@@ -17,6 +17,7 @@ static var developer_mode: bool = false
 static var settlement_log := SettlementLogServiceType.new()
 static var performance_stats := PerformanceStatsServiceType.new()
 static var pending_load_path: String = ""
+static var pending_menu_message: String = ""
 
 
 static func set_player(character: CharacterData) -> void:
@@ -32,6 +33,7 @@ static func set_player(character: CharacterData) -> void:
 	settlement_log = SettlementLogServiceType.new()
 	performance_stats = PerformanceStatsServiceType.new()
 	pending_load_path = ""
+	pending_menu_message = ""
 
 
 static func clear() -> void:
@@ -47,6 +49,7 @@ static func clear() -> void:
 	settlement_log = SettlementLogServiceType.new()
 	performance_stats = PerformanceStatsServiceType.new()
 	pending_load_path = ""
+	pending_menu_message = ""
 
 
 static func set_world_services(
