@@ -247,26 +247,34 @@ func _refresh() -> void:
 
 
 func _apply_domain_effect_if_ready(action: ActionInstanceData) -> void:
-	if action == null or action.status != ActionInstanceData.STATUS_COMPLETED or map_service == null or GameSessionService.society_service == null:
+	if action == null or action.status != ActionInstanceData.STATUS_COMPLETED or action.domain_effect_applied or map_service == null or GameSessionService.society_service == null:
 		return
 	var definition: ActionDefinitionData = map_service.data_set.actions.get(
 		action.definition_id
 	) as ActionDefinitionData
-	if definition != null:
-		if GameSessionService.society_service.apply_action_domain_effect(
-			action, definition, map_service
-		):
-			refresh_permissions()
+	if definition == null:
+		action.domain_effect_applied = true
+		return
+	var applied: bool = GameSessionService.society_service.apply_action_domain_effect(
+		action, definition, map_service
+	)
+	# A completed action gets exactly one domain hook attempt. “No change” is a valid
+	# terminal outcome for actions without a domain hook, full slots or capped values.
+	action.domain_effect_applied = true
+	if applied:
+		refresh_permissions()
 
 
 func _build_context(definition: ActionDefinitionData) -> Dictionary:
+	if context_service == null:
+		return {}
 	return context_service.build_context(
 		definition, GameSessionService.player_character, target_id
 	)
 
 
 func _get_player_permissions() -> Array[String]:
-	if GameSessionService.society_service == null or GameSessionService.society_service.organizations == null or not GameSessionService.has_player():
+	if GameSessionService.society_service == null or not GameSessionService.has_player():
 		return []
 	return GameSessionService.society_service.organizations.get_character_permissions(
 		GameSessionService.player_character.id
@@ -274,7 +282,7 @@ func _get_player_permissions() -> Array[String]:
 
 
 func _get_selected_definition() -> ActionDefinitionData:
-	if map_service == null or action_option.item_count == 0:
+	if map_service == null or action_option.item_count == 0 or action_option.selected < 0:
 		return null
 	var definition_id: String = str(action_option.get_item_metadata(action_option.selected))
 	return map_service.data_set.actions.get(definition_id) as ActionDefinitionData
@@ -288,10 +296,11 @@ static func _definition_requires_target(definition: ActionDefinitionData) -> boo
 
 
 static func _status_label(status: String) -> String:
-	return {
+	var labels: Dictionary = {
 		ActionInstanceData.STATUS_ACTIVE: "进行中",
 		ActionInstanceData.STATUS_PAUSED: "已暂停",
 		ActionInstanceData.STATUS_COMPLETED: "已完成",
 		ActionInstanceData.STATUS_CANCELLED: "已取消",
 		ActionInstanceData.STATUS_INTERRUPTED: "已中断",
-	}.get(status, status)
+	}
+	return str(labels.get(status, status))
