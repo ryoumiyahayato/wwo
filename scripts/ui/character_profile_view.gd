@@ -1,5 +1,5 @@
 extends Control
-## Public profile by default; exact hidden data requires global developer mode.
+## Public profile by default; hidden diagnostics are not visible in formal play.
 
 @onready var title_label: Label = %TitleLabel
 @onready var public_label: RichTextLabel = %PublicLabel
@@ -75,7 +75,7 @@ func _format_values(values: Dictionary, label_group: String) -> String:
 
 
 func _on_developer_toggled(enabled: bool) -> void:
-	developer_panel.visible = enabled and GameSessionService.developer_mode
+	developer_panel.visible = enabled
 
 
 func _on_event_pressed() -> void:
