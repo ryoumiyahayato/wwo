@@ -76,10 +76,11 @@ func setup(simulation_clock: SimulationClock, simulation: SocietySimulationServi
 func refresh_developer_mode() -> void:
 	if not is_node_ready():
 		return
+	var was_visible: bool = developer_toggle.visible
 	developer_toggle.visible = GameSessionService.developer_mode
+	if was_visible and not GameSessionService.developer_mode:
+		developer_toggle.button_pressed = false
 	var show_mutations: bool = developer_toggle.button_pressed
-	if not GameSessionService.developer_mode and developer_toggle.visible:
-		show_mutations = false
 	for control: Control in _developer_controls:
 		control.visible = show_mutations
 	ai_section.visible = show_mutations
