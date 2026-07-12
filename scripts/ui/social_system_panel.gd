@@ -1,6 +1,6 @@
 class_name SocialSystemPanel
 extends PanelContainer
-## M6 UI adapter. AI internals remain hidden until developer toggle is enabled.
+## Player-facing society overview; direct state mutation remains developer-only.
 
 signal close_requested
 signal society_changed
@@ -32,6 +32,7 @@ signal society_changed
 
 var clock: SimulationClock
 var society: SocietySimulationService
+var _developer_controls: Array[Control] = []
 
 
 func _ready() -> void:
@@ -46,7 +47,19 @@ func _ready() -> void:
 	confirm_succession_button.pressed.connect(_on_confirm_succession_pressed)
 	developer_toggle.toggled.connect(_on_developer_toggled)
 	ai_option.item_selected.connect(_on_ai_selected)
-	ai_section.visible = false
+	_developer_controls = [
+		join_button,
+		position_option,
+		position_button,
+		relationship_option,
+		relationship_button,
+		background_option,
+		promote_button,
+		active_option,
+		demote_button,
+	]
+	developer_toggle.text = "开发者：显示直接修改与 AI 调试"
+	refresh_developer_mode()
 
 
 func setup(simulation_clock: SimulationClock, simulation: SocietySimulationService) -> bool:
@@ -60,6 +73,20 @@ func setup(simulation_clock: SimulationClock, simulation: SocietySimulationServi
 	return true
 
 
+func refresh_developer_mode() -> void:
+	if not is_node_ready():
+		return
+	var developer_enabled: bool = GameSessionService.developer_mode
+	developer_toggle.visible = developer_enabled
+	if not developer_enabled:
+		developer_toggle.button_pressed = false
+	var show_mutations: bool = developer_enabled and developer_toggle.button_pressed
+	for control: Control in _developer_controls:
+		control.visible = show_mutations
+	ai_section.visible = show_mutations
+	_refresh_ai()
+
+
 func _refresh_all() -> void:
 	counts_label.text = "背景人物 %d · 活跃人物 %d / %d · 已退出 %d · 按需关系 %d" % [
 		society.roster.background_characters.size(), society.roster.active_characters.size(),
@@ -69,7 +96,7 @@ func _refresh_all() -> void:
 	_populate_organizations()
 	_populate_characters()
 	_refresh_relationships()
-	_refresh_ai()
+	refresh_developer_mode()
 
 
 func _populate_organizations() -> void:
@@ -113,6 +140,9 @@ func _on_organization_selected(_index: int) -> void:
 
 
 func _on_join_pressed() -> void:
+	if not GameSessionService.developer_mode:
+		message_label.text = "正式游戏请通过“长期行动 → 加入组织”申请。"
+		return
 	var organization: OrganizationData = _selected_organization()
 	var player: CharacterData = GameSessionService.player_character
 	var changed: bool
@@ -127,6 +157,9 @@ func _on_join_pressed() -> void:
 
 
 func _on_position_pressed() -> void:
+	if not GameSessionService.developer_mode:
+		message_label.text = "正式游戏请通过“长期行动 → 争取职位”晋升。"
+		return
 	var organization: OrganizationData = _selected_organization()
 	var position_id: String = _selected_metadata(position_option)
 	var changed: bool = society.organizations.assign_position(
@@ -139,6 +172,9 @@ func _on_position_pressed() -> void:
 
 
 func _on_relationship_pressed() -> void:
+	if not GameSessionService.developer_mode:
+		message_label.text = "正式游戏请通过“长期行动 → 建立关系”接触人物。"
+		return
 	var target_id: String = _selected_metadata(relationship_option)
 	var relationship: RelationshipData = society.create_player_relationship(target_id, clock.total_hours)
 	message_label.text = "已建立或加深实际联系。" if relationship != null else "无法创建该关系。"
@@ -146,6 +182,8 @@ func _on_relationship_pressed() -> void:
 
 
 func _on_promote_pressed() -> void:
+	if not GameSessionService.developer_mode:
+		return
 	var character_id: String = _selected_metadata(background_option)
 	var character: CharacterData = society.promote_background(character_id)
 	message_label.text = "人物已升级为活跃层。" if character != null else "活跃人物已达上限。"
@@ -153,6 +191,8 @@ func _on_promote_pressed() -> void:
 
 
 func _on_demote_pressed() -> void:
+	if not GameSessionService.developer_mode:
+		return
 	var character_id: String = _selected_metadata(active_option)
 	var character: BackgroundCharacterData = society.demote_active(character_id)
 	message_label.text = "人物已降级为背景层。" if character != null else "玩家或组织领导不能降级。"
@@ -178,7 +218,7 @@ func _on_prepare_succession_pressed() -> void:
 		)
 	confirm_succession_button.disabled = candidates.is_empty()
 	succession_label.text = (
-		"没有符合条件的继承者；请先建立可信关系或加入组织。"
+		"没有符合条件的继承者；请先通过长期行动建立可信关系或加入组织。"
 		if candidates.is_empty()
 		else "找到 %d 名来自真实关系或共同组织的候选。" % candidates.size()
 	)
@@ -228,12 +268,13 @@ func _populate_characters() -> void:
 func _refresh_relationships() -> void:
 	var player_id: String = GameSessionService.player_character.id
 	var known: Array[RelationshipData] = society.relationships.get_for_character(player_id)
-	relationship_label.text = "玩家已知实际关系：%d" % known.size()
+	relationship_label.text = "玩家已知实际关系：%d（通过长期行动建立）" % known.size()
 
 
 func _on_developer_toggled(enabled: bool) -> void:
-	ai_section.visible = enabled
-	_refresh_ai()
+	if not GameSessionService.developer_mode:
+		developer_toggle.button_pressed = false
+	refresh_developer_mode()
 
 
 func _on_ai_selected(_index: int) -> void:
@@ -241,7 +282,7 @@ func _on_ai_selected(_index: int) -> void:
 
 
 func _refresh_ai() -> void:
-	if not ai_section.visible or ai_option.item_count == 0:
+	if not ai_section.visible or ai_option.item_count == 0 or society == null:
 		return
 	var character_id: String = _selected_metadata(ai_option)
 	var state: AiStateData = society.ai.get_state(character_id)
