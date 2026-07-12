@@ -124,8 +124,6 @@ func _restore_pending_save() -> bool:
 		loaded = save_service.restore_snapshot(loaded.snapshot, _clock, _map_service)
 	if loaded.success:
 		return true
-	# restore_snapshot historically mutated the live clock/map before all validation
-	# finished. Roll both services back before leaving the failed load path.
 	_map_service.restore_persistent_state(previous_world_state)
 	_clock.restore_persistent_state(previous_clock_state)
 	var message: String = "加载存档失败：%s" % loaded.message
@@ -150,6 +148,11 @@ func _initialize_society() -> void:
 		):
 			LogService.error("StrategicMapView", GameSessionService.society_service.initialization_error)
 	GameSessionService.society_service.attach_clock(_clock)
+	var influence_service: RegionalInfluenceService = GameSessionService.society_service.regional_influence
+	if influence_service != null and not influence_service.social_influence_changed.is_connected(
+		_on_social_influence_changed
+	):
+		influence_service.social_influence_changed.connect(_on_social_influence_changed)
 	character_button.disabled = false
 	action_button.disabled = false
 	social_button.disabled = false
@@ -170,6 +173,14 @@ func _on_unit_selected(unit_id: String) -> void:
 
 func _on_control_unit_changed(unit_id: String) -> void:
 	if unit_id == _selected_unit_id:
+		_refresh_selection_panel()
+
+
+func _on_social_influence_changed(region_id: String) -> void:
+	if _map_service == null:
+		return
+	var unit: ControlUnitData = _map_service.get_unit(_selected_unit_id)
+	if unit != null and unit.region_id == region_id:
 		_refresh_selection_panel()
 
 
@@ -253,9 +264,6 @@ func _on_transfer_pressed() -> void:
 
 
 func _debug_mutation_allowed() -> bool:
-	# The legacy headless suite directly emits hidden debug button signals. Keep that
-	# test adapter available only in the editor binary; exported games require the
-	# explicit developer-mode gate even when a signal is emitted programmatically.
 	return GameSessionService.developer_mode or (
 		DisplayServer.get_name() == "headless" and OS.has_feature("editor")
 	)
@@ -336,7 +344,10 @@ func _on_social_pressed() -> void:
 	social_panel.visible = not social_panel.visible
 	action_panel.visible = false
 	developer_panel.visible = false
-	social_panel.refresh_developer_mode()
+	if social_panel.visible:
+		social_panel.refresh_view()
+	else:
+		social_panel.refresh_developer_mode()
 
 
 func _on_social_panel_close_requested() -> void:
