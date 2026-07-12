@@ -31,6 +31,9 @@ func _ready() -> void:
 	new_game_button.pressed.connect(_on_new_game_pressed)
 	load_game_button.pressed.connect(_on_load_game_pressed)
 	quit_button.pressed.connect(_on_quit_pressed)
+	if not GameSessionService.pending_menu_message.is_empty():
+		_show_menu_message(GameSessionService.pending_menu_message)
+		GameSessionService.pending_menu_message = ""
 	LogService.info("MainMenu", "基础主菜单已就绪")
 
 
@@ -44,12 +47,26 @@ func _on_new_game_pressed() -> void:
 
 
 func _on_load_game_pressed() -> void:
+	var preflight: SaveOperationResult = GameSaveService.new().load_from_path(
+		GameSaveService.MANUAL_PATH
+	)
+	if not preflight.success:
+		load_game_button.disabled = true
+		load_game_button.tooltip_text = "%s：%s" % [preflight.error_code, preflight.message]
+		_show_menu_message("存档不可用：%s" % preflight.message)
+		return
 	GameSessionService.clear()
 	GameSessionService.pending_load_path = GameSaveService.MANUAL_PATH
 	var change_error: Error = get_tree().change_scene_to_file("res://scenes/map/strategic_map_view.tscn")
 	if change_error != OK:
 		GameSessionService.pending_load_path = ""
+		_show_menu_message("无法打开存档地图：%s" % error_string(change_error))
 		LogService.error("MainMenu", "无法打开存档地图：%s" % error_string(change_error))
+
+
+func _show_menu_message(message: String) -> void:
+	footer_label.text = message
+	footer_label.tooltip_text = message
 
 
 func _on_quit_pressed() -> void:
