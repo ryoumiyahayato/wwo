@@ -58,6 +58,8 @@ static func set_world_services(
 	world_map_service = map_service
 	if autosave != null:
 		world_autosave = autosave
+	if society_service != null:
+		society_service.attach_world(world_clock, world_map_service)
 
 
 static func has_world_services() -> bool:
