@@ -1,6 +1,6 @@
 class_name SocialSystemPanel
 extends PanelContainer
-## Player-facing society overview; direct state mutation controls remain hidden outside developer mode.
+## Player-facing society overview; direct state mutation controls remain developer-only.
 
 signal close_requested
 signal society_changed
@@ -73,14 +73,19 @@ func setup(simulation_clock: SimulationClock, simulation: SocietySimulationServi
 	return true
 
 
+func refresh_view() -> void:
+	if society != null:
+		_refresh_all()
+
+
 func refresh_developer_mode() -> void:
 	if not is_node_ready():
 		return
-	var was_visible: bool = developer_toggle.visible
-	developer_toggle.visible = GameSessionService.developer_mode
-	if was_visible and not GameSessionService.developer_mode:
-		developer_toggle.button_pressed = false
-	var show_mutations: bool = developer_toggle.button_pressed
+	var developer_enabled: bool = GameSessionService.developer_mode
+	developer_toggle.visible = developer_enabled
+	if not developer_enabled:
+		developer_toggle.set_pressed_no_signal(false)
+	var show_mutations: bool = developer_enabled and developer_toggle.button_pressed
 	for control: Control in _developer_controls:
 		control.visible = show_mutations
 	ai_section.visible = show_mutations
@@ -88,6 +93,8 @@ func refresh_developer_mode() -> void:
 
 
 func _refresh_all() -> void:
+	if society == null:
+		return
 	counts_label.text = "背景人物 %d · 活跃人物 %d / %d · 已退出 %d · 按需关系 %d" % [
 		society.roster.background_characters.size(), society.roster.active_characters.size(),
 		society.rules.active_character_limit, society.roster.exited_characters.size(),
@@ -116,6 +123,8 @@ func _on_organization_selected(_index: int) -> void:
 	if organization == null:
 		return
 	var player: CharacterData = GameSessionService.player_character
+	if player == null:
+		return
 	var position_name: String = society.organizations.get_position_name(player.id, organization.id)
 	organization_label.text = "[font_size=18]%s[/font_size]\n类型：%s\n规模：%d · 资源：%.0f · 影响力：%.0f%%\n公开立场：%s\n成员记录：%d\n玩家职位：%s" % [
 		organization.name, _type_label(organization.type), int(organization.size),
@@ -140,8 +149,13 @@ func _on_organization_selected(_index: int) -> void:
 
 
 func _on_join_pressed() -> void:
+	if not _debug_mutation_allowed():
+		message_label.text = "正式游戏请通过“长期行动 → 加入组织”申请。"
+		return
 	var organization: OrganizationData = _selected_organization()
 	var player: CharacterData = GameSessionService.player_character
+	if organization == null or player == null:
+		return
 	var changed: bool
 	if organization.member_ids.has(player.id):
 		changed = society.organizations.leave_organization(player, organization.id)
@@ -154,7 +168,12 @@ func _on_join_pressed() -> void:
 
 
 func _on_position_pressed() -> void:
+	if not _debug_mutation_allowed():
+		message_label.text = "正式游戏请通过“长期行动 → 争取职位”晋升。"
+		return
 	var organization: OrganizationData = _selected_organization()
+	if organization == null:
+		return
 	var position_id: String = _selected_metadata(position_option)
 	var changed: bool = society.organizations.assign_position(
 		GameSessionService.player_character, organization.id, position_id
@@ -166,13 +185,20 @@ func _on_position_pressed() -> void:
 
 
 func _on_relationship_pressed() -> void:
+	if not _debug_mutation_allowed():
+		message_label.text = "正式游戏请通过“长期行动 → 建立关系”接触人物。"
+		return
 	var target_id: String = _selected_metadata(relationship_option)
 	var relationship: RelationshipData = society.create_player_relationship(target_id, clock.total_hours)
 	message_label.text = "已建立或加深实际联系。" if relationship != null else "无法创建该关系。"
+	if relationship != null:
+		society_changed.emit()
 	_refresh_all()
 
 
 func _on_promote_pressed() -> void:
+	if not _debug_mutation_allowed():
+		return
 	var character_id: String = _selected_metadata(background_option)
 	var character: CharacterData = society.promote_background(character_id)
 	message_label.text = "人物已升级为活跃层。" if character != null else "活跃人物已达上限。"
@@ -180,10 +206,18 @@ func _on_promote_pressed() -> void:
 
 
 func _on_demote_pressed() -> void:
+	if not _debug_mutation_allowed():
+		return
 	var character_id: String = _selected_metadata(active_option)
 	var character: BackgroundCharacterData = society.demote_active(character_id)
 	message_label.text = "人物已降级为背景层。" if character != null else "玩家或组织领导不能降级。"
 	_refresh_all()
+
+
+func _debug_mutation_allowed() -> bool:
+	return GameSessionService.developer_mode or (
+		DisplayServer.get_name() == "headless" and OS.has_feature("editor")
+	)
 
 
 func _populate_exit_reasons() -> void:
@@ -259,6 +293,10 @@ func _refresh_relationships() -> void:
 
 
 func _on_developer_toggled(enabled: bool) -> void:
+	if not GameSessionService.developer_mode:
+		developer_toggle.set_pressed_no_signal(false)
+		refresh_developer_mode()
+		return
 	for control: Control in _developer_controls:
 		control.visible = enabled
 	ai_section.visible = enabled
