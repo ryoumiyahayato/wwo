@@ -1,5 +1,5 @@
 extends SceneTree
-## Player-journey regression: drives public UI controls instead of fabricating completed actions.
+## Player-journey regression: drives visible public UI controls instead of fabricating completed actions.
 
 var _checks: int = 0
 var _failures: int = 0
@@ -31,9 +31,15 @@ func _run() -> void:
 	var map_service: MapControlService = GameSessionService.world_map_service
 	var society: SocietySimulationService = GameSessionService.society_service
 	var action_panel: ActionPanel = view.get_node("ActionPanel") as ActionPanel
+	var action_button: Button = view.get_node("RootMargin/Layout/TopBar/TopMargin/TopControls/ActionButton") as Button
+	var save_button: Button = view.get_node("RootMargin/Layout/TopBar/TopMargin/TopControls/SaveButton") as Button
 	_expect(clock != null and map_service != null and society != null, "公共地图建立权威世界会话")
-	_expect((view.get_node("RootMargin/Layout/TopBar/TopMargin/TopControls/SaveButton") as Button).visible, "正式顶栏显示保存游戏入口")
+	_expect(action_button.is_visible_in_tree() and not action_button.disabled, "顶栏长期行动入口真实可见且可用")
+	_expect(save_button.is_visible_in_tree() and not save_button.disabled, "正式顶栏显示可用的保存游戏入口")
 	_expect(not (view.get_node("RootMargin/Layout/Content/SidePanel/SideMargin/SideContent/PressureButton") as Button).visible, "普通模式隐藏地图直接压力入口")
+	action_button.pressed.emit()
+	_expect(action_panel.visible and action_panel.is_visible_in_tree(), "点击顶栏后长期行动面板真实显示")
+	_expect(action_panel.action_option.is_visible_in_tree(), "行动类型选择控件可见")
 	_expect(action_panel.action_option.item_count == 8, "长期行动面板列出八类行动")
 	_expect(action_panel.get_node_or_null("Margin/Root/Scroll/Content/PreparationInput") == null, "正式行动面板不再包含可任意填写的准备值")
 
@@ -60,24 +66,30 @@ func _run() -> void:
 	var target_unit: ControlUnitData = map_service.get_unit(target_unit_id)
 	var target_region: RegionData = map_service.data_set.regions[target_unit.region_id] as RegionData
 	var influence_before: float = float(target_region.social_influence[player.country_id])
-	action_panel.set_target(target_unit_id)
 	_run_action(action_panel, "action:promote_policy", target_unit_id, clock, 800)
 	_expect(float(target_region.social_influence[player.country_id]) > influence_before, "地区政策行动改变权威社会影响")
 
 	_select_action(action_panel, "action:study_skill", "")
-	(action_panel.get_node("Margin/Root/Scroll/Content/BeginButton") as Button).pressed.emit()
+	var begin_button: Button = action_panel.get_node("Margin/Root/Scroll/Content/BeginButton") as Button
+	_expect(begin_button.is_visible_in_tree() and not begin_button.disabled, "学习行动开始按钮真实可见且可用")
+	begin_button.pressed.emit()
 	var pending_action: ActionInstanceData = GameSessionService.current_action
+	_expect(pending_action != null and pending_action.definition_id == "action:study_skill", "通过可用按钮开始跨页面行动")
 	clock.advance_hours(1)
 	var pending_work: float = pending_action.accumulated_work
 	var clock_reference: SimulationClock = clock
 	var map_reference: MapControlService = map_service
 
-	(view.get_node("RootMargin/Layout/TopBar/TopMargin/TopControls/CharacterButton") as Button).pressed.emit()
+	var character_button: Button = view.get_node("RootMargin/Layout/TopBar/TopMargin/TopControls/CharacterButton") as Button
+	_expect(character_button.is_visible_in_tree() and not character_button.disabled, "人物信息入口真实可见且可用")
+	character_button.pressed.emit()
 	await process_frame
 	await process_frame
 	var profile: Control = current_scene as Control
 	_expect(profile != null and profile.name == "CharacterProfileView", "人物信息入口切换到人物页面")
-	(profile.get_node("Margin/Root/Bottom/BackButton") as Button).pressed.emit()
+	var profile_back: Button = profile.get_node("Margin/Root/Bottom/BackButton") as Button
+	_expect(profile_back.is_visible_in_tree() and not profile_back.disabled, "人物页面返回按钮真实可用")
+	profile_back.pressed.emit()
 	await process_frame
 	await process_frame
 	view = current_scene as Control
@@ -88,9 +100,13 @@ func _run() -> void:
 	_expect(pending_action.accumulated_work > pending_work, "跨页面返回后行动继续推进")
 
 	var social_button: Button = view.get_node("RootMargin/Layout/TopBar/TopMargin/TopControls/SocialButton") as Button
+	_expect(social_button.is_visible_in_tree() and not social_button.disabled, "社会系统入口真实可见且可用")
 	social_button.pressed.emit()
 	var social_panel: SocialSystemPanel = view.get_node("SocialSystemPanel") as SocialSystemPanel
-	(social_panel.get_node("Margin/Root/Scroll/Content/PrepareSuccessionButton") as Button).pressed.emit()
+	_expect(social_panel.visible and social_panel.is_visible_in_tree(), "点击顶栏后社会系统面板真实显示")
+	var prepare_succession: Button = social_panel.get_node("Margin/Root/Scroll/Content/PrepareSuccessionButton") as Button
+	_expect(prepare_succession.is_visible_in_tree() and not prepare_succession.disabled, "继承候选入口真实可用")
+	prepare_succession.pressed.emit()
 	var succession_option: OptionButton = social_panel.get_node("Margin/Root/Scroll/Content/SuccessionOption") as OptionButton
 	var leader_candidate_index: int = _option_index(succession_option, leader_id)
 	_expect(leader_candidate_index >= 0, "真实关系与共同组织生成组织领导继承候选")
@@ -100,24 +116,29 @@ func _run() -> void:
 	var retirement_index: int = _option_index(exit_option, "retirement")
 	if retirement_index >= 0:
 		exit_option.select(retirement_index)
-	(social_panel.get_node("Margin/Root/Scroll/Content/ConfirmSuccessionButton") as Button).pressed.emit()
+	var confirm_succession: Button = social_panel.get_node("Margin/Root/Scroll/Content/ConfirmSuccessionButton") as Button
+	_expect(confirm_succession.is_visible_in_tree() and not confirm_succession.disabled, "退休继承确认按钮真实可用")
+	confirm_succession.pressed.emit()
 	_expect(GameSessionService.player_character.id == leader_id, "玩家通过正式社会界面完成退休继承")
 	_expect(GameSessionService.world_clock == clock_reference and GameSessionService.world_map_service == map_reference, "继承保持同一权威世界")
 
 	var saved_player_id: String = GameSessionService.player_character.id
 	var saved_hour: int = clock_reference.total_hours
 	var saved_influence: float = float(target_region.social_influence[player.country_id])
-	var save_button: Button = view.get_node("RootMargin/Layout/TopBar/TopMargin/TopControls/SaveButton") as Button
+	save_button = view.get_node("RootMargin/Layout/TopBar/TopMargin/TopControls/SaveButton") as Button
+	_expect(save_button.is_visible_in_tree() and not save_button.disabled, "保存按钮在继承后仍真实可用")
 	save_button.pressed.emit()
 	_expect(FileAccess.file_exists(GameSaveService.MANUAL_PATH), "普通保存按钮写入手动存档")
 	_expect(save_button.text == "已保存", "普通保存按钮提供成功反馈")
 
-	(view.get_node("RootMargin/Layout/TopBar/TopMargin/TopControls/BackButton") as Button).pressed.emit()
+	var back_button: Button = view.get_node("RootMargin/Layout/TopBar/TopMargin/TopControls/BackButton") as Button
+	_expect(back_button.is_visible_in_tree() and not back_button.disabled, "返回主菜单按钮真实可用")
+	back_button.pressed.emit()
 	await process_frame
 	await process_frame
 	var menu: Control = current_scene as Control
 	var load_button: Button = menu.get_node("SafeMargin/Center/Card/CardMargin/Content/LoadGameButton") as Button
-	_expect(not load_button.disabled, "主菜单发现手动存档并启用加载")
+	_expect(load_button.is_visible_in_tree() and not load_button.disabled, "主菜单发现手动存档并显示可用加载入口")
 	load_button.pressed.emit()
 	await process_frame
 	await process_frame
@@ -142,12 +163,17 @@ func _run_action(
 	clock: SimulationClock,
 	hours: int
 ) -> void:
+	_expect(panel.visible and panel.is_visible_in_tree(), "行动面板在开始 %s 前保持可见" % definition_id)
 	_select_action(panel, definition_id, target_id)
 	var begin_button: Button = panel.get_node("Margin/Root/Scroll/Content/BeginButton") as Button
+	_expect(begin_button.is_visible_in_tree(), "%s 的开始按钮可见" % definition_id)
+	_expect(not begin_button.disabled, "%s 的开始按钮满足正式条件并可用" % definition_id)
+	if begin_button.disabled:
+		return
 	begin_button.pressed.emit()
 	var action: ActionInstanceData = GameSessionService.current_action
 	_expect(action != null and action.definition_id == definition_id, "通过正式行动面板开始 %s" % definition_id)
-	if action == null:
+	if action == null or action.definition_id != definition_id:
 		return
 	clock.advance_hours(hours)
 	_expect(action.status == ActionInstanceData.STATUS_COMPLETED, "%s 随权威时间完成" % definition_id)
@@ -155,6 +181,7 @@ func _run_action(
 
 
 func _select_action(panel: ActionPanel, definition_id: String, target_id: String) -> void:
+	_expect(panel.action_option.is_visible_in_tree(), "行动类型控件在选择 %s 时可见" % definition_id)
 	var index: int = _option_index(panel.action_option, definition_id)
 	_expect(index >= 0, "行动列表包含 %s" % definition_id)
 	if index < 0:
@@ -163,6 +190,7 @@ func _select_action(panel: ActionPanel, definition_id: String, target_id: String
 	panel.action_option.item_selected.emit(index)
 	if target_id.is_empty():
 		return
+	_expect(panel.target_option.visible and panel.target_option.is_visible_in_tree(), "%s 的目标选择控件可见" % definition_id)
 	var target_index: int = _option_index(panel.target_option, target_id)
 	_expect(target_index >= 0, "%s 提供目标 %s" % [definition_id, target_id])
 	if target_index >= 0:
