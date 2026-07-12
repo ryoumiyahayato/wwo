@@ -1,6 +1,6 @@
 class_name ActionPanel
 extends PanelContainer
-## UI adapter for one player action. Formula and progression stay in ActionService.
+## Player action adapter. Formula, context derivation and progression stay in services.
 
 signal close_requested
 
@@ -8,11 +8,7 @@ signal close_requested
 @onready var action_option: OptionButton = %ActionOption
 @onready var target_label: Label = %TargetLabel
 @onready var target_option: OptionButton = %TargetOption
-@onready var preparation_input: SpinBox = %PreparationInput
-@onready var organization_input: SpinBox = %OrganizationInput
-@onready var relationship_input: SpinBox = %RelationshipInput
-@onready var funding_input: SpinBox = %FundingInput
-@onready var resistance_input: SpinBox = %ResistanceInput
+@onready var context_label: RichTextLabel = %ContextLabel
 @onready var permission_check: CheckBox = %PermissionCheck
 @onready var begin_button: Button = %BeginButton
 @onready var pause_button: Button = %PauseButton
@@ -24,6 +20,7 @@ signal close_requested
 var clock: SimulationClock
 var map_service: MapControlService
 var action_service: ActionService
+var context_service: PlayerActionContextService
 var rules: ActionRulesConfig
 var target_id: String = ""
 var map_target_id: String = ""
@@ -37,9 +34,6 @@ func _ready() -> void:
 	begin_button.pressed.connect(_on_begin_pressed)
 	pause_button.pressed.connect(_on_pause_pressed)
 	cancel_button.pressed.connect(_on_cancel_pressed)
-	for input: SpinBox in [preparation_input, organization_input, relationship_input, funding_input, resistance_input]:
-		input.value_changed.connect(_on_context_changed)
-	permission_check.toggled.connect(_on_context_changed.unbind(1))
 	_refresh()
 
 
@@ -52,6 +46,9 @@ func setup(simulation_clock: SimulationClock, control_service: MapControlService
 		begin_button.disabled = true
 		return false
 	action_service = ActionService.new(rules, GameSessionService.action_id_service)
+	context_service = PlayerActionContextService.new(
+		rules, GameSessionService.society_service, map_service
+	)
 	clock.time_changed.connect(_on_time_changed)
 	_populate_actions()
 	_refresh()
@@ -65,6 +62,10 @@ func set_target(control_unit_id: String) -> void:
 
 
 func refresh_permissions() -> void:
+	if rules != null:
+		context_service = PlayerActionContextService.new(
+			rules, GameSessionService.society_service, map_service
+		)
 	_on_action_selected(action_option.selected)
 
 
@@ -87,13 +88,14 @@ func _on_action_selected(_index: int) -> void:
 		return
 	var permissions: Array[String] = _get_player_permissions()
 	permission_check.text = (
-		("已具备职位权限：%s" if permissions.has(definition.position_permission_required) else "缺少职位权限：%s") % definition.position_permission_required
+		(("已具备职位权限：%s" if permissions.has(definition.position_permission_required) else "缺少职位权限：%s") % definition.position_permission_required)
 		if not definition.position_permission_required.is_empty()
 		else "此行动不要求职位权限"
 	)
 	permission_check.disabled = true
 	permission_check.button_pressed = definition.position_permission_required.is_empty() or permissions.has(definition.position_permission_required)
 	_populate_targets(definition)
+	message_label.text = ""
 	_refresh()
 
 
@@ -105,17 +107,12 @@ func _populate_targets(definition: ActionDefinitionData) -> void:
 		return
 	var society: SocietySimulationService = GameSessionService.society_service
 	match definition.category:
-		"build_relationship":
+		"build_relationship", "investigate_character":
 			target_label.text = "目标人物"
 			if society != null:
 				for character_id: String in society.roster.get_background_ids():
-					var character: BackgroundCharacterData = society.roster.get_background(character_id)
-					_add_target(character.name, character_id, previous_id)
-				for character_id: String in society.roster.get_active_ids(false):
-					_add_target(society.roster.get_active(character_id).name, character_id, previous_id)
-		"investigate_character":
-			target_label.text = "目标人物"
-			if society != null:
+					var background: BackgroundCharacterData = society.roster.get_background(character_id)
+					_add_target(background.name, character_id, previous_id)
 				for character_id: String in society.roster.get_active_ids(false):
 					_add_target(society.roster.get_active(character_id).name, character_id, previous_id)
 		"join_organization":
@@ -154,16 +151,23 @@ func _add_target(label: String, id: String, selected_id: String) -> void:
 func _on_target_selected(index: int) -> void:
 	if index >= 0 and index < target_option.item_count:
 		target_id = str(target_option.get_item_metadata(index))
+	_refresh()
 
 
 func _on_begin_pressed() -> void:
-	if action_service == null or not GameSessionService.has_player():
+	if action_service == null or context_service == null or not GameSessionService.has_player():
 		message_label.text = "需要先创建玩家人物。"
 		return
 	if GameSessionService.current_action != null and not GameSessionService.current_action.is_terminal():
 		message_label.text = "每个人物同时只能进行一个主要行动。"
 		return
 	var definition: ActionDefinitionData = _get_selected_definition()
+	if definition == null:
+		message_label.text = "没有可用行动。"
+		return
+	if not context_service.can_afford(definition, GameSessionService.player_character):
+		message_label.text = "财富不足，无法支付本次行动费用。"
+		return
 	var result: ActionStartResult = action_service.start_action(
 		definition,
 		GameSessionService.player_character,
@@ -173,8 +177,9 @@ func _on_begin_pressed() -> void:
 	if not result.is_success():
 		message_label.text = "\n".join(result.errors)
 		return
+	context_service.consume_funding(definition, GameSessionService.player_character)
 	GameSessionService.current_action = result.action
-	message_label.text = "行动已开始。"
+	message_label.text = "行动已开始，费用已从人物财富中扣除。"
 	_refresh()
 
 
@@ -199,19 +204,6 @@ func _on_cancel_pressed() -> void:
 	_refresh()
 
 
-func _on_context_changed(_value: float = 0.0) -> void:
-	var action: ActionInstanceData = GameSessionService.current_action
-	if action == null or action.is_terminal() or action_service == null:
-		_refresh()
-		return
-	var definition: ActionDefinitionData = map_service.data_set.actions[action.definition_id] as ActionDefinitionData
-	action_service.update_context(
-		action, definition, GameSessionService.player_character, clock.total_hours,
-		_build_context(definition), map_service
-	)
-	_refresh()
-
-
 func _on_time_changed(_snapshot: Dictionary) -> void:
 	var action: ActionInstanceData = GameSessionService.current_action
 	if action != null and not action.is_terminal():
@@ -227,12 +219,20 @@ func _refresh() -> void:
 	_apply_domain_effect_if_ready(action)
 	var has_player: bool = GameSessionService.has_player()
 	var selected_definition: ActionDefinitionData = _get_selected_definition()
-	begin_button.disabled = not has_player or action_service == null or (action != null and not action.is_terminal()) or (_definition_requires_target(selected_definition) and target_id.is_empty())
+	var has_permission: bool = selected_definition == null or selected_definition.position_permission_required.is_empty() or _get_player_permissions().has(selected_definition.position_permission_required)
+	var can_afford: bool = selected_definition != null and context_service != null and has_player and context_service.can_afford(selected_definition, GameSessionService.player_character)
+	begin_button.disabled = not has_player or action_service == null or context_service == null or not has_permission or not can_afford or (action != null and not action.is_terminal()) or (_definition_requires_target(selected_definition) and target_id.is_empty())
 	pause_button.disabled = action == null or action.is_terminal()
 	cancel_button.disabled = action == null or action.is_terminal()
+	if selected_definition != null and context_service != null and has_player:
+		context_label.text = context_service.describe(
+			selected_definition, GameSessionService.player_character, target_id
+		)
+	else:
+		context_label.text = "行动条件尚未就绪。"
 	if action == null:
 		progress_bar.value = 0.0
-		summary_label.text = "尚无当前行动。\n\n准备、支持和资金可提高效率与成功把握；正式界面不显示精确成功概率。"
+		summary_label.text = "尚无当前行动。\n\n选择行动和真实目标；系统会依据财富、关系、组织职位与人物状态计算条件。"
 		return
 	progress_bar.value = action.get_progress_ratio() * 100.0
 	pause_button.text = "恢复行动" if action.status == ActionInstanceData.STATUS_PAUSED else "暂停行动"
@@ -253,22 +253,16 @@ func _apply_domain_effect_if_ready(action: ActionInstanceData) -> void:
 		action.definition_id
 	) as ActionDefinitionData
 	if definition != null:
-		GameSessionService.society_service.apply_action_domain_effect(
+		if GameSessionService.society_service.apply_action_domain_effect(
 			action, definition, map_service
-		)
+		):
+			refresh_permissions()
 
 
 func _build_context(definition: ActionDefinitionData) -> Dictionary:
-	var permissions: Array[String] = _get_player_permissions()
-	return {
-		"target_id": target_id,
-		"position_permissions": permissions,
-		"organization_support": organization_input.value,
-		"relationship_support": relationship_input.value,
-		"funding": funding_input.value,
-		"preparation": preparation_input.value,
-		"target_resistance": resistance_input.value,
-	}
+	return context_service.build_context(
+		definition, GameSessionService.player_character, target_id
+	)
 
 
 func _get_player_permissions() -> Array[String]:
