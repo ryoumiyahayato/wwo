@@ -71,47 +71,18 @@ custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 visible = false
 
-[node name="PreparationLabel" type="Label" parent="Margin/Root/Scroll/Content"]
+[node name="ContextHeader" type="Label" parent="Margin/Root/Scroll/Content"]
 layout_mode = 2
-text = "准备程度"
-[node name="PreparationInput" type="SpinBox" parent="Margin/Root/Scroll/Content"]
+theme_override_colors/font_color = Color(0.39, 0.79, 0.86, 1)
+text = "行动条件（自动计算）"
+[node name="ContextLabel" type="RichTextLabel" parent="Margin/Root/Scroll/Content"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 104)
 layout_mode = 2
-max_value = 100.0
-step = 5.0
-value = 20.0
-[node name="OrganizationLabel" type="Label" parent="Margin/Root/Scroll/Content"]
-layout_mode = 2
-text = "组织支持"
-[node name="OrganizationInput" type="SpinBox" parent="Margin/Root/Scroll/Content"]
-unique_name_in_owner = true
-layout_mode = 2
-max_value = 100.0
-step = 5.0
-[node name="RelationshipLabel" type="Label" parent="Margin/Root/Scroll/Content"]
-layout_mode = 2
-text = "关系支持"
-[node name="RelationshipInput" type="SpinBox" parent="Margin/Root/Scroll/Content"]
-unique_name_in_owner = true
-layout_mode = 2
-max_value = 100.0
-step = 5.0
-[node name="FundingLabel" type="Label" parent="Margin/Root/Scroll/Content"]
-layout_mode = 2
-text = "资金投入"
-[node name="FundingInput" type="SpinBox" parent="Margin/Root/Scroll/Content"]
-unique_name_in_owner = true
-layout_mode = 2
-max_value = 100.0
-step = 5.0
-[node name="ResistanceLabel" type="Label" parent="Margin/Root/Scroll/Content"]
-layout_mode = 2
-text = "额外目标阻力"
-[node name="ResistanceInput" type="SpinBox" parent="Margin/Root/Scroll/Content"]
-unique_name_in_owner = true
-layout_mode = 2
-max_value = 100.0
-step = 5.0
+bbcode_enabled = true
+fit_content = false
+text = "行动条件尚未就绪。"
+
 [node name="PermissionCheck" type="CheckBox" parent="Margin/Root/Scroll/Content"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -129,7 +100,7 @@ layout_mode = 2
 show_percentage = true
 [node name="SummaryLabel" type="RichTextLabel" parent="Margin/Root/Scroll/Content"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 165)
+custom_minimum_size = Vector2(0, 185)
 layout_mode = 2
 bbcode_enabled = true
 fit_content = false
