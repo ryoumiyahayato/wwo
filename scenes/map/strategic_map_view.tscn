@@ -158,6 +158,14 @@ disabled = true
 text = "社会系统"
 tooltip_text = "查看组织、关系、职位与继承"
 
+[node name="SaveButton" type="Button" parent="RootMargin/Layout/TopBar/TopMargin/TopControls"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(96, 36)
+layout_mode = 2
+disabled = false
+text = "保存游戏"
+tooltip_text = "保存到单一手动存档槽"
+
 [node name="DeveloperButton" type="Button" parent="RootMargin/Layout/TopBar/TopMargin/TopControls"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(92, 36)
@@ -249,6 +257,7 @@ scroll_active = true
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
+visible = false
 disabled = true
 text = "施加敌方压力"
 
@@ -256,6 +265,7 @@ text = "施加敌方压力"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
+visible = false
 disabled = true
 text = "模拟控制易手"
 
