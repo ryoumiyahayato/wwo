@@ -1,0 +1,187 @@
+{
+  "schema_version": 1,
+  "countries": [
+    {
+      "id": "country:test_republic",
+      "name": "测试共和国",
+      "region_ids": ["region:test_north"],
+      "public_status": {"stability": "stable"}
+    }
+  ],
+  "regions": [
+    {
+      "id": "region:test_north",
+      "name": "北部测试区",
+      "de_jure_country_id": "country:test_republic",
+      "population_group_ids": ["population:test_workers"],
+      "city_names": ["样例城"],
+      "resources": {"industry": 0.4},
+      "infrastructure": {"rail": 0.6},
+      "organization_ids": ["organization:test_union"],
+      "social_influence": {"country:test_republic": 0.7}
+    }
+  ],
+  "control_units": [
+    {
+      "id": "control:test_a",
+      "region_id": "region:test_north",
+      "grid_x": 0,
+      "grid_y": 0,
+      "city_name": "样例城",
+      "neighbor_ids": ["control:test_b"],
+      "de_jure_country_id": "country:test_republic",
+      "controller_country_id": "country:test_republic",
+      "control_strength": 0.8,
+      "contested_level": 0.1,
+      "garrison_pressure": 0.4,
+      "enemy_pressure": 0.1,
+      "social_support": 0.7,
+      "railroad_neighbor_ids": ["control:test_b"],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:test_b",
+      "region_id": "region:test_north",
+      "grid_x": 1,
+      "grid_y": 0,
+      "city_name": "",
+      "neighbor_ids": ["control:test_a"],
+      "de_jure_country_id": "country:test_republic",
+      "controller_country_id": "country:test_republic",
+      "control_strength": 0.75,
+      "contested_level": 0.15,
+      "garrison_pressure": 0.3,
+      "enemy_pressure": 0.15,
+      "social_support": 0.65,
+      "railroad_neighbor_ids": ["control:test_a"],
+      "infrastructure_state": "operational"
+    }
+  ],
+  "population_groups": [
+    {
+      "id": "population:test_workers",
+      "region_id": "region:test_north",
+      "population_count": 12000,
+      "social_class": "working_class",
+      "occupation_category": "industrial",
+      "average_income": 42.5,
+      "average_education": 0.45,
+      "unemployment_rate": 0.08,
+      "public_political_leaning": {"labor": 0.6},
+      "basic_living_state": "stable"
+    }
+  ],
+  "characters": [
+    {
+      "id": "character:test_anna",
+      "name": "安娜",
+      "age": 31,
+      "country_id": "country:test_republic",
+      "region_id": "region:test_north",
+      "occupation_id": "organizer",
+      "occupation": "organizer",
+      "public_position": "local_delegate",
+      "organization_ids": ["organization:test_union"],
+      "relationship_ids": ["relationship:test_anna_bo"],
+      "hidden_aptitudes": {},
+      "temperament_weights": {},
+      "skills": {"administration": 55},
+      "manifested_traits": ["cautious"],
+      "tendencies": {"government_support": 10},
+      "known_tendencies": {"government_support": "倾向支持政府"},
+      "current_status": {"health": 0.9},
+      "is_active": true,
+      "random_mode": "",
+      "random_category": "",
+      "is_challenge_start": false,
+      "generation_seed": 0,
+      "random_state": 0
+    },
+    {
+      "id": "character:test_bo",
+      "name": "博",
+      "age": 28,
+      "country_id": "country:test_republic",
+      "region_id": "region:test_north",
+      "occupation_id": "engineer",
+      "occupation": "engineer",
+      "public_position": "",
+      "organization_ids": [],
+      "relationship_ids": ["relationship:test_anna_bo"],
+      "hidden_aptitudes": {},
+      "temperament_weights": {},
+      "skills": {"engineering": 60},
+      "manifested_traits": ["disciplined"],
+      "tendencies": {"government_support": 0},
+      "known_tendencies": {"government_support": "立场中立"},
+      "current_status": {"health": 0.95},
+      "is_active": false,
+      "random_mode": "",
+      "random_category": "",
+      "is_challenge_start": false,
+      "generation_seed": 0,
+      "random_state": 0
+    }
+  ],
+  "organizations": [
+    {
+      "id": "organization:test_union",
+      "name": "测试工会",
+      "type": "union",
+      "country_id": "country:test_republic",
+      "region_id": "region:test_north",
+      "size": 1200,
+      "resources": 85,
+      "influence": 0.4,
+      "public_stance": "labor_reform",
+      "leader_character_id": "character:test_anna",
+      "member_ids": ["character:test_anna"],
+      "position_structure": {
+        "entry_position": "member",
+        "leader_position": "delegate",
+        "positions": {
+          "member": {"name": "会员", "level": 1, "slots": 20, "permissions": ["organization_member"], "holder_ids": []},
+          "delegate": {"name": "代表", "level": 2, "slots": 2, "permissions": ["organization_member"], "holder_ids": ["character:test_anna"]}
+        }
+      },
+      "organization_relations": {}
+    }
+  ],
+  "relationships": [
+    {
+      "id": "relationship:test_anna_bo",
+      "character_a_id": "character:test_anna",
+      "character_b_id": "character:test_bo",
+      "familiarity": 0.5,
+      "trust": 0.25,
+      "affinity": 0.2,
+      "interest_link": "workplace",
+      "is_public": true,
+      "last_interaction_hour": 0
+    }
+  ],
+  "actions": [
+    {
+      "id": "action:test_study",
+      "name": "测试学习",
+      "category": "study_skill",
+      "total_work": 40,
+      "base_progress_per_hour": 1,
+      "primary_skill": "administration",
+      "secondary_skills": ["investigation"],
+      "aptitude_modifier_weight": 0.1,
+      "position_permission_required": "",
+      "organization_support_weight": 0.2,
+      "relationship_support_weight": 0.2,
+      "funding_weight": 0.15,
+      "preparation_weight": 0.25,
+      "state_modifier_weight": 0.1,
+      "base_target_resistance": 20,
+      "interruption_conditions": ["detained", "incapacitated"],
+      "success_threshold": 50,
+      "guaranteed_success_threshold": 100,
+      "success_result": {"skill_xp": 10},
+      "failure_result": {"skill_xp": 2}
+    }
+  ]
+}

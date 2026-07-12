@@ -1,0 +1,172 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/social_system_panel.gd" id="1"]
+[sub_resource type="StyleBoxFlat" id="panel"]
+bg_color = Color(0.045, 0.065, 0.09, 0.99)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.25, 0.55, 0.62, 0.9)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[node name="SocialSystemPanel" type="PanelContainer"]
+unique_name_in_owner = true
+offset_right = 500.0
+offset_bottom = 680.0
+theme_override_styles/panel = SubResource("panel")
+script = ExtResource("1")
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 16
+[node name="Root" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+[node name="Header" type="HBoxContainer" parent="Margin/Root"]
+layout_mode = 2
+[node name="Title" type="Label" parent="Margin/Root/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.39, 0.79, 0.86, 1)
+theme_override_font_sizes/font_size = 22
+text = "组织、关系与人物层级"
+[node name="CloseButton" type="Button" parent="Margin/Root/Header"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(42, 36)
+layout_mode = 2
+text = "×"
+[node name="CountsLabel" type="Label" parent="Margin/Root"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.82, 0.86, 1)
+text = "背景人物 0 · 活跃人物 0 / 20 · 按需关系 0"
+[node name="Scroll" type="ScrollContainer" parent="Margin/Root"]
+layout_mode = 2
+size_flags_vertical = 3
+[node name="Content" type="VBoxContainer" parent="Margin/Root/Scroll"]
+custom_minimum_size = Vector2(445, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 7
+[node name="OrgHeader" type="Label" parent="Margin/Root/Scroll/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.39, 0.79, 0.86, 1)
+text = "组织与职位"
+[node name="OrganizationOption" type="OptionButton" parent="Margin/Root/Scroll/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+[node name="OrganizationLabel" type="RichTextLabel" parent="Margin/Root/Scroll/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 145)
+layout_mode = 2
+bbcode_enabled = true
+[node name="JoinButton" type="Button" parent="Margin/Root/Scroll/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "加入组织"
+[node name="PositionOption" type="OptionButton" parent="Margin/Root/Scroll/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+[node name="PositionButton" type="Button" parent="Margin/Root/Scroll/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "争取 / 调整职位"
+[node name="SeparatorA" type="HSeparator" parent="Margin/Root/Scroll/Content"]
+layout_mode = 2
+[node name="RelationHeader" type="Label" parent="Margin/Root/Scroll/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.39, 0.79, 0.86, 1)
+text = "按需关系"
+[node name="RelationshipOption" type="OptionButton" parent="Margin/Root/Scroll/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+[node name="RelationshipButton" type="Button" parent="Margin/Root/Scroll/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "建立 / 加深实际联系"
+[node name="RelationshipLabel" type="Label" parent="Margin/Root/Scroll/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "玩家已知实际关系：0"
+[node name="SeparatorB" type="HSeparator" parent="Margin/Root/Scroll/Content"]
+layout_mode = 2
+[node name="TierHeader" type="Label" parent="Margin/Root/Scroll/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.39, 0.79, 0.86, 1)
+text = "人物层级开发验证"
+[node name="BackgroundOption" type="OptionButton" parent="Margin/Root/Scroll/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+[node name="PromoteButton" type="Button" parent="Margin/Root/Scroll/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "升级为活跃人物"
+[node name="ActiveOption" type="OptionButton" parent="Margin/Root/Scroll/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+[node name="DemoteButton" type="Button" parent="Margin/Root/Scroll/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "降级为背景人物"
+[node name="SeparatorC" type="HSeparator" parent="Margin/Root/Scroll/Content"]
+layout_mode = 2
+[node name="SuccessionHeader" type="Label" parent="Margin/Root/Scroll/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.39, 0.79, 0.86, 1)
+text = "人物退出与继承"
+[node name="ExitReasonOption" type="OptionButton" parent="Margin/Root/Scroll/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+[node name="PrepareSuccessionButton" type="Button" parent="Margin/Root/Scroll/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "根据真实关系生成候选"
+[node name="SuccessionOption" type="OptionButton" parent="Margin/Root/Scroll/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+[node name="SuccessionLabel" type="Label" parent="Margin/Root/Scroll/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 2
+text = "继承不会复制前人物全部数据。"
+[node name="ConfirmSuccessionButton" type="Button" parent="Margin/Root/Scroll/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+disabled = true
+text = "确认退出并由候选继承"
+[node name="DeveloperToggle" type="CheckButton" parent="Margin/Root/Scroll/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "开发者：显示活跃 AI 调试"
+[node name="AiSection" type="VBoxContainer" parent="Margin/Root/Scroll/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+visible = false
+theme_override_constants/separation = 6
+[node name="AiOption" type="OptionButton" parent="Margin/Root/Scroll/Content/AiSection"]
+unique_name_in_owner = true
+layout_mode = 2
+[node name="AiLabel" type="RichTextLabel" parent="Margin/Root/Scroll/Content/AiSection"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 220)
+layout_mode = 2
+bbcode_enabled = true
+[node name="MessageLabel" type="Label" parent="Margin/Root/Scroll/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.72, 0.4, 1)
+autowrap_mode = 2

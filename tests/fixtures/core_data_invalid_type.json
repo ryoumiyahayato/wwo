@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "countries": [],
+  "regions": [],
+  "control_units": [],
+  "population_groups": [],
+  "characters": [
+    {
+      "id": "character:invalid_age",
+      "name": "错误年龄",
+      "age": "thirty",
+      "country_id": "country:missing",
+      "region_id": "region:missing",
+      "occupation_id": "tester",
+      "occupation": "tester",
+      "public_position": "",
+      "organization_ids": [],
+      "relationship_ids": [],
+      "hidden_aptitudes": {},
+      "temperament_weights": {},
+      "skills": {},
+      "manifested_traits": [],
+      "tendencies": {},
+      "known_tendencies": {},
+      "current_status": {},
+      "is_active": false,
+      "random_mode": "",
+      "random_category": "",
+      "is_challenge_start": false,
+      "generation_seed": 0,
+      "random_state": 0
+    }
+  ],
+  "organizations": [],
+  "relationships": [],
+  "actions": []
+}

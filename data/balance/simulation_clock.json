@@ -1,0 +1,9 @@
+{
+  "config_version": 1,
+  "start_year": 1900,
+  "start_month": 1,
+  "start_day": 1,
+  "start_hour": 0,
+  "real_seconds_per_game_hour": 1.0,
+  "allowed_speed_multipliers": [1, 2, 4, 8]
+}

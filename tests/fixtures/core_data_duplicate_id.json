@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "countries": [
+    {"id": "country:duplicate", "name": "甲", "region_ids": [], "public_status": {}},
+    {"id": "country:duplicate", "name": "乙", "region_ids": [], "public_status": {}}
+  ],
+  "regions": [],
+  "control_units": [],
+  "population_groups": [],
+  "characters": [],
+  "organizations": [],
+  "relationships": [],
+  "actions": []
+}

@@ -1,0 +1,197 @@
+{
+  "config_version": 1,
+  "age_range": [18, 60],
+  "aptitude_range": [20, 80],
+  "growth_modifier_range": [0.8, 1.2],
+  "trait_rules": {
+    "adult_age": 18,
+    "stable_age": 25,
+    "young_count": [1, 2],
+    "adult_count": [2, 4]
+  },
+  "aptitude_keys": [
+    "learning", "reasoning", "social_perception", "willpower",
+    "physical_coordination", "stress_tolerance"
+  ],
+  "skill_keys": [
+    "administration", "engineering", "finance", "political_activity",
+    "public_speaking", "investigation", "social_organization",
+    "military_command", "personal_combat"
+  ],
+  "trait_keys": [
+    "cautious", "impulsive", "trustworthy", "suspicious",
+    "ambitious", "compassionate", "disciplined", "adventurous"
+  ],
+  "labels": {
+    "aptitudes": {
+      "learning": "学习能力",
+      "reasoning": "推理能力",
+      "social_perception": "社会感知",
+      "willpower": "意志与自控",
+      "physical_coordination": "身体协调",
+      "stress_tolerance": "压力承受"
+    },
+    "skills": {
+      "administration": "行政",
+      "engineering": "工程",
+      "finance": "财务",
+      "political_activity": "政治活动",
+      "public_speaking": "演讲",
+      "investigation": "调查",
+      "social_organization": "社会组织",
+      "military_command": "军事指挥",
+      "personal_combat": "单兵能力"
+    },
+    "traits": {
+      "cautious": "谨慎",
+      "impulsive": "冲动",
+      "trustworthy": "守信",
+      "suspicious": "多疑",
+      "ambitious": "野心",
+      "compassionate": "同情心",
+      "disciplined": "纪律性",
+      "adventurous": "冒险倾向"
+    },
+    "categories": {
+      "civilian": "平民",
+      "military": "军方",
+      "political": "政界",
+      "industrial": "工业界",
+      "knowledge": "知识界"
+    },
+    "tendencies": {
+      "government_support": "政府态度",
+      "reform": "改革立场",
+      "militarism": "军事立场",
+      "labor_business": "劳资立场",
+      "nationalism": "民族立场"
+    },
+    "current_status": {
+      "health": "健康",
+      "fatigue": "疲劳",
+      "stress": "压力",
+      "injury": "伤势",
+      "mood": "情绪",
+      "wealth": "财富",
+      "reputation": "声望",
+      "employment_status": "就业",
+      "debt_state": "债务",
+      "monitored": "受监视",
+      "detained": "被拘留"
+    },
+    "status_values": {
+      "none": "无",
+      "calm": "平静",
+      "employed": "在业",
+      "self_employed": "自营",
+      "unemployed": "失业",
+      "true": "是",
+      "false": "否"
+    }
+  },
+  "tendency_poles": {
+    "government_support": {"negative": "反对政府", "positive": "支持政府"},
+    "reform": {"negative": "保守", "positive": "改革"},
+    "militarism": {"negative": "反战", "positive": "扩军"},
+    "labor_business": {"negative": "工会", "positive": "企业"},
+    "nationalism": {"negative": "国际主义", "positive": "民族主义"}
+  },
+  "country_names": {
+    "country:loran_federation": {
+      "family_names": ["安", "洛", "岑", "林", "陶", "沈", "白", "顾"],
+      "given_names": ["宁", "雅", "川", "文", "修", "澄", "岚", "启"]
+    },
+    "country:vesta_union": {
+      "family_names": ["维", "赫", "诺", "萨", "柯", "米", "塔", "罗"],
+      "given_names": ["伊娜", "列夫", "米娅", "安德", "索拉", "维克", "露卡", "艾尔"]
+    }
+  },
+  "occupations": [
+    {
+      "id": "civil_servant", "name": "公务员", "category": "political",
+      "standard_weight": 12, "population_weight": 5, "challenge": false,
+      "position": "基层办事员", "employment_status": "employed",
+      "wealth_range": [45, 75], "reputation_range": [12, 30],
+      "skill_bases": {"administration": 58, "finance": 38, "political_activity": 35},
+      "tendency_bases": {"government_support": 25, "reform": 5, "militarism": 0, "labor_business": 10, "nationalism": 12}
+    },
+    {
+      "id": "junior_officer", "name": "基层军官", "category": "military",
+      "standard_weight": 10, "population_weight": 3, "challenge": false,
+      "position": "排级军官", "employment_status": "employed",
+      "wealth_range": [48, 76], "reputation_range": [18, 36],
+      "skill_bases": {"military_command": 56, "personal_combat": 52, "administration": 32},
+      "tendency_bases": {"government_support": 28, "reform": -8, "militarism": 48, "labor_business": 8, "nationalism": 35}
+    },
+    {
+      "id": "teacher", "name": "教师", "category": "knowledge",
+      "standard_weight": 10, "population_weight": 7, "challenge": false,
+      "position": "教员", "employment_status": "employed",
+      "wealth_range": [35, 62], "reputation_range": [16, 38],
+      "skill_bases": {"public_speaking": 55, "investigation": 40, "administration": 35},
+      "tendency_bases": {"government_support": 5, "reform": 32, "militarism": -15, "labor_business": -8, "nationalism": 8}
+    },
+    {
+      "id": "journalist", "name": "记者", "category": "knowledge",
+      "standard_weight": 8, "population_weight": 4, "challenge": false,
+      "position": "记者", "employment_status": "employed",
+      "wealth_range": [30, 60], "reputation_range": [14, 42],
+      "skill_bases": {"investigation": 58, "public_speaking": 48, "political_activity": 42},
+      "tendency_bases": {"government_support": -5, "reform": 38, "militarism": -12, "labor_business": -5, "nationalism": 5}
+    },
+    {
+      "id": "small_merchant", "name": "小商人", "category": "industrial",
+      "standard_weight": 10, "population_weight": 9, "challenge": false,
+      "position": "店主", "employment_status": "self_employed",
+      "wealth_range": [55, 100], "reputation_range": [8, 30],
+      "skill_bases": {"finance": 55, "administration": 42, "public_speaking": 35},
+      "tendency_bases": {"government_support": 10, "reform": 5, "militarism": -5, "labor_business": 45, "nationalism": 10}
+    },
+    {
+      "id": "skilled_worker", "name": "熟练工人", "category": "industrial",
+      "standard_weight": 12, "population_weight": 18, "challenge": false,
+      "position": "技工", "employment_status": "employed",
+      "wealth_range": [25, 50], "reputation_range": [5, 22],
+      "skill_bases": {"engineering": 60, "social_organization": 35, "personal_combat": 28},
+      "tendency_bases": {"government_support": -2, "reform": 22, "militarism": -8, "labor_business": -38, "nationalism": 8}
+    },
+    {
+      "id": "union_member", "name": "工会成员", "category": "civilian",
+      "standard_weight": 8, "population_weight": 8, "challenge": false,
+      "position": "基层会员", "employment_status": "employed",
+      "wealth_range": [22, 48], "reputation_range": [10, 32],
+      "skill_bases": {"social_organization": 58, "political_activity": 45, "public_speaking": 42},
+      "tendency_bases": {"government_support": -18, "reform": 42, "militarism": -20, "labor_business": -65, "nationalism": 2}
+    },
+    {
+      "id": "farmer", "name": "农民", "category": "civilian",
+      "standard_weight": 0, "population_weight": 25, "challenge": true,
+      "position": "", "employment_status": "employed",
+      "wealth_range": [8, 30], "reputation_range": [0, 12],
+      "skill_bases": {"engineering": 28, "personal_combat": 25},
+      "tendency_bases": {"government_support": 2, "reform": -12, "militarism": -18, "labor_business": -15, "nationalism": 10}
+    },
+    {
+      "id": "laborer", "name": "普通工人", "category": "civilian",
+      "standard_weight": 0, "population_weight": 15, "challenge": true,
+      "position": "", "employment_status": "employed",
+      "wealth_range": [10, 32], "reputation_range": [0, 14],
+      "skill_bases": {"engineering": 30, "social_organization": 25, "personal_combat": 25},
+      "tendency_bases": {"government_support": -12, "reform": 28, "militarism": -15, "labor_business": -48, "nationalism": 5}
+    },
+    {
+      "id": "unemployed", "name": "无业者", "category": "civilian",
+      "standard_weight": 0, "population_weight": 6, "challenge": true,
+      "position": "", "employment_status": "unemployed",
+      "wealth_range": [0, 15], "reputation_range": [0, 8],
+      "skill_bases": {"personal_combat": 22},
+      "tendency_bases": {"government_support": -35, "reform": 38, "militarism": -22, "labor_business": -50, "nationalism": 0}
+    }
+  ],
+  "tendency_events": {
+    "propaganda": {"government_support": 8, "nationalism": 5},
+    "unemployment": {"government_support": -12, "reform": 8, "labor_business": -10},
+    "war_casualty": {"government_support": -10, "militarism": -15, "nationalism": 8},
+    "policy_benefit": {"government_support": 12, "reform": 5}
+  }
+}

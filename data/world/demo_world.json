@@ -1,0 +1,2327 @@
+{
+  "schema_version": 1,
+  "countries": [
+    {
+      "id": "country:loran_federation",
+      "name": "洛岚联邦",
+      "region_ids": [
+        "region:loran_dawnbay",
+        "region:loran_riverback",
+        "region:loran_forgeplain",
+        "region:loran_southridge"
+      ],
+      "public_status": {
+        "map_color": "#3f7f9f",
+        "stability": "stable"
+      }
+    },
+    {
+      "id": "country:vesta_union",
+      "name": "维斯塔联盟",
+      "region_ids": [
+        "region:vesta_northstar",
+        "region:vesta_silverfield",
+        "region:vesta_eastlake",
+        "region:vesta_redhill"
+      ],
+      "public_status": {
+        "map_color": "#a96652",
+        "stability": "stable"
+      }
+    }
+  ],
+  "regions": [
+    {
+      "id": "region:loran_dawnbay",
+      "name": "晨湾区",
+      "de_jure_country_id": "country:loran_federation",
+      "population_group_ids": [
+        "population:loran_dawnbay"
+      ],
+      "city_names": [
+        "晨港"
+      ],
+      "resources": {
+        "industry": 0.35,
+        "agriculture": 0.62
+      },
+      "infrastructure": {
+        "rail": 0.78,
+        "roads": 0.62
+      },
+      "organization_ids": [],
+      "social_influence": {
+        "country:loran_federation": 0.74,
+        "country:vesta_union": 0.26
+      }
+    },
+    {
+      "id": "region:vesta_northstar",
+      "name": "北辰区",
+      "de_jure_country_id": "country:vesta_union",
+      "population_group_ids": [
+        "population:vesta_northstar"
+      ],
+      "city_names": [],
+      "resources": {
+        "industry": 0.43,
+        "agriculture": 0.55
+      },
+      "infrastructure": {
+        "rail": 0.58,
+        "roads": 0.62
+      },
+      "organization_ids": [],
+      "social_influence": {
+        "country:loran_federation": 0.26,
+        "country:vesta_union": 0.74
+      }
+    },
+    {
+      "id": "region:loran_riverback",
+      "name": "河脊区",
+      "de_jure_country_id": "country:loran_federation",
+      "population_group_ids": [
+        "population:loran_riverback"
+      ],
+      "city_names": [
+        "铁川"
+      ],
+      "resources": {
+        "industry": 0.51,
+        "agriculture": 0.48
+      },
+      "infrastructure": {
+        "rail": 0.78,
+        "roads": 0.62
+      },
+      "organization_ids": [],
+      "social_influence": {
+        "country:loran_federation": 0.74,
+        "country:vesta_union": 0.26
+      }
+    },
+    {
+      "id": "region:vesta_silverfield",
+      "name": "银野区",
+      "de_jure_country_id": "country:vesta_union",
+      "population_group_ids": [
+        "population:vesta_silverfield"
+      ],
+      "city_names": [
+        "星城"
+      ],
+      "resources": {
+        "industry": 0.59,
+        "agriculture": 0.62
+      },
+      "infrastructure": {
+        "rail": 0.78,
+        "roads": 0.62
+      },
+      "organization_ids": [],
+      "social_influence": {
+        "country:loran_federation": 0.26,
+        "country:vesta_union": 0.74
+      }
+    },
+    {
+      "id": "region:loran_forgeplain",
+      "name": "铸原区",
+      "de_jure_country_id": "country:loran_federation",
+      "population_group_ids": [
+        "population:loran_forgeplain"
+      ],
+      "city_names": [],
+      "resources": {
+        "industry": 0.35,
+        "agriculture": 0.55
+      },
+      "infrastructure": {
+        "rail": 0.58,
+        "roads": 0.62
+      },
+      "organization_ids": [],
+      "social_influence": {
+        "country:loran_federation": 0.74,
+        "country:vesta_union": 0.26
+      }
+    },
+    {
+      "id": "region:vesta_eastlake",
+      "name": "东湖区",
+      "de_jure_country_id": "country:vesta_union",
+      "population_group_ids": [
+        "population:vesta_eastlake"
+      ],
+      "city_names": [],
+      "resources": {
+        "industry": 0.43,
+        "agriculture": 0.48
+      },
+      "infrastructure": {
+        "rail": 0.58,
+        "roads": 0.62
+      },
+      "organization_ids": [],
+      "social_influence": {
+        "country:loran_federation": 0.26,
+        "country:vesta_union": 0.74
+      }
+    },
+    {
+      "id": "region:loran_southridge",
+      "name": "南岭区",
+      "de_jure_country_id": "country:loran_federation",
+      "population_group_ids": [
+        "population:loran_southridge"
+      ],
+      "city_names": [],
+      "resources": {
+        "industry": 0.51,
+        "agriculture": 0.62
+      },
+      "infrastructure": {
+        "rail": 0.58,
+        "roads": 0.62
+      },
+      "organization_ids": [],
+      "social_influence": {
+        "country:loran_federation": 0.74,
+        "country:vesta_union": 0.26
+      }
+    },
+    {
+      "id": "region:vesta_redhill",
+      "name": "赤丘区",
+      "de_jure_country_id": "country:vesta_union",
+      "population_group_ids": [
+        "population:vesta_redhill"
+      ],
+      "city_names": [
+        "赤原"
+      ],
+      "resources": {
+        "industry": 0.59,
+        "agriculture": 0.55
+      },
+      "infrastructure": {
+        "rail": 0.78,
+        "roads": 0.62
+      },
+      "organization_ids": [],
+      "social_influence": {
+        "country:loran_federation": 0.26,
+        "country:vesta_union": 0.74
+      }
+    }
+  ],
+  "control_units": [
+    {
+      "id": "control:r0_c0",
+      "region_id": "region:loran_dawnbay",
+      "grid_x": 0,
+      "grid_y": 0,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r0_c1",
+        "control:r1_c0"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r0_c1",
+      "region_id": "region:loran_dawnbay",
+      "grid_x": 1,
+      "grid_y": 0,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r0_c0",
+        "control:r0_c2",
+        "control:r1_c1"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r0_c2",
+      "region_id": "region:loran_dawnbay",
+      "grid_x": 2,
+      "grid_y": 0,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r0_c1",
+        "control:r0_c3",
+        "control:r1_c2"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [
+        "control:r1_c2"
+      ],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r0_c3",
+      "region_id": "region:loran_dawnbay",
+      "grid_x": 3,
+      "grid_y": 0,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r0_c2",
+        "control:r0_c4",
+        "control:r1_c3"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r0_c4",
+      "region_id": "region:loran_dawnbay",
+      "grid_x": 4,
+      "grid_y": 0,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r0_c3",
+        "control:r0_c5",
+        "control:r1_c4"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.78,
+      "contested_level": 0.5,
+      "garrison_pressure": 0.55,
+      "enemy_pressure": 0.28,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r0_c5",
+      "region_id": "region:vesta_northstar",
+      "grid_x": 5,
+      "grid_y": 0,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r0_c4",
+        "control:r0_c6",
+        "control:r1_c5"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.78,
+      "contested_level": 0.5,
+      "garrison_pressure": 0.55,
+      "enemy_pressure": 0.28,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r0_c6",
+      "region_id": "region:vesta_northstar",
+      "grid_x": 6,
+      "grid_y": 0,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r0_c5",
+        "control:r0_c7",
+        "control:r1_c6"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r0_c7",
+      "region_id": "region:vesta_northstar",
+      "grid_x": 7,
+      "grid_y": 0,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r0_c6",
+        "control:r0_c8",
+        "control:r1_c7"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [
+        "control:r1_c7"
+      ],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r0_c8",
+      "region_id": "region:vesta_northstar",
+      "grid_x": 8,
+      "grid_y": 0,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r0_c7",
+        "control:r0_c9",
+        "control:r1_c8"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r0_c9",
+      "region_id": "region:vesta_northstar",
+      "grid_x": 9,
+      "grid_y": 0,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r0_c8",
+        "control:r1_c9"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r1_c0",
+      "region_id": "region:loran_dawnbay",
+      "grid_x": 0,
+      "grid_y": 1,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r0_c0",
+        "control:r1_c1",
+        "control:r2_c0"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r1_c1",
+      "region_id": "region:loran_dawnbay",
+      "grid_x": 1,
+      "grid_y": 1,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r0_c1",
+        "control:r1_c0",
+        "control:r1_c2",
+        "control:r2_c1"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r1_c2",
+      "region_id": "region:loran_dawnbay",
+      "grid_x": 2,
+      "grid_y": 1,
+      "city_name": "晨港",
+      "neighbor_ids": [
+        "control:r0_c2",
+        "control:r1_c1",
+        "control:r1_c3",
+        "control:r2_c2"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [
+        "control:r0_c2",
+        "control:r2_c2"
+      ],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r1_c3",
+      "region_id": "region:loran_dawnbay",
+      "grid_x": 3,
+      "grid_y": 1,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r0_c3",
+        "control:r1_c2",
+        "control:r1_c4",
+        "control:r2_c3"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r1_c4",
+      "region_id": "region:loran_dawnbay",
+      "grid_x": 4,
+      "grid_y": 1,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r0_c4",
+        "control:r1_c3",
+        "control:r1_c5",
+        "control:r2_c4"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.78,
+      "contested_level": 0.5,
+      "garrison_pressure": 0.55,
+      "enemy_pressure": 0.28,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r1_c5",
+      "region_id": "region:vesta_northstar",
+      "grid_x": 5,
+      "grid_y": 1,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r0_c5",
+        "control:r1_c4",
+        "control:r1_c6",
+        "control:r2_c5"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.78,
+      "contested_level": 0.5,
+      "garrison_pressure": 0.55,
+      "enemy_pressure": 0.28,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r1_c6",
+      "region_id": "region:vesta_northstar",
+      "grid_x": 6,
+      "grid_y": 1,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r0_c6",
+        "control:r1_c5",
+        "control:r1_c7",
+        "control:r2_c6"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r1_c7",
+      "region_id": "region:vesta_northstar",
+      "grid_x": 7,
+      "grid_y": 1,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r0_c7",
+        "control:r1_c6",
+        "control:r1_c8",
+        "control:r2_c7"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [
+        "control:r0_c7",
+        "control:r2_c7"
+      ],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r1_c8",
+      "region_id": "region:vesta_northstar",
+      "grid_x": 8,
+      "grid_y": 1,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r0_c8",
+        "control:r1_c7",
+        "control:r1_c9",
+        "control:r2_c8"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r1_c9",
+      "region_id": "region:vesta_northstar",
+      "grid_x": 9,
+      "grid_y": 1,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r0_c9",
+        "control:r1_c8",
+        "control:r2_c9"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r2_c0",
+      "region_id": "region:loran_riverback",
+      "grid_x": 0,
+      "grid_y": 2,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r1_c0",
+        "control:r2_c1",
+        "control:r3_c0"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r2_c1",
+      "region_id": "region:loran_riverback",
+      "grid_x": 1,
+      "grid_y": 2,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r1_c1",
+        "control:r2_c0",
+        "control:r2_c2",
+        "control:r3_c1"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r2_c2",
+      "region_id": "region:loran_riverback",
+      "grid_x": 2,
+      "grid_y": 2,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r1_c2",
+        "control:r2_c1",
+        "control:r2_c3",
+        "control:r3_c2"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [
+        "control:r1_c2",
+        "control:r3_c2"
+      ],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r2_c3",
+      "region_id": "region:loran_riverback",
+      "grid_x": 3,
+      "grid_y": 2,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r1_c3",
+        "control:r2_c2",
+        "control:r2_c4",
+        "control:r3_c3"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r2_c4",
+      "region_id": "region:loran_riverback",
+      "grid_x": 4,
+      "grid_y": 2,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r1_c4",
+        "control:r2_c3",
+        "control:r2_c5",
+        "control:r3_c4"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.78,
+      "contested_level": 0.5,
+      "garrison_pressure": 0.55,
+      "enemy_pressure": 0.28,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r2_c5",
+      "region_id": "region:vesta_silverfield",
+      "grid_x": 5,
+      "grid_y": 2,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r1_c5",
+        "control:r2_c4",
+        "control:r2_c6",
+        "control:r3_c5"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.78,
+      "contested_level": 0.5,
+      "garrison_pressure": 0.55,
+      "enemy_pressure": 0.28,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r2_c6",
+      "region_id": "region:vesta_silverfield",
+      "grid_x": 6,
+      "grid_y": 2,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r1_c6",
+        "control:r2_c5",
+        "control:r2_c7",
+        "control:r3_c6"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r2_c7",
+      "region_id": "region:vesta_silverfield",
+      "grid_x": 7,
+      "grid_y": 2,
+      "city_name": "星城",
+      "neighbor_ids": [
+        "control:r1_c7",
+        "control:r2_c6",
+        "control:r2_c8",
+        "control:r3_c7"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [
+        "control:r1_c7",
+        "control:r3_c7"
+      ],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r2_c8",
+      "region_id": "region:vesta_silverfield",
+      "grid_x": 8,
+      "grid_y": 2,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r1_c8",
+        "control:r2_c7",
+        "control:r2_c9",
+        "control:r3_c8"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r2_c9",
+      "region_id": "region:vesta_silverfield",
+      "grid_x": 9,
+      "grid_y": 2,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r1_c9",
+        "control:r2_c8",
+        "control:r3_c9"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r3_c0",
+      "region_id": "region:loran_riverback",
+      "grid_x": 0,
+      "grid_y": 3,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r2_c0",
+        "control:r3_c1",
+        "control:r4_c0"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [
+        "control:r3_c1"
+      ],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r3_c1",
+      "region_id": "region:loran_riverback",
+      "grid_x": 1,
+      "grid_y": 3,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r2_c1",
+        "control:r3_c0",
+        "control:r3_c2",
+        "control:r4_c1"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [
+        "control:r3_c0",
+        "control:r3_c2"
+      ],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r3_c2",
+      "region_id": "region:loran_riverback",
+      "grid_x": 2,
+      "grid_y": 3,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r2_c2",
+        "control:r3_c1",
+        "control:r3_c3",
+        "control:r4_c2"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [
+        "control:r2_c2",
+        "control:r3_c1",
+        "control:r3_c3",
+        "control:r4_c2"
+      ],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r3_c3",
+      "region_id": "region:loran_riverback",
+      "grid_x": 3,
+      "grid_y": 3,
+      "city_name": "铁川",
+      "neighbor_ids": [
+        "control:r2_c3",
+        "control:r3_c2",
+        "control:r3_c4",
+        "control:r4_c3"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [
+        "control:r3_c2",
+        "control:r3_c4"
+      ],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r3_c4",
+      "region_id": "region:loran_riverback",
+      "grid_x": 4,
+      "grid_y": 3,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r2_c4",
+        "control:r3_c3",
+        "control:r3_c5",
+        "control:r4_c4"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.78,
+      "contested_level": 0.5,
+      "garrison_pressure": 0.55,
+      "enemy_pressure": 0.28,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [
+        "control:r3_c3",
+        "control:r3_c5"
+      ],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r3_c5",
+      "region_id": "region:vesta_silverfield",
+      "grid_x": 5,
+      "grid_y": 3,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r2_c5",
+        "control:r3_c4",
+        "control:r3_c6",
+        "control:r4_c5"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.78,
+      "contested_level": 0.5,
+      "garrison_pressure": 0.55,
+      "enemy_pressure": 0.28,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [
+        "control:r3_c4",
+        "control:r3_c6"
+      ],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r3_c6",
+      "region_id": "region:vesta_silverfield",
+      "grid_x": 6,
+      "grid_y": 3,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r2_c6",
+        "control:r3_c5",
+        "control:r3_c7",
+        "control:r4_c6"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [
+        "control:r3_c5",
+        "control:r3_c7"
+      ],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r3_c7",
+      "region_id": "region:vesta_silverfield",
+      "grid_x": 7,
+      "grid_y": 3,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r2_c7",
+        "control:r3_c6",
+        "control:r3_c8",
+        "control:r4_c7"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [
+        "control:r2_c7",
+        "control:r3_c6",
+        "control:r3_c8",
+        "control:r4_c7"
+      ],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r3_c8",
+      "region_id": "region:vesta_silverfield",
+      "grid_x": 8,
+      "grid_y": 3,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r2_c8",
+        "control:r3_c7",
+        "control:r3_c9",
+        "control:r4_c8"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [
+        "control:r3_c7",
+        "control:r3_c9"
+      ],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r3_c9",
+      "region_id": "region:vesta_silverfield",
+      "grid_x": 9,
+      "grid_y": 3,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r2_c9",
+        "control:r3_c8",
+        "control:r4_c9"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [
+        "control:r3_c8"
+      ],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r4_c0",
+      "region_id": "region:loran_forgeplain",
+      "grid_x": 0,
+      "grid_y": 4,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r3_c0",
+        "control:r4_c1",
+        "control:r5_c0"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r4_c1",
+      "region_id": "region:loran_forgeplain",
+      "grid_x": 1,
+      "grid_y": 4,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r3_c1",
+        "control:r4_c0",
+        "control:r4_c2",
+        "control:r5_c1"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r4_c2",
+      "region_id": "region:loran_forgeplain",
+      "grid_x": 2,
+      "grid_y": 4,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r3_c2",
+        "control:r4_c1",
+        "control:r4_c3",
+        "control:r5_c2"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [
+        "control:r3_c2",
+        "control:r5_c2"
+      ],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r4_c3",
+      "region_id": "region:loran_forgeplain",
+      "grid_x": 3,
+      "grid_y": 4,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r3_c3",
+        "control:r4_c2",
+        "control:r4_c4",
+        "control:r5_c3"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r4_c4",
+      "region_id": "region:loran_forgeplain",
+      "grid_x": 4,
+      "grid_y": 4,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r3_c4",
+        "control:r4_c3",
+        "control:r4_c5",
+        "control:r5_c4"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.78,
+      "contested_level": 0.5,
+      "garrison_pressure": 0.55,
+      "enemy_pressure": 0.28,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r4_c5",
+      "region_id": "region:vesta_eastlake",
+      "grid_x": 5,
+      "grid_y": 4,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r3_c5",
+        "control:r4_c4",
+        "control:r4_c6",
+        "control:r5_c5"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.78,
+      "contested_level": 0.5,
+      "garrison_pressure": 0.55,
+      "enemy_pressure": 0.28,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r4_c6",
+      "region_id": "region:vesta_eastlake",
+      "grid_x": 6,
+      "grid_y": 4,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r3_c6",
+        "control:r4_c5",
+        "control:r4_c7",
+        "control:r5_c6"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r4_c7",
+      "region_id": "region:vesta_eastlake",
+      "grid_x": 7,
+      "grid_y": 4,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r3_c7",
+        "control:r4_c6",
+        "control:r4_c8",
+        "control:r5_c7"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [
+        "control:r3_c7",
+        "control:r5_c7"
+      ],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r4_c8",
+      "region_id": "region:vesta_eastlake",
+      "grid_x": 8,
+      "grid_y": 4,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r3_c8",
+        "control:r4_c7",
+        "control:r4_c9",
+        "control:r5_c8"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r4_c9",
+      "region_id": "region:vesta_eastlake",
+      "grid_x": 9,
+      "grid_y": 4,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r3_c9",
+        "control:r4_c8",
+        "control:r5_c9"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r5_c0",
+      "region_id": "region:loran_forgeplain",
+      "grid_x": 0,
+      "grid_y": 5,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r4_c0",
+        "control:r5_c1",
+        "control:r6_c0"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r5_c1",
+      "region_id": "region:loran_forgeplain",
+      "grid_x": 1,
+      "grid_y": 5,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r4_c1",
+        "control:r5_c0",
+        "control:r5_c2",
+        "control:r6_c1"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r5_c2",
+      "region_id": "region:loran_forgeplain",
+      "grid_x": 2,
+      "grid_y": 5,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r4_c2",
+        "control:r5_c1",
+        "control:r5_c3",
+        "control:r6_c2"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [
+        "control:r4_c2",
+        "control:r6_c2"
+      ],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r5_c3",
+      "region_id": "region:loran_forgeplain",
+      "grid_x": 3,
+      "grid_y": 5,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r4_c3",
+        "control:r5_c2",
+        "control:r5_c4",
+        "control:r6_c3"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r5_c4",
+      "region_id": "region:loran_forgeplain",
+      "grid_x": 4,
+      "grid_y": 5,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r4_c4",
+        "control:r5_c3",
+        "control:r5_c5",
+        "control:r6_c4"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.78,
+      "contested_level": 0.5,
+      "garrison_pressure": 0.55,
+      "enemy_pressure": 0.28,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r5_c5",
+      "region_id": "region:vesta_eastlake",
+      "grid_x": 5,
+      "grid_y": 5,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r4_c5",
+        "control:r5_c4",
+        "control:r5_c6",
+        "control:r6_c5"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.78,
+      "contested_level": 0.5,
+      "garrison_pressure": 0.55,
+      "enemy_pressure": 0.28,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r5_c6",
+      "region_id": "region:vesta_eastlake",
+      "grid_x": 6,
+      "grid_y": 5,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r4_c6",
+        "control:r5_c5",
+        "control:r5_c7",
+        "control:r6_c6"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r5_c7",
+      "region_id": "region:vesta_eastlake",
+      "grid_x": 7,
+      "grid_y": 5,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r4_c7",
+        "control:r5_c6",
+        "control:r5_c8",
+        "control:r6_c7"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [
+        "control:r4_c7",
+        "control:r6_c7"
+      ],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r5_c8",
+      "region_id": "region:vesta_eastlake",
+      "grid_x": 8,
+      "grid_y": 5,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r4_c8",
+        "control:r5_c7",
+        "control:r5_c9",
+        "control:r6_c8"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r5_c9",
+      "region_id": "region:vesta_eastlake",
+      "grid_x": 9,
+      "grid_y": 5,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r4_c9",
+        "control:r5_c8",
+        "control:r6_c9"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r6_c0",
+      "region_id": "region:loran_southridge",
+      "grid_x": 0,
+      "grid_y": 6,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r5_c0",
+        "control:r6_c1",
+        "control:r7_c0"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r6_c1",
+      "region_id": "region:loran_southridge",
+      "grid_x": 1,
+      "grid_y": 6,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r5_c1",
+        "control:r6_c0",
+        "control:r6_c2",
+        "control:r7_c1"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r6_c2",
+      "region_id": "region:loran_southridge",
+      "grid_x": 2,
+      "grid_y": 6,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r5_c2",
+        "control:r6_c1",
+        "control:r6_c3",
+        "control:r7_c2"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [
+        "control:r5_c2",
+        "control:r7_c2"
+      ],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r6_c3",
+      "region_id": "region:loran_southridge",
+      "grid_x": 3,
+      "grid_y": 6,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r5_c3",
+        "control:r6_c2",
+        "control:r6_c4",
+        "control:r7_c3"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r6_c4",
+      "region_id": "region:loran_southridge",
+      "grid_x": 4,
+      "grid_y": 6,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r5_c4",
+        "control:r6_c3",
+        "control:r6_c5",
+        "control:r7_c4"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.78,
+      "contested_level": 0.5,
+      "garrison_pressure": 0.55,
+      "enemy_pressure": 0.28,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r6_c5",
+      "region_id": "region:vesta_redhill",
+      "grid_x": 5,
+      "grid_y": 6,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r5_c5",
+        "control:r6_c4",
+        "control:r6_c6",
+        "control:r7_c5"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.78,
+      "contested_level": 0.5,
+      "garrison_pressure": 0.55,
+      "enemy_pressure": 0.28,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r6_c6",
+      "region_id": "region:vesta_redhill",
+      "grid_x": 6,
+      "grid_y": 6,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r5_c6",
+        "control:r6_c5",
+        "control:r6_c7",
+        "control:r7_c6"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r6_c7",
+      "region_id": "region:vesta_redhill",
+      "grid_x": 7,
+      "grid_y": 6,
+      "city_name": "赤原",
+      "neighbor_ids": [
+        "control:r5_c7",
+        "control:r6_c6",
+        "control:r6_c8",
+        "control:r7_c7"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [
+        "control:r5_c7",
+        "control:r7_c7"
+      ],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r6_c8",
+      "region_id": "region:vesta_redhill",
+      "grid_x": 8,
+      "grid_y": 6,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r5_c8",
+        "control:r6_c7",
+        "control:r6_c9",
+        "control:r7_c8"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r6_c9",
+      "region_id": "region:vesta_redhill",
+      "grid_x": 9,
+      "grid_y": 6,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r5_c9",
+        "control:r6_c8",
+        "control:r7_c9"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r7_c0",
+      "region_id": "region:loran_southridge",
+      "grid_x": 0,
+      "grid_y": 7,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r6_c0",
+        "control:r7_c1"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r7_c1",
+      "region_id": "region:loran_southridge",
+      "grid_x": 1,
+      "grid_y": 7,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r6_c1",
+        "control:r7_c0",
+        "control:r7_c2"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r7_c2",
+      "region_id": "region:loran_southridge",
+      "grid_x": 2,
+      "grid_y": 7,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r6_c2",
+        "control:r7_c1",
+        "control:r7_c3"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [
+        "control:r6_c2"
+      ],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r7_c3",
+      "region_id": "region:loran_southridge",
+      "grid_x": 3,
+      "grid_y": 7,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r6_c3",
+        "control:r7_c2",
+        "control:r7_c4"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r7_c4",
+      "region_id": "region:loran_southridge",
+      "grid_x": 4,
+      "grid_y": 7,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r6_c4",
+        "control:r7_c3",
+        "control:r7_c5"
+      ],
+      "de_jure_country_id": "country:loran_federation",
+      "controller_country_id": "country:loran_federation",
+      "control_strength": 0.78,
+      "contested_level": 0.5,
+      "garrison_pressure": 0.55,
+      "enemy_pressure": 0.28,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r7_c5",
+      "region_id": "region:vesta_redhill",
+      "grid_x": 5,
+      "grid_y": 7,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r6_c5",
+        "control:r7_c4",
+        "control:r7_c6"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.78,
+      "contested_level": 0.5,
+      "garrison_pressure": 0.55,
+      "enemy_pressure": 0.28,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r7_c6",
+      "region_id": "region:vesta_redhill",
+      "grid_x": 6,
+      "grid_y": 7,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r6_c6",
+        "control:r7_c5",
+        "control:r7_c7"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r7_c7",
+      "region_id": "region:vesta_redhill",
+      "grid_x": 7,
+      "grid_y": 7,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r6_c7",
+        "control:r7_c6",
+        "control:r7_c8"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [
+        "control:r6_c7"
+      ],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r7_c8",
+      "region_id": "region:vesta_redhill",
+      "grid_x": 8,
+      "grid_y": 7,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r6_c8",
+        "control:r7_c7",
+        "control:r7_c9"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    },
+    {
+      "id": "control:r7_c9",
+      "region_id": "region:vesta_redhill",
+      "grid_x": 9,
+      "grid_y": 7,
+      "city_name": "",
+      "neighbor_ids": [
+        "control:r6_c9",
+        "control:r7_c8"
+      ],
+      "de_jure_country_id": "country:vesta_union",
+      "controller_country_id": "country:vesta_union",
+      "control_strength": 0.92,
+      "contested_level": 0.08,
+      "garrison_pressure": 0.32,
+      "enemy_pressure": 0.04,
+      "social_support": 0.68,
+      "railroad_neighbor_ids": [],
+      "infrastructure_state": "operational"
+    }
+  ],
+  "population_groups": [
+    {
+      "id": "population:loran_dawnbay",
+      "region_id": "region:loran_dawnbay",
+      "population_count": 185000,
+      "social_class": "working_class",
+      "occupation_category": "industrial",
+      "average_income": 42,
+      "average_education": 0.38,
+      "unemployment_rate": 0.09,
+      "public_political_leaning": {
+        "government_support": 0.58
+      },
+      "basic_living_state": "stable"
+    },
+    {
+      "id": "population:vesta_northstar",
+      "region_id": "region:vesta_northstar",
+      "population_count": 172000,
+      "social_class": "mixed",
+      "occupation_category": "agricultural",
+      "average_income": 44.5,
+      "average_education": 0.405,
+      "unemployment_rate": 0.078,
+      "public_political_leaning": {
+        "government_support": 0.62
+      },
+      "basic_living_state": "stable"
+    },
+    {
+      "id": "population:loran_riverback",
+      "region_id": "region:loran_riverback",
+      "population_count": 206000,
+      "social_class": "working_class",
+      "occupation_category": "agricultural",
+      "average_income": 47,
+      "average_education": 0.43,
+      "unemployment_rate": 0.066,
+      "public_political_leaning": {
+        "government_support": 0.58
+      },
+      "basic_living_state": "stable"
+    },
+    {
+      "id": "population:vesta_silverfield",
+      "region_id": "region:vesta_silverfield",
+      "population_count": 221000,
+      "social_class": "mixed",
+      "occupation_category": "industrial",
+      "average_income": 49.5,
+      "average_education": 0.455,
+      "unemployment_rate": 0.09,
+      "public_political_leaning": {
+        "government_support": 0.62
+      },
+      "basic_living_state": "stable"
+    },
+    {
+      "id": "population:loran_forgeplain",
+      "region_id": "region:loran_forgeplain",
+      "population_count": 194000,
+      "social_class": "working_class",
+      "occupation_category": "agricultural",
+      "average_income": 52,
+      "average_education": 0.48,
+      "unemployment_rate": 0.078,
+      "public_political_leaning": {
+        "government_support": 0.58
+      },
+      "basic_living_state": "stable"
+    },
+    {
+      "id": "population:vesta_eastlake",
+      "region_id": "region:vesta_eastlake",
+      "population_count": 188000,
+      "social_class": "mixed",
+      "occupation_category": "agricultural",
+      "average_income": 54.5,
+      "average_education": 0.505,
+      "unemployment_rate": 0.066,
+      "public_political_leaning": {
+        "government_support": 0.62
+      },
+      "basic_living_state": "stable"
+    },
+    {
+      "id": "population:loran_southridge",
+      "region_id": "region:loran_southridge",
+      "population_count": 163000,
+      "social_class": "working_class",
+      "occupation_category": "industrial",
+      "average_income": 57,
+      "average_education": 0.53,
+      "unemployment_rate": 0.09,
+      "public_political_leaning": {
+        "government_support": 0.58
+      },
+      "basic_living_state": "stable"
+    },
+    {
+      "id": "population:vesta_redhill",
+      "region_id": "region:vesta_redhill",
+      "population_count": 179000,
+      "social_class": "mixed",
+      "occupation_category": "agricultural",
+      "average_income": 59.5,
+      "average_education": 0.555,
+      "unemployment_rate": 0.078,
+      "public_political_leaning": {
+        "government_support": 0.62
+      },
+      "basic_living_state": "stable"
+    }
+  ],
+  "characters": [],
+  "organizations": [
+    {
+      "id": "organization:loran_government", "name": "洛岚联邦行政院", "type": "government",
+      "country_id": "country:loran_federation", "region_id": "region:loran_dawnbay",
+      "size": 18000, "resources": 82, "influence": 0.9, "public_stance": "维持行政秩序",
+      "leader_character_id": "", "member_ids": [],
+      "position_structure": {"entry_position": "clerk", "leader_position": "minister", "positions": {
+        "clerk": {"name": "基层职员", "level": 1, "slots": 200, "permissions": ["organization_member"], "holder_ids": []},
+        "regional_official": {"name": "地区官员", "level": 2, "slots": 12, "permissions": ["organization_member", "regional_policy"], "holder_ids": []},
+        "minister": {"name": "行政部长", "level": 3, "slots": 1, "permissions": ["organization_member", "regional_policy", "regional_control_support"], "holder_ids": []}
+      }},
+      "organization_relations": {"organization:loran_military": 0.6, "organization:loran_union": -0.2}
+    },
+    {
+      "id": "organization:vesta_government", "name": "维斯塔联盟议政厅", "type": "government",
+      "country_id": "country:vesta_union", "region_id": "region:vesta_northstar",
+      "size": 16500, "resources": 80, "influence": 0.88, "public_stance": "维护联盟稳定",
+      "leader_character_id": "", "member_ids": [],
+      "position_structure": {"entry_position": "clerk", "leader_position": "minister", "positions": {
+        "clerk": {"name": "基层职员", "level": 1, "slots": 200, "permissions": ["organization_member"], "holder_ids": []},
+        "regional_official": {"name": "地区官员", "level": 2, "slots": 12, "permissions": ["organization_member", "regional_policy"], "holder_ids": []},
+        "minister": {"name": "议政部长", "level": 3, "slots": 1, "permissions": ["organization_member", "regional_policy", "regional_control_support"], "holder_ids": []}
+      }},
+      "organization_relations": {"organization:vesta_military": 0.55, "organization:vesta_union": -0.15}
+    },
+    {
+      "id": "organization:loran_military", "name": "洛岚联邦陆军", "type": "military",
+      "country_id": "country:loran_federation", "region_id": "region:loran_forgeplain",
+      "size": 42000, "resources": 76, "influence": 0.82, "public_stance": "保卫联邦边境",
+      "leader_character_id": "", "member_ids": [],
+      "position_structure": {"entry_position": "enlisted", "leader_position": "commander", "positions": {
+        "enlisted": {"name": "基层成员", "level": 1, "slots": 500, "permissions": ["organization_member"], "holder_ids": []},
+        "officer": {"name": "地区军官", "level": 2, "slots": 24, "permissions": ["organization_member", "regional_control_support"], "holder_ids": []},
+        "commander": {"name": "军区指挥官", "level": 3, "slots": 1, "permissions": ["organization_member", "regional_control_support"], "holder_ids": []}
+      }},
+      "organization_relations": {"organization:loran_government": 0.6}
+    },
+    {
+      "id": "organization:vesta_military", "name": "维斯塔联盟卫戍军", "type": "military",
+      "country_id": "country:vesta_union", "region_id": "region:vesta_redhill",
+      "size": 39500, "resources": 74, "influence": 0.8, "public_stance": "维护联盟防务",
+      "leader_character_id": "", "member_ids": [],
+      "position_structure": {"entry_position": "enlisted", "leader_position": "commander", "positions": {
+        "enlisted": {"name": "基层成员", "level": 1, "slots": 500, "permissions": ["organization_member"], "holder_ids": []},
+        "officer": {"name": "地区军官", "level": 2, "slots": 24, "permissions": ["organization_member", "regional_control_support"], "holder_ids": []},
+        "commander": {"name": "卫戍指挥官", "level": 3, "slots": 1, "permissions": ["organization_member", "regional_control_support"], "holder_ids": []}
+      }},
+      "organization_relations": {"organization:vesta_government": 0.55}
+    },
+    {
+      "id": "organization:loran_enterprise", "name": "洛岚联合工商业社", "type": "enterprise",
+      "country_id": "country:loran_federation", "region_id": "region:loran_riverback",
+      "size": 9600, "resources": 88, "influence": 0.68, "public_stance": "扩大工商业投资",
+      "leader_character_id": "", "member_ids": [],
+      "position_structure": {"entry_position": "employee", "leader_position": "executive", "positions": {
+        "employee": {"name": "雇员", "level": 1, "slots": 300, "permissions": ["organization_member"], "holder_ids": []},
+        "manager": {"name": "地区经理", "level": 2, "slots": 16, "permissions": ["organization_member", "organization_support"], "holder_ids": []},
+        "executive": {"name": "总经理", "level": 3, "slots": 1, "permissions": ["organization_member", "organization_support", "regional_policy"], "holder_ids": []}
+      }},
+      "organization_relations": {"organization:loran_union": -0.35}
+    },
+    {
+      "id": "organization:vesta_enterprise", "name": "维斯塔产业联合会", "type": "enterprise",
+      "country_id": "country:vesta_union", "region_id": "region:vesta_eastlake",
+      "size": 9100, "resources": 86, "influence": 0.66, "public_stance": "发展联盟产业",
+      "leader_character_id": "", "member_ids": [],
+      "position_structure": {"entry_position": "employee", "leader_position": "executive", "positions": {
+        "employee": {"name": "雇员", "level": 1, "slots": 300, "permissions": ["organization_member"], "holder_ids": []},
+        "manager": {"name": "地区经理", "level": 2, "slots": 16, "permissions": ["organization_member", "organization_support"], "holder_ids": []},
+        "executive": {"name": "总经理", "level": 3, "slots": 1, "permissions": ["organization_member", "organization_support", "regional_policy"], "holder_ids": []}
+      }},
+      "organization_relations": {"organization:vesta_union": -0.3}
+    },
+    {
+      "id": "organization:loran_union", "name": "洛岚劳动联合会", "type": "union",
+      "country_id": "country:loran_federation", "region_id": "region:loran_southridge",
+      "size": 28000, "resources": 54, "influence": 0.64, "public_stance": "改善劳动条件",
+      "leader_character_id": "", "member_ids": [],
+      "position_structure": {"entry_position": "member", "leader_position": "chair", "positions": {
+        "member": {"name": "基层会员", "level": 1, "slots": 500, "permissions": ["organization_member"], "holder_ids": []},
+        "organizer": {"name": "地区组织员", "level": 2, "slots": 20, "permissions": ["organization_member", "organization_support"], "holder_ids": []},
+        "chair": {"name": "联合会主席", "level": 3, "slots": 1, "permissions": ["organization_member", "organization_support", "regional_policy"], "holder_ids": []}
+      }},
+      "organization_relations": {"organization:loran_enterprise": -0.35, "organization:loran_government": -0.2}
+    },
+    {
+      "id": "organization:vesta_union", "name": "维斯塔工人协进会", "type": "union",
+      "country_id": "country:vesta_union", "region_id": "region:vesta_silverfield",
+      "size": 26500, "resources": 52, "influence": 0.62, "public_stance": "争取工人权益",
+      "leader_character_id": "", "member_ids": [],
+      "position_structure": {"entry_position": "member", "leader_position": "chair", "positions": {
+        "member": {"name": "基层会员", "level": 1, "slots": 500, "permissions": ["organization_member"], "holder_ids": []},
+        "organizer": {"name": "地区组织员", "level": 2, "slots": 20, "permissions": ["organization_member", "organization_support"], "holder_ids": []},
+        "chair": {"name": "协进会主席", "level": 3, "slots": 1, "permissions": ["organization_member", "organization_support", "regional_policy"], "holder_ids": []}
+      }},
+      "organization_relations": {"organization:vesta_enterprise": -0.3, "organization:vesta_government": -0.15}
+    }
+  ],
+  "relationships": [],
+  "actions": [
+    {
+      "id": "action:study_skill", "name": "学习技能", "category": "study_skill",
+      "total_work": 48, "base_progress_per_hour": 1.0,
+      "primary_skill": "investigation", "secondary_skills": ["administration"],
+      "aptitude_modifier_weight": 0.10, "position_permission_required": "",
+      "organization_support_weight": 0.08, "relationship_support_weight": 0.10,
+      "funding_weight": 0.12, "preparation_weight": 0.25, "state_modifier_weight": 0.35,
+      "base_target_resistance": 12, "interruption_conditions": ["detained", "incapacitated"],
+      "success_threshold": 45, "guaranteed_success_threshold": 100,
+      "success_result": {"description": "系统学习取得成果，主要技能提高。", "skill_delta": 4, "fatigue_delta": 6},
+      "failure_result": {"description": "学习未达目标，但积累了少量经验。", "skill_delta": 1, "fatigue_delta": 8}
+    },
+    {
+      "id": "action:perform_work", "name": "从事工作", "category": "perform_work",
+      "total_work": 60, "base_progress_per_hour": 1.2,
+      "primary_skill": "administration", "secondary_skills": ["finance"],
+      "aptitude_modifier_weight": 0.08, "position_permission_required": "",
+      "organization_support_weight": 0.12, "relationship_support_weight": 0.05,
+      "funding_weight": 0.05, "preparation_weight": 0.18, "state_modifier_weight": 0.45,
+      "base_target_resistance": 15, "interruption_conditions": ["detained", "incapacitated", "unemployed"],
+      "success_threshold": 45, "guaranteed_success_threshold": 100,
+      "success_result": {"description": "工作按计划完成并获得报酬。", "wealth_delta": 12, "reputation_delta": 2, "fatigue_delta": 10},
+      "failure_result": {"description": "工作结果不佳，只获得基础报酬。", "wealth_delta": 4, "fatigue_delta": 12, "stress_delta": 4}
+    },
+    {
+      "id": "action:build_relationship", "name": "建立关系", "category": "build_relationship",
+      "total_work": 72, "base_progress_per_hour": 1.0,
+      "primary_skill": "public_speaking", "secondary_skills": ["social_organization"],
+      "aptitude_modifier_weight": 0.10, "position_permission_required": "",
+      "organization_support_weight": 0.10, "relationship_support_weight": 0.25,
+      "funding_weight": 0.08, "preparation_weight": 0.20, "state_modifier_weight": 0.35,
+      "base_target_resistance": 20, "interruption_conditions": ["detained", "incapacitated"],
+      "success_threshold": 50, "guaranteed_success_threshold": 100,
+      "success_result": {"description": "双方建立了可继续发展的联系。", "reputation_delta": 2, "domain_effect": "relationship_contact"},
+      "failure_result": {"description": "接触未能建立稳定联系。", "stress_delta": 3, "domain_effect": "relationship_attempt"}
+    },
+    {
+      "id": "action:join_organization", "name": "加入组织", "category": "join_organization",
+      "total_work": 80, "base_progress_per_hour": 0.9,
+      "primary_skill": "social_organization", "secondary_skills": ["political_activity"],
+      "aptitude_modifier_weight": 0.10, "position_permission_required": "",
+      "organization_support_weight": 0.28, "relationship_support_weight": 0.18,
+      "funding_weight": 0.04, "preparation_weight": 0.22, "state_modifier_weight": 0.35,
+      "base_target_resistance": 25, "interruption_conditions": ["detained", "incapacitated"],
+      "success_threshold": 52, "guaranteed_success_threshold": 100,
+      "success_result": {"description": "加入申请获接纳，等待组织系统登记。", "reputation_delta": 2, "domain_effect": "organization_membership"},
+      "failure_result": {"description": "加入申请暂未获接纳。", "stress_delta": 4, "domain_effect": "organization_rejection"}
+    },
+    {
+      "id": "action:seek_position", "name": "争取职位", "category": "seek_position",
+      "total_work": 100, "base_progress_per_hour": 0.8,
+      "primary_skill": "political_activity", "secondary_skills": ["public_speaking", "administration"],
+      "aptitude_modifier_weight": 0.10, "position_permission_required": "organization_member",
+      "organization_support_weight": 0.28, "relationship_support_weight": 0.22,
+      "funding_weight": 0.08, "preparation_weight": 0.22, "state_modifier_weight": 0.40,
+      "base_target_resistance": 30, "interruption_conditions": ["detained", "incapacitated"],
+      "success_threshold": 55, "guaranteed_success_threshold": 105,
+      "success_result": {"description": "职位争取成功，等待组织职位系统登记。", "reputation_delta": 5, "domain_effect": "position_award"},
+      "failure_result": {"description": "职位争取失败。", "reputation_delta": -1, "stress_delta": 6, "domain_effect": "position_rejection"}
+    },
+    {
+      "id": "action:investigate_character", "name": "调查人物", "category": "investigate_character",
+      "total_work": 64, "base_progress_per_hour": 1.0,
+      "primary_skill": "investigation", "secondary_skills": ["public_speaking"],
+      "aptitude_modifier_weight": 0.12, "position_permission_required": "",
+      "organization_support_weight": 0.14, "relationship_support_weight": 0.12,
+      "funding_weight": 0.12, "preparation_weight": 0.25, "state_modifier_weight": 0.35,
+      "base_target_resistance": 24, "interruption_conditions": ["detained", "incapacitated"],
+      "success_threshold": 50, "guaranteed_success_threshold": 100,
+      "success_result": {"description": "调查获得可靠信息。", "reputation_delta": 1, "intelligence_delta": 15, "domain_effect": "character_intelligence"},
+      "failure_result": {"description": "调查没有得到可靠结论。", "stress_delta": 5, "intelligence_delta": 2, "domain_effect": "investigation_inconclusive"}
+    },
+    {
+      "id": "action:promote_policy", "name": "推动地区政策", "category": "promote_policy",
+      "total_work": 120, "base_progress_per_hour": 0.75,
+      "primary_skill": "administration", "secondary_skills": ["political_activity", "public_speaking"],
+      "aptitude_modifier_weight": 0.10, "position_permission_required": "regional_policy",
+      "organization_support_weight": 0.25, "relationship_support_weight": 0.16,
+      "funding_weight": 0.16, "preparation_weight": 0.24, "state_modifier_weight": 0.40,
+      "base_target_resistance": 35, "interruption_conditions": ["detained", "incapacitated"],
+      "success_threshold": 58, "guaranteed_success_threshold": 110,
+      "success_result": {"description": "政策提案获得推动，地区社会影响已更新。", "reputation_delta": 6, "domain_effect": "regional_policy_support"},
+      "failure_result": {"description": "政策提案未能推进。", "reputation_delta": -2, "stress_delta": 7, "domain_effect": "regional_policy_failure"}
+    },
+    {
+      "id": "action:support_control", "name": "支持扩大地区控制", "category": "support_control",
+      "total_work": 96, "base_progress_per_hour": 0.85,
+      "primary_skill": "military_command", "secondary_skills": ["social_organization", "administration"],
+      "aptitude_modifier_weight": 0.10, "position_permission_required": "regional_control_support",
+      "organization_support_weight": 0.25, "relationship_support_weight": 0.10,
+      "funding_weight": 0.20, "preparation_weight": 0.25, "state_modifier_weight": 0.45,
+      "base_target_resistance": 32, "interruption_conditions": ["detained", "incapacitated"],
+      "success_threshold": 58, "guaranteed_success_threshold": 110,
+      "success_result": {"description": "地区控制支援已生效。", "reputation_delta": 4, "control_pressure": 1.0},
+      "failure_result": {"description": "地区控制支援未能形成有效压力。", "stress_delta": 6}
+    }
+  ]
+}

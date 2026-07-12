@@ -1,0 +1,38 @@
+{
+  "config_version": 1,
+  "primary_skill_weight": 0.65,
+  "secondary_skill_weight": 0.15,
+  "position_permission_bonus": 15.0,
+  "progress_base_multiplier": 0.5,
+  "progress_effective_scale": 0.01,
+  "minimum_progress_multiplier": 0.25,
+  "maximum_progress_multiplier": 2.0,
+  "state": {
+    "health_baseline": 80.0,
+    "health_weight": 0.25,
+    "fatigue_weight": 0.25,
+    "stress_weight": 0.2,
+    "minimum": -25.0,
+    "maximum": 10.0,
+    "incapacitated_health": 0.0
+  },
+  "outlook_bands": [
+    {"maximum": 0.0, "label": "几乎不可能"},
+    {"maximum": 25.0, "label": "风险很高"},
+    {"maximum": 50.0, "label": "结果难料"},
+    {"maximum": 75.0, "label": "有一定把握"},
+    {"maximum": 1000000.0, "label": "很有把握"}
+  ],
+  "guaranteed_label": "条件充分，必然成功",
+  "aptitude_by_skill": {
+    "administration": "reasoning",
+    "engineering": "learning",
+    "finance": "reasoning",
+    "political_activity": "social_perception",
+    "public_speaking": "social_perception",
+    "investigation": "reasoning",
+    "social_organization": "social_perception",
+    "military_command": "willpower",
+    "personal_combat": "physical_coordination"
+  }
+}

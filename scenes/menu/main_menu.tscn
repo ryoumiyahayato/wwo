@@ -1,0 +1,151 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_main_menu"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card"]
+bg_color = Color(0.075, 0.102, 0.145, 0.96)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.235, 0.42, 0.56, 0.7)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0, 0, 0, 0.35)
+shadow_size = 18
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_main_menu")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.035, 0.047, 0.067, 1)
+
+[node name="Accent" type="ColorRect" parent="Background"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -5.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+color = Color(0.2, 0.58, 0.69, 1)
+
+[node name="SafeMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 32
+
+[node name="Center" type="CenterContainer" parent="SafeMargin"]
+layout_mode = 2
+
+[node name="Card" type="PanelContainer" parent="SafeMargin/Center"]
+custom_minimum_size = Vector2(480, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="CardMargin" type="MarginContainer" parent="SafeMargin/Center/Card"]
+layout_mode = 2
+theme_override_constants/margin_left = 44
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 44
+theme_override_constants/margin_bottom = 36
+
+[node name="Content" type="VBoxContainer" parent="SafeMargin/Center/Card/CardMargin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="MilestoneLabel" type="Label" parent="SafeMargin/Center/Card/CardMargin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.36, 0.78, 0.84, 1)
+theme_override_font_sizes/font_size = 14
+text = "M3"
+horizontal_alignment = 1
+
+[node name="TitleLabel" type="Label" parent="SafeMargin/Center/Card/CardMargin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.94, 0.965, 0.98, 1)
+theme_override_font_sizes/font_size = 34
+text = "1900"
+horizontal_alignment = 1
+
+[node name="SubtitleLabel" type="Label" parent="SafeMargin/Center/Card/CardMargin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.63, 0.7, 0.77, 1)
+theme_override_font_sizes/font_size = 17
+text = "Demo"
+horizontal_alignment = 1
+
+[node name="HeaderSpacer" type="Control" parent="SafeMargin/Center/Card/CardMargin/Content"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="NewGameButton" type="Button" parent="SafeMargin/Center/Card/CardMargin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+text = "新游戏"
+
+[node name="LoadGameButton" type="Button" parent="SafeMargin/Center/Card/CardMargin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+disabled = true
+text = "加载游戏"
+
+[node name="SettingsButton" type="Button" parent="SafeMargin/Center/Card/CardMargin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+disabled = true
+text = "设置"
+
+[node name="QuitButton" type="Button" parent="SafeMargin/Center/Card/CardMargin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+text = "退出"
+
+[node name="FooterSpacer" type="Control" parent="SafeMargin/Center/Card/CardMargin/Content"]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="FooterLabel" type="Label" parent="SafeMargin/Center/Card/CardMargin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.43, 0.5, 0.57, 1)
+theme_override_font_sizes/font_size = 13
+text = "离线单机"
+horizontal_alignment = 1

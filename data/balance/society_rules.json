@@ -1,0 +1,48 @@
+{
+  "config_version": 1,
+  "background_character_count": 120,
+  "active_character_limit": 20,
+  "initial_active_npc_count": 8,
+  "background_seed_base": 260000,
+  "relationship_defaults": {
+    "familiarity": 0.1,
+    "trust": 0.0,
+    "affinity": 0.0,
+    "is_public": true
+  },
+  "ai": {
+    "daily_interval_hours": 24,
+    "long_term_interval_hours": 720,
+    "skill_weight": 0.2,
+    "goal_bonus": 12.0,
+    "fatigue_penalty_weight": 0.18,
+    "stress_penalty_weight": 0.12,
+    "candidates": [
+      {"action_id": "action:perform_work", "base_weight": 30.0, "skill": "administration", "goal": "career_growth"},
+      {"action_id": "action:study_skill", "base_weight": 24.0, "skill": "investigation", "goal": "skill_growth"},
+      {"action_id": "action:build_relationship", "base_weight": 22.0, "skill": "public_speaking", "goal": "social_network"},
+      {"action_id": "action:join_organization", "base_weight": 18.0, "skill": "social_organization", "goal": "organization_influence"},
+      {"action_id": "rest", "base_weight": 8.0, "skill": "", "goal": "recovery"}
+    ],
+    "goal_by_occupation": {
+      "civil_servant": "career_growth",
+      "junior_officer": "organization_influence",
+      "teacher": "skill_growth",
+      "journalist": "social_network",
+      "small_merchant": "wealth_security",
+      "skilled_worker": "skill_growth",
+      "union_member": "organization_influence",
+      "farmer": "wealth_security",
+      "laborer": "wealth_security",
+      "unemployed": "recovery"
+    },
+    "goal_labels": {
+      "career_growth": "职业晋升",
+      "organization_influence": "扩大组织影响",
+      "skill_growth": "提升能力",
+      "social_network": "经营关系网络",
+      "wealth_security": "改善经济状况",
+      "recovery": "恢复状态"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "config_version": 1,
+  "social_influence": {
+    "policy_delta": 0.08,
+    "organization_delta_scale": 0.06,
+    "organization_resource_cost": 5.0,
+    "control_resource_cost": 8.0,
+    "minimum_organization_resources": 1.0
+  },
+  "candidate": {
+    "minimum_score": 20.0,
+    "familiarity_weight": 40.0,
+    "trust_weight": 25.0,
+    "affinity_weight": 15.0,
+    "shared_organization_bonus": 15.0,
+    "reputation_weight": 0.1
+  },
+  "enemy_affinity_threshold": -0.2,
+  "position_inheritance_minimum_score": 45.0,
+  "exit_reasons": {
+    "death": {"label": "死亡", "wealth_ratio": 0.50, "reputation_ratio": 0.25, "intelligence_ratio": 0.20, "ally_relationship_ratio": 0.35, "enemy_relationship_ratio": 0.60, "position_inheritance": false},
+    "retirement": {"label": "退休", "wealth_ratio": 0.70, "reputation_ratio": 0.60, "intelligence_ratio": 0.50, "ally_relationship_ratio": 0.55, "enemy_relationship_ratio": 0.35, "position_inheritance": true},
+    "long_imprisonment": {"label": "长期监禁", "wealth_ratio": 0.35, "reputation_ratio": 0.25, "intelligence_ratio": 0.15, "ally_relationship_ratio": 0.30, "enemy_relationship_ratio": 0.70, "position_inheritance": false},
+    "disgrace": {"label": "严重失势", "wealth_ratio": 0.20, "reputation_ratio": 0.10, "intelligence_ratio": 0.10, "ally_relationship_ratio": 0.20, "enemy_relationship_ratio": 0.80, "position_inheritance": false},
+    "voluntary": {"label": "自愿退出", "wealth_ratio": 0.60, "reputation_ratio": 0.50, "intelligence_ratio": 0.40, "ally_relationship_ratio": 0.50, "enemy_relationship_ratio": 0.40, "position_inheritance": true}
+  }
+}

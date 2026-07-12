@@ -1,0 +1,195 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/simulation_clock_view.gd" id="1_view"]
+[ext_resource type="Script" path="res://scripts/simulation/simulation_runner.gd" id="2_runner"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.075, 0.102, 0.145, 0.97)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.235, 0.42, 0.56, 0.8)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0, 0, 0, 0.35)
+shadow_size = 18
+
+[node name="SimulationClockView" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_view")
+
+[node name="SimulationRunner" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("2_runner")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.035, 0.047, 0.067, 1)
+
+[node name="Accent" type="ColorRect" parent="Background"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -5.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+color = Color(0.2, 0.58, 0.69, 1)
+
+[node name="SafeMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 32
+
+[node name="Center" type="CenterContainer" parent="SafeMargin"]
+layout_mode = 2
+
+[node name="Panel" type="PanelContainer" parent="SafeMargin/Center"]
+custom_minimum_size = Vector2(720, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="PanelMargin" type="MarginContainer" parent="SafeMargin/Center/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 48
+theme_override_constants/margin_top = 42
+theme_override_constants/margin_right = 48
+theme_override_constants/margin_bottom = 38
+
+[node name="Content" type="VBoxContainer" parent="SafeMargin/Center/Panel/PanelMargin"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="TitleLabel" type="Label" parent="SafeMargin/Center/Panel/PanelMargin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.36, 0.78, 0.84, 1)
+theme_override_font_sizes/font_size = 20
+text = "权威游戏时间"
+horizontal_alignment = 1
+
+[node name="DescriptionLabel" type="Label" parent="SafeMargin/Center/Panel/PanelMargin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.63, 0.7, 0.77, 1)
+theme_override_font_sizes/font_size = 15
+text = "模拟只按完整游戏小时推进"
+horizontal_alignment = 1
+
+[node name="DateTimeLabel" type="Label" parent="SafeMargin/Center/Panel/PanelMargin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 88)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.94, 0.965, 0.98, 1)
+theme_override_font_sizes/font_size = 40
+text = "1900年01月01日 00:00"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="SafeMargin/Center/Panel/PanelMargin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.73, 0.78, 0.82, 1)
+theme_override_font_sizes/font_size = 16
+text = "已暂停 · 当前速度 1×"
+horizontal_alignment = 1
+
+[node name="EventCountLabel" type="Label" parent="SafeMargin/Center/Panel/PanelMargin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.43, 0.5, 0.57, 1)
+theme_override_font_sizes/font_size = 14
+text = "已结算小时事件：0"
+horizontal_alignment = 1
+
+[node name="Controls" type="HBoxContainer" parent="SafeMargin/Center/Panel/PanelMargin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="PauseButton" type="Button" parent="SafeMargin/Center/Panel/PanelMargin/Content/Controls"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 44)
+layout_mode = 2
+text = "继续"
+
+[node name="StepButton" type="Button" parent="SafeMargin/Center/Panel/PanelMargin/Content/Controls"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 44)
+layout_mode = 2
+text = "单步 +1 小时"
+
+[node name="SpeedLabel" type="Label" parent="SafeMargin/Center/Panel/PanelMargin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.63, 0.7, 0.77, 1)
+text = "时间速度"
+horizontal_alignment = 1
+
+[node name="Speeds" type="HBoxContainer" parent="SafeMargin/Center/Panel/PanelMargin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="Speed1Button" type="Button" parent="SafeMargin/Center/Panel/PanelMargin/Content/Speeds"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(72, 42)
+layout_mode = 2
+toggle_mode = true
+button_pressed = true
+text = "1×"
+
+[node name="Speed2Button" type="Button" parent="SafeMargin/Center/Panel/PanelMargin/Content/Speeds"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(72, 42)
+layout_mode = 2
+toggle_mode = true
+text = "2×"
+
+[node name="Speed4Button" type="Button" parent="SafeMargin/Center/Panel/PanelMargin/Content/Speeds"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(72, 42)
+layout_mode = 2
+toggle_mode = true
+text = "4×"
+
+[node name="Speed8Button" type="Button" parent="SafeMargin/Center/Panel/PanelMargin/Content/Speeds"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(72, 42)
+layout_mode = 2
+toggle_mode = true
+text = "8×"
+
+[node name="BackSpacer" type="Control" parent="SafeMargin/Center/Panel/PanelMargin/Content"]
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="BackButton" type="Button" parent="SafeMargin/Center/Panel/PanelMargin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "返回主菜单"
+

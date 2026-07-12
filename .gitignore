@@ -1,0 +1,18 @@
+# Godot generated state
+.godot/
+.import/
+
+# Local editor state
+.idea/
+.vscode/
+*.tmp
+*.bak
+
+# Local builds and logs
+build/
+builds/
+logs/
+
+# OS metadata
+.DS_Store
+Thumbs.db
