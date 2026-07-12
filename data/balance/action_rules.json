@@ -16,6 +16,31 @@
     "maximum": 10.0,
     "incapacitated_health": 0.0
   },
+  "player_context": {
+    "base_preparation": 15.0,
+    "primary_skill_preparation_scale": 0.35,
+    "intelligence_preparation_scale": 0.25,
+    "funding_value_per_wealth": 5.0,
+    "funding_cost_by_category": {
+      "study_skill": 2,
+      "perform_work": 0,
+      "build_relationship": 3,
+      "join_organization": 4,
+      "seek_position": 6,
+      "investigate_character": 5,
+      "promote_policy": 8,
+      "support_control": 10
+    },
+    "organization_influence_scale": 45.0,
+    "position_level_scale": 12.0,
+    "relationship_familiarity_scale": 40.0,
+    "relationship_trust_scale": 30.0,
+    "relationship_affinity_scale": 30.0,
+    "character_reputation_resistance_scale": 0.25,
+    "organization_influence_resistance_scale": 25.0,
+    "control_contested_resistance_scale": 30.0,
+    "control_enemy_pressure_resistance_scale": 20.0
+  },
   "outlook_bands": [
     {"maximum": 0.0, "label": "几乎不可能"},
     {"maximum": 25.0, "label": "风险很高"},
