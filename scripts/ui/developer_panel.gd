@@ -2,6 +2,7 @@ class_name DeveloperPanel
 extends PanelContainer
 
 signal close_requested()
+signal developer_mode_changed(enabled: bool)
 
 @onready var enable_check: CheckButton = %EnableCheck
 @onready var status_label: Label = %StatusLabel
@@ -37,6 +38,7 @@ func _ready() -> void:
 func _on_enabled_toggled(enabled: bool) -> void:
 	if command_service != null:
 		command_service.set_enabled(enabled)
+	developer_mode_changed.emit(GameSessionService.developer_mode)
 	_refresh()
 
 
