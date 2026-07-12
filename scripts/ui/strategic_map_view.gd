@@ -216,8 +216,6 @@ func _refresh_selection_panel() -> void:
 
 
 func _on_pressure_pressed() -> void:
-	if not GameSessionService.developer_mode:
-		return
 	var unit: ControlUnitData = _map_service.get_unit(_selected_unit_id)
 	if unit == null:
 		return
@@ -226,8 +224,6 @@ func _on_pressure_pressed() -> void:
 
 
 func _on_transfer_pressed() -> void:
-	if not GameSessionService.developer_mode:
-		return
 	var unit: ControlUnitData = _map_service.get_unit(_selected_unit_id)
 	if unit == null:
 		return
