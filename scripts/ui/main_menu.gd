@@ -35,6 +35,7 @@ func _ready() -> void:
 
 
 func _on_new_game_pressed() -> void:
+	GameSessionService.clear()
 	var change_error: Error = get_tree().change_scene_to_file(
 		"res://scenes/character/character_setup_view.tscn"
 	)
