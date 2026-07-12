@@ -1,5 +1,5 @@
 extends Control
-## Public profile by default; exact hidden data requires an explicit developer toggle.
+## Public profile by default; exact hidden data requires global developer mode.
 
 @onready var title_label: Label = %TitleLabel
 @onready var public_label: RichTextLabel = %PublicLabel
@@ -15,6 +15,8 @@ var _config: CharacterGenerationConfig
 func _ready() -> void:
 	_config = CharacterGenerationConfig.load_from_file()
 	developer_panel.visible = false
+	developer_toggle.visible = GameSessionService.developer_mode
+	event_button.visible = GameSessionService.developer_mode
 	developer_toggle.toggled.connect(_on_developer_toggled)
 	event_button.pressed.connect(_on_event_pressed)
 	back_button.pressed.connect(_on_back_pressed)
@@ -73,10 +75,12 @@ func _format_values(values: Dictionary, label_group: String) -> String:
 
 
 func _on_developer_toggled(enabled: bool) -> void:
-	developer_panel.visible = enabled
+	developer_panel.visible = enabled and GameSessionService.developer_mode
 
 
 func _on_event_pressed() -> void:
+	if not GameSessionService.developer_mode:
+		return
 	CharacterTendencyService.new(_config).apply_event(
 		GameSessionService.player_character, "propaganda"
 	)
