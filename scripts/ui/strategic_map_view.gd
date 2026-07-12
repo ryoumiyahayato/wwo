@@ -74,7 +74,8 @@ func _ready() -> void:
 		return
 
 	_map_service.control_unit_changed.connect(_on_control_unit_changed)
-	_restore_pending_save()
+	if not _restore_pending_save():
+		return
 	_initialize_society()
 	_initialize_autosave()
 	GameSessionService.set_world_services(_clock, _map_service, _autosave)
@@ -110,17 +111,33 @@ func _bind_persistent_map() -> void:
 	_map_service = world_controller.control_service
 
 
-func _restore_pending_save() -> void:
+func _restore_pending_save() -> bool:
 	if GameSessionService.pending_load_path.is_empty():
-		return
+		return true
 	var pending_path: String = GameSessionService.pending_load_path
 	GameSessionService.pending_load_path = ""
+	var previous_clock_state: Dictionary = _clock.get_persistent_state()
+	var previous_world_state: Dictionary = _map_service.get_persistent_state()
 	var save_service := GameSaveService.new()
 	var loaded: SaveOperationResult = save_service.load_from_path(pending_path)
 	if loaded.success:
 		loaded = save_service.restore_snapshot(loaded.snapshot, _clock, _map_service)
-	if not loaded.success:
-		LogService.error("StrategicMapView", "加载存档失败：%s" % loaded.message)
+	if loaded.success:
+		return true
+	# restore_snapshot historically mutated the live clock/map before all validation
+	# finished. Roll both services back before leaving the failed load path.
+	_map_service.restore_persistent_state(previous_world_state)
+	_clock.restore_persistent_state(previous_clock_state)
+	var message: String = "加载存档失败：%s" % loaded.message
+	LogService.error("StrategicMapView", message)
+	GameSessionService.clear()
+	GameSessionService.pending_menu_message = message
+	var change_error: Error = get_tree().change_scene_to_file(
+		"res://scenes/menu/main_menu.tscn"
+	)
+	if change_error != OK:
+		_show_world_error("%s\n无法返回主菜单：%s" % [message, error_string(change_error)])
+	return false
 
 
 func _initialize_society() -> void:
@@ -216,6 +233,8 @@ func _refresh_selection_panel() -> void:
 
 
 func _on_pressure_pressed() -> void:
+	if not _debug_mutation_allowed():
+		return
 	var unit: ControlUnitData = _map_service.get_unit(_selected_unit_id)
 	if unit == null:
 		return
@@ -224,11 +243,22 @@ func _on_pressure_pressed() -> void:
 
 
 func _on_transfer_pressed() -> void:
+	if not _debug_mutation_allowed():
+		return
 	var unit: ControlUnitData = _map_service.get_unit(_selected_unit_id)
 	if unit == null:
 		return
 	var new_controller: String = _map_service.get_other_country_id(unit.controller_country_id)
 	_map_service.set_control_state(unit.id, new_controller, 0.3, 0.62)
+
+
+func _debug_mutation_allowed() -> bool:
+	# The legacy headless suite directly emits hidden debug button signals. Keep that
+	# test adapter available only in the editor binary; exported games require the
+	# explicit developer-mode gate even when a signal is emitted programmatically.
+	return GameSessionService.developer_mode or (
+		DisplayServer.get_name() == "headless" and OS.has_feature("editor")
+	)
 
 
 func _on_pause_pressed() -> void:
