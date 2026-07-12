@@ -151,9 +151,14 @@ func _target_resistance(target_id: String) -> float:
 		return 0.0
 	var config: Dictionary = rules.player_context_rules
 	var target: Variant = society.roster.get_public_character(target_id)
-	if target != null:
+	var status: Dictionary = {}
+	if target is CharacterData:
+		status = (target as CharacterData).current_status
+	elif target is BackgroundCharacterData:
+		status = (target as BackgroundCharacterData).current_status
+	if not status.is_empty():
 		return clampf(
-			float(target.current_status.get("reputation", 0))
+			float(status.get("reputation", 0))
 			* float(config.get("character_reputation_resistance_scale", 0.0)),
 			0.0,
 			100.0
