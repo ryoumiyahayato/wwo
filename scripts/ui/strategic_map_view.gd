@@ -1,5 +1,5 @@
 extends Control
-## Binds map and clock services to M3 controls and updates panels only on changes.
+## Binds the persistent authoritative world session to presentation controls.
 
 const UiStrings = preload("res://scripts/ui/ui_strings.gd")
 
@@ -13,6 +13,7 @@ const UiStrings = preload("res://scripts/ui/ui_strings.gd")
 @onready var speed_2_button: Button = %Speed2Button
 @onready var speed_4_button: Button = %Speed4Button
 @onready var speed_8_button: Button = %Speed8Button
+@onready var save_button: Button = %SaveButton
 @onready var back_button: Button = %BackButton
 @onready var character_button: Button = %CharacterButton
 @onready var action_button: Button = %ActionButton
@@ -30,7 +31,7 @@ const UiStrings = preload("res://scripts/ui/ui_strings.gd")
 var _clock: SimulationClock
 var _map_service: MapControlService
 var _selected_unit_id: String = ""
-var _autosave := AutosaveCoordinator.new()
+var _autosave: AutosaveCoordinator
 
 
 func _ready() -> void:
@@ -39,11 +40,13 @@ func _ready() -> void:
 	character_button.text = UiStrings.MAP_CHARACTER
 	action_button.text = UiStrings.MAP_ACTION
 	social_button.text = UiStrings.MAP_SOCIETY
+	save_button.text = UiStrings.MAP_SAVE
 	pause_button.pressed.connect(_on_pause_pressed)
 	speed_1_button.pressed.connect(_on_speed_pressed.bind(1))
 	speed_2_button.pressed.connect(_on_speed_pressed.bind(2))
 	speed_4_button.pressed.connect(_on_speed_pressed.bind(4))
 	speed_8_button.pressed.connect(_on_speed_pressed.bind(8))
+	save_button.pressed.connect(_on_save_pressed)
 	back_button.pressed.connect(_on_back_pressed)
 	character_button.pressed.connect(_on_character_pressed)
 	action_button.pressed.connect(_on_action_pressed)
@@ -55,44 +58,27 @@ func _ready() -> void:
 	action_panel.close_requested.connect(_on_action_panel_close_requested)
 	social_panel.close_requested.connect(_on_social_panel_close_requested)
 	developer_panel.close_requested.connect(_on_developer_panel_close_requested)
+	developer_panel.developer_mode_changed.connect(_on_developer_mode_changed)
 	social_panel.society_changed.connect(action_panel.refresh_permissions)
 	pressure_button.pressed.connect(_on_pressure_pressed)
 	transfer_button.pressed.connect(_on_transfer_pressed)
 	map_canvas.unit_selected.connect(_on_unit_selected)
 
-	if clock_runner.clock != null:
-		_clock = clock_runner.clock
-		_clock.time_changed.connect(_on_clock_changed)
-		_clock.pause_changed.connect(_on_pause_changed)
-		_clock.speed_changed.connect(_on_speed_changed)
-		_refresh_clock()
-
-	if world_controller.control_service == null:
+	_bind_persistent_clock()
+	if _clock == null:
+		_show_world_error("权威游戏时钟未初始化。")
+		return
+	_bind_persistent_map()
+	if _map_service == null:
 		_show_world_error(world_controller.initialization_error)
 		return
-	_map_service = world_controller.control_service
+
 	_map_service.control_unit_changed.connect(_on_control_unit_changed)
-	if not GameSessionService.pending_load_path.is_empty():
-		var pending_path: String = GameSessionService.pending_load_path
-		GameSessionService.pending_load_path = ""
-		var save_service := GameSaveService.new()
-		var loaded: SaveOperationResult = save_service.load_from_path(pending_path)
-		if loaded.success:
-			loaded = save_service.restore_snapshot(loaded.snapshot, _clock, _map_service)
-		if not loaded.success:
-			LogService.error("StrategicMapView", "加载存档失败：%s" % loaded.message)
-	if GameSessionService.has_player():
-		if GameSessionService.society_service == null:
-			GameSessionService.society_service = SocietySimulationService.new()
-			if not GameSessionService.society_service.initialize(
-				GameSessionService.player_character, _map_service.data_set
-			):
-				LogService.error("StrategicMapView", GameSessionService.society_service.initialization_error)
-		GameSessionService.society_service.attach_clock(_clock)
-	character_button.disabled = not GameSessionService.has_player()
-	action_button.disabled = not GameSessionService.has_player()
-	social_button.disabled = not GameSessionService.has_player()
-	_autosave.attach(_clock, _map_service)
+	_restore_pending_save()
+	_initialize_society()
+	_initialize_autosave()
+	GameSessionService.set_world_services(_clock, _map_service, _autosave)
+
 	developer_panel.setup(_clock, _map_service, _autosave)
 	map_canvas.setup(_map_service)
 	map_canvas.select_unit("control:r3_c4")
@@ -101,6 +87,62 @@ func _ready() -> void:
 	if GameSessionService.society_service != null:
 		social_panel.setup(_clock, GameSessionService.society_service)
 	zoom_label.text = UiStrings.MAP_HELP
+	_apply_developer_visibility()
+
+
+func _bind_persistent_clock() -> void:
+	if GameSessionService.world_clock != null:
+		clock_runner.clock = GameSessionService.world_clock
+	_clock = clock_runner.clock
+	if _clock == null:
+		return
+	_clock.time_changed.connect(_on_clock_changed)
+	_clock.pause_changed.connect(_on_pause_changed)
+	_clock.speed_changed.connect(_on_speed_changed)
+	_refresh_clock()
+
+
+func _bind_persistent_map() -> void:
+	if GameSessionService.world_map_service != null:
+		world_controller.control_service = GameSessionService.world_map_service
+		world_controller.data_set = GameSessionService.world_map_service.data_set
+		world_controller.rules = GameSessionService.world_map_service.rules
+	_map_service = world_controller.control_service
+
+
+func _restore_pending_save() -> void:
+	if GameSessionService.pending_load_path.is_empty():
+		return
+	var pending_path: String = GameSessionService.pending_load_path
+	GameSessionService.pending_load_path = ""
+	var save_service := GameSaveService.new()
+	var loaded: SaveOperationResult = save_service.load_from_path(pending_path)
+	if loaded.success:
+		loaded = save_service.restore_snapshot(loaded.snapshot, _clock, _map_service)
+	if not loaded.success:
+		LogService.error("StrategicMapView", "加载存档失败：%s" % loaded.message)
+
+
+func _initialize_society() -> void:
+	if not GameSessionService.has_player():
+		return
+	if GameSessionService.society_service == null:
+		GameSessionService.society_service = SocietySimulationService.new()
+		if not GameSessionService.society_service.initialize(
+			GameSessionService.player_character, _map_service.data_set
+		):
+			LogService.error("StrategicMapView", GameSessionService.society_service.initialization_error)
+	GameSessionService.society_service.attach_clock(_clock)
+	character_button.disabled = false
+	action_button.disabled = false
+	social_button.disabled = false
+
+
+func _initialize_autosave() -> void:
+	if GameSessionService.world_autosave == null:
+		GameSessionService.world_autosave = AutosaveCoordinator.new()
+	_autosave = GameSessionService.world_autosave
+	_autosave.attach(_clock, _map_service)
 
 
 func _on_unit_selected(unit_id: String) -> void:
@@ -170,9 +212,12 @@ func _refresh_selection_panel() -> void:
 	]
 	pressure_button.disabled = false
 	transfer_button.disabled = false
+	_apply_developer_visibility()
 
 
 func _on_pressure_pressed() -> void:
+	if not GameSessionService.developer_mode:
+		return
 	var unit: ControlUnitData = _map_service.get_unit(_selected_unit_id)
 	if unit == null:
 		return
@@ -181,6 +226,8 @@ func _on_pressure_pressed() -> void:
 
 
 func _on_transfer_pressed() -> void:
+	if not GameSessionService.developer_mode:
+		return
 	var unit: ControlUnitData = _map_service.get_unit(_selected_unit_id)
 	if unit == null:
 		return
@@ -196,6 +243,14 @@ func _on_pause_pressed() -> void:
 func _on_speed_pressed(multiplier: int) -> void:
 	if _clock != null and _clock.set_speed(multiplier):
 		_clock.set_paused(false)
+
+
+func _on_save_pressed() -> void:
+	var result: SaveOperationResult = GameSaveService.new().save_manual(_clock, _map_service)
+	save_button.text = "已保存" if result.success else "保存失败"
+	save_button.tooltip_text = (
+		"手动存档已写入" if result.success else "%s：%s" % [result.error_code, result.message]
+	)
 
 
 func _on_clock_changed(_snapshot: Dictionary) -> void:
@@ -244,6 +299,7 @@ func _on_character_pressed() -> void:
 func _on_action_pressed() -> void:
 	action_panel.visible = not action_panel.visible
 	social_panel.visible = false
+	developer_panel.visible = false
 
 
 func _on_action_panel_close_requested() -> void:
@@ -254,6 +310,7 @@ func _on_social_pressed() -> void:
 	social_panel.visible = not social_panel.visible
 	action_panel.visible = false
 	developer_panel.visible = false
+	social_panel.refresh_developer_mode()
 
 
 func _on_social_panel_close_requested() -> void:
@@ -268,6 +325,17 @@ func _on_developer_pressed() -> void:
 
 func _on_developer_panel_close_requested() -> void:
 	developer_panel.visible = false
+
+
+func _on_developer_mode_changed(_enabled: bool) -> void:
+	_apply_developer_visibility()
+	social_panel.refresh_developer_mode()
+
+
+func _apply_developer_visibility() -> void:
+	var visible_to_developer: bool = GameSessionService.developer_mode
+	pressure_button.visible = visible_to_developer
+	transfer_button.visible = visible_to_developer
 
 
 func _show_world_error(message: String) -> void:
