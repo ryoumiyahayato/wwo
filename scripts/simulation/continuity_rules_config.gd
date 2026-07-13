@@ -5,6 +5,7 @@ const DEFAULT_PATH: String = "res://data/balance/continuity_rules.json"
 
 var social_influence: Dictionary = {}
 var candidate: Dictionary = {}
+var exit_constraints: Dictionary = {}
 var enemy_affinity_threshold: float
 var position_inheritance_minimum_score: float
 var exit_reasons: Dictionary = {}
@@ -25,6 +26,7 @@ func load_from_file(path: String = DEFAULT_PATH) -> Error:
 		"config_version",
 		"social_influence",
 		"candidate",
+		"exit_constraints",
 		"enemy_affinity_threshold",
 		"position_inheritance_minimum_score",
 		"exit_reasons",
@@ -32,11 +34,18 @@ func load_from_file(path: String = DEFAULT_PATH) -> Error:
 		if not data.has(key):
 			error_message = "连续性规则缺少字段：%s" % key
 			return ERR_INVALID_DATA
-	if int(data["config_version"]) != 1 or not data["social_influence"] is Dictionary or not data["candidate"] is Dictionary or not data["exit_reasons"] is Dictionary:
+	if (
+		int(data["config_version"]) != 1
+		or not data["social_influence"] is Dictionary
+		or not data["candidate"] is Dictionary
+		or not data["exit_constraints"] is Dictionary
+		or not data["exit_reasons"] is Dictionary
+	):
 		error_message = "连续性规则版本或字段类型无效"
 		return ERR_INVALID_DATA
 	social_influence = (data["social_influence"] as Dictionary).duplicate(true)
 	candidate = (data["candidate"] as Dictionary).duplicate(true)
+	exit_constraints = (data["exit_constraints"] as Dictionary).duplicate(true)
 	enemy_affinity_threshold = float(data["enemy_affinity_threshold"])
 	position_inheritance_minimum_score = float(
 		data["position_inheritance_minimum_score"]
@@ -59,6 +68,12 @@ func load_from_file(path: String = DEFAULT_PATH) -> Error:
 		or int(candidate["maximum_inherited_organizations"]) > 8
 	):
 		error_message = "继承组织数量上限无效"
+		return ERR_INVALID_DATA
+	var disgrace_threshold: int = int(
+		exit_constraints.get("disgrace_reputation_threshold", -1)
+	)
+	if disgrace_threshold < 0 or disgrace_threshold > 100:
+		error_message = "失势退出声望阈值无效"
 		return ERR_INVALID_DATA
 	for reason_id: String in [
 		"death", "retirement", "long_imprisonment", "disgrace", "voluntary"
