@@ -33,6 +33,7 @@ func build_context(
 		return {}
 	var applied_extra: int = clampi(extra_funding, 0, get_max_extra_funding())
 	var total_cost: int = get_funding_cost(definition, applied_extra)
+	var running_npc: bool = _is_running_npc_action(character.id)
 	return {
 		"target_id": target_id,
 		"study_skill_id": resolved_study_skill,
@@ -51,6 +52,10 @@ func build_context(
 			definition, character, applied_extra, resolved_study_skill
 		),
 		"target_resistance": _target_resistance(target_id),
+		"boundary_invalid_reason": _get_strict_target_validation_error(
+			definition, character, target_id
+		) if running_npc else "",
+		"settle_previous_interval": running_npc,
 	}
 
 
@@ -105,7 +110,7 @@ func start_player_action(
 	if action_service == null or definition == null or character == null:
 		result.add_error("行动服务、行动定义和人物必须就绪。")
 		return result
-	var target_error: String = get_target_validation_error(
+	var target_error: String = _get_strict_target_validation_error(
 		definition, character, target_id
 	)
 	if not target_error.is_empty():
@@ -132,6 +137,8 @@ func start_player_action(
 		extra_funding,
 		resolved_study_skill
 	)
+	context["boundary_invalid_reason"] = ""
+	context["settle_previous_interval"] = false
 	context["funding_cost"] = cost
 	context["funding_committed"] = true
 	context["wealth_before_funding"] = wealth_before
@@ -192,6 +199,24 @@ func consume_funding(
 
 
 func get_target_validation_error(
+	definition: ActionDefinitionData,
+	character: CharacterData,
+	target_id: String
+) -> String:
+	var error: String = _get_strict_target_validation_error(
+		definition, character, target_id
+	)
+	if not error.is_empty() and character != null and _is_running_npc_action(
+		character.id
+	):
+		# The elapsed NPC interval still belongs to the previously stored context.
+		# Its new invalid state is marked in the rebuilt context and applied only
+		# after that interval has been settled.
+		return ""
+	return error
+
+
+func _get_strict_target_validation_error(
 	definition: ActionDefinitionData,
 	character: CharacterData,
 	target_id: String
@@ -284,7 +309,7 @@ func describe(
 	var base_cost: int = get_base_funding_cost(definition)
 	var wealth: int = int(character.current_status.get("wealth", 0))
 	var affordability: String = "可支付" if wealth >= cost else "资金不足"
-	var target_error: String = get_target_validation_error(
+	var target_error: String = _get_strict_target_validation_error(
 		definition, character, target_id
 	)
 	var target_line: String = (
@@ -377,6 +402,13 @@ func _resolve_study_skill_id(
 	if resolved.is_empty():
 		resolved = definition.primary_skill
 	return resolved if character.skills.has(resolved) else ""
+
+
+func _is_running_npc_action(character_id: String) -> bool:
+	if society == null or society.ai == null or character_id == society.roster.player_character_id:
+		return false
+	var state: AiStateData = society.ai.get_state(character_id)
+	return state != null and not state.current_action_record.is_empty()
 
 
 func _get_permissions(character_id: String) -> Array[String]:
