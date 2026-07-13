@@ -40,8 +40,10 @@ func initialize_background_population() -> bool:
 		var seed_value: int = rules.background_seed_base + index
 		var country_id: String = country_ids[index % country_ids.size()]
 		var generator := CharacterGenerator.new(
-			data_set, generation_config,
-			DeterministicRandomService.new(seed_value), StableIdService.new()
+			data_set,
+			generation_config,
+			DeterministicRandomService.new(seed_value),
+			StableIdService.new()
 		)
 		var result: CharacterGenerationResult = generator.generate_character(
 			country_id, CharacterGenerator.MODE_FULL_POPULATION
@@ -74,8 +76,10 @@ func promote(character_id: String) -> CharacterData:
 		return null
 	var background: BackgroundCharacterData = background_characters[character_id] as BackgroundCharacterData
 	var generator := CharacterGenerator.new(
-		data_set, generation_config,
-		DeterministicRandomService.new(background.activation_seed), StableIdService.new()
+		data_set,
+		generation_config,
+		DeterministicRandomService.new(background.activation_seed),
+		StableIdService.new()
 	)
 	var generated: CharacterGenerationResult = generator.generate_character(
 		background.country_id, CharacterGenerator.MODE_FULL_POPULATION
@@ -83,6 +87,7 @@ func promote(character_id: String) -> CharacterData:
 	if not generated.is_success():
 		return null
 	var character: CharacterData = generated.character
+	background.apply_persistent_core(character)
 	character.id = background.id
 	character.name = background.name
 	character.age = background.age
