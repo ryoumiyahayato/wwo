@@ -25,8 +25,14 @@ func _ready() -> void:
 
 	new_game_button.disabled = false
 	new_game_button.tooltip_text = ""
-	load_game_button.disabled = not FileAccess.file_exists(GameSaveService.MANUAL_PATH)
-	load_game_button.tooltip_text = "没有手动存档" if load_game_button.disabled else "加载手动存档"
+	var primary_exists: bool = FileAccess.file_exists(GameSaveService.MANUAL_PATH)
+	var backup_exists: bool = FileAccess.file_exists(GameSaveService.MANUAL_PATH + ".bak")
+	load_game_button.disabled = not primary_exists and not backup_exists
+	load_game_button.tooltip_text = (
+		"没有手动存档"
+		if load_game_button.disabled
+		else ("主存档缺失，将尝试安全备份" if not primary_exists else "加载手动存档")
+	)
 	settings_button.tooltip_text = UiStrings.FUTURE_FEATURE_TOOLTIP
 	new_game_button.pressed.connect(_on_new_game_pressed)
 	load_game_button.pressed.connect(_on_load_game_pressed)
