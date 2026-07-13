@@ -20,15 +20,18 @@ func validate(
 	society: SocietySimulationService,
 	map_service: MapControlService,
 	current_hour: int,
-	action_id_state: Dictionary
+	action_id_state: Dictionary,
+	require_player_actor: bool = true
 ) -> String:
 	var actor_id: String = str(record.get("actor_character_id", ""))
 	var definition_id: String = str(record.get("definition_id", ""))
 	var actor: CharacterData = society.roster.get_active(actor_id)
 	if actor_id.is_empty() or actor == null:
 		return "当前行动人物引用无效"
-	if actor_id != society.roster.player_character_id:
+	if require_player_actor and actor_id != society.roster.player_character_id:
 		return "当前行动不属于存档中的玩家人物"
+	if not require_player_actor and actor_id == society.roster.player_character_id:
+		return "NPC 行动不能引用玩家人物"
 	if not map_service.data_set.actions.has(definition_id):
 		return "当前行动定义引用无效"
 	if current_hour < 0:
@@ -99,9 +102,6 @@ func _validate_context(context: Dictionary, action: ActionInstanceData) -> Strin
 	var has_committed: bool = context.has("funding_committed")
 	var has_wealth: bool = context.has("wealth_before_funding")
 	if not has_cost and not has_committed and not has_wealth:
-		# Version 1 saves created before the authoritative funding transaction did
-		# not contain audit fields. They remain loadable and are upgraded on the
-		# next authoritative hourly context refresh.
 		return ""
 	if not has_cost or not has_committed or not has_wealth:
 		return "当前行动资金审计字段不完整"
@@ -168,7 +168,7 @@ func _validate_target(
 	map_service: MapControlService
 ) -> String:
 	if definition.category in ["build_relationship", "investigate_character"]:
-		if not society.roster.has_character(action.target_id) or action.target_id == action.actor_character_id:
+		if not society.roster.is_living(action.target_id) or action.target_id == action.actor_character_id:
 			return "当前行动人物目标无效"
 	elif definition.category in ["join_organization", "seek_position"]:
 		if society.organizations.get_organization(action.target_id) == null:
