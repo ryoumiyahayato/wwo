@@ -151,6 +151,8 @@ func get_character_permissions(character_id: String) -> Array[String]:
 	for raw_organization_id: Variant in index:
 		var organization_id: String = str(raw_organization_id)
 		var organization: OrganizationData = get_organization(organization_id)
+		if organization == null:
+			continue
 		var positions: Dictionary = organization.position_structure.get("positions", {}) as Dictionary
 		var position: Dictionary = positions.get(str(index[organization_id]), {}) as Dictionary
 		for permission: String in DataRecordUtils.to_string_array(position.get("permissions", [])):
@@ -177,24 +179,84 @@ func restore_persistent_state(records: Array) -> bool:
 			return false
 		var organization := OrganizationData.from_dict(raw_record as Dictionary)
 		var source: OrganizationData = organizations.get(organization.id) as OrganizationData
-		if source == null or organization.country_id != source.country_id or organization.type != source.type or restored.has(organization.id):
+		if source == null or restored.has(organization.id):
 			return false
+		if not _matches_immutable_structure(organization, source):
+			return false
+		if organization.size < 0.0 or organization.resources < 0.0 or organization.influence < 0.0 or organization.influence > 1.0:
+			return false
+		var unique_members: Dictionary = {}
+		for member_id: String in organization.member_ids:
+			if member_id.is_empty() or unique_members.has(member_id):
+				return false
+			unique_members[member_id] = true
 		var positions: Dictionary = organization.position_structure.get("positions", {}) as Dictionary
+		var source_positions: Dictionary = source.position_structure.get("positions", {}) as Dictionary
+		if positions.size() != source_positions.size():
+			return false
 		for raw_position_id: Variant in positions:
 			var position_id: String = str(raw_position_id)
+			if not source_positions.has(position_id) or not positions[position_id] is Dictionary:
+				return false
 			var position: Dictionary = positions[position_id] as Dictionary
-			for character_id: String in DataRecordUtils.to_string_array(position.get("holder_ids", [])):
+			var source_position: Dictionary = source_positions[position_id] as Dictionary
+			if not _matches_position_structure(position, source_position):
+				return false
+			var holders: Array[String] = DataRecordUtils.to_string_array(position.get("holder_ids", []))
+			if holders.size() > int(source_position.get("slots", 0)):
+				return false
+			var unique_holders: Dictionary = {}
+			for character_id: String in holders:
+				if not unique_members.has(character_id) or unique_holders.has(character_id):
+					return false
+				unique_holders[character_id] = true
 				var index: Dictionary = positions_by_character.get(character_id, {}) as Dictionary
 				if index.has(organization.id):
 					return false
 				index[organization.id] = position_id
 				positions_by_character[character_id] = index
+		var leader_position_id: String = str(source.position_structure.get("leader_position", ""))
+		var leader_holders: Array[String] = []
+		if positions.has(leader_position_id):
+			leader_holders = DataRecordUtils.to_string_array(
+				(positions[leader_position_id] as Dictionary).get("holder_ids", [])
+			)
+		if not organization.leader_character_id.is_empty():
+			if not unique_members.has(organization.leader_character_id) or not leader_holders.has(organization.leader_character_id):
+				return false
+		elif not leader_holders.is_empty():
+			return false
 		restored[organization.id] = organization
 	if restored.is_empty():
 		return false
 	organizations = restored
 	_positions_by_character = positions_by_character
 	return true
+
+
+func _matches_immutable_structure(
+	organization: OrganizationData,
+	source: OrganizationData
+) -> bool:
+	return (
+		organization.name == source.name
+		and organization.type == source.type
+		and organization.country_id == source.country_id
+		and organization.region_id == source.region_id
+		and organization.public_stance == source.public_stance
+		and organization.organization_relations == source.organization_relations
+		and str(organization.position_structure.get("entry_position", "")) == str(source.position_structure.get("entry_position", ""))
+		and str(organization.position_structure.get("leader_position", "")) == str(source.position_structure.get("leader_position", ""))
+	)
+
+
+func _matches_position_structure(position: Dictionary, source: Dictionary) -> bool:
+	return (
+		str(position.get("name", "")) == str(source.get("name", ""))
+		and int(position.get("level", -1)) == int(source.get("level", -1))
+		and int(position.get("slots", -1)) == int(source.get("slots", -1))
+		and DataRecordUtils.to_string_array(position.get("permissions", [])) == DataRecordUtils.to_string_array(source.get("permissions", []))
+	)
 
 
 func _remove_from_current_position(
