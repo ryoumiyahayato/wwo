@@ -11,10 +11,12 @@
 - 本机引擎：`D:\Tools\Godot-4.6.3\Godot_v4.6.3-stable_win64.exe`。
 - 启动：`& 'D:\Tools\Godot-4.6.3\Godot_v4.6.3-stable_win64.exe' --path 'D:\wwo'`
 - Headless 启动检查：`& 'D:\Tools\Godot-4.6.3\Godot_v4.6.3-stable_win64.exe' --headless --path 'D:\wwo' --quit-after 5`
-- 测试：`& 'D:\Tools\Godot-4.6.3\Godot_v4.6.3-stable_win64.exe' --headless --path 'D:\wwo' --script res://tests/test_runner.gd`
+- 原有测试：`& 'D:\Tools\Godot-4.6.3\Godot_v4.6.3-stable_win64.exe' --headless --path 'D:\wwo' --script res://tests/test_runner.gd`
+- P0-R1 逻辑回归：`& 'D:\Tools\Godot-4.6.3\Godot_v4.6.3-stable_win64.exe' --headless --path 'D:\wwo' --script res://tests/p0_r1_logic_regression.gd`
 - P0-R1 玩家旅程：`& 'D:\Tools\Godot-4.6.3\Godot_v4.6.3-stable_win64.exe' --headless --path 'D:\wwo' --script res://tests/p0_r1_player_journey.gd`
 - 状态一致性回归：`& 'D:\Tools\Godot-4.6.3\Godot_v4.6.3-stable_win64.exe' --headless --path 'D:\wwo' --script res://tests/state_consistency_regression.gd`
-- Windows Release 导出：`& 'D:\Tools\Godot-4.6.3\Godot_v4.6.3-stable_win64.exe' --headless --path 'D:\wwo' --export-release 'Windows Desktop' 'D:\wwo\builds\windows\wwo-p0-demo.exe'`。
+- 模拟质量回归：`& 'D:\Tools\Godot-4.6.3\Godot_v4.6.3-stable_win64.exe' --headless --path 'D:\wwo' --script res://tests/simulation_quality_regression.gd`
+- Windows Release 导出：`& 'D:\Tools\Godot-4.6.3\Godot_v4.6.3-stable_win64.exe' --headless --path 'D:\wwo' --export-release 'Windows Desktop' 'D:\wwo\builds\windows\wwo-p0-r1.exe'`。
 
 ## 目录
 
@@ -49,4 +51,6 @@
 
 ## 完成定义与提交前检查
 
-每轮只完成最早未完成的里程碑。提交前必须检查代码和文档、运行项目及测试、确认无解析错误和阻塞警告、更新 `docs/ROADMAP.md` 与 `docs/KNOWN_ISSUES.md`，并报告真实限制。涉及人物层级、继承、组织索引、行动结算或存档权威校验时，还必须运行状态一致性回归。详细规则见 `docs/`。
+每轮只完成最早未完成的里程碑。提交前必须检查代码和文档、运行项目及测试、确认无解析错误和阻塞警告、更新 `docs/ROADMAP.md` 与 `docs/KNOWN_ISSUES.md`，并报告真实限制。
+
+涉及人物层级、继承、组织索引、行动结算或存档权威校验时，必须运行状态一致性回归。涉及人口抽样、玩家投入、NPC 行动、组织经济、生命周期、辖区、控制压力或跨页面时间时，还必须运行模拟质量回归。修改模拟公式后必须重新运行 30 日和一年模拟，旧性能记录不得直接沿用。
