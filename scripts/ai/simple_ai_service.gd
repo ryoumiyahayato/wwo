@@ -121,6 +121,13 @@ func restore_persistent_state(records: Array) -> bool:
 			if action.actor_character_id != state.character_id or action.is_terminal():
 				return false
 		restored[state.character_id] = state
+	var expected_ids: Array[String] = roster.get_active_ids(false)
+	var restored_ids: Array[String] = []
+	for raw_id: Variant in restored:
+		restored_ids.append(str(raw_id))
+	restored_ids.sort()
+	if restored_ids != expected_ids:
+		return false
 	states = restored
 	return true
 
