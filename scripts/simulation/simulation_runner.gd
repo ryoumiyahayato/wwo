@@ -12,6 +12,11 @@ var initialization_error: String = ""
 
 
 func _ready() -> void:
+	if GameSessionService.world_clock != null:
+		clock = GameSessionService.world_clock
+		clock_ready.emit(clock)
+		LogService.info("SimulationRunner", "已复用权威世界时钟")
+		return
 	var config := SimulationClockConfig.new()
 	var load_error: Error = config.load_from_file(config_path)
 	if load_error != OK:
@@ -27,4 +32,3 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if clock != null:
 		clock.advance_real_seconds(delta)
-
