@@ -63,6 +63,8 @@ func validate(
 	error = _validate_target(action, definition, society, map_service)
 	if not error.is_empty():
 		return error
+	if action.status == ActionInstanceData.STATUS_COMPLETED and definition.category in DOMAIN_CATEGORIES and not action.domain_effect_applied:
+		return "已完成领域行动尚未执行权威写回"
 	if action.status in [ActionInstanceData.STATUS_ACTIVE, ActionInstanceData.STATUS_PAUSED]:
 		error = _validate_authoritative_context(
 			action, definition, actor, society, map_service
@@ -93,15 +95,25 @@ func _validate_context(context: Dictionary, action: ActionInstanceData) -> Strin
 		var value: float = float(raw_value)
 		if value < 0.0 or value > 100.0:
 			return "当前行动上下文字段 %s 超出范围" % field
-	var raw_cost: Variant = context.get("funding_cost", null)
-	var raw_wealth: Variant = context.get("wealth_before_funding", null)
+	var has_cost: bool = context.has("funding_cost")
+	var has_committed: bool = context.has("funding_committed")
+	var has_wealth: bool = context.has("wealth_before_funding")
+	if not has_cost and not has_committed and not has_wealth:
+		# Version 1 saves created before the authoritative funding transaction did
+		# not contain audit fields. They remain loadable and are upgraded on the
+		# next authoritative hourly context refresh.
+		return ""
+	if not has_cost or not has_committed or not has_wealth:
+		return "当前行动资金审计字段不完整"
+	var raw_cost: Variant = context["funding_cost"]
+	var raw_wealth: Variant = context["wealth_before_funding"]
 	if typeof(raw_cost) not in [TYPE_INT, TYPE_FLOAT] or typeof(raw_wealth) not in [TYPE_INT, TYPE_FLOAT]:
 		return "当前行动资金审计字段类型无效"
 	var cost: float = float(raw_cost)
 	var wealth_before: float = float(raw_wealth)
 	if cost < 0.0 or cost != floor(cost) or wealth_before < 0.0 or wealth_before != floor(wealth_before):
 		return "当前行动资金审计字段数值无效"
-	if typeof(context.get("funding_committed", null)) != TYPE_BOOL:
+	if typeof(context["funding_committed"]) != TYPE_BOOL:
 		return "当前行动资金承诺字段类型无效"
 	var committed: bool = bool(context["funding_committed"])
 	if committed and wealth_before < cost:
@@ -204,9 +216,9 @@ func _validate_authoritative_context(
 			float(expected.get(field, -2.0))
 		):
 			return "当前行动字段 %s 与权威状态不一致" % field
-	if bool(action.context.get("funding_committed", false)) and int(
-		action.context.get("funding_cost", -1)
-	) != int(expected.get("funding_cost", -2)):
+	if action.context.has("funding_committed") and bool(
+		action.context.get("funding_committed", false)
+	) and int(action.context.get("funding_cost", -1)) != int(expected.get("funding_cost", -2)):
 		return "当前行动费用与配置不一致"
 	if not definition.position_permission_required.is_empty() and not expected_permissions.has(
 		definition.position_permission_required
