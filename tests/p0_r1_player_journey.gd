@@ -1,5 +1,5 @@
 extends SceneTree
-## Player-journey regression: drives visible public UI controls instead of fabricating completed actions.
+## Player-journey regression: drives visible public UI controls with viewport mouse input.
 
 var _checks: int = 0
 var _failures: int = 0
@@ -38,7 +38,7 @@ func _run() -> void:
 		_finish()
 		return
 	_expect(not (view.get_node("RootMargin/Layout/Content/SidePanel/SideMargin/SideContent/PressureButton") as Button).visible, "普通模式隐藏地图直接压力入口")
-	if not _press_button(action_button, "顶栏长期行动入口"):
+	if not await _click_button(action_button, "顶栏长期行动入口"):
 		_finish()
 		return
 	_expect(action_panel.visible and action_panel.is_visible_in_tree(), "点击顶栏后长期行动面板真实显示")
@@ -61,22 +61,22 @@ func _run() -> void:
 		_finish()
 		return
 
-	if not _run_action(action_panel, "action:build_relationship", leader_id, clock, 500):
+	if not await _run_action(action_panel, "action:build_relationship", leader_id, clock, 500):
 		_finish()
 		return
-	if not _run_action(action_panel, "action:build_relationship", leader_id, clock, 500):
+	if not await _run_action(action_panel, "action:build_relationship", leader_id, clock, 500):
 		_finish()
 		return
 	_expect(society.relationships.get_between(player.id, leader_id) != null, "玩家通过两次正式长期行动建立真实关系")
 
-	if not _run_action(action_panel, "action:join_organization", government_id, clock, 500):
+	if not await _run_action(action_panel, "action:join_organization", government_id, clock, 500):
 		_finish()
 		return
 	_expect(government.member_ids.has(player.id), "加入组织行动把玩家写入正式成员索引")
 	var entry_position: String = society.organizations.get_position_id(player.id, government_id)
 	_expect(not entry_position.is_empty(), "加入组织后获得入口职位")
 
-	if not _run_action(action_panel, "action:seek_position", government_id, clock, 500):
+	if not await _run_action(action_panel, "action:seek_position", government_id, clock, 500):
 		_finish()
 		return
 	var promoted_position: String = society.organizations.get_position_id(player.id, government_id)
@@ -91,7 +91,7 @@ func _run() -> void:
 		return
 	var target_region: RegionData = map_service.data_set.regions[target_unit.region_id] as RegionData
 	var influence_before: float = float(target_region.social_influence[player.country_id])
-	if not _run_action(action_panel, "action:promote_policy", target_unit_id, clock, 800):
+	if not await _run_action(action_panel, "action:promote_policy", target_unit_id, clock, 800):
 		_finish()
 		return
 	_expect(float(target_region.social_influence[player.country_id]) > influence_before, "地区政策行动改变权威社会影响")
@@ -100,7 +100,7 @@ func _run() -> void:
 		_finish()
 		return
 	var begin_button: Button = action_panel.get_node("Margin/Root/Scroll/Content/BeginButton") as Button
-	if not _press_button(begin_button, "学习行动开始按钮"):
+	if not await _click_button(begin_button, "学习行动开始按钮"):
 		_finish()
 		return
 	var pending_action: ActionInstanceData = GameSessionService.current_action
@@ -114,7 +114,7 @@ func _run() -> void:
 	var map_reference: MapControlService = map_service
 
 	var character_button: Button = view.get_node("RootMargin/Layout/TopBar/TopMargin/TopControls/CharacterButton") as Button
-	if not _press_button(character_button, "人物信息入口"):
+	if not await _click_button(character_button, "人物信息入口"):
 		_finish()
 		return
 	await process_frame
@@ -125,7 +125,7 @@ func _run() -> void:
 		_finish()
 		return
 	var profile_back: Button = profile.get_node("Margin/Root/Bottom/BackButton") as Button
-	if not _press_button(profile_back, "人物页面返回按钮"):
+	if not await _click_button(profile_back, "人物页面返回按钮"):
 		_finish()
 		return
 	await process_frame
@@ -142,7 +142,7 @@ func _run() -> void:
 	_expect(pending_action.accumulated_work > pending_work, "跨页面返回后行动继续推进")
 
 	var social_button: Button = view.get_node("RootMargin/Layout/TopBar/TopMargin/TopControls/SocialButton") as Button
-	if not _press_button(social_button, "社会系统入口"):
+	if not await _click_button(social_button, "社会系统入口"):
 		_finish()
 		return
 	var social_panel: SocialSystemPanel = view.get_node("SocialSystemPanel") as SocialSystemPanel
@@ -151,7 +151,7 @@ func _run() -> void:
 		_finish()
 		return
 	var prepare_succession: Button = social_panel.get_node("Margin/Root/Scroll/Content/PrepareSuccessionButton") as Button
-	if not _press_button(prepare_succession, "继承候选入口"):
+	if not await _click_button(prepare_succession, "继承候选入口"):
 		_finish()
 		return
 	var succession_option: OptionButton = social_panel.get_node("Margin/Root/Scroll/Content/SuccessionOption") as OptionButton
@@ -163,7 +163,7 @@ func _run() -> void:
 		_finish()
 		return
 	var confirm_succession: Button = social_panel.get_node("Margin/Root/Scroll/Content/ConfirmSuccessionButton") as Button
-	if not _press_button(confirm_succession, "退休继承确认按钮"):
+	if not await _click_button(confirm_succession, "退休继承确认按钮"):
 		_finish()
 		return
 	_expect(GameSessionService.player_character.id == leader_id, "玩家通过正式社会界面完成退休继承")
@@ -173,14 +173,14 @@ func _run() -> void:
 	var saved_hour: int = clock_reference.total_hours
 	var saved_influence: float = float(target_region.social_influence[player.country_id])
 	save_button = view.get_node("RootMargin/Layout/TopBar/TopMargin/TopControls/SaveButton") as Button
-	if not _press_button(save_button, "保存游戏入口"):
+	if not await _click_button(save_button, "保存游戏入口"):
 		_finish()
 		return
 	_expect(FileAccess.file_exists(GameSaveService.MANUAL_PATH), "普通保存按钮写入手动存档")
 	_expect(save_button.text == "已保存", "普通保存按钮提供成功反馈")
 
 	var back_button: Button = view.get_node("RootMargin/Layout/TopBar/TopMargin/TopControls/BackButton") as Button
-	if not _press_button(back_button, "返回主菜单入口"):
+	if not await _click_button(back_button, "返回主菜单入口"):
 		_finish()
 		return
 	await process_frame
@@ -191,7 +191,7 @@ func _run() -> void:
 		_finish()
 		return
 	var load_button: Button = menu.get_node("SafeMargin/Center/Card/CardMargin/Content/LoadGameButton") as Button
-	if not _press_button(load_button, "加载游戏入口"):
+	if not await _click_button(load_button, "加载手动存档入口"):
 		_finish()
 		return
 	await process_frame
@@ -225,7 +225,7 @@ func _run_action(
 	if not panel_ready or not _select_action(panel, definition_id, target_id):
 		return false
 	var begin_button: Button = panel.get_node("Margin/Root/Scroll/Content/BeginButton") as Button
-	if not _press_button(begin_button, "%s 的开始按钮" % definition_id):
+	if not await _click_button(begin_button, "%s 的开始按钮" % definition_id):
 		return false
 	var action: ActionInstanceData = GameSessionService.current_action
 	var started: bool = action != null and action.definition_id == definition_id
@@ -260,19 +260,66 @@ func _select_option(option: OptionButton, metadata: String, description: String)
 	return str(option.get_item_metadata(option.selected)) == metadata
 
 
-func _press_button(button: Button, description: String) -> bool:
+func _click_button(button: Button, description: String) -> bool:
 	var usable: bool = button != null and button.is_visible_in_tree() and not button.disabled
 	_expect(usable, "%s真实可见且可用" % description)
 	if not usable:
 		return false
 	var button_rect: Rect2 = button.get_global_rect()
-	var viewport_rect := Rect2(Vector2.ZERO, get_root().size)
-	var on_screen: bool = button_rect.size.x > 0.0 and button_rect.size.y > 0.0 and viewport_rect.intersects(button_rect)
-	_expect(on_screen, "%s位于可交互视口内" % description)
-	if not on_screen:
+	var viewport_rect: Rect2 = get_root().get_visible_rect()
+	var bottom_right: Vector2 = button_rect.position + button_rect.size - Vector2.ONE
+	var fully_on_screen: bool = (
+		button_rect.size.x > 0.0
+		and button_rect.size.y > 0.0
+		and viewport_rect.has_point(button_rect.position)
+		and viewport_rect.has_point(bottom_right)
+	)
+	_expect(fully_on_screen, "%s完整位于可交互视口内" % description)
+	if not fully_on_screen:
 		return false
-	button.pressed.emit()
-	return true
+
+	var center: Vector2 = button_rect.get_center()
+	var motion := InputEventMouseMotion.new()
+	motion.position = center
+	motion.global_position = center
+	get_root().notify_mouse_entered()
+	get_root().push_input(motion, true)
+	await process_frame
+	var hovered: Control = get_root().gui_get_hovered_control()
+	var receives_pointer: bool = hovered == button or (
+		hovered != null and button.is_ancestor_of(hovered)
+	)
+	_expect(receives_pointer, "%s未被其他控件遮挡" % description)
+	if not receives_pointer:
+		return false
+
+	var triggered: Array[bool] = [false]
+	var observer := func() -> void: triggered[0] = true
+	button.pressed.connect(observer, CONNECT_ONE_SHOT)
+
+	var press := InputEventMouseButton.new()
+	press.button_index = MOUSE_BUTTON_LEFT
+	press.button_mask = MOUSE_BUTTON_MASK_LEFT
+	press.position = center
+	press.global_position = center
+	press.pressed = true
+	get_root().push_input(press, true)
+	await process_frame
+
+	var release := InputEventMouseButton.new()
+	release.button_index = MOUSE_BUTTON_LEFT
+	release.button_mask = 0
+	release.position = center
+	release.global_position = center
+	release.pressed = false
+	get_root().push_input(release, true)
+	await process_frame
+
+	var actually_pressed: bool = triggered[0]
+	_expect(actually_pressed, "%s通过真实鼠标按下与释放触发" % description)
+	if button.pressed.is_connected(observer):
+		button.pressed.disconnect(observer)
+	return actually_pressed
 
 
 func _make_test_player() -> CharacterData:
@@ -322,13 +369,11 @@ static func _option_index(option: OptionButton, metadata: String) -> int:
 
 
 func _cleanup_manual_save() -> void:
-	var absolute: String = ProjectSettings.globalize_path(GameSaveService.MANUAL_PATH)
-	if FileAccess.file_exists(absolute):
-		DirAccess.remove_absolute(absolute)
-	if FileAccess.file_exists(absolute + ".tmp"):
-		DirAccess.remove_absolute(absolute + ".tmp")
-	if FileAccess.file_exists(absolute + ".bak"):
-		DirAccess.remove_absolute(absolute + ".bak")
+	for path: String in [GameSaveService.MANUAL_PATH, GameSaveService.AUTOSAVE_PATH]:
+		var absolute: String = ProjectSettings.globalize_path(path)
+		for candidate: String in [absolute, absolute + ".tmp", absolute + ".bak"]:
+			if FileAccess.file_exists(candidate):
+				DirAccess.remove_absolute(candidate)
 
 
 func _expect(condition: bool, description: String) -> void:
