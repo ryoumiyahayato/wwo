@@ -22,6 +22,7 @@ var rail_attack_bonus: float = 0.18
 var rail_defense_bonus: float = 0.12
 var rail_consolidation_bonus: float = 0.14
 var social_support_scale: float = 0.35
+var unit_social_support_scale: float = 0.30
 var surrounded_attack_bonus: float = 0.35
 var multi_front_bonus: float = 0.12
 var minimum_pressure_multiplier: float = 0.35
@@ -65,6 +66,7 @@ func load_from_file(path: String = DEFAULT_PATH) -> Error:
 		"rail_defense_bonus",
 		"rail_consolidation_bonus",
 		"social_support_scale",
+		"unit_social_support_scale",
 		"surrounded_attack_bonus",
 		"multi_front_bonus",
 		"minimum_pressure_multiplier",
@@ -95,6 +97,7 @@ func load_from_file(path: String = DEFAULT_PATH) -> Error:
 	rail_defense_bonus = float(data["rail_defense_bonus"])
 	rail_consolidation_bonus = float(data["rail_consolidation_bonus"])
 	social_support_scale = float(data["social_support_scale"])
+	unit_social_support_scale = float(data["unit_social_support_scale"])
 	surrounded_attack_bonus = float(data["surrounded_attack_bonus"])
 	multi_front_bonus = float(data["multi_front_bonus"])
 	minimum_pressure_multiplier = float(data["minimum_pressure_multiplier"])
@@ -119,6 +122,7 @@ func load_from_file(path: String = DEFAULT_PATH) -> Error:
 		rail_defense_bonus,
 		rail_consolidation_bonus,
 		social_support_scale,
+		unit_social_support_scale,
 		surrounded_attack_bonus,
 		multi_front_bonus,
 	]:
