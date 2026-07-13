@@ -7,6 +7,7 @@ var roster: CharacterRosterService
 var organizations: OrganizationService
 var relationships: RelationshipService
 var ai: SimpleAiService
+var society_rules: SocietyRulesConfig
 
 
 func _init(
@@ -14,13 +15,15 @@ func _init(
 	character_roster: CharacterRosterService,
 	organization_service: OrganizationService,
 	relationship_service: RelationshipService,
-	ai_service: SimpleAiService
+	ai_service: SimpleAiService,
+	simulation_rules: SocietyRulesConfig
 ) -> void:
 	rules = continuity_rules
 	roster = character_roster
 	organizations = organization_service
 	relationships = relationship_service
 	ai = ai_service
+	society_rules = simulation_rules
 
 
 func get_candidates(character_id: String) -> Array[SuccessionCandidateData]:
@@ -86,6 +89,65 @@ func get_candidates(character_id: String) -> Array[SuccessionCandidateData]:
 	return output
 
 
+func get_valid_exit_reason_ids(character: CharacterData) -> Array[String]:
+	var output: Array[String] = []
+	if character == null:
+		return output
+	for reason_id: String in rules.get_exit_reason_ids():
+		if get_exit_reason_validation_error(character, reason_id).is_empty():
+			output.append(reason_id)
+	return output
+
+
+func get_exit_reason_validation_error(
+	character: CharacterData, exit_reason: String
+) -> String:
+	if character == null:
+		return "继承退出人物不存在"
+	if not rules.exit_reasons.has(exit_reason):
+		return "未知退出原因：%s" % exit_reason
+	if exit_reason == "voluntary":
+		return ""
+	if society_rules == null:
+		return "社会生命周期规则尚未就绪"
+	var lifecycle: Dictionary = society_rules.lifecycle_rules
+	var required: bool = bool(
+		character.current_status.get("succession_required", false)
+	)
+	var declared_reason: String = str(
+		character.current_status.get("succession_reason", "")
+	)
+	match exit_reason:
+		"retirement":
+			var retirement_age: int = int(lifecycle.get("retirement_age", 65))
+			if character.age < retirement_age and not (
+				required and declared_reason == "retirement"
+			):
+				return "人物尚未达到退休年龄"
+		"death":
+			var maximum_age: int = int(lifecycle.get("maximum_age", 90))
+			var health: int = int(character.current_status.get("health", 100))
+			if health > 0 and character.age < maximum_age and not (
+				required and declared_reason == "death"
+			):
+				return "人物当前并未死亡"
+		"long_imprisonment":
+			if not bool(character.current_status.get("detained", false)):
+				return "人物当前没有被拘禁"
+		"disgrace":
+			var threshold: int = int(
+				rules.exit_constraints.get("disgrace_reputation_threshold", 5)
+			)
+			var disgraced: bool = bool(
+				character.current_status.get("disgraced", false)
+			)
+			if int(character.current_status.get("reputation", 0)) > threshold and not disgraced and not (
+				required and declared_reason == "disgrace"
+			):
+				return "人物尚未达到严重失势条件"
+	return ""
+
+
 func execute_succession(
 	old_character_id: String,
 	successor_character_id: String,
@@ -102,6 +164,12 @@ func execute_succession(
 	var old_character: CharacterData = roster.get_active(old_character_id)
 	if old_character == null or old_character_id != roster.player_character_id:
 		result.add_error("只有当前玩家人物可以执行继承")
+		return result
+	var exit_error: String = get_exit_reason_validation_error(
+		old_character, exit_reason
+	)
+	if not exit_error.is_empty():
+		result.add_error(exit_error)
 		return result
 	var selected: SuccessionCandidateData
 	for candidate: SuccessionCandidateData in get_candidates(old_character_id):
