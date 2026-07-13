@@ -58,6 +58,56 @@ func consume_funding(definition: ActionDefinitionData, character: CharacterData)
 	return true
 
 
+func get_target_validation_error(
+	definition: ActionDefinitionData,
+	character: CharacterData,
+	target_id: String
+) -> String:
+	if definition == null or character == null:
+		return "行动或人物尚未就绪。"
+	if society == null or society.roster == null or society.organizations == null:
+		return "社会模拟尚未就绪。"
+	match definition.category:
+		"study_skill", "perform_work":
+			return "" if target_id.is_empty() else "此行动不应选择目标。"
+		"build_relationship", "investigate_character":
+			if target_id.is_empty() or not society.roster.has_character(target_id):
+				return "必须选择存在的人物目标。"
+			if target_id == character.id:
+				return "不能把自己作为人物目标。"
+			return ""
+		"join_organization":
+			var join_target: OrganizationData = society.organizations.get_organization(target_id)
+			if join_target == null:
+				return "必须选择存在的组织。"
+			if join_target.country_id != character.country_id:
+				return "不能加入其他国家的组织。"
+			if join_target.member_ids.has(character.id):
+				return "人物已经是该组织成员。"
+			return ""
+		"seek_position":
+			var position_target: OrganizationData = society.organizations.get_organization(target_id)
+			if position_target == null:
+				return "必须选择存在的组织。"
+			if not position_target.member_ids.has(character.id):
+				return "必须先加入该组织。"
+			if _get_next_available_position_id(character.id, position_target).is_empty():
+				return "该组织目前没有更高的空缺职位。"
+			return ""
+		"promote_policy":
+			if map_service == null or map_service.get_unit(target_id) == null:
+				return "必须选择有效的地区控制单元。"
+			return ""
+		"support_control":
+			if map_service == null or map_service.get_unit(target_id) == null:
+				return "必须选择有效的地区控制单元。"
+			if not map_service.is_valid_control_support_target(target_id, character.country_id):
+				return "军事控制支援只能作用于本国前线相邻敌区，或需要巩固的本国前线。"
+			return ""
+		_:
+			return "未知行动类别。"
+
+
 func describe(
 	definition: ActionDefinitionData,
 	character: CharacterData,
@@ -69,7 +119,13 @@ func describe(
 	var cost: int = get_funding_cost(definition)
 	var wealth: int = int(character.current_status.get("wealth", 0))
 	var affordability: String = "可支付" if wealth >= cost else "资金不足"
-	return "系统根据人物状态自动计算：\n准备 %.0f · 组织支持 %.0f · 关系支持 %.0f · 目标阻力 %.0f\n行动费用 %d（当前财富 %d，%s）" % [
+	var target_error: String = get_target_validation_error(definition, character, target_id)
+	var target_line: String = (
+		"目标有效"
+		if target_error.is_empty()
+		else "目标无效：%s" % target_error
+	)
+	return "系统根据人物状态自动计算：\n准备 %.0f · 组织支持 %.0f · 关系支持 %.0f · 目标阻力 %.0f\n行动费用 %d（当前财富 %d，%s）\n%s" % [
 		float(context["preparation"]),
 		float(context["organization_support"]),
 		float(context["relationship_support"]),
@@ -77,7 +133,39 @@ func describe(
 		cost,
 		wealth,
 		affordability,
+		target_line,
 	]
+
+
+func _get_next_available_position_id(
+	character_id: String,
+	organization: OrganizationData
+) -> String:
+	var positions: Dictionary = organization.position_structure.get("positions", {}) as Dictionary
+	var current_id: String = society.organizations.get_position_id(
+		character_id, organization.id
+	)
+	var current_level: int = int(
+		(positions.get(current_id, {}) as Dictionary).get("level", 0)
+	)
+	var candidates: Array[String] = []
+	for raw_position_id: Variant in positions:
+		var position_id: String = str(raw_position_id)
+		var position: Dictionary = positions[position_id] as Dictionary
+		var holders: Array[String] = DataRecordUtils.to_string_array(
+			position.get("holder_ids", [])
+		)
+		if (
+			int(position.get("level", 0)) > current_level
+			and holders.size() < int(position.get("slots", 0))
+		):
+			candidates.append(position_id)
+	candidates.sort_custom(func(a: String, b: String) -> bool:
+		var a_level: int = int((positions[a] as Dictionary).get("level", 0))
+		var b_level: int = int((positions[b] as Dictionary).get("level", 0))
+		return a < b if a_level == b_level else a_level < b_level
+	)
+	return "" if candidates.is_empty() else candidates[0]
 
 
 func _preparation(definition: ActionDefinitionData, character: CharacterData) -> float:
