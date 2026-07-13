@@ -10,13 +10,11 @@
 - 渲染器：Compatibility。
 - 本机引擎：`D:\Tools\Godot-4.6.3\Godot_v4.6.3-stable_win64.exe`。
 - 启动：`& 'D:\Tools\Godot-4.6.3\Godot_v4.6.3-stable_win64.exe' --path 'D:\wwo'`
-- Headless 启动检查：`& 'D:\Tools\Godot-4.6.3\Godot_v4.6.3-stable_win64.exe' --headless --path 'D:\wwo' --quit-after 5`
-- 原有测试：`& 'D:\Tools\Godot-4.6.3\Godot_v4.6.3-stable_win64.exe' --headless --path 'D:\wwo' --script res://tests/test_runner.gd`
-- P0-R1 逻辑回归：`& 'D:\Tools\Godot-4.6.3\Godot_v4.6.3-stable_win64.exe' --headless --path 'D:\wwo' --script res://tests/p0_r1_logic_regression.gd`
-- P0-R1 玩家旅程：`& 'D:\Tools\Godot-4.6.3\Godot_v4.6.3-stable_win64.exe' --headless --path 'D:\wwo' --script res://tests/p0_r1_player_journey.gd`
-- 状态一致性回归：`& 'D:\Tools\Godot-4.6.3\Godot_v4.6.3-stable_win64.exe' --headless --path 'D:\wwo' --script res://tests/state_consistency_regression.gd`
-- 模拟质量回归：`& 'D:\Tools\Godot-4.6.3\Godot_v4.6.3-stable_win64.exe' --headless --path 'D:\wwo' --script res://tests/simulation_quality_regression.gd`
+- 统一验证：`powershell -ExecutionPolicy Bypass -File 'D:\wwo\tools\run_validation.ps1'`
+- Codex 审计回归：`& 'D:\Tools\Godot-4.6.3\Godot_v4.6.3-stable_win64.exe' --headless --path 'D:\wwo' --script res://tests/codex_audit_regression.gd`
 - Windows Release 导出：`& 'D:\Tools\Godot-4.6.3\Godot_v4.6.3-stable_win64.exe' --headless --path 'D:\wwo' --export-release 'Windows Desktop' 'D:\wwo\builds\windows\wwo-p0-r1.exe'`。
+
+独立 `--script` 测试不能假设干净检出已存在 Godot 全局类缓存。默认使用统一验证脚本，它会先运行 Headless 编辑器导入，再执行全部测试，并在退出码为 `0` 时继续扫描解析、类型和脚本加载错误。
 
 ## 目录
 
@@ -25,15 +23,24 @@
 - `scenes/`：Godot 场景；按菜单、世界、地图、UI、开发工具分区。
 - `scripts/`：按核心、模拟、人物、组织、地图、行动、AI、存档、UI、工具分区。
 - `tests/`：自包含测试运行器、单元测试、集成测试与固定样本。
+- `tools/`：统一本地验证等工程脚本。
 - `docs/`：设计、架构、数据、计划、性能、存档与已知问题。
 
 ## 编码约定
 
-- 使用 UTF-8 和尽可能完整的强类型 GDScript；函数与变量使用英文。
+- 使用 UTF-8 和完整强类型 GDScript；函数与变量使用英文。
 - 单个脚本只承担一个主要职责。模拟逻辑不进入 UI 脚本。
 - UI 通过信号、事件或只读状态访问模拟；可见文本集中管理。
 - 配置、公式与权重不得散落为魔法数字；持久关系使用稳定 ID。
 - 注释解释约束和原因，不复述代码。
+
+## 权威模拟约束
+
+- 已经过的行动时间必须使用该区间开始时保存的效率和上下文结算；新目标、权限、状态和支持只从明确边界开始生效。
+- 学习行动必须允许选择人物技能；其他行动产生对应主技能实践成长。
+- 充分训练、准备和资金必须存在可证明的保证成功上界，且需要跨种子回归。
+- 退休、死亡、长期监禁和失势不能由 UI 任意选择，服务端必须重验权威人物状态。
+- 存档恢复必须验证活跃人物上限、层级、激活种子、AI 全覆盖、社会双向索引和行动 ID 全局唯一性。
 
 ## 性能禁区
 
@@ -46,11 +53,10 @@
 
 - 不升级或替换指定 Godot，不使用 C#、C++、GDExtension 或未批准插件。
 - 不加入联网、遥测、账户、广告、在线 AI 或来源不明素材。
-- 不提前实现当前里程碑以外的系统，不搭建空泛的未来框架。
-- 不声称未经真机测试的平台已兼容。
+- 不通过 Headless、编辑器或测试环境例外绕过正式游戏的状态约束。
+- 不为了让旧测试变绿而削弱权威产品规则；应更新失效夹具或提供明确兼容迁移。
+- 不声称未经真机测试的平台、性能或导出结果已通过。
 
 ## 完成定义与提交前检查
 
-每轮只完成最早未完成的里程碑。提交前必须检查代码和文档、运行项目及测试、确认无解析错误和阻塞警告、更新 `docs/ROADMAP.md` 与 `docs/KNOWN_ISSUES.md`，并报告真实限制。
-
-涉及人物层级、继承、组织索引、行动结算或存档权威校验时，必须运行状态一致性回归。涉及人口抽样、玩家投入、NPC 行动、组织经济、生命周期、辖区、控制压力或跨页面时间时，还必须运行模拟质量回归。修改模拟公式后必须重新运行 30 日和一年模拟，旧性能记录不得直接沿用。
+提交前必须运行统一验证脚本，确认全部测试和日志扫描通过；之后按修改范围执行 1280×720 人工旅程、存档往返、30 日与一年模拟以及导出。涉及人物层级、继承、组织索引、行动结算或存档时必须运行状态一致性回归；涉及成长、保证成功、NPC 时间边界或审计问题时必须运行 Codex 审计回归。修改模拟公式后，历史性能记录立即失效。
