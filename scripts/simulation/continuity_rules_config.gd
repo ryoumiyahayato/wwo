@@ -21,7 +21,14 @@ func load_from_file(path: String = DEFAULT_PATH) -> Error:
 		error_message = "连续性规则 JSON 无效"
 		return ERR_PARSE_ERROR
 	var data: Dictionary = parser.data as Dictionary
-	for key: String in ["config_version", "social_influence", "candidate", "enemy_affinity_threshold", "position_inheritance_minimum_score", "exit_reasons"]:
+	for key: String in [
+		"config_version",
+		"social_influence",
+		"candidate",
+		"enemy_affinity_threshold",
+		"position_inheritance_minimum_score",
+		"exit_reasons",
+	]:
 		if not data.has(key):
 			error_message = "连续性规则缺少字段：%s" % key
 			return ERR_INVALID_DATA
@@ -31,16 +38,46 @@ func load_from_file(path: String = DEFAULT_PATH) -> Error:
 	social_influence = (data["social_influence"] as Dictionary).duplicate(true)
 	candidate = (data["candidate"] as Dictionary).duplicate(true)
 	enemy_affinity_threshold = float(data["enemy_affinity_threshold"])
-	position_inheritance_minimum_score = float(data["position_inheritance_minimum_score"])
+	position_inheritance_minimum_score = float(
+		data["position_inheritance_minimum_score"]
+	)
 	exit_reasons = (data["exit_reasons"] as Dictionary).duplicate(true)
-	for reason_id: String in ["death", "retirement", "long_imprisonment", "disgrace", "voluntary"]:
+	for candidate_key: String in [
+		"minimum_score",
+		"familiarity_weight",
+		"trust_weight",
+		"affinity_weight",
+		"shared_organization_bonus",
+		"reputation_weight",
+		"maximum_inherited_organizations",
+	]:
+		if not candidate.has(candidate_key):
+			error_message = "继承候选规则缺少字段：%s" % candidate_key
+			return ERR_INVALID_DATA
+	if (
+		int(candidate["maximum_inherited_organizations"]) < 0
+		or int(candidate["maximum_inherited_organizations"]) > 8
+	):
+		error_message = "继承组织数量上限无效"
+		return ERR_INVALID_DATA
+	for reason_id: String in [
+		"death", "retirement", "long_imprisonment", "disgrace", "voluntary"
+	]:
 		if not exit_reasons.has(reason_id) or not exit_reasons[reason_id] is Dictionary:
 			error_message = "缺少退出原因规则：%s" % reason_id
 			return ERR_INVALID_DATA
 		var reason: Dictionary = exit_reasons[reason_id] as Dictionary
-		for ratio_key: String in ["wealth_ratio", "reputation_ratio", "intelligence_ratio", "ally_relationship_ratio", "enemy_relationship_ratio"]:
+		for ratio_key: String in [
+			"wealth_ratio",
+			"reputation_ratio",
+			"intelligence_ratio",
+			"ally_relationship_ratio",
+			"enemy_relationship_ratio",
+		]:
 			if not reason.has(ratio_key) or float(reason[ratio_key]) < 0.0 or float(reason[ratio_key]) > 1.0:
-				error_message = "退出原因 %s 的 %s 无效" % [reason_id, ratio_key]
+				error_message = "退出原因 %s 的 %s 无效" % [
+					reason_id, ratio_key
+				]
 				return ERR_INVALID_DATA
 	return OK
 
