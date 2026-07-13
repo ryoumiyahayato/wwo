@@ -166,18 +166,16 @@ func _on_begin_pressed() -> void:
 	if definition == null:
 		message_label.text = "没有可用行动。"
 		return
-	var target_error: String = context_service.get_target_validation_error(definition, GameSessionService.player_character, target_id)
-	if not target_error.is_empty():
-		message_label.text = target_error
-		return
-	if not context_service.can_afford(definition, GameSessionService.player_character):
-		message_label.text = "财富不足，无法支付本次行动费用。"
-		return
-	var result: ActionStartResult = action_service.start_action(definition, GameSessionService.player_character, clock.total_hours, _build_context(definition))
+	var result: ActionStartResult = context_service.start_player_action(
+		action_service,
+		definition,
+		GameSessionService.player_character,
+		clock.total_hours,
+		target_id
+	)
 	if not result.is_success():
 		message_label.text = "\n".join(result.errors)
 		return
-	context_service.consume_funding(definition, GameSessionService.player_character)
 	GameSessionService.current_action = result.action
 	message_label.text = "行动已开始，费用已从人物财富中扣除。"
 	_refresh()
