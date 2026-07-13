@@ -16,7 +16,7 @@ func _init(
 	organization_service: OrganizationService,
 	relationship_service: RelationshipService,
 	ai_service: SimpleAiService,
-	simulation_rules: SocietyRulesConfig
+	simulation_rules: SocietyRulesConfig = null
 ) -> void:
 	rules = continuity_rules
 	roster = character_roster
@@ -24,6 +24,10 @@ func _init(
 	relationships = relationship_service
 	ai = ai_service
 	society_rules = simulation_rules
+	if society_rules == null:
+		var loaded_rules := SocietyRulesConfig.new()
+		if loaded_rules.load_from_file() == OK:
+			society_rules = loaded_rules
 
 
 func get_candidates(character_id: String) -> Array[SuccessionCandidateData]:
