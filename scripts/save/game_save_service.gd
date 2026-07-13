@@ -166,7 +166,7 @@ func restore_snapshot(
 	if not temporary_society.initialize(seed_player, map_service.data_set):
 		return SaveOperationResult.fail("restore_error", temporary_society.initialization_error)
 	if not temporary_society.roster.restore_persistent_state(character_state):
-		return SaveOperationResult.fail("restore_error", "人物名册无效")
+		return SaveOperationResult.fail("restore_error", "人物名册无效或超过活跃上限")
 	var restored_player: CharacterData = temporary_society.roster.get_active(top_player_id)
 	if restored_player == null:
 		return SaveOperationResult.fail("broken_reference", "恢复后的玩家人物不存在")
@@ -192,12 +192,23 @@ func restore_snapshot(
 	if not map_service.restore_persistent_state(snapshot["world"] as Dictionary):
 		return SaveOperationResult.fail("restore_error", "地图状态无效")
 
+	var seen_action_ids: Dictionary = {}
+	if snapshot["current_action"] is Dictionary:
+		var player_action_id: String = str(
+			(snapshot["current_action"] as Dictionary).get("id", "")
+		)
+		if player_action_id.is_empty():
+			return _fail_and_restore_map(
+				map_service, previous_world_state, "broken_reference", "玩家行动缺少实例 ID"
+			)
+		seen_action_ids[player_action_id] = top_player_id
 	var ai_action_error: String = _validate_ai_action_records(
 		snapshot["ai_states"] as Array,
 		temporary_society,
 		map_service,
 		current_hour,
-		raw_action_id_state
+		raw_action_id_state,
+		seen_action_ids
 	)
 	if not ai_action_error.is_empty():
 		return _fail_and_restore_map(
@@ -205,7 +216,7 @@ func restore_snapshot(
 		)
 	if not temporary_society.ai.restore_persistent_state(snapshot["ai_states"] as Array):
 		return _fail_and_restore_map(
-			map_service, previous_world_state, "restore_error", "AI 状态无效"
+			map_service, previous_world_state, "restore_error", "AI 状态未覆盖全部活跃 NPC"
 		)
 
 	var settlement_state: Dictionary = snapshot.get("settlement_state", {}) as Dictionary
@@ -288,7 +299,8 @@ func _validate_ai_action_records(
 	society: SocietySimulationService,
 	map_service: MapControlService,
 	current_hour: int,
-	action_id_state: Dictionary
+	action_id_state: Dictionary,
+	seen_action_ids: Dictionary
 ) -> String:
 	var validator := ActionSaveValidator.new()
 	for raw_state: Variant in records:
@@ -304,9 +316,19 @@ func _validate_ai_action_records(
 			continue
 		if str(action_record.get("actor_character_id", "")) != character_id:
 			return "NPC 行动人物与 AI 状态人物不一致"
+		var action_id: String = str(action_record.get("id", ""))
+		if action_id.is_empty():
+			return "NPC 行动缺少实例 ID：%s" % character_id
+		if seen_action_ids.has(action_id):
+			return "行动实例 ID 重复：%s（%s 与 %s）" % [
+				action_id, str(seen_action_ids[action_id]), character_id
+			]
+		seen_action_ids[action_id] = character_id
 		var action := ActionInstanceData.from_dict(action_record)
 		if action.status not in [ActionInstanceData.STATUS_ACTIVE, ActionInstanceData.STATUS_PAUSED]:
 			return "NPC 持久行动必须处于进行中或暂停状态"
+		if str(state.get("current_action_id", "")) != action.definition_id:
+			return "NPC 当前行动标识与行动记录不一致：%s" % character_id
 		var error: String = validator.validate(
 			action_record,
 			society,
