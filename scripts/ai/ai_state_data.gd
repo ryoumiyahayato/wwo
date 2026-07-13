@@ -19,9 +19,11 @@ static func from_dict(data: Dictionary) -> AiStateData:
 	model.goal_priority = float(data.get("goal_priority", 0.0))
 	model.current_action_id = str(data.get("current_action_id", ""))
 	model.candidate_actions = []
-	for raw_candidate: Variant in data.get("candidate_actions", []):
-		if raw_candidate is Dictionary:
-			model.candidate_actions.append((raw_candidate as Dictionary).duplicate(true))
+	var raw_candidates: Variant = data.get("candidate_actions", [])
+	if raw_candidates is Array:
+		for raw_candidate: Variant in raw_candidates as Array:
+			if raw_candidate is Dictionary:
+				model.candidate_actions.append((raw_candidate as Dictionary).duplicate(true))
 	model.next_daily_decision_hour = int(data.get("next_daily_decision_hour", 0))
 	model.next_long_term_hour = int(data.get("next_long_term_hour", 0))
 	model.daily_decision_count = int(data.get("daily_decision_count", 0))
