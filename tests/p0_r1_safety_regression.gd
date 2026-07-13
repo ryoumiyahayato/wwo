@@ -1,5 +1,5 @@
 extends SceneTree
-## Safety regression for transactional restore, backup recovery and compatibility rejection.
+## Safety regression for transactional restore, validation, backup recovery and one-shot effects.
 
 var _checks: int = 0
 var _failures: int = 0
@@ -33,9 +33,10 @@ func _run() -> void:
 
 	var clock: SimulationClock = GameSessionService.world_clock
 	var map_service: MapControlService = GameSessionService.world_map_service
+	var society: SocietySimulationService = GameSessionService.society_service
 	var save_service := GameSaveService.new()
-	_expect(clock != null and map_service != null and GameSessionService.society_service != null, "安全回归建立完整权威会话")
-	if clock == null or map_service == null or GameSessionService.society_service == null:
+	_expect(clock != null and map_service != null and society != null, "安全回归建立完整权威会话")
+	if clock == null or map_service == null or society == null:
 		_finish()
 		return
 
@@ -45,6 +46,9 @@ func _run() -> void:
 
 	_test_transactional_restore(save_service, snapshot, clock, map_service)
 	_test_incompatible_config_rejected(save_service, snapshot)
+	_test_invalid_action_rejected(save_service, clock, map_service, society)
+	_test_social_index_mismatches(save_service, snapshot, clock, map_service)
+	_test_domain_hook_consumed_once(society, map_service, clock)
 	_test_backup_recovery(save_service, snapshot)
 
 	_cleanup_path(PROBE_PATH)
@@ -91,6 +95,119 @@ func _test_incompatible_config_rejected(
 	_expect("; ".join(errors).contains("配置版本不兼容"), "配置版本错误具有明确说明")
 
 
+func _test_invalid_action_rejected(
+	save_service: GameSaveService,
+	clock: SimulationClock,
+	map_service: MapControlService,
+	society: SocietySimulationService
+) -> void:
+	var rules := ActionRulesConfig.new()
+	_expect(rules.load_from_file() == OK, "行动规则可供存档安全测试加载")
+	if rules.error_message != "":
+		return
+	var definition: ActionDefinitionData = map_service.data_set.actions[
+		"action:study_skill"
+	] as ActionDefinitionData
+	var context_service := PlayerActionContextService.new(rules, society, map_service)
+	var action_service := ActionService.new(rules, GameSessionService.action_id_service)
+	var started: ActionStartResult = action_service.start_action(
+		definition,
+		GameSessionService.player_character,
+		clock.total_hours,
+		context_service.build_context(definition, GameSessionService.player_character, "")
+	)
+	_expect(started.is_success(), "可建立合法进行中行动快照")
+	if not started.is_success():
+		return
+	GameSessionService.current_action = started.action
+	var action_snapshot: Dictionary = save_service.build_snapshot(clock, map_service)
+	GameSessionService.current_action = null
+
+	var invalid_efficiency: Dictionary = action_snapshot.duplicate(true)
+	var invalid_action: Dictionary = invalid_efficiency["current_action"] as Dictionary
+	invalid_action["current_efficiency"] = 0.0
+	var before_clock: Dictionary = clock.get_persistent_state()
+	var before_world: Dictionary = map_service.get_persistent_state()
+	var result: SaveOperationResult = save_service.restore_snapshot(
+		invalid_efficiency, clock, map_service
+	)
+	_expect(not result.success, "零效率行动存档被拒绝")
+	_expect(clock.get_persistent_state() == before_clock, "非法行动不会修改时钟")
+	_expect(map_service.get_persistent_state() == before_world, "非法行动不会修改地图")
+
+	var invalid_context: Dictionary = action_snapshot.duplicate(true)
+	var context_action: Dictionary = invalid_context["current_action"] as Dictionary
+	var context: Dictionary = context_action["context"] as Dictionary
+	context["funding"] = 101.0
+	result = save_service.restore_snapshot(invalid_context, clock, map_service)
+	_expect(not result.success, "超范围行动上下文被拒绝")
+
+	var inconsistent_state: Dictionary = action_snapshot.duplicate(true)
+	var state_action: Dictionary = inconsistent_state["current_action"] as Dictionary
+	state_action["status"] = ActionInstanceData.STATUS_COMPLETED
+	state_action["completion_hour"] = clock.total_hours
+	state_action["estimated_completion_hour"] = clock.total_hours
+	state_action["outcome_code"] = "success"
+	state_action["result_applied"] = false
+	result = save_service.restore_snapshot(inconsistent_state, clock, map_service)
+	_expect(not result.success, "完成状态与未应用结果不一致的行动被拒绝")
+
+
+func _test_social_index_mismatches(
+	save_service: GameSaveService,
+	snapshot: Dictionary,
+	clock: SimulationClock,
+	map_service: MapControlService
+) -> void:
+	var player_id: String = str(snapshot["player_character_id"])
+	var organization_mismatch: Dictionary = snapshot.duplicate(true)
+	var org_player: Dictionary = _find_active_record(
+		organization_mismatch["characters"] as Dictionary, player_id
+	)
+	var organization_ids: Array = org_player["organization_ids"] as Array
+	organization_ids.append("organization:loran_government")
+	var result: SaveOperationResult = save_service.restore_snapshot(
+		organization_mismatch, clock, map_service
+	)
+	_expect(not result.success, "人物与组织成员双向索引不一致时拒绝恢复")
+
+	var relationship_mismatch: Dictionary = snapshot.duplicate(true)
+	var relationship_player: Dictionary = _find_active_record(
+		relationship_mismatch["characters"] as Dictionary, player_id
+	)
+	var relationship_ids: Array = relationship_player["relationship_ids"] as Array
+	relationship_ids.append("relationship:99999999")
+	result = save_service.restore_snapshot(relationship_mismatch, clock, map_service)
+	_expect(not result.success, "人物与关系记录双向索引不一致时拒绝恢复")
+
+
+func _test_domain_hook_consumed_once(
+	society: SocietySimulationService,
+	map_service: MapControlService,
+	clock: SimulationClock
+) -> void:
+	var definition: ActionDefinitionData = map_service.data_set.actions[
+		"action:seek_position"
+	] as ActionDefinitionData
+	var action := ActionInstanceData.new()
+	action.id = "action_instance:99999999"
+	action.definition_id = definition.id
+	action.actor_character_id = GameSessionService.player_character.id
+	action.target_id = "organization:loran_government"
+	action.status = ActionInstanceData.STATUS_COMPLETED
+	action.completion_hour = clock.total_hours
+	action.outcome_code = "success"
+	var first_applied: bool = society.apply_action_domain_effect(
+		action, definition, map_service
+	)
+	_expect(not first_applied, "无组织成员资格时职位领域结果不产生变化")
+	_expect(action.domain_effect_applied, "无变化的领域结果仍被标记为已消费")
+	var second_applied: bool = society.apply_action_domain_effect(
+		action, definition, map_service
+	)
+	_expect(not second_applied, "已消费的领域结果不会再次执行")
+
+
 func _test_backup_recovery(
 	save_service: GameSaveService,
 	snapshot: Dictionary
@@ -118,6 +235,13 @@ func _test_backup_recovery(
 	_expect(loaded.success, "主存档损坏时可读取安全备份")
 	_expect(loaded.message.contains("安全备份"), "备份恢复结果明确标记来源")
 	_expect(loaded.snapshot == snapshot, "安全备份恢复完整原始快照")
+
+
+func _find_active_record(state: Dictionary, character_id: String) -> Dictionary:
+	for raw_record: Variant in state["active"] as Array:
+		if raw_record is Dictionary and str((raw_record as Dictionary).get("id", "")) == character_id:
+			return raw_record as Dictionary
+	return {}
 
 
 func _make_test_player() -> CharacterData:
@@ -156,6 +280,7 @@ func _expect(condition: bool, description: String) -> void:
 
 
 func _finish() -> void:
+	_cleanup_path(PROBE_PATH)
 	if _failures > 0:
 		printerr("P0-R1 SAFETY REGRESSION FAILED: %d/%d checks failed" % [_failures, _checks])
 		quit(1)
