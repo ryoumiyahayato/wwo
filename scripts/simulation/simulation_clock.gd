@@ -143,6 +143,10 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		return false
 	if restored_hour < 0 or restored_hour >= HOURS_PER_DAY or restored_total_hours < 0:
 		return false
+	if restored_total_hours != _total_hours_for_datetime(
+		restored_year, restored_month, restored_day, restored_hour
+	):
+		return false
 	if not _config.allowed_speed_multipliers.has(restored_speed):
 		return false
 	if remainder < 0.0 or remainder >= _config.real_seconds_per_game_hour:
@@ -173,17 +177,11 @@ func set_datetime_for_debug(target_year: int, target_month: int, target_day: int
 		return false
 	if target_day < 1 or target_day > _days_in_month(target_year, target_month):
 		return false
-	var computed_hours: int = 0
-	for calendar_year: int in range(_config.start_year, target_year):
-		computed_hours += (366 if _is_leap_year(calendar_year) else 365) * HOURS_PER_DAY
-	for calendar_month: int in range(1, target_month):
-		computed_hours += _days_in_month(target_year, calendar_month) * HOURS_PER_DAY
-	computed_hours += (target_day - 1) * HOURS_PER_DAY + target_hour
 	year = target_year
 	month = target_month
 	day = target_day
 	hour = target_hour
-	total_hours = computed_hours
+	total_hours = _total_hours_for_datetime(target_year, target_month, target_day, target_hour)
 	_real_seconds_accumulator = 0.0
 	_event_queue.clear()
 	time_changed.emit(get_snapshot())
@@ -208,14 +206,9 @@ func _advance_one_hour() -> void:
 				month = 1
 				year += 1
 
+	# Hourly authoritative work is settled first. Scheduled events and calendar
+	# boundaries then observe the same completed hour; autosave is deliberately last.
 	hour_advanced.emit(total_hours)
-	if crossed_day:
-		day_advanced.emit(year, month, day)
-		if total_hours % HOURS_PER_WEEK == 0:
-			week_advanced.emit(int(total_hours / HOURS_PER_WEEK))
-		if crossed_month:
-			month_advanced.emit(year, month)
-
 	var due_events: Array[Dictionary] = _event_queue.pop_due_events(total_hours)
 	for event: Dictionary in due_events:
 		scheduled_event_due.emit(
@@ -223,6 +216,44 @@ func _advance_one_hour() -> void:
 			int(event["due_hour"]),
 			(event["payload"] as Dictionary).duplicate(true)
 		)
+	if crossed_day:
+		day_advanced.emit(year, month, day)
+		if crossed_month:
+			month_advanced.emit(year, month)
+		if total_hours % HOURS_PER_WEEK == 0:
+			week_advanced.emit(int(total_hours / HOURS_PER_WEEK))
+
+
+func _total_hours_for_datetime(
+	target_year: int,
+	target_month: int,
+	target_day: int,
+	target_hour: int
+) -> int:
+	var start_days: int = _absolute_day_index(
+		_config.start_year, _config.start_month, _config.start_day
+	)
+	var target_days: int = _absolute_day_index(
+		target_year, target_month, target_day
+	)
+	return (
+		(target_days - start_days) * HOURS_PER_DAY
+		+ target_hour
+		- _config.start_hour
+	)
+
+
+static func _absolute_day_index(target_year: int, target_month: int, target_day: int) -> int:
+	var previous_year: int = target_year - 1
+	var days: int = (
+		previous_year * 365
+		+ floori(float(previous_year) / 4.0)
+		- floori(float(previous_year) / 100.0)
+		+ floori(float(previous_year) / 400.0)
+	)
+	for calendar_month: int in range(1, target_month):
+		days += _days_in_month(target_year, calendar_month)
+	return days + target_day - 1
 
 
 static func _days_in_month(target_year: int, target_month: int) -> int:
