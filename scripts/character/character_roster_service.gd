@@ -4,6 +4,7 @@ extends RefCounted
 
 signal character_promoted(character_id: String)
 signal character_demoted(character_id: String)
+signal character_exited(character_id: String, reason: String)
 
 var data_set: CoreDataSet
 var generation_config: CharacterGenerationConfig
@@ -30,19 +31,18 @@ func initialize_background_population() -> bool:
 		return false
 	background_characters.clear()
 	_activation_seeds.clear()
-	var country_ids: Array[String] = []
-	for raw_id: Variant in data_set.countries:
-		country_ids.append(str(raw_id))
-	country_ids.sort()
-	if country_ids.is_empty():
+	if data_set.countries.is_empty():
 		return false
 	for index: int in range(rules.background_character_count):
 		var seed_value: int = rules.background_seed_base + index
-		var country_id: String = country_ids[index % country_ids.size()]
+		var random_service := DeterministicRandomService.new(seed_value)
+		var country_id: String = _pick_country_by_population(random_service)
+		if country_id.is_empty():
+			return false
 		var generator := CharacterGenerator.new(
 			data_set,
 			generation_config,
-			DeterministicRandomService.new(seed_value),
+			random_service,
 			StableIdService.new()
 		)
 		var result: CharacterGenerationResult = generator.generate_character(
@@ -72,36 +72,13 @@ func register_player(character: CharacterData) -> bool:
 func promote(character_id: String) -> CharacterData:
 	if active_characters.has(character_id):
 		return active_characters[character_id] as CharacterData
-	if active_characters.size() >= rules.active_character_limit or not background_characters.has(character_id):
+	if active_characters.size() >= rules.active_character_limit:
 		return null
-	var background: BackgroundCharacterData = background_characters[character_id] as BackgroundCharacterData
-	var generator := CharacterGenerator.new(
-		data_set,
-		generation_config,
-		DeterministicRandomService.new(background.activation_seed),
-		StableIdService.new()
-	)
-	var generated: CharacterGenerationResult = generator.generate_character(
-		background.country_id, CharacterGenerator.MODE_FULL_POPULATION
-	)
-	if not generated.is_success():
+	var character: CharacterData = _materialize_background(character_id)
+	if character == null:
 		return null
-	var character: CharacterData = generated.character
-	background.apply_persistent_core(character)
-	character.id = background.id
-	character.name = background.name
-	character.age = background.age
-	character.country_id = background.country_id
-	character.region_id = background.region_id
-	character.occupation_id = background.occupation_id
-	character.occupation = background.occupation
-	character.public_position = background.public_position
-	character.organization_ids = background.organization_ids.duplicate()
-	character.relationship_ids = background.relationship_ids.duplicate()
-	character.manifested_traits = background.manifested_traits.duplicate()
-	character.current_status = background.current_status.duplicate(true)
-	character.is_active = true
 	background_characters.erase(character_id)
+	character.is_active = true
 	active_characters[character_id] = character
 	character_promoted.emit(character_id)
 	return character
@@ -120,8 +97,21 @@ func demote(character_id: String) -> BackgroundCharacterData:
 	return background
 
 
+func increment_living_ages() -> void:
+	for raw_character: Variant in active_characters.values():
+		var character: CharacterData = raw_character as CharacterData
+		character.age += 1
+	for raw_background: Variant in background_characters.values():
+		var background: BackgroundCharacterData = raw_background as BackgroundCharacterData
+		background.age += 1
+
+
 func has_character(character_id: String) -> bool:
 	return active_characters.has(character_id) or background_characters.has(character_id) or exited_characters.has(character_id)
+
+
+func is_living(character_id: String) -> bool:
+	return active_characters.has(character_id) or background_characters.has(character_id)
 
 
 func get_active(character_id: String) -> CharacterData:
@@ -160,6 +150,28 @@ func exit_active_character(
 	record.exit_hour = current_hour
 	active_characters.erase(character_id)
 	exited_characters[character_id] = record
+	character_exited.emit(character_id, reason)
+	return record
+
+
+func exit_background_character(
+	character_id: String, reason: String, current_hour: int
+) -> ExitedCharacterRecord:
+	if current_hour < 0 or not background_characters.has(character_id):
+		return null
+	var character: CharacterData = _materialize_background(character_id)
+	if character == null:
+		return null
+	character.is_active = false
+	character.current_status["exit_reason"] = reason
+	character.current_status["exit_hour"] = current_hour
+	var record := ExitedCharacterRecord.new()
+	record.character = character
+	record.reason = reason
+	record.exit_hour = current_hour
+	background_characters.erase(character_id)
+	exited_characters[character_id] = record
+	character_exited.emit(character_id, reason)
 	return record
 
 
@@ -187,6 +199,18 @@ func get_background_ids(country_id: String = "") -> Array[String]:
 		var character: BackgroundCharacterData = background_characters[character_id] as BackgroundCharacterData
 		if country_id.is_empty() or character.country_id == country_id:
 			ids.append(character_id)
+	ids.sort()
+	return ids
+
+
+func get_living_ids(country_id: String = "") -> Array[String]:
+	var ids: Array[String] = []
+	for character_id: String in get_active_ids():
+		var active: CharacterData = get_active(character_id)
+		if country_id.is_empty() or active.country_id == country_id:
+			ids.append(character_id)
+	for character_id: String in get_background_ids(country_id):
+		ids.append(character_id)
 	ids.sort()
 	return ids
 
@@ -258,3 +282,74 @@ func restore_persistent_state(state: Dictionary) -> bool:
 	_activation_seeds = (raw_seeds as Dictionary).duplicate(true)
 	player_character_id = player_id
 	return true
+
+
+func _materialize_background(character_id: String) -> CharacterData:
+	var background: BackgroundCharacterData = get_background(character_id)
+	if background == null:
+		return null
+	var generator := CharacterGenerator.new(
+		data_set,
+		generation_config,
+		DeterministicRandomService.new(background.activation_seed),
+		StableIdService.new()
+	)
+	var generated: CharacterGenerationResult = generator.generate_character(
+		background.country_id, CharacterGenerator.MODE_FULL_POPULATION
+	)
+	if not generated.is_success():
+		return null
+	var character: CharacterData = generated.character
+	background.apply_persistent_core(character)
+	character.id = background.id
+	character.name = background.name
+	character.age = background.age
+	character.country_id = background.country_id
+	character.region_id = background.region_id
+	character.occupation_id = background.occupation_id
+	character.occupation = background.occupation
+	character.public_position = background.public_position
+	character.organization_ids = background.organization_ids.duplicate()
+	character.relationship_ids = background.relationship_ids.duplicate()
+	character.manifested_traits = background.manifested_traits.duplicate()
+	character.current_status = background.current_status.duplicate(true)
+	return character
+
+
+func _pick_country_by_population(random_service: DeterministicRandomService) -> String:
+	var country_ids: Array[String] = []
+	var weights: Dictionary = {}
+	var total_population: int = 0
+	for raw_id: Variant in data_set.countries:
+		var country_id: String = str(raw_id)
+		var population: int = _get_country_population(country_id)
+		if population <= 0:
+			continue
+		country_ids.append(country_id)
+		weights[country_id] = population
+		total_population += population
+	country_ids.sort()
+	if country_ids.is_empty() or total_population <= 0:
+		return ""
+	var roll: int = random_service.next_int(1, total_population)
+	for country_id: String in country_ids:
+		roll -= int(weights[country_id])
+		if roll <= 0:
+			return country_id
+	return country_ids.back()
+
+
+func _get_country_population(country_id: String) -> int:
+	var country: CountryData = data_set.countries.get(country_id) as CountryData
+	if country == null:
+		return 0
+	var total: int = 0
+	for region_id: String in country.region_ids:
+		var region: RegionData = data_set.regions.get(region_id) as RegionData
+		if region == null:
+			continue
+		for population_id: String in region.population_group_ids:
+			var group: PopulationGroupData = data_set.population_groups.get(population_id) as PopulationGroupData
+			if group != null:
+				total += maxi(group.population_count, 0)
+	return total
