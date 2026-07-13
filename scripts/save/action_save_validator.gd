@@ -101,10 +101,13 @@ func _validate_context(context: Dictionary, action: ActionInstanceData) -> Strin
 	var wealth_before: float = float(raw_wealth)
 	if cost < 0.0 or cost != floor(cost) or wealth_before < 0.0 or wealth_before != floor(wealth_before):
 		return "当前行动资金审计字段数值无效"
-	if typeof(context.get("funding_committed", null)) != TYPE_BOOL or not bool(context["funding_committed"]):
-		return "当前行动没有有效的资金承诺记录"
-	if wealth_before < cost:
+	if typeof(context.get("funding_committed", null)) != TYPE_BOOL:
+		return "当前行动资金承诺字段类型无效"
+	var committed: bool = bool(context["funding_committed"])
+	if committed and wealth_before < cost:
 		return "当前行动开始前财富不足以覆盖费用"
+	if not committed and (cost != 0.0 or wealth_before != 0.0):
+		return "未承诺资金的通用行动不能携带支付审计数值"
 	return ""
 
 
@@ -201,7 +204,9 @@ func _validate_authoritative_context(
 			float(expected.get(field, -2.0))
 		):
 			return "当前行动字段 %s 与权威状态不一致" % field
-	if int(action.context.get("funding_cost", -1)) != int(expected.get("funding_cost", -2)):
+	if bool(action.context.get("funding_committed", false)) and int(
+		action.context.get("funding_cost", -1)
+	) != int(expected.get("funding_cost", -2)):
 		return "当前行动费用与配置不一致"
 	if not definition.position_permission_required.is_empty() and not expected_permissions.has(
 		definition.position_permission_required
