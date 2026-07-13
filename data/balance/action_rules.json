@@ -21,6 +21,8 @@
     "primary_skill_preparation_scale": 0.35,
     "intelligence_preparation_scale": 0.25,
     "funding_value_per_wealth": 5.0,
+    "maximum_extra_funding": 20,
+    "preparation_value_per_extra_wealth": 3.0,
     "funding_cost_by_category": {
       "study_skill": 2,
       "perform_work": 0,
