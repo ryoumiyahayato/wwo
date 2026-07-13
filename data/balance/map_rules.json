@@ -13,5 +13,13 @@
   "consolidation_strength": 0.3,
   "pressure_strength_loss": 0.12,
   "pressure_contested_gain": 0.18,
-  "pressure_enemy_gain": 0.15
+  "pressure_enemy_gain": 0.15,
+  "rail_attack_bonus": 0.18,
+  "rail_defense_bonus": 0.12,
+  "rail_consolidation_bonus": 0.14,
+  "social_support_scale": 0.35,
+  "surrounded_attack_bonus": 0.35,
+  "multi_front_bonus": 0.12,
+  "minimum_pressure_multiplier": 0.35,
+  "maximum_pressure_multiplier": 1.9
 }
