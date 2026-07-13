@@ -234,7 +234,11 @@ func _test_backup_recovery(
 	var loaded: SaveOperationResult = save_service.load_from_path(PROBE_PATH)
 	_expect(loaded.success, "主存档损坏时可读取安全备份")
 	_expect(loaded.message.contains("安全备份"), "备份恢复结果明确标记来源")
-	_expect(loaded.snapshot == snapshot, "安全备份恢复完整原始快照")
+	var normalized: Variant = JSON.parse_string(JSON.stringify(snapshot))
+	_expect(
+		normalized is Dictionary and loaded.snapshot == normalized,
+		"安全备份恢复 JSON 语义完全一致的原始快照"
+	)
 
 
 func _find_active_record(state: Dictionary, character_id: String) -> Dictionary:
