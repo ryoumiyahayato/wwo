@@ -32,13 +32,21 @@ func start_action(
 	if not validation_error.is_empty():
 		result.add_error(validation_error)
 		return result
+	var study_skill_id: String = str(context.get("study_skill_id", ""))
+	if definition.category == "study_skill":
+		if study_skill_id.is_empty() or not character.skills.has(study_skill_id):
+			result.add_error("学习行动必须选择人物已有的有效技能")
+			return result
+	elif not study_skill_id.is_empty():
+		result.add_error("非学习行动不能携带学习技能目标")
+		return result
 	var permissions: Array[String] = DataRecordUtils.to_string_array(
 		context["position_permissions"]
 	)
 	if not definition.position_permission_required.is_empty() and not permissions.has(definition.position_permission_required):
 		result.add_error("缺少行动所需职位权限：%s" % definition.position_permission_required)
 		return result
-	var interruption: String = _get_interruption_reason(definition, character)
+	var interruption: String = get_interruption_reason(definition, character)
 	if not interruption.is_empty():
 		result.add_error("人物当前状态阻止行动：%s" % interruption)
 		return result
@@ -62,7 +70,8 @@ func update_to_hour(
 	definition: ActionDefinitionData,
 	character: CharacterData,
 	current_hour: int,
-	map_service: MapControlService = null
+	map_service: MapControlService = null,
+	check_current_interruptions: bool = true
 ) -> void:
 	if action == null or action.is_terminal() or current_hour <= action.last_update_hour:
 		return
@@ -70,10 +79,11 @@ func update_to_hour(
 		action.last_update_hour = current_hour
 		action.estimated_completion_hour = -1
 		return
-	var interruption: String = _get_interruption_reason(definition, character)
-	if not interruption.is_empty():
-		interrupt_action(action, current_hour, interruption)
-		return
+	if check_current_interruptions:
+		var interruption: String = get_interruption_reason(definition, character)
+		if not interruption.is_empty():
+			interrupt_action(action, current_hour, interruption)
+			return
 	var elapsed_hours: int = current_hour - action.last_update_hour
 	var remaining_work: float = maxf(action.total_work - action.accumulated_work, 0.0)
 	var required_hours: int = ceili(remaining_work / action.current_efficiency)
@@ -108,6 +118,12 @@ func update_context(
 		merged[str(raw_key)] = new_context[raw_key]
 	merged = _normalized_context(merged)
 	if not _validate_context(merged).is_empty():
+		return false
+	var study_skill_id: String = str(merged.get("study_skill_id", ""))
+	if definition.category == "study_skill":
+		if study_skill_id.is_empty() or not character.skills.has(study_skill_id):
+			return false
+	elif not study_skill_id.is_empty():
 		return false
 	var permissions: Array[String] = DataRecordUtils.to_string_array(
 		merged["position_permissions"]
@@ -162,7 +178,7 @@ func resume_action(
 ) -> bool:
 	if action == null or action.status != ActionInstanceData.STATUS_PAUSED:
 		return false
-	var interruption: String = _get_interruption_reason(definition, character)
+	var interruption: String = get_interruption_reason(definition, character)
 	if not interruption.is_empty():
 		interrupt_action(action, current_hour, interruption)
 		return false
@@ -196,7 +212,8 @@ func calculate_effective_value(
 	character: CharacterData,
 	context: Dictionary
 ) -> float:
-	var primary_skill: float = float(character.skills.get(definition.primary_skill, 0))
+	var primary_skill_id: String = _get_effective_primary_skill_id(definition, context)
+	var primary_skill: float = float(character.skills.get(primary_skill_id, 0))
 	var secondary_average: float = 0.0
 	for skill_id: String in definition.secondary_skills:
 		secondary_average += float(character.skills.get(skill_id, 0))
@@ -208,11 +225,26 @@ func calculate_effective_value(
 	var position_bonus: float = 0.0
 	if not definition.position_permission_required.is_empty() and permissions.has(definition.position_permission_required):
 		position_bonus = rules.position_permission_bonus
-	var aptitude_id: String = str(rules.aptitude_by_skill.get(definition.primary_skill, "learning"))
+	var aptitude_id: String = str(
+		rules.aptitude_by_skill.get(primary_skill_id, "learning")
+	)
 	var aptitude_adjustment: float = (
 		float(character.hidden_aptitudes.get(aptitude_id, 50)) - 50.0
 	) * definition.aptitude_modifier_weight
 	var state_adjustment: float = _calculate_state_modifier(character) * definition.state_modifier_weight
+	var mastery_bonus: float = 0.0
+	if (
+		primary_skill >= float(rules.mastery_guarantee.get("skill_threshold", 80.0))
+		and float(context.get("preparation", 0.0)) >= float(
+			rules.mastery_guarantee.get("preparation_threshold", 90.0)
+		)
+		and float(context.get("funding", 0.0)) >= float(
+			rules.mastery_guarantee.get("funding_threshold", 80.0)
+		)
+	):
+		mastery_bonus = float(
+			rules.mastery_guarantee.get("effective_value_bonus", 0.0)
+		)
 	return (
 		primary_skill * rules.primary_skill_weight
 		+ secondary_average * rules.secondary_skill_weight
@@ -223,6 +255,7 @@ func calculate_effective_value(
 		+ float(context.get("preparation", 0.0)) * definition.preparation_weight
 		+ aptitude_adjustment
 		+ state_adjustment
+		+ mastery_bonus
 		- definition.base_target_resistance
 		- float(context.get("target_resistance", 0.0))
 	)
@@ -279,6 +312,23 @@ func replace_completed_result(
 	return true
 
 
+func get_interruption_reason(
+	definition: ActionDefinitionData, character: CharacterData
+) -> String:
+	for condition: String in definition.interruption_conditions:
+		match condition:
+			"detained":
+				if bool(character.current_status.get("detained", false)):
+					return "detained"
+			"incapacitated":
+				if float(character.current_status.get("health", 100)) <= float(rules.state_rules["incapacitated_health"]):
+					return "incapacitated"
+			"unemployed":
+				if str(character.current_status.get("employment_status", "")) == "unemployed":
+					return "unemployed"
+	return ""
+
+
 func _recalculate_metrics(
 	action: ActionInstanceData,
 	definition: ActionDefinitionData,
@@ -333,9 +383,11 @@ func _apply_result_once(
 	var before: Dictionary = {}
 	action.result_description = str(result_data.get("description", "行动已结算"))
 	if result_data.has("skill_delta"):
-		var old_skill: int = int(character.skills.get(definition.primary_skill, 0))
-		before["skill"] = old_skill
-		character.skills[definition.primary_skill] = clampi(
+		var skill_id: String = _get_growth_skill_id(definition, action.context)
+		var old_skill: int = int(character.skills.get(skill_id, 0))
+		before["skill_id"] = skill_id
+		before["skill_value"] = old_skill
+		character.skills[skill_id] = clampi(
 			old_skill + int(result_data["skill_delta"]), 0, 100
 		)
 	if result_data.has("wealth_delta"):
@@ -372,7 +424,10 @@ func _restore_result_before(
 	character: CharacterData,
 	before: Dictionary
 ) -> void:
-	if before.has("skill"):
+	if before.has("skill_id") and before.has("skill_value"):
+		character.skills[str(before["skill_id"])] = int(before["skill_value"])
+	elif before.has("skill"):
+		# Compatibility with results written before selectable study skills.
 		character.skills[definition.primary_skill] = int(before["skill"])
 	for state_key: String in [
 		"wealth", "reputation", "intelligence_points", "fatigue", "stress"
@@ -396,26 +451,26 @@ func _calculate_state_modifier(character: CharacterData) -> float:
 	)
 
 
-func _get_interruption_reason(
-	definition: ActionDefinitionData, character: CharacterData
+func _get_effective_primary_skill_id(
+	definition: ActionDefinitionData, context: Dictionary
 ) -> String:
-	for condition: String in definition.interruption_conditions:
-		match condition:
-			"detained":
-				if bool(character.current_status.get("detained", false)):
-					return "detained"
-			"incapacitated":
-				if float(character.current_status.get("health", 100)) <= float(rules.state_rules["incapacitated_health"]):
-					return "incapacitated"
-			"unemployed":
-				if str(character.current_status.get("employment_status", "")) == "unemployed":
-					return "unemployed"
-	return ""
+	if definition.category == "study_skill":
+		var selected: String = str(context.get("study_skill_id", ""))
+		if not selected.is_empty():
+			return selected
+	return definition.primary_skill
+
+
+func _get_growth_skill_id(
+	definition: ActionDefinitionData, context: Dictionary
+) -> String:
+	return _get_effective_primary_skill_id(definition, context)
 
 
 static func _normalized_context(input_context: Dictionary) -> Dictionary:
 	return {
 		"target_id": str(input_context.get("target_id", "")),
+		"study_skill_id": str(input_context.get("study_skill_id", "")),
 		"position_permissions": DataRecordUtils.to_string_array(
 			input_context.get("position_permissions", [])
 		),
