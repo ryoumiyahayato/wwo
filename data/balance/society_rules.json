@@ -10,6 +10,21 @@
     "affinity": 0.0,
     "is_public": true
   },
+  "organization_economy": {
+    "monthly_base_income": 2.0,
+    "size_income_scale": 0.00008,
+    "influence_income_scale": 4.0,
+    "resource_cap": 160.0
+  },
+  "lifecycle": {
+    "retirement_age": 65,
+    "maximum_age": 90,
+    "health_decline_start_age": 55,
+    "old_age_start": 70,
+    "annual_health_decline": 1,
+    "old_age_additional_decline": 3,
+    "background_exit_age": 85
+  },
   "ai": {
     "daily_interval_hours": 24,
     "long_term_interval_hours": 720,
@@ -17,11 +32,15 @@
     "goal_bonus": 12.0,
     "fatigue_penalty_weight": 0.18,
     "stress_penalty_weight": 0.12,
+    "rest_fatigue_recovery": 12,
+    "rest_stress_recovery": 8,
+    "relationship_target_scan_limit": 24,
     "candidates": [
       {"action_id": "action:perform_work", "base_weight": 30.0, "skill": "administration", "goal": "career_growth"},
       {"action_id": "action:study_skill", "base_weight": 24.0, "skill": "investigation", "goal": "skill_growth"},
       {"action_id": "action:build_relationship", "base_weight": 22.0, "skill": "public_speaking", "goal": "social_network"},
       {"action_id": "action:join_organization", "base_weight": 18.0, "skill": "social_organization", "goal": "organization_influence"},
+      {"action_id": "action:seek_position", "base_weight": 16.0, "skill": "political_activity", "goal": "career_growth"},
       {"action_id": "rest", "base_weight": 8.0, "skill": "", "goal": "recovery"}
     ],
     "goal_by_occupation": {
