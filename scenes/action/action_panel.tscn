@@ -29,7 +29,7 @@ theme_override_constants/margin_bottom = 16
 
 [node name="Root" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
-theme_override_constants/separation = 9
+theme_override_constants/separation = 8
 
 [node name="Header" type="HBoxContainer" parent="Margin/Root"]
 layout_mode = 2
@@ -48,6 +48,7 @@ text = "×"
 [node name="Scroll" type="ScrollContainer" parent="Margin/Root"]
 layout_mode = 2
 size_flags_vertical = 3
+horizontal_scroll_mode = 0
 [node name="Content" type="VBoxContainer" parent="Margin/Root/Scroll"]
 custom_minimum_size = Vector2(385, 0)
 layout_mode = 2
@@ -66,6 +67,17 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "此行动无需目标"
 [node name="TargetOption" type="OptionButton" parent="Margin/Root/Scroll/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+visible = false
+
+[node name="StudySkillLabel" type="Label" parent="Margin/Root/Scroll/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+visible = false
+text = "学习技能"
+[node name="StudySkillOption" type="OptionButton" parent="Margin/Root/Scroll/Content"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
@@ -90,7 +102,7 @@ theme_override_colors/font_color = Color(0.39, 0.79, 0.86, 1)
 text = "行动条件（权威状态 + 主动投入）"
 [node name="ContextLabel" type="RichTextLabel" parent="Margin/Root/Scroll/Content"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 126)
+custom_minimum_size = Vector2(0, 112)
 layout_mode = 2
 bbcode_enabled = true
 fit_content = false
@@ -101,11 +113,6 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "此行动不要求职位权限"
 
-[node name="BeginButton" type="Button" parent="Margin/Root/Scroll/Content"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 42)
-layout_mode = 2
-text = "开始行动"
 [node name="ProgressBar" type="ProgressBar" parent="Margin/Root/Scroll/Content"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 24)
@@ -113,7 +120,7 @@ layout_mode = 2
 show_percentage = true
 [node name="SummaryLabel" type="RichTextLabel" parent="Margin/Root/Scroll/Content"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 185)
+custom_minimum_size = Vector2(0, 150)
 layout_mode = 2
 bbcode_enabled = true
 fit_content = false
@@ -138,3 +145,9 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.72, 0.4, 1)
 autowrap_mode = 2
+
+[node name="BeginButton" type="Button" parent="Margin/Root"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "开始行动"
