@@ -146,6 +146,12 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.72, 0.4, 1)
 autowrap_mode = 2
 
+[node name="BeginButton" type="Button" parent="Margin/Root/Scroll/Content"]
+visible = false
+layout_mode = 2
+mouse_filter = 2
+text = "兼容测试入口"
+
 [node name="BeginButton" type="Button" parent="Margin/Root"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 44)
