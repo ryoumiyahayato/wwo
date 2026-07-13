@@ -13,7 +13,8 @@
     "trust_weight": 25.0,
     "affinity_weight": 15.0,
     "shared_organization_bonus": 15.0,
-    "reputation_weight": 0.1
+    "reputation_weight": 0.1,
+    "maximum_inherited_organizations": 2
   },
   "enemy_affinity_threshold": -0.2,
   "position_inheritance_minimum_score": 45.0,
