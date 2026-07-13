@@ -1,6 +1,6 @@
 class_name SocietySimulationService
 extends RefCounted
-## Composition root for roster, organizations, sparse relationships and bounded active AI.
+## Composition root for roster, organizations, relationships, actions and bounded AI.
 
 var rules: SocietyRulesConfig
 var roster: CharacterRosterService
@@ -15,6 +15,9 @@ var paused_settlement_categories: Dictionary = {}
 var _clock: SimulationClock
 var _map_service: MapControlService
 var _data_set: CoreDataSet
+var _character_config: CharacterGenerationConfig
+var _action_rules: ActionRulesConfig
+var _action_service: ActionService
 
 
 func initialize(player: CharacterData, data_set: CoreDataSet) -> bool:
@@ -27,23 +30,24 @@ func initialize(player: CharacterData, data_set: CoreDataSet) -> bool:
 	if continuity_rules.load_from_file() != OK:
 		initialization_error = continuity_rules.error_message
 		return false
-	var character_config := CharacterGenerationConfig.load_from_file()
-	if not character_config.is_valid():
-		initialization_error = character_config.error_message
+	_character_config = CharacterGenerationConfig.load_from_file()
+	if not _character_config.is_valid():
+		initialization_error = _character_config.error_message
 		return false
-	roster = CharacterRosterService.new(data_set, character_config, rules)
+	_action_rules = ActionRulesConfig.new()
+	if _action_rules.load_from_file() != OK:
+		initialization_error = _action_rules.error_message
+		return false
+	_action_service = ActionService.new(_action_rules, GameSessionService.action_id_service)
+	roster = CharacterRosterService.new(data_set, _character_config, rules)
 	if not roster.initialize_background_population() or not roster.register_player(player):
 		initialization_error = "无法建立分层人物名册"
 		return false
 	organizations = OrganizationService.new(data_set.organizations)
-	relationships = RelationshipService.new(
-		roster, rules.relationship_defaults, StableIdService.new()
-	)
+	relationships = RelationshipService.new(roster, rules.relationship_defaults, StableIdService.new())
 	ai = SimpleAiService.new(roster, rules)
 	regional_influence = RegionalInfluenceService.new(continuity_rules)
-	succession = SuccessionService.new(
-		continuity_rules, roster, organizations, relationships, ai
-	)
+	succession = SuccessionService.new(continuity_rules, roster, organizations, relationships, ai)
 	_initialize_organization_leaders()
 	ai.run_long_term_evaluations(0)
 	ai.run_daily_decisions(0)
@@ -54,17 +58,20 @@ func attach_clock(simulation_clock: SimulationClock) -> void:
 	attach_world(simulation_clock, _map_service)
 
 
-func attach_world(
-	simulation_clock: SimulationClock,
-	control_service: MapControlService
-) -> void:
+func attach_world(simulation_clock: SimulationClock, control_service: MapControlService) -> void:
 	if control_service != null:
 		_map_service = control_service
-	if simulation_clock == null or simulation_clock == _clock:
+	if simulation_clock == null:
 		return
-	_clock = simulation_clock
-	_clock.day_advanced.connect(_on_day_advanced)
-	_clock.month_advanced.connect(_on_month_advanced)
+	if simulation_clock != _clock:
+		_clock = simulation_clock
+		if not _clock.hour_advanced.is_connected(_on_hour_advanced):
+			_clock.hour_advanced.connect(_on_hour_advanced)
+		if not _clock.day_advanced.is_connected(_on_day_advanced):
+			_clock.day_advanced.connect(_on_day_advanced)
+		if not _clock.month_advanced.is_connected(_on_month_advanced):
+			_clock.month_advanced.connect(_on_month_advanced)
+	_settle_current_action_domain_if_ready()
 
 
 func set_settlement_paused(category: String, paused: bool) -> void:
@@ -93,12 +100,13 @@ func demote_active(character_id: String) -> BackgroundCharacterData:
 	return roster.demote(character_id)
 
 
-func create_player_relationship(
-	other_character_id: String, current_hour: int
-) -> RelationshipData:
+func create_player_relationship(other_character_id: String, current_hour: int) -> RelationshipData:
 	return relationships.create_or_update(
-		roster.player_character_id, other_character_id, current_hour,
-		{"familiarity": 0.08, "trust": 0.02, "affinity": 0.01}, "player_contact"
+		roster.player_character_id,
+		other_character_id,
+		current_hour,
+		{"familiarity": 0.08, "trust": 0.02, "affinity": 0.01},
+		"player_contact"
 	)
 
 
@@ -109,40 +117,116 @@ func apply_action_domain_effect(
 ) -> bool:
 	if action == null or definition == null or action.status != ActionInstanceData.STATUS_COMPLETED or action.domain_effect_applied:
 		return false
-	# The service owns the one-shot invariant. A completed action consumes its
-	# domain hook even when the target is capped, a slot is full, or no hook exists.
-	action.domain_effect_applied = true
-	if action.outcome_code == "failure":
-		return false
-	var player: CharacterData = GameSessionService.player_character
-	if player == null:
-		return false
 	var applied: bool = false
-	match definition.category:
-		"build_relationship":
-			applied = create_player_relationship(action.target_id, action.completion_hour) != null
-		"join_organization":
-			applied = organizations.join_organization(player, action.target_id)
-		"seek_position":
-			applied = _award_next_position(player, action.target_id)
-		"investigate_character":
-			var target: Variant = roster.get_public_character(action.target_id)
-			if target != null:
-				var known: Dictionary = {}
-				if target is CharacterData:
-					known = (target as CharacterData).known_tendencies.duplicate(true)
-				player.current_status["known_character_%s" % str(target.id)] = known
-				applied = true
-		_:
-			applied = regional_influence.apply_action_domain_effect(
-				action, definition, player, map_service
-			)
+	if action.outcome_code != "failure":
+		var player: CharacterData = GameSessionService.player_character
+		if player != null:
+			match definition.category:
+				"build_relationship":
+					applied = create_player_relationship(action.target_id, action.completion_hour) != null
+				"join_organization":
+					applied = organizations.join_organization(player, action.target_id)
+				"seek_position":
+					applied = _award_next_position(player, action.target_id)
+				"investigate_character":
+					applied = _apply_investigation_dossier(player, action.target_id)
+				_:
+					applied = regional_influence.apply_action_domain_effect(
+						action, definition, player, map_service
+					)
+	# The composition root owns the one-shot invariant, but only after the
+	# subordinate service has had a chance to observe the unconsumed action.
+	action.domain_effect_applied = true
+	action.applied_effects["domain_applied"] = applied
+	if not applied and action.outcome_code != "failure":
+		_mark_domain_no_change(action, definition.category)
 	if applied:
 		GameSessionService.settlement_log.add(
-			"action_domain", "行动领域结果已应用", action.completion_hour,
+			"action_domain",
+			"行动领域结果已应用",
+			action.completion_hour,
 			{"action_id": action.id, "category": definition.category, "target_id": action.target_id}
 		)
 	return applied
+
+
+func _apply_investigation_dossier(player: CharacterData, target_id: String) -> bool:
+	var target: Variant = roster.get_public_character(target_id)
+	if target == null:
+		return false
+	var tendencies: Dictionary = {}
+	var name: String = ""
+	var age: int = 0
+	var occupation: String = ""
+	var public_position: String = ""
+	var region_id: String = ""
+	var traits: Array[String] = []
+	var organization_ids: Array[String] = []
+	if target is CharacterData:
+		var active: CharacterData = target as CharacterData
+		name = active.name
+		age = active.age
+		occupation = active.occupation
+		public_position = active.public_position
+		region_id = active.region_id
+		traits = active.manifested_traits.duplicate()
+		organization_ids = active.organization_ids.duplicate()
+		tendencies = active.tendencies.duplicate(true)
+	elif target is BackgroundCharacterData:
+		var background: BackgroundCharacterData = target as BackgroundCharacterData
+		name = background.name
+		age = background.age
+		occupation = background.occupation
+		public_position = background.public_position
+		region_id = background.region_id
+		traits = background.manifested_traits.duplicate()
+		organization_ids = background.organization_ids.duplicate()
+		var generator := CharacterGenerator.new(
+			_data_set,
+			_character_config,
+			DeterministicRandomService.new(background.activation_seed),
+			StableIdService.new()
+		)
+		var generated: CharacterGenerationResult = generator.generate_character(
+			background.country_id,
+			CharacterGenerator.MODE_FULL_POPULATION
+		)
+		if generated.is_success():
+			tendencies = generated.character.tendencies.duplicate(true)
+	var raw_dossiers: Variant = player.current_status.get("investigation_dossiers", {})
+	var dossiers: Dictionary = (
+		(raw_dossiers as Dictionary).duplicate(true)
+		if raw_dossiers is Dictionary
+		else {}
+	)
+	dossiers[target_id] = {
+		"name": name,
+		"age": age,
+		"occupation": occupation,
+		"public_position": public_position,
+		"region_id": region_id,
+		"traits": traits,
+		"organization_ids": organization_ids,
+		"tendencies": tendencies,
+		"investigated_hour": _current_hour(),
+	}
+	player.current_status["investigation_dossiers"] = dossiers
+	return true
+
+
+func _mark_domain_no_change(action: ActionInstanceData, category: String) -> void:
+	match category:
+		"seek_position":
+			action.outcome_code = "failure"
+			action.result_description = "行动过程完成，但结算时已无更高空缺职位。"
+		"promote_policy":
+			action.result_description = "政策行动完成，但目标地区影响已达可调整边界。"
+		"support_control":
+			action.outcome_code = "failure"
+			action.result_description = "行动完成时目标已不再符合前线支援条件。"
+		"investigate_character":
+			action.outcome_code = "failure"
+			action.result_description = "调查目标已不可用，未形成有效档案。"
 
 
 func _award_next_position(character: CharacterData, organization_id: String) -> bool:
@@ -168,15 +252,15 @@ func _award_next_position(character: CharacterData, organization_id: String) -> 
 
 
 func execute_player_succession(
-	successor_character_id: String, exit_reason: String, current_hour: int
+	successor_character_id: String,
+	exit_reason: String,
+	current_hour: int
 ) -> SuccessionResult:
 	var old_player_id: String = roster.player_character_id
 	if GameSessionService.current_action != null and not GameSessionService.current_action.is_terminal():
 		GameSessionService.current_action.status = ActionInstanceData.STATUS_CANCELLED
 		GameSessionService.current_action.estimated_completion_hour = -1
-	return succession.execute_succession(
-		old_player_id, successor_character_id, exit_reason, current_hour
-	)
+	return succession.execute_succession(old_player_id, successor_character_id, exit_reason, current_hour)
 
 
 func _initialize_organization_leaders() -> void:
@@ -193,11 +277,39 @@ func _initialize_organization_leaders() -> void:
 			break
 		organizations.join_organization(character, organization_id)
 		organizations.assign_position(
-			character, organization_id,
+			character,
+			organization_id,
 			str(organization.position_structure.get("leader_position", ""))
 		)
 		ai.register_active_npc(character.id)
 		initialized += 1
+
+
+func _on_hour_advanced(total_hour: int) -> void:
+	var action: ActionInstanceData = GameSessionService.current_action
+	var player: CharacterData = GameSessionService.player_character
+	if action == null or player == null or action.is_terminal():
+		return
+	var definition: ActionDefinitionData = _data_set.actions.get(action.definition_id) as ActionDefinitionData
+	if definition == null or action.actor_character_id != player.id:
+		action.status = ActionInstanceData.STATUS_INTERRUPTED
+		action.interruption_reason = "invalid_actor_or_definition"
+		action.last_update_hour = total_hour
+		action.estimated_completion_hour = -1
+		return
+	_action_service.update_to_hour(action, definition, player, total_hour, _map_service)
+	_settle_current_action_domain_if_ready()
+
+
+func _settle_current_action_domain_if_ready() -> void:
+	var action: ActionInstanceData = GameSessionService.current_action
+	if action == null or action.status != ActionInstanceData.STATUS_COMPLETED or action.domain_effect_applied or _map_service == null:
+		return
+	var definition: ActionDefinitionData = _data_set.actions.get(action.definition_id) as ActionDefinitionData
+	if definition == null:
+		action.domain_effect_applied = true
+		return
+	apply_action_domain_effect(action, definition, _map_service)
 
 
 func _on_day_advanced(_year: int, _month: int, _day: int) -> void:
@@ -209,7 +321,9 @@ func _on_day_advanced(_year: int, _month: int, _day: int) -> void:
 	GameSessionService.performance_stats.record("daily_ai", Time.get_ticks_usec() - started)
 	if applied > 0:
 		GameSessionService.settlement_log.add(
-			"daily_ai", "活跃 NPC 执行了 %d 项日常行动" % applied, _current_hour()
+			"daily_ai",
+			"活跃 NPC 执行了 %d 项日常行动" % applied,
+			_current_hour()
 		)
 
 
@@ -221,7 +335,9 @@ func _on_month_advanced(_year: int, _month: int) -> void:
 	var world_changes: int = _execute_ai_monthly_world_actions()
 	GameSessionService.performance_stats.record("monthly_ai", Time.get_ticks_usec() - started)
 	GameSessionService.settlement_log.add(
-		"monthly_ai", "月度长期计划结算完成", _current_hour(),
+		"monthly_ai",
+		"月度长期计划结算完成",
+		_current_hour(),
 		{"active_ai": ai.states.size(), "world_changes": world_changes}
 	)
 
@@ -235,28 +351,18 @@ func _execute_ai_daily_actions() -> int:
 			continue
 		match state.current_action_id:
 			"rest":
-				character.current_status["fatigue"] = maxi(
-					int(character.current_status.get("fatigue", 0)) - 8, 0
-				)
-				character.current_status["stress"] = maxi(
-					int(character.current_status.get("stress", 0)) - 5, 0
-				)
+				character.current_status["fatigue"] = maxi(int(character.current_status.get("fatigue", 0)) - 8, 0)
+				character.current_status["stress"] = maxi(int(character.current_status.get("stress", 0)) - 5, 0)
 				applied += 1
 			"action:perform_work":
-				character.current_status["wealth"] = int(
-					character.current_status.get("wealth", 0)
-				) + 1
-				character.current_status["fatigue"] = mini(
-					int(character.current_status.get("fatigue", 0)) + 2, 100
-				)
+				character.current_status["wealth"] = int(character.current_status.get("wealth", 0)) + 1
+				character.current_status["fatigue"] = mini(int(character.current_status.get("fatigue", 0)) + 2, 100)
 				applied += 1
 			"action:study_skill":
 				if state.daily_decision_count % 7 == 0:
 					var skill_id: String = _lowest_skill_id(character)
 					if not skill_id.is_empty():
-						character.skills[skill_id] = mini(
-							int(character.skills.get(skill_id, 0)) + 1, 100
-						)
+						character.skills[skill_id] = mini(int(character.skills.get(skill_id, 0)) + 1, 100)
 						applied += 1
 			"action:join_organization":
 				if character.organization_ids.is_empty() and _join_first_home_organization(character):
@@ -281,15 +387,23 @@ func _execute_ai_monthly_world_actions() -> int:
 				continue
 			if organizations.has_permission(character.id, organization.id, "regional_policy"):
 				if regional_influence.apply_organization_social_support(
-					organization, character.id, organization.region_id, 0.12,
-					organizations, _map_service
+					organization,
+					character.id,
+					organization.region_id,
+					0.12,
+					organizations,
+					_map_service
 				):
 					applied += 1
 			if organizations.has_permission(character.id, organization.id, "regional_control_support"):
 				var target_id: String = _first_enemy_frontier_unit(organization.country_id)
 				if not target_id.is_empty() and regional_influence.apply_organization_control_support(
-					organization, character.id, target_id, 0.10,
-					organizations, _map_service
+					organization,
+					character.id,
+					target_id,
+					0.10,
+					organizations,
+					_map_service
 				):
 					applied += 1
 	return applied
@@ -319,18 +433,15 @@ func _strengthen_existing_ai_relationship(character: CharacterData) -> bool:
 	var known: Array[RelationshipData] = relationships.get_for_character(character.id)
 	if known.is_empty():
 		return false
-	known.sort_custom(func(a: RelationshipData, b: RelationshipData) -> bool:
-		return a.id < b.id
-	)
+	known.sort_custom(func(a: RelationshipData, b: RelationshipData) -> bool: return a.id < b.id)
 	var relationship: RelationshipData = known[0]
-	var other_id: String = (
-		relationship.character_b_id
-		if relationship.character_a_id == character.id
-		else relationship.character_a_id
-	)
+	var other_id: String = relationship.character_b_id if relationship.character_a_id == character.id else relationship.character_a_id
 	return relationships.create_or_update(
-		character.id, other_id, _current_hour(),
-		{"familiarity": 0.02, "trust": 0.01, "affinity": 0.005}, "ai_contact"
+		character.id,
+		other_id,
+		_current_hour(),
+		{"familiarity": 0.02, "trust": 0.01, "affinity": 0.005},
+		"ai_contact"
 	) != null
 
 
@@ -339,12 +450,8 @@ func _first_enemy_frontier_unit(country_id: String) -> String:
 		return ""
 	for unit_id: String in _map_service.get_sorted_unit_ids():
 		var unit: ControlUnitData = _map_service.get_unit(unit_id)
-		if unit.controller_country_id == country_id:
-			continue
-		for neighbor_id: String in unit.neighbor_ids:
-			var neighbor: ControlUnitData = _map_service.get_unit(neighbor_id)
-			if neighbor != null and neighbor.controller_country_id == country_id:
-				return unit.id
+		if unit.controller_country_id != country_id and _map_service.is_valid_control_support_target(unit.id, country_id):
+			return unit.id
 	return ""
 
 
