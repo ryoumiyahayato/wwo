@@ -109,10 +109,14 @@ func apply_action_domain_effect(
 ) -> bool:
 	if action == null or definition == null or action.status != ActionInstanceData.STATUS_COMPLETED or action.domain_effect_applied:
 		return false
+	# The service owns the one-shot invariant. A completed action consumes its
+	# domain hook even when the target is capped, a slot is full, or no hook exists.
+	action.domain_effect_applied = true
 	if action.outcome_code == "failure":
-		action.domain_effect_applied = true
 		return false
 	var player: CharacterData = GameSessionService.player_character
+	if player == null:
+		return false
 	var applied: bool = false
 	match definition.category:
 		"build_relationship":
@@ -134,7 +138,6 @@ func apply_action_domain_effect(
 				action, definition, player, map_service
 			)
 	if applied:
-		action.domain_effect_applied = true
 		GameSessionService.settlement_log.add(
 			"action_domain", "行动领域结果已应用", action.completion_hour,
 			{"action_id": action.id, "category": definition.category, "target_id": action.target_id}
