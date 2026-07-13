@@ -34,7 +34,10 @@ func start_action(
 		return result
 	var study_skill_id: String = str(context.get("study_skill_id", ""))
 	if definition.category == "study_skill":
-		if study_skill_id.is_empty() or not character.skills.has(study_skill_id):
+		if study_skill_id.is_empty():
+			study_skill_id = definition.primary_skill
+			context["study_skill_id"] = study_skill_id
+		if not character.skills.has(study_skill_id):
 			result.add_error("学习行动必须选择人物已有的有效技能")
 			return result
 	elif not study_skill_id.is_empty():
@@ -155,7 +158,10 @@ func update_context(
 		return false
 	var study_skill_id: String = str(merged.get("study_skill_id", ""))
 	if definition.category == "study_skill":
-		if study_skill_id.is_empty() or not character.skills.has(study_skill_id):
+		if study_skill_id.is_empty():
+			study_skill_id = definition.primary_skill
+			merged["study_skill_id"] = study_skill_id
+		if not character.skills.has(study_skill_id):
 			return false
 	elif not study_skill_id.is_empty():
 		return false
