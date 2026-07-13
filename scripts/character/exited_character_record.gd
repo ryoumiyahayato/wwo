@@ -9,7 +9,12 @@ var successor_character_id: String = ""
 
 static func from_dict(data: Dictionary) -> ExitedCharacterRecord:
 	var model := ExitedCharacterRecord.new()
-	model.character = CharacterData.from_dict(data.get("character", {}) as Dictionary)
+	var raw_character: Variant = data.get("character", {})
+	model.character = (
+		CharacterData.from_dict(raw_character as Dictionary)
+		if raw_character is Dictionary
+		else null
+	)
 	model.reason = str(data.get("reason", ""))
 	model.exit_hour = int(data.get("exit_hour", -1))
 	model.successor_character_id = str(data.get("successor_character_id", ""))
@@ -18,7 +23,7 @@ static func from_dict(data: Dictionary) -> ExitedCharacterRecord:
 
 func to_dict() -> Dictionary:
 	return {
-		"character": character.to_dict(),
+		"character": {} if character == null else character.to_dict(),
 		"reason": reason,
 		"exit_hour": exit_hour,
 		"successor_character_id": successor_character_id,
