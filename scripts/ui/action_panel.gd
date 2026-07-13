@@ -7,6 +7,8 @@ signal close_requested
 @onready var action_option: OptionButton = %ActionOption
 @onready var target_label: Label = %TargetLabel
 @onready var target_option: OptionButton = %TargetOption
+@onready var study_skill_label: Label = %StudySkillLabel
+@onready var study_skill_option: OptionButton = %StudySkillOption
 @onready var investment_spin: SpinBox = %InvestmentSpin
 @onready var context_label: RichTextLabel = %ContextLabel
 @onready var permission_check: CheckBox = %PermissionCheck
@@ -22,6 +24,7 @@ var map_service: MapControlService
 var action_service: ActionService
 var context_service: PlayerActionContextService
 var rules: ActionRulesConfig
+var generation_config: CharacterGenerationConfig
 var target_id: String = ""
 var map_target_id: String = ""
 var _definition_ids: Array[String] = []
@@ -31,6 +34,9 @@ func _ready() -> void:
 	close_button.pressed.connect(func() -> void: close_requested.emit())
 	action_option.item_selected.connect(_on_action_selected)
 	target_option.item_selected.connect(_on_target_selected)
+	study_skill_option.item_selected.connect(
+		func(_index: int) -> void: _refresh()
+	)
 	investment_spin.value_changed.connect(
 		func(_value: float) -> void: _refresh()
 	)
@@ -46,6 +52,11 @@ func setup(simulation_clock: SimulationClock, control_service: MapControlService
 	rules = ActionRulesConfig.new()
 	if rules.load_from_file() != OK:
 		message_label.text = rules.error_message
+		begin_button.disabled = true
+		return false
+	generation_config = CharacterGenerationConfig.load_from_file()
+	if not generation_config.is_valid():
+		message_label.text = generation_config.error_message
 		begin_button.disabled = true
 		return false
 	action_service = ActionService.new(rules, GameSessionService.action_id_service)
@@ -110,9 +121,30 @@ func _on_action_selected(_index: int) -> void:
 		or permissions.has(definition.position_permission_required)
 	)
 	investment_spin.value = 0.0
+	_populate_study_skills(definition)
 	_populate_targets(definition)
 	message_label.text = ""
 	_refresh()
+
+
+func _populate_study_skills(definition: ActionDefinitionData) -> void:
+	study_skill_option.clear()
+	var visible: bool = definition != null and definition.category == "study_skill"
+	study_skill_label.visible = visible
+	study_skill_option.visible = visible
+	if not visible or generation_config == null or not GameSessionService.has_player():
+		return
+	for skill_id: String in generation_config.skill_keys:
+		if not GameSessionService.player_character.skills.has(skill_id):
+			continue
+		study_skill_option.add_item(
+			generation_config.get_label("skills", skill_id)
+		)
+		study_skill_option.set_item_metadata(
+			study_skill_option.item_count - 1, skill_id
+		)
+		if skill_id == definition.primary_skill:
+			study_skill_option.select(study_skill_option.item_count - 1)
 
 
 func _populate_targets(definition: ActionDefinitionData) -> void:
@@ -223,7 +255,8 @@ func _on_begin_pressed() -> void:
 		GameSessionService.player_character,
 		clock.total_hours,
 		target_id,
-		extra_funding
+		extra_funding,
+		_get_selected_study_skill_id()
 	)
 	if not result.is_success():
 		message_label.text = "\n".join(result.errors)
@@ -284,6 +317,7 @@ func _refresh() -> void:
 	_apply_domain_effect_if_ready(action)
 	var has_player: bool = GameSessionService.has_player()
 	var selected_definition: ActionDefinitionData = _get_selected_definition()
+	var selected_study_skill: String = _get_selected_study_skill_id()
 	var extra_funding: int = roundi(investment_spin.value)
 	_update_investment_limit(selected_definition, has_player)
 	extra_funding = roundi(investment_spin.value)
@@ -304,6 +338,11 @@ func _refresh() -> void:
 			extra_funding
 		)
 	)
+	var study_valid: bool = (
+		selected_definition == null
+		or selected_definition.category != "study_skill"
+		or not selected_study_skill.is_empty()
+	)
 	var target_valid: bool = false
 	if selected_definition != null and context_service != null and has_player:
 		target_valid = context_service.get_target_validation_error(
@@ -317,10 +356,15 @@ func _refresh() -> void:
 		or context_service == null
 		or not has_permission
 		or not can_afford
+		or not study_valid
 		or not target_valid
 		or (action != null and not action.is_terminal())
 	)
-	investment_spin.editable = action == null or action.is_terminal()
+	var can_edit_setup: bool = action == null or action.is_terminal()
+	investment_spin.editable = can_edit_setup
+	study_skill_option.disabled = not can_edit_setup
+	action_option.disabled = not can_edit_setup
+	target_option.disabled = not can_edit_setup
 	pause_button.disabled = action == null or action.is_terminal()
 	cancel_button.disabled = action == null or action.is_terminal()
 	if selected_definition != null and context_service != null and has_player:
@@ -328,13 +372,14 @@ func _refresh() -> void:
 			selected_definition,
 			GameSessionService.player_character,
 			target_id,
-			extra_funding
+			extra_funding,
+			selected_study_skill
 		)
 	else:
 		context_label.text = "行动条件尚未就绪。"
 	if action == null:
 		progress_bar.value = 0.0
-		summary_label.text = "尚无当前行动。\n\n选择行动、真实目标和额外准备投入；投入越高，资金支持和准备度越高。"
+		summary_label.text = "尚无当前行动。\n\n选择行动、真实目标、学习技能和额外准备投入。技能达到精通且准备与资金充分时，可进入必然成功区间。"
 		return
 	progress_bar.value = action.get_progress_ratio() * 100.0
 	pause_button.text = (
@@ -358,7 +403,12 @@ func _refresh() -> void:
 		if not action.result_description.is_empty()
 		else ""
 	)
-	summary_label.text = "[font_size=18]%s[/font_size]\n状态：%s\n进度：%.1f / %.1f\n成功把握：%s\n预计完成：%s\n目标：%s%s" % [
+	var study_line: String = ""
+	if definition != null and definition.category == "study_skill":
+		study_line = "\n学习技能：%s" % str(
+			action.context.get("study_skill_id", definition.primary_skill)
+		)
+	summary_label.text = "[font_size=18]%s[/font_size]\n状态：%s\n进度：%.1f / %.1f\n成功把握：%s\n预计完成：%s\n目标：%s%s%s" % [
 		name,
 		_status_label(action.status),
 		action.accumulated_work,
@@ -366,6 +416,7 @@ func _refresh() -> void:
 		action.outlook,
 		estimate,
 		action.target_id,
+		study_line,
 		result_line,
 	]
 
@@ -413,8 +464,15 @@ func _build_context(definition: ActionDefinitionData) -> Dictionary:
 		definition,
 		GameSessionService.player_character,
 		target_id,
-		roundi(investment_spin.value)
+		roundi(investment_spin.value),
+		_get_selected_study_skill_id()
 	)
+
+
+func _get_selected_study_skill_id() -> String:
+	if not study_skill_option.visible or study_skill_option.item_count == 0 or study_skill_option.selected < 0:
+		return ""
+	return str(study_skill_option.get_item_metadata(study_skill_option.selected))
 
 
 func _get_player_permissions() -> Array[String]:
