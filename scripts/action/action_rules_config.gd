@@ -11,6 +11,7 @@ var progress_base_multiplier: float
 var progress_effective_scale: float
 var minimum_progress_multiplier: float
 var maximum_progress_multiplier: float
+var mastery_guarantee: Dictionary = {}
 var state_rules: Dictionary = {}
 var player_context_rules: Dictionary = {}
 var outlook_bands: Array[Dictionary] = []
@@ -33,14 +34,22 @@ func load_from_file(path: String = DEFAULT_PATH) -> Error:
 		"config_version", "primary_skill_weight", "secondary_skill_weight",
 		"position_permission_bonus", "progress_base_multiplier",
 		"progress_effective_scale", "minimum_progress_multiplier",
-		"maximum_progress_multiplier", "state", "player_context", "outlook_bands",
-		"guaranteed_label", "aptitude_by_skill",
+		"maximum_progress_multiplier", "mastery_guarantee", "state",
+		"player_context", "outlook_bands", "guaranteed_label",
+		"aptitude_by_skill",
 	]
 	for key: String in required:
 		if not data.has(key):
 			error_message = "行动规则缺少字段：%s" % key
 			return ERR_INVALID_DATA
-	if int(data["config_version"]) != 1 or not data["state"] is Dictionary or not data["player_context"] is Dictionary or not data["outlook_bands"] is Array or not data["aptitude_by_skill"] is Dictionary:
+	if (
+		int(data["config_version"]) != 1
+		or not data["mastery_guarantee"] is Dictionary
+		or not data["state"] is Dictionary
+		or not data["player_context"] is Dictionary
+		or not data["outlook_bands"] is Array
+		or not data["aptitude_by_skill"] is Dictionary
+	):
 		error_message = "行动规则版本或字段类型无效"
 		return ERR_INVALID_DATA
 	primary_skill_weight = float(data["primary_skill_weight"])
@@ -50,6 +59,7 @@ func load_from_file(path: String = DEFAULT_PATH) -> Error:
 	progress_effective_scale = float(data["progress_effective_scale"])
 	minimum_progress_multiplier = float(data["minimum_progress_multiplier"])
 	maximum_progress_multiplier = float(data["maximum_progress_multiplier"])
+	mastery_guarantee = (data["mastery_guarantee"] as Dictionary).duplicate(true)
 	state_rules = (data["state"] as Dictionary).duplicate(true)
 	player_context_rules = (data["player_context"] as Dictionary).duplicate(true)
 	outlook_bands.clear()
@@ -62,6 +72,23 @@ func load_from_file(path: String = DEFAULT_PATH) -> Error:
 	aptitude_by_skill = (data["aptitude_by_skill"] as Dictionary).duplicate(true)
 	if primary_skill_weight < 0.0 or secondary_skill_weight < 0.0 or minimum_progress_multiplier <= 0.0 or maximum_progress_multiplier < minimum_progress_multiplier or outlook_bands.is_empty():
 		error_message = "行动规则数值范围无效"
+		return ERR_INVALID_DATA
+	for key: String in [
+		"skill_threshold",
+		"preparation_threshold",
+		"funding_threshold",
+		"effective_value_bonus",
+	]:
+		if typeof(mastery_guarantee.get(key)) not in [TYPE_INT, TYPE_FLOAT]:
+			error_message = "行动精通保证规则 %s 必须是数字" % key
+			return ERR_INVALID_DATA
+	for key: String in ["skill_threshold", "preparation_threshold", "funding_threshold"]:
+		var threshold: float = float(mastery_guarantee[key])
+		if threshold < 0.0 or threshold > 100.0:
+			error_message = "行动精通保证阈值 %s 超出范围" % key
+			return ERR_INVALID_DATA
+	if float(mastery_guarantee["effective_value_bonus"]) < 0.0:
+		error_message = "行动精通保证加成无效"
 		return ERR_INVALID_DATA
 	var costs: Variant = player_context_rules.get("funding_cost_by_category", {})
 	if not costs is Dictionary:
