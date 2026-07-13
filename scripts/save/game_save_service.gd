@@ -1,10 +1,17 @@
 class_name GameSaveService
 extends RefCounted
-## Versioned JSON save boundary with validation and temporary-file replacement.
+## Versioned JSON save boundary with validation, backup recovery and transactional restore.
 
 const SAVE_VERSION: int = 1
 const MANUAL_PATH: String = "user://saves/manual.json"
 const AUTOSAVE_PATH: String = "user://saves/autosave.json"
+const CONFIG_VERSIONS: Dictionary = {
+	"world": 1,
+	"clock": 1,
+	"character": 1,
+	"action": 1,
+	"society": 1,
+}
 const REQUIRED_CHARACTER_FIELDS: Array[String] = [
 	"id", "name", "age", "country_id", "region_id", "occupation_id", "occupation",
 	"public_position", "organization_ids", "relationship_ids", "hidden_aptitudes",
@@ -20,7 +27,7 @@ func build_snapshot(clock: SimulationClock, map_service: MapControlService) -> D
 		return {}
 	return {
 		"save_version": SAVE_VERSION,
-		"config_versions": {"world": 1, "clock": 1, "character": 1, "action": 1, "society": 1},
+		"config_versions": CONFIG_VERSIONS.duplicate(true),
 		"game_time": clock.get_persistent_state(),
 		"player_character_id": society.roster.player_character_id,
 		"selected_country_id": GameSessionService.selected_country_id,
@@ -88,8 +95,24 @@ func save_to_path(path: String, snapshot: Dictionary) -> SaveOperationResult:
 
 func load_from_path(path: String) -> SaveOperationResult:
 	var started: int = Time.get_ticks_usec()
-	if not path.begins_with("user://"):
-		return SaveOperationResult.fail("unsafe_path", "存档只能从 user:// 读取", path)
+	if not path.begins_with("user://") or not path.ends_with(".json"):
+		return SaveOperationResult.fail("unsafe_path", "存档只能从 user:// 下的 JSON 文件读取", path)
+	var primary: SaveOperationResult = _load_snapshot_file(path)
+	if primary.success:
+		GameSessionService.performance_stats.record("load_parse", Time.get_ticks_usec() - started)
+		return primary
+	var backup_path: String = path + ".bak"
+	if FileAccess.file_exists(backup_path):
+		var backup: SaveOperationResult = _load_snapshot_file(backup_path)
+		if backup.success:
+			backup.path = path
+			backup.message = "主存档不可用，已读取安全备份"
+			GameSessionService.performance_stats.record("load_parse", Time.get_ticks_usec() - started)
+			return backup
+	return primary
+
+
+func _load_snapshot_file(path: String) -> SaveOperationResult:
 	if not FileAccess.file_exists(path):
 		return SaveOperationResult.fail("not_found", "存档不存在", path)
 	var file := FileAccess.open(path, FileAccess.READ)
@@ -105,7 +128,6 @@ func load_from_path(path: String) -> SaveOperationResult:
 	var errors: Array[String] = validate_snapshot(snapshot)
 	if not errors.is_empty():
 		return SaveOperationResult.fail("invalid_snapshot", "; ".join(errors), path)
-	GameSessionService.performance_stats.record("load_parse", Time.get_ticks_usec() - started)
 	return SaveOperationResult.ok(path, snapshot)
 
 
@@ -143,39 +165,93 @@ func restore_snapshot(snapshot: Dictionary, clock: SimulationClock, map_service:
 	if not temporary_society.ai.restore_persistent_state(snapshot["ai_states"] as Array):
 		return SaveOperationResult.fail("restore_error", "AI 状态无效")
 	var settlement_state: Dictionary = snapshot.get("settlement_state", {}) as Dictionary
-	temporary_society.paused_settlement_categories = (settlement_state.get("paused_categories", {}) as Dictionary).duplicate(true)
+	var paused_categories: Variant = settlement_state.get("paused_categories", {})
+	if not paused_categories is Dictionary:
+		return SaveOperationResult.fail("restore_error", "暂停结算类别无效")
+	temporary_society.paused_settlement_categories = (paused_categories as Dictionary).duplicate(true)
 	var action_ids := StableIdService.new()
 	if not action_ids.restore_state(((snapshot["random_state"] as Dictionary)["action_id_service"] as Dictionary)):
 		return SaveOperationResult.fail("restore_error", "行动 ID 状态无效")
 	var selected_country_id: String = str(snapshot.get("selected_country_id", player.country_id))
 	if not map_service.data_set.countries.has(selected_country_id):
 		return SaveOperationResult.fail("broken_reference", "所选国家引用无效")
+	var restored_action: ActionInstanceData
 	if snapshot["current_action"] != null:
 		var action_record: Dictionary = snapshot["current_action"] as Dictionary
-		if not temporary_society.roster.has_character(str(action_record.get("actor_character_id", ""))) or not map_service.data_set.actions.has(str(action_record.get("definition_id", ""))):
-			return SaveOperationResult.fail("broken_reference", "当前行动引用无效")
-	if not map_service.restore_persistent_state(snapshot["world"] as Dictionary):
-		return SaveOperationResult.fail("restore_error", "地图状态无效")
-	if not clock.restore_persistent_state(snapshot["game_time"] as Dictionary):
-		return SaveOperationResult.fail("restore_error", "游戏时间无效")
+		var action_error: String = _validate_current_action(action_record, temporary_society, map_service)
+		if not action_error.is_empty():
+			return SaveOperationResult.fail("broken_reference", action_error)
+		restored_action = ActionInstanceData.from_dict(action_record)
 	var log_service := SettlementLogService.new()
 	if not log_service.restore_state(snapshot.get("settlement_log", {"max_entries": 200, "entries": []}) as Dictionary):
 		return SaveOperationResult.fail("restore_error", "结算日志无效")
 	var performance := PerformanceStatsService.new()
 	if not performance.restore_state(snapshot.get("performance_metrics", {}) as Dictionary):
 		return SaveOperationResult.fail("restore_error", "性能统计无效")
+
+	# Commit mutable world state only after every independent structure has validated.
+	var previous_world_state: Dictionary = map_service.get_persistent_state()
+	var previous_clock_state: Dictionary = clock.get_persistent_state()
+	if not map_service.restore_persistent_state(snapshot["world"] as Dictionary):
+		return SaveOperationResult.fail("restore_error", "地图状态无效")
+	if not clock.restore_persistent_state(snapshot["game_time"] as Dictionary):
+		map_service.restore_persistent_state(previous_world_state)
+		clock.restore_persistent_state(previous_clock_state)
+		return SaveOperationResult.fail("restore_error", "游戏时间无效")
+
 	GameSessionService.player_character = temporary_society.roster.get_active(str(snapshot["player_character_id"]))
 	GameSessionService.selected_country_id = selected_country_id
-	GameSessionService.current_action = null if snapshot["current_action"] == null else ActionInstanceData.from_dict(snapshot["current_action"] as Dictionary)
+	GameSessionService.current_action = restored_action
 	GameSessionService.action_id_service = action_ids
 	GameSessionService.society_service = temporary_society
 	GameSessionService.developer_mode = bool(snapshot.get("developer_mode", false))
 	GameSessionService.settlement_log = log_service
 	GameSessionService.performance_stats = performance
-	temporary_society.attach_clock(clock)
+	temporary_society.attach_world(clock, map_service)
 	performance.record("restore", Time.get_ticks_usec() - started)
 	log_service.add("load", "存档恢复完成", clock.total_hours)
 	return SaveOperationResult.ok("", snapshot)
+
+
+func _validate_current_action(
+	record: Dictionary,
+	society: SocietySimulationService,
+	map_service: MapControlService
+) -> String:
+	var actor_id: String = str(record.get("actor_character_id", ""))
+	var definition_id: String = str(record.get("definition_id", ""))
+	if actor_id != str(record.get("actor_character_id", "")) or not society.roster.has_character(actor_id):
+		return "当前行动人物引用无效"
+	if actor_id != str(society.roster.player_character_id):
+		return "当前行动不属于存档中的玩家人物"
+	if not map_service.data_set.actions.has(definition_id):
+		return "当前行动定义引用无效"
+	var action := ActionInstanceData.from_dict(record)
+	if action.id.is_empty() or not StableIdService.is_valid_id(action.id):
+		return "当前行动 ID 无效"
+	if action.status not in [
+		ActionInstanceData.STATUS_ACTIVE,
+		ActionInstanceData.STATUS_PAUSED,
+		ActionInstanceData.STATUS_COMPLETED,
+		ActionInstanceData.STATUS_CANCELLED,
+		ActionInstanceData.STATUS_INTERRUPTED,
+	]:
+		return "当前行动状态无效"
+	if action.total_work <= 0.0 or action.accumulated_work < 0.0 or action.accumulated_work > action.total_work:
+		return "当前行动进度无效"
+	if action.start_hour < 0 or action.last_update_hour < action.start_hour:
+		return "当前行动时间字段无效"
+	var definition: ActionDefinitionData = map_service.data_set.actions[definition_id] as ActionDefinitionData
+	if definition.category in ["build_relationship", "investigate_character"]:
+		if not society.roster.has_character(action.target_id) or action.target_id == actor_id:
+			return "当前行动人物目标无效"
+	elif definition.category in ["join_organization", "seek_position"]:
+		if society.organizations.get_organization(action.target_id) == null:
+			return "当前行动组织目标无效"
+	elif definition.category in ["promote_policy", "support_control"]:
+		if map_service.get_unit(action.target_id) == null:
+			return "当前行动地图目标无效"
+	return ""
 
 
 func validate_snapshot(snapshot: Dictionary) -> Array[String]:
@@ -196,6 +272,10 @@ func validate_snapshot(snapshot: Dictionary) -> Array[String]:
 	if not snapshot.has("current_action") or (snapshot["current_action"] != null and not snapshot["current_action"] is Dictionary):
 		errors.append("当前行动字段无效")
 	if errors.is_empty():
+		var config_versions: Dictionary = snapshot["config_versions"] as Dictionary
+		for config_id: String in CONFIG_VERSIONS:
+			if int(config_versions.get(config_id, -1)) != int(CONFIG_VERSIONS[config_id]):
+				errors.append("配置版本不兼容：%s" % config_id)
 		var characters: Dictionary = snapshot["characters"] as Dictionary
 		for field: String in ["background", "active", "exited"]:
 			if not characters.get(field) is Array:
@@ -214,4 +294,7 @@ func validate_snapshot(snapshot: Dictionary) -> Array[String]:
 		var random_state: Dictionary = snapshot["random_state"] as Dictionary
 		if not random_state.get("action_id_service") is Dictionary:
 			errors.append("缺少行动 ID 状态")
+		var settlement_state: Variant = snapshot.get("settlement_state", {})
+		if settlement_state is Dictionary and not (settlement_state as Dictionary).get("paused_categories", {}) is Dictionary:
+			errors.append("暂停结算类别必须是对象")
 	return errors
