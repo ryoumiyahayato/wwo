@@ -71,13 +71,26 @@ custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 visible = false
 
+[node name="InvestmentLabel" type="Label" parent="Margin/Root/Scroll/Content"]
+layout_mode = 2
+text = "额外准备投入（财富）"
+[node name="InvestmentSpin" type="SpinBox" parent="Margin/Root/Scroll/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+max_value = 20.0
+step = 1.0
+allow_greater = false
+allow_lesser = false
+suffix = " 财富"
+
 [node name="ContextHeader" type="Label" parent="Margin/Root/Scroll/Content"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.39, 0.79, 0.86, 1)
-text = "行动条件（自动计算）"
+text = "行动条件（权威状态 + 主动投入）"
 [node name="ContextLabel" type="RichTextLabel" parent="Margin/Root/Scroll/Content"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 104)
+custom_minimum_size = Vector2(0, 126)
 layout_mode = 2
 bbcode_enabled = true
 fit_content = false
