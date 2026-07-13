@@ -3,6 +3,7 @@ extends SceneTree
 
 var _checks: int = 0
 var _failures: int = 0
+var _preserved_save_slots: Dictionary = {}
 
 
 func _initialize() -> void:
@@ -10,7 +11,8 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	_cleanup_manual_save()
+	_preserve_save_slots()
+	_cleanup_test_saves()
 	var player: CharacterData = _make_test_player()
 	_expect(player != null, "可创建玩家旅程测试人物")
 	if player == null:
@@ -38,7 +40,7 @@ func _run() -> void:
 		_finish()
 		return
 	_expect(not (view.get_node("RootMargin/Layout/Content/SidePanel/SideMargin/SideContent/PressureButton") as Button).visible, "普通模式隐藏地图直接压力入口")
-	if not await _click_button(action_button, "顶栏长期行动入口"):
+	if not (await _click_button(action_button, "顶栏长期行动入口")):
 		_finish()
 		return
 	_expect(action_panel.visible and action_panel.is_visible_in_tree(), "点击顶栏后长期行动面板真实显示")
@@ -61,22 +63,22 @@ func _run() -> void:
 		_finish()
 		return
 
-	if not await _run_action(action_panel, "action:build_relationship", leader_id, clock, 500):
+	if not (await _run_action(action_panel, "action:build_relationship", leader_id, clock, 500)):
 		_finish()
 		return
-	if not await _run_action(action_panel, "action:build_relationship", leader_id, clock, 500):
+	if not (await _run_action(action_panel, "action:build_relationship", leader_id, clock, 500)):
 		_finish()
 		return
 	_expect(society.relationships.get_between(player.id, leader_id) != null, "玩家通过两次正式长期行动建立真实关系")
 
-	if not await _run_action(action_panel, "action:join_organization", government_id, clock, 500):
+	if not (await _run_action(action_panel, "action:join_organization", government_id, clock, 500)):
 		_finish()
 		return
 	_expect(government.member_ids.has(player.id), "加入组织行动把玩家写入正式成员索引")
 	var entry_position: String = society.organizations.get_position_id(player.id, government_id)
 	_expect(not entry_position.is_empty(), "加入组织后获得入口职位")
 
-	if not await _run_action(action_panel, "action:seek_position", government_id, clock, 500):
+	if not (await _run_action(action_panel, "action:seek_position", government_id, clock, 500)):
 		_finish()
 		return
 	var promoted_position: String = society.organizations.get_position_id(player.id, government_id)
@@ -91,7 +93,7 @@ func _run() -> void:
 		return
 	var target_region: RegionData = map_service.data_set.regions[target_unit.region_id] as RegionData
 	var influence_before: float = float(target_region.social_influence[player.country_id])
-	if not await _run_action(action_panel, "action:promote_policy", target_unit_id, clock, 800):
+	if not (await _run_action(action_panel, "action:promote_policy", target_unit_id, clock, 800)):
 		_finish()
 		return
 	_expect(float(target_region.social_influence[player.country_id]) > influence_before, "地区政策行动改变权威社会影响")
@@ -100,7 +102,7 @@ func _run() -> void:
 		_finish()
 		return
 	var begin_button: Button = action_panel.get_node("Margin/Root/Scroll/Content/BeginButton") as Button
-	if not await _click_button(begin_button, "学习行动开始按钮"):
+	if not (await _click_button(begin_button, "学习行动开始按钮")):
 		_finish()
 		return
 	var pending_action: ActionInstanceData = GameSessionService.current_action
@@ -114,7 +116,7 @@ func _run() -> void:
 	var map_reference: MapControlService = map_service
 
 	var character_button: Button = view.get_node("RootMargin/Layout/TopBar/TopMargin/TopControls/CharacterButton") as Button
-	if not await _click_button(character_button, "人物信息入口"):
+	if not (await _click_button(character_button, "人物信息入口")):
 		_finish()
 		return
 	await process_frame
@@ -125,7 +127,7 @@ func _run() -> void:
 		_finish()
 		return
 	var profile_back: Button = profile.get_node("Margin/Root/Bottom/BackButton") as Button
-	if not await _click_button(profile_back, "人物页面返回按钮"):
+	if not (await _click_button(profile_back, "人物页面返回按钮")):
 		_finish()
 		return
 	await process_frame
@@ -142,7 +144,7 @@ func _run() -> void:
 	_expect(pending_action.accumulated_work > pending_work, "跨页面返回后行动继续推进")
 
 	var social_button: Button = view.get_node("RootMargin/Layout/TopBar/TopMargin/TopControls/SocialButton") as Button
-	if not await _click_button(social_button, "社会系统入口"):
+	if not (await _click_button(social_button, "社会系统入口")):
 		_finish()
 		return
 	var social_panel: SocialSystemPanel = view.get_node("SocialSystemPanel") as SocialSystemPanel
@@ -151,7 +153,7 @@ func _run() -> void:
 		_finish()
 		return
 	var prepare_succession: Button = social_panel.get_node("Margin/Root/Scroll/Content/PrepareSuccessionButton") as Button
-	if not await _click_button(prepare_succession, "继承候选入口"):
+	if not (await _click_button(prepare_succession, "继承候选入口")):
 		_finish()
 		return
 	var succession_option: OptionButton = social_panel.get_node("Margin/Root/Scroll/Content/SuccessionOption") as OptionButton
@@ -163,7 +165,7 @@ func _run() -> void:
 		_finish()
 		return
 	var confirm_succession: Button = social_panel.get_node("Margin/Root/Scroll/Content/ConfirmSuccessionButton") as Button
-	if not await _click_button(confirm_succession, "退休继承确认按钮"):
+	if not (await _click_button(confirm_succession, "退休继承确认按钮")):
 		_finish()
 		return
 	_expect(GameSessionService.player_character.id == leader_id, "玩家通过正式社会界面完成退休继承")
@@ -173,14 +175,18 @@ func _run() -> void:
 	var saved_hour: int = clock_reference.total_hours
 	var saved_influence: float = float(target_region.social_influence[player.country_id])
 	save_button = view.get_node("RootMargin/Layout/TopBar/TopMargin/TopControls/SaveButton") as Button
-	if not await _click_button(save_button, "保存游戏入口"):
+	if not (await _click_button(save_button, "保存游戏入口")):
 		_finish()
 		return
 	_expect(FileAccess.file_exists(GameSaveService.MANUAL_PATH), "普通保存按钮写入手动存档")
 	_expect(save_button.text == "已保存", "普通保存按钮提供成功反馈")
+	var autosave_result: SaveOperationResult = GameSaveService.new().save_autosave(
+		clock_reference, map_reference
+	)
+	_expect(autosave_result.success, "当前世界可写入自动存档槽")
 
 	var back_button: Button = view.get_node("RootMargin/Layout/TopBar/TopMargin/TopControls/BackButton") as Button
-	if not await _click_button(back_button, "返回主菜单入口"):
+	if not (await _click_button(back_button, "返回主菜单入口")):
 		_finish()
 		return
 	await process_frame
@@ -190,27 +196,78 @@ func _run() -> void:
 	if menu == null or menu.name != "MainMenu":
 		_finish()
 		return
-	var load_button: Button = menu.get_node("SafeMargin/Center/Card/CardMargin/Content/LoadGameButton") as Button
-	if not await _click_button(load_button, "加载手动存档入口"):
+	var manual_load_button: Button = menu.get_node("SafeMargin/Center/Card/CardMargin/Content/LoadGameButton") as Button
+	var autosave_load_button: Button = menu.get_node("SafeMargin/Center/Card/CardMargin/Content/LoadAutosaveButton") as Button
+	_expect(manual_load_button.is_visible_in_tree() and not manual_load_button.disabled, "主菜单显示可用的手动存档入口")
+	if not (await _click_button(autosave_load_button, "加载自动存档入口")):
 		_finish()
 		return
 	await process_frame
 	await process_frame
 	await process_frame
 	view = current_scene as Control
-	_expect(view != null and view.name == "StrategicMapView", "加载游戏返回战略地图")
-	if view == null or view.name != "StrategicMapView":
+	if not _verify_loaded_world(view, saved_player_id, saved_hour, target_unit_id, player.country_id, saved_influence, "自动存档"):
 		_finish()
 		return
-	_expect(GameSessionService.player_character != null and GameSessionService.player_character.id == saved_player_id, "加载恢复继承后的玩家人物")
-	_expect(GameSessionService.world_clock != null and GameSessionService.world_clock.total_hours == saved_hour, "加载恢复权威时间")
-	var loaded_unit: ControlUnitData = GameSessionService.world_map_service.get_unit(target_unit_id)
-	var loaded_region: RegionData = GameSessionService.world_map_service.data_set.regions[loaded_unit.region_id] as RegionData
-	_expect(is_equal_approx(float(loaded_region.social_influence[player.country_id]), saved_influence), "加载恢复地区社会影响")
 
-	_cleanup_manual_save()
+	back_button = view.get_node("RootMargin/Layout/TopBar/TopMargin/TopControls/BackButton") as Button
+	if not (await _click_button(back_button, "自动存档返回主菜单入口")):
+		_finish()
+		return
+	await process_frame
+	await process_frame
+	menu = current_scene as Control
+	manual_load_button = menu.get_node("SafeMargin/Center/Card/CardMargin/Content/LoadGameButton") as Button
+	if not (await _click_button(manual_load_button, "加载手动存档入口")):
+		_finish()
+		return
+	await process_frame
+	await process_frame
+	await process_frame
+	view = current_scene as Control
+	if not _verify_loaded_world(view, saved_player_id, saved_hour, target_unit_id, player.country_id, saved_influence, "手动存档"):
+		_finish()
+		return
+
 	GameSessionService.clear()
 	_finish()
+
+
+func _verify_loaded_world(
+	view: Control,
+	saved_player_id: String,
+	saved_hour: int,
+	target_unit_id: String,
+	country_id: String,
+	saved_influence: float,
+	label: String
+) -> bool:
+	var valid_view: bool = view != null and view.name == "StrategicMapView"
+	_expect(valid_view, "%s加载后返回战略地图" % label)
+	if not valid_view:
+		return false
+	var player_restored: bool = (
+		GameSessionService.player_character != null
+		and GameSessionService.player_character.id == saved_player_id
+	)
+	_expect(player_restored, "%s恢复继承后的玩家人物" % label)
+	var time_restored: bool = (
+		GameSessionService.world_clock != null
+		and GameSessionService.world_clock.total_hours == saved_hour
+	)
+	_expect(time_restored, "%s恢复权威时间" % label)
+	if not player_restored or not time_restored or GameSessionService.world_map_service == null:
+		return false
+	var loaded_unit: ControlUnitData = GameSessionService.world_map_service.get_unit(target_unit_id)
+	if loaded_unit == null:
+		_expect(false, "%s恢复地区目标" % label)
+		return false
+	var loaded_region: RegionData = GameSessionService.world_map_service.data_set.regions[loaded_unit.region_id] as RegionData
+	var influence_restored: bool = is_equal_approx(
+		float(loaded_region.social_influence[country_id]), saved_influence
+	)
+	_expect(influence_restored, "%s恢复地区社会影响" % label)
+	return player_restored and time_restored and influence_restored
 
 
 func _run_action(
@@ -225,7 +282,7 @@ func _run_action(
 	if not panel_ready or not _select_action(panel, definition_id, target_id):
 		return false
 	var begin_button: Button = panel.get_node("Margin/Root/Scroll/Content/BeginButton") as Button
-	if not await _click_button(begin_button, "%s 的开始按钮" % definition_id):
+	if not (await _click_button(begin_button, "%s 的开始按钮" % definition_id)):
 		return false
 	var action: ActionInstanceData = GameSessionService.current_action
 	var started: bool = action != null and action.definition_id == definition_id
@@ -265,25 +322,11 @@ func _click_button(button: Button, description: String) -> bool:
 	_expect(usable, "%s真实可见且可用" % description)
 	if not usable:
 		return false
-	var button_rect: Rect2 = button.get_global_rect()
-	var viewport_rect: Rect2 = get_root().get_visible_rect()
-	var bottom_right: Vector2 = button_rect.position + button_rect.size - Vector2.ONE
-	var fully_on_screen: bool = (
-		button_rect.size.x > 0.0
-		and button_rect.size.y > 0.0
-		and viewport_rect.has_point(button_rect.position)
-		and viewport_rect.has_point(bottom_right)
-	)
-	_expect(fully_on_screen, "%s完整位于可交互视口内" % description)
-	if not fully_on_screen:
+	if not (await _scroll_control_into_view(button, description)):
 		return false
-
+	var button_rect: Rect2 = button.get_global_rect()
 	var center: Vector2 = button_rect.get_center()
-	var motion := InputEventMouseMotion.new()
-	motion.position = center
-	motion.global_position = center
-	get_root().notify_mouse_entered()
-	get_root().push_input(motion, true)
+	_move_pointer(center)
 	await process_frame
 	var hovered: Control = get_root().gui_get_hovered_control()
 	var receives_pointer: bool = hovered == button or (
@@ -294,7 +337,8 @@ func _click_button(button: Button, description: String) -> bool:
 		return false
 
 	var triggered: Array[bool] = [false]
-	var observer := func() -> void: triggered[0] = true
+	var observer: Callable = func() -> void:
+		triggered[0] = true
 	button.pressed.connect(observer, CONNECT_ONE_SHOT)
 
 	var press := InputEventMouseButton.new()
@@ -317,9 +361,74 @@ func _click_button(button: Button, description: String) -> bool:
 
 	var actually_pressed: bool = triggered[0]
 	_expect(actually_pressed, "%s通过真实鼠标按下与释放触发" % description)
-	if button.pressed.is_connected(observer):
+	if is_instance_valid(button) and button.pressed.is_connected(observer):
 		button.pressed.disconnect(observer)
 	return actually_pressed
+
+
+func _scroll_control_into_view(control: Control, description: String) -> bool:
+	for _attempt: int in range(80):
+		var target_rect: Rect2 = control.get_global_rect()
+		var clip_rect: Rect2 = _get_interactive_clip_rect(control)
+		if _rect_fully_inside(target_rect, clip_rect):
+			_expect(true, "%s完整位于可交互区域" % description)
+			return true
+		var scroll: ScrollContainer = _find_scroll_ancestor(control)
+		if scroll == null:
+			_expect(false, "%s无法滚动到可交互区域" % description)
+			return false
+		var scroll_center: Vector2 = scroll.get_global_rect().get_center()
+		_move_pointer(scroll_center)
+		await process_frame
+		var wheel := InputEventMouseButton.new()
+		wheel.button_index = (
+			MOUSE_BUTTON_WHEEL_DOWN
+			if target_rect.get_center().y > clip_rect.get_center().y
+			else MOUSE_BUTTON_WHEEL_UP
+		)
+		wheel.position = scroll_center
+		wheel.global_position = scroll_center
+		wheel.factor = 2.0
+		wheel.pressed = true
+		get_root().push_input(wheel, true)
+		await process_frame
+	_expect(false, "%s在滚动后仍不位于可交互区域" % description)
+	return false
+
+
+func _get_interactive_clip_rect(control: Control) -> Rect2:
+	var clip_rect: Rect2 = get_root().get_visible_rect()
+	var ancestor: Node = control.get_parent()
+	while ancestor != null:
+		if ancestor is ScrollContainer:
+			clip_rect = clip_rect.intersection((ancestor as ScrollContainer).get_global_rect())
+		ancestor = ancestor.get_parent()
+	return clip_rect
+
+
+func _find_scroll_ancestor(control: Control) -> ScrollContainer:
+	var ancestor: Node = control.get_parent()
+	while ancestor != null:
+		if ancestor is ScrollContainer:
+			return ancestor as ScrollContainer
+		ancestor = ancestor.get_parent()
+	return null
+
+
+static func _rect_fully_inside(target: Rect2, container: Rect2) -> bool:
+	if target.size.x <= 0.0 or target.size.y <= 0.0:
+		return false
+	var top_left: Vector2 = target.position + Vector2.ONE
+	var bottom_right: Vector2 = target.position + target.size - Vector2.ONE
+	return container.has_point(top_left) and container.has_point(bottom_right)
+
+
+func _move_pointer(position: Vector2) -> void:
+	var motion := InputEventMouseMotion.new()
+	motion.position = position
+	motion.global_position = position
+	get_root().notify_mouse_entered()
+	get_root().push_input(motion, true)
 
 
 func _make_test_player() -> CharacterData:
@@ -368,12 +477,52 @@ static func _option_index(option: OptionButton, metadata: String) -> int:
 	return -1
 
 
-func _cleanup_manual_save() -> void:
+func _preserve_save_slots() -> void:
+	_preserved_save_slots.clear()
 	for path: String in [GameSaveService.MANUAL_PATH, GameSaveService.AUTOSAVE_PATH]:
+		_preserved_save_slots[path] = _capture_slot(path)
+
+
+func _capture_slot(path: String) -> Dictionary:
+	var captured: Dictionary = {}
+	var absolute: String = ProjectSettings.globalize_path(path)
+	for suffix: String in ["", ".tmp", ".bak"]:
+		var candidate: String = absolute + suffix
+		if not FileAccess.file_exists(candidate):
+			continue
+		var file := FileAccess.open(candidate, FileAccess.READ)
+		if file != null:
+			captured[suffix] = file.get_as_text()
+			file.close()
+	return captured
+
+
+func _restore_save_slots() -> void:
+	for raw_path: Variant in _preserved_save_slots:
+		var path: String = str(raw_path)
+		_cleanup_slot(path)
+		var captured: Dictionary = _preserved_save_slots[path] as Dictionary
 		var absolute: String = ProjectSettings.globalize_path(path)
-		for candidate: String in [absolute, absolute + ".tmp", absolute + ".bak"]:
-			if FileAccess.file_exists(candidate):
-				DirAccess.remove_absolute(candidate)
+		DirAccess.make_dir_recursive_absolute(absolute.get_base_dir())
+		for raw_suffix: Variant in captured:
+			var suffix: String = str(raw_suffix)
+			var file := FileAccess.open(absolute + suffix, FileAccess.WRITE)
+			if file != null:
+				file.store_string(str(captured[suffix]))
+				file.close()
+	_preserved_save_slots.clear()
+
+
+func _cleanup_test_saves() -> void:
+	for path: String in [GameSaveService.MANUAL_PATH, GameSaveService.AUTOSAVE_PATH]:
+		_cleanup_slot(path)
+
+
+func _cleanup_slot(path: String) -> void:
+	var absolute: String = ProjectSettings.globalize_path(path)
+	for candidate: String in [absolute, absolute + ".tmp", absolute + ".bak"]:
+		if FileAccess.file_exists(candidate):
+			DirAccess.remove_absolute(candidate)
 
 
 func _expect(condition: bool, description: String) -> void:
@@ -386,6 +535,8 @@ func _expect(condition: bool, description: String) -> void:
 
 
 func _finish() -> void:
+	_cleanup_test_saves()
+	_restore_save_slots()
 	if _failures > 0:
 		printerr("P0-R1 PLAYER JOURNEY FAILED: %d/%d checks failed" % [_failures, _checks])
 		quit(1)
