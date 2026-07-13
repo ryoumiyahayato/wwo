@@ -206,9 +206,13 @@ func _advance_one_hour() -> void:
 				month = 1
 				year += 1
 
-	# Hourly authoritative work is settled first. Scheduled events and calendar
-	# boundaries then observe the same completed hour; autosave is deliberately last.
+	# Every completed hour settles player work first. Daily and monthly world
+	# state then settle, queued events observe that state, and weekly autosave is last.
 	hour_advanced.emit(total_hours)
+	if crossed_day:
+		day_advanced.emit(year, month, day)
+		if crossed_month:
+			month_advanced.emit(year, month)
 	var due_events: Array[Dictionary] = _event_queue.pop_due_events(total_hours)
 	for event: Dictionary in due_events:
 		scheduled_event_due.emit(
@@ -216,12 +220,8 @@ func _advance_one_hour() -> void:
 			int(event["due_hour"]),
 			(event["payload"] as Dictionary).duplicate(true)
 		)
-	if crossed_day:
-		day_advanced.emit(year, month, day)
-		if crossed_month:
-			month_advanced.emit(year, month)
-		if total_hours % HOURS_PER_WEEK == 0:
-			week_advanced.emit(int(total_hours / HOURS_PER_WEEK))
+	if crossed_day and total_hours % HOURS_PER_WEEK == 0:
+		week_advanced.emit(int(total_hours / HOURS_PER_WEEK))
 
 
 func _total_hours_for_datetime(
