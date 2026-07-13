@@ -41,13 +41,17 @@ performance_metrics
 
 `game_time.event_queue` 保存事件 ID、到期小时、插入序号、载荷和下一序号。地区只保存可变社会影响，控制单元只保存控制者、控制强度、争夺度和敌方压力；法理、邻接和铁路仍来自已验证的配置数据。前线在加载后从控制单元重建。
 
-人物按背景、活跃和已退出三层分别保存，保持同一稳定人物 ID。当前行动保存全部进度、效率、上次结算小时、上下文、结果和幂等标记。关系与行动的稳定 ID 计数器一并保存，使加载后的下一 ID 连续。
+人物按背景、活跃和已退出三层分别保存，保持同一稳定人物 ID。背景人物可选字段 `persistent_core` 保存技能、隐藏资质、气质权重、真实/已知倾向和随机生成核心，使人物降级后再次升级不会回滚成长；旧版本 1 存档缺失该字段时按稳定激活种子补全。
+
+当前行动保存全部进度、效率、上次结算小时、上下文、结果和幂等标记。正式玩家行动上下文新增 `funding_cost`、`funding_committed` 和 `wealth_before_funding`，用于证明费用与行动创建属于同一事务。旧版本 1 存档可缺失整组资金审计字段，并在下一权威小时更新上下文；只出现部分审计字段则视为损坏。已完成的领域行动必须在保存前完成 `domain_effect_applied` 权威写回，不允许把半完成领域结算留到加载后重放。
+
+关系与行动的稳定 ID 计数器一并保存，使加载后的下一 ID 连续。
 
 ## 验证、默认值和错误
 
 加载先解析 JSON，再验证根类型、精确存档版本、必要集合、玩家引用和记录形状；只有重建临时社会服务成功后才替换会话。未知版本、断裂引用和非法数值返回错误，不把异常暴露给 UI。
 
-版本 1 的核心世界字段必须存在。新增的可选诊断字段采用明确默认值：缺少 `developer_mode` 时为 `false`；缺少 `settlement_state` 时无暂停类别；缺少 `settlement_log` 时建立 200 条上限的空日志；缺少 `performance_metrics` 时建立空统计。
+版本 1 的核心世界字段必须存在。新增的可选诊断字段采用明确默认值：缺少 `developer_mode` 时为 `false`；缺少 `settlement_state` 时无暂停类别；缺少 `settlement_log` 时建立 200 条上限的空日志；缺少 `performance_metrics` 时建立空统计。背景人物缺少 `persistent_core` 和旧行动缺少完整资金审计字段也使用上述兼容路径。
 
 稳定错误码包括 `not_found`、`malformed_json`、`invalid_snapshot`、`broken_reference`、`unsafe_path`、`write_error`、`replace_error` 和 `restore_error`。
 

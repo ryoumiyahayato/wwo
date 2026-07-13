@@ -5,6 +5,14 @@ const NUMERIC_CONTEXT_FIELDS: Array[String] = [
 	"organization_support", "relationship_support", "funding", "preparation", "target_resistance",
 ]
 const VALID_OUTCOMES: Array[String] = ["failure", "success", "guaranteed_success"]
+const DOMAIN_CATEGORIES: Array[String] = [
+	"build_relationship",
+	"join_organization",
+	"seek_position",
+	"investigate_character",
+	"promote_policy",
+	"support_control",
+]
 
 
 func validate(
@@ -55,6 +63,14 @@ func validate(
 	error = _validate_target(action, definition, society, map_service)
 	if not error.is_empty():
 		return error
+	if action.status == ActionInstanceData.STATUS_COMPLETED and definition.category in DOMAIN_CATEGORIES and not action.domain_effect_applied:
+		return "已完成领域行动尚未执行权威写回"
+	if action.status in [ActionInstanceData.STATUS_ACTIVE, ActionInstanceData.STATUS_PAUSED]:
+		error = _validate_authoritative_context(
+			action, definition, actor, society, map_service
+		)
+		if not error.is_empty():
+			return error
 	return _validate_formula(action, definition, actor)
 
 
@@ -79,6 +95,31 @@ func _validate_context(context: Dictionary, action: ActionInstanceData) -> Strin
 		var value: float = float(raw_value)
 		if value < 0.0 or value > 100.0:
 			return "当前行动上下文字段 %s 超出范围" % field
+	var has_cost: bool = context.has("funding_cost")
+	var has_committed: bool = context.has("funding_committed")
+	var has_wealth: bool = context.has("wealth_before_funding")
+	if not has_cost and not has_committed and not has_wealth:
+		# Version 1 saves created before the authoritative funding transaction did
+		# not contain audit fields. They remain loadable and are upgraded on the
+		# next authoritative hourly context refresh.
+		return ""
+	if not has_cost or not has_committed or not has_wealth:
+		return "当前行动资金审计字段不完整"
+	var raw_cost: Variant = context["funding_cost"]
+	var raw_wealth: Variant = context["wealth_before_funding"]
+	if typeof(raw_cost) not in [TYPE_INT, TYPE_FLOAT] or typeof(raw_wealth) not in [TYPE_INT, TYPE_FLOAT]:
+		return "当前行动资金审计字段类型无效"
+	var cost: float = float(raw_cost)
+	var wealth_before: float = float(raw_wealth)
+	if cost < 0.0 or cost != floor(cost) or wealth_before < 0.0 or wealth_before != floor(wealth_before):
+		return "当前行动资金审计字段数值无效"
+	if typeof(context["funding_committed"]) != TYPE_BOOL:
+		return "当前行动资金承诺字段类型无效"
+	var committed: bool = bool(context["funding_committed"])
+	if committed and wealth_before < cost:
+		return "当前行动开始前财富不足以覆盖费用"
+	if not committed and (cost != 0.0 or wealth_before != 0.0):
+		return "未承诺资金的通用行动不能携带支付审计数值"
 	return ""
 
 
@@ -140,6 +181,52 @@ func _validate_target(
 	return ""
 
 
+func _validate_authoritative_context(
+	action: ActionInstanceData,
+	definition: ActionDefinitionData,
+	actor: CharacterData,
+	society: SocietySimulationService,
+	map_service: MapControlService
+) -> String:
+	var rules := ActionRulesConfig.new()
+	if rules.load_from_file() != OK:
+		return "无法验证当前行动权威条件：%s" % rules.error_message
+	var context_service := PlayerActionContextService.new(rules, society, map_service)
+	var target_error: String = context_service.get_target_validation_error(
+		definition, actor, action.target_id
+	)
+	if not target_error.is_empty():
+		return "当前行动目标已不满足权威条件：%s" % target_error
+	var expected: Dictionary = context_service.build_authoritative_context_for_action(
+		definition, actor, action
+	)
+	var stored_permissions: Array[String] = DataRecordUtils.to_string_array(
+		action.context.get("position_permissions", [])
+	)
+	var expected_permissions: Array[String] = DataRecordUtils.to_string_array(
+		expected.get("position_permissions", [])
+	)
+	stored_permissions.sort()
+	expected_permissions.sort()
+	if stored_permissions != expected_permissions:
+		return "当前行动职位权限与权威组织状态不一致"
+	for field: String in NUMERIC_CONTEXT_FIELDS:
+		if not is_equal_approx(
+			float(action.context.get(field, -1.0)),
+			float(expected.get(field, -2.0))
+		):
+			return "当前行动字段 %s 与权威状态不一致" % field
+	if action.context.has("funding_committed") and bool(
+		action.context.get("funding_committed", false)
+	) and int(action.context.get("funding_cost", -1)) != int(expected.get("funding_cost", -2)):
+		return "当前行动费用与配置不一致"
+	if not definition.position_permission_required.is_empty() and not expected_permissions.has(
+		definition.position_permission_required
+	):
+		return "当前行动所需职位权限已失效"
+	return ""
+
+
 func _validate_formula(
 	action: ActionInstanceData,
 	definition: ActionDefinitionData,
@@ -168,7 +255,7 @@ func _validate_formula(
 			action.domain_effect_applied
 			and action.outcome_code == "failure"
 			and action.applied_effects.get("domain_applied", true) == false
-			and definition.category in ["seek_position", "support_control", "investigate_character"]
+			and definition.category in DOMAIN_CATEGORIES
 		)
 		if action.outcome_code != expected and not domain_failure:
 			return "已完成行动结果与有效值阈值不一致"

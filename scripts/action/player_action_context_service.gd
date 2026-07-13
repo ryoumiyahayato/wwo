@@ -37,6 +37,59 @@ func build_context(
 	}
 
 
+func build_authoritative_context_for_action(
+	definition: ActionDefinitionData,
+	character: CharacterData,
+	action: ActionInstanceData
+) -> Dictionary:
+	if action == null:
+		return {}
+	var context: Dictionary = build_context(definition, character, action.target_id)
+	if context.is_empty():
+		return context
+	var cost: int = get_funding_cost(definition)
+	context["funding_cost"] = cost
+	context["funding_committed"] = bool(action.context.get("funding_committed", true))
+	context["wealth_before_funding"] = int(
+		action.context.get(
+			"wealth_before_funding",
+			int(character.current_status.get("wealth", 0)) + cost
+		)
+	)
+	return context
+
+
+func start_player_action(
+	action_service: ActionService,
+	definition: ActionDefinitionData,
+	character: CharacterData,
+	current_hour: int,
+	target_id: String
+) -> ActionStartResult:
+	var result := ActionStartResult.new()
+	if action_service == null or definition == null or character == null:
+		result.add_error("行动服务、行动定义和人物必须就绪。")
+		return result
+	var target_error: String = get_target_validation_error(definition, character, target_id)
+	if not target_error.is_empty():
+		result.add_error(target_error)
+		return result
+	if not can_afford(definition, character):
+		result.add_error("财富不足，无法支付本次行动费用。")
+		return result
+	var cost: int = get_funding_cost(definition)
+	var wealth_before: int = int(character.current_status.get("wealth", 0))
+	var context: Dictionary = build_context(definition, character, target_id)
+	context["funding_cost"] = cost
+	context["funding_committed"] = true
+	context["wealth_before_funding"] = wealth_before
+	character.current_status["wealth"] = wealth_before - cost
+	result = action_service.start_action(definition, character, current_hour, context)
+	if not result.is_success():
+		character.current_status["wealth"] = wealth_before
+	return result
+
+
 func get_funding_cost(definition: ActionDefinitionData) -> int:
 	if definition == null:
 		return 0
@@ -73,6 +126,8 @@ func get_target_validation_error(
 		"build_relationship", "investigate_character":
 			if target_id.is_empty() or not society.roster.has_character(target_id):
 				return "必须选择存在的人物目标。"
+			if society.roster.get_exited(target_id) != null:
+				return "目标人物已经退出当前社会活动。"
 			if target_id == character.id:
 				return "不能把自己作为人物目标。"
 			return ""

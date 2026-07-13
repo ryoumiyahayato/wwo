@@ -43,16 +43,29 @@ func join_organization(character: CharacterData, organization_id: String) -> boo
 	var organization: OrganizationData = get_organization(organization_id)
 	if character == null or organization == null or character.country_id != organization.country_id:
 		return false
+	var entry_position: String = str(organization.position_structure.get("entry_position", ""))
+	if entry_position.is_empty():
+		return false
 	if organization.member_ids.has(character.id):
-		return true
+		if not get_position_id(character.id, organization_id).is_empty():
+			return true
+		return assign_position(character, organization_id, entry_position)
+	var positions: Dictionary = organization.position_structure.get("positions", {}) as Dictionary
+	if not positions.has(entry_position):
+		return false
+	var entry: Dictionary = positions[entry_position] as Dictionary
+	var holders: Array[String] = DataRecordUtils.to_string_array(entry.get("holder_ids", []))
+	if holders.size() >= int(entry.get("slots", 0)):
+		return false
 	organization.member_ids.append(character.id)
 	organization.member_ids.sort()
 	if not character.organization_ids.has(organization_id):
 		character.organization_ids.append(organization_id)
 		character.organization_ids.sort()
-	var entry_position: String = str(organization.position_structure.get("entry_position", ""))
-	if not entry_position.is_empty():
-		assign_position(character, organization_id, entry_position)
+	if not assign_position(character, organization_id, entry_position):
+		organization.member_ids.erase(character.id)
+		character.organization_ids.erase(organization_id)
+		return false
 	membership_changed.emit(character.id, organization_id)
 	return true
 
@@ -202,11 +215,13 @@ func restore_persistent_state(records: Array) -> bool:
 			var source_position: Dictionary = source_positions[position_id] as Dictionary
 			if not _matches_position_structure(position, source_position):
 				return false
-			var holders: Array[String] = DataRecordUtils.to_string_array(position.get("holder_ids", []))
-			if holders.size() > int(source_position.get("slots", 0)):
+			var position_holders: Array[String] = DataRecordUtils.to_string_array(
+				position.get("holder_ids", [])
+			)
+			if position_holders.size() > int(source_position.get("slots", 0)):
 				return false
 			var unique_holders: Dictionary = {}
-			for character_id: String in holders:
+			for character_id: String in position_holders:
 				if not unique_members.has(character_id) or unique_holders.has(character_id):
 					return false
 				unique_holders[character_id] = true

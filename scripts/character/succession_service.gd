@@ -85,6 +85,9 @@ func execute_succession(
 	current_hour: int
 ) -> SuccessionResult:
 	var result := SuccessionResult.new()
+	if current_hour < 0:
+		result.add_error("继承时间无效")
+		return result
 	if not rules.exit_reasons.has(exit_reason):
 		result.add_error("未知退出原因：%s" % exit_reason)
 		return result
@@ -100,20 +103,36 @@ func execute_succession(
 	if selected == null:
 		result.add_error("所选人物不是有效继承候选")
 		return result
-	var successor: CharacterData = roster.get_active(successor_character_id)
-	if successor == null:
-		successor = roster.promote(successor_character_id)
-	if successor == null:
-		result.add_error("无法将继承候选升级到活跃层")
-		return result
 
-	var reason_rules: Dictionary = rules.exit_reasons[exit_reason] as Dictionary
+	var roster_before: Dictionary = roster.get_persistent_state()
+	var organizations_before: Array[Dictionary] = organizations.get_persistent_state()
+	var relationships_before: Dictionary = relationships.get_persistent_state()
+	var ai_before: Array[Dictionary] = ai.get_persistent_state()
 	var old_relationships: Array[RelationshipData] = relationships.get_for_character(old_character_id)
 	var old_positions: Dictionary = {}
 	for organization_id: String in old_character.organization_ids:
 		old_positions[organization_id] = organizations.get_position_id(
 			old_character_id, organization_id
 		)
+
+	# Exit first so a background successor can be promoted even when the active
+	# roster was exactly at its configured limit. Every later failure restores all
+	# four authoritative social stores before returning.
+	var exited: ExitedCharacterRecord = roster.exit_active_character(
+		old_character_id, exit_reason, current_hour
+	)
+	if exited == null:
+		result.add_error("无法记录当前人物退出")
+		return result
+	var successor: CharacterData = roster.get_active(successor_character_id)
+	if successor == null:
+		successor = roster.promote(successor_character_id)
+	if successor == null:
+		_rollback(roster_before, organizations_before, relationships_before, ai_before)
+		result.add_error("无法将继承候选升级到活跃层")
+		return result
+
+	var reason_rules: Dictionary = rules.exit_reasons[exit_reason] as Dictionary
 	_transfer_resources(old_character, successor, reason_rules, result)
 	_transfer_relationships(
 		old_character_id, successor, old_relationships, reason_rules, current_hour, result
@@ -122,10 +141,8 @@ func execute_succession(
 		old_character, successor, old_positions, reason_rules, selected.score, result
 	)
 	ai.unregister(successor.id)
-	var exited: ExitedCharacterRecord = roster.exit_active_character(
-		old_character_id, exit_reason, current_hour
-	)
-	if exited == null or not roster.set_player_character(successor):
+	if not roster.set_player_character(successor):
+		_rollback(roster_before, organizations_before, relationships_before, ai_before)
 		result.add_error("无法完成玩家人物切换")
 		return result
 	exited.successor_character_id = successor.id
@@ -133,6 +150,28 @@ func execute_succession(
 	result.exited_record = exited
 	GameSessionService.transfer_player(successor)
 	return result
+
+
+func _rollback(
+	roster_state: Dictionary,
+	organization_state: Array[Dictionary],
+	relationship_state: Dictionary,
+	ai_state: Array[Dictionary]
+) -> bool:
+	if not roster.restore_persistent_state(roster_state):
+		return false
+	if not organizations.restore_persistent_state(organization_state):
+		return false
+	if not relationships.restore_persistent_state(relationship_state):
+		return false
+	if not ai.restore_persistent_state(ai_state):
+		return false
+	var restored_player: CharacterData = roster.get_active(roster.player_character_id)
+	if restored_player == null:
+		return false
+	GameSessionService.player_character = restored_player
+	GameSessionService.selected_country_id = restored_player.country_id
+	return true
 
 
 func _transfer_resources(
@@ -174,7 +213,10 @@ func _transfer_relationships(
 			"enemy_relationship_ratio" if is_enemy else "ally_relationship_ratio"
 		])
 		var inherited: RelationshipData = relationships.create_or_update(
-			successor.id, other_id, current_hour, {},
+			successor.id,
+			other_id,
+			current_hour,
+			{},
 			"inherited_rival" if is_enemy else "inherited_ally"
 		)
 		if inherited == null:

@@ -117,29 +117,37 @@ func apply_action_domain_effect(
 ) -> bool:
 	if action == null or definition == null or action.status != ActionInstanceData.STATUS_COMPLETED or action.domain_effect_applied:
 		return false
+	var player: CharacterData = GameSessionService.player_character
 	var applied: bool = false
-	if action.outcome_code != "failure":
-		var player: CharacterData = GameSessionService.player_character
-		if player != null:
-			match definition.category:
-				"build_relationship":
-					applied = create_player_relationship(action.target_id, action.completion_hour) != null
-				"join_organization":
-					applied = organizations.join_organization(player, action.target_id)
-				"seek_position":
-					applied = _award_next_position(player, action.target_id)
-				"investigate_character":
-					applied = _apply_investigation_dossier(player, action.target_id)
-				_:
-					applied = regional_influence.apply_action_domain_effect(
-						action, definition, player, map_service
-					)
-	# The composition root owns the one-shot invariant, but only after the
-	# subordinate service has had a chance to observe the unconsumed action.
+	var requires_domain: bool = definition.category in [
+		"build_relationship",
+		"join_organization",
+		"seek_position",
+		"investigate_character",
+		"promote_policy",
+		"support_control",
+	]
+	if action.outcome_code != "failure" and player != null:
+		match definition.category:
+			"build_relationship":
+				applied = create_player_relationship(action.target_id, action.completion_hour) != null
+			"join_organization":
+				applied = organizations.join_organization(player, action.target_id)
+			"seek_position":
+				applied = _award_next_position(player, action.target_id)
+			"investigate_character":
+				applied = _apply_investigation_dossier(player, action.target_id)
+			_:
+				applied = regional_influence.apply_action_domain_effect(
+					action, definition, player, map_service
+				)
+	if requires_domain and action.outcome_code != "failure" and not applied and player != null:
+		_action_service.replace_completed_result(action, definition, player, "failure")
+		action.result_description = _domain_failure_description(definition.category)
+	# Mark one-shot state only after a failed domain transaction has replaced the
+	# generic success result, because replacement rebuilds applied_effects.
 	action.domain_effect_applied = true
 	action.applied_effects["domain_applied"] = applied
-	if not applied and action.outcome_code != "failure":
-		_mark_domain_no_change(action, definition.category)
 	if applied:
 		GameSessionService.settlement_log.add(
 			"action_domain",
@@ -181,18 +189,22 @@ func _apply_investigation_dossier(player: CharacterData, target_id: String) -> b
 		region_id = background.region_id
 		traits = background.manifested_traits.duplicate()
 		organization_ids = background.organization_ids.duplicate()
-		var generator := CharacterGenerator.new(
-			_data_set,
-			_character_config,
-			DeterministicRandomService.new(background.activation_seed),
-			StableIdService.new()
-		)
-		var generated: CharacterGenerationResult = generator.generate_character(
-			background.country_id,
-			CharacterGenerator.MODE_FULL_POPULATION
-		)
-		if generated.is_success():
-			tendencies = generated.character.tendencies.duplicate(true)
+		var stored_tendencies: Variant = background.persistent_core.get("tendencies", {})
+		if stored_tendencies is Dictionary and not (stored_tendencies as Dictionary).is_empty():
+			tendencies = (stored_tendencies as Dictionary).duplicate(true)
+		else:
+			var generator := CharacterGenerator.new(
+				_data_set,
+				_character_config,
+				DeterministicRandomService.new(background.activation_seed),
+				StableIdService.new()
+			)
+			var generated: CharacterGenerationResult = generator.generate_character(
+				background.country_id,
+				CharacterGenerator.MODE_FULL_POPULATION
+			)
+			if generated.is_success():
+				tendencies = generated.character.tendencies.duplicate(true)
 	var raw_dossiers: Variant = player.current_status.get("investigation_dossiers", {})
 	var dossiers: Dictionary = (
 		(raw_dossiers as Dictionary).duplicate(true)
@@ -214,19 +226,21 @@ func _apply_investigation_dossier(player: CharacterData, target_id: String) -> b
 	return true
 
 
-func _mark_domain_no_change(action: ActionInstanceData, category: String) -> void:
+func _domain_failure_description(category: String) -> String:
 	match category:
+		"build_relationship":
+			return "行动完成时目标已不可接触，未建立有效关系。"
+		"join_organization":
+			return "行动完成时组织入口职位不可用，未能加入组织。"
 		"seek_position":
-			action.outcome_code = "failure"
-			action.result_description = "行动过程完成，但结算时已无更高空缺职位。"
+			return "行动过程完成，但结算时已无更高空缺职位。"
 		"promote_policy":
-			action.result_description = "政策行动完成，但目标地区影响已达可调整边界。"
+			return "政策行动完成，但目标地区影响已达可调整边界。"
 		"support_control":
-			action.outcome_code = "failure"
-			action.result_description = "行动完成时目标已不再符合前线支援条件。"
+			return "行动完成时目标已不再符合前线支援条件。"
 		"investigate_character":
-			action.outcome_code = "failure"
-			action.result_description = "调查目标已不可用，未形成有效档案。"
+			return "调查目标已不可用，未形成有效档案。"
+	return "行动完成，但权威领域状态未发生变化。"
 
 
 func _award_next_position(character: CharacterData, organization_id: String) -> bool:
@@ -257,10 +271,14 @@ func execute_player_succession(
 	current_hour: int
 ) -> SuccessionResult:
 	var old_player_id: String = roster.player_character_id
-	if GameSessionService.current_action != null and not GameSessionService.current_action.is_terminal():
-		GameSessionService.current_action.status = ActionInstanceData.STATUS_CANCELLED
-		GameSessionService.current_action.estimated_completion_hour = -1
-	return succession.execute_succession(old_player_id, successor_character_id, exit_reason, current_hour)
+	var previous_action: ActionInstanceData = GameSessionService.current_action
+	var result: SuccessionResult = succession.execute_succession(
+		old_player_id, successor_character_id, exit_reason, current_hour
+	)
+	if result.successor != null and previous_action != null and not previous_action.is_terminal():
+		previous_action.status = ActionInstanceData.STATUS_CANCELLED
+		previous_action.estimated_completion_hour = -1
+	return result
 
 
 func _initialize_organization_leaders() -> void:
@@ -275,12 +293,17 @@ func _initialize_organization_leaders() -> void:
 		var character: CharacterData = roster.promote(candidates[0])
 		if character == null:
 			break
-		organizations.join_organization(character, organization_id)
-		organizations.assign_position(
+		if not organizations.join_organization(character, organization_id):
+			roster.demote(character.id)
+			continue
+		if not organizations.assign_position(
 			character,
 			organization_id,
 			str(organization.position_structure.get("leader_position", ""))
-		)
+		):
+			organizations.leave_organization(character, organization_id)
+			roster.demote(character.id)
+			continue
 		ai.register_active_npc(character.id)
 		initialized += 1
 
@@ -292,11 +315,45 @@ func _on_hour_advanced(total_hour: int) -> void:
 		return
 	var definition: ActionDefinitionData = _data_set.actions.get(action.definition_id) as ActionDefinitionData
 	if definition == null or action.actor_character_id != player.id:
-		action.status = ActionInstanceData.STATUS_INTERRUPTED
-		action.interruption_reason = "invalid_actor_or_definition"
-		action.last_update_hour = total_hour
-		action.estimated_completion_hour = -1
+		_action_service.interrupt_action(action, total_hour, "invalid_actor_or_definition")
 		return
+	var context_service := PlayerActionContextService.new(
+		_action_rules, self, _map_service
+	)
+	var target_error: String = context_service.get_target_validation_error(
+		definition, player, action.target_id
+	)
+	if not target_error.is_empty():
+		_action_service.interrupt_action(
+			action, total_hour, "authoritative_target_invalid:%s" % target_error
+		)
+		return
+	var authoritative_context: Dictionary = context_service.build_authoritative_context_for_action(
+		definition, player, action
+	)
+	var permissions: Array[String] = DataRecordUtils.to_string_array(
+		authoritative_context.get("position_permissions", [])
+	)
+	if not definition.position_permission_required.is_empty() and not permissions.has(
+		definition.position_permission_required
+	):
+		_action_service.interrupt_action(
+			action, total_hour, "authoritative_permission_lost"
+		)
+		return
+	if authoritative_context != action.context:
+		if not _action_service.update_context(
+			action,
+			definition,
+			player,
+			action.last_update_hour,
+			authoritative_context,
+			_map_service
+		):
+			_action_service.interrupt_action(
+				action, total_hour, "authoritative_context_invalid"
+			)
+			return
 	_action_service.update_to_hour(action, definition, player, total_hour, _map_service)
 	_settle_current_action_domain_if_ready()
 
