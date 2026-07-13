@@ -82,6 +82,14 @@ func _validate_context(context: Dictionary, action: ActionInstanceData) -> Strin
 		return "当前行动目标与上下文不一致"
 	if context.has("study_skill_id") and typeof(context["study_skill_id"]) != TYPE_STRING:
 		return "当前行动学习技能字段类型无效"
+	if typeof(context.get("boundary_invalid_reason", "")) != TYPE_STRING:
+		return "当前行动边界失效原因字段类型无效"
+	if typeof(context.get("settle_previous_interval", false)) != TYPE_BOOL:
+		return "当前行动旧区间结算字段类型无效"
+	if bool(context.get("settle_previous_interval", false)) or not str(
+		context.get("boundary_invalid_reason", "")
+	).is_empty():
+		return "存档不能包含日结算内部的临时行动边界状态"
 	var raw_permissions: Variant = context.get("position_permissions", null)
 	if not raw_permissions is Array:
 		return "当前行动职位权限字段无效"
@@ -226,7 +234,13 @@ func _validate_authoritative_context(
 	expected_permissions.sort()
 	if stored_permissions != expected_permissions:
 		return "当前行动职位权限与权威组织状态不一致"
-	if str(action.context.get("study_skill_id", "")) != str(expected.get("study_skill_id", "")):
+	var stored_study_skill: String = str(
+		action.context.get(
+			"study_skill_id",
+			definition.primary_skill if definition.category == "study_skill" else ""
+		)
+	)
+	if stored_study_skill != str(expected.get("study_skill_id", "")):
 		return "当前行动学习技能与权威人物状态不一致"
 	for field: String in NUMERIC_CONTEXT_FIELDS:
 		if not is_equal_approx(
