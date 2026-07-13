@@ -44,7 +44,8 @@ $tests = @(
     @{ Name = 'P0-R1 player journey'; Script = 'res://tests/p0_r1_player_journey.gd' },
     @{ Name = 'P0-R1 safety regression'; Script = 'res://tests/p0_r1_safety_regression.gd' },
     @{ Name = 'State consistency regression'; Script = 'res://tests/state_consistency_regression.gd' },
-    @{ Name = 'Simulation quality regression'; Script = 'res://tests/simulation_quality_regression.gd' }
+    @{ Name = 'Simulation quality regression'; Script = 'res://tests/simulation_quality_regression.gd' },
+    @{ Name = 'Codex audit regression'; Script = 'res://tests/codex_audit_regression.gd' }
 )
 
 foreach ($test in $tests) {
