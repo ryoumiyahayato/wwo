@@ -120,7 +120,15 @@ custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 mouse_default_cursor_shape = 2
 disabled = true
-text = "加载游戏"
+text = "加载手动存档"
+
+[node name="LoadAutosaveButton" type="Button" parent="SafeMargin/Center/Card/CardMargin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+disabled = true
+text = "加载自动存档"
 
 [node name="SettingsButton" type="Button" parent="SafeMargin/Center/Card/CardMargin/Content"]
 unique_name_in_owner = true
