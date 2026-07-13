@@ -70,6 +70,16 @@ func update_to_hour(
 		action.last_update_hour = current_hour
 		action.estimated_completion_hour = -1
 		return
+	# An invalid actor state must stop the action before any elapsed work is credited.
+	# Hourly authoritative updates make this boundary exact rather than retroactive.
+	var interruption: String = _get_interruption_reason(definition, character)
+	if not interruption.is_empty():
+		action.last_update_hour = current_hour
+		action.status = ActionInstanceData.STATUS_INTERRUPTED
+		action.interruption_reason = interruption
+		action.estimated_completion_hour = -1
+		action_changed.emit(action)
+		return
 	var elapsed_hours: int = current_hour - action.last_update_hour
 	var remaining_work: float = maxf(action.total_work - action.accumulated_work, 0.0)
 	var required_hours: int = ceili(remaining_work / action.current_efficiency)
@@ -81,13 +91,6 @@ func update_to_hour(
 	if action.accumulated_work >= action.total_work:
 		action.completion_hour = current_hour - maxi(elapsed_hours - required_hours, 0)
 		_complete_action(action, definition, character, map_service)
-		return
-	var interruption: String = _get_interruption_reason(definition, character)
-	if not interruption.is_empty():
-		action.status = ActionInstanceData.STATUS_INTERRUPTED
-		action.interruption_reason = interruption
-		action.estimated_completion_hour = -1
-		action_changed.emit(action)
 		return
 	_update_estimate(action, current_hour)
 	action_changed.emit(action)
@@ -144,6 +147,14 @@ func resume_action(
 	current_hour: int
 ) -> bool:
 	if action == null or action.status != ActionInstanceData.STATUS_PAUSED:
+		return false
+	var interruption: String = _get_interruption_reason(definition, character)
+	if not interruption.is_empty():
+		action.last_update_hour = current_hour
+		action.status = ActionInstanceData.STATUS_INTERRUPTED
+		action.interruption_reason = interruption
+		action.estimated_completion_hour = -1
+		action_changed.emit(action)
 		return false
 	action.status = ActionInstanceData.STATUS_ACTIVE
 	action.last_update_hour = current_hour
@@ -207,6 +218,30 @@ func calculate_effective_value(
 	)
 
 
+func calculate_efficiency(
+	definition: ActionDefinitionData,
+	effective_value: float
+) -> float:
+	var progress_multiplier: float = clampf(
+		rules.progress_base_multiplier
+		+ effective_value * rules.progress_effective_scale,
+		rules.minimum_progress_multiplier,
+		rules.maximum_progress_multiplier
+	)
+	return maxf(definition.base_progress_per_hour * progress_multiplier, 0.000001)
+
+
+func calculate_outcome_code(
+	definition: ActionDefinitionData,
+	effective_value: float
+) -> String:
+	if effective_value >= definition.guaranteed_success_threshold:
+		return "guaranteed_success"
+	if effective_value >= definition.success_threshold:
+		return "success"
+	return "failure"
+
+
 func _recalculate_metrics(
 	action: ActionInstanceData,
 	definition: ActionDefinitionData,
@@ -216,15 +251,7 @@ func _recalculate_metrics(
 	action.outlook = rules.get_outlook(
 		action.effective_value, definition.guaranteed_success_threshold
 	)
-	var progress_multiplier: float = clampf(
-		rules.progress_base_multiplier
-		+ action.effective_value * rules.progress_effective_scale,
-		rules.minimum_progress_multiplier,
-		rules.maximum_progress_multiplier
-	)
-	action.current_efficiency = maxf(
-		definition.base_progress_per_hour * progress_multiplier, 0.000001
-	)
+	action.current_efficiency = calculate_efficiency(definition, action.effective_value)
 	_update_estimate(action, action.last_update_hour)
 
 
@@ -246,12 +273,7 @@ func _complete_action(
 ) -> void:
 	action.status = ActionInstanceData.STATUS_COMPLETED
 	action.estimated_completion_hour = action.completion_hour
-	if action.effective_value >= definition.guaranteed_success_threshold:
-		action.outcome_code = "guaranteed_success"
-	elif action.effective_value >= definition.success_threshold:
-		action.outcome_code = "success"
-	else:
-		action.outcome_code = "failure"
+	action.outcome_code = calculate_outcome_code(definition, action.effective_value)
 	var result_data: Dictionary = (
 		definition.success_result
 		if action.outcome_code != "failure"
@@ -267,7 +289,7 @@ func _apply_result_once(
 	definition: ActionDefinitionData,
 	character: CharacterData,
 	result_data: Dictionary,
-	map_service: MapControlService
+	_map_service: MapControlService
 ) -> void:
 	if action.result_applied:
 		return
@@ -295,12 +317,8 @@ func _apply_result_once(
 			character.current_status[state_key] = clampi(
 				int(character.current_status.get(state_key, 0)) + int(result_data[delta_key]), 0, 100
 			)
-	if result_data.has("control_pressure") and map_service != null and not action.target_id.is_empty():
-		map_service.apply_control_pressure(
-			action.target_id,
-			character.country_id,
-			float(result_data["control_pressure"])
-		)
+	# Map, organization and relationship mutations are domain effects. They are
+	# applied once by SocietySimulationService after the generic result is committed.
 	action.applied_effects = result_data.duplicate(true)
 	action.result_applied = true
 
