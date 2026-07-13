@@ -7,6 +7,12 @@
   "progress_effective_scale": 0.01,
   "minimum_progress_multiplier": 0.25,
   "maximum_progress_multiplier": 2.0,
+  "mastery_guarantee": {
+    "skill_threshold": 80,
+    "preparation_threshold": 90,
+    "funding_threshold": 80,
+    "effective_value_bonus": 60.0
+  },
   "state": {
     "health_baseline": 80.0,
     "health_weight": 0.25,
