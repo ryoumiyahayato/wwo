@@ -188,6 +188,10 @@ func restore_snapshot(
 	if not action_ids.restore_state(raw_action_id_state):
 		return SaveOperationResult.fail("restore_error", "行动 ID 状态无效")
 	var current_hour: int = int((snapshot["game_time"] as Dictionary).get("total_hours", -1))
+	var previous_world_state: Dictionary = map_service.get_persistent_state()
+	if not map_service.restore_persistent_state(snapshot["world"] as Dictionary):
+		return SaveOperationResult.fail("restore_error", "地图状态无效")
+
 	var ai_action_error: String = _validate_ai_action_records(
 		snapshot["ai_states"] as Array,
 		temporary_society,
@@ -196,21 +200,31 @@ func restore_snapshot(
 		raw_action_id_state
 	)
 	if not ai_action_error.is_empty():
-		return SaveOperationResult.fail("broken_reference", ai_action_error)
+		return _fail_and_restore_map(
+			map_service, previous_world_state, "broken_reference", ai_action_error
+		)
 	if not temporary_society.ai.restore_persistent_state(snapshot["ai_states"] as Array):
-		return SaveOperationResult.fail("restore_error", "AI 状态无效")
+		return _fail_and_restore_map(
+			map_service, previous_world_state, "restore_error", "AI 状态无效"
+		)
 
 	var settlement_state: Dictionary = snapshot.get("settlement_state", {}) as Dictionary
 	var paused_categories: Variant = settlement_state.get("paused_categories", {})
 	if not paused_categories is Dictionary:
-		return SaveOperationResult.fail("restore_error", "暂停结算类别无效")
+		return _fail_and_restore_map(
+			map_service, previous_world_state, "restore_error", "暂停结算类别无效"
+		)
 	temporary_society.paused_settlement_categories = (paused_categories as Dictionary).duplicate(true)
 
 	var selected_country_id: String = str(snapshot["selected_country_id"])
 	if not map_service.data_set.countries.has(selected_country_id):
-		return SaveOperationResult.fail("broken_reference", "所选国家引用无效")
+		return _fail_and_restore_map(
+			map_service, previous_world_state, "broken_reference", "所选国家引用无效"
+		)
 	if selected_country_id != restored_player.country_id:
-		return SaveOperationResult.fail("broken_reference", "所选国家与玩家人物国家不一致")
+		return _fail_and_restore_map(
+			map_service, previous_world_state, "broken_reference", "所选国家与玩家人物国家不一致"
+		)
 
 	var restored_action: ActionInstanceData
 	if snapshot["current_action"] != null:
@@ -223,20 +237,23 @@ func restore_snapshot(
 			raw_action_id_state
 		)
 		if not action_error.is_empty():
-			return SaveOperationResult.fail("broken_reference", action_error)
+			return _fail_and_restore_map(
+				map_service, previous_world_state, "broken_reference", action_error
+			)
 		restored_action = ActionInstanceData.from_dict(action_record)
 
 	var log_service := SettlementLogService.new()
 	if not log_service.restore_state(snapshot.get("settlement_log", {"max_entries": 200, "entries": []}) as Dictionary):
-		return SaveOperationResult.fail("restore_error", "结算日志无效")
+		return _fail_and_restore_map(
+			map_service, previous_world_state, "restore_error", "结算日志无效"
+		)
 	var performance := PerformanceStatsService.new()
 	if not performance.restore_state(snapshot.get("performance_metrics", {}) as Dictionary):
-		return SaveOperationResult.fail("restore_error", "性能统计无效")
+		return _fail_and_restore_map(
+			map_service, previous_world_state, "restore_error", "性能统计无效"
+		)
 
-	var previous_world_state: Dictionary = map_service.get_persistent_state()
 	var previous_clock_state: Dictionary = clock.get_persistent_state()
-	if not map_service.restore_persistent_state(snapshot["world"] as Dictionary):
-		return SaveOperationResult.fail("restore_error", "地图状态无效")
 	if not clock.restore_persistent_state(snapshot["game_time"] as Dictionary):
 		map_service.restore_persistent_state(previous_world_state)
 		clock.restore_persistent_state(previous_clock_state)
@@ -254,6 +271,16 @@ func restore_snapshot(
 	performance.record("restore", Time.get_ticks_usec() - started)
 	log_service.add("load", "存档恢复完成", clock.total_hours)
 	return SaveOperationResult.ok("", snapshot)
+
+
+func _fail_and_restore_map(
+	map_service: MapControlService,
+	previous_world_state: Dictionary,
+	code: String,
+	message: String
+) -> SaveOperationResult:
+	map_service.restore_persistent_state(previous_world_state)
+	return SaveOperationResult.fail(code, message)
 
 
 func _validate_ai_action_records(
