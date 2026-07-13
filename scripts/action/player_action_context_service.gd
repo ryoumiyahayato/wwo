@@ -21,14 +21,21 @@ func build_context(
 	definition: ActionDefinitionData,
 	character: CharacterData,
 	target_id: String,
-	extra_funding: int = 0
+	extra_funding: int = 0,
+	study_skill_id: String = ""
 ) -> Dictionary:
 	if definition == null or character == null:
+		return {}
+	var resolved_study_skill: String = _resolve_study_skill_id(
+		definition, character, study_skill_id
+	)
+	if definition.category == "study_skill" and resolved_study_skill.is_empty():
 		return {}
 	var applied_extra: int = clampi(extra_funding, 0, get_max_extra_funding())
 	var total_cost: int = get_funding_cost(definition, applied_extra)
 	return {
 		"target_id": target_id,
+		"study_skill_id": resolved_study_skill,
 		"position_permissions": _get_permissions(character.id),
 		"organization_support": _organization_support(
 			definition, character, target_id
@@ -40,7 +47,9 @@ func build_context(
 			0.0,
 			100.0
 		),
-		"preparation": _preparation(definition, character, applied_extra),
+		"preparation": _preparation(
+			definition, character, applied_extra, resolved_study_skill
+		),
 		"target_resistance": _target_resistance(target_id),
 	}
 
@@ -60,7 +69,11 @@ func build_authoritative_context_for_action(
 		get_max_extra_funding()
 	)
 	var context: Dictionary = build_context(
-		definition, character, action.target_id, extra_funding
+		definition,
+		character,
+		action.target_id,
+		extra_funding,
+		str(action.context.get("study_skill_id", ""))
 	)
 	if context.is_empty():
 		return context
@@ -85,7 +98,8 @@ func start_player_action(
 	character: CharacterData,
 	current_hour: int,
 	target_id: String,
-	extra_funding: int = 0
+	extra_funding: int = 0,
+	study_skill_id: String = ""
 ) -> ActionStartResult:
 	var result := ActionStartResult.new()
 	if action_service == null or definition == null or character == null:
@@ -97,6 +111,12 @@ func start_player_action(
 	if not target_error.is_empty():
 		result.add_error(target_error)
 		return result
+	var resolved_study_skill: String = _resolve_study_skill_id(
+		definition, character, study_skill_id
+	)
+	if definition.category == "study_skill" and resolved_study_skill.is_empty():
+		result.add_error("必须选择人物拥有的有效技能作为学习目标。")
+		return result
 	if extra_funding < 0 or extra_funding > get_max_extra_funding():
 		result.add_error("额外准备投入超出允许范围。")
 		return result
@@ -106,7 +126,11 @@ func start_player_action(
 	var cost: int = get_funding_cost(definition, extra_funding)
 	var wealth_before: int = int(character.current_status.get("wealth", 0))
 	var context: Dictionary = build_context(
-		definition, character, target_id, extra_funding
+		definition,
+		character,
+		target_id,
+		extra_funding,
+		resolved_study_skill
 	)
 	context["funding_cost"] = cost
 	context["funding_committed"] = true
@@ -248,10 +272,11 @@ func describe(
 	definition: ActionDefinitionData,
 	character: CharacterData,
 	target_id: String,
-	extra_funding: int = 0
+	extra_funding: int = 0,
+	study_skill_id: String = ""
 ) -> String:
 	var context: Dictionary = build_context(
-		definition, character, target_id, extra_funding
+		definition, character, target_id, extra_funding, study_skill_id
 	)
 	if context.is_empty():
 		return "行动条件尚未就绪。"
@@ -265,7 +290,10 @@ func describe(
 	var target_line: String = (
 		"目标有效" if target_error.is_empty() else "目标无效：%s" % target_error
 	)
-	return "系统条件与主动投入共同计算：\n准备 %.0f · 组织支持 %.0f · 关系支持 %.0f · 目标阻力 %.0f\n基础费用 %d + 额外投入 %d = %d（当前财富 %d，%s）\n%s" % [
+	var study_line: String = ""
+	if definition.category == "study_skill":
+		study_line = "\n学习目标：%s" % str(context["study_skill_id"])
+	return "系统条件与主动投入共同计算：\n准备 %.0f · 组织支持 %.0f · 关系支持 %.0f · 目标阻力 %.0f\n基础费用 %d + 额外投入 %d = %d（当前财富 %d，%s）\n%s%s" % [
 		float(context["preparation"]),
 		float(context["organization_support"]),
 		float(context["relationship_support"]),
@@ -276,6 +304,7 @@ func describe(
 		wealth,
 		affordability,
 		target_line,
+		study_line,
 	]
 
 
@@ -315,12 +344,18 @@ func _get_next_available_position_id(
 func _preparation(
 	definition: ActionDefinitionData,
 	character: CharacterData,
-	extra_funding: int
+	extra_funding: int,
+	study_skill_id: String = ""
 ) -> float:
 	var config: Dictionary = rules.player_context_rules
+	var preparation_skill_id: String = (
+		study_skill_id
+		if definition.category == "study_skill" and not study_skill_id.is_empty()
+		else definition.primary_skill
+	)
 	return clampf(
 		float(config.get("base_preparation", 0.0))
-		+ float(character.skills.get(definition.primary_skill, 0))
+		+ float(character.skills.get(preparation_skill_id, 0))
 		* float(config.get("primary_skill_preparation_scale", 0.0))
 		+ float(character.current_status.get("intelligence_points", 0))
 		* float(config.get("intelligence_preparation_scale", 0.0))
@@ -329,6 +364,19 @@ func _preparation(
 		0.0,
 		100.0
 	)
+
+
+func _resolve_study_skill_id(
+	definition: ActionDefinitionData,
+	character: CharacterData,
+	study_skill_id: String
+) -> String:
+	if definition.category != "study_skill":
+		return ""
+	var resolved: String = study_skill_id
+	if resolved.is_empty():
+		resolved = definition.primary_skill
+	return resolved if character.skills.has(resolved) else ""
 
 
 func _get_permissions(character_id: String) -> Array[String]:
