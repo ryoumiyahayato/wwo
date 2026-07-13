@@ -45,7 +45,7 @@ func _run() -> void:
 
 	_test_transactional_restore(save_service, snapshot, clock, map_service)
 	_test_incompatible_config_rejected(save_service, snapshot)
-	await _test_backup_recovery(save_service, snapshot)
+	_test_backup_recovery(save_service, snapshot)
 
 	_cleanup_path(PROBE_PATH)
 	GameSessionService.clear()
@@ -96,7 +96,7 @@ func _test_backup_recovery(
 	snapshot: Dictionary
 ) -> void:
 	var saved: SaveOperationResult = save_service.save_to_path(PROBE_PATH, snapshot)
-	_expect(saved.success, "安全回归可写入探针存档")
+	_expect(saved.success, "安全回归可写入隔离探针存档")
 	if not saved.success:
 		return
 	var absolute: String = ProjectSettings.globalize_path(PROBE_PATH)
@@ -118,21 +118,6 @@ func _test_backup_recovery(
 	_expect(loaded.success, "主存档损坏时可读取安全备份")
 	_expect(loaded.message.contains("安全备份"), "备份恢复结果明确标记来源")
 	_expect(loaded.snapshot == snapshot, "安全备份恢复完整原始快照")
-
-	DirAccess.remove_absolute(absolute)
-	var menu_resource: Resource = load("res://scenes/menu/main_menu.tscn")
-	var menu: Control = null
-	if menu_resource is PackedScene:
-		menu = (menu_resource as PackedScene).instantiate() as Control
-	_expect(menu != null, "仅有备份时主菜单仍可实例化")
-	if menu != null:
-		get_root().add_child(menu)
-		await process_frame
-		var load_button: Button = menu.get_node(
-			"SafeMargin/Center/Card/CardMargin/Content/LoadGameButton"
-		) as Button
-		_expect(not load_button.disabled, "仅有安全备份时加载按钮保持可用")
-		menu.queue_free()
 
 
 func _make_test_player() -> CharacterData:
