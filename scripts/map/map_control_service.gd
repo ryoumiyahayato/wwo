@@ -13,7 +13,6 @@ const STAGE_CONSOLIDATING: String = "consolidating"
 
 var data_set: CoreDataSet
 var rules: MapRulesConfig
-
 var _frontline_edges: Dictionary = {}
 var _units_by_grid_position: Dictionary = {}
 
@@ -77,8 +76,7 @@ func set_control_state(
 
 
 func is_valid_control_support_target(
-	unit_id: String,
-	supporting_country_id: String
+	unit_id: String, supporting_country_id: String
 ) -> bool:
 	var unit: ControlUnitData = get_unit(unit_id)
 	if unit == null or not data_set.countries.has(supporting_country_id):
@@ -112,6 +110,57 @@ func apply_frontline_control_pressure(
 	return apply_control_pressure(unit_id, attacking_country_id, intensity)
 
 
+func get_control_pressure_multiplier(
+	unit_id: String, attacking_country_id: String
+) -> float:
+	var unit: ControlUnitData = get_unit(unit_id)
+	if unit == null or not data_set.countries.has(attacking_country_id):
+		return 0.0
+	var multiplier: float = 1.0
+	var attacking_neighbors: int = 0
+	var attacker_rail_link: bool = false
+	var defender_rail_link: bool = false
+	for neighbor_id: String in unit.neighbor_ids:
+		var neighbor: ControlUnitData = get_unit(neighbor_id)
+		if neighbor == null:
+			continue
+		var rail_link: bool = (
+			unit.railroad_neighbor_ids.has(neighbor_id)
+			or neighbor.railroad_neighbor_ids.has(unit.id)
+		)
+		if neighbor.controller_country_id == attacking_country_id:
+			attacking_neighbors += 1
+			attacker_rail_link = attacker_rail_link or rail_link
+		elif neighbor.controller_country_id == unit.controller_country_id:
+			defender_rail_link = defender_rail_link or rail_link
+	var region: RegionData = data_set.regions.get(unit.region_id) as RegionData
+	if region != null:
+		var attacker_support: float = float(
+			region.social_influence.get(attacking_country_id, 0.0)
+		)
+		var defender_support: float = float(
+			region.social_influence.get(unit.controller_country_id, 0.0)
+		)
+		multiplier += (attacker_support - defender_support) * rules.social_support_scale
+	if unit.controller_country_id == attacking_country_id:
+		if attacker_rail_link:
+			multiplier += rules.rail_consolidation_bonus
+	else:
+		if attacker_rail_link:
+			multiplier += rules.rail_attack_bonus
+		if defender_rail_link:
+			multiplier -= rules.rail_defense_bonus
+		if is_surrounded(unit):
+			multiplier += rules.surrounded_attack_bonus
+		if attacking_neighbors > 1:
+			multiplier += float(attacking_neighbors - 1) * rules.multi_front_bonus
+	return clampf(
+		multiplier,
+		rules.minimum_pressure_multiplier,
+		rules.maximum_pressure_multiplier
+	)
+
+
 func apply_control_pressure(
 	unit_id: String,
 	attacking_country_id: String,
@@ -120,7 +169,10 @@ func apply_control_pressure(
 	var unit: ControlUnitData = get_unit(unit_id)
 	if unit == null or not data_set.countries.has(attacking_country_id):
 		return false
-	var applied_intensity: float = clampf(intensity, 0.0, 1.0)
+	var base_intensity: float = clampf(intensity, 0.0, 1.0)
+	var applied_intensity: float = base_intensity * get_control_pressure_multiplier(
+		unit_id, attacking_country_id
+	)
 	if applied_intensity <= 0.0:
 		return false
 	if unit.controller_country_id == attacking_country_id:
@@ -263,7 +315,9 @@ func get_persistent_state() -> Dictionary:
 	var regions: Dictionary = {}
 	for raw_region: Variant in data_set.regions.values():
 		var region: RegionData = raw_region as RegionData
-		regions[region.id] = {"social_influence": region.social_influence.duplicate(true)}
+		regions[region.id] = {
+			"social_influence": region.social_influence.duplicate(true)
+		}
 	var units: Dictionary = {}
 	for unit_id: String in get_sorted_unit_ids():
 		var unit: ControlUnitData = get_unit(unit_id)
@@ -290,7 +344,9 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		var region_state: Variant = (regions as Dictionary)[region_id]
 		if not region_state is Dictionary or not (region_state as Dictionary).get("social_influence", {}) is Dictionary:
 			return false
-		var influence: Dictionary = (region_state as Dictionary).get("social_influence", {}) as Dictionary
+		var influence: Dictionary = (region_state as Dictionary).get(
+			"social_influence", {}
+		) as Dictionary
 		if influence.size() != expected_country_ids.size():
 			return false
 		var influence_total: float = 0.0
@@ -309,14 +365,24 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		var unit_state: Variant = (units as Dictionary)[unit_id]
 		if not unit_state is Dictionary:
 			return false
-		var controller_id: String = str((unit_state as Dictionary).get("controller_country_id", ""))
-		var strength: float = float((unit_state as Dictionary).get("control_strength", -1.0))
-		var contested: float = float((unit_state as Dictionary).get("contested_level", -1.0))
-		var pressure: float = float((unit_state as Dictionary).get("enemy_pressure", -1.0))
+		var controller_id: String = str(
+			(unit_state as Dictionary).get("controller_country_id", "")
+		)
+		var strength: float = float(
+			(unit_state as Dictionary).get("control_strength", -1.0)
+		)
+		var contested: float = float(
+			(unit_state as Dictionary).get("contested_level", -1.0)
+		)
+		var pressure: float = float(
+			(unit_state as Dictionary).get("enemy_pressure", -1.0)
+		)
 		if not data_set.countries.has(controller_id) or strength < 0.0 or strength > 1.0 or contested < 0.0 or contested > 1.0 or pressure < 0.0 or pressure > 1.0:
 			return false
 	for region_id: String in data_set.regions:
-		(data_set.regions[region_id] as RegionData).social_influence = (((regions as Dictionary)[region_id] as Dictionary)["social_influence"] as Dictionary).duplicate(true)
+		(data_set.regions[region_id] as RegionData).social_influence = (
+			(((regions as Dictionary)[region_id] as Dictionary)["social_influence"] as Dictionary).duplicate(true)
+		)
 	for unit_id: String in data_set.control_units:
 		var unit: ControlUnitData = get_unit(unit_id)
 		var unit_state: Dictionary = (units as Dictionary)[unit_id] as Dictionary
@@ -342,7 +408,9 @@ func _rebuild_all_frontlines() -> void:
 		_update_frontlines_for_unit(unit_value as ControlUnitData, false)
 
 
-func _update_frontlines_for_unit(unit: ControlUnitData, emit_signal: bool = true) -> void:
+func _update_frontlines_for_unit(
+	unit: ControlUnitData, emit_signal: bool = true
+) -> void:
 	var changed: bool = false
 	for neighbor_id: String in unit.neighbor_ids:
 		var neighbor: ControlUnitData = get_unit(neighbor_id)
@@ -354,8 +422,12 @@ func _update_frontlines_for_unit(unit: ControlUnitData, emit_signal: bool = true
 			and unit.controller_country_id != neighbor.controller_country_id
 		)
 		if should_exist and not _frontline_edges.has(key):
-			var ordered_ids: PackedStringArray = _ordered_edge_ids(unit.id, neighbor_id)
-			_frontline_edges[key] = {"a": ordered_ids[0], "b": ordered_ids[1]}
+			var ordered_ids: PackedStringArray = _ordered_edge_ids(
+				unit.id, neighbor_id
+			)
+			_frontline_edges[key] = {
+				"a": ordered_ids[0], "b": ordered_ids[1]
+			}
 			changed = true
 		elif not should_exist and _frontline_edges.erase(key):
 			changed = true
@@ -368,7 +440,9 @@ static func _edge_key(first_id: String, second_id: String) -> String:
 	return "%s|%s" % [ordered_ids[0], ordered_ids[1]]
 
 
-static func _ordered_edge_ids(first_id: String, second_id: String) -> PackedStringArray:
+static func _ordered_edge_ids(
+	first_id: String, second_id: String
+) -> PackedStringArray:
 	return (
 		PackedStringArray([first_id, second_id])
 		if first_id < second_id
