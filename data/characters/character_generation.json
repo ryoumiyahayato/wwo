@@ -188,6 +188,45 @@
       "tendency_bases": {"government_support": -35, "reform": 38, "militarism": -22, "labor_business": -50, "nationalism": 0}
     }
   ],
+  "population_occupation_multipliers": {
+    "agricultural": {
+      "civil_servant": 0.45,
+      "junior_officer": 0.35,
+      "teacher": 0.65,
+      "journalist": 0.25,
+      "small_merchant": 0.85,
+      "skilled_worker": 0.35,
+      "union_member": 0.35,
+      "farmer": 4.5,
+      "laborer": 0.55,
+      "unemployed": 0.8
+    },
+    "industrial": {
+      "civil_servant": 0.65,
+      "junior_officer": 0.55,
+      "teacher": 0.75,
+      "journalist": 0.55,
+      "small_merchant": 1.1,
+      "skilled_worker": 3.5,
+      "union_member": 2.2,
+      "farmer": 0.2,
+      "laborer": 2.8,
+      "unemployed": 1.2
+    },
+    "mixed": {
+      "civil_servant": 1.0,
+      "junior_officer": 1.0,
+      "teacher": 1.0,
+      "journalist": 1.0,
+      "small_merchant": 1.0,
+      "skilled_worker": 1.0,
+      "union_member": 1.0,
+      "farmer": 1.0,
+      "laborer": 1.0,
+      "unemployed": 1.0
+    },
+    "default": {}
+  },
   "tendency_events": {
     "propaganda": {"government_support": 8, "nationalism": 5},
     "unemployment": {"government_support": -12, "reform": 8, "labor_business": -10},
