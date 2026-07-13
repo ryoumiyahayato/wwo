@@ -68,7 +68,6 @@ func setup(simulation_clock: SimulationClock, simulation: SocietySimulationServi
 	if society == null or society.initialization_error != "":
 		message_label.text = "社会系统未初始化。"
 		return false
-	_populate_exit_reasons()
 	_refresh_all()
 	return true
 
@@ -102,6 +101,7 @@ func _refresh_all() -> void:
 	]
 	_populate_organizations()
 	_populate_characters()
+	_populate_exit_reasons()
 	_refresh_relationships()
 	refresh_developer_mode()
 
@@ -221,14 +221,35 @@ func _debug_mutation_allowed() -> bool:
 
 
 func _populate_exit_reasons() -> void:
+	var selected_id: String = _selected_metadata(exit_reason_option)
 	exit_reason_option.clear()
-	for reason_id: String in society.continuity_rules.get_exit_reason_ids():
+	var player: CharacterData = GameSessionService.player_character
+	var reason_ids: Array[String] = society.succession.get_valid_exit_reason_ids(player)
+	for reason_id: String in reason_ids:
 		exit_reason_option.add_item(society.continuity_rules.get_exit_label(reason_id))
 		exit_reason_option.set_item_metadata(exit_reason_option.item_count - 1, reason_id)
+		if reason_id == selected_id:
+			exit_reason_option.select(exit_reason_option.item_count - 1)
+	prepare_succession_button.disabled = reason_ids.is_empty()
+	if reason_ids.is_empty():
+		succession_label.text = "当前人物没有满足条件的退出原因。"
 
 
 func _on_prepare_succession_pressed() -> void:
+	_populate_exit_reasons()
 	succession_option.clear()
+	var reason_id: String = _selected_metadata(exit_reason_option)
+	if reason_id.is_empty():
+		confirm_succession_button.disabled = true
+		succession_label.text = "当前人物没有满足条件的退出原因。"
+		return
+	var exit_error: String = society.succession.get_exit_reason_validation_error(
+		GameSessionService.player_character, reason_id
+	)
+	if not exit_error.is_empty():
+		confirm_succession_button.disabled = true
+		succession_label.text = exit_error
+		return
 	var candidates: Array[SuccessionCandidateData] = society.succession.get_candidates(
 		GameSessionService.player_character.id
 	)
@@ -253,6 +274,7 @@ func _on_confirm_succession_pressed() -> void:
 	)
 	if not result.is_success():
 		message_label.text = "\n".join(result.errors)
+		_populate_exit_reasons()
 		return
 	message_label.text = "继承完成：%s 接续世界。财富 +%d，声望 +%d，关系 %d 条，职位 %d 个。" % [
 		result.successor.name, result.inherited_wealth, result.inherited_reputation,
@@ -318,10 +340,20 @@ func _refresh_ai() -> void:
 	var candidates: Array[String] = []
 	for candidate: Dictionary in state.candidate_actions:
 		candidates.append("%s：%.3f" % [candidate["action_id"], candidate["weight"]])
-	ai_label.text = "[color=#efb96a]活跃 AI 调试[/color]\n长期目标：%s（%.1f）\n当前选择：%s\n下次每日决策：%d\n下次长期评估：%d\n候选权重：\n%s" % [
+	var progress_line: String = "无进行中长期行动"
+	if not state.current_action_record.is_empty():
+		var action := ActionInstanceData.from_dict(state.current_action_record)
+		progress_line = "%s · %.1f / %.1f · %s" % [
+			action.definition_id,
+			action.accumulated_work,
+			action.total_work,
+			action.outlook,
+		]
+	ai_label.text = "[color=#efb96a]活跃 AI 调试[/color]\n长期目标：%s（%.1f）\n当前选择：%s\n行动进度：%s\n上次结果：%s\n下次每日决策：%d\n下次长期评估：%d\n候选权重：\n%s" % [
 		society.rules.get_goal_label(state.current_goal), state.goal_priority,
-		state.current_action_id, state.next_daily_decision_hour,
-		state.next_long_term_hour, "\n".join(candidates),
+		state.current_action_id, progress_line, state.last_action_result,
+		state.next_daily_decision_hour, state.next_long_term_hour,
+		"\n".join(candidates),
 	]
 
 
