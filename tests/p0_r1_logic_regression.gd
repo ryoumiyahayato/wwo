@@ -85,11 +85,13 @@ func _test_hourly_action_and_autosave(
 	_expect(rules.load_from_file() == OK, "行动规则可加载")
 	var context := PlayerActionContextService.new(rules, society, map_service)
 	var service := ActionService.new(rules, GameSessionService.action_id_service)
-	var started: ActionStartResult = service.start_action(
+	var started: ActionStartResult = context.start_player_action(
+		service,
 		definition,
 		GameSessionService.player_character,
 		clock.total_hours,
-		context.build_context(definition, GameSessionService.player_character, "")
+		"",
+		0
 	)
 	_expect(started.is_success(), "可开始小时推进测试行动")
 	if not started.is_success():
@@ -117,11 +119,13 @@ func _test_interruption_before_progress(
 	rules.load_from_file()
 	var context := PlayerActionContextService.new(rules, society, map_service)
 	var service := ActionService.new(rules, GameSessionService.action_id_service)
-	var started: ActionStartResult = service.start_action(
+	var started: ActionStartResult = context.start_player_action(
+		service,
 		definition,
 		GameSessionService.player_character,
 		clock.total_hours,
-		context.build_context(definition, GameSessionService.player_character, "")
+		"",
+		0
 	)
 	if not started.is_success():
 		_expect(false, "可开始中断测试行动")
@@ -260,11 +264,13 @@ func _test_save_consistency(
 	var definition: ActionDefinitionData = map_service.data_set.actions["action:study_skill"] as ActionDefinitionData
 	var context := PlayerActionContextService.new(rules, society, map_service)
 	var action_service := ActionService.new(rules, GameSessionService.action_id_service)
-	var started: ActionStartResult = action_service.start_action(
+	var started: ActionStartResult = context.start_player_action(
+		action_service,
 		definition,
 		GameSessionService.player_character,
 		clock.total_hours,
-		context.build_context(definition, GameSessionService.player_character, "")
+		"",
+		0
 	)
 	_expect(started.is_success(), "可创建公式一致的进行中行动存档")
 	if started.is_success():
