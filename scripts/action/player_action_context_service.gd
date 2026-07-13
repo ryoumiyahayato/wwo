@@ -126,6 +126,8 @@ func get_target_validation_error(
 		"build_relationship", "investigate_character":
 			if target_id.is_empty() or not society.roster.has_character(target_id):
 				return "必须选择存在的人物目标。"
+			if society.roster.get_exited(target_id) != null:
+				return "目标人物已经退出当前社会活动。"
 			if target_id == character.id:
 				return "不能把自己作为人物目标。"
 			return ""
