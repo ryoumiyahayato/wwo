@@ -35,14 +35,16 @@ func initialize_background_population() -> bool:
 		return false
 	for index: int in range(rules.background_character_count):
 		var seed_value: int = rules.background_seed_base + index
-		var random_service := DeterministicRandomService.new(seed_value)
-		var country_id: String = _pick_country_by_population(random_service)
+		var country_random := DeterministicRandomService.new(
+			seed_value + 1000003
+		)
+		var country_id: String = _pick_country_by_population(country_random)
 		if country_id.is_empty():
 			return false
 		var generator := CharacterGenerator.new(
 			data_set,
 			generation_config,
-			random_service,
+			DeterministicRandomService.new(seed_value),
 			StableIdService.new()
 		)
 		var result: CharacterGenerationResult = generator.generate_character(
@@ -88,7 +90,9 @@ func demote(character_id: String) -> BackgroundCharacterData:
 	if character_id == player_character_id or not active_characters.has(character_id):
 		return null
 	var character: CharacterData = active_characters[character_id] as CharacterData
-	var seed_value: int = int(_activation_seeds.get(character_id, character.generation_seed))
+	var seed_value: int = int(
+		_activation_seeds.get(character_id, character.generation_seed)
+	)
 	var background := BackgroundCharacterData.from_active(character, seed_value)
 	character.is_active = false
 	active_characters.erase(character_id)
@@ -107,11 +111,18 @@ func increment_living_ages() -> void:
 
 
 func has_character(character_id: String) -> bool:
-	return active_characters.has(character_id) or background_characters.has(character_id) or exited_characters.has(character_id)
+	return (
+		active_characters.has(character_id)
+		or background_characters.has(character_id)
+		or exited_characters.has(character_id)
+	)
 
 
 func is_living(character_id: String) -> bool:
-	return active_characters.has(character_id) or background_characters.has(character_id)
+	return (
+		active_characters.has(character_id)
+		or background_characters.has(character_id)
+	)
 
 
 func get_active(character_id: String) -> CharacterData:
@@ -196,7 +207,9 @@ func get_background_ids(country_id: String = "") -> Array[String]:
 	var ids: Array[String] = []
 	for raw_id: Variant in background_characters:
 		var character_id: String = str(raw_id)
-		var character: BackgroundCharacterData = background_characters[character_id] as BackgroundCharacterData
+		var character: BackgroundCharacterData = background_characters[
+			character_id
+		] as BackgroundCharacterData
 		if country_id.is_empty() or character.country_id == country_id:
 			ids.append(character_id)
 	ids.sort()
@@ -216,23 +229,33 @@ func get_living_ids(country_id: String = "") -> Array[String]:
 
 
 func get_total_character_count() -> int:
-	return background_characters.size() + active_characters.size() + exited_characters.size()
+	return (
+		background_characters.size()
+		+ active_characters.size()
+		+ exited_characters.size()
+	)
 
 
 func get_persistent_state() -> Dictionary:
 	var background: Array[Dictionary] = []
 	for character_id: String in get_background_ids():
-		background.append((background_characters[character_id] as BackgroundCharacterData).to_dict())
+		background.append(
+			(background_characters[character_id] as BackgroundCharacterData).to_dict()
+		)
 	var active: Array[Dictionary] = []
 	for character_id: String in get_active_ids():
-		active.append((active_characters[character_id] as CharacterData).to_dict())
+		active.append(
+			(active_characters[character_id] as CharacterData).to_dict()
+		)
 	var exited: Array[Dictionary] = []
 	var exited_ids: Array[String] = []
 	for raw_id: Variant in exited_characters:
 		exited_ids.append(str(raw_id))
 	exited_ids.sort()
 	for character_id: String in exited_ids:
-		exited.append((exited_characters[character_id] as ExitedCharacterRecord).to_dict())
+		exited.append(
+			(exited_characters[character_id] as ExitedCharacterRecord).to_dict()
+		)
 	return {
 		"player_character_id": player_character_id,
 		"background": background,
@@ -248,7 +271,13 @@ func restore_persistent_state(state: Dictionary) -> bool:
 	var raw_active: Variant = state.get("active", [])
 	var raw_exited: Variant = state.get("exited", [])
 	var raw_seeds: Variant = state.get("activation_seeds", {})
-	if player_id.is_empty() or not raw_background is Array or not raw_active is Array or not raw_exited is Array or not raw_seeds is Dictionary:
+	if (
+		player_id.is_empty()
+		or not raw_background is Array
+		or not raw_active is Array
+		or not raw_exited is Array
+		or not raw_seeds is Dictionary
+	):
 		return false
 	var restored_background: Dictionary = {}
 	var restored_active: Dictionary = {}
@@ -257,24 +286,49 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		if not raw_record is Dictionary:
 			return false
 		var record := BackgroundCharacterData.from_dict(raw_record as Dictionary)
-		if record.id.is_empty() or not data_set.countries.has(record.country_id) or not data_set.regions.has(record.region_id) or restored_background.has(record.id):
+		if (
+			record.id.is_empty()
+			or not data_set.countries.has(record.country_id)
+			or not data_set.regions.has(record.region_id)
+			or restored_background.has(record.id)
+		):
 			return false
 		restored_background[record.id] = record
 	for raw_character: Variant in raw_active:
 		if not raw_character is Dictionary:
 			return false
 		var character := CharacterData.from_dict(raw_character as Dictionary)
-		if character.id.is_empty() or not data_set.countries.has(character.country_id) or not data_set.regions.has(character.region_id) or restored_background.has(character.id) or restored_active.has(character.id):
+		if (
+			character.id.is_empty()
+			or not data_set.countries.has(character.country_id)
+			or not data_set.regions.has(character.region_id)
+			or restored_background.has(character.id)
+			or restored_active.has(character.id)
+		):
 			return false
 		restored_active[character.id] = character
 	for raw_record: Variant in raw_exited:
 		if not raw_record is Dictionary:
 			return false
 		var record := ExitedCharacterRecord.from_dict(raw_record as Dictionary)
-		if record.character == null or record.character.id.is_empty() or not data_set.countries.has(record.character.country_id) or not data_set.regions.has(record.character.region_id) or restored_background.has(record.character.id) or restored_active.has(record.character.id) or restored_exited.has(record.character.id):
+		if (
+			record.character == null
+			or record.character.id.is_empty()
+			or not data_set.countries.has(record.character.country_id)
+			or not data_set.regions.has(record.character.region_id)
+			or restored_background.has(record.character.id)
+			or restored_active.has(record.character.id)
+			or restored_exited.has(record.character.id)
+		):
 			return false
 		restored_exited[record.character.id] = record
-	if not restored_active.has(player_id) or restored_background.size() + restored_active.size() + restored_exited.size() == 0:
+	if (
+		not restored_active.has(player_id)
+		or restored_background.size()
+		+ restored_active.size()
+		+ restored_exited.size()
+		== 0
+	):
 		return false
 	background_characters = restored_background
 	active_characters = restored_active
@@ -316,7 +370,9 @@ func _materialize_background(character_id: String) -> CharacterData:
 	return character
 
 
-func _pick_country_by_population(random_service: DeterministicRandomService) -> String:
+func _pick_country_by_population(
+	random_service: DeterministicRandomService
+) -> String:
 	var country_ids: Array[String] = []
 	var weights: Dictionary = {}
 	var total_population: int = 0
@@ -349,7 +405,9 @@ func _get_country_population(country_id: String) -> int:
 		if region == null:
 			continue
 		for population_id: String in region.population_group_ids:
-			var group: PopulationGroupData = data_set.population_groups.get(population_id) as PopulationGroupData
+			var group: PopulationGroupData = data_set.population_groups.get(
+				population_id
+			) as PopulationGroupData
 			if group != null:
 				total += maxi(group.population_count, 0)
 	return total
