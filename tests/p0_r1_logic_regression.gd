@@ -43,6 +43,7 @@ func _run() -> void:
 	_test_background_investigation(society, map_service, clock)
 	_test_position_vacancy(society, map_service)
 	_test_frontline_rules(map_service, player.country_id)
+	_test_ai_frontline_consolidation(society, map_service, player.country_id)
 	_test_save_consistency(map_service, clock, society)
 
 	GameSessionService.clear()
@@ -151,7 +152,11 @@ func _test_background_investigation(
 	_expect(applied and dossiers is Dictionary, "背景人物调查生成正式档案")
 	if dossiers is Dictionary:
 		var dossier: Variant = (dossiers as Dictionary).get(background_ids[0], {})
-		_expect(dossier is Dictionary and not ((dossier as Dictionary).get("tendencies", {}) as Dictionary).is_empty(), "背景人物档案包含可定性展示的倾向")
+		_expect(
+			dossier is Dictionary
+			and not ((dossier as Dictionary).get("tendencies", {}) as Dictionary).is_empty(),
+			"背景人物档案包含可定性展示的倾向"
+		)
 
 
 func _test_position_vacancy(
@@ -187,6 +192,25 @@ func _test_frontline_rules(map_service: MapControlService, country_id: String) -
 	map_service.restore_persistent_state(world_before)
 
 
+func _test_ai_frontline_consolidation(
+	society: SocietySimulationService,
+	map_service: MapControlService,
+	country_id: String
+) -> void:
+	var world_before: Dictionary = map_service.get_persistent_state()
+	var own_frontline: ControlUnitData = map_service.get_unit("control:r0_c4")
+	var enemy_frontline: ControlUnitData = map_service.get_unit("control:r0_c5")
+	map_service.set_control_state(own_frontline.id, country_id, 0.30, 0.20)
+	var resolved: String = society.regional_influence._resolve_organization_control_target(
+		enemy_frontline.id, country_id, map_service
+	)
+	_expect(resolved == own_frontline.id, "组织 AI 在继续进攻前优先选择薄弱己方前线")
+	var strength_before: float = own_frontline.control_strength
+	map_service.apply_frontline_control_pressure(resolved, country_id, 0.5)
+	_expect(own_frontline.control_strength > strength_before, "组织控制支援可以主动巩固新占领地区")
+	map_service.restore_persistent_state(world_before)
+
+
 func _test_save_consistency(
 	map_service: MapControlService,
 	clock: SimulationClock,
@@ -197,6 +221,9 @@ func _test_save_consistency(
 	var snapshot: Dictionary = service.build_snapshot(clock, map_service)
 	var normal: SaveOperationResult = service.restore_snapshot(snapshot.duplicate(true), clock, map_service)
 	_expect(normal.success, "正常职业人物存档可恢复")
+	if not normal.success:
+		return
+	society = GameSessionService.society_service
 
 	var wrong_player: Dictionary = snapshot.duplicate(true)
 	(wrong_player["characters"] as Dictionary)["player_character_id"] = "character:other"
@@ -228,6 +255,27 @@ func _test_save_consistency(
 	result = service.restore_snapshot(relationship_snapshot, clock, map_service)
 	_expect(not result.success and result.message.contains("关系 ID"), "关系计数器落后于记录时拒绝恢复")
 
+	var rules := ActionRulesConfig.new()
+	rules.load_from_file()
+	var definition: ActionDefinitionData = map_service.data_set.actions["action:study_skill"] as ActionDefinitionData
+	var context := PlayerActionContextService.new(rules, society, map_service)
+	var action_service := ActionService.new(rules, GameSessionService.action_id_service)
+	var started: ActionStartResult = action_service.start_action(
+		definition,
+		GameSessionService.player_character,
+		clock.total_hours,
+		context.build_context(definition, GameSessionService.player_character, "")
+	)
+	_expect(started.is_success(), "可创建公式一致的进行中行动存档")
+	if started.is_success():
+		GameSessionService.current_action = started.action
+		var formula_snapshot: Dictionary = service.build_snapshot(clock, map_service)
+		var formula_action: Dictionary = formula_snapshot["current_action"] as Dictionary
+		formula_action["effective_value"] = float(formula_action["effective_value"]) + 1.0
+		result = service.restore_snapshot(formula_snapshot, clock, map_service)
+		_expect(not result.success and result.message.contains("有效值"), "篡改行动有效值时由公式校验明确拒绝")
+		GameSessionService.current_action = null
+
 
 func _completed_action(
 	definition: ActionDefinitionData,
@@ -257,8 +305,15 @@ func _make_test_player() -> CharacterData:
 	var config: CharacterGenerationConfig = CharacterGenerationConfig.load_from_file()
 	if not world.is_success() or not config.is_valid():
 		return null
-	var generator := CharacterGenerator.new(world.data_set, config, DeterministicRandomService.new(19000101), StableIdService.new())
-	var result: CharacterGenerationResult = generator.generate_character("country:loran_federation", CharacterGenerator.MODE_STANDARD)
+	var generator := CharacterGenerator.new(
+		world.data_set,
+		config,
+		DeterministicRandomService.new(19000101),
+		StableIdService.new()
+	)
+	var result: CharacterGenerationResult = generator.generate_character(
+		"country:loran_federation", CharacterGenerator.MODE_STANDARD
+	)
 	if not result.is_success():
 		return null
 	var player: CharacterData = result.character
