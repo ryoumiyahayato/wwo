@@ -16,6 +16,9 @@
     "reputation_weight": 0.1,
     "maximum_inherited_organizations": 2
   },
+  "exit_constraints": {
+    "disgrace_reputation_threshold": 5
+  },
   "enemy_affinity_threshold": -0.2,
   "position_inheritance_minimum_score": 45.0,
   "exit_reasons": {
