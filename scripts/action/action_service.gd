@@ -79,10 +79,15 @@ func update_to_hour(
 		action.last_update_hour = current_hour
 		action.estimated_completion_hour = -1
 		return
-	if check_current_interruptions:
-		var interruption: String = get_interruption_reason(definition, character)
-		if not interruption.is_empty():
-			interrupt_action(action, current_hour, interruption)
+	var settle_previous_interval: bool = bool(
+		action.context.get("settle_previous_interval", false)
+	)
+	if check_current_interruptions and not settle_previous_interval:
+		var immediate_interruption: String = get_interruption_reason(
+			definition, character
+		)
+		if not immediate_interruption.is_empty():
+			interrupt_action(action, current_hour, immediate_interruption)
 			return
 	var elapsed_hours: int = current_hour - action.last_update_hour
 	var remaining_work: float = maxf(action.total_work - action.accumulated_work, 0.0)
@@ -96,7 +101,36 @@ func update_to_hour(
 		action.completion_hour = current_hour - maxi(elapsed_hours - required_hours, 0)
 		_complete_action(action, definition, character, map_service)
 		return
-	_update_estimate(action, current_hour)
+	if settle_previous_interval:
+		action.context["settle_previous_interval"] = false
+		var boundary_invalid_reason: String = str(
+			action.context.get("boundary_invalid_reason", "")
+		)
+		if not boundary_invalid_reason.is_empty():
+			interrupt_action(
+				action,
+				current_hour,
+				"authoritative_target_invalid:%s" % boundary_invalid_reason
+			)
+			return
+		var boundary_interruption: String = get_interruption_reason(
+			definition, character
+		)
+		if not boundary_interruption.is_empty():
+			interrupt_action(action, current_hour, boundary_interruption)
+			return
+		var boundary_permissions: Array[String] = DataRecordUtils.to_string_array(
+			action.context.get("position_permissions", [])
+		)
+		if not definition.position_permission_required.is_empty() and not boundary_permissions.has(
+			definition.position_permission_required
+		):
+			interrupt_action(
+				action, current_hour, "authoritative_permission_lost"
+			)
+			return
+		action.context["boundary_invalid_reason"] = ""
+	_recalculate_metrics(action, definition, character)
 	action_changed.emit(action)
 
 
@@ -125,14 +159,24 @@ func update_context(
 			return false
 	elif not study_skill_id.is_empty():
 		return false
+	var settle_previous_interval: bool = (
+		bool(merged.get("settle_previous_interval", false))
+		and current_hour <= action.last_update_hour
+	)
 	var permissions: Array[String] = DataRecordUtils.to_string_array(
 		merged["position_permissions"]
 	)
-	if not definition.position_permission_required.is_empty() and not permissions.has(definition.position_permission_required):
+	if not settle_previous_interval and not definition.position_permission_required.is_empty() and not permissions.has(
+		definition.position_permission_required
+	):
 		return false
 	action.context = merged
 	action.target_id = str(merged["target_id"])
-	_recalculate_metrics(action, definition, character)
+	if settle_previous_interval:
+		# Keep the old effective value and efficiency for the elapsed interval.
+		_update_estimate(action, action.last_update_hour)
+	else:
+		_recalculate_metrics(action, definition, character)
 	action_changed.emit(action)
 	return true
 
@@ -487,6 +531,8 @@ static func _normalized_context(input_context: Dictionary) -> Dictionary:
 		"funding": float(input_context.get("funding", 0.0)),
 		"preparation": float(input_context.get("preparation", 0.0)),
 		"target_resistance": float(input_context.get("target_resistance", 0.0)),
+		"boundary_invalid_reason": str(input_context.get("boundary_invalid_reason", "")),
+		"settle_previous_interval": bool(input_context.get("settle_previous_interval", false)),
 		"funding_cost": int(input_context.get("funding_cost", 0)),
 		"funding_committed": bool(input_context.get("funding_committed", false)),
 		"wealth_before_funding": int(input_context.get("wealth_before_funding", 0)),
@@ -498,6 +544,10 @@ static func _validate_context(context: Dictionary) -> String:
 		var value: float = float(context[key])
 		if value < 0.0 or value > 100.0:
 			return "%s 必须位于 0 至 100" % key
+	if typeof(context.get("boundary_invalid_reason", "")) != TYPE_STRING:
+		return "行动边界失效原因必须为字符串"
+	if typeof(context.get("settle_previous_interval", false)) != TYPE_BOOL:
+		return "行动旧区间结算标记必须为布尔值"
 	var funding_cost: int = int(context["funding_cost"])
 	var wealth_before: int = int(context["wealth_before_funding"])
 	if funding_cost < 0 or wealth_before < 0:
