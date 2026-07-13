@@ -18,6 +18,7 @@
   "rail_defense_bonus": 0.12,
   "rail_consolidation_bonus": 0.14,
   "social_support_scale": 0.35,
+  "unit_social_support_scale": 0.30,
   "surrounded_attack_bonus": 0.35,
   "multi_front_bonus": 0.12,
   "minimum_pressure_multiplier": 0.35,
