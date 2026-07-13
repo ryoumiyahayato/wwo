@@ -18,6 +18,7 @@ var labels: Dictionary = {}
 var tendency_poles: Dictionary = {}
 var country_names: Dictionary = {}
 var occupations: Array[Dictionary] = []
+var population_occupation_multipliers: Dictionary = {}
 var tendency_events: Dictionary = {}
 var error_message: String = ""
 
@@ -66,6 +67,16 @@ func get_occupation(occupation_id: String) -> Dictionary:
 	return {}
 
 
+func get_population_occupation_multiplier(
+	population_category: String, occupation_id: String
+) -> float:
+	var category_rules: Dictionary = population_occupation_multipliers.get(
+		population_category,
+		population_occupation_multipliers.get("default", {})
+	) as Dictionary
+	return maxf(float(category_rules.get(occupation_id, 1.0)), 0.0)
+
+
 func growth_modifier(aptitude: int) -> float:
 	var ratio: float = clampf(float(aptitude) / 100.0, 0.0, 1.0)
 	return lerpf(growth_modifier_min, growth_modifier_max, ratio)
@@ -93,7 +104,8 @@ func _load_dictionary(data: Dictionary) -> void:
 	var required: Array[String] = [
 		"age_range", "aptitude_range", "growth_modifier_range", "trait_rules",
 		"aptitude_keys", "skill_keys", "trait_keys", "labels", "tendency_poles",
-		"country_names", "occupations", "tendency_events",
+		"country_names", "occupations", "population_occupation_multipliers",
+		"tendency_events",
 	]
 	for key: String in required:
 		if not data.has(key):
@@ -108,7 +120,7 @@ func _load_dictionary(data: Dictionary) -> void:
 	aptitude_max = int((data["aptitude_range"] as Array)[1])
 	growth_modifier_min = float((data["growth_modifier_range"] as Array)[0])
 	growth_modifier_max = float((data["growth_modifier_range"] as Array)[1])
-	if not data["trait_rules"] is Dictionary or not data["labels"] is Dictionary or not data["tendency_poles"] is Dictionary or not data["country_names"] is Dictionary or not data["occupations"] is Array or not data["tendency_events"] is Dictionary:
+	if not data["trait_rules"] is Dictionary or not data["labels"] is Dictionary or not data["tendency_poles"] is Dictionary or not data["country_names"] is Dictionary or not data["occupations"] is Array or not data["population_occupation_multipliers"] is Dictionary or not data["tendency_events"] is Dictionary:
 		error_message = "人物生成配置字段类型无效"
 		return
 	trait_rules = (data["trait_rules"] as Dictionary).duplicate(true)
@@ -128,6 +140,18 @@ func _load_dictionary(data: Dictionary) -> void:
 				error_message = "职业配置缺少字段：%s" % field
 				return
 		occupations.append(occupation.duplicate(true))
+	population_occupation_multipliers = (
+		data["population_occupation_multipliers"] as Dictionary
+	).duplicate(true)
+	for raw_category: Variant in population_occupation_multipliers:
+		var category_rules: Variant = population_occupation_multipliers[raw_category]
+		if not category_rules is Dictionary:
+			error_message = "人口职业倍率配置必须是对象"
+			return
+		for raw_value: Variant in (category_rules as Dictionary).values():
+			if typeof(raw_value) not in [TYPE_INT, TYPE_FLOAT] or float(raw_value) < 0.0:
+				error_message = "人口职业倍率必须为非负数字"
+				return
 	tendency_events = (data["tendency_events"] as Dictionary).duplicate(true)
 	if age_min > age_max or aptitude_min > aptitude_max or growth_modifier_min > growth_modifier_max or occupations.is_empty():
 		error_message = "人物生成配置范围顺序或职业列表无效"
