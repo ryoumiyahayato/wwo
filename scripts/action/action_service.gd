@@ -70,15 +70,9 @@ func update_to_hour(
 		action.last_update_hour = current_hour
 		action.estimated_completion_hour = -1
 		return
-	# An invalid actor state must stop the action before any elapsed work is credited.
-	# Hourly authoritative updates make this boundary exact rather than retroactive.
 	var interruption: String = _get_interruption_reason(definition, character)
 	if not interruption.is_empty():
-		action.last_update_hour = current_hour
-		action.status = ActionInstanceData.STATUS_INTERRUPTED
-		action.interruption_reason = interruption
-		action.estimated_completion_hour = -1
-		action_changed.emit(action)
+		interrupt_action(action, current_hour, interruption)
 		return
 	var elapsed_hours: int = current_hour - action.last_update_hour
 	var remaining_work: float = maxf(action.total_work - action.accumulated_work, 0.0)
@@ -115,9 +109,29 @@ func update_context(
 	merged = _normalized_context(merged)
 	if not _validate_context(merged).is_empty():
 		return false
+	var permissions: Array[String] = DataRecordUtils.to_string_array(
+		merged["position_permissions"]
+	)
+	if not definition.position_permission_required.is_empty() and not permissions.has(definition.position_permission_required):
+		return false
 	action.context = merged
 	action.target_id = str(merged["target_id"])
 	_recalculate_metrics(action, definition, character)
+	action_changed.emit(action)
+	return true
+
+
+func interrupt_action(
+	action: ActionInstanceData,
+	current_hour: int,
+	reason: String
+) -> bool:
+	if action == null or action.is_terminal() or reason.is_empty():
+		return false
+	action.last_update_hour = maxi(current_hour, action.last_update_hour)
+	action.status = ActionInstanceData.STATUS_INTERRUPTED
+	action.interruption_reason = reason
+	action.estimated_completion_hour = -1
 	action_changed.emit(action)
 	return true
 
@@ -150,11 +164,7 @@ func resume_action(
 		return false
 	var interruption: String = _get_interruption_reason(definition, character)
 	if not interruption.is_empty():
-		action.last_update_hour = current_hour
-		action.status = ActionInstanceData.STATUS_INTERRUPTED
-		action.interruption_reason = interruption
-		action.estimated_completion_hour = -1
-		action_changed.emit(action)
+		interrupt_action(action, current_hour, interruption)
 		return false
 	action.status = ActionInstanceData.STATUS_ACTIVE
 	action.last_update_hour = current_hour
@@ -242,6 +252,33 @@ func calculate_outcome_code(
 	return "failure"
 
 
+func replace_completed_result(
+	action: ActionInstanceData,
+	definition: ActionDefinitionData,
+	character: CharacterData,
+	outcome_code: String
+) -> bool:
+	if action == null or definition == null or character == null:
+		return false
+	if action.status != ActionInstanceData.STATUS_COMPLETED or not action.result_applied:
+		return false
+	if outcome_code not in ["failure", "success", "guaranteed_success"]:
+		return false
+	var raw_before: Variant = action.applied_effects.get("_before", null)
+	if not raw_before is Dictionary:
+		return false
+	_restore_result_before(definition, character, raw_before as Dictionary)
+	action.result_applied = false
+	action.applied_effects = {}
+	action.outcome_code = outcome_code
+	var result_data: Dictionary = (
+		definition.success_result if outcome_code != "failure" else definition.failure_result
+	)
+	_apply_result_once(action, definition, character, result_data, null)
+	action_changed.emit(action)
+	return true
+
+
 func _recalculate_metrics(
 	action: ActionInstanceData,
 	definition: ActionDefinitionData,
@@ -293,34 +330,55 @@ func _apply_result_once(
 ) -> void:
 	if action.result_applied:
 		return
+	var before: Dictionary = {}
 	action.result_description = str(result_data.get("description", "行动已结算"))
 	if result_data.has("skill_delta"):
 		var old_skill: int = int(character.skills.get(definition.primary_skill, 0))
+		before["skill"] = old_skill
 		character.skills[definition.primary_skill] = clampi(
 			old_skill + int(result_data["skill_delta"]), 0, 100
 		)
 	if result_data.has("wealth_delta"):
+		before["wealth"] = int(character.current_status.get("wealth", 0))
 		character.current_status["wealth"] = maxi(
-			int(character.current_status.get("wealth", 0)) + int(result_data["wealth_delta"]), 0
+			int(before["wealth"]) + int(result_data["wealth_delta"]), 0
 		)
 	if result_data.has("reputation_delta"):
+		before["reputation"] = int(character.current_status.get("reputation", 0))
 		character.current_status["reputation"] = maxi(
-			int(character.current_status.get("reputation", 0)) + int(result_data["reputation_delta"]), 0
+			int(before["reputation"]) + int(result_data["reputation_delta"]), 0
 		)
 	if result_data.has("intelligence_delta"):
+		before["intelligence_points"] = int(
+			character.current_status.get("intelligence_points", 0)
+		)
 		character.current_status["intelligence_points"] = maxi(
-			int(character.current_status.get("intelligence_points", 0)) + int(result_data["intelligence_delta"]), 0
+			int(before["intelligence_points"]) + int(result_data["intelligence_delta"]), 0
 		)
 	for state_key: String in ["fatigue", "stress"]:
 		var delta_key: String = state_key + "_delta"
 		if result_data.has(delta_key):
+			before[state_key] = int(character.current_status.get(state_key, 0))
 			character.current_status[state_key] = clampi(
-				int(character.current_status.get(state_key, 0)) + int(result_data[delta_key]), 0, 100
+				int(before[state_key]) + int(result_data[delta_key]), 0, 100
 			)
-	# Map, organization and relationship mutations are domain effects. They are
-	# applied once by SocietySimulationService after the generic result is committed.
 	action.applied_effects = result_data.duplicate(true)
+	action.applied_effects["_before"] = before
 	action.result_applied = true
+
+
+func _restore_result_before(
+	definition: ActionDefinitionData,
+	character: CharacterData,
+	before: Dictionary
+) -> void:
+	if before.has("skill"):
+		character.skills[definition.primary_skill] = int(before["skill"])
+	for state_key: String in [
+		"wealth", "reputation", "intelligence_points", "fatigue", "stress"
+	]:
+		if before.has(state_key):
+			character.current_status[state_key] = int(before[state_key])
 
 
 func _calculate_state_modifier(character: CharacterData) -> float:
@@ -366,6 +424,9 @@ static func _normalized_context(input_context: Dictionary) -> Dictionary:
 		"funding": float(input_context.get("funding", 0.0)),
 		"preparation": float(input_context.get("preparation", 0.0)),
 		"target_resistance": float(input_context.get("target_resistance", 0.0)),
+		"funding_cost": int(input_context.get("funding_cost", 0)),
+		"funding_committed": bool(input_context.get("funding_committed", false)),
+		"wealth_before_funding": int(input_context.get("wealth_before_funding", 0)),
 	}
 
 
@@ -374,4 +435,10 @@ static func _validate_context(context: Dictionary) -> String:
 		var value: float = float(context[key])
 		if value < 0.0 or value > 100.0:
 			return "%s 必须位于 0 至 100" % key
+	var funding_cost: int = int(context["funding_cost"])
+	var wealth_before: int = int(context["wealth_before_funding"])
+	if funding_cost < 0 or wealth_before < 0:
+		return "行动资金审计字段不得为负数"
+	if bool(context["funding_committed"]) and wealth_before < funding_cost:
+		return "行动开始前财富不足以覆盖已承诺费用"
 	return ""
