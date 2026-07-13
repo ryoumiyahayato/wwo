@@ -21,7 +21,12 @@ var aptitude_by_skill: Dictionary = {}
 var error_message: String = ""
 
 
+func is_valid() -> bool:
+	return error_message.is_empty()
+
+
 func load_from_file(path: String = DEFAULT_PATH) -> Error:
+	error_message = ""
 	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
 		error_message = "无法读取行动规则：%s" % path
