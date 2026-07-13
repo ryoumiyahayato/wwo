@@ -160,7 +160,7 @@ func get_control_pressure_multiplier(
 			multiplier += rules.rail_attack_bonus
 		if defender_rail_link:
 			multiplier -= rules.rail_defense_bonus
-		if is_surrounded(unit):
+		if is_surrounded(unit.id):
 			multiplier += rules.surrounded_attack_bonus
 		if attacking_neighbors > 1:
 			multiplier += float(attacking_neighbors - 1) * rules.multi_front_bonus
