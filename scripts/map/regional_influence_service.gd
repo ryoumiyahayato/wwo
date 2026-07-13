@@ -93,7 +93,7 @@ func apply_organization_control_support(
 	var cost: float = applied_effort * float(rules.social_influence["control_resource_cost"])
 	if applied_effort <= 0.0 or organization.resources < maxf(cost, float(rules.social_influence["minimum_organization_resources"])):
 		return false
-	if not map_service.apply_control_pressure(
+	if not map_service.apply_frontline_control_pressure(
 		control_unit_id, organization.country_id, applied_effort
 	):
 		return false
@@ -110,15 +110,15 @@ func apply_action_domain_effect(
 	if action == null or action.status != ActionInstanceData.STATUS_COMPLETED or action.outcome_code == "failure" or action.domain_effect_applied:
 		return false
 	var effect_id: String = str(action.applied_effects.get("domain_effect", ""))
-	var applied: bool = false
 	if effect_id == "regional_policy_support":
-		applied = apply_policy_action(action.target_id, character.country_id, map_service)
-	elif action.applied_effects.has("control_pressure"):
-		# The military effect is already applied by ActionService; mark the domain hook consumed.
-		applied = true
-	if applied:
-		action.domain_effect_applied = true
-	return applied
+		return apply_policy_action(action.target_id, character.country_id, map_service)
+	if action.applied_effects.has("control_pressure"):
+		return map_service.apply_frontline_control_pressure(
+			action.target_id,
+			character.country_id,
+			float(action.applied_effects["control_pressure"])
+		)
+	return false
 
 
 static func _normalize_influence(influence: Dictionary) -> void:
@@ -129,4 +129,3 @@ static func _normalize_influence(influence: Dictionary) -> void:
 		return
 	for raw_id: Variant in influence:
 		influence[raw_id] = float(influence[raw_id]) / total
-
