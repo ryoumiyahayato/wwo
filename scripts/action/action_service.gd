@@ -382,13 +382,21 @@ func _apply_result_once(
 		return
 	var before: Dictionary = {}
 	action.result_description = str(result_data.get("description", "行动已结算"))
-	if result_data.has("skill_delta"):
+	var skill_delta: int = int(result_data.get("skill_delta", 0))
+	if not result_data.has("skill_delta") and definition.category != "study_skill":
+		skill_delta = int(
+			rules.practice_growth.get(
+				"failure_delta" if action.outcome_code == "failure" else "success_delta",
+				0
+			)
+		)
+	if skill_delta != 0:
 		var skill_id: String = _get_growth_skill_id(definition, action.context)
 		var old_skill: int = int(character.skills.get(skill_id, 0))
 		before["skill_id"] = skill_id
 		before["skill_value"] = old_skill
 		character.skills[skill_id] = clampi(
-			old_skill + int(result_data["skill_delta"]), 0, 100
+			old_skill + skill_delta, 0, 100
 		)
 	if result_data.has("wealth_delta"):
 		before["wealth"] = int(character.current_status.get("wealth", 0))
