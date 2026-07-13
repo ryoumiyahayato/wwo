@@ -20,19 +20,27 @@ func _init(
 func build_context(
 	definition: ActionDefinitionData,
 	character: CharacterData,
-	target_id: String
+	target_id: String,
+	extra_funding: int = 0
 ) -> Dictionary:
 	if definition == null or character == null:
 		return {}
+	var applied_extra: int = clampi(extra_funding, 0, get_max_extra_funding())
+	var total_cost: int = get_funding_cost(definition, applied_extra)
 	return {
 		"target_id": target_id,
 		"position_permissions": _get_permissions(character.id),
-		"organization_support": _organization_support(character, target_id),
-		"relationship_support": _relationship_support(character.id, target_id),
-		"funding": float(get_funding_cost(definition)) * float(
-			rules.player_context_rules.get("funding_value_per_wealth", 0.0)
+		"organization_support": _organization_support(
+			definition, character, target_id
 		),
-		"preparation": _preparation(definition, character),
+		"relationship_support": _relationship_support(character.id, target_id),
+		"funding": clampf(
+			float(total_cost)
+			* float(rules.player_context_rules.get("funding_value_per_wealth", 0.0)),
+			0.0,
+			100.0
+		),
+		"preparation": _preparation(definition, character, applied_extra),
 		"target_resistance": _target_resistance(target_id),
 	}
 
@@ -44,16 +52,28 @@ func build_authoritative_context_for_action(
 ) -> Dictionary:
 	if action == null:
 		return {}
-	var context: Dictionary = build_context(definition, character, action.target_id)
+	var base_cost: int = get_base_funding_cost(definition)
+	var committed_cost: int = int(action.context.get("funding_cost", base_cost))
+	var extra_funding: int = clampi(
+		committed_cost - base_cost,
+		0,
+		get_max_extra_funding()
+	)
+	var context: Dictionary = build_context(
+		definition, character, action.target_id, extra_funding
+	)
 	if context.is_empty():
 		return context
-	var cost: int = get_funding_cost(definition)
-	context["funding_cost"] = cost
-	context["funding_committed"] = bool(action.context.get("funding_committed", true))
+	context["funding_cost"] = base_cost + extra_funding
+	context["funding_committed"] = bool(
+		action.context.get("funding_committed", true)
+	)
 	context["wealth_before_funding"] = int(
 		action.context.get(
 			"wealth_before_funding",
-			int(character.current_status.get("wealth", 0)) + cost
+			int(character.current_status.get("wealth", 0))
+			+ base_cost
+			+ extra_funding
 		)
 	)
 	return context
@@ -64,22 +84,30 @@ func start_player_action(
 	definition: ActionDefinitionData,
 	character: CharacterData,
 	current_hour: int,
-	target_id: String
+	target_id: String,
+	extra_funding: int = 0
 ) -> ActionStartResult:
 	var result := ActionStartResult.new()
 	if action_service == null or definition == null or character == null:
 		result.add_error("行动服务、行动定义和人物必须就绪。")
 		return result
-	var target_error: String = get_target_validation_error(definition, character, target_id)
+	var target_error: String = get_target_validation_error(
+		definition, character, target_id
+	)
 	if not target_error.is_empty():
 		result.add_error(target_error)
 		return result
-	if not can_afford(definition, character):
-		result.add_error("财富不足，无法支付本次行动费用。")
+	if extra_funding < 0 or extra_funding > get_max_extra_funding():
+		result.add_error("额外准备投入超出允许范围。")
 		return result
-	var cost: int = get_funding_cost(definition)
+	if not can_afford(definition, character, extra_funding):
+		result.add_error("财富不足，无法支付本次行动投入。")
+		return result
+	var cost: int = get_funding_cost(definition, extra_funding)
 	var wealth_before: int = int(character.current_status.get("wealth", 0))
-	var context: Dictionary = build_context(definition, character, target_id)
+	var context: Dictionary = build_context(
+		definition, character, target_id, extra_funding
+	)
 	context["funding_cost"] = cost
 	context["funding_committed"] = true
 	context["wealth_before_funding"] = wealth_before
@@ -90,7 +118,7 @@ func start_player_action(
 	return result
 
 
-func get_funding_cost(definition: ActionDefinitionData) -> int:
+func get_base_funding_cost(definition: ActionDefinitionData) -> int:
 	if definition == null:
 		return 0
 	var costs: Dictionary = rules.player_context_rules.get(
@@ -99,15 +127,43 @@ func get_funding_cost(definition: ActionDefinitionData) -> int:
 	return maxi(int(costs.get(definition.category, 0)), 0)
 
 
-func can_afford(definition: ActionDefinitionData, character: CharacterData) -> bool:
-	return character != null and int(character.current_status.get("wealth", 0)) >= get_funding_cost(definition)
+func get_funding_cost(
+	definition: ActionDefinitionData, extra_funding: int = 0
+) -> int:
+	return get_base_funding_cost(definition) + clampi(
+		extra_funding, 0, get_max_extra_funding()
+	)
 
 
-func consume_funding(definition: ActionDefinitionData, character: CharacterData) -> bool:
-	if not can_afford(definition, character):
+func get_max_extra_funding() -> int:
+	return maxi(
+		int(rules.player_context_rules.get("maximum_extra_funding", 0)), 0
+	)
+
+
+func can_afford(
+	definition: ActionDefinitionData,
+	character: CharacterData,
+	extra_funding: int = 0
+) -> bool:
+	return (
+		character != null
+		and int(character.current_status.get("wealth", 0))
+		>= get_funding_cost(definition, extra_funding)
+	)
+
+
+func consume_funding(
+	definition: ActionDefinitionData,
+	character: CharacterData,
+	extra_funding: int = 0
+) -> bool:
+	if not can_afford(definition, character, extra_funding):
 		return false
-	var cost: int = get_funding_cost(definition)
-	character.current_status["wealth"] = int(character.current_status.get("wealth", 0)) - cost
+	var cost: int = get_funding_cost(definition, extra_funding)
+	character.current_status["wealth"] = (
+		int(character.current_status.get("wealth", 0)) - cost
+	)
 	return true
 
 
@@ -132,7 +188,9 @@ func get_target_validation_error(
 				return "不能把自己作为人物目标。"
 			return ""
 		"join_organization":
-			var join_target: OrganizationData = society.organizations.get_organization(target_id)
+			var join_target: OrganizationData = society.organizations.get_organization(
+				target_id
+			)
 			if join_target == null:
 				return "必须选择存在的组织。"
 			if join_target.country_id != character.country_id:
@@ -141,23 +199,46 @@ func get_target_validation_error(
 				return "人物已经是该组织成员。"
 			return ""
 		"seek_position":
-			var position_target: OrganizationData = society.organizations.get_organization(target_id)
+			var position_target: OrganizationData = society.organizations.get_organization(
+				target_id
+			)
 			if position_target == null:
 				return "必须选择存在的组织。"
 			if not position_target.member_ids.has(character.id):
 				return "必须先加入该组织。"
-			if _get_next_available_position_id(character.id, position_target).is_empty():
+			if _get_next_available_position_id(
+				character.id, position_target
+			).is_empty():
 				return "该组织目前没有更高的空缺职位。"
 			return ""
 		"promote_policy":
 			if map_service == null or map_service.get_unit(target_id) == null:
 				return "必须选择有效的地区控制单元。"
+			var policy_unit: ControlUnitData = map_service.get_unit(target_id)
+			var policy_region: RegionData = map_service.data_set.regions.get(
+				policy_unit.region_id
+			) as RegionData
+			if policy_region == null or (
+				policy_region.de_jure_country_id != character.country_id
+				and policy_unit.controller_country_id != character.country_id
+			):
+				return "政策只能推动本国法理地区或本国实际控制地区。"
+			if not _has_jurisdiction_permission(
+				character, target_id, "regional_policy"
+			):
+				return "当前职位没有覆盖该地区的政策辖权。"
 			return ""
 		"support_control":
 			if map_service == null or map_service.get_unit(target_id) == null:
 				return "必须选择有效的地区控制单元。"
-			if not map_service.is_valid_control_support_target(target_id, character.country_id):
+			if not map_service.is_valid_control_support_target(
+				target_id, character.country_id
+			):
 				return "军事控制支援只能作用于本国前线相邻敌区，或需要巩固的本国前线。"
+			if not _has_jurisdiction_permission(
+				character, target_id, "regional_control_support"
+			):
+				return "只有本国政府或军队职位可以调动该前线支援。"
 			return ""
 		_:
 			return "未知行动类别。"
@@ -166,25 +247,31 @@ func get_target_validation_error(
 func describe(
 	definition: ActionDefinitionData,
 	character: CharacterData,
-	target_id: String
+	target_id: String,
+	extra_funding: int = 0
 ) -> String:
-	var context: Dictionary = build_context(definition, character, target_id)
+	var context: Dictionary = build_context(
+		definition, character, target_id, extra_funding
+	)
 	if context.is_empty():
 		return "行动条件尚未就绪。"
-	var cost: int = get_funding_cost(definition)
+	var cost: int = get_funding_cost(definition, extra_funding)
+	var base_cost: int = get_base_funding_cost(definition)
 	var wealth: int = int(character.current_status.get("wealth", 0))
 	var affordability: String = "可支付" if wealth >= cost else "资金不足"
-	var target_error: String = get_target_validation_error(definition, character, target_id)
-	var target_line: String = (
-		"目标有效"
-		if target_error.is_empty()
-		else "目标无效：%s" % target_error
+	var target_error: String = get_target_validation_error(
+		definition, character, target_id
 	)
-	return "系统根据人物状态自动计算：\n准备 %.0f · 组织支持 %.0f · 关系支持 %.0f · 目标阻力 %.0f\n行动费用 %d（当前财富 %d，%s）\n%s" % [
+	var target_line: String = (
+		"目标有效" if target_error.is_empty() else "目标无效：%s" % target_error
+	)
+	return "系统条件与主动投入共同计算：\n准备 %.0f · 组织支持 %.0f · 关系支持 %.0f · 目标阻力 %.0f\n基础费用 %d + 额外投入 %d = %d（当前财富 %d，%s）\n%s" % [
 		float(context["preparation"]),
 		float(context["organization_support"]),
 		float(context["relationship_support"]),
 		float(context["target_resistance"]),
+		base_cost,
+		clampi(extra_funding, 0, get_max_extra_funding()),
 		cost,
 		wealth,
 		affordability,
@@ -196,7 +283,9 @@ func _get_next_available_position_id(
 	character_id: String,
 	organization: OrganizationData
 ) -> String:
-	var positions: Dictionary = organization.position_structure.get("positions", {}) as Dictionary
+	var positions: Dictionary = organization.position_structure.get(
+		"positions", {}
+	) as Dictionary
 	var current_id: String = society.organizations.get_position_id(
 		character_id, organization.id
 	)
@@ -223,14 +312,20 @@ func _get_next_available_position_id(
 	return "" if candidates.is_empty() else candidates[0]
 
 
-func _preparation(definition: ActionDefinitionData, character: CharacterData) -> float:
+func _preparation(
+	definition: ActionDefinitionData,
+	character: CharacterData,
+	extra_funding: int
+) -> float:
 	var config: Dictionary = rules.player_context_rules
 	return clampf(
 		float(config.get("base_preparation", 0.0))
 		+ float(character.skills.get(definition.primary_skill, 0))
 		* float(config.get("primary_skill_preparation_scale", 0.0))
 		+ float(character.current_status.get("intelligence_points", 0))
-		* float(config.get("intelligence_preparation_scale", 0.0)),
+		* float(config.get("intelligence_preparation_scale", 0.0))
+		+ float(extra_funding)
+		* float(config.get("preparation_value_per_extra_wealth", 0.0)),
 		0.0,
 		100.0
 	)
@@ -242,17 +337,33 @@ func _get_permissions(character_id: String) -> Array[String]:
 	return society.organizations.get_character_permissions(character_id)
 
 
-func _organization_support(character: CharacterData, target_id: String) -> float:
+func _organization_support(
+	definition: ActionDefinitionData,
+	character: CharacterData,
+	target_id: String
+) -> float:
 	if society == null or society.organizations == null:
 		return 0.0
 	var config: Dictionary = rules.player_context_rules
 	var best: float = 0.0
 	for organization_id: String in character.organization_ids:
-		var organization: OrganizationData = society.organizations.get_organization(organization_id)
+		var organization: OrganizationData = society.organizations.get_organization(
+			organization_id
+		)
 		if organization == null:
 			continue
-		var position_id: String = society.organizations.get_position_id(character.id, organization_id)
-		var positions: Dictionary = organization.position_structure.get("positions", {}) as Dictionary
+		if definition.category in ["promote_policy", "support_control"] and not _organization_has_jurisdiction(
+			organization,
+			target_id,
+			definition.position_permission_required
+		):
+			continue
+		var position_id: String = society.organizations.get_position_id(
+			character.id, organization_id
+		)
+		var positions: Dictionary = organization.position_structure.get(
+			"positions", {}
+		) as Dictionary
 		var position: Dictionary = positions.get(position_id, {}) as Dictionary
 		var value: float = organization.influence * float(
 			config.get("organization_influence_scale", 0.0)
@@ -265,14 +376,58 @@ func _organization_support(character: CharacterData, target_id: String) -> float
 	return clampf(best, 0.0, 100.0)
 
 
+func _has_jurisdiction_permission(
+	character: CharacterData,
+	target_id: String,
+	permission_id: String
+) -> bool:
+	for organization_id: String in character.organization_ids:
+		var organization: OrganizationData = society.organizations.get_organization(
+			organization_id
+		)
+		if (
+			organization != null
+			and society.organizations.has_permission(
+				character.id, organization_id, permission_id
+			)
+			and _organization_has_jurisdiction(
+				organization, target_id, permission_id
+			)
+		):
+			return true
+	return false
+
+
+func _organization_has_jurisdiction(
+	organization: OrganizationData,
+	target_id: String,
+	permission_id: String
+) -> bool:
+	if organization == null or map_service == null:
+		return false
+	var unit: ControlUnitData = map_service.get_unit(target_id)
+	if unit == null:
+		return false
+	if permission_id == "regional_control_support":
+		return organization.type in ["government", "military"]
+	if permission_id == "regional_policy":
+		return (
+			organization.type == "government"
+			or organization.region_id == unit.region_id
+		)
+	return true
+
+
 func _relationship_support(character_id: String, target_id: String) -> float:
 	if society == null or society.relationships == null:
 		return 0.0
 	var relationship: RelationshipData
-	if society.roster.has_character(target_id):
+	if society.roster.is_living(target_id):
 		relationship = society.relationships.get_between(character_id, target_id)
 	else:
-		var organization: OrganizationData = society.organizations.get_organization(target_id)
+		var organization: OrganizationData = society.organizations.get_organization(
+			target_id
+		)
 		if organization != null and not organization.leader_character_id.is_empty():
 			relationship = society.relationships.get_between(
 				character_id, organization.leader_character_id
@@ -281,9 +436,12 @@ func _relationship_support(character_id: String, target_id: String) -> float:
 		return 0.0
 	var config: Dictionary = rules.player_context_rules
 	return clampf(
-		relationship.familiarity * float(config.get("relationship_familiarity_scale", 0.0))
-		+ maxf(relationship.trust, 0.0) * float(config.get("relationship_trust_scale", 0.0))
-		+ maxf(relationship.affinity, 0.0) * float(config.get("relationship_affinity_scale", 0.0)),
+		relationship.familiarity
+		* float(config.get("relationship_familiarity_scale", 0.0))
+		+ maxf(relationship.trust, 0.0)
+		* float(config.get("relationship_trust_scale", 0.0))
+		+ maxf(relationship.affinity, 0.0)
+		* float(config.get("relationship_affinity_scale", 0.0)),
 		0.0,
 		100.0
 	)
@@ -306,7 +464,9 @@ func _target_resistance(target_id: String) -> float:
 			0.0,
 			100.0
 		)
-	var organization: OrganizationData = society.organizations.get_organization(target_id)
+	var organization: OrganizationData = society.organizations.get_organization(
+		target_id
+	)
 	if organization != null:
 		return clampf(
 			organization.influence
