@@ -63,7 +63,7 @@ func validate(
 	error = _validate_state(action)
 	if not error.is_empty():
 		return error
-	error = _validate_target(action, definition, society, map_service)
+	error = _validate_target(action, definition, actor, society, map_service)
 	if not error.is_empty():
 		return error
 	if action.status == ActionInstanceData.STATUS_COMPLETED and definition.category in DOMAIN_CATEGORIES and not action.domain_effect_applied:
@@ -80,6 +80,8 @@ func validate(
 func _validate_context(context: Dictionary, action: ActionInstanceData) -> String:
 	if typeof(context.get("target_id", "")) != TYPE_STRING or str(context.get("target_id", "")) != action.target_id:
 		return "当前行动目标与上下文不一致"
+	if context.has("study_skill_id") and typeof(context["study_skill_id"]) != TYPE_STRING:
+		return "当前行动学习技能字段类型无效"
 	var raw_permissions: Variant = context.get("position_permissions", null)
 	if not raw_permissions is Array:
 		return "当前行动职位权限字段无效"
@@ -164,9 +166,21 @@ func _validate_state(action: ActionInstanceData) -> String:
 func _validate_target(
 	action: ActionInstanceData,
 	definition: ActionDefinitionData,
+	actor: CharacterData,
 	society: SocietySimulationService,
 	map_service: MapControlService
 ) -> String:
+	var study_skill_id: String = str(
+		action.context.get(
+			"study_skill_id",
+			definition.primary_skill if definition.category == "study_skill" else ""
+		)
+	)
+	if definition.category == "study_skill":
+		if study_skill_id.is_empty() or not actor.skills.has(study_skill_id):
+			return "当前学习行动的技能目标无效"
+	elif not study_skill_id.is_empty():
+		return "非学习行动包含异常技能目标"
 	if definition.category in ["build_relationship", "investigate_character"]:
 		if not society.roster.is_living(action.target_id) or action.target_id == action.actor_character_id:
 			return "当前行动人物目标无效"
@@ -200,6 +214,8 @@ func _validate_authoritative_context(
 	var expected: Dictionary = context_service.build_authoritative_context_for_action(
 		definition, actor, action
 	)
+	if expected.is_empty():
+		return "当前行动无法重建权威上下文"
 	var stored_permissions: Array[String] = DataRecordUtils.to_string_array(
 		action.context.get("position_permissions", [])
 	)
@@ -210,6 +226,8 @@ func _validate_authoritative_context(
 	expected_permissions.sort()
 	if stored_permissions != expected_permissions:
 		return "当前行动职位权限与权威组织状态不一致"
+	if str(action.context.get("study_skill_id", "")) != str(expected.get("study_skill_id", "")):
+		return "当前行动学习技能与权威人物状态不一致"
 	for field: String in NUMERIC_CONTEXT_FIELDS:
 		if not is_equal_approx(
 			float(action.context.get(field, -1.0)),
