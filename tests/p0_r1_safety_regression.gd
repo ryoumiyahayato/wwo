@@ -45,7 +45,7 @@ func _run() -> void:
 
 	_test_transactional_restore(save_service, snapshot, clock, map_service)
 	_test_incompatible_config_rejected(save_service, snapshot)
-	_test_backup_recovery(save_service, snapshot)
+	await _test_backup_recovery(save_service, snapshot)
 
 	_cleanup_path(PROBE_PATH)
 	GameSessionService.clear()
