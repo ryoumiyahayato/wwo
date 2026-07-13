@@ -31,7 +31,8 @@ func _ready() -> void:
 
 func _render() -> void:
 	var character: CharacterData = GameSessionService.player_character
-	var dossiers: Variant = character.current_status.get("investigation_dossiers", {})
+	var raw_dossiers: Variant = character.current_status.get("investigation_dossiers", {})
+	var dossiers: Dictionary = raw_dossiers as Dictionary if raw_dossiers is Dictionary else {}
 	title_label.text = "%s · 人物信息" % character.name
 	public_label.text = "[font_size=18]%s，%d岁[/font_size]\n%s · %s\n\n公开职位：%s\n性格表现：%s\n\n当前状态\n%s\n\n可见技能\n%s\n\n已知倾向\n%s\n\n调查档案\n%s" % [
 		character.name,
@@ -43,7 +44,7 @@ func _render() -> void:
 		_format_status(character.current_status),
 		_format_values(character.skills, "skills"),
 		_format_values(character.known_tendencies, "tendencies"),
-		_format_dossiers(dossiers as Dictionary if dossiers is Dictionary else {}),
+		_format_dossiers(dossiers),
 	]
 	developer_label.text = "[color=#efb96a]开发者隐藏数据[/color]\n种子 %d · RNG 状态 %d\n\n潜质（影响成长，不在正式信息中显示）\n%s\n\n气质权重\n%s\n\n真实倾向\n%s" % [
 		character.generation_seed,
@@ -89,14 +90,15 @@ func _format_dossiers(dossiers: Dictionary) -> String:
 		var tendency_lines: Array[String] = []
 		var raw_tendencies: Variant = dossier.get("tendencies", {})
 		if raw_tendencies is Dictionary:
+			var tendencies: Dictionary = raw_tendencies as Dictionary
 			var tendency_ids: Array[String] = []
-			for raw_key: Variant in raw_tendencies as Dictionary:
+			for raw_key: Variant in tendencies:
 				tendency_ids.append(str(raw_key))
 			tendency_ids.sort()
 			for tendency_id: String in tendency_ids:
 				tendency_lines.append("%s：%s" % [
 					_config.get_label("tendencies", tendency_id),
-					_config.describe_tendency(tendency_id, int((raw_tendencies as Dictionary)[tendency_id])),
+					_config.describe_tendency(tendency_id, int(tendencies[tendency_id])),
 				])
 		var position: String = str(dossier.get("public_position", ""))
 		sections.append("[b]%s[/b]，%d岁 · %s\n公开职位：%s\n性格表现：%s\n倾向判断：%s" % [
