@@ -64,8 +64,18 @@ func load_from_file(path: String = DEFAULT_PATH) -> Error:
 		error_message = "行动规则数值范围无效"
 		return ERR_INVALID_DATA
 	var costs: Variant = player_context_rules.get("funding_cost_by_category", {})
-	if not costs is Dictionary or float(player_context_rules.get("funding_value_per_wealth", 0.0)) < 0.0:
-		error_message = "玩家行动上下文规则无效"
+	if not costs is Dictionary:
+		error_message = "玩家行动费用规则无效"
+		return ERR_INVALID_DATA
+	for key: String in [
+		"funding_value_per_wealth",
+		"preparation_value_per_extra_wealth",
+	]:
+		if float(player_context_rules.get(key, -1.0)) < 0.0:
+			error_message = "玩家行动上下文规则 %s 无效" % key
+			return ERR_INVALID_DATA
+	if int(player_context_rules.get("maximum_extra_funding", -1)) < 0:
+		error_message = "玩家额外投入上限无效"
 		return ERR_INVALID_DATA
 	return OK
 
