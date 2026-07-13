@@ -93,8 +93,11 @@ func apply_organization_control_support(
 	var cost: float = applied_effort * float(rules.social_influence["control_resource_cost"])
 	if applied_effort <= 0.0 or organization.resources < maxf(cost, float(rules.social_influence["minimum_organization_resources"])):
 		return false
-	if not map_service.apply_frontline_control_pressure(
-		control_unit_id, organization.country_id, applied_effort
+	var resolved_target_id: String = _resolve_organization_control_target(
+		control_unit_id, organization.country_id, map_service
+	)
+	if resolved_target_id.is_empty() or not map_service.apply_frontline_control_pressure(
+		resolved_target_id, organization.country_id, applied_effort
 	):
 		return false
 	organization.resources -= cost
@@ -119,6 +122,28 @@ func apply_action_domain_effect(
 			float(action.applied_effects["control_pressure"])
 		)
 	return false
+
+
+func _resolve_organization_control_target(
+	requested_target_id: String,
+	country_id: String,
+	map_service: MapControlService
+) -> String:
+	# Organization AI must consolidate vulnerable captured/frontline units before
+	# spending resources on another advance. Player actions use their explicit target.
+	for unit_id: String in map_service.get_sorted_unit_ids():
+		var unit: ControlUnitData = map_service.get_unit(unit_id)
+		if (
+			unit != null
+			and unit.controller_country_id == country_id
+			and map_service.is_valid_control_support_target(unit_id, country_id)
+		):
+			return unit_id
+	return (
+		requested_target_id
+		if map_service.is_valid_control_support_target(requested_target_id, country_id)
+		else ""
+	)
 
 
 static func _normalize_influence(influence: Dictionary) -> void:
