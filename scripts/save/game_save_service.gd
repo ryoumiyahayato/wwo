@@ -182,6 +182,21 @@ func restore_snapshot(
 	var social_error: String = SocialSaveValidator.new().validate(temporary_society)
 	if not social_error.is_empty():
 		return SaveOperationResult.fail("broken_reference", social_error)
+
+	var raw_action_id_state: Dictionary = (snapshot["random_state"] as Dictionary)["action_id_service"] as Dictionary
+	var action_ids := StableIdService.new()
+	if not action_ids.restore_state(raw_action_id_state):
+		return SaveOperationResult.fail("restore_error", "行动 ID 状态无效")
+	var current_hour: int = int((snapshot["game_time"] as Dictionary).get("total_hours", -1))
+	var ai_action_error: String = _validate_ai_action_records(
+		snapshot["ai_states"] as Array,
+		temporary_society,
+		map_service,
+		current_hour,
+		raw_action_id_state
+	)
+	if not ai_action_error.is_empty():
+		return SaveOperationResult.fail("broken_reference", ai_action_error)
 	if not temporary_society.ai.restore_persistent_state(snapshot["ai_states"] as Array):
 		return SaveOperationResult.fail("restore_error", "AI 状态无效")
 
@@ -191,10 +206,6 @@ func restore_snapshot(
 		return SaveOperationResult.fail("restore_error", "暂停结算类别无效")
 	temporary_society.paused_settlement_categories = (paused_categories as Dictionary).duplicate(true)
 
-	var raw_action_id_state: Dictionary = (snapshot["random_state"] as Dictionary)["action_id_service"] as Dictionary
-	var action_ids := StableIdService.new()
-	if not action_ids.restore_state(raw_action_id_state):
-		return SaveOperationResult.fail("restore_error", "行动 ID 状态无效")
 	var selected_country_id: String = str(snapshot["selected_country_id"])
 	if not map_service.data_set.countries.has(selected_country_id):
 		return SaveOperationResult.fail("broken_reference", "所选国家引用无效")
@@ -208,7 +219,7 @@ func restore_snapshot(
 			action_record,
 			temporary_society,
 			map_service,
-			int((snapshot["game_time"] as Dictionary).get("total_hours", -1)),
+			current_hour,
 			raw_action_id_state
 		)
 		if not action_error.is_empty():
@@ -243,6 +254,43 @@ func restore_snapshot(
 	performance.record("restore", Time.get_ticks_usec() - started)
 	log_service.add("load", "存档恢复完成", clock.total_hours)
 	return SaveOperationResult.ok("", snapshot)
+
+
+func _validate_ai_action_records(
+	records: Array,
+	society: SocietySimulationService,
+	map_service: MapControlService,
+	current_hour: int,
+	action_id_state: Dictionary
+) -> String:
+	var validator := ActionSaveValidator.new()
+	for raw_state: Variant in records:
+		if not raw_state is Dictionary:
+			return "AI 状态记录必须是对象"
+		var state: Dictionary = raw_state as Dictionary
+		var character_id: String = str(state.get("character_id", ""))
+		var raw_action: Variant = state.get("current_action_record", {})
+		if not raw_action is Dictionary:
+			return "NPC 进行中行动必须是对象"
+		var action_record: Dictionary = raw_action as Dictionary
+		if action_record.is_empty():
+			continue
+		if str(action_record.get("actor_character_id", "")) != character_id:
+			return "NPC 行动人物与 AI 状态人物不一致"
+		var action := ActionInstanceData.from_dict(action_record)
+		if action.status not in [ActionInstanceData.STATUS_ACTIVE, ActionInstanceData.STATUS_PAUSED]:
+			return "NPC 持久行动必须处于进行中或暂停状态"
+		var error: String = validator.validate(
+			action_record,
+			society,
+			map_service,
+			current_hour,
+			action_id_state,
+			false
+		)
+		if not error.is_empty():
+			return "NPC 行动 %s 无效：%s" % [character_id, error]
+	return ""
 
 
 func validate_snapshot(snapshot: Dictionary) -> Array[String]:
