@@ -12,6 +12,7 @@ var progress_effective_scale: float
 var minimum_progress_multiplier: float
 var maximum_progress_multiplier: float
 var mastery_guarantee: Dictionary = {}
+var practice_growth: Dictionary = {}
 var state_rules: Dictionary = {}
 var player_context_rules: Dictionary = {}
 var outlook_bands: Array[Dictionary] = []
@@ -34,8 +35,8 @@ func load_from_file(path: String = DEFAULT_PATH) -> Error:
 		"config_version", "primary_skill_weight", "secondary_skill_weight",
 		"position_permission_bonus", "progress_base_multiplier",
 		"progress_effective_scale", "minimum_progress_multiplier",
-		"maximum_progress_multiplier", "mastery_guarantee", "state",
-		"player_context", "outlook_bands", "guaranteed_label",
+		"maximum_progress_multiplier", "mastery_guarantee", "practice_growth",
+		"state", "player_context", "outlook_bands", "guaranteed_label",
 		"aptitude_by_skill",
 	]
 	for key: String in required:
@@ -45,6 +46,7 @@ func load_from_file(path: String = DEFAULT_PATH) -> Error:
 	if (
 		int(data["config_version"]) != 1
 		or not data["mastery_guarantee"] is Dictionary
+		or not data["practice_growth"] is Dictionary
 		or not data["state"] is Dictionary
 		or not data["player_context"] is Dictionary
 		or not data["outlook_bands"] is Array
@@ -60,6 +62,7 @@ func load_from_file(path: String = DEFAULT_PATH) -> Error:
 	minimum_progress_multiplier = float(data["minimum_progress_multiplier"])
 	maximum_progress_multiplier = float(data["maximum_progress_multiplier"])
 	mastery_guarantee = (data["mastery_guarantee"] as Dictionary).duplicate(true)
+	practice_growth = (data["practice_growth"] as Dictionary).duplicate(true)
 	state_rules = (data["state"] as Dictionary).duplicate(true)
 	player_context_rules = (data["player_context"] as Dictionary).duplicate(true)
 	outlook_bands.clear()
@@ -90,6 +93,14 @@ func load_from_file(path: String = DEFAULT_PATH) -> Error:
 	if float(mastery_guarantee["effective_value_bonus"]) < 0.0:
 		error_message = "行动精通保证加成无效"
 		return ERR_INVALID_DATA
+	for key: String in ["success_delta", "failure_delta"]:
+		if typeof(practice_growth.get(key)) not in [TYPE_INT, TYPE_FLOAT]:
+			error_message = "行动实践成长规则 %s 必须是数字" % key
+			return ERR_INVALID_DATA
+		var value: float = float(practice_growth[key])
+		if value < 0.0 or value > 10.0 or value != floor(value):
+			error_message = "行动实践成长规则 %s 超出范围" % key
+			return ERR_INVALID_DATA
 	var costs: Variant = player_context_rules.get("funding_cost_by_category", {})
 	if not costs is Dictionary:
 		error_message = "玩家行动费用规则无效"
