@@ -141,11 +141,21 @@ func get_control_pressure_multiplier(
 		var defender_support: float = float(
 			region.social_influence.get(unit.controller_country_id, 0.0)
 		)
-		multiplier += (attacker_support - defender_support) * rules.social_support_scale
+		multiplier += (
+			(attacker_support - defender_support)
+			* rules.social_support_scale
+		)
+	var local_support: float = clampf(unit.social_support, 0.0, 1.0)
 	if unit.controller_country_id == attacking_country_id:
+		multiplier += (
+			local_support - 0.5
+		) * rules.unit_social_support_scale
 		if attacker_rail_link:
 			multiplier += rules.rail_consolidation_bonus
 	else:
+		multiplier += (
+			0.5 - local_support
+		) * rules.unit_social_support_scale
 		if attacker_rail_link:
 			multiplier += rules.rail_attack_bonus
 		if defender_rail_link:
