@@ -70,9 +70,46 @@ func set_control_state(
 	unit.control_strength = clampf(control_strength, 0.0, 1.0)
 	unit.contested_level = clampf(contested_level, 0.0, 1.0)
 	if controller_changed:
+		unit.enemy_pressure = 0.0
 		_update_frontlines_for_unit(unit)
 	control_unit_changed.emit(unit.id)
 	return true
+
+
+func is_valid_control_support_target(
+	unit_id: String,
+	supporting_country_id: String
+) -> bool:
+	var unit: ControlUnitData = get_unit(unit_id)
+	if unit == null or not data_set.countries.has(supporting_country_id):
+		return false
+	var adjacent_to_supporter: bool = false
+	var adjacent_to_enemy: bool = false
+	for neighbor_id: String in unit.neighbor_ids:
+		var neighbor: ControlUnitData = get_unit(neighbor_id)
+		if neighbor == null:
+			continue
+		if neighbor.controller_country_id == supporting_country_id:
+			adjacent_to_supporter = true
+		else:
+			adjacent_to_enemy = true
+	if unit.controller_country_id != supporting_country_id:
+		return adjacent_to_supporter
+	return adjacent_to_enemy and (
+		unit.control_strength < 1.0
+		or unit.contested_level > 0.0
+		or unit.enemy_pressure > 0.0
+	)
+
+
+func apply_frontline_control_pressure(
+	unit_id: String,
+	attacking_country_id: String,
+	intensity: float = 1.0
+) -> bool:
+	if not is_valid_control_support_target(unit_id, attacking_country_id):
+		return false
+	return apply_control_pressure(unit_id, attacking_country_id, intensity)
 
 
 func apply_control_pressure(
@@ -94,6 +131,11 @@ func apply_control_pressure(
 		)
 		unit.contested_level = clampf(
 			unit.contested_level - rules.pressure_contested_gain * applied_intensity,
+			0.0,
+			1.0
+		)
+		unit.enemy_pressure = clampf(
+			unit.enemy_pressure - rules.pressure_enemy_gain * applied_intensity,
 			0.0,
 			1.0
 		)
@@ -119,6 +161,8 @@ func apply_control_pressure(
 		):
 			unit.controller_country_id = attacking_country_id
 			unit.control_strength = rules.consolidation_strength
+			unit.contested_level = minf(rules.contested_threshold * 0.5, 0.2)
+			unit.enemy_pressure = 0.0
 			_update_frontlines_for_unit(unit)
 	control_unit_changed.emit(unit.id)
 	return true
@@ -239,6 +283,7 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		return false
 	if (regions as Dictionary).size() != data_set.regions.size() or (units as Dictionary).size() != data_set.control_units.size():
 		return false
+	var expected_country_ids: Array[String] = get_country_ids()
 	for region_id: String in data_set.regions:
 		if not (regions as Dictionary).has(region_id):
 			return false
@@ -246,10 +291,14 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		if not region_state is Dictionary or not (region_state as Dictionary).get("social_influence", {}) is Dictionary:
 			return false
 		var influence: Dictionary = (region_state as Dictionary).get("social_influence", {}) as Dictionary
+		if influence.size() != expected_country_ids.size():
+			return false
 		var influence_total: float = 0.0
-		for raw_country_id: Variant in influence:
-			var value: float = float(influence[raw_country_id])
-			if not data_set.countries.has(str(raw_country_id)) or value < 0.0 or value > 1.0:
+		for country_id: String in expected_country_ids:
+			if not influence.has(country_id):
+				return false
+			var value: float = float(influence[country_id])
+			if value < 0.0 or value > 1.0:
 				return false
 			influence_total += value
 		if not is_equal_approx(influence_total, 1.0):
