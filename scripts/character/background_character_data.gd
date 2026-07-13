@@ -30,7 +30,7 @@ static func from_dict(data: Dictionary) -> BackgroundCharacterData:
 	model.organization_ids = DataRecordUtils.to_string_array(data.get("organization_ids", []))
 	model.relationship_ids = DataRecordUtils.to_string_array(data.get("relationship_ids", []))
 	model.manifested_traits = DataRecordUtils.to_string_array(data.get("manifested_traits", []))
-	model.current_status = (data.get("current_status", {}) as Dictionary).duplicate(true)
+	model.current_status = DataRecordUtils.to_dictionary(data.get("current_status", {}))
 	model.activation_seed = int(data.get("activation_seed", 0))
 	return model
 
