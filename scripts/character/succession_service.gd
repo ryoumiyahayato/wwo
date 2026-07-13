@@ -37,7 +37,9 @@ func get_candidates(character_id: String) -> Array[SuccessionCandidateData]:
 		evidence[other_id] = {"relationship": relationship, "shared": []}
 	var source_orgs: Array[String] = _get_organization_ids(source)
 	for organization_id: String in source_orgs:
-		var organization: OrganizationData = organizations.get_organization(organization_id)
+		var organization: OrganizationData = organizations.get_organization(
+			organization_id
+		)
 		if organization == null:
 			continue
 		for member_id: String in organization.member_ids:
@@ -46,7 +48,9 @@ func get_candidates(character_id: String) -> Array[SuccessionCandidateData]:
 			if not evidence.has(member_id):
 				evidence[member_id] = {"relationship": null, "shared": []}
 			var item: Dictionary = evidence[member_id] as Dictionary
-			var shared: Array[String] = DataRecordUtils.to_string_array(item["shared"])
+			var shared: Array[String] = DataRecordUtils.to_string_array(
+				item["shared"]
+			)
 			if not shared.has(organization_id):
 				shared.append(organization_id)
 			item["shared"] = shared
@@ -61,14 +65,18 @@ func get_candidates(character_id: String) -> Array[SuccessionCandidateData]:
 		var item: Dictionary = evidence[candidate_id] as Dictionary
 		var relationship: RelationshipData = item["relationship"] as RelationshipData
 		var shared: Array[String] = DataRecordUtils.to_string_array(item["shared"])
-		var score: float = _score_candidate(candidate_source, relationship, shared)
+		var score: float = _score_candidate(
+			candidate_source, relationship, shared
+		)
 		if score < float(rules.candidate["minimum_score"]):
 			continue
 		var candidate := SuccessionCandidateData.new()
 		candidate.character_id = candidate_id
 		candidate.name = str(candidate_source.name)
 		candidate.score = snappedf(score, 0.001)
-		candidate.relationship_id = "" if relationship == null else relationship.id
+		candidate.relationship_id = (
+			"" if relationship == null else relationship.id
+		)
 		candidate.shared_organization_ids = shared.duplicate()
 		candidate.role_label = _role_label(relationship, shared)
 		output.append(candidate)
@@ -108,16 +116,15 @@ func execute_succession(
 	var organizations_before: Array[Dictionary] = organizations.get_persistent_state()
 	var relationships_before: Dictionary = relationships.get_persistent_state()
 	var ai_before: Array[Dictionary] = ai.get_persistent_state()
-	var old_relationships: Array[RelationshipData] = relationships.get_for_character(old_character_id)
+	var old_relationships: Array[RelationshipData] = relationships.get_for_character(
+		old_character_id
+	)
 	var old_positions: Dictionary = {}
 	for organization_id: String in old_character.organization_ids:
 		old_positions[organization_id] = organizations.get_position_id(
 			old_character_id, organization_id
 		)
 
-	# Exit first so a background successor can be promoted even when the active
-	# roster was exactly at its configured limit. Every later failure restores all
-	# four authoritative social stores before returning.
 	var exited: ExitedCharacterRecord = roster.exit_active_character(
 		old_character_id, exit_reason, current_hour
 	)
@@ -128,23 +135,46 @@ func execute_succession(
 	if successor == null:
 		successor = roster.promote(successor_character_id)
 	if successor == null:
-		_rollback(roster_before, organizations_before, relationships_before, ai_before)
+		_rollback(
+			roster_before,
+			organizations_before,
+			relationships_before,
+			ai_before
+		)
 		result.add_error("无法将继承候选升级到活跃层")
 		return result
 
 	var reason_rules: Dictionary = rules.exit_reasons[exit_reason] as Dictionary
 	_transfer_resources(old_character, successor, reason_rules, result)
 	_transfer_relationships(
-		old_character_id, successor, old_relationships, reason_rules, current_hour, result
+		old_character_id,
+		successor,
+		old_relationships,
+		reason_rules,
+		current_hour,
+		result
 	)
 	_transfer_organizations(
-		old_character, successor, old_positions, reason_rules, selected.score, result
+		old_character,
+		successor,
+		old_positions,
+		reason_rules,
+		selected.score,
+		selected.shared_organization_ids,
+		result
 	)
 	ai.unregister(successor.id)
 	if not roster.set_player_character(successor):
-		_rollback(roster_before, organizations_before, relationships_before, ai_before)
+		_rollback(
+			roster_before,
+			organizations_before,
+			relationships_before,
+			ai_before
+		)
 		result.add_error("无法完成玩家人物切换")
 		return result
+	successor.current_status.erase("succession_required")
+	successor.current_status.erase("succession_reason")
 	exited.successor_character_id = successor.id
 	result.successor = successor
 	result.exited_record = exited
@@ -166,7 +196,9 @@ func _rollback(
 		return false
 	if not ai.restore_persistent_state(ai_state):
 		return false
-	var restored_player: CharacterData = roster.get_active(roster.player_character_id)
+	var restored_player: CharacterData = roster.get_active(
+		roster.player_character_id
+	)
 	if restored_player == null:
 		return false
 	GameSessionService.player_character = restored_player
@@ -181,15 +213,31 @@ func _transfer_resources(
 	result: SuccessionResult
 ) -> void:
 	var old_wealth: int = int(old_character.current_status.get("wealth", 0))
-	var old_reputation: int = int(old_character.current_status.get("reputation", 0))
-	var old_intelligence: int = int(old_character.current_status.get("intelligence_points", 0))
-	result.inherited_wealth = floori(float(old_wealth) * float(reason_rules["wealth_ratio"]))
-	result.inherited_reputation = floori(float(old_reputation) * float(reason_rules["reputation_ratio"]))
-	result.inherited_intelligence = floori(float(old_intelligence) * float(reason_rules["intelligence_ratio"]))
+	var old_reputation: int = int(
+		old_character.current_status.get("reputation", 0)
+	)
+	var old_intelligence: int = int(
+		old_character.current_status.get("intelligence_points", 0)
+	)
+	result.inherited_wealth = floori(
+		float(old_wealth) * float(reason_rules["wealth_ratio"])
+	)
+	result.inherited_reputation = floori(
+		float(old_reputation) * float(reason_rules["reputation_ratio"])
+	)
+	result.inherited_intelligence = floori(
+		float(old_intelligence) * float(reason_rules["intelligence_ratio"])
+	)
 	old_character.current_status["wealth"] = old_wealth - result.inherited_wealth
-	successor.current_status["wealth"] = int(successor.current_status.get("wealth", 0)) + result.inherited_wealth
-	successor.current_status["reputation"] = int(successor.current_status.get("reputation", 0)) + result.inherited_reputation
-	successor.current_status["intelligence_points"] = int(successor.current_status.get("intelligence_points", 0)) + result.inherited_intelligence
+	successor.current_status["wealth"] = int(
+		successor.current_status.get("wealth", 0)
+	) + result.inherited_wealth
+	successor.current_status["reputation"] = int(
+		successor.current_status.get("reputation", 0)
+	) + result.inherited_reputation
+	successor.current_status["intelligence_points"] = int(
+		successor.current_status.get("intelligence_points", 0)
+	) + result.inherited_intelligence
 
 
 func _transfer_relationships(
@@ -206,25 +254,64 @@ func _transfer_relationships(
 			if old_relationship.character_a_id == old_character_id
 			else old_relationship.character_a_id
 		)
-		if other_id == successor.id or roster.get_public_character(other_id) == null:
+		if (
+			other_id == successor.id
+			or roster.get_public_character(other_id) == null
+		):
 			continue
-		var is_enemy: bool = old_relationship.affinity <= rules.enemy_affinity_threshold
-		var ratio: float = float(reason_rules[
-			"enemy_relationship_ratio" if is_enemy else "ally_relationship_ratio"
-		])
+		var is_enemy: bool = (
+			old_relationship.affinity <= rules.enemy_affinity_threshold
+		)
+		var ratio: float = float(
+			reason_rules[
+				"enemy_relationship_ratio"
+				if is_enemy
+				else "ally_relationship_ratio"
+			]
+		)
+		var inherited_familiarity: float = clampf(
+			old_relationship.familiarity * ratio, 0.0, 1.0
+		)
+		var inherited_trust: float = clampf(
+			old_relationship.trust * ratio, -1.0, 1.0
+		)
+		var inherited_affinity: float = clampf(
+			old_relationship.affinity * ratio, -1.0, 1.0
+		)
+		var existing: RelationshipData = relationships.get_between(
+			successor.id, other_id
+		)
 		var inherited: RelationshipData = relationships.create_or_update(
 			successor.id,
 			other_id,
 			current_hour,
 			{},
-			"inherited_rival" if is_enemy else "inherited_ally"
+			(
+				""
+				if existing != null
+				else "inherited_rival" if is_enemy else "inherited_ally"
+			)
 		)
 		if inherited == null:
 			continue
-		inherited.familiarity = clampf(old_relationship.familiarity * ratio, 0.0, 1.0)
-		inherited.trust = clampf(old_relationship.trust * ratio, -1.0, 1.0)
-		inherited.affinity = clampf(old_relationship.affinity * ratio, -1.0, 1.0)
-		inherited.is_public = old_relationship.is_public
+		if existing == null:
+			inherited.familiarity = inherited_familiarity
+			inherited.trust = inherited_trust
+			inherited.affinity = inherited_affinity
+			inherited.is_public = old_relationship.is_public
+		else:
+			inherited.familiarity = maxf(
+				existing.familiarity, inherited_familiarity
+			)
+			inherited.trust = _merge_relationship_axis(
+				existing.trust, inherited_trust
+			)
+			inherited.affinity = _merge_relationship_axis(
+				existing.affinity, inherited_affinity
+			)
+			inherited.is_public = (
+				existing.is_public or old_relationship.is_public
+			)
 		result.inherited_relationship_count += 1
 		if is_enemy:
 			result.inherited_enemy_count += 1
@@ -236,16 +323,87 @@ func _transfer_organizations(
 	old_positions: Dictionary,
 	reason_rules: Dictionary,
 	candidate_score: float,
+	shared_organization_ids: Array[String],
 	result: SuccessionResult
 ) -> void:
 	var organization_ids: Array[String] = old_character.organization_ids.duplicate()
+	var maximum_new_memberships: int = maxi(
+		int(rules.candidate.get("maximum_inherited_organizations", 2)), 0
+	)
+	var inherited_memberships: int = 0
+	var can_inherit_position: bool = (
+		bool(reason_rules.get("position_inheritance", false))
+		and candidate_score >= rules.position_inheritance_minimum_score
+	)
 	for organization_id: String in organization_ids:
-		var old_position: String = str(old_positions.get(organization_id, ""))
+		var old_position: String = str(
+			old_positions.get(organization_id, "")
+		)
 		organizations.leave_organization(old_character, organization_id)
-		if not organizations.join_organization(successor, organization_id):
-			continue
-		if bool(reason_rules.get("position_inheritance", false)) and candidate_score >= rules.position_inheritance_minimum_score and not old_position.is_empty() and organizations.assign_position(successor, organization_id, old_position):
+		var already_member: bool = successor.organization_ids.has(organization_id)
+		var eligible_membership: bool = (
+			shared_organization_ids.has(organization_id)
+			or can_inherit_position
+		)
+		if not already_member:
+			if (
+				not eligible_membership
+				or inherited_memberships >= maximum_new_memberships
+				or not organizations.join_organization(
+					successor, organization_id
+				)
+			):
+				continue
+			inherited_memberships += 1
+		if (
+			can_inherit_position
+			and not old_position.is_empty()
+			and _is_position_upgrade(
+				successor.id, organization_id, old_position
+			)
+			and organizations.assign_position(
+				successor, organization_id, old_position
+			)
+		):
 			result.inherited_position_count += 1
+
+
+func _is_position_upgrade(
+	character_id: String,
+	organization_id: String,
+	candidate_position_id: String
+) -> bool:
+	var organization: OrganizationData = organizations.get_organization(
+		organization_id
+	)
+	if organization == null:
+		return false
+	var positions: Dictionary = organization.position_structure.get(
+		"positions", {}
+	) as Dictionary
+	if not positions.has(candidate_position_id):
+		return false
+	var current_position_id: String = organizations.get_position_id(
+		character_id, organization_id
+	)
+	var current_level: int = int(
+		(positions.get(current_position_id, {}) as Dictionary).get("level", 0)
+	)
+	var candidate_level: int = int(
+		(positions[candidate_position_id] as Dictionary).get("level", 0)
+	)
+	return candidate_level > current_level
+
+
+static func _merge_relationship_axis(
+	existing_value: float, inherited_value: float
+) -> float:
+	var remaining_capacity: float = 1.0 - absf(existing_value)
+	return clampf(
+		existing_value + inherited_value * remaining_capacity * 0.5,
+		-1.0,
+		1.0
+	)
 
 
 func _score_candidate(
@@ -257,9 +415,15 @@ func _score_candidate(
 		rules.candidate["shared_organization_bonus"]
 	)
 	if relationship != null:
-		score += relationship.familiarity * float(rules.candidate["familiarity_weight"])
-		score += maxf(relationship.trust, 0.0) * float(rules.candidate["trust_weight"])
-		score += maxf(relationship.affinity, 0.0) * float(rules.candidate["affinity_weight"])
+		score += relationship.familiarity * float(
+			rules.candidate["familiarity_weight"]
+		)
+		score += maxf(relationship.trust, 0.0) * float(
+			rules.candidate["trust_weight"]
+		)
+		score += maxf(relationship.affinity, 0.0) * float(
+			rules.candidate["affinity_weight"]
+		)
 	score += float(candidate.current_status.get("reputation", 0)) * float(
 		rules.candidate["reputation_weight"]
 	)
@@ -279,7 +443,8 @@ static func _get_organization_ids(character: Variant) -> Array[String]:
 
 
 static func _role_label(
-	relationship: RelationshipData, shared_organizations: Array[String]
+	relationship: RelationshipData,
+	shared_organizations: Array[String]
 ) -> String:
 	if not shared_organizations.is_empty():
 		return "同组织继任者"
