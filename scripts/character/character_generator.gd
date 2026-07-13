@@ -45,8 +45,16 @@ func generate_character(
 		result.add_error("所选国家缺少姓名池：%s" % country_id)
 		return result
 
-	var region_id: String = _pick_region(country_id)
-	var occupation: Dictionary = _pick_occupation(mode, category)
+	var region_id: String = ""
+	var population_category: String = ""
+	if mode == MODE_FULL_POPULATION:
+		var population_group: PopulationGroupData = _pick_population_group(country_id)
+		if population_group != null:
+			region_id = population_group.region_id
+			population_category = population_group.occupation_category
+	else:
+		region_id = _pick_region(country_id)
+	var occupation: Dictionary = _pick_occupation(mode, category, population_category)
 	if region_id.is_empty() or occupation.is_empty():
 		result.add_error("所选条件没有可用的人物生成数据")
 		return result
@@ -72,6 +80,7 @@ func generate_character(
 	character.known_tendencies = {}
 	CharacterTendencyService.new(config).refresh_known_tendencies(character)
 	character.current_status = _generate_current_status(occupation)
+	character.current_status["population_category"] = population_category
 	character.is_active = true
 	character.random_mode = mode
 	character.random_category = category if mode == MODE_CATEGORY else ""
@@ -95,16 +104,35 @@ func _pick_region(country_id: String) -> String:
 	return str(_weighted_pick(candidates))
 
 
-func _pick_occupation(mode: String, category: String) -> Dictionary:
+func _pick_population_group(country_id: String) -> PopulationGroupData:
+	var country: CountryData = data_set.countries[country_id] as CountryData
+	var candidates: Array[Dictionary] = []
+	for region_id: String in country.region_ids:
+		var region: RegionData = data_set.regions[region_id] as RegionData
+		for population_id: String in region.population_group_ids:
+			var group: PopulationGroupData = data_set.population_groups.get(population_id) as PopulationGroupData
+			if group != null and group.population_count > 0:
+				candidates.append({"value": group, "weight": group.population_count})
+	return _weighted_pick(candidates) as PopulationGroupData
+
+
+func _pick_occupation(
+	mode: String, category: String, population_category: String = ""
+) -> Dictionary:
 	var candidates: Array[Dictionary] = []
 	for occupation: Dictionary in config.occupations:
 		if mode == MODE_CATEGORY and str(occupation["category"]) != category:
 			continue
-		var weight: int = (
-			int(occupation["standard_weight"])
+		var base_weight: float = (
+			float(occupation["standard_weight"])
 			if mode == MODE_STANDARD
-			else int(occupation["population_weight"])
+			else float(occupation["population_weight"])
 		)
+		if mode == MODE_FULL_POPULATION:
+			base_weight *= config.get_population_occupation_multiplier(
+				population_category, str(occupation["id"])
+			)
+		var weight: int = roundi(base_weight * 100.0)
 		if weight > 0:
 			candidates.append({"value": occupation, "weight": weight})
 	var picked: Variant = _weighted_pick(candidates)
