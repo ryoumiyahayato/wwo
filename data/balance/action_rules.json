@@ -13,6 +13,10 @@
     "funding_threshold": 80,
     "effective_value_bonus": 60.0
   },
+  "practice_growth": {
+    "success_delta": 2,
+    "failure_delta": 1
+  },
   "state": {
     "health_baseline": 80.0,
     "health_weight": 0.25,
