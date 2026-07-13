@@ -277,6 +277,7 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		or not raw_active is Array
 		or not raw_exited is Array
 		or not raw_seeds is Dictionary
+		or (raw_active as Array).size() > rules.active_character_limit
 	):
 		return false
 	var restored_background: Dictionary = {}
@@ -300,6 +301,7 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		var character := CharacterData.from_dict(raw_character as Dictionary)
 		if (
 			character.id.is_empty()
+			or not character.is_active
 			or not data_set.countries.has(character.country_id)
 			or not data_set.regions.has(character.region_id)
 			or restored_background.has(character.id)
@@ -314,6 +316,7 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		if (
 			record.character == null
 			or record.character.id.is_empty()
+			or record.character.is_active
 			or not data_set.countries.has(record.character.country_id)
 			or not data_set.regions.has(record.character.region_id)
 			or restored_background.has(record.character.id)
@@ -330,10 +333,37 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		== 0
 	):
 		return false
+	var all_character_ids: Dictionary = {}
+	for character_id: String in restored_background:
+		all_character_ids[character_id] = true
+	for character_id: String in restored_active:
+		all_character_ids[character_id] = true
+	for character_id: String in restored_exited:
+		all_character_ids[character_id] = true
+	var seeds: Dictionary = raw_seeds as Dictionary
+	if seeds.size() != all_character_ids.size():
+		return false
+	for raw_id: Variant in seeds:
+		var character_id: String = str(raw_id)
+		var raw_seed: Variant = seeds[raw_id]
+		if (
+			not all_character_ids.has(character_id)
+			or typeof(raw_seed) not in [TYPE_INT, TYPE_FLOAT]
+			or float(raw_seed) < 0.0
+			or float(raw_seed) != floor(float(raw_seed))
+		):
+			return false
+	for character_id: String in all_character_ids:
+		if not seeds.has(character_id):
+			return false
+		if restored_background.has(character_id) and int(seeds[character_id]) != int(
+			(restored_background[character_id] as BackgroundCharacterData).activation_seed
+		):
+			return false
 	background_characters = restored_background
 	active_characters = restored_active
 	exited_characters = restored_exited
-	_activation_seeds = (raw_seeds as Dictionary).duplicate(true)
+	_activation_seeds = seeds.duplicate(true)
 	player_character_id = player_id
 	return true
 
