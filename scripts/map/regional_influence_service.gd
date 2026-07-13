@@ -50,6 +50,11 @@ func apply_policy_action(
 	if unit == null:
 		return false
 	var region: RegionData = map_service.data_set.regions[unit.region_id] as RegionData
+	if (
+		region.de_jure_country_id != country_id
+		and unit.controller_country_id != country_id
+	):
+		return false
 	return apply_social_influence(
 		region, country_id, float(rules.social_influence["policy_delta"])
 	)
@@ -63,13 +68,29 @@ func apply_organization_social_support(
 	organization_service: OrganizationService,
 	map_service: MapControlService
 ) -> bool:
-	if organization == null or not organization_service.has_permission(character_id, organization.id, "regional_policy"):
+	if organization == null or not organization_service.has_permission(
+		character_id, organization.id, "regional_policy"
+	):
 		return false
-	var applied_effort: float = clampf(effort, 0.0, 1.0)
-	var cost: float = applied_effort * float(rules.social_influence["organization_resource_cost"])
-	if applied_effort <= 0.0 or organization.resources < maxf(cost, float(rules.social_influence["minimum_organization_resources"])) or not map_service.data_set.regions.has(region_id):
+	if not map_service.data_set.regions.has(region_id):
 		return false
 	var region: RegionData = map_service.data_set.regions[region_id] as RegionData
+	if region.de_jure_country_id != organization.country_id:
+		return false
+	if organization.type != "government" and organization.region_id != region_id:
+		return false
+	var applied_effort: float = clampf(effort, 0.0, 1.0)
+	var cost: float = applied_effort * float(
+		rules.social_influence["organization_resource_cost"]
+	)
+	if (
+		applied_effort <= 0.0
+		or organization.resources < maxf(
+			cost,
+			float(rules.social_influence["minimum_organization_resources"])
+		)
+	):
+		return false
 	var delta: float = applied_effort * organization.influence * float(
 		rules.social_influence["organization_delta_scale"]
 	)
@@ -87,11 +108,18 @@ func apply_organization_control_support(
 	organization_service: OrganizationService,
 	map_service: MapControlService
 ) -> bool:
-	if organization == null or not organization_service.has_permission(character_id, organization.id, "regional_control_support"):
+	if organization == null or organization.type not in ["government", "military"] or not organization_service.has_permission(
+		character_id, organization.id, "regional_control_support"
+	):
 		return false
 	var applied_effort: float = clampf(effort, 0.0, 1.0)
-	var cost: float = applied_effort * float(rules.social_influence["control_resource_cost"])
-	if applied_effort <= 0.0 or organization.resources < maxf(cost, float(rules.social_influence["minimum_organization_resources"])):
+	var cost: float = applied_effort * float(
+		rules.social_influence["control_resource_cost"]
+	)
+	if applied_effort <= 0.0 or organization.resources < maxf(
+		cost,
+		float(rules.social_influence["minimum_organization_resources"])
+	):
 		return false
 	var resolved_target_id: String = _resolve_organization_control_target(
 		control_unit_id, organization.country_id, map_service
@@ -114,7 +142,9 @@ func apply_action_domain_effect(
 		return false
 	var effect_id: String = str(action.applied_effects.get("domain_effect", ""))
 	if effect_id == "regional_policy_support":
-		return apply_policy_action(action.target_id, character.country_id, map_service)
+		return apply_policy_action(
+			action.target_id, character.country_id, map_service
+		)
 	if action.applied_effects.has("control_pressure"):
 		return map_service.apply_frontline_control_pressure(
 			action.target_id,
