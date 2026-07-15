@@ -57,7 +57,7 @@
 
 - 问题：开始按钮位于滚动内容底部，自动旅程无法稳定滚动到可交互位置。
 - 修复：正式开始按钮移动到滚动区外的面板底部。
-- 当前旅程：`tests/p0_r1_player_journey_post_audit.gd` 通过正式 UI 执行关系、组织、职位、政策、合法退休继承及保存加载，并验证按钮在 1280×720 内可见。
+- 当前旅程：`tests/p0_r1_player_journey_current.gd` 通过正式 UI 执行关系、组织、职位、政策、合法退休继承及保存加载，并验证按钮在 1280×720 内可见；历史和 post-audit 命令均继承该唯一权威实现。
 
 ## P2：干净检出测试不自举
 
@@ -66,7 +66,7 @@
 - 最终命令：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File 'D:\wwo\tools\run_post_audit_validation.ps1'
+powershell -ExecutionPolicy Bypass -File 'D:\wwo\tools\run_validation.ps1'
 ```
 
 ## P2：文档与性能证据分叉
@@ -77,21 +77,29 @@ powershell -ExecutionPolicy Bypass -File 'D:\wwo\tools\run_post_audit_validation
 小时 → 日 → 月 → 到期队列事件 → 周/自动存档
 ```
 
-- `README.md`、`ARCHITECTURE.md`、`DECISIONS.md`、`TEST_PLAN.md`、`ROADMAP.md`、`KNOWN_ISSUES.md` 和 `PERFORMANCE_BUDGET.md` 已区分历史证据、Codex 影子验证和当前未验证修改。
-- 历史一年模拟约 `846 ms`；Codex 单点影子修复约 `1,916 ms`。二者都不能作为当前默认分支最终性能证据。
+- `README.md`、`ARCHITECTURE.md`、`DECISIONS.md`、`TEST_PLAN.md`、`ROADMAP.md`、`KNOWN_ISSUES.md` 和 `PERFORMANCE_BUDGET.md` 已区分历史证据、Codex 影子验证和 2026-07-15 当前工作树证据。
+- 历史一年模拟约 `846 ms`；Codex 单点影子修复约 `1,916 ms`；当前工作树统一验证为约 `2,833 ms`，仍低于 10 秒预算。
 
 ## 安全回归的备份快照比较
 
 - 问题：JSON 往返可能把整数和浮点表现归一化，直接比较写入前内存字典会产生假失败。
 - 修复：预期快照先经 `JSON.stringify` 与 `JSON.parse_string` 归一化，再与备份加载结果比较。
 
+## 事务回滚补充修复
+
+- 本机状态一致性回归发现：若运行时活跃上限变化正是候选升级失败原因，外部存档用的严格名册恢复也会阻止事务快照回滚。
+- 修复：外部存档继续强制活跃上限；继承内部回滚可恢复事务开始前已经存在的合法运行态。
+- 防回归：合法退休条件下同时验证继承失败完整回滚，以及满 20 人时先释放旧玩家槽位再升级继承者。
+
 ## 当前验收状态
 
-当前默认分支已经逐项实现上述修复，并新增：
+当前工作树已经逐项实现上述修复，并保留以下统一入口：
 
 - `tests/current_test_runner.gd`
 - `tests/p0_r1_player_journey_post_audit.gd`
 - `tests/codex_audit_regression.gd`
-- `tools/run_post_audit_validation.ps1`
+- `tools/run_validation.ps1`；另外两个历史脚本只作为兼容转发入口。
 
-当前会话无法运行用户本机的 Godot 4.6.3，因此尚无审计后完整绿色结果。必须运行最终命令，并继续完成 GUI 人工旅程、30 日与一年模拟、存档体积/性能测量和 Windows 重新导出。全部通过前，P0-R1 仍不得标记完成。
+2026-07-15 使用用户指定的 Godot `4.6.3.stable.official.7d41c59c4` 完整运行统一验证：综合 `570/570`、逻辑 `35/35`、自动旅程 `32/32`、安全 `26/26`、状态一致性 `41/41`、模拟质量 `50/50`、专项 `29/29`，Headless 启动和日志扫描通过；一年约 `2,833 ms`，测试存档约 `292.7 KiB`。
+
+审计确定的 P0/P1/P2 代码问题已经关闭。1280×720 实际窗口人工旅程、真实历史存档迁移和 Windows 重新导出仍是发布验收事项，不属于本次确定性代码修复已通过的自动证据。

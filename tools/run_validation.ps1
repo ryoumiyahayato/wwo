@@ -4,6 +4,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+$expectedGodotVersion = '4.6.3.stable.official.7d41c59c4'
 
 if (-not (Test-Path -LiteralPath $GodotPath -PathType Leaf)) {
     throw "Godot executable not found: $GodotPath"
@@ -19,29 +20,62 @@ function Invoke-GodotStep {
     )
 
     Write-Host "`n=== $Name ==="
-    $lines = & $GodotPath @Arguments 2>&1
-    $exitCode = $LASTEXITCODE
-    $text = ($lines | Out-String)
-    $lines | ForEach-Object { Write-Host $_ }
+    $stdoutPath = [System.IO.Path]::GetTempFileName()
+    $stderrPath = [System.IO.Path]::GetTempFileName()
+    try {
+        # Windows PowerShell 5.1 promotes native stderr to ErrorRecord objects
+        # when $ErrorActionPreference is Stop. Redirect through Start-Process so
+        # Godot's normal stderr output cannot abort validation before its exit
+        # code and complete log are inspected.
+        $quotedArguments = @(
+            $Arguments | ForEach-Object {
+                '"' + $_.Replace('"', '\"') + '"'
+            }
+        ) -join ' '
+        $process = Start-Process `
+            -FilePath $GodotPath `
+            -ArgumentList $quotedArguments `
+            -WorkingDirectory $ProjectPath `
+            -NoNewWindow `
+            -Wait `
+            -PassThru `
+            -RedirectStandardOutput $stdoutPath `
+            -RedirectStandardError $stderrPath
+        $lines = @(
+            Get-Content -LiteralPath $stdoutPath -Encoding UTF8 -ErrorAction SilentlyContinue
+            Get-Content -LiteralPath $stderrPath -Encoding UTF8 -ErrorAction SilentlyContinue
+        )
+        $text = ($lines | Out-String)
+        $lines | ForEach-Object { Write-Host $_ }
 
-    if ($exitCode -ne 0) {
-        throw "$Name failed with exit code $exitCode"
+        if ($process.ExitCode -ne 0) {
+            throw "$Name failed with exit code $($process.ExitCode)"
+        }
+        if ($text -match $parseErrorPattern) {
+            throw "$Name emitted a script parse/load error despite exit code 0"
+        }
+        return $text.Trim()
     }
-    if ($text -match $parseErrorPattern) {
-        throw "$Name emitted a script parse/load error despite exit code 0"
+    finally {
+        Remove-Item -LiteralPath $stdoutPath, $stderrPath -Force -ErrorAction SilentlyContinue
     }
+}
+
+$actualGodotVersion = Invoke-GodotStep -Name 'Godot version' -Arguments @('--version')
+if ($actualGodotVersion -ne $expectedGodotVersion) {
+    throw "Godot version mismatch: expected $expectedGodotVersion, got $actualGodotVersion"
 }
 
 # A clean checkout may not yet have Godot's global class cache. Import the project
 # once before invoking standalone --script tests that refer to class_name types.
-Invoke-GodotStep -Name 'Clean import and script scan' -Arguments @(
+$null = Invoke-GodotStep -Name 'Clean import and script scan' -Arguments @(
     '--editor', '--headless', '--path', $ProjectPath, '--quit'
 )
 
 $tests = @(
-    @{ Name = 'Original regression'; Script = 'res://tests/test_runner.gd' },
+    @{ Name = 'Current M0-M9 regression'; Script = 'res://tests/current_test_runner.gd' },
     @{ Name = 'P0-R1 logic regression'; Script = 'res://tests/p0_r1_logic_regression.gd' },
-    @{ Name = 'P0-R1 player journey'; Script = 'res://tests/p0_r1_player_journey.gd' },
+    @{ Name = 'Post-audit player journey'; Script = 'res://tests/p0_r1_player_journey_post_audit.gd' },
     @{ Name = 'P0-R1 safety regression'; Script = 'res://tests/p0_r1_safety_regression.gd' },
     @{ Name = 'State consistency regression'; Script = 'res://tests/state_consistency_regression.gd' },
     @{ Name = 'Simulation quality regression'; Script = 'res://tests/simulation_quality_regression.gd' },
@@ -49,12 +83,12 @@ $tests = @(
 )
 
 foreach ($test in $tests) {
-    Invoke-GodotStep -Name $test.Name -Arguments @(
+	$null = Invoke-GodotStep -Name $test.Name -Arguments @(
         '--headless', '--path', $ProjectPath, '--script', $test.Script
     )
 }
 
-Invoke-GodotStep -Name 'Headless project startup' -Arguments @(
+$null = Invoke-GodotStep -Name 'Headless project startup' -Arguments @(
     '--headless', '--path', $ProjectPath, '--quit-after', '5'
 )
 

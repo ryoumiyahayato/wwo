@@ -147,7 +147,7 @@ func _run() -> void:
 	player.age = int(_society.rules.lifecycle_rules["retirement_age"])
 	await _open_social_panel()
 	var social_panel: SocialSystemPanel = _view.find_child(
-		"SocialPanel", true, false
+		"SocialSystemPanel", true, false
 	) as SocialSystemPanel
 	_expect(social_panel != null and social_panel.visible, "正式社会系统面板可打开")
 	if social_panel == null:
@@ -275,10 +275,8 @@ func _start_action_via_ui(
 	) as OptionButton
 	if not _select_option_by_metadata(action_option, action_id):
 		return false
-	await process_frame
-	if action_id == "action:promote_policy" or action_id == "action:support_control":
+	if action_id in ["action:promote_policy", "action:support_control"]:
 		_action_panel.set_target(target_id)
-		await process_frame
 	var target_option: OptionButton = _action_panel.find_child(
 		"TargetOption", true, false
 	) as OptionButton

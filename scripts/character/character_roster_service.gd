@@ -266,6 +266,14 @@ func get_persistent_state() -> Dictionary:
 
 
 func restore_persistent_state(state: Dictionary) -> bool:
+	return _restore_state(state, true)
+
+
+func restore_transaction_snapshot(state: Dictionary) -> bool:
+	return _restore_state(state, false)
+
+
+func _restore_state(state: Dictionary, enforce_active_limit: bool) -> bool:
 	var player_id: String = str(state.get("player_character_id", ""))
 	var raw_background: Variant = state.get("background", [])
 	var raw_active: Variant = state.get("active", [])
@@ -277,7 +285,10 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		or not raw_active is Array
 		or not raw_exited is Array
 		or not raw_seeds is Dictionary
-		or (raw_active as Array).size() > rules.active_character_limit
+		or (
+			enforce_active_limit
+			and (raw_active as Array).size() > rules.active_character_limit
+		)
 	):
 		return false
 	var restored_background: Dictionary = {}

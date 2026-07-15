@@ -82,13 +82,17 @@ func _test_atomic_organization_join(map_service: MapControlService) -> void:
 	var positions: Dictionary = organization.position_structure.get("positions", {}) as Dictionary
 	var entry: Dictionary = positions.get(entry_id, {}) as Dictionary
 	var slots: int = int(entry.get("slots", 0))
+	var all_joined: bool = true
 	for index: int in range(slots):
 		var member := CharacterData.new()
 		member.id = "character:atomic_member_%03d" % index
 		member.country_id = organization.country_id
 		member.organization_ids = []
 		member.relationship_ids = []
-		_expect(service.join_organization(member, organization.id), "入口职位空缺时加入组织成功")
+		if not service.join_organization(member, organization.id):
+			all_joined = false
+			break
+	_expect(all_joined, "全部入口职位空缺均可原子加入组织")
 	var rejected := CharacterData.new()
 	rejected.id = "character:atomic_rejected"
 	rejected.country_id = organization.country_id
@@ -262,6 +266,9 @@ func _test_succession_rollback(
 		{"familiarity": 1.0, "trust": 1.0, "affinity": 1.0},
 		"succession_test"
 	)
+	GameSessionService.player_character.age = int(
+		society.rules.lifecycle_rules["retirement_age"]
+	)
 	var roster_before: Dictionary = society.roster.get_persistent_state()
 	var organizations_before: Array[Dictionary] = society.organizations.get_persistent_state()
 	var relationships_before: Dictionary = society.relationships.get_persistent_state()
@@ -304,6 +311,9 @@ func _test_succession_at_active_limit(
 			break
 		society.promote_background(background_id)
 	_expect(society.roster.active_characters.size() == society.rules.active_character_limit, "继承前活跃人物达到配置上限")
+	GameSessionService.player_character.age = int(
+		society.rules.lifecycle_rules["retirement_age"]
+	)
 	var result: SuccessionResult = society.execute_player_succession(
 		candidate_id, "retirement", clock.total_hours
 	)

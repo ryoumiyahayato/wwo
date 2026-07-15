@@ -1071,6 +1071,11 @@ func _test_m5_control_result_application() -> void:
 	var definition: ActionDefinitionData = service_map.data_set.actions["action:support_control"] as ActionDefinitionData
 	var character: CharacterData = _make_action_character(100, 550)
 	character.country_id = "country:loran_federation"
+	var society := SocietySimulationService.new()
+	_expect_true(
+		society.initialize(character, service_map.data_set),
+		"地区控制支援夹具可初始化权威社会服务"
+	)
 	var context: Dictionary = _action_context(definition, 100.0)
 	context["target_id"] = "control:r3_c5"
 	var unit: ControlUnitData = service_map.get_unit("control:r3_c5")
@@ -1079,6 +1084,18 @@ func _test_m5_control_result_application() -> void:
 	var action: ActionInstanceData = service.start_action(definition, character, 0, context).action
 	service.update_to_hour(action, definition, character, 2000, service_map)
 	_expect_equal(action.outcome_code, "guaranteed_success", "地区控制支援可达到必然成功")
+	_expect_approx(
+		unit.control_strength,
+		strength_before,
+		0.000001,
+		"通用行动结算不越权修改地图"
+	)
+	_expect_true(
+		society.apply_character_action_domain_effect(
+			action, definition, character, service_map, "player_contact"
+		),
+		"完成行动可通过社会领域服务写回地图"
+	)
 	_expect_true(unit.control_strength < strength_before, "成功的地区控制行动应用到目标控制单元")
 
 
@@ -1096,13 +1113,14 @@ func _test_m5_action_panel_scene() -> void:
 	_expect_true(panel.visible, "行动入口可打开长期行动面板")
 	var action_option: OptionButton = panel.get_node("Margin/Root/Scroll/Content/ActionOption") as OptionButton
 	_expect_equal(action_option.item_count, 8, "行动面板列出八类正式行动")
-	var begin_button: Button = panel.get_node("Margin/Root/Scroll/Content/BeginButton") as Button
+	var begin_button: Button = panel.get_node("Margin/Root/BeginButton") as Button
 	begin_button.pressed.emit()
 	_expect_true(GameSessionService.current_action != null, "行动面板可开始当前人物行动")
 	var runner: SimulationRunner = view.get_node("SimulationRunner") as SimulationRunner
-	var before: float = GameSessionService.current_action.accumulated_work
-	runner.clock.advance_hours(1)
-	_expect_true(GameSessionService.current_action.accumulated_work > before, "权威时间变化驱动当前行动进度")
+	if GameSessionService.current_action != null:
+		var before: float = GameSessionService.current_action.accumulated_work
+		runner.clock.advance_hours(1)
+		_expect_true(GameSessionService.current_action.accumulated_work > before, "权威时间变化驱动当前行动进度")
 	var summary: RichTextLabel = panel.get_node("Margin/Root/Scroll/Content/SummaryLabel") as RichTextLabel
 	_expect_true(summary.text.contains("成功把握") and not summary.text.contains("有效值"), "正式行动 UI 显示定性把握且隐藏精确值")
 	view.queue_free()
@@ -1303,6 +1321,8 @@ func _test_m6_social_panel_scene() -> void:
 	_expect_true(counts.text.contains("背景人物 112") and counts.text.contains("活跃人物 9 / 20"), "社会面板显示人物层级预算")
 	var ai_section: VBoxContainer = panel.get_node("Margin/Root/Scroll/Content/AiSection") as VBoxContainer
 	_expect_true(not ai_section.visible, "AI 调试信息默认隐藏")
+	GameSessionService.developer_mode = true
+	panel.refresh_developer_mode()
 	var developer_toggle: CheckButton = panel.get_node("Margin/Root/Scroll/Content/DeveloperToggle") as CheckButton
 	developer_toggle.button_pressed = true
 	_expect_true(ai_section.visible, "开发者开关显示活跃 AI 调试视图")
@@ -1391,11 +1411,28 @@ func _test_m7_organization_support_channels() -> void:
 	society.organizations.assign_position(player, military_id, "officer")
 	var target: ControlUnitData = map_service.get_unit("control:r3_c5")
 	var target_region: RegionData = map_service.data_set.regions[target.region_id] as RegionData
-	var target_strength: float = target.control_strength
 	var target_social: Dictionary = target_region.social_influence.duplicate(true)
 	var military_resources: float = military.resources
+	var consolidation_target: ControlUnitData
+	for unit_id: String in map_service.get_sorted_unit_ids():
+		var candidate: ControlUnitData = map_service.get_unit(unit_id)
+		if (
+			candidate != null
+			and candidate.controller_country_id == player.country_id
+			and map_service.is_valid_control_support_target(unit_id, player.country_id)
+		):
+			consolidation_target = candidate
+			break
+	_expect_true(consolidation_target != null, "军事组织存在应优先巩固的己方前线单元")
+	var consolidation_strength: float = (
+		consolidation_target.control_strength if consolidation_target != null else 0.0
+	)
 	_expect_true(society.regional_influence.apply_organization_control_support(military, player.id, target.id, 1.0, society.organizations, map_service), "有控制权限的军事组织可投入地区控制")
-	_expect_true(target.control_strength < target_strength, "组织军事支援影响目标控制单元")
+	_expect_true(
+		consolidation_target != null
+		and consolidation_target.control_strength > consolidation_strength,
+		"组织军事支援优先巩固脆弱己方前线"
+	)
 	_expect_equal(target_region.social_influence, target_social, "组织军事支援不暗改社会影响")
 	_expect_true(military.resources < military_resources, "组织军事支援消耗组织资源")
 
@@ -1467,6 +1504,17 @@ func _test_m7_exit_reasons() -> void:
 		var old_player: CharacterData = society.roster.get_active(society.roster.player_character_id)
 		old_player.current_status["wealth"] = 100
 		old_player.current_status["reputation"] = 80
+		match reason_id:
+			"death":
+				old_player.current_status["health"] = 0
+			"retirement":
+				old_player.age = int(_society_rules.lifecycle_rules["retirement_age"])
+			"long_imprisonment":
+				old_player.current_status["detained"] = true
+			"disgrace":
+				old_player.current_status["reputation"] = int(
+					_continuity_rules.exit_constraints["disgrace_reputation_threshold"]
+				)
 		var successor_id: String = society.roster.get_background_ids(old_player.country_id)[0]
 		_set_relationship_values(society.relationships.create_or_update(old_player.id, successor_id, 1), 1.0, 1.0, 1.0)
 		GameSessionService.set_player(old_player)
@@ -1485,6 +1533,7 @@ func _test_m7_partial_succession_and_continuity() -> void:
 	old_player.current_status["wealth"] = 100
 	old_player.current_status["reputation"] = 80
 	old_player.current_status["intelligence_points"] = 40
+	old_player.age = int(_society_rules.lifecycle_rules["retirement_age"])
 	for raw_skill: Variant in old_player.skills:
 		old_player.skills[raw_skill] = 100
 	var ids: Array[String] = society.roster.get_background_ids(old_player.country_id)
@@ -1635,21 +1684,38 @@ func _test_m8_save_load_roundtrip() -> void:
 	var exiting_character: CharacterData = society.promote_background(exiting_id)
 	society.ai.unregister(exiting_id)
 	society.roster.exit_active_character(exiting_id, "voluntary", clock.total_hours)
-	var current_action := ActionInstanceData.new()
-	current_action.id = "action_run:00000001"
-	current_action.definition_id = "action:study_skill"
-	current_action.actor_character_id = player.id
-	current_action.target_id = ""
-	current_action.start_hour = 180
-	current_action.last_update_hour = 193
-	current_action.total_work = 100.0
-	current_action.accumulated_work = 12.5
-	current_action.current_efficiency = 1.2
-	current_action.estimated_completion_hour = 266
-	current_action.effective_value = 55.0
-	current_action.outlook = "条件一般"
+	var action_definition: ActionDefinitionData = map_service.data_set.actions[
+		"action:study_skill"
+	] as ActionDefinitionData
+	var action_service := ActionService.new(
+		_action_rules, GameSessionService.action_id_service
+	)
+	var context_service := PlayerActionContextService.new(
+		_action_rules, society, map_service
+	)
+	var action_result: ActionStartResult = context_service.start_player_action(
+		action_service,
+		action_definition,
+		player,
+		180,
+		"",
+		0,
+		action_definition.primary_skill
+	)
+	_expect_true(action_result.is_success(), "M8 通过权威入口创建进行中行动夹具")
+	if not action_result.is_success():
+		GameSessionService.clear()
+		return
+	var current_action: ActionInstanceData = action_result.action
+	action_service.update_to_hour(
+		current_action, action_definition, player, 193, map_service
+	)
+	var expected_action_work: float = current_action.accumulated_work
 	GameSessionService.current_action = current_action
-	GameSessionService.action_id_service.next_id("action_run")
+	var next_action_sequence: int = int(
+		GameSessionService.action_id_service.get_state().get("action_instance", 0)
+	) + 1
+	var expected_next_action_id: String = "action_instance:%08d" % next_action_sequence
 	GameSessionService.developer_mode = true
 	society.set_settlement_paused("daily_ai", true)
 	GameSessionService.settlement_log.add("test", "roundtrip", clock.total_hours)
@@ -1680,10 +1746,12 @@ func _test_m8_save_load_roundtrip() -> void:
 	_expect_approx(float((map_service.data_set.regions["region:loran_southridge"] as RegionData).social_influence["country:vesta_union"]), 0.59, 0.0001, "M8 加载恢复独立社会影响")
 	_expect_equal(GameSessionService.player_character.current_status["wealth"], expected_wealth, "M8 加载恢复玩家人物状态")
 	_expect_true(GameSessionService.developer_mode, "M8 加载恢复开发模式标记")
-	_expect_equal(GameSessionService.action_id_service.next_id("action_run"), "action_run:00000002", "M8 加载后稳定行动 ID 连续")
+	_expect_equal(GameSessionService.action_id_service.next_id("action_instance"), expected_next_action_id, "M8 加载后稳定行动 ID 连续")
 	_expect_equal(GameSessionService.society_service.relationships.size(), 1, "M8 加载恢复稀疏关系")
 	_expect_equal(GameSessionService.society_service.roster.exited_characters.size(), 1, "M8 加载恢复退出人物历史")
-	_expect_approx(GameSessionService.current_action.accumulated_work, 12.5, 0.0001, "M8 加载恢复进行中行动进度")
+	_expect_true(GameSessionService.current_action != null, "M8 加载恢复进行中行动")
+	if GameSessionService.current_action != null:
+		_expect_approx(GameSessionService.current_action.accumulated_work, expected_action_work, 0.0001, "M8 加载恢复进行中行动进度")
 	_expect_true(GameSessionService.society_service.paused_settlement_categories.has("daily_ai"), "M8 加载恢复暂停结算类别")
 	_expect_equal(GameSessionService.society_service.roster.get_total_character_count(), 121, "M8 加载保持人物身份总数")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
@@ -1719,7 +1787,7 @@ func _test_m8_invalid_save_and_safe_replace() -> void:
 	var broken_reference: Dictionary = valid.duplicate(true)
 	broken_reference["player_character_id"] = "character:missing"
 	var broken_result: SaveOperationResult = service.restore_snapshot(broken_reference, clock, map_service)
-	_expect_true(not broken_result.success and broken_result.error_code == "broken_reference", "M8 断裂玩家引用返回错误且不崩溃")
+	_expect_true(not broken_result.success and broken_result.error_code == "invalid_snapshot", "M8 顶层与名册玩家引用不一致时在结构校验阶段拒绝")
 	var malformed_path: String = "user://tests/m8_malformed.json"
 	var malformed := FileAccess.open(malformed_path, FileAccess.WRITE)
 	malformed.store_string("{broken")
@@ -1851,6 +1919,7 @@ func _test_m9_integrated_core_loop() -> void:
 	_set_relationship_values(relationship, 0.9, 0.9, 0.8)
 	var candidates: Array[SuccessionCandidateData] = society.succession.get_candidates(player.id)
 	_expect_true(not candidates.is_empty(), "M9 核心闭环从真实关系生成继承者")
+	player.age = int(_society_rules.lifecycle_rules["retirement_age"])
 	var succession: SuccessionResult = society.execute_player_succession(candidates[0].character_id, "retirement", 160)
 	_expect_true(succession.is_success(), "M9 人物退出后继承同一世界")
 	var save_path: String = "user://tests/m9_core_loop.json"

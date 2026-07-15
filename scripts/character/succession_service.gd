@@ -260,7 +260,10 @@ func _rollback(
 	relationship_state: Dictionary,
 	ai_state: Array[Dictionary]
 ) -> bool:
-	if not roster.restore_persistent_state(roster_state):
+	# This state was captured from the live roster before the transaction. It
+	# must be restorable even if a runtime limit change is what made promotion
+	# fail; external save loading still enforces the configured active cap.
+	if not roster.restore_transaction_snapshot(roster_state):
 		return false
 	if not organizations.restore_persistent_state(organization_state):
 		return false
