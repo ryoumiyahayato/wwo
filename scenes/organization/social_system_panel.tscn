@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/social_system_panel.gd" id="1"]
+
 [sub_resource type="StyleBoxFlat" id="panel"]
 bg_color = Color(0.045, 0.065, 0.09, 0.99)
 border_width_left = 1
@@ -13,159 +14,357 @@ corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 
+[sub_resource type="StyleBoxFlat" id="dev_panel"]
+bg_color = Color(0.13, 0.09, 0.06, 0.96)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.65, 0.42, 0.2, 0.85)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
 [node name="SocialSystemPanel" type="PanelContainer"]
 unique_name_in_owner = true
-offset_right = 500.0
-offset_bottom = 680.0
+custom_minimum_size = Vector2(540, 500)
+offset_right = 552.0
+offset_bottom = 594.0
+focus_mode = 1
 theme_override_styles/panel = SubResource("panel")
 script = ExtResource("1")
+
 [node name="Margin" type="MarginContainer" parent="."]
 layout_mode = 2
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 16
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 14
+
 [node name="Root" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
 theme_override_constants/separation = 8
+
 [node name="Header" type="HBoxContainer" parent="Margin/Root"]
 layout_mode = 2
+
 [node name="Title" type="Label" parent="Margin/Root/Header"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.39, 0.79, 0.86, 1)
 theme_override_font_sizes/font_size = 22
-text = "组织、关系与人物层级"
+text = "我的社会网络"
+vertical_alignment = 1
+
 [node name="CloseButton" type="Button" parent="Margin/Root/Header"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(42, 36)
 layout_mode = 2
 text = "×"
-[node name="CountsLabel" type="Label" parent="Margin/Root"]
+tooltip_text = "关闭（Esc）"
+
+[node name="PlayerSocialSummary" type="Label" parent="Margin/Root"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.75, 0.82, 0.86, 1)
-text = "背景人物 0 · 活跃人物 0 / 20 · 按需关系 0"
-[node name="Scroll" type="ScrollContainer" parent="Margin/Root"]
+theme_override_colors/font_color = Color(0.73, 0.8, 0.85, 1)
+text = "组织 0 · 关系 0 · 当前无职位权限"
+text_overrun_behavior = 3
+
+[node name="SocialTabs" type="TabContainer" parent="Margin/Root"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
-[node name="Content" type="VBoxContainer" parent="Margin/Root/Scroll"]
-custom_minimum_size = Vector2(445, 0)
+
+[node name="我的组织" type="ScrollContainer" parent="Margin/Root/SocialTabs"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="OrganizationContent" type="VBoxContainer" parent="Margin/Root/SocialTabs/我的组织"]
+custom_minimum_size = Vector2(492, 0)
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 7
-[node name="OrgHeader" type="Label" parent="Margin/Root/Scroll/Content"]
+theme_override_constants/separation = 8
+
+[node name="OrganizationIntro" type="Label" parent="Margin/Root/SocialTabs/我的组织/OrganizationContent"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.39, 0.79, 0.86, 1)
-text = "组织与职位"
-[node name="OrganizationOption" type="OptionButton" parent="Margin/Root/Scroll/Content"]
+theme_override_font_sizes/font_size = 17
+text = "组织身份与职位"
+
+[node name="OrganizationOption" type="OptionButton" parent="Margin/Root/SocialTabs/我的组织/OrganizationContent"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
-[node name="OrganizationLabel" type="RichTextLabel" parent="Margin/Root/Scroll/Content"]
+
+[node name="OrganizationLabel" type="RichTextLabel" parent="Margin/Root/SocialTabs/我的组织/OrganizationContent"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 145)
+custom_minimum_size = Vector2(0, 190)
 layout_mode = 2
 bbcode_enabled = true
-[node name="JoinButton" type="Button" parent="Margin/Root/Scroll/Content"]
+fit_content = false
+scroll_active = false
+
+[node name="OrganizationActions" type="GridContainer" parent="Margin/Root/SocialTabs/我的组织/OrganizationContent"]
+layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+
+[node name="FindOrganizationButton" type="Button" parent="Margin/Root/SocialTabs/我的组织/OrganizationContent/OrganizationActions"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
-text = "加入组织"
-[node name="PositionOption" type="OptionButton" parent="Margin/Root/Scroll/Content"]
+size_flags_horizontal = 3
+text = "寻找组织"
+
+[node name="JoinActionButton" type="Button" parent="Margin/Root/SocialTabs/我的组织/OrganizationContent/OrganizationActions"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 38)
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
-[node name="PositionButton" type="Button" parent="Margin/Root/Scroll/Content"]
+size_flags_horizontal = 3
+text = "申请加入"
+
+[node name="PositionActionButton" type="Button" parent="Margin/Root/SocialTabs/我的组织/OrganizationContent/OrganizationActions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "争取职位"
+
+[node name="PolicyActionButton" type="Button" parent="Margin/Root/SocialTabs/我的组织/OrganizationContent/OrganizationActions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "推动政策"
+
+[node name="ControlActionButton" type="Button" parent="Margin/Root/SocialTabs/我的组织/OrganizationContent/OrganizationActions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "支持地区控制"
+
+[node name="OrganizationHint" type="Label" parent="Margin/Root/SocialTabs/我的组织/OrganizationContent"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "争取 / 调整职位"
-[node name="SeparatorA" type="HSeparator" parent="Margin/Root/Scroll/Content"]
+theme_override_colors/font_color = Color(0.9, 0.7, 0.42, 1)
+text = "选择组织后查看可用行动。"
+autowrap_mode = 2
+
+[node name="人际关系" type="ScrollContainer" parent="Margin/Root/SocialTabs"]
 layout_mode = 2
-[node name="RelationHeader" type="Label" parent="Margin/Root/Scroll/Content"]
+horizontal_scroll_mode = 0
+
+[node name="RelationshipContent" type="VBoxContainer" parent="Margin/Root/SocialTabs/人际关系"]
+custom_minimum_size = Vector2(492, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="RelationshipHeader" type="Label" parent="Margin/Root/SocialTabs/人际关系/RelationshipContent"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.39, 0.79, 0.86, 1)
-text = "按需关系"
-[node name="RelationshipOption" type="OptionButton" parent="Margin/Root/Scroll/Content"]
+theme_override_font_sizes/font_size = 17
+text = "已建立的关系"
+
+[node name="RelationshipSummary" type="RichTextLabel" parent="Margin/Root/SocialTabs/人际关系/RelationshipContent"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 38)
+custom_minimum_size = Vector2(0, 210)
 layout_mode = 2
-[node name="RelationshipButton" type="Button" parent="Margin/Root/Scroll/Content"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "建立 / 加深实际联系"
-[node name="RelationshipLabel" type="Label" parent="Margin/Root/Scroll/Content"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "玩家已知实际关系：0"
-[node name="SeparatorB" type="HSeparator" parent="Margin/Root/Scroll/Content"]
-layout_mode = 2
-[node name="TierHeader" type="Label" parent="Margin/Root/Scroll/Content"]
+bbcode_enabled = true
+fit_content = false
+text = "尚未建立真实关系。"
+
+[node name="RelationshipTargetHeader" type="Label" parent="Margin/Root/SocialTabs/人际关系/RelationshipContent"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.39, 0.79, 0.86, 1)
-text = "人物层级开发验证"
-[node name="BackgroundOption" type="OptionButton" parent="Margin/Root/Scroll/Content"]
+text = "选择联系对象"
+
+[node name="RelationshipOption" type="OptionButton" parent="Margin/Root/SocialTabs/人际关系/RelationshipContent"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 38)
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
-[node name="PromoteButton" type="Button" parent="Margin/Root/Scroll/Content"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "升级为活跃人物"
-[node name="ActiveOption" type="OptionButton" parent="Margin/Root/Scroll/Content"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 38)
-layout_mode = 2
-[node name="DemoteButton" type="Button" parent="Margin/Root/Scroll/Content"]
+
+[node name="RelationshipTargetLabel" type="Label" parent="Margin/Root/SocialTabs/人际关系/RelationshipContent"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "降级为背景人物"
-[node name="SeparatorC" type="HSeparator" parent="Margin/Root/Scroll/Content"]
+theme_override_colors/font_color = Color(0.7, 0.77, 0.82, 1)
+autowrap_mode = 2
+
+[node name="RelationshipActions" type="GridContainer" parent="Margin/Root/SocialTabs/人际关系/RelationshipContent"]
 layout_mode = 2
-[node name="SuccessionHeader" type="Label" parent="Margin/Root/Scroll/Content"]
+columns = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+
+[node name="BuildRelationshipButton" type="Button" parent="Margin/Root/SocialTabs/人际关系/RelationshipContent/RelationshipActions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "建立新联系"
+
+[node name="DeepenRelationshipButton" type="Button" parent="Margin/Root/SocialTabs/人际关系/RelationshipContent/RelationshipActions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "加深关系"
+
+[node name="InvestigateActionButton" type="Button" parent="Margin/Root/SocialTabs/人际关系/RelationshipContent/RelationshipActions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "调查人物"
+
+[node name="人物继承" type="ScrollContainer" parent="Margin/Root/SocialTabs"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="SuccessionContent" type="VBoxContainer" parent="Margin/Root/SocialTabs/人物继承"]
+custom_minimum_size = Vector2(492, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="SuccessionHeader" type="Label" parent="Margin/Root/SocialTabs/人物继承/SuccessionContent"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.39, 0.79, 0.86, 1)
-text = "人物退出与继承"
-[node name="ExitReasonOption" type="OptionButton" parent="Margin/Root/Scroll/Content"]
+theme_override_font_sizes/font_size = 17
+text = "退出条件与人物继承"
+
+[node name="SuccessionStatusLabel" type="Label" parent="Margin/Root/SocialTabs/人物继承/SuccessionContent"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 38)
+custom_minimum_size = Vector2(0, 104)
 layout_mode = 2
-[node name="PrepareSuccessionButton" type="Button" parent="Margin/Root/Scroll/Content"]
+autowrap_mode = 2
+
+[node name="ExitReasonLabel" type="Label" parent="Margin/Root/SocialTabs/人物继承/SuccessionContent"]
+layout_mode = 2
+text = "当前合法退出原因"
+
+[node name="ExitReasonOption" type="OptionButton" parent="Margin/Root/SocialTabs/人物继承/SuccessionContent"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+
+[node name="InheritanceRatioLabel" type="Label" parent="Margin/Root/SocialTabs/人物继承/SuccessionContent"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "根据真实关系生成候选"
-[node name="SuccessionOption" type="OptionButton" parent="Margin/Root/Scroll/Content"]
+theme_override_colors/font_color = Color(0.7, 0.77, 0.82, 1)
+autowrap_mode = 2
+
+[node name="PrepareSuccessionButton" type="Button" parent="Margin/Root/SocialTabs/人物继承/SuccessionContent"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 38)
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
-[node name="SuccessionLabel" type="Label" parent="Margin/Root/Scroll/Content"]
+text = "查看合法继承者"
+
+[node name="SuccessionOption" type="OptionButton" parent="Margin/Root/SocialTabs/人物继承/SuccessionContent"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+
+[node name="SuccessionLabel" type="Label" parent="Margin/Root/SocialTabs/人物继承/SuccessionContent"]
 unique_name_in_owner = true
 layout_mode = 2
 autowrap_mode = 2
-text = "继承不会复制前人物全部数据。"
-[node name="ConfirmSuccessionButton" type="Button" parent="Margin/Root/Scroll/Content"]
+text = "人物继承只传递部分资源、关系和符合条件的职位。"
+
+[node name="ConfirmSuccessionButton" type="Button" parent="Margin/Root/SocialTabs/人物继承/SuccessionContent"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
 disabled = true
-text = "确认退出并由候选继承"
-[node name="DeveloperToggle" type="CheckButton" parent="Margin/Root/Scroll/Content"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "开发者：显示活跃 AI 调试"
-[node name="AiSection" type="VBoxContainer" parent="Margin/Root/Scroll/Content"]
+text = "确认退出并继承"
+
+[node name="DeveloperToggle" type="CheckButton" parent="Margin/Root"]
 unique_name_in_owner = true
 layout_mode = 2
 visible = false
+text = "开发者：显示直接修改与 AI 调试"
+
+[node name="DeveloperSection" type="PanelContainer" parent="Margin/Root"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 240)
+layout_mode = 2
+visible = false
+theme_override_styles/panel = SubResource("dev_panel")
+
+[node name="DeveloperScroll" type="ScrollContainer" parent="Margin/Root/DeveloperSection"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="DeveloperContent" type="VBoxContainer" parent="Margin/Root/DeveloperSection/DeveloperScroll"]
+custom_minimum_size = Vector2(486, 0)
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 6
-[node name="AiOption" type="OptionButton" parent="Margin/Root/Scroll/Content/AiSection"]
+
+[node name="DeveloperHeader" type="Label" parent="Margin/Root/DeveloperSection/DeveloperScroll/DeveloperContent"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.69, 0.4, 1)
+text = "开发者直接修改（不属于玩家流程）"
+
+[node name="DevOrganizationOption" type="OptionButton" parent="Margin/Root/DeveloperSection/DeveloperScroll/DeveloperContent"]
 unique_name_in_owner = true
 layout_mode = 2
-[node name="AiLabel" type="RichTextLabel" parent="Margin/Root/Scroll/Content/AiSection"]
+
+[node name="DevJoinButton" type="Button" parent="Margin/Root/DeveloperSection/DeveloperScroll/DeveloperContent"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 220)
+layout_mode = 2
+text = "直接加入 / 离开组织"
+
+[node name="DevPositionOption" type="OptionButton" parent="Margin/Root/DeveloperSection/DeveloperScroll/DeveloperContent"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="DevPositionButton" type="Button" parent="Margin/Root/DeveloperSection/DeveloperScroll/DeveloperContent"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "直接设置职位"
+
+[node name="DevRelationshipOption" type="OptionButton" parent="Margin/Root/DeveloperSection/DeveloperScroll/DeveloperContent"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="DevRelationshipButton" type="Button" parent="Margin/Root/DeveloperSection/DeveloperScroll/DeveloperContent"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "直接建立 / 加深关系"
+
+[node name="BackgroundOption" type="OptionButton" parent="Margin/Root/DeveloperSection/DeveloperScroll/DeveloperContent"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="PromoteButton" type="Button" parent="Margin/Root/DeveloperSection/DeveloperScroll/DeveloperContent"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "升级为活跃人物"
+
+[node name="ActiveOption" type="OptionButton" parent="Margin/Root/DeveloperSection/DeveloperScroll/DeveloperContent"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="DemoteButton" type="Button" parent="Margin/Root/DeveloperSection/DeveloperScroll/DeveloperContent"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "降级为背景人物"
+
+[node name="AiOption" type="OptionButton" parent="Margin/Root/DeveloperSection/DeveloperScroll/DeveloperContent"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="AiLabel" type="RichTextLabel" parent="Margin/Root/DeveloperSection/DeveloperScroll/DeveloperContent"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 200)
 layout_mode = 2
 bbcode_enabled = true
-[node name="MessageLabel" type="Label" parent="Margin/Root/Scroll/Content"]
+
+[node name="MessageLabel" type="Label" parent="Margin/Root"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.72, 0.4, 1)

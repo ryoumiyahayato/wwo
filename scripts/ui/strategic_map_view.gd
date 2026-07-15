@@ -8,20 +8,24 @@ const UiStrings = preload("res://scripts/ui/ui_strings.gd")
 @onready var map_canvas: StrategicMapCanvas = %MapCanvas
 @onready var title_label: Label = %TitleLabel
 @onready var date_label: Label = %DateLabel
+@onready var clock_status_label: Label = %ClockStatusLabel
+@onready var player_summary_label: Label = %PlayerSummaryLabel
+@onready var action_status_label: Label = %ActionStatusLabel
 @onready var pause_button: Button = %PauseButton
 @onready var speed_1_button: Button = %Speed1Button
 @onready var speed_2_button: Button = %Speed2Button
 @onready var speed_4_button: Button = %Speed4Button
 @onready var speed_8_button: Button = %Speed8Button
 @onready var save_button: Button = %SaveButton
-@onready var back_button: Button = %BackButton
+@onready var more_button: MenuButton = %MoreButton
 @onready var character_button: Button = %CharacterButton
 @onready var action_button: Button = %ActionButton
 @onready var action_panel: ActionPanel = %ActionPanel
 @onready var social_button: Button = %SocialButton
 @onready var social_panel: SocialSystemPanel = %SocialSystemPanel
-@onready var developer_button: Button = %DeveloperButton
 @onready var developer_panel: DeveloperPanel = %DeveloperPanel
+@onready var modal_layer: Control = %ModalLayer
+@onready var modal_backdrop: ColorRect = %ModalBackdrop
 @onready var selection_title: Label = %SelectionTitle
 @onready var details_label: RichTextLabel = %DetailsLabel
 @onready var pressure_button: Button = %PressureButton
@@ -36,33 +40,35 @@ var _autosave: AutosaveCoordinator
 
 func _ready() -> void:
 	title_label.text = UiStrings.MAP_TITLE
-	back_button.text = UiStrings.MAP_BACK
-	character_button.text = UiStrings.MAP_CHARACTER
-	action_button.text = UiStrings.MAP_ACTION
-	social_button.text = UiStrings.MAP_SOCIETY
-	save_button.text = UiStrings.MAP_SAVE
 	pause_button.pressed.connect(_on_pause_pressed)
 	speed_1_button.pressed.connect(_on_speed_pressed.bind(1))
 	speed_2_button.pressed.connect(_on_speed_pressed.bind(2))
 	speed_4_button.pressed.connect(_on_speed_pressed.bind(4))
 	speed_8_button.pressed.connect(_on_speed_pressed.bind(8))
 	save_button.pressed.connect(_on_save_pressed)
-	back_button.pressed.connect(_on_back_pressed)
+	var more_popup: PopupMenu = more_button.get_popup()
+	more_popup.add_item("返回主菜单", 1)
+	more_popup.add_separator()
+	more_popup.add_item("开发者工具", 2)
+	more_popup.id_pressed.connect(_on_more_item_pressed)
 	character_button.pressed.connect(_on_character_pressed)
 	action_button.pressed.connect(_on_action_pressed)
 	social_button.pressed.connect(_on_social_pressed)
-	developer_button.pressed.connect(_on_developer_pressed)
 	character_button.disabled = not GameSessionService.has_player()
 	action_button.disabled = not GameSessionService.has_player()
 	social_button.disabled = not GameSessionService.has_player()
 	action_panel.close_requested.connect(_on_action_panel_close_requested)
+	action_panel.action_state_changed.connect(_on_action_state_changed)
 	social_panel.close_requested.connect(_on_social_panel_close_requested)
+	social_panel.request_action.connect(_on_social_action_requested)
 	developer_panel.close_requested.connect(_on_developer_panel_close_requested)
 	developer_panel.developer_mode_changed.connect(_on_developer_mode_changed)
 	social_panel.society_changed.connect(action_panel.refresh_permissions)
 	pressure_button.pressed.connect(_on_pressure_pressed)
 	transfer_button.pressed.connect(_on_transfer_pressed)
 	map_canvas.unit_selected.connect(_on_unit_selected)
+	modal_backdrop.gui_input.connect(_on_modal_backdrop_input)
+	_close_primary_panel()
 
 	_bind_persistent_clock()
 	if _clock == null:
@@ -89,6 +95,7 @@ func _ready() -> void:
 		social_panel.setup(_clock, GameSessionService.society_service)
 	zoom_label.text = UiStrings.MAP_HELP
 	_apply_developer_visibility()
+	_refresh_player_status()
 
 
 func _bind_persistent_clock() -> void:
@@ -289,6 +296,7 @@ func _on_save_pressed() -> void:
 
 func _on_clock_changed(_snapshot: Dictionary) -> void:
 	_refresh_clock()
+	_refresh_player_status()
 
 
 func _on_pause_changed(_paused: bool) -> void:
@@ -306,6 +314,10 @@ func _refresh_clock() -> void:
 		_clock.year, _clock.month, _clock.day, _clock.hour
 	]
 	pause_button.text = UiStrings.CLOCK_RESUME if _clock.is_paused else UiStrings.CLOCK_PAUSE
+	clock_status_label.text = "%s · %d×" % [
+		"已暂停" if _clock.is_paused else "运行中",
+		_clock.speed_multiplier,
+	]
 	var speeds: Array[int] = [1, 2, 4, 8]
 	var buttons: Array[Button] = [
 		speed_1_button, speed_2_button, speed_4_button, speed_8_button
@@ -331,37 +343,43 @@ func _on_character_pressed() -> void:
 
 
 func _on_action_pressed() -> void:
-	action_panel.visible = not action_panel.visible
-	social_panel.visible = false
-	developer_panel.visible = false
+	if action_panel.visible:
+		_close_primary_panel()
+	else:
+		_open_primary_panel(action_panel)
 
 
 func _on_action_panel_close_requested() -> void:
-	action_panel.visible = false
+	_close_primary_panel()
+
+
+func _on_action_state_changed() -> void:
+	_refresh_player_status()
+	if social_panel.visible:
+		social_panel.refresh_view()
 
 
 func _on_social_pressed() -> void:
-	social_panel.visible = not social_panel.visible
-	action_panel.visible = false
-	developer_panel.visible = false
 	if social_panel.visible:
-		social_panel.refresh_view()
+		_close_primary_panel()
 	else:
-		social_panel.refresh_developer_mode()
+		_open_primary_panel(social_panel)
+		social_panel.refresh_view()
 
 
 func _on_social_panel_close_requested() -> void:
-	social_panel.visible = false
+	_close_primary_panel()
 
 
 func _on_developer_pressed() -> void:
-	developer_panel.visible = not developer_panel.visible
-	action_panel.visible = false
-	social_panel.visible = false
+	if developer_panel.visible:
+		_close_primary_panel()
+	else:
+		_open_primary_panel(developer_panel)
 
 
 func _on_developer_panel_close_requested() -> void:
-	developer_panel.visible = false
+	_close_primary_panel()
 
 
 func _on_developer_mode_changed(_enabled: bool) -> void:
@@ -373,6 +391,84 @@ func _apply_developer_visibility() -> void:
 	var visible_to_developer: bool = GameSessionService.developer_mode
 	pressure_button.visible = visible_to_developer
 	transfer_button.visible = visible_to_developer
+
+
+func _open_primary_panel(panel: Control) -> void:
+	action_panel.visible = panel == action_panel
+	social_panel.visible = panel == social_panel
+	developer_panel.visible = panel == developer_panel
+	modal_layer.visible = true
+	panel.grab_focus()
+
+
+func _close_primary_panel() -> void:
+	action_panel.visible = false
+	social_panel.visible = false
+	developer_panel.visible = false
+	modal_layer.visible = false
+
+
+func _on_modal_backdrop_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT and (event as InputEventMouseButton).pressed:
+		_close_primary_panel()
+		get_viewport().set_input_as_handled()
+
+
+func _on_more_item_pressed(item_id: int) -> void:
+	match item_id:
+		1:
+			_on_back_pressed()
+		2:
+			_on_developer_pressed()
+
+
+func _on_social_action_requested(action_id: String, requested_target_id: String) -> void:
+	_open_primary_panel(action_panel)
+	action_panel.prefill_action(action_id, requested_target_id)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		if modal_layer.visible:
+			_close_primary_panel()
+		get_viewport().set_input_as_handled()
+		return
+	if event.is_action_pressed("toggle_pause") and not _text_input_has_focus():
+		_on_pause_pressed()
+		get_viewport().set_input_as_handled()
+
+
+func _text_input_has_focus() -> bool:
+	var focused: Control = get_viewport().gui_get_focus_owner()
+	return focused is LineEdit or focused is TextEdit
+
+
+func _refresh_player_status() -> void:
+	if not GameSessionService.has_player():
+		player_summary_label.text = "尚未创建玩家人物"
+		action_status_label.text = "当前行动：无"
+		return
+	var player: CharacterData = GameSessionService.player_character
+	var role: String = player.public_position if not player.public_position.is_empty() else player.occupation
+	player_summary_label.text = "%s · %s · 财富 %d" % [
+		player.name,
+		role,
+		int(player.current_status.get("wealth", 0)),
+	]
+	var action: ActionInstanceData = GameSessionService.current_action
+	if action == null or action.is_terminal():
+		action_status_label.text = "当前行动：无"
+		return
+	var definition: ActionDefinitionData = (
+		_map_service.data_set.actions.get(action.definition_id) as ActionDefinitionData
+		if _map_service != null
+		else null
+	)
+	var action_name: String = definition.name if definition != null else "长期行动"
+	action_status_label.text = "当前行动：%s · %.0f%%" % [
+		action_name,
+		action.get_progress_ratio() * 100.0,
+	]
 
 
 func _show_world_error(message: String) -> void:
