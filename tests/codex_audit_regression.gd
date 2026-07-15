@@ -102,6 +102,8 @@ func _test_drawer_navigation() -> void:
 	var social_panel: Control = _view.find_child("SocialSystemPanel", true, false) as Control
 	var activity_panel: Control = _view.find_child("WorldActivityPanel", true, false) as Control
 	var modal_layer: Control = _view.find_child("ModalLayer", true, false) as Control
+	var modal_backdrop: ColorRect = _view.find_child("ModalBackdrop", true, false) as ColorRect
+	var gameplay_nav: Control = _view.find_child("GameplayNav", true, false) as Control
 	_expect(
 		character_button != null
 		and action_button != null
@@ -115,6 +117,13 @@ func _test_drawer_navigation() -> void:
 		and action_button.get_parent() == social_button.get_parent()
 		and save_button.get_parent() != character_button.get_parent(),
 		"玩法入口与工具入口使用独立顶栏分组"
+	)
+	_expect(
+		modal_backdrop != null
+		and gameplay_nav != null
+		and modal_backdrop.get_global_rect().position.y
+		>= gameplay_nav.get_global_rect().end.y,
+		"轻度遮罩从顶栏下方开始，打开抽屉后玩法入口仍可点击切换"
 	)
 	character_button.pressed.emit()
 	_expect(character_panel.visible and character_panel.position.x < 0.0, "人物抽屉从左侧开始滑入")
@@ -252,6 +261,13 @@ func _test_peace_war_and_border_state() -> void:
 	_expect(
 		support_error == "当前无战争或没有合法前线目标。",
 		"和平期支持控制行动以明确统一原因禁用"
+	)
+	var action_panel: ActionPanel = _view.find_child("ActionPanel", true, false) as ActionPanel
+	action_panel.prefill_action(support.id)
+	_expect(
+		action_panel._get_start_block_reason()
+		== "当前无战争或没有合法前线目标。",
+		"正式行动抽屉优先显示和平阻断，而不是职位权限错误"
 	)
 	var legacy_state: Dictionary = peace_state.duplicate(true)
 	legacy_state.erase("war_state")

@@ -758,6 +758,15 @@ func _get_start_block_reason() -> String:
 	)
 	if not interruption.is_empty():
 		return str(INTERRUPTION_LABELS.get(interruption, interruption))
+	# Peace is the authoritative global blocker. Report it before position
+	# eligibility so an unappointed player does not receive a misleading
+	# permission error for an action that nobody may perform in peacetime.
+	if definition.category == "support_control":
+		var peace_error: String = context_service.get_target_validation_error(
+			definition, GameSessionService.player_character, target_id
+		)
+		if not peace_error.is_empty():
+			return peace_error
 	var eligibility: String = _definition_eligibility_reason(definition)
 	if not eligibility.is_empty():
 		return eligibility
