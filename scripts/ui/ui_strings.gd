@@ -4,7 +4,7 @@ extends RefCounted
 
 const APP_TITLE: String = "1900年：社会与战争"
 const APP_SUBTITLE: String = "二维社会与战争模拟 Demo"
-const MILESTONE_LABEL: String = "P0-R1 · 玩家闭环补全中"
+const MILESTONE_LABEL: String = "P0-R1 · 阶段性健全"
 const MENU_NEW_GAME: String = "新游戏"
 const MENU_LOAD_GAME: String = "加载游戏"
 const MENU_LOAD_MANUAL: String = "加载手动存档"
