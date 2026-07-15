@@ -61,13 +61,13 @@
       "preferred_types_by_occupation": {
         "civil_servant": ["government"],
         "junior_officer": ["military"],
-        "teacher": ["government", "enterprise"],
-        "journalist": ["government", "enterprise"],
-        "small_merchant": ["enterprise"],
-        "skilled_worker": ["enterprise", "union"],
+        "teacher": ["education", "government"],
+        "journalist": ["news", "education"],
+        "small_merchant": ["commercial", "enterprise"],
+        "skilled_worker": ["industrial", "enterprise", "union"],
         "union_member": ["union"],
         "farmer": ["union"],
-        "laborer": ["union", "enterprise"]
+        "laborer": ["union", "industrial", "enterprise"]
       }
     },
     "funding_cost_by_category": {

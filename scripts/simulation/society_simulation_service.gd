@@ -10,6 +10,16 @@ const DOMAIN_ACTION_CATEGORIES: Array[String] = [
 	"promote_policy",
 	"support_control",
 ]
+const STARTER_LEADER_ORGANIZATION_IDS: Array[String] = [
+	"organization:loran_government",
+	"organization:vesta_government",
+	"organization:loran_military",
+	"organization:vesta_military",
+	"organization:loran_enterprise",
+	"organization:vesta_enterprise",
+	"organization:loran_union",
+	"organization:vesta_union",
+]
 
 var rules: SocietyRulesConfig
 var roster: CharacterRosterService
@@ -458,7 +468,14 @@ func execute_player_succession(
 
 func _initialize_organization_leaders() -> void:
 	var initialized: int = 0
+	var ordered_ids: Array[String] = []
+	for organization_id: String in STARTER_LEADER_ORGANIZATION_IDS:
+		if organizations.get_organization(organization_id) != null:
+			ordered_ids.append(organization_id)
 	for organization_id: String in organizations.get_organization_ids():
+		if not ordered_ids.has(organization_id):
+			ordered_ids.append(organization_id)
+	for organization_id: String in ordered_ids:
 		if initialized >= rules.initial_active_npc_count:
 			break
 		var organization: OrganizationData = organizations.get_organization(
@@ -1113,17 +1130,18 @@ func _organization_entry_available(
 func _occupation_organization_bonus(
 	occupation_id: String, organization_type: String
 ) -> float:
-	var preferred_type: Dictionary = {
-		"civil_servant": "government",
-		"junior_officer": "military",
-		"small_merchant": "enterprise",
-		"skilled_worker": "enterprise",
-		"union_member": "union",
-		"laborer": "union",
-	}
+	var organization_match: Dictionary = _action_rules.player_context_rules.get(
+		"organization_match_bonus", {}
+	) as Dictionary
+	var preferred_by_occupation: Dictionary = organization_match.get(
+		"preferred_types_by_occupation", {}
+	) as Dictionary
+	var preferred_types: Array[String] = DataRecordUtils.to_string_array(
+		preferred_by_occupation.get(occupation_id, [])
+	)
 	return (
 		30.0
-		if str(preferred_type.get(occupation_id, "")) == organization_type
+		if preferred_types.has(organization_type)
 		else 0.0
 	)
 

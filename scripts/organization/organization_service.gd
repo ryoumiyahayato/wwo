@@ -5,6 +5,17 @@ extends RefCounted
 signal membership_changed(character_id: String, organization_id: String)
 signal position_changed(character_id: String, organization_id: String, position_id: String)
 
+const LEGACY_BASE_ORGANIZATION_IDS: Array[String] = [
+	"organization:loran_enterprise",
+	"organization:loran_government",
+	"organization:loran_military",
+	"organization:loran_union",
+	"organization:vesta_enterprise",
+	"organization:vesta_government",
+	"organization:vesta_military",
+	"organization:vesta_union",
+]
+
 var organizations: Dictionary = {}
 var _positions_by_character: Dictionary = {}
 
@@ -201,7 +212,10 @@ func get_persistent_state() -> Array[Dictionary]:
 func restore_persistent_state(records: Array) -> bool:
 	var restored: Dictionary = {}
 	var positions_by_character: Dictionary = {}
-	if records.size() != organizations.size():
+	var legacy_content_migration: bool = (
+		records.size() == LEGACY_BASE_ORGANIZATION_IDS.size()
+	)
+	if not legacy_content_migration and records.size() != organizations.size():
 		return false
 	for raw_record: Variant in records:
 		if not raw_record is Dictionary:
@@ -258,6 +272,19 @@ func restore_persistent_state(records: Array) -> bool:
 		elif not leader_holders.is_empty():
 			return false
 		restored[organization.id] = organization
+	if legacy_content_migration:
+		var restored_ids: Array[String] = []
+		for raw_id: Variant in restored:
+			restored_ids.append(str(raw_id))
+		restored_ids.sort()
+		if restored_ids != LEGACY_BASE_ORGANIZATION_IDS:
+			return false
+		for organization_id: String in get_organization_ids():
+			if restored.has(organization_id):
+				continue
+			restored[organization_id] = OrganizationData.from_dict(
+				(organizations[organization_id] as OrganizationData).to_dict()
+			)
 	if restored.is_empty():
 		return false
 	organizations = restored

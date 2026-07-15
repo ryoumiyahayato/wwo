@@ -2223,6 +2223,150 @@
         "chair": {"name": "协进会主席", "level": 3, "slots": 1, "permissions": ["organization_member", "organization_support", "regional_policy"], "holder_ids": []}
       }},
       "organization_relations": {"organization:vesta_enterprise": -0.3, "organization:vesta_government": -0.15}
+    },
+    {
+      "id": "organization:loran_river_council", "name": "河脊地方事务厅", "type": "government",
+      "country_id": "country:loran_federation", "region_id": "region:loran_riverback",
+      "size": 4200, "resources": 48, "influence": 0.46, "public_stance": "处理地方公共事务",
+      "leader_character_id": "", "member_ids": [],
+      "position_structure": {"entry_position": "clerk", "leader_position": "director", "positions": {
+        "clerk": {"name": "地方办事员", "level": 1, "slots": 160, "permissions": ["organization_member"], "holder_ids": []},
+        "official": {"name": "地方官员", "level": 2, "slots": 14, "permissions": ["organization_member", "regional_policy"], "holder_ids": []},
+        "director": {"name": "事务厅长", "level": 3, "slots": 1, "permissions": ["organization_member", "regional_policy"], "holder_ids": []}
+      }},
+      "organization_relations": {"organization:loran_government": 0.55}
+    },
+    {
+      "id": "organization:vesta_lake_council", "name": "东湖地方议事署", "type": "government",
+      "country_id": "country:vesta_union", "region_id": "region:vesta_eastlake",
+      "size": 3900, "resources": 46, "influence": 0.44, "public_stance": "协调地方公共事务",
+      "leader_character_id": "", "member_ids": [],
+      "position_structure": {"entry_position": "clerk", "leader_position": "director", "positions": {
+        "clerk": {"name": "地方书记员", "level": 1, "slots": 160, "permissions": ["organization_member"], "holder_ids": []},
+        "official": {"name": "地方议事员", "level": 2, "slots": 14, "permissions": ["organization_member", "regional_policy"], "holder_ids": []},
+        "director": {"name": "议事署长", "level": 3, "slots": 1, "permissions": ["organization_member", "regional_policy"], "holder_ids": []}
+      }},
+      "organization_relations": {"organization:vesta_government": 0.52}
+    },
+    {
+      "id": "organization:loran_forgeworks", "name": "铸原机械制造社", "type": "industrial",
+      "country_id": "country:loran_federation", "region_id": "region:loran_forgeplain",
+      "size": 13800, "resources": 79, "influence": 0.58, "public_stance": "扩大机械生产",
+      "leader_character_id": "", "member_ids": [],
+      "position_structure": {"entry_position": "worker", "leader_position": "director", "positions": {
+        "worker": {"name": "产业雇员", "level": 1, "slots": 400, "permissions": ["organization_member"], "holder_ids": []},
+        "foreman": {"name": "生产主管", "level": 2, "slots": 24, "permissions": ["organization_member", "organization_support"], "holder_ids": []},
+        "director": {"name": "制造社主任", "level": 3, "slots": 1, "permissions": ["organization_member", "organization_support", "regional_policy"], "holder_ids": []}
+      }},
+      "organization_relations": {"organization:loran_enterprise": 0.35, "organization:loran_forge_union": -0.25}
+    },
+    {
+      "id": "organization:vesta_redhill_industry", "name": "赤丘重工联合厂", "type": "industrial",
+      "country_id": "country:vesta_union", "region_id": "region:vesta_redhill",
+      "size": 13100, "resources": 77, "influence": 0.56, "public_stance": "发展基础工业",
+      "leader_character_id": "", "member_ids": [],
+      "position_structure": {"entry_position": "worker", "leader_position": "director", "positions": {
+        "worker": {"name": "产业雇员", "level": 1, "slots": 400, "permissions": ["organization_member"], "holder_ids": []},
+        "foreman": {"name": "车间主管", "level": 2, "slots": 24, "permissions": ["organization_member", "organization_support"], "holder_ids": []},
+        "director": {"name": "联合厂主任", "level": 3, "slots": 1, "permissions": ["organization_member", "organization_support", "regional_policy"], "holder_ids": []}
+      }},
+      "organization_relations": {"organization:vesta_enterprise": 0.32, "organization:vesta_lake_union": -0.22}
+    },
+    {
+      "id": "organization:loran_dawnbay_trade", "name": "晨湾商贸公所", "type": "commercial",
+      "country_id": "country:loran_federation", "region_id": "region:loran_dawnbay",
+      "size": 7200, "resources": 72, "influence": 0.49, "public_stance": "维持城市贸易网络",
+      "leader_character_id": "", "member_ids": [],
+      "position_structure": {"entry_position": "associate", "leader_position": "president", "positions": {
+        "associate": {"name": "商贸协理", "level": 1, "slots": 250, "permissions": ["organization_member"], "holder_ids": []},
+        "steward": {"name": "地区理事", "level": 2, "slots": 18, "permissions": ["organization_member", "organization_support"], "holder_ids": []},
+        "president": {"name": "公所会长", "level": 3, "slots": 1, "permissions": ["organization_member", "organization_support", "regional_policy"], "holder_ids": []}
+      }},
+      "organization_relations": {"organization:loran_enterprise": 0.4}
+    },
+    {
+      "id": "organization:vesta_northstar_trade", "name": "北辰商业议会", "type": "commercial",
+      "country_id": "country:vesta_union", "region_id": "region:vesta_northstar",
+      "size": 6900, "resources": 70, "influence": 0.47, "public_stance": "协调联盟商业活动",
+      "leader_character_id": "", "member_ids": [],
+      "position_structure": {"entry_position": "associate", "leader_position": "president", "positions": {
+        "associate": {"name": "商业协理", "level": 1, "slots": 250, "permissions": ["organization_member"], "holder_ids": []},
+        "steward": {"name": "地区理事", "level": 2, "slots": 18, "permissions": ["organization_member", "organization_support"], "holder_ids": []},
+        "president": {"name": "议会会长", "level": 3, "slots": 1, "permissions": ["organization_member", "organization_support", "regional_policy"], "holder_ids": []}
+      }},
+      "organization_relations": {"organization:vesta_enterprise": 0.38}
+    },
+    {
+      "id": "organization:loran_dawnbay_academy", "name": "晨湾公共学院", "type": "education",
+      "country_id": "country:loran_federation", "region_id": "region:loran_dawnbay",
+      "size": 3600, "resources": 51, "influence": 0.43, "public_stance": "扩展公共教育",
+      "leader_character_id": "", "member_ids": [],
+      "position_structure": {"entry_position": "teacher", "leader_position": "principal", "positions": {
+        "teacher": {"name": "学院教员", "level": 1, "slots": 180, "permissions": ["organization_member"], "holder_ids": []},
+        "dean": {"name": "学科主任", "level": 2, "slots": 12, "permissions": ["organization_member", "organization_support"], "holder_ids": []},
+        "principal": {"name": "学院院长", "level": 3, "slots": 1, "permissions": ["organization_member", "organization_support", "regional_policy"], "holder_ids": []}
+      }},
+      "organization_relations": {"organization:loran_government": 0.25}
+    },
+    {
+      "id": "organization:vesta_silver_academy", "name": "银野联合学堂", "type": "education",
+      "country_id": "country:vesta_union", "region_id": "region:vesta_silverfield",
+      "size": 3400, "resources": 49, "influence": 0.41, "public_stance": "普及基础教育",
+      "leader_character_id": "", "member_ids": [],
+      "position_structure": {"entry_position": "teacher", "leader_position": "principal", "positions": {
+        "teacher": {"name": "学堂教员", "level": 1, "slots": 180, "permissions": ["organization_member"], "holder_ids": []},
+        "dean": {"name": "教务主任", "level": 2, "slots": 12, "permissions": ["organization_member", "organization_support"], "holder_ids": []},
+        "principal": {"name": "学堂校长", "level": 3, "slots": 1, "permissions": ["organization_member", "organization_support", "regional_policy"], "holder_ids": []}
+      }},
+      "organization_relations": {"organization:vesta_government": 0.24}
+    },
+    {
+      "id": "organization:loran_river_press", "name": "河脊公共通讯社", "type": "news",
+      "country_id": "country:loran_federation", "region_id": "region:loran_riverback",
+      "size": 1800, "resources": 43, "influence": 0.4, "public_stance": "报道地方公共事务",
+      "leader_character_id": "", "member_ids": [],
+      "position_structure": {"entry_position": "reporter", "leader_position": "editor", "positions": {
+        "reporter": {"name": "通讯记者", "level": 1, "slots": 120, "permissions": ["organization_member"], "holder_ids": []},
+        "correspondent": {"name": "资深通讯员", "level": 2, "slots": 10, "permissions": ["organization_member", "organization_support"], "holder_ids": []},
+        "editor": {"name": "总编辑", "level": 3, "slots": 1, "permissions": ["organization_member", "organization_support", "regional_policy"], "holder_ids": []}
+      }},
+      "organization_relations": {"organization:loran_river_council": 0.12}
+    },
+    {
+      "id": "organization:vesta_eastlake_press", "name": "东湖联盟日报社", "type": "news",
+      "country_id": "country:vesta_union", "region_id": "region:vesta_eastlake",
+      "size": 1700, "resources": 42, "influence": 0.39, "public_stance": "公开地方与联盟消息",
+      "leader_character_id": "", "member_ids": [],
+      "position_structure": {"entry_position": "reporter", "leader_position": "editor", "positions": {
+        "reporter": {"name": "日报记者", "level": 1, "slots": 120, "permissions": ["organization_member"], "holder_ids": []},
+        "correspondent": {"name": "资深通讯员", "level": 2, "slots": 10, "permissions": ["organization_member", "organization_support"], "holder_ids": []},
+        "editor": {"name": "总编辑", "level": 3, "slots": 1, "permissions": ["organization_member", "organization_support", "regional_policy"], "holder_ids": []}
+      }},
+      "organization_relations": {"organization:vesta_lake_council": 0.1}
+    },
+    {
+      "id": "organization:loran_forge_union", "name": "铸原产业工人会", "type": "union",
+      "country_id": "country:loran_federation", "region_id": "region:loran_forgeplain",
+      "size": 14600, "resources": 45, "influence": 0.48, "public_stance": "协调产业工人权益",
+      "leader_character_id": "", "member_ids": [],
+      "position_structure": {"entry_position": "member", "leader_position": "chair", "positions": {
+        "member": {"name": "产业会员", "level": 1, "slots": 400, "permissions": ["organization_member"], "holder_ids": []},
+        "organizer": {"name": "车间组织员", "level": 2, "slots": 20, "permissions": ["organization_member", "organization_support"], "holder_ids": []},
+        "chair": {"name": "工人会主席", "level": 3, "slots": 1, "permissions": ["organization_member", "organization_support", "regional_policy"], "holder_ids": []}
+      }},
+      "organization_relations": {"organization:loran_forgeworks": -0.25}
+    },
+    {
+      "id": "organization:vesta_lake_union", "name": "东湖雇员工会", "type": "union",
+      "country_id": "country:vesta_union", "region_id": "region:vesta_eastlake",
+      "size": 13900, "resources": 44, "influence": 0.46, "public_stance": "维护雇员劳动条件",
+      "leader_character_id": "", "member_ids": [],
+      "position_structure": {"entry_position": "member", "leader_position": "chair", "positions": {
+        "member": {"name": "地方会员", "level": 1, "slots": 400, "permissions": ["organization_member"], "holder_ids": []},
+        "organizer": {"name": "地区组织员", "level": 2, "slots": 20, "permissions": ["organization_member", "organization_support"], "holder_ids": []},
+        "chair": {"name": "工会主席", "level": 3, "slots": 1, "permissions": ["organization_member", "organization_support", "regional_policy"], "holder_ids": []}
+      }},
+      "organization_relations": {"organization:vesta_redhill_industry": -0.22}
     }
   ],
   "relationships": [],

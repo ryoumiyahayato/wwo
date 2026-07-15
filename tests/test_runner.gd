@@ -1148,18 +1148,122 @@ func _test_m6_society_rules_and_organizations() -> void:
 	_expect_equal(_society_rules.load_from_file(), OK, "M6 社会模拟规则可加载")
 	_expect_equal(_society_rules.background_character_count, 120, "背景人物目标为 120 人")
 	_expect_equal(_society_rules.active_character_limit, 20, "活跃人物硬上限为 20 人")
-	_expect_equal(_world_data.organizations.size(), 8, "正式世界包含两国各四类组织")
+	_expect_equal(_world_data.organizations.size(), 20, "正式世界包含两国各十个基础组织")
 	var organization_service := OrganizationService.new(_world_data.organizations)
 	_expect_equal(
 		organization_service.get_types(),
-		["enterprise", "government", "military", "union"],
-		"政府、军队、企业和工会四类组织完整"
+		[
+			"commercial", "education", "enterprise", "government",
+			"industrial", "military", "news", "union",
+		],
+		"行政、军事、工业、商业、工会、教育和新闻组织路径完整"
 	)
 	for organization_id: String in organization_service.get_organization_ids():
 		var organization: OrganizationData = organization_service.get_organization(organization_id)
 		var positions: Dictionary = organization.position_structure["positions"] as Dictionary
 		_expect_true(positions.size() >= 3, "组织具有至少三级职位：%s" % organization_id)
 		_expect_true(not organization.organization_relations.has(organization_id), "组织关系不包含自身：%s" % organization_id)
+	var organization_count_by_country: Dictionary = {}
+	var organization_count_by_region: Dictionary = {}
+	var entry_capacity_by_country: Dictionary = {}
+	for organization_id: String in organization_service.get_organization_ids():
+		var organization: OrganizationData = organization_service.get_organization(
+			organization_id
+		)
+		organization_count_by_country[organization.country_id] = int(
+			organization_count_by_country.get(organization.country_id, 0)
+		) + 1
+		organization_count_by_region[organization.region_id] = int(
+			organization_count_by_region.get(organization.region_id, 0)
+		) + 1
+		var entry_id: String = str(
+			organization.position_structure.get("entry_position", "")
+		)
+		var positions: Dictionary = organization.position_structure.get(
+			"positions", {}
+		) as Dictionary
+		var entry: Dictionary = positions.get(entry_id, {}) as Dictionary
+		entry_capacity_by_country[organization.country_id] = int(
+			entry_capacity_by_country.get(organization.country_id, 0)
+		) + int(entry.get("slots", 0))
+	for country_id: String in [
+		"country:loran_federation", "country:vesta_union",
+	]:
+		_expect_equal(
+			int(organization_count_by_country.get(country_id, 0)),
+			10,
+			"每个国家具有十个基础组织：%s" % country_id
+		)
+		_expect_true(
+			int(entry_capacity_by_country.get(country_id, 0)) >= 2000,
+			"每个国家的组织入口职位容量高于当前人物规模：%s" % country_id
+		)
+	for region_id: String in _world_data.regions:
+		_expect_true(
+			int(organization_count_by_region.get(region_id, 0)) >= 1,
+			"每个主要地区至少具有一个正式组织：%s" % region_id
+		)
+	var organization_match: Dictionary = _action_rules.player_context_rules.get(
+		"organization_match_bonus", {}
+	) as Dictionary
+	var preferred_by_occupation: Dictionary = organization_match.get(
+		"preferred_types_by_occupation", {}
+	) as Dictionary
+	var occupations_covered: bool = true
+	for occupation: Dictionary in _character_config.occupations:
+		if int(occupation.get("standard_weight", 0)) <= 0:
+			continue
+		var preferred_types: Array[String] = DataRecordUtils.to_string_array(
+			preferred_by_occupation.get(str(occupation.get("id", "")), [])
+		)
+		for country_id: String in [
+			"country:loran_federation", "country:vesta_union",
+		]:
+			var matched: bool = false
+			for organization_id: String in organization_service.get_organization_ids():
+				var organization: OrganizationData = (
+					organization_service.get_organization(organization_id)
+				)
+				if (
+					organization.country_id == country_id
+					and preferred_types.has(organization.type)
+					and organization_service.has_entry_vacancy(organization_id)
+				):
+					matched = true
+					break
+			occupations_covered = occupations_covered and matched
+	_expect_true(
+		occupations_covered,
+		"每种标准开局职业在两国均具有匹配且有入口空位的组织"
+	)
+	var legacy_records: Array[Dictionary] = []
+	for record: Dictionary in organization_service.get_persistent_state():
+		if OrganizationService.LEGACY_BASE_ORGANIZATION_IDS.has(
+			str(record.get("id", ""))
+		):
+			legacy_records.append(record)
+	var migrated_service := OrganizationService.new(_world_data.organizations)
+	_expect_true(
+		migrated_service.restore_persistent_state(legacy_records),
+		"旧版八组织存档可迁移并补入新增内容"
+	)
+	_expect_equal(
+		migrated_service.get_organization_ids().size(),
+		20,
+		"旧档迁移后保留完整二十组织世界"
+	)
+	var invalid_legacy: Array[Dictionary] = legacy_records.duplicate(true)
+	invalid_legacy[0] = (
+		organization_service.get_organization(
+			"organization:loran_dawnbay_trade"
+		).to_dict()
+	)
+	_expect_true(
+		not OrganizationService.new(_world_data.organizations).restore_persistent_state(
+			invalid_legacy
+		),
+		"仅精确旧版八组织集合允许内容迁移"
+	)
 
 
 func _test_m6_population_tiers_and_determinism() -> void:
@@ -1173,10 +1277,18 @@ func _test_m6_population_tiers_and_determinism() -> void:
 		var background: BackgroundCharacterData = _society.roster.get_background(character_id)
 		_expect_true(background is RefCounted, "背景人物只使用轻量 RefCounted 数据记录")
 		break
+	var initialized_leader_count: int = 0
 	for organization_id: String in _society.organizations.get_organization_ids():
 		var organization: OrganizationData = _society.organizations.get_organization(organization_id)
-		_expect_true(not organization.leader_character_id.is_empty(), "组织已配置活跃领导：%s" % organization_id)
-		_expect_true(_society.roster.get_active(organization.leader_character_id) != null, "组织领导位于活跃层：%s" % organization_id)
+		if organization.leader_character_id.is_empty():
+			continue
+		initialized_leader_count += 1
+		_expect_true(_society.roster.get_active(organization.leader_character_id) != null, "已初始化的组织领导位于活跃层：%s" % organization_id)
+	_expect_equal(
+		initialized_leader_count,
+		_society.rules.initial_active_npc_count,
+		"扩充组织内容不扩大初始活跃 AI 预算"
+	)
 
 	var second: SocietySimulationService = _make_society(610)
 	var first_ids: Array[String] = _society.roster.get_background_ids()
@@ -1326,7 +1438,7 @@ func _test_m6_social_panel_scene() -> void:
 	social_button.pressed.emit()
 	_expect_true(panel.visible, "社会入口可打开组织与人物层级面板")
 	var organization_option: OptionButton = panel.find_child("OrganizationOption", true, false) as OptionButton
-	_expect_equal(organization_option.item_count, 4, "组织面板只列出玩家可申请的四个本国组织")
+	_expect_equal(organization_option.item_count, 10, "组织面板列出玩家可申请的十个本国基础组织")
 	var social_summary: Label = panel.find_child("PlayerSocialSummary", true, false) as Label
 	_expect_true(social_summary.text.contains("已加入组织") and social_summary.text.contains("真实关系"), "社会面板以玩家组织与关系状态为中心")
 	var developer_section: PanelContainer = panel.find_child("DeveloperSection", true, false) as PanelContainer
@@ -1366,7 +1478,7 @@ func _test_m6_society_performance_baseline() -> void:
 	)
 	_expect_true(society.ai.states.size() <= 19, "30 日模拟始终只处理活跃 NPC")
 	_expect_true(initialization_usec < 250000, "120 人社会初始化低于 250 ms 预算")
-	print("[PERF] 初始化 120 人分层社会与 8 组织：%.3f ms" % (float(initialization_usec) / 1000.0))
+	print("[PERF] 初始化 120 人分层社会与 20 组织：%.3f ms" % (float(initialization_usec) / 1000.0))
 	print("[PERF] 19 人以内 AI 运行 30 日并创建 100 条关系：%.3f ms" % (float(simulation_usec) / 1000.0))
 
 

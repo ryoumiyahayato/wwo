@@ -576,7 +576,16 @@ static func _selected_metadata(option: OptionButton) -> String:
 
 
 static func _type_label(type_id: String) -> String:
-	return str({"government": "政府机构", "military": "军队", "enterprise": "企业", "union": "工会"}.get(type_id, "组织"))
+	return str({
+		"government": "政府机构",
+		"military": "军队",
+		"enterprise": "综合企业",
+		"industrial": "工业企业",
+		"commercial": "商业组织",
+		"union": "工会",
+		"education": "教育机构",
+		"news": "新闻机构",
+	}.get(type_id, "组织"))
 
 
 static func _signed_relation(value: float) -> String:
