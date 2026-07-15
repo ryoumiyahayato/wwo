@@ -58,6 +58,7 @@ func _run() -> void:
 	await _test_drawer_navigation()
 	_test_non_map_context_isolation()
 	_test_peace_war_and_border_state()
+	await _test_world_activity_notifications()
 	_test_standard_study_and_work_reachability()
 	_test_standard_relationship_reachability()
 	_test_selectable_skill_growth()
@@ -283,6 +284,97 @@ func _test_peace_war_and_border_state() -> void:
 		"战争权威状态可随世界存档完整往返"
 	)
 	_expect(_map.restore_persistent_state(peace_state), "和平世界状态可在战争测试后恢复")
+
+
+func _test_world_activity_notifications() -> void:
+	var activity: WorldActivityService = _society.world_activity
+	var center: WorldNotificationCenter = _view.find_child(
+		"WorldNotificationCenter", true, false
+	) as WorldNotificationCenter
+	var panel: WorldActivityPanel = _view.find_child(
+		"WorldActivityPanel", true, false
+	) as WorldActivityPanel
+	_expect(
+		activity != null and center != null and panel != null,
+		"正式世界动态服务、历史抽屉和右下角通知中心已建立"
+	)
+	if activity == null or center == null or panel == null:
+		return
+	var added_events: Array[Dictionary] = []
+	for index: int in range(6):
+		added_events.append(activity.add_event(
+			"test_public_event",
+			"公开动态 %d" % (index + 1),
+			"用于验证正式通知的有界显示与过期。",
+			_clock.total_hours,
+			WorldActivityService.IMPORTANCE_NORMAL
+		))
+	_expect(
+		center.get_visible_count() == WorldNotificationCenter.MAX_VISIBLE,
+		"右下角通知同时最多显示 4 条"
+	)
+	_expect(
+		panel.event_list.get_child_count() == activity.size(),
+		"世界动态抽屉与通知中心消费同一份公开事件历史"
+	)
+	var newest: Dictionary = added_events[added_events.size() - 1]
+	_expect(
+		center.expire_notification(str(newest["id"]), false)
+		and center.get_visible_count() == WorldNotificationCenter.MAX_VISIBLE - 1,
+		"正式通知可按事件 ID 过期且立即释放显示槽"
+	)
+	var persistent_state: Dictionary = activity.get_persistent_state()
+	var restored := WorldActivityService.new()
+	_expect(
+		restored.restore_persistent_state(persistent_state, _clock.total_hours)
+		and restored.get_persistent_state() == persistent_state,
+		"世界动态历史与事件 ID 可随存档完整往返"
+	)
+	var invalid_state: Dictionary = persistent_state.duplicate(true)
+	var invalid_events: Array = invalid_state["events"] as Array
+	(invalid_events[invalid_events.size() - 1] as Dictionary)["world_hour"] = (
+		_clock.total_hours + 1
+	)
+	_expect(
+		not WorldActivityService.new().restore_persistent_state(
+			invalid_state, _clock.total_hours
+		),
+		"世界动态恢复拒绝来自未来的事件"
+	)
+	var membership_recorded: bool = false
+	for character_id: String in _society.ai.get_ai_character_ids():
+		var character: CharacterData = _society.roster.get_active(character_id)
+		for organization_id: String in _society.organizations.get_organization_ids():
+			var organization: OrganizationData = _society.organizations.get_organization(
+				organization_id
+			)
+			if (
+				organization.country_id != character.country_id
+				or organization.member_ids.has(character.id)
+				or not _society.organizations.has_entry_vacancy(organization.id)
+			):
+				continue
+			var before_membership_event: int = activity.size()
+			membership_recorded = _society.organizations.join_organization(
+				character, organization.id
+			)
+			membership_recorded = (
+				membership_recorded
+				and activity.size() == before_membership_event + 1
+				and str(activity.get_recent(1)[0].get("category", ""))
+				== "organization_membership"
+			)
+			break
+		if membership_recorded:
+			break
+	_expect(membership_recorded, "NPC 加入组织会生成正式公开动态与通知")
+	for event: Dictionary in activity.get_recent():
+		_expect(
+			not event.has("random_state")
+			and not event.has("generation_seed")
+			and not event.has("population_category"),
+			"正式世界动态不暴露内部字段：%s" % str(event.get("id", ""))
+		)
 
 
 func _test_standard_study_and_work_reachability() -> void:

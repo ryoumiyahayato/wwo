@@ -29,6 +29,7 @@ var ai: SimpleAiService
 var continuity_rules: ContinuityRulesConfig
 var regional_influence: RegionalInfluenceService
 var succession: SuccessionService
+var world_activity: WorldActivityService
 var initialization_error: String = ""
 var paused_settlement_categories: Dictionary = {}
 var _clock: SimulationClock
@@ -37,6 +38,7 @@ var _data_set: CoreDataSet
 var _character_config: CharacterGenerationConfig
 var _action_rules: ActionRulesConfig
 var _action_service: ActionService
+var _control_owner_cache: Dictionary = {}
 
 
 func initialize(player: CharacterData, data_set: CoreDataSet) -> bool:
@@ -75,6 +77,8 @@ func initialize(player: CharacterData, data_set: CoreDataSet) -> bool:
 		continuity_rules, roster, organizations, relationships, ai
 	)
 	_initialize_organization_leaders()
+	world_activity = WorldActivityService.new()
+	_connect_activity_sources()
 	ai.run_long_term_evaluations(0)
 	ai.run_daily_decisions(0)
 	return true
@@ -89,6 +93,7 @@ func attach_world(
 ) -> void:
 	if control_service != null:
 		_map_service = control_service
+		_connect_map_activity_sources()
 	if simulation_clock == null:
 		return
 	if simulation_clock != _clock:
@@ -220,7 +225,204 @@ func apply_character_action_domain_effect(
 				"target_id": action.target_id,
 			}
 		)
+		_record_action_world_activity(action, definition, character, map_service)
 	return applied
+
+
+func _connect_activity_sources() -> void:
+	if world_activity == null:
+		return
+	if not organizations.membership_changed.is_connected(
+		_on_organization_membership_changed
+	):
+		organizations.membership_changed.connect(_on_organization_membership_changed)
+	if not organizations.position_changed.is_connected(_on_organization_position_changed):
+		organizations.position_changed.connect(_on_organization_position_changed)
+	if not relationships.relationship_changed.is_connected(_on_relationship_changed):
+		relationships.relationship_changed.connect(_on_relationship_changed)
+
+
+func _connect_map_activity_sources() -> void:
+	if _map_service == null or world_activity == null:
+		return
+	if not _map_service.war_started.is_connected(_on_war_started):
+		_map_service.war_started.connect(_on_war_started)
+	if not _map_service.war_ended.is_connected(_on_war_ended):
+		_map_service.war_ended.connect(_on_war_ended)
+	if not _map_service.control_unit_changed.is_connected(_on_activity_control_unit_changed):
+		_map_service.control_unit_changed.connect(_on_activity_control_unit_changed)
+	_cache_control_owners()
+
+
+func _on_organization_membership_changed(
+	character_id: String, organization_id: String
+) -> void:
+	var character: Variant = roster.get_public_character(character_id)
+	var organization: OrganizationData = organizations.get_organization(organization_id)
+	if character == null or organization == null:
+		return
+	var joined: bool = organization.member_ids.has(character_id)
+	world_activity.add_event(
+		"organization_membership",
+		"%s%s%s" % [str(character.name), "加入" if joined else "离开", organization.name],
+		"这项公开成员变动已写入组织名册。",
+		_current_hour(),
+		WorldActivityService.IMPORTANCE_NORMAL,
+		"organization",
+		organization.id
+	)
+
+
+func _on_organization_position_changed(
+	character_id: String, organization_id: String, position_id: String
+) -> void:
+	var organization: OrganizationData = organizations.get_organization(organization_id)
+	var character: Variant = roster.get_public_character(character_id)
+	if organization == null or character == null:
+		return
+	if position_id == str(organization.position_structure.get("entry_position", "")):
+		return
+	var position_name: String = organizations.get_position_name(
+		character_id, organization_id
+	)
+	world_activity.add_event(
+		"organization_position",
+		"%s获得%s职位" % [str(character.name), position_name],
+		"%s公布了这项职位任命。" % organization.name,
+		_current_hour(),
+		WorldActivityService.IMPORTANCE_IMPORTANT,
+		"organization",
+		organization.id
+	)
+
+
+func _on_relationship_changed(relationship_id: String, created: bool) -> void:
+	if not created:
+		return
+	var relationship: RelationshipData = relationships.relationships.get(
+		relationship_id
+	) as RelationshipData
+	if relationship == null or not relationship.is_public:
+		return
+	var first: Variant = roster.get_public_character(relationship.character_a_id)
+	var second: Variant = roster.get_public_character(relationship.character_b_id)
+	if first == null or second == null:
+		return
+	var subject_id: String = relationship.character_a_id
+	if subject_id == roster.player_character_id:
+		subject_id = relationship.character_b_id
+	world_activity.add_event(
+		"public_relationship",
+		"%s与%s建立公开关系" % [str(first.name), str(second.name)],
+		"两人的公开社会联系已经形成。",
+		_current_hour(),
+		WorldActivityService.IMPORTANCE_NORMAL,
+		"character",
+		subject_id
+	)
+
+
+func _record_action_world_activity(
+	action: ActionInstanceData,
+	definition: ActionDefinitionData,
+	character: CharacterData,
+	map_service: MapControlService
+) -> void:
+	if world_activity == null:
+		return
+	if definition.category == "promote_policy":
+		var unit: ControlUnitData = map_service.get_unit(action.target_id)
+		var region: RegionData = (
+			map_service.data_set.regions.get(unit.region_id) as RegionData
+			if unit != null
+			else null
+		)
+		if region != null:
+			world_activity.add_event(
+				"policy_change",
+				"%s推动%s政策变化" % [character.name, region.name],
+				"当地公开社会影响随政策行动发生变化。",
+				_current_hour(),
+				WorldActivityService.IMPORTANCE_IMPORTANT,
+				"region",
+				region.id
+			)
+	elif definition.category == "support_control":
+		var unit: ControlUnitData = map_service.get_unit(action.target_id)
+		if unit != null:
+			world_activity.add_event(
+				"control_support",
+				"%s支援战时控制" % character.name,
+				"合法前线目标的军事控制状态发生变化。",
+				_current_hour(),
+				WorldActivityService.IMPORTANCE_IMPORTANT,
+				"region",
+				unit.region_id
+			)
+
+
+func _cache_control_owners() -> void:
+	_control_owner_cache.clear()
+	if _map_service == null:
+		return
+	for unit_id: String in _map_service.get_sorted_unit_ids():
+		var unit: ControlUnitData = _map_service.get_unit(unit_id)
+		_control_owner_cache[unit_id] = unit.controller_country_id
+
+
+func _on_activity_control_unit_changed(unit_id: String) -> void:
+	if _map_service == null or world_activity == null:
+		return
+	var unit: ControlUnitData = _map_service.get_unit(unit_id)
+	if unit == null:
+		return
+	var previous_country_id: String = str(
+		_control_owner_cache.get(unit_id, unit.controller_country_id)
+	)
+	_control_owner_cache[unit_id] = unit.controller_country_id
+	if previous_country_id == unit.controller_country_id or not _map_service.is_war_active():
+		return
+	var region: RegionData = _data_set.regions.get(unit.region_id) as RegionData
+	var country: CountryData = _data_set.countries.get(unit.controller_country_id) as CountryData
+	if region == null or country == null:
+		return
+	world_activity.add_event(
+		"control_change",
+		"%s控制区发生变化" % region.name,
+		"%s取得了一个控制单元的实际控制。" % country.name,
+		_current_hour(),
+		WorldActivityService.IMPORTANCE_IMPORTANT,
+		"region",
+		region.id
+	)
+
+
+func _on_war_started(state: Dictionary) -> void:
+	if world_activity == null:
+		return
+	world_activity.add_event(
+		"war_started",
+		"战争开始",
+		"参战国与战争目标已经进入权威世界状态。",
+		_current_hour(),
+		WorldActivityService.IMPORTANCE_IMPORTANT,
+		"war",
+		str(state.get("war_id", "war:unknown"))
+	)
+
+
+func _on_war_ended(previous_state: Dictionary) -> void:
+	if world_activity == null:
+		return
+	world_activity.add_event(
+		"war_ended",
+		"战争结束",
+		"军事控制压力已经停止，边界恢复为和平期呈现。",
+		_current_hour(),
+		WorldActivityService.IMPORTANCE_IMPORTANT,
+		"war",
+		str(previous_state.get("war_id", "war:unknown"))
+	)
 
 
 func _initialize_player_social_anchors(player: CharacterData) -> void:
@@ -902,6 +1104,19 @@ func _execute_ai_monthly_world_actions() -> int:
 					_map_service
 				):
 					applied += 1
+					var region: RegionData = _data_set.regions.get(
+						organization.region_id
+					) as RegionData
+					if region != null and world_activity != null:
+						world_activity.add_event(
+							"organization_influence",
+							"%s扩大地区影响" % organization.name,
+							"%s的公开社会影响发生变化。" % region.name,
+							_current_hour(),
+							WorldActivityService.IMPORTANCE_NORMAL,
+							"organization",
+							organization.id
+						)
 			if _map_service.is_war_active() and organizations.has_permission(
 				character.id,
 				organization.id,
@@ -1002,6 +1217,12 @@ func _run_annual_lifecycle() -> int:
 		)
 		if exited == null:
 			continue
+		_record_character_exit_activity(
+			exited.character.id,
+			exited.character.name,
+			reason,
+			exited.character.region_id
+		)
 		for organization_id: String in exited.character.organization_ids.duplicate():
 			organizations.leave_organization(
 				exited.character, organization_id
@@ -1031,9 +1252,38 @@ func _exit_active_npc(character: CharacterData, reason: String) -> bool:
 	for organization_id: String in character.organization_ids.duplicate():
 		organizations.leave_organization(character, organization_id)
 	ai.unregister(character.id)
-	return roster.exit_active_character(
+	var exited: ExitedCharacterRecord = roster.exit_active_character(
 		character.id, reason, _current_hour()
-	) != null
+	)
+	if exited == null:
+		return false
+	_record_character_exit_activity(
+		exited.character.id,
+		exited.character.name,
+		reason,
+		exited.character.region_id
+	)
+	return true
+
+
+func _record_character_exit_activity(
+	character_id: String,
+	character_name: String,
+	reason: String,
+	region_id: String
+) -> void:
+	if world_activity == null:
+		return
+	var reason_label: String = "去世" if reason == "death" else "退休"
+	world_activity.add_event(
+		"character_exit",
+		"重要人物%s%s" % [character_name, reason_label],
+		"这项人物变化已经写入世界历史。",
+		_current_hour(),
+		WorldActivityService.IMPORTANCE_IMPORTANT,
+		"region" if not region_id.is_empty() else "character",
+		region_id if not region_id.is_empty() else character_id
+	)
 
 
 func _fill_vacant_leadership() -> int:

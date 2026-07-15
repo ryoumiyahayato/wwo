@@ -15,6 +15,7 @@ const PERMISSION_LABELS: Dictionary = {
 
 @onready var close_button: Button = %CloseButton
 @onready var player_social_summary: Label = %PlayerSocialSummary
+@onready var social_tabs: TabContainer = %SocialTabs
 @onready var organization_option: OptionButton = %OrganizationOption
 @onready var organization_label: RichTextLabel = %OrganizationLabel
 @onready var find_organization_button: Button = %FindOrganizationButton
@@ -95,6 +96,32 @@ func setup(simulation_clock: SimulationClock, simulation: SocietySimulationServi
 func refresh_view() -> void:
 	if society != null:
 		_refresh_all()
+
+
+func focus_organization(organization_id: String) -> bool:
+	if society == null:
+		return false
+	_populate_organizations()
+	for index: int in range(organization_option.item_count):
+		if str(organization_option.get_item_metadata(index)) == organization_id:
+			organization_option.select(index)
+			_on_organization_selected(index)
+			social_tabs.current_tab = 0
+			return true
+	return false
+
+
+func focus_character(character_id: String) -> bool:
+	if society == null:
+		return false
+	_populate_relationships()
+	for index: int in range(relationship_option.item_count):
+		if str(relationship_option.get_item_metadata(index)) == character_id:
+			relationship_option.select(index)
+			_on_relationship_selected(index)
+			social_tabs.current_tab = 1
+			return true
+	return false
 
 
 func refresh_developer_mode() -> void:

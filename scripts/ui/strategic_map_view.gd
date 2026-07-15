@@ -29,6 +29,7 @@ const DRAWER_OPEN_X: float = 14.0
 @onready var social_panel: SocialSystemPanel = %SocialSystemPanel
 @onready var world_activity_button: Button = %WorldActivityButton
 @onready var world_activity_panel: WorldActivityPanel = %WorldActivityPanel
+@onready var notification_center: WorldNotificationCenter = %WorldNotificationCenter
 @onready var developer_panel: DeveloperPanel = %DeveloperPanel
 @onready var modal_layer: Control = %ModalLayer
 @onready var modal_backdrop: ColorRect = %ModalBackdrop
@@ -70,6 +71,8 @@ func _ready() -> void:
 	social_panel.close_requested.connect(_on_social_panel_close_requested)
 	social_panel.request_action.connect(_on_social_action_requested)
 	world_activity_panel.close_requested.connect(_on_world_activity_panel_close_requested)
+	world_activity_panel.event_activated.connect(_on_world_activity_event_activated)
+	notification_center.event_activated.connect(_on_world_activity_event_activated)
 	developer_panel.close_requested.connect(_on_developer_panel_close_requested)
 	developer_panel.developer_mode_changed.connect(_on_developer_mode_changed)
 	social_panel.society_changed.connect(action_panel.refresh_permissions)
@@ -104,7 +107,8 @@ func _ready() -> void:
 	if GameSessionService.society_service != null:
 		character_panel.setup(GameSessionService.society_service)
 		social_panel.setup(_clock, GameSessionService.society_service)
-		world_activity_panel.refresh_view()
+		world_activity_panel.setup(GameSessionService.society_service.world_activity)
+		notification_center.setup(GameSessionService.society_service.world_activity)
 	zoom_label.text = UiStrings.MAP_HELP
 	_apply_developer_visibility()
 	_refresh_war_status()
@@ -556,6 +560,36 @@ func _refresh_more_menu() -> void:
 func _on_social_action_requested(action_id: String, requested_target_id: String) -> void:
 	_open_primary_panel(action_panel)
 	action_panel.prefill_action(action_id, requested_target_id)
+
+
+func _on_world_activity_event_activated(event: Dictionary) -> void:
+	var subject_type: String = str(event.get("subject_type", ""))
+	var subject_id: String = str(event.get("subject_id", ""))
+	match subject_type:
+		"organization":
+			if social_panel.focus_organization(subject_id):
+				_open_primary_panel(social_panel)
+			else:
+				_open_primary_panel(world_activity_panel)
+		"character":
+			if social_panel.focus_character(subject_id):
+				_open_primary_panel(social_panel)
+			else:
+				_open_primary_panel(world_activity_panel)
+		"region":
+			_select_first_unit_in_region(subject_id)
+			_close_primary_panel()
+		_:
+			world_activity_panel.refresh_view()
+			_open_primary_panel(world_activity_panel)
+
+
+func _select_first_unit_in_region(region_id: String) -> void:
+	for unit_id: String in _map_service.get_sorted_unit_ids():
+		var unit: ControlUnitData = _map_service.get_unit(unit_id)
+		if unit != null and unit.region_id == region_id:
+			map_canvas.select_unit(unit_id)
+			return
 
 
 func _input(event: InputEvent) -> void:

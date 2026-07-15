@@ -59,6 +59,16 @@ text = "公开事件历史"
 [node name="EmptyLabel" type="Label" parent="Margin/Root"]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_vertical = 3
 text = "最近没有可公开的世界动态。"
 autowrap_mode = 2
+
+[node name="EventScroll" type="ScrollContainer" parent="Margin/Root"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="EventList" type="VBoxContainer" parent="Margin/Root/EventScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8

@@ -5,6 +5,8 @@ extends RefCounted
 signal control_unit_changed(unit_id: String)
 signal frontlines_changed()
 signal war_state_changed()
+signal war_started(state: Dictionary)
+signal war_ended(previous_state: Dictionary)
 
 const STAGE_STABLE: String = "stable"
 const STAGE_WEAKENING: String = "weakening"
@@ -94,14 +96,17 @@ func declare_war(
 		"stalemate_reason": "尚未执行首次军事决策。",
 	}
 	war_state_changed.emit()
+	war_started.emit(get_war_state())
 	return true
 
 
 func end_war() -> bool:
 	if not is_war_active():
 		return false
+	var previous_state: Dictionary = get_war_state()
 	_war_state = _default_war_state()
 	war_state_changed.emit()
+	war_ended.emit(previous_state)
 	return true
 
 

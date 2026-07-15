@@ -2,6 +2,8 @@ class_name RelationshipService
 extends RefCounted
 ## Sparse relationship store: only contacted pairs receive a record.
 
+signal relationship_changed(relationship_id: String, created: bool)
+
 var roster: CharacterRosterService
 var defaults: Dictionary
 var id_service: StableIdService
@@ -30,9 +32,11 @@ func create_or_update(
 		return null
 	var pair_key: String = _pair_key(character_a_id, character_b_id)
 	var relationship: RelationshipData
+	var created: bool = false
 	if _id_by_pair.has(pair_key):
 		relationship = relationships[str(_id_by_pair[pair_key])] as RelationshipData
 	else:
+		created = true
 		relationship = RelationshipData.new()
 		relationship.id = id_service.next_id("relationship")
 		var ids: Array[String] = [character_a_id, character_b_id]
@@ -57,6 +61,7 @@ func create_or_update(
 	if not interest_link.is_empty():
 		relationship.interest_link = interest_link
 	relationship.last_interaction_hour = current_hour
+	relationship_changed.emit(relationship.id, created)
 	return relationship
 
 

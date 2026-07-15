@@ -246,7 +246,7 @@ func _test_save_consistency(
 	var service := GameSaveService.new()
 	var snapshot: Dictionary = service.build_snapshot(clock, map_service)
 	var normal: SaveOperationResult = service.restore_snapshot(snapshot.duplicate(true), clock, map_service)
-	_expect(normal.success, "正常职业人物存档可恢复")
+	_expect(normal.success, "正常职业人物存档可恢复：%s" % normal.message)
 	if not normal.success:
 		return
 	society = GameSessionService.society_service

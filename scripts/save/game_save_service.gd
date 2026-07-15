@@ -35,6 +35,7 @@ func build_snapshot(clock: SimulationClock, map_service: MapControlService) -> D
 		"characters": society.roster.get_persistent_state(),
 		"organizations": society.organizations.get_persistent_state(),
 		"relationships": society.relationships.get_persistent_state(),
+		"world_activity": society.world_activity.get_persistent_state(),
 		"ai_states": society.ai.get_persistent_state(),
 		"settlement_state": {"paused_categories": society.paused_settlement_categories.duplicate(true)},
 		"current_action": null if GameSessionService.current_action == null else GameSessionService.current_action.to_dict(),
@@ -191,6 +192,13 @@ func restore_snapshot(
 	if not action_ids.restore_state(raw_action_id_state):
 		return SaveOperationResult.fail("restore_error", "行动 ID 状态无效")
 	var current_hour: int = int((snapshot["game_time"] as Dictionary).get("total_hours", -1))
+	var activity_state: Dictionary = snapshot.get(
+		"world_activity", WorldActivityService.empty_persistent_state()
+	) as Dictionary
+	if not temporary_society.world_activity.restore_persistent_state(
+		activity_state, current_hour
+	):
+		return SaveOperationResult.fail("restore_error", "世界动态历史无效")
 	var previous_world_state: Dictionary = map_service.get_persistent_state()
 	if not map_service.restore_persistent_state(snapshot["world"] as Dictionary):
 		return SaveOperationResult.fail("restore_error", "地图状态无效")
@@ -384,7 +392,9 @@ func validate_snapshot(snapshot: Dictionary) -> Array[String]:
 	for field: String in ["organizations", "ai_states"]:
 		if not snapshot.get(field) is Array:
 			errors.append("字段 %s 必须是数组" % field)
-	for optional_field: String in ["settlement_state", "settlement_log", "performance_metrics"]:
+	for optional_field: String in [
+		"settlement_state", "settlement_log", "performance_metrics", "world_activity",
+	]:
 		if snapshot.has(optional_field) and not snapshot[optional_field] is Dictionary:
 			errors.append("字段 %s 必须是对象" % optional_field)
 	if snapshot.has("recent_action_result") and not snapshot["recent_action_result"] is Dictionary:

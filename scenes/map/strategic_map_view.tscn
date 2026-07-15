@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/strategic_map_view.gd" id="1_view"]
 [ext_resource type="Script" path="res://scripts/map/map_world_controller.gd" id="2_world"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" path="res://scenes/devtools/developer_panel.tscn" id="7_dev"]
 [ext_resource type="PackedScene" path="res://scenes/character/character_profile_panel.tscn" id="8_character"]
 [ext_resource type="PackedScene" path="res://scenes/world/world_activity_panel.tscn" id="9_activity"]
+[ext_resource type="PackedScene" path="res://scenes/world/world_notification_center.tscn" id="10_notifications"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
 bg_color = Color(0.06, 0.083, 0.115, 0.97)
@@ -408,6 +409,9 @@ offset_right = 514.0
 offset_bottom = -14.0
 grow_vertical = 2
 visible = false
+
+[node name="WorldNotificationCenter" parent="." instance=ExtResource("10_notifications")]
+z_index = 15
 
 [node name="DeveloperPanel" parent="ModalLayer" instance=ExtResource("7_dev")]
 unique_name_in_owner = true

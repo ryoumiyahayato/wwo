@@ -2074,7 +2074,15 @@ func _test_m9_integrated_core_loop() -> void:
 	_expect_true(save_service.save_to_path(save_path, save_service.build_snapshot(clock, map_service)).success, "M9 继承后的完整世界可保存")
 	clock.advance_hours(48)
 	var loaded: SaveOperationResult = save_service.load_from_path(save_path)
-	_expect_true(loaded.success and save_service.restore_snapshot(loaded.snapshot, clock, map_service).success, "M9 存档可加载并继续游戏")
+	var continue_result: SaveOperationResult = (
+		save_service.restore_snapshot(loaded.snapshot, clock, map_service)
+		if loaded.success
+		else SaveOperationResult.fail("load_failed", loaded.message)
+	)
+	_expect_true(
+		loaded.success and continue_result.success,
+		"M9 存档可加载并继续游戏：%s" % continue_result.message
+	)
 	clock.advance_hours(1)
 	_expect_equal(clock.total_hours, 1, "M9 加载后权威时间可继续推进")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(save_path))
