@@ -24,6 +24,7 @@ func build_snapshot(clock: SimulationClock, map_service: MapControlService) -> D
 	var society: SocietySimulationService = GameSessionService.society_service
 	if clock == null or map_service == null or society == null or not GameSessionService.has_player():
 		return {}
+	_archive_terminal_player_action(society, map_service)
 	return {
 		"save_version": SAVE_VERSION,
 		"config_versions": CONFIG_VERSIONS.duplicate(true),
@@ -37,6 +38,8 @@ func build_snapshot(clock: SimulationClock, map_service: MapControlService) -> D
 		"ai_states": society.ai.get_persistent_state(),
 		"settlement_state": {"paused_categories": society.paused_settlement_categories.duplicate(true)},
 		"current_action": null if GameSessionService.current_action == null else GameSessionService.current_action.to_dict(),
+		"recent_action_result": GameSessionService.recent_action_result.duplicate(true),
+		"action_history": GameSessionService.action_history.duplicate(true),
 		"random_state": {"action_id_service": GameSessionService.action_id_service.get_state()},
 		"developer_mode": GameSessionService.developer_mode,
 		"settlement_log": GameSessionService.settlement_log.get_state(),
@@ -202,6 +205,24 @@ func restore_snapshot(
 				map_service, previous_world_state, "broken_reference", "玩家行动缺少实例 ID"
 			)
 		seen_action_ids[player_action_id] = top_player_id
+	var restored_history: Array[Dictionary] = []
+	for raw_history_record: Variant in snapshot.get("action_history", []) as Array:
+		restored_history.append((raw_history_record as Dictionary).duplicate(true))
+	var restored_recent: Dictionary = (
+		(snapshot.get("recent_action_result", {}) as Dictionary).duplicate(true)
+	)
+	var history_error: String = _validate_action_result_records(
+		restored_history,
+		restored_recent,
+		map_service,
+		current_hour,
+		raw_action_id_state,
+		seen_action_ids
+	)
+	if not history_error.is_empty():
+		return _fail_and_restore_map(
+			map_service, previous_world_state, "broken_reference", history_error
+		)
 	var ai_action_error: String = _validate_ai_action_records(
 		snapshot["ai_states"] as Array,
 		temporary_society,
@@ -252,6 +273,16 @@ func restore_snapshot(
 				map_service, previous_world_state, "broken_reference", action_error
 			)
 		restored_action = ActionInstanceData.from_dict(action_record)
+		if restored_action.is_terminal():
+			var migrated_record: Dictionary = GameSessionService.build_action_result_record(
+				restored_action, restored_player
+			)
+			if not migrated_record.is_empty():
+				restored_history.append(migrated_record.duplicate(true))
+				while restored_history.size() > 100:
+					restored_history.pop_front()
+				restored_recent = migrated_record
+			restored_action = null
 
 	var log_service := SettlementLogService.new()
 	if not log_service.restore_state(snapshot.get("settlement_log", {"max_entries": 200, "entries": []}) as Dictionary):
@@ -273,6 +304,7 @@ func restore_snapshot(
 	GameSessionService.player_character = restored_player
 	GameSessionService.selected_country_id = selected_country_id
 	GameSessionService.current_action = restored_action
+	GameSessionService.restore_action_results(restored_recent, restored_history)
 	GameSessionService.action_id_service = action_ids
 	GameSessionService.society_service = temporary_society
 	GameSessionService.developer_mode = bool(snapshot.get("developer_mode", false))
@@ -355,6 +387,10 @@ func validate_snapshot(snapshot: Dictionary) -> Array[String]:
 	for optional_field: String in ["settlement_state", "settlement_log", "performance_metrics"]:
 		if snapshot.has(optional_field) and not snapshot[optional_field] is Dictionary:
 			errors.append("字段 %s 必须是对象" % optional_field)
+	if snapshot.has("recent_action_result") and not snapshot["recent_action_result"] is Dictionary:
+		errors.append("最近行动结果字段必须是对象")
+	if snapshot.has("action_history") and not snapshot["action_history"] is Array:
+		errors.append("行动日志字段必须是数组")
 	var player_id: String = str(snapshot.get("player_character_id", ""))
 	if player_id.is_empty():
 		errors.append("缺少玩家人物 ID")
@@ -392,3 +428,88 @@ func validate_snapshot(snapshot: Dictionary) -> Array[String]:
 	if settlement_state is Dictionary and not (settlement_state as Dictionary).get("paused_categories", {}) is Dictionary:
 		errors.append("暂停结算类别必须是对象")
 	return errors
+
+
+func _archive_terminal_player_action(
+	society: SocietySimulationService, map_service: MapControlService
+) -> void:
+	var action: ActionInstanceData = GameSessionService.current_action
+	if action == null or not action.is_terminal():
+		return
+	if action.status == ActionInstanceData.STATUS_COMPLETED and not action.domain_effect_applied:
+		var definition: ActionDefinitionData = map_service.data_set.actions.get(
+			action.definition_id
+		) as ActionDefinitionData
+		if definition != null:
+			society.apply_action_domain_effect(action, definition, map_service)
+	GameSessionService.archive_current_action(GameSessionService.player_character)
+
+
+func _validate_action_result_records(
+	history: Array[Dictionary],
+	recent: Dictionary,
+	map_service: MapControlService,
+	current_hour: int,
+	action_id_state: Dictionary,
+	seen_action_ids: Dictionary
+) -> String:
+	if history.size() > 100:
+		return "行动日志超过 100 条上限"
+	for record: Dictionary in history:
+		var error: String = _validate_action_result_record(
+			record, map_service, current_hour, action_id_state
+		)
+		if not error.is_empty():
+			return error
+		var action_id: String = str(record.get("action_id", ""))
+		if seen_action_ids.has(action_id):
+			return "行动实例 ID 重复：%s" % action_id
+		seen_action_ids[action_id] = str(record.get("actor_character_id", ""))
+	if not recent.is_empty():
+		var recent_error: String = _validate_action_result_record(
+			recent, map_service, current_hour, action_id_state
+		)
+		if not recent_error.is_empty():
+			return recent_error
+		if history.is_empty() or recent != history[history.size() - 1]:
+			return "最近行动结果与行动日志末条不一致"
+	return ""
+
+
+func _validate_action_result_record(
+	record: Dictionary,
+	map_service: MapControlService,
+	current_hour: int,
+	action_id_state: Dictionary
+) -> String:
+	for field: String in [
+		"action_id", "definition_id", "actor_character_id", "target_id",
+		"study_skill_id", "status", "outcome_code", "result_description",
+		"skill_id",
+	]:
+		if typeof(record.get(field, null)) != TYPE_STRING:
+			return "行动结果字段 %s 必须是字符串" % field
+	for field: String in ["skill_delta", "wealth_delta", "duration_hours", "completion_hour"]:
+		if typeof(record.get(field, null)) not in [TYPE_INT, TYPE_FLOAT]:
+			return "行动结果字段 %s 必须是数值" % field
+	var action_id: String = str(record.get("action_id", ""))
+	if not ActionSaveValidator.id_state_covers(
+		action_id_state, action_id, "action_instance"
+	):
+		return "行动日志 ID 计数器落后：%s" % action_id
+	if not map_service.data_set.actions.has(str(record.get("definition_id", ""))):
+		return "行动日志定义引用无效"
+	if str(record.get("status", "")) not in [
+		ActionInstanceData.STATUS_COMPLETED,
+		ActionInstanceData.STATUS_CANCELLED,
+		ActionInstanceData.STATUS_INTERRUPTED,
+	]:
+		return "行动日志包含非终态行动"
+	if str(record.get("result_description", "")).is_empty():
+		return "行动日志缺少结果摘要"
+	if int(record.get("duration_hours", -1)) < 0:
+		return "行动日志用时无效"
+	var completion_hour: int = int(record.get("completion_hour", -1))
+	if completion_hour < 0 or completion_hour > current_hour:
+		return "行动日志完成时间无效"
+	return ""

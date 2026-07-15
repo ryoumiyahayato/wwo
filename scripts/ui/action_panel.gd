@@ -78,6 +78,10 @@ const INTERRUPTION_LABELS: Dictionary = {
 @onready var cancel_button: Button = %CancelButton
 @onready var progress_bar: ProgressBar = %ProgressBar
 @onready var summary_label: RichTextLabel = %SummaryLabel
+@onready var recent_result_header: HBoxContainer = %RecentResultHeader
+@onready var recent_result_label: RichTextLabel = %RecentResultLabel
+@onready var dismiss_recent_button: Button = %DismissRecentButton
+@onready var action_log_label: RichTextLabel = %ActionLogLabel
 @onready var message_label: Label = %MessageLabel
 
 var clock: SimulationClock
@@ -99,6 +103,7 @@ func _ready() -> void:
 	begin_button.pressed.connect(_on_begin_pressed)
 	pause_button.pressed.connect(_on_pause_pressed)
 	cancel_button.pressed.connect(_on_cancel_pressed)
+	dismiss_recent_button.pressed.connect(_on_dismiss_recent_pressed)
 	_refresh()
 
 
@@ -452,6 +457,7 @@ func _on_cancel_pressed() -> void:
 		action.definition_id
 	) as ActionDefinitionData
 	action_service.cancel_action(action, definition, GameSessionService.player_character, clock.total_hours, map_service)
+	GameSessionService.archive_current_action(GameSessionService.player_character)
 	message_label.text = "行动已取消；已发生的时间和投入不会回退。"
 	action_state_changed.emit()
 	_refresh()
@@ -461,9 +467,17 @@ func _on_time_changed(_snapshot: Dictionary) -> void:
 	_refresh()
 
 
+func _on_dismiss_recent_pressed() -> void:
+	GameSessionService.dismiss_recent_action_result()
+	_refresh_recent_result()
+
+
 func _refresh() -> void:
 	var action: ActionInstanceData = GameSessionService.current_action
 	_apply_domain_effect_if_ready(action)
+	if action != null and action.is_terminal():
+		GameSessionService.archive_current_action(GameSessionService.player_character)
+	action = GameSessionService.current_action
 	var has_player: bool = GameSessionService.has_player()
 	var definition: ActionDefinitionData = _get_selected_definition()
 	_update_investment_limit(definition, has_player)
@@ -481,6 +495,8 @@ func _refresh() -> void:
 	begin_button.disabled = not blocked.is_empty()
 	begin_reason_label.text = "可以开始：确认目标、费用和条件后提交。" if blocked.is_empty() else "暂时不能开始：%s" % blocked
 	_refresh_current_action(action)
+	_refresh_recent_result()
+	_refresh_action_log()
 
 
 func _refresh_action_description(definition: ActionDefinitionData) -> void:
@@ -603,6 +619,66 @@ func _refresh_current_action(action: ActionInstanceData) -> void:
 		study_line,
 		result_line,
 	]
+
+
+func _refresh_recent_result() -> void:
+	var result: Dictionary = GameSessionService.recent_action_result
+	var has_result: bool = not result.is_empty()
+	recent_result_header.visible = has_result
+	recent_result_label.visible = has_result
+	if not has_result or map_service == null or generation_config == null:
+		return
+	var definition: ActionDefinitionData = map_service.data_set.actions.get(
+		str(result.get("definition_id", ""))
+	) as ActionDefinitionData
+	var action_name: String = definition.name if definition != null else "长期行动"
+	var target_text: String = _result_target_text(result)
+	var skill_text: String = "无"
+	var skill_id: String = str(result.get("skill_id", ""))
+	var skill_delta: int = int(result.get("skill_delta", 0))
+	if not skill_id.is_empty() and skill_delta != 0:
+		skill_text = "%s %+d" % [
+			generation_config.get_label("skills", skill_id), skill_delta,
+		]
+	recent_result_label.text = "[b]%s[/b] · %s\n目标：%s\n结果：%s\n技能成长：%s · 财富变化：%+d\n用时：%d 小时 · 完成：%s" % [
+		action_name,
+		_status_label(str(result.get("status", ""))),
+		target_text,
+		str(result.get("result_description", "")),
+		skill_text,
+		int(result.get("wealth_delta", 0)),
+		int(result.get("duration_hours", 0)),
+		_format_world_hour(int(result.get("completion_hour", 0))),
+	]
+
+
+func _refresh_action_log() -> void:
+	if GameSessionService.action_history.is_empty():
+		action_log_label.text = "尚无行动记录。"
+		return
+	if map_service == null:
+		action_log_label.text = "行动日志正在加载。"
+		return
+	var lines: Array[String] = []
+	var first_index: int = maxi(GameSessionService.action_history.size() - 10, 0)
+	for index: int in range(GameSessionService.action_history.size() - 1, first_index - 1, -1):
+		var record: Dictionary = GameSessionService.action_history[index]
+		var definition: ActionDefinitionData = map_service.data_set.actions.get(
+			str(record.get("definition_id", ""))
+		) as ActionDefinitionData
+		lines.append("%s · %s · %s" % [
+			_format_world_hour(int(record.get("completion_hour", 0))),
+			definition.name if definition != null else "长期行动",
+			str(record.get("result_description", "")),
+		])
+	action_log_label.text = "\n".join(lines)
+
+
+func _result_target_text(result: Dictionary) -> String:
+	var study_skill_id: String = str(result.get("study_skill_id", ""))
+	if not study_skill_id.is_empty():
+		return generation_config.get_label("skills", study_skill_id)
+	return _target_display_name(str(result.get("target_id", "")))
 
 
 func _get_start_block_reason() -> String:

@@ -94,13 +94,44 @@ func _run() -> void:
 	_expect(GameSessionService.current_action.status == ActionInstanceData.STATUS_ACTIVE, "通过当前行动卡片继续行动")
 	_expect(_complete_current_action(), "学习行动由权威时间推进到完成")
 	_expect(int(player.skills["administration"]) > administration_before, "完成学习后行政能力成长")
+	_expect(
+		GameSessionService.current_action == null
+		and str(GameSessionService.recent_action_result.get("definition_id", ""))
+		== "action:study_skill",
+		"学习完成后释放当前行动槽并写入最近结果"
+	)
+	var recent_result_label: RichTextLabel = _action_panel.find_child(
+		"RecentResultLabel", true, false
+	) as RichTextLabel
+	_expect(
+		recent_result_label.is_visible_in_tree()
+		and recent_result_label.text.contains("技能成长")
+		and recent_result_label.text.contains("财富变化")
+		and recent_result_label.text.contains("用时"),
+		"最近结果卡只提供玩家需要的紧凑结果摘要"
+	)
+	var dismiss_recent: Button = _action_panel.find_child(
+		"DismissRecentButton", true, false
+	) as Button
+	dismiss_recent.pressed.emit()
+	_expect(
+		GameSessionService.recent_action_result.is_empty()
+		and not recent_result_label.visible
+		and GameSessionService.action_history.size() == 1,
+		"玩家可关闭最近结果且完整记录仍保留在行动日志"
+	)
 
 	_expect(_action_panel.prefill_action("action:perform_work"), "可从行动列表选择从事工作")
 	_set_investment(0)
 	_expect(_start_selected_action(), "通过正式 UI 开始可取消的工作行动")
 	var cancel_button: Button = _action_panel.find_child("CancelButton", true, false) as Button
 	cancel_button.pressed.emit()
-	_expect(GameSessionService.current_action.status == ActionInstanceData.STATUS_CANCELLED, "通过当前行动卡片取消行动")
+	_expect(
+		GameSessionService.current_action == null
+		and str(GameSessionService.recent_action_result.get("status", ""))
+		== ActionInstanceData.STATUS_CANCELLED,
+		"通过当前行动卡片取消行动后立即释放当前槽"
+	)
 
 	var paused_before: bool = _clock.is_paused
 	await _send_input_action("toggle_pause")
@@ -176,7 +207,12 @@ func _run() -> void:
 	await _open_profile_and_return()
 	_refresh_world_references()
 	_expect(_clock.total_hours == hour_before_profile, "人物页往返保持同一权威世界时间")
-	_expect(GameSessionService.current_action != null and GameSessionService.current_action.is_terminal(), "页面切换保持行动状态")
+	_expect(
+		GameSessionService.current_action == null
+		and str(GameSessionService.recent_action_result.get("definition_id", ""))
+		== "action:promote_policy",
+		"页面切换保持最近结果且不恢复已完成的当前行动"
+	)
 
 	await _open_social_panel()
 	await _select_social_tab(2)
@@ -205,6 +241,8 @@ func _run() -> void:
 	var saved_hour: int = _clock.total_hours
 	var saved_region_influence: Dictionary = policy_region.social_influence.duplicate(true)
 	var saved_policy_unit: Dictionary = policy_unit.to_dict()
+	var saved_recent_result: Dictionary = GameSessionService.recent_action_result.duplicate(true)
+	var saved_action_history: Array[Dictionary] = GameSessionService.action_history.duplicate(true)
 	save_button.pressed.emit()
 	await process_frame
 	_expect(FileAccess.file_exists(ProjectSettings.globalize_path(MANUAL_PATH)), "保存按钮写入手动存档")
@@ -228,6 +266,12 @@ func _run() -> void:
 	var loaded_region: RegionData = _map.data_set.regions.get(loaded_unit.region_id) as RegionData
 	_expect(loaded_unit.to_dict() == saved_policy_unit, "加载恢复政策目标控制单元")
 	_expect(_numeric_dictionary_approx(loaded_region.social_influence, saved_region_influence), "加载恢复地区社会影响")
+	_expect(
+		GameSessionService.current_action == null
+		and GameSessionService.recent_action_result == saved_recent_result
+		and GameSessionService.action_history == saved_action_history,
+		"加载恢复最近结果与完整行动日志且当前槽保持空闲"
+	)
 	_expect(_society.roster.get_exited(old_player_id) != null, "加载恢复关系、组织与退出历史所在的社会状态")
 
 	_finish()
@@ -339,11 +383,23 @@ func _start_selected_action() -> bool:
 
 
 func _complete_current_action() -> bool:
+	var action_id: String = (
+		GameSessionService.current_action.id
+		if GameSessionService.current_action != null
+		else ""
+	)
 	var guard: int = 0
 	while GameSessionService.current_action != null and not GameSessionService.current_action.is_terminal() and guard < 400:
 		_clock.advance_hours(24)
 		guard += 1
-	return GameSessionService.current_action != null and GameSessionService.current_action.status == ActionInstanceData.STATUS_COMPLETED and GameSessionService.current_action.domain_effect_applied
+	return (
+		GameSessionService.current_action == null
+		and not action_id.is_empty()
+		and str(GameSessionService.recent_action_result.get("action_id", ""))
+		== action_id
+		and str(GameSessionService.recent_action_result.get("status", ""))
+		== ActionInstanceData.STATUS_COMPLETED
+	)
 
 
 func _open_profile_and_return() -> void:

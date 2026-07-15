@@ -262,6 +262,46 @@ size_flags_horizontal = 3
 disabled = true
 text = "取消行动"
 
+[node name="RecentResultHeader" type="HBoxContainer" parent="Margin/Root/ActionScroll/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="RecentResultTitle" type="Label" parent="Margin/Root/ActionScroll/Content/RecentResultHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.39, 0.79, 0.86, 1)
+theme_override_font_sizes/font_size = 17
+text = "最近结果"
+
+[node name="DismissRecentButton" type="Button" parent="Margin/Root/ActionScroll/Content/RecentResultHeader"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(70, 30)
+layout_mode = 2
+text = "关闭"
+
+[node name="RecentResultLabel" type="RichTextLabel" parent="Margin/Root/ActionScroll/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 132)
+layout_mode = 2
+bbcode_enabled = true
+fit_content = false
+scroll_active = false
+
+[node name="ActionLogHeader" type="Label" parent="Margin/Root/ActionScroll/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.39, 0.79, 0.86, 1)
+theme_override_font_sizes/font_size = 17
+text = "行动日志"
+
+[node name="ActionLogLabel" type="RichTextLabel" parent="Margin/Root/ActionScroll/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+bbcode_enabled = true
+fit_content = false
+scroll_active = true
+text = "尚无行动记录。"
+
 [node name="MessageLabel" type="Label" parent="Margin/Root"]
 unique_name_in_owner = true
 layout_mode = 2

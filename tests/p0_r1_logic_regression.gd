@@ -3,6 +3,7 @@ extends SceneTree
 const PROBE_PATH: String = "user://saves/p0_r1_logic_probe.json"
 var _checks: int = 0
 var _failures: int = 0
+var _legacy_completed_action: Dictionary = {}
 
 
 func _initialize() -> void:
@@ -103,9 +104,14 @@ func _test_hourly_action_and_autosave(
 	_expect(started.action.last_update_hour <= clock.total_hours, "行动更新时间不晚于权威时间")
 	var loaded: SaveOperationResult = GameSaveService.new().load_from_path(PROBE_PATH)
 	_expect(loaded.success, "周边界生成隔离自动存档")
-	if loaded.success and loaded.snapshot["current_action"] is Dictionary:
-		var saved_action: Dictionary = loaded.snapshot["current_action"] as Dictionary
-		_expect(str(saved_action.get("status", "")) == ActionInstanceData.STATUS_COMPLETED, "自动档包含同小时已完成行动")
+	if loaded.success:
+		_expect(
+			loaded.snapshot["current_action"] == null
+			and str((loaded.snapshot["recent_action_result"] as Dictionary).get("status", ""))
+			== ActionInstanceData.STATUS_COMPLETED,
+			"自动档将同小时完成行动保存为最近结果并释放当前槽"
+		)
+		_legacy_completed_action = started.action.to_dict()
 	GameSessionService.current_action = null
 
 
@@ -281,6 +287,22 @@ func _test_save_consistency(
 		result = service.restore_snapshot(formula_snapshot, clock, map_service)
 		_expect(not result.success and result.message.contains("有效值"), "篡改行动有效值时由公式校验明确拒绝")
 		GameSessionService.current_action = null
+
+	if not _legacy_completed_action.is_empty():
+		var legacy_snapshot: Dictionary = service.build_snapshot(clock, map_service)
+		legacy_snapshot["current_action"] = _legacy_completed_action.duplicate(true)
+		legacy_snapshot.erase("recent_action_result")
+		legacy_snapshot.erase("action_history")
+		var migrated: SaveOperationResult = service.restore_snapshot(
+			legacy_snapshot, clock, map_service
+		)
+		_expect(
+			migrated.success
+			and GameSessionService.current_action == null
+			and str(GameSessionService.recent_action_result.get("action_id", ""))
+			== str(_legacy_completed_action.get("id", "")),
+			"旧档中的已完成当前行动加载时迁移到最近结果"
+		)
 
 
 func _completed_action(

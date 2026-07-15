@@ -358,6 +358,7 @@ func execute_player_succession(
 	current_hour: int
 ) -> SuccessionResult:
 	var old_player_id: String = roster.player_character_id
+	var old_player: CharacterData = roster.get_active(old_player_id)
 	var previous_action: ActionInstanceData = GameSessionService.current_action
 	var result: SuccessionResult = succession.execute_succession(
 		old_player_id, successor_character_id, exit_reason, current_hour
@@ -369,6 +370,10 @@ func execute_player_succession(
 	):
 		previous_action.status = ActionInstanceData.STATUS_CANCELLED
 		previous_action.estimated_completion_hour = -1
+		previous_action.last_update_hour = maxi(
+			previous_action.last_update_hour, current_hour
+		)
+		GameSessionService.archive_action(previous_action, old_player)
 	return result
 
 
@@ -405,7 +410,10 @@ func _initialize_organization_leaders() -> void:
 func _on_hour_advanced(total_hour: int) -> void:
 	var action: ActionInstanceData = GameSessionService.current_action
 	var player: CharacterData = GameSessionService.player_character
-	if action == null or player == null or action.is_terminal():
+	if action == null or player == null:
+		return
+	if action.is_terminal():
+		_settle_current_action_domain_if_ready()
 		return
 	var definition: ActionDefinitionData = _data_set.actions.get(
 		action.definition_id
@@ -414,6 +422,7 @@ func _on_hour_advanced(total_hour: int) -> void:
 		_action_service.interrupt_action(
 			action, total_hour, "invalid_actor_or_definition"
 		)
+		GameSessionService.archive_current_action(player)
 		return
 	var context_service := PlayerActionContextService.new(
 		_action_rules, self, _map_service
@@ -427,6 +436,7 @@ func _on_hour_advanced(total_hour: int) -> void:
 			total_hour,
 			"authoritative_target_invalid:%s" % target_error
 		)
+		GameSessionService.archive_current_action(player)
 		return
 	var authoritative_context: Dictionary = (
 		context_service.build_authoritative_context_for_action(
@@ -443,6 +453,7 @@ func _on_hour_advanced(total_hour: int) -> void:
 		_action_service.interrupt_action(
 			action, total_hour, "authoritative_permission_lost"
 		)
+		GameSessionService.archive_current_action(player)
 		return
 	if authoritative_context != action.context:
 		if not _action_service.update_context(
@@ -456,6 +467,7 @@ func _on_hour_advanced(total_hour: int) -> void:
 			_action_service.interrupt_action(
 				action, total_hour, "authoritative_context_invalid"
 			)
+			GameSessionService.archive_current_action(player)
 			return
 	_action_service.update_to_hour(
 		action, definition, player, total_hour, _map_service
@@ -465,20 +477,24 @@ func _on_hour_advanced(total_hour: int) -> void:
 
 func _settle_current_action_domain_if_ready() -> void:
 	var action: ActionInstanceData = GameSessionService.current_action
-	if (
-		action == null
-		or action.status != ActionInstanceData.STATUS_COMPLETED
-		or action.domain_effect_applied
-		or _map_service == null
-	):
+	if action == null:
+		return
+	if action.status != ActionInstanceData.STATUS_COMPLETED:
+		if action.is_terminal():
+			GameSessionService.archive_current_action(
+				GameSessionService.player_character
+			)
+		return
+	if _map_service == null:
 		return
 	var definition: ActionDefinitionData = _data_set.actions.get(
 		action.definition_id
 	) as ActionDefinitionData
 	if definition == null:
 		action.domain_effect_applied = true
-		return
-	apply_action_domain_effect(action, definition, _map_service)
+	elif not action.domain_effect_applied:
+		apply_action_domain_effect(action, definition, _map_service)
+	GameSessionService.archive_current_action(GameSessionService.player_character)
 
 
 func _on_day_advanced(_year: int, _month: int, _day: int) -> void:
