@@ -57,6 +57,7 @@ func _run() -> void:
 	_test_fixed_action_button_layout()
 	await _test_drawer_navigation()
 	_test_non_map_context_isolation()
+	_test_peace_war_and_border_state()
 	_test_standard_study_and_work_reachability()
 	_test_standard_relationship_reachability()
 	_test_selectable_skill_growth()
@@ -212,6 +213,76 @@ func _test_non_map_context_isolation() -> void:
 		== PlayerActionContextService.TARGET_DOMAIN_MAP,
 		"人物、组织和地图行动具有显式且互不混用的目标域"
 	)
+
+
+func _test_peace_war_and_border_state() -> void:
+	_expect(not _map.is_war_active(), "标准世界以权威和平状态开始")
+	var peace_state: Dictionary = _map.get_persistent_state()
+	var war_state: Dictionary = _map.get_war_state()
+	_expect(
+		str(war_state.get("status", "")) == MapControlService.WAR_STATUS_PEACE
+		and str(war_state.get("stalemate_reason", "")) == "当前无战争。",
+		"和平状态明确记录状态与无战争原因"
+	)
+	var war_label: Label = _view.find_child("WarStatusLabel", true, false) as Label
+	_expect(
+		war_label != null
+		and war_label.text.contains("当前无战争")
+		and war_label.text.contains("国境/控制边界"),
+		"正式地图明确显示无战争且边界不是前线"
+	)
+	_expect(_map.get_border_edges() == _map.get_frontline_edges(), "相邻控制区以国境/控制边界接口公开")
+	var units_before: Dictionary = (
+		peace_state.get("control_units", {}) as Dictionary
+	).duplicate(true)
+	_society._execute_ai_monthly_world_actions()
+	var units_after: Dictionary = (
+		_map.get_persistent_state().get("control_units", {}) as Dictionary
+	).duplicate(true)
+	_expect(units_after == units_before, "和平期 NPC 月度行动不产生军事控制压力或边界变化")
+	var support: ActionDefinitionData = _map.data_set.actions.get(
+		"action:support_control"
+	) as ActionDefinitionData
+	var context_service := PlayerActionContextService.new(_rules, _society, _map)
+	var support_error: String = context_service.get_target_validation_error(
+		support, GameSessionService.player_character, _map.get_sorted_unit_ids()[0]
+	)
+	_expect(
+		support_error == "当前无战争或没有合法前线目标。",
+		"和平期支持控制行动以明确统一原因禁用"
+	)
+	var legacy_state: Dictionary = peace_state.duplicate(true)
+	legacy_state.erase("war_state")
+	_expect(
+		_map.restore_persistent_state(legacy_state) and not _map.is_war_active(),
+		"缺少战争字段的旧存档兼容迁移为和平状态"
+	)
+	var participants: Array[String] = _map.get_country_ids()
+	_expect(
+		_map.declare_war(
+			participants,
+			_clock.total_hours,
+			{participants[0]: "保卫边境", participants[1]: "争夺边境"}
+		),
+		"战争必须通过包含参战国、开始时间和目标的权威状态显式建立"
+	)
+	var active_state: Dictionary = _map.get_war_state()
+	_expect(
+		_map.is_war_active()
+		and (active_state.get("participant_country_ids", []) as Array).size() == 2
+		and int(active_state.get("start_hour", -1)) == _clock.total_hours
+		and not (active_state.get("objectives", {}) as Dictionary).is_empty()
+		and not str(active_state.get("stalemate_reason", "")).is_empty(),
+		"战时状态包含参战国、开始时间、战争目标和可观察僵持原因"
+	)
+	var active_snapshot: Dictionary = _map.get_persistent_state()
+	_expect(_map.end_war(), "显式战争可以结束并恢复和平")
+	_expect(
+		_map.restore_persistent_state(active_snapshot)
+		and _map.get_war_state() == active_state,
+		"战争权威状态可随世界存档完整往返"
+	)
+	_expect(_map.restore_persistent_state(peace_state), "和平世界状态可在战争测试后恢复")
 
 
 func _test_standard_study_and_work_reachability() -> void:

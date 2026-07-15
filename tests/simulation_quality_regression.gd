@@ -184,6 +184,17 @@ func _test_npc_long_action_and_relationship_bootstrap() -> void:
 func _test_control_modifiers() -> void:
 	var world_before: Dictionary = _map.get_persistent_state()
 	var attacking_country: String = GameSessionService.player_character.country_id
+	_expect(
+		_map.declare_war(
+			[attacking_country, _map.get_other_country_id(attacking_country)],
+			0,
+			{
+				attacking_country: "保卫边境",
+				_map.get_other_country_id(attacking_country): "争夺边境",
+			}
+		),
+		"控制倍率测试显式建立战争状态"
+	)
 	var target: ControlUnitData = _best_enemy_frontier_target(attacking_country)
 	_expect(target != null, "存在用于控制倍率测试的敌方前线单元")
 	if target == null:

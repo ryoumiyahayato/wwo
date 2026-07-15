@@ -11,6 +11,7 @@ const DRAWER_OPEN_X: float = 14.0
 @onready var title_label: Label = %TitleLabel
 @onready var date_label: Label = %DateLabel
 @onready var clock_status_label: Label = %ClockStatusLabel
+@onready var war_status_label: Label = %WarStatusLabel
 @onready var player_summary_label: Label = %PlayerSummaryLabel
 @onready var action_status_label: Label = %ActionStatusLabel
 @onready var pause_button: Button = %PauseButton
@@ -88,6 +89,7 @@ func _ready() -> void:
 		return
 
 	_map_service.control_unit_changed.connect(_on_control_unit_changed)
+	_map_service.war_state_changed.connect(_on_war_state_changed)
 	if not _restore_pending_save():
 		return
 	_initialize_society()
@@ -105,6 +107,7 @@ func _ready() -> void:
 		world_activity_panel.refresh_view()
 	zoom_label.text = UiStrings.MAP_HELP
 	_apply_developer_visibility()
+	_refresh_war_status()
 	_refresh_player_status()
 
 
@@ -194,6 +197,11 @@ func _on_control_unit_changed(unit_id: String) -> void:
 		_refresh_selection_panel()
 
 
+func _on_war_state_changed() -> void:
+	_refresh_war_status()
+	_refresh_selection_panel()
+
+
 func _on_social_influence_changed(region_id: String) -> void:
 	if _map_service == null:
 		return
@@ -225,32 +233,44 @@ func _refresh_selection_panel() -> void:
 		control_lines.append("%s %.0f%%" % [country.name, float(percentages[country_id]) * 100.0])
 	var city_suffix: String = " · %s" % unit.city_name if not unit.city_name.is_empty() else ""
 	selection_title.text = "%s%s" % [region.name, city_suffix]
+	var administration_label: String = "军事控制" if _map_service.is_war_active() else "实际管辖"
+	var stage_label: String = "控制阶段" if _map_service.is_war_active() else "地区状态"
+	var strength_label: String = "控制强度" if _map_service.is_war_active() else "治理强度"
+	var contested_label: String = "争夺程度" if _map_service.is_war_active() else "地方动荡"
+	var summary_label: String = "地区控制" if _map_service.is_war_active() else "地区管辖"
+	var average_label: String = "平均争夺" if _map_service.is_war_active() else "平均动荡"
 	details_label.text = """控制单元  %s
 网格坐标  (%d, %d)
 
 法理归属  %s
-军事控制  %s
-控制阶段  %s
-控制强度  %.0f%%
-争夺程度  %.0f%%
+%s  %s
+%s  %s
+%s  %.0f%%
+%s  %.0f%%
 社会支持  %.0f%%
 
 地区人口  %s
-地区控制  %s
-平均争夺  %.0f%%
+%s  %s
+%s  %.0f%%
 铁路状态  %s（%d 条地区连接）
 社会影响  %s""" % [
 		unit.id,
 		unit.grid_x,
 		unit.grid_y,
 		legal_country.name,
+		administration_label,
 		controller_country.name,
+		stage_label,
 		_stage_text(_map_service.get_control_stage(unit.id)),
+		strength_label,
 		unit.control_strength * 100.0,
+		contested_label,
 		unit.contested_level * 100.0,
 		unit.social_support * 100.0,
 		_format_integer(int(summary["population_total"])),
+		summary_label,
 		" / ".join(control_lines),
+		average_label,
 		float(summary["average_contested"]) * 100.0,
 		_infrastructure_state_text(unit.infrastructure_state),
 		int(summary["railroad_connections"]),
@@ -335,6 +355,26 @@ func _refresh_clock() -> void:
 	]
 	for index: int in range(buttons.size()):
 		buttons[index].button_pressed = speeds[index] == _clock.speed_multiplier
+
+
+func _refresh_war_status() -> void:
+	if _map_service == null:
+		return
+	var state: Dictionary = _map_service.get_war_state()
+	if not _map_service.is_war_active():
+		war_status_label.text = UiStrings.MAP_PEACE_STATUS
+		war_status_label.tooltip_text = "和平期间不会产生军事控制压力。"
+		return
+	var participants: Array[String] = DataRecordUtils.to_string_array(
+		state.get("participant_country_ids", [])
+	)
+	var names: Array[String] = []
+	for country_id: String in participants:
+		var country: CountryData = _map_service.data_set.countries.get(country_id) as CountryData
+		if country != null:
+			names.append(country.name)
+	war_status_label.text = "战争进行中 · %s" % " / ".join(names)
+	war_status_label.tooltip_text = str(state.get("stalemate_reason", "等待军事决策。"))
 
 
 func _on_back_pressed() -> void:
@@ -570,6 +610,15 @@ func _show_world_error(message: String) -> void:
 
 
 func _stage_text(stage: String) -> String:
+	if not _map_service.is_war_active():
+		var peace_labels: Dictionary = {
+			MapControlService.STAGE_STABLE: UiStrings.MAP_PEACE_STAGE_STABLE,
+			MapControlService.STAGE_WEAKENING: UiStrings.MAP_PEACE_STAGE_WEAKENING,
+			MapControlService.STAGE_CONTESTED: UiStrings.MAP_PEACE_STAGE_CONTESTED,
+			MapControlService.STAGE_ENEMY_OCCUPATION: UiStrings.MAP_PEACE_STAGE_OCCUPIED,
+			MapControlService.STAGE_CONSOLIDATING: UiStrings.MAP_PEACE_STAGE_CONSOLIDATING,
+		}
+		return str(peace_labels.get(stage, stage))
 	var labels: Dictionary = {
 		MapControlService.STAGE_STABLE: UiStrings.MAP_STAGE_STABLE,
 		MapControlService.STAGE_WEAKENING: UiStrings.MAP_STAGE_WEAKENING,

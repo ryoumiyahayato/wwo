@@ -23,7 +23,7 @@ const ACTION_PURPOSE: Dictionary = {
 	"seek_position": "在已加入的组织中争取下一层空缺职位与相应权限。",
 	"investigate_character": "调查人物背景，形成可在人物档案中查看的可靠认知。",
 	"promote_policy": "凭借组织职位推动辖区政策，改变地区社会影响。",
-	"support_control": "动员政府或军队资源支援前线控制与巩固。",
+	"support_control": "仅在正式战争期间动员政府或军队资源支援合法前线。",
 }
 const ACTION_SHORT_NAMES: Dictionary = {
 	"action:study_skill": "学习技能",

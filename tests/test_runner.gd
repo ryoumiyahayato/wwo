@@ -1070,6 +1070,17 @@ func _test_m5_thresholds_and_result_application() -> void:
 
 func _test_m5_control_result_application() -> void:
 	var service_map: MapControlService = _create_map_service()
+	_expect_true(
+		service_map.declare_war(
+			["country:loran_federation", "country:vesta_union"],
+			0,
+			{
+				"country:loran_federation": "保卫边境",
+				"country:vesta_union": "争夺边境",
+			}
+		),
+		"地区控制支援测试显式建立战争状态"
+	)
 	var definition: ActionDefinitionData = service_map.data_set.actions["action:support_control"] as ActionDefinitionData
 	var character: CharacterData = _make_action_character(100, 550)
 	character.country_id = "country:loran_federation"
@@ -1518,6 +1529,17 @@ func _test_m7_social_and_military_influence_separation() -> void:
 func _test_m7_organization_support_channels() -> void:
 	var society: SocietySimulationService = _make_society(710)
 	var map_service: MapControlService = _create_map_service()
+	_expect_true(
+		map_service.declare_war(
+			["country:loran_federation", "country:vesta_union"],
+			0,
+			{
+				"country:loran_federation": "保卫边境",
+				"country:vesta_union": "争夺边境",
+			}
+		),
+		"组织控制支援测试显式建立战争状态"
+	)
 	var player: CharacterData = society.roster.get_active(society.roster.player_character_id)
 	var government_id: String = "organization:loran_government"
 	var government: OrganizationData = society.organizations.get_organization(government_id)

@@ -189,6 +189,14 @@ func _test_position_vacancy(
 
 func _test_frontline_rules(map_service: MapControlService, country_id: String) -> void:
 	var world_before: Dictionary = map_service.get_persistent_state()
+	_expect(
+		map_service.declare_war(
+			[country_id, map_service.get_other_country_id(country_id)],
+			0,
+			{country_id: "保卫边境", map_service.get_other_country_id(country_id): "争夺边境"}
+		),
+		"显式战争状态可建立前线规则夹具"
+	)
 	_expect(not map_service.is_valid_control_support_target("control:r0_c9", country_id), "远离本国控制区的敌方腹地不是合法目标")
 	_expect(map_service.is_valid_control_support_target("control:r0_c5", country_id), "与本国接壤的敌方前线是合法目标")
 	var target: ControlUnitData = map_service.get_unit("control:r0_c5")
@@ -208,6 +216,14 @@ func _test_ai_frontline_consolidation(
 	country_id: String
 ) -> void:
 	var world_before: Dictionary = map_service.get_persistent_state()
+	_expect(
+		map_service.declare_war(
+			[country_id, map_service.get_other_country_id(country_id)],
+			0,
+			{country_id: "巩固边境", map_service.get_other_country_id(country_id): "突破边境"}
+		),
+		"显式战争状态可建立组织控制支援夹具"
+	)
 	var own_frontline: ControlUnitData = map_service.get_unit("control:r0_c4")
 	var enemy_frontline: ControlUnitData = map_service.get_unit("control:r0_c5")
 	map_service.set_control_state(own_frontline.id, country_id, 0.30, 0.20)

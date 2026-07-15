@@ -332,16 +332,18 @@ func _get_strict_target_validation_error(
 				return "当前职位没有覆盖该地区的政策辖权。"
 			return ""
 		"support_control":
+			if map_service == null or not map_service.is_war_active():
+				return "当前无战争或没有合法前线目标。"
 			if map_service == null or map_service.get_unit(target_id) == null:
 				return "必须选择有效的地区控制单元。"
 			if not map_service.is_valid_control_support_target(
 				target_id, character.country_id
 			):
-				return "军事控制支援只能作用于本国前线相邻敌区，或需要巩固的本国前线。"
+				return "当前无战争或没有合法前线目标。"
 			if not _has_jurisdiction_permission(
 				character, target_id, "regional_control_support"
 			):
-				return "只有本国政府或军队职位可以调动该前线支援。"
+				return "只有参战国政府或军队职位可以调动前线支援。"
 			return ""
 		_:
 			return "未知行动类别。"

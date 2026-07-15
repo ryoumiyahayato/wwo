@@ -384,7 +384,7 @@ func _domain_failure_description(category: String) -> String:
 		"promote_policy":
 			return "政策行动完成，但目标地区影响已达可调整边界。"
 		"support_control":
-			return "行动完成时目标已不再符合前线支援条件。"
+			return "行动完成时战争已结束，或目标已不再符合前线支援条件。"
 		"investigate_character":
 			return "调查目标已不可用，未形成有效档案。"
 	return "行动完成，但权威领域状态未发生变化。"
@@ -902,7 +902,7 @@ func _execute_ai_monthly_world_actions() -> int:
 					_map_service
 				):
 					applied += 1
-			if organizations.has_permission(
+			if _map_service.is_war_active() and organizations.has_permission(
 				character.id,
 				organization.id,
 				"regional_control_support"
@@ -1039,6 +1039,10 @@ func _exit_active_npc(character: CharacterData, reason: String) -> bool:
 func _fill_vacant_leadership() -> int:
 	var filled: int = 0
 	for organization_id: String in organizations.get_organization_ids():
+		# Content-only starter organizations do not consume scarce active NPC slots
+		# until a later system explicitly activates their leadership simulation.
+		if not STARTER_LEADER_ORGANIZATION_IDS.has(organization_id):
+			continue
 		var organization: OrganizationData = organizations.get_organization(
 			organization_id
 		)

@@ -178,7 +178,15 @@ func _on_organization_selected(_index: int) -> void:
 	join_action_button.disabled = is_member or not entry_available
 	position_action_button.disabled = not is_member or next_position.is_empty()
 	policy_action_button.disabled = not society.organizations.has_permission(player.id, organization.id, "regional_policy")
-	control_action_button.disabled = not society.organizations.has_permission(player.id, organization.id, "regional_control_support")
+	var map_service: MapControlService = GameSessionService.world_map_service
+	var control_permission: bool = society.organizations.has_permission(
+		player.id, organization.id, "regional_control_support"
+	)
+	control_action_button.disabled = (
+		not control_permission
+		or map_service == null
+		or not map_service.is_war_active()
+	)
 	var hints: Array[String] = []
 	if is_member:
 		hints.append("你已经加入该组织。")
@@ -193,7 +201,10 @@ func _on_organization_selected(_index: int) -> void:
 	if policy_action_button.disabled:
 		hints.append("推动政策需要地区政策权限。")
 	if control_action_button.disabled:
-		hints.append("支持控制需要政府或军队的地区控制支援权限。")
+		if map_service == null or not map_service.is_war_active():
+			hints.append("当前无战争或没有合法前线目标。")
+		else:
+			hints.append("支持控制需要政府或军队的地区控制支援权限。")
 	organization_hint.text = " ".join(hints)
 
 

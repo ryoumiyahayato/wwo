@@ -1,25 +1,30 @@
 class_name MapControlService
 extends RefCounted
-## Owns mutable military control and the incrementally maintained frontline edge set.
+## Owns territorial administration, explicit war state, and control-border edges.
 
 signal control_unit_changed(unit_id: String)
 signal frontlines_changed()
+signal war_state_changed()
 
 const STAGE_STABLE: String = "stable"
 const STAGE_WEAKENING: String = "weakening"
 const STAGE_CONTESTED: String = "contested"
 const STAGE_ENEMY_OCCUPATION: String = "enemy_occupation"
 const STAGE_CONSOLIDATING: String = "consolidating"
+const WAR_STATUS_PEACE: String = "peace"
+const WAR_STATUS_ACTIVE: String = "active"
 
 var data_set: CoreDataSet
 var rules: MapRulesConfig
 var _frontline_edges: Dictionary = {}
 var _units_by_grid_position: Dictionary = {}
+var _war_state: Dictionary = {}
 
 
 func _init(source_data_set: CoreDataSet, source_rules: MapRulesConfig) -> void:
 	data_set = source_data_set
 	rules = source_rules
+	_war_state = _default_war_state()
 	_index_grid_positions()
 	_rebuild_all_frontlines()
 
@@ -55,6 +60,51 @@ func get_other_country_id(country_id: String) -> String:
 	return ""
 
 
+func is_war_active() -> bool:
+	return str(_war_state.get("status", WAR_STATUS_PEACE)) == WAR_STATUS_ACTIVE
+
+
+func get_war_state() -> Dictionary:
+	return _war_state.duplicate(true)
+
+
+func declare_war(
+	participant_country_ids: Array[String],
+	start_hour: int,
+	objectives: Dictionary
+) -> bool:
+	var normalized_participants: Array[String] = []
+	for country_id: String in participant_country_ids:
+		if (
+			country_id.is_empty()
+			or not data_set.countries.has(country_id)
+			or normalized_participants.has(country_id)
+		):
+			return false
+		normalized_participants.append(country_id)
+	if normalized_participants.size() < 2 or start_hour < 0 or objectives.is_empty():
+		return false
+	normalized_participants.sort()
+	_war_state = {
+		"status": WAR_STATUS_ACTIVE,
+		"war_id": "war:%d" % start_hour,
+		"participant_country_ids": normalized_participants,
+		"start_hour": start_hour,
+		"objectives": objectives.duplicate(true),
+		"stalemate_reason": "尚未执行首次军事决策。",
+	}
+	war_state_changed.emit()
+	return true
+
+
+func end_war() -> bool:
+	if not is_war_active():
+		return false
+	_war_state = _default_war_state()
+	war_state_changed.emit()
+	return true
+
+
 func set_control_state(
 	unit_id: String,
 	controller_country_id: String,
@@ -78,8 +128,17 @@ func set_control_state(
 func is_valid_control_support_target(
 	unit_id: String, supporting_country_id: String
 ) -> bool:
+	if not is_war_active():
+		return false
+	var participants: Array[String] = DataRecordUtils.to_string_array(
+		_war_state.get("participant_country_ids", [])
+	)
+	if not participants.has(supporting_country_id):
+		return false
 	var unit: ControlUnitData = get_unit(unit_id)
 	if unit == null or not data_set.countries.has(supporting_country_id):
+		return false
+	if not participants.has(unit.controller_country_id):
 		return false
 	var adjacent_to_supporter: bool = false
 	var adjacent_to_enemy: bool = false
@@ -258,6 +317,10 @@ func get_frontline_edges() -> Array[Dictionary]:
 	return edges
 
 
+func get_border_edges() -> Array[Dictionary]:
+	return get_frontline_edges()
+
+
 func get_frontline_edge_count_for_unit(unit_id: String) -> int:
 	var count: int = 0
 	for edge: Dictionary in get_frontline_edges():
@@ -337,13 +400,22 @@ func get_persistent_state() -> Dictionary:
 			"contested_level": unit.contested_level,
 			"enemy_pressure": unit.enemy_pressure,
 		}
-	return {"regions": regions, "control_units": units}
+	return {
+		"regions": regions,
+		"control_units": units,
+		"war_state": get_war_state(),
+	}
 
 
 func restore_persistent_state(state: Dictionary) -> bool:
 	var regions: Variant = state.get("regions", {})
 	var units: Variant = state.get("control_units", {})
+	var restored_war_state: Variant = state.get("war_state", _default_war_state())
 	if not regions is Dictionary or not units is Dictionary:
+		return false
+	if not restored_war_state is Dictionary or not _is_valid_war_state(
+		restored_war_state as Dictionary
+	):
 		return false
 	if (regions as Dictionary).size() != data_set.regions.size() or (units as Dictionary).size() != data_set.control_units.size():
 		return false
@@ -400,9 +472,54 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		unit.control_strength = float(unit_state["control_strength"])
 		unit.contested_level = float(unit_state["contested_level"])
 		unit.enemy_pressure = float(unit_state["enemy_pressure"])
+	_war_state = (restored_war_state as Dictionary).duplicate(true)
 	_rebuild_all_frontlines()
 	frontlines_changed.emit()
+	war_state_changed.emit()
 	return true
+
+
+func _is_valid_war_state(state: Dictionary) -> bool:
+	var status: String = str(state.get("status", ""))
+	var war_id: String = str(state.get("war_id", ""))
+	var participants_value: Variant = state.get("participant_country_ids", [])
+	var objectives_value: Variant = state.get("objectives", {})
+	var start_hour: int = int(state.get("start_hour", -1))
+	var stalemate_reason: String = str(state.get("stalemate_reason", ""))
+	if not participants_value is Array or not objectives_value is Dictionary:
+		return false
+	var participants: Array[String] = DataRecordUtils.to_string_array(
+		participants_value as Array
+	)
+	if status == WAR_STATUS_PEACE:
+		return (
+			war_id.is_empty()
+			and participants.is_empty()
+			and start_hour == -1
+			and (objectives_value as Dictionary).is_empty()
+			and not stalemate_reason.is_empty()
+		)
+	if status != WAR_STATUS_ACTIVE or war_id.is_empty() or start_hour < 0:
+		return false
+	if participants.size() < 2 or (objectives_value as Dictionary).is_empty():
+		return false
+	var unique_participants: Dictionary = {}
+	for country_id: String in participants:
+		if not data_set.countries.has(country_id) or unique_participants.has(country_id):
+			return false
+		unique_participants[country_id] = true
+	return not stalemate_reason.is_empty()
+
+
+func _default_war_state() -> Dictionary:
+	return {
+		"status": WAR_STATUS_PEACE,
+		"war_id": "",
+		"participant_country_ids": [],
+		"start_hour": -1,
+		"objectives": {},
+		"stalemate_reason": "当前无战争。",
+	}
 
 
 func _index_grid_positions() -> void:

@@ -9,8 +9,8 @@ const GRID_COLOR: Color = Color(0.08, 0.11, 0.15, 0.75)
 const REGION_BORDER_COLOR: Color = Color(0.86, 0.9, 0.93, 0.88)
 const RAIL_DARK_COLOR: Color = Color(0.1, 0.12, 0.14, 0.9)
 const RAIL_LIGHT_COLOR: Color = Color(0.72, 0.7, 0.58, 0.95)
-const FRONTLINE_DARK_COLOR: Color = Color(0.08, 0.04, 0.03, 1.0)
-const FRONTLINE_COLOR: Color = Color(1.0, 0.57, 0.3, 1.0)
+const CONTROL_BORDER_DARK_COLOR: Color = Color(0.035, 0.055, 0.08, 1.0)
+const CONTROL_BORDER_COLOR: Color = Color(0.68, 0.78, 0.86, 0.96)
 const CONTESTED_COLOR: Color = Color(1.0, 0.86, 0.56, 0.42)
 const SELECTION_COLOR: Color = Color(0.98, 0.88, 0.42, 1.0)
 const CITY_COLOR: Color = Color(0.96, 0.96, 0.91, 1.0)
@@ -140,7 +140,7 @@ func _draw() -> void:
 	_draw_contested_hatching()
 	_draw_railroads()
 	_draw_unit_and_region_borders()
-	_draw_frontlines()
+	_draw_control_borders()
 	_draw_cities_and_region_labels()
 	_draw_selection()
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
@@ -158,6 +158,8 @@ func _draw_unit_fills() -> void:
 
 
 func _draw_contested_hatching() -> void:
+	if not control_service.is_war_active():
+		return
 	for unit_id: String in control_service.get_sorted_unit_ids():
 		var unit: ControlUnitData = control_service.get_unit(unit_id)
 		if unit.contested_level < rules.contested_threshold:
@@ -212,8 +214,8 @@ func _draw_unit_and_region_borders() -> void:
 				_draw_rect_side(rect, direction, REGION_BORDER_COLOR, 2.5)
 
 
-func _draw_frontlines() -> void:
-	for edge: Dictionary in control_service.get_frontline_edges():
+func _draw_control_borders() -> void:
+	for edge: Dictionary in control_service.get_border_edges():
 		var first: ControlUnitData = control_service.get_unit(str(edge["a"]))
 		var second: ControlUnitData = control_service.get_unit(str(edge["b"]))
 		if first == null or second == null:
@@ -221,8 +223,8 @@ func _draw_frontlines() -> void:
 		var segment: PackedVector2Array = _shared_boundary(first, second)
 		if segment.size() != 2:
 			continue
-		draw_line(segment[0], segment[1], FRONTLINE_DARK_COLOR, 8.0, true)
-		draw_line(segment[0], segment[1], FRONTLINE_COLOR, 3.5, true)
+		draw_line(segment[0], segment[1], CONTROL_BORDER_DARK_COLOR, 7.0, true)
+		draw_line(segment[0], segment[1], CONTROL_BORDER_COLOR, 2.5, true)
 
 
 func _draw_cities_and_region_labels() -> void:
