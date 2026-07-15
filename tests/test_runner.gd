@@ -2143,6 +2143,10 @@ func _test_m9_thirty_day_and_year_stability() -> void:
 func _test_m9_desktop_configuration() -> void:
 	_expect_equal(int(ProjectSettings.get_setting("display/window/size/viewport_width")), 1280, "M9 默认视口宽度为 1280")
 	_expect_equal(int(ProjectSettings.get_setting("display/window/size/viewport_height")), 720, "M9 默认视口高度为 720")
+	_expect_true(
+		not bool(ProjectSettings.get_setting("display/window/size/resizable", true)),
+		"M9 P0 正式窗口固定为 1280×720 且不可任意拉伸"
+	)
 	var preset_text: String = FileAccess.get_file_as_string("res://export_presets.cfg")
 	_expect_true(preset_text.contains("platform=\"Windows Desktop\"") and preset_text.contains("binary_format/architecture=\"x86_64\""), "M9 Windows Desktop x86-64 导出预设完整")
 	_expect_true(preset_text.contains("platform=\"Linux/BSD\"") and preset_text.contains("name=\"Linux x86-64\""), "M9 提供未声明已验证的 Linux x86-64 预设")
