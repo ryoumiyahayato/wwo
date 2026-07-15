@@ -180,6 +180,24 @@ func load_from_file(path: String = DEFAULT_PATH) -> Error:
 			if typeof(raw_type) != TYPE_STRING or str(raw_type).is_empty():
 				error_message = "职业与组织类型映射包含无效类型"
 				return ERR_INVALID_DATA
+	var position_path: Variant = player_context_rules.get(
+		"position_path_bonus", {}
+	)
+	if not position_path is Dictionary:
+		error_message = "职位发展路径加成规则无效"
+		return ERR_INVALID_DATA
+	var position_path_total: float = 0.0
+	for key: String in [
+		"organization_member", "entry_position", "next_position_vacancy",
+	]:
+		var value: float = float((position_path as Dictionary).get(key, -1.0))
+		if value < 0.0 or value > 100.0:
+			error_message = "职位发展路径加成规则 %s 超出范围" % key
+			return ERR_INVALID_DATA
+		position_path_total += value
+	if position_path_total > 100.0:
+		error_message = "职位发展路径加成总值超过上限"
+		return ERR_INVALID_DATA
 	return OK
 
 

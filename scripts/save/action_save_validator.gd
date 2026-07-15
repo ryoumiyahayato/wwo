@@ -223,10 +223,10 @@ func _validate_target(
 		float(action.context.get("social_match_bonus", 0.0))
 	):
 		return "非人物接触行动包含异常社会匹配上下文"
-	if definition.category != "join_organization" and not is_zero_approx(
+	if definition.category not in ["join_organization", "seek_position"] and not is_zero_approx(
 		float(action.context.get("organization_match_bonus", 0.0))
 	):
-		return "非加入组织行动包含异常组织匹配上下文"
+		return "非组织目标行动包含异常组织匹配上下文"
 	if definition.category in ["build_relationship", "investigate_character"]:
 		if not society.roster.is_living(action.target_id) or action.target_id == action.actor_character_id:
 			return "当前行动人物目标无效"

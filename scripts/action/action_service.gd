@@ -61,10 +61,10 @@ func start_action(
 	):
 		result.add_error("非人物接触行动不能携带社会匹配上下文")
 		return result
-	if definition.category != "join_organization" and not is_zero_approx(
+	if definition.category not in ["join_organization", "seek_position"] and not is_zero_approx(
 		float(context.get("organization_match_bonus", 0.0))
 	):
-		result.add_error("非加入组织行动不能携带组织匹配上下文")
+		result.add_error("非组织目标行动不能携带组织匹配上下文")
 		return result
 	var permissions: Array[String] = DataRecordUtils.to_string_array(
 		context["position_permissions"]
@@ -203,7 +203,7 @@ func update_context(
 		float(merged.get("social_match_bonus", 0.0))
 	):
 		return false
-	if definition.category != "join_organization" and not is_zero_approx(
+	if definition.category not in ["join_organization", "seek_position"] and not is_zero_approx(
 		float(merged.get("organization_match_bonus", 0.0))
 	):
 		return false

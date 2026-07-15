@@ -80,6 +80,7 @@ $tests = @(
     @{ Name = 'State consistency regression'; Script = 'res://tests/state_consistency_regression.gd' },
     @{ Name = 'Simulation quality regression'; Script = 'res://tests/simulation_quality_regression.gd' },
     @{ Name = 'Codex audit regression'; Script = 'res://tests/codex_audit_regression.gd' }
+    @{ Name = '1000-seed early-game reachability'; Script = 'res://tests/early_game_reachability_regression.gd' }
 )
 
 foreach ($test in $tests) {

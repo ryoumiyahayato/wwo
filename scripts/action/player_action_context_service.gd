@@ -656,7 +656,7 @@ func _organization_match_bonus(
 	character: CharacterData,
 	target_id: String
 ) -> float:
-	if definition.category != "join_organization":
+	if definition.category not in ["join_organization", "seek_position"]:
 		return 0.0
 	if society == null or society.organizations == null or target_id.is_empty():
 		return 0.0
@@ -665,6 +665,29 @@ func _organization_match_bonus(
 	)
 	if organization == null:
 		return 0.0
+	if definition.category == "seek_position":
+		if not organization.member_ids.has(character.id):
+			return 0.0
+		var path_config: Dictionary = rules.player_context_rules.get(
+			"position_path_bonus", {}
+		) as Dictionary
+		var path_value: float = float(
+			path_config.get("organization_member", 0.0)
+		)
+		var current_position_id: String = society.organizations.get_position_id(
+			character.id, organization.id
+		)
+		if current_position_id == str(
+			organization.position_structure.get("entry_position", "")
+		):
+			path_value += float(path_config.get("entry_position", 0.0))
+		if not _get_next_available_position_id(
+			character.id, organization
+		).is_empty():
+			path_value += float(
+				path_config.get("next_position_vacancy", 0.0)
+			)
+		return clampf(path_value, 0.0, 100.0)
 	var config: Dictionary = rules.player_context_rules.get(
 		"organization_match_bonus", {}
 	) as Dictionary

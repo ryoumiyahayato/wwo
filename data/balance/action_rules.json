@@ -70,6 +70,11 @@
         "laborer": ["union", "industrial", "enterprise"]
       }
     },
+    "position_path_bonus": {
+      "organization_member": 35.0,
+      "entry_position": 20.0,
+      "next_position_vacancy": 10.0
+    },
     "funding_cost_by_category": {
       "study_skill": 2,
       "perform_work": 0,
