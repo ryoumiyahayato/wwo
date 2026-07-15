@@ -56,6 +56,7 @@ func _run() -> void:
 
 	_test_fixed_action_button_layout()
 	await _test_drawer_navigation()
+	_test_non_map_context_isolation()
 	_test_selectable_skill_growth()
 	_test_practical_skill_growth()
 	_test_cross_seed_guaranteed_reachability()
@@ -145,6 +146,68 @@ func _test_drawer_navigation() -> void:
 	_expect(activity_panel.visible and modal_layer.visible, "世界动态使用统一左侧抽屉")
 	activity_button.pressed.emit()
 	await create_timer(0.24).timeout
+
+
+func _test_non_map_context_isolation() -> void:
+	var panel: ActionPanel = _view.find_child("ActionPanel", true, false) as ActionPanel
+	var player: CharacterData = GameSessionService.player_character
+	var unit_ids: Array[String] = _map.get_sorted_unit_ids()
+	_expect(unit_ids.size() >= 2, "地图具有两个可用于作用域回归的地区单元")
+	if panel == null or unit_ids.size() < 2:
+		return
+	var first_unit_id: String = unit_ids[0]
+	var second_unit_id: String = unit_ids[unit_ids.size() - 1]
+	var study: ActionDefinitionData = _map.data_set.actions.get(
+		"action:study_skill"
+	) as ActionDefinitionData
+	var work: ActionDefinitionData = _map.data_set.actions.get(
+		"action:perform_work"
+	) as ActionDefinitionData
+	panel.prefill_action(study.id)
+	panel.set_target(first_unit_id)
+	var study_a: Dictionary = panel.context_service.build_context(
+		study, player, first_unit_id, 5, "administration"
+	)
+	panel.set_target(second_unit_id)
+	var study_b: Dictionary = panel.context_service.build_context(
+		study, player, second_unit_id, 5, "administration"
+	)
+	_expect(
+		panel.target_id.is_empty()
+		and str(study_a.get("target_id", "invalid")).is_empty()
+		and study_a == study_b,
+		"切换地图地区后学习行动完整上下文保持一致且目标为空"
+	)
+	panel.prefill_action(work.id)
+	panel.set_target(first_unit_id)
+	var work_a: Dictionary = panel.context_service.build_context(
+		work, player, first_unit_id, 5
+	)
+	panel.set_target(second_unit_id)
+	var work_b: Dictionary = panel.context_service.build_context(
+		work, player, second_unit_id, 5
+	)
+	_expect(
+		panel.target_id.is_empty()
+		and str(work_a.get("target_id", "invalid")).is_empty()
+		and work_a == work_b,
+		"切换地图地区后工作行动完整上下文保持一致且目标为空"
+	)
+	_expect(
+		PlayerActionContextService.get_target_domain("build_relationship")
+		== PlayerActionContextService.TARGET_DOMAIN_CHARACTER
+		and PlayerActionContextService.get_target_domain("investigate_character")
+		== PlayerActionContextService.TARGET_DOMAIN_CHARACTER
+		and PlayerActionContextService.get_target_domain("join_organization")
+		== PlayerActionContextService.TARGET_DOMAIN_ORGANIZATION
+		and PlayerActionContextService.get_target_domain("seek_position")
+		== PlayerActionContextService.TARGET_DOMAIN_ORGANIZATION
+		and PlayerActionContextService.get_target_domain("promote_policy")
+		== PlayerActionContextService.TARGET_DOMAIN_MAP
+		and PlayerActionContextService.get_target_domain("support_control")
+		== PlayerActionContextService.TARGET_DOMAIN_MAP,
+		"人物、组织和地图行动具有显式且互不混用的目标域"
+	)
 
 
 func _test_selectable_skill_growth() -> void:

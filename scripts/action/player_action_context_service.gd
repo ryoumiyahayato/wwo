@@ -2,6 +2,11 @@ class_name PlayerActionContextService
 extends RefCounted
 ## Builds player action inputs from authoritative resources, relationships and positions.
 
+const TARGET_DOMAIN_NONE: String = "none"
+const TARGET_DOMAIN_CHARACTER: String = "character"
+const TARGET_DOMAIN_ORGANIZATION: String = "organization"
+const TARGET_DOMAIN_MAP: String = "map"
+
 var rules: ActionRulesConfig
 var society: SocietySimulationService
 var map_service: MapControlService
@@ -31,17 +36,18 @@ func build_context(
 	)
 	if definition.category == "study_skill" and resolved_study_skill.is_empty():
 		return {}
+	var resolved_target_id: String = normalize_target_id(definition, target_id)
 	var applied_extra: int = clampi(extra_funding, 0, get_max_extra_funding())
 	var total_cost: int = get_funding_cost(definition, applied_extra)
 	var running_npc: bool = _is_running_npc_action(character.id)
 	return {
-		"target_id": target_id,
+		"target_id": resolved_target_id,
 		"study_skill_id": resolved_study_skill,
 		"position_permissions": _get_permissions(character.id),
 		"organization_support": _organization_support(
-			definition, character, target_id
+			definition, character, resolved_target_id
 		),
-		"relationship_support": _relationship_support(character.id, target_id),
+		"relationship_support": _relationship_support(character.id, resolved_target_id),
 		"funding": clampf(
 			float(total_cost)
 			* float(rules.player_context_rules.get("funding_value_per_wealth", 0.0)),
@@ -51,9 +57,9 @@ func build_context(
 		"preparation": _preparation(
 			definition, character, applied_extra, resolved_study_skill
 		),
-		"target_resistance": _target_resistance(target_id),
+		"target_resistance": _target_resistance(resolved_target_id),
 		"boundary_invalid_reason": _get_strict_target_validation_error(
-			definition, character, target_id
+			definition, character, resolved_target_id
 		) if running_npc else "",
 		"settle_previous_interval": running_npc,
 	}
@@ -110,8 +116,9 @@ func start_player_action(
 	if action_service == null or definition == null or character == null:
 		result.add_error("行动服务、行动定义和人物必须就绪。")
 		return result
+	var resolved_target_id: String = normalize_target_id(definition, target_id)
 	var target_error: String = _get_strict_target_validation_error(
-		definition, character, target_id
+		definition, character, resolved_target_id
 	)
 	if not target_error.is_empty():
 		result.add_error(target_error)
@@ -133,7 +140,7 @@ func start_player_action(
 	var context: Dictionary = build_context(
 		definition,
 		character,
-		target_id,
+		resolved_target_id,
 		extra_funding,
 		resolved_study_skill
 	)
@@ -147,6 +154,32 @@ func start_player_action(
 	if not result.is_success():
 		character.current_status["wealth"] = wealth_before
 	return result
+
+
+static func get_target_domain(category: String) -> String:
+	match category:
+		"study_skill", "perform_work":
+			return TARGET_DOMAIN_NONE
+		"build_relationship", "investigate_character":
+			return TARGET_DOMAIN_CHARACTER
+		"join_organization", "seek_position":
+			return TARGET_DOMAIN_ORGANIZATION
+		"promote_policy", "support_control":
+			return TARGET_DOMAIN_MAP
+		_:
+			return ""
+
+
+static func normalize_target_id(
+	definition: ActionDefinitionData, requested_target_id: String
+) -> String:
+	if definition == null:
+		return ""
+	return (
+		""
+		if get_target_domain(definition.category) == TARGET_DOMAIN_NONE
+		else requested_target_id
+	)
 
 
 func get_base_funding_cost(definition: ActionDefinitionData) -> int:

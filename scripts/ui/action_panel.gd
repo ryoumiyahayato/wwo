@@ -130,7 +130,9 @@ func setup(simulation_clock: SimulationClock, control_service: MapControlService
 func set_target(control_unit_id: String) -> void:
 	map_target_id = control_unit_id
 	var definition: ActionDefinitionData = _get_selected_definition()
-	if definition != null and definition.category in ["promote_policy", "support_control"]:
+	if definition != null and PlayerActionContextService.get_target_domain(
+		definition.category
+	) == PlayerActionContextService.TARGET_DOMAIN_MAP:
 		_populate_targets(definition, control_unit_id)
 	_refresh()
 
@@ -202,7 +204,13 @@ func _on_action_selected(_index: int) -> void:
 		return
 	investment_spin.set_value_no_signal(0.0)
 	_populate_study_skills(definition)
-	_populate_targets(definition, target_id)
+	var preferred_target_id: String = (
+		map_target_id
+		if PlayerActionContextService.get_target_domain(definition.category)
+		== PlayerActionContextService.TARGET_DOMAIN_MAP
+		else target_id
+	)
+	_populate_targets(definition, preferred_target_id)
 	message_label.text = ""
 	_refresh()
 
