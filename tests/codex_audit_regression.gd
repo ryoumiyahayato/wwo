@@ -68,8 +68,11 @@ func _run() -> void:
 
 
 func _test_fixed_action_button_layout() -> void:
-	var panel: ActionPanel = _view.get_node("ActionPanel") as ActionPanel
-	var button: Button = panel.get_node("Margin/Root/BeginButton") as Button
+	var panel: ActionPanel = _view.find_child("ActionPanel", true, false) as ActionPanel
+	_expect(panel != null, "地图模态层包含正式行动面板")
+	var button: Button = (
+		panel.get_node("Margin/Root/BeginButton") as Button if panel != null else null
+	)
 	_expect(button != null, "开始行动按钮固定在滚动区外")
 	var ancestor: Node = button.get_parent() if button != null else null
 	var inside_scroll: bool = false
