@@ -2270,8 +2270,8 @@
       "aptitude_modifier_weight": 0.10, "position_permission_required": "",
       "organization_support_weight": 0.28, "relationship_support_weight": 0.18,
       "funding_weight": 0.04, "preparation_weight": 0.22, "state_modifier_weight": 0.35,
-      "base_target_resistance": 25, "interruption_conditions": ["detained", "incapacitated"],
-      "success_threshold": 52, "guaranteed_success_threshold": 100,
+      "base_target_resistance": 12, "interruption_conditions": ["detained", "incapacitated"],
+      "success_threshold": 45, "guaranteed_success_threshold": 65,
       "success_result": {"description": "加入申请获接纳，等待组织系统登记。", "reputation_delta": 2, "domain_effect": "organization_membership"},
       "failure_result": {"description": "加入申请暂未获接纳。", "stress_delta": 4, "domain_effect": "organization_rejection"}
     },

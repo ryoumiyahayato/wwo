@@ -1104,19 +1104,9 @@ func _promote_organization_candidate(
 func _organization_entry_available(
 	organization: OrganizationData
 ) -> bool:
-	var entry_id: String = str(
-		organization.position_structure.get("entry_position", "")
-	)
-	var positions: Dictionary = organization.position_structure.get(
-		"positions", {}
-	) as Dictionary
-	var entry: Dictionary = positions.get(entry_id, {}) as Dictionary
-	var holders: Array[String] = DataRecordUtils.to_string_array(
-		entry.get("holder_ids", [])
-	)
 	return (
-		not entry_id.is_empty()
-		and holders.size() < int(entry.get("slots", 0))
+		organization != null
+		and organizations.has_entry_vacancy(organization.id)
 	)
 
 

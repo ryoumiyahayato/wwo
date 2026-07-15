@@ -44,6 +44,9 @@ func build_context(
 	var social_match_bonus: float = _social_match_bonus(
 		definition, character, resolved_target_id
 	)
+	var organization_match_bonus: float = _organization_match_bonus(
+		definition, character, resolved_target_id
+	)
 	return {
 		"target_id": resolved_target_id,
 		"study_skill_id": resolved_study_skill,
@@ -54,6 +57,7 @@ func build_context(
 			else 0.0
 		),
 		"social_match_bonus": social_match_bonus,
+		"organization_match_bonus": organization_match_bonus,
 		"position_permissions": _get_permissions(character.id),
 		"organization_support": _organization_support(
 			definition, character, resolved_target_id
@@ -294,6 +298,8 @@ func _get_strict_target_validation_error(
 				return "不能加入其他国家的组织。"
 			if join_target.member_ids.has(character.id):
 				return "人物已经是该组织成员。"
+			if not society.organizations.has_entry_vacancy(target_id):
+				return "该组织入口职位目前没有空位。"
 			return ""
 		"seek_position":
 			var position_target: OrganizationData = society.organizations.get_organization(
@@ -641,6 +647,41 @@ static func _characters_share_organization(
 		if target.organization_ids.has(organization_id):
 			return true
 	return false
+
+
+func _organization_match_bonus(
+	definition: ActionDefinitionData,
+	character: CharacterData,
+	target_id: String
+) -> float:
+	if definition.category != "join_organization":
+		return 0.0
+	if society == null or society.organizations == null or target_id.is_empty():
+		return 0.0
+	var organization: OrganizationData = society.organizations.get_organization(
+		target_id
+	)
+	if organization == null:
+		return 0.0
+	var config: Dictionary = rules.player_context_rules.get(
+		"organization_match_bonus", {}
+	) as Dictionary
+	var value: float = 0.0
+	if organization.country_id == character.country_id:
+		value += float(config.get("same_country", 0.0))
+	if organization.region_id == character.region_id:
+		value += float(config.get("same_region", 0.0))
+	var preferred_by_occupation: Dictionary = config.get(
+		"preferred_types_by_occupation", {}
+	) as Dictionary
+	var preferred_types: Array[String] = DataRecordUtils.to_string_array(
+		preferred_by_occupation.get(character.occupation_id, [])
+	)
+	if preferred_types.has(organization.type):
+		value += float(config.get("occupation", 0.0))
+	if society.organizations.has_entry_vacancy(target_id):
+		value += float(config.get("entry_vacancy", 0.0))
+	return clampf(value, 0.0, 100.0)
 
 
 func _target_resistance(target_id: String) -> float:

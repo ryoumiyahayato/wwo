@@ -148,6 +148,38 @@ func load_from_file(path: String = DEFAULT_PATH) -> Error:
 		if value < 0.0 or value > 100.0:
 			error_message = "社会接触匹配规则 %s 超出范围" % key
 			return ERR_INVALID_DATA
+	var organization_match: Variant = player_context_rules.get(
+		"organization_match_bonus", {}
+	)
+	if not organization_match is Dictionary:
+		error_message = "组织目标匹配规则无效"
+		return ERR_INVALID_DATA
+	for key: String in [
+		"same_country", "same_region", "occupation", "entry_vacancy",
+	]:
+		var value: float = float(
+			(organization_match as Dictionary).get(key, -1.0)
+		)
+		if value < 0.0 or value > 100.0:
+			error_message = "组织目标匹配规则 %s 超出范围" % key
+			return ERR_INVALID_DATA
+	var preferred_types: Variant = (organization_match as Dictionary).get(
+		"preferred_types_by_occupation", {}
+	)
+	if not preferred_types is Dictionary or (preferred_types as Dictionary).is_empty():
+		error_message = "职业与组织类型映射无效"
+		return ERR_INVALID_DATA
+	for raw_occupation_id: Variant in preferred_types:
+		var values: Variant = (preferred_types as Dictionary)[raw_occupation_id]
+		if str(raw_occupation_id).is_empty() or not values is Array or (
+			values as Array
+		).is_empty():
+			error_message = "职业与组织类型映射包含空值"
+			return ERR_INVALID_DATA
+		for raw_type: Variant in values as Array:
+			if typeof(raw_type) != TYPE_STRING or str(raw_type).is_empty():
+				error_message = "职业与组织类型映射包含无效类型"
+				return ERR_INVALID_DATA
 	return OK
 
 

@@ -156,9 +156,9 @@
       "tendency_bases": {"government_support": -2, "reform": 22, "militarism": -8, "labor_business": -38, "nationalism": 8}
     },
     {
-      "id": "union_member", "name": "工会成员", "category": "civilian",
+      "id": "union_member", "name": "劳工组织者", "category": "civilian",
       "standard_weight": 8, "population_weight": 8, "challenge": false,
-      "position": "基层会员", "employment_status": "employed",
+      "position": "劳工联络员", "employment_status": "employed",
       "wealth_range": [22, 48], "reputation_range": [10, 32],
       "skill_bases": {"social_organization": 58, "political_activity": 45, "public_speaking": 42},
       "tendency_bases": {"government_support": -18, "reform": 42, "militarism": -20, "labor_business": -65, "nationalism": 2}

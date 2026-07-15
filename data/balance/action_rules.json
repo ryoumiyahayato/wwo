@@ -53,6 +53,23 @@
       "existing_relationship": 12.0,
       "shared_organization": 18.0
     },
+    "organization_match_bonus": {
+      "same_country": 8.0,
+      "same_region": 20.0,
+      "occupation": 50.0,
+      "entry_vacancy": 10.0,
+      "preferred_types_by_occupation": {
+        "civil_servant": ["government"],
+        "junior_officer": ["military"],
+        "teacher": ["government", "enterprise"],
+        "journalist": ["government", "enterprise"],
+        "small_merchant": ["enterprise"],
+        "skilled_worker": ["enterprise", "union"],
+        "union_member": ["union"],
+        "farmer": ["union"],
+        "laborer": ["union", "enterprise"]
+      }
+    },
     "funding_cost_by_category": {
       "study_skill": 2,
       "perform_work": 0,

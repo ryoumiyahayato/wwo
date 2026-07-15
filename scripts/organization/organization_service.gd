@@ -50,12 +50,7 @@ func join_organization(character: CharacterData, organization_id: String) -> boo
 		if not get_position_id(character.id, organization_id).is_empty():
 			return true
 		return assign_position(character, organization_id, entry_position)
-	var positions: Dictionary = organization.position_structure.get("positions", {}) as Dictionary
-	if not positions.has(entry_position):
-		return false
-	var entry: Dictionary = positions[entry_position] as Dictionary
-	var holders: Array[String] = DataRecordUtils.to_string_array(entry.get("holder_ids", []))
-	if holders.size() >= int(entry.get("slots", 0)):
+	if not has_entry_vacancy(organization_id):
 		return false
 	organization.member_ids.append(character.id)
 	organization.member_ids.sort()
@@ -68,6 +63,27 @@ func join_organization(character: CharacterData, organization_id: String) -> boo
 		return false
 	membership_changed.emit(character.id, organization_id)
 	return true
+
+
+func has_entry_vacancy(organization_id: String) -> bool:
+	var organization: OrganizationData = get_organization(organization_id)
+	if organization == null:
+		return false
+	var entry_position: String = str(
+		organization.position_structure.get("entry_position", "")
+	)
+	var positions: Dictionary = organization.position_structure.get(
+		"positions", {}
+	) as Dictionary
+	var entry: Dictionary = positions.get(entry_position, {}) as Dictionary
+	var holders: Array[String] = DataRecordUtils.to_string_array(
+		entry.get("holder_ids", [])
+	)
+	return (
+		not entry_position.is_empty()
+		and not entry.is_empty()
+		and holders.size() < int(entry.get("slots", 0))
+	)
 
 
 func leave_organization(character: CharacterData, organization_id: String) -> bool:

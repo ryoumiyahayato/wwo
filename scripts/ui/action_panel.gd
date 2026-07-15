@@ -620,13 +620,14 @@ func _refresh_forecast(definition: ActionDefinitionData) -> void:
 	var guarantee_gap: float = maxf(
 		definition.guaranteed_success_threshold - effective, 0.0
 	)
-	context_label.text = "[b]能力[/b] %d　[b]准备[/b] %.0f　[b]资金支持[/b] %.0f\n[b]关系支持[/b] %.0f　[b]组织支持[/b] %.0f　[b]场景匹配[/b] %.0f　[b]目标阻力[/b] %.0f\n────────────\n[b]当前有效值[/b] %.0f　[b]成功线[/b] %.0f　[b]保证线[/b] %.0f\n当前把握：[color=#9bd3a7]%s[/color]\n距成功线：%.0f　距保证线：%.0f\n预计用时：约 %d 小时" % [
+	context_label.text = "[b]能力[/b] %d　[b]准备[/b] %.0f　[b]资金支持[/b] %.0f\n[b]关系支持[/b] %.0f　[b]组织支持[/b] %.0f　[b]目标匹配[/b] %.0f　[b]目标阻力[/b] %.0f\n────────────\n[b]当前有效值[/b] %.0f　[b]成功线[/b] %.0f　[b]保证线[/b] %.0f\n当前把握：[color=#9bd3a7]%s[/color]\n距成功线：%.0f　距保证线：%.0f\n预计用时：约 %d 小时" % [
 		ability,
 		float(context.get("preparation", 0.0)),
 		float(context.get("funding", 0.0)),
 		float(context.get("relationship_support", 0.0)),
 		float(context.get("organization_support", 0.0)),
-		float(context.get("social_match_bonus", 0.0)),
+		float(context.get("social_match_bonus", 0.0))
+		+ float(context.get("organization_match_bonus", 0.0)),
 		float(context.get("target_resistance", 0.0)),
 		effective,
 		definition.success_threshold,
@@ -859,11 +860,12 @@ func _region_name(region_id: String) -> String:
 
 
 func _entry_position_available(organization: OrganizationData) -> bool:
-	var entry_id: String = str(organization.position_structure.get("entry_position", ""))
-	var positions: Dictionary = organization.position_structure.get("positions", {}) as Dictionary
-	var entry: Dictionary = positions.get(entry_id, {}) as Dictionary
-	var holders: Array[String] = DataRecordUtils.to_string_array(entry.get("holder_ids", []))
-	return not entry.is_empty() and holders.size() < int(entry.get("slots", 0))
+	var society: SocietySimulationService = GameSessionService.society_service
+	return (
+		organization != null
+		and society != null
+		and society.organizations.has_entry_vacancy(organization.id)
+	)
 
 
 func _format_world_hour(total_hour: int) -> String:

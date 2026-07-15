@@ -540,11 +540,12 @@ func _next_position(organization: OrganizationData, character_id: String) -> Dic
 
 
 func _entry_position_available(organization: OrganizationData) -> bool:
-	var entry_id: String = str(organization.position_structure.get("entry_position", ""))
-	var positions: Dictionary = organization.position_structure.get("positions", {}) as Dictionary
-	var entry: Dictionary = positions.get(entry_id, {}) as Dictionary
-	var holders: Array[String] = DataRecordUtils.to_string_array(entry.get("holder_ids", []))
-	return not entry.is_empty() and holders.size() < int(entry.get("slots", 0))
+	var society: SocietySimulationService = GameSessionService.society_service
+	return (
+		organization != null
+		and society != null
+		and society.organizations.has_entry_vacancy(organization.id)
+	)
 
 
 func _selected_organization() -> OrganizationData:

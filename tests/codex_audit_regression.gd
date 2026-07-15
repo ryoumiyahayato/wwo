@@ -296,6 +296,9 @@ func _test_standard_relationship_reachability() -> void:
 	var definition: ActionDefinitionData = _map.data_set.actions.get(
 		"action:build_relationship"
 	) as ActionDefinitionData
+	var join_definition: ActionDefinitionData = _map.data_set.actions.get(
+		"action:join_organization"
+	) as ActionDefinitionData
 	var countries: Array[String] = [
 		"country:loran_federation", "country:vesta_union",
 	]
@@ -304,6 +307,12 @@ func _test_standard_relationship_reachability() -> void:
 	var full_guaranteed: int = 0
 	var worst_base: float = INF
 	var worst_full: float = INF
+	var organization_base_reachable: int = 0
+	var organization_full_guaranteed: int = 0
+	var organization_occupation_matched: int = 0
+	var actual_join_completed: bool = false
+	var worst_organization_base: float = INF
+	var worst_organization_full: float = INF
 	for seed_value: int in range(1, 201):
 		var generator := CharacterGenerator.new(
 			_map.data_set,
@@ -372,9 +381,93 @@ func _test_standard_relationship_reachability() -> void:
 			base_reachable += 1
 		if best_full >= definition.guaranteed_success_threshold:
 			full_guaranteed += 1
+		var best_organization_base: float = -INF
+		var best_organization_full: float = -INF
+		var best_organization_match: float = 0.0
+		var best_organization_id: String = ""
+		var join_affordable_extra: int = mini(
+			context_service.get_max_extra_funding(),
+			maxi(
+				int(character.current_status.get("wealth", 0))
+				- context_service.get_base_funding_cost(join_definition),
+				0
+			)
+		)
+		for organization_id: String in society.organizations.get_organization_ids():
+			if not context_service.get_target_validation_error(
+				join_definition, character, organization_id
+			).is_empty():
+				continue
+			var organization_base_context: Dictionary = context_service.build_context(
+				join_definition, character, organization_id, 0
+			)
+			var organization_full_context: Dictionary = context_service.build_context(
+				join_definition, character, organization_id, join_affordable_extra
+			)
+			var organization_base: float = evaluator.calculate_effective_value(
+				join_definition, character, organization_base_context
+			)
+			var organization_full: float = evaluator.calculate_effective_value(
+				join_definition, character, organization_full_context
+			)
+			if organization_full > best_organization_full:
+				best_organization_id = organization_id
+				best_organization_base = organization_base
+				best_organization_full = organization_full
+				best_organization_match = float(
+					organization_full_context.get("organization_match_bonus", 0.0)
+				)
+		worst_organization_base = minf(
+			worst_organization_base, best_organization_base
+		)
+		worst_organization_full = minf(
+			worst_organization_full, best_organization_full
+		)
+		if best_organization_base >= join_definition.success_threshold - 10.0:
+			organization_base_reachable += 1
+		if best_organization_full >= join_definition.guaranteed_success_threshold:
+			organization_full_guaranteed += 1
+		if best_organization_match >= 68.0:
+			organization_occupation_matched += 1
+		if seed_value == 1 and not best_organization_id.is_empty():
+			var started: ActionStartResult = context_service.start_player_action(
+				evaluator,
+				join_definition,
+				character,
+				0,
+				best_organization_id,
+				join_affordable_extra
+			)
+			if started.is_success():
+				evaluator.update_to_hour(
+					started.action, join_definition, character, 10000
+				)
+				actual_join_completed = (
+					started.action.status == ActionInstanceData.STATUS_COMPLETED
+					and started.action.outcome_code != "failure"
+					and society.apply_character_action_domain_effect(
+						started.action,
+						join_definition,
+						character,
+						_map
+					)
+					and society.organizations.get_position_id(
+						character.id, best_organization_id
+					).is_empty() == false
+				)
 	_expect(anchors_present == 200, "200 个常规开局均生成 1～2 条真实弱关系")
 	_expect(base_reachable == 200, "200 个常规开局均有基础条件达到成功线的关系目标（最差 %.2f）" % worst_base)
 	_expect(full_guaranteed == 200, "200 个常规开局均有实际财富满额投入达到保证线的关系目标（最差 %.2f）" % worst_full)
+	_expect(organization_base_reachable == 200, "200 个常规开局均有基础条件不低于成功线 10 点的组织目标（最差 %.2f）" % worst_organization_base)
+	_expect(organization_full_guaranteed == 200, "200 个常规开局均有实际财富满额投入达到保证线的组织目标（最差 %.2f）" % worst_organization_full)
+	_expect(organization_occupation_matched == 200, "200 个常规开局的最佳组织均匹配国家、职业且入口有空位")
+	_expect(actual_join_completed, "常规开局可用真实资金完成加入组织并获得入口职位")
+	var labor_organizer: Dictionary = config.get_occupation("union_member")
+	_expect(
+		str(labor_organizer.get("name", "")) == "劳工组织者"
+		and str(labor_organizer.get("position", "")) == "劳工联络员",
+		"职业分类不再使用暗示正式组织成员身份的称谓"
+	)
 
 	var panel: ActionPanel = _view.find_child("ActionPanel", true, false) as ActionPanel
 	_expect(
@@ -404,6 +497,39 @@ func _test_standard_relationship_reachability() -> void:
 			and panel.target_id
 			== str(panel.target_option.get_item_metadata(0)),
 			"建立关系默认选择最容易接触的人物"
+		)
+		_expect(
+			panel.prefill_action(join_definition.id),
+			"正式行动面板可打开加入组织配置"
+		)
+		var organizations_sorted: bool = panel.target_option.item_count > 0
+		var last_organization_effective: float = INF
+		for index: int in range(panel.target_option.item_count):
+			var organization_id: String = str(
+				panel.target_option.get_item_metadata(index)
+			)
+			var organization_context: Dictionary = panel.context_service.build_context(
+				join_definition,
+				GameSessionService.player_character,
+				organization_id,
+				0
+			)
+			var organization_effective: float = (
+				panel.action_service.calculate_effective_value(
+					join_definition,
+					GameSessionService.player_character,
+					organization_context
+				)
+			)
+			if organization_effective > last_organization_effective + 0.0001:
+				organizations_sorted = false
+			last_organization_effective = organization_effective
+		_expect(organizations_sorted, "组织目标按当前实际有效值从高到低排序")
+		_expect(
+			panel.target_option.item_count > 0
+			and panel.target_id
+			== str(panel.target_option.get_item_metadata(0)),
+			"加入组织默认选择当前最匹配的目标"
 		)
 
 	var player: CharacterData = GameSessionService.player_character
