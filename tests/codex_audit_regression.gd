@@ -57,6 +57,7 @@ func _run() -> void:
 	_test_fixed_action_button_layout()
 	await _test_drawer_navigation()
 	_test_non_map_context_isolation()
+	_test_standard_study_and_work_reachability()
 	_test_selectable_skill_growth()
 	_test_practical_skill_growth()
 	_test_cross_seed_guaranteed_reachability()
@@ -168,6 +169,8 @@ func _test_non_map_context_isolation() -> void:
 	var study_a: Dictionary = panel.context_service.build_context(
 		study, player, first_unit_id, 5, "administration"
 	)
+
+
 	panel.set_target(second_unit_id)
 	var study_b: Dictionary = panel.context_service.build_context(
 		study, player, second_unit_id, 5, "administration"
@@ -208,6 +211,82 @@ func _test_non_map_context_isolation() -> void:
 		== PlayerActionContextService.TARGET_DOMAIN_MAP,
 		"人物、组织和地图行动具有显式且互不混用的目标域"
 	)
+
+
+func _test_standard_study_and_work_reachability() -> void:
+	var config: CharacterGenerationConfig = CharacterGenerationConfig.load_from_file()
+	var context_service := PlayerActionContextService.new(_rules, null, null)
+	var evaluator := ActionService.new(_rules, StableIdService.new())
+	var study: ActionDefinitionData = _map.data_set.actions.get(
+		"action:study_skill"
+	) as ActionDefinitionData
+	var work: ActionDefinitionData = _map.data_set.actions.get(
+		"action:perform_work"
+	) as ActionDefinitionData
+	var countries: Array[String] = [
+		"country:loran_federation", "country:vesta_union",
+	]
+	var study_reachable: int = 0
+	var work_base_near_line: int = 0
+	var work_reachable: int = 0
+	var work_skill_matched: int = 0
+	var worst_study: float = INF
+	var worst_work: float = INF
+	for seed_value: int in range(1, 201):
+		var generator := CharacterGenerator.new(
+			_map.data_set,
+			config,
+			DeterministicRandomService.new(seed_value),
+			StableIdService.new()
+		)
+		var generated: CharacterGenerationResult = generator.generate_character(
+			countries[(seed_value - 1) % countries.size()],
+			CharacterGenerator.MODE_STANDARD
+		)
+		if not generated.is_success():
+			continue
+		var character: CharacterData = generated.character
+		var weakest_skill_id: String = config.skill_keys[0]
+		for skill_id: String in config.skill_keys:
+			if int(character.skills[skill_id]) < int(character.skills[weakest_skill_id]):
+				weakest_skill_id = skill_id
+		var study_context: Dictionary = context_service.build_context(
+			study, character, "control:r0_c0", 20, weakest_skill_id
+		)
+		var study_effective: float = evaluator.calculate_effective_value(
+			study, character, study_context
+		)
+		worst_study = minf(worst_study, study_effective)
+		if study_effective >= study.success_threshold:
+			study_reachable += 1
+		var base_work_context: Dictionary = context_service.build_context(
+			work, character, "control:r0_c0", 0
+		)
+		var full_work_context: Dictionary = context_service.build_context(
+			work, character, "control:r0_c0", 20
+		)
+		var base_work_effective: float = evaluator.calculate_effective_value(
+			work, character, base_work_context
+		)
+		var full_work_effective: float = evaluator.calculate_effective_value(
+			work, character, full_work_context
+		)
+		worst_work = minf(worst_work, full_work_effective)
+		if base_work_effective >= work.success_threshold - 10.0:
+			work_base_near_line += 1
+		if full_work_effective >= work.success_threshold:
+			work_reachable += 1
+		var expected_work_skill: String = str(
+			(_rules.player_context_rules["work_skill_by_occupation"] as Dictionary).get(
+				character.occupation_id, ""
+			)
+		)
+		if str(full_work_context.get("work_skill_id", "")) == expected_work_skill:
+			work_skill_matched += 1
+	_expect(study_reachable == 200, "200 个常规开局的最低能力满额学习均达到成功线（最差 %.2f）" % worst_study)
+	_expect(work_base_near_line == 200, "200 个常规开局的本职工作基础条件均不低于成功线 10 点")
+	_expect(work_reachable == 200, "200 个常规开局的本职工作满额投入均达到成功线（最差 %.2f）" % worst_work)
+	_expect(work_skill_matched == 200, "本职工作对 200 个常规开局均读取职业匹配主能力")
 
 
 func _test_selectable_skill_growth() -> void:

@@ -503,7 +503,14 @@ func _refresh_action_description(definition: ActionDefinitionData) -> void:
 	if definition == null or generation_config == null:
 		action_description.text = "选择行动后查看用途和条件。"
 		return
-	var primary_label: String = generation_config.get_label("skills", definition.primary_skill)
+	var primary_skill_id: String = context_service.get_action_primary_skill_id(
+		definition,
+		GameSessionService.player_character,
+		_get_selected_study_skill_id()
+	)
+	var primary_label: String = generation_config.get_label(
+		"skills", primary_skill_id
+	)
 	var permission: String = (
 		"无需职位权限"
 		if definition.position_permission_required.is_empty()
@@ -559,22 +566,38 @@ func _refresh_forecast(definition: ActionDefinitionData) -> void:
 	if context.is_empty():
 		context_label.text = "请完成技能与目标选择。"
 		return
-	var primary_skill_id: String = _get_selected_study_skill_id() if definition.category == "study_skill" else definition.primary_skill
+	var primary_skill_id: String = context_service.get_action_primary_skill_id(
+		definition,
+		GameSessionService.player_character,
+		_get_selected_study_skill_id()
+	)
 	var ability: int = int(GameSessionService.player_character.skills.get(primary_skill_id, 0))
 	var effective: float = action_service.calculate_effective_value(definition, GameSessionService.player_character, context)
 	var efficiency: float = action_service.calculate_efficiency(definition, effective)
 	var hours: int = ceili(definition.total_work / maxf(efficiency, 0.01))
-	var outlook: String = rules.get_outlook(effective, definition.guaranteed_success_threshold)
-	context_label.text = "[b]能力[/b] %d · [b]准备[/b] %.0f · [b]资金[/b] %.0f\n[b]关系支持[/b] %.0f · [b]组织支持[/b] %.0f · [b]目标阻力[/b] %.0f\n预计耗时：约 %d 游戏小时 · 当前效率 %.2f 工作量/小时\n当前把握：[color=#9bd3a7]%s[/color]" % [
+	var outlook: String = rules.get_outlook(
+		effective,
+		definition.guaranteed_success_threshold,
+		definition.success_threshold
+	)
+	var success_gap: float = maxf(definition.success_threshold - effective, 0.0)
+	var guarantee_gap: float = maxf(
+		definition.guaranteed_success_threshold - effective, 0.0
+	)
+	context_label.text = "[b]能力[/b] %d　[b]准备[/b] %.0f　[b]资金支持[/b] %.0f\n[b]关系支持[/b] %.0f　[b]组织支持[/b] %.0f　[b]目标阻力[/b] %.0f\n────────────\n[b]当前有效值[/b] %.0f　[b]成功线[/b] %.0f　[b]保证线[/b] %.0f\n当前把握：[color=#9bd3a7]%s[/color]\n距成功线：%.0f　距保证线：%.0f\n预计用时：约 %d 小时" % [
 		ability,
 		float(context.get("preparation", 0.0)),
 		float(context.get("funding", 0.0)),
 		float(context.get("relationship_support", 0.0)),
 		float(context.get("organization_support", 0.0)),
 		float(context.get("target_resistance", 0.0)),
-		hours,
-		efficiency,
+		effective,
+		definition.success_threshold,
+		definition.guaranteed_success_threshold,
 		outlook,
+		success_gap,
+		guarantee_gap,
+		hours,
 	]
 
 

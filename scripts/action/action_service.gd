@@ -33,6 +33,7 @@ func start_action(
 		result.add_error(validation_error)
 		return result
 	var study_skill_id: String = str(context.get("study_skill_id", ""))
+	var work_skill_id: String = str(context.get("work_skill_id", ""))
 	if definition.category == "study_skill":
 		if study_skill_id.is_empty():
 			study_skill_id = definition.primary_skill
@@ -42,6 +43,18 @@ func start_action(
 			return result
 	elif not study_skill_id.is_empty():
 		result.add_error("非学习行动不能携带学习技能目标")
+		return result
+	if definition.category == "perform_work":
+		if work_skill_id.is_empty():
+			work_skill_id = definition.primary_skill
+			context["work_skill_id"] = work_skill_id
+		if not character.skills.has(work_skill_id):
+			result.add_error("本职工作能力映射无效")
+			return result
+	elif not work_skill_id.is_empty() or not is_zero_approx(
+		float(context.get("occupation_match_bonus", 0.0))
+	):
+		result.add_error("非工作行动不能携带职业匹配上下文")
 		return result
 	var permissions: Array[String] = DataRecordUtils.to_string_array(
 		context["position_permissions"]
@@ -164,6 +177,17 @@ func update_context(
 		if not character.skills.has(study_skill_id):
 			return false
 	elif not study_skill_id.is_empty():
+		return false
+	var work_skill_id: String = str(merged.get("work_skill_id", ""))
+	if definition.category == "perform_work":
+		if work_skill_id.is_empty():
+			work_skill_id = definition.primary_skill
+			merged["work_skill_id"] = work_skill_id
+		if not character.skills.has(work_skill_id):
+			return false
+	elif not work_skill_id.is_empty() or not is_zero_approx(
+		float(merged.get("occupation_match_bonus", 0.0))
+	):
 		return false
 	var settle_previous_interval: bool = (
 		bool(merged.get("settle_previous_interval", false))
@@ -303,6 +327,7 @@ func calculate_effective_value(
 		+ float(context.get("relationship_support", 0.0)) * definition.relationship_support_weight
 		+ float(context.get("funding", 0.0)) * definition.funding_weight
 		+ float(context.get("preparation", 0.0)) * definition.preparation_weight
+		+ float(context.get("occupation_match_bonus", 0.0))
 		+ aptitude_adjustment
 		+ state_adjustment
 		+ mastery_bonus
@@ -386,7 +411,9 @@ func _recalculate_metrics(
 ) -> void:
 	action.effective_value = calculate_effective_value(definition, character, action.context)
 	action.outlook = rules.get_outlook(
-		action.effective_value, definition.guaranteed_success_threshold
+		action.effective_value,
+		definition.guaranteed_success_threshold,
+		definition.success_threshold
 	)
 	action.current_efficiency = calculate_efficiency(definition, action.effective_value)
 	_update_estimate(action, action.last_update_hour)
@@ -516,6 +543,10 @@ func _get_effective_primary_skill_id(
 		var selected: String = str(context.get("study_skill_id", ""))
 		if not selected.is_empty():
 			return selected
+	if definition.category == "perform_work":
+		var work_skill_id: String = str(context.get("work_skill_id", ""))
+		if not work_skill_id.is_empty():
+			return work_skill_id
 	return definition.primary_skill
 
 
@@ -529,6 +560,10 @@ static func _normalized_context(input_context: Dictionary) -> Dictionary:
 	return {
 		"target_id": str(input_context.get("target_id", "")),
 		"study_skill_id": str(input_context.get("study_skill_id", "")),
+		"work_skill_id": str(input_context.get("work_skill_id", "")),
+		"occupation_match_bonus": float(
+			input_context.get("occupation_match_bonus", 0.0)
+		),
 		"position_permissions": DataRecordUtils.to_string_array(
 			input_context.get("position_permissions", [])
 		),
@@ -550,6 +585,11 @@ static func _validate_context(context: Dictionary) -> String:
 		var value: float = float(context[key])
 		if value < 0.0 or value > 100.0:
 			return "%s 必须位于 0 至 100" % key
+	var occupation_match_bonus: float = float(
+		context.get("occupation_match_bonus", 0.0)
+	)
+	if occupation_match_bonus < 0.0 or occupation_match_bonus > 100.0:
+		return "职业匹配加成必须位于 0 至 100"
 	if typeof(context.get("boundary_invalid_reason", "")) != TYPE_STRING:
 		return "行动边界失效原因必须为字符串"
 	if typeof(context.get("settle_previous_interval", false)) != TYPE_BOOL:

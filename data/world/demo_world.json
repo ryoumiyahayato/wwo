@@ -2234,8 +2234,8 @@
       "aptitude_modifier_weight": 0.10, "position_permission_required": "",
       "organization_support_weight": 0.08, "relationship_support_weight": 0.10,
       "funding_weight": 0.12, "preparation_weight": 0.25, "state_modifier_weight": 0.35,
-      "base_target_resistance": 12, "interruption_conditions": ["detained", "incapacitated"],
-      "success_threshold": 45, "guaranteed_success_threshold": 100,
+      "base_target_resistance": 8, "interruption_conditions": ["detained", "incapacitated"],
+      "success_threshold": 15, "guaranteed_success_threshold": 60,
       "success_result": {"description": "系统学习取得成果，主要技能提高。", "skill_delta": 4, "fatigue_delta": 6},
       "failure_result": {"description": "学习未达目标，但积累了少量经验。", "skill_delta": 1, "fatigue_delta": 8}
     },

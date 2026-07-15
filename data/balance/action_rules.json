@@ -33,6 +33,19 @@
     "funding_value_per_wealth": 5.0,
     "maximum_extra_funding": 20,
     "preparation_value_per_extra_wealth": 3.0,
+    "work_occupation_bonus": 20.0,
+    "work_skill_by_occupation": {
+      "civil_servant": "administration",
+      "junior_officer": "military_command",
+      "teacher": "public_speaking",
+      "journalist": "investigation",
+      "small_merchant": "finance",
+      "skilled_worker": "engineering",
+      "union_member": "social_organization",
+      "farmer": "engineering",
+      "laborer": "engineering",
+      "unemployed": "personal_combat"
+    },
     "funding_cost_by_category": {
       "study_skill": 2,
       "perform_work": 0,
@@ -54,11 +67,11 @@
     "control_enemy_pressure_resistance_scale": 20.0
   },
   "outlook_bands": [
-    {"maximum": 0.0, "label": "几乎不可能"},
-    {"maximum": 25.0, "label": "风险很高"},
-    {"maximum": 50.0, "label": "结果难料"},
-    {"maximum": 75.0, "label": "有一定把握"},
-    {"maximum": 1000000.0, "label": "很有把握"}
+    {"maximum": 0.0, "label": "远未达到成功线"},
+    {"maximum": 25.0, "label": "尚未达到成功线"},
+    {"maximum": 50.0, "label": "接近成功线"},
+    {"maximum": 75.0, "label": "达到成功线"},
+    {"maximum": 1000000.0, "label": "稳定达到成功线"}
   ],
   "guaranteed_label": "条件充分，必然成功",
   "aptitude_by_skill": {

@@ -120,12 +120,38 @@ func load_from_file(path: String = DEFAULT_PATH) -> Error:
 	if int(player_context_rules.get("maximum_extra_funding", -1)) < 0:
 		error_message = "玩家额外投入上限无效"
 		return ERR_INVALID_DATA
+	if float(player_context_rules.get("work_occupation_bonus", -1.0)) < 0.0:
+		error_message = "本职工作匹配加成无效"
+		return ERR_INVALID_DATA
+	var work_skills: Variant = player_context_rules.get(
+		"work_skill_by_occupation", {}
+	)
+	if not work_skills is Dictionary or (work_skills as Dictionary).is_empty():
+		error_message = "职业与本职工作能力映射无效"
+		return ERR_INVALID_DATA
+	for raw_occupation_id: Variant in work_skills:
+		if (
+			str(raw_occupation_id).is_empty()
+			or not aptitude_by_skill.has(str((work_skills as Dictionary)[raw_occupation_id]))
+		):
+			error_message = "职业工作能力映射包含未知能力"
+			return ERR_INVALID_DATA
 	return OK
 
 
-func get_outlook(effective_value: float, guaranteed_threshold: float) -> String:
+func get_outlook(
+	effective_value: float,
+	guaranteed_threshold: float,
+	success_threshold: float = -1.0
+) -> String:
 	if effective_value >= guaranteed_threshold:
 		return guaranteed_label
+	if success_threshold >= 0.0:
+		if effective_value >= success_threshold:
+			return "已达成功线，确定成功"
+		if success_threshold - effective_value <= 10.0:
+			return "接近成功线，当前条件会失败"
+		return "未达成功线，当前条件会失败"
 	for band: Dictionary in outlook_bands:
 		if effective_value < float(band["maximum"]):
 			return str(band["label"])

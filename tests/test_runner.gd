@@ -1051,14 +1051,14 @@ func _test_m5_thresholds_and_result_application() -> void:
 	failure_service.update_to_hour(failure, definition, failure_character, 2000)
 	_expect_equal(int(failure_character.skills[definition.primary_skill]), once_skill, "完成结果不会重复应用")
 
-	var success_character: CharacterData = _make_action_character(80, 541)
+	var success_character: CharacterData = _make_action_character(30, 541)
 	var success_service: ActionService = _make_action_service()
 	var success_context: Dictionary = _action_context(definition, 0.0)
 	success_context["preparation"] = 100.0
 	var success: ActionInstanceData = success_service.start_action(definition, success_character, 0, success_context).action
 	success_service.update_to_hour(success, definition, success_character, 1000)
 	_expect_equal(success.outcome_code, "success", "达到普通阈值但未达必然阈值时成功")
-	_expect_equal(int(success_character.skills[definition.primary_skill]), 84, "成功结果提高主要技能")
+	_expect_equal(int(success_character.skills[definition.primary_skill]), 34, "成功结果提高主要技能")
 
 	var guaranteed_character: CharacterData = _make_action_character(100, 542)
 	var guaranteed_service: ActionService = _make_action_service()

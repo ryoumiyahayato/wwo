@@ -40,9 +40,16 @@ func build_context(
 	var applied_extra: int = clampi(extra_funding, 0, get_max_extra_funding())
 	var total_cost: int = get_funding_cost(definition, applied_extra)
 	var running_npc: bool = _is_running_npc_action(character.id)
+	var work_skill_id: String = _get_work_skill_id(definition, character)
 	return {
 		"target_id": resolved_target_id,
 		"study_skill_id": resolved_study_skill,
+		"work_skill_id": work_skill_id,
+		"occupation_match_bonus": (
+			float(rules.player_context_rules.get("work_occupation_bonus", 0.0))
+			if not work_skill_id.is_empty()
+			else 0.0
+		),
 		"position_permissions": _get_permissions(character.id),
 		"organization_support": _organization_support(
 			definition, character, resolved_target_id
@@ -55,7 +62,11 @@ func build_context(
 			100.0
 		),
 		"preparation": _preparation(
-			definition, character, applied_extra, resolved_study_skill
+			definition,
+			character,
+			applied_extra,
+			resolved_study_skill,
+			work_skill_id
 		),
 		"target_resistance": _target_resistance(resolved_target_id),
 		"boundary_invalid_reason": _get_strict_target_validation_error(
@@ -403,13 +414,18 @@ func _preparation(
 	definition: ActionDefinitionData,
 	character: CharacterData,
 	extra_funding: int,
-	study_skill_id: String = ""
+	study_skill_id: String = "",
+	work_skill_id: String = ""
 ) -> float:
 	var config: Dictionary = rules.player_context_rules
 	var preparation_skill_id: String = (
 		study_skill_id
 		if definition.category == "study_skill" and not study_skill_id.is_empty()
-		else definition.primary_skill
+		else (
+			work_skill_id
+			if definition.category == "perform_work" and not work_skill_id.is_empty()
+			else definition.primary_skill
+		)
 	)
 	return clampf(
 		float(config.get("base_preparation", 0.0))
@@ -422,6 +438,31 @@ func _preparation(
 		0.0,
 		100.0
 	)
+
+
+func get_action_primary_skill_id(
+	definition: ActionDefinitionData,
+	character: CharacterData,
+	study_skill_id: String = ""
+) -> String:
+	if definition == null or character == null:
+		return ""
+	if definition.category == "study_skill":
+		return _resolve_study_skill_id(definition, character, study_skill_id)
+	var work_skill_id: String = _get_work_skill_id(definition, character)
+	return work_skill_id if not work_skill_id.is_empty() else definition.primary_skill
+
+
+func _get_work_skill_id(
+	definition: ActionDefinitionData, character: CharacterData
+) -> String:
+	if definition.category != "perform_work":
+		return ""
+	var mapping: Dictionary = rules.player_context_rules.get(
+		"work_skill_by_occupation", {}
+	) as Dictionary
+	var skill_id: String = str(mapping.get(character.occupation_id, ""))
+	return skill_id if character.skills.has(skill_id) else definition.primary_skill
 
 
 func _resolve_study_skill_id(

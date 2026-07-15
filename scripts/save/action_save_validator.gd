@@ -82,6 +82,14 @@ func _validate_context(context: Dictionary, action: ActionInstanceData) -> Strin
 		return "当前行动目标与上下文不一致"
 	if context.has("study_skill_id") and typeof(context["study_skill_id"]) != TYPE_STRING:
 		return "当前行动学习技能字段类型无效"
+	if context.has("work_skill_id") and typeof(context["work_skill_id"]) != TYPE_STRING:
+		return "当前行动本职工作技能字段类型无效"
+	if context.has("occupation_match_bonus"):
+		if typeof(context["occupation_match_bonus"]) not in [TYPE_INT, TYPE_FLOAT]:
+			return "当前行动职业匹配加成字段类型无效"
+		var occupation_bonus: float = float(context["occupation_match_bonus"])
+		if occupation_bonus < 0.0 or occupation_bonus > 100.0:
+			return "当前行动职业匹配加成超出范围"
 	if typeof(context.get("boundary_invalid_reason", "")) != TYPE_STRING:
 		return "当前行动边界失效原因字段类型无效"
 	if typeof(context.get("settle_previous_interval", false)) != TYPE_BOOL:
@@ -189,6 +197,14 @@ func _validate_target(
 			return "当前学习行动的技能目标无效"
 	elif not study_skill_id.is_empty():
 		return "非学习行动包含异常技能目标"
+	var work_skill_id: String = str(action.context.get("work_skill_id", ""))
+	if definition.category == "perform_work":
+		if not work_skill_id.is_empty() and not actor.skills.has(work_skill_id):
+			return "当前本职工作能力映射无效"
+	elif not work_skill_id.is_empty() or not is_zero_approx(
+		float(action.context.get("occupation_match_bonus", 0.0))
+	):
+		return "非工作行动包含异常职业匹配上下文"
 	if definition.category in ["build_relationship", "investigate_character"]:
 		if not society.roster.is_living(action.target_id) or action.target_id == action.actor_character_id:
 			return "当前行动人物目标无效"
@@ -242,6 +258,15 @@ func _validate_authoritative_context(
 	)
 	if stored_study_skill != str(expected.get("study_skill_id", "")):
 		return "当前行动学习技能与权威人物状态不一致"
+	if action.context.has("work_skill_id") and str(
+		action.context.get("work_skill_id", "")
+	) != str(expected.get("work_skill_id", "")):
+		return "当前行动本职工作技能与权威职业不一致"
+	if action.context.has("occupation_match_bonus") and not is_equal_approx(
+		float(action.context.get("occupation_match_bonus", -1.0)),
+		float(expected.get("occupation_match_bonus", -2.0))
+	):
+		return "当前行动职业匹配加成与权威职业不一致"
 	for field: String in NUMERIC_CONTEXT_FIELDS:
 		if not is_equal_approx(
 			float(action.context.get(field, -1.0)),
@@ -268,7 +293,11 @@ func _validate_formula(
 	if rules.load_from_file() != OK:
 		return "无法验证当前行动公式：%s" % rules.error_message
 	var evaluator := ActionService.new(rules, StableIdService.new())
-	if action.outlook != rules.get_outlook(action.effective_value, definition.guaranteed_success_threshold):
+	if action.outlook != rules.get_outlook(
+		action.effective_value,
+		definition.guaranteed_success_threshold,
+		definition.success_threshold
+	):
 		return "当前行动定性把握与有效值不一致"
 	if not is_equal_approx(action.current_efficiency, evaluator.calculate_efficiency(definition, action.effective_value)):
 		return "当前行动效率与有效值不一致"
