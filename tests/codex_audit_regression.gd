@@ -59,6 +59,7 @@ func _run() -> void:
 	_test_non_map_context_isolation()
 	_test_peace_war_and_border_state()
 	await _test_world_activity_notifications()
+	_test_character_development_guidance()
 	_test_standard_study_and_work_reachability()
 	_test_standard_relationship_reachability()
 	_test_selectable_skill_growth()
@@ -375,6 +376,49 @@ func _test_world_activity_notifications() -> void:
 			and not event.has("population_category"),
 			"正式世界动态不暴露内部字段：%s" % str(event.get("id", ""))
 		)
+
+
+func _test_character_development_guidance() -> void:
+	var panel: CharacterProfilePanel = _view.find_child(
+		"CharacterProfilePanel", true, false
+	) as CharacterProfilePanel
+	var player: CharacterData = GameSessionService.player_character
+	_expect(panel != null, "人物抽屉提供当前发展卡片")
+	if panel == null:
+		return
+	panel.refresh_view()
+	var suggestions: Array[String] = panel.get_development_suggestions(player)
+	_expect(
+		suggestions.size() >= 2 and suggestions.size() <= 4,
+		"人物当前发展卡片只显示 2～4 条实时建议"
+	)
+	var guidance_text: String = "\n".join(suggestions)
+	var relationship_target: Dictionary = panel._best_relationship_target(player)
+	var organization_target: Dictionary = panel._best_organization_target(player)
+	_expect(
+		not relationship_target.is_empty()
+		and guidance_text.contains(str(relationship_target["name"])),
+		"当前发展指出按实际把握计算的最容易人物目标"
+	)
+	_expect(
+		not organization_target.is_empty()
+		and guidance_text.contains(str(organization_target["name"])),
+		"当前发展指出按实际把握计算且有入口空位的匹配组织"
+	)
+	_expect(
+		guidance_text.contains("推荐能力")
+		and not guidance_text.contains("将在")
+		and not guidance_text.contains("教程"),
+		"当前发展给出紧凑能力建议且不显示占位文字或长教程"
+	)
+	var previous_action: ActionInstanceData = GameSessionService.current_action
+	var blocking_action := ActionInstanceData.new()
+	blocking_action.id = "action_instance:guidance_probe"
+	blocking_action.status = ActionInstanceData.STATUS_ACTIVE
+	GameSessionService.current_action = blocking_action
+	var blocked_text: String = "\n".join(panel.get_development_suggestions(player))
+	GameSessionService.current_action = previous_action
+	_expect(blocked_text.contains("当前阻挡：已有进行中行动"), "当前发展明确指出进行中行动阻挡")
 
 
 func _test_standard_study_and_work_reachability() -> void:

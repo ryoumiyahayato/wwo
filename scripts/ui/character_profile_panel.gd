@@ -22,6 +22,9 @@ const OTHER_SKILLS: Array[String] = [
 
 var _config: CharacterGenerationConfig
 var _society: SocietySimulationService
+var _action_rules: ActionRulesConfig
+var _context_service: PlayerActionContextService
+var _evaluator: ActionService
 
 
 func _ready() -> void:
@@ -31,6 +34,12 @@ func _ready() -> void:
 
 func setup(simulation: SocietySimulationService) -> bool:
 	_society = simulation
+	_action_rules = ActionRulesConfig.new()
+	if _action_rules.load_from_file() == OK and _society != null:
+		_context_service = PlayerActionContextService.new(
+			_action_rules, _society, GameSessionService.world_map_service
+		)
+		_evaluator = ActionService.new(_action_rules, StableIdService.new())
 	refresh_view()
 	return _config != null and _config.is_valid() and GameSessionService.has_player()
 
@@ -54,7 +63,150 @@ func refresh_view() -> void:
 	_render_skill_group(other_skills, "军事、技术与调查", OTHER_SKILLS, character)
 	_render_organizations(character)
 	_render_relationships(character)
-	development_label.text = "发展建议将在社会目标评估完成后显示。"
+	development_label.text = "\n".join(get_development_suggestions(character))
+
+
+func get_development_suggestions(character: CharacterData) -> Array[String]:
+	var suggestions: Array[String] = []
+	if (
+		character == null
+		or _society == null
+		or _context_service == null
+		or _evaluator == null
+	):
+		return ["当前发展状态尚未就绪。", "请返回地图后重新打开人物页。"]
+	var current_action: ActionInstanceData = GameSessionService.current_action
+	if current_action != null and current_action.status in [
+		ActionInstanceData.STATUS_ACTIVE, ActionInstanceData.STATUS_PAUSED,
+	]:
+		suggestions.append("• 当前阻挡：已有进行中行动，需先完成或结束该行动。")
+	elif bool(character.current_status.get("detained", false)):
+		suggestions.append("• 当前阻挡：人物正被拘押，长期行动暂不可用。")
+	elif character.organization_ids.is_empty():
+		suggestions.append("• 当前缺口：尚未加入正式组织，可先经营关系并申请入口职位。")
+	elif _society.relationships.get_for_character(character.id).is_empty():
+		suggestions.append("• 当前缺口：尚未建立社会关系。")
+	else:
+		suggestions.append("• 当前基础：已有关系和组织路径，可继续积累职位条件。")
+
+	var relationship_target: Dictionary = _best_relationship_target(character)
+	if not relationship_target.is_empty():
+		suggestions.append("• 最容易接触：%s（%s · %s，%s）" % [
+			str(relationship_target["name"]),
+			str(relationship_target["occupation"]),
+			str(relationship_target["region"]),
+			str(relationship_target["outlook"]),
+		])
+
+	var organization_target: Dictionary = _best_organization_target(character)
+	if not organization_target.is_empty():
+		suggestions.append("• 最匹配组织：%s（%s，%s）" % [
+			str(organization_target["name"]),
+			str(organization_target["region"]),
+			str(organization_target["outlook"]),
+		])
+
+	var recommended_skills: Array[String] = _recommended_skill_ids(character)
+	var skill_labels: Array[String] = []
+	for skill_id: String in recommended_skills:
+		skill_labels.append(_config.get_label("skills", skill_id))
+	suggestions.append("• 推荐能力：%s" % "、".join(skill_labels))
+	while suggestions.size() > 4:
+		suggestions.pop_back()
+	return suggestions
+
+
+func _best_relationship_target(character: CharacterData) -> Dictionary:
+	var map_service: MapControlService = GameSessionService.world_map_service
+	var definition: ActionDefinitionData = map_service.data_set.actions.get(
+		"action:build_relationship"
+	) as ActionDefinitionData
+	var best: Dictionary = {}
+	for target_id: String in _society.roster.get_living_ids(character.country_id):
+		if target_id == character.id or not _context_service.get_target_validation_error(
+			definition, character, target_id
+		).is_empty():
+			continue
+		var target: Variant = _society.roster.get_public_character(target_id)
+		if target == null:
+			continue
+		var context: Dictionary = _context_service.build_context(
+			definition, character, target_id, 0
+		)
+		var effective: float = _evaluator.calculate_effective_value(
+			definition, character, context
+		)
+		if best.is_empty() or effective > float(best["effective"]):
+			best = {
+				"id": target_id,
+				"name": str(target.name),
+				"occupation": str(target.occupation),
+				"region": _region_name(str(target.region_id)),
+				"effective": effective,
+				"outlook": _action_rules.get_outlook(
+					effective,
+					definition.guaranteed_success_threshold,
+					definition.success_threshold
+				),
+			}
+	return best
+
+
+func _best_organization_target(character: CharacterData) -> Dictionary:
+	var map_service: MapControlService = GameSessionService.world_map_service
+	var definition: ActionDefinitionData = map_service.data_set.actions.get(
+		"action:join_organization"
+	) as ActionDefinitionData
+	var best: Dictionary = {}
+	for organization_id: String in _society.organizations.get_organization_ids():
+		var organization: OrganizationData = _society.organizations.get_organization(
+			organization_id
+		)
+		if (
+			organization == null
+			or organization.member_ids.has(character.id)
+			or not _context_service.get_target_validation_error(
+				definition, character, organization_id
+			).is_empty()
+		):
+			continue
+		var context: Dictionary = _context_service.build_context(
+			definition, character, organization_id, 0
+		)
+		var effective: float = _evaluator.calculate_effective_value(
+			definition, character, context
+		)
+		if best.is_empty() or effective > float(best["effective"]):
+			best = {
+				"id": organization_id,
+				"name": organization.name,
+				"region": _region_name(organization.region_id),
+				"effective": effective,
+				"outlook": _action_rules.get_outlook(
+					effective,
+					definition.guaranteed_success_threshold,
+					definition.success_threshold
+				),
+			}
+	return best
+
+
+func _recommended_skill_ids(character: CharacterData) -> Array[String]:
+	var mapping: Dictionary = _action_rules.player_context_rules.get(
+		"work_skill_by_occupation", {}
+	) as Dictionary
+	var candidates: Array[String] = [
+		str(mapping.get(character.occupation_id, "social_organization")),
+		"public_speaking",
+		"social_organization",
+	]
+	var recommended: Array[String] = []
+	for skill_id: String in candidates:
+		if character.skills.has(skill_id) and not recommended.has(skill_id):
+			recommended.append(skill_id)
+		if recommended.size() >= 2:
+			break
+	return recommended
 
 
 func _render_status(character: CharacterData) -> void:
