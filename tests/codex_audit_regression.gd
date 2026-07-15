@@ -58,6 +58,7 @@ func _run() -> void:
 	await _test_drawer_navigation()
 	_test_non_map_context_isolation()
 	_test_standard_study_and_work_reachability()
+	_test_standard_relationship_reachability()
 	_test_selectable_skill_growth()
 	_test_practical_skill_growth()
 	_test_cross_seed_guaranteed_reachability()
@@ -287,6 +288,182 @@ func _test_standard_study_and_work_reachability() -> void:
 	_expect(work_base_near_line == 200, "200 个常规开局的本职工作基础条件均不低于成功线 10 点")
 	_expect(work_reachable == 200, "200 个常规开局的本职工作满额投入均达到成功线（最差 %.2f）" % worst_work)
 	_expect(work_skill_matched == 200, "本职工作对 200 个常规开局均读取职业匹配主能力")
+
+
+func _test_standard_relationship_reachability() -> void:
+	var config: CharacterGenerationConfig = CharacterGenerationConfig.load_from_file()
+	var evaluator := ActionService.new(_rules, StableIdService.new())
+	var definition: ActionDefinitionData = _map.data_set.actions.get(
+		"action:build_relationship"
+	) as ActionDefinitionData
+	var countries: Array[String] = [
+		"country:loran_federation", "country:vesta_union",
+	]
+	var anchors_present: int = 0
+	var base_reachable: int = 0
+	var full_guaranteed: int = 0
+	var worst_base: float = INF
+	var worst_full: float = INF
+	for seed_value: int in range(1, 201):
+		var generator := CharacterGenerator.new(
+			_map.data_set,
+			config,
+			DeterministicRandomService.new(seed_value),
+			StableIdService.new()
+		)
+		var generated: CharacterGenerationResult = generator.generate_character(
+			countries[(seed_value - 1) % countries.size()],
+			CharacterGenerator.MODE_STANDARD
+		)
+		if not generated.is_success():
+			continue
+		var character: CharacterData = generated.character
+		var society := SocietySimulationService.new()
+		if not society.initialize(character, _map.data_set):
+			continue
+		var anchors: Array[RelationshipData] = society.relationships.get_for_character(
+			character.id
+		)
+		if anchors.size() >= 1 and anchors.size() <= 2:
+			anchors_present += 1
+		var context_service := PlayerActionContextService.new(
+			_rules, society, _map
+		)
+		var affordable_extra: int = mini(
+			context_service.get_max_extra_funding(),
+			maxi(
+				int(character.current_status.get("wealth", 0))
+				- context_service.get_base_funding_cost(definition),
+				0
+			)
+		)
+		var best_base: float = -INF
+		var best_full: float = -INF
+		for target_character_id: String in society.roster.get_living_ids(
+			character.country_id
+		):
+			if target_character_id == character.id:
+				continue
+			if not context_service.get_target_validation_error(
+				definition, character, target_character_id
+			).is_empty():
+				continue
+			var base_context: Dictionary = context_service.build_context(
+				definition, character, target_character_id, 0
+			)
+			var full_context: Dictionary = context_service.build_context(
+				definition, character, target_character_id, affordable_extra
+			)
+			best_base = maxf(
+				best_base,
+				evaluator.calculate_effective_value(
+					definition, character, base_context
+				)
+			)
+			best_full = maxf(
+				best_full,
+				evaluator.calculate_effective_value(
+					definition, character, full_context
+				)
+			)
+		worst_base = minf(worst_base, best_base)
+		worst_full = minf(worst_full, best_full)
+		if best_base >= definition.success_threshold:
+			base_reachable += 1
+		if best_full >= definition.guaranteed_success_threshold:
+			full_guaranteed += 1
+	_expect(anchors_present == 200, "200 个常规开局均生成 1～2 条真实弱关系")
+	_expect(base_reachable == 200, "200 个常规开局均有基础条件达到成功线的关系目标（最差 %.2f）" % worst_base)
+	_expect(full_guaranteed == 200, "200 个常规开局均有实际财富满额投入达到保证线的关系目标（最差 %.2f）" % worst_full)
+
+	var panel: ActionPanel = _view.find_child("ActionPanel", true, false) as ActionPanel
+	_expect(
+		panel != null and panel.prefill_action(definition.id),
+		"正式行动面板可打开建立关系配置"
+	)
+	if panel != null:
+		var sorted: bool = panel.target_option.item_count > 0
+		var last_effective: float = INF
+		for index: int in range(panel.target_option.item_count):
+			var candidate_id: String = str(panel.target_option.get_item_metadata(index))
+			var context: Dictionary = panel.context_service.build_context(
+				definition,
+				GameSessionService.player_character,
+				candidate_id,
+				0
+			)
+			var effective: float = panel.action_service.calculate_effective_value(
+				definition, GameSessionService.player_character, context
+			)
+			if effective > last_effective + 0.0001:
+				sorted = false
+			last_effective = effective
+		_expect(sorted, "人物目标按当前实际有效值从高到低排序")
+		_expect(
+			panel.target_option.item_count > 0
+			and panel.target_id
+			== str(panel.target_option.get_item_metadata(0)),
+			"建立关系默认选择最容易接触的人物"
+		)
+
+	var player: CharacterData = GameSessionService.player_character
+	var player_relationships: Array[RelationshipData] = (
+		_society.relationships.get_for_character(player.id)
+	)
+	_expect(not player_relationships.is_empty(), "当前玩家开局具有可深化的弱关系")
+	if player_relationships.is_empty():
+		return
+	var anchor: RelationshipData = player_relationships[0]
+	var target_id: String = (
+		anchor.character_b_id
+		if anchor.character_a_id == player.id
+		else anchor.character_a_id
+	)
+	var familiarity_before: float = anchor.familiarity
+	for action_index: int in range(2):
+		var relationship_action := ActionInstanceData.new()
+		relationship_action.id = "action_instance:relationship_%d" % action_index
+		relationship_action.definition_id = definition.id
+		relationship_action.actor_character_id = player.id
+		relationship_action.target_id = target_id
+		relationship_action.status = ActionInstanceData.STATUS_COMPLETED
+		relationship_action.completion_hour = 100 + action_index
+		relationship_action.outcome_code = "success"
+		_society.apply_action_domain_effect(
+			relationship_action, definition, _map
+		)
+	_expect(
+		anchor.familiarity >= familiarity_before + 0.159,
+		"重复成功接触会加深同一条既有关系"
+	)
+	var total_familiarity_before: float = 0.0
+	for relationship: RelationshipData in _society.relationships.get_for_character(
+		player.id
+	):
+		total_familiarity_before += relationship.familiarity
+	var work_definition: ActionDefinitionData = _map.data_set.actions.get(
+		"action:perform_work"
+	) as ActionDefinitionData
+	var work_action := ActionInstanceData.new()
+	work_action.id = "action_instance:work_contact"
+	work_action.definition_id = work_definition.id
+	work_action.actor_character_id = player.id
+	work_action.status = ActionInstanceData.STATUS_COMPLETED
+	work_action.completion_hour = 200
+	work_action.outcome_code = "success"
+	_expect(
+		_society.apply_action_domain_effect(work_action, work_definition, _map),
+		"完成本职工作会产生同事关系机会"
+	)
+	var total_familiarity_after: float = 0.0
+	for relationship: RelationshipData in _society.relationships.get_for_character(
+		player.id
+	):
+		total_familiarity_after += relationship.familiarity
+	_expect(
+		total_familiarity_after > total_familiarity_before,
+		"工作机会会新建或深化一条同事关系"
+	)
 
 
 func _test_selectable_skill_growth() -> void:

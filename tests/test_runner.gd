@@ -1214,14 +1214,22 @@ func _test_m6_membership_positions_and_permissions() -> void:
 func _test_m6_sparse_relationships() -> void:
 	var player_id: String = _society.roster.player_character_id
 	var background_ids: Array[String] = _society.roster.get_background_ids()
-	var target_id: String = background_ids[0]
-	_expect_equal(_society.relationships.size(), 0, "人物名册不会预建两两关系矩阵")
+	var target_id: String = ""
+	for candidate_id: String in background_ids:
+		if _society.relationships.get_between(player_id, candidate_id) == null:
+			target_id = candidate_id
+			break
+	var initial_count: int = _society.relationships.size()
+	_expect_true(
+		initial_count >= 1 and initial_count <= 2,
+		"人物名册只预建 1～2 条开局弱关系而非两两关系矩阵"
+	)
 	_expect_true(_society.relationships.create_or_update(player_id, player_id, 0) == null, "关系服务拒绝人物与自身建立关系")
 	var relationship: RelationshipData = _society.relationships.create_or_update(
 		player_id, target_id, 10, {"familiarity": 0.2, "trust": 0.1}, "cooperation"
 	)
 	_expect_true(relationship != null, "实际接触时按需创建关系")
-	_expect_equal(_society.relationships.size(), 1, "一次实际接触只创建一个关系记录")
+	_expect_equal(_society.relationships.size(), initial_count + 1, "一次新人物接触只增加一个关系记录")
 	var same: RelationshipData = _society.relationships.create_or_update(
 		target_id, player_id, 20, {"trust": 0.2}, "cooperation"
 	)
@@ -1229,7 +1237,7 @@ func _test_m6_sparse_relationships() -> void:
 	_expect_approx(same.trust, 0.3, 0.000001, "已有关系按增量更新信任")
 	_expect_equal(same.last_interaction_hour, 20, "关系记录最后重要互动小时")
 	_expect_true(_society.relationships.get_between(background_ids[1], background_ids[2]) == null, "未接触人物对保持无关系记录")
-	_expect_equal(_society.relationships.get_for_character(player_id).size(), 1, "人物关系索引只返回实际联系")
+	_expect_equal(_society.relationships.get_for_character(player_id).size(), initial_count + 1, "人物关系索引只返回开局锚点与实际联系")
 	_expect_true(_society.roster.get_active(player_id).relationship_ids.has(relationship.id), "活跃人物记录同步稳定关系 ID")
 	_expect_true(_society.roster.get_background(target_id).relationship_ids.has(relationship.id), "背景人物轻量记录同步关系 ID")
 
@@ -1332,7 +1340,7 @@ func _test_m6_social_panel_scene() -> void:
 	_expect_true(ai_label.text.contains("活跃 AI 调试") and ai_label.text.contains("行动进度"), "隔离的 AI 调试区显示目标与行动进度")
 	var relationship_button: Button = panel.find_child("DevRelationshipButton", true, false) as Button
 	relationship_button.pressed.emit()
-	_expect_equal(GameSessionService.society_service.relationships.size(), 1, "开发者隔离区可显式创建调试关系")
+	_expect_true(GameSessionService.society_service.relationships.size() >= 2, "开发者隔离区可在开局弱关系基础上显式创建或深化调试关系")
 	view.queue_free()
 	GameSessionService.clear()
 
@@ -1351,7 +1359,11 @@ func _test_m6_society_performance_baseline() -> void:
 	for index: int in range(100):
 		society.create_player_relationship(relationship_targets[index], index * 24)
 	var simulation_usec: int = Time.get_ticks_usec() - started_at_usec
-	_expect_equal(society.relationships.size(), 100, "100 次实际接触只保存 100 条稀疏关系")
+	_expect_true(
+		society.relationships.size() >= 100
+		and society.relationships.size() <= 102,
+		"100 次实际接触连同至多 2 条开局锚点仍保持稀疏关系规模"
+	)
 	_expect_true(society.ai.states.size() <= 19, "30 日模拟始终只处理活跃 NPC")
 	_expect_true(initialization_usec < 250000, "120 人社会初始化低于 250 ms 预算")
 	print("[PERF] 初始化 120 人分层社会与 8 组织：%.3f ms" % (float(initialization_usec) / 1000.0))
@@ -1581,7 +1593,7 @@ func _test_m7_partial_succession_and_continuity() -> void:
 	_expect_true(int(successor.skills["administration"]) < 100, "继承者不复制前人物完整技能")
 	_expect_equal(result.inherited_position_count, 1, "高关系退休安排继承原职位")
 	_expect_equal(society.organizations.get_position_id(successor.id, organization_id), "regional_official", "继承职位保持组织槽位一致")
-	_expect_equal(result.inherited_relationship_count, 2, "盟友和敌对关系均可部分保留")
+	_expect_true(result.inherited_relationship_count >= 2, "盟友和敌对关系均可部分保留")
 	_expect_equal(result.inherited_enemy_count, 1, "敌对关系单独记录保留数量")
 	var inherited_ally: RelationshipData = society.relationships.get_between(successor.id, ally_id)
 	var inherited_enemy: RelationshipData = society.relationships.get_between(successor.id, enemy_id)
@@ -1723,6 +1735,7 @@ func _test_m8_save_load_roundtrip() -> void:
 	GameSessionService.settlement_log.add("test", "roundtrip", clock.total_hours)
 	GameSessionService.performance_stats.record("simulation_test", 1250)
 	var expected_wealth: int = int(player.current_status["wealth"])
+	var expected_relationship_count: int = society.relationships.size()
 	var service := GameSaveService.new()
 	var snapshot: Dictionary = service.build_snapshot(clock, map_service)
 	_expect_equal(int(snapshot["save_version"]), 1, "M8 存档版本固定为 1")
@@ -1749,7 +1762,7 @@ func _test_m8_save_load_roundtrip() -> void:
 	_expect_equal(GameSessionService.player_character.current_status["wealth"], expected_wealth, "M8 加载恢复玩家人物状态")
 	_expect_true(GameSessionService.developer_mode, "M8 加载恢复开发模式标记")
 	_expect_equal(GameSessionService.action_id_service.next_id("action_instance"), expected_next_action_id, "M8 加载后稳定行动 ID 连续")
-	_expect_equal(GameSessionService.society_service.relationships.size(), 1, "M8 加载恢复稀疏关系")
+	_expect_equal(GameSessionService.society_service.relationships.size(), expected_relationship_count, "M8 加载恢复全部稀疏关系")
 	_expect_equal(GameSessionService.society_service.roster.exited_characters.size(), 1, "M8 加载恢复退出人物历史")
 	_expect_true(GameSessionService.current_action != null, "M8 加载恢复进行中行动")
 	if GameSessionService.current_action != null:
@@ -1964,7 +1977,11 @@ func _test_m9_thirty_day_and_year_stability() -> void:
 	_expect_equal([clock.year, clock.month, clock.day, clock.hour], [1901, 1, 1, 0], "M9 一年自动模拟到达 1901 年元旦")
 	_expect_equal(clock.total_hours, 8760, "M9 一年自动模拟权威小时完整")
 	_expect_equal(society.ai.states.size(), society.roster.active_characters.size() - 1, "M9 一年模拟只为活跃 NPC 保持 AI")
-	_expect_equal(society.relationships.size(), 100, "M9 一年模拟保持按需稀疏关系规模")
+	_expect_true(
+		society.relationships.size() >= 100
+		and society.relationships.size() <= 150,
+		"M9 一年模拟包含工作同事机会但仍保持按需稀疏关系规模"
+	)
 	_expect_true(FileAccess.file_exists(autosave_path), "M9 一年模拟持续更新单一自动档")
 	var metrics: Dictionary = GameSessionService.performance_stats.get_snapshot()
 	_expect_equal(int((metrics["daily_ai"] as Dictionary)["count"]), 365, "M9 一年执行 365 次每日 AI 结算")

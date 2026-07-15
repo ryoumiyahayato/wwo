@@ -56,6 +56,11 @@ func start_action(
 	):
 		result.add_error("非工作行动不能携带职业匹配上下文")
 		return result
+	if definition.category not in ["build_relationship", "investigate_character"] and not is_zero_approx(
+		float(context.get("social_match_bonus", 0.0))
+	):
+		result.add_error("非人物接触行动不能携带社会匹配上下文")
+		return result
 	var permissions: Array[String] = DataRecordUtils.to_string_array(
 		context["position_permissions"]
 	)
@@ -187,6 +192,10 @@ func update_context(
 			return false
 	elif not work_skill_id.is_empty() or not is_zero_approx(
 		float(merged.get("occupation_match_bonus", 0.0))
+	):
+		return false
+	if definition.category not in ["build_relationship", "investigate_character"] and not is_zero_approx(
+		float(merged.get("social_match_bonus", 0.0))
 	):
 		return false
 	var settle_previous_interval: bool = (
@@ -328,6 +337,7 @@ func calculate_effective_value(
 		+ float(context.get("funding", 0.0)) * definition.funding_weight
 		+ float(context.get("preparation", 0.0)) * definition.preparation_weight
 		+ float(context.get("occupation_match_bonus", 0.0))
+		+ float(context.get("social_match_bonus", 0.0))
 		+ aptitude_adjustment
 		+ state_adjustment
 		+ mastery_bonus
@@ -564,6 +574,7 @@ static func _normalized_context(input_context: Dictionary) -> Dictionary:
 		"occupation_match_bonus": float(
 			input_context.get("occupation_match_bonus", 0.0)
 		),
+		"social_match_bonus": float(input_context.get("social_match_bonus", 0.0)),
 		"position_permissions": DataRecordUtils.to_string_array(
 			input_context.get("position_permissions", [])
 		),
@@ -590,6 +601,9 @@ static func _validate_context(context: Dictionary) -> String:
 	)
 	if occupation_match_bonus < 0.0 or occupation_match_bonus > 100.0:
 		return "职业匹配加成必须位于 0 至 100"
+	var social_match_bonus: float = float(context.get("social_match_bonus", 0.0))
+	if social_match_bonus < 0.0 or social_match_bonus > 100.0:
+		return "社会匹配加成必须位于 0 至 100"
 	if typeof(context.get("boundary_invalid_reason", "")) != TYPE_STRING:
 		return "行动边界失效原因必须为字符串"
 	if typeof(context.get("settle_previous_interval", false)) != TYPE_BOOL:

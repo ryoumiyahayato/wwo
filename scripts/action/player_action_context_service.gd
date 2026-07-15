@@ -41,6 +41,9 @@ func build_context(
 	var total_cost: int = get_funding_cost(definition, applied_extra)
 	var running_npc: bool = _is_running_npc_action(character.id)
 	var work_skill_id: String = _get_work_skill_id(definition, character)
+	var social_match_bonus: float = _social_match_bonus(
+		definition, character, resolved_target_id
+	)
 	return {
 		"target_id": resolved_target_id,
 		"study_skill_id": resolved_study_skill,
@@ -50,6 +53,7 @@ func build_context(
 			if not work_skill_id.is_empty()
 			else 0.0
 		),
+		"social_match_bonus": social_match_bonus,
 		"position_permissions": _get_permissions(character.id),
 		"organization_support": _organization_support(
 			definition, character, resolved_target_id
@@ -599,6 +603,44 @@ func _relationship_support(character_id: String, target_id: String) -> float:
 		0.0,
 		100.0
 	)
+
+
+func _social_match_bonus(
+	definition: ActionDefinitionData,
+	character: CharacterData,
+	target_id: String
+) -> float:
+	if definition.category not in ["build_relationship", "investigate_character"]:
+		return 0.0
+	if society == null or society.roster == null or target_id.is_empty():
+		return 0.0
+	var target: Variant = society.roster.get_public_character(target_id)
+	if not (target is CharacterData or target is BackgroundCharacterData):
+		return 0.0
+	var bonuses: Dictionary = rules.player_context_rules.get(
+		"social_match_bonus", {}
+	) as Dictionary
+	var value: float = 0.0
+	if str(target.country_id) == character.country_id:
+		value += float(bonuses.get("same_country", 0.0))
+	if str(target.region_id) == character.region_id:
+		value += float(bonuses.get("same_region", 0.0))
+	if str(target.occupation_id) == character.occupation_id:
+		value += float(bonuses.get("same_occupation", 0.0))
+	if society.relationships.get_between(character.id, target_id) != null:
+		value += float(bonuses.get("existing_relationship", 0.0))
+	if _characters_share_organization(character, target):
+		value += float(bonuses.get("shared_organization", 0.0))
+	return clampf(value, 0.0, 100.0)
+
+
+static func _characters_share_organization(
+	character: CharacterData, target: Variant
+) -> bool:
+	for organization_id: String in character.organization_ids:
+		if target.organization_ids.has(organization_id):
+			return true
+	return false
 
 
 func _target_resistance(target_id: String) -> float:

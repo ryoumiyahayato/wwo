@@ -46,6 +46,13 @@
       "laborer": "engineering",
       "unemployed": "personal_combat"
     },
+    "social_match_bonus": {
+      "same_country": 8.0,
+      "same_region": 35.0,
+      "same_occupation": 18.0,
+      "existing_relationship": 12.0,
+      "shared_organization": 18.0
+    },
     "funding_cost_by_category": {
       "study_skill": 2,
       "perform_work": 0,

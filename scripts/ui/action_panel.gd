@@ -99,7 +99,7 @@ func _ready() -> void:
 	action_list.item_selected.connect(_on_action_selected)
 	target_option.item_selected.connect(_on_target_selected)
 	study_skill_option.item_selected.connect(_on_study_skill_selected)
-	investment_spin.value_changed.connect(func(_value: float) -> void: _refresh())
+	investment_spin.value_changed.connect(_on_investment_changed)
 	begin_button.pressed.connect(_on_begin_pressed)
 	pause_button.pressed.connect(_on_pause_pressed)
 	cancel_button.pressed.connect(_on_cancel_pressed)
@@ -266,6 +266,7 @@ func _populate_targets(
 	definition: ActionDefinitionData, preferred_id: String = ""
 ) -> void:
 	var previous_id: String = preferred_id if not preferred_id.is_empty() else target_id
+	var candidates: Array[Dictionary] = []
 	target_option.clear()
 	target_id = ""
 	target_label.visible = true
@@ -280,23 +281,23 @@ func _populate_targets(
 			if society != null:
 				for character_id: String in society.roster.get_background_ids():
 					var background: BackgroundCharacterData = society.roster.get_background(character_id)
-					_add_eligible_target(definition, "%s · %s" % [background.name, background.occupation], character_id, previous_id)
+					_append_eligible_target(candidates, definition, "%s · %s" % [background.name, background.occupation], character_id)
 				for character_id: String in society.roster.get_active_ids(false):
 					var active: CharacterData = society.roster.get_active(character_id)
-					_add_eligible_target(definition, "%s · %s" % [active.name, active.occupation], character_id, previous_id)
+					_append_eligible_target(candidates, definition, "%s · %s" % [active.name, active.occupation], character_id)
 		"join_organization":
 			target_label.text = "目标组织"
 			if society != null:
 				for organization_id: String in society.organizations.get_organization_ids():
 					var organization: OrganizationData = society.organizations.get_organization(organization_id)
-					_add_eligible_target(definition, "%s · %s" % [organization.name, _organization_type_label(organization.type)], organization_id, previous_id)
+					_append_eligible_target(candidates, definition, "%s · %s" % [organization.name, _organization_type_label(organization.type)], organization_id)
 		"seek_position":
 			target_label.text = "目标组织"
 			if society != null and GameSessionService.has_player():
 				for organization_id: String in GameSessionService.player_character.organization_ids:
 					var organization: OrganizationData = society.organizations.get_organization(organization_id)
 					if organization != null:
-						_add_eligible_target(definition, organization.name, organization_id, previous_id)
+						_append_eligible_target(candidates, definition, organization.name, organization_id)
 		"promote_policy", "support_control":
 			target_label.text = "目标地区"
 			if map_service != null:
@@ -308,9 +309,23 @@ func _populate_targets(
 						(" / %s" % unit.city_name if not unit.city_name.is_empty() else ""),
 						unit.social_support * 100.0,
 					]
-					_add_eligible_target(definition, label, unit_id, previous_id)
+					_append_eligible_target(candidates, definition, label, unit_id)
 		_:
 			target_label.text = "行动目标"
+	candidates.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return (
+			str(a["id"]) < str(b["id"])
+			if is_equal_approx(float(a["effective"]), float(b["effective"]))
+			else float(a["effective"]) > float(b["effective"])
+		)
+	)
+	for candidate: Dictionary in candidates:
+		target_option.add_item("%s · 有效 %.0f" % [
+			str(candidate["label"]), float(candidate["effective"]),
+		])
+		target_option.set_item_metadata(
+			target_option.item_count - 1, str(candidate["id"])
+		)
 	if target_option.item_count > 0:
 		if not _select_target(previous_id):
 			target_option.select(0)
@@ -326,11 +341,11 @@ func _populate_targets(
 			target_details.text = "当前没有符合条件的目标。"
 
 
-func _add_eligible_target(
+func _append_eligible_target(
+	candidates: Array[Dictionary],
 	definition: ActionDefinitionData,
 	label: String,
-	id: String,
-	selected_id: String
+	id: String
 ) -> void:
 	if id.is_empty() or context_service == null or not GameSessionService.has_player():
 		return
@@ -339,10 +354,22 @@ func _add_eligible_target(
 	)
 	if not error.is_empty():
 		return
-	target_option.add_item(label)
-	target_option.set_item_metadata(target_option.item_count - 1, id)
-	if id == selected_id:
-		target_option.select(target_option.item_count - 1)
+	var context: Dictionary = context_service.build_context(
+		definition,
+		GameSessionService.player_character,
+		id,
+		roundi(investment_spin.value),
+		_get_selected_study_skill_id()
+	)
+	if context.is_empty():
+		return
+	candidates.append({
+		"id": id,
+		"label": label,
+		"effective": action_service.calculate_effective_value(
+			definition, GameSessionService.player_character, context
+		),
+	})
 
 
 func _select_target(requested_id: String) -> bool:
@@ -361,6 +388,15 @@ func _on_target_selected(index: int) -> void:
 	if index >= 0 and index < target_option.item_count:
 		target_id = str(target_option.get_item_metadata(index))
 	_refresh_target_details()
+	_refresh()
+
+
+func _on_investment_changed(_value: float) -> void:
+	var definition: ActionDefinitionData = _get_selected_definition()
+	if definition != null and PlayerActionContextService.get_target_domain(
+		definition.category
+	) != PlayerActionContextService.TARGET_DOMAIN_NONE:
+		_populate_targets(definition, target_id)
 	_refresh()
 
 
@@ -584,12 +620,13 @@ func _refresh_forecast(definition: ActionDefinitionData) -> void:
 	var guarantee_gap: float = maxf(
 		definition.guaranteed_success_threshold - effective, 0.0
 	)
-	context_label.text = "[b]能力[/b] %d　[b]准备[/b] %.0f　[b]资金支持[/b] %.0f\n[b]关系支持[/b] %.0f　[b]组织支持[/b] %.0f　[b]目标阻力[/b] %.0f\n────────────\n[b]当前有效值[/b] %.0f　[b]成功线[/b] %.0f　[b]保证线[/b] %.0f\n当前把握：[color=#9bd3a7]%s[/color]\n距成功线：%.0f　距保证线：%.0f\n预计用时：约 %d 小时" % [
+	context_label.text = "[b]能力[/b] %d　[b]准备[/b] %.0f　[b]资金支持[/b] %.0f\n[b]关系支持[/b] %.0f　[b]组织支持[/b] %.0f　[b]场景匹配[/b] %.0f　[b]目标阻力[/b] %.0f\n────────────\n[b]当前有效值[/b] %.0f　[b]成功线[/b] %.0f　[b]保证线[/b] %.0f\n当前把握：[color=#9bd3a7]%s[/color]\n距成功线：%.0f　距保证线：%.0f\n预计用时：约 %d 小时" % [
 		ability,
 		float(context.get("preparation", 0.0)),
 		float(context.get("funding", 0.0)),
 		float(context.get("relationship_support", 0.0)),
 		float(context.get("organization_support", 0.0)),
+		float(context.get("social_match_bonus", 0.0)),
 		float(context.get("target_resistance", 0.0)),
 		effective,
 		definition.success_threshold,

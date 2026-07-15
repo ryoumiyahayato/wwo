@@ -2258,8 +2258,8 @@
       "aptitude_modifier_weight": 0.10, "position_permission_required": "",
       "organization_support_weight": 0.10, "relationship_support_weight": 0.25,
       "funding_weight": 0.08, "preparation_weight": 0.20, "state_modifier_weight": 0.35,
-      "base_target_resistance": 20, "interruption_conditions": ["detained", "incapacitated"],
-      "success_threshold": 50, "guaranteed_success_threshold": 100,
+      "base_target_resistance": 12, "interruption_conditions": ["detained", "incapacitated"],
+      "success_threshold": 35, "guaranteed_success_threshold": 50,
       "success_result": {"description": "双方建立了可继续发展的联系。", "reputation_delta": 2, "domain_effect": "relationship_contact"},
       "failure_result": {"description": "接触未能建立稳定联系。", "stress_delta": 3, "domain_effect": "relationship_attempt"}
     },

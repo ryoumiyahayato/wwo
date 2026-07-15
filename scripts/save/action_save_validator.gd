@@ -90,6 +90,12 @@ func _validate_context(context: Dictionary, action: ActionInstanceData) -> Strin
 		var occupation_bonus: float = float(context["occupation_match_bonus"])
 		if occupation_bonus < 0.0 or occupation_bonus > 100.0:
 			return "当前行动职业匹配加成超出范围"
+	if context.has("social_match_bonus"):
+		if typeof(context["social_match_bonus"]) not in [TYPE_INT, TYPE_FLOAT]:
+			return "当前行动社会匹配加成字段类型无效"
+		var social_bonus: float = float(context["social_match_bonus"])
+		if social_bonus < 0.0 or social_bonus > 100.0:
+			return "当前行动社会匹配加成超出范围"
 	if typeof(context.get("boundary_invalid_reason", "")) != TYPE_STRING:
 		return "当前行动边界失效原因字段类型无效"
 	if typeof(context.get("settle_previous_interval", false)) != TYPE_BOOL:
@@ -205,6 +211,10 @@ func _validate_target(
 		float(action.context.get("occupation_match_bonus", 0.0))
 	):
 		return "非工作行动包含异常职业匹配上下文"
+	if definition.category not in ["build_relationship", "investigate_character"] and not is_zero_approx(
+		float(action.context.get("social_match_bonus", 0.0))
+	):
+		return "非人物接触行动包含异常社会匹配上下文"
 	if definition.category in ["build_relationship", "investigate_character"]:
 		if not society.roster.is_living(action.target_id) or action.target_id == action.actor_character_id:
 			return "当前行动人物目标无效"
@@ -267,6 +277,11 @@ func _validate_authoritative_context(
 		float(expected.get("occupation_match_bonus", -2.0))
 	):
 		return "当前行动职业匹配加成与权威职业不一致"
+	if action.context.has("social_match_bonus") and not is_equal_approx(
+		float(action.context.get("social_match_bonus", -1.0)),
+		float(expected.get("social_match_bonus", -2.0))
+	):
+		return "当前行动社会匹配加成与权威人物状态不一致"
 	for field: String in NUMERIC_CONTEXT_FIELDS:
 		if not is_equal_approx(
 			float(action.context.get(field, -1.0)),

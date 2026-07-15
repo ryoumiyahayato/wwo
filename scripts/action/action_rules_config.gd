@@ -136,6 +136,18 @@ func load_from_file(path: String = DEFAULT_PATH) -> Error:
 		):
 			error_message = "职业工作能力映射包含未知能力"
 			return ERR_INVALID_DATA
+	var social_match: Variant = player_context_rules.get("social_match_bonus", {})
+	if not social_match is Dictionary:
+		error_message = "社会接触匹配规则无效"
+		return ERR_INVALID_DATA
+	for key: String in [
+		"same_country", "same_region", "same_occupation",
+		"existing_relationship", "shared_organization",
+	]:
+		var value: float = float((social_match as Dictionary).get(key, -1.0))
+		if value < 0.0 or value > 100.0:
+			error_message = "社会接触匹配规则 %s 超出范围" % key
+			return ERR_INVALID_DATA
 	return OK
 
 

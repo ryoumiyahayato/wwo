@@ -58,6 +58,7 @@ func initialize(player: CharacterData, data_set: CoreDataSet) -> bool:
 	relationships = RelationshipService.new(
 		roster, rules.relationship_defaults, StableIdService.new()
 	)
+	_initialize_player_social_anchors(player)
 	ai = SimpleAiService.new(roster, rules)
 	regional_influence = RegionalInfluenceService.new(continuity_rules)
 	succession = SuccessionService.new(
@@ -162,6 +163,10 @@ func apply_character_action_domain_effect(
 	var requires_domain: bool = definition.category in DOMAIN_ACTION_CATEGORIES
 	if action.outcome_code != "failure":
 		match definition.category:
+			"perform_work":
+				applied = _apply_work_relationship_opportunity(
+					character, action.completion_hour
+				)
 			"build_relationship":
 				applied = relationships.create_or_update(
 					character.id,
@@ -206,6 +211,80 @@ func apply_character_action_domain_effect(
 			}
 		)
 	return applied
+
+
+func _initialize_player_social_anchors(player: CharacterData) -> void:
+	if player == null:
+		return
+	var candidates: Array[Dictionary] = []
+	for character_id: String in roster.get_background_ids(player.country_id):
+		var target: BackgroundCharacterData = roster.get_background(character_id)
+		if target == null:
+			continue
+		var score: int = 0
+		if target.region_id == player.region_id:
+			score += 100
+		if target.occupation_id == player.occupation_id:
+			score += 80
+		candidates.append({"id": character_id, "score": score})
+	candidates.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return (
+			str(a["id"]) < str(b["id"])
+			if int(a["score"]) == int(b["score"])
+			else int(a["score"]) > int(b["score"])
+		)
+	)
+	for index: int in range(mini(candidates.size(), 2)):
+		var target_id: String = str(candidates[index]["id"])
+		var target: BackgroundCharacterData = roster.get_background(target_id)
+		var link: String = (
+			"coworker"
+			if target.occupation_id == player.occupation_id
+			else "neighbor"
+		)
+		relationships.create_or_update(
+			player.id,
+			target_id,
+			0,
+			{"familiarity": 0.04, "trust": 0.01, "affinity": 0.01},
+			link
+		)
+
+
+func _apply_work_relationship_opportunity(
+	character: CharacterData, current_hour: int
+) -> bool:
+	var candidates: Array[Dictionary] = []
+	for character_id: String in roster.get_living_ids(character.country_id):
+		if character_id == character.id:
+			continue
+		var target: Variant = roster.get_public_character(character_id)
+		if not (target is CharacterData or target is BackgroundCharacterData):
+			continue
+		var score: int = 0
+		if str(target.occupation_id) == character.occupation_id:
+			score += 100
+		if str(target.region_id) == character.region_id:
+			score += 60
+		if relationships.get_between(character.id, character_id) != null:
+			score += 20
+		candidates.append({"id": character_id, "score": score})
+	if candidates.is_empty():
+		return false
+	candidates.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return (
+			str(a["id"]) < str(b["id"])
+			if int(a["score"]) == int(b["score"])
+			else int(a["score"]) > int(b["score"])
+		)
+	)
+	return relationships.create_or_update(
+		character.id,
+		str(candidates[0]["id"]),
+		current_hour,
+		{"familiarity": 0.03, "trust": 0.01, "affinity": 0.0},
+		"coworker"
+	) != null
 
 
 func _apply_investigation_dossier(
