@@ -86,20 +86,36 @@ theme_override_colors/font_color = Color(0.39, 0.79, 0.86, 1)
 theme_override_font_sizes/font_size = 17
 text = "选择行动"
 
-[node name="ActionList" type="ItemList" parent="Margin/Root/ActionScroll/Content"]
+[node name="SelectionRow" type="HBoxContainer" parent="Margin/Root/ActionScroll/Content"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ActionChooser" type="VBoxContainer" parent="Margin/Root/ActionScroll/Content/SelectionRow"]
+custom_minimum_size = Vector2(236, 120)
+layout_mode = 2
+
+[node name="ActionButtons" type="GridContainer" parent="Margin/Root/ActionScroll/Content/SelectionRow/ActionChooser"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 156)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/h_separation = 4
+theme_override_constants/v_separation = 4
+columns = 2
+
+[node name="ActionList" type="ItemList" parent="Margin/Root/ActionScroll/Content/SelectionRow/ActionChooser"]
+unique_name_in_owner = true
+visible = false
 layout_mode = 2
 allow_reselect = true
-auto_height = false
 
-[node name="ActionDescription" type="RichTextLabel" parent="Margin/Root/ActionScroll/Content"]
+[node name="ActionDescription" type="RichTextLabel" parent="Margin/Root/ActionScroll/Content/SelectionRow"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 118)
+custom_minimum_size = Vector2(0, 120)
 layout_mode = 2
+size_flags_horizontal = 3
 bbcode_enabled = true
 fit_content = false
-scroll_active = false
+scroll_active = true
 text = "选择行动后查看用途和条件。"
 
 [node name="SeparatorA" type="HSeparator" parent="Margin/Root/ActionScroll/Content"]
@@ -155,26 +171,31 @@ theme_override_styles/panel = SubResource("card")
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="FundingHeader" type="Label" parent="Margin/Root/ActionScroll/Content/FundingCard/FundingContent"]
+[node name="FundingTop" type="HBoxContainer" parent="Margin/Root/ActionScroll/Content/FundingCard/FundingContent"]
 layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="FundingHeader" type="Label" parent="Margin/Root/ActionScroll/Content/FundingCard/FundingContent/FundingTop"]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.39, 0.79, 0.86, 1)
 text = "主动投入"
 
-[node name="FundingSummary" type="Label" parent="Margin/Root/ActionScroll/Content/FundingCard/FundingContent"]
+[node name="InvestmentSpin" type="SpinBox" parent="Margin/Root/ActionScroll/Content/FundingCard/FundingContent/FundingTop"]
 unique_name_in_owner = true
-layout_mode = 2
-autowrap_mode = 2
-text = "财富与费用尚未就绪。"
-
-[node name="InvestmentSpin" type="SpinBox" parent="Margin/Root/ActionScroll/Content/FundingCard/FundingContent"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 40)
+custom_minimum_size = Vector2(190, 36)
 layout_mode = 2
 max_value = 20.0
 step = 1.0
 allow_greater = false
 allow_lesser = false
 suffix = " 额外财富"
+
+[node name="FundingSummary" type="Label" parent="Margin/Root/ActionScroll/Content/FundingCard/FundingContent"]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 2
+text = "财富与费用尚未就绪。"
 
 [node name="InvestmentHelp" type="Label" parent="Margin/Root/ActionScroll/Content/FundingCard/FundingContent"]
 layout_mode = 2

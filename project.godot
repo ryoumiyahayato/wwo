@@ -27,11 +27,11 @@ window/stretch/mode="canvas_items"
 
 toggle_pause={
 "deadzone": 0.5,
-"events": [Object(InputEventKey,"physical_keycode":32,"unicode":32)]
+"events": [Object(InputEventKey,"physical_keycode":32,"unicode":32), Object(InputEventKey,"keycode":32,"unicode":32)]
 }
 ui_cancel={
 "deadzone": 0.5,
-"events": [Object(InputEventKey,"physical_keycode":4194305,"unicode":0)]
+"events": [Object(InputEventKey,"physical_keycode":4194305,"unicode":0), Object(InputEventKey,"keycode":4194305,"unicode":0)]
 }
 
 [rendering]

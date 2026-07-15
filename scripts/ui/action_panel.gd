@@ -25,6 +25,16 @@ const ACTION_PURPOSE: Dictionary = {
 	"promote_policy": "凭借组织职位推动辖区政策，改变地区社会影响。",
 	"support_control": "动员政府或军队资源支援前线控制与巩固。",
 }
+const ACTION_SHORT_NAMES: Dictionary = {
+	"action:study_skill": "学习技能",
+	"action:perform_work": "从事工作",
+	"action:build_relationship": "建立关系",
+	"action:join_organization": "加入组织",
+	"action:seek_position": "争取职位",
+	"action:investigate_character": "调查人物",
+	"action:promote_policy": "推动政策",
+	"action:support_control": "支持控制",
+}
 const SKILL_USES: Dictionary = {
 	"administration": "影响工作、政策推动与组织治理。",
 	"engineering": "影响技术工作和后续工程类行动。",
@@ -50,6 +60,7 @@ const INTERRUPTION_LABELS: Dictionary = {
 
 @onready var close_button: Button = %CloseButton
 @onready var action_scroll: ScrollContainer = %ActionScroll
+@onready var action_buttons: GridContainer = %ActionButtons
 @onready var action_list: ItemList = %ActionList
 @onready var action_description: RichTextLabel = %ActionDescription
 @onready var target_label: Label = %TargetLabel
@@ -150,6 +161,8 @@ func refresh_permissions() -> void:
 
 func _populate_actions() -> void:
 	action_list.clear()
+	for child: Node in action_buttons.get_children():
+		child.free()
 	if map_service == null:
 		return
 	for definition_id: String in ACTION_ORDER:
@@ -158,14 +171,31 @@ func _populate_actions() -> void:
 		) as ActionDefinitionData
 		if definition == null:
 			continue
-		action_list.add_item(definition.name)
-		action_list.set_item_metadata(action_list.item_count - 1, definition_id)
+		action_list.add_item(str(ACTION_SHORT_NAMES.get(definition_id, definition.name)))
+		var item_index: int = action_list.item_count - 1
+		action_list.set_item_metadata(item_index, definition_id)
+		action_list.set_item_tooltip(item_index, "%s：%s" % [definition.name, str(ACTION_PURPOSE.get(definition.category, ""))])
+		var action_button := Button.new()
+		action_button.name = "ActionChoice%d" % item_index
+		action_button.custom_minimum_size = Vector2(114, 26)
+		action_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		action_button.toggle_mode = true
+		action_button.text = str(ACTION_SHORT_NAMES.get(definition_id, definition.name))
+		action_button.tooltip_text = action_list.get_item_tooltip(item_index)
+		action_button.pressed.connect(_on_action_button_pressed.bind(item_index))
+		action_buttons.add_child(action_button)
 	if action_list.item_count > 0:
 		action_list.select(0)
 		_on_action_selected(0)
 
 
+func _on_action_button_pressed(index: int) -> void:
+	action_list.select(index)
+	_on_action_selected(index)
+
+
 func _on_action_selected(_index: int) -> void:
+	_sync_action_buttons()
 	var definition: ActionDefinitionData = _get_selected_definition()
 	if definition == null:
 		_refresh()
@@ -175,6 +205,15 @@ func _on_action_selected(_index: int) -> void:
 	_populate_targets(definition, target_id)
 	message_label.text = ""
 	_refresh()
+
+
+func _sync_action_buttons() -> void:
+	var selected_items: PackedInt32Array = action_list.get_selected_items()
+	var selected_index: int = selected_items[0] if not selected_items.is_empty() else -1
+	for index: int in range(action_buttons.get_child_count()):
+		var button := action_buttons.get_child(index) as Button
+		if button != null:
+			button.set_pressed_no_signal(index == selected_index)
 
 
 func _populate_study_skills(definition: ActionDefinitionData) -> void:
@@ -216,6 +255,8 @@ func _populate_targets(
 	var previous_id: String = preferred_id if not preferred_id.is_empty() else target_id
 	target_option.clear()
 	target_id = ""
+	target_label.visible = true
+	target_details.visible = true
 	target_details.text = "此行动不需要目标。"
 	if definition == null:
 		return
@@ -265,7 +306,10 @@ func _populate_targets(
 		_refresh_target_details()
 	else:
 		target_option.visible = false
-		if definition.category not in ["study_skill", "perform_work"]:
+		if definition.category in ["study_skill", "perform_work"]:
+			target_label.visible = false
+			target_details.visible = false
+		else:
 			target_details.text = "当前没有符合条件的目标。"
 
 

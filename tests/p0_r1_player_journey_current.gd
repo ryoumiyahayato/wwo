@@ -66,9 +66,21 @@ func _run() -> void:
 	var study_section: VBoxContainer = _action_panel.find_child("StudySection", true, false) as VBoxContainer
 	var skill_option: OptionButton = _action_panel.find_child("StudySkillOption", true, false) as OptionButton
 	var investment: SpinBox = _action_panel.find_child("InvestmentSpin", true, false) as SpinBox
-	_expect(study_section != null and study_section.is_visible_in_tree(), "学习技能选择器真实可见")
+	var action_scroll: ScrollContainer = _action_panel.find_child("ActionScroll", true, false) as ScrollContainer
+	_expect(
+		study_section != null
+		and study_section.is_visible_in_tree()
+		and skill_option != null
+		and _rect_inside_rect(skill_option.get_global_rect(), action_scroll.get_global_rect()),
+		"学习技能选择器完整位于行动首屏"
+	)
 	_expect(skill_option != null and skill_option.item_count == 9, "学习页面提供九项人物能力")
-	_expect(investment != null and investment.is_visible_in_tree(), "主动财富投入控件真实可见")
+	_expect(
+		investment != null
+		and investment.is_visible_in_tree()
+		and _rect_inside_rect(investment.get_global_rect(), action_scroll.get_global_rect()),
+		"主动财富投入控件完整位于行动首屏"
+	)
 	_expect(_select_option_by_metadata(skill_option, "administration"), "可通过技能选择器选择行政")
 	var administration_before: int = int(player.skills["administration"])
 	_set_investment(20)
@@ -257,9 +269,17 @@ func _assert_action_layout() -> void:
 	var scroll: ScrollContainer = _action_panel.find_child("ActionScroll", true, false) as ScrollContainer
 	var begin: Button = _action_panel.find_child("BeginButton", true, false) as Button
 	var list: ItemList = _action_panel.find_child("ActionList", true, false) as ItemList
+	var choices: GridContainer = _action_panel.find_child("ActionButtons", true, false) as GridContainer
 	_expect(panel_rect.size.y >= VIEWPORT_SIZE.y * 0.70, "ActionPanel 可见高度至少占窗口 70%")
 	_expect(scroll.get_global_rect().size.y > 200.0, "行动内容滚动区高度大于 200")
-	_expect(list.is_visible_in_tree() and list.item_count == 8, "八类行动列表真实可见")
+	var all_choices_visible := choices != null and choices.get_child_count() == 8 and list.item_count == 8
+	if all_choices_visible:
+		for child: Node in choices.get_children():
+			var choice := child as Button
+			if choice == null or not choice.is_visible_in_tree() or not _rect_inside_rect(choice.get_global_rect(), scroll.get_global_rect()):
+				all_choices_visible = false
+				break
+	_expect(all_choices_visible, "八类行动以 2×4 按钮完整位于行动首屏")
 	_expect(_rect_inside_viewport(begin.get_global_rect()), "开始行动按钮完整位于 1280×720 窗口内")
 	_expect(not _social_panel.visible and not (_view.find_child("DeveloperPanel", true, false) as Control).visible, "行动页未被其他主面板遮挡")
 	_expect(_modal_layer().visible and (_view.find_child("ModalBackdrop", true, false) as ColorRect).is_visible_in_tree(), "打开主面板时显示半透明模态遮罩")
@@ -370,6 +390,17 @@ func _modal_layer() -> Control:
 
 func _rect_inside_viewport(rect: Rect2) -> bool:
 	return rect.size.x > 0.0 and rect.size.y > 0.0 and rect.position.x >= 0.0 and rect.position.y >= 0.0 and rect.end.x <= VIEWPORT_SIZE.x and rect.end.y <= VIEWPORT_SIZE.y
+
+
+func _rect_inside_rect(rect: Rect2, container: Rect2) -> bool:
+	return (
+		rect.size.x > 0.0
+		and rect.size.y > 0.0
+		and rect.position.x >= container.position.x
+		and rect.position.y >= container.position.y
+		and rect.end.x <= container.end.x
+		and rect.end.y <= container.end.y
+	)
 
 
 func _numeric_dictionary_approx(actual: Dictionary, expected: Dictionary) -> bool:

@@ -427,7 +427,7 @@ func _on_social_action_requested(action_id: String, requested_target_id: String)
 	action_panel.prefill_action(action_id, requested_target_id)
 
 
-func _unhandled_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		if modal_layer.visible:
 			_close_primary_panel()
