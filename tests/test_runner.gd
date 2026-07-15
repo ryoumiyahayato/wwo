@@ -1124,7 +1124,7 @@ func _test_m5_action_panel_scene() -> void:
 		runner.clock.advance_hours(1)
 		_expect_true(GameSessionService.current_action.accumulated_work > before, "权威时间变化驱动当前行动进度")
 	var summary: RichTextLabel = panel.find_child("SummaryLabel", true, false) as RichTextLabel
-	_expect_true(summary.text.contains("成功把握") and not summary.text.contains("有效值"), "正式行动 UI 显示定性把握且隐藏精确值")
+	_expect_true(summary.text.contains("当前把握") and not summary.text.contains("有效值"), "正式行动 UI 显示定性把握且隐藏精确值")
 	view.queue_free()
 	GameSessionService.clear()
 
