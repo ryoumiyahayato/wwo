@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/strategic_map_view.gd" id="1_view"]
 [ext_resource type="Script" path="res://scripts/map/map_world_controller.gd" id="2_world"]
@@ -7,6 +7,8 @@
 [ext_resource type="PackedScene" path="res://scenes/action/action_panel.tscn" id="5_action"]
 [ext_resource type="PackedScene" path="res://scenes/organization/social_system_panel.tscn" id="6_social"]
 [ext_resource type="PackedScene" path="res://scenes/devtools/developer_panel.tscn" id="7_dev"]
+[ext_resource type="PackedScene" path="res://scenes/character/character_profile_panel.tscn" id="8_character"]
+[ext_resource type="PackedScene" path="res://scenes/world/world_activity_panel.tscn" id="9_activity"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
 bg_color = Color(0.06, 0.083, 0.115, 0.97)
@@ -130,47 +132,11 @@ vertical_alignment = 1
 layout_mode = 2
 theme_override_constants/separation = 7
 
-[node name="PauseButton" type="Button" parent="RootMargin/Layout/TopBar/TopMargin/TopLayout/NavRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(62, 34)
+[node name="GameplayNav" type="HBoxContainer" parent="RootMargin/Layout/TopBar/TopMargin/TopLayout/NavRow"]
 layout_mode = 2
-text = "继续"
-tooltip_text = "暂停或继续游戏时间"
+theme_override_constants/separation = 7
 
-[node name="Speed1Button" type="Button" parent="RootMargin/Layout/TopBar/TopMargin/TopLayout/NavRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(42, 34)
-layout_mode = 2
-toggle_mode = true
-button_pressed = true
-text = "1×"
-
-[node name="Speed2Button" type="Button" parent="RootMargin/Layout/TopBar/TopMargin/TopLayout/NavRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(42, 34)
-layout_mode = 2
-toggle_mode = true
-text = "2×"
-
-[node name="Speed4Button" type="Button" parent="RootMargin/Layout/TopBar/TopMargin/TopLayout/NavRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(42, 34)
-layout_mode = 2
-toggle_mode = true
-text = "4×"
-
-[node name="Speed8Button" type="Button" parent="RootMargin/Layout/TopBar/TopMargin/TopLayout/NavRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(42, 34)
-layout_mode = 2
-toggle_mode = true
-text = "8×"
-
-[node name="NavSpacer" type="Control" parent="RootMargin/Layout/TopBar/TopMargin/TopLayout/NavRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="CharacterButton" type="Button" parent="RootMargin/Layout/TopBar/TopMargin/TopLayout/NavRow"]
+[node name="CharacterButton" type="Button" parent="RootMargin/Layout/TopBar/TopMargin/TopLayout/NavRow/GameplayNav"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(82, 34)
 layout_mode = 2
@@ -178,7 +144,7 @@ disabled = true
 text = "人物"
 tooltip_text = "查看当前玩家人物"
 
-[node name="ActionButton" type="Button" parent="RootMargin/Layout/TopBar/TopMargin/TopLayout/NavRow"]
+[node name="ActionButton" type="Button" parent="RootMargin/Layout/TopBar/TopMargin/TopLayout/NavRow/GameplayNav"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(82, 34)
 layout_mode = 2
@@ -186,7 +152,7 @@ disabled = true
 text = "行动"
 tooltip_text = "选择行动、目标并随时间推进"
 
-[node name="SocialButton" type="Button" parent="RootMargin/Layout/TopBar/TopMargin/TopLayout/NavRow"]
+[node name="SocialButton" type="Button" parent="RootMargin/Layout/TopBar/TopMargin/TopLayout/NavRow/GameplayNav"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(82, 34)
 layout_mode = 2
@@ -194,7 +160,66 @@ disabled = true
 text = "社会"
 tooltip_text = "查看组织、关系、职位与继承"
 
-[node name="SaveButton" type="Button" parent="RootMargin/Layout/TopBar/TopMargin/TopLayout/NavRow"]
+[node name="WorldActivityButton" type="Button" parent="RootMargin/Layout/TopBar/TopMargin/TopLayout/NavRow/GameplayNav"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(96, 34)
+layout_mode = 2
+disabled = true
+text = "世界动态"
+tooltip_text = "查看最近发生的公开世界事件"
+
+[node name="NavSpacer" type="Control" parent="RootMargin/Layout/TopBar/TopMargin/TopLayout/NavRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TimeControls" type="HBoxContainer" parent="RootMargin/Layout/TopBar/TopMargin/TopLayout/NavRow"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="PauseButton" type="Button" parent="RootMargin/Layout/TopBar/TopMargin/TopLayout/NavRow/TimeControls"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(62, 34)
+layout_mode = 2
+text = "继续"
+tooltip_text = "暂停或继续游戏时间"
+
+[node name="Speed1Button" type="Button" parent="RootMargin/Layout/TopBar/TopMargin/TopLayout/NavRow/TimeControls"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(42, 34)
+layout_mode = 2
+toggle_mode = true
+button_pressed = true
+text = "1×"
+
+[node name="Speed2Button" type="Button" parent="RootMargin/Layout/TopBar/TopMargin/TopLayout/NavRow/TimeControls"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(42, 34)
+layout_mode = 2
+toggle_mode = true
+text = "2×"
+
+[node name="Speed4Button" type="Button" parent="RootMargin/Layout/TopBar/TopMargin/TopLayout/NavRow/TimeControls"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(42, 34)
+layout_mode = 2
+toggle_mode = true
+text = "4×"
+
+[node name="Speed8Button" type="Button" parent="RootMargin/Layout/TopBar/TopMargin/TopLayout/NavRow/TimeControls"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(42, 34)
+layout_mode = 2
+toggle_mode = true
+text = "8×"
+
+[node name="ToolSeparator" type="VSeparator" parent="RootMargin/Layout/TopBar/TopMargin/TopLayout/NavRow"]
+layout_mode = 2
+
+[node name="ToolNav" type="HBoxContainer" parent="RootMargin/Layout/TopBar/TopMargin/TopLayout/NavRow"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="SaveButton" type="Button" parent="RootMargin/Layout/TopBar/TopMargin/TopLayout/NavRow/ToolNav"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(82, 34)
 layout_mode = 2
@@ -202,7 +227,7 @@ disabled = false
 text = "保存"
 tooltip_text = "保存到单一手动存档槽"
 
-[node name="MoreButton" type="MenuButton" parent="RootMargin/Layout/TopBar/TopMargin/TopLayout/NavRow"]
+[node name="MoreButton" type="MenuButton" parent="RootMargin/Layout/TopBar/TopMargin/TopLayout/NavRow/ToolNav"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(82, 34)
 layout_mode = 2
@@ -320,35 +345,57 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
-color = Color(0.005, 0.012, 0.02, 0.68)
+color = Color(0.005, 0.012, 0.02, 0.48)
+
+[node name="CharacterProfilePanel" parent="ModalLayer" instance=ExtResource("8_character")]
+layout_mode = 1
+anchors_preset = 0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 1.0
+offset_left = 14.0
+offset_top = 112.0
+offset_right = 514.0
+offset_bottom = -14.0
+grow_vertical = 2
+visible = false
 
 [node name="ActionPanel" parent="ModalLayer" instance=ExtResource("5_action")]
 layout_mode = 1
-anchors_preset = 12
-anchor_left = 1.0
+anchors_preset = 0
 anchor_top = 0.0
-anchor_right = 1.0
+anchor_right = 0.0
 anchor_bottom = 1.0
-offset_left = -566.0
+offset_left = 14.0
 offset_top = 112.0
-offset_right = -14.0
+offset_right = 514.0
 offset_bottom = -14.0
-grow_horizontal = 0
 grow_vertical = 2
 visible = false
 
 [node name="SocialSystemPanel" parent="ModalLayer" instance=ExtResource("6_social")]
 layout_mode = 1
-anchors_preset = 12
-anchor_left = 1.0
+anchors_preset = 0
 anchor_top = 0.0
-anchor_right = 1.0
+anchor_right = 0.0
 anchor_bottom = 1.0
-offset_left = -566.0
+offset_left = 14.0
 offset_top = 112.0
-offset_right = -14.0
+offset_right = 514.0
 offset_bottom = -14.0
-grow_horizontal = 0
+grow_vertical = 2
+visible = false
+
+[node name="WorldActivityPanel" parent="ModalLayer" instance=ExtResource("9_activity")]
+layout_mode = 1
+anchors_preset = 0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 1.0
+offset_left = 14.0
+offset_top = 112.0
+offset_right = 514.0
+offset_bottom = -14.0
 grow_vertical = 2
 visible = false
 

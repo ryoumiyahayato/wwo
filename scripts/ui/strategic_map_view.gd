@@ -2,6 +2,8 @@ extends Control
 ## Binds the persistent authoritative world session to presentation controls.
 
 const UiStrings = preload("res://scripts/ui/ui_strings.gd")
+const DRAWER_ANIMATION_SECONDS: float = 0.22
+const DRAWER_OPEN_X: float = 14.0
 
 @onready var world_controller: MapWorldController = %MapWorldController
 @onready var clock_runner: SimulationRunner = %SimulationRunner
@@ -19,10 +21,13 @@ const UiStrings = preload("res://scripts/ui/ui_strings.gd")
 @onready var save_button: Button = %SaveButton
 @onready var more_button: MenuButton = %MoreButton
 @onready var character_button: Button = %CharacterButton
+@onready var character_panel: CharacterProfilePanel = %CharacterProfilePanel
 @onready var action_button: Button = %ActionButton
 @onready var action_panel: ActionPanel = %ActionPanel
 @onready var social_button: Button = %SocialButton
 @onready var social_panel: SocialSystemPanel = %SocialSystemPanel
+@onready var world_activity_button: Button = %WorldActivityButton
+@onready var world_activity_panel: WorldActivityPanel = %WorldActivityPanel
 @onready var developer_panel: DeveloperPanel = %DeveloperPanel
 @onready var modal_layer: Control = %ModalLayer
 @onready var modal_backdrop: ColorRect = %ModalBackdrop
@@ -36,6 +41,8 @@ var _clock: SimulationClock
 var _map_service: MapControlService
 var _selected_unit_id: String = ""
 var _autosave: AutosaveCoordinator
+var _active_drawer: Control
+var _drawer_tween: Tween
 
 
 func _ready() -> void:
@@ -46,21 +53,22 @@ func _ready() -> void:
 	speed_4_button.pressed.connect(_on_speed_pressed.bind(4))
 	speed_8_button.pressed.connect(_on_speed_pressed.bind(8))
 	save_button.pressed.connect(_on_save_pressed)
-	var more_popup: PopupMenu = more_button.get_popup()
-	more_popup.add_item("返回主菜单", 1)
-	more_popup.add_separator()
-	more_popup.add_item("开发者工具", 2)
-	more_popup.id_pressed.connect(_on_more_item_pressed)
+	_refresh_more_menu()
+	more_button.get_popup().id_pressed.connect(_on_more_item_pressed)
 	character_button.pressed.connect(_on_character_pressed)
 	action_button.pressed.connect(_on_action_pressed)
 	social_button.pressed.connect(_on_social_pressed)
+	world_activity_button.pressed.connect(_on_world_activity_pressed)
 	character_button.disabled = not GameSessionService.has_player()
 	action_button.disabled = not GameSessionService.has_player()
 	social_button.disabled = not GameSessionService.has_player()
+	world_activity_button.disabled = not GameSessionService.has_player()
+	character_panel.close_requested.connect(_on_character_panel_close_requested)
 	action_panel.close_requested.connect(_on_action_panel_close_requested)
 	action_panel.action_state_changed.connect(_on_action_state_changed)
 	social_panel.close_requested.connect(_on_social_panel_close_requested)
 	social_panel.request_action.connect(_on_social_action_requested)
+	world_activity_panel.close_requested.connect(_on_world_activity_panel_close_requested)
 	developer_panel.close_requested.connect(_on_developer_panel_close_requested)
 	developer_panel.developer_mode_changed.connect(_on_developer_mode_changed)
 	social_panel.society_changed.connect(action_panel.refresh_permissions)
@@ -68,7 +76,7 @@ func _ready() -> void:
 	transfer_button.pressed.connect(_on_transfer_pressed)
 	map_canvas.unit_selected.connect(_on_unit_selected)
 	modal_backdrop.gui_input.connect(_on_modal_backdrop_input)
-	_close_primary_panel()
+	_close_primary_panel(false)
 
 	_bind_persistent_clock()
 	if _clock == null:
@@ -92,7 +100,9 @@ func _ready() -> void:
 	action_panel.setup(_clock, _map_service)
 	action_panel.set_target(_selected_unit_id)
 	if GameSessionService.society_service != null:
+		character_panel.setup(GameSessionService.society_service)
 		social_panel.setup(_clock, GameSessionService.society_service)
+		world_activity_panel.refresh_view()
 	zoom_label.text = UiStrings.MAP_HELP
 	_apply_developer_visibility()
 	_refresh_player_status()
@@ -163,6 +173,7 @@ func _initialize_society() -> void:
 	character_button.disabled = false
 	action_button.disabled = false
 	social_button.disabled = false
+	world_activity_button.disabled = false
 
 
 func _initialize_autosave() -> void:
@@ -335,11 +346,15 @@ func _on_back_pressed() -> void:
 
 
 func _on_character_pressed() -> void:
-	var change_error: Error = get_tree().change_scene_to_file(
-		"res://scenes/character/character_profile_view.tscn"
-	)
-	if change_error != OK:
-		LogService.error("StrategicMapView", "无法打开人物信息：%s" % error_string(change_error))
+	if character_panel.visible:
+		_close_primary_panel()
+	else:
+		character_panel.refresh_view()
+		_open_primary_panel(character_panel)
+
+
+func _on_character_panel_close_requested() -> void:
+	_close_primary_panel()
 
 
 func _on_action_pressed() -> void:
@@ -371,11 +386,23 @@ func _on_social_panel_close_requested() -> void:
 	_close_primary_panel()
 
 
-func _on_developer_pressed() -> void:
-	if developer_panel.visible:
+func _on_world_activity_pressed() -> void:
+	if world_activity_panel.visible:
 		_close_primary_panel()
 	else:
-		_open_primary_panel(developer_panel)
+		world_activity_panel.refresh_view()
+		_open_primary_panel(world_activity_panel)
+
+
+func _on_world_activity_panel_close_requested() -> void:
+	_close_primary_panel()
+
+
+func _on_developer_pressed() -> void:
+	if developer_panel.visible:
+		_close_primary_panel(false)
+	else:
+		_open_tool_panel(developer_panel)
 
 
 func _on_developer_panel_close_requested() -> void:
@@ -384,7 +411,10 @@ func _on_developer_panel_close_requested() -> void:
 
 func _on_developer_mode_changed(_enabled: bool) -> void:
 	_apply_developer_visibility()
+	_refresh_more_menu()
 	social_panel.refresh_developer_mode()
+	if not GameSessionService.developer_mode and developer_panel.visible:
+		_close_primary_panel(false)
 
 
 func _apply_developer_visibility() -> void:
@@ -394,18 +424,69 @@ func _apply_developer_visibility() -> void:
 
 
 func _open_primary_panel(panel: Control) -> void:
-	action_panel.visible = panel == action_panel
-	social_panel.visible = panel == social_panel
+	if _drawer_tween != null:
+		_drawer_tween.kill()
+	_hide_drawers_except(panel)
+	developer_panel.visible = false
+	_active_drawer = panel
+	modal_layer.visible = true
+	panel.visible = true
+	panel.position.x = -panel.size.x - 16.0
+	_drawer_tween = create_tween()
+	_drawer_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_drawer_tween.tween_property(
+		panel, "position:x", DRAWER_OPEN_X, DRAWER_ANIMATION_SECONDS
+	)
+	panel.grab_focus()
+
+
+func _open_tool_panel(panel: Control) -> void:
+	if _drawer_tween != null:
+		_drawer_tween.kill()
+	_hide_drawers_except(null)
+	_active_drawer = null
 	developer_panel.visible = panel == developer_panel
 	modal_layer.visible = true
 	panel.grab_focus()
 
 
-func _close_primary_panel() -> void:
-	action_panel.visible = false
-	social_panel.visible = false
+func _close_primary_panel(animated: bool = true) -> void:
 	developer_panel.visible = false
+	if _drawer_tween != null:
+		_drawer_tween.kill()
+	if animated and _active_drawer != null and _active_drawer.visible:
+		var closing_panel: Control = _active_drawer
+		_drawer_tween = create_tween()
+		_drawer_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		_drawer_tween.tween_property(
+			closing_panel,
+			"position:x",
+			-closing_panel.size.x - 16.0,
+			DRAWER_ANIMATION_SECONDS
+		)
+		_drawer_tween.finished.connect(_finish_drawer_close.bind(closing_panel))
+		return
+	_hide_drawers_except(null)
+	_active_drawer = null
 	modal_layer.visible = false
+
+
+func _finish_drawer_close(panel: Control) -> void:
+	if _active_drawer != panel:
+		return
+	panel.visible = false
+	panel.position.x = DRAWER_OPEN_X
+	_active_drawer = null
+	modal_layer.visible = false
+
+
+func _hide_drawers_except(panel: Control) -> void:
+	for drawer: Control in [
+		character_panel, action_panel, social_panel, world_activity_panel,
+	]:
+		drawer.visible = drawer == panel
+		if drawer != panel:
+			drawer.position.x = DRAWER_OPEN_X
 
 
 func _on_modal_backdrop_input(event: InputEvent) -> void:
@@ -419,7 +500,17 @@ func _on_more_item_pressed(item_id: int) -> void:
 		1:
 			_on_back_pressed()
 		2:
-			_on_developer_pressed()
+			if GameSessionService.developer_mode:
+				_on_developer_pressed()
+
+
+func _refresh_more_menu() -> void:
+	var popup: PopupMenu = more_button.get_popup()
+	popup.clear()
+	popup.add_item("返回主菜单", 1)
+	if GameSessionService.developer_mode:
+		popup.add_separator()
+		popup.add_item("开发者工具", 2)
 
 
 func _on_social_action_requested(action_id: String, requested_target_id: String) -> void:

@@ -28,8 +28,8 @@ corner_radius_bottom_left = 6
 
 [node name="SocialSystemPanel" type="PanelContainer"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(540, 500)
-offset_right = 552.0
+custom_minimum_size = Vector2(480, 500)
+offset_right = 500.0
 offset_bottom = 594.0
 focus_mode = 1
 theme_override_styles/panel = SubResource("panel")
@@ -81,7 +81,7 @@ layout_mode = 2
 horizontal_scroll_mode = 0
 
 [node name="OrganizationContent" type="VBoxContainer" parent="Margin/Root/SocialTabs/我的组织"]
-custom_minimum_size = Vector2(492, 0)
+custom_minimum_size = Vector2(444, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
@@ -158,7 +158,7 @@ layout_mode = 2
 horizontal_scroll_mode = 0
 
 [node name="RelationshipContent" type="VBoxContainer" parent="Margin/Root/SocialTabs/人际关系"]
-custom_minimum_size = Vector2(492, 0)
+custom_minimum_size = Vector2(444, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
@@ -225,7 +225,7 @@ layout_mode = 2
 horizontal_scroll_mode = 0
 
 [node name="SuccessionContent" type="VBoxContainer" parent="Margin/Root/SocialTabs/人物继承"]
-custom_minimum_size = Vector2(492, 0)
+custom_minimum_size = Vector2(444, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8

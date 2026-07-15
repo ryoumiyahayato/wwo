@@ -249,7 +249,7 @@ func _open_action_panel() -> void:
 	_expect(button != null and button.is_visible_in_tree(), "长期行动正式入口可见")
 	if button != null:
 		button.pressed.emit()
-		await process_frame
+		await create_timer(0.24).timeout
 	_expect(_action_panel.visible, "长期行动面板已打开")
 
 
@@ -260,7 +260,7 @@ func _open_social_panel() -> void:
 	_expect(button != null and button.is_visible_in_tree(), "社会系统正式入口可见")
 	if button != null:
 		button.pressed.emit()
-		await process_frame
+		await create_timer(0.24).timeout
 	_expect(_social_panel.visible, "社会系统面板已打开")
 
 
@@ -280,7 +280,10 @@ func _assert_action_layout() -> void:
 				all_choices_visible = false
 				break
 	_expect(all_choices_visible, "八类行动以 2×4 按钮完整位于行动首屏")
-	_expect(_rect_inside_viewport(begin.get_global_rect()), "开始行动按钮完整位于 1280×720 窗口内")
+	_expect(
+		_rect_inside_viewport(begin.get_global_rect()),
+		"开始行动按钮完整位于 1280×720 窗口内：%s" % begin.get_global_rect()
+	)
 	_expect(not _social_panel.visible and not (_view.find_child("DeveloperPanel", true, false) as Control).visible, "行动页未被其他主面板遮挡")
 	_expect(_modal_layer().visible and (_view.find_child("ModalBackdrop", true, false) as ColorRect).is_visible_in_tree(), "打开主面板时显示半透明模态遮罩")
 
@@ -291,7 +294,10 @@ func _assert_social_layout() -> void:
 	var dev_section: PanelContainer = _social_panel.find_child("DeveloperSection", true, false) as PanelContainer
 	_expect(panel_rect.size.y >= VIEWPORT_SIZE.y * 0.70, "SocialSystemPanel 可见高度至少占窗口 70%")
 	_expect(tabs.get_global_rect().size.y > 200.0, "社会系统内容区高度大于 200")
-	_expect(_rect_inside_viewport(panel_rect), "社会系统主要控件完整位于 1280×720 窗口内")
+	_expect(
+		_rect_inside_viewport(panel_rect),
+		"社会系统主要控件完整位于 1280×720 窗口内：%s" % panel_rect
+	)
 	_expect(not dev_section.is_visible_in_tree(), "正式玩家模式不存在可见的开发者直接修改区")
 	_expect(not _action_panel.visible and not (_view.find_child("DeveloperPanel", true, false) as Control).visible, "社会页未被其他主面板遮挡")
 
@@ -345,30 +351,33 @@ func _open_profile_and_return() -> void:
 		await _send_input_action("ui_cancel")
 	var character_button: Button = _view.find_child("CharacterButton", true, false) as Button
 	character_button.pressed.emit()
-	await process_frame
-	await process_frame
-	var profile: Control = current_scene as Control
-	_expect(profile != null and profile.name == "CharacterProfileView", "通过人物按钮进入结构化人物页")
+	await create_timer(0.24).timeout
+	var profile: Control = _view.find_child("CharacterProfilePanel", true, false) as Control
+	_expect(
+		profile != null
+		and profile.is_visible_in_tree()
+		and current_scene == _view,
+		"通过人物按钮打开地图上的结构化人物抽屉"
+	)
 	if profile == null:
 		return
 	var visible_text: String = _collect_visible_text(profile)
 	for forbidden: String in ["population_category", "generation_seed", "random_state", "可见技能", "已知倾向"]:
-		_expect(not visible_text.contains(forbidden), "正式人物页不出现内部或实现视角文本：%s" % forbidden)
+		_expect(not visible_text.contains(forbidden), "正式人物抽屉不出现内部或实现视角文本：%s" % forbidden)
 	var status_grid: GridContainer = profile.find_child("StatusGrid", true, false) as GridContainer
-	var ability_card: PanelContainer = profile.find_child("AbilitiesCard", true, false) as PanelContainer
 	var progress_bars: Array[Node] = profile.find_children("*", "ProgressBar", true, false)
-	_expect(status_grid != null and status_grid.get_child_count() == 18, "人物页用中文字段卡片展示九项正式状态")
-	_expect(ability_card != null and ability_card.is_visible_in_tree() and progress_bars.size() == 9, "人物能力按分组进度条展示")
+	_expect(status_grid != null and status_grid.get_child_count() == 12, "人物抽屉用中文字段展示六项核心状态")
+	_expect(progress_bars.size() == 9, "人物抽屉按分组进度条展示九项能力")
 	var profile_clock_before: bool = _clock.is_paused
 	await _send_input_action("toggle_pause")
-	_expect(_clock.is_paused != profile_clock_before, "人物页面 Space 操作同一权威时钟")
+	_expect(_clock.is_paused != profile_clock_before, "人物抽屉 Space 操作同一权威时钟")
 	await _send_input_action("toggle_pause")
-	var back: Button = profile.find_child("BackButton", true, false) as Button
-	back.pressed.emit()
-	await process_frame
-	await process_frame
-	_view = current_scene as Control
-	_expect(_view != null and _view.name == "StrategicMapView", "通过人物页返回按钮回到同一世界地图")
+	character_button.pressed.emit()
+	await create_timer(0.24).timeout
+	_expect(
+		not profile.visible and current_scene == _view,
+		"再次点击人物入口收起抽屉且地图始终保持可见"
+	)
 
 
 func _send_input_action(action_name: String) -> void:
@@ -382,6 +391,8 @@ func _send_input_action(action_name: String) -> void:
 	released.pressed = false
 	Input.parse_input_event(released)
 	await process_frame
+	if action_name == "ui_cancel":
+		await create_timer(0.24).timeout
 
 
 func _modal_layer() -> Control:

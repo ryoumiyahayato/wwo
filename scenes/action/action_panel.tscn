@@ -32,8 +32,8 @@ content_margin_bottom = 8.0
 
 [node name="ActionPanel" type="PanelContainer"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(540, 500)
-offset_right = 552.0
+custom_minimum_size = Vector2(480, 500)
+offset_right = 500.0
 offset_bottom = 594.0
 focus_mode = 1
 theme_override_styles/panel = SubResource("panel")
@@ -75,7 +75,7 @@ size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
 [node name="Content" type="VBoxContainer" parent="Margin/Root/ActionScroll"]
-custom_minimum_size = Vector2(500, 0)
+custom_minimum_size = Vector2(444, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
@@ -91,7 +91,7 @@ layout_mode = 2
 theme_override_constants/separation = 10
 
 [node name="ActionChooser" type="VBoxContainer" parent="Margin/Root/ActionScroll/Content/SelectionRow"]
-custom_minimum_size = Vector2(236, 120)
+custom_minimum_size = Vector2(210, 120)
 layout_mode = 2
 
 [node name="ActionButtons" type="GridContainer" parent="Margin/Root/ActionScroll/Content/SelectionRow/ActionChooser"]

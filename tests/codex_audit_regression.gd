@@ -55,6 +55,7 @@ func _run() -> void:
 		return
 
 	_test_fixed_action_button_layout()
+	await _test_drawer_navigation()
 	_test_selectable_skill_growth()
 	_test_practical_skill_growth()
 	_test_cross_seed_guaranteed_reachability()
@@ -82,6 +83,68 @@ func _test_fixed_action_button_layout() -> void:
 			break
 		ancestor = ancestor.get_parent()
 	_expect(not inside_scroll, "1280×720 下开始行动按钮不依赖滚动到页尾")
+
+
+func _test_drawer_navigation() -> void:
+	var character_button: Button = _view.find_child("CharacterButton", true, false) as Button
+	var action_button: Button = _view.find_child("ActionButton", true, false) as Button
+	var social_button: Button = _view.find_child("SocialButton", true, false) as Button
+	var activity_button: Button = _view.find_child("WorldActivityButton", true, false) as Button
+	var save_button: Button = _view.find_child("SaveButton", true, false) as Button
+	var character_panel: Control = _view.find_child("CharacterProfilePanel", true, false) as Control
+	var action_panel: Control = _view.find_child("ActionPanel", true, false) as Control
+	var social_panel: Control = _view.find_child("SocialSystemPanel", true, false) as Control
+	var activity_panel: Control = _view.find_child("WorldActivityPanel", true, false) as Control
+	var modal_layer: Control = _view.find_child("ModalLayer", true, false) as Control
+	_expect(
+		character_button != null
+		and action_button != null
+		and social_button != null
+		and activity_button != null
+		and save_button != null,
+		"地图顶栏提供四个玩法入口和独立保存工具入口"
+	)
+	_expect(
+		character_button.get_parent() == action_button.get_parent()
+		and action_button.get_parent() == social_button.get_parent()
+		and save_button.get_parent() != character_button.get_parent(),
+		"玩法入口与工具入口使用独立顶栏分组"
+	)
+	character_button.pressed.emit()
+	_expect(character_panel.visible and character_panel.position.x < 0.0, "人物抽屉从左侧开始滑入")
+	await create_timer(0.35).timeout
+	_expect(
+		is_equal_approx(character_panel.position.x, 14.0)
+		and character_panel.size.x >= 440.0
+		and character_panel.size.x <= 520.0,
+		"人物抽屉停靠左侧且宽度处于 440～520 像素：%s" % character_panel.get_global_rect()
+	)
+	action_button.pressed.emit()
+	await create_timer(0.35).timeout
+	_expect(
+		action_panel.visible
+		and not character_panel.visible
+		and not social_panel.visible
+		and not activity_panel.visible,
+		"切换玩法入口时抽屉保持互斥"
+	)
+	action_button.pressed.emit()
+	await create_timer(0.35).timeout
+	_expect(not action_panel.visible and not modal_layer.visible, "再次点击当前入口反向收起抽屉")
+	social_button.pressed.emit()
+	await create_timer(0.35).timeout
+	_expect(social_panel.visible and modal_layer.visible, "社会抽屉可从同一左侧位置打开")
+	var cancel := InputEventAction.new()
+	cancel.action = "ui_cancel"
+	cancel.pressed = true
+	Input.parse_input_event(cancel)
+	await create_timer(0.35).timeout
+	_expect(not social_panel.visible and not modal_layer.visible, "Esc 关闭当前左侧抽屉")
+	activity_button.pressed.emit()
+	await create_timer(0.35).timeout
+	_expect(activity_panel.visible and modal_layer.visible, "世界动态使用统一左侧抽屉")
+	activity_button.pressed.emit()
+	await create_timer(0.24).timeout
 
 
 func _test_selectable_skill_growth() -> void:
