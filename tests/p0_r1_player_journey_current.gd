@@ -1,8 +1,9 @@
 extends SceneTree
-## Current default-branch player journey. Uses formal UI controls and legal
-## succession preconditions; no developer mutation controls are used.
+## 1280x720 formal-player journey. After the stable new-game character is made,
+## all player decisions enter through visible controls and authoritative time.
 
 const MANUAL_PATH: String = GameSaveService.MANUAL_PATH
+const VIEWPORT_SIZE := Vector2(1280.0, 720.0)
 
 var _checks: int = 0
 var _failures: int = 0
@@ -12,6 +13,7 @@ var _clock: SimulationClock
 var _map: MapControlService
 var _society: SocietySimulationService
 var _action_panel: ActionPanel
+var _social_panel: SocialSystemPanel
 
 
 func _initialize() -> void:
@@ -23,18 +25,14 @@ func _run() -> void:
 	_preserve_manual_files()
 	GameSessionService.clear()
 	var player: CharacterData = _make_test_player()
-	_expect(player != null, "可创建当前玩家旅程人物")
+	_expect(player != null, "可在进入地图前创建稳定的新游戏人物")
 	if player == null:
 		_finish()
 		return
 	GameSessionService.set_player(player)
 
-	var packed: Resource = load("res://scenes/map/strategic_map_view.tscn")
-	_view = (
-		(packed as PackedScene).instantiate() as Control
-		if packed is PackedScene
-		else null
-	)
+	var packed: PackedScene = load("res://scenes/map/strategic_map_view.tscn") as PackedScene
+	_view = packed.instantiate() as Control if packed != null else null
 	_expect(_view != null, "战略地图可实例化")
 	if _view == null:
 		_finish()
@@ -43,192 +41,200 @@ func _run() -> void:
 	get_root().add_child(_view)
 	current_scene = _view
 	await process_frame
-
-	_clock = GameSessionService.world_clock
-	_map = GameSessionService.world_map_service
-	_society = GameSessionService.society_service
-	_action_panel = _view.find_child("ActionPanel", true, false) as ActionPanel
+	await process_frame
+	_refresh_world_references()
 	_expect(
-		_clock != null
-		and _map != null
-		and _society != null
-		and _action_panel != null,
-		"当前旅程建立权威世界与正式行动面板"
+		_clock != null and _map != null and _society != null and _action_panel != null and _social_panel != null,
+		"正式地图建立权威世界、行动页与社会页"
 	)
-	if _clock == null or _map == null or _society == null or _action_panel == null:
+	if _clock == null or _map == null or _society == null or _action_panel == null or _social_panel == null:
 		_finish()
 		return
+	_expect(not GameSessionService.developer_mode, "玩家旅程全程关闭开发者模式")
 
-	var government_id: String = (
-		"organization:loran_government"
-		if player.country_id == "country:loran_federation"
-		else "organization:vesta_government"
-	)
-	var government: OrganizationData = _society.organizations.get_organization(
-		government_id
-	)
-	_expect(government != null and not government.leader_character_id.is_empty(), "本国政府具有真实领导人物")
+	var government_id: String = "organization:loran_government"
+	var government: OrganizationData = _society.organizations.get_organization(government_id)
+	_expect(government != null and not government.leader_character_id.is_empty(), "本国政府具有可通过 UI 接触的真实领导人物")
 	if government == null or government.leader_character_id.is_empty():
 		_finish()
 		return
 	var leader_id: String = government.leader_character_id
 
 	await _open_action_panel()
-	_expect(_begin_button_is_visible_and_fixed(), "1280×720 下开始行动按钮可见且位于滚动区外")
+	_assert_action_layout()
+	_expect(_selected_action_id() == "action:study_skill", "行动列表默认选择学习技能")
+	var study_section: VBoxContainer = _action_panel.find_child("StudySection", true, false) as VBoxContainer
+	var skill_option: OptionButton = _action_panel.find_child("StudySkillOption", true, false) as OptionButton
+	var investment: SpinBox = _action_panel.find_child("InvestmentSpin", true, false) as SpinBox
+	_expect(study_section != null and study_section.is_visible_in_tree(), "学习技能选择器真实可见")
+	_expect(skill_option != null and skill_option.item_count == 9, "学习页面提供九项人物能力")
+	_expect(investment != null and investment.is_visible_in_tree(), "主动财富投入控件真实可见")
+	_expect(_select_option_by_metadata(skill_option, "administration"), "可通过技能选择器选择行政")
+	var administration_before: int = int(player.skills["administration"])
+	_set_investment(20)
+	_expect(_start_selected_action(), "通过固定可见按钮开始学习行政")
+	_expect(GameSessionService.current_action.context.get("study_skill_id", "") == "administration", "权威行动记录保存所选学习技能")
 
-	var relation_started: bool = _start_action_via_ui(
-		"action:build_relationship", leader_id, 20
-	)
-	_expect(relation_started, "通过正式 UI 开始建立关系行动")
-	if not relation_started:
-		_finish()
-		return
-	_expect(_complete_current_action(), "建立关系行动可由权威时间完成")
-	_expect(
-		_society.relationships.get_between(player.id, leader_id) != null,
-		"完成行动后形成真实关系记录"
-	)
+	var action_pause: Button = _action_panel.find_child("PauseButton", true, false) as Button
+	action_pause.pressed.emit()
+	_expect(GameSessionService.current_action.status == ActionInstanceData.STATUS_PAUSED, "通过当前行动卡片暂停行动")
+	action_pause.pressed.emit()
+	_expect(GameSessionService.current_action.status == ActionInstanceData.STATUS_ACTIVE, "通过当前行动卡片继续行动")
+	_expect(_complete_current_action(), "学习行动由权威时间推进到完成")
+	_expect(int(player.skills["administration"]) > administration_before, "完成学习后行政能力成长")
 
-	var join_started: bool = _start_action_via_ui(
-		"action:join_organization", government_id, 20
-	)
-	_expect(join_started, "通过正式 UI 开始加入组织行动")
-	if not join_started:
-		_finish()
-		return
-	_expect(_complete_current_action(), "加入组织行动可由权威时间完成")
-	_expect(
-		government.member_ids.has(player.id),
-		"完成行动后玩家成为本国政府成员"
-	)
+	_expect(_action_panel.prefill_action("action:perform_work"), "可从行动列表选择从事工作")
+	_set_investment(0)
+	_expect(_start_selected_action(), "通过正式 UI 开始可取消的工作行动")
+	var cancel_button: Button = _action_panel.find_child("CancelButton", true, false) as Button
+	cancel_button.pressed.emit()
+	_expect(GameSessionService.current_action.status == ActionInstanceData.STATUS_CANCELLED, "通过当前行动卡片取消行动")
 
-	var old_position_id: String = _society.organizations.get_position_id(
-		player.id, government_id
-	)
-	var position_started: bool = _start_action_via_ui(
-		"action:seek_position", government_id, 20
-	)
-	_expect(position_started, "通过正式 UI 开始争取职位行动")
-	if not position_started:
-		_finish()
-		return
-	_expect(_complete_current_action(), "争取职位行动可由权威时间完成")
-	var new_position_id: String = _society.organizations.get_position_id(
-		player.id, government_id
-	)
-	_expect(
-		not new_position_id.is_empty() and new_position_id != old_position_id,
-		"完成行动后职位按空缺规则晋升"
-	)
+	var paused_before: bool = _clock.is_paused
+	await _send_input_action("toggle_pause")
+	_expect(_clock.is_paused != paused_before, "地图按 Space 切换权威时钟暂停状态")
+	await _send_input_action("toggle_pause")
+	_expect(_clock.is_paused == paused_before, "再次按 Space 恢复原时钟状态")
+	await _send_input_action("ui_cancel")
+	_expect(not _action_panel.visible and not _modal_layer().visible, "按 Esc 关闭最上层行动面板")
 
-	var policy_target_id: String = _first_policy_target(player.country_id)
-	_expect(not policy_target_id.is_empty(), "存在合法本国政策目标")
-	if policy_target_id.is_empty():
-		_finish()
-		return
-	var policy_unit: ControlUnitData = _map.get_unit(policy_target_id)
-	var policy_region: RegionData = _map.data_set.regions[
-		policy_unit.region_id
-	] as RegionData
-	var influence_before: Dictionary = policy_region.social_influence.duplicate(true)
-	var policy_started: bool = _start_action_via_ui(
-		"action:promote_policy", policy_target_id, 20
-	)
-	_expect(policy_started, "通过正式 UI 开始地区政策行动")
-	if not policy_started:
-		_finish()
-		return
-	_expect(_complete_current_action(), "地区政策行动可由权威时间完成")
-	_expect(
-		policy_region.social_influence != influence_before,
-		"政策行动完成后修改权威地区社会影响"
-	)
-
-	player.age = int(_society.rules.lifecycle_rules["retirement_age"])
 	await _open_social_panel()
-	var social_panel: SocialSystemPanel = _view.find_child(
-		"SocialSystemPanel", true, false
-	) as SocialSystemPanel
-	_expect(social_panel != null and social_panel.visible, "正式社会系统面板可打开")
-	if social_panel == null:
-		_finish()
-		return
-	var reason_option: OptionButton = social_panel.find_child(
-		"ExitReasonOption", true, false
-	) as OptionButton
-	_expect(
-		_select_option_by_metadata(reason_option, "retirement"),
-		"达到退休年龄后正式退出原因出现退休"
-	)
-	var prepare_button: Button = social_panel.find_child(
-		"PrepareSuccessionButton", true, false
-	) as Button
-	_expect(prepare_button != null and not prepare_button.disabled, "合法退休可准备继承")
-	if prepare_button == null or prepare_button.disabled:
-		_finish()
-		return
-	prepare_button.pressed.emit()
+	_assert_social_layout()
+	_expect(_social_player_sections_visible(), "社会页可查看我的组织、关系与继承状态")
+	await _select_social_tab(1)
+	var relationship_option: OptionButton = _social_panel.find_child("RelationshipOption", true, false) as OptionButton
+	_expect(_select_option_by_metadata(relationship_option, leader_id), "可在关系页选择政府领导人物")
+	var build_relationship: Button = _social_panel.find_child("BuildRelationshipButton", true, false) as Button
+	_expect(build_relationship.is_visible_in_tree() and not build_relationship.disabled, "建立新联系入口真实可点击")
+	build_relationship.pressed.emit()
 	await process_frame
-	var successor_option: OptionButton = social_panel.find_child(
-		"SuccessionOption", true, false
-	) as OptionButton
-	_expect(successor_option != null and successor_option.item_count > 0, "真实关系或共同组织产生继承候选")
-	if successor_option == null or successor_option.item_count == 0:
+	_expect(_action_panel.visible and not _social_panel.visible, "社会入口跳转到行动页且保持单一主面板")
+	_expect(_selected_action_id() == "action:build_relationship" and _selected_target_id() == leader_id, "建立关系行动自动预填人物目标")
+	_set_investment(20)
+	_expect(_start_selected_action(), "从社会页跳转后通过正式 UI 开始建立关系")
+	_expect(_complete_current_action(), "建立关系行动完成")
+	_expect(_society.relationships.get_between(player.id, leader_id) != null, "社会服务出现真实双向关系记录")
+
+	await _open_social_panel()
+	await _select_social_tab(0)
+	var organization_option: OptionButton = _social_panel.find_child("OrganizationOption", true, false) as OptionButton
+	_expect(_select_option_by_metadata(organization_option, government_id), "可在我的组织页选择本国政府")
+	var join_button: Button = _social_panel.find_child("JoinActionButton", true, false) as Button
+	_expect(join_button.is_visible_in_tree() and not join_button.disabled, "申请加入入口真实可点击")
+	join_button.pressed.emit()
+	await process_frame
+	_expect(_selected_action_id() == "action:join_organization" and _selected_target_id() == government_id, "申请加入自动预填组织目标")
+	_set_investment(20)
+	_expect(_start_selected_action(), "通过正式 UI 开始加入组织")
+	_expect(_complete_current_action(), "加入组织行动完成")
+	_expect(government.member_ids.has(player.id), "完成后玩家获得组织身份和入口职位")
+
+	await _open_social_panel()
+	await _select_social_tab(0)
+	_select_option_by_metadata(organization_option, government_id)
+	var position_button: Button = _social_panel.find_child("PositionActionButton", true, false) as Button
+	_expect(position_button.is_visible_in_tree() and not position_button.disabled, "争取职位入口在成员状态下可点击")
+	var old_position_id: String = _society.organizations.get_position_id(player.id, government_id)
+	position_button.pressed.emit()
+	await process_frame
+	_expect(_selected_action_id() == "action:seek_position" and _selected_target_id() == government_id, "争取职位自动预填当前组织")
+	_set_investment(20)
+	_expect(_start_selected_action(), "通过正式 UI 开始争取职位")
+	_expect(_complete_current_action(), "争取职位行动完成")
+	var new_position_id: String = _society.organizations.get_position_id(player.id, government_id)
+	_expect(not new_position_id.is_empty() and new_position_id != old_position_id, "完成后获得更高职位与地区政策权限")
+
+	await _open_social_panel()
+	await _select_social_tab(0)
+	_select_option_by_metadata(organization_option, government_id)
+	var policy_button: Button = _social_panel.find_child("PolicyActionButton", true, false) as Button
+	_expect(policy_button.is_visible_in_tree() and not policy_button.disabled, "获得权限后推动政策入口可点击")
+	policy_button.pressed.emit()
+	await process_frame
+	_expect(_selected_action_id() == "action:promote_policy" and not _selected_target_id().is_empty(), "推动政策自动预填辖区内地区目标")
+	var policy_unit: ControlUnitData = _map.get_unit(_selected_target_id())
+	var policy_region: RegionData = _map.data_set.regions.get(policy_unit.region_id) as RegionData
+	var influence_before: Dictionary = policy_region.social_influence.duplicate(true)
+	_set_investment(20)
+	_expect(_start_selected_action(), "通过正式 UI 开始地区政策行动")
+	_expect(_complete_current_action(), "地区政策行动完成")
+	_expect(policy_region.social_influence != influence_before, "政策行动完成后改变权威地区社会影响")
+
+	var hour_before_profile: int = _clock.total_hours
+	await _open_profile_and_return()
+	_refresh_world_references()
+	_expect(_clock.total_hours == hour_before_profile, "人物页往返保持同一权威世界时间")
+	_expect(GameSessionService.current_action != null and GameSessionService.current_action.is_terminal(), "页面切换保持行动状态")
+
+	await _open_social_panel()
+	await _select_social_tab(2)
+	var exit_reason: OptionButton = _social_panel.find_child("ExitReasonOption", true, false) as OptionButton
+	_expect(_select_option_by_metadata(exit_reason, "voluntary"), "社会页显示权威服务认可的自愿退出原因")
+	var prepare: Button = _social_panel.find_child("PrepareSuccessionButton", true, false) as Button
+	_expect(prepare.is_visible_in_tree() and not prepare.disabled, "合法退出条件下可查看继承者")
+	prepare.pressed.emit()
+	await process_frame
+	var successor_option: OptionButton = _social_panel.find_child("SuccessionOption", true, false) as OptionButton
+	var confirm: Button = _social_panel.find_child("ConfirmSuccessionButton", true, false) as Button
+	_expect(successor_option.item_count > 0 and not confirm.disabled, "真实关系或共同组织产生合法继承候选")
+	if successor_option.item_count == 0 or confirm.disabled:
 		_finish()
 		return
 	var old_player_id: String = player.id
-	var expected_successor_id: String = str(
-		successor_option.get_item_metadata(successor_option.selected)
-	)
-	var confirm_button: Button = social_panel.find_child(
-		"ConfirmSuccessionButton", true, false
-	) as Button
-	_expect(confirm_button != null and not confirm_button.disabled, "继承确认按钮可用")
-	if confirm_button == null or confirm_button.disabled:
-		_finish()
-		return
-	confirm_button.pressed.emit()
+	var expected_successor_id: String = str(successor_option.get_item_metadata(successor_option.selected))
+	confirm.pressed.emit()
 	await process_frame
-	_expect(
-		GameSessionService.player_character != null
-		and GameSessionService.player_character.id == expected_successor_id
-		and GameSessionService.player_character.id != old_player_id,
-		"合法退休后玩家切换到所选继承者"
-	)
-	_expect(
-		_society.roster.get_exited(old_player_id) != null,
-		"旧玩家保留在退出历史中"
-	)
+	_expect(GameSessionService.player_character.id == expected_successor_id and expected_successor_id != old_player_id, "通过可见确认按钮完成人物继承")
+	_expect(_society.roster.get_exited(old_player_id) != null, "旧人物保留在退出历史并继续同一世界")
 
 	var save_button: Button = _view.find_child("SaveButton", true, false) as Button
-	_expect(save_button != null and save_button.visible, "正式保存按钮可见")
-	if save_button == null:
-		_finish()
-		return
+	_expect(save_button != null and save_button.is_visible_in_tree(), "正式保存按钮真实可见")
 	var saved_player_id: String = GameSessionService.player_character.id
 	var saved_hour: int = _clock.total_hours
+	var saved_region_influence: Dictionary = policy_region.social_influence.duplicate(true)
+	var saved_policy_unit: Dictionary = policy_unit.to_dict()
 	save_button.pressed.emit()
 	await process_frame
-	var save_service := GameSaveService.new()
-	var loaded: SaveOperationResult = save_service.load_from_path(MANUAL_PATH)
-	_expect(loaded.success, "正式保存按钮写入可读取手动档")
-	if loaded.success:
-		var restored: SaveOperationResult = save_service.restore_snapshot(
-			loaded.snapshot, _clock, _map
-		)
-		_expect(restored.success, "手动档可恢复到权威会话")
-		_expect(
-			GameSessionService.player_character.id == saved_player_id
-			and _clock.total_hours == saved_hour,
-			"恢复后继承者和权威时间保持一致"
-		)
+	_expect(FileAccess.file_exists(ProjectSettings.globalize_path(MANUAL_PATH)), "保存按钮写入手动存档")
+
+	var more_button: MenuButton = _view.find_child("MoreButton", true, false) as MenuButton
+	more_button.get_popup().id_pressed.emit(1)
+	await process_frame
+	await process_frame
+	var menu: Node = current_scene
+	_expect(menu != null and menu.name == "MainMenu", "通过更多菜单退出到主菜单")
+	var load_button: Button = menu.find_child("LoadGameButton", true, false) as Button
+	_expect(load_button != null and load_button.is_visible_in_tree() and not load_button.disabled, "主菜单显示可用的手动存档加载入口")
+	load_button.pressed.emit()
+	await process_frame
+	await process_frame
+	_view = current_scene as Control
+	_refresh_world_references()
+	_expect(_view != null and _view.name == "StrategicMapView", "通过主菜单真实加载返回战略地图")
+	_expect(GameSessionService.player_character.id == saved_player_id and _clock.total_hours == saved_hour, "加载恢复玩家继承者与权威世界时间")
+	var loaded_unit: ControlUnitData = _map.get_unit(str(saved_policy_unit["id"]))
+	var loaded_region: RegionData = _map.data_set.regions.get(loaded_unit.region_id) as RegionData
+	_expect(loaded_unit.to_dict() == saved_policy_unit, "加载恢复政策目标控制单元")
+	_expect(_numeric_dictionary_approx(loaded_region.social_influence, saved_region_influence), "加载恢复地区社会影响")
+	_expect(_society.roster.get_exited(old_player_id) != null, "加载恢复关系、组织与退出历史所在的社会状态")
 
 	_finish()
 
 
+func _refresh_world_references() -> void:
+	_clock = GameSessionService.world_clock
+	_map = GameSessionService.world_map_service
+	_society = GameSessionService.society_service
+	if _view != null:
+		_action_panel = _view.find_child("ActionPanel", true, false) as ActionPanel
+		_social_panel = _view.find_child("SocialSystemPanel", true, false) as SocialSystemPanel
+
+
 func _open_action_panel() -> void:
+	if _action_panel.visible:
+		return
 	var button: Button = _view.find_child("ActionButton", true, false) as Button
-	_expect(button != null and button.visible, "长期行动正式入口可见")
+	_expect(button != null and button.is_visible_in_tree(), "长期行动正式入口可见")
 	if button != null:
 		button.pressed.emit()
 		await process_frame
@@ -236,105 +242,161 @@ func _open_action_panel() -> void:
 
 
 func _open_social_panel() -> void:
+	if _social_panel.visible:
+		return
 	var button: Button = _view.find_child("SocialButton", true, false) as Button
-	_expect(button != null and button.visible, "社会系统正式入口可见")
+	_expect(button != null and button.is_visible_in_tree(), "社会系统正式入口可见")
 	if button != null:
 		button.pressed.emit()
 		await process_frame
+	_expect(_social_panel.visible, "社会系统面板已打开")
 
 
-func _begin_button_is_visible_and_fixed() -> bool:
-	var button: Button = _action_panel.get_node_or_null(
-		"Margin/Root/BeginButton"
-	) as Button
-	if button == null or not button.is_visible_in_tree():
-		return false
-	var ancestor: Node = button.get_parent()
-	while ancestor != null and ancestor != _action_panel:
-		if ancestor is ScrollContainer:
-			return false
-		ancestor = ancestor.get_parent()
-	var rect: Rect2 = button.get_global_rect()
-	return (
-		rect.size.x > 0.0
-		and rect.size.y > 0.0
-		and rect.position.x >= 0.0
-		and rect.position.y >= 0.0
-		and rect.end.x <= 1280.0
-		and rect.end.y <= 720.0
-	)
+func _assert_action_layout() -> void:
+	var panel_rect: Rect2 = _action_panel.get_global_rect()
+	var scroll: ScrollContainer = _action_panel.find_child("ActionScroll", true, false) as ScrollContainer
+	var begin: Button = _action_panel.find_child("BeginButton", true, false) as Button
+	var list: ItemList = _action_panel.find_child("ActionList", true, false) as ItemList
+	_expect(panel_rect.size.y >= VIEWPORT_SIZE.y * 0.70, "ActionPanel 可见高度至少占窗口 70%")
+	_expect(scroll.get_global_rect().size.y > 200.0, "行动内容滚动区高度大于 200")
+	_expect(list.is_visible_in_tree() and list.item_count == 8, "八类行动列表真实可见")
+	_expect(_rect_inside_viewport(begin.get_global_rect()), "开始行动按钮完整位于 1280×720 窗口内")
+	_expect(not _social_panel.visible and not (_view.find_child("DeveloperPanel", true, false) as Control).visible, "行动页未被其他主面板遮挡")
+	_expect(_modal_layer().visible and (_view.find_child("ModalBackdrop", true, false) as ColorRect).is_visible_in_tree(), "打开主面板时显示半透明模态遮罩")
 
 
-func _start_action_via_ui(
-	action_id: String,
-	target_id: String,
-	extra_funding: int
-) -> bool:
-	var action_option: OptionButton = _action_panel.find_child(
-		"ActionOption", true, false
-	) as OptionButton
-	if not _select_option_by_metadata(action_option, action_id):
+func _assert_social_layout() -> void:
+	var panel_rect: Rect2 = _social_panel.get_global_rect()
+	var tabs: TabContainer = _social_panel.find_child("SocialTabs", true, false) as TabContainer
+	var dev_section: PanelContainer = _social_panel.find_child("DeveloperSection", true, false) as PanelContainer
+	_expect(panel_rect.size.y >= VIEWPORT_SIZE.y * 0.70, "SocialSystemPanel 可见高度至少占窗口 70%")
+	_expect(tabs.get_global_rect().size.y > 200.0, "社会系统内容区高度大于 200")
+	_expect(_rect_inside_viewport(panel_rect), "社会系统主要控件完整位于 1280×720 窗口内")
+	_expect(not dev_section.is_visible_in_tree(), "正式玩家模式不存在可见的开发者直接修改区")
+	_expect(not _action_panel.visible and not (_view.find_child("DeveloperPanel", true, false) as Control).visible, "社会页未被其他主面板遮挡")
+
+
+func _social_player_sections_visible() -> bool:
+	var tabs: TabContainer = _social_panel.find_child("SocialTabs", true, false) as TabContainer
+	return tabs != null and tabs.get_tab_count() == 3 and tabs.get_tab_title(0) == "我的组织" and tabs.get_tab_title(1) == "人际关系" and tabs.get_tab_title(2) == "人物继承"
+
+
+func _select_social_tab(index: int) -> void:
+	var tabs: TabContainer = _social_panel.find_child("SocialTabs", true, false) as TabContainer
+	tabs.current_tab = index
+	await process_frame
+
+
+func _selected_action_id() -> String:
+	var list: ItemList = _action_panel.find_child("ActionList", true, false) as ItemList
+	var selected: PackedInt32Array = list.get_selected_items()
+	return "" if selected.is_empty() else str(list.get_item_metadata(selected[0]))
+
+
+func _selected_target_id() -> String:
+	var option: OptionButton = _action_panel.find_child("TargetOption", true, false) as OptionButton
+	return "" if option == null or option.item_count == 0 or option.selected < 0 else str(option.get_item_metadata(option.selected))
+
+
+func _set_investment(value: int) -> void:
+	var investment: SpinBox = _action_panel.find_child("InvestmentSpin", true, false) as SpinBox
+	investment.value = minf(float(value), investment.max_value)
+	investment.value_changed.emit(investment.value)
+
+
+func _start_selected_action() -> bool:
+	var begin: Button = _action_panel.find_child("BeginButton", true, false) as Button
+	if begin == null or not begin.is_visible_in_tree() or begin.disabled:
 		return false
-	if action_id in ["action:promote_policy", "action:support_control"]:
-		_action_panel.set_target(target_id)
-	var target_option: OptionButton = _action_panel.find_child(
-		"TargetOption", true, false
-	) as OptionButton
-	if not target_id.is_empty() and not _select_option_by_metadata(
-		target_option, target_id
-	):
-		return false
-	var investment: SpinBox = _action_panel.find_child(
-		"InvestmentSpin", true, false
-	) as SpinBox
-	if investment != null:
-		investment.value = minf(
-			float(extra_funding), investment.max_value
-		)
-		investment.value_changed.emit(investment.value)
-	var begin_button: Button = _action_panel.get_node_or_null(
-		"Margin/Root/BeginButton"
-	) as Button
-	if begin_button == null or begin_button.disabled or not begin_button.is_visible_in_tree():
-		return false
-	begin_button.pressed.emit()
-	return (
-		GameSessionService.current_action != null
-		and GameSessionService.current_action.definition_id == action_id
-	)
+	begin.pressed.emit()
+	return GameSessionService.current_action != null and GameSessionService.current_action.definition_id == _selected_action_id()
 
 
 func _complete_current_action() -> bool:
 	var guard: int = 0
-	while (
-		GameSessionService.current_action != null
-		and not GameSessionService.current_action.is_terminal()
-		and guard < 400
-	):
+	while GameSessionService.current_action != null and not GameSessionService.current_action.is_terminal() and guard < 400:
 		_clock.advance_hours(24)
 		guard += 1
-	return (
-		GameSessionService.current_action != null
-		and GameSessionService.current_action.status == ActionInstanceData.STATUS_COMPLETED
-		and GameSessionService.current_action.domain_effect_applied
-	)
+	return GameSessionService.current_action != null and GameSessionService.current_action.status == ActionInstanceData.STATUS_COMPLETED and GameSessionService.current_action.domain_effect_applied
 
 
-func _first_policy_target(country_id: String) -> String:
-	for unit_id: String in _map.get_sorted_unit_ids():
-		var unit: ControlUnitData = _map.get_unit(unit_id)
-		var region: RegionData = _map.data_set.regions[unit.region_id] as RegionData
-		if (
-			unit.controller_country_id == country_id
-			and region.de_jure_country_id == country_id
-		):
-			return unit_id
-	return ""
+func _open_profile_and_return() -> void:
+	if _modal_layer().visible:
+		await _send_input_action("ui_cancel")
+	var character_button: Button = _view.find_child("CharacterButton", true, false) as Button
+	character_button.pressed.emit()
+	await process_frame
+	await process_frame
+	var profile: Control = current_scene as Control
+	_expect(profile != null and profile.name == "CharacterProfileView", "通过人物按钮进入结构化人物页")
+	if profile == null:
+		return
+	var visible_text: String = _collect_visible_text(profile)
+	for forbidden: String in ["population_category", "generation_seed", "random_state", "可见技能", "已知倾向"]:
+		_expect(not visible_text.contains(forbidden), "正式人物页不出现内部或实现视角文本：%s" % forbidden)
+	var status_grid: GridContainer = profile.find_child("StatusGrid", true, false) as GridContainer
+	var ability_card: PanelContainer = profile.find_child("AbilitiesCard", true, false) as PanelContainer
+	var progress_bars: Array[Node] = profile.find_children("*", "ProgressBar", true, false)
+	_expect(status_grid != null and status_grid.get_child_count() == 18, "人物页用中文字段卡片展示九项正式状态")
+	_expect(ability_card != null and ability_card.is_visible_in_tree() and progress_bars.size() == 9, "人物能力按分组进度条展示")
+	var profile_clock_before: bool = _clock.is_paused
+	await _send_input_action("toggle_pause")
+	_expect(_clock.is_paused != profile_clock_before, "人物页面 Space 操作同一权威时钟")
+	await _send_input_action("toggle_pause")
+	var back: Button = profile.find_child("BackButton", true, false) as Button
+	back.pressed.emit()
+	await process_frame
+	await process_frame
+	_view = current_scene as Control
+	_expect(_view != null and _view.name == "StrategicMapView", "通过人物页返回按钮回到同一世界地图")
 
 
-func _select_option_by_metadata(
-	option: OptionButton, metadata_value: String
-) -> bool:
+func _send_input_action(action_name: String) -> void:
+	var pressed := InputEventAction.new()
+	pressed.action = action_name
+	pressed.pressed = true
+	Input.parse_input_event(pressed)
+	await process_frame
+	var released := InputEventAction.new()
+	released.action = action_name
+	released.pressed = false
+	Input.parse_input_event(released)
+	await process_frame
+
+
+func _modal_layer() -> Control:
+	return _view.find_child("ModalLayer", true, false) as Control
+
+
+func _rect_inside_viewport(rect: Rect2) -> bool:
+	return rect.size.x > 0.0 and rect.size.y > 0.0 and rect.position.x >= 0.0 and rect.position.y >= 0.0 and rect.end.x <= VIEWPORT_SIZE.x and rect.end.y <= VIEWPORT_SIZE.y
+
+
+func _numeric_dictionary_approx(actual: Dictionary, expected: Dictionary) -> bool:
+	if actual.size() != expected.size():
+		return false
+	for raw_key: Variant in expected:
+		if not actual.has(raw_key) or not is_equal_approx(float(actual[raw_key]), float(expected[raw_key])):
+			return false
+	return true
+
+
+func _collect_visible_text(root: Node) -> String:
+	var parts: Array[String] = []
+	for node: Node in root.find_children("*", "Control", true, false):
+		var control: Control = node as Control
+		if not control.is_visible_in_tree():
+			continue
+		if control is Label:
+			parts.append((control as Label).text)
+		elif control is RichTextLabel:
+			parts.append((control as RichTextLabel).text)
+		elif control is Button:
+			parts.append((control as Button).text)
+	return "\n".join(parts)
+
+
+func _select_option_by_metadata(option: OptionButton, metadata_value: String) -> bool:
 	if option == null:
 		return false
 	for index: int in range(option.item_count):
@@ -346,9 +408,7 @@ func _select_option_by_metadata(
 
 
 func _make_test_player() -> CharacterData:
-	var world: CoreDataLoadResult = CoreDataLoader.new().load_from_file(
-		"res://data/world/demo_world.json"
-	)
+	var world: CoreDataLoadResult = CoreDataLoader.new().load_from_file("res://data/world/demo_world.json")
 	var config: CharacterGenerationConfig = CharacterGenerationConfig.load_from_file()
 	if not world.is_success() or not config.is_valid():
 		return null
@@ -358,14 +418,13 @@ func _make_test_player() -> CharacterData:
 		DeterministicRandomService.new(19000101),
 		StableIdService.new()
 	)
-	var result: CharacterGenerationResult = generator.generate_character(
-		"country:loran_federation", CharacterGenerator.MODE_STANDARD
-	)
+	var result: CharacterGenerationResult = generator.generate_character("country:loran_federation", CharacterGenerator.MODE_STANDARD)
 	if not result.is_success():
 		return null
 	var player: CharacterData = result.character
 	for raw_skill: Variant in player.skills:
 		player.skills[raw_skill] = 100
+	player.skills["administration"] = 60
 	player.current_status["wealth"] = 1000
 	player.current_status["intelligence_points"] = 100
 	player.current_status["health"] = 100
@@ -383,11 +442,7 @@ func _preserve_manual_files() -> void:
 			_preserved_files[path] = null
 			continue
 		var file := FileAccess.open(path, FileAccess.READ)
-		_preserved_files[path] = (
-			PackedByteArray()
-			if file == null
-			else file.get_buffer(file.get_length())
-		)
+		_preserved_files[path] = PackedByteArray() if file == null else file.get_buffer(file.get_length())
 		if file != null:
 			file.close()
 
@@ -420,11 +475,7 @@ func _finish() -> void:
 	_restore_manual_files()
 	GameSessionService.clear()
 	if _failures > 0:
-		printerr(
-			"CURRENT PLAYER JOURNEY FAILED: %d/%d" % [
-				_failures, _checks
-			]
-		)
+		printerr("CURRENT PLAYER JOURNEY FAILED: %d/%d" % [_failures, _checks])
 		quit(1)
 	else:
 		print("CURRENT PLAYER JOURNEY PASSED: %d checks" % _checks)

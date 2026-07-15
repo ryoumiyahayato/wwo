@@ -915,11 +915,13 @@ func _test_m4_character_scenes() -> void:
 	if profile_resource is PackedScene:
 		var profile: Node = (profile_resource as PackedScene).instantiate()
 		get_root().add_child(profile)
-		var developer_panel: PanelContainer = profile.get_node("Margin/Root/Columns/DeveloperPanel") as PanelContainer
-		var public_label: RichTextLabel = profile.get_node("Margin/Root/Columns/PublicPanel/PublicMargin/PublicLabel") as RichTextLabel
-		var developer_toggle: CheckButton = profile.get_node("Margin/Root/Top/DeveloperToggle") as CheckButton
+		var developer_panel: PanelContainer = profile.find_child("DeveloperPanel", true, false) as PanelContainer
+		var identity_label: Label = profile.find_child("IdentityLabel", true, false) as Label
+		var developer_toggle: CheckButton = profile.find_child("DeveloperToggle", true, false) as CheckButton
 		_expect_true(not developer_panel.visible, "开发者隐藏数据面板默认关闭")
-		_expect_true(not public_label.text.contains("潜质"), "正式人物面板不泄露隐藏潜质")
+		_expect_true(not identity_label.text.contains("潜质") and not identity_label.text.contains("population_category"), "正式人物卡片不泄露内部字段或隐藏潜质")
+		GameSessionService.developer_mode = true
+		developer_toggle.visible = true
 		developer_toggle.button_pressed = true
 		_expect_true(developer_panel.visible, "开发者开关可显式显示隐藏数据")
 		profile.queue_free()
@@ -1105,14 +1107,14 @@ func _test_m5_action_panel_scene() -> void:
 	var scene_resource: Resource = load("res://scenes/map/strategic_map_view.tscn")
 	var view: Node = (scene_resource as PackedScene).instantiate()
 	get_root().add_child(view)
-	var action_button: Button = view.get_node("RootMargin/Layout/TopBar/TopMargin/TopControls/ActionButton") as Button
-	var panel: ActionPanel = view.get_node("ActionPanel") as ActionPanel
+	var action_button: Button = view.find_child("ActionButton", true, false) as Button
+	var panel: ActionPanel = view.find_child("ActionPanel", true, false) as ActionPanel
 	_expect_true(not action_button.disabled, "有玩家人物时地图行动入口可用")
 	_expect_true(not panel.visible, "长期行动面板默认关闭")
 	action_button.pressed.emit()
 	_expect_true(panel.visible, "行动入口可打开长期行动面板")
-	var action_option: OptionButton = panel.get_node("Margin/Root/Scroll/Content/ActionOption") as OptionButton
-	_expect_equal(action_option.item_count, 8, "行动面板列出八类正式行动")
+	var action_list: ItemList = panel.find_child("ActionList", true, false) as ItemList
+	_expect_equal(action_list.item_count, 8, "行动面板列出八类正式行动")
 	var begin_button: Button = panel.get_node("Margin/Root/BeginButton") as Button
 	begin_button.pressed.emit()
 	_expect_true(GameSessionService.current_action != null, "行动面板可开始当前人物行动")
@@ -1121,7 +1123,7 @@ func _test_m5_action_panel_scene() -> void:
 		var before: float = GameSessionService.current_action.accumulated_work
 		runner.clock.advance_hours(1)
 		_expect_true(GameSessionService.current_action.accumulated_work > before, "权威时间变化驱动当前行动进度")
-	var summary: RichTextLabel = panel.get_node("Margin/Root/Scroll/Content/SummaryLabel") as RichTextLabel
+	var summary: RichTextLabel = panel.find_child("SummaryLabel", true, false) as RichTextLabel
 	_expect_true(summary.text.contains("成功把握") and not summary.text.contains("有效值"), "正式行动 UI 显示定性把握且隐藏精确值")
 	view.queue_free()
 	GameSessionService.clear()
@@ -1309,28 +1311,28 @@ func _test_m6_social_panel_scene() -> void:
 	var scene_resource: Resource = load("res://scenes/map/strategic_map_view.tscn")
 	var view: Node = (scene_resource as PackedScene).instantiate()
 	get_root().add_child(view)
-	var social_button: Button = view.get_node("RootMargin/Layout/TopBar/TopMargin/TopControls/SocialButton") as Button
-	var panel: SocialSystemPanel = view.get_node("SocialSystemPanel") as SocialSystemPanel
+	var social_button: Button = view.find_child("SocialButton", true, false) as Button
+	var panel: SocialSystemPanel = view.find_child("SocialSystemPanel", true, false) as SocialSystemPanel
 	_expect_true(not social_button.disabled, "有玩家时社会系统入口可用")
 	_expect_true(not panel.visible, "社会系统面板默认关闭")
 	social_button.pressed.emit()
 	_expect_true(panel.visible, "社会入口可打开组织与人物层级面板")
-	var organization_option: OptionButton = panel.get_node("Margin/Root/Scroll/Content/OrganizationOption") as OptionButton
-	_expect_equal(organization_option.item_count, 8, "组织面板列出八个正式组织")
-	var counts: Label = panel.get_node("Margin/Root/CountsLabel") as Label
-	_expect_true(counts.text.contains("背景人物 112") and counts.text.contains("活跃人物 9 / 20"), "社会面板显示人物层级预算")
-	var ai_section: VBoxContainer = panel.get_node("Margin/Root/Scroll/Content/AiSection") as VBoxContainer
-	_expect_true(not ai_section.visible, "AI 调试信息默认隐藏")
+	var organization_option: OptionButton = panel.find_child("OrganizationOption", true, false) as OptionButton
+	_expect_equal(organization_option.item_count, 4, "组织面板只列出玩家可申请的四个本国组织")
+	var social_summary: Label = panel.find_child("PlayerSocialSummary", true, false) as Label
+	_expect_true(social_summary.text.contains("已加入组织") and social_summary.text.contains("真实关系"), "社会面板以玩家组织与关系状态为中心")
+	var developer_section: PanelContainer = panel.find_child("DeveloperSection", true, false) as PanelContainer
+	_expect_true(not developer_section.visible, "AI 与直接修改区默认隐藏")
 	GameSessionService.developer_mode = true
 	panel.refresh_developer_mode()
-	var developer_toggle: CheckButton = panel.get_node("Margin/Root/Scroll/Content/DeveloperToggle") as CheckButton
+	var developer_toggle: CheckButton = panel.find_child("DeveloperToggle", true, false) as CheckButton
 	developer_toggle.button_pressed = true
-	_expect_true(ai_section.visible, "开发者开关显示活跃 AI 调试视图")
-	var ai_label: RichTextLabel = panel.get_node("Margin/Root/Scroll/Content/AiSection/AiLabel") as RichTextLabel
-	_expect_true(ai_label.text.contains("候选权重") and ai_label.text.contains("下次每日决策"), "AI 调试视图包含目标、候选和下次决策")
-	var relationship_button: Button = panel.get_node("Margin/Root/Scroll/Content/RelationshipButton") as Button
+	_expect_true(developer_section.visible, "开发者开关显示隔离的直接修改与 AI 调试区")
+	var ai_label: RichTextLabel = panel.find_child("AiLabel", true, false) as RichTextLabel
+	_expect_true(ai_label.text.contains("活跃 AI 调试") and ai_label.text.contains("行动进度"), "隔离的 AI 调试区显示目标与行动进度")
+	var relationship_button: Button = panel.find_child("DevRelationshipButton", true, false) as Button
 	relationship_button.pressed.emit()
-	_expect_equal(GameSessionService.society_service.relationships.size(), 1, "社会面板按实际操作创建关系")
+	_expect_equal(GameSessionService.society_service.relationships.size(), 1, "开发者隔离区可显式创建调试关系")
 	view.queue_free()
 	GameSessionService.clear()
 
@@ -1598,11 +1600,11 @@ func _test_m7_succession_panel_scene() -> void:
 	var society: SocietySimulationService = GameSessionService.society_service
 	var target_id: String = society.roster.get_background_ids(player.country_id)[0]
 	_set_relationship_values(society.relationships.create_or_update(player.id, target_id, 0), 1.0, 1.0, 1.0)
-	var panel: SocialSystemPanel = view.get_node("SocialSystemPanel") as SocialSystemPanel
-	var prepare_button: Button = panel.get_node("Margin/Root/Scroll/Content/PrepareSuccessionButton") as Button
+	var panel: SocialSystemPanel = view.find_child("SocialSystemPanel", true, false) as SocialSystemPanel
+	var prepare_button: Button = panel.find_child("PrepareSuccessionButton", true, false) as Button
 	prepare_button.pressed.emit()
-	var succession_option: OptionButton = panel.get_node("Margin/Root/Scroll/Content/SuccessionOption") as OptionButton
-	var confirm_button: Button = panel.get_node("Margin/Root/Scroll/Content/ConfirmSuccessionButton") as Button
+	var succession_option: OptionButton = panel.find_child("SuccessionOption", true, false) as OptionButton
+	var confirm_button: Button = panel.find_child("ConfirmSuccessionButton", true, false) as Button
 	_expect_true(succession_option.item_count > 0 and not confirm_button.disabled, "继承面板从真实关系生成可选候选")
 	for index: int in range(succession_option.item_count):
 		if str(succession_option.get_item_metadata(index)) == target_id:
@@ -1611,8 +1613,8 @@ func _test_m7_succession_panel_scene() -> void:
 	confirm_button.pressed.emit()
 	_expect_equal(GameSessionService.player_character.id, target_id, "继承面板可切换当前玩家人物")
 	_expect_equal(society.roster.exited_characters.size(), 1, "继承面板创建一条退出历史记录")
-	var counts: Label = panel.get_node("Margin/Root/CountsLabel") as Label
-	_expect_true(counts.text.contains("已退出 1"), "社会面板显示已退出人物数量")
+	var succession_status: Label = panel.find_child("SuccessionStatusLabel", true, false) as Label
+	_expect_true(succession_status.text.contains("当前年龄") and succession_status.text.contains("合法退出原因"), "社会面板继承页持续显示权威人物退出条件")
 	view.queue_free()
 	GameSessionService.clear()
 
@@ -1894,13 +1896,11 @@ func _test_m9_integrated_core_loop() -> void:
 	var action_panel: ActionPanel = action_panel_scene.instantiate() as ActionPanel
 	root.add_child(action_panel)
 	action_panel.setup(clock, map_service)
-	var relationship_index: int = _option_index_for_metadata(action_panel.action_option, "action:build_relationship")
-	action_panel.action_option.select(relationship_index)
-	action_panel._on_action_selected(relationship_index)
+	var relationship_selected: bool = action_panel.prefill_action("action:build_relationship")
+	_expect_true(relationship_selected, "M9 可从正式行动列表选择建立关系")
 	_expect_true(action_panel.target_option.item_count > 0, "M9 行动面板为关系行动提供人物目标")
-	var join_index: int = _option_index_for_metadata(action_panel.action_option, "action:join_organization")
-	action_panel.action_option.select(join_index)
-	action_panel._on_action_selected(join_index)
+	var join_selected: bool = action_panel.prefill_action("action:join_organization")
+	_expect_true(join_selected, "M9 可从正式行动列表选择加入组织")
 	_expect_true(action_panel.target_option.item_count > 0, "M9 行动面板为加入行动提供本国组织目标")
 	action_panel.queue_free()
 	var government_id: String = "organization:loran_government"
