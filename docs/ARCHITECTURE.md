@@ -1,5 +1,7 @@
 # 架构
 
+> 状态说明：本文记录当前已实现技术架构。未来产品边界以 `GAME_VISION.md` 和 `DEVELOPMENT_ROADMAP_REDESIGN.md` 为准；架空网格、平铺行动和现有场景结构不是冻结的最终设计。
+
 ## 分层与依赖方向
 
 ```text
