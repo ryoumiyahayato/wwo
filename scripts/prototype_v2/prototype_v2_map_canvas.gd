@@ -27,6 +27,8 @@ const SHIPPING := Color("#67b8c8")
 const INSTITUTION := Color("#d2a65f")
 const ORGANIZATION := Color("#83b88c")
 const FRONT := Color("#d46355")
+const FOCUS_COUNTRY_ID := "country_fra"
+const PLAYER_CITY_ID := "lille"
 
 var current_mode: String = "legal"
 var selected_id: String = ""
@@ -57,6 +59,8 @@ var _port_by_id: Dictionary = {}
 var _institution_by_id: Dictionary = {}
 var _organization_by_id: Dictionary = {}
 var _label_rects: Array[Rect2] = []
+var _label_counts: Dictionary = {}
+var _last_draw_counts: Dictionary = {}
 
 
 func _ready() -> void:
@@ -190,7 +194,7 @@ func is_record_visible(record: Dictionary) -> bool:
 
 func get_object_at(screen_position: Vector2) -> Dictionary:
 	var world_position: Vector2 = (screen_position - pan) / zoom
-	if get_zoom_level() == "near":
+	if get_zoom_level() == "near" and should_draw_detail_nodes():
 		var node_result: Dictionary = _node_at(world_position, _institutions, "institution", 11.0)
 		if not node_result.is_empty():
 			return node_result
@@ -203,7 +207,7 @@ func get_object_at(screen_position: Vector2) -> Dictionary:
 	var city_result: Dictionary = _node_at(world_position, _cities, "city", 11.0)
 	if not city_result.is_empty():
 		return city_result
-	if get_zoom_level() != "far":
+	if get_zoom_level() == "near":
 		for index: int in range(_regions.size() - 1, -1, -1):
 			var region: Dictionary = _regions[index] as Dictionary
 			for clipped_polygon: PackedVector2Array in _clipped_region_world_polygons(region):
@@ -236,26 +240,74 @@ func get_organization(organization_id: String) -> Dictionary:
 	return _dictionary_value(_organization_by_id, organization_id)
 
 
+func get_label_budget(category: String, level: String = "") -> int:
+	var target_level: String = get_zoom_level() if level.is_empty() else level
+	var budgets: Dictionary = _modes.get("label_budgets", {}) as Dictionary
+	var level_budget: Dictionary = budgets.get(target_level, {}) as Dictionary
+	return int(level_budget.get(category, 0))
+
+
+func get_visible_rail_ids(level: String = "") -> Array[String]:
+	var target_level: String = get_zoom_level() if level.is_empty() else level
+	var result: Array[String] = []
+	for segment: Dictionary in _rail_segments_for_level(target_level):
+		result.append(str(segment.get("id", "")))
+	return result
+
+
+func should_draw_detail_nodes() -> bool:
+	return get_zoom_level() == "near" and selected_type in ["city", "region", "institution", "organization"]
+
+
+func debug_resolve_label_candidates(candidates: Array, budget: int) -> Array[String]:
+	var sorted_candidates: Array = candidates.duplicate(true)
+	sorted_candidates.sort_custom(_candidate_higher_priority)
+	var accepted_rects: Array[Rect2] = []
+	var accepted_ids: Array[String] = []
+	for candidate_variant: Variant in sorted_candidates:
+		if accepted_ids.size() >= budget:
+			break
+		var candidate: Dictionary = candidate_variant as Dictionary
+		var rect: Rect2 = candidate.get("rect", Rect2()) as Rect2
+		var collides: bool = false
+		for existing: Rect2 in accepted_rects:
+			if existing.intersects(rect):
+				collides = true
+				break
+		if collides:
+			continue
+		accepted_rects.append(rect)
+		accepted_ids.append(str(candidate.get("id", "")))
+	return accepted_ids
+
+
 func _draw() -> void:
 	_draw_ocean()
 	if _data == null:
 		return
 	_label_rects.clear()
+	_label_counts.clear()
+	_last_draw_counts.clear()
 	_draw_graticule()
 	_draw_countries()
+	_draw_selected_object_label()
+	_draw_player_city_label()
 	_draw_country_labels()
-	if get_zoom_level() != "far":
+	if get_zoom_level() == "near":
 		_draw_regions()
 	_draw_shipping_routes()
 	if get_zoom_level() != "far":
-		_draw_roads()
 		_draw_railways()
+	if get_zoom_level() == "near" and should_draw_detail_nodes():
+		_draw_roads()
 	if has_visible_front():
 		_draw_war_overlay()
 	_draw_cities()
 	if get_zoom_level() != "far":
+		_draw_transport_labels()
+	if get_zoom_level() != "far":
 		_draw_ports()
-	if get_zoom_level() == "near":
+	if should_draw_detail_nodes():
 		_draw_institutions()
 		_draw_organizations()
 	_draw_ocean_labels()
@@ -306,16 +358,54 @@ func _draw_countries() -> void:
 				draw_polyline(_closed_polygon(polygon), SELECT, 3.2, true)
 
 
+func _draw_selected_object_label() -> void:
+	if selected_id.is_empty():
+		return
+	var record: Dictionary
+	var coordinate_field: String = "lon_lat"
+	match selected_type:
+		"country":
+			record = get_country(selected_id)
+			coordinate_field = "label_lon_lat"
+		"region":
+			record = get_region(selected_id)
+			coordinate_field = "label_lon_lat"
+		"city":
+			record = get_city(selected_id)
+		"institution":
+			record = get_institution(selected_id)
+		"organization":
+			record = get_organization(selected_id)
+	if record.is_empty() or not record.has(coordinate_field):
+		return
+	var label: String = str(record.get("display_name_zh", record.get("name", "")))
+	_try_label(lon_lat_to_screen(record.get(coordinate_field, [])), label, 14, SELECT, true)
+
+
+func _draw_player_city_label() -> void:
+	if selected_type == "city" and selected_id == PLAYER_CITY_ID:
+		return
+	var city: Dictionary = get_city(PLAYER_CITY_ID)
+	if city.is_empty() or not is_record_visible(city):
+		return
+	_try_label(lon_lat_to_screen(city.get("lon_lat", [])) + Vector2(8.0, 3.0), str(city.get("name", "")), 12, SELECT, false, "city")
+
+
 func _draw_country_labels() -> void:
-	for country_variant: Variant in _countries:
+	for country_variant: Variant in _records_by_priority(_countries):
 		var country: Dictionary = country_variant as Dictionary
 		if not is_record_visible(country):
 			continue
-		_try_label(lon_lat_to_screen(country.get("label_lon_lat", [])), str(country.get("name", "")), 15, LABEL, true)
+		if selected_type == "country" and selected_id == str(country.get("id", "")):
+			continue
+		var color: Color = LABEL
+		if get_zoom_level() == "near" and str(country.get("id", "")) != FOCUS_COUNTRY_ID:
+			color = Color(LABEL_MUTED, 0.34)
+		_try_label(lon_lat_to_screen(country.get("label_lon_lat", [])), str(country.get("name", "")), 15, color, true, "country")
 
 
 func _draw_regions() -> void:
-	for region_variant: Variant in _regions:
+	for region_variant: Variant in _records_by_priority(_regions):
 		var region: Dictionary = region_variant as Dictionary
 		if not is_record_visible(region):
 			continue
@@ -332,8 +422,8 @@ func _draw_regions() -> void:
 			draw_polyline(_closed_polygon(polygon), REGION_BORDER, 1.15, true)
 			if selected_type == "region" and selected_id == str(region.get("id", "")):
 				draw_polyline(_closed_polygon(polygon), SELECT, 3.4, true)
-		if get_zoom_level() == "near" or int(region.get("label_priority", 0)) >= 88:
-			_try_label(lon_lat_to_screen(region.get("label_lon_lat", [])), str(region.get("name", "")), 13, LABEL, true)
+		if not (selected_type == "region" and selected_id == str(region.get("id", ""))):
+			_try_label(lon_lat_to_screen(region.get("label_lon_lat", [])), str(region.get("name", "")), 13, LABEL, true, "region")
 
 
 func _draw_shipping_routes() -> void:
@@ -349,20 +439,34 @@ func _draw_shipping_routes() -> void:
 
 
 func _draw_railways() -> void:
-	for segment_variant: Variant in _rail_segments:
-		var segment: Dictionary = segment_variant as Dictionary
-		if not is_record_visible(segment):
-			continue
+	var drawn: int = 0
+	for segment: Dictionary in _rail_segments_for_level(get_zoom_level()):
 		var first: Dictionary = get_city(str(segment.get("from_city_id", "")))
 		var second: Dictionary = get_city(str(segment.get("to_city_id", "")))
 		if first.is_empty() or second.is_empty():
 			continue
 		var start: Vector2 = lon_lat_to_screen(first.get("lon_lat", []))
 		var end: Vector2 = lon_lat_to_screen(second.get("lon_lat", []))
-		var width: float = 3.6 if bool(segment.get("main", false)) else 2.8
-		draw_line(start, end, RAIL_DARK, width, true)
-		draw_line(start, end, RAIL_LIGHT, 1.05, true)
-		_draw_rail_ties(start, end)
+		var selected: bool = _rail_is_selected(segment)
+		var alpha: float = 1.0 if selected else (0.62 if get_zoom_level() == "middle" else 0.4)
+		var width: float = 3.8 if bool(segment.get("main", false)) else 2.6
+		draw_line(start, end, Color(RAIL_DARK, alpha), width, true)
+		draw_line(start, end, Color(RAIL_LIGHT, alpha), 1.05, true)
+		_draw_rail_ties(start, end, alpha)
+		drawn += 1
+	_last_draw_counts["rail"] = drawn
+
+
+func _draw_transport_labels() -> void:
+	for segment: Dictionary in _rail_segments_for_level(get_zoom_level()):
+		if not bool(segment.get("main", false)):
+			continue
+		var first: Dictionary = get_city(str(segment.get("from_city_id", "")))
+		var second: Dictionary = get_city(str(segment.get("to_city_id", "")))
+		if first.is_empty() or second.is_empty():
+			continue
+		var midpoint: Vector2 = (lon_lat_to_screen(first.get("lon_lat", [])) + lon_lat_to_screen(second.get("lon_lat", []))) * 0.5
+		_try_label(midpoint + Vector2(0.0, -5.0), str(segment.get("name", "")), 9, Color(RAIL_LIGHT, 0.62), true, "transport")
 
 
 func _draw_roads() -> void:
@@ -389,7 +493,7 @@ func _draw_war_overlay() -> void:
 
 
 func _draw_cities() -> void:
-	for city_variant: Variant in _cities:
+	for city_variant: Variant in _records_by_priority(_cities):
 		var city: Dictionary = city_variant as Dictionary
 		if not is_record_visible(city):
 			continue
@@ -399,8 +503,8 @@ func _draw_cities() -> void:
 			draw_circle(point, 10.0, Color(SELECT, 0.24))
 		draw_circle(point, 4.5 if bool(city.get("major", false)) else 3.2, SELECT if is_selected else CITY)
 		draw_circle(point, 1.55, Color("#253537"))
-		if get_zoom_level() == "near" or int(city.get("label_priority", 0)) >= 84:
-			_try_label(point + Vector2(8.0, 3.0), str(city.get("name", "")), 11, LABEL, false)
+		if (get_zoom_level() == "near" or int(city.get("label_priority", 0)) >= 84) and not is_selected and str(city.get("id", "")) != PLAYER_CITY_ID:
+			_try_label(point + Vector2(8.0, 3.0), str(city.get("name", "")), 11, LABEL, false, "city")
 
 
 func _draw_ports() -> void:
@@ -414,9 +518,9 @@ func _draw_ports() -> void:
 
 
 func _draw_institutions() -> void:
-	for institution_variant: Variant in _institutions:
+	for institution_variant: Variant in _records_by_priority(_institutions):
 		var institution: Dictionary = institution_variant as Dictionary
-		if not is_record_visible(institution):
+		if not is_record_visible(institution) or not _detail_record_relevant(institution):
 			continue
 		var point: Vector2 = lon_lat_to_screen(institution.get("lon_lat", []))
 		var selected: bool = selected_type == "institution" and selected_id == str(institution.get("id", ""))
@@ -425,14 +529,16 @@ func _draw_institutions() -> void:
 
 
 func _draw_organizations() -> void:
-	for organization_variant: Variant in _organizations:
+	for organization_variant: Variant in _records_by_priority(_organizations):
 		var organization: Dictionary = organization_variant as Dictionary
-		if not is_record_visible(organization):
+		if not is_record_visible(organization) or not _detail_record_relevant(organization):
 			continue
 		var point: Vector2 = lon_lat_to_screen(organization.get("lon_lat", []))
 		var selected: bool = selected_type == "organization" and selected_id == str(organization.get("id", ""))
 		draw_circle(point, 5.5, SELECT if selected else ORGANIZATION)
 		draw_circle(point, 2.2, Color("#1c3430"))
+		if selected:
+			_try_label(point + Vector2(10.0, 4.0), str(organization.get("name", "")), 10, LABEL_MUTED, false)
 
 
 func _draw_ocean_labels() -> void:
@@ -491,22 +597,80 @@ func _build_indexes() -> void:
 	for institution_variant: Variant in _institutions:
 		var institution: Dictionary = institution_variant as Dictionary
 		_institution_by_id[str(institution.get("id", ""))] = institution
-	var organization_identities: Dictionary = _data.get_document("organizations").get("identities", {}) as Dictionary
-	for identity_variant: Variant in organization_identities.values():
-		var identity_records: Dictionary = identity_variant as Dictionary
-		for organization_variant: Variant in identity_records.get("owned", []):
-			var organization: Dictionary = organization_variant as Dictionary
-			if not organization.has("lon_lat"):
-				continue
-			var organization_id: String = str(organization.get("id", ""))
-			if _organization_by_id.has(organization_id):
-				continue
-			_organization_by_id[organization_id] = organization
+	for organization_variant: Variant in _data.get_document("organizations").get("catalog", []):
+		var organization: Dictionary = organization_variant as Dictionary
+		var organization_id: String = str(organization.get("id", ""))
+		_organization_by_id[organization_id] = organization
+		if organization.has("lon_lat"):
 			_organizations.append(organization)
 
 
 func _document_array(document_id: String, field: String) -> Array:
 	return _data.get_document(document_id).get(field, []) as Array
+
+
+func _records_by_priority(records: Array) -> Array:
+	var result: Array = records.duplicate()
+	result.sort_custom(_record_higher_priority)
+	return result
+
+
+func _record_higher_priority(first_variant: Variant, second_variant: Variant) -> bool:
+	var first: Dictionary = first_variant as Dictionary
+	var second: Dictionary = second_variant as Dictionary
+	return _record_priority(first) > _record_priority(second)
+
+
+func _record_priority(record: Dictionary) -> int:
+	if record.has("label_priority"):
+		return int(record.get("label_priority", 0))
+	return 70 if bool(record.get("main", false)) else 30
+
+
+func _candidate_higher_priority(first_variant: Variant, second_variant: Variant) -> bool:
+	return int((first_variant as Dictionary).get("priority", 0)) > int((second_variant as Dictionary).get("priority", 0))
+
+
+func _rail_segments_for_level(level: String) -> Array[Dictionary]:
+	if level == "far":
+		return []
+	var candidates: Array = []
+	for segment_variant: Variant in _rail_segments:
+		var segment: Dictionary = segment_variant as Dictionary
+		if level == get_zoom_level() and not is_record_visible(segment):
+			continue
+		if level == "middle" and not bool(segment.get("main", false)):
+			continue
+		candidates.append(segment)
+	candidates = _records_by_priority(candidates)
+	var result: Array[Dictionary] = []
+	var limit: int = get_label_budget("transport", level)
+	for index: int in range(mini(limit, candidates.size())):
+		result.append(candidates[index] as Dictionary)
+	return result
+
+
+func _rail_is_selected(segment: Dictionary) -> bool:
+	if selected_type == "city":
+		return selected_id in [str(segment.get("from_city_id", "")), str(segment.get("to_city_id", ""))]
+	if selected_type == "region":
+		var first: Dictionary = get_city(str(segment.get("from_city_id", "")))
+		var second: Dictionary = get_city(str(segment.get("to_city_id", "")))
+		return selected_id in [str(first.get("parent_region_id", "")), str(second.get("parent_region_id", ""))]
+	return false
+
+
+func _detail_record_relevant(record: Dictionary) -> bool:
+	match selected_type:
+		"city":
+			return str(record.get("city_id", "")) == selected_id
+		"region":
+			return str(record.get("parent_region_id", "")) == selected_id
+		"institution":
+			return str(record.get("id", "")) == selected_id or str(record.get("institution_id", "")) == selected_id
+		"organization":
+			return str(record.get("id", "")) == selected_id
+	return false
 
 
 func _country_color(country: Dictionary, continent: String) -> Color:
@@ -623,8 +787,10 @@ func _dictionary_value(source: Dictionary, key: String) -> Dictionary:
 	return value as Dictionary if value is Dictionary else {}
 
 
-func _try_label(position: Vector2, value: String, font_size: int, color: Color, centered: bool) -> bool:
+func _try_label(position: Vector2, value: String, font_size: int, color: Color, centered: bool, category: String = "") -> bool:
 	if value.is_empty():
+		return false
+	if not category.is_empty() and int(_label_counts.get(category, 0)) >= get_label_budget(category):
 		return false
 	var text_size: Vector2 = _font.get_string_size(value, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size)
 	var top_left := Vector2(position.x - text_size.x * 0.5 if centered else position.x, position.y - text_size.y * 0.72)
@@ -635,6 +801,8 @@ func _try_label(position: Vector2, value: String, font_size: int, color: Color, 
 		if existing.intersects(rect):
 			return false
 	_label_rects.append(rect)
+	if not category.is_empty():
+		_label_counts[category] = int(_label_counts.get(category, 0)) + 1
 	draw_string(_font, top_left + Vector2(0.0, text_size.y * 0.78), value, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size, color)
 	return true
 
@@ -651,7 +819,7 @@ func _draw_dashed_line(start: Vector2, end: Vector2, color: Color, dash: float, 
 		cursor += dash + gap
 
 
-func _draw_rail_ties(start: Vector2, end: Vector2) -> void:
+func _draw_rail_ties(start: Vector2, end: Vector2, alpha: float = 1.0) -> void:
 	var distance: float = start.distance_to(end)
 	if distance < 12.0:
 		return
@@ -660,7 +828,7 @@ func _draw_rail_ties(start: Vector2, end: Vector2) -> void:
 	var cursor: float = 8.0
 	while cursor < distance:
 		var center: Vector2 = start + direction * cursor
-		draw_line(center - normal, center + normal, Color(RAIL_LIGHT, 0.78), 0.85, true)
+		draw_line(center - normal, center + normal, Color(RAIL_LIGHT, 0.78 * alpha), 0.85, true)
 		cursor += 13.0
 
 

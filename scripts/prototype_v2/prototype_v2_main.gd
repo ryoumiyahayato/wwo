@@ -168,10 +168,12 @@ func _apply_review_state(view_id: String) -> void:
 	match view_id:
 		"europe_mid", "sequence_02_europe":
 			map_canvas.focus_europe()
-		"france_close", "sequence_03_france", "city_card", "sequence_04_city":
+		"france_close", "label_priority", "sequence_03_france", "city_card", "sequence_04_city":
 			map_canvas.focus_france()
 			if view_id in ["city_card", "sequence_04_city"]:
 				select_review_object("city", "lille")
+			elif view_id == "label_priority":
+				select_review_object("region", "northern_industrial_belt")
 		"market_map":
 			map_canvas.set_mode("market")
 			interface.set_mode_display("market")
