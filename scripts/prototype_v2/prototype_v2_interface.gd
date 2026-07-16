@@ -619,13 +619,13 @@ func _draw_relationships(rect: Rect2) -> void:
 
 func _draw_organizations(rect: Rect2, owned: bool) -> void:
 	_section_heading(rect.position + Vector2(0.0, 15.0), "我的组织" if owned else "探索组织")
-	_text(rect.position + Vector2(0.0, 35.0), "已加入的具体职位与项目" if owned else "只显示当前已知并可解释来源的组织", 9, INK_DIM)
+	_text(rect.position + Vector2(0.0, 43.0), "已加入的具体职位与项目" if owned else "只显示当前已知并可解释来源的组织", 9, INK_DIM)
 	var identity_records: Dictionary = _organization_identity_data()
 	var organizations: Array = identity_records.get("owned" if owned else "discover", []) as Array
 	for index: int in range(mini(organizations.size(), 2 if owned else 3)):
 		var organization: Dictionary = _organization_record(organizations[index] as Dictionary)
 		var height: float = 154.0 if owned else 100.0
-		var row := Rect2(rect.position.x, rect.position.y + 52.0 + float(index) * (height + 8.0), rect.size.x, height)
+		var row := Rect2(rect.position.x, rect.position.y + 60.0 + float(index) * (height + 8.0), rect.size.x, height)
 		_draw_organization_entry(row, organization, owned)
 
 
@@ -642,7 +642,7 @@ func _draw_organization_entry(rect: Rect2, organization: Dictionary, owned: bool
 		_text_link(Rect2(rect.position.x + 128.0, rect.end.y - 27.0, 100.0, 23.0), "参与当前项目", "organization_action", "参与当前项目", "次要动作")
 	else:
 		_text(rect.position + Vector2(12.0, 41.0), "%s · %s" % [str(organization.get("type", "")), str(organization.get("match", ""))], 9, INK_MUTED)
-		_text(rect.position + Vector2(12.0, 61.0), "得知来源：%s" % str(organization.get("contact_source", "")), 10, BLUE)
+		_text(rect.position + Vector2(12.0, 61.0), "接触来源：%s" % str(organization.get("contact_source", "")), 10, BLUE)
 		_text(rect.position + Vector2(12.0, 81.0), str(organization.get("access", "")), 9, INK_MUTED)
 		_register(rect, "organization_action", str(organization.get("primary_action", "")), "点击查看组织对象卡")
 
