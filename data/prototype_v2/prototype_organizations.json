@@ -1,27 +1,40 @@
 {
   "prototype_only": true,
-  "schema_version": 2,
+  "schema_version": 3,
+  "catalog": [
+    {"id":"enterprise_lille_mechanical","name":"里尔机械制造公司","native_name":"Manufacture mécanique de Lille","object_level":"organization","organization_kind":"enterprise","industry_id":"mechanical_manufacturing","country_id":"country_fra","city_id":"lille","parent_region_id":"northern_industrial_belt","lon_lat":[3.08,50.63],"emblem":"⚙","min_zoom":6.8,"max_zoom":12.0,"fictional_but_culturally_consistent":true,"map_node_default":false},
+    {"id":"union_metalworkers_nord","name":"北部省金属工人工会","native_name":"Syndicat des ouvriers métallurgistes du Nord","object_level":"organization","organization_kind":"labor_union","industry_id":"metalworking","country_id":"country_fra","city_id":"lille","parent_region_id":"northern_industrial_belt","lon_lat":[3.0,50.61],"emblem":"⚙","min_zoom":6.8,"max_zoom":12.0,"fictional_but_culturally_consistent":true,"map_node_default":false},
+    {"id":"school_lille_workers_evening","name":"里尔工人夜校","native_name":"École du soir ouvrière de Lille","object_level":"organization","organization_kind":"education","industry_id":"worker_education","country_id":"country_fra","city_id":"lille","parent_region_id":"northern_industrial_belt","lon_lat":[3.12,50.59],"emblem":"✦","min_zoom":7.0,"max_zoom":12.0,"fictional_but_culturally_consistent":true,"map_node_default":false},
+    {"id":"coop_lille_workers_consumption","name":"里尔工人消费合作社","native_name":"Coopérative ouvrière de consommation de Lille","object_level":"organization","organization_kind":"cooperative","industry_id":"retail_food_fuel","country_id":"country_fra","city_id":"lille","parent_region_id":"northern_industrial_belt","emblem":"◉","fictional_but_culturally_consistent":true,"map_node_default":false},
+    {"id":"union_mechanical_nord","name":"北部省机械行业联合会","native_name":"Union mécanique du Nord","object_level":"organization","organization_kind":"industry_federation","industry_id":"mechanical_manufacturing","country_id":"country_fra","city_id":"lille","parent_region_id":"northern_industrial_belt","emblem":"◇","fictional_but_culturally_consistent":true,"map_node_default":false},
+    {"id":"association_industry_commerce_nord","name":"北部省工业与商业协会","native_name":"Association industrielle et commerciale du Nord","object_level":"organization","organization_kind":"industry_association","industry_id":"industry_and_commerce","country_id":"country_fra","city_id":"lille","parent_region_id":"northern_industrial_belt","emblem":"§","fictional_but_culturally_consistent":true,"map_node_default":false},
+    {"id":"workplace_prefecture_nord","name":"北部省省政府","native_name":"Préfecture du Nord","object_level":"organization","organization_kind":"government_workplace","institution_id":"prefecture_nord","country_id":"country_fra","city_id":"lille","parent_region_id":"northern_industrial_belt","lon_lat":[3.064,50.637],"emblem":"◇","min_zoom":6.8,"max_zoom":12.0,"map_node_default":false},
+    {"id":"association_civil_servants_nord","name":"北部省公务人员协会","native_name":"Association des fonctionnaires du Nord","object_level":"organization","organization_kind":"professional_association","industry_id":"civil_service","country_id":"country_fra","city_id":"lille","parent_region_id":"northern_industrial_belt","emblem":"§","fictional_but_culturally_consistent":true,"map_node_default":false},
+    {"id":"committee_public_works_nord","name":"北部省公共工程委员会","native_name":"Commission des travaux publics du Nord","object_level":"organization","organization_kind":"public_committee","industry_id":"public_works","country_id":"country_fra","city_id":"lille","parent_region_id":"northern_industrial_belt","emblem":"◇","fictional_but_culturally_consistent":true,"map_node_default":false},
+    {"id":"committee_paris_lille_rail","name":"巴黎—里尔铁路协调委员会","native_name":"Commission de coordination ferroviaire Paris–Lille","object_level":"organization","organization_kind":"interagency_committee","industry_id":"rail_transport","country_id":"country_fra","city_id":"lille","parent_region_id":"northern_industrial_belt","emblem":"═","fictional_but_culturally_consistent":true,"map_node_default":false},
+    {"id":"office_local_budget_records","name":"财政部地方预算档案处","native_name":"Bureau des archives budgétaires locales","object_level":"organization","organization_kind":"central_public_office","industry_id":"public_finance","country_id":"country_fra","city_id":"paris","parent_region_id":"paris_basin","emblem":"§","fictional_but_culturally_consistent":true,"map_node_default":false}
+  ],
   "identities": {
     "worker": {
       "owned": [
-        {"id":"union","name":"河港机械工会","object_level":"organization","emblem":"⚙","lon_lat":[3.0,50.61],"min_zoom":6.8,"max_zoom":12.0,"position":"第三车间联络员","department":"机械分会第三车间","project":"工资谈判准备 · 58%","supervisor":"分会书记","authority":"召集车间会议、提交成员诉求","primary_action":"查看组织事务","secondary_action":"参与当前项目"},
-        {"id":"school","name":"河港工人夜校","object_level":"organization","emblem":"✦","lon_lat":[3.12,50.59],"min_zoom":7.0,"max_zoom":12.0,"position":"机械工程班学员","department":"夜间技术班","project":"工程课程 · 42%","supervisor":"课程教师","authority":"参加课程与学员讨论","primary_action":"查看课程事务","secondary_action":"继续当前课程"}
+        {"organization_id":"union_metalworkers_nord","position":"第三车间联络员","department":"金属工人分会第三车间","project":"工资谈判准备 · 58%","supervisor":"分会书记","authority":"召集车间会议、提交成员诉求","primary_action":"查看组织事务","secondary_action":"参与当前项目"},
+        {"organization_id":"school_lille_workers_evening","position":"机械制图班学员","department":"夜间技术班","project":"机械制图课程 · 42%","supervisor":"课程教师","authority":"参加课程与学员讨论","primary_action":"查看课程事务","secondary_action":"继续当前课程"}
       ],
       "discover": [
-        {"id":"coop","name":"河港消费合作社","object_level":"organization","type":"合作社","match":"生活匹配高","contact_source":"同地区公开组织","access":"公开登记即可接触","summary":"集中采购食品与燃料","primary_action":"查看公开章程"},
-        {"id":"guild","name":"北部机械师协会","object_level":"organization","type":"行业协会","match":"职业匹配高","contact_source":"当前工作单位关联","access":"需要熟练工推荐","summary":"技术交流与工作引荐","primary_action":"请求引荐"},
-        {"id":"commerce","name":"河港商业联合会","object_level":"organization","type":"行业协会","match":"匹配较低","contact_source":"新闻得知","access":"仅有公开记录","summary":"发布贸易与运输简报","primary_action":"查看行业记录"}
+        {"organization_id":"coop_lille_workers_consumption","match":"生活匹配高","contact_source":"同地区公开组织","access":"公开登记即可接触","summary":"集中采购食品与燃料","primary_action":"查看公开章程"},
+        {"organization_id":"union_mechanical_nord","match":"职业匹配高","contact_source":"当前工作单位关联","access":"需要熟练工推荐","summary":"机械行业交流与工作引荐","primary_action":"请求引荐"},
+        {"organization_id":"association_industry_commerce_nord","match":"匹配较低","contact_source":"行业公开记录","access":"仅有公开记录","summary":"发布北部省工业与运输简报","primary_action":"查看行业记录"}
       ]
     },
     "official": {
       "owned": [
-        {"id":"municipal","name":"北部工业区行政署","object_level":"organization","emblem":"◇","lon_lat":[3.02,50.64],"min_zoom":6.8,"max_zoom":12.0,"position":"公共事务科副主任","department":"公共事务科","project":"粮运协调方案 · 61%","supervisor":"地方行政长官","authority":"提交地方事务、协调项目、查阅科室预算","primary_action":"查看组织事务","secondary_action":"参与当前项目"},
-        {"id":"civil_service","name":"地方公务人员协会","object_level":"organization","emblem":"§","position":"普通会员","department":"行政事务组","project":"行政培训计划 · 31%","supervisor":"协会理事","authority":"参加专业讨论、提交培训建议","primary_action":"查看协会事务","secondary_action":"参与培训项目"}
+        {"organization_id":"workplace_prefecture_nord","position":"公共工程处事务员","department":"公共工程处","project":"铁路运输协调案 · 61%","supervisor":"公共工程处主任","authority":"提交处内事务、协调项目、查阅本处预算","primary_action":"查看机构事务","secondary_action":"参与当前项目"},
+        {"organization_id":"association_civil_servants_nord","position":"普通会员","department":"行政事务组","project":"行政培训计划 · 31%","supervisor":"协会理事","authority":"参加专业讨论、提交培训建议","primary_action":"查看协会事务","secondary_action":"参与培训项目"}
       ],
       "discover": [
-        {"id":"relief","name":"北部公共救济委员会","object_level":"organization","type":"公共机构","match":"职位匹配高","contact_source":"同地区公开组织","access":"可申请项目席位","summary":"协调住房、食品与紧急救济","primary_action":"了解席位程序"},
-        {"id":"rail_board","name":"区域铁路协调会","object_level":"organization","type":"跨地区机构","match":"交通议题相关","contact_source":"关系人物引荐","access":"需要行政长官提名","summary":"协商铁路容量与货运优先级","primary_action":"请求引荐"},
-        {"id":"central_finance","name":"中央财政委员会","object_level":"organization","type":"中央机构","match":"当前无权限","contact_source":"行业公开记录","access":"🔒 无当前渠道","summary":"仅能获知公开预算记录","primary_action":"查看公开记录"}
+        {"organization_id":"committee_public_works_nord","match":"职位匹配高","contact_source":"同地区公开组织","access":"可申请列席项目会议","summary":"协调道路、建筑与市镇工程","primary_action":"了解列席程序"},
+        {"organization_id":"committee_paris_lille_rail","match":"交通议题相关","contact_source":"关系人物引荐","access":"需要公共工程处主任提名","summary":"协商铁路容量与货运优先级","primary_action":"请求引荐"},
+        {"organization_id":"office_local_budget_records","match":"当前无权限","contact_source":"行政公开记录","access":"🔒 无当前直接渠道","summary":"仅能获知公开预算档案目录","primary_action":"查看公开记录"}
       ]
     }
   }
