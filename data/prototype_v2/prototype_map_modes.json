@@ -1,7 +1,8 @@
 {
   "prototype_only": true,
-  "schema_version": 2,
+  "schema_version": 3,
   "shared_basemap_id":"natural_earth_110m_v2_1",
+  "boundary_notice":"当前世界政治边界采用现代 Natural Earth 几何，仅用于 UI、缩放、标签和地图模式验证。国家名称及颜色包含 1900 年主题占位，不代表准确的 1900 年疆域、殖民体系或国际关系。",
   "modes":[
     {"id":"legal","label":"法理归属","icon":"◇","description":"强调国家填充、国境和法理标签"},
     {"id":"market","label":"区域市场","icon":"¤","description":"在同一地理底图上叠加市场状态"},
@@ -9,7 +10,13 @@
     {"id":"war","label":"战争状态","icon":"⚔","description":"仅在战争示例中增加控制覆盖、战线与战区标签"}
   ],
   "zoom":{"minimum":0.82,"maximum":12.0,"factor":1.26,"far_max":1.5,"middle_max":6.2},
-  "levels":{"far":{"id":"world","label":"世界远景"},"middle":{"id":"country_region","label":"国家与地区"},"near":{"id":"local","label":"地方近景"}},
+  "levels":{"far":{"id":"world","label":"世界远景"},"middle":{"id":"western_europe","label":"欧洲中景"},"near":{"id":"france_local","label":"法国近景"}},
+  "label_budgets":{
+    "far":{"country":12,"city":4,"region":0,"transport":0},
+    "middle":{"country":10,"city":10,"region":0,"transport":4},
+    "near":{"country":5,"city":10,"region":9,"transport":7}
+  },
+  "detail_node_policy":{"far":"hidden","middle":"hidden","near":"selected_city_or_region_only"},
   "peace_note":"和平状态：战争模式仍使用相同底图，但不显示战线。",
   "war_note":"战争视觉示例：静态覆盖，不运行任何战争模拟。",
   "transport_legend":{"rail":"双线枕木 · 陆地铁路","road":"细虚线 · 一般陆路","shipping":"蓝色长虚线 · 海运航线","border":"浅色细实线 · 国境","front":"红色锯齿粗线 · 战线"}
