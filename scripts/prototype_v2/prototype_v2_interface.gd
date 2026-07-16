@@ -225,6 +225,14 @@ func apply_review_state(state_id: String) -> void:
 		"world_activity":
 			open_panel = "activity"
 			panel_progress = 1.0
+		"time_panel":
+			open_panel = "time"
+			panel_progress = 1.0
+		"action_detail":
+			open_panel = "character"
+			character_section = "summary"
+			action_detail_id = "学习"
+			panel_progress = 1.0
 		_:
 			pass
 	queue_redraw()
