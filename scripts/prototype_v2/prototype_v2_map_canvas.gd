@@ -255,6 +255,16 @@ func get_visible_rail_ids(level: String = "") -> Array[String]:
 	return result
 
 
+func get_visible_city_node_ids(level: String = "") -> Array[String]:
+	var target_level: String = get_zoom_level() if level.is_empty() else level
+	var result: Array[String] = []
+	for city_variant: Variant in _cities:
+		var city: Dictionary = city_variant as Dictionary
+		if _city_node_visible_for_level(city, target_level):
+			result.append(str(city.get("id", "")))
+	return result
+
+
 func should_draw_detail_nodes() -> bool:
 	return get_zoom_level() == "near" and selected_type in ["city", "region", "institution", "organization"]
 
@@ -305,7 +315,7 @@ func _draw() -> void:
 	_draw_cities()
 	if get_zoom_level() != "far":
 		_draw_transport_labels()
-	if get_zoom_level() != "far":
+	if get_zoom_level() == "near":
 		_draw_ports()
 	if should_draw_detail_nodes():
 		_draw_institutions()
@@ -493,9 +503,10 @@ func _draw_war_overlay() -> void:
 
 
 func _draw_cities() -> void:
+	var level: String = get_zoom_level()
 	for city_variant: Variant in _records_by_priority(_cities):
 		var city: Dictionary = city_variant as Dictionary
-		if not is_record_visible(city):
+		if not is_record_visible(city) or not _city_node_visible_for_level(city, level):
 			continue
 		var point: Vector2 = lon_lat_to_screen(city.get("lon_lat", []))
 		var is_selected: bool = selected_type == "city" and selected_id == str(city.get("id", ""))
@@ -503,7 +514,8 @@ func _draw_cities() -> void:
 			draw_circle(point, 10.0, Color(SELECT, 0.24))
 		draw_circle(point, 4.5 if bool(city.get("major", false)) else 3.2, SELECT if is_selected else CITY)
 		draw_circle(point, 1.55, Color("#253537"))
-		if (get_zoom_level() == "near" or int(city.get("label_priority", 0)) >= 84) and not is_selected and str(city.get("id", "")) != PLAYER_CITY_ID:
+		var allow_middle_french_label: bool = str(city.get("parent_country_id", "")) != FOCUS_COUNTRY_ID or str(city.get("id", "")) in ["paris", PLAYER_CITY_ID]
+		if (level == "near" or (int(city.get("label_priority", 0)) >= 84 and allow_middle_french_label)) and not is_selected and str(city.get("id", "")) != PLAYER_CITY_ID:
 			_try_label(point + Vector2(8.0, 3.0), str(city.get("name", "")), 11, LABEL, false, "city")
 
 
@@ -650,6 +662,20 @@ func _rail_segments_for_level(level: String) -> Array[Dictionary]:
 	return result
 
 
+func _city_node_visible_for_level(city: Dictionary, level: String) -> bool:
+	if level != "middle":
+		return true
+	var city_id: String = str(city.get("id", ""))
+	if str(city.get("parent_country_id", "")) != FOCUS_COUNTRY_ID:
+		return int(city.get("label_priority", 0)) >= 84
+	if city_id in ["paris", PLAYER_CITY_ID]:
+		return true
+	for segment: Dictionary in _rail_segments_for_level("middle"):
+		if city_id in [str(segment.get("from_city_id", "")), str(segment.get("to_city_id", ""))]:
+			return true
+	return false
+
+
 func _rail_is_selected(segment: Dictionary) -> bool:
 	if selected_type == "city":
 		return selected_id in [str(segment.get("from_city_id", "")), str(segment.get("to_city_id", ""))]
@@ -794,7 +820,9 @@ func _try_label(position: Vector2, value: String, font_size: int, color: Color, 
 		return false
 	var text_size: Vector2 = _font.get_string_size(value, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size)
 	var top_left := Vector2(position.x - text_size.x * 0.5 if centered else position.x, position.y - text_size.y * 0.72)
-	var rect := Rect2(top_left - Vector2(3.0, 2.0), text_size + Vector2(6.0, 4.0))
+	# Labels keep readable air around their glyph bounds; low-priority candidates are
+	# dropped instead of compressing dense Western European names together.
+	var rect := Rect2(top_left - Vector2(7.0, 4.0), text_size + Vector2(14.0, 8.0))
 	if rect.end.x < 0.0 or rect.position.x > size.x or rect.end.y < 0.0 or rect.position.y > size.y:
 		return false
 	for existing: Rect2 in _label_rects:

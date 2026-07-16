@@ -297,6 +297,11 @@ func _test_label_density_and_detail_nodes() -> void:
 	var rail_by_id: Dictionary = _index_records(_view.prototype_data.get_document("rail_segments").get("segments", []) as Array)
 	for rail_id: String in middle_rails:
 		_expect(bool((rail_by_id.get(rail_id, {}) as Dictionary).get("main", false)), "%s 为中景主要铁路" % rail_id)
+	var middle_city_nodes: Array[String] = map.get_visible_city_node_ids("middle")
+	for hidden_city_id: String in ["calais", "le_havre", "nantes", "bordeaux", "toulouse"]:
+		_expect(hidden_city_id not in middle_city_nodes, "欧洲中景隐藏法国次要城市节点 %s" % hidden_city_id)
+	for required_city_id: String in ["paris", "lille", "london", "berlin"]:
+		_expect(required_city_id in middle_city_nodes, "欧洲中景保留主要城市节点 %s" % required_city_id)
 	var near_rails: Array[String] = map.get_visible_rail_ids("near")
 	_expect(near_rails.size() >= 5 and near_rails.size() <= 8, "法国近景铁路数量遵守 5–8 条预算")
 	var collision_result: Array[String] = map.debug_resolve_label_candidates([
@@ -351,7 +356,11 @@ func _test_corner_entries_and_identity_review() -> void:
 	_expect(character_state.get("character_corner_visible", true) == false, "打开人物中心后左下人物摘要不重复显示")
 	interface.close_panel(false)
 	_expect(interface.debug_state().get("identity_switch_visible", true) == false, "普通原型模式隐藏身份切换器")
-	interface.set_review_mode(true)
+	var review_key := InputEventKey.new()
+	review_key.keycode = KEY_F9
+	review_key.pressed = true
+	_view._input(review_key)
+	_expect(interface.review_mode, "F9 可显隐本地评审身份切换器")
 	await process_frame
 	interface.handle_pointer_pressed(Vector2(710.0, 30.0))
 	_expect(interface.identity == "official", "--prototype-review 评审工具可切换地方官员")
