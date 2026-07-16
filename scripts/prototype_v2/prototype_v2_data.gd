@@ -12,6 +12,7 @@ const FILES: Dictionary = {
 	"road_segments": "res://data/prototype_v2/prototype_road_segments.json",
 	"shipping_routes": "res://data/prototype_v2/prototype_shipping_routes.json",
 	"characters": "res://data/prototype_v2/prototype_characters.json",
+	"name_pool_fr": "res://data/prototype_v2/prototype_name_pool_fr.json",
 	"relationships": "res://data/prototype_v2/prototype_relationships.json",
 	"organizations": "res://data/prototype_v2/prototype_organizations.json",
 	"institutions": "res://data/prototype_v2/prototype_institutions.json",

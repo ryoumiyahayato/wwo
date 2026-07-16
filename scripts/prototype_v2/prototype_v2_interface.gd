@@ -223,10 +223,10 @@ func apply_review_state(state_id: String) -> void:
 			character_section = "relationships"
 			panel_progress = 1.0
 		"person_card", "sequence_05_person":
-			detail_person_id = "anna"
+			detail_person_id = "jeanne"
 			person_detail_level = 1
 		"person_detail":
-			detail_person_id = "anna"
+			detail_person_id = "jeanne"
 			person_detail_level = 3
 		"owned_organizations":
 			open_panel = "character"
@@ -259,6 +259,7 @@ func apply_review_state(state_id: String) -> void:
 
 
 func debug_state() -> Dictionary:
+	var country: Dictionary = _focus_country_data()
 	return {
 		"identity": identity,
 		"open_panel": open_panel,
@@ -275,6 +276,10 @@ func debug_state() -> Dictionary:
 		"object_card_secondary_actions": 2,
 		"activity_summary_items": 1,
 		"institution_structure": "public_portal" if identity == "worker" else "department_hierarchy",
+		"country_emblem_type": str(country.get("emblem_type", "")),
+		"country_detail_name": str(country.get("formal_name_zh", "")),
+		"country_visible_text": "%s %s %s" % [str(country.get("display_name_zh", "")), str(country.get("formal_name_zh", "")), str(country.get("native_name", ""))],
+		"identity_fields_separated": true,
 	}
 
 
@@ -341,11 +346,31 @@ func _draw_review_switch() -> void:
 func _draw_country_corner() -> void:
 	_surface(COUNTRY_CORNER, PANEL, Color(GOLD, 0.18), 10)
 	_register(COUNTRY_CORNER, "corner_country", null, "打开国家或所属机构")
-	draw_circle(Vector2(48.0, 51.0), 18.0, Color("#2b4b50"))
-	_text(Vector2(37.0, 56.0), "FR", 11, GOLD)
+	_draw_french_tricolor_emblem(Vector2(48.0, 51.0), 18.0)
 	_text(Vector2(78.0, 42.0), "法兰西共和国", 17, INK)
-	_text(Vector2(78.0, 63.0), "公开国家信息" if identity == "worker" else "北部工业区行政署", 11, GOLD if identity == "official" else INK_MUTED)
+	_text(Vector2(78.0, 63.0), "公开国家信息" if identity == "worker" else "北部省省政府", 11, GOLD if identity == "official" else INK_MUTED)
 	_text(Vector2(264.0, 55.0), "›", 20, INK_DIM)
+
+
+func _draw_french_tricolor_emblem(center: Vector2, radius: float) -> void:
+	draw_circle(center, radius, Color("#f4f1e8"))
+	_draw_vertical_circle_segment(center, radius, -radius, -radius / 3.0, Color("#244b8e"))
+	_draw_vertical_circle_segment(center, radius, radius / 3.0, radius, Color("#c9424a"))
+	draw_arc(center, radius, 0.0, TAU, 40, Color(GOLD, 0.72), 1.5, true)
+	var rf_size: Vector2 = _font.get_string_size("RF", HORIZONTAL_ALIGNMENT_LEFT, -1.0, 8)
+	draw_string(_font, center + Vector2(-rf_size.x * 0.5, rf_size.y * 0.35), "RF", HORIZONTAL_ALIGNMENT_LEFT, -1.0, 8, Color("#243335"))
+
+
+func _draw_vertical_circle_segment(center: Vector2, radius: float, left: float, right: float, color: Color) -> void:
+	var points := PackedVector2Array()
+	var steps: int = 8
+	for index: int in range(steps + 1):
+		var top_x: float = lerpf(left, right, float(index) / float(steps))
+		points.append(center + Vector2(top_x, -sqrt(maxf(0.0, radius * radius - top_x * top_x))))
+	for index: int in range(steps, -1, -1):
+		var bottom_x: float = lerpf(left, right, float(index) / float(steps))
+		points.append(center + Vector2(bottom_x, sqrt(maxf(0.0, radius * radius - bottom_x * bottom_x))))
+	draw_colored_polygon(points, color)
 
 
 func _draw_time_corner() -> void:
@@ -363,9 +388,9 @@ func _draw_character_corner() -> void:
 	_register(CHARACTER_CORNER, "corner_character", null, "打开人物中心")
 	_draw_avatar(CHARACTER_CORNER.position + Vector2(34.0, 36.0), 23.0)
 	var person: Dictionary = _identity_data()
-	_text(CHARACTER_CORNER.position + Vector2(70.0, 25.0), str(person.get("name", "")), 17, INK)
-	_text(CHARACTER_CORNER.position + Vector2(70.0, 44.0), str(person.get("role", "")), 11, GOLD)
-	_text(CHARACTER_CORNER.position + Vector2(70.0, 62.0), str(person.get("life_summary", "")), 10, INK_MUTED)
+	_text(CHARACTER_CORNER.position + Vector2(70.0, 23.0), str(person.get("display_name_zh", "")), 16, INK)
+	_text(CHARACTER_CORNER.position + Vector2(70.0, 41.0), str(person.get("native_name", "")), 9, INK_MUTED)
+	_text(CHARACTER_CORNER.position + Vector2(70.0, 60.0), str(person.get("occupation", "")), 11, GOLD)
 	_text(CHARACTER_CORNER.end - Vector2(22.0, 30.0), "›", 20, INK_DIM)
 
 
@@ -414,50 +439,53 @@ func _draw_country_panel() -> void:
 
 
 func _draw_worker_country_view(rect: Rect2) -> void:
-	_text(rect.position + Vector2(20.0, 34.0), "法兰西共和国", 22, INK)
-	_text(rect.position + Vector2(20.0, 57.0), "公开入口 · 信息精度受公开渠道限制", 11, BLUE)
+	_text(rect.position + Vector2(20.0, 34.0), "法兰西第三共和国", 22, INK)
+	_text(rect.position + Vector2(20.0, 56.0), "République française", 10, INK_MUTED)
+	_text(rect.position + Vector2(20.0, 74.0), "公开入口 · 信息精度受公开渠道限制", 10, BLUE)
 	_section_heading(rect.position + Vector2(20.0, 94.0), "本地政策")
-	_text(rect.position + Vector2(20.0, 119.0), "工厂安全法进入北部工业区落实", 13, INK)
-	_text(rect.position + Vector2(20.0, 138.0), "✓ 可查看公开检查摘要与投诉渠道", 10, INK_MUTED)
+	_text(rect.position + Vector2(20.0, 119.0), "北部省劳动监察处发布安全检查公告", 12, INK)
+	_text(rect.position + Vector2(20.0, 138.0), "✓ 静态条目 · 可查看公开摘要与投诉渠道", 10, INK_MUTED)
 	_divider(rect.position + Vector2(20.0, 160.0), rect.size.x - 40.0)
 	_section_heading(rect.position + Vector2(20.0, 190.0), "公开新闻")
-	_text(rect.position + Vector2(20.0, 215.0), "《河港日报》：铁路货运仍在协调", 12, INK)
+	_text(rect.position + Vector2(20.0, 215.0), "《里尔公报》：巴黎—里尔铁路出现延误", 11, INK)
 	_text(rect.position + Vector2(20.0, 235.0), "来源：公开报道 · 今日", 10, INK_DIM)
 	_divider(rect.position + Vector2(20.0, 258.0), rect.size.x - 40.0)
 	_section_heading(rect.position + Vector2(20.0, 288.0), "可接触组织")
-	_text(rect.position + Vector2(20.0, 314.0), "劳工监察署", 13, INK)
+	_text(rect.position + Vector2(20.0, 314.0), "北部省劳动监察处", 13, INK)
 	_text(rect.position + Vector2(20.0, 334.0), "公开公告与投诉窗口", 10, INK_MUTED)
-	_text(rect.position + Vector2(20.0, 365.0), "市政服务处", 13, INK)
+	_text(rect.position + Vector2(20.0, 365.0), "里尔市政厅", 13, INK)
 	_text(rect.position + Vector2(20.0, 385.0), "办事程序与地区公告", 10, INK_MUTED)
-	_text(rect.position + Vector2(20.0, 424.0), "中央预算、内部层级与未公开议程不会显示", 10, INK_DIM)
+	_text(rect.position + Vector2(20.0, 414.0), "现代 Natural Earth 边界仅用于本原型的 UI 与缩放验证", 9, INK_DIM)
+	_text(rect.position + Vector2(20.0, 430.0), "中央预算、内部层级与未公开议程不会显示", 9, INK_DIM)
 	_primary_action(Rect2(rect.position.x + 20.0, rect.end.y - 48.0, 140.0, 30.0), "查看本地政策", "context_action", "查看本地政策", "公开信息入口")
 	_text_link(Rect2(rect.position.x + 176.0, rect.end.y - 46.0, 92.0, 28.0), "公开新闻", "context_action", "公开新闻", "打开公开新闻")
 	_more_action(Rect2(rect.end.x - 54.0, rect.end.y - 46.0, 34.0, 28.0), "国家入口更多信息")
 
 
 func _draw_official_institution_view(rect: Rect2) -> void:
-	_text(rect.position + Vector2(20.0, 34.0), "北部工业区行政署", 22, INK)
-	_text(rect.position + Vector2(20.0, 57.0), "公共事务科副主任 · 地方行政视角", 11, GOLD)
+	_text(rect.position + Vector2(20.0, 34.0), "北部省省政府", 22, INK)
+	_text(rect.position + Vector2(20.0, 55.0), "Préfecture du Nord", 10, INK_MUTED)
+	_text(rect.position + Vector2(20.0, 73.0), "公共工程处事务员 · 省级行政视角", 10, GOLD)
 	_section_heading(rect.position + Vector2(20.0, 88.0), "机构结构")
 	var center_x: float = rect.position.x + rect.size.x * 0.5
-	_text(Vector2(center_x - 54.0, rect.position.y + 112.0), "地方行政长官", 11, INK_MUTED)
+	_text(Vector2(center_x - 43.0, rect.position.y + 112.0), "北部省省长", 11, INK_MUTED)
 	draw_line(Vector2(center_x, rect.position.y + 120.0), Vector2(center_x, rect.position.y + 145.0), LINE, 1.5)
 	_surface(Rect2(center_x - 76.0, rect.position.y + 145.0, 152.0, 42.0), Color(GOLD, 0.12), Color(GOLD, 0.3), 7)
-	_text(Vector2(center_x - 49.0, rect.position.y + 171.0), "公共事务科", 14, INK)
+	_text(Vector2(center_x - 49.0, rect.position.y + 171.0), "公共工程处", 14, INK)
 	draw_line(Vector2(center_x, rect.position.y + 187.0), Vector2(center_x, rect.position.y + 205.0), LINE, 1.5)
 	draw_line(Vector2(center_x - 122.0, rect.position.y + 205.0), Vector2(center_x + 122.0, rect.position.y + 205.0), LINE, 1.0)
-	_text(Vector2(center_x - 147.0, rect.position.y + 226.0), "铁路协调处", 10, INK_MUTED)
-	_text(Vector2(center_x - 42.0, rect.position.y + 226.0), "卫生处", 10, INK_MUTED)
-	_text(Vector2(center_x + 54.0, rect.position.y + 226.0), "劳工监察署", 10, INK_MUTED)
+	_text(Vector2(center_x - 148.0, rect.position.y + 226.0), "里尔区公署", 10, INK_MUTED)
+	_text(Vector2(center_x - 43.0, rect.position.y + 226.0), "里尔市政厅", 10, INK_MUTED)
+	_text(Vector2(center_x + 64.0, rect.position.y + 226.0), "劳动监察处", 10, INK_MUTED)
 	_divider(rect.position + Vector2(20.0, 246.0), rect.size.x - 40.0)
 	_text(rect.position + Vector2(20.0, 270.0), "管辖", 10, INK_DIM)
-	_text(rect.position + Vector2(86.0, 270.0), "北部工业区", 12, INK)
+	_text(rect.position + Vector2(86.0, 270.0), "北部省（département）", 12, INK)
 	_text(rect.position + Vector2(20.0, 294.0), "预算来源", 10, INK_DIM)
-	_text(rect.position + Vector2(86.0, 294.0), "地方总预算拨款 · 科室执行额 68%", 11, INK)
+	_text(rect.position + Vector2(86.0, 294.0), "北部省预算拨款 · 本处执行额 68%", 11, INK)
 	_section_heading(rect.position + Vector2(20.0, 329.0), "当前议程")
-	_text(rect.position + Vector2(20.0, 355.0), "! 恢复食品铁路运输", 13, AMBER)
+	_text(rect.position + Vector2(20.0, 355.0), "! 协调巴黎—里尔铁路运输延误", 12, AMBER)
 	_text(rect.position + Vector2(20.0, 381.0), "可执行程序", 10, INK_DIM)
-	_text(rect.position + Vector2(88.0, 381.0), "提交事务 · 跨部门会签 · 执行复核", 11, INK)
+	_text(rect.position + Vector2(88.0, 381.0), "处内提交 · 跨单位会签 · 执行复核", 11, INK)
 	_text(rect.position + Vector2(20.0, 415.0), "🔒 中央铁路投资排序 · 已知但无权处理", 10, AMBER)
 	_primary_action(Rect2(rect.position.x + 20.0, rect.end.y - 48.0, 142.0, 30.0), "处理当前议程", "context_action", "处理当前议程", "仅限当前职位与辖区")
 	_text_link(Rect2(rect.position.x + 178.0, rect.end.y - 46.0, 96.0, 28.0), "查看程序", "context_action", "查看程序", "查看法定程序")
@@ -494,11 +522,12 @@ func _draw_character_panel() -> void:
 	_close_control(rect)
 	var person: Dictionary = _identity_data()
 	_draw_avatar(rect.position + Vector2(42.0, 42.0), 25.0)
-	_text(rect.position + Vector2(80.0, 35.0), str(person.get("name", "")), 21, INK)
-	_text(rect.position + Vector2(80.0, 57.0), "%s · %s" % [str(person.get("role", "")), str(person.get("position", ""))], 11, GOLD)
-	var nav_rect := Rect2(rect.position.x + 14.0, rect.position.y + 86.0, 92.0, rect.size.y - 104.0)
+	_text(rect.position + Vector2(80.0, 31.0), str(person.get("display_name_zh", "")), 20, INK)
+	_text(rect.position + Vector2(80.0, 50.0), str(person.get("native_name", "")), 10, INK_MUTED)
+	_text(rect.position + Vector2(80.0, 70.0), "职业：%s" % str(person.get("occupation", "")), 10, GOLD)
+	var nav_rect := Rect2(rect.position.x + 14.0, rect.position.y + 96.0, 92.0, rect.size.y - 114.0)
 	_draw_character_navigation(nav_rect)
-	var body := Rect2(rect.position.x + 118.0, rect.position.y + 86.0, rect.size.x - 136.0, rect.size.y - 104.0)
+	var body := Rect2(rect.position.x + 118.0, rect.position.y + 96.0, rect.size.x - 136.0, rect.size.y - 114.0)
 	match character_section:
 		"summary":
 			_draw_character_summary(body, person)
@@ -532,11 +561,15 @@ func _draw_character_summary(rect: Rect2, person: Dictionary) -> void:
 	_text(rect.position + Vector2(82.0, 45.0), str(person.get("fatigue", "")), 12, AMBER)
 	_text(rect.position + Vector2(168.0, 45.0), str(person.get("stress", "")), 12, BLUE if identity == "worker" else AMBER)
 	_divider(rect.position + Vector2(0.0, 62.0), rect.size.x)
-	_status_line(rect.position + Vector2(0.0, 89.0), "本月净收支", str(person.get("monthly_balance", "")), GOLD)
-	_status_line(rect.position + Vector2(0.0, 123.0), "当前工作", str(person.get("current_work", "")), INK)
-	_status_line(rect.position + Vector2(0.0, 171.0), "主要问题", str(person.get("primary_concern", "")), AMBER)
-	_status_line(rect.position + Vector2(0.0, 219.0), "主要计划", str(person.get("plan", "")), GREEN)
-	_text(rect.position + Vector2(0.0, 265.0), "状态来源与完整数字在点击详情后显示", 9, INK_DIM)
+	_text(rect.position + Vector2(0.0, 86.0), "职业", 10, INK_DIM)
+	_text(rect.position + Vector2(62.0, 86.0), str(person.get("occupation", "")), 11, INK)
+	_text(rect.position + Vector2(0.0, 112.0), "雇主" if identity == "worker" else "所属机构", 10, INK_DIM)
+	_text(rect.position + Vector2(62.0, 112.0), str(person.get("employer", "")) if identity == "worker" else str(person.get("institution", "")), 11, INK)
+	_text(rect.position + Vector2(0.0, 138.0), "工会职位" if identity == "worker" else "机构职位", 10, INK_DIM)
+	_text(rect.position + Vector2(62.0, 138.0), str(person.get("union_position", "")) if identity == "worker" else str(person.get("institution_position", "")), 11, GOLD)
+	_status_line(rect.position + Vector2(0.0, 169.0), "当前工作", str(person.get("current_work", "")), INK)
+	_status_line(rect.position + Vector2(0.0, 211.0), "主要问题", str(person.get("primary_concern", "")), AMBER)
+	_status_line(rect.position + Vector2(0.0, 253.0), "主要计划", str(person.get("plan", "")), GREEN)
 	_primary_action(Rect2(rect.position.x, rect.end.y - 38.0, 118.0, 30.0), "查看当前计划", "action_detail", str(person.get("plan", "")), "进入第三层详情")
 	_more_action(Rect2(rect.position.x + 130.0, rect.end.y - 38.0, 34.0, 30.0), "人物更多信息")
 
@@ -546,21 +579,28 @@ func _draw_life_work(rect: Rect2, person: Dictionary) -> void:
 		_section_heading(rect.position + Vector2(0.0, 15.0), "生活")
 		_text(rect.position + Vector2(0.0, 43.0), str(person.get("household", "")), 12, INK)
 		_text(rect.position + Vector2(0.0, 65.0), "现金 %s · 本月 %s" % [str(person.get("cash", "")), str(person.get("monthly_balance", ""))], 10, INK_MUTED)
-		_section_heading(rect.position + Vector2(0.0, 105.0), "工作合同")
-		_text(rect.position + Vector2(0.0, 133.0), str(person.get("work_contract", "")), 11, INK)
-		_text(rect.position + Vector2(0.0, 158.0), "雇主", 10, INK_DIM)
-		_text(rect.position + Vector2(48.0, 158.0), str(person.get("employer", "")), 11, INK)
-		_text(rect.position + Vector2(0.0, 184.0), "工会", 10, INK_DIM)
-		_text(rect.position + Vector2(48.0, 184.0), str(person.get("union", "")), 11, GOLD)
-		_text(rect.position + Vector2(0.0, 225.0), "! 疲劳偏高可能影响夜校计划", 10, AMBER)
+		_section_heading(rect.position + Vector2(0.0, 98.0), "工作与组织")
+		_text(rect.position + Vector2(0.0, 126.0), "职业", 10, INK_DIM)
+		_text(rect.position + Vector2(58.0, 126.0), str(person.get("occupation", "")), 11, INK)
+		_text(rect.position + Vector2(0.0, 151.0), "雇主", 10, INK_DIM)
+		_text(rect.position + Vector2(58.0, 151.0), str(person.get("employer", "")), 11, INK)
+		_text(rect.position + Vector2(0.0, 176.0), "工会", 10, INK_DIM)
+		_text(rect.position + Vector2(58.0, 176.0), str(person.get("union", "")), 11, GOLD)
+		_text(rect.position + Vector2(0.0, 201.0), "工会职位", 10, INK_DIM)
+		_text(rect.position + Vector2(58.0, 201.0), str(person.get("union_position", "")), 11, GOLD)
+		_text(rect.position + Vector2(0.0, 226.0), "夜校", 10, INK_DIM)
+		_text(rect.position + Vector2(58.0, 226.0), str(person.get("school", "")), 11, INK)
+		_text(rect.position + Vector2(0.0, 259.0), str(person.get("work_contract", "")), 9, INK_MUTED)
+		_text(rect.position + Vector2(0.0, 282.0), "! 疲劳偏高可能影响夜校计划", 10, AMBER)
 	else:
 		_section_heading(rect.position + Vector2(0.0, 15.0), "个人与任职")
-		_status_line(rect.position + Vector2(0.0, 46.0), "所属部门", str(person.get("department", "")), INK)
-		_status_line(rect.position + Vector2(0.0, 87.0), "上级", str(person.get("supervisor", "")), INK)
-		_status_line(rect.position + Vector2(0.0, 128.0), "下属", str(person.get("subordinates", "")), INK)
-		_status_line(rect.position + Vector2(0.0, 169.0), "管辖", str(person.get("jurisdiction", "")), GOLD)
-		_status_line(rect.position + Vector2(0.0, 210.0), "预算来源", str(person.get("budget_source", "")), INK_MUTED)
-		_text(rect.position + Vector2(0.0, 260.0), str(person.get("upstream_locked", "")), 9, AMBER)
+		_status_line(rect.position + Vector2(0.0, 42.0), "职业", str(person.get("occupation", "")), INK)
+		_status_line(rect.position + Vector2(0.0, 80.0), "机构职位", str(person.get("institution_position", "")), GOLD)
+		_status_line(rect.position + Vector2(0.0, 118.0), "所属机构", str(person.get("institution", "")), INK)
+		_status_line(rect.position + Vector2(0.0, 156.0), "管辖范围", str(person.get("jurisdiction", "")), GOLD)
+		_status_line(rect.position + Vector2(0.0, 194.0), "权限来源", str(person.get("authority_source", "")), INK_MUTED)
+		_status_line(rect.position + Vector2(0.0, 232.0), "预算来源", str(person.get("budget_source", "")), INK_MUTED)
+		_text(rect.position + Vector2(0.0, 285.0), str(person.get("upstream_locked", "")), 9, AMBER)
 
 
 func _draw_relationships(rect: Rect2) -> void:
@@ -583,8 +623,8 @@ func _draw_organizations(rect: Rect2, owned: bool) -> void:
 	var identity_records: Dictionary = _organization_identity_data()
 	var organizations: Array = identity_records.get("owned" if owned else "discover", []) as Array
 	for index: int in range(mini(organizations.size(), 2 if owned else 3)):
-		var organization: Dictionary = organizations[index] as Dictionary
-		var height: float = 142.0 if owned else 100.0
+		var organization: Dictionary = _organization_record(organizations[index] as Dictionary)
+		var height: float = 154.0 if owned else 100.0
 		var row := Rect2(rect.position.x, rect.position.y + 52.0 + float(index) * (height + 8.0), rect.size.x, height)
 		_draw_organization_entry(row, organization, owned)
 
@@ -593,10 +633,11 @@ func _draw_organization_entry(rect: Rect2, organization: Dictionary, owned: bool
 	draw_rect(Rect2(rect.position, Vector2(3.0, rect.size.y)), GOLD if owned else BLUE)
 	_text(rect.position + Vector2(12.0, 20.0), "%s  %s" % [str(organization.get("emblem", "○")), str(organization.get("name", ""))], 13, INK)
 	if owned:
-		_text(rect.position + Vector2(12.0, 42.0), "%s · %s" % [str(organization.get("position", "")), str(organization.get("department", ""))], 10, GOLD)
-		_text(rect.position + Vector2(12.0, 62.0), "项目  %s" % str(organization.get("project", "")), 10, GREEN)
-		_text(rect.position + Vector2(12.0, 82.0), "上级  %s" % str(organization.get("supervisor", "")), 9, INK_MUTED)
-		_text(rect.position + Vector2(12.0, 102.0), "权限  %s" % str(organization.get("authority", "")), 9, INK_MUTED)
+		_text(rect.position + Vector2(12.0, 41.0), "职位  %s" % str(organization.get("position", "")), 10, GOLD)
+		_text(rect.position + Vector2(12.0, 59.0), "部门  %s" % str(organization.get("department", "")), 9, INK_MUTED)
+		_text(rect.position + Vector2(12.0, 77.0), "项目  %s" % str(organization.get("project", "")), 10, GREEN)
+		_text(rect.position + Vector2(12.0, 95.0), "上级  %s" % str(organization.get("supervisor", "")), 9, INK_MUTED)
+		_text(rect.position + Vector2(12.0, 113.0), "权限  %s" % str(organization.get("authority", "")), 9, INK_MUTED)
 		_text_link(Rect2(rect.position.x + 12.0, rect.end.y - 27.0, 104.0, 23.0), "查看组织事务", "organization_action", "查看组织事务", "主要动作")
 		_text_link(Rect2(rect.position.x + 128.0, rect.end.y - 27.0, 100.0, 23.0), "参与当前项目", "organization_action", "参与当前项目", "次要动作")
 	else:
@@ -643,7 +684,7 @@ func _draw_object_card() -> void:
 	_icon_close(Rect2(rect.end.x - 38.0, rect.position.y + 10.0, 26.0, 26.0), "object_close", "关闭对象卡")
 	var type_label: String = _object_type_label(object_type)
 	_text(rect.position + Vector2(20.0, 28.0), type_label, 10, BLUE)
-	_text(rect.position + Vector2(20.0, 57.0), str(object_data.get("name", "未命名对象")), 21, INK)
+	_text(rect.position + Vector2(20.0, 57.0), _object_display_name(object_type, object_data), 21, INK)
 	_text(rect.position + Vector2(20.0, 80.0), _object_hierarchy(object_type, object_data), 10, INK_MUTED)
 	_divider(rect.position + Vector2(20.0, 96.0), rect.size.x - 40.0)
 	_draw_object_summary(rect, object_type, object_data)
@@ -655,11 +696,13 @@ func _draw_object_card() -> void:
 func _draw_object_summary(rect: Rect2, object_type: String, object_data: Dictionary) -> void:
 	match object_type:
 		"country":
-			_text(rect.position + Vector2(20.0, 123.0), str(object_data.get("diplomacy", "和平")), 12, GREEN)
-			_text(rect.position + Vector2(20.0, 148.0), "政治边界为视觉原型近似", 10, INK_DIM)
+			_text(rect.position + Vector2(20.0, 121.0), str(object_data.get("native_name", "")), 11, INK)
+			_text(rect.position + Vector2(20.0, 143.0), "%s · %s" % [str(object_data.get("government_name", "")), str(object_data.get("diplomacy", "和平"))], 10, GREEN)
+			_text(rect.position + Vector2(20.0, 164.0), "现代 Natural Earth 边界 · 1900 年主题占位", 9, INK_DIM)
 		"region":
 			_text(rect.position + Vector2(20.0, 123.0), "人口  %s" % str(object_data.get("population", "")), 11, INK)
-			_text(rect.position + Vector2(20.0, 148.0), "市场  %s · %s" % [str(object_data.get("market", "")), str(object_data.get("market_state", ""))], 11, AMBER)
+			_text(rect.position + Vector2(20.0, 146.0), "观察  %s · %s" % [str(object_data.get("market", "")), str(object_data.get("market_state", ""))], 10, AMBER)
+			_text(rect.position + Vector2(20.0, 166.0), "游戏宏观地区，不等同于历史行政区划。", 9, INK_DIM)
 		"city":
 			_text(rect.position + Vector2(20.0, 123.0), "主要城市节点 · 地方交通入口", 11, INK)
 			_text(rect.position + Vector2(20.0, 148.0), "缩放到近景可见机构与组织", 10, INK_MUTED)
@@ -669,7 +712,8 @@ func _draw_object_summary(rect: Rect2, object_type: String, object_data: Diction
 			var view_key: String = "worker_view" if identity == "worker" else "official_view"
 			var view: Dictionary = object_data.get(view_key, {}) as Dictionary
 			_text(rect.position + Vector2(20.0, 123.0), str(view.get("summary", "")), 11, INK)
-			_text(rect.position + Vector2(20.0, 148.0), "信息精度：%s" % str(view.get("precision", "")), 10, GOLD)
+			_text(rect.position + Vector2(20.0, 146.0), "层级：%s · 管辖：%s" % [str(object_data.get("administrative_level", "")), str(object_data.get("jurisdiction", ""))], 10, GOLD)
+			_text(rect.position + Vector2(20.0, 166.0), "信息精度：%s" % str(view.get("precision", "")), 9, INK_MUTED)
 		"organization":
 			_text(rect.position + Vector2(20.0, 123.0), "%s · %s" % [str(object_data.get("position", "")), str(object_data.get("department", ""))], 11, GOLD)
 			_text(rect.position + Vector2(20.0, 148.0), "项目：%s" % str(object_data.get("project", "")), 10, GREEN)
@@ -691,11 +735,12 @@ func _draw_person_first_layer(relation: Dictionary) -> void:
 	_register(rect, "consume")
 	_icon_close(Rect2(rect.end.x - 38.0, rect.position.y + 10.0, 26.0, 26.0), "close_person_detail", "关闭人物卡")
 	_draw_avatar(rect.position + Vector2(43.0, 49.0), 24.0)
-	_text(rect.position + Vector2(82.0, 42.0), str(relation.get("name", "")), 20, INK)
-	_text(rect.position + Vector2(82.0, 64.0), "%s · %s" % [str(relation.get("occupation", "")), str(relation.get("region", ""))], 10, GOLD)
-	_text(rect.position + Vector2(20.0, 105.0), str(relation.get("relation", "")), 13, INK)
-	_text(rect.position + Vector2(20.0, 128.0), "最近互动  %s" % str(relation.get("last_interaction", "")), 10, INK_MUTED)
-	_text(rect.position + Vector2(20.0, 150.0), str(relation.get("status", "")), 10, INK_MUTED)
+	_text(rect.position + Vector2(82.0, 38.0), str(relation.get("display_name_zh", "")), 20, INK)
+	_text(rect.position + Vector2(82.0, 56.0), str(relation.get("native_name", "")), 9, INK_MUTED)
+	_text(rect.position + Vector2(82.0, 74.0), "%s · %s" % [str(relation.get("occupation", "")), str(relation.get("region", ""))], 9, GOLD)
+	_text(rect.position + Vector2(20.0, 110.0), str(relation.get("relation", "")), 13, INK)
+	_text(rect.position + Vector2(20.0, 133.0), "最近互动  %s" % str(relation.get("last_interaction", "")), 10, INK_MUTED)
+	_text(rect.position + Vector2(20.0, 155.0), str(relation.get("status", "")), 10, INK_MUTED)
 	_primary_action(Rect2(rect.position.x + 20.0, rect.end.y - 46.0, 104.0, 30.0), "联系", "person_action", "联系", "主要动作")
 	_text_link(Rect2(rect.position.x + 140.0, rect.end.y - 44.0, 92.0, 28.0), "请求帮助", "person_action", "请求帮助", "次要动作；条件不足时会提示")
 	_more_action(Rect2(rect.position.x + 248.0, rect.end.y - 44.0, 34.0, 28.0), "引荐、调查、共同关系")
@@ -708,8 +753,9 @@ func _draw_person_third_layer(relation: Dictionary) -> void:
 	_register(rect, "consume")
 	_icon_close(Rect2(rect.end.x - 38.0, rect.position.y + 10.0, 26.0, 26.0), "close_person_detail", "关闭人物详情")
 	_draw_avatar(rect.position + Vector2(45.0, 48.0), 25.0)
-	_text(rect.position + Vector2(84.0, 39.0), str(relation.get("name", "")), 21, INK)
-	_text(rect.position + Vector2(84.0, 62.0), "%s · %s" % [str(relation.get("occupation", "")), str(relation.get("region", ""))], 11, GOLD)
+	_text(rect.position + Vector2(84.0, 35.0), str(relation.get("display_name_zh", "")), 21, INK)
+	_text(rect.position + Vector2(84.0, 54.0), str(relation.get("native_name", "")), 9, INK_MUTED)
+	_text(rect.position + Vector2(84.0, 72.0), "%s · %s" % [str(relation.get("occupation", "")), str(relation.get("region", ""))], 10, GOLD)
 	_section_heading(rect.position + Vector2(20.0, 101.0), "关系结构")
 	var rows: Array = [
 		["关系", relation.get("relation", "")], ["最近互动", relation.get("last_interaction", "")],
@@ -833,9 +879,29 @@ func _identity_data() -> Dictionary:
 	return _dictionary_value(identities, identity)
 
 
+func _focus_country_data() -> Dictionary:
+	for country_variant: Variant in data.get_document("countries").get("countries", []):
+		var country: Dictionary = country_variant as Dictionary
+		if str(country.get("stable_id", "")) == "country_fra":
+			return country
+	return {}
+
+
 func _organization_identity_data() -> Dictionary:
 	var identities: Dictionary = data.get_document("organizations").get("identities", {}) as Dictionary
 	return _dictionary_value(identities, identity)
+
+
+func _organization_record(context: Dictionary) -> Dictionary:
+	var result: Dictionary = {}
+	var organization_id: String = str(context.get("organization_id", context.get("id", "")))
+	for record_variant: Variant in data.get_document("organizations").get("catalog", []):
+		var record: Dictionary = record_variant as Dictionary
+		if str(record.get("id", "")) == organization_id:
+			result = record.duplicate(true)
+			break
+	result.merge(context, true)
+	return result
 
 
 func _relationship_by_id(person_id: String) -> Dictionary:
@@ -862,18 +928,26 @@ func _mode_by_id(mode_id: String) -> Dictionary:
 	return {}
 
 
+func _object_display_name(object_type: String, object_data: Dictionary) -> String:
+	if object_type == "country":
+		return str(object_data.get("formal_name_zh", object_data.get("display_name_zh", object_data.get("name", "未命名国家"))))
+	return str(object_data.get("name", "未命名对象"))
+
+
 func _object_hierarchy(object_type: String, object_data: Dictionary) -> String:
 	match object_type:
 		"country":
 			return "世界 › 国家"
 		"region":
-			return "法兰西共和国 › 地区"
+			return "法兰西第三共和国 › 游戏宏观地区"
 		"city":
-			return "法兰西共和国 › %s › 城市" % _region_name(str(object_data.get("parent_region_id", "")))
+			if str(object_data.get("id", "")) == "lille":
+				return "法兰西第三共和国 › 北部省 › 里尔区 › 里尔市"
+			return "法兰西第三共和国 › %s › 城市" % _region_name(str(object_data.get("parent_region_id", "")))
 		"port":
-			return "法兰西共和国 › %s › 港口" % _region_name(str(object_data.get("parent_region_id", "")))
+			return "法兰西第三共和国 › %s › 港口" % _region_name(str(object_data.get("parent_region_id", "")))
 		"institution":
-			return "法兰西共和国 › %s › 地方机构" % _region_name(str(object_data.get("parent_region_id", "")))
+			return "法兰西第三共和国 › %s › %s" % [str(object_data.get("jurisdiction", "地方辖区")), str(object_data.get("administrative_level", "机构"))]
 		"organization":
 			return "人物关系 › 已加入组织"
 	return "地理对象"
