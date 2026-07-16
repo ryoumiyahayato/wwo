@@ -1,0 +1,30 @@
+{
+  "prototype_only": true,
+  "schema_version": 1,
+  "world_size": [1120, 560],
+  "regions": [
+    {"id":"north_america","name":"北美东部","country":"美国","capital":"纽约","population":"人口稠密","market":"工业品充足","transport":"铁路网络发达","politics":"联邦公开制度","polygon":[[80,125],[165,88],[260,110],[300,180],[255,245],[170,230],[112,190]],"legal":"#a9a46f","market_color":"#9a775d","population_color":"#d5a25f","war_color":"#7b8062"},
+    {"id":"south_america","name":"南美南部","country":"阿根廷共和国","capital":"布宜诺斯艾利斯","population":"沿海集中","market":"出口贸易活跃","transport":"港口通达","politics":"公开政局稳定","polygon":[[220,275],[285,292],[310,365],[280,475],[235,445],[205,350]],"legal":"#879c72","market_color":"#9c7a55","population_color":"#bc8756","war_color":"#6e7b67"},
+    {"id":"western_europe","name":"西欧工业带","country":"法兰西共和国","capital":"巴黎","population":"城市密集","market":"区域市场繁荣","transport":"铁路与港口密集","politics":"劳工议题活跃","polygon":[[465,135],[525,115],[562,148],[550,205],[495,218],[458,180]],"legal":"#788fa5","market_color":"#5f9c8a","population_color":"#d08755","war_color":"#798477"},
+    {"id":"central_europe","name":"中欧走廊","country":"德意志帝国","capital":"柏林","population":"工业城市密集","market":"机械与煤炭强势","transport":"铁路枢纽密集","politics":"行政集中","polygon":[[525,115],[610,118],[645,170],[612,218],[550,205],[562,148]],"legal":"#8f887a","market_color":"#6b9a7c","population_color":"#d69458","war_color":"#84786e"},
+    {"id":"north_africa","name":"北非沿岸","country":"奥斯曼帝国与殖民地","capital":"亚历山大港","population":"沿海集中","market":"粮食与海运市场","transport":"港口较强、内陆有限","politics":"多重法理与行政","polygon":[[455,240],[540,222],[620,245],[650,330],[590,395],[500,365],[452,300]],"legal":"#b09b67","market_color":"#a48257","population_color":"#b6814f","war_color":"#7d7767"},
+    {"id":"russian_west","name":"俄国西部","country":"俄罗斯帝国","capital":"圣彼得堡","population":"城市与乡村混合","market":"粮食运输受季节影响","transport":"主干铁路延伸","politics":"帝国行政","polygon":[[610,88],[775,78],[850,122],[815,200],[690,224],[645,170]],"legal":"#7d926f","market_color":"#718c70","population_color":"#bb8d58","war_color":"#727a69"},
+    {"id":"east_asia","name":"华北与日本列岛","country":"清帝国 / 日本帝国","capital":"北京","population":"人口高度集中","market":"沿海贸易增长","transport":"铁路建设中","politics":"制度转型压力","polygon":[[820,160],[930,135],[1010,185],[985,265],[885,278],[815,220]],"legal":"#a58a69","market_color":"#6e9180","population_color":"#d47f54","war_color":"#857365"},
+    {"id":"south_asia","name":"南亚地区","country":"英属印度","capital":"加尔各答","population":"人口高度集中","market":"纺织与粮食贸易","transport":"铁路与港口扩张","politics":"殖民行政","polygon":[[700,245],[785,225],[845,275],[805,370],[745,350],[690,300]],"legal":"#9b806e","market_color":"#7d9b76","population_color":"#d57e50","war_color":"#7d7168"}
+  ],
+  "cities": [
+    {"id":"new_york","name":"纽约","region":"north_america","position":[230,165],"port":true},
+    {"id":"buenos_aires","name":"布宜诺斯艾利斯","region":"south_america","position":[270,400],"port":true},
+    {"id":"paris","name":"巴黎","region":"western_europe","position":[505,160],"port":false},
+    {"id":"harbor","name":"河港市","region":"western_europe","position":[478,192],"port":true},
+    {"id":"berlin","name":"柏林","region":"central_europe","position":[585,150],"port":false},
+    {"id":"vienna","name":"维也纳","region":"central_europe","position":[595,195],"port":false},
+    {"id":"alexandria","name":"亚历山大港","region":"north_africa","position":[565,275],"port":true},
+    {"id":"st_petersburg","name":"圣彼得堡","region":"russian_west","position":[690,120],"port":true},
+    {"id":"moscow","name":"莫斯科","region":"russian_west","position":[735,165],"port":false},
+    {"id":"beijing","name":"北京","region":"east_asia","position":[900,205],"port":false},
+    {"id":"tokyo","name":"东京","region":"east_asia","position":[980,220],"port":true},
+    {"id":"calcutta","name":"加尔各答","region":"south_asia","position":[785,310],"port":true}
+  ],
+  "railways": [["new_york","paris"],["paris","harbor"],["paris","berlin"],["berlin","vienna"],["berlin","st_petersburg"],["st_petersburg","moscow"],["moscow","beijing"],["beijing","tokyo"],["vienna","alexandria"],["alexandria","calcutta"]]
+}

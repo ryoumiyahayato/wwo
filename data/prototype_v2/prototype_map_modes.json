@@ -1,0 +1,15 @@
+{
+  "prototype_only": true,
+  "schema_version": 1,
+  "modes": [
+    {"id":"legal","label":"法理归属","description":"国家与地区法理边界"},
+    {"id":"market","label":"区域市场","description":"静态市场连通与状态"},
+    {"id":"population","label":"人口","description":"静态人口密度示意"},
+    {"id":"war","label":"战争示例","description":"静态假前线，仅展示视觉"}
+  ],
+  "peace_note":"和平状态：不显示前线与军事控制入口",
+  "war_note":"战争视觉示例：不运行任何战争模拟",
+  "zoom_min": 0.78,
+  "zoom_max": 1.85,
+  "zoom_step": 0.12
+}

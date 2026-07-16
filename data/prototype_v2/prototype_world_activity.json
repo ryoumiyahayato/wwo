@@ -1,0 +1,11 @@
+{
+  "prototype_only": true,
+  "schema_version": 1,
+  "items": [
+    {"level":"important","time":"今天","title":"河港食品价格异常上涨","detail":"铁路货运中断推高本地运输成本","source":"河港日报 · 今日"},
+    {"level":"normal","time":"本周","title":"劳动安全法进入地方执行","detail":"北部工业区开始首轮工厂检查","source":"地方公告 · 3 天前"},
+    {"level":"normal","time":"本周","title":"3 家企业宣布缩减招聘","detail":"同类招聘变化已聚合","source":"行业简报 · 3 天前"},
+    {"level":"world","time":"本月","title":"6 个组织在 5 个地区扩大影响","detail":"低价值组织变化已按地区和周期聚合","source":"多份公开报道"},
+    {"level":"world","time":"本月","title":"东亚铁路建设获得新融资","detail":"项目仍处于公开筹备阶段","source":"国际电讯 · 2 个月前"}
+  ]
+}

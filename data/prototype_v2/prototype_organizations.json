@@ -1,0 +1,28 @@
+{
+  "prototype_only": true,
+  "schema_version": 1,
+  "identities": {
+    "worker": {
+      "owned": [
+        {"id":"union","name":"河港机械工会","type":"工会","relationship":"已加入 · 信任良好","position":"第三车间联络员","department":"机械分会第三车间","authority":"召集车间会议、提交成员诉求","resources":"活动经费一般","influence":"本地区影响稳定","stance":"支持工厂安全与合理工时","allowance":"津贴 2/月","supervisor":"分会书记","subordinates":"无","next_position":"分会干事","project":"工资谈判准备 · 58%"},
+        {"id":"school","name":"河港工人夜校","type":"教育组织","relationship":"在读学员","position":"机械工程班学员","department":"夜间技术班","authority":"参加课程与学员讨论","resources":"教学资源充足","influence":"本地职业教育声誉良好","stance":"倡导实用技术教育","allowance":"无津贴","supervisor":"课程教师","subordinates":"无","next_position":"助教志愿者","project":"工程课程 · 42%"}
+      ],
+      "discover": [
+        {"id":"coop","name":"河港消费合作社","type":"合作社","match":"本地 · 生活匹配高","access":"公开加入","summary":"集中采购食品与燃料，成员共享账目","action":"申请加入"},
+        {"id":"guild","name":"北部机械师协会","type":"行业协会","match":"本地 · 职业匹配高","access":"需要熟练工推荐","summary":"技术交流、职业资格与工作引荐","action":"请求引荐"},
+        {"id":"commerce","name":"河港商业联合会","type":"行业协会","match":"本地 · 匹配较低","access":"需要企业所有权或成员引荐","summary":"公开发布贸易与运输简报","action":"了解更多"}
+      ]
+    },
+    "official": {
+      "owned": [
+        {"id":"municipal","name":"北部工业区行政署","type":"地方行政机构","relationship":"法定任职","position":"公共事务科副主任","department":"公共事务科","authority":"提交地方事务、协调项目、查阅科室预算","resources":"年度预算执行 68%","influence":"辖区行政影响较强","stance":"优先保障粮运与公共卫生","allowance":"职位津贴 9/月","supervisor":"地方行政长官","subordinates":"事务员 4 人","next_position":"公共事务科主任","project":"粮运协调方案 · 61%"},
+        {"id":"civil_service","name":"地方公务人员协会","type":"职业协会","relationship":"已加入 · 信任一般","position":"普通会员","department":"行政事务组","authority":"参加专业讨论、提交培训建议","resources":"会费收入稳定","influence":"机构内部影响一般","stance":"支持程序透明与专业培训","allowance":"无津贴","supervisor":"协会理事","subordinates":"无","next_position":"事务组联络员","project":"行政培训计划 · 31%"}
+      ],
+      "discover": [
+        {"id":"relief","name":"北部公共救济委员会","type":"公共机构","match":"辖区内 · 职位匹配高","access":"可申请项目席位","summary":"协调住房、食品与紧急救济","action":"了解更多"},
+        {"id":"rail_board","name":"区域铁路协调会","type":"跨地区机构","match":"交通议题 · 关系引荐","access":"需要行政长官提名","summary":"协商铁路容量与货运优先级","action":"请求引荐"},
+        {"id":"central_finance","name":"中央财政委员会","type":"中央机构","match":"国家级 · 当前完全无关","access":"无当前渠道","summary":"此身份不会在界面中提供操作入口","action":"隐藏"}
+      ]
+    }
+  }
+}

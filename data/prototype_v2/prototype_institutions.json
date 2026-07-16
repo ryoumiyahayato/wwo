@@ -1,0 +1,13 @@
+{
+  "prototype_only": true,
+  "schema_version": 1,
+  "country": {"name":"法兰西共和国","government":"议会共和制","emblem":"FR","public_policy":"工厂安全法进入地方落实","news":"河港日报 · 今日更新"},
+  "institutions": [
+    {"id":"labor","name":"劳工监察署","mandate":"监督工厂安全与劳动条件","agenda":"完成北部工业区安全检查","budget":"已批准 · 人员偏紧","worker_visibility":"public","official_visibility":"internal","worker_access":"可查看公开检查摘要","official_access":"可查看执行进度；无调整预算权限"},
+    {"id":"municipal","name":"北部工业区行政署","mandate":"地方公共服务与跨部门协调","agenda":"恢复食品铁路运输","budget":"本季预算执行 68%","worker_visibility":"known_locked","official_visibility":"operable","worker_access":"公开服务与地区议程","official_access":"可提交议程、协调项目、查阅科室预算"},
+    {"id":"finance","name":"中央财政委员会","mandate":"国家预算与财政监督","agenda":"审议下一年度铁路支出","budget":"仅公开总额","worker_visibility":"hidden","official_visibility":"known_locked","worker_access":"","official_access":"需要中央财政职位"},
+    {"id":"army","name":"陆军总参谋部","mandate":"全国军事计划与指挥","agenda":"当前未公开议程","budget":"保密","worker_visibility":"hidden","official_visibility":"hidden","worker_access":"","official_access":""}
+  ],
+  "official_permissions": ["提交地方事务", "支持地区议程", "协调公共项目", "查阅科室预算"],
+  "official_locks": ["分配地方总预算：需要预算权限", "任命机构负责人：需要法定任命权", "中央政策执行：超出当前辖区"]
+}
