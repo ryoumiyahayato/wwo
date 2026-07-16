@@ -1,31 +1,62 @@
 class_name PrototypeV2MapCanvas
 extends Control
-## Programmatic, original placeholder geography for the isolated visual prototype.
+## Geographic V2.1 prototype map. Every object is projected from WGS84 lon/lat.
 
-const OCEAN_TOP := Color("#233b49")
-const OCEAN_BOTTOM := Color("#142c38")
-const COAST := Color("#d8c9a4")
-const REGION_LINE := Color("#263b3d")
-const RAIL_DARK := Color("#242c2a")
-const RAIL_LIGHT := Color("#d0b16f")
-const PORT := Color("#d9c27e")
-const CITY := Color("#f1e7c9")
-const LABEL := Color("#e8dfc6")
-const LABEL_MUTED := Color("#b9b59f")
-const SELECT := Color("#f0c866")
-const FRONT := Color("#c45e51")
-const FRONT_GLOW := Color(0.88, 0.37, 0.29, 0.24)
+const WORLD_SIZE := Vector2(1080.0, 540.0)
+const ROBINSON_X := [1.0, 0.9986, 0.9954, 0.99, 0.9822, 0.973, 0.96, 0.9427, 0.9216, 0.8962, 0.8679, 0.835, 0.7986, 0.7597, 0.7186, 0.6732, 0.6213, 0.5722, 0.5322]
+const ROBINSON_Y := [0.0, 0.062, 0.124, 0.186, 0.248, 0.31, 0.372, 0.434, 0.4958, 0.5571, 0.6176, 0.6769, 0.7346, 0.7903, 0.8435, 0.8936, 0.9394, 0.9761, 1.0]
+const ROBINSON_X_EXTENT := 2.6662696851
+const ROBINSON_Y_EXTENT := 1.3523
 
-var map_data: Dictionary = {}
-var mode_data: Dictionary = {}
+const OCEAN_TOP := Color("#1f4150")
+const OCEAN_BOTTOM := Color("#0d2632")
+const OCEAN_GRID := Color(0.46, 0.68, 0.72, 0.12)
+const LAND_BASE := Color("#66776c")
+const COAST := Color("#dfd4b8")
+const COUNTRY_BORDER := Color(0.15, 0.22, 0.23, 0.82)
+const REGION_BORDER := Color(0.91, 0.84, 0.65, 0.74)
+const LABEL := Color("#f2ead7")
+const LABEL_MUTED := Color("#b9c2b5")
+const SELECT := Color("#f2c865")
+const CITY := Color("#f6e7bd")
+const PORT_COLOR := Color("#66b5c4")
+const RAIL_DARK := Color("#172022")
+const RAIL_LIGHT := Color("#e0bd6f")
+const ROAD := Color("#ba9e79")
+const SHIPPING := Color("#67b8c8")
+const INSTITUTION := Color("#d2a65f")
+const ORGANIZATION := Color("#83b88c")
+const FRONT := Color("#d46355")
+
 var current_mode: String = "legal"
 var selected_id: String = ""
 var selected_type: String = ""
-var zoom: float = 1.0
-var pan: Vector2 = Vector2(80.0, 78.0)
+var zoom: float = 0.94
+var pan: Vector2 = Vector2(132.0, 93.0)
+var war_example_active: bool = false
 
+var _data: PrototypeV2Data
 var _font: Font
+var _coastlines: Array = []
+var _countries: Array = []
+var _regions: Array = []
+var _cities: Array = []
+var _ports: Array = []
+var _rail_segments: Array = []
+var _road_segments: Array = []
+var _shipping_routes: Array = []
+var _institutions: Array = []
+var _organizations: Array = []
+var _modes: Dictionary = {}
+var _country_by_id: Dictionary = {}
+var _country_by_iso: Dictionary = {}
+var _features_by_iso: Dictionary = {}
+var _region_by_id: Dictionary = {}
 var _city_by_id: Dictionary = {}
+var _port_by_id: Dictionary = {}
+var _institution_by_id: Dictionary = {}
+var _organization_by_id: Dictionary = {}
+var _label_rects: Array[Rect2] = []
 
 
 func _ready() -> void:
@@ -34,19 +65,30 @@ func _ready() -> void:
 	_font = ThemeDB.fallback_font
 
 
-func setup(regions_document: Dictionary, modes_document: Dictionary) -> void:
-	map_data = regions_document
-	mode_data = modes_document
-	_city_by_id.clear()
-	for city_variant: Variant in map_data.get("cities", []):
-		if city_variant is Dictionary:
-			var city: Dictionary = city_variant as Dictionary
-			_city_by_id[str(city.get("id", ""))] = city
+func setup(prototype_data: PrototypeV2Data) -> void:
+	_data = prototype_data
+	_coastlines = _document_array("world_coastlines", "features")
+	_countries = _document_array("countries", "countries")
+	_regions = _document_array("regions", "regions")
+	_cities = _document_array("cities", "cities")
+	_ports = _document_array("ports", "ports")
+	_rail_segments = _document_array("rail_segments", "segments")
+	_road_segments = _document_array("road_segments", "segments")
+	_shipping_routes = _document_array("shipping_routes", "routes")
+	_institutions = _document_array("institutions", "institutions")
+	_modes = _data.get_document("map_modes")
+	_build_indexes()
+	reset_view()
 	queue_redraw()
 
 
 func set_mode(mode_id: String) -> void:
 	current_mode = mode_id
+	queue_redraw()
+
+
+func set_war_example_active(active: bool) -> void:
+	war_example_active = active
 	queue_redraw()
 
 
@@ -69,11 +111,12 @@ func pan_by(delta: Vector2) -> void:
 
 
 func zoom_at(direction: float, anchor: Vector2) -> void:
-	var minimum: float = float(mode_data.get("zoom_min", 0.78))
-	var maximum: float = float(mode_data.get("zoom_max", 1.85))
-	var step: float = float(mode_data.get("zoom_step", 0.12))
+	var zoom_config: Dictionary = _modes.get("zoom", {}) as Dictionary
+	var minimum: float = float(zoom_config.get("minimum", 0.82))
+	var maximum: float = float(zoom_config.get("maximum", 5.8))
+	var factor: float = float(zoom_config.get("factor", 1.24))
 	var previous: float = zoom
-	var next_zoom: float = clampf(zoom + direction * step, minimum, maximum)
+	var next_zoom: float = clampf(zoom * (factor if direction > 0.0 else 1.0 / factor), minimum, maximum)
 	if is_equal_approx(previous, next_zoom):
 		return
 	var world_anchor: Vector2 = (anchor - pan) / previous
@@ -84,166 +127,475 @@ func zoom_at(direction: float, anchor: Vector2) -> void:
 
 
 func reset_view() -> void:
-	zoom = 1.0
-	pan = Vector2(80.0, 78.0)
-	queue_redraw()
+	_set_view(Vector2(4.0, 14.0), 0.94, Vector2(640.0, 356.0))
+
+
+func focus_europe() -> void:
+	_set_view(Vector2(9.0, 49.0), 3.25, Vector2(650.0, 354.0))
+
+
+func focus_france() -> void:
+	_set_view(Vector2(2.25, 47.1), 9.2, Vector2(650.0, 360.0))
+
+
+func get_zoom_level() -> String:
+	var zoom_config: Dictionary = _modes.get("zoom", {}) as Dictionary
+	if zoom <= float(zoom_config.get("far_max", 1.5)):
+		return "far"
+	if zoom <= float(zoom_config.get("middle_max", 3.15)):
+		return "middle"
+	return "near"
+
+
+func get_shared_basemap_id() -> String:
+	return str(_modes.get("shared_basemap_id", ""))
+
+
+func has_visible_front() -> bool:
+	return current_mode == "war" and war_example_active
+
+
+func project_lon_lat(value: Variant) -> Vector2:
+	var lon_lat: Vector2 = _array_to_vector(value)
+	var longitude_radians: float = deg_to_rad(clampf(lon_lat.x, -180.0, 180.0))
+	var latitude: float = clampf(lon_lat.y, -90.0, 90.0)
+	var coefficient_index: float = absf(latitude) / 5.0
+	var lower: int = clampi(int(floor(coefficient_index)), 0, ROBINSON_X.size() - 1)
+	var upper: int = mini(lower + 1, ROBINSON_X.size() - 1)
+	var weight: float = coefficient_index - float(lower)
+	var x_coefficient: float = lerpf(float(ROBINSON_X[lower]), float(ROBINSON_X[upper]), weight)
+	var y_coefficient: float = lerpf(float(ROBINSON_Y[lower]), float(ROBINSON_Y[upper]), weight)
+	var projected_x: float = 0.8487 * longitude_radians * x_coefficient
+	var projected_y: float = 1.3523 * signf(latitude) * y_coefficient
+	return Vector2(
+		(projected_x / (ROBINSON_X_EXTENT * 2.0) + 0.5) * WORLD_SIZE.x,
+		(0.5 - projected_y / (ROBINSON_Y_EXTENT * 2.0)) * WORLD_SIZE.y
+	)
+
+
+func lon_lat_to_screen(value: Variant) -> Vector2:
+	return project_lon_lat(value) * zoom + pan
+
+
+func region_contains_lon_lat(region_id: String, lon_lat: Variant) -> bool:
+	var region: Dictionary = get_region(region_id)
+	if region.is_empty():
+		return false
+	return Geometry2D.is_point_in_polygon(_array_to_vector(lon_lat), _lon_lat_polygon(region.get("polygon_lon_lat", [])))
+
+
+func is_record_visible(record: Dictionary) -> bool:
+	return zoom >= float(record.get("min_zoom", 0.0)) and zoom <= float(record.get("max_zoom", 99.0))
 
 
 func get_object_at(screen_position: Vector2) -> Dictionary:
-	var world_position: Vector2 = _to_world(screen_position)
-	var city_radius: float = 13.0 / zoom
-	for city_variant: Variant in map_data.get("cities", []):
-		if not city_variant is Dictionary:
-			continue
-		var city: Dictionary = city_variant as Dictionary
-		if world_position.distance_to(_array_to_vector(city.get("position", []))) <= city_radius:
-			return {"type": "city", "id": str(city.get("id", "")), "data": city}
-	var regions: Array = map_data.get("regions", []) as Array
-	for index: int in range(regions.size() - 1, -1, -1):
-		var region_variant: Variant = regions[index]
-		if not region_variant is Dictionary:
-			continue
-		var region: Dictionary = region_variant as Dictionary
-		var polygon: PackedVector2Array = _polygon_points(region.get("polygon", []))
-		if Geometry2D.is_point_in_polygon(world_position, polygon):
-			return {"type": "region", "id": str(region.get("id", "")), "data": region}
+	var world_position: Vector2 = (screen_position - pan) / zoom
+	if get_zoom_level() == "near":
+		var node_result: Dictionary = _node_at(world_position, _institutions, "institution", 11.0)
+		if not node_result.is_empty():
+			return node_result
+		node_result = _node_at(world_position, _organizations, "organization", 10.0)
+		if not node_result.is_empty():
+			return node_result
+		var port_result: Dictionary = _node_at(world_position, _ports, "port", 10.0)
+		if not port_result.is_empty():
+			return port_result
+	var city_result: Dictionary = _node_at(world_position, _cities, "city", 11.0)
+	if not city_result.is_empty():
+		return city_result
+	if get_zoom_level() != "far":
+		for index: int in range(_regions.size() - 1, -1, -1):
+			var region: Dictionary = _regions[index] as Dictionary
+			for clipped_polygon: PackedVector2Array in _clipped_region_world_polygons(region):
+				if Geometry2D.is_point_in_polygon(world_position, clipped_polygon):
+					return {"type": "region", "id": str(region.get("id", "")), "data": region}
+	for country_variant: Variant in _countries:
+		var country: Dictionary = country_variant as Dictionary
+		if _country_contains(country, world_position):
+			return {"type": "country", "id": str(country.get("id", "")), "data": country}
 	return {}
 
 
 func get_region(region_id: String) -> Dictionary:
-	for region_variant: Variant in map_data.get("regions", []):
-		if region_variant is Dictionary and str((region_variant as Dictionary).get("id", "")) == region_id:
-			return region_variant as Dictionary
-	return {}
+	return _dictionary_value(_region_by_id, region_id)
 
 
 func get_city(city_id: String) -> Dictionary:
-	var value: Variant = _city_by_id.get(city_id, {})
-	return value as Dictionary if value is Dictionary else {}
+	return _dictionary_value(_city_by_id, city_id)
+
+
+func get_country(country_id: String) -> Dictionary:
+	return _dictionary_value(_country_by_id, country_id)
+
+
+func get_institution(institution_id: String) -> Dictionary:
+	return _dictionary_value(_institution_by_id, institution_id)
+
+
+func get_organization(organization_id: String) -> Dictionary:
+	return _dictionary_value(_organization_by_id, organization_id)
 
 
 func _draw() -> void:
 	_draw_ocean()
-	if map_data.is_empty():
+	if _data == null:
 		return
-	_draw_regions()
-	_draw_transport()
-	if current_mode == "war":
-		_draw_static_front()
+	_label_rects.clear()
+	_draw_graticule()
+	_draw_countries()
+	_draw_country_labels()
+	if get_zoom_level() != "far":
+		_draw_regions()
+	_draw_shipping_routes()
+	if get_zoom_level() != "far":
+		_draw_roads()
+		_draw_railways()
+	if has_visible_front():
+		_draw_war_overlay()
 	_draw_cities()
-	_draw_scale_hint()
+	if get_zoom_level() != "far":
+		_draw_ports()
+	if get_zoom_level() == "near":
+		_draw_institutions()
+		_draw_organizations()
+	_draw_ocean_labels()
+	_draw_transport_legend()
 
 
 func _draw_ocean() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), OCEAN_BOTTOM)
-	var bands: int = 14
-	for index: int in range(bands):
-		var ratio: float = float(index) / float(bands)
+	for index: int in range(16):
+		var ratio: float = float(index) / 15.0
 		var color: Color = OCEAN_TOP.lerp(OCEAN_BOTTOM, ratio)
-		color.a = 0.24
-		draw_rect(Rect2(0.0, ratio * size.y, size.x, size.y / float(bands) + 1.0), color)
-	for index: int in range(7):
-		var y: float = 112.0 + float(index) * 76.0
-		draw_arc(Vector2(size.x * 0.52, y), 360.0 + float(index) * 28.0, 3.32, 6.08, 48, Color(0.54, 0.71, 0.72, 0.08), 1.0)
+		draw_rect(Rect2(0.0, ratio * size.y, size.x, size.y / 15.0 + 1.0), Color(color, 0.58))
+	for index: int in range(8):
+		var center := Vector2(size.x * (0.18 + float(index % 4) * 0.23), 130.0 + float(index / 4) * 370.0)
+		draw_circle(center, 210.0, Color(0.18, 0.4, 0.47, 0.035))
+
+
+func _draw_graticule() -> void:
+	for longitude: int in range(-150, 180, 30):
+		var points := PackedVector2Array()
+		for latitude: int in range(-80, 81, 5):
+			points.append(lon_lat_to_screen([longitude, latitude]))
+		draw_polyline(points, OCEAN_GRID, 1.0, true)
+	for latitude: int in range(-60, 61, 30):
+		var points := PackedVector2Array()
+		for longitude: int in range(-180, 181, 5):
+			points.append(lon_lat_to_screen([longitude, latitude]))
+		draw_polyline(points, OCEAN_GRID, 1.0, true)
+
+
+func _draw_countries() -> void:
+	for feature_variant: Variant in _coastlines:
+		var feature: Dictionary = feature_variant as Dictionary
+		var iso_a3: String = str(feature.get("iso_a3", ""))
+		var country: Dictionary = _dictionary_value(_country_by_iso, iso_a3)
+		var fill: Color = _country_color(country, str(feature.get("continent", "")))
+		for ring_variant: Variant in feature.get("rings", []):
+			var polygon: PackedVector2Array = _screen_polygon(ring_variant)
+			if polygon.size() < 3:
+				continue
+			# Dateline-touching rings can become non-simple after planar projection. Their
+			# coastline still renders, but invalid rings are not sent to the triangulator.
+			if not Geometry2D.triangulate_polygon(polygon).is_empty():
+				draw_colored_polygon(polygon, fill)
+			var border: Color = COAST if country.is_empty() else COUNTRY_BORDER
+			draw_polyline(_closed_polygon(polygon), border, 0.75 if get_zoom_level() == "far" else 1.15, true)
+			if selected_type == "country" and selected_id == str(country.get("id", "")):
+				draw_polyline(_closed_polygon(polygon), SELECT, 3.2, true)
+
+
+func _draw_country_labels() -> void:
+	for country_variant: Variant in _countries:
+		var country: Dictionary = country_variant as Dictionary
+		if not is_record_visible(country):
+			continue
+		_try_label(lon_lat_to_screen(country.get("label_lon_lat", [])), str(country.get("name", "")), 15, LABEL, true)
 
 
 func _draw_regions() -> void:
-	for region_variant: Variant in map_data.get("regions", []):
-		if not region_variant is Dictionary:
-			continue
+	for region_variant: Variant in _regions:
 		var region: Dictionary = region_variant as Dictionary
-		var world_polygon: PackedVector2Array = _polygon_points(region.get("polygon", []))
-		var screen_polygon := PackedVector2Array()
-		for point: Vector2 in world_polygon:
-			screen_polygon.append(_to_screen(point))
-		var fill: Color = _region_color(region)
-		draw_colored_polygon(screen_polygon, fill)
-		draw_polyline(_closed_polygon(screen_polygon), Color(COAST, 0.72), maxf(1.0, 1.4 * zoom), true)
-		draw_polyline(_closed_polygon(screen_polygon), REGION_LINE, maxf(0.8, 0.8 * zoom), true)
-		if selected_type == "region" and selected_id == str(region.get("id", "")):
-			draw_polyline(_closed_polygon(screen_polygon), SELECT, 4.0, true)
-		var center: Vector2 = _polygon_center(world_polygon)
-		_draw_centered_text(_to_screen(center) + Vector2(0.0, -5.0), str(region.get("name", "")), 15, LABEL)
-		if zoom >= 1.05:
-			_draw_centered_text(_to_screen(center) + Vector2(0.0, 13.0), str(region.get("country", "")), 11, LABEL_MUTED)
+		if not is_record_visible(region):
+			continue
+		var color_key: String = "legal_color"
+		if current_mode == "market":
+			color_key = "market_color"
+		elif current_mode == "population":
+			color_key = "population_color"
+		var alpha: float = 0.22 if current_mode in ["legal", "war"] else 0.45
+		for world_polygon: PackedVector2Array in _clipped_region_world_polygons(region):
+			var polygon: PackedVector2Array = _world_to_screen_polygon(world_polygon)
+			if not Geometry2D.triangulate_polygon(polygon).is_empty():
+				draw_colored_polygon(polygon, Color(Color(str(region.get(color_key, "#718da0"))), alpha))
+			draw_polyline(_closed_polygon(polygon), REGION_BORDER, 1.15, true)
+			if selected_type == "region" and selected_id == str(region.get("id", "")):
+				draw_polyline(_closed_polygon(polygon), SELECT, 3.4, true)
+		if get_zoom_level() == "near" or int(region.get("label_priority", 0)) >= 88:
+			_try_label(lon_lat_to_screen(region.get("label_lon_lat", [])), str(region.get("name", "")), 13, LABEL, true)
 
 
-func _draw_transport() -> void:
-	for connection_variant: Variant in map_data.get("railways", []):
-		if not connection_variant is Array:
+func _draw_shipping_routes() -> void:
+	for route_variant: Variant in _shipping_routes:
+		var route: Dictionary = route_variant as Dictionary
+		if not is_record_visible(route):
 			continue
-		var connection: Array = connection_variant as Array
-		if connection.size() != 2:
+		var points := PackedVector2Array()
+		for point_variant: Variant in route.get("waypoints_lon_lat", []):
+			points.append(lon_lat_to_screen(point_variant))
+		for index: int in range(points.size() - 1):
+			_draw_dashed_line(points[index], points[index + 1], Color(SHIPPING, 0.78), 10.0, 7.0, 1.6)
+
+
+func _draw_railways() -> void:
+	for segment_variant: Variant in _rail_segments:
+		var segment: Dictionary = segment_variant as Dictionary
+		if not is_record_visible(segment):
 			continue
-		var first: Dictionary = get_city(str(connection[0]))
-		var second: Dictionary = get_city(str(connection[1]))
+		var first: Dictionary = get_city(str(segment.get("from_city_id", "")))
+		var second: Dictionary = get_city(str(segment.get("to_city_id", "")))
 		if first.is_empty() or second.is_empty():
 			continue
-		var start: Vector2 = _to_screen(_array_to_vector(first.get("position", [])))
-		var end: Vector2 = _to_screen(_array_to_vector(second.get("position", [])))
-		var distance: float = start.distance_to(end)
-		if distance > 205.0 * zoom:
-			_draw_dashed_line(start, end, Color(PORT, 0.48), 7.0, 5.0, 1.2)
-		else:
-			draw_line(start, end, Color(RAIL_DARK, 0.82), maxf(2.4, 3.6 * zoom), true)
-			draw_line(start, end, Color(RAIL_LIGHT, 0.72), maxf(0.9, 1.2 * zoom), true)
+		var start: Vector2 = lon_lat_to_screen(first.get("lon_lat", []))
+		var end: Vector2 = lon_lat_to_screen(second.get("lon_lat", []))
+		var width: float = 3.6 if bool(segment.get("main", false)) else 2.8
+		draw_line(start, end, RAIL_DARK, width, true)
+		draw_line(start, end, RAIL_LIGHT, 1.05, true)
+		_draw_rail_ties(start, end)
 
 
-func _draw_static_front() -> void:
-	var front_points := PackedVector2Array([
-		_to_screen(Vector2(618.0, 118.0)),
-		_to_screen(Vector2(633.0, 144.0)),
-		_to_screen(Vector2(625.0, 171.0)),
-		_to_screen(Vector2(642.0, 198.0)),
-	])
-	draw_polyline(front_points, FRONT_GLOW, 12.0, true)
+func _draw_roads() -> void:
+	for segment_variant: Variant in _road_segments:
+		var segment: Dictionary = segment_variant as Dictionary
+		if not is_record_visible(segment):
+			continue
+		var first: Dictionary = get_city(str(segment.get("from_city_id", "")))
+		var second: Dictionary = get_city(str(segment.get("to_city_id", "")))
+		if first.is_empty() or second.is_empty():
+			continue
+		_draw_dashed_line(lon_lat_to_screen(first.get("lon_lat", [])), lon_lat_to_screen(second.get("lon_lat", [])), Color(ROAD, 0.72), 4.0, 4.0, 1.0)
+
+
+func _draw_war_overlay() -> void:
+	var control_polygon: PackedVector2Array = _screen_polygon([[4.1, 49.1], [7.9, 48.0], [8.2, 50.8], [4.4, 51.0]])
+	draw_colored_polygon(control_polygon, Color(FRONT, 0.2))
+	var front_points := PackedVector2Array()
+	for point: Array in [[5.8, 49.8], [5.95, 49.45], [5.75, 49.1], [6.0, 48.75], [5.82, 48.4]]:
+		front_points.append(lon_lat_to_screen(point))
+	draw_polyline(front_points, Color(FRONT, 0.22), 13.0, true)
 	draw_polyline(front_points, FRONT, 4.0, true)
-	for point: Vector2 in front_points:
-		draw_circle(point, 4.5, Color("#e6b06b"))
+	_try_label(lon_lat_to_screen([6.75, 49.15]), "莱茵战区 · 静态示例", 12, Color("#ffd0b0"), true)
 
 
 func _draw_cities() -> void:
-	for city_variant: Variant in map_data.get("cities", []):
-		if not city_variant is Dictionary:
-			continue
+	for city_variant: Variant in _cities:
 		var city: Dictionary = city_variant as Dictionary
-		var position: Vector2 = _to_screen(_array_to_vector(city.get("position", [])))
+		if not is_record_visible(city):
+			continue
+		var point: Vector2 = lon_lat_to_screen(city.get("lon_lat", []))
 		var is_selected: bool = selected_type == "city" and selected_id == str(city.get("id", ""))
 		if is_selected:
-			draw_circle(position, 11.0, Color(SELECT, 0.2))
-		draw_circle(position, 5.2 if bool(city.get("port", false)) else 4.3, SELECT if is_selected else CITY)
-		draw_circle(position, 2.1, Color("#263335"))
-		if bool(city.get("port", false)):
-			draw_arc(position + Vector2(0.0, 4.0), 7.0, 0.2, 2.94, 12, PORT, 1.4)
-		var city_id: String = str(city.get("id", ""))
-		var always_labeled: bool = city_id in ["new_york", "buenos_aires", "alexandria", "calcutta", "tokyo"]
-		if zoom >= 1.14 or is_selected or always_labeled:
-			draw_string(_font, position + Vector2(9.0, 5.0), str(city.get("name", "")), HORIZONTAL_ALIGNMENT_LEFT, -1.0, 12, LABEL)
+			draw_circle(point, 10.0, Color(SELECT, 0.24))
+		draw_circle(point, 4.5 if bool(city.get("major", false)) else 3.2, SELECT if is_selected else CITY)
+		draw_circle(point, 1.55, Color("#253537"))
+		if get_zoom_level() == "near" or int(city.get("label_priority", 0)) >= 84:
+			_try_label(point + Vector2(8.0, 3.0), str(city.get("name", "")), 11, LABEL, false)
 
 
-func _draw_scale_hint() -> void:
-	var label: String = "战争视觉示例 · 静态假数据" if current_mode == "war" else "和平 · 无前线"
-	draw_string(_font, Vector2(22.0, 356.0), label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 12, Color(LABEL_MUTED, 0.78))
+func _draw_ports() -> void:
+	for port_variant: Variant in _ports:
+		var port: Dictionary = port_variant as Dictionary
+		if not is_record_visible(port):
+			continue
+		var point: Vector2 = lon_lat_to_screen(port.get("lon_lat", [])) + Vector2(0.0, 7.0)
+		draw_arc(point, 5.5, 0.15, PI - 0.15, 12, PORT_COLOR, 1.5)
+		draw_line(point + Vector2(0.0, -6.0), point + Vector2(0.0, 4.0), PORT_COLOR, 1.4)
 
 
-func _region_color(region: Dictionary) -> Color:
-	var key: String = "legal"
-	match current_mode:
-		"market":
-			key = "market_color"
-		"population":
-			key = "population_color"
-		"war":
-			key = "war_color"
-		_:
-			key = "legal"
-	var color := Color(str(region.get(key, "#7f8874")))
-	if current_mode == "population":
-		color = color.lightened(0.04)
-	return Color(color, 0.94)
+func _draw_institutions() -> void:
+	for institution_variant: Variant in _institutions:
+		var institution: Dictionary = institution_variant as Dictionary
+		if not is_record_visible(institution):
+			continue
+		var point: Vector2 = lon_lat_to_screen(institution.get("lon_lat", []))
+		var selected: bool = selected_type == "institution" and selected_id == str(institution.get("id", ""))
+		_draw_diamond(point, 6.0, SELECT if selected else INSTITUTION)
+		_try_label(point + Vector2(10.0, 4.0), str(institution.get("name", "")), 10, LABEL_MUTED, false)
 
 
-func _polygon_points(source: Variant) -> PackedVector2Array:
+func _draw_organizations() -> void:
+	for organization_variant: Variant in _organizations:
+		var organization: Dictionary = organization_variant as Dictionary
+		if not is_record_visible(organization):
+			continue
+		var point: Vector2 = lon_lat_to_screen(organization.get("lon_lat", []))
+		var selected: bool = selected_type == "organization" and selected_id == str(organization.get("id", ""))
+		draw_circle(point, 5.5, SELECT if selected else ORGANIZATION)
+		draw_circle(point, 2.2, Color("#1c3430"))
+
+
+func _draw_ocean_labels() -> void:
+	if get_zoom_level() != "far":
+		return
+	_try_label(lon_lat_to_screen([-38.0, 6.0]), "大 西 洋", 14, Color(LABEL_MUTED, 0.56), true)
+	_try_label(lon_lat_to_screen([79.0, -23.0]), "印 度 洋", 14, Color(LABEL_MUTED, 0.56), true)
+	_try_label(lon_lat_to_screen([-151.0, 4.0]), "太 平 洋", 14, Color(LABEL_MUTED, 0.56), true)
+	_try_label(lon_lat_to_screen([159.0, -4.0]), "太 平 洋", 14, Color(LABEL_MUTED, 0.56), true)
+
+
+func _draw_transport_legend() -> void:
+	if get_zoom_level() == "far":
+		return
+	var origin := Vector2(478.0, 672.0)
+	draw_rect(Rect2(origin - Vector2(12.0, 18.0), Vector2(326.0, 34.0)), Color(0.025, 0.06, 0.07, 0.78))
+	draw_line(origin, origin + Vector2(34.0, 0.0), RAIL_DARK, 3.4, true)
+	draw_line(origin, origin + Vector2(34.0, 0.0), RAIL_LIGHT, 1.0, true)
+	draw_string(_font, origin + Vector2(40.0, 4.0), "铁路", HORIZONTAL_ALIGNMENT_LEFT, -1.0, 10, LABEL_MUTED)
+	_draw_dashed_line(origin + Vector2(86.0, 0.0), origin + Vector2(120.0, 0.0), ROAD, 4.0, 4.0, 1.0)
+	draw_string(_font, origin + Vector2(126.0, 4.0), "陆路", HORIZONTAL_ALIGNMENT_LEFT, -1.0, 10, LABEL_MUTED)
+	_draw_dashed_line(origin + Vector2(170.0, 0.0), origin + Vector2(206.0, 0.0), SHIPPING, 9.0, 6.0, 1.5)
+	draw_string(_font, origin + Vector2(212.0, 4.0), "航运", HORIZONTAL_ALIGNMENT_LEFT, -1.0, 10, LABEL_MUTED)
+	if has_visible_front():
+		draw_line(origin + Vector2(260.0, 0.0), origin + Vector2(286.0, 0.0), FRONT, 4.0, true)
+		draw_string(_font, origin + Vector2(292.0, 4.0), "战线", HORIZONTAL_ALIGNMENT_LEFT, -1.0, 10, Color("#ffc1a8"))
+
+
+func _build_indexes() -> void:
+	_country_by_id.clear()
+	_country_by_iso.clear()
+	_features_by_iso.clear()
+	_region_by_id.clear()
+	_city_by_id.clear()
+	_port_by_id.clear()
+	_institution_by_id.clear()
+	_organization_by_id.clear()
+	_organizations.clear()
+	for feature_variant: Variant in _coastlines:
+		var feature: Dictionary = feature_variant as Dictionary
+		_features_by_iso[str(feature.get("iso_a3", ""))] = feature
+	for country_variant: Variant in _countries:
+		var country: Dictionary = country_variant as Dictionary
+		_country_by_id[str(country.get("id", ""))] = country
+		for iso_variant: Variant in country.get("geometry_iso_a3", []):
+			_country_by_iso[str(iso_variant)] = country
+	for region_variant: Variant in _regions:
+		var region: Dictionary = region_variant as Dictionary
+		_region_by_id[str(region.get("id", ""))] = region
+	for city_variant: Variant in _cities:
+		var city: Dictionary = city_variant as Dictionary
+		_city_by_id[str(city.get("id", ""))] = city
+	for port_variant: Variant in _ports:
+		var port: Dictionary = port_variant as Dictionary
+		_port_by_id[str(port.get("id", ""))] = port
+	for institution_variant: Variant in _institutions:
+		var institution: Dictionary = institution_variant as Dictionary
+		_institution_by_id[str(institution.get("id", ""))] = institution
+	var organization_identities: Dictionary = _data.get_document("organizations").get("identities", {}) as Dictionary
+	for identity_variant: Variant in organization_identities.values():
+		var identity_records: Dictionary = identity_variant as Dictionary
+		for organization_variant: Variant in identity_records.get("owned", []):
+			var organization: Dictionary = organization_variant as Dictionary
+			if not organization.has("lon_lat"):
+				continue
+			var organization_id: String = str(organization.get("id", ""))
+			if _organization_by_id.has(organization_id):
+				continue
+			_organization_by_id[organization_id] = organization
+			_organizations.append(organization)
+
+
+func _document_array(document_id: String, field: String) -> Array:
+	return _data.get_document(document_id).get(field, []) as Array
+
+
+func _country_color(country: Dictionary, continent: String) -> Color:
+	if country.is_empty():
+		var generic: Dictionary = {
+			"Africa": Color("#777d68"), "Asia": Color("#747a68"), "Europe": Color("#6e7d76"),
+			"North America": Color("#6e7c71"), "South America": Color("#6f806e"), "Oceania": Color("#7b806d"),
+		}
+		return Color(generic.get(continent, LAND_BASE) as Color, 0.94)
+	var key: String = "legal_color"
+	if current_mode == "market":
+		key = "market_color"
+	elif current_mode == "population":
+		key = "population_color"
+	elif current_mode == "war":
+		key = "war_color"
+	return Color(Color(str(country.get(key, "#738077"))), 0.96)
+
+
+func _node_at(world_position: Vector2, records: Array, object_type: String, radius_pixels: float) -> Dictionary:
+	for index: int in range(records.size() - 1, -1, -1):
+		var record: Dictionary = records[index] as Dictionary
+		if not record.has("lon_lat") or not is_record_visible(record):
+			continue
+		if world_position.distance_to(project_lon_lat(record.get("lon_lat", []))) <= radius_pixels / zoom:
+			return {"type": object_type, "id": str(record.get("id", "")), "data": record}
+	return {}
+
+
+func _country_contains(country: Dictionary, world_position: Vector2) -> bool:
+	for iso_variant: Variant in country.get("geometry_iso_a3", []):
+		var feature: Dictionary = _dictionary_value(_features_by_iso, str(iso_variant))
+		for ring_variant: Variant in feature.get("rings", []):
+			if Geometry2D.is_point_in_polygon(world_position, _projected_polygon(ring_variant)):
+				return true
+	return false
+
+
+func _set_view(center_lon_lat: Vector2, next_zoom: float, screen_anchor: Vector2) -> void:
+	zoom = next_zoom
+	pan = screen_anchor - project_lon_lat(center_lon_lat) * zoom
+	_clamp_pan()
+	queue_redraw()
+
+
+func _clamp_pan() -> void:
+	var scaled: Vector2 = WORLD_SIZE * zoom
+	var margin := Vector2(230.0, 170.0)
+	pan.x = clampf(pan.x, size.x - scaled.x - margin.x, margin.x)
+	pan.y = clampf(pan.y, size.y - scaled.y - margin.y, margin.y)
+
+
+func _screen_polygon(source: Variant) -> PackedVector2Array:
+	var result := PackedVector2Array()
+	if source is Array:
+		for point_variant: Variant in source as Array:
+			result.append(lon_lat_to_screen(point_variant))
+	return result
+
+
+func _projected_polygon(source: Variant) -> PackedVector2Array:
+	var result := PackedVector2Array()
+	if source is Array:
+		for point_variant: Variant in source as Array:
+			result.append(project_lon_lat(point_variant))
+	return result
+
+
+func _world_to_screen_polygon(source: PackedVector2Array) -> PackedVector2Array:
+	var result := PackedVector2Array()
+	for point: Vector2 in source:
+		result.append(point * zoom + pan)
+	return result
+
+
+func _clipped_region_world_polygons(region: Dictionary) -> Array[PackedVector2Array]:
+	var result: Array[PackedVector2Array] = []
+	var region_polygon: PackedVector2Array = _projected_polygon(region.get("polygon_lon_lat", []))
+	var france_feature: Dictionary = _dictionary_value(_features_by_iso, "FRA")
+	for ring_variant: Variant in france_feature.get("rings", []):
+		var country_polygon: PackedVector2Array = _projected_polygon(ring_variant)
+		for intersection_variant: Variant in Geometry2D.intersect_polygons(region_polygon, country_polygon):
+			var intersection: PackedVector2Array = intersection_variant as PackedVector2Array
+			if intersection.size() >= 3:
+				result.append(intersection)
+	return result
+
+
+func _lon_lat_polygon(source: Variant) -> PackedVector2Array:
 	var result := PackedVector2Array()
 	if source is Array:
 		for point_variant: Variant in source as Array:
@@ -253,46 +605,38 @@ func _polygon_points(source: Variant) -> PackedVector2Array:
 
 func _closed_polygon(points: PackedVector2Array) -> PackedVector2Array:
 	var result: PackedVector2Array = points.duplicate()
-	if not result.is_empty():
+	if not result.is_empty() and result[0] != result[-1]:
 		result.append(result[0])
 	return result
 
 
 func _array_to_vector(value: Variant) -> Vector2:
+	if value is Vector2:
+		return value as Vector2
 	if value is Array and (value as Array).size() >= 2:
 		return Vector2(float((value as Array)[0]), float((value as Array)[1]))
 	return Vector2.ZERO
 
 
-func _polygon_center(points: PackedVector2Array) -> Vector2:
-	if points.is_empty():
-		return Vector2.ZERO
-	var total := Vector2.ZERO
-	for point: Vector2 in points:
-		total += point
-	return total / float(points.size())
+func _dictionary_value(source: Dictionary, key: String) -> Dictionary:
+	var value: Variant = source.get(key, {})
+	return value as Dictionary if value is Dictionary else {}
 
 
-func _to_screen(world_position: Vector2) -> Vector2:
-	return world_position * zoom + pan
-
-
-func _to_world(screen_position: Vector2) -> Vector2:
-	return (screen_position - pan) / zoom
-
-
-func _clamp_pan() -> void:
-	var world_array: Array = map_data.get("world_size", [1120, 560]) as Array
-	var world_size := Vector2(float(world_array[0]), float(world_array[1])) * zoom
-	var horizontal_margin: float = 260.0
-	var vertical_margin: float = 180.0
-	pan.x = clampf(pan.x, size.x - world_size.x - horizontal_margin, horizontal_margin)
-	pan.y = clampf(pan.y, size.y - world_size.y - vertical_margin, vertical_margin)
-
-
-func _draw_centered_text(position: Vector2, value: String, font_size: int, color: Color) -> void:
-	var width: float = _font.get_string_size(value, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size).x
-	draw_string(_font, position - Vector2(width * 0.5, 0.0), value, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size, color)
+func _try_label(position: Vector2, value: String, font_size: int, color: Color, centered: bool) -> bool:
+	if value.is_empty():
+		return false
+	var text_size: Vector2 = _font.get_string_size(value, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size)
+	var top_left := Vector2(position.x - text_size.x * 0.5 if centered else position.x, position.y - text_size.y * 0.72)
+	var rect := Rect2(top_left - Vector2(3.0, 2.0), text_size + Vector2(6.0, 4.0))
+	if rect.end.x < 0.0 or rect.position.x > size.x or rect.end.y < 0.0 or rect.position.y > size.y:
+		return false
+	for existing: Rect2 in _label_rects:
+		if existing.intersects(rect):
+			return false
+	_label_rects.append(rect)
+	draw_string(_font, top_left + Vector2(0.0, text_size.y * 0.78), value, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size, color)
+	return true
 
 
 func _draw_dashed_line(start: Vector2, end: Vector2, color: Color, dash: float, gap: float, width: float) -> void:
@@ -305,3 +649,25 @@ func _draw_dashed_line(start: Vector2, end: Vector2, color: Color, dash: float, 
 		var segment_end: float = minf(cursor + dash, distance)
 		draw_line(start + direction * cursor, start + direction * segment_end, color, width, true)
 		cursor += dash + gap
+
+
+func _draw_rail_ties(start: Vector2, end: Vector2) -> void:
+	var distance: float = start.distance_to(end)
+	if distance < 12.0:
+		return
+	var direction: Vector2 = (end - start).normalized()
+	var normal := Vector2(-direction.y, direction.x) * 3.5
+	var cursor: float = 8.0
+	while cursor < distance:
+		var center: Vector2 = start + direction * cursor
+		draw_line(center - normal, center + normal, Color(RAIL_LIGHT, 0.78), 0.85, true)
+		cursor += 13.0
+
+
+func _draw_diamond(center: Vector2, radius: float, color: Color) -> void:
+	var points := PackedVector2Array([
+		center + Vector2(0.0, -radius), center + Vector2(radius, 0.0),
+		center + Vector2(0.0, radius), center + Vector2(-radius, 0.0),
+	])
+	draw_colored_polygon(points, color)
+	draw_polyline(_closed_polygon(points), Color("#2a3331"), 1.0, true)

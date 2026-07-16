@@ -1,0 +1,14 @@
+{
+  "prototype_only": true,
+  "schema_version": 2,
+  "ports": [
+    {"id":"port_le_havre","name":"勒阿弗尔港","object_level":"port","city_id":"le_havre","parent_region_id":"normandy","parent_country_id":"france","lon_lat":[0.1,49.49],"label_priority":86,"min_zoom":1.65,"max_zoom":12.0},
+    {"id":"port_calais","name":"加来港","object_level":"port","city_id":"calais","parent_region_id":"north_industrial","parent_country_id":"france","lon_lat":[1.85,50.96],"label_priority":60,"min_zoom":6.4,"max_zoom":12.0},
+    {"id":"port_brest","name":"布雷斯特港","object_level":"port","city_id":"brest","parent_region_id":"brittany","parent_country_id":"france","lon_lat":[-4.49,48.39],"label_priority":58,"min_zoom":6.4,"max_zoom":12.0},
+    {"id":"port_bordeaux","name":"波尔多港","object_level":"port","city_id":"bordeaux","parent_region_id":"southwest","parent_country_id":"france","lon_lat":[-0.58,44.84],"label_priority":60,"min_zoom":6.4,"max_zoom":12.0},
+    {"id":"port_marseille","name":"马赛港","object_level":"port","city_id":"marseille","parent_region_id":"mediterranean","parent_country_id":"france","lon_lat":[5.37,43.29],"label_priority":88,"min_zoom":1.6,"max_zoom":12.0},
+    {"id":"port_london","name":"伦敦港","object_level":"port","city_id":"london","parent_region_id":"","parent_country_id":"british_empire","lon_lat":[0.0,51.5],"label_priority":64,"min_zoom":1.7,"max_zoom":6.2},
+    {"id":"port_new_york","name":"纽约港","object_level":"port","city_id":"new_york","parent_region_id":"","parent_country_id":"united_states","lon_lat":[-74.0,40.7],"label_priority":64,"min_zoom":1.7,"max_zoom":6.2},
+    {"id":"port_alexandria","name":"亚历山大港","object_level":"port","city_id":"alexandria","parent_region_id":"","parent_country_id":"ottoman_empire","lon_lat":[29.92,31.2],"label_priority":64,"min_zoom":1.7,"max_zoom":6.2}
+  ]
+}

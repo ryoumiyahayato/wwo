@@ -1,11 +1,12 @@
 {
   "prototype_only": true,
-  "schema_version": 1,
+  "schema_version": 2,
+  "default_summary":{"unread_count":4,"latest_id":"food_price","max_visible_items":1,"transient_seconds":4},
   "items": [
-    {"level":"important","time":"今天","title":"河港食品价格异常上涨","detail":"铁路货运中断推高本地运输成本","source":"河港日报 · 今日"},
-    {"level":"normal","time":"本周","title":"劳动安全法进入地方执行","detail":"北部工业区开始首轮工厂检查","source":"地方公告 · 3 天前"},
-    {"level":"normal","time":"本周","title":"3 家企业宣布缩减招聘","detail":"同类招聘变化已聚合","source":"行业简报 · 3 天前"},
-    {"level":"world","time":"本月","title":"6 个组织在 5 个地区扩大影响","detail":"低价值组织变化已按地区和周期聚合","source":"多份公开报道"},
-    {"level":"world","time":"本月","title":"东亚铁路建设获得新融资","detail":"项目仍处于公开筹备阶段","source":"国际电讯 · 2 个月前"}
+    {"id":"food_price","kind":"notification","priority":"important","time":"刚刚","title":"里尔食品价格异常上涨","detail":"铁路货运中断推高本地运输成本","source":"《河港日报》","object_type":"region","object_id":"north_industrial","group_key":"local_prices","group_count":1,"unread":true},
+    {"id":"safety_law","kind":"event","priority":"normal","time":"3 天前","title":"工厂安全法进入地方执行","detail":"北部工业区开始首轮工厂检查","source":"地方公告","object_type":"institution","object_id":"labor_inspectorate","group_key":"policy_execution","group_count":1,"unread":true},
+    {"id":"hiring_group","kind":"notification","priority":"normal","time":"本周","title":"3 家企业缩减招聘","detail":"同类招聘变化已聚合为一条通知","source":"行业公开记录","object_type":"region","object_id":"north_industrial","group_key":"hiring_changes","group_count":3,"unread":true},
+    {"id":"organizations_group","kind":"event","priority":"world","time":"本月","title":"5 个地区的组织活动增加","detail":"6 条低优先级变化已按地区与周期聚合","source":"多份公开报道","object_type":"country","object_id":"france","group_key":"organization_growth","group_count":6,"unread":false},
+    {"id":"east_asia_rail","kind":"news","priority":"world","time":"2 个月前","title":"东亚铁路建设获得新融资","detail":"项目仍处于公开筹备阶段","source":"国际电讯","object_type":"country","object_id":"qing_empire","group_key":"world_infrastructure","group_count":1,"unread":true}
   ]
 }

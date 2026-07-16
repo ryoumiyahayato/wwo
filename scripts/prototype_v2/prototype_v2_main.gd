@@ -23,10 +23,7 @@ func _ready() -> void:
 	if not prototype_data.load_all():
 		push_error("V2 原型数据加载失败：%s" % "; ".join(prototype_data.errors))
 		return
-	map_canvas.setup(
-		prototype_data.get_document("regions"),
-		prototype_data.get_document("map_modes")
-	)
+	map_canvas.setup(prototype_data)
 	interface.setup(prototype_data)
 	interface.mode_requested.connect(_on_mode_requested)
 	interface.selection_clear_requested.connect(_on_selection_clear_requested)
@@ -84,6 +81,10 @@ func _input(event: InputEvent) -> void:
 		if key.keycode == KEY_ESCAPE:
 			if interface.close_top_layer():
 				get_viewport().set_input_as_handled()
+		elif key.keycode == KEY_F9:
+			# Hidden local review aid; ordinary screenshots and play never show it by default.
+			interface.set_review_mode(not interface.review_mode)
+			get_viewport().set_input_as_handled()
 		elif key.keycode == KEY_SPACE:
 			interface.paused = not interface.paused
 			interface.queue_redraw()
@@ -92,12 +93,19 @@ func _input(event: InputEvent) -> void:
 
 func select_review_object(object_type: String, object_id: String) -> bool:
 	var object_data: Dictionary
-	if object_type == "region":
-		object_data = map_canvas.get_region(object_id)
-	elif object_type == "city":
-		object_data = map_canvas.get_city(object_id)
-	else:
-		return false
+	match object_type:
+		"country":
+			object_data = map_canvas.get_country(object_id)
+		"region":
+			object_data = map_canvas.get_region(object_id)
+		"city":
+			object_data = map_canvas.get_city(object_id)
+		"institution":
+			object_data = map_canvas.get_institution(object_id)
+		"organization":
+			object_data = map_canvas.get_organization(object_id)
+		_:
+			return false
 	if object_data.is_empty():
 		return false
 	map_canvas.set_selection(object_type, object_id)
@@ -135,13 +143,19 @@ func _on_selection_clear_requested() -> void:
 
 func _parse_review_arguments() -> void:
 	var view_id: String = ""
-	for argument: String in OS.get_cmdline_user_args():
+	var arguments: PackedStringArray = OS.get_cmdline_args()
+	for user_argument: String in OS.get_cmdline_user_args():
+		if not arguments.has(user_argument):
+			arguments.append(user_argument)
+	for argument: String in arguments:
 		if argument.begins_with("--prototype-view="):
 			view_id = argument.trim_prefix("--prototype-view=")
 		elif argument.begins_with("--prototype-capture="):
 			_capture_path = argument.trim_prefix("--prototype-capture=")
 		elif argument == "--prototype-exit-after-capture":
 			_exit_after_capture = true
+		elif argument == "--prototype-review":
+			interface.set_review_mode(true)
 	if not view_id.is_empty():
 		_apply_review_state(view_id)
 	if not _capture_path.is_empty():
@@ -150,18 +164,41 @@ func _parse_review_arguments() -> void:
 
 func _apply_review_state(view_id: String) -> void:
 	interface.apply_review_state(view_id)
+	map_canvas.set_war_example_active(false)
 	match view_id:
-		"market_region":
+		"europe_mid", "sequence_02_europe":
+			map_canvas.focus_europe()
+		"france_close", "sequence_03_france", "city_card", "sequence_04_city":
+			map_canvas.focus_france()
+			if view_id in ["city_card", "sequence_04_city"]:
+				select_review_object("city", "lille")
+		"market_map":
 			map_canvas.set_mode("market")
 			interface.set_mode_display("market")
-			select_review_object("region", "western_europe")
+			map_canvas.focus_europe()
+		"population_map":
+			map_canvas.set_mode("population")
+			interface.set_mode_display("population")
+			map_canvas.focus_europe()
+		"legal_map":
+			map_canvas.set_mode("legal")
+			interface.set_mode_display("legal")
+			map_canvas.focus_europe()
 		"war_map":
 			map_canvas.set_mode("war")
 			interface.set_mode_display("war")
+			map_canvas.set_war_example_active(true)
+			map_canvas.focus_europe()
 		"peace_map":
-			map_canvas.set_mode("legal")
-			interface.set_mode_display("legal")
+			map_canvas.set_mode("war")
+			interface.set_mode_display("war")
+			map_canvas.focus_europe()
+		"institution_official", "institution_worker", "official_permissions", "worker_permissions":
+			map_canvas.focus_europe()
+		"person_card", "person_detail", "worker_character", "official_character", "owned_organizations", "discover_organizations", "world_activity", "time_panel", "activity_toast", "mode_menu", "sequence_05_person", "sequence_06_character", "sequence_07_official", "sequence_08_activity":
+			map_canvas.focus_europe()
 		_:
+			map_canvas.reset_view()
 			map_canvas.set_mode("legal")
 			interface.set_mode_display("legal")
 

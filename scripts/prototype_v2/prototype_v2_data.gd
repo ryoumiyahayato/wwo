@@ -3,11 +3,18 @@ extends RefCounted
 ## Loads only the isolated static prototype fixtures. It never touches formal data loaders.
 
 const FILES: Dictionary = {
+	"world_coastlines": "res://data/prototype_v2/prototype_world_coastlines.json",
+	"countries": "res://data/prototype_v2/prototype_countries.json",
+	"regions": "res://data/prototype_v2/prototype_regions.json",
+	"cities": "res://data/prototype_v2/prototype_cities.json",
+	"ports": "res://data/prototype_v2/prototype_ports.json",
+	"rail_segments": "res://data/prototype_v2/prototype_rail_segments.json",
+	"road_segments": "res://data/prototype_v2/prototype_road_segments.json",
+	"shipping_routes": "res://data/prototype_v2/prototype_shipping_routes.json",
 	"characters": "res://data/prototype_v2/prototype_characters.json",
 	"relationships": "res://data/prototype_v2/prototype_relationships.json",
 	"organizations": "res://data/prototype_v2/prototype_organizations.json",
 	"institutions": "res://data/prototype_v2/prototype_institutions.json",
-	"regions": "res://data/prototype_v2/prototype_regions.json",
 	"activity": "res://data/prototype_v2/prototype_world_activity.json",
 	"map_modes": "res://data/prototype_v2/prototype_map_modes.json",
 }

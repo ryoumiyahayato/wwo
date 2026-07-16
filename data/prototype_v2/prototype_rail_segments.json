@@ -1,0 +1,17 @@
+{
+  "prototype_only": true,
+  "schema_version": 2,
+  "type": "rail",
+  "segments": [
+    {"id":"rail_paris_lille","type":"rail","from_city_id":"paris","to_city_id":"lille","main":true,"min_zoom":1.55,"max_zoom":12.0},
+    {"id":"rail_lille_calais","type":"rail","from_city_id":"lille","to_city_id":"calais","main":false,"min_zoom":6.4,"max_zoom":12.0},
+    {"id":"rail_paris_rouen","type":"rail","from_city_id":"paris","to_city_id":"rouen","main":true,"min_zoom":1.6,"max_zoom":12.0},
+    {"id":"rail_rouen_le_havre","type":"rail","from_city_id":"rouen","to_city_id":"le_havre","main":false,"min_zoom":6.4,"max_zoom":12.0},
+    {"id":"rail_paris_strasbourg","type":"rail","from_city_id":"paris","to_city_id":"strasbourg","main":true,"min_zoom":1.55,"max_zoom":12.0},
+    {"id":"rail_paris_lyon","type":"rail","from_city_id":"paris","to_city_id":"lyon","main":true,"min_zoom":1.5,"max_zoom":12.0},
+    {"id":"rail_lyon_marseille","type":"rail","from_city_id":"lyon","to_city_id":"marseille","main":true,"min_zoom":1.55,"max_zoom":12.0},
+    {"id":"rail_paris_nantes","type":"rail","from_city_id":"paris","to_city_id":"nantes","main":true,"min_zoom":1.75,"max_zoom":12.0},
+    {"id":"rail_nantes_bordeaux","type":"rail","from_city_id":"nantes","to_city_id":"bordeaux","main":false,"min_zoom":6.4,"max_zoom":12.0},
+    {"id":"rail_bordeaux_toulouse","type":"rail","from_city_id":"bordeaux","to_city_id":"toulouse","main":false,"min_zoom":6.4,"max_zoom":12.0}
+  ]
+}

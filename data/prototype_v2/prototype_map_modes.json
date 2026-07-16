@@ -1,15 +1,16 @@
 {
   "prototype_only": true,
-  "schema_version": 1,
-  "modes": [
-    {"id":"legal","label":"法理归属","description":"国家与地区法理边界"},
-    {"id":"market","label":"区域市场","description":"静态市场连通与状态"},
-    {"id":"population","label":"人口","description":"静态人口密度示意"},
-    {"id":"war","label":"战争示例","description":"静态假前线，仅展示视觉"}
+  "schema_version": 2,
+  "shared_basemap_id":"natural_earth_110m_v2_1",
+  "modes":[
+    {"id":"legal","label":"法理归属","icon":"◇","description":"强调国家填充、国境和法理标签"},
+    {"id":"market","label":"区域市场","icon":"¤","description":"在同一地理底图上叠加市场状态"},
+    {"id":"population","label":"人口","icon":"●","description":"在同一地理底图上叠加人口密度"},
+    {"id":"war","label":"战争状态","icon":"⚔","description":"仅在战争示例中增加控制覆盖、战线与战区标签"}
   ],
-  "peace_note":"和平状态：不显示前线与军事控制入口",
-  "war_note":"战争视觉示例：不运行任何战争模拟",
-  "zoom_min": 0.78,
-  "zoom_max": 1.85,
-  "zoom_step": 0.12
+  "zoom":{"minimum":0.82,"maximum":12.0,"factor":1.26,"far_max":1.5,"middle_max":6.2},
+  "levels":{"far":{"id":"world","label":"世界远景"},"middle":{"id":"country_region","label":"国家与地区"},"near":{"id":"local","label":"地方近景"}},
+  "peace_note":"和平状态：战争模式仍使用相同底图，但不显示战线。",
+  "war_note":"战争视觉示例：静态覆盖，不运行任何战争模拟。",
+  "transport_legend":{"rail":"双线枕木 · 陆地铁路","road":"细虚线 · 一般陆路","shipping":"蓝色长虚线 · 海运航线","border":"浅色细实线 · 国境","front":"红色锯齿粗线 · 战线"}
 }
