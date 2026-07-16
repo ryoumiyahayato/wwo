@@ -18,7 +18,7 @@ var _exit_after_capture: bool = false
 
 func _ready() -> void:
 	get_viewport().content_scale_size = Vector2i(1280, 720)
-	DisplayServer.window_set_title("《1900》 — V2 静态视觉原型")
+	_apply_prototype_window_title.call_deferred()
 	prototype_data = PrototypeV2Data.new()
 	if not prototype_data.load_all():
 		push_error("V2 原型数据加载失败：%s" % "; ".join(prototype_data.errors))
@@ -32,6 +32,12 @@ func _ready() -> void:
 	interface.selection_clear_requested.connect(_on_selection_clear_requested)
 	_parse_review_arguments()
 	queue_redraw()
+
+
+func _apply_prototype_window_title() -> void:
+	# Godot applies project metadata during startup, so the isolated scene wins one frame later.
+	await get_tree().process_frame
+	DisplayServer.window_set_title("《1900》 — V2 静态视觉原型")
 
 
 func _gui_input(event: InputEvent) -> void:
