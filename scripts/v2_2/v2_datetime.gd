@@ -75,7 +75,7 @@ static func parse_iso(value: String) -> Dictionary:
 	for component: String in [
 		year_text, month_text, day_text, hour_text, minute_text, second_text,
 	]:
-		if not component.is_valid_int():
+		if not _is_decimal_digits(component):
 			return {}
 	if minute_text != "00" or second_text != "00":
 		return {}
@@ -186,3 +186,13 @@ static func days_in_month(year: int, month: int) -> int:
 
 static func is_leap_year(year: int) -> bool:
 	return year % 400 == 0 or (year % 4 == 0 and year % 100 != 0)
+
+
+static func _is_decimal_digits(value: String) -> bool:
+	if value.is_empty():
+		return false
+	for index: int in range(value.length()):
+		var codepoint: int = value.unicode_at(index)
+		if codepoint < 48 or codepoint > 57:
+			return false
+	return true
