@@ -53,7 +53,7 @@ func is_required_work_hour(person_id: String, total_hour: int) -> bool:
 	if contract.is_empty() or str(contract.get("contract_status", "")) != "active":
 		return false
 	var value: Dictionary = V2DateTime.from_total_hour(total_hour)
-	if not (contract.get("work_days", []) as Array).has(int(value["weekday"])):
+	if value.is_empty() or not (contract.get("work_days", []) as Array).has(int(value["weekday"])):
 		return false
 	var hour: int = int(value["hour"])
 	for raw_segment: Variant in contract.get("shift_segments", []) as Array:
@@ -117,7 +117,7 @@ func record_hour(
 			0, 1000
 		)
 	var value: Dictionary = V2DateTime.from_total_hour(total_hour)
-	if required and _is_last_shift_hour(contract, int(value["hour"])):
+	if required and _is_last_shift_hour(contract, int(value.get("hour", -1))):
 		var date: String = V2DateTime.date_from_total_hour(total_hour)
 		var required_count: int = 0
 		var attended_count: int = 0
@@ -154,17 +154,20 @@ func settle_due_pay(
 		var contract: Dictionary = contracts[contract_id] as Dictionary
 		if int(contract.get("next_pay_hour", -1)) != total_hour:
 			continue
-		var result: V2LifeLoopResult
-		if str(contract.get("wage_period", "")) == "weekly":
-			result = _settle_weekly(
-				contract, total_hour, households, ledger, notifications
-			)
-			contract["next_pay_hour"] = total_hour + 168
-		else:
-			result = _settle_monthly(
-				contract, total_hour, households, ledger, notifications
-			)
-			contract["next_pay_hour"] = V2DateTime.next_month_hour(total_hour, 1, 9)
+		var result: V2LifeLoopResult = (
+			_settle_weekly(contract, total_hour, households, ledger, notifications)
+			if str(contract.get("wage_period", "")) == "weekly"
+			else _settle_monthly(contract, total_hour, households, ledger, notifications)
+		)
+		results.append(result)
+		if not result.success:
+			continue
+		contract = contracts[contract_id] as Dictionary
+		contract["next_pay_hour"] = (
+			total_hour + 168
+			if str(contract.get("wage_period", "")) == "weekly"
+			else V2DateTime.next_month_hour(total_hour, 1, 9)
+		)
 		contract["next_pay_datetime"] = V2DateTime.iso_from_total_hour(
 			int(contract["next_pay_hour"])
 		)
@@ -172,7 +175,6 @@ func settle_due_pay(
 			contract, int(contract["next_pay_hour"])
 		)
 		contracts[contract_id] = contract
-		results.append(result)
 	return results
 
 
@@ -233,22 +235,47 @@ func restore_persistent_state(state: Dictionary) -> bool:
 	):
 		return false
 	var restored_contracts: Dictionary = state["contracts"] as Dictionary
-	for raw_contract: Variant in restored_contracts.values():
+	var person_ids: Dictionary = {}
+	for contract_id_variant: Variant in restored_contracts.keys():
+		var contract_id: String = str(contract_id_variant)
+		var raw_contract: Variant = restored_contracts[contract_id]
 		if not raw_contract is Dictionary:
 			return false
-		var risk: int = int((raw_contract as Dictionary).get("employment_risk", -1))
-		if risk < 0 or risk > 1000:
+		var contract: Dictionary = raw_contract as Dictionary
+		if contract_id != str(contract.get("contract_id", "")):
 			return false
-	contracts = restored_contracts.duplicate(true)
-	attendance_records.clear()
+		var person_id: String = str(contract.get("person_id", ""))
+		if person_id.is_empty() or person_ids.has(person_id):
+			return false
+		person_ids[person_id] = true
+		var risk: int = int(contract.get("employment_risk", -1))
+		if risk < 0 or risk > 1000 or int(contract.get("next_pay_hour", -1)) < 0:
+			return false
+	var restored_attendance: Array[Dictionary] = []
+	var restored_attendance_keys: Dictionary = state["attendance_keys"] as Dictionary
+	var seen_attendance: Dictionary = {}
 	for raw_record: Variant in state["attendance_records"] as Array:
 		if not raw_record is Dictionary:
 			return false
-		attendance_records.append((raw_record as Dictionary).duplicate(true))
+		var record: Dictionary = raw_record as Dictionary
+		var attendance_id: String = str(record.get("attendance_id", ""))
+		if (
+			attendance_id.is_empty()
+			or seen_attendance.has(attendance_id)
+			or not restored_attendance_keys.has(attendance_id)
+			or not restored_contracts.has(str(record.get("contract_id", "")))
+		):
+			return false
+		seen_attendance[attendance_id] = true
+		restored_attendance.append(record.duplicate(true))
+	if seen_attendance.size() != restored_attendance_keys.size():
+		return false
+	contracts = restored_contracts.duplicate(true)
+	attendance_records = restored_attendance
 	processed_pay_period_ids = (
 		state["processed_pay_period_ids"] as Dictionary
 	).duplicate(true)
-	_attendance_keys = (state["attendance_keys"] as Dictionary).duplicate(true)
+	_attendance_keys = restored_attendance_keys.duplicate(true)
 	return true
 
 
@@ -284,34 +311,31 @@ func _settle_weekly(
 		+ absence_hours * int(contract.get("absence_deduction_centimes_per_hour", 0))
 	)
 	var base_payment: int = maxi(0, int(contract.get("base_wage_centimes", 0)) - deduction)
-	var overtime_payment: int = (
-		overtime_hours * int(contract.get("overtime_rate_centimes_per_hour", 0))
-	)
+	var overtime_payment: int = overtime_hours * int(contract.get("overtime_rate_centimes_per_hour", 0))
 	var person_id: String = str(contract.get("person_id", ""))
 	var household_id: String = households.household_id_for_person(person_id)
-	var base_result: V2LifeLoopResult = ledger.post(
-		households.households, household_id, person_id, base_payment,
-		"income", "wage", total_hour, contract_id, key, "%s:base" % key,
-		"周薪到账"
-	)
-	if not base_result.success:
-		return base_result
+	var entries: Array[Dictionary] = [
+		_payroll_entry(
+			household_id, person_id, base_payment, "wage", total_hour,
+			contract_id, key, "%s:base" % key, "周薪到账"
+		),
+	]
 	if overtime_payment > 0:
-		var overtime_result: V2LifeLoopResult = ledger.post(
-			households.households, household_id, person_id, overtime_payment,
-			"income", "overtime_wage", total_hour, contract_id, key,
-			"%s:overtime" % key, "加班工资到账"
-		)
-		if not overtime_result.success:
-			return overtime_result
+		entries.append(_payroll_entry(
+			household_id, person_id, overtime_payment, "overtime_wage", total_hour,
+			contract_id, key, "%s:overtime" % key, "加班工资到账"
+		))
+	var batch_result: V2LifeLoopResult = ledger.post_batch(
+		households.households, entries, "周薪与加班工资到账"
+	)
+	if not batch_result.success:
+		return batch_result
 	processed_pay_period_ids[key] = true
 	var processed: Array = contract.get("processed_pay_period_ids", []) as Array
 	processed.append(period_id)
 	while processed.size() > 128:
 		var removed_period: String = str(processed.pop_front())
-		processed_pay_period_ids.erase(
-			"%s:wage:%s" % [contract_id, removed_period]
-		)
+		processed_pay_period_ids.erase("%s:wage:%s" % [contract_id, removed_period])
 	contract["processed_pay_period_ids"] = processed
 	contracts[contract_id] = contract
 	notifications.add(
@@ -322,7 +346,7 @@ func _settle_weekly(
 		],
 		total_hour, "wage:%s" % contract_id, [person_id, household_id, contract_id]
 	)
-	base_result.data.merge({
+	batch_result.data.merge({
 		"base_payment_centimes": base_payment,
 		"overtime_payment_centimes": overtime_payment,
 		"authorized_leave_hours": leave_hours,
@@ -330,7 +354,7 @@ func _settle_weekly(
 		"overtime_hours": overtime_hours,
 		"idempotency_key": key,
 	}, true)
-	return base_result
+	return batch_result
 
 
 func _settle_monthly(
@@ -350,28 +374,28 @@ func _settle_monthly(
 	var household_id: String = households.household_id_for_person(person_id)
 	var salary: int = int(contract.get("base_wage_centimes", 0))
 	var allowance: int = int(contract.get("allowance_centimes", 0))
-	var salary_result: V2LifeLoopResult = ledger.post(
-		households.households, household_id, person_id, salary, "income", "salary",
-		total_hour, contract_id, key, "%s:salary" % key, "月薪到账"
-	)
-	if not salary_result.success:
-		return salary_result
+	var entries: Array[Dictionary] = [
+		_payroll_entry(
+			household_id, person_id, salary, "salary", total_hour,
+			contract_id, key, "%s:salary" % key, "月薪到账"
+		),
+	]
 	if allowance > 0:
-		var allowance_result: V2LifeLoopResult = ledger.post(
-			households.households, household_id, person_id, allowance,
-			"income", "allowance", total_hour, contract_id, key,
-			"%s:allowance" % key, "交通津贴到账"
-		)
-		if not allowance_result.success:
-			return allowance_result
+		entries.append(_payroll_entry(
+			household_id, person_id, allowance, "allowance", total_hour,
+			contract_id, key, "%s:allowance" % key, "交通津贴到账"
+		))
+	var batch_result: V2LifeLoopResult = ledger.post_batch(
+		households.households, entries, "月薪与津贴到账"
+	)
+	if not batch_result.success:
+		return batch_result
 	processed_pay_period_ids[key] = true
 	var processed: Array = contract.get("processed_pay_period_ids", []) as Array
 	processed.append(period_id)
 	while processed.size() > 128:
 		var removed_period: String = str(processed.pop_front())
-		processed_pay_period_ids.erase(
-			"%s:salary:%s" % [contract_id, removed_period]
-		)
+		processed_pay_period_ids.erase("%s:salary:%s" % [contract_id, removed_period])
 	contract["processed_pay_period_ids"] = processed
 	contracts[contract_id] = contract
 	notifications.add(
@@ -379,12 +403,12 @@ func _settle_monthly(
 		"月薪 %d 生丁，交通津贴 %d 生丁" % [salary, allowance],
 		total_hour, "salary:%s" % contract_id, [person_id, household_id, contract_id]
 	)
-	salary_result.data.merge({
+	batch_result.data.merge({
 		"salary_centimes": salary,
 		"allowance_centimes": allowance,
 		"idempotency_key": key,
 	}, true)
-	return salary_result
+	return batch_result
 
 
 func _next_pay_hour(contract: Dictionary, start_hour: int) -> int:
@@ -394,14 +418,14 @@ func _next_pay_hour(contract: Dictionary, start_hour: int) -> int:
 			var candidate: int = start_hour + offset
 			var value: Dictionary = V2DateTime.from_total_hour(candidate)
 			if (
-				int(value["weekday"]) == int(rule.get("weekday_monday_zero", 5))
-				and int(value["hour"]) == int(rule.get("hour", 18))
+				int(value.get("weekday", -1)) == int(rule.get("weekday_monday_zero", 5))
+				and int(value.get("hour", -1)) == int(rule.get("hour", 18))
 			):
 				return candidate
 	var start: Dictionary = V2DateTime.from_total_hour(start_hour)
 	var candidate_monthly: int = V2DateTime.to_total_hour({
-		"year": int(start["year"]),
-		"month": int(start["month"]),
+		"year": int(start.get("year", 0)),
+		"month": int(start.get("month", 0)),
 		"day": int(rule.get("day_of_month", 1)),
 		"hour": int(rule.get("hour", 9)),
 	})
@@ -416,7 +440,7 @@ func _period_id(contract: Dictionary, total_hour: int) -> String:
 	if str(contract.get("wage_period", "")) == "weekly":
 		return V2DateTime.week_id(total_hour)
 	var value: Dictionary = V2DateTime.from_total_hour(total_hour)
-	return "%04d-%02d" % [int(value["year"]), int(value["month"])]
+	return "%04d-%02d" % [int(value.get("year", 0)), int(value.get("month", 0))]
 
 
 static func _is_last_shift_hour(contract: Dictionary, hour: int) -> bool:
@@ -424,3 +448,28 @@ static func _is_last_shift_hour(contract: Dictionary, hour: int) -> bool:
 	for raw_segment: Variant in contract.get("shift_segments", []) as Array:
 		last_end = maxi(last_end, int((raw_segment as Dictionary).get("end_hour", 0)))
 	return hour == last_end - 1
+
+
+static func _payroll_entry(
+	household_id: String,
+	person_id: String,
+	amount_centimes: int,
+	category: String,
+	total_hour: int,
+	contract_id: String,
+	source_event_id: String,
+	idempotency_key: String,
+	description: String
+) -> Dictionary:
+	return {
+		"household_id": household_id,
+		"person_id": person_id,
+		"amount_centimes": amount_centimes,
+		"direction": "income",
+		"category": category,
+		"total_hour": total_hour,
+		"source_entity_id": contract_id,
+		"source_event_id": source_event_id,
+		"idempotency_key": idempotency_key,
+		"description": description,
+	}
