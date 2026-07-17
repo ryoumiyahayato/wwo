@@ -87,6 +87,7 @@ $tests = @(
     @{ Name = 'V2.2 employment'; Script = 'res://tests/v2_2/v2_2_employment_test.gd' },
     @{ Name = 'V2.2 household'; Script = 'res://tests/v2_2/v2_2_household_test.gd' },
     @{ Name = 'V2.2 condition'; Script = 'res://tests/v2_2/v2_2_condition_test.gd' },
+    @{ Name = 'V2.2 notification'; Script = 'res://tests/v2_2/v2_2_notification_test.gd' },
     @{ Name = 'V2.2 save/load'; Script = 'res://tests/v2_2/v2_2_save_load_test.gd' },
     @{ Name = 'V2.2 determinism'; Script = 'res://tests/v2_2/v2_2_determinism_test.gd' },
     @{ Name = 'V2.2 UI binding'; Script = 'res://tests/v2_2/v2_2_ui_binding_test.gd' },
@@ -94,7 +95,7 @@ $tests = @(
 )
 
 foreach ($test in $tests) {
-	$null = Invoke-GodotStep -Name $test.Name -Arguments @(
+    $null = Invoke-GodotStep -Name $test.Name -Arguments @(
         '--headless', '--path', $ProjectPath, '--script', $test.Script
     )
 }
