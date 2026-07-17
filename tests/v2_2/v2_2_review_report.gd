@@ -34,10 +34,16 @@ func _run() -> void:
 		quit(1)
 		return
 	var split := V2LifeLoopSimulation.new()
-	split.initialize()
+	if not split.initialize():
+		push_error("Cannot initialize split review simulation")
+		quit(1)
+		return
 	split.run_days(10)
 	var resumed := V2LifeLoopSimulation.new()
-	resumed.initialize()
+	if not resumed.initialize():
+		push_error("Cannot initialize resumed review simulation")
+		quit(1)
+		return
 	var restore_result: V2LifeLoopResult = resumed.restore_persistent_state(
 		split.get_persistent_state()
 	)
@@ -81,7 +87,7 @@ func _run() -> void:
 			determinism.get("all_fields_equal", false),
 		]
 	)
-	quit(0)
+	quit(0 if bool(determinism.get("all_fields_equal", false)) else 1)
 
 
 func _build_final_state(
@@ -135,7 +141,8 @@ func _build_final_state(
 		"hours_processed": simulation.hours_processed,
 		"elapsed_usec": elapsed_usec,
 		"ledger_consistent": simulation.ledger_consistency().success,
-		"schedule_overlap_count": _count_schedule_overlaps(simulation),
+		"uncovered_person_hours": _count_uncovered_person_hours(simulation),
+		"same_priority_overlap_count": _count_schedule_overlaps(simulation),
 		"transaction_count": simulation.ledger.transactions.size(),
 		"transaction_category_counts": category_counts,
 		"processed_pay_period_count": (
@@ -153,40 +160,36 @@ func _build_final_state(
 func _build_determinism_summary(
 	direct: V2LifeLoopSimulation, resumed: V2LifeLoopSimulation
 ) -> Dictionary:
-	var direct_digest: Dictionary = direct.deterministic_digest()
-	var resumed_digest: Dictionary = resumed.deterministic_digest()
-	var fields: Array[String] = [
-		"current_datetime",
-		"person_states",
-		"households",
-		"ledger",
-		"conditions",
-		"attendance",
-		"contracts",
-		"relationships",
-		"organizations",
-		"processed",
-		"pay_processed",
-		"household_processed",
-	]
-	var comparisons: Dictionary = {}
-	var all_equal: bool = true
-	for field: String in fields:
-		var equal: bool = direct_digest.get(field) == resumed_digest.get(field)
-		comparisons[field] = equal
-		all_equal = all_equal and equal
+	var comparison: Dictionary = V2DeterminismAudit.comparison(direct, resumed)
 	return {
 		"record_type": "v2_2_direct_30_vs_10_restore_20",
 		"schema_version": V2LifeLoopSimulation.SCHEMA_VERSION,
-		"comparison_fields": comparisons,
-		"all_fields_equal": all_equal,
+		"comparison_fields": comparison.get("fields", {}),
+		"all_fields_equal": comparison.get("all_fields_equal", false),
 		"direct_ledger_consistent": direct.ledger_consistency().success,
 		"resumed_ledger_consistent": resumed.ledger_consistency().success,
-		"direct_current_datetime": direct_digest.get("current_datetime", ""),
-		"resumed_current_datetime": resumed_digest.get(
-			"current_datetime", ""
+		"direct_current_datetime": V2DateTime.iso_from_total_hour(
+			direct.clock.total_hours
+		),
+		"resumed_current_datetime": V2DateTime.iso_from_total_hour(
+			resumed.clock.total_hours
 		),
 	}
+
+
+func _count_uncovered_person_hours(simulation: V2LifeLoopSimulation) -> int:
+	var uncovered: int = 0
+	for person_id: String in [
+		V2LifeLoopSimulation.PIERRE_ID,
+		V2LifeLoopSimulation.ALBERT_ID,
+	]:
+		for hour: int in range(
+			simulation.clock.total_hours,
+			simulation.clock.total_hours + 48
+		):
+			if simulation.schedule.activity_for_hour(person_id, hour).is_empty():
+				uncovered += 1
+	return uncovered
 
 
 func _count_schedule_overlaps(simulation: V2LifeLoopSimulation) -> int:
