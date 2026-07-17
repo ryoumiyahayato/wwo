@@ -1,6 +1,6 @@
 class_name V2RelationshipProgressService
 extends RefCounted
-## Minimal deterministic progression for the configured Jeanne relationship.
+## Minimal deterministic progression for configured, data-driven relationships.
 
 var relationships: Dictionary = {}
 var processed_idempotency_keys: Dictionary = {}
@@ -23,11 +23,44 @@ func configure(records: Array, rules: Dictionary) -> void:
 		relationships[key] = record
 
 
+func contact_candidates(person_id: String) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for key_variant: Variant in relationships.keys():
+		var relation: Dictionary = relationships[key_variant] as Dictionary
+		if str(relation.get("person_id", "")) != person_id:
+			continue
+		result.append(relation.duplicate(true))
+	result.sort_custom(func(left: Dictionary, right: Dictionary) -> bool:
+		return contact_display_name(left) < contact_display_name(right)
+	)
+	return result
+
+
+func first_contact_target(person_id: String) -> String:
+	var candidates: Array[Dictionary] = contact_candidates(person_id)
+	return "" if candidates.is_empty() else str(candidates[0].get("target_id", ""))
+
+
+func contact_display_name(relation: Dictionary) -> String:
+	var display_name: String = str(relation.get("target_display_name_zh", ""))
+	if display_name.is_empty():
+		display_name = str(relation.get("target_native_name", ""))
+	if display_name.is_empty():
+		display_name = str(relation.get("target_id", "关系人物"))
+	return display_name
+
+
+func target_display_name(person_id: String, target_id: String) -> String:
+	var relation: Dictionary = get_relationship(person_id, target_id)
+	return contact_display_name(relation) if not relation.is_empty() else target_id
+
+
 func can_contact(person_id: String, target_id: String, start_hour: int) -> V2LifeLoopResult:
 	var relation_key: String = _key(person_id, target_id)
 	if not relationships.has(relation_key):
 		return V2LifeLoopResult.fail(
-			"unknown_relationship", "找不到该关系人物", relation_key, [person_id, target_id]
+			"unknown_relationship", "当前人物并不认识该联系人", relation_key,
+			[person_id, target_id]
 		)
 	var value: Dictionary = V2DateTime.from_total_hour(start_hour)
 	if value.is_empty():
@@ -37,8 +70,8 @@ func can_contact(person_id: String, target_id: String, start_hour: int) -> V2Lif
 	var hour: int = int(value["hour"])
 	if hour < int(_rules.get("contact_start_hour", 18)) or hour >= int(_rules.get("contact_end_hour", 21)):
 		return V2LifeLoopResult.fail(
-			"invalid_contact_time", "联系时间必须在 18:00—21:00", V2DateTime.iso_from_total_hour(start_hour),
-			[person_id, target_id]
+			"invalid_contact_time", "联系时间必须在 18:00—21:00",
+			V2DateTime.iso_from_total_hour(start_hour), [person_id, target_id]
 		)
 	var relation: Dictionary = relationships[relation_key] as Dictionary
 	var last_contact: String = str(relation.get("last_contact_datetime", ""))
@@ -100,16 +133,18 @@ func complete_contact(
 	relation["recent_interactions"] = interactions
 	relationships[relation_key] = relation
 	_remember_processed_key(key)
+	var target_name: String = contact_display_name(relation)
 	notifications.add(
 		"personal", "event", "联系完成",
-		"与让娜联系后熟悉度 +%d、信任 +%d" % [
+		"与%s联系后熟悉度 +%d、信任 +%d" % [
+			target_name,
 			int(_rules.get("familiarity_delta", 5)),
 			int(_rules.get("trust_delta", 2)),
 		],
 		total_hour, "contact:%s:%s" % [person_id, target_id], [person_id, target_id]
 	)
 	return V2LifeLoopResult.ok(
-		"联系完成",
+		"已联系%s" % target_name,
 		{"relationship": relation.duplicate(true), "idempotency_key": key},
 		[person_id, target_id]
 	)
@@ -144,6 +179,8 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		var person_id: String = str(relation.get("person_id", ""))
 		var target_id: String = str(relation.get("target_id", ""))
 		if relation_key != _key(person_id, target_id) or person_id.is_empty() or target_id.is_empty():
+			return false
+		if contact_display_name(relation).is_empty():
 			return false
 		for field: String in ["familiarity", "trust"]:
 			var value: int = int(relation.get(field, -1))
