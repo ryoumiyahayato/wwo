@@ -35,9 +35,9 @@ func can_attend(
 			[person_id, organization_id]
 		)
 	var value: Dictionary = V2DateTime.from_total_hour(start_hour)
-	if (
-		int(value["weekday"]) != int(_rules.get("weekday_monday_zero", 2))
-		or int(value["hour"]) != int(_rules.get("start_hour", 19))
+	if value.is_empty() or (
+		int(value.get("weekday", -1)) != int(_rules.get("weekday_monday_zero", 2))
+		or int(value.get("hour", -1)) != int(_rules.get("start_hour", 19))
 	):
 		return V2LifeLoopResult.fail(
 			"invalid_union_time", "工会例会只能安排在星期三 19:00",
@@ -58,7 +58,14 @@ func complete_activity(
 	activity_id: String,
 	notifications: V2NotificationService
 ) -> V2LifeLoopResult:
-	var date: String = V2DateTime.date_from_total_hour(total_hour)
+	var duration: int = int(_rules.get("duration_hours", 2))
+	var start_hour: int = total_hour - duration + 1
+	var timing_check: V2LifeLoopResult = can_attend(
+		person_id, organization_id, start_hour, 0
+	)
+	if not timing_check.success:
+		return timing_check
+	var date: String = V2DateTime.date_from_total_hour(start_hour)
 	var event_id: String = str(_rules.get("event_id", "union_event"))
 	var key: String = "person:%s:union:%s:%s" % [person_id, event_id, date]
 	if processed_idempotency_keys.has(key):
@@ -81,7 +88,8 @@ func complete_activity(
 	history.append({
 		"activity_id": activity_id,
 		"event_id": event_id,
-		"datetime": V2DateTime.iso_from_total_hour(total_hour),
+		"datetime": V2DateTime.iso_from_total_hour(start_hour),
+		"completed_datetime": V2DateTime.iso_from_total_hour(total_hour + 1),
 		"participation_delta": delta,
 	})
 	while history.size() > 12:
@@ -120,7 +128,22 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		or not state.get("processed_idempotency_keys", {}) is Dictionary
 	):
 		return false
-	memberships = (state["memberships"] as Dictionary).duplicate(true)
+	var restored_memberships: Dictionary = state["memberships"] as Dictionary
+	for membership_key_variant: Variant in restored_memberships.keys():
+		var membership_key: String = str(membership_key_variant)
+		var raw_membership: Variant = restored_memberships[membership_key]
+		if not raw_membership is Dictionary:
+			return false
+		var membership: Dictionary = raw_membership as Dictionary
+		if membership_key != _key(
+			str(membership.get("person_id", "")),
+			str(membership.get("organization_id", ""))
+		):
+			return false
+		var participation: int = int(membership.get("participation", -1))
+		if participation < 0 or participation > 1000:
+			return false
+	memberships = restored_memberships.duplicate(true)
 	processed_idempotency_keys = (
 		state["processed_idempotency_keys"] as Dictionary
 	).duplicate(true)
@@ -130,7 +153,7 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		return false
 	for raw_key: Variant in raw_order as Array:
 		var key: String = str(raw_key)
-		if not processed_idempotency_keys.has(key):
+		if not processed_idempotency_keys.has(key) or key in _processed_key_order:
 			return false
 		_processed_key_order.append(key)
 	if _processed_key_order.size() != processed_idempotency_keys.size():
