@@ -18,6 +18,7 @@ const FILES: Dictionary = {
 	"institutions": "res://data/prototype_v2/prototype_institutions.json",
 	"activity": "res://data/prototype_v2/prototype_world_activity.json",
 	"map_modes": "res://data/prototype_v2/prototype_map_modes.json",
+	"map_geometry_cache": "res://data/prototype_v2/prototype_map_geometry_cache.json",
 }
 
 var records: Dictionary = {}

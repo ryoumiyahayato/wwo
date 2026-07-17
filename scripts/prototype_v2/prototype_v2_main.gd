@@ -26,6 +26,7 @@ func _ready() -> void:
 	map_canvas.setup(prototype_data)
 	interface.setup(prototype_data)
 	interface.mode_requested.connect(_on_mode_requested)
+	interface.world_view_requested.connect(_on_world_view_requested)
 	interface.selection_clear_requested.connect(_on_selection_clear_requested)
 	_parse_review_arguments()
 	queue_redraw()
@@ -48,6 +49,7 @@ func _gui_input(event: InputEvent) -> void:
 		if _left_button_down and not _ui_captured_press:
 			if not _dragging_map and motion.position.distance_to(_press_position) >= DRAG_THRESHOLD:
 				_dragging_map = true
+				map_canvas.begin_camera_interaction()
 			if _dragging_map:
 				map_canvas.pan_by(motion.relative)
 				accept_event()
@@ -90,6 +92,8 @@ func _gui_input(event: InputEvent) -> void:
 			_dragging_map = false
 			_ui_captured_press = interface.handle_pointer_pressed(button.position)
 		else:
+			if _dragging_map:
+				map_canvas.end_camera_interaction()
 			if not _ui_captured_press and not _dragging_map:
 				_select_map_object(button.position)
 			_ui_captured_press = false
@@ -163,6 +167,11 @@ func _select_map_object(position: Vector2) -> void:
 func _on_mode_requested(mode_id: String) -> void:
 	map_canvas.set_mode(mode_id)
 	interface.set_mode_display(mode_id)
+
+
+func _on_world_view_requested() -> void:
+	map_canvas.focus_world()
+	interface.show_camera_focus_feedback("已返回世界视角")
 
 
 func _on_selection_clear_requested() -> void:

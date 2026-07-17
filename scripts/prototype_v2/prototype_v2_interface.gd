@@ -3,6 +3,7 @@ extends Control
 ## V2.1.2 four-corner interface. The map remains the primary visual surface.
 
 signal mode_requested(mode_id: String)
+signal world_view_requested
 signal selection_clear_requested
 
 const INK := Color("#f1ead9")
@@ -25,6 +26,7 @@ const SYSTEM_CORNER := Rect2(1214.0, 18.0, 48.0, 48.0)
 const CHARACTER_CORNER := Rect2(18.0, 630.0, 304.0, 72.0)
 const ACTIVITY_CORNER := Rect2(944.0, 622.0, 318.0, 80.0)
 const MODE_ENTRY := Rect2(548.0, 674.0, 184.0, 28.0)
+const WORLD_VIEW_ENTRY := Rect2(738.0, 674.0, 34.0, 28.0)
 const REVIEW_SWITCH := Rect2(502.0, 14.0, 276.0, 34.0)
 const MAX_PRIMARY_PANEL_WIDTH := 396.0
 
@@ -345,6 +347,8 @@ func debug_state() -> Dictionary:
 		"mode_menu_open": mode_menu_open,
 		"system_menu_open": system_menu_open,
 		"person_more_menu_open": person_more_menu_open,
+		"hover_tooltip": _hover_tooltip,
+		"world_view_entry": WORLD_VIEW_ENTRY,
 		"object_card_primary_actions": 1,
 		"object_card_secondary_actions": 2,
 		"activity_summary_items": 1,
@@ -406,6 +410,7 @@ func _draw() -> void:
 	if open_panel != "activity":
 		_draw_activity_corner()
 	_draw_mode_entry()
+	_draw_world_view_entry()
 	if mode_menu_open:
 		_draw_mode_menu()
 	if not open_panel.is_empty() and panel_progress > 0.01:
@@ -527,6 +532,22 @@ func _draw_mode_entry() -> void:
 	_text(MODE_ENTRY.position + Vector2(14.0, 19.0), "%s  %s" % [str(mode.get("icon", "◇")), str(mode.get("label", "地图模式"))], 11, INK)
 	_text(MODE_ENTRY.end - Vector2(24.0, 9.0), "⌃" if mode_menu_open else "⌄", 12, INK_MUTED)
 	_register(MODE_ENTRY, "toggle_mode_menu", null, str(mode.get("description", "")))
+
+
+func _draw_world_view_entry() -> void:
+	_surface(
+		WORLD_VIEW_ENTRY,
+		Color(0.025, 0.055, 0.06, 0.9),
+		Color(GOLD, 0.2),
+		14
+	)
+	_text(WORLD_VIEW_ENTRY.position + Vector2(10.0, 20.0), "⌂", 14, INK)
+	_register(
+		WORLD_VIEW_ENTRY,
+		"world_view",
+		null,
+		"返回世界视角（Home）"
+	)
 
 
 func _draw_mode_menu() -> void:
@@ -985,6 +1006,11 @@ func _activate(action: String, payload: Variant) -> void:
 		"toggle_mode_menu":
 			mode_menu_open = not mode_menu_open
 			system_menu_open = false
+			queue_redraw()
+		"world_view":
+			mode_menu_open = false
+			system_menu_open = false
+			world_view_requested.emit()
 			queue_redraw()
 		"mode":
 			current_mode = str(payload)

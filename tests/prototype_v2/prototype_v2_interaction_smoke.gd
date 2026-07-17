@@ -39,6 +39,7 @@ func _run() -> void:
 	_test_french_names_and_culture()
 	_test_content_reference_consistency()
 	_test_v2_1_2_map_geometry_and_camera()
+	await _test_v2_1_2_performance_architecture()
 	_test_v2_1_2_country_labels()
 	_test_v2_1_2_status_and_plan()
 	_test_v2_1_2_relationships_and_organizations()
@@ -335,6 +336,195 @@ func _test_v2_1_2_map_geometry_and_camera() -> void:
 	map.pan_by(Vector2.ZERO)
 	var scaled_world := Rect2(map.pan, PrototypeV2MapCanvas.WORLD_SIZE * map.zoom)
 	_expect(scaled_world.intersects(VIEWPORT_RECT), "高倍率平移后地图不能完全离开窗口")
+	map.reset_view()
+
+
+func _test_v2_1_2_performance_architecture() -> void:
+	var map: PrototypeV2MapCanvas = _view.map_canvas
+	var interface: PrototypeV2Interface = _view.interface
+	var cold_map := PrototypeV2MapCanvas.new()
+	cold_map.size = Vector2(1280.0, 720.0)
+	root.add_child(cold_map)
+	cold_map.setup(_view.prototype_data)
+	await process_frame
+	var cold_state: Dictionary = cold_map.debug_architecture_state()
+	_expect(
+		(cold_state.get("loaded_administrative_lods", []) as Array).is_empty()
+		and (cold_state.get("loaded_macro_lods", []) as Array).is_empty(),
+		"世界远景不实例化法国行政区与宏观地区高精度绘制数组"
+	)
+	cold_map.queue_free()
+	await process_frame
+	var cache: Dictionary = _view.prototype_data.get_document("map_geometry_cache")
+	var country_lods: Dictionary = cache.get("country_lods", {}) as Dictionary
+	var lod_vertex_counts: Array[int] = []
+	for lod_id: String in ["lod0", "lod1", "lod2", "lod3", "lod4"]:
+		var vertex_count: int = 0
+		for feature_variant: Variant in country_lods.get(lod_id, []):
+			for polygon_variant: Variant in (
+				feature_variant as Dictionary
+			).get("polygons", []):
+				vertex_count += (
+					(polygon_variant as Dictionary).get("outer", []) as Array
+				).size()
+		lod_vertex_counts.append(vertex_count)
+	_expect(
+		lod_vertex_counts[0] < lod_vertex_counts[1]
+		and lod_vertex_counts[1] < lod_vertex_counts[4],
+		"世界远景使用独立强简化 LOD，近景保留更多顶点"
+	)
+	map.focus_world()
+	await process_frame
+	var far_state: Dictionary = map.debug_architecture_state()
+	var far_counts: Dictionary = far_state.get("visible_counts", {}) as Dictionary
+	_expect(
+		str(far_state.get("lod", "")) == "lod0"
+		and int(far_counts.get("administrative_units", -1)) == 0,
+		"世界远景使用 LOD0 且不查询法国行政区"
+	)
+	map.focus_player_location()
+	await process_frame
+	var local_state: Dictionary = map.debug_architecture_state()
+	var local_counts: Dictionary = local_state.get("visible_counts", {}) as Dictionary
+	_expect(
+		str(local_state.get("lod", "")) == "lod4"
+		and int(local_counts.get("administrative_units", 0)) > 0
+		and int(local_counts.get("administrative_units", 999)) < 98,
+		"96 倍地方视角只保留视口附近行政区"
+	)
+	_expect(
+		int(local_counts.get("cities", 999)) < (
+			_view.prototype_data.get_document("cities").get("cities", []) as Array
+		).size()
+		and int(local_counts.get("labels", 999)) < 177,
+		"屏幕外城市和标签不进入地方视角布局"
+	)
+	_expect(
+		(local_state.get("layers", []) as Array).size() == 9
+		and (local_state.get("layers", []) as Array).has("countries")
+		and (local_state.get("layers", []) as Array).has("selection"),
+		"基础几何与动态选择覆盖层由少量批绘层分离"
+	)
+
+	map.debug_reset_performance_metrics()
+	map.begin_camera_interaction()
+	for _index: int in range(40):
+		map.pan_by(Vector2(2.0, -1.0))
+	var drag_snapshot: Dictionary = map.debug_performance_snapshot()
+	_expect(
+		int(drag_snapshot.get("queue_redraw_calls", -1)) == 0
+		and int(drag_snapshot.get("visible_queries", -1)) == 0,
+		"拖动热循环只更新统一变换，不触发完整重绘或空间查询"
+	)
+	_expect(
+		int(drag_snapshot.get("projection_calls", -1)) == 0
+		and int(drag_snapshot.get("runtime_merge_calls", -1)) == 0
+		and int(drag_snapshot.get("runtime_triangulation_calls", -1)) == 0,
+		"拖动热循环不执行 Robinson 投影、几何合并或三角化"
+	)
+	_expect(
+		int(drag_snapshot.get("label_rebuilds", -1)) == 0
+		and int(drag_snapshot.get("label_cache_reuses", 0)) == 40,
+		"同一缩放档拖动复用标签布局缓存"
+	)
+	_expect(
+		int(drag_snapshot.get("transport_rebuilds", -1)) == 0
+		and int(drag_snapshot.get("json_parses_during_camera", -1)) == 0,
+		"拖动不会重建铁路或重新解析 JSON"
+	)
+	map.end_camera_interaction()
+	await process_frame
+	var settled_drag: Dictionary = map.debug_performance_snapshot()
+	_expect(
+		int(settled_drag.get("visible_queries", -1)) == 1
+		and int(settled_drag.get("label_rebuilds", -1)) == 1
+		and int(settled_drag.get("queue_redraw_calls", 99)) <= 8,
+		"拖动结束只进行一次裁剪、标签恢复和分层刷新"
+	)
+
+	map.focus_player_location()
+	map.debug_reset_performance_metrics()
+	var zoom_anchor := Vector2(704.0, 372.0)
+	for operation_index: int in range(100):
+		map.zoom_at(-1.0 if operation_index % 2 == 0 else 1.0, zoom_anchor)
+	var zoom_snapshot: Dictionary = map.debug_performance_snapshot()
+	_expect(
+		int(zoom_snapshot.get("queue_redraw_calls", -1)) == 0
+		and int(zoom_snapshot.get("projection_calls", -1)) == 0
+		and int(zoom_snapshot.get("label_rebuilds", -1)) == 0,
+		"同一 LOD 内快速缩放只变换缓存层，不逐次重建地图和标签"
+	)
+	await create_timer(0.1).timeout
+	await process_frame
+	var settled_zoom: Dictionary = map.debug_performance_snapshot()
+	_expect(
+		int(settled_zoom.get("visible_queries", -1)) == 1
+		and int(settled_zoom.get("queue_redraw_calls", 99)) <= 8,
+		"快速缩放停止后仅执行一次精确刷新"
+	)
+
+	var lille_screen: Vector2 = map.lon_lat_to_screen([3.064, 50.637])
+	map.debug_reset_performance_metrics()
+	map.get_object_at(lille_screen)
+	var click_snapshot: Dictionary = map.debug_performance_snapshot()
+	_expect(
+		int(click_snapshot.get("click_candidates", 999)) < 20,
+		"点击检测先使用空间候选集而非遍历全部多边形"
+	)
+
+	map.debug_reset_performance_metrics()
+	interface.open_panel_named("character", false)
+	await process_frame
+	var panel_snapshot: Dictionary = map.debug_performance_snapshot()
+	_expect(
+		int(panel_snapshot.get("queue_redraw_calls", -1)) == 0
+		and int(panel_snapshot.get("visible_queries", -1)) == 0,
+		"打开人物面板不会重排或重建整张地图"
+	)
+	interface.close_panel(false)
+	map.set_mode("population")
+	var overlay_snapshot: Dictionary = map.debug_performance_snapshot()
+	_expect(
+		int(overlay_snapshot.get("visible_queries", -1)) == 0
+		and int(overlay_snapshot.get("queue_redraw_calls", 99)) == 4,
+		"切换覆盖层只刷新受影响图层"
+	)
+	map.set_mode("legal")
+
+	map.focus_player_location()
+	await process_frame
+	var home_center: Vector2 = PrototypeV2Interface.WORLD_VIEW_ENTRY.get_center()
+	interface.handle_pointer_motion(home_center)
+	var home_hover_state: Dictionary = interface.debug_state()
+	var home_consumed: bool = interface.handle_pointer_pressed(home_center)
+	_expect(
+		home_consumed
+		and map.camera_focus_id == "world"
+		and map.get_zoom_level() == "far",
+		"底部归位图标消费点击并返回世界视角"
+	)
+	_expect(
+		str(home_hover_state.get("hover_tooltip", "")) == "返回世界视角（Home）",
+		"归位图标悬停明确显示 Home 提示"
+	)
+	_expect(
+		_rect_inside(PrototypeV2Interface.WORLD_VIEW_ENTRY, VIEWPORT_RECT),
+		"归位图标在 1280×720 视口内无裁切"
+	)
+	var map_source: String = _read_text(
+		"res://scripts/prototype_v2/prototype_v2_map_canvas.gd"
+	)
+	var builder_source: String = _read_text(
+		"res://tools/prototype_v2/build_map_performance_geometry.gd"
+	)
+	_expect(
+		not map_source.contains("Geometry2D.merge_polygons")
+		and not map_source.contains("Geometry2D.triangulate_polygon")
+		and builder_source.contains("Geometry2D.merge_polygons")
+		and builder_source.contains("Geometry2D.triangulate_polygon"),
+		"几何合并与三角化仅存在于离线构建工具"
+	)
+	interface.handle_pointer_motion(Vector2.ZERO)
 	map.reset_view()
 
 
