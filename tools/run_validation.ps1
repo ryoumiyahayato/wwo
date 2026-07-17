@@ -87,6 +87,7 @@ $tests = @(
     @{ Name = 'V2.2 save/load'; Script = 'res://tests/v2_2/v2_2_save_load_test.gd' },
     @{ Name = 'V2.2 determinism'; Script = 'res://tests/v2_2/v2_2_determinism_test.gd' },
     @{ Name = 'V2.2 UI binding'; Script = 'res://tests/v2_2/v2_2_ui_binding_test.gd' },
+    @{ Name = 'V2.2.1 polish'; Script = 'res://tests/v2_2/v2_2_polish_test.gd' },
     @{ Name = 'V2.2 performance guard'; Script = 'res://tests/v2_2/v2_2_performance_guard_test.gd' }
 )
 
