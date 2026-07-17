@@ -1,6 +1,6 @@
 class_name V2ScheduleService
 extends RefCounted
-## Incremental 48-hour schedules with one authoritative primary activity per person-hour.
+## Incremental schedules with one authoritative primary activity per person-hour.
 
 const SOURCE_PRIORITY: Dictionary = {
 	"default_routine": 1,
@@ -13,6 +13,10 @@ const PLAYER_TYPES: PackedStringArray = [
 	"overtime", "authorized_leave", "rest", "sleep", "purchase_food",
 	"purchase_essentials", "social_contact", "union_activity", "absence",
 ]
+const TERMINAL_STATUSES: PackedStringArray = [
+	"cancelled", "completed", "missed", "interrupted",
+]
+const ACTIVE_STATUSES: PackedStringArray = ["planned", "active"]
 
 var schedules: Dictionary = {}
 var recent_completed_activities: Array[Dictionary] = []
@@ -55,6 +59,8 @@ func configure(
 
 
 func ensure_future(person_id: String, current_hour: int, reason: String) -> bool:
+	if not schedules.has(person_id):
+		return false
 	var future_end: int = _future_end(person_id, current_hour)
 	if future_end - current_hour >= _refill_threshold:
 		return false
@@ -68,22 +74,7 @@ func get_future_horizon(person_id: String, current_hour: int) -> int:
 
 
 func activity_for_hour(person_id: String, total_hour: int) -> Dictionary:
-	var best: Dictionary = {}
-	var best_priority: int = -1
-	for raw_activity: Variant in schedules.get(person_id, []) as Array:
-		var activity: Dictionary = raw_activity as Dictionary
-		if str(activity.get("status", "")) in ["cancelled", "completed", "missed", "interrupted"]:
-			continue
-		if (
-			total_hour < int(activity.get("start_hour", -1))
-			or total_hour >= int(activity.get("end_hour", -1))
-		):
-			continue
-		var priority: int = int(SOURCE_PRIORITY.get(str(activity.get("source", "")), 0))
-		if priority > best_priority:
-			best = activity
-			best_priority = priority
-	return best.duplicate(true)
+	return _select_activity(person_id, total_hour, false)
 
 
 func next_activity(person_id: String, current_hour: int) -> Dictionary:
@@ -138,16 +129,12 @@ func schedule_player_activity(
 	var activity: Dictionary = _make_activity(
 		person_id, activity_type, start_hour, start_hour + duration_hours,
 		location_id, "player", related_entity_id, required_cash_centimes,
-		expected_effects
+		expected_effects, current_hour
 	)
-	var person_schedule: Array = schedules[person_id] as Array
-	person_schedule.append(activity)
-	_sort_activities(person_schedule)
-	schedules[person_id] = person_schedule
+	_append_activity(person_id, activity)
 	generation_reasons[person_id] = "player_schedule_changed"
 	return V2LifeLoopResult.ok(
-		"活动已安排",
-		{"activity": activity.duplicate(true)},
+		"活动已安排", {"activity": activity.duplicate(true)},
 		[person_id, str(activity.get("activity_id", ""))]
 	)
 
@@ -162,8 +149,12 @@ func schedule_rule_activity(
 	related_entity_id: String = "",
 	required_cash_centimes: int = 0
 ) -> V2LifeLoopResult:
+	if not _people.has(person_id):
+		return V2LifeLoopResult.fail("unknown_person", "找不到当前人物", person_id, [person_id])
 	if source not in ["npc_rule", "system"]:
 		return V2LifeLoopResult.fail("invalid_source", "日程来源无效", source, [person_id])
+	if duration_hours < 1 or start_hour < 0:
+		return V2LifeLoopResult.fail("invalid_duration", "规则活动时间无效", activity_type)
 	for raw_existing: Variant in schedules.get(person_id, []) as Array:
 		var existing: Dictionary = raw_existing as Dictionary
 		if (
@@ -171,7 +162,7 @@ func schedule_rule_activity(
 			and int(existing.get("start_hour", -1)) == start_hour
 			and int(existing.get("end_hour", -1)) == start_hour + duration_hours
 			and str(existing.get("source", "")) == source
-			and str(existing.get("status", "")) in ["planned", "active"]
+			and str(existing.get("status", "")) in ACTIVE_STATUSES
 		):
 			return V2LifeLoopResult.ok(
 				"规则活动已经存在",
@@ -185,12 +176,9 @@ func schedule_rule_activity(
 		return conflict
 	var activity: Dictionary = _make_activity(
 		person_id, activity_type, start_hour, start_hour + duration_hours,
-		location_id, source, related_entity_id, required_cash_centimes, {}
+		location_id, source, related_entity_id, required_cash_centimes, {}, start_hour
 	)
-	var person_schedule: Array = schedules[person_id] as Array
-	person_schedule.append(activity)
-	_sort_activities(person_schedule)
-	schedules[person_id] = person_schedule
+	_append_activity(person_id, activity)
 	generation_reasons[person_id] = "%s_need" % activity_type
 	return V2LifeLoopResult.ok(
 		"规则活动已安排", {"activity": activity.duplicate(true)}, [person_id]
@@ -202,16 +190,27 @@ func find_available_hour(
 	start_hour: int,
 	end_hour: int,
 	allowed_start_hour: int = 0,
-	allowed_end_hour: int = 24
+	allowed_end_hour: int = 24,
+	duration_hours: int = 1
 ) -> int:
+	var duration: int = maxi(1, duration_hours)
 	for candidate: int in range(start_hour, end_hour):
-		var value: Dictionary = V2DateTime.from_total_hour(candidate)
-		var hour: int = int(value["hour"])
-		if hour < allowed_start_hour or hour >= allowed_end_hour:
-			continue
-		var activity: Dictionary = activity_for_hour(person_id, candidate)
-		var source: String = str(activity.get("source", ""))
-		if source == "default_routine":
+		var fits: bool = true
+		for offset: int in range(duration):
+			var hour_value: int = candidate + offset
+			if hour_value >= end_hour:
+				fits = false
+				break
+			var value: Dictionary = V2DateTime.from_total_hour(hour_value)
+			var hour: int = int(value.get("hour", -1))
+			if hour < allowed_start_hour or hour >= allowed_end_hour:
+				fits = false
+				break
+			var activity: Dictionary = activity_for_hour(person_id, hour_value)
+			if str(activity.get("source", "")) != "default_routine":
+				fits = false
+				break
+		if fits:
 			return candidate
 	return -1
 
@@ -223,7 +222,7 @@ func has_pending_activity(
 		var activity: Dictionary = raw_activity as Dictionary
 		if (
 			str(activity.get("activity_type", "")) == activity_type
-			and str(activity.get("status", "")) in ["planned", "active"]
+			and str(activity.get("status", "")) in ACTIVE_STATUSES
 			and int(activity.get("end_hour", -1)) > current_hour
 		):
 			return true
@@ -254,9 +253,7 @@ func prune_before(cutoff_hour: int) -> void:
 		var retained: Array = []
 		for raw_activity: Variant in schedules[person_id] as Array:
 			var activity: Dictionary = raw_activity as Dictionary
-			var terminal: bool = str(activity.get("status", "")) in [
-				"cancelled", "completed", "missed", "interrupted",
-			]
+			var terminal: bool = str(activity.get("status", "")) in TERMINAL_STATUSES
 			if terminal and int(activity.get("end_hour", 0)) < cutoff_hour:
 				continue
 			retained.append(activity)
@@ -264,9 +261,7 @@ func prune_before(cutoff_hour: int) -> void:
 	for generated_key_variant: Variant in _generated_days.keys():
 		var generated_key: String = str(generated_key_variant)
 		var generated_date: String = generated_key.right(10)
-		var generated_hour: int = V2DateTime.total_hour_from_iso(
-			"%sT00:00:00" % generated_date
-		)
+		var generated_hour: int = V2DateTime.total_hour_from_iso("%sT00:00:00" % generated_date)
 		if generated_hour >= 0 and generated_hour + 24 < cutoff_hour:
 			_generated_days.erase(generated_key_variant)
 
@@ -286,6 +281,10 @@ func cancel_player_activity(
 		if int(activity.get("start_hour", -1)) <= current_hour:
 			return V2LifeLoopResult.fail(
 				"activity_started", "活动已经开始，不能取消", activity_id, [person_id]
+			)
+		if str(activity.get("status", "")) != "planned":
+			return V2LifeLoopResult.fail(
+				"activity_not_planned", "活动已经结束或取消", activity_id, [person_id]
 			)
 		activity["status"] = "cancelled"
 		activity["cancellation_reason"] = "player_cancelled"
@@ -324,7 +323,7 @@ func finish_hour(person_id: String, total_hour: int, selected_activity_id: Strin
 		var activity: Dictionary = person_schedule[index] as Dictionary
 		if int(activity.get("end_hour", 0)) > total_hour + 1:
 			continue
-		if str(activity.get("status", "")) not in ["planned", "active"]:
+		if str(activity.get("status", "")) not in ACTIVE_STATUSES:
 			continue
 		var processed_hours: int = int(
 			(activity.get("actual_effects", {}) as Dictionary).get("processed_hours", 0)
@@ -348,6 +347,8 @@ func finish_hour(person_id: String, total_hour: int, selected_activity_id: Strin
 
 func timeline_for_day(person_id: String, day_hour: int, current_hour: int) -> Array[Dictionary]:
 	var day_value: Dictionary = V2DateTime.from_total_hour(day_hour)
+	if day_value.is_empty():
+		return []
 	var start: int = V2DateTime.to_total_hour({
 		"year": int(day_value["year"]),
 		"month": int(day_value["month"]),
@@ -356,13 +357,16 @@ func timeline_for_day(person_id: String, day_hour: int, current_hour: int) -> Ar
 	})
 	var result: Array[Dictionary] = []
 	for total_hour: int in range(start, start + 24):
-		var activity: Dictionary = _activity_for_hour_with_history(person_id, total_hour)
+		var activity: Dictionary = _select_activity(person_id, total_hour, true)
 		if activity.is_empty():
 			continue
-		var segment_status: String = (
-			"completed" if total_hour < current_hour
-			else ("active" if total_hour == current_hour else "planned")
-		)
+		var stored_status: String = str(activity.get("status", "planned"))
+		var segment_status: String = stored_status
+		if stored_status in ACTIVE_STATUSES:
+			segment_status = (
+				"completed" if total_hour < current_hour
+				else ("active" if total_hour == current_hour else "planned")
+			)
 		var can_merge: bool = (
 			not result.is_empty()
 			and str(result[-1].get("activity_id", "")) == str(activity.get("activity_id", ""))
@@ -443,28 +447,48 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		or int(state.get("next_sequence", 0)) < 1
 	):
 		return false
+	var restored_schedules: Dictionary = state["schedules"] as Dictionary
+	if restored_schedules.size() != _people.size():
+		return false
 	var seen_activity_ids: Dictionary = {}
-	for raw_schedule: Variant in (state["schedules"] as Dictionary).values():
+	for person_id_variant: Variant in restored_schedules.keys():
+		var person_id: String = str(person_id_variant)
+		if not _people.has(person_id):
+			return false
+		var raw_schedule: Variant = restored_schedules[person_id]
 		if not raw_schedule is Array:
 			return false
+		var previous_start: int = -1
 		for raw_activity: Variant in raw_schedule as Array:
 			if not raw_activity is Dictionary:
 				return false
 			var activity: Dictionary = raw_activity as Dictionary
 			var activity_id: String = str(activity.get("activity_id", ""))
+			var start_hour: int = int(activity.get("start_hour", -1))
+			var end_hour: int = int(activity.get("end_hour", -1))
 			if (
 				activity_id.is_empty()
 				or seen_activity_ids.has(activity_id)
-				or int(activity.get("end_hour", 0)) <= int(activity.get("start_hour", 0))
+				or str(activity.get("person_id", "")) != person_id
+				or end_hour <= start_hour
+				or start_hour < previous_start
+				or str(activity.get("source", "")) not in SOURCE_PRIORITY
+				or str(activity.get("status", "")) not in [
+					"planned", "active", "cancelled", "completed", "missed", "interrupted",
+				]
 			):
 				return false
+			previous_start = start_hour
 			seen_activity_ids[activity_id] = true
-	schedules = (state["schedules"] as Dictionary).duplicate(true)
-	recent_completed_activities.clear()
+	var restored_completed: Array[Dictionary] = []
 	for raw_completed: Variant in state["recent_completed_activities"] as Array:
 		if not raw_completed is Dictionary:
 			return false
-		recent_completed_activities.append((raw_completed as Dictionary).duplicate(true))
+		restored_completed.append((raw_completed as Dictionary).duplicate(true))
+	if restored_completed.size() > _completed_limit:
+		return false
+	schedules = restored_schedules.duplicate(true)
+	recent_completed_activities = restored_completed
 	generation_reasons = (state["generation_reasons"] as Dictionary).duplicate(true)
 	_generated_days = (state["generated_days"] as Dictionary).duplicate(true)
 	_next_sequence = int(state["next_sequence"])
@@ -473,6 +497,8 @@ func restore_persistent_state(state: Dictionary) -> bool:
 
 func _generate_through(person_id: String, current_hour: int, target_hour: int) -> void:
 	var start_value: Dictionary = V2DateTime.from_total_hour(current_hour)
+	if start_value.is_empty():
+		return
 	var day_start: int = V2DateTime.to_total_hour({
 		"year": int(start_value["year"]),
 		"month": int(start_value["month"]),
@@ -499,9 +525,7 @@ func _generate_person_day(person_id: String, day_hour: int) -> void:
 	var block_start: int = day_hour
 	for offset: int in range(24):
 		var total_hour: int = day_hour + offset
-		var resolved: Dictionary = _default_hour(
-			person_id, total_hour, person, routine
-		)
+		var resolved: Dictionary = _default_hour(person_id, total_hour, person, routine)
 		var next_type: String = str(resolved.get("type", "free_time"))
 		var next_source: String = str(resolved.get("source", "default_routine"))
 		var next_location: String = str(resolved.get(
@@ -512,11 +536,7 @@ func _generate_person_day(person_id: String, day_hour: int) -> void:
 			block_source = next_source
 			block_location = next_location
 			block_start = total_hour
-		elif (
-			next_type != block_type
-			or next_source != block_source
-			or next_location != block_location
-		):
+		elif next_type != block_type or next_source != block_source or next_location != block_location:
 			blocks.append({
 				"type": block_type,
 				"source": block_source,
@@ -535,21 +555,11 @@ func _generate_person_day(person_id: String, day_hour: int) -> void:
 		"start_hour": block_start,
 		"end_hour": day_hour + 24,
 	})
-	var person_schedule: Array = schedules[person_id] as Array
 	for block: Dictionary in blocks:
-		person_schedule.append(_make_activity(
-			person_id,
-			str(block["type"]),
-			int(block["start_hour"]),
-			int(block["end_hour"]),
-			str(block["location_id"]),
-			str(block["source"]),
-			"",
-			0,
-			{}
+		_append_activity(person_id, _make_activity(
+			person_id, str(block["type"]), int(block["start_hour"]), int(block["end_hour"]),
+			str(block["location_id"]), str(block["source"]), "", 0, {}, day_hour
 		))
-	_sort_activities(person_schedule)
-	schedules[person_id] = person_schedule
 	_generated_days[generated_key] = true
 
 
@@ -560,24 +570,17 @@ func _default_hour(
 	routine: Dictionary
 ) -> Dictionary:
 	var value: Dictionary = V2DateTime.from_total_hour(total_hour)
-	var hour: int = int(value["hour"])
+	var hour: int = int(value.get("hour", -1))
 	var home: String = str(person.get("home_location_id", ""))
 	var workplace: String = str(person.get("workplace_location_id", ""))
-	if (
-		hour < int(routine.get("sleep_end_hour", 6))
-		or hour >= int(routine.get("sleep_start_hour", 22))
-	):
+	if hour < int(routine.get("sleep_end_hour", 6)) or hour >= int(routine.get("sleep_start_hour", 22)):
 		return {"type": "sleep", "source": "default_routine", "location_id": home}
 	if _employment.is_required_work_hour(person_id, total_hour):
 		return {"type": "work", "source": "contract", "location_id": workplace}
 	var contract: Dictionary = _employment.contract_for_person(person_id)
-	var workday: bool = (contract.get("work_days", []) as Array).has(int(value["weekday"]))
+	var workday: bool = (contract.get("work_days", []) as Array).has(int(value.get("weekday", -1)))
 	if workday and hour == int(routine.get("commute_to_work_start_hour", 6)):
-		return {
-			"type": "commute_to_work",
-			"source": "contract",
-			"location_id": workplace,
-		}
+		return {"type": "commute_to_work", "source": "contract", "location_id": workplace}
 	if workday and hour == int(routine.get("meal_break_start_hour", 12)):
 		return {"type": "meal_break", "source": "contract", "location_id": workplace}
 	if workday and hour == int(routine.get("commute_home_start_hour", 17)):
@@ -599,6 +602,8 @@ func _validate_conflict(
 		var source: String = str(existing.get("source", ""))
 		if source == "system":
 			return _conflict_result(person_id, total_hour, existing, "强制健康安排")
+		if new_source == "system":
+			continue
 		if source == "player":
 			return _conflict_result(person_id, total_hour, existing, "已有玩家活动")
 		if source == "contract":
@@ -610,7 +615,7 @@ func _validate_conflict(
 			var overtime_after_shift: bool = (
 				activity_type == "overtime" and existing_type == "commute_home"
 			)
-			if new_source != "system" and not can_replace and not overtime_after_shift:
+			if not can_replace and not overtime_after_shift:
 				return _conflict_result(person_id, total_hour, existing, "工作义务冲突")
 		if new_source == "npc_rule" and source not in ["default_routine", "npc_rule"]:
 			return _conflict_result(person_id, total_hour, existing, "更高优先级日程")
@@ -624,8 +629,7 @@ func _conflict_result(
 	reason: String
 ) -> V2LifeLoopResult:
 	return V2LifeLoopResult.fail(
-		"time_conflict",
-		"%s：%s" % [reason, V2DateTime.display_from_total_hour(total_hour)],
+		"time_conflict", "%s：%s" % [reason, V2DateTime.display_from_total_hour(total_hour)],
 		"conflict_activity=%s" % str(existing.get("activity_id", "")),
 		[person_id, str(existing.get("activity_id", ""))]
 	)
@@ -640,7 +644,8 @@ func _make_activity(
 	source: String,
 	related_entity_id: String,
 	required_cash_centimes: int,
-	expected_effects: Dictionary
+	expected_effects: Dictionary,
+	created_hour: int = -1
 ) -> Dictionary:
 	var activity_id: String = "activity:v2_2:%d" % _next_sequence
 	_next_sequence += 1
@@ -661,20 +666,25 @@ func _make_activity(
 		"actual_effects": {},
 		"cancellation_reason": "",
 		"interruption_reason": "",
-		"created_datetime": V2DateTime.iso_from_total_hour(start_hour),
+		"created_datetime": V2DateTime.iso_from_total_hour(
+			start_hour if created_hour < 0 else created_hour
+		),
 		"completed_datetime": "",
 	}
 
 
+func _append_activity(person_id: String, activity: Dictionary) -> void:
+	var person_schedule: Array = schedules[person_id] as Array
+	person_schedule.append(activity)
+	_sort_activities(person_schedule)
+	schedules[person_id] = person_schedule
+
+
 func _future_end(person_id: String, current_hour: int) -> int:
-	# A distant union/contact rule must not hide an uncovered gap in the default
-	# routine. Horizon means contiguous explainable hours, not the furthest event.
 	var result: int = current_hour
-	# Schedules are sorted by start time, so merge coverage intervals in one pass.
-	# This avoids an O(hours × activities) scan during long simulations.
 	for raw_activity: Variant in schedules.get(person_id, []) as Array:
 		var activity: Dictionary = raw_activity as Dictionary
-		if str(activity.get("status", "")) not in ["planned", "active"]:
+		if str(activity.get("status", "")) not in ACTIVE_STATUSES:
 			continue
 		var start_hour: int = int(activity.get("start_hour", -1))
 		var end_hour: int = int(activity.get("end_hour", -1))
@@ -686,17 +696,15 @@ func _future_end(person_id: String, current_hour: int) -> int:
 	return result
 
 
-func _activity_for_hour_with_history(person_id: String, total_hour: int) -> Dictionary:
+func _select_activity(person_id: String, total_hour: int, include_terminal: bool) -> Dictionary:
 	var best: Dictionary = {}
 	var best_priority: int = -1
 	for raw_activity: Variant in schedules.get(person_id, []) as Array:
 		var activity: Dictionary = raw_activity as Dictionary
-		if str(activity.get("status", "")) in ["cancelled", "interrupted"]:
+		var status: String = str(activity.get("status", ""))
+		if not include_terminal and status in TERMINAL_STATUSES:
 			continue
-		if (
-			total_hour < int(activity.get("start_hour", -1))
-			or total_hour >= int(activity.get("end_hour", -1))
-		):
+		if total_hour < int(activity.get("start_hour", -1)) or total_hour >= int(activity.get("end_hour", -1)):
 			continue
 		var priority: int = int(SOURCE_PRIORITY.get(str(activity.get("source", "")), 0))
 		if priority > best_priority:
