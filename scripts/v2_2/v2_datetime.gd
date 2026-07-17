@@ -9,7 +9,9 @@ const WEEKDAY_NAMES: PackedStringArray = [
 
 
 static func from_total_hour(total_hour: int) -> Dictionary:
-	var remaining_days: int = maxi(0, total_hour) / 24
+	if total_hour < 0:
+		return {}
+	var remaining_days: int = total_hour / 24
 	var result_hour: int = posmod(total_hour, 24)
 	var result_year: int = START_YEAR
 	while true:
@@ -34,28 +36,10 @@ static func from_total_hour(total_hour: int) -> Dictionary:
 
 
 static func to_total_hour(value: Dictionary) -> int:
-	var start_day: int = absolute_day_index(START_YEAR, 1, 1)
-	var target_day: int = absolute_day_index(
-		int(value.get("year", START_YEAR)),
-		int(value.get("month", 1)),
-		int(value.get("day", 1))
-	)
-	return (target_day - start_day) * 24 + int(value.get("hour", 0))
-
-
-static func parse_iso(value: String) -> Dictionary:
-	if value.length() < 13:
-		return {}
-	var parsed: Dictionary = {
-		"year": int(value.substr(0, 4)),
-		"month": int(value.substr(5, 2)),
-		"day": int(value.substr(8, 2)),
-		"hour": int(value.substr(11, 2)),
-	}
-	var year: int = int(parsed["year"])
-	var month: int = int(parsed["month"])
-	var day: int = int(parsed["day"])
-	var hour: int = int(parsed["hour"])
+	var year: int = int(value.get("year", 0))
+	var month: int = int(value.get("month", 0))
+	var day: int = int(value.get("day", 0))
+	var hour: int = int(value.get("hour", -1))
 	if (
 		year < START_YEAR
 		or month < 1
@@ -65,8 +49,46 @@ static func parse_iso(value: String) -> Dictionary:
 		or hour < 0
 		or hour > 23
 	):
+		return -1
+	var start_day: int = absolute_day_index(START_YEAR, 1, 1)
+	var target_day: int = absolute_day_index(year, month, day)
+	return (target_day - start_day) * 24 + hour
+
+
+static func parse_iso(value: String) -> Dictionary:
+	if value.length() != 19:
 		return {}
-	parsed["weekday"] = posmod(absolute_day_index(year, month, day), 7)
+	if (
+		value.substr(4, 1) != "-"
+		or value.substr(7, 1) != "-"
+		or value.substr(10, 1) != "T"
+		or value.substr(13, 1) != ":"
+		or value.substr(16, 1) != ":"
+	):
+		return {}
+	var year_text: String = value.substr(0, 4)
+	var month_text: String = value.substr(5, 2)
+	var day_text: String = value.substr(8, 2)
+	var hour_text: String = value.substr(11, 2)
+	var minute_text: String = value.substr(14, 2)
+	var second_text: String = value.substr(17, 2)
+	for component: String in [
+		year_text, month_text, day_text, hour_text, minute_text, second_text,
+	]:
+		if not component.is_valid_int():
+			return {}
+	if minute_text != "00" or second_text != "00":
+		return {}
+	var parsed: Dictionary = {
+		"year": int(year_text),
+		"month": int(month_text),
+		"day": int(day_text),
+		"hour": int(hour_text),
+	}
+	var total_hour: int = to_total_hour(parsed)
+	if total_hour < 0:
+		return {}
+	parsed["weekday"] = int(from_total_hour(total_hour).get("weekday", -1))
 	return parsed
 
 
@@ -77,6 +99,8 @@ static func total_hour_from_iso(value: String) -> int:
 
 static func iso_from_total_hour(total_hour: int) -> String:
 	var value: Dictionary = from_total_hour(total_hour)
+	if value.is_empty():
+		return ""
 	return "%04d-%02d-%02dT%02d:00:00" % [
 		int(value["year"]), int(value["month"]), int(value["day"]), int(value["hour"]),
 	]
@@ -84,6 +108,8 @@ static func iso_from_total_hour(total_hour: int) -> String:
 
 static func date_from_total_hour(total_hour: int) -> String:
 	var value: Dictionary = from_total_hour(total_hour)
+	if value.is_empty():
+		return ""
 	return "%04d-%02d-%02d" % [
 		int(value["year"]), int(value["month"]), int(value["day"]),
 	]
@@ -91,6 +117,8 @@ static func date_from_total_hour(total_hour: int) -> String:
 
 static func display_from_total_hour(total_hour: int) -> String:
 	var value: Dictionary = from_total_hour(total_hour)
+	if value.is_empty():
+		return "无效时间"
 	return "%04d年%d月%d日 %s %02d:00" % [
 		int(value["year"]),
 		int(value["month"]),
@@ -102,6 +130,8 @@ static func display_from_total_hour(total_hour: int) -> String:
 
 static func week_id(total_hour: int) -> String:
 	var value: Dictionary = from_total_hour(total_hour)
+	if value.is_empty():
+		return ""
 	var year: int = int(value["year"])
 	var day_of_year: int = 0
 	for month: int in range(1, int(value["month"])):
@@ -114,6 +144,8 @@ static func week_id(total_hour: int) -> String:
 
 static func next_month_hour(total_hour: int, day: int, hour: int) -> int:
 	var value: Dictionary = from_total_hour(total_hour)
+	if value.is_empty() or day < 1 or hour < 0 or hour > 23:
+		return -1
 	var year: int = int(value["year"])
 	var month: int = int(value["month"]) + 1
 	if month > 12:
@@ -146,8 +178,10 @@ static func days_in_month(year: int, month: int) -> int:
 			return 29 if is_leap_year(year) else 28
 		4, 6, 9, 11:
 			return 30
-		_:
+		1, 3, 5, 7, 8, 10, 12:
 			return 31
+		_:
+			return 0
 
 
 static func is_leap_year(year: int) -> bool:
