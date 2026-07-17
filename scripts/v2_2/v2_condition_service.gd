@@ -18,7 +18,9 @@ func configure(balance: Dictionary, people: Array) -> void:
 		(balance.get("history_limits", {}) as Dictionary).get("causal_events", 512)
 	)
 	person_states.clear()
+	causal_events.clear()
 	sleep_hour_history.clear()
+	_next_sequence = 1
 	for record_variant: Variant in people:
 		var person: Dictionary = record_variant as Dictionary
 		var person_id: String = str(person.get("person_id", ""))
@@ -32,7 +34,8 @@ func seed_sleep_history(person_id: String, start_hour: int, sleep_hours: int) ->
 		return
 	var history: Array = []
 	for total_hour: int in range(start_hour - maxi(0, sleep_hours), start_hour):
-		history.append(total_hour)
+		if total_hour >= 0:
+			history.append(total_hour)
 	sleep_hour_history[person_id] = history
 
 
@@ -113,6 +116,8 @@ func settle_daily_sleep(person_id: String, total_hour: int) -> int:
 	elif sleep_hours < int(_rules.get("healthy_sleep_hours", 8)):
 		apply_delta(person_id, "fatigue", int(_rules.get("partial_sleep_fatigue_delta", 30)), total_hour, "过去24小时睡眠不足8小时", "daily_sleep", V2DateTime.date_from_total_hour(total_hour))
 		apply_delta(person_id, "stress", int(_rules.get("partial_sleep_stress_delta", 10)), total_hour, "睡眠时间偏短", "daily_sleep", V2DateTime.date_from_total_hour(total_hour))
+		state = person_states[person_id] as Dictionary
+		state["consecutive_short_sleep_days"] = 0
 	else:
 		apply_delta(person_id, "health", int(_rules.get("healthy_sleep_health_delta", 2)), total_hour, "过去24小时获得充分睡眠", "daily_sleep", V2DateTime.date_from_total_hour(total_hour))
 		state = person_states[person_id] as Dictionary
@@ -131,22 +136,14 @@ func settle_food_need(person_id: String, has_food_deficit: bool, total_hour: int
 		state["consecutive_food_deficit_days"] = consecutive_days
 		person_states[person_id] = state
 		apply_delta(
-			person_id,
-			"stress",
-			int(_rules.get("food_deficit_stress_delta", 50)),
-			total_hour,
-			"住户当天食品不足",
-			"household_consumption",
+			person_id, "stress", int(_rules.get("food_deficit_stress_delta", 50)),
+			total_hour, "住户当天食品不足", "household_consumption",
 			V2DateTime.date_from_total_hour(total_hour)
 		)
 		if consecutive_days >= int(_rules.get("food_deficit_health_threshold_days", 2)):
 			apply_delta(
-				person_id,
-				"health",
-				int(_rules.get("food_deficit_health_delta_after_days", -10)),
-				total_hour,
-				"连续食品不足影响健康",
-				"household_consumption",
+				person_id, "health", int(_rules.get("food_deficit_health_delta_after_days", -10)),
+				total_hour, "连续食品不足影响健康", "household_consumption",
 				V2DateTime.date_from_total_hour(total_hour)
 			)
 	else:
@@ -157,24 +154,16 @@ func settle_food_need(person_id: String, has_food_deficit: bool, total_hour: int
 func settle_essentials_need(person_id: String, has_deficit: bool, total_hour: int) -> void:
 	if has_deficit:
 		apply_delta(
-			person_id,
-			"stress",
-			int(_rules.get("essentials_deficit_stress_delta", 15)),
-			total_hour,
-			"住户当天生活用品不足",
-			"household_consumption",
+			person_id, "stress", int(_rules.get("essentials_deficit_stress_delta", 15)),
+			total_hour, "住户当天生活用品不足", "household_consumption",
 			V2DateTime.date_from_total_hour(total_hour)
 		)
 
 
 func apply_rent_arrears(person_id: String, total_hour: int) -> void:
 	apply_delta(
-		person_id,
-		"stress",
-		int(_rules.get("rent_arrears_stress_delta", 60)),
-		total_hour,
-		"房租到期但现金不足",
-		"rent",
+		person_id, "stress", int(_rules.get("rent_arrears_stress_delta", 60)),
+		total_hour, "房租到期但现金不足", "rent",
 		V2DateTime.iso_from_total_hour(total_hour)
 	)
 
@@ -259,21 +248,31 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		or int(state.get("next_sequence", 0)) < 1
 	):
 		return false
-	for raw_state: Variant in (state["person_states"] as Dictionary).values():
-		if not raw_state is Dictionary:
+	var restored_states: Dictionary = state["person_states"] as Dictionary
+	var restored_sleep: Dictionary = state["sleep_hour_history"] as Dictionary
+	for person_id_variant: Variant in restored_states.keys():
+		var person_id: String = str(person_id_variant)
+		var raw_state: Variant = restored_states[person_id]
+		if not raw_state is Dictionary or not restored_sleep.has(person_id):
 			return false
 		var person_state: Dictionary = raw_state as Dictionary
 		for stat: String in ["health", "fatigue", "stress"]:
 			var value: int = int(person_state.get(stat, -1))
 			if value < 0 or value > 1000:
 				return false
-	person_states = (state["person_states"] as Dictionary).duplicate(true)
+		var raw_history: Variant = restored_sleep[person_id]
+		if not raw_history is Array:
+			return false
+		for raw_hour: Variant in raw_history as Array:
+			if int(raw_hour) < 0:
+				return false
+	person_states = restored_states.duplicate(true)
 	causal_events.clear()
 	for raw_event: Variant in state["causal_events"] as Array:
 		if not raw_event is Dictionary:
 			return false
 		causal_events.append((raw_event as Dictionary).duplicate(true))
-	sleep_hour_history = (state["sleep_hour_history"] as Dictionary).duplicate(true)
+	sleep_hour_history = restored_sleep.duplicate(true)
 	_next_sequence = int(state["next_sequence"])
 	return true
 
