@@ -9,6 +9,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$ExpectedGodotVersionPrefix = '4.6.3.stable.official.7d41c59c4'
 
 function Assert-PathExists {
     param(
@@ -55,6 +56,14 @@ function Invoke-Step {
 Assert-PathExists -Path $GodotPath -Label 'Godot 可执行文件'
 Assert-PathExists -Path $ProjectPath -Label '项目目录'
 Assert-PathExists -Path (Join-Path $ProjectPath 'project.godot') -Label 'project.godot'
+Assert-PathExists -Path (Join-Path $ProjectPath 'tools\v2_2\capture_review.tscn') -Label 'V2.2 可见评审场景'
+Assert-PathExists -Path (Join-Path $ProjectPath 'tools\v2_2\perf_capture.tscn') -Label 'V2.2 性能采集场景'
+
+$versionOutput = (& $GodotPath --version 2>&1 | Out-String).Trim()
+if (-not $versionOutput.StartsWith($ExpectedGodotVersionPrefix)) {
+    throw "Godot 版本不匹配。需要 $ExpectedGodotVersionPrefix，实际为：$versionOutput"
+}
+Write-Host "Godot：$versionOutput" -ForegroundColor DarkGray
 
 $Results = @()
 $headlessScripts = @(
@@ -97,7 +106,7 @@ if ($validationExit -ne 0 -and -not $ContinueOnFailure) {
 if (-not $SkipVisibleCapture) {
     Invoke-Step -Name 'visible_review_capture' -Visible -Arguments @(
         '--path', $ProjectPath,
-        '--script', 'res://tools/v2_2/capture_review.gd',
+        'res://tools/v2_2/capture_review.tscn',
         '--', '--developer-mode'
     )
 }
@@ -105,7 +114,7 @@ if (-not $SkipVisibleCapture) {
 if (-not $SkipPerformanceCapture) {
     Invoke-Step -Name 'visible_performance_capture' -Visible -Arguments @(
         '--path', $ProjectPath,
-        '--script', 'res://tools/v2_2/perf_capture.gd',
+        'res://tools/v2_2/perf_capture.tscn',
         '--', '--developer-mode'
     )
 }
