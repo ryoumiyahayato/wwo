@@ -52,6 +52,34 @@ func _test_atomic_ledger_batch() -> void:
 	test.equal(ledger.transactions.size(), count_before, "复合交易失败不写入部分账本")
 	test.expect(not ledger.has_key("key:first"), "复合交易失败不消耗其他幂等键")
 
+	var small_ledger := V2LedgerService.new()
+	small_ledger.configure(32)
+	var small_households: Dictionary = {
+		"household:test": {
+			"cash_centimes": 100,
+			"income_current_period_centimes": 0,
+			"expense_current_period_centimes": 0,
+			"recent_transaction_ids": [],
+		}
+	}
+	small_ledger.register_household("household:test", 100)
+	var transient_negative: V2LifeLoopResult = small_ledger.post_batch(
+		small_households,
+		[
+			_entry("key:expense:1", 80, "expense", "test_expense"),
+			_entry("key:expense:2", 80, "expense", "test_expense"),
+			_entry("key:income:later", 100, "income", "test_income"),
+		],
+		"不允许中途负现金"
+	)
+	test.expect(not transient_negative.success, "复合交易任何中间步骤都不能让现金为负")
+	test.equal(
+		int((small_households["household:test"] as Dictionary)["cash_centimes"]),
+		100,
+		"中途负现金批次整体回滚"
+	)
+	test.equal(small_ledger.transactions.size(), 0, "中途负现金批次不写入流水")
+
 	var success: V2LifeLoopResult = ledger.post_batch(
 		households,
 		[
