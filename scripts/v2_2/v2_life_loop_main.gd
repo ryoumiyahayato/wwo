@@ -28,6 +28,7 @@ func _ready() -> void:
 		_has_user_argument("--developer-mode") or interface.review_mode
 	)
 	life_binding = V2LifeLoopUiBinding.new(life_simulation, developer_mode)
+	life_binding.save_service = V2ReviewSaveService.new()
 	interface.setup_life_loop(life_binding)
 	if not life_simulation.state_changed.is_connected(_on_life_state_changed):
 		life_simulation.state_changed.connect(_on_life_state_changed)
