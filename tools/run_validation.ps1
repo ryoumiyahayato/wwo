@@ -23,10 +23,6 @@ function Invoke-GodotStep {
     $stdoutPath = [System.IO.Path]::GetTempFileName()
     $stderrPath = [System.IO.Path]::GetTempFileName()
     try {
-        # Windows PowerShell 5.1 promotes native stderr to ErrorRecord objects
-        # when $ErrorActionPreference is Stop. Redirect through Start-Process so
-        # Godot's normal stderr output cannot abort validation before its exit
-        # code and complete log are inspected.
         $quotedArguments = @(
             $Arguments | ForEach-Object {
                 '"' + $_.Replace('"', '\"') + '"'
@@ -66,8 +62,6 @@ if ($actualGodotVersion -ne $expectedGodotVersion) {
     throw "Godot version mismatch: expected $expectedGodotVersion, got $actualGodotVersion"
 }
 
-# A clean checkout may not yet have Godot's global class cache. Import the project
-# once before invoking standalone --script tests that refer to class_name types.
 $null = Invoke-GodotStep -Name 'Clean import and script scan' -Arguments @(
     '--editor', '--headless', '--path', $ProjectPath, '--quit'
 )
@@ -81,6 +75,8 @@ $tests = @(
     @{ Name = 'Simulation quality regression'; Script = 'res://tests/simulation_quality_regression.gd' },
     @{ Name = 'Codex audit regression'; Script = 'res://tests/codex_audit_regression.gd' },
     @{ Name = '1000-seed early-game reachability'; Script = 'res://tests/early_game_reachability_regression.gd' },
+    @{ Name = 'V2.2 config and datetime'; Script = 'res://tests/v2_2/v2_2_config_datetime_test.gd' },
+    @{ Name = 'V2.2 atomicity'; Script = 'res://tests/v2_2/v2_2_atomicity_test.gd' },
     @{ Name = 'V2.2 life-loop smoke'; Script = 'res://tests/v2_2/v2_2_life_loop_smoke.gd' },
     @{ Name = 'V2.2 time'; Script = 'res://tests/v2_2/v2_2_time_test.gd' },
     @{ Name = 'V2.2 schedule'; Script = 'res://tests/v2_2/v2_2_schedule_test.gd' },
