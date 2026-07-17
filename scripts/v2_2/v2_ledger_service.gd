@@ -70,7 +70,7 @@ func post_batch(
 	if entries.is_empty():
 		return V2LifeLoopResult.fail("empty_transaction_batch", "复合交易不能为空")
 	var batch_keys: Dictionary = {}
-	var net_by_household: Dictionary = {}
+	var projected_cash: Dictionary = {}
 	for entry: Dictionary in entries:
 		var validation: V2LifeLoopResult = _validate_entry(households, entry)
 		if not validation.success:
@@ -82,18 +82,21 @@ func post_batch(
 			)
 		batch_keys[key] = true
 		var household_id: String = str(entry.get("household_id", ""))
+		if not projected_cash.has(household_id):
+			projected_cash[household_id] = int(
+				(households[household_id] as Dictionary).get("cash_centimes", 0)
+			)
 		var signed_amount: int = int(entry.get("amount_centimes", 0))
 		if str(entry.get("direction", "")) == "expense":
 			signed_amount = -signed_amount
-		net_by_household[household_id] = int(net_by_household.get(household_id, 0)) + signed_amount
-	for household_id_variant: Variant in net_by_household.keys():
-		var household_id: String = str(household_id_variant)
-		var household: Dictionary = households[household_id] as Dictionary
-		var final_cash: int = int(household.get("cash_centimes", 0)) + int(net_by_household[household_id])
-		if final_cash < 0:
+		projected_cash[household_id] = int(projected_cash[household_id]) + signed_amount
+		if int(projected_cash[household_id]) < 0:
 			return V2LifeLoopResult.fail(
 				"insufficient_cash", "现金不足，复合交易未执行",
-				"household=%s final=%d" % [household_id, final_cash], [household_id]
+				"household=%s projected=%d" % [
+					household_id, int(projected_cash[household_id]),
+				],
+				[household_id]
 			)
 	var committed: Array[Dictionary] = []
 	for entry: Dictionary in entries:
@@ -111,7 +114,6 @@ func post_batch(
 			str(entry.get("description", ""))
 		)
 		if not result.success:
-			# All mutable failure conditions were checked before the first commit.
 			push_error("V2.2 原子复合交易在预检后失败：%s" % result.user_message)
 			return result
 		committed.append((result.data.get("transaction", {}) as Dictionary).duplicate(true))
@@ -150,9 +152,9 @@ func validate_balances(households: Dictionary) -> V2LifeLoopResult:
 			var amount: int = int(transaction.get("amount_centimes", 0))
 			expected += amount if str(transaction.get("direction", "")) == "income" else -amount
 			previous = int(transaction.get("balance_after_centimes", -1))
-			if previous != expected:
+			if previous != expected or previous < 0:
 				return V2LifeLoopResult.fail(
-					"ledger_transaction_mismatch", "交易前后余额不一致",
+					"ledger_transaction_mismatch", "交易前后余额不一致或出现负现金",
 					str(transaction.get("transaction_id", "")), [household_id]
 				)
 		var household: Dictionary = households[household_id] as Dictionary
@@ -201,6 +203,8 @@ func restore_persistent_state(state: Dictionary) -> bool:
 			or seen_ids.has(transaction_id)
 			or transaction_keys.has(key)
 			or int(transaction.get("amount_centimes", -1)) < 0
+			or int(transaction.get("balance_before_centimes", -1)) < 0
+			or int(transaction.get("balance_after_centimes", -1)) < 0
 			or str(transaction.get("direction", "")) not in ["income", "expense"]
 		):
 			return false
@@ -261,6 +265,10 @@ func _validate_entry(households: Dictionary, entry: Dictionary) -> V2LifeLoopRes
 		)
 	var household: Dictionary = households[household_id] as Dictionary
 	var before: int = int(household.get("cash_centimes", 0))
+	if before < 0:
+		return V2LifeLoopResult.fail(
+			"invalid_household_cash", "住户现金状态无效", household_id, [household_id]
+		)
 	if direction == "expense" and before < amount_centimes:
 		return V2LifeLoopResult.fail(
 			"insufficient_cash",
