@@ -72,6 +72,7 @@ $headlessScripts = @(
     'res://tests/v2_2/v2_2_employment_test.gd',
     'res://tests/v2_2/v2_2_household_test.gd',
     'res://tests/v2_2/v2_2_condition_test.gd',
+    'res://tests/v2_2/v2_2_notification_test.gd',
     'res://tests/v2_2/v2_2_save_load_test.gd',
     'res://tests/v2_2/v2_2_determinism_test.gd',
     'res://tests/v2_2/v2_2_ui_binding_test.gd',
