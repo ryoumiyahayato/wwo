@@ -22,6 +22,14 @@ func _run() -> void:
 	await process_frame
 	await process_frame
 	test.expect(view.life_simulation != null and view.life_simulation.initialized, "场景建立正式生活模拟")
+	if view.life_simulation == null or not view.life_simulation.initialized:
+		view.queue_free()
+		test.finish(self, "V2.2 UI binding")
+		return
+	test.expect(
+		view.life_binding.save_service is V2ReviewSaveService,
+		"正式 V2.2 场景使用保留安全备份的存档服务"
+	)
 	var state: Dictionary = view.debug_state()
 	test.expect(not bool(state.get("time_is_static_prototype", true)), "旧静态时间提示已删除")
 	test.equal(str(state.get("identity", "")), "worker", "正常启动默认显示皮埃尔")
@@ -77,6 +85,19 @@ func _run() -> void:
 	var paused_hour: int = view.life_simulation.clock.total_hours
 	view.life_simulation.advance_real_seconds(2.0)
 	test.equal(view.life_simulation.clock.total_hours, paused_hour, "暂停后状态停止")
+
+	view.life_simulation.notifications.add(
+		"personal", "notification", "界面未读测试", "打开生活动态后应标记已读",
+		view.life_simulation.clock.total_hours, "ui_unread_test",
+		[V2LifeLoopSimulation.PIERRE_ID]
+	)
+	test.equal(view.life_simulation.notifications.unread_count(), 1, "新增生活通知进入未读状态")
+	view.interface.open_panel_named("activity", false)
+	await process_frame
+	await process_frame
+	test.equal(view.life_simulation.notifications.unread_count(), 0, "打开生活动态面板后未读状态清零")
+	view.interface.close_panel(false)
+
 	view.interface.set_review_mode(true)
 	view.interface.set_identity("official")
 	test.equal(view.life_simulation.selected_person_id, V2LifeLoopSimulation.ALBERT_ID, "评审身份切换只改变观察人物")
