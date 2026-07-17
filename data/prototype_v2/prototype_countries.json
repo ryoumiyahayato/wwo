@@ -1,18 +1,6216 @@
 {
   "prototype_only": true,
-  "schema_version": 3,
+  "schema_version": 4,
   "hierarchy": "world/country",
-  "historical_notice": "当前世界政治边界采用现代 Natural Earth 几何，仅用于 UI、缩放、标签和地图模式验证。国家名称及颜色包含 1900 年主题占位，不代表准确的 1900 年疆域、殖民体系或国际关系。",
+  "historical_notice": "世界边界采用现代 Natural Earth 几何。主要国家保留 1900 年主题名称，其余国家名称用于完整标签与交互覆盖，不代表完整历史疆域。",
+  "name_coverage": {
+    "records": 177,
+    "display_name_zh": 177,
+    "formal_name_zh": 177,
+    "native_name": 177,
+    "label_anchor": 177
+  },
   "countries": [
-    {"id":"country_fra","stable_id":"country_fra","data_code":"FRA","display_name_zh":"法兰西共和国","formal_name_zh":"法兰西第三共和国","native_name":"République française","government_name":"第三共和国","emblem_type":"french_tricolor_rf","name":"法兰西共和国","object_level":"country","geometry_iso_a3":["FRA"],"label_lon_lat":[2.1,46.4],"label_priority":100,"min_zoom":0.8,"max_zoom":12.0,"capital_city_id":"paris","legal_color":"#6689a4","market_color":"#5f9f8c","population_color":"#d48756","war_color":"#537a93","diplomacy":"和平 · 与邻国保持外交关系","boundary_status":"modern_natural_earth_prototype_geometry"},
-    {"id":"german_empire","name":"德意志帝国","object_level":"country","geometry_iso_a3":["DEU"],"label_lon_lat":[10.4,51.0],"label_priority":96,"min_zoom":0.8,"max_zoom":12.0,"capital_city_id":"berlin","legal_color":"#8c8578","market_color":"#789a78","population_color":"#c98c56","war_color":"#806f68","diplomacy":"和平","theme_label_placeholder":true},
-    {"id":"british_empire","name":"大英帝国","object_level":"country","geometry_iso_a3":["GBR","IND"],"label_lon_lat":[-3.0,55.1],"label_priority":94,"min_zoom":0.8,"max_zoom":12.0,"capital_city_id":"london","legal_color":"#8b6f67","market_color":"#6c8f87","population_color":"#c07b55","war_color":"#805c58","diplomacy":"和平","theme_label_placeholder":true},
-    {"id":"russian_empire","name":"俄罗斯帝国","object_level":"country","geometry_iso_a3":["RUS"],"label_lon_lat":[67.0,58.0],"label_priority":98,"min_zoom":0.8,"max_zoom":12.0,"capital_city_id":"st_petersburg","legal_color":"#718b72","market_color":"#6f927b","population_color":"#aa8357","war_color":"#667c69","diplomacy":"和平","theme_label_placeholder":true},
-    {"id":"austro_hungarian_empire","name":"奥匈帝国","object_level":"country","geometry_iso_a3":["AUT","HUN","CZE","SVK","SVN","HRV","BIH"],"label_lon_lat":[16.0,47.4],"label_priority":86,"min_zoom":0.9,"max_zoom":12.0,"capital_city_id":"vienna","legal_color":"#a58b70","market_color":"#88956f","population_color":"#c5955f","war_color":"#88705f","diplomacy":"和平","theme_label_placeholder":true},
-    {"id":"ottoman_empire","name":"奥斯曼帝国","object_level":"country","geometry_iso_a3":["TUR"],"label_lon_lat":[33.0,39.0],"label_priority":88,"min_zoom":0.8,"max_zoom":12.0,"capital_city_id":"istanbul","legal_color":"#9b7c63","market_color":"#77927d","population_color":"#bc8354","war_color":"#835f55","diplomacy":"和平","theme_label_placeholder":true},
-    {"id":"united_states","name":"美利坚合众国","object_level":"country","geometry_iso_a3":["USA"],"label_lon_lat":[-101.0,39.0],"label_priority":98,"min_zoom":0.8,"max_zoom":12.0,"capital_city_id":"washington","legal_color":"#758f82","market_color":"#6d9c8b","population_color":"#b57f55","war_color":"#687d77","diplomacy":"和平","theme_label_placeholder":true},
-    {"id":"qing_empire","name":"大清帝国","object_level":"country","geometry_iso_a3":["CHN"],"label_lon_lat":[104.0,35.0],"label_priority":98,"min_zoom":0.8,"max_zoom":12.0,"capital_city_id":"beijing","legal_color":"#aa9165","market_color":"#82977b","population_color":"#d28b51","war_color":"#8d745d","diplomacy":"和平","theme_label_placeholder":true},
-    {"id":"japanese_empire","name":"日本帝国","object_level":"country","geometry_iso_a3":["JPN"],"label_lon_lat":[139.0,37.0],"label_priority":84,"min_zoom":0.9,"max_zoom":12.0,"capital_city_id":"tokyo","legal_color":"#9b786e","market_color":"#7f9187","population_color":"#c87b59","war_color":"#855f5a","diplomacy":"和平","theme_label_placeholder":true},
-    {"id":"argentine_republic","name":"阿根廷共和国","object_level":"country","geometry_iso_a3":["ARG"],"label_lon_lat":[-64.0,-35.0],"label_priority":62,"min_zoom":1.15,"max_zoom":12.0,"capital_city_id":"buenos_aires","legal_color":"#728a78","market_color":"#6f927f","population_color":"#aa8058","war_color":"#68766b","diplomacy":"和平","theme_label_placeholder":true}
+    {
+      "id": "country_fra",
+      "stable_id": "country_fra",
+      "data_code": "FRA",
+      "source_iso_a3": "-99",
+      "display_name_zh": "法兰西共和国",
+      "formal_name_zh": "法兰西第三共和国",
+      "native_name": "République française",
+      "native_name_source": "v2_1_theme_override",
+      "government_name": "第三共和国",
+      "name": "法兰西共和国",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320637"
+      ],
+      "geometry_iso_a3": [
+        "FRA"
+      ],
+      "label_anchor": [
+        2.5523,
+        46.6961
+      ],
+      "label_lon_lat": [
+        2.5523,
+        46.6961
+      ],
+      "label_priority": 100,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "和平 · 与邻国保持外交关系",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": false,
+      "emblem_type": "french_tricolor_rf",
+      "legal_color": "#6689a4",
+      "market_color": "#5f9f8c",
+      "population_color": "#d48756",
+      "war_color": "#537a93",
+      "capital_city_id": "paris"
+    },
+    {
+      "id": "qing_empire",
+      "stable_id": "qing_empire",
+      "data_code": "CHN",
+      "source_iso_a3": "CHN",
+      "display_name_zh": "大清帝国",
+      "formal_name_zh": "大清帝国",
+      "native_name": "大清國",
+      "native_name_source": "v2_1_theme_override",
+      "government_name": "帝国",
+      "name": "大清帝国",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320471"
+      ],
+      "geometry_iso_a3": [
+        "CHN"
+      ],
+      "label_anchor": [
+        106.3373,
+        32.4982
+      ],
+      "label_lon_lat": [
+        106.3373,
+        32.4982
+      ],
+      "label_priority": 98,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": false
+    },
+    {
+      "id": "russian_empire",
+      "stable_id": "russian_empire",
+      "data_code": "RUS",
+      "source_iso_a3": "RUS",
+      "display_name_zh": "俄罗斯帝国",
+      "formal_name_zh": "俄罗斯帝国",
+      "native_name": "Россійская Имперія",
+      "native_name_source": "v2_1_theme_override",
+      "government_name": "帝国",
+      "name": "俄罗斯帝国",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321201"
+      ],
+      "geometry_iso_a3": [
+        "RUS"
+      ],
+      "label_anchor": [
+        44.6865,
+        58.2494
+      ],
+      "label_lon_lat": [
+        44.6865,
+        58.2494
+      ],
+      "label_priority": 98,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": false
+    },
+    {
+      "id": "united_states",
+      "stable_id": "united_states",
+      "data_code": "USA",
+      "source_iso_a3": "USA",
+      "display_name_zh": "美利坚合众国",
+      "formal_name_zh": "美利坚合众国",
+      "native_name": "United States of America",
+      "native_name_source": "v2_1_theme_override",
+      "government_name": "联邦共和国",
+      "name": "美利坚合众国",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321369"
+      ],
+      "geometry_iso_a3": [
+        "USA"
+      ],
+      "label_anchor": [
+        -97.4826,
+        39.5385
+      ],
+      "label_lon_lat": [
+        -97.4826,
+        39.5385
+      ],
+      "label_priority": 98,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7c71",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": false
+    },
+    {
+      "id": "country_aus",
+      "stable_id": "country_aus",
+      "data_code": "AUS",
+      "source_iso_a3": "AUS",
+      "display_name_zh": "澳大利亚",
+      "formal_name_zh": "澳大利亚",
+      "native_name": "Australia",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "澳大利亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320355"
+      ],
+      "geometry_iso_a3": [
+        "AUS"
+      ],
+      "label_anchor": [
+        134.0497,
+        -24.1295
+      ],
+      "label_lon_lat": [
+        134.0497,
+        -24.1295
+      ],
+      "label_priority": 96,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#7b806d",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_bel",
+      "stable_id": "country_bel",
+      "data_code": "BEL",
+      "source_iso_a3": "BEL",
+      "display_name_zh": "比利时",
+      "formal_name_zh": "比利时",
+      "native_name": "Belgium",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "比利时",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320389"
+      ],
+      "geometry_iso_a3": [
+        "BEL"
+      ],
+      "label_anchor": [
+        4.8004,
+        50.7854
+      ],
+      "label_lon_lat": [
+        4.8004,
+        50.7854
+      ],
+      "label_priority": 96,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_bra",
+      "stable_id": "country_bra",
+      "data_code": "BRA",
+      "source_iso_a3": "BRA",
+      "display_name_zh": "巴西",
+      "formal_name_zh": "巴西",
+      "native_name": "Brazil",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "巴西",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320441"
+      ],
+      "geometry_iso_a3": [
+        "BRA"
+      ],
+      "label_anchor": [
+        -49.5594,
+        -12.0987
+      ],
+      "label_lon_lat": [
+        -49.5594,
+        -12.0987
+      ],
+      "label_priority": 96,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6f806e",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_can",
+      "stable_id": "country_can",
+      "data_code": "CAN",
+      "source_iso_a3": "CAN",
+      "display_name_zh": "加拿大",
+      "formal_name_zh": "加拿大",
+      "native_name": "Canada",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "加拿大",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320467"
+      ],
+      "geometry_iso_a3": [
+        "CAN"
+      ],
+      "label_anchor": [
+        -101.9107,
+        60.3243
+      ],
+      "label_lon_lat": [
+        -101.9107,
+        60.3243
+      ],
+      "label_priority": 96,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7c71",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_chl",
+      "stable_id": "country_chl",
+      "data_code": "CHL",
+      "source_iso_a3": "CHL",
+      "display_name_zh": "智利",
+      "formal_name_zh": "智利",
+      "native_name": "Chile",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "智利",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320493"
+      ],
+      "geometry_iso_a3": [
+        "CHL"
+      ],
+      "label_anchor": [
+        -72.3189,
+        -38.1518
+      ],
+      "label_lon_lat": [
+        -72.3189,
+        -38.1518
+      ],
+      "label_priority": 96,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6f806e",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_cod",
+      "stable_id": "country_cod",
+      "data_code": "COD",
+      "source_iso_a3": "COD",
+      "display_name_zh": "刚果民主共和国",
+      "formal_name_zh": "刚果民主共和国",
+      "native_name": "Democratic Republic of the Congo",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "刚果民主共和国",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320513"
+      ],
+      "geometry_iso_a3": [
+        "COD"
+      ],
+      "label_anchor": [
+        23.4588,
+        -1.8582
+      ],
+      "label_lon_lat": [
+        23.4588,
+        -1.8582
+      ],
+      "label_priority": 96,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_col",
+      "stable_id": "country_col",
+      "data_code": "COL",
+      "source_iso_a3": "COL",
+      "display_name_zh": "哥伦比亚",
+      "formal_name_zh": "哥伦比亚",
+      "native_name": "Colombia",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "哥伦比亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320517"
+      ],
+      "geometry_iso_a3": [
+        "COL"
+      ],
+      "label_anchor": [
+        -73.1743,
+        3.3731
+      ],
+      "label_lon_lat": [
+        -73.1743,
+        3.3731
+      ],
+      "label_priority": 96,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6f806e",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_egy",
+      "stable_id": "country_egy",
+      "data_code": "EGY",
+      "source_iso_a3": "EGY",
+      "display_name_zh": "埃及",
+      "formal_name_zh": "埃及",
+      "native_name": "Egypt",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "埃及",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320575"
+      ],
+      "geometry_iso_a3": [
+        "EGY"
+      ],
+      "label_anchor": [
+        29.4458,
+        26.1862
+      ],
+      "label_lon_lat": [
+        29.4458,
+        26.1862
+      ],
+      "label_priority": 96,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_esp",
+      "stable_id": "country_esp",
+      "data_code": "ESP",
+      "source_iso_a3": "ESP",
+      "display_name_zh": "西班牙",
+      "formal_name_zh": "西班牙",
+      "native_name": "Spain",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "西班牙",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320587"
+      ],
+      "geometry_iso_a3": [
+        "ESP"
+      ],
+      "label_anchor": [
+        -3.4647,
+        40.091
+      ],
+      "label_lon_lat": [
+        -3.4647,
+        40.091
+      ],
+      "label_priority": 96,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_eth",
+      "stable_id": "country_eth",
+      "data_code": "ETH",
+      "source_iso_a3": "ETH",
+      "display_name_zh": "埃塞俄比亚",
+      "formal_name_zh": "埃塞俄比亚",
+      "native_name": "Ethiopia",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "埃塞俄比亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320617"
+      ],
+      "geometry_iso_a3": [
+        "ETH"
+      ],
+      "label_anchor": [
+        39.0886,
+        8.0328
+      ],
+      "label_lon_lat": [
+        39.0886,
+        8.0328
+      ],
+      "label_priority": 96,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_idn",
+      "stable_id": "country_idn",
+      "data_code": "IDN",
+      "source_iso_a3": "IDN",
+      "display_name_zh": "印度尼西亚",
+      "formal_name_zh": "印度尼西亚",
+      "native_name": "Indonesia",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "印度尼西亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320845"
+      ],
+      "geometry_iso_a3": [
+        "IDN"
+      ],
+      "label_anchor": [
+        101.8929,
+        -0.9544
+      ],
+      "label_lon_lat": [
+        101.8929,
+        -0.9544
+      ],
+      "label_priority": 96,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_ind",
+      "stable_id": "country_ind",
+      "data_code": "IND",
+      "source_iso_a3": "IND",
+      "display_name_zh": "印度",
+      "formal_name_zh": "印度",
+      "native_name": "India",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "印度",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320847"
+      ],
+      "geometry_iso_a3": [
+        "IND"
+      ],
+      "label_anchor": [
+        79.3581,
+        22.6869
+      ],
+      "label_lon_lat": [
+        79.3581,
+        22.6869
+      ],
+      "label_priority": 96,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_irn",
+      "stable_id": "country_irn",
+      "data_code": "IRN",
+      "source_iso_a3": "IRN",
+      "display_name_zh": "伊朗",
+      "formal_name_zh": "伊朗",
+      "native_name": "Iran",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "伊朗",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320881"
+      ],
+      "geometry_iso_a3": [
+        "IRN"
+      ],
+      "label_anchor": [
+        54.9315,
+        32.1662
+      ],
+      "label_lon_lat": [
+        54.9315,
+        32.1662
+      ],
+      "label_priority": 96,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_ita",
+      "stable_id": "country_ita",
+      "data_code": "ITA",
+      "source_iso_a3": "ITA",
+      "display_name_zh": "意大利",
+      "formal_name_zh": "意大利",
+      "native_name": "Italy",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "意大利",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320919"
+      ],
+      "geometry_iso_a3": [
+        "ITA"
+      ],
+      "label_anchor": [
+        11.0769,
+        44.7325
+      ],
+      "label_lon_lat": [
+        11.0769,
+        44.7325
+      ],
+      "label_priority": 96,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_ken",
+      "stable_id": "country_ken",
+      "data_code": "KEN",
+      "source_iso_a3": "KEN",
+      "display_name_zh": "肯尼亚",
+      "formal_name_zh": "肯尼亚",
+      "native_name": "Kenya",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "肯尼亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320971"
+      ],
+      "geometry_iso_a3": [
+        "KEN"
+      ],
+      "label_anchor": [
+        37.9076,
+        0.549
+      ],
+      "label_lon_lat": [
+        37.9076,
+        0.549
+      ],
+      "label_priority": 96,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_kor",
+      "stable_id": "country_kor",
+      "data_code": "KOR",
+      "source_iso_a3": "KOR",
+      "display_name_zh": "大韩民国",
+      "formal_name_zh": "大韩民国",
+      "native_name": "South Korea",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "大韩民国",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320985"
+      ],
+      "geometry_iso_a3": [
+        "KOR"
+      ],
+      "label_anchor": [
+        128.1295,
+        36.3849
+      ],
+      "label_lon_lat": [
+        128.1295,
+        36.3849
+      ],
+      "label_priority": 96,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_mex",
+      "stable_id": "country_mex",
+      "data_code": "MEX",
+      "source_iso_a3": "MEX",
+      "display_name_zh": "墨西哥",
+      "formal_name_zh": "墨西哥",
+      "native_name": "Mexico",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "墨西哥",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321055"
+      ],
+      "geometry_iso_a3": [
+        "MEX"
+      ],
+      "label_anchor": [
+        -102.2894,
+        23.92
+      ],
+      "label_lon_lat": [
+        -102.2894,
+        23.92
+      ],
+      "label_priority": 96,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7c71",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_nga",
+      "stable_id": "country_nga",
+      "data_code": "NGA",
+      "source_iso_a3": "NGA",
+      "display_name_zh": "尼日利亚",
+      "formal_name_zh": "尼日利亚",
+      "native_name": "Nigeria",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "尼日利亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321089"
+      ],
+      "geometry_iso_a3": [
+        "NGA"
+      ],
+      "label_anchor": [
+        7.5032,
+        9.4398
+      ],
+      "label_lon_lat": [
+        7.5032,
+        9.4398
+      ],
+      "label_priority": 96,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_nzl",
+      "stable_id": "country_nzl",
+      "data_code": "NZL",
+      "source_iso_a3": "NZL",
+      "display_name_zh": "新西兰",
+      "formal_name_zh": "新西兰",
+      "native_name": "New Zealand",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "新西兰",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321135"
+      ],
+      "geometry_iso_a3": [
+        "NZL"
+      ],
+      "label_anchor": [
+        172.787,
+        -39.759
+      ],
+      "label_lon_lat": [
+        172.787,
+        -39.759
+      ],
+      "label_priority": 96,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#7b806d",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_pak",
+      "stable_id": "country_pak",
+      "data_code": "PAK",
+      "source_iso_a3": "PAK",
+      "display_name_zh": "巴基斯坦",
+      "formal_name_zh": "巴基斯坦",
+      "native_name": "Pakistan",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "巴基斯坦",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321153"
+      ],
+      "geometry_iso_a3": [
+        "PAK"
+      ],
+      "label_anchor": [
+        68.5456,
+        29.3284
+      ],
+      "label_lon_lat": [
+        68.5456,
+        29.3284
+      ],
+      "label_priority": 96,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_per",
+      "stable_id": "country_per",
+      "data_code": "PER",
+      "source_iso_a3": "PER",
+      "display_name_zh": "秘鲁",
+      "formal_name_zh": "秘鲁",
+      "native_name": "Peru",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "秘鲁",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321163"
+      ],
+      "geometry_iso_a3": [
+        "PER"
+      ],
+      "label_anchor": [
+        -72.9002,
+        -12.9767
+      ],
+      "label_lon_lat": [
+        -72.9002,
+        -12.9767
+      ],
+      "label_priority": 96,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6f806e",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_phl",
+      "stable_id": "country_phl",
+      "data_code": "PHL",
+      "source_iso_a3": "PHL",
+      "display_name_zh": "菲律宾",
+      "formal_name_zh": "菲律宾",
+      "native_name": "Philippines",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "菲律宾",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321169"
+      ],
+      "geometry_iso_a3": [
+        "PHL"
+      ],
+      "label_anchor": [
+        122.465,
+        11.198
+      ],
+      "label_lon_lat": [
+        122.465,
+        11.198
+      ],
+      "label_priority": 96,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_png",
+      "stable_id": "country_png",
+      "data_code": "PNG",
+      "source_iso_a3": "PNG",
+      "display_name_zh": "巴布亚新几内亚",
+      "formal_name_zh": "巴布亚新几内亚",
+      "native_name": "Papua New Guinea",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "巴布亚新几内亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321173"
+      ],
+      "geometry_iso_a3": [
+        "PNG"
+      ],
+      "label_anchor": [
+        143.9102,
+        -5.6953
+      ],
+      "label_lon_lat": [
+        143.9102,
+        -5.6953
+      ],
+      "label_priority": 96,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#7b806d",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_prt",
+      "stable_id": "country_prt",
+      "data_code": "PRT",
+      "source_iso_a3": "PRT",
+      "display_name_zh": "葡萄牙",
+      "formal_name_zh": "葡萄牙",
+      "native_name": "Portugal",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "葡萄牙",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321187"
+      ],
+      "geometry_iso_a3": [
+        "PRT"
+      ],
+      "label_anchor": [
+        -8.2718,
+        39.6067
+      ],
+      "label_lon_lat": [
+        -8.2718,
+        39.6067
+      ],
+      "label_priority": 96,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_sau",
+      "stable_id": "country_sau",
+      "data_code": "SAU",
+      "source_iso_a3": "SAU",
+      "display_name_zh": "沙特阿拉伯",
+      "formal_name_zh": "沙特阿拉伯",
+      "native_name": "Saudi Arabia",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "沙特阿拉伯",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321225"
+      ],
+      "geometry_iso_a3": [
+        "SAU"
+      ],
+      "label_anchor": [
+        44.6996,
+        23.8069
+      ],
+      "label_lon_lat": [
+        44.6996,
+        23.8069
+      ],
+      "label_priority": 96,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_vnm",
+      "stable_id": "country_vnm",
+      "data_code": "VNM",
+      "source_iso_a3": "VNM",
+      "display_name_zh": "越南",
+      "formal_name_zh": "越南",
+      "native_name": "Vietnam",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "越南",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321417"
+      ],
+      "geometry_iso_a3": [
+        "VNM"
+      ],
+      "label_anchor": [
+        105.3873,
+        21.7154
+      ],
+      "label_lon_lat": [
+        105.3873,
+        21.7154
+      ],
+      "label_priority": 96,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_zaf",
+      "stable_id": "country_zaf",
+      "data_code": "ZAF",
+      "source_iso_a3": "ZAF",
+      "display_name_zh": "南非",
+      "formal_name_zh": "南非",
+      "native_name": "South Africa",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "南非",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321431"
+      ],
+      "geometry_iso_a3": [
+        "ZAF"
+      ],
+      "label_anchor": [
+        23.6657,
+        -29.7088
+      ],
+      "label_lon_lat": [
+        23.6657,
+        -29.7088
+      ],
+      "label_priority": 96,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "german_empire",
+      "stable_id": "german_empire",
+      "data_code": "DEU",
+      "source_iso_a3": "DEU",
+      "display_name_zh": "德意志帝国",
+      "formal_name_zh": "德意志帝国",
+      "native_name": "Deutsches Reich",
+      "native_name_source": "v2_1_theme_override",
+      "government_name": "帝国",
+      "name": "德意志帝国",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320539"
+      ],
+      "geometry_iso_a3": [
+        "DEU"
+      ],
+      "label_anchor": [
+        9.6783,
+        50.9617
+      ],
+      "label_lon_lat": [
+        9.6783,
+        50.9617
+      ],
+      "label_priority": 96,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": false
+    },
+    {
+      "id": "british_empire",
+      "stable_id": "british_empire",
+      "data_code": "GBR",
+      "source_iso_a3": "GBR",
+      "display_name_zh": "大英帝国",
+      "formal_name_zh": "大不列颠及爱尔兰联合王国",
+      "native_name": "United Kingdom of Great Britain and Ireland",
+      "native_name_source": "v2_1_theme_override",
+      "government_name": "君主立宪制",
+      "name": "大英帝国",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320713"
+      ],
+      "geometry_iso_a3": [
+        "GBR"
+      ],
+      "label_anchor": [
+        -2.1163,
+        54.4027
+      ],
+      "label_lon_lat": [
+        -2.1163,
+        54.4027
+      ],
+      "label_priority": 94,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": false
+    },
+    {
+      "id": "country_afg",
+      "stable_id": "country_afg",
+      "data_code": "AFG",
+      "source_iso_a3": "AFG",
+      "display_name_zh": "阿富汗",
+      "formal_name_zh": "阿富汗",
+      "native_name": "Afghanistan",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "阿富汗",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320319"
+      ],
+      "geometry_iso_a3": [
+        "AFG"
+      ],
+      "label_anchor": [
+        66.4966,
+        34.1643
+      ],
+      "label_lon_lat": [
+        66.4966,
+        34.1643
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_ago",
+      "stable_id": "country_ago",
+      "data_code": "AGO",
+      "source_iso_a3": "AGO",
+      "display_name_zh": "安哥拉",
+      "formal_name_zh": "安哥拉",
+      "native_name": "Angola",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "安哥拉",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320323"
+      ],
+      "geometry_iso_a3": [
+        "AGO"
+      ],
+      "label_anchor": [
+        17.9842,
+        -12.1828
+      ],
+      "label_lon_lat": [
+        17.9842,
+        -12.1828
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_bfa",
+      "stable_id": "country_bfa",
+      "data_code": "BFA",
+      "source_iso_a3": "BFA",
+      "display_name_zh": "布基纳法索",
+      "formal_name_zh": "布基纳法索",
+      "native_name": "Burkina Faso",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "布基纳法索",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320405"
+      ],
+      "geometry_iso_a3": [
+        "BFA"
+      ],
+      "label_anchor": [
+        -1.3639,
+        12.673
+      ],
+      "label_lon_lat": [
+        -1.3639,
+        12.673
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_bgd",
+      "stable_id": "country_bgd",
+      "data_code": "BGD",
+      "source_iso_a3": "BGD",
+      "display_name_zh": "孟加拉国",
+      "formal_name_zh": "孟加拉国",
+      "native_name": "Bangladesh",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "孟加拉国",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320407"
+      ],
+      "geometry_iso_a3": [
+        "BGD"
+      ],
+      "label_anchor": [
+        89.685,
+        24.215
+      ],
+      "label_lon_lat": [
+        89.685,
+        24.215
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_bol",
+      "stable_id": "country_bol",
+      "data_code": "BOL",
+      "source_iso_a3": "BOL",
+      "display_name_zh": "玻利维亚",
+      "formal_name_zh": "玻利维亚",
+      "native_name": "Bolivia",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "玻利维亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320439"
+      ],
+      "geometry_iso_a3": [
+        "BOL"
+      ],
+      "label_anchor": [
+        -64.5934,
+        -16.666
+      ],
+      "label_lon_lat": [
+        -64.5934,
+        -16.666
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6f806e",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_civ",
+      "stable_id": "country_civ",
+      "data_code": "CIV",
+      "source_iso_a3": "CIV",
+      "display_name_zh": "科特迪瓦",
+      "formal_name_zh": "科特迪瓦",
+      "native_name": "Ivory Coast",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "科特迪瓦",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320507"
+      ],
+      "geometry_iso_a3": [
+        "CIV"
+      ],
+      "label_anchor": [
+        -5.5686,
+        7.4914
+      ],
+      "label_lon_lat": [
+        -5.5686,
+        7.4914
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_cmr",
+      "stable_id": "country_cmr",
+      "data_code": "CMR",
+      "source_iso_a3": "CMR",
+      "display_name_zh": "喀麦隆",
+      "formal_name_zh": "喀麦隆",
+      "native_name": "Cameroon",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "喀麦隆",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320509"
+      ],
+      "geometry_iso_a3": [
+        "CMR"
+      ],
+      "label_anchor": [
+        12.4735,
+        4.585
+      ],
+      "label_lon_lat": [
+        12.4735,
+        4.585
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_cub",
+      "stable_id": "country_cub",
+      "data_code": "CUB",
+      "source_iso_a3": "CUB",
+      "display_name_zh": "古巴",
+      "formal_name_zh": "古巴",
+      "native_name": "Cuba",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "古巴",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320527"
+      ],
+      "geometry_iso_a3": [
+        "CUB"
+      ],
+      "label_anchor": [
+        -77.9759,
+        21.334
+      ],
+      "label_lon_lat": [
+        -77.9759,
+        21.334
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7c71",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_dza",
+      "stable_id": "country_dza",
+      "data_code": "DZA",
+      "source_iso_a3": "DZA",
+      "display_name_zh": "阿尔及利亚",
+      "formal_name_zh": "阿尔及利亚",
+      "native_name": "Algeria",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "阿尔及利亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320565"
+      ],
+      "geometry_iso_a3": [
+        "DZA"
+      ],
+      "label_anchor": [
+        2.8082,
+        27.3974
+      ],
+      "label_lon_lat": [
+        2.8082,
+        27.3974
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_ecu",
+      "stable_id": "country_ecu",
+      "data_code": "ECU",
+      "source_iso_a3": "ECU",
+      "display_name_zh": "厄瓜多尔",
+      "formal_name_zh": "厄瓜多尔",
+      "native_name": "Ecuador",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "厄瓜多尔",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320567"
+      ],
+      "geometry_iso_a3": [
+        "ECU"
+      ],
+      "label_anchor": [
+        -78.1884,
+        -1.2591
+      ],
+      "label_lon_lat": [
+        -78.1884,
+        -1.2591
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6f806e",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_fin",
+      "stable_id": "country_fin",
+      "data_code": "FIN",
+      "source_iso_a3": "FIN",
+      "display_name_zh": "芬兰",
+      "formal_name_zh": "芬兰",
+      "native_name": "Finland",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "芬兰",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320623"
+      ],
+      "geometry_iso_a3": [
+        "FIN"
+      ],
+      "label_anchor": [
+        27.2764,
+        63.2524
+      ],
+      "label_lon_lat": [
+        27.2764,
+        63.2524
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_gha",
+      "stable_id": "country_gha",
+      "data_code": "GHA",
+      "source_iso_a3": "GHA",
+      "display_name_zh": "加纳",
+      "formal_name_zh": "加纳",
+      "native_name": "Ghana",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "加纳",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320793"
+      ],
+      "geometry_iso_a3": [
+        "GHA"
+      ],
+      "label_anchor": [
+        -1.0369,
+        7.7176
+      ],
+      "label_lon_lat": [
+        -1.0369,
+        7.7176
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_gin",
+      "stable_id": "country_gin",
+      "data_code": "GIN",
+      "source_iso_a3": "GIN",
+      "display_name_zh": "几内亚",
+      "formal_name_zh": "几内亚",
+      "native_name": "Guinea",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "几内亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320795"
+      ],
+      "geometry_iso_a3": [
+        "GIN"
+      ],
+      "label_anchor": [
+        -10.0164,
+        10.6185
+      ],
+      "label_lon_lat": [
+        -10.0164,
+        10.6185
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_grc",
+      "stable_id": "country_grc",
+      "data_code": "GRC",
+      "source_iso_a3": "GRC",
+      "display_name_zh": "希腊",
+      "formal_name_zh": "希腊",
+      "native_name": "Greece",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "希腊",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320811"
+      ],
+      "geometry_iso_a3": [
+        "GRC"
+      ],
+      "label_anchor": [
+        21.7257,
+        39.4928
+      ],
+      "label_lon_lat": [
+        21.7257,
+        39.4928
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_grl",
+      "stable_id": "country_grl",
+      "data_code": "GRL",
+      "source_iso_a3": "GRL",
+      "display_name_zh": "格陵兰",
+      "formal_name_zh": "格陵兰",
+      "native_name": "Greenland",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "格陵兰",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320551"
+      ],
+      "geometry_iso_a3": [
+        "GRL"
+      ],
+      "label_anchor": [
+        -39.3353,
+        74.3194
+      ],
+      "label_lon_lat": [
+        -39.3353,
+        74.3194
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7c71",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_gtm",
+      "stable_id": "country_gtm",
+      "data_code": "GTM",
+      "source_iso_a3": "GTM",
+      "display_name_zh": "危地马拉",
+      "formal_name_zh": "危地马拉",
+      "native_name": "Guatemala",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "危地马拉",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320815"
+      ],
+      "geometry_iso_a3": [
+        "GTM"
+      ],
+      "label_anchor": [
+        -90.4971,
+        14.9821
+      ],
+      "label_lon_lat": [
+        -90.4971,
+        14.9821
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7c71",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_irl",
+      "stable_id": "country_irl",
+      "data_code": "IRL",
+      "source_iso_a3": "IRL",
+      "display_name_zh": "爱尔兰",
+      "formal_name_zh": "爱尔兰",
+      "native_name": "Ireland",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "爱尔兰",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320877"
+      ],
+      "geometry_iso_a3": [
+        "IRL"
+      ],
+      "label_anchor": [
+        -7.7986,
+        53.0787
+      ],
+      "label_lon_lat": [
+        -7.7986,
+        53.0787
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_irq",
+      "stable_id": "country_irq",
+      "data_code": "IRQ",
+      "source_iso_a3": "IRQ",
+      "display_name_zh": "伊拉克",
+      "formal_name_zh": "伊拉克",
+      "native_name": "Iraq",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "伊拉克",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320887"
+      ],
+      "geometry_iso_a3": [
+        "IRQ"
+      ],
+      "label_anchor": [
+        43.2618,
+        33.094
+      ],
+      "label_lon_lat": [
+        43.2618,
+        33.094
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_isl",
+      "stable_id": "country_isl",
+      "data_code": "ISL",
+      "source_iso_a3": "ISL",
+      "display_name_zh": "冰岛",
+      "formal_name_zh": "冰岛",
+      "native_name": "Iceland",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "冰岛",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320917"
+      ],
+      "geometry_iso_a3": [
+        "ISL"
+      ],
+      "label_anchor": [
+        -18.6737,
+        64.7793
+      ],
+      "label_lon_lat": [
+        -18.6737,
+        64.7793
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_kaz",
+      "stable_id": "country_kaz",
+      "data_code": "KAZ",
+      "source_iso_a3": "KAZ",
+      "display_name_zh": "哈萨克斯坦",
+      "formal_name_zh": "哈萨克斯坦",
+      "native_name": "Kazakhstan",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "哈萨克斯坦",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320967"
+      ],
+      "geometry_iso_a3": [
+        "KAZ"
+      ],
+      "label_anchor": [
+        68.6855,
+        49.0541
+      ],
+      "label_lon_lat": [
+        68.6855,
+        49.0541
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_khm",
+      "stable_id": "country_khm",
+      "data_code": "KHM",
+      "source_iso_a3": "KHM",
+      "display_name_zh": "柬埔寨",
+      "formal_name_zh": "柬埔寨",
+      "native_name": "Cambodia",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "柬埔寨",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320979"
+      ],
+      "geometry_iso_a3": [
+        "KHM"
+      ],
+      "label_anchor": [
+        104.5049,
+        12.6476
+      ],
+      "label_lon_lat": [
+        104.5049,
+        12.6476
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_lby",
+      "stable_id": "country_lby",
+      "data_code": "LBY",
+      "source_iso_a3": "LBY",
+      "display_name_zh": "利比亚",
+      "formal_name_zh": "利比亚",
+      "native_name": "Libya",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "利比亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321017"
+      ],
+      "geometry_iso_a3": [
+        "LBY"
+      ],
+      "label_anchor": [
+        18.011,
+        26.6389
+      ],
+      "label_lon_lat": [
+        18.011,
+        26.6389
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_lka",
+      "stable_id": "country_lka",
+      "data_code": "LKA",
+      "source_iso_a3": "LKA",
+      "display_name_zh": "斯里兰卡",
+      "formal_name_zh": "斯里兰卡",
+      "native_name": "Sri Lanka",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "斯里兰卡",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321025"
+      ],
+      "geometry_iso_a3": [
+        "LKA"
+      ],
+      "label_anchor": [
+        80.7048,
+        7.5811
+      ],
+      "label_lon_lat": [
+        80.7048,
+        7.5811
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_mar",
+      "stable_id": "country_mar",
+      "data_code": "MAR",
+      "source_iso_a3": "MAR",
+      "display_name_zh": "摩洛哥",
+      "formal_name_zh": "摩洛哥",
+      "native_name": "Morocco",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "摩洛哥",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321035"
+      ],
+      "geometry_iso_a3": [
+        "MAR"
+      ],
+      "label_anchor": [
+        -7.1873,
+        31.6507
+      ],
+      "label_lon_lat": [
+        -7.1873,
+        31.6507
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_mdg",
+      "stable_id": "country_mdg",
+      "data_code": "MDG",
+      "source_iso_a3": "MDG",
+      "display_name_zh": "马达加斯加",
+      "formal_name_zh": "马达加斯加",
+      "native_name": "Madagascar",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "马达加斯加",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321051"
+      ],
+      "geometry_iso_a3": [
+        "MDG"
+      ],
+      "label_anchor": [
+        46.7042,
+        -18.6283
+      ],
+      "label_lon_lat": [
+        46.7042,
+        -18.6283
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_mli",
+      "stable_id": "country_mli",
+      "data_code": "MLI",
+      "source_iso_a3": "MLI",
+      "display_name_zh": "马里",
+      "formal_name_zh": "马里",
+      "native_name": "Mali",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "马里",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321063"
+      ],
+      "geometry_iso_a3": [
+        "MLI"
+      ],
+      "label_anchor": [
+        -2.0385,
+        18.6927
+      ],
+      "label_lon_lat": [
+        -2.0385,
+        18.6927
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_mmr",
+      "stable_id": "country_mmr",
+      "data_code": "MMR",
+      "source_iso_a3": "MMR",
+      "display_name_zh": "缅甸",
+      "formal_name_zh": "缅甸",
+      "native_name": "Myanmar",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "缅甸",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321067"
+      ],
+      "geometry_iso_a3": [
+        "MMR"
+      ],
+      "label_anchor": [
+        95.8045,
+        21.5739
+      ],
+      "label_lon_lat": [
+        95.8045,
+        21.5739
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_mng",
+      "stable_id": "country_mng",
+      "data_code": "MNG",
+      "source_iso_a3": "MNG",
+      "display_name_zh": "蒙古国",
+      "formal_name_zh": "蒙古国",
+      "native_name": "Mongolia",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "蒙古国",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321071"
+      ],
+      "geometry_iso_a3": [
+        "MNG"
+      ],
+      "label_anchor": [
+        104.1504,
+        45.9975
+      ],
+      "label_lon_lat": [
+        104.1504,
+        45.9975
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_moz",
+      "stable_id": "country_moz",
+      "data_code": "MOZ",
+      "source_iso_a3": "MOZ",
+      "display_name_zh": "莫桑比克",
+      "formal_name_zh": "莫桑比克",
+      "native_name": "Mozambique",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "莫桑比克",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321073"
+      ],
+      "geometry_iso_a3": [
+        "MOZ"
+      ],
+      "label_anchor": [
+        37.8379,
+        -13.9432
+      ],
+      "label_lon_lat": [
+        37.8379,
+        -13.9432
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_mrt",
+      "stable_id": "country_mrt",
+      "data_code": "MRT",
+      "source_iso_a3": "MRT",
+      "display_name_zh": "毛里塔尼亚",
+      "formal_name_zh": "毛里塔尼亚",
+      "native_name": "Mauritania",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "毛里塔尼亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321075"
+      ],
+      "geometry_iso_a3": [
+        "MRT"
+      ],
+      "label_anchor": [
+        -9.7403,
+        19.5871
+      ],
+      "label_lon_lat": [
+        -9.7403,
+        19.5871
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_mys",
+      "stable_id": "country_mys",
+      "data_code": "MYS",
+      "source_iso_a3": "MYS",
+      "display_name_zh": "马来西亚",
+      "formal_name_zh": "马来西亚",
+      "native_name": "Malaysia",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "马来西亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321083"
+      ],
+      "geometry_iso_a3": [
+        "MYS"
+      ],
+      "label_anchor": [
+        113.8371,
+        2.5287
+      ],
+      "label_lon_lat": [
+        113.8371,
+        2.5287
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_nam",
+      "stable_id": "country_nam",
+      "data_code": "NAM",
+      "source_iso_a3": "NAM",
+      "display_name_zh": "纳米比亚",
+      "formal_name_zh": "纳米比亚",
+      "native_name": "Namibia",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "纳米比亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321085"
+      ],
+      "geometry_iso_a3": [
+        "NAM"
+      ],
+      "label_anchor": [
+        17.1082,
+        -20.5753
+      ],
+      "label_lon_lat": [
+        17.1082,
+        -20.5753
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_ncl",
+      "stable_id": "country_ncl",
+      "data_code": "NCL",
+      "source_iso_a3": "NCL",
+      "display_name_zh": "新喀里多尼亚",
+      "formal_name_zh": "新喀里多尼亚",
+      "native_name": "New Caledonia",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "新喀里多尼亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320641"
+      ],
+      "geometry_iso_a3": [
+        "NCL"
+      ],
+      "label_anchor": [
+        165.084,
+        -21.0647
+      ],
+      "label_lon_lat": [
+        165.084,
+        -21.0647
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#7b806d",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_ner",
+      "stable_id": "country_ner",
+      "data_code": "NER",
+      "source_iso_a3": "NER",
+      "display_name_zh": "尼日尔",
+      "formal_name_zh": "尼日尔",
+      "native_name": "Niger",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "尼日尔",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321087"
+      ],
+      "geometry_iso_a3": [
+        "NER"
+      ],
+      "label_anchor": [
+        9.5044,
+        17.4462
+      ],
+      "label_lon_lat": [
+        9.5044,
+        17.4462
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_nor",
+      "stable_id": "country_nor",
+      "data_code": "NOR",
+      "source_iso_a3": "-99",
+      "display_name_zh": "挪威",
+      "formal_name_zh": "挪威",
+      "native_name": "Norway",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "挪威",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321109"
+      ],
+      "geometry_iso_a3": [
+        "NOR"
+      ],
+      "label_anchor": [
+        9.68,
+        61.3571
+      ],
+      "label_lon_lat": [
+        9.68,
+        61.3571
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_npl",
+      "stable_id": "country_npl",
+      "data_code": "NPL",
+      "source_iso_a3": "NPL",
+      "display_name_zh": "尼泊尔",
+      "formal_name_zh": "尼泊尔",
+      "native_name": "Nepal",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "尼泊尔",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321121"
+      ],
+      "geometry_iso_a3": [
+        "NPL"
+      ],
+      "label_anchor": [
+        83.6399,
+        28.2979
+      ],
+      "label_lon_lat": [
+        83.6399,
+        28.2979
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_pol",
+      "stable_id": "country_pol",
+      "data_code": "POL",
+      "source_iso_a3": "POL",
+      "display_name_zh": "波兰",
+      "formal_name_zh": "波兰",
+      "native_name": "Poland",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "波兰",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321179"
+      ],
+      "geometry_iso_a3": [
+        "POL"
+      ],
+      "label_anchor": [
+        19.4905,
+        51.9903
+      ],
+      "label_lon_lat": [
+        19.4905,
+        51.9903
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_prk",
+      "stable_id": "country_prk",
+      "data_code": "PRK",
+      "source_iso_a3": "PRK",
+      "display_name_zh": "朝鲜民主主义人民共和国",
+      "formal_name_zh": "朝鲜民主主义人民共和国",
+      "native_name": "North Korea",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "朝鲜民主主义人民共和国",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321181"
+      ],
+      "geometry_iso_a3": [
+        "PRK"
+      ],
+      "label_anchor": [
+        126.4445,
+        39.8853
+      ],
+      "label_lon_lat": [
+        126.4445,
+        39.8853
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_rou",
+      "stable_id": "country_rou",
+      "data_code": "ROU",
+      "source_iso_a3": "ROU",
+      "display_name_zh": "罗马尼亚",
+      "formal_name_zh": "罗马尼亚",
+      "native_name": "Romania",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "罗马尼亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321199"
+      ],
+      "geometry_iso_a3": [
+        "ROU"
+      ],
+      "label_anchor": [
+        24.9726,
+        45.7332
+      ],
+      "label_lon_lat": [
+        24.9726,
+        45.7332
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_rwa",
+      "stable_id": "country_rwa",
+      "data_code": "RWA",
+      "source_iso_a3": "RWA",
+      "display_name_zh": "卢旺达",
+      "formal_name_zh": "卢旺达",
+      "native_name": "Rwanda",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "卢旺达",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321219"
+      ],
+      "geometry_iso_a3": [
+        "RWA"
+      ],
+      "label_anchor": [
+        30.1039,
+        -1.8972
+      ],
+      "label_lon_lat": [
+        30.1039,
+        -1.8972
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_sdn",
+      "stable_id": "country_sdn",
+      "data_code": "SDN",
+      "source_iso_a3": "SDN",
+      "display_name_zh": "苏丹",
+      "formal_name_zh": "苏丹",
+      "native_name": "Sudan",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "苏丹",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321229"
+      ],
+      "geometry_iso_a3": [
+        "SDN"
+      ],
+      "label_anchor": [
+        29.2607,
+        16.3307
+      ],
+      "label_lon_lat": [
+        29.2607,
+        16.3307
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_sds",
+      "stable_id": "country_sds",
+      "data_code": "SDS",
+      "source_iso_a3": "SSD",
+      "display_name_zh": "南苏丹",
+      "formal_name_zh": "南苏丹",
+      "native_name": "South Sudan",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "南苏丹",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321235"
+      ],
+      "geometry_iso_a3": [
+        "SDS"
+      ],
+      "label_anchor": [
+        30.3902,
+        7.2305
+      ],
+      "label_lon_lat": [
+        30.3902,
+        7.2305
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_sen",
+      "stable_id": "country_sen",
+      "data_code": "SEN",
+      "source_iso_a3": "SEN",
+      "display_name_zh": "塞内加尔",
+      "formal_name_zh": "塞内加尔",
+      "native_name": "Senegal",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "塞内加尔",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321243"
+      ],
+      "geometry_iso_a3": [
+        "SEN"
+      ],
+      "label_anchor": [
+        -14.7786,
+        15.1381
+      ],
+      "label_lon_lat": [
+        -14.7786,
+        15.1381
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_slb",
+      "stable_id": "country_slb",
+      "data_code": "SLB",
+      "source_iso_a3": "SLB",
+      "display_name_zh": "所罗门群岛",
+      "formal_name_zh": "所罗门群岛",
+      "native_name": "Solomon Islands",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "所罗门群岛",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321249"
+      ],
+      "geometry_iso_a3": [
+        "SLB"
+      ],
+      "label_anchor": [
+        159.1705,
+        -8.0295
+      ],
+      "label_lon_lat": [
+        159.1705,
+        -8.0295
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#7b806d",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_swe",
+      "stable_id": "country_swe",
+      "data_code": "SWE",
+      "source_iso_a3": "SWE",
+      "display_name_zh": "瑞典",
+      "formal_name_zh": "瑞典",
+      "native_name": "Sweden",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "瑞典",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321287"
+      ],
+      "geometry_iso_a3": [
+        "SWE"
+      ],
+      "label_anchor": [
+        19.0171,
+        65.8592
+      ],
+      "label_lon_lat": [
+        19.0171,
+        65.8592
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_syr",
+      "stable_id": "country_syr",
+      "data_code": "SYR",
+      "source_iso_a3": "SYR",
+      "display_name_zh": "叙利亚",
+      "formal_name_zh": "叙利亚",
+      "native_name": "Syria",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "叙利亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321295"
+      ],
+      "geometry_iso_a3": [
+        "SYR"
+      ],
+      "label_anchor": [
+        38.2778,
+        35.0066
+      ],
+      "label_lon_lat": [
+        38.2778,
+        35.0066
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_tcd",
+      "stable_id": "country_tcd",
+      "data_code": "TCD",
+      "source_iso_a3": "TCD",
+      "display_name_zh": "乍得",
+      "formal_name_zh": "乍得",
+      "native_name": "Chad",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "乍得",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321301"
+      ],
+      "geometry_iso_a3": [
+        "TCD"
+      ],
+      "label_anchor": [
+        18.645,
+        15.143
+      ],
+      "label_lon_lat": [
+        18.645,
+        15.143
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_tha",
+      "stable_id": "country_tha",
+      "data_code": "THA",
+      "source_iso_a3": "THA",
+      "display_name_zh": "泰国",
+      "formal_name_zh": "泰国",
+      "native_name": "Thailand",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "泰国",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321305"
+      ],
+      "geometry_iso_a3": [
+        "THA"
+      ],
+      "label_anchor": [
+        101.0732,
+        15.4597
+      ],
+      "label_lon_lat": [
+        101.0732,
+        15.4597
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_tun",
+      "stable_id": "country_tun",
+      "data_code": "TUN",
+      "source_iso_a3": "TUN",
+      "display_name_zh": "突尼斯",
+      "formal_name_zh": "突尼斯",
+      "native_name": "Tunisia",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "突尼斯",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321327"
+      ],
+      "geometry_iso_a3": [
+        "TUN"
+      ],
+      "label_anchor": [
+        9.0079,
+        33.6873
+      ],
+      "label_lon_lat": [
+        9.0079,
+        33.6873
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_twn",
+      "stable_id": "country_twn",
+      "data_code": "TWN",
+      "source_iso_a3": "TWN",
+      "display_name_zh": "中华民国",
+      "formal_name_zh": "中华民国",
+      "native_name": "Taiwan",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "中华民国",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321335"
+      ],
+      "geometry_iso_a3": [
+        "TWN"
+      ],
+      "label_anchor": [
+        120.8682,
+        23.6524
+      ],
+      "label_lon_lat": [
+        120.8682,
+        23.6524
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_tza",
+      "stable_id": "country_tza",
+      "data_code": "TZA",
+      "source_iso_a3": "TZA",
+      "display_name_zh": "坦桑尼亚",
+      "formal_name_zh": "坦桑尼亚",
+      "native_name": "Tanzania",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "坦桑尼亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321337"
+      ],
+      "geometry_iso_a3": [
+        "TZA"
+      ],
+      "label_anchor": [
+        34.9592,
+        -6.0519
+      ],
+      "label_lon_lat": [
+        34.9592,
+        -6.0519
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_uga",
+      "stable_id": "country_uga",
+      "data_code": "UGA",
+      "source_iso_a3": "UGA",
+      "display_name_zh": "乌干达",
+      "formal_name_zh": "乌干达",
+      "native_name": "Uganda",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "乌干达",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321343"
+      ],
+      "geometry_iso_a3": [
+        "UGA"
+      ],
+      "label_anchor": [
+        32.9486,
+        1.9726
+      ],
+      "label_lon_lat": [
+        32.9486,
+        1.9726
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_ukr",
+      "stable_id": "country_ukr",
+      "data_code": "UKR",
+      "source_iso_a3": "UKR",
+      "display_name_zh": "乌克兰",
+      "formal_name_zh": "乌克兰",
+      "native_name": "Ukraine",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "乌克兰",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321345"
+      ],
+      "geometry_iso_a3": [
+        "UKR"
+      ],
+      "label_anchor": [
+        32.1409,
+        49.7247
+      ],
+      "label_lon_lat": [
+        32.1409,
+        49.7247
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_uzb",
+      "stable_id": "country_uzb",
+      "data_code": "UZB",
+      "source_iso_a3": "UZB",
+      "display_name_zh": "乌兹别克斯坦",
+      "formal_name_zh": "乌兹别克斯坦",
+      "native_name": "Uzbekistan",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "乌兹别克斯坦",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321405"
+      ],
+      "geometry_iso_a3": [
+        "UZB"
+      ],
+      "label_anchor": [
+        64.0054,
+        41.6936
+      ],
+      "label_lon_lat": [
+        64.0054,
+        41.6936
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_ven",
+      "stable_id": "country_ven",
+      "data_code": "VEN",
+      "source_iso_a3": "VEN",
+      "display_name_zh": "委内瑞拉",
+      "formal_name_zh": "委内瑞拉",
+      "native_name": "Venezuela",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "委内瑞拉",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321411"
+      ],
+      "geometry_iso_a3": [
+        "VEN"
+      ],
+      "label_anchor": [
+        -64.5994,
+        7.1825
+      ],
+      "label_lon_lat": [
+        -64.5994,
+        7.1825
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6f806e",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_yem",
+      "stable_id": "country_yem",
+      "data_code": "YEM",
+      "source_iso_a3": "YEM",
+      "display_name_zh": "也门",
+      "formal_name_zh": "也门",
+      "native_name": "Yemen",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "也门",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321425"
+      ],
+      "geometry_iso_a3": [
+        "YEM"
+      ],
+      "label_anchor": [
+        45.8744,
+        15.3282
+      ],
+      "label_lon_lat": [
+        45.8744,
+        15.3282
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_zmb",
+      "stable_id": "country_zmb",
+      "data_code": "ZMB",
+      "source_iso_a3": "ZMB",
+      "display_name_zh": "赞比亚",
+      "formal_name_zh": "赞比亚",
+      "native_name": "Zambia",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "赞比亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321439"
+      ],
+      "geometry_iso_a3": [
+        "ZMB"
+      ],
+      "label_anchor": [
+        26.3953,
+        -14.6608
+      ],
+      "label_lon_lat": [
+        26.3953,
+        -14.6608
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_zwe",
+      "stable_id": "country_zwe",
+      "data_code": "ZWE",
+      "source_iso_a3": "ZWE",
+      "display_name_zh": "津巴布韦",
+      "formal_name_zh": "津巴布韦",
+      "native_name": "Zimbabwe",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "津巴布韦",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321441"
+      ],
+      "geometry_iso_a3": [
+        "ZWE"
+      ],
+      "label_anchor": [
+        29.9254,
+        -18.9116
+      ],
+      "label_lon_lat": [
+        29.9254,
+        -18.9116
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "ottoman_empire",
+      "stable_id": "ottoman_empire",
+      "data_code": "TUR",
+      "source_iso_a3": "TUR",
+      "display_name_zh": "奥斯曼帝国",
+      "formal_name_zh": "奥斯曼帝国",
+      "native_name": "Devlet-i ʿAlīye-i ʿOsmānīye",
+      "native_name_source": "v2_1_theme_override",
+      "government_name": "帝国",
+      "name": "奥斯曼帝国",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321331"
+      ],
+      "geometry_iso_a3": [
+        "TUR"
+      ],
+      "label_anchor": [
+        34.5083,
+        39.3454
+      ],
+      "label_lon_lat": [
+        34.5083,
+        39.3454
+      ],
+      "label_priority": 88,
+      "visible_zoom_min": 0.82,
+      "min_zoom": 0.82,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": false
+    },
+    {
+      "id": "austro_hungarian_empire",
+      "stable_id": "austro_hungarian_empire",
+      "data_code": "AUT",
+      "source_iso_a3": "AUT",
+      "display_name_zh": "奥匈帝国",
+      "formal_name_zh": "奥匈帝国",
+      "native_name": "Österreich-Ungarn",
+      "native_name_source": "v2_1_theme_override",
+      "government_name": "二元君主国",
+      "name": "奥匈帝国",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320379"
+      ],
+      "geometry_iso_a3": [
+        "AUT"
+      ],
+      "label_anchor": [
+        14.1305,
+        47.5189
+      ],
+      "label_lon_lat": [
+        14.1305,
+        47.5189
+      ],
+      "label_priority": 86,
+      "visible_zoom_min": 0.9,
+      "min_zoom": 0.9,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": false
+    },
+    {
+      "id": "japanese_empire",
+      "stable_id": "japanese_empire",
+      "data_code": "JPN",
+      "source_iso_a3": "JPN",
+      "display_name_zh": "日本帝国",
+      "formal_name_zh": "大日本帝国",
+      "native_name": "大日本帝國",
+      "native_name_source": "v2_1_theme_override",
+      "government_name": "帝国",
+      "name": "日本帝国",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320937"
+      ],
+      "geometry_iso_a3": [
+        "JPN"
+      ],
+      "label_anchor": [
+        138.4422,
+        36.1425
+      ],
+      "label_lon_lat": [
+        138.4422,
+        36.1425
+      ],
+      "label_priority": 84,
+      "visible_zoom_min": 0.9,
+      "min_zoom": 0.9,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": false
+    },
+    {
+      "id": "country_are",
+      "stable_id": "country_are",
+      "data_code": "ARE",
+      "source_iso_a3": "ARE",
+      "display_name_zh": "阿拉伯联合酋长国",
+      "formal_name_zh": "阿拉伯联合酋长国",
+      "native_name": "United Arab Emirates",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "阿拉伯联合酋长国",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320329"
+      ],
+      "geometry_iso_a3": [
+        "ARE"
+      ],
+      "label_anchor": [
+        54.5473,
+        23.4663
+      ],
+      "label_lon_lat": [
+        54.5473,
+        23.4663
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_ata",
+      "stable_id": "country_ata",
+      "data_code": "ATA",
+      "source_iso_a3": "ATA",
+      "display_name_zh": "南极洲",
+      "formal_name_zh": "南极洲",
+      "native_name": "Antarctica",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "南极洲",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320335"
+      ],
+      "geometry_iso_a3": [
+        "ATA"
+      ],
+      "label_anchor": [
+        35.8855,
+        -79.8432
+      ],
+      "label_lon_lat": [
+        35.8855,
+        -79.8432
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#7b8178",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_bgr",
+      "stable_id": "country_bgr",
+      "data_code": "BGR",
+      "source_iso_a3": "BGR",
+      "display_name_zh": "保加利亚",
+      "formal_name_zh": "保加利亚",
+      "native_name": "Bulgaria",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "保加利亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320409"
+      ],
+      "geometry_iso_a3": [
+        "BGR"
+      ],
+      "label_anchor": [
+        25.1571,
+        42.5088
+      ],
+      "label_lon_lat": [
+        25.1571,
+        42.5088
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_bhs",
+      "stable_id": "country_bhs",
+      "data_code": "BHS",
+      "source_iso_a3": "BHS",
+      "display_name_zh": "巴哈马",
+      "formal_name_zh": "巴哈马",
+      "native_name": "The Bahamas",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "巴哈马",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320415"
+      ],
+      "geometry_iso_a3": [
+        "BHS"
+      ],
+      "label_anchor": [
+        -77.1467,
+        26.4018
+      ],
+      "label_lon_lat": [
+        -77.1467,
+        26.4018
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7c71",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_blr",
+      "stable_id": "country_blr",
+      "data_code": "BLR",
+      "source_iso_a3": "BLR",
+      "display_name_zh": "白俄罗斯",
+      "formal_name_zh": "白俄罗斯",
+      "native_name": "Belarus",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "白俄罗斯",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320427"
+      ],
+      "geometry_iso_a3": [
+        "BLR"
+      ],
+      "label_anchor": [
+        28.4177,
+        53.8219
+      ],
+      "label_lon_lat": [
+        28.4177,
+        53.8219
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_bwa",
+      "stable_id": "country_bwa",
+      "data_code": "BWA",
+      "source_iso_a3": "BWA",
+      "display_name_zh": "博茨瓦纳",
+      "formal_name_zh": "博茨瓦纳",
+      "native_name": "Botswana",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "博茨瓦纳",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320461"
+      ],
+      "geometry_iso_a3": [
+        "BWA"
+      ],
+      "label_anchor": [
+        24.1792,
+        -22.1026
+      ],
+      "label_lon_lat": [
+        24.1792,
+        -22.1026
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_caf",
+      "stable_id": "country_caf",
+      "data_code": "CAF",
+      "source_iso_a3": "CAF",
+      "display_name_zh": "中非共和国",
+      "formal_name_zh": "中非共和国",
+      "native_name": "Central African Republic",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "中非共和国",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320463"
+      ],
+      "geometry_iso_a3": [
+        "CAF"
+      ],
+      "label_anchor": [
+        20.9069,
+        6.9897
+      ],
+      "label_lon_lat": [
+        20.9069,
+        6.9897
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_che",
+      "stable_id": "country_che",
+      "data_code": "CHE",
+      "source_iso_a3": "CHE",
+      "display_name_zh": "瑞士",
+      "formal_name_zh": "瑞士",
+      "native_name": "Switzerland",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "瑞士",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320491"
+      ],
+      "geometry_iso_a3": [
+        "CHE"
+      ],
+      "label_anchor": [
+        7.464,
+        46.7191
+      ],
+      "label_lon_lat": [
+        7.464,
+        46.7191
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_cog",
+      "stable_id": "country_cog",
+      "data_code": "COG",
+      "source_iso_a3": "COG",
+      "display_name_zh": "刚果共和国",
+      "formal_name_zh": "刚果共和国",
+      "native_name": "Republic of the Congo",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "刚果共和国",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320515"
+      ],
+      "geometry_iso_a3": [
+        "COG"
+      ],
+      "label_anchor": [
+        15.9005,
+        0.1423
+      ],
+      "label_lon_lat": [
+        15.9005,
+        0.1423
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_dnk",
+      "stable_id": "country_dnk",
+      "data_code": "DNK",
+      "source_iso_a3": "DNK",
+      "display_name_zh": "丹麦",
+      "formal_name_zh": "丹麦",
+      "native_name": "Denmark",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "丹麦",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320547"
+      ],
+      "geometry_iso_a3": [
+        "DNK"
+      ],
+      "label_anchor": [
+        9.0182,
+        55.967
+      ],
+      "label_lon_lat": [
+        9.0182,
+        55.967
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_eri",
+      "stable_id": "country_eri",
+      "data_code": "ERI",
+      "source_iso_a3": "ERI",
+      "display_name_zh": "厄立特里亚",
+      "formal_name_zh": "厄立特里亚",
+      "native_name": "Eritrea",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "厄立特里亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320581"
+      ],
+      "geometry_iso_a3": [
+        "ERI"
+      ],
+      "label_anchor": [
+        38.2856,
+        15.7874
+      ],
+      "label_lon_lat": [
+        38.2856,
+        15.7874
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_gab",
+      "stable_id": "country_gab",
+      "data_code": "GAB",
+      "source_iso_a3": "GAB",
+      "display_name_zh": "加蓬",
+      "formal_name_zh": "加蓬",
+      "native_name": "Gabon",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "加蓬",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320693"
+      ],
+      "geometry_iso_a3": [
+        "GAB"
+      ],
+      "label_anchor": [
+        11.8359,
+        -0.4377
+      ],
+      "label_lon_lat": [
+        11.8359,
+        -0.4377
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_gnq",
+      "stable_id": "country_gnq",
+      "data_code": "GNQ",
+      "source_iso_a3": "GNQ",
+      "display_name_zh": "赤道几内亚",
+      "formal_name_zh": "赤道几内亚",
+      "native_name": "Equatorial Guinea",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "赤道几内亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320801"
+      ],
+      "geometry_iso_a3": [
+        "GNQ"
+      ],
+      "label_anchor": [
+        8.9902,
+        2.333
+      ],
+      "label_lon_lat": [
+        8.9902,
+        2.333
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_guy",
+      "stable_id": "country_guy",
+      "data_code": "GUY",
+      "source_iso_a3": "GUY",
+      "display_name_zh": "圭亚那",
+      "formal_name_zh": "圭亚那",
+      "native_name": "Guyana",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "圭亚那",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320817"
+      ],
+      "geometry_iso_a3": [
+        "GUY"
+      ],
+      "label_anchor": [
+        -58.9426,
+        5.1243
+      ],
+      "label_lon_lat": [
+        -58.9426,
+        5.1243
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6f806e",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_isr",
+      "stable_id": "country_isr",
+      "data_code": "ISR",
+      "source_iso_a3": "ISR",
+      "display_name_zh": "以色列",
+      "formal_name_zh": "以色列",
+      "native_name": "Israel",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "以色列",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320895"
+      ],
+      "geometry_iso_a3": [
+        "ISR"
+      ],
+      "label_anchor": [
+        34.8479,
+        30.9111
+      ],
+      "label_lon_lat": [
+        34.8479,
+        30.9111
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_jam",
+      "stable_id": "country_jam",
+      "data_code": "JAM",
+      "source_iso_a3": "JAM",
+      "display_name_zh": "牙买加",
+      "formal_name_zh": "牙买加",
+      "native_name": "Jamaica",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "牙买加",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320931"
+      ],
+      "geometry_iso_a3": [
+        "JAM"
+      ],
+      "label_anchor": [
+        -77.3188,
+        18.1371
+      ],
+      "label_lon_lat": [
+        -77.3188,
+        18.1371
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7c71",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_jor",
+      "stable_id": "country_jor",
+      "data_code": "JOR",
+      "source_iso_a3": "JOR",
+      "display_name_zh": "约旦",
+      "formal_name_zh": "约旦",
+      "native_name": "Jordan",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "约旦",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320935"
+      ],
+      "geometry_iso_a3": [
+        "JOR"
+      ],
+      "label_anchor": [
+        36.376,
+        30.805
+      ],
+      "label_lon_lat": [
+        36.376,
+        30.805
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_kgz",
+      "stable_id": "country_kgz",
+      "data_code": "KGZ",
+      "source_iso_a3": "KGZ",
+      "display_name_zh": "吉尔吉斯斯坦",
+      "formal_name_zh": "吉尔吉斯斯坦",
+      "native_name": "Kyrgyzstan",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "吉尔吉斯斯坦",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320977"
+      ],
+      "geometry_iso_a3": [
+        "KGZ"
+      ],
+      "label_anchor": [
+        74.5326,
+        41.6685
+      ],
+      "label_lon_lat": [
+        74.5326,
+        41.6685
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_lao",
+      "stable_id": "country_lao",
+      "data_code": "LAO",
+      "source_iso_a3": "LAO",
+      "display_name_zh": "老挝",
+      "formal_name_zh": "老挝",
+      "native_name": "Laos",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "老挝",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321011"
+      ],
+      "geometry_iso_a3": [
+        "LAO"
+      ],
+      "label_anchor": [
+        102.5339,
+        19.4318
+      ],
+      "label_lon_lat": [
+        102.5339,
+        19.4318
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_lbr",
+      "stable_id": "country_lbr",
+      "data_code": "LBR",
+      "source_iso_a3": "LBR",
+      "display_name_zh": "利比里亚",
+      "formal_name_zh": "利比里亚",
+      "native_name": "Liberia",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "利比里亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321015"
+      ],
+      "geometry_iso_a3": [
+        "LBR"
+      ],
+      "label_anchor": [
+        -9.4604,
+        6.4472
+      ],
+      "label_lon_lat": [
+        -9.4604,
+        6.4472
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_omn",
+      "stable_id": "country_omn",
+      "data_code": "OMN",
+      "source_iso_a3": "OMN",
+      "display_name_zh": "阿曼",
+      "formal_name_zh": "阿曼",
+      "native_name": "Oman",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "阿曼",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321151"
+      ],
+      "geometry_iso_a3": [
+        "OMN"
+      ],
+      "label_anchor": [
+        57.3366,
+        22.1204
+      ],
+      "label_lon_lat": [
+        57.3366,
+        22.1204
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_pan",
+      "stable_id": "country_pan",
+      "data_code": "PAN",
+      "source_iso_a3": "PAN",
+      "display_name_zh": "巴拿马",
+      "formal_name_zh": "巴拿马",
+      "native_name": "Panama",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "巴拿马",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321161"
+      ],
+      "geometry_iso_a3": [
+        "PAN"
+      ],
+      "label_anchor": [
+        -80.3521,
+        8.722
+      ],
+      "label_lon_lat": [
+        -80.3521,
+        8.722
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7c71",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_pry",
+      "stable_id": "country_pry",
+      "data_code": "PRY",
+      "source_iso_a3": "PRY",
+      "display_name_zh": "巴拉圭",
+      "formal_name_zh": "巴拉圭",
+      "native_name": "Paraguay",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "巴拉圭",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321195"
+      ],
+      "geometry_iso_a3": [
+        "PRY"
+      ],
+      "label_anchor": [
+        -60.1464,
+        -21.6745
+      ],
+      "label_lon_lat": [
+        -60.1464,
+        -21.6745
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6f806e",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_sle",
+      "stable_id": "country_sle",
+      "data_code": "SLE",
+      "source_iso_a3": "SLE",
+      "display_name_zh": "塞拉利昂",
+      "formal_name_zh": "塞拉利昂",
+      "native_name": "Sierra Leone",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "塞拉利昂",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321251"
+      ],
+      "geometry_iso_a3": [
+        "SLE"
+      ],
+      "label_anchor": [
+        -11.7637,
+        8.6174
+      ],
+      "label_lon_lat": [
+        -11.7637,
+        8.6174
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_sur",
+      "stable_id": "country_sur",
+      "data_code": "SUR",
+      "source_iso_a3": "SUR",
+      "display_name_zh": "苏里南",
+      "formal_name_zh": "苏里南",
+      "native_name": "Suriname",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "苏里南",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321281"
+      ],
+      "geometry_iso_a3": [
+        "SUR"
+      ],
+      "label_anchor": [
+        -55.9109,
+        4.144
+      ],
+      "label_lon_lat": [
+        -55.9109,
+        4.144
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6f806e",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_swz",
+      "stable_id": "country_swz",
+      "data_code": "SWZ",
+      "source_iso_a3": "SWZ",
+      "display_name_zh": "斯威士兰",
+      "formal_name_zh": "斯威士兰",
+      "native_name": "Eswatini",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "斯威士兰",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321289"
+      ],
+      "geometry_iso_a3": [
+        "SWZ"
+      ],
+      "label_anchor": [
+        31.4673,
+        -26.5337
+      ],
+      "label_lon_lat": [
+        31.4673,
+        -26.5337
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_tjk",
+      "stable_id": "country_tjk",
+      "data_code": "TJK",
+      "source_iso_a3": "TJK",
+      "display_name_zh": "塔吉克斯坦",
+      "formal_name_zh": "塔吉克斯坦",
+      "native_name": "Tajikistan",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "塔吉克斯坦",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321307"
+      ],
+      "geometry_iso_a3": [
+        "TJK"
+      ],
+      "label_anchor": [
+        72.5873,
+        38.1998
+      ],
+      "label_lon_lat": [
+        72.5873,
+        38.1998
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_tkm",
+      "stable_id": "country_tkm",
+      "data_code": "TKM",
+      "source_iso_a3": "TKM",
+      "display_name_zh": "土库曼斯坦",
+      "formal_name_zh": "土库曼斯坦",
+      "native_name": "Turkmenistan",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "土库曼斯坦",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321309"
+      ],
+      "geometry_iso_a3": [
+        "TKM"
+      ],
+      "label_anchor": [
+        58.6766,
+        39.8552
+      ],
+      "label_lon_lat": [
+        58.6766,
+        39.8552
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_ury",
+      "stable_id": "country_ury",
+      "data_code": "URY",
+      "source_iso_a3": "URY",
+      "display_name_zh": "乌拉圭",
+      "formal_name_zh": "乌拉圭",
+      "native_name": "Uruguay",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "乌拉圭",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321353"
+      ],
+      "geometry_iso_a3": [
+        "URY"
+      ],
+      "label_anchor": [
+        -55.9669,
+        -32.9611
+      ],
+      "label_lon_lat": [
+        -55.9669,
+        -32.9611
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6f806e",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_vut",
+      "stable_id": "country_vut",
+      "data_code": "VUT",
+      "source_iso_a3": "VUT",
+      "display_name_zh": "瓦努阿图",
+      "formal_name_zh": "瓦努阿图",
+      "native_name": "Vanuatu",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "瓦努阿图",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321421"
+      ],
+      "geometry_iso_a3": [
+        "VUT"
+      ],
+      "label_anchor": [
+        166.9088,
+        -15.3715
+      ],
+      "label_lon_lat": [
+        166.9088,
+        -15.3715
+      ],
+      "label_priority": 80,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#7b806d",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_aze",
+      "stable_id": "country_aze",
+      "data_code": "AZE",
+      "source_iso_a3": "AZE",
+      "display_name_zh": "阿塞拜疆",
+      "formal_name_zh": "阿塞拜疆",
+      "native_name": "Azerbaijan",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "阿塞拜疆",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320381"
+      ],
+      "geometry_iso_a3": [
+        "AZE"
+      ],
+      "label_anchor": [
+        47.211,
+        40.4024
+      ],
+      "label_lon_lat": [
+        47.211,
+        40.4024
+      ],
+      "label_priority": 72,
+      "visible_zoom_min": 1.7,
+      "min_zoom": 1.7,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_ben",
+      "stable_id": "country_ben",
+      "data_code": "BEN",
+      "source_iso_a3": "BEN",
+      "display_name_zh": "贝宁",
+      "formal_name_zh": "贝宁",
+      "native_name": "Benin",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "贝宁",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320399"
+      ],
+      "geometry_iso_a3": [
+        "BEN"
+      ],
+      "label_anchor": [
+        2.352,
+        10.3248
+      ],
+      "label_lon_lat": [
+        2.352,
+        10.3248
+      ],
+      "label_priority": 72,
+      "visible_zoom_min": 1.7,
+      "min_zoom": 1.7,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_bih",
+      "stable_id": "country_bih",
+      "data_code": "BIH",
+      "source_iso_a3": "BIH",
+      "display_name_zh": "波斯尼亚和黑塞哥维那",
+      "formal_name_zh": "波斯尼亚和黑塞哥维那",
+      "native_name": "Bosnia and Herzegovina",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "波斯尼亚和黑塞哥维那",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320417"
+      ],
+      "geometry_iso_a3": [
+        "BIH"
+      ],
+      "label_anchor": [
+        18.0684,
+        44.0911
+      ],
+      "label_lon_lat": [
+        18.0684,
+        44.0911
+      ],
+      "label_priority": 72,
+      "visible_zoom_min": 1.7,
+      "min_zoom": 1.7,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_btn",
+      "stable_id": "country_btn",
+      "data_code": "BTN",
+      "source_iso_a3": "BTN",
+      "display_name_zh": "不丹",
+      "formal_name_zh": "不丹",
+      "native_name": "Bhutan",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "不丹",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320453"
+      ],
+      "geometry_iso_a3": [
+        "BTN"
+      ],
+      "label_anchor": [
+        90.0403,
+        27.5367
+      ],
+      "label_lon_lat": [
+        90.0403,
+        27.5367
+      ],
+      "label_priority": 72,
+      "visible_zoom_min": 1.7,
+      "min_zoom": 1.7,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_cri",
+      "stable_id": "country_cri",
+      "data_code": "CRI",
+      "source_iso_a3": "CRI",
+      "display_name_zh": "哥斯达黎加",
+      "formal_name_zh": "哥斯达黎加",
+      "native_name": "Costa Rica",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "哥斯达黎加",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320525"
+      ],
+      "geometry_iso_a3": [
+        "CRI"
+      ],
+      "label_anchor": [
+        -84.0779,
+        10.0651
+      ],
+      "label_lon_lat": [
+        -84.0779,
+        10.0651
+      ],
+      "label_priority": 72,
+      "visible_zoom_min": 1.7,
+      "min_zoom": 1.7,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7c71",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_cyp",
+      "stable_id": "country_cyp",
+      "data_code": "CYP",
+      "source_iso_a3": "CYP",
+      "display_name_zh": "塞浦路斯",
+      "formal_name_zh": "塞浦路斯",
+      "native_name": "Cyprus",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "塞浦路斯",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320533"
+      ],
+      "geometry_iso_a3": [
+        "CYP"
+      ],
+      "label_anchor": [
+        33.0842,
+        34.9133
+      ],
+      "label_lon_lat": [
+        33.0842,
+        34.9133
+      ],
+      "label_priority": 72,
+      "visible_zoom_min": 1.7,
+      "min_zoom": 1.7,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_cze",
+      "stable_id": "country_cze",
+      "data_code": "CZE",
+      "source_iso_a3": "CZE",
+      "display_name_zh": "捷克",
+      "formal_name_zh": "捷克",
+      "native_name": "Czech Republic",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "捷克",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320535"
+      ],
+      "geometry_iso_a3": [
+        "CZE"
+      ],
+      "label_anchor": [
+        15.3776,
+        49.8824
+      ],
+      "label_lon_lat": [
+        15.3776,
+        49.8824
+      ],
+      "label_priority": 72,
+      "visible_zoom_min": 1.7,
+      "min_zoom": 1.7,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_dji",
+      "stable_id": "country_dji",
+      "data_code": "DJI",
+      "source_iso_a3": "DJI",
+      "display_name_zh": "吉布提",
+      "formal_name_zh": "吉布提",
+      "native_name": "Djibouti",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "吉布提",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320541"
+      ],
+      "geometry_iso_a3": [
+        "DJI"
+      ],
+      "label_anchor": [
+        42.4988,
+        11.9763
+      ],
+      "label_lon_lat": [
+        42.4988,
+        11.9763
+      ],
+      "label_priority": 72,
+      "visible_zoom_min": 1.7,
+      "min_zoom": 1.7,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_dom",
+      "stable_id": "country_dom",
+      "data_code": "DOM",
+      "source_iso_a3": "DOM",
+      "display_name_zh": "多米尼加",
+      "formal_name_zh": "多米尼加",
+      "native_name": "Dominican Republic",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "多米尼加",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320563"
+      ],
+      "geometry_iso_a3": [
+        "DOM"
+      ],
+      "label_anchor": [
+        -70.654,
+        19.1041
+      ],
+      "label_lon_lat": [
+        -70.654,
+        19.1041
+      ],
+      "label_priority": 72,
+      "visible_zoom_min": 1.7,
+      "min_zoom": 1.7,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7c71",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_flk",
+      "stable_id": "country_flk",
+      "data_code": "FLK",
+      "source_iso_a3": "FLK",
+      "display_name_zh": "福克兰群岛",
+      "formal_name_zh": "福克兰群岛",
+      "native_name": "Falkland Islands",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "福克兰群岛",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320711"
+      ],
+      "geometry_iso_a3": [
+        "FLK"
+      ],
+      "label_anchor": [
+        -58.7386,
+        -51.6089
+      ],
+      "label_lon_lat": [
+        -58.7386,
+        -51.6089
+      ],
+      "label_priority": 72,
+      "visible_zoom_min": 1.7,
+      "min_zoom": 1.7,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6f806e",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_geo",
+      "stable_id": "country_geo",
+      "data_code": "GEO",
+      "source_iso_a3": "GEO",
+      "display_name_zh": "格鲁吉亚",
+      "formal_name_zh": "格鲁吉亚",
+      "native_name": "Georgia",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "格鲁吉亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320779"
+      ],
+      "geometry_iso_a3": [
+        "GEO"
+      ],
+      "label_anchor": [
+        43.7357,
+        41.8701
+      ],
+      "label_lon_lat": [
+        43.7357,
+        41.8701
+      ],
+      "label_priority": 72,
+      "visible_zoom_min": 1.7,
+      "min_zoom": 1.7,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_hnd",
+      "stable_id": "country_hnd",
+      "data_code": "HND",
+      "source_iso_a3": "HND",
+      "display_name_zh": "洪都拉斯",
+      "formal_name_zh": "洪都拉斯",
+      "native_name": "Honduras",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "洪都拉斯",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320827"
+      ],
+      "geometry_iso_a3": [
+        "HND"
+      ],
+      "label_anchor": [
+        -86.8876,
+        14.7948
+      ],
+      "label_lon_lat": [
+        -86.8876,
+        14.7948
+      ],
+      "label_priority": 72,
+      "visible_zoom_min": 1.7,
+      "min_zoom": 1.7,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7c71",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_hti",
+      "stable_id": "country_hti",
+      "data_code": "HTI",
+      "source_iso_a3": "HTI",
+      "display_name_zh": "海地",
+      "formal_name_zh": "海地",
+      "native_name": "Haiti",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "海地",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320839"
+      ],
+      "geometry_iso_a3": [
+        "HTI"
+      ],
+      "label_anchor": [
+        -72.2241,
+        19.2638
+      ],
+      "label_lon_lat": [
+        -72.2241,
+        19.2638
+      ],
+      "label_priority": 72,
+      "visible_zoom_min": 1.7,
+      "min_zoom": 1.7,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7c71",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_hun",
+      "stable_id": "country_hun",
+      "data_code": "HUN",
+      "source_iso_a3": "HUN",
+      "display_name_zh": "匈牙利",
+      "formal_name_zh": "匈牙利",
+      "native_name": "Hungary",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "匈牙利",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320841"
+      ],
+      "geometry_iso_a3": [
+        "HUN"
+      ],
+      "label_anchor": [
+        19.4479,
+        47.0868
+      ],
+      "label_lon_lat": [
+        19.4479,
+        47.0868
+      ],
+      "label_priority": 72,
+      "visible_zoom_min": 1.7,
+      "min_zoom": 1.7,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_lbn",
+      "stable_id": "country_lbn",
+      "data_code": "LBN",
+      "source_iso_a3": "LBN",
+      "display_name_zh": "黎巴嫩",
+      "formal_name_zh": "黎巴嫩",
+      "native_name": "Lebanon",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "黎巴嫩",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321013"
+      ],
+      "geometry_iso_a3": [
+        "LBN"
+      ],
+      "label_anchor": [
+        35.9929,
+        34.1334
+      ],
+      "label_lon_lat": [
+        35.9929,
+        34.1334
+      ],
+      "label_priority": 72,
+      "visible_zoom_min": 1.7,
+      "min_zoom": 1.7,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_ltu",
+      "stable_id": "country_ltu",
+      "data_code": "LTU",
+      "source_iso_a3": "LTU",
+      "display_name_zh": "立陶宛",
+      "formal_name_zh": "立陶宛",
+      "native_name": "Lithuania",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "立陶宛",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321029"
+      ],
+      "geometry_iso_a3": [
+        "LTU"
+      ],
+      "label_anchor": [
+        24.0899,
+        55.1037
+      ],
+      "label_lon_lat": [
+        24.0899,
+        55.1037
+      ],
+      "label_priority": 72,
+      "visible_zoom_min": 1.7,
+      "min_zoom": 1.7,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_lva",
+      "stable_id": "country_lva",
+      "data_code": "LVA",
+      "source_iso_a3": "LVA",
+      "display_name_zh": "拉脱维亚",
+      "formal_name_zh": "拉脱维亚",
+      "native_name": "Latvia",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "拉脱维亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321033"
+      ],
+      "geometry_iso_a3": [
+        "LVA"
+      ],
+      "label_anchor": [
+        25.4587,
+        57.0669
+      ],
+      "label_lon_lat": [
+        25.4587,
+        57.0669
+      ],
+      "label_priority": 72,
+      "visible_zoom_min": 1.7,
+      "min_zoom": 1.7,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_nic",
+      "stable_id": "country_nic",
+      "data_code": "NIC",
+      "source_iso_a3": "NIC",
+      "display_name_zh": "尼加拉瓜",
+      "formal_name_zh": "尼加拉瓜",
+      "native_name": "Nicaragua",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "尼加拉瓜",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321091"
+      ],
+      "geometry_iso_a3": [
+        "NIC"
+      ],
+      "label_anchor": [
+        -85.0693,
+        12.6707
+      ],
+      "label_lon_lat": [
+        -85.0693,
+        12.6707
+      ],
+      "label_priority": 72,
+      "visible_zoom_min": 1.7,
+      "min_zoom": 1.7,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7c71",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_nld",
+      "stable_id": "country_nld",
+      "data_code": "NLD",
+      "source_iso_a3": "NLD",
+      "display_name_zh": "荷兰",
+      "formal_name_zh": "荷兰",
+      "native_name": "Netherlands",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "荷兰",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321101"
+      ],
+      "geometry_iso_a3": [
+        "NLD"
+      ],
+      "label_anchor": [
+        5.6114,
+        52.4222
+      ],
+      "label_lon_lat": [
+        5.6114,
+        52.4222
+      ],
+      "label_priority": 72,
+      "visible_zoom_min": 1.7,
+      "min_zoom": 1.7,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_pri",
+      "stable_id": "country_pri",
+      "data_code": "PRI",
+      "source_iso_a3": "PRI",
+      "display_name_zh": "波多黎各",
+      "formal_name_zh": "波多黎各",
+      "native_name": "Puerto Rico",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "波多黎各",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321363"
+      ],
+      "geometry_iso_a3": [
+        "PRI"
+      ],
+      "label_anchor": [
+        -66.4811,
+        18.2347
+      ],
+      "label_lon_lat": [
+        -66.4811,
+        18.2347
+      ],
+      "label_priority": 72,
+      "visible_zoom_min": 1.7,
+      "min_zoom": 1.7,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7c71",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_psx",
+      "stable_id": "country_psx",
+      "data_code": "PSX",
+      "source_iso_a3": "PSE",
+      "display_name_zh": "巴勒斯坦",
+      "formal_name_zh": "巴勒斯坦",
+      "native_name": "Palestine",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "巴勒斯坦",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320899"
+      ],
+      "geometry_iso_a3": [
+        "PSX"
+      ],
+      "label_anchor": [
+        35.2913,
+        32.0474
+      ],
+      "label_lon_lat": [
+        35.2913,
+        32.0474
+      ],
+      "label_priority": 72,
+      "visible_zoom_min": 1.7,
+      "min_zoom": 1.7,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_qat",
+      "stable_id": "country_qat",
+      "data_code": "QAT",
+      "source_iso_a3": "QAT",
+      "display_name_zh": "卡塔尔",
+      "formal_name_zh": "卡塔尔",
+      "native_name": "Qatar",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "卡塔尔",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321197"
+      ],
+      "geometry_iso_a3": [
+        "QAT"
+      ],
+      "label_anchor": [
+        51.1435,
+        25.2374
+      ],
+      "label_lon_lat": [
+        51.1435,
+        25.2374
+      ],
+      "label_priority": 72,
+      "visible_zoom_min": 1.7,
+      "min_zoom": 1.7,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_sol",
+      "stable_id": "country_sol",
+      "data_code": "SOL",
+      "source_iso_a3": "-99",
+      "display_name_zh": "索马里兰",
+      "formal_name_zh": "索马里兰",
+      "native_name": "Somaliland",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "索马里兰",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321259"
+      ],
+      "geometry_iso_a3": [
+        "SOL"
+      ],
+      "label_anchor": [
+        46.7316,
+        9.4439
+      ],
+      "label_lon_lat": [
+        46.7316,
+        9.4439
+      ],
+      "label_priority": 72,
+      "visible_zoom_min": 1.7,
+      "min_zoom": 1.7,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_srb",
+      "stable_id": "country_srb",
+      "data_code": "SRB",
+      "source_iso_a3": "SRB",
+      "display_name_zh": "塞尔维亚",
+      "formal_name_zh": "塞尔维亚",
+      "native_name": "Serbia",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "塞尔维亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321267"
+      ],
+      "geometry_iso_a3": [
+        "SRB"
+      ],
+      "label_anchor": [
+        20.788,
+        44.1899
+      ],
+      "label_lon_lat": [
+        20.788,
+        44.1899
+      ],
+      "label_priority": 72,
+      "visible_zoom_min": 1.7,
+      "min_zoom": 1.7,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_tls",
+      "stable_id": "country_tls",
+      "data_code": "TLS",
+      "source_iso_a3": "TLS",
+      "display_name_zh": "东帝汶",
+      "formal_name_zh": "东帝汶",
+      "native_name": "East Timor",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "东帝汶",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321313"
+      ],
+      "geometry_iso_a3": [
+        "TLS"
+      ],
+      "label_anchor": [
+        125.8547,
+        -8.8037
+      ],
+      "label_lon_lat": [
+        125.8547,
+        -8.8037
+      ],
+      "label_priority": 72,
+      "visible_zoom_min": 1.7,
+      "min_zoom": 1.7,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_tto",
+      "stable_id": "country_tto",
+      "data_code": "TTO",
+      "source_iso_a3": "TTO",
+      "display_name_zh": "特立尼达和多巴哥",
+      "formal_name_zh": "特立尼达和多巴哥",
+      "native_name": "Trinidad and Tobago",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "特立尼达和多巴哥",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321321"
+      ],
+      "geometry_iso_a3": [
+        "TTO"
+      ],
+      "label_anchor": [
+        -60.9184,
+        10.9989
+      ],
+      "label_lon_lat": [
+        -60.9184,
+        10.9989
+      ],
+      "label_priority": 72,
+      "visible_zoom_min": 1.7,
+      "min_zoom": 1.7,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7c71",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_alb",
+      "stable_id": "country_alb",
+      "data_code": "ALB",
+      "source_iso_a3": "ALB",
+      "display_name_zh": "阿尔巴尼亚",
+      "formal_name_zh": "阿尔巴尼亚",
+      "native_name": "Albania",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "阿尔巴尼亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320325"
+      ],
+      "geometry_iso_a3": [
+        "ALB"
+      ],
+      "label_anchor": [
+        20.1138,
+        40.6549
+      ],
+      "label_lon_lat": [
+        20.1138,
+        40.6549
+      ],
+      "label_priority": 64,
+      "visible_zoom_min": 2.4,
+      "min_zoom": 2.4,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_arm",
+      "stable_id": "country_arm",
+      "data_code": "ARM",
+      "source_iso_a3": "ARM",
+      "display_name_zh": "亚美尼亚",
+      "formal_name_zh": "亚美尼亚",
+      "native_name": "Armenia",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "亚美尼亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320333"
+      ],
+      "geometry_iso_a3": [
+        "ARM"
+      ],
+      "label_anchor": [
+        44.8006,
+        40.4591
+      ],
+      "label_lon_lat": [
+        44.8006,
+        40.4591
+      ],
+      "label_priority": 64,
+      "visible_zoom_min": 2.4,
+      "min_zoom": 2.4,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_atf",
+      "stable_id": "country_atf",
+      "data_code": "ATF",
+      "source_iso_a3": "ATF",
+      "display_name_zh": "法属南部和南极领地",
+      "formal_name_zh": "法属南部和南极领地",
+      "native_name": "French Southern and Antarctic Lands",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "法属南部和南极领地",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320631"
+      ],
+      "geometry_iso_a3": [
+        "ATF"
+      ],
+      "label_anchor": [
+        69.1221,
+        -49.3037
+      ],
+      "label_lon_lat": [
+        69.1221,
+        -49.3037
+      ],
+      "label_priority": 64,
+      "visible_zoom_min": 2.4,
+      "min_zoom": 2.4,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#737b70",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_bdi",
+      "stable_id": "country_bdi",
+      "data_code": "BDI",
+      "source_iso_a3": "BDI",
+      "display_name_zh": "布隆迪",
+      "formal_name_zh": "布隆迪",
+      "native_name": "Burundi",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "布隆迪",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320387"
+      ],
+      "geometry_iso_a3": [
+        "BDI"
+      ],
+      "label_anchor": [
+        29.9171,
+        -3.3328
+      ],
+      "label_lon_lat": [
+        29.9171,
+        -3.3328
+      ],
+      "label_priority": 64,
+      "visible_zoom_min": 2.4,
+      "min_zoom": 2.4,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_blz",
+      "stable_id": "country_blz",
+      "data_code": "BLZ",
+      "source_iso_a3": "BLZ",
+      "display_name_zh": "伯利兹",
+      "formal_name_zh": "伯利兹",
+      "native_name": "Belize",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "伯利兹",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320431"
+      ],
+      "geometry_iso_a3": [
+        "BLZ"
+      ],
+      "label_anchor": [
+        -88.713,
+        17.2021
+      ],
+      "label_lon_lat": [
+        -88.713,
+        17.2021
+      ],
+      "label_priority": 64,
+      "visible_zoom_min": 2.4,
+      "min_zoom": 2.4,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7c71",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_brn",
+      "stable_id": "country_brn",
+      "data_code": "BRN",
+      "source_iso_a3": "BRN",
+      "display_name_zh": "文莱",
+      "formal_name_zh": "文莱",
+      "native_name": "Brunei",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "文莱",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320451"
+      ],
+      "geometry_iso_a3": [
+        "BRN"
+      ],
+      "label_anchor": [
+        114.5519,
+        4.4483
+      ],
+      "label_lon_lat": [
+        114.5519,
+        4.4483
+      ],
+      "label_priority": 64,
+      "visible_zoom_min": 2.4,
+      "min_zoom": 2.4,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_cyn",
+      "stable_id": "country_cyn",
+      "data_code": "CYN",
+      "source_iso_a3": "-99",
+      "display_name_zh": "北塞浦路斯土耳其共和国",
+      "formal_name_zh": "北塞浦路斯土耳其共和国",
+      "native_name": "Turkish Republic of Northern Cyprus",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "北塞浦路斯土耳其共和国",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320531"
+      ],
+      "geometry_iso_a3": [
+        "CYN"
+      ],
+      "label_anchor": [
+        33.6924,
+        35.2161
+      ],
+      "label_lon_lat": [
+        33.6924,
+        35.2161
+      ],
+      "label_priority": 64,
+      "visible_zoom_min": 2.4,
+      "min_zoom": 2.4,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_est",
+      "stable_id": "country_est",
+      "data_code": "EST",
+      "source_iso_a3": "EST",
+      "display_name_zh": "爱沙尼亚",
+      "formal_name_zh": "爱沙尼亚",
+      "native_name": "Estonia",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "爱沙尼亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320615"
+      ],
+      "geometry_iso_a3": [
+        "EST"
+      ],
+      "label_anchor": [
+        25.8671,
+        58.7249
+      ],
+      "label_lon_lat": [
+        25.8671,
+        58.7249
+      ],
+      "label_priority": 64,
+      "visible_zoom_min": 2.4,
+      "min_zoom": 2.4,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_fji",
+      "stable_id": "country_fji",
+      "data_code": "FJI",
+      "source_iso_a3": "FJI",
+      "display_name_zh": "斐济",
+      "formal_name_zh": "斐济",
+      "native_name": "Fiji",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "斐济",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320625"
+      ],
+      "geometry_iso_a3": [
+        "FJI"
+      ],
+      "label_anchor": [
+        177.9754,
+        -17.8261
+      ],
+      "label_lon_lat": [
+        177.9754,
+        -17.8261
+      ],
+      "label_priority": 64,
+      "visible_zoom_min": 2.4,
+      "min_zoom": 2.4,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#7b806d",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_gmb",
+      "stable_id": "country_gmb",
+      "data_code": "GMB",
+      "source_iso_a3": "GMB",
+      "display_name_zh": "冈比亚",
+      "formal_name_zh": "冈比亚",
+      "native_name": "The Gambia",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "冈比亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320797"
+      ],
+      "geometry_iso_a3": [
+        "GMB"
+      ],
+      "label_anchor": [
+        -14.9983,
+        13.6417
+      ],
+      "label_lon_lat": [
+        -14.9983,
+        13.6417
+      ],
+      "label_priority": 64,
+      "visible_zoom_min": 2.4,
+      "min_zoom": 2.4,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_gnb",
+      "stable_id": "country_gnb",
+      "data_code": "GNB",
+      "source_iso_a3": "GNB",
+      "display_name_zh": "几内亚比绍",
+      "formal_name_zh": "几内亚比绍",
+      "native_name": "Guinea-Bissau",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "几内亚比绍",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320799"
+      ],
+      "geometry_iso_a3": [
+        "GNB"
+      ],
+      "label_anchor": [
+        -14.5241,
+        12.1637
+      ],
+      "label_lon_lat": [
+        -14.5241,
+        12.1637
+      ],
+      "label_priority": 64,
+      "visible_zoom_min": 2.4,
+      "min_zoom": 2.4,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_hrv",
+      "stable_id": "country_hrv",
+      "data_code": "HRV",
+      "source_iso_a3": "HRV",
+      "display_name_zh": "克罗地亚",
+      "formal_name_zh": "克罗地亚",
+      "native_name": "Croatia",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "克罗地亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320833"
+      ],
+      "geometry_iso_a3": [
+        "HRV"
+      ],
+      "label_anchor": [
+        16.3724,
+        45.8058
+      ],
+      "label_lon_lat": [
+        16.3724,
+        45.8058
+      ],
+      "label_priority": 64,
+      "visible_zoom_min": 2.4,
+      "min_zoom": 2.4,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_kos",
+      "stable_id": "country_kos",
+      "data_code": "KOS",
+      "source_iso_a3": "-99",
+      "display_name_zh": "科索沃",
+      "formal_name_zh": "科索沃",
+      "native_name": "Kosovo",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "科索沃",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321007"
+      ],
+      "geometry_iso_a3": [
+        "KOS"
+      ],
+      "label_anchor": [
+        20.8607,
+        42.5936
+      ],
+      "label_lon_lat": [
+        20.8607,
+        42.5936
+      ],
+      "label_priority": 64,
+      "visible_zoom_min": 2.4,
+      "min_zoom": 2.4,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_kwt",
+      "stable_id": "country_kwt",
+      "data_code": "KWT",
+      "source_iso_a3": "KWT",
+      "display_name_zh": "科威特",
+      "formal_name_zh": "科威特",
+      "native_name": "Kuwait",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "科威特",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321009"
+      ],
+      "geometry_iso_a3": [
+        "KWT"
+      ],
+      "label_anchor": [
+        47.314,
+        29.4136
+      ],
+      "label_lon_lat": [
+        47.314,
+        29.4136
+      ],
+      "label_priority": 64,
+      "visible_zoom_min": 2.4,
+      "min_zoom": 2.4,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#747a68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_lso",
+      "stable_id": "country_lso",
+      "data_code": "LSO",
+      "source_iso_a3": "LSO",
+      "display_name_zh": "莱索托",
+      "formal_name_zh": "莱索托",
+      "native_name": "Lesotho",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "莱索托",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321027"
+      ],
+      "geometry_iso_a3": [
+        "LSO"
+      ],
+      "label_anchor": [
+        28.2466,
+        -29.4802
+      ],
+      "label_lon_lat": [
+        28.2466,
+        -29.4802
+      ],
+      "label_priority": 64,
+      "visible_zoom_min": 2.4,
+      "min_zoom": 2.4,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_lux",
+      "stable_id": "country_lux",
+      "data_code": "LUX",
+      "source_iso_a3": "LUX",
+      "display_name_zh": "卢森堡",
+      "formal_name_zh": "卢森堡",
+      "native_name": "Luxembourg",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "卢森堡",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321031"
+      ],
+      "geometry_iso_a3": [
+        "LUX"
+      ],
+      "label_anchor": [
+        6.0776,
+        49.7337
+      ],
+      "label_lon_lat": [
+        6.0776,
+        49.7337
+      ],
+      "label_priority": 64,
+      "visible_zoom_min": 2.4,
+      "min_zoom": 2.4,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_mda",
+      "stable_id": "country_mda",
+      "data_code": "MDA",
+      "source_iso_a3": "MDA",
+      "display_name_zh": "摩尔多瓦",
+      "formal_name_zh": "摩尔多瓦",
+      "native_name": "Moldova",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "摩尔多瓦",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321045"
+      ],
+      "geometry_iso_a3": [
+        "MDA"
+      ],
+      "label_anchor": [
+        28.4879,
+        47.435
+      ],
+      "label_lon_lat": [
+        28.4879,
+        47.435
+      ],
+      "label_priority": 64,
+      "visible_zoom_min": 2.4,
+      "min_zoom": 2.4,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_mkd",
+      "stable_id": "country_mkd",
+      "data_code": "MKD",
+      "source_iso_a3": "MKD",
+      "display_name_zh": "北马其顿",
+      "formal_name_zh": "北马其顿",
+      "native_name": "North Macedonia",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "北马其顿",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321061"
+      ],
+      "geometry_iso_a3": [
+        "MKD"
+      ],
+      "label_anchor": [
+        21.5558,
+        41.5582
+      ],
+      "label_lon_lat": [
+        21.5558,
+        41.5582
+      ],
+      "label_priority": 64,
+      "visible_zoom_min": 2.4,
+      "min_zoom": 2.4,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_mne",
+      "stable_id": "country_mne",
+      "data_code": "MNE",
+      "source_iso_a3": "MNE",
+      "display_name_zh": "黑山",
+      "formal_name_zh": "黑山",
+      "native_name": "Montenegro",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "黑山",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321069"
+      ],
+      "geometry_iso_a3": [
+        "MNE"
+      ],
+      "label_anchor": [
+        19.1437,
+        42.8031
+      ],
+      "label_lon_lat": [
+        19.1437,
+        42.8031
+      ],
+      "label_priority": 64,
+      "visible_zoom_min": 2.4,
+      "min_zoom": 2.4,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_mwi",
+      "stable_id": "country_mwi",
+      "data_code": "MWI",
+      "source_iso_a3": "MWI",
+      "display_name_zh": "马拉维",
+      "formal_name_zh": "马拉维",
+      "native_name": "Malawi",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "马拉维",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321081"
+      ],
+      "geometry_iso_a3": [
+        "MWI"
+      ],
+      "label_anchor": [
+        33.6081,
+        -13.3867
+      ],
+      "label_lon_lat": [
+        33.6081,
+        -13.3867
+      ],
+      "label_priority": 64,
+      "visible_zoom_min": 2.4,
+      "min_zoom": 2.4,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_slv",
+      "stable_id": "country_slv",
+      "data_code": "SLV",
+      "source_iso_a3": "SLV",
+      "display_name_zh": "萨尔瓦多",
+      "formal_name_zh": "萨尔瓦多",
+      "native_name": "El Salvador",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "萨尔瓦多",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321253"
+      ],
+      "geometry_iso_a3": [
+        "SLV"
+      ],
+      "label_anchor": [
+        -88.8901,
+        13.6854
+      ],
+      "label_lon_lat": [
+        -88.8901,
+        13.6854
+      ],
+      "label_priority": 64,
+      "visible_zoom_min": 2.4,
+      "min_zoom": 2.4,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7c71",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_som",
+      "stable_id": "country_som",
+      "data_code": "SOM",
+      "source_iso_a3": "SOM",
+      "display_name_zh": "索马里",
+      "formal_name_zh": "索马里",
+      "native_name": "Somalia",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "索马里",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321261"
+      ],
+      "geometry_iso_a3": [
+        "SOM"
+      ],
+      "label_anchor": [
+        45.1924,
+        3.5689
+      ],
+      "label_lon_lat": [
+        45.1924,
+        3.5689
+      ],
+      "label_priority": 64,
+      "visible_zoom_min": 2.4,
+      "min_zoom": 2.4,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_svk",
+      "stable_id": "country_svk",
+      "data_code": "SVK",
+      "source_iso_a3": "SVK",
+      "display_name_zh": "斯洛伐克",
+      "formal_name_zh": "斯洛伐克",
+      "native_name": "Slovakia",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "斯洛伐克",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321283"
+      ],
+      "geometry_iso_a3": [
+        "SVK"
+      ],
+      "label_anchor": [
+        19.0499,
+        48.734
+      ],
+      "label_lon_lat": [
+        19.0499,
+        48.734
+      ],
+      "label_priority": 64,
+      "visible_zoom_min": 2.4,
+      "min_zoom": 2.4,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_svn",
+      "stable_id": "country_svn",
+      "data_code": "SVN",
+      "source_iso_a3": "SVN",
+      "display_name_zh": "斯洛文尼亚",
+      "formal_name_zh": "斯洛文尼亚",
+      "native_name": "Slovenia",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "斯洛文尼亚",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321285"
+      ],
+      "geometry_iso_a3": [
+        "SVN"
+      ],
+      "label_anchor": [
+        14.9153,
+        46.0608
+      ],
+      "label_lon_lat": [
+        14.9153,
+        46.0608
+      ],
+      "label_priority": 64,
+      "visible_zoom_min": 2.4,
+      "min_zoom": 2.4,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6e7d76",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "country_tgo",
+      "stable_id": "country_tgo",
+      "data_code": "TGO",
+      "source_iso_a3": "TGO",
+      "display_name_zh": "多哥",
+      "formal_name_zh": "多哥",
+      "native_name": "Togo",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "多哥",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321303"
+      ],
+      "geometry_iso_a3": [
+        "TGO"
+      ],
+      "label_anchor": [
+        1.0581,
+        8.8072
+      ],
+      "label_lon_lat": [
+        1.0581,
+        8.8072
+      ],
+      "label_priority": 64,
+      "visible_zoom_min": 2.4,
+      "min_zoom": 2.4,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    },
+    {
+      "id": "argentine_republic",
+      "stable_id": "argentine_republic",
+      "data_code": "ARG",
+      "source_iso_a3": "ARG",
+      "display_name_zh": "阿根廷共和国",
+      "formal_name_zh": "阿根廷共和国",
+      "native_name": "República Argentina",
+      "native_name_source": "v2_1_theme_override",
+      "government_name": "联邦共和国",
+      "name": "阿根廷共和国",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159320331"
+      ],
+      "geometry_iso_a3": [
+        "ARG"
+      ],
+      "label_anchor": [
+        -64.1733,
+        -33.5012
+      ],
+      "label_lon_lat": [
+        -64.1733,
+        -33.5012
+      ],
+      "label_priority": 62,
+      "visible_zoom_min": 1.15,
+      "min_zoom": 1.15,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#6f806e",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": false
+    },
+    {
+      "id": "country_sah",
+      "stable_id": "country_sah",
+      "data_code": "SAH",
+      "source_iso_a3": "ESH",
+      "display_name_zh": "西撒哈拉",
+      "formal_name_zh": "西撒哈拉",
+      "native_name": "Western Sahara",
+      "native_name_source": "natural_earth_name_en_fallback",
+      "government_name": "政体资料待扩充",
+      "name": "西撒哈拉",
+      "object_level": "country",
+      "geometry_feature_ids": [
+        "ne_admin0_1159321223"
+      ],
+      "geometry_iso_a3": [
+        "SAH"
+      ],
+      "label_anchor": [
+        -12.6303,
+        23.9676
+      ],
+      "label_lon_lat": [
+        -12.6303,
+        23.9676
+      ],
+      "label_priority": 56,
+      "visible_zoom_min": 3.2,
+      "min_zoom": 3.2,
+      "max_zoom": 96.0,
+      "neutral_land_color": "#777d68",
+      "diplomacy": "公开外交资料待扩充",
+      "boundary_status": "modern_natural_earth_prototype_geometry",
+      "theme_label_placeholder": true
+    }
   ]
 }

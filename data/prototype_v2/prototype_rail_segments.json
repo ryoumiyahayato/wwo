@@ -3,14 +3,14 @@
   "schema_version": 2,
   "type": "rail",
   "segments": [
-    {"id":"rail_paris_lille","name":"巴黎—里尔铁路","type":"rail","from_city_id":"paris","to_city_id":"lille","main":true,"label_priority":100,"min_zoom":1.55,"max_zoom":12.0},
-    {"id":"rail_lille_calais","type":"rail","from_city_id":"lille","to_city_id":"calais","main":false,"min_zoom":6.4,"max_zoom":12.0},
-    {"id":"rail_paris_rouen","name":"巴黎—鲁昂铁路","type":"rail","from_city_id":"paris","to_city_id":"rouen","main":true,"label_priority":92,"min_zoom":1.6,"max_zoom":12.0},
-    {"id":"rail_rouen_le_havre","type":"rail","from_city_id":"rouen","to_city_id":"le_havre","main":false,"min_zoom":6.4,"max_zoom":12.0},
-    {"id":"rail_paris_lyon","name":"巴黎—里昂铁路","type":"rail","from_city_id":"paris","to_city_id":"lyon","main":true,"label_priority":98,"min_zoom":1.5,"max_zoom":12.0},
-    {"id":"rail_lyon_marseille","name":"里昂—马赛铁路","type":"rail","from_city_id":"lyon","to_city_id":"marseille","main":true,"label_priority":96,"min_zoom":1.55,"max_zoom":12.0},
-    {"id":"rail_paris_nantes","name":"巴黎—南特铁路","type":"rail","from_city_id":"paris","to_city_id":"nantes","main":true,"label_priority":88,"min_zoom":1.75,"max_zoom":12.0},
-    {"id":"rail_nantes_bordeaux","type":"rail","from_city_id":"nantes","to_city_id":"bordeaux","main":false,"min_zoom":6.4,"max_zoom":12.0},
-    {"id":"rail_bordeaux_toulouse","type":"rail","from_city_id":"bordeaux","to_city_id":"toulouse","main":false,"min_zoom":6.4,"max_zoom":12.0}
+    {"id":"rail_paris_lille","name":"巴黎—里尔铁路","type":"rail","from_city_id":"paris","to_city_id":"lille","main":true,"label_priority":100,"min_zoom":1.55,"max_zoom":96.0},
+    {"id":"rail_lille_calais","type":"rail","from_city_id":"lille","to_city_id":"calais","main":false,"min_zoom":6.4,"max_zoom":96.0},
+    {"id":"rail_paris_rouen","name":"巴黎—鲁昂铁路","type":"rail","from_city_id":"paris","to_city_id":"rouen","main":true,"label_priority":92,"min_zoom":1.6,"max_zoom":96.0},
+    {"id":"rail_rouen_le_havre","type":"rail","from_city_id":"rouen","to_city_id":"le_havre","main":false,"min_zoom":6.4,"max_zoom":96.0},
+    {"id":"rail_paris_lyon","name":"巴黎—里昂铁路","type":"rail","from_city_id":"paris","to_city_id":"lyon","main":true,"label_priority":98,"min_zoom":1.5,"max_zoom":96.0},
+    {"id":"rail_lyon_marseille","name":"里昂—马赛铁路","type":"rail","from_city_id":"lyon","to_city_id":"marseille","main":true,"label_priority":96,"min_zoom":1.55,"max_zoom":96.0},
+    {"id":"rail_paris_nantes","name":"巴黎—南特铁路","type":"rail","from_city_id":"paris","to_city_id":"nantes","main":true,"label_priority":88,"min_zoom":1.75,"max_zoom":96.0},
+    {"id":"rail_nantes_bordeaux","type":"rail","from_city_id":"nantes","to_city_id":"bordeaux","main":false,"min_zoom":6.4,"max_zoom":96.0},
+    {"id":"rail_bordeaux_toulouse","type":"rail","from_city_id":"bordeaux","to_city_id":"toulouse","main":false,"min_zoom":6.4,"max_zoom":96.0}
   ]
 }

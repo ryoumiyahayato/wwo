@@ -40,7 +40,11 @@ func _apply_prototype_window_title() -> void:
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		var motion: InputEventMouseMotion = event as InputEventMouseMotion
-		interface.handle_pointer_motion(motion.position)
+		var over_interface: bool = interface.handle_pointer_motion(motion.position)
+		if over_interface:
+			map_canvas.clear_hovered_country()
+		else:
+			map_canvas.set_hovered_country_at(motion.position)
 		if _left_button_down and not _ui_captured_press:
 			if not _dragging_map and motion.position.distance_to(_press_position) >= DRAG_THRESHOLD:
 				_dragging_map = true
@@ -62,6 +66,24 @@ func _gui_input(event: InputEvent) -> void:
 			return
 		if button.button_index != MOUSE_BUTTON_LEFT:
 			return
+		if button.pressed and button.double_click:
+			var focus_target: String = interface.camera_focus_target_at(button.position)
+			if focus_target == "person":
+				_left_button_down = true
+				_ui_captured_press = true
+				_dragging_map = false
+				map_canvas.focus_player_location()
+				interface.show_camera_focus_feedback("已聚焦当前人物所在地 · 里尔")
+				accept_event()
+				return
+			if focus_target == "country":
+				_left_button_down = true
+				_ui_captured_press = true
+				_dragging_map = false
+				map_canvas.focus_current_country()
+				interface.show_camera_focus_feedback("已聚焦当前国家 · 法国")
+				accept_event()
+				return
 		_left_button_down = button.pressed
 		if button.pressed:
 			_press_position = button.position
@@ -88,6 +110,10 @@ func _input(event: InputEvent) -> void:
 		elif key.keycode == KEY_SPACE:
 			interface.paused = not interface.paused
 			interface.queue_redraw()
+			get_viewport().set_input_as_handled()
+		elif key.keycode == KEY_HOME:
+			map_canvas.focus_world()
+			interface.show_camera_focus_feedback("已返回世界视角")
 			get_viewport().set_input_as_handled()
 
 
@@ -119,6 +145,8 @@ func debug_state() -> Dictionary:
 	state["map_zoom"] = map_canvas.zoom
 	state["map_pan"] = map_canvas.pan
 	state["selected_id"] = map_canvas.selected_id
+	state["camera_focus_id"] = map_canvas.camera_focus_id
+	state["maximum_zoom"] = map_canvas.get_maximum_zoom()
 	return state
 
 
@@ -166,14 +194,21 @@ func _apply_review_state(view_id: String) -> void:
 	interface.apply_review_state(view_id)
 	map_canvas.set_war_example_active(false)
 	match view_id:
+		"world_labels":
+			map_canvas.reset_view()
+			map_canvas.hovered_country_id = "country_lux"
 		"europe_mid", "sequence_02_europe":
 			map_canvas.focus_europe()
-		"france_close", "label_priority", "sequence_03_france", "city_card", "sequence_04_city":
+		"france_close", "macro_admin_compare", "label_priority", "sequence_03_france", "city_card", "sequence_04_city":
 			map_canvas.focus_france()
 			if view_id in ["city_card", "sequence_04_city"]:
 				select_review_object("city", "lille")
 			elif view_id == "label_priority":
 				select_review_object("region", "northern_industrial_belt")
+		"nord_close", "camera_focus":
+			map_canvas.focus_player_location()
+			if view_id == "nord_close":
+				select_review_object("city", "lille")
 		"market_map":
 			map_canvas.set_mode("market")
 			interface.set_mode_display("market")
@@ -197,7 +232,7 @@ func _apply_review_state(view_id: String) -> void:
 			map_canvas.focus_europe()
 		"institution_official", "institution_worker", "official_permissions", "worker_permissions":
 			map_canvas.focus_europe()
-		"person_card", "person_detail", "worker_character", "official_character", "owned_organizations", "discover_organizations", "world_activity", "time_panel", "activity_toast", "mode_menu", "sequence_05_person", "sequence_06_character", "sequence_07_official", "sequence_08_activity":
+		"person_card", "person_detail", "person_more_menu", "worker_character", "official_character", "status_symbols", "plan_detail", "owned_organizations", "discover_organizations", "organization_name_tooltip", "official_discover_organizations", "position_salary_tooltip", "official_economy", "world_activity", "time_panel", "system_menu", "activity_toast", "mode_menu", "sequence_05_person", "sequence_06_character", "sequence_07_official", "sequence_08_activity":
 			map_canvas.focus_europe()
 		_:
 			map_canvas.reset_view()
@@ -215,4 +250,6 @@ func _capture_review_image() -> void:
 	else:
 		print("PROTOTYPE_CAPTURE_SAVED %s" % _capture_path)
 	if _exit_after_capture:
+		await get_tree().process_frame
+		await get_tree().process_frame
 		get_tree().quit(0 if error == OK else 1)

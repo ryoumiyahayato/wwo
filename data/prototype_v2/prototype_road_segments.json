@@ -3,8 +3,8 @@
   "schema_version": 2,
   "type": "road",
   "segments": [
-    {"id":"road_rouen_paris","type":"road","from_city_id":"rouen","to_city_id":"paris","min_zoom":6.6,"max_zoom":12.0},
-    {"id":"road_lille_rouen","type":"road","from_city_id":"lille","to_city_id":"rouen","min_zoom":6.6,"max_zoom":12.0},
-    {"id":"road_lyon_strasbourg","type":"road","from_city_id":"lyon","to_city_id":"strasbourg","min_zoom":6.6,"max_zoom":12.0}
+    {"id":"road_rouen_paris","type":"road","from_city_id":"rouen","to_city_id":"paris","min_zoom":6.6,"max_zoom":96.0},
+    {"id":"road_lille_rouen","type":"road","from_city_id":"lille","to_city_id":"rouen","min_zoom":6.6,"max_zoom":96.0},
+    {"id":"road_lyon_strasbourg","type":"road","from_city_id":"lyon","to_city_id":"strasbourg","min_zoom":6.6,"max_zoom":96.0}
   ]
 }

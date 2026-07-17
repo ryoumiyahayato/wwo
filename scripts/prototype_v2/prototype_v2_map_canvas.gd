@@ -1,6 +1,6 @@
 class_name PrototypeV2MapCanvas
 extends Control
-## Geographic V2.1 prototype map. Every object is projected from WGS84 lon/lat.
+## Geographic V2.1.2 prototype map. Every object is projected from WGS84 lon/lat.
 
 const WORLD_SIZE := Vector2(1080.0, 540.0)
 const ROBINSON_X := [1.0, 0.9986, 0.9954, 0.99, 0.9822, 0.973, 0.96, 0.9427, 0.9216, 0.8962, 0.8679, 0.835, 0.7986, 0.7597, 0.7186, 0.6732, 0.6213, 0.5722, 0.5322]
@@ -14,7 +14,9 @@ const OCEAN_GRID := Color(0.46, 0.68, 0.72, 0.12)
 const LAND_BASE := Color("#66776c")
 const COAST := Color("#dfd4b8")
 const COUNTRY_BORDER := Color(0.15, 0.22, 0.23, 0.82)
-const REGION_BORDER := Color(0.91, 0.84, 0.65, 0.74)
+const REGION_BORDER := Color(0.94, 0.75, 0.35, 0.88)
+const ADMINISTRATIVE_BORDER := Color(0.72, 0.82, 0.83, 0.68)
+const ADMINISTRATIVE_LABEL := Color(0.78, 0.84, 0.82, 0.82)
 const LABEL := Color("#f2ead7")
 const LABEL_MUTED := Color("#b9c2b5")
 const SELECT := Color("#f2c865")
@@ -36,12 +38,15 @@ var selected_type: String = ""
 var zoom: float = 0.94
 var pan: Vector2 = Vector2(132.0, 93.0)
 var war_example_active: bool = false
+var hovered_country_id: String = ""
+var camera_focus_id: String = "world"
 
 var _data: PrototypeV2Data
 var _font: Font
 var _coastlines: Array = []
 var _countries: Array = []
 var _regions: Array = []
+var _administrative_units: Array = []
 var _cities: Array = []
 var _ports: Array = []
 var _rail_segments: Array = []
@@ -54,6 +59,7 @@ var _country_by_id: Dictionary = {}
 var _country_by_iso: Dictionary = {}
 var _features_by_iso: Dictionary = {}
 var _region_by_id: Dictionary = {}
+var _administrative_unit_by_id: Dictionary = {}
 var _city_by_id: Dictionary = {}
 var _port_by_id: Dictionary = {}
 var _institution_by_id: Dictionary = {}
@@ -61,6 +67,8 @@ var _organization_by_id: Dictionary = {}
 var _label_rects: Array[Rect2] = []
 var _label_counts: Dictionary = {}
 var _last_draw_counts: Dictionary = {}
+var _macro_world_polygons: Dictionary = {}
+var _administrative_world_polygons: Dictionary = {}
 
 
 func _ready() -> void:
@@ -74,6 +82,7 @@ func setup(prototype_data: PrototypeV2Data) -> void:
 	_coastlines = _document_array("world_coastlines", "features")
 	_countries = _document_array("countries", "countries")
 	_regions = _document_array("regions", "regions")
+	_administrative_units = _document_array("regions", "administrative_units")
 	_cities = _document_array("cities", "cities")
 	_ports = _document_array("ports", "ports")
 	_rail_segments = _document_array("rail_segments", "segments")
@@ -82,6 +91,7 @@ func setup(prototype_data: PrototypeV2Data) -> void:
 	_institutions = _document_array("institutions", "institutions")
 	_modes = _data.get_document("map_modes")
 	_build_indexes()
+	_build_administrative_geometry_cache()
 	reset_view()
 	queue_redraw()
 
@@ -108,6 +118,26 @@ func clear_selection() -> void:
 	queue_redraw()
 
 
+func set_hovered_country_at(screen_position: Vector2) -> void:
+	var world_position: Vector2 = (screen_position - pan) / zoom
+	var next_id: String = ""
+	for country_variant: Variant in _countries:
+		var country: Dictionary = country_variant as Dictionary
+		if _country_contains(country, world_position):
+			next_id = str(country.get("id", ""))
+			break
+	if next_id != hovered_country_id:
+		hovered_country_id = next_id
+		queue_redraw()
+
+
+func clear_hovered_country() -> void:
+	if hovered_country_id.is_empty():
+		return
+	hovered_country_id = ""
+	queue_redraw()
+
+
 func pan_by(delta: Vector2) -> void:
 	pan += delta
 	_clamp_pan()
@@ -131,15 +161,31 @@ func zoom_at(direction: float, anchor: Vector2) -> void:
 
 
 func reset_view() -> void:
-	_set_view(Vector2(4.0, 14.0), 0.94, Vector2(640.0, 356.0))
+	camera_focus_id = "world"
+	_set_view(Vector2(4.0, 14.0), 0.94, _map_anchor())
 
 
 func focus_europe() -> void:
-	_set_view(Vector2(9.0, 49.0), 3.25, Vector2(650.0, 354.0))
+	camera_focus_id = "europe"
+	_set_view(Vector2(9.0, 49.0), 3.75, _map_anchor())
 
 
 func focus_france() -> void:
-	_set_view(Vector2(2.25, 47.1), 9.2, Vector2(650.0, 360.0))
+	camera_focus_id = "country_fra"
+	_set_view(Vector2(2.25, 47.1), 18.0, _map_anchor())
+
+
+func focus_player_location() -> void:
+	camera_focus_id = PLAYER_CITY_ID
+	_set_view(Vector2(3.064, 50.637), 96.0, _map_anchor())
+
+
+func focus_current_country() -> void:
+	focus_france()
+
+
+func focus_world() -> void:
+	reset_view()
 
 
 func get_zoom_level() -> String:
@@ -185,7 +231,11 @@ func region_contains_lon_lat(region_id: String, lon_lat: Variant) -> bool:
 	var region: Dictionary = get_region(region_id)
 	if region.is_empty():
 		return false
-	return Geometry2D.is_point_in_polygon(_array_to_vector(lon_lat), _lon_lat_polygon(region.get("polygon_lon_lat", [])))
+	var world_point: Vector2 = project_lon_lat(lon_lat)
+	for polygon: PackedVector2Array in _macro_polygons_for_region(region):
+		if Geometry2D.is_point_in_polygon(world_point, polygon):
+			return true
+	return false
 
 
 func is_record_visible(record: Dictionary) -> bool:
@@ -210,8 +260,8 @@ func get_object_at(screen_position: Vector2) -> Dictionary:
 	if get_zoom_level() == "near":
 		for index: int in range(_regions.size() - 1, -1, -1):
 			var region: Dictionary = _regions[index] as Dictionary
-			for clipped_polygon: PackedVector2Array in _clipped_region_world_polygons(region):
-				if Geometry2D.is_point_in_polygon(world_position, clipped_polygon):
+			for macro_polygon: PackedVector2Array in _macro_polygons_for_region(region):
+				if Geometry2D.is_point_in_polygon(world_position, macro_polygon):
 					return {"type": "region", "id": str(region.get("id", "")), "data": region}
 	for country_variant: Variant in _countries:
 		var country: Dictionary = country_variant as Dictionary
@@ -222,6 +272,10 @@ func get_object_at(screen_position: Vector2) -> Dictionary:
 
 func get_region(region_id: String) -> Dictionary:
 	return _dictionary_value(_region_by_id, region_id)
+
+
+func get_administrative_unit(unit_id: String) -> Dictionary:
+	return _dictionary_value(_administrative_unit_by_id, unit_id)
 
 
 func get_city(city_id: String) -> Dictionary:
@@ -245,6 +299,70 @@ func get_label_budget(category: String, level: String = "") -> int:
 	var budgets: Dictionary = _modes.get("label_budgets", {}) as Dictionary
 	var level_budget: Dictionary = budgets.get(target_level, {}) as Dictionary
 	return int(level_budget.get(category, 0))
+
+
+func get_maximum_zoom() -> float:
+	return float((_modes.get("zoom", {}) as Dictionary).get("maximum", 96.0))
+
+
+func get_country_screen_rect(country_id: String, mainland_only: bool = false) -> Rect2:
+	var country: Dictionary = get_country(country_id)
+	var has_point: bool = false
+	var minimum := Vector2(INF, INF)
+	var maximum := Vector2(-INF, -INF)
+	for iso_variant: Variant in country.get("geometry_iso_a3", []):
+		var feature: Dictionary = _dictionary_value(_features_by_iso, str(iso_variant))
+		for polygon: Dictionary in _feature_polygons(feature):
+			for point_variant: Variant in polygon.get("outer", []):
+				var lon_lat: Vector2 = _array_to_vector(point_variant)
+				if mainland_only and country_id == FOCUS_COUNTRY_ID and (lon_lat.x < -10.0 or lon_lat.y < 40.0):
+					continue
+				var point: Vector2 = lon_lat_to_screen(lon_lat)
+				minimum = minimum.min(point)
+				maximum = maximum.max(point)
+				has_point = true
+	return Rect2(minimum, maximum - minimum) if has_point else Rect2()
+
+
+func get_administrative_unit_screen_rect(unit_id: String) -> Rect2:
+	var has_point: bool = false
+	var minimum := Vector2(INF, INF)
+	var maximum := Vector2(-INF, -INF)
+	for world_polygon: PackedVector2Array in _administrative_polygons_for_unit(unit_id):
+		for world_point: Vector2 in world_polygon:
+			var point: Vector2 = world_point * zoom + pan
+			minimum = minimum.min(point)
+			maximum = maximum.max(point)
+			has_point = true
+	return Rect2(minimum, maximum - minimum) if has_point else Rect2()
+
+
+func country_label_can_be_revealed(country: Dictionary) -> bool:
+	return not str(country.get("display_name_zh", "")).is_empty() and (float(country.get("visible_zoom_min", 99.0)) <= get_maximum_zoom() or not str(country.get("id", "")).is_empty())
+
+
+func get_land_geometry_audit() -> Dictionary:
+	var africa_features: int = 0
+	var empty_stable_ids: int = 0
+	var transparent_land_colors: int = 0
+	var failed_outer_rings: int = 0
+	var failed_outer_ring_ids: Array[String] = []
+	var outer_rings: int = 0
+	for feature_variant: Variant in _coastlines:
+		var feature: Dictionary = feature_variant as Dictionary
+		if str(feature.get("continent", "")) == "Africa":
+			africa_features += 1
+		if str(feature.get("stable_id", "")).is_empty():
+			empty_stable_ids += 1
+		var country: Dictionary = _dictionary_value(_country_by_iso, str(feature.get("iso_a3", "")))
+		if _country_color(country, str(feature.get("continent", ""))).a < 0.9:
+			transparent_land_colors += 1
+		for polygon: Dictionary in _feature_polygons(feature):
+			outer_rings += 1
+			if Geometry2D.triangulate_polygon(_open_polygon(_projected_polygon(polygon.get("outer", [])))).is_empty():
+				failed_outer_rings += 1
+				failed_outer_ring_ids.append("%s:%d" % [str(feature.get("iso_a3", "")), outer_rings - 1])
+	return {"africa_features": africa_features, "empty_stable_ids": empty_stable_ids, "transparent_land_colors": transparent_land_colors, "outer_rings": outer_rings, "failed_outer_rings": failed_outer_rings, "failed_outer_ring_ids": failed_outer_ring_ids}
 
 
 func get_visible_rail_ids(level: String = "") -> Array[String]:
@@ -301,10 +419,12 @@ func _draw() -> void:
 	_draw_graticule()
 	_draw_countries()
 	_draw_selected_object_label()
+	_draw_hovered_country_label()
 	_draw_player_city_label()
 	_draw_country_labels()
 	if get_zoom_level() == "near":
 		_draw_regions()
+		_draw_administrative_units()
 	_draw_shipping_routes()
 	if get_zoom_level() != "far":
 		_draw_railways()
@@ -354,16 +474,19 @@ func _draw_countries() -> void:
 		var iso_a3: String = str(feature.get("iso_a3", ""))
 		var country: Dictionary = _dictionary_value(_country_by_iso, iso_a3)
 		var fill: Color = _country_color(country, str(feature.get("continent", "")))
-		for ring_variant: Variant in feature.get("rings", []):
-			var polygon: PackedVector2Array = _screen_polygon(ring_variant)
+		for polygon_record: Dictionary in _feature_polygons(feature):
+			var polygon: PackedVector2Array = _open_polygon(_screen_polygon(polygon_record.get("outer", [])))
 			if polygon.size() < 3:
 				continue
-			# Dateline-touching rings can become non-simple after planar projection. Their
-			# coastline still renders, but invalid rings are not sent to the triangulator.
 			if not Geometry2D.triangulate_polygon(polygon).is_empty():
 				draw_colored_polygon(polygon, fill)
 			var border: Color = COAST if country.is_empty() else COUNTRY_BORDER
 			draw_polyline(_closed_polygon(polygon), border, 0.75 if get_zoom_level() == "far" else 1.15, true)
+			for hole_variant: Variant in polygon_record.get("holes", []):
+				var hole: PackedVector2Array = _open_polygon(_screen_polygon(hole_variant))
+				if hole.size() >= 3 and not Geometry2D.triangulate_polygon(hole).is_empty():
+					draw_colored_polygon(hole, OCEAN_BOTTOM)
+					draw_polyline(_closed_polygon(hole), COAST, 0.75, true)
 			if selected_type == "country" and selected_id == str(country.get("id", "")):
 				draw_polyline(_closed_polygon(polygon), SELECT, 3.2, true)
 
@@ -401,9 +524,20 @@ func _draw_player_city_label() -> void:
 	_try_label(lon_lat_to_screen(city.get("lon_lat", [])) + Vector2(8.0, 3.0), str(city.get("name", "")), 12, SELECT, false, "city")
 
 
+func _draw_hovered_country_label() -> void:
+	if hovered_country_id.is_empty() or (selected_type == "country" and selected_id == hovered_country_id):
+		return
+	var country: Dictionary = get_country(hovered_country_id)
+	if country.is_empty():
+		return
+	_try_label(lon_lat_to_screen(country.get("label_anchor", country.get("label_lon_lat", []))), str(country.get("display_name_zh", country.get("name", ""))), 14, SELECT, true)
+
+
 func _draw_country_labels() -> void:
 	for country_variant: Variant in _records_by_priority(_countries):
 		var country: Dictionary = country_variant as Dictionary
+		if get_zoom_level() == "far" and bool(country.get("theme_label_placeholder", true)) and str(country.get("id", "")) not in [FOCUS_COUNTRY_ID, hovered_country_id]:
+			continue
 		if not is_record_visible(country):
 			continue
 		if selected_type == "country" and selected_id == str(country.get("id", "")):
@@ -411,7 +545,9 @@ func _draw_country_labels() -> void:
 		var color: Color = LABEL
 		if get_zoom_level() == "near" and str(country.get("id", "")) != FOCUS_COUNTRY_ID:
 			color = Color(LABEL_MUTED, 0.34)
-		_try_label(lon_lat_to_screen(country.get("label_lon_lat", [])), str(country.get("name", "")), 15, color, true, "country")
+		if str(country.get("id", "")) == hovered_country_id:
+			continue
+		_try_label(lon_lat_to_screen(country.get("label_anchor", country.get("label_lon_lat", []))), str(country.get("display_name_zh", country.get("name", ""))), 15, color, true, "country")
 
 
 func _draw_regions() -> void:
@@ -425,15 +561,27 @@ func _draw_regions() -> void:
 		elif current_mode == "population":
 			color_key = "population_color"
 		var alpha: float = 0.22 if current_mode in ["legal", "war"] else 0.45
-		for world_polygon: PackedVector2Array in _clipped_region_world_polygons(region):
+		for world_polygon: PackedVector2Array in _macro_polygons_for_region(region):
 			var polygon: PackedVector2Array = _world_to_screen_polygon(world_polygon)
 			if not Geometry2D.triangulate_polygon(polygon).is_empty():
 				draw_colored_polygon(polygon, Color(Color(str(region.get(color_key, "#718da0"))), alpha))
-			draw_polyline(_closed_polygon(polygon), REGION_BORDER, 1.15, true)
+			draw_polyline(_closed_polygon(polygon), REGION_BORDER, 2.35, true)
 			if selected_type == "region" and selected_id == str(region.get("id", "")):
 				draw_polyline(_closed_polygon(polygon), SELECT, 3.4, true)
 		if not (selected_type == "region" and selected_id == str(region.get("id", ""))):
-			_try_label(lon_lat_to_screen(region.get("label_lon_lat", [])), str(region.get("name", "")), 13, LABEL, true, "region")
+			_try_label(lon_lat_to_screen(region.get("label_anchor", region.get("label_lon_lat", []))), str(region.get("display_name_zh", region.get("name", ""))), 13, LABEL, true, "region")
+
+
+func _draw_administrative_units() -> void:
+	for unit_variant: Variant in _records_by_priority(_administrative_units):
+		var unit: Dictionary = unit_variant as Dictionary
+		if not is_record_visible(unit):
+			continue
+		var unit_id: String = str(unit.get("stable_id", unit.get("id", "")))
+		for world_polygon: PackedVector2Array in _administrative_polygons_for_unit(unit_id):
+			var polygon: PackedVector2Array = _world_to_screen_polygon(world_polygon)
+			draw_polyline(_closed_polygon(polygon), ADMINISTRATIVE_BORDER, 0.85, true)
+		_try_label(lon_lat_to_screen(unit.get("label_anchor", [])), str(unit.get("display_name_zh", unit.get("name", ""))), 10, ADMINISTRATIVE_LABEL, true, "administrative")
 
 
 func _draw_shipping_routes() -> void:
@@ -584,6 +732,7 @@ func _build_indexes() -> void:
 	_country_by_iso.clear()
 	_features_by_iso.clear()
 	_region_by_id.clear()
+	_administrative_unit_by_id.clear()
 	_city_by_id.clear()
 	_port_by_id.clear()
 	_institution_by_id.clear()
@@ -600,6 +749,9 @@ func _build_indexes() -> void:
 	for region_variant: Variant in _regions:
 		var region: Dictionary = region_variant as Dictionary
 		_region_by_id[str(region.get("id", ""))] = region
+	for unit_variant: Variant in _administrative_units:
+		var unit: Dictionary = unit_variant as Dictionary
+		_administrative_unit_by_id[str(unit.get("stable_id", unit.get("id", "")))] = unit
 	for city_variant: Variant in _cities:
 		var city: Dictionary = city_variant as Dictionary
 		_city_by_id[str(city.get("id", ""))] = city
@@ -713,7 +865,8 @@ func _country_color(country: Dictionary, continent: String) -> Color:
 		key = "population_color"
 	elif current_mode == "war":
 		key = "war_color"
-	return Color(Color(str(country.get(key, "#738077"))), 0.96)
+	var fallback: String = str(country.get("neutral_land_color", "#738077"))
+	return Color(Color(str(country.get(key, fallback))), 0.96)
 
 
 func _node_at(world_position: Vector2, records: Array, object_type: String, radius_pixels: float) -> Dictionary:
@@ -736,7 +889,7 @@ func _country_contains(country: Dictionary, world_position: Vector2) -> bool:
 
 
 func _set_view(center_lon_lat: Vector2, next_zoom: float, screen_anchor: Vector2) -> void:
-	zoom = next_zoom
+	zoom = clampf(next_zoom, float((_modes.get("zoom", {}) as Dictionary).get("minimum", 0.82)), get_maximum_zoom())
 	pan = screen_anchor - project_lon_lat(center_lon_lat) * zoom
 	_clamp_pan()
 	queue_redraw()
@@ -744,9 +897,78 @@ func _set_view(center_lon_lat: Vector2, next_zoom: float, screen_anchor: Vector2
 
 func _clamp_pan() -> void:
 	var scaled: Vector2 = WORLD_SIZE * zoom
-	var margin := Vector2(230.0, 170.0)
-	pan.x = clampf(pan.x, size.x - scaled.x - margin.x, margin.x)
-	pan.y = clampf(pan.y, size.y - scaled.y - margin.y, margin.y)
+	var required_visible := Vector2(180.0, 135.0)
+	if scaled.x + required_visible.x * 2.0 <= size.x:
+		pan.x = (size.x - scaled.x) * 0.5
+	else:
+		pan.x = clampf(pan.x, required_visible.x - scaled.x, size.x - required_visible.x)
+	if scaled.y + required_visible.y * 2.0 <= size.y:
+		pan.y = (size.y - scaled.y) * 0.5
+	else:
+		pan.y = clampf(pan.y, required_visible.y - scaled.y, size.y - required_visible.y)
+
+
+func _map_anchor() -> Vector2:
+	return Vector2(size.x * 0.52 if size.x > 0.0 else 650.0, size.y * 0.5 if size.y > 0.0 else 360.0)
+
+
+func _feature_polygons(feature: Dictionary) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	var polygon_variants: Variant = feature.get("polygons", [])
+	if polygon_variants is Array and not (polygon_variants as Array).is_empty():
+		for polygon_variant: Variant in polygon_variants as Array:
+			if polygon_variant is Dictionary:
+				result.append(polygon_variant as Dictionary)
+		return result
+	for ring_variant: Variant in feature.get("rings", []):
+		result.append({"outer": ring_variant, "holes": []})
+	return result
+
+
+func _build_administrative_geometry_cache() -> void:
+	_administrative_world_polygons.clear()
+	_macro_world_polygons.clear()
+	for unit_variant: Variant in _administrative_units:
+		var unit: Dictionary = unit_variant as Dictionary
+		var unit_id: String = str(unit.get("stable_id", unit.get("id", "")))
+		var projected: Array[PackedVector2Array] = []
+		for polygon_variant: Variant in unit.get("geometry", []):
+			var polygon_record: Dictionary = polygon_variant as Dictionary
+			var polygon: PackedVector2Array = _open_polygon(_projected_polygon(polygon_record.get("outer", [])))
+			if polygon.size() >= 3:
+				projected.append(polygon)
+		_administrative_world_polygons[unit_id] = projected
+	for region_variant: Variant in _regions:
+		var region: Dictionary = region_variant as Dictionary
+		var merged: Array[PackedVector2Array] = []
+		for unit_id_variant: Variant in region.get("administrative_unit_ids", []):
+			for polygon: PackedVector2Array in _administrative_polygons_for_unit(str(unit_id_variant)):
+				_merge_polygon_into_collection(merged, polygon)
+		_macro_world_polygons[str(region.get("id", ""))] = merged
+
+
+func _merge_polygon_into_collection(collection: Array[PackedVector2Array], source: PackedVector2Array) -> void:
+	var pending: PackedVector2Array = source
+	var index: int = 0
+	while index < collection.size():
+		var merged_variants: Array[PackedVector2Array] = Geometry2D.merge_polygons(collection[index], pending)
+		if merged_variants.size() == 1:
+			pending = merged_variants[0]
+			collection.remove_at(index)
+			index = 0
+		else:
+			index += 1
+	collection.append(pending)
+
+
+func _macro_polygons_for_region(region: Dictionary) -> Array[PackedVector2Array]:
+	var value: Variant = _macro_world_polygons.get(str(region.get("id", "")), [])
+	return value as Array[PackedVector2Array] if value is Array else []
+
+
+func _administrative_polygons_for_unit(unit_id: String) -> Array[PackedVector2Array]:
+	var value: Variant = _administrative_world_polygons.get(unit_id, [])
+	return value as Array[PackedVector2Array] if value is Array else []
 
 
 func _screen_polygon(source: Variant) -> PackedVector2Array:
@@ -772,24 +994,10 @@ func _world_to_screen_polygon(source: PackedVector2Array) -> PackedVector2Array:
 	return result
 
 
-func _clipped_region_world_polygons(region: Dictionary) -> Array[PackedVector2Array]:
-	var result: Array[PackedVector2Array] = []
-	var region_polygon: PackedVector2Array = _projected_polygon(region.get("polygon_lon_lat", []))
-	var france_feature: Dictionary = _dictionary_value(_features_by_iso, "FRA")
-	for ring_variant: Variant in france_feature.get("rings", []):
-		var country_polygon: PackedVector2Array = _projected_polygon(ring_variant)
-		for intersection_variant: Variant in Geometry2D.intersect_polygons(region_polygon, country_polygon):
-			var intersection: PackedVector2Array = intersection_variant as PackedVector2Array
-			if intersection.size() >= 3:
-				result.append(intersection)
-	return result
-
-
-func _lon_lat_polygon(source: Variant) -> PackedVector2Array:
-	var result := PackedVector2Array()
-	if source is Array:
-		for point_variant: Variant in source as Array:
-			result.append(_array_to_vector(point_variant))
+func _open_polygon(points: PackedVector2Array) -> PackedVector2Array:
+	var result: PackedVector2Array = points.duplicate()
+	if result.size() >= 2 and result[0] == result[-1]:
+		result.remove_at(result.size() - 1)
 	return result
 
 

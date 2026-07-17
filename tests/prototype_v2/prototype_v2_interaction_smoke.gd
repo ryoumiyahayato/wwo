@@ -1,5 +1,5 @@
 extends SceneTree
-## V2.1 map, hierarchy, layout, and interaction smoke coverage.
+## V2.1.2 map, hierarchy, layout, and interaction smoke coverage.
 
 const VIEWPORT_RECT := Rect2(0.0, 0.0, 1280.0, 720.0)
 
@@ -16,12 +16,12 @@ func _run() -> void:
 	root.content_scale_size = Vector2i(1280, 720)
 	_test_static_documents()
 	var packed: PackedScene = load("res://scenes/prototype_v2/prototype_v2_main.tscn") as PackedScene
-	_expect(packed != null, "独立 V2.1 原型场景资源可加载")
+	_expect(packed != null, "独立 V2.1.2 原型场景资源可加载")
 	if packed == null:
 		_finish()
 		return
 	_view = packed.instantiate() as PrototypeV2Main
-	_expect(_view != null, "独立 V2.1 原型场景可实例化")
+	_expect(_view != null, "独立 V2.1.2 原型场景可实例化")
 	if _view == null:
 		_finish()
 		return
@@ -29,7 +29,7 @@ func _run() -> void:
 	current_scene = _view
 	await process_frame
 	await process_frame
-	_expect(_view.prototype_data != null and _view.prototype_data.errors.is_empty(), "V2.1 静态数据加载且不依赖正式服务")
+	_expect(_view.prototype_data != null and _view.prototype_data.errors.is_empty(), "V2.1.2 静态数据加载且不依赖正式服务")
 	_expect(_view.map_canvas != null and _view.interface != null, "地理地图与四角界面同时建立")
 	_test_geographic_projection_and_land()
 	_test_transport_semantics()
@@ -38,6 +38,11 @@ func _run() -> void:
 	_test_country_identity_and_emblem()
 	_test_french_names_and_culture()
 	_test_content_reference_consistency()
+	_test_v2_1_2_map_geometry_and_camera()
+	_test_v2_1_2_country_labels()
+	_test_v2_1_2_status_and_plan()
+	_test_v2_1_2_relationships_and_organizations()
+	_test_v2_1_2_economy_permissions_and_tools()
 	_test_label_density_and_detail_nodes()
 	_test_layout_constraints()
 	await _test_corner_entries_and_identity_review()
@@ -281,6 +286,138 @@ func _test_content_reference_consistency() -> void:
 		_expect(not regions.has(old_region_id), "不存在旧架空地区 ID %s" % old_region_id)
 
 
+func _test_v2_1_2_map_geometry_and_camera() -> void:
+	var map: PrototypeV2MapCanvas = _view.map_canvas
+	var world_document: Dictionary = _view.prototype_data.get_document("world_coastlines")
+	var geometry_audit: Dictionary = map.get_land_geometry_audit()
+	_expect(int(geometry_audit.get("africa_features", 0)) == int((world_document.get("audit", {}) as Dictionary).get("africa_feature_count", -1)) and int(geometry_audit.get("africa_features", 0)) >= 50, "非洲全部 Natural Earth 陆地要素存在")
+	_expect(int(geometry_audit.get("empty_stable_ids", -1)) == 0, "所有有效陆地国家要素具有稳定回退 ID")
+	_expect(int(geometry_audit.get("transparent_land_colors", -1)) == 0, "无陆地国家使用透明或海洋颜色")
+	_expect(int(geometry_audit.get("failed_outer_rings", -1)) == 0, "全部 Polygon 与 MultiPolygon 外环可绘制：%s" % str(geometry_audit.get("failed_outer_ring_ids", [])))
+	_expect(int(geometry_audit.get("outer_rings", 0)) == int((world_document.get("audit", {}) as Dictionary).get("outer_ring_count", -1)), "MultiPolygon 全部外环进入地图审计")
+	var repaired: Array = (world_document.get("audit", {}) as Dictionary).get("repaired_features", []) as Array
+	_expect(repaired.size() == 1 and str((repaired[0] as Dictionary).get("iso_a3", "")) == "SDN", "苏丹自交尖刺修复原因记录在生成数据中")
+
+	var region_document: Dictionary = _view.prototype_data.get_document("regions")
+	var regions: Array = region_document.get("regions", []) as Array
+	var units: Array = region_document.get("administrative_units", []) as Array
+	var department_count: int = 0
+	for unit_variant: Variant in units:
+		var unit: Dictionary = unit_variant as Dictionary
+		if str(unit.get("administrative_level", "")) != "departement":
+			continue
+		department_count += 1
+		for field: String in ["stable_id", "administrative_level", "parent_country_id", "geometry", "label_anchor", "label_priority", "visible_zoom_min", "display_name_zh", "native_name"]:
+			_expect(unit.has(field), "%s 具有行政区字段 %s" % [str(unit.get("display_name_zh", "")), field])
+		var geometry: Array = unit.get("geometry", []) as Array
+		_expect(not geometry.is_empty() and not _polygon_is_rectangle((geometry[0] as Dictionary).get("outer", []) as Array), "%s 使用自然多边形而非矩形" % str(unit.get("display_name_zh", "")))
+	_expect(department_count == 96, "法国加载 96 个本土省级自然边界占位")
+	_expect((region_document.get("coverage", {}) as Dictionary).get("unassigned_department_codes", []) == [], "全部法国本土省级单位组合进宏观地区")
+	for region_variant: Variant in regions:
+		var region: Dictionary = region_variant as Dictionary
+		_expect(not region.has("polygon_lon_lat") and not (region.get("administrative_unit_ids", []) as Array).is_empty(), "%s 由行政单位组合而非独立矩形生成" % str(region.get("name", "")))
+	_expect(PrototypeV2MapCanvas.REGION_BORDER != PrototypeV2MapCanvas.ADMINISTRATIVE_BORDER, "宏观地区与行政单位使用不同线条样式")
+	_expect(map.get_maximum_zoom() >= 24.0 and map.get_maximum_zoom() >= float((_view.prototype_data.get_document("map_modes").get("zoom", {}) as Dictionary).get("v2_1_1_maximum", 12.0)) * 2.0, "最大缩放至少达到 V2.1.1 上限的两倍")
+	map.focus_france()
+	var france_rect: Rect2 = map.get_country_screen_rect("country_fra", true)
+	_expect(france_rect.size.y / 720.0 >= 0.70, "法国聚焦后占据视口高度 70% 以上")
+	map.focus_player_location()
+	var nord_rect: Rect2 = map.get_administrative_unit_screen_rect("departement_nord")
+	_expect(map.camera_focus_id == "lille" and is_equal_approx(map.zoom, 96.0), "当前人物所在地可归位到里尔高倍率近景")
+	_expect(nord_rect.size.x / 1280.0 >= 0.45 or nord_rect.size.y / 720.0 >= 0.45, "北部省高倍率近景占据主要地图区域：%s" % str(nord_rect.size))
+	_expect(_read_text("res://scripts/prototype_v2/prototype_v2_main.gd").contains("_ui_captured_press = true"), "双击镜头入口消费释放事件，避免穿透打开地图对象卡")
+	map.focus_current_country()
+	_expect(map.camera_focus_id == "country_fra", "当前国家可归位到法国")
+	map.focus_world()
+	_expect(map.camera_focus_id == "world" and map.get_zoom_level() == "far", "Home 语义可返回世界视角")
+	map.zoom = map.get_maximum_zoom()
+	map.pan = Vector2(100000.0, -100000.0)
+	map.pan_by(Vector2.ZERO)
+	var scaled_world := Rect2(map.pan, PrototypeV2MapCanvas.WORLD_SIZE * map.zoom)
+	_expect(scaled_world.intersects(VIEWPORT_RECT), "高倍率平移后地图不能完全离开窗口")
+	map.reset_view()
+
+
+func _test_v2_1_2_country_labels() -> void:
+	var map: PrototypeV2MapCanvas = _view.map_canvas
+	var countries: Array = _view.prototype_data.get_document("countries").get("countries", []) as Array
+	_expect(countries.size() == 177, "全部 177 个 Natural Earth 国家要素具有名称记录")
+	for country_variant: Variant in countries:
+		var country: Dictionary = country_variant as Dictionary
+		for field: String in ["display_name_zh", "formal_name_zh", "native_name", "label_priority", "visible_zoom_min", "label_anchor"]:
+			_expect(country.has(field) and (not country[field] is String or not str(country[field]).is_empty()), "%s 具有完整国家字段 %s" % [str(country.get("data_code", "")), field])
+		_expect(map.country_label_can_be_revealed(country), "%s 可通过悬停或足够缩放显示名称" % str(country.get("display_name_zh", "")))
+	_expect(map.get_label_budget("country", "far") <= 12, "世界远景国家标签保持预算上限")
+	_expect(map.get_label_budget("country", "middle") <= 12, "欧洲中景继续使用碰撞预算")
+	var collision_candidates: Array = [{"id":"france","priority":100,"rect":Rect2(100,100,90,24)}, {"id":"belgium","priority":80,"rect":Rect2(150,100,80,24)}, {"id":"luxembourg","priority":60,"rect":Rect2(165,100,100,24)}]
+	_expect(map.debug_resolve_label_candidates(collision_candidates, 12) == ["france"], "欧洲中景重叠标签保留高优先级项")
+
+
+func _test_v2_1_2_status_and_plan() -> void:
+	var identities: Dictionary = _view.prototype_data.get_document("characters").get("identities", {}) as Dictionary
+	for identity_id: String in ["worker", "official"]:
+		var person: Dictionary = identities.get(identity_id, {}) as Dictionary
+		var indicators: Array = person.get("status_indicators", []) as Array
+		_expect(indicators.size() >= 3, "%s 人物概览具有统一状态符号" % identity_id)
+		for indicator_variant: Variant in indicators:
+			var indicator: Dictionary = indicator_variant as Dictionary
+			_expect(str(indicator.get("symbol", "")) in ["✓", "!", "×", "🔒"], "%s 状态第一层使用规范符号" % identity_id)
+			for field: String in ["state", "reason", "trend", "impact", "suggestion"]:
+				_expect(not str(indicator.get(field, "")).is_empty(), "%s 状态悬停说明包含 %s" % [identity_id, field])
+		var plan: Dictionary = person.get("plan_detail", {}) as Dictionary
+		_expect(not str(plan.get("title", "")).contains("%") and not str(person.get("plan", "")).contains("%"), "%s 当前计划标题不包含成功率百分比" % identity_id)
+		for field: String in ["goal", "responsible", "stage", "duration", "effects", "time_cost", "resources", "authority", "stop_conditions", "next_step"]:
+			_expect(plan.has(field), "%s 当前计划主要说明包含 %s" % [identity_id, field])
+		_expect(str(plan.get("success_symbol", "")) in ["★", "✓", "!", "×"] and not str(plan.get("success_detail", "")).is_empty(), "%s 成功信息仅作为附属符号与悬停说明" % identity_id)
+	var ui_state: Dictionary = _view.interface.debug_state()
+	_expect(ui_state.get("plan_formula_visible") == false, "普通计划界面不显示完整内部公式")
+
+
+func _test_v2_1_2_relationships_and_organizations() -> void:
+	var ui_state: Dictionary = _view.interface.debug_state()
+	_expect(ui_state.get("visible_ellipsis_has_menu") == true, "所有保留的可见省略号均具有二级菜单")
+	var jeanne: Dictionary = _index_records(_view.prototype_data.get_document("relationships").get("relationships", []) as Array).get("jeanne", {}) as Dictionary
+	for field: String in ["relation_type", "familiarity", "trust", "affinity", "common_work", "common_organizations", "common_contacts", "last_interaction", "obligations", "available_relationship_actions"]:
+		_expect(jeanne.has(field), "关系详情预留 %s" % field)
+	var organization_document: Dictionary = _view.prototype_data.get_document("organizations")
+	var organization_identities: Dictionary = organization_document.get("identities", {}) as Dictionary
+	var worker_discover: Array = (organization_identities.get("worker", {}) as Dictionary).get("discover", []) as Array
+	var official_discover: Array = (organization_identities.get("official", {}) as Dictionary).get("discover", []) as Array
+	_expect(JSON.stringify(worker_discover) != JSON.stringify(official_discover), "普通工人与公务员探索组织集合不同")
+	for collection: Array in [worker_discover, official_discover]:
+		for context_variant: Variant in collection:
+			var context: Dictionary = context_variant as Dictionary
+			for field: String in ["organization_id", "type", "access", "available_position", "primary_action"]:
+				_expect(not str(context.get(field, "")).is_empty(), "探索组织默认卡片包含 %s" % field)
+			for field: String in ["known_reason", "contact_source", "function", "entry_method", "eligible", "missing_conditions"]:
+				_expect(context.has(field), "组织名称悬停包含 %s" % field)
+			for field: String in ["position_salary", "pay_cycle", "allowance", "position_authority", "position_work", "position_requirements", "supervisor", "department"]:
+				_expect(context.has(field), "职位悬停包含 %s" % field)
+	for identity_id: String in ["worker", "official"]:
+		var identity_data: Dictionary = organization_identities.get(identity_id, {}) as Dictionary
+		_expect(identity_data.get("owned", []) != identity_data.get("discover", []), "%s 的我的组织与探索组织继续分离" % identity_id)
+
+
+func _test_v2_1_2_economy_permissions_and_tools() -> void:
+	var official: Dictionary = _view.prototype_data.get_document("characters").get("identities", {}).get("official", {}) as Dictionary
+	for field: String in ["cash", "income", "expenses", "monthly_salary", "pay_cycle", "allowance", "debt_burden"]:
+		_expect(not str(official.get(field, "")).is_empty(), "公务员个人经济包含 %s" % field)
+	_expect(official.has("institution_budget_source") and not official.has("budget_source"), "公务员个人资金与机构预算字段严格分开")
+	var worker: Dictionary = _view.prototype_data.get_document("characters").get("identities", {}).get("worker", {}) as Dictionary
+	_expect(not str(worker.get("weekly_wage", "")).is_empty() and not str(worker.get("pay_cycle", "")).is_empty(), "普通工人显示工资支付周期")
+	var permission_text: String = JSON.stringify(_view.prototype_data.get_document("institutions")) + _read_text("res://scripts/prototype_v2/prototype_v2_interface.gd")
+	_expect(not permission_text.contains("已知但无权处理"), "权限界面不再出现笼统限制措辞")
+	_expect(permission_text.contains("需要中央部门批准") and permission_text.contains("需要省长授权") and permission_text.contains("需要跨部门会签"), "权限限制使用具体原因")
+	var state: Dictionary = _view.interface.debug_state()
+	_expect((state.get("time_menu_items", []) as Array) == ["暂停", "1×", "2×", "4×", "8×"] and state.get("time_menu_contains_system_tools") == false, "时间展开菜单为独立紧凑速度菜单")
+	_expect((state.get("system_menu_items", []) as Array).size() == 3, "右上齿轮菜单包含保存、设置和退出占位")
+	_expect(state.get("time_is_static_prototype") == true and not _read_text("res://scripts/prototype_v2/prototype_v2_interface.gd").contains("▶ 运行"), "静态原型不会虚假表示正式时间结算已运行")
+	_expect(_rect_inside(PrototypeV2Interface.SYSTEM_CORNER, VIEWPORT_RECT), "独立齿轮系统入口位于右上角且无裁切")
+	_view.interface.open_panel_named("time", false)
+	_expect(_view.interface.get_panel_rect().size.x <= 180.0 and _view.interface.get_panel_rect().size.y <= 200.0, "时间菜单保持紧凑尺寸")
+	_view.interface.close_panel(false)
+
+
 func _test_label_density_and_detail_nodes() -> void:
 	var map: PrototypeV2MapCanvas = _view.map_canvas
 	_expect(map.get_label_budget("country", "far") >= 10 and map.get_label_budget("country", "far") <= 14, "世界远景国家标签预算为 10–14")
@@ -381,7 +518,7 @@ func _test_identity_information_architecture() -> void:
 	_expect(worker_state.get("institution_structure") == "public_portal", "普通工人国家入口使用公开政策与新闻结构")
 	_expect(official_state.get("institution_structure") == "department_hierarchy", "地方官员机构页使用部门层级结构")
 	var official: Dictionary = _view.prototype_data.get_document("characters").get("identities", {}).get("official", {}) as Dictionary
-	for field: String in ["department", "supervisor", "subordinates", "jurisdiction", "budget_source", "agenda", "procedures", "upstream_locked"]:
+	for field: String in ["department", "supervisor", "subordinates", "jurisdiction", "institution_budget_source", "agenda", "procedures", "upstream_locked"]:
 		_expect(official.has(field), "地方官员结构包含 %s" % field)
 	var worker: Dictionary = _view.prototype_data.get_document("characters").get("identities", {}).get("worker", {}) as Dictionary
 	for field: String in ["work_contract", "employer", "union", "household"]:
@@ -457,7 +594,14 @@ func _test_escape_and_exclusivity() -> void:
 	interface.open_panel_named("country", false)
 	_expect(interface.open_panel == "country", "主要面板互斥，后打开面板替换前一面板")
 	interface.apply_review_state("person_detail")
-	_expect(interface.close_top_layer() and interface.detail_person_id.is_empty(), "Esc 第一层关闭人物第三层详情")
+	_expect(interface.close_top_layer() and interface.detail_person_id.is_empty(), "Esc 第一层关闭人物完整关系详情")
+	interface.apply_review_state("person_more_menu")
+	_expect(interface.close_top_layer() and not interface.person_more_menu_open and not interface.detail_person_id.is_empty(), "Esc 先关闭人物更多二级菜单")
+	interface.close_top_layer()
+	interface.apply_review_state("system_menu")
+	_expect(interface.close_top_layer() and not interface.system_menu_open, "Esc 可关闭右上系统工具菜单")
+	interface.apply_review_state("mode_menu")
+	_expect(interface.close_top_layer() and not interface.mode_menu_open, "Esc 可关闭地图覆盖层菜单")
 	interface.open_panel_named("character", false)
 	var closed_workspace: bool = interface.close_top_layer()
 	await create_timer(0.18).timeout
@@ -497,6 +641,23 @@ func _rect_inside(inner: Rect2, outer: Rect2) -> bool:
 	return outer.has_point(inner.position) and inner.end.x <= outer.end.x and inner.end.y <= outer.end.y
 
 
+func _polygon_is_rectangle(points: Array) -> bool:
+	if points.size() != 5:
+		return false
+	var unique_x: Dictionary = {}
+	var unique_y: Dictionary = {}
+	for point_variant: Variant in points:
+		var point: Array = point_variant as Array
+		unique_x[float(point[0])] = true
+		unique_y[float(point[1])] = true
+	return unique_x.size() == 2 and unique_y.size() == 2
+
+
+func _read_text(path: String) -> String:
+	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
+	return file.get_as_text() if file != null else ""
+
+
 func _index_records(records: Array) -> Dictionary:
 	var result: Dictionary = {}
 	for record_variant: Variant in records:
@@ -515,5 +676,5 @@ func _expect(condition: bool, label: String) -> void:
 
 
 func _finish() -> void:
-	print("V2.1 prototype smoke: %d checks, %d failures" % [_checks, _failures])
+	print("V2.1.2 prototype smoke: %d checks, %d failures" % [_checks, _failures])
 	quit(0 if _failures == 0 else 1)
