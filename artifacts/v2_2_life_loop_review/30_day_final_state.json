@@ -1,0 +1,61 @@
+{
+	"record_type": "v2_2_30_day_final_state",
+	"schema_version": "v2_2_life_loop_1",
+	"scenario_id": "v2_2_lille_life_loop",
+	"current_datetime": "1900-04-11T05:00:00",
+	"hours_processed": 720,
+	"elapsed_usec": 453531,
+	"ledger_consistent": true,
+	"schedule_overlap_count": 0,
+	"transaction_count": 26,
+	"transaction_category_counts": {
+		"food_purchase": 8,
+		"wage": 4,
+		"essentials_purchase": 7,
+		"rent": 5,
+		"salary": 1,
+		"allowance": 1
+	},
+	"processed_pay_period_count": 5,
+	"processed_household_key_count": 80,
+	"notification_count": 55,
+	"causal_event_count": 512,
+	"people": {
+		"character_pierre_lefevre": {
+			"condition": {
+				"health": 841,
+				"fatigue": 0,
+				"stress": 79,
+				"sleep_hours_current_day": 0,
+				"consecutive_short_sleep_days": 4,
+				"consecutive_food_deficit_days": 0
+			},
+			"cash_centimes": 6340,
+			"food_stock_person_days": 1,
+			"essentials_stock_person_days": 2,
+			"rent_arrears_centimes": 0,
+			"next_rent_datetime": "1900-04-16T06:00:00",
+			"next_pay_datetime": "1900-04-14T18:00:00",
+			"employment_risk": 0,
+			"future_schedule_hours": 67
+		},
+		"character_albert_dumont": {
+			"condition": {
+				"health": 940,
+				"fatigue": 0,
+				"stress": 0,
+				"sleep_hours_current_day": 8,
+				"consecutive_short_sleep_days": 0,
+				"consecutive_food_deficit_days": 0
+			},
+			"cash_centimes": 16400,
+			"food_stock_person_days": 5,
+			"essentials_stock_person_days": 5,
+			"rent_arrears_centimes": 0,
+			"next_rent_datetime": "1900-05-01T18:00:00",
+			"next_pay_datetime": "1900-05-01T09:00:00",
+			"employment_risk": 0,
+			"future_schedule_hours": 91
+		}
+	}
+}

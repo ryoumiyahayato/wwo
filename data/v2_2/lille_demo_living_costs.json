@@ -1,0 +1,24 @@
+{
+  "config_version": 1,
+  "prototype_balance_value": true,
+  "historical_price_claim": false,
+  "market_simulation_active": false,
+  "currency": {
+    "name": "法郎",
+    "minor_name": "生丁",
+    "minor_units_per_major": 100
+  },
+  "purchase_location_id": "location:lille_living_goods",
+  "business_open_hour": 6,
+  "business_close_hour": 21,
+  "purchase_duration_hours": 1,
+  "food_package": {
+    "price_centimes": 560,
+    "stock_person_days": 7
+  },
+  "essentials_package": {
+    "price_centimes": 140,
+    "stock_person_days": 7
+  },
+  "daily_consumption_hour": 6
+}

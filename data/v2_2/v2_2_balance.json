@@ -1,0 +1,83 @@
+{
+  "config_version": 1,
+  "prototype_balance_value": true,
+  "time": {
+    "real_seconds_per_game_hour": 1.0,
+    "allowed_speed_multipliers": [1, 2, 4, 8],
+    "minimum_schedule_horizon_hours": 48,
+    "schedule_refill_threshold_hours": 24
+  },
+  "activity_effects": {
+    "sleep": {"fatigue": -90, "stress": -20},
+    "commute_to_work": {"fatigue": 15, "stress": 8},
+    "work": {"fatigue": 35, "stress": 12},
+    "meal_break": {"fatigue": -10, "stress": -5},
+    "commute_home": {"fatigue": 15, "stress": 8},
+    "rest": {"fatigue": -25, "stress": -10},
+    "free_time": {"fatigue": -10, "stress": -5},
+    "household_chores": {"fatigue": 10, "stress": 0},
+    "purchase_food": {"fatigue": 10, "stress": 0},
+    "purchase_essentials": {"fatigue": 10, "stress": 0},
+    "social_contact": {"fatigue": 5, "stress": -20},
+    "union_activity": {"fatigue": 15, "stress": -5},
+    "overtime": {"fatigue": 55, "stress": 20},
+    "authorized_leave": {"fatigue": -10, "stress": -5},
+    "absence": {"fatigue": -10, "stress": 25}
+  },
+  "condition": {
+    "minimum": 0,
+    "maximum": 1000,
+    "forced_rest_fatigue": 950,
+    "short_sleep_hours": 6,
+    "healthy_sleep_hours": 8,
+    "short_sleep_fatigue_delta": 80,
+    "short_sleep_stress_delta": 40,
+    "short_sleep_health_delta": -5,
+    "partial_sleep_fatigue_delta": 30,
+    "partial_sleep_stress_delta": 10,
+    "healthy_sleep_health_delta": 2,
+    "food_deficit_stress_delta": 50,
+    "food_deficit_health_delta_after_days": -10,
+    "food_deficit_health_threshold_days": 2,
+    "essentials_deficit_stress_delta": 15,
+    "rent_arrears_stress_delta": 60,
+    "employment_risk_absence_hour_delta": 25,
+    "employment_risk_full_day_delta": -10,
+    "employment_risk_warning": 300,
+    "employment_risk_severe": 700
+  },
+  "relationship": {
+    "contact_duration_hours": 1,
+    "contact_start_hour": 18,
+    "contact_end_hour": 21,
+    "contact_cooldown_hours": 24,
+    "npc_contact_cooldown_hours": 168,
+    "familiarity_delta": 5,
+    "trust_delta": 2
+  },
+  "union": {
+    "event_id": "union_event:metalworkers_nord_weekly_meeting",
+    "weekday_monday_zero": 2,
+    "start_hour": 19,
+    "duration_hours": 2,
+    "participation_delta": 5
+  },
+  "history_limits": {
+    "completed_activities": 256,
+    "causal_events": 512,
+    "notifications": 160,
+    "transactions_per_household": 256,
+    "attendance_records": 512
+  },
+  "npc_priority": [
+    "system_health_rest",
+    "sleep",
+    "contract",
+    "purchase_food",
+    "purchase_essentials",
+    "organization_activity",
+    "household_chores",
+    "social_contact",
+    "free_time"
+  ]
+}

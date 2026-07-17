@@ -31,6 +31,7 @@ const REVIEW_SWITCH := Rect2(502.0, 14.0, 276.0, 34.0)
 const MAX_PRIMARY_PANEL_WIDTH := 396.0
 
 var data: PrototypeV2Data
+var life_binding: V2LifeLoopUiBinding
 var identity: String = "worker"
 var open_panel: String = ""
 var character_section: String = "summary"
@@ -45,6 +46,7 @@ var mode_menu_open: bool = false
 var system_menu_open: bool = false
 var person_more_menu_open: bool = false
 var review_mode: bool = false
+var schedule_form: Dictionary = {}
 var panel_progress: float = 0.0:
 	set(value):
 		panel_progress = value
@@ -73,6 +75,26 @@ func _process(_delta: float) -> void:
 
 func setup(prototype_data: PrototypeV2Data) -> void:
 	data = prototype_data
+	queue_redraw()
+
+
+func setup_life_loop(binding: V2LifeLoopUiBinding) -> void:
+	life_binding = binding
+	if life_binding != null:
+		identity = life_binding.identity_id()
+		paused = bool(life_binding.time_view().get("paused", true))
+		speed = int(life_binding.time_view().get("speed", 1))
+		if not life_binding.view_changed.is_connected(_on_life_view_changed):
+			life_binding.view_changed.connect(_on_life_view_changed)
+	queue_redraw()
+
+
+func toggle_pause_command() -> void:
+	if life_binding != null:
+		life_binding.toggle_pause()
+		paused = bool(life_binding.time_view().get("paused", true))
+	else:
+		paused = not paused
 	queue_redraw()
 
 
@@ -150,7 +172,11 @@ func open_panel_named(panel_id: String, animated: bool = true) -> void:
 		return
 	if _panel_tween != null:
 		_panel_tween.kill()
+	if life_binding != null and open_panel in ["schedule", "developer"] and open_panel != panel_id:
+		life_binding.end_blocking_panel()
 	open_panel = panel_id
+	if life_binding != null and panel_id in ["schedule", "developer"]:
+		life_binding.begin_blocking_panel()
 	mode_menu_open = false
 	system_menu_open = false
 	person_more_menu_open = false
@@ -170,11 +196,14 @@ func open_panel_named(panel_id: String, animated: bool = true) -> void:
 func close_panel(animated: bool = true) -> void:
 	if open_panel.is_empty():
 		return
+	var was_blocking: bool = open_panel in ["schedule", "developer"]
 	if _panel_tween != null:
 		_panel_tween.kill()
 	if not animated:
 		panel_progress = 0.0
 		open_panel = ""
+		if life_binding != null and was_blocking:
+			life_binding.end_blocking_panel()
 		queue_redraw()
 		return
 	_panel_tween = create_tween()
@@ -182,6 +211,8 @@ func close_panel(animated: bool = true) -> void:
 	_panel_tween.tween_property(self, "panel_progress", 0.0, 0.16)
 	_panel_tween.tween_callback(func() -> void:
 		open_panel = ""
+		if life_binding != null and was_blocking:
+			life_binding.end_blocking_panel()
 		queue_redraw()
 	)
 
@@ -190,6 +221,11 @@ func set_identity(identity_id: String) -> void:
 	if identity_id not in ["worker", "official"]:
 		return
 	identity = identity_id
+	if life_binding != null:
+		var result: V2LifeLoopResult = life_binding.select_identity(identity_id)
+		if not result.success:
+			_show_toast(result.user_message)
+			return
 	detail_person_id = ""
 	person_detail_level = 0
 	person_more_menu_open = false
@@ -333,7 +369,7 @@ func debug_state() -> Dictionary:
 	var country: Dictionary = _focus_country_data()
 	var identities: Dictionary = data.get_document("characters").get("identities", {}) as Dictionary
 	var official: Dictionary = _dictionary_value(identities, "official")
-	return {
+	var state: Dictionary = {
 		"identity": identity,
 		"open_panel": open_panel,
 		"character_section": character_section,
@@ -379,6 +415,15 @@ func debug_state() -> Dictionary:
 		"personal_and_institution_budget_separated": not official.has("budget_source") and official.has("institution_budget_source"),
 		"permission_copy": "需要中央部门批准",
 	}
+	if life_binding != null:
+		state.merge(life_binding.debug_state(), true)
+		state["paused"] = bool(life_binding.time_view().get("paused", true))
+		state["speed"] = int(life_binding.time_view().get("speed", 1))
+		state["identity_switch_visible"] = review_mode
+		state["time_is_static_prototype"] = false
+		state["schedule_panel_available"] = true
+		state["save_load_available"] = true
+	return state
 
 
 func get_panel_rect() -> Rect2:
@@ -391,6 +436,10 @@ func get_panel_rect() -> Rect2:
 			return Rect2(18.0, 98.0, MAX_PRIMARY_PANEL_WIDTH, 516.0)
 		"activity":
 			return Rect2(866.0, 104.0, MAX_PRIMARY_PANEL_WIDTH, 500.0)
+		"schedule":
+			return Rect2(706.0, 86.0, 556.0, 528.0)
+		"developer":
+			return Rect2(654.0, 86.0, 608.0, 528.0)
 	return Rect2()
 
 
@@ -423,6 +472,10 @@ func _draw() -> void:
 				_draw_character_panel()
 			"activity":
 				_draw_activity_panel()
+			"schedule":
+				_draw_schedule_panel()
+			"developer":
+				_draw_developer_panel()
 	if system_menu_open:
 		_draw_system_menu()
 	if not selected_object.is_empty():
@@ -478,9 +531,23 @@ func _draw_vertical_circle_segment(center: Vector2, radius: float, left: float, 
 
 func _draw_time_corner() -> void:
 	_surface(TIME_CORNER, PANEL, Color(GOLD, 0.18), 10)
-	_register(TIME_CORNER, "corner_time", null, "静态原型：时间推进尚未接入。点击选择暂停或速度视觉状态。")
-	_text(TIME_CORNER.position + Vector2(14.0, 24.0), "1900年3月12日", 15, INK)
+	var tooltip: String = "点击控制权威时间" if life_binding != null else "静态原型：时间推进尚未接入。点击选择暂停或速度视觉状态。"
+	_register(TIME_CORNER, "corner_time", null, tooltip)
+	var date_label: String = "1900年3月12日"
 	var state_label: String = "Ⅱ 暂停" if paused else "速度预览 · %d×" % speed
+	if life_binding != null:
+		var time: Dictionary = life_binding.time_view()
+		date_label = "%s · %s" % [
+			str(time.get("date_display", "")), str(time.get("hour_display", "")),
+		]
+		paused = bool(time.get("paused", true))
+		speed = int(time.get("speed", 1))
+		state_label = (
+			"Ⅱ 暂停 · %s" % str(time.get("weekday_display", ""))
+			if paused
+			else "%s · %d×" % [str(time.get("weekday_display", "")), speed]
+		)
+	_text(TIME_CORNER.position + Vector2(14.0, 24.0), date_label, 13 if life_binding != null else 15, INK)
 	_text(TIME_CORNER.position + Vector2(14.0, 47.0), state_label, 10, GOLD)
 	_text(TIME_CORNER.end - Vector2(23.0, 20.0), "⌄", 14, INK_DIM)
 
@@ -488,15 +555,32 @@ func _draw_time_corner() -> void:
 func _draw_system_corner() -> void:
 	_surface(SYSTEM_CORNER, PANEL, Color(GOLD, 0.22), 18)
 	_text(SYSTEM_CORNER.position + Vector2(14.0, 31.0), "⚙", 18, INK)
-	_register(SYSTEM_CORNER, "toggle_system_menu", null, "系统工具：保存、设置、退出占位")
+	_register(SYSTEM_CORNER, "toggle_system_menu", null, "系统工具：保存、载入、设置与开发者工具")
 
 
 func _draw_system_menu() -> void:
-	var rect := Rect2(1048.0, 78.0, 214.0, 132.0)
+	var live: bool = life_binding != null
+	var items: Array = [
+		["保存", "system_save", "原型不会写入存档"],
+		["设置", "system_settings", "静态设置入口占位"],
+		["退出或返回主菜单", "system_return", "独立原型不连接正式菜单"],
+	]
+	if live:
+		items = [
+			["保存进度", "system_save", "保存到 V2.2 固定评审槽"],
+			["载入最近存档", "system_load", "验证后事务式恢复最近评审存档"],
+			["设置", "system_settings", "设置入口占位"],
+			["退出或返回主菜单", "system_return", "独立评审场景保持当前行为"],
+		]
+		if review_mode or life_binding.developer_mode:
+			items.insert(
+				3,
+				["开发者工具", "open_developer", "打开权威时间、账本与结算工具"]
+			)
+	var rect := Rect2(1034.0, 78.0, 228.0, 18.0 + float(items.size()) * 29.0)
 	_surface(rect, PANEL_SOLID, Color(GOLD, 0.3), 10)
 	_register(rect, "consume")
 	_text(rect.position + Vector2(14.0, 23.0), "系统工具", 12, INK_MUTED)
-	var items: Array = [["保存", "system_save", "原型不会写入存档"], ["设置", "system_settings", "静态设置入口占位"], ["退出或返回主菜单", "system_return", "独立原型不连接正式菜单"]]
 	for index: int in range(items.size()):
 		var item: Array = items[index] as Array
 		var row := Rect2(rect.position.x + 9.0, rect.position.y + 34.0 + float(index) * 29.0, rect.size.x - 18.0, 26.0)
@@ -512,17 +596,32 @@ func _draw_character_corner() -> void:
 	_text(CHARACTER_CORNER.position + Vector2(70.0, 23.0), str(person.get("display_name_zh", "")), 16, INK)
 	_text(CHARACTER_CORNER.position + Vector2(70.0, 41.0), str(person.get("native_name", "")), 9, INK_MUTED)
 	_text(CHARACTER_CORNER.position + Vector2(70.0, 60.0), str(person.get("occupation", "")), 11, GOLD)
+	if life_binding != null:
+		var current: Dictionary = person.get("current_activity", {}) as Dictionary
+		_text(
+			CHARACTER_CORNER.position + Vector2(196.0, 60.0),
+			str(current.get("label", "")), 9, GREEN
+		)
 	_text(CHARACTER_CORNER.end - Vector2(22.0, 30.0), "›", 20, INK_DIM)
 
 
 func _draw_activity_corner() -> void:
 	_surface(ACTIVITY_CORNER, PANEL, Color(AMBER, 0.2), 10)
 	_register(ACTIVITY_CORNER, "corner_activity", null, "展开通知、事件与新闻历史")
-	var summary: Dictionary = data.get_document("activity").get("default_summary", {}) as Dictionary
-	var latest: Dictionary = _activity_by_id(str(summary.get("latest_id", "")))
-	_text(ACTIVITY_CORNER.position + Vector2(14.0, 21.0), "! 重要通知", 11, AMBER)
-	_text(ACTIVITY_CORNER.position + Vector2(14.0, 43.0), str(latest.get("title", "")), 13, INK)
-	_text(ACTIVITY_CORNER.position + Vector2(14.0, 63.0), "%s · 未读 %d" % [str(latest.get("time", "")), int(summary.get("unread_count", 0))], 10, INK_MUTED)
+	var latest: Dictionary = {}
+	var unread_count: int = 0
+	if life_binding != null:
+		var live_items: Array[Dictionary] = life_binding.notifications_view(1)
+		if not live_items.is_empty():
+			latest = live_items[0]
+		unread_count = life_binding.simulation.notifications.unread_count()
+	else:
+		var summary: Dictionary = data.get_document("activity").get("default_summary", {}) as Dictionary
+		latest = _activity_by_id(str(summary.get("latest_id", "")))
+		unread_count = int(summary.get("unread_count", 0))
+	_text(ACTIVITY_CORNER.position + Vector2(14.0, 21.0), "! 生活通知" if life_binding != null else "! 重要通知", 11, AMBER)
+	_text(ACTIVITY_CORNER.position + Vector2(14.0, 43.0), str(latest.get("title", "暂无新通知")), 13, INK)
+	_text(ACTIVITY_CORNER.position + Vector2(14.0, 63.0), "%s · 未读 %d" % [str(latest.get("time", "")), unread_count], 10, INK_MUTED)
 	_text(ACTIVITY_CORNER.end - Vector2(24.0, 29.0), "↑", 15, GOLD)
 
 
@@ -631,13 +730,13 @@ func _draw_time_panel() -> void:
 	var rect: Rect2 = _animated_rect(get_panel_rect(), Vector2(0.0, -24.0))
 	_surface(rect, PANEL_SOLID, Color(GOLD, 0.28), 12)
 	_register(rect, "consume")
-	_text(rect.position + Vector2(14.0, 24.0), "速度视觉状态", 12, INK_MUTED)
+	_text(rect.position + Vector2(14.0, 24.0), "权威时间速度" if life_binding != null else "速度视觉状态", 12, INK_MUTED)
 	var pause_row := Rect2(rect.position.x + 8.0, rect.position.y + 34.0, rect.size.x - 16.0, 27.0)
-	_compact_action(pause_row, "Ⅱ  暂停", paused, "pause", null, "静态原型：时间推进尚未接入。")
+	_compact_action(pause_row, "Ⅱ  暂停", paused, "pause", null, "暂停权威时间" if life_binding != null else "静态原型：时间推进尚未接入。")
 	for index: int in range(4):
 		var option: int = [1, 2, 4, 8][index]
 		var row := Rect2(rect.position.x + 8.0, rect.position.y + 64.0 + float(index) * 29.0, rect.size.x - 16.0, 26.0)
-		_compact_action(row, "%d×  速度预览" % option, not paused and speed == option, "speed", option, "仅验证视觉选中状态；不推进正式世界时间。")
+		_compact_action(row, "%d×  运行" % option if life_binding != null else "%d×  速度预览" % option, not paused and speed == option, "speed", option, "按固定小时步进运行" if life_binding != null else "仅验证视觉选中状态；不推进正式世界时间。")
 
 
 func _draw_character_panel() -> void:
@@ -658,6 +757,8 @@ func _draw_character_panel() -> void:
 			_draw_character_summary(body, person)
 		"life_work":
 			_draw_life_work(body, person)
+		"schedule":
+			_draw_schedule_summary(body, person)
 		"relationships":
 			_draw_relationships(body)
 		"owned_orgs":
@@ -668,9 +769,12 @@ func _draw_character_panel() -> void:
 
 func _draw_character_navigation(rect: Rect2) -> void:
 	var items: Array = [
-		["summary", "概览"], ["life_work", "生活与工作"], ["relationships", "关系人物"],
+		["summary", "概览"], ["life_work", "生活与工作"],
+		["relationships", "关系人物"],
 		["owned_orgs", "我的组织"], ["discover_orgs", "探索组织"],
 	]
+	if life_binding != null:
+		items.insert(2, ["schedule", "安排活动"])
 	for index: int in range(items.size()):
 		var item: Array = items[index] as Array
 		var row := Rect2(rect.position.x, rect.position.y + float(index) * 45.0, rect.size.x, 34.0)
@@ -695,10 +799,19 @@ func _draw_character_summary(rect: Rect2, person: Dictionary) -> void:
 	_status_line(rect.position + Vector2(0.0, 169.0), "当前工作", str(person.get("current_work", "")), INK)
 	_status_line(rect.position + Vector2(0.0, 211.0), "主要问题", str(person.get("primary_concern", "")), AMBER)
 	_status_line(rect.position + Vector2(0.0, 253.0), "主要计划", str(person.get("plan", "")), GREEN)
-	_primary_action(Rect2(rect.position.x, rect.end.y - 38.0, 118.0, 30.0), "查看当前计划", "action_detail", str(person.get("plan", "")), "查看目标、效果、资源、权限与下一步骤")
+	_primary_action(
+		Rect2(rect.position.x, rect.end.y - 38.0, 118.0, 30.0),
+		"安排活动" if life_binding != null else "查看当前计划",
+		"open_schedule" if life_binding != null else "action_detail",
+		str(person.get("plan", "")),
+		"打开日期、时间、成本、效果与冲突检查" if life_binding != null else "查看目标、效果、资源、权限与下一步骤"
+	)
 
 
 func _draw_life_work(rect: Rect2, person: Dictionary) -> void:
+	if life_binding != null:
+		_draw_live_life_work(rect, person)
+		return
 	if identity == "worker":
 		_section_heading(rect.position + Vector2(0.0, 15.0), "个人经济")
 		_text(rect.position + Vector2(0.0, 43.0), str(person.get("household", "")), 12, INK)
@@ -732,7 +845,64 @@ func _draw_life_work(rect: Rect2, person: Dictionary) -> void:
 		_text(rect.position + Vector2(0.0, 292.0), str(person.get("upstream_locked", "")), 9, AMBER)
 
 
+func _draw_live_life_work(rect: Rect2, person: Dictionary) -> void:
+	_section_heading(rect.position + Vector2(0.0, 15.0), "个人经济")
+	_text(rect.position + Vector2(0.0, 42.0), "现金  %s" % str(person.get("cash", "")), 11, INK)
+	_text(rect.position + Vector2(0.0, 63.0), "%s · %s" % [str(person.get("income", "")), str(person.get("expenses", ""))], 9, INK_MUTED)
+	_text(rect.position + Vector2(0.0, 84.0), "%s" % str(person.get("weekly_wage", "")), 10, GOLD)
+	_text(rect.position + Vector2(0.0, 104.0), str(person.get("pay_cycle", "")), 8, INK_MUTED)
+	_divider(rect.position + Vector2(0.0, 120.0), rect.size.x)
+	_section_heading(rect.position + Vector2(0.0, 145.0), "生活物资与住房")
+	_text(rect.position + Vector2(0.0, 173.0), "食品  %d 人日 · 用品  %d 人日" % [
+		int(person.get("food_stock", 0)), int(person.get("essentials_stock", 0)),
+	], 10, INK)
+	_text(rect.position + Vector2(0.0, 195.0), "下次房租  %s" % str(person.get("next_rent", "")), 8, INK_MUTED)
+	_text(rect.position + Vector2(0.0, 217.0), "欠款  %d 生丁" % int(person.get("rent_arrears_centimes", 0)), 10, AMBER if int(person.get("rent_arrears_centimes", 0)) > 0 else GREEN)
+	_divider(rect.position + Vector2(0.0, 234.0), rect.size.x)
+	_section_heading(rect.position + Vector2(0.0, 259.0), "今日出勤")
+	var attendance: Dictionary = person.get("today_attendance", {}) as Dictionary
+	_text(rect.position + Vector2(0.0, 287.0), "义务 %d · 出勤 %d · 请假 %d" % [
+		int(attendance.get("required", 0)),
+		int(attendance.get("attended", 0)),
+		int(attendance.get("authorized_leave", 0)),
+	], 9, INK)
+	_text(rect.position + Vector2(0.0, 307.0), "缺勤 %d · 加班 %d · 风险 %d" % [
+		int(attendance.get("unauthorized_absence", 0)),
+		int(attendance.get("overtime", 0)),
+		int(person.get("employment_risk", 0)),
+	], 9, AMBER)
+
+
+func _draw_schedule_summary(rect: Rect2, person: Dictionary) -> void:
+	_section_heading(rect.position + Vector2(0.0, 15.0), "当前与下一活动")
+	var current: Dictionary = person.get("current_activity", {}) as Dictionary
+	var next: Dictionary = person.get("next_activity", {}) as Dictionary
+	_text(rect.position + Vector2(0.0, 45.0), "当前  %s" % str(current.get("label", "无")), 11, GREEN)
+	_text(rect.position + Vector2(0.0, 67.0), str(current.get("location_name", "")), 9, INK_MUTED)
+	_text(rect.position + Vector2(0.0, 91.0), "结束  %s" % str(current.get("end_display", "")), 8, INK_DIM)
+	_text(rect.position + Vector2(0.0, 124.0), "下一  %s" % str(next.get("label", "无")), 11, GOLD)
+	_text(rect.position + Vector2(0.0, 146.0), str(next.get("start_display", "")), 8, INK_MUTED)
+	_divider(rect.position + Vector2(0.0, 168.0), rect.size.x)
+	_text(rect.position + Vector2(0.0, 194.0), "Demo 简化规则：无薪请假自动批准", 9, BLUE)
+	_text(rect.position + Vector2(0.0, 218.0), "所有活动先检查时间、现金、工作义务与疲劳。", 9, INK_MUTED)
+	_primary_action(Rect2(rect.position.x, rect.position.y + 252.0, 138.0, 30.0), "打开安排面板", "open_schedule", null, "选择活动并查看实时后果")
+
+
 func _draw_relationships(rect: Rect2) -> void:
+	if life_binding != null:
+		var person: Dictionary = _identity_data()
+		var relationship: Dictionary = person.get("relationship", {}) as Dictionary
+		_section_heading(rect.position + Vector2(0.0, 15.0), "让娜·勒鲁瓦")
+		if relationship.is_empty():
+			_text(rect.position + Vector2(0.0, 48.0), "当前人物没有可用关系行动", 10, INK_MUTED)
+			return
+		_text(rect.position + Vector2(0.0, 48.0), "熟悉度  %d" % int(relationship.get("familiarity", 0)), 11, INK)
+		_text(rect.position + Vector2(0.0, 72.0), "信任  %d" % int(relationship.get("trust", 0)), 11, INK)
+		_text(rect.position + Vector2(0.0, 102.0), "最近联系  %s" % str(relationship.get("last_contact_datetime", "尚未联系")), 9, INK_MUTED)
+		var interactions: Array = relationship.get("recent_interactions", []) as Array
+		_text(rect.position + Vector2(0.0, 130.0), "最近互动 %d 条 · 每24小时最多一次" % interactions.size(), 9, GOLD)
+		_primary_action(Rect2(rect.position.x, rect.position.y + 165.0, 116.0, 30.0), "联系让娜", "schedule_activity", "social_contact", "耗时1小时；熟悉度+5、信任+2、压力-20")
+		return
 	_section_heading(rect.position + Vector2(0.0, 15.0), "有限关系人物")
 	var relationships: Array = data.get_document("relationships").get("relationships", []) as Array
 	for index: int in range(mini(relationships.size(), 4)):
@@ -786,9 +956,13 @@ func _draw_activity_panel() -> void:
 	_surface(rect, PANEL_SOLID, Color(GOLD, 0.28), 12)
 	_register(rect, "consume")
 	_close_control(rect)
-	_text(rect.position + Vector2(20.0, 35.0), "世界动态", 22, INK)
-	_text(rect.position + Vector2(20.0, 58.0), "通知即时提醒 · 事件可操作 · 新闻来自公开渠道", 10, INK_MUTED)
-	var items: Array = data.get_document("activity").get("items", []) as Array
+	_text(rect.position + Vector2(20.0, 35.0), "生活动态" if life_binding != null else "世界动态", 22, INK)
+	_text(rect.position + Vector2(20.0, 58.0), "个人提醒 · 组织信息 · 公开背景新闻" if life_binding != null else "通知即时提醒 · 事件可操作 · 新闻来自公开渠道", 10, INK_MUTED)
+	var items: Array = (
+		life_binding.notifications_view(20)
+		if life_binding != null
+		else data.get_document("activity").get("items", []) as Array
+	)
 	var y: float = rect.position.y + 86.0
 	var last_kind: String = ""
 	for item_variant: Variant in items:
@@ -807,6 +981,226 @@ func _draw_activity_panel() -> void:
 		y += 58.0
 		if y > rect.end.y - 32.0:
 			break
+
+
+func _draw_schedule_panel() -> void:
+	if life_binding == null:
+		return
+	var rect: Rect2 = _animated_rect(get_panel_rect(), Vector2(30.0, 0.0))
+	_surface(rect, PANEL_SOLID, Color(GOLD, 0.36), 12)
+	_register(rect, "consume")
+	_close_control(rect)
+	var person: Dictionary = _identity_data()
+	_text(rect.position + Vector2(20.0, 34.0), "安排活动", 22, INK)
+	_text(rect.position + Vector2(20.0, 57.0), "%s · 面板打开时自动暂停" % str(person.get("display_name_zh", "")), 10, INK_MUTED)
+	_section_heading(rect.position + Vector2(20.0, 82.0), "今日连续日程")
+	var timeline: Array[Dictionary] = life_binding.today_schedule()
+	var y: float = rect.position.y + 112.0
+	for index: int in range(mini(6, timeline.size())):
+		var segment: Dictionary = timeline[index]
+		var start_value: Dictionary = V2DateTime.from_total_hour(int(segment.get("start_hour", 0)))
+		var end_value: Dictionary = V2DateTime.from_total_hour(int(segment.get("end_hour", 0)))
+		var source: String = str(segment.get("source", "default_routine"))
+		var status: String = str(segment.get("display_status", "planned"))
+		_text(Vector2(rect.position.x + 20.0, y), "%02d:00—%02d:00" % [
+			int(start_value["hour"]), int(end_value["hour"]),
+		], 9, INK_DIM)
+		_text(Vector2(rect.position.x + 105.0, y), "%s · %s · %s" % [
+			V2LifeLoopUiBinding._activity_label(str(segment.get("activity_type", ""))),
+			_source_label(source), _schedule_status_label(status),
+		], 9, INK if status != "completed" else INK_MUTED)
+		if source == "player" and status == "planned":
+			_register(
+				Rect2(rect.position.x + 16.0, y - 15.0, rect.size.x - 32.0, 19.0),
+				"schedule_cancel_activity",
+				str(segment.get("activity_id", "")),
+				"点击取消尚未开始的玩家活动"
+			)
+		y += 20.0
+	_divider(Vector2(rect.position.x + 20.0, rect.position.y + 238.0), rect.size.x - 40.0)
+	_section_heading(Vector2(rect.position.x + 20.0, rect.position.y + 259.0), "选择活动")
+	var actions: Array = [
+		["购买食品", "purchase_food", "1小时 · 560生丁 · +7人日"],
+		["购买用品", "purchase_essentials", "1小时 · 140生丁 · +7人日"],
+		["休息", "rest", "1小时 · 恢复疲劳与压力"],
+		["睡眠", "sleep", "8小时 · 优先恢复"],
+		["加班", "overtime", "17:00后 · 最多2小时"],
+		["上午请假", "authorized_leave", "Demo：无薪自动批准；时长10小时为全天"],
+		["联系让娜", "social_contact", "18:00—21:00 · 24小时冷却"],
+		["工会例会", "union_activity", "星期三19:00—21:00"],
+	]
+	for index: int in range(actions.size()):
+		var item: Array = actions[index] as Array
+		var column: int = index % 4
+		var row_index: int = index / 4
+		var row := Rect2(
+			rect.position.x + 20.0 + float(column) * 128.0,
+			rect.position.y + 277.0 + float(row_index) * 31.0,
+			120.0, 25.0
+		)
+		_compact_action(
+			row,
+			str(item[0]),
+			str(schedule_form.get("activity_type", "")) == str(item[1]),
+			"schedule_activity",
+			str(item[1]),
+			str(item[2])
+		)
+	if not schedule_form.is_empty():
+		var start_hour: int = int(schedule_form.get("start_hour", 0))
+		var duration: int = int(schedule_form.get("duration_hours", 1))
+		var activity_type: String = str(schedule_form.get("activity_type", ""))
+		_divider(Vector2(rect.position.x + 20.0, rect.position.y + 342.0), rect.size.x - 40.0)
+		_text(
+			rect.position + Vector2(20.0, 365.0),
+			"%s · %s—%s" % [
+				V2LifeLoopUiBinding._activity_label(activity_type),
+				V2DateTime.display_from_total_hour(start_hour),
+				V2DateTime.display_from_total_hour(start_hour + duration),
+			],
+			10,
+			INK
+		)
+		_text(
+			rect.position + Vector2(20.0, 385.0),
+			"地点：%s · 时间成本：%d 小时 · 现金成本：%d 生丁" % [
+				life_binding.simulation.config.location_name(
+					str(schedule_form.get("location_id", ""))
+				),
+				duration,
+				int(schedule_form.get("required_cash_centimes", 0)),
+			],
+			8,
+			INK_MUTED
+		)
+		_text(
+			rect.position + Vector2(20.0, 403.0),
+			"预期：%s · 工作影响：%s" % [
+				str(schedule_form.get("expected_effects", "")),
+				"替换合同义务" if activity_type in ["authorized_leave", "absence"]
+				else "不替换正式工作",
+			],
+			8,
+			INK_MUTED
+		)
+		_text(
+			rect.position + Vector2(20.0, 421.0),
+			"✓ 待权威冲突检查 · 可调整日期、时间和持续时长",
+			8,
+			GREEN
+		)
+		var adjustments: Array = [
+			["日期 -1", -24], ["日期 +1", 24],
+			["时间 -1", -1], ["时间 +1", 1],
+			["时长 -1", -1001], ["时长 +1", 1001],
+		]
+		for index: int in range(adjustments.size()):
+			var adjustment: Array = adjustments[index] as Array
+			_compact_action(
+				Rect2(
+					rect.position.x + 20.0 + float(index) * 85.0,
+					rect.position.y + 439.0,
+					79.0,
+					24.0
+				),
+				str(adjustment[0]),
+				false,
+				"schedule_adjust",
+				int(adjustment[1]),
+				"调整后仍由权威层检查营业时间、合同义务与冲突"
+			)
+		_primary_action(
+			Rect2(rect.position.x + 20.0, rect.position.y + 474.0, 160.0, 30.0),
+			"确认安排",
+			"schedule_confirm",
+			null,
+			"提交到正式日程服务"
+		)
+		_text_link(
+			Rect2(rect.position.x + 194.0, rect.position.y + 476.0, 82.0, 26.0),
+			"取消编辑",
+			"schedule_cancel_edit",
+			null,
+			"放弃尚未提交的编辑"
+		)
+	if not life_binding.last_command_result.success:
+		_text(rect.position + Vector2(20.0, rect.end.y - 18.0), "× %s" % life_binding.last_command_result.user_message, 9, RED)
+	elif schedule_form.is_empty() and not life_binding.last_command_result.user_message.is_empty():
+		_text(rect.position + Vector2(20.0, rect.end.y - 18.0), "✓ %s" % life_binding.last_command_result.user_message, 9, GREEN)
+
+
+func _draw_developer_panel() -> void:
+	if life_binding == null:
+		return
+	var rect: Rect2 = _animated_rect(get_panel_rect(), Vector2(30.0, 0.0))
+	_surface(rect, PANEL_SOLID, Color(BLUE, 0.42), 12)
+	_register(rect, "consume")
+	_close_control(rect)
+	var debug: Dictionary = life_binding.simulation.get_debug_state()
+	_text(rect.position + Vector2(20.0, 34.0), "V2.2 开发者工具", 21, INK)
+	_text(rect.position + Vector2(20.0, 57.0), "权威时间与生活结算 · 打开时自动暂停", 10, INK_MUTED)
+	var household: Dictionary = life_binding.simulation.households.household_for_person(
+		life_binding.simulation.selected_person_id
+	)
+	var current_activity: Dictionary = debug.get("current_activity", {}) as Dictionary
+	var next_activity: Dictionary = debug.get("next_activity", {}) as Dictionary
+	var rows: Array = [
+		["权威时间", debug.get("authoritative_datetime", "")],
+		["下一小时", debug.get("next_hour", "")],
+		["速度", "%s · %s" % [debug.get("speed", 1), "暂停" if debug.get("paused", true) else "运行"]],
+		["当前活动", current_activity.get("activity_type", "无")],
+		["下一活动", next_activity.get("activity_type", "无")],
+		["未来日程", "%s 小时 · %s" % [debug.get("future_48_hours", 0), debug.get("generation_reason", "")]],
+		["工资周期", debug.get("current_pay_period", "")],
+		["工资幂等键", JSON.stringify(debug.get("processed_pay_keys", [])).left(54)],
+		["房租到期", V2DateTime.iso_from_total_hour(int(debug.get("rent_due", -1)))],
+		["日消费键", JSON.stringify(debug.get("daily_consumption_keys", [])).right(54)],
+		["现金", "%s 生丁" % debug.get("cash", 0)],
+		["库存", "食品 %s · 用品 %s" % [
+			household.get("food_stock_person_days", 0),
+			household.get("essentials_stock_person_days", 0),
+		]],
+		["账本校验", "一致" if debug.get("ledger_valid", false) else "失败"],
+		["状态", JSON.stringify(debug.get("condition", {}))],
+		["就业风险", life_binding.simulation.employment.employment_risk(
+			life_binding.simulation.selected_person_id
+		)],
+		["存档版本", debug.get("schema_version", "")],
+		["小时性能", "最近 %sµs · 最大 %sµs" % [debug.get("last_hour_processing_usec", 0), debug.get("maximum_hour_processing_usec", 0)]],
+		["最近因果", JSON.stringify(debug.get("recent_causal_events", [])).left(54)],
+	]
+	for index: int in range(rows.size()):
+		var row: Array = rows[index] as Array
+		var column: int = index / 9
+		var row_index: int = index % 9
+		var x: float = rect.position.x + 20.0 + float(column) * 282.0
+		var y: float = rect.position.y + 84.0 + float(row_index) * 25.0
+		_text(Vector2(x, y), str(row[0]), 8, INK_DIM)
+		_text(Vector2(x + 76.0, y), str(row[1]).left(34), 8, INK)
+	_divider(rect.position + Vector2(20.0, 318.0), rect.size.x - 40.0)
+	var commands: Array = [
+		["推进1小时", "step_hour"], ["推进1天", "step_day"],
+		["到4月1日", "set_date:1900-04-01T08:00:00"],
+		["强制发薪", "force_pay"], ["强制房租", "force_rent"],
+		["制造缺勤", "absence"], ["现金归零", "cash_zero"],
+		["食品归零", "food_zero"], ["用品归零", "essentials_zero"],
+		["健康400", "health_low"], ["疲劳950", "fatigue_max"],
+		["压力700", "stress_high"], ["清除玩家日程", "clear_schedule"], ["保存", "save"],
+		["载入", "load"], ["重置场景", "reset"],
+	]
+	for index: int in range(commands.size()):
+		var command: Array = commands[index] as Array
+		var column: int = index % 5
+		var row_index: int = index / 5
+		_compact_action(
+			Rect2(
+				rect.position.x + 20.0 + float(column) * 112.0,
+				rect.position.y + 336.0 + float(row_index) * 36.0,
+				104.0, 28.0
+			),
+			str(command[0]), false, "developer_command", str(command[1]),
+			"开发者命令：%s" % str(command[0])
+		)
 
 
 func _draw_object_card() -> void:
@@ -1049,24 +1443,106 @@ func _activate(action: String, payload: Variant) -> void:
 			action_detail_id = ""
 			queue_redraw()
 		"toggle_pause":
-			paused = not paused
-			_show_toast("静态原型：仅切换时间视觉状态")
+			toggle_pause_command()
+			if life_binding == null:
+				_show_toast("静态原型：仅切换时间视觉状态")
 		"pause":
+			if life_binding != null:
+				life_binding.set_paused(true)
 			paused = true
 			queue_redraw()
 		"speed":
 			speed = int(payload)
 			paused = false
+			if life_binding != null:
+				life_binding.set_speed(speed)
 			queue_redraw()
 		"system_save":
-			_show_toast("保存仅为视觉占位 · 原型不写入 user://")
+			if life_binding != null:
+				var save_result: V2LifeLoopResult = life_binding.save_review()
+				_show_toast(("✓ " if save_result.success else "× ") + save_result.user_message)
+			else:
+				_show_toast("保存仅为视觉占位 · 原型不写入 user://")
+		"system_load":
+			if life_binding != null:
+				var load_result: V2LifeLoopResult = life_binding.load_review()
+				_show_toast(("✓ " if load_result.success else "× ") + load_result.user_message)
 		"system_settings":
 			_show_toast("设置入口为静态占位")
 		"system_return":
 			_show_toast("独立原型不连接正式菜单")
+		"open_schedule":
+			open_panel_named("schedule")
+		"schedule_activity":
+			if life_binding != null:
+				var proposal: V2LifeLoopResult = life_binding.activity_proposal(
+					str(payload)
+				)
+				if proposal.success:
+					schedule_form = proposal.data.duplicate(true)
+					_show_toast("✓ 已载入建议时间，可调整后确认")
+				else:
+					schedule_form.clear()
+					life_binding.last_command_result = proposal
+					_show_toast("× " + proposal.user_message)
+				queue_redraw()
+		"schedule_adjust":
+			if not schedule_form.is_empty():
+				var adjustment: int = int(payload)
+				if absi(adjustment) == 1001:
+					var duration_delta: int = 1 if adjustment > 0 else -1
+					schedule_form["duration_hours"] = clampi(
+						int(schedule_form.get("duration_hours", 1))
+						+ duration_delta,
+						1,
+						12
+					)
+				else:
+					schedule_form["start_hour"] = maxi(
+						life_binding.simulation.clock.total_hours,
+						int(schedule_form.get("start_hour", 0)) + adjustment
+					)
+				queue_redraw()
+		"schedule_confirm":
+			if life_binding != null and not schedule_form.is_empty():
+				var confirmed: V2LifeLoopResult = life_binding.submit_activity(
+					str(schedule_form.get("activity_type", "")),
+					int(schedule_form.get("start_hour", -1)),
+					int(schedule_form.get("duration_hours", 1))
+				)
+				_show_toast(("✓ " if confirmed.success else "× ") + confirmed.user_message)
+				if confirmed.success:
+					schedule_form.clear()
+				queue_redraw()
+		"schedule_cancel_edit":
+			schedule_form.clear()
+			queue_redraw()
+		"schedule_cancel_activity":
+			if life_binding != null:
+				var cancelled: V2LifeLoopResult = life_binding.cancel_activity(
+					str(payload)
+				)
+				_show_toast(
+					("✓ " if cancelled.success else "× ")
+					+ cancelled.user_message
+				)
+		"open_developer":
+			system_menu_open = false
+			if life_binding != null and (review_mode or life_binding.developer_mode):
+				open_panel_named("developer")
+			else:
+				_show_toast("开发者工具只在评审或开发者模式可用")
+		"developer_command":
+			if life_binding != null:
+				var developer_result: V2LifeLoopResult = life_binding.developer_command(str(payload))
+				_show_toast(("✓ " if developer_result.success else "× ") + developer_result.user_message)
 		"person_action":
 			person_more_menu_open = false
-			_show_toast("%s · 静态关系行为入口" % str(payload))
+			if life_binding != null and str(payload) == "联系":
+				var contact_result: V2LifeLoopResult = life_binding.schedule_next("social_contact")
+				_show_toast(("✓ " if contact_result.success else "× ") + contact_result.user_message)
+			else:
+				_show_toast("%s · 静态关系行为入口" % str(payload))
 		"organization_action", "context_action", "object_action", "activity_item":
 			_show_toast("%s · 静态上下文入口" % str(payload if payload != null else "更多"))
 		_:
@@ -1074,6 +1550,8 @@ func _activate(action: String, payload: Variant) -> void:
 
 
 func _identity_data() -> Dictionary:
+	if life_binding != null:
+		return life_binding.person_view()
 	var identities: Dictionary = data.get_document("characters").get("identities", {}) as Dictionary
 	return _dictionary_value(identities, identity)
 
@@ -1104,6 +1582,23 @@ func _organization_record(context: Dictionary) -> Dictionary:
 
 
 func _relationship_by_id(person_id: String) -> Dictionary:
+	if life_binding != null and person_id == "jeanne":
+		var static_record: Dictionary = {}
+		for relation_variant: Variant in data.get_document("relationships").get("relationships", []):
+			var candidate: Dictionary = relation_variant as Dictionary
+			if str(candidate.get("id", "")) == person_id:
+				static_record = candidate.duplicate(true)
+				break
+		var live: Dictionary = (
+			life_binding.person_view().get("relationship", {}) as Dictionary
+		)
+		if not live.is_empty():
+			static_record["familiarity"] = "%d/1000" % int(live.get("familiarity", 0))
+			static_record["trust"] = "%d/1000" % int(live.get("trust", 0))
+			static_record["last_interaction"] = str(
+				live.get("last_contact_datetime", "尚未联系")
+			)
+		return static_record
 	for relation_variant: Variant in data.get_document("relationships").get("relationships", []):
 		var relation: Dictionary = relation_variant as Dictionary
 		if str(relation.get("id", "")) == person_id:
@@ -1299,3 +1794,35 @@ func _draw_avatar(center: Vector2, radius: float) -> void:
 func _dictionary_value(source: Dictionary, key: String) -> Dictionary:
 	var value: Variant = source.get(key, {})
 	return value as Dictionary if value is Dictionary else {}
+
+
+func _on_life_view_changed() -> void:
+	if life_binding == null:
+		return
+	var time: Dictionary = life_binding.time_view()
+	paused = bool(time.get("paused", true))
+	speed = int(time.get("speed", 1))
+	identity = life_binding.identity_id()
+	queue_redraw()
+
+
+static func _source_label(source: String) -> String:
+	var labels: Dictionary = {
+		"contract": "合同",
+		"default_routine": "默认",
+		"player": "玩家",
+		"npc_rule": "NPC规则",
+		"system": "系统",
+	}
+	return str(labels.get(source, source))
+
+
+static func _schedule_status_label(status: String) -> String:
+	var labels: Dictionary = {
+		"completed": "已完成",
+		"active": "正在进行",
+		"planned": "计划",
+		"missed": "缺勤",
+		"cancelled": "取消",
+	}
+	return str(labels.get(status, status))

@@ -1,0 +1,118 @@
+{
+  "config_version": 1,
+  "prototype_balance_value": true,
+  "people": [
+    {
+      "person_id": "character_pierre_lefevre",
+      "identity_id": "worker",
+      "display_name_zh": "皮埃尔·勒费弗尔",
+      "native_name": "Pierre Lefèvre",
+      "occupation": "机械装配工",
+      "organization_name": "里尔机械制造公司",
+      "organization_id": "enterprise_lille_mechanical",
+      "position_name": "机械装配工",
+      "union_id": "union_metalworkers_nord",
+      "union_name": "北部省金属工人工会",
+      "union_position": "第三车间联络员",
+      "household_id": "household:pierre",
+      "home_location_id": "location:pierre_home",
+      "workplace_location_id": "location:lille_mechanical_factory",
+      "initial_location_id": "location:pierre_home",
+      "initial_condition": {
+        "health": 900,
+        "fatigue": 250,
+        "stress": 200,
+        "sleep_hours_current_day": 0,
+        "consecutive_short_sleep_days": 0,
+        "consecutive_food_deficit_days": 0
+      },
+      "default_schedule": {
+        "sleep_start_hour": 22,
+        "sleep_end_hour": 6,
+        "commute_to_work_start_hour": 6,
+        "meal_break_start_hour": 12,
+        "commute_home_start_hour": 17
+      }
+    },
+    {
+      "person_id": "character_albert_dumont",
+      "identity_id": "official",
+      "display_name_zh": "阿尔贝·迪蒙",
+      "native_name": "Albert Dumont",
+      "occupation": "行政公务员",
+      "organization_name": "北部省省政府",
+      "organization_id": "workplace_prefecture_nord",
+      "position_name": "公共工程处事务员",
+      "institution_id": "prefecture_nord",
+      "institution_name": "北部省省政府",
+      "institution_budget_display": "北部省预算拨款 · 公共工程处执行额 68%",
+      "household_id": "household:albert",
+      "home_location_id": "location:albert_home",
+      "workplace_location_id": "location:prefecture_nord",
+      "initial_location_id": "location:albert_home",
+      "initial_condition": {
+        "health": 880,
+        "fatigue": 310,
+        "stress": 330,
+        "sleep_hours_current_day": 0,
+        "consecutive_short_sleep_days": 0,
+        "consecutive_food_deficit_days": 0
+      },
+      "default_schedule": {
+        "sleep_start_hour": 22,
+        "sleep_end_hour": 6,
+        "commute_to_work_start_hour": 7,
+        "meal_break_start_hour": 12,
+        "commute_home_start_hour": 17
+      }
+    }
+  ],
+  "households": [
+    {
+      "household_id": "household:pierre",
+      "member_ids": ["character_pierre_lefevre"],
+      "home_location_id": "location:pierre_home",
+      "cash_centimes": 1800,
+      "food_stock_person_days": 3,
+      "essentials_stock_person_days": 5,
+      "rent_amount_centimes": 600,
+      "rent_period": "days:7",
+      "first_rent_due_datetime": "1900-03-19T06:00:00",
+      "rent_arrears_centimes": 0,
+      "other_debt_centimes": 0
+    },
+    {
+      "household_id": "household:albert",
+      "member_ids": ["character_albert_dumont"],
+      "home_location_id": "location:albert_home",
+      "cash_centimes": 8600,
+      "food_stock_person_days": 7,
+      "essentials_stock_person_days": 7,
+      "rent_amount_centimes": 2200,
+      "rent_period": "monthly",
+      "first_rent_due_datetime": "1900-04-01T18:00:00",
+      "rent_arrears_centimes": 0,
+      "other_debt_centimes": 0
+    }
+  ],
+  "relationships": [
+    {
+      "person_id": "character_pierre_lefevre",
+      "target_id": "jeanne",
+      "target_display_name_zh": "让娜·勒鲁瓦",
+      "target_native_name": "Jeanne Leroy",
+      "familiarity": 55,
+      "trust": 62,
+      "recent_interactions": [],
+      "last_contact_datetime": ""
+    }
+  ],
+  "organization_memberships": [
+    {
+      "person_id": "character_pierre_lefevre",
+      "organization_id": "union_metalworkers_nord",
+      "participation": 20,
+      "recent_activities": []
+    }
+  ]
+}

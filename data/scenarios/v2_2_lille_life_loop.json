@@ -1,0 +1,12 @@
+{
+  "scenario_id": "v2_2_lille_life_loop",
+  "schema_version": 1,
+  "prototype_balance_value": true,
+  "start_datetime": "1900-03-12T05:00:00",
+  "default_selected_person_id": "character_pierre_lefevre",
+  "random_seed": 2201900,
+  "review_save_path": "user://saves/v2_2_review_slot.json",
+  "window_title": "《1900》— V2.2 人物生活闭环原型",
+  "developer_mode_allowed": true,
+  "formal_space_transport_deferred_to": "V2.3"
+}

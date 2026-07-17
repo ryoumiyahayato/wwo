@@ -4,6 +4,8 @@ extends RefCounted
 const SAVE_VERSION: int = 1
 const MANUAL_PATH: String = "user://saves/manual.json"
 const AUTOSAVE_PATH: String = "user://saves/autosave.json"
+const V2_2_SCHEMA_VERSION: String = "v2_2_life_loop_1"
+const V2_2_REVIEW_PATH: String = "user://saves/v2_2_review_slot.json"
 const CONFIG_VERSIONS: Dictionary = {
 	"world": 1,
 	"clock": 1,
@@ -18,6 +20,200 @@ const REQUIRED_CHARACTER_FIELDS: Array[String] = [
 	"known_tendencies", "current_status", "is_active", "random_mode",
 	"random_category", "is_challenge_start", "generation_seed", "random_state",
 ]
+
+
+func build_v2_2_snapshot(simulation: V2LifeLoopSimulation) -> Dictionary:
+	if simulation == null or not simulation.initialized:
+		return {}
+	var snapshot: Dictionary = simulation.get_persistent_state()
+	snapshot["integrity"] = {
+		"algorithm": "sha256",
+		"digest": _v2_2_digest(snapshot),
+	}
+	return snapshot
+
+
+func save_v2_2_review(
+	simulation: V2LifeLoopSimulation,
+	path: String = V2_2_REVIEW_PATH
+) -> SaveOperationResult:
+	var snapshot: Dictionary = build_v2_2_snapshot(simulation)
+	var errors: Array[String] = validate_v2_2_snapshot(snapshot)
+	if not errors.is_empty():
+		return SaveOperationResult.fail("invalid_snapshot", "; ".join(errors), path)
+	if not path.begins_with("user://") or not path.ends_with(".json"):
+		return SaveOperationResult.fail(
+			"unsafe_path", "存档只能写入 user:// 下的 JSON 文件", path
+		)
+	var write_error: String = _write_atomic_json(path, snapshot)
+	if not write_error.is_empty():
+		return SaveOperationResult.fail("write_error", write_error, path)
+	return SaveOperationResult.ok(path, snapshot)
+
+
+func load_v2_2_review(
+	path: String = V2_2_REVIEW_PATH
+) -> SaveOperationResult:
+	if not path.begins_with("user://") or not path.ends_with(".json"):
+		return SaveOperationResult.fail(
+			"unsafe_path", "存档只能从 user:// 下的 JSON 文件读取", path
+		)
+	var primary: SaveOperationResult = _load_v2_2_file(path)
+	if primary.success:
+		return primary
+	var backup_path: String = path + ".bak"
+	if FileAccess.file_exists(backup_path):
+		var backup: SaveOperationResult = _load_v2_2_file(backup_path)
+		if backup.success:
+			backup.path = path
+			backup.message = "主存档不可用，已读取安全备份"
+			return backup
+	return primary
+
+
+func restore_v2_2_review(
+	snapshot: Dictionary,
+	simulation: V2LifeLoopSimulation
+) -> SaveOperationResult:
+	var errors: Array[String] = validate_v2_2_snapshot(snapshot)
+	if not errors.is_empty() or simulation == null:
+		return SaveOperationResult.fail(
+			"invalid_snapshot",
+			"; ".join(errors) if not errors.is_empty() else "V2.2 生活模拟不可用"
+		)
+	var result: V2LifeLoopResult = simulation.restore_persistent_state(snapshot)
+	if not result.success:
+		return SaveOperationResult.fail(
+			result.error_code, result.user_message, V2_2_REVIEW_PATH
+		)
+	return SaveOperationResult.ok(V2_2_REVIEW_PATH, snapshot)
+
+
+func validate_v2_2_snapshot(snapshot: Dictionary) -> Array[String]:
+	var errors: Array[String] = []
+	if str(snapshot.get("schema_version", "")) != V2_2_SCHEMA_VERSION:
+		errors.append("不支持的 V2.2 存档版本")
+	for field: String in [
+		"person_states", "person_locations", "current_activities", "future_schedules",
+		"employment_contracts", "pay_period_states", "households", "cash",
+		"inventories", "rent_due_dates", "rent_arrears", "ledgers", "health",
+		"fatigue", "stress", "employment_risk", "short_sleep_counters",
+		"food_deficit_counters", "relationships", "union_participation",
+		"schedule_state", "household_state", "condition_state",
+		"processed_idempotency_keys", "notifications", "integrity",
+	]:
+		if not snapshot.get(field) is Dictionary:
+			errors.append("V2.2 字段 %s 必须是对象" % field)
+	for field: String in [
+		"recent_completed_activities", "attendance_records", "causal_events",
+		"processed_hour_keys",
+	]:
+		if not snapshot.get(field) is Array:
+			errors.append("V2.2 字段 %s 必须是数组" % field)
+	for field: String in [
+		"scenario_id", "current_datetime", "selected_person_id",
+	]:
+		if str(snapshot.get(field, "")).is_empty():
+			errors.append("V2.2 字段 %s 不能为空" % field)
+	if errors.is_empty():
+		var integrity: Dictionary = snapshot["integrity"] as Dictionary
+		if (
+			str(integrity.get("algorithm", "")) != "sha256"
+			or str(integrity.get("digest", "")) != _v2_2_digest(snapshot)
+		):
+			errors.append("V2.2 存档完整性校验失败")
+	return errors
+
+
+func _load_v2_2_file(path: String) -> SaveOperationResult:
+	if not FileAccess.file_exists(path):
+		return SaveOperationResult.fail("not_found", "存档不存在", path)
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		return SaveOperationResult.fail(
+			"read_error", error_string(FileAccess.get_open_error()), path
+		)
+	var parser := JSON.new()
+	var parse_error: Error = parser.parse(file.get_as_text())
+	if parse_error != OK:
+		return SaveOperationResult.fail(
+			"malformed_json",
+			"第 %d 行：%s" % [parser.get_error_line(), parser.get_error_message()],
+			path
+		)
+	if not parser.data is Dictionary:
+		return SaveOperationResult.fail("invalid_snapshot", "存档根节点必须是对象", path)
+	var snapshot: Dictionary = _v2_2_canonical(parser.data) as Dictionary
+	var errors: Array[String] = validate_v2_2_snapshot(snapshot)
+	if not errors.is_empty():
+		var code: String = (
+			"incompatible_version"
+			if errors.has("不支持的 V2.2 存档版本")
+			else "invalid_snapshot"
+		)
+		return SaveOperationResult.fail(code, "; ".join(errors), path)
+	return SaveOperationResult.ok(path, snapshot)
+
+
+func _write_atomic_json(path: String, snapshot: Dictionary) -> String:
+	var absolute_path: String = ProjectSettings.globalize_path(path)
+	var make_error: Error = DirAccess.make_dir_recursive_absolute(
+		absolute_path.get_base_dir()
+	)
+	if make_error != OK:
+		return error_string(make_error)
+	var temporary_path: String = absolute_path + ".tmp"
+	var backup_path: String = absolute_path + ".bak"
+	var file := FileAccess.open(temporary_path, FileAccess.WRITE)
+	if file == null:
+		return error_string(FileAccess.get_open_error())
+	file.store_string(JSON.stringify(snapshot, "\t", false))
+	file.flush()
+	file.close()
+	var had_primary: bool = FileAccess.file_exists(absolute_path)
+	if FileAccess.file_exists(backup_path):
+		DirAccess.remove_absolute(backup_path)
+	if had_primary:
+		var backup_error: Error = DirAccess.rename_absolute(absolute_path, backup_path)
+		if backup_error != OK:
+			DirAccess.remove_absolute(temporary_path)
+			return error_string(backup_error)
+	var replace_error: Error = DirAccess.rename_absolute(temporary_path, absolute_path)
+	if replace_error != OK:
+		if FileAccess.file_exists(backup_path):
+			DirAccess.rename_absolute(backup_path, absolute_path)
+		DirAccess.remove_absolute(temporary_path)
+		return error_string(replace_error)
+	if FileAccess.file_exists(backup_path):
+		DirAccess.remove_absolute(backup_path)
+	return ""
+
+
+static func _v2_2_digest(snapshot: Dictionary) -> String:
+	var payload: Dictionary = snapshot.duplicate(true)
+	payload.erase("integrity")
+	return JSON.stringify(_v2_2_canonical(payload), "", true).sha256_text()
+
+
+static func _v2_2_canonical(value: Variant) -> Variant:
+	if value is Dictionary:
+		var source: Dictionary = value as Dictionary
+		var keys: Array[String] = []
+		for raw_key: Variant in source.keys():
+			keys.append(str(raw_key))
+		keys.sort()
+		var result: Dictionary = {}
+		for key: String in keys:
+			result[key] = _v2_2_canonical(source[key])
+		return result
+	if value is Array:
+		var result: Array = []
+		for item: Variant in value as Array:
+			result.append(_v2_2_canonical(item))
+		return result
+	if typeof(value) == TYPE_FLOAT and is_equal_approx(float(value), roundf(float(value))):
+		return int(roundf(float(value)))
+	return value
 
 
 func build_snapshot(clock: SimulationClock, map_service: MapControlService) -> Dictionary:

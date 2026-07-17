@@ -79,8 +79,18 @@ $tests = @(
     @{ Name = 'P0-R1 safety regression'; Script = 'res://tests/p0_r1_safety_regression.gd' },
     @{ Name = 'State consistency regression'; Script = 'res://tests/state_consistency_regression.gd' },
     @{ Name = 'Simulation quality regression'; Script = 'res://tests/simulation_quality_regression.gd' },
-    @{ Name = 'Codex audit regression'; Script = 'res://tests/codex_audit_regression.gd' }
-    @{ Name = '1000-seed early-game reachability'; Script = 'res://tests/early_game_reachability_regression.gd' }
+    @{ Name = 'Codex audit regression'; Script = 'res://tests/codex_audit_regression.gd' },
+    @{ Name = '1000-seed early-game reachability'; Script = 'res://tests/early_game_reachability_regression.gd' },
+    @{ Name = 'V2.2 life-loop smoke'; Script = 'res://tests/v2_2/v2_2_life_loop_smoke.gd' },
+    @{ Name = 'V2.2 time'; Script = 'res://tests/v2_2/v2_2_time_test.gd' },
+    @{ Name = 'V2.2 schedule'; Script = 'res://tests/v2_2/v2_2_schedule_test.gd' },
+    @{ Name = 'V2.2 employment'; Script = 'res://tests/v2_2/v2_2_employment_test.gd' },
+    @{ Name = 'V2.2 household'; Script = 'res://tests/v2_2/v2_2_household_test.gd' },
+    @{ Name = 'V2.2 condition'; Script = 'res://tests/v2_2/v2_2_condition_test.gd' },
+    @{ Name = 'V2.2 save/load'; Script = 'res://tests/v2_2/v2_2_save_load_test.gd' },
+    @{ Name = 'V2.2 determinism'; Script = 'res://tests/v2_2/v2_2_determinism_test.gd' },
+    @{ Name = 'V2.2 UI binding'; Script = 'res://tests/v2_2/v2_2_ui_binding_test.gd' },
+    @{ Name = 'V2.2 performance guard'; Script = 'res://tests/v2_2/v2_2_performance_guard_test.gd' }
 )
 
 foreach ($test in $tests) {

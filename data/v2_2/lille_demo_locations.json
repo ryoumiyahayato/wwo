@@ -1,0 +1,46 @@
+{
+  "config_version": 1,
+  "prototype_balance_value": true,
+  "commute_duration_hours": 1,
+  "locations": [
+    {
+      "id": "location:pierre_home",
+      "name": "皮埃尔住所",
+      "city_id": "lille",
+      "kind": "home"
+    },
+    {
+      "id": "location:lille_mechanical_factory",
+      "name": "里尔机械制造公司",
+      "city_id": "lille",
+      "organization_id": "enterprise_lille_mechanical",
+      "kind": "workplace"
+    },
+    {
+      "id": "location:lille_living_goods",
+      "name": "里尔生活物资购买地点",
+      "city_id": "lille",
+      "kind": "shop"
+    },
+    {
+      "id": "location:metalworkers_nord_hall",
+      "name": "北部省金属工人工会活动地点",
+      "city_id": "lille",
+      "organization_id": "union_metalworkers_nord",
+      "kind": "organization"
+    },
+    {
+      "id": "location:albert_home",
+      "name": "阿尔贝住所",
+      "city_id": "lille",
+      "kind": "home"
+    },
+    {
+      "id": "location:prefecture_nord",
+      "name": "北部省省政府",
+      "city_id": "lille",
+      "institution_id": "prefecture_nord",
+      "kind": "workplace"
+    }
+  ]
+}

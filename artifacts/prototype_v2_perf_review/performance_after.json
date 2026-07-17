@@ -1,0 +1,1215 @@
+{
+	"engine_version": {
+		"build": "official",
+		"hash": "7d41c59c457bd5a245092b4e7eb2d833e3b3f8c3",
+		"hex": 263683,
+		"major": 4,
+		"minor": 6,
+		"patch": 3,
+		"status": "stable",
+		"string": "4.6.3-stable (official)",
+		"timestamp": 0
+	},
+	"memory_stability": {
+		"duration_seconds": 20.07578,
+		"frames": 2881,
+		"map_metrics": {
+			"camera_transform_updates": 2881,
+			"click_candidates": 0,
+			"current_lod": "lod4",
+			"dirty_flags": {
+				"camera_dirty": false,
+				"geometry_layer_dirty": false,
+				"labels_dirty": false,
+				"overlay_dirty": false,
+				"selection_dirty": false,
+				"zoom_bucket_dirty": false
+			},
+			"draw_calls": 8,
+			"draw_ms_samples": [
+				1.335,
+				1.229,
+				1.377,
+				0.093,
+				0.177,
+				0.001,
+				0.023,
+				0.035
+			],
+			"hotspots": {
+				"draw_administrative": {
+					"calls": 1,
+					"max_usec": 1377,
+					"total_usec": 1377
+				},
+				"draw_cities_ports": {
+					"calls": 1,
+					"max_usec": 177,
+					"total_usec": 177
+				},
+				"draw_countries": {
+					"calls": 1,
+					"max_usec": 1335,
+					"total_usec": 1335
+				},
+				"draw_hud": {
+					"calls": 1,
+					"max_usec": 23,
+					"total_usec": 23
+				},
+				"draw_labels": {
+					"calls": 1,
+					"max_usec": 35,
+					"total_usec": 35
+				},
+				"draw_macro_regions": {
+					"calls": 1,
+					"max_usec": 1229,
+					"total_usec": 1229
+				},
+				"draw_selection": {
+					"calls": 1,
+					"max_usec": 1,
+					"total_usec": 1
+				},
+				"draw_transport": {
+					"calls": 1,
+					"max_usec": 93,
+					"total_usec": 93
+				}
+			},
+			"json_parses_during_camera": 0,
+			"label_cache_buckets": [
+				"lod0",
+				"lod3",
+				"lod4"
+			],
+			"label_cache_reuses": 2881,
+			"label_rebuilds": 1,
+			"layer_redraws": {
+				"administrative": 1,
+				"cities_ports": 1,
+				"countries": 1,
+				"hud": 1,
+				"labels": 1,
+				"macro_regions": 1,
+				"selection": 1,
+				"transport": 1
+			},
+			"projection_calls": 0,
+			"queue_redraw_calls": 8,
+			"runtime_merge_calls": 0,
+			"runtime_triangulation_calls": 0,
+			"transport_rebuilds": 0,
+			"traversal_totals": {
+				"administrative_units": 35,
+				"cities": 8,
+				"country_features": 7,
+				"labels": 10,
+				"ports": 3,
+				"rail_segments": 6,
+				"regions": 6,
+				"shipping_routes": 2
+			},
+			"visible_counts": {
+				"administrative_units": 35,
+				"cities": 8,
+				"countries": 7,
+				"institutions": 6,
+				"labels": 10,
+				"organizations": 4,
+				"ports": 3,
+				"rail": 6,
+				"regions": 6,
+				"road": 3,
+				"shipping": 2
+			},
+			"visible_queries": 1
+		},
+		"memory_mib_delta": 0.00728225708007813,
+		"memory_mib_end": 120.591052055359,
+		"memory_mib_max": 120.591052055359,
+		"memory_mib_start": 120.583769798279,
+		"scenario": "nord_96x_unrecorded_drag_20s"
+	},
+	"phase": "after",
+	"renderer": "gl_compatibility",
+	"scenarios": [
+		{
+			"average_fps": 143.080269230873,
+			"draw_calls_average": 1279.0,
+			"draw_primitives_average": 48290.0,
+			"frame_ms_average": 6.98908385744234,
+			"frame_ms_max": 15.272,
+			"frame_ms_p95": 8.723,
+			"frames": 2862,
+			"label_restore_ms": 32.709,
+			"map_draw_ms_average": 1.446875,
+			"map_draw_ms_max": 10.801,
+			"map_draw_ms_p95": 10.801,
+			"map_metrics": {
+				"camera_transform_updates": 2862,
+				"click_candidates": 0,
+				"current_lod": "lod0",
+				"dirty_flags": {
+					"camera_dirty": false,
+					"geometry_layer_dirty": false,
+					"labels_dirty": false,
+					"overlay_dirty": false,
+					"selection_dirty": false,
+					"zoom_bucket_dirty": false
+				},
+				"draw_calls": 8,
+				"draw_ms_samples": [
+					10.801,
+					0.002,
+					0.003,
+					0.018,
+					0.178,
+					0.001,
+					0.001,
+					0.571
+				],
+				"hotspots": {
+					"draw_administrative": {
+						"calls": 1,
+						"max_usec": 3,
+						"total_usec": 3
+					},
+					"draw_cities_ports": {
+						"calls": 1,
+						"max_usec": 178,
+						"total_usec": 178
+					},
+					"draw_countries": {
+						"calls": 1,
+						"max_usec": 10801,
+						"total_usec": 10801
+					},
+					"draw_hud": {
+						"calls": 1,
+						"max_usec": 1,
+						"total_usec": 1
+					},
+					"draw_labels": {
+						"calls": 1,
+						"max_usec": 571,
+						"total_usec": 571
+					},
+					"draw_macro_regions": {
+						"calls": 1,
+						"max_usec": 2,
+						"total_usec": 2
+					},
+					"draw_selection": {
+						"calls": 1,
+						"max_usec": 1,
+						"total_usec": 1
+					},
+					"draw_transport": {
+						"calls": 1,
+						"max_usec": 18,
+						"total_usec": 18
+					}
+				},
+				"json_parses_during_camera": 0,
+				"label_cache_buckets": [
+					"lod0"
+				],
+				"label_cache_reuses": 2862,
+				"label_rebuilds": 1,
+				"layer_redraws": {
+					"administrative": 1,
+					"cities_ports": 1,
+					"countries": 1,
+					"hud": 1,
+					"labels": 1,
+					"macro_regions": 1,
+					"selection": 1,
+					"transport": 1
+				},
+				"projection_calls": 0,
+				"queue_redraw_calls": 8,
+				"runtime_merge_calls": 0,
+				"runtime_triangulation_calls": 0,
+				"transport_rebuilds": 0,
+				"traversal_totals": {
+					"cities": 25,
+					"country_features": 177,
+					"labels": 10,
+					"shipping_routes": 3
+				},
+				"visible_counts": {
+					"administrative_units": 0,
+					"cities": 25,
+					"countries": 177,
+					"institutions": 7,
+					"labels": 10,
+					"organizations": 4,
+					"ports": 8,
+					"rail": 9,
+					"regions": 0,
+					"road": 3,
+					"shipping": 3
+				},
+				"visible_queries": 1
+			},
+			"memory_mib_end": 116.585618019104,
+			"memory_mib_max": 116.585618019104,
+			"memory_mib_start": 112.523858070374,
+			"minimum_fps": 65.4793085385018,
+			"one_percent_low_fps": 85.0629465804695,
+			"process_ms_average": 13.6412935010484,
+			"process_ms_p95": 55.528,
+			"scenario": "world_far_drag"
+		},
+		{
+			"average_fps": 144.162885265189,
+			"draw_calls_average": 817.0,
+			"draw_primitives_average": 71118.0,
+			"frame_ms_average": 6.93659812760054,
+			"frame_ms_max": 11.478,
+			"frame_ms_p95": 7.453,
+			"frames": 2884,
+			"label_restore_ms": 26.395,
+			"map_draw_ms_average": 1.758,
+			"map_draw_ms_max": 5.248,
+			"map_draw_ms_p95": 5.248,
+			"map_metrics": {
+				"camera_transform_updates": 2884,
+				"click_candidates": 0,
+				"current_lod": "lod3",
+				"dirty_flags": {
+					"camera_dirty": false,
+					"geometry_layer_dirty": false,
+					"labels_dirty": false,
+					"overlay_dirty": false,
+					"selection_dirty": false,
+					"zoom_bucket_dirty": false
+				},
+				"draw_calls": 8,
+				"draw_ms_samples": [
+					5.248,
+					1.791,
+					4.757,
+					0.099,
+					0.379,
+					0.0,
+					0.027,
+					1.763
+				],
+				"hotspots": {
+					"draw_administrative": {
+						"calls": 1,
+						"max_usec": 4757,
+						"total_usec": 4757
+					},
+					"draw_cities_ports": {
+						"calls": 1,
+						"max_usec": 379,
+						"total_usec": 379
+					},
+					"draw_countries": {
+						"calls": 1,
+						"max_usec": 5248,
+						"total_usec": 5248
+					},
+					"draw_hud": {
+						"calls": 1,
+						"max_usec": 27,
+						"total_usec": 27
+					},
+					"draw_labels": {
+						"calls": 1,
+						"max_usec": 1763,
+						"total_usec": 1763
+					},
+					"draw_macro_regions": {
+						"calls": 1,
+						"max_usec": 1791,
+						"total_usec": 1791
+					},
+					"draw_selection": {
+						"calls": 1,
+						"max_usec": 0,
+						"total_usec": 0
+					},
+					"draw_transport": {
+						"calls": 1,
+						"max_usec": 99,
+						"total_usec": 99
+					}
+				},
+				"json_parses_during_camera": 0,
+				"label_cache_buckets": [
+					"lod0",
+					"lod3"
+				],
+				"label_cache_reuses": 2884,
+				"label_rebuilds": 1,
+				"layer_redraws": {
+					"administrative": 1,
+					"cities_ports": 1,
+					"countries": 1,
+					"hud": 1,
+					"labels": 1,
+					"macro_regions": 1,
+					"selection": 1,
+					"transport": 1
+				},
+				"projection_calls": 0,
+				"queue_redraw_calls": 8,
+				"runtime_merge_calls": 0,
+				"runtime_triangulation_calls": 0,
+				"transport_rebuilds": 0,
+				"traversal_totals": {
+					"administrative_units": 98,
+					"cities": 15,
+					"country_features": 40,
+					"labels": 33,
+					"ports": 6,
+					"rail_segments": 9,
+					"regions": 9,
+					"shipping_routes": 3
+				},
+				"visible_counts": {
+					"administrative_units": 98,
+					"cities": 15,
+					"countries": 40,
+					"institutions": 7,
+					"labels": 33,
+					"organizations": 4,
+					"ports": 6,
+					"rail": 9,
+					"regions": 9,
+					"road": 3,
+					"shipping": 3
+				},
+				"visible_queries": 1
+			},
+			"memory_mib_end": 118.784014701843,
+			"memory_mib_max": 118.784014701843,
+			"memory_mib_start": 114.685000419617,
+			"minimum_fps": 87.123192193762,
+			"one_percent_low_fps": 117.716303708064,
+			"process_ms_average": 11.1408970180306,
+			"process_ms_p95": 11.622,
+			"scenario": "france_drag"
+		},
+		{
+			"average_fps": 144.177659671634,
+			"draw_calls_average": 384.0,
+			"draw_primitives_average": 56137.0,
+			"frame_ms_average": 6.93588730929265,
+			"frame_ms_max": 8.106,
+			"frame_ms_p95": 7.289,
+			"frames": 2884,
+			"label_restore_ms": 19.32,
+			"map_draw_ms_average": 1.2145,
+			"map_draw_ms_max": 3.247,
+			"map_draw_ms_p95": 3.247,
+			"map_metrics": {
+				"camera_transform_updates": 2884,
+				"click_candidates": 0,
+				"current_lod": "lod4",
+				"dirty_flags": {
+					"camera_dirty": false,
+					"geometry_layer_dirty": false,
+					"labels_dirty": false,
+					"overlay_dirty": false,
+					"selection_dirty": false,
+					"zoom_bucket_dirty": false
+				},
+				"draw_calls": 8,
+				"draw_ms_samples": [
+					2.568,
+					1.97,
+					3.247,
+					0.237,
+					0.539,
+					0.002,
+					0.062,
+					1.091
+				],
+				"hotspots": {
+					"draw_administrative": {
+						"calls": 1,
+						"max_usec": 3247,
+						"total_usec": 3247
+					},
+					"draw_cities_ports": {
+						"calls": 1,
+						"max_usec": 539,
+						"total_usec": 539
+					},
+					"draw_countries": {
+						"calls": 1,
+						"max_usec": 2568,
+						"total_usec": 2568
+					},
+					"draw_hud": {
+						"calls": 1,
+						"max_usec": 62,
+						"total_usec": 62
+					},
+					"draw_labels": {
+						"calls": 1,
+						"max_usec": 1091,
+						"total_usec": 1091
+					},
+					"draw_macro_regions": {
+						"calls": 1,
+						"max_usec": 1970,
+						"total_usec": 1970
+					},
+					"draw_selection": {
+						"calls": 1,
+						"max_usec": 2,
+						"total_usec": 2
+					},
+					"draw_transport": {
+						"calls": 1,
+						"max_usec": 237,
+						"total_usec": 237
+					}
+				},
+				"json_parses_during_camera": 0,
+				"label_cache_buckets": [
+					"lod0",
+					"lod3",
+					"lod4"
+				],
+				"label_cache_reuses": 2884,
+				"label_rebuilds": 1,
+				"layer_redraws": {
+					"administrative": 1,
+					"cities_ports": 1,
+					"countries": 1,
+					"hud": 1,
+					"labels": 1,
+					"macro_regions": 1,
+					"selection": 1,
+					"transport": 1
+				},
+				"projection_calls": 0,
+				"queue_redraw_calls": 8,
+				"runtime_merge_calls": 0,
+				"runtime_triangulation_calls": 0,
+				"transport_rebuilds": 0,
+				"traversal_totals": {
+					"administrative_units": 33,
+					"cities": 8,
+					"country_features": 7,
+					"labels": 9,
+					"ports": 3,
+					"rail_segments": 6,
+					"regions": 6,
+					"shipping_routes": 2
+				},
+				"visible_counts": {
+					"administrative_units": 33,
+					"cities": 8,
+					"countries": 7,
+					"institutions": 6,
+					"labels": 9,
+					"organizations": 4,
+					"ports": 3,
+					"rail": 6,
+					"regions": 6,
+					"road": 3,
+					"shipping": 2
+				},
+				"visible_queries": 1
+			},
+			"memory_mib_end": 120.742089271545,
+			"memory_mib_max": 120.742089271545,
+			"memory_mib_start": 116.646500587463,
+			"minimum_fps": 123.365408339502,
+			"one_percent_low_fps": 132.222662964432,
+			"process_ms_average": 10.303363730929,
+			"process_ms_p95": 8.61,
+			"scenario": "nord_96x_drag"
+		},
+		{
+			"average_fps": 144.205390062584,
+			"draw_calls_average": 419.0,
+			"draw_primitives_average": 57449.0,
+			"frame_ms_average": 6.93455355285961,
+			"frame_ms_max": 10.909,
+			"frame_ms_p95": 7.294,
+			"frames": 2885,
+			"label_restore_ms": 11.212,
+			"map_draw_ms_average": 0.597125,
+			"map_draw_ms_max": 1.645,
+			"map_draw_ms_p95": 1.645,
+			"map_metrics": {
+				"camera_transform_updates": 2885,
+				"click_candidates": 0,
+				"current_lod": "lod4",
+				"dirty_flags": {
+					"camera_dirty": false,
+					"geometry_layer_dirty": false,
+					"labels_dirty": false,
+					"overlay_dirty": false,
+					"selection_dirty": false,
+					"zoom_bucket_dirty": false
+				},
+				"draw_calls": 8,
+				"draw_ms_samples": [
+					1.645,
+					0.987,
+					1.363,
+					0.095,
+					0.272,
+					0.001,
+					0.029,
+					0.385
+				],
+				"hotspots": {
+					"draw_administrative": {
+						"calls": 1,
+						"max_usec": 1363,
+						"total_usec": 1363
+					},
+					"draw_cities_ports": {
+						"calls": 1,
+						"max_usec": 272,
+						"total_usec": 272
+					},
+					"draw_countries": {
+						"calls": 1,
+						"max_usec": 1645,
+						"total_usec": 1645
+					},
+					"draw_hud": {
+						"calls": 1,
+						"max_usec": 29,
+						"total_usec": 29
+					},
+					"draw_labels": {
+						"calls": 1,
+						"max_usec": 385,
+						"total_usec": 385
+					},
+					"draw_macro_regions": {
+						"calls": 1,
+						"max_usec": 987,
+						"total_usec": 987
+					},
+					"draw_selection": {
+						"calls": 1,
+						"max_usec": 1,
+						"total_usec": 1
+					},
+					"draw_transport": {
+						"calls": 1,
+						"max_usec": 95,
+						"total_usec": 95
+					}
+				},
+				"json_parses_during_camera": 0,
+				"label_cache_buckets": [
+					"lod0",
+					"lod3",
+					"lod4"
+				],
+				"label_cache_reuses": 2885,
+				"label_rebuilds": 1,
+				"layer_redraws": {
+					"administrative": 1,
+					"cities_ports": 1,
+					"countries": 1,
+					"hud": 1,
+					"labels": 1,
+					"macro_regions": 1,
+					"selection": 1,
+					"transport": 1
+				},
+				"projection_calls": 0,
+				"queue_redraw_calls": 8,
+				"runtime_merge_calls": 0,
+				"runtime_triangulation_calls": 0,
+				"transport_rebuilds": 0,
+				"traversal_totals": {
+					"administrative_units": 33,
+					"cities": 8,
+					"country_features": 7,
+					"labels": 9,
+					"ports": 3,
+					"rail_segments": 6,
+					"regions": 6,
+					"shipping_routes": 2
+				},
+				"visible_counts": {
+					"administrative_units": 33,
+					"cities": 8,
+					"countries": 7,
+					"institutions": 6,
+					"labels": 9,
+					"organizations": 4,
+					"ports": 3,
+					"rail": 6,
+					"regions": 6,
+					"road": 3,
+					"shipping": 2
+				},
+				"visible_queries": 1
+			},
+			"memory_mib_end": 122.275311470032,
+			"memory_mib_max": 122.275311470032,
+			"memory_mib_start": 118.209210395813,
+			"minimum_fps": 91.6674305619214,
+			"one_percent_low_fps": 132.608407373027,
+			"process_ms_average": 11.9782644714038,
+			"process_ms_p95": 50.937,
+			"scenario": "nord_96x_character_panel_drag"
+		},
+		{
+			"average_fps": 144.043252133029,
+			"draw_calls_average": 384.0,
+			"draw_primitives_average": 56133.0,
+			"frame_ms_average": 6.94235922330097,
+			"frame_ms_max": 7.919,
+			"frame_ms_p95": 7.287,
+			"frames": 721,
+			"label_restore_ms": 9.619,
+			"map_draw_ms_average": 0.554125,
+			"map_draw_ms_max": 1.36,
+			"map_draw_ms_p95": 1.36,
+			"map_metrics": {
+				"camera_transform_updates": 721,
+				"click_candidates": 0,
+				"current_lod": "lod4",
+				"dirty_flags": {
+					"camera_dirty": false,
+					"geometry_layer_dirty": false,
+					"labels_dirty": false,
+					"overlay_dirty": false,
+					"selection_dirty": false,
+					"zoom_bucket_dirty": false
+				},
+				"draw_calls": 8,
+				"draw_ms_samples": [
+					1.33,
+					1.011,
+					1.36,
+					0.093,
+					0.308,
+					0.001,
+					0.029,
+					0.301
+				],
+				"hotspots": {
+					"draw_administrative": {
+						"calls": 1,
+						"max_usec": 1360,
+						"total_usec": 1360
+					},
+					"draw_cities_ports": {
+						"calls": 1,
+						"max_usec": 308,
+						"total_usec": 308
+					},
+					"draw_countries": {
+						"calls": 1,
+						"max_usec": 1330,
+						"total_usec": 1330
+					},
+					"draw_hud": {
+						"calls": 1,
+						"max_usec": 29,
+						"total_usec": 29
+					},
+					"draw_labels": {
+						"calls": 1,
+						"max_usec": 301,
+						"total_usec": 301
+					},
+					"draw_macro_regions": {
+						"calls": 1,
+						"max_usec": 1011,
+						"total_usec": 1011
+					},
+					"draw_selection": {
+						"calls": 1,
+						"max_usec": 1,
+						"total_usec": 1
+					},
+					"draw_transport": {
+						"calls": 1,
+						"max_usec": 93,
+						"total_usec": 93
+					}
+				},
+				"json_parses_during_camera": 0,
+				"label_cache_buckets": [
+					"lod0",
+					"lod3",
+					"lod4"
+				],
+				"label_cache_reuses": 721,
+				"label_rebuilds": 1,
+				"layer_redraws": {
+					"administrative": 1,
+					"cities_ports": 1,
+					"countries": 1,
+					"hud": 1,
+					"labels": 1,
+					"macro_regions": 1,
+					"selection": 1,
+					"transport": 1
+				},
+				"projection_calls": 0,
+				"queue_redraw_calls": 8,
+				"runtime_merge_calls": 0,
+				"runtime_triangulation_calls": 0,
+				"transport_rebuilds": 0,
+				"traversal_totals": {
+					"administrative_units": 34,
+					"cities": 8,
+					"country_features": 7,
+					"labels": 9,
+					"ports": 3,
+					"rail_segments": 6,
+					"regions": 6,
+					"shipping_routes": 2
+				},
+				"visible_counts": {
+					"administrative_units": 34,
+					"cities": 8,
+					"countries": 7,
+					"institutions": 6,
+					"labels": 9,
+					"organizations": 4,
+					"ports": 3,
+					"rail": 6,
+					"regions": 6,
+					"road": 3,
+					"shipping": 2
+				},
+				"visible_queries": 1
+			},
+			"memory_mib_end": 120.419779777527,
+			"memory_mib_max": 120.419779777527,
+			"memory_mib_start": 119.328898429871,
+			"minimum_fps": 126.278570526582,
+			"one_percent_low_fps": 133.582687683676,
+			"process_ms_average": 9.43321220527045,
+			"process_ms_p95": 17.994,
+			"scenario": "nord_96x_population_drag"
+		},
+		{
+			"average_fps": 144.009475463961,
+			"draw_calls_average": 385.0,
+			"draw_primitives_average": 56137.0,
+			"frame_ms_average": 6.94398751733703,
+			"frame_ms_max": 10.11,
+			"frame_ms_p95": 7.276,
+			"frames": 721,
+			"label_restore_ms": 9.298,
+			"map_draw_ms_average": 0.540875,
+			"map_draw_ms_max": 1.652,
+			"map_draw_ms_p95": 1.652,
+			"map_metrics": {
+				"camera_transform_updates": 721,
+				"click_candidates": 0,
+				"current_lod": "lod4",
+				"dirty_flags": {
+					"camera_dirty": false,
+					"geometry_layer_dirty": false,
+					"labels_dirty": false,
+					"overlay_dirty": false,
+					"selection_dirty": false,
+					"zoom_bucket_dirty": false
+				},
+				"draw_calls": 8,
+				"draw_ms_samples": [
+					1.652,
+					1.023,
+					1.328,
+					0.09,
+					0.175,
+					0.001,
+					0.024,
+					0.034
+				],
+				"hotspots": {
+					"draw_administrative": {
+						"calls": 1,
+						"max_usec": 1328,
+						"total_usec": 1328
+					},
+					"draw_cities_ports": {
+						"calls": 1,
+						"max_usec": 175,
+						"total_usec": 175
+					},
+					"draw_countries": {
+						"calls": 1,
+						"max_usec": 1652,
+						"total_usec": 1652
+					},
+					"draw_hud": {
+						"calls": 1,
+						"max_usec": 24,
+						"total_usec": 24
+					},
+					"draw_labels": {
+						"calls": 1,
+						"max_usec": 34,
+						"total_usec": 34
+					},
+					"draw_macro_regions": {
+						"calls": 1,
+						"max_usec": 1023,
+						"total_usec": 1023
+					},
+					"draw_selection": {
+						"calls": 1,
+						"max_usec": 1,
+						"total_usec": 1
+					},
+					"draw_transport": {
+						"calls": 1,
+						"max_usec": 90,
+						"total_usec": 90
+					}
+				},
+				"json_parses_during_camera": 0,
+				"label_cache_buckets": [
+					"lod0",
+					"lod3",
+					"lod4"
+				],
+				"label_cache_reuses": 721,
+				"label_rebuilds": 1,
+				"layer_redraws": {
+					"administrative": 1,
+					"cities_ports": 1,
+					"countries": 1,
+					"hud": 1,
+					"labels": 1,
+					"macro_regions": 1,
+					"selection": 1,
+					"transport": 1
+				},
+				"projection_calls": 0,
+				"queue_redraw_calls": 8,
+				"runtime_merge_calls": 0,
+				"runtime_triangulation_calls": 0,
+				"transport_rebuilds": 0,
+				"traversal_totals": {
+					"administrative_units": 34,
+					"cities": 8,
+					"country_features": 7,
+					"labels": 9,
+					"ports": 3,
+					"rail_segments": 6,
+					"regions": 6,
+					"shipping_routes": 2
+				},
+				"visible_counts": {
+					"administrative_units": 34,
+					"cities": 8,
+					"countries": 7,
+					"institutions": 6,
+					"labels": 9,
+					"organizations": 4,
+					"ports": 3,
+					"rail": 6,
+					"regions": 6,
+					"road": 3,
+					"shipping": 2
+				},
+				"visible_queries": 1
+			},
+			"memory_mib_end": 120.712628364563,
+			"memory_mib_max": 120.712628364563,
+			"memory_mib_start": 119.692769050598,
+			"minimum_fps": 98.9119683481701,
+			"one_percent_low_fps": 133.850890108419,
+			"process_ms_average": 8.43660055478494,
+			"process_ms_p95": 12.434,
+			"scenario": "nord_96x_market_drag"
+		},
+		{
+			"average_fps": 144.001123208761,
+			"draw_calls_average": 385.0,
+			"draw_primitives_average": 56137.0,
+			"frame_ms_average": 6.94439027777777,
+			"frame_ms_max": 10.701,
+			"frame_ms_p95": 7.265,
+			"frames": 720,
+			"label_restore_ms": 8.259,
+			"map_draw_ms_average": 0.494875,
+			"map_draw_ms_max": 1.349,
+			"map_draw_ms_p95": 1.349,
+			"map_metrics": {
+				"camera_transform_updates": 720,
+				"click_candidates": 0,
+				"current_lod": "lod4",
+				"dirty_flags": {
+					"camera_dirty": false,
+					"geometry_layer_dirty": false,
+					"labels_dirty": false,
+					"overlay_dirty": false,
+					"selection_dirty": false,
+					"zoom_bucket_dirty": false
+				},
+				"draw_calls": 8,
+				"draw_ms_samples": [
+					1.313,
+					0.985,
+					1.349,
+					0.086,
+					0.172,
+					0.001,
+					0.023,
+					0.03
+				],
+				"hotspots": {
+					"draw_administrative": {
+						"calls": 1,
+						"max_usec": 1349,
+						"total_usec": 1349
+					},
+					"draw_cities_ports": {
+						"calls": 1,
+						"max_usec": 172,
+						"total_usec": 172
+					},
+					"draw_countries": {
+						"calls": 1,
+						"max_usec": 1313,
+						"total_usec": 1313
+					},
+					"draw_hud": {
+						"calls": 1,
+						"max_usec": 23,
+						"total_usec": 23
+					},
+					"draw_labels": {
+						"calls": 1,
+						"max_usec": 30,
+						"total_usec": 30
+					},
+					"draw_macro_regions": {
+						"calls": 1,
+						"max_usec": 985,
+						"total_usec": 985
+					},
+					"draw_selection": {
+						"calls": 1,
+						"max_usec": 1,
+						"total_usec": 1
+					},
+					"draw_transport": {
+						"calls": 1,
+						"max_usec": 86,
+						"total_usec": 86
+					}
+				},
+				"json_parses_during_camera": 0,
+				"label_cache_buckets": [
+					"lod0",
+					"lod3",
+					"lod4"
+				],
+				"label_cache_reuses": 720,
+				"label_rebuilds": 1,
+				"layer_redraws": {
+					"administrative": 1,
+					"cities_ports": 1,
+					"countries": 1,
+					"hud": 1,
+					"labels": 1,
+					"macro_regions": 1,
+					"selection": 1,
+					"transport": 1
+				},
+				"projection_calls": 0,
+				"queue_redraw_calls": 8,
+				"runtime_merge_calls": 0,
+				"runtime_triangulation_calls": 0,
+				"transport_rebuilds": 0,
+				"traversal_totals": {
+					"administrative_units": 34,
+					"cities": 8,
+					"country_features": 7,
+					"labels": 8,
+					"ports": 3,
+					"rail_segments": 6,
+					"regions": 6,
+					"shipping_routes": 2
+				},
+				"visible_counts": {
+					"administrative_units": 34,
+					"cities": 8,
+					"countries": 7,
+					"institutions": 6,
+					"labels": 8,
+					"organizations": 4,
+					"ports": 3,
+					"rail": 6,
+					"regions": 6,
+					"road": 3,
+					"shipping": 2
+				},
+				"visible_queries": 1
+			},
+			"memory_mib_end": 121.255595207214,
+			"memory_mib_max": 121.255595207214,
+			"memory_mib_start": 120.23711681366,
+			"minimum_fps": 93.4492103541725,
+			"one_percent_low_fps": 132.59082471493,
+			"process_ms_average": 8.84421944444447,
+			"process_ms_p95": 13.2,
+			"scenario": "nord_96x_war_drag"
+		},
+		{
+			"average_fps": 144.047800822225,
+			"draw_calls_average": 381.36,
+			"draw_primitives_average": 55711.66,
+			"frame_ms_average": 6.94214,
+			"frame_ms_max": 11.754,
+			"frame_ms_p95": 7.289,
+			"frames": 100,
+			"map_draw_ms_average": 0.6135,
+			"map_draw_ms_max": 1.984,
+			"map_draw_ms_p95": 1.984,
+			"map_metrics": {
+				"camera_transform_updates": 125,
+				"click_candidates": 0,
+				"current_lod": "lod4",
+				"dirty_flags": {
+					"camera_dirty": true,
+					"geometry_layer_dirty": false,
+					"labels_dirty": false,
+					"overlay_dirty": false,
+					"selection_dirty": false,
+					"zoom_bucket_dirty": false
+				},
+				"draw_calls": 16,
+				"draw_ms_samples": [
+					1.431,
+					1.383,
+					1.984,
+					0.105,
+					0.193,
+					0.001,
+					0.026,
+					0.747,
+					1.141,
+					0.862,
+					1.476,
+					0.103,
+					0.219,
+					0.001,
+					0.095,
+					0.049
+				],
+				"hotspots": {
+					"draw_administrative": {
+						"calls": 2,
+						"max_usec": 1984,
+						"total_usec": 3460
+					},
+					"draw_cities_ports": {
+						"calls": 2,
+						"max_usec": 219,
+						"total_usec": 412
+					},
+					"draw_countries": {
+						"calls": 2,
+						"max_usec": 1431,
+						"total_usec": 2572
+					},
+					"draw_hud": {
+						"calls": 2,
+						"max_usec": 95,
+						"total_usec": 121
+					},
+					"draw_labels": {
+						"calls": 2,
+						"max_usec": 747,
+						"total_usec": 796
+					},
+					"draw_macro_regions": {
+						"calls": 2,
+						"max_usec": 1383,
+						"total_usec": 2245
+					},
+					"draw_selection": {
+						"calls": 2,
+						"max_usec": 1,
+						"total_usec": 2
+					},
+					"draw_transport": {
+						"calls": 2,
+						"max_usec": 105,
+						"total_usec": 208
+					}
+				},
+				"json_parses_during_camera": 0,
+				"label_cache_buckets": [
+					"lod0",
+					"lod3",
+					"lod4"
+				],
+				"label_cache_reuses": 123,
+				"label_rebuilds": 2,
+				"layer_redraws": {
+					"administrative": 2,
+					"cities_ports": 2,
+					"countries": 2,
+					"hud": 2,
+					"labels": 2,
+					"macro_regions": 2,
+					"selection": 2,
+					"transport": 2
+				},
+				"projection_calls": 0,
+				"queue_redraw_calls": 16,
+				"runtime_merge_calls": 0,
+				"runtime_triangulation_calls": 0,
+				"transport_rebuilds": 0,
+				"traversal_totals": {
+					"administrative_units": 69,
+					"cities": 17,
+					"country_features": 14,
+					"labels": 26,
+					"ports": 7,
+					"rail_segments": 12,
+					"regions": 12,
+					"shipping_routes": 4
+				},
+				"visible_counts": {
+					"administrative_units": 35,
+					"cities": 9,
+					"countries": 7,
+					"institutions": 6,
+					"labels": 13,
+					"organizations": 4,
+					"ports": 4,
+					"rail": 6,
+					"regions": 6,
+					"road": 3,
+					"shipping": 2
+				},
+				"visible_queries": 2
+			},
+			"memory_mib_end": 120.678984642029,
+			"memory_mib_max": 120.678984642029,
+			"memory_mib_start": 120.52832698822,
+			"minimum_fps": 85.0774204526119,
+			"one_percent_low_fps": 101.916021198532,
+			"process_ms_average": 7.60799999999998,
+			"process_ms_p95": 7.608,
+			"scenario": "nord_96x_rapid_zoom_100"
+		}
+	],
+	"viewport": [
+		1280,
+		720
+	]
+}

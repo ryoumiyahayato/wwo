@@ -1,0 +1,57 @@
+{
+  "config_version": 1,
+  "prototype_balance_value": true,
+  "contracts": [
+    {
+      "contract_id": "contract:pierre_lille_mechanical",
+      "person_id": "character_pierre_lefevre",
+      "employer_organization_id": "enterprise_lille_mechanical",
+      "position_id": "position:mechanical_assembler",
+      "position_name": "机械装配工",
+      "workplace_location_id": "location:lille_mechanical_factory",
+      "contract_status": "active",
+      "start_date": "1900-01-01",
+      "work_days": [0, 1, 2, 3, 4, 5],
+      "shift_segments": [
+        {"start_hour": 7, "end_hour": 12},
+        {"start_hour": 13, "end_hour": 17}
+      ],
+      "required_paid_hours_per_week": 54,
+      "wage_period": "weekly",
+      "base_wage_centimes": 2400,
+      "pay_day_rule": {"weekday_monday_zero": 5, "hour": 18},
+      "absence_deduction_centimes_per_hour": 45,
+      "authorized_leave_deduction_centimes_per_hour": 45,
+      "overtime_rate_centimes_per_hour": 56,
+      "overtime_max_hours_per_day": 2,
+      "leave_policy": "prototype_auto_approved_unpaid",
+      "employment_risk": 0
+    },
+    {
+      "contract_id": "contract:albert_prefecture_nord",
+      "person_id": "character_albert_dumont",
+      "employer_organization_id": "workplace_prefecture_nord",
+      "position_id": "position:public_works_clerk",
+      "position_name": "公共工程处事务员",
+      "workplace_location_id": "location:prefecture_nord",
+      "contract_status": "active",
+      "start_date": "1900-01-01",
+      "work_days": [0, 1, 2, 3, 4, 5],
+      "shift_segments": [
+        {"start_hour": 8, "end_hour": 12},
+        {"start_hour": 13, "end_hour": 17}
+      ],
+      "required_paid_hours_per_week": 48,
+      "wage_period": "monthly",
+      "base_wage_centimes": 12000,
+      "allowance_centimes": 800,
+      "pay_day_rule": {"day_of_month": 1, "hour": 9},
+      "absence_deduction_centimes_per_hour": 0,
+      "authorized_leave_deduction_centimes_per_hour": 0,
+      "overtime_rate_centimes_per_hour": 0,
+      "overtime_max_hours_per_day": 0,
+      "leave_policy": "prototype_not_player_schedulable",
+      "employment_risk": 0
+    }
+  ]
+}

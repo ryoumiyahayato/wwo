@@ -35,7 +35,11 @@ func _ready() -> void:
 func _apply_prototype_window_title() -> void:
 	# Godot applies project metadata during startup, so the isolated scene wins one frame later.
 	await get_tree().process_frame
-	DisplayServer.window_set_title("《1900》 — V2 静态视觉原型")
+	DisplayServer.window_set_title(get_window_title())
+
+
+func get_window_title() -> String:
+	return "《1900》 — V2 静态视觉原型"
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -112,8 +116,7 @@ func _input(event: InputEvent) -> void:
 			interface.set_review_mode(not interface.review_mode)
 			get_viewport().set_input_as_handled()
 		elif key.keycode == KEY_SPACE:
-			interface.paused = not interface.paused
-			interface.queue_redraw()
+			interface.toggle_pause_command()
 			get_viewport().set_input_as_handled()
 		elif key.keycode == KEY_HOME:
 			map_canvas.focus_world()
