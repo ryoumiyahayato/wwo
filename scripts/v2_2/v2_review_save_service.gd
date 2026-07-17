@@ -42,13 +42,14 @@ func _write_review_atomic(path: String, snapshot: Dictionary) -> String:
 	if not verification.success:
 		DirAccess.remove_absolute(temporary_path)
 		return "临时存档写入后校验失败：%s" % verification.message
-	if FileAccess.file_exists(backup_path):
-		var remove_old_backup: Error = DirAccess.remove_absolute(backup_path)
-		if remove_old_backup != OK:
-			DirAccess.remove_absolute(temporary_path)
-			return error_string(remove_old_backup)
+
 	var had_primary: bool = FileAccess.file_exists(absolute_path)
 	if had_primary:
+		if FileAccess.file_exists(backup_path):
+			var remove_old_backup: Error = DirAccess.remove_absolute(backup_path)
+			if remove_old_backup != OK:
+				DirAccess.remove_absolute(temporary_path)
+				return error_string(remove_old_backup)
 		var backup_error: Error = DirAccess.rename_absolute(absolute_path, backup_path)
 		if backup_error != OK:
 			DirAccess.remove_absolute(temporary_path)
