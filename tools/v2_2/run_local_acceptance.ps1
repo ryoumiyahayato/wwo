@@ -10,6 +10,12 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $ExpectedGodotVersion = '4.6.3.stable.official.7d41c59c4'
+$ParseErrorPattern = '(?im)(SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|Cannot get class)'
+
+$Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+[Console]::InputEncoding = $Utf8NoBom
+[Console]::OutputEncoding = $Utf8NoBom
+$OutputEncoding = $Utf8NoBom
 
 function Assert-PathExists {
     param(
@@ -105,6 +111,9 @@ function Invoke-Step {
     if ($result.ExitCode -ne 0 -and -not $ContinueOnFailure) {
         throw "$Name failed with exit code $($result.ExitCode)"
     }
+    if (-not $Visible -and $result.Output -match $ParseErrorPattern) {
+        throw "$Name emitted a script parse/load error"
+    }
 }
 
 Assert-PathExists -Path $GodotPath -Label 'Godot executable'
@@ -124,6 +133,16 @@ if ($versionOutput -ne $ExpectedGodotVersion) {
 Write-Host "Godot: $versionOutput" -ForegroundColor DarkGray
 
 $Results = @()
+
+# A fresh pull can contain new class_name scripts that are not yet present in
+# Godot's local global-class cache. Import once before standalone --script tests.
+Invoke-Step -Name 'clean_import_and_script_scan' -Arguments @(
+    '--editor',
+    '--headless',
+    '--path', $ProjectPath,
+    '--quit'
+)
+
 $headlessScripts = @(
     'res://tests/v2_2/v2_2_config_datetime_test.gd',
     'res://tests/v2_2/v2_2_atomicity_test.gd',
@@ -169,6 +188,9 @@ $Results += [pscustomobject]@{
 }
 if ($validationResult.ExitCode -ne 0 -and -not $ContinueOnFailure) {
     throw "Unified validation failed with exit code $($validationResult.ExitCode)"
+}
+if ($validationResult.Output -match $ParseErrorPattern) {
+    throw 'Unified validation emitted a script parse/load error'
 }
 
 if (-not $SkipVisibleCapture) {
