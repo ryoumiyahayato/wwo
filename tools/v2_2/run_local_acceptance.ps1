@@ -67,6 +67,8 @@ Write-Host "Godot：$versionOutput" -ForegroundColor DarkGray
 
 $Results = @()
 $headlessScripts = @(
+    'res://tests/v2_2/v2_2_config_datetime_test.gd',
+    'res://tests/v2_2/v2_2_atomicity_test.gd',
     'res://tests/v2_2/v2_2_time_test.gd',
     'res://tests/v2_2/v2_2_schedule_test.gd',
     'res://tests/v2_2/v2_2_employment_test.gd',
