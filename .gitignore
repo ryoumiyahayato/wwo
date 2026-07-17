@@ -12,6 +12,15 @@
 build/
 builds/
 logs/
+*.log
+
+# Local review and profiling output
+artifacts/
+*.png.import
+*.jpg.import
+*.jpeg.import
+*.csv.import
+*.translation
 
 # OS metadata
 .DS_Store
