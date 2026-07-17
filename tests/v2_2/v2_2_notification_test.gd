@@ -81,7 +81,11 @@ func _run() -> void:
 	test.equal(restored.notifications.size(), service.notifications.size(), "载入后历史数量一致")
 
 	var corrupt: Dictionary = snapshot.duplicate(true)
-	(corrupt["notifications"] as Array)[0]["affected_entity_ids"] = "broken"
+	var corrupt_notifications: Array = corrupt["notifications"] as Array
+	var corrupt_record: Dictionary = corrupt_notifications[0] as Dictionary
+	corrupt_record["affected_entity_ids"] = "broken"
+	corrupt_notifications[0] = corrupt_record
+	corrupt["notifications"] = corrupt_notifications
 	var rejected := V2NotificationService.new()
 	test.expect(not rejected.restore_persistent_state(corrupt), "损坏的关联对象列表会被拒绝")
 
