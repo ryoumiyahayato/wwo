@@ -7,6 +7,7 @@ const ERROR_OVERLAY_NAME: String = "V2LifeLoopInitializationError"
 var life_simulation: V2LifeLoopSimulation
 var life_binding: V2LifeLoopUiBinding
 var life_initialization_error: String = ""
+var _activity_panel_was_open: bool = false
 
 
 func _ready() -> void:
@@ -28,12 +29,15 @@ func _ready() -> void:
 	)
 	life_binding = V2LifeLoopUiBinding.new(life_simulation, developer_mode)
 	interface.setup_life_loop(life_binding)
+	if not life_simulation.state_changed.is_connected(_on_life_state_changed):
+		life_simulation.state_changed.connect(_on_life_state_changed)
 	set_process(true)
 
 
 func _process(delta: float) -> void:
 	if life_simulation != null and life_simulation.initialized:
 		life_simulation.advance_real_seconds(delta)
+	_sync_activity_panel_read_state()
 
 
 func get_window_title() -> String:
@@ -49,6 +53,28 @@ func debug_state() -> Dictionary:
 	if life_binding != null:
 		state.merge(life_binding.debug_state(), true)
 	return state
+
+
+func _sync_activity_panel_read_state() -> void:
+	if life_simulation == null or not life_simulation.initialized:
+		_activity_panel_was_open = false
+		return
+	var panel_open: bool = interface != null and interface.open_panel == "activity"
+	if panel_open and not _activity_panel_was_open:
+		_mark_visible_notifications_read()
+	_activity_panel_was_open = panel_open
+
+
+func _on_life_state_changed(_change_set: Dictionary) -> void:
+	if interface != null and interface.open_panel == "activity":
+		_mark_visible_notifications_read()
+
+
+func _mark_visible_notifications_read() -> void:
+	if life_simulation.notifications.unread_count() <= 0:
+		return
+	if life_simulation.notifications.mark_all_read() > 0 and interface != null:
+		interface.queue_redraw()
 
 
 func _show_initialization_error(message: String) -> void:
