@@ -30,6 +30,10 @@ func can_contact(person_id: String, target_id: String, start_hour: int) -> V2Lif
 			"unknown_relationship", "找不到该关系人物", relation_key, [person_id, target_id]
 		)
 	var value: Dictionary = V2DateTime.from_total_hour(start_hour)
+	if value.is_empty():
+		return V2LifeLoopResult.fail(
+			"invalid_contact_time", "联系时间无效", str(start_hour), [person_id, target_id]
+		)
 	var hour: int = int(value["hour"])
 	if hour < int(_rules.get("contact_start_hour", 18)) or hour >= int(_rules.get("contact_end_hour", 21)):
 		return V2LifeLoopResult.fail(
@@ -40,6 +44,11 @@ func can_contact(person_id: String, target_id: String, start_hour: int) -> V2Lif
 	var last_contact: String = str(relation.get("last_contact_datetime", ""))
 	if not last_contact.is_empty():
 		var last_hour: int = V2DateTime.total_hour_from_iso(last_contact)
+		if last_hour < 0:
+			return V2LifeLoopResult.fail(
+				"invalid_relationship_state", "关系中的最近联系时间无效",
+				last_contact, [person_id, target_id]
+			)
 		if start_hour - last_hour < int(_rules.get("contact_cooldown_hours", 24)):
 			return V2LifeLoopResult.fail(
 				"contact_cooldown", "24 小时内不能重复联系",
@@ -125,21 +134,53 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		or not state.get("processed_idempotency_keys", {}) is Dictionary
 	):
 		return false
-	relationships = (state["relationships"] as Dictionary).duplicate(true)
-	processed_idempotency_keys = (
+	var restored_relationships: Dictionary = state["relationships"] as Dictionary
+	for relation_key_variant: Variant in restored_relationships.keys():
+		var relation_key: String = str(relation_key_variant)
+		var raw_relation: Variant = restored_relationships[relation_key]
+		if not raw_relation is Dictionary:
+			return false
+		var relation: Dictionary = raw_relation as Dictionary
+		var person_id: String = str(relation.get("person_id", ""))
+		var target_id: String = str(relation.get("target_id", ""))
+		if relation_key != _key(person_id, target_id) or person_id.is_empty() or target_id.is_empty():
+			return false
+		for field: String in ["familiarity", "trust"]:
+			var value: int = int(relation.get(field, -1))
+			if value < 0 or value > 1000:
+				return false
+		var last_contact: String = str(relation.get("last_contact_datetime", ""))
+		if not last_contact.is_empty() and V2DateTime.total_hour_from_iso(last_contact) < 0:
+			return false
+		var interactions: Variant = relation.get("recent_interactions", [])
+		if not interactions is Array or (interactions as Array).size() > 12:
+			return false
+		for raw_interaction: Variant in interactions as Array:
+			if not raw_interaction is Dictionary:
+				return false
+			var interaction: Dictionary = raw_interaction as Dictionary
+			if (
+				str(interaction.get("activity_id", "")).is_empty()
+				or V2DateTime.total_hour_from_iso(str(interaction.get("datetime", ""))) < 0
+			):
+				return false
+	var processed: Dictionary = (
 		state["processed_idempotency_keys"] as Dictionary
 	).duplicate(true)
-	_processed_key_order.clear()
 	var raw_order: Variant = state.get("processed_key_order", [])
 	if not raw_order is Array:
 		return false
+	var restored_order: Array[String] = []
 	for raw_key: Variant in raw_order as Array:
 		var key: String = str(raw_key)
-		if not processed_idempotency_keys.has(key):
+		if key.is_empty() or not processed.has(key) or key in restored_order:
 			return false
-		_processed_key_order.append(key)
-	if _processed_key_order.size() != processed_idempotency_keys.size():
+		restored_order.append(key)
+	if restored_order.size() != processed.size() or restored_order.size() > MAX_PROCESSED_KEYS:
 		return false
+	relationships = restored_relationships.duplicate(true)
+	processed_idempotency_keys = processed
+	_processed_key_order = restored_order
 	return true
 
 
