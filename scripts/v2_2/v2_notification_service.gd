@@ -32,6 +32,11 @@ func add(
 			existing["total_hour"] = total_hour
 			existing["datetime"] = V2DateTime.iso_from_total_hour(total_hour)
 			existing["read"] = false
+			var affected: Array = existing.get("affected_entity_ids", []) as Array
+			for entity_id: String in entity_ids:
+				if entity_id not in affected:
+					affected.append(entity_id)
+			existing["affected_entity_ids"] = affected
 			notifications[index] = existing
 			return existing.duplicate(true)
 	var record: Dictionary = {
@@ -57,7 +62,12 @@ func add(
 
 func latest(limit: int = 20) -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
-	for index: int in range(notifications.size() - 1, maxi(-1, notifications.size() - limit - 1), -1):
+	var safe_limit: int = maxi(0, limit)
+	for index: int in range(
+		notifications.size() - 1,
+		maxi(-1, notifications.size() - safe_limit - 1),
+		-1
+	):
 		result.append(notifications[index].duplicate(true))
 	return result
 
@@ -68,6 +78,31 @@ func unread_count() -> int:
 		if not bool(record.get("read", false)):
 			count += 1
 	return count
+
+
+func mark_read(notification_id: String) -> bool:
+	for index: int in range(notifications.size() - 1, -1, -1):
+		var record: Dictionary = notifications[index]
+		if str(record.get("notification_id", "")) != notification_id:
+			continue
+		if bool(record.get("read", false)):
+			return false
+		record["read"] = true
+		notifications[index] = record
+		return true
+	return false
+
+
+func mark_all_read() -> int:
+	var changed: int = 0
+	for index: int in range(notifications.size()):
+		var record: Dictionary = notifications[index]
+		if bool(record.get("read", false)):
+			continue
+		record["read"] = true
+		notifications[index] = record
+		changed += 1
+	return changed
 
 
 func get_persistent_state() -> Dictionary:
@@ -94,8 +129,14 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		if record_id.is_empty() or seen.has(record_id):
 			return false
 		seen[record_id] = true
-		restored.append(record.duplicate(true))
+		var normalized: Dictionary = record.duplicate(true)
+		normalized["read"] = bool(normalized.get("read", false))
+		if not normalized.get("affected_entity_ids", []) is Array:
+			return false
+		restored.append(normalized)
 	_next_sequence = next_sequence
 	_maximum_entries = maxi(16, int(state.get("maximum_entries", 160)))
 	notifications = restored
+	while notifications.size() > _maximum_entries:
+		notifications.pop_front()
 	return true
