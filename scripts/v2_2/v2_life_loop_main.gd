@@ -1,13 +1,18 @@
 class_name V2LifeLoopMain
 extends PrototypeV2Main
-## V2.2 scene adapter: advances the authoritative clock and injects live UI state.
+## V2.2 scene adapter: advances the authoritative clock, injects live UI state,
+## and provides Paradox-style map edge scrolling.
 
 const ERROR_OVERLAY_NAME: String = "V2LifeLoopInitializationError"
+const EDGE_SCROLL_MARGIN: float = 20.0
+const EDGE_SCROLL_MIN_SPEED: float = 240.0
+const EDGE_SCROLL_MAX_SPEED: float = 720.0
 
-var life_simulation: V2LifeLoopSimulation
-var life_binding: V2LifeLoopUiBinding
+var life_simulation: V2LifeLoopSimulationPolish
+var life_binding: V2LifeLoopUiBindingPolish
 var life_initialization_error: String = ""
 var _activity_panel_was_open: bool = false
+var _edge_scrolling_map: bool = false
 
 
 func _ready() -> void:
@@ -17,7 +22,7 @@ func _ready() -> void:
 		_show_initialization_error(life_initialization_error)
 		set_process(false)
 		return
-	life_simulation = V2LifeLoopSimulation.new()
+	life_simulation = V2LifeLoopSimulationPolish.new()
 	if not life_simulation.initialize():
 		life_initialization_error = life_simulation.initialization_error
 		push_error("V2.2 生活模拟初始化失败：%s" % life_initialization_error)
@@ -27,7 +32,9 @@ func _ready() -> void:
 	var developer_mode: bool = (
 		_has_user_argument("--developer-mode") or interface.review_mode
 	)
-	life_binding = V2LifeLoopUiBinding.new(life_simulation, developer_mode)
+	life_binding = V2LifeLoopUiBindingPolish.new(
+		life_simulation, developer_mode
+	)
 	life_binding.save_service = V2ReviewSaveService.new()
 	interface.setup_life_loop(life_binding)
 	if not life_simulation.state_changed.is_connected(_on_life_state_changed):
@@ -39,6 +46,7 @@ func _process(delta: float) -> void:
 	if life_simulation != null and life_simulation.initialized:
 		life_simulation.advance_real_seconds(delta)
 	_sync_activity_panel_read_state()
+	_update_edge_scroll(delta)
 
 
 func get_window_title() -> String:
@@ -51,9 +59,87 @@ func debug_state() -> Dictionary:
 		life_simulation != null and life_simulation.initialized
 	)
 	state["life_initialization_error"] = life_initialization_error
+	state["edge_scroll_enabled"] = true
+	state["edge_scroll_margin"] = EDGE_SCROLL_MARGIN
+	state["edge_scrolling_map"] = _edge_scrolling_map
 	if life_binding != null:
 		state.merge(life_binding.debug_state(), true)
 	return state
+
+
+func _update_edge_scroll(delta: float) -> void:
+	if (
+		map_canvas == null
+		or interface == null
+		or _left_button_down
+		or _dragging_map
+		or _ui_captured_press
+	):
+		_stop_edge_scroll()
+		return
+	var viewport_rect: Rect2 = get_viewport().get_visible_rect()
+	var mouse_position: Vector2 = get_viewport().get_mouse_position()
+	if not viewport_rect.has_point(mouse_position):
+		_stop_edge_scroll()
+		return
+	if interface.contains_point(mouse_position):
+		_stop_edge_scroll()
+		return
+
+	var direction := Vector2.ZERO
+	var strength: float = 0.0
+	if mouse_position.x <= viewport_rect.position.x + EDGE_SCROLL_MARGIN:
+		var left_strength: float = 1.0 - clampf(
+			(mouse_position.x - viewport_rect.position.x) / EDGE_SCROLL_MARGIN,
+			0.0,
+			1.0
+		)
+		direction.x -= left_strength
+		strength = maxf(strength, left_strength)
+	elif mouse_position.x >= viewport_rect.end.x - EDGE_SCROLL_MARGIN:
+		var right_strength: float = 1.0 - clampf(
+			(viewport_rect.end.x - mouse_position.x) / EDGE_SCROLL_MARGIN,
+			0.0,
+			1.0
+		)
+		direction.x += right_strength
+		strength = maxf(strength, right_strength)
+	if mouse_position.y <= viewport_rect.position.y + EDGE_SCROLL_MARGIN:
+		var top_strength: float = 1.0 - clampf(
+			(mouse_position.y - viewport_rect.position.y) / EDGE_SCROLL_MARGIN,
+			0.0,
+			1.0
+		)
+		direction.y -= top_strength
+		strength = maxf(strength, top_strength)
+	elif mouse_position.y >= viewport_rect.end.y - EDGE_SCROLL_MARGIN:
+		var bottom_strength: float = 1.0 - clampf(
+			(viewport_rect.end.y - mouse_position.y) / EDGE_SCROLL_MARGIN,
+			0.0,
+			1.0
+		)
+		direction.y += bottom_strength
+		strength = maxf(strength, bottom_strength)
+
+	if direction.is_zero_approx():
+		_stop_edge_scroll()
+		return
+	if not _edge_scrolling_map:
+		_edge_scrolling_map = true
+		map_canvas.begin_camera_interaction()
+	var speed: float = lerpf(
+		EDGE_SCROLL_MIN_SPEED, EDGE_SCROLL_MAX_SPEED, clampf(strength, 0.0, 1.0)
+	)
+	# Camera moves toward the cursor, therefore the map content moves opposite it.
+	map_canvas.pan_by(-direction.normalized() * speed * delta)
+
+
+func _stop_edge_scroll() -> void:
+	if not _edge_scrolling_map:
+		return
+	_edge_scrolling_map = false
+	if map_canvas != null:
+		map_canvas.end_camera_interaction()
 
 
 func _sync_activity_panel_read_state() -> void:
