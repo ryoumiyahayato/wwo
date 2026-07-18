@@ -55,8 +55,8 @@ func _run() -> void:
 	)
 	test.equal(
 		configured_main,
-		"res://scenes/v2_2/v2_2_life_loop_menu.tscn",
-		"project starts from the dedicated V2.2 menu instead of the legacy P0-R1 menu"
+		"res://scenes/v2_3/v2_3_life_loop_menu.tscn",
+		"project advances to the dedicated V2.3 menu instead of the legacy P0-R1 menu"
 	)
 	var menu_scene: PackedScene = load(
 		"res://scenes/v2_2/v2_2_life_loop_menu.tscn"
