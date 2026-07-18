@@ -52,6 +52,10 @@ func _run() -> void:
 		"res://scenes/menu/main_menu.tscn",
 		"res://scenes/character/character_setup_view.tscn",
 		"res://scenes/map/strategic_map_view.tscn",
+		"res://scenes/action/action_panel.tscn",
+		"res://scenes/organization/social_system_panel.tscn",
+		"res://scenes/devtools/developer_panel.tscn",
+		"res://scenes/world/world_activity_panel.tscn",
 		"res://scenes/prototype_v2/prototype_v2_main.tscn",
 		"res://data/prototype_v2/prototype_map_modes.json",
 	]:
