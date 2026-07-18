@@ -12,7 +12,7 @@ config_version=5
 
 config/name="1900年二维社会与战争模拟 Demo"
 config/version="1.0.0"
-run/main_scene="res://scenes/v2_2/v2_2_life_loop_menu.tscn"
+run/main_scene="res://scenes/v2_3/v2_3_life_loop_menu.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 
 [display]

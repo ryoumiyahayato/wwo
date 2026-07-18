@@ -1,0 +1,172 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/v2_3/v2_3_life_loop_menu.gd" id="1_menu"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card"]
+bg_color = Color(0.025, 0.055, 0.06, 0.97)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.72, 0.64, 0.38, 0.48)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0, 0, 0, 0.35)
+shadow_size = 18
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button"]
+bg_color = Color(0.105, 0.125, 0.115, 0.94)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.72, 0.64, 0.38, 0.24)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="V23LifeLoopMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_menu")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.025, 0.105, 0.125, 1)
+
+[node name="TopShade" type="ColorRect" parent="Background"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 180.0
+grow_horizontal = 2
+mouse_filter = 2
+color = Color(0.02, 0.075, 0.09, 0.8)
+
+[node name="BottomAccent" type="ColorRect" parent="Background"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -4.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+color = Color(0.72, 0.64, 0.38, 0.9)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Card" type="PanelContainer" parent="Center"]
+custom_minimum_size = Vector2(590, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="Margin" type="MarginContainer" parent="Center/Card"]
+layout_mode = 2
+theme_override_constants/margin_left = 46
+theme_override_constants/margin_top = 34
+theme_override_constants/margin_right = 46
+theme_override_constants/margin_bottom = 32
+
+[node name="Content" type="VBoxContainer" parent="Center/Card/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="PhaseLabel" type="Label" parent="Center/Card/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.76, 0.68, 0.4, 1)
+theme_override_font_sizes/font_size = 14
+text = "V2.3 · 空间移动、有限认知、通信与动态关系"
+horizontal_alignment = 1
+
+[node name="TitleLabel" type="Label" parent="Center/Card/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.94, 0.93, 0.85, 1)
+theme_override_font_sizes/font_size = 30
+text = "《1900》人物生活闭环"
+horizontal_alignment = 1
+
+[node name="SubtitleLabel" type="Label" parent="Center/Card/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.68, 0.74, 0.7, 1)
+theme_override_font_sizes/font_size = 14
+text = "在同一张世界地图上旅行、通信、获知并维系关系"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="Center/Card/Margin/Content"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="NewReviewButton" type="Button" parent="Center/Card/Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "开始新的 V2.3 评审"
+
+[node name="LoadReviewButton" type="Button" parent="Center/Card/Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "载入 V2.3 最近存档"
+
+[node name="MigrateButton" type="Button" parent="Center/Card/Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "迁移并载入 V2.2 存档"
+
+[node name="StatusLabel" type="Label" parent="Center/Card/Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.67, 0.72, 0.68, 1)
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="QuitButton" type="Button" parent="Center/Card/Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+text = "退出"
+
+[node name="FooterLabel" type="Label" parent="Center/Card/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.46, 0.52, 0.49, 1)
+theme_override_font_sizes/font_size = 11
+text = "离线 Demo · 单一权威时钟 · 不改变指定 Godot 版本"
+horizontal_alignment = 1

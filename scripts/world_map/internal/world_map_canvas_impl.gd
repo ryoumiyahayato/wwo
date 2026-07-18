@@ -108,6 +108,7 @@ var _organization_spatial_index := PrototypeV2SpatialIndex.new()
 var _rail_spatial_index := PrototypeV2SpatialIndex.new()
 var _road_spatial_index := PrototypeV2SpatialIndex.new()
 var _shipping_spatial_index := PrototypeV2SpatialIndex.new()
+var _v2_3_local_spatial_index := PrototypeV2SpatialIndex.new()
 
 var _visible_country_indices: Array[int] = []
 var _visible_administrative_indices: Array[int] = []
@@ -119,8 +120,17 @@ var _visible_organization_indices: Array[int] = []
 var _visible_rail_indices: Array[int] = []
 var _visible_road_indices: Array[int] = []
 var _visible_shipping_indices: Array[int] = []
+var _visible_v2_3_local_indices: Array[int] = []
 var _query_scratch: Array[int] = []
 var _point_query_scratch: Array[int] = []
+
+var _v2_3_local_overlay: Dictionary = {}
+var _v2_3_local_locations: Array = []
+var _v2_3_local_location_points: Dictionary = {}
+var _v2_3_local_location_lookup: Dictionary = {}
+var _v2_3_local_edge_lookup: Dictionary = {}
+var _v2_3_local_catalog_revision: int = -1
+var _v2_3_local_overlay_revision: int = -1
 
 var _background_layer: PrototypeV2MapLayer
 var _country_layer: PrototypeV2MapLayer
@@ -171,6 +181,8 @@ var _perf_label_rebuilds: int = 0
 var _perf_label_cache_reuses: int = 0
 var _perf_click_candidates: int = 0
 var _perf_transport_rebuilds: int = 0
+var _perf_v2_3_overlay_updates: int = 0
+var _perf_v2_3_catalog_rebuilds: int = 0
 
 
 func _ready() -> void:
@@ -281,6 +293,60 @@ func end_camera_interaction() -> void:
 		return
 	_dragging_camera = false
 	_refresh_visible_scene(true, true)
+
+
+func set_v2_3_local_overlay(payload: Dictionary) -> void:
+	var catalog_revision: int = int(payload.get("catalog_revision", 0))
+	var overlay_revision: int = int(payload.get("overlay_revision", 0))
+	if (
+		catalog_revision == _v2_3_local_catalog_revision
+		and overlay_revision == _v2_3_local_overlay_revision
+	):
+		return
+	_v2_3_local_overlay = payload.duplicate(true)
+	_v2_3_local_overlay_revision = overlay_revision
+	_v2_3_local_locations = (
+		_v2_3_local_overlay.get("locations", []) as Array
+	).duplicate(true)
+	_v2_3_local_location_lookup.clear()
+	for raw_location: Variant in _v2_3_local_locations:
+		if not raw_location is Dictionary:
+			continue
+		var location: Dictionary = raw_location as Dictionary
+		_v2_3_local_location_lookup[str(location.get("location_id", ""))] = location
+	_v2_3_local_edge_lookup.clear()
+	for raw_edge: Variant in _v2_3_local_overlay.get("edges", []) as Array:
+		if not raw_edge is Dictionary:
+			continue
+		var edge: Dictionary = raw_edge as Dictionary
+		_v2_3_local_edge_lookup[str(edge.get("edge_id", ""))] = edge
+	if catalog_revision != _v2_3_local_catalog_revision:
+		_rebuild_v2_3_local_catalog(catalog_revision)
+	_query_v2_3_local_locations(_world_view_rect().grow(4.0))
+	_perf_v2_3_overlay_updates += 1
+	_dirty_flags["overlay_dirty"] = true
+	for layer: PrototypeV2MapLayer in [
+		_transport_layer, _node_layer, _selection_layer, _label_layer,
+	]:
+		_request_layer_redraw(layer)
+	_dirty_flags["overlay_dirty"] = false
+
+
+func clear_v2_3_local_overlay() -> void:
+	if _v2_3_local_overlay.is_empty():
+		return
+	_v2_3_local_overlay.clear()
+	_v2_3_local_locations.clear()
+	_v2_3_local_location_points.clear()
+	_v2_3_local_location_lookup.clear()
+	_v2_3_local_edge_lookup.clear()
+	_visible_v2_3_local_indices.clear()
+	_v2_3_local_catalog_revision = -1
+	_v2_3_local_overlay_revision = -1
+	for layer: PrototypeV2MapLayer in [
+		_transport_layer, _node_layer, _selection_layer, _label_layer,
+	]:
+		_request_layer_redraw(layer)
 
 
 func pan_by(delta: Vector2) -> void:
@@ -685,6 +751,8 @@ func debug_reset_performance_metrics() -> void:
 	_perf_label_cache_reuses = 0
 	_perf_click_candidates = 0
 	_perf_transport_rebuilds = 0
+	_perf_v2_3_overlay_updates = 0
+	_perf_v2_3_catalog_rebuilds = 0
 	for layer: PrototypeV2MapLayer in _all_layers():
 		layer.redraw_count = 0
 
@@ -707,10 +775,25 @@ func debug_performance_snapshot() -> Dictionary:
 		"label_cache_buckets": _label_cache_by_bucket.keys(),
 		"click_candidates": _perf_click_candidates,
 		"transport_rebuilds": _perf_transport_rebuilds,
+		"v2_3_overlay_updates": _perf_v2_3_overlay_updates,
+		"v2_3_catalog_rebuilds": _perf_v2_3_catalog_rebuilds,
+		"v2_3_visible_local_candidates": _visible_v2_3_local_indices.size(),
+		"v2_3_spatial_query_candidates": (
+			_v2_3_local_spatial_index.last_query_candidates
+		),
 		"json_parses_during_camera": 0,
 		"current_lod": _current_lod,
 		"visible_counts": _visible_counts(),
 		"dirty_flags": _dirty_flags.duplicate(true),
+		"v2_3_local_overlay": {
+			"enabled": not _v2_3_local_overlay.is_empty(),
+			"catalog_revision": _v2_3_local_catalog_revision,
+			"overlay_revision": _v2_3_local_overlay_revision,
+			"location_count": _v2_3_local_locations.size(),
+			"visible_candidate_count": _visible_v2_3_local_indices.size(),
+			"truth_view": bool(_v2_3_local_overlay.get("truth_view", false)),
+			"observer_id": str(_v2_3_local_overlay.get("observer_id", "")),
+		},
 	}
 
 
@@ -1020,6 +1103,7 @@ func _draw_transport_layer(target: PrototypeV2MapLayer) -> void:
 			)
 	if has_visible_front():
 		_draw_war_overlay(target)
+	_draw_v2_3_local_transport(target)
 	_finish_layer_draw("transport", started_usec)
 
 
@@ -1050,6 +1134,7 @@ func _draw_node_layer(target: PrototypeV2MapLayer) -> void:
 			SELECT if is_selected else CITY
 		)
 		target.draw_circle(point, 1.55 / zoom, Color("#253537"))
+	_draw_v2_3_local_nodes(target)
 	if _current_lod in ["lod3", "lod4"]:
 		var port_points: Dictionary = _world_point_dictionary("ports")
 		_add_perf_traversal("ports", _visible_port_indices.size())
@@ -1117,6 +1202,7 @@ func _draw_label_layer(target: PrototypeV2MapLayer) -> void:
 			int(item.get("font_size", 12)),
 			item.get("color", LABEL) as Color
 		)
+	_draw_v2_3_local_labels(target)
 	_finish_layer_draw("labels", started_usec)
 
 
@@ -1284,6 +1370,7 @@ func _refresh_visible_scene(redraw_geometry: bool, rebuild_labels: bool) -> void
 		_shipping_world_records,
 		_visible_shipping_indices
 	)
+	_query_v2_3_local_locations(query_rect)
 	_visible_cache_pan = pan
 	_visible_cache_zoom = zoom
 	_perf_visible_queries += 1
@@ -1306,6 +1393,189 @@ func _refresh_visible_scene(redraw_geometry: bool, rebuild_labels: bool) -> void
 	_dirty_flags["geometry_layer_dirty"] = false
 	_dirty_flags["selection_dirty"] = false
 	_dirty_flags["overlay_dirty"] = false
+
+
+func _rebuild_v2_3_local_catalog(catalog_revision: int) -> void:
+	_v2_3_local_location_points.clear()
+	_v2_3_local_spatial_index.configure(WORLD_BOUNDS, 24.0, _v2_3_local_locations.size())
+	for index: int in range(_v2_3_local_locations.size()):
+		var location: Dictionary = _v2_3_local_locations[index] as Dictionary
+		var location_id: String = str(location.get("location_id", ""))
+		if location_id.is_empty():
+			continue
+		var point: Vector2 = project_lon_lat(location.get("world_position", []))
+		_v2_3_local_location_points[location_id] = point
+		_v2_3_local_spatial_index.insert(
+			index, Rect2(point - Vector2.ONE * 0.05, Vector2.ONE * 0.1)
+		)
+	_v2_3_local_catalog_revision = catalog_revision
+	_perf_v2_3_catalog_rebuilds += 1
+
+
+func _query_v2_3_local_locations(query_rect: Rect2) -> void:
+	if _v2_3_local_overlay.is_empty() or _v2_3_local_locations.is_empty():
+		_visible_v2_3_local_indices.clear()
+		return
+	_v2_3_local_spatial_index.query(query_rect, _visible_v2_3_local_indices)
+
+
+func _v2_3_local_overlay_visible() -> bool:
+	return not _v2_3_local_overlay.is_empty() and zoom >= 48.0
+
+
+func _draw_v2_3_local_transport(target: PrototypeV2MapLayer) -> void:
+	if not _v2_3_local_overlay_visible():
+		return
+	var edges: Array = _v2_3_local_overlay.get("edges", []) as Array
+	_add_perf_traversal("v2_3_local_edges", edges.size())
+	for raw_edge: Variant in edges:
+		if not raw_edge is Dictionary:
+			continue
+		var edge: Dictionary = raw_edge as Dictionary
+		if not bool(edge.get("visible", false)):
+			continue
+		_draw_v2_3_route_segment(
+			target, edge, Color(0.54, 0.58, 0.53, 0.44), 1.1
+		)
+	for raw_segment: Variant in (
+		_v2_3_local_overlay.get("preview_route_segments", []) as Array
+	):
+		if raw_segment is Dictionary:
+			_draw_v2_3_route_segment(
+				target, raw_segment as Dictionary, Color("#63a9d8"), 2.5
+			)
+	for raw_segment: Variant in (
+		_v2_3_local_overlay.get("active_route_segments", []) as Array
+	):
+		if raw_segment is Dictionary:
+			_draw_v2_3_route_segment(
+				target, raw_segment as Dictionary, Color("#d9b85c"), 3.2
+			)
+
+
+func _draw_v2_3_route_segment(
+	target: PrototypeV2MapLayer,
+	segment: Dictionary,
+	color: Color,
+	width_pixels: float
+) -> void:
+	var from_id: String = str(segment.get("from_location_id", ""))
+	var to_id: String = str(segment.get("to_location_id", ""))
+	if (from_id.is_empty() or to_id.is_empty()) and segment.has("edge_id"):
+		var edge: Dictionary = _v2_3_local_edge_lookup.get(
+			str(segment.get("edge_id", "")), {}
+		) as Dictionary
+		from_id = str(edge.get("from_location_id", ""))
+		to_id = str(edge.get("to_location_id", ""))
+	if (
+		not _v2_3_local_location_points.has(from_id)
+		or not _v2_3_local_location_points.has(to_id)
+	):
+		return
+	target.draw_line(
+		_v2_3_local_location_points[from_id] as Vector2,
+		_v2_3_local_location_points[to_id] as Vector2,
+		color,
+		width_pixels / zoom,
+		true
+	)
+
+
+func _draw_v2_3_local_nodes(target: PrototypeV2MapLayer) -> void:
+	if not _v2_3_local_overlay_visible():
+		return
+	_add_perf_traversal("v2_3_local_locations", _visible_v2_3_local_indices.size())
+	for index: int in _visible_v2_3_local_indices:
+		if index < 0 or index >= _v2_3_local_locations.size():
+			continue
+		var location: Dictionary = _v2_3_local_locations[index] as Dictionary
+		if not bool(location.get("visible", false)):
+			continue
+		var location_id: String = str(location.get("location_id", ""))
+		var point: Vector2 = _v2_3_local_location_points.get(
+			location_id, Vector2.ZERO
+		) as Vector2
+		target.draw_circle(point, 5.0 / zoom, Color("#d9c77a"))
+		target.draw_circle(point, 2.2 / zoom, Color("#273c38"))
+	var observer_id: String = str(_v2_3_local_overlay.get("observer_id", ""))
+	for raw_position: Variant in (
+		_v2_3_local_overlay.get("person_positions", []) as Array
+	):
+		if not raw_position is Dictionary:
+			continue
+		var position: Dictionary = raw_position as Dictionary
+		if not bool(position.get("visible", false)):
+			continue
+		var point: Vector2 = _v2_3_person_world_point(position)
+		if point == Vector2.INF:
+			continue
+		var selected: bool = str(position.get("person_id", "")) == observer_id
+		target.draw_circle(
+			point,
+			(6.4 if selected else 4.2) / zoom,
+			Color("#e8c55e") if selected else Color("#82a7a0")
+		)
+		target.draw_circle(point, 1.8 / zoom, Color("#172b2b"))
+
+
+func _v2_3_person_world_point(position: Dictionary) -> Vector2:
+	var location_id: String = str(position.get("current_location_id", ""))
+	var point: Vector2 = _v2_3_local_location_points.get(
+		location_id, Vector2.INF
+	) as Vector2
+	if str(position.get("location_state", "")) != "in_transit":
+		return point
+	var edge: Dictionary = _v2_3_local_edge_lookup.get(
+		str(position.get("current_edge_id", "")), {}
+	) as Dictionary
+	if edge.is_empty():
+		return point
+	var from_point: Vector2 = _v2_3_local_location_points.get(
+		str(edge.get("from_location_id", "")), point
+	) as Vector2
+	var to_point: Vector2 = _v2_3_local_location_points.get(
+		str(edge.get("to_location_id", "")), point
+	) as Vector2
+	return from_point.lerp(to_point, float(position.get("segment_progress", 0.5)))
+
+
+func _draw_v2_3_local_labels(target: PrototypeV2MapLayer) -> void:
+	if not _v2_3_local_overlay_visible() or _font == null:
+		return
+	var accepted: Array[Rect2] = []
+	for index: int in _visible_v2_3_local_indices:
+		if index < 0 or index >= _v2_3_local_locations.size():
+			continue
+		var location: Dictionary = _v2_3_local_locations[index] as Dictionary
+		if not bool(location.get("visible", false)):
+			continue
+		var label: String = str(location.get("display_name", ""))
+		if label.is_empty():
+			continue
+		var point: Vector2 = (
+			_v2_3_local_location_points.get(
+				str(location.get("location_id", "")), Vector2.ZERO
+			) as Vector2
+		) * zoom + pan
+		if not Rect2(Vector2.ZERO, size).grow(-8.0).has_point(point):
+			continue
+		var text_size: Vector2 = _font.get_string_size(
+			label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 11
+		)
+		var rect := Rect2(point + Vector2(7.0, -13.0), text_size + Vector2(6.0, 4.0))
+		var collides: bool = false
+		for existing: Rect2 in accepted:
+			if existing.intersects(rect):
+				collides = true
+				break
+		if collides:
+			continue
+		accepted.append(rect)
+		target.draw_rect(rect, Color(0.025, 0.06, 0.065, 0.82))
+		target.draw_string(
+			_font, rect.position + Vector2(3.0, 13.0), label,
+			HORIZONTAL_ALIGNMENT_LEFT, -1.0, 11, Color("#e6dfc5")
+		)
 
 
 func _rebuild_label_cache() -> void:
