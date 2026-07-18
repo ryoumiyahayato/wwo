@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/v2_2/v2_life_loop_main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/prototype_v2/prototype_v2_map_canvas.gd" id="2_map"]
-[ext_resource type="Script" path="res://scripts/v2_2/v2_life_loop_interface.gd" id="3_ui"]
+[ext_resource type="Script" path="res://scripts/v2_2/v2_life_loop_interface_final.gd" id="3_ui"]
 
 [node name="V2LifeLoopMain" type="Control"]
 layout_mode = 3
