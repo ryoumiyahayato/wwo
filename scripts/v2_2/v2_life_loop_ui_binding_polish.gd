@@ -45,8 +45,19 @@ func person_view(person_id: String = "") -> Dictionary:
 	var contacts: Array[Dictionary] = contact_options(resolved_person_id)
 	view["relationships"] = contacts
 	view["relationship"] = contacts[0].duplicate(true) if not contacts.is_empty() else {}
-	_decorate_contact_activity(view.get("current_activity", {}) as Dictionary, resolved_person_id)
-	_decorate_contact_activity(view.get("next_activity", {}) as Dictionary, resolved_person_id)
+	var current: Dictionary = view.get("current_activity", {}) as Dictionary
+	var next: Dictionary = view.get("next_activity", {}) as Dictionary
+	_decorate_contact_activity(current, resolved_person_id)
+	_decorate_contact_activity(next, resolved_person_id)
+	view["current_activity"] = current
+	view["next_activity"] = next
+	if not current.is_empty():
+		view["current_work"] = "%s · %s" % [
+			str(current.get("label", "当前活动")),
+			str(current.get("location_name", "")),
+		]
+	if not next.is_empty():
+		view["plan"] = "下一活动：%s" % str(next.get("label", "自由时间"))
 	return view
 
 
