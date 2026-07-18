@@ -67,14 +67,6 @@ $null = Invoke-GodotStep -Name 'Clean import and script scan' -Arguments @(
 )
 
 $tests = @(
-    @{ Name = 'Current M0-M9 regression'; Script = 'res://tests/current_test_runner.gd' },
-    @{ Name = 'P0-R1 logic regression'; Script = 'res://tests/p0_r1_logic_regression.gd' },
-    @{ Name = 'Post-audit player journey'; Script = 'res://tests/p0_r1_player_journey_post_audit.gd' },
-    @{ Name = 'P0-R1 safety regression'; Script = 'res://tests/p0_r1_safety_regression.gd' },
-    @{ Name = 'State consistency regression'; Script = 'res://tests/state_consistency_regression.gd' },
-    @{ Name = 'Simulation quality regression'; Script = 'res://tests/simulation_quality_regression.gd' },
-    @{ Name = 'Codex audit regression'; Script = 'res://tests/codex_audit_regression.gd' },
-    @{ Name = '1000-seed early-game reachability'; Script = 'res://tests/early_game_reachability_regression.gd' },
     @{ Name = 'V2.2 config and datetime'; Script = 'res://tests/v2_2/v2_2_config_datetime_test.gd' },
     @{ Name = 'V2.2 atomicity'; Script = 'res://tests/v2_2/v2_2_atomicity_test.gd' },
     @{ Name = 'V2.2 life-loop smoke'; Script = 'res://tests/v2_2/v2_2_life_loop_smoke.gd' },
@@ -88,7 +80,7 @@ $tests = @(
     @{ Name = 'V2.2 determinism'; Script = 'res://tests/v2_2/v2_2_determinism_test.gd' },
     @{ Name = 'V2.2 UI binding'; Script = 'res://tests/v2_2/v2_2_ui_binding_test.gd' },
     @{ Name = 'V2.2.1 polish'; Script = 'res://tests/v2_2/v2_2_polish_test.gd' },
-    @{ Name = 'V2.2 performance guard'; Script = 'res://tests/v2_2/v2_2_performance_guard_test.gd' }
+    @{ Name = 'V2.2 performance and cleanup guard'; Script = 'res://tests/v2_2/v2_2_performance_guard_test.gd' }
 )
 
 foreach ($test in $tests) {
@@ -101,4 +93,4 @@ $null = Invoke-GodotStep -Name 'Headless project startup' -Arguments @(
     '--headless', '--path', $ProjectPath, '--quit-after', '5'
 )
 
-Write-Host "`nAll validation steps passed without parse/load errors."
+Write-Host "`nAll current V2.2 validation steps passed without parse/load errors."

@@ -1,5 +1,5 @@
 extends SceneTree
-## Bounded hourly work and V2.1.2-PERF map architecture guard.
+## Bounded hourly work and accepted world-map architecture guard.
 
 var test := V2TestCase.new()
 
@@ -19,21 +19,21 @@ func _run() -> void:
 	test.expect(simulation.schedule.recent_completed_activities.size() <= 256, "完成活动历史保持有界")
 	test.expect(simulation.notifications.notifications.size() <= 160, "通知历史保持有界")
 	test.expect(simulation.conditions.causal_events.size() <= 512, "因果历史保持有界")
-	var map_source: String = _read_text("res://scripts/prototype_v2/prototype_v2_map_canvas.gd")
+	var map_source: String = _read_text("res://scripts/world_map/internal/world_map_canvas_impl.gd")
 	var life_source: String = _read_text("res://scripts/v2_2/v2_life_loop_simulation.gd")
 	test.expect(not life_source.contains("PrototypeV2MapCanvas"), "生活模拟不引用地图画布")
 	test.expect(not life_source.contains("queue_redraw"), "逐小时生活结算不触发地图重绘")
 	var map_modes: Dictionary = JSON.parse_string(
-		_read_text("res://data/prototype_v2/prototype_map_modes.json")
+		_read_text("res://data/world_map/map_modes.json")
 	) as Dictionary
 	test.equal(
 		int((map_modes.get("zoom", {}) as Dictionary).get("maximum", 0)),
 		96,
 		"地图最大缩放仍为96"
 	)
-	test.expect(map_source.contains("PrototypeV2SpatialIndex"), "统一空间索引仍保留")
+	test.expect(map_source.contains("PrototypeV2SpatialIndex"), "统一空间索引实现仍保留")
 	test.expect(map_source.contains("_request_layer_redraw"), "批绘图层增量重绘仍保留")
-	var region_data: Variant = JSON.parse_string(_read_text("res://data/prototype_v2/prototype_regions.json"))
+	var region_data: Variant = JSON.parse_string(_read_text("res://data/world_map/regions.json"))
 	var administrative_units: Array = (region_data as Dictionary).get("administrative_units", []) as Array
 	var department_count: int = 0
 	for raw_unit: Variant in administrative_units:
@@ -47,6 +47,18 @@ func _run() -> void:
 		"法国本土省级覆盖声明仍为96"
 	)
 	test.equal(department_count, 96, "法国96个省级行政区仍保留")
+
+	for removed_path: String in [
+		"res://scenes/menu/main_menu.tscn",
+		"res://scenes/character/character_setup_view.tscn",
+		"res://scenes/map/strategic_map_view.tscn",
+		"res://scenes/prototype_v2/prototype_v2_main.tscn",
+		"res://data/prototype_v2/prototype_map_modes.json",
+	]:
+		test.expect(not FileAccess.file_exists(removed_path), "已删除不合格旧入口：%s" % removed_path)
+	test.expect(FileAccess.file_exists("res://scripts/world_map/world_map_canvas.gd"), "正式世界地图画布入口存在")
+	test.expect(FileAccess.file_exists("res://data/world_map/map_geometry_cache.json"), "正式世界地图几何缓存存在")
+
 	var retained_schedule_count: int = 0
 	for raw_schedule: Variant in simulation.schedule.schedules.values():
 		retained_schedule_count += (raw_schedule as Array).size()

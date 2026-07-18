@@ -1,5 +1,5 @@
 class_name V2LifeLoopMain
-extends PrototypeV2Main
+extends WorldMapMain
 ## V2.2 scene adapter: advances the authoritative clock, injects live UI state,
 ## and provides Paradox-style map edge scrolling.
 
@@ -82,9 +82,6 @@ func _apply_launch_request() -> void:
 	if launch_mode != "load":
 		return
 	var result: V2LifeLoopResult = life_binding.load_review()
-	# Do not hard-reference the optional presentation subclass here. A missing or
-	# stale global class cache must never prevent the authoritative world scene
-	# from attaching its controller and initializing.
 	if interface != null and interface.has_method("show_launch_result"):
 		interface.call("show_launch_result", result)
 
@@ -152,7 +149,6 @@ func _update_edge_scroll(delta: float) -> void:
 	var speed: float = lerpf(
 		EDGE_SCROLL_MIN_SPEED, EDGE_SCROLL_MAX_SPEED, clampf(strength, 0.0, 1.0)
 	)
-	# Camera moves toward the cursor, therefore the map content moves opposite it.
 	map_canvas.pan_by(-direction.normalized() * speed * delta)
 
 
