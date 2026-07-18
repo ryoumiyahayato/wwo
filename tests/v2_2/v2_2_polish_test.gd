@@ -1,6 +1,6 @@
 extends SceneTree
-## V2.2.1 regression for data-driven contacts, blocking-panel pause feedback,
-## polished scene wiring, and edge-scroll configuration.
+## V2.2.1 regression for data-driven contacts, V2-only navigation,
+## reviewed panel spacing, blocking-panel pause feedback, and edge scrolling.
 
 var test := V2TestCase.new()
 
@@ -50,13 +50,39 @@ func _run() -> void:
 		"person without contacts receives an explicit unavailable result"
 	)
 
+	var configured_main: String = str(
+		ProjectSettings.get_setting("application/run/main_scene", "")
+	)
+	test.equal(
+		configured_main,
+		"res://scenes/v2_2/v2_2_life_loop_menu.tscn",
+		"project starts from the dedicated V2.2 menu instead of the legacy P0-R1 menu"
+	)
+	var menu_scene: PackedScene = load(
+		"res://scenes/v2_2/v2_2_life_loop_menu.tscn"
+	) as PackedScene
+	test.expect(menu_scene != null, "dedicated V2.2 menu scene loads")
+	if menu_scene != null:
+		var menu: V2LifeLoopMenu = menu_scene.instantiate() as V2LifeLoopMenu
+		test.expect(menu != null, "dedicated V2.2 menu instantiates")
+		if menu != null:
+			root.add_child(menu)
+			await process_frame
+			test.equal(
+				menu.LIFE_LOOP_SCENE,
+				"res://scenes/v2_2/v2_2_life_loop_main.tscn",
+				"new and load actions target only the V2.2 world map"
+			)
+			menu.queue_free()
+			await process_frame
+
 	root.content_scale_size = Vector2i(1280, 720)
 	var packed: PackedScene = load(
 		"res://scenes/v2_2/v2_2_life_loop_main.tscn"
 	) as PackedScene
-	test.expect(packed != null, "polished V2.2 scene loads")
+	test.expect(packed != null, "reviewed V2.2 scene loads")
 	var view: V2LifeLoopMain = packed.instantiate() as V2LifeLoopMain
-	test.expect(view != null, "polished V2.2 scene instantiates")
+	test.expect(view != null, "reviewed V2.2 scene instantiates")
 	if view == null:
 		test.finish(self, "V2.2.1 polish")
 		return
@@ -65,8 +91,8 @@ func _run() -> void:
 	await process_frame
 	await process_frame
 	test.expect(
-		view.interface is V2LifeLoopInterface,
-		"scene uses the V2.2.1 interface subclass"
+		view.interface is V2LifeLoopInterfaceFinal,
+		"scene uses the final reviewed V2.2 interface subclass"
 	)
 	test.expect(
 		view.life_binding is V2LifeLoopUiBindingPolish,
@@ -101,6 +127,23 @@ func _run() -> void:
 	var state: Dictionary = view.debug_state()
 	test.expect(bool(state.get("edge_scroll_enabled", false)), "edge scrolling is enabled")
 	test.equal(float(state.get("edge_scroll_margin", 0.0)), 20.0, "edge scroll margin is stable")
+	test.equal(
+		str(state.get("v2_menu_scene", "")),
+		"res://scenes/v2_2/v2_2_life_loop_menu.tscn",
+		"system return points to the V2.2 menu, not the legacy menu"
+	)
+	test.expect(
+		not bool(state.get("system_menu_heading_visible", true)),
+		"gear menu omits the redundant system-tools heading"
+	)
+	test.expect(
+		float(state.get("relationship_first_row_offset", 0.0)) >= 54.0,
+		"relationship names are separated from the section heading"
+	)
+	test.expect(
+		float(state.get("summary_heading_offset", 99.0)) <= 10.0,
+		"current-status heading is raised within the overview"
+	)
 	view.queue_free()
 	await process_frame
 	test.finish(self, "V2.2.1 polish")
