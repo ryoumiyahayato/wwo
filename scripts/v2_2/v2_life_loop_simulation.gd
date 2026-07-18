@@ -747,13 +747,14 @@ func _settle_hour(total_hour: int) -> void:
 		var activity_id: String = str(activity.get("activity_id", ""))
 		var person_state: Dictionary = person_states[person_id] as Dictionary
 		person_state["current_activity_id"] = activity_id
-		person_state["current_location_id"] = str(activity.get(
-			"location_id", person_state.get("current_location_id", "")
-		))
+		_apply_activity_location(person_id, activity, total_hour)
+		person_state = person_states[person_id] as Dictionary
 		person_states[person_id] = person_state
-		employment.record_hour(person_id, total_hour, activity_type, condition_rules)
+		_record_employment_hour(
+			person_id, total_hour, activity_type, activity, condition_rules
+		)
 		var fatigue_before: int = int(conditions.get_state(person_id).get("fatigue", 0))
-		conditions.apply_activity(person_id, activity_type, total_hour)
+		_apply_activity_condition(person_id, activity_type, activity, total_hour)
 		if (
 			fatigue_before < int(condition_rules.get("forced_rest_fatigue", 950))
 			and int(conditions.get_state(person_id).get("fatigue", 0))
@@ -803,6 +804,35 @@ func _settle_hour(total_hour: int) -> void:
 		"hour": total_hour,
 		"current_datetime": V2DateTime.iso_from_total_hour(total_hour + 1),
 	})
+
+
+func _apply_activity_location(
+	person_id: String, activity: Dictionary, _total_hour: int
+) -> void:
+	var person_state: Dictionary = person_states[person_id] as Dictionary
+	person_state["current_location_id"] = str(activity.get(
+		"location_id", person_state.get("current_location_id", "")
+	))
+	person_states[person_id] = person_state
+
+
+func _record_employment_hour(
+	person_id: String,
+	total_hour: int,
+	activity_type: String,
+	_activity: Dictionary,
+	condition_rules: Dictionary
+) -> void:
+	employment.record_hour(person_id, total_hour, activity_type, condition_rules)
+
+
+func _apply_activity_condition(
+	person_id: String,
+	activity_type: String,
+	_activity: Dictionary,
+	total_hour: int
+) -> void:
+	conditions.apply_activity(person_id, activity_type, total_hour)
 
 
 func _complete_activity(

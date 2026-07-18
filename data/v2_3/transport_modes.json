@@ -1,0 +1,43 @@
+{
+  "config_version": 1,
+  "prototype_balance_value": true,
+  "modes": [
+    {
+      "mode_id": "walk",
+      "display_name": "步行",
+      "default_cost_centimes": 0,
+      "opening_hours": [0, 24],
+      "fatigue_per_hour": 25,
+      "stress_per_hour": 4,
+      "nonessential_fatigue_limit": 950,
+      "prototype_balance_value": true
+    },
+    {
+      "mode_id": "urban_transit",
+      "display_name": "市内公共交通",
+      "default_cost_centimes": 5,
+      "opening_hours": [5, 23],
+      "fatigue_per_hour": 8,
+      "stress_per_hour": 5,
+      "prototype_balance_value": true
+    },
+    {
+      "mode_id": "regional_train",
+      "display_name": "短途铁路",
+      "default_cost_centimes": 20,
+      "opening_hours": [6, 22],
+      "fatigue_per_hour": 5,
+      "stress_per_hour": 3,
+      "prototype_balance_value": true
+    }
+  ],
+  "waiting_effect_per_hour": {
+    "fatigue": 3,
+    "stress": 8,
+    "prototype_balance_value": true
+  },
+  "late_effect_per_hour": {
+    "stress": 20,
+    "prototype_balance_value": true
+  }
+}

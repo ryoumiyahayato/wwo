@@ -29,7 +29,7 @@ func _ready() -> void:
 		_show_initialization_error(life_initialization_error)
 		set_process(false)
 		return
-	life_simulation = V2LifeLoopSimulationPolish.new()
+	life_simulation = _create_life_simulation()
 	if not life_simulation.initialize():
 		life_initialization_error = life_simulation.initialization_error
 		push_error("V2.2 生活模拟初始化失败：%s" % life_initialization_error)
@@ -39,15 +39,26 @@ func _ready() -> void:
 	var developer_mode: bool = (
 		_has_user_argument("--developer-mode") or interface.review_mode
 	)
-	life_binding = V2LifeLoopUiBindingPolish.new(
-		life_simulation, developer_mode
-	)
+	life_binding = _create_life_binding(life_simulation, developer_mode)
 	life_binding.save_service = V2ReviewSaveService.new()
 	interface.setup_life_loop(life_binding)
 	_apply_launch_request()
 	if not life_simulation.state_changed.is_connected(_on_life_state_changed):
 		life_simulation.state_changed.connect(_on_life_state_changed)
 	set_process(true)
+
+
+func _create_life_simulation() -> V2LifeLoopSimulationPolish:
+	return V2LifeLoopSimulationPolish.new()
+
+
+func _create_life_binding(
+	target_simulation: V2LifeLoopSimulationPolish,
+	enable_developer_mode: bool
+) -> V2LifeLoopUiBindingPolish:
+	return V2LifeLoopUiBindingPolish.new(
+		target_simulation, enable_developer_mode
+	)
 
 
 func _process(delta: float) -> void:

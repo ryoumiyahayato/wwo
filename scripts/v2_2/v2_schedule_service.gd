@@ -12,6 +12,10 @@ const SOURCE_PRIORITY: Dictionary = {
 const PLAYER_TYPES: PackedStringArray = [
 	"overtime", "authorized_leave", "rest", "sleep", "purchase_food",
 	"purchase_essentials", "social_contact", "union_activity", "absence",
+	"plan_route", "wait_for_transport", "travel_walk",
+	"travel_urban_transit", "travel_regional_train", "arrive", "return_home",
+	"meet_person", "social_visit", "workplace_conversation",
+	"organization_conversation", "write_message", "read_message",
 ]
 const TERMINAL_STATUSES: PackedStringArray = [
 	"cancelled", "completed", "missed", "interrupted",
@@ -182,6 +186,91 @@ func schedule_rule_activity(
 	generation_reasons[person_id] = "%s_need" % activity_type
 	return V2LifeLoopResult.ok(
 		"规则活动已安排", {"activity": activity.duplicate(true)}, [person_id]
+	)
+
+
+func can_schedule_activity(
+	person_id: String,
+	activity_type: String,
+	start_hour: int,
+	duration_hours: int,
+	source: String
+) -> V2LifeLoopResult:
+	if not _people.has(person_id):
+		return V2LifeLoopResult.fail("unknown_person", "找不到当前人物", person_id, [person_id])
+	if duration_hours < 1 or start_hour < 0:
+		return V2LifeLoopResult.fail("invalid_duration", "活动时间无效", activity_type)
+	if source not in SOURCE_PRIORITY:
+		return V2LifeLoopResult.fail("invalid_source", "日程来源无效", source)
+	return _validate_conflict(
+		person_id, activity_type, start_hour, start_hour + duration_hours, source
+	)
+
+
+func merge_activity_metadata(
+	person_id: String, activity_id: String, metadata: Dictionary
+) -> bool:
+	var person_schedule: Array = schedules.get(person_id, []) as Array
+	for index: int in range(person_schedule.size()):
+		var activity: Dictionary = person_schedule[index] as Dictionary
+		if str(activity.get("activity_id", "")) != activity_id:
+			continue
+		for raw_key: Variant in metadata.keys():
+			activity[str(raw_key)] = metadata[raw_key]
+		person_schedule[index] = activity
+		schedules[person_id] = person_schedule
+		return true
+	return false
+
+
+func cancel_future_activity_types(
+	person_id: String,
+	activity_types: PackedStringArray,
+	current_hour: int,
+	reason: String
+) -> int:
+	var person_schedule: Array = schedules.get(person_id, []) as Array
+	var cancelled: int = 0
+	for index: int in range(person_schedule.size()):
+		var activity: Dictionary = person_schedule[index] as Dictionary
+		if (
+			str(activity.get("activity_type", "")) in activity_types
+			and int(activity.get("start_hour", -1)) >= current_hour
+			and str(activity.get("status", "")) == "planned"
+		):
+			activity["status"] = "cancelled"
+			activity["cancellation_reason"] = reason
+			person_schedule[index] = activity
+			cancelled += 1
+	schedules[person_id] = person_schedule
+	return cancelled
+
+
+func cancel_activity_by_id(
+	person_id: String, activity_id: String, current_hour: int, reason: String
+) -> V2LifeLoopResult:
+	var person_schedule: Array = schedules.get(person_id, []) as Array
+	for index: int in range(person_schedule.size()):
+		var activity: Dictionary = person_schedule[index] as Dictionary
+		if str(activity.get("activity_id", "")) != activity_id:
+			continue
+		if int(activity.get("start_hour", -1)) <= current_hour:
+			return V2LifeLoopResult.fail(
+				"activity_started", "活动已经开始，不能静默取消", activity_id,
+				[person_id, activity_id]
+			)
+		if str(activity.get("status", "")) != "planned":
+			return V2LifeLoopResult.fail(
+				"activity_not_planned", "活动已经结束或取消", activity_id,
+				[person_id, activity_id]
+			)
+		activity["status"] = "cancelled"
+		activity["cancellation_reason"] = reason
+		person_schedule[index] = activity
+		schedules[person_id] = person_schedule
+		return V2LifeLoopResult.ok("活动已取消", {"activity": activity}, [person_id, activity_id])
+	return V2LifeLoopResult.fail(
+		"activity_not_found", "找不到活动", activity_id, [person_id, activity_id]
 	)
 
 

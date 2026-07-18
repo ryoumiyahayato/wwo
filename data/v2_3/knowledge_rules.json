@@ -1,0 +1,21 @@
+{
+  "config_version": 1,
+  "prototype_balance_value": true,
+  "confidence": {
+    "direct_observation": 1000,
+    "organization_notice": 950,
+    "face_to_face": 900,
+    "local_letter": 800,
+    "public_notice": 750,
+    "rumor": 450
+  },
+  "freshness_hours": {
+    "person_location": 6,
+    "person_schedule": 24,
+    "membership": 720,
+    "identity": -1,
+    "travel_route": 720,
+    "public_notice": 168
+  },
+  "history_limit_per_person": 256
+}

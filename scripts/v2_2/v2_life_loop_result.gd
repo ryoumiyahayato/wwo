@@ -7,6 +7,7 @@ var error_code: String = ""
 var user_message: String = ""
 var technical_message: String = ""
 var affected_entity_ids: Array[String] = []
+var suggested_alternatives: Array[String] = []
 var data: Dictionary = {}
 
 
@@ -44,5 +45,6 @@ func to_dict() -> Dictionary:
 		"user_message": user_message,
 		"technical_message": technical_message,
 		"affected_entity_ids": affected_entity_ids.duplicate(),
+		"suggested_alternatives": suggested_alternatives.duplicate(),
 		"data": data.duplicate(true),
 	}

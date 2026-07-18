@@ -1,0 +1,28 @@
+{
+  "config_version": 1,
+  "prototype_balance_value": true,
+  "history_limits": {
+    "travel_plans": 128,
+    "messages": 256,
+    "knowledge_per_person": 256,
+    "relationship_interactions": 32,
+    "appointments": 128,
+    "idempotency_keys": 1024
+  },
+  "npc": {
+    "planning_interval_hours": 24,
+    "message_read_delay_hours": 1,
+    "relationship_maintenance_hours": 168,
+    "background_schedule_horizon_hours": 48
+  },
+  "appointment": {
+    "minimum_duration_hours": 1,
+    "late_grace_hours": 1
+  },
+  "map": {
+    "local_minimum_zoom": 48.0,
+    "local_label_minimum_zoom": 72.0,
+    "maximum_zoom": 96.0,
+    "local_query_radius_world_units": 0.35
+  }
+}

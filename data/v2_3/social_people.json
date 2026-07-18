@@ -1,0 +1,106 @@
+{
+  "config_version": 1,
+  "prototype_balance_value": true,
+  "people": [
+    {
+      "person_id": "character_pierre_lefevre",
+      "display_name_zh": "皮埃尔·勒费弗尔",
+      "native_name": "Pierre Lefèvre",
+      "age": 32,
+      "role": "机械装配工",
+      "person_kind": "formal",
+      "home_location_id": "location_lille_pierre_home",
+      "workplace_location_id": "location_lille_fives_factory",
+      "known_person_ids": ["jeanne"],
+      "postal_address_location_id": "location_lille_pierre_home"
+    },
+    {
+      "person_id": "character_albert_dumont",
+      "display_name_zh": "阿尔贝·迪蒙",
+      "native_name": "Albert Dumont",
+      "age": 38,
+      "role": "公共工程处事务员",
+      "person_kind": "formal",
+      "home_location_id": "location_lille_albert_home",
+      "workplace_location_id": "location_lille_prefecture_office",
+      "known_person_ids": ["character_lucien_moreau"],
+      "postal_address_location_id": "location_lille_albert_home"
+    },
+    {
+      "person_id": "jeanne",
+      "display_name_zh": "让娜·勒鲁瓦",
+      "native_name": "Jeanne Leroy",
+      "age": 30,
+      "role": "工会联系人",
+      "person_kind": "background",
+      "home_location_id": "location_lille_centre",
+      "workplace_location_id": "location_lille_metalworkers_union_hall",
+      "known_person_ids": ["character_pierre_lefevre", "character_jules_martin"],
+      "postal_address_location_id": "location_lille_metalworkers_union_hall"
+    },
+    {
+      "person_id": "character_jules_martin",
+      "display_name_zh": "儒勒·马丁",
+      "native_name": "Jules Martin",
+      "age": 29,
+      "role": "机械工人",
+      "person_kind": "background",
+      "home_location_id": "location_lille_centre",
+      "workplace_location_id": "location_lille_fives_factory",
+      "organization_ids": ["union_metalworkers_nord"],
+      "known_person_ids": ["jeanne"],
+      "postal_address_location_id": "location_lille_metalworkers_union_hall"
+    },
+    {
+      "person_id": "character_lucien_moreau",
+      "display_name_zh": "吕西安·莫罗",
+      "native_name": "Lucien Moreau",
+      "age": 34,
+      "role": "公共工程部门事务员",
+      "person_kind": "background",
+      "home_location_id": "location_lille_centre",
+      "workplace_location_id": "location_lille_prefecture_office",
+      "organization_ids": ["prefecture_nord"],
+      "known_person_ids": ["character_albert_dumont"],
+      "postal_address_location_id": "location_lille_prefecture_office"
+    }
+  ],
+  "relationships": [
+    {
+      "person_id": "character_pierre_lefevre",
+      "target_id": "jeanne",
+      "familiarity": 300,
+      "trust": 250,
+      "affinity": 100,
+      "tension": 0,
+      "obligation": 0,
+      "reciprocity": 0,
+      "relationship_status": "acquaintance",
+      "known_contact_channels": ["local_letter", "face_to_face"]
+    },
+    {
+      "person_id": "jeanne",
+      "target_id": "character_jules_martin",
+      "familiarity": 500,
+      "trust": 400,
+      "affinity": 150,
+      "tension": 0,
+      "obligation": 0,
+      "reciprocity": 0,
+      "relationship_status": "colleague_or_union_contact",
+      "known_contact_channels": ["local_letter", "face_to_face"]
+    },
+    {
+      "person_id": "character_albert_dumont",
+      "target_id": "character_lucien_moreau",
+      "familiarity": 350,
+      "trust": 300,
+      "affinity": 80,
+      "tension": 0,
+      "obligation": 0,
+      "reciprocity": 0,
+      "relationship_status": "colleague",
+      "known_contact_channels": ["local_letter", "face_to_face"]
+    }
+  ]
+}

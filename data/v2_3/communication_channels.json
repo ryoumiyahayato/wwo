@@ -1,0 +1,46 @@
+{
+  "config_version": 1,
+  "prototype_balance_value": true,
+  "channels": [
+    {
+      "channel": "face_to_face",
+      "write_duration_hours": 1,
+      "delivery_hours_local": 0,
+      "delivery_hours_regional": 0,
+      "postage_centimes": 0,
+      "knowledge_confidence": 900,
+      "requires_same_location": true,
+      "prototype_balance_value": true
+    },
+    {
+      "channel": "local_letter",
+      "write_duration_hours": 1,
+      "delivery_hours_local": 12,
+      "delivery_hours_regional": 24,
+      "postage_centimes": 5,
+      "knowledge_confidence": 800,
+      "requires_postal_address": true,
+      "prototype_balance_value": true
+    },
+    {
+      "channel": "organization_notice",
+      "write_duration_hours": 0,
+      "delivery_hours_local": 6,
+      "delivery_hours_regional": 6,
+      "postage_centimes": 0,
+      "knowledge_confidence": 950,
+      "requires_membership": true,
+      "prototype_balance_value": true
+    },
+    {
+      "channel": "public_notice",
+      "write_duration_hours": 0,
+      "delivery_hours_local": 0,
+      "delivery_hours_regional": 0,
+      "postage_centimes": 0,
+      "knowledge_confidence": 750,
+      "requires_observation_or_subscription": true,
+      "prototype_balance_value": true
+    }
+  ]
+}
