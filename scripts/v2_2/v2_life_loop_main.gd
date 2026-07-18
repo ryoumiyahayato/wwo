@@ -1,5 +1,5 @@
 class_name V2LifeLoopMain
-extends WorldMapMain
+extends "res://scripts/world_map/world_map_main.gd"
 ## V2.2 scene adapter: advances the authoritative clock, injects live UI state,
 ## and provides Paradox-style map edge scrolling.
 
