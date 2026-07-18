@@ -19,7 +19,13 @@ var _edge_scrolling_map: bool = false
 func _ready() -> void:
 	super()
 	if prototype_data == null or not prototype_data.errors.is_empty():
-		life_initialization_error = "V2 地图与界面数据不可用"
+		var data_errors: String = (
+			"未创建地图数据加载器"
+			if prototype_data == null
+			else "; ".join(prototype_data.errors)
+		)
+		life_initialization_error = "地图与界面资源加载失败：%s" % data_errors
+		push_error(life_initialization_error)
 		_show_initialization_error(life_initialization_error)
 		set_process(false)
 		return
@@ -76,8 +82,11 @@ func _apply_launch_request() -> void:
 	if launch_mode != "load":
 		return
 	var result: V2LifeLoopResult = life_binding.load_review()
-	if interface is V2LifeLoopInterfaceFinal:
-		(interface as V2LifeLoopInterfaceFinal).show_launch_result(result)
+	# Do not hard-reference the optional presentation subclass here. A missing or
+	# stale global class cache must never prevent the authoritative world scene
+	# from attaching its controller and initializing.
+	if interface != null and interface.has_method("show_launch_result"):
+		interface.call("show_launch_result", result)
 
 
 func _update_edge_scroll(delta: float) -> void:
