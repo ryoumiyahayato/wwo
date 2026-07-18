@@ -7,6 +7,7 @@ const ERROR_OVERLAY_NAME: String = "V2LifeLoopInitializationError"
 const EDGE_SCROLL_MARGIN: float = 20.0
 const EDGE_SCROLL_MIN_SPEED: float = 240.0
 const EDGE_SCROLL_MAX_SPEED: float = 720.0
+const LAUNCH_MODE_META: StringName = &"v2_2_launch_mode"
 
 var life_simulation: V2LifeLoopSimulationPolish
 var life_binding: V2LifeLoopUiBindingPolish
@@ -37,6 +38,7 @@ func _ready() -> void:
 	)
 	life_binding.save_service = V2ReviewSaveService.new()
 	interface.setup_life_loop(life_binding)
+	_apply_launch_request()
 	if not life_simulation.state_changed.is_connected(_on_life_state_changed):
 		life_simulation.state_changed.connect(_on_life_state_changed)
 	set_process(true)
@@ -65,6 +67,17 @@ func debug_state() -> Dictionary:
 	if life_binding != null:
 		state.merge(life_binding.debug_state(), true)
 	return state
+
+
+func _apply_launch_request() -> void:
+	var launch_mode: String = str(get_tree().get_meta(LAUNCH_MODE_META, ""))
+	if get_tree().has_meta(LAUNCH_MODE_META):
+		get_tree().remove_meta(LAUNCH_MODE_META)
+	if launch_mode != "load":
+		return
+	var result: V2LifeLoopResult = life_binding.load_review()
+	if interface is V2LifeLoopInterfaceFinal:
+		(interface as V2LifeLoopInterfaceFinal).show_launch_result(result)
 
 
 func _update_edge_scroll(delta: float) -> void:
