@@ -91,6 +91,21 @@
       "required_knowledge": "edge_21_brussels_antwerp",
       "active": true,
       "prototype_balance_value": true
+    },
+    {
+      "edge_id": "edge_22_brussels_cologne",
+      "from_location_id": "location_brussels_centre",
+      "to_location_id": "location_cologne_centre",
+      "bidirectional": true,
+      "available_modes": ["regional_train"],
+      "duration_hours_by_mode": {"regional_train": 6},
+      "cost_centimes_by_mode": {"regional_train": 85},
+      "opening_hours_by_mode": {"regional_train": [6, 22]},
+      "fatigue_by_mode": {"regional_train": 24},
+      "stress_by_mode": {"regional_train": 14},
+      "required_knowledge": "edge_22_brussels_cologne",
+      "active": true,
+      "prototype_balance_value": true
     }
   ]
 }
