@@ -28,22 +28,30 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $buildCode = (git rev-parse --short=4 HEAD).Trim().ToLowerInvariant()
+          $displayVersion = "v0.001a ($buildCode)"
+          $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+
           $buildInfoPath = Join-Path $PWD 'scripts\core\build_info.gd'
-          $content = Get-Content -LiteralPath $buildInfoPath -Raw
-          $replacement = 'const BUILD_CODE: String = "' + $buildCode + '"'
-          $content = [regex]::Replace(
-            $content,
+          $buildInfo = Get-Content -LiteralPath $buildInfoPath -Raw
+          $buildInfo = [regex]::Replace(
+            $buildInfo,
             'const BUILD_CODE: String = "[^"]+"',
-            $replacement
+            ('const BUILD_CODE: String = "' + $buildCode + '"')
           )
-          [System.IO.File]::WriteAllText(
-            $buildInfoPath,
-            $content,
-            (New-Object System.Text.UTF8Encoding($false))
+          [System.IO.File]::WriteAllText($buildInfoPath, $buildInfo, $utf8NoBom)
+
+          $installerPath = Join-Path $PWD 'packaging\windows\1900.iss'
+          $installer = Get-Content -LiteralPath $installerPath -Raw
+          $installer = [regex]::Replace(
+            $installer,
+            '#define MyAppVersion "[^"]+"',
+            ('#define MyAppVersion "' + $displayVersion + '"')
           )
+          [System.IO.File]::WriteAllText($installerPath, $installer, $utf8NoBom)
+
           "build_code=$buildCode" >> $env:GITHUB_OUTPUT
-          "display_version=v0.001a ($buildCode)" >> $env:GITHUB_OUTPUT
-          Write-Host "Building 1900 v0.001a ($buildCode)"
+          "display_version=$displayVersion" >> $env:GITHUB_OUTPUT
+          Write-Host "Building 1900 $displayVersion"
 
       - name: Download Godot 4.6.3
         shell: pwsh
@@ -101,8 +109,7 @@ jobs:
           if (-not (Test-Path -LiteralPath $iscc)) {
             throw 'Inno Setup compiler was not found.'
           }
-          $displayVersion = '${{ steps.build_info.outputs.display_version }}'
-          & $iscc "/DMyAppVersion=$displayVersion" packaging\windows\1900.iss
+          & $iscc packaging\windows\1900.iss
           if (-not (Test-Path -LiteralPath builds\installer\1900-Prototype-Setup.exe)) {
             throw 'Installer compilation did not produce the expected file.'
           }
@@ -126,7 +133,7 @@ jobs:
           removeArtifacts: true
           artifacts: builds/installer/1900-Prototype-Setup.exe
           body: |
-            版本：v0.001a (${{ steps.build_info.outputs.build_code }})
+            版本：${{ steps.build_info.outputs.display_version }}
             自动覆盖的 Windows 原型安装包。
             安装标识固定；再次安装会覆盖旧版本，不建立新的存档体系。
             对应提交：${{ github.sha }}
