@@ -1,0 +1,44 @@
+{
+  "config_version": 1,
+  "prototype_balance_value": true,
+  "lenders": [
+    {
+      "lender_id": "organization:lille_mutual_credit",
+      "display_name": "里尔市民互助信贷所",
+      "location_id": "location_lille_centre",
+      "opening_hours": {"weekday": [8, 18], "saturday": [8, 13]},
+      "opening_capital_centimes": 120000,
+      "public": true
+    }
+  ],
+  "products": [
+    {
+      "product_id": "loan_product:lille_wage_advance",
+      "lender_id": "organization:lille_mutual_credit",
+      "display_name": "工资担保短期借款",
+      "description": "依据现有劳动收入审查，不要求抵押物。",
+      "amount_options_centimes": [1000, 2500, 5000],
+      "term_days": 30,
+      "annual_rate_bp": 900,
+      "review_delay_hours": 1,
+      "offer_valid_hours": 72,
+      "grace_days": 7,
+      "minimum_monthly_income_centimes": 3000,
+      "approval_threshold": 55
+    },
+    {
+      "product_id": "loan_product:lille_emergency_credit",
+      "lender_id": "organization:lille_mutual_credit",
+      "display_name": "小额应急信用借款",
+      "description": "金额较低、审查较宽，但成本更高。",
+      "amount_options_centimes": [500, 1000, 2000],
+      "term_days": 14,
+      "annual_rate_bp": 1800,
+      "review_delay_hours": 1,
+      "offer_valid_hours": 48,
+      "grace_days": 3,
+      "minimum_monthly_income_centimes": 0,
+      "approval_threshold": 42
+    }
+  ]
+}
