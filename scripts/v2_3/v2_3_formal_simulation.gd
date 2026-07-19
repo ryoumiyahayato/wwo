@@ -51,7 +51,7 @@ func submit_loan_application(
 
 func accept_loan_offer(application_id: String) -> V2LifeLoopResult:
 	var result: V2LifeLoopResult = finance.accept_offer(
-		"v2_3:loan_accept:%s:%d" % [application_id, clock.total_hours],
+		"v2_3:loan_accept:%s" % application_id,
 		application_id,
 		clock.total_hours
 	)
@@ -133,13 +133,13 @@ func _settle_hour(total_hour: int) -> void:
 		return
 	for event: Dictionary in finance_events:
 		var event_type: String = str(event.get("event_type", ""))
-		var title: String = {
+		var title: String = str({
 			"loan_offer": "借款方提出条件",
 			"loan_rejected": "借款申请被拒绝",
 			"loan_offer_expired": "借款条件已过期",
 			"loan_overdue": "借款已经逾期",
 			"loan_defaulted": "借款已经违约",
-		}.get(event_type, "金融状态发生变化")
+		}.get(event_type, "金融状态发生变化"))
 		notifications.add(
 			"personal",
 			"notification" if event_type in ["loan_offer", "loan_overdue", "loan_defaulted"] else "event",
@@ -159,5 +159,5 @@ func _monthly_income_for(person_id: String) -> int:
 	var base_wage: int = int(contract.get("base_wage_centimes", 0))
 	var allowance: int = int(contract.get("allowance_centimes", 0))
 	if str(contract.get("wage_period", "")) == "weekly":
-		return base_wage * 52 / 12 + allowance
+		return int(base_wage * 52 / 12) + allowance
 	return base_wage + allowance
