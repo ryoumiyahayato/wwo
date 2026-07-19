@@ -11,6 +11,14 @@ func _init(
 ) -> void:
 	super._init(life_simulation, enable_developer_mode)
 	controlled_simulation = life_simulation as V23ControlledSimulation
+	if (
+		simulation != null
+		and simulation.clock != null
+		and not simulation.clock.time_changed.is_connected(
+			_on_clock_time_changed
+		)
+	):
+		simulation.clock.time_changed.connect(_on_clock_time_changed)
 
 
 func time_view() -> Dictionary:
@@ -129,3 +137,8 @@ func submit_travel_with_leave(request: Dictionary) -> V2LifeLoopResult:
 	_view_revision += 1
 	view_changed.emit()
 	return last_command_result
+
+
+func _on_clock_time_changed(_snapshot: Dictionary) -> void:
+	_view_revision += 1
+	view_changed.emit()
