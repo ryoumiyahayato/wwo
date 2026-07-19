@@ -4,7 +4,7 @@ extends V23LifeLoopMain
 
 
 func _create_life_simulation() -> V2LifeLoopSimulationPolish:
-	return V23MinuteControlledSimulation.new()
+	return V23ProductSimulation.new()
 
 
 func _create_life_binding(
