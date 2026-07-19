@@ -55,8 +55,15 @@ func _run() -> void:
 	)
 	test.equal(
 		configured_main,
-		"res://scenes/v2_3/v2_3_life_loop_menu.tscn",
-		"project advances to the dedicated V2.3 menu instead of the legacy P0-R1 menu"
+		"res://scenes/alpha/alpha_menu.tscn",
+		"project advances to the formal Alpha menu instead of a legacy menu"
+	)
+	var v2_3_migration_source: PackedScene = load(
+		"res://scenes/v2_3/v2_3_life_loop_menu.tscn"
+	) as PackedScene
+	test.expect(
+		v2_3_migration_source != null,
+		"the V2.3 menu remains loadable as the Alpha migration source"
 	)
 	var menu_scene: PackedScene = load(
 		"res://scenes/v2_2/v2_2_life_loop_menu.tscn"

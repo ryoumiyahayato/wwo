@@ -11,7 +11,7 @@ if (-not (Test-Path -LiteralPath $GodotPath -PathType Leaf)) {
 }
 
 $ProjectPath = (Resolve-Path -LiteralPath $ProjectPath).Path
-$parseErrorPattern = '(?im)(SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|Cannot get class)'
+$parseErrorPattern = '(?im)(SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|Cannot get class|Invalid call|Invalid get index|Assertion failed)'
 
 function Invoke-GodotStep {
     param(
@@ -101,7 +101,12 @@ $tests = @(
     @{ Name = 'Alpha economy lifecycle'; Script = 'res://tests/alpha/alpha_economy_lifecycle_test.gd' },
     @{ Name = 'Alpha labor and enterprise'; Script = 'res://tests/alpha/alpha_labor_enterprise_test.gd' },
     @{ Name = 'Alpha character and development'; Script = 'res://tests/alpha/alpha_character_development_test.gd' },
-    @{ Name = 'Alpha organization and politics'; Script = 'res://tests/alpha/alpha_organization_politics_test.gd' }
+    @{ Name = 'Alpha organization and politics'; Script = 'res://tests/alpha/alpha_organization_politics_test.gd' },
+    @{ Name = 'Alpha composition smoke'; Script = 'res://tests/alpha/alpha_composition_smoke.gd' },
+    @{ Name = 'Alpha UI and review presets'; Script = 'res://tests/alpha/alpha_ui_and_presets_test.gd' },
+    @{ Name = 'Alpha save and migration'; Script = 'res://tests/alpha/alpha_save_and_migration_test.gd' },
+    @{ Name = 'Alpha cross-system scenarios'; Script = 'res://tests/alpha/alpha_cross_system_scenarios_test.gd' },
+    @{ Name = 'Alpha three-year performance'; Script = 'res://tests/alpha/alpha_three_year_performance_test.gd' }
 )
 
 foreach ($test in $tests) {
