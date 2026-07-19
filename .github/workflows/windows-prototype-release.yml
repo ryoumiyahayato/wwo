@@ -1,0 +1,107 @@
+name: Windows Prototype Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+concurrency:
+  group: windows-prototype-release
+  cancel-in-progress: true
+
+jobs:
+  build-installer:
+    runs-on: windows-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Godot 4.6.3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $engineUrl = 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip'
+          $templateUrl = 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_export_templates.tpz'
+          Invoke-WebRequest -Uri $engineUrl -OutFile godot.zip
+          Expand-Archive -LiteralPath godot.zip -DestinationPath godot
+          $engine = Get-ChildItem -LiteralPath godot -Filter '*.exe' -Recurse | Select-Object -First 1
+          if ($null -eq $engine) { throw 'Godot executable was not found after extraction.' }
+          Copy-Item -LiteralPath $engine.FullName -Destination Godot.exe
+          Invoke-WebRequest -Uri $templateUrl -OutFile templates.zip
+          Expand-Archive -LiteralPath templates.zip -DestinationPath templates
+          $templateTarget = Join-Path $env:APPDATA 'Godot\export_templates\4.6.3.stable'
+          New-Item -ItemType Directory -Force -Path $templateTarget | Out-Null
+          $templateRoot = Join-Path $PWD 'templates\templates'
+          if (-not (Test-Path -LiteralPath $templateRoot)) {
+            $templateRoot = Join-Path $PWD 'templates'
+          }
+          Copy-Item -Path (Join-Path $templateRoot '*') -Destination $templateTarget -Recurse -Force
+          .\Godot.exe --version
+
+      - name: Import and script scan
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          .\Godot.exe --editor --headless --path . --quit
+
+      - name: Run formal control regression
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          .\Godot.exe --headless --path . --script res://tests/v2_3/v2_3_controlled_world_test.gd
+
+      - name: Export embedded Windows executable
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force -Path builds\windows | Out-Null
+          .\Godot.exe --headless --path . --export-release 'Windows Desktop' builds\windows\wwo-p0-demo.exe
+          if (-not (Test-Path -LiteralPath builds\windows\wwo-p0-demo.exe)) {
+            throw 'Windows export did not create the executable.'
+          }
+
+      - name: Build installer
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          choco install innosetup --yes --no-progress
+          $iscc = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'
+          if (-not (Test-Path -LiteralPath $iscc)) {
+            $iscc = Join-Path $env:ProgramFiles 'Inno Setup 6\ISCC.exe'
+          }
+          if (-not (Test-Path -LiteralPath $iscc)) {
+            throw 'Inno Setup compiler was not found.'
+          }
+          & $iscc packaging\windows\1900.iss
+          if (-not (Test-Path -LiteralPath builds\installer\1900-Prototype-Setup.exe)) {
+            throw 'Installer compilation did not produce the expected file.'
+          }
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: 1900-Prototype-Windows-Installer
+          path: builds/installer/1900-Prototype-Setup.exe
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Replace prototype-latest prerelease
+        uses: ncipollo/release-action@v1
+        with:
+          tag: prototype-latest
+          name: 1900 Prototype Latest
+          prerelease: true
+          allowUpdates: true
+          replacesArtifacts: true
+          removeArtifacts: true
+          artifacts: builds/installer/1900-Prototype-Setup.exe
+          body: |
+            自动覆盖的 Windows 原型安装包。
+            安装标识固定；再次安装会覆盖旧版本，不建立新的存档体系。
+            对应提交：${{ github.sha }}
