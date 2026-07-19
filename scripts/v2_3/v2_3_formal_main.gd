@@ -17,4 +17,4 @@ func _create_life_binding(
 
 
 func get_window_title() -> String:
-	return "《1900》— 正式世界、人物生活与个人经济"
+	return BuildInfo.window_title()
