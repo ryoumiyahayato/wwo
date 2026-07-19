@@ -1,5 +1,5 @@
 extends SceneTree
-## V2.3 binding fields, limited cognition and 1280x720 panel bounds.
+## V2.3 binding fields, limited cognition, formal finance and 1280x720 panel bounds.
 
 var test := V23TestCase.new()
 
@@ -9,12 +9,12 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var simulation := V23LifeLoopSimulation.new()
+	var simulation := V23FormalSimulation.new()
 	test.expect(simulation.initialize(), "V2.3 UI 绑定环境初始化")
 	if not simulation.initialized:
 		test.finish(self, "V2.3 UI binding")
 		return
-	var binding := V23LifeLoopUiBinding.new(simulation, true)
+	var binding := V23FormalUiBinding.new(simulation, true)
 	var person: Dictionary = binding.person_view()
 	test.equal(
 		person.get("current_location_id"), "location_lille_pierre_home",
@@ -23,6 +23,10 @@ func _run() -> void:
 	test.equal(person.get("location_state"), "at_location", "人物摘要显示位置状态")
 	test.expect(person.has("unread_message_count"), "人物摘要显示未读消息数")
 	test.expect(person.has("knowledge_count"), "人物摘要显示认知记录数")
+	var finance: Dictionary = binding.finance_view()
+	test.expect(not finance.is_empty(), "正式界面提供个人财务投影")
+	test.equal(int(finance.get("total_debt_centimes", -1)), 0, "初始正式债务为零")
+	test.expect(not (finance.get("lenders", []) as Array).is_empty(), "正式界面可发现里尔放贷方")
 	var destinations: Array[Dictionary] = binding.travel_destination_options()
 	var has_factory: bool = false
 	var has_albert_home: bool = false
@@ -69,11 +73,13 @@ func _run() -> void:
 	await process_frame
 	await process_frame
 	test.expect(
-		view.life_simulation is V23LifeLoopSimulation
+		view.life_simulation is V23FormalSimulation
 		and view.life_simulation.initialized,
-		"正式场景建立 V2.3 组合根"
+		"正式场景建立带个人金融的 V2.3 组合根"
 	)
-	for panel_id: String in V23LifeLoopInterface.V2_3_PANEL_IDS:
+	test.expect(view.life_binding is V23FormalUiBinding, "正式场景使用正式金融绑定")
+	test.expect(view.interface is V23FormalInterface, "正式场景使用正式金融界面")
+	for panel_id: String in V23FormalInterface.FORMAL_PANEL_IDS:
 		view.interface.open_panel_named(panel_id, false)
 		var rect: Rect2 = view.interface.get_panel_rect()
 		test.expect(
@@ -83,6 +89,7 @@ func _run() -> void:
 		)
 	var state: Dictionary = view.debug_state()
 	test.expect(bool(state.get("v2_3_scene", false)), "调试状态标记 V2.3 正式场景")
+	test.expect(bool(state.get("formal_finance_visible", false)), "调试状态标记正式金融面板")
 	view.queue_free()
 	await process_frame
 	test.finish(self, "V2.3 UI binding")
