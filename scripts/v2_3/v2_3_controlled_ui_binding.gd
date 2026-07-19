@@ -1,6 +1,6 @@
 class_name V23ControlledUiBinding
 extends V23FormalUiBinding
-## Presentation and commands for player-authoritative movement and contextual leave.
+## Presentation and commands for minute time, player movement and contextual leave.
 
 var controlled_simulation: V23ControlledSimulation
 
@@ -11,6 +11,30 @@ func _init(
 ) -> void:
 	super._init(life_simulation, enable_developer_mode)
 	controlled_simulation = life_simulation as V23ControlledSimulation
+
+
+func time_view() -> Dictionary:
+	var view: Dictionary = super.time_view()
+	if simulation == null or not simulation.clock is V23MinuteClock:
+		return view
+	var minute_clock: V23MinuteClock = simulation.clock as V23MinuteClock
+	var snapshot: Dictionary = minute_clock.get_snapshot()
+	view["minute"] = int(snapshot.get("minute", 0))
+	view["total_minutes"] = int(snapshot.get("total_minutes", 0))
+	view["hour_display"] = "%02d:%02d" % [
+		int(snapshot.get("hour", 0)),
+		int(snapshot.get("minute", 0)),
+	]
+	view["speed"] = int(snapshot.get("speed_level", 1))
+	view["speed_level"] = int(snapshot.get("speed_level", 1))
+	view["game_minutes_per_tick"] = int(
+		snapshot.get("game_minutes_per_tick", 1)
+	)
+	view["real_seconds_per_tick"] = float(
+		snapshot.get("real_seconds_per_tick", 0.1)
+	)
+	view["allowed_speeds"] = minute_clock.get_allowed_speeds()
+	return view
 
 
 func person_view(person_id: String = "") -> Dictionary:
