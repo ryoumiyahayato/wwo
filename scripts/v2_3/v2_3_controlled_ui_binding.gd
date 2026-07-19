@@ -55,8 +55,13 @@ func person_view(person_id: String = "") -> Dictionary:
 		"current_activity", {}
 	) as Dictionary
 	var source: String = str(current_activity.get("source", ""))
-	var expected_location_id: String = str(
+	var raw_expected_location_id: String = str(
 		current_activity.get("location_id", "")
+	)
+	var expected_location_id: String = str(
+		V23LifeLoopSimulation.LOCATION_ALIASES.get(
+			raw_expected_location_id, raw_expected_location_id
+		)
 	)
 	var actual_location_id: String = str(
 		view.get("current_location_id", "")
