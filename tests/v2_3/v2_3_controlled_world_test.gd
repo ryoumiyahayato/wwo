@@ -35,19 +35,33 @@ func _run() -> void:
 	minute_clock.set_paused(true)
 
 	var albert: String = V2LifeLoopSimulation.ALBERT_ID
-	var cross_border: V2LifeLoopResult = simulation.preview_route(
+	var belgium_route: V2LifeLoopResult = simulation.preview_route(
 		albert,
 		"location_brussels_centre",
 		"fastest",
 		simulation.clock.total_hours + 1
 	)
-	test.expect(cross_border.success, "里尔人物可规划前往比利时的正式路线")
-	if cross_border.success:
+	test.expect(belgium_route.success, "里尔人物可规划前往比利时的正式路线")
+	if belgium_route.success:
 		test.expect(
 			"location_brussels_centre" in (
-				cross_border.data.get("path_nodes", []) as Array
+				belgium_route.data.get("path_nodes", []) as Array
 			),
 			"跨国路线实际到达布鲁塞尔地点"
+		)
+	var germany_route: V2LifeLoopResult = simulation.preview_route(
+		albert,
+		"location_cologne_centre",
+		"fastest",
+		simulation.clock.total_hours + 1
+	)
+	test.expect(germany_route.success, "里尔人物可经比利时规划前往德国的正式路线")
+	if germany_route.success:
+		var germany_nodes: Array = germany_route.data.get("path_nodes", []) as Array
+		test.expect(
+			"location_brussels_centre" in germany_nodes
+			and "location_cologne_centre" in germany_nodes,
+			"德国路线实际经过布鲁塞尔并到达科隆"
 		)
 
 	var pierre: String = V2LifeLoopSimulation.PIERRE_ID
