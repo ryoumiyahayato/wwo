@@ -1,10 +1,10 @@
 class_name V23FormalMain
 extends V23LifeLoopMain
-## Product entry retaining the formal map while making player commands authoritative.
+## Product entry retaining the formal map with minute time and player authority.
 
 
 func _create_life_simulation() -> V2LifeLoopSimulationPolish:
-	return V23ControlledSimulation.new()
+	return V23MinuteControlledSimulation.new()
 
 
 func _create_life_binding(
