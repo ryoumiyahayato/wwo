@@ -22,6 +22,29 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Stamp build identity
+        id: build_info
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $buildCode = (git rev-parse --short=4 HEAD).Trim().ToLowerInvariant()
+          $buildInfoPath = Join-Path $PWD 'scripts\core\build_info.gd'
+          $content = Get-Content -LiteralPath $buildInfoPath -Raw
+          $replacement = 'const BUILD_CODE: String = "' + $buildCode + '"'
+          $content = [regex]::Replace(
+            $content,
+            'const BUILD_CODE: String = "[^"]+"',
+            $replacement
+          )
+          [System.IO.File]::WriteAllText(
+            $buildInfoPath,
+            $content,
+            (New-Object System.Text.UTF8Encoding($false))
+          )
+          "build_code=$buildCode" >> $env:GITHUB_OUTPUT
+          "display_version=0.001a ($buildCode)" >> $env:GITHUB_OUTPUT
+          Write-Host "Building 1900 v0.001a ($buildCode)"
+
       - name: Download Godot 4.6.3
         shell: pwsh
         run: |
@@ -78,7 +101,8 @@ jobs:
           if (-not (Test-Path -LiteralPath $iscc)) {
             throw 'Inno Setup compiler was not found.'
           }
-          & $iscc packaging\windows\1900.iss
+          $displayVersion = '${{ steps.build_info.outputs.display_version }}'
+          & $iscc "/DMyAppVersion=$displayVersion" packaging\windows\1900.iss
           if (-not (Test-Path -LiteralPath builds\installer\1900-Prototype-Setup.exe)) {
             throw 'Installer compilation did not produce the expected file.'
           }
@@ -102,6 +126,7 @@ jobs:
           removeArtifacts: true
           artifacts: builds/installer/1900-Prototype-Setup.exe
           body: |
+            版本：v0.001a (${{ steps.build_info.outputs.build_code }})
             自动覆盖的 Windows 原型安装包。
             安装标识固定；再次安装会覆盖旧版本，不建立新的存档体系。
             对应提交：${{ github.sha }}
