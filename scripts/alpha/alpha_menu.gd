@@ -79,7 +79,11 @@ func _build_interface() -> void:
 	title.add_theme_font_size_override("font_size", 34)
 	box.add_child(title)
 	var warning := Label.new()
-	warning.text = "此入口使用已否决的洛岚—维斯塔10×8网格，只供服务、迁移和性能回归。\n普通游戏与正式地图请从项目默认入口启动。"
+	warning.text = (
+		"此入口使用已否决的洛岚—维斯塔10×8网格，只供服务、迁移和性能回归。"
+		+ String.chr(10)
+		+ "普通游戏与正式地图请从项目默认入口启动。"
+	)
 	warning.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	warning.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	warning.add_theme_color_override("font_color", Color("#e7c7a9"))
