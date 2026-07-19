@@ -77,7 +77,7 @@ func _diagnostic_summary(detail: Dictionary) -> String:
 
 
 func _diagnostic_label(key: String) -> String:
-	return {
+	return str({
 		"name": "名称",
 		"display_name": "显示名称",
 		"status": "状态",
@@ -91,7 +91,7 @@ func _diagnostic_label(key: String) -> String:
 		"cash_centimes": "现金",
 		"balance_centimes": "余额",
 		"principal_centimes": "本金",
-	}.get(key, key)
+	}.get(key, key))
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
