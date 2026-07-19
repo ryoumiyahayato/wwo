@@ -62,12 +62,25 @@ func initialize_background_population() -> bool:
 
 
 func register_player(character: CharacterData) -> bool:
-	if character == null or active_characters.size() >= rules.active_character_limit:
+	return register_active_character(character, true)
+
+
+func register_active_character(
+	character: CharacterData, as_player: bool = false
+) -> bool:
+	if (
+		character == null
+		or character.id.is_empty()
+		or active_characters.size() >= rules.active_character_limit
+		or has_character(character.id)
+		or (as_player and not player_character_id.is_empty())
+	):
 		return false
-	player_character_id = character.id
 	character.is_active = true
 	active_characters[character.id] = character
 	_activation_seeds[character.id] = character.generation_seed
+	if as_player:
+		player_character_id = character.id
 	return true
 
 

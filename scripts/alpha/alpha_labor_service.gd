@@ -269,7 +269,14 @@ func accept_job_offer(
 	ids.append(contract_id)
 	profile["employment_contract_ids"] = ids
 	profile["occupation_id"] = str(job.get("job_id", ""))
+	profile["income_monthly_centimes"] = weekly_wage * 4
 	person_profiles[person_id] = profile
+	if _economy.entity_profiles.has(person_id):
+		var economy_profile: Dictionary = _economy.entity_profiles[
+			person_id
+		] as Dictionary
+		economy_profile["income_monthly_centimes"] = weekly_wage * 4
+		_economy.entity_profiles[person_id] = economy_profile
 	unemployment.erase(person_id)
 	application["status"] = "accepted"
 	application["contract_id"] = contract_id
@@ -546,8 +553,8 @@ func restore_persistent_state(state: Dictionary) -> bool:
 	employment_states = (state["employment_states"] as Dictionary).duplicate(true)
 	person_profiles = (state["person_profiles"] as Dictionary).duplicate(true)
 	unemployment = (state.get("unemployment", {}) as Dictionary).duplicate(true)
-	migrations = (
-		(state.get("migrations", []) as Array).duplicate(true) as Array[Dictionary]
+	migrations = DataRecordUtils.to_dictionary_array(
+		state.get("migrations", [])
 	)
 	_processed_keys = (state.get("processed_keys", {}) as Dictionary).duplicate(true)
 	_next_application_sequence = int(state.get("next_application_sequence", 0))

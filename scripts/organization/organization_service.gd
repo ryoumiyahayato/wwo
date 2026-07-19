@@ -252,15 +252,25 @@ func restore_persistent_state(records: Array) -> bool:
 	var legacy_content_migration: bool = (
 		records.size() == LEGACY_BASE_ORGANIZATION_IDS.size()
 	)
-	if not legacy_content_migration and records.size() != organizations.size():
+	if (
+		not legacy_content_migration
+		and (
+			records.size() < organizations.size()
+			or records.size() > organizations.size() + 32
+		)
+	):
 		return false
 	for raw_record: Variant in records:
 		if not raw_record is Dictionary:
 			return false
 		var organization := OrganizationData.from_dict(raw_record as Dictionary)
 		var source: OrganizationData = organizations.get(organization.id) as OrganizationData
-		if source == null or restored.has(organization.id):
+		if restored.has(organization.id):
 			return false
+		if source == null:
+			if not _is_valid_runtime_enterprise(organization):
+				return false
+			source = OrganizationData.from_dict(organization.to_dict())
 		if not _matches_immutable_structure(organization, source):
 			return false
 		if organization.size < 0.0 or organization.resources < 0.0 or organization.influence < 0.0 or organization.influence > 1.0:
@@ -324,9 +334,36 @@ func restore_persistent_state(records: Array) -> bool:
 			)
 	if restored.is_empty():
 		return false
+	if not legacy_content_migration:
+		for organization_id: String in get_organization_ids():
+			if not restored.has(organization_id):
+				return false
 	organizations = restored
 	_positions_by_character = positions_by_character
 	return true
+
+
+func _is_valid_runtime_enterprise(organization: OrganizationData) -> bool:
+	if (
+		organization == null
+		or not organization.id.begins_with("organization:player_enterprise_")
+		or organization.type != "enterprise"
+		or organization.country_id.is_empty()
+		or organization.region_id.is_empty()
+	):
+		return false
+	var structure: Dictionary = organization.position_structure
+	var entry_id: String = str(structure.get("entry_position", ""))
+	var leader_id: String = str(structure.get("leader_position", ""))
+	var positions: Dictionary = structure.get("positions", {}) as Dictionary
+	return (
+		not entry_id.is_empty()
+		and not leader_id.is_empty()
+		and positions.has(entry_id)
+		and positions.has(leader_id)
+		and positions[entry_id] is Dictionary
+		and positions[leader_id] is Dictionary
+	)
 
 
 func _matches_immutable_structure(

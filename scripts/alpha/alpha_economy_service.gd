@@ -450,7 +450,7 @@ func default_loan(
 	idempotency_key: String, contract_id: String, total_hour: int, reason: String
 ) -> Dictionary:
 	var contract: Dictionary = contracts.contracts.get(contract_id, {}) as Dictionary
-	if str(contract.get("status", "")) != "overdue":
+	if str(contract.get("status", "")) not in ["overdue", "defaulted"]:
 		return _fail("loan_not_overdue", "借款必须先进入逾期状态")
 	return contracts.default_contract(idempotency_key, contract_id, total_hour, reason)
 
@@ -703,7 +703,7 @@ func market_price(region_id: String, good_id: String) -> int:
 
 func total_debt(entity_id: String) -> int:
 	var total: int = 0
-	for contract: Dictionary in contracts.contracts_for_party(entity_id, false):
+	for contract: Dictionary in contracts.contracts_for_party(entity_id, true):
 		if (
 			str(contract.get("contract_type", "")) == "loan"
 			and _party_with_role(contract, "borrower") == entity_id
@@ -776,9 +776,8 @@ func restore_persistent_state(state: Dictionary) -> bool:
 	loan_claim_assets = (state["loan_claim_assets"] as Dictionary).duplicate(true)
 	entity_profiles = (state["entity_profiles"] as Dictionary).duplicate(true)
 	markets = (state["markets"] as Dictionary).duplicate(true)
-	external_events = (
-		(state.get("external_events", []) as Array).duplicate(true)
-		as Array[Dictionary]
+	external_events = DataRecordUtils.to_dictionary_array(
+		state.get("external_events", [])
 	)
 	_processed_keys = (
 		(state.get("processed_keys", {}) as Dictionary).duplicate(true)

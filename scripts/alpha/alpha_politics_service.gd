@@ -1030,9 +1030,8 @@ func restore_persistent_state(state: Dictionary) -> bool:
 	political_exchanges = (state["political_exchanges"] as Dictionary).duplicate(true)
 	corruption_cases = (state["corruption_cases"] as Dictionary).duplicate(true)
 	investigations = (state["investigations"] as Dictionary).duplicate(true)
-	public_events = (
-		(state.get("public_events", []) as Array).duplicate(true)
-		as Array[Dictionary]
+	public_events = DataRecordUtils.to_dictionary_array(
+		state.get("public_events", [])
 	)
 	obligations = (state["obligations"] as Dictionary).duplicate(true)
 	_processed_keys = (state["processed_keys"] as Dictionary).duplicate(true)

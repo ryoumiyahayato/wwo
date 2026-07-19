@@ -4,11 +4,13 @@ extends RefCounted
 
 const SYSTEM_OPENING_ACCOUNT: String = "account:system:opening"
 const DEFAULT_HISTORY_LIMIT: int = 8192
+const PROCESSED_KEY_MULTIPLIER: int = 8
 
 var accounts: Dictionary = {}
 var transactions: Array[Dictionary] = []
 var opening_balances: Dictionary = {}
 var _transactions_by_key: Dictionary = {}
+var _processed_key_order: Array[String] = []
 var _next_sequence: int = 1
 var _history_limit: int = DEFAULT_HISTORY_LIMIT
 
@@ -18,6 +20,7 @@ func configure(history_limit: int = DEFAULT_HISTORY_LIMIT) -> void:
 	transactions.clear()
 	opening_balances.clear()
 	_transactions_by_key.clear()
+	_processed_key_order.clear()
 	_next_sequence = 1
 	_history_limit = maxi(256, history_limit)
 	_register_account(SYSTEM_OPENING_ACCOUNT, "system:opening", "system", true)
@@ -181,7 +184,9 @@ func post(
 		accounts[account_id] = account
 	transactions.append(transaction)
 	_transactions_by_key[idempotency_key] = transactions.size() - 1
+	_processed_key_order.append(idempotency_key)
 	_trim_history()
+	_trim_processed_keys()
 	return _ok({"transaction": transaction.duplicate(true), "duplicate": false})
 
 
@@ -236,6 +241,7 @@ func get_persistent_state() -> Dictionary:
 		"transactions": transactions.duplicate(true),
 		"opening_balances": opening_balances.duplicate(true),
 		"processed_keys": _transactions_by_key.keys(),
+		"processed_key_order": _processed_key_order.duplicate(),
 		"next_sequence": _next_sequence,
 		"history_limit": _history_limit,
 	}
@@ -259,6 +265,7 @@ func restore_persistent_state(state: Dictionary) -> bool:
 			return false
 	var restored_transactions: Array[Dictionary] = []
 	var index: Dictionary = {}
+	var restored_order: Array[String] = []
 	for raw_transaction: Variant in state["transactions"] as Array:
 		if not raw_transaction is Dictionary:
 			return false
@@ -268,20 +275,35 @@ func restore_persistent_state(state: Dictionary) -> bool:
 			return false
 		index[key] = restored_transactions.size()
 		restored_transactions.append(transaction)
+		restored_order.append(key)
 	for raw_key: Variant in state["processed_keys"] as Array:
 		var key: String = str(raw_key)
 		if key.is_empty():
 			return false
 		if not index.has(key):
 			index[key] = -1
+			restored_order.append(key)
+	if state.get("processed_key_order", []) is Array:
+		restored_order.clear()
+		for raw_key: Variant in state.get("processed_key_order", []) as Array:
+			var key: String = str(raw_key)
+			if key.is_empty() or not index.has(key) or key in restored_order:
+				return false
+			restored_order.append(key)
+		for raw_key: Variant in index:
+			var key: String = str(raw_key)
+			if key not in restored_order:
+				restored_order.append(key)
 	accounts = restored_accounts
 	transactions = restored_transactions
 	opening_balances = restored_opening
 	_transactions_by_key = index
+	_processed_key_order = restored_order
 	_next_sequence = int(state.get("next_sequence", 0))
 	_history_limit = maxi(256, int(state.get("history_limit", DEFAULT_HISTORY_LIMIT)))
 	if _next_sequence < 1 or not bool(validate_balances().get("success", false)):
 		return false
+	_trim_processed_keys()
 	return true
 
 
@@ -313,6 +335,14 @@ func _trim_history() -> void:
 		_transactions_by_key[str(removed.get("idempotency_key", ""))] = -1
 	for index: int in range(transactions.size()):
 		_transactions_by_key[str(transactions[index].get("idempotency_key", ""))] = index
+
+
+func _trim_processed_keys() -> void:
+	var processed_limit: int = _history_limit * PROCESSED_KEY_MULTIPLIER
+	while _processed_key_order.size() > processed_limit:
+		var oldest_key: String = _processed_key_order.pop_front()
+		if int(_transactions_by_key.get(oldest_key, -1)) < 0:
+			_transactions_by_key.erase(oldest_key)
 
 
 static func _ok(data: Dictionary = {}) -> Dictionary:

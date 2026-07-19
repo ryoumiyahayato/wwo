@@ -17,3 +17,12 @@ static func to_dictionary(value: Variant) -> Dictionary:
 		return (value as Dictionary).duplicate(true)
 	return {}
 
+
+static func to_dictionary_array(value: Variant) -> Array[Dictionary]:
+	var output: Array[Dictionary] = []
+	if not value is Array:
+		return output
+	for item: Variant in value as Array:
+		if item is Dictionary:
+			output.append((item as Dictionary).duplicate(true))
+	return output

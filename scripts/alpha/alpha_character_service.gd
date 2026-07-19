@@ -626,8 +626,8 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		return false
 	development_plans = (state["development_plans"] as Dictionary).duplicate(true)
 	authorizations = (state["authorizations"] as Dictionary).duplicate(true)
-	assessments = (
-		(state.get("assessments", []) as Array).duplicate(true) as Array[Dictionary]
+	assessments = DataRecordUtils.to_dictionary_array(
+		state.get("assessments", [])
 	)
 	_processed_keys = (state["processed_keys"] as Dictionary).duplicate(true)
 	_next_plan_sequence = int(state.get("next_plan_sequence", 0))

@@ -140,6 +140,7 @@ func create_enterprise(
 			"asset_id", ""
 		)
 	)
+	state["controller_id"] = owner_id
 	var equipment_id: String = _create_operating_asset(
 		organization_id, "equipment", maxi(1000, initial_capital_centimes / 3),
 		{"capacity_units": 12}

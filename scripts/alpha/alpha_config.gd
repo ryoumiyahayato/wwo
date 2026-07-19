@@ -115,6 +115,12 @@ func preset_records() -> Array:
 	return presets().get("presets", []) as Array
 
 
+func review_state_ids() -> Array[String]:
+	return DataRecordUtils.to_string_array(
+		presets().get("review_states", [])
+	)
+
+
 func get_preset(preset_id: String) -> Dictionary:
 	for raw_preset: Variant in preset_records():
 		var preset: Dictionary = raw_preset as Dictionary
