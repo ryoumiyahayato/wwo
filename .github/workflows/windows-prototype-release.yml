@@ -42,7 +42,7 @@ jobs:
             (New-Object System.Text.UTF8Encoding($false))
           )
           "build_code=$buildCode" >> $env:GITHUB_OUTPUT
-          "display_version=0.001a ($buildCode)" >> $env:GITHUB_OUTPUT
+          "display_version=v0.001a ($buildCode)" >> $env:GITHUB_OUTPUT
           Write-Host "Building 1900 v0.001a ($buildCode)"
 
       - name: Download Godot 4.6.3
