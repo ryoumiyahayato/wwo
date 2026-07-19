@@ -1,14 +1,16 @@
 class_name V23FormalSimulation
 extends V23LifeLoopSimulation
-## Formal V2.3 composition root with personal credit attached to the existing map and cash ledger.
+## Formal V2.3 composition root with personal credit and non-blocking authorized leave.
 
 var finance_config := V23FinanceConfig.new()
 var finance := V23FinanceService.new()
+var leave := V23LeaveService.new()
 
 
 func initialize(simulation_clock: SimulationClock = null) -> bool:
 	if not super.initialize(simulation_clock):
 		return false
+	leave.reset()
 	var location_ids: Array[String] = []
 	for raw_location: Variant in v2_3_config.location_records():
 		location_ids.append(str((raw_location as Dictionary).get("location_id", "")))
@@ -19,8 +21,79 @@ func initialize(simulation_clock: SimulationClock = null) -> bool:
 	)
 	if not finance_result.success:
 		return _fail_v2_3_initialization(finance_result.user_message)
-	state_changed.emit({"formal_finance_initialized": true})
+	state_changed.emit({"formal_finance_initialized": true, "formal_leave_initialized": true})
 	return true
+
+
+func suggest_next_activity(
+	person_id: String,
+	activity_type: String
+) -> V2LifeLoopResult:
+	if activity_type != "authorized_leave":
+		return super.suggest_next_activity(person_id, activity_type)
+	var current_hour: int = clock.total_hours
+	for day_offset: int in range(8):
+		var candidate_day: int = _formal_day_start(current_hour + day_offset * 24)
+		var covered: Array[int] = []
+		for hour_offset: int in range(24):
+			var total_hour: int = candidate_day + hour_offset
+			if total_hour >= current_hour and employment.is_required_work_hour(person_id, total_hour):
+				covered.append(total_hour)
+		if covered.is_empty():
+			continue
+		var start_hour: int = covered.front()
+		var end_hour: int = covered.back() + 1
+		return V2LifeLoopResult.ok(
+			"已选择下一段合同工作义务",
+			{
+				"activity_type": "authorized_leave",
+				"start_hour": start_hour,
+				"duration_hours": end_hour - start_hour,
+				"location_id": "",
+				"required_cash_centimes": 0,
+				"expected_effects": "解除所选时段内的合同工作义务；时间可自由安排",
+			},
+			[person_id]
+		)
+	return V2LifeLoopResult.fail("no_work_obligation", "未来七日没有可以申请解除的工作义务")
+
+
+func request_activity(
+	person_id: String,
+	activity_type: String,
+	start_hour: int,
+	duration_hours: int
+) -> V2LifeLoopResult:
+	if activity_type != "authorized_leave":
+		return super.request_activity(person_id, activity_type, start_hour, duration_hours)
+	var result: V2LifeLoopResult = leave.authorize(
+		person_id,
+		start_hour,
+		start_hour + duration_hours,
+		clock.total_hours,
+		employment
+	)
+	if not result.success:
+		return result
+	var record: Dictionary = result.data.get("leave_authorization", {}) as Dictionary
+	leave.release_contract_schedule(record, schedule)
+	var first_day: int = _formal_day_start(int(record.get("start_hour", start_hour)))
+	var last_day: int = _formal_day_start(int(record.get("end_hour", start_hour + duration_hours - 1)))
+	for day_start: int in range(first_day, last_day + 1, 24):
+		leave.cancel_automatic_commutes_for_day(
+			person_id, day_start, clock.total_hours, schedule, travel_execution
+		)
+	notifications.add(
+		"personal",
+		"event",
+		"请假已批准",
+		"对应合同工时已解除；这段时间不会被请假本身占用。",
+		clock.total_hours,
+		str(record.get("leave_id", "authorized_leave")),
+		result.affected_entity_ids
+	)
+	state_changed.emit({"schedule": person_id, "employment": person_id, "leave": true})
+	return result
 
 
 func submit_loan_application(
@@ -88,6 +161,7 @@ func repay_personal_loan(contract_id: String, requested_centimes: int) -> V2Life
 func get_persistent_state() -> Dictionary:
 	var state: Dictionary = super.get_persistent_state()
 	state["formal_finance_state"] = finance.get_persistent_state()
+	state["formal_leave_state"] = leave.get_persistent_state()
 	return state
 
 
@@ -99,6 +173,10 @@ func validate_v2_3_state(state: Dictionary) -> V2LifeLoopResult:
 		state.get("formal_finance_state", {}) as Dictionary
 	):
 		return V2LifeLoopResult.fail("corrupt_save", "正式金融存档字段损坏")
+	if state.has("formal_leave_state") and not leave.validate_persistent_state(
+		state.get("formal_leave_state", {}) as Dictionary
+	):
+		return V2LifeLoopResult.fail("corrupt_save", "正式请假记录损坏")
 	return V2LifeLoopResult.ok("V2.3 正式存档结构有效")
 
 
@@ -116,21 +194,49 @@ func restore_v2_3_state(state: Dictionary) -> V2LifeLoopResult:
 		state.get("formal_finance_state", {}) as Dictionary
 	):
 		return V2LifeLoopResult.fail("finance_restore_failed", "正式金融状态恢复失败")
-	state_changed.emit({"loaded": true, "formal_finance": true})
+	leave.reset()
+	if state.has("formal_leave_state") and not leave.restore_persistent_state(
+		state.get("formal_leave_state", {}) as Dictionary
+	):
+		return V2LifeLoopResult.fail("leave_restore_failed", "正式请假状态恢复失败")
+	state_changed.emit({"loaded": true, "formal_finance": true, "formal_leave": true})
 	return V2LifeLoopResult.ok("V2.3 正式存档已载入")
 
 
 func determinism_snapshot() -> Dictionary:
 	var snapshot: Dictionary = super.determinism_snapshot()
 	snapshot["formal_finance"] = finance.get_persistent_state()
+	snapshot["formal_leave"] = leave.get_persistent_state()
 	return snapshot
+
+
+func _record_employment_hour(
+	person_id: String,
+	total_hour: int,
+	activity_type: String,
+	activity: Dictionary,
+	condition_rules: Dictionary
+) -> void:
+	if leave.covers(person_id, total_hour):
+		employment.record_hour(person_id, total_hour, "authorized_leave", condition_rules)
+		return
+	super._record_employment_hour(
+		person_id, total_hour, activity_type, activity, condition_rules
+	)
 
 
 func _settle_hour(total_hour: int) -> void:
 	super._settle_hour(total_hour)
+	var condition_rules: Dictionary = (
+		config.get_document("balance").get("condition", {}) as Dictionary
+	)
+	for person_id_variant: Variant in person_states.keys():
+		var person_id: String = str(person_id_variant)
+		if leave.covers(person_id, total_hour):
+			employment.record_hour(
+				person_id, total_hour, "authorized_leave", condition_rules
+			)
 	var finance_events: Array[Dictionary] = finance.process_hour(total_hour + 1)
-	if finance_events.is_empty():
-		return
 	for event: Dictionary in finance_events:
 		var event_type: String = str(event.get("event_type", ""))
 		var title: String = str({
@@ -149,7 +255,8 @@ func _settle_hour(total_hour: int) -> void:
 			str(event.get("event_id", "finance:%s:%d" % [event_type, total_hour + 1])),
 			DataRecordUtils.to_string_array(event.get("entity_ids", []))
 		)
-	state_changed.emit({"finance": finance_events.size(), "households": true})
+	if not finance_events.is_empty():
+		state_changed.emit({"finance": finance_events.size(), "households": true})
 
 
 func _monthly_income_for(person_id: String) -> int:
@@ -161,3 +268,15 @@ func _monthly_income_for(person_id: String) -> int:
 	if str(contract.get("wage_period", "")) == "weekly":
 		return int(base_wage * 52 / 12) + allowance
 	return base_wage + allowance
+
+
+static func _formal_day_start(total_hour: int) -> int:
+	var value: Dictionary = V2DateTime.from_total_hour(total_hour)
+	if value.is_empty():
+		return total_hour
+	return V2DateTime.to_total_hour({
+		"year": int(value.get("year", 1900)),
+		"month": int(value.get("month", 1)),
+		"day": int(value.get("day", 1)),
+		"hour": 0,
+	})
