@@ -1,6 +1,6 @@
 class_name V23ControlledUiBinding
 extends V23FormalUiBinding
-## Presentation and commands for minute time, player movement and contextual leave.
+## Presentation and commands for minute time, temporary stays and contextual leave.
 
 var controlled_simulation: V23ControlledSimulation
 
@@ -57,6 +57,13 @@ func person_view(person_id: String = "") -> Dictionary:
 	)
 	view["manual_location_hold_id"] = hold_location_id
 	view["manual_location_hold"] = not hold_location_id.is_empty()
+	var prompt: Dictionary = controlled_simulation.next_return_home_prompt()
+	view["return_home_prompt_pending"] = (
+		str(prompt.get("person_id", "")) == resolved_id
+	)
+	view["stay_outside_home_until_hour"] = int(
+		controlled_simulation.stay_outside_home_until_hours.get(resolved_id, -1)
+	)
 	if hold_location_id.is_empty():
 		return view
 	var current_activity: Dictionary = view.get(
@@ -87,13 +94,43 @@ func person_view(person_id: String = "") -> Dictionary:
 			view.get("current_location", "未知地点")
 		)
 		current_activity["activity_type"] = "free_time"
-		current_activity["label"] = "停留"
+		current_activity["label"] = "临时停留"
 		current_activity["suppressed_automatic_activity"] = true
 		current_activity["suppressed_activity_source"] = source
 		view["current_activity"] = current_activity
-		view["current_work"] = "停留 · %s" % actual_name
-		view["plan"] = "等待玩家指令；不会自动离开%s" % actual_name
+		view["current_work"] = "临时停留 · %s" % actual_name
+		view["plan"] = "晚间空闲时会询问返家；玩家可继续滞留并承担状态损耗"
 	return view
+
+
+func return_home_prompt_view() -> Dictionary:
+	if controlled_simulation == null:
+		return {}
+	return controlled_simulation.next_return_home_prompt()
+
+
+func accept_return_home_prompt(person_id: String) -> V2LifeLoopResult:
+	if controlled_simulation == null:
+		return V2LifeLoopResult.fail(
+			"controlled_simulation_unavailable", "玩家控制模拟不可用"
+		)
+	last_command_result = controlled_simulation.accept_return_home(person_id)
+	_view_revision += 1
+	view_changed.emit()
+	return last_command_result
+
+
+func continue_staying_prompt(person_id: String) -> V2LifeLoopResult:
+	if controlled_simulation == null:
+		return V2LifeLoopResult.fail(
+			"controlled_simulation_unavailable", "玩家控制模拟不可用"
+		)
+	last_command_result = controlled_simulation.continue_staying_outside_home(
+		person_id
+	)
+	_view_revision += 1
+	view_changed.emit()
+	return last_command_result
 
 
 func submit_activity_with_leave(
