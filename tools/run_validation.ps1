@@ -93,6 +93,7 @@ $tests = @(
     @{ Name = 'V2.3 save migration'; Script = 'res://tests/v2_3/v2_3_save_migration_test.gd' },
     @{ Name = 'V2.3 save load'; Script = 'res://tests/v2_3/v2_3_save_load_test.gd' },
     @{ Name = 'V2.3 determinism'; Script = 'res://tests/v2_3/v2_3_determinism_test.gd' },
+    @{ Name = 'V2.3 formal finance'; Script = 'res://tests/v2_3/v2_3_formal_finance_test.gd' },
     @{ Name = 'V2.3 UI binding'; Script = 'res://tests/v2_3/v2_3_ui_binding_test.gd' },
     @{ Name = 'V2.3 map integration'; Script = 'res://tests/v2_3/v2_3_map_integration_test.gd' },
     @{ Name = 'V2.3 performance guard'; Script = 'res://tests/v2_3/v2_3_performance_guard_test.gd' },
@@ -119,4 +120,4 @@ $null = Invoke-GodotStep -Name 'Headless project startup' -Arguments @(
     '--headless', '--path', $ProjectPath, '--quit-after', '5'
 )
 
-Write-Host "`nAll current V2.2, V2.3 and quarantined grid-fixture validation steps passed without parse/load errors."
+Write-Host "`nAll current V2.2, formal V2.3 and quarantined grid-fixture validation steps passed without parse/load errors."
