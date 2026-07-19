@@ -1,12 +1,15 @@
 #define MyAppName "1900"
 #define MyAppPublisher "1900 Project"
-#define MyAppVersion "0.001A"
+#ifndef MyAppVersion
+#define MyAppVersion "0.001a (dev)"
+#endif
 #define MyAppExeName "wwo-p0-demo.exe"
 
 [Setup]
 AppId={{A77A76ED-71DE-4CA8-884C-1900001A0001}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
+AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 DefaultDirName={autopf}\1900
 DefaultGroupName=1900
