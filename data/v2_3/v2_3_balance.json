@@ -19,10 +19,18 @@
     "minimum_duration_hours": 1,
     "late_grace_hours": 1
   },
+  "player_location": {
+    "return_home_prompt_hour": 21,
+    "late_stay_penalty_start_hour": 22,
+    "late_stay_penalty_end_hour": 6,
+    "late_stay_fatigue_per_hour": 45,
+    "late_stay_stress_per_hour": 20,
+    "late_stay_health_per_hour": -2
+  },
   "map": {
     "local_minimum_zoom": 48.0,
     "local_label_minimum_zoom": 72.0,
-    "maximum_zoom": 96.0,
+    "maximum_zoom": 200.0,
     "local_query_radius_world_units": 0.35
   }
 }
