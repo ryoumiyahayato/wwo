@@ -9,14 +9,14 @@
     {"id":"population","label":"人口","icon":"●","description":"在同一地理底图上叠加人口密度"},
     {"id":"war","label":"战争状态","icon":"⚔","description":"仅在战争示例中增加控制覆盖、战线与战区标签"}
   ],
-  "zoom":{"minimum":0.82,"maximum":96.0,"factor":1.26,"far_max":1.5,"middle_max":6.2,"v2_1_1_maximum":12.0,"france_focus":18.0,"player_location_focus":96.0},
-  "levels":{"far":{"id":"world","label":"世界远景"},"middle":{"id":"western_europe","label":"欧洲中景"},"near":{"id":"france_local","label":"法国近景"}},
+  "zoom":{"minimum":0.82,"maximum":200.0,"factor":1.24,"far_max":1.5,"middle_max":6.2,"v2_1_1_maximum":12.0,"france_focus":18.0,"player_location_focus":180.0},
+  "levels":{"far":{"id":"world","label":"世界远景"},"middle":{"id":"western_europe","label":"欧洲中景"},"near":{"id":"local_detail","label":"地点近景"}},
   "label_budgets":{
     "far":{"country":12,"city":4,"region":0,"administrative":0,"transport":0},
     "middle":{"country":12,"city":10,"region":0,"administrative":0,"transport":4},
-    "near":{"country":5,"city":12,"region":9,"administrative":18,"transport":8}
+    "near":{"country":5,"city":20,"region":12,"administrative":24,"transport":18}
   },
-  "detail_node_policy":{"far":"hidden","middle":"hidden","near":"selected_city_or_region_only"},
+  "detail_node_policy":{"far":"hidden","middle":"hidden","near":"visible_local_and_selected_context"},
   "peace_note":"和平状态：战争模式仍使用相同底图，但不显示战线。",
   "war_note":"战争视觉示例：静态覆盖，不运行任何战争模拟。",
   "transport_legend":{"rail":"双线枕木 · 陆地铁路","road":"细虚线 · 一般陆路","shipping":"蓝色长虚线 · 海运航线","border":"浅色细实线 · 国境","front":"红色锯齿粗线 · 战线"}
