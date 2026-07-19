@@ -10,8 +10,8 @@ config_version=5
 
 [application]
 
-config/name="1900年二维社会与战争模拟 Demo"
-config/version="1.0.0"
+config/name="1900"
+config/version="0.001a"
 run/main_scene="res://scenes/v2_3/v2_3_life_loop_menu.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 
