@@ -130,6 +130,7 @@ func _settle_hour(total_hour: int) -> void:
 		reconciled = true
 	if reconciled:
 		state_changed.emit({"manual_location_holds_reconciled": true})
+	process_manual_location_policy(total_hour)
 
 
 func restore_v2_3_state(state: Dictionary) -> V2LifeLoopResult:
