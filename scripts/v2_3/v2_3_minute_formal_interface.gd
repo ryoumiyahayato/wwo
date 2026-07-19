@@ -1,6 +1,24 @@
 class_name V23MinuteFormalInterface
 extends V23FormalScheduleInterface
-## Five-level minute clock controls and contextual travel leave.
+## Five-level minute clock controls, contextual travel leave and return-home decisions.
+
+
+func _draw() -> void:
+	super._draw()
+	var binding: V23ControlledUiBinding = _controlled_binding()
+	if binding == null:
+		return
+	var prompt: Dictionary = binding.return_home_prompt_view()
+	if not prompt.is_empty():
+		_draw_return_home_prompt(prompt)
+
+
+func close_top_layer() -> bool:
+	var binding: V23ControlledUiBinding = _controlled_binding()
+	if binding != null and not binding.return_home_prompt_view().is_empty():
+		_show_toast("需要先决定返家或继续停留")
+		return true
+	return super.close_top_layer()
 
 
 func get_panel_rect() -> Rect2:
@@ -84,9 +102,89 @@ func _draw_time_panel() -> void:
 	)
 
 
+func _draw_return_home_prompt(prompt: Dictionary) -> void:
+	_register(Rect2(Vector2.ZERO, size), "consume", null, "")
+	var rect := Rect2(362.0, 184.0, 556.0, 336.0)
+	_surface(rect, PANEL_SOLID, Color(AMBER, 0.68), 12)
+	_register(rect, "consume")
+	_text(rect.position + Vector2(24.0, 39.0), "人物准备返家", 22, INK)
+	_text(
+		rect.position + Vector2(24.0, 70.0),
+		"%s目前位于%s。" % [
+			str(prompt.get("person_name", "当前人物")),
+			str(prompt.get("current_location_name", "当前位置")),
+		],
+		11,
+		INK
+	)
+	_text(
+		rect.position + Vector2(24.0, 96.0),
+		"当前没有尚未完成的玩家活动，人物准备返回%s。" % str(
+			prompt.get("home_location_name", "住所")
+		),
+		10,
+		INK_MUTED
+	)
+	_divider(rect.position + Vector2(24.0, 122.0), rect.size.x - 48.0)
+	_text(rect.position + Vector2(24.0, 151.0), "允许返家", 11, GREEN)
+	_text(
+		rect.position + Vector2(122.0, 151.0),
+		"建立实际返家路线；到家后恢复正常自动日程。",
+		9,
+		INK_MUTED
+	)
+	_text(rect.position + Vector2(24.0, 184.0), "继续停留", 11, AMBER)
+	_text(
+		rect.position + Vector2(122.0, 184.0),
+		"夜间每小时：疲劳 +%d，压力 +%d，健康 %d。" % [
+			int(prompt.get("fatigue_per_hour", 0)),
+			int(prompt.get("stress_per_hour", 0)),
+			int(prompt.get("health_per_hour", 0)),
+		],
+		9,
+		INK_MUTED
+	)
+	_text(
+		rect.position + Vector2(24.0, 218.0),
+		"时间已暂停。系统不会替玩家默认选择继续滞留。",
+		9,
+		BLUE
+	)
+	_primary_action(
+		Rect2(rect.position.x + 24.0, rect.end.y - 66.0, 186.0, 38.0),
+		"让人物回家",
+		"return_home_accept",
+		str(prompt.get("person_id", "")),
+		"按实际路线返家，并解除临时停留指令"
+	)
+	_text_link(
+		Rect2(rect.position.x + 244.0, rect.end.y - 64.0, 150.0, 34.0),
+		"继续留在这里",
+		"return_home_stay",
+		str(prompt.get("person_id", "")),
+		"明确阻止返家；夜间状态损耗将逐小时结算"
+	)
+
+
 func _activate(action: String, payload: Variant) -> void:
 	var binding: V23ControlledUiBinding = _controlled_binding()
 	match action:
+		"return_home_accept":
+			if binding == null:
+				return
+			var result: V2LifeLoopResult = binding.accept_return_home_prompt(
+				str(payload)
+			)
+			_show_toast(("✓ " if result.success else "× ") + result.user_message)
+			queue_redraw()
+		"return_home_stay":
+			if binding == null:
+				return
+			var result: V2LifeLoopResult = binding.continue_staying_prompt(
+				str(payload)
+			)
+			_show_toast(("✓ " if result.success else "× ") + result.user_message)
+			queue_redraw()
 		"v2_3_travel_confirm":
 			if binding == null:
 				return
