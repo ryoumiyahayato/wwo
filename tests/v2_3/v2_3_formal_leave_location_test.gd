@@ -92,6 +92,25 @@ func _run() -> void:
 		"载入后实际位置仍为里尔市中心"
 	)
 	test.equal(restored.leave.records_for_person(person_id).size(), 1, "载入后保留一份请假豁免记录")
+
+	var legacy := V23LifeLoopSimulation.new()
+	test.expect(legacy.initialize(), "可建立旧 V2.3 占时请假存档")
+	var legacy_start: int = V2DateTime.total_hour_from_iso("1900-03-12T07:00:00")
+	test.expect(
+		legacy.request_activity(person_id, "authorized_leave", legacy_start, 5).success,
+		"旧实现可生成待迁移的占时请假活动"
+	)
+	var legacy_snapshot: Dictionary = save_service.build_snapshot(legacy)
+	var migrated := V23FormalSimulation.new()
+	test.expect(migrated.initialize(), "可建立旧存档迁移目标")
+	test.expect(save_service.restore(legacy_snapshot, migrated).success, "旧占时请假存档可载入正式实现")
+	var legacy_activity_remains: bool = false
+	for raw_activity: Variant in migrated.schedule.schedules.get(person_id, []) as Array:
+		if str((raw_activity as Dictionary).get("activity_type", "")) == "authorized_leave":
+			legacy_activity_remains = true
+	test.expect(not legacy_activity_remains, "旧存档中的请假活动块已被清除")
+	test.equal(migrated.leave.records_for_person(person_id).size(), 1, "旧请假活动迁移为劳动义务豁免记录")
+
 	var packed: PackedScene = load("res://scenes/v2_3/v2_3_life_loop_main.tscn") as PackedScene
 	var view: V23LifeLoopMain = packed.instantiate() as V23LifeLoopMain
 	test.expect(view != null, "正式场景可实例化")
