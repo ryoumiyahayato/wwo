@@ -64,15 +64,18 @@ func _run() -> void:
 		and not str(person_view.get("current_work", "")).contains("皮埃尔住所"),
 		"当前活动摘要不再用默认日程地点覆盖实际位置"
 	)
-	var attendance_before: int = simulation.employment.attendance_records.size()
 	var covered_end: int = int(record.get("end_hour", arrival_hour))
 	if simulation.clock.total_hours < covered_end:
 		simulation.advance_hours(covered_end - simulation.clock.total_hours)
+	var covered_set: Dictionary = {}
+	for raw_hour: Variant in record.get("covered_contract_hours", []) as Array:
+		covered_set[int(raw_hour)] = true
 	var leave_hours: int = 0
-	for attendance: Dictionary in simulation.employment.attendance_records.slice(attendance_before):
+	for attendance: Dictionary in simulation.employment.attendance_records:
 		if (
 			str(attendance.get("person_id", "")) == person_id
 			and bool(attendance.get("authorized_leave", false))
+			and covered_set.has(int(attendance.get("total_hour", -1)))
 		):
 			leave_hours += 1
 	test.equal(leave_hours, int(record.get("covered_hour_count", 0)), "被解除的合同工时按授权请假记入考勤")
