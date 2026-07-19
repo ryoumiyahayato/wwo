@@ -111,6 +111,27 @@ func authorize_leave_and_request_travel(
 	return result
 
 
+func _settle_hour(total_hour: int) -> void:
+	super._settle_hour(total_hour)
+	var reconciled: bool = false
+	for person_id_variant: Variant in manual_location_holds.keys():
+		var person_id: String = str(person_id_variant)
+		if not travel_execution.active_plan_for_person(person_id).is_empty():
+			continue
+		var position: Dictionary = spatial_locations.position_for(person_id)
+		var actual_location_id: String = str(
+			position.get("current_location_id", "")
+		)
+		if actual_location_id.is_empty():
+			continue
+		if str(manual_location_holds.get(person_id, "")) == actual_location_id:
+			continue
+		manual_location_holds[person_id] = actual_location_id
+		reconciled = true
+	if reconciled:
+		state_changed.emit({"manual_location_holds_reconciled": true})
+
+
 func restore_v2_3_state(state: Dictionary) -> V2LifeLoopResult:
 	var normalized: Dictionary = state.duplicate(true)
 	_normalize_expanded_spatial_state(normalized)
