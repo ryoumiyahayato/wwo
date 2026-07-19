@@ -1,6 +1,6 @@
 class_name V23ProductSimulation
 extends V23MinuteControlledSimulation
-## Final formal product composition: activity and travel conflicts share contextual leave.
+## Final formal product composition: contextual leave and compatible world expansion.
 
 
 func request_travel(
@@ -109,3 +109,66 @@ func authorize_leave_and_request_travel(
 		"player_override": true,
 	})
 	return result
+
+
+func restore_v2_3_state(state: Dictionary) -> V2LifeLoopResult:
+	var normalized: Dictionary = state.duplicate(true)
+	_normalize_expanded_spatial_state(normalized)
+	_normalize_expanded_graph_state(normalized)
+	return super.restore_v2_3_state(normalized)
+
+
+func _normalize_expanded_spatial_state(state: Dictionary) -> void:
+	if not state.get("spatial_state", {}) is Dictionary:
+		return
+	var spatial_state: Dictionary = (
+		state.get("spatial_state", {}) as Dictionary
+	).duplicate(true)
+	var restored_known: Dictionary = (
+		spatial_state.get("known_location_ids", {}) as Dictionary
+	).duplicate(true)
+	for person_id_variant: Variant in spatial_locations.known_location_ids.keys():
+		var person_id: String = str(person_id_variant)
+		var merged: Dictionary = (
+			restored_known.get(person_id, {}) as Dictionary
+		).duplicate(true)
+		for location_id_variant: Variant in (
+			spatial_locations.known_location_ids.get(person_id, {}) as Dictionary
+		).keys():
+			merged[str(location_id_variant)] = true
+		restored_known[person_id] = merged
+	spatial_state["known_location_ids"] = restored_known
+	state["spatial_state"] = spatial_state
+
+
+func _normalize_expanded_graph_state(state: Dictionary) -> void:
+	if not state.get("travel_graph_state", {}) is Dictionary:
+		return
+	var graph_state: Dictionary = (
+		state.get("travel_graph_state", {}) as Dictionary
+	).duplicate(true)
+	var active_edges: Dictionary = (
+		graph_state.get("active_edges", {}) as Dictionary
+	).duplicate(true)
+	for edge_id_variant: Variant in travel_graph.edges.keys():
+		var edge_id: String = str(edge_id_variant)
+		if not active_edges.has(edge_id):
+			active_edges[edge_id] = bool(
+				(travel_graph.edges[edge_id] as Dictionary).get("active", true)
+			)
+	graph_state["active_edges"] = active_edges
+	var restored_known: Dictionary = (
+		graph_state.get("known_edge_ids", {}) as Dictionary
+	).duplicate(true)
+	for person_id_variant: Variant in travel_graph.known_edge_ids.keys():
+		var person_id: String = str(person_id_variant)
+		var merged: Dictionary = (
+			restored_known.get(person_id, {}) as Dictionary
+		).duplicate(true)
+		for edge_id_variant: Variant in (
+			travel_graph.known_edge_ids.get(person_id, {}) as Dictionary
+		).keys():
+			merged[str(edge_id_variant)] = true
+		restored_known[person_id] = merged
+	graph_state["known_edge_ids"] = restored_known
+	state["travel_graph_state"] = graph_state
