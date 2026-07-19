@@ -81,6 +81,27 @@ func generate_character(
 	CharacterTendencyService.new(config).refresh_known_tendencies(character)
 	character.current_status = _generate_current_status(occupation)
 	character.current_status["population_category"] = population_category
+	character.background_history = [{
+		"kind": "prior_occupation",
+		"occupation_id": character.occupation_id,
+		"region_id": character.region_id,
+		"years": maxi(1, character.age - 18),
+	}]
+	character.domain_experience = {
+		character.occupation_id: maxi(10, (character.age - 18) * 2),
+		character.region_id: maxi(10, character.age - 18),
+	}
+	character.qualifications = []
+	character.drives = {
+		"security": random.next_int(20, 80),
+		"wealth": random.next_int(20, 80),
+		"status": random.next_int(20, 80),
+		"belonging": random.next_int(20, 80),
+		"ideals": random.next_int(20, 80),
+	}
+	character.issue_positions = {}
+	character.current_agendas = []
+	character.bottom_lines = ["survival"]
 	character.is_active = true
 	character.random_mode = mode
 	character.random_category = category if mode == MODE_CATEGORY else ""

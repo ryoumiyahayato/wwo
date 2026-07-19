@@ -63,6 +63,13 @@ static func from_active(character: CharacterData, seed_value: int) -> Background
 		"is_challenge_start": character.is_challenge_start,
 		"generation_seed": character.generation_seed,
 		"random_state": character.random_state,
+		"background_history": character.background_history.duplicate(true),
+		"domain_experience": character.domain_experience.duplicate(true),
+		"qualifications": character.qualifications.duplicate(),
+		"drives": character.drives.duplicate(true),
+		"issue_positions": character.issue_positions.duplicate(true),
+		"current_agendas": character.current_agendas.duplicate(true),
+		"bottom_lines": character.bottom_lines.duplicate(),
 	}
 	return model
 
@@ -96,6 +103,35 @@ func apply_persistent_core(character: CharacterData) -> void:
 		persistent_core.get("generation_seed", character.generation_seed)
 	)
 	character.random_state = int(persistent_core.get("random_state", character.random_state))
+	character.background_history = []
+	for raw_history: Variant in persistent_core.get(
+		"background_history", character.background_history
+	) as Array:
+		if raw_history is Dictionary:
+			character.background_history.append(
+				(raw_history as Dictionary).duplicate(true)
+			)
+	character.domain_experience = DataRecordUtils.to_dictionary(
+		persistent_core.get("domain_experience", character.domain_experience)
+	)
+	character.qualifications = DataRecordUtils.to_string_array(
+		persistent_core.get("qualifications", character.qualifications)
+	)
+	character.drives = DataRecordUtils.to_dictionary(
+		persistent_core.get("drives", character.drives)
+	)
+	character.issue_positions = DataRecordUtils.to_dictionary(
+		persistent_core.get("issue_positions", character.issue_positions)
+	)
+	character.current_agendas = []
+	for raw_agenda: Variant in persistent_core.get(
+		"current_agendas", character.current_agendas
+	) as Array:
+		if raw_agenda is Dictionary:
+			character.current_agendas.append((raw_agenda as Dictionary).duplicate(true))
+	character.bottom_lines = DataRecordUtils.to_string_array(
+		persistent_core.get("bottom_lines", character.bottom_lines)
+	)
 
 
 func to_dict() -> Dictionary:

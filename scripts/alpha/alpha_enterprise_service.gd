@@ -850,6 +850,10 @@ func _bootstrap_enterprise(record: Dictionary, start_hour: int) -> bool:
 			region_id
 		):
 			return false
+	else:
+		# The retained core used industry-facing labels. Alpha normalizes every
+		# operating business to the single enterprise organization type.
+		_organizations.get_organization(organization_id).type = "enterprise"
 	var state: Dictionary = _new_enterprise_state(record)
 	var registered: Dictionary = _economy.register_entity(
 		organization_id,
