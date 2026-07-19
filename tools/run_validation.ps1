@@ -97,7 +97,9 @@ $tests = @(
     @{ Name = 'V2.3 map integration'; Script = 'res://tests/v2_3/v2_3_map_integration_test.gd' },
     @{ Name = 'V2.3 performance guard'; Script = 'res://tests/v2_3/v2_3_performance_guard_test.gd' },
     @{ Name = 'V2.3 full loop smoke'; Script = 'res://tests/v2_3/v2_3_full_loop_smoke.gd' },
-    @{ Name = 'Alpha world and topology'; Script = 'res://tests/alpha/alpha_world_topology_test.gd' }
+    @{ Name = 'Alpha world and topology'; Script = 'res://tests/alpha/alpha_world_topology_test.gd' },
+    @{ Name = 'Alpha economy lifecycle'; Script = 'res://tests/alpha/alpha_economy_lifecycle_test.gd' },
+    @{ Name = 'Alpha labor and enterprise'; Script = 'res://tests/alpha/alpha_labor_enterprise_test.gd' }
 )
 
 foreach ($test in $tests) {

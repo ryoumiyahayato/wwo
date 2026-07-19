@@ -50,6 +50,43 @@ func get_types() -> Array[String]:
 	return output
 
 
+func register_runtime_organization(organization: OrganizationData) -> bool:
+	if (
+		organization == null
+		or organization.id.is_empty()
+		or organization.type.is_empty()
+		or organization.country_id.is_empty()
+		or organization.region_id.is_empty()
+		or organizations.has(organization.id)
+	):
+		return false
+	var structure: Dictionary = organization.position_structure
+	var entry_position: String = str(structure.get("entry_position", ""))
+	var leader_position: String = str(structure.get("leader_position", ""))
+	var positions: Dictionary = structure.get("positions", {}) as Dictionary
+	if (
+		entry_position.is_empty()
+		or leader_position.is_empty()
+		or not positions.has(entry_position)
+		or not positions.has(leader_position)
+	):
+		return false
+	organizations[organization.id] = OrganizationData.from_dict(organization.to_dict())
+	return true
+
+
+func remove_runtime_organization(organization_id: String) -> bool:
+	var organization: OrganizationData = get_organization(organization_id)
+	if (
+		organization == null
+		or not organization.member_ids.is_empty()
+		or not organization.leader_character_id.is_empty()
+	):
+		return false
+	organizations.erase(organization_id)
+	return true
+
+
 func join_organization(character: CharacterData, organization_id: String) -> bool:
 	var organization: OrganizationData = get_organization(organization_id)
 	if character == null or organization == null or character.country_id != organization.country_id:

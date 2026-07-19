@@ -81,6 +81,7 @@
   "region_profiles": [
     {
       "region_id": "region:loran_dawnbay",
+      "country_id": "country:loran_federation",
       "economic_role": "首都港口、批发贸易与公共行政",
       "major_city_id": "city:dawnharbor",
       "population": 1280000,
@@ -98,6 +99,7 @@
     },
     {
       "region_id": "region:loran_riverback",
+      "country_id": "country:loran_federation",
       "economic_role": "机械、河运与制造业",
       "major_city_id": "city:ironford",
       "population": 1170000,
@@ -115,6 +117,7 @@
     },
     {
       "region_id": "region:loran_forgeplain",
+      "country_id": "country:loran_federation",
       "economic_role": "煤铁加工与中小工场",
       "major_city_id": "",
       "population": 1110000,
@@ -132,6 +135,7 @@
     },
     {
       "region_id": "region:loran_southridge",
+      "country_id": "country:loran_federation",
       "economic_role": "农业、木材与劳动力供给",
       "major_city_id": "",
       "population": 1060000,
@@ -149,6 +153,7 @@
     },
     {
       "region_id": "region:vesta_northstar",
+      "country_id": "country:vesta_union",
       "economic_role": "边境贸易、畜产与行政",
       "major_city_id": "",
       "population": 930000,
@@ -166,6 +171,7 @@
     },
     {
       "region_id": "region:vesta_silverfield",
+      "country_id": "country:vesta_union",
       "economic_role": "首都金融、纺织与联盟行政",
       "major_city_id": "city:starhold",
       "population": 1260000,
@@ -183,6 +189,7 @@
     },
     {
       "region_id": "region:vesta_eastlake",
+      "country_id": "country:vesta_union",
       "economic_role": "湖运、物流与轻工业",
       "major_city_id": "",
       "population": 1040000,
@@ -200,6 +207,7 @@
     },
     {
       "region_id": "region:vesta_redhill",
+      "country_id": "country:vesta_union",
       "economic_role": "重工、煤炭与军需",
       "major_city_id": "city:redplain",
       "population": 1080000,
