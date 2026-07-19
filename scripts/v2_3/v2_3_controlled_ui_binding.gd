@@ -102,3 +102,25 @@ func submit_activity_with_leave(
 	_view_revision += 1
 	view_changed.emit()
 	return last_command_result
+
+
+func submit_travel_with_leave(request: Dictionary) -> V2LifeLoopResult:
+	var product_simulation: V23ProductSimulation = (
+		controlled_simulation as V23ProductSimulation
+	)
+	if product_simulation == null:
+		return V2LifeLoopResult.fail(
+			"product_simulation_unavailable",
+			"旅行请假服务不可用"
+		)
+	last_command_result = product_simulation.authorize_leave_and_request_travel(
+		selected_person_id(),
+		str(request.get("destination_id", "")),
+		str(request.get("preference", "fastest")),
+		int(request.get("start_hour", -1))
+	)
+	if last_command_result.success:
+		route_preview.clear()
+	_view_revision += 1
+	view_changed.emit()
+	return last_command_result
