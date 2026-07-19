@@ -1,19 +1,27 @@
 class_name V23LifeLoopMenu
 extends Control
-## Dedicated V2.3 launcher with explicit V2.2 migration.
+## Stable product launcher. The title never changes; only BuildInfo does.
 
 const LIFE_LOOP_SCENE: String = "res://scenes/v2_3/v2_3_life_loop_main.tscn"
 const LAUNCH_MODE_META: StringName = &"v2_3_launch_mode"
 
+@onready var title_label: Label = %TitleLabel
+@onready var version_label: Label = %PhaseLabel
+@onready var subtitle_label: Label = %SubtitleLabel
 @onready var new_button: Button = %NewReviewButton
 @onready var load_button: Button = %LoadReviewButton
 @onready var migrate_button: Button = %MigrateButton
 @onready var quit_button: Button = %QuitButton
 @onready var status_label: Label = %StatusLabel
+@onready var footer_label: Label = %FooterLabel
 
 
 func _ready() -> void:
-	DisplayServer.window_set_title("《1900》— V2.3 空间与有限认知")
+	DisplayServer.window_set_title(BuildInfo.window_title())
+	title_label.text = BuildInfo.GAME_NAME
+	version_label.text = BuildInfo.display_version()
+	subtitle_label.text = "人物、地点、工作与经济模拟"
+	footer_label.text = "Godot 4.6.3 · Windows x86-64"
 	new_button.pressed.connect(_open.bind("new"))
 	load_button.pressed.connect(_open.bind("load"))
 	migrate_button.pressed.connect(_open.bind("migrate"))
@@ -32,7 +40,7 @@ func _open(mode: String) -> void:
 	get_tree().set_meta(LAUNCH_MODE_META, mode)
 	var error: Error = get_tree().change_scene_to_file(LIFE_LOOP_SCENE)
 	if error != OK:
-		status_label.text = "无法打开 V2.3 世界地图：%s" % error_string(error)
+		status_label.text = "无法打开游戏：%s" % error_string(error)
 		status_label.add_theme_color_override("font_color", Color("#d88a74"))
 
 
@@ -47,7 +55,7 @@ func _refresh_state() -> void:
 	)
 	load_button.disabled = not v2_3_available
 	migrate_button.disabled = not v2_2_available
-	status_label.text = "V2.3 存档：%s · 可迁移 V2.2：%s" % [
-		"可用" if v2_3_available else "无",
+	status_label.text = "当前存档：%s · 可迁移旧版：%s" % [
+		"可继续" if v2_3_available else "无",
 		"是" if v2_2_available else "否",
 	]
