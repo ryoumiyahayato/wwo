@@ -96,21 +96,21 @@ theme_override_constants/separation = 12
 layout_mode = 2
 theme_override_colors/font_color = Color(0.76, 0.68, 0.4, 1)
 theme_override_font_sizes/font_size = 14
-text = "V2.3 · 空间移动、有限认知、通信与动态关系"
+text = "V2.3 · 正式世界地图、具身生活与个人经济"
 horizontal_alignment = 1
 
 [node name="TitleLabel" type="Label" parent="Center/Card/Margin/Content"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.94, 0.93, 0.85, 1)
 theme_override_font_sizes/font_size = 30
-text = "《1900》人物生活闭环"
+text = "《1900》人物生活与经济"
 horizontal_alignment = 1
 
 [node name="SubtitleLabel" type="Label" parent="Center/Card/Margin/Content"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.68, 0.74, 0.7, 1)
 theme_override_font_sizes/font_size = 14
-text = "在同一张世界地图上旅行、通信、获知并维系关系"
+text = "在正式地图上旅行、工作、通信，并通过现实地点处理个人借款"
 horizontal_alignment = 1
 
 [node name="Spacer" type="Control" parent="Center/Card/Margin/Content"]
@@ -125,7 +125,7 @@ layout_mode = 2
 mouse_default_cursor_shape = 2
 theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = SubResource("StyleBoxFlat_button")
-text = "开始新的 V2.3 评审"
+text = "进入正式 V2.3 世界"
 
 [node name="LoadReviewButton" type="Button" parent="Center/Card/Margin/Content"]
 unique_name_in_owner = true
@@ -134,7 +134,7 @@ layout_mode = 2
 mouse_default_cursor_shape = 2
 theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = SubResource("StyleBoxFlat_button")
-text = "载入 V2.3 最近存档"
+text = "载入正式 V2.3 存档"
 
 [node name="MigrateButton" type="Button" parent="Center/Card/Margin/Content"]
 unique_name_in_owner = true
@@ -168,5 +168,5 @@ text = "退出"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.46, 0.52, 0.49, 1)
 theme_override_font_sizes/font_size = 11
-text = "离线 Demo · 单一权威时钟 · 不改变指定 Godot 版本"
+text = "离线开发版本 · 单一权威时钟与住户账本 · Godot 4.6.3"
 horizontal_alignment = 1
