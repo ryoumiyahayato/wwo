@@ -1,5 +1,5 @@
 extends SceneTree
-## Product regression for minute time, contextual leave, location rules and map scale.
+## Product regression for minute time, contextual leave, temporary stays and identity.
 
 var test := V23TestCase.new()
 
@@ -9,6 +9,12 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	test.equal(BuildInfo.GAME_NAME, "1900", "游戏名称固定为1900")
+	test.expect(
+		BuildInfo.display_version().begins_with("v0.001a ("),
+		"首页版本使用独立的基础版本与构建标识"
+	)
+
 	var simulation := V23ProductSimulation.new()
 	test.expect(simulation.initialize(), "正式产品模拟可初始化")
 	if not simulation.initialized:
@@ -104,7 +110,7 @@ func _run() -> void:
 	test.equal(
 		simulation.manual_hold_for(pierre),
 		"location_lille_centre",
-		"玩家指定地点成为持续位置指令"
+		"玩家指定地点形成临时停留意图"
 	)
 	var sleep_result: V2LifeLoopResult = simulation.request_activity(
 		pierre,
@@ -116,21 +122,76 @@ func _run() -> void:
 		not sleep_result.success and sleep_result.error_code == "requires_location",
 		"人物不能在市中心远程执行住所睡眠"
 	)
-	var hold_check_hour: int = simulation.clock.total_hours + 24
-	simulation.advance_hours(24)
+
+	minute_clock.set_paused(false)
+	var first_prompt_hour: int = _next_hour_of_day(
+		simulation.clock.total_hours, 21
+	)
+	simulation.advance_hours(first_prompt_hour - simulation.clock.total_hours)
+	var return_prompt: Dictionary = simulation.next_return_home_prompt()
+	test.expect(not return_prompt.is_empty(), "晚间空闲时形成返家提示")
+	test.equal(
+		str(return_prompt.get("person_id", "")),
+		pierre,
+		"返家提示关联被玩家留在市中心的人物"
+	)
+	test.expect(minute_clock.is_paused, "返家提示出现时权威时间暂停")
+	var condition_before_stay: Dictionary = simulation.conditions.get_state(pierre)
+	var stay_result: V2LifeLoopResult = simulation.continue_staying_outside_home(
+		pierre
+	)
+	test.expect(stay_result.success, "玩家可以明确阻止人物返家")
+	test.expect(not minute_clock.is_paused, "处理唯一返家提示后恢复原运行状态")
+	simulation.advance_hours(2)
+	var condition_after_stay: Dictionary = simulation.conditions.get_state(pierre)
+	test.expect(
+		int(condition_after_stay.get("fatigue", 0))
+		> int(condition_before_stay.get("fatigue", 0)),
+		"夜间强制滞留逐小时增加疲劳"
+	)
+	test.expect(
+		int(condition_after_stay.get("stress", 0))
+		> int(condition_before_stay.get("stress", 0)),
+		"夜间强制滞留逐小时增加压力"
+	)
+	test.expect(
+		int(condition_after_stay.get("health", 0))
+		< int(condition_before_stay.get("health", 0)),
+		"夜间强制滞留逐小时降低健康"
+	)
+
+	var second_prompt_hour: int = _next_hour_of_day(
+		simulation.clock.total_hours, 21
+	)
+	simulation.advance_hours(second_prompt_hour - simulation.clock.total_hours)
+	return_prompt = simulation.next_return_home_prompt()
+	test.expect(not return_prompt.is_empty(), "下一晚仍在外时再次询问返家")
+	var return_result: V2LifeLoopResult = simulation.accept_return_home(pierre)
+	test.expect(return_result.success, "确认返家会建立实际返家路线")
+	test.expect(simulation.next_return_home_prompt().is_empty(), "确认后返家提示被清除")
+	active_plan = simulation.travel_execution.active_plan_for_person(pierre)
+	test.expect(not active_plan.is_empty(), "返家不是瞬移而是正式旅行计划")
+	arrival_hour = int(
+		active_plan.get("expected_arrival_hour", simulation.clock.total_hours + 1)
+	)
+	if simulation.clock.total_hours < arrival_hour:
+		simulation.advance_hours(arrival_hour - simulation.clock.total_hours)
 	position = simulation.spatial_locations.position_for(pierre)
+	var home_id: String = "location_lille_pierre_home"
 	test.equal(
 		str(position.get("current_location_id", "")),
-		"location_lille_centre",
-		"没有新玩家移动指令时人物不会被自动通勤带走"
+		home_id,
+		"返家行程完成后人物实际位于住所"
 	)
-	test.equal(simulation.clock.total_hours, hold_check_hour, "位置保持测试推进24小时")
+	test.equal(
+		simulation.manual_hold_for(pierre),
+		"",
+		"返家后解除临时停留并恢复正常自动日程"
+	)
 
-	var home_id: String = "location_lille_pierre_home"
 	simulation.spatial_locations.force_set_at_location(
 		pierre, home_id, simulation.clock.total_hours
 	)
-	simulation.manual_location_holds[pierre] = home_id
 	var work_hour: int = _next_unreleased_work_hour(simulation, pierre)
 	test.expect(work_hour >= 0, "可找到下一小时合同工作义务")
 	if work_hour >= 0:
@@ -170,6 +231,27 @@ func _run() -> void:
 		"人物所在地默认聚焦倍率为180"
 	)
 
+	var menu_packed: PackedScene = load(
+		"res://scenes/v2_3/v2_3_life_loop_menu.tscn"
+	) as PackedScene
+	var menu: V23LifeLoopMenu = menu_packed.instantiate() as V23LifeLoopMenu
+	test.expect(menu != null, "正式首页可实例化")
+	if menu != null:
+		root.add_child(menu)
+		await process_frame
+		test.equal(
+			str(menu.get_node("Center/Card/Margin/Content/TitleLabel").get("text")),
+			"1900",
+			"首页只显示固定游戏名称"
+		)
+		test.equal(
+			str(menu.get_node("Center/Card/Margin/Content/PhaseLabel").get("text")),
+			BuildInfo.display_version(),
+			"首页单独显示可核对版本号"
+		)
+		menu.queue_free()
+		await process_frame
+
 	var packed: PackedScene = load(
 		"res://scenes/v2_3/v2_3_life_loop_main.tscn"
 	) as PackedScene
@@ -186,6 +268,14 @@ func _run() -> void:
 		view.queue_free()
 		await process_frame
 	test.finish(self, "V2.3 controlled world")
+
+
+func _next_hour_of_day(total_hour: int, target_hour_of_day: int) -> int:
+	var value: Dictionary = V2DateTime.from_total_hour(total_hour)
+	var candidate: int = total_hour - int(value.get("hour", 0)) + target_hour_of_day
+	if candidate <= total_hour:
+		candidate += 24
+	return candidate
 
 
 func _next_unreleased_work_hour(
