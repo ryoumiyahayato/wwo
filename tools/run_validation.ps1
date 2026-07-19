@@ -1,6 +1,7 @@
 param(
     [string]$GodotPath = 'D:\Tools\Godot-4.6.3\Godot_v4.6.3-stable_win64.exe',
-    [string]$ProjectPath = (Split-Path -Parent $PSScriptRoot)
+    [string]$ProjectPath = (Split-Path -Parent $PSScriptRoot),
+    [int]$StepTimeoutSeconds = 120
 )
 
 $ErrorActionPreference = 'Stop'
@@ -9,6 +10,9 @@ $expectedGodotVersion = '4.6.3.stable.official.7d41c59c4'
 if (-not (Test-Path -LiteralPath $GodotPath -PathType Leaf)) {
     throw "Godot executable not found: $GodotPath"
 }
+if ($StepTimeoutSeconds -lt 10) {
+    throw 'StepTimeoutSeconds must be at least 10.'
+}
 
 $ProjectPath = (Resolve-Path -LiteralPath $ProjectPath).Path
 $parseErrorPattern = '(?im)(SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|Cannot get class|Invalid call|Invalid get index|Assertion failed)'
@@ -16,10 +20,12 @@ $parseErrorPattern = '(?im)(SCRIPT ERROR|Parse Error|Failed to load script|Could
 function Invoke-GodotStep {
     param(
         [Parameter(Mandatory = $true)][string]$Name,
-        [Parameter(Mandatory = $true)][string[]]$Arguments
+        [Parameter(Mandatory = $true)][string[]]$Arguments,
+        [int]$TimeoutSeconds = $StepTimeoutSeconds
     )
 
     Write-Host "`n=== $Name ==="
+    Write-Host "Timeout: $TimeoutSeconds seconds"
     $stdoutPath = [System.IO.Path]::GetTempFileName()
     $stderrPath = [System.IO.Path]::GetTempFileName()
     try {
@@ -33,10 +39,20 @@ function Invoke-GodotStep {
             -ArgumentList $quotedArguments `
             -WorkingDirectory $ProjectPath `
             -NoNewWindow `
-            -Wait `
             -PassThru `
             -RedirectStandardOutput $stdoutPath `
             -RedirectStandardError $stderrPath
+
+        $finished = $process.WaitForExit($TimeoutSeconds * 1000)
+        if (-not $finished) {
+            Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+            $process.WaitForExit()
+        }
+        else {
+            # Ensure redirected streams have fully flushed before reading them.
+            $process.WaitForExit()
+        }
+
         $lines = @(
             Get-Content -LiteralPath $stdoutPath -Encoding UTF8 -ErrorAction SilentlyContinue
             Get-Content -LiteralPath $stderrPath -Encoding UTF8 -ErrorAction SilentlyContinue
@@ -44,6 +60,9 @@ function Invoke-GodotStep {
         $text = ($lines | Out-String)
         $lines | ForEach-Object { Write-Host $_ }
 
+        if (-not $finished) {
+            throw "$Name timed out after $TimeoutSeconds seconds; the Godot process was terminated"
+        }
         if ($process.ExitCode -ne 0) {
             throw "$Name failed with exit code $($process.ExitCode)"
         }
@@ -57,14 +76,14 @@ function Invoke-GodotStep {
     }
 }
 
-$actualGodotVersion = Invoke-GodotStep -Name 'Godot version' -Arguments @('--version')
+$actualGodotVersion = Invoke-GodotStep -Name 'Godot version' -Arguments @('--version') -TimeoutSeconds 30
 if ($actualGodotVersion -ne $expectedGodotVersion) {
     throw "Godot version mismatch: expected $expectedGodotVersion, got $actualGodotVersion"
 }
 
 $null = Invoke-GodotStep -Name 'Clean import and script scan' -Arguments @(
     '--editor', '--headless', '--path', $ProjectPath, '--quit'
-)
+) -TimeoutSeconds 180
 
 $tests = @(
     @{ Name = 'V2.2 config and datetime'; Script = 'res://tests/v2_2/v2_2_config_datetime_test.gd' },
@@ -93,7 +112,8 @@ $tests = @(
     @{ Name = 'V2.3 save migration'; Script = 'res://tests/v2_3/v2_3_save_migration_test.gd' },
     @{ Name = 'V2.3 save load'; Script = 'res://tests/v2_3/v2_3_save_load_test.gd' },
     @{ Name = 'V2.3 determinism'; Script = 'res://tests/v2_3/v2_3_determinism_test.gd' },
-    @{ Name = 'V2.3 formal finance'; Script = 'res://tests/v2_3/v2_3_formal_finance_test.gd' },
+    @{ Name = 'V2.3 formal finance'; Script = 'res://tests/v2_3/v2_3_formal_finance_test.gd'; TimeoutSeconds = 60 },
+    @{ Name = 'V2.3 formal leave and location'; Script = 'res://tests/v2_3/v2_3_formal_leave_location_test.gd'; TimeoutSeconds = 60 },
     @{ Name = 'V2.3 UI binding'; Script = 'res://tests/v2_3/v2_3_ui_binding_test.gd' },
     @{ Name = 'V2.3 map integration'; Script = 'res://tests/v2_3/v2_3_map_integration_test.gd' },
     @{ Name = 'V2.3 performance guard'; Script = 'res://tests/v2_3/v2_3_performance_guard_test.gd' },
@@ -107,17 +127,23 @@ $tests = @(
     @{ Name = 'Grid fixture quarantine and presets'; Script = 'res://tests/alpha/alpha_ui_and_presets_test.gd' },
     @{ Name = 'Grid fixture save and migration'; Script = 'res://tests/alpha/alpha_save_and_migration_test.gd' },
     @{ Name = 'Grid fixture cross-system scenarios'; Script = 'res://tests/alpha/alpha_cross_system_scenarios_test.gd' },
-    @{ Name = 'Grid fixture three-year performance'; Script = 'res://tests/alpha/alpha_three_year_performance_test.gd' }
+    @{ Name = 'Grid fixture three-year performance'; Script = 'res://tests/alpha/alpha_three_year_performance_test.gd'; TimeoutSeconds = 220 }
 )
 
 foreach ($test in $tests) {
+    $timeout = if ($test.ContainsKey('TimeoutSeconds')) {
+        [int]$test.TimeoutSeconds
+    }
+    else {
+        $StepTimeoutSeconds
+    }
     $null = Invoke-GodotStep -Name $test.Name -Arguments @(
         '--headless', '--path', $ProjectPath, '--script', $test.Script
-    )
+    ) -TimeoutSeconds $timeout
 }
 
 $null = Invoke-GodotStep -Name 'Headless project startup' -Arguments @(
     '--headless', '--path', $ProjectPath, '--quit-after', '5'
-)
+) -TimeoutSeconds 30
 
 Write-Host "`nAll current V2.2, formal V2.3 and quarantined grid-fixture validation steps passed without parse/load errors."
