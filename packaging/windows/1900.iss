@@ -1,7 +1,7 @@
 #define MyAppName "1900"
 #define MyAppPublisher "1900 Project"
 #ifndef MyAppVersion
-#define MyAppVersion "0.001a (dev)"
+#define MyAppVersion "v0.001a (dev)"
 #endif
 #define MyAppExeName "wwo-p0-demo.exe"
 
