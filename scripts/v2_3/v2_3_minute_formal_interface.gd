@@ -1,6 +1,6 @@
 class_name V23MinuteFormalInterface
 extends V23FormalScheduleInterface
-## Five-level minute clock controls for the formal product scene.
+## Five-level minute clock controls and contextual travel leave.
 
 
 func get_panel_rect() -> Rect2:
@@ -82,3 +82,37 @@ func _draw_time_panel() -> void:
 		8,
 		INK_DIM
 	)
+
+
+func _activate(action: String, payload: Variant) -> void:
+	var binding: V23ControlledUiBinding = _controlled_binding()
+	match action:
+		"v2_3_travel_confirm":
+			if binding == null:
+				return
+			var result: V2LifeLoopResult = binding.submit_travel()
+			if (
+				not result.success
+				and result.error_code == "requires_leave_authorization"
+			):
+				leave_confirmation = result.data.duplicate(true)
+				_show_toast("该行程与工作冲突，请确认是否请假")
+			else:
+				_show_toast(("✓ " if result.success else "× ") + result.user_message)
+			queue_redraw()
+		"leave_confirm_activity":
+			if (
+				binding != null
+				and str(leave_confirmation.get("command_type", "")) == "travel"
+			):
+				var result: V2LifeLoopResult = binding.submit_travel_with_leave(
+					leave_confirmation
+				)
+				_show_toast(("✓ " if result.success else "× ") + result.user_message)
+				if result.success:
+					leave_confirmation.clear()
+				queue_redraw()
+			else:
+				super._activate(action, payload)
+		_:
+			super._activate(action, payload)
