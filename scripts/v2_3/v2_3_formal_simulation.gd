@@ -37,7 +37,11 @@ func suggest_next_activity(
 		var covered: Array[int] = []
 		for hour_offset: int in range(24):
 			var total_hour: int = candidate_day + hour_offset
-			if total_hour >= current_hour and employment.is_required_work_hour(person_id, total_hour):
+			if (
+				total_hour >= current_hour
+				and employment.is_required_work_hour(person_id, total_hour)
+				and not leave.covers(person_id, total_hour)
+			):
 				covered.append(total_hour)
 		if covered.is_empty():
 			continue
@@ -77,12 +81,7 @@ func request_activity(
 		return result
 	var record: Dictionary = result.data.get("leave_authorization", {}) as Dictionary
 	leave.release_contract_schedule(record, schedule)
-	var first_day: int = _formal_day_start(int(record.get("start_hour", start_hour)))
-	var last_day: int = _formal_day_start(int(record.get("end_hour", start_hour + duration_hours - 1)))
-	for day_start: int in range(first_day, last_day + 1, 24):
-		leave.cancel_automatic_commutes_for_day(
-			person_id, day_start, clock.total_hours, schedule, travel_execution
-		)
+	_replan_commutes_for_leave_record(record)
 	notifications.add(
 		"personal",
 		"event",
@@ -199,7 +198,13 @@ func restore_v2_3_state(state: Dictionary) -> V2LifeLoopResult:
 		state.get("formal_leave_state", {}) as Dictionary
 	):
 		return V2LifeLoopResult.fail("leave_restore_failed", "正式请假状态恢复失败")
-	state_changed.emit({"loaded": true, "formal_finance": true, "formal_leave": true})
+	var migrated_leave_count: int = _migrate_legacy_scheduled_leave()
+	state_changed.emit({
+		"loaded": true,
+		"formal_finance": true,
+		"formal_leave": true,
+		"legacy_leave_migrated": migrated_leave_count,
+	})
 	return V2LifeLoopResult.ok("V2.3 正式存档已载入")
 
 
@@ -268,6 +273,85 @@ func _monthly_income_for(person_id: String) -> int:
 	if str(contract.get("wage_period", "")) == "weekly":
 		return int(base_wage * 52 / 12) + allowance
 	return base_wage + allowance
+
+
+func _replan_commutes_for_leave_record(record: Dictionary) -> void:
+	var person_id: String = str(record.get("person_id", ""))
+	var first_day: int = _formal_day_start(int(record.get("start_hour", clock.total_hours)))
+	var last_day: int = _formal_day_start(int(record.get("end_hour", clock.total_hours + 1)) - 1)
+	for day_start: int in range(first_day, last_day + 1, 24):
+		if not _leave_covers_full_workday(person_id, day_start):
+			continue
+		leave.cancel_automatic_commutes_for_day(
+			person_id, day_start, clock.total_hours, schedule, travel_execution
+		)
+
+
+func _leave_covers_full_workday(person_id: String, day_start: int) -> bool:
+	var found_required_hour: bool = false
+	for offset: int in range(24):
+		var total_hour: int = day_start + offset
+		if not employment.is_required_work_hour(person_id, total_hour):
+			continue
+		found_required_hour = true
+		if not leave.covers(person_id, total_hour):
+			return false
+	return found_required_hour
+
+
+func _migrate_legacy_scheduled_leave() -> int:
+	var migrated_count: int = 0
+	for person_id_variant: Variant in schedule.schedules.keys():
+		var person_id: String = str(person_id_variant)
+		var original: Array = schedule.schedules.get(person_id, []) as Array
+		var retained: Array = []
+		var migrated_records: Array[Dictionary] = []
+		for raw_activity: Variant in original:
+			var activity: Dictionary = raw_activity as Dictionary
+			if str(activity.get("activity_type", "")) != "authorized_leave":
+				retained.append(activity)
+				continue
+			if str(activity.get("status", "")) == "cancelled":
+				continue
+			var covered_hours: Array[int] = []
+			for total_hour: int in range(
+				int(activity.get("start_hour", 0)),
+				int(activity.get("end_hour", 0))
+			):
+				if employment.is_required_work_hour(person_id, total_hour) and not leave.covers(person_id, total_hour):
+					covered_hours.append(total_hour)
+			if covered_hours.is_empty():
+				continue
+			var leave_id: String = "leave:legacy:%s" % str(activity.get("activity_id", migrated_count))
+			var record: Dictionary = {
+				"leave_id": leave_id,
+				"person_id": person_id,
+				"contract_id": str(employment.contract_for_person(person_id).get("contract_id", "")),
+				"start_hour": int(activity.get("start_hour", 0)),
+				"end_hour": int(activity.get("end_hour", 0)),
+				"start_datetime": V2DateTime.iso_from_total_hour(int(activity.get("start_hour", 0))),
+				"end_datetime": V2DateTime.iso_from_total_hour(int(activity.get("end_hour", 0))),
+				"covered_contract_hours": covered_hours.duplicate(),
+				"covered_hour_count": covered_hours.size(),
+				"paid": false,
+				"status": "approved",
+				"approved_hour": clock.total_hours,
+				"approved_datetime": V2DateTime.iso_from_total_hour(clock.total_hours),
+				"migrated_from_activity_id": str(activity.get("activity_id", "")),
+			}
+			leave.authorizations[leave_id] = record
+			migrated_records.append(record)
+			migrated_count += 1
+		schedule.schedules[person_id] = retained
+		for record: Dictionary in migrated_records:
+			leave.release_contract_schedule(record, schedule)
+			_replan_commutes_for_leave_record(record)
+	var retained_completed: Array[Dictionary] = []
+	for activity: Dictionary in schedule.recent_completed_activities:
+		if str(activity.get("activity_type", "")) != "authorized_leave":
+			retained_completed.append(activity)
+	schedule.recent_completed_activities = retained_completed
+	return migrated_count
 
 
 static func _formal_day_start(total_hour: int) -> int:
