@@ -91,6 +91,24 @@
       "map_visibility_rule": "known_cross_border_location",
       "discovery_rule": "rail_timetable_or_message",
       "prototype_balance_value": true
+    },
+    {
+      "location_id": "location_cologne_centre",
+      "display_name": "科隆市中心",
+      "location_type": "regional_centre",
+      "parent_region_id": "german_empire",
+      "world_position": [6.9603, 50.9375],
+      "local_position": [278.0, -21.4],
+      "known_by_default_person_ids": ["character_pierre_lefevre", "character_albert_dumont"],
+      "opening_hours": {"all": [0, 24]},
+      "organization_ids": [],
+      "workplace_ids": [],
+      "resident_person_ids": [],
+      "available_services": ["meet_person", "purchase_food", "purchase_essentials"],
+      "communication_services": ["local_letter_address", "public_notice"],
+      "map_visibility_rule": "known_cross_border_location",
+      "discovery_rule": "international_rail_timetable_or_message",
+      "prototype_balance_value": true
     }
   ]
 }
