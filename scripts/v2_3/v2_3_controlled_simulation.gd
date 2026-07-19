@@ -1,16 +1,23 @@
 class_name V23ControlledSimulation
 extends V23FormalSimulation
-## Player-directed movement becomes authoritative until another player command changes it.
-## Automatic routines may still describe obligations, but they cannot move a manually
-## positioned person or execute location-bound actions from the wrong place.
+## Player travel creates a temporary stay intention. Automatic work travel cannot
+## override it, but an idle person outside home will ask to return before sleep.
 
 var manual_location_holds: Dictionary = {}
+var manual_location_hold_started_hours: Dictionary = {}
+var pending_return_home_prompts: Dictionary = {}
+var stay_outside_home_until_hours: Dictionary = {}
+var _return_home_policy_resume_after_decisions: bool = false
 
 
 func initialize(simulation_clock: SimulationClock = null) -> bool:
 	if not super.initialize(simulation_clock):
 		return false
 	manual_location_holds.clear()
+	manual_location_hold_started_hours.clear()
+	pending_return_home_prompts.clear()
+	stay_outside_home_until_hours.clear()
+	_return_home_policy_resume_after_decisions = false
 	return true
 
 
@@ -39,14 +46,23 @@ func request_travel(
 		schedule.restore_persistent_state(schedule_before)
 		travel_execution.restore_persistent_state(travel_before)
 		return result
-	manual_location_holds[person_id] = destination_id
-	_cancel_overlapping_automatic_work(
-		person_id, actual_start, 2147483647, true
-	)
+	_clear_return_home_decision(person_id)
+	var home_id: String = _home_for(person_id)
+	if destination_id == home_id:
+		manual_location_holds.erase(person_id)
+		manual_location_hold_started_hours.erase(person_id)
+		_resume_automatic_routine_after(arrival_hour)
+	else:
+		manual_location_holds[person_id] = destination_id
+		manual_location_hold_started_hours[person_id] = arrival_hour
+		_cancel_overlapping_automatic_work(
+			person_id, actual_start, 2147483647, true
+		)
 	local_overlay_revision += 1
 	state_changed.emit({
 		"manual_location_hold": person_id,
 		"destination_id": destination_id,
+		"temporary_stay": destination_id != home_id,
 		"local_overlay": local_overlay_revision,
 	})
 	return result
@@ -172,9 +188,176 @@ func manual_hold_for(person_id: String) -> String:
 	return str(manual_location_holds.get(person_id, ""))
 
 
+func next_return_home_prompt() -> Dictionary:
+	if pending_return_home_prompts.has(selected_person_id):
+		return (
+			pending_return_home_prompts[selected_person_id] as Dictionary
+		).duplicate(true)
+	var person_ids: Array[String] = []
+	for person_id_variant: Variant in pending_return_home_prompts.keys():
+		person_ids.append(str(person_id_variant))
+	person_ids.sort()
+	if person_ids.is_empty():
+		return {}
+	return (
+		pending_return_home_prompts[person_ids.front()] as Dictionary
+	).duplicate(true)
+
+
+func accept_return_home(person_id: String) -> V2LifeLoopResult:
+	if not pending_return_home_prompts.has(person_id):
+		return V2LifeLoopResult.fail(
+			"return_home_prompt_missing", "当前没有需要处理的返家提示", person_id
+		)
+	var prompt: Dictionary = pending_return_home_prompts[person_id] as Dictionary
+	var home_id: String = str(prompt.get("home_location_id", _home_for(person_id)))
+	var position: Dictionary = spatial_locations.position_for(person_id)
+	if str(position.get("current_location_id", "")) == home_id:
+		_release_manual_hold(person_id, clock.total_hours)
+		pending_return_home_prompts.erase(person_id)
+		_resume_clock_when_prompt_queue_empty()
+		return V2LifeLoopResult.ok("人物已经回到住所", {}, [person_id, home_id])
+	var start_hour: int = clock.total_hours + 1
+	var preview: V2LifeLoopResult = preview_route(
+		person_id, home_id, "cheapest", start_hour
+	)
+	if not preview.success:
+		return preview
+	var arrival_hour: int = int(preview.data.get("arrival_hour", start_hour + 1))
+	var schedule_before: Dictionary = schedule.get_persistent_state()
+	var travel_before: Dictionary = travel_execution.get_persistent_state()
+	_cancel_overlapping_automatic_work(
+		person_id, start_hour, arrival_hour, false
+	)
+	var result: V2LifeLoopResult = super.request_travel(
+		person_id, home_id, "cheapest", start_hour
+	)
+	if not result.success:
+		schedule.restore_persistent_state(schedule_before)
+		travel_execution.restore_persistent_state(travel_before)
+		return result
+	manual_location_holds.erase(person_id)
+	manual_location_hold_started_hours.erase(person_id)
+	stay_outside_home_until_hours.erase(person_id)
+	pending_return_home_prompts.erase(person_id)
+	_resume_automatic_routine_after(arrival_hour)
+	notifications.add(
+		"personal",
+		"event",
+		"人物开始返家",
+		"已按较低费用路线安排返家；到家后恢复正常自动日程。",
+		clock.total_hours,
+		"return_home:%s:%d" % [person_id, clock.total_hours],
+		[person_id, home_id]
+	)
+	local_overlay_revision += 1
+	state_changed.emit({
+		"return_home": person_id,
+		"travel": person_id,
+		"manual_location_hold_released": true,
+		"local_overlay": local_overlay_revision,
+	})
+	_resume_clock_when_prompt_queue_empty()
+	return result
+
+
+func continue_staying_outside_home(person_id: String) -> V2LifeLoopResult:
+	if not pending_return_home_prompts.has(person_id):
+		return V2LifeLoopResult.fail(
+			"return_home_prompt_missing", "当前没有需要处理的返家提示", person_id
+		)
+	var rules: Dictionary = _player_location_rules()
+	var until_hour: int = _next_hour_of_day(
+		clock.total_hours,
+		int(rules.get("late_stay_penalty_end_hour", 6))
+	)
+	stay_outside_home_until_hours[person_id] = until_hour
+	pending_return_home_prompts.erase(person_id)
+	notifications.add(
+		"personal",
+		"notification",
+		"人物继续在外停留",
+		"玩家阻止返家；夜间每小时会增加疲劳与压力，并轻微损害健康。",
+		clock.total_hours,
+		"stay_outside:%s:%d" % [person_id, clock.total_hours],
+		[person_id]
+	)
+	state_changed.emit({
+		"stay_outside_home": person_id,
+		"until_hour": until_hour,
+		"condition_risk": true,
+	})
+	_resume_clock_when_prompt_queue_empty()
+	return V2LifeLoopResult.ok(
+		"人物将继续停留到清晨；夜间状态会逐小时恶化。",
+		{"person_id": person_id, "until_hour": until_hour},
+		[person_id]
+	)
+
+
+func process_manual_location_policy(settled_hour: int) -> void:
+	var rules: Dictionary = _player_location_rules()
+	var current_hour: int = settled_hour + 1
+	var current_value: Dictionary = V2DateTime.from_total_hour(current_hour)
+	var hour_of_day: int = int(current_value.get("hour", 0))
+	var prompt_hour: int = int(rules.get("return_home_prompt_hour", 21))
+	var person_ids: Array[String] = []
+	for person_id_variant: Variant in manual_location_holds.keys():
+		person_ids.append(str(person_id_variant))
+	person_ids.sort()
+	for person_id: String in person_ids:
+		if not person_states.has(person_id):
+			continue
+		if not travel_execution.active_plan_for_person(person_id).is_empty():
+			continue
+		var position: Dictionary = spatial_locations.position_for(person_id)
+		if str(position.get("location_state", "")) != "at_location":
+			continue
+		var actual_location_id: String = str(
+			position.get("current_location_id", "")
+		)
+		var home_id: String = _home_for(person_id)
+		if actual_location_id == home_id:
+			_release_manual_hold(person_id, current_hour)
+			continue
+		var stay_until: int = int(
+			stay_outside_home_until_hours.get(person_id, -1)
+		)
+		if stay_until > current_hour:
+			_apply_late_stay_penalty(person_id, settled_hour, rules)
+			continue
+		if stay_until >= 0:
+			stay_outside_home_until_hours.erase(person_id)
+		if pending_return_home_prompts.has(person_id):
+			continue
+		if not _is_return_home_time(
+			hour_of_day,
+			prompt_hour,
+			int(rules.get("late_stay_penalty_end_hour", 6))
+		):
+			continue
+		if not _is_idle_for_return_home(person_id, current_hour):
+			continue
+		_create_return_home_prompt(
+			person_id, actual_location_id, home_id, current_hour, rules
+		)
+
+
 func get_persistent_state() -> Dictionary:
 	var state: Dictionary = super.get_persistent_state()
 	state["manual_location_holds"] = manual_location_holds.duplicate(true)
+	state["manual_location_hold_started_hours"] = (
+		manual_location_hold_started_hours.duplicate(true)
+	)
+	state["pending_return_home_prompts"] = (
+		pending_return_home_prompts.duplicate(true)
+	)
+	state["stay_outside_home_until_hours"] = (
+		stay_outside_home_until_hours.duplicate(true)
+	)
+	state["return_home_policy_resume_after_decisions"] = (
+		_return_home_policy_resume_after_decisions
+	)
 	return state
 
 
@@ -182,12 +365,16 @@ func validate_v2_3_state(state: Dictionary) -> V2LifeLoopResult:
 	var base_result: V2LifeLoopResult = super.validate_v2_3_state(state)
 	if not base_result.success:
 		return base_result
-	if state.has("manual_location_holds") and not state.get(
-		"manual_location_holds", {}
-	) is Dictionary:
-		return V2LifeLoopResult.fail(
-			"corrupt_save", "玩家位置保持记录损坏"
-		)
+	for field: String in [
+		"manual_location_holds",
+		"manual_location_hold_started_hours",
+		"pending_return_home_prompts",
+		"stay_outside_home_until_hours",
+	]:
+		if state.has(field) and not state.get(field, {}) is Dictionary:
+			return V2LifeLoopResult.fail(
+				"corrupt_save", "玩家临时停留记录损坏：%s" % field
+			)
 	return V2LifeLoopResult.ok("V2.3 玩家控制状态有效")
 
 
@@ -196,6 +383,9 @@ func restore_v2_3_state(state: Dictionary) -> V2LifeLoopResult:
 	if not result.success:
 		return result
 	manual_location_holds.clear()
+	manual_location_hold_started_hours.clear()
+	pending_return_home_prompts.clear()
+	stay_outside_home_until_hours.clear()
 	for person_id_variant: Variant in (
 		state.get("manual_location_holds", {}) as Dictionary
 	).keys():
@@ -210,13 +400,58 @@ func restore_v2_3_state(state: Dictionary) -> V2LifeLoopResult:
 			and not spatial_locations.get_location(location_id).is_empty()
 		):
 			manual_location_holds[person_id] = location_id
-	state_changed.emit({"manual_location_holds_restored": true})
+	for person_id_variant: Variant in (
+		state.get("manual_location_hold_started_hours", {}) as Dictionary
+	).keys():
+		var person_id: String = str(person_id_variant)
+		if manual_location_holds.has(person_id):
+			manual_location_hold_started_hours[person_id] = int(
+				(state.get("manual_location_hold_started_hours", {}) as Dictionary).get(
+					person_id_variant, clock.total_hours
+				)
+			)
+	for person_id_variant: Variant in (
+		state.get("pending_return_home_prompts", {}) as Dictionary
+	).keys():
+		var person_id: String = str(person_id_variant)
+		var prompt: Variant = (
+			state.get("pending_return_home_prompts", {}) as Dictionary
+		).get(person_id_variant, {})
+		if manual_location_holds.has(person_id) and prompt is Dictionary:
+			pending_return_home_prompts[person_id] = (
+				prompt as Dictionary
+			).duplicate(true)
+	for person_id_variant: Variant in (
+		state.get("stay_outside_home_until_hours", {}) as Dictionary
+	).keys():
+		var person_id: String = str(person_id_variant)
+		if manual_location_holds.has(person_id):
+			stay_outside_home_until_hours[person_id] = int(
+				(state.get("stay_outside_home_until_hours", {}) as Dictionary).get(
+					person_id_variant, -1
+				)
+			)
+	_return_home_policy_resume_after_decisions = bool(
+		state.get("return_home_policy_resume_after_decisions", false)
+	)
+	if not pending_return_home_prompts.is_empty():
+		clock.set_paused(true)
+	state_changed.emit({
+		"manual_location_holds_restored": true,
+		"return_home_prompts_restored": pending_return_home_prompts.size(),
+	})
 	return result
 
 
 func determinism_snapshot() -> Dictionary:
 	var snapshot: Dictionary = super.determinism_snapshot()
 	snapshot["manual_location_holds"] = manual_location_holds.duplicate(true)
+	snapshot["pending_return_home_prompts"] = (
+		pending_return_home_prompts.duplicate(true)
+	)
+	snapshot["stay_outside_home_until_hours"] = (
+		stay_outside_home_until_hours.duplicate(true)
+	)
 	return snapshot
 
 
@@ -445,3 +680,163 @@ func _cancel_overlapping_automatic_work(
 			cancelled += 1
 	schedule.schedules[person_id] = person_schedule
 	return cancelled
+
+
+func _player_location_rules() -> Dictionary:
+	return (
+		v2_3_config.get_document("balance").get("player_location", {})
+		as Dictionary
+	)
+
+
+func _is_idle_for_return_home(person_id: String, total_hour: int) -> bool:
+	var activity: Dictionary = schedule.activity_for_hour(person_id, total_hour)
+	if activity.is_empty():
+		return true
+	var activity_type: String = str(activity.get("activity_type", "free_time"))
+	if activity_type in TRAVEL_TYPES:
+		return false
+	return not (
+		str(activity.get("source", "")) == "player"
+		and activity_type != "free_time"
+	)
+
+
+func _is_return_home_time(
+	hour_of_day: int,
+	prompt_hour: int,
+	penalty_end_hour: int
+) -> bool:
+	return hour_of_day >= prompt_hour or hour_of_day < penalty_end_hour
+
+
+func _create_return_home_prompt(
+	person_id: String,
+	current_location_id: String,
+	home_id: String,
+	current_hour: int,
+	rules: Dictionary
+) -> void:
+	if pending_return_home_prompts.is_empty():
+		_return_home_policy_resume_after_decisions = not clock.is_paused
+	clock.set_paused(true)
+	pending_return_home_prompts[person_id] = {
+		"person_id": person_id,
+		"person_name": str(_social_person(person_id).get(
+			"display_name_zh", person_id
+		)),
+		"current_location_id": current_location_id,
+		"current_location_name": spatial_locations.location_name(
+			current_location_id, person_id, truth_view
+		),
+		"home_location_id": home_id,
+		"home_location_name": spatial_locations.location_name(
+			home_id, person_id, truth_view
+		),
+		"prompt_hour": current_hour,
+		"prompt_datetime": V2DateTime.iso_from_total_hour(current_hour),
+		"fatigue_per_hour": int(rules.get("late_stay_fatigue_per_hour", 45)),
+		"stress_per_hour": int(rules.get("late_stay_stress_per_hour", 20)),
+		"health_per_hour": int(rules.get("late_stay_health_per_hour", -2)),
+	}
+	notifications.add(
+		"personal",
+		"notification",
+		"人物准备返家",
+		"人物已无玩家安排，准备从当前地点返回住所。",
+		current_hour,
+		"return_home_prompt:%s:%d" % [person_id, current_hour],
+		[person_id, current_location_id, home_id]
+	)
+	state_changed.emit({
+		"return_home_prompt": person_id,
+		"clock_paused": true,
+	})
+
+
+func _apply_late_stay_penalty(
+	person_id: String,
+	settled_hour: int,
+	rules: Dictionary
+) -> void:
+	var hour_of_day: int = int(
+		V2DateTime.from_total_hour(settled_hour).get("hour", 0)
+	)
+	var start_hour: int = int(rules.get("late_stay_penalty_start_hour", 22))
+	var end_hour: int = int(rules.get("late_stay_penalty_end_hour", 6))
+	if hour_of_day < start_hour and hour_of_day >= end_hour:
+		return
+	conditions.apply_delta(
+		person_id,
+		"fatigue",
+		int(rules.get("late_stay_fatigue_per_hour", 45)),
+		settled_hour,
+		"玩家要求人物夜间继续在住所外停留",
+		"stay_outside_home",
+		V2DateTime.iso_from_total_hour(settled_hour)
+	)
+	conditions.apply_delta(
+		person_id,
+		"stress",
+		int(rules.get("late_stay_stress_per_hour", 20)),
+		settled_hour,
+		"夜间无法按正常生活节奏返家",
+		"stay_outside_home",
+		V2DateTime.iso_from_total_hour(settled_hour)
+	)
+	conditions.apply_delta(
+		person_id,
+		"health",
+		int(rules.get("late_stay_health_per_hour", -2)),
+		settled_hour,
+		"持续在住所外过夜影响健康",
+		"stay_outside_home",
+		V2DateTime.iso_from_total_hour(settled_hour)
+	)
+	state_changed.emit({
+		"condition": person_id,
+		"late_stay_penalty": true,
+	})
+
+
+func _release_manual_hold(person_id: String, resume_hour: int) -> void:
+	var existed: bool = manual_location_holds.erase(person_id)
+	manual_location_hold_started_hours.erase(person_id)
+	pending_return_home_prompts.erase(person_id)
+	stay_outside_home_until_hours.erase(person_id)
+	if existed:
+		_resume_automatic_routine_after(resume_hour)
+		state_changed.emit({
+			"manual_location_hold_released": person_id,
+			"automatic_routine_resumed": true,
+		})
+
+
+func _clear_return_home_decision(person_id: String) -> void:
+	pending_return_home_prompts.erase(person_id)
+	stay_outside_home_until_hours.erase(person_id)
+	_resume_clock_when_prompt_queue_empty()
+
+
+func _resume_clock_when_prompt_queue_empty() -> void:
+	if not pending_return_home_prompts.is_empty():
+		return
+	var should_resume: bool = _return_home_policy_resume_after_decisions
+	_return_home_policy_resume_after_decisions = false
+	if should_resume:
+		clock.set_paused(false)
+
+
+func _resume_automatic_routine_after(start_hour: int) -> void:
+	_commute_planned_through_day = -1
+	_replace_fixed_commutes(
+		maxi(clock.total_hours, start_hour), "manual_location_hold_released"
+	)
+
+
+func _next_hour_of_day(current_hour: int, target_hour_of_day: int) -> int:
+	var value: Dictionary = V2DateTime.from_total_hour(current_hour)
+	var candidate: int = current_hour - int(value.get("hour", 0)) + target_hour_of_day
+	if candidate <= current_hour:
+		candidate += 24
+	return candidate
