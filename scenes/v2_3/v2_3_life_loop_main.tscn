@@ -1,8 +1,8 @@
 [gd_scene load_steps=4 format=3]
 
-[ext_resource type="Script" path="res://scripts/v2_3/v2_3_life_loop_main.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/v2_3/v2_3_formal_main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/world_map/world_map_canvas.gd" id="2_map"]
-[ext_resource type="Script" path="res://scripts/v2_3/v2_3_life_loop_interface.gd" id="3_ui"]
+[ext_resource type="Script" path="res://scripts/v2_3/v2_3_formal_interface.gd" id="3_ui"]
 
 [node name="V23LifeLoopMain" type="Control"]
 layout_mode = 3
