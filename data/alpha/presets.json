@@ -1,0 +1,28 @@
+{
+  "config_version": 1,
+  "creation_modes": ["standard_random", "category_random", "full_random", "custom_background"],
+  "categories": ["industrial", "commercial", "administrative", "military", "professional", "organization", "civilian"],
+  "presets": [
+    {"preset_id": "preset:employed_worker", "name": "普通受雇人物", "person_id": "character_pierre_lefevre", "category": "industrial", "country_id": "country:loran_federation", "region_id": "region:loran_dawnbay", "city_id": "city:dawnharbor", "seed": 101, "cash": 5200, "debt": 0, "occupation_id": "skilled_worker", "experience": {"machinery": 44, "dawnharbor": 38}, "qualifications": []},
+    {"preset_id": "preset:indebted_laborer", "name": "低收入负债人物", "person_id": "character_pierre_lefevre", "category": "civilian", "country_id": "country:loran_federation", "region_id": "region:loran_southridge", "city_id": "city:dawnharbor", "seed": 202, "cash": 900, "debt": 6200, "occupation_id": "laborer", "experience": {"agriculture": 35}, "qualifications": []},
+    {"preset_id": "preset:leveraged_owner", "name": "高杠杆企业人物", "person_id": "character_pierre_lefevre", "category": "commercial", "country_id": "country:vesta_union", "region_id": "region:vesta_redhill", "city_id": "city:redplain", "seed": 303, "cash": 8000, "debt": 16000, "occupation_id": "small_merchant", "experience": {"trade": 48, "redplain": 30}, "qualifications": ["bookkeeping"]},
+    {"preset_id": "preset:distressed_owner", "name": "企业接近破产", "person_id": "character_pierre_lefevre", "category": "industrial", "country_id": "country:vesta_union", "region_id": "region:vesta_redhill", "city_id": "city:redplain", "seed": 404, "cash": 1400, "debt": 24000, "occupation_id": "small_merchant", "experience": {"machinery": 40}, "qualifications": []},
+    {"preset_id": "preset:isolated_professional", "name": "有专业能力但缺乏关系", "person_id": "character_pierre_lefevre", "category": "professional", "country_id": "country:vesta_union", "region_id": "region:vesta_silverfield", "city_id": "city:starhold", "seed": 505, "cash": 7200, "debt": 0, "occupation_id": "journalist", "experience": {"investigation": 62}, "qualifications": ["press_registry"]},
+    {"preset_id": "preset:partner_supported", "name": "能力较弱但有优秀合作者", "person_id": "character_pierre_lefevre", "category": "commercial", "country_id": "country:loran_federation", "region_id": "region:loran_riverback", "city_id": "city:ironford", "seed": 606, "cash": 4600, "debt": 0, "occupation_id": "small_merchant", "experience": {"trade": 24}, "qualifications": []},
+    {"preset_id": "preset:local_official", "name": "地方官员", "person_id": "character_pierre_lefevre", "category": "administrative", "country_id": "country:loran_federation", "region_id": "region:loran_riverback", "city_id": "city:ironford", "seed": 707, "cash": 6800, "debt": 0, "occupation_id": "civil_servant", "experience": {"administration": 58}, "qualifications": ["civil_exam"]},
+    {"preset_id": "preset:military_organizer", "name": "军事背景组织者", "person_id": "character_pierre_lefevre", "category": "military", "country_id": "country:vesta_union", "region_id": "region:vesta_redhill", "city_id": "city:redplain", "seed": 808, "cash": 5900, "debt": 0, "occupation_id": "junior_officer", "experience": {"military": 52, "organization": 38}, "qualifications": ["officer_commission"]}
+  ],
+  "review_states": [
+    "employed_worker",
+    "indebted_low_income",
+    "leveraged_enterprise",
+    "enterprise_near_bankruptcy",
+    "isolated_professional",
+    "weak_owner_strong_partner",
+    "local_official",
+    "business_owner_in_politics",
+    "policy_changed_region",
+    "interregional_trade_and_migration",
+    "world_after_three_years"
+  ]
+}

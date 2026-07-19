@@ -1,0 +1,58 @@
+{
+  "config_version": 1,
+  "currency_scale": 100,
+  "goods_and_services": [
+    {"good_id": "grain", "name": "粮食", "kind": "basic_life", "base_price": 120},
+    {"good_id": "household_goods", "name": "生活用品", "kind": "basic_life", "base_price": 180},
+    {"good_id": "coal", "name": "煤炭", "kind": "industrial_input", "base_price": 260},
+    {"good_id": "timber", "name": "木材", "kind": "industrial_input", "base_price": 220},
+    {"good_id": "machinery", "name": "机械", "kind": "industrial_output", "base_price": 760},
+    {"good_id": "textiles", "name": "纺织品", "kind": "industrial_output", "base_price": 310},
+    {"good_id": "freight", "name": "运输服务", "kind": "tradable_service", "base_price": 240},
+    {"good_id": "investigation_service", "name": "调查与信息服务", "kind": "tradable_service", "base_price": 420}
+  ],
+  "contract_templates": [
+    {"template_id": "contract_template:employment", "contract_type": "employment", "name": "雇佣合同", "default_term_days": 180, "obligations": ["work", "wage"], "breach_rules": ["absence", "unpaid_wage"]},
+    {"template_id": "contract_template:sale", "contract_type": "sale", "name": "买卖合同", "default_term_days": 7, "obligations": ["payment", "delivery"], "breach_rules": ["late_payment", "non_delivery"]},
+    {"template_id": "contract_template:service", "contract_type": "service", "name": "服务合同", "default_term_days": 30, "obligations": ["service", "payment"], "breach_rules": ["poor_quality", "late_payment"]},
+    {"template_id": "contract_template:lease", "contract_type": "lease", "name": "租赁合同", "default_term_days": 365, "obligations": ["use_right", "rent"], "breach_rules": ["unpaid_rent", "damage"]},
+    {"template_id": "contract_template:loan", "contract_type": "loan", "name": "借款合同", "default_term_days": 90, "obligations": ["disbursement", "principal", "interest"], "breach_rules": ["overdue", "default"]},
+    {"template_id": "contract_template:partnership", "contract_type": "partnership", "name": "合伙合同", "default_term_days": 365, "obligations": ["contribution", "profit_share", "liability_share"], "breach_rules": ["missing_contribution", "misappropriation"]},
+    {"template_id": "contract_template:order", "contract_type": "order", "name": "订单合同", "default_term_days": 30, "obligations": ["goods_or_service", "acceptance", "payment"], "breach_rules": ["late_delivery", "quality_failure"]}
+  ],
+  "credit_products": [
+    {"product_id": "credit:personal_unsecured", "name": "无抵押个人借款", "borrower_type": "person", "collateral_required": false, "annual_rate_bp": 1800, "term_days": 60, "risk_tolerance": 42},
+    {"product_id": "credit:personal_secured", "name": "有担保个人借款", "borrower_type": "person", "collateral_required": true, "annual_rate_bp": 1050, "term_days": 120, "risk_tolerance": 62},
+    {"product_id": "credit:enterprise_operating", "name": "企业经营借款", "borrower_type": "organization", "collateral_required": false, "annual_rate_bp": 1450, "term_days": 90, "risk_tolerance": 55},
+    {"product_id": "credit:asset_mortgage", "name": "资产抵押借款", "borrower_type": "any", "collateral_required": true, "annual_rate_bp": 850, "term_days": 240, "risk_tolerance": 72},
+    {"product_id": "credit:supplier", "name": "供应商信用", "borrower_type": "organization", "collateral_required": false, "annual_rate_bp": 2100, "term_days": 30, "risk_tolerance": 38}
+  ],
+  "enterprises": [
+    {"organization_id": "organization:loran_enterprise", "name": "洛岚联合商贸社", "structure": "retail_trade", "region_id": "region:loran_riverback", "city_id": "city:ironford", "product_id": "machinery", "input_id": "coal", "opening_cash": 26000, "opening_debt": 0, "employees": 12, "purchasable": true, "distress": 20},
+    {"organization_id": "organization:loran_forgeworks", "name": "铸原机械制造社", "structure": "small_production", "region_id": "region:loran_forgeplain", "city_id": "city:ironford", "product_id": "machinery", "input_id": "timber", "opening_cash": 18000, "opening_debt": 12000, "employees": 18, "purchasable": true, "distress": 58},
+    {"organization_id": "organization:loran_dawnbay_trade", "name": "晨湾商贸公所经营部", "structure": "retail_trade", "region_id": "region:loran_dawnbay", "city_id": "city:dawnharbor", "product_id": "grain", "input_id": "grain", "opening_cash": 22000, "opening_debt": 0, "employees": 9, "purchasable": false, "distress": 18},
+    {"organization_id": "organization:vesta_enterprise", "name": "维斯塔产业联合运输部", "structure": "logistics", "region_id": "region:vesta_eastlake", "city_id": "city:starhold", "product_id": "freight", "input_id": "coal", "opening_cash": 31000, "opening_debt": 8000, "employees": 15, "purchasable": false, "distress": 32},
+    {"organization_id": "organization:vesta_redhill_industry", "name": "赤丘重工联合厂", "structure": "small_production", "region_id": "region:vesta_redhill", "city_id": "city:redplain", "product_id": "machinery", "input_id": "coal", "opening_cash": 6000, "opening_debt": 28000, "employees": 22, "purchasable": true, "distress": 88},
+    {"organization_id": "organization:vesta_northstar_trade", "name": "北辰商业议会经营部", "structure": "retail_trade", "region_id": "region:vesta_northstar", "city_id": "city:starhold", "product_id": "textiles", "input_id": "textiles", "opening_cash": 17000, "opening_debt": 0, "employees": 8, "purchasable": true, "distress": 40},
+    {"organization_id": "organization:enterprise_dawnharbor_freight", "name": "晨港联运公司", "structure": "logistics", "region_id": "region:loran_dawnbay", "city_id": "city:dawnharbor", "product_id": "freight", "input_id": "coal", "opening_cash": 19000, "opening_debt": 0, "employees": 11, "purchasable": false, "distress": 24},
+    {"organization_id": "organization:enterprise_ironford_textile", "name": "铁川纺织工场", "structure": "small_production", "region_id": "region:loran_riverback", "city_id": "city:ironford", "product_id": "textiles", "input_id": "timber", "opening_cash": 15000, "opening_debt": 0, "employees": 14, "purchasable": false, "distress": 36},
+    {"organization_id": "organization:enterprise_loran_gazette", "name": "洛岚商事公报社", "structure": "information_service", "region_id": "region:loran_dawnbay", "city_id": "city:dawnharbor", "product_id": "investigation_service", "input_id": "household_goods", "opening_cash": 13000, "opening_debt": 0, "employees": 7, "purchasable": false, "distress": 22},
+    {"organization_id": "organization:enterprise_starhold_press", "name": "星城调查通讯社", "structure": "information_service", "region_id": "region:vesta_silverfield", "city_id": "city:starhold", "product_id": "investigation_service", "input_id": "household_goods", "opening_cash": 12000, "opening_debt": 0, "employees": 7, "purchasable": false, "distress": 28},
+    {"organization_id": "organization:enterprise_redplain_supply", "name": "赤原工业供应社", "structure": "retail_trade", "region_id": "region:vesta_redhill", "city_id": "city:redplain", "product_id": "coal", "input_id": "coal", "opening_cash": 16000, "opening_debt": 7000, "employees": 10, "purchasable": false, "distress": 49},
+    {"organization_id": "organization:enterprise_eastlake_boats", "name": "东湖货运合作社", "structure": "logistics", "region_id": "region:vesta_eastlake", "city_id": "city:redplain", "product_id": "freight", "input_id": "timber", "opening_cash": 14500, "opening_debt": 0, "employees": 9, "purchasable": false, "distress": 31}
+  ],
+  "jobs": [
+    {"job_id": "job:mechanical_worker", "name": "机械装配工", "category": "industrial", "employer_id": "organization:loran_forgeworks", "city_id": "city:ironford", "wage": 2600, "hours_per_week": 48, "skill": "engineering", "qualification": "", "risk": 36, "promotion": "foreman", "dismissal": "absence_or_low_quality", "part_time": false},
+    {"job_id": "job:market_clerk", "name": "市场店员", "category": "commercial", "employer_id": "organization:loran_dawnbay_trade", "city_id": "city:dawnharbor", "wage": 1900, "hours_per_week": 42, "skill": "finance", "qualification": "", "risk": 15, "promotion": "steward", "dismissal": "absence_or_shrinkage", "part_time": false},
+    {"job_id": "job:freight_porter", "name": "货运装卸员", "category": "transport", "employer_id": "organization:enterprise_dawnharbor_freight", "city_id": "city:dawnharbor", "wage": 2100, "hours_per_week": 45, "skill": "physical_coordination", "qualification": "", "risk": 42, "promotion": "dispatcher", "dismissal": "absence_or_damage", "part_time": false},
+    {"job_id": "job:rail_dispatcher", "name": "铁路调度助理", "category": "transport", "employer_id": "organization:vesta_enterprise", "city_id": "city:starhold", "wage": 2800, "hours_per_week": 48, "skill": "administration", "qualification": "rail_safety", "risk": 24, "promotion": "manager", "dismissal": "safety_breach", "part_time": false},
+    {"job_id": "job:government_clerk", "name": "地区办事员", "category": "administration", "employer_id": "organization:loran_river_council", "city_id": "city:ironford", "wage": 3000, "hours_per_week": 42, "skill": "administration", "qualification": "civil_exam", "risk": 8, "promotion": "official", "dismissal": "discipline_or_term", "part_time": false},
+    {"job_id": "job:credit_assistant", "name": "信贷助理", "category": "professional", "employer_id": "organization:vesta_government", "city_id": "city:starhold", "wage": 3300, "hours_per_week": 42, "skill": "finance", "qualification": "bookkeeping", "risk": 12, "promotion": "analyst", "dismissal": "fraud_or_error", "part_time": false},
+    {"job_id": "job:reporter", "name": "调查记者", "category": "professional", "employer_id": "organization:enterprise_starhold_press", "city_id": "city:starhold", "wage": 2500, "hours_per_week": 40, "skill": "investigation", "qualification": "", "risk": 28, "promotion": "editor", "dismissal": "fabrication_or_low_output", "part_time": false},
+    {"job_id": "job:union_organizer", "name": "工会组织员", "category": "organization", "employer_id": "organization:loran_union", "city_id": "city:dawnharbor", "wage": 2200, "hours_per_week": 36, "skill": "social_organization", "qualification": "", "risk": 20, "promotion": "chair", "dismissal": "lost_support", "part_time": false},
+    {"job_id": "job:redplain_machinist", "name": "赤原机工", "category": "industrial", "employer_id": "organization:vesta_redhill_industry", "city_id": "city:redplain", "wage": 2900, "hours_per_week": 50, "skill": "engineering", "qualification": "", "risk": 48, "promotion": "foreman", "dismissal": "absence_or_low_quality", "part_time": false},
+    {"job_id": "job:trade_agent", "name": "跨区商贸代理", "category": "commercial", "employer_id": "organization:vesta_northstar_trade", "city_id": "city:starhold", "wage": 2600, "hours_per_week": 44, "skill": "finance", "qualification": "", "risk": 22, "promotion": "steward", "dismissal": "contract_loss", "part_time": false},
+    {"job_id": "job:evening_bookkeeper", "name": "晚间记账员", "category": "professional", "employer_id": "organization:enterprise_ironford_textile", "city_id": "city:ironford", "wage": 950, "hours_per_week": 16, "skill": "finance", "qualification": "bookkeeping", "risk": 8, "promotion": "accountant", "dismissal": "error_or_absence", "part_time": true},
+    {"job_id": "job:weekend_vendor", "name": "周末市场帮工", "category": "commercial", "employer_id": "organization:enterprise_redplain_supply", "city_id": "city:redplain", "wage": 700, "hours_per_week": 12, "skill": "public_speaking", "qualification": "", "risk": 10, "promotion": "clerk", "dismissal": "absence", "part_time": true}
+  ]
+}

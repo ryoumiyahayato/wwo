@@ -1,0 +1,45 @@
+{
+  "config_version": 1,
+  "organization_additions": [
+    {"organization_id": "organization:loran_commerce_registry", "name": "洛岚商事登记处", "type": "government", "country_id": "country:loran_federation", "region_id": "region:loran_dawnbay", "entry_position": "clerk", "leader_position": "registrar"},
+    {"organization_id": "organization:loran_labor_board", "name": "洛岚劳动委员会", "type": "government", "country_id": "country:loran_federation", "region_id": "region:loran_forgeplain", "entry_position": "inspector", "leader_position": "commissioner"},
+    {"organization_id": "organization:vesta_commerce_chamber", "name": "维斯塔联盟商事署", "type": "government", "country_id": "country:vesta_union", "region_id": "region:vesta_silverfield", "entry_position": "clerk", "leader_position": "director"},
+    {"organization_id": "organization:vesta_rail_board", "name": "维斯塔铁路委员会", "type": "government", "country_id": "country:vesta_union", "region_id": "region:vesta_eastlake", "entry_position": "inspector", "leader_position": "commissioner"},
+    {"organization_id": "organization:loran_civic_league", "name": "洛岚公民同盟", "type": "political", "country_id": "country:loran_federation", "region_id": "region:loran_dawnbay", "entry_position": "member", "leader_position": "chair"},
+    {"organization_id": "organization:loran_labor_caucus", "name": "洛岚劳动议政会", "type": "political", "country_id": "country:loran_federation", "region_id": "region:loran_forgeplain", "entry_position": "member", "leader_position": "secretary"},
+    {"organization_id": "organization:vesta_reform_society", "name": "维斯塔改进社", "type": "political", "country_id": "country:vesta_union", "region_id": "region:vesta_silverfield", "entry_position": "member", "leader_position": "chair"},
+    {"organization_id": "organization:vesta_industry_bloc", "name": "维斯塔产业团", "type": "political", "country_id": "country:vesta_union", "region_id": "region:vesta_redhill", "entry_position": "member", "leader_position": "convenor"}
+  ],
+  "issues": [
+    {"issue_id": "issue:loran_wage_floor", "country_id": "country:loran_federation", "name": "地区最低工资", "supporting_interests": ["union", "workers"], "opposing_interests": ["enterprise"], "pressure": 58},
+    {"issue_id": "issue:loran_license_reform", "country_id": "country:loran_federation", "name": "简化企业许可", "supporting_interests": ["enterprise", "merchant"], "opposing_interests": ["bureaucracy"], "pressure": 44},
+    {"issue_id": "issue:loran_credit_fee", "country_id": "country:loran_federation", "name": "限制高息费用", "supporting_interests": ["debtor", "union"], "opposing_interests": ["lender"], "pressure": 51},
+    {"issue_id": "issue:loran_south_rail", "country_id": "country:loran_federation", "name": "南岭铁路预算", "supporting_interests": ["south_region", "merchant"], "opposing_interests": ["capital_budget"], "pressure": 47},
+    {"issue_id": "issue:vesta_shift_hours", "country_id": "country:vesta_union", "name": "限制连续工时", "supporting_interests": ["union", "workers"], "opposing_interests": ["heavy_industry"], "pressure": 62},
+    {"issue_id": "issue:vesta_factory_license", "country_id": "country:vesta_union", "name": "工厂牌照与检查", "supporting_interests": ["government", "workers"], "opposing_interests": ["enterprise"], "pressure": 49},
+    {"issue_id": "issue:vesta_debt_relief", "country_id": "country:vesta_union", "name": "企业债务重组", "supporting_interests": ["distressed_enterprise", "workers"], "opposing_interests": ["lender"], "pressure": 65},
+    {"issue_id": "issue:vesta_eastlake_rail", "country_id": "country:vesta_union", "name": "东湖运输预算", "supporting_interests": ["logistics", "eastlake"], "opposing_interests": ["military_budget"], "pressure": 53}
+  ],
+  "policies": [
+    {"policy_id": "policy:loran_wage_floor", "country_id": "country:loran_federation", "issue_id": "issue:loran_wage_floor", "name": "地区工资底线", "domain": "labor", "legal_permission": "policy_labor", "budget_cost": 6000, "effects": {"wage_index": 5, "employment_index": -1}},
+    {"policy_id": "policy:loran_fast_license", "country_id": "country:loran_federation", "issue_id": "issue:loran_license_reform", "name": "快速商事许可", "domain": "enterprise", "legal_permission": "policy_enterprise", "budget_cost": 4000, "effects": {"enterprise_cost_index": -4, "corruption_risk": 2}},
+    {"policy_id": "policy:loran_credit_cap", "country_id": "country:loran_federation", "issue_id": "issue:loran_credit_fee", "name": "信贷费用上限", "domain": "credit", "legal_permission": "policy_credit", "budget_cost": 3000, "effects": {"credit_rate_index": -6, "credit_supply_index": -2}},
+    {"policy_id": "policy:loran_south_rail", "country_id": "country:loran_federation", "issue_id": "issue:loran_south_rail", "name": "南岭铁路扩建", "domain": "infrastructure", "legal_permission": "policy_budget", "budget_cost": 18000, "effects": {"transport_cost_index": -8, "infrastructure_index": 6}},
+    {"policy_id": "policy:vesta_shift_limit", "country_id": "country:vesta_union", "issue_id": "issue:vesta_shift_hours", "name": "连续工时限制", "domain": "labor", "legal_permission": "policy_labor", "budget_cost": 5000, "effects": {"wage_index": 3, "health_risk_index": -5}},
+    {"policy_id": "policy:vesta_factory_inspection", "country_id": "country:vesta_union", "issue_id": "issue:vesta_factory_license", "name": "工厂牌照检查", "domain": "enterprise", "legal_permission": "policy_enterprise", "budget_cost": 7000, "effects": {"enterprise_cost_index": 3, "health_risk_index": -7}},
+    {"policy_id": "policy:vesta_restructure", "country_id": "country:vesta_union", "issue_id": "issue:vesta_debt_relief", "name": "企业债务协调处", "domain": "credit", "legal_permission": "policy_credit", "budget_cost": 9000, "effects": {"default_index": -5, "tax_index": 2}},
+    {"policy_id": "policy:vesta_eastlake_rail", "country_id": "country:vesta_union", "issue_id": "issue:vesta_eastlake_rail", "name": "东湖运输拨款", "domain": "infrastructure", "legal_permission": "policy_budget", "budget_cost": 16000, "effects": {"transport_cost_index": -7, "infrastructure_index": 5}}
+  ],
+  "budget_fields": [
+    {"country_id": "country:loran_federation", "fields": ["labor_and_health", "commerce_and_credit", "transport_and_education"]},
+    {"country_id": "country:vesta_union", "fields": ["labor_and_inspection", "industry_and_credit", "rail_and_public_service"]}
+  ],
+  "corruption_actions": [
+    {"action_id": "corruption:steer_contract", "name": "转移合同", "required_permission": "contract_sign", "benefit_kind": "contract"},
+    {"action_id": "corruption:accept_benefit", "name": "接受利益", "required_permission": "organization_member", "benefit_kind": "cash"},
+    {"action_id": "corruption:misuse_budget", "name": "挪用预算", "required_permission": "budget_spend", "benefit_kind": "cash"},
+    {"action_id": "corruption:protect_ally", "name": "保护盟友", "required_permission": "investigation_control", "benefit_kind": "obligation"},
+    {"action_id": "corruption:cheap_asset", "name": "低价取得资产", "required_permission": "asset_disposal", "benefit_kind": "asset"},
+    {"action_id": "corruption:public_staff_private", "name": "使用公共人员处理私人事务", "required_permission": "command_staff", "benefit_kind": "service"}
+  ]
+}

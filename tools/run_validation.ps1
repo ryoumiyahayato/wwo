@@ -96,7 +96,8 @@ $tests = @(
     @{ Name = 'V2.3 UI binding'; Script = 'res://tests/v2_3/v2_3_ui_binding_test.gd' },
     @{ Name = 'V2.3 map integration'; Script = 'res://tests/v2_3/v2_3_map_integration_test.gd' },
     @{ Name = 'V2.3 performance guard'; Script = 'res://tests/v2_3/v2_3_performance_guard_test.gd' },
-    @{ Name = 'V2.3 full loop smoke'; Script = 'res://tests/v2_3/v2_3_full_loop_smoke.gd' }
+    @{ Name = 'V2.3 full loop smoke'; Script = 'res://tests/v2_3/v2_3_full_loop_smoke.gd' },
+    @{ Name = 'Alpha world and topology'; Script = 'res://tests/alpha/alpha_world_topology_test.gd' }
 )
 
 foreach ($test in $tests) {
@@ -109,4 +110,4 @@ $null = Invoke-GodotStep -Name 'Headless project startup' -Arguments @(
     '--headless', '--path', $ProjectPath, '--quit-after', '5'
 )
 
-Write-Host "`nAll current V2.2 and V2.3 validation steps passed without parse/load errors."
+Write-Host "`nAll current V2.2, V2.3 and Alpha validation steps passed without parse/load errors."
