@@ -73,10 +73,17 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $templateUrl = 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_export_templates.tpz'
+          # This is the object-storage URL currently returned by Godot's
+          # official 4.6.3 archive page. It avoids GitHub release-asset
+          # redirects, which were the source of intermittent Windows CI stalls.
+          $templateUrl = 'https://godot-releases.nbg1.your-objectstorage.com/4.6.3-stable/Godot_v4.6.3-stable_export_templates.tpz'
           curl.exe --fail --location --retry 5 --retry-delay 3 --output templates.zip $templateUrl
           if ($LASTEXITCODE -ne 0 -or -not (Test-Path templates.zip)) {
             throw 'Godot export templates download failed.'
+          }
+          $templateArchive = Get-Item -LiteralPath templates.zip
+          if ($templateArchive.Length -lt 10MB) {
+            throw "Godot export templates archive is unexpectedly small: $($templateArchive.Length) bytes"
           }
           Expand-Archive -LiteralPath templates.zip -DestinationPath templates -Force
           $templateTarget = Join-Path $env:APPDATA 'Godot\export_templates\4.6.3.stable'
