@@ -17,7 +17,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  validate-and-build:
+  validate-and-export:
     runs-on: windows-latest
     timeout-minutes: 45
 
@@ -25,7 +25,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Stamp build identity
+      - name: Stamp executable identity
         id: build_info
         shell: pwsh
         run: |
@@ -43,18 +43,9 @@ jobs:
           )
           [System.IO.File]::WriteAllText($buildInfoPath, $buildInfo, $utf8NoBom)
 
-          $installerPath = Join-Path $PWD 'packaging\windows\1900.iss'
-          $installer = Get-Content -LiteralPath $installerPath -Raw
-          $installer = [regex]::Replace(
-            $installer,
-            '#define MyAppVersion "[^"]+"',
-            ('#define MyAppVersion "' + $displayVersion + '"')
-          )
-          [System.IO.File]::WriteAllText($installerPath, $installer, $utf8NoBom)
-
           "build_code=$buildCode" >> $env:GITHUB_OUTPUT
           "display_version=$displayVersion" >> $env:GITHUB_OUTPUT
-          Write-Host "Building 1900 $displayVersion"
+          Write-Host "Validating 1900 $displayVersion"
 
       - name: Install Godot 4.6.3
         shell: pwsh
@@ -69,13 +60,9 @@ jobs:
           godot --version
 
       - name: Install export templates
-        if: github.event_name != 'pull_request'
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          # This is the object-storage URL currently returned by Godot's
-          # official 4.6.3 archive page. It avoids GitHub release-asset
-          # redirects, which were the source of intermittent Windows CI stalls.
           $templateUrl = 'https://godot-releases.nbg1.your-objectstorage.com/4.6.3-stable/Godot_v4.6.3-stable_export_templates.tpz'
           curl.exe --fail --location --retry 5 --retry-delay 3 --output templates.zip $templateUrl
           if ($LASTEXITCODE -ne 0 -or -not (Test-Path templates.zip)) {
@@ -100,9 +87,7 @@ jobs:
 
       - name: Import and script scan
         shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          godot --editor --headless --path . --quit
+        run: godot --editor --headless --path . --quit
 
       - name: Run formal control regression
         shell: pwsh
@@ -129,36 +114,186 @@ jobs:
         run: godot --headless --path . --quit-after 5
 
       - name: Export embedded Windows executable
-        if: github.event_name != 'pull_request'
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
           New-Item -ItemType Directory -Force -Path builds\windows | Out-Null
           godot --headless --path . --export-release 'Windows Desktop' builds\windows\wwo-p0-demo.exe
+          if ($LASTEXITCODE -ne 0) {
+            throw "Godot Windows export failed with exit code $LASTEXITCODE"
+          }
           if (-not (Test-Path -LiteralPath builds\windows\wwo-p0-demo.exe)) {
             throw 'Windows export did not create the executable.'
           }
+          $export = Get-Item -LiteralPath builds\windows\wwo-p0-demo.exe
+          if ($export.Length -lt 1MB) {
+            throw "Windows export is unexpectedly small: $($export.Length) bytes"
+          }
+          Write-Host "Windows export: $($export.FullName) ($($export.Length) bytes)"
 
-      - name: Build installer
-        if: github.event_name != 'pull_request'
+      - name: Upload raw Windows export
+        uses: actions/upload-artifact@v4
+        with:
+          name: 1900-Windows-Export
+          path: builds/windows/wwo-p0-demo.exe
+          if-no-files-found: error
+          retention-days: 7
+
+  build-installer:
+    needs: validate-and-export
+    runs-on: windows-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download validated Windows export
+        uses: actions/download-artifact@v4
+        with:
+          name: 1900-Windows-Export
+          path: builds/windows
+
+      - name: Verify downloaded export
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          choco install innosetup --yes --no-progress
-          $iscc = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'
-          if (-not (Test-Path -LiteralPath $iscc)) {
-            $iscc = Join-Path $env:ProgramFiles 'Inno Setup 6\ISCC.exe'
+          $exportPath = Join-Path $PWD 'builds\windows\wwo-p0-demo.exe'
+          if (-not (Test-Path -LiteralPath $exportPath -PathType Leaf)) {
+            throw "Validated Windows export is missing: $exportPath"
           }
-          if (-not (Test-Path -LiteralPath $iscc)) {
-            throw 'Inno Setup compiler was not found.'
+          $export = Get-Item -LiteralPath $exportPath
+          if ($export.Length -lt 1MB) {
+            throw "Downloaded Windows export is unexpectedly small: $($export.Length) bytes"
           }
-          & $iscc packaging\windows\1900.iss
-          if (-not (Test-Path -LiteralPath builds\installer\1900-Prototype-Setup.exe)) {
-            throw 'Installer compilation did not produce the expected file.'
+          Write-Host "Installer input: $($export.FullName) ($($export.Length) bytes)"
+
+      - name: Stamp installer identity
+        id: installer_build_info
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $buildCode = (git rev-parse --short=4 HEAD).Trim().ToLowerInvariant()
+          $displayVersion = "v0.001a ($buildCode)"
+          $installerPath = Join-Path $PWD 'packaging\windows\1900.iss'
+          $installer = Get-Content -LiteralPath $installerPath -Raw
+          $installer = [regex]::Replace(
+            $installer,
+            '#define MyAppVersion "[^"]+"',
+            ('#define MyAppVersion "' + $displayVersion + '"')
+          )
+          [System.IO.File]::WriteAllText(
+            $installerPath,
+            $installer,
+            (New-Object System.Text.UTF8Encoding($false))
+          )
+          "build_code=$buildCode" >> $env:GITHUB_OUTPUT
+          "display_version=$displayVersion" >> $env:GITHUB_OUTPUT
+          Write-Host "Compiling installer for 1900 $displayVersion"
+
+      - name: Install Inno Setup 6.7.1
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          choco install innosetup --version=6.7.1 --yes --no-progress --limit-output
+          $chocoExit = $LASTEXITCODE
+          if ($chocoExit -notin @(0, 1641, 3010)) {
+            throw "Chocolatey failed to install Inno Setup 6.7.1: exit $chocoExit"
+          }
+          $isccCommand = Get-Command iscc -ErrorAction SilentlyContinue
+          if ($null -ne $isccCommand) {
+            "ISCC_PATH=$($isccCommand.Source)" >> $env:GITHUB_ENV
+            Write-Host "Inno Setup shim: $($isccCommand.Source)"
+            exit 0
+          }
+          $searchRoots = @(
+            ${env:ProgramFiles(x86)},
+            $env:ProgramFiles,
+            $env:ChocolateyInstall
+          ) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) -and (Test-Path $_) }
+          $isccCandidate = Get-ChildItem -Path $searchRoots -Filter ISCC.exe -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($null -eq $isccCandidate) {
+            throw 'Inno Setup compiler was not found after installation.'
+          }
+          "ISCC_PATH=$($isccCandidate.FullName)" >> $env:GITHUB_ENV
+          Write-Host "Inno Setup compiler: $($isccCandidate.FullName)"
+
+      - name: Compile installer and capture log
+        id: compile_installer
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ([string]::IsNullOrWhiteSpace($env:ISCC_PATH)) {
+            throw 'ISCC_PATH was not resolved.'
+          }
+          $logDir = Join-Path $PWD 'builds\installer'
+          New-Item -ItemType Directory -Force -Path $logDir | Out-Null
+          $stdoutPath = Join-Path $logDir 'iscc.stdout.log'
+          $stderrPath = Join-Path $logDir 'iscc.stderr.log'
+          $combinedPath = Join-Path $logDir 'iscc.log'
+          $process = Start-Process `
+            -FilePath $env:ISCC_PATH `
+            -ArgumentList @('packaging\windows\1900.iss') `
+            -WorkingDirectory $PWD `
+            -RedirectStandardOutput $stdoutPath `
+            -RedirectStandardError $stderrPath `
+            -NoNewWindow `
+            -Wait `
+            -PassThru
+          $parts = @()
+          if (Test-Path -LiteralPath $stdoutPath) {
+            $parts += Get-Content -LiteralPath $stdoutPath
+          }
+          if (Test-Path -LiteralPath $stderrPath) {
+            $parts += Get-Content -LiteralPath $stderrPath
+          }
+          $parts | Set-Content -LiteralPath $combinedPath -Encoding utf8
+          "exit_code=$($process.ExitCode)" >> $env:GITHUB_OUTPUT
+          Write-Host "ISCC exit code: $($process.ExitCode)"
+          if ($parts.Count -gt 0) {
+            $parts | Select-Object -Last 80 | ForEach-Object { Write-Host $_ }
+          }
+          if ($process.ExitCode -ne 0) {
+            exit $process.ExitCode
           }
 
+      - name: Upload Inno compiler log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 1900-Inno-Compiler-Log
+          path: |
+            builds/installer/iscc.log
+            builds/installer/iscc.stdout.log
+            builds/installer/iscc.stderr.log
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Verify installer compilation
+        if: always()
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ('${{ steps.compile_installer.outcome }}' -ne 'success') {
+            $logPath = Join-Path $PWD 'builds\installer\iscc.log'
+            if (Test-Path -LiteralPath $logPath) {
+              Write-Host 'Inno compiler failure tail:'
+              Get-Content -LiteralPath $logPath | Select-Object -Last 80 | ForEach-Object { Write-Host $_ }
+            }
+            throw 'Inno Setup compilation failed; compiler logs were uploaded.'
+          }
+          $installerPath = Join-Path $PWD 'builds\installer\1900-Prototype-Setup.exe'
+          if (-not (Test-Path -LiteralPath $installerPath -PathType Leaf)) {
+            throw "Installer compilation did not produce the expected file: $installerPath"
+          }
+          $installer = Get-Item -LiteralPath $installerPath
+          if ($installer.Length -lt 1MB) {
+            throw "Installer is unexpectedly small: $($installer.Length) bytes"
+          }
+          Write-Host "Installer: $($installer.FullName) ($($installer.Length) bytes)"
+
       - name: Upload installer artifact
-        if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: 1900-Prototype-Windows-Installer
@@ -178,7 +313,7 @@ jobs:
           removeArtifacts: true
           artifacts: builds/installer/1900-Prototype-Setup.exe
           body: |
-            版本：${{ steps.build_info.outputs.display_version }}
+            版本：${{ steps.installer_build_info.outputs.display_version }}
             自动覆盖的 Windows 原型安装包。
             安装标识固定；再次安装会覆盖旧版本，不建立新的存档体系。
             对应提交：${{ github.sha }}
