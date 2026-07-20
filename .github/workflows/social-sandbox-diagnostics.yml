@@ -1,0 +1,69 @@
+name: Social Sandbox Diagnostics
+
+on:
+  pull_request:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Godot 4.6.3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          choco install godot --version=4.6.3 --yes --no-progress
+          if ($LASTEXITCODE -notin @(0, 1641, 3010)) {
+            throw "Chocolatey failed to install Godot: exit $LASTEXITCODE"
+          }
+          godot --version
+      - name: Import scripts
+        shell: pwsh
+        run: godot --editor --headless --path . --quit
+      - name: Run formal sandbox test and capture output
+        id: sandbox
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          New-Item -ItemType Directory -Force -Path builds\diagnostics | Out-Null
+          $stdout = Join-Path $PWD 'builds\diagnostics\social.stdout.log'
+          $stderr = Join-Path $PWD 'builds\diagnostics\social.stderr.log'
+          $combined = Join-Path $PWD 'builds\diagnostics\social.log'
+          $process = Start-Process `
+            -FilePath (Get-Command godot).Source `
+            -ArgumentList @('--headless', '--path', '.', '--script', 'res://tests/v2_3/v2_3_social_sandbox_test.gd') `
+            -WorkingDirectory $PWD `
+            -RedirectStandardOutput $stdout `
+            -RedirectStandardError $stderr `
+            -NoNewWindow `
+            -Wait `
+            -PassThru
+          $parts = @()
+          if (Test-Path $stdout) { $parts += Get-Content $stdout }
+          if (Test-Path $stderr) { $parts += Get-Content $stderr }
+          $parts | Set-Content -LiteralPath $combined -Encoding utf8
+          "exit_code=$($process.ExitCode)" >> $env:GITHUB_OUTPUT
+          $parts | ForEach-Object { Write-Host $_ }
+          if ($process.ExitCode -ne 0) { exit $process.ExitCode }
+      - name: Upload diagnostic log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Social-Sandbox-Diagnostics
+          path: builds/diagnostics/*.log
+          if-no-files-found: error
+          retention-days: 7
+      - name: Verify formal sandbox test
+        if: always()
+        shell: pwsh
+        run: |
+          if ('${{ steps.sandbox.outcome }}' -ne 'success') {
+            throw 'Formal social sandbox test failed; diagnostic logs were uploaded.'
+          }
