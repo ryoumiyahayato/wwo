@@ -29,8 +29,12 @@ VersionInfoVersion=0.0.1.0
 VersionInfoProductName=1900
 VersionInfoDescription=1900 Prototype Installer
 
+; The official Inno Setup compiler always includes Default.isl, while
+; contributed translations are optional and are not installed consistently by
+; Chocolatey. Keep the release compiler self-contained instead of failing when
+; an external ChineseSimplified.isl file is absent. Unicode Chinese strings in
+; this script and the exported game remain supported.
 [Languages]
-Name: "chinesesimp"; MessagesFile: "compiler:Languages\ChineseSimplified.isl"
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
