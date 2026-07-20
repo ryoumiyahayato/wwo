@@ -69,7 +69,6 @@ jobs:
           godot --version
 
       - name: Install export templates
-        if: github.event_name != 'pull_request'
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -129,7 +128,6 @@ jobs:
         run: godot --headless --path . --quit-after 5
 
       - name: Export embedded Windows executable
-        if: github.event_name != 'pull_request'
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -140,7 +138,6 @@ jobs:
           }
 
       - name: Build installer
-        if: github.event_name != 'pull_request'
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -158,7 +155,6 @@ jobs:
           }
 
       - name: Upload installer artifact
-        if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: 1900-Prototype-Windows-Installer
