@@ -60,20 +60,52 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $engineUrl = 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip'
-          $templateUrl = 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_export_templates.tpz'
-          Invoke-WebRequest -Uri $engineUrl -OutFile godot.zip
-          Expand-Archive -LiteralPath godot.zip -DestinationPath godot
+          $headers = @{
+            Accept = 'application/vnd.github+json'
+            'X-GitHub-Api-Version' = '2022-11-28'
+            'User-Agent' = 'wwo-ci'
+          }
+          $release = Invoke-RestMethod `
+            -Uri 'https://api.github.com/repos/godotengine/godot-builds/releases/tags/4.6.3-stable' `
+            -Headers $headers
+          $engineAsset = $release.assets | Where-Object {
+            $_.name -eq 'Godot_v4.6.3-stable_win64.exe.zip'
+          } | Select-Object -First 1
+          $templateAsset = $release.assets | Where-Object {
+            $_.name -eq 'Godot_v4.6.3-stable_export_templates.tpz'
+          } | Select-Object -First 1
+          if ($null -eq $engineAsset) {
+            throw 'Godot 4.6.3 Windows editor asset was not found in the official release.'
+          }
+          if ($null -eq $templateAsset) {
+            throw 'Godot 4.6.3 export templates asset was not found in the official release.'
+          }
+          curl.exe --fail --location --retry 5 --retry-delay 3 `
+            --output godot.zip $engineAsset.browser_download_url
+          if ($LASTEXITCODE -ne 0 -or -not (Test-Path godot.zip)) {
+            throw 'Godot editor download failed.'
+          }
+          Expand-Archive -LiteralPath godot.zip -DestinationPath godot -Force
           $engine = Get-ChildItem -LiteralPath godot -Filter '*.exe' -Recurse | Select-Object -First 1
-          if ($null -eq $engine) { throw 'Godot executable was not found after extraction.' }
-          Copy-Item -LiteralPath $engine.FullName -Destination Godot.exe
-          Invoke-WebRequest -Uri $templateUrl -OutFile templates.zip
-          Expand-Archive -LiteralPath templates.zip -DestinationPath templates
+          if ($null -eq $engine) {
+            throw 'Godot executable was not found after extraction.'
+          }
+          Copy-Item -LiteralPath $engine.FullName -Destination Godot.exe -Force
+          curl.exe --fail --location --retry 5 --retry-delay 3 `
+            --output templates.zip $templateAsset.browser_download_url
+          if ($LASTEXITCODE -ne 0 -or -not (Test-Path templates.zip)) {
+            throw 'Godot export templates download failed.'
+          }
+          Expand-Archive -LiteralPath templates.zip -DestinationPath templates -Force
           $templateTarget = Join-Path $env:APPDATA 'Godot\export_templates\4.6.3.stable'
           New-Item -ItemType Directory -Force -Path $templateTarget | Out-Null
           $templateRoot = Join-Path $PWD 'templates\templates'
           if (-not (Test-Path -LiteralPath $templateRoot)) {
             $templateRoot = Join-Path $PWD 'templates'
+          }
+          $templateFiles = Get-ChildItem -LiteralPath $templateRoot -File -Recurse
+          if ($templateFiles.Count -eq 0) {
+            throw 'Godot export templates archive was empty.'
           }
           Copy-Item -Path (Join-Path $templateRoot '*') -Destination $templateTarget -Recurse -Force
           .\Godot.exe --version
