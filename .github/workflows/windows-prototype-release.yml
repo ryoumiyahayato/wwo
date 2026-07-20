@@ -133,6 +133,9 @@ jobs:
           $ErrorActionPreference = 'Stop'
           New-Item -ItemType Directory -Force -Path builds\windows | Out-Null
           godot --headless --path . --export-release 'Windows Desktop' builds\windows\wwo-p0-demo.exe
+          if ($LASTEXITCODE -ne 0) {
+            throw "Godot Windows export failed with exit code $LASTEXITCODE"
+          }
           if (-not (Test-Path -LiteralPath builds\windows\wwo-p0-demo.exe)) {
             throw 'Windows export did not create the executable.'
           }
@@ -141,15 +144,30 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          choco install innosetup --yes --no-progress
-          $iscc = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'
-          if (-not (Test-Path -LiteralPath $iscc)) {
-            $iscc = Join-Path $env:ProgramFiles 'Inno Setup 6\ISCC.exe'
+          choco install innosetup --version=6.7.1 --yes --no-progress --limit-output
+          $chocoExit = $LASTEXITCODE
+          if ($chocoExit -notin @(0, 1641, 3010)) {
+            throw "Chocolatey failed to install Inno Setup 6.7.1: exit $chocoExit"
           }
-          if (-not (Test-Path -LiteralPath $iscc)) {
-            throw 'Inno Setup compiler was not found.'
+          $isccCommand = Get-Command iscc -ErrorAction SilentlyContinue
+          if ($null -eq $isccCommand) {
+            $isccCandidate = Get-ChildItem `
+              -Path ${env:ProgramFiles(x86)}, $env:ProgramFiles `
+              -Filter ISCC.exe -Recurse -ErrorAction SilentlyContinue |
+              Select-Object -First 1
+            if ($null -eq $isccCandidate) {
+              throw 'Inno Setup compiler was not found after installation.'
+            }
+            $isccPath = $isccCandidate.FullName
           }
-          & $iscc packaging\windows\1900.iss
+          else {
+            $isccPath = $isccCommand.Source
+          }
+          Write-Host "Inno Setup compiler: $isccPath"
+          & $isccPath packaging\windows\1900.iss
+          if ($LASTEXITCODE -ne 0) {
+            throw "Inno Setup compilation failed with exit code $LASTEXITCODE"
+          }
           if (-not (Test-Path -LiteralPath builds\installer\1900-Prototype-Setup.exe)) {
             throw 'Installer compilation did not produce the expected file.'
           }
