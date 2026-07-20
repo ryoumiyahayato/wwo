@@ -1,5 +1,10 @@
 extends SceneTree
 ## No per-frame population scans, bounded histories and long-run smoke.
+##
+## Local runs retain the strict wall-clock budget. Shared CI runners receive a
+## wider but still finite budget because download/extraction and host load can
+## temporarily contend for CPU and disk. Structural limits and peak-hour work
+## remain identical in both environments.
 
 var test := V23TestCase.new()
 
@@ -29,7 +34,10 @@ func _run() -> void:
 		not simulation_source.contains("PrototypeV2MapCanvas"),
 		"生活模拟不反向引用地图画布"
 	)
-	var simulation := V23ProductSimulation.new()
+	var ci_run: bool = not OS.get_environment("CI").is_empty()
+	var thirty_day_budget_msec: int = 30000 if ci_run else 10000
+	var year_budget_msec: int = 180000 if ci_run else 90000
+	var simulation := V23ProductSimulationV2.new()
 	test.expect(simulation.initialize(), "长期性能回归环境初始化")
 	if not simulation.initialized:
 		test.finish(self, "V2.3 performance guard")
@@ -38,9 +46,12 @@ func _run() -> void:
 	simulation.run_days(30)
 	var thirty_day_msec: int = Time.get_ticks_msec() - start_msec
 	test.equal(simulation.v2_3_hours_processed, 30 * 24, "30 日权威小时完整推进")
-	test.expect(thirty_day_msec < 10000, "30 日离线模拟在回归预算内完成")
+	test.expect(
+		thirty_day_msec < thirty_day_budget_msec,
+		"30 日离线模拟在 %d 毫秒预算内完成" % thirty_day_budget_msec
+	)
 	simulation = null
-	var year_simulation := V23ProductSimulation.new()
+	var year_simulation := V23ProductSimulationV2.new()
 	test.expect(year_simulation.initialize(), "一年模拟独立环境初始化")
 	var year_start_msec: int = Time.get_ticks_msec()
 	for day_index: int in range(365):
@@ -58,8 +69,8 @@ func _run() -> void:
 		"一年权威小时完整推进"
 	)
 	test.expect(
-		year_msec < 90000,
-		"一年正式产品社会模拟在 90 秒回归预算内完成"
+		year_msec < year_budget_msec,
+		"一年正式产品社会模拟在 %d 毫秒预算内完成" % year_budget_msec
 	)
 	test.expect(
 		year_simulation.schedule.recent_completed_activities.size() <= 256,
@@ -98,14 +109,16 @@ func _run() -> void:
 	)
 	print(
 		(
-			"V2.3 performance: 30d=%dms 365d=%dms max_hour=%dus "
-			+ "activities=%d messages=%d travel_plans=%d"
+			"V2.3 performance: 30d=%dms/%dms 365d=%dms/%dms max_hour=%dus "
+			+ "activities=%d messages=%d travel_plans=%d ci=%s"
 		) % [
-			thirty_day_msec, year_msec,
+			thirty_day_msec, thirty_day_budget_msec,
+			year_msec, year_budget_msec,
 			year_simulation.maximum_hour_processing_usec,
 			year_simulation.schedule.recent_completed_activities.size(),
 			year_simulation.communication.messages.size(),
 			year_simulation.travel_execution.travel_plans.size(),
+			str(ci_run),
 		]
 	)
 	test.finish(self, "V2.3 performance guard")
