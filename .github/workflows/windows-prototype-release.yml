@@ -87,9 +87,7 @@ jobs:
 
       - name: Import and script scan
         shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          godot --editor --headless --path . --quit
+        run: godot --editor --headless --path . --quit
 
       - name: Run formal control regression
         shell: pwsh
@@ -220,16 +218,70 @@ jobs:
           "ISCC_PATH=$($isccCandidate.FullName)" >> $env:GITHUB_ENV
           Write-Host "Inno Setup compiler: $($isccCandidate.FullName)"
 
-      - name: Compile installer
+      - name: Compile installer and capture log
+        id: compile_installer
+        continue-on-error: true
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
           if ([string]::IsNullOrWhiteSpace($env:ISCC_PATH)) {
             throw 'ISCC_PATH was not resolved.'
           }
-          & $env:ISCC_PATH /O+ packaging\windows\1900.iss
-          if ($LASTEXITCODE -ne 0) {
-            throw "Inno Setup compilation failed with exit code $LASTEXITCODE"
+          $logDir = Join-Path $PWD 'builds\installer'
+          New-Item -ItemType Directory -Force -Path $logDir | Out-Null
+          $stdoutPath = Join-Path $logDir 'iscc.stdout.log'
+          $stderrPath = Join-Path $logDir 'iscc.stderr.log'
+          $combinedPath = Join-Path $logDir 'iscc.log'
+          $process = Start-Process `
+            -FilePath $env:ISCC_PATH `
+            -ArgumentList @('packaging\windows\1900.iss') `
+            -WorkingDirectory $PWD `
+            -RedirectStandardOutput $stdoutPath `
+            -RedirectStandardError $stderrPath `
+            -NoNewWindow `
+            -Wait `
+            -PassThru
+          $parts = @()
+          if (Test-Path -LiteralPath $stdoutPath) {
+            $parts += Get-Content -LiteralPath $stdoutPath
+          }
+          if (Test-Path -LiteralPath $stderrPath) {
+            $parts += Get-Content -LiteralPath $stderrPath
+          }
+          $parts | Set-Content -LiteralPath $combinedPath -Encoding utf8
+          "exit_code=$($process.ExitCode)" >> $env:GITHUB_OUTPUT
+          Write-Host "ISCC exit code: $($process.ExitCode)"
+          if ($parts.Count -gt 0) {
+            $parts | Select-Object -Last 80 | ForEach-Object { Write-Host $_ }
+          }
+          if ($process.ExitCode -ne 0) {
+            exit $process.ExitCode
+          }
+
+      - name: Upload Inno compiler log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 1900-Inno-Compiler-Log
+          path: |
+            builds/installer/iscc.log
+            builds/installer/iscc.stdout.log
+            builds/installer/iscc.stderr.log
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Verify installer compilation
+        if: always()
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ('${{ steps.compile_installer.outcome }}' -ne 'success') {
+            $logPath = Join-Path $PWD 'builds\installer\iscc.log'
+            if (Test-Path -LiteralPath $logPath) {
+              Write-Host 'Inno compiler failure tail:'
+              Get-Content -LiteralPath $logPath | Select-Object -Last 80 | ForEach-Object { Write-Host $_ }
+            }
+            throw 'Inno Setup compilation failed; compiler logs were uploaded.'
           }
           $installerPath = Join-Path $PWD 'builds\installer\1900-Prototype-Setup.exe'
           if (-not (Test-Path -LiteralPath $installerPath -PathType Leaf)) {
