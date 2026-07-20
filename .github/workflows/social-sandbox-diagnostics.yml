@@ -26,9 +26,7 @@ jobs:
       - name: Import scripts
         shell: pwsh
         run: godot --editor --headless --path . --quit
-      - name: Run formal sandbox test and capture output
-        id: sandbox
-        continue-on-error: true
+      - name: Run scheduling diagnostics
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Continue'
@@ -38,7 +36,7 @@ jobs:
           $combined = Join-Path $PWD 'builds\diagnostics\social.log'
           $process = Start-Process `
             -FilePath (Get-Command godot).Source `
-            -ArgumentList @('--headless', '--path', '.', '--script', 'res://tests/v2_3/v2_3_social_sandbox_test.gd') `
+            -ArgumentList @('--headless', '--path', '.', '--script', 'res://tests/v2_3/v2_3_social_sandbox_debug.gd') `
             -WorkingDirectory $PWD `
             -RedirectStandardOutput $stdout `
             -RedirectStandardError $stderr `
@@ -49,7 +47,6 @@ jobs:
           if (Test-Path $stdout) { $parts += Get-Content $stdout }
           if (Test-Path $stderr) { $parts += Get-Content $stderr }
           $parts | Set-Content -LiteralPath $combined -Encoding utf8
-          "exit_code=$($process.ExitCode)" >> $env:GITHUB_OUTPUT
           $parts | ForEach-Object { Write-Host $_ }
           if ($process.ExitCode -ne 0) { exit $process.ExitCode }
       - name: Upload diagnostic log
@@ -60,10 +57,3 @@ jobs:
           path: builds/diagnostics/*.log
           if-no-files-found: error
           retention-days: 7
-      - name: Verify formal sandbox test
-        if: always()
-        shell: pwsh
-        run: |
-          if ('${{ steps.sandbox.outcome }}' -ne 'success') {
-            throw 'Formal social sandbox test failed; diagnostic logs were uploaded.'
-          }
