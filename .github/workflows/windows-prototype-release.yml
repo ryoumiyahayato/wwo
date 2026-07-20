@@ -2,6 +2,9 @@ name: Windows Prototype Release
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches:
+      - master
   push:
     branches:
       - master
@@ -10,11 +13,11 @@ permissions:
   contents: write
 
 concurrency:
-  group: windows-prototype-release
+  group: windows-prototype-release-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build-installer:
+  validate-and-build:
     runs-on: windows-latest
     timeout-minutes: 45
 
@@ -53,51 +56,84 @@ jobs:
           "display_version=$displayVersion" >> $env:GITHUB_OUTPUT
           Write-Host "Building 1900 $displayVersion"
 
-      - name: Download Godot 4.6.3
+      - name: Install Godot 4.6.3
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $engineUrl = 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip'
+          choco install godot --version=4.6.3 --yes --no-progress
+          if ($LASTEXITCODE -notin @(0, 1641, 3010)) {
+            throw "Chocolatey failed to install Godot 4.6.3: exit $LASTEXITCODE"
+          }
+          $godot = Get-Command godot -ErrorAction Stop
+          Write-Host "Godot command: $($godot.Source)"
+          godot --version
+
+      - name: Install export templates
+        if: github.event_name != 'pull_request'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
           $templateUrl = 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_export_templates.tpz'
-          Invoke-WebRequest -Uri $engineUrl -OutFile godot.zip
-          Expand-Archive -LiteralPath godot.zip -DestinationPath godot
-          $engine = Get-ChildItem -LiteralPath godot -Filter '*.exe' -Recurse | Select-Object -First 1
-          if ($null -eq $engine) { throw 'Godot executable was not found after extraction.' }
-          Copy-Item -LiteralPath $engine.FullName -Destination Godot.exe
-          Invoke-WebRequest -Uri $templateUrl -OutFile templates.zip
-          Expand-Archive -LiteralPath templates.zip -DestinationPath templates
+          curl.exe --fail --location --retry 5 --retry-delay 3 --output templates.zip $templateUrl
+          if ($LASTEXITCODE -ne 0 -or -not (Test-Path templates.zip)) {
+            throw 'Godot export templates download failed.'
+          }
+          Expand-Archive -LiteralPath templates.zip -DestinationPath templates -Force
           $templateTarget = Join-Path $env:APPDATA 'Godot\export_templates\4.6.3.stable'
           New-Item -ItemType Directory -Force -Path $templateTarget | Out-Null
           $templateRoot = Join-Path $PWD 'templates\templates'
           if (-not (Test-Path -LiteralPath $templateRoot)) {
             $templateRoot = Join-Path $PWD 'templates'
           }
+          $templateFiles = Get-ChildItem -LiteralPath $templateRoot -File -Recurse
+          if ($templateFiles.Count -eq 0) {
+            throw 'Godot export templates archive was empty.'
+          }
           Copy-Item -Path (Join-Path $templateRoot '*') -Destination $templateTarget -Recurse -Force
-          .\Godot.exe --version
 
       - name: Import and script scan
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          .\Godot.exe --editor --headless --path . --quit
+          godot --editor --headless --path . --quit
 
       - name: Run formal control regression
         shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          .\Godot.exe --headless --path . --script res://tests/v2_3/v2_3_controlled_world_test.gd
+        run: godot --headless --path . --script res://tests/v2_3/v2_3_controlled_world_test.gd
+
+      - name: Run social sandbox core regression
+        shell: pwsh
+        run: godot --headless --path . --script res://tests/v2_3/v2_3_social_sandbox_test.gd
+
+      - name: Run social sandbox completion regression
+        shell: pwsh
+        run: godot --headless --path . --script res://tests/v2_3/v2_3_social_sandbox_completion_test.gd
+
+      - name: Run save round-trip regression
+        shell: pwsh
+        run: godot --headless --path . --script res://tests/v2_3/v2_3_save_load_test.gd
+
+      - name: Run formal performance guard
+        shell: pwsh
+        run: godot --headless --path . --script res://tests/v2_3/v2_3_performance_guard_test.gd
+
+      - name: Headless product startup
+        shell: pwsh
+        run: godot --headless --path . --quit-after 5
 
       - name: Export embedded Windows executable
+        if: github.event_name != 'pull_request'
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
           New-Item -ItemType Directory -Force -Path builds\windows | Out-Null
-          .\Godot.exe --headless --path . --export-release 'Windows Desktop' builds\windows\wwo-p0-demo.exe
+          godot --headless --path . --export-release 'Windows Desktop' builds\windows\wwo-p0-demo.exe
           if (-not (Test-Path -LiteralPath builds\windows\wwo-p0-demo.exe)) {
             throw 'Windows export did not create the executable.'
           }
 
       - name: Build installer
+        if: github.event_name != 'pull_request'
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -115,6 +151,7 @@ jobs:
           }
 
       - name: Upload installer artifact
+        if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: 1900-Prototype-Windows-Installer
@@ -123,6 +160,7 @@ jobs:
           retention-days: 30
 
       - name: Replace prototype-latest prerelease
+        if: github.event_name != 'pull_request'
         uses: ncipollo/release-action@v1
         with:
           tag: prototype-latest
