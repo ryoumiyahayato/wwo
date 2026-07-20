@@ -112,6 +112,7 @@ $tests = @(
     @{ Name = 'V2.3 formal finance'; Script = 'res://tests/v2_3/v2_3_formal_finance_test.gd'; TimeoutSeconds = 60 },
     @{ Name = 'V2.3 formal leave and location'; Script = 'res://tests/v2_3/v2_3_formal_leave_location_test.gd'; TimeoutSeconds = 60 },
     @{ Name = 'V2.3 autonomous social sandbox'; Script = 'res://tests/v2_3/v2_3_social_sandbox_test.gd'; TimeoutSeconds = 120 },
+    @{ Name = 'V2.3 completed social sandbox'; Script = 'res://tests/v2_3/v2_3_social_sandbox_completion_test.gd'; TimeoutSeconds = 120 },
     @{ Name = 'V2.3 UI binding'; Script = 'res://tests/v2_3/v2_3_ui_binding_test.gd' },
     @{ Name = 'V2.3 map integration'; Script = 'res://tests/v2_3/v2_3_map_integration_test.gd' },
     @{ Name = 'V2.3 performance guard'; Script = 'res://tests/v2_3/v2_3_performance_guard_test.gd'; TimeoutSeconds = 180 },
