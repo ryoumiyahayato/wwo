@@ -87,6 +87,11 @@ func validate_snapshot(snapshot: Dictionary) -> Array[String]:
 	]:
 		if not snapshot.get(field) is Dictionary:
 			errors.append("V2.3 字段 %s 必须是对象" % field)
+	if (
+		snapshot.has("social_sandbox_state")
+		and not snapshot.get("social_sandbox_state") is Dictionary
+	):
+		errors.append("V2.3 字段 social_sandbox_state 必须是对象")
 	for field: String in [
 		"recent_completed_activities", "attendance_records", "processed_hour_keys",
 		"background_person_ids",

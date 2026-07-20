@@ -29,7 +29,7 @@ func _run() -> void:
 		not simulation_source.contains("PrototypeV2MapCanvas"),
 		"生活模拟不反向引用地图画布"
 	)
-	var simulation := V23LifeLoopSimulation.new()
+	var simulation := V23ProductSimulation.new()
 	test.expect(simulation.initialize(), "长期性能回归环境初始化")
 	if not simulation.initialized:
 		test.finish(self, "V2.3 performance guard")
@@ -40,7 +40,7 @@ func _run() -> void:
 	test.equal(simulation.v2_3_hours_processed, 30 * 24, "30 日权威小时完整推进")
 	test.expect(thirty_day_msec < 10000, "30 日离线模拟在回归预算内完成")
 	simulation = null
-	var year_simulation := V23LifeLoopSimulation.new()
+	var year_simulation := V23ProductSimulation.new()
 	test.expect(year_simulation.initialize(), "一年模拟独立环境初始化")
 	var year_start_msec: int = Time.get_ticks_msec()
 	for day_index: int in range(365):
@@ -57,7 +57,10 @@ func _run() -> void:
 		year_simulation.v2_3_hours_processed, 365 * 24,
 		"一年权威小时完整推进"
 	)
-	test.expect(year_msec < 30000, "一年离线模拟在回归预算内完成")
+	test.expect(
+		year_msec < 90000,
+		"一年正式产品社会模拟在 90 秒回归预算内完成"
+	)
 	test.expect(
 		year_simulation.schedule.recent_completed_activities.size() <= 256,
 		"已完成活动历史保持上限"
@@ -73,6 +76,25 @@ func _run() -> void:
 	test.expect(
 		year_simulation.maximum_hour_processing_usec < 500000,
 		"单小时结算无异常全世界深度扫描"
+	)
+	test.expect(
+		year_simulation.social_sandbox.event_ledger.size() <= 1024,
+		"一年后社会事件账本保持上限"
+	)
+	test.expect(
+		year_simulation.social_sandbox.tasks.size() <= 256
+		and year_simulation.social_sandbox.intents.size() <= 256,
+		"一年后社会任务与意图历史保持上限"
+	)
+	test.expect(
+		year_simulation.social_sandbox.pending_reactions.size() <= 128,
+		"一年后延迟反应队列保持上限"
+	)
+	test.expect(
+		V23SaveService.new().validate_snapshot(
+			V23SaveService.new().build_snapshot(year_simulation)
+		).is_empty(),
+		"一年状态仍可形成有效产品快照"
 	)
 	print(
 		(

@@ -49,9 +49,20 @@ func _run() -> void:
 		person_id, "location_lille_centre", "fastest", simulation.clock.total_hours + 1
 	)
 	test.expect(travel_result.success, "请假释放后可在原工作日程中安排旅行")
-	var active_plan: Dictionary = simulation.travel_execution.active_plan_for_person(person_id)
-	test.expect(not active_plan.is_empty(), "旅行使用正式计划而不是直接修改地点")
-	var arrival_hour: int = int(active_plan.get("expected_arrival_hour", simulation.clock.total_hours + 1))
+	var active_plan: Dictionary = travel_result.data.get(
+		"travel_plan", {}
+	) as Dictionary
+	test.expect(
+		not active_plan.is_empty()
+		and str(active_plan.get("destination_id", ""))
+		== "location_lille_centre",
+		"旅行使用请求返回的正式计划而不是其他自动通勤计划"
+	)
+	var arrival_hour: int = int(
+		active_plan.get(
+			"expected_arrival_hour", simulation.clock.total_hours + 1
+		)
+	)
 	simulation.advance_hours(arrival_hour - simulation.clock.total_hours)
 	var position: Dictionary = simulation.spatial_locations.position_for(person_id)
 	test.equal(str(position.get("current_location_id", "")), "location_lille_centre", "旅行完成后空间权威位于里尔市中心")

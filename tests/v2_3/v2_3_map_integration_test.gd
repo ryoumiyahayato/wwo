@@ -30,8 +30,19 @@ func _run() -> void:
 	)
 	var initial: Dictionary = view.map_canvas.debug_performance_snapshot()
 	var overlay: Dictionary = initial.get("v2_3_local_overlay", {}) as Dictionary
-	test.equal(int(overlay.get("location_count", 0)), 12, "本地覆盖载入 12 个正式节点")
-	test.equal(view.map_canvas.zoom, 96.0, "正式场景聚焦里尔最高细节层级")
+	var formal_config := V23Config.new()
+	formal_config.load_all()
+	var formal_location_count: int = formal_config.location_records().size()
+	test.equal(
+		int(overlay.get("location_count", 0)),
+		formal_location_count,
+		"本地覆盖载入全部扩展正式节点"
+	)
+	test.equal(
+		view.map_canvas.zoom,
+		180.0,
+		"正式场景使用当前人物所在地聚焦倍率"
+	)
 	view.map_canvas.debug_reset_performance_metrics()
 	var binding: V23LifeLoopUiBinding = view.life_binding as V23LifeLoopUiBinding
 	binding.set_truth_view(true)
@@ -46,7 +57,9 @@ func _run() -> void:
 		"动态本地覆盖刷新不重复执行经纬度投影"
 	)
 	test.expect(
-		int(performance.get("v2_3_spatial_query_candidates", 99)) <= 12,
+		int(performance.get(
+			"v2_3_spatial_query_candidates", 999
+		)) <= formal_location_count,
 		"当前视口通过本地空间索引限制候选节点"
 	)
 	var redraws: Dictionary = performance.get("layer_redraws", {}) as Dictionary

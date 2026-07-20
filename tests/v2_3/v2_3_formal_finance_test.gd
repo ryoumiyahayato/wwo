@@ -24,13 +24,18 @@ func _run() -> void:
 		not remote_result.success and remote_result.error_code == "not_at_lender",
 		"不在正式办理地点时借款申请被客观拒绝"
 	)
+	simulation.advance_hours(3)
 	test.expect(
 		simulation.spatial_locations.force_set_at_location(
 			person_id, "location_lille_centre", simulation.clock.total_hours
 		).success,
-		"测试通过正式地点服务进入里尔市中心"
+		"自动日常推进后通过正式地点服务进入里尔市中心"
 	)
-	simulation.advance_hours(3)
+	initial_cash = int(
+		simulation.households.household_for_person(person_id).get(
+			"cash_centimes", 0
+		)
+	)
 	var submitted: V2LifeLoopResult = simulation.submit_loan_application(
 		person_id, "loan_product:lille_wage_advance", 1000
 	)

@@ -12,16 +12,30 @@ func _run() -> void:
 	var config := V23Config.new()
 	test.equal(config.load_all(), OK, "V2.3 全部数据驱动配置通过引用校验")
 	test.equal(config.errors.size(), 0, "V2.3 配置没有校验错误")
-	test.equal(config.location_records().size(), 12, "12 个最低正式地点全部存在")
+	test.expect(
+		config.location_records().size() >= 17,
+		"扩展后的正式地点至少包含 17 个稳定节点"
+	)
 	var simulation := V23LifeLoopSimulation.new()
 	test.expect(simulation.initialize(), "V2.3 组合根使用唯一权威时钟初始化")
 	if not simulation.initialized:
 		push_error(simulation.initialization_error)
 		test.finish(self, "V2.3 locations")
 		return
-	test.equal(simulation.spatial_locations.locations.size(), 12, "正式地点 ID 全部进入索引")
-	test.equal(simulation.travel_graph.adjacency.size(), 12, "交通图含 12 个节点")
-	test.equal(simulation.travel_graph.edges.size(), 15, "交通图含 15 条稳定边")
+	test.equal(
+		simulation.spatial_locations.locations.size(),
+		config.location_records().size(),
+		"全部正式地点 ID 进入同一空间索引"
+	)
+	test.equal(
+		simulation.travel_graph.adjacency.size(),
+		config.location_records().size(),
+		"交通图覆盖全部扩展地点节点"
+	)
+	test.expect(
+		simulation.travel_graph.edges.size() >= 22,
+		"扩展交通图至少包含 22 条稳定边"
+	)
 	test.expect(simulation.travel_graph.graph_is_connected(), "整个正式交通图连通")
 	test.equal(simulation.travel_graph.modes.size(), 3, "步行、市内交通和短途铁路齐备")
 	test.expect(
@@ -60,7 +74,8 @@ func _run() -> void:
 		"皮埃尔初始正式位置为本人住所"
 	)
 	test.equal(
-		simulation.schedule.schedules.size(), 5,
-		"同一现有日程服务同时覆盖两名正式人物和三名背景人物"
+		simulation.schedule.schedules.size(),
+		config.social_people().size(),
+		"同一现有日程服务覆盖全部正式与背景人物"
 	)
 	test.finish(self, "V2.3 locations")

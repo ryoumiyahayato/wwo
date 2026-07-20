@@ -13,6 +13,7 @@ const PATHS: Dictionary = {
 	"relationships": "res://data/v2_3/relationship_rules.json",
 	"people": "res://data/v2_3/social_people.json",
 	"balance": "res://data/v2_3/v2_3_balance.json",
+	"sandbox": "res://data/v2_3/social_sandbox_rules.json",
 	"scenario": "res://data/scenarios/v2_3_lille_space_cognition.json",
 }
 
@@ -76,6 +77,10 @@ func social_people() -> Array:
 
 func relationship_records() -> Array:
 	return get_document("people").get("relationships", []) as Array
+
+
+func sandbox_rules() -> Dictionary:
+	return get_document("sandbox")
 
 
 func scenario() -> Dictionary:
@@ -232,6 +237,54 @@ func _validate_people(locations: Dictionary) -> void:
 	]:
 		if not people.has(required_id):
 			errors.append("V2.3 缺少人物：%s" % required_id)
+	if documents.has("sandbox"):
+		if not people.has("character_louis_bernard"):
+			errors.append("V2.3 社会沙盒缺少人物：character_louis_bernard")
+		_validate_sandbox(people, locations)
+
+
+func _validate_sandbox(people: Dictionary, locations: Dictionary) -> void:
+	var rules: Dictionary = sandbox_rules()
+	var organizations: Dictionary = {}
+	for raw_organization: Variant in rules.get("organizations", []) as Array:
+		if not raw_organization is Dictionary:
+			errors.append("社会沙盒组织记录必须是对象")
+			continue
+		var organization: Dictionary = raw_organization as Dictionary
+		var organization_id: String = str(
+			organization.get("organization_id", "")
+		)
+		if organization_id.is_empty() or organizations.has(organization_id):
+			errors.append("社会沙盒组织 ID 缺失或重复：%s" % organization_id)
+		else:
+			organizations[organization_id] = true
+		if not locations.has(str(organization.get("location_id", ""))):
+			errors.append("社会沙盒组织引用未知地点：%s" % organization_id)
+	var method_ids: Dictionary = {}
+	for raw_method: Variant in rules.get("methods", []) as Array:
+		if not raw_method is Dictionary:
+			errors.append("社会沙盒方法记录必须是对象")
+			continue
+		var method: Dictionary = raw_method as Dictionary
+		var method_id: String = str(method.get("method_id", ""))
+		if method_id.is_empty() or method_ids.has(method_id):
+			errors.append("社会沙盒方法 ID 缺失或重复：%s" % method_id)
+		else:
+			method_ids[method_id] = true
+		if int(method.get("duration_hours", 0)) < 1:
+			errors.append("社会沙盒方法持续时间无效：%s" % method_id)
+		if int(method.get("base_score", -1)) not in range(0, 1001):
+			errors.append("社会沙盒方法成功分数无效：%s" % method_id)
+	if method_ids.size() < 24:
+		errors.append("社会沙盒方法少于 24 种")
+	for raw_membership: Variant in rules.get("memberships", []) as Array:
+		if not raw_membership is Dictionary:
+			continue
+		var membership: Dictionary = raw_membership as Dictionary
+		if not people.has(str(membership.get("person_id", ""))):
+			errors.append("社会沙盒成员引用未知人物")
+		if not organizations.has(str(membership.get("organization_id", ""))):
+			errors.append("社会沙盒成员引用未知组织")
 
 
 static func _valid_pair(value: Variant) -> bool:

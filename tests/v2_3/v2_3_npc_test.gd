@@ -14,8 +14,17 @@ func _run() -> void:
 	if not simulation.initialized:
 		test.finish(self, "V2.3 NPC spatial routine")
 		return
-	test.equal(simulation.background_person_ids.size(), 3, "最小闭环包含三名背景人物")
-	test.equal(simulation.npc_routines.npc_plans.size(), 5, "正式与背景人物共用事件驱动规划索引")
+	test.equal(
+		simulation.background_person_ids.size(),
+		simulation.v2_3_config.social_people().size()
+		- V23LifeLoopSimulation.FORMAL_PERSON_IDS.size(),
+		"背景人物索引覆盖正式配置中的全部非玩家人物"
+	)
+	test.equal(
+		simulation.npc_routines.npc_plans.size(),
+		simulation.v2_3_config.social_people().size(),
+		"正式与背景人物共用事件驱动规划索引"
+	)
 	for person_id: String in simulation.background_person_ids:
 		test.expect(
 			not simulation.spatial_locations.position_for(person_id).is_empty(),

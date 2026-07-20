@@ -91,7 +91,18 @@ func step_one_hour() -> void:
 func advance_hours(hour_count: int) -> void:
 	if hour_count <= 0:
 		return
-	advance_minutes(hour_count * 60)
+	if minute != 0:
+		# Interactive time can be between hour boundaries; preserve the exact
+		# minute and the per-minute presentation signal in that case.
+		advance_minutes(hour_count * 60)
+		return
+	# Offline day/year simulation has no minute-level social work. Advancing
+	# through 60 presentation ticks per hour would make performance depend on
+	# an unused signal frequency, so use the existing authoritative hourly
+	# clock directly and publish one final minute snapshot.
+	total_minutes += hour_count * 60
+	super.advance_hours(hour_count)
+	minute_advanced.emit(total_minutes)
 
 
 func get_real_seconds_remainder() -> float:

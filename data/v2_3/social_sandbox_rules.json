@@ -1,0 +1,112 @@
+{
+  "config_version": 1,
+  "prototype_balance_value": true,
+  "limits": {
+    "events": 1024,
+    "tasks": 256,
+    "intents": 256,
+    "goals_per_person": 4,
+    "situations_per_person": 12,
+    "explanations_per_person": 16,
+    "reactions": 128,
+    "evidence": 128,
+    "commitments": 128
+  },
+  "planning": {
+    "reevaluate_hour": 6,
+    "minimum_delay_hours": 1,
+    "search_horizon_hours": 72,
+    "npc_actions_per_day": 1,
+    "npc_normal_action_interval_days": 3,
+    "reaction_delay_hours": 2
+  },
+  "organizations": [
+    {
+      "organization_id": "enterprise_lille_mechanical",
+      "display_name_zh": "里尔机械制造公司",
+      "location_id": "location_lille_fives_factory",
+      "organization_type": "enterprise"
+    },
+    {
+      "organization_id": "factory_fives_workgroup_three",
+      "display_name_zh": "菲弗工厂第三工作组",
+      "location_id": "location_lille_fives_factory",
+      "organization_type": "workgroup"
+    },
+    {
+      "organization_id": "union_metalworkers_nord",
+      "display_name_zh": "北部省金属工人工会",
+      "location_id": "location_lille_metalworkers_union_hall",
+      "organization_type": "union"
+    },
+    {
+      "organization_id": "prefecture_nord",
+      "display_name_zh": "北部省省政府",
+      "location_id": "location_lille_prefecture_office",
+      "organization_type": "government"
+    }
+  ],
+  "memberships": [
+    {"person_id": "character_pierre_lefevre", "organization_id": "enterprise_lille_mechanical", "participation": 400, "status": "active"},
+    {"person_id": "character_pierre_lefevre", "organization_id": "factory_fives_workgroup_three", "participation": 300, "status": "active"},
+    {"person_id": "character_pierre_lefevre", "organization_id": "union_metalworkers_nord", "participation": 20, "status": "active"},
+    {"person_id": "character_jules_martin", "organization_id": "enterprise_lille_mechanical", "participation": 420, "status": "active"},
+    {"person_id": "character_jules_martin", "organization_id": "factory_fives_workgroup_three", "participation": 350, "status": "active"},
+    {"person_id": "character_jules_martin", "organization_id": "union_metalworkers_nord", "participation": 240, "status": "active"},
+    {"person_id": "character_louis_bernard", "organization_id": "enterprise_lille_mechanical", "participation": 380, "status": "active"},
+    {"person_id": "character_louis_bernard", "organization_id": "factory_fives_workgroup_three", "participation": 330, "status": "active"},
+    {"person_id": "jeanne", "organization_id": "union_metalworkers_nord", "participation": 600, "status": "active"},
+    {"person_id": "character_albert_dumont", "organization_id": "prefecture_nord", "participation": 450, "status": "active"},
+    {"person_id": "character_lucien_moreau", "organization_id": "prefecture_nord", "participation": 420, "status": "active"}
+  ],
+  "positions": [
+    {
+      "position_id": "factory_fives_workgroup_three:delegate",
+      "organization_id": "factory_fives_workgroup_three",
+      "display_name_zh": "工作组代表",
+      "holder_person_id": "",
+      "unique": true
+    },
+    {
+      "position_id": "union_metalworkers_nord:contact",
+      "organization_id": "union_metalworkers_nord",
+      "display_name_zh": "工会联系人",
+      "holder_person_id": "jeanne",
+      "unique": true
+    }
+  ],
+  "methods": [
+    {"method_id": "reliable_work", "label_zh": "认真完成班次", "goal_kinds": ["maintenance", "opportunity", "ambition"], "duration_hours": 1, "location_kind": "workplace", "base_score": 880, "risk": 30, "effect": "work_reputation"},
+    {"method_id": "temporary_work", "label_zh": "寻找临时工作", "goal_kinds": ["maintenance", "opportunity"], "duration_hours": 2, "location_kind": "workplace", "base_score": 650, "risk": 130, "effect": "earn_cash"},
+    {"method_id": "ask_raise", "label_zh": "提出加薪", "goal_kinds": ["opportunity", "ambition"], "duration_hours": 1, "location_kind": "workplace", "base_score": 460, "risk": 220, "effect": "work_reputation"},
+    {"method_id": "quit_job", "label_zh": "辞去工作", "goal_kinds": ["threat", "ambition"], "duration_hours": 1, "location_kind": "workplace", "base_score": 1000, "risk": 600, "effect": "employment_exit"},
+    {"method_id": "request_help", "label_zh": "请求帮助", "goal_kinds": ["maintenance", "threat"], "duration_hours": 1, "location_kind": "target", "base_score": 650, "risk": 80, "effect": "relationship_positive"},
+    {"method_id": "repay_favor", "label_zh": "偿还人情", "goal_kinds": ["maintenance", "ambition"], "duration_hours": 1, "location_kind": "target", "base_score": 850, "risk": 30, "effect": "promise_kept"},
+    {"method_id": "make_promise", "label_zh": "作出承诺", "goal_kinds": ["opportunity", "ambition"], "duration_hours": 1, "location_kind": "target", "base_score": 780, "risk": 120, "effect": "promise_create"},
+    {"method_id": "contact_person", "label_zh": "主动交谈", "goal_kinds": ["maintenance", "opportunity", "ambition"], "duration_hours": 1, "location_kind": "target", "base_score": 820, "risk": 50, "effect": "relationship_positive"},
+    {"method_id": "refuse_request", "label_zh": "拒绝请求", "goal_kinds": ["threat", "maintenance"], "duration_hours": 1, "location_kind": "target", "base_score": 1000, "risk": 260, "effect": "relationship_negative"},
+    {"method_id": "exchange_favor", "label_zh": "交换人情", "goal_kinds": ["opportunity", "ambition"], "duration_hours": 1, "location_kind": "target", "base_score": 670, "risk": 160, "effect": "relationship_positive"},
+    {"method_id": "persuade", "label_zh": "说服对方", "goal_kinds": ["opportunity", "ambition"], "duration_hours": 1, "location_kind": "target", "base_score": 590, "risk": 210, "effect": "persuasion"},
+    {"method_id": "threaten", "label_zh": "威胁施压", "goal_kinds": ["threat", "ambition"], "duration_hours": 1, "location_kind": "target", "base_score": 620, "risk": 650, "illegal": true, "effect": "coercion"},
+    {"method_id": "deceive", "label_zh": "欺骗对方", "goal_kinds": ["threat", "opportunity", "ambition"], "duration_hours": 1, "location_kind": "target", "base_score": 560, "risk": 600, "illegal": true, "effect": "deception"},
+    {"method_id": "share_rumor", "label_zh": "传播传闻", "goal_kinds": ["opportunity", "ambition"], "duration_hours": 1, "location_kind": "public", "base_score": 720, "risk": 420, "effect": "rumor"},
+    {"method_id": "form_alliance", "label_zh": "结成同盟", "goal_kinds": ["threat", "opportunity", "ambition"], "duration_hours": 2, "location_kind": "target", "base_score": 520, "risk": 180, "effect": "alliance"},
+    {"method_id": "ask_question", "label_zh": "询问消息", "goal_kinds": ["threat", "opportunity"], "duration_hours": 1, "location_kind": "target", "base_score": 800, "risk": 50, "effect": "information"},
+    {"method_id": "observe", "label_zh": "实地观察", "goal_kinds": ["threat", "opportunity"], "duration_hours": 1, "location_kind": "public", "base_score": 900, "risk": 80, "effect": "information"},
+    {"method_id": "investigate", "label_zh": "调查线索", "goal_kinds": ["threat", "opportunity", "ambition"], "duration_hours": 2, "location_kind": "public", "base_score": 610, "risk": 260, "effect": "evidence"},
+    {"method_id": "verify_fact", "label_zh": "核实事实", "goal_kinds": ["threat", "opportunity"], "duration_hours": 1, "location_kind": "public", "base_score": 780, "risk": 80, "effect": "information"},
+    {"method_id": "hide_evidence", "label_zh": "隐藏证据", "goal_kinds": ["threat"], "duration_hours": 1, "location_kind": "public", "base_score": 540, "risk": 720, "illegal": true, "effect": "hide_evidence"},
+    {"method_id": "steal_document", "label_zh": "窃取文件", "goal_kinds": ["threat", "opportunity", "ambition"], "duration_hours": 2, "location_kind": "organization", "base_score": 420, "risk": 850, "illegal": true, "effect": "evidence"},
+    {"method_id": "forge_document", "label_zh": "伪造文件", "goal_kinds": ["opportunity", "ambition"], "duration_hours": 2, "location_kind": "organization", "base_score": 390, "risk": 900, "illegal": true, "effect": "forge_evidence"},
+    {"method_id": "leak_information", "label_zh": "泄露消息", "goal_kinds": ["threat", "opportunity", "ambition"], "duration_hours": 1, "location_kind": "public", "base_score": 650, "risk": 700, "illegal": true, "effect": "rumor"},
+    {"method_id": "join_organization", "label_zh": "申请加入组织", "goal_kinds": ["opportunity", "ambition"], "duration_hours": 1, "location_kind": "organization", "base_score": 760, "risk": 90, "effect": "join_organization"},
+    {"method_id": "leave_organization", "label_zh": "退出组织", "goal_kinds": ["threat", "maintenance"], "duration_hours": 1, "location_kind": "organization", "base_score": 1000, "risk": 240, "effect": "leave_organization"},
+    {"method_id": "seek_position", "label_zh": "争取工作组职位", "goal_kinds": ["opportunity", "ambition"], "duration_hours": 2, "location_kind": "organization", "base_score": 560, "risk": 230, "effect": "claim_position", "conflict_key": "factory_fives_workgroup_three:delegate"},
+    {"method_id": "support_candidate", "label_zh": "支持候选人", "goal_kinds": ["opportunity", "ambition"], "duration_hours": 1, "location_kind": "organization", "base_score": 760, "risk": 120, "effect": "relationship_positive"},
+    {"method_id": "oppose_candidate", "label_zh": "反对候选人", "goal_kinds": ["threat", "ambition"], "duration_hours": 1, "location_kind": "organization", "base_score": 690, "risk": 320, "effect": "relationship_negative"},
+    {"method_id": "call_meeting", "label_zh": "召集会议", "goal_kinds": ["threat", "opportunity", "ambition"], "duration_hours": 2, "location_kind": "organization", "base_score": 620, "risk": 160, "effect": "organization_participation"},
+    {"method_id": "disobey_order", "label_zh": "拒绝服从命令", "goal_kinds": ["threat", "ambition"], "duration_hours": 1, "location_kind": "workplace", "base_score": 1000, "risk": 700, "effect": "relationship_negative"},
+    {"method_id": "bribe", "label_zh": "行贿", "goal_kinds": ["threat", "opportunity", "ambition"], "duration_hours": 1, "location_kind": "target", "base_score": 480, "risk": 900, "illegal": true, "cash_cost_centimes": 200, "effect": "coercion"},
+    {"method_id": "sabotage", "label_zh": "破坏他人计划", "goal_kinds": ["threat", "ambition"], "duration_hours": 2, "location_kind": "workplace", "base_score": 430, "risk": 920, "illegal": true, "effect": "sabotage"}
+  ]
+}

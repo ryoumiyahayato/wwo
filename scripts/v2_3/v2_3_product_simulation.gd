@@ -2,6 +2,45 @@ class_name V23ProductSimulation
 extends V23MinuteControlledSimulation
 ## Final formal product composition: contextual leave and compatible world expansion.
 
+var social_sandbox := V23SocialSandboxService.new()
+var last_social_sandbox_hour: Dictionary = {}
+
+
+func initialize(simulation_clock: SimulationClock = null) -> bool:
+	if not super.initialize(simulation_clock):
+		return false
+	var result: V2LifeLoopResult = social_sandbox.configure(
+		v2_3_config.social_people(),
+		v2_3_config.sandbox_rules(),
+		schedule,
+		spatial_locations,
+		dynamic_relationships,
+		knowledge,
+		organizations,
+		households,
+		ledger,
+		employment,
+		clock.total_hours,
+		selected_person_id
+	)
+	if not result.success:
+		return _fail_v2_3_initialization(result.user_message)
+	last_social_sandbox_hour.clear()
+	state_changed.emit({"social_sandbox_initialized": true})
+	return true
+
+
+func select_person(person_id: String) -> V2LifeLoopResult:
+	var result: V2LifeLoopResult = super.select_person(person_id)
+	if result.success and not social_sandbox.set_player_person(person_id):
+		return V2LifeLoopResult.fail(
+			"sandbox_unknown_player",
+			"社会沙盒无法同步当前控制人物",
+			person_id,
+			[person_id]
+		)
+	return result
+
 
 func request_travel(
 	person_id: String,
@@ -131,13 +170,89 @@ func _settle_hour(total_hour: int) -> void:
 	if reconciled:
 		state_changed.emit({"manual_location_holds_reconciled": true})
 	process_manual_location_policy(total_hour)
+	last_social_sandbox_hour = social_sandbox.process_hour(total_hour)
+	if (
+		int(last_social_sandbox_hour.get("committed_events", 0)) > 0
+		or int(last_social_sandbox_hour.get("reactions", 0)) > 0
+		or bool(last_social_sandbox_hour.get("rolled_back", false))
+	):
+		state_changed.emit({
+			"social_sandbox": last_social_sandbox_hour.duplicate(true),
+		})
+
+
+func get_persistent_state() -> Dictionary:
+	var state: Dictionary = super.get_persistent_state()
+	state["social_sandbox_state"] = social_sandbox.get_persistent_state()
+	return state
+
+
+func validate_v2_3_state(state: Dictionary) -> V2LifeLoopResult:
+	var base_result: V2LifeLoopResult = super.validate_v2_3_state(state)
+	if not base_result.success:
+		return base_result
+	if (
+		state.has("social_sandbox_state")
+		and not state.get("social_sandbox_state", {}) is Dictionary
+	):
+		return V2LifeLoopResult.fail(
+			"corrupt_save", "社会沙盒存档字段损坏"
+		)
+	return V2LifeLoopResult.ok("V2.3 产品与社会沙盒状态有效")
+
+
+func determinism_snapshot() -> Dictionary:
+	var snapshot: Dictionary = super.determinism_snapshot()
+	snapshot["social_sandbox"] = social_sandbox.get_persistent_state()
+	return snapshot
 
 
 func restore_v2_3_state(state: Dictionary) -> V2LifeLoopResult:
 	var normalized: Dictionary = state.duplicate(true)
 	_normalize_expanded_spatial_state(normalized)
 	_normalize_expanded_graph_state(normalized)
-	return super.restore_v2_3_state(normalized)
+	var previous: Dictionary = get_persistent_state()
+	var result: V2LifeLoopResult = super.restore_v2_3_state(normalized)
+	if not result.success:
+		return result
+	if not social_sandbox.set_player_person(selected_person_id):
+		var player_base_rollback: V2LifeLoopResult = super.restore_v2_3_state(
+			previous
+		)
+		if not player_base_rollback.success:
+			push_error("社会沙盒控制人物同步失败后无法恢复先前产品状态")
+		return V2LifeLoopResult.fail(
+			"sandbox_player_restore_failed",
+			"社会沙盒无法恢复控制人物，当前状态保持不变",
+			selected_person_id,
+			[selected_person_id]
+		)
+	var sandbox_restored: bool = true
+	if normalized.has("social_sandbox_state"):
+		sandbox_restored = social_sandbox.restore_persistent_state(
+			normalized.get("social_sandbox_state", {}) as Dictionary
+		)
+	else:
+		# Legacy V2.3 snapshots predate the social sandbox. Rebuild only
+		# derived/new state from the restored authorities; never replay old
+		# actions or fabricate historical events.
+		social_sandbox.reset_from_authority(clock.total_hours)
+	if not sandbox_restored:
+		var base_rollback: V2LifeLoopResult = super.restore_v2_3_state(
+			previous
+		)
+		var sandbox_rollback: bool = social_sandbox.restore_persistent_state(
+			previous.get("social_sandbox_state", {}) as Dictionary
+		)
+		if not base_rollback.success or not sandbox_rollback:
+			push_error("社会沙盒载入失败后无法恢复先前产品状态")
+		return V2LifeLoopResult.fail(
+			"sandbox_restore_failed",
+			"社会沙盒存档损坏，当前状态保持不变"
+		)
+	last_social_sandbox_hour.clear()
+	state_changed.emit({"loaded": true, "social_sandbox": true})
+	return V2LifeLoopResult.ok("V2.3 产品与社会沙盒状态已载入")
 
 
 func _normalize_expanded_spatial_state(state: Dictionary) -> void:

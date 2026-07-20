@@ -11,7 +11,7 @@ func migrate_snapshot(v2_2_snapshot: Dictionary) -> V2LifeLoopResult:
 		return V2LifeLoopResult.fail(
 			"invalid_v2_2_save", "V2.2 存档无法迁移", "; ".join(source_errors)
 		)
-	var simulation := V23LifeLoopSimulation.new()
+	var simulation := V23ProductSimulation.new()
 	if not simulation.initialize():
 		return V2LifeLoopResult.fail(
 			"migration_initialization_failed", "无法建立 V2.3 迁移环境",

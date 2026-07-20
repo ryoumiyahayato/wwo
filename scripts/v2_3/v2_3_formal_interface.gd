@@ -5,7 +5,7 @@ extends V23LifeLoopInterface
 const FINANCE_PANEL_ID: String = "v2_3_finance"
 const FORMAL_PANEL_IDS: PackedStringArray = [
 	"v2_3_travel", "v2_3_messages", "v2_3_knowledge", "v2_3_social",
-	FINANCE_PANEL_ID,
+	FINANCE_PANEL_ID, "v2_3_sandbox",
 ]
 
 
@@ -36,15 +36,16 @@ func _draw_v2_3_navigation() -> void:
 		["认知", "v2_3_knowledge"],
 		["关系", "v2_3_social"],
 		["财务", FINANCE_PANEL_ID],
+		["处境/行动", "v2_3_sandbox"],
 	]
 	var bar := Rect2(318.0, 52.0, 610.0, 34.0)
 	_surface(bar, Color(0.025, 0.055, 0.06, 0.92), Color(GOLD, 0.24), 8)
 	for index: int in range(items.size()):
 		var item: Array = items[index] as Array
 		var row := Rect2(
-			bar.position.x + 7.0 + float(index) * 91.0,
+			bar.position.x + 7.0 + float(index) * 75.0,
 			bar.position.y + 4.0,
-			84.0,
+			68.0,
 			26.0
 		)
 		_compact_action(

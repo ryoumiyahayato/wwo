@@ -195,6 +195,10 @@ func _run() -> void:
 	var work_hour: int = _next_unreleased_work_hour(simulation, pierre)
 	test.expect(work_hour >= 0, "可找到下一小时合同工作义务")
 	if work_hour >= 0:
+		simulation.manual_location_holds[pierre] = home_id
+		simulation._cancel_overlapping_automatic_work(
+			pierre, simulation.clock.total_hours, 2147483647, true
+		)
 		var rest_request: V2LifeLoopResult = simulation.request_activity(
 			pierre, "rest", work_hour, 1
 		)

@@ -28,8 +28,8 @@ func _run() -> void:
 	) as Dictionary
 	test.equal(
 		int((map_modes.get("zoom", {}) as Dictionary).get("maximum", 0)),
-		96,
-		"地图最大缩放仍为96"
+		200,
+		"地图最大缩放使用当前正式配置 200"
 	)
 	test.expect(map_source.contains("PrototypeV2SpatialIndex"), "统一空间索引实现仍保留")
 	test.expect(map_source.contains("_request_layer_redraw"), "批绘图层增量重绘仍保留")

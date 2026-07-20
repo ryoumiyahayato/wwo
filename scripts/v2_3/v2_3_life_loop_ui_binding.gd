@@ -304,6 +304,75 @@ func set_truth_view(enabled: bool) -> V2LifeLoopResult:
 	return last_command_result
 
 
+func sandbox_view(person_id: String = "") -> Dictionary:
+	var product: V23ProductSimulation = (
+		v2_3_simulation as V23ProductSimulation
+	)
+	if product == null:
+		return {
+			"available": false,
+			"situations": [],
+			"goals": [],
+			"methods": [],
+			"tasks": [],
+			"events": [],
+			"explanation": {},
+		}
+	var resolved_id: String = (
+		selected_person_id() if person_id.is_empty() else person_id
+	)
+	var person_goals: Array[Dictionary] = product.social_sandbox.goals_for(
+		resolved_id
+	)
+	var selected_goal_id: String = (
+		""
+		if person_goals.is_empty()
+		else str(person_goals.front().get("goal_id", ""))
+	)
+	return {
+		"available": true,
+		"person_id": resolved_id,
+		"situations": product.social_sandbox.situations_for(resolved_id),
+		"goals": person_goals,
+		"selected_goal_id": selected_goal_id,
+		"methods": product.social_sandbox.methods_for(
+			resolved_id, selected_goal_id
+		),
+		"tasks": product.social_sandbox.tasks_for(resolved_id, true),
+		"events": product.social_sandbox.visible_events_for(
+			resolved_id, product.truth_view, 12
+		),
+		"explanation": (
+			product.social_sandbox.explanation_for(resolved_id)
+			if product.truth_view
+			else {}
+		),
+	}
+
+
+func submit_sandbox_method(
+	goal_id: String, method_id: String, target_id: String = ""
+) -> V2LifeLoopResult:
+	var product: V23ProductSimulation = (
+		v2_3_simulation as V23ProductSimulation
+	)
+	if product == null:
+		return V2LifeLoopResult.fail(
+			"sandbox_unavailable", "社会沙盒行动服务不可用"
+		)
+	last_command_result = product.social_sandbox.submit_intent(
+		selected_person_id(),
+		goal_id,
+		method_id,
+		target_id,
+		"player",
+		{"current_hour": product.clock.total_hours, "preparation": 250}
+	)
+	_view_revision += 1
+	view_changed.emit()
+	return last_command_result
+
+
 func map_overlay_payload() -> Dictionary:
 	if v2_3_simulation == null:
 		return {}
@@ -472,6 +541,22 @@ func debug_state() -> Dictionary:
 	state["truth_view"] = v2_3_simulation.truth_view
 	state["map_overlay_revision"] = _view_revision
 	state["review_save_path"] = V23SaveService.REVIEW_PATH
+	var product: V23ProductSimulation = (
+		v2_3_simulation as V23ProductSimulation
+	)
+	if product != null:
+		state["social_sandbox"] = {
+			"event_count": product.social_sandbox.event_ledger.size(),
+			"task_count": product.social_sandbox.tasks.size(),
+			"commitment_count": product.social_sandbox.commitments.size(),
+			"evidence_count": product.social_sandbox.evidence_records.size(),
+			"last_hour": product.last_social_sandbox_hour.duplicate(true),
+			"selected_explanation": (
+				product.social_sandbox.explanation_for(
+					selected_person_id()
+				)
+			),
+		}
 	return state
 
 

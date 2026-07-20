@@ -5,6 +5,7 @@ extends V2LifeLoopInterfaceFinal
 const V2_3_MENU_SCENE: String = "res://scenes/v2_3/v2_3_life_loop_menu.tscn"
 const V2_3_PANEL_IDS: PackedStringArray = [
 	"v2_3_travel", "v2_3_messages", "v2_3_knowledge", "v2_3_social",
+	"v2_3_sandbox",
 ]
 
 
@@ -24,6 +25,8 @@ func _draw() -> void:
 			_draw_v2_3_knowledge_panel()
 		"v2_3_social":
 			_draw_v2_3_social_panel()
+		"v2_3_sandbox":
+			_draw_v2_3_sandbox_panel()
 
 
 func get_panel_rect() -> Rect2:
@@ -66,8 +69,9 @@ func _draw_v2_3_navigation() -> void:
 		["消息%s" % (" %d" % unread if unread > 0 else ""), "v2_3_messages"],
 		["认知", "v2_3_knowledge"],
 		["关系", "v2_3_social"],
+		["处境/行动", "v2_3_sandbox"],
 	]
-	var bar := Rect2(376.0, 52.0, 494.0, 34.0)
+	var bar := Rect2(300.0, 52.0, 650.0, 34.0)
 	_surface(bar, Color(0.025, 0.055, 0.06, 0.92), Color(GOLD, 0.24), 8)
 	for index: int in range(items.size()):
 		var item: Array = items[index] as Array
@@ -90,6 +94,116 @@ func _draw_v2_3_navigation() -> void:
 		null,
 		"评审开关：普通人物视图不会泄露未知地点和人物位置"
 	)
+
+
+func _draw_v2_3_sandbox_panel() -> void:
+	var binding: V23LifeLoopUiBinding = _v2_3_binding()
+	if binding == null:
+		return
+	var rect: Rect2 = _animated_rect(get_panel_rect(), Vector2(30.0, 0.0))
+	_surface(rect, PANEL_SOLID, Color(GOLD, 0.36), 12)
+	_register(rect, "consume")
+	_close_control(rect)
+	var view: Dictionary = binding.sandbox_view()
+	_text(rect.position + Vector2(20.0, 34.0), "处境、目标与行动", 22, INK)
+	_text(
+		rect.position + Vector2(20.0, 58.0),
+		"所有方法经同一意图、日程与事件管线；违法行为可尝试但会承担发现风险。",
+		9,
+		GOLD
+	)
+	var situations: Array = view.get("situations", []) as Array
+	_section_heading(rect.position + Vector2(20.0, 88.0), "真实状态派生的处境")
+	for index: int in range(mini(4, situations.size())):
+		var situation: Dictionary = situations[index] as Dictionary
+		var row_y: float = rect.position.y + 110.0 + float(index) * 31.0
+		_text(
+			Vector2(rect.position.x + 20.0, row_y),
+			"%s · %s" % [
+				_sandbox_kind_label(str(situation.get("kind", ""))),
+				str(situation.get("title_zh", "")),
+			],
+			9,
+			INK
+		)
+		_text(
+			Vector2(rect.end.x - 98.0, row_y),
+			"紧迫 %d" % int(situation.get("urgency", 0)),
+			8,
+			AMBER
+		)
+	var goals: Array = view.get("goals", []) as Array
+	var selected_goal_id: String = str(view.get("selected_goal_id", ""))
+	_section_heading(rect.position + Vector2(20.0, 245.0), "当前目标与可执行方法")
+	if not goals.is_empty():
+		var goal: Dictionary = goals.front() as Dictionary
+		_text(
+			rect.position + Vector2(20.0, 272.0),
+			str(goal.get("title_zh", "")),
+			11,
+			INK
+		)
+	var methods: Array = view.get("methods", []) as Array
+	for index: int in range(mini(5, methods.size())):
+		var method: Dictionary = methods[index] as Dictionary
+		var row_x: float = rect.position.x + 20.0 + float(index % 3) * 178.0
+		var row_y: float = rect.position.y + 290.0 + float(index / 3) * 40.0
+		var label: String = str(method.get("label_zh", ""))
+		if bool(method.get("illegal", false)):
+			label += " ⚠"
+		_compact_action(
+			Rect2(row_x, row_y, 164.0, 31.0),
+			label,
+			false,
+			"v2_3_sandbox_submit",
+			{
+				"goal_id": selected_goal_id,
+				"method_id": str(method.get("method_id", "")),
+			},
+			str(method.get("expected_consequence", ""))
+		)
+	var tasks: Array = view.get("tasks", []) as Array
+	_section_heading(rect.position + Vector2(20.0, 389.0), "日程任务与已知事件")
+	var active_task_text: String = "暂无任务"
+	if not tasks.is_empty():
+		var task: Dictionary = tasks.back() as Dictionary
+		active_task_text = "%s · %s · %s" % [
+			str(task.get("method_id", "")),
+			str(task.get("status", "")),
+			V2DateTime.iso_from_total_hour(int(task.get("start_hour", 0))),
+		]
+	_text(
+		rect.position + Vector2(20.0, 416.0),
+		active_task_text,
+		9,
+		INK_MUTED
+	)
+	var events: Array = view.get("events", []) as Array
+	for index: int in range(mini(3, events.size())):
+		var event: Dictionary = events[index] as Dictionary
+		_text(
+			rect.position + Vector2(
+				20.0, 442.0 + float(index) * 22.0
+			),
+			"%s · %s · %s" % [
+				str(event.get("datetime", "")),
+				str(event.get("method_id", "")),
+				"成功" if bool(event.get("success", false)) else "未成功",
+			],
+			8,
+			INK_DIM
+		)
+	var explanation: Dictionary = view.get("explanation", {}) as Dictionary
+	if not explanation.is_empty():
+		_text(
+			rect.position + Vector2(20.0, rect.end.y - 18.0),
+			"调试：%s · %s" % [
+				str(explanation.get("decision", "")),
+				str(explanation.get("reason", "")),
+			],
+			8,
+			AMBER
+		)
 
 
 func _draw_v2_3_travel_panel() -> void:
@@ -418,6 +532,13 @@ func _activate(action: String, payload: Variant) -> void:
 		"v2_3_request_introduction":
 			var result: V2LifeLoopResult = binding.request_first_introduction()
 			_show_toast(("✓ " if result.success else "× ") + result.user_message)
+		"v2_3_sandbox_submit":
+			var request: Dictionary = payload as Dictionary
+			var result: V2LifeLoopResult = binding.submit_sandbox_method(
+				str(request.get("goal_id", "")),
+				str(request.get("method_id", ""))
+			)
+			_show_toast(("✓ " if result.success else "× ") + result.user_message)
 		"v2_3_truth_toggle":
 			var result: V2LifeLoopResult = binding.set_truth_view(
 				not binding.v2_3_simulation.truth_view
@@ -478,3 +599,16 @@ static func _message_type_label(content_type: String) -> String:
 		"introduction":
 			return "正式介绍"
 	return content_type
+
+
+static func _sandbox_kind_label(kind: String) -> String:
+	match kind:
+		"maintenance":
+			return "维持"
+		"threat":
+			return "威胁"
+		"opportunity":
+			return "机会"
+		"ambition":
+			return "抱负"
+	return kind

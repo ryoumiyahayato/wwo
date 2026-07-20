@@ -26,54 +26,51 @@ function Invoke-GodotStep {
 
     Write-Host "`n=== $Name ==="
     Write-Host "Timeout: $TimeoutSeconds seconds"
-    $stdoutPath = [System.IO.Path]::GetTempFileName()
-    $stderrPath = [System.IO.Path]::GetTempFileName()
-    try {
-        $quotedArguments = @(
-            $Arguments | ForEach-Object {
-                '"' + $_.Replace('"', '\"') + '"'
-            }
-        ) -join ' '
-        $process = Start-Process `
-            -FilePath $GodotPath `
-            -ArgumentList $quotedArguments `
-            -WorkingDirectory $ProjectPath `
-            -NoNewWindow `
-            -PassThru `
-            -RedirectStandardOutput $stdoutPath `
-            -RedirectStandardError $stderrPath
-
-        $finished = $process.WaitForExit($TimeoutSeconds * 1000)
-        if (-not $finished) {
-            Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
-            $process.WaitForExit()
+    $quotedArguments = @(
+        $Arguments | ForEach-Object {
+            '"' + $_.Replace('"', '\"') + '"'
         }
-        else {
-            # Ensure redirected streams have fully flushed before reading them.
-            $process.WaitForExit()
-        }
-
-        $lines = @(
-            Get-Content -LiteralPath $stdoutPath -Encoding UTF8 -ErrorAction SilentlyContinue
-            Get-Content -LiteralPath $stderrPath -Encoding UTF8 -ErrorAction SilentlyContinue
-        )
-        $text = ($lines | Out-String)
-        $lines | ForEach-Object { Write-Host $_ }
-
-        if (-not $finished) {
-            throw "$Name timed out after $TimeoutSeconds seconds; the Godot process was terminated"
-        }
-        if ($process.ExitCode -ne 0) {
-            throw "$Name failed with exit code $($process.ExitCode)"
-        }
-        if ($text -match $parseErrorPattern) {
-            throw "$Name emitted a script parse/load error despite exit code 0"
-        }
-        return $text.Trim()
+    ) -join ' '
+    $startInfo = New-Object System.Diagnostics.ProcessStartInfo
+    $startInfo.FileName = $GodotPath
+    $startInfo.Arguments = $quotedArguments
+    $startInfo.WorkingDirectory = $ProjectPath
+    $startInfo.UseShellExecute = $false
+    $startInfo.CreateNoWindow = $true
+    $startInfo.RedirectStandardOutput = $true
+    $startInfo.RedirectStandardError = $true
+    $process = New-Object System.Diagnostics.Process
+    $process.StartInfo = $startInfo
+    if (-not $process.Start()) {
+        throw "$Name could not start"
     }
-    finally {
-        Remove-Item -LiteralPath $stdoutPath, $stderrPath -Force -ErrorAction SilentlyContinue
+    $stdoutTask = $process.StandardOutput.ReadToEndAsync()
+    $stderrTask = $process.StandardError.ReadToEndAsync()
+    $finished = $process.WaitForExit($TimeoutSeconds * 1000)
+    if (-not $finished) {
+        $process.Kill()
     }
+    $process.WaitForExit()
+    $stdout = $stdoutTask.Result
+    $stderr = $stderrTask.Result
+    $text = "$stdout$stderr"
+    if (-not [string]::IsNullOrWhiteSpace($stdout)) {
+        Write-Host $stdout.TrimEnd()
+    }
+    if (-not [string]::IsNullOrWhiteSpace($stderr)) {
+        Write-Host $stderr.TrimEnd()
+    }
+
+    if (-not $finished) {
+        throw "$Name timed out after $TimeoutSeconds seconds; the Godot process was terminated"
+    }
+    if ($process.ExitCode -ne 0) {
+        throw "$Name failed with exit code $($process.ExitCode)"
+    }
+    if ($text -match $parseErrorPattern) {
+        throw "$Name emitted a script parse/load error despite exit code 0"
+    }
+    return $text.Trim()
 }
 
 $actualGodotVersion = Invoke-GodotStep -Name 'Godot version' -Arguments @('--version') -TimeoutSeconds 30
@@ -114,9 +111,10 @@ $tests = @(
     @{ Name = 'V2.3 determinism'; Script = 'res://tests/v2_3/v2_3_determinism_test.gd' },
     @{ Name = 'V2.3 formal finance'; Script = 'res://tests/v2_3/v2_3_formal_finance_test.gd'; TimeoutSeconds = 60 },
     @{ Name = 'V2.3 formal leave and location'; Script = 'res://tests/v2_3/v2_3_formal_leave_location_test.gd'; TimeoutSeconds = 60 },
+    @{ Name = 'V2.3 autonomous social sandbox'; Script = 'res://tests/v2_3/v2_3_social_sandbox_test.gd'; TimeoutSeconds = 120 },
     @{ Name = 'V2.3 UI binding'; Script = 'res://tests/v2_3/v2_3_ui_binding_test.gd' },
     @{ Name = 'V2.3 map integration'; Script = 'res://tests/v2_3/v2_3_map_integration_test.gd' },
-    @{ Name = 'V2.3 performance guard'; Script = 'res://tests/v2_3/v2_3_performance_guard_test.gd' },
+    @{ Name = 'V2.3 performance guard'; Script = 'res://tests/v2_3/v2_3_performance_guard_test.gd'; TimeoutSeconds = 180 },
     @{ Name = 'V2.3 full loop smoke'; Script = 'res://tests/v2_3/v2_3_full_loop_smoke.gd' },
     @{ Name = 'Grid fixture world and topology'; Script = 'res://tests/alpha/alpha_world_topology_test.gd' },
     @{ Name = 'Grid fixture economy lifecycle'; Script = 'res://tests/alpha/alpha_economy_lifecycle_test.gd' },

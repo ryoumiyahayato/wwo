@@ -14,7 +14,14 @@
     "private_reply": {"familiarity": 3, "trust": 1, "affinity": 0, "tension": 0, "obligation": 0, "reciprocity": 2},
     "introduction": {"familiarity": 40, "trust": 0, "affinity": 0, "tension": 0, "obligation": 0, "reciprocity": 0},
     "appointment_attended": {"familiarity": 10, "trust": 5, "affinity": 0, "tension": 0, "obligation": 0, "reciprocity": 3},
-    "appointment_missed": {"familiarity": 0, "trust": -8, "affinity": 0, "tension": 6, "obligation": 0, "reciprocity": -5}
+    "appointment_missed": {"familiarity": 0, "trust": -8, "affinity": 0, "tension": 6, "obligation": 0, "reciprocity": -5},
+    "cooperation": {"familiarity": 12, "trust": 8, "affinity": 4, "tension": -3, "obligation": 2, "reciprocity": 6},
+    "promise_kept": {"familiarity": 4, "trust": 18, "affinity": 5, "tension": -6, "obligation": -8, "reciprocity": 12},
+    "promise_broken": {"familiarity": 2, "trust": -24, "affinity": -8, "tension": 18, "obligation": 0, "reciprocity": -15},
+    "persuasion_success": {"familiarity": 5, "trust": 3, "affinity": 1, "tension": 1, "obligation": 4, "reciprocity": 2},
+    "threat": {"familiarity": 4, "trust": -18, "affinity": -12, "tension": 28, "obligation": 8, "reciprocity": -10},
+    "deception_exposed": {"familiarity": 2, "trust": -30, "affinity": -10, "tension": 24, "obligation": 0, "reciprocity": -18},
+    "competition_loss": {"familiarity": 3, "trust": -5, "affinity": -4, "tension": 12, "obligation": 0, "reciprocity": -4}
   },
   "contact_cooldown_hours": 24,
   "history_limit_per_relationship": 32

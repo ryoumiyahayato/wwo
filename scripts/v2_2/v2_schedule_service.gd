@@ -16,6 +16,7 @@ const PLAYER_TYPES: PackedStringArray = [
 	"travel_urban_transit", "travel_regional_train", "arrive", "return_home",
 	"meet_person", "social_visit", "workplace_conversation",
 	"organization_conversation", "write_message", "read_message",
+	"social_action",
 ]
 const TERMINAL_STATUSES: PackedStringArray = [
 	"cancelled", "completed", "missed", "interrupted",

@@ -79,6 +79,10 @@ func _run() -> void:
 	)
 	test.expect(view.life_binding is V23FormalUiBinding, "正式场景使用正式金融绑定")
 	test.expect(view.interface is V23FormalInterface, "正式场景使用正式金融界面")
+	test.expect(
+		"v2_3_sandbox" in V23FormalInterface.FORMAL_PANEL_IDS,
+		"正式产品导航包含处境与行动入口"
+	)
 	for panel_id: String in V23FormalInterface.FORMAL_PANEL_IDS:
 		view.interface.open_panel_named(panel_id, false)
 		var rect: Rect2 = view.interface.get_panel_rect()
