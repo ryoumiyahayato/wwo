@@ -4,14 +4,14 @@ extends V23LifeLoopMain
 
 
 func _create_life_simulation() -> V2LifeLoopSimulationPolish:
-	return V23ProductSimulation.new()
+	return V23ProductSimulationV2.new()
 
 
 func _create_life_binding(
 	target_simulation: V2LifeLoopSimulationPolish,
 	enable_developer_mode: bool
 ) -> V2LifeLoopUiBindingPolish:
-	return V23ControlledUiBinding.new(
+	return V23ControlledUiBindingV2.new(
 		target_simulation, enable_developer_mode
 	)
 
