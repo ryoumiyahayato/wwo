@@ -1,5 +1,5 @@
 {
-  "config_version": 1,
+  "config_version": 2,
   "prototype_balance_value": true,
   "people": [
     {
@@ -12,7 +12,15 @@
       "home_location_id": "location_lille_pierre_home",
       "workplace_location_id": "location_lille_fives_factory",
       "known_person_ids": ["jeanne"],
-      "postal_address_location_id": "location_lille_pierre_home"
+      "postal_address_location_id": "location_lille_pierre_home",
+      "maintenance_profile": {
+        "preferred_stock_days": 7,
+        "warning_stock_days": 4,
+        "urgent_stock_days": 2,
+        "emergency_stock_days": 1,
+        "cash_reserve_centimes": 700,
+        "shopping_preference": "balanced"
+      }
     },
     {
       "person_id": "character_albert_dumont",
@@ -24,7 +32,15 @@
       "home_location_id": "location_lille_albert_home",
       "workplace_location_id": "location_lille_prefecture_office",
       "known_person_ids": ["character_lucien_moreau"],
-      "postal_address_location_id": "location_lille_albert_home"
+      "postal_address_location_id": "location_lille_albert_home",
+      "maintenance_profile": {
+        "preferred_stock_days": 9,
+        "warning_stock_days": 5,
+        "urgent_stock_days": 3,
+        "emergency_stock_days": 1,
+        "cash_reserve_centimes": 1200,
+        "shopping_preference": "cautious"
+      }
     },
     {
       "person_id": "jeanne",
@@ -36,7 +52,15 @@
       "home_location_id": "location_lille_centre",
       "workplace_location_id": "location_lille_metalworkers_union_hall",
       "known_person_ids": ["character_pierre_lefevre", "character_jules_martin"],
-      "postal_address_location_id": "location_lille_metalworkers_union_hall"
+      "postal_address_location_id": "location_lille_metalworkers_union_hall",
+      "maintenance_profile": {
+        "preferred_stock_days": 6,
+        "warning_stock_days": 3,
+        "urgent_stock_days": 2,
+        "emergency_stock_days": 1,
+        "cash_reserve_centimes": 500,
+        "shopping_preference": "social_support"
+      }
     },
     {
       "person_id": "character_jules_martin",
@@ -49,7 +73,15 @@
       "workplace_location_id": "location_lille_fives_factory",
       "organization_ids": ["union_metalworkers_nord"],
       "known_person_ids": ["jeanne", "character_louis_bernard"],
-      "postal_address_location_id": "location_lille_metalworkers_union_hall"
+      "postal_address_location_id": "location_lille_metalworkers_union_hall",
+      "maintenance_profile": {
+        "preferred_stock_days": 5,
+        "warning_stock_days": 3,
+        "urgent_stock_days": 2,
+        "emergency_stock_days": 1,
+        "cash_reserve_centimes": 350,
+        "shopping_preference": "late_purchase"
+      }
     },
     {
       "person_id": "character_louis_bernard",
@@ -62,7 +94,15 @@
       "workplace_location_id": "location_lille_fives_factory",
       "organization_ids": ["factory_fives_workgroup_three"],
       "known_person_ids": ["character_jules_martin"],
-      "postal_address_location_id": "location_lille_centre"
+      "postal_address_location_id": "location_lille_centre",
+      "maintenance_profile": {
+        "preferred_stock_days": 4,
+        "warning_stock_days": 2,
+        "urgent_stock_days": 1,
+        "emergency_stock_days": 0,
+        "cash_reserve_centimes": 250,
+        "shopping_preference": "risk_tolerant"
+      }
     },
     {
       "person_id": "character_lucien_moreau",
@@ -75,7 +115,15 @@
       "workplace_location_id": "location_lille_prefecture_office",
       "organization_ids": ["prefecture_nord"],
       "known_person_ids": ["character_albert_dumont"],
-      "postal_address_location_id": "location_lille_prefecture_office"
+      "postal_address_location_id": "location_lille_prefecture_office",
+      "maintenance_profile": {
+        "preferred_stock_days": 8,
+        "warning_stock_days": 4,
+        "urgent_stock_days": 2,
+        "emergency_stock_days": 1,
+        "cash_reserve_centimes": 900,
+        "shopping_preference": "cautious"
+      }
     }
   ],
   "relationships": [
