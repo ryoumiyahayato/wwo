@@ -38,12 +38,7 @@ func preview_intent(
 	_restore_travel_snapshot(snapshot)
 	_last_reservation_metadata = metadata_before
 	if not reservation.success:
-		return V2LifeLoopResult.fail(
-			reservation.error_code,
-			reservation.user_message,
-			reservation.debug_details,
-			reservation.affected_entity_ids
-		)
+		return reservation
 	var activity: Dictionary = reservation.data.get("activity", {}) as Dictionary
 	var actual_start: int = int(
 		activity.get(
