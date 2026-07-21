@@ -7,7 +7,7 @@ var survival_autonomy := V23SurvivalAutonomyServiceV2.new()
 
 
 func initialize(simulation_clock: SimulationClock = null) -> bool:
-	social_sandbox = V23SocialSandboxServiceV2.new()
+	social_sandbox = V23SocialSandboxServiceV3.new()
 	(social_sandbox as V23SocialSandboxServiceV2).attach_product(self)
 	if not super.initialize(simulation_clock):
 		return false
