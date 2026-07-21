@@ -3,7 +3,7 @@ extends V23ProductSimulation
 ## Product composition using the completed social sandbox and bounded household
 ## self-maintenance through the existing schedule, travel, inventory and ledger.
 
-var survival_autonomy := V23SurvivalAutonomyService.new()
+var survival_autonomy := V23SurvivalAutonomyServiceV2.new()
 
 
 func initialize(simulation_clock: SimulationClock = null) -> bool:
