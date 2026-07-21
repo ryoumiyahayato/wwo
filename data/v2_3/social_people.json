@@ -1,5 +1,5 @@
 {
-  "config_version": 2,
+  "config_version": 1,
   "prototype_balance_value": true,
   "people": [
     {
@@ -13,14 +13,7 @@
       "workplace_location_id": "location_lille_fives_factory",
       "known_person_ids": ["jeanne"],
       "postal_address_location_id": "location_lille_pierre_home",
-      "maintenance_profile": {
-        "preferred_stock_days": 7,
-        "warning_stock_days": 4,
-        "urgent_stock_days": 2,
-        "emergency_stock_days": 1,
-        "cash_reserve_centimes": 700,
-        "shopping_preference": "balanced"
-      }
+      "maintenance_profile": {"preferred_stock_days": 7, "warning_stock_days": 4, "urgent_stock_days": 2, "emergency_stock_days": 1, "cash_reserve_centimes": 700, "shopping_preference": "balanced"}
     },
     {
       "person_id": "character_albert_dumont",
@@ -33,14 +26,7 @@
       "workplace_location_id": "location_lille_prefecture_office",
       "known_person_ids": ["character_lucien_moreau"],
       "postal_address_location_id": "location_lille_albert_home",
-      "maintenance_profile": {
-        "preferred_stock_days": 9,
-        "warning_stock_days": 5,
-        "urgent_stock_days": 3,
-        "emergency_stock_days": 1,
-        "cash_reserve_centimes": 1200,
-        "shopping_preference": "cautious"
-      }
+      "maintenance_profile": {"preferred_stock_days": 9, "warning_stock_days": 5, "urgent_stock_days": 3, "emergency_stock_days": 1, "cash_reserve_centimes": 1200, "shopping_preference": "cautious"}
     },
     {
       "person_id": "jeanne",
@@ -53,14 +39,7 @@
       "workplace_location_id": "location_lille_metalworkers_union_hall",
       "known_person_ids": ["character_pierre_lefevre", "character_jules_martin"],
       "postal_address_location_id": "location_lille_metalworkers_union_hall",
-      "maintenance_profile": {
-        "preferred_stock_days": 6,
-        "warning_stock_days": 3,
-        "urgent_stock_days": 2,
-        "emergency_stock_days": 1,
-        "cash_reserve_centimes": 500,
-        "shopping_preference": "social_support"
-      }
+      "maintenance_profile": {"preferred_stock_days": 6, "warning_stock_days": 3, "urgent_stock_days": 2, "emergency_stock_days": 1, "cash_reserve_centimes": 500, "shopping_preference": "social_support"}
     },
     {
       "person_id": "character_jules_martin",
@@ -74,14 +53,7 @@
       "organization_ids": ["union_metalworkers_nord"],
       "known_person_ids": ["jeanne", "character_louis_bernard"],
       "postal_address_location_id": "location_lille_metalworkers_union_hall",
-      "maintenance_profile": {
-        "preferred_stock_days": 5,
-        "warning_stock_days": 3,
-        "urgent_stock_days": 2,
-        "emergency_stock_days": 1,
-        "cash_reserve_centimes": 350,
-        "shopping_preference": "late_purchase"
-      }
+      "maintenance_profile": {"preferred_stock_days": 5, "warning_stock_days": 3, "urgent_stock_days": 2, "emergency_stock_days": 1, "cash_reserve_centimes": 350, "shopping_preference": "late_purchase"}
     },
     {
       "person_id": "character_louis_bernard",
@@ -95,14 +67,7 @@
       "organization_ids": ["factory_fives_workgroup_three"],
       "known_person_ids": ["character_jules_martin"],
       "postal_address_location_id": "location_lille_centre",
-      "maintenance_profile": {
-        "preferred_stock_days": 4,
-        "warning_stock_days": 2,
-        "urgent_stock_days": 1,
-        "emergency_stock_days": 0,
-        "cash_reserve_centimes": 250,
-        "shopping_preference": "risk_tolerant"
-      }
+      "maintenance_profile": {"preferred_stock_days": 4, "warning_stock_days": 2, "urgent_stock_days": 1, "emergency_stock_days": 0, "cash_reserve_centimes": 250, "shopping_preference": "risk_tolerant"}
     },
     {
       "person_id": "character_lucien_moreau",
@@ -116,76 +81,14 @@
       "organization_ids": ["prefecture_nord"],
       "known_person_ids": ["character_albert_dumont"],
       "postal_address_location_id": "location_lille_prefecture_office",
-      "maintenance_profile": {
-        "preferred_stock_days": 8,
-        "warning_stock_days": 4,
-        "urgent_stock_days": 2,
-        "emergency_stock_days": 1,
-        "cash_reserve_centimes": 900,
-        "shopping_preference": "cautious"
-      }
+      "maintenance_profile": {"preferred_stock_days": 8, "warning_stock_days": 4, "urgent_stock_days": 2, "emergency_stock_days": 1, "cash_reserve_centimes": 900, "shopping_preference": "cautious"}
     }
   ],
   "relationships": [
-    {
-      "person_id": "character_pierre_lefevre",
-      "target_id": "jeanne",
-      "familiarity": 300,
-      "trust": 250,
-      "affinity": 100,
-      "tension": 0,
-      "obligation": 0,
-      "reciprocity": 0,
-      "relationship_status": "acquaintance",
-      "known_contact_channels": ["local_letter", "face_to_face"]
-    },
-    {
-      "person_id": "jeanne",
-      "target_id": "character_jules_martin",
-      "familiarity": 500,
-      "trust": 400,
-      "affinity": 150,
-      "tension": 0,
-      "obligation": 0,
-      "reciprocity": 0,
-      "relationship_status": "colleague_or_union_contact",
-      "known_contact_channels": ["local_letter", "face_to_face"]
-    },
-    {
-      "person_id": "character_albert_dumont",
-      "target_id": "character_lucien_moreau",
-      "familiarity": 350,
-      "trust": 300,
-      "affinity": 80,
-      "tension": 0,
-      "obligation": 0,
-      "reciprocity": 0,
-      "relationship_status": "colleague",
-      "known_contact_channels": ["local_letter", "face_to_face"]
-    },
-    {
-      "person_id": "character_jules_martin",
-      "target_id": "character_louis_bernard",
-      "familiarity": 420,
-      "trust": 180,
-      "affinity": 60,
-      "tension": 40,
-      "obligation": 0,
-      "reciprocity": 20,
-      "relationship_status": "workmate",
-      "known_contact_channels": ["local_letter", "face_to_face"]
-    },
-    {
-      "person_id": "character_louis_bernard",
-      "target_id": "character_jules_martin",
-      "familiarity": 420,
-      "trust": 160,
-      "affinity": 40,
-      "tension": 50,
-      "obligation": 0,
-      "reciprocity": 10,
-      "relationship_status": "workmate",
-      "known_contact_channels": ["local_letter", "face_to_face"]
-    }
+    {"person_id": "character_pierre_lefevre", "target_id": "jeanne", "familiarity": 300, "trust": 250, "affinity": 100, "tension": 0, "obligation": 0, "reciprocity": 0, "relationship_status": "acquaintance", "known_contact_channels": ["local_letter", "face_to_face"]},
+    {"person_id": "jeanne", "target_id": "character_jules_martin", "familiarity": 500, "trust": 400, "affinity": 150, "tension": 0, "obligation": 0, "reciprocity": 0, "relationship_status": "colleague_or_union_contact", "known_contact_channels": ["local_letter", "face_to_face"]},
+    {"person_id": "character_albert_dumont", "target_id": "character_lucien_moreau", "familiarity": 350, "trust": 300, "affinity": 80, "tension": 0, "obligation": 0, "reciprocity": 0, "relationship_status": "colleague", "known_contact_channels": ["local_letter", "face_to_face"]},
+    {"person_id": "character_jules_martin", "target_id": "character_louis_bernard", "familiarity": 420, "trust": 180, "affinity": 60, "tension": 40, "obligation": 0, "reciprocity": 20, "relationship_status": "workmate", "known_contact_channels": ["local_letter", "face_to_face"]},
+    {"person_id": "character_louis_bernard", "target_id": "character_jules_martin", "familiarity": 420, "trust": 160, "affinity": 40, "tension": 50, "obligation": 0, "reciprocity": 10, "relationship_status": "workmate", "known_contact_channels": ["local_letter", "face_to_face"]}
   ]
 }
