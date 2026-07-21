@@ -13,6 +13,37 @@ func _draw() -> void:
 		_draw_supply_status()
 
 
+func _draw_v2_3_sandbox_panel() -> void:
+	super._draw_v2_3_sandbox_panel()
+	var binding: V23PlayerUiBinding = life_binding as V23PlayerUiBinding
+	if binding == null:
+		return
+	var view: Dictionary = binding.sandbox_view()
+	var preview: Dictionary = view.get("preview", {}) as Dictionary
+	if str(preview.get("error_code", "")) != "requires_leave_authorization":
+		return
+	var rect: Rect2 = _animated_rect(get_panel_rect(), Vector2(30.0, 0.0))
+	_surface(
+		Rect2(rect.position.x + 18.0, rect.end.y - 78.0, rect.size.x - 36.0, 54.0),
+		Color(AMBER, 0.08),
+		Color(AMBER, 0.35),
+		7
+	)
+	_text(
+		Vector2(rect.position.x + 30.0, rect.end.y - 49.0),
+		"行程会占用合同工时，需要由玩家确认请假。",
+		10,
+		AMBER
+	)
+	_primary_action(
+		Rect2(rect.end.x - 188.0, rect.end.y - 68.0, 158.0, 35.0),
+		"请假并建立计划",
+		"sandbox_plan_confirm_leave",
+		null,
+		"解除与行程重叠的工作义务，再原子建立行动计划"
+	)
+
+
 func _draw_map_layer_controls() -> void:
 	var map: WorldMapCanvas = _map_canvas()
 	if map == null:
@@ -72,6 +103,13 @@ func _activate(action: String, payload: Variant) -> void:
 		var map: WorldMapCanvas = _map_canvas()
 		if map != null:
 			map.set_map_scope(str(payload))
+		queue_redraw()
+		return
+	if action == "sandbox_plan_confirm_leave":
+		var binding: V23PlayerUiBinding = life_binding as V23PlayerUiBinding
+		if binding != null:
+			var result: V2LifeLoopResult = binding.submit_selected_sandbox_plan_with_leave()
+			_show_toast(("✓ " if result.success else "× ") + result.user_message)
 		queue_redraw()
 		return
 	super._activate(action, payload)
