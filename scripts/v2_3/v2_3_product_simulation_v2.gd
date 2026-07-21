@@ -27,52 +27,84 @@ func authorize_leave_and_submit_social_intent(
 	target_id: String,
 	options: Dictionary
 ) -> V2LifeLoopResult:
-	var preview: V2LifeLoopResult = social_sandbox.preview_intent(
+	var result: V2LifeLoopResult = social_sandbox.preview_intent(
 		actor_id, goal_id, method_id, target_id, options
 	)
-	if preview.success:
+	if result.success:
 		return social_sandbox.submit_intent(
 			actor_id, goal_id, method_id, target_id, "player", options
 		)
-	if preview.error_code != "requires_leave_authorization":
-		return preview
-	var departure_hour: int = int(preview.data.get("start_hour", -1))
-	var arrival_hour: int = int(preview.data.get("arrival_hour", -1))
-	if departure_hour < clock.total_hours or arrival_hour <= departure_hour:
-		return V2LifeLoopResult.fail(
-			"invalid_leave_window",
-			"无法确定需要解除的工作时段，请重新选择计划时间。"
-		)
+	if result.error_code != "requires_leave_authorization":
+		return result
 	var schedule_before: Dictionary = schedule.get_persistent_state()
 	var travel_before: Dictionary = travel_execution.get_persistent_state()
 	var spatial_before: Dictionary = spatial_locations.get_persistent_state()
 	var leave_before: Dictionary = leave.get_persistent_state()
 	var sandbox_before: Dictionary = social_sandbox.get_persistent_state()
 	var manual_holds_before: Dictionary = manual_location_holds.duplicate(true)
-	var authorization: V2LifeLoopResult = leave.authorize(
-		actor_id,
-		departure_hour,
-		arrival_hour,
-		clock.total_hours,
-		employment
-	)
-	if not authorization.success:
-		return authorization
-	var record: Dictionary = authorization.data.get(
-		"leave_authorization", {}
-	) as Dictionary
-	leave.release_contract_schedule(record, schedule)
-	_replan_commutes_for_leave_record(record)
-	var result: V2LifeLoopResult = social_sandbox.submit_intent(
-		actor_id, goal_id, method_id, target_id, "player", options
-	)
+	var first_leave_hour: int = -1
+	for _attempt: int in range(3):
+		if result.error_code != "requires_leave_authorization":
+			break
+		var leave_person_id: String = str(result.data.get("person_id", actor_id))
+		if leave_person_id != actor_id:
+			_restore_social_plan_authorities(
+				schedule_before, travel_before, spatial_before, leave_before,
+				sandbox_before, manual_holds_before
+			)
+			return V2LifeLoopResult.fail(
+				"target_schedule_requires_leave",
+				"行动对象的工作安排与计划冲突，请调整行动时间。",
+				leave_person_id,
+				[actor_id, leave_person_id]
+			)
+		var covered_hours: Array[int] = []
+		for raw_hour: Variant in result.data.get("covered_contract_hours", []) as Array:
+			covered_hours.append(int(raw_hour))
+		var leave_start: int
+		var leave_end: int
+		if covered_hours.is_empty():
+			leave_start = int(result.data.get("start_hour", -1))
+			leave_end = int(result.data.get("arrival_hour", leave_start + 1))
+		else:
+			covered_hours.sort()
+			leave_start = covered_hours.front()
+			leave_end = covered_hours.back() + 1
+		if leave_start < clock.total_hours or leave_end <= leave_start:
+			_restore_social_plan_authorities(
+				schedule_before, travel_before, spatial_before, leave_before,
+				sandbox_before, manual_holds_before
+			)
+			return V2LifeLoopResult.fail(
+				"invalid_leave_window",
+				"无法确定需要解除的工作时段，请重新选择计划时间。"
+			)
+		if first_leave_hour < 0:
+			first_leave_hour = leave_start
+		var authorization: V2LifeLoopResult = leave.authorize(
+			actor_id, leave_start, leave_end, clock.total_hours, employment
+		)
+		if not authorization.success:
+			_restore_social_plan_authorities(
+				schedule_before, travel_before, spatial_before, leave_before,
+				sandbox_before, manual_holds_before
+			)
+			return authorization
+		var record: Dictionary = authorization.data.get(
+			"leave_authorization", {}
+		) as Dictionary
+		leave.release_contract_schedule(record, schedule)
+		_replan_commutes_for_leave_record(record)
+		result = social_sandbox.submit_intent(
+			actor_id, goal_id, method_id, target_id, "player", options
+		)
+		if result.success:
+			break
 	if not result.success:
-		schedule.restore_persistent_state(schedule_before)
-		travel_execution.restore_persistent_state(travel_before)
-		spatial_locations.restore_persistent_state(spatial_before)
-		leave.restore_persistent_state(leave_before)
-		social_sandbox.restore_persistent_state(sandbox_before)
-		manual_location_holds = manual_holds_before
+		_restore_social_plan_authorities(
+			schedule_before, travel_before, spatial_before, leave_before,
+			sandbox_before, manual_holds_before
+		)
 		return result
 	notifications.add(
 		"personal",
@@ -80,7 +112,7 @@ func authorize_leave_and_submit_social_intent(
 		"请假并建立行动计划",
 		"已解除与行程重叠的工作义务，并建立实际行程与行动日程。",
 		clock.total_hours,
-		"leave_for_social_plan:%s:%d" % [actor_id, departure_hour],
+		"leave_for_social_plan:%s:%d" % [actor_id, first_leave_hour],
 		result.affected_entity_ids
 	)
 	state_changed.emit({
@@ -89,6 +121,22 @@ func authorize_leave_and_submit_social_intent(
 		"player_override": true,
 	})
 	return result
+
+
+func _restore_social_plan_authorities(
+	schedule_state: Dictionary,
+	travel_state: Dictionary,
+	spatial_state: Dictionary,
+	leave_state: Dictionary,
+	sandbox_state: Dictionary,
+	manual_holds_state: Dictionary
+) -> void:
+	schedule.restore_persistent_state(schedule_state)
+	travel_execution.restore_persistent_state(travel_state)
+	spatial_locations.restore_persistent_state(spatial_state)
+	leave.restore_persistent_state(leave_state)
+	social_sandbox.restore_persistent_state(sandbox_state)
+	manual_location_holds = manual_holds_state.duplicate(true)
 
 
 func _settle_hour(total_hour: int) -> void:
