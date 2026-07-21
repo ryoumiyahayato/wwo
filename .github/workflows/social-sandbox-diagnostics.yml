@@ -11,7 +11,7 @@ permissions:
 jobs:
   diagnose:
     runs-on: windows-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - name: Install Godot 4.6.3
@@ -26,29 +26,39 @@ jobs:
       - name: Import scripts
         shell: pwsh
         run: godot --editor --headless --path . --quit
-      - name: Run scheduling diagnostics
+      - name: Capture formal conformance and scheduling diagnostics
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Continue'
           New-Item -ItemType Directory -Force -Path builds\diagnostics | Out-Null
-          $stdout = Join-Path $PWD 'builds\diagnostics\social.stdout.log'
-          $stderr = Join-Path $PWD 'builds\diagnostics\social.stderr.log'
-          $combined = Join-Path $PWD 'builds\diagnostics\social.log'
-          $process = Start-Process `
-            -FilePath (Get-Command godot).Source `
-            -ArgumentList @('--headless', '--path', '.', '--script', 'res://tests/v2_3/v2_3_social_sandbox_debug.gd') `
-            -WorkingDirectory $PWD `
-            -RedirectStandardOutput $stdout `
-            -RedirectStandardError $stderr `
-            -NoNewWindow `
-            -Wait `
-            -PassThru
-          $parts = @()
-          if (Test-Path $stdout) { $parts += Get-Content $stdout }
-          if (Test-Path $stderr) { $parts += Get-Content $stderr }
-          $parts | Set-Content -LiteralPath $combined -Encoding utf8
-          $parts | ForEach-Object { Write-Host $_ }
-          if ($process.ExitCode -ne 0) { exit $process.ExitCode }
+          $scripts = @(
+            'res://tests/v2_3/v2_3_social_sandbox_test.gd',
+            'res://tests/v2_3/v2_3_social_sandbox_debug.gd'
+          )
+          $failed = $false
+          foreach ($script in $scripts) {
+            $safeName = [IO.Path]::GetFileNameWithoutExtension($script)
+            $stdout = Join-Path $PWD "builds\diagnostics\$safeName.stdout.log"
+            $stderr = Join-Path $PWD "builds\diagnostics\$safeName.stderr.log"
+            $combined = Join-Path $PWD "builds\diagnostics\$safeName.log"
+            $process = Start-Process `
+              -FilePath (Get-Command godot).Source `
+              -ArgumentList @('--headless', '--path', '.', '--script', $script) `
+              -WorkingDirectory $PWD `
+              -RedirectStandardOutput $stdout `
+              -RedirectStandardError $stderr `
+              -NoNewWindow `
+              -Wait `
+              -PassThru
+            $parts = @()
+            if (Test-Path $stdout) { $parts += Get-Content $stdout }
+            if (Test-Path $stderr) { $parts += Get-Content $stderr }
+            $parts | Set-Content -LiteralPath $combined -Encoding utf8
+            Write-Host "===== $script ====="
+            $parts | ForEach-Object { Write-Host $_ }
+            if ($process.ExitCode -ne 0) { $failed = $true }
+          }
+          if ($failed) { exit 1 }
       - name: Upload diagnostic log
         if: always()
         uses: actions/upload-artifact@v4
