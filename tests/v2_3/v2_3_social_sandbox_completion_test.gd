@@ -17,7 +17,7 @@ func _run() -> void:
 	var sandbox: V23SocialSandboxServiceV2 = (
 		simulation.social_sandbox as V23SocialSandboxServiceV2
 	)
-	var binding := V23ControlledUiBindingV2.new(simulation, true)
+	var binding := V23PlayerUiBinding.new(simulation, true)
 	var pierre: String = V2LifeLoopSimulation.PIERRE_ID
 	var goal: Dictionary = _goal(sandbox.goals_for(pierre), "maintenance")
 	test.expect(not goal.is_empty(), "玩家有可持续的稳定目标")
@@ -64,17 +64,23 @@ func _run() -> void:
 	binding.set_sandbox_preparation(700)
 	view = binding.sandbox_view()
 	var preview: Dictionary = view.get("preview", {}) as Dictionary
+	var preview_success: bool = bool(preview.get("success", false))
+	var leave_required: bool = str(preview.get("error_code", "")) == "requires_leave_authorization"
 	test.expect(
-		bool(preview.get("success", false)),
-		"计划预览验证双方路线与时间：%s (%s)" % [
+		preview_success or leave_required,
+		"计划预览验证双方路线、日程和请假条件：%s (%s)" % [
 			str(preview.get("message", "没有返回原因")),
 			str(preview.get("error_code", "")),
 		]
 	)
-	var submit: V2LifeLoopResult = binding.submit_selected_sandbox_plan()
+	var submit: V2LifeLoopResult = (
+		binding.submit_selected_sandbox_plan_with_leave()
+		if leave_required
+		else binding.submit_selected_sandbox_plan()
+	)
 	test.expect(
 		submit.success,
-		"确认后建立社会行动计划：%s (%s)" % [submit.user_message, submit.error_code]
+		"玩家确认必要请假后建立社会行动计划：%s (%s)" % [submit.user_message, submit.error_code]
 	)
 	if submit.success:
 		var task: Dictionary = submit.data.get("task", {}) as Dictionary
