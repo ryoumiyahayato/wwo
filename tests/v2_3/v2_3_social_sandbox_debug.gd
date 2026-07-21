@@ -23,7 +23,9 @@ func _run() -> void:
 		"player",
 		{"current_hour": simulation.clock.total_hours, "preparation": 700}
 	)
-	print("player_result=", player_result.to_dictionary())
+	print("player_result_success=", player_result.success)
+	print("player_result_message=", player_result.message)
+	print("player_result_data=", player_result.data)
 	for person: Dictionary in simulation.v2_3_config.social_people():
 		var person_id: String = str(person.get("person_id", ""))
 		print("initial person=", person_id)
