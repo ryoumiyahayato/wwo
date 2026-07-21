@@ -14,8 +14,8 @@
   },
   "planning": {
     "reevaluate_hour": 6,
-    "minimum_delay_hours": 1,
-    "search_horizon_hours": 72,
+    "minimum_delay_hours": 12,
+    "search_horizon_hours": 120,
     "npc_actions_per_day": 1,
     "npc_normal_action_interval_days": 3,
     "reaction_delay_hours": 2
