@@ -1,7 +1,10 @@
 class_name V23SocialSandboxServiceV3
 extends V23SocialSandboxServiceV2
 ## Product preview uses the same schedule/travel reservation path as submit.
-## The complete authority snapshot is restored immediately after preview.
+## Explicit player confirmation authorizes only the controlled actor's trip;
+## targets must still have a naturally available schedule.
+
+var _authorize_player_travel_for_submit: bool = false
 
 
 func preview_intent(
@@ -59,4 +62,72 @@ func preview_intent(
 		"当前条件下可以建立这项计划",
 		data,
 		[actor_id, resolved_target, location_id]
+	)
+
+
+func submit_intent_with_player_leave(
+	actor_id: String,
+	goal_id: String,
+	method_id: String,
+	target_id: String,
+	options: Dictionary
+) -> V2LifeLoopResult:
+	_authorize_player_travel_for_submit = true
+	var result: V2LifeLoopResult = super.submit_intent(
+		actor_id, goal_id, method_id, target_id, "player", options
+	)
+	_authorize_player_travel_for_submit = false
+	return result
+
+
+func _ensure_arrival(
+	person_id: String,
+	location_id: String,
+	action_start: int,
+	current_hour: int,
+	player_request: bool
+) -> V2LifeLoopResult:
+	var position: Dictionary = _locations.position_for(person_id)
+	if (
+		str(position.get("location_state", "")) == "at_location"
+		and str(position.get("current_location_id", "")) == location_id
+	):
+		return V2LifeLoopResult.ok(
+			"人物已经在行动地点",
+			{"travel_required": false, "travel_plan_id": ""}
+		)
+	var preview: Dictionary = _route_preview_before(
+		person_id, location_id, action_start, current_hour
+	)
+	if not bool(preview.get("success", false)):
+		return V2LifeLoopResult.fail(
+			"route_unavailable",
+			"人物无法在行动开始前到达地点",
+			location_id,
+			[person_id, location_id]
+		)
+	var departure_hour: int = int(preview.get("departure_hour", current_hour + 1))
+	var result: V2LifeLoopResult
+	if player_request and _authorize_player_travel_for_submit:
+		result = _product.authorize_leave_and_request_travel(
+			person_id, location_id, "fastest", departure_hour
+		)
+	else:
+		result = _product.request_travel(
+			person_id, location_id, "fastest", departure_hour
+		)
+	if not result.success:
+		if player_request and result.error_code == "requires_leave_authorization":
+			result.user_message = "社会行动需要先确认请假并建立实际行程。"
+		return result
+	var plan: Dictionary = result.data.get("plan", result.data) as Dictionary
+	return V2LifeLoopResult.ok(
+		"人物行程已经建立",
+		{
+			"travel_required": true,
+			"travel_plan_id": str(plan.get("travel_plan_id", "")),
+			"departure_hour": departure_hour,
+			"arrival_hour": int(preview.get("arrival_hour", action_start)),
+		},
+		[person_id, location_id]
 	)
