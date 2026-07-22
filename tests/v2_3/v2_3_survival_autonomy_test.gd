@@ -26,7 +26,8 @@ func _run() -> void:
 	)
 	test.equal(int(planned.get("planned", 0)), 1, "食品接近警戒线时主动生成一次采购计划")
 	var maintenance: Dictionary = simulation.survival_autonomy.maintenance_view(person_id)
-	test.equal(str((maintenance.get("active_need", {}) as Dictionary).get("item_type", "")), "food", "主动计划对应真实食品需要")
+	var active_need: Dictionary = maintenance.get("active_need", {}) as Dictionary
+	test.equal(str(active_need.get("item_type", "")), "food", "主动计划对应真实食品需要")
 	test.expect(
 		simulation.schedule.has_pending_activity(person_id, "purchase_food", simulation.clock.total_hours),
 		"采购通过唯一权威日程安排"
@@ -34,7 +35,11 @@ func _run() -> void:
 	var plan: Dictionary = simulation.travel_execution.active_plan_for_person(person_id)
 	test.expect(not plan.is_empty(), "不在市场时通过正式旅行服务建立采购行程")
 	var initial_cash: int = int(household.get("cash_centimes", 0))
-	simulation.run_days(3)
+	var purchase_hour: int = int(active_need.get("start_hour", simulation.clock.total_hours + 1))
+	simulation.advance_hours(maxi(
+		1,
+		purchase_hour + 1 - simulation.clock.total_hours
+	))
 	var after_household: Dictionary = simulation.households.households[household_id] as Dictionary
 	test.expect(int(after_household.get("food_stock_person_days", 0)) > 2, "实际到场和购买后食品库存得到补充")
 	test.expect(int(after_household.get("cash_centimes", 0)) < initial_cash, "采购费用只通过住户账本扣除")
@@ -85,8 +90,8 @@ func _run() -> void:
 		not override_sim.schedule.has_pending_activity(person_id, "purchase_food", override_sim.clock.total_hours),
 		"玩家覆盖时AI不偷偷写入采购日程"
 	)
-	var active_need: Dictionary = override_sim.survival_autonomy.maintenance_view(person_id).get("active_need", {}) as Dictionary
-	test.equal(str(active_need.get("status", "")), "retry_next_day", "采购失败后保留次日重试状态")
+	var blocked_need: Dictionary = override_sim.survival_autonomy.maintenance_view(person_id).get("active_need", {}) as Dictionary
+	test.equal(str(blocked_need.get("status", "")), "retry_next_day", "采购失败后保留次日重试状态")
 
 	var snapshot: Dictionary = simulation.get_persistent_state()
 	test.expect(simulation.survival_autonomy.validate_persistent_state(snapshot.get("survival_autonomy_state", {}) as Dictionary), "生活自理状态可保存")
