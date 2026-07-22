@@ -49,11 +49,12 @@ func _run() -> void:
 	test.expect(float(regional.get("last_query_ms", 9999.0)) < 1200.0, "区域城市冷查询不阻塞超过1.2秒")
 
 	var cache_hits_before: int = int(regional.get("cache_hits", 0))
-	map.pan_by(Vector2(-180.0, 0.0))
-	map.pan_by(Vector2(180.0, 0.0))
+	map.set_map_scope(WorldMapCanvas.MAP_SCOPE_WORLD)
+	await process_frame
+	map.set_map_scope(WorldMapCanvas.MAP_SCOPE_REGIONAL)
 	await process_frame
 	var repeated: Dictionary = map.debug_city_detail_snapshot()
-	test.expect(int(repeated.get("cache_hits", 0)) > cache_hits_before, "重复区域视窗复用已解析分片")
+	test.expect(int(repeated.get("cache_hits", 0)) > cache_hits_before, "再次进入同一区域复用已解析分片")
 
 	map.set_map_scope(WorldMapCanvas.MAP_SCOPE_CITY)
 	await process_frame
