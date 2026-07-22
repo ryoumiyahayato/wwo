@@ -104,3 +104,114 @@ func _plan_need(
 		price,
 		cash
 	)
+
+
+func _schedule_purchase_trip(
+	person_id: String,
+	household_id: String,
+	_household: Dictionary,
+	need: Dictionary,
+	current_hour: int,
+	price: int,
+	cash: int
+) -> V2LifeLoopResult:
+	var item_type: String = str(need.get("item_type", ""))
+	var position: Dictionary = product.spatial_locations.position_for(person_id)
+	var origin_id: String = str(position.get("current_location_id", ""))
+	var fatigue: int = int(product.conditions.get_state(person_id).get("fatigue", 0))
+	for departure_hour: int in range(current_hour + 1, current_hour + 73):
+		var route: V2LifeLoopResult = product.route_planner.plan_route(
+			person_id,
+			origin_id,
+			MARKET_LOCATION_ID,
+			departure_hour,
+			"fastest",
+			cash,
+			fatigue,
+			bool(need.get("emergency", false))
+		)
+		if not route.success:
+			continue
+		var arrival_hour: int = int(route.data.get("arrival_hour", departure_hour + 1))
+		# Travel settlement moves the person to the destination at the end of the
+		# arrival hour. Purchase therefore starts no earlier than the following
+		# hour; scheduling both at arrival_hour caused a remote-purchase rejection.
+		var purchase_hour: int = arrival_hour + 1
+		var purchase_value: Dictionary = V2DateTime.from_total_hour(purchase_hour)
+		var purchase_clock_hour: int = int(purchase_value.get("hour", -1))
+		if purchase_clock_hour < 6 or purchase_clock_hour >= 21:
+			continue
+		if not product.schedule.can_schedule_activity(
+			person_id,
+			"purchase_%s" % item_type,
+			purchase_hour,
+			1,
+			"npc_rule"
+		).success:
+			continue
+		var schedule_before: Dictionary = product.schedule.get_persistent_state()
+		var travel_before: Dictionary = product.travel_execution.get_persistent_state()
+		var created: V2LifeLoopResult = product.travel_execution.create_plan(
+			person_id,
+			MARKET_LOCATION_ID,
+			"fastest",
+			departure_hour,
+			cash,
+			fatigue,
+			"survival_purchase:%s" % item_type,
+			bool(need.get("emergency", false))
+		)
+		if not created.success:
+			continue
+		var plan: Dictionary = created.data.get("travel_plan", {}) as Dictionary
+		var travel_result: V2LifeLoopResult = product.travel_execution.schedule_plan(
+			str(plan.get("travel_plan_id", "")),
+			product.schedule,
+			current_hour,
+			"npc_rule"
+		)
+		if not travel_result.success:
+			product.schedule.restore_persistent_state(schedule_before)
+			product.travel_execution.restore_persistent_state(travel_before)
+			continue
+		var purchase_result: V2LifeLoopResult = product.schedule.schedule_rule_activity(
+			person_id,
+			"purchase_%s" % item_type,
+			purchase_hour,
+			1,
+			MARKET_LOCATION_ID,
+			"npc_rule",
+			household_id,
+			price
+		)
+		if not purchase_result.success:
+			product.schedule.restore_persistent_state(schedule_before)
+			product.travel_execution.restore_persistent_state(travel_before)
+			continue
+		var activity: Dictionary = purchase_result.data.get("activity", {}) as Dictionary
+		product.schedule.merge_activity_metadata(
+			person_id,
+			str(activity.get("activity_id", "")),
+			{
+				"autonomous_maintenance": true,
+				"maintenance_item_type": item_type,
+				"required_cash_centimes": price,
+				"travel_plan_id": str(plan.get("travel_plan_id", "")),
+			}
+		)
+		return _record_plan(
+			person_id,
+			household_id,
+			need,
+			current_hour,
+			purchase_hour,
+			"travel_and_purchase_scheduled",
+			str(activity.get("activity_id", ""))
+		)
+	return _block_and_retry(
+		person_id,
+		household_id,
+		need,
+		current_hour,
+		"未来三天没有能够完成采购的行程和时间"
+	)
