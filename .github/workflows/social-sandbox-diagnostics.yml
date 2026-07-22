@@ -39,6 +39,17 @@ jobs:
           if ($LASTEXITCODE -ne 0) {
             throw "player interface base failed direct parse check: exit $LASTEXITCODE"
           }
+      - name: Audit runtime code structure
+        shell: pwsh
+        run: |
+          python tools/audit_runtime_code.py `
+            --root . `
+            --json-output builds/diagnostics/runtime-code-audit.json `
+            --markdown-output builds/diagnostics/runtime-code-audit.md `
+            --fail-on-hard-findings
+          if ($LASTEXITCODE -ne 0) {
+            throw "runtime code audit found duplicate class declarations or exact duplicate production scripts"
+          }
       - name: Run focused tests sequentially
         shell: pwsh
         run: |
@@ -97,6 +108,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Focused-Product-Diagnostics
-          path: builds/diagnostics/*.log
+          path: builds/diagnostics/*
           if-no-files-found: error
           retention-days: 7
