@@ -34,7 +34,6 @@ func _run() -> void:
 	)
 	var plan: Dictionary = simulation.travel_execution.active_plan_for_person(person_id)
 	test.expect(not plan.is_empty(), "不在市场时通过正式旅行服务建立采购行程")
-	var travel_plan_id: String = str(plan.get("travel_plan_id", ""))
 	var initial_cash: int = int(household.get("cash_centimes", 0))
 	var purchase_hour: int = int(active_need.get("start_hour", simulation.clock.total_hours + 1))
 	simulation.advance_hours(maxi(
@@ -42,19 +41,9 @@ func _run() -> void:
 		purchase_hour + 1 - simulation.clock.total_hours
 	))
 	var after_household: Dictionary = simulation.households.households[household_id] as Dictionary
-	var stock_replenished: bool = int(after_household.get("food_stock_person_days", 0)) > 2
-	var settlement_debug: Dictionary = {
-		"clock_hour": simulation.clock.total_hours,
-		"purchase_hour": purchase_hour,
-		"household": after_household.duplicate(true),
-		"position": simulation.spatial_locations.position_for(person_id),
-		"travel_plan": (simulation.travel_execution.travel_plans.get(travel_plan_id, {}) as Dictionary).duplicate(true),
-		"schedule": (simulation.schedule.schedules.get(person_id, []) as Array).duplicate(true),
-		"recent_completed": simulation.schedule.recent_completed_activities.duplicate(true),
-	}
 	test.expect(
-		stock_replenished,
-		"实际到场和购买后食品库存得到补充：%s" % JSON.stringify(settlement_debug)
+		int(after_household.get("food_stock_person_days", 0)) > 2,
+		"实际到场和购买后食品库存得到补充"
 	)
 	test.expect(int(after_household.get("cash_centimes", 0)) < initial_cash, "采购费用只通过住户账本扣除")
 	test.expect(simulation.ledger.validate_balances(simulation.households.households).success, "自主采购后账本链保持一致")
