@@ -1,5 +1,5 @@
 class_name V23PlayerInterface
-extends V23MinuteFormalInterfaceV2
+extends "res://scripts/v2_3/v2_3_minute_formal_interface_v2.gd"
 ## Small product HUD additions: explicit map-layer switching and readable
 ## household supply status. Neither surface exposes internal AI state.
 
