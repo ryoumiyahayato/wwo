@@ -1,10 +1,15 @@
 class_name WorldCityShardCatalog
 extends RefCounted
-## Lazy modern-city projection. Only the most relevant viewport-intersecting
-## shards are parsed, then retained through a hard-bounded LRU cache.
+## Lazy modern-city projection for the regional transport layer only. Dense
+## municipality data remains available in shards but is never part of routine
+## rendering; the city layer is owned by formal local locations.
 
 const INDEX_PATH: String = "res://data/world_map/city_detail/index.json"
 const SHARD_ROOT: String = "res://data/world_map/city_detail/"
+const HARD_CACHE_LIMIT: int = 4
+const HARD_NODE_BUDGET: int = 120
+const HARD_LABEL_BUDGET: int = 32
+const MIN_RUNTIME_PRIORITY: int = 76
 
 var configured: bool = false
 var index_document: Dictionary = {}
@@ -16,9 +21,9 @@ var _projector: Callable
 var _loaded_shards: Dictionary = {}
 var _lru_shard_ids: Array[String] = []
 var _visible_signature: String = ""
-var _cache_limit: int = 12
-var _node_budget: int = 1600
-var _label_budget: int = 180
+var _cache_limit: int = HARD_CACHE_LIMIT
+var _node_budget: int = HARD_NODE_BUDGET
+var _label_budget: int = HARD_LABEL_BUDGET
 var _metrics: Dictionary = {
 	"index_loaded": false,
 	"index_shards": 0,
@@ -35,6 +40,8 @@ var _metrics: Dictionary = {
 	"last_matching_shards": 0,
 	"last_intersecting_shards": 0,
 	"missing_shards": 0,
+	"municipality_records_skipped": 0,
+	"low_priority_records_skipped": 0,
 }
 
 
@@ -51,9 +58,9 @@ func configure(projector: Callable) -> bool:
 		push_error("城市细化索引缺少现代地理边界声明")
 		return false
 	var policy: Dictionary = index_document.get("runtime_policy", {}) as Dictionary
-	_cache_limit = maxi(2, int(policy.get("country_cache_limit", 12)))
-	_node_budget = maxi(100, int(policy.get("visible_node_budget", 1600)))
-	_label_budget = maxi(20, int(policy.get("visible_label_budget", 180)))
+	_cache_limit = clampi(int(policy.get("country_cache_limit", HARD_CACHE_LIMIT)), 2, HARD_CACHE_LIMIT)
+	_node_budget = clampi(int(policy.get("visible_node_budget", HARD_NODE_BUDGET)), 40, HARD_NODE_BUDGET)
+	_label_budget = clampi(int(policy.get("visible_label_budget", HARD_LABEL_BUDGET)), 12, HARD_LABEL_BUDGET)
 	for raw_country: Variant in index_document.get("countries", []) as Array:
 		if not raw_country is Dictionary:
 			continue
@@ -85,7 +92,7 @@ func configure(projector: Callable) -> bool:
 func query(world_rect: Rect2, scope: String, zoom: float) -> bool:
 	var started_usec: int = Time.get_ticks_usec()
 	_metrics["query_count"] = int(_metrics.get("query_count", 0)) + 1
-	if not configured or scope == "world":
+	if not configured or scope != "regional":
 		var had_visible: bool = not visible_records.is_empty()
 		visible_records.clear()
 		visible_by_id.clear()
@@ -131,8 +138,8 @@ func query(world_rect: Rect2, scope: String, zoom: float) -> bool:
 			candidates.append(record)
 	_evict_to_limit(exempt)
 	candidates.sort_custom(_record_higher_priority)
-	if candidates.size() > _node_budget:
-		candidates.resize(_node_budget)
+	var raw_candidate_count: int = candidates.size()
+	candidates = _thin_by_screen_spacing(candidates, zoom)
 
 	var signature_parts := PackedStringArray()
 	for record: Dictionary in candidates:
@@ -145,7 +152,7 @@ func query(world_rect: Rect2, scope: String, zoom: float) -> bool:
 		visible_by_id.clear()
 		for record: Dictionary in visible_records:
 			visible_by_id[str(record.get("id", ""))] = record
-	_finish_query(started_usec, matching_count, intersecting.size(), candidates.size())
+	_finish_query(started_usec, matching_count, intersecting.size(), raw_candidate_count)
 	return changed
 
 
@@ -175,6 +182,7 @@ func debug_snapshot() -> Dictionary:
 	snapshot["loaded_shards"] = _loaded_shards.size()
 	snapshot["loaded_shard_ids"] = _lru_shard_ids.duplicate()
 	snapshot["visible_records"] = visible_records.size()
+	snapshot["regional_only"] = true
 	return snapshot
 
 
@@ -196,7 +204,14 @@ func _load_shard(metadata: Dictionary) -> Array[Dictionary]:
 	for raw_record: Variant in document.get("cities", []) as Array:
 		if not raw_record is Dictionary:
 			continue
-		var record: Dictionary = (raw_record as Dictionary).duplicate(true)
+		var source: Dictionary = raw_record as Dictionary
+		if str(source.get("record_type", "")) == "municipality":
+			_metrics["municipality_records_skipped"] = int(_metrics.get("municipality_records_skipped", 0)) + 1
+			continue
+		if int(source.get("label_priority", 0)) < MIN_RUNTIME_PRIORITY:
+			_metrics["low_priority_records_skipped"] = int(_metrics.get("low_priority_records_skipped", 0)) + 1
+			continue
+		var record: Dictionary = source.duplicate(true)
 		record["world_point"] = _projector.call(record.get("lon_lat", [])) as Vector2
 		records.append(record)
 	_loaded_shards[shard_id] = records
@@ -250,16 +265,50 @@ func _project_bounds(bounds: Array) -> Rect2:
 
 
 func _record_visible(record: Dictionary, scope: String, zoom: float) -> bool:
-	if scope == "city":
-		return true
+	if scope != "regional" or str(record.get("record_type", "")) != "city":
+		return false
 	var priority: int = int(record.get("label_priority", 0))
-	if zoom < 12.0:
-		return priority >= 84
-	if zoom < 24.0:
-		return priority >= 62
+	if zoom < 18.0:
+		return priority >= 100
 	if zoom < 48.0:
-		return priority >= 48
-	return priority >= 38
+		return priority >= 94
+	if zoom < 96.0:
+		return priority >= 88
+	return priority >= 84
+
+
+func _thin_by_screen_spacing(records: Array[Dictionary], zoom: float) -> Array[Dictionary]:
+	var accepted: Array[Dictionary] = []
+	var accepted_screen_points: Array[Vector2] = []
+	var minimum_spacing: float = _node_spacing_pixels(zoom)
+	var minimum_distance_squared: float = minimum_spacing * minimum_spacing
+	for record: Dictionary in records:
+		if accepted.size() >= _node_budget:
+			break
+		var point: Vector2 = record.get("world_point", Vector2.INF) as Vector2
+		if point == Vector2.INF:
+			continue
+		var screen_point: Vector2 = point * zoom
+		var too_close: bool = false
+		for existing: Vector2 in accepted_screen_points:
+			if screen_point.distance_squared_to(existing) < minimum_distance_squared:
+				too_close = true
+				break
+		if too_close:
+			continue
+		accepted.append(record)
+		accepted_screen_points.append(screen_point)
+	return accepted
+
+
+func _node_spacing_pixels(zoom: float) -> float:
+	if zoom < 24.0:
+		return 150.0
+	if zoom < 48.0:
+		return 110.0
+	if zoom < 96.0:
+		return 88.0
+	return 72.0
 
 
 func _record_higher_priority(left: Dictionary, right: Dictionary) -> bool:
