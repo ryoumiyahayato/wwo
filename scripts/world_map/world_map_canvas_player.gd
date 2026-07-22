@@ -1,5 +1,5 @@
 class_name WorldMapCanvasPlayer
-extends WorldMapCanvas
+extends "res://scripts/world_map/world_map_canvas_detail.gd"
 ## Foreign cities currently have regional-centre records but not detailed local
 ## children. City scope therefore anchors to the actual centre instead of going
 ## blank; future neighbourhood records can use that centre ID as their parent.
