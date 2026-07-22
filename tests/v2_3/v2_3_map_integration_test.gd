@@ -40,8 +40,8 @@ func _run() -> void:
 	)
 	test.equal(
 		view.map_canvas.zoom,
-		180.0,
-		"正式场景使用当前人物所在地聚焦倍率"
+		420.0,
+		"正式场景使用当前城市内部聚焦倍率"
 	)
 	view.map_canvas.debug_reset_performance_metrics()
 	var binding: V23LifeLoopUiBinding = view.life_binding as V23LifeLoopUiBinding
