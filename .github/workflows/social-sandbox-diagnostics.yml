@@ -30,6 +30,9 @@ jobs:
       - name: Import and scan scripts
         shell: pwsh
         run: godot --editor --headless --path . --quit
+      - name: Check player interface base
+        shell: pwsh
+        run: godot --headless --path . --check-only --script res://scripts/v2_3/v2_3_minute_formal_interface_v2.gd
       - name: Run focused tests sequentially
         shell: pwsh
         run: |
