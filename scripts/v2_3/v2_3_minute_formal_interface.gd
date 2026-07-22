@@ -3,6 +3,29 @@ extends V23FormalScheduleInterface
 ## Five-level minute clock controls, contextual travel leave and return-home decisions.
 
 
+func _text(
+	position: Vector2,
+	value: String,
+	font_size: int,
+	color: Color,
+	max_width: float = -1.0
+) -> void:
+	draw_string(
+		_font,
+		position,
+		value,
+		HORIZONTAL_ALIGNMENT_LEFT,
+		max_width,
+		font_size,
+		color
+	)
+
+
+func _divider(position: Vector2, length: float, vertical: bool = false) -> void:
+	var offset: Vector2 = Vector2(0.0, length) if vertical else Vector2(length, 0.0)
+	draw_line(position, position + offset, LINE, 1.0)
+
+
 func _draw() -> void:
 	super._draw()
 	var binding: V23ControlledUiBinding = _controlled_binding()
