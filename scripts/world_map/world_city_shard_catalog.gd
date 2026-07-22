@@ -1,7 +1,7 @@
 class_name WorldCityShardCatalog
 extends RefCounted
-## Lazy modern-city projection. The catalog loads only shards whose projected
-## bounds intersect the current world-space viewport and keeps a bounded LRU.
+## Lazy modern-city projection. Only the most relevant viewport-intersecting
+## shards are parsed, then retained through a hard-bounded LRU cache.
 
 const INDEX_PATH: String = "res://data/world_map/city_detail/index.json"
 const SHARD_ROOT: String = "res://data/world_map/city_detail/"
@@ -32,6 +32,7 @@ var _metrics: Dictionary = {
 	"visible_records": 0,
 	"last_query_ms": 0.0,
 	"maximum_query_ms": 0.0,
+	"last_matching_shards": 0,
 	"last_intersecting_shards": 0,
 	"missing_shards": 0,
 }
@@ -42,11 +43,7 @@ func configure(projector: Callable) -> bool:
 	configured = false
 	index_document = _read_json(INDEX_PATH)
 	shard_metadata.clear()
-	_loaded_shards.clear()
-	_lru_shard_ids.clear()
-	visible_records.clear()
-	visible_by_id.clear()
-	_visible_signature = ""
+	clear_cache()
 	if index_document.is_empty() or not _projector.is_valid():
 		_metrics["index_loaded"] = false
 		return false
@@ -69,7 +66,8 @@ func configure(projector: Callable) -> bool:
 			shard["continent"] = str(country.get("continent", ""))
 			shard["municipality_detail"] = bool(country.get("municipality_detail", false))
 			shard["world_rect"] = _project_bounds(shard.get("bounds", []) as Array)
-			if not str(shard.get("id", "")).is_empty() and not (shard["world_rect"] as Rect2).has_area():
+			var shard_rect: Rect2 = shard.get("world_rect", Rect2()) as Rect2
+			if str(shard.get("id", "")).is_empty() or not shard_rect.has_area():
 				continue
 			shard_metadata.append(shard)
 	shard_metadata.sort_custom(func(left: Dictionary, right: Dictionary) -> bool:
@@ -92,18 +90,36 @@ func query(world_rect: Rect2, scope: String, zoom: float) -> bool:
 		visible_records.clear()
 		visible_by_id.clear()
 		_visible_signature = ""
-		_finish_query(started_usec, 0, 0)
+		_finish_query(started_usec, 0, 0, 0)
 		return had_visible
+
 	var intersecting: Array[Dictionary] = []
-	var exempt: Dictionary = {}
 	for shard: Dictionary in shard_metadata:
 		var shard_rect: Rect2 = shard.get("world_rect", Rect2()) as Rect2
-		if not shard_rect.intersects(world_rect):
-			continue
-		intersecting.append(shard)
-		exempt[str(shard.get("id", ""))] = true
+		if shard_rect.intersects(world_rect):
+			intersecting.append(shard)
+	var matching_count: int = intersecting.size()
+	var query_center: Vector2 = world_rect.get_center()
+	intersecting.sort_custom(func(left: Dictionary, right: Dictionary) -> bool:
+		var left_rect: Rect2 = left.get("world_rect", Rect2()) as Rect2
+		var right_rect: Rect2 = right.get("world_rect", Rect2()) as Rect2
+		var left_contains: bool = left_rect.has_point(query_center)
+		var right_contains: bool = right_rect.has_point(query_center)
+		if left_contains != right_contains:
+			return left_contains
+		var left_distance: float = left_rect.get_center().distance_squared_to(query_center)
+		var right_distance: float = right_rect.get_center().distance_squared_to(query_center)
+		if not is_equal_approx(left_distance, right_distance):
+			return left_distance < right_distance
+		return str(left.get("id", "")) < str(right.get("id", ""))
+	)
+	if intersecting.size() > _cache_limit:
+		intersecting.resize(_cache_limit)
+
+	var exempt: Dictionary = {}
 	var candidates: Array[Dictionary] = []
 	for shard: Dictionary in intersecting:
+		exempt[str(shard.get("id", ""))] = true
 		for record: Dictionary in _load_shard(shard):
 			var point: Vector2 = record.get("world_point", Vector2.INF) as Vector2
 			if point == Vector2.INF or not world_rect.has_point(point):
@@ -117,10 +133,11 @@ func query(world_rect: Rect2, scope: String, zoom: float) -> bool:
 	candidates.sort_custom(_record_higher_priority)
 	if candidates.size() > _node_budget:
 		candidates.resize(_node_budget)
-	var next_signature_parts := PackedStringArray()
+
+	var signature_parts := PackedStringArray()
 	for record: Dictionary in candidates:
-		next_signature_parts.append(str(record.get("id", "")))
-	var next_signature: String = "|".join(next_signature_parts)
+		signature_parts.append(str(record.get("id", "")))
+	var next_signature: String = "|".join(signature_parts)
 	var changed: bool = next_signature != _visible_signature
 	if changed:
 		_visible_signature = next_signature
@@ -128,7 +145,7 @@ func query(world_rect: Rect2, scope: String, zoom: float) -> bool:
 		visible_by_id.clear()
 		for record: Dictionary in visible_records:
 			visible_by_id[str(record.get("id", ""))] = record
-	_finish_query(started_usec, intersecting.size(), candidates.size())
+	_finish_query(started_usec, matching_count, intersecting.size(), candidates.size())
 	return changed
 
 
@@ -166,10 +183,10 @@ func _load_shard(metadata: Dictionary) -> Array[Dictionary]:
 	if _loaded_shards.has(shard_id):
 		_metrics["cache_hits"] = int(_metrics.get("cache_hits", 0)) + 1
 		_touch_shard(shard_id)
-		return _loaded_shards[shard_id] as Array[Dictionary]
+		var cached: Variant = _loaded_shards[shard_id]
+		return cached as Array[Dictionary]
 	_metrics["cache_misses"] = int(_metrics.get("cache_misses", 0)) + 1
-	var relative_path: String = str(metadata.get("path", ""))
-	var document: Dictionary = _read_json(SHARD_ROOT + relative_path)
+	var document: Dictionary = _read_json(SHARD_ROOT + str(metadata.get("path", "")))
 	var records: Array[Dictionary] = []
 	if document.is_empty():
 		_metrics["missing_shards"] = int(_metrics.get("missing_shards", 0)) + 1
@@ -211,21 +228,17 @@ func _evict_to_limit(exempt: Dictionary) -> void:
 func _project_bounds(bounds: Array) -> Rect2:
 	if bounds.size() != 4:
 		return Rect2()
-	var minimum_longitude: float = float(bounds[0])
-	var minimum_latitude: float = float(bounds[1])
-	var maximum_longitude: float = float(bounds[2])
-	var maximum_latitude: float = float(bounds[3])
-	var middle_longitude: float = (minimum_longitude + maximum_longitude) * 0.5
-	var middle_latitude: float = (minimum_latitude + maximum_latitude) * 0.5
+	var min_lon: float = float(bounds[0])
+	var min_lat: float = float(bounds[1])
+	var max_lon: float = float(bounds[2])
+	var max_lat: float = float(bounds[3])
+	var middle_lon: float = (min_lon + max_lon) * 0.5
+	var middle_lat: float = (min_lat + max_lat) * 0.5
 	var samples: Array = [
-		[minimum_longitude, minimum_latitude],
-		[minimum_longitude, maximum_latitude],
-		[maximum_longitude, minimum_latitude],
-		[maximum_longitude, maximum_latitude],
-		[middle_longitude, minimum_latitude],
-		[middle_longitude, maximum_latitude],
-		[minimum_longitude, middle_latitude],
-		[maximum_longitude, middle_latitude],
+		[min_lon, min_lat], [min_lon, max_lat],
+		[max_lon, min_lat], [max_lon, max_lat],
+		[middle_lon, min_lat], [middle_lon, max_lat],
+		[min_lon, middle_lat], [max_lon, middle_lat],
 	]
 	var minimum := Vector2(INF, INF)
 	var maximum := Vector2(-INF, -INF)
@@ -261,11 +274,17 @@ func _record_higher_priority(left: Dictionary, right: Dictionary) -> bool:
 	return str(left.get("id", "")) < str(right.get("id", ""))
 
 
-func _finish_query(started_usec: int, intersecting_shards: int, candidate_count: int) -> void:
+func _finish_query(
+	started_usec: int,
+	matching_shards: int,
+	selected_shards: int,
+	candidate_count: int
+) -> void:
 	var elapsed_ms: float = float(Time.get_ticks_usec() - started_usec) / 1000.0
 	_metrics["last_query_ms"] = elapsed_ms
 	_metrics["maximum_query_ms"] = maxf(float(_metrics.get("maximum_query_ms", 0.0)), elapsed_ms)
-	_metrics["last_intersecting_shards"] = intersecting_shards
+	_metrics["last_matching_shards"] = matching_shards
+	_metrics["last_intersecting_shards"] = selected_shards
 	_metrics["candidate_records"] = candidate_count
 	_metrics["visible_records"] = visible_records.size()
 
