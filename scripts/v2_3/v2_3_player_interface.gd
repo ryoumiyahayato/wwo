@@ -8,7 +8,7 @@ func _draw() -> void:
 	super._draw()
 	if life_binding == null:
 		return
-	if open_panel.is_empty() and not system_menu_open and not time_menu_open:
+	if open_panel.is_empty() and not system_menu_open:
 		_draw_map_layer_controls()
 		_draw_supply_status()
 
