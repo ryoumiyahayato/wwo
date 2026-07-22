@@ -15,7 +15,7 @@ concurrency:
 jobs:
   diagnose:
     runs-on: windows-latest
-    timeout-minutes: 20
+    timeout-minutes: 24
     steps:
       - uses: actions/checkout@v4
       - name: Install Godot 4.6.3
@@ -39,6 +39,17 @@ jobs:
           if ($LASTEXITCODE -ne 0) {
             throw "player interface base failed direct parse check: exit $LASTEXITCODE"
           }
+      - name: Audit runtime code structure
+        shell: pwsh
+        run: |
+          python tools/audit_runtime_code.py `
+            --root . `
+            --json-output builds/diagnostics/runtime-code-audit.json `
+            --markdown-output builds/diagnostics/runtime-code-audit.md `
+            --fail-on-hard-findings
+          if ($LASTEXITCODE -ne 0) {
+            throw "runtime code audit found duplicate class declarations or exact duplicate production scripts"
+          }
       - name: Run focused tests sequentially
         shell: pwsh
         run: |
@@ -49,6 +60,7 @@ jobs:
             @{ Name = 'social-completion'; Script = 'res://tests/v2_3/v2_3_social_sandbox_completion_test.gd'; Timeout = 120 },
             @{ Name = 'survival-autonomy'; Script = 'res://tests/v2_3/v2_3_survival_autonomy_test.gd'; Timeout = 120 },
             @{ Name = 'player-interface'; Script = 'res://tests/v2_3/v2_3_player_interface_test.gd'; Timeout = 120 },
+            @{ Name = 'city-detail'; Script = 'res://tests/v2_3/v2_3_city_detail_performance_test.gd'; Timeout = 180 },
             @{ Name = 'ui-binding'; Script = 'res://tests/v2_3/v2_3_ui_binding_test.gd'; Timeout = 120 },
             @{ Name = 'save-load'; Script = 'res://tests/v2_3/v2_3_save_load_test.gd'; Timeout = 120 },
             @{ Name = 'performance'; Script = 'res://tests/v2_3/v2_3_performance_guard_test.gd'; Timeout = 180 }
@@ -96,6 +108,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Focused-Product-Diagnostics
-          path: builds/diagnostics/*.log
+          path: builds/diagnostics/*
           if-no-files-found: error
           retention-days: 7

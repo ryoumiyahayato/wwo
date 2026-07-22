@@ -2,6 +2,13 @@ class_name V23FormalMain
 extends V23LifeLoopMain
 ## Product entry retaining the formal map with minute time and player authority.
 
+const MINIMUM_PRODUCT_WINDOW := Vector2i(960, 540)
+
+
+func _ready() -> void:
+	get_window().min_size = MINIMUM_PRODUCT_WINDOW
+	super._ready()
+
 
 func _create_life_simulation() -> V2LifeLoopSimulationPolish:
 	return V23ProductSimulationV2.new()
