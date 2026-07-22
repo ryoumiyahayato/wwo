@@ -1,7 +1,8 @@
 class_name V23SurvivalAutonomyServiceV2
 extends V23SurvivalAutonomyService
-## Uses only SpatialLocationService's public projection. The service must not
-## inspect a second or private positions dictionary.
+## Uses only public spatial and schedule projections. Autonomous maintenance
+## may replace default free time, but never competes with another NPC rule,
+## contract obligation, player command or system activity.
 
 
 func process_hour(current_hour: int) -> Dictionary:
@@ -92,9 +93,6 @@ func _plan_need(
 		return _schedule_purchase(
 			person_id, household_id, need, current_hour, price
 		)
-	# A planned commute or another future trip is not the same as being unable to
-	# shop. The authoritative schedule and travel services below decide whether
-	# a later departure can coexist with every existing obligation.
 	return _schedule_purchase_trip(
 		person_id,
 		household_id,
@@ -116,30 +114,51 @@ func _schedule_purchase_trip(
 	cash: int
 ) -> V2LifeLoopResult:
 	var item_type: String = str(need.get("item_type", ""))
-	var position: Dictionary = product.spatial_locations.position_for(person_id)
-	var origin_id: String = str(position.get("current_location_id", ""))
+	var current_position: Dictionary = product.spatial_locations.position_for(person_id)
+	var current_origin: String = str(current_position.get("current_location_id", ""))
 	var fatigue: int = int(product.conditions.get_state(person_id).get("fatigue", 0))
+	var essential: bool = bool(need.get("emergency", false))
 	for departure_hour: int in range(current_hour + 1, current_hour + 73):
+		var departure_activity: Dictionary = product.schedule.activity_for_hour(
+			person_id, departure_hour
+		)
+		if not _is_replaceable_free_time(departure_activity):
+			continue
+		var predicted_origin: String = _normalized_location_id(str(
+			departure_activity.get("location_id", current_origin)
+		))
+		if predicted_origin.is_empty():
+			predicted_origin = current_origin
+		if predicted_origin == MARKET_LOCATION_ID:
+			var direct_result: V2LifeLoopResult = _schedule_purchase(
+				person_id, household_id, need, departure_hour, price
+			)
+			if direct_result.success:
+				return direct_result
+			continue
 		var route: V2LifeLoopResult = product.route_planner.plan_route(
 			person_id,
-			origin_id,
+			predicted_origin,
 			MARKET_LOCATION_ID,
 			departure_hour,
 			"fastest",
 			cash,
 			fatigue,
-			bool(need.get("emergency", false))
+			essential
 		)
 		if not route.success:
 			continue
 		var arrival_hour: int = int(route.data.get("arrival_hour", departure_hour + 1))
-		# Travel settlement moves the person to the destination at the end of the
-		# arrival hour. Purchase therefore starts no earlier than the following
-		# hour; scheduling both at arrival_hour caused a remote-purchase rejection.
-		var purchase_hour: int = arrival_hour + 1
+		if not _window_is_replaceable(person_id, departure_hour, arrival_hour):
+			continue
+		var purchase_hour: int = arrival_hour
 		var purchase_value: Dictionary = V2DateTime.from_total_hour(purchase_hour)
 		var purchase_clock_hour: int = int(purchase_value.get("hour", -1))
 		if purchase_clock_hour < 6 or purchase_clock_hour >= 21:
+			continue
+		if not _is_replaceable_free_time(
+			product.schedule.activity_for_hour(person_id, purchase_hour)
+		):
 			continue
 		if not product.schedule.can_schedule_activity(
 			person_id,
@@ -159,7 +178,8 @@ func _schedule_purchase_trip(
 			cash,
 			fatigue,
 			"survival_purchase:%s" % item_type,
-			bool(need.get("emergency", false))
+			essential,
+			predicted_origin
 		)
 		if not created.success:
 			continue
@@ -215,3 +235,22 @@ func _schedule_purchase_trip(
 		current_hour,
 		"未来三天没有能够完成采购的行程和时间"
 	)
+
+
+func _window_is_replaceable(
+	person_id: String, start_hour: int, end_hour: int
+) -> bool:
+	for total_hour: int in range(start_hour, end_hour):
+		if not _is_replaceable_free_time(
+			product.schedule.activity_for_hour(person_id, total_hour)
+		):
+			return false
+	return true
+
+
+static func _is_replaceable_free_time(activity: Dictionary) -> bool:
+	return activity.is_empty() or str(activity.get("source", "")) == "default_routine"
+
+
+static func _normalized_location_id(location_id: String) -> String:
+	return str(V23LifeLoopSimulation.LOCATION_ALIASES.get(location_id, location_id))
