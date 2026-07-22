@@ -1,7 +1,25 @@
 class_name V23PlayerInterface
 extends "res://scripts/v2_3/v2_3_minute_formal_interface_v2.gd"
-## Small product HUD additions: explicit map-layer switching and readable
-## household supply status. Neither surface exposes internal AI state.
+## Product-facing readability rules. Developer surfaces keep their own compact
+## density, while every ordinary player text call has a 12 px logical floor.
+
+const PLAYER_MINIMUM_FONT_SIZE: int = 12
+
+
+func _text(
+	position: Vector2,
+	value: String,
+	font_size: int,
+	color: Color,
+	max_width: float = -1.0
+) -> void:
+	super._text(
+		position,
+		value,
+		maxi(font_size, PLAYER_MINIMUM_FONT_SIZE),
+		color,
+		max_width
+	)
 
 
 func _draw() -> void:
@@ -24,19 +42,19 @@ func _draw_v2_3_sandbox_panel() -> void:
 		return
 	var rect: Rect2 = _animated_rect(get_panel_rect(), Vector2(30.0, 0.0))
 	_surface(
-		Rect2(rect.position.x + 18.0, rect.end.y - 78.0, rect.size.x - 36.0, 54.0),
+		Rect2(rect.position.x + 18.0, rect.end.y - 82.0, rect.size.x - 36.0, 58.0),
 		Color(AMBER, 0.08),
 		Color(AMBER, 0.35),
 		7
 	)
 	_text(
-		Vector2(rect.position.x + 30.0, rect.end.y - 49.0),
+		Vector2(rect.position.x + 30.0, rect.end.y - 50.0),
 		"行程会占用合同工时，需要由玩家确认请假。",
-		10,
+		12,
 		AMBER
 	)
 	_primary_action(
-		Rect2(rect.end.x - 188.0, rect.end.y - 68.0, 158.0, 35.0),
+		Rect2(rect.end.x - 192.0, rect.end.y - 72.0, 162.0, 39.0),
 		"请假并建立计划",
 		"sandbox_plan_confirm_leave",
 		null,
@@ -49,19 +67,19 @@ func _draw_map_layer_controls() -> void:
 	if map == null:
 		return
 	var current_scope: String = map.get_map_scope()
-	var rect := Rect2(20.0, 122.0, 272.0, 38.0)
+	var rect := Rect2(20.0, 122.0, 284.0, 42.0)
 	_surface(rect, Color(0.025, 0.055, 0.06, 0.90), Color(GOLD, 0.22), 8)
 	var items: Array = [
 		["世界", WorldMapCanvas.MAP_SCOPE_WORLD],
 		["区域交通", WorldMapCanvas.MAP_SCOPE_REGIONAL],
 		["城市", WorldMapCanvas.MAP_SCOPE_CITY],
 	]
-	var widths: Array[float] = [68.0, 96.0, 68.0]
+	var widths: Array[float] = [72.0, 102.0, 72.0]
 	var x: float = rect.position.x + 8.0
 	for index: int in range(items.size()):
 		var item: Array = items[index] as Array
 		_compact_action(
-			Rect2(x, rect.position.y + 6.0, widths[index], 26.0),
+			Rect2(x, rect.position.y + 6.0, widths[index], 30.0),
 			str(item[0]),
 			current_scope == str(item[1]),
 			"map_scope",
@@ -78,7 +96,7 @@ func _draw_supply_status() -> void:
 	var maintenance: Dictionary = binding.person_view().get("maintenance", {}) as Dictionary
 	if maintenance.is_empty():
 		return
-	var rect := Rect2(20.0, 612.0, 304.0, 32.0)
+	var rect := Rect2(20.0, 608.0, 326.0, 38.0)
 	_surface(rect, Color(0.025, 0.055, 0.06, 0.88), Color(INK_DIM, 0.18), 7)
 	var active_need: Dictionary = maintenance.get("active_need", {}) as Dictionary
 	var suffix: String = ""
@@ -87,13 +105,13 @@ func _draw_supply_status() -> void:
 		var status: String = str(active_need.get("status", ""))
 		suffix = " · %s%s" % [item_label, "已安排补充" if status.contains("scheduled") else "次日重试"]
 	_text(
-		rect.position + Vector2(12.0, 21.0),
+		rect.position + Vector2(12.0, 25.0),
 		"食品约 %d 天 · 生活用品约 %d 天%s" % [
 			int(maintenance.get("food_days", 0)),
 			int(maintenance.get("essentials_days", 0)),
 			suffix,
 		],
-		10,
+		12,
 		AMBER if int(maintenance.get("food_days", 0)) <= 2 or int(maintenance.get("essentials_days", 0)) <= 2 else INK_MUTED
 	)
 
