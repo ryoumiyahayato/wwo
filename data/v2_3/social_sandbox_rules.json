@@ -5,8 +5,8 @@
     "events": 1024,
     "tasks": 256,
     "intents": 256,
-    "goals_per_person": 4,
-    "situations_per_person": 12,
+    "goals_per_person": 64,
+    "situations_per_person": 64,
     "explanations_per_person": 16,
     "reactions": 128,
     "evidence": 128,
@@ -14,37 +14,17 @@
   },
   "planning": {
     "reevaluate_hour": 6,
-    "minimum_delay_hours": 1,
-    "search_horizon_hours": 72,
+    "minimum_delay_hours": 12,
+    "search_horizon_hours": 120,
     "npc_actions_per_day": 1,
-    "npc_normal_action_interval_days": 3,
+    "npc_normal_action_interval_days": 1,
     "reaction_delay_hours": 2
   },
   "organizations": [
-    {
-      "organization_id": "enterprise_lille_mechanical",
-      "display_name_zh": "里尔机械制造公司",
-      "location_id": "location_lille_fives_factory",
-      "organization_type": "enterprise"
-    },
-    {
-      "organization_id": "factory_fives_workgroup_three",
-      "display_name_zh": "菲弗工厂第三工作组",
-      "location_id": "location_lille_fives_factory",
-      "organization_type": "workgroup"
-    },
-    {
-      "organization_id": "union_metalworkers_nord",
-      "display_name_zh": "北部省金属工人工会",
-      "location_id": "location_lille_metalworkers_union_hall",
-      "organization_type": "union"
-    },
-    {
-      "organization_id": "prefecture_nord",
-      "display_name_zh": "北部省省政府",
-      "location_id": "location_lille_prefecture_office",
-      "organization_type": "government"
-    }
+    {"organization_id": "enterprise_lille_mechanical", "display_name_zh": "里尔机械制造公司", "location_id": "location_lille_fives_factory", "organization_type": "enterprise"},
+    {"organization_id": "factory_fives_workgroup_three", "display_name_zh": "菲弗工厂第三工作组", "location_id": "location_lille_fives_factory", "organization_type": "workgroup"},
+    {"organization_id": "union_metalworkers_nord", "display_name_zh": "北部省金属工人工会", "location_id": "location_lille_metalworkers_union_hall", "organization_type": "union"},
+    {"organization_id": "prefecture_nord", "display_name_zh": "北部省省政府", "location_id": "location_lille_prefecture_office", "organization_type": "government"}
   ],
   "memberships": [
     {"person_id": "character_pierre_lefevre", "organization_id": "enterprise_lille_mechanical", "participation": 400, "status": "active"},
@@ -60,20 +40,8 @@
     {"person_id": "character_lucien_moreau", "organization_id": "prefecture_nord", "participation": 420, "status": "active"}
   ],
   "positions": [
-    {
-      "position_id": "factory_fives_workgroup_three:delegate",
-      "organization_id": "factory_fives_workgroup_three",
-      "display_name_zh": "工作组代表",
-      "holder_person_id": "",
-      "unique": true
-    },
-    {
-      "position_id": "union_metalworkers_nord:contact",
-      "organization_id": "union_metalworkers_nord",
-      "display_name_zh": "工会联系人",
-      "holder_person_id": "jeanne",
-      "unique": true
-    }
+    {"position_id": "factory_fives_workgroup_three:delegate", "organization_id": "factory_fives_workgroup_three", "display_name_zh": "工作组代表", "holder_person_id": "", "unique": true},
+    {"position_id": "union_metalworkers_nord:contact", "organization_id": "union_metalworkers_nord", "display_name_zh": "工会联系人", "holder_person_id": "jeanne", "unique": true}
   ],
   "methods": [
     {"method_id": "reliable_work", "label_zh": "认真完成班次", "goal_kinds": ["maintenance", "opportunity", "ambition"], "duration_hours": 1, "location_kind": "workplace", "base_score": 880, "risk": 30, "effect": "work_reputation"},
@@ -101,7 +69,7 @@
     {"method_id": "leak_information", "label_zh": "泄露消息", "goal_kinds": ["threat", "opportunity", "ambition"], "duration_hours": 1, "location_kind": "public", "base_score": 650, "risk": 700, "illegal": true, "effect": "rumor"},
     {"method_id": "join_organization", "label_zh": "申请加入组织", "goal_kinds": ["opportunity", "ambition"], "duration_hours": 1, "location_kind": "organization", "base_score": 760, "risk": 90, "effect": "join_organization"},
     {"method_id": "leave_organization", "label_zh": "退出组织", "goal_kinds": ["threat", "maintenance"], "duration_hours": 1, "location_kind": "organization", "base_score": 1000, "risk": 240, "effect": "leave_organization"},
-    {"method_id": "seek_position", "label_zh": "争取工作组职位", "goal_kinds": ["opportunity", "ambition"], "duration_hours": 2, "location_kind": "organization", "base_score": 560, "risk": 230, "effect": "claim_position", "conflict_key": "factory_fives_workgroup_three:delegate"},
+    {"method_id": "seek_position", "label_zh": "争取组织职位", "goal_kinds": ["opportunity", "ambition"], "duration_hours": 2, "location_kind": "organization", "base_score": 560, "risk": 230, "effect": "claim_position"},
     {"method_id": "support_candidate", "label_zh": "支持候选人", "goal_kinds": ["opportunity", "ambition"], "duration_hours": 1, "location_kind": "organization", "base_score": 760, "risk": 120, "effect": "relationship_positive"},
     {"method_id": "oppose_candidate", "label_zh": "反对候选人", "goal_kinds": ["threat", "ambition"], "duration_hours": 1, "location_kind": "organization", "base_score": 690, "risk": 320, "effect": "relationship_negative"},
     {"method_id": "call_meeting", "label_zh": "召集会议", "goal_kinds": ["threat", "opportunity", "ambition"], "duration_hours": 2, "location_kind": "organization", "base_score": 620, "risk": 160, "effect": "organization_participation"},

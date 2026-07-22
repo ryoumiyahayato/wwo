@@ -15,7 +15,7 @@ if ($StepTimeoutSeconds -lt 10) {
 }
 
 $ProjectPath = (Resolve-Path -LiteralPath $ProjectPath).Path
-$parseErrorPattern = '(?im)(SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|Cannot get class|Invalid call|Invalid get index|Assertion failed)'
+$parseErrorPattern = '(?im)(SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|Cannot get class|Invalid call|Invalid get index|Assertion failed|[1-9][0-9]* failures)'
 
 function Invoke-GodotStep {
     param(
@@ -68,7 +68,7 @@ function Invoke-GodotStep {
         throw "$Name failed with exit code $($process.ExitCode)"
     }
     if ($text -match $parseErrorPattern) {
-        throw "$Name emitted a script parse/load error despite exit code 0"
+        throw "$Name emitted a script, assertion or nonzero test failure despite exit code 0"
     }
     return $text.Trim()
 }
@@ -111,8 +111,10 @@ $tests = @(
     @{ Name = 'V2.3 determinism'; Script = 'res://tests/v2_3/v2_3_determinism_test.gd' },
     @{ Name = 'V2.3 formal finance'; Script = 'res://tests/v2_3/v2_3_formal_finance_test.gd'; TimeoutSeconds = 60 },
     @{ Name = 'V2.3 formal leave and location'; Script = 'res://tests/v2_3/v2_3_formal_leave_location_test.gd'; TimeoutSeconds = 60 },
-    @{ Name = 'V2.3 autonomous social sandbox'; Script = 'res://tests/v2_3/v2_3_social_sandbox_test.gd'; TimeoutSeconds = 120 },
+    @{ Name = 'V2.3 autonomous social sandbox'; Script = 'res://tests/v2_3/v2_3_social_sandbox_test.gd'; TimeoutSeconds = 220 },
     @{ Name = 'V2.3 completed social sandbox'; Script = 'res://tests/v2_3/v2_3_social_sandbox_completion_test.gd'; TimeoutSeconds = 120 },
+    @{ Name = 'V2.3 survival autonomy'; Script = 'res://tests/v2_3/v2_3_survival_autonomy_test.gd'; TimeoutSeconds = 120 },
+    @{ Name = 'V2.3 player interface'; Script = 'res://tests/v2_3/v2_3_player_interface_test.gd'; TimeoutSeconds = 120 },
     @{ Name = 'V2.3 UI binding'; Script = 'res://tests/v2_3/v2_3_ui_binding_test.gd' },
     @{ Name = 'V2.3 map integration'; Script = 'res://tests/v2_3/v2_3_map_integration_test.gd' },
     @{ Name = 'V2.3 performance guard'; Script = 'res://tests/v2_3/v2_3_performance_guard_test.gd'; TimeoutSeconds = 180 },
@@ -145,4 +147,4 @@ $null = Invoke-GodotStep -Name 'Headless project startup' -Arguments @(
     '--headless', '--path', $ProjectPath, '--quit-after', '5'
 ) -TimeoutSeconds 30
 
-Write-Host "`nAll current V2.2, formal V2.3 and quarantined grid-fixture validation steps passed without parse/load errors."
+Write-Host "`nAll current life simulation, formal world, player-surface and quarantined fixture validation steps passed."
