@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui_spikes/holographic_workspace/holographic_workspace_spike.gd" id="1_spike"]
+[ext_resource type="Script" path="res://scripts/ui_spikes/holographic_workspace/holographic_hemisphere_3d.gd" id="2_hemi"]
+
+[node name="HolographicWorkspaceSpike" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_spike")
+
+[node name="HemisphereViewportContainer" type="SubViewportContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+mouse_filter = 2
+stretch = true
+
+[node name="HemisphereViewport" type="SubViewport" parent="HemisphereViewportContainer"]
+unique_name_in_owner = true
+transparent_bg = true
+render_target_update_mode = 1
+
+[node name="Hemisphere3D" type="Node3D" parent="HemisphereViewportContainer/HemisphereViewport"]
+unique_name_in_owner = true
+script = ExtResource("2_hemi")
+
+[node name="Surface" type="MeshInstance3D" parent="HemisphereViewportContainer/HemisphereViewport/Hemisphere3D"]
+
+[node name="Camera3D" type="Camera3D" parent="HemisphereViewportContainer/HemisphereViewport/Hemisphere3D"]
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 0, 2.35)
+projection = 1
+size = 2.55
+near = 0.05
+far = 12.0
+current = true
