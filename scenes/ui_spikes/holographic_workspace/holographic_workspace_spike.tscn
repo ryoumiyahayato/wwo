@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3]
 
-[ext_resource type="Script" path="res://scripts/ui_spikes/holographic_workspace/holographic_workspace_spike.gd" id="1_spike"]
+[ext_resource type="Script" path="res://scripts/ui_spikes/holographic_workspace/holographic_workspace_runtime_fixups.gd" id="1_spike"]
 [ext_resource type="Script" path="res://scripts/ui_spikes/holographic_workspace/holographic_hemisphere_3d.gd" id="2_hemi"]
 
 [node name="HolographicWorkspaceSpike" type="Control"]
