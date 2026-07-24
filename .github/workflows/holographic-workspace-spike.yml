@@ -1,0 +1,144 @@
+name: Holographic workspace spike
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/holographic-workspace-spike.yml"
+      - "docs/ui_spikes/holographic_workspace_spike.md"
+      - "scenes/ui_spikes/holographic_workspace/**"
+      - "scripts/ui_spikes/holographic_workspace/**"
+      - "shaders/ui_spikes/holographic_workspace/**"
+      - "data/world_map/cities.json"
+      - "data/world_map/regions.json"
+      - "data/world_map/world_coastlines.json"
+      - "data/world_map/institutions.json"
+      - "data/world_map/characters.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  godot-headless:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GODOT_VERSION: "4.6.3"
+      GODOT_BIN: "${{ github.workspace }}/.ci-godot/Godot_v4.6.3-stable_linux.x86_64"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Download Godot 4.6.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .ci-godot
+          curl --fail --location --retry 3 --retry-delay 2 \
+            "https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_linux.x86_64.zip" \
+            --output .ci-godot/godot.zip
+          unzip -q .ci-godot/godot.zip -d .ci-godot
+          chmod +x "${GODOT_BIN}"
+          "${GODOT_BIN}" --version
+
+      - name: Install visual test dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install --yes xvfb fonts-noto-cjk
+          fc-cache -f
+
+      - name: Import project and parse scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" \
+            --headless \
+            --audio-driver Dummy \
+            --path . \
+            --editor \
+            --quit-after 3 \
+            --log-file godot-import.log
+          if grep -Eq "SCRIPT ERROR|^ERROR:" godot-import.log; then
+            cat godot-import.log
+            exit 1
+          fi
+
+      - name: Load holographic workspace scene
+        shell: bash
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" \
+            --headless \
+            --audio-driver Dummy \
+            --path . \
+            --scene res://scenes/ui_spikes/holographic_workspace/holographic_workspace_spike.tscn \
+            --quit-after 8 \
+            --log-file godot-spike.log
+          if grep -Eq "SCRIPT ERROR|^ERROR:" godot-spike.log; then
+            cat godot-spike.log
+            exit 1
+          fi
+
+      - name: Run interaction probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM 90s \
+            xvfb-run --auto-servernum --server-args="-screen 0 1280x720x24" \
+            "${GODOT_BIN}" \
+            --audio-driver Dummy \
+            --path . \
+            --rendering-method gl_compatibility \
+            --scene res://scenes/ui_spikes/holographic_workspace/holographic_workspace_interaction_probe.tscn \
+            --log-file godot-interaction-probe.log
+          if grep -Eq "SCRIPT ERROR|^ERROR:" godot-interaction-probe.log; then
+            cat godot-interaction-probe.log
+            exit 1
+          fi
+
+      - name: Capture rendered workspace states
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf artifacts/holographic_workspace
+          timeout --signal=TERM 120s \
+            xvfb-run --auto-servernum --server-args="-screen 0 1280x720x24" \
+            "${GODOT_BIN}" \
+            --audio-driver Dummy \
+            --path . \
+            --rendering-method gl_compatibility \
+            --scene res://scenes/ui_spikes/holographic_workspace/holographic_workspace_capture.tscn \
+            --log-file godot-capture.log
+          if grep -Eq "SCRIPT ERROR|^ERROR:" godot-capture.log; then
+            cat godot-capture.log
+            exit 1
+          fi
+          test -s artifacts/holographic_workspace/01_global_focus.png
+          test -s artifacts/holographic_workspace/02_operation_workspace.png
+          test -s artifacts/holographic_workspace/03_france_region_selected.png
+          test -s artifacts/holographic_workspace/04_region_layer.png
+          test -s artifacts/holographic_workspace/05_city_layer.png
+          region_capture_count="$(find artifacts/holographic_workspace -maxdepth 1 -type f -name '04_region_[0-9][0-9]_*.png' | wc -l)"
+          test "${region_capture_count}" -eq 9
+
+      - name: Upload rendered screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: holographic-workspace-screenshots
+          path: artifacts/holographic_workspace/*.png
+          if-no-files-found: error
+
+      - name: Upload Godot logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: holographic-workspace-godot-logs
+          path: |
+            godot-import.log
+            godot-spike.log
+            godot-interaction-probe.log
+            godot-capture.log
+          if-no-files-found: ignore
