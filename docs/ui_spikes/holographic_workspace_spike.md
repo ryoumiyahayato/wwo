@@ -2,26 +2,52 @@
 
 ## Status
 
-This PR is an **未经 Godot 运行验证的 UI spike 草稿** until a Godot 4.6.3 CI or local runtime confirms script parsing, scene loading, shader compilation, interaction, and screenshots.
+This PR is an **未经 Godot 4.6.3 运行验证的 UI spike 草稿**. The code has received structural review and direct fixes, but script parsing, scene loading, shader compilation, real input behavior, performance, and screenshots still require a Godot runtime.
 
-The previous implementation only had static checks (`git diff --check`, JSON parsing, file existence). It was not a completed or visually verified sample.
+The formal entry remains `run/main_scene="res://scenes/v2_3/v2_3_life_loop_menu.tscn"` in `project.godot`; this spike does not replace it.
 
-## Audit summary
+## Isolation
 
-- The formal entry remains `run/main_scene="res://scenes/v2_3/v2_3_life_loop_menu.tscn"` in `project.godot`; this spike does not replace it.
-- The menu scene instantiates `V23LifeLoopMenu` and keeps the ordinary new/load/migrate/quit buttons. The formal game scene instantiates `V23FormalMain`, `WorldMapCanvasPlayer`, and `V23PlayerInterface` as sibling full-screen controls.
-- The retained four-corner HUD is drawn by `scripts/world_map/internal/world_map_interface_impl.gd`: country/institution at top-left, time at top-right, character at bottom-left, activity/messages at bottom-right. `scripts/v2_3/v2_3_player_interface.gd` extends it with map scope controls and supply status.
-- The current map scopes are switched by `V23PlayerInterface._activate("map_scope")`, which calls `WorldMapCanvas.set_map_scope()` with world, regional, or city scope. `WorldMapCanvasPlayer` customizes city-scope visibility for regional-centre records.
-- Existing reusable data includes `countries.json`, `regions.json`, `cities.json`, `world_coastlines.json`, transport segments, ports, institutions, and the map geometry cache. This spike reads the first four directly and leaves the formal canvas untouched.
-- Isolation: all new runtime files are under `scenes/ui_spikes/holographic_workspace`, `scripts/ui_spikes/holographic_workspace`, and `shaders/ui_spikes/holographic_workspace`; no formal save, time, character, or map systems are modified.
+All runtime files remain under:
 
-## Data actually used
+- `scenes/ui_spikes/holographic_workspace/`
+- `scripts/ui_spikes/holographic_workspace/`
+- `shaders/ui_spikes/holographic_workspace/`
+
+No formal save, time, character, economy, politics, military, or map-scope system is modified.
+
+## Data used
 
 - World coastline background: `world_coastlines.json` feature polygon outer rings.
 - Selectable world-layer regions: French macro regions from `regions.json`.
-- Macro-region boundaries: each region's `administrative_unit_ids` mapped to `regions.json` `administrative_units[].geometry[].outer`; no artificial ellipse boundaries are generated.
-- City-to-region mapping: `cities.json` `parent_region_id`. Cities without that field populated are treated as world-important city markers only and are not offered as region-layer city entries.
-- If the selected region has no mapped cities, the region layer displays `当前大区没有配置城市入口` and no hidden Paris fallback is used.
+- Macro-region boundaries: `regions[].administrative_unit_ids` mapped to `administrative_units[].geometry[].outer`.
+- City-to-region mapping: `cities[].parent_region_id`.
+- Cities without `parent_region_id` are world markers only and are not offered as region-layer entries.
+- Regions without mapped cities display `当前大区没有配置城市入口`; there is no hidden Paris fallback.
+
+## Current spatial model
+
+The 3D object is a static front-hemisphere shell rendered by an orthographic `Camera3D`. The camera is a sibling of the hemisphere mesh, so it no longer rotates with the mesh.
+
+Geographic data uses one shared projection:
+
+1. lon/lat → unit-sphere point;
+2. apply player yaw and tilt to the geographic point;
+3. reject points on the hidden back hemisphere;
+4. project visible `x/y` coordinates into the same screen circle used by the orthographic 3D shell.
+
+The shell stays fixed while geographic content rotates underneath it. This avoids the previous mismatch between “rotate an already-cut hemisphere” and “rotate a full globe, then select the visible half”.
+
+World-region selection uses visible region anchor points. Real administrative polygons remain visible boundaries, but partially clipped polygons are not closed into synthetic hit areas at the hemisphere edge.
+
+## Performance measures
+
+- JSON is read only during `_ready()`.
+- Coastline and administrative polygon lines are decimated to bounded point counts at load time.
+- Region hit testing scans only the nine visible macro-region anchors.
+- `_process()` runs only during drag inertia or edge-hover rotation.
+- The 3D SubViewport is static and uses `UPDATE_ONCE`; it is disabled and hidden outside the world layer.
+- World, region, and city layers are not rendered simultaneously.
 
 ## How to run
 
@@ -33,21 +59,23 @@ Controls:
 
 - F1: hemisphere-focused layout.
 - F2: operation-workspace layout.
-- Left-drag the hemisphere: rotate with short inertia.
-- Hover near the left/right edge of the hemisphere interaction area: slow edge rotation.
-- Click a visible French macro-region boundary/anchor: select it and open the top information layer.
+- Left-drag: rotate geographic content with short inertia.
+- Hover near the left/right edge: slow rotation.
+- Click a visible French macro-region anchor: select the region and open the top information layer.
 - Click `进入大区`: enter the 2D region layer.
-- In the region layer, click a configured city `进入城市` button: enter the city placeholder layer.
-- `返回上层`, `返回世界`, or Esc navigate back without using continuous cross-layer zoom.
+- Click a configured city button: enter the city placeholder layer.
+- `返回上层`, `返回世界`, or Esc: navigate back.
 
-## Implementation notes
+## Remaining validation
 
-- The translucent hemisphere is a real front-hemisphere `ArrayMesh` in an embedded `SubViewport`; it is no longer a flattened full sphere.
-- Geographic drawing uses a shared lon/lat → rotated sphere → screen projection path. Back-side points are not drawn or hit-tested, and visible line segments are split when they cross the hidden hemisphere or longitude seam.
-- The 2D region layer draws selected macro-region administrative-unit geometry and mapped cities. Traffic lines are explicitly marked as sample placeholders when drawn.
-- The city layer is a simplified placeholder with 3–6 local nodes and does not claim to reuse a formal city-local map.
+Before merge, a Godot 4.6.3 runtime must still confirm:
 
-## Known limits
-
-- This spike covers world coastlines as background plus French macro regions as the selectable sample. It is not a global first-level administrative-region system.
-- Runtime screenshots and Godot 4.6.3 parse results are still required before this can be considered visually reviewed.
+- GDScript parsing;
+- scene loading;
+- front-hemisphere mesh visibility and winding;
+- shader compilation;
+- F1/F2/Esc handling;
+- drag, inertia, edge hover, selection, and three-layer navigation;
+- F1/F2 visual alignment at 1280×720;
+- resized-window layout;
+- actual screenshots and basic performance.
