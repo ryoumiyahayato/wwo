@@ -41,6 +41,14 @@ jobs:
           chmod +x "${GODOT_BIN}"
           "${GODOT_BIN}" --version
 
+      - name: Install visual test dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install --yes xvfb fonts-noto-cjk
+          fc-cache -f
+
       - name: Import project and parse scripts
         shell: bash
         run: |
@@ -73,13 +81,27 @@ jobs:
             exit 1
           fi
 
+      - name: Run interaction probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM 90s \
+            xvfb-run --auto-servernum --server-args="-screen 0 1280x720x24" \
+            "${GODOT_BIN}" \
+            --audio-driver Dummy \
+            --path . \
+            --rendering-method gl_compatibility \
+            --scene res://scenes/ui_spikes/holographic_workspace/holographic_workspace_interaction_probe.tscn \
+            --log-file godot-interaction-probe.log
+          if grep -Eq "SCRIPT ERROR|^ERROR:" godot-interaction-probe.log; then
+            cat godot-interaction-probe.log
+            exit 1
+          fi
+
       - name: Capture rendered workspace states
         shell: bash
         run: |
           set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install --yes xvfb fonts-noto-cjk
-          fc-cache -f
           rm -rf artifacts/holographic_workspace
           timeout --signal=TERM 90s \
             xvfb-run --auto-servernum --server-args="-screen 0 1280x720x24" \
@@ -114,5 +136,6 @@ jobs:
           path: |
             godot-import.log
             godot-spike.log
+            godot-interaction-probe.log
             godot-capture.log
           if-no-files-found: ignore
