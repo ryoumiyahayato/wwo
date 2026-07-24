@@ -52,7 +52,18 @@ jobs:
             --quit-after 3 \
             --log-file godot-import.log
 
-      - name: Load holographic workspace scene
+      - name: Load direct base-script probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" \
+            --headless \
+            --path . \
+            --scene res://scenes/ui_spikes/holographic_workspace/holographic_workspace_base_probe.tscn \
+            --quit-after 8 \
+            --log-file godot-base-probe.log
+
+      - name: Load derived holographic workspace scene
         shell: bash
         run: |
           set -euo pipefail
@@ -99,6 +110,7 @@ jobs:
           name: holographic-workspace-godot-logs
           path: |
             godot-import.log
+            godot-base-probe.log
             godot-spike.log
             godot-capture.log
           if-no-files-found: ignore
