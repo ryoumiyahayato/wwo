@@ -1,0 +1,74 @@
+name: Holographic workspace spike
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/holographic-workspace-spike.yml"
+      - "scenes/ui_spikes/holographic_workspace/**"
+      - "scripts/ui_spikes/holographic_workspace/**"
+      - "shaders/ui_spikes/holographic_workspace/**"
+      - "data/world_map/cities.json"
+      - "data/world_map/regions.json"
+      - "data/world_map/world_coastlines.json"
+      - "data/world_map/institutions.json"
+      - "data/world_map/characters.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  godot-headless:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GODOT_VERSION: "4.6.3"
+      GODOT_BIN: "${{ github.workspace }}/.ci-godot/Godot_v4.6.3-stable_linux.x86_64"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Download Godot 4.6.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .ci-godot
+          curl --fail --location --retry 3 --retry-delay 2 \
+            "https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_linux.x86_64.zip" \
+            --output .ci-godot/godot.zip
+          unzip -q .ci-godot/godot.zip -d .ci-godot
+          chmod +x "${GODOT_BIN}"
+          "${GODOT_BIN}" --version
+
+      - name: Import project and parse scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" \
+            --headless \
+            --path . \
+            --editor \
+            --quit-after 3 \
+            --log-file godot-import.log
+
+      - name: Load holographic workspace scene
+        shell: bash
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" \
+            --headless \
+            --path . \
+            --scene res://scenes/ui_spikes/holographic_workspace/holographic_workspace_spike.tscn \
+            --quit-after 8 \
+            --log-file godot-spike.log
+
+      - name: Upload Godot logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: holographic-workspace-godot-logs
+          path: |
+            godot-import.log
+            godot-spike.log
+          if-no-files-found: ignore
