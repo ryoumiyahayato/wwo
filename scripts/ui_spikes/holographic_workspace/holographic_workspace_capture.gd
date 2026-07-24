@@ -1,4 +1,4 @@
-extends Node
+extends SceneTree
 
 const TARGET_SCENE := "res://scenes/ui_spikes/holographic_workspace/holographic_workspace_spike.tscn"
 const OUTPUT_DIRECTORY := "res://artifacts/holographic_workspace"
@@ -6,15 +6,19 @@ const OUTPUT_DIRECTORY := "res://artifacts/holographic_workspace"
 var workspace
 
 
-func _ready() -> void:
+func _initialize() -> void:
+	_run_capture.call_deferred()
+
+
+func _run_capture() -> void:
 	var packed_scene := load(TARGET_SCENE) as PackedScene
 	if packed_scene == null:
 		push_error("Unable to load holographic workspace scene")
-		get_tree().quit(1)
+		quit(1)
 		return
 
 	workspace = packed_scene.instantiate()
-	add_child(workspace)
+	root.add_child(workspace)
 	await _settle_frames(4)
 	await _capture("01_global_focus")
 
@@ -26,7 +30,7 @@ func _ready() -> void:
 	workspace._focus_selected_country()
 	workspace.selected_region_id = "northern_industrial_belt"
 	workspace._set_info_open(true)
-	await get_tree().create_timer(0.24).timeout
+	await create_timer(0.24).timeout
 	await _settle_frames(3)
 	await _capture("03_france_region_selected")
 
@@ -38,12 +42,12 @@ func _ready() -> void:
 	await _settle_frames(3)
 	await _capture("05_city_layer")
 
-	get_tree().quit(0)
+	quit(0)
 
 
 func _settle_frames(count: int) -> void:
 	for _index in range(count):
-		await get_tree().process_frame
+		await process_frame
 	await RenderingServer.frame_post_draw
 
 
@@ -52,16 +56,16 @@ func _capture(file_stem: String) -> void:
 	var directory_error := DirAccess.make_dir_recursive_absolute(absolute_directory)
 	if directory_error != OK and directory_error != ERR_ALREADY_EXISTS:
 		push_error("Unable to create screenshot directory: %s" % directory_error)
-		get_tree().quit(1)
+		quit(1)
 		return
 	await RenderingServer.frame_post_draw
-	var image := get_viewport().get_texture().get_image()
+	var image := root.get_texture().get_image()
 	if image == null or image.is_empty():
 		push_error("Viewport screenshot is empty: " + file_stem)
-		get_tree().quit(1)
+		quit(1)
 		return
 	var output_path := absolute_directory.path_join(file_stem + ".png")
 	var save_error := image.save_png(output_path)
 	if save_error != OK:
 		push_error("Unable to save screenshot %s: %s" % [output_path, save_error])
-		get_tree().quit(1)
+		quit(1)
