@@ -38,7 +38,7 @@ func _draw_global_world() -> void:
 		var selected: bool = country_id == selected_country_id
 		var hovered: bool = country_id == hover_country_id
 		var label_rank: int = int(country.get("label_rank", 9))
-		var visible_marker: bool = selected or hovered or country_id == FOCUS_COUNTRY_ID or label_rank <= 4
+		var visible_marker: bool = selected or hovered or country_id == FOCUS_COUNTRY_ID or label_rank <= 2
 		if not visible_marker:
 			continue
 		var point: Vector2 = _country_screen_anchors.get(country_id, Vector2.ZERO) as Vector2
@@ -100,3 +100,49 @@ func _draw_country_focus() -> void:
 		"overview_world",
 		true
 	)
+
+
+func _draw_region_map() -> void:
+	var rect: Rect2 = _main_content_rect(120.0, 166.0, 104.0)
+	_panel(rect, Color(0.025, 0.047, 0.052, 0.94), Color(0.70, 0.62, 0.36, 0.32))
+	var region: Dictionary = _region_by_id.get(selected_region_id, {}) as Dictionary
+	_draw_label(rect.position + Vector2(24.0, 34.0), "二维大区层 · " + str(region.get("display_name_zh", "选中大区")), 17)
+	_draw_label(
+		rect.position + Vector2(24.0, 58.0),
+		"行政边界、城市与机构来自现有数据；城市联系线按现有坐标派生",
+		12,
+		Color(0.73, 0.82, 0.78, 1.0)
+	)
+	_draw_region_flat_geometry(rect)
+	_draw_region_cities_and_routes(rect)
+	_draw_region_institutions(rect)
+
+
+func _draw_city_map() -> void:
+	var rect: Rect2 = _main_content_rect(120.0, 166.0, 104.0)
+	_panel(rect, Color(0.03, 0.04, 0.04, 0.94), Color(0.72, 0.75, 0.66, 0.24))
+	var city: Dictionary = _city_by_id.get(selected_city_id, {}) as Dictionary
+	_draw_label(rect.position + Vector2(24.0, 34.0), "城市本地层 · " + str(city.get("name", "本地城市")), 17)
+	_draw_label(
+		rect.position + Vector2(24.0, 58.0),
+		"显示该城市已配置的正式机构与人物；未配置对象不会用虚构地点补齐",
+		12,
+		Color(0.73, 0.82, 0.78, 1.0)
+	)
+	_draw_city_institutions(rect)
+	_draw_city_characters(rect)
+
+
+func _enter_region() -> void:
+	if selected_region_id.is_empty():
+		return
+	if _info_tween != null and _info_tween.is_valid():
+		_info_tween.kill()
+	info_open = false
+	info_progress = 0.0
+	space_level = REGION
+	dragging = false
+	angular_velocity = 0.0
+	set_process(false)
+	_set_world_layer_visible(false)
+	queue_redraw()
