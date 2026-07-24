@@ -445,22 +445,29 @@ func _simplify_line(points: PackedVector2Array, max_points: int) -> PackedVector
 func _rdp(points: PackedVector2Array, epsilon: float) -> PackedVector2Array:
 	if points.size() < 3:
 		return points
-	var maximum_distance := 0.0
-	var split_index := 0
-	var start := points[0]
-	var finish := points[points.size() - 1]
-	for index in range(1, points.size() - 1):
-		var distance := _point_segment_distance(points[index], start, finish)
-		if distance > maximum_distance:
-			maximum_distance = distance
-			split_index = index
-	if maximum_distance <= epsilon:
-		return PackedVector2Array([start, finish])
-	var left := _rdp(points.slice(0, split_index + 1), epsilon)
-	var right := _rdp(points.slice(split_index, points.size()), epsilon)
-	left.resize(left.size() - 1)
-	left.append_array(right)
-	return left
+	var keep := PackedByteArray()
+	keep.resize(points.size())
+	keep[0] = 1
+	keep[points.size() - 1] = 1
+	var stack: Array = [Vector2i(0, points.size() - 1)]
+	while not stack.is_empty():
+		var bounds: Vector2i = stack.pop_back()
+		var maximum_distance := 0.0
+		var split_index := -1
+		for index in range(bounds.x + 1, bounds.y):
+			var distance := _point_segment_distance(points[index], points[bounds.x], points[bounds.y])
+			if distance > maximum_distance:
+				maximum_distance = distance
+				split_index = index
+		if split_index >= 0 and maximum_distance > epsilon:
+			keep[split_index] = 1
+			stack.append(Vector2i(bounds.x, split_index))
+			stack.append(Vector2i(split_index, bounds.y))
+	var simplified := PackedVector2Array()
+	for index in range(points.size()):
+		if keep[index] == 1:
+			simplified.append(points[index])
+	return simplified
 
 
 func _point_segment_distance(point: Vector2, start: Vector2, finish: Vector2) -> float:
@@ -714,7 +721,9 @@ func _draw_global_world() -> void:
 		var severity := int(event.get("severity", 1))
 		var color := Color(0.96, 0.59, 0.28, 0.94) if severity >= 2 else Color(0.91, 0.76, 0.40, 0.82)
 		var radius := 5.5 if event_id == hover_event_id or event_id == selected_event_id else 4.0
-		draw_circle(point, radius + 3.0, Color(color, 0.14), false, 1.2)
+		var halo := color
+		halo.a = 0.14
+		draw_circle(point, radius + 3.0, halo, false, 1.2)
 		draw_circle(point, radius, color)
 		if event_id == hover_event_id:
 			_draw_label(point + Vector2(10.0, 4.0), str(event.get("title", "状态")), 11)
@@ -756,7 +765,7 @@ func _draw_country_focus() -> void:
 
 func _region_color(region: Dictionary, alpha: float) -> Color:
 	var value := str(region.get("legal_color", "#6f8d9f"))
-	var color := Color(value)
+	var color := Color.from_string(value, Color(0.44, 0.56, 0.62, 1.0))
 	color.a = alpha
 	return color
 
@@ -764,7 +773,7 @@ func _region_color(region: Dictionary, alpha: float) -> Color:
 func _select_global_object_at(pos: Vector2, click: bool) -> void:
 	_ensure_projection_cache()
 	var nearest_event := ""
-	var nearest_event_distance := 18.0
+	var nearest_event_distance := 10.0
 	for event_id in _event_screen_positions.keys():
 		var distance := pos.distance_to(_event_screen_positions[event_id])
 		if distance < nearest_event_distance:
@@ -772,7 +781,7 @@ func _select_global_object_at(pos: Vector2, click: bool) -> void:
 			nearest_event_distance = distance
 
 	var nearest_country := ""
-	var nearest_country_distance := 26.0
+	var nearest_country_distance := 16.0
 	for country_id in _country_screen_anchors.keys():
 		var distance := pos.distance_to(_country_screen_anchors[country_id])
 		if distance < nearest_country_distance:
@@ -1197,12 +1206,16 @@ func _draw_character_panel(rect: Rect2) -> void:
 
 func _draw_activity_panel(rect: Rect2) -> void:
 	_draw_label(rect.position + Vector2(24.0, 38.0), "已知信息与机构议程", 19)
-	var y := rect.position.y + 76.0
+	var y := rect.position.y + 66.0
 	for index in range(mini(_world_events.size(), 6)):
 		var event: Dictionary = _world_events[index]
-		_draw_label(Vector2(rect.position.x + 28.0, y), "• " + str(event.get("title", "状态")), 11)
+		var event_id := str(event.get("id", ""))
+		var row := Rect2(rect.position.x + 24.0, y, rect.size.x - 48.0, 27.0)
+		_panel(row, Color(0.055, 0.075, 0.072, 0.82), Color(0.48, 0.62, 0.56, 0.22))
+		_register_hit(row, "inspect_event:" + event_id, true)
+		_draw_label(row.position + Vector2(8.0, 18.0), "• " + str(event.get("title", "状态")), 10)
 		y += 31.0
-	_draw_button(Rect2(rect.position.x + 24.0, rect.end.y - 50.0, 118.0, 32.0), "标记已读", "mark_read", activity_unread > 0)
+	_draw_button(Rect2(rect.position.x + 24.0, rect.end.y - 42.0, 118.0, 28.0), "标记已读", "mark_read", activity_unread > 0)
 
 
 func _draw_time_panel(rect: Rect2) -> void:
@@ -1291,6 +1304,8 @@ func _activate_button(action: String) -> void:
 	elif action.begins_with("inspect_institution:"):
 		selected_institution_id = action.get_slice(":", 1)
 		_set_info_open(true)
+	elif action.begins_with("inspect_event:"):
+		_show_event_from_hud(action.get_slice(":", 1))
 	elif action == "close_info":
 		_set_info_open(false)
 	elif action == "back":
@@ -1325,6 +1340,22 @@ func _activate_button(action: String) -> void:
 		sim_speed = maxi(1, int(action.get_slice(":", 1)))
 		sim_paused = false
 		queue_redraw()
+
+
+func _show_event_from_hud(event_id: String) -> void:
+	if not _event_by_id.has(event_id):
+		return
+	active_hud_panel = ""
+	space_level = WORLD
+	world_mode = WORLD_COUNTRIES
+	selected_event_id = event_id
+	selected_country_id = ""
+	selected_region_id = ""
+	selected_institution_id = ""
+	_set_world_layer_visible(true)
+	_mark_projection_dirty()
+	_set_info_open(true)
+	queue_redraw()
 
 
 func _focus_selected_country() -> void:
