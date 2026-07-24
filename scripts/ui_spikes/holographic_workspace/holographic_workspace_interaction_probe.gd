@@ -55,6 +55,37 @@ func _run_probe() -> void:
 	if not _require(str(workspace.get("world_mode")) == "country_focus", "进入国家后未切换国家聚焦模式"):
 		return
 	workspace.call("_ensure_projection_cache")
+
+	var regions: Array = workspace.get("_regions") as Array
+	var region_polygons: Dictionary = workspace.get("_region_polygons") as Dictionary
+	var region_units: Dictionary = workspace.get("_administrative_units_by_region") as Dictionary
+	var region_cities: Dictionary = workspace.get("_cities_by_region") as Dictionary
+	if not _require(regions.size() == 9, "法兰西宏观大区数量不是9"):
+		return
+	for region_value: Variant in regions:
+		var region: Dictionary = region_value as Dictionary
+		var region_id: String = str(region.get("id", ""))
+		var polygons: Array = region_polygons.get(region_id, []) as Array
+		var units: Array = region_units.get(region_id, []) as Array
+		var cities: Array = region_cities.get(region_id, []) as Array
+		if not _require(not polygons.is_empty(), "大区缺少几何：" + region_id):
+			return
+		if not _require(not units.is_empty(), "大区缺少行政分区：" + region_id):
+			return
+		if not _require(not cities.is_empty(), "大区缺少城市入口：" + region_id):
+			return
+
+	var sample_bounds: Rect2 = Rect2(Vector2(0.0, 45.0), Vector2(4.0, 4.0))
+	var sample_rect: Rect2 = Rect2(Vector2.ZERO, Vector2(800.0, 400.0))
+	var sample_center: Vector2 = sample_bounds.get_center()
+	var projected_center: Vector2 = workspace.call("_lon_lat_to_rect", sample_center, sample_bounds, sample_rect) as Vector2
+	var projected_lon: Vector2 = workspace.call("_lon_lat_to_rect", sample_center + Vector2(1.0, 0.0), sample_bounds, sample_rect) as Vector2
+	var projected_lat: Vector2 = workspace.call("_lon_lat_to_rect", sample_center + Vector2(0.0, 1.0), sample_bounds, sample_rect) as Vector2
+	var expected_ratio: float = cos(deg_to_rad(sample_center.y))
+	var measured_ratio: float = projected_center.distance_to(projected_lon) / maxf(0.001, projected_center.distance_to(projected_lat))
+	if not _require(absf(measured_ratio - expected_ratio) < 0.03, "大区投影未保持统一地理比例"):
+		return
+
 	var region_anchors: Dictionary = workspace.get("_focus_region_screen_anchors") as Dictionary
 	if not _require(region_anchors.has("northern_industrial_belt"), "北部工业带聚焦锚点不存在"):
 		return
@@ -68,6 +99,18 @@ func _run_probe() -> void:
 		return
 	var viewport_container: SubViewportContainer = workspace.get_node("HemisphereViewportContainer") as SubViewportContainer
 	if not _require(viewport_container != null and not viewport_container.visible, "离开世界层后3D视口仍可见"):
+		return
+	workspace.queue_redraw()
+	await _settle_frames(3)
+
+	var administrative_polygons: Dictionary = workspace.get("_administrative_screen_polygons") as Dictionary
+	if not _require(administrative_polygons.size() == 5, "北部工业带未绘制5个行政分区"):
+		return
+	workspace.call("_activate_button", "next_region")
+	if not _require(str(workspace.get("selected_region_id")) == "paris_basin", "下一个大区按钮未切换到巴黎盆地"):
+		return
+	workspace.call("_activate_button", "previous_region")
+	if not _require(str(workspace.get("selected_region_id")) == "northern_industrial_belt", "上一个大区按钮未返回北部工业带"):
 		return
 
 	workspace.call("_enter_city", "lille")
