@@ -57,12 +57,12 @@ func _draw_city_institutions(rect: Rect2) -> void:
 	var columns := mini(3, maxi(1, institution_ids.size()))
 	var row_count := int(ceil(float(institution_ids.size()) / float(columns)))
 	var inner_left := rect.position.x + 96.0
-	var inner_right := rect.end.x - 96.0
+	var inner_right := maxf(inner_left, rect.end.x - 96.0)
 	var available_top := rect.position.y + 145.0
-	var available_bottom := rect.end.y - 104.0
+	var available_bottom := maxf(available_top, rect.end.y - 104.0)
 	var row_step := 0.0
 	if row_count > 1:
-		row_step = maxf(72.0, (available_bottom - available_top) / float(row_count - 1))
+		row_step = (available_bottom - available_top) / float(row_count - 1)
 
 	for index in range(institution_ids.size()):
 		var column := index % columns
@@ -272,3 +272,15 @@ func _ellipsize(value: String, maximum_characters: int) -> String:
 	if maximum_characters <= 1 or value.length() <= maximum_characters:
 		return value
 	return value.left(maximum_characters - 1) + "…"
+
+
+func _handle_button_click(position: Vector2) -> bool:
+	for index in range(_button_hits.size() - 1, -1, -1):
+		var record: Dictionary = _button_hits[index]
+		var rect: Rect2 = record.get("rect", Rect2())
+		if not rect.has_point(position):
+			continue
+		if bool(record.get("enabled", false)):
+			_activate_button(str(record.get("action", "")))
+		return true
+	return false
