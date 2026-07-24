@@ -184,7 +184,7 @@ func _read_document(path: String) -> Dictionary:
 		return {}
 	var parsed: Variant = JSON.parse_string(file.get_as_text())
 	if parsed is Dictionary:
-		return parsed
+		return parsed as Dictionary
 	return {}
 
 
@@ -481,7 +481,7 @@ func _draw_region_flat_geometry(rect: Rect2) -> void:
 	var polygons: Array = _region_polygons.get(selected_region_id, [])
 	var bounds := _lon_lat_bounds(polygons)
 	var map_rect := rect.grow(-70.0)
-	map_rect.size.x = maxf(260.0, map_rect.size.x - 190.0)
+	map_rect.size = Vector2(maxf(260.0, map_rect.size.x - 190.0), map_rect.size.y)
 	for polygon in polygons:
 		var flat := PackedVector2Array()
 		for lon_lat in polygon:
@@ -513,7 +513,7 @@ func _draw_region_cities(rect: Rect2) -> void:
 
 	var bounds := _lon_lat_bounds(_region_polygons.get(selected_region_id, []))
 	var map_rect := rect.grow(-70.0)
-	map_rect.size.x = maxf(260.0, map_rect.size.x - 190.0)
+	map_rect.size = Vector2(maxf(260.0, map_rect.size.x - 190.0), map_rect.size.y)
 	var list_x := rect.end.x - 172.0
 	var list_y := rect.position.y + 88.0
 	var index := 0
@@ -557,7 +557,7 @@ func _draw_city_map() -> void:
 	var points: Array[Vector2] = []
 	for index in range(labels.size()):
 		var column := index % 3
-		var row := index / 3
+		var row := int(index / 3)
 		points.append(
 			rect.position + Vector2(
 				rect.size.x * (0.22 + float(column) * 0.28),
