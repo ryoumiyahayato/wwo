@@ -6,8 +6,8 @@ const OUTPUT_DIRECTORY := "res://artifacts/holographic_workspace"
 var workspace
 
 
-func _initialize() -> void:
-	_run_capture.call_deferred()
+func _init() -> void:
+	call_deferred("_run_capture")
 
 
 func _run_capture() -> void:
@@ -19,11 +19,11 @@ func _run_capture() -> void:
 
 	workspace = packed_scene.instantiate()
 	root.add_child(workspace)
-	await _settle_frames(4)
+	await _settle_frames(8)
 	await _capture("01_global_focus")
 
 	workspace._set_layout(workspace.LAYOUT_WORKSPACE)
-	await _settle_frames(3)
+	await _settle_frames(5)
 	await _capture("02_operation_workspace")
 
 	workspace.selected_country_id = workspace.FOCUS_COUNTRY_ID
@@ -31,15 +31,15 @@ func _run_capture() -> void:
 	workspace.selected_region_id = "northern_industrial_belt"
 	workspace._set_info_open(true)
 	await create_timer(0.24).timeout
-	await _settle_frames(3)
+	await _settle_frames(5)
 	await _capture("03_france_region_selected")
 
 	workspace._enter_region()
-	await _settle_frames(3)
+	await _settle_frames(5)
 	await _capture("04_region_layer")
 
 	workspace._enter_city("lille")
-	await _settle_frames(3)
+	await _settle_frames(5)
 	await _capture("05_city_layer")
 
 	quit(0)
@@ -48,7 +48,6 @@ func _run_capture() -> void:
 func _settle_frames(count: int) -> void:
 	for _index in range(count):
 		await process_frame
-	await RenderingServer.frame_post_draw
 
 
 func _capture(file_stem: String) -> void:
@@ -58,7 +57,7 @@ func _capture(file_stem: String) -> void:
 		push_error("Unable to create screenshot directory: %s" % directory_error)
 		quit(1)
 		return
-	await RenderingServer.frame_post_draw
+	await process_frame
 	var image := root.get_texture().get_image()
 	if image == null or image.is_empty():
 		push_error("Viewport screenshot is empty: " + file_stem)
