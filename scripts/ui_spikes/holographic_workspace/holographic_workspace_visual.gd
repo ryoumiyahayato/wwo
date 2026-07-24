@@ -16,6 +16,12 @@ func _ready() -> void:
 	super._ready()
 
 
+func _set_layout(layout_id: int) -> void:
+	super._set_layout(layout_id)
+	if space_level == WORLD:
+		viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+
+
 func _draw_label(
 	position: Vector2,
 	text: String,
@@ -66,19 +72,20 @@ func _draw_global_world() -> void:
 
 
 func _draw_country_focus() -> void:
-	for region: Dictionary in _regions:
+	for region_index: int in range(_regions.size()):
+		var region: Dictionary = _regions[region_index]
 		var region_id: String = str(region.get("id", ""))
 		var selected: bool = region_id == selected_region_id
 		var hovered: bool = region_id == hover_region_id
-		var fill: Color = _region_color(region, 0.24)
+		var fill: Color = _focus_region_color(region_index)
 		var border: Color = Color(0.0, 0.0, 0.0, 0.0)
 		var border_width: float = 0.0
 		if selected:
-			fill = Color(0.84, 0.63, 0.28, 0.42)
+			fill = Color(0.84, 0.63, 0.28, 0.44)
 			border = Color(0.96, 0.80, 0.42, 0.96)
 			border_width = 1.8
 		elif hovered:
-			fill = Color(0.44, 0.70, 0.64, 0.36)
+			fill = Color(0.44, 0.70, 0.64, 0.40)
 			border = Color(0.78, 0.94, 0.86, 0.90)
 			border_width = 1.4
 		var polygons: Array = _focus_region_screen_polygons.get(region_id, []) as Array
@@ -100,6 +107,28 @@ func _draw_country_focus() -> void:
 		"overview_world",
 		true
 	)
+
+
+func _focus_region_color(index: int) -> Color:
+	match index % 9:
+		0:
+			return Color(0.25, 0.37, 0.39, 0.32)
+		1:
+			return Color(0.31, 0.38, 0.34, 0.32)
+		2:
+			return Color(0.32, 0.34, 0.42, 0.32)
+		3:
+			return Color(0.37, 0.35, 0.30, 0.32)
+		4:
+			return Color(0.27, 0.40, 0.36, 0.32)
+		5:
+			return Color(0.35, 0.31, 0.39, 0.32)
+		6:
+			return Color(0.30, 0.39, 0.43, 0.32)
+		7:
+			return Color(0.39, 0.37, 0.29, 0.32)
+		_:
+			return Color(0.29, 0.34, 0.36, 0.32)
 
 
 func _draw_region_map() -> void:
