@@ -72,7 +72,8 @@ jobs:
             sudo apt-get install --yes xvfb
           fi
           rm -rf artifacts/holographic_workspace
-          xvfb-run --auto-servernum --server-args="-screen 0 1280x720x24" \
+          timeout --signal=TERM 90s \
+            xvfb-run --auto-servernum --server-args="-screen 0 1280x720x24" \
             "${GODOT_BIN}" \
             --path . \
             --rendering-method gl_compatibility \
