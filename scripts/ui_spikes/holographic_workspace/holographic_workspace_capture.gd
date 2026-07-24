@@ -34,6 +34,19 @@ func _ready() -> void:
 	await _settle_frames(5)
 	await _capture("04_region_layer")
 
+	var regions: Array = workspace.get("_regions") as Array
+	for index: int in range(regions.size()):
+		var region: Dictionary = regions[index] as Dictionary
+		var region_id: String = str(region.get("id", "region_%02d" % index))
+		workspace.selected_region_id = region_id
+		workspace.selected_city_id = ""
+		workspace.selected_administrative_unit_id = ""
+		workspace.hover_administrative_unit_id = ""
+		workspace.queue_redraw()
+		await _settle_frames(4)
+		await _capture("04_region_%02d_%s" % [index + 1, region_id])
+
+	workspace.selected_region_id = "northern_industrial_belt"
 	workspace._enter_city("lille")
 	await _settle_frames(5)
 	await _capture("05_city_layer")
