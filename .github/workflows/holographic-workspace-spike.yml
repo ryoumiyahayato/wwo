@@ -20,7 +20,7 @@ permissions:
 jobs:
   godot-headless:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     env:
       GODOT_VERSION: "4.6.3"
       GODOT_BIN: "${{ github.workspace }}/.ci-godot/Godot_v4.6.3-stable_linux.x86_64"
@@ -63,6 +63,34 @@ jobs:
             --quit-after 8 \
             --log-file godot-spike.log
 
+      - name: Capture rendered workspace states
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v xvfb-run >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install --yes xvfb
+          fi
+          rm -rf artifacts/holographic_workspace
+          xvfb-run --auto-servernum --server-args="-screen 0 1280x720x24" \
+            "${GODOT_BIN}" \
+            --path . \
+            --rendering-method gl_compatibility \
+            --script res://scripts/ui_spikes/holographic_workspace/holographic_workspace_capture.gd \
+            --log-file godot-capture.log
+          test -s artifacts/holographic_workspace/01_global_focus.png
+          test -s artifacts/holographic_workspace/02_operation_workspace.png
+          test -s artifacts/holographic_workspace/03_france_region_selected.png
+          test -s artifacts/holographic_workspace/04_region_layer.png
+          test -s artifacts/holographic_workspace/05_city_layer.png
+
+      - name: Upload rendered screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: holographic-workspace-screenshots
+          path: artifacts/holographic_workspace/*.png
+          if-no-files-found: error
+
       - name: Upload Godot logs on failure
         if: failure()
         uses: actions/upload-artifact@v4
@@ -71,4 +99,5 @@ jobs:
           path: |
             godot-import.log
             godot-spike.log
+            godot-capture.log
           if-no-files-found: ignore
