@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/holographic-workspace-spike.yml"
+      - "docs/ui_spikes/holographic_workspace_spike.md"
       - "scenes/ui_spikes/holographic_workspace/**"
       - "scripts/ui_spikes/holographic_workspace/**"
       - "shaders/ui_spikes/holographic_workspace/**"
