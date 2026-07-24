@@ -610,6 +610,8 @@ func _rebuild_country_focus_cache() -> void:
 	var map_rect := _focus_map_rect()
 	var country_polygons: Array = _country_lonlat_polygons.get(FOCUS_COUNTRY_ID, [])
 	for polygon in country_polygons:
+		if not _polygon_overlaps_bounds(polygon, _focus_bounds):
+			continue
 		var flat := PackedVector2Array()
 		for lon_lat in polygon:
 			flat.append(_lon_lat_to_rect(lon_lat, _focus_bounds, map_rect))
@@ -1218,6 +1220,7 @@ func _draw_data_errors() -> void:
 		return
 	var rect := Rect2(18.0, 158.0, minf(520.0, size.x - 36.0), 30.0)
 	_panel(rect, Color(0.28, 0.06, 0.05, 0.94), Color(0.96, 0.36, 0.26, 0.75))
+	_register_hit(rect, "noop", true)
 	_draw_label(rect.position + Vector2(10.0, 20.0), _data_errors[0], 11, Color(1.0, 0.78, 0.72, 1.0))
 
 
@@ -1524,6 +1527,13 @@ func _lon_lat_bounds(polygons: Array) -> Rect2:
 	if not has_point:
 		return Rect2(Vector2(-5.0, 42.0), Vector2(12.0, 10.0))
 	return Rect2(min_point, max_point - min_point)
+
+
+func _polygon_overlaps_bounds(polygon: PackedVector2Array, bounds: Rect2) -> bool:
+	if polygon.is_empty():
+		return false
+	var polygon_bounds := _lon_lat_bounds([polygon])
+	return polygon_bounds.intersects(bounds) or bounds.encloses(polygon_bounds)
 
 
 func _lon_lat_to_rect(lon_lat: Vector2, bounds: Rect2, rect: Rect2) -> Vector2:
