@@ -77,7 +77,7 @@ jobs:
             "${GODOT_BIN}" \
             --path . \
             --rendering-method gl_compatibility \
-            --script res://scripts/ui_spikes/holographic_workspace/holographic_workspace_capture.gd \
+            --scene res://scenes/ui_spikes/holographic_workspace/holographic_workspace_capture.tscn \
             --log-file godot-capture.log
           test -s artifacts/holographic_workspace/01_global_focus.png
           test -s artifacts/holographic_workspace/02_operation_workspace.png
