@@ -29,9 +29,10 @@ script = ExtResource("2_hemi")
 
 [node name="Surface" type="MeshInstance3D" parent="HemisphereViewportContainer/HemisphereViewport/Hemisphere3D"]
 
-[node name="Camera3D" type="Camera3D" parent="HemisphereViewportContainer/HemisphereViewport/Hemisphere3D"]
-transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 0, 2.35)
+[node name="Camera3D" type="Camera3D" parent="HemisphereViewportContainer/HemisphereViewport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.35)
 projection = 1
+keep_aspect = 1
 size = 2.55
 near = 0.05
 far = 12.0
