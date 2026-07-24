@@ -103,7 +103,7 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf artifacts/holographic_workspace
-          timeout --signal=TERM 90s \
+          timeout --signal=TERM 120s \
             xvfb-run --auto-servernum --server-args="-screen 0 1280x720x24" \
             "${GODOT_BIN}" \
             --audio-driver Dummy \
@@ -120,6 +120,8 @@ jobs:
           test -s artifacts/holographic_workspace/03_france_region_selected.png
           test -s artifacts/holographic_workspace/04_region_layer.png
           test -s artifacts/holographic_workspace/05_city_layer.png
+          region_capture_count="$(find artifacts/holographic_workspace -maxdepth 1 -type f -name '04_region_[0-9][0-9]_*.png' | wc -l)"
+          test "${region_capture_count}" -eq 9
 
       - name: Upload rendered screenshots
         uses: actions/upload-artifact@v4
