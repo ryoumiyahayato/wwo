@@ -77,10 +77,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if ! command -v xvfb-run >/dev/null 2>&1; then
-            sudo apt-get update
-            sudo apt-get install --yes xvfb
-          fi
+          sudo apt-get update
+          sudo apt-get install --yes xvfb fonts-noto-cjk
+          fc-cache -f
           rm -rf artifacts/holographic_workspace
           timeout --signal=TERM 90s \
             xvfb-run --auto-servernum --server-args="-screen 0 1280x720x24" \
