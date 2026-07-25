@@ -60,7 +60,7 @@ func _run_probe() -> void:
 	workspace.call("_focus_selected_country")
 	workspace.call("_enter_region")
 	workspace.set("selected_world_admin1_id", str((german_regions[0] as Dictionary).get("id", "")))
-	workspace.call("_enter_selected_world_admin1")
+	workspace.call("_activate_button", "history_enter_admin1")
 	if not _require(str(workspace.get("space_level")) == "region", "法国人物查看德国时越过了外国省级终点"):
 		return
 	workspace.call("_return_to_global_world")
