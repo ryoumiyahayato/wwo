@@ -20,8 +20,28 @@ func _ready() -> void:
 	await get_tree().create_timer(1.6).timeout
 	await _settle_frames(2)
 	await _capture("00_global_twinkle_b")
+
+	workspace._set_world_zoom(0.74)
+	await _settle_frames(4)
+	await _capture("01_global_flag_overview")
 	await _capture("01_global_focus")
 
+	workspace._set_world_zoom(1.06)
+	await _settle_frames(4)
+	await _capture("01_global_mid_zoom")
+
+	workspace._set_world_zoom(1.24)
+	await _settle_frames(4)
+	await _capture("01_global_country_names")
+
+	workspace._set_world_zoom(1.08)
+	workspace.selected_country_id = workspace.FOCUS_COUNTRY_ID
+	workspace._mark_projection_dirty()
+	workspace.queue_redraw()
+	await _settle_frames(4)
+	await _capture("01_global_france_selected")
+
+	workspace._set_world_zoom(0.86)
 	workspace._set_layout(workspace.LAYOUT_WORKSPACE)
 	await _settle_frames(5)
 	await _capture("02_operation_workspace")
