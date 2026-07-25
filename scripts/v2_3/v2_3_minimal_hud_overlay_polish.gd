@@ -34,6 +34,12 @@ func _draw_field_book() -> void:
 	_draw_text(Vector2(visible_x + 8.0, top + 74.0), "簿", 14, Color(0.91, 0.84, 0.67, 1.0))
 
 
+func _visible_book_tab_rect() -> Rect2:
+	var rect := super._visible_book_tab_rect()
+	rect.position.x -= field_book_progress * 112.0
+	return rect
+
+
 func _country_cover_rect() -> Rect2:
 	return Rect2(12.0, 12.0, 96.0, 82.0)
 
