@@ -54,11 +54,11 @@ func _run_probe() -> void:
 		return
 	if not _require(str(overlay.call("_role_category")) in ["worker", "official", "farmer", "merchant", "intellectual", "royal"], "人物身份图标分类无效"):
 		return
-	var country_rect := overlay.call("_country_cover_rect") as Rect2
-	var character_rect := overlay.call("_character_cover_rect") as Rect2
+	var country_rect: Rect2 = overlay.call("_country_cover_rect")
+	var character_rect: Rect2 = overlay.call("_character_cover_rect")
 	if not _require(country_rect.size.x <= 110.0 and character_rect.size.x <= 110.0, "左侧图标仍被大面积空白面板包围"):
 		return
-	var book_tab := overlay.call("_book_tab_rect") as Rect2
+	var book_tab: Rect2 = overlay.call("_book_tab_rect")
 	if not _require(book_tab.end.x >= 38.0 and book_tab.size.y >= 120.0, "事务簿书脊不可辨识"):
 		return
 	if not _require(not (overlay.call("_left_page_lines") as Array).is_empty(), "事务书左页没有内容"):
