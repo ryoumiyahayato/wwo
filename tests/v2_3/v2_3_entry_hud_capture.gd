@@ -46,13 +46,13 @@ func _save_method_inventory(interface: Object) -> void:
 	for method_value: Variant in interface.get_method_list():
 		var method := method_value as Dictionary
 		var name := str(method.get("name", ""))
-		if "corner" in name or "identity" in name or "newspaper" in name:
+		if name.begins_with("_draw_"):
 			names.append(name)
 	names.sort()
 	var path := ProjectSettings.globalize_path(OUTPUT_DIR.path_join("corner_methods.txt"))
 	var file := FileAccess.open(path, FileAccess.WRITE)
 	if file == null:
-		push_error("Formal UI capture: cannot write corner method inventory")
+		push_error("Formal UI capture: cannot write draw method inventory")
 		get_tree().quit(1)
 		return
 	file.store_string("\n".join(names))
