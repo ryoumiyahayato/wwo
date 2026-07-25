@@ -53,26 +53,28 @@ func _distinctive_flag_color(pattern: String, colors: PackedColorArray, u: float
 		var parts := pattern.split("|")
 		var base_pattern := str(parts[1]) if parts.size() > 1 else "solid"
 		var variant := int(parts[2]) if parts.size() > 2 else 0
-		return _apply_generic_seal(super._distinctive_flag_color(base_pattern, colors, u, v), colors, variant, u, v)
-	match pattern:
-		"taegeuk": return _taegeuk_color(colors, u, v)
-		"armillary": return _armillary_color(colors, u, v)
-		"single_star": return _single_star_color(colors, u, v)
-		"union_cross": return _union_cross_color(colors, u, v)
-		"nordic_cross": return _nordic_cross_color(colors, u, v)
-		"swiss_cross": return _swiss_cross_color(colors, u, v)
-		"cross_stripes": return _cross_stripes_color(colors, u, v)
-		"lion_sun": return _lion_sun_color(colors, u, v)
-		"elephant": return _elephant_color(colors, u, v)
-		"morocco_star": return _morocco_star_color(colors, u, v)
-		"diamond_disc": return _diamond_disc_color(colors, u, v)
+		var base := super._distinctive_flag_color(base_pattern, colors, u, v)
+		return _apply_generic_seal(base, colors, variant, u, v)
+	if pattern == "taegeuk": return _taegeuk_color(colors, u, v)
+	if pattern == "armillary": return _armillary_color(colors, u, v)
+	if pattern == "single_star": return _single_star_color(colors, u, v)
+	if pattern == "union_cross": return _union_cross_color(colors, u, v)
+	if pattern == "nordic_cross": return _nordic_cross_color(colors, u, v)
+	if pattern == "swiss_cross": return _swiss_cross_color(colors, u, v)
+	if pattern == "cross_stripes": return _cross_stripes_color(colors, u, v)
+	if pattern == "lion_sun": return _lion_sun_color(colors, u, v)
+	if pattern == "elephant": return _elephant_color(colors, u, v)
+	if pattern == "morocco_star": return _morocco_star_color(colors, u, v)
+	if pattern == "diamond_disc": return _diamond_disc_color(colors, u, v)
 	return super._distinctive_flag_color(pattern, colors, u, v)
 
 
 func _apply_generic_seal(base: Color, colors: PackedColorArray, variant: int, u: float, v: float) -> Color:
 	var ink := _contrast_color(colors, base)
 	var shape := variant % 7
-	var center := Vector2(0.5 + float(int(variant / 7) % 3 - 1) * 0.13, 0.5 + float(int(variant / 21) % 3 - 1) * 0.11)
+	var x_slot := int(variant / 7) % 3
+	var y_slot := int(variant / 21) % 3
+	var center := Vector2(0.5 + float(x_slot - 1) * 0.13, 0.5 + float(y_slot - 1) * 0.11)
 	var p := Vector2(u, v) - center
 	match shape:
 		0:
@@ -180,7 +182,7 @@ func flag_coverage_report() -> Dictionary:
 			generated_count += 1
 			var signature := _visual_flag_signature(texture)
 			if not signature.is_empty(): signatures[signature] = true
-	return {"explicit_count": explicit_count, "generated_count": generated_count, "unique_signatures": signatures.size()}
+	return {"explicit_count":explicit_count, "generated_count":generated_count, "unique_signatures":signatures.size()}
 
 
 func _visual_flag_signature(texture: ImageTexture) -> String:
@@ -221,10 +223,14 @@ func _enter_region() -> void:
 
 
 func _enter_selected_world_admin1() -> void:
-	if world_mode == WORLD_HISTORICAL_ENTITY_FOCUS and not _is_home_historical_entity(selected_country_id):
+	super._enter_selected_world_admin1()
+
+
+func _activate_button(action: String) -> void:
+	if action == "history_enter_admin1" and world_mode == WORLD_HISTORICAL_ENTITY_FOCUS and not _is_home_historical_entity(selected_country_id):
 		queue_redraw()
 		return
-	super._enter_selected_world_admin1()
+	super._activate_button(action)
 
 
 func _draw_world_admin1_layer() -> void:
@@ -281,4 +287,4 @@ func _is_home_historical_entity(entity_id: String) -> bool:
 
 
 func home_country_detail_report() -> Dictionary:
-	return {"active_character_key": active_character_key, "home_entity_id": _home_historical_entity_id(), "selected_entity_id": selected_country_id, "selected_is_home": _is_home_historical_entity(selected_country_id)}
+	return {"active_character_key":active_character_key, "home_entity_id":_home_historical_entity_id(), "selected_entity_id":selected_country_id, "selected_is_home":_is_home_historical_entity(selected_country_id)}
