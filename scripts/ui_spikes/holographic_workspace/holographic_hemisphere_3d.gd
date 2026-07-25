@@ -3,16 +3,28 @@ extends Node3D
 const LAT_SEGMENTS := 32
 const LON_SEGMENTS := 64
 const RADIUS := 1.0
+const MOON_RADIUS := 0.145
 
 @onready var _surface: MeshInstance3D = $Surface
+@onready var _moon: MeshInstance3D = $Moon
 
 
 func _ready() -> void:
 	_surface.mesh = _build_front_hemisphere_mesh()
-	var shader := load("res://shaders/ui_spikes/holographic_workspace/hemisphere_surface.gdshader") as Shader
-	var material := ShaderMaterial.new()
-	material.shader = shader
-	_surface.material_override = material
+	var hemisphere_shader := load(
+		"res://shaders/ui_spikes/holographic_workspace/hemisphere_surface.gdshader"
+	) as Shader
+	var hemisphere_material := ShaderMaterial.new()
+	hemisphere_material.shader = hemisphere_shader
+	_surface.material_override = hemisphere_material
+
+	_moon.mesh = _build_moon_mesh()
+	var moon_shader := load(
+		"res://shaders/ui_spikes/holographic_workspace/moon_surface.gdshader"
+	) as Shader
+	var moon_material := ShaderMaterial.new()
+	moon_material.shader = moon_shader
+	_moon.material_override = moon_material
 
 
 func _build_front_hemisphere_mesh() -> ArrayMesh:
@@ -54,4 +66,13 @@ func _build_front_hemisphere_mesh() -> ArrayMesh:
 
 	var mesh := ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	return mesh
+
+
+func _build_moon_mesh() -> SphereMesh:
+	var mesh := SphereMesh.new()
+	mesh.radius = MOON_RADIUS
+	mesh.height = MOON_RADIUS * 2.0
+	mesh.radial_segments = 32
+	mesh.rings = 18
 	return mesh
