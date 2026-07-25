@@ -31,7 +31,11 @@ func _run_probe() -> void:
 		return
 	workspace.set("selected_country_id", "german_empire")
 	workspace.call("_focus_selected_country")
-	if not _require(str(workspace.call("_current_country_corner_title")) == "德意志帝国", "国家HUD没有切换到德意志帝国"):
+	var german_corner_title: String = str(workspace.call("_current_country_corner_title"))
+	var german_entity: Dictionary = workspace.call("_current_country_entity") as Dictionary
+	if not _require(german_corner_title == "德国", "国家HUD没有显示德意志帝国短名称"):
+		return
+	if not _require(str(german_entity.get("name_zh", "")) == "德意志帝国", "国家面板没有保留德意志帝国全称"):
 		return
 	if not _require("帝国" in str(workspace.call("_current_country_corner_subtitle")), "国家HUD没有显示德意志帝国地位"):
 		return
@@ -56,7 +60,11 @@ func _run_probe() -> void:
 	workspace.call("_enter_region")
 	if not _require(str(workspace.get("selected_historical_territory_iso")) == "NPL", "尼泊尔单一辖区没有自动选中"):
 		return
-	if not _require(str(workspace.call("_current_country_corner_title")) == "尼泊尔王国", "国家HUD没有切换到尼泊尔王国"):
+	var nepal_corner_title: String = str(workspace.call("_current_country_corner_title"))
+	var nepal_entity: Dictionary = workspace.call("_current_country_entity") as Dictionary
+	if not _require(nepal_corner_title == "尼泊尔", "国家HUD没有显示尼泊尔王国短名称"):
+		return
+	if not _require(str(nepal_entity.get("name_zh", "")) == "尼泊尔王国", "国家面板没有保留尼泊尔王国全称"):
 		return
 	var nepal_records: Array = admin1_by_iso.get("NPL", []) as Array
 	if not _require(not nepal_records.is_empty(), "尼泊尔没有一级行政区回退数据"):
