@@ -1,14 +1,16 @@
 class_name WorldMapCanvas
 extends "res://scripts/world_map/internal/world_map_canvas_impl.gd"
-## Formal map with three explicit spatial layers. The shared basemap remains
-## fixed; only the relevant local overlay is expanded for the active layer.
+## Formal map with three explicit spatial layers. World and regional scopes reuse
+## the shared basemap; city scope replaces it with the current city's local graph.
 
 const MAP_SCOPE_WORLD: String = "world"
 const MAP_SCOPE_REGIONAL: String = "regional"
 const MAP_SCOPE_CITY: String = "city"
-const REGIONAL_ZOOM: float = 36.0
-const CITY_ZOOM: float = 180.0
-const CITY_LOCAL_SCALE := Vector2(0.62, 0.52)
+const REGIONAL_ZOOM: float = 32.0
+const CITY_SCOPE_THRESHOLD: float = 160.0
+const CITY_ZOOM: float = 420.0
+const CITY_LOCAL_SCALE := Vector2(0.52, 0.45)
+const CITY_PLATE_HALF_SIZE := Vector2(3.2, 2.15)
 
 var _scope_cache: String = MAP_SCOPE_CITY
 var _current_city_parent_id: String = "lille"
@@ -31,7 +33,7 @@ func set_map_scope(scope: String) -> void:
 func get_map_scope() -> String:
 	if zoom < 10.0:
 		return MAP_SCOPE_WORLD
-	if zoom < 80.0:
+	if zoom < CITY_SCOPE_THRESHOLD:
 		return MAP_SCOPE_REGIONAL
 	return MAP_SCOPE_CITY
 
@@ -65,6 +67,83 @@ func focus_player_location() -> void:
 	_rebuild_scope_catalog()
 
 
+func _draw_country_layer(target: PrototypeV2MapLayer) -> void:
+	if get_map_scope() != MAP_SCOPE_CITY:
+		super._draw_country_layer(target)
+		return
+	var started_usec: int = Time.get_ticks_usec()
+	var anchor: Vector2 = _city_anchor_for_parent(_current_city_parent_id)
+	var plate := Rect2(anchor - CITY_PLATE_HALF_SIZE, CITY_PLATE_HALF_SIZE * 2.0)
+	target.draw_rect(plate, Color("#697970"))
+	for index: int in range(-6, 7):
+		var x: float = anchor.x + float(index) * 0.5
+		target.draw_line(
+			Vector2(x, plate.position.y),
+			Vector2(x, plate.end.y),
+			Color(0.73, 0.80, 0.76, 0.055),
+			0.75 / zoom,
+			true
+		)
+	for index: int in range(-4, 5):
+		var y: float = anchor.y + float(index) * 0.5
+		target.draw_line(
+			Vector2(plate.position.x, y),
+			Vector2(plate.end.x, y),
+			Color(0.73, 0.80, 0.76, 0.055),
+			0.75 / zoom,
+			true
+		)
+	_finish_layer_draw("countries", started_usec)
+
+
+func _draw_region_layer(target: PrototypeV2MapLayer) -> void:
+	if get_map_scope() == MAP_SCOPE_CITY:
+		_finish_layer_draw("macro_regions", Time.get_ticks_usec())
+		return
+	super._draw_region_layer(target)
+
+
+func _draw_administrative_layer(target: PrototypeV2MapLayer) -> void:
+	if get_map_scope() == MAP_SCOPE_CITY:
+		_finish_layer_draw("administrative", Time.get_ticks_usec())
+		return
+	super._draw_administrative_layer(target)
+
+
+func _draw_transport_layer(target: PrototypeV2MapLayer) -> void:
+	if get_map_scope() != MAP_SCOPE_CITY:
+		super._draw_transport_layer(target)
+		return
+	var started_usec: int = Time.get_ticks_usec()
+	_draw_v2_3_local_transport(target)
+	_finish_layer_draw("transport", started_usec)
+
+
+func _draw_node_layer(target: PrototypeV2MapLayer) -> void:
+	if get_map_scope() != MAP_SCOPE_CITY:
+		super._draw_node_layer(target)
+		return
+	var started_usec: int = Time.get_ticks_usec()
+	_draw_v2_3_local_nodes(target)
+	_finish_layer_draw("cities_ports", started_usec)
+
+
+func _draw_selection_layer(target: PrototypeV2MapLayer) -> void:
+	if get_map_scope() == MAP_SCOPE_CITY:
+		_finish_layer_draw("selection", Time.get_ticks_usec())
+		return
+	super._draw_selection_layer(target)
+
+
+func _draw_label_layer(target: PrototypeV2MapLayer) -> void:
+	if get_map_scope() != MAP_SCOPE_CITY:
+		super._draw_label_layer(target)
+		return
+	var started_usec: int = Time.get_ticks_usec()
+	_draw_v2_3_local_labels(target)
+	_finish_layer_draw("labels", started_usec)
+
+
 func _rebuild_v2_3_local_catalog(catalog_revision: int) -> void:
 	_update_current_city_parent()
 	_v2_3_local_location_points.clear()
@@ -87,12 +166,18 @@ func _rebuild_v2_3_local_catalog(catalog_revision: int) -> void:
 
 
 func _rebuild_scope_catalog() -> void:
-	if _v2_3_local_overlay.is_empty() or _v2_3_local_locations.is_empty():
-		return
-	_rebuild_v2_3_local_catalog(maxi(1, _v2_3_local_catalog_revision))
-	_query_v2_3_local_locations(_world_view_rect().grow(4.0))
+	if not _v2_3_local_overlay.is_empty() and not _v2_3_local_locations.is_empty():
+		_rebuild_v2_3_local_catalog(maxi(1, _v2_3_local_catalog_revision))
+		_query_v2_3_local_locations(_world_view_rect().grow(4.0))
 	for layer: PrototypeV2MapLayer in [
-		_transport_layer, _node_layer, _selection_layer, _label_layer, _hud_layer,
+		_country_layer,
+		_region_layer,
+		_administrative_layer,
+		_transport_layer,
+		_node_layer,
+		_selection_layer,
+		_label_layer,
+		_hud_layer,
 	]:
 		_request_layer_redraw(layer)
 
@@ -162,7 +247,7 @@ func _draw_v2_3_local_nodes(target: PrototypeV2MapLayer) -> void:
 		if not bool(location.get("visible", false)) or not _location_visible_in_scope(location, scope):
 			continue
 		var point: Vector2 = _v2_3_local_location_points.get(str(location.get("location_id", "")), Vector2.ZERO) as Vector2
-		var radius: float = 6.0 if scope == MAP_SCOPE_CITY else 4.8
+		var radius: float = 6.4 if scope == MAP_SCOPE_CITY else 4.8
 		target.draw_circle(point, radius / zoom, Color("#d9c77a"))
 		target.draw_circle(point, 2.1 / zoom, Color("#273c38"))
 	var observer_id: String = str(_v2_3_local_overlay.get("observer_id", ""))
@@ -210,19 +295,19 @@ func _draw_v2_3_local_labels(target: PrototypeV2MapLayer) -> void:
 		var point: Vector2 = (_v2_3_local_location_points.get(str(location.get("location_id", "")), Vector2.ZERO) as Vector2) * zoom + pan
 		if not Rect2(Vector2.ZERO, size).grow(-8.0).has_point(point):
 			continue
-		var font_size: int = 12 if scope == MAP_SCOPE_CITY else 11
+		var font_size: int = 13 if scope == MAP_SCOPE_CITY else 11
 		var text_size: Vector2 = _font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size)
-		var rect := Rect2(point + Vector2(8.0, -14.0), text_size + Vector2(7.0, 5.0))
+		var rect := Rect2(point + Vector2(8.0, -15.0), text_size + Vector2(8.0, 6.0))
 		var collides: bool = false
 		for existing: Rect2 in accepted:
-			if existing.intersects(rect):
+			if existing.grow(4.0).intersects(rect):
 				collides = true
 				break
 		if collides:
 			continue
 		accepted.append(rect)
-		target.draw_rect(rect, Color(0.025, 0.06, 0.065, 0.84))
-		target.draw_string(_font, rect.position + Vector2(3.0, float(font_size) + 2.0), label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size, Color("#e6dfc5"))
+		target.draw_rect(rect, Color(0.025, 0.06, 0.065, 0.86))
+		target.draw_string(_font, rect.position + Vector2(4.0, float(font_size) + 2.0), label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size, Color("#e6dfc5"))
 
 
 func _draw_hud_layer(target: PrototypeV2MapLayer) -> void:

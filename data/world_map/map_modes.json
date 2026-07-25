@@ -9,7 +9,7 @@
     {"id":"population","label":"人口","icon":"●","description":"在同一地理底图上叠加人口密度"},
     {"id":"war","label":"战争状态","icon":"⚔","description":"仅在战争示例中增加控制覆盖、战线与战区标签"}
   ],
-  "zoom":{"minimum":0.82,"maximum":200.0,"factor":1.24,"far_max":1.5,"middle_max":6.2,"v2_1_1_maximum":12.0,"france_focus":18.0,"player_location_focus":180.0},
+  "zoom":{"minimum":0.82,"maximum":480.0,"factor":1.24,"far_max":1.5,"middle_max":6.2,"v2_1_1_maximum":12.0,"france_focus":18.0,"player_location_focus":420.0},
   "levels":{"far":{"id":"world","label":"世界远景"},"middle":{"id":"western_europe","label":"欧洲中景"},"near":{"id":"local_detail","label":"地点近景"}},
   "label_budgets":{
     "far":{"country":12,"city":4,"region":0,"administrative":0,"transport":0},

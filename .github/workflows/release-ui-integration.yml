@@ -1,0 +1,96 @@
+name: Release UI integration
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/release-ui-integration.yml"
+      - "scenes/v2_3/v2_3_life_loop_menu.tscn"
+      - "scenes/v2_3/v2_3_entry_hud_probe.tscn"
+      - "scenes/v2_3/v2_3_entry_hud_capture.tscn"
+      - "scripts/v2_3/v2_3_life_loop_menu.gd"
+      - "scripts/v2_3/v2_3_player_interface.gd"
+      - "scripts/v2_3/v2_3_minimal_hud_overlay.gd"
+      - "scenes/ui_spikes/holographic_workspace/**"
+      - "scripts/ui_spikes/holographic_workspace/**"
+      - "data/world_map/historical_political_entities_1900.json"
+      - "data/world_map/characters.json"
+      - "tests/v2_3/v2_3_entry_hud_probe.gd"
+      - "tests/v2_3/v2_3_entry_hud_capture.gd"
+      - "tools/audit_release_module_size.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  release-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      GODOT_BIN: "${{ github.workspace }}/.ci-godot/Godot_v4.6.3-stable_linux.x86_64"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Download Godot 4.6.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .ci-godot
+          curl --fail --location --retry 3 --retry-delay 2 "https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_linux.x86_64.zip" --output .ci-godot/godot.zip
+          unzip -q .ci-godot/godot.zip -d .ci-godot
+          chmod +x "${GODOT_BIN}"
+          "${GODOT_BIN}" --version
+      - name: Install visual test dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install --yes xvfb fonts-noto-cjk
+          fc-cache -f
+      - name: Audit release module size
+        run: python3 tools/audit_release_module_size.py
+      - name: Import project and parse scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" --headless --audio-driver Dummy --path . --editor --quit-after 3 --log-file release-ui-import.log
+          if grep -Eq "SCRIPT ERROR|^ERROR:" release-ui-import.log; then cat release-ui-import.log; exit 1; fi
+      - name: Verify historical flag and home-country rules
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM 150s xvfb-run --auto-servernum --server-args="-screen 0 1280x720x24" "${GODOT_BIN}" --audio-driver Dummy --path . --rendering-method gl_compatibility --scene res://scenes/ui_spikes/holographic_workspace/holographic_workspace_release_probe.tscn --log-file release-ui-historical.log
+          if grep -Eq "SCRIPT ERROR|^ERROR:" release-ui-historical.log; then cat release-ui-historical.log; exit 1; fi
+      - name: Verify title and formal HUD
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM 150s xvfb-run --auto-servernum --server-args="-screen 0 1280x720x24" "${GODOT_BIN}" --audio-driver Dummy --path . --rendering-method gl_compatibility --scene res://scenes/v2_3/v2_3_entry_hud_probe.tscn --log-file release-ui-formal.log
+          if grep -Eq "SCRIPT ERROR|^ERROR:" release-ui-formal.log; then cat release-ui-formal.log; exit 1; fi
+      - name: Capture title and formal HUD
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf artifacts/formal_ui
+          timeout --signal=TERM 180s xvfb-run --auto-servernum --server-args="-screen 0 1280x720x24" "${GODOT_BIN}" --audio-driver Dummy --path . --rendering-method gl_compatibility --scene res://scenes/v2_3/v2_3_entry_hud_capture.tscn --log-file release-ui-capture.log
+          if grep -Eq "SCRIPT ERROR|^ERROR:" release-ui-capture.log; then cat release-ui-capture.log; exit 1; fi
+          test -s artifacts/formal_ui/00_title_v0001.png
+          test -s artifacts/formal_ui/01_main_hud_closed.png
+          test -s artifacts/formal_ui/02_field_book_open.png
+      - name: Upload title and formal HUD screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-ui-screenshots
+          path: artifacts/formal_ui/*.png
+          if-no-files-found: error
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-ui-logs
+          path: |
+            release-ui-import.log
+            release-ui-historical.log
+            release-ui-formal.log
+            release-ui-capture.log
+          if-no-files-found: ignore

@@ -228,11 +228,11 @@ func _run() -> void:
 		map_file.get_as_text()
 	) as Dictionary
 	var zoom: Dictionary = map_document.get("zoom", {}) as Dictionary
-	test.equal(float(zoom.get("maximum", 0.0)), 200.0, "地图最大倍率为200")
+	test.equal(float(zoom.get("maximum", 0.0)), 480.0, "地图最大倍率为480")
 	test.equal(
 		float(zoom.get("player_location_focus", 0.0)),
-		180.0,
-		"人物所在地默认聚焦倍率为180"
+		420.0,
+		"人物所在地默认聚焦倍率为420"
 	)
 
 	var menu_packed: PackedScene = load(
