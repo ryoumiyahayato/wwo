@@ -20,6 +20,7 @@ func _ready() -> void:
 	version_label.text = DISPLAY_VERSION
 	prompt_label.text = "按任意键进入"
 	status_label.text = ""
+	_sync_legacy_title_nodes()
 	_wire_legacy_buttons()
 	_refresh_state()
 	grab_focus()
@@ -75,6 +76,15 @@ func _enter_world(forced_mode: String = "") -> void:
 	_entering = false
 	status_label.text = "无法打开游戏：%s" % error_string(error)
 	status_label.add_theme_color_override("font_color", Color("#c57b67"))
+
+
+func _sync_legacy_title_nodes() -> void:
+	var legacy_title := get_node_or_null("Center/Card/Margin/Content/TitleLabel") as Label
+	var legacy_phase := get_node_or_null("Center/Card/Margin/Content/PhaseLabel") as Label
+	if legacy_title != null:
+		legacy_title.text = BuildInfo.GAME_NAME
+	if legacy_phase != null:
+		legacy_phase.text = BuildInfo.display_version()
 
 
 func _wire_legacy_buttons() -> void:
