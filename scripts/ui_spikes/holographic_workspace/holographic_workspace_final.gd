@@ -1,5 +1,57 @@
 extends "res://scripts/ui_spikes/holographic_workspace/holographic_workspace_polish.gd"
 
+@onready var _moon_node: MeshInstance3D = %Moon
+
+
+func _ready() -> void:
+	super._ready()
+	_sync_moon_visibility()
+
+
+func _activate_button(action: String) -> void:
+	super._activate_button(action)
+	_sync_moon_visibility()
+
+
+func _focus_selected_country() -> void:
+	super._focus_selected_country()
+	_sync_moon_visibility()
+
+
+func _show_event_from_hud(event_id: String) -> void:
+	super._show_event_from_hud(event_id)
+	_sync_moon_visibility()
+
+
+func _return_to_global_world() -> void:
+	super._return_to_global_world()
+	_sync_moon_visibility()
+
+
+func _enter_region() -> void:
+	super._enter_region()
+	_sync_moon_visibility()
+
+
+func _enter_city(city_id: String) -> void:
+	super._enter_city(city_id)
+	_sync_moon_visibility()
+
+
+func _go_back() -> void:
+	super._go_back()
+	_sync_moon_visibility()
+
+
+func _sync_moon_visibility() -> void:
+	if _moon_node == null:
+		return
+	_moon_node.visible = (
+		space_level == WORLD
+		and world_mode == WORLD_COUNTRIES
+		and viewport_container.visible
+	)
+
 
 func _draw_region_cities_and_routes(rect: Rect2) -> void:
 	var city_ids: Array = _cities_by_region.get(selected_region_id, []) as Array
