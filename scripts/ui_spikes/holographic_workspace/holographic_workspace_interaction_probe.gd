@@ -171,25 +171,27 @@ func _count_changed_background_samples(before: Image, after: Image) -> int:
 		return 0
 	var width: int = mini(before.get_width(), after.get_width())
 	var height: int = mini(before.get_height(), after.get_height())
-	var start_x: int = maxi(0, width - 270)
-	var end_x: int = maxi(start_x, width - 18)
-	var start_y: int = mini(118, maxi(0, height - 1))
-	var end_y: int = maxi(start_y, height - 96)
+	var start_x: int = 12
+	var end_x: int = maxi(start_x, width - 12)
+	var start_y: int = mini(84, maxi(0, height - 1))
+	var end_y: int = maxi(start_y, height - 84)
 	var changed: int = 0
-	for y: int in range(start_y, end_y, 2):
-		for x: int in range(start_x, end_x, 2):
+	for y: int in range(start_y, end_y):
+		for x: int in range(start_x, end_x):
 			var before_color: Color = before.get_pixel(x, y)
 			var after_color: Color = after.get_pixel(x, y)
-			var difference: float = absf(
-				_luminance(before_color) - _luminance(after_color)
+			var difference: float = maxf(
+				absf(before_color.r - after_color.r),
+				maxf(
+					absf(before_color.g - after_color.g),
+					absf(before_color.b - after_color.b)
+				)
 			)
-			if difference > 0.0008:
+			if difference > 0.0015:
 				changed += 1
+				if changed >= 6:
+					return changed
 	return changed
-
-
-func _luminance(color: Color) -> float:
-	return color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722
 
 
 func _send_mouse_button(position: Vector2, pressed: bool) -> void:
