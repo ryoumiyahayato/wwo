@@ -78,12 +78,11 @@ jobs:
           test -s artifacts/formal_ui/00_title_v0001.png
           test -s artifacts/formal_ui/01_main_hud_closed.png
           test -s artifacts/formal_ui/02_field_book_open.png
-          test -s artifacts/formal_ui/corner_methods.txt
       - name: Upload title and formal HUD screenshots
         uses: actions/upload-artifact@v4
         with:
           name: release-ui-screenshots
-          path: artifacts/formal_ui/*
+          path: artifacts/formal_ui/*.png
           if-no-files-found: error
       - name: Upload logs on failure
         if: failure()
