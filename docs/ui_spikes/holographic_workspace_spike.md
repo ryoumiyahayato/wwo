@@ -2,71 +2,123 @@
 
 ## Status
 
-This is an isolated, runnable UI spike. It is not the formal main interface.
+This is an isolated, runnable Godot 4.6.3 UI spike. It does not replace the formal main interface.
 
 The formal entry remains:
 
 `run/main_scene="res://scenes/v2_3/v2_3_life_loop_menu.tscn"`
 
-The spike is verified with the official Godot 4.6.3 Linux build in GitHub Actions:
+The spike is verified in GitHub Actions with the official Godot 4.6.3 Linux build, GL Compatibility rendering, real mouse/key interaction probes, focused product regressions, Windows export and installer compilation.
 
-- project import and strict GDScript parsing pass;
-- the spike scene loads without `SCRIPT ERROR` or Godot `ERROR:` log entries;
-- the GL Compatibility renderer loads the hemisphere, moon and procedural background shaders;
-- the targeted interaction probe passes;
-- far, medium and near global zoom states, workspace, France focus, city and all nine macro-region views are rendered as real 1280×720 Godot screenshots.
+## Global historical model
 
-## What rotates
+The global hemisphere no longer treats the 177 modern Natural Earth features as 177 sovereign states in 1900.
 
-The visible world rotates.
+`historical_political_entities_1900.json` groups modern geometry into approximate political entities for the selected 1900 date, including:
 
-The transparent front-hemisphere shell stays fixed. Country outlines, coastlines, country flag skins, state markers and a restrained latitude/longitude grid rotate through the same `yaw` and `tilt` basis inside that shell. Keeping the already-clipped shell fixed avoids rotating a cut surface into an invalid viewing orientation, while the moving geography and grid preserve the visual result of rotating the observed world.
+- French Third Republic and French colonial territories;
+- United Kingdom and overseas British territories;
+- German Empire and German colonial territories;
+- Austria-Hungary;
+- Russian Empire;
+- Ottoman Empire;
+- Qing Empire;
+- Empire of Japan and Korean Empire;
+- United States and overseas control areas;
+- other European, Asian, African and American states or dependencies configured in the file.
 
-The interaction probe sends real mouse-button and mouse-motion events and confirms that dragging changes `yaw`. Release retains short inertia, and left/right edge hover applies slow rotation.
+Modern polygons not yet assigned to an explicit historical entity remain visible only as low-priority `待校订领土`. They are not presented as verified 1900 sovereign states.
 
-## Global country flag skins and zoom LOD
+This is a prototype historical aggregation layer, not exact historical GIS. It replaces the most misleading modern-state interpretation, but complex colonial borders, protectorates, leases, disputed areas and historical provincial boundaries still require dedicated source data.
 
-The global hemisphere no longer relies on persistent country names at the far overview scale.
+## Distinctive political-entity skins
 
-Every visible country polygon receives a low-saturation, semi-transparent flag-like skin. Explicit palettes cover the principal powers and a broad set of other countries in `country_flag_palettes.json`. Countries without an explicit palette still receive a deterministic restrained fallback palette, so no visible country is left unfilled.
+The global fill is no longer produced by blurred vertex-color interpolation.
 
-The palette is intentionally an identification layer rather than a literal cloth texture:
+Each political entity uses a cached 144×96 procedural texture. Standard horizontal, vertical, cross, canton, disc and quartered structures are supported. Several politically important or visually distinctive entities receive dedicated patterns:
 
-- common vertical, horizontal, cross, canton, disc and quartered structures are represented;
-- complex coats of arms are not reproduced;
-- historical great-power colors are preferred where configured, such as black-white-red for the German Empire;
-- the polygon boundary never deforms;
-- a low-frequency color and brightness wave gives the interior a mild flag-surface motion.
+- British Union structure;
+- United States stripes and canton;
+- Qing yellow field with central dragon-like disc structure;
+- Japanese sun disc;
+- Ottoman crescent structure;
+- Austria-Hungary dual-monarchy structure;
+- Nepal double pennant;
+- Bhutan diagonal dragon-like structure.
 
-The flag animation is driven by a 0.12-second low-frequency timer. It redraws only the isolated global sample while the global country view is visible. Geography projection is not rebuilt for every animation tick.
+The texture is clipped to the entity polygon. A small UV displacement and brightness modulation produce restrained cloth motion without deforming the political boundary.
 
-The mouse wheel controls a bounded global zoom from 74% to 124%. The 3D orthographic camera and 2D projection radius change together.
+Automated tests sample the generated textures and require distinct signatures for the major entities. Boundary animation is tested separately: alpha and width change slowly while the projected geometry checksum remains unchanged.
 
-Display levels are:
+## Rotation, zoom and labels
 
-- far view: flag skins and borders, with no persistent country-name layer;
-- medium view: the most important country names begin to fade in;
-- near view: a larger bounded set of country names appears;
-- selected or hovered countries retain immediate identification at every zoom.
+The transparent front-hemisphere shell remains fixed. Geography, political fills, borders, war fronts, state markers and longitude/latitude grid rotate through the shared `yaw` and `tilt` transform.
 
-Country names use priority limits and approximate collision rectangles. They are never intended to label all 177 country features simultaneously.
+- left drag rotates the world;
+- release keeps short inertia;
+- left/right edge hover produces slow rotation;
+- mouse wheel changes bounded global zoom;
+- the global range is 74% to 600%;
+- `放大定位` recentres the selected entity and computes a fit zoom from its angular extent.
 
-The moon is available as a global spatial reference at overview and medium zoom. It is hidden at close country-reading zoom and outside the global 3D country view so it does not crowd the map or float beside the flat France-focus view.
+The minimum screenshot is the complete hemisphere overview. At high zoom the hemisphere extends outside the viewport, allowing small entities such as Nepal and Bhutan to remain complete and readable instead of being represented only by an anchor.
 
-## Spatial flow
+Label LOD is progressive:
 
-The player-facing flow is:
+- far overview: no persistent political-entity names;
+- medium zoom: high-priority entities begin to appear;
+- high zoom: more names appear with a bounded label count and collision filtering;
+- selected and hovered entities remain identifiable at all zoom levels.
 
-1. global country overview on the 3D hemisphere;
-2. France country-focus view with nine selectable macro regions;
-3. selected macro-region view with its constituent administrative subdivisions and city entries;
-4. city view with configured institutions, institution parent links and configured character badges.
+The moon is visible only in the global 3D overview and medium zoom. It is hidden during close country reading and in flat political, regional and city layers.
 
-The nine French macro regions are not selected at global scale. France is selected first, then opened as an enlarged country-focus view where the macro-region polygons are clickable.
+## Political borders and war layer
 
-## France regional coverage
+Historical political borders use merged entity outlines rather than drawing every modern polygon as a separate sovereign border.
 
-All nine configured macro regions are implemented and included in automated screenshots:
+- sovereign and imperial entities use a solid slowly pulsing outline;
+- dependencies and autonomous areas use dashed outlines;
+- provisional territories are visually subdued;
+- contested or fragmented areas use warmer warning colors;
+- selected and hovered entities receive stronger outlines.
+
+`historical_political_entities_1900.json` also defines prototype conflict paths for the selected date, including the Second Boer War, Boxer crisis, Philippine-American War and War of the Golden Stool. The global `战争边界` control toggles this layer.
+
+War paths and historical borders are visual planning data, not a complete operational front simulation. They do not alter formal military systems.
+
+## Global hierarchy
+
+The generic hierarchy for non-France entities is:
+
+1. global historical political entity;
+2. member territory or political holding;
+3. first-level administrative region;
+4. first-level-region local view.
+
+For an entity with one member territory, that territory is selected automatically. For a territory with one first-level region, the hierarchy automatically skips the redundant selection layer.
+
+All configured global territories can use `world_admin1.json`, generated from Natural Earth admin-1 geometry by `tools/build_world_admin1.py`.
+
+Current generated audit:
+
+- 4,589 first-level regions;
+- 251 country or territory codes;
+- 6,334 polygons.
+
+These admin-1 boundaries are a modern fallback when historical regional geometry is unavailable. The interface states this explicitly and does not claim that every region matches 1900.
+
+At global zoom 220% or greater, the selected territory's admin-1 boundaries can appear directly on the globe. At higher zoom, a bounded set of admin-1 labels is shown.
+
+## France hierarchy
+
+France retains its dedicated sample hierarchy:
+
+1. French Third Republic on the global hemisphere;
+2. France focus with nine macro regions;
+3. selected macro region with constituent administrative subdivisions and city entries;
+4. city with configured institutions, parent links and character badges.
+
+The nine macro regions are:
 
 1. Northern Industrial Belt;
 2. Paris Basin;
@@ -78,160 +130,111 @@ All nine configured macro regions are implemented and included in automated scre
 8. Rhône Valley;
 9. Mediterranean Coast.
 
-Every macro region has:
+The region layer uses one geographic scale with longitude corrected by the cosine of reference latitude. It no longer stretches latitude and longitude independently. No synthetic transport network is drawn.
 
-- one or more real administrative-unit polygons from `regions.json`;
-- separately rendered subdivision fills and borders;
-- subdivision hover and click selection;
-- administrative source-code labels;
-- at least one city entry;
-- previous/next region navigation.
+## Background and moon
 
-The repository data contains 96 metropolitan administrative units assigned across the nine macro regions. Their geometry is based on Natural Earth modern French department/province boundaries. It is a reliable spatial planning reference for the spike, but it is not presented as an exact reconstruction of every French boundary in 1900. The repository notes known historical differences such as the former Seine department.
+The background is a procedural, GL-compatible dark starfield with:
 
-A bounded set of additional French city anchors exists only inside the isolated spike runtime so every macro region can demonstrate city entry. These additions do not modify formal `cities.json`, saves or formal map systems. Cities without configured institution data say so rather than receiving fictional institutions.
-
-## Corrected regional projection
-
-The former region view stretched longitude and latitude independently to fill the panel, which visibly flattened or widened some regions.
-
-The region layer now uses one uniform geographic scale. Longitude is adjusted by the cosine of the reference latitude, latitude and longitude then share the same pixel scale, and the result is centered inside the available map rectangle. The interaction probe checks this ratio numerically.
-
-A small offset shadow and differentiated subdivision fills provide restrained depth separation. The region layer remains a deliberate enlarged planning map rather than pretending to be another globe. It is no longer geometrically squashed.
-
-No synthetic transport network is drawn. The previous arbitrary line joining cities by longitude was removed. City markers retain their actual configured or spike-supplemented coordinates.
-
-## Background
-
-The solid black background is replaced by a procedural GL-compatible canvas shader with:
-
-- a very dark navy/green gradient;
-- sparse stars of several restrained scales;
+- restrained navy/green gradient;
+- sparse stars at several scales;
 - low-opacity cool and warm cloud bands;
-- a soft vignette;
-- fixed-position stars with slow, phase-shifted sine brightness changes.
+- soft vignette;
+- fixed star positions with slow phase-shifted brightness changes.
 
-Stars do not jump position, flicker on and off or produce rapid flashes. The background shader runs continuously while visible; the country flag wave uses a separate bounded low-frequency redraw.
+The moon is a real `SphereMesh` in the isolated 3D SubViewport with a procedural lit surface. It is not a 2D circle.
 
-## Data used
+## Rendering and performance structure
 
-- Global country outlines and names: all features in `world_coastlines.json`.
-- Country IDs: `iso_a3`, with France normalized to `country_fra`.
-- Explicit country identification palettes: `country_flag_palettes.json`.
-- Macro regions: `regions[].administrative_unit_ids`.
-- Administrative subdivisions: `administrative_units[].geometry[].outer`.
-- Formal region cities: `cities[].parent_region_id` and `cities[].lon_lat`.
-- Institutions: `institutions.json`, including `city_id`, `parent_region_id`, `lon_lat`, `agenda`, `mandate` and `parent_institution_id`.
-- Character profiles: `characters.json` identities.
-- World status markers: a bounded set derived from configured institution agendas.
+The draw order is:
 
-## Rendering structure
+1. procedural background;
+2. isolated `World3D` SubViewport with hemisphere and moon;
+3. cached geographic overlays, entity textures, borders, fronts and HUD.
 
-The scene draw order is explicit:
+Global lon/lat points are converted to unit-sphere vectors at load time. Projection results are cached until rotation, zoom, selection or layout changes. Back-hemisphere lines and polygons are clipped at the horizon.
 
-1. procedural background `ColorRect`;
-2. isolated `World3D` SubViewport containing the fixed front-hemisphere shell and moon;
-3. cached geographic overlays, flag skins and all HUD surfaces above the SubViewport.
+Flag animation reuses cached textures and projected polygons. It does not rebuild geographic data every timer tick.
 
-The camera is a sibling of the hemisphere mesh. The SubViewport uses `own_world_3d=true`, GL Compatibility and `UPDATE_ONCE`; it is disabled and hidden outside the world level.
+The global admin-1 file is generated deterministically in CI and loaded by the isolated spike. Production integration should later split or lazily load this data according to selected entity.
 
-Global lon/lat coordinates are converted to unit-sphere vectors once at load time. Projection results are cached until rotation, selection, layout or zoom changes. Hidden-hemisphere lines and country fills are clipped at an interpolated horizon crossing. Flag animation changes only vertex colors and does not rebuild the geographic cache.
+## Functional controls
 
-All coastline rings are loaded and simplified with a bounded Ramer-Douglas-Peucker pass rather than the former first-160-ring cutoff or fixed-step skipping.
+- F1/F2 layout switching;
+- global drag, inertia and edge-hover rotation;
+- wheel zoom from overview to small-state reading scale;
+- political-entity selection and fit zoom;
+- war-layer toggle;
+- generic entity → territory → admin-1 → local navigation;
+- France → macro region → subdivision/city navigation;
+- Esc closes information/HUD surfaces first, then returns one spatial level;
+- collapsible F2 workspace;
+- functional country, character, local-time-speed and activity corners.
 
-## Functional interaction
-
-- F1/F2 switch the two layout presets through `_unhandled_key_input()`.
-- Left drag rotates global geography, flag skins and the latitude/longitude grid.
-- Release retains short inertia.
-- Hovering near the hemisphere left/right edge applies slow rotation.
-- Mouse-wheel input changes bounded global zoom.
-- Country anchors can be discovered and selected globally.
-- Zoom controls the fade-in of bounded, collision-filtered country names.
-- France can be entered from global selection or the country HUD surface.
-- Actual region polygons can be selected in France focus.
-- All nine macro regions can be reviewed with previous/next controls.
-- Administrative subdivisions can be hovered and selected inside a macro region.
-- Region city markers and buttons enter the city layer.
-- Institution nodes in the city layer open the top information surface.
-- Esc closes active information/HUD surfaces before returning one spatial level.
-- The F2 workspace can be collapsed and reopened.
-- The top information surface uses a Tween slide transition.
-
-## Functional four-corner HUD
-
-- Country corner opens configured country/government information and can locate France.
-- Character corner opens configured worker/official data and switches the displayed profile.
-- Time corner controls pause and 1×/2×/4× speed for a spike-local clock.
-- Activity corner opens configured institution agendas, marks them read and locates an agenda in France focus.
-
-These controls remain spike-local and do not alter formal game systems.
+Spike time and HUD controls remain isolated and do not alter formal game systems.
 
 ## Automated verification
 
-Workflow:
+`.github/workflows/holographic-workspace-spike.yml` performs:
 
-`.github/workflows/holographic-workspace-spike.yml`
+1. deterministic global admin-1 generation and audit;
+2. project import and strict script parsing;
+3. direct spike-scene loading;
+4. main interaction probe;
+5. independent global admin-1 hierarchy probe;
+6. GL Compatibility screenshot capture;
+7. screenshot artifact upload.
 
-The workflow uses Godot 4.6.3 and fails when logs contain `SCRIPT ERROR` or Godot `ERROR:` entries. It performs:
+The probes verify:
 
-1. project import;
-2. direct spike-scene loading;
-3. an Xvfb interaction probe;
-4. GL Compatibility screenshot capture;
-5. screenshot artifact upload.
+- modern Germany is replaced by the German Empire entity;
+- major 1900 empires and Nepal/Bhutan exist;
+- provisional entities do not replace the entire world;
+- distinctive flag-texture signatures;
+- border pulse changes without geometry movement;
+- war data exists;
+- far labels are hidden and high-zoom labels appear;
+- Nepal and Bhutan remain readable at bounded maximum zoom;
+- German Empire generic focus and admin-1 flow;
+- global admin-1 record and country coverage;
+- Russian Empire territory aggregation;
+- France's nine-region flow and existing city/HUD interactions.
 
-The interaction probe verifies:
+Real screenshots include:
 
-- F1/F2 switching;
-- drag changing `yaw`;
-- a minimum explicit flag-palette count;
-- visible-country flag-polygon generation;
-- far-zoom country names hidden;
-- flag-wave time advancing;
-- real mouse-wheel zoom changing both `world_zoom` and the orthographic camera;
-- close-zoom country names faded in;
-- close-zoom moon suppression and overview restoration;
-- France country selection and focus entry;
-- exactly nine macro regions;
-- geometry, administrative subdivisions and city coverage for every region;
-- the corrected uniform regional projection ratio;
-- macro-region polygon selection;
-- Northern Industrial Belt subdivision rendering;
-- previous/next region controls;
-- region and city entry;
-- 3D viewport shutdown outside the world level;
-- Esc return through city → region → country focus → global;
-- country-corner opening;
-- 4× speed control.
+- minimum 1900 world overview;
+- war-boundary view;
+- high-zoom entity names;
+- complete Nepal focus;
+- German Empire focus;
+- Germany admin-1 and local admin-1 views;
+- Russian Empire holdings;
+- France focus, nine French macro regions and city view.
 
-The screenshot job produces far flag overview, medium zoom, close country-name and selected-France global views, plus dedicated images for every one of the nine macro regions.
-
-## How to run locally
+## Run locally
 
 Open or run:
 
 `res://scenes/ui_spikes/holographic_workspace/holographic_workspace_spike.tscn`
 
-Suggested review flow:
+Suggested review:
 
-1. use the wheel to compare far flag overview and close country-name view;
-2. rotate the global hemisphere;
-3. select France and choose `进入国家`;
-4. select one of the nine macro regions;
-5. choose `进入大区`;
-6. use `上一个大区` and `下一个大区` to review all regions;
-7. hover or click administrative subdivisions;
-8. enter a mapped city and open an institution node;
-9. return through city, region, France focus and global;
-10. test every corner panel, F1/F2 and the collapsible F2 workspace.
+1. rotate the minimum global overview;
+2. toggle war boundaries;
+3. select and fit Nepal or Bhutan;
+4. select the German or Russian Empire and enter its territory hierarchy;
+5. inspect a first-level administrative region;
+6. return globally and enter France;
+7. review all nine French macro regions and a city;
+8. test F1/F2 and all four corner controls.
 
 ## Known limitations
 
-- Only France has a detailed country-focus implementation. Other countries are selectable global objects but do not receive fabricated internal data.
-- Explicit flag palettes simplify complex emblems and do not claim exact vexillological reconstruction for every territory in 1900.
-- Countries without an explicit entry use deterministic restrained fallback colors.
-- Modern Natural Earth department geometry is a documented visual planning reference, not an exact 1900 boundary reconstruction.
-- Spike-supplemented cities provide geographic entry coverage but do not fabricate institutions or gameplay content.
-- CI covers 1280×720. Manual review remains useful for multiple window dimensions, prolonged edge-hover feel and target-hardware CPU/GPU measurements.
-- The runtime remains intentionally isolated and should be decomposed before any future production integration.
+- historical political boundaries are approximate aggregations of modern geometry;
+- global admin-1 boundaries are modern fallback data, not verified 1900 subdivisions;
+- provisional territories remain where explicit historical mapping is incomplete;
+- the conflict layer is illustrative and not a complete military front database;
+- only France has a dedicated hand-shaped macro-region and city sample;
+- other entities use the generic member-territory and modern admin-1 fallback hierarchy;
+- CI screenshots use 1280×720; manual review remains useful for additional window sizes and target hardware;
+- the isolated runtime is deliberately layered for the spike and should be decomposed before production integration.
