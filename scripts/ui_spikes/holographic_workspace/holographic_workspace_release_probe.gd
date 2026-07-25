@@ -26,7 +26,18 @@ func _run_probe() -> void:
 		return
 	if not _require(generated_count == explicit_count, "仍有明确政治实体没有生成旗帜纹理"):
 		return
-	if not _require(unique_signatures >= int(ceil(float(explicit_count) * 0.75)), "政治实体旗帜识别结构重复过多"):
+	if not _require(unique_signatures == explicit_count, "政治实体旗面仍存在视觉签名重复"):
+		return
+	var navigation := workspace.call("navigation_coverage_report") as Dictionary
+	var total_territories := int(navigation.get("total_territories", 0))
+	var classified := int(navigation.get("curated_navigation", 0)) + int(navigation.get("modern_reference", 0)) + int(navigation.get("country_terminal", 0))
+	if not _require(total_territories > 0 and classified == total_territories, "政治实体辖区没有全部得到数据等级分类"):
+		return
+	if not _require(int(navigation.get("curated_navigation", 0)) >= 1, "法兰西专门导航没有被识别"):
+		return
+	if not _require(int(navigation.get("modern_reference", 0)) > 0, "现代行政参考层没有被明确分类"):
+		return
+	if not _require(not bool(navigation.get("fully_historical", true)), "现代参考数据被错误标记为完整1900历史GIS"):
 		return
 	var profiles := workspace.get("_character_profiles") as Dictionary
 	profiles["german_test"] = {"nationality_id":"country_deu", "culture_id":"deu", "occupation":"行政主官", "role":"行政主官", "position":"地方行政主官"}
@@ -50,7 +61,7 @@ func _run_probe() -> void:
 		return
 	workspace.set("selected_world_admin1_id", str((german_regions[0] as Dictionary).get("id", "")))
 	workspace.call("_enter_selected_world_admin1")
-	if not _require(str(workspace.get("space_level")) == "city", "德国人物无法从本国一级区进入本地层"):
+	if not _require(str(workspace.get("space_level")) == "city", "德国人物无法从本国一级区进入本地参考层"):
 		return
 	workspace.call("_return_to_global_world")
 	workspace.set("active_character_key", "worker")
