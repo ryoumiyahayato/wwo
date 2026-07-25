@@ -16,6 +16,10 @@ func _ready() -> void:
 	workspace = packed_scene.instantiate()
 	add_child(workspace)
 	await _settle_frames(8)
+	await _capture("00_global_twinkle_a")
+	await get_tree().create_timer(1.6).timeout
+	await _settle_frames(2)
+	await _capture("00_global_twinkle_b")
 	await _capture("01_global_focus")
 
 	workspace._set_layout(workspace.LAYOUT_WORKSPACE)
