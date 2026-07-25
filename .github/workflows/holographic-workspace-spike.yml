@@ -11,6 +11,7 @@ on:
       - "data/world_map/cities.json"
       - "data/world_map/regions.json"
       - "data/world_map/world_coastlines.json"
+      - "data/world_map/country_flag_palettes.json"
       - "data/world_map/institutions.json"
       - "data/world_map/characters.json"
   workflow_dispatch:
@@ -118,7 +119,11 @@ jobs:
           fi
           test -s artifacts/holographic_workspace/00_global_twinkle_a.png
           test -s artifacts/holographic_workspace/00_global_twinkle_b.png
+          test -s artifacts/holographic_workspace/01_global_flag_overview.png
           test -s artifacts/holographic_workspace/01_global_focus.png
+          test -s artifacts/holographic_workspace/01_global_mid_zoom.png
+          test -s artifacts/holographic_workspace/01_global_country_names.png
+          test -s artifacts/holographic_workspace/01_global_france_selected.png
           test -s artifacts/holographic_workspace/02_operation_workspace.png
           test -s artifacts/holographic_workspace/03_france_region_selected.png
           test -s artifacts/holographic_workspace/04_region_layer.png
