@@ -33,6 +33,8 @@ func _run_probe() -> void:
 		return
 	if not _require(not bool(menu.call("accepts_entry_event", escape_event)), "Escape错误地被接受为进入输入"):
 		return
+	if not _require(str(menu.call("entry_action_for_event", escape_event)) == "stay", "Escape没有保持在标题页"):
+		return
 	menu.queue_free()
 	await _settle_frames(3)
 	get_tree().set_meta(&"v2_3_launch_mode", "new")
@@ -51,6 +53,13 @@ func _run_probe() -> void:
 	if not _require(str(overlay.call("_home_country_key")).contains("fra"), "法国人物没有得到法国国家徽记"):
 		return
 	if not _require(str(overlay.call("_role_category")) in ["worker", "official", "farmer", "merchant", "intellectual", "royal"], "人物身份图标分类无效"):
+		return
+	var country_rect := overlay.call("_country_cover_rect") as Rect2
+	var character_rect := overlay.call("_character_cover_rect") as Rect2
+	if not _require(country_rect.size.x <= 110.0 and character_rect.size.x <= 110.0, "左侧图标仍被大面积空白面板包围"):
+		return
+	var book_tab := overlay.call("_book_tab_rect") as Rect2
+	if not _require(book_tab.end.x >= 38.0 and book_tab.size.y >= 120.0, "事务簿书脊不可辨识"):
 		return
 	if not _require(not (overlay.call("_left_page_lines") as Array).is_empty(), "事务书左页没有内容"):
 		return
