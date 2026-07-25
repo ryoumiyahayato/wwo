@@ -27,7 +27,6 @@ func _draw() -> void:
 		return
 	if open_panel.is_empty() and not system_menu_open:
 		_draw_map_layer_controls()
-		_draw_supply_status()
 
 
 func _draw_country_corner() -> void:
@@ -79,24 +78,6 @@ func _draw_map_layer_controls() -> void:
 		var item: Array = items[index] as Array
 		_compact_action(Rect2(x, rect.position.y + 6.0, widths[index], 30.0), str(item[0]), current_scope == str(item[1]), "map_scope", str(item[1]), "切换地图层级")
 		x += widths[index] + 7.0
-
-
-func _draw_supply_status() -> void:
-	var binding: V23PlayerUiBinding = life_binding as V23PlayerUiBinding
-	if binding == null:
-		return
-	var maintenance: Dictionary = binding.person_view().get("maintenance", {}) as Dictionary
-	if maintenance.is_empty():
-		return
-	var rect := Rect2(20.0, 608.0, 326.0, 38.0)
-	_surface(rect, Color(0.025, 0.055, 0.06, 0.88), Color(INK_DIM, 0.18), 7)
-	var active_need: Dictionary = maintenance.get("active_need", {}) as Dictionary
-	var suffix: String = ""
-	if not active_need.is_empty():
-		var item_label: String = "食品" if str(active_need.get("item_type", "")) == "food" else "生活用品"
-		var status: String = str(active_need.get("status", ""))
-		suffix = " · %s%s" % [item_label, "已安排补充" if status.contains("scheduled") else "次日重试"]
-	_text(rect.position + Vector2(12.0, 25.0), "食品约 %d 天 · 生活用品约 %d 天%s" % [int(maintenance.get("food_days", 0)), int(maintenance.get("essentials_days", 0)), suffix], 12, AMBER if int(maintenance.get("food_days", 0)) <= 2 or int(maintenance.get("essentials_days", 0)) <= 2 else INK_MUTED)
 
 
 func _activate(action: String, payload: Variant) -> void:
