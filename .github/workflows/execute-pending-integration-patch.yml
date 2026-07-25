@@ -20,18 +20,36 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          awk '/<<'"'"'PATCH_B64'"'"'/{capture=1; next} /^PATCH_B64$/{capture=0} capture' \
-            .github/workflows/apply-pending-integration-patch.yml > /tmp/wwo_patch.zip.b64
-          test -s /tmp/wwo_patch.zip.b64
-          base64 --decode /tmp/wwo_patch.zip.b64 > /tmp/wwo_patch.zip
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64
+          import hashlib
+
+          source_path = Path('.github/workflows/apply-pending-integration-patch.yml')
+          source = source_path.read_text(encoding='utf-8')
+          marker = "<<'PATCH_B64'\n"
+          start = source.index(marker) + len(marker)
+          end = source.index('\nPATCH_B64', start)
+          payload = ''.join(source[start:end].split())
+          archive = base64.b64decode(payload, validate=True)
+          digest = hashlib.sha256(archive).hexdigest()
+          print(f'payload_chars={len(payload)} archive_bytes={len(archive)} sha256={digest}')
+          expected_digest = 'c047d530faf568f0b96fa74ff9a12d24cb531b15c803d96528695457e90d4ff3'
+          if digest != expected_digest:
+              raise SystemExit(f'embedded patch checksum mismatch: {digest}')
+          Path('/tmp/wwo_patch.zip').write_bytes(archive)
+          PY
           unzip -tq /tmp/wwo_patch.zip
           rm -rf /tmp/wwo_patch
           unzip -q /tmp/wwo_patch.zip -d /tmp
+          test -f /tmp/wwo_patch/scripts/v2_3/v2_3_minimal_hud_overlay.gd
+          test -f /tmp/wwo_patch/scripts/ui_spikes/holographic_workspace/holographic_workspace_release.gd
           rsync -a /tmp/wwo_patch/ ./
           rm -f .github/workflows/apply-pending-integration-patch.yml
           rm -f .github/workflows/execute-pending-integration-patch.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
+          git status --short
           git commit -m "feat: integrate release entry HUD and home-country hierarchy"
           git push origin HEAD:${{ github.event.pull_request.head.ref }}
