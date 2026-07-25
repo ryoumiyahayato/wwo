@@ -1,9 +1,20 @@
 class_name V23PlayerInterface
 extends "res://scripts/v2_3/v2_3_minute_formal_interface_v2.gd"
-## Product-facing readability rules. Developer surfaces keep their own compact
-## density, while every ordinary player text call has a 12 px logical floor.
+## Product-facing readability rules and the restrained icon/book workspace overlay.
 
 const PLAYER_MINIMUM_FONT_SIZE: int = 12
+const MINIMAL_HUD_OVERLAY_SCRIPT = preload("res://scripts/v2_3/v2_3_minimal_hud_overlay.gd")
+
+var minimal_hud_overlay: V23MinimalHudOverlay
+
+
+func _ready() -> void:
+	super._ready()
+	minimal_hud_overlay = MINIMAL_HUD_OVERLAY_SCRIPT.new() as V23MinimalHudOverlay
+	minimal_hud_overlay.name = "MinimalHudOverlay"
+	minimal_hud_overlay.configure(self)
+	add_child(minimal_hud_overlay)
+	move_child(minimal_hud_overlay, get_child_count() - 1)
 
 
 func _text(
