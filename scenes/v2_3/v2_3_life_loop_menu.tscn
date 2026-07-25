@@ -118,6 +118,14 @@ layout_mode = 2
 [node name="Content" type="VBoxContainer" parent="Center/Card/Margin"]
 layout_mode = 2
 
+[node name="TitleLabel" type="Label" parent="Center/Card/Margin/Content"]
+layout_mode = 2
+text = "1900"
+
+[node name="PhaseLabel" type="Label" parent="Center/Card/Margin/Content"]
+layout_mode = 2
+text = "v0.001a (dev)"
+
 [node name="NewReviewButton" type="Button" parent="Center/Card/Margin/Content"]
 unique_name_in_owner = true
 layout_mode = 2
