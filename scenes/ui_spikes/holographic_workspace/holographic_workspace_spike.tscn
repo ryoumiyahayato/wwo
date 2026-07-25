@@ -50,6 +50,11 @@ script = ExtResource("2_hemi")
 
 [node name="Surface" type="MeshInstance3D" parent="HemisphereViewportContainer/HemisphereViewport/Hemisphere3D"]
 
+[node name="Moon" type="MeshInstance3D" parent="HemisphereViewportContainer/HemisphereViewport/Hemisphere3D"]
+unique_name_in_owner = true
+position = Vector3(1.18, 0.53, 0.08)
+rotation = Vector3(-0.08, 0.24, 0.0)
+
 [node name="Camera3D" type="Camera3D" parent="HemisphereViewportContainer/HemisphereViewport"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.35)
 projection = 1
