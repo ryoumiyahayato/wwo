@@ -37,10 +37,7 @@ func _run_probe() -> void:
 	await get_tree().create_timer(1.6).timeout
 	await _settle_frames(2)
 	var background_after: Image = workspace.get_viewport().get_texture().get_image()
-	var changed_samples: int = _count_changed_background_samples(
-		background_before,
-		background_after
-	)
+	var changed_samples: int = _count_changed_background_samples(background_before, background_after)
 	if not _require(changed_samples >= 6, "星空在1.6秒内没有形成可测量的缓慢明暗变化"):
 		return
 
@@ -53,7 +50,40 @@ func _run_probe() -> void:
 	if not _require(int(workspace.get("layout_mode_id")) == 0, "F1未切换半球聚焦布局"):
 		return
 
+	workspace.call("_set_world_zoom", 0.74)
+	workspace.call("_ensure_projection_cache")
+	var flag_palettes: Dictionary = workspace.get("_flag_palettes") as Dictionary
+	var flag_polygons: Dictionary = workspace.get("_flag_screen_polygons") as Dictionary
+	if not _require(flag_palettes.size() >= 45, "明确配置的国家旗色数量不足"):
+		return
+	if not _require(flag_polygons.size() >= 70, "远景没有为足够多的可见国家生成旗色蒙皮"):
+		return
+	if not _require(float(workspace.call("_country_label_alpha")) <= 0.01, "远景仍然显示常驻国家名称"):
+		return
+	var flag_time_before: float = float(workspace.get("_flag_time"))
+	workspace.call("_on_flag_timer_timeout")
+	if not _require(float(workspace.get("_flag_time")) > flag_time_before, "旗色蒙皮波动时间没有推进"):
+		return
+
 	var centre: Vector2 = workspace.get("_hemisphere_center") as Vector2
+	var camera: Camera3D = workspace.get_node("HemisphereViewportContainer/HemisphereViewport/Camera3D") as Camera3D
+	var zoom_before: float = float(workspace.get("world_zoom"))
+	var camera_size_before: float = camera.size
+	_send_wheel(centre, MOUSE_BUTTON_WHEEL_UP)
+	if not _require(float(workspace.get("world_zoom")) > zoom_before, "滚轮向上没有放大全球半球"):
+		return
+	if not _require(camera.size < camera_size_before, "滚轮放大没有同步正交相机"):
+		return
+	workspace.call("_set_world_zoom", 1.24)
+	if not _require(float(workspace.call("_country_label_alpha")) >= 0.98, "近景没有淡入国家名称"):
+		return
+	if not _require(not moon.visible, "近景放大后月球仍挤占国家阅读空间"):
+		return
+	workspace.call("_set_world_zoom", 0.86)
+	if not _require(moon.visible, "恢复全球总览后月球没有重新显示"):
+		return
+
+	centre = workspace.get("_hemisphere_center") as Vector2
 	var yaw_before: float = float(workspace.get("yaw"))
 	_send_mouse_button(centre, true)
 	_send_mouse_motion(centre + Vector2(42.0, 0.0), Vector2(42.0, 0.0))
@@ -188,10 +218,7 @@ func _count_changed_background_samples(before: Image, after: Image) -> int:
 			var after_color: Color = after.get_pixel(x, y)
 			var difference: float = maxf(
 				absf(before_color.r - after_color.r),
-				maxf(
-					absf(before_color.g - after_color.g),
-					absf(before_color.b - after_color.b)
-				)
+				maxf(absf(before_color.g - after_color.g), absf(before_color.b - after_color.b))
 			)
 			if difference > 0.0015:
 				changed += 1
@@ -204,6 +231,15 @@ func _send_mouse_button(position: Vector2, pressed: bool) -> void:
 	var event: InputEventMouseButton = InputEventMouseButton.new()
 	event.button_index = MOUSE_BUTTON_LEFT
 	event.pressed = pressed
+	event.position = position
+	event.global_position = position
+	workspace.call("_gui_input", event)
+
+
+func _send_wheel(position: Vector2, button_index: MouseButton) -> void:
+	var event: InputEventMouseButton = InputEventMouseButton.new()
+	event.button_index = button_index
+	event.pressed = true
 	event.position = position
 	event.global_position = position
 	workspace.call("_gui_input", event)
