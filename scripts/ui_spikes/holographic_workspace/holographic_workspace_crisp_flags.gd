@@ -157,7 +157,9 @@ func _distinctive_flag_color(pattern: String, colors: PackedColorArray, u: float
 	if pattern == "stripes_canton":
 		var stripe: Color = c0 if int(floor(v * 13.0)) % 2 == 0 else c1
 		if u < 0.42 and v < 0.54:
-			var star_cell: Vector2 = Vector2(fract(u * 13.0), fract(v * 11.0)) - Vector2(0.5, 0.5)
+			var grid_u: float = u * 13.0
+			var grid_v: float = v * 11.0
+			var star_cell: Vector2 = Vector2(grid_u - floor(grid_u), grid_v - floor(grid_v)) - Vector2(0.5, 0.5)
 			return c1 if star_cell.length() < 0.075 else c2
 		return stripe
 	if pattern == "dragon_disc":
