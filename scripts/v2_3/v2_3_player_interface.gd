@@ -41,6 +41,10 @@ func _draw_time_corner() -> void:
 	pass
 
 
+func _draw_system_corner() -> void:
+	pass
+
+
 func _draw_activity_corner() -> void:
 	pass
 
