@@ -1,4 +1,4 @@
-extends "res://scripts/ui_spikes/holographic_workspace/holographic_workspace_crisp_flags.gd"
+extends "res://scripts/ui_spikes/holographic_workspace/holographic_workspace_crisp_flags_fixed.gd"
 
 
 func _focus_selected_country() -> void:
