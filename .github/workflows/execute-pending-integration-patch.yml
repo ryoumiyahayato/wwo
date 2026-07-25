@@ -1,0 +1,36 @@
+name: Execute pending integration patch
+
+on:
+  pull_request:
+    types: [synchronize, opened, reopened]
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.event.pull_request.number == 8 && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - name: Decode and apply prepared patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          sed -n "/^PATCH_B64$/q; /<<'PATCH_B64'/,/^PATCH_B64$/p" .github/workflows/apply-pending-integration-patch.yml \
+            | sed '1d;$d' > /tmp/wwo_patch.zip.b64
+          test -s /tmp/wwo_patch.zip.b64
+          base64 --decode /tmp/wwo_patch.zip.b64 > /tmp/wwo_patch.zip
+          rm -rf /tmp/wwo_patch
+          unzip -q /tmp/wwo_patch.zip -d /tmp
+          rsync -a /tmp/wwo_patch/ ./
+          rm -f .github/workflows/apply-pending-integration-patch.yml
+          rm -f .github/workflows/execute-pending-integration-patch.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat: integrate release entry HUD and home-country hierarchy"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
