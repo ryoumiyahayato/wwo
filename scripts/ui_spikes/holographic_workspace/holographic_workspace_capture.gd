@@ -23,28 +23,50 @@ func _ready() -> void:
 
 	workspace._set_world_zoom(0.74)
 	await _settle_frames(4)
-	await _capture("01_global_flag_overview")
+	await _capture("01_1900_global_overview")
 	await _capture("01_global_focus")
 
-	workspace._set_world_zoom(1.06)
+	workspace._set_world_zoom(1.65)
 	await _settle_frames(4)
-	await _capture("01_global_mid_zoom")
+	await _capture("01_1900_global_war_boundaries")
 
-	workspace._set_world_zoom(1.24)
+	workspace._set_world_zoom(3.60)
 	await _settle_frames(4)
-	await _capture("01_global_country_names")
+	await _capture("01_1900_high_zoom_names")
 
-	workspace._set_world_zoom(1.08)
-	workspace.selected_country_id = workspace.FOCUS_COUNTRY_ID
-	workspace._mark_projection_dirty()
-	workspace.queue_redraw()
-	await _settle_frames(4)
-	await _capture("01_global_france_selected")
+	workspace.selected_country_id = "kingdom_of_nepal"
+	workspace._zoom_to_selected_historical_entity()
+	await _settle_frames(5)
+	await _capture("01_nepal_full_country")
 
+	workspace._return_to_global_world()
+	workspace._set_world_zoom(0.86)
+	workspace.selected_country_id = "german_empire"
+	workspace._focus_selected_country()
+	await _settle_frames(5)
+	await _capture("02_german_empire_focus")
+
+	workspace._enter_region()
+	await _settle_frames(5)
+	await _capture("02_germany_admin1")
+	var german_admin1: Array = (workspace.get("_world_admin1_by_iso") as Dictionary).get("DEU", []) as Array
+	if not german_admin1.is_empty():
+		workspace.selected_world_admin1_id = str((german_admin1[0] as Dictionary).get("id", ""))
+		workspace._enter_selected_world_admin1()
+		await _settle_frames(4)
+		await _capture("02_germany_admin1_local")
+
+	workspace._return_to_global_world()
+	workspace.selected_country_id = "russian_empire"
+	workspace._focus_selected_country()
+	await _settle_frames(5)
+	await _capture("02_russian_empire_territories")
+
+	workspace._return_to_global_world()
 	workspace._set_world_zoom(0.86)
 	workspace._set_layout(workspace.LAYOUT_WORKSPACE)
 	await _settle_frames(5)
-	await _capture("02_operation_workspace")
+	await _capture("03_operation_workspace")
 
 	workspace.selected_country_id = workspace.FOCUS_COUNTRY_ID
 	workspace._focus_selected_country()
@@ -52,11 +74,11 @@ func _ready() -> void:
 	workspace._set_info_open(true)
 	await get_tree().create_timer(0.24).timeout
 	await _settle_frames(5)
-	await _capture("03_france_region_selected")
+	await _capture("04_france_region_selected")
 
 	workspace._enter_region()
 	await _settle_frames(5)
-	await _capture("04_region_layer")
+	await _capture("05_region_layer")
 
 	var regions: Array = workspace.get("_regions") as Array
 	for index: int in range(regions.size()):
@@ -68,12 +90,12 @@ func _ready() -> void:
 		workspace.hover_administrative_unit_id = ""
 		workspace.queue_redraw()
 		await _settle_frames(4)
-		await _capture("04_region_%02d_%s" % [index + 1, region_id])
+		await _capture("05_region_%02d_%s" % [index + 1, region_id])
 
 	workspace.selected_region_id = "northern_industrial_belt"
 	workspace._enter_city("lille")
 	await _settle_frames(5)
-	await _capture("05_city_layer")
+	await _capture("06_city_layer")
 
 	get_tree().quit(0)
 
