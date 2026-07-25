@@ -7,6 +7,9 @@ uniform vec4 nebula_color : source_color = vec4(0.10, 0.23, 0.25, 1.0);
 uniform vec4 warm_nebula_color : source_color = vec4(0.20, 0.14, 0.08, 1.0);
 uniform float star_density : hint_range(0.0, 1.0) = 0.48;
 uniform float nebula_strength : hint_range(0.0, 1.0) = 0.40;
+uniform float twinkle_strength : hint_range(0.0, 1.0) = 0.34;
+
+const float TWO_PI = 6.28318530718;
 
 float hash21(vec2 p) {
 	p = fract(p * vec2(123.34, 456.21));
@@ -37,14 +40,39 @@ float fbm(vec2 p) {
 	return value;
 }
 
-float star_layer(vec2 uv, vec2 grid_size, float threshold, float radius) {
+float star_layer(
+	vec2 uv,
+	vec2 grid_size,
+	float threshold,
+	float radius,
+	float speed_min,
+	float speed_max,
+	float layer_amplitude,
+	vec2 seed_offset
+) {
 	vec2 grid = uv * grid_size;
 	vec2 cell = floor(grid);
 	vec2 local = fract(grid) - 0.5;
-	float random_value = hash21(cell);
+	float random_value = hash21(cell + seed_offset);
 	float star = smoothstep(radius, 0.0, length(local));
 	float enabled = smoothstep(threshold, 1.0, random_value);
-	return star * enabled;
+
+	float phase = hash21(cell + seed_offset + vec2(17.31, 43.77)) * TWO_PI;
+	float speed = mix(
+		speed_min,
+		speed_max,
+		hash21(cell + seed_offset + vec2(71.19, 11.83))
+	);
+	float wave = 0.5 + 0.5 * sin(mod(TIME, 4096.0) * speed + phase);
+	wave = wave * wave * (3.0 - 2.0 * wave);
+	float participation = smoothstep(
+		0.18,
+		0.92,
+		hash21(cell + seed_offset + vec2(29.41, 89.17))
+	);
+	float amplitude = layer_amplitude * twinkle_strength * participation;
+	float brightness = mix(1.0 - amplitude, 1.0 + amplitude, wave);
+	return star * enabled * brightness;
 }
 
 void fragment() {
@@ -65,9 +93,36 @@ void fragment() {
 	color += nebula_color.rgb * fine_band * nebula_strength * 0.34;
 	color += warm_nebula_color.rgb * warm_band * nebula_strength * 0.34;
 
-	float stars_small = star_layer(uv, vec2(210.0, 118.0), 0.9960 - star_density * 0.005, 0.082);
-	float stars_medium = star_layer(uv + vec2(0.13, 0.07), vec2(116.0, 66.0), 0.9978 - star_density * 0.003, 0.108);
-	float stars_large = star_layer(uv + vec2(0.31, 0.19), vec2(62.0, 35.0), 0.9990 - star_density * 0.0015, 0.135);
+	float stars_small = star_layer(
+		uv,
+		vec2(210.0, 118.0),
+		0.9960 - star_density * 0.005,
+		0.082,
+		0.20,
+		0.58,
+		0.34,
+		vec2(3.1, 8.7)
+	);
+	float stars_medium = star_layer(
+		uv + vec2(0.13, 0.07),
+		vec2(116.0, 66.0),
+		0.9978 - star_density * 0.003,
+		0.108,
+		0.15,
+		0.44,
+		0.44,
+		vec2(19.2, 4.6)
+	);
+	float stars_large = star_layer(
+		uv + vec2(0.31, 0.19),
+		vec2(62.0, 35.0),
+		0.9990 - star_density * 0.0015,
+		0.135,
+		0.10,
+		0.32,
+		0.52,
+		vec2(41.7, 23.5)
+	);
 	color += vec3(0.68, 0.82, 0.86) * stars_small * 0.46;
 	color += vec3(0.84, 0.87, 0.77) * stars_medium * 0.68;
 	color += vec3(0.96, 0.89, 0.72) * stars_large * 0.92;
