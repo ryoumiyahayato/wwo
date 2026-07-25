@@ -1,0 +1,7 @@
+source_chars=19982
+marker_index=464
+payload_raw_chars=18919
+payload_chars=18674
+archive_bytes=14004
+sha256=ba647a0351ada8664caa951eb2cab7e8c39dea17eec111ae6f37e2a61ef73ed2
+decode=success
