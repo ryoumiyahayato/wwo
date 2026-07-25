@@ -20,7 +20,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   godot-headless:
@@ -33,8 +33,6 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Download Godot 4.6.3
         shell: bash
@@ -56,7 +54,7 @@ jobs:
           sudo apt-get install --yes xvfb fonts-noto-cjk
           fc-cache -f
 
-      - name: Generate compact world admin1 data
+      - name: Regenerate and verify compact world admin1 data
         shell: bash
         run: |
           set -euo pipefail
@@ -69,32 +67,17 @@ jobs:
             generated/world_admin1.json
           python3 - <<'PY'
           import json
-          data=json.load(open('generated/world_admin1.json', encoding='utf-8'))
-          audit=data['audit']
+          generated=json.load(open('generated/world_admin1.json', encoding='utf-8'))
+          committed=json.load(open('data/world_map/world_admin1.json', encoding='utf-8'))
+          audit=generated['audit']
           assert audit['region_count'] >= 4000, audit
           assert audit['country_count'] >= 180, audit
           assert audit['polygon_count'] >= 4500, audit
+          assert generated == committed, 'Committed world_admin1.json is not reproducible from tools/build_world_admin1.py'
           print(audit)
           PY
 
-      - name: Commit generated world admin1 data
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p data/world_map
-          cp generated/world_admin1.json data/world_map/world_admin1.json
-          if [[ -z "$(git status --porcelain -- data/world_map/world_admin1.json)" ]]; then
-            echo "Generated admin1 data is already current."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/world_map/world_admin1.json
-          git commit -m "data: add compact global admin1 boundaries"
-          git push origin "HEAD:${GITHUB_HEAD_REF}"
-
-      - name: Upload generated world admin1 data
+      - name: Upload regenerated world admin1 data
         uses: actions/upload-artifact@v4
         with:
           name: world-admin1-generated
