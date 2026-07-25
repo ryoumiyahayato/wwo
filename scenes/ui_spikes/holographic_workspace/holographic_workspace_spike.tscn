@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3]
 
-[ext_resource type="Script" path="res://scripts/ui_spikes/holographic_workspace/holographic_workspace_final.gd" id="1_spike"]
+[ext_resource type="Script" path="res://scripts/ui_spikes/holographic_workspace/holographic_workspace_flags.gd" id="1_spike"]
 [ext_resource type="Script" path="res://scripts/ui_spikes/holographic_workspace/holographic_hemisphere_3d.gd" id="2_hemi"]
 [ext_resource type="Shader" path="res://shaders/ui_spikes/holographic_workspace/workspace_background.gdshader" id="3_background"]
 
@@ -56,6 +56,7 @@ position = Vector3(1.18, 0.53, 0.08)
 rotation = Vector3(-0.08, 0.24, 0.0)
 
 [node name="Camera3D" type="Camera3D" parent="HemisphereViewportContainer/HemisphereViewport"]
+unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.35)
 projection = 1
 keep_aspect = 1
@@ -68,4 +69,9 @@ current = true
 wait_time = 0.25
 autostart = true
 
+[node name="FlagTimer" type="Timer" parent="."]
+wait_time = 0.12
+autostart = true
+
 [connection signal="timeout" from="ClockTimer" to="." method="_on_clock_timer_timeout"]
+[connection signal="timeout" from="FlagTimer" to="." method="_on_flag_timer_timeout"]
