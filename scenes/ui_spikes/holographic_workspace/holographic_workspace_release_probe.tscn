@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui_spikes/holographic_workspace/holographic_workspace_release_probe.gd" id="1_probe"]
+
+[node name="HolographicWorkspaceReleaseProbe" type="Node"]
+script = ExtResource("1_probe")
