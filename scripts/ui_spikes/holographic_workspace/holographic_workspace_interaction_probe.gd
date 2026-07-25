@@ -19,6 +19,29 @@ func _run_probe() -> void:
 	add_child(workspace)
 	await _settle_frames(4)
 
+	var moon: MeshInstance3D = workspace.get_node_or_null(
+		"HemisphereViewportContainer/HemisphereViewport/Hemisphere3D/Moon"
+	) as MeshInstance3D
+	if not _require(moon != null, "三维视口中缺少月球节点"):
+		return
+	if not _require(moon.mesh != null, "月球节点没有生成球体网格"):
+		return
+	if not _require(moon.material_override is ShaderMaterial, "月球没有程序化材质"):
+		return
+	if not _require(moon.position.x > 1.0 and moon.position.y > 0.25, "月球没有位于地球右上方"):
+		return
+
+	var background_before: Image = workspace.get_viewport().get_texture().get_image()
+	await get_tree().create_timer(1.6).timeout
+	await _settle_frames(2)
+	var background_after: Image = workspace.get_viewport().get_texture().get_image()
+	var changed_samples: int = _count_changed_background_samples(
+		background_before,
+		background_after
+	)
+	if not _require(changed_samples >= 6, "星空在1.6秒内没有形成可测量的缓慢明暗变化"):
+		return
+
 	var f2_event: InputEventKey = _key_event(KEY_F2)
 	workspace.call("_unhandled_key_input", f2_event)
 	if not _require(int(workspace.get("layout_mode_id")) == 1, "F2未切换操作桌面布局"):
@@ -141,6 +164,32 @@ func _run_probe() -> void:
 
 	workspace.queue_free()
 	get_tree().quit(0)
+
+
+func _count_changed_background_samples(before: Image, after: Image) -> int:
+	if before == null or after == null or before.is_empty() or after.is_empty():
+		return 0
+	var width: int = mini(before.get_width(), after.get_width())
+	var height: int = mini(before.get_height(), after.get_height())
+	var start_x: int = maxi(0, width - 270)
+	var end_x: int = maxi(start_x, width - 18)
+	var start_y: int = mini(118, maxi(0, height - 1))
+	var end_y: int = maxi(start_y, height - 96)
+	var changed: int = 0
+	for y: int in range(start_y, end_y, 2):
+		for x: int in range(start_x, end_x, 2):
+			var before_color: Color = before.get_pixel(x, y)
+			var after_color: Color = after.get_pixel(x, y)
+			var difference: float = absf(
+				_luminance(before_color) - _luminance(after_color)
+			)
+			if difference > 0.0008:
+				changed += 1
+	return changed
+
+
+func _luminance(color: Color) -> float:
+	return color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722
 
 
 func _send_mouse_button(position: Vector2, pressed: bool) -> void:
