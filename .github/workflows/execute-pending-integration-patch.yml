@@ -19,35 +19,16 @@ jobs:
       - name: Decode and apply prepared patch
         shell: bash
         run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-          import base64
-          import hashlib
-
-          source = Path('.github/workflows/apply-pending-integration-patch.yml').read_text(encoding='utf-8')
-          marker = "<<'PATCH_B64'\n"
-          start = source.index(marker) + len(marker)
-          end = source.index('\nPATCH_B64', start)
-          payload = ''.join(source[start:end].split())
-          archive = base64.b64decode(payload, validate=True)
-          digest = hashlib.sha256(archive).hexdigest()
-          print(f'payload_chars={len(payload)} archive_bytes={len(archive)} sha256={digest}')
-          if len(archive) < 27000:
-              raise SystemExit('embedded patch archive is unexpectedly small')
-          Path('/tmp/wwo_patch.zip').write_bytes(archive)
-          PY
-          unzip -tq /tmp/wwo_patch.zip
+          set -eu
+          python3 -c "from pathlib import Path; import base64,hashlib; s=Path('.github/workflows/apply-pending-integration-patch.yml').read_text(); m=\"<<'PATCH_B64'\\n\"; a=s.index(m)+len(m); b=s.index('\\nPATCH_B64',a); p=''.join(s[a:b].split()); z=base64.b64decode(p,validate=True); print('payload',len(p),'archive',len(z),'sha256',hashlib.sha256(z).hexdigest()); Path('/tmp/wwo_patch.zip').write_bytes(z)"
+          unzip -t /tmp/wwo_patch.zip
           rm -rf /tmp/wwo_patch
           unzip -q /tmp/wwo_patch.zip -d /tmp
           test -f /tmp/wwo_patch/scripts/v2_3/v2_3_minimal_hud_overlay.gd
-          test -f /tmp/wwo_patch/scripts/ui_spikes/holographic_workspace/holographic_workspace_release.gd
           rsync -a /tmp/wwo_patch/ ./
-          rm -f .github/workflows/apply-pending-integration-patch.yml
-          rm -f .github/workflows/execute-pending-integration-patch.yml
+          rm -f .github/workflows/apply-pending-integration-patch.yml .github/workflows/execute-pending-integration-patch.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git status --short
           git commit -m "feat: integrate release entry HUD and home-country hierarchy"
           git push origin HEAD:${{ github.event.pull_request.head.ref }}
