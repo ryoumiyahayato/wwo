@@ -8,21 +8,50 @@ The formal entry remains:
 
 `run/main_scene="res://scenes/v2_3/v2_3_life_loop_menu.tscn"`
 
-The spike has been verified with the official Godot 4.6.3 Linux build in GitHub Actions:
+The spike is verified with the official Godot 4.6.3 Linux build in GitHub Actions:
 
-- project import and GDScript parsing passed;
-- the spike scene loaded without `SCRIPT ERROR` or Godot `ERROR:` log entries;
-- the GL Compatibility renderer loaded both the 3D hemisphere shader and the procedural background shader;
-- the targeted interaction probe passed;
-- global, workspace, France-focus, city and all nine macro-region views were rendered as real 1280×720 Godot screenshots.
+- project import and strict GDScript parsing pass;
+- the spike scene loads without `SCRIPT ERROR` or Godot `ERROR:` log entries;
+- the GL Compatibility renderer loads the hemisphere, moon and procedural background shaders;
+- the targeted interaction probe passes;
+- far, medium and near global zoom states, workspace, France focus, city and all nine macro-region views are rendered as real 1280×720 Godot screenshots.
 
 ## What rotates
 
-The visible world does rotate.
+The visible world rotates.
 
-The transparent front-hemisphere shell stays fixed. Country outlines, coastlines, state markers and a restrained latitude/longitude grid are rotated through the same `yaw` and `tilt` basis inside that shell. Keeping the already-clipped shell fixed avoids rotating a cut surface into an invalid viewing orientation, while the moving geography and grid preserve the visual result of rotating the observed world.
+The transparent front-hemisphere shell stays fixed. Country outlines, coastlines, country flag skins, state markers and a restrained latitude/longitude grid rotate through the same `yaw` and `tilt` basis inside that shell. Keeping the already-clipped shell fixed avoids rotating a cut surface into an invalid viewing orientation, while the moving geography and grid preserve the visual result of rotating the observed world.
 
 The interaction probe sends real mouse-button and mouse-motion events and confirms that dragging changes `yaw`. Release retains short inertia, and left/right edge hover applies slow rotation.
+
+## Global country flag skins and zoom LOD
+
+The global hemisphere no longer relies on persistent country names at the far overview scale.
+
+Every visible country polygon receives a low-saturation, semi-transparent flag-like skin. Explicit palettes cover the principal powers and a broad set of other countries in `country_flag_palettes.json`. Countries without an explicit palette still receive a deterministic restrained fallback palette, so no visible country is left unfilled.
+
+The palette is intentionally an identification layer rather than a literal cloth texture:
+
+- common vertical, horizontal, cross, canton, disc and quartered structures are represented;
+- complex coats of arms are not reproduced;
+- historical great-power colors are preferred where configured, such as black-white-red for the German Empire;
+- the polygon boundary never deforms;
+- a low-frequency color and brightness wave gives the interior a mild flag-surface motion.
+
+The flag animation is driven by a 0.12-second low-frequency timer. It redraws only the isolated global sample while the global country view is visible. Geography projection is not rebuilt for every animation tick.
+
+The mouse wheel controls a bounded global zoom from 74% to 124%. The 3D orthographic camera and 2D projection radius change together.
+
+Display levels are:
+
+- far view: flag skins and borders, with no persistent country-name layer;
+- medium view: the most important country names begin to fade in;
+- near view: a larger bounded set of country names appears;
+- selected or hovered countries retain immediate identification at every zoom.
+
+Country names use priority limits and approximate collision rectangles. They are never intended to label all 177 country features simultaneously.
+
+The moon is available as a global spatial reference at overview and medium zoom. It is hidden at close country-reading zoom and outside the global 3D country view so it does not crowd the map or float beside the flat France-focus view.
 
 ## Spatial flow
 
@@ -58,9 +87,9 @@ Every macro region has:
 - at least one city entry;
 - previous/next region navigation.
 
-The repository data contains 96 metropolitan administrative units assigned across the nine macro regions. Their geometry is based on Natural Earth modern French department/province boundaries. It is a reliable spatial planning reference for the spike, but it is not falsely presented as an exact reconstruction of every French boundary in 1900. The repository itself notes known historical differences such as the former Seine department.
+The repository data contains 96 metropolitan administrative units assigned across the nine macro regions. Their geometry is based on Natural Earth modern French department/province boundaries. It is a reliable spatial planning reference for the spike, but it is not presented as an exact reconstruction of every French boundary in 1900. The repository notes known historical differences such as the former Seine department.
 
-A bounded set of additional French city anchors is installed only inside the isolated spike runtime so that every macro region can demonstrate city entry. These additions do not modify formal `cities.json`, saves or formal map systems. Cities without configured institution data say so rather than receiving fictional institutions.
+A bounded set of additional French city anchors exists only inside the isolated spike runtime so every macro region can demonstrate city entry. These additions do not modify formal `cities.json`, saves or formal map systems. Cities without configured institution data say so rather than receiving fictional institutions.
 
 ## Corrected regional projection
 
@@ -74,19 +103,21 @@ No synthetic transport network is drawn. The previous arbitrary line joining cit
 
 ## Background
 
-The solid black background has been replaced by a procedural GL-compatible canvas shader with:
+The solid black background is replaced by a procedural GL-compatible canvas shader with:
 
 - a very dark navy/green gradient;
 - sparse stars of several restrained scales;
 - low-opacity cool and warm cloud bands;
-- a soft vignette.
+- a soft vignette;
+- fixed-position stars with slow, phase-shifted sine brightness changes.
 
-The background is intentionally subdued so it does not turn the interface into a bright science-fiction HUD or compete with the map and corner controls. It uses no external image asset and adds no runtime animation cost.
+Stars do not jump position, flicker on and off or produce rapid flashes. The background shader runs continuously while visible; the country flag wave uses a separate bounded low-frequency redraw.
 
 ## Data used
 
 - Global country outlines and names: all features in `world_coastlines.json`.
 - Country IDs: `iso_a3`, with France normalized to `country_fra`.
+- Explicit country identification palettes: `country_flag_palettes.json`.
 - Macro regions: `regions[].administrative_unit_ids`.
 - Administrative subdivisions: `administrative_units[].geometry[].outer`.
 - Formal region cities: `cities[].parent_region_id` and `cities[].lon_lat`.
@@ -99,22 +130,24 @@ The background is intentionally subdued so it does not turn the interface into a
 The scene draw order is explicit:
 
 1. procedural background `ColorRect`;
-2. isolated `World3D` SubViewport containing the fixed front-hemisphere shell;
-3. rotating cached geographic overlays and all HUD surfaces above the SubViewport.
+2. isolated `World3D` SubViewport containing the fixed front-hemisphere shell and moon;
+3. cached geographic overlays, flag skins and all HUD surfaces above the SubViewport.
 
 The camera is a sibling of the hemisphere mesh. The SubViewport uses `own_world_3d=true`, GL Compatibility and `UPDATE_ONCE`; it is disabled and hidden outside the world level.
 
-Global lon/lat coordinates are converted to unit-sphere vectors once at load time. Projection results are cached until rotation or layout changes. Hidden-hemisphere lines are split at an interpolated horizon crossing. Projection does not allocate a Dictionary for every point.
+Global lon/lat coordinates are converted to unit-sphere vectors once at load time. Projection results are cached until rotation, selection, layout or zoom changes. Hidden-hemisphere lines and country fills are clipped at an interpolated horizon crossing. Flag animation changes only vertex colors and does not rebuild the geographic cache.
 
 All coastline rings are loaded and simplified with a bounded Ramer-Douglas-Peucker pass rather than the former first-160-ring cutoff or fixed-step skipping.
 
 ## Functional interaction
 
 - F1/F2 switch the two layout presets through `_unhandled_key_input()`.
-- Left drag rotates global geography and the latitude/longitude grid.
+- Left drag rotates global geography, flag skins and the latitude/longitude grid.
 - Release retains short inertia.
 - Hovering near the hemisphere left/right edge applies slow rotation.
+- Mouse-wheel input changes bounded global zoom.
 - Country anchors can be discovered and selected globally.
+- Zoom controls the fade-in of bounded, collision-filtered country names.
 - France can be entered from global selection or the country HUD surface.
 - Actual region polygons can be selected in France focus.
 - All nine macro regions can be reviewed with previous/next controls.
@@ -152,6 +185,13 @@ The interaction probe verifies:
 
 - F1/F2 switching;
 - drag changing `yaw`;
+- a minimum explicit flag-palette count;
+- visible-country flag-polygon generation;
+- far-zoom country names hidden;
+- flag-wave time advancing;
+- real mouse-wheel zoom changing both `world_zoom` and the orthographic camera;
+- close-zoom country names faded in;
+- close-zoom moon suppression and overview restoration;
 - France country selection and focus entry;
 - exactly nine macro regions;
 - geometry, administrative subdivisions and city coverage for every region;
@@ -165,7 +205,7 @@ The interaction probe verifies:
 - country-corner opening;
 - 4× speed control.
 
-The screenshot job produces dedicated images for every one of the nine macro regions and fails unless all nine files exist.
+The screenshot job produces far flag overview, medium zoom, close country-name and selected-France global views, plus dedicated images for every one of the nine macro regions.
 
 ## How to run locally
 
@@ -175,19 +215,22 @@ Open or run:
 
 Suggested review flow:
 
-1. rotate the global hemisphere;
-2. select France and choose `进入国家`;
-3. select one of the nine macro regions;
-4. choose `进入大区`;
-5. use `上一个大区` and `下一个大区` to review all regions;
-6. hover or click administrative subdivisions;
-7. enter a mapped city and open an institution node;
-8. return through city, region, France focus and global;
-9. test every corner panel, F1/F2 and the collapsible F2 workspace.
+1. use the wheel to compare far flag overview and close country-name view;
+2. rotate the global hemisphere;
+3. select France and choose `进入国家`;
+4. select one of the nine macro regions;
+5. choose `进入大区`;
+6. use `上一个大区` and `下一个大区` to review all regions;
+7. hover or click administrative subdivisions;
+8. enter a mapped city and open an institution node;
+9. return through city, region, France focus and global;
+10. test every corner panel, F1/F2 and the collapsible F2 workspace.
 
 ## Known limitations
 
 - Only France has a detailed country-focus implementation. Other countries are selectable global objects but do not receive fabricated internal data.
+- Explicit flag palettes simplify complex emblems and do not claim exact vexillological reconstruction for every territory in 1900.
+- Countries without an explicit entry use deterministic restrained fallback colors.
 - Modern Natural Earth department geometry is a documented visual planning reference, not an exact 1900 boundary reconstruction.
 - Spike-supplemented cities provide geographic entry coverage but do not fabricate institutions or gameplay content.
 - CI covers 1280×720. Manual review remains useful for multiple window dimensions, prolonged edge-hover feel and target-hardware CPU/GPU measurements.
