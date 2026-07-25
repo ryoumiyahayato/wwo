@@ -30,6 +30,26 @@ func _draw() -> void:
 		_draw_supply_status()
 
 
+func _draw_country_corner() -> void:
+	pass
+
+
+func _draw_character_corner() -> void:
+	pass
+
+
+func _draw_time_corner() -> void:
+	pass
+
+
+func _draw_activity_corner() -> void:
+	pass
+
+
+func legacy_corner_draws_suppressed() -> bool:
+	return true
+
+
 func _draw_v2_3_sandbox_panel() -> void:
 	super._draw_v2_3_sandbox_panel()
 	var binding: V23PlayerUiBinding = life_binding as V23PlayerUiBinding
