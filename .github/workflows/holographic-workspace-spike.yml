@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/holographic-workspace-spike.yml"
+      - "tools/build_world_admin1.py"
       - "docs/ui_spikes/holographic_workspace_spike.md"
       - "scenes/ui_spikes/holographic_workspace/**"
       - "scripts/ui_spikes/holographic_workspace/**"
@@ -22,7 +23,7 @@ permissions:
 jobs:
   godot-headless:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       GODOT_VERSION: "4.6.3"
       GODOT_BIN: "${{ github.workspace }}/.ci-godot/Godot_v4.6.3-stable_linux.x86_64"
@@ -50,6 +51,34 @@ jobs:
           sudo apt-get update
           sudo apt-get install --yes xvfb fonts-noto-cjk
           fc-cache -f
+
+      - name: Generate compact world admin1 data
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p generated
+          curl --fail --location --retry 3 --retry-delay 2 \
+            "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_1_states_provinces.geojson" \
+            --output generated/ne_10m_admin_1_states_provinces.geojson
+          python3 tools/build_world_admin1.py \
+            generated/ne_10m_admin_1_states_provinces.geojson \
+            generated/world_admin1.json
+          python3 - <<'PY'
+          import json
+          data=json.load(open('generated/world_admin1.json', encoding='utf-8'))
+          audit=data['audit']
+          assert audit['region_count'] >= 4000, audit
+          assert audit['country_count'] >= 180, audit
+          assert audit['polygon_count'] >= 4500, audit
+          print(audit)
+          PY
+
+      - name: Upload generated world admin1 data
+        uses: actions/upload-artifact@v4
+        with:
+          name: world-admin1-generated
+          path: generated/world_admin1.json
+          if-no-files-found: error
 
       - name: Import project and parse scripts
         shell: bash
