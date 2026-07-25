@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "year": 1900,
+  "prototype_only": true,
+  "approximation_notice": "本文件将现有 Natural Earth 现代国家多边形聚合为约1900年的政治实体、殖民地与受保护领地，用于全息空间导航样机。它修正现代177国直接作为1900主权国家的问题，但不是逐点考证的1900历史边界。复杂殖民地、附庸、租借地和边境争议仍需未来以历史GIS数据替换。",
+  "fallback_notice": "未被明确映射的现代多边形会保留为低优先级‘待校订领土’，仅在高倍率显示，不宣称其为1900独立国家。",
+  "entities": [
+    {"id":"country_fra","name_zh":"法兰西第三共和国","short_name_zh":"法国","status":"sovereign","label_rank":1,"detail_mode":"france","members":["FRA"],"core_members":["FRA"],"pattern":"vertical","colors":["#264B78","#DDD8CB","#8F343D"]},
+    {"id":"french_colonial_empire","name_zh":"法兰西殖民帝国","short_name_zh":"法属领地","status":"dependency","sovereign_id":"country_fra","label_rank":3,"detail_mode":"territories","members":["DZA","TUN","SEN","MLI","MRT","BEN","NER","TCD","CAF","COG","GAB","CIV","GIN","BFA","MDG","DJI","VNM","KHM","LAO","NCL"],"pattern":"vertical","colors":["#263F67","#C8C3B7","#79323A"]},
+
+    {"id":"british_isles_1900","name_zh":"大不列颠及爱尔兰联合王国","short_name_zh":"英国","status":"sovereign","label_rank":1,"detail_mode":"territories","members":["GBR","IRL"],"core_members":["GBR"],"pattern":"cross","colors":["#243B67","#DAD5C8","#92343D"]},
+    {"id":"british_empire_overseas","name_zh":"大英帝国海外领地","short_name_zh":"英属领地","status":"dependency","sovereign_id":"british_isles_1900","label_rank":2,"detail_mode":"territories","members":["CAN","AUS","NZL","IND","PAK","BGD","LKA","MMR","MYS","BRN","FJI","KEN","UGA","NGA","GHA","SLE","GMB","BWA","ZWE","ZMB","MWI","LSO","SWZ","CYP","EGY","SDN","ARE","QAT","KWT","BHS","JAM","BLZ","GUY","FLK","PNG","SLB","VUT"],"pattern":"canton","colors":["#263D69","#D5D0C4","#8A333C"]},
+
+    {"id":"german_empire","name_zh":"德意志帝国","short_name_zh":"德国","status":"sovereign","label_rank":1,"detail_mode":"single","members":["DEU"],"pattern":"horizontal","colors":["#181817","#D7D1C5","#92343D"]},
+    {"id":"german_colonial_empire","name_zh":"德属殖民地","short_name_zh":"德属领地","status":"dependency","sovereign_id":"german_empire","label_rank":3,"detail_mode":"territories","members":["NAM","TZA","RWA","BDI","CMR","TGO"],"pattern":"horizontal","colors":["#20201E","#C8C2B7","#7E333A"]},
+
+    {"id":"austria_hungary","name_zh":"奥匈帝国","short_name_zh":"奥匈帝国","status":"empire","label_rank":1,"detail_mode":"territories","members":["AUT","HUN","CZE","SVK","SVN","HRV","BIH"],"core_members":["AUT","HUN"],"pattern":"quartered","colors":["#26221D","#C2A14A","#8F343D","#D8D2C6"]},
+    {"id":"russian_empire","name_zh":"俄罗斯帝国","short_name_zh":"俄罗斯帝国","status":"empire","label_rank":1,"detail_mode":"territories","members":["RUS","UKR","BLR","MDA","EST","LVA","LTU","FIN","POL","GEO","ARM","AZE","KAZ","KGZ","TJK","TKM","UZB"],"core_members":["RUS"],"pattern":"horizontal","colors":["#D9D5CB","#3D5983","#8E343D"]},
+    {"id":"ottoman_empire","name_zh":"奥斯曼帝国","short_name_zh":"奥斯曼帝国","status":"empire","label_rank":1,"detail_mode":"territories","members":["TUR","SYR","IRQ","LBN","ISR","PSE","JOR","LBY","ALB","MKD","YEM"],"core_members":["TUR"],"pattern":"disc","colors":["#8F343D","#DAD5C8"]},
+    {"id":"qing_empire","name_zh":"大清帝国","short_name_zh":"清帝国","status":"empire","label_rank":1,"detail_mode":"territories","members":["CHN","MNG"],"core_members":["CHN"],"pattern":"disc","colors":["#C3A247","#2F5277","#8B343C"]},
+    {"id":"empire_of_japan","name_zh":"大日本帝国","short_name_zh":"日本帝国","status":"empire","label_rank":1,"detail_mode":"territories","members":["JPN","TWN"],"core_members":["JPN"],"pattern":"disc","colors":["#D9D5CB","#8E343D"]},
+    {"id":"korean_empire","name_zh":"大韩帝国","short_name_zh":"韩国","status":"sovereign","label_rank":3,"detail_mode":"single","members":["KOR"],"pattern":"disc","colors":["#D8D4CA","#8E343D","#31547D"]},
+
+    {"id":"united_states_1900","name_zh":"美利坚合众国","short_name_zh":"美国","status":"sovereign","label_rank":1,"detail_mode":"single","members":["USA"],"pattern":"canton","colors":["#8E343D","#DAD5C9","#294A72"]},
+    {"id":"united_states_overseas","name_zh":"美国海外控制区","short_name_zh":"美国控制区","status":"dependency","sovereign_id":"united_states_1900","label_rank":3,"detail_mode":"territories","members":["PHL","PRI","CUB"],"pattern":"canton","colors":["#7D333A","#CBC6BA","#29476D"]},
+
+    {"id":"kingdom_of_italy","name_zh":"意大利王国","short_name_zh":"意大利","status":"sovereign","label_rank":2,"detail_mode":"territories","members":["ITA","ERI"],"core_members":["ITA"],"pattern":"vertical","colors":["#37624F","#D9D5CA","#8E343D"]},
+    {"id":"kingdom_of_spain","name_zh":"西班牙王国","short_name_zh":"西班牙","status":"sovereign","label_rank":2,"detail_mode":"single","members":["ESP"],"pattern":"horizontal","colors":["#8E343D","#C2A248","#8E343D"]},
+    {"id":"spanish_possessions","name_zh":"西班牙海外领地","short_name_zh":"西属领地","status":"dependency","sovereign_id":"kingdom_of_spain","label_rank":4,"detail_mode":"territories","members":["ESH","GNQ"],"pattern":"horizontal","colors":["#7B333A","#B59A49","#7B333A"]},
+    {"id":"kingdom_of_portugal","name_zh":"葡萄牙王国","short_name_zh":"葡萄牙","status":"sovereign","label_rank":3,"detail_mode":"single","members":["PRT"],"pattern":"vertical","colors":["#31547B","#D9D4C8","#31547B"]},
+    {"id":"portuguese_empire","name_zh":"葡萄牙殖民帝国","short_name_zh":"葡属领地","status":"dependency","sovereign_id":"kingdom_of_portugal","label_rank":3,"detail_mode":"territories","members":["AGO","MOZ","GNB","TLS"],"pattern":"vertical","colors":["#2E4F72","#CFC9BD","#7F343B"]},
+    {"id":"kingdom_of_belgium","name_zh":"比利时王国","short_name_zh":"比利时","status":"sovereign","label_rank":3,"detail_mode":"single","members":["BEL"],"pattern":"vertical","colors":["#191817","#C3A246","#8E343D"]},
+    {"id":"congo_free_state","name_zh":"刚果自由邦","short_name_zh":"刚果自由邦","status":"personal_union","sovereign_id":"kingdom_of_belgium","label_rank":3,"detail_mode":"single","members":["COD"],"pattern":"disc","colors":["#31567E","#C5A64A","#8A343C"]},
+    {"id":"kingdom_of_netherlands","name_zh":"尼德兰王国","short_name_zh":"荷兰","status":"sovereign","label_rank":3,"detail_mode":"single","members":["NLD"],"pattern":"horizontal","colors":["#8E343D","#D9D4C8","#31547C"]},
+    {"id":"dutch_colonial_empire","name_zh":"荷兰殖民帝国","short_name_zh":"荷属领地","status":"dependency","sovereign_id":"kingdom_of_netherlands","label_rank":3,"detail_mode":"territories","members":["IDN","SUR"],"pattern":"horizontal","colors":["#7F343B","#CFC9BD","#2E4F74"]},
+    {"id":"sweden_norway_union","name_zh":"瑞典—挪威联合王国","short_name_zh":"瑞典—挪威","status":"personal_union","label_rank":2,"detail_mode":"territories","members":["SWE","NOR"],"pattern":"cross","colors":["#31577F","#C3A246","#8E343D"]},
+    {"id":"kingdom_of_denmark","name_zh":"丹麦王国","short_name_zh":"丹麦","status":"sovereign","label_rank":3,"detail_mode":"territories","members":["DNK","GRL","ISL"],"core_members":["DNK"],"pattern":"cross","colors":["#8E343D","#D9D4C8"]},
+    {"id":"swiss_confederation","name_zh":"瑞士联邦","short_name_zh":"瑞士","status":"sovereign","label_rank":4,"detail_mode":"single","members":["CHE"],"pattern":"cross","colors":["#8E343D","#D9D4C8"]},
+
+    {"id":"kingdom_of_romania","name_zh":"罗马尼亚王国","short_name_zh":"罗马尼亚","status":"sovereign","label_rank":3,"detail_mode":"single","members":["ROU"],"pattern":"vertical","colors":["#31547C","#C3A246","#8E343D"]},
+    {"id":"kingdom_of_serbia","name_zh":"塞尔维亚王国","short_name_zh":"塞尔维亚","status":"sovereign","label_rank":4,"detail_mode":"single","members":["SRB"],"pattern":"horizontal","colors":["#8E343D","#31547C","#D9D4C8"]},
+    {"id":"principality_of_montenegro","name_zh":"黑山公国","short_name_zh":"黑山","status":"sovereign","label_rank":5,"detail_mode":"single","members":["MNE"],"pattern":"horizontal","colors":["#8E343D","#31547C","#D9D4C8"]},
+    {"id":"principality_of_bulgaria","name_zh":"保加利亚公国","short_name_zh":"保加利亚","status":"autonomous","label_rank":4,"detail_mode":"single","members":["BGR"],"pattern":"horizontal","colors":["#D9D4C8","#3D684F","#8E343D"]},
+    {"id":"kingdom_of_greece","name_zh":"希腊王国","short_name_zh":"希腊","status":"sovereign","label_rank":4,"detail_mode":"single","members":["GRC"],"pattern":"cross","colors":["#31577F","#D9D4C8"]},
+
+    {"id":"persia_qajar","name_zh":"卡扎尔波斯","short_name_zh":"波斯","status":"sovereign","label_rank":2,"detail_mode":"single","members":["IRN"],"pattern":"horizontal","colors":["#3D684F","#D8D3C8","#8E343D"]},
+    {"id":"emirate_of_afghanistan","name_zh":"阿富汗酋长国","short_name_zh":"阿富汗","status":"sovereign","label_rank":3,"detail_mode":"single","members":["AFG"],"pattern":"horizontal","colors":["#1C1B19","#8E343D","#3D684F"]},
+    {"id":"kingdom_of_siam","name_zh":"暹罗王国","short_name_zh":"暹罗","status":"sovereign","label_rank":2,"detail_mode":"single","members":["THA"],"pattern":"horizontal","colors":["#8E343D","#D8D3C8","#31547C"]},
+    {"id":"kingdom_of_nepal","name_zh":"尼泊尔王国","short_name_zh":"尼泊尔","status":"sovereign","label_rank":4,"detail_mode":"single","members":["NPL"],"pattern":"solid","colors":["#8E343D","#31547C","#D9D4C8"]},
+    {"id":"kingdom_of_bhutan","name_zh":"不丹王国","short_name_zh":"不丹","status":"sovereign","label_rank":5,"detail_mode":"single","members":["BTN"],"pattern":"diagonal","colors":["#C3A246","#8E343D","#D9D4C8"]},
+    {"id":"ethiopian_empire","name_zh":"埃塞俄比亚帝国","short_name_zh":"埃塞俄比亚","status":"empire","label_rank":2,"detail_mode":"single","members":["ETH"],"pattern":"horizontal","colors":["#3D684F","#C3A246","#8E343D"]},
+    {"id":"republic_of_liberia","name_zh":"利比里亚共和国","short_name_zh":"利比里亚","status":"sovereign","label_rank":5,"detail_mode":"single","members":["LBR"],"pattern":"canton","colors":["#8E343D","#D9D4C8","#31547C"]},
+    {"id":"moroccan_sultanate","name_zh":"摩洛哥苏丹国","short_name_zh":"摩洛哥","status":"sovereign","label_rank":3,"detail_mode":"single","members":["MAR"],"pattern":"solid","colors":["#8E343D","#3D684F"]},
+    {"id":"arabian_polities","name_zh":"阿拉伯半岛诸政权","short_name_zh":"阿拉伯诸政权","status":"fragmented","label_rank":4,"detail_mode":"single","members":["SAU"],"pattern":"solid","colors":["#6E5B36","#D4CCB9"]},
+    {"id":"sultanate_of_muscat_oman","name_zh":"马斯喀特和阿曼苏丹国","short_name_zh":"阿曼","status":"sovereign","label_rank":4,"detail_mode":"single","members":["OMN"],"pattern":"solid","colors":["#8E343D","#D9D4C8"]},
+    {"id":"somali_territories_1900","name_zh":"索马里诸领地","short_name_zh":"索马里诸领地","status":"fragmented","label_rank":5,"detail_mode":"single","members":["SOM"],"pattern":"quartered","colors":["#31547C","#D9D4C8","#8E343D","#3D684F"]},
+    {"id":"south_africa_war_zone","name_zh":"南部非洲交战区","short_name_zh":"布尔战争区","status":"contested","label_rank":2,"detail_mode":"single","members":["ZAF"],"pattern":"quartered","colors":["#6D5B38","#8E343D","#31547C","#D9D4C8"]},
+
+    {"id":"mexican_republic","name_zh":"墨西哥合众国","short_name_zh":"墨西哥","status":"sovereign","label_rank":2,"detail_mode":"single","members":["MEX"],"pattern":"vertical","colors":["#3D684F","#D9D4C8","#8E343D"]},
+    {"id":"guatemala_1900","name_zh":"危地马拉共和国","short_name_zh":"危地马拉","status":"sovereign","label_rank":5,"detail_mode":"single","members":["GTM"],"pattern":"vertical","colors":["#5F829B","#D9D4C8","#5F829B"]},
+    {"id":"honduras_1900","name_zh":"洪都拉斯共和国","short_name_zh":"洪都拉斯","status":"sovereign","label_rank":5,"detail_mode":"single","members":["HND"],"pattern":"horizontal","colors":["#31577F","#D9D4C8","#31577F"]},
+    {"id":"el_salvador_1900","name_zh":"萨尔瓦多共和国","short_name_zh":"萨尔瓦多","status":"sovereign","label_rank":5,"detail_mode":"single","members":["SLV"],"pattern":"horizontal","colors":["#31577F","#D9D4C8","#31577F"]},
+    {"id":"nicaragua_1900","name_zh":"尼加拉瓜共和国","short_name_zh":"尼加拉瓜","status":"sovereign","label_rank":5,"detail_mode":"single","members":["NIC"],"pattern":"horizontal","colors":["#31577F","#D9D4C8","#31577F"]},
+    {"id":"costa_rica_1900","name_zh":"哥斯达黎加共和国","short_name_zh":"哥斯达黎加","status":"sovereign","label_rank":5,"detail_mode":"single","members":["CRI"],"pattern":"horizontal","colors":["#31577F","#D9D4C8","#8E343D"]},
+    {"id":"republic_of_colombia_1900","name_zh":"哥伦比亚共和国","short_name_zh":"哥伦比亚","status":"sovereign","label_rank":3,"detail_mode":"territories","members":["COL","PAN"],"core_members":["COL"],"pattern":"horizontal","colors":["#C3A246","#31547C","#8E343D"]},
+    {"id":"venezuela_1900","name_zh":"委内瑞拉合众国","short_name_zh":"委内瑞拉","status":"sovereign","label_rank":3,"detail_mode":"single","members":["VEN"],"pattern":"horizontal","colors":["#C3A246","#31547C","#8E343D"]},
+    {"id":"ecuador_1900","name_zh":"厄瓜多尔共和国","short_name_zh":"厄瓜多尔","status":"sovereign","label_rank":4,"detail_mode":"single","members":["ECU"],"pattern":"horizontal","colors":["#C3A246","#31547C","#8E343D"]},
+    {"id":"peru_1900","name_zh":"秘鲁共和国","short_name_zh":"秘鲁","status":"sovereign","label_rank":3,"detail_mode":"single","members":["PER"],"pattern":"vertical","colors":["#8E343D","#D9D4C8","#8E343D"]},
+    {"id":"bolivia_1900","name_zh":"玻利维亚共和国","short_name_zh":"玻利维亚","status":"sovereign","label_rank":4,"detail_mode":"single","members":["BOL"],"pattern":"horizontal","colors":["#8E343D","#C3A246","#3D684F"]},
+    {"id":"chile_1900","name_zh":"智利共和国","short_name_zh":"智利","status":"sovereign","label_rank":3,"detail_mode":"single","members":["CHL"],"pattern":"canton","colors":["#D9D4C8","#8E343D","#31547C"]},
+    {"id":"argentina_1900","name_zh":"阿根廷共和国","short_name_zh":"阿根廷","status":"sovereign","label_rank":2,"detail_mode":"single","members":["ARG"],"pattern":"horizontal","colors":["#6688A1","#D9D4C8","#C3A246"]},
+    {"id":"paraguay_1900","name_zh":"巴拉圭共和国","short_name_zh":"巴拉圭","status":"sovereign","label_rank":5,"detail_mode":"single","members":["PRY"],"pattern":"horizontal","colors":["#8E343D","#D9D4C8","#31547C"]},
+    {"id":"uruguay_1900","name_zh":"乌拉圭东岸共和国","short_name_zh":"乌拉圭","status":"sovereign","label_rank":4,"detail_mode":"single","members":["URY"],"pattern":"horizontal","colors":["#D9D4C8","#6688A1","#C3A246"]},
+    {"id":"brazil_1900","name_zh":"巴西合众国","short_name_zh":"巴西","status":"sovereign","label_rank":2,"detail_mode":"single","members":["BRA"],"pattern":"disc","colors":["#3D684F","#C3A246","#31547C"]},
+    {"id":"haiti_1900","name_zh":"海地共和国","short_name_zh":"海地","status":"sovereign","label_rank":5,"detail_mode":"single","members":["HTI"],"pattern":"horizontal","colors":["#31547C","#8E343D"]},
+    {"id":"dominican_republic_1900","name_zh":"多米尼加共和国","short_name_zh":"多米尼加","status":"sovereign","label_rank":5,"detail_mode":"single","members":["DOM"],"pattern":"cross","colors":["#31547C","#D9D4C8","#8E343D"]}
+  ],
+  "conflicts": [
+    {
+      "id":"second_boer_war",
+      "name_zh":"第二次布尔战争",
+      "type":"war_front",
+      "start_date":"1899-10-11",
+      "end_date":"1902-05-31",
+      "severity":3,
+      "paths":[
+        [[24.63,-25.87],[25.60,-27.18],[24.77,-28.74],[26.22,-29.12]],
+        [[29.78,-28.55],[30.12,-29.60],[29.88,-30.73]]
+      ]
+    },
+    {
+      "id":"boxer_uprising",
+      "name_zh":"义和团运动与八国联军干涉",
+      "type":"contested_front",
+      "start_date":"1899-11-01",
+      "end_date":"1901-09-07",
+      "severity":3,
+      "paths":[
+        [[116.40,39.90],[117.20,39.12],[117.00,36.65]],
+        [[116.40,39.90],[114.50,38.05],[112.55,37.87]]
+      ]
+    },
+    {
+      "id":"philippine_american_war",
+      "name_zh":"美菲战争",
+      "type":"war_front",
+      "start_date":"1899-02-04",
+      "end_date":"1902-07-02",
+      "severity":2,
+      "paths":[
+        [[120.98,14.60],[120.81,14.84],[120.59,15.48],[120.35,16.00]]
+      ]
+    },
+    {
+      "id":"war_of_golden_stool",
+      "name_zh":"金凳子战争",
+      "type":"contested_front",
+      "start_date":"1900-03-01",
+      "end_date":"1900-09-30",
+      "severity":1,
+      "paths":[
+        [[-1.62,6.69],[-1.20,6.50],[-0.80,6.20]]
+      ]
+    }
+  ]
+}
