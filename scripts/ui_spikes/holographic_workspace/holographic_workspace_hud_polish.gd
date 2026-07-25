@@ -38,7 +38,7 @@ func _draw_country_panel(rect: Rect2) -> void:
 		return
 
 	var title: String = str(entity.get("name_zh", entity.get("name", selected_country_id)))
-	var status: String = _history_status_label(str(entity.get("status", "sovereign")))
+	var status: String = _entity_status_label(entity)
 	var territory_count: int = (_history_territories_by_entity.get(selected_country_id, []) as Array).size()
 	_draw_label(rect.position + Vector2(24.0, 38.0), _ellipsize(title, 42), 20)
 	_draw_label(rect.position + Vector2(24.0, 72.0), "地位：" + status, 13)
@@ -71,7 +71,7 @@ func _current_country_entity() -> Dictionary:
 func _current_country_corner_title() -> String:
 	var entity: Dictionary = _current_country_entity()
 	if not entity.is_empty():
-		return str(entity.get("short_name_zh", entity.get("name_zh", entity.get("name", selected_country_id))))
+		return str(entity.get("name_zh", entity.get("name", selected_country_id)))
 	if world_mode == WORLD_COUNTRY_FOCUS or not selected_region_id.is_empty() or not selected_city_id.is_empty():
 		return str(_country_profile.get("formal_name_zh", "法兰西第三共和国"))
 	return "1900世界政治实体"
@@ -83,12 +83,32 @@ func _current_country_corner_subtitle() -> String:
 		return "政治实体 / 战争边界 / 国家入口"
 	if selected_country_id == FOCUS_COUNTRY_ID:
 		return "第三共和国 / 九大区 / 国家入口"
-	var subtitle: String = _history_status_label(str(entity.get("status", "sovereign")))
+	var subtitle: String = _entity_status_label(entity)
 	if not selected_historical_territory_iso.is_empty():
 		subtitle += " / " + _history_territory_name(selected_historical_territory_iso)
 	else:
 		subtitle += " / %d个辖区" % ((_history_territories_by_entity.get(selected_country_id, []) as Array).size())
 	return subtitle
+
+
+func _entity_status_label(entity: Dictionary) -> String:
+	var explicit: String = _history_status_label(str(entity.get("status", "sovereign")))
+	if explicit != "主权国家":
+		return explicit
+	var name: String = str(entity.get("name_zh", entity.get("name", "")))
+	if "帝国" in name:
+		return "帝国"
+	if "王国" in name:
+		return "王国"
+	if "共和国" in name:
+		return "共和国"
+	if "公国" in name:
+		return "公国"
+	if "酋长国" in name:
+		return "酋长国"
+	if "苏丹国" in name:
+		return "苏丹国"
+	return explicit
 
 
 func _history_status_label(status: String) -> String:
@@ -115,7 +135,11 @@ func _history_status_label(status: String) -> String:
 			return "争议地区"
 		"fragmented":
 			return "多政权地区"
+		"personal_union":
+			return "共主邦联"
 		"provisional":
 			return "待校订领土"
+		"sovereign":
+			return "主权国家"
 		_:
 			return "政治实体"
