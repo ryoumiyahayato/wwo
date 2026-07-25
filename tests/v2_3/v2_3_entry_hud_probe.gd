@@ -47,7 +47,8 @@ func _run_probe() -> void:
 	var interface := main.get_node_or_null("PrototypeInterface") as Control
 	if not _require(interface != null, "正式玩家界面缺失"):
 		return
-	_print_corner_methods(interface)
+	if not _require(bool(interface.call("legacy_corner_draws_suppressed")), "旧四角HUD绘制没有关闭"):
+		return
 	var overlay := interface.get_node_or_null("MinimalHudOverlay") as Control
 	if not _require(overlay != null, "极简HUD覆盖层缺失"):
 		return
@@ -76,17 +77,6 @@ func _run_probe() -> void:
 		return
 	main.queue_free()
 	get_tree().quit(0)
-
-
-func _print_corner_methods(interface: Object) -> void:
-	var names := PackedStringArray()
-	for method_value: Variant in interface.get_method_list():
-		var method := method_value as Dictionary
-		var name := str(method.get("name", ""))
-		if "corner" in name or "identity" in name or "newspaper" in name:
-			names.append(name)
-	names.sort()
-	print("V23_CORNER_METHODS=" + ",".join(names))
 
 
 func _settle_frames(count: int) -> void:
