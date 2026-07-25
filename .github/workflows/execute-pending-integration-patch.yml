@@ -16,19 +16,39 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
-      - name: Decode and apply prepared patch
+      - name: Persist decoder diagnostics
         shell: bash
         run: |
-          set -eu
-          python3 -c "from pathlib import Path; import base64,hashlib; s=Path('.github/workflows/apply-pending-integration-patch.yml').read_text(); m=\"<<'PATCH_B64'\\n\"; a=s.index(m)+len(m); b=s.index('\\nPATCH_B64',a); p=''.join(s[a:b].split()); z=base64.b64decode(p,validate=True); print('payload',len(p),'archive',len(z),'sha256',hashlib.sha256(z).hexdigest()); Path('/tmp/wwo_patch.zip').write_bytes(z)"
-          unzip -t /tmp/wwo_patch.zip
-          rm -rf /tmp/wwo_patch
-          unzip -q /tmp/wwo_patch.zip -d /tmp
-          test -f /tmp/wwo_patch/scripts/v2_3/v2_3_minimal_hud_overlay.gd
-          rsync -a /tmp/wwo_patch/ ./
-          rm -f .github/workflows/apply-pending-integration-patch.yml .github/workflows/execute-pending-integration-patch.yml
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64
+          import hashlib
+          import traceback
+
+          report = []
+          try:
+              source = Path('.github/workflows/apply-pending-integration-patch.yml').read_text(encoding='utf-8')
+              report.append(f'source_chars={len(source)}')
+              marker = "<<'PATCH_B64'\n"
+              report.append(f'marker_index={source.find(marker)}')
+              start = source.index(marker) + len(marker)
+              end = source.index('\nPATCH_B64', start)
+              payload_raw = source[start:end]
+              payload = ''.join(payload_raw.split())
+              report.append(f'payload_raw_chars={len(payload_raw)}')
+              report.append(f'payload_chars={len(payload)}')
+              archive = base64.b64decode(payload, validate=True)
+              report.append(f'archive_bytes={len(archive)}')
+              report.append(f'sha256={hashlib.sha256(archive).hexdigest()}')
+              Path('/tmp/wwo_patch.zip').write_bytes(archive)
+              report.append('decode=success')
+          except Exception:
+              report.append('decode=failure')
+              report.append(traceback.format_exc())
+          Path('.github/PATCH_DIAGNOSTIC.txt').write_text('\n'.join(report), encoding='utf-8')
+          PY
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "feat: integrate release entry HUD and home-country hierarchy"
+          git add .github/PATCH_DIAGNOSTIC.txt
+          git commit -m "debug: record pending patch decoder state"
           git push origin HEAD:${{ github.event.pull_request.head.ref }}
