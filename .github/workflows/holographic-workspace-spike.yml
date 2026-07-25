@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   godot-headless:
@@ -31,6 +31,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Download Godot 4.6.3
         shell: bash
@@ -72,6 +74,23 @@ jobs:
           assert audit['polygon_count'] >= 4500, audit
           print(audit)
           PY
+
+      - name: Commit generated world admin1 data
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p data/world_map
+          cp generated/world_admin1.json data/world_map/world_admin1.json
+          if git diff --quiet -- data/world_map/world_admin1.json; then
+            echo "Generated admin1 data is already current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/world_map/world_admin1.json
+          git commit -m "data: add compact global admin1 boundaries"
+          git push origin "HEAD:${GITHUB_HEAD_REF}"
 
       - name: Upload generated world admin1 data
         uses: actions/upload-artifact@v4
