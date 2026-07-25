@@ -7,7 +7,7 @@ uniform vec4 nebula_color : source_color = vec4(0.10, 0.23, 0.25, 1.0);
 uniform vec4 warm_nebula_color : source_color = vec4(0.20, 0.14, 0.08, 1.0);
 uniform float star_density : hint_range(0.0, 1.0) = 0.48;
 uniform float nebula_strength : hint_range(0.0, 1.0) = 0.40;
-uniform float twinkle_strength : hint_range(0.0, 1.0) = 0.34;
+uniform float twinkle_strength : hint_range(0.0, 1.0) = 0.52;
 
 const float TWO_PI = 6.28318530718;
 
@@ -98,8 +98,8 @@ void fragment() {
 		vec2(210.0, 118.0),
 		0.9960 - star_density * 0.005,
 		0.082,
-		0.20,
-		0.58,
+		0.24,
+		0.68,
 		0.34,
 		vec2(3.1, 8.7)
 	);
@@ -108,8 +108,8 @@ void fragment() {
 		vec2(116.0, 66.0),
 		0.9978 - star_density * 0.003,
 		0.108,
-		0.15,
-		0.44,
+		0.18,
+		0.52,
 		0.44,
 		vec2(19.2, 4.6)
 	);
@@ -118,8 +118,8 @@ void fragment() {
 		vec2(62.0, 35.0),
 		0.9990 - star_density * 0.0015,
 		0.135,
-		0.10,
-		0.32,
+		0.12,
+		0.38,
 		0.52,
 		vec2(41.7, 23.5)
 	);
