@@ -82,7 +82,7 @@ jobs:
           set -euo pipefail
           mkdir -p data/world_map
           cp generated/world_admin1.json data/world_map/world_admin1.json
-          if git diff --quiet -- data/world_map/world_admin1.json; then
+          if [[ -z "$(git status --porcelain -- data/world_map/world_admin1.json)" ]]; then
             echo "Generated admin1 data is already current."
             exit 0
           fi
