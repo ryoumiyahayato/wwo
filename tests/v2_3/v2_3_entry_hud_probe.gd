@@ -60,6 +60,18 @@ func _run_probe() -> void:
 	var character_rect: Rect2 = overlay.call("_character_cover_rect")
 	if not _require(country_rect.size.x <= 110.0 and character_rect.size.x <= 110.0, "左侧图标仍被大面积空白面板包围"):
 		return
+	var time_rect: Rect2 = overlay.call("_time_cover_rect")
+	var system_rect: Rect2 = overlay.call("_system_cover_rect")
+	if not _require(time_rect.encloses(system_rect), "系统入口没有整合进时钟区域"):
+		return
+	var system_click := InputEventMouseButton.new()
+	system_click.button_index = MOUSE_BUTTON_LEFT
+	system_click.pressed = true
+	system_click.position = system_rect.get_center()
+	overlay.call("_input", system_click)
+	if not _require(bool(interface.get("system_menu_open")), "新系统入口无法打开系统菜单"):
+		return
+	interface.set("system_menu_open", false)
 	var book_tab: Rect2 = overlay.call("_book_tab_rect")
 	if not _require(book_tab.end.x >= 38.0 and book_tab.size.y >= 120.0, "事务簿书脊不可辨识"):
 		return
@@ -70,6 +82,9 @@ func _run_probe() -> void:
 	overlay.call("set_field_book_open", true)
 	await _settle_frames(25)
 	if not _require(bool(overlay.get("field_book_open")) and float(overlay.get("field_book_progress")) > 0.90, "事务书没有展开到中央"):
+		return
+	var shifted_tab: Rect2 = overlay.call("_visible_book_tab_rect")
+	if not _require(shifted_tab.end.x <= 0.0, "事务簿展开后书脊仍滞留在页面外侧"):
 		return
 	overlay.call("set_field_book_open", false)
 	await _settle_frames(25)
