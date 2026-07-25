@@ -20,10 +20,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          sed -n "/^PATCH_B64$/q; /<<'PATCH_B64'/,/^PATCH_B64$/p" .github/workflows/apply-pending-integration-patch.yml \
-            | sed '1d;$d' > /tmp/wwo_patch.zip.b64
+          awk '/<<'"'"'PATCH_B64'"'"'/{capture=1; next} /^PATCH_B64$/{capture=0} capture' \
+            .github/workflows/apply-pending-integration-patch.yml > /tmp/wwo_patch.zip.b64
           test -s /tmp/wwo_patch.zip.b64
           base64 --decode /tmp/wwo_patch.zip.b64 > /tmp/wwo_patch.zip
+          unzip -tq /tmp/wwo_patch.zip
           rm -rf /tmp/wwo_patch
           unzip -q /tmp/wwo_patch.zip -d /tmp
           rsync -a /tmp/wwo_patch/ ./
