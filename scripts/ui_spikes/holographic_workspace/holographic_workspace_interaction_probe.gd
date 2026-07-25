@@ -30,6 +30,8 @@ func _run_probe() -> void:
 		return
 	if not _require(moon.position.x > 1.0 and moon.position.y > 0.25, "月球没有位于地球右上方"):
 		return
+	if not _require(moon.visible, "全球三维半球状态没有显示月球"):
+		return
 
 	var background_before: Image = workspace.get_viewport().get_texture().get_image()
 	await get_tree().create_timer(1.6).timeout
@@ -76,6 +78,8 @@ func _run_probe() -> void:
 
 	workspace.call("_focus_selected_country")
 	if not _require(str(workspace.get("world_mode")) == "country_focus", "进入国家后未切换国家聚焦模式"):
+		return
+	if not _require(not moon.visible, "进入国家聚焦后月球仍悬在二维地图旁"):
 		return
 	workspace.call("_ensure_projection_cache")
 
@@ -150,6 +154,8 @@ func _run_probe() -> void:
 		return
 	workspace.call("_unhandled_key_input", _key_event(KEY_ESCAPE))
 	if not _require(str(workspace.get("world_mode")) == "countries", "国家聚焦层Esc未返回全球层"):
+		return
+	if not _require(moon.visible, "返回全球三维半球后月球没有恢复显示"):
 		return
 
 	workspace.queue_redraw()
