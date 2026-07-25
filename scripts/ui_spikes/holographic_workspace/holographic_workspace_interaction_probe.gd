@@ -52,17 +52,28 @@ func _run_probe() -> void:
 
 	workspace.call("_set_world_zoom", 0.74)
 	workspace.call("_ensure_projection_cache")
-	var flag_palettes: Dictionary = workspace.get("_flag_palettes") as Dictionary
+	var history_entities: Dictionary = workspace.get("_history_entity_by_id") as Dictionary
+	var history_conflicts: Array = workspace.get("_history_conflicts") as Array
+	var provisional_entities: Array = workspace.get("_history_provisional_entity_ids") as Array
+	var global_entities: Dictionary = workspace.get("_country_by_id") as Dictionary
 	var flag_polygons: Dictionary = workspace.get("_flag_screen_polygons") as Dictionary
-	if not _require(flag_palettes.size() >= 45, "明确配置的国家旗色数量不足"):
+	if not _require(history_entities.size() >= 45, "明确配置的1900政治实体数量不足"):
 		return
-	if not _require(flag_polygons.size() >= 70, "远景没有为足够多的可见国家生成旗色蒙皮"):
+	if not _require(history_entities.has("german_empire") and history_entities.has("austria_hungary") and history_entities.has("russian_empire") and history_entities.has("qing_empire"), "主要1900帝国实体不完整"):
 		return
-	if not _require(float(workspace.call("_country_label_alpha")) <= 0.01, "远景仍然显示常驻国家名称"):
+	if not _require(global_entities.has("german_empire") and not global_entities.has("country_deu"), "现代德国记录没有被德意志帝国替代"):
+		return
+	if not _require(history_conflicts.size() >= 4, "1900战争和争议边界层数量不足"):
+		return
+	if not _require(provisional_entities.size() < global_entities.size(), "所有政治实体仍退化成现代待校订国家"):
+		return
+	if not _require(flag_polygons.size() >= 28, "远景没有为足够多的可见1900政治实体生成蒙皮"):
+		return
+	if not _require(float(workspace.call("_country_label_alpha")) <= 0.01, "远景仍然显示常驻政治实体名称"):
 		return
 	var flag_time_before: float = float(workspace.get("_flag_time"))
 	workspace.call("_on_flag_timer_timeout")
-	if not _require(float(workspace.get("_flag_time")) > flag_time_before, "旗色蒙皮波动时间没有推进"):
+	if not _require(float(workspace.get("_flag_time")) > flag_time_before, "政治实体蒙皮与边界波动时间没有推进"):
 		return
 
 	var centre: Vector2 = workspace.get("_hemisphere_center") as Vector2
@@ -74,11 +85,20 @@ func _run_probe() -> void:
 		return
 	if not _require(camera.size < camera_size_before, "滚轮放大没有同步正交相机"):
 		return
-	workspace.call("_set_world_zoom", 1.24)
-	if not _require(float(workspace.call("_country_label_alpha")) >= 0.98, "近景没有淡入国家名称"):
+	workspace.call("_set_world_zoom", 3.6)
+	if not _require(float(workspace.call("_country_label_alpha")) >= 0.98, "高倍率没有淡入政治实体名称"):
 		return
-	if not _require(not moon.visible, "近景放大后月球仍挤占国家阅读空间"):
+	if not _require(not moon.visible, "高倍率放大后月球仍挤占国家阅读空间"):
 		return
+
+	workspace.set("selected_country_id", "kingdom_of_nepal")
+	workspace.call("_zoom_to_selected_historical_entity")
+	if not _require(float(workspace.get("world_zoom")) >= 2.5, "尼泊尔没有获得足以阅读小国完整轮廓的聚焦倍率"):
+		return
+	if not _require(float(workspace.get("world_zoom")) <= 6.0, "小国聚焦突破了有限最大倍率"):
+		return
+
+	workspace.call("_return_to_global_world")
 	workspace.call("_set_world_zoom", 0.86)
 	if not _require(moon.visible, "恢复全球总览后月球没有重新显示"):
 		return
@@ -93,23 +113,43 @@ func _run_probe() -> void:
 	workspace.set("angular_velocity", 0.0)
 	workspace.set_process(false)
 
+	workspace.set("selected_country_id", "german_empire")
+	workspace.call("_focus_selected_country")
+	if not _require(str(workspace.get("world_mode")) == "historical_entity_focus", "德意志帝国没有进入通用历史政治实体层"):
+		return
+	if not _require(not moon.visible, "历史政治实体平面层仍显示月球"):
+		return
+	var german_territories: Array = (workspace.get("_history_territories_by_entity") as Dictionary).get("german_empire", []) as Array
+	if not _require(german_territories.size() == 1, "德意志帝国单一辖区结构异常"):
+		return
+	workspace.call("_enter_region")
+	if not _require(str(workspace.get("space_level")) == "region", "单一辖区政治实体没有直接进入辖区层"):
+		return
+	workspace.call("_unhandled_key_input", _key_event(KEY_ESCAPE))
+	if not _require(str(workspace.get("space_level")) == "world" and str(workspace.get("world_mode")) == "historical_entity_focus", "通用辖区Esc没有返回政治实体层"):
+		return
+	workspace.call("_unhandled_key_input", _key_event(KEY_ESCAPE))
+	if not _require(str(workspace.get("world_mode")) == "countries", "政治实体层Esc没有返回全球层"):
+		return
+
 	workspace.set("yaw", -0.08)
 	workspace.set("tilt", -0.18)
+	workspace.call("_set_world_zoom", 0.86)
 	workspace.call("_mark_projection_dirty")
 	workspace.call("_ensure_projection_cache")
 	var country_anchors: Dictionary = workspace.get("_country_screen_anchors") as Dictionary
-	if not _require(country_anchors.has("country_fra"), "默认视角下法兰西国家锚点不可见"):
+	if not _require(country_anchors.has("country_fra"), "默认视角下法兰西第三共和国锚点不可见"):
 		return
 	var france_point: Vector2 = country_anchors.get("country_fra", Vector2.INF) as Vector2
 	_send_mouse_button(france_point, true)
 	_send_mouse_button(france_point, false)
-	if not _require(str(workspace.get("selected_country_id")) == "country_fra", "点击法兰西锚点未选择国家"):
+	if not _require(str(workspace.get("selected_country_id")) == "country_fra", "点击法兰西锚点未选择法兰西第三共和国"):
 		return
 
 	workspace.call("_focus_selected_country")
-	if not _require(str(workspace.get("world_mode")) == "country_focus", "进入国家后未切换国家聚焦模式"):
+	if not _require(str(workspace.get("world_mode")) == "country_focus", "法兰西没有进入已有九大区聚焦模式"):
 		return
-	if not _require(not moon.visible, "进入国家聚焦后月球仍悬在二维地图旁"):
+	if not _require(not moon.visible, "进入法国聚焦后月球仍悬在二维地图旁"):
 		return
 	workspace.call("_ensure_projection_cache")
 
