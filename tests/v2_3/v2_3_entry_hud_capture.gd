@@ -22,14 +22,8 @@ func _capture() -> void:
 	var main := (load(MAIN_SCENE) as PackedScene).instantiate() as Control
 	add_child(main)
 	await _settle_frames(24)
-	var interface := main.get_node_or_null("PrototypeInterface") as Control
-	if interface == null:
-		push_error("Formal UI capture: PrototypeInterface missing")
-		get_tree().quit(1)
-		return
-	_save_method_inventory(interface)
 	_save_viewport("01_main_hud_closed.png")
-	var overlay := interface.get_node_or_null("MinimalHudOverlay") as Control
+	var overlay := main.get_node_or_null("PrototypeInterface/MinimalHudOverlay") as Control
 	if overlay == null:
 		push_error("Formal UI capture: MinimalHudOverlay missing")
 		get_tree().quit(1)
@@ -39,30 +33,6 @@ func _capture() -> void:
 	_save_viewport("02_field_book_open.png")
 	main.queue_free()
 	get_tree().quit(0)
-
-
-func _save_method_inventory(interface: Object) -> void:
-	var lines := PackedStringArray(["SCRIPT_CHAIN"])
-	var script := interface.get_script() as Script
-	while script != null:
-		lines.append(script.resource_path)
-		script = script.get_base_script()
-	lines.append("DRAW_METHODS")
-	var names := PackedStringArray()
-	for method_value: Variant in interface.get_method_list():
-		var method := method_value as Dictionary
-		var name := str(method.get("name", ""))
-		if name.begins_with("_draw_"):
-			names.append(name)
-	names.sort()
-	lines.append_array(names)
-	var path := ProjectSettings.globalize_path(OUTPUT_DIR.path_join("corner_methods.txt"))
-	var file := FileAccess.open(path, FileAccess.WRITE)
-	if file == null:
-		push_error("Formal UI capture: cannot write draw method inventory")
-		get_tree().quit(1)
-		return
-	file.store_string("\n".join(lines))
 
 
 func _save_viewport(filename: String) -> void:
