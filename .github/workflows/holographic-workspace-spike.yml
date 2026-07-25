@@ -116,6 +116,8 @@ jobs:
             cat godot-capture.log
             exit 1
           fi
+          test -s artifacts/holographic_workspace/00_global_twinkle_a.png
+          test -s artifacts/holographic_workspace/00_global_twinkle_b.png
           test -s artifacts/holographic_workspace/01_global_focus.png
           test -s artifacts/holographic_workspace/02_operation_workspace.png
           test -s artifacts/holographic_workspace/03_france_region_selected.png
