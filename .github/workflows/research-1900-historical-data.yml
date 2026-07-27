@@ -33,24 +33,27 @@ jobs:
           python3 -m json.tool artifacts/historical_1900_research/research_report.json >/dev/null
           python3 -m json.tool artifacts/historical_1900_research/cshapes_schema_probe.json >/dev/null
           python3 -m json.tool artifacts/historical_1900_research/commons_flag_candidates_1900.json >/dev/null
-      - name: Build offline CShapes snapshot
+      - name: Build offline historical provider
         run: |
           set -euo pipefail
           python3 tools/historical_data/build_cshapes_1900_snapshot.py
+          python3 tools/historical_data/build_1900_entity_registry.py
           python3 -m json.tool data/world_map/historical/cshapes_1900_snapshot.json >/dev/null
+          python3 -m json.tool data/world_map/historical/political_units_1900.json >/dev/null
           test "$(python3 -c "import json; print(json.load(open('data/world_map/historical/cshapes_1900_snapshot.json', encoding='utf-8'))['feature_count'])")" = "151"
-      - name: Persist generated snapshot
+          test "$(python3 -c "import json; print(json.load(open('data/world_map/historical/political_units_1900.json', encoding='utf-8'))['unit_count'])")" = "151"
+      - name: Persist generated provider
         if: github.event_name == 'pull_request' && github.actor != 'github-actions[bot]'
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/world_map/historical/cshapes_1900_snapshot.json data/world_map/historical/CShapes-2.0-ATTRIBUTION.md
+          git add data/world_map/historical/cshapes_1900_snapshot.json data/world_map/historical/CShapes-2.0-ATTRIBUTION.md data/world_map/historical/political_units_1900.json
           if git diff --cached --quiet; then
-            echo "Snapshot is already current"
+            echo "Historical provider is already current"
           else
-            git commit -m "generate CShapes 1900 historical snapshot"
+            git commit -m "generate source-backed 1900 historical provider"
             git push origin HEAD:${{ github.head_ref }}
           fi
       - name: Upload research artifact
