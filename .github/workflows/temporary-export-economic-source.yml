@@ -1,0 +1,25 @@
+name: Temporary export economic source
+
+on:
+  pull_request:
+    branches:
+      - agent/historical-admin-top50-generalize
+    paths:
+      - ".github/workflows/temporary-export-economic-source.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  export-source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create source archive
+        run: |
+          zip -qr wwo-economic-source.zip . -x '.git/*'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wwo-economic-source
+          path: wwo-economic-source.zip
+          retention-days: 1
