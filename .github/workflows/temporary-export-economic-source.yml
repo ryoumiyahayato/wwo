@@ -1,6 +1,12 @@
 name: Apply staged 1900 economy implementation
 
 on:
+  pull_request:
+    branches:
+      - agent/historical-admin-top50-generalize
+    paths:
+      - ".github/economy_patch/**"
+      - ".github/workflows/temporary-export-economic-source.yml"
   push:
     branches:
       - agent/1900-market-economy-core
