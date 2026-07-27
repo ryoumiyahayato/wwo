@@ -1,0 +1,37 @@
+name: Research 1900 historical data
+
+on:
+  push:
+    branches:
+      - agent/1900-historical-gis-flags
+    paths:
+      - "tools/historical_data/research_1900_sources.py"
+      - ".github/workflows/research-1900-historical-data.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Run source research probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf artifacts/historical_1900_research
+          python3 tools/historical_data/research_1900_sources.py artifacts/historical_1900_research
+          python3 -m json.tool artifacts/historical_1900_research/research_report.json >/dev/null
+          python3 -m json.tool artifacts/historical_1900_research/cshapes_schema_probe.json >/dev/null
+          python3 -m json.tool artifacts/historical_1900_research/commons_flag_candidates_1900.json >/dev/null
+      - name: Upload research artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: historical-1900-source-research
+          path: artifacts/historical_1900_research/
+          if-no-files-found: error
+          retention-days: 14
