@@ -1,6 +1,12 @@
 name: Research 1900 historical data
 
 on:
+  pull_request:
+    branches:
+      - agent/resolve-historical-ui-gaps
+    paths:
+      - "tools/historical_data/**"
+      - ".github/workflows/research-1900-historical-data.yml"
   push:
     branches:
       - agent/1900-historical-gis-flags
