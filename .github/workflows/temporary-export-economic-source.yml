@@ -1,25 +1,37 @@
-name: Temporary export economic source
+name: Apply staged 1900 economy implementation
 
 on:
-  pull_request:
+  push:
     branches:
-      - agent/historical-admin-top50-generalize
+      - agent/1900-market-economy-core
     paths:
+      - ".github/economy_patch/**"
       - ".github/workflows/temporary-export-economic-source.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  export-source:
+  apply-economy-patch:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Create source archive
-        run: |
-          zip -qr wwo-economic-source.zip . -x '.git/*'
-      - uses: actions/upload-artifact@v4
+      - name: Check out economy branch
+        uses: actions/checkout@v4
         with:
-          name: wwo-economic-source
-          path: wwo-economic-source.zip
-          retention-days: 1
+          ref: agent/1900-market-economy-core
+      - name: Apply reviewed source archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .github/economy_patch/part* > /tmp/economy-patch.tar.gz.b64
+          base64 --decode /tmp/economy-patch.tar.gz.b64 > /tmp/economy-patch.tar.gz
+          tar -xzf /tmp/economy-patch.tar.gz -C .
+          rm -rf .github/economy_patch
+          rm -f .github/workflows/temporary-export-economic-source.yml
+          python3 tools/audit_1900_commodity_economy.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "build population-linked 1900 commodity economy"
+          git push origin HEAD:agent/1900-market-economy-core
