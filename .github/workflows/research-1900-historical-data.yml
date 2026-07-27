@@ -38,12 +38,7 @@ jobs:
           set -euo pipefail
           python3 tools/historical_data/build_cshapes_1900_snapshot.py
           python3 -m json.tool data/world_map/historical/cshapes_1900_snapshot.json >/dev/null
-          test "$(python3 - <<'PY'
-import json
-with open('data/world_map/historical/cshapes_1900_snapshot.json', encoding='utf-8') as handle:
-    print(json.load(handle)['feature_count'])
-PY
-)" = "151"
+          test "$(python3 -c "import json; print(json.load(open('data/world_map/historical/cshapes_1900_snapshot.json', encoding='utf-8'))['feature_count'])")" = "151"
       - name: Persist generated snapshot
         if: github.event_name == 'pull_request' && github.actor != 'github-actions[bot]'
         shell: bash
