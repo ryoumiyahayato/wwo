@@ -21,21 +21,21 @@ permissions:
 jobs:
   build-evidence:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 25
     steps:
       - name: Check out head branch
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref || github.ref_name }}
       - name: Install historical data dependencies
-        run: python3 -m pip install --disable-pip-version-check "shapely==2.1.2" "CairoSVG==2.8.2" "Pillow==11.3.0"
+        run: python3 -m pip install --disable-pip-version-check "shapely==2.1.2" "Pillow==11.3.0"
       - name: Build offline historical provider and flag registry
         run: |
           set -euo pipefail
           rm -rf assets/historical_flags/1900
           python3 tools/historical_data/build_cshapes_1900_snapshot.py
           python3 tools/historical_data/build_1900_entity_registry.py
-          python3 tools/historical_data/build_1900_flag_registry.py
+          python3 tools/historical_data/build_1900_flag_registry_fast.py
           python3 tools/historical_data/audit_1900_historical_provider.py
           python3 -m json.tool data/world_map/historical/cshapes_1900_snapshot.json >/dev/null
           python3 -m json.tool data/world_map/historical/political_units_1900.json >/dev/null
