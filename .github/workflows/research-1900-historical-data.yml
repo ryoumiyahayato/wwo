@@ -11,6 +11,10 @@ on:
       - "assets/historical_flags/**"
   workflow_dispatch:
 
+concurrency:
+  group: historical-1900-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
@@ -41,13 +45,13 @@ jobs:
           python3 tools/historical_data/build_cshapes_1900_snapshot.py
           python3 tools/historical_data/build_1900_entity_registry.py
           python3 tools/historical_data/build_1900_flag_registry.py
+          python3 tools/historical_data/audit_1900_historical_provider.py
           python3 -m json.tool data/world_map/historical/cshapes_1900_snapshot.json >/dev/null
           python3 -m json.tool data/world_map/historical/political_units_1900.json >/dev/null
           python3 -m json.tool data/world_map/historical/flags_1900.json >/dev/null
           test "$(python3 -c "import json; print(json.load(open('data/world_map/historical/cshapes_1900_snapshot.json', encoding='utf-8'))['feature_count'])")" = "151"
           test "$(python3 -c "import json; print(json.load(open('data/world_map/historical/political_units_1900.json', encoding='utf-8'))['unit_count'])")" = "151"
           test "$(find assets/historical_flags/1900 -type f -name '*.png' | wc -l)" = "60"
-          python3 -c "import json; d=json.load(open('data/world_map/historical/political_units_1900.json', encoding='utf-8')); assert all(u['flag_id'] != 'research_required' for u in d['units'])"
       - name: Persist generated historical provider
         if: github.event_name == 'pull_request' && github.actor != 'github-actions[bot]'
         shell: bash
