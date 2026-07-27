@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3]
 
-[ext_resource type="Script" path="res://scripts/ui_spikes/holographic_workspace/holographic_workspace_release_quality.gd" id="1_spike"]
+[ext_resource type="Script" path="res://scripts/ui_spikes/holographic_workspace/holographic_workspace_historical_evidence_ui.gd" id="1_spike"]
 [ext_resource type="Script" path="res://scripts/ui_spikes/holographic_workspace/holographic_hemisphere_3d.gd" id="2_hemi"]
 [ext_resource type="Shader" path="res://shaders/ui_spikes/holographic_workspace/workspace_background.gdshader" id="3_background"]
 
