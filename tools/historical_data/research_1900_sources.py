@@ -12,6 +12,8 @@ import html
 import json
 import re
 import sys
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 import zipfile
@@ -20,7 +22,9 @@ from typing import Any
 
 CSHAPES_PAGE = "https://icr.ethz.ch/data/cshapes/"
 COMMONS_API = "https://commons.wikimedia.org/w/api.php"
-USER_AGENT = "wwo-1900-source-audit/1.0 (historical data research)"
+USER_AGENT = "wwo-1900-source-audit/1.1 (historical data research; contact via repository)"
+COMMONS_REQUEST_INTERVAL_SECONDS = 0.65
+COMMONS_MAX_RETRIES = 6
 
 FLAG_QUERIES: dict[str, str] = {
     "france_1794": "Flag of France 1794 1815 1830 historical svg",
@@ -31,55 +35,64 @@ FLAG_QUERIES: dict[str, str] = {
     "ottoman_empire_1844": "Flag of the Ottoman Empire 1844 1922 svg",
     "qing_empire_1889": "Flag of China 1889 1912 Qing svg",
     "japan_1870": "Flag of Japan 1870 1999 svg",
-    "korean_empire_1897": "Flag of the Korean Empire 1897 svg",
+    "korean_empire_1897": "Flag of Korea 1897 1910 historical svg",
     "united_states_45_star": "Flag of the United States 1896 1908 45 stars svg",
-    "italy_1861": "Flag of Italy 1861 1946 Kingdom svg",
-    "spain_1875": "Flag of Spain 1875 1931 svg",
-    "portugal_1830": "Flag of Portugal 1830 1910 svg",
-    "belgium_1831": "Flag of Belgium 1831 svg",
-    "congo_free_state": "Flag of the Congo Free State svg",
-    "netherlands": "Flag of the Netherlands svg",
-    "sweden_norway_union": "Swedish Norwegian union flag 1844 1905 svg",
-    "denmark": "Flag of Denmark svg",
-    "switzerland": "Flag of Switzerland svg",
-    "romania_1867": "Flag of Romania 1867 1948 svg",
-    "serbia_1882": "Flag of the Kingdom of Serbia 1882 1918 svg",
-    "montenegro_1876": "Flag of Montenegro 1876 1905 svg",
-    "bulgaria_1878": "Flag of Bulgaria 1878 1946 svg",
-    "greece_1822": "Flag of Greece 1822 1978 svg",
-    "qajar_persia": "Flag of Qajar Persia lion and sun svg",
-    "afghanistan_1880": "Flag of Afghanistan 1880 1901 svg",
-    "siam_1855": "Flag of Siam 1855 1916 white elephant svg",
-    "nepal_historical": "Flag of Nepal before 1962 historical svg",
-    "ethiopia_1897": "Flag of Ethiopia 1897 1914 svg",
-    "liberia_1847": "Flag of Liberia 1847 svg",
-    "morocco_plain_red": "Flag of Morocco before 1915 plain red svg",
-    "muscat_oman_red": "Flag of Muscat and Oman historical red svg",
-    "mexico_1893": "Flag of Mexico 1893 1916 svg",
-    "guatemala_1871": "Flag of Guatemala 1871 1968 svg",
-    "honduras_1866": "Flag of Honduras 1866 1898 1949 svg",
-    "el_salvador_1875": "Flag of El Salvador 1875 1912 svg",
-    "nicaragua_1896": "Flag of Nicaragua 1896 1908 svg",
-    "costa_rica_1848": "Flag of Costa Rica 1848 1906 svg",
-    "colombia_1861": "Flag of Colombia 1861 svg",
-    "venezuela_1863": "Flag of Venezuela 1863 1905 svg",
-    "ecuador_1860": "Flag of Ecuador 1860 1900 svg",
-    "peru_1884": "Flag of Peru 1884 1950 svg",
-    "bolivia_1851": "Flag of Bolivia 1851 svg",
-    "chile_1817": "Flag of Chile 1817 svg",
-    "argentina_1861": "Flag of Argentina 1861 svg",
-    "paraguay_1842": "Flag of Paraguay 1842 historical svg",
-    "uruguay_1830": "Flag of Uruguay 1830 svg",
-    "brazil_1889": "Flag of Brazil 1889 1960 svg",
-    "haiti_1859": "Flag of Haiti 1859 1964 svg",
-    "dominican_republic_1865": "Flag of Dominican Republic 1865 historical svg",
+    "italy_1861": "Flag of Italy 1861 1946 Kingdom",
+    "spain_1875": "Flag of Spain 1875 1931",
+    "portugal_1830": "Flag of Portugal 1830 1910",
+    "belgium_1831": "Flag of Belgium",
+    "congo_free_state": "Flag of the Congo Free State",
+    "netherlands": "Flag of the Netherlands",
+    "sweden_norway_union": "Swedish Norwegian union flag 1844 1905",
+    "denmark": "Flag of Denmark",
+    "switzerland": "Flag of Switzerland",
+    "romania_1867": "Flag of Romania 1867 1948",
+    "serbia_1882": "Flag of the Kingdom of Serbia 1882 1918",
+    "montenegro_1876": "Flag of Montenegro 1876 1905",
+    "bulgaria_1878": "Flag of Bulgaria 1878 1946",
+    "greece_1822": "Flag of Greece 1822 1978",
+    "qajar_persia": "Flag Qajar Persia lion sun",
+    "afghanistan_1880": "Flag of Afghanistan 1880 1901",
+    "siam_1855": "Flag of Siam 1855 1916 white elephant",
+    "nepal_historical": "Flag of Nepal historical before 1962",
+    "ethiopia_1897": "Flag of Ethiopia 1897 1914",
+    "liberia_1847": "Flag of Liberia 1847",
+    "morocco_plain_red": "Flag of Morocco before 1915 plain red",
+    "muscat_oman_red": "Flag of Muscat Oman historical red",
+    "mexico_1893": "Flag of Mexico 1893 1916",
+    "guatemala_1871": "Flag of Guatemala 1871 1968",
+    "honduras_1866": "Flag of Honduras 1898 1949",
+    "el_salvador_1875": "Flag of El Salvador 1875 1912",
+    "nicaragua_1896": "Flag of Nicaragua 1896 1908",
+    "costa_rica_1848": "Flag of Costa Rica 1848 1906",
+    "colombia_1861": "Flag of Colombia 1861",
+    "venezuela_1863": "Flag of Venezuela 1863 1905",
+    "ecuador_1860": "Flag of Ecuador 1860 1900",
+    "peru_1884": "Flag of Peru 1884 1950",
+    "bolivia_1851": "Flag of Bolivia 1851",
+    "chile_1817": "Flag of Chile 1817",
+    "argentina_1861": "Flag of Argentina 1861",
+    "paraguay_1842": "Flag of Paraguay 1842 historical",
+    "uruguay_1830": "Flag of Uruguay 1830",
+    "brazil_1889": "Flag of Brazil 1889 1960",
+    "haiti_1859": "Flag of Haiti 1859 1964",
+    "dominican_republic_1865": "Flag of Dominican Republic 1865 historical",
 }
 
 
-def fetch_bytes(url: str) -> bytes:
-    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(request, timeout=90) as response:
-        return response.read()
+def fetch_bytes(url: str, retries: int = 1) -> bytes:
+    for attempt in range(retries):
+        request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+        try:
+            with urllib.request.urlopen(request, timeout=90) as response:
+                return response.read()
+        except urllib.error.HTTPError as exc:
+            if exc.code != 429 or attempt + 1 >= retries:
+                raise
+            retry_after = exc.headers.get("Retry-After")
+            delay = float(retry_after) if retry_after else min(20.0, 1.5 * (2**attempt))
+            time.sleep(delay)
+    raise RuntimeError("unreachable fetch retry state")
 
 
 def discover_cshapes_links() -> list[str]:
@@ -106,7 +119,6 @@ def download_cshapes(output_dir: Path) -> dict[str, Any]:
     )
     if not links:
         raise RuntimeError("No CShapes GeoJSON/ZIP link discovered on official page")
-
     errors: list[str] = []
     for index, url in enumerate(links):
         try:
@@ -124,15 +136,14 @@ def download_cshapes(output_dir: Path) -> dict[str, Any]:
                     if not json_members:
                         raise RuntimeError("ZIP contains no global GeoJSON")
                     selected = max(json_members, key=lambda name: archive.getinfo(name).file_size)
-                    geojson_payload = archive.read(selected)
                     geojson_path = output_dir / "cshapes_2_0.geojson"
-                    geojson_path.write_bytes(geojson_payload)
+                    geojson_path.write_bytes(archive.read(selected))
                     return inspect_geojson(geojson_path, url, selected)
             else:
                 geojson_path = output_dir / "cshapes_2_0.geojson"
                 geojson_path.write_bytes(payload)
                 return inspect_geojson(geojson_path, url, "")
-        except Exception as exc:  # noqa: BLE001 - audit should retain all failures
+        except Exception as exc:  # noqa: BLE001
             errors.append(f"{url}: {exc}")
     raise RuntimeError("Unable to download CShapes data:\n" + "\n".join(errors))
 
@@ -166,15 +177,16 @@ def commons_candidates(query: str) -> list[dict[str, Any]]:
         "generator": "search",
         "gsrsearch": query,
         "gsrnamespace": "6",
-        "gsrlimit": "8",
+        "gsrlimit": "10",
         "prop": "imageinfo",
         "iiprop": "url|mime|size|extmetadata",
         "format": "json",
         "formatversion": "2",
         "origin": "*",
+        "maxlag": "5",
     }
     url = COMMONS_API + "?" + urllib.parse.urlencode(parameters)
-    document = json.loads(fetch_bytes(url).decode("utf-8"))
+    document = json.loads(fetch_bytes(url, COMMONS_MAX_RETRIES).decode("utf-8"))
     pages = document.get("query", {}).get("pages", [])
     candidates: list[dict[str, Any]] = []
     for page in pages:
@@ -200,9 +212,12 @@ def commons_candidates(query: str) -> list[dict[str, Any]]:
 
 def research_flags(output_dir: Path) -> dict[str, Any]:
     results: dict[str, Any] = {}
-    for key, query in FLAG_QUERIES.items():
+    for index, (key, query) in enumerate(FLAG_QUERIES.items()):
+        if index:
+            time.sleep(COMMONS_REQUEST_INTERVAL_SECONDS)
         try:
-            results[key] = {"query": query, "candidates": commons_candidates(query)}
+            candidates = commons_candidates(query)
+            results[key] = {"query": query, "candidates": candidates}
         except Exception as exc:  # noqa: BLE001
             results[key] = {"query": query, "error": str(exc), "candidates": []}
     (output_dir / "commons_flag_candidates_1900.json").write_text(
@@ -230,12 +245,19 @@ def main() -> int:
         report["cshapes"] = download_cshapes(output_dir)
     except Exception as exc:  # noqa: BLE001
         report["cshapes_error"] = str(exc)
-    report["flag_subject_count"] = len(research_flags(output_dir))
+    flag_results = research_flags(output_dir)
+    report["flag_subject_count"] = len(flag_results)
+    report["flag_query_error_count"] = sum(
+        1 for result in flag_results.values() if result.get("error")
+    )
+    report["flag_query_empty_count"] = sum(
+        1 for result in flag_results.values() if not result.get("candidates")
+    )
     (output_dir / "research_report.json").write_text(
         json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
     )
     print(json.dumps(report, ensure_ascii=False, indent=2))
-    return 0 if "cshapes" in report else 1
+    return 0 if "cshapes" in report and report["flag_query_error_count"] == 0 else 1
 
 
 if __name__ == "__main__":
