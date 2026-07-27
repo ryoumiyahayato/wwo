@@ -8,6 +8,7 @@ on:
       - "tools/historical_data/**"
       - ".github/workflows/research-1900-historical-data.yml"
       - "data/world_map/historical/**"
+      - "assets/historical_flags/**"
   workflow_dispatch:
 
 permissions:
@@ -16,14 +17,14 @@ permissions:
 jobs:
   research:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 40
     steps:
       - name: Check out head branch
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref || github.ref_name }}
-      - name: Install geometry dependency
-        run: python3 -m pip install --disable-pip-version-check "shapely==2.1.2"
+      - name: Install historical data dependencies
+        run: python3 -m pip install --disable-pip-version-check "shapely==2.1.2" "CairoSVG==2.8.2" "Pillow==11.3.0"
       - name: Run source research probe
         shell: bash
         run: |
@@ -33,27 +34,32 @@ jobs:
           python3 -m json.tool artifacts/historical_1900_research/research_report.json >/dev/null
           python3 -m json.tool artifacts/historical_1900_research/cshapes_schema_probe.json >/dev/null
           python3 -m json.tool artifacts/historical_1900_research/commons_flag_candidates_1900.json >/dev/null
-      - name: Build offline historical provider
+      - name: Build offline historical provider and flag registry
         run: |
           set -euo pipefail
+          rm -rf assets/historical_flags/1900
           python3 tools/historical_data/build_cshapes_1900_snapshot.py
           python3 tools/historical_data/build_1900_entity_registry.py
+          python3 tools/historical_data/build_1900_flag_registry.py
           python3 -m json.tool data/world_map/historical/cshapes_1900_snapshot.json >/dev/null
           python3 -m json.tool data/world_map/historical/political_units_1900.json >/dev/null
+          python3 -m json.tool data/world_map/historical/flags_1900.json >/dev/null
           test "$(python3 -c "import json; print(json.load(open('data/world_map/historical/cshapes_1900_snapshot.json', encoding='utf-8'))['feature_count'])")" = "151"
           test "$(python3 -c "import json; print(json.load(open('data/world_map/historical/political_units_1900.json', encoding='utf-8'))['unit_count'])")" = "151"
-      - name: Persist generated provider
+          test "$(find assets/historical_flags/1900 -type f -name '*.png' | wc -l)" = "60"
+          python3 -c "import json; d=json.load(open('data/world_map/historical/political_units_1900.json', encoding='utf-8')); assert all(u['flag_id'] != 'research_required' for u in d['units'])"
+      - name: Persist generated historical provider
         if: github.event_name == 'pull_request' && github.actor != 'github-actions[bot]'
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/world_map/historical/cshapes_1900_snapshot.json data/world_map/historical/CShapes-2.0-ATTRIBUTION.md data/world_map/historical/political_units_1900.json
+          git add data/world_map/historical/cshapes_1900_snapshot.json data/world_map/historical/CShapes-2.0-ATTRIBUTION.md data/world_map/historical/political_units_1900.json data/world_map/historical/flags_1900.json data/world_map/historical/FLAG_ASSET_ATTRIBUTION.md assets/historical_flags/1900
           if git diff --cached --quiet; then
             echo "Historical provider is already current"
           else
-            git commit -m "generate source-backed 1900 historical provider"
+            git commit -m "generate sourced 1900 GIS and flag assets"
             git push origin HEAD:${{ github.head_ref }}
           fi
       - name: Upload research artifact
