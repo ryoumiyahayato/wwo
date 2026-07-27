@@ -28,7 +28,7 @@ jobs:
         with:
           ref: ${{ github.head_ref || github.ref_name }}
       - name: Install historical data dependencies
-        run: python3 -m pip install --disable-pip-version-check "shapely==2.1.2" "Pillow==11.3.0"
+        run: python3 -m pip install --disable-pip-version-check "shapely==2.1.2" "Pillow==11.3.0" "CairoSVG==2.8.2"
       - name: Build offline historical provider and flag registry
         shell: bash
         run: |
