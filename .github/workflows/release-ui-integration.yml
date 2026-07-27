@@ -10,6 +10,7 @@ on:
       - "scripts/v2_3/v2_3_life_loop_menu.gd"
       - "scripts/v2_3/v2_3_player_interface.gd"
       - "scripts/v2_3/v2_3_minimal_hud_overlay.gd"
+      - "scripts/v2_3/v2_3_minimal_hud_overlay_polish.gd"
       - "scenes/ui_spikes/holographic_workspace/**"
       - "scripts/ui_spikes/holographic_workspace/**"
       - "data/world_map/historical_political_entities_1900.json"

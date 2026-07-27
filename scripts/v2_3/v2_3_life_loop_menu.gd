@@ -27,24 +27,27 @@ func _ready() -> void:
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
-	if not event is InputEventKey:
+	var action: String = entry_action_for_event(event)
+	if action == "ignore":
 		return
-	var key_event := event as InputEventKey
-	if not key_event.pressed or key_event.echo:
-		return
-	if key_event.keycode == KEY_ESCAPE:
-		get_tree().quit()
+	if action == "stay":
 		get_viewport().set_input_as_handled()
 		return
 	_enter_world()
 	get_viewport().set_input_as_handled()
 
 
-func accepts_entry_event(event: InputEvent) -> bool:
+func entry_action_for_event(event: InputEvent) -> String:
 	if not event is InputEventKey:
-		return false
+		return "ignore"
 	var key_event := event as InputEventKey
-	return key_event.pressed and not key_event.echo and key_event.keycode != KEY_ESCAPE
+	if not key_event.pressed or key_event.echo:
+		return "ignore"
+	return "stay" if key_event.keycode == KEY_ESCAPE else "enter"
+
+
+func accepts_entry_event(event: InputEvent) -> bool:
+	return entry_action_for_event(event) == "enter"
 
 
 func resolved_launch_mode() -> String:
