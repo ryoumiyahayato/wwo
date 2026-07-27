@@ -1,4 +1,4 @@
-name: Research 1900 historical data
+name: Build 1900 historical evidence
 
 on:
   pull_request:
@@ -19,9 +19,9 @@ permissions:
   contents: write
 
 jobs:
-  research:
+  build-evidence:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 35
     steps:
       - name: Check out head branch
         uses: actions/checkout@v4
@@ -29,15 +29,6 @@ jobs:
           ref: ${{ github.head_ref || github.ref_name }}
       - name: Install historical data dependencies
         run: python3 -m pip install --disable-pip-version-check "shapely==2.1.2" "CairoSVG==2.8.2" "Pillow==11.3.0"
-      - name: Run source research probe
-        shell: bash
-        run: |
-          set -euo pipefail
-          rm -rf artifacts/historical_1900_research
-          python3 tools/historical_data/research_1900_sources.py artifacts/historical_1900_research
-          python3 -m json.tool artifacts/historical_1900_research/research_report.json >/dev/null
-          python3 -m json.tool artifacts/historical_1900_research/cshapes_schema_probe.json >/dev/null
-          python3 -m json.tool artifacts/historical_1900_research/commons_flag_candidates_1900.json >/dev/null
       - name: Build offline historical provider and flag registry
         run: |
           set -euo pipefail
@@ -66,10 +57,12 @@ jobs:
             git commit -m "generate sourced 1900 GIS and flag assets"
             git push origin HEAD:${{ github.head_ref }}
           fi
-      - name: Upload research artifact
+      - name: Upload generated evidence
         uses: actions/upload-artifact@v4
         with:
-          name: historical-1900-source-research
-          path: artifacts/historical_1900_research/
+          name: historical-1900-generated-evidence
+          path: |
+            data/world_map/historical/
+            assets/historical_flags/1900/
           if-no-files-found: error
           retention-days: 14
