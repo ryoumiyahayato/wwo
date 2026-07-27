@@ -7,24 +7,23 @@ on:
     paths:
       - "tools/historical_data/**"
       - ".github/workflows/research-1900-historical-data.yml"
-  push:
-    branches:
-      - agent/1900-historical-gis-flags
-    paths:
-      - "tools/historical_data/research_1900_sources.py"
-      - ".github/workflows/research-1900-historical-data.yml"
+      - "data/world_map/historical/**"
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   research:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
-      - name: Check out repository
+      - name: Check out head branch
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+      - name: Install geometry dependency
+        run: python3 -m pip install --disable-pip-version-check "shapely==2.1.2"
       - name: Run source research probe
         shell: bash
         run: |
@@ -34,6 +33,31 @@ jobs:
           python3 -m json.tool artifacts/historical_1900_research/research_report.json >/dev/null
           python3 -m json.tool artifacts/historical_1900_research/cshapes_schema_probe.json >/dev/null
           python3 -m json.tool artifacts/historical_1900_research/commons_flag_candidates_1900.json >/dev/null
+      - name: Build offline CShapes snapshot
+        run: |
+          set -euo pipefail
+          python3 tools/historical_data/build_cshapes_1900_snapshot.py
+          python3 -m json.tool data/world_map/historical/cshapes_1900_snapshot.json >/dev/null
+          test "$(python3 - <<'PY'
+import json
+with open('data/world_map/historical/cshapes_1900_snapshot.json', encoding='utf-8') as handle:
+    print(json.load(handle)['feature_count'])
+PY
+)" = "151"
+      - name: Persist generated snapshot
+        if: github.event_name == 'pull_request' && github.actor != 'github-actions[bot]'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/world_map/historical/cshapes_1900_snapshot.json data/world_map/historical/CShapes-2.0-ATTRIBUTION.md
+          if git diff --cached --quiet; then
+            echo "Snapshot is already current"
+          else
+            git commit -m "generate CShapes 1900 historical snapshot"
+            git push origin HEAD:${{ github.head_ref }}
+          fi
       - name: Upload research artifact
         uses: actions/upload-artifact@v4
         with:
