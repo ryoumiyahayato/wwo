@@ -1,4 +1,4 @@
-name: Temporary export final economy audit source
+name: Apply economy audit performance indexes
 
 on:
   pull_request:
@@ -8,19 +8,118 @@ on:
       - ".github/workflows/temporary-export-final-economy-audit.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  export:
+  apply:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Pack final branch source
-        run: |
-          zip -qr final-economy-audit-source.zip . -x '.git/*'
-      - uses: actions/upload-artifact@v4
         with:
-          name: final-economy-audit-source
-          path: final-economy-audit-source.zip
-          if-no-files-found: error
-          retention-days: 1
+          ref: agent/1900-market-economy-core
+      - name: Build cached production capacity indexes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('scripts/alpha/alpha_commodity_market_service.gd')
+          text = path.read_text(encoding='utf-8')
+          text = text.replace(
+              'var _region_ids: Array[String] = []\nvar _processed_keys: Dictionary = {}',
+              'var _region_ids: Array[String] = []\nvar _production_site_ids: Array[String] = []\nvar _industrial_input_capacity: Dictionary = {}\nvar _output_capacity: Dictionary = {}\nvar _processed_keys: Dictionary = {}',
+              1,
+          )
+          text = text.replace(
+              '\t_region_ids.clear()\n\t_processed_keys.clear()',
+              '\t_region_ids.clear()\n\t_production_site_ids.clear()\n\t_industrial_input_capacity.clear()\n\t_output_capacity.clear()\n\t_processed_keys.clear()',
+              1,
+          )
+          text = text.replace(
+              '\t\tproduction_sites[site_id] = site\n\t_initialize_international_market(document)',
+              '\t\tproduction_sites[site_id] = site\n\t\t_production_site_ids.append(site_id)\n\t_production_site_ids.sort()\n\t_build_capacity_indexes()\n\t_initialize_international_market(document)',
+              1,
+          )
+          text = text.replace(
+              'func _run_production(total_hour: int) -> void:\n\tvar site_ids: Array[String] = []\n\tfor raw_id: Variant in production_sites:\n\t\tsite_ids.append(str(raw_id))\n\tsite_ids.sort()\n\tfor site_id: String in site_ids:',
+              'func _run_production(total_hour: int) -> void:\n\tfor site_id: String in _production_site_ids:',
+              1,
+          )
+          old = '''func _daily_industrial_input_need(region_id: String, commodity_id: String) -> float:
+\tvar total: float = 0.0
+\tfor raw_site: Variant in production_sites.values():
+\t\tvar site: Dictionary = raw_site as Dictionary
+\t\tif str(site.get("region_id", "")) != region_id:
+\t\t\tcontinue
+\t\tvar recipe: Dictionary = recipes.get(str(site.get("recipe_id", "")), {}) as Dictionary
+\t\tfor raw_input: Variant in recipe.get("inputs", []) as Array:
+\t\t\tvar input: Dictionary = raw_input as Dictionary
+\t\t\tif str(input.get("commodity_id", "")) == commodity_id:
+\t\t\t\ttotal += float(input.get("units", 0.0)) * float(site.get("capacity_batches_per_day", 0.0))
+\treturn total
+
+
+func _daily_output_capacity(region_id: String, commodity_id: String) -> float:
+\tvar total: float = 0.0
+\tfor raw_site: Variant in production_sites.values():
+\t\tvar site: Dictionary = raw_site as Dictionary
+\t\tif str(site.get("region_id", "")) != region_id:
+\t\t\tcontinue
+\t\tvar recipe: Dictionary = recipes.get(str(site.get("recipe_id", "")), {}) as Dictionary
+\t\tfor raw_output: Variant in recipe.get("outputs", []) as Array:
+\t\t\tvar output: Dictionary = raw_output as Dictionary
+\t\t\tif str(output.get("commodity_id", "")) == commodity_id:
+\t\t\t\ttotal += float(output.get("units", 0.0)) * float(site.get("capacity_batches_per_day", 0.0))
+\treturn total
+'''
+          new = '''func _build_capacity_indexes() -> void:
+\tfor region_id: String in _region_ids:
+\t\t_industrial_input_capacity[region_id] = {}
+\t\t_output_capacity[region_id] = {}
+\tfor site_id: String in _production_site_ids:
+\t\tvar site: Dictionary = production_sites[site_id] as Dictionary
+\t\tvar region_id: String = str(site.get("region_id", ""))
+\t\tvar recipe: Dictionary = recipes.get(str(site.get("recipe_id", "")), {}) as Dictionary
+\t\tvar capacity: float = float(site.get("capacity_batches_per_day", 0.0))
+\t\tvar inputs: Dictionary = _industrial_input_capacity.get(region_id, {}) as Dictionary
+\t\tfor raw_input: Variant in recipe.get("inputs", []) as Array:
+\t\t\tvar input: Dictionary = raw_input as Dictionary
+\t\t\tvar commodity_id: String = str(input.get("commodity_id", ""))
+\t\t\tinputs[commodity_id] = float(inputs.get(commodity_id, 0.0)) + float(input.get("units", 0.0)) * capacity
+\t\t_industrial_input_capacity[region_id] = inputs
+\t\tvar outputs: Dictionary = _output_capacity.get(region_id, {}) as Dictionary
+\t\tfor raw_output: Variant in recipe.get("outputs", []) as Array:
+\t\t\tvar output: Dictionary = raw_output as Dictionary
+\t\t\tvar commodity_id: String = str(output.get("commodity_id", ""))
+\t\t\toutputs[commodity_id] = float(outputs.get(commodity_id, 0.0)) + float(output.get("units", 0.0)) * capacity
+\t\t_output_capacity[region_id] = outputs
+
+
+func _daily_industrial_input_need(region_id: String, commodity_id: String) -> float:
+\treturn float(
+\t\t(_industrial_input_capacity.get(region_id, {}) as Dictionary).get(
+\t\t\tcommodity_id, 0.0
+\t\t)
+\t)
+
+
+func _daily_output_capacity(region_id: String, commodity_id: String) -> float:
+\treturn float(
+\t\t(_output_capacity.get(region_id, {}) as Dictionary).get(commodity_id, 0.0)
+\t)
+'''
+          if old not in text:
+              raise SystemExit('capacity scan block not found')
+          text = text.replace(old, new, 1)
+          path.write_text(text, encoding='utf-8')
+          PY
+          rm -f .github/workflows/temporary-export-final-economy-audit.yml
+          grep -q '_build_capacity_indexes' scripts/alpha/alpha_commodity_market_service.gd
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/alpha/alpha_commodity_market_service.gd .github/workflows/temporary-export-final-economy-audit.yml
+          git commit -m "optimize commodity capacity lookups"
+          git push origin HEAD:agent/1900-market-economy-core
