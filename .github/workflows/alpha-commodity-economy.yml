@@ -3,7 +3,7 @@ name: Alpha 1900 commodity economy
 on:
   pull_request:
     branches:
-      - agent/historical-admin-top50-generalize
+      - master
     paths:
       - "data/alpha/**"
       - "scripts/alpha/**"
@@ -11,6 +11,7 @@ on:
       - "scenes/alpha/**"
       - "tests/alpha/**"
       - "tools/audit_1900_commodity_economy.py"
+      - "tools/audit_1900_economy_integration.py"
       - "docs/economy/**"
       - ".github/workflows/alpha-commodity-economy.yml"
   workflow_dispatch:
@@ -25,7 +26,7 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 28
+    timeout-minutes: 32
     env:
       GODOT_BIN: "${{ github.workspace }}/.ci-godot/Godot_v4.6.3-stable_linux.x86_64"
     steps:
@@ -45,11 +46,14 @@ jobs:
           set -euo pipefail
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends xvfb xauth fonts-noto-cjk
-      - name: Audit commodity configuration
+      - name: Audit commodity and integrated economy configuration
         run: |
           set -euo pipefail
           python3 tools/audit_1900_commodity_economy.py
+          python3 tools/audit_1900_economy_integration.py
           python3 -m json.tool data/alpha/commodity_market_1900.json >/dev/null
+          python3 -m json.tool data/alpha/economy_integration_1900.json >/dev/null
+          python3 -m json.tool data/alpha/historical_economy_coverage_1900.json >/dev/null
       - name: Import project and scan scripts
         shell: bash
         run: |
@@ -68,31 +72,32 @@ jobs:
             tests/alpha/alpha_composition_smoke.gd
             tests/alpha/alpha_save_and_migration_test.gd
             tests/alpha/alpha_economy_ui_audit_test.gd
+            tests/alpha/alpha_economy_integration_phase2_test.gd
             tests/alpha/alpha_ai_economy_stability_test.gd
           )
           for test_script in "${tests[@]}"; do
             name="$(basename "${test_script}" .gd)"
             log="builds/alpha-commodity/${name}.log"
-            timeout --signal=TERM 240s "${GODOT_BIN}" --headless --audio-driver Dummy --path . --script "res://${test_script}" --log-file "${log}"
+            timeout --signal=TERM 300s "${GODOT_BIN}" --headless --audio-driver Dummy --path . --script "res://${test_script}" --log-file "${log}"
             if grep -Eq "SCRIPT ERROR|Parse Error|Failed to load script|Assertion failed|[1-9][0-9]* failures|^ERROR:" "${log}"; then cat "${log}"; exit 1; fi
           done
-      - name: Capture economy interface
+      - name: Capture integrated economy interface
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p builds/alpha-commodity/screenshots
           capture_path="${GITHUB_WORKSPACE}/builds/alpha-commodity/screenshots/economy-dashboard.png"
-          timeout --signal=TERM 240s xvfb-run -a -s "-screen 0 1280x720x24" \
+          timeout --signal=TERM 300s xvfb-run -a -s "-screen 0 1280x720x24" \
             "${GODOT_BIN}" --audio-driver Dummy --rendering-method gl_compatibility \
             --path . --windowed --resolution 1280x720 \
             res://scenes/alpha/alpha_economy_dashboard_preview.tscn \
             -- --economy-audit-capture="${capture_path}"
           test -s "${capture_path}"
           file "${capture_path}" | tee builds/alpha-commodity/economy-capture-file.log
-      - name: Upload economy screenshot
+      - name: Upload integrated economy screenshot
         uses: actions/upload-artifact@v4
         with:
-          name: alpha-1900-economy-ui-screenshot
+          name: alpha-1900-economy-integration-ui-screenshot
           path: builds/alpha-commodity/screenshots/economy-dashboard.png
           if-no-files-found: error
           retention-days: 14
@@ -100,7 +105,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: alpha-1900-commodity-economy-logs
+          name: alpha-1900-economy-integration-logs
           path: |
             alpha-commodity-import.log
             builds/alpha-commodity/*.log
