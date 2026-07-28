@@ -1,7 +1,8 @@
 class_name FormalWorldEconomyService
 extends RefCounted
 ## Formal 1900 world economy. The historical map contains every dated political
-## unit, while only the ranked major-polity roster receives high-detail economy.
+## unit, while only the ranked major-economy roster receives high-detail economy.
+## One economy may cover several map units, as with the six Australian colonies.
 ## The retired two-country/eight-region Alpha world is never loaded here.
 
 const HOURS_PER_DAY: int = 24
@@ -13,9 +14,12 @@ const EXPECTED_MAJOR_ROSTER_COUNT: int = 50
 const PRIMARY_PLAYABLE_LIMIT: int = 30
 const COMMODITY_CATALOG_PATH: String = "res://data/alpha/commodity_market_1900.json"
 const POLITICAL_UNITS_PATH: String = "res://data/world_map/historical/political_units_1900.json"
+const CROSSWALK_PATH: String = "res://data/world_map/historical/major_economy_polity_crosswalk_1900.json"
 
 var country_states: Dictionary = {}
 var polity_records: Dictionary = {}
+var economy_polity_ids: Dictionary = {}
+var economy_by_polity_id: Dictionary = {}
 var routes: Array[Dictionary] = []
 var shipments: Array[Dictionary] = []
 var history: Array[Dictionary] = []
@@ -25,6 +29,7 @@ var initialization_error: String = ""
 var _historical := AlphaHistoricalWorldEconomyData.new()
 var _commodities: Dictionary = {}
 var _routes_by_country: Dictionary = {}
+var _crosswalk_records: Dictionary = {}
 var _next_shipment_sequence: int = 1
 var _last_day_index: int = -1
 var _political_unit_count: int = 0
@@ -33,10 +38,13 @@ var _political_unit_count: int = 0
 func configure() -> bool:
 	country_states.clear()
 	polity_records.clear()
+	economy_polity_ids.clear()
+	economy_by_polity_id.clear()
 	routes.clear()
 	shipments.clear()
 	history.clear()
 	_routes_by_country.clear()
+	_crosswalk_records.clear()
 	_commodities.clear()
 	total_hour = 0
 	_last_day_index = -1
@@ -49,13 +57,17 @@ func configure() -> bool:
 		return false
 	if not _load_polity_registry():
 		return false
+	if not _load_crosswalk():
+		return false
 	for record: Dictionary in _historical.simulation_countries():
 		_initialize_country(record)
 	_build_routes()
 	if country_states.size() != EXPECTED_MAJOR_ROSTER_COUNT:
 		return _fail(
-			"主要政权高细节经济目录应为%d，当前为%d" % [
-				EXPECTED_MAJOR_ROSTER_COUNT, country_states.size(),
+			"主要政权高细节经济目录应为%d，当前为%d：%s" % [
+				EXPECTED_MAJOR_ROSTER_COUNT,
+				country_states.size(),
+				initialization_error,
 			]
 		)
 	if _political_unit_count <= country_states.size():
@@ -107,16 +119,25 @@ func world_summary() -> Dictionary:
 			"secondary_roster": secondary_roster_count += 1
 	return {
 		"total_hour": total_hour,
-		# Compatibility alias. This is the high-detail major roster, not the world total.
+		# Compatibility alias. This is the high-detail economy roster, not world total.
 		"country_count": country_states.size(),
 		"major_economy_count": country_states.size(),
 		"world_political_unit_count": _political_unit_count,
-		"background_polity_count": maxi(0, _political_unit_count - country_states.size()),
-		"primary_playable_count": leading_power_count + great_power_count + major_power_count + primary_playable_count,
+		"detailed_polity_unit_count": economy_by_polity_id.size(),
+		"background_polity_count": maxi(
+			0, _political_unit_count - economy_by_polity_id.size()
+		),
+		"primary_playable_count": (
+			leading_power_count
+			+ great_power_count
+			+ major_power_count
+			+ primary_playable_count
+		),
 		"secondary_roster_count": secondary_roster_count,
 		"leading_power_count": leading_power_count,
 		"great_power_count": great_power_count,
 		"major_power_count": major_power_count,
+		"crosswalk_exception_count": _crosswalk_records.size(),
 		"population": population,
 		"commodity_count": _commodities.size(),
 		"active_shipments": shipments.size(),
@@ -134,12 +155,15 @@ func world_summary() -> Dictionary:
 
 
 func country_summary(entity_id: String) -> Dictionary:
-	var state := country_states.get(entity_id, {}) as Dictionary
+	var economy_id := entity_id
+	if not country_states.has(economy_id):
+		economy_id = economy_entity_for_polity(entity_id)
+	var state := country_states.get(economy_id, {}) as Dictionary
 	if state.is_empty():
 		return {}
 	var result := state.duplicate(true)
 	result["top_shortages"] = _top_country_shortages(state, 8)
-	result["active_shipments"] = _shipment_count_for(entity_id)
+	result["active_shipments"] = _shipment_count_for(economy_id)
 	return result
 
 
@@ -148,15 +172,25 @@ func polity_summary(entity_id: String) -> Dictionary:
 	if polity.is_empty():
 		return {}
 	var result := polity.duplicate(true)
-	var detailed := country_states.has(entity_id)
+	var economy_id := economy_entity_for_polity(entity_id)
+	var detailed := not economy_id.is_empty() and country_states.has(economy_id)
 	result["has_detailed_economy"] = detailed
+	result["economy_entity_id"] = economy_id
 	if detailed:
-		result["economy"] = country_summary(entity_id)
+		result["economy"] = country_summary(economy_id)
 	return result
 
 
 func has_detailed_economy(entity_id: String) -> bool:
-	return country_states.has(entity_id)
+	return not economy_entity_for_polity(entity_id).is_empty()
+
+
+func economy_entity_for_polity(polity_id: String) -> String:
+	return str(economy_by_polity_id.get(polity_id, ""))
+
+
+func polity_ids_for_economy(economy_id: String) -> Array[String]:
+	return DataRecordUtils.to_string_array(economy_polity_ids.get(economy_id, []))
 
 
 func formal_verified_countries() -> Array[Dictionary]:
@@ -165,7 +199,7 @@ func formal_verified_countries() -> Array[Dictionary]:
 
 func get_persistent_state() -> Dictionary:
 	return {
-		"schema_id": "formal_world_economy_state_v2",
+		"schema_id": "formal_world_economy_state_v3",
 		"total_hour": total_hour,
 		"country_states": country_states.duplicate(true),
 		"shipments": shipments.duplicate(true),
@@ -178,7 +212,11 @@ func get_persistent_state() -> Dictionary:
 func restore_persistent_state(state: Dictionary) -> bool:
 	var schema_id := str(state.get("schema_id", ""))
 	if (
-		schema_id not in ["formal_world_economy_state_v1", "formal_world_economy_state_v2"]
+		schema_id not in [
+			"formal_world_economy_state_v1",
+			"formal_world_economy_state_v2",
+			"formal_world_economy_state_v3",
+		]
 		or not state.get("country_states", {}) is Dictionary
 		or not state.get("shipments", []) is Array
 		or not state.get("history", []) is Array
@@ -188,8 +226,13 @@ func restore_persistent_state(state: Dictionary) -> bool:
 	if restored.size() != country_states.size():
 		return false
 	for raw_id: Variant in restored:
-		if not country_states.has(str(raw_id)):
+		var economy_id := str(raw_id)
+		if not country_states.has(economy_id):
 			return false
+		var restored_state := restored[economy_id] as Dictionary
+		if not restored_state.get("polity_ids", []) is Array:
+			restored_state["polity_ids"] = polity_ids_for_economy(economy_id)
+			restored[economy_id] = restored_state
 	country_states = restored
 	shipments = DataRecordUtils.to_dictionary_array(state.get("shipments", []))
 	history = DataRecordUtils.to_dictionary_array(state.get("history", []))
@@ -235,6 +278,7 @@ func _load_polity_registry() -> bool:
 		unit["playability_tier_zh"] = "背景政治单元"
 		unit["major_roster"] = false
 		unit["primary_playable"] = false
+		unit["economy_entity_id"] = ""
 		polity_records[entity_id] = unit
 	if polity_records.size() != _political_unit_count:
 		return _fail(
@@ -245,13 +289,41 @@ func _load_polity_registry() -> bool:
 	return true
 
 
+func _load_crosswalk() -> bool:
+	var document := _read_document(CROSSWALK_PATH)
+	if document.is_empty():
+		return false
+	if str(document.get("schema_id", "")) != "major_economy_polity_crosswalk_1900_v1":
+		return _fail("主要经济体与政治单元交叉表 Schema 无效")
+	for raw_record: Variant in document.get("records", []) as Array:
+		if not raw_record is Dictionary:
+			return _fail("主要经济体交叉表记录格式无效")
+		var record := (raw_record as Dictionary).duplicate(true)
+		var economy_id := str(record.get("economy_entity_id", ""))
+		var polity_ids := DataRecordUtils.to_string_array(record.get("polity_ids", []))
+		if economy_id.is_empty() or polity_ids.is_empty():
+			return _fail("主要经济体交叉表记录缺少ID")
+		for polity_id: String in polity_ids:
+			if not polity_records.has(polity_id):
+				return _fail("交叉表引用未知政治单元：%s" % polity_id)
+		_crosswalk_records[economy_id] = record
+	return true
+
+
 func _initialize_country(record: Dictionary) -> void:
 	var entity_id := str(record.get("entity_id", ""))
 	if entity_id.is_empty():
 		return
-	if not polity_records.has(entity_id):
-		_fail("主要政权未出现在1900政治单元地图中：%s" % entity_id)
+	var polity_ids := _resolve_polity_ids(entity_id)
+	if polity_ids.is_empty():
+		_fail("主要经济体未映射到1900政治地图：%s" % entity_id)
 		return
+	for polity_id: String in polity_ids:
+		if economy_by_polity_id.has(polity_id):
+			_fail(
+				"政治单元重复映射到主要经济体：%s" % polity_id
+			)
+			return
 	var rank := int(record.get("rank", 0))
 	var tier := _tier_for_rank(rank)
 	var population_record := record.get("population", {}) as Dictionary
@@ -273,7 +345,9 @@ func _initialize_country(record: Dictionary) -> void:
 		)
 		var capacity_factor := _production_factor(record, commodity)
 		var opening_days := 8.0 + 22.0 * capacity_factor
-		inventory[commodity_id] = maxf(demand * opening_days, capacity_factor * 40.0)
+		inventory[commodity_id] = maxf(
+			demand * opening_days, capacity_factor * 40.0
+		)
 		prices[commodity_id] = base_price
 		daily_metrics[commodity_id] = {
 			"demand": 0.0,
@@ -286,6 +360,7 @@ func _initialize_country(record: Dictionary) -> void:
 	var coverage := record.get("coverage", {}) as Dictionary
 	country_states[entity_id] = {
 		"entity_id": entity_id,
+		"polity_ids": polity_ids.duplicate(),
 		"rank": rank,
 		"playability_tier": str(tier.get("id", "secondary_roster")),
 		"playability_tier_zh": str(tier.get("name_zh", "次要目录")),
@@ -300,7 +375,9 @@ func _initialize_country(record: Dictionary) -> void:
 		"infrastructure": infrastructure.duplicate(true),
 		"overall_confidence_bp": int(record.get("overall_confidence_bp", 0)),
 		"admission_status": str(coverage.get("status", "bounded_estimate")),
-		"verified_dimensions": (coverage.get("verified_dimensions", []) as Array).duplicate(),
+		"verified_dimensions": (
+			coverage.get("verified_dimensions", []) as Array
+		).duplicate(),
 		"inventory": inventory,
 		"prices": prices,
 		"daily_metrics": daily_metrics,
@@ -310,13 +387,26 @@ func _initialize_country(record: Dictionary) -> void:
 		"tariff_revenue_centimes": 0,
 		"last_settlement_hour": 0,
 	}
-	var polity := polity_records[entity_id] as Dictionary
-	polity["rank"] = rank
-	polity["playability_tier"] = str(tier.get("id", "secondary_roster"))
-	polity["playability_tier_zh"] = str(tier.get("name_zh", "次要目录"))
-	polity["major_roster"] = true
-	polity["primary_playable"] = rank > 0 and rank <= PRIMARY_PLAYABLE_LIMIT
-	polity_records[entity_id] = polity
+	economy_polity_ids[entity_id] = polity_ids.duplicate()
+	for polity_id: String in polity_ids:
+		economy_by_polity_id[polity_id] = entity_id
+		var polity := polity_records[polity_id] as Dictionary
+		polity["rank"] = rank
+		polity["playability_tier"] = str(tier.get("id", "secondary_roster"))
+		polity["playability_tier_zh"] = str(
+			tier.get("name_zh", "次要目录")
+		)
+		polity["major_roster"] = true
+		polity["primary_playable"] = rank > 0 and rank <= PRIMARY_PLAYABLE_LIMIT
+		polity["economy_entity_id"] = entity_id
+		polity_records[polity_id] = polity
+
+
+func _resolve_polity_ids(economy_id: String) -> Array[String]:
+	if polity_records.has(economy_id):
+		return [economy_id]
+	var crosswalk := _crosswalk_records.get(economy_id, {}) as Dictionary
+	return DataRecordUtils.to_string_array(crosswalk.get("polity_ids", []))
 
 
 func _tier_for_rank(rank: int) -> Dictionary:
@@ -623,8 +713,11 @@ func _production_factor(record: Dictionary, commodity: Dictionary) -> float:
 	if category in ["agricultural_food", "agricultural_input"]:
 		return clampf(agriculture, 0.05, 2.2)
 	if category in [
-		"industrial_material", "capital_good", "manufactured_good",
-		"processed_food", "textile",
+		"industrial_material",
+		"capital_good",
+		"manufactured_good",
+		"processed_food",
+		"textile",
 	]:
 		return clampf(industry, 0.03, 2.4)
 	return clampf((agriculture + industry) * 0.5, 0.05, 1.8)
@@ -698,15 +791,25 @@ func _shipment_count_for(entity_id: String) -> int:
 func _validate_state() -> bool:
 	if _political_unit_count != polity_records.size():
 		return false
+	if country_states.size() != EXPECTED_MAJOR_ROSTER_COUNT:
+		return false
 	for raw_state: Variant in country_states.values():
 		var state := raw_state as Dictionary
-		var entity_id := str(state.get("entity_id", ""))
-		if (
-			int(state.get("population", 0)) <= 0
-			or not polity_records.has(entity_id)
-			or not bool((polity_records[entity_id] as Dictionary).get("major_roster", false))
-		):
+		var economy_id := str(state.get("entity_id", ""))
+		var polity_ids := DataRecordUtils.to_string_array(state.get("polity_ids", []))
+		if int(state.get("population", 0)) <= 0 or polity_ids.is_empty():
 			return false
+		for polity_id: String in polity_ids:
+			if (
+				not polity_records.has(polity_id)
+				or str(economy_by_polity_id.get(polity_id, "")) != economy_id
+				or not bool(
+					(polity_records[polity_id] as Dictionary).get(
+						"major_roster", false
+					)
+				)
+			):
+				return false
 		for value: Variant in (state.get("inventory", {}) as Dictionary).values():
 			if float(value) < 0.0:
 				return false
