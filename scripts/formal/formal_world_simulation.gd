@@ -99,5 +99,5 @@ func load_from_user() -> bool:
 	var file := FileAccess.open(SAVE_PATH, FileAccess.READ)
 	if file == null:
 		return false
-	var parsed := JSON.parse_string(file.get_as_text())
+	var parsed: Variant = JSON.parse_string(file.get_as_text())
 	return parsed is Dictionary and restore_persistent_state(parsed as Dictionary)
