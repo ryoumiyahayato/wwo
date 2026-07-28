@@ -47,6 +47,7 @@ jobs:
           cp scripts/alpha/alpha_economy_integration_service.gd builds/formal-world/patched/
           cp scripts/alpha/alpha_historical_world_economy_data.gd builds/formal-world/patched/
           cp scripts/alpha/alpha_commodity_market_service.gd builds/formal-world/patched/
+          cp scripts/alpha/alpha_ledger_service.gd builds/formal-world/patched/
           cp scripts/formal/*.gd builds/formal-world/patched/
 
       - name: Run static audits
@@ -89,6 +90,7 @@ jobs:
           scripts=(
             scripts/alpha/alpha_historical_world_economy_data.gd
             scripts/alpha/alpha_commodity_market_service.gd
+            scripts/alpha/alpha_ledger_service.gd
             scripts/alpha/alpha_economy_integration_service.gd
             scripts/alpha/alpha_ai_service.gd
             scripts/alpha/alpha_world_dynamics_service.gd
@@ -143,7 +145,6 @@ jobs:
           set -euo pipefail
           rm -f tools/apply_formal_world_integration.py
           rm -f tools/fix_formal_world_patch_output.py
-          rm -f .github/workflows/apply-formal-world-integration.yml
 
       - name: Commit integrated result
         shell: bash
