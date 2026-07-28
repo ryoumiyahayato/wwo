@@ -103,9 +103,9 @@
     {"exporter_country_id": "country:vesta_union", "importer_country_id": "country:loran_federation", "tariff_bp": 520, "daily_quota_units": 1600, "embargo": false, "preference_bp": 0}
   ],
   "government_procurement": [
-    {"country_id": "country:loran_federation", "commodity_id": "grain", "target_units": 1500, "daily_purchase_limit_units": 80},
+    {"country_id": "country:loran_federation", "commodity_id": "wheat", "target_units": 1500, "daily_purchase_limit_units": 80},
     {"country_id": "country:loran_federation", "commodity_id": "coal", "target_units": 1200, "daily_purchase_limit_units": 70},
-    {"country_id": "country:vesta_union", "commodity_id": "grain", "target_units": 1400, "daily_purchase_limit_units": 75},
+    {"country_id": "country:vesta_union", "commodity_id": "wheat", "target_units": 1400, "daily_purchase_limit_units": 75},
     {"country_id": "country:vesta_union", "commodity_id": "coal", "target_units": 1800, "daily_purchase_limit_units": 90}
   ],
   "historical_world_adapter": {
