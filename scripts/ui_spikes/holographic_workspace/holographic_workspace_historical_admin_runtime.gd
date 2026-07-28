@@ -62,6 +62,15 @@ func _load_historical_admin_records() -> void:
 		_historical_admin_by_entity[entity_id] = country
 
 
+func _legacy_navigation_key(entity_id: String, gwcode: int) -> String:
+	var profile := _major_state_profile_by_entity.get(entity_id, {}) as Dictionary
+	for alias_value: Variant in (profile.get("aliases", []) as Array):
+		var alias := str(alias_value).strip_edges().to_upper()
+		if alias.length() == 3:
+			return alias
+	return super._legacy_navigation_key(entity_id, gwcode)
+
+
 func _home_historical_entity_id() -> String:
 	var profile := _character_profiles.get(active_character_key, {}) as Dictionary
 	var nationality_id := str(profile.get("nationality_id", ""))
