@@ -5,6 +5,7 @@ extends RefCounted
 const PATHS: Dictionary = {
 	"world": "res://data/alpha/world.json",
 	"economy": "res://data/alpha/economy.json",
+	"commodity_market": "res://data/alpha/commodity_market_1900.json",
 	"politics": "res://data/alpha/politics.json",
 	"presets": "res://data/alpha/presets.json",
 }
@@ -59,6 +60,10 @@ func economy() -> Dictionary:
 	return get_document("economy")
 
 
+func commodity_market() -> Dictionary:
+	return get_document("commodity_market")
+
+
 func politics() -> Dictionary:
 	return get_document("politics")
 
@@ -97,6 +102,18 @@ func credit_products() -> Array:
 
 func goods() -> Array:
 	return economy().get("goods_and_services", []) as Array
+
+
+func commodity_records() -> Array:
+	return commodity_market().get("commodities", []) as Array
+
+
+func commodity_recipes() -> Array:
+	return commodity_market().get("recipes", []) as Array
+
+
+func commodity_production_sites() -> Array:
+	return commodity_market().get("production_sites", []) as Array
 
 
 func policy_records() -> Array:
@@ -314,6 +331,11 @@ func _validate() -> void:
 	_expect_count("交通连接", transport_edges.size(), 20, 9999)
 	_expect_count("高精度人物", people.size(), 8, 20)
 	_expect_count("商品与服务", goods().size(), 8, 9999)
+	_expect_count("1900商品", commodity_records().size(), 50, 120)
+	_expect_count("1900生产配方", commodity_recipes().size(), 20, 120)
+	_expect_count("1900生产设施", commodity_production_sites().size(), 24, 240)
+	if str(commodity_market().get("schema_id", "")) != "alpha_commodity_market_1900_v1":
+		errors.append("Alpha 1900商品市场 Schema 无效")
 	_expect_count("企业", enterprise_records().size(), 12, 9999)
 	_expect_count("工作模板", job_records().size(), 12, 9999)
 	_expect_count("合同模板", contract_templates().size(), 7, 9999)

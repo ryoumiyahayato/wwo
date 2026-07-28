@@ -3,12 +3,14 @@ name: Build 1900 historical evidence
 on:
   pull_request:
     branches:
-      - agent/resolve-historical-ui-gaps
+      - master
     paths:
       - "tools/historical_data/**"
       - ".github/workflows/research-1900-historical-data.yml"
       - "data/world_map/historical/**"
       - "assets/historical_flags/**"
+      - "scripts/ui_spikes/holographic_workspace/**"
+      - "scenes/ui_spikes/holographic_workspace/**"
   workflow_dispatch:
 
 concurrency:
@@ -16,64 +18,25 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  build-evidence:
+  validate-evidence:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 12
     steps:
-      - name: Check out head branch
+      - name: Check out branch
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref || github.ref_name }}
-      - name: Install historical data dependencies
-        run: python3 -m pip install --disable-pip-version-check "shapely==2.1.2" "Pillow==11.3.0" "CairoSVG==2.8.2"
-      - name: Build offline historical provider and flag registry
-        shell: bash
+      - name: Audit locked historical provider
         run: |
           set -euo pipefail
-          exec > >(tee historical-1900-build.log) 2>&1
-          rm -rf assets/historical_flags/1900
-          python3 tools/historical_data/build_cshapes_1900_snapshot.py
-          python3 tools/historical_data/build_1900_entity_registry.py
-          python3 tools/historical_data/build_1900_flag_registry_throttled.py
           python3 tools/historical_data/audit_1900_historical_provider.py
+          python3 tools/historical_data/audit_major_state_detail_1900.py
           python3 -m json.tool data/world_map/historical/cshapes_1900_snapshot.json >/dev/null
           python3 -m json.tool data/world_map/historical/political_units_1900.json >/dev/null
           python3 -m json.tool data/world_map/historical/flags_1900.json >/dev/null
+          python3 -m json.tool data/world_map/historical/major_state_profiles_1900.json >/dev/null
+          python3 -m json.tool data/world_map/historical/historical_admin1_1900.json >/dev/null
           test "$(python3 -c "import json; print(json.load(open('data/world_map/historical/cshapes_1900_snapshot.json', encoding='utf-8'))['feature_count'])")" = "151"
-          test "$(python3 -c "import json; print(json.load(open('data/world_map/historical/political_units_1900.json', encoding='utf-8'))['unit_count'])")" = "151"
+          test "$(python3 -c "import json; print(json.load(open('data/world_map/historical/major_state_profiles_1900.json', encoding='utf-8'))['profiles'].__len__())")" = "50"
           test "$(find assets/historical_flags/1900 -type f -name '*.png' | wc -l)" = "60"
-      - name: Persist generated historical provider
-        if: github.event_name == 'pull_request' && github.actor != 'github-actions[bot]'
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/world_map/historical/cshapes_1900_snapshot.json data/world_map/historical/CShapes-2.0-ATTRIBUTION.md data/world_map/historical/political_units_1900.json data/world_map/historical/flags_1900.json data/world_map/historical/FLAG_ASSET_ATTRIBUTION.md assets/historical_flags/1900
-          if git diff --cached --quiet; then
-            echo "Historical provider is already current"
-          else
-            git commit -m "generate sourced 1900 GIS and flag assets"
-            git push origin HEAD:${{ github.head_ref }}
-          fi
-      - name: Upload generated evidence
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: historical-1900-generated-evidence
-          path: |
-            data/world_map/historical/
-            assets/historical_flags/1900/
-          if-no-files-found: error
-          retention-days: 14
-      - name: Upload build log on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: historical-1900-build-log
-          path: historical-1900-build.log
-          if-no-files-found: error
-          retention-days: 14

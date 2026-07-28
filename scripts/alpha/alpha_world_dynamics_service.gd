@@ -15,6 +15,7 @@ var _enterprise: AlphaEnterpriseService
 var _politics: AlphaPoliticsService
 var _roster: CharacterRosterService
 var _config: AlphaConfig
+var _commodity_market: AlphaCommodityMarketService
 var _last_day_index: int = -1
 var _last_week_index: int = -1
 var _last_month_key: String = ""
@@ -26,7 +27,8 @@ func configure(
 	enterprise: AlphaEnterpriseService,
 	politics: AlphaPoliticsService,
 	roster: CharacterRosterService,
-	config: AlphaConfig
+	config: AlphaConfig,
+	commodity_market: AlphaCommodityMarketService = null
 ) -> bool:
 	_world = world
 	_economy = economy
@@ -34,6 +36,7 @@ func configure(
 	_politics = politics
 	_roster = roster
 	_config = config
+	_commodity_market = commodity_market
 	background_states.clear()
 	national_issues.clear()
 	events.clear()
@@ -161,6 +164,10 @@ func summary() -> Dictionary:
 		"national_issue_count": national_issues.size(),
 		"event_count": events.size(),
 		"counters": counters.duplicate(true),
+		"commodity_market": (
+			_commodity_market.world_summary()
+			if _commodity_market != null else {}
+		),
 	}
 
 
