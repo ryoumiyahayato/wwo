@@ -78,14 +78,16 @@ jobs:
           text = audit.read_text(encoding='utf-8')
           start = text.index('    adapter = integration.get("historical_world_adapter", {})')
           end = text.index('\n\n    print(', start)
-          replacement = '''    adapter = integration.get("historical_world_adapter", {})
-          assert adapter.get("allow_bounded_estimates") is True
-          assert adapter.get("require_numeric_bounds") is True
-          assert adapter.get("forbid_unbounded_numeric_defaults") is True
-          assert int(adapter.get("minimum_confidence_bp", 0)) == 4500
-          assert str(adapter.get("coverage_registry_path", "")).endswith(
-              "historical_world_economy_1900.json"
-          )'''
+          replacement = "\n".join([
+              '    adapter = integration.get("historical_world_adapter", {})',
+              '    assert adapter.get("allow_bounded_estimates") is True',
+              '    assert adapter.get("require_numeric_bounds") is True',
+              '    assert adapter.get("forbid_unbounded_numeric_defaults") is True',
+              '    assert int(adapter.get("minimum_confidence_bp", 0)) == 4500',
+              '    assert str(adapter.get("coverage_registry_path", "")).endswith(',
+              '        "historical_world_economy_1900.json"',
+              '    )',
+          ])
           audit.write_text(text[:start] + replacement + text[end:], encoding='utf-8')
 
           report = Path('docs/economy/1900_world_data_methodology.md')
