@@ -1,0 +1,48 @@
+name: Fix economy phase two carrier scope
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/fix-economy-phase2-carrier-scope.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/economy-integration-phase2
+      - name: Declare shipment carrier before atomic posting
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path("scripts/alpha/alpha_economy_integration_service.gd")
+          text = path.read_text(encoding="utf-8")
+          old = '''\tvar route_terms := _route_terms(edge_ids)
+          \tvar freight := maxi(0, int(round(float(route_terms.get("cost_per_unit", 0.0)) * units)))
+          '''
+          new = '''\tvar route_terms := _route_terms(edge_ids)
+          \tvar carrier_id := str(route_terms.get("carrier_id", ""))
+          \tif carrier_id.is_empty():
+          \t\treturn _fail("carrier_missing", "运输路径缺少承运企业")
+          \tvar freight := maxi(0, int(round(float(route_terms.get("cost_per_unit", 0.0)) * units)))
+          '''
+          if new not in text:
+              if old not in text:
+                  raise SystemExit("shipment carrier declaration anchor missing")
+              path.write_text(text.replace(old, new, 1), encoding="utf-8")
+          PY
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/alpha/alpha_economy_integration_service.gd
+          git commit -m "declare shipment carrier before atomic settlement"
+          git push origin HEAD:agent/economy-integration-phase2
