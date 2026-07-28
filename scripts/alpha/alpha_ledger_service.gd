@@ -256,6 +256,41 @@ func validate_balances() -> Dictionary:
 	})
 
 
+func create_transaction_checkpoint() -> Dictionary:
+	# Transaction dictionaries are immutable after posting, so the transaction
+	# array and key index only need shallow copies. Account balances are mutable
+	# and therefore retain an independent deep copy.
+	return {
+		"accounts": accounts.duplicate(true),
+		"transactions": transactions.duplicate(),
+		"transactions_by_key": _transactions_by_key.duplicate(),
+		"processed_key_order": _processed_key_order.duplicate(),
+		"next_sequence": _next_sequence,
+	}
+
+
+func restore_transaction_checkpoint(checkpoint: Dictionary) -> bool:
+	if (
+		not checkpoint.get("accounts", {}) is Dictionary
+		or not checkpoint.get("transactions", []) is Array
+		or not checkpoint.get("transactions_by_key", {}) is Dictionary
+		or not checkpoint.get("processed_key_order", []) is Array
+	):
+		return false
+	accounts = (checkpoint.get("accounts", {}) as Dictionary).duplicate(true)
+	transactions = DataRecordUtils.to_dictionary_array(
+		checkpoint.get("transactions", [])
+	)
+	_transactions_by_key = (
+		checkpoint.get("transactions_by_key", {}) as Dictionary
+	).duplicate()
+	_processed_key_order = DataRecordUtils.to_string_array(
+		checkpoint.get("processed_key_order", [])
+	)
+	_next_sequence = maxi(1, int(checkpoint.get("next_sequence", 1)))
+	return bool(validate_balances().get("success", false))
+
+
 func get_persistent_state() -> Dictionary:
 	return {
 		"accounts": accounts.duplicate(true),
