@@ -119,7 +119,18 @@ func _check_scene_binding() -> void:
 		view.formal_simulation.economy.total_hour >= before_hour + 1,
 		"场景计时器推进正式经济"
 	)
-	var rect := view.get_viewport_rect()
-	test.equal(rect.size, Vector2(1280, 720), "正式UI在1280×720基准视口运行")
+	test.equal(
+		root.content_scale_size,
+		Vector2i(1280, 720),
+		"正式UI使用1280×720内容缩放基准"
+	)
+	test.equal(
+		Vector2i(
+			int(ProjectSettings.get_setting("display/window/size/viewport_width", 0)),
+			int(ProjectSettings.get_setting("display/window/size/viewport_height", 0))
+		),
+		Vector2i(1280, 720),
+		"项目视口配置保持1280×720"
+	)
 	view.queue_free()
 	await process_frame
