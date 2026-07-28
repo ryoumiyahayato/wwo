@@ -92,6 +92,7 @@ func configure(config: AlphaConfig) -> bool:
 		site["last_batches"] = 0.0
 		site["operating_target_bp"] = int(site.get("opening_operating_bp", BASIS_POINTS))
 		site["last_operating_bp"] = 0
+		site["last_output_units"] = {}
 		production_sites[site_id] = site
 		_production_site_ids.append(site_id)
 	_production_site_ids.sort()
@@ -545,6 +546,7 @@ func _run_production(total_hour: int) -> void:
 			var used: float = float(input.get("units", 0.0)) * batches
 			inventory[commodity_id] = maxf(0.0, float(inventory.get(commodity_id, 0.0)) - used)
 			_add_metric(metrics, "industrial_inputs", commodity_id, used)
+		var actual_outputs: Dictionary = {}
 		for raw_output: Variant in recipe.get("outputs", []) as Array:
 			var output: Dictionary = raw_output as Dictionary
 			var commodity_id: String = str(output.get("commodity_id", ""))
@@ -553,6 +555,7 @@ func _run_production(total_hour: int) -> void:
 				region_id, commodity_id, total_hour
 			)
 			produced *= float(supply_modifier_bp) / float(BASIS_POINTS)
+			actual_outputs[commodity_id] = produced
 			inventory[commodity_id] = float(inventory.get(commodity_id, 0.0)) + produced
 			_add_metric(metrics, "produced", commodity_id, produced)
 		var workers_capacity: int = int(site.get("workers_capacity", 0))
@@ -560,6 +563,7 @@ func _run_production(total_hour: int) -> void:
 		metrics["workers_capacity"] = int(metrics.get("workers_capacity", 0)) + workers_capacity
 		metrics["workers_active"] = int(metrics.get("workers_active", 0)) + int(round(workers_capacity * utilization))
 		site["last_batches"] = batches
+		site["last_output_units"] = actual_outputs
 		site["last_operating_bp"] = int(round(utilization * BASIS_POINTS))
 		site["last_settlement_hour"] = total_hour
 		production_sites[site_id] = site
