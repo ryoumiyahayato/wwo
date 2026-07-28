@@ -1,0 +1,40 @@
+{
+  "schema_id": "historical_economy_coverage_1900_v1",
+  "calibration_year": 1900,
+  "policy": {
+    "numeric_defaults_forbidden": true,
+    "modern_statistics_require_explicit_crosswalk": true,
+    "unverified_records_must_not_enter_formal_simulation": true,
+    "allowed_statuses": ["verified", "partial", "source_required"]
+  },
+  "dimensions": [
+    "population",
+    "agricultural_output",
+    "mineral_output",
+    "industrial_capacity",
+    "ports",
+    "railway_capacity",
+    "trade_flows",
+    "price_series",
+    "wages",
+    "public_finance",
+    "currency_and_gold"
+  ],
+  "countries": [
+    {"entity_id": "french_republic", "status": "partial", "verified_dimensions": ["population"], "missing_dimensions": ["agricultural_output", "mineral_output", "industrial_capacity", "ports", "railway_capacity", "trade_flows", "price_series", "wages", "public_finance", "currency_and_gold"]},
+    {"entity_id": "german_empire", "status": "partial", "verified_dimensions": ["population"], "missing_dimensions": ["agricultural_output", "mineral_output", "industrial_capacity", "ports", "railway_capacity", "trade_flows", "price_series", "wages", "public_finance", "currency_and_gold"]},
+    {"entity_id": "united_kingdom", "status": "partial", "verified_dimensions": ["population"], "missing_dimensions": ["agricultural_output", "mineral_output", "industrial_capacity", "ports", "railway_capacity", "trade_flows", "price_series", "wages", "public_finance", "currency_and_gold"]},
+    {"entity_id": "russian_empire", "status": "source_required", "verified_dimensions": [], "missing_dimensions": ["population", "agricultural_output", "mineral_output", "industrial_capacity", "ports", "railway_capacity", "trade_flows", "price_series", "wages", "public_finance", "currency_and_gold"]},
+    {"entity_id": "austria_hungary", "status": "source_required", "verified_dimensions": [], "missing_dimensions": ["population", "agricultural_output", "mineral_output", "industrial_capacity", "ports", "railway_capacity", "trade_flows", "price_series", "wages", "public_finance", "currency_and_gold"]},
+    {"entity_id": "united_states_1900", "status": "partial", "verified_dimensions": ["population"], "missing_dimensions": ["agricultural_output", "mineral_output", "industrial_capacity", "ports", "railway_capacity", "trade_flows", "price_series", "wages", "public_finance", "currency_and_gold"]},
+    {"entity_id": "qing_empire", "status": "source_required", "verified_dimensions": [], "missing_dimensions": ["population", "agricultural_output", "mineral_output", "industrial_capacity", "ports", "railway_capacity", "trade_flows", "price_series", "wages", "public_finance", "currency_and_gold"]},
+    {"entity_id": "empire_of_japan", "status": "source_required", "verified_dimensions": [], "missing_dimensions": ["population", "agricultural_output", "mineral_output", "industrial_capacity", "ports", "railway_capacity", "trade_flows", "price_series", "wages", "public_finance", "currency_and_gold"]},
+    {"entity_id": "ottoman_empire", "status": "source_required", "verified_dimensions": [], "missing_dimensions": ["population", "agricultural_output", "mineral_output", "industrial_capacity", "ports", "railway_capacity", "trade_flows", "price_series", "wages", "public_finance", "currency_and_gold"]},
+    {"entity_id": "kingdom_of_italy", "status": "source_required", "verified_dimensions": [], "missing_dimensions": ["population", "agricultural_output", "mineral_output", "industrial_capacity", "ports", "railway_capacity", "trade_flows", "price_series", "wages", "public_finance", "currency_and_gold"]},
+    {"entity_id": "kingdom_of_spain", "status": "source_required", "verified_dimensions": [], "missing_dimensions": ["population", "agricultural_output", "mineral_output", "industrial_capacity", "ports", "railway_capacity", "trade_flows", "price_series", "wages", "public_finance", "currency_and_gold"]},
+    {"entity_id": "kingdom_of_belgium", "status": "source_required", "verified_dimensions": [], "missing_dimensions": ["population", "agricultural_output", "mineral_output", "industrial_capacity", "ports", "railway_capacity", "trade_flows", "price_series", "wages", "public_finance", "currency_and_gold"]},
+    {"entity_id": "kingdom_of_netherlands", "status": "source_required", "verified_dimensions": [], "missing_dimensions": ["population", "agricultural_output", "mineral_output", "industrial_capacity", "ports", "railway_capacity", "trade_flows", "price_series", "wages", "public_finance", "currency_and_gold"]},
+    {"entity_id": "dominion_of_canada", "status": "source_required", "verified_dimensions": [], "missing_dimensions": ["population", "agricultural_output", "mineral_output", "industrial_capacity", "ports", "railway_capacity", "trade_flows", "price_series", "wages", "public_finance", "currency_and_gold"]},
+    {"entity_id": "british_india_1900", "status": "source_required", "verified_dimensions": [], "missing_dimensions": ["population", "agricultural_output", "mineral_output", "industrial_capacity", "ports", "railway_capacity", "trade_flows", "price_series", "wages", "public_finance", "currency_and_gold"]}
+  ]
+}
