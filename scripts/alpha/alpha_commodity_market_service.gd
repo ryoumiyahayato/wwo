@@ -23,6 +23,9 @@ var history: Array[Dictionary] = []
 var initialization_error: String = ""
 var _commodity_ids: Array[String] = []
 var _region_ids: Array[String] = []
+var _production_site_ids: Array[String] = []
+var _industrial_input_capacity: Dictionary = {}
+var _output_capacity: Dictionary = {}
 var _processed_keys: Dictionary = {}
 var _last_day_index: int = -1
 var _policies: Dictionary = {}
@@ -38,6 +41,9 @@ func configure(config: AlphaConfig) -> bool:
 	history.clear()
 	_commodity_ids.clear()
 	_region_ids.clear()
+	_production_site_ids.clear()
+	_industrial_input_capacity.clear()
+	_output_capacity.clear()
 	_processed_keys.clear()
 	_last_day_index = -1
 	initialization_error = ""
@@ -85,6 +91,9 @@ func configure(config: AlphaConfig) -> bool:
 		site["operating_target_bp"] = int(site.get("opening_operating_bp", BASIS_POINTS))
 		site["last_operating_bp"] = 0
 		production_sites[site_id] = site
+		_production_site_ids.append(site_id)
+	_production_site_ids.sort()
+	_build_capacity_indexes()
 	_initialize_international_market(document)
 	_seed_opening_stocks()
 	var integrity: Dictionary = validate_integrity()
@@ -499,11 +508,7 @@ func _apply_spoilage() -> void:
 
 
 func _run_production(total_hour: int) -> void:
-	var site_ids: Array[String] = []
-	for raw_id: Variant in production_sites:
-		site_ids.append(str(raw_id))
-	site_ids.sort()
-	for site_id: String in site_ids:
+	for site_id: String in _production_site_ids:
 		var site: Dictionary = production_sites[site_id] as Dictionary
 		var region_id: String = str(site.get("region_id", ""))
 		var recipe: Dictionary = recipes.get(str(site.get("recipe_id", "")), {}) as Dictionary
@@ -825,32 +830,41 @@ func _target_stock_units(region_id: String, commodity_id: String, multiplier: fl
 	)
 
 
-func _daily_industrial_input_need(region_id: String, commodity_id: String) -> float:
-	var total: float = 0.0
-	for raw_site: Variant in production_sites.values():
-		var site: Dictionary = raw_site as Dictionary
-		if str(site.get("region_id", "")) != region_id:
-			continue
+func _build_capacity_indexes() -> void:
+	for region_id: String in _region_ids:
+		_industrial_input_capacity[region_id] = {}
+		_output_capacity[region_id] = {}
+	for site_id: String in _production_site_ids:
+		var site: Dictionary = production_sites[site_id] as Dictionary
+		var region_id: String = str(site.get("region_id", ""))
 		var recipe: Dictionary = recipes.get(str(site.get("recipe_id", "")), {}) as Dictionary
+		var capacity: float = float(site.get("capacity_batches_per_day", 0.0))
+		var inputs: Dictionary = _industrial_input_capacity.get(region_id, {}) as Dictionary
 		for raw_input: Variant in recipe.get("inputs", []) as Array:
 			var input: Dictionary = raw_input as Dictionary
-			if str(input.get("commodity_id", "")) == commodity_id:
-				total += float(input.get("units", 0.0)) * float(site.get("capacity_batches_per_day", 0.0))
-	return total
+			var commodity_id: String = str(input.get("commodity_id", ""))
+			inputs[commodity_id] = float(inputs.get(commodity_id, 0.0)) + float(input.get("units", 0.0)) * capacity
+		_industrial_input_capacity[region_id] = inputs
+		var outputs: Dictionary = _output_capacity.get(region_id, {}) as Dictionary
+		for raw_output: Variant in recipe.get("outputs", []) as Array:
+			var output: Dictionary = raw_output as Dictionary
+			var commodity_id: String = str(output.get("commodity_id", ""))
+			outputs[commodity_id] = float(outputs.get(commodity_id, 0.0)) + float(output.get("units", 0.0)) * capacity
+		_output_capacity[region_id] = outputs
+
+
+func _daily_industrial_input_need(region_id: String, commodity_id: String) -> float:
+	return float(
+		(_industrial_input_capacity.get(region_id, {}) as Dictionary).get(
+			commodity_id, 0.0
+		)
+	)
 
 
 func _daily_output_capacity(region_id: String, commodity_id: String) -> float:
-	var total: float = 0.0
-	for raw_site: Variant in production_sites.values():
-		var site: Dictionary = raw_site as Dictionary
-		if str(site.get("region_id", "")) != region_id:
-			continue
-		var recipe: Dictionary = recipes.get(str(site.get("recipe_id", "")), {}) as Dictionary
-		for raw_output: Variant in recipe.get("outputs", []) as Array:
-			var output: Dictionary = raw_output as Dictionary
-			if str(output.get("commodity_id", "")) == commodity_id:
-				total += float(output.get("units", 0.0)) * float(site.get("capacity_batches_per_day", 0.0))
-	return total
+	return float(
+		(_output_capacity.get(region_id, {}) as Dictionary).get(commodity_id, 0.0)
+	)
 
 
 func _metric_value(region_id: String, map_name: String, commodity_id: String) -> float:
