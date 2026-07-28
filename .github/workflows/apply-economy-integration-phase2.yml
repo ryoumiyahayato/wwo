@@ -18,82 +18,71 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: agent/economy-integration-phase2
-      - name: Wire config and commodity logistics delegation
+      - name: Wire simulation daily settlement and persistence
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
 
-          def apply(path, old, new, label):
-              p = Path(path)
-              text = p.read_text(encoding="utf-8")
+          path = Path("scripts/alpha/alpha_simulation_service.gd")
+          text = path.read_text(encoding="utf-8")
+
+          def apply(old, new, label):
+              global text
               if new in text:
                   print(f"already applied: {label}")
                   return
               if old not in text:
                   raise SystemExit(f"anchor missing: {label}")
-              p.write_text(text.replace(old, new, 1), encoding="utf-8")
+              text = text.replace(old, new, 1)
               print(f"applied: {label}")
 
           apply(
-              "scripts/alpha/alpha_config.gd",
-              '\t"commodity_market": "res://data/alpha/commodity_market_1900.json",\n\t"politics":',
-              '\t"commodity_market": "res://data/alpha/commodity_market_1900.json",\n\t"economy_integration": "res://data/alpha/economy_integration_1900.json",\n\t"politics":',
-              "config path",
+              'var commodity_market := AlphaCommodityMarketService.new()\nvar labor :=',
+              'var commodity_market := AlphaCommodityMarketService.new()\nvar economy_integration := AlphaEconomyIntegrationService.new()\nvar labor :=',
+              "integration member",
           )
           apply(
-              "scripts/alpha/alpha_config.gd",
-              'func commodity_market() -> Dictionary:\n\treturn get_document("commodity_market")\n\n\nfunc politics()',
-              'func commodity_market() -> Dictionary:\n\treturn get_document("commodity_market")\n\n\nfunc economy_integration() -> Dictionary:\n\treturn get_document("economy_integration")\n\n\nfunc politics()',
-              "config accessor",
+              '\tif not enterprise.configure(\n\t\talpha_config, economy, labor, organization_service, clock.total_hours\n\t):\n\t\treturn _fail_alpha("企业服务初始化失败")\n\tif not character_service.configure(',
+              '\tif not enterprise.configure(\n\t\talpha_config, economy, labor, organization_service, clock.total_hours\n\t):\n\t\treturn _fail_alpha("企业服务初始化失败")\n\tif not economy_integration.configure(\n\t\talpha_config, commodity_market, economy, enterprise, labor\n\t):\n\t\treturn _fail_alpha(\n\t\t\t"统一商品、现金、企业与物流结算初始化失败：%s"\n\t\t\t% economy_integration.initialization_error\n\t\t)\n\tif not character_service.configure(',
+              "integration configure",
           )
           apply(
-              "scripts/alpha/alpha_commodity_market_service.gd",
-              'var _policies: Dictionary = {}\n',
-              'var _policies: Dictionary = {}\nvar _external_logistics_managed: bool = false\n',
-              "managed logistics state",
+              '\tcounts["commodity_production_sites"] = commodity_market.production_sites.size()\n\tcounts["debts"]',
+              '\tcounts["commodity_production_sites"] = commodity_market.production_sites.size()\n\tcounts["commodity_active_shipments"] = economy_integration.shipments.size()\n\tcounts["commodity_transport_edges"] = economy_integration.transport_edge_count()\n\tcounts["enterprise_economic_decisions"] = economy_integration.decision_history.size()\n\tcounts["debts"]',
+              "integration counts",
           )
           apply(
-              "scripts/alpha/alpha_commodity_market_service.gd",
-              '\tinitialization_error = ""\n\tvar document: Dictionary = config.commodity_market()',
-              '\tinitialization_error = ""\n\t_external_logistics_managed = false\n\tvar document: Dictionary = config.commodity_market()',
-              "managed logistics reset",
+              '\t\teconomy.validate_integrity(),\n\t\tcommodity_market.validate_integrity(),\n\t\tenterprise.validate_integrity(),',
+              '\t\teconomy.validate_integrity(),\n\t\tcommodity_market.validate_integrity(),\n\t\teconomy_integration.validate_integrity(),\n\t\tenterprise.validate_integrity(),',
+              "integration validation",
           )
           apply(
-              "scripts/alpha/alpha_commodity_market_service.gd",
-              'func settle_day(total_hour: int) -> Dictionary:\n',
-              'func set_external_logistics_managed(enabled: bool) -> void:\n\t_external_logistics_managed = enabled\n\n\nfunc external_logistics_managed() -> bool:\n\treturn _external_logistics_managed\n\n\nfunc settle_day(total_hour: int) -> Dictionary:\n',
-              "managed logistics API",
+              '\tstate["alpha_commodity_market_state"] = commodity_market.get_persistent_state()\n\tstate["alpha_labor_state"]',
+              '\tstate["alpha_commodity_market_state"] = commodity_market.get_persistent_state()\n\tstate["alpha_economy_integration_state"] = economy_integration.get_persistent_state()\n\tstate["alpha_labor_state"]',
+              "integration save",
           )
           apply(
-              "scripts/alpha/alpha_commodity_market_service.gd",
-              '\t_run_local_consumption()\n\t_run_regional_balancing()\n\t_run_international_market()\n\t_enforce_all_warehouse_capacity()',
-              '\t_run_local_consumption()\n\tif not _external_logistics_managed:\n\t\t_run_regional_balancing()\n\t\t_run_international_market()\n\t_enforce_all_warehouse_capacity()',
-              "delegate logistics",
+              '\tif (\n\t\tstate.has("alpha_commodity_market_state")\n\t\tand not state["alpha_commodity_market_state"] is Dictionary\n\t):\n\t\treturn _result(false, "invalid_field:alpha_commodity_market_state", {})\n',
+              '\tif (\n\t\tstate.has("alpha_commodity_market_state")\n\t\tand not state["alpha_commodity_market_state"] is Dictionary\n\t):\n\t\treturn _result(false, "invalid_field:alpha_commodity_market_state", {})\n\tif (\n\t\tstate.has("alpha_economy_integration_state")\n\t\tand not state["alpha_economy_integration_state"] is Dictionary\n\t):\n\t\treturn _result(false, "invalid_field:alpha_economy_integration_state", {})\n',
+              "integration save validation",
           )
           apply(
-              "scripts/alpha/alpha_commodity_market_service.gd",
-              '\t\t"international_exports": {},\n\t\t"spoiled": {},',
-              '\t\t"international_exports": {},\n\t\t"transit_received": {},\n\t\t"transit_dispatched": {},\n\t\t"strategic_release": {},\n\t\t"spoiled": {},',
-              "integration metrics",
+              '\t\tvar market_result: Dictionary = commodity_market.settle_day(total_hour)\n\t\tif not bool(market_result.get("success", false)):\n\t\t\t_append_alpha_event({\n\t\t\t\t"event_id": "event:commodity_market_failure:%d" % total_hour,\n\t\t\t\t"total_hour": total_hour,\n\t\t\t\t"fact_type": "commodity_market_failure",\n\t\t\t\t"summary": "商品市场日结失败，已保留上一日状态。",\n\t\t\t\t"requires_decision": true,\n\t\t\t})\n\t\t_process_active_ai(total_hour)',
+              '\t\tvar market_result: Dictionary = commodity_market.settle_day(total_hour)\n\t\tif not bool(market_result.get("success", false)):\n\t\t\t_append_alpha_event({\n\t\t\t\t"event_id": "event:commodity_market_failure:%d" % total_hour,\n\t\t\t\t"total_hour": total_hour,\n\t\t\t\t"fact_type": "commodity_market_failure",\n\t\t\t\t"summary": "商品市场日结失败，已保留上一日状态。",\n\t\t\t\t"requires_decision": true,\n\t\t\t})\n\t\telse:\n\t\t\teconomy_integration.deliver_due_shipments(total_hour)\n\t\t\tvar integration_result := economy_integration.settle_day(total_hour)\n\t\t\tif not bool(integration_result.get("success", false)):\n\t\t\t\t_append_alpha_event({\n\t\t\t\t\t"event_id": "event:economy_integration_failure:%d" % total_hour,\n\t\t\t\t\t"total_hour": total_hour,\n\t\t\t\t\t"fact_type": "economy_integration_failure",\n\t\t\t\t\t"summary": "商品、现金、企业或物流统一结算失败。",\n\t\t\t\t\t"requires_decision": true,\n\t\t\t\t})\n\t\t_process_active_ai(total_hour)',
+              "daily integration settlement",
           )
           apply(
-              "scripts/alpha/alpha_economy_integration_service.gd",
-              '\t_policies = (_document.get("policies", {}) as Dictionary).duplicate(true)\n\t_household_strata',
-              '\t_policies = (_document.get("policies", {}) as Dictionary).duplicate(true)\n\t_commodity_market.set_external_logistics_managed(bool(\n\t\t_policies.get("external_logistics_managed", true)\n\t))\n\t_household_strata',
-              "enable external logistics",
+              '\tif not enterprise.restore_persistent_state(\n\t\tstate["alpha_enterprise_state"] as Dictionary\n\t):\n\t\treturn _restore_domain_failed("enterprise")\n\tif not character_service.restore_persistent_state(',
+              '\tif not enterprise.restore_persistent_state(\n\t\tstate["alpha_enterprise_state"] as Dictionary\n\t):\n\t\treturn _restore_domain_failed("enterprise")\n\tif state.has("alpha_economy_integration_state"):\n\t\tif not economy_integration.restore_persistent_state(\n\t\t\tstate["alpha_economy_integration_state"] as Dictionary\n\t\t):\n\t\t\treturn _restore_domain_failed("economy_integration")\n\telif not economy_integration.configure(\n\t\talpha_config, commodity_market, economy, enterprise, labor\n\t):\n\t\treturn _restore_domain_failed("economy_integration_migration")\n\tif not character_service.restore_persistent_state(',
+              "integration restore",
           )
-          apply(
-              "scripts/alpha/alpha_economy_integration_service.gd",
-              'func integration_summary() -> Dictionary:\n',
-              'func transport_edge_count() -> int:\n\treturn _edges_by_id.size()\n\n\nfunc integration_summary() -> Dictionary:\n',
-              "route count API",
-          )
+          path.write_text(text, encoding="utf-8")
           PY
           git diff --check
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add scripts/alpha/alpha_config.gd scripts/alpha/alpha_commodity_market_service.gd scripts/alpha/alpha_economy_integration_service.gd
-          git commit -m "wire economy configuration and sparse logistics delegation"
+          git add scripts/alpha/alpha_simulation_service.gd
+          git commit -m "compose unified economy settlement and persistence"
           git push origin HEAD:agent/economy-integration-phase2
