@@ -562,44 +562,53 @@ func _settle_household_consumption(total_hour: int) -> Dictionary:
 		var region_id := str(raw_region_id)
 		var account := region_accounts[region_id] as Dictionary
 		var market_id := str(account.get("market_id", ""))
-		var report := _commodity_market.region_report(region_id)
-		var metrics := report.get("daily_metrics", {}) as Dictionary
+		var state := _commodity_market.region_states.get(region_id, {}) as Dictionary
+		var metrics := state.get("daily_metrics", {}) as Dictionary
 		var consumed := metrics.get("consumed", {}) as Dictionary
-		var region_spending := 0
-		var region_arrears := 0
+		var value := 0
 		for raw_commodity_id: Variant in consumed:
 			var commodity_id := str(raw_commodity_id)
-			var units := float(consumed[commodity_id])
-			var value := maxi(0, int(round(units * float(_commodity_market.market_price(region_id, commodity_id)))))
-			if value <= 0:
-				continue
-			var allocated := 0
-			for stratum_index: int in range(_household_strata.size()):
-				var stratum := _household_strata[stratum_index] as Dictionary
-				var share_bp := int(stratum.get("budget_share_bp", 0))
-				var share := value - allocated if stratum_index == _household_strata.size() - 1 else value * share_bp / BASIS_POINTS
-				allocated += share
-				var payer_id := str((account.get("stratum_ids", []) as Array)[stratum_index])
-				var paid := mini(share, _economy.ledger.owner_cash(payer_id))
-				if paid > 0 and _safe_transfer(
-					"integration:household:%d:%s:%s:%d" % [total_hour, region_id, commodity_id, stratum_index],
-					total_hour,
-					payer_id,
-					market_id,
-					paid,
-					"household_consumption",
-					"居民购买%s" % commodity_id
-				):
-					region_spending += paid
-				if paid < share:
-					region_arrears += share - paid
-		account["last_household_spending_centimes"] = region_spending
-		account["household_arrears_centimes"] = int(account.get("household_arrears_centimes", 0)) + region_arrears
+			value += maxi(0, int(round(
+				float(consumed[commodity_id])
+				* float(_commodity_market.market_price(region_id, commodity_id))
+			)))
+		var entries: Array[Dictionary] = []
+		var paid_total := 0
+		var region_arrears := 0
+		var allocated := 0
+		for stratum_index: int in range(_household_strata.size()):
+			var stratum := _household_strata[stratum_index] as Dictionary
+			var share := (
+				value - allocated
+				if stratum_index == _household_strata.size() - 1
+				else value * int(stratum.get("budget_share_bp", 0)) / BASIS_POINTS
+			)
+			allocated += share
+			var payer_id := str((account.get("stratum_ids", []) as Array)[stratum_index])
+			var paid := mini(share, _economy.ledger.owner_cash(payer_id))
+			if paid > 0:
+				entries.append({"owner_id": payer_id, "delta_centimes": -paid})
+				paid_total += paid
+			region_arrears += share - paid
+		if paid_total > 0:
+			entries.append({"owner_id": market_id, "delta_centimes": paid_total})
+			if not _post_owner_entries(
+				"integration:household:%d:%s" % [total_hour, region_id],
+				total_hour,
+				"household_consumption",
+				"地区家庭阶层合并消费结算",
+				entries
+			):
+				region_arrears += paid_total
+				paid_total = 0
+		account["last_household_spending_centimes"] = paid_total
+		account["household_arrears_centimes"] = int(
+			account.get("household_arrears_centimes", 0)
+		) + region_arrears
 		region_accounts[region_id] = account
-		spending += region_spending
+		spending += paid_total
 		arrears += region_arrears
 	return {"spending_centimes": spending, "arrears_centimes": arrears}
-
 
 func _settle_enterprises(total_hour: int) -> Dictionary:
 	var total_revenue := 0
@@ -633,63 +642,29 @@ func _settle_enterprises(total_hour: int) -> Dictionary:
 		var taxable_profit := maxi(0, revenue - input_cost - wage_cost - maintenance)
 		var tax := taxable_profit * int(_policies.get("business_tax_bp", 0)) / BASIS_POINTS
 		_ensure_market_liquidity(region_id, revenue, total_hour)
-		var revenue_paid := revenue <= 0 or _safe_transfer(
+		var revenue_paid := revenue <= 0 or _post_owner_entries(
 			"integration:revenue:%d:%s" % [total_hour, site_id],
 			total_hour,
-			market_id,
-			enterprise_id,
-			revenue,
 			"commodity_sales_revenue",
-			"生产设施商品销售收入"
+			"生产设施商品销售收入",
+			[
+				{"owner_id": market_id, "delta_centimes": -revenue},
+				{"owner_id": enterprise_id, "delta_centimes": revenue},
+			]
 		)
-		var input_paid := input_cost <= 0 or _safe_transfer(
-			"integration:input:%d:%s" % [total_hour, site_id],
-			total_hour,
-			enterprise_id,
-			market_id,
-			input_cost,
-			"commodity_input_purchase",
-			"生产设施原料采购"
+		var expenses_paid := _settle_site_expenses(
+			enterprise_id, region_id, market_id, input_cost, wage_cost,
+			maintenance, tax, total_hour, site_id
 		)
-		var wages_paid := _pay_aggregate_wages(
-			enterprise_id, region_id, wage_cost, total_hour, site_id
-		)
-		var maintenance_paid := maintenance <= 0 or _safe_transfer(
-			"integration:maintenance:%d:%s" % [total_hour, site_id],
-			total_hour,
-			enterprise_id,
-			CAPITAL_SUPPLIER_ID,
-			maintenance,
-			"equipment_maintenance",
-			"设备维护与折旧准备"
-		)
-		var country_id := str((region_accounts[region_id] as Dictionary).get("country_id", ""))
-		var treasury_id := str((country_finance[country_id] as Dictionary).get("treasury_id", ""))
-		var tax_paid := tax <= 0 or _safe_transfer(
-			"integration:business_tax:%d:%s" % [total_hour, site_id],
-			total_hour,
-			enterprise_id,
-			treasury_id,
-			tax,
-			"business_tax",
-			"企业营业与利润税"
-		)
-		var all_paid := revenue_paid and input_paid and wages_paid and maintenance_paid and tax_paid
+		var all_paid := revenue_paid and expenses_paid
 		_update_site_and_enterprise_after_settlement(
-			site_id,
-			enterprise_id,
-			revenue,
-			input_cost,
-			wage_cost,
-			maintenance,
-			tax,
-			all_paid,
-			total_hour
+			site_id, enterprise_id, revenue, input_cost, wage_cost,
+			maintenance, tax, all_paid, total_hour
 		)
-		total_revenue += revenue
-		total_cost += input_cost + wage_cost + maintenance + tax
-		total_wages += wage_cost if wages_paid else 0
-		total_tax += tax if tax_paid else 0
+		total_revenue += revenue if revenue_paid else 0
+		total_cost += input_cost + wage_cost + maintenance + tax if expenses_paid else 0
+		total_wages += wage_cost if expenses_paid else 0
+		total_tax += tax if expenses_paid else 0
 		settled_enterprises[enterprise_id] = true
 	for raw_enterprise_id: Variant in settled_enterprises:
 		_maybe_invest(str(raw_enterprise_id), total_hour)
@@ -702,37 +677,49 @@ func _settle_enterprises(total_hour: int) -> Dictionary:
 	}
 
 
-func _pay_aggregate_wages(
+func _settle_site_expenses(
 	enterprise_id: String,
 	region_id: String,
+	market_id: String,
+	input_cost: int,
 	wage_cost: int,
+	maintenance: int,
+	tax: int,
 	total_hour: int,
 	site_id: String
 ) -> bool:
-	if wage_cost <= 0:
+	var total_expense := input_cost + wage_cost + maintenance + tax
+	if total_expense <= 0:
 		return true
 	var account := region_accounts[region_id] as Dictionary
+	var country_id := str(account.get("country_id", ""))
+	var treasury_id := str((country_finance[country_id] as Dictionary).get("treasury_id", ""))
+	var entries: Array[Dictionary] = [
+		{"owner_id": enterprise_id, "delta_centimes": -total_expense},
+		{"owner_id": market_id, "delta_centimes": input_cost},
+		{"owner_id": CAPITAL_SUPPLIER_ID, "delta_centimes": maintenance},
+		{"owner_id": treasury_id, "delta_centimes": tax},
+	]
 	var allocated := 0
 	for stratum_index: int in range(_household_strata.size()):
-		var stratum := _household_strata[stratum_index] as Dictionary
-		var population_bp := int(stratum.get("population_bp", 0))
-		var share := wage_cost - allocated if stratum_index == _household_strata.size() - 1 else wage_cost * population_bp / BASIS_POINTS
+		var share := (
+			wage_cost - allocated
+			if stratum_index == _household_strata.size() - 1
+			else wage_cost * int((_household_strata[stratum_index] as Dictionary).get("population_bp", 0)) / BASIS_POINTS
+		)
 		allocated += share
-		if share <= 0:
-			continue
-		var receiver_id := str((account.get("stratum_ids", []) as Array)[stratum_index])
-		if not _safe_transfer(
-			"integration:wage:%d:%s:%d" % [total_hour, site_id, stratum_index],
-			total_hour,
-			enterprise_id,
-			receiver_id,
-			share,
-			"aggregate_wage",
-			"商品生产部门工资"
-		):
-			return false
-	return true
-
+		if share > 0:
+			entries.append({
+				"owner_id": str((account.get("stratum_ids", []) as Array)[stratum_index]),
+				"delta_centimes": share,
+			})
+	return _post_owner_entries(
+		"integration:expenses:%d:%s" % [total_hour, site_id],
+		total_hour,
+		"commodity_operating_expenses",
+		"生产设施原料、工资、维护与税费合并结算",
+		entries
+	)
 
 func _update_site_and_enterprise_after_settlement(
 	site_id: String,
@@ -966,52 +953,24 @@ func _create_shipment(
 		insurance = goods_value * int(_policies.get("insurance_premium_bp", 0)) / BASIS_POINTS
 	var shipment_id := "shipment:commodity:%d" % _next_shipment_sequence
 	_next_shipment_sequence += 1
-	if not _safe_transfer(
-		"integration:shipment:escrow:%s" % shipment_id,
-		total_hour,
-		buyer_id,
-		ESCROW_ID,
-		goods_value,
-		"commodity_trade_escrow",
-		"商品运输托管货款"
-	):
-		return _fail("escrow_failed", "买方货款无法进入托管")
-	var carrier_id := str(route_terms.get("carrier_id", ""))
-	if freight > 0 and not _safe_transfer(
-		"integration:shipment:freight:%s" % shipment_id,
-		total_hour,
-		buyer_id,
-		carrier_id,
-		freight,
-		"freight_charge",
-		"运输费用"
-	):
-		_refund_escrow(shipment_id, buyer_id, goods_value, total_hour)
-		return _fail("freight_payment_failed", "运输费用结算失败")
-	if insurance > 0 and not _safe_transfer(
-		"integration:shipment:insurance:%s" % shipment_id,
-		total_hour,
-		buyer_id,
-		INSURER_ID,
-		insurance,
-		"cargo_insurance",
-		"货运保险费"
-	):
-		_refund_escrow(shipment_id, buyer_id, goods_value, total_hour)
-		return _fail("insurance_payment_failed", "保险费用结算失败")
+	var payment_entries: Array[Dictionary] = [
+		{"owner_id": buyer_id, "delta_centimes": -(goods_value + freight + tariff + insurance)},
+		{"owner_id": ESCROW_ID, "delta_centimes": goods_value},
+		{"owner_id": carrier_id, "delta_centimes": freight},
+		{"owner_id": INSURER_ID, "delta_centimes": insurance},
+	]
 	if tariff > 0:
 		var treasury_id := str((country_finance[destination_country] as Dictionary).get("treasury_id", ""))
-		if not _safe_transfer(
-			"integration:shipment:tariff:%s" % shipment_id,
-			total_hour,
-			buyer_id,
-			treasury_id,
-			tariff,
-			"import_tariff",
-			"进口关税"
-		):
-			_refund_escrow(shipment_id, buyer_id, goods_value, total_hour)
-			return _fail("tariff_payment_failed", "关税结算失败")
+		payment_entries.append({"owner_id": treasury_id, "delta_centimes": tariff})
+	if not _post_owner_entries(
+		"integration:shipment:dispatch:%s" % shipment_id,
+		total_hour,
+		"commodity_shipment_dispatch",
+		"商品货款托管、运输、保险与关税原子分账",
+		payment_entries
+	):
+		return _fail("shipment_payment_failed", "运输发出结算失败")
+	if tariff > 0:
 		var finance := country_finance[destination_country] as Dictionary
 		finance["cumulative_tariff_centimes"] = int(finance.get("cumulative_tariff_centimes", 0)) + tariff
 		country_finance[destination_country] = finance
@@ -1356,6 +1315,42 @@ func _refund_escrow(shipment_id: String, buyer_id: String, amount: int, total_ho
 		"commodity_trade_refund",
 		"未交付货物托管退款"
 	)
+
+
+func _post_owner_entries(
+	key: String,
+	total_hour: int,
+	category: String,
+	description: String,
+	owner_entries: Array[Dictionary]
+) -> bool:
+	var by_account: Dictionary = {}
+	for owner_entry: Dictionary in owner_entries:
+		var delta := int(owner_entry.get("delta_centimes", 0))
+		if delta == 0:
+			continue
+		var account_id := _economy.ledger.cash_account_id(str(owner_entry.get("owner_id", "")))
+		if account_id.is_empty():
+			return false
+		by_account[account_id] = int(by_account.get(account_id, 0)) + delta
+	var entries: Array[Dictionary] = []
+	for raw_account_id: Variant in by_account:
+		var account_id := str(raw_account_id)
+		var delta := int(by_account[account_id])
+		if delta != 0:
+			entries.append({"account_id": account_id, "delta_centimes": delta})
+	if entries.is_empty():
+		return true
+	if entries.size() < 2:
+		return false
+	return bool(_economy.ledger.post(
+		key,
+		total_hour,
+		category,
+		"fact:%s" % key,
+		entries,
+		description
+	).get("success", false))
 
 
 func _safe_transfer(

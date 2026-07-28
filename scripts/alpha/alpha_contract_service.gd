@@ -524,12 +524,7 @@ func _duplicate_contract(idempotency_key: String) -> Dictionary:
 
 
 func _ledger_has_transaction(transaction_id: String) -> bool:
-	if _ledger == null:
-		return false
-	for transaction: Dictionary in _ledger.transactions:
-		if str(transaction.get("transaction_id", "")) == transaction_id:
-			return true
-	return false
+	return _ledger != null and _ledger.has_transaction(transaction_id)
 
 
 static func _append_history(
