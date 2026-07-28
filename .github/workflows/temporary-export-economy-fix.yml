@@ -1,4 +1,4 @@
-name: Temporary export economy fix files
+name: Apply overlapping market shock fix
 
 on:
   pull_request:
@@ -8,19 +8,239 @@ on:
       - ".github/workflows/temporary-export-economy-fix.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  export:
+  apply:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/upload-artifact@v4
         with:
-          name: economy-fix-files
-          path: |
-            scripts/alpha/alpha_economy_service.gd
-            scripts/alpha/alpha_contract_service.gd
-            tests/alpha/alpha_economy_lifecycle_test.gd
-          if-no-files-found: error
-          retention-days: 1
+          ref: agent/1900-market-economy-core
+      - name: Patch overlapping shock lifecycle
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          economy_path = Path('scripts/alpha/alpha_economy_service.gd')
+          text = economy_path.read_text(encoding='utf-8')
+          start = text.index('func apply_market_shock(')
+          end = text.index('\n\nfunc market_price(', start)
+          replacement = '''func apply_market_shock(
+          \tidempotency_key: String,
+          \tregion_id: String,
+          \tgood_id: String,
+          \tprice_delta_bp: int,
+          \tduration_days: int,
+          \tcause: String,
+          \ttotal_hour: int
+          ) -> Dictionary:
+          \tif _processed_keys.has(idempotency_key):
+          \t\treturn _ok({"duplicate": true})
+          \tif (
+          \t\tnot markets.has(region_id)
+          \t\tor not goods.has(good_id)
+          \t\tor duration_days <= 0
+          \t\tor price_delta_bp <= -10000
+          \t):
+          \t\treturn _fail("invalid_market_shock", "市场冲击引用或价格修正无效")
+          \tvar before: int = market_price(region_id, good_id)
+          \tvar base_price: int = _market_shock_base_price(
+          \t\tregion_id, good_id, before, total_hour
+          \t)
+          \tvar event: Dictionary = {
+          \t\t"event_id": "market_event:%d" % external_events.size(),
+          \t\t"region_id": region_id,
+          \t\t"good_id": good_id,
+          \t\t"base_price": base_price,
+          \t\t"before_price": before,
+          \t\t"after_price": before,
+          \t\t"price_delta_bp": price_delta_bp,
+          \t\t"start_hour": total_hour,
+          \t\t"end_hour": total_hour + duration_days * HOURS_PER_DAY,
+          \t\t"cause": cause,
+          \t}
+          \texternal_events.append(event)
+          \tvar after: int = _recompute_market_shock_price(
+          \t\tregion_id, good_id, base_price, total_hour
+          \t)
+          \tevent["after_price"] = after
+          \texternal_events[external_events.size() - 1] = event
+          \twhile external_events.size() > 128:
+          \t\texternal_events.pop_front()
+          \t_processed_keys[idempotency_key] = "market"
+          \treturn _ok({"before_price": before, "after_price": after})
+
+
+          func expire_market_shocks(total_hour: int) -> int:
+          \tvar active: Array[Dictionary] = []
+          \tvar affected: Dictionary = {}
+          \tvar expired_count: int = 0
+          \tfor event: Dictionary in external_events:
+          \t\tif total_hour < int(event.get("end_hour", -1)):
+          \t\t\tactive.append(event)
+          \t\t\tcontinue
+          \t\tvar region_id: String = str(event.get("region_id", ""))
+          \t\tvar good_id: String = str(event.get("good_id", ""))
+          \t\tvar pair_key: String = "%s|%s" % [region_id, good_id]
+          \t\tif not affected.has(pair_key):
+          \t\t\taffected[pair_key] = {
+          \t\t\t\t"region_id": region_id,
+          \t\t\t\t"good_id": good_id,
+          \t\t\t\t"base_price": _market_shock_original_base_price(
+          \t\t\t\t\tregion_id, good_id, market_price(region_id, good_id)
+          \t\t\t\t),
+          \t\t\t}
+          \t\texpired_count += 1
+          \texternal_events = active
+          \tfor raw_pair: Variant in affected.values():
+          \t\tvar pair: Dictionary = raw_pair as Dictionary
+          \t\t_recompute_market_shock_price(
+          \t\t\tstr(pair.get("region_id", "")),
+          \t\t\tstr(pair.get("good_id", "")),
+          \t\t\tint(pair.get("base_price", 1)),
+          \t\t\ttotal_hour
+          \t\t)
+          \treturn expired_count
+
+
+          func _market_shock_base_price(
+          \tregion_id: String,
+          \tgood_id: String,
+          \tfallback_price: int,
+          \ttotal_hour: int
+          ) -> int:
+          \tfor event: Dictionary in external_events:
+          \t\tif (
+          \t\t\tstr(event.get("region_id", "")) == region_id
+          \t\t\tand str(event.get("good_id", "")) == good_id
+          \t\t\tand total_hour < int(event.get("end_hour", -1))
+          \t\t):
+          \t\t\treturn maxi(
+          \t\t\t\t1,
+          \t\t\t\tint(event.get("base_price", event.get("before_price", fallback_price)))
+          \t\t\t)
+          \treturn maxi(1, fallback_price)
+
+
+          func _market_shock_original_base_price(
+          \tregion_id: String,
+          \tgood_id: String,
+          \tfallback_price: int
+          ) -> int:
+          \tfor event: Dictionary in external_events:
+          \t\tif (
+          \t\t\tstr(event.get("region_id", "")) == region_id
+          \t\t\tand str(event.get("good_id", "")) == good_id
+          \t\t):
+          \t\t\treturn maxi(
+          \t\t\t\t1,
+          \t\t\t\tint(event.get("base_price", event.get("before_price", fallback_price)))
+          \t\t\t)
+          \treturn maxi(1, fallback_price)
+
+
+          func _market_shock_delta_bp(event: Dictionary) -> int:
+          \tif event.has("price_delta_bp"):
+          \t\treturn maxi(-9999, int(event.get("price_delta_bp", 0)))
+          \tvar before: int = int(event.get("before_price", 0))
+          \tvar after: int = int(event.get("after_price", 0))
+          \tif before <= 0 or after <= 0:
+          \t\treturn 0
+          \treturn maxi(-9999, int(round(float(after) * 10000.0 / float(before))) - 10000)
+
+
+          func _recompute_market_shock_price(
+          \tregion_id: String,
+          \tgood_id: String,
+          \tbase_price: int,
+          \ttotal_hour: int
+          ) -> int:
+          \tif not markets.has(region_id) or not goods.has(good_id):
+          \t\treturn 0
+          \tvar price: int = maxi(1, base_price)
+          \tvar has_active: bool = false
+          \tfor event: Dictionary in external_events:
+          \t\tif (
+          \t\t\tstr(event.get("region_id", "")) != region_id
+          \t\t\tor str(event.get("good_id", "")) != good_id
+          \t\t\tor total_hour >= int(event.get("end_hour", -1))
+          \t\t):
+          \t\t\tcontinue
+          \t\tprice = maxi(1, price * (10000 + _market_shock_delta_bp(event)) / 10000)
+          \t\thas_active = true
+          \tvar market: Dictionary = markets[region_id] as Dictionary
+          \tvar prices: Dictionary = market.get("prices", {}) as Dictionary
+          \tprices[good_id] = price
+          \tmarket["prices"] = prices
+          \tmarket["state"] = (
+          \t\t"balanced"
+          \t\tif not has_active or price == base_price
+          \t\telse ("shortage" if price > base_price else "surplus")
+          \t)
+          \tmarkets[region_id] = market
+          \treturn price
+          '''
+          economy_path.write_text(text[:start] + replacement + text[end:], encoding='utf-8')
+
+          test_path = Path('tests/alpha/alpha_economy_lifecycle_test.gd')
+          test_text = test_path.read_text(encoding='utf-8')
+          marker = '\tvar integrity: Dictionary = economy.validate_integrity()\n'
+          insertion = '''\tvar overlap_base: int = economy.market_price("region:vesta_redhill", "coal")
+          \ttest.expect(
+          \t\tbool(economy.apply_market_shock(
+          \t\t\t"shock:test:coal:long",
+          \t\t\t"region:vesta_redhill",
+          \t\t\t"coal",
+          \t\t\t2000,
+          \t\t\t2,
+          \t\t\t"矿井停产",
+          \t\t\t400
+          \t\t).get("success", false)),
+          \t\t"可登记较长期煤炭冲击"
+          \t)
+          \tvar overlap_long_price: int = economy.market_price("region:vesta_redhill", "coal")
+          \ttest.expect(
+          \t\tbool(economy.apply_market_shock(
+          \t\t\t"shock:test:coal:short",
+          \t\t\t"region:vesta_redhill",
+          \t\t\t"coal",
+          \t\t\t1000,
+          \t\t\t1,
+          \t\t\t"铁路拥堵",
+          \t\t\t400
+          \t\t).get("success", false)),
+          \t\t"同一商品可叠加较短冲击"
+          \t)
+          \ttest.expect(
+          \t\teconomy.market_price("region:vesta_redhill", "coal") > overlap_long_price,
+          \t\t"重叠冲击按共同基准叠加"
+          \t)
+          \ttest.equal(economy.expire_market_shocks(424), 1, "较短冲击按结束小时单独到期")
+          \ttest.equal(
+          \t\teconomy.market_price("region:vesta_redhill", "coal"),
+          \t\toverlap_long_price,
+          \t\t"短冲击到期后仍保留长期冲击价格"
+          \t)
+          \ttest.equal(economy.expire_market_shocks(448), 1, "长期冲击随后到期")
+          \ttest.equal(
+          \t\teconomy.market_price("region:vesta_redhill", "coal"),
+          \t\toverlap_base,
+          \t\t"全部重叠冲击到期后恢复原始基准价格"
+          \t)
+          '''
+          if insertion not in test_text:
+              test_text = test_text.replace(marker, insertion + marker, 1)
+          test_path.write_text(test_text, encoding='utf-8')
+          PY
+          git diff --check
+          grep -q 'base_price' scripts/alpha/alpha_economy_service.gd
+          grep -q '全部重叠冲击到期后恢复原始基准价格' tests/alpha/alpha_economy_lifecycle_test.gd
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/alpha/alpha_economy_service.gd tests/alpha/alpha_economy_lifecycle_test.gd
+          git commit -m "fix overlapping market shock expiry"
+          git push origin HEAD:agent/1900-market-economy-core
