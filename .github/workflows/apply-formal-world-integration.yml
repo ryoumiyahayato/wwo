@@ -1,0 +1,128 @@
+name: Apply formal world integration
+
+on:
+  push:
+    branches:
+      - agent/formal-world-economy-integration
+    paths:
+      - ".github/workflows/apply-formal-world-integration.yml"
+      - "tools/apply_formal_world_integration.py"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-formal-world-integration
+  cancel-in-progress: true
+
+jobs:
+  apply-validate-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GODOT_BIN: "${{ github.workspace }}/.ci-godot/Godot_v4.6.3-stable_linux.x86_64"
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/formal-world-economy-integration
+          fetch-depth: 0
+
+      - name: Apply integration patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/apply_formal_world_integration.py
+          git diff --check
+
+      - name: Run static audits
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/audit_1900_commodity_economy.py
+          python3 tools/audit_1900_economy_integration.py
+          python3 tools/audit_1900_world_economy_compact.py
+          python3 -m json.tool data/alpha/commodity_market_1900.json >/dev/null
+          python3 -m json.tool data/alpha/economy_integration_1900.json >/dev/null
+          python3 -m json.tool data/alpha/historical_world_economy_1900.json >/dev/null
+
+      - name: Install Godot 4.6.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .ci-godot
+          curl --fail --location --retry 3 --retry-delay 2 \
+            "https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_linux.x86_64.zip" \
+            --output .ci-godot/godot.zip
+          unzip -q .ci-godot/godot.zip -d .ci-godot
+          chmod +x "${GODOT_BIN}"
+          "${GODOT_BIN}" --version
+
+      - name: Import project and scan scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" --headless --audio-driver Dummy --path . --editor --quit-after 5 --log-file formal-world-import.log
+          if grep -Eq "SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|^ERROR:" formal-world-import.log; then
+            cat formal-world-import.log
+            exit 1
+          fi
+
+      - name: Run focused regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/formal-world
+          tests=(
+            tests/alpha/alpha_commodity_market_test.gd
+            tests/alpha/alpha_economy_lifecycle_test.gd
+            tests/alpha/alpha_labor_enterprise_test.gd
+            tests/alpha/alpha_composition_smoke.gd
+            tests/alpha/alpha_save_and_migration_test.gd
+            tests/alpha/alpha_economy_integration_phase2_test.gd
+            tests/alpha/alpha_ai_economy_stability_test.gd
+            tests/alpha/alpha_historical_world_economy_data_test.gd
+            tests/formal/formal_world_integration_test.gd
+          )
+          for test_script in "${tests[@]}"; do
+            name="$(basename "${test_script}" .gd)"
+            log="builds/formal-world/${name}.log"
+            timeout --signal=TERM 360s "${GODOT_BIN}" --headless --audio-driver Dummy --path . --script "res://${test_script}" --log-file "${log}"
+            if grep -Eq "SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Assertion failed|[1-9][0-9]* failures|^ERROR:" "${log}"; then
+              cat "${log}"
+              exit 1
+            fi
+          done
+
+      - name: Remove one-time patch machinery
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f tools/apply_formal_world_integration.py
+          rm -f .github/workflows/apply-formal-world-integration.yml
+
+      - name: Commit integrated result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "integrate historical economy into formal hemisphere"
+          git push origin HEAD:agent/formal-world-economy-integration
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formal-world-integration-diagnostics
+          path: |
+            formal-world-import.log
+            builds/formal-world/*.log
+          if-no-files-found: ignore
+          retention-days: 7
