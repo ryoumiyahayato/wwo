@@ -83,24 +83,34 @@ func _check_world_roster(
 	)
 	_check(
 		int(initial.get("major_economy_count", 0)) == 50,
-		"50个主要政权使用高细节经济"
+		"50个主要政权经济聚合体使用高细节模拟"
+	)
+	_check(
+		int(initial.get("detailed_polity_unit_count", 0)) == 55,
+		"50个经济聚合体明确覆盖55个地图政治单元"
 	)
 	_check(
 		int(initial.get("primary_playable_count", 0)) == 30,
-		"前30个政权进入当前核心可玩层"
+		"前30个经济聚合体进入当前核心可玩层"
 	)
 	_check(
 		int(initial.get("secondary_roster_count", 0)) == 20,
 		"第31至50位保留为次要政权候选"
 	)
 	_check(
-		int(initial.get("background_polity_count", 0)) == 101,
-		"其余101个政治单元作为背景世界存在"
+		int(initial.get("background_polity_count", 0)) == 96,
+		"其余96个地图政治单元作为纯背景世界存在"
 	)
 	_check(
 		not economy.country_states.has("country:loran_federation")
 		and not economy.country_states.has("country:vesta_union"),
 		"正式世界不包含两国八地区架空夹具"
+	)
+	_check_australia_crosswalk(economy)
+	_check(
+		economy.economy_entity_for_polity("grand_duchy_of_luxembourg")
+		== "kingdom_of_luxembourg",
+		"卢森堡经济旧名显式映射到卢森堡大公国地图单元"
 	)
 	var background := economy.polity_summary("cshapes_gw_31")
 	_check(not background.is_empty(), "背景政治单元仍可在半球选择")
@@ -108,6 +118,18 @@ func _check_world_roster(
 		not bool(background.get("has_detailed_economy", true)),
 		"背景政治单元不运行高细节经济"
 	)
+
+
+func _check_australia_crosswalk(economy: FormalWorldEconomyService) -> void:
+	var polity_ids := economy.polity_ids_for_economy("australia_colonies_1900")
+	_check(polity_ids.size() == 6, "澳大利亚经济聚合体覆盖六个自治殖民地")
+	for index: int in range(901, 907):
+		var polity_id := "cshapes_gw_%d" % index
+		_check(
+			economy.economy_entity_for_polity(polity_id)
+			== "australia_colonies_1900",
+			"%s映射到澳大利亚殖民地经济聚合体" % polity_id
+		)
 
 
 func _check_formal_simulation() -> void:
@@ -176,7 +198,11 @@ func _check_runtime_application(application: FormalWorldApplication) -> void:
 	)
 	_check(
 		int(runtime_summary.get("major_economy_count", 0)) == 50,
-		"正式半球运行时持有50个主要经济体"
+		"正式半球运行时持有50个主要经济聚合体"
+	)
+	_check(
+		int(runtime_summary.get("detailed_polity_unit_count", 0)) == 55,
+		"正式半球运行时将高细节经济绑定到55个地图单元"
 	)
 	_check(
 		application.get_node_or_null("PrototypeMap") == null,
