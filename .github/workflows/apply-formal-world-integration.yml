@@ -6,17 +6,6 @@ on:
       - agent/formal-world-economy-integration
     paths:
       - ".github/workflows/apply-formal-world-integration.yml"
-  pull_request:
-    branches:
-      - master
-    paths:
-      - ".github/workflows/apply-formal-world-integration.yml"
-      - "tools/apply_formal_world_integration.py"
-      - "tools/fix_formal_world_patch_output.py"
-      - "tools/restore_workflow_files_before_publish.py"
-      - "scripts/formal/**"
-      - "scenes/formal/**"
-      - "tests/formal/**"
 
 permissions:
   contents: write
@@ -31,6 +20,7 @@ jobs:
     timeout-minutes: 45
     env:
       GODOT_BIN: "${{ github.workspace }}/.ci-godot/Godot_v4.6.3-stable_linux.x86_64"
+      GH_TOKEN: "${{ github.token }}"
     steps:
       - name: Check out branch
         uses: actions/checkout@v4
@@ -146,27 +136,45 @@ jobs:
             fi
           done
 
-      - name: Remove one-time patch machinery
+      - name: Publish verified source files
         shell: bash
         run: |
           set -euo pipefail
-          rm -f tools/apply_formal_world_integration.py
-          rm -f tools/fix_formal_world_patch_output.py
-          rm -f tools/restore_workflow_files_before_publish.py
-
-      - name: Commit integrated result
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-            exit 0
-          fi
-          git commit -m "integrate historical economy into formal hemisphere"
-          git push origin HEAD:agent/formal-world-economy-integration
+          branch="agent/formal-world-economy-integration"
+          repo="${GITHUB_REPOSITORY}"
+          message="integrate historical economy into formal hemisphere"
+          modified_files=(
+            scripts/alpha/alpha_ai_service.gd
+            scripts/alpha/alpha_commodity_market_service.gd
+            scripts/alpha/alpha_economy_integration_service.gd
+            scripts/alpha/alpha_historical_world_economy_data.gd
+            scripts/alpha/alpha_ledger_service.gd
+            scripts/alpha/alpha_simulation_service.gd
+            scripts/alpha/alpha_world_dynamics_service.gd
+            scripts/formal/formal_world_application.gd
+            scripts/formal/formal_world_simulation.gd
+            scripts/v2_3/v2_3_life_loop_menu.gd
+            tools/run_validation.ps1
+          )
+          for path in "${modified_files[@]}"; do
+            sha="$(gh api "repos/${repo}/contents/${path}?ref=${branch}" --jq .sha)"
+            encoded="$(base64 -w 0 "${path}")"
+            gh api --method PUT "repos/${repo}/contents/${path}" \
+              -f message="${message}: ${path}" \
+              -f content="${encoded}" \
+              -f branch="${branch}" \
+              -f sha="${sha}" >/dev/null
+          done
+          for path in \
+            tools/apply_formal_world_integration.py \
+            tools/fix_formal_world_patch_output.py \
+            tools/restore_workflow_files_before_publish.py; do
+            sha="$(gh api "repos/${repo}/contents/${path}?ref=${branch}" --jq .sha)"
+            gh api --method DELETE "repos/${repo}/contents/${path}" \
+              -f message="remove one-time formal integration tooling" \
+              -f branch="${branch}" \
+              -f sha="${sha}" >/dev/null
+          done
 
       - name: Upload diagnostics
         if: always()
