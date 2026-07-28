@@ -47,10 +47,12 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends xvfb xauth fonts-noto-cjk
       - name: Audit commodity and integrated economy configuration
+        shell: bash
         run: |
           set -euo pipefail
-          python3 tools/audit_1900_commodity_economy.py
-          python3 tools/audit_1900_economy_integration.py
+          mkdir -p builds/alpha-commodity
+          python3 tools/audit_1900_commodity_economy.py 2>&1 | tee builds/alpha-commodity/commodity-static-audit.log
+          python3 tools/audit_1900_economy_integration.py 2>&1 | tee builds/alpha-commodity/integration-static-audit.log
           python3 -m json.tool data/alpha/commodity_market_1900.json >/dev/null
           python3 -m json.tool data/alpha/economy_integration_1900.json >/dev/null
           python3 -m json.tool data/alpha/historical_economy_coverage_1900.json >/dev/null
