@@ -96,8 +96,8 @@ func _build_summary_row() -> Control:
 		{"id": "population", "title": "总人口"},
 		{"id": "fulfillment", "title": "消费满足率"},
 		{"id": "unemployment", "title": "失业率"},
-		{"id": "imports", "title": "今日国际进口"},
-		{"id": "exports", "title": "今日国际出口"},
+		{"id": "imports", "title": "今日新建运输"},
+		{"id": "exports", "title": "当前在途批次"},
 		{"id": "ai", "title": "AI决策记录"},
 	]:
 		var box := VBoxContainer.new()
@@ -264,6 +264,7 @@ func _refresh_all() -> void:
 	if not simulation.initialized:
 		return
 	var summary: Dictionary = simulation.commodity_market.world_summary()
+	var integrated: Dictionary = simulation.economy_integration.integration_summary()
 	date_label.text = "%s · 已运行 %d 日" % [
 		V2DateTime.iso_from_total_hour(simulation.clock.total_hours),
 		simulation.clock.total_hours / 24,
@@ -271,15 +272,15 @@ func _refresh_all() -> void:
 	(summary_labels["population"] as Label).text = _compact_number(int(summary.get("population", 0)))
 	(summary_labels["fulfillment"] as Label).text = _percent(int(summary.get("fulfillment_bp", 0)))
 	(summary_labels["unemployment"] as Label).text = _percent(int(summary.get("unemployment_bp", 0)))
-	(summary_labels["imports"] as Label).text = _quantity(float(summary.get("international_import_units", 0.0)))
-	(summary_labels["exports"] as Label).text = _quantity(float(summary.get("international_export_units", 0.0)))
+	(summary_labels["imports"] as Label).text = _quantity(float(integrated.get("shipment_units", 0.0)))
+	(summary_labels["exports"] as Label).text = str(int(integrated.get("active_shipments", 0)))
 	(summary_labels["ai"] as Label).text = str(simulation.alpha_ai.decisions.size())
 	_refresh_market_tree()
 	_refresh_flow_list()
 	_refresh_ai_list()
 	status_label.text = (
 		"运行正常：%d种商品、%d个生产设施、%d个地区；"
-		+ "当前页面为可操作审计预览，正式世界经济接入仍待完成。"
+		+ "商品、现金、企业、劳动和稀疏物流统一结算已启用；正式历史世界仍受史料覆盖门控。"
 	) % [
 		simulation.commodity_market.commodities.size(),
 		simulation.commodity_market.production_sites.size(),
@@ -301,8 +302,8 @@ func _refresh_market_tree() -> void:
 		var produced: float = _metric(metrics, "produced", commodity_id)
 		var consumed: float = _metric(metrics, "consumed", commodity_id)
 		var unmet: float = _metric(metrics, "unmet", commodity_id)
-		var imported: float = _metric(metrics, "international_imports", commodity_id)
-		var exported: float = _metric(metrics, "international_exports", commodity_id)
+		var imported: float = _metric(metrics, "transit_received", commodity_id)
+		var exported: float = _metric(metrics, "transit_dispatched", commodity_id)
 		if (
 			demand <= 0.0001 and produced <= 0.0001 and consumed <= 0.0001
 			and unmet <= 0.0001 and imported <= 0.0001 and exported <= 0.0001
@@ -344,10 +345,9 @@ func _refresh_flow_list() -> void:
 	var metrics: Dictionary = report.get("daily_metrics", {}) as Dictionary
 	var entries: Array[Dictionary] = []
 	for definition: Dictionary in [
-		{"key": "regional_received", "label": "区域调入"},
-		{"key": "regional_sent", "label": "区域调出"},
-		{"key": "international_imports", "label": "国际进口"},
-		{"key": "international_exports", "label": "国际出口"},
+		{"key": "transit_received", "label": "运输到达"},
+		{"key": "transit_dispatched", "label": "运输发出"},
+		{"key": "strategic_release", "label": "战略库存释放"},
 	]:
 		var values: Dictionary = metrics.get(str(definition["key"]), {}) as Dictionary
 		for raw_id: Variant in values:
@@ -360,6 +360,21 @@ func _refresh_flow_list() -> void:
 				],
 				"amount": amount,
 			})
+	for shipment: Dictionary in simulation.economy_integration.shipments:
+		if (
+			str(shipment.get("origin_region_id", "")) == _selected_region_id
+			or str(shipment.get("destination_region_id", "")) == _selected_region_id
+		):
+			entries.append({
+				"label": "在途 · %s → %s · %s %s · 到达%d时" % [
+					str(shipment.get("origin_region_id", "")).get_slice(":", 1),
+					str(shipment.get("destination_region_id", "")).get_slice(":", 1),
+					_commodity_label(str(shipment.get("commodity_id", ""))),
+					_quantity(float(shipment.get("units", 0.0))),
+					int(shipment.get("arrival_hour", 0)),
+				],
+				"amount": float(shipment.get("units", 0.0)),
+			})
 	entries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return float(a.get("amount", 0.0)) > float(b.get("amount", 0.0))
 	)
@@ -371,8 +386,17 @@ func _refresh_flow_list() -> void:
 
 func _refresh_ai_list() -> void:
 	ai_list.clear()
+	var economic_decisions: Array[Dictionary] = simulation.economy_integration.decision_history
+	var economic_start: int = maxi(0, economic_decisions.size() - 6)
+	for index: int in range(economic_decisions.size() - 1, economic_start - 1, -1):
+		var decision: Dictionary = economic_decisions[index]
+		ai_list.add_item("%s · %s · 目标开工%.1f%%" % [
+			str(decision.get("enterprise_id", "")).get_slice(":", 1),
+			str(decision.get("decision_type", "economy")),
+			float(decision.get("operating_target_bp", 0)) / 100.0,
+		])
 	var decisions: Array[Dictionary] = simulation.alpha_ai.decisions
-	var start: int = maxi(0, decisions.size() - 12)
+	var start: int = maxi(0, decisions.size() - 8)
 	for index: int in range(decisions.size() - 1, start - 1, -1):
 		var decision: Dictionary = decisions[index]
 		ai_list.add_item("%s · %s · %s" % [
