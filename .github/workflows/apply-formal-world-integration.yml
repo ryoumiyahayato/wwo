@@ -7,12 +7,14 @@ on:
     paths:
       - ".github/workflows/apply-formal-world-integration.yml"
       - "tools/apply_formal_world_integration.py"
+      - "tools/fix_formal_world_patch_output.py"
   pull_request:
     branches:
       - master
     paths:
       - ".github/workflows/apply-formal-world-integration.yml"
       - "tools/apply_formal_world_integration.py"
+      - "tools/fix_formal_world_patch_output.py"
       - "scripts/formal/**"
       - "scenes/formal/**"
       - "tests/formal/**"
@@ -43,6 +45,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 tools/apply_formal_world_integration.py
+          python3 tools/fix_formal_world_patch_output.py
           git diff --check
           mkdir -p builds/formal-world/patched
           git diff > builds/formal-world/formal-world-integration.patch
@@ -148,6 +151,7 @@ jobs:
         run: |
           set -euo pipefail
           rm -f tools/apply_formal_world_integration.py
+          rm -f tools/fix_formal_world_patch_output.py
           rm -f .github/workflows/apply-formal-world-integration.yml
 
       - name: Commit integrated result
