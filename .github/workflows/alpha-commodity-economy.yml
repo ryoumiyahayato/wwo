@@ -12,14 +12,15 @@ on:
       - "tests/alpha/**"
       - "tools/audit_1900_commodity_economy.py"
       - "tools/audit_1900_economy_integration.py"
-      - "tools/audit_1900_world_economy_estimates.py"
+      - "tools/audit_1900_world_economy_compact.py"
       - "tools/build_1900_world_economy_estimates.py"
+      - "tools/compact_1900_world_economy_estimates.py"
       - "docs/economy/**"
       - ".github/workflows/alpha-commodity-economy.yml"
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: alpha-commodity-economy-${{ github.ref }}
@@ -33,127 +34,14 @@ jobs:
       GODOT_BIN: "${{ github.workspace }}/.ci-godot/Godot_v4.6.3-stable_linux.x86_64"
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: agent/economy-integration-phase2
-          fetch-depth: 0
-      - name: Apply bounded 1900 world data
-        if: github.actor != 'github-actions[bot]'
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 tools/build_1900_world_economy_estimates.py
-          python3 - <<'PY'
-          import json
-          from pathlib import Path
-
-          config = Path('scripts/alpha/alpha_config.gd')
-          text = config.read_text(encoding='utf-8')
-          anchor = '\t"economy_integration": "res://data/alpha/economy_integration_1900.json",\n'
-          additions = (
-              anchor
-              + '\t"historical_world_economy": "res://data/alpha/historical_world_economy_1900.json",\n'
-              + '\t"historical_household_budgets": "res://data/alpha/historical_household_budgets_1900.json",\n'
-              + '\t"historical_transport_network": "res://data/alpha/historical_transport_network_1900.json",\n'
-          )
-          if '"historical_world_economy"' not in text:
-              if anchor not in text:
-                  raise SystemExit('AlphaConfig path anchor missing')
-              text = text.replace(anchor, additions, 1)
-          methods = '''func historical_world_economy() -> Dictionary:
-          \treturn get_document("historical_world_economy")
-
-
-          func historical_household_budgets() -> Dictionary:
-          \treturn get_document("historical_household_budgets")
-
-
-          func historical_transport_network() -> Dictionary:
-          \treturn get_document("historical_transport_network")
-
-
-          '''
-          if 'func historical_world_economy()' not in text:
-              anchor = 'func politics() -> Dictionary:\n'
-              if anchor not in text:
-                  raise SystemExit('AlphaConfig accessor anchor missing')
-              text = text.replace(anchor, methods + anchor, 1)
-          config.write_text(text, encoding='utf-8')
-
-          integration_path = Path('data/alpha/economy_integration_1900.json')
-          integration = json.loads(integration_path.read_text(encoding='utf-8'))
-          integration['scope_notice_zh'] = '统一结算机制继续使用八地区Alpha回归；历史世界数据允许带来源、上下界和置信度的估算进入国家级校准，未达到阈值的记录只能用于全球总量。'
-          integration['historical_world_adapter'] = {
-              'coverage_registry_path': 'res://data/alpha/historical_world_economy_1900.json',
-              'household_budget_path': 'res://data/alpha/historical_household_budgets_1900.json',
-              'transport_network_path': 'res://data/alpha/historical_transport_network_1900.json',
-              'allow_bounded_estimates': True,
-              'minimum_confidence_bp': 4500,
-              'require_numeric_bounds': True,
-              'forbid_unbounded_numeric_defaults': True,
-              'modern_infrastructure_requires_historical_crosswalk': True,
-          }
-          integration_path.write_text(json.dumps(integration, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-
-          audit = Path('tools/audit_1900_economy_integration.py')
-          text = audit.read_text(encoding='utf-8')
-          start = text.index('    adapter = integration.get("historical_world_adapter", {})')
-          end = text.index('\n\n    print(', start)
-          replacement = '''    adapter = integration.get("historical_world_adapter", {})
-          assert adapter.get("allow_bounded_estimates") is True
-          assert adapter.get("require_numeric_bounds") is True
-          assert adapter.get("forbid_unbounded_numeric_defaults") is True
-          assert int(adapter.get("minimum_confidence_bp", 0)) == 4500
-          assert str(adapter.get("coverage_registry_path", "")).endswith(
-              "historical_world_economy_1900.json"
-          )'''
-          audit.write_text(text[:start] + replacement + text[end:], encoding='utf-8')
-
-          report = Path('docs/economy/1900_world_data_methodology.md')
-          report.write_text('''# 1900世界经济数据方法
-
-本数据层覆盖50个可玩政治实体，并以残余汇总项闭合全球人口。国家记录可用于国家级校准；残余汇总仅用于全球总量，不生成虚假的行政区。
-
-## 数据级别
-
-1. 历史锚点：Maddison人口/GDP、COW人口/城市人口/钢铁/能源、CEPII贸易与关税、国家统计及铁路史料。
-2. 插值与边界转换：邻近年份插值，并按1900政治边界组合或拆分序列。
-3. 有界估算：缺失的农业、矿产、铁路、水运及港口能力使用人口、GDP、城市化、资源禀赋和已知枢纽推导，必须保存上下界与置信度。
-
-综合置信度低于45%的国家记录不进入正式结算。现代港口和铁路数据只用于核对位置或定义，不直接替代1900数值。
-
-## 家庭预算
-
-城市工人模板以1901年工人家庭调查为锚；其他阶层按相邻模板中位数和恩格尔规律调整，并允许家庭层面±12%的随机差异。
-
-## 运输图
-
-当前为国家—枢纽级稀疏图，包含主要远洋蒸汽航线、河运走廊和50国铁路/水道总量，用于容量和路径规划，不声称复原每条支线或港区。
-''', encoding='utf-8')
-          PY
-          python3 tools/audit_1900_commodity_economy.py
-          python3 tools/audit_1900_economy_integration.py
-          python3 tools/audit_1900_world_economy_estimates.py
-          git diff --check
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add \
-            data/alpha/historical_world_economy_1900.json \
-            data/alpha/historical_household_budgets_1900.json \
-            data/alpha/historical_transport_network_1900.json \
-            data/alpha/economy_integration_1900.json \
-            scripts/alpha/alpha_config.gd \
-            tools/audit_1900_economy_integration.py \
-            docs/economy/1900_world_data_methodology.md
-          if ! git diff --cached --quiet; then
-            git commit -m "import bounded 1900 world economy calibration"
-            git push origin HEAD:agent/economy-integration-phase2
-          fi
       - name: Download Godot 4.6.3
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p .ci-godot
-          curl --fail --location --retry 3 --retry-delay 2 "https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_linux.x86_64.zip" --output .ci-godot/godot.zip
+          curl --fail --location --retry 3 --retry-delay 2 \
+            "https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_linux.x86_64.zip" \
+            --output .ci-godot/godot.zip
           unzip -q .ci-godot/godot.zip -d .ci-godot
           chmod +x "${GODOT_BIN}"
           "${GODOT_BIN}" --version
@@ -163,26 +51,31 @@ jobs:
           set -euo pipefail
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends xvfb xauth fonts-noto-cjk
-      - name: Audit commodity and integrated economy configuration
+      - name: Audit economy and historical calibration
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p builds/alpha-commodity
           python3 tools/audit_1900_commodity_economy.py 2>&1 | tee builds/alpha-commodity/commodity-static-audit.log
           python3 tools/audit_1900_economy_integration.py 2>&1 | tee builds/alpha-commodity/integration-static-audit.log
-          python3 tools/audit_1900_world_economy_estimates.py 2>&1 | tee builds/alpha-commodity/world-economy-static-audit.log
+          python3 tools/audit_1900_world_economy_compact.py 2>&1 | tee builds/alpha-commodity/world-economy-static-audit.log
           python3 -m json.tool data/alpha/commodity_market_1900.json >/dev/null
           python3 -m json.tool data/alpha/economy_integration_1900.json >/dev/null
           python3 -m json.tool data/alpha/historical_world_economy_1900.json >/dev/null
+          python3 -m json.tool data/alpha/historical_world_economy_1900/countries_compact.json >/dev/null
           python3 -m json.tool data/alpha/historical_household_budgets_1900.json >/dev/null
           python3 -m json.tool data/alpha/historical_transport_network_1900.json >/dev/null
+          python3 -m json.tool data/alpha/historical_transport_network_1900/transport_compact.json >/dev/null
       - name: Import project and scan scripts
         shell: bash
         run: |
           set -euo pipefail
           "${GODOT_BIN}" --headless --audio-driver Dummy --path . --editor --quit-after 4 --log-file alpha-commodity-import.log
-          if grep -Eq "SCRIPT ERROR|Parse Error|Failed to load script|^ERROR:" alpha-commodity-import.log; then cat alpha-commodity-import.log; exit 1; fi
-      - name: Run economy and save regressions
+          if grep -Eq "SCRIPT ERROR|Parse Error|Failed to load script|^ERROR:" alpha-commodity-import.log; then
+            cat alpha-commodity-import.log
+            exit 1
+          fi
+      - name: Run economy, historical data and save regressions
         shell: bash
         run: |
           set -euo pipefail
@@ -196,14 +89,18 @@ jobs:
             tests/alpha/alpha_economy_ui_audit_test.gd
             tests/alpha/alpha_economy_integration_phase2_test.gd
             tests/alpha/alpha_ai_economy_stability_test.gd
+            tests/alpha/alpha_historical_world_economy_data_test.gd
           )
           for test_script in "${tests[@]}"; do
             name="$(basename "${test_script}" .gd)"
             log="builds/alpha-commodity/${name}.log"
             timeout --signal=TERM 300s "${GODOT_BIN}" --headless --audio-driver Dummy --path . --script "res://${test_script}" --log-file "${log}"
-            if grep -Eq "SCRIPT ERROR|Parse Error|Failed to load script|Assertion failed|[1-9][0-9]* failures|^ERROR:" "${log}"; then cat "${log}"; exit 1; fi
+            if grep -Eq "SCRIPT ERROR|Parse Error|Failed to load script|Assertion failed|[1-9][0-9]* failures|^ERROR:" "${log}"; then
+              cat "${log}"
+              exit 1
+            fi
           done
-      - name: Capture integrated economy interface
+      - name: Capture economy interface
         shell: bash
         run: |
           set -euo pipefail
@@ -216,10 +113,10 @@ jobs:
             -- --economy-audit-capture="${capture_path}"
           test -s "${capture_path}"
           file "${capture_path}" | tee builds/alpha-commodity/economy-capture-file.log
-      - name: Upload integrated economy screenshot
+      - name: Upload economy screenshot
         uses: actions/upload-artifact@v4
         with:
-          name: alpha-1900-economy-integration-ui-screenshot
+          name: alpha-1900-economy-ui-screenshot
           path: builds/alpha-commodity/screenshots/economy-dashboard.png
           if-no-files-found: error
           retention-days: 14
@@ -227,7 +124,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: alpha-1900-economy-integration-logs
+          name: alpha-1900-commodity-economy-logs
           path: |
             alpha-commodity-import.log
             builds/alpha-commodity/*.log
