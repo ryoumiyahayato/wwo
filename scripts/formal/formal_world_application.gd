@@ -132,7 +132,7 @@ func _draw_formal_economy_panel() -> void:
 	_draw_button(Rect2(rect.position.x + 110.0, button_y, 84.0, 26.0), "读取 F9", "formal_load", true)
 	_draw_button(Rect2(rect.end.x - 88.0, button_y, 70.0, 26.0), "关闭", "formal_economy_toggle", true)
 	if not _formal_status.is_empty():
-		_draw_label(rect.position + Vector2(20.0, rect.size.y - 51.0), _formal_status, 8, Color(0.72, 0.78, 0.72, 0.92), rect.size.x - 40.0)
+		_draw_label(rect.position + Vector2(20.0, rect.size.y - 51.0), _formal_status, 8, Color(0.72, 0.78, 0.72, 0.92))
 
 
 func _activate_button(action: String) -> void:
