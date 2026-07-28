@@ -5,6 +5,7 @@ extends Control
 const LIFE_LOOP_SCENE: String = "res://scenes/v2_3/v2_3_life_loop_main.tscn"
 const LAUNCH_MODE_META: StringName = &"v2_3_launch_mode"
 const DISPLAY_VERSION: String = "V0.001"
+const ECONOMY_AUDIT_SCENE: String = "res://scenes/alpha/alpha_economy_dashboard_preview.tscn"
 
 @onready var title_label: Label = %TitleLabel
 @onready var version_label: Label = %VersionLabel
@@ -100,9 +101,37 @@ func _wire_legacy_buttons() -> void:
 		var button := find_child(node_name, true, false) as Button
 		if button != null:
 			button.pressed.connect(_open.bind(str(actions[node_name])))
+	_add_economy_audit_button()
 	var quit_button := find_child("QuitButton", true, false) as Button
 	if quit_button != null:
 		quit_button.pressed.connect(get_tree().quit)
+
+
+func _add_economy_audit_button() -> void:
+	var content := get_node_or_null("Center/Card/Margin/Content") as VBoxContainer
+	if content == null or content.has_node("EconomyAuditButton"):
+		return
+	var button := Button.new()
+	button.name = "EconomyAuditButton"
+	button.text = "经济系统审计预览"
+	button.custom_minimum_size = Vector2(0, 42)
+	button.tooltip_text = "打开商品、库存、生产、调拨、国际贸易和AI决策审计页面"
+	button.pressed.connect(_open_economy_audit)
+	var quit_button := find_child("QuitButton", true, false) as Button
+	var index: int = content.get_child_count() if quit_button == null else quit_button.get_index()
+	content.add_child(button)
+	content.move_child(button, index)
+
+
+func _open_economy_audit() -> void:
+	if _entering:
+		return
+	_entering = true
+	var error: Error = get_tree().change_scene_to_file(ECONOMY_AUDIT_SCENE)
+	if error == OK:
+		return
+	_entering = false
+	status_label.text = "无法打开经济系统审计：%s" % error_string(error)
 
 
 func _refresh_state() -> void:
