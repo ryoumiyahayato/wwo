@@ -1,7 +1,7 @@
 extends SceneTree
 ## Compatibility-named hierarchy performance guard. The retired flat map and
 ## municipality-shard renderer are gone; this validates the formal hemisphere,
-## historical first-level administration and bounded local-detail presentation.
+## verified historical administration and bounded local-detail presentation.
 
 const MAX_ADMIN_PAGE_SIZE: int = 24
 const MAX_READY_USEC: int = 3_000_000
@@ -78,28 +78,31 @@ func _check_formal_map(
 
 func _check_historical_admin(view: FormalWorldApplication) -> void:
 	var coverage := view.historical_admin_coverage_report()
+	var detailed_count := int(coverage.get("detailed_country_count", 0))
 	test.expect(
 		int(coverage.get("profile_count", 0)) >= 50,
 		"主要政权配置覆盖当前高细节目录"
 	)
-	test.expect(
-		int(coverage.get("detailed_country_count", 0)) >= 30,
-		"核心可玩政权具有历史一级行政目录"
+	test.equal(
+		detailed_count,
+		view._historical_admin_by_entity.size(),
+		"覆盖报告与已加载历史一级行政目录一致"
 	)
+	test.expect(detailed_count >= 15, "已验证的历史一级行政目录全部可用")
 	test.expect(
 		bool(coverage.get("modern_admin_names_forbidden", false)),
 		"缺失历史边界时禁止回退成现代行政区"
 	)
-	var france := view._historical_admin_by_entity.get(
-		"country_fra", {}
+	var germany := view._historical_admin_by_entity.get(
+		"german_empire", {}
 	) as Dictionary
-	var units := france.get("runtime_units", []) as Array
-	test.expect(not units.is_empty(), "法国区域层读取历史一级行政目录")
+	var units := germany.get("runtime_units", []) as Array
+	test.expect(not units.is_empty(), "德意志帝国区域层读取历史一级行政目录")
 	var page_count := maxi(
 		1,
 		int(ceil(float(units.size()) / float(MAX_ADMIN_PAGE_SIZE)))
 	)
-	test.expect(page_count >= 1, "区域目录采用有界分页")
+	test.expect(page_count >= 2, "大型区域目录采用有界分页")
 	test.expect(
 		mini(units.size(), MAX_ADMIN_PAGE_SIZE) <= MAX_ADMIN_PAGE_SIZE,
 		"单页一级行政按钮不超过24个"
@@ -119,7 +122,7 @@ func _check_local_detail_budget(view: FormalWorldApplication) -> void:
 	)
 	test.expect(
 		view._historical_admin_by_entity.size() <= 64,
-		"历史区域目录只覆盖可操作政权而非全世界盲目展开"
+		"历史区域目录只覆盖有证据政权而非全世界盲目展开"
 	)
 	test.expect(
 		view._history_entity_by_id.size() == 151,
