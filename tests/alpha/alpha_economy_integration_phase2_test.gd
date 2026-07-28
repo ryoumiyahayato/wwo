@@ -150,8 +150,13 @@ func _run() -> void:
 
 	for _day: int in range(90):
 		simulation.advance_hours(24)
+	var final_integrity := simulation.validate_alpha_integrity()
+	print("PHASE2_FINAL_INTEGRITY=", final_integrity)
+	print("PHASE2_MAXIMUM_HOUR_USEC=", simulation.alpha_maximum_hour_usec)
+	print("PHASE2_ACTIVE_SHIPMENTS=", integration.shipments.size())
+	print("PHASE2_SHIPMENT_HISTORY=", integration.shipment_history.size())
 	test.expect(
-		bool(simulation.validate_alpha_integrity().get("success", false)),
+		bool(final_integrity.get("success", false)),
 		"九十日统一结算后无负库存、失衡账本或无效运输"
 	)
 	test.expect(

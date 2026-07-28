@@ -806,10 +806,10 @@ func _site_output_shortage_bp(site: Dictionary) -> int:
 	var recipe := _commodity_market.recipes.get(str(site.get("recipe_id", "")), {}) as Dictionary
 	var region_id := str(site.get("region_id", ""))
 	var maximum := 0
+	var region_state := _commodity_market.region_states.get(region_id, {}) as Dictionary
+	var metrics := region_state.get("daily_metrics", {}) as Dictionary
 	for output: Dictionary in DataRecordUtils.to_dictionary_array(recipe.get("outputs", [])):
 		var commodity_id := str(output.get("commodity_id", ""))
-		var report := _commodity_market.region_report(region_id)
-		var metrics := report.get("daily_metrics", {}) as Dictionary
 		var demand := float((metrics.get("demand", {}) as Dictionary).get(commodity_id, 0.0))
 		var unmet := float((metrics.get("unmet", {}) as Dictionary).get(commodity_id, 0.0))
 		if demand > 0.0:
@@ -1267,8 +1267,8 @@ func _largest_shortage_region(country_id: String, commodity_id: String) -> Strin
 
 
 func _metric_value(region_id: String, metric_name: String, commodity_id: String) -> float:
-	var report := _commodity_market.region_report(region_id)
-	var metrics := report.get("daily_metrics", {}) as Dictionary
+	var state := _commodity_market.region_states.get(region_id, {}) as Dictionary
+	var metrics := state.get("daily_metrics", {}) as Dictionary
 	return float((metrics.get(metric_name, {}) as Dictionary).get(commodity_id, 0.0))
 
 
