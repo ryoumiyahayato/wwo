@@ -5,11 +5,19 @@ var checks := 0
 
 
 func _initialize() -> void:
+	_run.call_deferred()
+
+
+func _run() -> void:
 	var historical := AlphaHistoricalWorldEconomyData.new()
 	_check(historical.configure(), "历史经济数据可加载：%s" % historical.initialization_error)
 	if failures == 0:
 		_check(historical.simulation_countries().size() == 50, "50个历史政治实体进入有界模拟目录")
 		_check(historical.formal_countries().size() <= historical.simulation_countries().size(), "严格验证目录不宽于有界目录")
+		for record: Dictionary in historical.formal_countries():
+			var coverage := record.get("coverage", {}) as Dictionary
+			_check(str(coverage.get("status", "")) == "verified", "正式准入国家必须通过覆盖登记表")
+
 	var economy := FormalWorldEconomyService.new()
 	_check(economy.configure(), "正式世界经济可初始化：%s" % economy.initialization_error)
 	if failures == 0:
@@ -26,6 +34,7 @@ func _initialize() -> void:
 		_check(restored.configure(), "恢复目标可初始化")
 		_check(restored.restore_persistent_state(saved), "正式经济存档可恢复")
 		_check(restored.world_summary() == economy.world_summary(), "正式经济恢复后摘要等价")
+
 	var simulation := FormalWorldSimulation.new()
 	_check(simulation.initialize(), "正式世界组合根可初始化：%s" % simulation.initialization_error)
 	if failures == 0:
@@ -35,12 +44,42 @@ func _initialize() -> void:
 		_check(restored_simulation.initialize(), "恢复组合根可初始化")
 		_check(restored_simulation.restore_persistent_state(state), "正式世界组合根可恢复")
 		_check(restored_simulation.world_summary() == simulation.world_summary(), "组合根恢复后经济摘要等价")
+
+	_check(
+		V23LifeLoopMenu.LIFE_LOOP_SCENE == "res://scenes/formal/formal_world_main.tscn",
+		"标题页正式入口不再指向V23产品模拟"
+	)
 	var scene := load("res://scenes/formal/formal_world_main.tscn") as PackedScene
 	_check(scene != null, "正式半球场景可加载")
 	if scene != null:
 		var instance := scene.instantiate()
 		_check(instance is FormalWorldApplication, "正式场景使用FormalWorldApplication而非V23产品模拟")
-		instance.free()
+		get_root().add_child(instance)
+		await process_frame
+		await process_frame
+		var application := instance as FormalWorldApplication
+		_check(application.formal_simulation.initialized, "正式半球执行ready后初始化统一正式世界")
+		_check(
+			int(application.formal_simulation.world_summary().get("country_count", 0)) == 50,
+			"正式半球运行时直接持有50国经济"
+		)
+		_check(
+			application.get_node_or_null("HemisphereViewportContainer/HemisphereViewport/Hemisphere3D") != null,
+			"正式运行场景包含真实三维半球"
+		)
+		var before_hour := application.formal_simulation.economy.total_hour
+		for _tick: int in range(4):
+			application._on_clock_timer_timeout()
+		_check(
+			application.formal_simulation.economy.total_hour >= before_hour + 1,
+			"半球时钟与正式经济使用同一推进源"
+		)
+		application.economy_panel_open = false
+		application._activate_button("formal_economy_toggle")
+		_check(application.economy_panel_open, "正式半球经济面板可由正式交互打开")
+		application.queue_free()
+		await process_frame
+
 	print("Formal world integration: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures > 0 else 0)
 
