@@ -102,8 +102,37 @@ func _observer_note_for(target_entity_id: String) -> String:
 	return str(by_target.get(target_entity_id, ""))
 
 
+func _default_historical_territory_iso(entity_id: String) -> String:
+	var territories := _history_territories_by_entity.get(entity_id, []) as Array
+	if territories.is_empty():
+		return ""
+	var preferred_isos: Array[String] = []
+	var state_profile := _major_state_profile_by_entity.get(entity_id, {}) as Dictionary
+	for alias_value: Variant in (state_profile.get("aliases", []) as Array):
+		var alias := str(alias_value).to_upper()
+		if not alias.is_empty() and alias not in preferred_isos:
+			preferred_isos.append(alias)
+	var historical_entity := _history_entity_by_id.get(entity_id, {}) as Dictionary
+	for core_value: Variant in (historical_entity.get("core_members", []) as Array):
+		var core_iso := str(core_value).to_upper()
+		if not core_iso.is_empty() and core_iso not in preferred_isos:
+			preferred_isos.append(core_iso)
+	for preferred_iso: String in preferred_isos:
+		for territory_value: Variant in territories:
+			var territory := territory_value as Dictionary
+			if str(territory.get("iso_a3", "")).to_upper() == preferred_iso:
+				return preferred_iso
+	if territories.size() == 1 or _is_home_historical_entity(entity_id):
+		return str((territories[0] as Dictionary).get("iso_a3", "")).to_upper()
+	return ""
+
+
 func _enter_region() -> void:
 	if world_mode == WORLD_HISTORICAL_ENTITY_FOCUS and _historical_admin_by_entity.has(selected_country_id):
+		if selected_historical_territory_iso.is_empty():
+			selected_historical_territory_iso = _default_historical_territory_iso(
+				selected_country_id
+			)
 		space_level = REGION
 		selected_admin_unit_id = ""
 		admin_page_index = 0
