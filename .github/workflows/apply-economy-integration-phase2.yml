@@ -18,14 +18,14 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: agent/economy-integration-phase2
-      - name: Wire player-visible integrated economy dashboard
+      - name: Add permanent integration audits and regressions
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
 
-          path = Path("scripts/alpha/alpha_economy_dashboard_preview.gd")
+          path = Path(".github/workflows/alpha-commodity-economy.yml")
           text = path.read_text(encoding="utf-8")
 
           def apply(old, new, label):
@@ -39,50 +39,25 @@ jobs:
               print(f"applied: {label}")
 
           apply(
-              '{"id": "imports", "title": "今日国际进口"},\n\t\t{"id": "exports", "title": "今日国际出口"},',
-              '{"id": "imports", "title": "今日新建运输"},\n\t\t{"id": "exports", "title": "当前在途批次"},',
-              "summary labels",
+              '    branches:\n      - agent/historical-admin-top50-generalize',
+              '    branches:\n      - master',
+              "workflow base",
           )
           apply(
-              '\tvar summary: Dictionary = simulation.commodity_market.world_summary()\n\tdate_label.text',
-              '\tvar summary: Dictionary = simulation.commodity_market.world_summary()\n\tvar integrated: Dictionary = simulation.economy_integration.integration_summary()\n\tdate_label.text',
-              "integration summary",
+              '          python3 tools/audit_1900_commodity_economy.py\n          python3 -m json.tool data/alpha/commodity_market_1900.json >/dev/null',
+              '          python3 tools/audit_1900_commodity_economy.py\n          python3 tools/audit_1900_economy_integration.py\n          python3 -m json.tool data/alpha/commodity_market_1900.json >/dev/null\n          python3 -m json.tool data/alpha/economy_integration_1900.json >/dev/null\n          python3 -m json.tool data/alpha/historical_economy_coverage_1900.json >/dev/null',
+              "integration audits",
           )
           apply(
-              '\t(summary_labels["imports"] as Label).text = _quantity(float(summary.get("international_import_units", 0.0)))\n\t(summary_labels["exports"] as Label).text = _quantity(float(summary.get("international_export_units", 0.0)))',
-              '\t(summary_labels["imports"] as Label).text = _quantity(float(integrated.get("shipment_units", 0.0)))\n\t(summary_labels["exports"] as Label).text = str(int(integrated.get("active_shipments", 0)))',
-              "integration values",
-          )
-          apply(
-              '\t\t"运行正常：%d种商品、%d个生产设施、%d个地区；"\n\t\t+ "当前页面为可操作审计预览，正式世界经济接入仍待完成。"',
-              '\t\t"运行正常：%d种商品、%d个生产设施、%d个地区；"\n\t\t+ "商品、现金、企业、劳动和稀疏物流统一结算已启用；正式历史世界仍受史料覆盖门控。"',
-              "status wording",
-          )
-          apply(
-              '\t\tvar imported: float = _metric(metrics, "international_imports", commodity_id)\n\t\tvar exported: float = _metric(metrics, "international_exports", commodity_id)',
-              '\t\tvar imported: float = _metric(metrics, "transit_received", commodity_id)\n\t\tvar exported: float = _metric(metrics, "transit_dispatched", commodity_id)',
-              "transport columns",
-          )
-          apply(
-              '\tfor definition: Dictionary in [\n\t\t{"key": "regional_received", "label": "区域调入"},\n\t\t{"key": "regional_sent", "label": "区域调出"},\n\t\t{"key": "international_imports", "label": "国际进口"},\n\t\t{"key": "international_exports", "label": "国际出口"},\n\t]:',
-              '\tfor definition: Dictionary in [\n\t\t{"key": "transit_received", "label": "运输到达"},\n\t\t{"key": "transit_dispatched", "label": "运输发出"},\n\t\t{"key": "strategic_release", "label": "战略库存释放"},\n\t]:',
-              "flow definitions",
-          )
-          apply(
-              '\tentries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:\n\t\treturn float(a.get("amount", 0.0)) > float(b.get("amount", 0.0))\n\t)\n\tfor index: int in range(mini(14, entries.size())):',
-              '\tfor shipment: Dictionary in simulation.economy_integration.shipments:\n\t\tif (\n\t\t\tstr(shipment.get("origin_region_id", "")) == _selected_region_id\n\t\t\tor str(shipment.get("destination_region_id", "")) == _selected_region_id\n\t\t):\n\t\t\tentries.append({\n\t\t\t\t"label": "在途 · %s → %s · %s %s · 到达%d时" % [\n\t\t\t\t\tstr(shipment.get("origin_region_id", "")).get_slice(":", 1),\n\t\t\t\t\tstr(shipment.get("destination_region_id", "")).get_slice(":", 1),\n\t\t\t\t\t_commodity_label(str(shipment.get("commodity_id", ""))),\n\t\t\t\t\t_quantity(float(shipment.get("units", 0.0))),\n\t\t\t\t\tint(shipment.get("arrival_hour", 0)),\n\t\t\t\t],\n\t\t\t\t"amount": float(shipment.get("units", 0.0)),\n\t\t\t})\n\tentries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:\n\t\treturn float(a.get("amount", 0.0)) > float(b.get("amount", 0.0))\n\t)\n\tfor index: int in range(mini(14, entries.size())):',
-              "active shipments",
-          )
-          apply(
-              '\tvar decisions: Array[Dictionary] = simulation.alpha_ai.decisions\n\tvar start: int = maxi(0, decisions.size() - 12)',
-              '\tvar economic_decisions: Array[Dictionary] = simulation.economy_integration.decision_history\n\tvar economic_start: int = maxi(0, economic_decisions.size() - 6)\n\tfor index: int in range(economic_decisions.size() - 1, economic_start - 1, -1):\n\t\tvar decision: Dictionary = economic_decisions[index]\n\t\tai_list.add_item("%s · %s · 目标开工%.1f%%" % [\n\t\t\tstr(decision.get("enterprise_id", "")).get_slice(":", 1),\n\t\t\tstr(decision.get("decision_type", "economy")),\n\t\t\tfloat(decision.get("operating_target_bp", 0)) / 100.0,\n\t\t])\n\tvar decisions: Array[Dictionary] = simulation.alpha_ai.decisions\n\tvar start: int = maxi(0, decisions.size() - 8)',
-              "enterprise decisions",
+              '            tests/alpha/alpha_economy_ui_audit_test.gd\n            tests/alpha/alpha_ai_economy_stability_test.gd',
+              '            tests/alpha/alpha_economy_ui_audit_test.gd\n            tests/alpha/alpha_economy_integration_phase2_test.gd\n            tests/alpha/alpha_ai_economy_stability_test.gd',
+              "integration regression",
           )
           path.write_text(text, encoding="utf-8")
           PY
           git diff --check
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add scripts/alpha/alpha_economy_dashboard_preview.gd
-          git commit -m "show integrated shipments and enterprise decisions"
+          git add .github/workflows/alpha-commodity-economy.yml
+          git commit -m "validate unified economy settlement in permanent CI"
           git push origin HEAD:agent/economy-integration-phase2
