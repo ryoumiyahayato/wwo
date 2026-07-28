@@ -67,12 +67,14 @@ func _run() -> void:
 			application.get_node_or_null("HemisphereViewportContainer/HemisphereViewport/Hemisphere3D") != null,
 			"正式运行场景包含真实三维半球"
 		)
+		application.sim_paused = false
+		application.sim_speed = 1
 		var before_hour := application.formal_simulation.economy.total_hour
 		for _tick: int in range(4):
 			application._on_clock_timer_timeout()
 		_check(
 			application.formal_simulation.economy.total_hour >= before_hour + 1,
-			"半球时钟与正式经济使用同一推进源"
+			"解除暂停后半球时钟与正式经济使用同一推进源"
 		)
 		application.economy_panel_open = false
 		application._activate_button("formal_economy_toggle")
