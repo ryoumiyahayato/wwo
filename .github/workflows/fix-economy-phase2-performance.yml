@@ -1,0 +1,104 @@
+name: Fix economy phase two performance
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/fix-economy-phase2-performance.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/economy-integration-phase2
+      - name: Remove deep report copies and expose failure diagnostics
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          service = Path("scripts/alpha/alpha_economy_integration_service.gd")
+          text = service.read_text(encoding="utf-8")
+          old = '''\tfor output: Dictionary in DataRecordUtils.to_dictionary_array(recipe.get("outputs", [])):
+          \t\tvar commodity_id := str(output.get("commodity_id", ""))
+          \t\tvar report := _commodity_market.region_report(region_id)
+          \t\tvar metrics := report.get("daily_metrics", {}) as Dictionary
+          \t\tvar demand := float((metrics.get("demand", {}) as Dictionary).get(commodity_id, 0.0))
+          \t\tvar unmet := float((metrics.get("unmet", {}) as Dictionary).get(commodity_id, 0.0))
+          '''
+          new = '''\tvar region_state := _commodity_market.region_states.get(region_id, {}) as Dictionary
+          \tvar metrics := region_state.get("daily_metrics", {}) as Dictionary
+          \tfor output: Dictionary in DataRecordUtils.to_dictionary_array(recipe.get("outputs", [])):
+          \t\tvar commodity_id := str(output.get("commodity_id", ""))
+          \t\tvar demand := float((metrics.get("demand", {}) as Dictionary).get(commodity_id, 0.0))
+          \t\tvar unmet := float((metrics.get("unmet", {}) as Dictionary).get(commodity_id, 0.0))
+          '''
+          if new not in text:
+              if old not in text:
+                  raise SystemExit("site shortage deep-copy anchor missing")
+              text = text.replace(old, new, 1)
+          old = '''func _metric_value(region_id: String, metric_name: String, commodity_id: String) -> float:
+          \tvar report := _commodity_market.region_report(region_id)
+          \tvar metrics := report.get("daily_metrics", {}) as Dictionary
+          \treturn float((metrics.get(metric_name, {}) as Dictionary).get(commodity_id, 0.0))
+          '''
+          new = '''func _metric_value(region_id: String, metric_name: String, commodity_id: String) -> float:
+          \tvar state := _commodity_market.region_states.get(region_id, {}) as Dictionary
+          \tvar metrics := state.get("daily_metrics", {}) as Dictionary
+          \treturn float((metrics.get(metric_name, {}) as Dictionary).get(commodity_id, 0.0))
+          '''
+          if new not in text:
+              if old not in text:
+                  raise SystemExit("metric deep-copy anchor missing")
+              text = text.replace(old, new, 1)
+          service.write_text(text, encoding="utf-8")
+
+          test = Path("tests/alpha/alpha_economy_integration_phase2_test.gd")
+          text = test.read_text(encoding="utf-8")
+          old = '''\tfor _day: int in range(90):
+          \t\tsimulation.advance_hours(24)
+          \ttest.expect(
+          \t\tbool(simulation.validate_alpha_integrity().get("success", false)),
+          \t\t"九十日统一结算后无负库存、失衡账本或无效运输"
+          \t)
+          \ttest.expect(
+          \t\tsimulation.alpha_maximum_hour_usec < 1_000_000,
+          \t\t"稀疏运输图下最慢单小时低于一秒"
+          \t)
+          '''
+          new = '''\tfor _day: int in range(90):
+          \t\tsimulation.advance_hours(24)
+          \tvar final_integrity := simulation.validate_alpha_integrity()
+          \tprint("PHASE2_FINAL_INTEGRITY=", final_integrity)
+          \tprint("PHASE2_MAXIMUM_HOUR_USEC=", simulation.alpha_maximum_hour_usec)
+          \tprint("PHASE2_ACTIVE_SHIPMENTS=", integration.shipments.size())
+          \tprint("PHASE2_SHIPMENT_HISTORY=", integration.shipment_history.size())
+          \ttest.expect(
+          \t\tbool(final_integrity.get("success", false)),
+          \t\t"九十日统一结算后无负库存、失衡账本或无效运输"
+          \t)
+          \ttest.expect(
+          \t\tsimulation.alpha_maximum_hour_usec < 1_000_000,
+          \t\t"稀疏运输图下最慢单小时低于一秒"
+          \t)
+          '''
+          if new not in text:
+              if old not in text:
+                  raise SystemExit("phase two diagnostics anchor missing")
+              text = text.replace(old, new, 1)
+          test.write_text(text, encoding="utf-8")
+          PY
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/alpha/alpha_economy_integration_service.gd tests/alpha/alpha_economy_integration_phase2_test.gd
+          git commit -m "optimize phase two metric reads and expose diagnostics"
+          git push origin HEAD:agent/economy-integration-phase2
