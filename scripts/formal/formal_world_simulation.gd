@@ -1,12 +1,12 @@
 class_name FormalWorldSimulation
 extends RefCounted
-## Formal product composition root. It owns the historical country economy and
-## replaces the old V2.3 product simulation as the scene entry authority.
+## Formal product composition root. It owns the 151-unit historical political
+## world and the separate 50-polity high-detail economy roster.
 
 signal state_changed(change: Dictionary)
 
 const SAVE_PATH: String = "user://formal_world_1900.json"
-const SCHEMA_ID: String = "formal_world_simulation_v1"
+const SCHEMA_ID: String = "formal_world_simulation_v2"
 
 var economy := FormalWorldEconomyService.new()
 var initialized: bool = false
@@ -50,6 +50,10 @@ func country_summary(entity_id: String) -> Dictionary:
 	return economy.country_summary(entity_id)
 
 
+func polity_summary(entity_id: String) -> Dictionary:
+	return economy.polity_summary(entity_id)
+
+
 func date_time() -> Dictionary:
 	var value := V2DateTime.from_total_hour(economy.total_hour)
 	value["minute"] = _minute_remainder
@@ -66,8 +70,9 @@ func get_persistent_state() -> Dictionary:
 
 
 func restore_persistent_state(state: Dictionary) -> bool:
+	var schema_id := str(state.get("schema_id", ""))
 	if (
-		str(state.get("schema_id", "")) != SCHEMA_ID
+		schema_id not in ["formal_world_simulation_v1", SCHEMA_ID]
 		or not state.get("economy", {}) is Dictionary
 	):
 		return false
