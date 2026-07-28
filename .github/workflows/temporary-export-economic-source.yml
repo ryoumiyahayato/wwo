@@ -51,10 +51,12 @@ jobs:
             > /tmp/economy-patch.tar.gz.b64
           base64 --decode /tmp/economy-patch.tar.gz.b64 > /tmp/economy-patch.tar.gz
           gzip -t /tmp/economy-patch.tar.gz
-          tar -tzf /tmp/economy-patch.tar.gz | tee economy-patch-manifest.txt
+          tar -tzf /tmp/economy-patch.tar.gz | tee /tmp/economy-patch-manifest.txt
           tar -xzf /tmp/economy-patch.tar.gz -C .
+          cp .github/workflows/alpha-commodity-economy.yml /tmp/alpha-commodity-economy.yml
+          rm -f .github/workflows/alpha-commodity-economy.yml
           rm -rf .github/economy_patch .github/economy_payload
-          rm -f .github/workflows/temporary-export-economic-source.yml
+          rm -f .github/workflows/temporary-export-economic-source.yml economy-patch-manifest.txt
           python3 tools/audit_1900_commodity_economy.py
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -68,6 +70,7 @@ jobs:
           name: economy-patch-application-log
           path: |
             apply-economy.log
-            economy-patch-manifest.txt
+            /tmp/economy-patch-manifest.txt
+            /tmp/alpha-commodity-economy.yml
           if-no-files-found: warn
           retention-days: 1
