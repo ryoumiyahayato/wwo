@@ -7,14 +7,18 @@ on:
     paths:
       - "data/alpha/**"
       - "scripts/alpha/**"
+      - "scripts/formal/**"
       - "scripts/v2_3/v2_3_life_loop_menu.gd"
       - "scenes/alpha/**"
+      - "scenes/formal/**"
       - "tests/alpha/**"
+      - "tests/formal/**"
       - "tools/audit_1900_commodity_economy.py"
       - "tools/audit_1900_economy_integration.py"
       - "tools/audit_1900_world_economy_compact.py"
       - "tools/build_1900_world_economy_estimates.py"
       - "tools/compact_1900_world_economy_estimates.py"
+      - "tools/run_validation.ps1"
       - "docs/economy/**"
       - ".github/workflows/alpha-commodity-economy.yml"
   workflow_dispatch:
@@ -29,7 +33,7 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 40
     env:
       GODOT_BIN: "${{ github.workspace }}/.ci-godot/Godot_v4.6.3-stable_linux.x86_64"
     steps:
@@ -71,11 +75,11 @@ jobs:
         run: |
           set -euo pipefail
           "${GODOT_BIN}" --headless --audio-driver Dummy --path . --editor --quit-after 4 --log-file alpha-commodity-import.log
-          if grep -Eq "SCRIPT ERROR|Parse Error|Failed to load script|^ERROR:" alpha-commodity-import.log; then
+          if grep -Eq "SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|^ERROR:" alpha-commodity-import.log; then
             cat alpha-commodity-import.log
             exit 1
           fi
-      - name: Run economy, historical data and save regressions
+      - name: Run economy, historical data, formal world and save regressions
         shell: bash
         run: |
           set -euo pipefail
@@ -90,12 +94,13 @@ jobs:
             tests/alpha/alpha_economy_integration_phase2_test.gd
             tests/alpha/alpha_ai_economy_stability_test.gd
             tests/alpha/alpha_historical_world_economy_data_test.gd
+            tests/formal/formal_world_integration_test.gd
           )
           for test_script in "${tests[@]}"; do
             name="$(basename "${test_script}" .gd)"
             log="builds/alpha-commodity/${name}.log"
-            timeout --signal=TERM 300s "${GODOT_BIN}" --headless --audio-driver Dummy --path . --script "res://${test_script}" --log-file "${log}"
-            if grep -Eq "SCRIPT ERROR|Parse Error|Failed to load script|Assertion failed|[1-9][0-9]* failures|^ERROR:" "${log}"; then
+            timeout --signal=TERM 360s "${GODOT_BIN}" --headless --audio-driver Dummy --path . --script "res://${test_script}" --log-file "${log}"
+            if grep -Eq "SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|Assertion failed|[1-9][0-9]* failures|^ERROR:" "${log}"; then
               cat "${log}"
               exit 1
             fi
