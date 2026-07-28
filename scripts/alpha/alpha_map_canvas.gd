@@ -32,7 +32,7 @@ const MODE_LABELS: Dictionary = {
 var simulation: AlphaSimulationService
 var map_mode: String = "administration"
 var selected_object_id: String = ""
-var selected_good_id: String = "grain"
+var selected_good_id: String = "bread"
 var _map_rect := Rect2()
 var _cell_size := Vector2.ZERO
 
@@ -218,7 +218,7 @@ func _cell_color(cell: Dictionary) -> Color:
 			return _gradient(wage, 70.0, 125.0, Color("#5c3d45"), Color("#3f806d"))
 		"goods_prices":
 			var price: float = float(
-				simulation.economy.market_price(region_id, selected_good_id)
+				simulation.commodity_market.market_price(region_id, selected_good_id)
 			)
 			return _gradient(price, 70.0, 450.0, Color("#3a765b"), Color("#8a584e"))
 		"enterprises_industries":

@@ -108,6 +108,11 @@ func validate_snapshot(snapshot: Dictionary) -> Array[String]:
 	]:
 		if not snapshot.get(field) is Dictionary:
 			errors.append("Alpha 字段 %s 必须是对象" % field)
+	if (
+		snapshot.has("alpha_commodity_market_state")
+		and not snapshot["alpha_commodity_market_state"] is Dictionary
+	):
+		errors.append("Alpha 字段 alpha_commodity_market_state 必须是对象")
 	for field: String in [
 		"alpha_organization_state",
 		"alpha_events",

@@ -182,7 +182,19 @@ func _run_probe() -> void:
 	workspace.set("selected_country_id", "russian_empire")
 	workspace.call("_focus_selected_country")
 	var russian_territories: Array = (workspace.get("_history_territories_by_entity") as Dictionary).get("russian_empire", []) as Array
-	if not _require(russian_territories.size() >= 10, "俄罗斯帝国没有保留多辖区结构"):
+	if not _require(
+		russian_territories.size() == 1
+		and str((russian_territories[0] as Dictionary).get("iso_a3", "")) == "RUS",
+		"俄罗斯帝国本土没有保持为CShapes历史政治核心"
+	):
+		return
+	var dated_units: Array = (workspace.get("_dated_units_document") as Dictionary).get("units", []) as Array
+	var russian_protected_units := 0
+	for unit_value: Variant in dated_units:
+		var unit := unit_value as Dictionary
+		if str(unit.get("controller_id", "")) == "russian_empire":
+			russian_protected_units += 1
+	if not _require(russian_protected_units >= 2, "俄罗斯保护国没有作为独立历史政治单元保留"):
 		return
 	workspace.call("_return_to_global_world")
 
