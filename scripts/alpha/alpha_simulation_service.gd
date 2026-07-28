@@ -27,6 +27,7 @@ var world := AlphaWorldService.new()
 var organization_service: OrganizationService
 var economy := AlphaEconomyService.new()
 var commodity_market := AlphaCommodityMarketService.new()
+var economic_closure := AlphaEconomicClosureService.new()
 var labor := AlphaLaborService.new()
 var enterprise := AlphaEnterpriseService.new()
 var character_service := AlphaCharacterService.new()
@@ -80,6 +81,8 @@ func initialize(simulation_clock: SimulationClock = null) -> bool:
 		alpha_config, economy, labor, organization_service, clock.total_hours
 	):
 		return _fail_alpha("企业服务初始化失败")
+	if not economic_closure.configure(economy, commodity_market, enterprise, labor):
+		return _fail_alpha("经济闭环服务初始化失败：%s" % economic_closure.initialization_error)
 	if not character_service.configure(
 		core_data, generation_config, alpha_config, economy, labor
 	):
@@ -427,6 +430,15 @@ func _settle_hour(total_hour: int) -> void:
 	if int(value.get("hour", -1)) == 23:
 		economy.expire_market_shocks(total_hour)
 		var market_result: Dictionary = commodity_market.settle_day(total_hour)
+		var closure_result: Dictionary = economic_closure.settle_day(total_hour)
+		if not bool(closure_result.get("success", false)):
+			_append_alpha_event({
+				"event_id": "event:economic_closure_failure:%d" % total_hour,
+				"total_hour": total_hour,
+				"fact_type": "economic_closure_failure",
+				"summary": "商品实物流、现金、企业、劳动或运输结算失败。",
+				"requires_decision": true,
+			})
 		if not bool(market_result.get("success", false)):
 			_append_alpha_event({
 				"event_id": "event:commodity_market_failure:%d" % total_hour,
