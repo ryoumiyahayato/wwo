@@ -1,0 +1,52 @@
+name: Alpha economic closure
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - "scripts/alpha/alpha_economic_closure_service.gd"
+      - "scripts/alpha/alpha_simulation_service.gd"
+      - "tests/alpha/alpha_economic_closure_test.gd"
+      - ".github/workflows/alpha-economic-closure.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GODOT_BIN: "${{ github.workspace }}/.ci-godot/Godot_v4.6.3-stable_linux.x86_64"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download Godot 4.6.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .ci-godot
+          curl --fail --location --retry 3 --retry-delay 2 "https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_linux.x86_64.zip" --output .ci-godot/godot.zip
+          unzip -q .ci-godot/godot.zip -d .ci-godot
+          chmod +x "${GODOT_BIN}"
+      - name: Import and parse
+        shell: bash
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" --headless --audio-driver Dummy --path . --editor --quit-after 4 --log-file closure-import.log
+          if grep -Eq "SCRIPT ERROR|Parse Error|Failed to load script|^ERROR:" closure-import.log; then cat closure-import.log; exit 1; fi
+      - name: Run economic closure regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM 240s "${GODOT_BIN}" --headless --audio-driver Dummy --path . --script res://tests/alpha/alpha_economic_closure_test.gd --log-file closure-test.log
+          if grep -Eq "SCRIPT ERROR|Parse Error|Failed to load script|Assertion failed|[1-9][0-9]* failures|^ERROR:" closure-test.log; then cat closure-test.log; exit 1; fi
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha-economic-closure-logs
+          path: |
+            closure-import.log
+            closure-test.log
+          if-no-files-found: ignore
