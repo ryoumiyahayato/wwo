@@ -45,11 +45,11 @@ func configure() -> bool:
 	for raw_budget: Variant in household_budgets.get("templates", []) as Array:
 		if not raw_budget is Dictionary:
 			continue
-		var budget := (raw_budget as Dictionary).duplicate(true)
-		var budget_id := str(budget.get("template_id", ""))
+		var budget: Dictionary = (raw_budget as Dictionary).duplicate(true)
+		var budget_id: String = str(budget.get("template_id", ""))
 		if not budget_id.is_empty():
 			budget_by_id[budget_id] = budget
-	var integrity := validate_integrity()
+	var integrity: Dictionary = validate_integrity()
 	if not bool(integrity.get("success", false)):
 		return _fail(str(integrity.get("message", "1900世界经济数据完整性失败")))
 	return true
@@ -61,7 +61,7 @@ func country(entity_id: String) -> Dictionary:
 
 func formal_countries() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
-	var threshold := int((world_manifest.get("policy", {}) as Dictionary).get(
+	var threshold: int = int((world_manifest.get("policy", {}) as Dictionary).get(
 		"minimum_formal_confidence_bp", 4500
 	))
 	for record: Dictionary in countries:
@@ -74,7 +74,7 @@ func formal_countries() -> Array[Dictionary]:
 
 
 func coverage_summary() -> Dictionary:
-	var summary := (world_manifest.get("coverage_summary", {}) as Dictionary).duplicate(true)
+	var summary: Dictionary = (world_manifest.get("coverage_summary", {}) as Dictionary).duplicate(true)
 	summary["loaded_country_count"] = countries.size()
 	summary["formal_country_count"] = formal_countries().size()
 	summary["domestic_network_count"] = domestic_networks.size()
@@ -95,23 +95,25 @@ func validate_integrity() -> Dictionary:
 		return _result(false, "家庭预算模板覆盖不足")
 	var seen_ranks: Dictionary = {}
 	for record: Dictionary in countries:
-		var entity_id := str(record.get("entity_id", ""))
-		var rank := int(record.get("rank", 0))
+		var entity_id: String = str(record.get("entity_id", ""))
+		var rank: int = int(record.get("rank", 0))
 		if entity_id.is_empty() or country_by_entity.get(entity_id, {}) != record:
 			return _result(false, "国家记录索引无效")
 		if seen_ranks.has(rank) or rank < 1 or rank > 50:
 			return _result(false, "国家优先级缺失或重复")
 		seen_ranks[rank] = true
 		for field: String in ["population", "gdp_per_capita_2011_intl_dollars", "urban_population_share_bp"]:
-			var bounded := record.get(field, {}) as Dictionary
+			var bounded: Dictionary = record.get(field, {}) as Dictionary
 			if float(bounded.get("lower", 0)) > float(bounded.get("value", 0)):
 				return _result(false, "估算下界高于中心值：%s/%s" % [entity_id, field])
 			if float(bounded.get("value", 0)) > float(bounded.get("upper", 0)):
 				return _result(false, "估算中心值高于上界：%s/%s" % [entity_id, field])
+			if int(bounded.get("confidence_bp", 0)) <= 0:
+				return _result(false, "估算缺少有效置信度：%s/%s" % [entity_id, field])
 		if not budget_by_id.has(str(record.get("household_budget_template_id", ""))):
 			return _result(false, "国家引用未知家庭预算模板：%s" % entity_id)
 	for budget: Dictionary in budget_by_id.values():
-		var total := 0
+		var total: int = 0
 		for value: Variant in (budget.get("shares_bp", {}) as Dictionary).values():
 			total += int(value)
 		if total != 10000:
@@ -120,23 +122,23 @@ func validate_integrity() -> Dictionary:
 
 
 func _load_country_table() -> bool:
-	var table_path := str(world_manifest.get("compact_country_table_path", ""))
-	var table := _load_document(table_path)
+	var table_path: String = str(world_manifest.get("compact_country_table_path", ""))
+	var table: Dictionary = _load_document(table_path)
 	if str(table.get("schema_id", "")) != "historical_world_economy_1900_compact_country_table_v1":
 		return _fail("1900国家紧凑表 Schema 无效")
-	var fields := DataRecordUtils.to_string_array(table.get("field_order", []))
-	var methods := table.get("common_methods", {}) as Dictionary
+	var fields: Array[String] = DataRecordUtils.to_string_array(table.get("field_order", []))
+	var methods: Dictionary = table.get("common_methods", {}) as Dictionary
 	for raw_row: Variant in table.get("rows", []) as Array:
 		if not raw_row is Array:
 			return _fail("1900国家紧凑表行格式无效")
-		var values := raw_row as Array
+		var values: Array = raw_row as Array
 		if values.size() != fields.size():
 			return _fail("1900国家紧凑表列数不一致")
 		var flat: Dictionary = {}
 		for index: int in fields.size():
 			flat[fields[index]] = values[index]
-		var record := _expand_country(flat, methods)
-		var entity_id := str(record.get("entity_id", ""))
+		var record: Dictionary = _expand_country(flat, methods)
+		var entity_id: String = str(record.get("entity_id", ""))
 		if entity_id.is_empty() or country_by_entity.has(entity_id):
 			return _fail("1900国家记录ID缺失或重复")
 		countries.append(record)
@@ -188,20 +190,27 @@ func _expand_country(flat: Dictionary, methods: Dictionary) -> Dictionary:
 
 
 func _bounded(flat: Dictionary, prefix: String, method_key: String, methods: Dictionary) -> Dictionary:
-	var value_key := prefix + "_value"
+	var value_key: String = prefix + "_value"
+	var lower_key: String = prefix + "_lower"
+	var upper_key: String = prefix + "_upper"
+	var confidence_key: String = prefix + "_confidence_bp"
 	if prefix == "urban":
 		value_key = "urban_value_bp"
+		lower_key = "urban_lower_bp"
+		upper_key = "urban_upper_bp"
+	elif prefix == "gdp_pc":
+		confidence_key = "gdp_confidence_bp"
 	return {
 		"value": flat.get(value_key, 0),
-		"lower": flat.get(prefix + "_lower" + ("_bp" if prefix == "urban" else ""), 0),
-		"upper": flat.get(prefix + "_upper" + ("_bp" if prefix == "urban" else ""), 0),
-		"confidence_bp": int(flat.get(prefix + "_confidence_bp", 0)),
+		"lower": flat.get(lower_key, 0),
+		"upper": flat.get(upper_key, 0),
+		"confidence_bp": int(flat.get(confidence_key, 0)),
 		"method": str(methods.get(method_key, "bounded_estimate")),
 	}
 
 
 func _load_transport_table() -> bool:
-	var table := _load_document(str(transport_manifest.get("compact_table_path", "")))
+	var table: Dictionary = _load_document(str(transport_manifest.get("compact_table_path", "")))
 	if str(table.get("schema_id", "")) != "historical_transport_network_1900_compact_tables_v1":
 		return _fail("1900运输紧凑表 Schema 无效")
 	domestic_networks = _expand_rows(table, "domestic")
@@ -211,10 +220,10 @@ func _load_transport_table() -> bool:
 
 
 func _expand_rows(table: Dictionary, prefix: String) -> Array[Dictionary]:
-	var fields := DataRecordUtils.to_string_array(table.get(prefix + "_field_order", []))
+	var fields: Array[String] = DataRecordUtils.to_string_array(table.get(prefix + "_field_order", []))
 	var result: Array[Dictionary] = []
 	for raw_row: Variant in table.get(prefix + "_rows", []) as Array:
-		var row := raw_row as Array
+		var row: Array = raw_row as Array
 		if row.size() != fields.size():
 			continue
 		var record: Dictionary = {}
@@ -228,7 +237,7 @@ func _load_document(path: String) -> Dictionary:
 	if path.is_empty():
 		_fail("历史经济数据路径为空")
 		return {}
-	var file := FileAccess.open(path, FileAccess.READ)
+	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
 	if file == null:
 		_fail("无法读取历史经济数据：%s" % path)
 		return {}
