@@ -5,7 +5,7 @@ on:
     branches:
       - agent/historical-admin-top50-generalize
     paths:
-      - ".github/economy_patch/**"
+      - ".github/economy_payload/**"
       - ".github/workflows/temporary-export-economic-source.yml"
 
 permissions:
@@ -15,20 +15,45 @@ jobs:
   apply-economy-patch:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Check out economy branch
         uses: actions/checkout@v4
         with:
           ref: agent/1900-market-economy-core
-      - name: Apply reviewed source archive
+      - name: Verify and apply reviewed source archive
         shell: bash
         run: |
           set -euo pipefail
           exec > >(tee apply-economy.log) 2>&1
-          cat .github/economy_patch/part* > /tmp/economy-patch.tar.gz.b64
+          cat \
+            .github/economy_payload/part00 \
+            .github/economy_payload/part01 \
+            .github/economy_payload/part02 \
+            .github/economy_payload/part03 \
+            .github/economy_payload/part04 \
+            .github/economy_payload/part05 \
+            .github/economy_payload/part06 \
+            .github/economy_payload/part07 \
+            .github/economy_payload/part08 \
+            .github/economy_payload/part09 \
+            .github/economy_payload/part10 \
+            .github/economy_payload/part110 \
+            .github/economy_payload/part111 \
+            .github/economy_payload/part12 \
+            .github/economy_payload/part13 \
+            .github/economy_payload/part14 \
+            .github/economy_payload/part150 \
+            .github/economy_payload/part151 \
+            .github/economy_payload/part160 \
+            .github/economy_payload/part161 \
+            .github/economy_payload/part17 \
+            > /tmp/economy-patch.tar.gz.b64
           base64 --decode /tmp/economy-patch.tar.gz.b64 > /tmp/economy-patch.tar.gz
+          gzip -t /tmp/economy-patch.tar.gz
+          tar -tzf /tmp/economy-patch.tar.gz | tee economy-patch-manifest.txt
           tar -xzf /tmp/economy-patch.tar.gz -C .
-          rm -rf .github/economy_patch
+          rm -rf .github/economy_patch .github/economy_payload
           rm -f .github/workflows/temporary-export-economic-source.yml
           python3 tools/audit_1900_commodity_economy.py
           git config user.name "github-actions[bot]"
@@ -36,11 +61,13 @@ jobs:
           git add -A
           git commit -m "build population-linked 1900 commodity economy"
           git push origin HEAD:agent/1900-market-economy-core
-      - name: Upload application log
+      - name: Upload application diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: economy-patch-application-log
-          path: apply-economy.log
+          path: |
+            apply-economy.log
+            economy-patch-manifest.txt
           if-no-files-found: warn
           retention-days: 1
