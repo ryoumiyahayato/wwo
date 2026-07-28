@@ -232,7 +232,7 @@ func _load_document(path: String) -> Dictionary:
 	if file == null:
 		_fail("无法读取历史经济数据：%s" % path)
 		return {}
-	var parsed := JSON.parse_string(file.get_as_text())
+	var parsed: Variant = JSON.parse_string(file.get_as_text())
 	if not parsed is Dictionary:
 		_fail("历史经济JSON无效：%s" % path)
 		return {}
