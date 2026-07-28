@@ -1,0 +1,132 @@
+{
+  "config_version": 1,
+  "schema_id": "historical_household_budgets_1900_v1",
+  "calibration_year": 1900,
+  "observed_anchor": {
+    "source_id": "bls_1901_family_budget",
+    "sample_detailed_families": 2567,
+    "broader_sample_families": 25440,
+    "necessities_share_bp": 7980,
+    "food_share_bp": 4254
+  },
+  "policy": {
+    "shares_sum_to_bp": 10000,
+    "household_level_random_variation_bp": 1200
+  },
+  "templates": [
+    {
+      "template_id": "rural_subsistence",
+      "label_zh": "农村低收入家庭",
+      "basis": "observed anchor or bounded median/Engel extrapolation",
+      "shares_bp": {
+        "food": 6000,
+        "housing": 800,
+        "fuel_and_light": 900,
+        "clothing": 900,
+        "household_goods": 400,
+        "transport": 150,
+        "health": 250,
+        "education": 100,
+        "taxes_and_insurance": 150,
+        "services_and_luxury": 150,
+        "savings": 200
+      },
+      "confidence_bp": 4200
+    },
+    {
+      "template_id": "low_income_mixed",
+      "label_zh": "城乡低收入家庭",
+      "basis": "observed anchor or bounded median/Engel extrapolation",
+      "shares_bp": {
+        "food": 5200,
+        "housing": 1200,
+        "fuel_and_light": 700,
+        "clothing": 950,
+        "household_goods": 450,
+        "transport": 250,
+        "health": 300,
+        "education": 150,
+        "taxes_and_insurance": 250,
+        "services_and_luxury": 250,
+        "savings": 300
+      },
+      "confidence_bp": 4800
+    },
+    {
+      "template_id": "urban_working",
+      "label_zh": "城市工人家庭",
+      "basis": "observed anchor or bounded median/Engel extrapolation",
+      "shares_bp": {
+        "food": 4250,
+        "housing": 1500,
+        "fuel_and_light": 600,
+        "clothing": 1300,
+        "household_goods": 400,
+        "transport": 300,
+        "health": 300,
+        "education": 150,
+        "taxes_and_insurance": 300,
+        "services_and_luxury": 400,
+        "savings": 500
+      },
+      "confidence_bp": 6800
+    },
+    {
+      "template_id": "lower_middle",
+      "label_zh": "下层中产家庭",
+      "basis": "observed anchor or bounded median/Engel extrapolation",
+      "shares_bp": {
+        "food": 3400,
+        "housing": 1600,
+        "fuel_and_light": 450,
+        "clothing": 1150,
+        "household_goods": 550,
+        "transport": 450,
+        "health": 400,
+        "education": 350,
+        "taxes_and_insurance": 450,
+        "services_and_luxury": 650,
+        "savings": 550
+      },
+      "confidence_bp": 5200
+    },
+    {
+      "template_id": "industrial_middle",
+      "label_zh": "工业化地区中产家庭",
+      "basis": "observed anchor or bounded median/Engel extrapolation",
+      "shares_bp": {
+        "food": 3000,
+        "housing": 1600,
+        "fuel_and_light": 400,
+        "clothing": 1000,
+        "household_goods": 600,
+        "transport": 600,
+        "health": 450,
+        "education": 450,
+        "taxes_and_insurance": 500,
+        "services_and_luxury": 750,
+        "savings": 650
+      },
+      "confidence_bp": 4800
+    },
+    {
+      "template_id": "affluent_industrial",
+      "label_zh": "富裕工业社会家庭",
+      "basis": "observed anchor or bounded median/Engel extrapolation",
+      "shares_bp": {
+        "food": 2200,
+        "housing": 1500,
+        "fuel_and_light": 300,
+        "clothing": 1000,
+        "household_goods": 700,
+        "transport": 800,
+        "health": 500,
+        "education": 600,
+        "taxes_and_insurance": 700,
+        "services_and_luxury": 1000,
+        "savings": 700
+      },
+      "confidence_bp": 4200
+    }
+  ]
+}

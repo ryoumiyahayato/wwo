@@ -29,6 +29,7 @@ var _output_capacity: Dictionary = {}
 var _processed_keys: Dictionary = {}
 var _last_day_index: int = -1
 var _policies: Dictionary = {}
+var _external_logistics_managed: bool = false
 
 
 func configure(config: AlphaConfig) -> bool:
@@ -47,6 +48,7 @@ func configure(config: AlphaConfig) -> bool:
 	_processed_keys.clear()
 	_last_day_index = -1
 	initialization_error = ""
+	_external_logistics_managed = false
 	var document: Dictionary = config.commodity_market()
 	if str(document.get("schema_id", "")) != "alpha_commodity_market_1900_v1":
 		return _fail_initialize("1900商品市场配置 Schema 无效")
@@ -102,6 +104,14 @@ func configure(config: AlphaConfig) -> bool:
 	return true
 
 
+func set_external_logistics_managed(enabled: bool) -> void:
+	_external_logistics_managed = enabled
+
+
+func external_logistics_managed() -> bool:
+	return _external_logistics_managed
+
+
 func settle_day(total_hour: int) -> Dictionary:
 	var day_index: int = total_hour / 24
 	if day_index <= _last_day_index:
@@ -112,8 +122,9 @@ func settle_day(total_hour: int) -> Dictionary:
 	_reset_local_services()
 	_run_production(total_hour)
 	_run_local_consumption()
-	_run_regional_balancing()
-	_run_international_market()
+	if not _external_logistics_managed:
+		_run_regional_balancing()
+		_run_international_market()
 	_enforce_all_warehouse_capacity()
 	_update_prices()
 	_update_employment()
@@ -460,6 +471,9 @@ func _empty_metrics() -> Dictionary:
 		"regional_sent": {},
 		"international_imports": {},
 		"international_exports": {},
+		"transit_received": {},
+		"transit_dispatched": {},
+		"strategic_release": {},
 		"spoiled": {},
 		"warehouse_overflow": {},
 		"workers_active": 0,

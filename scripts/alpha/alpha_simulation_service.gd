@@ -27,6 +27,7 @@ var world := AlphaWorldService.new()
 var organization_service: OrganizationService
 var economy := AlphaEconomyService.new()
 var commodity_market := AlphaCommodityMarketService.new()
+var economy_integration := AlphaEconomyIntegrationService.new()
 var labor := AlphaLaborService.new()
 var enterprise := AlphaEnterpriseService.new()
 var character_service := AlphaCharacterService.new()
@@ -80,6 +81,13 @@ func initialize(simulation_clock: SimulationClock = null) -> bool:
 		alpha_config, economy, labor, organization_service, clock.total_hours
 	):
 		return _fail_alpha("企业服务初始化失败")
+	if not economy_integration.configure(
+		alpha_config, commodity_market, economy, enterprise, labor
+	):
+		return _fail_alpha(
+			"统一商品、现金、企业与物流结算初始化失败：%s"
+			% economy_integration.initialization_error
+		)
 	if not character_service.configure(
 		core_data, generation_config, alpha_config, economy, labor
 	):
@@ -313,6 +321,9 @@ func alpha_counts() -> Dictionary:
 	counts["commodities"] = commodity_market.commodities.size()
 	counts["commodity_regions"] = commodity_market.region_states.size()
 	counts["commodity_production_sites"] = commodity_market.production_sites.size()
+	counts["commodity_active_shipments"] = economy_integration.shipments.size()
+	counts["commodity_transport_edges"] = economy_integration.transport_edge_count()
+	counts["enterprise_economic_decisions"] = economy_integration.decision_history.size()
 	counts["debts"] = _loan_count()
 	counts["unfinished_matters"] = _unfinished_matter_count()
 	counts["event_history"] = (
@@ -327,6 +338,7 @@ func validate_alpha_integrity() -> Dictionary:
 	for result: Dictionary in [
 		economy.validate_integrity(),
 		commodity_market.validate_integrity(),
+		economy_integration.validate_integrity(),
 		enterprise.validate_integrity(),
 		politics.validate_integrity(),
 	]:
@@ -355,6 +367,7 @@ func get_alpha_persistent_state() -> Dictionary:
 	state["alpha_organization_state"] = organization_service.get_persistent_state()
 	state["alpha_economy_state"] = economy.get_persistent_state()
 	state["alpha_commodity_market_state"] = commodity_market.get_persistent_state()
+	state["alpha_economy_integration_state"] = economy_integration.get_persistent_state()
 	state["alpha_labor_state"] = labor.get_persistent_state()
 	state["alpha_enterprise_state"] = enterprise.get_persistent_state()
 	state["alpha_character_state"] = character_service.get_persistent_state()
@@ -410,6 +423,11 @@ func validate_alpha_snapshot_structure(state: Dictionary) -> Dictionary:
 		and not state["alpha_commodity_market_state"] is Dictionary
 	):
 		return _result(false, "invalid_field:alpha_commodity_market_state", {})
+	if (
+		state.has("alpha_economy_integration_state")
+		and not state["alpha_economy_integration_state"] is Dictionary
+	):
+		return _result(false, "invalid_field:alpha_economy_integration_state", {})
 	for field: String in [
 		"alpha_organization_state", "alpha_events", "detailed_enterprise_ids",
 	]:
@@ -435,6 +453,17 @@ func _settle_hour(total_hour: int) -> void:
 				"summary": "商品市场日结失败，已保留上一日状态。",
 				"requires_decision": true,
 			})
+		else:
+			economy_integration.deliver_due_shipments(total_hour)
+			var integration_result := economy_integration.settle_day(total_hour)
+			if not bool(integration_result.get("success", false)):
+				_append_alpha_event({
+					"event_id": "event:economy_integration_failure:%d" % total_hour,
+					"total_hour": total_hour,
+					"fact_type": "economy_integration_failure",
+					"summary": "商品、现金、企业或物流统一结算失败。",
+					"requires_decision": true,
+				})
 		_process_active_ai(total_hour)
 		world_dynamics.process_boundaries(
 			total_hour, roster.active_characters
@@ -1263,6 +1292,15 @@ func _apply_alpha_state(state: Dictionary) -> bool:
 		state["alpha_enterprise_state"] as Dictionary
 	):
 		return _restore_domain_failed("enterprise")
+	if state.has("alpha_economy_integration_state"):
+		if not economy_integration.restore_persistent_state(
+			state["alpha_economy_integration_state"] as Dictionary
+		):
+			return _restore_domain_failed("economy_integration")
+	elif not economy_integration.configure(
+		alpha_config, commodity_market, economy, enterprise, labor
+	):
+		return _restore_domain_failed("economy_integration_migration")
 	if not character_service.restore_persistent_state(
 		state["alpha_character_state"] as Dictionary
 	):

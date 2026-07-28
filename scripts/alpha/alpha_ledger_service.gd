@@ -4,7 +4,7 @@ extends RefCounted
 
 const SYSTEM_OPENING_ACCOUNT: String = "account:system:opening"
 const DEFAULT_HISTORY_LIMIT: int = 8192
-const PROCESSED_KEY_MULTIPLIER: int = 8
+const DEFAULT_PROCESSED_KEY_MULTIPLIER: int = 4
 
 var accounts: Dictionary = {}
 var transactions: Array[Dictionary] = []
@@ -13,6 +13,7 @@ var _transactions_by_key: Dictionary = {}
 var _processed_key_order: Array[String] = []
 var _next_sequence: int = 1
 var _history_limit: int = DEFAULT_HISTORY_LIMIT
+var _processed_key_multiplier: int = DEFAULT_PROCESSED_KEY_MULTIPLIER
 
 
 func configure(history_limit: int = DEFAULT_HISTORY_LIMIT) -> void:
@@ -23,7 +24,13 @@ func configure(history_limit: int = DEFAULT_HISTORY_LIMIT) -> void:
 	_processed_key_order.clear()
 	_next_sequence = 1
 	_history_limit = maxi(256, history_limit)
+	_processed_key_multiplier = DEFAULT_PROCESSED_KEY_MULTIPLIER
 	_register_account(SYSTEM_OPENING_ACCOUNT, "system:opening", "system", true)
+
+
+func set_processed_key_multiplier(multiplier: int) -> void:
+	_processed_key_multiplier = clampi(multiplier, 1, 8)
+	_trim_processed_keys()
 
 
 func register_cash_account(
@@ -125,12 +132,14 @@ func post(
 	if idempotency_key.is_empty() or fact_id.is_empty():
 		return _fail("invalid_transaction", "账本分录必须具有幂等键和事实引用")
 	if _transactions_by_key.has(idempotency_key):
-		var existing_index: int = int(_transactions_by_key[idempotency_key])
-		if existing_index >= 0 and existing_index < transactions.size():
-			return _ok({
-				"duplicate": true,
-				"transaction": transactions[existing_index].duplicate(true),
-			})
+		var existing_id := str(_transactions_by_key[idempotency_key])
+		if not existing_id.is_empty():
+			for transaction: Dictionary in transactions:
+				if str(transaction.get("transaction_id", "")) == existing_id:
+					return _ok({
+						"duplicate": true,
+						"transaction": transaction.duplicate(true),
+					})
 		return _fail("duplicate_pruned_transaction", "该交易已经结算且历史摘要仍保留")
 	if entries.size() < 2:
 		return _fail("invalid_transaction", "双边账本至少需要两条分录")
@@ -183,11 +192,23 @@ func post(
 		)
 		accounts[account_id] = account
 	transactions.append(transaction)
-	_transactions_by_key[idempotency_key] = transactions.size() - 1
+	_transactions_by_key[idempotency_key] = str(transaction.get("transaction_id", ""))
 	_processed_key_order.append(idempotency_key)
 	_trim_history()
 	_trim_processed_keys()
 	return _ok({"transaction": transaction.duplicate(true), "duplicate": false})
+
+
+func has_transaction(transaction_id: String) -> bool:
+	if transaction_id.begins_with("transaction:alpha:"):
+		var sequence_text := transaction_id.trim_prefix("transaction:alpha:")
+		if sequence_text.is_valid_int():
+			var sequence := int(sequence_text)
+			return sequence > 0 and sequence < _next_sequence
+	for transaction: Dictionary in transactions:
+		if str(transaction.get("transaction_id", "")) == transaction_id:
+			return true
+	return false
 
 
 func validate_balances() -> Dictionary:
@@ -244,6 +265,7 @@ func get_persistent_state() -> Dictionary:
 		"processed_key_order": _processed_key_order.duplicate(),
 		"next_sequence": _next_sequence,
 		"history_limit": _history_limit,
+		"processed_key_multiplier": _processed_key_multiplier,
 	}
 
 
@@ -273,7 +295,7 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		var key: String = str(transaction.get("idempotency_key", ""))
 		if key.is_empty() or index.has(key):
 			return false
-		index[key] = restored_transactions.size()
+		index[key] = str(transaction.get("transaction_id", ""))
 		restored_transactions.append(transaction)
 		restored_order.append(key)
 	for raw_key: Variant in state["processed_keys"] as Array:
@@ -281,7 +303,7 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		if key.is_empty():
 			return false
 		if not index.has(key):
-			index[key] = -1
+			index[key] = ""
 			restored_order.append(key)
 	if state.get("processed_key_order", []) is Array:
 		restored_order.clear()
@@ -301,6 +323,9 @@ func restore_persistent_state(state: Dictionary) -> bool:
 	_processed_key_order = restored_order
 	_next_sequence = int(state.get("next_sequence", 0))
 	_history_limit = maxi(256, int(state.get("history_limit", DEFAULT_HISTORY_LIMIT)))
+	_processed_key_multiplier = clampi(int(
+		state.get("processed_key_multiplier", DEFAULT_PROCESSED_KEY_MULTIPLIER)
+	), 1, 8)
 	if _next_sequence < 1 or not bool(validate_balances().get("success", false)):
 		return false
 	_trim_processed_keys()
@@ -332,16 +357,14 @@ func _trim_history() -> void:
 				int(opening_balances.get(account_id, 0))
 				+ int(entry.get("delta_centimes", 0))
 			)
-		_transactions_by_key[str(removed.get("idempotency_key", ""))] = -1
-	for index: int in range(transactions.size()):
-		_transactions_by_key[str(transactions[index].get("idempotency_key", ""))] = index
+		_transactions_by_key[str(removed.get("idempotency_key", ""))] = ""
 
 
 func _trim_processed_keys() -> void:
-	var processed_limit: int = _history_limit * PROCESSED_KEY_MULTIPLIER
+	var processed_limit: int = _history_limit * _processed_key_multiplier
 	while _processed_key_order.size() > processed_limit:
 		var oldest_key: String = _processed_key_order.pop_front()
-		if int(_transactions_by_key.get(oldest_key, -1)) < 0:
+		if str(_transactions_by_key.get(oldest_key, "")).is_empty():
 			_transactions_by_key.erase(oldest_key)
 
 

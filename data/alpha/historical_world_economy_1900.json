@@ -1,0 +1,126 @@
+{
+  "config_version": 1,
+  "schema_id": "historical_world_economy_1900_estimates_v1",
+  "calibration_date": "1900-01-01",
+  "scope": "50 gameplay entities plus global residual aggregates",
+  "policy": {
+    "estimated_values_allowed": true,
+    "minimum_formal_confidence_bp": 4500,
+    "all_estimates_require_bounds": true,
+    "silent_numeric_defaults_forbidden": true,
+    "modern_data_requires_historical_crosswalk": true
+  },
+  "source_manifest": [
+    {
+      "source_id": "maddison_2023",
+      "title": "Maddison Project Database 2023",
+      "coverage": "population and GDP per capita, 169 countries",
+      "license": "CC BY 4.0",
+      "role": "population and GDP anchors"
+    },
+    {
+      "source_id": "cow_nmc_v7",
+      "title": "Correlates of War National Material Capabilities v7",
+      "coverage": "1816-2022 population, urban population, steel and energy",
+      "role": "urban, steel and energy anchors; quality varies by state-year"
+    },
+    {
+      "source_id": "cepii_tradhist",
+      "title": "CEPII TRADHIST",
+      "coverage": "1827-2014 bilateral trade, tariffs, GDP and exchange rates",
+      "license": "Etalab 2.0",
+      "role": "trade and corridor calibration"
+    },
+    {
+      "source_id": "bls_1901_family_budget",
+      "title": "US Commissioner of Labor 1901 family budgets",
+      "coverage": "2,567 detailed and 25,440 broader working-family records",
+      "role": "working-family expenditure anchor"
+    },
+    {
+      "source_id": "wfp_global_ports",
+      "title": "WFP Global Ports",
+      "coverage": "modern global port points",
+      "role": "location cross-check only, never direct 1900 capacity"
+    },
+    {
+      "source_id": "world_bank_rail_modern",
+      "title": "World Bank/UIC rail route kilometres",
+      "coverage": "1995-2021",
+      "role": "definition and plausibility check only"
+    }
+  ],
+  "methodology": {
+    "population": "historical series/census anchors and circa-1900 border crosswalk",
+    "gdp": "Maddison anchors or bounded regional analogues",
+    "production": "COW steel/energy anchors or bounded capacity model",
+    "infrastructure": "historical totals where available; density model and curated gateways otherwise",
+    "households": "1901 working-family anchor plus median interpolation and Engel-law ordering"
+  },
+  "coverage_summary": {
+    "formal_entity_count": 50,
+    "residual_aggregate_count": 8,
+    "formal_entity_population": 1411020000,
+    "residual_population": 237600000,
+    "estimated_world_population": 1648620000
+  },
+  "compact_country_table_path": "res://data/alpha/historical_world_economy_1900/countries_compact.json",
+  "world_residual_aggregates": [
+    {
+      "aggregate_id": "residual:dutch_east_indies",
+      "population_estimate": 38000000,
+      "confidence_bp": 5500,
+      "controller_entity_id": "kingdom_of_netherlands",
+      "formal_simulation_allowed": false
+    },
+    {
+      "aggregate_id": "residual:philippines",
+      "population_estimate": 7600000,
+      "confidence_bp": 6000,
+      "controller_entity_id": "united_states_1900",
+      "formal_simulation_allowed": false
+    },
+    {
+      "aggregate_id": "residual:french_indochina",
+      "population_estimate": 17000000,
+      "confidence_bp": 5200,
+      "controller_entity_id": "country_fra",
+      "formal_simulation_allowed": false
+    },
+    {
+      "aggregate_id": "residual:british_africa_malaya",
+      "population_estimate": 40000000,
+      "confidence_bp": 3500,
+      "controller_entity_id": "british_isles_1900",
+      "formal_simulation_allowed": false
+    },
+    {
+      "aggregate_id": "residual:french_colonial_residual",
+      "population_estimate": 25000000,
+      "confidence_bp": 3300,
+      "controller_entity_id": "country_fra",
+      "formal_simulation_allowed": false
+    },
+    {
+      "aggregate_id": "residual:other_colonial_africa",
+      "population_estimate": 65000000,
+      "confidence_bp": 2800,
+      "controller_entity_id": "",
+      "formal_simulation_allowed": false
+    },
+    {
+      "aggregate_id": "residual:central_america_caribbean",
+      "population_estimate": 10000000,
+      "confidence_bp": 3200,
+      "controller_entity_id": "",
+      "formal_simulation_allowed": false
+    },
+    {
+      "aggregate_id": "residual:minor_europe_middle_east_pacific",
+      "population_estimate": 35000000,
+      "confidence_bp": 2500,
+      "controller_entity_id": "",
+      "formal_simulation_allowed": false
+    }
+  ]
+}

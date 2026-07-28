@@ -1,0 +1,12 @@
+{
+  "config_version": 1,
+  "schema_id": "historical_transport_network_1900_estimates_v1",
+  "calibration_year": 1900,
+  "policy": {
+    "topology_type": "country_and_gateway_graph",
+    "not_exact_track_geometry": true,
+    "external_gateways_must_be_labelled": true
+  },
+  "generation_note_zh": "国家与枢纽级稀疏运输骨架；不是每条铁轨、河道和港区的精确复原。",
+  "compact_table_path": "res://data/alpha/historical_transport_network_1900/transport_compact.json"
+}

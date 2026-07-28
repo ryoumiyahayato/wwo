@@ -6,6 +6,7 @@ const PATHS: Dictionary = {
 	"world": "res://data/alpha/world.json",
 	"economy": "res://data/alpha/economy.json",
 	"commodity_market": "res://data/alpha/commodity_market_1900.json",
+	"economy_integration": "res://data/alpha/economy_integration_1900.json",
 	"politics": "res://data/alpha/politics.json",
 	"presets": "res://data/alpha/presets.json",
 }
@@ -62,6 +63,10 @@ func economy() -> Dictionary:
 
 func commodity_market() -> Dictionary:
 	return get_document("commodity_market")
+
+
+func economy_integration() -> Dictionary:
+	return get_document("economy_integration")
 
 
 func politics() -> Dictionary:
