@@ -1,6 +1,11 @@
 name: Apply formal world integration
 
 on:
+  push:
+    branches:
+      - agent/formal-world-economy-integration
+    paths:
+      - ".github/workflows/apply-formal-world-integration.yml"
   pull_request:
     branches:
       - master
