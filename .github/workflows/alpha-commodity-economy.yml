@@ -7,6 +7,8 @@ on:
     paths:
       - "data/alpha/**"
       - "scripts/alpha/**"
+      - "scripts/v2_3/v2_3_life_loop_menu.gd"
+      - "scenes/alpha/**"
       - "tests/alpha/**"
       - "tools/audit_1900_commodity_economy.py"
       - "docs/economy/**"
@@ -37,6 +39,12 @@ jobs:
           unzip -q .ci-godot/godot.zip -d .ci-godot
           chmod +x "${GODOT_BIN}"
           "${GODOT_BIN}" --version
+      - name: Install screenshot runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends xvfb fonts-noto-cjk
       - name: Audit commodity configuration
         run: |
           set -euo pipefail
@@ -59,6 +67,8 @@ jobs:
             tests/alpha/alpha_labor_enterprise_test.gd
             tests/alpha/alpha_composition_smoke.gd
             tests/alpha/alpha_save_and_migration_test.gd
+            tests/alpha/alpha_economy_ui_audit_test.gd
+            tests/alpha/alpha_ai_economy_stability_test.gd
           )
           for test_script in "${tests[@]}"; do
             name="$(basename "${test_script}" .gd)"
@@ -66,6 +76,26 @@ jobs:
             timeout --signal=TERM 240s "${GODOT_BIN}" --headless --audio-driver Dummy --path . --script "res://${test_script}" --log-file "${log}"
             if grep -Eq "SCRIPT ERROR|Parse Error|Failed to load script|Assertion failed|[1-9][0-9]* failures|^ERROR:" "${log}"; then cat "${log}"; exit 1; fi
           done
+      - name: Capture economy interface
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/alpha-commodity/screenshots
+          capture_path="${GITHUB_WORKSPACE}/builds/alpha-commodity/screenshots/economy-dashboard.png"
+          timeout --signal=TERM 240s xvfb-run -a -s "-screen 0 1280x720x24" \
+            "${GODOT_BIN}" --audio-driver Dummy --rendering-method gl_compatibility \
+            --path . --windowed --resolution 1280x720 \
+            res://scenes/alpha/alpha_economy_dashboard_preview.tscn \
+            -- --economy-audit-capture="${capture_path}"
+          test -s "${capture_path}"
+          file "${capture_path}" | tee builds/alpha-commodity/economy-capture-file.log
+      - name: Upload economy screenshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha-1900-economy-ui-screenshot
+          path: builds/alpha-commodity/screenshots/economy-dashboard.png
+          if-no-files-found: error
+          retention-days: 14
       - name: Upload diagnostics
         if: always()
         uses: actions/upload-artifact@v4
@@ -74,5 +104,6 @@ jobs:
           path: |
             alpha-commodity-import.log
             builds/alpha-commodity/*.log
+            builds/alpha-commodity/economy-capture-file.log
           if-no-files-found: ignore
           retention-days: 7
