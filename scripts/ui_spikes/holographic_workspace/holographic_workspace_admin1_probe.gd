@@ -80,7 +80,19 @@ func _run_probe() -> void:
 	if not _require(str(workspace.call("_current_country_corner_title")) == "俄罗斯帝国", "国家HUD没有切换到俄罗斯帝国"):
 		return
 	var russian_territories: Array = (workspace.get("_history_territories_by_entity") as Dictionary).get("russian_empire", []) as Array
-	if not _require(russian_territories.size() >= 12, "俄罗斯帝国没有聚合足够的辖区"):
+	if not _require(
+		russian_territories.size() == 1
+		and str((russian_territories[0] as Dictionary).get("iso_a3", "")) == "RUS",
+		"俄罗斯帝国本土没有保持为CShapes历史政治核心"
+	):
+		return
+	var dated_units: Array = (workspace.get("_dated_units_document") as Dictionary).get("units", []) as Array
+	var russian_protected_units := 0
+	for unit_value: Variant in dated_units:
+		var unit := unit_value as Dictionary
+		if str(unit.get("controller_id", "")) == "russian_empire":
+			russian_protected_units += 1
+	if not _require(russian_protected_units >= 2, "俄罗斯保护国没有作为独立历史政治单元保留"):
 		return
 
 	workspace.queue_free()
