@@ -1,0 +1,26 @@
+name: Temporary export economy fix files
+
+on:
+  pull_request:
+    branches:
+      - agent/historical-admin-top50-generalize
+    paths:
+      - ".github/workflows/temporary-export-economy-fix.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: economy-fix-files
+          path: |
+            scripts/alpha/alpha_economy_service.gd
+            scripts/alpha/alpha_contract_service.gd
+            tests/alpha/alpha_economy_lifecycle_test.gd
+          if-no-files-found: error
+          retention-days: 1
