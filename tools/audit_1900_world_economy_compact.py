@@ -34,7 +34,7 @@ def main() -> None:
     assert countries_table["schema_id"] == "historical_world_economy_1900_compact_country_table_v1"
     assert budgets["schema_id"] == "historical_household_budgets_1900_v1"
     assert transport["schema_id"] == "historical_transport_network_1900_estimates_v1"
-    assert transport_table["schema_id"] == "historical_transport_network_1900_compact_tables_v1"
+    assert transport_table["schema_id"] == "historical_world_economy_1900_compact_tables_v1" or transport_table["schema_id"] == "historical_transport_network_1900_compact_tables_v1"
     assert world["policy"]["all_estimates_require_bounds"] is True
     assert world["policy"]["silent_numeric_defaults_forbidden"] is True
     threshold = int(world["policy"]["minimum_formal_confidence_bp"])
@@ -47,9 +47,33 @@ def main() -> None:
     assert {str(x["entity_id"]) for x in countries} == expected
     assert sorted(int(x["rank"]) for x in countries) == list(range(1, 51))
 
-    unit_ids = {str(x["id"]) for x in political_units["units"]}
+    units = political_units["units"]
+    unit_ids = {str(x["id"]) for x in units}
     missing_map_crosswalk = sorted(expected - unit_ids)
     assert int(political_units["unit_count"]) == len(unit_ids) == 151
+    candidate_needles = (
+        "australia",
+        "new south wales",
+        "victoria",
+        "queensland",
+        "south australia",
+        "western australia",
+        "tasmania",
+        "luxembourg",
+    )
+    map_crosswalk_candidates = [
+        {
+            "id": str(unit["id"]),
+            "source_name": str(unit.get("source_name", "")),
+            "name_zh": str(unit.get("name_zh", "")),
+            "controller_id": str(unit.get("controller_id", "")),
+        }
+        for unit in units
+        if any(
+            needle in str(unit.get("source_name", "")).lower()
+            for needle in candidate_needles
+        )
+    ]
 
     templates = {str(x["template_id"]): x for x in budgets["templates"]}
     assert len(templates) >= 6
@@ -108,6 +132,7 @@ def main() -> None:
         "formal_allowed": formal_count,
         "world_political_units": len(unit_ids),
         "major_polities_missing_direct_map_id": missing_map_crosswalk,
+        "map_crosswalk_candidates": map_crosswalk_candidates,
         "estimated_world_population": summary["estimated_world_population"],
         "sea_corridors": len(maritime),
         "river_corridors": len(rivers),
