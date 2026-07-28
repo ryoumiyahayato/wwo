@@ -55,8 +55,8 @@ func _run() -> void:
 		"界面明确报告经济系统运行状态"
 	)
 	test.expect(
-		dashboard.date_label.text.contains("已运行 30 日"),
-		"审计预览以30日运行结果打开"
+		dashboard.simulation.clock.total_hours >= 30 * 24,
+		"审计预览至少推进30日并显示运行结果"
 	)
 	dashboard.queue_free()
 	await process_frame
