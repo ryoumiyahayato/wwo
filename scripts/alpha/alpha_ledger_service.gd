@@ -4,7 +4,7 @@ extends RefCounted
 
 const SYSTEM_OPENING_ACCOUNT: String = "account:system:opening"
 const DEFAULT_HISTORY_LIMIT: int = 8192
-const PROCESSED_KEY_MULTIPLIER: int = 8
+const DEFAULT_PROCESSED_KEY_MULTIPLIER: int = 4
 
 var accounts: Dictionary = {}
 var transactions: Array[Dictionary] = []
@@ -13,6 +13,7 @@ var _transactions_by_key: Dictionary = {}
 var _processed_key_order: Array[String] = []
 var _next_sequence: int = 1
 var _history_limit: int = DEFAULT_HISTORY_LIMIT
+var _processed_key_multiplier: int = DEFAULT_PROCESSED_KEY_MULTIPLIER
 
 
 func configure(history_limit: int = DEFAULT_HISTORY_LIMIT) -> void:
@@ -23,7 +24,13 @@ func configure(history_limit: int = DEFAULT_HISTORY_LIMIT) -> void:
 	_processed_key_order.clear()
 	_next_sequence = 1
 	_history_limit = maxi(256, history_limit)
+	_processed_key_multiplier = DEFAULT_PROCESSED_KEY_MULTIPLIER
 	_register_account(SYSTEM_OPENING_ACCOUNT, "system:opening", "system", true)
+
+
+func set_processed_key_multiplier(multiplier: int) -> void:
+	_processed_key_multiplier = clampi(multiplier, 1, 8)
+	_trim_processed_keys()
 
 
 func register_cash_account(
@@ -258,6 +265,7 @@ func get_persistent_state() -> Dictionary:
 		"processed_key_order": _processed_key_order.duplicate(),
 		"next_sequence": _next_sequence,
 		"history_limit": _history_limit,
+		"processed_key_multiplier": _processed_key_multiplier,
 	}
 
 
@@ -315,6 +323,9 @@ func restore_persistent_state(state: Dictionary) -> bool:
 	_processed_key_order = restored_order
 	_next_sequence = int(state.get("next_sequence", 0))
 	_history_limit = maxi(256, int(state.get("history_limit", DEFAULT_HISTORY_LIMIT)))
+	_processed_key_multiplier = clampi(int(
+		state.get("processed_key_multiplier", DEFAULT_PROCESSED_KEY_MULTIPLIER)
+	), 1, 8)
 	if _next_sequence < 1 or not bool(validate_balances().get("success", false)):
 		return false
 	_trim_processed_keys()
@@ -350,7 +361,7 @@ func _trim_history() -> void:
 
 
 func _trim_processed_keys() -> void:
-	var processed_limit: int = _history_limit * PROCESSED_KEY_MULTIPLIER
+	var processed_limit: int = _history_limit * _processed_key_multiplier
 	while _processed_key_order.size() > processed_limit:
 		var oldest_key: String = _processed_key_order.pop_front()
 		if str(_transactions_by_key.get(oldest_key, "")).is_empty():

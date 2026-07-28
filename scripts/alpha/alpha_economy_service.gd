@@ -26,7 +26,13 @@ var _next_application_sequence: int = 1
 
 
 func configure(config: AlphaConfig) -> bool:
-	ledger.configure()
+	var integration_policies := (
+		config.economy_integration().get("policies", {}) as Dictionary
+	)
+	ledger.configure(int(integration_policies.get("ledger_history_limit", 4096)))
+	ledger.set_processed_key_multiplier(int(
+		integration_policies.get("ledger_processed_key_multiplier", 4)
+	))
 	assets.configure(ledger)
 	if not contracts.configure(config.contract_templates(), ledger, assets):
 		return false
