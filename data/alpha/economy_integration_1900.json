@@ -1,0 +1,118 @@
+{
+  "config_version": 1,
+  "schema_id": "alpha_economy_integration_1900_v1",
+  "calibration_year": 1900,
+  "scope_notice_zh": "该文件定义统一结算、运输网络、企业归属、财政和金本位机制。当前数值用于八地区Alpha回归；历史国家记录只有在史料覆盖状态为verified时才允许进入正式世界。",
+  "policies": {
+    "external_logistics_managed": true,
+    "maximum_nearby_suppliers": 8,
+    "shipment_history_limit": 512,
+    "decision_history_limit": 256,
+    "minimum_enterprise_cash_days": 10,
+    "maintenance_bp_of_revenue": 350,
+    "business_tax_bp": 650,
+    "wage_tax_bp": 180,
+    "insurance_premium_bp": 90,
+    "maximum_route_risk_bp": 3500,
+    "operating_target_step_bp": 350,
+    "minimum_operating_target_bp": 1500,
+    "maximum_operating_target_bp": 10000,
+    "gold_reserve_floor_bp": 1200,
+    "maximum_daily_fx_change_bp": 120,
+    "strategic_release_shortage_bp": 3500,
+    "bankruptcy_cash_days": 2
+  },
+  "household_strata": [
+    {"stratum_id": "working", "population_bp": 6500, "opening_cash_per_person_centimes": 18, "budget_share_bp": 6200},
+    {"stratum_id": "middle", "population_bp": 2800, "opening_cash_per_person_centimes": 55, "budget_share_bp": 2700},
+    {"stratum_id": "wealthy", "population_bp": 700, "opening_cash_per_person_centimes": 240, "budget_share_bp": 1100}
+  ],
+  "countries": [
+    {
+      "country_id": "country:loran_federation",
+      "currency_id": "currency:loran_krona",
+      "treasury_id": "government:loran_treasury",
+      "central_bank_id": "bank:loran_note_office",
+      "opening_treasury_cash_centimes": 18000000,
+      "opening_central_bank_cash_centimes": 24000000,
+      "gold_reserve_grams": 12500000,
+      "parity_centimes_per_gram": 310,
+      "opening_exchange_rate_bp": 10000
+    },
+    {
+      "country_id": "country:vesta_union",
+      "currency_id": "currency:vesta_thaler",
+      "treasury_id": "government:vesta_treasury",
+      "central_bank_id": "bank:vesta_issue_consortium",
+      "opening_treasury_cash_centimes": 16000000,
+      "opening_central_bank_cash_centimes": 22000000,
+      "gold_reserve_grams": 11200000,
+      "parity_centimes_per_gram": 300,
+      "opening_exchange_rate_bp": 10000
+    }
+  ],
+  "regions": [
+    {"region_id": "region:loran_dawnbay", "market_id": "market_clearing:loran_dawnbay", "household_id": "households:loran_dawnbay", "country_id": "country:loran_federation", "logistics_operator_id": "organization:enterprise_dawnharbor_freight", "wage_centimes_per_worker_day": 9, "market_opening_cash_centimes": 9000000},
+    {"region_id": "region:loran_riverback", "market_id": "market_clearing:loran_riverback", "household_id": "households:loran_riverback", "country_id": "country:loran_federation", "logistics_operator_id": "organization:enterprise_dawnharbor_freight", "wage_centimes_per_worker_day": 8, "market_opening_cash_centimes": 8000000},
+    {"region_id": "region:loran_forgeplain", "market_id": "market_clearing:loran_forgeplain", "household_id": "households:loran_forgeplain", "country_id": "country:loran_federation", "logistics_operator_id": "organization:enterprise_dawnharbor_freight", "wage_centimes_per_worker_day": 7, "market_opening_cash_centimes": 7500000},
+    {"region_id": "region:loran_southridge", "market_id": "market_clearing:loran_southridge", "household_id": "households:loran_southridge", "country_id": "country:loran_federation", "logistics_operator_id": "organization:enterprise_dawnharbor_freight", "wage_centimes_per_worker_day": 5, "market_opening_cash_centimes": 6500000},
+    {"region_id": "region:vesta_northstar", "market_id": "market_clearing:vesta_northstar", "household_id": "households:vesta_northstar", "country_id": "country:vesta_union", "logistics_operator_id": "organization:vesta_enterprise", "wage_centimes_per_worker_day": 5, "market_opening_cash_centimes": 6200000},
+    {"region_id": "region:vesta_silverfield", "market_id": "market_clearing:vesta_silverfield", "household_id": "households:vesta_silverfield", "country_id": "country:vesta_union", "logistics_operator_id": "organization:vesta_enterprise", "wage_centimes_per_worker_day": 9, "market_opening_cash_centimes": 8500000},
+    {"region_id": "region:vesta_eastlake", "market_id": "market_clearing:vesta_eastlake", "household_id": "households:vesta_eastlake", "country_id": "country:vesta_union", "logistics_operator_id": "organization:enterprise_eastlake_boats", "wage_centimes_per_worker_day": 7, "market_opening_cash_centimes": 7000000},
+    {"region_id": "region:vesta_redhill", "market_id": "market_clearing:vesta_redhill", "household_id": "households:vesta_redhill", "country_id": "country:vesta_union", "logistics_operator_id": "organization:vesta_enterprise", "wage_centimes_per_worker_day": 8, "market_opening_cash_centimes": 7800000}
+  ],
+  "enterprise_assignment": {
+    "region_enterprises": {
+      "region:loran_dawnbay": ["organization:loran_dawnbay_trade", "organization:enterprise_dawnharbor_freight", "organization:enterprise_loran_gazette"],
+      "region:loran_riverback": ["organization:loran_enterprise", "organization:enterprise_ironford_textile"],
+      "region:loran_forgeplain": ["organization:loran_forgeworks"],
+      "region:loran_southridge": ["organization:loran_dawnbay_trade"],
+      "region:vesta_northstar": ["organization:vesta_northstar_trade"],
+      "region:vesta_silverfield": ["organization:vesta_northstar_trade", "organization:enterprise_starhold_press"],
+      "region:vesta_eastlake": ["organization:vesta_enterprise", "organization:enterprise_eastlake_boats"],
+      "region:vesta_redhill": ["organization:vesta_redhill_industry", "organization:enterprise_redplain_supply"]
+    },
+    "recipe_structure_affinity": {
+      "freight_network": "logistics",
+      "thermal_power": "small_production",
+      "coal_mine": "small_production",
+      "iron_mine": "small_production",
+      "copper_mine": "small_production",
+      "blast_furnace": "small_production",
+      "steelworks": "small_production",
+      "machine_works": "small_production",
+      "cotton_mill": "small_production",
+      "wool_mill": "small_production",
+      "clothing_factory": "small_production",
+      "paper_mill": "information_service"
+    }
+  },
+  "transport_edges": [
+    {"edge_id": "route:loran_dawnbay_riverback", "from_region_id": "region:loran_dawnbay", "to_region_id": "region:loran_riverback", "bidirectional": true, "mode": "rail_river", "duration_hours": 18, "capacity_units_per_day": 900, "cost_centimes_per_unit": 5, "risk_bp": 120, "cross_border": false, "carrier_id": "organization:enterprise_dawnharbor_freight"},
+    {"edge_id": "route:loran_riverback_forgeplain", "from_region_id": "region:loran_riverback", "to_region_id": "region:loran_forgeplain", "bidirectional": true, "mode": "rail", "duration_hours": 20, "capacity_units_per_day": 780, "cost_centimes_per_unit": 6, "risk_bp": 150, "cross_border": false, "carrier_id": "organization:enterprise_dawnharbor_freight"},
+    {"edge_id": "route:loran_riverback_southridge", "from_region_id": "region:loran_riverback", "to_region_id": "region:loran_southridge", "bidirectional": true, "mode": "branch_rail_road", "duration_hours": 32, "capacity_units_per_day": 520, "cost_centimes_per_unit": 9, "risk_bp": 260, "cross_border": false, "carrier_id": "organization:enterprise_dawnharbor_freight"},
+    {"edge_id": "route:vesta_northstar_silverfield", "from_region_id": "region:vesta_northstar", "to_region_id": "region:vesta_silverfield", "bidirectional": true, "mode": "rail_post", "duration_hours": 26, "capacity_units_per_day": 600, "cost_centimes_per_unit": 8, "risk_bp": 220, "cross_border": false, "carrier_id": "organization:vesta_enterprise"},
+    {"edge_id": "route:vesta_silverfield_eastlake", "from_region_id": "region:vesta_silverfield", "to_region_id": "region:vesta_eastlake", "bidirectional": true, "mode": "rail_lake", "duration_hours": 16, "capacity_units_per_day": 880, "cost_centimes_per_unit": 5, "risk_bp": 130, "cross_border": false, "carrier_id": "organization:vesta_enterprise"},
+    {"edge_id": "route:vesta_eastlake_redhill", "from_region_id": "region:vesta_eastlake", "to_region_id": "region:vesta_redhill", "bidirectional": true, "mode": "heavy_rail", "duration_hours": 18, "capacity_units_per_day": 1100, "cost_centimes_per_unit": 6, "risk_bp": 180, "cross_border": false, "carrier_id": "organization:vesta_enterprise"},
+    {"edge_id": "route:dawnbay_silverfield_border", "from_region_id": "region:loran_dawnbay", "to_region_id": "region:vesta_silverfield", "bidirectional": true, "mode": "port_rail", "duration_hours": 42, "capacity_units_per_day": 620, "cost_centimes_per_unit": 13, "risk_bp": 420, "cross_border": true, "carrier_id": "organization:enterprise_dawnharbor_freight"},
+    {"edge_id": "route:riverback_redhill_border", "from_region_id": "region:loran_riverback", "to_region_id": "region:vesta_redhill", "bidirectional": true, "mode": "border_rail", "duration_hours": 46, "capacity_units_per_day": 700, "cost_centimes_per_unit": 14, "risk_bp": 500, "cross_border": true, "carrier_id": "organization:vesta_enterprise"},
+    {"edge_id": "route:southridge_northstar_border", "from_region_id": "region:loran_southridge", "to_region_id": "region:vesta_northstar", "bidirectional": true, "mode": "road_rail", "duration_hours": 58, "capacity_units_per_day": 360, "cost_centimes_per_unit": 18, "risk_bp": 680, "cross_border": true, "carrier_id": "organization:vesta_enterprise"}
+  ],
+  "trade_relations": [
+    {"exporter_country_id": "country:loran_federation", "importer_country_id": "country:vesta_union", "tariff_bp": 650, "daily_quota_units": 1500, "embargo": false, "preference_bp": 0},
+    {"exporter_country_id": "country:vesta_union", "importer_country_id": "country:loran_federation", "tariff_bp": 520, "daily_quota_units": 1600, "embargo": false, "preference_bp": 0}
+  ],
+  "government_procurement": [
+    {"country_id": "country:loran_federation", "commodity_id": "grain", "target_units": 1500, "daily_purchase_limit_units": 80},
+    {"country_id": "country:loran_federation", "commodity_id": "coal", "target_units": 1200, "daily_purchase_limit_units": 70},
+    {"country_id": "country:vesta_union", "commodity_id": "grain", "target_units": 1400, "daily_purchase_limit_units": 75},
+    {"country_id": "country:vesta_union", "commodity_id": "coal", "target_units": 1800, "daily_purchase_limit_units": 90}
+  ],
+  "historical_world_adapter": {
+    "coverage_registry_path": "res://data/alpha/historical_economy_coverage_1900.json",
+    "require_verified_population": true,
+    "require_verified_industry": true,
+    "require_verified_transport": true,
+    "forbid_generated_numeric_defaults": true
+  }
+}
