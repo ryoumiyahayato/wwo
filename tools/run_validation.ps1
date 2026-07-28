@@ -82,6 +82,15 @@ $null = Invoke-GodotStep -Name 'Clean import and script scan' -Arguments @(
     '--editor', '--headless', '--path', $ProjectPath, '--quit'
 ) -TimeoutSeconds 180
 
+
+Write-Host "`n=== 1900 economy static audits ==="
+& python "$ProjectPath/tools/audit_1900_commodity_economy.py"
+if ($LASTEXITCODE -ne 0) { throw 'Commodity economy static audit failed' }
+& python "$ProjectPath/tools/audit_1900_economy_integration.py"
+if ($LASTEXITCODE -ne 0) { throw 'Economy integration static audit failed' }
+& python "$ProjectPath/tools/audit_1900_world_economy_compact.py"
+if ($LASTEXITCODE -ne 0) { throw 'Historical world economy static audit failed' }
+
 $tests = @(
     @{ Name = 'V2.2 config and datetime'; Script = 'res://tests/v2_2/v2_2_config_datetime_test.gd' },
     @{ Name = 'V2.2 atomicity'; Script = 'res://tests/v2_2/v2_2_atomicity_test.gd' },
@@ -121,6 +130,13 @@ $tests = @(
     @{ Name = 'V2.3 full loop smoke'; Script = 'res://tests/v2_3/v2_3_full_loop_smoke.gd' },
     @{ Name = 'Grid fixture world and topology'; Script = 'res://tests/alpha/alpha_world_topology_test.gd' },
     @{ Name = 'Grid fixture economy lifecycle'; Script = 'res://tests/alpha/alpha_economy_lifecycle_test.gd' },
+
+@{ Name = 'Grid fixture commodity market'; Script = 'res://tests/alpha/alpha_commodity_market_test.gd'; TimeoutSeconds = 180 },
+@{ Name = 'Grid fixture economy UI'; Script = 'res://tests/alpha/alpha_economy_ui_audit_test.gd'; TimeoutSeconds = 180 },
+@{ Name = 'Grid fixture unified economy phase two'; Script = 'res://tests/alpha/alpha_economy_integration_phase2_test.gd'; TimeoutSeconds = 240 },
+@{ Name = 'Grid fixture AI economy stability'; Script = 'res://tests/alpha/alpha_ai_economy_stability_test.gd'; TimeoutSeconds = 300 },
+@{ Name = 'Historical world economy data'; Script = 'res://tests/alpha/alpha_historical_world_economy_data_test.gd'; TimeoutSeconds = 120 },
+@{ Name = 'Formal historical world integration'; Script = 'res://tests/formal/formal_world_integration_test.gd'; TimeoutSeconds = 300 },
     @{ Name = 'Grid fixture labor and enterprise'; Script = 'res://tests/alpha/alpha_labor_enterprise_test.gd' },
     @{ Name = 'Grid fixture character and development'; Script = 'res://tests/alpha/alpha_character_development_test.gd' },
     @{ Name = 'Grid fixture organization and politics'; Script = 'res://tests/alpha/alpha_organization_politics_test.gd' },
