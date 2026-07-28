@@ -1,0 +1,142 @@
+name: Fix economy phase two save footprint
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/fix-economy-phase2-save-footprint.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/economy-integration-phase2
+      - name: Bound retained ledger and idempotency history
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+
+          config_path = Path("data/alpha/economy_integration_1900.json")
+          document = json.loads(config_path.read_text(encoding="utf-8"))
+          policies = document.setdefault("policies", {})
+          policies["ledger_history_limit"] = 4096
+          policies["ledger_processed_key_multiplier"] = 4
+          config_path.write_text(
+              json.dumps(document, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+
+          economy_path = Path("scripts/alpha/alpha_economy_service.gd")
+          text = economy_path.read_text(encoding="utf-8")
+          old = '''func configure(config: AlphaConfig) -> bool:
+          \tledger.configure()
+          \tassets.configure(ledger)
+          '''
+          new = '''func configure(config: AlphaConfig) -> bool:
+          \tvar integration_policies := (
+          \t\tconfig.economy_integration().get("policies", {}) as Dictionary
+          \t)
+          \tledger.configure(int(integration_policies.get("ledger_history_limit", 4096)))
+          \tledger.set_processed_key_multiplier(int(
+          \t\tintegration_policies.get("ledger_processed_key_multiplier", 4)
+          \t))
+          \tassets.configure(ledger)
+          '''
+          if new not in text:
+              if old not in text:
+                  raise SystemExit("economy ledger configuration anchor missing")
+              economy_path.write_text(text.replace(old, new, 1), encoding="utf-8")
+
+          ledger_path = Path("scripts/alpha/alpha_ledger_service.gd")
+          text = ledger_path.read_text(encoding="utf-8")
+          text = text.replace(
+              'const PROCESSED_KEY_MULTIPLIER: int = 8\n',
+              'const DEFAULT_PROCESSED_KEY_MULTIPLIER: int = 4\n',
+              1,
+          )
+          old = '''var _next_sequence: int = 1
+          var _history_limit: int = DEFAULT_HISTORY_LIMIT
+          '''
+          new = '''var _next_sequence: int = 1
+          var _history_limit: int = DEFAULT_HISTORY_LIMIT
+          var _processed_key_multiplier: int = DEFAULT_PROCESSED_KEY_MULTIPLIER
+          '''
+          if new not in text:
+              if old not in text:
+                  raise SystemExit("ledger multiplier state anchor missing")
+              text = text.replace(old, new, 1)
+          old = '''\t_history_limit = maxi(256, history_limit)
+          \t_register_account(SYSTEM_OPENING_ACCOUNT, "system:opening", "system", true)
+          '''
+          new = '''\t_history_limit = maxi(256, history_limit)
+          \t_processed_key_multiplier = DEFAULT_PROCESSED_KEY_MULTIPLIER
+          \t_register_account(SYSTEM_OPENING_ACCOUNT, "system:opening", "system", true)
+          '''
+          if new not in text:
+              if old not in text:
+                  raise SystemExit("ledger configure multiplier reset anchor missing")
+              text = text.replace(old, new, 1)
+          anchor = '''func register_cash_account(
+          '''
+          method = '''func set_processed_key_multiplier(multiplier: int) -> void:
+          \t_processed_key_multiplier = clampi(multiplier, 1, 8)
+          \t_trim_processed_keys()
+          
+          
+          func register_cash_account(
+          '''
+          if method not in text:
+              if anchor not in text:
+                  raise SystemExit("ledger multiplier setter anchor missing")
+              text = text.replace(anchor, method, 1)
+          old = '''\t\t"history_limit": _history_limit,
+          \t}
+          '''
+          new = '''\t\t"history_limit": _history_limit,
+          \t\t"processed_key_multiplier": _processed_key_multiplier,
+          \t}
+          '''
+          if new not in text:
+              if old not in text:
+                  raise SystemExit("ledger persistent multiplier anchor missing")
+              text = text.replace(old, new, 1)
+          old = '''\t_history_limit = maxi(256, int(state.get("history_limit", DEFAULT_HISTORY_LIMIT)))
+          \tif _next_sequence < 1 or not bool(validate_balances().get("success", false)):
+          '''
+          new = '''\t_history_limit = maxi(256, int(state.get("history_limit", DEFAULT_HISTORY_LIMIT)))
+          \t_processed_key_multiplier = clampi(int(
+          \t\tstate.get("processed_key_multiplier", DEFAULT_PROCESSED_KEY_MULTIPLIER)
+          \t), 1, 8)
+          \tif _next_sequence < 1 or not bool(validate_balances().get("success", false)):
+          '''
+          if new not in text:
+              if old not in text:
+                  raise SystemExit("ledger restore multiplier anchor missing")
+              text = text.replace(old, new, 1)
+          old = '''\tvar processed_limit: int = _history_limit * PROCESSED_KEY_MULTIPLIER
+          '''
+          new = '''\tvar processed_limit: int = _history_limit * _processed_key_multiplier
+          '''
+          if new not in text:
+              if old not in text:
+                  raise SystemExit("ledger processed limit anchor missing")
+              text = text.replace(old, new, 1)
+          ledger_path.write_text(text, encoding="utf-8")
+          PY
+          python3 -m json.tool data/alpha/economy_integration_1900.json >/dev/null
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/alpha/economy_integration_1900.json scripts/alpha/alpha_economy_service.gd scripts/alpha/alpha_ledger_service.gd
+          git commit -m "bound ledger persistence for long simulations"
+          git push origin HEAD:agent/economy-integration-phase2
