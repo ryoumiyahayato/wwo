@@ -116,6 +116,14 @@ func _draw_formal_polity_panel() -> void:
 		Color(0.014, 0.031, 0.037, 0.975),
 		Color(0.78, 0.66, 0.38, 0.44)
 	)
+	_draw_formal_panel_header(rect)
+	var selected_id := _selected_polity_entity_id()
+	var polity := formal_simulation.polity_summary(selected_id)
+	_draw_polity_content(rect, selected_id, polity)
+	_draw_formal_panel_buttons(rect)
+
+
+func _draw_formal_panel_header(rect: Rect2) -> void:
 	_draw_label(
 		rect.position + Vector2(20.0, 31.0),
 		"正式世界政经",
@@ -128,8 +136,11 @@ func _draw_formal_polity_panel() -> void:
 		9,
 		Color(0.76, 0.81, 0.78, 0.95)
 	)
-	var selected_id := _selected_polity_entity_id()
-	var polity := formal_simulation.polity_summary(selected_id)
+
+
+func _draw_polity_content(
+	rect: Rect2, selected_id: String, polity: Dictionary
+) -> void:
 	var y := 86.0
 	if polity.is_empty():
 		_draw_label(
@@ -137,68 +148,96 @@ func _draw_formal_polity_panel() -> void:
 			"在半球上选择政治单元。",
 			11
 		)
+		return
+	_draw_label(
+		rect.position + Vector2(20.0, y),
+		str(polity.get("name_zh", polity.get("short_name_zh", selected_id))),
+		14
+	)
+	y += 24.0
+	var polity_lines: Array[String] = [
+		"层级：%s" % str(polity.get("playability_tier_zh", "背景政治单元")),
+		"地位：%s · %s" % [
+			str(polity.get("status", "unknown")),
+			str(polity.get("relationship", "")),
+		],
+	]
+	var controller_id := str(polity.get("controller_id", ""))
+	if not controller_id.is_empty():
+		polity_lines.append("控制方：%s" % controller_id)
+	y = _draw_panel_lines(
+		rect,
+		y,
+		polity_lines,
+		Color(0.82, 0.84, 0.78, 0.96),
+		10
+	)
+	y += 5.0
+	if bool(polity.get("has_detailed_economy", false)):
+		_draw_detailed_economy(rect, y, polity.get("economy", {}) as Dictionary)
 	else:
+		_draw_background_polity_notice(rect, y)
+
+
+func _draw_detailed_economy(
+	rect: Rect2, y: float, country: Dictionary
+) -> void:
+	var totals := country.get("daily_totals", {}) as Dictionary
+	var economy_lines: Array[String] = [
+		"主要政权序位：%d" % int(country.get("rank", 0)),
+		"人口：%s" % _compact_integer(int(country.get("population", 0))),
+		"人均产出锚：%d（2011国际元口径）" % int(
+			country.get("income_per_capita", 0)
+		),
+		"城市化率：%.1f%%" % (
+			float(country.get("urban_share_bp", 0)) / 100.0
+		),
+		"数据状态：%.1f%% · %s" % [
+			float(country.get("overall_confidence_bp", 0)) / 100.0,
+			str(country.get("admission_status", "bounded_estimate")),
+		],
+		"当日满足率：%.1f%%" % (
+			float(totals.get("fulfillment_bp", 0)) / 100.0
+		),
+		"关联在途运输：%d" % int(country.get("active_shipments", 0)),
+	]
+	_draw_panel_lines(
+		rect,
+		y,
+		economy_lines,
+		Color(0.86, 0.87, 0.80, 0.98),
+		10
+	)
+
+
+func _draw_background_polity_notice(rect: Rect2, y: float) -> void:
+	_draw_label(
+		rect.position + Vector2(20.0, y),
+		"该单元属于背景世界：保留边界、归属与外交存在，不运行高细节经济。",
+		9,
+		Color(0.91, 0.70, 0.45, 0.98)
+	)
+
+
+func _draw_panel_lines(
+	rect: Rect2,
+	y: float,
+	lines: Array[String],
+	color: Color,
+	font_size: int
+) -> float:
+	for line: String in lines:
 		_draw_label(
 			rect.position + Vector2(20.0, y),
-			str(polity.get("name_zh", polity.get("short_name_zh", selected_id))),
-			14
+			line,
+			font_size,
+			color
 		)
-		y += 24.0
-		var polity_lines: Array[String] = [
-			"层级：%s" % str(polity.get("playability_tier_zh", "背景政治单元")),
-			"地位：%s · %s" % [
-				str(polity.get("status", "unknown")),
-				str(polity.get("relationship", "")),
-			],
-		]
-		var controller_id := str(polity.get("controller_id", ""))
-		if not controller_id.is_empty():
-			polity_lines.append("控制方：%s" % controller_id)
-		for line: String in polity_lines:
-			_draw_label(
-				rect.position + Vector2(20.0, y),
-				line,
-				10,
-				Color(0.82, 0.84, 0.78, 0.96)
-			)
-			y += 19.0
-		y += 5.0
-		if bool(polity.get("has_detailed_economy", false)):
-			var country := polity.get("economy", {}) as Dictionary
-			var totals := country.get("daily_totals", {}) as Dictionary
-			var economy_lines: Array[String] = [
-				"主要政权序位：%d" % int(country.get("rank", 0)),
-				"人口：%s" % _compact_integer(int(country.get("population", 0))),
-				"人均产出锚：%d（2011国际元口径）" % int(
-					country.get("income_per_capita", 0)
-				),
-				"城市化率：%.1f%%" % (
-					float(country.get("urban_share_bp", 0)) / 100.0
-				),
-				"数据状态：%.1f%% · %s" % [
-					float(country.get("overall_confidence_bp", 0)) / 100.0,
-					str(country.get("admission_status", "bounded_estimate")),
-				],
-				"当日满足率：%.1f%%" % (
-					float(totals.get("fulfillment_bp", 0)) / 100.0
-				),
-				"关联在途运输：%d" % int(country.get("active_shipments", 0)),
-			]
-			for line: String in economy_lines:
-				_draw_label(
-					rect.position + Vector2(20.0, y),
-					line,
-					10,
-					Color(0.86, 0.87, 0.80, 0.98)
-				)
-				y += 19.0
-		else:
-			_draw_label(
-				rect.position + Vector2(20.0, y),
-				"该单元属于背景世界：保留边界、归属与外交存在，不运行高细节经济。",
-				9,
-				Color(0.91, 0.70, 0.45, 0.98)
-			)
+		y += 19.0
+	return y
+
+
+func _draw_formal_panel_buttons(rect: Rect2) -> void:
 	var button_y := rect.end.y - 38.0
 	_draw_button(
 		Rect2(rect.position.x + 18.0, button_y, 84.0, 26.0),
