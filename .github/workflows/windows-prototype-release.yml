@@ -63,8 +63,8 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $templateUrl = 'https://godot-releases.nbg1.your-objectstorage.com/4.6.3-stable/Godot_v4.6.3-stable_export_templates.tpz'
-          curl.exe --fail --location --retry 5 --retry-delay 3 --output templates.zip $templateUrl
+          $templateUrl = 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_export_templates.tpz'
+          curl.exe --fail --location --retry 5 --retry-delay 3 --max-time 900 --output templates.zip $templateUrl
           if ($LASTEXITCODE -ne 0 -or -not (Test-Path templates.zip)) {
             throw 'Godot export templates download failed.'
           }
