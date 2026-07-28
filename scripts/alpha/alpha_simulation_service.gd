@@ -26,6 +26,7 @@ var core_data: CoreDataSet
 var world := AlphaWorldService.new()
 var organization_service: OrganizationService
 var economy := AlphaEconomyService.new()
+var commodity_market := AlphaCommodityMarketService.new()
 var labor := AlphaLaborService.new()
 var enterprise := AlphaEnterpriseService.new()
 var character_service := AlphaCharacterService.new()
@@ -71,6 +72,8 @@ func initialize(simulation_clock: SimulationClock = null) -> bool:
 	organization_service = OrganizationService.new(core_data.organizations)
 	if not economy.configure(alpha_config):
 		return _fail_alpha("统一经济服务初始化失败")
+	if not commodity_market.configure(alpha_config):
+		return _fail_alpha("1900商品市场初始化失败：%s" % commodity_market.initialization_error)
 	if not labor.configure(alpha_config, economy):
 		return _fail_alpha("劳动服务初始化失败")
 	if not enterprise.configure(
@@ -98,7 +101,7 @@ func initialize(simulation_clock: SimulationClock = null) -> bool:
 	):
 		return _fail_alpha("AI 服务初始化失败")
 	if not world_dynamics.configure(
-		world, economy, enterprise, politics, roster, alpha_config
+		world, economy, enterprise, politics, roster, alpha_config, commodity_market
 	):
 		return _fail_alpha("世界动态服务初始化失败")
 	alpha_events.clear()
@@ -307,6 +310,9 @@ func alpha_counts() -> Dictionary:
 		if organization_service != null else 0
 	)
 	counts["contracts"] = economy.contracts.contracts.size()
+	counts["commodities"] = commodity_market.commodities.size()
+	counts["commodity_regions"] = commodity_market.region_states.size()
+	counts["commodity_production_sites"] = commodity_market.production_sites.size()
 	counts["debts"] = _loan_count()
 	counts["unfinished_matters"] = _unfinished_matter_count()
 	counts["event_history"] = (
@@ -320,6 +326,7 @@ func validate_alpha_integrity() -> Dictionary:
 		return _result(false, "active_character_limit", {})
 	for result: Dictionary in [
 		economy.validate_integrity(),
+		commodity_market.validate_integrity(),
 		enterprise.validate_integrity(),
 		politics.validate_integrity(),
 	]:
@@ -347,6 +354,7 @@ func get_alpha_persistent_state() -> Dictionary:
 	state["alpha_roster_state"] = roster.get_persistent_state()
 	state["alpha_organization_state"] = organization_service.get_persistent_state()
 	state["alpha_economy_state"] = economy.get_persistent_state()
+	state["alpha_commodity_market_state"] = commodity_market.get_persistent_state()
 	state["alpha_labor_state"] = labor.get_persistent_state()
 	state["alpha_enterprise_state"] = enterprise.get_persistent_state()
 	state["alpha_character_state"] = character_service.get_persistent_state()
@@ -397,6 +405,11 @@ func validate_alpha_snapshot_structure(state: Dictionary) -> Dictionary:
 	]:
 		if not state.get(field, {}) is Dictionary:
 			return _result(false, "invalid_field:%s" % field, {})
+	if (
+		state.has("alpha_commodity_market_state")
+		and not state["alpha_commodity_market_state"] is Dictionary
+	):
+		return _result(false, "invalid_field:alpha_commodity_market_state", {})
 	for field: String in [
 		"alpha_organization_state", "alpha_events", "detailed_enterprise_ids",
 	]:
@@ -412,6 +425,16 @@ func _settle_hour(total_hour: int) -> void:
 	_reconcile_legacy_cash(legacy_before, total_hour)
 	var value: Dictionary = V2DateTime.from_total_hour(total_hour)
 	if int(value.get("hour", -1)) == 23:
+		economy.expire_market_shocks(total_hour)
+		var market_result: Dictionary = commodity_market.settle_day(total_hour)
+		if not bool(market_result.get("success", false)):
+			_append_alpha_event({
+				"event_id": "event:commodity_market_failure:%d" % total_hour,
+				"total_hour": total_hour,
+				"fact_type": "commodity_market_failure",
+				"summary": "商品市场日结失败，已保留上一日状态。",
+				"requires_decision": true,
+			})
 		_process_active_ai(total_hour)
 		world_dynamics.process_boundaries(
 			total_hour, roster.active_characters
@@ -1227,6 +1250,11 @@ func _apply_alpha_state(state: Dictionary) -> bool:
 		state["alpha_economy_state"] as Dictionary
 	):
 		return _restore_domain_failed("economy")
+	if state.has("alpha_commodity_market_state"):
+		if not commodity_market.restore_persistent_state(
+			state["alpha_commodity_market_state"] as Dictionary
+		):
+			return _restore_domain_failed("commodity_market")
 	if not labor.restore_persistent_state(
 		state["alpha_labor_state"] as Dictionary
 	):

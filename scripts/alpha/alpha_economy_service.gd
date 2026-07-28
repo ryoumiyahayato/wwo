@@ -4,6 +4,7 @@ extends RefCounted
 
 const HOURS_PER_DAY: int = 24
 const DAYS_PER_YEAR: int = 365
+const TRADE_ESCROW_ID: String = "system:trade_escrow"
 const CREDIT_LENDER_IDS: Array[String] = [
 	"organization:loran_public_credit",
 	"organization:vesta_public_credit",
@@ -47,6 +48,9 @@ func configure(config: AlphaConfig) -> bool:
 	for raw_region: Variant in config.region_profiles():
 		var region: Dictionary = raw_region as Dictionary
 		_initialize_market(region)
+	var escrow_registered: Dictionary = register_entity(TRADE_ESCROW_ID, "system", 0)
+	if not bool(escrow_registered.get("success", false)):
+		return false
 	for lender_id: String in CREDIT_LENDER_IDS:
 		var registered: Dictionary = register_entity(lender_id, "organization", 2_000_000)
 		if not bool(registered.get("success", false)):
@@ -593,23 +597,48 @@ func settle_trade(
 	idempotency_key: String, contract_id: String, total_hour: int
 ) -> Dictionary:
 	var contract: Dictionary = contracts.contracts.get(contract_id, {}) as Dictionary
+	if contract.is_empty():
+		return _fail("trade_contract_missing", "买卖或订单合同不存在")
 	if str(contract.get("contract_type", "")) not in ["sale", "order"]:
 		return _fail("invalid_trade_contract", "结算对象不是买卖或订单合同")
+	if str(contract.get("status", "")) == "fulfilled":
+		return _ok({"contract": contract.duplicate(true), "duplicate": true})
+	if str(contract.get("status", "")) not in AlphaContractService.ACTIVE_STATUSES:
+		return _fail("trade_contract_inactive", "买卖合同不处于可结算状态")
 	var buyer_id: String = _party_with_role(contract, "buyer")
 	var seller_id: String = _party_with_role(contract, "seller")
 	var amount: int = contracts.outstanding(contract_id)
-	var payment: Dictionary = ledger.transfer(
-		"ledger:%s" % idempotency_key,
+	var delivery_conditions: Dictionary = contract.get("delivery_conditions", {}) as Dictionary
+	var due_hour: int = int(contract.get("start_hour", 0)) + int(
+		delivery_conditions.get("transport_days", 0)
+	) * HOURS_PER_DAY
+	if total_hour < due_hour:
+		return _fail("trade_not_deliverable_yet", "运输期限尚未届满")
+	if (
+		buyer_id.is_empty()
+		or seller_id.is_empty()
+		or amount <= 0
+		or ledger.cash_account_id(buyer_id).is_empty()
+		or ledger.cash_account_id(seller_id).is_empty()
+		or ledger.cash_account_id(TRADE_ESCROW_ID).is_empty()
+	):
+		return _fail("trade_settlement_preflight_failed", "交易参与方、账户或应付金额无效")
+	if ledger.owner_cash(buyer_id) < amount:
+		return _fail("insufficient_cash", "%s 现金不足" % buyer_id)
+	if int(contract.get("fulfillment_bp", 0)) != 0:
+		return _fail("partial_trade_requires_manual_resolution", "部分交付合同不能使用一次性全额结算")
+	var escrowed: Dictionary = ledger.transfer(
+		"ledger:escrow:%s" % idempotency_key,
 		total_hour,
 		buyer_id,
-		seller_id,
+		TRADE_ESCROW_ID,
 		amount,
-		"trade_payment",
-		"fact:trade_settlement:%s" % contract_id,
-		"商品或服务交易结算"
+		"trade_escrow",
+		"fact:trade_escrow:%s" % contract_id,
+		"买卖合同交付前托管"
 	)
-	if not bool(payment.get("success", false)):
-		return payment
+	if not bool(escrowed.get("success", false)):
+		return escrowed
 	var delivered: Dictionary = contracts.record_delivery(
 		"delivery:%s" % idempotency_key,
 		contract_id,
@@ -618,12 +647,34 @@ func settle_trade(
 		"evidence:delivery:%s" % contract_id
 	)
 	if not bool(delivered.get("success", false)):
+		ledger.transfer(
+			"ledger:escrow_refund:%s" % idempotency_key,
+			total_hour,
+			TRADE_ESCROW_ID,
+			buyer_id,
+			amount,
+			"trade_escrow_refund",
+			"fact:trade_escrow_refund:%s" % contract_id,
+			"交付登记失败，退回交易托管款"
+		)
 		return delivered
+	var payment: Dictionary = ledger.transfer(
+		"ledger:settlement:%s" % idempotency_key,
+		total_hour,
+		TRADE_ESCROW_ID,
+		seller_id,
+		amount,
+		"trade_payment",
+		"fact:trade_settlement:%s" % contract_id,
+		"商品或服务交易结算"
+	)
+	if not bool(payment.get("success", false)):
+		return payment
 	var transaction: Dictionary = (payment.get("data", {}) as Dictionary).get(
 		"transaction", {}
 	) as Dictionary
 	return contracts.record_payment(
-		idempotency_key,
+		"contract_payment:%s" % idempotency_key,
 		contract_id,
 		total_hour,
 		str(transaction.get("transaction_id", "")),
@@ -693,6 +744,27 @@ func apply_market_shock(
 		external_events.pop_front()
 	_processed_keys[idempotency_key] = "market"
 	return _ok({"before_price": before, "after_price": prices[good_id]})
+
+
+func expire_market_shocks(total_hour: int) -> int:
+	var active: Array[Dictionary] = []
+	var expired_count: int = 0
+	for event: Dictionary in external_events:
+		if total_hour < int(event.get("end_hour", -1)):
+			active.append(event)
+			continue
+		var region_id: String = str(event.get("region_id", ""))
+		var good_id: String = str(event.get("good_id", ""))
+		var market: Dictionary = markets.get(region_id, {}) as Dictionary
+		var prices: Dictionary = market.get("prices", {}) as Dictionary
+		if int(prices.get(good_id, 0)) == int(event.get("after_price", -1)):
+			prices[good_id] = maxi(1, int(event.get("before_price", 1)))
+			market["prices"] = prices
+			market["state"] = "balanced"
+			markets[region_id] = market
+		expired_count += 1
+	external_events = active
+	return expired_count
 
 
 func market_price(region_id: String, good_id: String) -> int:

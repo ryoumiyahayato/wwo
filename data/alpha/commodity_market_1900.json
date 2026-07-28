@@ -1,0 +1,2404 @@
+{
+  "config_version": 1,
+  "schema_id": "alpha_commodity_market_1900_v1",
+  "calibration_year": 1900,
+  "calibration_notice_zh": "消费率与价格是以1900年前后统计资料约束的游戏校准值，不是所有国家和阶层的统一历史真值。",
+  "policies": {
+    "population_unit": 1000000,
+    "basis_points": 10000,
+    "regional_balance_before_international": true,
+    "negative_inventory_forbidden": true,
+    "modern_brand_skus_collapsed": true,
+    "local_perishables_not_internationally_cleared": true,
+    "price_smoothing_bp": 2500,
+    "minimum_frictional_unemployment_bp": 250,
+    "maximum_daily_price_change_bp": 1800
+  },
+  "source_groups": [
+    {
+      "source_id": "nber_us_trade_1879_1923",
+      "title": "Price Quantity Indexes and Values for U.S. Exports and Imports, 1879–1923",
+      "use": "国际商品分类与贸易品范围"
+    },
+    {
+      "source_id": "federico_tena_world_trade",
+      "title": "World Trade, 1800–1938: A New Synthesis",
+      "use": "世界贸易覆盖、初级品与制成品结构"
+    },
+    {
+      "source_id": "us_census_1900_manufactures",
+      "title": "Twelfth Census of the United States: Manufactures and selected industries",
+      "use": "食品、纺织、木材、纸浆、金属、焦炭、石油、机械和化工产业范围"
+    },
+    {
+      "source_id": "uk_food_consumption_1909_1913",
+      "title": "United Kingdom weekly per-capita food consumption estimates, 1909–1913",
+      "use": "人口食品消费数量级校准"
+    }
+  ],
+  "commodities": [
+    {
+      "commodity_id": "wheat",
+      "name_zh": "小麦",
+      "category": "agricultural_food",
+      "trade_class": "global_bulk",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 120,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 100,
+      "spoilage_bp_per_day": 5,
+      "target_stock_days": 30,
+      "international_liquidity_units": 220000,
+      "storage_priority": 10,
+      "historical_note": "跨大西洋粮食贸易的核心谷物；主要供面粉厂。"
+    },
+    {
+      "commodity_id": "rye",
+      "name_zh": "黑麦",
+      "category": "agricultural_food",
+      "trade_class": "regional_mass",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 105,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 80,
+      "spoilage_bp_per_day": 5,
+      "target_stock_days": 25,
+      "international_liquidity_units": 65000,
+      "storage_priority": 9,
+      "historical_note": "北欧和东欧重要口粮谷物。"
+    },
+    {
+      "commodity_id": "maize",
+      "name_zh": "玉米",
+      "category": "agricultural_food",
+      "trade_class": "global_bulk",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 95,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 100,
+      "spoilage_bp_per_day": 5,
+      "target_stock_days": 25,
+      "international_liquidity_units": 180000,
+      "storage_priority": 9,
+      "historical_note": "兼作口粮、饲料和工业原料。"
+    },
+    {
+      "commodity_id": "rice",
+      "name_zh": "稻米",
+      "category": "agricultural_food",
+      "trade_class": "global_bulk",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 135,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 120,
+      "spoilage_bp_per_day": 5,
+      "target_stock_days": 30,
+      "international_liquidity_units": 180000,
+      "storage_priority": 10,
+      "historical_note": "亚洲区域贸易及远洋贸易的重要主粮。"
+    },
+    {
+      "commodity_id": "potatoes",
+      "name_zh": "马铃薯",
+      "category": "agricultural_food",
+      "trade_class": "regional_mass",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 60,
+      "base_daily_units_per_million": 210,
+      "income_elasticity_bp": 200,
+      "spoilage_bp_per_day": 80,
+      "target_stock_days": 8,
+      "international_liquidity_units": 15000,
+      "storage_priority": 10,
+      "historical_note": "高体积低价值主粮，远洋贸易较少。"
+    },
+    {
+      "commodity_id": "pulses",
+      "name_zh": "豆类",
+      "category": "agricultural_food",
+      "trade_class": "international_specialty",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 145,
+      "base_daily_units_per_million": 22,
+      "income_elasticity_bp": 250,
+      "spoilage_bp_per_day": 12,
+      "target_stock_days": 20,
+      "international_liquidity_units": 35000,
+      "storage_priority": 8,
+      "historical_note": "耐储存的蛋白质来源。"
+    },
+    {
+      "commodity_id": "flour",
+      "name_zh": "面粉",
+      "category": "processed_food",
+      "trade_class": "regional_mass",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 185,
+      "base_daily_units_per_million": 72,
+      "income_elasticity_bp": 120,
+      "spoilage_bp_per_day": 12,
+      "target_stock_days": 15,
+      "international_liquidity_units": 50000,
+      "storage_priority": 10,
+      "historical_note": "磨坊产物，兼供家庭与面包房。"
+    },
+    {
+      "commodity_id": "bread",
+      "name_zh": "面包",
+      "category": "processed_food",
+      "trade_class": "local_perishable",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 265,
+      "base_daily_units_per_million": 205,
+      "income_elasticity_bp": 80,
+      "spoilage_bp_per_day": 850,
+      "target_stock_days": 3,
+      "international_liquidity_units": 0,
+      "storage_priority": 10,
+      "historical_note": "城市工人家庭的主要加工主粮；不可作为远洋大宗品。"
+    },
+    {
+      "commodity_id": "meat",
+      "name_zh": "鲜肉",
+      "category": "processed_food",
+      "trade_class": "local_perishable",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 520,
+      "base_daily_units_per_million": 72,
+      "income_elasticity_bp": 550,
+      "spoilage_bp_per_day": 650,
+      "target_stock_days": 4,
+      "international_liquidity_units": 0,
+      "storage_priority": 9,
+      "historical_note": "牛羊猪肉合并为大众肉类市场。"
+    },
+    {
+      "commodity_id": "fish",
+      "name_zh": "鱼类",
+      "category": "processed_food",
+      "trade_class": "regional_mass",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 410,
+      "base_daily_units_per_million": 24,
+      "income_elasticity_bp": 450,
+      "spoilage_bp_per_day": 550,
+      "target_stock_days": 5,
+      "international_liquidity_units": 8000,
+      "storage_priority": 8,
+      "historical_note": "鲜鱼与盐渍鱼合并，区域贸易占主导。"
+    },
+    {
+      "commodity_id": "milk",
+      "name_zh": "鲜奶",
+      "category": "processed_food",
+      "trade_class": "local_perishable",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 110,
+      "base_daily_units_per_million": 320,
+      "income_elasticity_bp": 350,
+      "spoilage_bp_per_day": 1200,
+      "target_stock_days": 2,
+      "international_liquidity_units": 0,
+      "storage_priority": 10,
+      "historical_note": "鲜奶高度本地化，冷链不足。"
+    },
+    {
+      "commodity_id": "butter",
+      "name_zh": "黄油及食用脂",
+      "category": "processed_food",
+      "trade_class": "international_specialty",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 640,
+      "base_daily_units_per_million": 16,
+      "income_elasticity_bp": 650,
+      "spoilage_bp_per_day": 120,
+      "target_stock_days": 18,
+      "international_liquidity_units": 22000,
+      "storage_priority": 7,
+      "historical_note": "黄油、人造黄油与食用动物脂合并。"
+    },
+    {
+      "commodity_id": "preserved_food",
+      "name_zh": "罐藏与腌制食品",
+      "category": "processed_food",
+      "trade_class": "international_specialty",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 460,
+      "base_daily_units_per_million": 10,
+      "income_elasticity_bp": 600,
+      "spoilage_bp_per_day": 20,
+      "target_stock_days": 45,
+      "international_liquidity_units": 45000,
+      "storage_priority": 6,
+      "historical_note": "肉、鱼和蔬果罐藏品的合并品类。"
+    },
+    {
+      "commodity_id": "sugar",
+      "name_zh": "糖",
+      "category": "agricultural_food",
+      "trade_class": "global_bulk",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 300,
+      "base_daily_units_per_million": 34,
+      "income_elasticity_bp": 650,
+      "spoilage_bp_per_day": 8,
+      "target_stock_days": 40,
+      "international_liquidity_units": 180000,
+      "storage_priority": 8,
+      "historical_note": "蔗糖与甜菜糖合并。"
+    },
+    {
+      "commodity_id": "salt",
+      "name_zh": "食盐",
+      "category": "agricultural_food",
+      "trade_class": "regional_mass",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 55,
+      "base_daily_units_per_million": 9,
+      "income_elasticity_bp": 50,
+      "spoilage_bp_per_day": 0,
+      "target_stock_days": 60,
+      "international_liquidity_units": 90000,
+      "storage_priority": 9,
+      "historical_note": "生活与食品加工共同消耗。"
+    },
+    {
+      "commodity_id": "coffee",
+      "name_zh": "咖啡",
+      "category": "colonial_consumable",
+      "trade_class": "international_specialty",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 920,
+      "base_daily_units_per_million": 2,
+      "income_elasticity_bp": 1150,
+      "spoilage_bp_per_day": 10,
+      "target_stock_days": 90,
+      "international_liquidity_units": 38000,
+      "storage_priority": 4,
+      "historical_note": "热带种植区输出的殖民贸易品。"
+    },
+    {
+      "commodity_id": "tea",
+      "name_zh": "茶叶",
+      "category": "colonial_consumable",
+      "trade_class": "international_specialty",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 1100,
+      "base_daily_units_per_million": 1,
+      "income_elasticity_bp": 1050,
+      "spoilage_bp_per_day": 8,
+      "target_stock_days": 120,
+      "international_liquidity_units": 32000,
+      "storage_priority": 4,
+      "historical_note": "亚洲生产、欧洲及北美消费的重要远洋贸易品。"
+    },
+    {
+      "commodity_id": "cocoa",
+      "name_zh": "可可",
+      "category": "colonial_consumable",
+      "trade_class": "international_specialty",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 980,
+      "base_daily_units_per_million": 0.5,
+      "income_elasticity_bp": 1300,
+      "spoilage_bp_per_day": 10,
+      "target_stock_days": 90,
+      "international_liquidity_units": 18000,
+      "storage_priority": 3,
+      "historical_note": "规模较小但增长中的食品原料。"
+    },
+    {
+      "commodity_id": "tobacco",
+      "name_zh": "烟草",
+      "category": "colonial_consumable",
+      "trade_class": "international_specialty",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 760,
+      "base_daily_units_per_million": 2,
+      "income_elasticity_bp": 900,
+      "spoilage_bp_per_day": 8,
+      "target_stock_days": 90,
+      "international_liquidity_units": 45000,
+      "storage_priority": 3,
+      "historical_note": "叶烟与普通烟草制品的上游合并品。"
+    },
+    {
+      "commodity_id": "oilseeds",
+      "name_zh": "油料作物",
+      "category": "agricultural_raw",
+      "trade_class": "global_bulk",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 180,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 200,
+      "spoilage_bp_per_day": 5,
+      "target_stock_days": 40,
+      "international_liquidity_units": 90000,
+      "storage_priority": 6,
+      "historical_note": "花生、棉籽、亚麻籽等合并。"
+    },
+    {
+      "commodity_id": "vegetable_oil",
+      "name_zh": "植物油",
+      "category": "processed_food",
+      "trade_class": "international_specialty",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 440,
+      "base_daily_units_per_million": 9,
+      "income_elasticity_bp": 650,
+      "spoilage_bp_per_day": 18,
+      "target_stock_days": 35,
+      "international_liquidity_units": 50000,
+      "storage_priority": 7,
+      "historical_note": "食用与肥皂工业共用。"
+    },
+    {
+      "commodity_id": "livestock",
+      "name_zh": "牲畜",
+      "category": "agricultural_raw",
+      "trade_class": "regional_mass",
+      "unit_name_zh": "百头",
+      "unit_mass_kg": 50000,
+      "base_price_centimes": 850,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 300,
+      "spoilage_bp_per_day": 25,
+      "target_stock_days": 10,
+      "international_liquidity_units": 6000,
+      "storage_priority": 6,
+      "historical_note": "活牛羊猪的区域及跨境贸易。"
+    },
+    {
+      "commodity_id": "raw_cotton",
+      "name_zh": "原棉",
+      "category": "industrial_raw",
+      "trade_class": "global_bulk",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 390,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 250,
+      "spoilage_bp_per_day": 8,
+      "target_stock_days": 70,
+      "international_liquidity_units": 190000,
+      "storage_priority": 8,
+      "historical_note": "全球纺织工业关键原料。"
+    },
+    {
+      "commodity_id": "wool",
+      "name_zh": "羊毛",
+      "category": "industrial_raw",
+      "trade_class": "global_bulk",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 720,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 350,
+      "spoilage_bp_per_day": 8,
+      "target_stock_days": 70,
+      "international_liquidity_units": 85000,
+      "storage_priority": 7,
+      "historical_note": "澳洲、南美及草原地区的重要输出。"
+    },
+    {
+      "commodity_id": "raw_silk",
+      "name_zh": "生丝",
+      "category": "industrial_raw",
+      "trade_class": "international_specialty",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 2600,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 800,
+      "spoilage_bp_per_day": 12,
+      "target_stock_days": 100,
+      "international_liquidity_units": 12000,
+      "storage_priority": 3,
+      "historical_note": "高价值低体积纤维。"
+    },
+    {
+      "commodity_id": "jute",
+      "name_zh": "黄麻",
+      "category": "industrial_raw",
+      "trade_class": "global_bulk",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 260,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 180,
+      "spoilage_bp_per_day": 8,
+      "target_stock_days": 80,
+      "international_liquidity_units": 85000,
+      "storage_priority": 6,
+      "historical_note": "麻袋、绳索和包装材料原料。"
+    },
+    {
+      "commodity_id": "hides",
+      "name_zh": "生皮",
+      "category": "industrial_raw",
+      "trade_class": "global_bulk",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 440,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 300,
+      "spoilage_bp_per_day": 15,
+      "target_stock_days": 45,
+      "international_liquidity_units": 70000,
+      "storage_priority": 6,
+      "historical_note": "皮革工业的可贸易副产品。"
+    },
+    {
+      "commodity_id": "natural_rubber",
+      "name_zh": "天然橡胶",
+      "category": "industrial_raw",
+      "trade_class": "international_specialty",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 1550,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 1000,
+      "spoilage_bp_per_day": 5,
+      "target_stock_days": 120,
+      "international_liquidity_units": 18000,
+      "storage_priority": 4,
+      "historical_note": "1900年前后需求正在上升的高价值原料。"
+    },
+    {
+      "commodity_id": "coal",
+      "name_zh": "煤炭",
+      "category": "energy_raw",
+      "trade_class": "global_bulk",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 85,
+      "base_daily_units_per_million": 4,
+      "income_elasticity_bp": 100,
+      "spoilage_bp_per_day": 0,
+      "target_stock_days": 45,
+      "international_liquidity_units": 500000,
+      "storage_priority": 10,
+      "historical_note": "蒸汽、冶金、铁路和城市燃料的基础。"
+    },
+    {
+      "commodity_id": "coke",
+      "name_zh": "焦炭",
+      "category": "industrial_intermediate",
+      "trade_class": "regional_mass",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 145,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 80,
+      "spoilage_bp_per_day": 0,
+      "target_stock_days": 35,
+      "international_liquidity_units": 120000,
+      "storage_priority": 9,
+      "historical_note": "高炉炼铁关键燃料。"
+    },
+    {
+      "commodity_id": "iron_ore",
+      "name_zh": "铁矿石",
+      "category": "mineral_raw",
+      "trade_class": "global_bulk",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 70,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 80,
+      "spoilage_bp_per_day": 0,
+      "target_stock_days": 60,
+      "international_liquidity_units": 350000,
+      "storage_priority": 9,
+      "historical_note": "钢铁工业基础矿石。"
+    },
+    {
+      "commodity_id": "pig_iron",
+      "name_zh": "生铁",
+      "category": "industrial_intermediate",
+      "trade_class": "regional_mass",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 240,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 100,
+      "spoilage_bp_per_day": 0,
+      "target_stock_days": 45,
+      "international_liquidity_units": 120000,
+      "storage_priority": 8,
+      "historical_note": "高炉产品，供炼钢与铸造。"
+    },
+    {
+      "commodity_id": "steel",
+      "name_zh": "钢材",
+      "category": "industrial_intermediate",
+      "trade_class": "global_bulk",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 430,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 250,
+      "spoilage_bp_per_day": 0,
+      "target_stock_days": 50,
+      "international_liquidity_units": 250000,
+      "storage_priority": 10,
+      "historical_note": "铁路、机械、军需和建筑共同消耗。"
+    },
+    {
+      "commodity_id": "copper_ore",
+      "name_zh": "铜矿石",
+      "category": "mineral_raw",
+      "trade_class": "global_bulk",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 180,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 100,
+      "spoilage_bp_per_day": 0,
+      "target_stock_days": 70,
+      "international_liquidity_units": 110000,
+      "storage_priority": 6,
+      "historical_note": "电气化和合金工业的上游矿石。"
+    },
+    {
+      "commodity_id": "copper",
+      "name_zh": "精炼铜",
+      "category": "industrial_intermediate",
+      "trade_class": "global_bulk",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 980,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 500,
+      "spoilage_bp_per_day": 0,
+      "target_stock_days": 90,
+      "international_liquidity_units": 90000,
+      "storage_priority": 7,
+      "historical_note": "电线、电气设备和机械的重要金属。"
+    },
+    {
+      "commodity_id": "crude_petroleum",
+      "name_zh": "原油",
+      "category": "energy_raw",
+      "trade_class": "global_bulk",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 130,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 300,
+      "spoilage_bp_per_day": 0,
+      "target_stock_days": 75,
+      "international_liquidity_units": 160000,
+      "storage_priority": 6,
+      "historical_note": "照明油、润滑油与新兴动力燃料的上游。"
+    },
+    {
+      "commodity_id": "kerosene",
+      "name_zh": "煤油及照明油",
+      "category": "mass_manufacture",
+      "trade_class": "international_specialty",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 310,
+      "base_daily_units_per_million": 5,
+      "income_elasticity_bp": 450,
+      "spoilage_bp_per_day": 15,
+      "target_stock_days": 40,
+      "international_liquidity_units": 100000,
+      "storage_priority": 7,
+      "historical_note": "国际贸易广泛的照明燃料。"
+    },
+    {
+      "commodity_id": "timber",
+      "name_zh": "原木",
+      "category": "industrial_raw",
+      "trade_class": "global_bulk",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 95,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 100,
+      "spoilage_bp_per_day": 10,
+      "target_stock_days": 45,
+      "international_liquidity_units": 260000,
+      "storage_priority": 8,
+      "historical_note": "建筑、矿柱、铁路枕木及纸浆原料。"
+    },
+    {
+      "commodity_id": "lumber",
+      "name_zh": "锯材",
+      "category": "industrial_intermediate",
+      "trade_class": "global_bulk",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 180,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 180,
+      "spoilage_bp_per_day": 6,
+      "target_stock_days": 40,
+      "international_liquidity_units": 180000,
+      "storage_priority": 8,
+      "historical_note": "经过锯切的标准化木材。"
+    },
+    {
+      "commodity_id": "phosphate_guano",
+      "name_zh": "磷矿与鸟粪肥",
+      "category": "mineral_raw",
+      "trade_class": "global_bulk",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 210,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 200,
+      "spoilage_bp_per_day": 0,
+      "target_stock_days": 90,
+      "international_liquidity_units": 75000,
+      "storage_priority": 5,
+      "historical_note": "农业肥料和化学工业原料。"
+    },
+    {
+      "commodity_id": "nitrates",
+      "name_zh": "硝石与硝酸盐",
+      "category": "mineral_raw",
+      "trade_class": "global_bulk",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 360,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 500,
+      "spoilage_bp_per_day": 0,
+      "target_stock_days": 120,
+      "international_liquidity_units": 70000,
+      "storage_priority": 7,
+      "historical_note": "肥料、炸药和军需工业关键原料。"
+    },
+    {
+      "commodity_id": "sulfur",
+      "name_zh": "硫磺",
+      "category": "mineral_raw",
+      "trade_class": "international_specialty",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 250,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 300,
+      "spoilage_bp_per_day": 0,
+      "target_stock_days": 100,
+      "international_liquidity_units": 35000,
+      "storage_priority": 5,
+      "historical_note": "硫酸、火药和化学品原料。"
+    },
+    {
+      "commodity_id": "limestone",
+      "name_zh": "石灰石",
+      "category": "mineral_raw",
+      "trade_class": "regional_mass",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 38,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 50,
+      "spoilage_bp_per_day": 0,
+      "target_stock_days": 40,
+      "international_liquidity_units": 50000,
+      "storage_priority": 7,
+      "historical_note": "炼钢、玻璃和水泥的低值高体积原料。"
+    },
+    {
+      "commodity_id": "industrial_chemicals",
+      "name_zh": "基础化学品",
+      "category": "industrial_intermediate",
+      "trade_class": "international_specialty",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 680,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 650,
+      "spoilage_bp_per_day": 15,
+      "target_stock_days": 80,
+      "international_liquidity_units": 65000,
+      "storage_priority": 7,
+      "historical_note": "酸碱、染料中间体和工业药剂的合并品类。"
+    },
+    {
+      "commodity_id": "paper_pulp",
+      "name_zh": "纸浆",
+      "category": "industrial_intermediate",
+      "trade_class": "global_bulk",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 240,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 220,
+      "spoilage_bp_per_day": 25,
+      "target_stock_days": 55,
+      "international_liquidity_units": 60000,
+      "storage_priority": 5,
+      "historical_note": "造纸工业半成品。"
+    },
+    {
+      "commodity_id": "electricity_service",
+      "name_zh": "电力服务",
+      "category": "local_service",
+      "trade_class": "local_service",
+      "unit_name_zh": "兆瓦时",
+      "unit_mass_kg": 0,
+      "base_price_centimes": 75,
+      "base_daily_units_per_million": 2,
+      "income_elasticity_bp": 700,
+      "spoilage_bp_per_day": 0,
+      "target_stock_days": 0,
+      "international_liquidity_units": 0,
+      "storage_priority": 8,
+      "historical_note": "不可储存的本地公用事业服务。"
+    },
+    {
+      "commodity_id": "freight_service",
+      "name_zh": "货运能力",
+      "category": "local_service",
+      "trade_class": "local_service",
+      "unit_name_zh": "百吨公里",
+      "unit_mass_kg": 0,
+      "base_price_centimes": 90,
+      "base_daily_units_per_million": 6,
+      "income_elasticity_bp": 500,
+      "spoilage_bp_per_day": 0,
+      "target_stock_days": 0,
+      "international_liquidity_units": 0,
+      "storage_priority": 9,
+      "historical_note": "铁路、河运、海运和公路的合并运输服务。"
+    },
+    {
+      "commodity_id": "cotton_cloth",
+      "name_zh": "棉布",
+      "category": "mass_manufacture",
+      "trade_class": "global_bulk",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 760,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 500,
+      "spoilage_bp_per_day": 5,
+      "target_stock_days": 80,
+      "international_liquidity_units": 130000,
+      "storage_priority": 8,
+      "historical_note": "全球最大宗的纺织制成品之一。"
+    },
+    {
+      "commodity_id": "wool_cloth",
+      "name_zh": "毛呢",
+      "category": "mass_manufacture",
+      "trade_class": "international_specialty",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 1180,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 700,
+      "spoilage_bp_per_day": 5,
+      "target_stock_days": 90,
+      "international_liquidity_units": 55000,
+      "storage_priority": 6,
+      "historical_note": "较高价值的服装和军服面料。"
+    },
+    {
+      "commodity_id": "clothing",
+      "name_zh": "普通成衣",
+      "category": "mass_manufacture",
+      "trade_class": "regional_mass",
+      "unit_name_zh": "千件",
+      "unit_mass_kg": 700,
+      "base_price_centimes": 850,
+      "base_daily_units_per_million": 2.1,
+      "income_elasticity_bp": 850,
+      "spoilage_bp_per_day": 5,
+      "target_stock_days": 50,
+      "international_liquidity_units": 40000,
+      "storage_priority": 9,
+      "historical_note": "大众成衣、鞋帽以外的普通穿着品合并。"
+    },
+    {
+      "commodity_id": "leather_goods",
+      "name_zh": "皮革与普通鞋具",
+      "category": "mass_manufacture",
+      "trade_class": "regional_mass",
+      "unit_name_zh": "千件",
+      "unit_mass_kg": 900,
+      "base_price_centimes": 980,
+      "base_daily_units_per_million": 0.8,
+      "income_elasticity_bp": 900,
+      "spoilage_bp_per_day": 4,
+      "target_stock_days": 70,
+      "international_liquidity_units": 25000,
+      "storage_priority": 7,
+      "historical_note": "鞋靴、皮带和耐用品合并。"
+    },
+    {
+      "commodity_id": "soap",
+      "name_zh": "肥皂",
+      "category": "household_consumable",
+      "trade_class": "regional_mass",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 520,
+      "base_daily_units_per_million": 3.2,
+      "income_elasticity_bp": 800,
+      "spoilage_bp_per_day": 5,
+      "target_stock_days": 60,
+      "international_liquidity_units": 35000,
+      "storage_priority": 9,
+      "historical_note": "日常清洁与洗衣的基础日化品。"
+    },
+    {
+      "commodity_id": "candles_matches",
+      "name_zh": "蜡烛与火柴",
+      "category": "household_consumable",
+      "trade_class": "international_specialty",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 470,
+      "base_daily_units_per_million": 1.0,
+      "income_elasticity_bp": 650,
+      "spoilage_bp_per_day": 8,
+      "target_stock_days": 70,
+      "international_liquidity_units": 28000,
+      "storage_priority": 7,
+      "historical_note": "家庭照明和点火用品合并。"
+    },
+    {
+      "commodity_id": "paper",
+      "name_zh": "纸张与纸板",
+      "category": "mass_manufacture",
+      "trade_class": "international_specialty",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 620,
+      "base_daily_units_per_million": 1.4,
+      "income_elasticity_bp": 900,
+      "spoilage_bp_per_day": 10,
+      "target_stock_days": 80,
+      "international_liquidity_units": 50000,
+      "storage_priority": 6,
+      "historical_note": "印刷、包装、行政和教育共同消耗。"
+    },
+    {
+      "commodity_id": "glass",
+      "name_zh": "平板玻璃与普通玻璃器",
+      "category": "mass_manufacture",
+      "trade_class": "regional_mass",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 540,
+      "base_daily_units_per_million": 0.7,
+      "income_elasticity_bp": 900,
+      "spoilage_bp_per_day": 0,
+      "target_stock_days": 80,
+      "international_liquidity_units": 35000,
+      "storage_priority": 5,
+      "historical_note": "建筑及家庭容器的普通玻璃。"
+    },
+    {
+      "commodity_id": "cement",
+      "name_zh": "水泥",
+      "category": "mass_manufacture",
+      "trade_class": "regional_mass",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 125,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 500,
+      "spoilage_bp_per_day": 0,
+      "target_stock_days": 45,
+      "international_liquidity_units": 90000,
+      "storage_priority": 8,
+      "historical_note": "城市建设、港口和铁路工程材料。"
+    },
+    {
+      "commodity_id": "machinery",
+      "name_zh": "通用机械",
+      "category": "capital_good",
+      "trade_class": "international_specialty",
+      "unit_name_zh": "标准机组",
+      "unit_mass_kg": 3500,
+      "base_price_centimes": 2600,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 1400,
+      "spoilage_bp_per_day": 0,
+      "target_stock_days": 150,
+      "international_liquidity_units": 28000,
+      "storage_priority": 8,
+      "historical_note": "机床、蒸汽设备和工厂机械合并。"
+    },
+    {
+      "commodity_id": "railway_equipment",
+      "name_zh": "铁路设备",
+      "category": "capital_good",
+      "trade_class": "international_specialty",
+      "unit_name_zh": "标准车组",
+      "unit_mass_kg": 18000,
+      "base_price_centimes": 9200,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 1500,
+      "spoilage_bp_per_day": 0,
+      "target_stock_days": 180,
+      "international_liquidity_units": 9000,
+      "storage_priority": 7,
+      "historical_note": "机车、车厢、钢轨附件和信号设备合并。"
+    },
+    {
+      "commodity_id": "small_arms",
+      "name_zh": "轻武器",
+      "category": "military_good",
+      "trade_class": "international_specialty",
+      "unit_name_zh": "千支",
+      "unit_mass_kg": 4000,
+      "base_price_centimes": 5800,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 1200,
+      "spoilage_bp_per_day": 0,
+      "target_stock_days": 240,
+      "international_liquidity_units": 6000,
+      "storage_priority": 5,
+      "historical_note": "步枪、手枪及少量机枪合并。"
+    },
+    {
+      "commodity_id": "ammunition",
+      "name_zh": "弹药",
+      "category": "military_good",
+      "trade_class": "international_specialty",
+      "unit_name_zh": "百万发",
+      "unit_mass_kg": 22000,
+      "base_price_centimes": 7600,
+      "base_daily_units_per_million": 0,
+      "income_elasticity_bp": 1000,
+      "spoilage_bp_per_day": 0,
+      "target_stock_days": 180,
+      "international_liquidity_units": 8000,
+      "storage_priority": 6,
+      "historical_note": "轻武器弹药与部分炮弹耗材折算。"
+    },
+    {
+      "commodity_id": "fine_clothing",
+      "name_zh": "高档衣物",
+      "category": "luxury",
+      "trade_class": "luxury",
+      "unit_name_zh": "百套",
+      "unit_mass_kg": 180,
+      "base_price_centimes": 1800,
+      "base_daily_units_per_million": 0.07,
+      "income_elasticity_bp": 1800,
+      "spoilage_bp_per_day": 5,
+      "target_stock_days": 180,
+      "international_liquidity_units": 4000,
+      "storage_priority": 2,
+      "historical_note": "定制服装、礼服和高档成衣合并，不按品牌拆分。"
+    },
+    {
+      "commodity_id": "silk_goods",
+      "name_zh": "丝织品",
+      "category": "luxury",
+      "trade_class": "luxury",
+      "unit_name_zh": "百匹",
+      "unit_mass_kg": 120,
+      "base_price_centimes": 2200,
+      "base_daily_units_per_million": 0.05,
+      "income_elasticity_bp": 1700,
+      "spoilage_bp_per_day": 5,
+      "target_stock_days": 240,
+      "international_liquidity_units": 4500,
+      "storage_priority": 2,
+      "historical_note": "高档丝绸及刺绣织物合并。"
+    },
+    {
+      "commodity_id": "perfume_cosmetics",
+      "name_zh": "香水与高档化妆品",
+      "category": "luxury",
+      "trade_class": "luxury",
+      "unit_name_zh": "百箱",
+      "unit_mass_kg": 80,
+      "base_price_centimes": 2500,
+      "base_daily_units_per_million": 0.03,
+      "income_elasticity_bp": 2100,
+      "spoilage_bp_per_day": 8,
+      "target_stock_days": 240,
+      "international_liquidity_units": 3000,
+      "storage_priority": 1,
+      "historical_note": "品牌香水、香粉和美容用品合并。"
+    },
+    {
+      "commodity_id": "jewelry_watches",
+      "name_zh": "珠宝与钟表",
+      "category": "luxury",
+      "trade_class": "luxury",
+      "unit_name_zh": "百件",
+      "unit_mass_kg": 40,
+      "base_price_centimes": 6800,
+      "base_daily_units_per_million": 0.015,
+      "income_elasticity_bp": 2300,
+      "spoilage_bp_per_day": 0,
+      "target_stock_days": 300,
+      "international_liquidity_units": 1800,
+      "storage_priority": 1,
+      "historical_note": "贵金属首饰、怀表和高档钟表合并。"
+    },
+    {
+      "commodity_id": "porcelain_fine_glass",
+      "name_zh": "瓷器与高档玻璃器",
+      "category": "luxury",
+      "trade_class": "luxury",
+      "unit_name_zh": "百箱",
+      "unit_mass_kg": 220,
+      "base_price_centimes": 1700,
+      "base_daily_units_per_million": 0.025,
+      "income_elasticity_bp": 1600,
+      "spoilage_bp_per_day": 0,
+      "target_stock_days": 240,
+      "international_liquidity_units": 3500,
+      "storage_priority": 1,
+      "historical_note": "高档餐具、装饰瓷和水晶器合并。"
+    },
+    {
+      "commodity_id": "fine_wine_spirits",
+      "name_zh": "高档葡萄酒与烈酒",
+      "category": "luxury",
+      "trade_class": "luxury",
+      "unit_name_zh": "吨",
+      "unit_mass_kg": 1000,
+      "base_price_centimes": 1500,
+      "base_daily_units_per_million": 0.08,
+      "income_elasticity_bp": 1700,
+      "spoilage_bp_per_day": 12,
+      "target_stock_days": 180,
+      "international_liquidity_units": 7000,
+      "storage_priority": 2,
+      "historical_note": "陈年葡萄酒、香槟和高档蒸馏酒合并。"
+    },
+    {
+      "commodity_id": "cigars",
+      "name_zh": "雪茄与高档烟草制品",
+      "category": "luxury",
+      "trade_class": "luxury",
+      "unit_name_zh": "百万支",
+      "unit_mass_kg": 4500,
+      "base_price_centimes": 2400,
+      "base_daily_units_per_million": 0.025,
+      "income_elasticity_bp": 1800,
+      "spoilage_bp_per_day": 8,
+      "target_stock_days": 180,
+      "international_liquidity_units": 3500,
+      "storage_priority": 1,
+      "historical_note": "品牌雪茄和高档卷烟合并。"
+    }
+  ],
+  "recipes": [
+    {
+      "recipe_id": "farm_wheat",
+      "name_zh": "小麦农场",
+      "inputs": [],
+      "outputs": [
+        {
+          "commodity_id": "wheat",
+          "units": 20
+        }
+      ],
+      "workers_per_batch": 700
+    },
+    {
+      "recipe_id": "farm_rye",
+      "name_zh": "黑麦农场",
+      "inputs": [],
+      "outputs": [
+        {
+          "commodity_id": "rye",
+          "units": 18
+        }
+      ],
+      "workers_per_batch": 650
+    },
+    {
+      "recipe_id": "farm_maize",
+      "name_zh": "玉米农场",
+      "inputs": [],
+      "outputs": [
+        {
+          "commodity_id": "maize",
+          "units": 20
+        }
+      ],
+      "workers_per_batch": 650
+    },
+    {
+      "recipe_id": "farm_potatoes",
+      "name_zh": "马铃薯农场",
+      "inputs": [],
+      "outputs": [
+        {
+          "commodity_id": "potatoes",
+          "units": 24
+        }
+      ],
+      "workers_per_batch": 600
+    },
+    {
+      "recipe_id": "farm_livestock",
+      "name_zh": "畜牧场",
+      "inputs": [],
+      "outputs": [
+        {
+          "commodity_id": "livestock",
+          "units": 1
+        },
+        {
+          "commodity_id": "milk",
+          "units": 6
+        },
+        {
+          "commodity_id": "hides",
+          "units": 0.2
+        }
+      ],
+      "workers_per_batch": 1000
+    },
+    {
+      "recipe_id": "fishery",
+      "name_zh": "渔业",
+      "inputs": [],
+      "outputs": [
+        {
+          "commodity_id": "fish",
+          "units": 8
+        }
+      ],
+      "workers_per_batch": 500
+    },
+    {
+      "recipe_id": "flour_mill",
+      "name_zh": "面粉厂",
+      "inputs": [
+        {
+          "commodity_id": "wheat",
+          "units": 10
+        },
+        {
+          "commodity_id": "coal",
+          "units": 0.4
+        }
+      ],
+      "outputs": [
+        {
+          "commodity_id": "flour",
+          "units": 7.8
+        }
+      ],
+      "workers_per_batch": 450
+    },
+    {
+      "recipe_id": "bakery",
+      "name_zh": "面包房",
+      "inputs": [
+        {
+          "commodity_id": "flour",
+          "units": 8
+        },
+        {
+          "commodity_id": "coal",
+          "units": 0.5
+        }
+      ],
+      "outputs": [
+        {
+          "commodity_id": "bread",
+          "units": 10
+        }
+      ],
+      "workers_per_batch": 650
+    },
+    {
+      "recipe_id": "meat_processing",
+      "name_zh": "屠宰与肉类加工",
+      "inputs": [
+        {
+          "commodity_id": "livestock",
+          "units": 1
+        },
+        {
+          "commodity_id": "salt",
+          "units": 0.2
+        }
+      ],
+      "outputs": [
+        {
+          "commodity_id": "meat",
+          "units": 12
+        },
+        {
+          "commodity_id": "hides",
+          "units": 0.8
+        }
+      ],
+      "workers_per_batch": 700
+    },
+    {
+      "recipe_id": "preserving",
+      "name_zh": "食品罐藏厂",
+      "inputs": [
+        {
+          "commodity_id": "meat",
+          "units": 3
+        },
+        {
+          "commodity_id": "fish",
+          "units": 2
+        },
+        {
+          "commodity_id": "salt",
+          "units": 0.2
+        },
+        {
+          "commodity_id": "coal",
+          "units": 0.4
+        }
+      ],
+      "outputs": [
+        {
+          "commodity_id": "preserved_food",
+          "units": 4.6
+        }
+      ],
+      "workers_per_batch": 750
+    },
+    {
+      "recipe_id": "oil_press",
+      "name_zh": "榨油厂",
+      "inputs": [
+        {
+          "commodity_id": "oilseeds",
+          "units": 8
+        },
+        {
+          "commodity_id": "coal",
+          "units": 0.3
+        }
+      ],
+      "outputs": [
+        {
+          "commodity_id": "vegetable_oil",
+          "units": 3.2
+        }
+      ],
+      "workers_per_batch": 500
+    },
+    {
+      "recipe_id": "coal_mine",
+      "name_zh": "煤矿",
+      "inputs": [],
+      "outputs": [
+        {
+          "commodity_id": "coal",
+          "units": 25
+        }
+      ],
+      "workers_per_batch": 900
+    },
+    {
+      "recipe_id": "iron_mine",
+      "name_zh": "铁矿",
+      "inputs": [],
+      "outputs": [
+        {
+          "commodity_id": "iron_ore",
+          "units": 22
+        }
+      ],
+      "workers_per_batch": 850
+    },
+    {
+      "recipe_id": "copper_mine",
+      "name_zh": "铜矿",
+      "inputs": [],
+      "outputs": [
+        {
+          "commodity_id": "copper_ore",
+          "units": 12
+        }
+      ],
+      "workers_per_batch": 800
+    },
+    {
+      "recipe_id": "timber_camp",
+      "name_zh": "林场",
+      "inputs": [],
+      "outputs": [
+        {
+          "commodity_id": "timber",
+          "units": 20
+        }
+      ],
+      "workers_per_batch": 650
+    },
+    {
+      "recipe_id": "sawmill",
+      "name_zh": "锯木厂",
+      "inputs": [
+        {
+          "commodity_id": "timber",
+          "units": 10
+        },
+        {
+          "commodity_id": "coal",
+          "units": 0.2
+        }
+      ],
+      "outputs": [
+        {
+          "commodity_id": "lumber",
+          "units": 7.5
+        }
+      ],
+      "workers_per_batch": 500
+    },
+    {
+      "recipe_id": "coke_works",
+      "name_zh": "焦化厂",
+      "inputs": [
+        {
+          "commodity_id": "coal",
+          "units": 10
+        }
+      ],
+      "outputs": [
+        {
+          "commodity_id": "coke",
+          "units": 7.2
+        }
+      ],
+      "workers_per_batch": 650
+    },
+    {
+      "recipe_id": "blast_furnace",
+      "name_zh": "高炉炼铁",
+      "inputs": [
+        {
+          "commodity_id": "iron_ore",
+          "units": 12
+        },
+        {
+          "commodity_id": "coke",
+          "units": 6
+        },
+        {
+          "commodity_id": "limestone",
+          "units": 2
+        }
+      ],
+      "outputs": [
+        {
+          "commodity_id": "pig_iron",
+          "units": 8
+        }
+      ],
+      "workers_per_batch": 1000
+    },
+    {
+      "recipe_id": "steelworks",
+      "name_zh": "钢铁厂",
+      "inputs": [
+        {
+          "commodity_id": "pig_iron",
+          "units": 8
+        },
+        {
+          "commodity_id": "coke",
+          "units": 2
+        },
+        {
+          "commodity_id": "limestone",
+          "units": 1
+        }
+      ],
+      "outputs": [
+        {
+          "commodity_id": "steel",
+          "units": 7.4
+        }
+      ],
+      "workers_per_batch": 1200
+    },
+    {
+      "recipe_id": "copper_smelter",
+      "name_zh": "炼铜厂",
+      "inputs": [
+        {
+          "commodity_id": "copper_ore",
+          "units": 10
+        },
+        {
+          "commodity_id": "coal",
+          "units": 2
+        }
+      ],
+      "outputs": [
+        {
+          "commodity_id": "copper",
+          "units": 2.8
+        }
+      ],
+      "workers_per_batch": 800
+    },
+    {
+      "recipe_id": "oil_refinery",
+      "name_zh": "炼油厂",
+      "inputs": [
+        {
+          "commodity_id": "crude_petroleum",
+          "units": 10
+        },
+        {
+          "commodity_id": "coal",
+          "units": 0.5
+        }
+      ],
+      "outputs": [
+        {
+          "commodity_id": "kerosene",
+          "units": 5.2
+        },
+        {
+          "commodity_id": "industrial_chemicals",
+          "units": 0.5
+        }
+      ],
+      "workers_per_batch": 900
+    },
+    {
+      "recipe_id": "chemical_works",
+      "name_zh": "化工厂",
+      "inputs": [
+        {
+          "commodity_id": "sulfur",
+          "units": 2
+        },
+        {
+          "commodity_id": "nitrates",
+          "units": 2
+        },
+        {
+          "commodity_id": "phosphate_guano",
+          "units": 2
+        },
+        {
+          "commodity_id": "coal",
+          "units": 1
+        }
+      ],
+      "outputs": [
+        {
+          "commodity_id": "industrial_chemicals",
+          "units": 5
+        }
+      ],
+      "workers_per_batch": 900
+    },
+    {
+      "recipe_id": "pulp_mill",
+      "name_zh": "纸浆厂",
+      "inputs": [
+        {
+          "commodity_id": "timber",
+          "units": 8
+        },
+        {
+          "commodity_id": "industrial_chemicals",
+          "units": 0.5
+        },
+        {
+          "commodity_id": "coal",
+          "units": 1
+        }
+      ],
+      "outputs": [
+        {
+          "commodity_id": "paper_pulp",
+          "units": 4
+        }
+      ],
+      "workers_per_batch": 650
+    },
+    {
+      "recipe_id": "paper_mill",
+      "name_zh": "造纸厂",
+      "inputs": [
+        {
+          "commodity_id": "paper_pulp",
+          "units": 5
+        },
+        {
+          "commodity_id": "industrial_chemicals",
+          "units": 0.2
+        },
+        {
+          "commodity_id": "coal",
+          "units": 0.5
+        }
+      ],
+      "outputs": [
+        {
+          "commodity_id": "paper",
+          "units": 4.4
+        }
+      ],
+      "workers_per_batch": 700
+    },
+    {
+      "recipe_id": "cotton_mill",
+      "name_zh": "棉纺织厂",
+      "inputs": [
+        {
+          "commodity_id": "raw_cotton",
+          "units": 5
+        },
+        {
+          "commodity_id": "coal",
+          "units": 1
+        }
+      ],
+      "outputs": [
+        {
+          "commodity_id": "cotton_cloth",
+          "units": 4.2
+        }
+      ],
+      "workers_per_batch": 950
+    },
+    {
+      "recipe_id": "wool_mill",
+      "name_zh": "毛纺织厂",
+      "inputs": [
+        {
+          "commodity_id": "wool",
+          "units": 5
+        },
+        {
+          "commodity_id": "coal",
+          "units": 1
+        }
+      ],
+      "outputs": [
+        {
+          "commodity_id": "wool_cloth",
+          "units": 4
+        }
+      ],
+      "workers_per_batch": 850
+    },
+    {
+      "recipe_id": "clothing_factory",
+      "name_zh": "成衣厂",
+      "inputs": [
+        {
+          "commodity_id": "cotton_cloth",
+          "units": 2
+        },
+        {
+          "commodity_id": "wool_cloth",
+          "units": 0.4
+        }
+      ],
+      "outputs": [
+        {
+          "commodity_id": "clothing",
+          "units": 3
+        }
+      ],
+      "workers_per_batch": 800
+    },
+    {
+      "recipe_id": "fine_clothing_workshop",
+      "name_zh": "高级服装工坊",
+      "inputs": [
+        {
+          "commodity_id": "wool_cloth",
+          "units": 0.7
+        },
+        {
+          "commodity_id": "silk_goods",
+          "units": 0.1
+        }
+      ],
+      "outputs": [
+        {
+          "commodity_id": "fine_clothing",
+          "units": 1
+        }
+      ],
+      "workers_per_batch": 450
+    },
+    {
+      "recipe_id": "tannery",
+      "name_zh": "制革厂",
+      "inputs": [
+        {
+          "commodity_id": "hides",
+          "units": 4
+        },
+        {
+          "commodity_id": "industrial_chemicals",
+          "units": 0.5
+        }
+      ],
+      "outputs": [
+        {
+          "commodity_id": "leather_goods",
+          "units": 2.4
+        }
+      ],
+      "workers_per_batch": 650
+    },
+    {
+      "recipe_id": "soap_works",
+      "name_zh": "肥皂厂",
+      "inputs": [
+        {
+          "commodity_id": "vegetable_oil",
+          "units": 3
+        },
+        {
+          "commodity_id": "industrial_chemicals",
+          "units": 0.5
+        },
+        {
+          "commodity_id": "coal",
+          "units": 0.2
+        }
+      ],
+      "outputs": [
+        {
+          "commodity_id": "soap",
+          "units": 3.2
+        }
+      ],
+      "workers_per_batch": 450
+    },
+    {
+      "recipe_id": "glassworks",
+      "name_zh": "玻璃厂",
+      "inputs": [
+        {
+          "commodity_id": "limestone",
+          "units": 4
+        },
+        {
+          "commodity_id": "coal",
+          "units": 3
+        },
+        {
+          "commodity_id": "industrial_chemicals",
+          "units": 0.3
+        }
+      ],
+      "outputs": [
+        {
+          "commodity_id": "glass",
+          "units": 3
+        }
+      ],
+      "workers_per_batch": 700
+    },
+    {
+      "recipe_id": "cement_works",
+      "name_zh": "水泥厂",
+      "inputs": [
+        {
+          "commodity_id": "limestone",
+          "units": 10
+        },
+        {
+          "commodity_id": "coal",
+          "units": 3
+        }
+      ],
+      "outputs": [
+        {
+          "commodity_id": "cement",
+          "units": 8
+        }
+      ],
+      "workers_per_batch": 750
+    },
+    {
+      "recipe_id": "machine_works",
+      "name_zh": "机械厂",
+      "inputs": [
+        {
+          "commodity_id": "steel",
+          "units": 3
+        },
+        {
+          "commodity_id": "copper",
+          "units": 0.3
+        },
+        {
+          "commodity_id": "coal",
+          "units": 0.5
+        }
+      ],
+      "outputs": [
+        {
+          "commodity_id": "machinery",
+          "units": 1
+        }
+      ],
+      "workers_per_batch": 1200
+    },
+    {
+      "recipe_id": "railway_works",
+      "name_zh": "铁路设备厂",
+      "inputs": [
+        {
+          "commodity_id": "steel",
+          "units": 12
+        },
+        {
+          "commodity_id": "lumber",
+          "units": 2
+        },
+        {
+          "commodity_id": "machinery",
+          "units": 0.6
+        }
+      ],
+      "outputs": [
+        {
+          "commodity_id": "railway_equipment",
+          "units": 1
+        }
+      ],
+      "workers_per_batch": 1800
+    },
+    {
+      "recipe_id": "arms_factory",
+      "name_zh": "武器制造厂",
+      "inputs": [
+        {
+          "commodity_id": "steel",
+          "units": 2
+        },
+        {
+          "commodity_id": "machinery",
+          "units": 0.2
+        },
+        {
+          "commodity_id": "lumber",
+          "units": 0.4
+        }
+      ],
+      "outputs": [
+        {
+          "commodity_id": "small_arms",
+          "units": 1
+        }
+      ],
+      "workers_per_batch": 1000
+    },
+    {
+      "recipe_id": "ammunition_factory",
+      "name_zh": "弹药厂",
+      "inputs": [
+        {
+          "commodity_id": "steel",
+          "units": 1.5
+        },
+        {
+          "commodity_id": "copper",
+          "units": 0.4
+        },
+        {
+          "commodity_id": "nitrates",
+          "units": 1
+        },
+        {
+          "commodity_id": "industrial_chemicals",
+          "units": 0.5
+        }
+      ],
+      "outputs": [
+        {
+          "commodity_id": "ammunition",
+          "units": 1
+        }
+      ],
+      "workers_per_batch": 1100
+    },
+    {
+      "recipe_id": "thermal_power",
+      "name_zh": "火力发电厂",
+      "inputs": [
+        {
+          "commodity_id": "coal",
+          "units": 5
+        }
+      ],
+      "outputs": [
+        {
+          "commodity_id": "electricity_service",
+          "units": 45
+        }
+      ],
+      "workers_per_batch": 750
+    },
+    {
+      "recipe_id": "freight_network",
+      "name_zh": "货运企业",
+      "inputs": [
+        {
+          "commodity_id": "coal",
+          "units": 2
+        },
+        {
+          "commodity_id": "lumber",
+          "units": 0.2
+        }
+      ],
+      "outputs": [
+        {
+          "commodity_id": "freight_service",
+          "units": 30
+        }
+      ],
+      "workers_per_batch": 650
+    }
+  ],
+  "production_sites": [
+    {
+      "site_id": "dawnbay_flour",
+      "region_id": "region:loran_dawnbay",
+      "recipe_id": "flour_mill",
+      "capacity_batches_per_day": 28,
+      "workers_capacity": 18000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "dawnbay_bakery",
+      "region_id": "region:loran_dawnbay",
+      "recipe_id": "bakery",
+      "capacity_batches_per_day": 30,
+      "workers_capacity": 24000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "dawnbay_preserving",
+      "region_id": "region:loran_dawnbay",
+      "recipe_id": "preserving",
+      "capacity_batches_per_day": 9,
+      "workers_capacity": 9000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "dawnbay_soap",
+      "region_id": "region:loran_dawnbay",
+      "recipe_id": "soap_works",
+      "capacity_batches_per_day": 10,
+      "workers_capacity": 6500,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "dawnbay_freight",
+      "region_id": "region:loran_dawnbay",
+      "recipe_id": "freight_network",
+      "capacity_batches_per_day": 15,
+      "workers_capacity": 12000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "dawnbay_power",
+      "region_id": "region:loran_dawnbay",
+      "recipe_id": "thermal_power",
+      "capacity_batches_per_day": 8,
+      "workers_capacity": 6500,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "riverback_cotton",
+      "region_id": "region:loran_riverback",
+      "recipe_id": "cotton_mill",
+      "capacity_batches_per_day": 18,
+      "workers_capacity": 22000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "riverback_clothing",
+      "region_id": "region:loran_riverback",
+      "recipe_id": "clothing_factory",
+      "capacity_batches_per_day": 12,
+      "workers_capacity": 14000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "riverback_machines",
+      "region_id": "region:loran_riverback",
+      "recipe_id": "machine_works",
+      "capacity_batches_per_day": 8,
+      "workers_capacity": 15000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "riverback_paper",
+      "region_id": "region:loran_riverback",
+      "recipe_id": "paper_mill",
+      "capacity_batches_per_day": 8,
+      "workers_capacity": 8000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "riverback_freight",
+      "region_id": "region:loran_riverback",
+      "recipe_id": "freight_network",
+      "capacity_batches_per_day": 12,
+      "workers_capacity": 9000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "riverback_power",
+      "region_id": "region:loran_riverback",
+      "recipe_id": "thermal_power",
+      "capacity_batches_per_day": 7,
+      "workers_capacity": 6000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "forgeplain_coal",
+      "region_id": "region:loran_forgeplain",
+      "recipe_id": "coal_mine",
+      "capacity_batches_per_day": 30,
+      "workers_capacity": 28000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "forgeplain_iron",
+      "region_id": "region:loran_forgeplain",
+      "recipe_id": "iron_mine",
+      "capacity_batches_per_day": 22,
+      "workers_capacity": 21000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "forgeplain_coke",
+      "region_id": "region:loran_forgeplain",
+      "recipe_id": "coke_works",
+      "capacity_batches_per_day": 18,
+      "workers_capacity": 14000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "forgeplain_furnace",
+      "region_id": "region:loran_forgeplain",
+      "recipe_id": "blast_furnace",
+      "capacity_batches_per_day": 12,
+      "workers_capacity": 18000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "forgeplain_steel",
+      "region_id": "region:loran_forgeplain",
+      "recipe_id": "steelworks",
+      "capacity_batches_per_day": 10,
+      "workers_capacity": 17000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "forgeplain_arms",
+      "region_id": "region:loran_forgeplain",
+      "recipe_id": "arms_factory",
+      "capacity_batches_per_day": 3,
+      "workers_capacity": 6500,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "forgeplain_power",
+      "region_id": "region:loran_forgeplain",
+      "recipe_id": "thermal_power",
+      "capacity_batches_per_day": 10,
+      "workers_capacity": 7000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "southridge_wheat",
+      "region_id": "region:loran_southridge",
+      "recipe_id": "farm_wheat",
+      "capacity_batches_per_day": 26,
+      "workers_capacity": 36000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "southridge_potatoes",
+      "region_id": "region:loran_southridge",
+      "recipe_id": "farm_potatoes",
+      "capacity_batches_per_day": 22,
+      "workers_capacity": 26000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "southridge_livestock",
+      "region_id": "region:loran_southridge",
+      "recipe_id": "farm_livestock",
+      "capacity_batches_per_day": 14,
+      "workers_capacity": 22000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "southridge_timber",
+      "region_id": "region:loran_southridge",
+      "recipe_id": "timber_camp",
+      "capacity_batches_per_day": 20,
+      "workers_capacity": 18000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "southridge_sawmill",
+      "region_id": "region:loran_southridge",
+      "recipe_id": "sawmill",
+      "capacity_batches_per_day": 12,
+      "workers_capacity": 9000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "northstar_rye",
+      "region_id": "region:vesta_northstar",
+      "recipe_id": "farm_rye",
+      "capacity_batches_per_day": 24,
+      "workers_capacity": 30000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "northstar_livestock",
+      "region_id": "region:vesta_northstar",
+      "recipe_id": "farm_livestock",
+      "capacity_batches_per_day": 18,
+      "workers_capacity": 25000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "northstar_wool",
+      "region_id": "region:vesta_northstar",
+      "recipe_id": "wool_mill",
+      "capacity_batches_per_day": 10,
+      "workers_capacity": 10000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "northstar_hides",
+      "region_id": "region:vesta_northstar",
+      "recipe_id": "tannery",
+      "capacity_batches_per_day": 8,
+      "workers_capacity": 8000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "northstar_freight",
+      "region_id": "region:vesta_northstar",
+      "recipe_id": "freight_network",
+      "capacity_batches_per_day": 8,
+      "workers_capacity": 7000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "silverfield_cotton",
+      "region_id": "region:vesta_silverfield",
+      "recipe_id": "cotton_mill",
+      "capacity_batches_per_day": 22,
+      "workers_capacity": 26000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "silverfield_clothing",
+      "region_id": "region:vesta_silverfield",
+      "recipe_id": "clothing_factory",
+      "capacity_batches_per_day": 16,
+      "workers_capacity": 17000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "silverfield_fine",
+      "region_id": "region:vesta_silverfield",
+      "recipe_id": "fine_clothing_workshop",
+      "capacity_batches_per_day": 3,
+      "workers_capacity": 3500,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "silverfield_paper",
+      "region_id": "region:vesta_silverfield",
+      "recipe_id": "paper_mill",
+      "capacity_batches_per_day": 10,
+      "workers_capacity": 9000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "silverfield_power",
+      "region_id": "region:vesta_silverfield",
+      "recipe_id": "thermal_power",
+      "capacity_batches_per_day": 8,
+      "workers_capacity": 6500,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "eastlake_timber",
+      "region_id": "region:vesta_eastlake",
+      "recipe_id": "timber_camp",
+      "capacity_batches_per_day": 17,
+      "workers_capacity": 15000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "eastlake_sawmill",
+      "region_id": "region:vesta_eastlake",
+      "recipe_id": "sawmill",
+      "capacity_batches_per_day": 14,
+      "workers_capacity": 11000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "eastlake_glass",
+      "region_id": "region:vesta_eastlake",
+      "recipe_id": "glassworks",
+      "capacity_batches_per_day": 10,
+      "workers_capacity": 8500,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "eastlake_cement",
+      "region_id": "region:vesta_eastlake",
+      "recipe_id": "cement_works",
+      "capacity_batches_per_day": 14,
+      "workers_capacity": 10000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "eastlake_fish",
+      "region_id": "region:vesta_eastlake",
+      "recipe_id": "fishery",
+      "capacity_batches_per_day": 16,
+      "workers_capacity": 10000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "eastlake_freight",
+      "region_id": "region:vesta_eastlake",
+      "recipe_id": "freight_network",
+      "capacity_batches_per_day": 18,
+      "workers_capacity": 13000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "redhill_coal",
+      "region_id": "region:vesta_redhill",
+      "recipe_id": "coal_mine",
+      "capacity_batches_per_day": 35,
+      "workers_capacity": 32000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "redhill_iron",
+      "region_id": "region:vesta_redhill",
+      "recipe_id": "iron_mine",
+      "capacity_batches_per_day": 25,
+      "workers_capacity": 23000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "redhill_coke",
+      "region_id": "region:vesta_redhill",
+      "recipe_id": "coke_works",
+      "capacity_batches_per_day": 20,
+      "workers_capacity": 15000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "redhill_furnace",
+      "region_id": "region:vesta_redhill",
+      "recipe_id": "blast_furnace",
+      "capacity_batches_per_day": 14,
+      "workers_capacity": 20000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "redhill_steel",
+      "region_id": "region:vesta_redhill",
+      "recipe_id": "steelworks",
+      "capacity_batches_per_day": 12,
+      "workers_capacity": 19000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "redhill_machines",
+      "region_id": "region:vesta_redhill",
+      "recipe_id": "machine_works",
+      "capacity_batches_per_day": 9,
+      "workers_capacity": 16000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "redhill_arms",
+      "region_id": "region:vesta_redhill",
+      "recipe_id": "arms_factory",
+      "capacity_batches_per_day": 4,
+      "workers_capacity": 8000,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "redhill_ammo",
+      "region_id": "region:vesta_redhill",
+      "recipe_id": "ammunition_factory",
+      "capacity_batches_per_day": 4,
+      "workers_capacity": 8500,
+      "opening_operating_bp": 9000
+    },
+    {
+      "site_id": "redhill_power",
+      "region_id": "region:vesta_redhill",
+      "recipe_id": "thermal_power",
+      "capacity_batches_per_day": 12,
+      "workers_capacity": 8500,
+      "opening_operating_bp": 9000
+    }
+  ],
+  "region_overrides": {
+    "region:loran_dawnbay": {
+      "warehouse_capacity_tonnes": 180000,
+      "import_capacity_units_per_day": 650,
+      "export_capacity_units_per_day": 550,
+      "labor_force_bp": 4450,
+      "nonmodeled_employment_bp": 8350,
+      "demand_modifiers_bp": {
+        "bread": 10800,
+        "fish": 11800,
+        "coffee": 12500,
+        "tea": 8500,
+        "fine_clothing": 12500
+      }
+    },
+    "region:loran_riverback": {
+      "warehouse_capacity_tonnes": 150000,
+      "import_capacity_units_per_day": 420,
+      "export_capacity_units_per_day": 440,
+      "labor_force_bp": 4520,
+      "nonmodeled_employment_bp": 8200,
+      "demand_modifiers_bp": {
+        "bread": 10500,
+        "meat": 10800,
+        "clothing": 11200,
+        "soap": 10800
+      }
+    },
+    "region:loran_forgeplain": {
+      "warehouse_capacity_tonnes": 175000,
+      "import_capacity_units_per_day": 500,
+      "export_capacity_units_per_day": 600,
+      "labor_force_bp": 4650,
+      "nonmodeled_employment_bp": 8000,
+      "demand_modifiers_bp": {
+        "bread": 11200,
+        "meat": 10500,
+        "milk": 8500,
+        "coal": 12500
+      }
+    },
+    "region:loran_southridge": {
+      "warehouse_capacity_tonnes": 140000,
+      "import_capacity_units_per_day": 220,
+      "export_capacity_units_per_day": 420,
+      "labor_force_bp": 4380,
+      "nonmodeled_employment_bp": 8650,
+      "demand_modifiers_bp": {
+        "bread": 8200,
+        "potatoes": 14500,
+        "milk": 11500,
+        "coffee": 5500,
+        "tea": 7000,
+        "fine_clothing": 4500
+      }
+    },
+    "region:vesta_northstar": {
+      "warehouse_capacity_tonnes": 125000,
+      "import_capacity_units_per_day": 240,
+      "export_capacity_units_per_day": 380,
+      "labor_force_bp": 4500,
+      "nonmodeled_employment_bp": 8500,
+      "demand_modifiers_bp": {
+        "rye": 15000,
+        "bread": 9000,
+        "meat": 12000,
+        "milk": 11000,
+        "tea": 9000
+      }
+    },
+    "region:vesta_silverfield": {
+      "warehouse_capacity_tonnes": 165000,
+      "import_capacity_units_per_day": 600,
+      "export_capacity_units_per_day": 500,
+      "labor_force_bp": 4400,
+      "nonmodeled_employment_bp": 8400,
+      "demand_modifiers_bp": {
+        "bread": 10500,
+        "coffee": 11000,
+        "tea": 11500,
+        "fine_clothing": 15000,
+        "perfume_cosmetics": 14500,
+        "jewelry_watches": 13500
+      }
+    },
+    "region:vesta_eastlake": {
+      "warehouse_capacity_tonnes": 155000,
+      "import_capacity_units_per_day": 480,
+      "export_capacity_units_per_day": 620,
+      "labor_force_bp": 4480,
+      "nonmodeled_employment_bp": 8300,
+      "demand_modifiers_bp": {
+        "fish": 15500,
+        "bread": 9800,
+        "rice": 11000,
+        "freight_service": 13500
+      }
+    },
+    "region:vesta_redhill": {
+      "warehouse_capacity_tonnes": 190000,
+      "import_capacity_units_per_day": 540,
+      "export_capacity_units_per_day": 680,
+      "labor_force_bp": 4700,
+      "nonmodeled_employment_bp": 7850,
+      "demand_modifiers_bp": {
+        "bread": 11500,
+        "meat": 11000,
+        "milk": 8000,
+        "coal": 14000,
+        "clothing": 11000
+      }
+    }
+  },
+  "international_market": {
+    "default_import_tariff_bp": 650,
+    "default_freight_cost_bp": 900,
+    "pool_restock_floor_bp": 1200,
+    "price_pressure_weight_bp": 2800
+  }
+}
