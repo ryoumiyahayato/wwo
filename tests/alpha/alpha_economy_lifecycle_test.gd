@@ -218,6 +218,48 @@ func _run() -> void:
 		economy.market_price("region:vesta_redhill", "grain") > before_shock,
 		"地区短缺实际提高正式价格"
 	)
+	var overlap_base: int = economy.market_price("region:vesta_redhill", "coal")
+	test.expect(
+		bool(economy.apply_market_shock(
+			"shock:test:coal:long",
+			"region:vesta_redhill",
+			"coal",
+			2000,
+			2,
+			"矿井停产",
+			400
+		).get("success", false)),
+		"可登记较长期煤炭冲击"
+	)
+	var overlap_long_price: int = economy.market_price("region:vesta_redhill", "coal")
+	test.expect(
+		bool(economy.apply_market_shock(
+			"shock:test:coal:short",
+			"region:vesta_redhill",
+			"coal",
+			1000,
+			1,
+			"铁路拥堵",
+			400
+		).get("success", false)),
+		"同一商品可叠加较短冲击"
+	)
+	test.expect(
+		economy.market_price("region:vesta_redhill", "coal") > overlap_long_price,
+		"重叠冲击按共同基准叠加"
+	)
+	test.equal(economy.expire_market_shocks(424), 1, "较短冲击按结束小时单独到期")
+	test.equal(
+		economy.market_price("region:vesta_redhill", "coal"),
+		overlap_long_price,
+		"短冲击到期后仍保留长期冲击价格"
+	)
+	test.equal(economy.expire_market_shocks(448), 1, "长期冲击随后到期")
+	test.equal(
+		economy.market_price("region:vesta_redhill", "coal"),
+		overlap_base,
+		"全部重叠冲击到期后恢复原始基准价格"
+	)
 	var integrity: Dictionary = economy.validate_integrity()
 	test.expect(bool(integrity.get("success", false)), "账本、资产、合同和债务引用闭合")
 	var saved: Dictionary = economy.get_persistent_state()

@@ -722,32 +722,44 @@ func apply_market_shock(
 ) -> Dictionary:
 	if _processed_keys.has(idempotency_key):
 		return _ok({"duplicate": true})
-	if not markets.has(region_id) or not goods.has(good_id) or duration_days <= 0:
-		return _fail("invalid_market_shock", "市场冲击引用无效")
-	var market: Dictionary = markets[region_id] as Dictionary
-	var prices: Dictionary = market.get("prices", {}) as Dictionary
-	var before: int = int(prices.get(good_id, 0))
-	prices[good_id] = maxi(1, before * (10000 + price_delta_bp) / 10000)
-	market["prices"] = prices
-	market["state"] = "shortage" if price_delta_bp > 0 else "surplus"
-	markets[region_id] = market
-	external_events.append({
+	if (
+		not markets.has(region_id)
+		or not goods.has(good_id)
+		or duration_days <= 0
+		or price_delta_bp <= -10000
+	):
+		return _fail("invalid_market_shock", "市场冲击引用或价格修正无效")
+	var before: int = market_price(region_id, good_id)
+	var base_price: int = _market_shock_base_price(
+		region_id, good_id, before, total_hour
+	)
+	var event: Dictionary = {
 		"event_id": "market_event:%d" % external_events.size(),
 		"region_id": region_id,
 		"good_id": good_id,
+		"base_price": base_price,
 		"before_price": before,
-		"after_price": prices[good_id],
+		"after_price": before,
+		"price_delta_bp": price_delta_bp,
+		"start_hour": total_hour,
 		"end_hour": total_hour + duration_days * HOURS_PER_DAY,
 		"cause": cause,
-	})
+	}
+	external_events.append(event)
+	var after: int = _recompute_market_shock_price(
+		region_id, good_id, base_price, total_hour
+	)
+	event["after_price"] = after
+	external_events[external_events.size() - 1] = event
 	while external_events.size() > 128:
 		external_events.pop_front()
 	_processed_keys[idempotency_key] = "market"
-	return _ok({"before_price": before, "after_price": prices[good_id]})
+	return _ok({"before_price": before, "after_price": after})
 
 
 func expire_market_shocks(total_hour: int) -> int:
 	var active: Array[Dictionary] = []
+	var affected: Dictionary = {}
 	var expired_count: int = 0
 	for event: Dictionary in external_events:
 		if total_hour < int(event.get("end_hour", -1)):
@@ -755,16 +767,104 @@ func expire_market_shocks(total_hour: int) -> int:
 			continue
 		var region_id: String = str(event.get("region_id", ""))
 		var good_id: String = str(event.get("good_id", ""))
-		var market: Dictionary = markets.get(region_id, {}) as Dictionary
-		var prices: Dictionary = market.get("prices", {}) as Dictionary
-		if int(prices.get(good_id, 0)) == int(event.get("after_price", -1)):
-			prices[good_id] = maxi(1, int(event.get("before_price", 1)))
-			market["prices"] = prices
-			market["state"] = "balanced"
-			markets[region_id] = market
+		var pair_key: String = "%s|%s" % [region_id, good_id]
+		if not affected.has(pair_key):
+			affected[pair_key] = {
+				"region_id": region_id,
+				"good_id": good_id,
+				"base_price": _market_shock_original_base_price(
+					region_id, good_id, market_price(region_id, good_id)
+				),
+			}
 		expired_count += 1
 	external_events = active
+	for raw_pair: Variant in affected.values():
+		var pair: Dictionary = raw_pair as Dictionary
+		_recompute_market_shock_price(
+			str(pair.get("region_id", "")),
+			str(pair.get("good_id", "")),
+			int(pair.get("base_price", 1)),
+			total_hour
+		)
 	return expired_count
+
+
+func _market_shock_base_price(
+	region_id: String,
+	good_id: String,
+	fallback_price: int,
+	total_hour: int
+) -> int:
+	for event: Dictionary in external_events:
+		if (
+			str(event.get("region_id", "")) == region_id
+			and str(event.get("good_id", "")) == good_id
+			and total_hour < int(event.get("end_hour", -1))
+		):
+			return maxi(
+				1,
+				int(event.get("base_price", event.get("before_price", fallback_price)))
+			)
+	return maxi(1, fallback_price)
+
+
+func _market_shock_original_base_price(
+	region_id: String,
+	good_id: String,
+	fallback_price: int
+) -> int:
+	for event: Dictionary in external_events:
+		if (
+			str(event.get("region_id", "")) == region_id
+			and str(event.get("good_id", "")) == good_id
+		):
+			return maxi(
+				1,
+				int(event.get("base_price", event.get("before_price", fallback_price)))
+			)
+	return maxi(1, fallback_price)
+
+
+func _market_shock_delta_bp(event: Dictionary) -> int:
+	if event.has("price_delta_bp"):
+		return maxi(-9999, int(event.get("price_delta_bp", 0)))
+	var before: int = int(event.get("before_price", 0))
+	var after: int = int(event.get("after_price", 0))
+	if before <= 0 or after <= 0:
+		return 0
+	return maxi(-9999, int(round(float(after) * 10000.0 / float(before))) - 10000)
+
+
+func _recompute_market_shock_price(
+	region_id: String,
+	good_id: String,
+	base_price: int,
+	total_hour: int
+) -> int:
+	if not markets.has(region_id) or not goods.has(good_id):
+		return 0
+	var price: int = maxi(1, base_price)
+	var has_active: bool = false
+	for event: Dictionary in external_events:
+		if (
+			str(event.get("region_id", "")) != region_id
+			or str(event.get("good_id", "")) != good_id
+			or total_hour >= int(event.get("end_hour", -1))
+		):
+			continue
+		price = maxi(1, price * (10000 + _market_shock_delta_bp(event)) / 10000)
+		has_active = true
+	var market: Dictionary = markets[region_id] as Dictionary
+	var prices: Dictionary = market.get("prices", {}) as Dictionary
+	prices[good_id] = price
+	market["prices"] = prices
+	market["state"] = (
+		"balanced"
+		if not has_active or price == base_price
+		else ("shortage" if price > base_price else "surplus")
+	)
+	markets[region_id] = market
+	return price
 
 
 func market_price(region_id: String, good_id: String) -> int:
