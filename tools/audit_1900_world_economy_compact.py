@@ -53,11 +53,16 @@ def main() -> None:
 
     population_total = 0
     formal_count = 0
+    bounded_fields = (
+        ("population", "population_confidence_bp"),
+        ("gdp_pc", "gdp_confidence_bp"),
+    )
     for country in countries:
-        for prefix in ("population", "gdp_pc"):
+        for prefix, confidence_field in bounded_fields:
             assert float(country[f"{prefix}_lower"]) <= float(country[f"{prefix}_value"]) <= float(country[f"{prefix}_upper"])
-            assert 0 < int(country[f"{prefix}_confidence_bp"]) <= 10000
+            assert 0 < int(country[confidence_field]) <= 10000
         assert int(country["urban_lower_bp"]) <= int(country["urban_value_bp"]) <= int(country["urban_upper_bp"])
+        assert 0 < int(country["urban_confidence_bp"]) <= 10000
         assert int(country["rail_lower_km"]) <= int(country["rail_route_km"]) <= int(country["rail_upper_km"])
         assert 0 <= int(country["port_capacity_index"]) <= 100
         assert 0 <= int(country["merchant_shipping_index"]) <= 100
