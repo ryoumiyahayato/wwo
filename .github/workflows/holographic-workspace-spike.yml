@@ -20,7 +20,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   godot-headless:
@@ -33,24 +33,6 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-        with:
-          ref: agent/1900-market-economy-core
-
-      - name: Update source-backed Russia interaction assertion
-        if: github.actor != 'github-actions[bot]'
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 tools/temporary_update_russia_interaction_probe.py
-          if git diff --quiet -- scripts/ui_spikes/holographic_workspace/holographic_workspace_interaction_probe.gd; then
-            echo "Russia interaction assertion already current"
-          else
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add scripts/ui_spikes/holographic_workspace/holographic_workspace_interaction_probe.gd
-            git commit -m "align Russia interaction probe with source-backed GIS"
-            git push origin HEAD:agent/1900-market-economy-core
-          fi
 
       - name: Download Godot 4.6.3
         shell: bash
