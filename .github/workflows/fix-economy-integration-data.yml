@@ -1,0 +1,40 @@
+name: Fix economy integration data
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/fix-economy-integration-data.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/economy-integration-phase2
+      - name: Replace invalid aggregate grain procurement
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path("data/alpha/economy_integration_1900.json")
+          text = path.read_text(encoding="utf-8")
+          old = '"commodity_id": "grain"'
+          count = text.count(old)
+          if count != 2:
+              raise SystemExit(f"expected two grain procurement records, found {count}")
+          path.write_text(text.replace(old, '"commodity_id": "wheat"'), encoding="utf-8")
+          PY
+          python3 -m json.tool data/alpha/economy_integration_1900.json >/dev/null
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/alpha/economy_integration_1900.json
+          git commit -m "use catalog wheat for strategic procurement"
+          git push origin HEAD:agent/economy-integration-phase2
