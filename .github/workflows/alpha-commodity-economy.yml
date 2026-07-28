@@ -3,7 +3,7 @@ name: Alpha 1900 commodity economy
 on:
   pull_request:
     branches:
-      - agent/historical-admin-top50-generalize
+      - master
     paths:
       - "data/alpha/**"
       - "scripts/alpha/**"
@@ -11,6 +11,9 @@ on:
       - "scenes/alpha/**"
       - "tests/alpha/**"
       - "tools/audit_1900_commodity_economy.py"
+      - "tools/audit_1900_economy_integration.py"
+      - "tools/audit_1900_world_economy_estimates.py"
+      - "tools/build_1900_world_economy_estimates.py"
       - "docs/economy/**"
       - ".github/workflows/alpha-commodity-economy.yml"
   workflow_dispatch:
