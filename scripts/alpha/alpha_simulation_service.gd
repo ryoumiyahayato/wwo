@@ -28,6 +28,7 @@ var organization_service: OrganizationService
 var economy := AlphaEconomyService.new()
 var commodity_market := AlphaCommodityMarketService.new()
 var economy_integration := AlphaEconomyIntegrationService.new()
+var historical_world_economy := AlphaHistoricalWorldEconomyData.new()
 var labor := AlphaLaborService.new()
 var enterprise := AlphaEnterpriseService.new()
 var character_service := AlphaCharacterService.new()
@@ -88,6 +89,8 @@ func initialize(simulation_clock: SimulationClock = null) -> bool:
 			"统一商品、现金、企业与物流结算初始化失败：%s"
 			% economy_integration.initialization_error
 		)
+	if not historical_world_economy.configure():
+		return _fail_alpha("1900历史世界经济数据初始化失败：%s" % historical_world_economy.initialization_error)
 	if not character_service.configure(
 		core_data, generation_config, alpha_config, economy, labor
 	):
@@ -105,11 +108,12 @@ func initialize(simulation_clock: SimulationClock = null) -> bool:
 		return false
 	if not alpha_ai.configure(
 		labor, economy, enterprise, politics, organization_service,
-		character_service
+		character_service, commodity_market, economy_integration, historical_world_economy
 	):
 		return _fail_alpha("AI 服务初始化失败")
 	if not world_dynamics.configure(
-		world, economy, enterprise, politics, roster, alpha_config, commodity_market
+		world, economy, enterprise, politics, roster, alpha_config, commodity_market,
+		economy_integration
 	):
 		return _fail_alpha("世界动态服务初始化失败")
 	alpha_events.clear()
@@ -324,6 +328,8 @@ func alpha_counts() -> Dictionary:
 	counts["commodity_active_shipments"] = economy_integration.shipments.size()
 	counts["commodity_transport_edges"] = economy_integration.transport_edge_count()
 	counts["enterprise_economic_decisions"] = economy_integration.decision_history.size()
+	counts["historical_world_countries"] = historical_world_economy.countries.size()
+	counts["historical_formal_countries"] = historical_world_economy.formal_countries().size()
 	counts["debts"] = _loan_count()
 	counts["unfinished_matters"] = _unfinished_matter_count()
 	counts["event_history"] = (
@@ -443,37 +449,69 @@ func _settle_hour(total_hour: int) -> void:
 	_reconcile_legacy_cash(legacy_before, total_hour)
 	var value: Dictionary = V2DateTime.from_total_hour(total_hour)
 	if int(value.get("hour", -1)) == 23:
+		var snapshot := _capture_economy_day_state()
 		economy.expire_market_shocks(total_hour)
 		var market_result: Dictionary = commodity_market.settle_day(total_hour)
+		var delivery_result: Dictionary = _result(false, "not_run", {})
+		var integration_result: Dictionary = _result(false, "not_run", {})
+		var failed_code := ""
 		if not bool(market_result.get("success", false)):
+			failed_code = "commodity_market_failure"
+		else:
+			delivery_result = economy_integration.deliver_due_shipments(total_hour)
+			if not bool(delivery_result.get("success", false)):
+				failed_code = "shipment_delivery_failure"
+			else:
+				integration_result = economy_integration.settle_day(total_hour)
+				if not bool(integration_result.get("success", false)):
+					failed_code = "economy_integration_failure"
+		if not failed_code.is_empty():
+			_restore_economy_day_state(snapshot)
 			_append_alpha_event({
-				"event_id": "event:commodity_market_failure:%d" % total_hour,
+				"event_id": "event:%s:%d" % [failed_code, total_hour],
 				"total_hour": total_hour,
-				"fact_type": "commodity_market_failure",
-				"summary": "商品市场日结失败，已保留上一日状态。",
+				"fact_type": failed_code,
+				"summary": "商品、现金、企业、劳动与运输日结未能原子完成，已完整回滚。",
 				"requires_decision": true,
 			})
 		else:
-			economy_integration.deliver_due_shipments(total_hour)
-			var integration_result := economy_integration.settle_day(total_hour)
-			if not bool(integration_result.get("success", false)):
-				_append_alpha_event({
-					"event_id": "event:economy_integration_failure:%d" % total_hour,
-					"total_hour": total_hour,
-					"fact_type": "economy_integration_failure",
-					"summary": "商品、现金、企业或物流统一结算失败。",
-					"requires_decision": true,
-				})
-		_process_active_ai(total_hour)
-		world_dynamics.process_boundaries(
-			total_hour, roster.active_characters
-		)
-		_settle_due_development(total_hour)
+			_process_active_ai(total_hour)
+			world_dynamics.process_boundaries(total_hour, roster.active_characters)
+			_settle_due_development(total_hour)
 	alpha_hours_processed += 1
 	alpha_last_hour_usec = Time.get_ticks_usec() - started_usec
-	alpha_maximum_hour_usec = maxi(
-		alpha_maximum_hour_usec, alpha_last_hour_usec
+	alpha_maximum_hour_usec = maxi(alpha_maximum_hour_usec, alpha_last_hour_usec)
+
+
+func _capture_economy_day_state() -> Dictionary:
+	return {
+		"ledger": economy.ledger.create_transaction_checkpoint(),
+		"assets": economy.assets.get_persistent_state(),
+		"contracts": economy.contracts.get_persistent_state(),
+		"markets": economy.markets.duplicate(true),
+		"external_events": economy.external_events.duplicate(true),
+		"commodity_market": commodity_market.get_persistent_state(),
+		"economy_integration": economy_integration.get_persistent_state(),
+		"enterprise": enterprise.get_persistent_state(),
+		"labor": labor.get_persistent_state(),
+	}
+
+
+func _restore_economy_day_state(snapshot: Dictionary) -> bool:
+	var ok := economy.ledger.restore_transaction_checkpoint(
+		snapshot.get("ledger", {}) as Dictionary
 	)
+	ok = economy.assets.restore_persistent_state(snapshot.get("assets", {}) as Dictionary) and ok
+	ok = economy.contracts.restore_persistent_state(snapshot.get("contracts", {}) as Dictionary) and ok
+	economy.markets = (snapshot.get("markets", {}) as Dictionary).duplicate(true)
+	economy.external_events = DataRecordUtils.to_dictionary_array(
+		snapshot.get("external_events", [])
+	)
+	ok = commodity_market.restore_persistent_state(snapshot.get("commodity_market", {}) as Dictionary) and ok
+	ok = enterprise.restore_persistent_state(snapshot.get("enterprise", {}) as Dictionary) and ok
+	ok = labor.restore_persistent_state(snapshot.get("labor", {}) as Dictionary) and ok
+	ok = economy_integration.restore_persistent_state(snapshot.get("economy_integration", {}) as Dictionary) and ok
+	return ok
 
 
 func _initialize_high_detail_people() -> bool:
