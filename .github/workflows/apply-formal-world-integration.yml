@@ -7,13 +7,22 @@ on:
     paths:
       - ".github/workflows/apply-formal-world-integration.yml"
       - "tools/apply_formal_world_integration.py"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/apply-formal-world-integration.yml"
+      - "tools/apply_formal_world_integration.py"
+      - "scripts/formal/**"
+      - "scenes/formal/**"
+      - "tests/formal/**"
   workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: apply-formal-world-integration
+  group: apply-formal-world-integration-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -96,6 +105,7 @@ jobs:
           done
 
       - name: Remove one-time patch machinery
+        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
@@ -103,6 +113,7 @@ jobs:
           rm -f .github/workflows/apply-formal-world-integration.yml
 
       - name: Commit integrated result
+        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
