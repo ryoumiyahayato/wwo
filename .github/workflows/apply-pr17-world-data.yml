@@ -1,15 +1,16 @@
 name: Apply PR17 bounded world data
 
 on:
-  pull_request_target:
-    types: [synchronize]
+  push:
+    branches: [master]
+    paths:
+      - ".github/workflows/apply-pr17-world-data.yml"
 
 permissions:
   contents: write
 
 jobs:
   apply:
-    if: github.event.pull_request.number == 17 && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
