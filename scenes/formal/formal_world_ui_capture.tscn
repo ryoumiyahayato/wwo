@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tests/formal/formal_world_ui_capture.gd" id="1_capture"]
+
+[node name="FormalWorldUiCapture" type="Node"]
+script = ExtResource("1_capture")
