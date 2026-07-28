@@ -1,0 +1,26 @@
+name: Temporary export final economy audit source
+
+on:
+  pull_request:
+    branches:
+      - agent/historical-admin-top50-generalize
+    paths:
+      - ".github/workflows/temporary-export-final-economy-audit.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pack final branch source
+        run: |
+          zip -qr final-economy-audit-source.zip . -x '.git/*'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: final-economy-audit-source
+          path: final-economy-audit-source.zip
+          if-no-files-found: error
+          retention-days: 1
