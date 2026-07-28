@@ -26,53 +26,63 @@ jobs:
 
           path = Path('scripts/alpha/alpha_simulation_service.gd')
           text = path.read_text(encoding='utf-8')
-          replacements = [
-              (
-                  'var commodity_market := AlphaCommodityMarketService.new()\nvar labor := AlphaLaborService.new()',
-                  'var commodity_market := AlphaCommodityMarketService.new()\nvar economic_closure := AlphaEconomicClosureService.new()\nvar labor := AlphaLaborService.new()',
-              ),
-              (
-                  '\tif not enterprise.configure(\n\t\talpha_config, economy, labor, organization_service, clock.total_hours\n\t):\n\t\treturn _fail_alpha("企业服务初始化失败")',
-                  '\tif not enterprise.configure(\n\t\talpha_config, economy, labor, organization_service, clock.total_hours\n\t):\n\t\treturn _fail_alpha("企业服务初始化失败")\n\tif not economic_closure.configure(economy, commodity_market, enterprise, labor):\n\t\treturn _fail_alpha("经济闭环服务初始化失败：%s" % economic_closure.initialization_error)',
-              ),
-              (
-                  '\t\tcommodity_market.validate_integrity(),\n\t\tenterprise.validate_integrity(),',
-                  '\t\tcommodity_market.validate_integrity(),\n\t\teconomic_closure.validate_integrity(),\n\t\tenterprise.validate_integrity(),',
-              ),
-              (
-                  '\tcounts["commodity_production_sites"] = commodity_market.production_sites.size()',
-                  '\tcounts["commodity_production_sites"] = commodity_market.production_sites.size()\n\tcounts["economic_routes"] = economic_closure.route_capacity_units.size()\n\tcounts["in_transit_shipments"] = economic_closure.in_transit.size()',
-              ),
-              (
-                  '\tstate["alpha_commodity_market_state"] = commodity_market.get_persistent_state()',
-                  '\tstate["alpha_commodity_market_state"] = commodity_market.get_persistent_state()\n\tstate["alpha_economic_closure_state"] = economic_closure.get_persistent_state()',
-              ),
-              (
-                  '\t\tvar market_result: Dictionary = commodity_market.settle_day(total_hour)\n\t\tif not bool(market_result.get("success", false)):',
-                  '\t\tvar market_result: Dictionary = commodity_market.settle_day(total_hour)\n\t\tvar closure_result: Dictionary = economic_closure.settle_day(total_hour)\n\t\tif not bool(closure_result.get("success", false)):\n\t\t\t_append_alpha_event({\n\t\t\t\t"event_id": "event:economic_closure_failure:%d" % total_hour,\n\t\t\t\t"total_hour": total_hour,\n\t\t\t\t"fact_type": "economic_closure_failure",\n\t\t\t\t"summary": "商品实物流、现金、企业、劳动或运输结算失败。",\n\t\t\t\t"requires_decision": true,\n\t\t\t})\n\t\tif not bool(market_result.get("success", false)):',
-              ),
-          ]
-          for old, new in replacements:
-              if new in text:
-                  continue
-              if old not in text:
-                  raise SystemExit(f'simulation integration anchor missing: {old[:60]!r}')
-              text = text.replace(old, new, 1)
+          def insert_after(anchor, addition, label):
+              global text
+              if addition.strip() in text:
+                  return
+              if anchor not in text:
+                  raise SystemExit(f'{label} anchor missing')
+              text = text.replace(anchor, anchor + addition, 1)
+
+          insert_after(
+              'var commodity_market := AlphaCommodityMarketService.new()\n',
+              'var economic_closure := AlphaEconomicClosureService.new()\n',
+              'service declaration',
+          )
+          insert_after(
+              '\t\treturn _fail_alpha("企业服务初始化失败")\n',
+              '\tif not economic_closure.configure(economy, commodity_market, enterprise, labor):\n\t\treturn _fail_alpha("经济闭环服务初始化失败：%s" % economic_closure.initialization_error)\n',
+              'service configure',
+          )
+          insert_after(
+              '\t\tcommodity_market.validate_integrity(),\n',
+              '\t\teconomic_closure.validate_integrity(),\n',
+              'integrity list',
+          )
+          insert_after(
+              '\tcounts["commodity_production_sites"] = commodity_market.production_sites.size()\n',
+              '\tcounts["economic_routes"] = economic_closure.route_capacity_units.size()\n\tcounts["in_transit_shipments"] = economic_closure.in_transit.size()\n',
+              'count summary',
+          )
+          insert_after(
+              '\tstate["alpha_commodity_market_state"] = commodity_market.get_persistent_state()\n',
+              '\tstate["alpha_economic_closure_state"] = economic_closure.get_persistent_state()\n',
+              'persistent state',
+          )
+          insert_after(
+              '\t\tvar market_result: Dictionary = commodity_market.settle_day(total_hour)\n',
+              '\t\tvar closure_result: Dictionary = economic_closure.settle_day(total_hour)\n\t\tif not bool(closure_result.get("success", false)):\n\t\t\t_append_alpha_event({\n\t\t\t\t"event_id": "event:economic_closure_failure:%d" % total_hour,\n\t\t\t\t"total_hour": total_hour,\n\t\t\t\t"fact_type": "economic_closure_failure",\n\t\t\t\t"summary": "商品实物流、现金、企业、劳动或运输结算失败。",\n\t\t\t\t"requires_decision": true,\n\t\t\t})\n',
+              'daily settlement',
+          )
           path.write_text(text, encoding='utf-8')
 
           workflow = Path('.github/workflows/alpha-commodity-economy.yml')
           text = workflow.read_text(encoding='utf-8')
-          anchor = '            tests/alpha/alpha_ai_economy_stability_test.gd\n'
-          addition = anchor + '            tests/alpha/alpha_economic_closure_test.gd\n'
-          if 'tests/alpha/alpha_economic_closure_test.gd' not in text:
+          test_line = '            tests/alpha/alpha_economic_closure_test.gd\n'
+          if test_line not in text:
+              anchor = '            tests/alpha/alpha_ai_economy_stability_test.gd\n'
               if anchor not in text:
                   raise SystemExit('economy CI test-list anchor missing')
-              text = text.replace(anchor, addition, 1)
-          workflow.write_text(text, encoding='utf-8')
+              text = text.replace(anchor, anchor + test_line, 1)
+              workflow.write_text(text, encoding='utf-8')
           PY
           git diff --check
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add scripts/alpha/alpha_simulation_service.gd .github/workflows/alpha-commodity-economy.yml
-          git commit -m "integrate economic closure into daily simulation"
-          git push origin HEAD:agent/economic-closure-network
+          if git diff --cached --quiet; then
+            echo "Economic closure integration already committed"
+          else
+            git commit -m "integrate economic closure into daily simulation"
+            git push origin HEAD:agent/economic-closure-network
+          fi
