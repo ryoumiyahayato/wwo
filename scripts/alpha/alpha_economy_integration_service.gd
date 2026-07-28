@@ -77,6 +77,9 @@ func configure(
 	if str(_document.get("schema_id", "")) != "alpha_economy_integration_1900_v1":
 		return _fail_initialize("统一经济结算配置 Schema 无效")
 	_policies = (_document.get("policies", {}) as Dictionary).duplicate(true)
+	_commodity_market.set_external_logistics_managed(bool(
+		_policies.get("external_logistics_managed", true)
+	))
 	_household_strata = DataRecordUtils.to_dictionary_array(
 		_document.get("household_strata", [])
 	)
@@ -184,6 +187,10 @@ func settle_day(total_hour: int) -> Dictionary:
 		"gold_reserves": _gold_reserve_summary(),
 	}
 	return _ok(daily_summary.duplicate(true))
+
+
+func transport_edge_count() -> int:
+	return _edges_by_id.size()
 
 
 func integration_summary() -> Dictionary:
