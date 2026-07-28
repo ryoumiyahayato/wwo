@@ -1,13 +1,6 @@
 name: Apply formal world integration
 
 on:
-  push:
-    branches:
-      - agent/formal-world-economy-integration
-    paths:
-      - ".github/workflows/apply-formal-world-integration.yml"
-      - "tools/apply_formal_world_integration.py"
-      - "tools/fix_formal_world_patch_output.py"
   pull_request:
     branches:
       - master
@@ -18,7 +11,6 @@ on:
       - "scripts/formal/**"
       - "scenes/formal/**"
       - "tests/formal/**"
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -146,7 +138,6 @@ jobs:
           done
 
       - name: Remove one-time patch machinery
-        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
@@ -155,7 +146,6 @@ jobs:
           rm -f .github/workflows/apply-formal-world-integration.yml
 
       - name: Commit integrated result
-        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
