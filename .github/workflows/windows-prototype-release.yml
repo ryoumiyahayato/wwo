@@ -93,13 +93,9 @@ jobs:
         shell: pwsh
         run: godot --headless --path . --script res://tests/formal/formal_world_integration_test.gd
 
-      - name: Run unified economy regression
+      - name: Run formal world ten-year balance
         shell: pwsh
-        run: godot --headless --path . --script res://tests/alpha/alpha_economy_integration_phase2_test.gd
-
-      - name: Run AI economy stability regression
-        shell: pwsh
-        run: godot --headless --path . --script res://tests/alpha/alpha_ai_economy_stability_test.gd
+        run: godot --headless --path . --script res://tests/formal/formal_world_long_term_balance_test.gd
 
       - name: Run historical world data regression
         shell: pwsh
