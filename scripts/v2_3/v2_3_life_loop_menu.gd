@@ -2,7 +2,7 @@ class_name V23LifeLoopMenu
 extends Control
 ## Minimal product title. Any non-Escape key enters the best available launch path.
 
-const LIFE_LOOP_SCENE: String = "res://scenes/v2_3/v2_3_life_loop_main.tscn"
+const LIFE_LOOP_SCENE: String = "res://scenes/formal/formal_world_main.tscn"
 const LAUNCH_MODE_META: StringName = &"v2_3_launch_mode"
 const DISPLAY_VERSION: String = "V0.001"
 const ECONOMY_AUDIT_SCENE: String = "res://scenes/alpha/alpha_economy_dashboard_preview.tscn"
