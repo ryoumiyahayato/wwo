@@ -16,6 +16,7 @@ var _politics: AlphaPoliticsService
 var _roster: CharacterRosterService
 var _config: AlphaConfig
 var _commodity_market: AlphaCommodityMarketService
+var _economy_integration: AlphaEconomyIntegrationService
 var _last_day_index: int = -1
 var _last_week_index: int = -1
 var _last_month_key: String = ""
@@ -28,7 +29,8 @@ func configure(
 	politics: AlphaPoliticsService,
 	roster: CharacterRosterService,
 	config: AlphaConfig,
-	commodity_market: AlphaCommodityMarketService = null
+	commodity_market: AlphaCommodityMarketService = null,
+	economy_integration: AlphaEconomyIntegrationService = null
 ) -> bool:
 	_world = world
 	_economy = economy
@@ -37,6 +39,7 @@ func configure(
 	_roster = roster
 	_config = config
 	_commodity_market = commodity_market
+	_economy_integration = economy_integration
 	background_states.clear()
 	national_issues.clear()
 	events.clear()
@@ -301,6 +304,8 @@ func _process_enterprises(week_index: int, total_hour: int) -> void:
 	for organization_id: String in enterprise_ids:
 		var state: Dictionary = _enterprise.enterprises[organization_id] as Dictionary
 		if str(state.get("status", "")) not in AlphaEnterpriseService.ACTIVE_ENTERPRISE_STATUSES:
+			continue
+		if _economy_integration != null and _economy_integration.is_integrated_enterprise(organization_id):
 			continue
 		_enterprise.aggregate_day(
 			"world:enterprise_week:%s:%d" % [organization_id, week_index],
