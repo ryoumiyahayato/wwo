@@ -930,6 +930,9 @@ func _create_shipment(
 	var unit_price := _commodity_market.market_price(origin_id, commodity_id)
 	var goods_value := maxi(1, int(round(float(unit_price) * units)))
 	var route_terms := _route_terms(edge_ids)
+	var carrier_id := str(route_terms.get("carrier_id", ""))
+	if carrier_id.is_empty():
+		return _fail("carrier_missing", "运输路径缺少承运企业")
 	var freight := maxi(0, int(round(float(route_terms.get("cost_per_unit", 0.0)) * units)))
 	var tariff_bp := int(relation.get("tariff_bp", 0)) if cross_border else 0
 	var preference_bp := int(relation.get("preference_bp", 0)) if cross_border else 0
