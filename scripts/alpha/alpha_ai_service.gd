@@ -13,6 +13,9 @@ var _enterprise: AlphaEnterpriseService
 var _politics: AlphaPoliticsService
 var _organizations: OrganizationService
 var _characters: AlphaCharacterService
+var _commodity_market: AlphaCommodityMarketService
+var _economy_integration: AlphaEconomyIntegrationService
+var _historical_world: AlphaHistoricalWorldEconomyData
 var _processed_days: Dictionary = {}
 
 
@@ -22,7 +25,10 @@ func configure(
 	enterprise: AlphaEnterpriseService,
 	politics: AlphaPoliticsService,
 	organizations: OrganizationService,
-	characters: AlphaCharacterService
+	characters: AlphaCharacterService,
+	commodity_market: AlphaCommodityMarketService = null,
+	economy_integration: AlphaEconomyIntegrationService = null,
+	historical_world: AlphaHistoricalWorldEconomyData = null
 ) -> bool:
 	_labor = labor
 	_economy = economy
@@ -30,6 +36,9 @@ func configure(
 	_politics = politics
 	_organizations = organizations
 	_characters = characters
+	_commodity_market = commodity_market
+	_economy_integration = economy_integration
+	_historical_world = historical_world
 	decisions.clear()
 	last_candidates.clear()
 	_processed_days.clear()
@@ -155,37 +164,37 @@ func process_person_day(
 	var candidates: Array[Dictionary] = build_candidates(character, known, total_hour)
 	if candidates.is_empty():
 		return _result(false, "no_candidate", {})
-	var selected: Dictionary = candidates[0]
-	var secondary_day: bool = (
-		posmod(day_index + absi(character.id.hash()), 7) == 0
-	)
+	var ordered := candidates.duplicate(true)
+	var secondary_day: bool = posmod(day_index + absi(character.id.hash()), 7) == 0
 	if secondary_day:
-		var secondary_candidates: Array[Dictionary] = []
-		for candidate: Dictionary in candidates:
-			if str(candidate.get("action_id", "")) not in [
-				"work", "seek_job", "migrate_for_work", "seek_credit",
-				"repay_debt", "join_organization", "wait",
-			]:
-				secondary_candidates.append(candidate)
-		if not secondary_candidates.is_empty():
-			selected = secondary_candidates[posmod(
-				day_index / 7 + absi(character.id.hash()),
-				secondary_candidates.size()
-			)]
-	var action_id: String = str(selected.get("action_id", "wait"))
-	var execution: Dictionary = _execute(
-		character, action_id, known, total_hour, process_key
-	)
+		for index: int in range(ordered.size()):
+			var action := str((ordered[index] as Dictionary).get("action_id", ""))
+			if action not in ["work", "seek_job", "migrate_for_work", "seek_credit", "repay_debt", "join_organization", "wait"]:
+				var secondary: Dictionary = ordered[index] as Dictionary
+				ordered.remove_at(index)
+				ordered.push_front(secondary)
+				break
+	var attempted: Array[String] = []
+	var selected := ordered[0] as Dictionary
+	var execution := _result(false, "no_action_succeeded", {})
+	for candidate: Dictionary in ordered:
+		var action_id := str(candidate.get("action_id", "wait"))
+		attempted.append(action_id)
+		var attempt := _execute(character, action_id, known, total_hour, process_key)
+		selected = candidate
+		execution = attempt
+		if bool(attempt.get("success", false)):
+			break
+	var final_action_id := str(selected.get("action_id", "wait"))
 	var decision: Dictionary = {
 		"decision_id": "ai_decision:%s:%d" % [character.id, day_index],
 		"person_id": character.id,
 		"total_hour": total_hour,
-		"action_id": action_id,
+		"action_id": final_action_id,
 		"reason": str(selected.get("reason", "")),
-		"known_fields_used": (
-			selected.get("known_fields_used", []) as Array
-		).duplicate(),
+		"known_fields_used": (selected.get("known_fields_used", []) as Array).duplicate(),
 		"candidate_count": candidates.size(),
+		"attempted_action_ids": attempted,
 		"execution_success": bool(execution.get("success", false)),
 		"execution_code": str(execution.get("code", "")),
 	}
@@ -268,10 +277,11 @@ func _execute(
 		"found_enterprise":
 			return _found_enterprise(character, known, total_hour, key)
 		"manage_enterprise":
+			var managed_id := str(known.get("controlled_enterprise_id", ""))
+			if _economy_integration != null and _economy_integration.is_integrated_enterprise(managed_id):
+				return _economy_integration.manage_integrated_enterprise(managed_id, total_hour)
 			return _enterprise.aggregate_day(
-				"ai:manage:%s" % key,
-				str(known.get("controlled_enterprise_id", "")),
-				total_hour
+				"ai:manage:%s" % key, managed_id, total_hour
 			)
 		"establish_partnership":
 			return _enterprise.establish_partnership(
@@ -328,7 +338,7 @@ func _found_enterprise(
 		character.region_id,
 		str(character.current_status.get("city_id", "city:dawnharbor")),
 		str(known.get("business_product_id", "household_goods")),
-		str(known.get("business_input_id", "grain")),
+		str(known.get("business_input_id", "wheat")),
 		mini(1200, available / 2),
 		total_hour
 	)
