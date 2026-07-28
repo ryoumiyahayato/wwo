@@ -44,6 +44,15 @@ jobs:
           set -euo pipefail
           python3 tools/apply_formal_world_integration.py
           git diff --check
+          mkdir -p builds/formal-world/patched
+          git diff > builds/formal-world/formal-world-integration.patch
+          cp scripts/alpha/alpha_simulation_service.gd builds/formal-world/patched/
+          cp scripts/alpha/alpha_ai_service.gd builds/formal-world/patched/
+          cp scripts/alpha/alpha_world_dynamics_service.gd builds/formal-world/patched/
+          cp scripts/alpha/alpha_economy_integration_service.gd builds/formal-world/patched/
+          cp scripts/alpha/alpha_historical_world_economy_data.gd builds/formal-world/patched/
+          cp scripts/alpha/alpha_commodity_market_service.gd builds/formal-world/patched/
+          cp scripts/formal/*.gd builds/formal-world/patched/
 
       - name: Run static audits
         shell: bash
@@ -77,6 +86,35 @@ jobs:
             cat formal-world-import.log
             exit 1
           fi
+
+      - name: Parse integrated scripts directly
+        shell: bash
+        run: |
+          set -euo pipefail
+          scripts=(
+            scripts/alpha/alpha_historical_world_economy_data.gd
+            scripts/alpha/alpha_commodity_market_service.gd
+            scripts/alpha/alpha_economy_integration_service.gd
+            scripts/alpha/alpha_ai_service.gd
+            scripts/alpha/alpha_world_dynamics_service.gd
+            scripts/alpha/alpha_simulation_service.gd
+            scripts/formal/formal_world_economy_service.gd
+            scripts/formal/formal_world_simulation.gd
+            scripts/formal/formal_world_application.gd
+          )
+          status=0
+          for script in "${scripts[@]}"; do
+            name="$(basename "${script}" .gd)"
+            log="builds/formal-world/parse-${name}.log"
+            if ! "${GODOT_BIN}" --headless --audio-driver Dummy --path . --script "res://${script}" --check-only --log-file "${log}"; then
+              status=1
+            fi
+            if grep -Eq "SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|^ERROR:" "${log}"; then
+              cat "${log}"
+              status=1
+            fi
+          done
+          exit "${status}"
 
       - name: Run focused regressions
         shell: bash
@@ -134,6 +172,6 @@ jobs:
           name: formal-world-integration-diagnostics
           path: |
             formal-world-import.log
-            builds/formal-world/*.log
+            builds/formal-world/**
           if-no-files-found: ignore
           retention-days: 7
