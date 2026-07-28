@@ -7,6 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 ALPHA = ROOT / "data" / "alpha"
 PROFILES = ROOT / "data" / "world_map" / "historical" / "major_state_profiles_1900.json"
+POLITICAL_UNITS = ROOT / "data" / "world_map" / "historical" / "political_units_1900.json"
 
 
 def load(path: Path) -> dict:
@@ -27,6 +28,7 @@ def main() -> None:
     transport = load(ALPHA / "historical_transport_network_1900.json")
     transport_table = load(ALPHA / "historical_transport_network_1900" / "transport_compact.json")
     profiles = load(PROFILES)
+    political_units = load(POLITICAL_UNITS)
 
     assert world["schema_id"] == "historical_world_economy_1900_estimates_v1"
     assert countries_table["schema_id"] == "historical_world_economy_1900_compact_country_table_v1"
@@ -44,6 +46,10 @@ def main() -> None:
     expected = {str(x["entity_id"]) for x in profiles["profiles"]}
     assert {str(x["entity_id"]) for x in countries} == expected
     assert sorted(int(x["rank"]) for x in countries) == list(range(1, 51))
+
+    unit_ids = {str(x["id"]) for x in political_units["units"]}
+    missing_map_crosswalk = sorted(expected - unit_ids)
+    assert int(political_units["unit_count"]) == len(unit_ids) == 151
 
     templates = {str(x["template_id"]): x for x in budgets["templates"]}
     assert len(templates) >= 6
@@ -100,6 +106,8 @@ def main() -> None:
     print({
         "countries": len(countries),
         "formal_allowed": formal_count,
+        "world_political_units": len(unit_ids),
+        "major_polities_missing_direct_map_id": missing_map_crosswalk,
         "estimated_world_population": summary["estimated_world_population"],
         "sea_corridors": len(maritime),
         "river_corridors": len(rivers),
