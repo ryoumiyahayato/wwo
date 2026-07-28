@@ -8,6 +8,7 @@ on:
       - ".github/workflows/apply-formal-world-integration.yml"
       - "tools/apply_formal_world_integration.py"
       - "tools/fix_formal_world_patch_output.py"
+      - "tools/restore_workflow_files_before_publish.py"
       - "scripts/formal/**"
       - "scenes/formal/**"
       - "tests/formal/**"
@@ -38,6 +39,7 @@ jobs:
           set -euo pipefail
           python3 tools/apply_formal_world_integration.py
           python3 tools/fix_formal_world_patch_output.py
+          python3 tools/restore_workflow_files_before_publish.py
           git diff --check
           mkdir -p builds/formal-world/patched
           git diff > builds/formal-world/formal-world-integration.patch
@@ -145,6 +147,7 @@ jobs:
           set -euo pipefail
           rm -f tools/apply_formal_world_integration.py
           rm -f tools/fix_formal_world_patch_output.py
+          rm -f tools/restore_workflow_files_before_publish.py
 
       - name: Commit integrated result
         shell: bash
