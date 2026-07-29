@@ -76,7 +76,7 @@ def main() -> None:
 
 ## 审计基线
 
-- 基线：`agent/formal-world-economy-integration@950512aba6889ff8ffd6f24c4be7559b7ef1f1cd`。
+- 基线：`agent/remove-duplicated-player-country-state`当前检出提交；基础提交为`b4a9d637e294aa53b0c0e2525260421dce3b5182`。
 - 引擎：Godot 4.6.3。
 - 范围：`project.godot`、`scripts/`、`scenes/`、`data/`、`resources/`。
 - 本文件只提供静态成员索引证据，不持有审计结论、实施方案、多写入状态总结、UI副本总结或停止项。
@@ -98,7 +98,7 @@ def main() -> None:
 """]
     lines.extend(f"- **{key}**：{value}。\n" for key, value in CATEGORY_TEXT.items())
     lines.append(
-        "\n## 1,613个生产成员字段逐项表\n\n"
+        f"\n## {metrics['member_fields_total']:,}个生产成员字段逐项表\n\n"
         "每个代码块中的文件标题后依次列出：`声明行 分类 字段`。\n\n"
     )
 
