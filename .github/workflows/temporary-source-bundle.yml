@@ -36,52 +36,15 @@ jobs:
                   raise SystemExit(f'{path}: expected {expected} occurrences, found {count}: {old!r}')
               target.write_text(text.replace(old, new), encoding='utf-8')
 
-          replace_exact(
-              'scripts/character/game_session_service.gd',
-              'static var selected_country_id: String = ""\n',
-              '',
-          )
-          replace_exact(
-              'scripts/character/game_session_service.gd',
-              '\tselected_country_id = "" if character == null else character.country_id\n',
-              '',
-              2,
-          )
-          replace_exact(
-              'scripts/character/game_session_service.gd',
-              '\tselected_country_id = ""\n',
-              '',
-          )
-          replace_exact(
-              'scripts/character/succession_service.gd',
-              '\tGameSessionService.selected_country_id = restored_player.country_id\n',
-              '',
-          )
-          replace_exact(
-              'scripts/save/game_save_service.gd',
-              '\t\t"selected_country_id": GameSessionService.selected_country_id,\n',
-              '\t\t"selected_country_id": GameSessionService.player_character.country_id,\n',
-          )
-          replace_exact(
-              'scripts/save/game_save_service.gd',
-              '\tvar selected_country_id: String = str(snapshot["selected_country_id"])\n',
-              '\tvar saved_player_country_id: String = str(snapshot["selected_country_id"])\n',
-          )
-          replace_exact(
-              'scripts/save/game_save_service.gd',
-              '\tif not map_service.data_set.countries.has(selected_country_id):\n',
-              '\tif not map_service.data_set.countries.has(saved_player_country_id):\n',
-          )
-          replace_exact(
-              'scripts/save/game_save_service.gd',
-              '\tif selected_country_id != restored_player.country_id:\n',
-              '\tif saved_player_country_id != restored_player.country_id:\n',
-          )
-          replace_exact(
-              'scripts/save/game_save_service.gd',
-              '\tGameSessionService.selected_country_id = selected_country_id\n',
-              '',
-          )
+          replace_exact('scripts/character/game_session_service.gd', 'static var selected_country_id: String = ""\n', '')
+          replace_exact('scripts/character/game_session_service.gd', '\tselected_country_id = "" if character == null else character.country_id\n', '', 2)
+          replace_exact('scripts/character/game_session_service.gd', '\tselected_country_id = ""\n', '')
+          replace_exact('scripts/character/succession_service.gd', '\tGameSessionService.selected_country_id = restored_player.country_id\n', '')
+          replace_exact('scripts/save/game_save_service.gd', '\t\t"selected_country_id": GameSessionService.selected_country_id,\n', '\t\t"selected_country_id": GameSessionService.player_character.country_id,\n')
+          replace_exact('scripts/save/game_save_service.gd', '\tvar selected_country_id: String = str(snapshot["selected_country_id"])\n', '\tvar saved_player_country_id: String = str(snapshot["selected_country_id"])\n')
+          replace_exact('scripts/save/game_save_service.gd', '\tif not map_service.data_set.countries.has(selected_country_id):\n', '\tif not map_service.data_set.countries.has(saved_player_country_id):\n')
+          replace_exact('scripts/save/game_save_service.gd', '\tif selected_country_id != restored_player.country_id:\n', '\tif saved_player_country_id != restored_player.country_id:\n')
+          replace_exact('scripts/save/game_save_service.gd', '\tGameSessionService.selected_country_id = selected_country_id\n', '')
           PY
 
       - name: Regenerate audit documents with repository scanner
@@ -99,11 +62,11 @@ jobs:
           test "$(sha256sum tests/fixtures/save/current_save_v1.json | cut -d' ' -f1)" = "b366f3e84a57be8318c536f3dcb131373d7ff8b970f2f0fc12841a4e271c6bc9"
           test "$(sha256sum tests/variable_state/generate_current_save_v1_fixture.gd | cut -d' ' -f1)" = "1afe2860312a2d47f823f8e903dbd8465dbd7b29431461d78c604033022c590f"
           test "$(sha256sum tests/variable_state/variable_state_behavior_baseline_test.gd | cut -d' ' -f1)" = "02ad53ed096acb4fc05ebc4214e9f83e81f3a1cb2266eda0514e395219a33506"
-          if rg -n 'GameSessionService\.selected_country_id' .; then
+          if grep -RIn --exclude-dir=.git -- 'GameSessionService.selected_country_id' .; then
             echo 'Deleted qualified runtime reference remains' >&2
             exit 1
           fi
-          mapfile -t declarations < <(rg -n '^\s*(static\s+)?var\s+selected_country_id\b' scripts scenes tests tools docs || true)
+          mapfile -t declarations < <(grep -RInE --include='*.gd' '^[[:space:]]*(static[[:space:]]+)?var[[:space:]]+selected_country_id([[:space:]:=]|$)' scripts scenes tests || true)
           test "${#declarations[@]}" -eq 1
           printf '%s\n' "${declarations[0]}" | grep -F 'scripts/ui_spikes/holographic_workspace/holographic_workspace_runtime.gd:23:'
           python3 - <<'PY'
