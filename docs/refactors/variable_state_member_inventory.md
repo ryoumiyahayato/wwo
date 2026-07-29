@@ -47,7 +47,175 @@
 
 ### 第3段：`scripts/alpha/alpha_ui_binding.gd` 至 `scripts/core/log_service.gd`
 
-<!-- INVENTORY_PART_03 -->
+```text
+@ scripts/alpha/alpha_ui_binding.gd | AlphaUiBinding
+7 C OBJECT_KINDS
+19 K simulation
+20 A save_service
+21 I migration
+22 K developer_mode
+23 K last_result
+24 A _command_sequence
+@ scripts/alpha/alpha_v23_config.gd | AlphaV23Config
+5 A alpha
+@ scripts/alpha/alpha_world_dynamics_service.gd | AlphaWorldDynamicsService
+5 C EVENT_LIMIT
+6 C BACKGROUND_MATTER_LIMIT
+8 K background_states
+9 K national_issues
+10 K events
+11 E counters
+12 K _world
+13 K _economy
+14 K _enterprise
+15 K _politics
+16 K _roster
+17 K _config
+18 K _commodity_market
+19 K _economy_integration
+20 A _last_day_index
+21 A _last_week_index
+22 K _last_month_key
+@ scripts/alpha/alpha_world_service.gd | AlphaWorldService
+5 E countries
+6 K regions
+7 K cells
+8 K cities
+9 K locations
+10 K routes
+11 E topology_report
+12 K initialization_error
+13 K revision
+@ scripts/character/background_character_data.gd | BackgroundCharacterData
+5 K id
+6 K name
+7 K age
+8 E country_id
+9 K region_id
+10 K occupation_id
+11 K occupation
+12 K public_position
+13 K organization_ids
+14 K relationship_ids
+15 K manifested_traits
+16 K current_status
+17 K activation_seed
+18 K persistent_core
+@ scripts/character/character_generation_config.gd | CharacterGenerationConfig
+5 C DEFAULT_PATH
+7 K age_min
+8 K age_max
+9 K aptitude_min
+10 K aptitude_max
+11 K growth_modifier_min
+12 K growth_modifier_max
+13 K trait_rules
+14 K aptitude_keys
+15 K skill_keys
+16 K trait_keys
+17 K labels
+18 K tendency_poles
+19 E country_names
+20 K occupations
+21 K population_occupation_multipliers
+22 K tendency_events
+23 K error_message
+@ scripts/character/character_generation_result.gd | CharacterGenerationResult
+4 K character
+5 K errors
+@ scripts/character/character_generator.gd | CharacterGenerator
+5 C MODE_STANDARD
+6 C MODE_FULL_POPULATION
+7 C MODE_CATEGORY
+8 C VALID_MODES
+10 K data_set
+11 K config
+12 K random
+13 K id_service
+@ scripts/character/character_roster_service.gd | CharacterRosterService
+9 K data_set
+10 K generation_config
+11 K rules
+12 K player_character_id
+13 K background_characters
+14 K active_characters
+15 K exited_characters
+16 K _activation_seeds
+@ scripts/character/character_tendency_service.gd | CharacterTendencyService
+5 K config
+@ scripts/character/exited_character_record.gd | ExitedCharacterRecord
+4 K character
+5 K reason
+6 K exit_hour
+7 K successor_character_id
+@ scripts/character/game_session_service.gd | GameSessionService
+5 C SettlementLogServiceType
+6 C PerformanceStatsServiceType
+8 A player_character
+9 E selected_country_id
+10 A current_action
+11 A recent_action_result
+12 A action_history
+13 A action_id_service
+14 A society_service
+15 A world_clock
+16 A world_map_service
+17 A world_autosave
+18 A developer_mode
+19 A settlement_log
+20 A performance_stats
+21 A pending_load_path
+22 A pending_menu_message
+@ scripts/character/succession_candidate_data.gd | SuccessionCandidateData
+4 K character_id
+5 K name
+6 K role_label
+7 K score
+8 K relationship_id
+9 K shared_organization_ids
+@ scripts/character/succession_result.gd | SuccessionResult
+4 K successor
+5 K exited_record
+6 K inherited_wealth
+7 K inherited_reputation
+8 K inherited_intelligence
+9 E inherited_relationship_count
+10 E inherited_enemy_count
+11 E inherited_position_count
+12 K errors
+@ scripts/character/succession_service.gd | SuccessionService
+5 K rules
+6 K roster
+7 K organizations
+8 K relationships
+9 K ai
+10 K society_rules
+@ scripts/core/build_info.gd | BuildInfo
+5 C GAME_NAME
+6 C BASE_VERSION
+7 C BUILD_CODE
+@ scripts/core/core_data_load_result.gd | CoreDataLoadResult
+5 K data_set
+6 K errors
+@ scripts/core/core_data_loader.gd | CoreDataLoader
+6 C SCHEMA_VERSION
+7 C COLLECTIONS
+17 C ID_NAMESPACES
+@ scripts/core/core_data_set.gd | CoreDataSet
+5 E countries
+6 K regions
+7 K control_units
+8 K population_groups
+9 K characters
+10 K organizations
+11 K relationships
+12 K actions
+@ scripts/core/deterministic_random_service.gd | DeterministicRandomService
+5 A _rng
+6 K _initial_seed
+@ scripts/core/log_service.gd | LogService
+13 A minimum_level
+```
 
 ### 第4段：`scripts/core/models/action_definition_data.gd` 至 `scripts/formal/formal_world_simulation.gd`
 
