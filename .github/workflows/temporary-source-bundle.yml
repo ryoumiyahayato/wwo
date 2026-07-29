@@ -56,16 +56,12 @@ jobs:
           python3 tools/generate_variable_state_docs.py
           python3 tools/render_variable_refactor_plan.py
 
-      - name: Verify approved scope and scanner results
+      - name: Verify protected files and scanner results
         run: |
           set -euo pipefail
           test "$(sha256sum tests/fixtures/save/current_save_v1.json | cut -d' ' -f1)" = "b366f3e84a57be8318c536f3dcb131373d7ff8b970f2f0fc12841a4e271c6bc9"
           test "$(sha256sum tests/variable_state/generate_current_save_v1_fixture.gd | cut -d' ' -f1)" = "1afe2860312a2d47f823f8e903dbd8465dbd7b29431461d78c604033022c590f"
           test "$(sha256sum tests/variable_state/variable_state_behavior_baseline_test.gd | cut -d' ' -f1)" = "02ad53ed096acb4fc05ebc4214e9f83e81f3a1cb2266eda0514e395219a33506"
-          if grep -RIn --exclude-dir=.git -- 'GameSessionService.selected_country_id' .; then
-            echo 'Deleted qualified runtime reference remains' >&2
-            exit 1
-          fi
           mapfile -t declarations < <(grep -RInE --include='*.gd' '^[[:space:]]*(static[[:space:]]+)?var[[:space:]]+selected_country_id([[:space:]:=]|$)' scripts scenes tests || true)
           test "${#declarations[@]}" -eq 1
           printf '%s\n' "${declarations[0]}" | grep -F 'scripts/ui_spikes/holographic_workspace/holographic_workspace_runtime.gd:23:'
@@ -91,11 +87,15 @@ jobs:
           PY
           git diff --check
 
-      - name: Remove temporary files and push final scope
+      - name: Remove temporary files, verify final tree and push
         run: |
           set -euo pipefail
           rm -rf .github/remove-country-patch
           rm -f .github/workflows/temporary-source-bundle.yml
+          if grep -RIn --exclude-dir=.git -- 'GameSessionService.selected_country_id' .; then
+            echo 'Deleted qualified runtime reference remains in final tree' >&2
+            exit 1
+          fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A -- \
