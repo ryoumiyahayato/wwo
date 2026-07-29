@@ -1,56 +1,77 @@
-# 第一批变量重构计划：玩家所属国家所有权
+# 第一批变量重构实施记录：玩家所属国家所有权
 
-状态：仅计划，未批准实施。基线：`agent/formal-world-economy-integration@950512aba6889ff8ffd6f24c4be7559b7ef1f1cd`。
+状态：已实施，等待Draft PR审查，尚未合并。基础提交：`b4a9d637e294aa53b0c0e2525260421dce3b5182`。
 
-## 当前问题
+## 已完成的所有权决定
 
-`GameSessionService.selected_country_id`是`player_character.country_id`的运行期可写副本。存档加载已经要求两者一致，因此该成员没有独立语义。半球地图同名字段表示地图选择，不属于本批。
+- 唯一玩家对象：`GameSessionService.player_character`。
+- 玩家所属国家：有玩家时只由`player_character.country_id`取得；无玩家时为空字符串。
+- 已删除会话服务中重复的`selected_country_id`运行期成员。
+- 半球地图自己的同名字段仍表示地图选择，未修改。
+- 未新增替代成员、getter缓存、兼容别名、Dictionary字段、Autoload、Manager、同步信号、fallback或双写逻辑。
 
-## 目标唯一事实源
+## 生产代码变更
 
-- 所有者：`GameSessionService.player_character`。
-- 玩家所属国家：由`player_character.country_id`只读推导；无玩家时为空字符串。
-- 写入入口：`set_player()`、`transfer_player()`、继承事务提交/回滚和存档恢复只修改或提交玩家对象。
-- 存档边界：继续输出和验证旧`selected_country_id`键；内部不保留第二份成员状态。
-- 不新增Autoload、Manager、Dictionary状态容器、同步信号、fallback或兼容别名。
+### `scripts/character/game_session_service.gd`
 
-## qualified引用范围
+- 删除一个`static var`成员。
+- `set_player()`、`clear()`和`transfer_player()`不再维护国家副本。
+- 其余清理和提交顺序保持不变。
 
-- 成员声明：`scripts/character/game_session_service.gd:11`。
-- 类内实际写入：`scripts/character/game_session_service.gd:29`、`:47`、`:82`。
-- 外部实际写入：`scripts/character/succession_service.gd:280`、`scripts/save/game_save_service.gd:509`。
-- 合格读取：`scripts/save/game_save_service.gd:231`。
-- 存档边界：`scripts/save/game_save_service.gd:231,455-460,603`。
-- 同名地图成员：`scripts/ui_spikes/holographic_workspace/holographic_workspace_runtime.gd:23`，不得修改。
-- 函数局部同名：`scripts/save/game_save_service.gd:455`，不计入成员删除。
+### `scripts/character/succession_service.gd`
 
-`set_player()`、`clear()`和`transfer_player()`的函数声明分别位于`:27`、`:45`和`:80`；这些声明行不是写入行，不作为qualified写入位置。
+- 继承事务回滚仍依次恢复名册、组织、关系和AI状态。
+- 恢复玩家后只提交`GameSessionService.player_character = restored_player`。
+- 未改变其他回滚内容或顺序。
 
-## 实施前行为基线与测试
+### `scripts/save/game_save_service.gd`
 
-1. 提交一个当前`SAVE_VERSION = 1`存档fixture，并证明现有代码可以加载。
-2. 断言保存键等于`player_character.country_id`。
-3. 断言旧键与玩家国家不一致时加载失败且事务不提交。
-4. 覆盖`transfer_player()`。
-5. 覆盖继承成功。
-6. 覆盖继承中途失败后的完整事务回滚。
-7. 证明地图`selected_country_id`和玩家国家互不影响。
-8. 证明`GameSessionService.clear()`后派生国家为空。
+- `SAVE_VERSION`保持1，存档schema不变。
+- 旧JSON键`"selected_country_id"`继续保留。
+- `build_snapshot()`直接从`GameSessionService.player_character.country_id`生成旧键。
+- `restore_snapshot()`继续验证旧键所指国家存在，且等于`restored_player.country_id`。
+- 函数局部候选值机械改名为`saved_player_country_id`。
+- 验证通过后只提交恢复后的玩家对象，不写入第二个运行期国家字段。
 
-上述测试和fixture尚未创建。本轮只修订文档。
+## 行为基线保持
 
-## 预计变更
+以下PR #29产物保持字节级不变：
 
-- 删除可写成员：1。
-- 新增可写成员：0。
-- 保留存档键：1。
-- 减少重复可写事实：1。
-- 不新增Autoload、Manager、Dictionary状态容器、同步信号、fallback或兼容别名。
+- `tests/fixtures/save/current_save_v1.json`
+- `tests/variable_state/generate_current_save_v1_fixture.gd`
+- `tests/variable_state/variable_state_behavior_baseline_test.gd`
 
-## 风险与停止条件
+行为基线继续覆盖：
 
-- fixture不能代表当前真实存档时停止。
-- 无法证明继承回滚的原子性时停止。
-- 任何地图选择行为变化时停止。
-- 需要同时维护新旧运行期状态时停止。
-- 需要修改玩法、UI或正式半球导航时停止。
+1. 当前SAVE_VERSION=1服务级fixture生成、加载和恢复。
+2. 保存旧键等于玩家人物国家。
+3. 旧键不一致时`restore_snapshot()`拒绝恢复，且事务前后完整状态一致。
+4. `transfer_player()`。
+5. 人物继承成功。
+6. 人物继承事务回滚。
+7. 半球地图选择与玩家国家双向隔离。
+8. `clear()`后玩家为空且派生国家为空。
+
+## 审计净变化
+
+现有扫描器生成的删除前后指标：
+
+| 指标 | 删除前 | 删除后 | 净变化 |
+|---|---:|---:|---:|
+| 生产成员字段 | 1,613 | 1,612 | -1 |
+| 可写成员字段 | 1,243 | 1,242 | -1 |
+| 进程级全局可写字段 | 16 | 15 | -1 |
+| 持久化关联候选（静态启发式） | 492 | 510 | 不可直接比较 |
+| 可推导成员候选 | 61 | 60 | -1 |
+| 新增可写成员 | 0 | 0 | 0 |
+
+qualified所有权结论同时减少一份重复可写事实。其他状态组没有重新设计或修改。
+
+## 验收与停止边界
+
+- 全仓库不得再出现已删除会话成员的qualified引用。
+- `selected_country_id`只继续用于SAVE_VERSION=1旧JSON键和半球地图场景选择字段。
+- 不修改正式时间、导航、经济映射、玩法、UI或其他变量。
+- 不修改PR #29的fixture、生成器和行为测试。
+- 完整验证、fixture比较、行为基线和审计CI全部通过后停止。
+- 本Draft PR不得在本轮合并。

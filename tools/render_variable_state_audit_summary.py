@@ -26,13 +26,13 @@ TEXT = r'''# 变量、状态所有权与数据流审计
 | 可写成员字段 | 1,243 | __WRITABLE_COUNT__ | -1 |
 | 进程级全局可写字段 | 16 | __GLOBAL_COUNT__ | -1 |
 | Autoload可写字段 | 0 | __AUTOLOAD_COUNT__ | 0 |
-| 持久化关联候选 | 492 | __PERSISTED_COUNT__ | -1 |
+| 持久化关联候选（静态启发式） | 492 | __PERSISTED_COUNT__ | 不可直接比较 |
 | UI显示副本候选 | 32 | __UI_COUNT__ | 0 |
 | 命名缓存候选 | 16 | __CACHE_COUNT__ | 0 |
 | 可推导成员候选 | 61 | __DERIVED_COUNT__ | -1 |
 | K类、不得修改字段 | 885 | __UNCLEAR_COUNT__ | 0 |
 
-以上当前值直接来自`tools/audit_variable_state.py`生成的inventory，不是手工估算。第一批同时减少一份经qualified核验的重复可写事实；该项是所有权结论，不是词法扫描器的独立计数器。
+以上当前值直接来自`tools/audit_variable_state.py`生成的inventory，不是手工估算。持久化关联候选会受扫描范围内审计生成器文本的词法命中影响，因此旧报告值与当前值不可作为生产字段净变化比较。第一批经qualified核验减少一份重复可写事实；该项是所有权结论，不是词法扫描器的独立计数器。
 
 ## 2. 最严重的10组重复或混乱状态
 
