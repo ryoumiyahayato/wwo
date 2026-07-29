@@ -1281,7 +1281,175 @@
 
 ### 第8段：`scripts/v2_2/v2_life_loop_ui_binding.gd` 至 `scripts/v2_3/v2_3_formal_schedule_interface.gd`
 
-<!-- INVENTORY_PART_08 -->
+```text
+@ scripts/v2_2/v2_life_loop_ui_binding.gd | V2LifeLoopUiBinding
+7 K simulation
+8 A save_service
+9 K developer_mode
+10 A last_command_result
+11 K _panel_pause_depth
+12 A _panel_previous_paused
+13 A _panel_previous_speed
+@ scripts/v2_2/v2_notification_service.gd | V2NotificationService
+5 K notifications
+6 A _next_sequence
+7 A _maximum_entries
+@ scripts/v2_2/v2_organization_activity_service.gd | V2OrganizationActivityService
+5 K memberships
+6 K organizations
+7 K positions
+8 K processed_idempotency_keys
+9 K _rules
+10 K _processed_key_order
+12 C MAX_PROCESSED_KEYS
+@ scripts/v2_2/v2_relationship_progress_service.gd | V2RelationshipProgressService
+5 K relationships
+6 K processed_idempotency_keys
+7 K _rules
+8 K _processed_key_order
+10 C MAX_PROCESSED_KEYS
+@ scripts/v2_2/v2_schedule_service.gd | V2ScheduleService
+5 C SOURCE_PRIORITY
+12 C PLAYER_TYPES
+21 C TERMINAL_STATUSES
+24 C ACTIVE_STATUSES
+26 K schedules
+27 K recent_completed_activities
+28 K generation_reasons
+29 K _people
+30 K _employment
+31 K _generated_days
+32 A _next_sequence
+33 A _minimum_horizon
+34 A _refill_threshold
+35 A _completed_limit
+@ scripts/v2_3/communication_service.gd | CommunicationService
+5 C MESSAGE_STATUSES
+10 K messages
+11 K inbox_index
+12 K outbox_index
+13 K delivery_queue
+14 K public_notice_ids
+15 K processed_idempotency_keys
+16 K _processed_key_order
+17 K _people
+18 K _channels
+19 A _next_sequence
+20 A _message_limit
+21 A _key_limit
+@ scripts/v2_3/knowledge_service.gd | KnowledgeService
+5 C STATUSES
+9 K records
+10 K person_index
+11 K subject_index
+12 K processed_idempotency_keys
+13 K _processed_key_order
+14 K _rules
+15 A _next_sequence
+16 A _history_limit
+@ scripts/v2_3/relationship_service.gd | V23RelationshipService
+5 C DIMENSIONS
+9 K relationships
+10 K person_pair_index
+11 K processed_idempotency_keys
+12 K _processed_key_order
+13 K _rules
+14 K _people
+15 A _history_limit
+16 A _key_limit
+@ scripts/v2_3/route_planner_service.gd | RoutePlannerService
+5 K graph
+6 K locations
+7 F _cache
+8 F cache_hits
+9 F cache_misses
+@ scripts/v2_3/social_appointment_service.gd | SocialAppointmentService
+5 C STATUSES
+10 K appointments
+11 K processed_idempotency_keys
+12 K _processed_key_order
+13 A _next_sequence
+14 A _history_limit
+15 A _key_limit
+@ scripts/v2_3/social_introduction_service.gd | SocialIntroductionService
+5 C STATUSES
+10 K requests
+11 K processed_idempotency_keys
+12 A _next_sequence
+@ scripts/v2_3/spatial_location_service.gd | SpatialLocationService
+5 C LOCATION_STATES
+9 K locations
+10 K person_positions
+11 K known_location_ids
+12 K _type_index
+13 K _service_index
+@ scripts/v2_3/spatial_npc_routine_service.gd | SpatialNpcRoutineService
+5 C REPLAN_REASONS
+10 K npc_plans
+11 K planning_events
+12 E planning_call_count
+13 A _planning_interval
+14 A _history_limit
+@ scripts/v2_3/travel_execution_service.gd | TravelExecutionService
+5 C TRAVEL_ACTIVITY_TYPES
+8 C PLAN_STATUSES
+13 K travel_plans
+14 K processed_idempotency_keys
+15 K _processed_key_order
+16 A _next_sequence
+17 A _history_limit
+18 A _idempotency_limit
+19 K _nonterminal_plan_index
+20 K _terminal_plan_order
+21 K locations
+22 K graph
+23 K planner
+@ scripts/v2_3/travel_graph_service.gd | TravelGraphService
+5 K edges
+6 K modes
+7 K adjacency
+8 K mode_edge_index
+9 K known_edge_ids
+@ scripts/v2_3/v2_3_config.gd | V23Config
+5 C PATHS
+20 K documents
+21 K errors
+@ scripts/v2_3/v2_3_controlled_simulation.gd | V23ControlledSimulation
+6 K manual_location_holds
+7 K manual_location_hold_started_hours
+8 K pending_return_home_prompts
+9 K stay_outside_home_until_hours
+10 K _return_home_policy_resume_after_decisions
+@ scripts/v2_3/v2_3_controlled_ui_binding.gd | V23ControlledUiBinding
+5 K controlled_simulation
+@ scripts/v2_3/v2_3_controlled_ui_binding_v2.gd | V23ControlledUiBindingV2
+6 K _sandbox_selection_by_person
+7 K _selected_message_by_person
+@ scripts/v2_3/v2_3_finance_config.gd | V23FinanceConfig
+5 C PATH
+7 K document
+8 K errors
+@ scripts/v2_3/v2_3_finance_service.gd | V23FinanceService
+5 C HOURS_PER_DAY
+6 C DAYS_PER_YEAR
+7 C MAX_HISTORY
+9 K lenders
+10 K products
+11 K applications
+12 K contracts
+13 K event_history
+15 K _households
+16 K _ledger
+17 K _processed_keys
+18 K _processed_key_order
+19 A _next_application_sequence
+20 A _next_contract_sequence
+@ scripts/v2_3/v2_3_formal_interface.gd | V23FormalInterface
+5 C FINANCE_PANEL_ID
+6 C FORMAL_PANEL_IDS
+@ scripts/v2_3/v2_3_formal_schedule_interface.gd | V23FormalScheduleInterface
+5 K leave_confirmation
+```
 
 ### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/v2_3/v2_3_survival_autonomy_service.gd`
 
