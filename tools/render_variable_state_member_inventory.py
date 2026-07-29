@@ -76,7 +76,7 @@ def main() -> None:
 
 ## 审计基线
 
-- 基线：`agent/remove-duplicated-player-country-state`当前检出提交；基础提交为`b4a9d637e294aa53b0c0e2525260421dce3b5182`。
+- 第一批实现基于基础提交`b4a9d637e294aa53b0c0e2525260421dce3b5182`，由PR #30实施。
 - 引擎：Godot 4.6.3。
 - 范围：`project.godot`、`scripts/`、`scenes/`、`data/`、`resources/`。
 - 本文件只提供静态成员索引证据，不持有审计结论、实施方案、多写入状态总结、UI副本总结或停止项。

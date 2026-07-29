@@ -2,7 +2,7 @@
 
 ## 0. 基线与规则
 
-基线：`agent/remove-duplicated-player-country-state`当前检出提交；基础提交为`b4a9d637e294aa53b0c0e2525260421dce3b5182`。本矩阵描述第一批删除后的当前所有权及其余状态组的既有目标。
+第一批实现基于基础提交`b4a9d637e294aa53b0c0e2525260421dce3b5182`，由PR #30实施。本矩阵描述第一批删除后的当前所有权及其余状态组的既有目标。
 
 - 同一事实原则上只能有一个可写来源。
 - selected、hovered、focused、active、pending、previous、requested、displayed、loaded、visible、enabled保持区分。
