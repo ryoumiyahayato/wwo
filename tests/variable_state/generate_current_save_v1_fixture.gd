@@ -1,10 +1,11 @@
 extends SceneTree
 ## Generates the committed SAVE_VERSION=1 fixture through the current production
-## snapshot, atomic writer, parser and restore path. This script does not define
-## or migrate a schema.
+## character generator, snapshot, atomic writer, parser and restore path. This
+## script does not define or migrate a schema.
 
 const FIXTURE_USER_PATH: String = "user://tests/variable_state/current_save_v1.json"
 const WORLD_PATH: String = "res://data/world/demo_world.json"
+const PLAYER_SEED: int = 190001
 
 
 func _initialize() -> void:
@@ -73,6 +74,7 @@ func _run() -> void:
 	print("FIXTURE_SAVE_VERSION=%d" % int(load_result.snapshot["save_version"]))
 	print("FIXTURE_PLAYER_ID=%s" % str(load_result.snapshot["player_character_id"]))
 	print("FIXTURE_COUNTRY_ID=%s" % str(load_result.snapshot["selected_country_id"]))
+	print("FIXTURE_PLAYER_SEED=%d" % PLAYER_SEED)
 	print("Current SAVE_VERSION=1 fixture generated and restored through production services.")
 	quit(0)
 
@@ -83,17 +85,30 @@ func _create_runtime() -> Dictionary:
 		_fail("world data failed to load: %s" % load_result.errors)
 		return {}
 	var data_set: CoreDataSet = load_result.data_set
-	var character_ids: Array[String] = []
-	for raw_id: Variant in data_set.characters:
-		character_ids.append(str(raw_id))
-	character_ids.sort()
-	if character_ids.is_empty():
-		_fail("world data contains no real character record")
+	var country_ids: Array[String] = []
+	for raw_id: Variant in data_set.countries:
+		country_ids.append(str(raw_id))
+	country_ids.sort()
+	if country_ids.is_empty():
+		_fail("world data contains no country for production character generation")
 		return {}
-	var source_character: CharacterData = data_set.characters[
-		character_ids[0]
-	] as CharacterData
-	var player := CharacterData.from_dict(source_character.to_dict())
+	var character_config: CharacterGenerationConfig = CharacterGenerationConfig.load_from_file()
+	if not character_config.is_valid():
+		_fail("character generation config failed: %s" % character_config.error_message)
+		return {}
+	var generator := CharacterGenerator.new(
+		data_set,
+		character_config,
+		DeterministicRandomService.new(PLAYER_SEED),
+		StableIdService.new()
+	)
+	var generated: CharacterGenerationResult = generator.generate_character(
+		country_ids[0], CharacterGenerator.MODE_STANDARD
+	)
+	if not generated.is_success():
+		_fail("production character generation failed: %s" % generated.errors)
+		return {}
+	var player: CharacterData = generated.character
 	GameSessionService.set_player(player)
 	var services := _create_services(data_set)
 	if services.is_empty():
