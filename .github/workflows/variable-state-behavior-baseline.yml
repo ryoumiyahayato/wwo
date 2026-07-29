@@ -48,6 +48,26 @@ jobs:
         run: |
           powershell -ExecutionPolicy Bypass -File tools/run_validation.ps1 -GodotPath $env:GODOT_BIN
 
+  variable-state-baseline:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Godot 4.6.3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'godot.zip'
+          $install = Join-Path $env:RUNNER_TEMP 'godot-4.6.3'
+          Invoke-WebRequest -Uri 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip' -OutFile $archive
+          Expand-Archive -LiteralPath $archive -DestinationPath $install
+          $binary = (Get-ChildItem -LiteralPath $install -Filter 'Godot_v4.6.3-stable_win64.exe' -Recurse | Select-Object -First 1).FullName
+          if (-not $binary) { throw 'Godot 4.6.3 executable was not found after extraction' }
+          "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          & $binary --version
+
       - name: Generate SAVE_VERSION 1 fixture through production services
         shell: pwsh
         run: |
@@ -60,7 +80,9 @@ jobs:
           Copy-Item -LiteralPath $fixture.FullName -Destination builds/variable-state/current_save_v1.json
           $snapshot = Get-Content -LiteralPath builds/variable-state/current_save_v1.json -Raw | ConvertFrom-Json
           if ([int]$snapshot.save_version -ne 1) { throw 'Generated fixture is not SAVE_VERSION 1' }
-          if ([string]$snapshot.selected_country_id -ne [string]($snapshot.characters.active | Where-Object id -eq $snapshot.player_character_id | Select-Object -First 1).country_id) {
+          $player = $snapshot.characters.active | Where-Object id -eq $snapshot.player_character_id | Select-Object -First 1
+          if (-not $player) { throw 'Generated fixture player is absent from active characters' }
+          if ([string]$snapshot.selected_country_id -ne [string]$player.country_id) {
             throw 'Generated fixture selected_country_id differs from player country'
           }
 
