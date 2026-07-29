@@ -11,6 +11,7 @@ on:
       - "data/**"
       - "resources/**"
       - "tools/audit_variable_state.py"
+      - "tools/audit_variable_state_v2.py"
       - ".github/workflows/variable-state-audit.yml"
   pull_request:
     branches:
@@ -22,6 +23,7 @@ on:
       - "data/**"
       - "resources/**"
       - "tools/audit_variable_state.py"
+      - "tools/audit_variable_state_v2.py"
       - ".github/workflows/variable-state-audit.yml"
   workflow_dispatch:
 
@@ -42,7 +44,7 @@ jobs:
       - name: Generate read-only inventory
         run: |
           set -euo pipefail
-          python3 tools/audit_variable_state.py | tee variable-state-audit-summary.log
+          python3 tools/audit_variable_state_v2.py | tee variable-state-audit-summary.log
           test -s builds/variable-state-audit/variable_state_inventory.json
           test -s builds/variable-state-audit/member_inventory.md
       - name: Upload variable state inventory
