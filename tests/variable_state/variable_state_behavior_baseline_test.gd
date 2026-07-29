@@ -1,6 +1,6 @@
 extends SceneTree
-## Behavioral baseline for the first variable-state refactor. The duplicated
-## GameSessionService.selected_country_id member intentionally remains present.
+## Behavioral baseline for the first variable-state refactor. Player-country
+## assertions derive country identity from the current player object.
 
 const FIXTURE_RESOURCE_PATH: String = "res://tests/fixtures/save/current_save_v1.json"
 const FIXTURE_USER_PATH: String = "user://tests/variable_state/committed_current_save_v1.json"
@@ -31,7 +31,7 @@ func _run() -> void:
 
 func _test_current_fixture_loads() -> void:
 	var fixture: Dictionary = _read_fixture()
-	test.expect(not fixture.is_empty(), "提交的SAVE_VERSION=1真实fixture可读取")
+	test.expect(not fixture.is_empty(), "提交的SAVE_VERSION=1服务级fixture可读取")
 	if fixture.is_empty():
 		return
 	test.equal(
@@ -45,7 +45,7 @@ func _test_current_fixture_loads() -> void:
 		return
 	var service := GameSaveService.new()
 	var loaded: SaveOperationResult = service.load_from_path(FIXTURE_USER_PATH)
-	test.expect(loaded.success, "现有未重构代码可解析并校验fixture")
+	test.expect(loaded.success, "当前GameSaveService可解析并校验fixture")
 	if not loaded.success:
 		return
 	var restored: SaveOperationResult = service.restore_snapshot(
@@ -53,7 +53,7 @@ func _test_current_fixture_loads() -> void:
 		runtime["clock"] as SimulationClock,
 		runtime["map"] as MapControlService
 	)
-	test.expect(restored.success, "现有未重构代码可完整恢复fixture")
+	test.expect(restored.success, "当前GameSaveService可完整恢复fixture")
 	if not restored.success:
 		return
 	test.equal(
@@ -62,9 +62,9 @@ func _test_current_fixture_loads() -> void:
 		"fixture恢复当前玩家人物"
 	)
 	test.equal(
-		GameSessionService.selected_country_id,
+		str(fixture.get("selected_country_id", "")),
 		GameSessionService.player_character.country_id,
-		"fixture恢复后玩家国家双写仍一致"
+		"fixture旧国家键等于恢复后的玩家国家"
 	)
 
 
@@ -113,12 +113,12 @@ func _test_mismatch_rejected_without_partial_commit() -> void:
 	var result: SaveOperationResult = GameSaveService.new().restore_snapshot(
 		tampered, clock, map_service
 	)
-	test.expect(not result.success, "旧键与玩家国家不一致时加载失败")
+	test.expect(not result.success, "旧键与玩家国家不一致时restore_snapshot恢复拒绝")
 	test.equal(result.error_code, "broken_reference", "国家不一致返回引用错误")
 	test.equal(
 		_capture_runtime(clock, map_service),
 		before,
-		"国家不一致失败前后完整运行状态一致"
+		"restore_snapshot恢复拒绝前后完整运行状态一致"
 	)
 
 
@@ -127,15 +127,7 @@ func _test_transfer_player() -> void:
 	if runtime.is_empty():
 		return
 	var society: SocietySimulationService = runtime["society"] as SocietySimulationService
-	var target: CharacterData
-	for character_id: String in society.roster.get_active_ids(false):
-		target = society.roster.get_active(character_id)
-		if target != null:
-			break
-	if target == null:
-		var background_ids: Array[String] = society.roster.get_background_ids()
-		if not background_ids.is_empty():
-			target = society.promote_background(background_ids[0])
+	var target: CharacterData = _find_or_promote_any_non_player(society)
 	test.expect(target != null, "transfer_player测试拥有真实目标人物")
 	if target == null:
 		return
@@ -145,9 +137,9 @@ func _test_transfer_player() -> void:
 		"transfer_player切换当前玩家对象"
 	)
 	test.equal(
-		GameSessionService.selected_country_id,
+		_derived_player_country_id(),
 		target.country_id,
-		"transfer_player同步现有玩家国家副本"
+		"transfer_player后国家由新玩家对象派生"
 	)
 	test.expect(
 		GameSessionService.current_action == null,
@@ -182,9 +174,9 @@ func _test_succession_success() -> void:
 		"继承成功后会话玩家切换"
 	)
 	test.equal(
-		GameSessionService.selected_country_id,
-		GameSessionService.player_character.country_id,
-		"继承成功后现有玩家国家副本保持一致"
+		_derived_player_country_id(),
+		result.successor.country_id,
+		"继承成功后国家由继承者对象派生"
 	)
 	test.expect(
 		society.roster.get_exited(old_player_id) != null,
@@ -222,37 +214,36 @@ func _test_map_selection_isolated_from_player_country() -> void:
 	if runtime.is_empty():
 		return
 	var data_set: CoreDataSet = runtime["data_set"] as CoreDataSet
-	var session_country_before: String = GameSessionService.selected_country_id
-	var map_country: String = _other_country_id(data_set, session_country_before)
-	test.expect(not map_country.is_empty(), "地图选择隔离测试拥有另一国家")
-	if map_country.is_empty():
+	var player_country_before: String = _derived_player_country_id()
+	var other_country: String = _other_country_id(data_set, player_country_before)
+	test.expect(not other_country.is_empty(), "地图选择隔离测试拥有另一国家")
+	if other_country.is_empty():
 		return
 	var runtime_script: Script = load(HEMISPHERE_RUNTIME_PATH) as Script
-	var hemisphere: Control = runtime_script.new() as Control
-	hemisphere.set("selected_country_id", map_country)
+	var hemisphere: Variant = runtime_script.new()
+	hemisphere.selected_country_id = other_country
 	test.equal(
-		GameSessionService.selected_country_id,
-		session_country_before,
+		_derived_player_country_id(),
+		player_country_before,
 		"修改半球地图selected_country_id不改变玩家国家"
 	)
 	var society: SocietySimulationService = runtime["society"] as SocietySimulationService
-	var transfer_target: CharacterData
-	for character_id: String in society.roster.get_active_ids(false):
-		var active: CharacterData = society.roster.get_active(character_id)
-		if active != null:
-			transfer_target = active
-			break
-	if transfer_target == null:
-		var background_ids: Array[String] = society.roster.get_background_ids()
-		if not background_ids.is_empty():
-			transfer_target = society.promote_background(background_ids[0])
-	test.expect(transfer_target != null, "地图隔离测试拥有可转移玩家人物")
+	var transfer_target: CharacterData = _find_or_promote_character_in_country(
+		society, other_country
+	)
+	test.expect(transfer_target != null, "地图隔离测试拥有另一国家的可转移人物")
 	if transfer_target != null:
+		hemisphere.selected_country_id = player_country_before
 		GameSessionService.transfer_player(transfer_target)
 		test.equal(
-			str(hemisphere.get("selected_country_id")),
-			map_country,
-			"修改玩家国家不改变半球地图选择"
+			_derived_player_country_id(),
+			other_country,
+			"转移玩家后国家由新玩家人物派生"
+		)
+		test.equal(
+			str(hemisphere.selected_country_id),
+			player_country_before,
+			"修改玩家国家不改变半球地图selected_country_id"
 		)
 	hemisphere.free()
 
@@ -263,7 +254,6 @@ func _test_clear_empties_player_and_derived_country() -> void:
 		return
 	GameSessionService.clear()
 	test.expect(GameSessionService.player_character == null, "clear后玩家为空")
-	test.equal(GameSessionService.selected_country_id, "", "clear后现有国家副本为空")
 	test.equal(_derived_player_country_id(), "", "clear后由玩家派生的国家为空")
 
 
@@ -286,7 +276,7 @@ func _create_runtime() -> Dictionary:
 	var character_config: CharacterGenerationConfig = (
 		CharacterGenerationConfig.load_from_file()
 	)
-	test.expect(character_config.is_valid(), "正式人物生成配置可加载")
+	test.expect(character_config.is_valid(), "人物生成配置可加载")
 	if not character_config.is_valid():
 		return {}
 	var generator := CharacterGenerator.new(
@@ -329,6 +319,34 @@ func _create_runtime() -> Dictionary:
 		"clock": clock,
 		"map": map_service,
 	}
+
+
+func _find_or_promote_any_non_player(
+	society: SocietySimulationService
+) -> CharacterData:
+	for character_id: String in society.roster.get_active_ids(false):
+		var active: CharacterData = society.roster.get_active(character_id)
+		if active != null:
+			return active
+	for character_id: String in society.roster.get_background_ids():
+		var promoted: CharacterData = society.promote_background(character_id)
+		if promoted != null:
+			return promoted
+	return null
+
+
+func _find_or_promote_character_in_country(
+	society: SocietySimulationService, country_id: String
+) -> CharacterData:
+	for character_id: String in society.roster.get_active_ids(false):
+		var active: CharacterData = society.roster.get_active(character_id)
+		if active != null and active.country_id == country_id:
+			return active
+	for character_id: String in society.roster.get_background_ids(country_id):
+		var promoted: CharacterData = society.promote_background(character_id)
+		if promoted != null:
+			return promoted
+	return null
 
 
 func _prepare_background_succession_candidate(
@@ -388,7 +406,6 @@ func _capture_runtime(
 			if GameSessionService.player_character == null
 			else GameSessionService.player_character.to_dict()
 		),
-		"selected_country_id": GameSessionService.selected_country_id,
 		"current_action": action_state,
 		"recent_action_result": (
 			GameSessionService.recent_action_result.duplicate(true)
