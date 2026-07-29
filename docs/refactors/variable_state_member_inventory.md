@@ -71,7 +71,140 @@
 
 ### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/v2_3/v2_3_survival_autonomy_service.gd`
 
-<!-- INVENTORY_PART_09 -->
+```text
+@ scripts/v2_3/v2_3_formal_simulation.gd | V23FormalSimulation
+5 A finance_config
+6 A finance
+7 A leave
+@ scripts/v2_3/v2_3_formal_ui_binding.gd | V23FormalUiBinding
+5 K formal_simulation
+@ scripts/v2_3/v2_3_leave_service.gd | V23LeaveService
+5 K authorizations
+6 A _next_sequence
+@ scripts/v2_3/v2_3_life_loop_interface.gd | V23LifeLoopInterface
+5 C V2_3_MENU_SCENE
+6 C V2_3_PANEL_IDS
+@ scripts/v2_3/v2_3_life_loop_simulation.gd | V23LifeLoopSimulation
+5 C V2_3_SCHEMA_VERSION
+6 C JULES_ID
+7 C LUCIEN_ID
+8 C FORMAL_PERSON_IDS
+9 C TRAVEL_TYPES
+13 C LOCATION_ALIASES
+22 A v2_3_config
+23 A spatial_locations
+24 A travel_graph
+25 A route_planner
+26 A travel_execution
+27 A communication
+28 A knowledge
+29 A dynamic_relationships
+30 A appointments
+31 A introductions
+32 A npc_routines
+34 K truth_view
+35 A review_mode
+36 K background_person_ids
+37 K v2_3_initialization_error
+38 K v2_3_hours_processed
+39 E last_delivery_count
+40 E last_knowledge_expiration_count
+41 E last_appointment_result_count
+42 K local_overlay_revision
+43 K public_notice_id
+44 A _commute_planned_through_day
+@ scripts/v2_3/v2_3_life_loop_ui_binding.gd | V23LifeLoopUiBinding
+5 K v2_3_simulation
+6 A v2_3_save_service
+7 I save_migration
+8 K route_preview
+9 A _view_revision
+@ scripts/v2_3/v2_3_minimal_hud_overlay.gd | V23MinimalHudOverlay
+4 C PAPER
+5 C PAPER_DARK
+6 C INK
+7 C INK_MUTED
+8 C GOLD
+9 C PANEL
+10 C PANEL_BORDER
+12 K host
+13 K field_book_open
+14 K field_book_progress
+15 K _refresh_timer
+@ scripts/v2_3/v2_3_minute_clock.gd | V23MinuteClock
+9 C REAL_SECONDS_PER_TICK
+10 C MINUTES_PER_SPEED
+17 C TICK_EPSILON
+19 K minute
+20 K total_minutes
+21 K _tick_seconds_remainder
+@ scripts/v2_3/v2_3_minute_controlled_simulation.gd | V23MinuteControlledSimulation
+5 C MINUTE_CLOCK_PATH
+@ scripts/v2_3/v2_3_minute_formal_interface_v2.gd | V23MinuteFormalInterfaceV2
+6 K _selected_contact_id
+@ scripts/v2_3/v2_3_product_simulation.gd | V23ProductSimulation
+5 A social_sandbox
+6 K last_social_sandbox_hour
+@ scripts/v2_3/v2_3_product_simulation_v2.gd | V23ProductSimulationV2
+6 A survival_autonomy
+@ scripts/v2_3/v2_3_save_service.gd | V23SaveService
+5 C SCHEMA_VERSION
+6 C REVIEW_PATH
+@ scripts/v2_3/v2_3_social_sandbox_service.gd | V23SocialSandboxService
+10 C STATE_VERSION
+11 C PHASE_PREPARE
+12 C PHASE_CONFLICT
+13 C PHASE_COMMIT
+14 C SIGNAL_KINDS
+17 C NEGATIVE_EFFECTS
+22 K situations
+23 K goals
+24 K intents
+25 K tasks
+26 K event_ledger
+27 K commitments
+28 K evidence_records
+29 K pending_reactions
+30 K decision_explanations
+31 K last_planned_dates
+32 K player_person_id
+34 K _rules
+35 K _people
+36 K _methods
+37 K _dirty_people
+38 A _next_signal_sequence
+39 A _next_goal_sequence
+40 A _next_intent_sequence
+41 A _next_task_sequence
+42 A _next_event_sequence
+43 A _next_commitment_sequence
+44 A _next_evidence_sequence
+45 A _last_processed_hour
+47 K _schedule
+48 K _locations
+49 K _relationships
+50 K _knowledge
+51 K _organizations
+52 K _households
+53 K _ledger
+54 K _employment
+57 K fail_next_commit_for_test
+@ scripts/v2_3/v2_3_social_sandbox_service_v2.gd | V23SocialSandboxServiceV2
+10 K _product
+11 K _submit_options
+12 K _last_reservation_metadata
+@ scripts/v2_3/v2_3_social_sandbox_service_v3.gd | V23SocialSandboxServiceV3
+7 K _authorize_player_travel_for_submit
+@ scripts/v2_3/v2_3_survival_autonomy_service.gd | V23SurvivalAutonomyService
+6 C MARKET_LOCATION_ID
+7 C ITEM_TYPES
+8 C MAX_DECISIONS
+10 K product
+11 K profiles
+12 K next_retry_hours
+13 K active_needs
+14 K decision_history
+```
 
 ### 第10段：`scripts/world_map/internal/world_map_canvas_impl.gd` 至 `scripts/world_map/internal/world_map_data_impl.gd`
 
