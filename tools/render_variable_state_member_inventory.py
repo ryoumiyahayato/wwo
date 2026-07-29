@@ -8,7 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 INVENTORY_PATH = ROOT / "builds" / "variable-state-audit" / "variable_state_inventory.json"
 OUTPUT_PATH = ROOT / "docs" / "refactors" / "variable_state_member_inventory.md"
-PART_BYTE_LIMIT = 6500
+PART_BYTE_LIMIT = 4500
 CATEGORY_TEXT = {
     "A": "唯一事实源候选",
     "B": "外部配置",
