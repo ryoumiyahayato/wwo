@@ -7,7 +7,9 @@ extends SceneTree
 const FIXTURE_RESOURCE_PATH: String = "res://tests/fixtures/save/current_save_v1.json"
 const FIXTURE_USER_PATH: String = "user://tests/variable_state/committed_current_save_v1.json"
 const WORLD_PATH: String = "res://data/world/demo_world.json"
-const HEMISPHERE_RUNTIME_PATH: String = "res://scripts/ui_spikes/holographic_workspace/holographic_workspace_runtime.gd"
+const HEMISPHERE_RUNTIME_SCRIPT: Script = preload(
+	"res://scripts/ui_spikes/holographic_workspace/holographic_workspace_runtime.gd"
+)
 const PLAYER_SEED: int = 190001
 
 var test := AlphaTestCase.new()
@@ -221,8 +223,7 @@ func _test_map_selection_isolated_from_player_country() -> void:
 	test.expect(not other_country.is_empty(), "地图选择隔离测试拥有另一国家")
 	if other_country.is_empty():
 		return
-	var runtime_script: Script = load(HEMISPHERE_RUNTIME_PATH) as Script
-	var hemisphere: Variant = runtime_script.new()
+	var hemisphere = HEMISPHERE_RUNTIME_SCRIPT.new()
 	hemisphere.selected_country_id = other_country
 	test.equal(
 		_derived_player_country_id(),
