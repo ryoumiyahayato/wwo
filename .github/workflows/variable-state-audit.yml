@@ -12,6 +12,17 @@ on:
       - "resources/**"
       - "tools/audit_variable_state.py"
       - ".github/workflows/variable-state-audit.yml"
+  pull_request:
+    branches:
+      - agent/formal-world-economy-integration
+    paths:
+      - "project.godot"
+      - "scripts/**"
+      - "scenes/**"
+      - "data/**"
+      - "resources/**"
+      - "tools/audit_variable_state.py"
+      - ".github/workflows/variable-state-audit.yml"
   workflow_dispatch:
 
 permissions:
