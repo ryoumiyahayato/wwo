@@ -15,7 +15,7 @@ on:
       - "tools/audit_variable_state_v2.py"
       - "tools/generate_variable_state_docs.py"
       - "tools/refine_variable_state_docs.py"
-      - "tools/compact_variable_state_audit.py"
+      - "tools/render_variable_state_audit_summary.py"
       - ".github/workflows/variable-state-audit.yml"
   workflow_dispatch:
 
@@ -39,11 +39,14 @@ jobs:
           set -euo pipefail
           python3 tools/audit_variable_state_v2.py
           python3 tools/generate_variable_state_docs.py
+          cp docs/refactors/variable_state_audit.md \
+            docs/refactors/variable_state_member_inventory.md
           python3 tools/refine_variable_state_docs.py
-          python3 tools/compact_variable_state_audit.py
+          python3 tools/render_variable_state_audit_summary.py
           test -s builds/variable-state-audit/variable_state_inventory.json
           test -s builds/variable-state-audit/member_inventory.md
           test -s docs/refactors/variable_state_audit.md
+          test -s docs/refactors/variable_state_member_inventory.md
           test -s docs/refactors/state_ownership_matrix.md
           test -s docs/refactors/variable_refactor_plan.md
 
@@ -52,5 +55,6 @@ jobs:
           set -euo pipefail
           git diff --exit-code -- \
             docs/refactors/variable_state_audit.md \
+            docs/refactors/variable_state_member_inventory.md \
             docs/refactors/state_ownership_matrix.md \
             docs/refactors/variable_refactor_plan.md
