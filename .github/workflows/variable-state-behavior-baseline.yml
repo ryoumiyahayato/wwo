@@ -52,8 +52,8 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          & $env:GODOT_BIN --headless --path . --script res://tests/variable_state/generate_current_save_v1_fixture.gd
-          if ($LASTEXITCODE -ne 0) { throw "Fixture generator failed with exit code $LASTEXITCODE" }
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless', '--path', '.', '--script', 'res://tests/variable_state/generate_current_save_v1_fixture.gd') -Wait -PassThru -NoNewWindow
+          if ($process.ExitCode -ne 0) { throw "Fixture generator failed with exit code $($process.ExitCode)" }
           $fixture = Get-ChildItem -LiteralPath (Join-Path $env:APPDATA 'Godot\app_userdata') -Filter 'current_save_v1.json' -Recurse | Select-Object -First 1
           if (-not $fixture) { throw 'Generated SAVE_VERSION 1 fixture was not found under user://' }
           New-Item -ItemType Directory -Force -Path builds/variable-state | Out-Null
@@ -83,5 +83,5 @@ jobs:
         if: ${{ hashFiles('tests/variable_state/variable_state_behavior_baseline_test.gd') != '' }}
         shell: pwsh
         run: |
-          & $env:GODOT_BIN --headless --path . --script res://tests/variable_state/variable_state_behavior_baseline_test.gd
-          if ($LASTEXITCODE -ne 0) { throw "Variable-state behavior tests failed with exit code $LASTEXITCODE" }
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless', '--path', '.', '--script', 'res://tests/variable_state/variable_state_behavior_baseline_test.gd') -Wait -PassThru -NoNewWindow
+          if ($process.ExitCode -ne 0) { throw "Variable-state behavior tests failed with exit code $($process.ExitCode)" }
