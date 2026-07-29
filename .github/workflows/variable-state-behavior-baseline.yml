@@ -48,8 +48,40 @@ jobs:
         run: |
           powershell -ExecutionPolicy Bypass -File tools/run_validation.ps1 -GodotPath $env:GODOT_BIN
 
+      - name: Generate SAVE_VERSION 1 fixture through production services
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & $env:GODOT_BIN --headless --path . --script res://tests/variable_state/generate_current_save_v1_fixture.gd
+          if ($LASTEXITCODE -ne 0) { throw "Fixture generator failed with exit code $LASTEXITCODE" }
+          $fixture = Get-ChildItem -LiteralPath (Join-Path $env:APPDATA 'Godot\app_userdata') -Filter 'current_save_v1.json' -Recurse | Select-Object -First 1
+          if (-not $fixture) { throw 'Generated SAVE_VERSION 1 fixture was not found under user://' }
+          New-Item -ItemType Directory -Force -Path builds/variable-state | Out-Null
+          Copy-Item -LiteralPath $fixture.FullName -Destination builds/variable-state/current_save_v1.json
+          $snapshot = Get-Content -LiteralPath builds/variable-state/current_save_v1.json -Raw | ConvertFrom-Json
+          if ([int]$snapshot.save_version -ne 1) { throw 'Generated fixture is not SAVE_VERSION 1' }
+          if ([string]$snapshot.selected_country_id -ne [string]($snapshot.characters.active | Where-Object id -eq $snapshot.player_character_id | Select-Object -First 1).country_id) {
+            throw 'Generated fixture selected_country_id differs from player country'
+          }
+
+      - name: Verify committed fixture matches production output
+        if: ${{ hashFiles('tests/fixtures/save/current_save_v1.json') != '' }}
+        shell: pwsh
+        run: |
+          $generated = Get-Content -LiteralPath builds/variable-state/current_save_v1.json -Raw | ConvertFrom-Json | ConvertTo-Json -Depth 100 -Compress
+          $committed = Get-Content -LiteralPath tests/fixtures/save/current_save_v1.json -Raw | ConvertFrom-Json | ConvertTo-Json -Depth 100 -Compress
+          if ($generated -cne $committed) { throw 'Committed fixture differs from current production save output' }
+
+      - name: Upload generated fixture
+        uses: actions/upload-artifact@v4
+        with:
+          name: current-save-v1
+          path: builds/variable-state/current_save_v1.json
+          if-no-files-found: error
+
       - name: Run variable-state behavior tests
         if: ${{ hashFiles('tests/variable_state/variable_state_behavior_baseline_test.gd') != '' }}
         shell: pwsh
         run: |
           & $env:GODOT_BIN --headless --path . --script res://tests/variable_state/variable_state_behavior_baseline_test.gd
+          if ($LASTEXITCODE -ne 0) { throw "Variable-state behavior tests failed with exit code $LASTEXITCODE" }
