@@ -112,16 +112,15 @@ jobs:
           $testPath = 'tests/variable_state/formal_time_stable_contract_test.gd'
           $logPath = 'builds/formal-time/formal_time_stable_contract_test.log'
           $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless', '--audio-driver', 'Dummy', '--path', '.', '--script', "res://$testPath", '--log-file', $logPath) -Wait -PassThru -NoNewWindow
-          if ($process.ExitCode -ne 0) { throw "Formal time stable contract failed with exit code $($process.ExitCode)" }
           if (-not (Test-Path -LiteralPath $logPath -PathType Leaf)) { throw 'Stable contract log was not created' }
           $content = Get-Content -LiteralPath $logPath -Raw
+          Write-Host $content
+          if ($process.ExitCode -ne 0) { throw "Formal time stable contract failed with exit code $($process.ExitCode)" }
           if ($content -match 'SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|Assertion failed|[1-9][0-9]* failures|^ERROR:') {
-            Write-Host $content
             throw 'Stable contract log contains a fatal error or failure'
           }
           $summary = [regex]::Match($content, 'Formal time stable contract: ([1-9][0-9]*) checks, 0 failures')
           if (-not $summary.Success) {
-            Write-Host $content
             throw 'Stable contract summary is missing, has zero checks, or reports failures'
           }
           Write-Host $summary.Value
@@ -133,16 +132,15 @@ jobs:
           $testPath = 'tests/variable_state/formal_time_known_defects_test.gd'
           $logPath = 'builds/formal-time/formal_time_known_defects_test.log'
           $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless', '--audio-driver', 'Dummy', '--path', '.', '--script', "res://$testPath", '--log-file', $logPath) -Wait -PassThru -NoNewWindow
-          if ($process.ExitCode -ne 0) { throw "Formal time known defects failed with exit code $($process.ExitCode)" }
           if (-not (Test-Path -LiteralPath $logPath -PathType Leaf)) { throw 'Known-defects log was not created' }
           $content = Get-Content -LiteralPath $logPath -Raw
+          Write-Host $content
+          if ($process.ExitCode -ne 0) { throw "Formal time known defects failed with exit code $($process.ExitCode)" }
           if ($content -match 'SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|Assertion failed|[1-9][0-9]* failures|^ERROR:') {
-            Write-Host $content
             throw 'Known-defects log contains a fatal error or failure'
           }
           $summary = [regex]::Match($content, 'Formal time known defects: ([1-9][0-9]*) checks, 0 failures')
           if (-not $summary.Success) {
-            Write-Host $content
             throw 'Known-defects summary is missing, has zero checks, or reports failures'
           }
           Write-Host $summary.Value
