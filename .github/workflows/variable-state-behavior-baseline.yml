@@ -1,0 +1,55 @@
+name: Variable state behavior baseline
+
+on:
+  pull_request:
+    branches:
+      - agent/formal-world-economy-integration
+    paths:
+      - ".github/workflows/variable-state-behavior-baseline.yml"
+      - "tests/variable_state/**"
+      - "tests/fixtures/save/**"
+      - "tools/run_validation.ps1"
+      - "project.godot"
+      - "scripts/character/**"
+      - "scripts/save/**"
+      - "scripts/ui_spikes/holographic_workspace/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: variable-state-behavior-baseline-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  existing-validation:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Godot 4.6.3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'godot.zip'
+          $install = Join-Path $env:RUNNER_TEMP 'godot-4.6.3'
+          Invoke-WebRequest -Uri 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip' -OutFile $archive
+          Expand-Archive -LiteralPath $archive -DestinationPath $install
+          $binary = (Get-ChildItem -LiteralPath $install -Filter 'Godot_v4.6.3-stable_win64.exe' -Recurse | Select-Object -First 1).FullName
+          if (-not $binary) { throw 'Godot 4.6.3 executable was not found after extraction' }
+          "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          & $binary --version
+
+      - name: Run existing validation baseline
+        shell: pwsh
+        run: |
+          powershell -ExecutionPolicy Bypass -File tools/run_validation.ps1 -GodotPath $env:GODOT_BIN
+
+      - name: Run variable-state behavior tests
+        if: ${{ hashFiles('tests/variable_state/variable_state_behavior_baseline_test.gd') != '' }}
+        shell: pwsh
+        run: |
+          & $env:GODOT_BIN --headless --path . --script res://tests/variable_state/variable_state_behavior_baseline_test.gd
