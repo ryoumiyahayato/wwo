@@ -35,8 +35,8 @@ MEMBER_RE = re.compile(
     r"^(?P<mods>(?:(?:static\s+)|(?:@\w+(?:\([^)]*\))?\s+))*)"
     r"(?P<kind>var|const)\s+"
     r"(?P<name>[A-Za-z_]\w*)"
-    r"(?:\s*:\s*(?P<type>[^=]+?))?"
-    r"(?:\s*=\s*(?P<init>.*))?$"
+    r"(?:\s*:\s*(?P<type>[^=:]+?))?"
+    r"(?:\s*(?::=|=)\s*(?P<init>.*))?$"
 )
 CLASS_RE = re.compile(r"^class_name\s+([A-Za-z_]\w*)")
 EXTENDS_RE = re.compile(r"^extends\s+(.+)$")
