@@ -12,6 +12,7 @@ on:
       - "resources/**"
       - "tools/audit_variable_state.py"
       - "tools/audit_variable_state_v2.py"
+      - "tools/generate_variable_state_docs.py"
       - ".github/workflows/variable-state-audit.yml"
   pull_request:
     branches:
@@ -24,11 +25,12 @@ on:
       - "resources/**"
       - "tools/audit_variable_state.py"
       - "tools/audit_variable_state_v2.py"
+      - "tools/generate_variable_state_docs.py"
       - ".github/workflows/variable-state-audit.yml"
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: variable-state-audit-${{ github.ref }}
@@ -41,18 +43,38 @@ jobs:
     steps:
       - name: Checkout audit baseline
         uses: actions/checkout@v4
-      - name: Generate read-only inventory
+      - name: Generate read-only inventory and documents
         run: |
           set -euo pipefail
           python3 tools/audit_variable_state_v2.py | tee variable-state-audit-summary.log
+          python3 tools/generate_variable_state_docs.py | tee variable-state-docs-summary.log
           test -s builds/variable-state-audit/variable_state_inventory.json
           test -s builds/variable-state-audit/member_inventory.md
+          test -s docs/refactors/variable_state_audit.md
+          test -s docs/refactors/state_ownership_matrix.md
+      - name: Commit generated audit documents
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/refactors/variable_state_audit.md docs/refactors/state_ownership_matrix.md
+          if git diff --cached --quiet; then
+            echo "Audit documents unchanged."
+            exit 0
+          fi
+          git commit -m "document variable state ownership audit"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
       - name: Upload variable state inventory
         uses: actions/upload-artifact@v4
         with:
           name: variable-state-audit-inventory
           path: |
             builds/variable-state-audit/**
+            docs/refactors/variable_state_audit.md
+            docs/refactors/state_ownership_matrix.md
             variable-state-audit-summary.log
+            variable-state-docs-summary.log
           if-no-files-found: error
           retention-days: 14
