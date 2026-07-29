@@ -1,6 +1,8 @@
 extends SceneTree
 ## Behavioral baseline for the first variable-state refactor. Player-country
-## assertions derive country identity from the current player object.
+## assertions derive country identity from the current player object. The
+## fixture is a GameSaveService SAVE_VERSION=1 service-level fixture over the
+## isolated Loran/Vesta demo world, not a formal_world_1900 product save.
 
 const FIXTURE_RESOURCE_PATH: String = "res://tests/fixtures/save/current_save_v1.json"
 const FIXTURE_USER_PATH: String = "user://tests/variable_state/committed_current_save_v1.json"
