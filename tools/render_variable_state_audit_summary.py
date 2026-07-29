@@ -10,11 +10,11 @@ TEXT = r'''# 变量、状态所有权与数据流审计
 
 ## 0. 审计边界
 
-- 审计基线：`agent/remove-duplicated-player-country-state`当前检出提交；基础分支合入PR #29后的提交为`b4a9d637e294aa53b0c0e2525260421dce3b5182`。
+- 第一批实现基于基础提交`b4a9d637e294aa53b0c0e2525260421dce3b5182`，由PR #30实施。
 - 引擎：Godot 4.6.3；正式入口：`res://scenes/formal/formal_world_menu.tscn`。
 - 本报告持有审计结论；第一批实施记录由[`variable_refactor_plan.md`](variable_refactor_plan.md)单独持有。
 - __MEMBER_COUNT__个生产成员字段的静态逐项索引由[`variable_state_member_inventory.md`](variable_state_member_inventory.md)单独持有。
-- 本轮只删除玩家所属国家的一个重复运行期成员，并机械调整继承回滚和SAVE_VERSION=1存档边界；未处理其他状态组。
+- 第一批只删除玩家所属国家的一个重复运行期成员，并机械调整继承回滚和SAVE_VERSION=1存档边界；未处理其他状态组。
 - 扫描范围为__SOURCE_COUNT__个源/配置文件、__GDSCRIPT_COUNT__个GDScript文件。
 - 静态写入者、读取者、持久化、fallback和分类均为候选证据；不同对象的同名字段不能据此自动合并。
 
@@ -26,13 +26,13 @@ TEXT = r'''# 变量、状态所有权与数据流审计
 | 可写成员字段 | 1,243 | __WRITABLE_COUNT__ | -1 |
 | 进程级全局可写字段 | 16 | __GLOBAL_COUNT__ | -1 |
 | Autoload可写字段 | 0 | __AUTOLOAD_COUNT__ | 0 |
-| 持久化关联候选（静态启发式） | 492 | __PERSISTED_COUNT__ | 不可直接比较 |
+| 持久化关联候选（静态启发式） | 472 | __PERSISTED_COUNT__ | 不可直接比较 |
 | UI显示副本候选 | 32 | __UI_COUNT__ | 0 |
 | 命名缓存候选 | 16 | __CACHE_COUNT__ | 0 |
 | 可推导成员候选 | 61 | __DERIVED_COUNT__ | -1 |
 | K类、不得修改字段 | 885 | __UNCLEAR_COUNT__ | 0 |
 
-以上当前值直接来自`tools/audit_variable_state.py`生成的inventory，不是手工估算。持久化关联候选会受扫描范围内审计生成器文本的词法命中影响，因此旧报告值与当前值不可作为生产字段净变化比较。第一批经qualified核验减少一份重复可写事实；该项是所有权结论，不是词法扫描器的独立计数器。
+以上当前值直接来自`tools/audit_variable_state.py`生成的inventory，不是手工估算。扫描器扫描`.gd`、`.tscn`、`.tres`、`.godot`、`.json`和`.cfg`；PR #29新增的测试GDScript和SAVE_VERSION=1 JSON fixture扩大了词法证据范围。`persisted_by_name`是在全部扫描源中，按同名字段与save、load、restore、snapshot等词推断的启发式，因此批准基线472和当前值__PERSISTED_COUNT__不能作为生产持久化字段的净变化比较；本报告不声称已经精确证明每一项增量的来源。第一批经qualified核验减少一份重复可写事实；该项是所有权结论，不是词法扫描器的独立计数器。
 
 ## 2. 最严重的10组重复或混乱状态
 
