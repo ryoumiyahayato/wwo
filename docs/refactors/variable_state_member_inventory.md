@@ -37,31 +37,47 @@
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
-### 第1段：`scripts/action/action_instance_data.gd` 至 `scripts/alpha/alpha_ledger_service.gd`
+### 第1段：`scripts/action/action_instance_data.gd` 至 `scripts/alpha/alpha_economy_integration_service.gd`
 
 <!-- INVENTORY_PART_01 -->
 
-### 第2段：`scripts/alpha/alpha_main.gd` 至 `scripts/core/deterministic_random_service.gd`
+### 第2段：`scripts/alpha/alpha_economy_service.gd` 至 `scripts/alpha/alpha_simulation_service.gd`
 
 <!-- INVENTORY_PART_02 -->
 
-### 第3段：`scripts/core/log_service.gd` 至 `scripts/save/action_save_validator.gd`
+### 第3段：`scripts/alpha/alpha_ui_binding.gd` 至 `scripts/core/log_service.gd`
 
 <!-- INVENTORY_PART_03 -->
 
-### 第4段：`scripts/save/autosave_coordinator.gd` 至 `scripts/ui_spikes/holographic_workspace/holographic_workspace_release.gd`
+### 第4段：`scripts/core/models/action_definition_data.gd` 至 `scripts/formal/formal_world_simulation.gd`
 
 <!-- INVENTORY_PART_04 -->
 
-### 第5段：`scripts/ui_spikes/holographic_workspace/holographic_workspace_release_probe.gd` 至 `scripts/v2_3/relationship_service.gd`
+### 第5段：`scripts/map/map_control_service.gd` 至 `scripts/simulation/society_simulation_service.gd`
 
 <!-- INVENTORY_PART_05 -->
 
-### 第6段：`scripts/v2_3/route_planner_service.gd` 至 `scripts/v2_3/v2_3_survival_autonomy_service.gd`
+### 第6段：`scripts/simulation/world_activity_service.gd` 至 `scripts/ui_spikes/holographic_workspace/holographic_workspace_release_probe.gd`
 
 <!-- INVENTORY_PART_06 -->
 
-### 第7段：`scripts/world_map/internal/world_map_canvas_impl.gd` 至 `scripts/world_map/world_map_canvas_detail.gd`
+### 第7段：`scripts/ui_spikes/holographic_workspace/holographic_workspace_release_quality.gd` 至 `scripts/v2_2/v2_life_loop_simulation.gd`
 
 <!-- INVENTORY_PART_07 -->
+
+### 第8段：`scripts/v2_2/v2_life_loop_ui_binding.gd` 至 `scripts/v2_3/v2_3_formal_schedule_interface.gd`
+
+<!-- INVENTORY_PART_08 -->
+
+### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/v2_3/v2_3_survival_autonomy_service.gd`
+
+<!-- INVENTORY_PART_09 -->
+
+### 第10段：`scripts/world_map/internal/world_map_canvas_impl.gd` 至 `scripts/world_map/internal/world_map_data_impl.gd`
+
+<!-- INVENTORY_PART_10 -->
+
+### 第11段：`scripts/world_map/internal/world_map_interface_impl.gd` 至 `scripts/world_map/world_map_canvas_detail.gd`
+
+<!-- INVENTORY_PART_11 -->
 
