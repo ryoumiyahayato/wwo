@@ -1,0 +1,45 @@
+name: Variable state audit
+
+on:
+  push:
+    branches:
+      - agent/variable-state-audit
+    paths:
+      - "project.godot"
+      - "scripts/**"
+      - "scenes/**"
+      - "data/**"
+      - "resources/**"
+      - "tools/audit_variable_state.py"
+      - ".github/workflows/variable-state-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: variable-state-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout audit baseline
+        uses: actions/checkout@v4
+      - name: Generate read-only inventory
+        run: |
+          set -euo pipefail
+          python3 tools/audit_variable_state.py | tee variable-state-audit-summary.log
+          test -s builds/variable-state-audit/variable_state_inventory.json
+          test -s builds/variable-state-audit/member_inventory.md
+      - name: Upload variable state inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: variable-state-audit-inventory
+          path: |
+            builds/variable-state-audit/**
+            variable-state-audit-summary.log
+          if-no-files-found: error
+          retention-days: 14
