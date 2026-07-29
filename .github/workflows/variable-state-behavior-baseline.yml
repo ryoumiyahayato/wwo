@@ -10,8 +10,21 @@ on:
       - "tests/fixtures/save/**"
       - "tools/run_validation.ps1"
       - "project.godot"
+      - "data/world/demo_world.json"
+      - "data/characters/character_generation.json"
+      - "data/balance/map_rules.json"
+      - "data/balance/simulation_clock.json"
+      - "data/balance/society_rules.json"
+      - "data/balance/continuity_rules.json"
+      - "data/balance/action_rules.json"
+      - "scripts/core/**"
+      - "scripts/action/**"
       - "scripts/character/**"
+      - "scripts/map/**"
+      - "scripts/organization/**"
+      - "scripts/relationship/**"
       - "scripts/save/**"
+      - "scripts/simulation/**"
       - "scripts/ui_spikes/holographic_workspace/**"
   workflow_dispatch:
 
@@ -93,11 +106,15 @@ jobs:
           }
 
       - name: Verify committed fixture matches production output
-        if: ${{ hashFiles('tests/fixtures/save/current_save_v1.json') != '' }}
         shell: pwsh
         run: |
+          $ErrorActionPreference = 'Stop'
+          $fixturePath = 'tests/fixtures/save/current_save_v1.json'
+          if (-not (Test-Path -LiteralPath $fixturePath -PathType Leaf)) {
+            throw "Required committed fixture is missing: $fixturePath"
+          }
           $generated = Get-Content -LiteralPath builds/variable-state/current_save_v1.json -Raw | ConvertFrom-Json | ConvertTo-Json -Depth 100 -Compress
-          $committed = Get-Content -LiteralPath tests/fixtures/save/current_save_v1.json -Raw | ConvertFrom-Json | ConvertTo-Json -Depth 100 -Compress
+          $committed = Get-Content -LiteralPath $fixturePath -Raw | ConvertFrom-Json | ConvertTo-Json -Depth 100 -Compress
           if ($generated -cne $committed) { throw 'Committed fixture differs from current production save output' }
 
       - name: Upload generated fixture
@@ -108,8 +125,12 @@ jobs:
           if-no-files-found: error
 
       - name: Run variable-state behavior tests
-        if: ${{ hashFiles('tests/variable_state/variable_state_behavior_baseline_test.gd') != '' }}
         shell: pwsh
         run: |
+          $ErrorActionPreference = 'Stop'
+          $testPath = 'tests/variable_state/variable_state_behavior_baseline_test.gd'
+          if (-not (Test-Path -LiteralPath $testPath -PathType Leaf)) {
+            throw "Required behavior test is missing: $testPath"
+          }
           $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless', '--path', '.', '--script', 'res://tests/variable_state/variable_state_behavior_baseline_test.gd') -Wait -PassThru -NoNewWindow
           if ($process.ExitCode -ne 0) { throw "Variable-state behavior tests failed with exit code $($process.ExitCode)" }
