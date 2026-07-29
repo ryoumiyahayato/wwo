@@ -7,7 +7,7 @@ extends SceneTree
 const FIXTURE_RESOURCE_PATH: String = "res://tests/fixtures/save/current_save_v1.json"
 const FIXTURE_USER_PATH: String = "user://tests/variable_state/committed_current_save_v1.json"
 const WORLD_PATH: String = "res://data/world/demo_world.json"
-const HEMISPHERE_RUNTIME_SCRIPT: Script = preload(
+const HEMISPHERE_RUNTIME_SCRIPT = preload(
 	"res://scripts/ui_spikes/holographic_workspace/holographic_workspace_runtime.gd"
 )
 const PLAYER_SEED: int = 190001
