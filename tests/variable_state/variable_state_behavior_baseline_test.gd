@@ -41,15 +41,15 @@ func _test_current_fixture_loads() -> void:
 	test.equal(
 		int(fixture.get("save_version", -1)),
 		GameSaveService.SAVE_VERSION,
-		"fixture使用当前SAVE_VERSION"
+		"服务级fixture使用当前SAVE_VERSION"
 	)
-	test.expect(_copy_fixture_to_user(), "fixture复制到生产加载允许的user://路径")
+	test.expect(_copy_fixture_to_user(), "服务级fixture复制到GameSaveService允许的user://路径")
 	var runtime := _create_runtime()
 	if runtime.is_empty():
 		return
 	var service := GameSaveService.new()
 	var loaded: SaveOperationResult = service.load_from_path(FIXTURE_USER_PATH)
-	test.expect(loaded.success, "当前GameSaveService可解析并校验fixture")
+	test.expect(loaded.success, "当前GameSaveService可解析并校验服务级fixture")
 	if not loaded.success:
 		return
 	var restored: SaveOperationResult = service.restore_snapshot(
@@ -57,18 +57,18 @@ func _test_current_fixture_loads() -> void:
 		runtime["clock"] as SimulationClock,
 		runtime["map"] as MapControlService
 	)
-	test.expect(restored.success, "当前GameSaveService可完整恢复fixture")
+	test.expect(restored.success, "当前GameSaveService可完整恢复服务级fixture")
 	if not restored.success:
 		return
 	test.equal(
 		GameSessionService.player_character.id,
 		str(fixture["player_character_id"]),
-		"fixture恢复当前玩家人物"
+		"服务级fixture恢复当前玩家人物"
 	)
 	test.equal(
 		str(fixture.get("selected_country_id", "")),
 		GameSessionService.player_character.country_id,
-		"fixture旧国家键等于恢复后的玩家国家"
+		"服务级fixture旧国家键等于恢复后的玩家国家"
 	)
 
 
