@@ -4,10 +4,11 @@
 
 - 审计基线：`agent/formal-world-economy-integration@950512aba6889ff8ffd6f24c4be7559b7ef1f1cd`。
 - 引擎：Godot 4.6.3；正式入口：`res://scenes/formal/formal_world_menu.tscn`。
-- 本报告及配套清单只记录审计结论；未修改 `scripts/`、`scenes/`、`data/` 或 `resources/`。
+- 本报告只持有审计结论；第一批实施方案由 [`variable_refactor_plan.md`](variable_refactor_plan.md) 单独持有。
+- 1,613个生产成员字段的静态逐项索引由 [`variable_state_member_inventory.md`](variable_state_member_inventory.md) 单独持有。
+- 本轮未修改 `scripts/`、`scenes/`、`data/` 或 `resources/`，未创建测试或存档fixture。
 - 扫描范围为502个源/配置文件、255个GDScript文件。
-- 1,613个生产成员字段的逐项表保存在同目录的 [`variable_state_member_inventory.md`](variable_state_member_inventory.md)。该文件由同一扫描器确定性生成，不把函数局部变量混入成员表。
-- 静态写入者、读取者、持久化和fallback结果属于候选证据；不同对象的同名字段不能据此自动合并。
+- 静态写入者、读取者、持久化、fallback和分类均为候选证据；不同对象的同名字段不能据此自动合并。
 
 ## 1. 基线指标
 
@@ -27,11 +28,11 @@
 
 | 等级 | 组 | 当前事实与问题 | 审计决定 |
 |---|---|---|---|
-| P0 | D01 正式时间三重表示及初始错位 | 半球UI、正式模拟和正式经济分别保存可写时间；而且初始日期已经不同。 | 现存正确性缺陷，单独批次处理；本批不得顺带修复。 |
+| P0 | D01 正式时间三重表示及初始错位 | 半球UI、正式模拟和正式经济分别保存可写时间，且初始日期已经不同。 | 现存正确性缺陷，必须作为独立批次处理；本批不得顺带修复。 |
 | P0 | D02 经济体—政治单元关系来源、索引和持久化混合 | 原始来源、双向索引、持久化副本和UI投影混在同一服务内。 | 分类型审计；不预设删除必要索引。 |
 | P0 | D03 导航层级多个直接写入者 | `space_level/world_mode`由继承链多个脚本直接赋值，并手工同步viewport、渲染和选择清理。 | 建立转场行为基线后再处理。 |
 | P0 | D04 一级行政选择平行状态 | 四个选择字段属于历史领土、历史几何、现代近似几何和名称目录等不同ID空间。 | 不按名称合并，先建立ID命名空间和crosswalk矩阵。 |
-| P0 | D05 `selected_country_id`同名不同义 | 会话字段是玩家所属国家，半球字段是用户地图选择。 | 绝不能合并；第一批只计划删除前者的运行期副本。 |
+| P0 | D05 `selected_country_id`同名不同义 | 会话字段是玩家所属国家，半球字段是用户地图选择。 | 两者不得合并；会话字段的qualified证据见第6节。 |
 | P1 | D06 当前玩家、角色和显示身份分立 | `player_character`、`active_character_key`、`selected_person_id`关系未定义。 | 人工定义active/displayed/selected后再处理。 |
 | P1 | D07 事件、消息和未读数缺少正式所有者 | 半球展示事件、事件队列、通知和通信inbox并存。 | 确定正式业务服务，HUD只读。 |
 | P1 | D08 旧地图画布—界面双写 | Canvas与Interface分别保存模式和选择，Controller同时写两边。 | 决定隔离或删除旧样机；若保留则UI只读。 |
@@ -86,87 +87,48 @@
 6. `_panel_previous_*`、`_activity_panel_was_open`等可能用于恢复或边沿检测的状态。
 7. 不同语义的selected、hovered、focused、active、pending、previous、requested、displayed、loaded、visible和enabled。
 
-## 6. 推荐第一批范围：玩家所属国家所有权（尚未实施）
+## 6. `GameSessionService.selected_country_id` qualified引用证据
 
-### 6.1 唯一事实源方案
+以下结果按所有者、限定名和词法作用域逐项核验，不使用纯名称扫描代替qualified核验。实施方案和测试计划只记录在`variable_refactor_plan.md`。
 
-第一批只计划处理`GameSessionService.selected_country_id`。候选唯一事实源是`GameSessionService.player_character.country_id`。
+### 6.1 成员声明
 
-- 玩家对象由`GameSessionService.player_character`拥有。
-- 玩家所属国家从玩家对象只读推导；无玩家时为空字符串。
-- 半球地图的`selected_country_id`继续表示用户选中的地图政治单元，必须保持独立。
-- 旧存档JSON键`selected_country_id`暂时保留：保存时从玩家对象推导，加载时继续验证旧键与恢复玩家国家一致；运行期不再保存第二份可写国家ID。
-- 不新增Autoload、Manager、Dictionary状态容器、同步信号、fallback或兼容别名。
+- `scripts/character/game_session_service.gd:11`：`GameSessionService.selected_country_id`。
 
-### 6.2 qualified引用清单
+### 6.2 合格读取点
 
-以下结果按所有者、限定名和词法作用域逐项核验，不使用纯名称扫描代替qualified核验。
-
-#### 成员声明
-
-- `scripts/character/game_session_service.gd:9`：`GameSessionService.selected_country_id`。
-
-#### 合格读取点
-
-- `scripts/save/game_save_service.gd:229`：`build_snapshot()`读取`GameSessionService.selected_country_id`并生成旧存档键。
+- `scripts/save/game_save_service.gd:231`：`build_snapshot()`读取`GameSessionService.selected_country_id`并生成旧存档键。
 - 全仓库未发现其他合格运行期读取点。
 
-#### 合格写入点
+### 6.3 合格写入点
 
-- `scripts/character/game_session_service.gd:27`：`set_player()`按`character.country_id`写入。
-- `scripts/character/game_session_service.gd:45`：`clear()`写入空字符串。
-- `scripts/character/game_session_service.gd:80`：`transfer_player()`按`character.country_id`写入。
+- `scripts/character/game_session_service.gd:29`：`set_player()`按`character.country_id`写入。
+- `scripts/character/game_session_service.gd:47`：`clear()`写入空字符串。
+- `scripts/character/game_session_service.gd:82`：`transfer_player()`按`character.country_id`写入。
 - `scripts/character/succession_service.gd:280`：继承事务失败回滚后按`restored_player.country_id`恢复。
 - `scripts/save/game_save_service.gd:509`：存档恢复通过一致性验证后，将函数局部候选值写回会话成员。
 
 声明处的空字符串初始化是初始化值，不重复计入上述五个运行期写入点。
 
-#### 存档键
+### 6.4 存档键
 
-- `scripts/save/game_save_service.gd:229`：生成`"selected_country_id"`键。
+- `scripts/save/game_save_service.gd:231`：生成`"selected_country_id"`键。
 - `scripts/save/game_save_service.gd:455-460`：读取旧键，验证国家存在，并要求它等于`restored_player.country_id`。
 - `scripts/save/game_save_service.gd:603`：验证快照必须包含非空旧键。
 
-#### 同名但属于其他对象的成员
+### 6.5 同名但属于其他对象的成员
 
 - `scripts/ui_spikes/holographic_workspace/holographic_workspace_runtime.gd:23`：半球场景成员`selected_country_id`，表示用户选择的地图政治单元。它不是玩家所属国家副本，本批必须保持不变。
 - 全仓库成员声明核验只发现上述两个`selected_country_id`成员。
 
-#### 函数局部同名变量
+### 6.6 函数局部同名变量
 
 - `scripts/save/game_save_service.gd:455`：`restore_snapshot()`局部`selected_country_id`，保存从快照读取、尚未提交的候选值。它不是成员字段。
 - 全仓库词法核验未发现其他`var selected_country_id`函数局部声明。
 
-### 6.3 第一批实施前必须创建的测试
+## 7. 文档职责边界
 
-1. **现有版本存档fixture**：使用当前`SAVE_VERSION = 1`结构，包含有效玩家、国家、地图、人物和行动状态；重构前必须可以实际加载。
-2. **保存键推导测试**：保存后`snapshot["selected_country_id"] == GameSessionService.player_character.country_id`。
-3. **旧键不一致拒绝测试**：修改fixture旧键使其与恢复玩家`country_id`不同；加载必须失败且不得提交任何部分恢复状态。
-4. **玩家转移测试**：`transfer_player()`后派生玩家国家立即等于新玩家`country_id`，不依赖第二次同步调用。
-5. **人物继承成功测试**：继承成功后玩家对象、roster玩家ID和派生国家一致。
-6. **人物继承事务回滚测试**：在可控制的中途失败点触发回滚，玩家对象、roster、组织、关系、AI和派生国家恢复到事务前状态。
-7. **地图选择隔离测试**：改变半球场景`selected_country_id`不得改变玩家所属国家；转移玩家也不得改变当前地图选择。
-8. **清理测试**：`GameSessionService.clear()`后`player_character == null`，派生玩家国家为空字符串。
-
-测试只在下一次批准后创建。本次修订只提交测试计划。
-
-### 6.4 第一批预计数量
-
-| 项目 | 预计数量 |
-|---|---:|
-| 删除可写成员 | 1 |
-| 保留`GameSessionService`其他`static var` | 14，本批不处理 |
-| 新增可写成员 | 0 |
-| 减少重复可写事实 | 1 |
-| 删除兼容存档键 | 0 |
-| 删除fallback | 0 |
-| 删除同步函数 | 0 |
-| 预计生产文件 | 3至5 |
-
-阻塞条件：未创建现有版本存档fixture、未建立上述测试基线或无法验证继承回滚原子性时，第一批必须停止。
-
-## 7. 分类说明
-
-A唯一事实源；B外部配置；C不可变常量；D节点或资源引用；E可推导值；F有失效规则的缓存；GUI显示副本；H兼容字段；I迁移字段；J无用字段；K语义不明确、暂不得修改。
-
-完整逐字段分类、声明位置、静态写入/读取证据、持久化候选和建议见[`variable_state_member_inventory.md`](variable_state_member_inventory.md)。
+- 本文件持有审计结论和qualified证据。
+- `variable_refactor_plan.md`持有第一批实施方案、测试计划、风险与停止条件。
+- `variable_state_member_inventory.md`只持有静态成员索引证据，不重复D01–D10、实施建议、多写入总结、UI副本总结或停止项。
+- `state_ownership_matrix.md`持有当前与目标所有权矩阵。
