@@ -1,7 +1,8 @@
 extends SceneTree
-## Generates the committed SAVE_VERSION=1 fixture through the current production
-## character generator, snapshot, atomic writer, parser and restore path. This
-## script does not define or migrate a schema.
+## Generates the committed GameSaveService SAVE_VERSION=1 service-level fixture
+## with the isolated Loran/Vesta demo world, current character generator,
+## snapshot, atomic writer, parser and restore path. This script does not define
+## or migrate a schema and does not represent a formal_world_1900 save.
 
 const FIXTURE_USER_PATH: String = "user://tests/variable_state/current_save_v1.json"
 const WORLD_PATH: String = "res://data/world/demo_world.json"
@@ -75,7 +76,7 @@ func _run() -> void:
 	print("FIXTURE_PLAYER_ID=%s" % str(load_result.snapshot["player_character_id"]))
 	print("FIXTURE_COUNTRY_ID=%s" % str(load_result.snapshot["selected_country_id"]))
 	print("FIXTURE_PLAYER_SEED=%d" % PLAYER_SEED)
-	print("Current SAVE_VERSION=1 fixture generated and restored through production services.")
+	print("Current SAVE_VERSION=1 service-level fixture generated and restored through GameSaveService.")
 	quit(0)
 
 
