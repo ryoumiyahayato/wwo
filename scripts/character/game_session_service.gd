@@ -6,7 +6,6 @@ const SettlementLogServiceType = preload("res://scripts/devtools/settlement_log_
 const PerformanceStatsServiceType = preload("res://scripts/devtools/performance_stats_service.gd")
 
 static var player_character: CharacterData
-static var selected_country_id: String = ""
 static var current_action: ActionInstanceData
 static var recent_action_result: Dictionary = {}
 static var action_history: Array[Dictionary] = []
@@ -24,7 +23,6 @@ static var pending_menu_message: String = ""
 
 static func set_player(character: CharacterData) -> void:
 	player_character = character
-	selected_country_id = "" if character == null else character.country_id
 	current_action = null
 	recent_action_result = {}
 	action_history = []
@@ -42,7 +40,6 @@ static func set_player(character: CharacterData) -> void:
 
 static func clear() -> void:
 	player_character = null
-	selected_country_id = ""
 	current_action = null
 	recent_action_result = {}
 	action_history = []
@@ -77,7 +74,6 @@ static func has_world_services() -> bool:
 
 static func transfer_player(character: CharacterData) -> void:
 	player_character = character
-	selected_country_id = "" if character == null else character.country_id
 	current_action = null
 
 

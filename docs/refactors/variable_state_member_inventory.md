@@ -2,7 +2,7 @@
 
 ## 审计基线
 
-- 基线：`agent/formal-world-economy-integration@950512aba6889ff8ffd6f24c4be7559b7ef1f1cd`。
+- 第一批实现基于基础提交`b4a9d637e294aa53b0c0e2525260421dce3b5182`，由PR #30实施。
 - 引擎：Godot 4.6.3。
 - 范围：`project.godot`、`scripts/`、`scenes/`、`data/`、`resources/`。
 - 本文件只提供静态成员索引证据，不持有审计结论、实施方案、多写入状态总结、UI副本总结或停止项。
@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1613|1243|16|0|472|5|32|16|61|885|502|255|
+|1612|1242|15|0|510|5|32|16|60|885|505|257|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,613个生产成员字段逐项表
+## 1,612个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -426,7 +426,7 @@
 51 H _last_legacy_cash
 ```
 
-### 第3段：`scripts/alpha/alpha_ui_binding.gd` 至 `scripts/core/log_service.gd`
+### 第3段：`scripts/alpha/alpha_ui_binding.gd` 至 `scripts/core/models/action_definition_data.gd`
 
 ```text
 @ scripts/alpha/alpha_ui_binding.gd | AlphaUiBinding
@@ -533,20 +533,19 @@
 5 C SettlementLogServiceType
 6 C PerformanceStatsServiceType
 8 A player_character
-9 E selected_country_id
-10 A current_action
-11 A recent_action_result
-12 A action_history
-13 A action_id_service
-14 A society_service
-15 A world_clock
-16 A world_map_service
-17 A world_autosave
-18 A developer_mode
-19 A settlement_log
-20 A performance_stats
-21 A pending_load_path
-22 A pending_menu_message
+9 A current_action
+10 A recent_action_result
+11 A action_history
+12 A action_id_service
+13 A society_service
+14 A world_clock
+15 A world_map_service
+16 A world_autosave
+17 A developer_mode
+18 A settlement_log
+19 A performance_stats
+20 A pending_load_path
+21 A pending_menu_message
 @ scripts/character/succession_candidate_data.gd | SuccessionCandidateData
 4 K character_id
 5 K name
@@ -596,11 +595,6 @@
 6 K _initial_seed
 @ scripts/core/log_service.gd | LogService
 13 A minimum_level
-```
-
-### 第4段：`scripts/core/models/action_definition_data.gd` 至 `scripts/formal/formal_world_simulation.gd`
-
-```text
 @ scripts/core/models/action_definition_data.gd | ActionDefinitionData
 4 K id
 5 K name
@@ -622,6 +616,11 @@
 21 K guaranteed_success_threshold
 22 K success_result
 23 K failure_result
+```
+
+### 第4段：`scripts/core/models/character_data.gd` 至 `scripts/map/map_control_service.gd`
+
+```text
 @ scripts/core/models/character_data.gd | CharacterData
 4 K id
 5 K name
@@ -786,11 +785,6 @@
 13 K initialization_error
 14 K total_minutes
 15 K _minute_remainder
-```
-
-### 第5段：`scripts/map/map_control_service.gd` 至 `scripts/simulation/society_simulation_service.gd`
-
-```text
 @ scripts/map/map_control_service.gd | MapControlService
 11 C STAGE_STABLE
 12 C STAGE_WEAKENING
@@ -804,6 +798,11 @@
 21 K _frontline_edges
 22 K _units_by_grid_position
 23 K _war_state
+```
+
+### 第5段：`scripts/map/map_rules_config.gd` 至 `scripts/ui_spikes/holographic_workspace/holographic_hemisphere_3d.gd`
+
+```text
 @ scripts/map/map_rules_config.gd | MapRulesConfig
 5 C DEFAULT_PATH
 7 A tile_width
@@ -966,11 +965,6 @@
 39 K _action_rules
 40 K _action_service
 41 F _control_owner_cache
-```
-
-### 第6段：`scripts/simulation/world_activity_service.gd` 至 `scripts/ui_spikes/holographic_workspace/holographic_workspace_release_probe.gd`
-
-```text
 @ scripts/simulation/world_activity_service.gd | WorldActivityService
 7 C MAX_EVENTS
 8 C IMPORTANCE_NORMAL
@@ -986,6 +980,11 @@
 6 C MOON_RADIUS
 8 D _surface
 9 D _moon
+```
+
+### 第6段：`scripts/ui_spikes/holographic_workspace/holographic_workspace_admin1.gd` 至 `scripts/ui_spikes/holographic_workspace/holographic_workspace_release_quality.gd`
+
+```text
 @ scripts/ui_spikes/holographic_workspace/holographic_workspace_admin1.gd | holographic_workspace_admin1
 3 K selected_world_admin1_id
 4 K hover_world_admin1_id
@@ -1089,16 +1088,16 @@
 @ scripts/ui_spikes/holographic_workspace/holographic_workspace_release_probe.gd | holographic_workspace_release_probe
 3 C TARGET_SCENE
 5 K workspace
-```
-
-### 第7段：`scripts/ui_spikes/holographic_workspace/holographic_workspace_release_quality.gd` 至 `scripts/v2_2/v2_life_loop_simulation.gd`
-
-```text
 @ scripts/ui_spikes/holographic_workspace/holographic_workspace_release_quality.gd | holographic_workspace_release_quality
 4 C IDENTITY_PREFIX
 5 C IDENTITY_SEPARATOR
 6 C ADMIN1_REFERENCE_NOTICE
 7 C FLAG_REFERENCE_NOTICE
+```
+
+### 第7段：`scripts/ui_spikes/holographic_workspace/holographic_workspace_runtime.gd` 至 `scripts/v2_2/v2_life_loop_ui_binding.gd`
+
+```text
 @ scripts/ui_spikes/holographic_workspace/holographic_workspace_runtime.gd | holographic_workspace_runtime
 3 C WORLD
 4 C REGION
@@ -1277,11 +1276,6 @@
 33 K last_hour_processing_usec
 34 K maximum_hour_processing_usec
 35 K hours_processed
-```
-
-### 第8段：`scripts/v2_2/v2_life_loop_ui_binding.gd` 至 `scripts/v2_3/v2_3_formal_schedule_interface.gd`
-
-```text
 @ scripts/v2_2/v2_life_loop_ui_binding.gd | V2LifeLoopUiBinding
 7 K simulation
 8 A save_service
@@ -1290,6 +1284,11 @@
 11 K _panel_pause_depth
 12 A _panel_previous_paused
 13 A _panel_previous_speed
+```
+
+### 第8段：`scripts/v2_2/v2_notification_service.gd` 至 `scripts/v2_3/v2_3_leave_service.gd`
+
+```text
 @ scripts/v2_2/v2_notification_service.gd | V2NotificationService
 5 K notifications
 6 A _next_sequence
@@ -1449,11 +1448,6 @@
 6 C FORMAL_PANEL_IDS
 @ scripts/v2_3/v2_3_formal_schedule_interface.gd | V23FormalScheduleInterface
 5 K leave_confirmation
-```
-
-### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/v2_3/v2_3_survival_autonomy_service.gd`
-
-```text
 @ scripts/v2_3/v2_3_formal_simulation.gd | V23FormalSimulation
 5 A finance_config
 6 A finance
@@ -1463,6 +1457,11 @@
 @ scripts/v2_3/v2_3_leave_service.gd | V23LeaveService
 5 K authorizations
 6 A _next_sequence
+```
+
+### 第9段：`scripts/v2_3/v2_3_life_loop_interface.gd` 至 `scripts/v2_3/v2_3_survival_autonomy_service.gd`
+
+```text
 @ scripts/v2_3/v2_3_life_loop_interface.gd | V23LifeLoopInterface
 5 C V2_3_MENU_SCENE
 6 C V2_3_PANEL_IDS

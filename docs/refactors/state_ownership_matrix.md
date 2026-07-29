@@ -2,7 +2,7 @@
 
 ## 0. 基线与规则
 
-基线：`agent/formal-world-economy-integration@950512aba6889ff8ffd6f24c4be7559b7ef1f1cd`。本矩阵只描述当前与目标所有权，不修改生产代码。
+第一批实现基于基础提交`b4a9d637e294aa53b0c0e2525260421dce3b5182`，由PR #30实施。本矩阵描述第一批删除后的当前所有权及其余状态组的既有目标。
 
 - 同一事实原则上只能有一个可写来源。
 - selected、hovered、focused、active、pending、previous、requested、displayed、loaded、visible、enabled保持区分。
@@ -12,7 +12,7 @@
 | 概念 | 当前可写所有者 | 写入者 | 只读者 | 生命周期 | 存档 | 可推导 | 副本 | 当前不一致处理 | 重构后唯一事实源 | 结论 |
 |---|---|---|---|---|---|---|---|---|---|---|
 | 当前玩家 | GameSessionService.player_character；roster player_character_id | set/transfer、继承、存档恢复 | 动作、存档、社会服务、HUD | 进程会话 | 是 | 否 | 与 selected_person_id/active_character_key 未对齐 | 靠调用顺序 | player_character 对象；roster ID 为持久标识 | 第一批只处理派生国家 |
-| 当前国家（玩家所属） | selected_country_id + player_character.country_id | set/transfer/succession/load | 存档、国家入口 | 进程会话 | 是 | 是 | 2份可写 | 加载时要求相等，否则拒绝 | player_character.country_id | 第一批删除运行时副本 |
+| 当前国家（玩家所属） | player_character.country_id | set/transfer/succession/load只提交玩家对象 | 存档、国家入口 | 进程会话 | 旧JSON键保留 | 是 | 无运行期副本 | restore_snapshot要求旧键等于恢复玩家国家，否则拒绝 | player_character.country_id | 第一批已完成 |
 | 当前地图选择政权 | 半球 selected_country_id | 鼠标、历史焦点、返回、测试 | 地图、政经面板、导航 | 场景 | 否 | 否 | 与玩家国家同名不同义 | 政经面板存在 home/France/首项 fallback | 正式导航控制器 selected_map_polity_id | 先补选择行为测试 |
 | 当前角色/显示身份 | active_character_key、selected_person_id、player_character | HUD、模拟 select_person、继承 | 人物面板、行动服务 | 场景/模拟/进程 | 部分 | 部分 | displayed/selected/active 未区分 | 各系统独立 | 三个明确语义字段 | K：人工决定 |
 | 当前日期 | sim_*、Formal minutes、Economy total_hour、SimulationClock | 计时器、advance、恢复 | HUD、经济、事件、存档 | 场景/模拟 | 是 | 年月日可由累计分钟推导 | 至少3套可写 | Application 同时推进两套 | 单一正式时钟 | P0 独立批次 |
@@ -41,7 +41,7 @@
 
 ## 1. 第一批所有权决定
 
-`GameSessionService.player_character`拥有当前玩家人物。玩家所属国家是该对象属性，不再允许会话服务长期保存第二个可写国家 ID。地图选择政权属于正式半球导航场景，必须继续与玩家所属国家区分。
+`GameSessionService.player_character`拥有当前玩家人物。玩家所属国家只由该对象的`country_id`属性取得；会话服务中的第二个可写国家ID已删除。无玩家时派生结果为空字符串。地图选择政权仍属于正式半球导航场景，并继续与玩家所属国家区分。
 
 ## 2. 仍需人工决定
 

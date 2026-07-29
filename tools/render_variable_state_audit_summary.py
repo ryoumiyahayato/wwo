@@ -1,43 +1,48 @@
 #!/usr/bin/env python3
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = ROOT / 'docs' / 'refactors' / 'variable_state_audit.md'
+INVENTORY = ROOT / "builds" / "variable-state-audit" / "variable_state_inventory.json"
+OUTPUT = ROOT / "docs" / "refactors" / "variable_state_audit.md"
+
 TEXT = r'''# 变量、状态所有权与数据流审计
 
 ## 0. 审计边界
 
-- 审计基线：`agent/formal-world-economy-integration@950512aba6889ff8ffd6f24c4be7559b7ef1f1cd`。
+- 第一批实现基于基础提交`b4a9d637e294aa53b0c0e2525260421dce3b5182`，由PR #30实施。
 - 引擎：Godot 4.6.3；正式入口：`res://scenes/formal/formal_world_menu.tscn`。
-- 本报告只持有审计结论；第一批实施方案由 [`variable_refactor_plan.md`](variable_refactor_plan.md) 单独持有。
-- 1,613个生产成员字段的静态逐项索引由 [`variable_state_member_inventory.md`](variable_state_member_inventory.md) 单独持有。
-- 本轮未修改 `scripts/`、`scenes/`、`data/` 或 `resources/`，未创建测试或存档fixture。
-- 扫描范围为502个源/配置文件、255个GDScript文件。
+- 本报告持有审计结论；第一批实施记录由[`variable_refactor_plan.md`](variable_refactor_plan.md)单独持有。
+- __MEMBER_COUNT__个生产成员字段的静态逐项索引由[`variable_state_member_inventory.md`](variable_state_member_inventory.md)单独持有。
+- 第一批只删除玩家所属国家的一个重复运行期成员，并机械调整继承回滚和SAVE_VERSION=1存档边界；未处理其他状态组。
+- 扫描范围为__SOURCE_COUNT__个源/配置文件、__GDSCRIPT_COUNT__个GDScript文件。
 - 静态写入者、读取者、持久化、fallback和分类均为候选证据；不同对象的同名字段不能据此自动合并。
 
-## 1. 基线指标
+## 1. 当前指标与第一批净变化
 
-| 指标 | 审计值 | 说明 |
-|---|---:|---|
-| 生产成员字段 | 1,613 | 包含常量、节点引用和可写成员 |
-| 可写成员字段 | 1,243 | 排除`const`和`@onready` |
-| 进程级全局可写字段 | 16 | `static var`，主要集中于`GameSessionService` |
-| Autoload可写字段 | 0 | `project.godot`无Autoload |
-| 持久化关联候选 | 472 | 静态证据上限，不是精确存档字段数 |
-| UI显示副本候选 | 32 | 仍需逐项人工确认 |
-| 命名缓存候选 | 16 | 投影和索引缓存另行审计 |
-| 可推导成员候选 | 61 | 只有证明后才能删除 |
-| K类、不得修改字段 | 885 | 语义未确认 |
+| 指标 | 删除前批准基线 | 当前扫描值 | 净变化 |
+|---|---:|---:|---:|
+| 生产成员字段 | 1,613 | __MEMBER_COUNT__ | -1 |
+| 可写成员字段 | 1,243 | __WRITABLE_COUNT__ | -1 |
+| 进程级全局可写字段 | 16 | __GLOBAL_COUNT__ | -1 |
+| Autoload可写字段 | 0 | __AUTOLOAD_COUNT__ | 0 |
+| 持久化关联候选（静态启发式） | 472 | __PERSISTED_COUNT__ | 不可直接比较 |
+| UI显示副本候选 | 32 | __UI_COUNT__ | 0 |
+| 命名缓存候选 | 16 | __CACHE_COUNT__ | 0 |
+| 可推导成员候选 | 61 | __DERIVED_COUNT__ | -1 |
+| K类、不得修改字段 | 885 | __UNCLEAR_COUNT__ | 0 |
+
+以上当前值直接来自`tools/audit_variable_state.py`生成的inventory，不是手工估算。扫描器扫描`.gd`、`.tscn`、`.tres`、`.godot`、`.json`和`.cfg`；PR #29新增的测试GDScript和SAVE_VERSION=1 JSON fixture扩大了词法证据范围。`persisted_by_name`是在全部扫描源中，按同名字段与save、load、restore、snapshot等词推断的启发式，因此批准基线472和当前值__PERSISTED_COUNT__不能作为生产持久化字段的净变化比较；本报告不声称已经精确证明每一项增量的来源。第一批经qualified核验减少一份重复可写事实；该项是所有权结论，不是词法扫描器的独立计数器。
 
 ## 2. 最严重的10组重复或混乱状态
 
 | 等级 | 组 | 当前事实与问题 | 审计决定 |
 |---|---|---|---|
-| P0 | D01 正式时间三重表示及初始错位 | 半球UI、正式模拟和正式经济分别保存可写时间，且初始日期已经不同。 | 现存正确性缺陷，必须作为独立批次处理；本批不得顺带修复。 |
+| P0 | D01 正式时间三重表示及初始错位 | 半球UI、正式模拟和正式经济分别保存可写时间，且初始日期已经不同。 | 现存正确性缺陷，必须作为独立批次处理；本批未修改。 |
 | P0 | D02 经济体—政治单元关系来源、索引和持久化混合 | 原始来源、双向索引、持久化副本和UI投影混在同一服务内。 | 分类型审计；不预设删除必要索引。 |
 | P0 | D03 导航层级多个直接写入者 | `space_level/world_mode`由继承链多个脚本直接赋值，并手工同步viewport、渲染和选择清理。 | 建立转场行为基线后再处理。 |
 | P0 | D04 一级行政选择平行状态 | 四个选择字段属于历史领土、历史几何、现代近似几何和名称目录等不同ID空间。 | 不按名称合并，先建立ID命名空间和crosswalk矩阵。 |
-| P0 | D05 `selected_country_id`同名不同义 | 会话字段是玩家所属国家，半球字段是用户地图选择。 | 两者不得合并；会话字段的qualified证据见第6节。 |
+| 已完成 | D05 玩家所属国家运行期副本 | 会话中的重复国家成员已经删除；唯一事实源为`player_character.country_id`。半球同名字段仍表示用户地图选择。 | 第一批完成；旧存档键继续在SAVE_VERSION=1边界生成和验证。 |
 | P1 | D06 当前玩家、角色和显示身份分立 | `player_character`、`active_character_key`、`selected_person_id`关系未定义。 | 人工定义active/displayed/selected后再处理。 |
 | P1 | D07 事件、消息和未读数缺少正式所有者 | 半球展示事件、事件队列、通知和通信inbox并存。 | 确定正式业务服务，HUD只读。 |
 | P1 | D08 旧地图画布—界面双写 | Canvas与Interface分别保存模式和选择，Controller同时写两边。 | 决定隔离或删除旧样机；若保留则UI只读。 |
@@ -46,7 +51,7 @@ TEXT = r'''# 变量、状态所有权与数据流审计
 
 ## 3. 已确认的现存正确性缺陷：正式时间初始错位（P0）
 
-该问题是审计确认的现存行为缺陷，不是本审计批引入，也不得在本批顺带修复。
+该问题是审计确认的现存行为缺陷，不是本批引入，本批没有修改。
 
 1. 半球UI继承层将初始时间保存为`sim_year = 1900`、`sim_month = 3`、`sim_day = 12`、`sim_hour = 8`、`sim_minute = 0`，即 **1900-03-12 08:00**。证据：`scripts/ui_spikes/holographic_workspace/holographic_workspace_runtime.gd:48-54`。
 2. `FormalWorldSimulation.total_minutes`和`_minute_remainder`初始化并重置为0；`FormalWorldEconomyService.total_hour`也初始化并重置为0。`V2DateTime`明确将累计小时0定义为 **1900-01-01 00:00**。证据：`scripts/formal/formal_world_simulation.gd:13-23`、`scripts/formal/formal_world_economy_service.gd:21-28,40-55`、`scripts/v2_2/v2_datetime.gd:3-18`。
@@ -73,7 +78,7 @@ TEXT = r'''# 变量、状态所有权与数据流审计
 
 ## 5. 已确认的多写入、UI副本和停止项
 
-已人工确认的多写入状态包括正式时间、导航层级、国家/区域/城市/行政选择、玩家国家、经济映射、旧地图模式/选择，以及跨服务位置、债务和劳动副本。
+除已完成的玩家国家副本外，已人工确认的多写入状态仍包括正式时间、导航层级、国家/区域/城市/行政选择、经济映射、旧地图模式/选择，以及跨服务位置、债务和劳动副本。
 
 可列为UI或派生候选但尚未删除：
 
@@ -92,55 +97,63 @@ TEXT = r'''# 变量、状态所有权与数据流审计
 6. `_panel_previous_*`、`_activity_panel_was_open`等可能用于恢复或边沿检测的状态。
 7. 不同语义的selected、hovered、focused、active、pending、previous、requested、displayed、loaded、visible和enabled。
 
-## 6. `GameSessionService.selected_country_id` qualified引用证据
+## 6. 第一批删除后的qualified证据
 
-以下结果按所有者、限定名和词法作用域逐项核验，不使用纯名称扫描代替qualified核验。实施方案和测试计划只记录在`variable_refactor_plan.md`。
+### 6.1 运行期成员与引用
 
-### 6.1 成员声明
+- `scripts/character/game_session_service.gd`不再声明或写入玩家国家副本；`set_player()`、`clear()`和`transfer_player()`只提交玩家对象及既有会话状态。
+- `scripts/character/succession_service.gd:274-280`的回滚顺序保持不变，只在名册、组织、关系和AI恢复后重新提交`restored_player`，不再提交第二个国家字段。
+- 全仓库qualified搜索不存在已删除会话成员的引用。
 
-- `scripts/character/game_session_service.gd:11`：`GameSessionService.selected_country_id`。
+### 6.2 SAVE_VERSION=1旧键
 
-### 6.2 合格读取点
+- `scripts/save/game_save_service.gd:229`继续生成`"selected_country_id"`键，但值直接来自`GameSessionService.player_character.country_id`。
+- `scripts/save/game_save_service.gd:455-463`将旧键读入函数局部`saved_player_country_id`，验证国家存在，并要求它等于`restored_player.country_id`。
+- `scripts/save/game_save_service.gd:508-516`验证通过后只提交`restored_player`及原有事务状态，不写入第二个玩家国家字段。
+- `scripts/save/game_save_service.gd:602-603`继续要求旧键非空；`SAVE_VERSION`仍为1，schema未改变。
 
-- `scripts/save/game_save_service.gd:231`：`build_snapshot()`读取`GameSessionService.selected_country_id`并生成旧存档键。
-- 全仓库未发现其他合格运行期读取点。
+### 6.3 同名地图成员
 
-### 6.3 合格写入点
+- `scripts/ui_spikes/holographic_workspace/holographic_workspace_runtime.gd:23`仍声明半球场景自己的`selected_country_id`，表示用户选择的地图政治单元。
+- 当前生产成员清单只剩这一项同名成员；它与玩家所属国家互相隔离，不属于本批删除对象。
 
-- `scripts/character/game_session_service.gd:29`：`set_player()`按`character.country_id`写入。
-- `scripts/character/game_session_service.gd:47`：`clear()`写入空字符串。
-- `scripts/character/game_session_service.gd:82`：`transfer_player()`按`character.country_id`写入。
-- `scripts/character/succession_service.gd:280`：继承事务失败回滚后按`restored_player.country_id`恢复。
-- `scripts/save/game_save_service.gd:509`：存档恢复通过一致性验证后，将函数局部候选值写回会话成员。
+### 6.4 行为基线边界
 
-声明处的空字符串初始化是初始化值，不重复计入上述五个运行期写入点。
-
-### 6.4 存档键
-
-- `scripts/save/game_save_service.gd:231`：生成`"selected_country_id"`键。
-- `scripts/save/game_save_service.gd:455-460`：读取旧键，验证国家存在，并要求它等于`restored_player.country_id`。
-- `scripts/save/game_save_service.gd:603`：验证快照必须包含非空旧键。
-
-### 6.5 同名但属于其他对象的成员
-
-- `scripts/ui_spikes/holographic_workspace/holographic_workspace_runtime.gd:23`：半球场景成员`selected_country_id`，表示用户选择的地图政治单元。它不是玩家所属国家副本，本批必须保持不变。
-- 全仓库成员声明核验只发现上述两个`selected_country_id`成员。
-
-### 6.6 函数局部同名变量
-
-- `scripts/save/game_save_service.gd:455`：`restore_snapshot()`局部`selected_country_id`，保存从快照读取、尚未提交的候选值。它不是成员字段。
-- 全仓库词法核验未发现其他`var selected_country_id`函数局部声明。
+- `tests/fixtures/save/current_save_v1.json`保持字节不变。
+- `tests/variable_state/generate_current_save_v1_fixture.gd`保持字节不变。
+- `tests/variable_state/variable_state_behavior_baseline_test.gd`保持字节不变。
+- 既有测试继续覆盖保存旧键、恢复拒绝原子性、玩家转移、继承成功、继承回滚、半球地图隔离和clear后的派生国家。
 
 ## 7. 文档职责边界
 
 - 本文件持有审计结论和qualified证据。
-- `variable_refactor_plan.md`持有第一批实施方案、测试计划、风险与停止条件。
-- `variable_state_member_inventory.md`只持有静态成员索引证据，不重复D01–D10、实施建议、多写入总结、UI副本总结或停止项。
+- `variable_refactor_plan.md`持有第一批实施记录、验证要求和剩余风险。
+- `variable_state_member_inventory.md`只持有静态成员索引证据，不重复D01–D10的设计讨论。
 - `state_ownership_matrix.md`持有当前与目标所有权矩阵。'''
 
-def main() -> None:
-    OUTPUT.write_text(TEXT + '\n', encoding='utf-8')
-    print(f'wrote {OUTPUT}')
 
-if __name__ == '__main__':
+def main() -> None:
+    data = json.loads(INVENTORY.read_text(encoding="utf-8"))
+    metrics = data["metrics"]
+    replacements = {
+        "__MEMBER_COUNT__": f"{metrics['member_fields_total']:,}",
+        "__WRITABLE_COUNT__": f"{metrics['writable_member_fields_total']:,}",
+        "__GLOBAL_COUNT__": f"{metrics['global_writable_fields_total']:,}",
+        "__AUTOLOAD_COUNT__": f"{metrics['autoload_writable_fields_total']:,}",
+        "__PERSISTED_COUNT__": f"{metrics['persisted_member_fields_by_static_evidence']:,}",
+        "__UI_COUNT__": f"{metrics['ui_copy_candidates']:,}",
+        "__CACHE_COUNT__": f"{metrics['cache_candidates']:,}",
+        "__DERIVED_COUNT__": f"{metrics['derived_member_candidates']:,}",
+        "__UNCLEAR_COUNT__": f"{metrics['unclear_member_fields']:,}",
+        "__SOURCE_COUNT__": f"{metrics['source_files_scanned']:,}",
+        "__GDSCRIPT_COUNT__": f"{metrics['gdscript_files_scanned']:,}",
+    }
+    text = TEXT
+    for marker, value in replacements.items():
+        text = text.replace(marker, value)
+    OUTPUT.write_text(text + "\n", encoding="utf-8")
+    print(f"wrote {OUTPUT}")
+
+
+if __name__ == "__main__":
     main()
