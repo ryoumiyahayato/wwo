@@ -68,6 +68,12 @@ jobs:
           "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           & $binary --version
 
+      - name: Import project class cache
+        shell: pwsh
+        run: |
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless', '--editor', '--path', '.', '--quit-after', '2') -Wait -PassThru -NoNewWindow
+          if ($process.ExitCode -ne 0) { throw "Godot project import failed with exit code $($process.ExitCode)" }
+
       - name: Generate SAVE_VERSION 1 fixture through production services
         shell: pwsh
         run: |
