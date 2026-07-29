@@ -67,8 +67,8 @@ func _run() -> void:
 	if GameSessionService.player_character == null:
 		_fail("fixture restore did not commit a player")
 		return
-	if GameSessionService.selected_country_id != GameSessionService.player_character.country_id:
-		_fail("fixture restore did not preserve player-country equality")
+	if str(load_result.snapshot.get("selected_country_id", "")) != GameSessionService.player_character.country_id:
+		_fail("fixture restore did not preserve save-key/player-country equality")
 		return
 	print("FIXTURE_USER_PATH=%s" % ProjectSettings.globalize_path(FIXTURE_USER_PATH))
 	print("FIXTURE_SAVE_VERSION=%d" % int(load_result.snapshot["save_version"]))
