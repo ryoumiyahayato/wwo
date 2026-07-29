@@ -1,4 +1,4 @@
-name: Apply approved country-state removal
+name: Diagnose approved removal patch
 
 on:
   pull_request:
@@ -6,95 +6,27 @@ on:
       - agent/formal-world-economy-integration
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  apply:
+  diagnose:
     if: >-
       github.event.pull_request.head.repo.full_name == github.repository &&
       github.event.pull_request.head.ref == 'agent/remove-duplicated-player-country-state'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
     steps:
       - name: Checkout exact PR head
         uses: actions/checkout@v4
         with:
           ref: agent/remove-duplicated-player-country-state
-          fetch-depth: 0
 
-      - name: Apply approved production and audit-tool patch
+      - name: Verify patch transfer hashes
         run: |
           set -euo pipefail
-          cat .github/remove-country-patch/part* | base64 --decode > /tmp/remove-country.patch
-          git apply --check /tmp/remove-country.patch
-          git apply /tmp/remove-country.patch
-
-      - name: Regenerate audit documents with repository scanner
-        run: |
-          set -euo pipefail
-          python3 tools/audit_variable_state.py
-          python3 tools/render_variable_state_audit_summary.py
-          python3 tools/render_variable_state_member_inventory.py
-          python3 tools/generate_variable_state_docs.py
-          python3 tools/render_variable_refactor_plan.py
-
-      - name: Verify approved scope and metrics
-        run: |
-          set -euo pipefail
-          test "$(sha256sum tests/fixtures/save/current_save_v1.json | cut -d' ' -f1)" = "b366f3e84a57be8318c536f3dcb131373d7ff8b970f2f0fc12841a4e271c6bc9"
-          test "$(sha256sum tests/variable_state/generate_current_save_v1_fixture.gd | cut -d' ' -f1)" = "1afe2860312a2d47f823f8e903dbd8465dbd7b29431461d78c604033022c590f"
-          test "$(sha256sum tests/variable_state/variable_state_behavior_baseline_test.gd | cut -d' ' -f1)" = "02ad53ed096acb4fc05ebc4214e9f83e81f3a1cb2266eda0514e395219a33506"
-          if rg -n 'GameSessionService\.selected_country_id' .; then
-            echo 'Deleted qualified runtime reference remains' >&2
-            exit 1
-          fi
-          mapfile -t declarations < <(rg -n '^\s*(static\s+)?var\s+selected_country_id\b' scripts scenes tests tools docs || true)
-          test "${#declarations[@]}" -eq 1
-          printf '%s\n' "${declarations[0]}" | grep -F 'scripts/ui_spikes/holographic_workspace/holographic_workspace_runtime.gd:23:'
-          python3 - <<'PY'
-          import json
-          from pathlib import Path
-          data = json.loads(Path('builds/variable-state-audit/variable_state_inventory.json').read_text(encoding='utf-8'))
-          metrics = data['metrics']
-          expected = {
-              'member_fields_total': 1612,
-              'writable_member_fields_total': 1242,
-              'global_writable_fields_total': 15,
-              'autoload_writable_fields_total': 0,
-              'persisted_member_fields_by_static_evidence': 491,
-              'ui_copy_candidates': 32,
-              'cache_candidates': 16,
-              'derived_member_candidates': 60,
-              'unclear_member_fields': 885,
-          }
-          actual = {key: metrics[key] for key in expected}
-          if actual != expected:
-              raise SystemExit(f'audit metrics differ: expected={expected}, actual={actual}')
-          print(actual)
-          PY
-          git diff --check
-
-      - name: Remove transfer machinery and commit final scope
-        run: |
-          set -euo pipefail
-          rm -rf .github/remove-country-patch
-          rm -f .github/workflows/temporary-source-bundle.yml
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A -- \
-            .github/remove-country-patch \
-            .github/workflows/temporary-source-bundle.yml \
-            scripts/character/game_session_service.gd \
-            scripts/character/succession_service.gd \
-            scripts/save/game_save_service.gd \
-            tools/generate_variable_state_docs.py \
-            tools/render_variable_refactor_plan.py \
-            tools/render_variable_state_audit_summary.py \
-            tools/render_variable_state_member_inventory.py \
-            docs/refactors/state_ownership_matrix.md \
-            docs/refactors/variable_refactor_plan.md \
-            docs/refactors/variable_state_audit.md \
-            docs/refactors/variable_state_member_inventory.md
-          git diff --cached --check
-          git commit -m 'Remove duplicated player country state'
-          git push origin HEAD:agent/remove-duplicated-player-country-state
+          sha256sum .github/remove-country-patch/part*
+          cat .github/remove-country-patch/part* > /tmp/remove-country.patch.b64
+          sha256sum /tmp/remove-country.patch.b64
+          base64 --decode /tmp/remove-country.patch.b64 > /tmp/remove-country.patch
+          sha256sum /tmp/remove-country.patch
+          git apply --check --verbose /tmp/remove-country.patch
