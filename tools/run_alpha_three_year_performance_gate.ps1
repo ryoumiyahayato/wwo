@@ -409,6 +409,12 @@ if ($networkApiMatches.Count -ne 0) {
 
 $operatingSystem = Get-CimInstance Win32_OperatingSystem
 $processor = Get-CimInstance Win32_Processor | Select-Object -First 1
+$gateFailureArray = @(
+    $gateFailures | ForEach-Object { [string]$_ }
+)
+$runArray = @(
+    $records | ForEach-Object { $_ }
+)
 $report = [ordered]@{
     schema_version = 1
     generated_at_utc = [DateTime]::UtcNow.ToString('o')
@@ -443,7 +449,7 @@ $report = [ordered]@{
         maximum_relative_median_ratio = $MaximumRelativeMedianRatio
         relative_median_ratio = $relativeMedianRatio
         passed = $gateFailures.Count -eq 0
-        failures = @($gateFailures)
+        failures = $gateFailureArray
     }
     cold_import = [ordered]@{
         base_wall_seconds = $baseImport.WallSeconds
@@ -467,7 +473,7 @@ $report = [ordered]@{
             $records | Where-Object { -not $_.StateEquivalent }
         ).Count -eq 0
     }
-    runs = @($records)
+    runs = $runArray
 }
 $reportJson = $report | ConvertTo-Json -Depth 100
 $reportPath = Join-Path $OutputPath 'alpha-three-year-performance-report.json'
