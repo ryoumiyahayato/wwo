@@ -60,6 +60,22 @@ func _run() -> void:
 		not simulation.schedule.restore_persistent_state(invalid_state),
 		"恢复时拒绝全局重复活动ID"
 	)
+	var unsorted_state: Dictionary = (
+		simulation.schedule.get_persistent_state()
+	)
+	var unsorted_schedule: Array = (
+		(unsorted_state.get("schedules", {}) as Dictionary).get(
+			pierre, []
+		) as Array
+	)
+	if unsorted_schedule.size() >= 2:
+		var first_activity: Variant = unsorted_schedule[0]
+		unsorted_schedule[0] = unsorted_schedule[-1]
+		unsorted_schedule[-1] = first_activity
+	test.expect(
+		not simulation.schedule.restore_persistent_state(unsorted_state),
+		"恢复拒绝未按开始时间排序的日程"
+	)
 	test.finish(self, "V2.2 schedule")
 
 

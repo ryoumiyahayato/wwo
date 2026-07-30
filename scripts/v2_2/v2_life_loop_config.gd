@@ -46,7 +46,8 @@ func contract_records() -> Array:
 
 
 func person_record(person_id: String) -> Dictionary:
-	for record_variant: Variant in person_records():
+	var people_document: Dictionary = documents.get("people", {}) as Dictionary
+	for record_variant: Variant in people_document.get("people", []) as Array:
 		var record: Dictionary = record_variant as Dictionary
 		if str(record.get("person_id", "")) == person_id:
 			return record.duplicate(true)
@@ -54,7 +55,12 @@ func person_record(person_id: String) -> Dictionary:
 
 
 func contract_for_person(person_id: String) -> Dictionary:
-	for record_variant: Variant in contract_records():
+	var employment_document: Dictionary = (
+		documents.get("employment", {}) as Dictionary
+	)
+	for record_variant: Variant in (
+		employment_document.get("contracts", []) as Array
+	):
 		var record: Dictionary = record_variant as Dictionary
 		if str(record.get("person_id", "")) == person_id:
 			return record.duplicate(true)

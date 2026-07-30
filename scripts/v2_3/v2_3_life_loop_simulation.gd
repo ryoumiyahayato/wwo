@@ -6,6 +6,9 @@ const V2_3_SCHEMA_VERSION: String = "v2_3_space_cognition_1"
 const JULES_ID: String = "character_jules_martin"
 const LUCIEN_ID: String = "character_lucien_moreau"
 const FORMAL_PERSON_IDS: PackedStringArray = [PIERRE_ID, ALBERT_ID]
+const FIXED_COMMUTE_ACTIVITY_TYPES: PackedStringArray = [
+	"commute_to_work", "commute_home",
+]
 const TRAVEL_TYPES: PackedStringArray = [
 	"wait_for_transport", "travel_walk", "travel_urban_transit",
 	"travel_regional_train",
@@ -642,7 +645,9 @@ func _replace_fixed_commutes(start_hour: int, reason: String) -> void:
 	# midnight adds deterministic work without changing any authoritative
 	# activity.
 	var configured_horizon: int = int(
-		(v2_3_config.get_document("balance").get("npc", {}) as Dictionary).get(
+		((v2_3_config.documents.get("balance", {}) as Dictionary).get(
+			"npc", {}
+		) as Dictionary).get(
 			"background_schedule_horizon_hours", 48
 		)
 	)
@@ -656,7 +661,7 @@ func _replace_fixed_commutes(start_hour: int, reason: String) -> void:
 	for person_id: String in FORMAL_PERSON_IDS:
 		schedule.cancel_future_activity_types(
 			person_id,
-			PackedStringArray(["commute_to_work", "commute_home"]),
+			FIXED_COMMUTE_ACTIVITY_TYPES,
 			start_hour,
 			"replaced_by_v2_3_route"
 		)
@@ -667,7 +672,7 @@ func _replace_fixed_commutes(start_hour: int, reason: String) -> void:
 	for person_id: String in background_person_ids:
 		schedule.cancel_future_activity_types(
 			person_id,
-			PackedStringArray(["commute_to_work", "commute_home"]),
+			FIXED_COMMUTE_ACTIVITY_TYPES,
 			start_hour,
 			"replaced_by_v2_3_route"
 		)
@@ -895,10 +900,13 @@ func _workplace_for(person_id: String) -> String:
 
 
 func _social_person(person_id: String) -> Dictionary:
-	for raw_person: Variant in v2_3_config.social_people():
+	var people_document: Dictionary = (
+		v2_3_config.documents.get("people", {}) as Dictionary
+	)
+	for raw_person: Variant in people_document.get("people", []) as Array:
 		var person: Dictionary = raw_person as Dictionary
 		if str(person.get("person_id", "")) == person_id:
-			return person
+			return person.duplicate(true)
 	return {}
 
 

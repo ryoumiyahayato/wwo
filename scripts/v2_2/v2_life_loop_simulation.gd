@@ -734,7 +734,7 @@ func _settle_hour(total_hour: int) -> void:
 	var hour_key: String = "hour:%s" % V2DateTime.iso_from_total_hour(total_hour)
 	if processed_idempotency_keys.has(hour_key):
 		return
-	var balance: Dictionary = config.get_document("balance")
+	var balance: Dictionary = config.documents.get("balance", {}) as Dictionary
 	var condition_rules: Dictionary = balance.get("condition", {}) as Dictionary
 	var needs_health_replan: bool = false
 	for person_id_variant: Variant in person_states.keys():
@@ -877,7 +877,9 @@ func _complete_activity(
 
 
 func _plan_life_needs(start_hour: int, reason: String) -> void:
-	var costs: Dictionary = config.get_document("living_costs")
+	var costs: Dictionary = (
+		config.documents.get("living_costs", {}) as Dictionary
+	)
 	for person_id_variant: Variant in person_states.keys():
 		var person_id: String = str(person_id_variant)
 		schedule.ensure_future(person_id, start_hour, reason)
