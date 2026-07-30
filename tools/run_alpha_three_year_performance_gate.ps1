@@ -499,3 +499,4 @@ if ($gateFailures.Count -gt 0) {
     exit 1
 }
 Write-Host 'Alpha three-year performance gate passed.'
+exit 0
