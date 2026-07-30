@@ -162,9 +162,12 @@ func schedule_rule_activity(
 		return V2LifeLoopResult.fail("invalid_duration", "规则活动时间无效", activity_type)
 	for raw_existing: Variant in schedules.get(person_id, []) as Array:
 		var existing: Dictionary = raw_existing as Dictionary
+		var existing_start_hour: int = int(existing.get("start_hour", -1))
+		if existing_start_hour > start_hour:
+			break
 		if (
 			str(existing.get("activity_type", "")) == activity_type
-			and int(existing.get("start_hour", -1)) == start_hour
+			and existing_start_hour == start_hour
 			and int(existing.get("end_hour", -1)) == start_hour + duration_hours
 			and str(existing.get("source", "")) == source
 			and str(existing.get("status", "")) in ACTIVE_STATUSES
@@ -393,6 +396,8 @@ func begin_hour(person_id: String, total_hour: int) -> Dictionary:
 	var person_schedule: Array = schedules[person_id] as Array
 	for index: int in range(person_schedule.size()):
 		var activity: Dictionary = person_schedule[index] as Dictionary
+		if int(activity.get("start_hour", -1)) > total_hour:
+			break
 		if str(activity.get("activity_id", "")) != str(selected.get("activity_id", "")):
 			continue
 		activity["status"] = "active"
@@ -411,6 +416,8 @@ func finish_hour(person_id: String, total_hour: int, selected_activity_id: Strin
 	var completed: Dictionary = {}
 	for index: int in range(person_schedule.size()):
 		var activity: Dictionary = person_schedule[index] as Dictionary
+		if int(activity.get("start_hour", -1)) > total_hour:
+			break
 		if int(activity.get("end_hour", 0)) > total_hour + 1:
 			continue
 		if str(activity.get("status", "")) not in ACTIVE_STATUSES:
@@ -791,10 +798,13 @@ func _select_activity(person_id: String, total_hour: int, include_terminal: bool
 	var best_priority: int = -1
 	for raw_activity: Variant in schedules.get(person_id, []) as Array:
 		var activity: Dictionary = raw_activity as Dictionary
+		var start_hour: int = int(activity.get("start_hour", -1))
+		if start_hour > total_hour:
+			break
 		var status: String = str(activity.get("status", ""))
 		if not include_terminal and status in TERMINAL_STATUSES:
 			continue
-		if total_hour < int(activity.get("start_hour", -1)) or total_hour >= int(activity.get("end_hour", -1)):
+		if total_hour < start_hour or total_hour >= int(activity.get("end_hour", -1)):
 			continue
 		var priority: int = int(SOURCE_PRIORITY.get(str(activity.get("source", "")), 0))
 		if priority > best_priority:

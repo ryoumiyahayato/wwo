@@ -15,6 +15,16 @@ func _run() -> void:
 		test.finish(self, "V2.3 schedule integration")
 		return
 	var person_id: String = V2LifeLoopSimulation.PIERRE_ID
+	var social_person_copy: Dictionary = simulation._social_person(person_id)
+	var original_social_name: String = str(
+		social_person_copy.get("name", "")
+	)
+	social_person_copy["name"] = "mutated test copy"
+	test.equal(
+		str(simulation._social_person(person_id).get("name", "")),
+		original_social_name,
+		"社会人物查询不暴露权威配置记录"
+	)
 	var schedule_records: Array = simulation.schedule.schedules[person_id] as Array
 	var fixed_commute_count: int = 0
 	var formal_travel_count: int = 0
