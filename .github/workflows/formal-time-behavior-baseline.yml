@@ -47,6 +47,36 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  audit-documents:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Regenerate variable state audit documents
+        run: |
+          set -euo pipefail
+          python tools/audit_variable_state.py
+          python tools/render_variable_state_audit_summary.py
+          python tools/render_variable_state_member_inventory.py
+          python tools/generate_variable_state_docs.py
+          python tools/render_variable_refactor_plan.py
+          test -s builds/variable-state-audit/variable_state_inventory.json
+          test -s builds/variable-state-audit/member_inventory.md
+          test -s docs/refactors/variable_state_audit.md
+          test -s docs/refactors/variable_state_member_inventory.md
+          test -s docs/refactors/state_ownership_matrix.md
+          test -s docs/refactors/variable_refactor_plan.md
+
+      - name: Verify audit documents remain unchanged
+        run: |
+          git diff --exit-code -- \
+            docs/refactors/variable_state_audit.md \
+            docs/refactors/variable_state_member_inventory.md \
+            docs/refactors/state_ownership_matrix.md \
+            docs/refactors/variable_refactor_plan.md
+
   formal-time-baseline:
     runs-on: windows-latest
     timeout-minutes: 60
@@ -154,40 +184,6 @@ jobs:
             $leftovers | ForEach-Object { Write-Host $_.FullName }
             throw 'Formal-time tests left a production-named save in isolated user data'
           }
-
-      - name: Regenerate variable state audit documents
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          python tools/audit_variable_state.py
-          if ($LASTEXITCODE -ne 0) { throw 'Variable state audit failed' }
-          python tools/render_variable_state_audit_summary.py
-          if ($LASTEXITCODE -ne 0) { throw 'Variable state audit summary render failed' }
-          python tools/render_variable_state_member_inventory.py
-          if ($LASTEXITCODE -ne 0) { throw 'Variable state member inventory render failed' }
-          python tools/generate_variable_state_docs.py
-          if ($LASTEXITCODE -ne 0) { throw 'Variable state ownership document generation failed' }
-          python tools/render_variable_refactor_plan.py
-          if ($LASTEXITCODE -ne 0) { throw 'Variable state refactor plan render failed' }
-          $required = @(
-            'builds/variable-state-audit/variable_state_inventory.json',
-            'builds/variable-state-audit/member_inventory.md',
-            'docs/refactors/variable_state_audit.md',
-            'docs/refactors/variable_state_member_inventory.md',
-            'docs/refactors/state_ownership_matrix.md',
-            'docs/refactors/variable_refactor_plan.md'
-          )
-          foreach ($path in $required) {
-            if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw "Audit output is missing: $path" }
-            if ((Get-Item -LiteralPath $path).Length -le 0) { throw "Audit output is empty: $path" }
-          }
-
-      - name: Verify audit documents remain unchanged
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          git diff --exit-code -- docs/refactors/variable_state_audit.md docs/refactors/variable_state_member_inventory.md docs/refactors/state_ownership_matrix.md docs/refactors/variable_refactor_plan.md
-          if ($LASTEXITCODE -ne 0) { throw 'Formal-time test additions changed existing variable audit documents' }
 
       - name: Run existing validation baseline
         shell: pwsh
