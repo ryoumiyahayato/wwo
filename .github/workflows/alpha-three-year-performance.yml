@@ -1,0 +1,297 @@
+name: Alpha three-year performance gate
+
+on:
+  pull_request:
+    branches:
+      - agent/formal-world-economy-integration
+    paths:
+      - ".github/workflows/alpha-three-year-performance.yml"
+      - "data/alpha/**"
+      - "data/v2_2/**"
+      - "data/v2_3/**"
+      - "scripts/alpha/**"
+      - "scripts/v2_2/**"
+      - "scripts/v2_3/**"
+      - "tests/alpha/**"
+      - "tools/run_alpha_three_year_performance_gate.ps1"
+      - "tools/run_validation.ps1"
+      - "docs/performance/**"
+  workflow_dispatch:
+    inputs:
+      base_sha:
+        description: Base revision measured on the same runner
+        required: true
+        default: 4697ec70dfbaadbb7b61350ad9d7a6e4aeb95858
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alpha-three-year-performance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compare-base-and-head:
+    name: Compare Base and Head on one Windows runner
+    runs-on: windows-2022
+    timeout-minutes: 90
+    env:
+      BASE_SHA: ${{ github.event.pull_request.base.sha || inputs.base_sha }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      ARTIFACT_PATH: ${{ github.workspace }}\artifacts\alpha-three-year
+    steps:
+      - name: Checkout Head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.HEAD_SHA }}
+          path: head
+
+      - name: Checkout Base
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.BASE_SHA }}
+          path: base
+
+      - name: Install exact Godot 4.6.3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'godot-4.6.3.zip'
+          $install = Join-Path $env:RUNNER_TEMP 'godot-4.6.3'
+          Invoke-WebRequest `
+            -Uri 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip' `
+            -OutFile $archive
+          Expand-Archive -LiteralPath $archive -DestinationPath $install
+          $binary = (
+            Get-ChildItem `
+              -LiteralPath $install `
+              -Filter 'Godot_v4.6.3-stable_win64.exe' `
+              -Recurse |
+              Select-Object -First 1
+          ).FullName
+          if (-not $binary) {
+            throw 'Godot 4.6.3 executable was not found after extraction.'
+          }
+          "GODOT_BIN=$binary" |
+            Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          & $binary --version
+
+      - name: Measure five interleaved Base and Head runs
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & "$env:GITHUB_WORKSPACE\head\tools\run_alpha_three_year_performance_gate.ps1" `
+            -GodotPath $env:GODOT_BIN `
+            -BasePath "$env:GITHUB_WORKSPACE\base" `
+            -HeadPath "$env:GITHUB_WORKSPACE\head" `
+            -OutputPath $env:ARTIFACT_PATH `
+            -Runs 5 `
+            -TargetSeconds 180 `
+            -AbsoluteSafetyCapSeconds 300 `
+            -MaximumRelativeMedianRatio 1.05
+          if ($LASTEXITCODE -ne 0) {
+            throw "Alpha three-year performance gate failed with exit code $LASTEXITCODE."
+          }
+
+      - name: Capture one read-only Head stage profile
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $log = Join-Path $env:ARTIFACT_PATH 'head-stage-profile.godot.log'
+          $arguments = @(
+            '--headless',
+            '--audio-driver', 'Dummy',
+            '--path', "$env:GITHUB_WORKSPACE\head",
+            '--script', 'res://tests/alpha/alpha_three_year_stage_profile_test.gd',
+            '--log-file', $log
+          )
+          $process = Start-Process `
+            -FilePath $env:GODOT_BIN `
+            -ArgumentList $arguments `
+            -WorkingDirectory "$env:GITHUB_WORKSPACE\head" `
+            -Wait `
+            -PassThru `
+            -NoNewWindow
+          if ($process.ExitCode -ne 0) {
+            throw "Alpha stage profile exited with code $($process.ExitCode)."
+          }
+          $text = Get-Content -LiteralPath $log -Raw
+          if ($text -notmatch 'Alpha three-year stage profile: 15 checks, 0 failures') {
+            throw 'Alpha stage profile did not complete 15 checks without failures.'
+          }
+          if ($text -match 'SCRIPT ERROR|Parse Error|Failed to load script|(?m)^ERROR:') {
+            throw 'Alpha stage profile log contains a Godot error.'
+          }
+
+      - name: Upload structured performance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha-three-year-performance-${{ github.run_id }}
+          path: artifacts/alpha-three-year
+          if-no-files-found: error
+          retention-days: 14
+
+  targeted-equivalence:
+    name: Alpha equivalence and Codex audit
+    runs-on: windows-2022
+    timeout-minutes: 30
+    env:
+      HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Checkout Head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.HEAD_SHA }}
+
+      - name: Install exact Godot 4.6.3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'godot-4.6.3.zip'
+          $install = Join-Path $env:RUNNER_TEMP 'godot-4.6.3'
+          Invoke-WebRequest `
+            -Uri 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip' `
+            -OutFile $archive
+          Expand-Archive -LiteralPath $archive -DestinationPath $install
+          $binary = (
+            Get-ChildItem `
+              -LiteralPath $install `
+              -Filter 'Godot_v4.6.3-stable_win64.exe' `
+              -Recurse |
+              Select-Object -First 1
+          ).FullName
+          if (-not $binary) {
+            throw 'Godot 4.6.3 executable was not found after extraction.'
+          }
+          "GODOT_BIN=$binary" |
+            Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          & $binary --version
+
+      - name: Import project class cache
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $process = Start-Process `
+            -FilePath $env:GODOT_BIN `
+            -ArgumentList @(
+              '--headless', '--audio-driver', 'Dummy', '--editor',
+              '--path', '.', '--quit-after', '8',
+              '--log-file', 'alpha-performance-import.log'
+            ) `
+            -Wait `
+            -PassThru `
+            -NoNewWindow
+          if ($process.ExitCode -ne 0) {
+            throw "Godot import exited with code $($process.ExitCode)."
+          }
+          $text = Get-Content -LiteralPath 'alpha-performance-import.log' -Raw
+          if ($text -match 'SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|(?m)^ERROR:') {
+            throw 'Godot import log contains a script error.'
+          }
+
+      - name: Run Alpha save-restore equivalence
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $log = 'alpha-state-equivalence.log'
+          $process = Start-Process `
+            -FilePath $env:GODOT_BIN `
+            -ArgumentList @(
+              '--headless', '--audio-driver', 'Dummy', '--path', '.',
+              '--script', 'res://tests/alpha/alpha_state_equivalence_test.gd',
+              '--log-file', $log
+            ) `
+            -Wait `
+            -PassThru `
+            -NoNewWindow
+          if ($process.ExitCode -ne 0) {
+            throw "Alpha state equivalence exited with code $($process.ExitCode)."
+          }
+          $text = Get-Content -LiteralPath $log -Raw
+          if ($text -notmatch 'Alpha state equivalence: 6 checks, 0 failures') {
+            throw 'Alpha state equivalence did not complete 6 checks without failures.'
+          }
+
+      - name: Run optimized-path behavior regressions
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $tests = @(
+            @{
+              Script = 'tests/v2_2/v2_2_config_datetime_test.gd'
+              Summary = 'V2.2 config and datetime: 28 checks, 0 failures'
+            },
+            @{
+              Script = 'tests/v2_2/v2_2_schedule_test.gd'
+              Summary = 'V2.2 schedule: 20 checks, 0 failures'
+            },
+            @{
+              Script = 'tests/v2_3/v2_3_schedule_integration_test.gd'
+              Summary = 'V2.3 schedule integration: 10 checks, 0 failures'
+            },
+            @{
+              Script = 'tests/alpha/alpha_economy_integration_phase2_test.gd'
+              Summary = 'Alpha economy integration phase two: 74 checks, 0 failures'
+            }
+          )
+          foreach ($test in $tests) {
+            $name = [IO.Path]::GetFileNameWithoutExtension($test.Script)
+            $log = "$name.log"
+            $process = Start-Process `
+              -FilePath $env:GODOT_BIN `
+              -ArgumentList @(
+                '--headless', '--audio-driver', 'Dummy', '--path', '.',
+                '--script', "res://$($test.Script)",
+                '--log-file', $log
+              ) `
+              -Wait `
+              -PassThru `
+              -NoNewWindow
+            if ($process.ExitCode -ne 0) {
+              throw "$($test.Script) exited with code $($process.ExitCode)."
+            }
+            $text = Get-Content -LiteralPath $log -Raw
+            if ($text -notmatch [regex]::Escape($test.Summary)) {
+              throw "$($test.Script) did not emit its expected check summary."
+            }
+          }
+
+      - name: Run Codex audit regression
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $log = 'codex-audit-regression.log'
+          $process = Start-Process `
+            -FilePath $env:GODOT_BIN `
+            -ArgumentList @(
+              '--headless', '--audio-driver', 'Dummy', '--path', '.',
+              '--script', 'res://tests/codex_audit_regression.gd',
+              '--log-file', $log
+            ) `
+            -Wait `
+            -PassThru `
+            -NoNewWindow
+          if ($process.ExitCode -ne 0) {
+            throw "Codex audit regression exited with code $($process.ExitCode)."
+          }
+          $text = Get-Content -LiteralPath $log -Raw
+          if ($text -match 'SCRIPT ERROR|Parse Error|Assertion failed|[1-9][0-9]* failures|(?m)^ERROR:') {
+            throw 'Codex audit regression log contains a failure.'
+          }
+
+      - name: Upload targeted acceptance logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha-performance-targeted-${{ github.run_id }}
+          path: |
+            alpha-performance-import.log
+            alpha-state-equivalence.log
+            v2_2_config_datetime_test.log
+            v2_2_schedule_test.log
+            v2_3_schedule_integration_test.log
+            alpha_economy_integration_phase2_test.log
+            codex-audit-regression.log
+          if-no-files-found: ignore
+          retention-days: 14

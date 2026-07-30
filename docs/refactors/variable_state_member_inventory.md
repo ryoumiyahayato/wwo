@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1612|1242|15|0|510|5|32|16|60|885|505|257|
+|1613|1242|15|0|510|5|32|16|60|885|507|259|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,612个生产成员字段逐项表
+## 1,613个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -1470,30 +1470,31 @@
 6 C JULES_ID
 7 C LUCIEN_ID
 8 C FORMAL_PERSON_IDS
-9 C TRAVEL_TYPES
-13 C LOCATION_ALIASES
-22 A v2_3_config
-23 A spatial_locations
-24 A travel_graph
-25 A route_planner
-26 A travel_execution
-27 A communication
-28 A knowledge
-29 A dynamic_relationships
-30 A appointments
-31 A introductions
-32 A npc_routines
-34 K truth_view
-35 A review_mode
-36 K background_person_ids
-37 K v2_3_initialization_error
-38 K v2_3_hours_processed
-39 E last_delivery_count
-40 E last_knowledge_expiration_count
-41 E last_appointment_result_count
-42 K local_overlay_revision
-43 K public_notice_id
-44 A _commute_planned_through_day
+9 C FIXED_COMMUTE_ACTIVITY_TYPES
+12 C TRAVEL_TYPES
+16 C LOCATION_ALIASES
+25 A v2_3_config
+26 A spatial_locations
+27 A travel_graph
+28 A route_planner
+29 A travel_execution
+30 A communication
+31 A knowledge
+32 A dynamic_relationships
+33 A appointments
+34 A introductions
+35 A npc_routines
+37 K truth_view
+38 A review_mode
+39 K background_person_ids
+40 K v2_3_initialization_error
+41 K v2_3_hours_processed
+42 E last_delivery_count
+43 E last_knowledge_expiration_count
+44 E last_appointment_result_count
+45 K local_overlay_revision
+46 K public_notice_id
+47 A _commute_planned_through_day
 @ scripts/v2_3/v2_3_life_loop_ui_binding.gd | V23LifeLoopUiBinding
 5 K v2_3_simulation
 6 A v2_3_save_service
