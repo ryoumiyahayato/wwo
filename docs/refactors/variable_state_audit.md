@@ -5,16 +5,16 @@
 - 第一批实现基于基础提交`b4a9d637e294aa53b0c0e2525260421dce3b5182`，由PR #30实施。
 - 引擎：Godot 4.6.3；正式入口：`res://scenes/formal/formal_world_menu.tscn`。
 - 本报告持有审计结论；第一批实施记录由[`variable_refactor_plan.md`](variable_refactor_plan.md)单独持有。
-- 1,612个生产成员字段的静态逐项索引由[`variable_state_member_inventory.md`](variable_state_member_inventory.md)单独持有。
+- 1,613个生产成员字段的静态逐项索引由[`variable_state_member_inventory.md`](variable_state_member_inventory.md)单独持有。
 - 第一批只删除玩家所属国家的一个重复运行期成员，并机械调整继承回滚和SAVE_VERSION=1存档边界；未处理其他状态组。
-- 扫描范围为508个源/配置文件、260个GDScript文件。
+- 扫描范围为510个源/配置文件、262个GDScript文件。
 - 静态写入者、读取者、持久化、fallback和分类均为候选证据；不同对象的同名字段不能据此自动合并。
 
 ## 1. 当前指标与第一批净变化
 
 | 指标 | 删除前批准基线 | 当前扫描值 | 净变化 |
 |---|---:|---:|---:|
-| 生产成员字段 | 1,613 | 1,612 | -1 |
+| 生产成员字段 | 1,613 | 1,613 | -1 |
 | 可写成员字段 | 1,243 | 1,242 | -1 |
 | 进程级全局可写字段 | 16 | 15 | -1 |
 | Autoload可写字段 | 0 | 0 | 0 |

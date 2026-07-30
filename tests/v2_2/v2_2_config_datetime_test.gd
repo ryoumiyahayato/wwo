@@ -15,6 +15,32 @@ func _run() -> void:
 	test.equal(config.person_records().size(), 2, "配置包含两个人物")
 	test.equal(config.household_records().size(), 2, "配置包含两个住户")
 	test.equal(config.contract_records().size(), 2, "配置包含两份劳动合同")
+	var person_copy: Dictionary = config.person_record(
+		V2LifeLoopSimulation.PIERRE_ID
+	)
+	var original_home_id: String = str(person_copy.get("home_location_id", ""))
+	person_copy["home_location_id"] = "location:mutated_test_copy"
+	test.equal(
+		str(config.person_record(
+			V2LifeLoopSimulation.PIERRE_ID
+		).get("home_location_id", "")),
+		original_home_id,
+		"单个人物查询只复制返回记录且不暴露权威配置"
+	)
+	var contract_copy: Dictionary = config.contract_for_person(
+		V2LifeLoopSimulation.PIERRE_ID
+	)
+	var original_weekly_hours: int = int(
+		contract_copy.get("required_paid_hours_per_week", 0)
+	)
+	contract_copy["required_paid_hours_per_week"] = -1
+	test.equal(
+		int(config.contract_for_person(
+			V2LifeLoopSimulation.PIERRE_ID
+		).get("required_paid_hours_per_week", 0)),
+		original_weekly_hours,
+		"单个合同查询只复制返回记录且不暴露权威配置"
+	)
 
 	var start_iso: String = "1900-03-12T05:00:00"
 	var start_hour: int = V2DateTime.total_hour_from_iso(start_iso)

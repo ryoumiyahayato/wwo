@@ -921,6 +921,7 @@ func _schedule_shortage_shipments(total_hour: int) -> Dictionary:
 	var tariff_total := 0
 	var freight_total := 0
 	var max_suppliers := int(_policies.get("maximum_nearby_suppliers", 8))
+	var target_stock_units: Dictionary = {}
 	for raw_commodity_id: Variant in _commodity_market.commodities:
 		var commodity_id := str(raw_commodity_id)
 		for raw_receiver_id: Variant in region_accounts:
@@ -936,7 +937,16 @@ func _schedule_shortage_shipments(total_hour: int) -> Dictionary:
 				checked += 1
 				var route := route_value as Dictionary
 				var donor_id := str(route.get("region_id", ""))
-				var surplus := _surplus_units(donor_id, commodity_id)
+				var target_key := "%s|%s" % [donor_id, commodity_id]
+				if not target_stock_units.has(target_key):
+					target_stock_units[target_key] = _target_stock_units(
+						donor_id, commodity_id
+					)
+				var surplus := maxf(
+					0.0,
+					_commodity_market.inventory_units(donor_id, commodity_id)
+					- float(target_stock_units[target_key]) * 0.85
+				)
 				if surplus <= 0.0001:
 					continue
 				var route_capacity := _route_remaining_capacity(route.get("edge_ids", []) as Array)

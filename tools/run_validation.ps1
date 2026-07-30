@@ -118,6 +118,7 @@ $tests = @(
     @{ Name = 'Quarantined labor-enterprise fixture'; Script = 'res://tests/alpha/alpha_labor_enterprise_test.gd' },
     @{ Name = 'Quarantined unified economy fixture'; Script = 'res://tests/alpha/alpha_economy_integration_phase2_test.gd'; TimeoutSeconds = 300 },
     @{ Name = 'Quarantined AI economy fixture'; Script = 'res://tests/alpha/alpha_ai_economy_stability_test.gd'; TimeoutSeconds = 360 },
+    @{ Name = 'Quarantined Alpha save-restore equivalence'; Script = 'res://tests/alpha/alpha_state_equivalence_test.gd'; TimeoutSeconds = 120 },
     @{ Name = 'Quarantined save-migration fixture'; Script = 'res://tests/alpha/alpha_save_and_migration_test.gd' }
 )
 
