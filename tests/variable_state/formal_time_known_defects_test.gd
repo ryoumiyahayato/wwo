@@ -225,4 +225,8 @@ func _check(condition: bool, label: String) -> void:
 
 
 func _equal(actual: Variant, expected: Variant, label: String) -> void:
-	_check(actual == expected, "%s（actual=%s expected=%s）" % [label, str(actual), str(expected)])
+	var difference: String = SUPPORT.first_semantic_difference(actual, expected)
+	_check(
+		difference.is_empty(),
+		label if difference.is_empty() else "%s（%s）" % [label, difference]
+	)

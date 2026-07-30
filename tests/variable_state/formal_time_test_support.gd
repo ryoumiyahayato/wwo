@@ -93,3 +93,75 @@ static func hemisphere_total_minute(application: FormalWorldApplication) -> int:
 
 static func simulation_state(simulation: FormalWorldSimulation) -> Dictionary:
 	return simulation.get_persistent_state().duplicate(true)
+
+
+static func first_semantic_difference(
+	actual: Variant, expected: Variant, path: String = "$"
+) -> String:
+	var actual_type: int = typeof(actual)
+	var expected_type: int = typeof(expected)
+	if _is_number_type(actual_type) and _is_number_type(expected_type):
+		var same_value: bool = (
+			actual == expected
+			if actual_type == TYPE_INT and expected_type == TYPE_INT
+			else float(actual) == float(expected)
+		)
+		# Disk round trips are compared at the production JSON boundary without
+		# introducing a broad approximate tolerance for economic state.
+		var same_json_value: bool = JSON.stringify(actual) == JSON.stringify(expected)
+		return "" if same_value or same_json_value else (
+			"%s numeric value differs (%s != %s)" % [path, str(actual), str(expected)]
+		)
+	if actual_type != expected_type:
+		return "%s type differs (%s != %s)" % [
+			path,
+			type_string(actual_type),
+			type_string(expected_type),
+		]
+	if actual is Dictionary:
+		var actual_dictionary := actual as Dictionary
+		var expected_dictionary := expected as Dictionary
+		if actual_dictionary.size() != expected_dictionary.size():
+			return "%s dictionary size differs (%d != %d)" % [
+				path,
+				actual_dictionary.size(),
+				expected_dictionary.size(),
+			]
+		var keys: Array = expected_dictionary.keys()
+		keys.sort()
+		for key: Variant in keys:
+			if not actual_dictionary.has(key):
+				return "%s missing key %s" % [path, str(key)]
+			var difference := first_semantic_difference(
+				actual_dictionary[key],
+				expected_dictionary[key],
+				"%s.%s" % [path, str(key)]
+			)
+			if not difference.is_empty():
+				return difference
+		return ""
+	if actual is Array:
+		var actual_array := actual as Array
+		var expected_array := expected as Array
+		if actual_array.size() != expected_array.size():
+			return "%s array size differs (%d != %d)" % [
+				path,
+				actual_array.size(),
+				expected_array.size(),
+			]
+		for index: int in range(expected_array.size()):
+			var difference := first_semantic_difference(
+				actual_array[index],
+				expected_array[index],
+				"%s[%d]" % [path, index]
+			)
+			if not difference.is_empty():
+				return difference
+		return ""
+	return "" if actual == expected else (
+		"%s value differs (%s != %s)" % [path, str(actual), str(expected)]
+	)
+
+
+static func _is_number_type(value_type: int) -> bool:
+	return value_type == TYPE_INT or value_type == TYPE_FLOAT
