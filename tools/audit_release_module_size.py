@@ -14,7 +14,6 @@ TARGETS = [
     Path("scripts/v2_3/v2_3_minimal_hud_overlay.gd"),
     Path("scripts/v2_3/v2_3_minimal_hud_overlay_polish.gd"),
     Path("scripts/ui_spikes/holographic_workspace/holographic_workspace_release.gd"),
-    Path("scripts/ui_spikes/holographic_workspace/holographic_workspace_release_quality.gd"),
     Path("scripts/ui_spikes/holographic_workspace/holographic_workspace_release_probe.gd"),
     Path("tests/v2_3/v2_3_entry_hud_probe.gd"),
     Path("tests/v2_3/v2_3_entry_hud_capture.gd"),

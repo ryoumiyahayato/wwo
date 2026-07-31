@@ -506,7 +506,7 @@ func migrate(
 	)
 	if not bool(payment.get("success", false)):
 		return payment
-	var migration: Dictionary = {
+	var migration_record: Dictionary = {
 		"migration_id": "migration:alpha:%d" % migrations.size(),
 		"person_id": person_id,
 		"from_country_id": profile.get("country_id", ""),
@@ -525,9 +525,9 @@ func migrate(
 	var economy_profile: Dictionary = _economy.entity_profiles[person_id] as Dictionary
 	economy_profile["region_id"] = new_region_id
 	_economy.entity_profiles[person_id] = economy_profile
-	migrations.append(migration)
-	_processed_keys[idempotency_key] = migration["migration_id"]
-	return _ok({"migration": migration.duplicate(true)})
+	migrations.append(migration_record)
+	_processed_keys[idempotency_key] = migration_record["migration_id"]
+	return _ok({"migration": migration_record.duplicate(true)})
 
 
 func get_persistent_state() -> Dictionary:

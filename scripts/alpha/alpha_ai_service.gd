@@ -435,7 +435,7 @@ func _seek_and_accept_job(
 		var job: Dictionary = _labor.jobs.get(job_id, {}) as Dictionary
 		var target_city: String = str(job.get("city_id", ""))
 		var target_region: String = str(known.get("target_region_id", ""))
-		var migration: Dictionary = _labor.migrate(
+		var migration_result: Dictionary = _labor.migrate(
 			"ai:migrate:%s" % key,
 			character.id,
 			str(known.get("target_country_id", character.country_id)),
@@ -445,8 +445,8 @@ func _seek_and_accept_job(
 			int(known.get("migration_cost_centimes", 120)),
 			total_hour
 		)
-		if not bool(migration.get("success", false)):
-			return migration
+		if not bool(migration_result.get("success", false)):
+			return migration_result
 		character.region_id = target_region
 		character.current_status["city_id"] = target_city
 	var applied: Dictionary = _labor.apply_for_job(

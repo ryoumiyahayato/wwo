@@ -41,5 +41,5 @@ func _location_visible_in_scope(location: Dictionary, scope: String) -> bool:
 func _city_anchor_for_parent(parent_id: String) -> Vector2:
 	var exact: Dictionary = _v2_3_local_location_lookup.get(parent_id, {}) as Dictionary
 	if not exact.is_empty():
-		return project_lon_lat(exact.get("world_position", []))
+		return _cached_world_point(exact)
 	return super._city_anchor_for_parent(parent_id)
