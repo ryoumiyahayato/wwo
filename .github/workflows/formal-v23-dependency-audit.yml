@@ -57,7 +57,7 @@ jobs:
             git diff --name-only "$PR_BASE_SHA...$PR_HEAD_SHA" > changed-files.txt
             while IFS= read -r path; do
               case "$path" in
-                tools/audit_formal_v23_dependencies.py|tools/generate_formal_v23_dependency_audit.py|tools/run_formal_v23_dependency_audit.py|tools/sitecustomize.py|tests/tools/test_audit_formal_v23_dependencies.py|tests/tools/test_generate_formal_v23_dependency_audit.py|tests/tools/test_run_formal_v23_dependency_audit.py|tests/tools/test_tracked_audit_inputs.py|docs/refactors/formal_v23_dependency_audit.md|docs/refactors/formal_v23_dependency_inventory.json.gz|.github/workflows/formal-v23-dependency-audit.yml)
+                tools/audit_formal_v23_dependencies.py|tools/generate_formal_v23_dependency_audit.py|tools/run_formal_v23_dependency_audit.py|tools/run_tracked_dependency_audit.py|tools/sitecustomize.py|tests/tools/test_audit_formal_v23_dependencies.py|tests/tools/test_generate_formal_v23_dependency_audit.py|tests/tools/test_run_formal_v23_dependency_audit.py|tests/tools/test_tracked_audit_inputs.py|docs/refactors/formal_v23_dependency_audit.md|docs/refactors/formal_v23_dependency_inventory.json.gz|.github/workflows/formal-v23-dependency-audit.yml)
                   ;;
                 *)
                   echo "Out-of-scope file: $path" >&2
@@ -81,7 +81,7 @@ jobs:
           python tests/tools/test_tracked_audit_inputs.py
 
       - name: Regenerate dependency artifacts
-        run: python tools/run_formal_v23_dependency_audit.py --write --print-summary
+        run: python tools/run_tracked_dependency_audit.py --write --print-summary
 
       - name: Upload generated audit artifacts
         uses: actions/upload-artifact@v4
@@ -95,7 +95,7 @@ jobs:
       - name: Verify committed artifacts are current
         run: |
           set -euo pipefail
-          python tools/run_formal_v23_dependency_audit.py --check
+          python tools/run_tracked_dependency_audit.py --check
           python - <<'PY'
           import gzip
           import json
@@ -191,7 +191,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          python tools/run_formal_v23_dependency_audit.py --check --print-summary
+          python tools/run_tracked_dependency_audit.py --check --print-summary
           if ($LASTEXITCODE -ne 0) { throw 'Formal V2.3 dependency audit check failed' }
           python -c "import gzip,json,pathlib; p=pathlib.Path('docs/refactors/formal_v23_dependency_inventory.json.gz'); d=json.loads(gzip.decompress(p.read_bytes()).decode('utf-8')); assert d['formal_time_contract']['unchanged']; assert d['counts']['candidate_total'] == len(d['candidates'])"
           if ($LASTEXITCODE -ne 0) { throw 'Compressed inventory validation failed' }
