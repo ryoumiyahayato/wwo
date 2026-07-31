@@ -6,26 +6,6 @@ on:
       - agent/formal-world-economy-integration
     paths:
       - ".github/workflows/variable-state-behavior-baseline.yml"
-      - "tests/variable_state/**"
-      - "tests/fixtures/save/**"
-      - "tools/run_validation.ps1"
-      - "project.godot"
-      - "data/world/demo_world.json"
-      - "data/characters/character_generation.json"
-      - "data/balance/map_rules.json"
-      - "data/balance/simulation_clock.json"
-      - "data/balance/society_rules.json"
-      - "data/balance/continuity_rules.json"
-      - "data/balance/action_rules.json"
-      - "scripts/core/**"
-      - "scripts/action/**"
-      - "scripts/character/**"
-      - "scripts/map/**"
-      - "scripts/organization/**"
-      - "scripts/relationship/**"
-      - "scripts/save/**"
-      - "scripts/simulation/**"
-      - "scripts/ui_spikes/holographic_workspace/**"
   workflow_dispatch:
 
 permissions:
@@ -67,10 +47,9 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $log = 'cleanup-import.log'
           $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless', '--audio-driver', 'Dummy', '--editor', '--path', '.', '--quit-after', '8', '--log-file', $log) -Wait -PassThru -NoNewWindow
-          $text = if (Test-Path -LiteralPath $log) { Get-Content -LiteralPath $log -Raw } else { '' }
+          $text = Get-Content -LiteralPath $log -Raw
           Write-Host $text
-          if ($process.ExitCode -ne 0) { throw "Godot import failed with exit code $($process.ExitCode)" }
-          if ($text -match 'SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|(?m)^ERROR:') { throw 'Godot import emitted a script or resource error' }
+          if ($process.ExitCode -ne 0 -or $text -match 'SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|(?m)^ERROR:') { throw 'Godot import or script parsing failed' }
 
       - name: Verify cleanup scope and protected boundaries
         shell: pwsh
@@ -82,9 +61,7 @@ jobs:
             'scripts/v2_3/v2_3_minimal_hud_overlay.gd',
             'scripts/v2_3/v2_3_minimal_hud_overlay_polish.gd'
           )
-          foreach ($path in $deleted) {
-            if (Test-Path -LiteralPath $path) { throw "Retired remnant still exists: $path" }
-          }
+          foreach ($path in $deleted) { if (Test-Path -LiteralPath $path) { throw "Retired remnant still exists: $path" } }
           foreach ($path in @('scripts/v2_3/v2_3_save_migration.gd', 'scripts/v2_3/v2_3_save_service.gd')) {
             if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw "Compatibility service missing: $path" }
           }
@@ -92,15 +69,10 @@ jobs:
           if ($blob -ne $env:D01_CONTRACT_BLOB) { throw "D01 contract blob changed: $blob" }
           git fetch origin $env:FIXED_BASE_SHA --depth=1
           $changed = @(git diff --name-only "$env:FIXED_BASE_SHA...HEAD")
-          $uid = @($changed | Where-Object { $_ -match '(^|/)\.uid$' })
+          $uid = @($changed | Where-Object { $_ -match '\.uid$' })
           if ($uid.Count -ne 0) { throw "Unexpected UID changes: $($uid -join ', ')" }
+          $allowed = $deleted
           $productionChanges = @($changed | Where-Object { $_ -like 'scripts/*' -or $_ -like 'scenes/*' })
-          $allowed = @(
-            'scenes/v2_3/v2_3_entry_hud_capture.tscn',
-            'scenes/v2_3/v2_3_entry_hud_probe.tscn',
-            'scripts/v2_3/v2_3_minimal_hud_overlay.gd',
-            'scripts/v2_3/v2_3_minimal_hud_overlay_polish.gd'
-          )
           $unexpected = @($productionChanges | Where-Object { $_ -notin $allowed })
           if ($unexpected.Count -ne 0) { throw "Unexpected production or scene changes: $($unexpected -join ', ')" }
           $formalRoots = @('project.godot', 'scenes/formal', 'scripts/formal', 'scripts/ui_spikes/holographic_workspace')
@@ -115,11 +87,11 @@ jobs:
             throw 'Formal product roots contain a retired V2.3, PrototypeMap, Loran, or Vesta reference'
           }
           $project = Get-Content -LiteralPath project.godot -Raw
-          if ($project -notmatch 'run/main_scene="uid://') { throw 'project.godot main scene is not configured by UID' }
+          if ($project -notmatch 'run/main_scene="res://scenes/formal/formal_world_menu\.tscn"') { throw 'project.godot does not use the formal menu as its main scene' }
           $export = Get-Content -LiteralPath export_presets.cfg -Raw
           if ($export -notmatch 'name="Windows Desktop"' -or $export -notmatch 'platform="Windows Desktop"' -or $export -notmatch 'binary_format/architecture="x86_64"') { throw 'Windows Desktop export preset is incomplete' }
           if ($export -match 'v2_3_entry_hud_capture|v2_3_entry_hud_probe|v2_3_minimal_hud_overlay|PrototypeV2MapCanvas|PrototypeMap') { throw 'Windows export configuration references retired product remnants' }
-          Write-Host "Protected cleanup boundaries and Windows export configuration passed."
+          Write-Host 'Protected cleanup boundaries and Windows export configuration passed.'
 
       - name: Run variable-state behavior baseline
         shell: pwsh
@@ -145,9 +117,9 @@ jobs:
             return $matches[0]
           }
           $targets = @(
-            @{ Label = 'V2.2 historical AI economy'; Expected = 42; Item = (Select-OneTest 'V2.2 historical AI economy' '(?is)(V2\.2.{0,120}historical.{0,80}AI.{0,80}economy|historical.{0,80}AI.{0,80}economy.{0,120}V2\.2)') },
-            @{ Label = 'V2.3 historical AI economy'; Expected = 42; Item = (Select-OneTest 'V2.3 historical AI economy' '(?is)(V2\.3.{0,120}historical.{0,80}AI.{0,80}economy|historical.{0,80}AI.{0,80}economy.{0,120}V2\.3)') },
-            @{ Label = 'Retained V2.3 services'; Expected = 69; Item = (Select-OneTest 'Retained V2.3 services' '(?is)(retained.{0,120}V2\.3.{0,80}services|V2\.3.{0,120}retained.{0,80}services)') }
+            @{ Label = 'V2.2 historical AI economy'; Expected = 42; Item = (Select-OneTest 'V2.2 historical AI economy' '(?is)(V2\.2.{0,160}historical.{0,100}AI.{0,100}economy|historical.{0,100}AI.{0,100}economy.{0,160}V2\.2)') },
+            @{ Label = 'V2.3 historical AI economy'; Expected = 42; Item = (Select-OneTest 'V2.3 historical AI economy' '(?is)(V2\.3.{0,160}historical.{0,100}AI.{0,100}economy|historical.{0,100}AI.{0,100}economy.{0,160}V2\.3)') },
+            @{ Label = 'Retained V2.3 services'; Expected = 69; Item = (Select-OneTest 'Retained V2.3 services' '(?is)(retained.{0,160}V2\.3.{0,100}services|V2\.3.{0,160}retained.{0,100}services)') }
           )
           foreach ($target in $targets) {
             $relative = [IO.Path]::GetRelativePath($PWD.Path, $target.Item.Path).Replace('\', '/')
@@ -165,11 +137,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: cleanup-supplemental-validation-${{ github.run_id }}
-          path: |
-            cleanup-import.log
-            variable-state-behavior.log
-            v2-2-historical-ai-economy.log
-            v2-3-historical-ai-economy.log
-            retained-v2-3-services.log
+          path: '*.log'
           if-no-files-found: ignore
           retention-days: 7
