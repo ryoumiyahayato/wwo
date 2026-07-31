@@ -23,8 +23,16 @@ var economy_by_polity_id: Dictionary = {}
 var routes: Array[Dictionary] = []
 var shipments: Array[Dictionary] = []
 var history: Array[Dictionary] = []
-var total_hour: int = 0
 var initialization_error: String = ""
+
+var _authoritative_hour_source: Callable = Callable()
+var total_hour: int:
+	get:
+		assert(
+			_authoritative_hour_source.is_valid(),
+			"FormalWorldEconomyService requires the formal simulation hour source"
+		)
+		return int(_authoritative_hour_source.call())
 
 var _historical := AlphaHistoricalWorldEconomyData.new()
 var _commodities: Dictionary = {}
@@ -46,7 +54,6 @@ func configure() -> bool:
 	_routes_by_country.clear()
 	_crosswalk_records.clear()
 	_commodities.clear()
-	total_hour = 0
 	_last_day_index = -1
 	_next_shipment_sequence = 1
 	_political_unit_count = 0
@@ -77,14 +84,19 @@ func configure() -> bool:
 	return _validate_state()
 
 
-func advance_hours(hours: int) -> Dictionary:
-	if hours <= 0:
+func bind_authoritative_hour_source(source: Callable) -> void:
+	_authoritative_hour_source = source
+
+
+func settle_hour_range(
+	previous_total_hour: int, current_total_hour: int
+) -> Dictionary:
+	if previous_total_hour < 0 or current_total_hour <= previous_total_hour:
 		return world_summary()
-	var target_hour := total_hour + hours
-	while total_hour < target_hour:
-		total_hour += 1
-		if total_hour % HOURS_PER_DAY == 0:
-			_settle_day(total_hour)
+	assert(current_total_hour == total_hour)
+	for crossed_hour: int in range(previous_total_hour + 1, current_total_hour + 1):
+		if crossed_hour % HOURS_PER_DAY == 0:
+			_settle_day(crossed_hour)
 	return world_summary()
 
 
@@ -222,6 +234,9 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		or not state.get("history", []) is Array
 	):
 		return false
+	var saved_total_hour := int(state.get("total_hour", -1))
+	if saved_total_hour < 0 or saved_total_hour != total_hour:
+		return false
 	var restored := (state.get("country_states", {}) as Dictionary).duplicate(true)
 	if restored.size() != country_states.size():
 		return false
@@ -236,9 +251,8 @@ func restore_persistent_state(state: Dictionary) -> bool:
 	country_states = restored
 	shipments = DataRecordUtils.to_dictionary_array(state.get("shipments", []))
 	history = DataRecordUtils.to_dictionary_array(state.get("history", []))
-	total_hour = int(state.get("total_hour", 0))
 	_next_shipment_sequence = maxi(1, int(state.get("next_shipment_sequence", 1)))
-	_last_day_index = int(state.get("last_day_index", total_hour / HOURS_PER_DAY))
+	_last_day_index = int(state.get("last_day_index", saved_total_hour / HOURS_PER_DAY))
 	while history.size() > HISTORY_LIMIT:
 		history.pop_front()
 	return _validate_state()

@@ -51,44 +51,24 @@ static func restore_formal_save(backup: Dictionary) -> bool:
 
 
 static func hemisphere_state(application: FormalWorldApplication) -> Dictionary:
+	var value := application.formal_simulation.date_time()
 	return {
-		"year": application.sim_year,
-		"month": application.sim_month,
-		"day": application.sim_day,
-		"hour": application.sim_hour,
-		"minute": application.sim_minute,
+		"year": int(value.get("year", 0)),
+		"month": int(value.get("month", 0)),
+		"day": int(value.get("day", 0)),
+		"hour": int(value.get("hour", -1)),
+		"minute": int(value.get("minute", -1)),
 		"paused": application.sim_paused,
 		"speed": application.sim_speed,
 	}
 
 
-static func set_hemisphere_time(
-	application: FormalWorldApplication,
-	year: int,
-	month: int,
-	day: int,
-	hour: int,
-	minute: int
-) -> void:
-	application.sim_year = year
-	application.sim_month = month
-	application.sim_day = day
-	application.sim_hour = hour
-	application.sim_minute = minute
-
-
 static func hemisphere_total_hour(application: FormalWorldApplication) -> int:
-	return V2DateTime.to_total_hour({
-		"year": application.sim_year,
-		"month": application.sim_month,
-		"day": application.sim_day,
-		"hour": application.sim_hour,
-	})
+	return V2DateTime.to_total_hour(application.formal_simulation.date_time())
 
 
 static func hemisphere_total_minute(application: FormalWorldApplication) -> int:
-	var total_hour := hemisphere_total_hour(application)
-	return -1 if total_hour < 0 else total_hour * 60 + application.sim_minute
+	return application.formal_simulation.total_minutes
 
 
 static func simulation_state(simulation: FormalWorldSimulation) -> Dictionary:
@@ -106,8 +86,6 @@ static func first_semantic_difference(
 			if actual_type == TYPE_INT and expected_type == TYPE_INT
 			else float(actual) == float(expected)
 		)
-		# Disk round trips are compared at the production JSON boundary without
-		# introducing a broad approximate tolerance for economic state.
 		var same_json_value: bool = JSON.stringify(actual) == JSON.stringify(expected)
 		return "" if same_value or same_json_value else (
 			"%s numeric value differs (%s != %s)" % [path, str(actual), str(expected)]

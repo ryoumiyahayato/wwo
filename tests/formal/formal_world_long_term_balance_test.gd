@@ -19,18 +19,19 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var economy := FormalWorldEconomyService.new()
+	var simulation := FormalWorldSimulation.new()
 	_check(
-		economy.configure(),
-		"正式半球长期经济可初始化：%s" % economy.initialization_error
+		simulation.initialize(),
+		"正式半球长期经济可通过唯一时间源初始化：%s" % simulation.initialization_error
 	)
 	if failures > 0:
 		_finish({})
 		return
+	var economy := simulation.economy
 	var started_usec := Time.get_ticks_usec()
 	var annual_fulfillment: Array[int] = []
 	for year: int in range(1, YEARS + 1):
-		var summary := economy.advance_hours(HOURS_PER_YEAR)
+		var summary := simulation.advance_minutes(HOURS_PER_YEAR * 60)
 		var fulfillment := int(summary.get("fulfillment_bp", -1))
 		annual_fulfillment.append(fulfillment)
 		_check(
@@ -54,12 +55,12 @@ func _run() -> void:
 	_check(_state_is_numerically_sound(economy), "十年运行后价格、库存和日结状态有效")
 	_check(economy.routes.size() >= 30, "正式历史运输网络持续可用")
 	_check(economy.shipments.size() <= 5000, "在途运输队列保持有界")
-	var save_state := economy.get_persistent_state()
+	var save_state := simulation.get_persistent_state()
 	var serialized_bytes := JSON.stringify(save_state).to_utf8_buffer().size()
 	_check(serialized_bytes < MAX_SAVE_BYTES, "十年正式世界存档小于20MB")
 	_check(elapsed_usec < MAX_ELAPSED_USEC, "十年正式世界模拟在CI安全时间内完成")
-	var restored := FormalWorldEconomyService.new()
-	_check(restored.configure(), "十年存档恢复目标可初始化")
+	var restored := FormalWorldSimulation.new()
+	_check(restored.initialize(), "十年存档恢复目标可初始化")
 	_check(restored.restore_persistent_state(save_state), "十年正式世界存档可恢复")
 	_check(
 		restored.world_summary() == final_summary,

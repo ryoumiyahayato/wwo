@@ -1,11 +1,8 @@
 extends SceneTree
-## KNOWN DEFECT CHARACTERIZATION
-## NOT A LONG-TERM CORRECTNESS CONTRACT
-## These assertions prove the current D01 defects. The implementation PR must
-## replace them with consistency assertions when the defects are corrected.
+## Long-term formal-time consistency checks replacing the former defect
+## characterization. Formal product time has one writable authority.
 
 const SUPPORT = preload("res://tests/variable_state/formal_time_test_support.gd")
-const EXPECTED_OFFSET_HOURS: int = 1688
 
 var checks: int = 0
 var failures: int = 0
@@ -18,201 +15,245 @@ func _initialize() -> void:
 func _run() -> void:
 	var backup: Dictionary = SUPPORT.backup_formal_save()
 	_check(not bool(backup.get("read_error", false)), "现有正式存档如存在则可安全备份")
-	_check(SUPPORT.cleanup_formal_save(), "已知缺陷测试开始前清理隔离user://正式存档")
-	_test_initial_time_offset()
-	_test_offset_persists_through_real_ticks()
-	_test_invalid_hemisphere_calendar()
-	_test_formal_load_does_not_sync_hemisphere()
-	await _test_continue_game_does_not_sync_hemisphere()
-	_test_inconsistent_persistent_time_is_accepted()
-	_check(SUPPORT.restore_formal_save(backup), "已知缺陷测试结束后恢复原有存档或保持隔离目录为空")
+	_check(SUPPORT.cleanup_formal_save(), "一致性测试开始前清理隔离user://正式存档")
+	_test_initial_time_consistency()
+	_test_single_authoritative_tick()
+	_test_gregorian_formal_calendar()
+	_test_formal_load_restores_visible_time()
+	await _test_new_game_product_path()
+	await _test_continue_game_restores_visible_time()
+	_test_inconsistent_persistent_time_is_rejected()
+	_test_legacy_save_time_compatibility()
+	_check(SUPPORT.restore_formal_save(backup), "一致性测试结束后恢复原有存档或保持隔离目录为空")
 	print("Formal time known defects: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures > 0 or checks <= 0 else 0)
 
 
-func _test_initial_time_offset() -> void:
+func _test_initial_time_consistency() -> void:
 	var application := FormalWorldApplication.new()
-	_check(
-		application.formal_simulation.initialize(),
-		"初始错位测试可初始化正式模拟"
-	)
+	_check(application.formal_simulation.initialize(), "正式应用可初始化唯一时间源")
 	if not application.formal_simulation.initialized:
 		application.free()
 		return
-	_equal(application.sim_year, 1900, "半球初始年份为1900")
-	_equal(application.sim_month, 3, "半球初始月份为3")
-	_equal(application.sim_day, 12, "半球初始日期为12")
-	_equal(application.sim_hour, 8, "半球初始小时为8")
-	_equal(application.sim_minute, 0, "半球初始分钟为0")
-	var formal: Dictionary = application.formal_simulation.date_time()
-	_equal(int(formal.get("year", 0)), 1900, "正式模拟初始年份为1900")
-	_equal(int(formal.get("month", 0)), 1, "正式模拟初始月份为1")
-	_equal(int(formal.get("day", 0)), 1, "正式模拟初始日期为1")
-	_equal(int(formal.get("hour", -1)), 0, "正式模拟初始小时为0")
-	_equal(int(formal.get("minute", -1)), 0, "正式模拟初始分钟为0")
-	var hemisphere_hour: int = SUPPORT.hemisphere_total_hour(application)
 	_equal(
-		hemisphere_hour - application.formal_simulation.economy.total_hour,
-		EXPECTED_OFFSET_HOURS,
-		"当前初始半球时间比正式模拟时间晚70天8小时即1688小时"
+		SUPPORT.hemisphere_state(application),
+		{
+			"year": 1900,
+			"month": 1,
+			"day": 1,
+			"hour": 0,
+			"minute": 0,
+			"paused": true,
+			"speed": 1,
+		},
+		"正式模拟、半球与HUD初始时间统一为1900-01-01 00:00"
 	)
+	_equal(application._format_sim_datetime(), "1900年01月01日 00:00", "正式HUD即时派生初始时间")
+	for removed_property: String in ["sim_year", "sim_month", "sim_day", "sim_hour", "sim_minute"]:
+		_check(not _has_property(application, removed_property), "正式应用不再持有可写字段%s" % removed_property)
 	application.free()
 
 
-func _test_offset_persists_through_real_ticks() -> void:
+func _test_single_authoritative_tick() -> void:
 	var application := FormalWorldApplication.new()
-	_check(
-		application.formal_simulation.initialize(),
-		"持续错位测试可初始化正式模拟"
-	)
+	_check(application.formal_simulation.initialize(), "唯一推进测试可初始化正式模拟")
 	if not application.formal_simulation.initialized:
 		application.free()
 		return
-	var hemisphere_before: int = SUPPORT.hemisphere_total_minute(application)
-	var formal_before: int = application.formal_simulation.total_minutes
 	application.sim_paused = false
 	application.sim_speed = 1
 	for _tick: int in range(4):
 		application._on_clock_timer_timeout()
-	var hemisphere_after: int = SUPPORT.hemisphere_total_minute(application)
-	var formal_after: int = application.formal_simulation.total_minutes
-	_equal(hemisphere_after - hemisphere_before, 60, "四个真实tick推进半球展示60分钟")
-	_equal(formal_after - formal_before, 60, "四个真实tick推进正式模拟60分钟")
-	_check(hemisphere_after != formal_after, "真实tick后半球与正式模拟仍不是同一时间事实")
-	_equal(
-		int((hemisphere_after - formal_after) / 60),
-		EXPECTED_OFFSET_HOURS,
-		"双表示分别推进后原有1688小时错位仍然存在"
-	)
+	_equal(application.formal_simulation.total_minutes, 60, "四个真实tick只推进60权威分钟")
+	_equal(application.formal_simulation.economy.total_hour, 1, "经济小时由60权威分钟只读派生")
+	_equal(SUPPORT.hemisphere_total_minute(application), 60, "半球显示与权威分钟完全相同")
+	_equal(application._format_sim_datetime(), "1900年01月01日 01:00", "HUD显示同一权威时间")
 	application.free()
 
 
-func _test_invalid_hemisphere_calendar() -> void:
-	var application := FormalWorldApplication.new()
-	SUPPORT.set_hemisphere_time(application, 1900, 2, 28, 23, 45)
-	application._advance_clock(15)
-	_equal(application.sim_year, 1900, "无效公历证据保持1900年")
-	_equal(application.sim_month, 2, "无效公历证据保持2月")
-	_equal(application.sim_day, 29, "当前半球时钟从1900-02-28生成1900-02-29")
-	_equal(application.sim_hour, 0, "当前半球时钟跨日后小时归零")
-	_equal(application.sim_minute, 0, "当前半球时钟跨日后分钟归零")
-	_equal(
-		V2DateTime.to_total_hour({
-			"year": application.sim_year,
-			"month": application.sim_month,
-			"day": application.sim_day,
-			"hour": application.sim_hour,
-		}),
-		-1,
-		"V2DateTime判定1900-02-29为无效公历日期"
-	)
-	application.free()
+func _test_gregorian_formal_calendar() -> void:
+	var simulation := FormalWorldSimulation.new()
+	_check(simulation.initialize(), "正式公历测试可初始化")
+	if not simulation.initialized:
+		return
+	var february_end_hour := V2DateTime.to_total_hour({
+		"year": 1900,
+		"month": 2,
+		"day": 28,
+		"hour": 23,
+	})
+	_check(february_end_hour >= 0, "1900-02-28 23:00是有效公历时间")
+	simulation.advance_minutes(february_end_hour * 60 + 45)
+	_equal(simulation.date_time(), {
+		"year": 1900,
+		"month": 2,
+		"day": 28,
+		"hour": 23,
+		"weekday": 2,
+		"minute": 45,
+	}, "正式时间到达1900-02-28 23:45")
+	simulation.advance_minutes(15)
+	var value := simulation.date_time()
+	_equal(int(value.get("year", 0)), 1900, "二月月末后年份仍为1900")
+	_equal(int(value.get("month", 0)), 3, "1900非闰年二月后进入三月")
+	_equal(int(value.get("day", 0)), 1, "1900-02-28后直接进入三月一日")
+	_equal(int(value.get("hour", -1)), 0, "跨月后小时归零")
+	_equal(int(value.get("minute", -1)), 0, "跨月后分钟归零")
+	_check(V2DateTime.to_total_hour({"year": 1900, "month": 2, "day": 29, "hour": 0}) < 0, "1900-02-29始终无效")
 
 
-func _test_formal_load_does_not_sync_hemisphere() -> void:
-	_check(SUPPORT.cleanup_formal_save(), "界面读取缺陷测试前隔离存档为空")
+func _test_formal_load_restores_visible_time() -> void:
+	_check(SUPPORT.cleanup_formal_save(), "界面读取测试前隔离存档为空")
 	var source := FormalWorldSimulation.new()
-	_check(source.initialize(), "界面读取缺陷测试存档源可初始化")
+	_check(source.initialize(), "界面读取存档源可初始化")
 	if not source.initialized:
 		return
 	source.advance_minutes(125)
-	var saved: Dictionary = SUPPORT.simulation_state(source)
-	_check(source.save_to_user(), "界面读取缺陷测试通过生产方法保存非零正式时间")
+	var saved := SUPPORT.simulation_state(source)
+	_check(source.save_to_user(), "通过生产方法保存非零正式时间")
 	var application := FormalWorldApplication.new()
-	_check(
-		application.formal_simulation.initialize(),
-		"界面读取缺陷测试应用正式模拟可初始化"
-	)
+	_check(application.formal_simulation.initialize(), "界面读取应用可初始化")
 	if not application.formal_simulation.initialized:
 		application.free()
 		return
 	application.formal_simulation.advance_minutes(600)
-	SUPPORT.set_hemisphere_time(application, 1901, 7, 4, 12, 30)
-	var hemisphere_before: Dictionary = SUPPORT.hemisphere_state(application)
 	application._activate_button("formal_load")
-	_equal(
-		SUPPORT.simulation_state(application.formal_simulation),
-		saved,
-		"当前formal_load界面路径恢复正式模拟状态"
-	)
-	_equal(
-		SUPPORT.hemisphere_state(application),
-		hemisphere_before,
-		"当前formal_load界面路径不恢复半球sim_*显示时间"
-	)
-	_equal(application._formal_status, "正式世界存档已恢复。", "界面读取路径报告正式存档已恢复")
+	_equal(SUPPORT.simulation_state(application.formal_simulation), saved, "formal_load恢复完整正式模拟状态")
+	_equal(SUPPORT.hemisphere_total_minute(application), 125, "读取后半球立即显示已恢复权威分钟")
+	_equal(application._format_sim_datetime(), "1900年01月01日 02:05", "读取后HUD立即显示已恢复时间")
+	_equal(application._formal_status, "正式世界存档已恢复。", "界面读取报告成功")
 	application.free()
-	_check(SUPPORT.cleanup_formal_save(), "界面读取缺陷测试删除自己产生的正式存档")
+	_check(SUPPORT.cleanup_formal_save(), "界面读取测试删除自己产生的存档")
 
 
-func _test_continue_game_does_not_sync_hemisphere() -> void:
-	_check(SUPPORT.cleanup_formal_save(), "继续游戏缺陷测试前隔离存档为空")
-	var source := FormalWorldSimulation.new()
-	_check(source.initialize(), "继续游戏缺陷测试存档源可初始化")
-	if not source.initialized:
-		return
-	source.advance_minutes(185)
-	var saved: Dictionary = SUPPORT.simulation_state(source)
-	_check(source.save_to_user(), "继续游戏缺陷测试通过生产方法保存非零正式时间")
+func _test_new_game_product_path() -> void:
+	_check(SUPPORT.cleanup_formal_save(), "新游戏产品路径前隔离存档为空")
 	root.content_scale_size = Vector2i(1280, 720)
-	set_meta(FormalWorldApplication.LAUNCH_MODE_META, "load")
+	set_meta(FormalWorldApplication.LAUNCH_MODE_META, "new")
 	var scene := load("res://scenes/formal/formal_world_main.tscn") as PackedScene
-	_check(scene != null, "继续游戏测试可加载正式产品场景")
+	_check(scene != null, "新游戏可加载正式产品场景")
 	if scene == null:
 		return
 	var application := scene.instantiate() as FormalWorldApplication
-	_check(application != null, "继续游戏测试可实例化正式产品场景")
+	_check(application != null, "新游戏可实例化正式产品场景")
 	if application == null:
 		return
 	root.add_child(application)
 	await process_frame
 	await process_frame
-	_equal(
-		SUPPORT.simulation_state(application.formal_simulation),
-		saved,
-		"launch_mode=load真实产品路径恢复正式模拟状态"
-	)
-	_equal(application._formal_status, "正式世界存档已恢复。", "继续游戏产品路径确认正式存档恢复")
-	_equal(
-		SUPPORT.hemisphere_state(application),
-		{
-			"year": 1900,
-			"month": 3,
-			"day": 12,
-			"hour": 8,
-			"minute": 0,
-			"paused": true,
-			"speed": 1,
-		},
-		"继续游戏恢复正式模拟但半球sim_*仍保持场景初始值"
-	)
+	_equal(application.formal_simulation.total_minutes, 0, "新游戏产品路径从0权威分钟开始")
+	_equal(SUPPORT.hemisphere_total_minute(application), 0, "新游戏半球立即显示1900-01-01 00:00")
+	_equal(application._formal_status, "新的1900正式世界已建立。", "新游戏产品路径报告新世界")
 	application.queue_free()
 	await process_frame
-	_check(SUPPORT.cleanup_formal_save(), "继续游戏缺陷测试删除自己产生的正式存档")
 
 
-func _test_inconsistent_persistent_time_is_accepted() -> void:
+func _test_continue_game_restores_visible_time() -> void:
+	_check(SUPPORT.cleanup_formal_save(), "继续游戏测试前隔离存档为空")
+	var source := FormalWorldSimulation.new()
+	_check(source.initialize(), "继续游戏存档源可初始化")
+	if not source.initialized:
+		return
+	source.advance_minutes(185)
+	var saved := SUPPORT.simulation_state(source)
+	_check(source.save_to_user(), "继续游戏通过生产方法保存非零正式时间")
+	root.content_scale_size = Vector2i(1280, 720)
+	set_meta(FormalWorldApplication.LAUNCH_MODE_META, "load")
+	var scene := load("res://scenes/formal/formal_world_main.tscn") as PackedScene
+	_check(scene != null, "继续游戏可加载正式产品场景")
+	if scene == null:
+		return
+	var application := scene.instantiate() as FormalWorldApplication
+	_check(application != null, "继续游戏可实例化正式产品场景")
+	if application == null:
+		return
+	root.add_child(application)
+	await process_frame
+	await process_frame
+	_equal(SUPPORT.simulation_state(application.formal_simulation), saved, "继续游戏恢复完整正式模拟状态")
+	_equal(SUPPORT.hemisphere_total_minute(application), 185, "继续游戏半球立即读取同一权威时间")
+	_equal(application._format_sim_datetime(), "1900年01月01日 03:05", "继续游戏HUD立即显示恢复时间")
+	_equal(application._formal_status, "正式世界存档已恢复。", "继续游戏产品路径报告恢复成功")
+	application.queue_free()
+	await process_frame
+	_check(SUPPORT.cleanup_formal_save(), "继续游戏测试删除自己产生的存档")
+
+
+func _test_inconsistent_persistent_time_is_rejected() -> void:
+	_check(SUPPORT.cleanup_formal_save(), "矛盾存档测试前隔离存档为空")
 	var simulation := FormalWorldSimulation.new()
-	_check(simulation.initialize(), "存档内部时间不一致测试可初始化")
+	_check(simulation.initialize(), "矛盾存档拒绝测试可初始化")
 	if not simulation.initialized:
 		return
-	var inconsistent: Dictionary = SUPPORT.simulation_state(simulation)
-	inconsistent["total_minutes"] = 125
-	inconsistent["minute_remainder"] = 5
-	var economy_state: Dictionary = inconsistent.get("economy", {}) as Dictionary
-	economy_state["total_hour"] = 99
-	inconsistent["economy"] = economy_state
-	_check(
-		simulation.restore_persistent_state(inconsistent),
-		"当前restore_persistent_state接受彼此不一致的分钟与经济小时"
-	)
-	_equal(simulation.total_minutes, 125, "不一致恢复后total_minutes为125")
-	_equal(simulation._minute_remainder, 5, "不一致恢复后minute_remainder为5")
-	_equal(simulation.economy.total_hour, 99, "不一致恢复后economy.total_hour为99")
-	_check(
-		simulation.economy.total_hour != int(simulation.total_minutes / 60),
-		"恢复后正式累计分钟与经济小时可以长期不一致"
-	)
+	simulation.advance_minutes(125)
+	var before := SUPPORT.simulation_state(simulation)
+
+	var wrong_remainder := before.duplicate(true)
+	wrong_remainder["minute_remainder"] = 6
+	_assert_rejected_without_mutation(simulation, wrong_remainder, before, "分钟余数与权威分钟矛盾")
+
+	var wrong_hour := before.duplicate(true)
+	var wrong_economy := wrong_hour.get("economy", {}) as Dictionary
+	wrong_economy["total_hour"] = 99
+	wrong_hour["economy"] = wrong_economy
+	_assert_rejected_without_mutation(simulation, wrong_hour, before, "经济小时与权威分钟矛盾")
+
+	var missing_authority := before.duplicate(true)
+	missing_authority.erase("total_minutes")
+	_assert_rejected_without_mutation(simulation, missing_authority, before, "V2存档缺少权威分钟")
+
+	var file := FileAccess.open(FormalWorldSimulation.SAVE_PATH, FileAccess.WRITE)
+	_check(file != null, "可写入损坏时间存档测试文件")
+	if file != null:
+		file.store_string(JSON.stringify(wrong_hour))
+		file.close()
+	_check(not simulation.load_from_user(), "真实磁盘读取拒绝矛盾时间字段")
+	_equal(SUPPORT.simulation_state(simulation), before, "磁盘恢复失败前后完整状态相等")
+	_check(SUPPORT.cleanup_formal_save(), "矛盾存档测试删除自己产生的存档")
+
+
+func _test_legacy_save_time_compatibility() -> void:
+	var source := FormalWorldSimulation.new()
+	_check(source.initialize(), "旧存档兼容源可初始化")
+	if not source.initialized:
+		return
+	source.advance_minutes(125)
+	var legacy := SUPPORT.simulation_state(source)
+	legacy["schema_id"] = "formal_world_simulation_v1"
+	var target := FormalWorldSimulation.new()
+	_check(target.initialize(), "旧存档兼容目标可初始化")
+	_check(target.restore_persistent_state(legacy), "一致的V1正式存档仍可读取")
+	_equal(target.total_minutes, 125, "V1存档恢复权威分钟")
+	_equal(target.economy.total_hour, 2, "V1存档经济小时由权威分钟派生")
+
+	var boundary_source := FormalWorldSimulation.new()
+	_check(boundary_source.initialize(), "旧小时边界存档源可初始化")
+	boundary_source.advance_minutes(120)
+	var sparse_legacy := SUPPORT.simulation_state(boundary_source)
+	sparse_legacy["schema_id"] = "formal_world_simulation_v1"
+	sparse_legacy.erase("total_minutes")
+	sparse_legacy.erase("minute_remainder")
+	var boundary_target := FormalWorldSimulation.new()
+	_check(boundary_target.initialize(), "旧小时边界存档目标可初始化")
+	_check(boundary_target.restore_persistent_state(sparse_legacy), "V1小时边界存档可从经济小时恢复")
+	_equal(boundary_target.total_minutes, 120, "V1小时边界恢复为120权威分钟")
+
+
+func _assert_rejected_without_mutation(
+	simulation: FormalWorldSimulation,
+	rejected: Dictionary,
+	before: Dictionary,
+	label: String
+) -> void:
+	_check(not simulation.restore_persistent_state(rejected), "%s被拒绝" % label)
+	_equal(SUPPORT.simulation_state(simulation), before, "%s拒绝后完整状态原子回滚" % label)
+
+
+func _has_property(value: Object, property_name: String) -> bool:
+	for record: Dictionary in value.get_property_list():
+		if str(record.get("name", "")) == property_name:
+			return true
+	return false
 
 
 func _check(condition: bool, label: String) -> void:
