@@ -6,6 +6,7 @@ from typing import Iterable
 
 _AUDIT_INFRASTRUCTURE_PATHS = {
     "tools/sitecustomize.py",
+    "tools/run_tracked_dependency_audit.py",
     "tests/tools/test_tracked_audit_inputs.py",
 }
 
