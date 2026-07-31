@@ -4,6 +4,11 @@ import subprocess
 from pathlib import Path, PurePosixPath
 from typing import Iterable
 
+_AUDIT_INFRASTRUCTURE_PATHS = {
+    "tools/sitecustomize.py",
+    "tests/tools/test_tracked_audit_inputs.py",
+}
+
 
 def iter_tracked_scan_files(root: Path, audit_module) -> Iterable[Path]:
     """Yield only Git-tracked audit inputs with platform-independent paths."""
@@ -14,6 +19,8 @@ def iter_tracked_scan_files(root: Path, audit_module) -> Iterable[Path]:
     )
     tracked = completed.stdout.decode("utf-8").split("\0")
     for value in sorted(item for item in tracked if item):
+        if value in _AUDIT_INFRASTRUCTURE_PATHS:
+            continue
         relative = PurePosixPath(value)
         if any(part in audit_module.IGNORED_PARTS for part in relative.parts):
             continue
