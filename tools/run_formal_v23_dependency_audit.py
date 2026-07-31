@@ -8,6 +8,8 @@ from collections import deque
 
 import generate_formal_v23_dependency_audit as generator
 
+_DYNAMIC_INDEX: list[tuple[str, int, str]] | None = None
+
 
 def _linear_bfs_paths(roots: set[str], nodes: dict) -> tuple[dict[str, list[str]], dict[str, int]]:
     paths: dict[str, list[str]] = {}
@@ -46,6 +48,25 @@ def _linear_reverse_closure(path: str, reverse: dict[str, set[str]]) -> set[str]
     return seen
 
 
+def _indexed_incoming_dynamic_sites(path: str, node, nodes: dict) -> list[str]:
+    global _DYNAMIC_INDEX
+    if _DYNAMIC_INDEX is None:
+        index: list[tuple[str, int, str]] = []
+        for caller_path, caller in sorted(nodes.items()):
+            if caller_path.startswith("docs/") or caller_path in generator.EXCLUDED_PATHS:
+                continue
+            for number, line in enumerate(caller.text.splitlines(), 1):
+                if generator.engine.DYNAMIC_RE.search(line):
+                    index.append((caller_path, number, line))
+        _DYNAMIC_INDEX = index
+    terms = ["res://" + path, path, *node.class_names]
+    return sorted({
+        f"{caller_path}:{number}: {line.strip()[:240]}"
+        for caller_path, number, line in _DYNAMIC_INDEX
+        if any(term and term in line for term in terms)
+    })
+
+
 def _hard_timeout() -> None:
     print("Formal V2.3 dependency generation exceeded 180 seconds.", flush=True)
     os._exit(124)
@@ -54,6 +75,7 @@ def _hard_timeout() -> None:
 def main() -> int:
     generator.engine.bfs_paths = _linear_bfs_paths
     generator.reverse_closure = _linear_reverse_closure
+    generator.incoming_dynamic_sites = _indexed_incoming_dynamic_sites
     faulthandler.dump_traceback_later(60, repeat=True)
     timer = threading.Timer(180, _hard_timeout)
     timer.daemon = True
