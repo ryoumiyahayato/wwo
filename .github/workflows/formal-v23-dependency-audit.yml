@@ -191,11 +191,14 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
+          git config core.autocrlf false
+          git config core.eol lf
+          git checkout --force HEAD -- tests/variable_state/formal_time_stable_contract_test.gd
           python tools/run_tracked_dependency_audit.py --check --print-summary
           if ($LASTEXITCODE -ne 0) { throw 'Formal V2.3 dependency audit check failed' }
           python -c "import gzip,json,pathlib; p=pathlib.Path('docs/refactors/formal_v23_dependency_inventory.json.gz'); d=json.loads(gzip.decompress(p.read_bytes()).decode('utf-8')); assert d['formal_time_contract']['unchanged']; assert d['counts']['candidate_total'] == len(d['candidates'])"
           if ($LASTEXITCODE -ne 0) { throw 'Compressed inventory validation failed' }
-          $blob = git hash-object tests/variable_state/formal_time_stable_contract_test.gd
+          $blob = git rev-parse "HEAD:tests/variable_state/formal_time_stable_contract_test.gd"
           if ($blob -ne $env:D01_CONTRACT_BLOB) { throw "D01 stable contract changed: $blob" }
 
   alpha-three-year-performance:
