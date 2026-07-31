@@ -37,14 +37,15 @@ func _check_historical_catalog() -> void:
 
 
 func _check_formal_economy() -> void:
-	var economy := FormalWorldEconomyService.new()
+	var simulation := FormalWorldSimulation.new()
 	_check(
-		economy.configure(),
-		"正式世界经济可初始化：%s" % economy.initialization_error
+		simulation.initialize(),
+		"正式世界经济可通过唯一时间源初始化：%s" % simulation.initialization_error
 	)
 	if failures > 0:
 		return
-	var initial := economy.world_summary()
+	var economy := simulation.economy
+	var initial := simulation.world_summary()
 	_check_world_roster(initial, economy)
 	_check(
 		int(initial.get("commodity_count", 0)) >= 60,
@@ -54,7 +55,7 @@ func _check_formal_economy() -> void:
 		int(initial.get("route_count", 0)) >= 30,
 		"正式经济使用历史稀疏航路"
 	)
-	var after := economy.advance_hours(90 * 24)
+	var after := simulation.advance_minutes(90 * 24 * 60)
 	_check(int(after.get("total_hour", 0)) == 90 * 24, "90日结算完成")
 	_check(
 		int(after.get("fulfillment_bp", -1)) >= 0,
@@ -64,12 +65,12 @@ func _check_formal_economy() -> void:
 		_no_negative_inventory(economy.country_states),
 		"所有高细节政权库存非负"
 	)
-	var saved := economy.get_persistent_state()
-	var restored := FormalWorldEconomyService.new()
-	_check(restored.configure(), "恢复目标可初始化")
-	_check(restored.restore_persistent_state(saved), "正式经济存档可恢复")
+	var saved := simulation.get_persistent_state()
+	var restored := FormalWorldSimulation.new()
+	_check(restored.initialize(), "恢复目标可初始化")
+	_check(restored.restore_persistent_state(saved), "正式经济存档可通过组合根恢复")
 	_check(
-		restored.world_summary() == economy.world_summary(),
+		restored.world_summary() == simulation.world_summary(),
 		"正式经济恢复后摘要等价"
 	)
 

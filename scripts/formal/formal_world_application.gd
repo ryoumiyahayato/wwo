@@ -21,22 +21,44 @@ func _ready() -> void:
 		var launch_mode := str(get_tree().get_meta(LAUNCH_MODE_META, "new"))
 		if get_tree().has_meta(LAUNCH_MODE_META):
 			get_tree().remove_meta(LAUNCH_MODE_META)
-		if launch_mode == "load" and formal_simulation.load_from_user():
-			_formal_status = "正式世界存档已恢复。"
+		if launch_mode == "load":
+			_formal_status = (
+				"正式世界存档已恢复。"
+				if _load_formal_state()
+				else "正式世界存档恢复失败；当前状态保持1900-01-01 00:00。"
+			)
 		else:
 			_formal_status = "新的1900正式世界已建立。"
 		_last_summary = formal_simulation.world_summary()
 	queue_redraw()
 
 
-func _on_clock_timer_timeout() -> void:
-	if sim_paused:
-		return
-	var minutes := 15 * sim_speed
-	_advance_clock(minutes)
-	if formal_simulation.initialized:
+func _advance_simulation_minutes(minutes: int) -> void:
+	if formal_simulation.initialized and minutes > 0:
 		_last_summary = formal_simulation.advance_minutes(minutes)
-	queue_redraw()
+
+
+func _format_sim_datetime() -> String:
+	var value := formal_simulation.date_time()
+	if value.is_empty():
+		return "无效时间"
+	return "%04d年%02d月%02d日 %02d:%02d" % [
+		int(value.get("year", 0)),
+		int(value.get("month", 0)),
+		int(value.get("day", 0)),
+		int(value.get("hour", 0)),
+		int(value.get("minute", 0)),
+	]
+
+
+func _time_source_description() -> String:
+	return "正式模拟权威时间；半球与HUD仅派生显示"
+
+
+func _load_formal_state() -> bool:
+	var restored := formal_simulation.load_from_user()
+	_last_summary = formal_simulation.world_summary()
+	return restored
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
@@ -60,7 +82,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			if key_event.keycode == KEY_F9:
 				_formal_status = (
 					"正式世界存档已恢复。"
-					if formal_simulation.load_from_user()
+					if _load_formal_state()
 					else "没有可恢复的正式世界存档。"
 				)
 				_last_summary = formal_simulation.world_summary()
@@ -282,7 +304,7 @@ func _activate_button(action: String) -> void:
 	if action == "formal_load":
 		_formal_status = (
 			"正式世界存档已恢复。"
-			if formal_simulation.load_from_user()
+			if _load_formal_state()
 			else "没有可恢复的正式世界存档。"
 		)
 		_last_summary = formal_simulation.world_summary()

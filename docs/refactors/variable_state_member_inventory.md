@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1613|1242|15|0|510|5|32|16|60|885|510|262|
+|1609|1237|15|0|512|5|32|16|60|882|511|263|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,613个生产成员字段逐项表
+## 1,609个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -759,15 +759,15 @@
 23 K routes
 24 K shipments
 25 K history
-26 K total_hour
-27 K initialization_error
-29 A _historical
-30 K _commodities
-31 E _routes_by_country
-32 K _crosswalk_records
-33 A _next_shipment_sequence
-34 A _last_day_index
-35 E _political_unit_count
+26 K initialization_error
+28 A _authoritative_hour_source
+37 A _historical
+38 K _commodities
+39 E _routes_by_country
+40 K _crosswalk_records
+41 A _next_shipment_sequence
+42 A _last_day_index
+43 E _political_unit_count
 @ scripts/formal/formal_world_menu.gd | FormalWorldMenu
 6 C WORLD_SCENE
 7 C LAUNCH_MODE_META
@@ -784,7 +784,6 @@
 12 K initialized
 13 K initialization_error
 14 K total_minutes
-15 K _minute_remainder
 @ scripts/map/map_control_service.gd | MapControlService
 11 C STAGE_STABLE
 12 C STAGE_WEAKENING
@@ -1095,7 +1094,7 @@
 7 C FLAG_REFERENCE_NOTICE
 ```
 
-### 第7段：`scripts/ui_spikes/holographic_workspace/holographic_workspace_runtime.gd` 至 `scripts/v2_2/v2_life_loop_ui_binding.gd`
+### 第7段：`scripts/ui_spikes/holographic_workspace/holographic_workspace_runtime.gd` 至 `scripts/v2_2/v2_life_loop_simulation.gd`
 
 ```text
 @ scripts/ui_spikes/holographic_workspace/holographic_workspace_runtime.gd | holographic_workspace_runtime
@@ -1139,47 +1138,45 @@
 44 K drag_moved
 46 A sim_paused
 47 A sim_speed
-48 A sim_day
-49 A sim_month
-50 A sim_year
-51 A sim_hour
-52 K sim_minute
-53 A activity_unread
-55 E _countries
-56 E _country_by_id
-57 E _country_unit_polygons
-58 E _country_anchor_units
-59 K _coastline_unit_lines
-61 K _regions
-62 K _region_by_id
-63 K _region_polygons
-64 K _cities
-65 K _city_by_id
-66 K _cities_by_region
-67 K _institutions
-68 K _institution_by_id
-69 K _institutions_by_city
-70 K _institutions_by_region
-71 K _character_profiles
-72 E _country_profile
-73 K _world_events
-74 K _event_by_id
-75 K _data_errors
-77 K _button_hits
-78 A _hemisphere_center
-79 A _hemisphere_rect
-80 A _hemisphere_radius
-81 E _focus_bounds
-83 A _projection_dirty
-84 G _global_screen_segments
-85 E _selected_country_segments
-86 G _country_screen_anchors
-87 G _event_screen_positions
-88 G _focus_country_screen_polygons
-89 G _focus_region_screen_polygons
-90 G _focus_region_screen_anchors
-92 D viewport_container
-93 D viewport
+48 A activity_unread
+50 E _countries
+51 E _country_by_id
+52 E _country_unit_polygons
+53 E _country_anchor_units
+54 K _coastline_unit_lines
+56 K _regions
+57 K _region_by_id
+58 K _region_polygons
+59 K _cities
+60 K _city_by_id
+61 K _cities_by_region
+62 K _institutions
+63 K _institution_by_id
+64 K _institutions_by_city
+65 K _institutions_by_region
+66 K _character_profiles
+67 E _country_profile
+68 K _world_events
+69 K _event_by_id
+70 K _data_errors
+72 K _button_hits
+73 A _hemisphere_center
+74 A _hemisphere_rect
+75 A _hemisphere_radius
+76 E _focus_bounds
+78 A _projection_dirty
+79 G _global_screen_segments
+80 E _selected_country_segments
+81 G _country_screen_anchors
+82 G _event_screen_positions
+83 G _focus_country_screen_polygons
+84 G _focus_region_screen_polygons
+85 G _focus_region_screen_anchors
+87 D viewport_container
+88 D viewport
+@ scripts/ui_spikes/holographic_workspace/holographic_workspace_spike_runtime.gd | holographic_workspace_spike_runtime
+5 C INITIAL_TOTAL_MINUTES
+7 A _local_total_minutes
 @ scripts/ui_spikes/holographic_workspace/holographic_workspace_visual.gd | holographic_workspace_visual
 3 K _workspace_font
 @ scripts/v2_2/v2_condition_service.gd | V2ConditionService
@@ -1276,6 +1273,11 @@
 33 K last_hour_processing_usec
 34 K maximum_hour_processing_usec
 35 K hours_processed
+```
+
+### 第8段：`scripts/v2_2/v2_life_loop_ui_binding.gd` 至 `scripts/v2_3/v2_3_formal_schedule_interface.gd`
+
+```text
 @ scripts/v2_2/v2_life_loop_ui_binding.gd | V2LifeLoopUiBinding
 7 K simulation
 8 A save_service
@@ -1284,11 +1286,6 @@
 11 K _panel_pause_depth
 12 A _panel_previous_paused
 13 A _panel_previous_speed
-```
-
-### 第8段：`scripts/v2_2/v2_notification_service.gd` 至 `scripts/v2_3/v2_3_leave_service.gd`
-
-```text
 @ scripts/v2_2/v2_notification_service.gd | V2NotificationService
 5 K notifications
 6 A _next_sequence
@@ -1448,6 +1445,11 @@
 6 C FORMAL_PANEL_IDS
 @ scripts/v2_3/v2_3_formal_schedule_interface.gd | V23FormalScheduleInterface
 5 K leave_confirmation
+```
+
+### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/v2_3/v2_3_survival_autonomy_service.gd`
+
+```text
 @ scripts/v2_3/v2_3_formal_simulation.gd | V23FormalSimulation
 5 A finance_config
 6 A finance
@@ -1457,11 +1459,6 @@
 @ scripts/v2_3/v2_3_leave_service.gd | V23LeaveService
 5 K authorizations
 6 A _next_sequence
-```
-
-### 第9段：`scripts/v2_3/v2_3_life_loop_interface.gd` 至 `scripts/v2_3/v2_3_survival_autonomy_service.gd`
-
-```text
 @ scripts/v2_3/v2_3_life_loop_interface.gd | V23LifeLoopInterface
 5 C V2_3_MENU_SCENE
 6 C V2_3_PANEL_IDS

@@ -45,11 +45,6 @@ var drag_moved: bool = false
 
 var sim_paused: bool = true
 var sim_speed: int = 1
-var sim_day: int = 12
-var sim_month: int = 3
-var sim_year: int = 1900
-var sim_hour: int = 8
-var sim_minute: int = 0
 var activity_unread: int = 2
 
 var _countries: Array[Dictionary] = []
@@ -118,7 +113,7 @@ func _process(delta: float) -> void:
 func _on_clock_timer_timeout() -> void:
 	if sim_paused:
 		return
-	_advance_clock(15 * sim_speed)
+	_advance_simulation_minutes(15 * sim_speed)
 	queue_redraw()
 
 
@@ -1186,7 +1181,12 @@ func _draw_activity_panel(rect: Rect2) -> void:
 func _draw_time_panel(rect: Rect2) -> void:
 	_draw_label(rect.position + Vector2(24.0, 38.0), "时间与速度", 19)
 	_draw_label(rect.position + Vector2(24.0, 78.0), _format_sim_datetime(), 15)
-	_draw_label(rect.position + Vector2(24.0, 110.0), "样机本地时钟，不修改正式时间系统", 12, Color(0.73, 0.82, 0.78, 1.0))
+	_draw_label(
+		rect.position + Vector2(24.0, 110.0),
+		_time_source_description(),
+		12,
+		Color(0.73, 0.82, 0.78, 1.0)
+	)
 	_draw_button(Rect2(rect.position.x + 24.0, rect.position.y + 142.0, 74.0, 30.0), "暂停" if not sim_paused else "继续", "toggle_pause", true)
 	_draw_button(Rect2(rect.position.x + 110.0, rect.position.y + 142.0, 56.0, 30.0), "1×", "speed:1", true)
 	_draw_button(Rect2(rect.position.x + 176.0, rect.position.y + 142.0, 56.0, 30.0), "2×", "speed:2", true)
@@ -1471,23 +1471,15 @@ func _city_name() -> String:
 
 
 func _format_sim_datetime() -> String:
-	return "%04d年%02d月%02d日 %02d:%02d" % [sim_year, sim_month, sim_day, sim_hour, sim_minute]
+	return "无权威时间源"
 
 
-func _advance_clock(minutes: int) -> void:
-	sim_minute += minutes
-	while sim_minute >= 60:
-		sim_minute -= 60
-		sim_hour += 1
-	while sim_hour >= 24:
-		sim_hour -= 24
-		sim_day += 1
-	if sim_day > 31:
-		sim_day = 1
-		sim_month += 1
-	if sim_month > 12:
-		sim_month = 1
-		sim_year += 1
+func _time_source_description() -> String:
+	return "当前场景未绑定时间源"
+
+
+func _advance_simulation_minutes(_minutes: int) -> void:
+	pass
 
 
 func _lon_lat_from_record(record: Dictionary, key: String) -> Variant:
