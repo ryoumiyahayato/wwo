@@ -4,7 +4,10 @@ from __future__ import annotations
 import faulthandler
 import json
 import os
+import struct
+import sys
 import threading
+import zlib
 from collections import deque
 from pathlib import Path
 
@@ -13,6 +16,8 @@ import generate_formal_v23_dependency_audit as generator
 _DYNAMIC_INDEX: list[tuple[str, int, str]] | None = None
 _ORIGINAL_BUILD_AUDIT = generator.build_audit
 RUNNER_PATH = "tools/run_formal_v23_dependency_audit.py"
+INVENTORY_PATH = "docs/refactors/formal_v23_dependency_inventory.json.gz"
+REPORT_PATH = "docs/refactors/formal_v23_dependency_audit.md"
 
 
 def _linear_bfs_paths(roots: set[str], nodes: dict) -> tuple[dict[str, list[str]], dict[str, int]]:
@@ -216,6 +221,14 @@ def _serialize_compact_json(audit: dict) -> str:
     return json.dumps(audit, ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n"
 
 
+def _deterministic_gzip(data: bytes) -> bytes:
+    compressor = zlib.compressobj(level=9, method=zlib.DEFLATED, wbits=-zlib.MAX_WBITS)
+    payload = compressor.compress(data) + compressor.flush()
+    header = b"\x1f\x8b\x08\x00\x00\x00\x00\x00\x02\xff"
+    footer = struct.pack("<II", zlib.crc32(data) & 0xFFFFFFFF, len(data) & 0xFFFFFFFF)
+    return header + payload + footer
+
+
 def _render_concise_markdown(audit: dict) -> str:
     counts = audit["counts"]
     lines = [
@@ -225,6 +238,7 @@ def _render_concise_markdown(audit: dict) -> str:
         f"- 固定 Base SHA：`{audit['fixed_base_sha']}`",
         f"- 默认启动场景：`{audit['scan']['main_scene'] or '未解析'}`",
         f"- 扫描文件数：{audit['scan']['source_file_count']}",
+        f"- 完整机器清单：`{INVENTORY_PATH}`（确定性 gzip 压缩 JSON）",
         f"- D01 稳定契约 blob：`{audit['formal_time_contract']['actual_blob_sha']}`",
         f"- D01 稳定契约保持不变：`{str(audit['formal_time_contract']['unchanged']).lower()}`",
         "- 扫描覆盖 `project.godot`、导出配置、脚本、场景、资源、数据、测试、工具和 workflow；文档引用不作为生产依赖证据。", "",
@@ -308,19 +322,44 @@ def _render_concise_markdown(audit: dict) -> str:
     return "\n".join(lines)
 
 
+def _write_or_check_gzip(root: Path, audit: dict, check: bool) -> int:
+    report = _render_concise_markdown(audit).encode("utf-8")
+    inventory = _deterministic_gzip(_serialize_compact_json(audit).encode("utf-8"))
+    targets = {
+        root / REPORT_PATH: report,
+        root / INVENTORY_PATH: inventory,
+    }
+    failures: list[str] = []
+    for path, expected in targets.items():
+        if check:
+            actual = path.read_bytes() if path.exists() else None
+            if actual != expected:
+                failures.append(path.relative_to(root).as_posix())
+        else:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(expected)
+    if failures:
+        print("Out-of-date formal V2.3 dependency artifacts:", file=sys.stderr)
+        for path in failures:
+            print(f"  {path}", file=sys.stderr)
+        return 1
+    return 0
+
+
 def _hard_timeout() -> None:
     print("Formal V2.3 dependency generation exceeded 180 seconds.", flush=True)
     os._exit(124)
 
 
 def main() -> int:
-    generator.EXCLUDED_PATHS.add(RUNNER_PATH)
+    generator.EXCLUDED_PATHS.update({RUNNER_PATH, INVENTORY_PATH, REPORT_PATH})
     generator.engine.bfs_paths = _linear_bfs_paths
     generator.reverse_closure = _linear_reverse_closure
     generator.incoming_dynamic_sites = _indexed_incoming_dynamic_sites
     generator.build_audit = _refined_build_audit
     generator.engine.serialize_json = _serialize_compact_json
     generator.render_markdown = _render_concise_markdown
+    generator.write_or_check = _write_or_check_gzip
     faulthandler.dump_traceback_later(60, repeat=True)
     timer = threading.Timer(180, _hard_timeout)
     timer.daemon = True
