@@ -11,6 +11,11 @@ _AUDIT_INFRASTRUCTURE_PATHS = {
 }
 
 
+def normalize_audit_text_bytes(data: bytes) -> bytes:
+    """Normalize audit text input line endings without changing repository files."""
+    return data.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+
+
 def iter_tracked_scan_files(root: Path, audit_module) -> Iterable[Path]:
     """Yield only Git-tracked audit inputs with platform-independent paths."""
     completed = subprocess.run(
@@ -42,6 +47,12 @@ except ModuleNotFoundError:
     _formal_v23_audit = None
 
 if _formal_v23_audit is not None:
+    _raw_git_blob_sha = _formal_v23_audit.git_blob_sha
+
+    def _normalized_audit_text_blob_sha(data: bytes) -> str:
+        return _raw_git_blob_sha(normalize_audit_text_bytes(data))
+
     _formal_v23_audit.iter_scan_files = (
         lambda root: iter_tracked_scan_files(root, _formal_v23_audit)
     )
+    _formal_v23_audit.git_blob_sha = _normalized_audit_text_blob_sha
