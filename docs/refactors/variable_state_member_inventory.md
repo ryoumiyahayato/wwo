@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1609|1237|15|0|512|5|32|16|60|882|511|263|
+|1598|1233|15|0|509|5|32|16|60|878|506|260|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,609个生产成员字段逐项表
+## 1,598个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -1498,18 +1498,6 @@
 7 I save_migration
 8 K route_preview
 9 A _view_revision
-@ scripts/v2_3/v2_3_minimal_hud_overlay.gd | V23MinimalHudOverlay
-4 C PAPER
-5 C PAPER_DARK
-6 C INK
-7 C INK_MUTED
-8 C GOLD
-9 C PANEL
-10 C PANEL_BORDER
-12 K host
-13 K field_book_open
-14 K field_book_progress
-15 K _refresh_timer
 @ scripts/v2_3/v2_3_minute_clock.gd | V23MinuteClock
 9 C REAL_SECONDS_PER_TICK
 10 C MINUTES_PER_SPEED
