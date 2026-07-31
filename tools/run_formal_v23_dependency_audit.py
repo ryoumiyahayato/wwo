@@ -78,6 +78,35 @@ def _location_only(site: str) -> str:
     return site
 
 
+def _first_location_per_file(sites: list[str]) -> list[str]:
+    result: dict[str, str] = {}
+    for site in sorted({_location_only(value) for value in sites}):
+        path = site.rsplit(":", 1)[0] if ":" in site else site
+        result.setdefault(path, site)
+    return [result[path] for path in sorted(result)]
+
+
+def _deduplicate_indirect_callers(audit: dict) -> None:
+    unique_sets = sorted({
+        tuple(item["indirect_callers"])
+        for item in audit["candidates"]
+        if item["indirect_callers"]
+    })
+    identifiers = {values: f"s{index:03d}" for index, values in enumerate(unique_sets, 1)}
+    audit["indirect_caller_sets"] = {
+        identifiers[values]: list(values) for values in unique_sets
+    }
+    for item in audit["candidates"]:
+        values = tuple(item["indirect_callers"])
+        item["indirect_callers"] = {
+            "set_id": identifiers.get(values),
+            "count": len(values),
+        }
+    audit["scan"]["indirect_callers_encoding"] = (
+        "Each candidate records a set_id and count; the complete sorted caller list is stored once in indirect_caller_sets."
+    )
+
+
 def _recount(audit: dict) -> None:
     entries = audit["candidates"]
     counts = audit["counts"]
@@ -107,7 +136,7 @@ def _compact_evidence(audit: dict) -> None:
         item["dynamic_loading_evidence"] = sorted({_location_only(site) for site in item["dynamic_loading_evidence"]})
     checks = audit["special_checks"]
     for key in ("loran", "vesta", "prototype_map"):
-        checks[key]["evidence"] = sorted({_location_only(site) for site in checks[key]["evidence"]})
+        checks[key]["evidence"] = _first_location_per_file(checks[key]["evidence"])
     performance = checks["old_150_second_performance_test"]
     performance["evidence"] = sorted({_location_only(site) for site in performance["evidence"]})
     performance["other_150_second_workflow_timeouts"] = sorted({
@@ -175,6 +204,7 @@ def _refine_audit(root: Path, audit: dict) -> dict:
     _recount(audit)
     _compact_evidence(audit)
     _compact_roots(audit)
+    _deduplicate_indirect_callers(audit)
     return audit
 
 
