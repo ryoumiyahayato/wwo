@@ -191,9 +191,8 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          git config core.autocrlf false
-          git config core.eol lf
-          git checkout --force HEAD -- tests/variable_state/formal_time_stable_contract_test.gd
+          python -c "import pathlib,subprocess; pathlib.Path('tests/variable_state/formal_time_stable_contract_test.gd').write_bytes(subprocess.check_output(['git','cat-file','blob','HEAD:tests/variable_state/formal_time_stable_contract_test.gd']))"
+          if ($LASTEXITCODE -ne 0) { throw 'Failed to restore protected contract bytes from Git object' }
           python tools/run_tracked_dependency_audit.py --check --print-summary
           if ($LASTEXITCODE -ne 0) { throw 'Formal V2.3 dependency audit check failed' }
           python -c "import gzip,json,pathlib; p=pathlib.Path('docs/refactors/formal_v23_dependency_inventory.json.gz'); d=json.loads(gzip.decompress(p.read_bytes()).decode('utf-8')); assert d['formal_time_contract']['unchanged']; assert d['counts']['candidate_total'] == len(d['candidates'])"
