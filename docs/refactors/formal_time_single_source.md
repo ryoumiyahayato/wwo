@@ -46,7 +46,9 @@ UI 样机场景改为加载 `holographic_workspace_spike_runtime.gd`。该脚本
 
 ## 公历和经济结算
 
-日期统一由 `V2DateTime` 从权威累计小时派生。`V2DateTime` 使用完整格里高利规则，1900 年不是闰年，1900 年 2 月为 28 天。经济服务接收本批跨越的完整小时数，并依据权威目标小时处理 24 小时边界；自身不再递增或恢复独立小时字段。
+日期统一由 `V2DateTime` 从权威累计小时派生。`V2DateTime` 使用完整格里高利规则，1900 年不是闰年，1900 年 2 月为 28 天。
+
+正式模拟在写入本批分钟之前记录起始权威小时，在写入后计算结束权威小时，并把两者传给 `settle_hour_range(previous_total_hour, current_total_hour)`。经济服务只消费 `(previous_total_hour, current_total_hour]` 内跨越的完整小时，并验证结束小时等于当前权威小时；它不保存、递增或恢复第二个小时计数。因此 23/24、47/48 小时及大跨度跨日推进均只结算一次。
 
 ## 保存和读取
 
