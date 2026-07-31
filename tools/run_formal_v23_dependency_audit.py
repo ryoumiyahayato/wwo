@@ -6,6 +6,26 @@ from collections import deque
 import generate_formal_v23_dependency_audit as generator
 
 
+def _linear_bfs_paths(roots: set[str], nodes: dict) -> tuple[dict[str, list[str]], dict[str, int]]:
+    paths: dict[str, list[str]] = {}
+    distances: dict[str, int] = {}
+    queue: deque[str] = deque()
+    for root in sorted(roots):
+        if root in nodes and root not in distances:
+            paths[root] = [root]
+            distances[root] = 0
+            queue.append(root)
+    while queue:
+        current = queue.popleft()
+        for target in sorted(nodes[current].references):
+            if target in distances:
+                continue
+            distances[target] = distances[current] + 1
+            paths[target] = paths[current] + [target]
+            queue.append(target)
+    return paths, distances
+
+
 def _linear_reverse_closure(path: str, reverse: dict[str, set[str]]) -> set[str]:
     seen: set[str] = set()
     queued: set[str] = set(reverse.get(path, set()))
@@ -24,6 +44,7 @@ def _linear_reverse_closure(path: str, reverse: dict[str, set[str]]) -> set[str]
 
 
 def main() -> int:
+    generator.engine.bfs_paths = _linear_bfs_paths
     generator.reverse_closure = _linear_reverse_closure
     return generator.main()
 
