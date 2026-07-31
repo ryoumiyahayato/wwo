@@ -14,7 +14,7 @@ on:
       - "tests/**"
       - "tools/**"
       - "docs/refactors/formal_v23_dependency_audit.md"
-      - "docs/refactors/formal_v23_dependency_inventory.json"
+      - "docs/refactors/formal_v23_dependency_inventory.json.gz"
       - ".github/workflows/**"
   workflow_dispatch:
 
@@ -57,7 +57,7 @@ jobs:
             git diff --name-only "$PR_BASE_SHA...$PR_HEAD_SHA" > changed-files.txt
             while IFS= read -r path; do
               case "$path" in
-                tools/audit_formal_v23_dependencies.py|tools/generate_formal_v23_dependency_audit.py|tools/run_formal_v23_dependency_audit.py|tests/tools/test_audit_formal_v23_dependencies.py|tests/tools/test_generate_formal_v23_dependency_audit.py|docs/refactors/formal_v23_dependency_audit.md|docs/refactors/formal_v23_dependency_inventory.json|.github/workflows/formal-v23-dependency-audit.yml)
+                tools/audit_formal_v23_dependencies.py|tools/generate_formal_v23_dependency_audit.py|tools/run_formal_v23_dependency_audit.py|tests/tools/test_audit_formal_v23_dependencies.py|tests/tools/test_generate_formal_v23_dependency_audit.py|tests/tools/test_run_formal_v23_dependency_audit.py|docs/refactors/formal_v23_dependency_audit.md|docs/refactors/formal_v23_dependency_inventory.json.gz|.github/workflows/formal-v23-dependency-audit.yml)
                   ;;
                 *)
                   echo "Out-of-scope file: $path" >&2
@@ -72,11 +72,12 @@ jobs:
             exit 1
           fi
 
-      - name: Test dependency graph and strict policy
+      - name: Test dependency graph, policy, and compressed inventory
         run: |
           set -euo pipefail
           python tests/tools/test_audit_formal_v23_dependencies.py
           python tests/tools/test_generate_formal_v23_dependency_audit.py
+          python tests/tools/test_run_formal_v23_dependency_audit.py
 
       - name: Regenerate dependency artifacts
         run: python tools/run_formal_v23_dependency_audit.py --write --print-summary
@@ -87,16 +88,26 @@ jobs:
           name: formal-v23-dependency-audit-generated
           path: |
             docs/refactors/formal_v23_dependency_audit.md
-            docs/refactors/formal_v23_dependency_inventory.json
+            docs/refactors/formal_v23_dependency_inventory.json.gz
           if-no-files-found: error
 
       - name: Verify committed artifacts are current
         run: |
           set -euo pipefail
           python tools/run_formal_v23_dependency_audit.py --check
+          python - <<'PY'
+          import gzip
+          import json
+          from pathlib import Path
+          path = Path('docs/refactors/formal_v23_dependency_inventory.json.gz')
+          inventory = json.loads(gzip.decompress(path.read_bytes()).decode('utf-8'))
+          assert inventory['schema_version'] == 1
+          assert inventory['formal_time_contract']['unchanged'] is True
+          assert inventory['counts']['candidate_total'] == len(inventory['candidates'])
+          PY
           git diff --exit-code -- \
             docs/refactors/formal_v23_dependency_audit.md \
-            docs/refactors/formal_v23_dependency_inventory.json
+            docs/refactors/formal_v23_dependency_inventory.json.gz
 
       - name: Verify variable-state audit determinism
         run: |
@@ -181,6 +192,8 @@ jobs:
           $ErrorActionPreference = 'Stop'
           python tools/run_formal_v23_dependency_audit.py --check --print-summary
           if ($LASTEXITCODE -ne 0) { throw 'Formal V2.3 dependency audit check failed' }
+          python -c "import gzip,json,pathlib; p=pathlib.Path('docs/refactors/formal_v23_dependency_inventory.json.gz'); d=json.loads(gzip.decompress(p.read_bytes()).decode('utf-8')); assert d['formal_time_contract']['unchanged']; assert d['counts']['candidate_total'] == len(d['candidates'])"
+          if ($LASTEXITCODE -ne 0) { throw 'Compressed inventory validation failed' }
           $blob = git hash-object tests/variable_state/formal_time_stable_contract_test.gd
           if ($blob -ne $env:D01_CONTRACT_BLOB) { throw "D01 stable contract changed: $blob" }
 
