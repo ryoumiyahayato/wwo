@@ -16,6 +16,7 @@ import generate_formal_v23_dependency_audit as generator
 _DYNAMIC_INDEX: list[tuple[str, int, str]] | None = None
 _ORIGINAL_BUILD_AUDIT = generator.build_audit
 RUNNER_PATH = "tools/run_formal_v23_dependency_audit.py"
+RUNNER_TEST_PATH = "tests/tools/test_run_formal_v23_dependency_audit.py"
 INVENTORY_PATH = "docs/refactors/formal_v23_dependency_inventory.json.gz"
 REPORT_PATH = "docs/refactors/formal_v23_dependency_audit.md"
 
@@ -176,7 +177,8 @@ def _compact_roots(audit: dict) -> None:
 
 def _refine_audit(root: Path, audit: dict) -> dict:
     audit["candidates"] = [
-        item for item in audit["candidates"] if item["file_path"] != RUNNER_PATH
+        item for item in audit["candidates"]
+        if item["file_path"] not in {RUNNER_PATH, RUNNER_TEST_PATH}
     ]
     by_path = {item["file_path"]: item for item in audit["candidates"]}
     changed = True
@@ -352,7 +354,7 @@ def _hard_timeout() -> None:
 
 
 def main() -> int:
-    generator.EXCLUDED_PATHS.update({RUNNER_PATH, INVENTORY_PATH, REPORT_PATH})
+    generator.EXCLUDED_PATHS.update({RUNNER_PATH, RUNNER_TEST_PATH, INVENTORY_PATH, REPORT_PATH})
     generator.engine.bfs_paths = _linear_bfs_paths
     generator.reverse_closure = _linear_reverse_closure
     generator.incoming_dynamic_sites = _indexed_incoming_dynamic_sites
