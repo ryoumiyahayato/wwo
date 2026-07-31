@@ -36,14 +36,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  existing-validation:
-    runs-on: windows-latest
-    timeout-minutes: 45
+  cleanup-supplemental-validation:
+    runs-on: windows-2022
+    timeout-minutes: 60
+    env:
+      FIXED_BASE_SHA: db5556125a78a296045cb29c7cba18ff2438af96
+      D01_CONTRACT_BLOB: 871d312cd0d8fa4370aa201ad7ac5a863684ab4d
     steps:
-      - name: Checkout
+      - name: Checkout cleanup Head
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Install Godot 4.6.3
+      - name: Install exact Godot 4.6.3
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -56,81 +61,115 @@ jobs:
           "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           & $binary --version
 
-      - name: Run existing validation baseline
-        shell: pwsh
-        run: |
-          powershell -ExecutionPolicy Bypass -File tools/run_validation.ps1 -GodotPath $env:GODOT_BIN
-
-  variable-state-baseline:
-    runs-on: windows-latest
-    timeout-minutes: 15
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Godot 4.6.3
+      - name: Import project and parse scripts
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $archive = Join-Path $env:RUNNER_TEMP 'godot.zip'
-          $install = Join-Path $env:RUNNER_TEMP 'godot-4.6.3'
-          Invoke-WebRequest -Uri 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip' -OutFile $archive
-          Expand-Archive -LiteralPath $archive -DestinationPath $install
-          $binary = (Get-ChildItem -LiteralPath $install -Filter 'Godot_v4.6.3-stable_win64.exe' -Recurse | Select-Object -First 1).FullName
-          if (-not $binary) { throw 'Godot 4.6.3 executable was not found after extraction' }
-          "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          & $binary --version
+          $log = 'cleanup-import.log'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless', '--audio-driver', 'Dummy', '--editor', '--path', '.', '--quit-after', '8', '--log-file', $log) -Wait -PassThru -NoNewWindow
+          $text = if (Test-Path -LiteralPath $log) { Get-Content -LiteralPath $log -Raw } else { '' }
+          Write-Host $text
+          if ($process.ExitCode -ne 0) { throw "Godot import failed with exit code $($process.ExitCode)" }
+          if ($text -match 'SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|(?m)^ERROR:') { throw 'Godot import emitted a script or resource error' }
 
-      - name: Import project class cache
-        shell: pwsh
-        run: |
-          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless', '--editor', '--path', '.', '--quit-after', '2') -Wait -PassThru -NoNewWindow
-          if ($process.ExitCode -ne 0) { throw "Godot project import failed with exit code $($process.ExitCode)" }
-
-      - name: Generate SAVE_VERSION 1 fixture through production services
+      - name: Verify cleanup scope and protected boundaries
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless', '--path', '.', '--script', 'res://tests/variable_state/generate_current_save_v1_fixture.gd') -Wait -PassThru -NoNewWindow
-          if ($process.ExitCode -ne 0) { throw "Fixture generator failed with exit code $($process.ExitCode)" }
-          $fixture = Get-ChildItem -LiteralPath (Join-Path $env:APPDATA 'Godot\app_userdata') -Filter 'current_save_v1.json' -Recurse | Select-Object -First 1
-          if (-not $fixture) { throw 'Generated SAVE_VERSION 1 fixture was not found under user://' }
-          New-Item -ItemType Directory -Force -Path builds/variable-state | Out-Null
-          Copy-Item -LiteralPath $fixture.FullName -Destination builds/variable-state/current_save_v1.json
-          $snapshot = Get-Content -LiteralPath builds/variable-state/current_save_v1.json -Raw | ConvertFrom-Json
-          if ([int]$snapshot.save_version -ne 1) { throw 'Generated fixture is not SAVE_VERSION 1' }
-          $player = $snapshot.characters.active | Where-Object id -eq $snapshot.player_character_id | Select-Object -First 1
-          if (-not $player) { throw 'Generated fixture player is absent from active characters' }
-          if ([string]$snapshot.selected_country_id -ne [string]$player.country_id) {
-            throw 'Generated fixture selected_country_id differs from player country'
+          $deleted = @(
+            'scenes/v2_3/v2_3_entry_hud_capture.tscn',
+            'scenes/v2_3/v2_3_entry_hud_probe.tscn',
+            'scripts/v2_3/v2_3_minimal_hud_overlay.gd',
+            'scripts/v2_3/v2_3_minimal_hud_overlay_polish.gd'
+          )
+          foreach ($path in $deleted) {
+            if (Test-Path -LiteralPath $path) { throw "Retired remnant still exists: $path" }
+          }
+          foreach ($path in @('scripts/v2_3/v2_3_save_migration.gd', 'scripts/v2_3/v2_3_save_service.gd')) {
+            if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw "Compatibility service missing: $path" }
+          }
+          $blob = git hash-object tests/variable_state/formal_time_stable_contract_test.gd
+          if ($blob -ne $env:D01_CONTRACT_BLOB) { throw "D01 contract blob changed: $blob" }
+          git fetch origin $env:FIXED_BASE_SHA --depth=1
+          $changed = @(git diff --name-only "$env:FIXED_BASE_SHA...HEAD")
+          $uid = @($changed | Where-Object { $_ -match '(^|/)\.uid$' })
+          if ($uid.Count -ne 0) { throw "Unexpected UID changes: $($uid -join ', ')" }
+          $productionChanges = @($changed | Where-Object { $_ -like 'scripts/*' -or $_ -like 'scenes/*' })
+          $allowed = @(
+            'scenes/v2_3/v2_3_entry_hud_capture.tscn',
+            'scenes/v2_3/v2_3_entry_hud_probe.tscn',
+            'scripts/v2_3/v2_3_minimal_hud_overlay.gd',
+            'scripts/v2_3/v2_3_minimal_hud_overlay_polish.gd'
+          )
+          $unexpected = @($productionChanges | Where-Object { $_ -notin $allowed })
+          if ($unexpected.Count -ne 0) { throw "Unexpected production or scene changes: $($unexpected -join ', ')" }
+          $formalRoots = @('project.godot', 'scenes/formal', 'scripts/formal', 'scripts/ui_spikes/holographic_workspace')
+          $formalFiles = foreach ($root in $formalRoots) {
+            if (Test-Path -LiteralPath $root -PathType Leaf) { Get-Item -LiteralPath $root }
+            elseif (Test-Path -LiteralPath $root -PathType Container) { Get-ChildItem -LiteralPath $root -Recurse -File }
+          }
+          $forbiddenPattern = 'v2_3_entry_hud_capture|v2_3_entry_hud_probe|v2_3_minimal_hud_overlay|PrototypeV2MapCanvas|PrototypeMap|\bLoran\b|\bVesta\b'
+          $formalHits = @($formalFiles | Select-String -Pattern $forbiddenPattern -CaseSensitive:$false)
+          if ($formalHits.Count -ne 0) {
+            $formalHits | ForEach-Object { Write-Host "$($_.Path):$($_.LineNumber):$($_.Line)" }
+            throw 'Formal product roots contain a retired V2.3, PrototypeMap, Loran, or Vesta reference'
+          }
+          $project = Get-Content -LiteralPath project.godot -Raw
+          if ($project -notmatch 'run/main_scene="uid://') { throw 'project.godot main scene is not configured by UID' }
+          $export = Get-Content -LiteralPath export_presets.cfg -Raw
+          if ($export -notmatch 'name="Windows Desktop"' -or $export -notmatch 'platform="Windows Desktop"' -or $export -notmatch 'binary_format/architecture="x86_64"') { throw 'Windows Desktop export preset is incomplete' }
+          if ($export -match 'v2_3_entry_hud_capture|v2_3_entry_hud_probe|v2_3_minimal_hud_overlay|PrototypeV2MapCanvas|PrototypeMap') { throw 'Windows export configuration references retired product remnants' }
+          Write-Host "Protected cleanup boundaries and Windows export configuration passed."
+
+      - name: Run variable-state behavior baseline
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $log = 'variable-state-behavior.log'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless', '--audio-driver', 'Dummy', '--path', '.', '--script', 'res://tests/variable_state/variable_state_behavior_baseline_test.gd', '--log-file', $log) -Wait -PassThru -NoNewWindow
+          $text = Get-Content -LiteralPath $log -Raw
+          Write-Host $text
+          if ($process.ExitCode -ne 0 -or $text -notmatch 'Variable state behavior baseline: [1-9][0-9]* checks, 0 failures') { throw 'Variable-state behavior baseline failed or emitted no valid summary' }
+
+      - name: Run historical AI economy and retained-service behavior
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $all = @(Get-ChildItem -LiteralPath tests -Recurse -Filter '*.gd' -File | ForEach-Object {
+            [pscustomobject]@{ Path = $_.FullName; Text = (Get-Content -LiteralPath $_.FullName -Raw) }
+          })
+          function Select-OneTest([string]$label, [string]$pattern) {
+            $matches = @($all | Where-Object { $_.Text -match $pattern })
+            Write-Host "$label candidates: $($matches.Path -join ', ')"
+            if ($matches.Count -ne 1) { throw "$label expected exactly one test script, found $($matches.Count)" }
+            return $matches[0]
+          }
+          $targets = @(
+            @{ Label = 'V2.2 historical AI economy'; Expected = 42; Item = (Select-OneTest 'V2.2 historical AI economy' '(?is)(V2\.2.{0,120}historical.{0,80}AI.{0,80}economy|historical.{0,80}AI.{0,80}economy.{0,120}V2\.2)') },
+            @{ Label = 'V2.3 historical AI economy'; Expected = 42; Item = (Select-OneTest 'V2.3 historical AI economy' '(?is)(V2\.3.{0,120}historical.{0,80}AI.{0,80}economy|historical.{0,80}AI.{0,80}economy.{0,120}V2\.3)') },
+            @{ Label = 'Retained V2.3 services'; Expected = 69; Item = (Select-OneTest 'Retained V2.3 services' '(?is)(retained.{0,120}V2\.3.{0,80}services|V2\.3.{0,120}retained.{0,80}services)') }
+          )
+          foreach ($target in $targets) {
+            $relative = [IO.Path]::GetRelativePath($PWD.Path, $target.Item.Path).Replace('\', '/')
+            $log = (($target.Label -replace '[^A-Za-z0-9]+', '-').Trim('-').ToLowerInvariant() + '.log')
+            Write-Host "Running $($target.Label): $relative"
+            $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless', '--audio-driver', 'Dummy', '--path', '.', '--script', "res://$relative", '--log-file', $log) -Wait -PassThru -NoNewWindow
+            $text = Get-Content -LiteralPath $log -Raw
+            Write-Host $text
+            $summary = [regex]::Escape($target.Label) + ': ' + $target.Expected + ' checks, 0 failures'
+            if ($process.ExitCode -ne 0 -or $text -notmatch $summary) { throw "$($target.Label) failed or did not emit the expected $($target.Expected)-check summary" }
           }
 
-      - name: Verify committed fixture matches production output
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $fixturePath = 'tests/fixtures/save/current_save_v1.json'
-          if (-not (Test-Path -LiteralPath $fixturePath -PathType Leaf)) {
-            throw "Required committed fixture is missing: $fixturePath"
-          }
-          $generated = Get-Content -LiteralPath builds/variable-state/current_save_v1.json -Raw | ConvertFrom-Json | ConvertTo-Json -Depth 100 -Compress
-          $committed = Get-Content -LiteralPath $fixturePath -Raw | ConvertFrom-Json | ConvertTo-Json -Depth 100 -Compress
-          if ($generated -cne $committed) { throw 'Committed fixture differs from current production save output' }
-
-      - name: Upload generated fixture
+      - name: Upload supplemental validation logs
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: current-save-v1
-          path: builds/variable-state/current_save_v1.json
-          if-no-files-found: error
-
-      - name: Run variable-state behavior tests
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $testPath = 'tests/variable_state/variable_state_behavior_baseline_test.gd'
-          if (-not (Test-Path -LiteralPath $testPath -PathType Leaf)) {
-            throw "Required behavior test is missing: $testPath"
-          }
-          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless', '--path', '.', '--script', 'res://tests/variable_state/variable_state_behavior_baseline_test.gd') -Wait -PassThru -NoNewWindow
-          if ($process.ExitCode -ne 0) { throw "Variable-state behavior tests failed with exit code $($process.ExitCode)" }
+          name: cleanup-supplemental-validation-${{ github.run_id }}
+          path: |
+            cleanup-import.log
+            variable-state-behavior.log
+            v2-2-historical-ai-economy.log
+            v2-3-historical-ai-economy.log
+            retained-v2-3-services.log
+          if-no-files-found: ignore
+          retention-days: 7
