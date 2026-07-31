@@ -1,0 +1,238 @@
+name: Formal V2.3 dependency audit
+
+on:
+  pull_request:
+    branches:
+      - agent/formal-world-economy-integration
+    paths:
+      - "project.godot"
+      - "export_presets.cfg"
+      - "scripts/**"
+      - "scenes/**"
+      - "resources/**"
+      - "data/**"
+      - "tests/**"
+      - "tools/**"
+      - "docs/refactors/formal_v23_dependency_audit.md"
+      - "docs/refactors/formal_v23_dependency_inventory.json"
+      - ".github/workflows/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formal-v23-dependency-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FIXED_BASE_SHA: db5556125a78a296045cb29c7cba18ff2438af96
+  D01_CONTRACT_BLOB: 871d312cd0d8fa4370aa201ad7ac5a863684ab4d
+
+jobs:
+  deterministic-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verify fixed base and audit-only scope
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            test "$PR_BASE_SHA" = "$FIXED_BASE_SHA"
+            git diff --name-only "$PR_BASE_SHA...$PR_HEAD_SHA" > changed-files.txt
+            while IFS= read -r path; do
+              case "$path" in
+                tools/audit_formal_v23_dependencies.py|tests/tools/test_audit_formal_v23_dependencies.py|docs/refactors/formal_v23_dependency_audit.md|docs/refactors/formal_v23_dependency_inventory.json|.github/workflows/formal-v23-dependency-audit.yml)
+                  ;;
+                *)
+                  echo "Out-of-scope file: $path" >&2
+                  exit 1
+                  ;;
+              esac
+            done < changed-files.txt
+          fi
+          test "$(git hash-object tests/variable_state/formal_time_stable_contract_test.gd)" = "$D01_CONTRACT_BLOB"
+          if git diff --name-only "$FIXED_BASE_SHA...HEAD" | grep -E '(^|/)\.uid$|^\.godot/|^builds/|^artifacts/'; then
+            echo "Forbidden generated or UID path in diff" >&2
+            exit 1
+          fi
+
+      - name: Test the audit tool
+        run: python tests/tools/test_audit_formal_v23_dependencies.py
+
+      - name: Regenerate dependency artifacts
+        run: python tools/audit_formal_v23_dependencies.py --write --print-summary
+
+      - name: Upload generated audit artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: formal-v23-dependency-audit-generated
+          path: |
+            docs/refactors/formal_v23_dependency_audit.md
+            docs/refactors/formal_v23_dependency_inventory.json
+          if-no-files-found: error
+
+      - name: Verify committed artifacts are current
+        run: |
+          set -euo pipefail
+          python tools/audit_formal_v23_dependencies.py --check
+          git diff --exit-code -- \
+            docs/refactors/formal_v23_dependency_audit.md \
+            docs/refactors/formal_v23_dependency_inventory.json
+
+      - name: Verify variable-state audit determinism
+        run: |
+          set -euo pipefail
+          python tools/audit_variable_state.py
+          python tools/render_variable_state_audit_summary.py
+          python tools/render_variable_state_member_inventory.py
+          python tools/generate_variable_state_docs.py
+          python tools/render_variable_refactor_plan.py
+          git diff --exit-code -- \
+            docs/refactors/variable_state_audit.md \
+            docs/refactors/variable_state_member_inventory.md \
+            docs/refactors/state_ownership_matrix.md \
+            docs/refactors/variable_refactor_plan.md
+
+  full-validation:
+    needs: deterministic-audit
+    runs-on: windows-2022
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install exact Godot 4.6.3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'godot.zip'
+          $install = Join-Path $env:RUNNER_TEMP 'godot-4.6.3'
+          Invoke-WebRequest -Uri 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip' -OutFile $archive
+          Expand-Archive -LiteralPath $archive -DestinationPath $install
+          $binary = (Get-ChildItem -LiteralPath $install -Filter 'Godot_v4.6.3-stable_win64.exe' -Recurse | Select-Object -First 1).FullName
+          if (-not $binary) { throw 'Godot 4.6.3 executable was not found' }
+          "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          & $binary --version
+
+      - name: Prepare isolated user data
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $root = Join-Path $env:RUNNER_TEMP 'formal-v23-audit-user-data'
+          if (Test-Path -LiteralPath $root) { Remove-Item -LiteralPath $root -Recurse -Force }
+          New-Item -ItemType Directory -Force -Path $root | Out-Null
+          "APPDATA=$root" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Import project class cache
+        shell: pwsh
+        run: |
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless', '--audio-driver', 'Dummy', '--editor', '--path', '.', '--quit-after', '4') -Wait -PassThru -NoNewWindow
+          if ($process.ExitCode -ne 0) { throw "Godot import failed with exit code $($process.ExitCode)" }
+
+      - name: Run formal-time and variable-state contracts
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $tests = @(
+            'tests/variable_state/formal_time_stable_contract_test.gd',
+            'tests/variable_state/formal_time_known_defects_test.gd',
+            'tests/variable_state/variable_state_behavior_baseline_test.gd'
+          )
+          foreach ($test in $tests) {
+            $log = Join-Path $env:RUNNER_TEMP ((Split-Path $test -Leaf) + '.log')
+            $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless', '--audio-driver', 'Dummy', '--path', '.', '--script', "res://$test", '--log-file', $log) -Wait -PassThru -NoNewWindow
+            $content = if (Test-Path -LiteralPath $log) { Get-Content -LiteralPath $log -Raw } else { '' }
+            Write-Host $content
+            if ($process.ExitCode -ne 0) { throw "$test failed with exit code $($process.ExitCode)" }
+            if ($content -match 'SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|Assertion failed|[1-9][0-9]* failures|^ERROR:') {
+              throw "$test emitted a fatal error or failure"
+            }
+          }
+
+      - name: Run complete unified validation
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          powershell -ExecutionPolicy Bypass -File tools/run_validation.ps1 -GodotPath $env:GODOT_BIN
+          if ($LASTEXITCODE -ne 0) { throw "Unified validation failed with exit code $LASTEXITCODE" }
+
+      - name: Recheck audit and protected contract
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          python tools/audit_formal_v23_dependencies.py --check --print-summary
+          if ($LASTEXITCODE -ne 0) { throw 'Formal V2.3 dependency audit check failed' }
+          $blob = git hash-object tests/variable_state/formal_time_stable_contract_test.gd
+          if ($blob -ne $env:D01_CONTRACT_BLOB) { throw "D01 stable contract changed: $blob" }
+
+  alpha-three-year-performance:
+    needs: deterministic-audit
+    runs-on: windows-2022
+    timeout-minutes: 100
+    env:
+      BASE_SHA: ${{ github.event.pull_request.base.sha || 'db5556125a78a296045cb29c7cba18ff2438af96' }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      ARTIFACT_PATH: ${{ github.workspace }}\artifacts\formal-v23-alpha-three-year
+    steps:
+      - name: Checkout Head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.HEAD_SHA }}
+          path: head
+
+      - name: Checkout Base
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.BASE_SHA }}
+          path: base
+
+      - name: Install exact Godot 4.6.3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'godot.zip'
+          $install = Join-Path $env:RUNNER_TEMP 'godot-4.6.3'
+          Invoke-WebRequest -Uri 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip' -OutFile $archive
+          Expand-Archive -LiteralPath $archive -DestinationPath $install
+          $binary = (Get-ChildItem -LiteralPath $install -Filter 'Godot_v4.6.3-stable_win64.exe' -Recurse | Select-Object -First 1).FullName
+          if (-not $binary) { throw 'Godot 4.6.3 executable was not found' }
+          "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          & $binary --version
+
+      - name: Compare fixed Base and Head
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & "$env:GITHUB_WORKSPACE\head\tools\run_alpha_three_year_performance_gate.ps1" `
+            -GodotPath $env:GODOT_BIN `
+            -BasePath "$env:GITHUB_WORKSPACE\base" `
+            -HeadPath "$env:GITHUB_WORKSPACE\head" `
+            -OutputPath $env:ARTIFACT_PATH `
+            -Runs 5 `
+            -TargetSeconds 180 `
+            -AbsoluteSafetyCapSeconds 300
+          if ($LASTEXITCODE -ne 0) { throw "Alpha three-year performance gate failed with exit code $LASTEXITCODE" }
+
+      - name: Upload performance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formal-v23-alpha-three-year-performance
+          path: artifacts/formal-v23-alpha-three-year
+          if-no-files-found: ignore
