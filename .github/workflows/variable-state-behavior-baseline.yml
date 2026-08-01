@@ -6,6 +6,11 @@ on:
       - agent/formal-world-economy-integration
     paths:
       - ".github/workflows/variable-state-behavior-baseline.yml"
+      - "scenes/v2_3/v2_3_entry_hud_capture.tscn"
+      - "scenes/v2_3/v2_3_entry_hud_probe.tscn"
+      - "scripts/v2_3/v2_3_minimal_hud_overlay.gd"
+      - "scripts/v2_3/v2_3_minimal_hud_overlay_polish.gd"
+      - "tests/alpha/alpha_fixture_retained_services_performance_test.gd"
       - "tests/variable_state/**"
       - "tests/fixtures/save/**"
       - "tools/run_validation.ps1"

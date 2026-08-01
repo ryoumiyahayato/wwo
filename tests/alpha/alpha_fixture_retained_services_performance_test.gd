@@ -1,5 +1,10 @@
 extends SceneTree
-## No per-frame population scans, bounded histories and long-run smoke.
+## Retained Alpha/fixture services avoid per-frame scans, keep bounded histories,
+## and complete long-run smoke coverage.
+##
+## This is supplemental retained-service diagnostics, not the authoritative
+## performance gate. The five-run Base/Head Alpha three-year gate remains the
+## only authoritative performance acceptance.
 ##
 ## Local runs retain the strict wall-clock budget. Shared CI runners receive a
 ## wider but still finite budget because download/extraction and host load can
@@ -23,24 +28,24 @@ func _run() -> void:
 	test.expect(
 		not simulation_source.contains("func _process(")
 		and not simulation_source.contains("func _physics_process("),
-		"V2.3 模拟不在每帧入口遍历人物"
+		"Alpha/fixture 保留模拟不在每帧入口遍历人物"
 	)
 	test.expect(
 		not npc_source.contains("func _process(")
 		and not npc_source.contains("func _physics_process("),
-		"NPC 空间规划不绑定渲染帧"
+		"Alpha/fixture NPC 空间规划不绑定渲染帧"
 	)
 	test.expect(
 		not simulation_source.contains("PrototypeV2MapCanvas"),
-		"生活模拟不反向引用地图画布"
+		"保留生活模拟不反向引用地图画布"
 	)
 	var ci_run: bool = not OS.get_environment("CI").is_empty()
 	var thirty_day_budget_msec: int = 30000 if ci_run else 10000
 	var year_budget_msec: int = 180000 if ci_run else 90000
 	var simulation := V23ProductSimulationV2.new()
-	test.expect(simulation.initialize(), "长期性能回归环境初始化")
+	test.expect(simulation.initialize(), "Alpha/fixture 长期性能回归环境初始化")
 	if not simulation.initialized:
-		test.finish(self, "V2.3 performance guard")
+		test.finish(self, "Alpha/fixture retained services performance")
 		return
 	var start_msec: int = Time.get_ticks_msec()
 	simulation.run_days(30)
@@ -58,7 +63,7 @@ func _run() -> void:
 		year_simulation.run_days(1)
 		if (day_index + 1) % 30 == 0:
 			print(
-				"V2.3 year progress: %d days, %dms" % [
+				"Alpha/fixture year progress: %d days, %dms" % [
 					day_index + 1,
 					Time.get_ticks_msec() - year_start_msec,
 				]
@@ -70,7 +75,7 @@ func _run() -> void:
 	)
 	test.expect(
 		year_msec < year_budget_msec,
-		"一年正式产品社会模拟在 %d 毫秒预算内完成" % year_budget_msec
+		"一年 Alpha/fixture 保留服务模拟在 %d 毫秒预算内完成" % year_budget_msec
 	)
 	test.expect(
 		year_simulation.schedule.recent_completed_activities.size() <= 256,
@@ -105,12 +110,12 @@ func _run() -> void:
 		V23SaveService.new().validate_snapshot(
 			V23SaveService.new().build_snapshot(year_simulation)
 		).is_empty(),
-		"一年状态仍可形成有效产品快照"
+		"一年状态仍可形成有效 Alpha/fixture 快照"
 	)
 	print(
 		(
-			"V2.3 performance: 30d=%dms/%dms 365d=%dms/%dms max_hour=%dus "
-			+ "activities=%d messages=%d travel_plans=%d ci=%s"
+			"ALPHA_FIXTURE_RETAINED_PERFORMANCE 30d=%dms/%dms 365d=%dms/%dms "
+			+ "max_hour=%dus activities=%d messages=%d travel_plans=%d ci=%s"
 		) % [
 			thirty_day_msec, thirty_day_budget_msec,
 			year_msec, year_budget_msec,
@@ -121,7 +126,7 @@ func _run() -> void:
 			str(ci_run),
 		]
 	)
-	test.finish(self, "V2.3 performance guard")
+	test.finish(self, "Alpha/fixture retained services performance")
 
 
 static func _source(path: String) -> String:
