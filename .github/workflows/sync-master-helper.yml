@@ -1,0 +1,57 @@
+name: Temporary master sync helper
+
+on:
+  push:
+    branches:
+      - agent/sync-master-helper
+
+permissions:
+  contents: read
+
+jobs:
+  inspect-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out fixed synchronization branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/sync-master-into-formal-integration
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify fixed refs and inspect merge conflicts
+        shell: bash
+        run: |
+          set -euo pipefail
+          readonly EXPECTED_MASTER="92bbf22d05d8f1ba31fc2559f8b41d01a002e823"
+          readonly EXPECTED_INTEGRATION="8f6be5f5b41b9e00e10ebd998c45740327da966e"
+          readonly EXPECTED_BASE="b24135afc622581ee19e378391cb7616689258aa"
+
+          git fetch origin master agent/formal-world-economy-integration agent/sync-master-into-formal-integration
+          test "$(git rev-parse origin/master)" = "$EXPECTED_MASTER"
+          test "$(git rev-parse origin/agent/formal-world-economy-integration)" = "$EXPECTED_INTEGRATION"
+          test "$(git rev-parse HEAD)" = "$EXPECTED_INTEGRATION"
+          test "$(git merge-base origin/master origin/agent/formal-world-economy-integration)" = "$EXPECTED_BASE"
+          test -z "$(git status --porcelain)"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          set +e
+          git merge --no-ff --no-commit "$EXPECTED_MASTER"
+          merge_status=$?
+          set -e
+
+          echo "MERGE_STATUS=$merge_status"
+          echo "CONFLICTS_BEGIN"
+          git diff --name-only --diff-filter=U || true
+          echo "CONFLICTS_END"
+          echo "STATUS_BEGIN"
+          git status --short
+          echo "STATUS_END"
+
+          if [ "$merge_status" -ne 0 ]; then
+            exit 1
+          fi
+
+          git merge --abort
