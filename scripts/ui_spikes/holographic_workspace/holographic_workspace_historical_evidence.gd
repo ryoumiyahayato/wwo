@@ -8,6 +8,8 @@ const HISTORICAL_FLAGS_PATH := "res://data/world_map/historical/flags_1900.json"
 const HISTORICAL_SNAPSHOT_DATE := "1900-03-12"
 const GLOBAL_SOURCE_NOTICE := "1900-03-12 · CShapes 2.0 历史政治边界 · 旗帜含来源与适用年代"
 const LOWER_ADMIN_NOTICE := "政治边界为1900历史GIS；下级行政区仍为现代参考或待补数据。"
+const ADMIN1_REFERENCE_NOTICE := "现代一级行政区参考层，不代表1900年逐点历史边界。"
+const FLAG_REFERENCE_NOTICE := "旗面包含程序化识别码；用于空间导航，不等同于历史旗帜复原。"
 
 const NATIONALITY_ENTITY_ALIASES := {
 	"FRA": "country_fra",
@@ -253,8 +255,44 @@ func _historical_geometry_notice(_territories: Array) -> String:
 	return "辖区数量：1 · CShapes 2.0 于1900-03-12有效的历史政治边界"
 
 
+func _distinctive_pattern_for_entity(
+	entity_id: String, fallback: String
+) -> String:
+	return HistoricalMapIdentityStyle.encode_entity_pattern(
+		entity_id,
+		super._distinctive_pattern_for_entity(entity_id, fallback),
+		_country_by_id,
+		_history_entity_by_id
+	)
+
+
+func _distinctive_flag_color(
+	pattern: String, colors: PackedColorArray, u: float, v: float
+) -> Color:
+	var identity: Dictionary = HistoricalMapIdentityStyle.decode_pattern(pattern)
+	if identity.is_empty():
+		return super._distinctive_flag_color(pattern, colors, u, v)
+	var base: Color = super._distinctive_flag_color(
+		str(identity.get("base_pattern", "")), colors, u, v
+	)
+	return HistoricalMapIdentityStyle.apply_identity_code(
+		base,
+		colors,
+		int(identity.get("ordinal", 0)),
+		u,
+		v,
+		Callable(self, "_contrast_color")
+	)
+
+
 func _draw_global_world() -> void:
 	super._draw_global_world()
+	_draw_label(
+		Vector2(_hemisphere_rect.position.x + 14.0, _hemisphere_rect.position.y + 34.0),
+		FLAG_REFERENCE_NOTICE,
+		9,
+		Color(0.74, 0.77, 0.68, 0.72)
+	)
 	_draw_label(
 		Vector2(_hemisphere_rect.position.x + 14.0, _hemisphere_rect.position.y + 19.0),
 		GLOBAL_SOURCE_NOTICE,
@@ -266,7 +304,40 @@ func _draw_global_world() -> void:
 func _draw_world_admin1_layer() -> void:
 	super._draw_world_admin1_layer()
 	var rect := _main_content_rect(110.0, 166.0, 104.0)
+	var records: Array = (
+		_world_admin1_by_iso.get(selected_historical_territory_iso, []) as Array
+	)
+	var status: String = "现代参考" if not records.is_empty() else "无下级历史数据"
+	var badge := Rect2(rect.end.x - 270.0, rect.position.y + 18.0, 246.0, 24.0)
+	_panel(
+		badge,
+		Color(0.12, 0.09, 0.04, 0.96),
+		Color(0.80, 0.58, 0.25, 0.72)
+	)
+	_draw_label(
+		badge.position + Vector2(10.0, 16.0),
+		"数据等级：" + status,
+		10,
+		Color(0.96, 0.79, 0.46, 1.0)
+	)
 	_draw_label(rect.position + Vector2(24.0, 79.0), LOWER_ADMIN_NOTICE, 9, Color(0.96, 0.74, 0.43, 0.92))
+
+
+func _draw_world_admin1_local_layer() -> void:
+	super._draw_world_admin1_local_layer()
+	var rect := _main_content_rect(110.0, 166.0, 104.0)
+	var badge := Rect2(rect.end.x - 390.0, rect.position.y + 17.0, 366.0, 25.0)
+	_panel(
+		badge,
+		Color(0.14, 0.08, 0.04, 0.97),
+		Color(0.84, 0.49, 0.24, 0.78)
+	)
+	_draw_label(
+		badge.position + Vector2(10.0, 17.0),
+		ADMIN1_REFERENCE_NOTICE,
+		9,
+		Color(0.98, 0.79, 0.53, 1.0)
+	)
 
 
 func historical_evidence_report() -> Dictionary:

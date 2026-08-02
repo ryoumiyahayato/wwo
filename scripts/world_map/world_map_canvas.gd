@@ -337,7 +337,7 @@ func _edge_visible_in_scope(edge: Dictionary, scope: String) -> bool:
 
 
 func _scope_point(location: Dictionary, scope: String) -> Vector2:
-	var world_point: Vector2 = project_lon_lat(location.get("world_position", []))
+	var world_point: Vector2 = _cached_world_point(location)
 	if scope != MAP_SCOPE_CITY:
 		return world_point
 	if str(location.get("parent_region_id", "")) != _current_city_parent_id:
@@ -378,7 +378,7 @@ func _player_world_point() -> Vector2:
 	var location: Dictionary = _v2_3_local_location_lookup.get(_observer_location_id(), {}) as Dictionary
 	if location.is_empty():
 		return _camera_focus_point("lille")
-	return project_lon_lat(location.get("world_position", []))
+	return _cached_world_point(location)
 
 
 func _player_city_anchor() -> Vector2:
@@ -401,4 +401,14 @@ func _city_anchor_for_parent(parent_id: String) -> Vector2:
 			centre_candidate = location
 	if centre_candidate.is_empty():
 		return _player_world_point()
-	return project_lon_lat(centre_candidate.get("world_position", []))
+	return _cached_world_point(centre_candidate)
+
+
+func _cached_world_point(location: Dictionary) -> Vector2:
+	var location_id: String = str(location.get("location_id", ""))
+	var cached: Vector2 = _v2_3_local_location_points.get(
+		location_id, Vector2.INF
+	) as Vector2
+	if cached != Vector2.INF:
+		return cached
+	return project_lon_lat(location.get("world_position", []))

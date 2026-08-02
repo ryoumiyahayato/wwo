@@ -57,8 +57,7 @@ func shuffled_copy(values: Array) -> Array:
 	var output: Array = values.duplicate(true)
 	for index: int in range(output.size() - 1, 0, -1):
 		var swap_index: int = next_int(0, index)
-		var temporary: Variant = output[index]
+		var swap_value: Variant = output[index]
 		output[index] = output[swap_index]
-		output[swap_index] = temporary
+		output[swap_index] = swap_value
 	return output
-

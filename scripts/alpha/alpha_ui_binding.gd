@@ -18,7 +18,7 @@ const OBJECT_KINDS: Array[String] = [
 
 var simulation: AlphaSimulationService
 var save_service := AlphaSaveService.new()
-var migration := AlphaSaveMigration.new()
+var save_migration := AlphaSaveMigration.new()
 var developer_mode: bool = false
 var last_result: Dictionary = {}
 var _command_sequence: int = 1
@@ -447,7 +447,7 @@ func load_review() -> Dictionary:
 
 
 func migrate_v2_3_review() -> Dictionary:
-	var migrated: SaveOperationResult = migration.migrate_v2_3_file()
+	var migrated: SaveOperationResult = save_migration.migrate_v2_3_file()
 	if not migrated.success:
 		return _finish(_failure(migrated.error_code, migrated.message))
 	return load_review()

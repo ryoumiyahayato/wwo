@@ -12,7 +12,6 @@ TARGETS = [
     Path("scripts/formal/formal_world_menu.gd"),
     Path("scripts/formal/formal_world_application.gd"),
     Path("scripts/ui_spikes/holographic_workspace/holographic_workspace_release.gd"),
-    Path("scripts/ui_spikes/holographic_workspace/holographic_workspace_release_quality.gd"),
     Path("scripts/ui_spikes/holographic_workspace/holographic_workspace_release_probe.gd"),
     Path("tests/formal/formal_world_integration_test.gd"),
     Path("tests/formal/formal_world_ui_capture.gd"),
