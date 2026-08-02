@@ -9,59 +9,47 @@ permissions:
   contents: write
 
 jobs:
-  merge-fixed-master:
+  refresh-variable-docs:
     if: github.head_ref == 'agent/sync-master-helper'
     runs-on: ubuntu-latest
     steps:
-      - name: Check out fixed synchronization branch
+      - name: Check out synchronization branch
         uses: actions/checkout@v4
         with:
           ref: agent/sync-master-into-formal-integration
           fetch-depth: 0
 
-      - name: Merge fixed master and keep retired map player deleted
+      - name: Regenerate deterministic variable-state documents
         shell: bash
         run: |
           set -euxo pipefail
-          readonly EXPECTED_MASTER="92bbf22d05d8f1ba31fc2559f8b41d01a002e823"
-          readonly EXPECTED_INTEGRATION="8f6be5f5b41b9e00e10ebd998c45740327da966e"
-          readonly EXPECTED_BASE="b24135afc622581ee19e378391cb7616689258aa"
-          readonly RETIRED_MAP_PLAYER="scripts/world_map/world_map_canvas_player.gd"
-          readonly STABLE_CONTRACT="tests/variable_state/formal_time_stable_contract_test.gd"
-
-          git fetch origin master agent/formal-world-economy-integration agent/sync-master-into-formal-integration
-          test "$(git rev-parse origin/master)" = "$EXPECTED_MASTER"
-          test "$(git rev-parse origin/agent/formal-world-economy-integration)" = "$EXPECTED_INTEGRATION"
-          test "$(git rev-parse HEAD)" = "$EXPECTED_INTEGRATION"
-          test "$(git merge-base origin/master origin/agent/formal-world-economy-integration)" = "$EXPECTED_BASE"
+          readonly EXPECTED_HEAD="f94dfb87256a52d7aa51587e72f03acd2b6ae7b6"
+          git fetch origin agent/sync-master-into-formal-integration
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
           test -z "$(git status --porcelain)"
+
+          python3 tools/audit_variable_state.py
+          python3 tools/render_variable_state_audit_summary.py
+          python3 tools/render_variable_state_member_inventory.py
+          python3 tools/generate_variable_state_docs.py
+          python3 tools/render_variable_refactor_plan.py
+
+          git diff --check
+          git diff --quiet -- \
+            docs/refactors/variable_state_audit.md \
+            docs/refactors/variable_state_member_inventory.md \
+            docs/refactors/state_ownership_matrix.md \
+            docs/refactors/variable_refactor_plan.md && {
+              echo 'Expected generated document changes were not produced.' >&2
+              exit 1
+            }
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          set +e
-          git merge --no-ff --no-commit "$EXPECTED_MASTER"
-          merge_status=$?
-          set -e
-          test "$merge_status" -ne 0
-
-          mapfile -t conflicts < <(git diff --name-only --diff-filter=U)
-          test "${#conflicts[@]}" -eq 1
-          test "${conflicts[0]}" = "$RETIRED_MAP_PLAYER"
-
-          git rm -- "$RETIRED_MAP_PLAYER"
-          git status --short
-          test -z "$(git diff --name-only --diff-filter=U)"
-          test ! -e "$RETIRED_MAP_PLAYER"
-          test -f scenes/formal/formal_world_menu.tscn
-          test -f scenes/formal/formal_world_main.tscn
-          grep -Fq 'const SAVE_VERSION: int = 1' scripts/save/game_save_service.gd
-          git diff --quiet "$EXPECTED_INTEGRATION" -- "$STABLE_CONTRACT"
-          git diff --check
-
-          git commit -m "Merge master into formal world integration"
-          readonly MERGE_SHA="$(git rev-parse HEAD)"
-          test "$(git rev-parse HEAD^1)" = "$EXPECTED_INTEGRATION"
-          test "$(git rev-parse HEAD^2)" = "$EXPECTED_MASTER"
-          echo "MERGE_SHA=$MERGE_SHA"
+          git add \
+            docs/refactors/variable_state_audit.md \
+            docs/refactors/variable_state_member_inventory.md \
+            docs/refactors/state_ownership_matrix.md \
+            docs/refactors/variable_refactor_plan.md
+          git commit -m "docs: refresh variable state audit after master sync"
           git push origin HEAD:agent/sync-master-into-formal-integration
