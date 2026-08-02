@@ -6,10 +6,10 @@ on:
       - agent/sync-master-into-formal-integration
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  inspect-merge:
+  merge-fixed-master:
     if: github.head_ref == 'agent/sync-master-helper'
     runs-on: ubuntu-latest
     steps:
@@ -18,15 +18,15 @@ jobs:
         with:
           ref: agent/sync-master-into-formal-integration
           fetch-depth: 0
-          persist-credentials: false
 
-      - name: Verify fixed refs and inspect merge conflicts
+      - name: Merge fixed master and keep retired map player deleted
         shell: bash
         run: |
           set -euo pipefail
           readonly EXPECTED_MASTER="92bbf22d05d8f1ba31fc2559f8b41d01a002e823"
           readonly EXPECTED_INTEGRATION="8f6be5f5b41b9e00e10ebd998c45740327da966e"
           readonly EXPECTED_BASE="b24135afc622581ee19e378391cb7616689258aa"
+          readonly RETIRED_MAP_PLAYER="scripts/world_map/world_map_canvas_player.gd"
 
           git fetch origin master agent/formal-world-economy-integration agent/sync-master-into-formal-integration
           test "$(git rev-parse origin/master)" = "$EXPECTED_MASTER"
@@ -42,17 +42,24 @@ jobs:
           git merge --no-ff --no-commit "$EXPECTED_MASTER"
           merge_status=$?
           set -e
+          test "$merge_status" -ne 0
 
-          echo "MERGE_STATUS=$merge_status"
-          echo "CONFLICTS_BEGIN"
-          git diff --name-only --diff-filter=U || true
-          echo "CONFLICTS_END"
-          echo "STATUS_BEGIN"
-          git status --short
-          echo "STATUS_END"
+          mapfile -t conflicts < <(git diff --name-only --diff-filter=U)
+          test "${#conflicts[@]}" -eq 1
+          test "${conflicts[0]}" = "$RETIRED_MAP_PLAYER"
 
-          if [ "$merge_status" -ne 0 ]; then
-            exit 1
-          fi
+          git rm -- "$RETIRED_MAP_PLAYER"
+          test -z "$(git diff --name-only --diff-filter=U)"
+          test ! -e "$RETIRED_MAP_PLAYER"
+          test -f scenes/formal/formal_world_menu.tscn
+          test -f scenes/formal/formal_world_main.tscn
+          grep -Fq 'const SAVE_VERSION: int = 1' scripts/save/game_save_service.gd
+          grep -Fq 'FormalWorldSimulation.total_minutes' tests/variable_state/formal_time_stable_contract_test.gd
+          git diff --check
 
-          git merge --abort
+          git commit -m "Merge master into formal world integration"
+          readonly MERGE_SHA="$(git rev-parse HEAD)"
+          test "$(git rev-parse HEAD^1)" = "$EXPECTED_INTEGRATION"
+          test "$(git rev-parse HEAD^2)" = "$EXPECTED_MASTER"
+          echo "MERGE_SHA=$MERGE_SHA"
+          git push origin HEAD:agent/sync-master-into-formal-integration
