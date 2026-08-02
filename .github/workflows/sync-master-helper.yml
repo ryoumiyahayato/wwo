@@ -6,10 +6,11 @@ on:
       - agent/sync-master-helper
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   inspect-merge:
+    if: github.event.head_commit.message != 'ci: record master synchronization conflicts'
     runs-on: ubuntu-latest
     steps:
       - name: Check out fixed synchronization branch
@@ -17,17 +18,17 @@ jobs:
         with:
           ref: agent/sync-master-into-formal-integration
           fetch-depth: 0
-          persist-credentials: false
 
-      - name: Verify fixed refs and inspect merge conflicts
+      - name: Verify fixed refs and record merge conflicts
         shell: bash
         run: |
           set -euo pipefail
           readonly EXPECTED_MASTER="92bbf22d05d8f1ba31fc2559f8b41d01a002e823"
           readonly EXPECTED_INTEGRATION="8f6be5f5b41b9e00e10ebd998c45740327da966e"
           readonly EXPECTED_BASE="b24135afc622581ee19e378391cb7616689258aa"
+          readonly REPORT="/tmp/master-sync-conflicts.md"
 
-          git fetch origin master agent/formal-world-economy-integration agent/sync-master-into-formal-integration
+          git fetch origin master agent/formal-world-economy-integration agent/sync-master-into-formal-integration agent/sync-master-helper
           test "$(git rev-parse origin/master)" = "$EXPECTED_MASTER"
           test "$(git rev-parse origin/agent/formal-world-economy-integration)" = "$EXPECTED_INTEGRATION"
           test "$(git rev-parse HEAD)" = "$EXPECTED_INTEGRATION"
@@ -42,16 +43,29 @@ jobs:
           merge_status=$?
           set -e
 
-          echo "MERGE_STATUS=$merge_status"
-          echo "CONFLICTS_BEGIN"
-          git diff --name-only --diff-filter=U || true
-          echo "CONFLICTS_END"
-          echo "STATUS_BEGIN"
-          git status --short
-          echo "STATUS_END"
+          {
+            echo "# Master synchronization merge inspection"
+            echo
+            echo "- Integration: \`$EXPECTED_INTEGRATION\`"
+            echo "- Master: \`$EXPECTED_MASTER\`"
+            echo "- Merge base: \`$EXPECTED_BASE\`"
+            echo "- Merge status: \`$merge_status\`"
+            echo
+            echo "## Unmerged paths"
+            echo '```text'
+            git diff --name-only --diff-filter=U || true
+            echo '```'
+            echo
+            echo "## Working tree status"
+            echo '```text'
+            git status --short
+            echo '```'
+          } > "$REPORT"
 
-          if [ "$merge_status" -ne 0 ]; then
-            exit 1
-          fi
-
-          git merge --abort
+          git merge --abort || true
+          git switch -C agent/sync-master-helper origin/agent/sync-master-helper
+          mkdir -p artifacts/sync-master
+          cp "$REPORT" artifacts/sync-master/conflicts.md
+          git add artifacts/sync-master/conflicts.md
+          git commit -m "ci: record master synchronization conflicts"
+          git push origin HEAD:agent/sync-master-helper
