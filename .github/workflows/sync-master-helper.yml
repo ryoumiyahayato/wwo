@@ -1,4 +1,4 @@
-name: Temporary master sync helper
+name: Temporary master sync cleanup
 
 on:
   pull_request:
@@ -9,47 +9,35 @@ permissions:
   contents: write
 
 jobs:
-  refresh-variable-docs:
+  delete-temporary-branches:
     if: github.head_ref == 'agent/sync-master-helper'
     runs-on: ubuntu-latest
     steps:
-      - name: Check out synchronization branch
-        uses: actions/checkout@v4
-        with:
-          ref: agent/sync-master-into-formal-integration
-          fetch-depth: 0
-
-      - name: Regenerate deterministic variable-state documents
+      - name: Verify completed synchronization and delete temporary branches
         shell: bash
         run: |
-          set -euxo pipefail
-          readonly EXPECTED_HEAD="f94dfb87256a52d7aa51587e72f03acd2b6ae7b6"
-          git fetch origin agent/sync-master-into-formal-integration
-          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
-          test -z "$(git status --porcelain)"
+          set -euo pipefail
+          readonly EXPECTED_MASTER="92bbf22d05d8f1ba31fc2559f8b41d01a002e823"
+          readonly EXPECTED_INTEGRATION="277a6d801a6eae762e4f6963ceb995a909f80bd9"
+          readonly EXPECTED_PR_HEAD="bb513ebaaee8de0f613debe3c3b71a4375beb543"
 
-          python3 tools/audit_variable_state.py
-          python3 tools/render_variable_state_audit_summary.py
-          python3 tools/render_variable_state_member_inventory.py
-          python3 tools/generate_variable_state_docs.py
-          python3 tools/render_variable_refactor_plan.py
+          git init cleanup
+          cd cleanup
+          git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch --no-tags origin \
+            master \
+            agent/formal-world-economy-integration \
+            agent/sync-master-into-formal-integration \
+            agent/sync-master-helper
 
-          git diff --check
-          git diff --quiet -- \
-            docs/refactors/variable_state_audit.md \
-            docs/refactors/variable_state_member_inventory.md \
-            docs/refactors/state_ownership_matrix.md \
-            docs/refactors/variable_refactor_plan.md && {
-              echo 'Expected generated document changes were not produced.' >&2
-              exit 1
-            }
+          test "$(git rev-parse FETCH_HEAD^{commit})" != ""
+          test "$(git ls-remote origin refs/heads/master | cut -f1)" = "$EXPECTED_MASTER"
+          test "$(git ls-remote origin refs/heads/agent/formal-world-economy-integration | cut -f1)" = "$EXPECTED_INTEGRATION"
+          git merge-base --is-ancestor "$EXPECTED_MASTER" "$EXPECTED_INTEGRATION"
+          git merge-base --is-ancestor "$EXPECTED_PR_HEAD" "$EXPECTED_INTEGRATION"
 
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add \
-            docs/refactors/variable_state_audit.md \
-            docs/refactors/variable_state_member_inventory.md \
-            docs/refactors/state_ownership_matrix.md \
-            docs/refactors/variable_refactor_plan.md
-          git commit -m "docs: refresh variable state audit after master sync"
-          git push origin HEAD:agent/sync-master-into-formal-integration
+          git push origin --delete \
+            agent/sync-master-into-formal-integration \
+            agent/sync-master-helper
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
