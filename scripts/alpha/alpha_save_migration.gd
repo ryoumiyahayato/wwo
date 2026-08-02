@@ -120,20 +120,22 @@ func migrate_v2_2_snapshot(source: Dictionary) -> V2LifeLoopResult:
 	)
 	if result.success:
 		var snapshot: Dictionary = result.data.get("snapshot", {}) as Dictionary
-		var migration: Dictionary = snapshot.get("migration", {}) as Dictionary
-		migration["source_schema_version"] = V2LifeLoopSimulation.SCHEMA_VERSION
-		migration["migration_chain"] = [
+		var migration_metadata: Dictionary = (
+			snapshot.get("migration", {}) as Dictionary
+		)
+		migration_metadata["source_schema_version"] = V2LifeLoopSimulation.SCHEMA_VERSION
+		migration_metadata["migration_chain"] = [
 			V2LifeLoopSimulation.SCHEMA_VERSION,
 			V23LifeLoopSimulation.V2_3_SCHEMA_VERSION,
 			AlphaSimulationService.ALPHA_SCHEMA_VERSION,
 		]
-		snapshot["migration"] = migration
+		snapshot["migration"] = migration_metadata
 		snapshot["integrity"] = {
 			"algorithm": "sha256",
 			"digest": AlphaSaveService._digest(snapshot),
 		}
 		result.data["snapshot"] = snapshot
-		result.data["summary"] = migration
+		result.data["summary"] = migration_metadata
 	return result
 
 

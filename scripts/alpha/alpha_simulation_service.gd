@@ -444,9 +444,9 @@ func validate_alpha_snapshot_structure(state: Dictionary) -> Dictionary:
 
 func _settle_hour(total_hour: int) -> void:
 	var started_usec: int = Time.get_ticks_usec()
-	var legacy_before: Dictionary = _legacy_cash_snapshot()
+	var legacy_cash_before: Dictionary = _legacy_cash_snapshot()
 	super._settle_hour(total_hour)
-	_reconcile_legacy_cash(legacy_before, total_hour)
+	_reconcile_legacy_cash(legacy_cash_before, total_hour)
 	var value: Dictionary = V2DateTime.from_total_hour(total_hour)
 	if int(value.get("hour", -1)) == 23:
 		var snapshot := _capture_economy_day_state()
@@ -922,12 +922,12 @@ func _prepare_interregional_trade_and_migration() -> Dictionary:
 	player.country_id = "country:vesta_union"
 	player.region_id = "region:vesta_silverfield"
 	player.current_status["city_id"] = "city:starhold"
-	var migration: Dictionary = (
+	var migration_record: Dictionary = (
 		migrated.get("data", {}) as Dictionary
 	).get("migration", {}) as Dictionary
 	return _result(true, "ok", {
 		"contract_id": contract_id,
-		"migration_id": migration.get("migration_id", ""),
+		"migration_id": migration_record.get("migration_id", ""),
 	})
 
 

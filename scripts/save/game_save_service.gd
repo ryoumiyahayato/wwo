@@ -156,37 +156,21 @@ func _load_v2_2_file(path: String) -> SaveOperationResult:
 
 
 func _write_atomic_json(path: String, snapshot: Dictionary) -> String:
-	var absolute_path: String = ProjectSettings.globalize_path(path)
-	var make_error: Error = DirAccess.make_dir_recursive_absolute(
-		absolute_path.get_base_dir()
+	return AtomicJsonFileStore.write_verified(
+		path,
+		snapshot,
+		Callable(self, "_verify_v2_2_temporary"),
+		false
 	)
-	if make_error != OK:
-		return error_string(make_error)
-	var temporary_path: String = absolute_path + ".tmp"
-	var backup_path: String = absolute_path + ".bak"
-	var file := FileAccess.open(temporary_path, FileAccess.WRITE)
-	if file == null:
-		return error_string(FileAccess.get_open_error())
-	file.store_string(JSON.stringify(snapshot, "\t", false))
-	file.flush()
-	file.close()
-	var had_primary: bool = FileAccess.file_exists(absolute_path)
-	if FileAccess.file_exists(backup_path):
-		DirAccess.remove_absolute(backup_path)
-	if had_primary:
-		var backup_error: Error = DirAccess.rename_absolute(absolute_path, backup_path)
-		if backup_error != OK:
-			DirAccess.remove_absolute(temporary_path)
-			return error_string(backup_error)
-	var replace_error: Error = DirAccess.rename_absolute(temporary_path, absolute_path)
-	if replace_error != OK:
-		if FileAccess.file_exists(backup_path):
-			DirAccess.rename_absolute(backup_path, absolute_path)
-		DirAccess.remove_absolute(temporary_path)
-		return error_string(replace_error)
-	if FileAccess.file_exists(backup_path):
-		DirAccess.remove_absolute(backup_path)
-	return ""
+
+
+func _verify_v2_2_temporary(absolute_path: String) -> String:
+	var verification: SaveOperationResult = _load_v2_2_file(absolute_path)
+	return (
+		""
+		if verification.success
+		else "临时 V2.2 存档校验失败：%s" % verification.message
+	)
 
 
 static func _v2_2_digest(snapshot: Dictionary) -> String:
@@ -259,33 +243,14 @@ func save_to_path(path: String, snapshot: Dictionary) -> SaveOperationResult:
 		return SaveOperationResult.fail("invalid_snapshot", "; ".join(errors), path)
 	if not path.begins_with("user://") or not path.ends_with(".json"):
 		return SaveOperationResult.fail("unsafe_path", "存档只能写入 user:// 下的 JSON 文件", path)
-	var absolute_path: String = ProjectSettings.globalize_path(path)
-	var make_error: Error = DirAccess.make_dir_recursive_absolute(absolute_path.get_base_dir())
-	if make_error != OK:
-		return SaveOperationResult.fail("directory_error", error_string(make_error), path)
-	var temporary_path: String = absolute_path + ".tmp"
-	var backup_path: String = absolute_path + ".bak"
-	var file := FileAccess.open(temporary_path, FileAccess.WRITE)
-	if file == null:
-		return SaveOperationResult.fail("write_error", error_string(FileAccess.get_open_error()), path)
-	file.store_string(JSON.stringify(snapshot, "\t", false))
-	file.flush()
-	file.close()
-	if FileAccess.file_exists(backup_path):
-		DirAccess.remove_absolute(backup_path)
-	if FileAccess.file_exists(absolute_path):
-		var backup_error: Error = DirAccess.rename_absolute(absolute_path, backup_path)
-		if backup_error != OK:
-			DirAccess.remove_absolute(temporary_path)
-			return SaveOperationResult.fail("replace_error", error_string(backup_error), path)
-	var replace_error: Error = DirAccess.rename_absolute(temporary_path, absolute_path)
-	if replace_error != OK:
-		if FileAccess.file_exists(backup_path):
-			DirAccess.rename_absolute(backup_path, absolute_path)
-		DirAccess.remove_absolute(temporary_path)
-		return SaveOperationResult.fail("replace_error", error_string(replace_error), path)
-	if FileAccess.file_exists(backup_path):
-		DirAccess.remove_absolute(backup_path)
+	var write_error: String = AtomicJsonFileStore.write_verified(
+		path,
+		snapshot,
+		Callable(self, "_verify_primary_temporary"),
+		false
+	)
+	if not write_error.is_empty():
+		return SaveOperationResult.fail("write_error", write_error, path)
 	GameSessionService.performance_stats.record("save", Time.get_ticks_usec() - started)
 	GameSessionService.settlement_log.add(
 		"save",
@@ -294,6 +259,15 @@ func save_to_path(path: String, snapshot: Dictionary) -> SaveOperationResult:
 		{"path": path}
 	)
 	return SaveOperationResult.ok(path, snapshot)
+
+
+func _verify_primary_temporary(absolute_path: String) -> String:
+	var verification: SaveOperationResult = _load_snapshot_file(absolute_path)
+	return (
+		""
+		if verification.success
+		else "临时存档校验失败：%s" % verification.message
+	)
 
 
 func load_from_path(path: String) -> SaveOperationResult:
@@ -361,25 +335,25 @@ func restore_snapshot(
 	if player_record.is_empty():
 		return SaveOperationResult.fail("broken_reference", "玩家人物不在活跃人物中")
 
-	var temporary_society := SocietySimulationService.new()
+	var candidate_society := SocietySimulationService.new()
 	var seed_player := CharacterData.from_dict(player_record)
-	if not temporary_society.initialize(seed_player, map_service.data_set):
-		return SaveOperationResult.fail("restore_error", temporary_society.initialization_error)
-	if not temporary_society.roster.restore_persistent_state(character_state):
+	if not candidate_society.initialize(seed_player, map_service.data_set):
+		return SaveOperationResult.fail("restore_error", candidate_society.initialization_error)
+	if not candidate_society.roster.restore_persistent_state(character_state):
 		return SaveOperationResult.fail("restore_error", "人物名册无效或超过活跃上限")
-	var restored_player: CharacterData = temporary_society.roster.get_active(top_player_id)
+	var restored_player: CharacterData = candidate_society.roster.get_active(top_player_id)
 	if restored_player == null:
 		return SaveOperationResult.fail("broken_reference", "恢复后的玩家人物不存在")
-	if not temporary_society.organizations.restore_persistent_state(snapshot["organizations"] as Array):
+	if not candidate_society.organizations.restore_persistent_state(snapshot["organizations"] as Array):
 		return SaveOperationResult.fail("restore_error", "组织状态无效")
-	for raw_organization: Variant in temporary_society.organizations.organizations.values():
+	for raw_organization: Variant in candidate_society.organizations.organizations.values():
 		var organization: OrganizationData = raw_organization as OrganizationData
 		for member_id: String in organization.member_ids:
-			if not temporary_society.roster.has_character(member_id):
+			if not candidate_society.roster.has_character(member_id):
 				return SaveOperationResult.fail("broken_reference", "组织成员引用无效：%s" % member_id)
-	if not temporary_society.relationships.restore_persistent_state(snapshot["relationships"] as Dictionary):
+	if not candidate_society.relationships.restore_persistent_state(snapshot["relationships"] as Dictionary):
 		return SaveOperationResult.fail("restore_error", "关系状态或关系 ID 计数器无效")
-	var social_error: String = SocialSaveValidator.new().validate(temporary_society)
+	var social_error: String = SocialSaveValidator.new().validate(candidate_society)
 	if not social_error.is_empty():
 		return SaveOperationResult.fail("broken_reference", social_error)
 
@@ -391,7 +365,7 @@ func restore_snapshot(
 	var activity_state: Dictionary = snapshot.get(
 		"world_activity", WorldActivityService.empty_persistent_state()
 	) as Dictionary
-	if not temporary_society.world_activity.restore_persistent_state(
+	if not candidate_society.world_activity.restore_persistent_state(
 		activity_state, current_hour
 	):
 		return SaveOperationResult.fail("restore_error", "世界动态历史无效")
@@ -429,7 +403,7 @@ func restore_snapshot(
 		)
 	var ai_action_error: String = _validate_ai_action_records(
 		snapshot["ai_states"] as Array,
-		temporary_society,
+		candidate_society,
 		map_service,
 		current_hour,
 		raw_action_id_state,
@@ -439,7 +413,7 @@ func restore_snapshot(
 		return _fail_and_restore_map(
 			map_service, previous_world_state, "broken_reference", ai_action_error
 		)
-	if not temporary_society.ai.restore_persistent_state(snapshot["ai_states"] as Array):
+	if not candidate_society.ai.restore_persistent_state(snapshot["ai_states"] as Array):
 		return _fail_and_restore_map(
 			map_service, previous_world_state, "restore_error", "AI 状态未覆盖全部活跃 NPC"
 		)
@@ -450,7 +424,7 @@ func restore_snapshot(
 		return _fail_and_restore_map(
 			map_service, previous_world_state, "restore_error", "暂停结算类别无效"
 		)
-	temporary_society.paused_settlement_categories = (paused_categories as Dictionary).duplicate(true)
+	candidate_society.paused_settlement_categories = (paused_categories as Dictionary).duplicate(true)
 
 	var saved_player_country_id: String = str(snapshot["selected_country_id"])
 	if not map_service.data_set.countries.has(saved_player_country_id):
@@ -467,7 +441,7 @@ func restore_snapshot(
 		var action_record: Dictionary = snapshot["current_action"] as Dictionary
 		var action_error: String = ActionSaveValidator.new().validate(
 			action_record,
-			temporary_society,
+			candidate_society,
 			map_service,
 			current_hour,
 			raw_action_id_state
@@ -509,11 +483,11 @@ func restore_snapshot(
 	GameSessionService.current_action = restored_action
 	GameSessionService.restore_action_results(restored_recent, restored_history)
 	GameSessionService.action_id_service = action_ids
-	GameSessionService.society_service = temporary_society
+	GameSessionService.society_service = candidate_society
 	GameSessionService.developer_mode = bool(snapshot.get("developer_mode", false))
 	GameSessionService.settlement_log = log_service
 	GameSessionService.performance_stats = performance
-	temporary_society.attach_world(clock, map_service)
+	candidate_society.attach_world(clock, map_service)
 	performance.record("restore", Time.get_ticks_usec() - started)
 	log_service.add("load", "存档恢复完成", clock.total_hours)
 	return SaveOperationResult.ok("", snapshot)

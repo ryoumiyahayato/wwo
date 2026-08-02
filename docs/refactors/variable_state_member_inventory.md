@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1598|1233|15|0|509|5|32|16|60|878|506|260|
+|1607|1233|15|0|509|5|32|16|60|878|507|261|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,598个生产成员字段逐项表
+## 1,607个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -433,7 +433,7 @@
 7 C OBJECT_KINDS
 19 K simulation
 20 A save_service
-21 I migration
+21 I save_migration
 22 K developer_mode
 23 K last_result
 24 A _command_sequence
@@ -799,7 +799,7 @@
 23 K _war_state
 ```
 
-### 第5段：`scripts/map/map_rules_config.gd` 至 `scripts/ui_spikes/holographic_workspace/holographic_hemisphere_3d.gd`
+### 第5段：`scripts/map/map_rules_config.gd` 至 `scripts/simulation/world_activity_service.gd`
 
 ```text
 @ scripts/map/map_rules_config.gd | MapRulesConfig
@@ -873,6 +873,9 @@
 4 C NUMERIC_CONTEXT_FIELDS
 7 C VALID_OUTCOMES
 8 C DOMAIN_CATEGORIES
+@ scripts/save/atomic_json_file_store.gd | AtomicJsonFileStore
+5 C TEMPORARY_SUFFIX
+6 C BACKUP_SUFFIX
 @ scripts/save/autosave_coordinator.gd | AutosaveCoordinator
 5 K clock
 6 K map_service
@@ -972,6 +975,11 @@
 13 C VALID_SUBJECT_TYPES
 17 K _events
 18 A _next_event_id
+```
+
+### 第6段：`scripts/ui_spikes/holographic_workspace/holographic_hemisphere_3d.gd` 至 `scripts/ui_spikes/holographic_workspace/holographic_workspace_release_probe.gd`
+
+```text
 @ scripts/ui_spikes/holographic_workspace/holographic_hemisphere_3d.gd | holographic_hemisphere_3d
 3 C LAT_SEGMENTS
 4 C LON_SEGMENTS
@@ -979,11 +987,6 @@
 6 C MOON_RADIUS
 8 D _surface
 9 D _moon
-```
-
-### 第6段：`scripts/ui_spikes/holographic_workspace/holographic_workspace_admin1.gd` 至 `scripts/ui_spikes/holographic_workspace/holographic_workspace_release_quality.gd`
-
-```text
 @ scripts/ui_spikes/holographic_workspace/holographic_workspace_admin1.gd | holographic_workspace_admin1
 3 K selected_world_admin1_id
 4 K hover_world_admin1_id
@@ -1039,13 +1042,15 @@
 8 C HISTORICAL_SNAPSHOT_DATE
 9 C GLOBAL_SOURCE_NOTICE
 10 C LOWER_ADMIN_NOTICE
-12 C NATIONALITY_ENTITY_ALIASES
-46 K _dated_geometry_document
-47 K _dated_units_document
-48 K _historical_flag_document
-49 K _historical_flag_records
-50 K _geometry_feature_by_id
-51 K _missing_flag_record_ids
+11 C ADMIN1_REFERENCE_NOTICE
+12 C FLAG_REFERENCE_NOTICE
+14 C NATIONALITY_ENTITY_ALIASES
+48 K _dated_geometry_document
+49 K _dated_units_document
+50 K _historical_flag_document
+51 K _historical_flag_records
+52 K _geometry_feature_by_id
+53 K _missing_flag_record_ids
 @ scripts/ui_spikes/holographic_workspace/holographic_workspace_history.gd | holographic_workspace_history
 3 C WORLD_HISTORICAL_ENTITY_FOCUS
 4 C HISTORY_ZOOM_MIN
@@ -1087,11 +1092,6 @@
 @ scripts/ui_spikes/holographic_workspace/holographic_workspace_release_probe.gd | holographic_workspace_release_probe
 3 C TARGET_SCENE
 5 K workspace
-@ scripts/ui_spikes/holographic_workspace/holographic_workspace_release_quality.gd | holographic_workspace_release_quality
-4 C IDENTITY_PREFIX
-5 C IDENTITY_SEPARATOR
-6 C ADMIN1_REFERENCE_NOTICE
-7 C FLAG_REFERENCE_NOTICE
 ```
 
 ### 第7段：`scripts/ui_spikes/holographic_workspace/holographic_workspace_runtime.gd` 至 `scripts/v2_2/v2_life_loop_simulation.gd`
@@ -1447,7 +1447,7 @@
 5 K leave_confirmation
 ```
 
-### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/v2_3/v2_3_survival_autonomy_service.gd`
+### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/world_map/historical_map_identity_style.gd`
 
 ```text
 @ scripts/v2_3/v2_3_formal_simulation.gd | V23FormalSimulation
@@ -1571,6 +1571,16 @@
 12 K next_retry_hours
 13 K active_needs
 14 K decision_history
+@ scripts/world_map/historical_map_identity_style.gd | HistoricalMapIdentityStyle
+5 C PATTERN_PREFIX
+6 C PATTERN_SEPARATOR
+7 C CODE_MIN_U
+8 C CODE_MIN_V
+9 C CODE_RADIUS
+10 C CODE_PLATE_COLOR
+11 C CODE_PLATE_BLEND
+12 C CODE_COLUMN_CENTERS
+13 C CODE_ROW_CENTERS
 ```
 
 ### 第10段：`scripts/world_map/internal/world_map_canvas_impl.gd` 至 `scripts/world_map/internal/world_map_data_impl.gd`

@@ -204,50 +204,23 @@ func _validate_cross_references(snapshot: Dictionary) -> Array[String]:
 
 
 func _write_atomic(path: String, snapshot: Dictionary) -> String:
-	var absolute_path: String = ProjectSettings.globalize_path(path)
-	var make_error: Error = DirAccess.make_dir_recursive_absolute(
-		absolute_path.get_base_dir()
+	return AtomicJsonFileStore.write_verified(
+		path,
+		snapshot,
+		Callable(self, "_verify_temporary"),
+		true
 	)
-	if make_error != OK:
-		return error_string(make_error)
-	var temporary_path: String = absolute_path + ".tmp"
-	var backup_path: String = absolute_path + ".bak"
-	if FileAccess.file_exists(temporary_path):
-		DirAccess.remove_absolute(temporary_path)
-	var file := FileAccess.open(temporary_path, FileAccess.WRITE)
-	if file == null:
-		return error_string(FileAccess.get_open_error())
-	file.store_string(JSON.stringify(snapshot, "\t", false))
-	file.flush()
-	file.close()
+
+
+func _verify_temporary(absolute_path: String) -> String:
 	var verification: SaveOperationResult = _load_absolute_for_verification(
-		temporary_path
+		absolute_path
 	)
-	if not verification.success:
-		DirAccess.remove_absolute(temporary_path)
-		return "临时 Alpha 存档校验失败：%s" % verification.message
-	var had_primary: bool = FileAccess.file_exists(absolute_path)
-	if had_primary:
-		if FileAccess.file_exists(backup_path):
-			var remove_backup: Error = DirAccess.remove_absolute(backup_path)
-			if remove_backup != OK:
-				DirAccess.remove_absolute(temporary_path)
-				return error_string(remove_backup)
-		var backup_error: Error = DirAccess.rename_absolute(
-			absolute_path, backup_path
-		)
-		if backup_error != OK:
-			DirAccess.remove_absolute(temporary_path)
-			return error_string(backup_error)
-	var replace_error: Error = DirAccess.rename_absolute(
-		temporary_path, absolute_path
+	return (
+		""
+		if verification.success
+		else "临时 Alpha 存档校验失败：%s" % verification.message
 	)
-	if replace_error != OK:
-		if had_primary and FileAccess.file_exists(backup_path):
-			DirAccess.rename_absolute(backup_path, absolute_path)
-		DirAccess.remove_absolute(temporary_path)
-		return error_string(replace_error)
-	return ""
 
 
 func _load_file(path: String) -> SaveOperationResult:
