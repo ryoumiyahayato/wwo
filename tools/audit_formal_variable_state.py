@@ -1010,7 +1010,6 @@ def build_payload(
         "audit_date": AUDIT_DATE,
         "baseline": {
             "report_base_sha": resolved_report_base,
-            "branch": git(root, "branch", "--show-current"),
             "integration_branch_sha": resolved_report_base,
             "master_sha": MASTER_SHA,
             "merge_base": MASTER_SHA,
@@ -1164,6 +1163,14 @@ def normalized_artifact(payload: dict[str, object]) -> dict[str, object]:
     result = encode(payload)
     assert isinstance(result, dict)
     result.pop("scan_context", None)
+    baseline = result["baseline"]
+    assert isinstance(baseline, dict)
+    assert "branch" not in baseline, (
+        "normalized artifacts must not depend on the checkout branch"
+    )
+    assert "scan_context" not in result, (
+        "normalized artifacts must not contain runtime checkout context"
+    )
     result["schema_version"] = "variable-state-audit/v2-normalized"
     result["artifact_encoding"] = {
         "checkout_head": (

@@ -37,7 +37,7 @@ jobs:
       - name: Regenerate variable state audit documents
         run: |
           set -euo pipefail
-          python3 tools/audit_variable_state.py
+          python3 -B tools/audit_variable_state.py --root .
           python3 tools/render_variable_state_audit_summary.py
           python3 tools/render_variable_state_member_inventory.py
           python3 tools/generate_variable_state_docs.py

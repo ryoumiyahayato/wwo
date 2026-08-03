@@ -56,7 +56,7 @@ audit/formal-variable-state-inventory-20260803
 5. 动态边界：保留非字面 `get/set/call/call_deferred`、动态 `load/preload`、NodePath、信号、资源路径和重要事务/恢复局部变量，避免把静态未命中误写成“未使用”。
 6. 人工复核：逐段核对正式时间、玩家、地图/政治、经济、存档、UI、事件/消息/AI 的权威状态和写入边界。
 
-完整逐字段清单见 `docs/audits/variable_state_inventory_20260803.md`，机器可读结果见 `artifacts/variable-state-audit.json`。artifact 使用 `variable-state-audit/v2-normalized`：证据字段中的整数索引指向 38,961 项 `evidence_table`，去除重复字符串但不丢弃证据。
+完整逐字段清单见 `docs/audits/variable_state_inventory_20260803.md`，机器可读结果见 `artifacts/variable-state-audit.json`。artifact 使用 `variable-state-audit/v2-normalized`：证据字段中的整数索引指向 38,967 项 `evidence_table`，去除重复字符串但不丢弃证据。
 
 ## 总量统计
 
@@ -207,16 +207,17 @@ P1 产品边界候选：正式 UI 展示的“世界事件”目前由展示数�
 
 ## 静态验证与可复现性
 
-最终验证不启动 Godot，包含：
+PR #38 的原始静态审计与本轮阻断修复验证包含：
 
-- 扫描器同路径连续运行两次，JSON 与 Markdown 哈希逐字节一致。
+- 命名分支连续运行两次，JSON 与 Markdown 哈希逐字节一致；规范化阶段断言排除 checkout 分支和运行期上下文，并在提交后用同一 Head 的 detached checkout 复验。
 - 生产声明覆盖校验：扫描器产出 1,609 个唯一声明位置，独立声明正则未发现遗漏。
 - JSON 可解析、每个成员恰有 A–I 一个分类、A–I 计数之和等于 1,609。
-- 所有生成差异只位于授权文档、artifact 和必要的只读 `tools/audit_*`。
-- 扫描器不含网络调用，不写生产/测试/工作流文件。
-- `git diff --check` 通过；没有 `.uid` 生成。
+- Codex 审计回归 31 checks、formal time stable contract 117 checks、formal time known defects 71 checks，均为 0 failures。
+- 统一验证在临时克隆通过，包含 Godot 导入、静态经济审计、正式世界/十年平衡、保留服务、Alpha 隔离夹具和 Headless 正式入口。
+- 所有差异只位于授权 workflow、人工审计文档、artifact 和必要的只读扫描器；扫描器不含网络调用，不写生产脚本、测试、场景、数据或资源。
+- `git diff --check` 通过；Godot 产生的 `.uid` 仅位于临时克隆，主工作树没有新增 `.uid`。
 
-标准复跑命令如下。它从 PR 最新 Head 取得独立的检出门禁值，继续把原始审计 Base 写入报告，并把两次输出放在仓库外临时目录。实际检出 Head 只出现在扫描器的运行输出中，不写入提交产物，避免产物对其所在提交 SHA 形成自引用。
+标准复跑命令如下。它从 PR 最新 Head 取得独立的检出门禁值，继续把原始审计 Base 写入报告，并把两次输出放在仓库外临时目录。当前分支不属于固定 Base 语义，因此不写入规范化 `baseline`；实际检出 Head 只出现在扫描器的运行输出中，也不写入提交产物，避免产物依赖 checkout 形态或对其所在提交 SHA 形成自引用。
 
 ```powershell
 $repoRoot = 'D:\wwo-variable-audit'
@@ -260,13 +261,13 @@ $hashes
 
 本次连续两次复跑及仓库产物的确定性哈希如下，三方逐字节一致：
 
-- `artifacts/variable-state-audit.json`：run1 `4B3C0FCC734A304AD7BA7C4AE7987B5DB28663A33914162A0506645C55ECB75A`；run2 `4B3C0FCC734A304AD7BA7C4AE7987B5DB28663A33914162A0506645C55ECB75A`；仓库产物 `4B3C0FCC734A304AD7BA7C4AE7987B5DB28663A33914162A0506645C55ECB75A`。
+- `artifacts/variable-state-audit.json`：run1 `C8B39A4AE3AA49DFE36CE1BD28DB96FCB8A7B1EFB61179C4501EB63CE8F2C689`；run2 `C8B39A4AE3AA49DFE36CE1BD28DB96FCB8A7B1EFB61179C4501EB63CE8F2C689`；仓库产物 `C8B39A4AE3AA49DFE36CE1BD28DB96FCB8A7B1EFB61179C4501EB63CE8F2C689`。
 - `docs/audits/variable_state_inventory_20260803.md`：run1 `0B7090A0944B3BD5F08B0D9D06086782713B6DD0C8694128AAB64BCFCC321BFE`；run2 `0B7090A0944B3BD5F08B0D9D06086782713B6DD0C8694128AAB64BCFCC321BFE`；仓库产物 `0B7090A0944B3BD5F08B0D9D06086782713B6DD0C8694128AAB64BCFCC321BFE`。
 
 ## 本轮不做
 
 - 不删除、合并、改名、改型任何生产字段。
-- 不修改生产脚本、测试、工作流、数据或资源。
-- 不启动 Godot 或声称动态、真机、性能、导出验证通过。
+- 不修改生产脚本、测试、场景、数据或资源；两个 workflow 只补齐扫描器 CLI 参数。
+- Godot 只在临时克隆运行；不声称未执行的 1280×720 人工旅程、真机平台或导出验证通过。
 - 不把静态未命中当成不可达证明。
 - 不合并 PR，不把 Draft PR 标为 Ready。
