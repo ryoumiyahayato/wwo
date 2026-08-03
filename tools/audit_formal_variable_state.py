@@ -8,6 +8,10 @@ dynamic call, scene injection, or semantic distinction is absent.
 
 from __future__ import annotations
 
+import sys
+
+sys.dont_write_bytecode = True
+
 import argparse
 import json
 import re
@@ -19,7 +23,7 @@ from typing import Iterable
 import audit_variable_state as legacy
 
 
-FIXED_BASE = "277a6d801a6eae762e4f6963ceb995a909f80bd9"
+REPORT_BASE_SHA = "277a6d801a6eae762e4f6963ceb995a909f80bd9"
 MASTER_SHA = "92bbf22d05d8f1ba31fc2559f8b41d01a002e823"
 AUDIT_DATE = "2026-08-03"
 
@@ -125,9 +129,9 @@ MANUAL_CATEGORIES = {
 }
 
 MANUAL_CACHES = {
-    "FormalWorldEconomyService.economy_polity_ids": "由 political_economy_crosswalk_1900.json 构建；正式运行期没有增量失效入口。",
-    "FormalWorldEconomyService.economy_by_polity_id": "由 political_economy_crosswalk_1900.json 构建；正式运行期没有增量失效入口。",
-    "FormalWorldEconomyService._crosswalk_records": "由 political_economy_crosswalk_1900.json 加载；正式运行期没有增量失效入口。",
+    "FormalWorldEconomyService.economy_polity_ids": "由 major_economy_polity_crosswalk_1900.json 构建；正式运行期没有增量失效入口。",
+    "FormalWorldEconomyService.economy_by_polity_id": "由 major_economy_polity_crosswalk_1900.json 构建；正式运行期没有增量失效入口。",
+    "FormalWorldEconomyService._crosswalk_records": "由 major_economy_polity_crosswalk_1900.json 加载；正式运行期没有增量失效入口。",
     "holographic_workspace_admin1._world_admin1_bounds": "由行政区多边形计算；行政几何重新加载时重建。",
 }
 
@@ -533,10 +537,26 @@ def write_scope(value: str) -> str:
     return f"{match.group('path')}::{function}"
 
 
-def build_payload(root: Path, expected_base: str) -> dict[str, object]:
+def build_payload(
+    root: Path, expected_head: str, report_base_sha: str,
+) -> dict[str, object]:
+    repository_root = Path(git(root, "rev-parse", "--show-toplevel")).resolve()
+    if repository_root != root:
+        raise SystemExit(
+            f"--root must be the repository root: expected {repository_root}, found {root}"
+        )
     head = git(root, "rev-parse", "HEAD")
-    if head != expected_base:
-        raise SystemExit(f"fixed Base changed: expected {expected_base}, found {head}")
+    resolved_expected_head = git(
+        root, "rev-parse", "--verify", f"{expected_head}^{{commit}}"
+    )
+    if head != resolved_expected_head:
+        raise SystemExit(
+            "checked-out Head changed: "
+            f"expected {resolved_expected_head}, found {head}"
+        )
+    resolved_report_base = git(
+        root, "rev-parse", "--verify", f"{report_base_sha}^{{commit}}"
+    )
     files = scope_files(root)
     text_by_path = {rel(root, path): read_text(path) for path in files}
     masked_text_by_path = {
@@ -551,7 +571,9 @@ def build_payload(root: Path, expected_base: str) -> dict[str, object]:
     parsed_members: list[legacy.Member] = []
     for path in production_paths:
         parsed_members.extend(
-            legacy.parse_members(path, read_text(path), set(autoloads.values()))
+            legacy.parse_members(
+                root, path, read_text(path), set(autoloads.values())
+            )
         )
     parsed_locations = {(member.path, member.line) for member in parsed_members}
     members_by_path: dict[str, list[legacy.Member]] = defaultdict(list)
@@ -969,7 +991,7 @@ def build_payload(root: Path, expected_base: str) -> dict[str, object]:
                     "scripts/formal/formal_world_economy_service.gd:237-255",
                     "scripts/formal/formal_world_economy_service.gd:805-838",
                 ],
-                "finding": "last_day_index 可从存档独立恢复，_validate_state 未见与权威 total_hour 的一致性校验；篡改或旧值可能影响日结边界。",
+                "finding": "last_day_index 可从存档独立恢复，_validate_state 未见与权威 total_hour 的一致性校验；过大的值可能跳过未来日结，过小值的行为影响需后续测试确认。",
             },
             {
                 "id": "juridical_control_alias",
@@ -987,13 +1009,15 @@ def build_payload(root: Path, expected_base: str) -> dict[str, object]:
         "schema_version": "variable-state-audit/v1",
         "audit_date": AUDIT_DATE,
         "baseline": {
-            "fixed_base_sha": expected_base,
-            "checked_out_head": head,
+            "report_base_sha": resolved_report_base,
             "branch": git(root, "branch", "--show-current"),
-            "integration_branch_sha": expected_base,
+            "integration_branch_sha": resolved_report_base,
             "master_sha": MASTER_SHA,
             "merge_base": MASTER_SHA,
             "initial_status": "clean; git status --short produced no output",
+        },
+        "scan_context": {
+            "checked_out_head": head,
         },
         "scope": [rel(root, path) for path in files],
         "methodology": {
@@ -1031,7 +1055,7 @@ def inventory_markdown(payload: dict[str, object]) -> str:
     lines = [
         "# WWO 全仓库变量与状态可追溯清单（2026-08-03）",
         "",
-        f"> 固定 Base：`{baseline['fixed_base_sha']}`。由 `tools/audit_formal_variable_state.py` 确定性生成；静态候选不等于删除结论。",
+        f"> 固定 Base：`{baseline['report_base_sha']}`。由 `tools/audit_formal_variable_state.py` 确定性生成；静态候选不等于删除结论。",
         "",
         "## 范围与限制",
         "",
@@ -1139,8 +1163,13 @@ def normalized_artifact(payload: dict[str, object]) -> dict[str, object]:
 
     result = encode(payload)
     assert isinstance(result, dict)
+    result.pop("scan_context", None)
     result["schema_version"] = "variable-state-audit/v2-normalized"
     result["artifact_encoding"] = {
+        "checkout_head": (
+            "Validated at runtime by --expected-head and omitted from the "
+            "artifact to avoid commit-SHA self-reference."
+        ),
         "evidence_reference": (
             "Integer values in evidence-bearing fields index evidence_table."
         ),
@@ -1153,8 +1182,18 @@ def normalized_artifact(payload: dict[str, object]) -> dict[str, object]:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
-    parser.add_argument("--base-sha", default=FIXED_BASE)
+    parser.add_argument(
+        "--root", type=Path, required=True,
+        help="explicit repository root to scan",
+    )
+    parser.add_argument(
+        "--expected-head", required=True,
+        help="commit expected at the currently checked-out HEAD",
+    )
+    parser.add_argument(
+        "--report-base-sha", default=REPORT_BASE_SHA,
+        help="original fixed Base recorded in the audit report",
+    )
     parser.add_argument("--json-output", type=Path)
     parser.add_argument("--markdown-output", type=Path)
     return parser.parse_args()
@@ -1165,20 +1204,32 @@ def write_explicit(path: Path, content: str) -> None:
     path.write_text(content, encoding="utf-8", newline="\n")
 
 
+def resolve_from_root(root: Path, path: Path) -> Path:
+    return path.resolve() if path.is_absolute() else (root / path).resolve()
+
+
 def main() -> None:
     args = parse_args()
-    payload = build_payload(args.root.resolve(), args.base_sha)
+    root = args.root.resolve()
+    payload = build_payload(root, args.expected_head, args.report_base_sha)
     if args.json_output:
         write_explicit(
-            args.json_output.resolve(),
+            resolve_from_root(root, args.json_output),
             json.dumps(
                 normalized_artifact(payload), ensure_ascii=False, sort_keys=True,
                 separators=(",", ":"),
             ) + "\n",
         )
     if args.markdown_output:
-        write_explicit(args.markdown_output.resolve(), inventory_markdown(payload))
-    print(json.dumps(payload["metrics"], ensure_ascii=False, sort_keys=True))
+        write_explicit(
+            resolve_from_root(root, args.markdown_output),
+            inventory_markdown(payload),
+        )
+    print(json.dumps({
+        "checked_out_head": payload["scan_context"]["checked_out_head"],
+        "metrics": payload["metrics"],
+        "report_base_sha": payload["baseline"]["report_base_sha"],
+    }, ensure_ascii=False, sort_keys=True))
 
 
 if __name__ == "__main__":

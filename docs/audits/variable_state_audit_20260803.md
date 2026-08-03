@@ -127,7 +127,7 @@ P1 是审计排序，不代表 243 个确认缺陷。尤其同名持久化键和
 
 结论：保留 `total_minutes`、`_minute_remainder` 和 `total_hour` 的当前权威/派生关系。不要把 `minute_remainder` 的持久化副本当成第二个权威时间。
 
-P1 候选：`FormalWorldEconomyService._last_day_index` 随经济状态持久化并可独立恢复，但 `_validate_state()` 没有验证它与权威 `total_hour / 24` 的关系（`scripts/formal/formal_world_economy_service.gd:212-220,237-258,487-500,805-838`）。被篡改、损坏或来自旧实现的值可能跳过或重复日结边界。此项需要单独修复任务和跨日/存档回归，本轮不改行为。
+P1 候选：`FormalWorldEconomyService._last_day_index` 随经济状态持久化并可独立恢复，但 `_validate_state()` 没有验证它与权威 `total_hour / 24` 的关系（`scripts/formal/formal_world_economy_service.gd:212-220,237-258,487-500,805-838`）。过大的 `last_day_index` 会使后续满足 `day_index <= _last_day_index` 的日结直接返回，因此可能跳过未来日结；过小值是否会造成重复日结，现有静态源码证据不能确认，需要后续行为测试。此项需要单独修复任务和跨日/存档回归，本轮不改行为。
 
 ### 2. 玩家与人物身份
 
@@ -216,10 +216,52 @@ P1 产品边界候选：正式 UI 展示的“世界事件”目前由展示数�
 - 扫描器不含网络调用，不写生产/测试/工作流文件。
 - `git diff --check` 通过；没有 `.uid` 生成。
 
-最终确定性哈希将在提交前验证后写入本节：
+标准复跑命令如下。它从 PR 最新 Head 取得独立的检出门禁值，继续把原始审计 Base 写入报告，并把两次输出放在仓库外临时目录。实际检出 Head 只出现在扫描器的运行输出中，不写入提交产物，避免产物对其所在提交 SHA 形成自引用。
 
-- `artifacts/variable-state-audit.json`：`99109431D70A4598B4DB81F0447E4CAB0345AC057C799F237BA8A9A08A2AAF28`
-- `docs/audits/variable_state_inventory_20260803.md`：`0B7090A0944B3BD5F08B0D9D06086782713B6DD0C8694128AAB64BCFCC321BFE`
+```powershell
+$repoRoot = 'D:\wwo-variable-audit'
+$expectedHead = git -C $repoRoot rev-parse HEAD
+$reportBaseSha = '277a6d801a6eae762e4f6963ceb995a909f80bd9'
+$tempRoot = Join-Path ([IO.Path]::GetTempPath()) ("wwo-variable-state-audit-" + [guid]::NewGuid().ToString('N'))
+$run1 = Join-Path $tempRoot 'run1'
+$run2 = Join-Path $tempRoot 'run2'
+New-Item -ItemType Directory -Path $run1, $run2 | Out-Null
+
+python -B (Join-Path $repoRoot 'tools\audit_formal_variable_state.py') `
+  --root $repoRoot `
+  --expected-head $expectedHead `
+  --report-base-sha $reportBaseSha `
+  --json-output (Join-Path $run1 'variable-state-audit.json') `
+  --markdown-output (Join-Path $run1 'variable_state_inventory_20260803.md')
+
+python -B (Join-Path $repoRoot 'tools\audit_formal_variable_state.py') `
+  --root $repoRoot `
+  --expected-head $expectedHead `
+  --report-base-sha $reportBaseSha `
+  --json-output (Join-Path $run2 'variable-state-audit.json') `
+  --markdown-output (Join-Path $run2 'variable_state_inventory_20260803.md')
+
+$hashes = [ordered]@{
+  run1_json = (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $run1 'variable-state-audit.json')).Hash
+  run2_json = (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $run2 'variable-state-audit.json')).Hash
+  committed_json = (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $repoRoot 'artifacts\variable-state-audit.json')).Hash
+  run1_markdown = (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $run1 'variable_state_inventory_20260803.md')).Hash
+  run2_markdown = (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $run2 'variable_state_inventory_20260803.md')).Hash
+  committed_markdown = (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $repoRoot 'docs\audits\variable_state_inventory_20260803.md')).Hash
+}
+$hashes
+[ordered]@{
+  json_runs_match = $hashes.run1_json -eq $hashes.run2_json
+  json_matches_committed = $hashes.run1_json -eq $hashes.committed_json
+  markdown_runs_match = $hashes.run1_markdown -eq $hashes.run2_markdown
+  markdown_matches_committed = $hashes.run1_markdown -eq $hashes.committed_markdown
+}
+```
+
+本次连续两次复跑及仓库产物的确定性哈希如下，三方逐字节一致：
+
+- `artifacts/variable-state-audit.json`：run1 `4B3C0FCC734A304AD7BA7C4AE7987B5DB28663A33914162A0506645C55ECB75A`；run2 `4B3C0FCC734A304AD7BA7C4AE7987B5DB28663A33914162A0506645C55ECB75A`；仓库产物 `4B3C0FCC734A304AD7BA7C4AE7987B5DB28663A33914162A0506645C55ECB75A`。
+- `docs/audits/variable_state_inventory_20260803.md`：run1 `0B7090A0944B3BD5F08B0D9D06086782713B6DD0C8694128AAB64BCFCC321BFE`；run2 `0B7090A0944B3BD5F08B0D9D06086782713B6DD0C8694128AAB64BCFCC321BFE`；仓库产物 `0B7090A0944B3BD5F08B0D9D06086782713B6DD0C8694128AAB64BCFCC321BFE`。
 
 ## 本轮不做
 
