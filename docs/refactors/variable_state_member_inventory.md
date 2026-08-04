@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1607|1233|15|0|1233|5|32|16|60|878|508|261|
+|1607|1233|15|0|1233|5|32|16|60|878|509|261|
 
 ## A–K分类说明
 
@@ -842,7 +842,7 @@
 8 C GRID_COLOR
 9 C REGION_BORDER_COLOR
 10 C RAIL_DARK_COLOR
-11 C RAIL_LIGHT_COLOR
+11 C RAIL_LIGHT
 12 C CONTROL_BORDER_DARK_COLOR
 13 C CONTROL_BORDER_COLOR
 14 C CONTESTED_COLOR
