@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import sys
+
+sys.dont_write_bytecode = True
+
+import argparse
 import json
 import re
 from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Iterable
-
-ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "builds" / "variable-state-audit"
 
 SOURCE_SUFFIXES = {".gd", ".tscn", ".tres", ".godot", ".json", ".cfg"}
 IGNORED_PARTS = {".git", ".godot", "builds", ".ci-godot"}
@@ -94,17 +96,17 @@ class Member:
     unclear: bool = False
 
 
-def iter_source_files() -> Iterable[Path]:
-    for path in ROOT.rglob("*"):
+def iter_source_files(root: Path) -> Iterable[Path]:
+    for path in root.rglob("*"):
         if not path.is_file() or path.suffix.lower() not in SOURCE_SUFFIXES:
             continue
-        if any(part in IGNORED_PARTS for part in path.relative_to(ROOT).parts):
+        if any(part in IGNORED_PARTS for part in path.relative_to(root).parts):
             continue
         yield path
 
 
-def rel(path: Path) -> str:
-    return path.relative_to(ROOT).as_posix()
+def rel(root: Path, path: Path) -> str:
+    return path.relative_to(root).as_posix()
 
 
 def read_text(path: Path) -> str:
@@ -202,10 +204,12 @@ def infer_category(
     return "A", "candidate unique source pending writer audit", flags
 
 
-def parse_members(path: Path, text: str, autoload_paths: set[str]) -> list[Member]:
+def parse_members(
+    root: Path, path: Path, text: str, autoload_paths: set[str],
+) -> list[Member]:
     if path.suffix.lower() != ".gd":
         return []
-    path_str = rel(path)
+    path_str = rel(root, path)
     owner = path.stem
     extends = ""
     pending_annotations: list[str] = []
@@ -448,7 +452,9 @@ def detect_state_containers(members: list[Member]) -> list[str]:
     return findings
 
 
-def write_markdown_inventory(members: list[Member], metrics: dict[str, int]) -> None:
+def write_markdown_inventory(
+    output_dir: Path, members: list[Member], metrics: dict[str, int],
+) -> None:
     rows = [m for m in members if m.is_production]
     lines = [
         "# Generated variable state inventory",
@@ -475,19 +481,47 @@ def write_markdown_inventory(members: list[Member], metrics: dict[str, int]) -> 
             f"{m.lifecycle} | {m.writer_count} | {m.reader_count} | "
             f"{'yes' if m.persisted_by_name else 'no'} | {m.category} | {reason} |"
         )
-    (OUT / "member_inventory.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    (output_dir / "member_inventory.md").write_text(
+        "\n".join(lines) + "\n", encoding="utf-8"
+    )
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--root", type=Path, required=True,
+        help="explicit repository root to scan",
+    )
+    parser.add_argument(
+        "--output-dir", type=Path,
+        help="output directory; relative paths are resolved from --root",
+    )
+    return parser.parse_args()
+
+
+def resolve_from_root(root: Path, path: Path) -> Path:
+    return path.resolve() if path.is_absolute() else (root / path).resolve()
 
 
 def main() -> None:
-    OUT.mkdir(parents=True, exist_ok=True)
-    files = list(iter_source_files())
-    text_by_path = {rel(path): read_text(path) for path in files}
+    args = parse_args()
+    root = args.root.resolve()
+    output_dir = (
+        resolve_from_root(root, args.output_dir)
+        if args.output_dir
+        else root / "builds" / "variable-state-audit"
+    )
+    output_dir.mkdir(parents=True, exist_ok=True)
+    files = list(iter_source_files(root))
+    text_by_path = {rel(root, path): read_text(path) for path in files}
     project_text = text_by_path.get("project.godot", "")
     autoloads = parse_autoloads(project_text)
     autoload_paths = set(autoloads.values())
     members: list[Member] = []
     for path in files:
-        members.extend(parse_members(path, text_by_path[rel(path)], autoload_paths))
+        members.extend(
+            parse_members(root, path, text_by_path[rel(root, path)], autoload_paths)
+        )
     token_index, key_counts, key_sites = build_occurrence_index(text_by_path)
     annotate_occurrences(members, token_index, key_counts, key_sites)
     metrics = declaration_metrics(members, autoload_paths)
@@ -519,22 +553,22 @@ def main() -> None:
         "sync_function_candidates": sync_functions,
         "generic_dictionary_state_container_candidates": state_containers,
     }
-    (OUT / "variable_state_inventory.json").write_text(
+    (output_dir / "variable_state_inventory.json").write_text(
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
-    (OUT / "metrics.json").write_text(
+    (output_dir / "metrics.json").write_text(
         json.dumps(metrics, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
-    (OUT / "repository_paths.txt").write_text(
+    (output_dir / "repository_paths.txt").write_text(
         "\n".join(sorted(text_by_path)) + "\n", encoding="utf-8"
     )
-    (OUT / "fallback_candidates.txt").write_text(
+    (output_dir / "fallback_candidates.txt").write_text(
         "\n".join(fallbacks) + "\n", encoding="utf-8"
     )
-    (OUT / "sync_function_candidates.txt").write_text(
+    (output_dir / "sync_function_candidates.txt").write_text(
         "\n".join(sync_functions) + "\n", encoding="utf-8"
     )
-    write_markdown_inventory(members, metrics)
+    write_markdown_inventory(output_dir, members, metrics)
     print(json.dumps(metrics, ensure_ascii=False, sort_keys=True))
 
 
