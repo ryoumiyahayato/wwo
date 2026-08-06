@@ -47,6 +47,20 @@ func _check_formal_economy() -> void:
 	var economy := simulation.economy
 	var initial := simulation.world_summary()
 	_check_world_roster(initial, economy)
+	var first_polity_id := simulation.first_polity_id()
+	_check(not first_polity_id.is_empty(), "正式组合根暴露确定性首个政治单元")
+	_check(
+		simulation.has_polity(first_polity_id),
+		"正式组合根可查询首个政治单元"
+	)
+	_check(
+		not simulation.has_polity("missing_formal_polity"),
+		"正式组合根拒绝未知政治单元"
+	)
+	_check(
+		first_polity_id == economy.first_polity_id(),
+		"正式组合根查询与经济服务结果一致"
+	)
 	_check(
 		int(initial.get("commodity_count", 0)) >= 60,
 		"正式经济直接读取完整商品目录"
@@ -161,6 +175,13 @@ func _check_product_scenes() -> void:
 		== "res://scenes/formal/formal_world_menu.tscn",
 		"产品默认入口已迁移到正式半球目录"
 	)
+	var application_source := FileAccess.get_file_as_string(
+		"res://scripts/formal/formal_world_application.gd"
+	)
+	_check(
+		not application_source.contains("formal_simulation.economy.polity_records"),
+		"正式UI不再绕过组合根读取经济服务政治单元字典"
+	)
 	var menu_scene := load(
 		"res://scenes/formal/formal_world_menu.tscn"
 	) as PackedScene
@@ -205,6 +226,12 @@ func _check_runtime_application(application: FormalWorldApplication) -> void:
 		int(runtime_summary.get("detailed_polity_unit_count", 0)) == 55,
 		"正式半球运行时将高细节经济绑定到55个地图单元"
 	)
+	var first_polity_id := application.formal_simulation.first_polity_id()
+	application.selected_country_id = first_polity_id
+	_check(
+		application._selected_polity_entity_id() == first_polity_id,
+		"正式UI通过组合根解析已选政治单元"
+	)
 	_check(
 		application.get_node_or_null("PrototypeMap") == null,
 		"正式运行场景不再包含旧平面PrototypeMap"
@@ -228,7 +255,12 @@ func _check_runtime_application(application: FormalWorldApplication) -> void:
 	application._activate_button("formal_economy_toggle")
 	_check(
 		application.economy_panel_open,
-		"正式半球政经面板可由正式交互打开"
+		"正式半球政经面板可由正式按钮命令打开"
+	)
+	application._toggle_formal_economy_panel()
+	_check(
+		not application.economy_panel_open,
+		"正式半球政经面板统一命令保持切换行为"
 	)
 
 
