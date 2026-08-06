@@ -87,6 +87,7 @@ func _check_formal_economy() -> void:
 		restored.world_summary() == simulation.world_summary(),
 		"正式经济恢复后摘要等价"
 	)
+	_check_economy_restore_is_atomic(restored.economy)
 
 
 func _check_world_roster(
@@ -261,6 +262,43 @@ func _check_runtime_application(application: FormalWorldApplication) -> void:
 	_check(
 		not application.economy_panel_open,
 		"正式半球政经面板统一命令保持切换行为"
+	)
+
+
+func _check_economy_restore_is_atomic(
+	economy: FormalWorldEconomyService
+) -> void:
+	var before := economy.get_persistent_state()
+	var rejected := before.duplicate(true)
+	var candidate_states := rejected.get("country_states", {}) as Dictionary
+	var economy_ids: Array[String] = []
+	for raw_id: Variant in candidate_states:
+		economy_ids.append(str(raw_id))
+	economy_ids.sort()
+	_check(not economy_ids.is_empty(), "原子恢复测试存在正式经济候选")
+	if economy_ids.is_empty():
+		return
+	var economy_id := economy_ids[0]
+	var candidate_state := candidate_states[economy_id] as Dictionary
+	var inventory := candidate_state.get("inventory", {}) as Dictionary
+	var commodity_ids: Array[String] = []
+	for raw_id: Variant in inventory:
+		commodity_ids.append(str(raw_id))
+	commodity_ids.sort()
+	_check(not commodity_ids.is_empty(), "原子恢复测试存在库存候选")
+	if commodity_ids.is_empty():
+		return
+	inventory[commodity_ids[0]] = -1.0
+	candidate_state["inventory"] = inventory
+	candidate_states[economy_id] = candidate_state
+	rejected["country_states"] = candidate_states
+	_check(
+		not economy.restore_persistent_state(rejected),
+		"正式经济拒绝负库存恢复候选"
+	)
+	_check(
+		economy.get_persistent_state() == before,
+		"正式经济失败恢复前后持久状态完全一致"
 	)
 
 
