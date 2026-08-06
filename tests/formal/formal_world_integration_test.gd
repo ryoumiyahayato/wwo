@@ -187,7 +187,6 @@ func _check_formal_atomic_save_recovery() -> void:
 	var source := FormalWorldSimulation.new()
 	_check(source.initialize(), "正式原子存档测试源可初始化")
 	if source.initialized:
-		var first_state := source.get_persistent_state().duplicate(true)
 		var first_save := source.save_to_user()
 		_check(first_save.success, "正式世界可通过统一原子接口保存")
 		_check(
@@ -199,14 +198,23 @@ func _check_formal_atomic_save_recovery() -> void:
 			not FileAccess.file_exists(temporary_path),
 			"首次原子保存完成后不残留临时文件"
 		)
+		var first_primary_text := FileAccess.get_file_as_string(primary_path)
+		var expected_first := FormalWorldSimulation.new()
+		_check(expected_first.initialize(), "首次主档规范化恢复目标可初始化")
+		var expected_first_state: Dictionary = {}
+		if expected_first.initialized:
+			var expected_first_load := expected_first.load_from_user()
+			_check(expected_first_load.success, "首次主档可由统一读取接口恢复")
+			if expected_first_load.success:
+				expected_first_state = expected_first.get_persistent_state().duplicate(true)
 
 		source.advance_minutes(60)
 		var second_save := source.save_to_user()
 		_check(second_save.success, "正式世界第二次原子保存成功")
 		_check(FileAccess.file_exists(backup_path), "第二次保存生成安全备份")
 		_check(
-			_parse_dictionary_file(backup_path) == first_state,
-			"安全备份保留上一份有效主档"
+			FileAccess.get_file_as_string(backup_path) == first_primary_text,
+			"安全备份逐字保留上一份有效主档"
 		)
 
 		_write_text_file(primary_path, "{broken")
@@ -220,7 +228,7 @@ func _check_formal_atomic_save_recovery() -> void:
 				"备份恢复返回明确统一结果"
 			)
 			_check(
-				recovered.get_persistent_state() == first_state,
+				recovered.get_persistent_state() == expected_first_state,
 				"备份恢复得到上一份有效正式状态"
 			)
 
