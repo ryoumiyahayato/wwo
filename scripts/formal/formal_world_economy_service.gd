@@ -249,25 +249,54 @@ func restore_persistent_state(state: Dictionary) -> bool:
 	var saved_total_hour := int(state.get("total_hour", -1))
 	if saved_total_hour < 0 or saved_total_hour != total_hour:
 		return false
-	var restored := (state.get("country_states", {}) as Dictionary).duplicate(true)
-	if restored.size() != country_states.size():
+	var candidate_country_states: Dictionary = (
+		(state.get("country_states", {}) as Dictionary).duplicate(true)
+	)
+	if candidate_country_states.size() != country_states.size():
 		return false
-	for raw_id: Variant in restored:
+	for raw_id: Variant in candidate_country_states:
 		var economy_id := str(raw_id)
-		if not country_states.has(economy_id):
+		if (
+			not country_states.has(economy_id)
+			or not candidate_country_states[economy_id] is Dictionary
+		):
 			return false
-		var restored_state := restored[economy_id] as Dictionary
+		var restored_state := candidate_country_states[economy_id] as Dictionary
 		if not restored_state.get("polity_ids", []) is Array:
 			restored_state["polity_ids"] = polity_ids_for_economy(economy_id)
-			restored[economy_id] = restored_state
-	country_states = restored
-	shipments = DataRecordUtils.to_dictionary_array(state.get("shipments", []))
-	history = DataRecordUtils.to_dictionary_array(state.get("history", []))
-	_next_shipment_sequence = maxi(1, int(state.get("next_shipment_sequence", 1)))
-	_last_day_index = int(state.get("last_day_index", saved_total_hour / HOURS_PER_DAY))
-	while history.size() > HISTORY_LIMIT:
-		history.pop_front()
-	return _validate_state()
+			candidate_country_states[economy_id] = restored_state
+	var candidate_shipments: Array[Dictionary] = (
+		DataRecordUtils.to_dictionary_array(state.get("shipments", []))
+	)
+	var candidate_history: Array[Dictionary] = (
+		DataRecordUtils.to_dictionary_array(state.get("history", []))
+	)
+	var candidate_next_shipment_sequence: int = maxi(
+		1, int(state.get("next_shipment_sequence", 1))
+	)
+	var expected_last_day_index := (
+		-1
+		if saved_total_hour < HOURS_PER_DAY
+		else int(saved_total_hour / HOURS_PER_DAY)
+	)
+	var candidate_last_day_index: int = int(
+		state.get("last_day_index", expected_last_day_index)
+	)
+	while candidate_history.size() > HISTORY_LIMIT:
+		candidate_history.pop_front()
+	if not _validate_candidate_state(
+		candidate_country_states,
+		candidate_shipments,
+		candidate_last_day_index,
+		saved_total_hour
+	):
+		return false
+	country_states = candidate_country_states
+	shipments = candidate_shipments
+	history = candidate_history
+	_next_shipment_sequence = candidate_next_shipment_sequence
+	_last_day_index = candidate_last_day_index
+	return true
 
 
 func _load_commodity_catalog() -> bool:
@@ -815,15 +844,44 @@ func _shipment_count_for(entity_id: String) -> int:
 
 
 func _validate_state() -> bool:
+	return _validate_candidate_state(
+		country_states,
+		shipments,
+		_last_day_index,
+		total_hour
+	)
+
+
+func _validate_candidate_state(
+	candidate_country_states: Dictionary,
+	candidate_shipments: Array[Dictionary],
+	candidate_last_day_index: int,
+	expected_total_hour: int
+) -> bool:
 	if _political_unit_count != polity_records.size():
 		return false
-	if country_states.size() != EXPECTED_MAJOR_ROSTER_COUNT:
+	if expected_total_hour < 0:
 		return false
-	for raw_state: Variant in country_states.values():
-		var state := raw_state as Dictionary
-		var economy_id := str(state.get("entity_id", ""))
+	var expected_last_day_index := (
+		-1
+		if expected_total_hour < HOURS_PER_DAY
+		else int(expected_total_hour / HOURS_PER_DAY)
+	)
+	if candidate_last_day_index != expected_last_day_index:
+		return false
+	if candidate_country_states.size() != EXPECTED_MAJOR_ROSTER_COUNT:
+		return false
+	for raw_id: Variant in candidate_country_states:
+		var economy_id := str(raw_id)
+		if not candidate_country_states[economy_id] is Dictionary:
+			return false
+		var state := candidate_country_states[economy_id] as Dictionary
 		var polity_ids := DataRecordUtils.to_string_array(state.get("polity_ids", []))
-		if int(state.get("population", 0)) <= 0 or polity_ids.is_empty():
+		if (
+			str(state.get("entity_id", "")) != economy_id
+			or int(state.get("population", 0)) <= 0
+			or polity_ids.is_empty()
+		):
 			return false
 		for polity_id: String in polity_ids:
 			if (
@@ -839,12 +897,18 @@ func _validate_state() -> bool:
 		for value: Variant in (state.get("inventory", {}) as Dictionary).values():
 			if float(value) < 0.0:
 				return false
-	for shipment: Dictionary in shipments:
+	for shipment: Dictionary in candidate_shipments:
+		var origin_id := str(shipment.get("origin_entity_id", ""))
+		var destination_id := str(shipment.get("destination_entity_id", ""))
+		var dispatch_hour := int(shipment.get("dispatch_hour", -1))
+		var arrival_hour := int(shipment.get("arrival_hour", -1))
 		if (
 			float(shipment.get("units", 0.0)) <= 0.0
-			or int(shipment.get("arrival_hour", 0)) <= int(
-				shipment.get("dispatch_hour", 0)
-			)
+			or not candidate_country_states.has(origin_id)
+			or not candidate_country_states.has(destination_id)
+			or dispatch_hour < 0
+			or dispatch_hour > expected_total_hour
+			or arrival_hour <= dispatch_hour
 		):
 			return false
 	return true
