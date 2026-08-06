@@ -277,7 +277,6 @@ func _rollback(
 	if restored_player == null:
 		return false
 	GameSessionService.player_character = restored_player
-	GameSessionService.selected_country_id = restored_player.country_id
 	return true
 
 

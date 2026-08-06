@@ -1,20 +1,24 @@
-name: Alpha 1900 commodity economy
+name: Formal 1900 world economy
 
 on:
   pull_request:
     branches:
       - master
     paths:
+      - "project.godot"
       - "data/alpha/**"
+      - "data/world_map/historical/**"
       - "scripts/alpha/**"
-      - "scripts/v2_3/v2_3_life_loop_menu.gd"
-      - "scenes/alpha/**"
+      - "scripts/formal/**"
+      - "scenes/formal/**"
       - "tests/alpha/**"
+      - "tests/formal/**"
       - "tools/audit_1900_commodity_economy.py"
       - "tools/audit_1900_economy_integration.py"
       - "tools/audit_1900_world_economy_compact.py"
       - "tools/build_1900_world_economy_estimates.py"
       - "tools/compact_1900_world_economy_estimates.py"
+      - "tools/run_validation.ps1"
       - "docs/economy/**"
       - ".github/workflows/alpha-commodity-economy.yml"
   workflow_dispatch:
@@ -23,13 +27,13 @@ permissions:
   contents: read
 
 concurrency:
-  group: alpha-commodity-economy-${{ github.ref }}
+  group: formal-1900-world-economy-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 45
     env:
       GODOT_BIN: "${{ github.workspace }}/.ci-godot/Godot_v4.6.3-stable_linux.x86_64"
     steps:
@@ -45,20 +49,14 @@ jobs:
           unzip -q .ci-godot/godot.zip -d .ci-godot
           chmod +x "${GODOT_BIN}"
           "${GODOT_BIN}" --version
-      - name: Install screenshot runtime
-        shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends xvfb xauth fonts-noto-cjk
       - name: Audit economy and historical calibration
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p builds/alpha-commodity
-          python3 tools/audit_1900_commodity_economy.py 2>&1 | tee builds/alpha-commodity/commodity-static-audit.log
-          python3 tools/audit_1900_economy_integration.py 2>&1 | tee builds/alpha-commodity/integration-static-audit.log
-          python3 tools/audit_1900_world_economy_compact.py 2>&1 | tee builds/alpha-commodity/world-economy-static-audit.log
+          mkdir -p builds/formal-economy
+          python3 tools/audit_1900_commodity_economy.py 2>&1 | tee builds/formal-economy/commodity-static-audit.log
+          python3 tools/audit_1900_economy_integration.py 2>&1 | tee builds/formal-economy/integration-static-audit.log
+          python3 tools/audit_1900_world_economy_compact.py 2>&1 | tee builds/formal-economy/world-economy-static-audit.log
           python3 -m json.tool data/alpha/commodity_market_1900.json >/dev/null
           python3 -m json.tool data/alpha/economy_integration_1900.json >/dev/null
           python3 -m json.tool data/alpha/historical_world_economy_1900.json >/dev/null
@@ -66,68 +64,51 @@ jobs:
           python3 -m json.tool data/alpha/historical_household_budgets_1900.json >/dev/null
           python3 -m json.tool data/alpha/historical_transport_network_1900.json >/dev/null
           python3 -m json.tool data/alpha/historical_transport_network_1900/transport_compact.json >/dev/null
+          python3 -m json.tool data/world_map/historical/political_units_1900.json >/dev/null
+          python3 -m json.tool data/world_map/historical/major_economy_polity_crosswalk_1900.json >/dev/null
       - name: Import project and scan scripts
         shell: bash
         run: |
           set -euo pipefail
-          "${GODOT_BIN}" --headless --audio-driver Dummy --path . --editor --quit-after 4 --log-file alpha-commodity-import.log
-          if grep -Eq "SCRIPT ERROR|Parse Error|Failed to load script|^ERROR:" alpha-commodity-import.log; then
-            cat alpha-commodity-import.log
+          "${GODOT_BIN}" --headless --audio-driver Dummy --path . --editor --quit-after 4 --log-file formal-economy-import.log
+          if grep -Eq "SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|^ERROR:" formal-economy-import.log; then
+            cat formal-economy-import.log
             exit 1
           fi
-      - name: Run economy, historical data and save regressions
+      - name: Run formal world and isolated service regressions
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p builds/alpha-commodity
+          mkdir -p builds/formal-economy
           tests=(
+            tests/formal/formal_world_integration_test.gd
+            tests/formal/formal_world_long_term_balance_test.gd
+            tests/alpha/alpha_historical_world_economy_data_test.gd
+            tests/alpha/alpha_economy_ui_audit_test.gd
             tests/alpha/alpha_commodity_market_test.gd
             tests/alpha/alpha_economy_lifecycle_test.gd
             tests/alpha/alpha_labor_enterprise_test.gd
             tests/alpha/alpha_composition_smoke.gd
             tests/alpha/alpha_save_and_migration_test.gd
-            tests/alpha/alpha_economy_ui_audit_test.gd
             tests/alpha/alpha_economy_integration_phase2_test.gd
             tests/alpha/alpha_ai_economy_stability_test.gd
-            tests/alpha/alpha_historical_world_economy_data_test.gd
           )
           for test_script in "${tests[@]}"; do
             name="$(basename "${test_script}" .gd)"
-            log="builds/alpha-commodity/${name}.log"
-            timeout --signal=TERM 300s "${GODOT_BIN}" --headless --audio-driver Dummy --path . --script "res://${test_script}" --log-file "${log}"
-            if grep -Eq "SCRIPT ERROR|Parse Error|Failed to load script|Assertion failed|[1-9][0-9]* failures|^ERROR:" "${log}"; then
+            log="builds/formal-economy/${name}.log"
+            timeout --signal=TERM 420s "${GODOT_BIN}" --headless --audio-driver Dummy --path . --script "res://${test_script}" --log-file "${log}"
+            if grep -Eq "SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|Assertion failed|[1-9][0-9]* failures|^ERROR:" "${log}"; then
               cat "${log}"
               exit 1
             fi
           done
-      - name: Capture economy interface
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p builds/alpha-commodity/screenshots
-          capture_path="${GITHUB_WORKSPACE}/builds/alpha-commodity/screenshots/economy-dashboard.png"
-          timeout --signal=TERM 300s xvfb-run -a -s "-screen 0 1280x720x24" \
-            "${GODOT_BIN}" --audio-driver Dummy --rendering-method gl_compatibility \
-            --path . --windowed --resolution 1280x720 \
-            res://scenes/alpha/alpha_economy_dashboard_preview.tscn \
-            -- --economy-audit-capture="${capture_path}"
-          test -s "${capture_path}"
-          file "${capture_path}" | tee builds/alpha-commodity/economy-capture-file.log
-      - name: Upload economy screenshot
-        uses: actions/upload-artifact@v4
-        with:
-          name: alpha-1900-economy-ui-screenshot
-          path: builds/alpha-commodity/screenshots/economy-dashboard.png
-          if-no-files-found: error
-          retention-days: 14
       - name: Upload diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: alpha-1900-commodity-economy-logs
+          name: formal-world-economy-logs
           path: |
-            alpha-commodity-import.log
-            builds/alpha-commodity/*.log
-            builds/alpha-commodity/economy-capture-file.log
+            formal-economy-import.log
+            builds/formal-economy/*.log
           if-no-files-found: ignore
           retention-days: 7

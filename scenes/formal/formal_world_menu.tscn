@@ -1,0 +1,109 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/formal/formal_world_menu.gd" id="1_menu"]
+
+[node name="FormalWorldMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 2
+script = ExtResource("1_menu")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.014, 0.026, 0.03, 1)
+
+[node name="TopField" type="ColorRect" parent="Background"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 160.0
+grow_horizontal = 2
+mouse_filter = 2
+color = Color(0.020, 0.043, 0.048, 0.72)
+
+[node name="BottomField" type="ColorRect" parent="Background"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -150.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+color = Color(0.009, 0.018, 0.021, 0.72)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Content" type="VBoxContainer" parent="Center"]
+custom_minimum_size = Vector2(560, 0)
+layout_mode = 2
+theme_override_constants/separation = 13
+
+[node name="TitleLabel" type="Label" parent="Center/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.91, 0.90, 0.82, 1)
+theme_override_font_sizes/font_size = 68
+text = "1900"
+horizontal_alignment = 1
+
+[node name="ThickRule" type="ColorRect" parent="Center/Content"]
+custom_minimum_size = Vector2(560, 6)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.72, 0.64, 0.38, 0.88)
+
+[node name="ThinRule" type="ColorRect" parent="Center/Content"]
+custom_minimum_size = Vector2(560, 1)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.72, 0.64, 0.38, 0.45)
+
+[node name="VersionLabel" type="Label" parent="Center/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.69, 0.55, 1)
+theme_override_font_sizes/font_size = 15
+text = "V0.001"
+horizontal_alignment = 1
+
+[node name="PromptSpacer" type="Control" parent="Center/Content"]
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="PromptLabel" type="Label" parent="Center/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.54, 0.60, 0.56, 0.88)
+theme_override_font_sizes/font_size = 13
+text = "按任意键进入正式世界"
+horizontal_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="Center/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.68, 0.72, 0.68, 1)
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2

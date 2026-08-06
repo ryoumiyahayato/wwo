@@ -1,0 +1,193 @@
+name: Formal time behavior baseline
+
+on:
+  pull_request:
+    branches:
+      - agent/formal-world-economy-integration
+    paths:
+      - ".github/workflows/formal-time-behavior-baseline.yml"
+      - "tests/variable_state/formal_time_stable_contract_test.gd"
+      - "tests/variable_state/formal_time_known_defects_test.gd"
+      - "tests/variable_state/formal_time_test_support.gd"
+      - "docs/refactors/formal_time_behavior_baseline.md"
+      - "scripts/formal/**"
+      - "scripts/ui_spikes/holographic_workspace/**"
+      - "scripts/v2_2/v2_datetime.gd"
+      - "scripts/alpha/**"
+      - "scripts/core/data_record_utils.gd"
+      - "scenes/formal/**"
+      - "shaders/ui_spikes/holographic_workspace/**"
+      - "data/alpha/commodity_market_1900.json"
+      - "data/alpha/historical_world_economy_1900.json"
+      - "data/alpha/historical_world_economy_1900/**"
+      - "data/world_map/historical/**"
+      - "data/world_map/world_coastlines.json"
+      - "data/world_map/regions.json"
+      - "data/world_map/cities.json"
+      - "data/world_map/institutions.json"
+      - "data/world_map/characters.json"
+      - "project.godot"
+      - "tools/run_validation.ps1"
+      - "tools/audit_variable_state.py"
+      - "tools/generate_variable_state_docs.py"
+      - "tools/render_variable_state_audit_summary.py"
+      - "tools/render_variable_state_member_inventory.py"
+      - "tools/render_variable_refactor_plan.py"
+      - "docs/refactors/variable_state_audit.md"
+      - "docs/refactors/variable_state_member_inventory.md"
+      - "docs/refactors/state_ownership_matrix.md"
+      - "docs/refactors/variable_refactor_plan.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formal-time-behavior-baseline-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit-documents:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Regenerate variable state audit documents
+        run: |
+          set -euo pipefail
+          python -B tools/audit_variable_state.py --root .
+          python tools/render_variable_state_audit_summary.py
+          python tools/render_variable_state_member_inventory.py
+          python tools/generate_variable_state_docs.py
+          python tools/render_variable_refactor_plan.py
+          test -s builds/variable-state-audit/variable_state_inventory.json
+          test -s builds/variable-state-audit/member_inventory.md
+          test -s docs/refactors/variable_state_audit.md
+          test -s docs/refactors/variable_state_member_inventory.md
+          test -s docs/refactors/state_ownership_matrix.md
+          test -s docs/refactors/variable_refactor_plan.md
+
+      - name: Verify audit documents remain unchanged
+        run: |
+          git diff --exit-code -- \
+            docs/refactors/variable_state_audit.md \
+            docs/refactors/variable_state_member_inventory.md \
+            docs/refactors/state_ownership_matrix.md \
+            docs/refactors/variable_refactor_plan.md
+
+  formal-time-baseline:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Godot 4.6.3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'godot.zip'
+          $install = Join-Path $env:RUNNER_TEMP 'godot-4.6.3'
+          Invoke-WebRequest -Uri 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip' -OutFile $archive
+          Expand-Archive -LiteralPath $archive -DestinationPath $install
+          $binary = (Get-ChildItem -LiteralPath $install -Filter 'Godot_v4.6.3-stable_win64.exe' -Recurse | Select-Object -First 1).FullName
+          if (-not $binary) { throw 'Godot 4.6.3 executable was not found after extraction' }
+          "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          & $binary --version
+
+      - name: Prepare isolated user data
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $userDataRoot = Join-Path $env:RUNNER_TEMP 'formal-time-user-data'
+          if (Test-Path -LiteralPath $userDataRoot) {
+            Remove-Item -LiteralPath $userDataRoot -Recurse -Force
+          }
+          New-Item -ItemType Directory -Force -Path $userDataRoot | Out-Null
+          "APPDATA=$userDataRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          Write-Host "Isolated Godot APPDATA: $userDataRoot"
+
+      - name: Verify required baseline files
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $required = @(
+            'tests/variable_state/formal_time_stable_contract_test.gd',
+            'tests/variable_state/formal_time_known_defects_test.gd',
+            'tests/variable_state/formal_time_test_support.gd'
+          )
+          foreach ($path in $required) {
+            if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+              throw "Required formal-time baseline file is missing: $path"
+            }
+            if ((Get-Item -LiteralPath $path).Length -le 0) {
+              throw "Required formal-time baseline file is empty: $path"
+            }
+          }
+
+      - name: Import project class cache
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless', '--audio-driver', 'Dummy', '--editor', '--path', '.', '--quit-after', '4') -Wait -PassThru -NoNewWindow
+          if ($process.ExitCode -ne 0) { throw "Godot project import failed with exit code $($process.ExitCode)" }
+
+      - name: Run formal time stable contract
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force -Path builds/formal-time | Out-Null
+          $testPath = 'tests/variable_state/formal_time_stable_contract_test.gd'
+          $logPath = 'builds/formal-time/formal_time_stable_contract_test.log'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless', '--audio-driver', 'Dummy', '--path', '.', '--script', "res://$testPath", '--log-file', $logPath) -Wait -PassThru -NoNewWindow
+          if (-not (Test-Path -LiteralPath $logPath -PathType Leaf)) { throw 'Stable contract log was not created' }
+          $content = Get-Content -LiteralPath $logPath -Raw
+          Write-Host $content
+          if ($process.ExitCode -ne 0) { throw "Formal time stable contract failed with exit code $($process.ExitCode)" }
+          if ($content -match 'SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|Assertion failed|[1-9][0-9]* failures|^ERROR:') {
+            throw 'Stable contract log contains a fatal error or failure'
+          }
+          $summary = [regex]::Match($content, 'Formal time stable contract: ([1-9][0-9]*) checks, 0 failures')
+          if (-not $summary.Success) {
+            throw 'Stable contract summary is missing, has zero checks, or reports failures'
+          }
+          Write-Host $summary.Value
+
+      - name: Run formal time known defects
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $testPath = 'tests/variable_state/formal_time_known_defects_test.gd'
+          $logPath = 'builds/formal-time/formal_time_known_defects_test.log'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless', '--audio-driver', 'Dummy', '--path', '.', '--script', "res://$testPath", '--log-file', $logPath) -Wait -PassThru -NoNewWindow
+          if (-not (Test-Path -LiteralPath $logPath -PathType Leaf)) { throw 'Known-defects log was not created' }
+          $content = Get-Content -LiteralPath $logPath -Raw
+          Write-Host $content
+          if ($process.ExitCode -ne 0) { throw "Formal time known defects failed with exit code $($process.ExitCode)" }
+          if ($content -match 'SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|Assertion failed|[1-9][0-9]* failures|^ERROR:') {
+            throw 'Known-defects log contains a fatal error or failure'
+          }
+          $summary = [regex]::Match($content, 'Formal time known defects: ([1-9][0-9]*) checks, 0 failures')
+          if (-not $summary.Success) {
+            throw 'Known-defects summary is missing, has zero checks, or reports failures'
+          }
+          Write-Host $summary.Value
+
+      - name: Verify isolated save cleanup
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $leftovers = Get-ChildItem -LiteralPath $env:APPDATA -Filter 'formal_world_1900.json' -Recurse -File -ErrorAction SilentlyContinue
+          if ($leftovers) {
+            $leftovers | ForEach-Object { Write-Host $_.FullName }
+            throw 'Formal-time tests left a production-named save in isolated user data'
+          }
+
+      - name: Run existing validation baseline
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          powershell -ExecutionPolicy Bypass -File tools/run_validation.ps1 -GodotPath $env:GODOT_BIN
+          if ($LASTEXITCODE -ne 0) { throw "Existing validation failed with exit code $LASTEXITCODE" }

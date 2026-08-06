@@ -1,0 +1,141 @@
+name: Variable state behavior baseline
+
+on:
+  pull_request:
+    branches:
+      - agent/formal-world-economy-integration
+    paths:
+      - ".github/workflows/variable-state-behavior-baseline.yml"
+      - "scenes/v2_3/v2_3_entry_hud_capture.tscn"
+      - "scenes/v2_3/v2_3_entry_hud_probe.tscn"
+      - "scripts/v2_3/v2_3_minimal_hud_overlay.gd"
+      - "scripts/v2_3/v2_3_minimal_hud_overlay_polish.gd"
+      - "tests/alpha/alpha_fixture_retained_services_performance_test.gd"
+      - "tests/variable_state/**"
+      - "tests/fixtures/save/**"
+      - "tools/run_validation.ps1"
+      - "project.godot"
+      - "data/world/demo_world.json"
+      - "data/characters/character_generation.json"
+      - "data/balance/map_rules.json"
+      - "data/balance/simulation_clock.json"
+      - "data/balance/society_rules.json"
+      - "data/balance/continuity_rules.json"
+      - "data/balance/action_rules.json"
+      - "scripts/core/**"
+      - "scripts/action/**"
+      - "scripts/character/**"
+      - "scripts/map/**"
+      - "scripts/organization/**"
+      - "scripts/relationship/**"
+      - "scripts/save/**"
+      - "scripts/simulation/**"
+      - "scripts/ui_spikes/holographic_workspace/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: variable-state-behavior-baseline-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  existing-validation:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Godot 4.6.3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'godot.zip'
+          $install = Join-Path $env:RUNNER_TEMP 'godot-4.6.3'
+          Invoke-WebRequest -Uri 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip' -OutFile $archive
+          Expand-Archive -LiteralPath $archive -DestinationPath $install
+          $binary = (Get-ChildItem -LiteralPath $install -Filter 'Godot_v4.6.3-stable_win64.exe' -Recurse | Select-Object -First 1).FullName
+          if (-not $binary) { throw 'Godot 4.6.3 executable was not found after extraction' }
+          "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          & $binary --version
+
+      - name: Run existing validation baseline
+        shell: pwsh
+        run: |
+          powershell -ExecutionPolicy Bypass -File tools/run_validation.ps1 -GodotPath $env:GODOT_BIN
+
+  variable-state-baseline:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Godot 4.6.3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'godot.zip'
+          $install = Join-Path $env:RUNNER_TEMP 'godot-4.6.3'
+          Invoke-WebRequest -Uri 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip' -OutFile $archive
+          Expand-Archive -LiteralPath $archive -DestinationPath $install
+          $binary = (Get-ChildItem -LiteralPath $install -Filter 'Godot_v4.6.3-stable_win64.exe' -Recurse | Select-Object -First 1).FullName
+          if (-not $binary) { throw 'Godot 4.6.3 executable was not found after extraction' }
+          "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          & $binary --version
+
+      - name: Import project class cache
+        shell: pwsh
+        run: |
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless', '--editor', '--path', '.', '--quit-after', '2') -Wait -PassThru -NoNewWindow
+          if ($process.ExitCode -ne 0) { throw "Godot project import failed with exit code $($process.ExitCode)" }
+
+      - name: Generate SAVE_VERSION 1 fixture through production services
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless', '--path', '.', '--script', 'res://tests/variable_state/generate_current_save_v1_fixture.gd') -Wait -PassThru -NoNewWindow
+          if ($process.ExitCode -ne 0) { throw "Fixture generator failed with exit code $($process.ExitCode)" }
+          $fixture = Get-ChildItem -LiteralPath (Join-Path $env:APPDATA 'Godot\app_userdata') -Filter 'current_save_v1.json' -Recurse | Select-Object -First 1
+          if (-not $fixture) { throw 'Generated SAVE_VERSION 1 fixture was not found under user://' }
+          New-Item -ItemType Directory -Force -Path builds/variable-state | Out-Null
+          Copy-Item -LiteralPath $fixture.FullName -Destination builds/variable-state/current_save_v1.json
+          $snapshot = Get-Content -LiteralPath builds/variable-state/current_save_v1.json -Raw | ConvertFrom-Json
+          if ([int]$snapshot.save_version -ne 1) { throw 'Generated fixture is not SAVE_VERSION 1' }
+          $player = $snapshot.characters.active | Where-Object id -eq $snapshot.player_character_id | Select-Object -First 1
+          if (-not $player) { throw 'Generated fixture player is absent from active characters' }
+          if ([string]$snapshot.selected_country_id -ne [string]$player.country_id) {
+            throw 'Generated fixture selected_country_id differs from player country'
+          }
+
+      - name: Verify committed fixture matches production output
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $fixturePath = 'tests/fixtures/save/current_save_v1.json'
+          if (-not (Test-Path -LiteralPath $fixturePath -PathType Leaf)) {
+            throw "Required committed fixture is missing: $fixturePath"
+          }
+          $generated = Get-Content -LiteralPath builds/variable-state/current_save_v1.json -Raw | ConvertFrom-Json | ConvertTo-Json -Depth 100 -Compress
+          $committed = Get-Content -LiteralPath $fixturePath -Raw | ConvertFrom-Json | ConvertTo-Json -Depth 100 -Compress
+          if ($generated -cne $committed) { throw 'Committed fixture differs from current production save output' }
+
+      - name: Upload generated fixture
+        uses: actions/upload-artifact@v4
+        with:
+          name: current-save-v1
+          path: builds/variable-state/current_save_v1.json
+          if-no-files-found: error
+
+      - name: Run variable-state behavior tests
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $testPath = 'tests/variable_state/variable_state_behavior_baseline_test.gd'
+          if (-not (Test-Path -LiteralPath $testPath -PathType Leaf)) {
+            throw "Required behavior test is missing: $testPath"
+          }
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless', '--path', '.', '--script', 'res://tests/variable_state/variable_state_behavior_baseline_test.gd') -Wait -PassThru -NoNewWindow
+          if ($process.ExitCode -ne 0) { throw "Variable-state behavior tests failed with exit code $($process.ExitCode)" }

@@ -6,16 +6,19 @@ extends RefCounted
 const WORLD_MANIFEST_PATH := "res://data/alpha/historical_world_economy_1900.json"
 const HOUSEHOLD_BUDGET_PATH := "res://data/alpha/historical_household_budgets_1900.json"
 const TRANSPORT_MANIFEST_PATH := "res://data/alpha/historical_transport_network_1900.json"
+const COVERAGE_REGISTRY_PATH := "res://data/alpha/historical_economy_coverage_1900.json"
 
 var world_manifest: Dictionary = {}
 var household_budgets: Dictionary = {}
 var transport_manifest: Dictionary = {}
+var coverage_registry: Dictionary = {}
 var countries: Array[Dictionary] = []
 var domestic_networks: Array[Dictionary] = []
 var maritime_corridors: Array[Dictionary] = []
 var river_corridors: Array[Dictionary] = []
 var country_by_entity: Dictionary = {}
 var budget_by_id: Dictionary = {}
+var coverage_by_entity: Dictionary = {}
 var initialization_error: String = ""
 
 
@@ -27,10 +30,17 @@ func configure() -> bool:
 	river_corridors.clear()
 	country_by_entity.clear()
 	budget_by_id.clear()
+	coverage_by_entity.clear()
 	world_manifest = _load_document(WORLD_MANIFEST_PATH)
 	household_budgets = _load_document(HOUSEHOLD_BUDGET_PATH)
 	transport_manifest = _load_document(TRANSPORT_MANIFEST_PATH)
-	if world_manifest.is_empty() or household_budgets.is_empty() or transport_manifest.is_empty():
+	coverage_registry = _load_document(COVERAGE_REGISTRY_PATH)
+	if (
+		world_manifest.is_empty()
+		or household_budgets.is_empty()
+		or transport_manifest.is_empty()
+		or coverage_registry.is_empty()
+	):
 		return false
 	if str(world_manifest.get("schema_id", "")) != "historical_world_economy_1900_estimates_v1":
 		return _fail("1900世界经济清单 Schema 无效")
@@ -38,6 +48,9 @@ func configure() -> bool:
 		return _fail("1900家庭预算 Schema 无效")
 	if str(transport_manifest.get("schema_id", "")) != "historical_transport_network_1900_estimates_v1":
 		return _fail("1900运输网络清单 Schema 无效")
+	if str(coverage_registry.get("schema_id", "")) != "historical_economy_coverage_1900_v1":
+		return _fail("1900经济覆盖登记表 Schema 无效")
+	_load_coverage_registry()
 	if not _load_country_table():
 		return false
 	if not _load_transport_table():
@@ -64,19 +77,69 @@ func formal_countries() -> Array[Dictionary]:
 	var threshold: int = int((world_manifest.get("policy", {}) as Dictionary).get(
 		"minimum_formal_confidence_bp", 4500
 	))
+	var required_dimensions: Array[String] = [
+		"population", "industrial_capacity", "railway_capacity",
+	]
 	for record: Dictionary in countries:
+		var entity_id := str(record.get("entity_id", ""))
+		var coverage := coverage_by_entity.get(entity_id, {}) as Dictionary
+		if str(coverage.get("status", "source_required")) != "verified":
+			continue
+		var verified := DataRecordUtils.to_string_array(coverage.get("verified_dimensions", []))
+		var complete := true
+		for dimension: String in required_dimensions:
+			if dimension not in verified:
+				complete = false
+				break
 		if (
-			bool(record.get("formal_simulation_allowed", false))
+			complete
+			and bool(record.get("formal_simulation_allowed", false))
 			and int(record.get("overall_confidence_bp", 0)) >= threshold
 		):
-			result.append(record.duplicate(true))
+			var admitted := record.duplicate(true)
+			admitted["coverage"] = coverage.duplicate(true)
+			result.append(admitted)
 	return result
+
+
+func simulation_countries() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	var formally_admitted: Dictionary = {}
+	for record: Dictionary in formal_countries():
+		formally_admitted[str(record.get("entity_id", ""))] = true
+	for record: Dictionary in countries:
+		var entity_id := str(record.get("entity_id", ""))
+		var coverage := (coverage_by_entity.get(entity_id, {
+			"entity_id": entity_id,
+			"status": "source_required",
+			"verified_dimensions": [],
+			"missing_dimensions": (coverage_registry.get("dimensions", []) as Array).duplicate(),
+		}) as Dictionary).duplicate(true)
+		coverage["status"] = "verified" if formally_admitted.has(entity_id) else "bounded_estimate"
+		var simulation_record := record.duplicate(true)
+		simulation_record["coverage"] = coverage
+		simulation_record["admission_status"] = str(coverage.get("status", "bounded_estimate"))
+		result.append(simulation_record)
+	return result
+
+
+func _load_coverage_registry() -> void:
+	coverage_by_entity.clear()
+	for raw_record: Variant in coverage_registry.get("countries", []) as Array:
+		if not raw_record is Dictionary:
+			continue
+		var record := (raw_record as Dictionary).duplicate(true)
+		var entity_id := str(record.get("entity_id", ""))
+		if not entity_id.is_empty():
+			coverage_by_entity[entity_id] = record
 
 
 func coverage_summary() -> Dictionary:
 	var summary: Dictionary = (world_manifest.get("coverage_summary", {}) as Dictionary).duplicate(true)
 	summary["loaded_country_count"] = countries.size()
 	summary["formal_country_count"] = formal_countries().size()
+	summary["bounded_simulation_country_count"] = simulation_countries().size()
+	summary["coverage_registry_country_count"] = coverage_by_entity.size()
 	summary["domestic_network_count"] = domestic_networks.size()
 	summary["maritime_corridor_count"] = maritime_corridors.size()
 	summary["river_corridor_count"] = river_corridors.size()

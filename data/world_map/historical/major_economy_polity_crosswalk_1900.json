@@ -1,0 +1,32 @@
+{
+  "schema_id": "major_economy_polity_crosswalk_1900_v1",
+  "snapshot_date": "1900-03-12",
+  "policy": {
+    "economy_count_is_not_world_polity_count": true,
+    "one_economy_may_cover_multiple_map_units": true,
+    "all_crosswalk_exceptions_must_be_explicit": true
+  },
+  "records": [
+    {
+      "economy_entity_id": "australia_colonies_1900",
+      "mapping_mode": "historical_economic_aggregate",
+      "polity_ids": [
+        "cshapes_gw_901",
+        "cshapes_gw_902",
+        "cshapes_gw_903",
+        "cshapes_gw_904",
+        "cshapes_gw_905",
+        "cshapes_gw_906"
+      ],
+      "reason_zh": "1900年澳大利亚联邦尚未成立；高细节经济记录聚合六个自治殖民地，地图仍分别保留六个政治单元。"
+    },
+    {
+      "economy_entity_id": "kingdom_of_luxembourg",
+      "mapping_mode": "historical_name_alias",
+      "polity_ids": [
+        "grand_duchy_of_luxembourg"
+      ],
+      "reason_zh": "经济目录旧名与1900政治地图中的卢森堡大公国规范ID不同。"
+    }
+  ]
+}

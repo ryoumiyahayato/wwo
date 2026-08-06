@@ -210,7 +210,7 @@ func build_snapshot(clock: SimulationClock, map_service: MapControlService) -> D
 		"config_versions": CONFIG_VERSIONS.duplicate(true),
 		"game_time": clock.get_persistent_state(),
 		"player_character_id": society.roster.player_character_id,
-		"selected_country_id": GameSessionService.selected_country_id,
+		"selected_country_id": GameSessionService.player_character.country_id,
 		"world": map_service.get_persistent_state(),
 		"characters": society.roster.get_persistent_state(),
 		"organizations": society.organizations.get_persistent_state(),
@@ -426,12 +426,12 @@ func restore_snapshot(
 		)
 	candidate_society.paused_settlement_categories = (paused_categories as Dictionary).duplicate(true)
 
-	var selected_country_id: String = str(snapshot["selected_country_id"])
-	if not map_service.data_set.countries.has(selected_country_id):
+	var saved_player_country_id: String = str(snapshot["selected_country_id"])
+	if not map_service.data_set.countries.has(saved_player_country_id):
 		return _fail_and_restore_map(
 			map_service, previous_world_state, "broken_reference", "所选国家引用无效"
 		)
-	if selected_country_id != restored_player.country_id:
+	if saved_player_country_id != restored_player.country_id:
 		return _fail_and_restore_map(
 			map_service, previous_world_state, "broken_reference", "所选国家与玩家人物国家不一致"
 		)
@@ -480,7 +480,6 @@ func restore_snapshot(
 		return SaveOperationResult.fail("restore_error", "游戏时间与累计小时不一致或字段无效")
 
 	GameSessionService.player_character = restored_player
-	GameSessionService.selected_country_id = selected_country_id
 	GameSessionService.current_action = restored_action
 	GameSessionService.restore_action_results(restored_recent, restored_history)
 	GameSessionService.action_id_service = action_ids

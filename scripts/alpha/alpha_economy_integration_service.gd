@@ -39,6 +39,7 @@ var _edge_remaining_capacity: Dictionary = {}
 var _trade_quota_remaining: Dictionary = {}
 var _processed_days: Dictionary = {}
 var _next_shipment_sequence: int = 1
+var _liquidity_sequence_by_day_region: Dictionary = {}
 
 
 func configure(
@@ -72,6 +73,7 @@ func configure(
 	_trade_quota_remaining.clear()
 	_processed_days.clear()
 	_next_shipment_sequence = 1
+	_liquidity_sequence_by_day_region.clear()
 	initialization_error = ""
 	_document = config.economy_integration()
 	if str(_document.get("schema_id", "")) != "alpha_economy_integration_1900_v1":
@@ -119,29 +121,28 @@ func deliver_due_shipments(total_hour: int) -> Dictionary:
 		var units := float(shipment.get("units", 0.0))
 		var seller_id := str(shipment.get("seller_id", ""))
 		var goods_value := int(shipment.get("goods_value_centimes", 0))
-		var seller_state := _enterprise.enterprises.get(seller_id, {}) as Dictionary
-		var seller_failed := (
-			not seller_state.is_empty()
-			and str(seller_state.get("status", "")) in ["bankrupt", "dissolved"]
+		var explicitly_defaulted := (
+			str(shipment.get("status", "")) == "default_requested"
+			or bool(shipment.get("force_default", false))
 		)
-		if seller_failed:
+		if explicitly_defaulted:
 			_refund_failed_shipment(shipment, total_hour)
 			shipment["status"] = "defaulted"
-			shipment["default_reason"] = "seller_bankrupt_before_delivery"
+			shipment["default_reason"] = str(shipment.get("default_reason", "transport_default"))
 			defaulted_count += 1
 		else:
 			_add_region_inventory(destination_id, commodity_id, units)
 			_record_market_metric(destination_id, "transit_received", commodity_id, units)
-			if goods_value > 0:
-				_safe_transfer(
-					"integration:shipment:release:%s" % str(shipment.get("shipment_id", "")),
-					total_hour,
-					ESCROW_ID,
-					seller_id,
-					goods_value,
-					"commodity_delivery",
-					"货物交付后释放托管货款"
-				)
+			if goods_value > 0 and not _safe_transfer(
+				"integration:shipment:release:%s" % str(shipment.get("shipment_id", "")),
+				total_hour,
+				ESCROW_ID,
+				seller_id,
+				goods_value,
+				"commodity_delivery",
+				"货物交付后释放托管货款"
+			):
+				return _fail("shipment_release_failed", "货物已到达但托管货款无法释放")
 			shipment["status"] = "delivered"
 			shipment["delivered_hour"] = total_hour
 			delivered_count += 1
@@ -187,6 +188,42 @@ func settle_day(total_hour: int) -> Dictionary:
 		"gold_reserves": _gold_reserve_summary(),
 	}
 	return _ok(daily_summary.duplicate(true))
+
+
+func is_integrated_enterprise(enterprise_id: String) -> bool:
+	return enterprise_id in site_enterprise.values()
+
+
+func manage_integrated_enterprise(enterprise_id: String, total_hour: int) -> Dictionary:
+	if not is_integrated_enterprise(enterprise_id):
+		return _fail("enterprise_not_integrated", "企业未接入商品经营结算")
+	var state := _enterprise.enterprises.get(enterprise_id, {}) as Dictionary
+	if state.is_empty():
+		return _fail("enterprise_missing", "企业不存在")
+	var changed := 0
+	for raw_site_id: Variant in site_enterprise:
+		var site_id := str(raw_site_id)
+		if str(site_enterprise[site_id]) != enterprise_id:
+			continue
+		var site := _commodity_market.production_sites.get(site_id, {}) as Dictionary
+		var target := int(site.get("operating_target_bp", BASIS_POINTS))
+		var shortage := _site_output_shortage_bp(site)
+		var margin := int(state.get("last_commodity_margin_centimes", 0))
+		var step := int(_policies.get("operating_target_step_bp", 350))
+		if shortage >= 1800 and margin >= 0:
+			target += step
+		elif shortage <= 200 or margin < 0:
+			target -= step
+		target = clampi(
+			target,
+			int(_policies.get("minimum_operating_target_bp", 1500)),
+			int(_policies.get("maximum_operating_target_bp", BASIS_POINTS))
+		)
+		if target != int(site.get("operating_target_bp", BASIS_POINTS)):
+			site["operating_target_bp"] = target
+			_commodity_market.production_sites[site_id] = site
+			changed += 1
+	return _ok({"enterprise_id": enterprise_id, "sites_changed": changed, "total_hour": total_hour})
 
 
 func transport_edge_count() -> int:
@@ -245,9 +282,11 @@ func get_persistent_state() -> Dictionary:
 		"decision_history": decision_history.duplicate(true),
 		"government_stockpiles": government_stockpiles.duplicate(true),
 		"country_finance": country_finance.duplicate(true),
+		"region_accounts": region_accounts.duplicate(true),
 		"daily_summary": daily_summary.duplicate(true),
 		"processed_days": _processed_days.keys(),
 		"next_shipment_sequence": _next_shipment_sequence,
+		"liquidity_sequence_by_day_region": _liquidity_sequence_by_day_region.duplicate(true),
 	}
 
 
@@ -258,18 +297,29 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		or not state.get("decision_history", []) is Array
 		or not state.get("government_stockpiles", {}) is Dictionary
 		or not state.get("country_finance", {}) is Dictionary
+		or not state.get("region_accounts", region_accounts) is Dictionary
 	):
 		return false
+	var restored_regions := (state.get("region_accounts", region_accounts) as Dictionary).duplicate(true)
+	if restored_regions.size() != region_accounts.size():
+		return false
+	for raw_region_id: Variant in restored_regions:
+		if not region_accounts.has(str(raw_region_id)):
+			return false
 	shipments = DataRecordUtils.to_dictionary_array(state.get("shipments", []))
 	shipment_history = DataRecordUtils.to_dictionary_array(state.get("shipment_history", []))
 	decision_history = DataRecordUtils.to_dictionary_array(state.get("decision_history", []))
 	government_stockpiles = (state.get("government_stockpiles", {}) as Dictionary).duplicate(true)
 	country_finance = (state.get("country_finance", {}) as Dictionary).duplicate(true)
+	region_accounts = restored_regions
 	daily_summary = (state.get("daily_summary", {}) as Dictionary).duplicate(true)
 	_processed_days.clear()
 	for raw_day: Variant in state.get("processed_days", []) as Array:
 		_processed_days[int(raw_day)] = true
 	_next_shipment_sequence = int(state.get("next_shipment_sequence", 1))
+	_liquidity_sequence_by_day_region = (
+		state.get("liquidity_sequence_by_day_region", {}) as Dictionary
+	).duplicate(true)
 	_trim_history()
 	return bool(validate_integrity().get("success", false))
 
@@ -615,7 +665,7 @@ func _settle_enterprises(total_hour: int) -> Dictionary:
 	var total_cost := 0
 	var total_wages := 0
 	var total_tax := 0
-	var settled_enterprises: Dictionary = {}
+	var enterprise_results: Dictionary = {}
 	for raw_site_id: Variant in _commodity_market.production_sites:
 		var site_id := str(raw_site_id)
 		var site := _commodity_market.production_sites[site_id] as Dictionary
@@ -627,11 +677,15 @@ func _settle_enterprises(total_hour: int) -> Dictionary:
 		var market_id := str((region_accounts[region_id] as Dictionary).get("market_id", ""))
 		var recipe := _commodity_market.recipes.get(str(site.get("recipe_id", "")), {}) as Dictionary
 		var batches := float(site.get("last_batches", 0.0))
+		var actual_outputs := site.get("last_output_units", {}) as Dictionary
 		var revenue := 0
 		var input_cost := 0
 		for output: Dictionary in DataRecordUtils.to_dictionary_array(recipe.get("outputs", [])):
 			var commodity_id := str(output.get("commodity_id", ""))
-			revenue += int(round(float(output.get("units", 0.0)) * batches * float(_commodity_market.market_price(region_id, commodity_id))))
+			var produced_units := float(actual_outputs.get(
+				commodity_id, float(output.get("units", 0.0)) * batches
+			))
+			revenue += int(round(produced_units * float(_commodity_market.market_price(region_id, commodity_id))))
 		for input: Dictionary in DataRecordUtils.to_dictionary_array(recipe.get("inputs", [])):
 			var commodity_id := str(input.get("commodity_id", ""))
 			input_cost += int(round(float(input.get("units", 0.0)) * batches * float(_commodity_market.market_price(region_id, commodity_id))))
@@ -641,7 +695,7 @@ func _settle_enterprises(total_hour: int) -> Dictionary:
 		var maintenance := revenue * int(_policies.get("maintenance_bp_of_revenue", 0)) / BASIS_POINTS
 		var taxable_profit := maxi(0, revenue - input_cost - wage_cost - maintenance)
 		var tax := taxable_profit * int(_policies.get("business_tax_bp", 0)) / BASIS_POINTS
-		_ensure_market_liquidity(region_id, revenue, total_hour)
+		_ensure_market_liquidity(region_id, revenue, total_hour, "site_revenue:%s" % site_id)
 		var revenue_paid := revenue <= 0 or _post_owner_entries(
 			"integration:revenue:%d:%s" % [total_hour, site_id],
 			total_hour,
@@ -657,23 +711,38 @@ func _settle_enterprises(total_hour: int) -> Dictionary:
 			maintenance, tax, total_hour, site_id
 		)
 		var all_paid := revenue_paid and expenses_paid
-		_update_site_and_enterprise_after_settlement(
-			site_id, enterprise_id, revenue, input_cost, wage_cost,
-			maintenance, tax, all_paid, total_hour
-		)
+		var margin := revenue - input_cost - wage_cost - maintenance - tax
+		_update_site_after_settlement(site_id, margin, all_paid)
+		var aggregate := enterprise_results.get(enterprise_id, {
+			"revenue": 0, "input_cost": 0, "wage_cost": 0,
+			"maintenance": 0, "tax": 0, "margin": 0,
+			"all_paid": true, "site_count": 0,
+		}) as Dictionary
+		aggregate["revenue"] = int(aggregate.get("revenue", 0)) + revenue
+		aggregate["input_cost"] = int(aggregate.get("input_cost", 0)) + input_cost
+		aggregate["wage_cost"] = int(aggregate.get("wage_cost", 0)) + wage_cost
+		aggregate["maintenance"] = int(aggregate.get("maintenance", 0)) + maintenance
+		aggregate["tax"] = int(aggregate.get("tax", 0)) + tax
+		aggregate["margin"] = int(aggregate.get("margin", 0)) + margin
+		aggregate["all_paid"] = bool(aggregate.get("all_paid", true)) and all_paid
+		aggregate["site_count"] = int(aggregate.get("site_count", 0)) + 1
+		enterprise_results[enterprise_id] = aggregate
 		total_revenue += revenue if revenue_paid else 0
 		total_cost += input_cost + wage_cost + maintenance + tax if expenses_paid else 0
 		total_wages += wage_cost if expenses_paid else 0
 		total_tax += tax if expenses_paid else 0
-		settled_enterprises[enterprise_id] = true
-	for raw_enterprise_id: Variant in settled_enterprises:
-		_maybe_invest(str(raw_enterprise_id), total_hour)
+	for raw_enterprise_id: Variant in enterprise_results:
+		var enterprise_id := str(raw_enterprise_id)
+		_finalize_enterprise_day(
+			enterprise_id, enterprise_results[enterprise_id] as Dictionary, total_hour
+		)
+		_maybe_invest(enterprise_id, total_hour)
 	return {
 		"revenue_centimes": total_revenue,
 		"cost_centimes": total_cost,
 		"wages_centimes": total_wages,
 		"tax_centimes": total_tax,
-		"enterprise_count": settled_enterprises.size(),
+		"enterprise_count": enterprise_results.size(),
 	}
 
 
@@ -721,29 +790,10 @@ func _settle_site_expenses(
 		entries
 	)
 
-func _update_site_and_enterprise_after_settlement(
-	site_id: String,
-	enterprise_id: String,
-	revenue: int,
-	input_cost: int,
-	wage_cost: int,
-	maintenance: int,
-	tax: int,
-	all_paid: bool,
-	total_hour: int
-) -> void:
+func _update_site_after_settlement(site_id: String, margin: int, all_paid: bool) -> void:
 	var site := _commodity_market.production_sites[site_id] as Dictionary
-	var state := _enterprise.enterprises[enterprise_id] as Dictionary
-	var margin := revenue - input_cost - wage_cost - maintenance - tax
 	var condition := int(site.get("condition_bp", BASIS_POINTS))
-	var failures := int(state.get("commodity_cash_failure_days", 0))
-	if all_paid:
-		condition = mini(BASIS_POINTS, condition + 20)
-		failures = 0
-	else:
-		condition = maxi(2500, condition - 180)
-		failures += 1
-	site["condition_bp"] = condition
+	condition = mini(BASIS_POINTS, condition + 20) if all_paid else maxi(2500, condition - 180)
 	var step := int(_policies.get("operating_target_step_bp", 350))
 	var target := int(site.get("operating_target_bp", BASIS_POINTS))
 	var output_shortage_bp := _site_output_shortage_bp(site)
@@ -756,22 +806,13 @@ func _update_site_and_enterprise_after_settlement(
 		int(_policies.get("minimum_operating_target_bp", 1500)),
 		mini(condition, int(_policies.get("maximum_operating_target_bp", BASIS_POINTS)))
 	)
+	site["condition_bp"] = condition
 	site["operating_target_bp"] = target
 	_commodity_market.production_sites[site_id] = site
-	state["commodity_revenue_centimes"] = int(state.get("commodity_revenue_centimes", 0)) + revenue
-	state["commodity_input_cost_centimes"] = int(state.get("commodity_input_cost_centimes", 0)) + input_cost
-	state["commodity_wage_cost_centimes"] = int(state.get("commodity_wage_cost_centimes", 0)) + wage_cost
-	state["commodity_maintenance_centimes"] = int(state.get("commodity_maintenance_centimes", 0)) + maintenance
-	state["commodity_tax_centimes"] = int(state.get("commodity_tax_centimes", 0)) + tax
-	state["last_commodity_margin_centimes"] = margin
-	state["commodity_cash_failure_days"] = failures
-	state["last_commodity_settlement_hour"] = total_hour
-	state["distress"] = clampi(int(state.get("distress", 0)) + (-1 if all_paid and margin >= 0 else 3), 0, 100)
-	_enterprise.enterprises[enterprise_id] = state
 	decision_history.append({
-		"decision_id": "decision:enterprise_operating:%d:%s" % [total_hour, site_id],
-		"total_hour": total_hour,
-		"enterprise_id": enterprise_id,
+		"decision_id": "decision:enterprise_operating:%d:%s" % [int(site.get("last_settlement_hour", 0)), site_id],
+		"total_hour": int(site.get("last_settlement_hour", 0)),
+		"enterprise_id": str(site_enterprise.get(site_id, "")),
 		"site_id": site_id,
 		"decision_type": "operating_target",
 		"operating_target_bp": target,
@@ -779,6 +820,31 @@ func _update_site_and_enterprise_after_settlement(
 		"output_shortage_bp": output_shortage_bp,
 		"reason": "shortage_and_margin" if target >= int(site.get("last_operating_bp", 0)) else "loss_cash_or_glut",
 	})
+	_trim_history()
+
+
+func _finalize_enterprise_day(
+	enterprise_id: String, aggregate: Dictionary, total_hour: int
+) -> void:
+	var state := _enterprise.enterprises.get(enterprise_id, {}) as Dictionary
+	if state.is_empty():
+		return
+	var all_paid := bool(aggregate.get("all_paid", false))
+	var margin := int(aggregate.get("margin", 0))
+	var failures := int(state.get("commodity_cash_failure_days", 0))
+	failures = 0 if all_paid else failures + 1
+	state["commodity_revenue_centimes"] = int(state.get("commodity_revenue_centimes", 0)) + int(aggregate.get("revenue", 0))
+	state["commodity_input_cost_centimes"] = int(state.get("commodity_input_cost_centimes", 0)) + int(aggregate.get("input_cost", 0))
+	state["commodity_wage_cost_centimes"] = int(state.get("commodity_wage_cost_centimes", 0)) + int(aggregate.get("wage_cost", 0))
+	state["commodity_maintenance_centimes"] = int(state.get("commodity_maintenance_centimes", 0)) + int(aggregate.get("maintenance", 0))
+	state["commodity_tax_centimes"] = int(state.get("commodity_tax_centimes", 0)) + int(aggregate.get("tax", 0))
+	state["last_commodity_margin_centimes"] = margin
+	state["commodity_cash_failure_days"] = failures
+	state["last_commodity_settlement_hour"] = total_hour
+	state["distress"] = clampi(
+		int(state.get("distress", 0)) + (-1 if all_paid and margin >= 0 else 3), 0, 100
+	)
+	_enterprise.enterprises[enterprise_id] = state
 	if failures >= 10 and int(state.get("distress", 0)) >= 95:
 		_enterprise.bankrupt(
 			"integration:bankrupt:%s:%d" % [enterprise_id, total_hour],
@@ -786,7 +852,6 @@ func _update_site_and_enterprise_after_settlement(
 			total_hour,
 			"商品经营连续现金流失败"
 		)
-	_trim_history()
 
 
 func _site_output_shortage_bp(site: Dictionary) -> int:
@@ -805,7 +870,7 @@ func _site_output_shortage_bp(site: Dictionary) -> int:
 
 
 func _maybe_invest(enterprise_id: String, total_hour: int) -> void:
-	if total_hour % (30 * HOURS_PER_DAY) != 23:
+	if total_hour < 30 * HOURS_PER_DAY - 1 or (total_hour + 1) % (30 * HOURS_PER_DAY) != 0:
 		return
 	var state := _enterprise.enterprises.get(enterprise_id, {}) as Dictionary
 	if state.is_empty() or str(state.get("status", "")) not in AlphaEnterpriseService.ACTIVE_ENTERPRISE_STATUSES:
@@ -829,24 +894,22 @@ func _maybe_invest(enterprise_id: String, total_hour: int) -> void:
 		"integration:expand:%s:%d" % [enterprise_id, total_hour],
 		enterprise_id,
 		investment,
-		1,
+		maxi(1, site_ids.size()),
 		CAPITAL_SUPPLIER_ID,
 		total_hour
 	)
 	if not bool(expanded.get("success", false)):
 		return
-	var selected_site_id := site_ids[0]
-	var selected_site := _commodity_market.production_sites[selected_site_id] as Dictionary
-	selected_site["capacity_batches_per_day"] = float(selected_site.get("capacity_batches_per_day", 0.0)) * 1.02
-	_commodity_market.production_sites[selected_site_id] = selected_site
-	_build_capacity_indexes()
+	for site_id: String in site_ids:
+		var site := _commodity_market.production_sites.get(site_id, {}) as Dictionary
+		site["capacity_batches_per_day"] = float(site.get("capacity_batches_per_day", 0.0)) * 1.04
+		_commodity_market.production_sites[site_id] = site
 	decision_history.append({
-		"decision_id": "decision:enterprise_invest:%d:%s" % [total_hour, enterprise_id],
+		"decision_id": "decision:enterprise_investment:%d:%s" % [total_hour, enterprise_id],
 		"total_hour": total_hour,
 		"enterprise_id": enterprise_id,
 		"decision_type": "capacity_investment",
 		"investment_centimes": investment,
-		"site_id": selected_site_id,
 		"reason": "persistent_shortage_and_high_utilization",
 	})
 	_trim_history()
@@ -858,6 +921,7 @@ func _schedule_shortage_shipments(total_hour: int) -> Dictionary:
 	var tariff_total := 0
 	var freight_total := 0
 	var max_suppliers := int(_policies.get("maximum_nearby_suppliers", 8))
+	var target_stock_units: Dictionary = {}
 	for raw_commodity_id: Variant in _commodity_market.commodities:
 		var commodity_id := str(raw_commodity_id)
 		for raw_receiver_id: Variant in region_accounts:
@@ -873,7 +937,16 @@ func _schedule_shortage_shipments(total_hour: int) -> Dictionary:
 				checked += 1
 				var route := route_value as Dictionary
 				var donor_id := str(route.get("region_id", ""))
-				var surplus := _surplus_units(donor_id, commodity_id)
+				var target_key := "%s|%s" % [donor_id, commodity_id]
+				if not target_stock_units.has(target_key):
+					target_stock_units[target_key] = _target_stock_units(
+						donor_id, commodity_id
+					)
+				var surplus := maxf(
+					0.0,
+					_commodity_market.inventory_units(donor_id, commodity_id)
+					- float(target_stock_units[target_key]) * 0.85
+				)
 				if surplus <= 0.0001:
 					continue
 				var route_capacity := _route_remaining_capacity(route.get("edge_ids", []) as Array)
@@ -927,11 +1000,13 @@ func _create_shipment(
 	units = minf(units, _route_remaining_capacity(edge_ids))
 	if units <= 0.0001:
 		return _fail("shipment_capacity_missing", "运输、配额或黄金储备不足")
+	var shipment_id := "shipment:commodity:%d" % _next_shipment_sequence
+	_next_shipment_sequence += 1
 	var unit_price := _commodity_market.market_price(origin_id, commodity_id)
 	var goods_value := maxi(1, int(round(float(unit_price) * units)))
 	var route_terms := _route_terms(edge_ids)
-	var carrier_id := str(route_terms.get("carrier_id", ""))
-	if carrier_id.is_empty():
+	var carrier_rates := route_terms.get("carrier_cost_per_unit", {}) as Dictionary
+	if carrier_rates.is_empty():
 		return _fail("carrier_missing", "运输路径缺少承运企业")
 	var freight := maxi(0, int(round(float(route_terms.get("cost_per_unit", 0.0)) * units)))
 	var tariff_bp := int(relation.get("tariff_bp", 0)) if cross_border else 0
@@ -939,11 +1014,10 @@ func _create_shipment(
 	var tariff := goods_value * maxi(0, tariff_bp - preference_bp) / BASIS_POINTS
 	var insurance := goods_value * int(_policies.get("insurance_premium_bp", 0)) / BASIS_POINTS
 	var buyer_id := str(destination_account.get("market_id", ""))
-	var seller_id := _producer_for(origin_id, commodity_id)
-	if seller_id.is_empty():
-		return _fail("seller_missing", "供应地区缺少商品生产企业")
+	var seller_id := str(origin_account.get("market_id", ""))
+	var producer_id := _producer_for(origin_id, commodity_id)
 	var total_due := goods_value + freight + tariff + insurance
-	_ensure_market_liquidity(destination_id, total_due, total_hour)
+	_ensure_market_liquidity(destination_id, total_due, total_hour, "shipment:%s" % shipment_id)
 	var buyer_cash := _economy.ledger.owner_cash(buyer_id)
 	if buyer_cash < total_due:
 		var ratio := float(buyer_cash) / float(maxi(1, total_due))
@@ -954,14 +1028,27 @@ func _create_shipment(
 		freight = maxi(0, int(round(float(route_terms.get("cost_per_unit", 0.0)) * units)))
 		tariff = goods_value * maxi(0, tariff_bp - preference_bp) / BASIS_POINTS
 		insurance = goods_value * int(_policies.get("insurance_premium_bp", 0)) / BASIS_POINTS
-	var shipment_id := "shipment:commodity:%d" % _next_shipment_sequence
-	_next_shipment_sequence += 1
 	var payment_entries: Array[Dictionary] = [
 		{"owner_id": buyer_id, "delta_centimes": -(goods_value + freight + tariff + insurance)},
 		{"owner_id": ESCROW_ID, "delta_centimes": goods_value},
-		{"owner_id": carrier_id, "delta_centimes": freight},
 		{"owner_id": INSURER_ID, "delta_centimes": insurance},
 	]
+	var carrier_payments: Dictionary = {}
+	var allocated_freight := 0
+	var carrier_ids := DataRecordUtils.to_string_array(carrier_rates.keys())
+	carrier_ids.sort()
+	for index: int in range(carrier_ids.size()):
+		var carrier_id := carrier_ids[index]
+		var amount := (
+			freight - allocated_freight
+			if index == carrier_ids.size() - 1
+			else int(round(float(carrier_rates.get(carrier_id, 0.0)) * units))
+		)
+		amount = maxi(0, amount)
+		allocated_freight += amount
+		carrier_payments[carrier_id] = amount
+		if amount > 0:
+			payment_entries.append({"owner_id": carrier_id, "delta_centimes": amount})
 	if tariff > 0:
 		var treasury_id := str((country_finance[destination_country] as Dictionary).get("treasury_id", ""))
 		payment_entries.append({"owner_id": treasury_id, "delta_centimes": tariff})
@@ -969,7 +1056,7 @@ func _create_shipment(
 		"integration:shipment:dispatch:%s" % shipment_id,
 		total_hour,
 		"commodity_shipment_dispatch",
-		"商品货款托管、运输、保险与关税原子分账",
+		"商品货款托管、分段运输、保险与关税原子分账",
 		payment_entries
 	):
 		return _fail("shipment_payment_failed", "运输发出结算失败")
@@ -980,12 +1067,13 @@ func _create_shipment(
 	_remove_region_inventory(origin_id, commodity_id, units)
 	_record_market_metric(origin_id, "transit_dispatched", commodity_id, units)
 	_consume_route_capacity(edge_ids, units)
+	var gold_transferred := 0.0
 	if cross_border:
 		_trade_quota_remaining[_trade_key(origin_country, destination_country)] = maxf(
 			0.0,
 			float(_trade_quota_remaining.get(_trade_key(origin_country, destination_country), 0.0)) - units
 		)
-		_transfer_gold_for_trade(destination_country, origin_country, goods_value)
+		gold_transferred = _transfer_gold_for_trade(destination_country, origin_country, goods_value)
 	var shipment := {
 		"shipment_id": shipment_id,
 		"status": "in_transit",
@@ -996,8 +1084,9 @@ func _create_shipment(
 		"commodity_id": commodity_id,
 		"units": units,
 		"seller_id": seller_id,
+		"producer_id": producer_id,
 		"buyer_id": buyer_id,
-		"carrier_id": carrier_id,
+		"carrier_payments": carrier_payments,
 		"dispatch_hour": total_hour,
 		"arrival_hour": total_hour + int(route_terms.get("duration_hours", HOURS_PER_DAY)),
 		"edge_ids": edge_ids,
@@ -1006,6 +1095,7 @@ func _create_shipment(
 		"freight_centimes": freight,
 		"tariff_centimes": tariff,
 		"insurance_centimes": insurance,
+		"gold_grams_transferred": gold_transferred,
 		"risk_bp": int(route_terms.get("risk_bp", 0)),
 	}
 	shipments.append(shipment)
@@ -1016,19 +1106,21 @@ func _route_terms(edge_ids: Array[String]) -> Dictionary:
 	var duration := 0
 	var cost := 0.0
 	var risk := 0
-	var carrier_id := ""
+	var carrier_cost_per_unit: Dictionary = {}
 	for edge_id: String in edge_ids:
 		var edge := _edges_by_id.get(edge_id, {}) as Dictionary
 		duration += int(edge.get("duration_hours", 0))
-		cost += float(edge.get("cost_centimes_per_unit", 0.0))
+		var edge_cost := float(edge.get("cost_centimes_per_unit", 0.0))
+		cost += edge_cost
 		risk += int(edge.get("risk_bp", 0))
-		if carrier_id.is_empty():
-			carrier_id = str(edge.get("carrier_id", ""))
+		var carrier_id := str(edge.get("carrier_id", ""))
+		if not carrier_id.is_empty():
+			carrier_cost_per_unit[carrier_id] = float(carrier_cost_per_unit.get(carrier_id, 0.0)) + edge_cost
 	return {
 		"duration_hours": maxi(HOURS_PER_DAY, duration),
 		"cost_per_unit": cost,
 		"risk_bp": mini(int(_policies.get("maximum_route_risk_bp", 3500)), risk),
-		"carrier_id": carrier_id,
+		"carrier_cost_per_unit": carrier_cost_per_unit,
 	}
 
 
@@ -1150,7 +1242,9 @@ func _sync_labor_market() -> void:
 		_labor.jobs[job_id] = job
 
 
-func _ensure_market_liquidity(region_id: String, required: int, total_hour: int) -> void:
+func _ensure_market_liquidity(
+	region_id: String, required: int, total_hour: int, obligation_id: String = ""
+) -> void:
 	if required <= 0:
 		return
 	var account := region_accounts[region_id] as Dictionary
@@ -1162,16 +1256,22 @@ func _ensure_market_liquidity(region_id: String, required: int, total_hour: int)
 	var central_bank_id := str((country_finance[country_id] as Dictionary).get("central_bank_id", ""))
 	var available := _economy.ledger.owner_cash(central_bank_id)
 	var injection := mini(required - cash, available)
-	if injection > 0:
-		_safe_transfer(
-			"integration:clearing_liquidity:%d:%s" % [total_hour, region_id],
-			total_hour,
-			central_bank_id,
-			market_id,
-			injection,
-			"clearing_liquidity",
-			"商品市场日内清算流动性"
-		)
+	if injection <= 0:
+		return
+	var sequence_key := "%d:%s" % [total_hour / HOURS_PER_DAY, region_id]
+	var sequence := int(_liquidity_sequence_by_day_region.get(sequence_key, 0)) + 1
+	_liquidity_sequence_by_day_region[sequence_key] = sequence
+	_safe_transfer(
+		"integration:clearing_liquidity:%d:%s:%s:%d" % [
+			total_hour, region_id, obligation_id.validate_node_name(), sequence,
+		],
+		total_hour,
+		central_bank_id,
+		market_id,
+		injection,
+		"clearing_liquidity",
+		"商品市场日内清算流动性"
+	)
 
 
 func _surplus_units(region_id: String, commodity_id: String) -> float:
@@ -1283,9 +1383,9 @@ func _limit_by_gold_reserve(
 	return minf(units, maximum_units)
 
 
-func _transfer_gold_for_trade(importer_country: String, exporter_country: String, value: int) -> void:
+func _transfer_gold_for_trade(importer_country: String, exporter_country: String, value: int) -> float:
 	if importer_country == exporter_country or value <= 0:
-		return
+		return 0.0
 	var importer := country_finance[importer_country] as Dictionary
 	var exporter := country_finance[exporter_country] as Dictionary
 	var parity := maxf(1.0, float(importer.get("parity_centimes_per_gram", 1.0)))
@@ -1298,12 +1398,34 @@ func _transfer_gold_for_trade(importer_country: String, exporter_country: String
 	exporter["cumulative_trade_balance_centimes"] = int(exporter.get("cumulative_trade_balance_centimes", 0)) + value
 	country_finance[importer_country] = importer
 	country_finance[exporter_country] = exporter
+	return gold
 
 
 func _refund_failed_shipment(shipment: Dictionary, total_hour: int) -> void:
 	var buyer_id := str(shipment.get("buyer_id", ""))
 	var goods_value := int(shipment.get("goods_value_centimes", 0))
 	_refund_escrow(str(shipment.get("shipment_id", "")), buyer_id, goods_value, total_hour)
+	_reverse_gold_for_trade(shipment)
+
+
+func _reverse_gold_for_trade(shipment: Dictionary) -> void:
+	if not bool(shipment.get("cross_border", false)):
+		return
+	var importer_id := str(shipment.get("destination_country_id", ""))
+	var exporter_id := str(shipment.get("origin_country_id", ""))
+	var gold := float(shipment.get("gold_grams_transferred", 0.0))
+	var value := int(shipment.get("goods_value_centimes", 0))
+	if gold <= 0.0 or not country_finance.has(importer_id) or not country_finance.has(exporter_id):
+		return
+	var importer := country_finance[importer_id] as Dictionary
+	var exporter := country_finance[exporter_id] as Dictionary
+	var reversible := minf(gold, float(exporter.get("gold_reserve_grams", 0.0)))
+	exporter["gold_reserve_grams"] = maxf(0.0, float(exporter.get("gold_reserve_grams", 0.0)) - reversible)
+	importer["gold_reserve_grams"] = float(importer.get("gold_reserve_grams", 0.0)) + reversible
+	importer["cumulative_trade_balance_centimes"] = int(importer.get("cumulative_trade_balance_centimes", 0)) + value
+	exporter["cumulative_trade_balance_centimes"] = int(exporter.get("cumulative_trade_balance_centimes", 0)) - value
+	country_finance[importer_id] = importer
+	country_finance[exporter_id] = exporter
 
 
 func _refund_escrow(shipment_id: String, buyer_id: String, amount: int, total_hour: int) -> void:

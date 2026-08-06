@@ -1,5 +1,6 @@
 extends SceneTree
-## Verifies that the formal menu exposes the economy audit and the dashboard renders live data.
+## Compatibility-named economy UI audit. The former two-country/eight-region
+## dashboard has been retired; this validates the formal hemisphere economy UI.
 
 var test := AlphaTestCase.new()
 
@@ -9,55 +10,113 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var menu_scene := load("res://scenes/v2_3/v2_3_life_loop_menu.tscn") as PackedScene
-	test.expect(menu_scene != null, "正式菜单场景可载入")
-	var menu: Control = menu_scene.instantiate() as Control
-	root.add_child(menu)
-	await process_frame
-	await process_frame
-	var audit_button := menu.find_child("EconomyAuditButton", true, false) as Button
-	test.expect(audit_button != null, "正式菜单提供经济系统审计入口")
-	test.expect(
-		audit_button != null and not audit_button.disabled,
-		"经济系统审计入口可正常点击"
-	)
-	menu.queue_free()
-	await process_frame
-
-	var dashboard_scene := load(
-		"res://scenes/alpha/alpha_economy_dashboard_preview.tscn"
+	root.content_scale_size = Vector2i(1280, 720)
+	var menu_scene := load(
+		"res://scenes/formal/formal_world_menu.tscn"
 	) as PackedScene
-	test.expect(dashboard_scene != null, "经济系统审计场景可载入")
-	var dashboard := dashboard_scene.instantiate() as AlphaEconomyDashboardPreview
-	root.add_child(dashboard)
+	test.expect(menu_scene != null, "正式世界菜单场景可载入")
+	if menu_scene != null:
+		var menu := menu_scene.instantiate()
+		test.expect(menu is FormalWorldMenu, "正式菜单使用半球产品控制器")
+		menu.free()
+
+	var world_scene := load(
+		"res://scenes/formal/formal_world_main.tscn"
+	) as PackedScene
+	test.expect(world_scene != null, "正式半球政经场景可载入")
+	if world_scene == null:
+		test.finish(self, "Formal hemisphere economy UI audit")
+		return
+	var view := world_scene.instantiate() as FormalWorldApplication
+	test.expect(view != null, "正式半球政经场景可实例化")
+	if view == null:
+		test.finish(self, "Formal hemisphere economy UI audit")
+		return
+	root.add_child(view)
 	await process_frame
 	await process_frame
-	test.expect(dashboard.simulation.initialized, "经济审计界面完成模拟初始化")
+	_check_world_summary(view)
+	_check_polity_projection(view)
+	_check_interaction(view)
+	view.queue_free()
+	await process_frame
+	test.finish(self, "Formal hemisphere economy UI audit")
+
+
+func _check_world_summary(view: FormalWorldApplication) -> void:
+	test.expect(view.formal_simulation.initialized, "正式政经界面完成世界初始化")
+	var summary := view.formal_simulation.world_summary()
+	test.equal(int(summary.get("commodity_count", 0)), 67, "界面读取67种正式商品")
 	test.equal(
-		dashboard.simulation.commodity_market.commodities.size(),
-		67,
-		"界面读取67种正式商品"
+		int(summary.get("world_political_unit_count", 0)),
+		151,
+		"界面显示完整151单元政治世界"
 	)
 	test.equal(
-		dashboard.simulation.commodity_market.region_states.size(),
-		8,
-		"界面读取8个Alpha样本地区"
+		int(summary.get("major_economy_count", 0)),
+		50,
+		"界面显示50个高细节经济聚合体"
 	)
-	var tree_root: TreeItem = dashboard.market_tree.get_root()
+	test.equal(
+		int(summary.get("detailed_polity_unit_count", 0)),
+		55,
+		"界面区分55个高细节地图单元"
+	)
+	test.equal(
+		int(summary.get("background_polity_count", 0)),
+		96,
+		"界面区分96个纯背景单元"
+	)
+
+
+func _check_polity_projection(view: FormalWorldApplication) -> void:
+	view.selected_country_id = "grand_duchy_of_luxembourg"
+	var luxembourg := view.formal_simulation.polity_summary(
+		view._selected_polity_entity_id()
+	)
 	test.expect(
-		tree_root != null and tree_root.get_child_count() > 0,
-		"商品表格显示库存、价格、生产与消费行"
+		bool(luxembourg.get("has_detailed_economy", false)),
+		"卢森堡地图单元显示高细节经济"
 	)
-	test.expect(dashboard.flow_list.item_count > 0, "界面显示调拨或国际贸易流")
-	test.expect(dashboard.ai_list.item_count > 0, "界面显示人物AI经济决策")
+	test.equal(
+		str(luxembourg.get("economy_entity_id", "")),
+		"kingdom_of_luxembourg",
+		"卢森堡地图别名投影到正确经济记录"
+	)
+	view.selected_country_id = "cshapes_gw_31"
+	var background := view.formal_simulation.polity_summary(
+		view._selected_polity_entity_id()
+	)
+	test.expect(not background.is_empty(), "背景地图单元仍有政经选择投影")
 	test.expect(
-		"运行正常" in dashboard.status_label.text,
-		"界面明确报告经济系统运行状态"
+		not bool(background.get("has_detailed_economy", true)),
+		"背景单元界面不伪造详细经济"
+	)
+
+
+func _check_interaction(view: FormalWorldApplication) -> void:
+	test.expect(
+		view.get_node_or_null("PrototypeMap") == null,
+		"正式政经界面不包含旧平面地图"
 	)
 	test.expect(
-		dashboard.simulation.clock.total_hours >= 30 * 24,
-		"审计预览至少推进30日并显示运行结果"
+		view.get_node_or_null(
+			"HemisphereViewportContainer/HemisphereViewport/Hemisphere3D"
+		) != null,
+		"正式政经界面以三维半球为地图"
 	)
-	dashboard.queue_free()
-	await process_frame
-	test.finish(self, "Alpha economy UI audit")
+	view.economy_panel_open = false
+	view._activate_button("formal_economy_toggle")
+	test.expect(view.economy_panel_open, "正式政经面板可打开")
+	view.sim_paused = false
+	var before_hour := view.formal_simulation.economy.total_hour
+	for _index: int in range(4):
+		view._on_clock_timer_timeout()
+	test.expect(
+		view.formal_simulation.economy.total_hour >= before_hour + 1,
+		"界面时钟推进正式经济"
+	)
+	test.expect(
+		view.formal_simulation.save_to_user().success,
+		"正式政经界面可写入正式世界存档"
+	)

@@ -1,6 +1,6 @@
 ; Engine configuration file.
 ; It's best edited using the editor UI and not directly,
-; since the parameters that go here are not all obvious.
+; since the parameters here are not all obvious.
 ;
 ; Format:
 ;   [section] ; section goes between []
@@ -12,7 +12,7 @@ config_version=5
 
 config/name="1900"
 config/version="0.001a"
-run/main_scene="res://scenes/v2_3/v2_3_life_loop_menu.tscn"
+run/main_scene="res://scenes/formal/formal_world_menu.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 
 [display]
