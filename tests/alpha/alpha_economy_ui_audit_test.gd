@@ -117,6 +117,6 @@ func _check_interaction(view: FormalWorldApplication) -> void:
 		"界面时钟推进正式经济"
 	)
 	test.expect(
-		view.formal_simulation.save_to_user(),
+		view.formal_simulation.save_to_user().success,
 		"正式政经界面可写入正式世界存档"
 	)
