@@ -23,6 +23,7 @@ func _run() -> void:
 	await _test_new_game_product_path()
 	await _test_continue_game_restores_visible_time()
 	_test_inconsistent_persistent_time_is_rejected()
+	_test_economy_restore_day_boundaries()
 	_test_legacy_save_time_compatibility()
 	_check(SUPPORT.restore_formal_save(backup), "一致性测试结束后恢复原有存档或保持隔离目录为空")
 	print("Formal time known defects: %d checks, %d failures" % [checks, failures])
@@ -212,6 +213,84 @@ func _test_inconsistent_persistent_time_is_rejected() -> void:
 	_check(SUPPORT.cleanup_formal_save(), "矛盾存档测试删除自己产生的存档")
 
 
+func _test_economy_restore_day_boundaries() -> void:
+	var simulation := FormalWorldSimulation.new()
+	_check(simulation.initialize(), "经济日结边界恢复测试可初始化")
+	if not simulation.initialized:
+		return
+	var previous_total_hour := 0
+	for boundary: Dictionary in [
+		{"total_hour": 0, "last_day_index": -1},
+		{"total_hour": 23, "last_day_index": -1},
+		{"total_hour": 24, "last_day_index": 1},
+		{"total_hour": 25, "last_day_index": 1},
+		{"total_hour": 48, "last_day_index": 2},
+	]:
+		var total_hour := int(boundary.get("total_hour", 0))
+		var expected_last_day_index := int(boundary.get("last_day_index", -99))
+		if total_hour > previous_total_hour:
+			simulation.advance_minutes((total_hour - previous_total_hour) * 60)
+		previous_total_hour = total_hour
+		var saved := simulation.economy.get_persistent_state()
+		_equal(
+			int(saved.get("last_day_index", -99)),
+			expected_last_day_index,
+			"%d小时持久状态日结索引为%d" % [
+				total_hour, expected_last_day_index,
+			]
+		)
+		_check(
+			simulation.economy.restore_persistent_state(saved),
+			"%d小时合法经济状态可恢复" % total_hour
+		)
+		_equal(
+			int(
+				simulation.economy.get_persistent_state().get(
+					"last_day_index", -99
+				)
+			),
+			expected_last_day_index,
+			"%d小时恢复后日结索引保持%d" % [
+				total_hour, expected_last_day_index,
+			]
+		)
+		if total_hour == 23:
+			var legacy := saved.duplicate(true)
+			legacy["schema_id"] = "formal_world_economy_state_v1"
+			legacy.erase("last_day_index")
+			_check(
+				simulation.economy.restore_persistent_state(legacy),
+				"23小时旧经济schema缺少日结字段时可恢复"
+			)
+			_equal(
+				int(
+					simulation.economy.get_persistent_state().get(
+						"last_day_index", -99
+					)
+				),
+				-1,
+				"23小时旧经济schema缺字段时派生为-1"
+			)
+		if total_hour == 25:
+			var before := simulation.economy.get_persistent_state()
+			var too_large := before.duplicate(true)
+			too_large["last_day_index"] = 2
+			_assert_economy_rejected_without_mutation(
+				simulation.economy,
+				too_large,
+				before,
+				"25小时last_day_index过大"
+			)
+			var too_small := before.duplicate(true)
+			too_small["last_day_index"] = 0
+			_assert_economy_rejected_without_mutation(
+				simulation.economy,
+				too_small,
+				before,
+				"25小时last_day_index过小"
+			)
+
+
 func _test_legacy_save_time_compatibility() -> void:
 	var source := FormalWorldSimulation.new()
 	_check(source.initialize(), "旧存档兼容源可初始化")
@@ -237,6 +316,16 @@ func _test_legacy_save_time_compatibility() -> void:
 	_check(boundary_target.initialize(), "旧小时边界存档目标可初始化")
 	_check(boundary_target.restore_persistent_state(sparse_legacy), "V1小时边界存档可从经济小时恢复")
 	_equal(boundary_target.total_minutes, 120, "V1小时边界恢复为120权威分钟")
+
+
+func _assert_economy_rejected_without_mutation(
+	economy: FormalWorldEconomyService,
+	rejected: Dictionary,
+	before: Dictionary,
+	label: String
+) -> void:
+	_check(not economy.restore_persistent_state(rejected), "%s被拒绝" % label)
+	_equal(economy.get_persistent_state(), before, "%s拒绝后经济状态完全一致" % label)
 
 
 func _assert_rejected_without_mutation(
