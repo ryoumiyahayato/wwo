@@ -61,35 +61,52 @@ func _load_formal_state() -> bool:
 	return restored
 
 
+func _toggle_formal_economy_panel() -> void:
+	economy_panel_open = not economy_panel_open
+	queue_redraw()
+
+
+func _save_formal_state_from_ui() -> void:
+	_formal_status = (
+		"正式世界已保存。"
+		if formal_simulation.save_to_user()
+		else "正式世界保存失败。"
+	)
+	queue_redraw()
+
+
+func _load_formal_state_from_ui() -> void:
+	_formal_status = (
+		"正式世界存档已恢复。"
+		if _load_formal_state()
+		else "没有可恢复的正式世界存档。"
+	)
+	_last_summary = formal_simulation.world_summary()
+	queue_redraw()
+
+
 func _unhandled_key_input(event: InputEvent) -> void:
-	if event is InputEventKey:
-		var key_event := event as InputEventKey
-		if key_event.pressed and not key_event.echo:
-			if key_event.keycode == KEY_E:
-				economy_panel_open = not economy_panel_open
-				queue_redraw()
-				get_viewport().set_input_as_handled()
-				return
-			if key_event.keycode == KEY_F5:
-				_formal_status = (
-					"正式世界已保存。"
-					if formal_simulation.save_to_user()
-					else "正式世界保存失败。"
-				)
-				queue_redraw()
-				get_viewport().set_input_as_handled()
-				return
-			if key_event.keycode == KEY_F9:
-				_formal_status = (
-					"正式世界存档已恢复。"
-					if _load_formal_state()
-					else "没有可恢复的正式世界存档。"
-				)
-				_last_summary = formal_simulation.world_summary()
-				queue_redraw()
-				get_viewport().set_input_as_handled()
-				return
-	super._unhandled_key_input(event)
+	if not event is InputEventKey:
+		super._unhandled_key_input(event)
+		return
+
+	var key_event := event as InputEventKey
+	if not key_event.pressed or key_event.echo:
+		super._unhandled_key_input(event)
+		return
+
+	match key_event.keycode:
+		KEY_E:
+			_toggle_formal_economy_panel()
+		KEY_F5:
+			_save_formal_state_from_ui()
+		KEY_F9:
+			_load_formal_state_from_ui()
+		_:
+			super._unhandled_key_input(event)
+			return
+
+	get_viewport().set_input_as_handled()
 
 
 func _draw() -> void:
@@ -289,43 +306,29 @@ func _draw_formal_panel_buttons(rect: Rect2) -> void:
 
 
 func _activate_button(action: String) -> void:
-	if action == "formal_economy_toggle":
-		economy_panel_open = not economy_panel_open
-		queue_redraw()
-		return
-	if action == "formal_save":
-		_formal_status = (
-			"正式世界已保存。"
-			if formal_simulation.save_to_user()
-			else "正式世界保存失败。"
-		)
-		queue_redraw()
-		return
-	if action == "formal_load":
-		_formal_status = (
-			"正式世界存档已恢复。"
-			if _load_formal_state()
-			else "没有可恢复的正式世界存档。"
-		)
-		_last_summary = formal_simulation.world_summary()
-		queue_redraw()
-		return
-	super._activate_button(action)
+	match action:
+		"formal_economy_toggle":
+			_toggle_formal_economy_panel()
+		"formal_save":
+			_save_formal_state_from_ui()
+		"formal_load":
+			_load_formal_state_from_ui()
+		_:
+			super._activate_button(action)
 
 
 func _selected_polity_entity_id() -> String:
-	if (
-		not selected_country_id.is_empty()
-		and formal_simulation.economy.polity_records.has(selected_country_id)
-	):
+	if formal_simulation.has_polity(selected_country_id):
 		return selected_country_id
+
 	var home_id := _home_historical_entity_id()
-	if formal_simulation.economy.polity_records.has(home_id):
+	if formal_simulation.has_polity(home_id):
 		return home_id
-	if formal_simulation.economy.polity_records.has("country_fra"):
+
+	if formal_simulation.has_polity("country_fra"):
 		return "country_fra"
-	var ids: Array = formal_simulation.economy.polity_records.keys()
-	return str(ids[0]) if not ids.is_empty() else ""
+
+	return formal_simulation.first_polity_id()
 
 
 func _compact_integer(value: int) -> String:

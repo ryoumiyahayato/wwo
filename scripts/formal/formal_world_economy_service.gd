@@ -193,6 +193,18 @@ func polity_summary(entity_id: String) -> Dictionary:
 	return result
 
 
+func has_polity(entity_id: String) -> bool:
+	return polity_records.has(entity_id)
+
+
+func first_polity_id() -> String:
+	var ids: Array[String] = []
+	for raw_id: Variant in polity_records.keys():
+		ids.append(str(raw_id))
+	ids.sort()
+	return ids[0] if not ids.is_empty() else ""
+
+
 func has_detailed_economy(entity_id: String) -> bool:
 	return not economy_entity_for_polity(entity_id).is_empty()
 
