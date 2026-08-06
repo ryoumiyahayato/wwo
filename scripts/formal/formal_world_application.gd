@@ -314,18 +314,17 @@ func _activate_button(action: String) -> void:
 
 
 func _selected_polity_entity_id() -> String:
-	if (
-		not selected_country_id.is_empty()
-		and formal_simulation.economy.polity_records.has(selected_country_id)
-	):
+	if formal_simulation.has_polity(selected_country_id):
 		return selected_country_id
+
 	var home_id := _home_historical_entity_id()
-	if formal_simulation.economy.polity_records.has(home_id):
+	if formal_simulation.has_polity(home_id):
 		return home_id
-	if formal_simulation.economy.polity_records.has("country_fra"):
+
+	if formal_simulation.has_polity("country_fra"):
 		return "country_fra"
-	var ids: Array = formal_simulation.economy.polity_records.keys()
-	return str(ids[0]) if not ids.is_empty() else ""
+
+	return formal_simulation.first_polity_id()
 
 
 func _compact_integer(value: int) -> String:

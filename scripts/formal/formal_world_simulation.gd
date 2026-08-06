@@ -68,6 +68,14 @@ func polity_summary(entity_id: String) -> Dictionary:
 	return economy.polity_summary(entity_id)
 
 
+func has_polity(entity_id: String) -> bool:
+	return economy.has_polity(entity_id)
+
+
+func first_polity_id() -> String:
+	return economy.first_polity_id()
+
+
 func date_time() -> Dictionary:
 	var value := V2DateTime.from_total_hour(_authoritative_total_hour())
 	value["minute"] = _minute_remainder
