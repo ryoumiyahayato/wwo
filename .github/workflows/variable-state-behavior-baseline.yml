@@ -3,7 +3,7 @@ name: Variable state behavior baseline
 on:
   pull_request:
     branches:
-      - agent/formal-world-economy-integration
+      - master
     paths:
       - ".github/workflows/variable-state-behavior-baseline.yml"
       - "scenes/v2_3/v2_3_entry_hud_capture.tscn"
