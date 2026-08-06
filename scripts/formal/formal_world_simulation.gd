@@ -117,28 +117,109 @@ func restore_persistent_state(state: Dictionary) -> bool:
 	return true
 
 
-func save_to_user() -> bool:
+func save_to_user() -> SaveOperationResult:
 	if not initialized:
-		return false
-	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
-	if file == null:
-		return false
-	file.store_string(JSON.stringify(get_persistent_state()))
-	file.flush()
-	file.close()
+		return SaveOperationResult.fail(
+			"not_initialized",
+			"正式世界尚未初始化，无法保存。",
+			SAVE_PATH
+		)
+	var snapshot := get_persistent_state()
+	var write_error := AtomicJsonFileStore.write_verified(
+		SAVE_PATH,
+		snapshot,
+		Callable(self, "_verify_temporary_save"),
+		true
+	)
+	if not write_error.is_empty():
+		return SaveOperationResult.fail(
+			"write_error",
+			"正式世界保存失败：%s" % write_error,
+			SAVE_PATH
+		)
 	state_changed.emit({"saved": true})
-	return true
+	var result := SaveOperationResult.ok(SAVE_PATH, snapshot)
+	result.message = "正式世界已保存。"
+	return result
 
 
-func load_from_user() -> bool:
-	if not FileAccess.file_exists(SAVE_PATH):
-		return false
-	var file := FileAccess.open(SAVE_PATH, FileAccess.READ)
+func _verify_temporary_save(absolute_path: String) -> String:
+	var loaded := _read_snapshot_file(absolute_path)
+	if not loaded.success:
+		return "临时存档校验失败：%s" % loaded.message
+	var candidate := FormalWorldSimulation.new()
+	if not candidate.initialize():
+		return "临时存档校验失败：正式世界初始化失败：%s" % (
+			candidate.initialization_error
+		)
+	if not candidate.restore_persistent_state(loaded.snapshot):
+		return "临时存档校验失败：正式世界状态无效"
+	return ""
+
+
+func load_from_user() -> SaveOperationResult:
+	var primary := _restore_snapshot_file(SAVE_PATH)
+	if primary.success:
+		primary.message = "正式世界存档已恢复。"
+		return primary
+	var backup_path := SAVE_PATH + AtomicJsonFileStore.BACKUP_SUFFIX
+	var backup := _restore_snapshot_file(backup_path)
+	if backup.success:
+		backup.path = SAVE_PATH
+		backup.message = "主存档不可用，已读取安全备份"
+		return backup
+	return SaveOperationResult.fail(
+		"load_error",
+		"主存档不可用：%s；安全备份不可用：%s" % [
+			primary.message,
+			backup.message,
+		],
+		SAVE_PATH
+	)
+
+
+func _restore_snapshot_file(path: String) -> SaveOperationResult:
+	var loaded := _read_snapshot_file(path)
+	if not loaded.success:
+		return loaded
+	if not restore_persistent_state(loaded.snapshot):
+		return SaveOperationResult.fail(
+			"restore_error",
+			"存档状态校验或恢复失败",
+			path
+		)
+	return loaded
+
+
+func _read_snapshot_file(path: String) -> SaveOperationResult:
+	if not FileAccess.file_exists(path):
+		return SaveOperationResult.fail("not_found", "存档不存在", path)
+	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
-		return false
-	var parsed: Variant = JSON.parse_string(file.get_as_text())
+		return SaveOperationResult.fail(
+			"read_error",
+			error_string(FileAccess.get_open_error()),
+			path
+		)
+	var parser := JSON.new()
+	var parse_error := parser.parse(file.get_as_text())
 	file.close()
-	return parsed is Dictionary and restore_persistent_state(parsed as Dictionary)
+	if parse_error != OK:
+		return SaveOperationResult.fail(
+			"malformed_json",
+			"第 %d 行：%s" % [
+				parser.get_error_line(),
+				parser.get_error_message(),
+			],
+			path
+		)
+	if not parser.data is Dictionary:
+		return SaveOperationResult.fail(
+			"invalid_snapshot",
+			"存档根节点必须是对象",
+			path
+		)
+	return SaveOperationResult.ok(path, parser.data as Dictionary)
 
 
 func _authoritative_total_hour() -> int:

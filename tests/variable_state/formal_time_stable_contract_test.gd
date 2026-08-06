@@ -223,7 +223,10 @@ func _test_save_load_round_trip() -> void:
 		return
 	simulation.advance_minutes(125)
 	var saved: Dictionary = SUPPORT.simulation_state(simulation)
-	_check(simulation.save_to_user(), "save_to_user通过生产方法写入真实正式存档")
+	_check(
+		simulation.save_to_user().success,
+		"save_to_user通过生产方法写入真实正式存档"
+	)
 	_check(
 		FileAccess.file_exists(FormalWorldSimulation.SAVE_PATH),
 		"真实正式存档存在于隔离user://路径"
@@ -233,7 +236,10 @@ func _test_save_load_round_trip() -> void:
 		SUPPORT.simulation_state(simulation) != saved,
 		"读取前运行状态已被真实推进改变"
 	)
-	_check(simulation.load_from_user(), "load_from_user通过生产方法恢复真实正式存档")
+	_check(
+		simulation.load_from_user().success,
+		"load_from_user通过生产方法恢复真实正式存档"
+	)
 	_equal(simulation.total_minutes, int(saved.get("total_minutes", -1)), "读取恢复total_minutes")
 	_equal(
 		simulation._minute_remainder,

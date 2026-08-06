@@ -22,11 +22,14 @@ func _ready() -> void:
 		if get_tree().has_meta(LAUNCH_MODE_META):
 			get_tree().remove_meta(LAUNCH_MODE_META)
 		if launch_mode == "load":
-			_formal_status = (
-				"正式世界存档已恢复。"
-				if _load_formal_state()
-				else "正式世界存档恢复失败；当前状态保持1900-01-01 00:00。"
-			)
+			var result := _load_formal_state()
+			_formal_status = result.message
+			if _formal_status.is_empty():
+				_formal_status = (
+					"正式世界存档已恢复。"
+					if result.success
+					else "正式世界存档恢复失败；当前状态保持1900-01-01 00:00。"
+				)
 		else:
 			_formal_status = "新的1900正式世界已建立。"
 		_last_summary = formal_simulation.world_summary()
@@ -55,10 +58,11 @@ func _time_source_description() -> String:
 	return "正式模拟权威时间；半球与HUD仅派生显示"
 
 
-func _load_formal_state() -> bool:
-	var restored := formal_simulation.load_from_user()
-	_last_summary = formal_simulation.world_summary()
-	return restored
+func _load_formal_state() -> SaveOperationResult:
+	var result := formal_simulation.load_from_user()
+	if result.success:
+		_last_summary = formal_simulation.world_summary()
+	return result
 
 
 func _toggle_formal_economy_panel() -> void:
@@ -67,21 +71,28 @@ func _toggle_formal_economy_panel() -> void:
 
 
 func _save_formal_state_from_ui() -> void:
-	_formal_status = (
-		"正式世界已保存。"
-		if formal_simulation.save_to_user()
-		else "正式世界保存失败。"
-	)
+	var result := formal_simulation.save_to_user()
+	_formal_status = result.message
+	if _formal_status.is_empty():
+		_formal_status = (
+			"正式世界已保存。"
+			if result.success
+			else "正式世界保存失败。"
+		)
 	queue_redraw()
 
 
 func _load_formal_state_from_ui() -> void:
-	_formal_status = (
-		"正式世界存档已恢复。"
-		if _load_formal_state()
-		else "没有可恢复的正式世界存档。"
-	)
-	_last_summary = formal_simulation.world_summary()
+	var result := formal_simulation.load_from_user()
+	_formal_status = result.message
+	if _formal_status.is_empty():
+		_formal_status = (
+			"正式世界存档已恢复。"
+			if result.success
+			else "没有可恢复的正式世界存档。"
+		)
+	if result.success:
+		_last_summary = formal_simulation.world_summary()
 	queue_redraw()
 
 

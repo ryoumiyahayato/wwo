@@ -111,7 +111,7 @@ func _test_formal_load_restores_visible_time() -> void:
 		return
 	source.advance_minutes(125)
 	var saved := SUPPORT.simulation_state(source)
-	_check(source.save_to_user(), "通过生产方法保存非零正式时间")
+	_check(source.save_to_user().success, "通过生产方法保存非零正式时间")
 	var application := FormalWorldApplication.new()
 	_check(application.formal_simulation.initialize(), "界面读取应用可初始化")
 	if not application.formal_simulation.initialized:
@@ -157,7 +157,7 @@ func _test_continue_game_restores_visible_time() -> void:
 		return
 	source.advance_minutes(185)
 	var saved := SUPPORT.simulation_state(source)
-	_check(source.save_to_user(), "继续游戏通过生产方法保存非零正式时间")
+	_check(source.save_to_user().success, "继续游戏通过生产方法保存非零正式时间")
 	root.content_scale_size = Vector2i(1280, 720)
 	set_meta(FormalWorldApplication.LAUNCH_MODE_META, "load")
 	var scene := load("res://scenes/formal/formal_world_main.tscn") as PackedScene
@@ -208,7 +208,7 @@ func _test_inconsistent_persistent_time_is_rejected() -> void:
 	if file != null:
 		file.store_string(JSON.stringify(wrong_hour))
 		file.close()
-	_check(not simulation.load_from_user(), "真实磁盘读取拒绝矛盾时间字段")
+	_check(not simulation.load_from_user().success, "真实磁盘读取拒绝矛盾时间字段")
 	_equal(SUPPORT.simulation_state(simulation), before, "磁盘恢复失败前后完整状态相等")
 	_check(SUPPORT.cleanup_formal_save(), "矛盾存档测试删除自己产生的存档")
 
