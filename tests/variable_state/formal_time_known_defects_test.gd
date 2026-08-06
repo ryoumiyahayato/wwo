@@ -25,7 +25,7 @@ func _run() -> void:
 	_test_inconsistent_persistent_time_is_rejected()
 	_test_economy_restore_day_boundaries()
 	_test_legacy_save_time_compatibility()
-	_check(SUPPORT.restore_formal_save(backup), "一致性测试结束后恢复原有正式存档或保持隔离目录为空")
+	_check(SUPPORT.restore_formal_save(backup), "一致性测试结束后恢复原有存档或保持隔离目录为空")
 	print("Formal time known defects: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures > 0 or checks <= 0 else 0)
 
