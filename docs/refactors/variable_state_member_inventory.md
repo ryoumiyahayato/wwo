@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1607|1233|15|0|1233|5|32|16|60|878|509|261|
+|1609|1234|15|0|1233|5|32|16|60|879|511|263|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,607个生产成员字段逐项表
+## 1,609个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -1571,6 +1571,9 @@
 12 K next_retry_hours
 13 K active_needs
 14 K decision_history
+@ scripts/vnext/world_runtime.gd | VNextWorldRuntime
+4 C SNAPSHOT_SCHEMA_ID
+6 K _total_minutes
 @ scripts/world_map/historical_map_identity_style.gd | HistoricalMapIdentityStyle
 5 C PATTERN_PREFIX
 6 C PATTERN_SEPARATOR
