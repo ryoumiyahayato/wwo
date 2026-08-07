@@ -3,7 +3,7 @@ name: Variable state audit
 on:
   pull_request:
     branches:
-      - agent/formal-world-economy-integration
+      - master
     paths:
       - "project.godot"
       - "scripts/**"

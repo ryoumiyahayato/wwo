@@ -3,7 +3,7 @@ name: Formal time behavior baseline
 on:
   pull_request:
     branches:
-      - agent/formal-world-economy-integration
+      - master
     paths:
       - ".github/workflows/formal-time-behavior-baseline.yml"
       - "tests/variable_state/formal_time_stable_contract_test.gd"
