@@ -1,4 +1,4 @@
-name: vNext runtime foundation
+name: vNext validation
 
 on:
   pull_request:
@@ -7,7 +7,9 @@ on:
     paths:
       - "scripts/vnext/**"
       - "tests/vnext/**"
-      - "docs/vnext/runtime_foundation.md"
+      - "tests/tools/test_run_vnext_validation.py"
+      - "tools/run_vnext_validation.py"
+      - "docs/vnext/**"
       - ".github/workflows/vnext-runtime.yml"
   workflow_dispatch:
 
@@ -21,6 +23,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check diff whitespace
+        run: git diff --check HEAD^ HEAD
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Test vNext validation runner
+        run: python -B tests/tools/test_run_vnext_validation.py
 
       - name: Install Godot 4.6.3
         shell: pwsh
@@ -35,35 +50,6 @@ jobs:
           "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           & $binary --version
 
-      - name: Import project and scan scripts
+      - name: Run unified vNext validation
         shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $logPath = Join-Path $env:RUNNER_TEMP 'vnext_import.log'
-          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless', '--audio-driver', 'Dummy', '--editor', '--path', '.', '--quit-after', '4', '--log-file', $logPath) -Wait -PassThru -NoNewWindow
-          if (-not (Test-Path -LiteralPath $logPath -PathType Leaf)) { throw 'Godot import log was not created' }
-          $content = Get-Content -LiteralPath $logPath -Raw
-          Write-Host $content
-          if ($process.ExitCode -ne 0) { throw "Godot project import failed with exit code $($process.ExitCode)" }
-          if ($content -match 'SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|Assertion failed|[1-9][0-9]* failures') {
-            throw 'Godot import log contains a script, parse, class-resolution, assertion, or test failure'
-          }
-
-      - name: Run vNext world runtime test
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $logPath = Join-Path $env:RUNNER_TEMP 'vnext_world_runtime_test.log'
-          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless', '--audio-driver', 'Dummy', '--path', '.', '--script', 'res://tests/vnext/world_runtime_test.gd', '--log-file', $logPath) -Wait -PassThru -NoNewWindow
-          if (-not (Test-Path -LiteralPath $logPath -PathType Leaf)) { throw 'vNext runtime test log was not created' }
-          $content = Get-Content -LiteralPath $logPath -Raw
-          Write-Host $content
-          if ($process.ExitCode -ne 0) { throw "vNext runtime test failed with exit code $($process.ExitCode)" }
-          if ($content -match 'SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|Assertion failed|[1-9][0-9]* failures') {
-            throw 'vNext runtime test log contains a script, parse, class-resolution, assertion, or nonzero failure count'
-          }
-          $summary = [regex]::Match($content, 'VNext world runtime: ([1-9][0-9]*) checks, 0 failures')
-          if (-not $summary.Success) {
-            throw 'vNext runtime summary is missing, has zero checks, or reports failures'
-          }
-          Write-Host $summary.Value
+        run: python -B tools/run_vnext_validation.py --root . --godot "$env:GODOT_BIN"
