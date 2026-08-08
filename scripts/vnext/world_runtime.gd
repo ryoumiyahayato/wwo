@@ -33,11 +33,23 @@ func restore(snapshot_value: Dictionary) -> bool:
 		return false
 	if not has_total_minutes:
 		return false
-	if typeof(candidate_total_minutes_value) != TYPE_INT:
-		return false
 
-	var candidate_total_minutes: int = int(candidate_total_minutes_value)
-	if candidate_total_minutes < 0:
+	var candidate_total_minutes: int
+	var candidate_total_minutes_type: int = typeof(candidate_total_minutes_value)
+	if candidate_total_minutes_type == TYPE_INT:
+		candidate_total_minutes = int(candidate_total_minutes_value)
+		if candidate_total_minutes < 0:
+			return false
+	elif candidate_total_minutes_type == TYPE_FLOAT:
+		var candidate_total_minutes_float: float = float(candidate_total_minutes_value)
+		if not is_finite(candidate_total_minutes_float):
+			return false
+		if candidate_total_minutes_float < 0.0:
+			return false
+		if candidate_total_minutes_float != floor(candidate_total_minutes_float):
+			return false
+		candidate_total_minutes = int(candidate_total_minutes_float)
+	else:
 		return false
 
 	_total_minutes = candidate_total_minutes
