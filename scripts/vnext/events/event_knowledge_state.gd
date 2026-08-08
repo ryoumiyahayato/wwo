@@ -87,7 +87,7 @@ func restore(snapshot_value: Dictionary) -> bool:
 	if typeof(snapshot_value.get("player_id")) != TYPE_STRING:
 		return false
 
-	var candidate_player_id: String = snapshot_value.get("player_id") as String
+	var candidate_player_id: String = str(snapshot_value.get("player_id"))
 	if not _is_person_id(candidate_player_id):
 		return false
 
@@ -112,7 +112,7 @@ func restore(snapshot_value: Dictionary) -> bool:
 			return false
 		if typeof(record.get("event_id")) != TYPE_STRING:
 			return false
-		var event_id: String = record.get("event_id") as String
+		var event_id: String = str(record.get("event_id"))
 		if not _is_event_id(event_id) or candidate_event_records.has(event_id):
 			return false
 		var occurred_at_minutes: int = _normalized_nonnegative_int(
@@ -129,7 +129,7 @@ func restore(snapshot_value: Dictionary) -> bool:
 	for raw_event_id: Variant in raw_known_event_ids as Array:
 		if typeof(raw_event_id) != TYPE_STRING:
 			return false
-		var event_id: String = raw_event_id as String
+		var event_id: String = str(raw_event_id)
 		if (
 			not _is_event_id(event_id)
 			or not candidate_event_records.has(event_id)
@@ -142,7 +142,7 @@ func restore(snapshot_value: Dictionary) -> bool:
 	for raw_event_id: Variant in raw_read_event_ids as Array:
 		if typeof(raw_event_id) != TYPE_STRING:
 			return false
-		var event_id: String = raw_event_id as String
+		var event_id: String = str(raw_event_id)
 		if (
 			not _is_event_id(event_id)
 			or not candidate_known_event_ids.has(event_id)
