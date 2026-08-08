@@ -61,3 +61,5 @@ balance_minor: <non-negative integer minor units>
 ## Integration status
 
 This PR does not modify `scripts/vnext/world_runtime.gd`, `scripts/vnext/persistence/**`, player-action work, travel work, event work, or the formal product. The wallet is an isolated vNext authority ready for a later composition task once the player/session owner and persistence composition rules are established.
+
+The repository variable-state generators were rerun after adding the wallet. Their mechanically generated audit summary and member inventory are committed with this task and contain no manual ownership reinterpretation.
