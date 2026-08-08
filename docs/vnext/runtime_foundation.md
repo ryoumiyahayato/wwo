@@ -8,6 +8,8 @@ The current vNext runtime is isolated from the formal product. It is not a forma
 
 `restore()` is transactional: candidate snapshot values are read and validated before `_total_minutes` is changed. A rejected restore leaves the runtime snapshot unchanged.
 
+Runtime `total_minutes` is always an `int`. A serialized JSON number may parse back as a `float`, so `restore()` accepts a non-negative numeric value only when it is finite and numerically integral. Accepted values are stored as `int`; fractional values are always rejected.
+
 The current vNext runtime has no player, personal economy, world economy, travel, geography business logic, social system, communication system, organization system, politics, events, or AI.
 
 Later systems must not write `_total_minutes` directly. Time changes remain owned by `VNextWorldRuntime` through its public contract.
