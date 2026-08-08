@@ -89,8 +89,9 @@ func _test_deterministic_snapshot() -> void:
 		JSON.stringify(second.snapshot()),
 		"deterministic snapshot also has stable JSON ordering"
 	)
+	var sorted_records: Array = first.snapshot().get("event_records", []) as Array
 	_equal(
-		(first.snapshot().get("event_records", []) as Array)[0].get("event_id"),
+		(sorted_records[0] as Dictionary).get("event_id"),
 		"event:alpha",
 		"event records are emitted in event-ID order"
 	)
