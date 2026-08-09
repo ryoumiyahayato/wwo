@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1626|1247|15|0|1236|5|32|16|60|892|526|278|
+|1632|1251|15|0|1236|5|32|16|60|896|528|280|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,626个生产成员字段逐项表
+## 1,632个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -1576,6 +1576,13 @@
 5 C MAX_BALANCE_MINOR
 7 K _owner_person_id
 8 K _balance_minor
+@ scripts/vnext/events/event_knowledge_state.gd | VNextEventKnowledgeState
+4 C SNAPSHOT_SCHEMA_ID
+5 C MAX_JSON_SAFE_INTEGER
+7 K _player_id
+8 K _event_records
+9 K _known_event_ids
+10 K _read_event_ids
 @ scripts/vnext/player/action_result.gd | VNextActionResult
 4 K success
 5 K code
