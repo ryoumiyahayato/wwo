@@ -71,8 +71,7 @@ func _test_quote_validation() -> void:
 
 
 func _test_successful_travel() -> void:
-	var runtime := VNextWorldRuntime.new()
-	_check(runtime.advance_minutes(30), "success fixture establishes nonzero runtime")
+	var runtime := _runtime_at(30)
 	var location := _location_at(ORIGIN_ID)
 	var quote := _quote(ORIGIN_ID, DESTINATION_ID, 75, 125)
 	var service := VNextTravelService.new()
@@ -84,8 +83,7 @@ func _test_successful_travel() -> void:
 
 
 func _test_origin_mismatch_is_atomic() -> void:
-	var runtime := VNextWorldRuntime.new()
-	_check(runtime.advance_minutes(12), "origin mismatch fixture establishes runtime")
+	var runtime := _runtime_at(12)
 	var location := _location_at(OTHER_ID)
 	var quote := _quote(ORIGIN_ID, DESTINATION_ID, 20, 0)
 	var before_runtime: Dictionary = runtime.snapshot()
@@ -97,8 +95,7 @@ func _test_origin_mismatch_is_atomic() -> void:
 
 
 func _test_invalid_quote_execution_is_atomic() -> void:
-	var runtime := VNextWorldRuntime.new()
-	_check(runtime.advance_minutes(44), "invalid quote fixture establishes runtime")
+	var runtime := _runtime_at(44)
 	var location := _location_at(ORIGIN_ID)
 	var invalid_quote := VNextTravelQuote.new()
 	_check(not invalid_quote.configure(ORIGIN_ID, DESTINATION_ID, 0, 10), "invalid execution quote is not configurable")
@@ -151,6 +148,16 @@ func _test_location_json_round_trip() -> void:
 	var restored := VNextLocationState.new()
 	_check(restored.restore(parser.data as Dictionary), "JSON-parsed location snapshot restores")
 	_equal(restored.snapshot(), expected, "location JSON round trip preserves state")
+
+
+func _runtime_at(minutes: int) -> VNextWorldRuntime:
+	var runtime := VNextWorldRuntime.create(PLAYER_ID, ORIGIN_ID)
+	_check(runtime != null, "travel fixture creates a valid v2 runtime")
+	if runtime == null:
+		return null
+	if minutes > 0:
+		_check(runtime.advance_minutes(minutes), "travel fixture establishes runtime time")
+	return runtime
 
 
 func _location_at(place_id_value: String) -> VNextLocationState:

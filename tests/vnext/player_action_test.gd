@@ -108,8 +108,7 @@ func _test_player_json_round_trip() -> void:
 
 
 func _test_wait_advances_runtime() -> void:
-	var runtime := VNextWorldRuntime.new()
-	_check(runtime.advance_minutes(10), "WAIT fixture can establish initial runtime time")
+	var runtime := _runtime_at(10)
 	var player := VNextPlayerState.new("person:player_one")
 	var player_before: Dictionary = player.snapshot()
 	var service := VNextPlayerActionService.new()
@@ -246,7 +245,10 @@ func _test_no_second_time_or_session_owner() -> void:
 
 
 func _runtime_at(minutes: int) -> VNextWorldRuntime:
-	var runtime := VNextWorldRuntime.new()
+	var runtime := VNextWorldRuntime.create("person:player_one", "place:player_home")
+	_check(runtime != null, "failure fixture creates a valid v2 runtime")
+	if runtime == null:
+		return null
 	if minutes > 0:
 		_check(runtime.advance_minutes(minutes), "failure fixture can establish runtime time")
 	return runtime
