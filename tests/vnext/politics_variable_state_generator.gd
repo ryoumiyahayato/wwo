@@ -37,4 +37,3 @@ static func severe_input() -> VNextPoliticsPressureInput:
 
 static func recovery_input() -> VNextPoliticsPressureInput:
 	return VNextPoliticsPressureInput.create(30, 0.0, 0.0, 0.0, 0.0, 12.0)
-
