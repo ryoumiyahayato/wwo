@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1637|1255|15|0|1255|5|32|16|60|900|530|282|
+|1686|1266|15|0|1256|5|32|16|60|911|536|287|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,637个生产成员字段逐项表
+## 1,686个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -792,408 +792,7 @@
 15 C STAGE_CONSOLIDATING
 16 C WAR_STATUS_PEACE
 17 C WAR_STATUS_ACTIVE
-19 K data_set
-20 K rules
-21 K _frontline_edges
-22 K _units_by_grid_position
-23 K _war_state
-```
-
-### 第5段：`scripts/map/map_rules_config.gd` 至 `scripts/simulation/world_activity_service.gd`
-
-```text
-@ scripts/map/map_rules_config.gd | MapRulesConfig
-5 C DEFAULT_PATH
-7 A tile_width
-8 A tile_height
-9 A min_zoom
-10 A max_zoom
-11 A zoom_step
-12 G pan_visible_margin
-13 A weak_control_threshold
-14 A contested_threshold
-15 A capture_strength_threshold
-16 A capture_contested_threshold
-17 A consolidation_strength
-18 A pressure_strength_loss
-19 A pressure_contested_gain
-20 A pressure_enemy_gain
-21 A rail_attack_bonus
-22 A rail_defense_bonus
-23 A rail_consolidation_bonus
-24 A social_support_scale
-25 A unit_social_support_scale
-26 A surrounded_attack_bonus
-27 A multi_front_bonus
-28 A minimum_pressure_multiplier
-29 A maximum_pressure_multiplier
-30 K error_message
-@ scripts/map/map_world_controller.gd | MapWorldController
-7 B world_data_path
-8 B map_rules_path
-10 K data_set
-11 K rules
-12 K control_service
-13 K initialization_error
-@ scripts/map/regional_influence_service.gd | RegionalInfluenceService
-7 K rules
-@ scripts/map/strategic_map_canvas.gd | StrategicMapCanvas
-7 C MAP_BACKGROUND
-8 C GRID_COLOR
-9 C REGION_BORDER_COLOR
-10 C RAIL_DARK_COLOR
-11 C RAIL_LIGHT_COLOR
-12 C CONTROL_BORDER_DARK_COLOR
-13 C CONTROL_BORDER_COLOR
-14 C CONTESTED_COLOR
-15 C SELECTION_COLOR
-16 C CITY_COLOR
-17 C DRAG_THRESHOLD
-19 K control_service
-20 K rules
-21 K selected_unit_id
-23 A _zoom
-24 A _pan_offset
-25 K _left_button_down
-26 K _dragging
-27 A _press_position
-28 E _country_colors
-29 K _fallback_font
-@ scripts/organization/organization_service.gd | OrganizationService
-8 C LEGACY_BASE_ORGANIZATION_IDS
-19 K organizations
-20 K _positions_by_character
-@ scripts/relationship/relationship_service.gd | RelationshipService
-7 K roster
-8 K defaults
-9 K id_service
-10 K relationships
-11 K _id_by_pair
-@ scripts/save/action_save_validator.gd | ActionSaveValidator
-4 C NUMERIC_CONTEXT_FIELDS
-7 C VALID_OUTCOMES
-8 C DOMAIN_CATEGORIES
-@ scripts/save/atomic_json_file_store.gd | AtomicJsonFileStore
-5 C TEMPORARY_SUFFIX
-6 C BACKUP_SUFFIX
-@ scripts/save/autosave_coordinator.gd | AutosaveCoordinator
-5 K clock
-6 K map_service
-7 A save_service
-8 A autosave_path
-@ scripts/save/game_save_service.gd | GameSaveService
-4 C SAVE_VERSION
-5 C MANUAL_PATH
-6 C AUTOSAVE_PATH
-7 C V2_2_SCHEMA_VERSION
-8 C V2_2_REVIEW_PATH
-9 C CONFIG_VERSIONS
-16 C REQUIRED_CHARACTER_FIELDS
-@ scripts/save/save_operation_result.gd | SaveOperationResult
-4 K success
-5 K error_code
-6 K message
-7 K path
-8 K snapshot
-@ scripts/simulation/continuity_rules_config.gd | ContinuityRulesConfig
-4 C DEFAULT_PATH
-6 K social_influence
-7 K candidate
-8 K exit_constraints
-9 K enemy_affinity_threshold
-10 K position_inheritance_minimum_score
-11 K exit_reasons
-12 K error_message
-@ scripts/simulation/simulation_clock.gd | SimulationClock
-15 C HOURS_PER_DAY
-16 C HOURS_PER_WEEK
-17 C ACCUMULATOR_EPSILON
-19 K year
-20 K month
-21 K day
-22 K hour
-23 K total_hours
-24 A is_paused
-25 A speed_multiplier
-27 K _config
-28 K _real_seconds_accumulator
-29 A _event_queue
-@ scripts/simulation/simulation_clock_config.gd | SimulationClockConfig
-5 C DEFAULT_PATH
-7 A start_year
-8 A start_month
-9 A start_day
-10 K start_hour
-11 A real_seconds_per_game_hour
-12 A allowed_speed_multipliers
-13 K error_message
-@ scripts/simulation/simulation_event_queue.gd | SimulationEventQueue
-5 K _events
-6 K _event_ids
-7 K _next_sequence
-@ scripts/simulation/simulation_runner.gd | SimulationRunner
-8 B config_path
-10 K clock
-11 K initialization_error
-@ scripts/simulation/society_rules_config.gd | SocietyRulesConfig
-4 C DEFAULT_PATH
-6 E background_character_count
-7 K active_character_limit
-8 E initial_active_npc_count
-9 K background_seed_base
-10 K relationship_defaults
-11 K organization_economy
-12 K lifecycle_rules
-13 K ai_rules
-14 K error_message
-@ scripts/simulation/society_simulation_service.gd | SocietySimulationService
-5 C DOMAIN_ACTION_CATEGORIES
-13 C STARTER_LEADER_ORGANIZATION_IDS
-24 K rules
-25 K roster
-26 K organizations
-27 K relationships
-28 K ai
-29 K continuity_rules
-30 K regional_influence
-31 K succession
-32 K world_activity
-33 K initialization_error
-34 K paused_settlement_categories
-35 K _clock
-36 K _map_service
-37 K _data_set
-38 K _character_config
-39 K _action_rules
-40 K _action_service
-41 F _control_owner_cache
-@ scripts/simulation/world_activity_service.gd | WorldActivityService
-7 C MAX_EVENTS
-8 C IMPORTANCE_NORMAL
-9 C IMPORTANCE_IMPORTANT
-10 C VALID_IMPORTANCE
-13 C VALID_SUBJECT_TYPES
-17 K _events
-18 A _next_event_id
-```
-
-### 第6段：`scripts/ui_spikes/holographic_workspace/holographic_hemisphere_3d.gd` 至 `scripts/ui_spikes/holographic_workspace/holographic_workspace_release_probe.gd`
-
-```text
-@ scripts/ui_spikes/holographic_workspace/holographic_hemisphere_3d.gd | holographic_hemisphere_3d
-3 C LAT_SEGMENTS
-4 C LON_SEGMENTS
-5 C RADIUS
-6 C MOON_RADIUS
-8 D _surface
-9 D _moon
-@ scripts/ui_spikes/holographic_workspace/holographic_workspace_admin1.gd | holographic_workspace_admin1
-3 K selected_world_admin1_id
-4 K hover_world_admin1_id
-5 K _world_admin1_by_iso
-6 K _world_admin1_by_id
-7 G _world_admin1_screen_polygons
-8 E _world_admin1_bounds
-@ scripts/ui_spikes/holographic_workspace/holographic_workspace_admin1_probe.gd | holographic_workspace_admin1_probe
-3 C TARGET_SCENE
-5 K workspace
-@ scripts/ui_spikes/holographic_workspace/holographic_workspace_capture.gd | holographic_workspace_capture
-3 C TARGET_SCENE
-4 C OUTPUT_DIRECTORY
-6 K workspace
-@ scripts/ui_spikes/holographic_workspace/holographic_workspace_crisp_flags_fixed.gd | holographic_workspace_crisp_flags_fixed
-3 C FLAG_TEXTURE_WIDTH
-4 C FLAG_TEXTURE_HEIGHT
-5 C ADMIN1_GLOBAL_ZOOM_START
-6 C ADMIN1_GLOBAL_LABEL_ZOOM
-8 K _flag_texture_by_entity
-9 K _historical_outline_polygons
-10 F _world_admin1_unit_cache
-11 E _world_admin1_country_count
-@ scripts/ui_spikes/holographic_workspace/holographic_workspace_final.gd | holographic_workspace_final
-3 D _moon_node
-@ scripts/ui_spikes/holographic_workspace/holographic_workspace_flags.gd | holographic_workspace_flags
-3 C WORLD_ZOOM_MIN
-4 C WORLD_ZOOM_MAX
-5 C WORLD_ZOOM_STEP
-6 C COUNTRY_LABEL_FADE_START
-7 C COUNTRY_LABEL_FADE_END
-8 C FLAG_TIMER_STEP
-10 A world_zoom
-11 A _base_hemisphere_radius
-12 K _flag_time
-13 K _flag_palettes
-14 G _flag_screen_polygons
-15 G _flag_screen_bounds
-17 D _world_camera
-@ scripts/ui_spikes/holographic_workspace/holographic_workspace_historical_admin_runtime.gd | holographic_workspace_historical_admin_runtime
-5 C MAJOR_STATE_PROFILE_PATH
-6 C HISTORICAL_ADMIN_PATH
-7 C ADMIN_PAGE_SIZE
-9 K selected_admin_unit_id
-10 K admin_page_index
-11 K _major_state_profile_by_entity
-12 H _entity_by_nationality_alias
-13 K _historical_admin_by_entity
-@ scripts/ui_spikes/holographic_workspace/holographic_workspace_historical_evidence.gd | holographic_workspace_historical_evidence
-5 C HISTORICAL_GEOMETRY_PATH
-6 C HISTORICAL_UNITS_PATH
-7 C HISTORICAL_FLAGS_PATH
-8 C HISTORICAL_SNAPSHOT_DATE
-9 C GLOBAL_SOURCE_NOTICE
-10 C LOWER_ADMIN_NOTICE
-11 C ADMIN1_REFERENCE_NOTICE
-12 C FLAG_REFERENCE_NOTICE
-14 C NATIONALITY_ENTITY_ALIASES
-48 K _dated_geometry_document
-49 K _dated_units_document
-50 K _historical_flag_document
-51 K _historical_flag_records
-52 K _geometry_feature_by_id
-53 K _missing_flag_record_ids
-@ scripts/ui_spikes/holographic_workspace/holographic_workspace_history.gd | holographic_workspace_history
-3 C WORLD_HISTORICAL_ENTITY_FOCUS
-4 C HISTORY_ZOOM_MIN
-5 C HISTORY_ZOOM_MAX
-6 C HISTORY_ZOOM_FACTOR
-7 C HISTORY_LABEL_FADE_START
-8 C HISTORY_LABEL_FADE_END
-10 A history_war_layer_visible
-11 K selected_historical_territory_iso
-12 K hover_historical_territory_iso
-14 K _history_document
-15 K _history_entity_by_id
-16 K _history_territories_by_entity
-17 K _history_modern_record_by_iso
-18 K _history_modern_polygons_by_iso
-19 E _history_modern_anchor_by_iso
-20 K _history_explicit_mapped_isos
-21 K _history_provisional_entity_ids
-22 G _history_focus_screen_polygons
-23 G _history_focus_screen_bounds
-24 A _history_focus_dirty
-25 K _history_conflicts
-@ scripts/ui_spikes/holographic_workspace/holographic_workspace_interaction_probe.gd | holographic_workspace_interaction_probe
-3 C TARGET_SCENE
-5 K workspace
-@ scripts/ui_spikes/holographic_workspace/holographic_workspace_polish.gd | holographic_workspace_polish
-3 C REGION_CITY_SUPPLEMENTS
-29 K selected_administrative_unit_id
-30 K hover_administrative_unit_id
-31 K _administrative_notice
-32 K _administrative_unit_by_id
-33 K _administrative_polygons_by_id
-34 E _administrative_anchor_by_id
-35 K _administrative_units_by_region
-36 G _administrative_screen_polygons
-37 K _globe_grid_unit_lines
-@ scripts/ui_spikes/holographic_workspace/holographic_workspace_release.gd | holographic_workspace_release
-4 C FOREIGN_ADMIN1_NOTICE
-@ scripts/ui_spikes/holographic_workspace/holographic_workspace_release_probe.gd | holographic_workspace_release_probe
-3 C TARGET_SCENE
-5 K workspace
-```
-
-### 第7段：`scripts/ui_spikes/holographic_workspace/holographic_workspace_runtime.gd` 至 `scripts/v2_2/v2_life_loop_simulation.gd`
-
-```text
-@ scripts/ui_spikes/holographic_workspace/holographic_workspace_runtime.gd | holographic_workspace_runtime
-3 C WORLD
-4 C REGION
-5 C CITY
-6 C WORLD_COUNTRIES
-7 C WORLD_COUNTRY_FOCUS
-8 C LAYOUT_FOCUS
-9 C LAYOUT_WORKSPACE
-10 C FOCUS_COUNTRY_ID
-11 C CAMERA_ORTHO_SIZE
-12 C EDGE_BAND
-13 C DRAG_THRESHOLD
-14 C MOTION_EPSILON
-15 C FOCUS_VIEWPORT_SIZE
-16 C WORKSPACE_VIEWPORT_SIZE
-18 A layout_mode_id
-19 G workspace_open
-20 A space_level
-21 A world_mode
-23 E selected_country_id
-24 K selected_region_id
-25 K selected_city_id
-26 K selected_event_id
-27 K selected_institution_id
-28 E hover_country_id
-29 K hover_region_id
-30 K hover_event_id
-32 G info_open
-33 K info_progress
-34 K _info_tween
-35 K active_hud_panel
-36 A active_character_key
-38 A yaw
-39 A tilt
-40 K angular_velocity
-41 K dragging
-42 A drag_start
-43 A drag_last
-44 K drag_moved
-46 A sim_paused
-47 A sim_speed
-48 A activity_unread
-50 E _countries
-51 E _country_by_id
-52 E _country_unit_polygons
-53 E _country_anchor_units
-54 K _coastline_unit_lines
-56 K _regions
-57 K _region_by_id
-58 K _region_polygons
-59 K _cities
-60 K _city_by_id
-61 K _cities_by_region
-62 K _institutions
-63 K _institution_by_id
-64 K _institutions_by_city
-65 K _institutions_by_region
-66 K _character_profiles
-67 E _country_profile
-68 K _world_events
-69 K _event_by_id
-70 K _data_errors
-72 K _button_hits
-73 A _hemisphere_center
-74 A _hemisphere_rect
-75 A _hemisphere_radius
-76 E _focus_bounds
-78 A _projection_dirty
-79 G _global_screen_segments
-80 E _selected_country_segments
-81 G _country_screen_anchors
-82 G _event_screen_positions
-83 G _focus_country_screen_polygons
-84 G _focus_region_screen_polygons
-85 G _focus_region_screen_anchors
-87 D viewport_container
-88 D viewport
-@ scripts/ui_spikes/holographic_workspace/holographic_workspace_spike_runtime.gd | holographic_workspace_spike_runtime
-5 C INITIAL_TOTAL_MINUTES
-7 A _local_total_minutes
-@ scripts/ui_spikes/holographic_workspace/holographic_workspace_visual.gd | holographic_workspace_visual
-3 K _workspace_font
-@ scripts/v2_2/v2_condition_service.gd | V2ConditionService
-5 K person_states
-6 K causal_events
-7 K sleep_hour_history
-8 K _effects
-9 K _rules
-10 A _next_sequence
-11 A _maximum_events
-@ scripts/v2_2/v2_datetime.gd | V2DateTime
-5 C START_YEAR
-6 C WEEKDAY_NAMES
-@ scripts/v2_2/v2_employment_service.gd | V2EmploymentService
-5 K contracts
-6 K attendance_records
-7 K processed_pay_period_ids
+19 K data_se…2958 tokens truncated…sed_pay_period_ids
 8 K _attendance_keys
 9 A _maximum_records
 @ scripts/v2_2/v2_household_service.gd | V2HouseholdService
@@ -1447,7 +1046,7 @@
 5 K leave_confirmation
 ```
 
-### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/vnext/world_runtime.gd`
+### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/vnext/politics/politics_pressure_input.gd`
 
 ```text
 @ scripts/v2_3/v2_3_formal_simulation.gd | V23FormalSimulation
@@ -1591,6 +1190,63 @@
 @ scripts/vnext/player/player_state.gd | VNextPlayerState
 4 C SNAPSHOT_SCHEMA_ID
 6 K _player_id
+@ scripts/vnext/politics/politics_pressure_input.gd | VNextPoliticsPressureInput
+7 C SNAPSHOT_SCHEMA_ID
+8 C MAX_PERIOD_DAYS
+9 C MIN_SIGNAL
+10 C MAX_SIGNAL
+12 C ECONOMIC_SIGNAL_KEYS
+19 C WAR_SIGNAL_KEYS
+26 K _period_days
+27 K _price_pressure
+28 K _unemployment_pressure
+29 K _fiscal_pressure
+30 K _shortage_pressure
+31 K _growth_signal
+32 K _war_pressure
+33 K _casualty_pressure
+34 K _mobilization_pressure
+35 K _military_result_signal
+```
+
+### 第10段：`scripts/vnext/politics/politics_update_service.gd` 至 `scripts/world_map/historical_map_identity_style.gd`
+
+```text
+@ scripts/vnext/politics/politics_update_service.gd | VNextPoliticsUpdateService
+8 C PRESSURE_SCALE
+9 C FORCE_DELTA_LIMIT
+10 C POLICY_REVIEW_COOLDOWN
+11 C POLICY_CHANGE_MARGIN
+12 C EMERGENCY_POLICY_PRESSURE
+13 C POLICY_PRIORITY_SIGNAL_THRESHOLD
+14 C POLICY_PRIORITY_BONUS
+15 C STRAINED_STREAK
+16 C CRISIS_STREAK
+17 C GOVERNMENT_CHANGE_STREAK
+18 C RECOVERY_TO_STABLE_STREAK
+19 C CRISIS_SUPPORT_THRESHOLD
+20 C CRISIS_CONTROL_THRESHOLD
+21 C CRISIS_LEGITIMACY_THRESHOLD
+22 C CRISIS_STABILITY_THRESHOLD
+23 C CRITICAL_SUPPORT_THRESHOLD
+24 C CRITICAL_CONTROL_THRESHOLD
+25 C CRITICAL_STABILITY_THRESHOLD
+26 C MAX_HISTORY
+28 C ECONOMIC_WEIGHTS
+35 C WAR_WEIGHTS
+41 C REGIME_PROCEDURAL_BASELINES
+@ scripts/vnext/politics/state_politics.gd | VNextStatePolitics
+7 C SNAPSHOT_SCHEMA_ID
+8 C FORCE_SUPPORT_THRESHOLD
+9 C FORCE_OPPOSITION_THRESHOLD
+10 C MAX_FORCE_HISTORY
+11 C MAX_POLICY_HISTORY
+12 C MAX_GOVERNMENT_CHANGE_HISTORY
+14 C REGIME_TYPES
+25 C POLICY_DOMAINS
+33 C PRESSURE_SIGNAL_KEYS
+44 C CAPACITY_KEYS
+52 K _state
 @ scripts/vnext/travel/location_state.gd | VNextLocationState
 4 C SNAPSHOT_SCHEMA_ID
 6 K _player_id
@@ -1608,11 +1264,6 @@
 9 K _wallet
 10 K _location
 11 K _event_knowledge
-```
-
-### 第10段：`scripts/world_map/historical_map_identity_style.gd` 至 `scripts/world_map/internal/world_map_data_impl.gd`
-
-```text
 @ scripts/world_map/historical_map_identity_style.gd | HistoricalMapIdentityStyle
 5 C PATTERN_PREFIX
 6 C PATTERN_SEPARATOR
@@ -1623,6 +1274,11 @@
 11 C CODE_PLATE_BLEND
 12 C CODE_COLUMN_CENTERS
 13 C CODE_ROW_CENTERS
+```
+
+### 第11段：`scripts/world_map/internal/world_map_canvas_impl.gd` 至 `scripts/world_map/internal/world_map_data_impl.gd`
+
+```text
 @ scripts/world_map/internal/world_map_canvas_impl.gd | PrototypeV2MapCanvas
 5 C WORLD_SIZE
 6 C WORLD_BOUNDS
@@ -1796,7 +1452,7 @@
 26 K errors
 ```
 
-### 第11段：`scripts/world_map/internal/world_map_interface_impl.gd` 至 `scripts/world_map/world_map_canvas_detail.gd`
+### 第12段：`scripts/world_map/internal/world_map_interface_impl.gd` 至 `scripts/world_map/world_map_canvas_detail.gd`
 
 ```text
 @ scripts/world_map/internal/world_map_interface_impl.gd | PrototypeV2Interface
@@ -1898,4 +1554,3 @@
 7 C DETAIL_SELECTED_COLOR
 9 A _city_detail_catalog
 ```
-
