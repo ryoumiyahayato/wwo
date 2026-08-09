@@ -21,6 +21,7 @@ func _run() -> void:
 	_test_origin_mismatch_is_atomic()
 	_test_invalid_quote_execution_is_atomic()
 	_test_invalid_runtime_is_rejected()
+	_test_travel_service_ownership_boundary()
 	_test_location_snapshot_restore()
 	_test_location_json_round_trip()
 	print("VNext location travel: %d checks, %d failures" % [checks, failures])
@@ -71,8 +72,7 @@ func _test_quote_validation() -> void:
 
 
 func _test_successful_travel() -> void:
-	var runtime := VNextWorldRuntime.new()
-	_check(runtime.advance_minutes(30), "success fixture establishes nonzero runtime")
+	var runtime := _runtime_at(30)
 	var location := _location_at(ORIGIN_ID)
 	var quote := _quote(ORIGIN_ID, DESTINATION_ID, 75, 125)
 	var service := VNextTravelService.new()
@@ -84,8 +84,7 @@ func _test_successful_travel() -> void:
 
 
 func _test_origin_mismatch_is_atomic() -> void:
-	var runtime := VNextWorldRuntime.new()
-	_check(runtime.advance_minutes(12), "origin mismatch fixture establishes runtime")
+	var runtime := _runtime_at(12)
 	var location := _location_at(OTHER_ID)
 	var quote := _quote(ORIGIN_ID, DESTINATION_ID, 20, 0)
 	var before_runtime: Dictionary = runtime.snapshot()
@@ -97,8 +96,7 @@ func _test_origin_mismatch_is_atomic() -> void:
 
 
 func _test_invalid_quote_execution_is_atomic() -> void:
-	var runtime := VNextWorldRuntime.new()
-	_check(runtime.advance_minutes(44), "invalid quote fixture establishes runtime")
+	var runtime := _runtime_at(44)
 	var location := _location_at(ORIGIN_ID)
 	var invalid_quote := VNextTravelQuote.new()
 	_check(not invalid_quote.configure(ORIGIN_ID, DESTINATION_ID, 0, 10), "invalid execution quote is not configurable")
@@ -117,6 +115,21 @@ func _test_invalid_runtime_is_rejected() -> void:
 	_check(not VNextTravelService.new().execute(null, location, quote), "null runtime is rejected")
 	_equal(location.snapshot(), before, "null runtime rejection leaves location unchanged")
 
+
+func _test_travel_service_ownership_boundary() -> void:
+	var source: String = FileAccess.get_file_as_string(
+		"res://scripts/vnext/travel/travel_service.gd"
+	)
+	_check(source.contains("func execute("), "TravelService exposes the typed location travel entry point")
+	_check(source.contains("runtime: VNextWorldRuntime"), "TravelService types the runtime parameter")
+	_check(source.contains("location: VNextLocationState"), "TravelService types the location parameter")
+	_check(source.contains("quote: VNextTravelQuote"), "TravelService types the quote parameter")
+	_check(source.contains("runtime.advance_minutes"), "TravelService owns runtime time advancement")
+	_check(source.contains("location.move_to"), "TravelService owns location movement")
+	_check(not source.contains("VNextPersonalWallet"), "TravelService does not depend on the wallet owner")
+	_check(not source.contains("wallet"), "TravelService has no wallet access")
+	_check(not source.contains("debit("), "TravelService cannot debit funds")
+	_check(not source.contains("execute_paid"), "TravelService has no paid orchestration entry point")
 
 func _test_location_snapshot_restore() -> void:
 	var source := _location_at(DESTINATION_ID)
@@ -151,6 +164,16 @@ func _test_location_json_round_trip() -> void:
 	var restored := VNextLocationState.new()
 	_check(restored.restore(parser.data as Dictionary), "JSON-parsed location snapshot restores")
 	_equal(restored.snapshot(), expected, "location JSON round trip preserves state")
+
+
+func _runtime_at(minutes: int) -> VNextWorldRuntime:
+	var runtime := VNextWorldRuntime.create(PLAYER_ID, ORIGIN_ID)
+	_check(runtime != null, "travel fixture creates a valid v2 runtime")
+	if runtime == null:
+		return null
+	if minutes > 0:
+		_check(runtime.advance_minutes(minutes), "travel fixture establishes runtime time")
+	return runtime
 
 
 func _location_at(place_id_value: String) -> VNextLocationState:

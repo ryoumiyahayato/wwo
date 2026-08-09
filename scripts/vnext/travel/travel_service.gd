@@ -9,7 +9,9 @@ func execute(
 ) -> bool:
 	if runtime == null or location == null or quote == null:
 		return false
-	if not location.is_valid() or not quote.is_valid():
+	if not runtime.is_valid() or not location.is_valid() or not quote.is_valid():
+		return false
+	if location.player_id() != runtime.player_id():
 		return false
 	if location.place_id() != quote.origin_place_id():
 		return false

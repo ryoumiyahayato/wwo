@@ -1,104 +1,37 @@
-# vNext location and travel boundary
+# vNext location, travel and paid core integration
 
-## Fixed base and scope
+## Boundary
 
-- `FIXED_BASE`: `b2584cdf6cfc5579f20a792826f6acb284164dfb`.
-- Branch: `feat/vnext-location-travel-20260808`.
-- This change introduces the first vNext authoritative player location and the smallest travel execution boundary.
-- It does not modify `scripts/vnext/world_runtime.gd`, `PersonalWallet`, map UI, or `FormalWorldSimulation`.
+The vNext location boundary owns one actual player location and the smallest execution boundary for an already-determined quote. It remains isolated from map UI, formal product entry points and route-planning algorithms.
 
-## Migration evidence
+VNextLocationState owns exactly:
 
-The reuse/migration inventory classifies `SpatialLocationService`, `RoutePlannerService`, and `TravelExecutionService` as `REUSE_WITH_ADAPTER`. Their existing source and retained tests were reviewed before this implementation.
+- player_id: a valid person:* stable ID;
+- place_id: a valid place:* stable ID.
 
-The old services deliberately own more than this vNext slice:
+VNextTravelQuote contains only an origin, destination, positive integer duration and non-negative integer cost. It does not calculate a route.
 
-- `SpatialLocationService` owns a location catalog, per-person positions, discovery/known-location state, transit/wait/interruption state, and persistence.
-- `RoutePlannerService` owns graph search, fastest/cheapest preference handling, affordability filtering, cognition limits, path tie-breaking, and route caching.
-- `TravelExecutionService` owns travel plans, scheduling integration, segment settlement, payment, fatigue/stress effects, idempotency, interruption, and bounded history.
+## Runtime integration
 
-Those responsibilities are not copied into vNext. In particular, this change does not copy the old route-planning algorithm.
+The v2 composition root supplies the authoritative runtime, location and wallet owners. VNextTravelService.execute(runtime, location, quote) owns only the runtime time advance and actual location change. VNextCoreLoopService.execute_paid_travel(runtime, quote) owns the cross-owner paid composition and is the only layer that reads or debits the wallet.
 
-Useful retained tests reviewed for behavior boundaries include:
+A successful paid travel transaction:
 
-- `tests/v2_3/v2_3_location_test.gd`;
-- `tests/v2_3/v2_3_route_planner_test.gd`;
-- `tests/v2_3/v2_3_travel_execution_test.gd`.
+1. records the complete runtime snapshot;
+2. debits the wallet once when cost is positive;
+3. advances VNextWorldRuntime by the quoted duration;
+4. moves the actual location to the destination.
 
-## Ownership
+The paid core loop preflights runtime validity, quote validity, person identity, actual origin, JSON-safe time capacity and wallet funds before debiting. Known failures therefore leave time, wallet, location and event knowledge unchanged without relying on a debit-then-rollback path. execute(runtime, location, quote) remains the explicit low-level location/time boundary and never accesses a wallet.
 
-### `VNextLocationState`
+## Identity and time
 
-`VNextLocationState` owns exactly two business facts:
-
-- `player_id`: a valid `person:*` vNext stable ID;
-- `place_id`: a valid `place:*` vNext stable ID.
-
-Its snapshot schema is `vnext_location_state_v1` and contains only `schema_id`, `player_id`, and `place_id`.
-
-Restore is transactional. Schema, field presence, string types, and stable-ID kinds are validated before either owned fact is committed.
-
-### `VNextTravelQuote`
-
-`VNextTravelQuote` represents only an already-determined travel plan:
-
-- `origin_place_id`;
-- `destination_place_id`;
-- `duration_minutes`;
-- `cost_minor`.
-
-A quote is valid only when both IDs are valid `place:*` stable IDs, origin and destination differ, duration is a positive integer, and cost is a non-negative integer. Float money and float duration are rejected at the quote boundary.
-
-The quote does not calculate a path. `cost_minor` is descriptive in this PR and is not deducted from a wallet.
-
-### `VNextTravelService`
-
-`VNextTravelService` owns no independent clock, route graph, wallet, or player position. It executes a validated quote against two authorities supplied by the caller:
-
-1. `VNextWorldRuntime` for time;
-2. `VNextLocationState` for player position.
-
-Before committing state it validates:
-
-- runtime, location, and quote exist;
-- location state is valid;
-- quote is valid;
-- current `place_id` equals the quote origin.
-
-On success it advances `VNextWorldRuntime` by `duration_minutes`, then moves the location to the quote destination. The service keeps pre-execution snapshots so an unexpected post-time location commit failure can restore both authorities to their prior state.
+Travel never stores its own clock, wallet, route graph or player identity. The runtime's player ID must match the location owner, and all elapsed travel minutes are applied through VNextWorldRuntime.advance_minutes().
 
 ## Explicit exclusions
 
-This boundary does not:
+This integration does not copy V2.3 transit, schedule, condition, payment, route-cache, route-planner or travel-history state. It does not create map UI, a formal product entry point, social/communication/organization/career/politics/law/AI systems or a second location authority.
 
-- create a second clock or time field;
-- use UI selection as player position;
-- create map UI;
-- copy or rewrite complex pathfinding;
-- deduct `cost_minor` from `PersonalWallet`;
-- modify `PersonalWallet`;
-- modify `scripts/vnext/world_runtime.gd`;
-- integrate with `FormalWorldSimulation`;
-- import V2.3 transit, waiting, schedule, condition, payment, or route-cache state.
+## Validation
 
-Wallet charging belongs to the later core integration after the independent player, personal-economy, travel, and related vNext boundaries are combined.
-
-## Validation contract
-
-`tests/vnext/location_travel_test.gd` covers:
-
-- legal location initialization;
-- invalid person/place stable IDs;
-- quote field and integer validation;
-- successful quote execution;
-- exact runtime minute advancement;
-- destination update;
-- origin mismatch rejection;
-- zero/negative duration rejection;
-- negative cost rejection;
-- float money rejection;
-- failure atomicity for location and time;
-- location snapshot/restore;
-- JSON snapshot round trip.
-
-The repository-wide vNext validation entry point remains `tools/run_vnext_validation.py`; no separate runner is introduced.
+tests/vnext/location_travel_test.gd covers the independent location/time boundary and TravelService ownership guard. tests/vnext/core_loop_integration_test.gd covers paid wallet settlement, shared time, arrival, zero-cost travel, invalid origins/quotes, insufficient funds, stale-reference safety and time-overflow preflight.

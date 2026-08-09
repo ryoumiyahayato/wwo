@@ -13,6 +13,8 @@ func _run() -> void:
 	_test_player_snapshot_restore()
 	_test_player_json_round_trip()
 	_test_wait_advances_runtime()
+	_test_wait_current_player_helper()
+	_test_typed_wait_source_boundary()
 	_test_wait_validation_failures()
 	_test_null_boundaries()
 	_test_no_second_time_or_session_owner()
@@ -108,8 +110,7 @@ func _test_player_json_round_trip() -> void:
 
 
 func _test_wait_advances_runtime() -> void:
-	var runtime := VNextWorldRuntime.new()
-	_check(runtime.advance_minutes(10), "WAIT fixture can establish initial runtime time")
+	var runtime := _runtime_at(10)
 	var player := VNextPlayerState.new("person:player_one")
 	var player_before: Dictionary = player.snapshot()
 	var service := VNextPlayerActionService.new()
@@ -122,6 +123,34 @@ func _test_wait_advances_runtime() -> void:
 	_equal(runtime.total_minutes(), 35, "WAIT advances authoritative runtime time exactly once")
 	_equal(player.snapshot(), player_before, "WAIT does not mutate player identity")
 
+
+func _test_wait_current_player_helper() -> void:
+	var runtime := _runtime_at(10)
+	if runtime == null:
+		return
+	var service := VNextPlayerActionService.new()
+	var result: VNextActionResult = service.wait_current_player(runtime, 20)
+	_check(result.success, "current-player WAIT helper succeeds")
+	_equal(result.elapsed_minutes, 20, "current-player WAIT helper reports elapsed minutes")
+	_equal(runtime.total_minutes(), 30, "current-player WAIT helper advances the shared runtime")
+	var null_runtime_result: VNextActionResult = service.wait_current_player(null, 5)
+	_check(not null_runtime_result.success, "current-player WAIT helper rejects null runtime")
+	_equal(null_runtime_result.code, "invalid_runtime", "current-player helper keeps typed failure behavior")
+
+func _test_typed_wait_source_boundary() -> void:
+	var source: String = FileAccess.get_file_as_string(
+		"res://scripts/vnext/player/player_action_service.gd"
+	)
+	_check(source.contains("func wait("), "WAIT exposes the typed wait entry point")
+	_check(source.contains("runtime: VNextWorldRuntime"), "WAIT types the runtime parameter")
+	_check(source.contains("player: VNextPlayerState"), "WAIT types the player parameter")
+	_check(source.contains("minutes: int"), "WAIT types the minutes parameter")
+	_check(source.contains("func wait_current_player"), "WAIT exposes the current-player helper")
+	_check(source.contains("runtime.player()"), "current-player helper reads the runtime player")
+	_check(source.contains("wait(runtime, player, minutes)"), "current-player helper calls the typed WAIT entry point")
+	_check(not source.contains("Variant"), "WAIT has no Variant dynamic overload")
+	_check(not source.contains("requested_minutes"), "WAIT has no dynamic requested-minutes sentinel")
+	_check(not source.contains("-1"), "WAIT has no -1 player sentinel")
 
 func _test_wait_validation_failures() -> void:
 	var service := VNextPlayerActionService.new()
@@ -246,7 +275,10 @@ func _test_no_second_time_or_session_owner() -> void:
 
 
 func _runtime_at(minutes: int) -> VNextWorldRuntime:
-	var runtime := VNextWorldRuntime.new()
+	var runtime := VNextWorldRuntime.create("person:player_one", "place:player_home")
+	_check(runtime != null, "failure fixture creates a valid v2 runtime")
+	if runtime == null:
+		return null
 	if minutes > 0:
 		_check(runtime.advance_minutes(minutes), "failure fixture can establish runtime time")
 	return runtime
