@@ -279,4 +279,3 @@ static func _normalize_int(value: Variant, minimum: int, maximum: int) -> int:
 		return -1
 	var normalized: int = int(float_value)
 	return normalized if normalized >= minimum and normalized <= maximum else -1
-
