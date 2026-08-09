@@ -1,0 +1,192 @@
+{
+  "schema_id": "vnext_state_politics_catalog_v1",
+  "source_notes": [
+    "Reuses the Alpha politics issue and policy domains without importing Alpha service state.",
+    "Initial force categories follow the coalition and legitimacy design document.",
+    "State IDs are vNext stable IDs; historical 1900 records remain data-only catalog sources."
+  ],
+  "state_id": "state:loran_federation",
+  "regime_type": "federal_republic",
+  "government_id": "organization:loran_government",
+  "government_group_id": "organization:loran_government_group",
+  "government_leader_id": "person:loran_premier",
+  "capacity": {
+    "administrative": 72.0,
+    "enforcement": 64.0,
+    "fiscal": 68.0,
+    "corruption": 22.0,
+    "control": 70.0
+  },
+  "legitimacy": 68.0,
+  "stability": 70.0,
+  "forces": [
+    {
+      "force_id": "organization:loran_government_group",
+      "name": "Government group",
+      "kind": "government",
+      "leader_id": "person:loran_premier",
+      "influence": 30.0,
+      "government_support": 80.0,
+      "base_government_support": 80.0,
+      "institutional_access": 95.0,
+      "mobilization_capacity": 55.0,
+      "government_eligible": true,
+      "policy_preferences": {"trade": 20.0, "tax": 10.0, "labor": -10.0, "social_spending": 0.0, "public_order": 40.0, "military_mobilization": 20.0},
+      "pressure_response": {"price_pressure": -0.15, "unemployment_pressure": -0.18, "fiscal_pressure": -0.20, "shortage_pressure": -0.15, "growth_signal": 0.20, "war_pressure": -0.18, "casualty_pressure": -0.25, "mobilization_pressure": -0.12, "military_result_signal": 0.20}
+    },
+    {
+      "force_id": "organization:loran_conservative_bloc",
+      "name": "Conservative bloc",
+      "kind": "conservative",
+      "leader_id": "person:loran_conservative_leader",
+      "influence": 17.0,
+      "government_support": 45.0,
+      "base_government_support": 45.0,
+      "institutional_access": 68.0,
+      "mobilization_capacity": 52.0,
+      "government_eligible": true,
+      "policy_preferences": {"trade": 45.0, "tax": 35.0, "labor": -45.0, "social_spending": -20.0, "public_order": 65.0, "military_mobilization": 50.0},
+      "pressure_response": {"price_pressure": -0.32, "unemployment_pressure": -0.12, "fiscal_pressure": 0.08, "shortage_pressure": -0.22, "growth_signal": 0.18, "war_pressure": 0.18, "casualty_pressure": -0.18, "mobilization_pressure": 0.08, "military_result_signal": 0.18}
+    },
+    {
+      "force_id": "organization:loran_liberal_league",
+      "name": "Liberal league",
+      "kind": "liberal",
+      "leader_id": "person:loran_liberal_leader",
+      "influence": 14.0,
+      "government_support": 25.0,
+      "base_government_support": 25.0,
+      "institutional_access": 62.0,
+      "mobilization_capacity": 48.0,
+      "government_eligible": true,
+      "policy_preferences": {"trade": 40.0, "tax": -20.0, "labor": 20.0, "social_spending": 55.0, "public_order": 10.0, "military_mobilization": 0.0},
+      "pressure_response": {"price_pressure": -0.20, "unemployment_pressure": -0.25, "fiscal_pressure": -0.12, "shortage_pressure": -0.18, "growth_signal": 0.20, "war_pressure": -0.22, "casualty_pressure": -0.22, "mobilization_pressure": -0.16, "military_result_signal": 0.10}
+    },
+    {
+      "force_id": "organization:loran_labor_caucus",
+      "name": "Labor and socialist caucus",
+      "kind": "labor",
+      "leader_id": "person:loran_labor_leader",
+      "influence": 18.0,
+      "government_support": 10.0,
+      "base_government_support": 10.0,
+      "institutional_access": 72.0,
+      "mobilization_capacity": 78.0,
+      "government_eligible": true,
+      "policy_preferences": {"trade": -10.0, "tax": -40.0, "labor": 80.0, "social_spending": 85.0, "public_order": -20.0, "military_mobilization": -30.0},
+      "pressure_response": {"price_pressure": -0.42, "unemployment_pressure": -0.62, "fiscal_pressure": -0.16, "shortage_pressure": -0.38, "growth_signal": 0.10, "war_pressure": -0.20, "casualty_pressure": -0.10, "mobilization_pressure": -0.28, "military_result_signal": 0.02}
+    },
+    {
+      "force_id": "organization:loran_military_command",
+      "name": "Military command",
+      "kind": "military",
+      "leader_id": "person:loran_marshal",
+      "influence": 10.0,
+      "government_support": 30.0,
+      "base_government_support": 30.0,
+      "institutional_access": 76.0,
+      "mobilization_capacity": 90.0,
+      "government_eligible": true,
+      "policy_preferences": {"trade": 0.0, "tax": 20.0, "labor": -15.0, "social_spending": -25.0, "public_order": 80.0, "military_mobilization": 90.0},
+      "pressure_response": {"price_pressure": -0.12, "unemployment_pressure": -0.08, "fiscal_pressure": 0.12, "shortage_pressure": -0.18, "growth_signal": 0.04, "war_pressure": 0.42, "casualty_pressure": -0.42, "mobilization_pressure": 0.30, "military_result_signal": 0.48}
+    },
+    {
+      "force_id": "organization:loran_land_industry",
+      "name": "Land and industrial interests",
+      "kind": "land_industry",
+      "leader_id": "person:loran_industry_leader",
+      "influence": 7.0,
+      "government_support": 40.0,
+      "base_government_support": 40.0,
+      "institutional_access": 70.0,
+      "mobilization_capacity": 36.0,
+      "government_eligible": true,
+      "policy_preferences": {"trade": 70.0, "tax": -40.0, "labor": -60.0, "social_spending": -40.0, "public_order": 35.0, "military_mobilization": 30.0},
+      "pressure_response": {"price_pressure": -0.20, "unemployment_pressure": -0.22, "fiscal_pressure": -0.12, "shortage_pressure": -0.30, "growth_signal": 0.35, "war_pressure": 0.12, "casualty_pressure": -0.15, "mobilization_pressure": -0.12, "military_result_signal": 0.14}
+    },
+    {
+      "force_id": "organization:loran_regional_union",
+      "name": "Regional and national interests",
+      "kind": "regional",
+      "leader_id": "person:loran_regional_leader",
+      "influence": 4.0,
+      "government_support": 20.0,
+      "base_government_support": 20.0,
+      "institutional_access": 58.0,
+      "mobilization_capacity": 64.0,
+      "government_eligible": true,
+      "policy_preferences": {"trade": 20.0, "tax": 0.0, "labor": 10.0, "social_spending": 30.0, "public_order": 20.0, "military_mobilization": -20.0},
+      "pressure_response": {"price_pressure": -0.20, "unemployment_pressure": -0.20, "fiscal_pressure": -0.08, "shortage_pressure": -0.40, "growth_signal": 0.08, "war_pressure": -0.16, "casualty_pressure": -0.18, "mobilization_pressure": -0.22, "military_result_signal": 0.04}
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "policy:loran_balanced_budget",
+      "name": "Balanced public budget",
+      "domain": "tax",
+      "position": -20.0,
+      "fiscal_demand": 10.0,
+      "administrative_demand": 15.0,
+      "required_control": 30.0,
+      "pressure_targets": {"fiscal_pressure": 70.0},
+      "political_relief": {"fiscal_pressure": 45.0}
+    },
+    {
+      "policy_id": "policy:loran_labor_relief",
+      "name": "Labor and wage relief",
+      "domain": "labor",
+      "position": 70.0,
+      "fiscal_demand": 32.0,
+      "administrative_demand": 25.0,
+      "required_control": 35.0,
+      "pressure_targets": {"unemployment_pressure": 85.0, "price_pressure": 25.0},
+      "political_relief": {"unemployment_pressure": 78.0, "price_pressure": 22.0}
+    },
+    {
+      "policy_id": "policy:loran_public_order",
+      "name": "Public order administration",
+      "domain": "public_order",
+      "position": 60.0,
+      "fiscal_demand": 15.0,
+      "administrative_demand": 35.0,
+      "required_control": 40.0,
+      "pressure_targets": {"shortage_pressure": 55.0, "war_pressure": 20.0},
+      "political_relief": {"shortage_pressure": 35.0}
+    },
+    {
+      "policy_id": "policy:loran_military_mobilization",
+      "name": "Military mobilization order",
+      "domain": "military_mobilization",
+      "position": 65.0,
+      "fiscal_demand": 60.0,
+      "administrative_demand": 45.0,
+      "required_control": 45.0,
+      "pressure_targets": {"war_pressure": 80.0, "casualty_pressure": 60.0, "mobilization_pressure": 80.0},
+      "political_relief": {"war_pressure": 48.0, "mobilization_pressure": 18.0}
+    },
+    {
+      "policy_id": "policy:loran_trade_protection",
+      "name": "Strategic trade protection",
+      "domain": "trade",
+      "position": -55.0,
+      "fiscal_demand": 20.0,
+      "administrative_demand": 20.0,
+      "required_control": 30.0,
+      "pressure_targets": {"shortage_pressure": 50.0, "price_pressure": 20.0},
+      "political_relief": {"shortage_pressure": 20.0}
+    },
+    {
+      "policy_id": "policy:loran_social_spending",
+      "name": "Social relief spending",
+      "domain": "social_spending",
+      "position": 70.0,
+      "fiscal_demand": 50.0,
+      "administrative_demand": 30.0,
+      "required_control": 35.0,
+      "pressure_targets": {"unemployment_pressure": 60.0, "price_pressure": 20.0},
+      "political_relief": {"unemployment_pressure": 55.0, "price_pressure": 18.0}
+    }
+  ],
+  "active_policy_ids": ["policy:loran_balanced_budget"]
+}
+
