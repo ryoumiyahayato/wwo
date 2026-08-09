@@ -18,13 +18,13 @@
 | 可写成员字段 | 1,243 | 1,255 | -1 |
 | 进程级全局可写字段 | 16 | 15 | -1 |
 | Autoload可写字段 | 0 | 0 | 0 |
-| 持久化关联候选（静态启发式） | 472 | 1,240 | 不可直接比较 |
+| 持久化关联候选（静态启发式） | 472 | 1,255 | 不可直接比较 |
 | UI显示副本候选 | 32 | 32 | 0 |
 | 命名缓存候选 | 16 | 16 | 0 |
 | 可推导成员候选 | 61 | 60 | -1 |
 | K类、不得修改字段 | 885 | 900 | 0 |
 
-以上当前值直接来自`tools/audit_variable_state.py`生成的inventory，不是手工估算。扫描器扫描`.gd`、`.tscn`、`.tres`、`.godot`、`.json`和`.cfg`；PR #29新增的测试GDScript和SAVE_VERSION=1 JSON fixture扩大了词法证据范围。`persisted_by_name`是在全部扫描源中，按同名字段与save、load、restore、snapshot等词推断的启发式，因此批准基线472和当前值1,240不能作为生产持久化字段的净变化比较；本报告不声称已经精确证明每一项增量的来源。第一批经qualified核验减少一份重复可写事实；该项是所有权结论，不是词法扫描器的独立计数器。
+以上当前值直接来自`tools/audit_variable_state.py`生成的inventory，不是手工估算。扫描器扫描`.gd`、`.tscn`、`.tres`、`.godot`、`.json`和`.cfg`；PR #29新增的测试GDScript和SAVE_VERSION=1 JSON fixture扩大了词法证据范围。`persisted_by_name`是在全部扫描源中，按同名字段与save、load、restore、snapshot等词推断的启发式，因此批准基线472和当前值1,255不能作为生产持久化字段的净变化比较；本报告不声称已经精确证明每一项增量的来源。第一批经qualified核验减少一份重复可写事实；该项是所有权结论，不是词法扫描器的独立计数器。
 
 ## 2. 最严重的10组重复或混乱状态
 
