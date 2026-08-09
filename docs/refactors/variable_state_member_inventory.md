@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1637|1255|15|0|1255|5|32|16|60|900|530|282|
+|1690|1295|15|0|1280|5|32|16|63|932|536|287|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,637个生产成员字段逐项表
+## 1,690个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -1447,7 +1447,7 @@
 5 K leave_confirmation
 ```
 
-### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/vnext/world_runtime.gd`
+### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/vnext/map/military_map_adapter.gd`
 
 ```text
 @ scripts/v2_3/v2_3_formal_simulation.gd | V23FormalSimulation
@@ -1583,6 +1583,68 @@
 8 K _event_records
 9 K _known_event_ids
 10 K _read_event_ids
+@ scripts/vnext/map/military_map_adapter.gd | VNextMilitaryMapAdapter
+6 C OVERLAY_PATH
+7 C MODE_ROAD
+8 C MODE_RAIL
+9 C MODE_SHIPPING
+11 K errors
+12 K cities
+13 E countries
+14 K regions
+15 K ports
+16 K links
+17 K links_by_city
+18 K terrain_profiles
+19 K transport_profiles
+20 K supply_rules
+21 K battle_rules
+22 K region_overlays
+23 E country_overlays
+24 K city_overlays
+```
+
+### 第10段：`scripts/vnext/military/military_formation.gd` 至 `scripts/world_map/historical_map_identity_style.gd`
+
+```text
+@ scripts/vnext/military/military_formation.gd | VNextMilitaryFormation
+5 C ACTION_IDLE
+6 C ACTION_MOVING
+7 C ACTION_CONCENTRATING
+8 C ACTION_ATTACKING
+9 C ACTION_DEFENDING
+10 C RESOURCE_IDS
+11 C SUPPLY_STATUSES
+13 K formation_id
+14 E country_id
+15 A service_branch
+16 K parent_formation_id
+17 K personnel
+18 K equipment_sets
+19 K training
+20 K morale
+21 K organization
+22 K current_city_id
+23 A action_state
+24 A supply_status
+25 K supply_level
+26 K supply_fill
+27 A defense_posture
+28 K daily_requirements
+@ scripts/vnext/military/military_service.gd | VNextMilitaryService
+7 C RESOURCE_IDS
+@ scripts/vnext/military/military_state.gd | VNextMilitaryState
+5 C SCHEMA_ID
+7 K formations
+8 K region_controls
+9 K region_garrisons
+10 K supply_inputs
+11 K active_actions
+12 K completed_actions
+13 K battle_results
+14 K control_history
+15 K last_simulated_hour
+16 A next_action_sequence
 @ scripts/vnext/player/action_result.gd | VNextActionResult
 4 K success
 5 K code
@@ -1608,11 +1670,6 @@
 9 K _wallet
 10 K _location
 11 K _event_knowledge
-```
-
-### 第10段：`scripts/world_map/historical_map_identity_style.gd` 至 `scripts/world_map/internal/world_map_data_impl.gd`
-
-```text
 @ scripts/world_map/historical_map_identity_style.gd | HistoricalMapIdentityStyle
 5 C PATTERN_PREFIX
 6 C PATTERN_SEPARATOR
@@ -1623,6 +1680,11 @@
 11 C CODE_PLATE_BLEND
 12 C CODE_COLUMN_CENTERS
 13 C CODE_ROW_CENTERS
+```
+
+### 第11段：`scripts/world_map/internal/world_map_canvas_impl.gd` 至 `scripts/world_map/internal/world_map_data_impl.gd`
+
+```text
 @ scripts/world_map/internal/world_map_canvas_impl.gd | PrototypeV2MapCanvas
 5 C WORLD_SIZE
 6 C WORLD_BOUNDS
@@ -1796,7 +1858,7 @@
 26 K errors
 ```
 
-### 第11段：`scripts/world_map/internal/world_map_interface_impl.gd` 至 `scripts/world_map/world_map_canvas_detail.gd`
+### 第12段：`scripts/world_map/internal/world_map_interface_impl.gd` 至 `scripts/world_map/world_map_canvas_detail.gd`
 
 ```text
 @ scripts/world_map/internal/world_map_interface_impl.gd | PrototypeV2Interface
