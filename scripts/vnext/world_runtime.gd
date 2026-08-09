@@ -93,14 +93,18 @@ func total_minutes() -> int:
 
 
 func advance_minutes(minutes: int) -> bool:
+	if not can_advance_minutes(minutes):
+		return false
+	_total_minutes += minutes
+	return true
+
+
+func can_advance_minutes(minutes: int) -> bool:
 	if not is_valid():
 		return false
 	if minutes <= 0:
 		return false
-	if minutes > MAX_JSON_SAFE_INTEGER - _total_minutes:
-		return false
-	_total_minutes += minutes
-	return true
+	return minutes <= MAX_JSON_SAFE_INTEGER - _total_minutes
 
 
 func record_event(event_id: String) -> bool:
@@ -193,12 +197,58 @@ func restore(snapshot_value: Dictionary) -> bool:
 	):
 		return false
 
+	if _has_initialized_owner_objects():
+		var previous_player: Dictionary = _player.snapshot()
+		var previous_wallet: Dictionary = _wallet.snapshot()
+		var previous_location: Dictionary = _location.snapshot()
+		var previous_event_knowledge: Dictionary = _event_knowledge.snapshot()
+		if not _restore_owner_objects(
+			candidate_player.snapshot(),
+			candidate_wallet.snapshot(),
+			candidate_location.snapshot(),
+			candidate_event_knowledge.snapshot()
+		):
+			_restore_owner_objects(
+				previous_player,
+				previous_wallet,
+				previous_location,
+				previous_event_knowledge
+			)
+			return false
+		_total_minutes = candidate_total_minutes
+		return true
+
 	_total_minutes = candidate_total_minutes
 	_player = candidate_player
 	_wallet = candidate_wallet
 	_location = candidate_location
 	_event_knowledge = candidate_event_knowledge
 	return true
+
+
+func _has_initialized_owner_objects() -> bool:
+	return (
+		_player != null
+		and _wallet != null
+		and _location != null
+		and _event_knowledge != null
+		and is_valid()
+	)
+
+
+func _restore_owner_objects(
+	player_snapshot: Dictionary,
+	wallet_snapshot: Dictionary,
+	location_snapshot: Dictionary,
+	event_knowledge_snapshot: Dictionary
+) -> bool:
+	if not _player.restore(player_snapshot):
+		return false
+	if not _wallet.restore(wallet_snapshot):
+		return false
+	if not _location.restore(location_snapshot):
+		return false
+	return _event_knowledge.restore(event_knowledge_snapshot)
 
 
 static func _is_composition_valid(

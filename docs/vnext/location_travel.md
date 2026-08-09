@@ -13,7 +13,7 @@ VNextTravelQuote contains only an origin, destination, positive integer duration
 
 ## Runtime integration
 
-The v2 composition root supplies the authoritative runtime, location and wallet owners. VNextTravelService.execute_paid(runtime, quote) validates that the runtime is initialized, the quote origin matches the actual location and the wallet can pay the quoted cost.
+The v2 composition root supplies the authoritative runtime, location and wallet owners. VNextTravelService.execute(runtime, location, quote) owns only the runtime time advance and actual location change. VNextCoreLoopService.execute_paid_travel(runtime, quote) owns the cross-owner paid composition and is the only layer that reads or debits the wallet.
 
 A successful paid travel transaction:
 
@@ -22,9 +22,7 @@ A successful paid travel transaction:
 3. advances VNextWorldRuntime by the quoted duration;
 4. moves the actual location to the destination.
 
-If a later step fails, the complete runtime v2 snapshot is restored. Insufficient funds, origin mismatches, invalid quotes and runtime time overflow therefore leave time, wallet, location and event knowledge unchanged.
-
-execute(runtime, location, quote) remains available as the explicit low-level unpaid location/time boundary used by the existing location contract. It does not debit a wallet. The composed core loop uses the paid path.
+The paid core loop preflights runtime validity, quote validity, person identity, actual origin, JSON-safe time capacity and wallet funds before debiting. Known failures therefore leave time, wallet, location and event knowledge unchanged without relying on a debit-then-rollback path. execute(runtime, location, quote) remains the explicit low-level location/time boundary and never accesses a wallet.
 
 ## Identity and time
 
@@ -36,4 +34,4 @@ This integration does not copy V2.3 transit, schedule, condition, payment, route
 
 ## Validation
 
-tests/vnext/location_travel_test.gd covers the independent location/time boundary. tests/vnext/core_loop_integration_test.gd covers paid wallet settlement, shared time, arrival, insufficient-funds atomicity and overflow rollback.
+tests/vnext/location_travel_test.gd covers the independent location/time boundary and TravelService ownership guard. tests/vnext/core_loop_integration_test.gd covers paid wallet settlement, shared time, arrival, zero-cost travel, invalid origins/quotes, insufficient funds, stale-reference safety and time-overflow preflight.

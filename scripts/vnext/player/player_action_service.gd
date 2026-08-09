@@ -4,8 +4,8 @@ extends RefCounted
 
 func wait(
 	runtime: VNextWorldRuntime,
-	player_or_minutes: Variant,
-	requested_minutes: int = -1
+	player: VNextPlayerState,
+	minutes: int
 ) -> VNextActionResult:
 	if runtime == null:
 		return VNextActionResult.fail(
@@ -15,16 +15,6 @@ func wait(
 		return VNextActionResult.fail(
 			"invalid_runtime", "WAIT requires an initialized vNext runtime."
 		)
-
-	var player: VNextPlayerState = null
-	var minutes: int = requested_minutes
-	if requested_minutes == -1 and typeof(player_or_minutes) == TYPE_INT:
-		player = runtime.player()
-		minutes = int(player_or_minutes)
-	else:
-		if typeof(player_or_minutes) == TYPE_OBJECT:
-			player = player_or_minutes as VNextPlayerState
-
 	if player == null:
 		return VNextActionResult.fail(
 			"invalid_player", "vNext player state is required for WAIT."
@@ -52,4 +42,7 @@ func wait(
 func wait_current_player(
 	runtime: VNextWorldRuntime, minutes: int
 ) -> VNextActionResult:
-	return wait(runtime, minutes)
+	var player: VNextPlayerState = null
+	if runtime != null:
+		player = runtime.player()
+	return wait(runtime, player, minutes)

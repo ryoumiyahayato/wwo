@@ -21,6 +21,7 @@ func _run() -> void:
 	_test_origin_mismatch_is_atomic()
 	_test_invalid_quote_execution_is_atomic()
 	_test_invalid_runtime_is_rejected()
+	_test_travel_service_ownership_boundary()
 	_test_location_snapshot_restore()
 	_test_location_json_round_trip()
 	print("VNext location travel: %d checks, %d failures" % [checks, failures])
@@ -114,6 +115,21 @@ func _test_invalid_runtime_is_rejected() -> void:
 	_check(not VNextTravelService.new().execute(null, location, quote), "null runtime is rejected")
 	_equal(location.snapshot(), before, "null runtime rejection leaves location unchanged")
 
+
+func _test_travel_service_ownership_boundary() -> void:
+	var source: String = FileAccess.get_file_as_string(
+		"res://scripts/vnext/travel/travel_service.gd"
+	)
+	_check(source.contains("func execute("), "TravelService exposes the typed location travel entry point")
+	_check(source.contains("runtime: VNextWorldRuntime"), "TravelService types the runtime parameter")
+	_check(source.contains("location: VNextLocationState"), "TravelService types the location parameter")
+	_check(source.contains("quote: VNextTravelQuote"), "TravelService types the quote parameter")
+	_check(source.contains("runtime.advance_minutes"), "TravelService owns runtime time advancement")
+	_check(source.contains("location.move_to"), "TravelService owns location movement")
+	_check(not source.contains("VNextPersonalWallet"), "TravelService does not depend on the wallet owner")
+	_check(not source.contains("wallet"), "TravelService has no wallet access")
+	_check(not source.contains("debit("), "TravelService cannot debit funds")
+	_check(not source.contains("execute_paid"), "TravelService has no paid orchestration entry point")
 
 func _test_location_snapshot_restore() -> void:
 	var source := _location_at(DESTINATION_ID)

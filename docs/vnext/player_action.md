@@ -6,12 +6,12 @@ VNextWorldRuntime v2 composes that player owner with the wallet, location and ev
 
 ## WAIT
 
-VNextPlayerActionService supports both explicit and composed calls:
+VNextPlayerActionService supports two typed calls:
 
     wait(runtime, player, minutes)
-    wait(runtime, minutes)
+    wait_current_player(runtime, minutes)
 
-The two-argument form uses runtime.player(). The explicit form is retained as a typed boundary and must identify the same person as the runtime. Both forms validate the initialized runtime and call only VNextWorldRuntime.advance_minutes(minutes).
+wait(runtime, player, minutes) validates the initialized runtime and matching person identity. wait_current_player(runtime, minutes) obtains runtime.player() and calls the typed entry point. Both forms call only VNextWorldRuntime.advance_minutes(minutes); no Variant overload or -1 sentinel is used.
 
 WAIT has no independent clock. Its per-call elapsed_minutes result is a result DTO, not persistent time state. A successful WAIT and a successful paid travel therefore advance the same runtime total_minutes value exactly once.
 

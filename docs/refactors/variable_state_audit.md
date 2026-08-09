@@ -7,7 +7,7 @@
 - 本报告持有审计结论；第一批实施记录由[`variable_refactor_plan.md`](variable_refactor_plan.md)单独持有。
 - 1,637个生产成员字段的静态逐项索引由[`variable_state_member_inventory.md`](variable_state_member_inventory.md)单独持有。
 - 第一批只删除玩家所属国家的一个重复运行期成员，并机械调整继承回滚和SAVE_VERSION=1存档边界；未处理其他状态组。
-- 扫描范围为529个源/配置文件、281个GDScript文件。
+- 扫描范围为530个源/配置文件、282个GDScript文件。
 - 静态写入者、读取者、持久化、fallback和分类均为候选证据；不同对象的同名字段不能据此自动合并。
 
 ## 1. 当前指标与第一批净变化

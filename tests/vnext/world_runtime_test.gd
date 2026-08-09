@@ -16,6 +16,7 @@ func _initialize() -> void:
 func _run() -> void:
 	_test_empty_restore_shell()
 	_test_composition_and_identity()
+	_test_owner_references_preserved_after_restore()
 	_test_advance_minutes_and_json_safe_bound()
 	_test_snapshot_contract()
 	_test_snapshot_round_trip()
@@ -74,10 +75,19 @@ func _test_advance_minutes_and_json_safe_bound() -> void:
 	_equal(runtime.total_minutes(), 60, "multiple advances use one runtime clock")
 	_check(not runtime.advance_minutes(0), "zero minute advance is rejected")
 	_check(not runtime.advance_minutes(-1), "negative minute advance is rejected")
+	_check(runtime.can_advance_minutes(5), "can_advance_minutes accepts a valid preflight")
+	_equal(runtime.total_minutes(), 60, "can_advance_minutes does not mutate runtime time")
+	_check(not runtime.can_advance_minutes(0), "can_advance_minutes rejects zero")
+	_check(not runtime.can_advance_minutes(-1), "can_advance_minutes rejects negative minutes")
+	_equal(runtime.total_minutes(), 60, "invalid can_advance_minutes calls remain side-effect free")
 
 	var maximum_runtime := _new_runtime()
 	if maximum_runtime == null:
 		return
+	_check(
+		maximum_runtime.can_advance_minutes(VNextWorldRuntime.MAX_JSON_SAFE_INTEGER),
+		"can_advance_minutes accepts the JSON-safe maximum without mutation"
+	)
 	_check(
 		maximum_runtime.advance_minutes(VNextWorldRuntime.MAX_JSON_SAFE_INTEGER),
 		"JSON-safe maximum total_minutes is accepted"
@@ -96,6 +106,7 @@ func _test_advance_minutes_and_json_safe_bound() -> void:
 		VNextWorldRuntime.MAX_JSON_SAFE_INTEGER,
 		"overflow rejection leaves total_minutes unchanged"
 	)
+	_check(not maximum_runtime.can_advance_minutes(1), "can_advance_minutes rejects overflow")
 
 
 func _test_snapshot_contract() -> void:
@@ -125,6 +136,51 @@ func _test_snapshot_contract() -> void:
 		"v2 snapshot contains the wallet snapshot"
 	)
 
+
+func _test_owner_references_preserved_after_restore() -> void:
+	var runtime := _new_runtime()
+	if runtime == null:
+		return
+	var player_ref: VNextPlayerState = runtime.player()
+	var wallet_ref: VNextPersonalWallet = runtime.wallet()
+	var location_ref: VNextLocationState = runtime.location()
+	var event_knowledge_ref: VNextEventKnowledgeState = runtime.event_knowledge()
+
+	var source := _new_runtime(OTHER_PLAYER_ID, OTHER_PLACE_ID)
+	if source == null:
+		return
+	_check(source.advance_minutes(90), "restore identity fixture advances source time")
+	_check(source.wallet().credit(777), "restore identity fixture funds source wallet")
+	_check(source.record_event("event:restore_identity"), "restore identity fixture records event")
+	var saved: Dictionary = source.snapshot()
+
+	_check(runtime.restore(saved), "initialized runtime restores validated candidates")
+	_check(runtime.player() == player_ref, "successful restore preserves player object identity")
+	_check(runtime.wallet() == wallet_ref, "successful restore preserves wallet object identity")
+	_check(runtime.location() == location_ref, "successful restore preserves location object identity")
+	_check(
+		runtime.event_knowledge() == event_knowledge_ref,
+		"successful restore preserves event knowledge object identity"
+	)
+	_equal(runtime.snapshot(), saved, "in-place restore commits the complete candidate snapshot")
+
+	var before_rejected_restore: Dictionary = runtime.snapshot()
+	var rejected := before_rejected_restore.duplicate(true)
+	var rejected_wallet: Dictionary = rejected.get("wallet") as Dictionary
+	rejected_wallet["owner_person_id"] = PLAYER_ID
+	_check(not runtime.restore(rejected), "cross-owner restore remains rejected after in-place restore")
+	_check(runtime.player() == player_ref, "rejected restore preserves player object identity")
+	_check(runtime.wallet() == wallet_ref, "rejected restore preserves wallet object identity")
+	_check(runtime.location() == location_ref, "rejected restore preserves location object identity")
+	_check(
+		runtime.event_knowledge() == event_knowledge_ref,
+		"rejected restore preserves event knowledge object identity"
+	)
+	_equal(
+		runtime.snapshot(),
+		before_rejected_restore,
+		"rejected in-place restore remains transactional"
+	)
 
 func _test_snapshot_round_trip() -> void:
 	var source := _new_runtime()
