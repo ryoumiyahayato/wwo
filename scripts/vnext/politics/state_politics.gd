@@ -619,4 +619,3 @@ static func _sorted_dictionary_array(raw_array: Array) -> Array[Dictionary]:
 		return left_id < right_id
 	)
 	return result
-
