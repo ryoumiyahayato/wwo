@@ -9,10 +9,12 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	_test_invalid_owner_fail_closed()
 	_test_event_stable_id_contract()
 	_test_duplicate_rejection()
 	_test_reveal_and_read_flow()
 	_test_unknown_failures_do_not_pollute_state()
+	_test_json_safe_occurrence_limit()
 	_test_deterministic_snapshot()
 	_test_snapshot_restore_round_trip()
 	_test_json_round_trip()
@@ -21,8 +23,26 @@ func _run() -> void:
 	quit(1 if failures > 0 or checks <= 0 else 0)
 
 
+func _test_invalid_owner_fail_closed() -> void:
+	var invalid_created: VNextEventKnowledgeState = VNextEventKnowledgeState.create(
+		"place:not_a_person"
+	)
+	_check(invalid_created == null, "factory rejects a non-person authority owner")
+
+	var shell := VNextEventKnowledgeState.new()
+	_equal(shell.player_id(), "", "empty restore shell has no authority owner")
+	var before: Dictionary = shell.snapshot()
+	_check(not shell.record_event("event:blocked_record", 1), "ownerless shell cannot record events")
+	_check(not shell.reveal_event("event:blocked_record"), "ownerless shell cannot reveal events")
+	_check(not shell.mark_event_read("event:blocked_record"), "ownerless shell cannot read events")
+	_check(not shell.knows_event("event:blocked_record"), "ownerless shell knowledge query fails closed")
+	_check(not shell.has_read_event("event:blocked_record"), "ownerless shell read query fails closed")
+	_equal(shell.snapshot(), before, "ownerless business failures leave shell state unchanged")
+
+
 func _test_event_stable_id_contract() -> void:
-	var state := VNextEventKnowledgeState.new("person:player_one")
+	var state: VNextEventKnowledgeState = VNextEventKnowledgeState.create("person:player_one")
+	_check(state != null, "valid person stable ID creates event authority")
 	_check(VNextStableId.is_valid("event:rail_delay"), "event stable ID is accepted by shared validator")
 	_equal(VNextStableId.kind_of("event:rail_delay"), "event", "event stable ID keeps event kind")
 	_check(state.record_event("event:rail_delay", 15), "valid event stable ID can be recorded")
@@ -34,7 +54,7 @@ func _test_event_stable_id_contract() -> void:
 
 
 func _test_duplicate_rejection() -> void:
-	var state := VNextEventKnowledgeState.new("person:player_one")
+	var state: VNextEventKnowledgeState = VNextEventKnowledgeState.create("person:player_one")
 	_check(state.record_event("event:market_open", 20), "duplicate fixture event is recorded once")
 	var before_duplicate: Dictionary = state.snapshot()
 	_check(not state.record_event("event:market_open", 99), "duplicate event ID is rejected")
@@ -47,7 +67,7 @@ func _test_duplicate_rejection() -> void:
 
 
 func _test_reveal_and_read_flow() -> void:
-	var state := VNextEventKnowledgeState.new("person:player_one")
+	var state: VNextEventKnowledgeState = VNextEventKnowledgeState.create("person:player_one")
 	_check(state.record_event("event:factory_notice", 30), "reveal fixture event is recorded")
 	_check(not state.knows_event("event:factory_notice"), "recorded event starts unknown to player")
 	_check(not state.has_read_event("event:factory_notice"), "recorded event starts unread")
@@ -61,7 +81,7 @@ func _test_reveal_and_read_flow() -> void:
 
 
 func _test_unknown_failures_do_not_pollute_state() -> void:
-	var state := VNextEventKnowledgeState.new("person:player_one")
+	var state: VNextEventKnowledgeState = VNextEventKnowledgeState.create("person:player_one")
 	_check(state.record_event("event:known_truth", 40), "failure fixture contains one authoritative event")
 	var before_failures: Dictionary = state.snapshot()
 	_check(not state.reveal_event("event:not_recorded"), "unrecorded event cannot be revealed")
@@ -70,9 +90,74 @@ func _test_unknown_failures_do_not_pollute_state() -> void:
 	_equal(state.snapshot(), before_failures, "failed reveal/read operations do not pollute state")
 
 
+func _test_json_safe_occurrence_limit() -> void:
+	var state: VNextEventKnowledgeState = VNextEventKnowledgeState.create("person:player_one")
+	var maximum: int = VNextEventKnowledgeState.MAX_JSON_SAFE_INTEGER
+	var before_overflow: Dictionary = state.snapshot()
+	_check(
+		not state.record_event("event:too_large", maximum + 1),
+		"record rejects occurrence minute above JSON-safe maximum"
+	)
+	_equal(state.snapshot(), before_overflow, "record overflow rejection leaves state unchanged")
+	_check(state.record_event("event:max_safe", maximum), "record accepts JSON-safe maximum occurrence minute")
+
+	var source_snapshot: Dictionary = state.snapshot()
+	var serialized_snapshot: String = JSON.stringify(source_snapshot)
+	var parser := JSON.new()
+	var parse_error: Error = parser.parse(serialized_snapshot)
+	_equal(parse_error, OK, "maximum JSON-safe event snapshot parses")
+	if parse_error != OK:
+		return
+	var parsed_value: Variant = parser.data
+	_check(typeof(parsed_value) == TYPE_DICTIONARY, "maximum JSON-safe parse returns a Dictionary")
+	if typeof(parsed_value) != TYPE_DICTIONARY:
+		return
+	var parsed_snapshot: Dictionary = parsed_value
+	var parsed_records: Array = parsed_snapshot.get("event_records", []) as Array
+	_equal(
+		typeof((parsed_records[0] as Dictionary).get("occurred_at_minutes")),
+		TYPE_FLOAT,
+		"maximum JSON-safe occurrence minute crosses JSON as float"
+	)
+	var restored := VNextEventKnowledgeState.new()
+	_check(restored.restore(parsed_snapshot), "maximum JSON-safe occurrence minute restores from JSON")
+	_equal(
+		_event_record(restored.snapshot(), "event:max_safe").get("occurred_at_minutes"),
+		maximum,
+		"maximum JSON-safe occurrence minute round trips exactly"
+	)
+
+	var guarded: VNextEventKnowledgeState = VNextEventKnowledgeState.create("person:guarded")
+	_check(guarded.record_event("event:guard", 7), "restore overflow guard has existing state")
+	var before_restore_overflow: Dictionary = guarded.snapshot()
+	var over_limit_snapshot: Dictionary = source_snapshot.duplicate(true)
+	var over_limit_records: Array = over_limit_snapshot.get("event_records", []) as Array
+	(over_limit_records[0] as Dictionary)["occurred_at_minutes"] = maximum + 1
+	_check(not guarded.restore(over_limit_snapshot), "restore rejects integer above JSON-safe maximum")
+	_equal(
+		guarded.snapshot(), before_restore_overflow,
+		"integer restore overflow rejection leaves state unchanged"
+	)
+
+	var over_limit_json: String = JSON.stringify(over_limit_snapshot)
+	var over_limit_parser := JSON.new()
+	_equal(over_limit_parser.parse(over_limit_json), OK, "over-limit JSON fixture parses")
+	var over_limit_parsed: Variant = over_limit_parser.data
+	_check(typeof(over_limit_parsed) == TYPE_DICTIONARY, "over-limit JSON parse returns a Dictionary")
+	if typeof(over_limit_parsed) == TYPE_DICTIONARY:
+		_check(
+			not guarded.restore(over_limit_parsed as Dictionary),
+			"restore rejects JSON-parsed value above safe maximum"
+		)
+		_equal(
+			guarded.snapshot(), before_restore_overflow,
+			"JSON restore overflow rejection leaves state unchanged"
+		)
+
+
 func _test_deterministic_snapshot() -> void:
-	var first := VNextEventKnowledgeState.new("person:player_one")
-	var second := VNextEventKnowledgeState.new("person:player_one")
+	var first: VNextEventKnowledgeState = VNextEventKnowledgeState.create("person:player_one")
+	var second: VNextEventKnowledgeState = VNextEventKnowledgeState.create("person:player_one")
 	_check(first.record_event("event:zeta", 80), "first deterministic state records zeta")
 	_check(first.record_event("event:alpha", 10), "first deterministic state records alpha")
 	_check(second.record_event("event:alpha", 10), "second deterministic state records alpha first")
@@ -98,7 +183,7 @@ func _test_deterministic_snapshot() -> void:
 
 
 func _test_snapshot_restore_round_trip() -> void:
-	var source := VNextEventKnowledgeState.new("person:player_one")
+	var source: VNextEventKnowledgeState = VNextEventKnowledgeState.create("person:player_one")
 	_check(source.record_event("event:letter_arrived", 120), "snapshot source records first event")
 	_check(source.record_event("event:meeting_called", 121), "snapshot source records second event")
 	_check(source.reveal_event("event:letter_arrived"), "snapshot source reveals first event")
@@ -106,9 +191,8 @@ func _test_snapshot_restore_round_trip() -> void:
 	_check(source.reveal_event("event:meeting_called"), "snapshot source reveals second event")
 	var saved: Dictionary = source.snapshot()
 
-	var restored := VNextEventKnowledgeState.new("person:other_player")
-	_check(restored.record_event("event:temporary", 999), "restore target can start with different state")
-	_check(restored.restore(saved), "valid event knowledge snapshot restores")
+	var restored := VNextEventKnowledgeState.new()
+	_check(restored.restore(saved), "valid snapshot initializes an empty restore shell")
 	_equal(restored.player_id(), "person:player_one", "restore recovers player owner")
 	_equal(restored.snapshot(), saved, "snapshot restore preserves complete state")
 	_check(restored.knows_event("event:meeting_called"), "known event survives restore")
@@ -116,7 +200,7 @@ func _test_snapshot_restore_round_trip() -> void:
 
 
 func _test_json_round_trip() -> void:
-	var source := VNextEventKnowledgeState.new("person:player_one")
+	var source: VNextEventKnowledgeState = VNextEventKnowledgeState.create("person:player_one")
 	_check(source.record_event("event:json_boundary", 137), "JSON source records event")
 	_check(source.reveal_event("event:json_boundary"), "JSON source reveals event")
 	_check(source.mark_event_read("event:json_boundary"), "JSON source reads event")
@@ -138,13 +222,13 @@ func _test_json_round_trip() -> void:
 		TYPE_FLOAT,
 		"JSON occurrence minutes cross serialization boundary as float"
 	)
-	var restored := VNextEventKnowledgeState.new("person:restore_target")
-	_check(restored.restore(parsed_snapshot), "JSON-parsed event knowledge snapshot restores")
+	var restored := VNextEventKnowledgeState.new()
+	_check(restored.restore(parsed_snapshot), "JSON-parsed snapshot initializes empty restore shell")
 	_equal(restored.snapshot(), source_snapshot, "JSON round trip preserves event knowledge business state")
 
 
 func _test_transactional_restore() -> void:
-	var state := VNextEventKnowledgeState.new("person:player_one")
+	var state: VNextEventKnowledgeState = VNextEventKnowledgeState.create("person:player_one")
 	_check(state.record_event("event:restore_guard", 200), "restore guard event is recorded")
 	_check(state.reveal_event("event:restore_guard"), "restore guard event is known")
 	var before: Dictionary = state.snapshot()
