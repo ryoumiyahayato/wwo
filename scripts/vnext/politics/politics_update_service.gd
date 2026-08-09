@@ -737,4 +737,3 @@ func _fail(error_code: String, message: String) -> Dictionary:
 		"error_code": error_code,
 		"message": message,
 	}
-
