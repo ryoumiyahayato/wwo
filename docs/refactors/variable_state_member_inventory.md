@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1632|1251|15|0|1236|5|32|16|60|896|528|280|
+|1637|1255|15|0|1240|5|32|16|60|900|529|281|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,632个生产成员字段逐项表
+## 1,637个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -1447,7 +1447,7 @@
 5 K leave_confirmation
 ```
 
-### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/world_map/historical_map_identity_style.gd`
+### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/vnext/world_runtime.gd`
 
 ```text
 @ scripts/v2_3/v2_3_formal_simulation.gd | V23FormalSimulation
@@ -1602,7 +1602,17 @@
 7 K _cost_minor
 @ scripts/vnext/world_runtime.gd | VNextWorldRuntime
 4 C SNAPSHOT_SCHEMA_ID
-6 K _total_minutes
+5 C MAX_JSON_SAFE_INTEGER
+7 K _total_minutes
+8 K _player
+9 K _wallet
+10 K _location
+11 K _event_knowledge
+```
+
+### 第10段：`scripts/world_map/historical_map_identity_style.gd` 至 `scripts/world_map/internal/world_map_data_impl.gd`
+
+```text
 @ scripts/world_map/historical_map_identity_style.gd | HistoricalMapIdentityStyle
 5 C PATTERN_PREFIX
 6 C PATTERN_SEPARATOR
@@ -1613,11 +1623,6 @@
 11 C CODE_PLATE_BLEND
 12 C CODE_COLUMN_CENTERS
 13 C CODE_ROW_CENTERS
-```
-
-### 第10段：`scripts/world_map/internal/world_map_canvas_impl.gd` 至 `scripts/world_map/internal/world_map_data_impl.gd`
-
-```text
 @ scripts/world_map/internal/world_map_canvas_impl.gd | PrototypeV2MapCanvas
 5 C WORLD_SIZE
 6 C WORLD_BOUNDS
