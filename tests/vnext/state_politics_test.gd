@@ -262,4 +262,3 @@ func _check(condition: bool, label: String) -> void:
 
 func _equal(actual: Variant, expected: Variant, label: String) -> void:
 	_check(actual == expected, label)
-
