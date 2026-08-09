@@ -8,6 +8,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: pr53-master-sync
+  cancel-in-progress: true
+
 jobs:
   sync:
     if: github.actor != 'github-actions[bot]'
@@ -26,6 +30,12 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          printf 'PR53 master sync runner started\n' > .github/pr53-sync-started
+          git add .github/pr53-sync-started
+          git commit -m "chore: mark PR53 sync runner start"
+          git push origin HEAD:feat/vnext-personal-economy-20260808
+
           git fetch origin master
           MASTER_SHA="$(git rev-parse origin/master)"
           echo "Syncing master ${MASTER_SHA}"
@@ -68,11 +78,16 @@ jobs:
             docs/refactors/variable_state_member_inventory.md \
             docs/refactors/state_ownership_matrix.md \
             docs/refactors/variable_refactor_plan.md
-          git rm .github/workflows/temp-sync-pr53-master.yml
 
-          if [ -n "$(git diff --name-only --diff-filter=U)" ]; then
-            echo "Unresolved conflicts remain"
-            git diff --name-only --diff-filter=U
+          git checkout origin/master -- .github/workflows/vnext-runtime.yml
+          git rm .github/workflows/temp-sync-pr53-master.yml
+          git rm .github/pr53-sync-started
+          git add .github/workflows/vnext-runtime.yml
+
+          unresolved="$(git diff --name-only --diff-filter=U)"
+          if [ -n "$unresolved" ]; then
+            echo "Unresolved conflicts remain:"
+            printf '%s\n' "$unresolved"
             exit 1
           fi
 
