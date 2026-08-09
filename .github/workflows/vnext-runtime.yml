@@ -14,10 +14,89 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
+  sync-pr53-master:
+    if: github.event_name == 'pull_request' && github.event.pull_request.number == 53
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/vnext-personal-economy-20260808
+          fetch-depth: 0
+
+      - name: Merge latest master and mechanically refresh generated docs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin master
+          MASTER_SHA="$(git rev-parse origin/master)"
+          echo "Syncing master ${MASTER_SHA}"
+
+          set +e
+          git merge --no-ff --no-commit origin/master
+          merge_status=$?
+          set -e
+
+          if [ "$merge_status" -ne 0 ]; then
+            conflicts="$(git diff --name-only --diff-filter=U)"
+            if [ -z "$conflicts" ]; then
+              echo "Merge failed without resolvable conflicts"
+              exit "$merge_status"
+            fi
+            echo "Conflicts:"
+            printf '%s\n' "$conflicts"
+            while IFS= read -r path; do
+              case "$path" in
+                docs/refactors/variable_state_audit.md|docs/refactors/variable_state_member_inventory.md|docs/refactors/state_ownership_matrix.md|docs/refactors/variable_refactor_plan.md)
+                  git checkout --theirs -- "$path"
+                  git add "$path"
+                  ;;
+                *)
+                  echo "Unexpected merge conflict outside generated variable-state docs: $path"
+                  exit 1
+                  ;;
+              esac
+            done <<< "$conflicts"
+          fi
+
+          python3 -B tools/audit_variable_state.py --root .
+          python3 tools/render_variable_state_audit_summary.py
+          python3 tools/render_variable_state_member_inventory.py
+          python3 tools/generate_variable_state_docs.py
+          python3 tools/render_variable_refactor_plan.py
+
+          git add \
+            docs/refactors/variable_state_audit.md \
+            docs/refactors/variable_state_member_inventory.md \
+            docs/refactors/state_ownership_matrix.md \
+            docs/refactors/variable_refactor_plan.md
+
+          git checkout origin/master -- .github/workflows/vnext-runtime.yml
+          if [ -f .github/workflows/temp-sync-pr53-master.yml ]; then
+            git rm .github/workflows/temp-sync-pr53-master.yml
+          fi
+          git add .github/workflows/vnext-runtime.yml
+
+          unresolved="$(git diff --name-only --diff-filter=U)"
+          if [ -n "$unresolved" ]; then
+            echo "Unresolved conflicts remain:"
+            printf '%s\n' "$unresolved"
+            exit 1
+          fi
+
+          git diff --check
+          git diff --cached --check
+          git commit -m "Merge master ${MASTER_SHA} into personal economy branch"
+          git push origin HEAD:feat/vnext-personal-economy-20260808
+
   vnext-runtime:
+    if: github.event_name != 'pull_request' || github.event.pull_request.number != 53
     runs-on: windows-latest
     timeout-minutes: 20
     steps:
