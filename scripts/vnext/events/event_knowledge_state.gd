@@ -2,16 +2,20 @@ class_name VNextEventKnowledgeState
 extends RefCounted
 
 const SNAPSHOT_SCHEMA_ID: String = "vnext_event_knowledge_v1"
+const MAX_JSON_SAFE_INTEGER: int = 9_007_199_254_740_991
 
-var _player_id: String
+var _player_id: String = ""
 var _event_records: Dictionary = {}
 var _known_event_ids: Dictionary = {}
 var _read_event_ids: Dictionary = {}
 
 
-func _init(initial_player_id: String) -> void:
-	assert(_is_person_id(initial_player_id), "player_id must be a valid person stable ID")
-	_player_id = initial_player_id
+static func create(initial_player_id: String) -> VNextEventKnowledgeState:
+	if not _is_person_id(initial_player_id):
+		return null
+	var state := VNextEventKnowledgeState.new()
+	state._player_id = initial_player_id
+	return state
 
 
 func player_id() -> String:
@@ -19,9 +23,11 @@ func player_id() -> String:
 
 
 func record_event(event_id: String, occurred_at_minutes: int) -> bool:
+	if not _has_valid_owner():
+		return false
 	if not _is_event_id(event_id):
 		return false
-	if occurred_at_minutes < 0:
+	if occurred_at_minutes < 0 or occurred_at_minutes > MAX_JSON_SAFE_INTEGER:
 		return false
 	if _event_records.has(event_id):
 		return false
@@ -34,6 +40,8 @@ func record_event(event_id: String, occurred_at_minutes: int) -> bool:
 
 
 func reveal_event(event_id: String) -> bool:
+	if not _has_valid_owner():
+		return false
 	if not _event_records.has(event_id):
 		return false
 	_known_event_ids[event_id] = true
@@ -41,6 +49,8 @@ func reveal_event(event_id: String) -> bool:
 
 
 func mark_event_read(event_id: String) -> bool:
+	if not _has_valid_owner():
+		return false
 	if not _known_event_ids.has(event_id):
 		return false
 	_read_event_ids[event_id] = true
@@ -48,10 +58,14 @@ func mark_event_read(event_id: String) -> bool:
 
 
 func knows_event(event_id: String) -> bool:
+	if not _has_valid_owner():
+		return false
 	return _known_event_ids.has(event_id)
 
 
 func has_read_event(event_id: String) -> bool:
+	if not _has_valid_owner():
+		return false
 	return _read_event_ids.has(event_id)
 
 
@@ -115,7 +129,7 @@ func restore(snapshot_value: Dictionary) -> bool:
 		var event_id: String = str(record.get("event_id"))
 		if not _is_event_id(event_id) or candidate_event_records.has(event_id):
 			return false
-		var occurred_at_minutes: int = _normalized_nonnegative_int(
+		var occurred_at_minutes: int = _normalized_json_safe_nonnegative_int(
 			record.get("occurred_at_minutes")
 		)
 		if occurred_at_minutes < 0:
@@ -158,6 +172,10 @@ func restore(snapshot_value: Dictionary) -> bool:
 	return true
 
 
+func _has_valid_owner() -> bool:
+	return _is_person_id(_player_id)
+
+
 static func _is_person_id(candidate_id: String) -> bool:
 	return VNextStableId.is_valid(candidate_id) and VNextStableId.kind_of(candidate_id) == "person"
 
@@ -174,16 +192,20 @@ static func _sorted_string_keys(source: Dictionary) -> Array[String]:
 	return result
 
 
-static func _normalized_nonnegative_int(candidate_value: Variant) -> int:
+static func _normalized_json_safe_nonnegative_int(candidate_value: Variant) -> int:
 	var candidate_type: int = typeof(candidate_value)
 	if candidate_type == TYPE_INT:
 		var candidate_int: int = int(candidate_value)
-		return candidate_int if candidate_int >= 0 else -1
+		if candidate_int < 0 or candidate_int > MAX_JSON_SAFE_INTEGER:
+			return -1
+		return candidate_int
 	if candidate_type == TYPE_FLOAT:
 		var candidate_float: float = float(candidate_value)
 		if not is_finite(candidate_float):
 			return -1
-		if candidate_float < 0.0 or candidate_float != floor(candidate_float):
+		if candidate_float < 0.0 or candidate_float > float(MAX_JSON_SAFE_INTEGER):
+			return -1
+		if candidate_float != floor(candidate_float):
 			return -1
 		return int(candidate_float)
 	return -1
