@@ -10,6 +10,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	_test_owner_validation()
+	_test_uninitialized_shell_is_fail_closed()
 	_test_credit_and_debit()
 	_test_failed_amounts_are_transactional()
 	_test_insufficient_funds_are_transactional()
@@ -25,6 +26,7 @@ func _test_owner_validation() -> void:
 	var wallet := VNextPersonalWallet.create("person:player_one")
 	_check(wallet != null, "valid person stable ID creates a wallet")
 	if wallet != null:
+		_check(wallet.is_valid(), "created wallet reports a valid person owner")
 		_equal(wallet.owner_id(), "person:player_one", "wallet owns the person stable ID")
 		_equal(wallet.balance_minor(), 0, "new wallet starts with zero balance")
 		_equal(typeof(wallet.balance_minor()), TYPE_INT, "wallet balance is an int")
@@ -41,6 +43,39 @@ func _test_owner_validation() -> void:
 		VNextPersonalWallet.create("person:PlayerOne") == null,
 		"invalid person stable ID is rejected as a wallet owner"
 	)
+
+
+func _test_uninitialized_shell_is_fail_closed() -> void:
+	var shell := VNextPersonalWallet.new()
+	_check(not shell.is_valid(), "direct new creates an invalid uninitialized shell")
+	_equal(shell.owner_id(), "", "uninitialized shell has no owner")
+	_equal(shell.balance_minor(), 0, "uninitialized shell starts with zero balance")
+	_check(not shell.can_debit(1), "invalid shell cannot report debit capacity")
+
+	var before_credit: Dictionary = shell.snapshot()
+	_check(not shell.credit(100), "invalid shell rejects credit")
+	_equal(shell.snapshot(), before_credit, "invalid shell credit leaves state unchanged")
+
+	var before_debit: Dictionary = shell.snapshot()
+	_check(not shell.debit(1), "invalid shell rejects debit")
+	_equal(shell.snapshot(), before_debit, "invalid shell debit leaves state unchanged")
+
+	_expect_restore_failure(
+		shell,
+		{"schema_id": "vnext_personal_wallet_v1", "owner_person_id": "place:not_a_person", "balance_minor": 25},
+		"invalid shell non-person restore"
+	)
+	_check(not shell.is_valid(), "failed restore leaves shell invalid")
+
+	var source := VNextPersonalWallet.create("person:shell_restore")
+	_check(source.credit(42), "shell restore source can be funded")
+	_check(shell.restore(source.snapshot()), "valid snapshot restores into empty shell")
+	_check(shell.is_valid(), "successful restore makes shell valid")
+	_equal(shell.owner_id(), "person:shell_restore", "restored shell owns snapshot person")
+	_equal(shell.balance_minor(), 42, "restored shell receives snapshot balance")
+	_check(shell.credit(8), "restored shell accepts credit after becoming valid")
+	_check(shell.debit(10), "restored shell accepts debit after becoming valid")
+	_equal(shell.balance_minor(), 40, "restored shell mutates normally after validation")
 
 
 func _test_credit_and_debit() -> void:
