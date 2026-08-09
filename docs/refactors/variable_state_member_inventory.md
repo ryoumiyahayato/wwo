@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1615|1238|15|0|1233|5|32|16|60|883|518|270|
+|1626|1247|15|0|1236|5|32|16|60|892|526|278|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,615个生产成员字段逐项表
+## 1,626个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -1571,13 +1571,28 @@
 12 K next_retry_hours
 13 K active_needs
 14 K decision_history
-@ scripts/vnext/events/event_knowledge_state.gd | VNextEventKnowledgeState
+@ scripts/vnext/economy/personal_wallet.gd | VNextPersonalWallet
 4 C SNAPSHOT_SCHEMA_ID
-5 C MAX_JSON_SAFE_INTEGER
-7 K _player_id
-8 K _event_records
-9 K _known_event_ids
-10 K _read_event_ids
+5 C MAX_BALANCE_MINOR
+7 K _owner_person_id
+8 K _balance_minor
+@ scripts/vnext/player/action_result.gd | VNextActionResult
+4 K success
+5 K code
+6 K message
+7 K elapsed_minutes
+@ scripts/vnext/player/player_state.gd | VNextPlayerState
+4 C SNAPSHOT_SCHEMA_ID
+6 K _player_id
+@ scripts/vnext/travel/location_state.gd | VNextLocationState
+4 C SNAPSHOT_SCHEMA_ID
+6 K _player_id
+7 K _place_id
+@ scripts/vnext/travel/travel_quote.gd | VNextTravelQuote
+4 K _origin_place_id
+5 K _destination_place_id
+6 K _duration_minutes
+7 K _cost_minor
 @ scripts/vnext/world_runtime.gd | VNextWorldRuntime
 4 C SNAPSHOT_SCHEMA_ID
 6 K _total_minutes
