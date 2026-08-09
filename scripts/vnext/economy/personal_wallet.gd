@@ -4,19 +4,20 @@ extends RefCounted
 const SNAPSHOT_SCHEMA_ID: String = "vnext_personal_wallet_v1"
 const MAX_BALANCE_MINOR: int = 9_007_199_254_740_991
 
-var _owner_person_id: String
+var _owner_person_id: String = ""
 var _balance_minor: int = 0
-
-
-func _init(owner_person_id: String) -> void:
-	assert(_is_valid_person_id(owner_person_id))
-	_owner_person_id = owner_person_id
 
 
 static func create(owner_person_id: String) -> VNextPersonalWallet:
 	if not _is_valid_person_id(owner_person_id):
 		return null
-	return VNextPersonalWallet.new(owner_person_id)
+	var wallet := VNextPersonalWallet.new()
+	wallet._owner_person_id = owner_person_id
+	return wallet
+
+
+func is_valid() -> bool:
+	return _is_valid_person_id(_owner_person_id)
 
 
 func owner_id() -> String:
@@ -28,10 +29,14 @@ func balance_minor() -> int:
 
 
 func can_debit(amount_minor: int) -> bool:
+	if not is_valid():
+		return false
 	return amount_minor > 0 and amount_minor <= _balance_minor
 
 
 func credit(amount_minor: int) -> bool:
+	if not is_valid():
+		return false
 	if amount_minor <= 0:
 		return false
 	if amount_minor > MAX_BALANCE_MINOR - _balance_minor:
