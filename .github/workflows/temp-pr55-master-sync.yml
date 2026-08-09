@@ -90,3 +90,5 @@ jobs:
           git status --short
           git commit -m "Merge master $SYNCED_MASTER into vNext location travel"
           git push origin HEAD:feat/vnext-location-travel-20260808
+
+# trigger: 2026-08-09-pr55-sync
