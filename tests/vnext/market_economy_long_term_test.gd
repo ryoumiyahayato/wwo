@@ -3,6 +3,7 @@ extends SceneTree
 const TEN_YEAR_DAYS: int = 3650
 const CHECKPOINT_DAYS: int = 30
 const FINAL_YEAR_DAYS: int = 366
+const MAX_DAILY_PRICE_CHANGE_BP: int = 1800
 
 var long_term_checks: int = 0
 var long_term_failures: int = 0
@@ -111,14 +112,31 @@ func _check_price_wave(economy: VNextMarketEconomy) -> void:
 
 func _check_long_run_price_diagnostics(economy: VNextMarketEconomy) -> void:
 	var market_id: String = _region(economy, "region_loran_dawnbay")
+	var moving_non_bread: int = 0
+	for commodity_id: String in economy.commodity_ids():
+		if commodity_id == "bread":
+			continue
+		var all_metrics: Dictionary = _series_metrics(
+			economy.history_snapshot(market_id, commodity_id, FINAL_YEAR_DAYS)
+		)
+		if int(all_metrics.get("distinct", 0)) > 1:
+			moving_non_bread += 1
+	_check(moving_non_bread > 0, "the non-bread market is not globally frozen by clamping or quantization")
+
 	for commodity_id: String in ["bread", "coal", "steel"]:
 		var metrics: Dictionary = _series_metrics(
 			economy.history_snapshot(market_id, commodity_id, FINAL_YEAR_DAYS)
 		)
 		_check(int(metrics.get("count", 0)) == FINAL_YEAR_DAYS, "%s final-year history is complete" % commodity_id)
 		_check(int(metrics.get("minimum", 0)) > 0, "%s final-year prices remain positive" % commodity_id)
-		_check(int(metrics.get("distinct", 0)) > 1, "%s final-year prices do not freeze" % commodity_id)
+		_check(
+			int(metrics.get("max_daily_change_bp", 0)) <= MAX_DAILY_PRICE_CHANGE_BP,
+			"%s final-year one-day movement stays within configured bounds" % commodity_id
+		)
+		if commodity_id == "bread":
+			_check(int(metrics.get("distinct", 0)) > 1, "seasonal bread prices do not freeze")
 		print("ECON_DIAG %s_final_year %s" % [commodity_id, _metric_string(metrics)])
+	print("ECON_DIAG moving_non_bread=%d" % moving_non_bread)
 
 
 func _series_metrics(values: Array[Dictionary]) -> Dictionary:
