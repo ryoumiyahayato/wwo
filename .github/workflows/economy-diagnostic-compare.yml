@@ -1,0 +1,69 @@
+name: Economy Diagnostic Compare
+
+on:
+  push:
+    branches:
+      - feat/vnext-market-economy-20260809
+
+permissions:
+  contents: read
+
+jobs:
+  economy-compare:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: baseline
+            ref: a20cfc9ef9aa4ed20fe0fcbc9f1d9687b0588d1c
+          - label: same-day-pressure
+            ref: 75682ef9e777fb47c14cdf592c443a72e43a686d
+    runs-on: windows-2025
+    timeout-minutes: 30
+    steps:
+      - name: Checkout diagnostic commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.ref }}
+          fetch-depth: 1
+
+      - name: Install Godot 4.6.3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'godot.zip'
+          $install = Join-Path $env:RUNNER_TEMP 'godot-4.6.3'
+          Invoke-WebRequest -Uri 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip' -OutFile $archive
+          Expand-Archive -LiteralPath $archive -DestinationPath $install
+          $binary = (Get-ChildItem -LiteralPath $install -Filter 'Godot_v4.6.3-stable_win64.exe' -Recurse | Select-Object -First 1).FullName
+          if (-not $binary) { throw 'Godot 4.6.3 executable was not found' }
+          "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          & $binary --version
+
+      - name: Clean import
+        shell: pwsh
+        run: |
+          & $env:GODOT_BIN --editor --headless --path . --quit
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Run economy diagnostics
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          Write-Host "ECON_COMPARE label=${{ matrix.label }} ref=${{ matrix.ref }}"
+
+          & $env:GODOT_BIN --headless --path . --script res://tests/vnext/market_economy_a_patch_setup_test.gd
+          $setupExit = $LASTEXITCODE
+          Write-Host "ECON_COMPARE setup_exit=$setupExit"
+          if ($setupExit -ne 0) { exit $setupExit }
+
+          & $env:GODOT_BIN --headless --path . --script res://tests/vnext/market_economy_behavior_test.gd
+          $behaviorExit = $LASTEXITCODE
+          Write-Host "ECON_COMPARE behavior_exit=$behaviorExit"
+
+          & $env:GODOT_BIN --headless --path . --script res://tests/vnext/market_economy_long_term_test.gd
+          $longExit = $LASTEXITCODE
+          Write-Host "ECON_COMPARE long_term_exit=$longExit"
+
+          if ($longExit -ne 0) { exit $longExit }
+          if ('${{ matrix.label }}' -eq 'same-day-pressure' -and $behaviorExit -ne 0) { exit $behaviorExit }
