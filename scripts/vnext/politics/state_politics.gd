@@ -521,13 +521,13 @@ static func _validate_force(force: Dictionary, current_period: int) -> bool:
 		var record_period := _normalize_int(record.get("period"), 0, current_period)
 		if record_period < 0:
 			return false
-		if not _in_range_number(record.get("support"), -100.0, 100.0) or not _in_range_number(record.get("delta"), -100.0, 100.0):
+		if not _in_range_number(record.get("support"), -100.0, 100.0) or not _in_range_number(record.get("delta"), -200.0, 200.0):
 			return false
 	if not history.is_empty():
 		var ordered := _sorted_dictionary_array(history)
 		if not is_equal_approx(float(ordered.back().get("support", 0.0)), float(force.get("government_support", 0.0))):
 			return false
-	return _in_range_number(force.get("last_support_delta"), -100.0, 100.0)
+	return _in_range_number(force.get("last_support_delta"), -200.0, 200.0)
 
 
 static func _validate_policy(policy: Dictionary) -> bool:
