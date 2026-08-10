@@ -239,8 +239,13 @@ func _test_transition_selection_and_no_ping_pong() -> void:
 	_check(float(first.get("procedure_score", 0.0)) > 0.0, "transition records regime procedure")
 
 	var count_after_first := history.size()
-	service.update(state, GENERATOR.severe_input(180))
-	_equal(state.government_change_history().size(), count_after_first, "transition cooldown prevents immediate repeated replacement")
+	var last_change_period := int((history.back() as Dictionary).get("period", 0))
+	var elapsed_since_change := state.period_index() - last_change_period
+	var days_before_cooldown := VNextPoliticsUpdateService.TRANSITION_COOLDOWN_DAYS - elapsed_since_change - 1
+	_check(days_before_cooldown > 0 and days_before_cooldown <= 366, "transition cooldown remainder is an explicit elapsed-day interval")
+	if days_before_cooldown > 0:
+		service.update(state, GENERATOR.severe_input(days_before_cooldown))
+	_equal(state.government_change_history().size(), count_after_first, "transition cooldown blocks replacement through the day before eligibility")
 
 	var long_state := _load_fixture()
 	if long_state == null:
