@@ -1,4 +1,4 @@
-name: Economy 10-Year Candidate Gate
+name: Economy Upstream Diagnostic
 
 on:
   push:
@@ -12,14 +12,14 @@ permissions:
   contents: read
 
 jobs:
-  economy-long-term:
+  economy-upstream:
     runs-on: windows-2025
     timeout-minutes: 35
     steps:
-      - name: Checkout fixed candidate
+      - name: Checkout current economy branch
         uses: actions/checkout@v4
         with:
-          ref: 3c691e9d57ce2e2f56026eeed627df286f27577a
+          ref: feat/vnext-market-economy-20260809
           fetch-depth: 1
 
       - name: Install Godot 4.6.3
@@ -40,22 +40,12 @@ jobs:
         shell: pwsh
         run: |
           $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--editor','--headless','--path','.', '--quit') -NoNewWindow -Wait -PassThru
-          Write-Host "ECON_LONG import_exit=$($process.ExitCode)"
+          Write-Host "ECON_UPSTREAM import_exit=$($process.ExitCode)"
           if ($process.ExitCode -ne 0) { exit $process.ExitCode }
 
-      - name: Run full 3650-day economy candidate
+      - name: Run upstream diagnostic
         shell: pwsh
         run: |
-          function Invoke-GodotScript {
-            param([string]$ScriptPath)
-            $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless','--path','.', '--script',$ScriptPath) -NoNewWindow -Wait -PassThru
-            Write-Host "ECON_LONG script=$ScriptPath exit=$($process.ExitCode)"
-            return $process.ExitCode
-          }
-
-          Write-Host 'ECON_LONG candidate=production-inertia-plus-same-day-pressure ref=3c691e9d57ce2e2f56026eeed627df286f27577a'
-          $setupExit = Invoke-GodotScript 'res://tests/vnext/market_economy_a_patch_setup_test.gd'
-          if ($setupExit -ne 0) { exit $setupExit }
-          $longExit = Invoke-GodotScript 'res://tests/vnext/market_economy_long_term_test.gd'
-          Write-Host "ECON_LONG complete setup=$setupExit long_term=$longExit"
-          if ($longExit -ne 0) { exit $longExit }
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless','--path','.', '--script','res://tests/vnext/market_economy_flow_diagnostic_test.gd') -NoNewWindow -Wait -PassThru
+          Write-Host "ECON_UPSTREAM diagnostic_exit=$($process.ExitCode)"
+          if ($process.ExitCode -ne 0) { exit $process.ExitCode }
