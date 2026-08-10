@@ -4,27 +4,25 @@ extends RefCounted
 ## Deterministic political simulation over authoritative elapsed days.
 ## A multi-day call follows exactly the same daily micro-steps as partitioned calls.
 
+
 const PRESSURE_SCALE: float = 12.0
-const MONTH_DAYS: float = 30.0
-const FORCE_DAILY_DELTA_LIMIT: float = 18.0 / MONTH_DAYS
-const POLICY_REVIEW_COOLDOWN_DAYS: int = 90
+const FORCE_DELTA_LIMIT: float = 18.0
+const POLICY_REVIEW_COOLDOWN: int = 90
 const POLICY_CHANGE_MARGIN: float = 4.0
 const EMERGENCY_POLICY_PRESSURE: float = 70.0
 const POLICY_PRIORITY_SIGNAL_THRESHOLD: float = 65.0
 const POLICY_PRIORITY_BONUS: float = 10.0
-const STRAINED_DAYS: int = 30
-const CRISIS_DAYS: int = 90
-const GOVERNMENT_CHANGE_DAYS: int = 180
-const RECOVERY_TO_STABLE_DAYS: int = 90
-const TRANSITION_MIN_DAYS: int = 120
-const MIN_INITIAL_TENURE_DAYS: int = 180
-const TRANSITION_COOLDOWN_DAYS: int = 365
-const RETURN_GOVERNMENT_PENALTY_DAYS: int = 720
-const CHALLENGER_MANDATE_THRESHOLD: float = 55.0
+const STRAINED_STREAK: int = 30
+const CRISIS_STREAK: int = 90
+const GOVERNMENT_CHANGE_STREAK: int = 180
+const RECOVERY_TO_STABLE_STREAK: int = 90
 const CRISIS_SUPPORT_THRESHOLD: float = 46.0
 const CRISIS_CONTROL_THRESHOLD: float = 32.0
 const CRISIS_LEGITIMACY_THRESHOLD: float = 38.0
 const CRISIS_STABILITY_THRESHOLD: float = 42.0
+const CRITICAL_SUPPORT_THRESHOLD: float = 35.0
+const CRITICAL_CONTROL_THRESHOLD: float = 26.0
+const CRITICAL_STABILITY_THRESHOLD: float = 30.0
 const MAX_HISTORY: int = 96
 
 const ECONOMIC_WEIGHTS: Dictionary = {
@@ -50,6 +48,20 @@ const REGIME_PROCEDURAL_BASELINES: Dictionary = {
 	"military_rule": 38.0,
 	"imperial_bureaucracy": 46.0,
 	"colonial_administration": 34.0,
+}
+
+enum {
+	MONTH_DAYS = 30,
+	POLICY_REVIEW_COOLDOWN_DAYS = 90,
+	STRAINED_DAYS = 30,
+	CRISIS_DAYS = 90,
+	GOVERNMENT_CHANGE_DAYS = 180,
+	RECOVERY_TO_STABLE_DAYS = 90,
+	TRANSITION_MIN_DAYS = 120,
+	MIN_INITIAL_TENURE_DAYS = 180,
+	TRANSITION_COOLDOWN_DAYS = 365,
+	RETURN_GOVERNMENT_PENALTY_DAYS = 720,
+	CHALLENGER_MANDATE_THRESHOLD = 55,
 }
 
 
@@ -129,12 +141,13 @@ func _advance_one_day(
 		var old_support := float(force.get("government_support", 0.0))
 		var monthly_delta := _force_external_delta(force, input)
 		monthly_delta += _force_policy_delta(force, active, policies)
-		var support_delta := monthly_delta / MONTH_DAYS
+		var support_delta := monthly_delta / float(MONTH_DAYS)
 		if total_pressure < 25.0:
 			support_delta += (float(force.get("base_government_support", old_support)) - old_support) * 0.002
 		if input.growth_signal() > 0.0:
 			support_delta += input.growth_signal() * 0.0004
-		support_delta = clampf(support_delta, -FORCE_DAILY_DELTA_LIMIT, FORCE_DAILY_DELTA_LIMIT)
+		var daily_delta_limit := FORCE_DELTA_LIMIT / float(MONTH_DAYS)
+		support_delta = clampf(support_delta, -daily_delta_limit, daily_delta_limit)
 		var new_support := clampf(old_support + support_delta, -100.0, 100.0)
 		force["government_support"] = new_support
 		force["last_support_delta"] = support_delta
@@ -790,7 +803,7 @@ func _stable_actor_effect(stable_id: String, maximum_abs: float) -> float:
 
 
 func _daily_alpha(monthly_alpha: float) -> float:
-	return 1.0 - pow(1.0 - monthly_alpha, 1.0 / MONTH_DAYS)
+	return 1.0 - pow(1.0 - monthly_alpha, 1.0 / float(MONTH_DAYS))
 
 
 func _sorted_keys(dictionary: Dictionary) -> Array[String]:
