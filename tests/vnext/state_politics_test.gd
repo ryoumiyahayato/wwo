@@ -370,9 +370,8 @@ func _test_near_tie_policy_decision() -> void:
 	var z_policy := template.duplicate(true)
 	z_policy["policy_id"] = "policy:z_near_tie"
 	z_policy["name"] = "Z near tie"
-	policies.append(z_policy)
-	policies.append(a_policy)
-	config_a["policies"] = policies
+	config_a["policies"] = [z_policy, a_policy]
+	config_a["active_policy_ids"] = []
 	var config_b := config_a.duplicate(true)
 	var reverse := (config_b.get("policies", []) as Array).duplicate(true)
 	reverse.reverse()
