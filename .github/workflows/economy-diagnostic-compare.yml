@@ -11,7 +11,7 @@ permissions:
 jobs:
   economy-finalize:
     runs-on: windows-2025
-    timeout-minutes: 65
+    timeout-minutes: 70
     steps:
       - name: Checkout current economy branch
         uses: actions/checkout@v4
@@ -27,7 +27,7 @@ jobs:
           "ECON_START_HEAD=$startHead" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           Write-Host "ECON_START_HEAD=$startHead"
 
-      - name: Apply minimal reachable-demand production fix
+      - name: Apply reachable-demand and stock-replenishment fix
         shell: pwsh
         run: |
           @'
@@ -41,12 +41,24 @@ jobs:
 
           market_path = Path("scripts/vnext/economy/market_economy.gd")
           market = market_path.read_text(encoding="utf-8").replace("\r\n", "\n")
+
           market = replace_once(
               market,
               "\t\tunits < 0.0\n\t\tor not region_states.has(market_id)",
               "\t\tis_nan(units)\n\t\tor is_inf(units)\n\t\tor units < 0.0\n\t\tor not region_states.has(market_id)",
               "finite inventory setter",
           )
+
+          old_schedule_head = '''func _schedule_shipments(day_index: int) -> void:\n\tvar shortages: Array[Dictionary] = []\n\tfor region_id: String in _region_ids:\n\t\tvar state: Dictionary = region_states[region_id] as Dictionary\n\t\tvar commodity_states: Dictionary = state.get("commodities", {}) as Dictionary\n\t\tfor commodity_id: String in _commodity_ids:\n\t\t\tvar commodity_state: Dictionary = commodity_states[commodity_id] as Dictionary\n\t\t\tvar unmet: float = float(commodity_state.get("unmet_units", 0.0))\n\t\t\tif unmet > 0.0001:\n\t\t\t\tshortages.append({\n\t\t\t\t\t"region_id": region_id,\n\t\t\t\t\t"commodity_id": commodity_id,\n\t\t\t\t\t"unmet": unmet,\n\t\t\t\t\t"shortage_bp": int(commodity_state.get("shortage_bp", 0)),\n\t\t\t\t})\n\tshortages.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:\n\t\tif int(a.get("shortage_bp", 0)) == int(b.get("shortage_bp", 0)):\n\t\t\tvar a_key: String = str(a.get("region_id", "")) + str(a.get("commodity_id", ""))\n\t\t\tvar b_key: String = str(b.get("region_id", "")) + str(b.get("commodity_id", ""))\n\t\t\treturn a_key < b_key\n\t\treturn int(a.get("shortage_bp", 0)) > int(b.get("shortage_bp", 0))\n\t)'''
+          new_schedule_head = '''func _in_transit_units_for(destination_id: String, commodity_id: String) -> float:\n\tvar total: float = 0.0\n\tfor shipment: Dictionary in shipments:\n\t\tif (\n\t\t\tstr(shipment.get("destination_market_id", "")) == destination_id\n\t\t\tand str(shipment.get("commodity_id", "")) == commodity_id\n\t\t\tand str(shipment.get("status", "")) == "in_transit"\n\t\t):\n\t\t\ttotal += maxf(0.0, float(shipment.get("units", 0.0)))\n\treturn total\n\n\nfunc _schedule_shipments(day_index: int) -> void:\n\tvar requests: Array[Dictionary] = []\n\tfor region_id: String in _region_ids:\n\t\tvar state: Dictionary = region_states[region_id] as Dictionary\n\t\tvar inventory: Dictionary = state.get("inventory", {}) as Dictionary\n\t\tvar commodity_states: Dictionary = state.get("commodities", {}) as Dictionary\n\t\tfor commodity_id: String in _commodity_ids:\n\t\t\tvar commodity_state: Dictionary = commodity_states[commodity_id] as Dictionary\n\t\t\tvar unmet: float = maxf(0.0, float(commodity_state.get("unmet_units", 0.0)))\n\t\t\tvar target_stock: float = float(commodity_state.get("target_stock_units", 0.0))\n\t\t\tif target_stock <= 0.0:\n\t\t\t\ttarget_stock = _target_stock_for(region_id, commodity_id)\n\t\t\tvar stock: float = maxf(0.0, float(inventory.get(commodity_id, 0.0)))\n\t\t\tvar in_transit: float = _in_transit_units_for(region_id, commodity_id)\n\t\t\tvar replenishment: float = maxf(0.0, target_stock - stock - in_transit)\n\t\t\tvar requested: float = maxf(unmet, replenishment)\n\t\t\tif requested <= 0.0001:\n\t\t\t\tcontinue\n\t\t\tvar replenishment_bp: int = clampi(\n\t\t\t\tint(round(replenishment / maxf(1.0, target_stock) * BASIS_POINTS)),\n\t\t\t\t0,\n\t\t\t\tBASIS_POINTS\n\t\t\t)\n\t\t\trequests.append({\n\t\t\t\t"region_id": region_id,\n\t\t\t\t"commodity_id": commodity_id,\n\t\t\t\t"request_units": requested,\n\t\t\t\t"shortage_bp": int(commodity_state.get("shortage_bp", 0)),\n\t\t\t\t"replenishment_bp": replenishment_bp,\n\t\t\t})\n\trequests.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:\n\t\tvar a_shortage: int = int(a.get("shortage_bp", 0))\n\t\tvar b_shortage: int = int(b.get("shortage_bp", 0))\n\t\tif a_shortage != b_shortage:\n\t\t\treturn a_shortage > b_shortage\n\t\tvar a_replenishment: int = int(a.get("replenishment_bp", 0))\n\t\tvar b_replenishment: int = int(b.get("replenishment_bp", 0))\n\t\tif a_replenishment != b_replenishment:\n\t\t\treturn a_replenishment > b_replenishment\n\t\tvar a_key: String = str(a.get("region_id", "")) + str(a.get("commodity_id", ""))\n\t\tvar b_key: String = str(b.get("region_id", "")) + str(b.get("commodity_id", ""))\n\t\treturn a_key < b_key\n\t)'''
+          market = replace_once(market, old_schedule_head, new_schedule_head, "stock replenishment scheduler")
+          market = replace_once(
+              market,
+              "\tfor shortage: Dictionary in shortages:\n\t\tif created >= max_shipments:\n\t\t\tbreak\n\t\tvar destination_id: String = str(shortage.get(\"region_id\", \"\"))\n\t\tvar commodity_id: String = str(shortage.get(\"commodity_id\", \"\"))\n\t\tvar remaining: float = float(shortage.get(\"unmet\", 0.0))",
+              "\tfor request: Dictionary in requests:\n\t\tif created >= max_shipments:\n\t\t\tbreak\n\t\tvar destination_id: String = str(request.get(\"region_id\", \"\"))\n\t\tvar commodity_id: String = str(request.get(\"commodity_id\", \"\"))\n\t\tvar remaining: float = float(request.get(\"request_units\", 0.0))",
+              "shipment request iteration",
+          )
+
           market = replace_once(
               market,
               "\n\nfunc _update_site_targets() -> void:\n",
@@ -190,5 +202,5 @@ jobs:
           }
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'Fix reachable demand production continuity'
+          git commit -m 'Fix economy supply-chain continuity'
           git push origin HEAD:feat/vnext-market-economy-20260809
