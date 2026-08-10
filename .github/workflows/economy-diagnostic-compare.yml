@@ -1,4 +1,4 @@
-name: Economy Diagnostic Compare
+name: Economy Focused Candidate Gate
 
 on:
   push:
@@ -12,14 +12,14 @@ permissions:
   contents: read
 
 jobs:
-  economy-compare:
+  economy-focused:
     runs-on: windows-2025
-    timeout-minutes: 30
+    timeout-minutes: 20
     steps:
-      - name: Checkout precision candidate
+      - name: Checkout current economy branch
         uses: actions/checkout@v4
         with:
-          ref: 9288bc39638b8e0e66c80544bd1f4c3b92e9ede9
+          ref: feat/vnext-market-economy-20260809
           fetch-depth: 1
 
       - name: Install Godot 4.6.3
@@ -40,24 +40,21 @@ jobs:
         shell: pwsh
         run: |
           $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--editor','--headless','--path','.', '--quit') -NoNewWindow -Wait -PassThru
-          Write-Host "ECON_COMPARE import_exit=$($process.ExitCode)"
+          Write-Host "ECON_FOCUSED import_exit=$($process.ExitCode)"
           if ($process.ExitCode -ne 0) { exit $process.ExitCode }
 
-      - name: Run economy diagnostics
+      - name: Run focused economy candidate tests
         shell: pwsh
         run: |
           function Invoke-GodotScript {
             param([string]$ScriptPath)
             $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless','--path','.', '--script',$ScriptPath) -NoNewWindow -Wait -PassThru
-            Write-Host "ECON_COMPARE script=$ScriptPath exit=$($process.ExitCode)"
-            return $process.ExitCode
+            Write-Host "ECON_FOCUSED script=$ScriptPath exit=$($process.ExitCode)"
+            if ($process.ExitCode -ne 0) { exit $process.ExitCode }
           }
 
-          Write-Host 'ECON_COMPARE label=pressure-precision ref=9288bc39638b8e0e66c80544bd1f4c3b92e9ede9'
-          $setupExit = Invoke-GodotScript 'res://tests/vnext/market_economy_a_patch_setup_test.gd'
-          if ($setupExit -ne 0) { exit $setupExit }
-          $behaviorExit = Invoke-GodotScript 'res://tests/vnext/market_economy_behavior_test.gd'
-          if ($behaviorExit -ne 0) { exit $behaviorExit }
-          $longExit = Invoke-GodotScript 'res://tests/vnext/market_economy_long_term_test.gd'
-          Write-Host "ECON_COMPARE complete setup=$setupExit behavior=$behaviorExit long_term=$longExit"
-          if ($longExit -ne 0) { exit $longExit }
+          Invoke-GodotScript 'res://tests/vnext/market_economy_a_patch_setup_test.gd'
+          Invoke-GodotScript 'res://tests/vnext/market_economy_test.gd'
+          Invoke-GodotScript 'res://tests/vnext/market_economy_behavior_test.gd'
+          Invoke-GodotScript 'res://tests/vnext/market_economy_recovery_test.gd'
+          Write-Host 'ECON_FOCUSED complete'
