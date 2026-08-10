@@ -1,0 +1,185 @@
+name: Economy Finalize Validated Repair
+
+on:
+  push:
+    branches:
+      - feat/vnext-market-economy-20260809
+
+permissions:
+  contents: write
+
+jobs:
+  finalize-economy:
+    runs-on: windows-2025
+    timeout-minutes: 120
+    steps:
+      - name: Checkout economy branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/vnext-market-economy-20260809
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Record guarded remote head
+        shell: pwsh
+        run: |
+          $startHead = (git rev-parse HEAD).Trim()
+          "ECON_START_HEAD=$startHead" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          Write-Host "ECON_FINAL_START_HEAD=$startHead"
+
+      - name: Apply exactly the validated candidate
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          @'
+          from pathlib import Path
+          workflow = Path('.github/workflows/economy-diagnostic-compare.yml').read_text(encoding='utf-8').replace('\r\n', '\n')
+          marker = '          from pathlib import Path\n'
+          start = workflow.index(marker)
+          end = workflow.index("          '@ | python -", start)
+          block = workflow[start:end]
+          lines = [line[10:] if line.startswith('          ') else line for line in block.splitlines()]
+          script = '\n'.join(lines) + '\n'
+          exec(compile(script, '<validated-economy-candidate>', 'exec'), {})
+          '@ | python -
+
+          git rm -f --ignore-unmatch -- \
+            tests/vnext/market_economy_a_patch_setup_test.gd \
+            tests/vnext/market_economy_flow_diagnostic_test.gd \
+            .github/workflows/economy-diagnostic-compare.yml \
+            .github/workflows/economy-long-term-candidate.yml \
+            .github/workflows/economy-finalize.yml
+          git diff --check
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Godot 4.6.3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'godot.zip'
+          $install = Join-Path $env:RUNNER_TEMP 'godot-4.6.3'
+          Invoke-WebRequest -Uri 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip' -OutFile $archive
+          Expand-Archive -LiteralPath $archive -DestinationPath $install
+          $binary = (Get-ChildItem -LiteralPath $install -Filter 'Godot_v4.6.3-stable_win64.exe' -Recurse | Select-Object -First 1).FullName
+          if (-not $binary) { throw 'Godot 4.6.3 executable was not found' }
+          "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          & $binary --version
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Clean Godot import
+        shell: pwsh
+        run: |
+          $p = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--editor','--headless','--path','.', '--quit') -NoNewWindow -Wait -PassThru
+          if ($p.ExitCode -ne 0) { exit $p.ExitCode }
+
+      - name: Run focused economy tests
+        shell: pwsh
+        run: |
+          foreach ($script in @(
+            'res://tests/vnext/market_economy_test.gd',
+            'res://tests/vnext/market_economy_behavior_test.gd',
+            'res://tests/vnext/market_economy_recovery_test.gd',
+            'res://tests/vnext/market_economy_export_production_test.gd'
+          )) {
+            $p = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless','--path','.', '--script',$script) -NoNewWindow -Wait -PassThru
+            Write-Host "ECON_FINAL_FOCUSED script=$script exit=$($p.ExitCode)"
+            if ($p.ExitCode -ne 0) { exit $p.ExitCode }
+          }
+
+      - name: Run unified vNext validation including 3650 days
+        shell: pwsh
+        run: |
+          python -B tools/run_vnext_validation.py --root . --godot "$env:GODOT_BIN"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Run repository validation
+        shell: pwsh
+        run: |
+          & ./tools/run_validation.ps1 -GodotPath $env:GODOT_BIN -ProjectPath .
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Regenerate variable-state audit baseline
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          python -B tools/audit_variable_state.py --root .
+          python tools/render_variable_state_audit_summary.py
+          python tools/render_variable_state_member_inventory.py
+          python tools/generate_variable_state_docs.py
+          python tools/render_variable_refactor_plan.py
+          foreach ($path in @(
+            'docs/refactors/variable_state_audit.md',
+            'docs/refactors/variable_state_member_inventory.md',
+            'docs/refactors/state_ownership_matrix.md',
+            'docs/refactors/variable_refactor_plan.md'
+          )) {
+            if (-not (Test-Path $path) -or (Get-Item $path).Length -le 0) { throw "Missing audit document: $path" }
+          }
+          git add -- docs/refactors/variable_state_audit.md docs/refactors/variable_state_member_inventory.md docs/refactors/state_ownership_matrix.md docs/refactors/variable_refactor_plan.md
+          python -B tools/audit_variable_state.py --root .
+          python tools/render_variable_state_audit_summary.py
+          python tools/render_variable_state_member_inventory.py
+          python tools/generate_variable_state_docs.py
+          python tools/render_variable_refactor_plan.py
+          git diff --exit-code -- docs/refactors/variable_state_audit.md docs/refactors/variable_state_member_inventory.md docs/refactors/state_ownership_matrix.md docs/refactors/variable_refactor_plan.md
+
+      - name: Guard scope and commit validated repair
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          git add -A -- \
+            scripts/vnext/economy \
+            tests/vnext/market_economy_test.gd \
+            tests/vnext/market_economy_long_term_test.gd \
+            tests/vnext/market_economy_behavior_test.gd \
+            tests/vnext/market_economy_recovery_test.gd \
+            tests/vnext/market_economy_export_production_test.gd \
+            tests/vnext/market_economy_a_patch_setup_test.gd \
+            tests/vnext/market_economy_flow_diagnostic_test.gd \
+            docs/refactors/variable_state_audit.md \
+            docs/refactors/variable_state_member_inventory.md \
+            docs/refactors/state_ownership_matrix.md \
+            docs/refactors/variable_refactor_plan.md \
+            .github/workflows/economy-diagnostic-compare.yml \
+            .github/workflows/economy-long-term-candidate.yml \
+            .github/workflows/economy-finalize.yml
+
+          git diff --cached --check
+          $staged = @(git diff --cached --name-only)
+          foreach ($path in $staged) {
+            $allowed = (
+              $path -like 'scripts/vnext/economy/*' -or
+              $path -like 'tests/vnext/*economy*' -or
+              $path -in @(
+                'docs/refactors/variable_state_audit.md',
+                'docs/refactors/variable_state_member_inventory.md',
+                'docs/refactors/state_ownership_matrix.md',
+                'docs/refactors/variable_refactor_plan.md',
+                '.github/workflows/economy-diagnostic-compare.yml',
+                '.github/workflows/economy-long-term-candidate.yml',
+                '.github/workflows/economy-finalize.yml'
+              )
+            )
+            if (-not $allowed) { throw "Out-of-scope staged file: $path" }
+            if ($path -match '\.uid$|(^|/)(build|builds|export|exports|cache|logs?)(/|$)') { throw "Generated artifact staged: $path" }
+          }
+          if (Test-Path '.github/workflows/economy-diagnostic-compare.yml') { throw 'Temporary diagnostic workflow still exists' }
+          if (Test-Path '.github/workflows/economy-long-term-candidate.yml') { throw 'Temporary long-term workflow still exists' }
+          if (Test-Path '.github/workflows/economy-finalize.yml') { throw 'Temporary finalize workflow still exists' }
+          if (Test-Path 'tests/vnext/market_economy_a_patch_setup_test.gd') { throw 'Temporary patch setup test still exists' }
+          if (Test-Path 'tests/vnext/market_economy_flow_diagnostic_test.gd') { throw 'Temporary flow diagnostic test still exists' }
+
+          git fetch origin feat/vnext-market-economy-20260809
+          $remoteHead = (git rev-parse origin/feat/vnext-market-economy-20260809).Trim()
+          if ($remoteHead -ne $env:ECON_START_HEAD) {
+            throw "Remote branch advanced during final validation: start=$env:ECON_START_HEAD current=$remoteHead"
+          }
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Fix economy supply-chain continuity'
+          git push origin HEAD:feat/vnext-market-economy-20260809
