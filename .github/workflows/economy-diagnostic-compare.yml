@@ -1,4 +1,4 @@
-name: Economy Upstream Diagnostic
+name: Economy Supply Chain Diagnostic
 
 on:
   push:
@@ -14,7 +14,7 @@ permissions:
 jobs:
   economy-upstream:
     runs-on: windows-2025
-    timeout-minutes: 35
+    timeout-minutes: 20
     steps:
       - name: Checkout current economy branch
         uses: actions/checkout@v4
@@ -40,12 +40,12 @@ jobs:
         shell: pwsh
         run: |
           $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--editor','--headless','--path','.', '--quit') -NoNewWindow -Wait -PassThru
-          Write-Host "ECON_UPSTREAM import_exit=$($process.ExitCode)"
+          Write-Host "ECON_CHAIN import_exit=$($process.ExitCode)"
           if ($process.ExitCode -ne 0) { exit $process.ExitCode }
 
-      - name: Run upstream diagnostic
+      - name: Run supply chain diagnostic
         shell: pwsh
         run: |
           $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless','--path','.', '--script','res://tests/vnext/market_economy_flow_diagnostic_test.gd') -NoNewWindow -Wait -PassThru
-          Write-Host "ECON_UPSTREAM diagnostic_exit=$($process.ExitCode)"
+          Write-Host "ECON_CHAIN diagnostic_exit=$($process.ExitCode)"
           if ($process.ExitCode -ne 0) { exit $process.ExitCode }
