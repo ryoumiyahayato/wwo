@@ -25,27 +25,52 @@ func _test_same_day_direction_and_bounds() -> void:
 	var baseline: VNextMarketEconomy = _new_economy("same-day baseline")
 	var market_id: String = _region(baseline, "region_loran_dawnbay")
 	var initial_bread: int = baseline.current_price(market_id, "bread")
+	_check(baseline.set_region_inventory(market_id, "bread", 0.0), "baseline bread stock can start empty")
 	_check(bool(baseline.settle_day(0).get("success", false)), "baseline day settles")
 	var baseline_bread: int = baseline.current_price(market_id, "bread")
 
 	var shortage: VNextMarketEconomy = _new_economy("same-day shortage")
 	var shortage_market: String = _region(shortage, "region_loran_dawnbay")
-	_check(shortage.set_region_inventory(shortage_market, "bread", 0.0), "bread stock can be depleted")
+	_check(shortage.set_region_inventory(shortage_market, "bread", 0.0), "shortage bread stock can start empty")
+	var shortage_shock: Dictionary = shortage.apply_market_shock(
+		"test_bread_supply_stop",
+		shortage_market,
+		"bread",
+		0,
+		10000,
+		1,
+		0,
+		0,
+		"test same-day supply interruption"
+	)
+	_check(bool(shortage_shock.get("success", false)), "one-day bread supply interruption is accepted")
 	_check(bool(shortage.settle_day(0).get("success", false)), "shortage day settles")
 	var shortage_row: Dictionary = shortage.commodity_snapshot(shortage_market, "bread")
 	var shortage_price: int = int(shortage_row.get("price_centimes", 0))
-	_check(float(shortage_row.get("unmet_units", 0.0)) > 0.0, "same-day shortage creates unmet demand")
-	_check(shortage_price >= baseline_bread, "same-day shortage does not lower bread price")
+	_check(float(shortage_row.get("unmet_units", 0.0)) > 0.0, "same-day supply interruption creates unmet demand")
+	_check(shortage_price > baseline_bread, "same-day shortage raises bread price versus equivalent baseline")
 
 	var surplus: VNextMarketEconomy = _new_economy("same-day surplus")
 	var surplus_market: String = _region(surplus, "region_loran_dawnbay")
-	_check(surplus.set_region_inventory(surplus_market, "bread", 1000000.0), "bread stock can be overfilled")
+	_check(surplus.set_region_inventory(surplus_market, "bread", 0.0), "surplus bread stock can start empty")
+	var surplus_shock: Dictionary = surplus.apply_market_shock(
+		"test_bread_supply_surge",
+		surplus_market,
+		"bread",
+		40000,
+		10000,
+		1,
+		0,
+		0,
+		"test same-day supply surge"
+	)
+	_check(bool(surplus_shock.get("success", false)), "one-day bread supply surge is accepted")
 	_check(bool(surplus.settle_day(0).get("success", false)), "surplus day settles")
 	var surplus_price: int = surplus.current_price(surplus_market, "bread")
-	_check(surplus_price <= baseline_bread, "same-day surplus does not raise bread price")
+	_check(surplus_price < baseline_bread, "same-day surplus lowers bread price versus equivalent baseline")
 
-	var max_up: int = maxi(initial_bread, initial_bread * 11800 / 10000)
-	var min_down: int = maxi(1, initial_bread * 8200 / 10000)
+	var max_up: int = maxi(initial_bread, int(ceil(float(initial_bread) * 1.18)))
+	var min_down: int = maxi(1, int(floor(float(initial_bread) * 0.82)))
 	_check(shortage_price <= max_up, "one-day shortage movement remains bounded")
 	_check(surplus_price >= min_down, "one-day surplus movement remains bounded")
 
