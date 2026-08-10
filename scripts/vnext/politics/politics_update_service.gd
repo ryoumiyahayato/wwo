@@ -199,7 +199,7 @@ func _advance_one_day(
 	candidate["stability"] = clampf(stability, 0.0, 100.0)
 	candidate["government_support"] = weighted_support
 
-	var unstable := _is_unstable(weighted_support, control, legitimacy, stability, coalition_cohesion, leader_effect)
+	var unstable := _is_unstable(weighted_support, control, legitimacy, stability, coalition_cohesion, leader_effect, total_pressure)
 	var instability_days := int(candidate.get("instability_streak", 0)) + 1 if unstable else maxi(0, int(candidate.get("instability_streak", 0)) - 1)
 	var recovery_days := int(candidate.get("recovery_streak", 0)) + 1 if not unstable else 0
 	candidate["instability_streak"] = instability_days
@@ -558,10 +558,11 @@ func _new_active_policy(policy_id: String, period: int, control: float, candidat
 	}
 
 
-func _is_unstable(weighted_support: float, control: float, legitimacy: float, stability: float, coalition_cohesion: float, leader_effect: float) -> bool:
+func _is_unstable(weighted_support: float, control: float, legitimacy: float, stability: float, coalition_cohesion: float, leader_effect: float, total_pressure: float) -> bool:
 	var resilience := clampf((coalition_cohesion - 50.0) * 0.04 + leader_effect * 0.8, -6.0, 6.0)
 	return (
-		weighted_support < CRISIS_SUPPORT_THRESHOLD - resilience
+		total_pressure >= 45.0
+		or weighted_support < CRISIS_SUPPORT_THRESHOLD - resilience
 		or control < CRISIS_CONTROL_THRESHOLD - resilience * 0.6
 		or legitimacy < CRISIS_LEGITIMACY_THRESHOLD - resilience * 0.7
 		or stability < CRISIS_STABILITY_THRESHOLD - resilience * 0.7
@@ -666,9 +667,7 @@ func _return_government_penalty(candidate: Dictionary, challenger_id: String) ->
 	if challenger_id != str(last.get("old_government_group_id", "")):
 		return 0.0
 	var age := int(candidate.get("period_index", 0)) - int(last.get("period", 0))
-	if age >= RETURN_GOVERNMENT_PENALTY_DAYS:
-		return 0.0
-	return 20.0 * (1.0 - clampf(float(age) / float(RETURN_GOVERNMENT_PENALTY_DAYS), 0.0, 1.0))
+	return 100.0 if age < RETURN_GOVERNMENT_PENALTY_DAYS else 0.0
 
 
 func _apply_government_change(candidate: Dictionary, challenger_result: Dictionary, total_pressure: float) -> Dictionary:
