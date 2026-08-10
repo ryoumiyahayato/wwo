@@ -27,7 +27,7 @@ jobs:
           "ECON_START_HEAD=$startHead" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           Write-Host "ECON_START_HEAD=$startHead"
 
-      - name: Apply minimal export-demand production fix
+      - name: Apply minimal reachable-demand production fix
         shell: pwsh
         run: |
           @'
@@ -49,21 +49,27 @@ jobs:
           )
           market = replace_once(
               market,
+              "\n\nfunc _update_site_targets() -> void:\n",
+              '''\n\nfunc _reachable_external_shortage_bp(origin_id: String, commodity_id: String) -> int:\n\tvar maximum_shortage_bp: int = 0\n\tfor destination_id: String in _region_ids:\n\t\tif destination_id == origin_id:\n\t\t\tcontinue\n\t\tvar destination_state: Dictionary = region_states[destination_id] as Dictionary\n\t\tvar destination_row: Dictionary = (\n\t\t\tdestination_state.get("commodities", {}) as Dictionary\n\t\t).get(commodity_id, {}) as Dictionary\n\t\tvar shortage_bp: int = int(destination_row.get("shortage_bp", 0))\n\t\tif shortage_bp <= maximum_shortage_bp or shortage_bp < 500:\n\t\t\tcontinue\n\t\tvar route: Dictionary = routes.find_route(origin_id, destination_id)\n\t\tif route.is_empty() or routes.route_capacity(route) <= 0.0001:\n\t\t\tcontinue\n\t\tif bool(route.get("cross_border", false)):\n\t\t\tvar origin_country: String = str((region_states[origin_id] as Dictionary).get("country_market_id", ""))\n\t\t\tvar destination_country: String = str(destination_state.get("country_market_id", ""))\n\t\t\tvar relation_key: String = origin_country + ">" + destination_country\n\t\t\tvar relation: Dictionary = catalog.trade_relations.get(relation_key, {}) as Dictionary\n\t\t\tif (\n\t\t\t\trelation.is_empty()\n\t\t\t\tor bool(relation.get("embargo", false))\n\t\t\t\tor float(_trade_quota_remaining.get(relation_key, 0.0)) <= 0.0001\n\t\t\t):\n\t\t\t\tcontinue\n\t\tmaximum_shortage_bp = shortage_bp\n\treturn maximum_shortage_bp\n\n\nfunc _update_site_targets() -> void:\n''',
+              "reachable external shortage helper",
+          )
+          market = replace_once(
+              market,
               "\t\tvar output_shortage_bp: int = 0\n\t\tvar output_surplus: bool = true",
-              "\t\tvar output_shortage_bp: int = 0\n\t\tvar output_exports: float = 0.0\n\t\tvar output_surplus: bool = true",
-              "export signal declaration",
+              "\t\tvar output_shortage_bp: int = 0\n\t\tvar output_external_shortage_bp: int = 0\n\t\tvar output_exports: float = 0.0\n\t\tvar output_surplus: bool = true",
+              "external signal declaration",
           )
           market = replace_once(
               market,
               "\t\t\toutput_shortage_bp = maxi(\n\t\t\t\toutput_shortage_bp, int(commodity_state.get(\"shortage_bp\", 0))\n\t\t\t)\n\t\t\tif float(commodity_state.get(\"inventory_coverage_bp\", 0)) <= 12000.0:",
-              "\t\t\toutput_shortage_bp = maxi(\n\t\t\t\toutput_shortage_bp, int(commodity_state.get(\"shortage_bp\", 0))\n\t\t\t)\n\t\t\toutput_exports += float(commodity_state.get(\"exports_units\", 0.0))\n\t\t\tif float(commodity_state.get(\"inventory_coverage_bp\", 0)) <= 12000.0:",
-              "export signal collection",
+              "\t\t\toutput_shortage_bp = maxi(\n\t\t\t\toutput_shortage_bp, int(commodity_state.get(\"shortage_bp\", 0))\n\t\t\t)\n\t\t\toutput_external_shortage_bp = maxi(\n\t\t\t\toutput_external_shortage_bp,\n\t\t\t\t_reachable_external_shortage_bp(region_id, commodity_id)\n\t\t\t)\n\t\t\toutput_exports += float(commodity_state.get(\"exports_units\", 0.0))\n\t\t\tif float(commodity_state.get(\"inventory_coverage_bp\", 0)) <= 12000.0:",
+              "external signal collection",
           )
           market = replace_once(
               market,
               "\t\tif margin > 0 and (output_shortage_bp >= 500 or input_shortage_bp >= 500):\n\t\t\ttarget += int(_policies.get(\"operating_increase_step_bp\", 140))\n\t\telif margin < 0 or (output_surplus and output_shortage_bp == 0):",
-              "\t\tif margin > 0 and (\n\t\t\toutput_shortage_bp >= 500\n\t\t\tor input_shortage_bp >= 500\n\t\t\tor output_exports > 0.0001\n\t\t):\n\t\t\ttarget += int(_policies.get(\"operating_increase_step_bp\", 140))\n\t\telif margin < 0 or (\n\t\t\toutput_surplus\n\t\t\tand output_shortage_bp == 0\n\t\t\tand output_exports <= 0.0001\n\t\t):",
-              "export-responsive operating target",
+              "\t\tif margin > 0 and (\n\t\t\toutput_shortage_bp >= 500\n\t\t\tor output_external_shortage_bp >= 500\n\t\t\tor input_shortage_bp >= 500\n\t\t\tor output_exports > 0.0001\n\t\t):\n\t\t\ttarget += int(_policies.get(\"operating_increase_step_bp\", 140))\n\t\telif margin < 0 or (\n\t\t\toutput_surplus\n\t\t\tand output_shortage_bp == 0\n\t\t\tand output_external_shortage_bp < 500\n\t\t\tand output_exports <= 0.0001\n\t\t):",
+              "reachable-demand operating target",
           )
           market_path.write_text(market, encoding="utf-8", newline="\n")
 
@@ -184,5 +190,5 @@ jobs:
           }
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'Fix export-driven economy production continuity'
+          git commit -m 'Fix reachable demand production continuity'
           git push origin HEAD:feat/vnext-market-economy-20260809
