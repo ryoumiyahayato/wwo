@@ -10,12 +10,6 @@ const FORCE_OPPOSITION_THRESHOLD: float = -10.0
 const MAX_FORCE_HISTORY: int = 64
 const MAX_POLICY_HISTORY: int = 96
 const MAX_GOVERNMENT_CHANGE_HISTORY: int = 32
-const MAX_ELAPSED_DAYS: int = 9_000_000
-
-const VIABILITY_SUPPORT_THRESHOLD: float = 46.0
-const VIABILITY_CONTROL_THRESHOLD: float = 32.0
-const VIABILITY_LEGITIMACY_THRESHOLD: float = 38.0
-const VIABILITY_STABILITY_THRESHOLD: float = 42.0
 
 const REGIME_TYPES: Array[String] = [
 	"absolute_monarchy",
@@ -56,6 +50,14 @@ const CAPACITY_KEYS: Array[String] = [
 ]
 
 var _state: Dictionary = {}
+
+enum {
+	MAX_ELAPSED_DAYS = 9_000_000,
+	VIABILITY_SUPPORT_THRESHOLD = 46,
+	VIABILITY_CONTROL_THRESHOLD = 32,
+	VIABILITY_LEGITIMACY_THRESHOLD = 38,
+	VIABILITY_STABILITY_THRESHOLD = 42,
+}
 
 
 static func create_from_config(config: Dictionary) -> VNextStatePolitics:
