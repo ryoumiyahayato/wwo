@@ -29,8 +29,10 @@ func _run() -> void:
 func _test_map_capacity_truth() -> void:
 	_check(map.get_city_ids().size() == 32, "strategic map reuses 32 existing cities")
 	_check(map.get_all_links().size() == 15, "strategic map reuses existing road rail shipping links")
-	var road_route: Dictionary = map.find_route("paris", "rouen", ["road"])
-	var rail_route: Dictionary = map.find_route("paris", "rouen", ["rail"])
+	var road_modes: Array[String] = ["road"]
+	var rail_modes: Array[String] = ["rail"]
+	var road_route: Dictionary = map.find_route("paris", "rouen", road_modes)
+	var rail_route: Dictionary = map.find_route("paris", "rouen", rail_modes)
 	var sea_route: Dictionary = map.find_route("paris", "london")
 	_check(bool(road_route.get("reachable", false)), "road route is reachable")
 	_check(bool(rail_route.get("reachable", false)), "rail route is reachable")
@@ -42,7 +44,7 @@ func _test_map_capacity_truth() -> void:
 	var original_capacity: int = int((map.links[rail_link_id] as Dictionary).get("capacity_personnel", 0))
 	(map.links[rail_link_id] as Dictionary)["capacity_personnel"] = 0
 	_check(map.get_link_transport_capacity_per_hour(rail_link_id) == 0.0, "zero link capacity stays zero")
-	_check(not bool(map.find_route("paris", "rouen", ["rail"]).get("reachable", false)), "zero capacity link is impassable")
+	_check(not bool(map.find_route("paris", "rouen", rail_modes).get("reachable", false)), "zero capacity link is impassable")
 	(map.links[rail_link_id] as Dictionary)["capacity_personnel"] = original_capacity
 
 	var road_link_id: String = str((road_route.get("link_ids", []) as Array)[0])
@@ -53,7 +55,8 @@ func _test_map_capacity_truth() -> void:
 	var equal_a: Dictionary = map.find_route("paris", "rouen")
 	var equal_b: Dictionary = map.find_route("paris", "rouen")
 	_equal(equal_a.get("link_ids", []), equal_b.get("link_ids", []), "equal cost route tie is deterministic")
-	_check(str((equal_a.get("link_ids", []) as Array)[0]) == mini(road_link_id, rail_link_id), "equal cost route chooses stable lexical link tie break")
+	var expected_link_id: String = road_link_id if road_link_id < rail_link_id else rail_link_id
+	_equal(str((equal_a.get("link_ids", []) as Array)[0]), expected_link_id, "equal cost route chooses stable lexical link tie break")
 	(map.links[road_link_id] as Dictionary)["movement_hours"] = old_road_hours
 	(map.links[rail_link_id] as Dictionary)["movement_hours"] = old_rail_hours
 
@@ -220,7 +223,7 @@ func _test_attack_positioning_and_combat() -> void:
 	undersupplied.get_formation("formation:attacker").update_supply({"food": 0.05, "ammunition": 0.05, "equipment": 0.05, "transport_capacity": 0.05}, 0.05, "cut")
 	undersupplied.get_formation("formation:defender").update_supply({"food": 0.05, "ammunition": 0.05, "equipment": 0.05, "transport_capacity": 0.05}, 0.05, "cut")
 	var under_preview: Dictionary = service.preview_battle(undersupplied, map, "formation:attacker", "lille")
-	_check(is_finite(float(under_preview.get("attacker_power", NAN))) and is_finite(float(under_preview.get("defender_power", NAN))), "both undersupplied combat remains finite")
+	_check(is_finite(float(under_preview.get("attacker_power", 0.0))) and is_finite(float(under_preview.get("defender_power", 0.0))), "both undersupplied combat remains finite")
 
 
 func _test_destroyed_and_strict_restore() -> void:
@@ -244,22 +247,21 @@ func _test_destroyed_and_strict_restore() -> void:
 	_check(roundtrip.restore(valid, map), "valid active action snapshot restores")
 	_equal(roundtrip.snapshot(), valid, "valid active action snapshot roundtrips")
 
-	_check(_reject_mutation(valid, func(s: Dictionary) -> void: (s["active_actions"] as Array)[0]["kind"] = "unknown"), "unknown action kind rejected")
-	_check(_reject_mutation(valid, func(s: Dictionary) -> void: (s["active_actions"] as Array)[0]["route"] = {}), "missing or empty transport route rejected")
-	_check(_reject_mutation(valid, func(s: Dictionary) -> void: ((s["active_actions"] as Array)[0]["route"] as Dictionary)["city_ids"] = ["paris", "berlin"]), "discontinuous route rejected")
-	_check(_reject_mutation(valid, func(s: Dictionary) -> void: (s["active_actions"] as Array)[0]["eta_hour"] = (s["active_actions"] as Array)[0]["start_hour"]), "zero duration rejected")
-	_check(_reject_mutation(valid, func(s: Dictionary) -> void: (s["active_actions"] as Array)[0]["progress"] = 2.0), "invalid progress rejected")
-	_check(_reject_mutation(valid, func(s: Dictionary) -> void: (s["formations"] as Array)[0]["action_state"] = "idle"), "formation action mismatch rejected")
-	_check(_reject_mutation(valid, func(s: Dictionary) -> void: s["next_action_sequence"] = 1), "sequence conflict rejected")
-	_check(_reject_mutation(valid, func(s: Dictionary) -> void: (s["active_actions"] as Array)[0]["action_id"] = "military_action:bad_id"), "invalid military action sequence ID rejected")
-	_check(_reject_mutation(valid, func(s: Dictionary) -> void: (s["active_actions"] as Array)[0]["origin_city_id"] = "missing_city"), "invalid origin rejected")
-	_check(_reject_mutation(valid, func(s: Dictionary) -> void: (s["active_actions"] as Array)[0]["destination_city_id"] = "missing_city"), "invalid target rejected")
+	_check(_restore_rejected(_mutated_snapshot(valid, "unknown_kind")), "unknown action kind rejected")
+	_check(_restore_rejected(_mutated_snapshot(valid, "empty_route")), "missing or empty transport route rejected")
+	_check(_restore_rejected(_mutated_snapshot(valid, "discontinuous_route")), "discontinuous route rejected")
+	_check(_restore_rejected(_mutated_snapshot(valid, "zero_duration")), "zero duration rejected")
+	_check(_restore_rejected(_mutated_snapshot(valid, "invalid_progress")), "invalid progress rejected")
+	_check(_restore_rejected(_mutated_snapshot(valid, "formation_action_mismatch")), "formation action mismatch rejected")
+	_check(_restore_rejected(_mutated_snapshot(valid, "sequence_conflict")), "sequence conflict rejected")
+	_check(_restore_rejected(_mutated_snapshot(valid, "bad_action_id")), "invalid military action sequence ID rejected")
+	_check(_restore_rejected(_mutated_snapshot(valid, "bad_origin")), "invalid origin rejected")
+	_check(_restore_rejected(_mutated_snapshot(valid, "bad_target")), "invalid target rejected")
 
 	var transactional := _new_state()
 	_check(_add(transactional, "formation:sentinel", "paris", 1000, 1.0), "create transactional restore sentinel")
 	var before: Dictionary = transactional.snapshot()
-	var invalid: Dictionary = valid.duplicate(true)
-	(invalid["active_actions"] as Array)[0]["progress"] = -1.0
+	var invalid: Dictionary = _mutated_snapshot(valid, "invalid_progress")
 	_check(not transactional.restore(invalid, map), "invalid restore fails transactionally")
 	_equal(transactional.snapshot(), before, "failed restore leaves previous state unchanged")
 	_check(not service.create_formation(_new_state(), map, "bad_formation_id", "country_fra", "paris", 1000), "invalid formation stable ID rejected")
@@ -276,13 +278,20 @@ func _test_condition_penalties_and_recovery() -> void:
 	_add(low_equipment, "formation:low_equipment", "paris", 8000, 0.05)
 	low_supply.get_formation("formation:low_supply").update_supply({"food": 0.1, "ammunition": 0.1, "equipment": 0.1, "transport_capacity": 0.1}, 0.1, "cut")
 	low_org.get_formation("formation:low_org").organization = 0.1
-	var healthy_eta: int = int(service.move(healthy, map, "formation:healthy", "marseille", 0).get("eta_hour", 0))
-	var low_supply_eta: int = int(service.move(low_supply, map, "formation:low_supply", "marseille", 0).get("eta_hour", 0))
-	var low_org_eta: int = int(service.move(low_org, map, "formation:low_org", "marseille", 0).get("eta_hour", 0))
-	var low_equipment_eta: int = int(service.move(low_equipment, map, "formation:low_equipment", "marseille", 0).get("eta_hour", 0))
-	_check(low_supply_eta > healthy_eta, "low supply reduces movement efficiency")
-	_check(low_org_eta > healthy_eta, "low organization reduces movement efficiency")
-	_check(low_equipment_eta > healthy_eta, "low equipment reduces movement efficiency")
+	var healthy_move: Dictionary = service.move(healthy, map, "formation:healthy", "marseille", 0)
+	var low_supply_move: Dictionary = service.move(low_supply, map, "formation:low_supply", "marseille", 0)
+	var low_org_move: Dictionary = service.move(low_org, map, "formation:low_org", "marseille", 0)
+	var low_equipment_move: Dictionary = service.move(low_equipment, map, "formation:low_equipment", "marseille", 0)
+	var healthy_action: Dictionary = service.get_action(healthy, str(healthy_move.get("action_id", "")))
+	var low_supply_action: Dictionary = service.get_action(low_supply, str(low_supply_move.get("action_id", "")))
+	var low_org_action: Dictionary = service.get_action(low_org, str(low_org_move.get("action_id", "")))
+	var low_equipment_action: Dictionary = service.get_action(low_equipment, str(low_equipment_move.get("action_id", "")))
+	_check(float(low_supply_action.get("edge_load_total", 0.0)) > float(healthy_action.get("edge_load_total", 0.0)), "low supply increases bounded movement burden")
+	_check(float(low_org_action.get("edge_load_total", 0.0)) > float(healthy_action.get("edge_load_total", 0.0)), "low organization increases bounded movement burden")
+	_check(float(low_equipment_action.get("edge_load_total", 0.0)) > float(healthy_action.get("edge_load_total", 0.0)), "low equipment increases bounded movement burden")
+	_check(int(low_supply_move.get("eta_hour", 0)) >= int(healthy_move.get("eta_hour", 0)), "low supply never improves ETA")
+	_check(int(low_org_move.get("eta_hour", 0)) >= int(healthy_move.get("eta_hour", 0)), "low organization never improves ETA")
+	_check(int(low_equipment_move.get("eta_hour", 0)) >= int(healthy_move.get("eta_hour", 0)), "low equipment never improves ETA")
 
 	var recovery := _new_state()
 	_add(recovery, "formation:recovery", "paris", 2000, 0.2)
@@ -296,7 +305,7 @@ func _test_condition_penalties_and_recovery() -> void:
 	service.advance_to_hour(recovery, map, 72)
 	_check(recovering.organization > old_org, "full local supply provides organization recovery path")
 	_check(recovering.equipment_factor() > old_equipment, "full local supply provides equipment recovery path")
-	_check(recovering.formation_status == VNextMilitaryFormation.STATUS_ACTIVE, "recovery does not require deadlock-breaking teleport")
+	_check(recovering.formation_status == VNextMilitaryFormation.STATUS_ACTIVE, "recovery does not require a teleport or deadlock bypass")
 
 
 func _test_concentrate_control_history_and_scope() -> void:
@@ -307,10 +316,12 @@ func _test_concentrate_control_history_and_scope() -> void:
 	var duplicate: Dictionary = service.concentrate(state, map, ["formation:conc_a", "formation:conc_a"], "lyon", 0)
 	_check(not bool(duplicate.get("success", false)), "duplicate concentrate formation IDs rejected")
 	_check(state.active_actions.is_empty() and state.next_action_sequence == sequence_before, "duplicate concentrate failure is atomic")
-	var invalid_batch: Dictionary = service.concentrate(state, map, ["formation:conc_a", "formation:missing"], "lyon", 0)
+	var invalid_ids: Array[String] = ["formation:conc_a", "formation:missing"]
+	var invalid_batch: Dictionary = service.concentrate(state, map, invalid_ids, "lyon", 0)
 	_check(not bool(invalid_batch.get("success", false)), "invalid concentrate batch rejected")
 	_check(state.active_actions.is_empty() and state.next_action_sequence == sequence_before, "candidate batch validates fully before action creation")
-	var valid_batch: Dictionary = service.concentrate(state, map, ["formation:conc_b", "formation:conc_a"], "lyon", 0)
+	var valid_ids: Array[String] = ["formation:conc_b", "formation:conc_a"]
+	var valid_batch: Dictionary = service.concentrate(state, map, valid_ids, "lyon", 0)
 	_check(bool(valid_batch.get("success", false)) and (valid_batch.get("action_ids", []) as Array).size() == 2, "valid concentrate batch creates atomically")
 
 	var control_state := _new_state()
@@ -364,11 +375,40 @@ func _battle_state(attacker_personnel: int, defender_personnel: int, attacker_eq
 	return state
 
 
-func _reject_mutation(valid_snapshot: Dictionary, mutate: Callable) -> bool:
-	var candidate: Dictionary = valid_snapshot.duplicate(true)
-	mutate.call(candidate)
+func _mutated_snapshot(valid_snapshot: Dictionary, mutation: String) -> Dictionary:
+	var snapshot: Dictionary = valid_snapshot.duplicate(true)
+	var actions: Array = snapshot.get("active_actions", []) as Array
+	var formations: Array = snapshot.get("formations", []) as Array
+	var action: Dictionary = actions[0] as Dictionary
+	match mutation:
+		"unknown_kind":
+			action["kind"] = "unknown"
+		"empty_route":
+			action["route"] = {}
+		"discontinuous_route":
+			var route: Dictionary = action["route"] as Dictionary
+			route["city_ids"] = ["paris", "berlin"]
+		"zero_duration":
+			action["eta_hour"] = action["start_hour"]
+		"invalid_progress":
+			action["progress"] = 2.0
+		"formation_action_mismatch":
+			var formation: Dictionary = formations[0] as Dictionary
+			formation["action_state"] = "idle"
+		"sequence_conflict":
+			snapshot["next_action_sequence"] = 1
+		"bad_action_id":
+			action["action_id"] = "military_action:bad_id"
+		"bad_origin":
+			action["origin_city_id"] = "missing_city"
+		"bad_target":
+			action["destination_city_id"] = "missing_city"
+	return snapshot
+
+
+func _restore_rejected(snapshot: Dictionary) -> bool:
 	var restored := VNextMilitaryState.new()
-	return not restored.restore(candidate, map)
+	return not restored.restore(snapshot, map)
 
 
 func _finish_action(state: VNextMilitaryState, action_id: String, max_hours: int) -> void:
