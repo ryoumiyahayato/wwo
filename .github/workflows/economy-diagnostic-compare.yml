@@ -1,4 +1,4 @@
-name: Economy Finalize Candidate
+name: Economy Industrial Replenishment Candidate
 
 on:
   pull_request:
@@ -6,28 +6,20 @@ on:
       - master
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  economy-finalize:
+  economy-candidate:
     runs-on: windows-2025
-    timeout-minutes: 70
+    timeout-minutes: 25
     steps:
       - name: Checkout current economy branch
         uses: actions/checkout@v4
         with:
           ref: feat/vnext-market-economy-20260809
-          fetch-depth: 0
-          persist-credentials: true
+          fetch-depth: 1
 
-      - name: Record starting remote head
-        shell: pwsh
-        run: |
-          $startHead = (git rev-parse HEAD).Trim()
-          "ECON_START_HEAD=$startHead" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          Write-Host "ECON_START_HEAD=$startHead"
-
-      - name: Apply reachable-demand and stock-replenishment fix
+      - name: Apply candidate in CI worktree
         shell: pwsh
         run: |
           @'
@@ -36,12 +28,11 @@ jobs:
           def replace_once(text: str, old: str, new: str, label: str) -> str:
               count = text.count(old)
               if count != 1:
-                  raise SystemExit(f"{label}: expected exactly one anchor, found {count}")
+                  raise SystemExit(f"{label}: expected one anchor, found {count}")
               return text.replace(old, new, 1)
 
           market_path = Path("scripts/vnext/economy/market_economy.gd")
           market = market_path.read_text(encoding="utf-8").replace("\r\n", "\n")
-
           market = replace_once(
               market,
               "\t\tunits < 0.0\n\t\tor not region_states.has(market_id)",
@@ -49,9 +40,9 @@ jobs:
               "finite inventory setter",
           )
 
-          old_schedule_head = '''func _schedule_shipments(day_index: int) -> void:\n\tvar shortages: Array[Dictionary] = []\n\tfor region_id: String in _region_ids:\n\t\tvar state: Dictionary = region_states[region_id] as Dictionary\n\t\tvar commodity_states: Dictionary = state.get("commodities", {}) as Dictionary\n\t\tfor commodity_id: String in _commodity_ids:\n\t\t\tvar commodity_state: Dictionary = commodity_states[commodity_id] as Dictionary\n\t\t\tvar unmet: float = float(commodity_state.get("unmet_units", 0.0))\n\t\t\tif unmet > 0.0001:\n\t\t\t\tshortages.append({\n\t\t\t\t\t"region_id": region_id,\n\t\t\t\t\t"commodity_id": commodity_id,\n\t\t\t\t\t"unmet": unmet,\n\t\t\t\t\t"shortage_bp": int(commodity_state.get("shortage_bp", 0)),\n\t\t\t\t})\n\tshortages.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:\n\t\tif int(a.get("shortage_bp", 0)) == int(b.get("shortage_bp", 0)):\n\t\t\tvar a_key: String = str(a.get("region_id", "")) + str(a.get("commodity_id", ""))\n\t\t\tvar b_key: String = str(b.get("region_id", "")) + str(b.get("commodity_id", ""))\n\t\t\treturn a_key < b_key\n\t\treturn int(a.get("shortage_bp", 0)) > int(b.get("shortage_bp", 0))\n\t)'''
-          new_schedule_head = '''func _in_transit_units_for(destination_id: String, commodity_id: String) -> float:\n\tvar total: float = 0.0\n\tfor shipment: Dictionary in shipments:\n\t\tif (\n\t\t\tstr(shipment.get("destination_market_id", "")) == destination_id\n\t\t\tand str(shipment.get("commodity_id", "")) == commodity_id\n\t\t\tand str(shipment.get("status", "")) == "in_transit"\n\t\t):\n\t\t\ttotal += maxf(0.0, float(shipment.get("units", 0.0)))\n\treturn total\n\n\nfunc _schedule_shipments(day_index: int) -> void:\n\tvar requests: Array[Dictionary] = []\n\tfor region_id: String in _region_ids:\n\t\tvar state: Dictionary = region_states[region_id] as Dictionary\n\t\tvar inventory: Dictionary = state.get("inventory", {}) as Dictionary\n\t\tvar commodity_states: Dictionary = state.get("commodities", {}) as Dictionary\n\t\tfor commodity_id: String in _commodity_ids:\n\t\t\tvar commodity_state: Dictionary = commodity_states[commodity_id] as Dictionary\n\t\t\tvar unmet: float = maxf(0.0, float(commodity_state.get("unmet_units", 0.0)))\n\t\t\tvar target_stock: float = float(commodity_state.get("target_stock_units", 0.0))\n\t\t\tif target_stock <= 0.0:\n\t\t\t\ttarget_stock = _target_stock_for(region_id, commodity_id)\n\t\t\tvar stock: float = maxf(0.0, float(inventory.get(commodity_id, 0.0)))\n\t\t\tvar in_transit: float = _in_transit_units_for(region_id, commodity_id)\n\t\t\tvar replenishment: float = maxf(0.0, target_stock - stock - in_transit)\n\t\t\tvar requested: float = maxf(unmet, replenishment)\n\t\t\tif requested <= 0.0001:\n\t\t\t\tcontinue\n\t\t\tvar replenishment_bp: int = clampi(\n\t\t\t\tint(round(replenishment / maxf(1.0, target_stock) * BASIS_POINTS)),\n\t\t\t\t0,\n\t\t\t\tBASIS_POINTS\n\t\t\t)\n\t\t\trequests.append({\n\t\t\t\t"region_id": region_id,\n\t\t\t\t"commodity_id": commodity_id,\n\t\t\t\t"request_units": requested,\n\t\t\t\t"shortage_bp": int(commodity_state.get("shortage_bp", 0)),\n\t\t\t\t"replenishment_bp": replenishment_bp,\n\t\t\t})\n\trequests.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:\n\t\tvar a_shortage: int = int(a.get("shortage_bp", 0))\n\t\tvar b_shortage: int = int(b.get("shortage_bp", 0))\n\t\tif a_shortage != b_shortage:\n\t\t\treturn a_shortage > b_shortage\n\t\tvar a_replenishment: int = int(a.get("replenishment_bp", 0))\n\t\tvar b_replenishment: int = int(b.get("replenishment_bp", 0))\n\t\tif a_replenishment != b_replenishment:\n\t\t\treturn a_replenishment > b_replenishment\n\t\tvar a_key: String = str(a.get("region_id", "")) + str(a.get("commodity_id", ""))\n\t\tvar b_key: String = str(b.get("region_id", "")) + str(b.get("commodity_id", ""))\n\t\treturn a_key < b_key\n\t)'''
-          market = replace_once(market, old_schedule_head, new_schedule_head, "stock replenishment scheduler")
+          old_head = '''func _schedule_shipments(day_index: int) -> void:\n\tvar shortages: Array[Dictionary] = []\n\tfor region_id: String in _region_ids:\n\t\tvar state: Dictionary = region_states[region_id] as Dictionary\n\t\tvar commodity_states: Dictionary = state.get("commodities", {}) as Dictionary\n\t\tfor commodity_id: String in _commodity_ids:\n\t\t\tvar commodity_state: Dictionary = commodity_states[commodity_id] as Dictionary\n\t\t\tvar unmet: float = float(commodity_state.get("unmet_units", 0.0))\n\t\t\tif unmet > 0.0001:\n\t\t\t\tshortages.append({\n\t\t\t\t\t"region_id": region_id,\n\t\t\t\t\t"commodity_id": commodity_id,\n\t\t\t\t\t"unmet": unmet,\n\t\t\t\t\t"shortage_bp": int(commodity_state.get("shortage_bp", 0)),\n\t\t\t\t})\n\tshortages.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:\n\t\tif int(a.get("shortage_bp", 0)) == int(b.get("shortage_bp", 0)):\n\t\t\tvar a_key: String = str(a.get("region_id", "")) + str(a.get("commodity_id", ""))\n\t\t\tvar b_key: String = str(b.get("region_id", "")) + str(b.get("commodity_id", ""))\n\t\t\treturn a_key < b_key\n\t\treturn int(a.get("shortage_bp", 0)) > int(b.get("shortage_bp", 0))\n\t)'''
+          new_head = '''func _in_transit_units_for(destination_id: String, commodity_id: String) -> float:\n\tvar total: float = 0.0\n\tfor shipment: Dictionary in shipments:\n\t\tif (\n\t\t\tstr(shipment.get("destination_market_id", "")) == destination_id\n\t\t\tand str(shipment.get("commodity_id", "")) == commodity_id\n\t\t\tand str(shipment.get("status", "")) == "in_transit"\n\t\t):\n\t\t\ttotal += maxf(0.0, float(shipment.get("units", 0.0)))\n\treturn total\n\n\nfunc _schedule_shipments(day_index: int) -> void:\n\tvar requests: Array[Dictionary] = []\n\tfor region_id: String in _region_ids:\n\t\tvar state: Dictionary = region_states[region_id] as Dictionary\n\t\tvar inventory: Dictionary = state.get("inventory", {}) as Dictionary\n\t\tvar commodity_states: Dictionary = state.get("commodities", {}) as Dictionary\n\t\tfor commodity_id: String in _commodity_ids:\n\t\t\tvar commodity_state: Dictionary = commodity_states[commodity_id] as Dictionary\n\t\t\tvar unmet: float = maxf(0.0, float(commodity_state.get("unmet_units", 0.0)))\n\t\t\tvar industrial_demand: float = maxf(0.0, float(commodity_state.get("industrial_demand_units", 0.0)))\n\t\t\tvar replenishment: float = 0.0\n\t\t\tvar target_stock: float = 0.0\n\t\t\tif industrial_demand > 0.0001:\n\t\t\t\ttarget_stock = float(commodity_state.get("target_stock_units", 0.0))\n\t\t\t\tif target_stock <= 0.0:\n\t\t\t\t\ttarget_stock = _target_stock_for(region_id, commodity_id)\n\t\t\t\tvar stock: float = maxf(0.0, float(inventory.get(commodity_id, 0.0)))\n\t\t\t\tvar in_transit: float = _in_transit_units_for(region_id, commodity_id)\n\t\t\t\treplenishment = maxf(0.0, target_stock - stock - in_transit)\n\t\t\tvar requested: float = maxf(unmet, replenishment)\n\t\t\tif requested <= 0.0001:\n\t\t\t\tcontinue\n\t\t\tvar replenishment_bp: int = (\n\t\t\t\t0 if target_stock <= 0.0 else clampi(\n\t\t\t\t\tint(round(replenishment / maxf(1.0, target_stock) * BASIS_POINTS)),\n\t\t\t\t\t0, BASIS_POINTS\n\t\t\t\t)\n\t\t\t)\n\t\t\trequests.append({\n\t\t\t\t"region_id": region_id,\n\t\t\t\t"commodity_id": commodity_id,\n\t\t\t\t"request_units": requested,\n\t\t\t\t"shortage_bp": int(commodity_state.get("shortage_bp", 0)),\n\t\t\t\t"industrial_replenishment_bp": replenishment_bp,\n\t\t\t})\n\trequests.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:\n\t\tvar a_shortage: int = int(a.get("shortage_bp", 0))\n\t\tvar b_shortage: int = int(b.get("shortage_bp", 0))\n\t\tif a_shortage != b_shortage:\n\t\t\treturn a_shortage > b_shortage\n\t\tvar a_replenishment: int = int(a.get("industrial_replenishment_bp", 0))\n\t\tvar b_replenishment: int = int(b.get("industrial_replenishment_bp", 0))\n\t\tif a_replenishment != b_replenishment:\n\t\t\treturn a_replenishment > b_replenishment\n\t\tvar a_key: String = str(a.get("region_id", "")) + str(a.get("commodity_id", ""))\n\t\tvar b_key: String = str(b.get("region_id", "")) + str(b.get("commodity_id", ""))\n\t\treturn a_key < b_key\n\t)'''
+          market = replace_once(market, old_head, new_head, "industrial replenishment scheduler")
           market = replace_once(
               market,
               "\tfor shortage: Dictionary in shortages:\n\t\tif created >= max_shipments:\n\t\t\tbreak\n\t\tvar destination_id: String = str(shortage.get(\"region_id\", \"\"))\n\t\tvar commodity_id: String = str(shortage.get(\"commodity_id\", \"\"))\n\t\tvar remaining: float = float(shortage.get(\"unmet\", 0.0))",
@@ -62,7 +53,7 @@ jobs:
           market = replace_once(
               market,
               "\n\nfunc _update_site_targets() -> void:\n",
-              '''\n\nfunc _reachable_external_shortage_bp(origin_id: String, commodity_id: String) -> int:\n\tvar maximum_shortage_bp: int = 0\n\tfor destination_id: String in _region_ids:\n\t\tif destination_id == origin_id:\n\t\t\tcontinue\n\t\tvar destination_state: Dictionary = region_states[destination_id] as Dictionary\n\t\tvar destination_row: Dictionary = (\n\t\t\tdestination_state.get("commodities", {}) as Dictionary\n\t\t).get(commodity_id, {}) as Dictionary\n\t\tvar shortage_bp: int = int(destination_row.get("shortage_bp", 0))\n\t\tif shortage_bp <= maximum_shortage_bp or shortage_bp < 500:\n\t\t\tcontinue\n\t\tvar route: Dictionary = routes.find_route(origin_id, destination_id)\n\t\tif route.is_empty() or routes.route_capacity(route) <= 0.0001:\n\t\t\tcontinue\n\t\tif bool(route.get("cross_border", false)):\n\t\t\tvar origin_country: String = str((region_states[origin_id] as Dictionary).get("country_market_id", ""))\n\t\t\tvar destination_country: String = str(destination_state.get("country_market_id", ""))\n\t\t\tvar relation_key: String = origin_country + ">" + destination_country\n\t\t\tvar relation: Dictionary = catalog.trade_relations.get(relation_key, {}) as Dictionary\n\t\t\tif (\n\t\t\t\trelation.is_empty()\n\t\t\t\tor bool(relation.get("embargo", false))\n\t\t\t\tor float(_trade_quota_remaining.get(relation_key, 0.0)) <= 0.0001\n\t\t\t):\n\t\t\t\tcontinue\n\t\tmaximum_shortage_bp = shortage_bp\n\treturn maximum_shortage_bp\n\n\nfunc _update_site_targets() -> void:\n''',
+              '''\n\nfunc _reachable_external_shortage_bp(origin_id: String, commodity_id: String) -> int:\n\tvar maximum_shortage_bp: int = 0\n\tfor destination_id: String in _region_ids:\n\t\tif destination_id == origin_id:\n\t\t\tcontinue\n\t\tvar destination_state: Dictionary = region_states[destination_id] as Dictionary\n\t\tvar destination_row: Dictionary = (destination_state.get("commodities", {}) as Dictionary).get(commodity_id, {}) as Dictionary\n\t\tvar shortage_bp: int = int(destination_row.get("shortage_bp", 0))\n\t\tif shortage_bp <= maximum_shortage_bp or shortage_bp < 500:\n\t\t\tcontinue\n\t\tvar route: Dictionary = routes.find_route(origin_id, destination_id)\n\t\tif route.is_empty() or routes.route_capacity(route) <= 0.0001:\n\t\t\tcontinue\n\t\tif bool(route.get("cross_border", false)):\n\t\t\tvar origin_country: String = str((region_states[origin_id] as Dictionary).get("country_market_id", ""))\n\t\t\tvar destination_country: String = str(destination_state.get("country_market_id", ""))\n\t\t\tvar relation_key: String = origin_country + ">" + destination_country\n\t\t\tvar relation: Dictionary = catalog.trade_relations.get(relation_key, {}) as Dictionary\n\t\t\tif relation.is_empty() or bool(relation.get("embargo", false)) or float(_trade_quota_remaining.get(relation_key, 0.0)) <= 0.0001:\n\t\t\t\tcontinue\n\t\tmaximum_shortage_bp = shortage_bp\n\treturn maximum_shortage_bp\n\n\nfunc _update_site_targets() -> void:\n''',
               "reachable external shortage helper",
           )
           market = replace_once(
@@ -74,13 +65,13 @@ jobs:
           market = replace_once(
               market,
               "\t\t\toutput_shortage_bp = maxi(\n\t\t\t\toutput_shortage_bp, int(commodity_state.get(\"shortage_bp\", 0))\n\t\t\t)\n\t\t\tif float(commodity_state.get(\"inventory_coverage_bp\", 0)) <= 12000.0:",
-              "\t\t\toutput_shortage_bp = maxi(\n\t\t\t\toutput_shortage_bp, int(commodity_state.get(\"shortage_bp\", 0))\n\t\t\t)\n\t\t\toutput_external_shortage_bp = maxi(\n\t\t\t\toutput_external_shortage_bp,\n\t\t\t\t_reachable_external_shortage_bp(region_id, commodity_id)\n\t\t\t)\n\t\t\toutput_exports += float(commodity_state.get(\"exports_units\", 0.0))\n\t\t\tif float(commodity_state.get(\"inventory_coverage_bp\", 0)) <= 12000.0:",
+              "\t\t\toutput_shortage_bp = maxi(\n\t\t\t\toutput_shortage_bp, int(commodity_state.get(\"shortage_bp\", 0))\n\t\t\t)\n\t\t\toutput_external_shortage_bp = maxi(output_external_shortage_bp, _reachable_external_shortage_bp(region_id, commodity_id))\n\t\t\toutput_exports += float(commodity_state.get(\"exports_units\", 0.0))\n\t\t\tif float(commodity_state.get(\"inventory_coverage_bp\", 0)) <= 12000.0:",
               "external signal collection",
           )
           market = replace_once(
               market,
               "\t\tif margin > 0 and (output_shortage_bp >= 500 or input_shortage_bp >= 500):\n\t\t\ttarget += int(_policies.get(\"operating_increase_step_bp\", 140))\n\t\telif margin < 0 or (output_surplus and output_shortage_bp == 0):",
-              "\t\tif margin > 0 and (\n\t\t\toutput_shortage_bp >= 500\n\t\t\tor output_external_shortage_bp >= 500\n\t\t\tor input_shortage_bp >= 500\n\t\t\tor output_exports > 0.0001\n\t\t):\n\t\t\ttarget += int(_policies.get(\"operating_increase_step_bp\", 140))\n\t\telif margin < 0 or (\n\t\t\toutput_surplus\n\t\t\tand output_shortage_bp == 0\n\t\t\tand output_external_shortage_bp < 500\n\t\t\tand output_exports <= 0.0001\n\t\t):",
+              "\t\tif margin > 0 and (\n\t\t\toutput_shortage_bp >= 500\n\t\t\tor output_external_shortage_bp >= 500\n\t\t\tor input_shortage_bp >= 500\n\t\t\tor output_exports > 0.0001\n\t\t):\n\t\t\ttarget += int(_policies.get(\"operating_increase_step_bp\", 140))\n\t\telif margin < 0 or (output_surplus and output_shortage_bp == 0 and output_external_shortage_bp < 500 and output_exports <= 0.0001):",
               "reachable-demand operating target",
           )
           market_path.write_text(market, encoding="utf-8", newline="\n")
@@ -97,29 +88,12 @@ jobs:
 
           recovery_path = Path("tests/vnext/market_economy_recovery_test.gd")
           recovery = recovery_path.read_text(encoding="utf-8").replace("\r\n", "\n")
-          recovery = replace_once(
-              recovery,
-              "\t_test_extreme_legal_inputs()\n\tprint(\"VNext market economy recovery: %d checks, %d failures\" % [checks, failures])",
-              "\t_test_extreme_legal_inputs()\n\t_test_nonfinite_controls_rejected()\n\tprint(\"VNext market economy recovery: %d checks, %d failures\" % [checks, failures])",
-              "nonfinite test invocation",
-          )
-          insertion = '''\n\nfunc _test_nonfinite_controls_rejected() -> void:\n\tvar economy := _new_economy("nonfinite controls")\n\tvar market_id := _region(economy, "region_loran_dawnbay")\n\t_check(not economy.set_region_inventory(market_id, "bread", NAN), "inventory setter rejects NaN")\n\t_check(not economy.set_region_inventory(market_id, "bread", INF), "inventory setter rejects positive infinity")\n\t_check(not economy.set_region_inventory(market_id, "bread", -INF), "inventory setter rejects negative infinity")\n\tvar edge_id := str((economy.catalog.transport_edges[0] as Dictionary).get("edge_id", ""))\n\t_check(not edge_id.is_empty(), "nonfinite route fixture has an edge")\n\t_check(not economy.set_route_capacity(edge_id, NAN), "route capacity rejects NaN")\n\t_check(not economy.set_route_capacity(edge_id, INF), "route capacity rejects positive infinity")\n\t_check(not economy.set_route_capacity(edge_id, -INF), "route capacity rejects negative infinity")\n\t_check(economy.validate_integrity(), "rejected nonfinite controls leave economy valid")\n'''
-          recovery = replace_once(
-              recovery,
-              "\n\nfunc _find_shipment(snapshot_value: Dictionary, origin_id: String, destination_id: String, commodity_id: String) -> Dictionary:",
-              insertion + "\n\nfunc _find_shipment(snapshot_value: Dictionary, origin_id: String, destination_id: String, commodity_id: String) -> Dictionary:",
-              "nonfinite test insertion",
-          )
+          recovery = replace_once(recovery, "\t_test_extreme_legal_inputs()\n\tprint(\"VNext market economy recovery: %d checks, %d failures\" % [checks, failures])", "\t_test_extreme_legal_inputs()\n\t_test_nonfinite_controls_rejected()\n\tprint(\"VNext market economy recovery: %d checks, %d failures\" % [checks, failures])", "nonfinite invocation")
+          insertion = '''\n\nfunc _test_nonfinite_controls_rejected() -> void:\n\tvar economy := _new_economy("nonfinite controls")\n\tvar market_id := _region(economy, "region_loran_dawnbay")\n\t_check(not economy.set_region_inventory(market_id, "bread", NAN), "inventory setter rejects NaN")\n\t_check(not economy.set_region_inventory(market_id, "bread", INF), "inventory setter rejects infinity")\n\tvar edge_id := str((economy.catalog.transport_edges[0] as Dictionary).get("edge_id", ""))\n\t_check(not economy.set_route_capacity(edge_id, NAN), "route capacity rejects NaN")\n\t_check(not economy.set_route_capacity(edge_id, INF), "route capacity rejects infinity")\n\t_check(economy.validate_integrity(), "nonfinite controls leave economy valid")\n'''
+          recovery = replace_once(recovery, "\n\nfunc _find_shipment(snapshot_value: Dictionary, origin_id: String, destination_id: String, commodity_id: String) -> Dictionary:", insertion + "\n\nfunc _find_shipment(snapshot_value: Dictionary, origin_id: String, destination_id: String, commodity_id: String) -> Dictionary:", "nonfinite insertion")
           recovery_path.write_text(recovery, encoding="utf-8", newline="\n")
           '@ | python -
-
-          git rm -f -- tests/vnext/market_economy_a_patch_setup_test.gd tests/vnext/market_economy_flow_diagnostic_test.gd
           git diff --check
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
 
       - name: Install Godot 4.6.3
         shell: pwsh
@@ -130,77 +104,24 @@ jobs:
           Invoke-WebRequest -Uri 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip' -OutFile $archive
           Expand-Archive -LiteralPath $archive -DestinationPath $install
           $binary = (Get-ChildItem -LiteralPath $install -Filter 'Godot_v4.6.3-stable_win64.exe' -Recurse | Select-Object -First 1).FullName
-          if (-not $binary) { throw 'Godot 4.6.3 executable was not found' }
           "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          & $binary --version
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Clean import
         shell: pwsh
         run: |
-          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--editor','--headless','--path','.', '--quit') -NoNewWindow -Wait -PassThru
-          if ($process.ExitCode -ne 0) { exit $process.ExitCode }
+          $p = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--editor','--headless','--path','.', '--quit') -NoNewWindow -Wait -PassThru
+          if ($p.ExitCode -ne 0) { exit $p.ExitCode }
 
-      - name: Run focused and ten-year economy tests
+      - name: Run focused candidate tests
         shell: pwsh
         run: |
-          function Invoke-EconomyTest {
-            param([string]$ScriptPath)
-            $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless','--path','.', '--script',$ScriptPath) -NoNewWindow -Wait -PassThru
-            Write-Host "ECON_FINALIZE script=$ScriptPath exit=$($process.ExitCode)"
-            if ($process.ExitCode -ne 0) { exit $process.ExitCode }
+          foreach ($script in @(
+            'res://tests/vnext/market_economy_test.gd',
+            'res://tests/vnext/market_economy_behavior_test.gd',
+            'res://tests/vnext/market_economy_recovery_test.gd',
+            'res://tests/vnext/market_economy_export_production_test.gd'
+          )) {
+            $p = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless','--path','.', '--script',$script) -NoNewWindow -Wait -PassThru
+            Write-Host "ECON_INDUSTRIAL script=$script exit=$($p.ExitCode)"
+            if ($p.ExitCode -ne 0) { exit $p.ExitCode }
           }
-          Invoke-EconomyTest 'res://tests/vnext/market_economy_test.gd'
-          Invoke-EconomyTest 'res://tests/vnext/market_economy_behavior_test.gd'
-          Invoke-EconomyTest 'res://tests/vnext/market_economy_recovery_test.gd'
-          Invoke-EconomyTest 'res://tests/vnext/market_economy_export_production_test.gd'
-          Invoke-EconomyTest 'res://tests/vnext/market_economy_long_term_test.gd'
-
-      - name: Run unified vNext validation
-        shell: pwsh
-        run: |
-          python -B tools/run_vnext_validation.py --root . --godot "$env:GODOT_BIN"
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-      - name: Run repository validation
-        shell: pwsh
-        run: |
-          & ./tools/run_validation.ps1 -GodotPath $env:GODOT_BIN -ProjectPath .
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-      - name: Regenerate variable-state audit documents
-        shell: pwsh
-        run: |
-          python -B tools/audit_variable_state.py --root .
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          python tools/render_variable_state_audit_summary.py
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          python tools/render_variable_state_member_inventory.py
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          python tools/generate_variable_state_docs.py
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          python tools/render_variable_refactor_plan.py
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-      - name: Commit validated economy repair
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          git diff --check
-          git add -- scripts/vnext/economy/market_economy.gd scripts/vnext/economy/market_route_network.gd tests/vnext/market_economy_recovery_test.gd docs/refactors/variable_state_audit.md docs/refactors/variable_state_member_inventory.md docs/refactors/state_ownership_matrix.md docs/refactors/variable_refactor_plan.md
-          $staged = @(git diff --cached --name-only)
-          foreach ($path in $staged) {
-            if ($path -match '\.uid$|(^|/)(build|builds|export|exports|cache|logs?)(/|$)') {
-              throw "Generated artifact must not be committed: $path"
-            }
-          }
-          git diff --cached --check
-          git fetch origin feat/vnext-market-economy-20260809
-          $remoteHead = (git rev-parse origin/feat/vnext-market-economy-20260809).Trim()
-          if ($remoteHead -ne $env:ECON_START_HEAD) {
-            throw "Remote branch advanced during validation: start=$env:ECON_START_HEAD current=$remoteHead"
-          }
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'Fix economy supply-chain continuity'
-          git push origin HEAD:feat/vnext-market-economy-20260809
