@@ -110,7 +110,12 @@ func update(state: VNextStatePolitics, pressure_input: VNextPoliticsPressureInpu
 	}
 
 
-func _advance_one_day(candidate: Dictionary, input: VNextPoliticsPressureInput, daily_input: Dictionary, total_pressure: float) -> Dictionary:
+func _advance_one_day(
+	candidate: Dictionary,
+	input: VNextPoliticsPressureInput,
+	daily_input: Dictionary,
+	total_pressure: float
+) -> Dictionary:
 	var next_day := int(candidate.get("period_index", 0)) + 1
 	if next_day > VNextStatePolitics.MAX_ELAPSED_DAYS:
 		return _fail("elapsed_day_overflow", "political elapsed-day bound exceeded")
@@ -156,7 +161,11 @@ func _advance_one_day(candidate: Dictionary, input: VNextPoliticsPressureInput, 
 	var policy_burden := _policy_burden(active, policies)
 	var leader_effect := _stable_actor_effect(str(candidate.get("government_leader_id", "")), 3.0)
 	var institution_effect := _stable_actor_effect(str(candidate.get("government_id", "")), 2.0)
-	var procedural_baseline := clampf(float(REGIME_PROCEDURAL_BASELINES.get(str(candidate.get("regime_type", "")), 50.0)) + institution_effect, 0.0, 100.0)
+	var procedural_baseline := clampf(
+		float(REGIME_PROCEDURAL_BASELINES.get(str(candidate.get("regime_type", "")), 50.0)) + institution_effect,
+		0.0,
+		100.0
+	)
 	var corruption := float(capacity.get("corruption", 0.0))
 	var legitimacy_target := clampf(
 		weighted_support * 0.25
@@ -168,7 +177,8 @@ func _advance_one_day(candidate: Dictionary, input: VNextPoliticsPressureInput, 
 			- total_pressure * 0.28
 			+ input.military_result_signal() * 0.08
 			+ leader_effect,
-		0.0, 100.0
+		0.0,
+		100.0
 	)
 	var legitimacy := lerpf(float(candidate.get("legitimacy", 0.0)), legitimacy_target, _daily_alpha(0.20))
 	var stability_target := clampf(
@@ -181,7 +191,8 @@ func _advance_one_day(candidate: Dictionary, input: VNextPoliticsPressureInput, 
 			- policy_burden * 0.12
 			+ input.military_result_signal() * 0.05
 			+ leader_effect * 0.5,
-		0.0, 100.0
+		0.0,
+		100.0
 	)
 	var stability := lerpf(float(candidate.get("stability", 0.0)), stability_target, _daily_alpha(0.22))
 	candidate["legitimacy"] = clampf(legitimacy, 0.0, 100.0)
@@ -194,10 +205,18 @@ func _advance_one_day(candidate: Dictionary, input: VNextPoliticsPressureInput, 
 	candidate["instability_streak"] = instability_days
 	candidate["recovery_streak"] = recovery_days
 	var days_since_change := _days_since_last_change(candidate, next_day)
-	candidate["crisis_stage"] = _next_crisis_stage(str(candidate.get("crisis_stage", "stable")), unstable, instability_days, recovery_days, days_since_change)
+	candidate["crisis_stage"] = _next_crisis_stage(
+		str(candidate.get("crisis_stage", "stable")), unstable, instability_days,
+		recovery_days, days_since_change
+	)
 
 	var government_change: Dictionary = {}
-	if instability_days >= GOVERNMENT_CHANGE_DAYS and weighted_support < 48.0 and str(candidate.get("crisis_stage", "")) == "crisis" and _transition_allowed(candidate, next_day):
+	if (
+		instability_days >= GOVERNMENT_CHANGE_DAYS
+		and weighted_support < 48.0
+		and str(candidate.get("crisis_stage", "")) == "crisis"
+		and _transition_allowed(candidate, next_day)
+	):
 		var challenger := _select_challenger(candidate, total_pressure)
 		if not challenger.is_empty():
 			government_change = _apply_government_change(candidate, challenger, total_pressure)
@@ -212,7 +231,12 @@ func _advance_one_day(candidate: Dictionary, input: VNextPoliticsPressureInput, 
 		and float(candidate.get("legitimacy", 0.0)) >= VNextStatePolitics.VIABILITY_LEGITIMACY_THRESHOLD
 		and float(candidate.get("stability", 0.0)) >= VNextStatePolitics.VIABILITY_STABILITY_THRESHOLD
 	)
-	return {"success": true, "candidate": candidate, "policy_changes": policy_changes, "government_change": government_change}
+	return {
+		"success": true,
+		"candidate": candidate,
+		"policy_changes": policy_changes,
+		"government_change": government_change,
+	}
 
 
 func _economic_pressure(input: VNextPoliticsPressureInput) -> float:
@@ -263,10 +287,17 @@ func _update_capacity(old_capacity: Dictionary, input: VNextPoliticsPressureInpu
 	var old_control := float(old_capacity.get("control", 0.0))
 	var positive_growth := maxf(0.0, input.growth_signal())
 	var admin_target := clampf(old_admin - total_pressure * 0.08 + positive_growth * 0.035, 0.0, 100.0)
-	var enforcement_target := clampf(old_enforcement - total_pressure * 0.06 + input.mobilization_pressure() * 0.035 - input.casualty_pressure() * 0.025, 0.0, 100.0)
+	var enforcement_target := clampf(
+		old_enforcement - total_pressure * 0.06 + input.mobilization_pressure() * 0.035 - input.casualty_pressure() * 0.025,
+		0.0, 100.0
+	)
 	var fiscal_target := clampf(old_fiscal - input.fiscal_pressure() * 0.10 - total_pressure * 0.025 + positive_growth * 0.04, 0.0, 100.0)
 	var corruption_target := clampf(old_corruption + input.fiscal_pressure() * 0.065 + input.shortage_pressure() * 0.035 - old_admin * 0.012, 0.0, 100.0)
-	var control_target := clampf(admin_target * 0.30 + enforcement_target * 0.25 + fiscal_target * 0.20 + (100.0 - corruption_target) * 0.10 + old_control * 0.15 - total_pressure * 0.32, 0.0, 100.0)
+	var control_target := clampf(
+		admin_target * 0.30 + enforcement_target * 0.25 + fiscal_target * 0.20
+			+ (100.0 - corruption_target) * 0.10 + old_control * 0.15 - total_pressure * 0.32,
+		0.0, 100.0
+	)
 	return {
 		"administrative": lerpf(old_admin, admin_target, _daily_alpha(0.20)),
 		"enforcement": lerpf(old_enforcement, enforcement_target, _daily_alpha(0.20)),
@@ -301,6 +332,7 @@ func _review_policies(candidate: Dictionary, input: VNextPoliticsPressureInput, 
 	if period - last_review < POLICY_REVIEW_COOLDOWN_DAYS:
 		return changes
 	candidate["last_policy_review_period"] = period
+	var forces := _sorted_forces(candidate.get("forces", []) as Array)
 	var policies := _sorted_policies(candidate.get("policies", []) as Array)
 	var active := _sorted_active(candidate.get("active_policies", []) as Array)
 	for index: int in range(active.size()):
@@ -326,7 +358,11 @@ func _review_policies(candidate: Dictionary, input: VNextPoliticsPressureInput, 
 		if str(active_item.get("policy_id", "")) == str(best_policy.get("policy_id", "")):
 			current_same_policy = true
 			break
-	var should_change := active.is_empty() or (not current_same_policy and best_score >= current_score + POLICY_CHANGE_MARGIN) or (total_pressure >= EMERGENCY_POLICY_PRESSURE and not current_same_policy and best_score >= current_score + 2.0)
+	var should_change := (
+		active.is_empty()
+		or (not current_same_policy and best_score >= current_score + POLICY_CHANGE_MARGIN)
+		or (total_pressure >= EMERGENCY_POLICY_PRESSURE and not current_same_policy and best_score >= current_score + 2.0)
+	)
 	if not should_change:
 		return changes
 
@@ -356,7 +392,13 @@ func _review_policies(candidate: Dictionary, input: VNextPoliticsPressureInput, 
 	while history.size() > MAX_HISTORY:
 		history.pop_front()
 	candidate["policy_history"] = history
-	changes.append({"action": "adopted", "policy_id": best_policy.get("policy_id", ""), "replaced_policy_id": replaced_policy_id, "score": best_score, "period": period})
+	changes.append({
+		"action": "adopted",
+		"policy_id": best_policy.get("policy_id", ""),
+		"replaced_policy_id": replaced_policy_id,
+		"score": best_score,
+		"period": period,
+	})
 	return changes
 
 
@@ -507,7 +549,13 @@ func _new_active_policy(policy_id: String, period: int, control: float, candidat
 	var alignment := _policy_governing_alignment(policy, candidate.get("forces", []) as Array, str(candidate.get("government_group_id", "")))
 	var leader_effect := _stable_actor_effect(str(candidate.get("government_leader_id", "")), 3.0)
 	var strength := clampf((control / 100.0) * (0.72 + alignment * 0.0028) + leader_effect * 0.005, 0.15, 1.0)
-	return {"policy_id": policy_id, "started_period": period, "implementation_strength": strength, "last_review_period": period, "status": "implementing"}
+	return {
+		"policy_id": policy_id,
+		"started_period": period,
+		"implementation_strength": strength,
+		"last_review_period": period,
+		"status": "implementing",
+	}
 
 
 func _is_unstable(weighted_support: float, control: float, legitimacy: float, stability: float, coalition_cohesion: float, leader_effect: float) -> bool:
@@ -561,7 +609,11 @@ func _select_challenger(candidate: Dictionary, total_pressure: float) -> Diction
 		var opposition := clampf(50.0 - float(force.get("government_support", 0.0)) * 0.5, 0.0, 100.0)
 		if opposition < 35.0:
 			continue
-		var power := float(force.get("influence", 0.0)) * 0.40 + float(force.get("institutional_access", 0.0)) * 0.35 + float(force.get("mobilization_capacity", 0.0)) * 0.25
+		var power := (
+			float(force.get("influence", 0.0)) * 0.40
+			+ float(force.get("institutional_access", 0.0)) * 0.35
+			+ float(force.get("mobilization_capacity", 0.0)) * 0.25
+		)
 		var coalition := _challenger_coalition_feasibility(force, forces, current_group_id)
 		var procedure := _challenger_procedure_score(candidate, force, total_pressure)
 		var mandate := power * 0.30 + opposition * 0.25 + coalition * 0.30 + procedure * 0.15
@@ -569,7 +621,12 @@ func _select_challenger(candidate: Dictionary, total_pressure: float) -> Diction
 		mandate = clampf(mandate, 0.0, 100.0)
 		if mandate > best_score or (is_equal_approx(mandate, best_score) and force_id < str((best.get("force", {}) as Dictionary).get("force_id", "~"))):
 			best_score = mandate
-			best = {"force": force.duplicate(true), "mandate_score": mandate, "procedure_score": procedure, "coalition_score": coalition}
+			best = {
+				"force": force.duplicate(true),
+				"mandate_score": mandate,
+				"procedure_score": procedure,
+				"coalition_score": coalition,
+			}
 	if best_score < CHALLENGER_MANDATE_THRESHOLD:
 		return {}
 	return best
@@ -605,7 +662,7 @@ func _return_government_penalty(candidate: Dictionary, challenger_id: String) ->
 	var history := _sorted_history(candidate.get("government_change_history", []) as Array)
 	if history.is_empty():
 		return 0.0
-	var last := history.back()
+	var last: Dictionary = history.back() as Dictionary
 	if challenger_id != str(last.get("old_government_group_id", "")):
 		return 0.0
 	var age := int(candidate.get("period_index", 0)) - int(last.get("period", 0))
@@ -636,7 +693,11 @@ func _apply_government_change(candidate: Dictionary, challenger_result: Dictiona
 		force["government_support"] = baseline
 		force["last_support_delta"] = baseline - old_support
 		var support_history := (force.get("support_history", []) as Array).duplicate(true)
-		support_history.append({"period": period, "support": baseline, "delta": baseline - old_support})
+		var rebase_record: Dictionary = {"period": period, "support": baseline, "delta": baseline - old_support}
+		if not support_history.is_empty() and int((support_history.back() as Dictionary).get("period", -1)) == period:
+			support_history[support_history.size() - 1] = rebase_record
+		else:
+			support_history.append(rebase_record)
 		while support_history.size() > VNextStatePolitics.MAX_FORCE_HISTORY:
 			support_history.pop_front()
 		force["support_history"] = support_history
