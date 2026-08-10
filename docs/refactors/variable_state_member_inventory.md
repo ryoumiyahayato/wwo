@@ -525,7 +525,7 @@
 @ scripts/character/character_tendency_service.gd | CharacterTendencyService
 5 K config
 @ scripts/character/exited_character_record.gd | ExitedCharacterRecord
-4 K character_id
+4 K character
 5 K reason
 6 K exit_hour
 7 K successor_character_id
@@ -1298,7 +1298,7 @@
 9 K _rules
 10 K _processed_key_order
 12 C MAX_PROCESSED_KEYS
-@ scripts/v2_2/v2_relationship_progress_service.gd | V2RelationshipService
+@ scripts/v2_2/v2_relationship_progress_service.gd | V2RelationshipProgressService
 5 K relationships
 6 K processed_idempotency_keys
 7 K _rules
