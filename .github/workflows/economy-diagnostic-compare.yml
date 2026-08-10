@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - feat/vnext-market-economy-20260809
+  pull_request:
+    branches:
+      - master
 
 permissions:
   contents: read
