@@ -525,7 +525,7 @@
 @ scripts/character/character_tendency_service.gd | CharacterTendencyService
 5 K config
 @ scripts/character/exited_character_record.gd | ExitedCharacterRecord
-4 K character
+4 K character_id
 5 K reason
 6 K exit_hour
 7 K successor_character_id
@@ -688,16 +688,16 @@
 15 K position_structure
 16 K organization_relations
 @ scripts/core/models/population_group_data.gd | PopulationGroupData
-5 K id
-6 K region_id
-7 E population_count
-8 K social_class
-9 K occupation_category
-10 K average_income
-11 K average_education
-12 K unemployment_rate
-13 K public_political_leaning
-14 K basic_living_state
+4 K id
+5 K region_id
+6 E population_count
+7 K social_class
+8 K occupation_category
+9 K average_income
+10 K average_education
+11 K unemployment_rate
+12 K public_political_leaning
+13 K basic_living_state
 @ scripts/core/models/region_data.gd | RegionData
 4 K id
 5 K name
@@ -1298,7 +1298,7 @@
 9 K _rules
 10 K _processed_key_order
 12 C MAX_PROCESSED_KEYS
-@ scripts/v2_2/v2_relationship_progress_service.gd | V2RelationshipProgressService
+@ scripts/v2_2/v2_relationship_progress_service.gd | V2RelationshipService
 5 K relationships
 6 K processed_idempotency_keys
 7 K _rules
@@ -1974,3 +1974,4 @@
 7 C DETAIL_SELECTED_COLOR
 9 A _city_detail_catalog
 ```
+
