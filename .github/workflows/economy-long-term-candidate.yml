@@ -1,0 +1,62 @@
+name: Economy Industrial Replenishment 10-Year
+
+on:
+  pull_request:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  economy-long-term:
+    runs-on: windows-2025
+    timeout-minutes: 40
+    steps:
+      - name: Checkout current economy branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/vnext-market-economy-20260809
+          fetch-depth: 1
+
+      - name: Reuse validated candidate patch
+        shell: pwsh
+        run: |
+          @'
+          from pathlib import Path
+          workflow = Path('.github/workflows/economy-diagnostic-compare.yml').read_text(encoding='utf-8').replace('\r\n', '\n')
+          marker = '          from pathlib import Path\n'
+          start = workflow.index(marker)
+          end = workflow.index("          '@ | python -", start)
+          block = workflow[start:end]
+          lines = []
+          for line in block.splitlines():
+              lines.append(line[10:] if line.startswith('          ') else line)
+          script = '\n'.join(lines) + '\n'
+          exec(compile(script, '<economy-candidate-patch>', 'exec'), {})
+          '@ | python -
+          git diff --check
+
+      - name: Install Godot 4.6.3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'godot.zip'
+          $install = Join-Path $env:RUNNER_TEMP 'godot-4.6.3'
+          Invoke-WebRequest -Uri 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip' -OutFile $archive
+          Expand-Archive -LiteralPath $archive -DestinationPath $install
+          $binary = (Get-ChildItem -LiteralPath $install -Filter 'Godot_v4.6.3-stable_win64.exe' -Recurse | Select-Object -First 1).FullName
+          "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Clean import
+        shell: pwsh
+        run: |
+          $p = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--editor','--headless','--path','.', '--quit') -NoNewWindow -Wait -PassThru
+          if ($p.ExitCode -ne 0) { exit $p.ExitCode }
+
+      - name: Run complete 3650-day economy test
+        shell: pwsh
+        run: |
+          $p = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless','--path','.', '--script','res://tests/vnext/market_economy_long_term_test.gd') -NoNewWindow -Wait -PassThru
+          Write-Host "ECON_10Y exit=$($p.ExitCode)"
+          if ($p.ExitCode -ne 0) { exit $p.ExitCode }
