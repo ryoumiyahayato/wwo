@@ -1,9 +1,9 @@
 name: Economy Finalize Validated Repair
 
 on:
-  push:
+  pull_request:
     branches:
-      - feat/vnext-market-economy-20260809
+      - master
 
 permissions:
   contents: write
