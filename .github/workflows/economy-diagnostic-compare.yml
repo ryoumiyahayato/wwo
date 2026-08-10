@@ -13,21 +13,13 @@ permissions:
 
 jobs:
   economy-compare:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - label: baseline
-            ref: a20cfc9ef9aa4ed20fe0fcbc9f1d9687b0588d1c
-          - label: same-day-pressure
-            ref: 75682ef9e777fb47c14cdf592c443a72e43a686d
     runs-on: windows-2025
     timeout-minutes: 30
     steps:
-      - name: Checkout diagnostic commit
+      - name: Checkout precision candidate
         uses: actions/checkout@v4
         with:
-          ref: ${{ matrix.ref }}
+          ref: 9288bc39638b8e0e66c80544bd1f4c3b92e9ede9
           fetch-depth: 1
 
       - name: Install Godot 4.6.3
@@ -61,13 +53,11 @@ jobs:
             return $process.ExitCode
           }
 
-          Write-Host "ECON_COMPARE label=${{ matrix.label }} ref=${{ matrix.ref }}"
+          Write-Host 'ECON_COMPARE label=pressure-precision ref=9288bc39638b8e0e66c80544bd1f4c3b92e9ede9'
           $setupExit = Invoke-GodotScript 'res://tests/vnext/market_economy_a_patch_setup_test.gd'
           if ($setupExit -ne 0) { exit $setupExit }
-
           $behaviorExit = Invoke-GodotScript 'res://tests/vnext/market_economy_behavior_test.gd'
+          if ($behaviorExit -ne 0) { exit $behaviorExit }
           $longExit = Invoke-GodotScript 'res://tests/vnext/market_economy_long_term_test.gd'
           Write-Host "ECON_COMPARE complete setup=$setupExit behavior=$behaviorExit long_term=$longExit"
-
           if ($longExit -ne 0) { exit $longExit }
-          if ('${{ matrix.label }}' -eq 'same-day-pressure' -and $behaviorExit -ne 0) { exit $behaviorExit }
