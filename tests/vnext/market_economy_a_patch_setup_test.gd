@@ -15,19 +15,26 @@ func _run() -> void:
 	_check(not source.is_empty(), "market economy source is readable")
 	source = source.replace("\r\n", "\n")
 
-	var scale_anchor: String = "const MIN_PRICE_CENTIMES: int = 1\nconst SEASONAL_COMMODITY_CATEGORIES: Dictionary = {"
-	var scale_replacement: String = "const MIN_PRICE_CENTIMES: int = 1\nconst PRICE_SCALE: int = 10000\nconst SEASONAL_COMMODITY_CATEGORIES: Dictionary = {"
-	_check(source.contains(scale_anchor), "price scale anchor is exact")
-	if source.contains(scale_anchor):
-		source = source.replace(scale_anchor, scale_replacement)
-
-	var policy_anchor: String = "\t\"price_smoothing_bp\": 1800,\n\t\"maximum_daily_price_change_bp\": 1400,"
+	var policy_anchor: String = (
+		"\t\"price_smoothing_bp\": 1800,\n"
+		+ "\t\"maximum_daily_price_change_bp\": 1400,\n"
+		+ "\t\"minimum_price_bp_of_base\": 2500,\n"
+		+ "\t\"maximum_price_bp_of_base\": 12000,\n"
+		+ "\t\"reserve_stock_bp\": 8500,\n"
+		+ "\t\"operating_increase_step_bp\": 140,\n"
+		+ "\t\"operating_decrease_step_bp\": 100,"
+	)
 	var policy_replacement: String = (
 		"\t\"price_smoothing_bp\": 1800,\n"
 		+ "\t\"maximum_daily_price_change_bp\": 1400,\n"
-		+ "\t\"same_day_balance_pressure_bp\": 1800,"
+		+ "\t\"same_day_balance_pressure_bp\": 1800,\n"
+		+ "\t\"minimum_price_bp_of_base\": 2500,\n"
+		+ "\t\"maximum_price_bp_of_base\": 12000,\n"
+		+ "\t\"reserve_stock_bp\": 8500,\n"
+		+ "\t\"operating_increase_step_bp\": 25,\n"
+		+ "\t\"operating_decrease_step_bp\": 20,"
 	)
-	_check(source.contains(policy_anchor), "price policy anchor is exact")
+	_check(source.contains(policy_anchor), "price and production policy anchor is exact")
 	if source.contains(policy_anchor):
 		source = source.replace(policy_anchor, policy_replacement)
 
@@ -78,81 +85,6 @@ func _run() -> void:
 	if source.contains(pressure_anchor):
 		source = source.replace(pressure_anchor, pressure_replacement)
 
-	var precision_anchor: String = (
-		"\t\t\tvar target_price: int = maxi(\n"
-		+ "\t\t\t\tMIN_PRICE_CENTIMES, base_price * target_multiplier_bp / BASIS_POINTS\n"
-		+ "\t\t\t)\n"
-		+ "\t\t\tvar previous_price: int = maxi(\n"
-		+ "\t\t\t\tMIN_PRICE_CENTIMES, int(commodity_state.get(\"price_centimes\", base_price))\n"
-		+ "\t\t\t)\n"
-		+ "\t\t\tvar smoothed: int = (\n"
-		+ "\t\t\t\tprevious_price * (BASIS_POINTS - smoothing_bp)\n"
-		+ "\t\t\t\t+ target_price * smoothing_bp\n"
-		+ "\t\t\t) / BASIS_POINTS\n"
-		+ "\t\t\tvar minimum_price: int = maxi(\n"
-		+ "\t\t\t\tMIN_PRICE_CENTIMES,\n"
-		+ "\t\t\t\tprevious_price * (BASIS_POINTS - max_change_bp) / BASIS_POINTS\n"
-		+ "\t\t\t)\n"
-		+ "\t\t\tvar maximum_price: int = maxi(\n"
-		+ "\t\t\t\tminimum_price,\n"
-		+ "\t\t\t\tprevious_price * (BASIS_POINTS + max_change_bp) / BASIS_POINTS\n"
-		+ "\t\t\t)\n"
-		+ "\t\t\tcommodity_state[\"price_centimes\"] = clampi(smoothed, minimum_price, maximum_price)\n"
-		+ "\t\t\tcommodity_state[\"target_price_centimes\"] = target_price"
-	)
-	var precision_replacement: String = (
-		"\t\t\tvar target_price_scaled: int = maxi(\n"
-		+ "\t\t\t\tPRICE_SCALE,\n"
-		+ "\t\t\t\tbase_price * PRICE_SCALE * target_multiplier_bp / BASIS_POINTS\n"
-		+ "\t\t\t)\n"
-		+ "\t\t\tvar previous_price: int = maxi(\n"
-		+ "\t\t\t\tMIN_PRICE_CENTIMES, int(commodity_state.get(\"price_centimes\", base_price))\n"
-		+ "\t\t\t)\n"
-		+ "\t\t\tvar previous_price_scaled: int = maxi(\n"
-		+ "\t\t\t\tPRICE_SCALE, int(commodity_state.get(\"price_scaled\", previous_price * PRICE_SCALE))\n"
-		+ "\t\t\t)\n"
-		+ "\t\t\tvar smoothed_scaled: int = (\n"
-		+ "\t\t\t\tprevious_price_scaled * (BASIS_POINTS - smoothing_bp)\n"
-		+ "\t\t\t\t+ target_price_scaled * smoothing_bp\n"
-		+ "\t\t\t) / BASIS_POINTS\n"
-		+ "\t\t\tvar minimum_price_scaled: int = maxi(\n"
-		+ "\t\t\t\tPRICE_SCALE,\n"
-		+ "\t\t\t\tprevious_price_scaled * (BASIS_POINTS - max_change_bp) / BASIS_POINTS\n"
-		+ "\t\t\t)\n"
-		+ "\t\t\tvar maximum_price_scaled: int = maxi(\n"
-		+ "\t\t\t\tminimum_price_scaled,\n"
-		+ "\t\t\t\tprevious_price_scaled * (BASIS_POINTS + max_change_bp) / BASIS_POINTS\n"
-		+ "\t\t\t)\n"
-		+ "\t\t\tvar next_price_scaled: int = clampi(\n"
-		+ "\t\t\t\tsmoothed_scaled, minimum_price_scaled, maximum_price_scaled\n"
-		+ "\t\t\t)\n"
-		+ "\t\t\tcommodity_state[\"price_scaled\"] = next_price_scaled\n"
-		+ "\t\t\tcommodity_state[\"target_price_scaled\"] = target_price_scaled\n"
-		+ "\t\t\tcommodity_state[\"price_centimes\"] = maxi(\n"
-		+ "\t\t\t\tMIN_PRICE_CENTIMES, int(round(float(next_price_scaled) / float(PRICE_SCALE)))\n"
-		+ "\t\t\t)\n"
-		+ "\t\t\tcommodity_state[\"target_price_centimes\"] = maxi(\n"
-		+ "\t\t\t\tMIN_PRICE_CENTIMES, int(round(float(target_price_scaled) / float(PRICE_SCALE)))\n"
-		+ "\t\t\t)"
-	)
-	_check(source.contains(precision_anchor), "price precision anchor is exact")
-	if source.contains(precision_anchor):
-		source = source.replace(precision_anchor, precision_replacement)
-
-	var state_anchor: String = (
-		"\t\t\"price_centimes\": maxi(MIN_PRICE_CENTIMES, base_price),\n"
-		+ "\t\t\"target_price_centimes\": maxi(MIN_PRICE_CENTIMES, base_price),"
-	)
-	var state_replacement: String = (
-		"\t\t\"price_centimes\": maxi(MIN_PRICE_CENTIMES, base_price),\n"
-		+ "\t\t\"target_price_centimes\": maxi(MIN_PRICE_CENTIMES, base_price),\n"
-		+ "\t\t\"price_scaled\": maxi(MIN_PRICE_CENTIMES, base_price) * PRICE_SCALE,\n"
-		+ "\t\t\"target_price_scaled\": maxi(MIN_PRICE_CENTIMES, base_price) * PRICE_SCALE,"
-	)
-	_check(source.contains(state_anchor), "commodity state price precision anchor is exact")
-	if source.contains(state_anchor):
-		source = source.replace(state_anchor, state_replacement)
-
 	if failures == 0:
 		var file: FileAccess = FileAccess.open(SOURCE_PATH, FileAccess.WRITE)
 		_check(file != null, "patched source is writable")
@@ -160,7 +92,7 @@ func _run() -> void:
 			file.store_string(source)
 			file.close()
 
-	print("VNext market economy precision patch setup: %d checks, %d failures" % [checks, failures])
+	print("VNext market economy production-inertia patch setup: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures > 0 or checks <= 0 else 0)
 
 
