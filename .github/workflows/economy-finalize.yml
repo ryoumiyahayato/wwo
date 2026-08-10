@@ -43,13 +43,17 @@ jobs:
           exec(compile(script, '<validated-economy-candidate>', 'exec'), {})
           '@ | python -
 
-          git rm -f --ignore-unmatch -- \
-            tests/vnext/market_economy_a_patch_setup_test.gd \
-            tests/vnext/market_economy_flow_diagnostic_test.gd \
-            .github/workflows/economy-diagnostic-compare.yml \
-            .github/workflows/economy-long-term-candidate.yml \
-            .github/workflows/economy-finalize.yml
+          $cleanupPaths = @(
+            'tests/vnext/market_economy_a_patch_setup_test.gd',
+            'tests/vnext/market_economy_flow_diagnostic_test.gd',
+            '.github/workflows/economy-diagnostic-compare.yml',
+            '.github/workflows/economy-long-term-candidate.yml',
+            '.github/workflows/economy-finalize.yml'
+          )
+          git rm -f --ignore-unmatch -- $cleanupPaths
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           git diff --check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -107,48 +111,62 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           python -B tools/audit_variable_state.py --root .
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/render_variable_state_audit_summary.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/render_variable_state_member_inventory.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/generate_variable_state_docs.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/render_variable_refactor_plan.py
-          foreach ($path in @(
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          $auditDocs = @(
             'docs/refactors/variable_state_audit.md',
             'docs/refactors/variable_state_member_inventory.md',
             'docs/refactors/state_ownership_matrix.md',
             'docs/refactors/variable_refactor_plan.md'
-          )) {
+          )
+          foreach ($path in $auditDocs) {
             if (-not (Test-Path $path) -or (Get-Item $path).Length -le 0) { throw "Missing audit document: $path" }
           }
-          git add -- docs/refactors/variable_state_audit.md docs/refactors/variable_state_member_inventory.md docs/refactors/state_ownership_matrix.md docs/refactors/variable_refactor_plan.md
+          git add -- $auditDocs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
           python -B tools/audit_variable_state.py --root .
           python tools/render_variable_state_audit_summary.py
           python tools/render_variable_state_member_inventory.py
           python tools/generate_variable_state_docs.py
           python tools/render_variable_refactor_plan.py
-          git diff --exit-code -- docs/refactors/variable_state_audit.md docs/refactors/variable_state_member_inventory.md docs/refactors/state_ownership_matrix.md docs/refactors/variable_refactor_plan.md
+          git diff --exit-code -- $auditDocs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Guard scope and commit validated repair
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          git add -A -- \
-            scripts/vnext/economy \
-            tests/vnext/market_economy_test.gd \
-            tests/vnext/market_economy_long_term_test.gd \
-            tests/vnext/market_economy_behavior_test.gd \
-            tests/vnext/market_economy_recovery_test.gd \
-            tests/vnext/market_economy_export_production_test.gd \
-            tests/vnext/market_economy_a_patch_setup_test.gd \
-            tests/vnext/market_economy_flow_diagnostic_test.gd \
-            docs/refactors/variable_state_audit.md \
-            docs/refactors/variable_state_member_inventory.md \
-            docs/refactors/state_ownership_matrix.md \
-            docs/refactors/variable_refactor_plan.md \
-            .github/workflows/economy-diagnostic-compare.yml \
-            .github/workflows/economy-long-term-candidate.yml \
-            .github/workflows/economy-finalize.yml
-
+          $stagePaths = @(
+            'scripts/vnext/economy',
+            'tests/vnext/market_economy_test.gd',
+            'tests/vnext/market_economy_long_term_test.gd',
+            'tests/vnext/market_economy_behavior_test.gd',
+            'tests/vnext/market_economy_recovery_test.gd',
+            'tests/vnext/market_economy_export_production_test.gd',
+            'tests/vnext/market_economy_a_patch_setup_test.gd',
+            'tests/vnext/market_economy_flow_diagnostic_test.gd',
+            'docs/refactors/variable_state_audit.md',
+            'docs/refactors/variable_state_member_inventory.md',
+            'docs/refactors/state_ownership_matrix.md',
+            'docs/refactors/variable_refactor_plan.md',
+            '.github/workflows/economy-diagnostic-compare.yml',
+            '.github/workflows/economy-long-term-candidate.yml',
+            '.github/workflows/economy-finalize.yml'
+          )
+          git add -A -- $stagePaths
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           git diff --cached --check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
           $staged = @(git diff --cached --name-only)
           foreach ($path in $staged) {
             $allowed = (
@@ -167,13 +185,19 @@ jobs:
             if (-not $allowed) { throw "Out-of-scope staged file: $path" }
             if ($path -match '\.uid$|(^|/)(build|builds|export|exports|cache|logs?)(/|$)') { throw "Generated artifact staged: $path" }
           }
-          if (Test-Path '.github/workflows/economy-diagnostic-compare.yml') { throw 'Temporary diagnostic workflow still exists' }
-          if (Test-Path '.github/workflows/economy-long-term-candidate.yml') { throw 'Temporary long-term workflow still exists' }
-          if (Test-Path '.github/workflows/economy-finalize.yml') { throw 'Temporary finalize workflow still exists' }
-          if (Test-Path 'tests/vnext/market_economy_a_patch_setup_test.gd') { throw 'Temporary patch setup test still exists' }
-          if (Test-Path 'tests/vnext/market_economy_flow_diagnostic_test.gd') { throw 'Temporary flow diagnostic test still exists' }
+
+          foreach ($temp in @(
+            '.github/workflows/economy-diagnostic-compare.yml',
+            '.github/workflows/economy-long-term-candidate.yml',
+            '.github/workflows/economy-finalize.yml',
+            'tests/vnext/market_economy_a_patch_setup_test.gd',
+            'tests/vnext/market_economy_flow_diagnostic_test.gd'
+          )) {
+            if (Test-Path $temp) { throw "Temporary diagnostic file still exists: $temp" }
+          }
 
           git fetch origin feat/vnext-market-economy-20260809
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $remoteHead = (git rev-parse origin/feat/vnext-market-economy-20260809).Trim()
           if ($remoteHead -ne $env:ECON_START_HEAD) {
             throw "Remote branch advanced during final validation: start=$env:ECON_START_HEAD current=$remoteHead"
@@ -182,4 +206,6 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -m 'Fix economy supply-chain continuity'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           git push origin HEAD:feat/vnext-market-economy-20260809
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
