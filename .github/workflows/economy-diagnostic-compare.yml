@@ -1,4 +1,4 @@
-name: Economy Focused Candidate Gate
+name: Economy 10-Year Candidate Gate
 
 on:
   push:
@@ -12,14 +12,14 @@ permissions:
   contents: read
 
 jobs:
-  economy-focused:
+  economy-long-term:
     runs-on: windows-2025
-    timeout-minutes: 20
+    timeout-minutes: 35
     steps:
-      - name: Checkout current economy branch
+      - name: Checkout fixed candidate
         uses: actions/checkout@v4
         with:
-          ref: feat/vnext-market-economy-20260809
+          ref: 3c691e9d57ce2e2f56026eeed627df286f27577a
           fetch-depth: 1
 
       - name: Install Godot 4.6.3
@@ -40,21 +40,22 @@ jobs:
         shell: pwsh
         run: |
           $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--editor','--headless','--path','.', '--quit') -NoNewWindow -Wait -PassThru
-          Write-Host "ECON_FOCUSED import_exit=$($process.ExitCode)"
+          Write-Host "ECON_LONG import_exit=$($process.ExitCode)"
           if ($process.ExitCode -ne 0) { exit $process.ExitCode }
 
-      - name: Run focused economy candidate tests
+      - name: Run full 3650-day economy candidate
         shell: pwsh
         run: |
           function Invoke-GodotScript {
             param([string]$ScriptPath)
             $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless','--path','.', '--script',$ScriptPath) -NoNewWindow -Wait -PassThru
-            Write-Host "ECON_FOCUSED script=$ScriptPath exit=$($process.ExitCode)"
-            if ($process.ExitCode -ne 0) { exit $process.ExitCode }
+            Write-Host "ECON_LONG script=$ScriptPath exit=$($process.ExitCode)"
+            return $process.ExitCode
           }
 
-          Invoke-GodotScript 'res://tests/vnext/market_economy_a_patch_setup_test.gd'
-          Invoke-GodotScript 'res://tests/vnext/market_economy_test.gd'
-          Invoke-GodotScript 'res://tests/vnext/market_economy_behavior_test.gd'
-          Invoke-GodotScript 'res://tests/vnext/market_economy_recovery_test.gd'
-          Write-Host 'ECON_FOCUSED complete'
+          Write-Host 'ECON_LONG candidate=production-inertia-plus-same-day-pressure ref=3c691e9d57ce2e2f56026eeed627df286f27577a'
+          $setupExit = Invoke-GodotScript 'res://tests/vnext/market_economy_a_patch_setup_test.gd'
+          if ($setupExit -ne 0) { exit $setupExit }
+          $longExit = Invoke-GodotScript 'res://tests/vnext/market_economy_long_term_test.gd'
+          Write-Host "ECON_LONG complete setup=$setupExit long_term=$longExit"
+          if ($longExit -ne 0) { exit $longExit }
