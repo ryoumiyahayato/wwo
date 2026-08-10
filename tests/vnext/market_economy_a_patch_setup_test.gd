@@ -13,6 +13,7 @@ func _initialize() -> void:
 func _run() -> void:
 	var source: String = FileAccess.get_file_as_string(SOURCE_PATH)
 	_check(not source.is_empty(), "market economy source is readable")
+	source = source.replace("\r\n", "\n")
 
 	var policy_anchor: String = "\t\"price_smoothing_bp\": 1800,\n\t\"maximum_daily_price_change_bp\": 1400,"
 	var policy_replacement: String = (
