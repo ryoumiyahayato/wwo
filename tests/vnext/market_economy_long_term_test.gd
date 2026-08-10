@@ -2,6 +2,7 @@ extends SceneTree
 
 const TEN_YEAR_DAYS: int = 3650
 const CHECKPOINT_DAYS: int = 30
+const FINAL_YEAR_DAYS: int = 366
 
 var long_term_checks: int = 0
 var long_term_failures: int = 0
@@ -28,9 +29,10 @@ func _run() -> void:
 	_check(checkpoint_count >= 120, "ten-year test reaches regular checkpoints")
 	_check(economy.last_day_index() == TEN_YEAR_DAYS - 1, "simulation reaches the full 3650 days")
 	_check(economy.history_snapshot(
-		_region(economy, "region_loran_dawnbay"), "bread", 366
-	).size() == 366, "history retains the bounded recent window")
+		_region(economy, "region_loran_dawnbay"), "bread", FINAL_YEAR_DAYS
+	).size() == FINAL_YEAR_DAYS, "history retains the bounded recent window")
 	_check_price_wave(economy)
+	_check_long_run_price_diagnostics(economy)
 	_check_national_markets_survive(economy)
 	var final_snapshot: Dictionary = economy.snapshot()
 	_check((final_snapshot.get("shipments", []) as Array).size() <= 256, "in-transit queue stays bounded")
@@ -93,7 +95,7 @@ func _check_checkpoint_health(economy: VNextMarketEconomy, day_index: int) -> vo
 
 func _check_price_wave(economy: VNextMarketEconomy) -> void:
 	var values: Array[Dictionary] = economy.history_snapshot(
-		_region(economy, "region_loran_dawnbay"), "bread", 366
+		_region(economy, "region_loran_dawnbay"), "bread", FINAL_YEAR_DAYS
 	)
 	var minimum: int = 2147483647
 	var maximum: int = 0
@@ -105,6 +107,76 @@ func _check_price_wave(economy: VNextMarketEconomy) -> void:
 		distinct_prices[price] = true
 	_check(distinct_prices.size() > 1, "normal economy exhibits price movement")
 	_check(maximum > minimum, "normal economy has a measurable price wave")
+
+
+func _check_long_run_price_diagnostics(economy: VNextMarketEconomy) -> void:
+	var market_id: String = _region(economy, "region_loran_dawnbay")
+	for commodity_id: String in ["bread", "coal", "steel"]:
+		var metrics: Dictionary = _series_metrics(
+			economy.history_snapshot(market_id, commodity_id, FINAL_YEAR_DAYS)
+		)
+		_check(int(metrics.get("count", 0)) == FINAL_YEAR_DAYS, "%s final-year history is complete" % commodity_id)
+		_check(int(metrics.get("minimum", 0)) > 0, "%s final-year prices remain positive" % commodity_id)
+		_check(int(metrics.get("distinct", 0)) > 1, "%s final-year prices do not freeze" % commodity_id)
+		print("ECON_DIAG %s_final_year %s" % [commodity_id, _metric_string(metrics)])
+
+
+func _series_metrics(values: Array[Dictionary]) -> Dictionary:
+	if values.is_empty():
+		return {"count": 0}
+	var minimum: int = 2147483647
+	var maximum: int = 0
+	var total: float = 0.0
+	var abs_change_bp_total: float = 0.0
+	var max_daily_change_bp: int = 0
+	var distinct: Dictionary = {}
+	var previous: int = 0
+	for index: int in range(values.size()):
+		var price: int = int(values[index].get("price_centimes", 0))
+		minimum = mini(minimum, price)
+		maximum = maxi(maximum, price)
+		total += price
+		distinct[price] = true
+		if index > 0 and previous > 0:
+			var change_bp: int = int(round(absf(float(price - previous)) / float(previous) * 10000.0))
+			abs_change_bp_total += change_bp
+			max_daily_change_bp = maxi(max_daily_change_bp, change_bp)
+		previous = price
+	var mean: float = total / float(values.size())
+	var variance: float = 0.0
+	for row: Dictionary in values:
+		var delta: float = float(row.get("price_centimes", 0)) - mean
+		variance += delta * delta
+	variance /= float(values.size())
+	var stddev: float = sqrt(maxf(0.0, variance))
+	return {
+		"count": values.size(),
+		"minimum": minimum,
+		"maximum": maximum,
+		"mean": mean,
+		"range_bp_of_mean": 0 if mean <= 0.0 else int(round(float(maximum - minimum) / mean * 10000.0)),
+		"coefficient_variation_bp": 0 if mean <= 0.0 else int(round(stddev / mean * 10000.0)),
+		"avg_abs_daily_change_bp": 0 if values.size() <= 1 else int(round(abs_change_bp_total / float(values.size() - 1))),
+		"max_daily_change_bp": max_daily_change_bp,
+		"distinct": distinct.size(),
+	}
+
+
+func _metric_string(value: Dictionary) -> String:
+	return (
+		"count=%d min=%d max=%d mean=%.3f range_bp=%d cv_bp=%d avg_abs_daily_change_bp=%d max_daily_change_bp=%d distinct=%d"
+		% [
+			int(value.get("count", 0)),
+			int(value.get("minimum", 0)),
+			int(value.get("maximum", 0)),
+			float(value.get("mean", 0.0)),
+			int(value.get("range_bp_of_mean", 0)),
+			int(value.get("coefficient_variation_bp", 0)),
+			int(value.get("avg_abs_daily_change_bp", 0)),
+			int(value.get("max_daily_change_bp", 0)),
+			int(value.get("distinct", 0)),
+		]
+	)
 
 
 func _check_national_markets_survive(economy: VNextMarketEconomy) -> void:
