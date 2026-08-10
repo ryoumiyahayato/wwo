@@ -129,11 +129,13 @@ func movement_efficiency() -> float:
 	var organization_component: float = clampf(organization, 0.0, 1.0)
 	var equipment_component: float = clampf(equipment_factor(), 0.0, 1.0)
 	var morale_component: float = clampf(morale, 0.0, 1.0)
+	# Bounded floor preserves a recovery path, while equipment and organization
+	# remain strong enough that stripping equipment cannot make a formation faster.
 	return clampf(
-		0.20
-		+ supply_component * 0.35
+		0.15
+		+ supply_component * 0.30
 		+ organization_component * 0.25
-		+ equipment_component * 0.15
+		+ equipment_component * 0.25
 		+ morale_component * 0.05,
 		0.20,
 		1.0
@@ -223,11 +225,7 @@ func restore(data: Dictionary) -> bool:
 	formation_status = restored_status
 	supply_status = str(data.get("supply_status", "cut"))
 	defense_posture = restored_posture
-	update_supply(
-		restored_fill as Dictionary,
-		restored_level,
-		supply_status
-	)
+	update_supply(restored_fill as Dictionary, restored_level, supply_status)
 	if formation_status == STATUS_DESTROYED:
 		if personnel != 0:
 			return false
