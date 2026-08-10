@@ -41,22 +41,33 @@ jobs:
           $binary = (Get-ChildItem -LiteralPath $install -Filter 'Godot_v4.6.3-stable_win64.exe' -Recurse | Select-Object -First 1).FullName
           if (-not $binary) { throw 'Godot 4.6.3 executable was not found' }
           "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          & $binary --version
+          $version = Start-Process -FilePath $binary -ArgumentList @('--version') -NoNewWindow -Wait -PassThru
+          if ($version.ExitCode -ne 0) { exit $version.ExitCode }
 
       - name: Clean import
         shell: pwsh
         run: |
-          & $env:GODOT_BIN --editor --headless --path . --quit
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--editor','--headless','--path','.', '--quit') -NoNewWindow -Wait -PassThru
+          Write-Host "ECON_COMPARE import_exit=$($process.ExitCode)"
+          if ($process.ExitCode -ne 0) { exit $process.ExitCode }
 
       - name: Run economy diagnostics
         shell: pwsh
         run: |
-          $ErrorActionPreference = 'Continue'
+          function Invoke-GodotScript {
+            param([string]$ScriptPath)
+            $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless','--path','.', '--script',$ScriptPath) -NoNewWindow -Wait -PassThru
+            Write-Host "ECON_COMPARE script=$ScriptPath exit=$($process.ExitCode)"
+            return $process.ExitCode
+          }
+
           Write-Host "ECON_COMPARE label=${{ matrix.label }} ref=${{ matrix.ref }}"
-          Write-Host 'ECON_COMPARE setup_begin'
-          & $env:GODOT_BIN --headless --path . --script res://tests/vnext/market_economy_a_patch_setup_test.gd
-          Write-Host 'ECON_COMPARE behavior_begin'
-          & $env:GODOT_BIN --headless --path . --script res://tests/vnext/market_economy_behavior_test.gd
-          Write-Host 'ECON_COMPARE long_term_begin'
-          & $env:GODOT_BIN --headless --path . --script res://tests/vnext/market_economy_long_term_test.gd
-          Write-Host 'ECON_COMPARE complete'
+          $setupExit = Invoke-GodotScript 'res://tests/vnext/market_economy_a_patch_setup_test.gd'
+          if ($setupExit -ne 0) { exit $setupExit }
+
+          $behaviorExit = Invoke-GodotScript 'res://tests/vnext/market_economy_behavior_test.gd'
+          $longExit = Invoke-GodotScript 'res://tests/vnext/market_economy_long_term_test.gd'
+          Write-Host "ECON_COMPARE complete setup=$setupExit behavior=$behaviorExit long_term=$longExit"
+
+          if ($longExit -ne 0) { exit $longExit }
+          if ('${{ matrix.label }}' -eq 'same-day-pressure' -and $behaviorExit -ne 0) { exit $behaviorExit }
