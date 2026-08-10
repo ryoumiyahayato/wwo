@@ -7,6 +7,8 @@ const ACTION_MOVING: String = "moving"
 const ACTION_CONCENTRATING: String = "concentrating"
 const ACTION_ATTACKING: String = "attacking"
 const ACTION_DEFENDING: String = "defending"
+const STATUS_ACTIVE: String = "active"
+const STATUS_DESTROYED: String = "destroyed"
 const RESOURCE_IDS: PackedStringArray = ["food", "ammunition", "equipment", "transport_capacity"]
 const SUPPLY_STATUSES: PackedStringArray = ["full", "strained", "low", "cut"]
 
@@ -21,8 +23,9 @@ var morale: float = 0.0
 var organization: float = 0.0
 var current_city_id: String = ""
 var action_state: String = ACTION_IDLE
-var supply_status: String = "cut"
-var supply_level: float = 0.0
+var formation_status: String = STATUS_ACTIVE
+var supply_status: String = "full"
+var supply_level: float = 1.0
 var supply_fill: Dictionary = {}
 var defense_posture: float = 1.0
 var daily_requirements: Dictionary = {}
@@ -40,9 +43,9 @@ func configure(
 	starting_city_id: String,
 	requirements: Dictionary = {}
 ) -> bool:
-	if id.is_empty() or owner_country_id.is_empty() or starting_city_id.is_empty():
+	if VNextStableId.kind_of(id) != "formation" or owner_country_id.is_empty() or starting_city_id.is_empty():
 		return false
-	if starting_personnel <= 0:
+	if starting_personnel < 0:
 		return false
 	if not _is_unit_float_valid(starting_training) or not _is_unit_float_valid(starting_morale) or not _is_unit_float_valid(starting_organization):
 		return false
@@ -57,18 +60,29 @@ func configure(
 	current_city_id = starting_city_id
 	daily_requirements = _normalize_requirements(requirements, starting_personnel)
 	supply_fill = {
-		"food": 0.0,
-		"ammunition": 0.0,
-		"equipment": 0.0,
-		"transport_capacity": 0.0,
+		"food": 1.0,
+		"ammunition": 1.0,
+		"equipment": 1.0,
+		"transport_capacity": 1.0,
 	}
-	supply_level = 0.0
-	supply_status = "cut"
+	supply_level = 1.0
+	supply_status = "full"
+	action_state = ACTION_IDLE
+	formation_status = STATUS_DESTROYED if starting_personnel == 0 else STATUS_ACTIVE
+	if formation_status == STATUS_DESTROYED:
+		organization = 0.0
+		morale = 0.0
 	return is_valid()
 
 
 func is_valid() -> bool:
-	if formation_id.is_empty() or country_id.is_empty() or current_city_id.is_empty() or personnel < 0:
+	if VNextStableId.kind_of(formation_id) != "formation" or country_id.is_empty() or current_city_id.is_empty() or personnel < 0:
+		return false
+	if formation_status not in [STATUS_ACTIVE, STATUS_DESTROYED]:
+		return false
+	if formation_status == STATUS_ACTIVE and personnel <= 0:
+		return false
+	if formation_status == STATUS_DESTROYED and (personnel != 0 or action_state != ACTION_IDLE):
 		return false
 	if not is_finite(training) or not is_finite(morale) or not is_finite(organization):
 		return false
@@ -99,9 +113,31 @@ func is_valid() -> bool:
 	return true
 
 
+func can_receive_orders() -> bool:
+	return formation_status == STATUS_ACTIVE and personnel > 0 and action_state == ACTION_IDLE
+
+
 func equipment_factor() -> float:
 	var configured: float = float(equipment_sets.get("equipment_factor", 1.0))
 	return clampf(configured, 0.0, 1.5) if is_finite(configured) else 0.0
+
+
+func movement_efficiency() -> float:
+	if formation_status != STATUS_ACTIVE or personnel <= 0:
+		return 0.0
+	var supply_component: float = clampf(supply_level, 0.0, 1.0)
+	var organization_component: float = clampf(organization, 0.0, 1.0)
+	var equipment_component: float = clampf(equipment_factor(), 0.0, 1.0)
+	var morale_component: float = clampf(morale, 0.0, 1.0)
+	return clampf(
+		0.20
+		+ supply_component * 0.35
+		+ organization_component * 0.25
+		+ equipment_component * 0.15
+		+ morale_component * 0.05,
+		0.20,
+		1.0
+	)
 
 
 func apply_losses(losses: int) -> int:
@@ -111,6 +147,9 @@ func apply_losses(losses: int) -> int:
 		personnel = 0
 		organization = 0.0
 		morale = 0.0
+		action_state = ACTION_IDLE
+		formation_status = STATUS_DESTROYED
+		defense_posture = 1.0
 	return applied
 
 
@@ -126,7 +165,7 @@ func update_supply(
 		"transport_capacity": _safe_unit(new_supply_fill.get("transport_capacity", 0.0)),
 	}
 	supply_level = _safe_unit(new_supply_level)
-	supply_status = new_supply_status
+	supply_status = new_supply_status if SUPPLY_STATUSES.has(new_supply_status) else "cut"
 
 
 func to_dict() -> Dictionary:
@@ -142,6 +181,7 @@ func to_dict() -> Dictionary:
 		"organization": organization,
 		"current_city_id": current_city_id,
 		"action_state": action_state,
+		"formation_status": formation_status,
 		"supply_status": supply_status,
 		"supply_level": supply_level,
 		"supply_fill": supply_fill.duplicate(true),
@@ -156,7 +196,10 @@ func restore(data: Dictionary) -> bool:
 	var restored_requirements: Variant = data.get("daily_requirements", {})
 	var restored_level: float = float(data.get("supply_level", 0.0))
 	var restored_posture: float = float(data.get("defense_posture", 1.0))
+	var restored_status: String = str(data.get("formation_status", STATUS_ACTIVE))
 	if not restored_equipment is Dictionary or not restored_fill is Dictionary or not restored_requirements is Dictionary:
+		return false
+	if restored_status not in [STATUS_ACTIVE, STATUS_DESTROYED]:
 		return false
 	if not is_finite(restored_level) or restored_level < 0.0 or restored_level > 1.0:
 		return false
@@ -177,6 +220,7 @@ func restore(data: Dictionary) -> bool:
 		return false
 	parent_formation_id = str(data.get("parent_formation_id", ""))
 	action_state = str(data.get("action_state", ACTION_IDLE))
+	formation_status = restored_status
 	supply_status = str(data.get("supply_status", "cut"))
 	defense_posture = restored_posture
 	update_supply(
@@ -184,13 +228,15 @@ func restore(data: Dictionary) -> bool:
 		restored_level,
 		supply_status
 	)
-	return action_state in [
-		ACTION_IDLE,
-		ACTION_MOVING,
-		ACTION_CONCENTRATING,
-		ACTION_ATTACKING,
-		ACTION_DEFENDING,
-	] and is_valid()
+	if formation_status == STATUS_DESTROYED:
+		if personnel != 0:
+			return false
+		action_state = ACTION_IDLE
+		organization = 0.0
+		morale = 0.0
+	elif personnel <= 0:
+		return false
+	return is_valid()
 
 
 func _normalize_requirements(source: Dictionary, starting_personnel: int) -> Dictionary:
