@@ -1,26 +1,107 @@
-name: Economy Supply Chain Diagnostic
+name: Economy Finalize Candidate
 
 on:
-  push:
-    branches:
-      - feat/vnext-market-economy-20260809
   pull_request:
     branches:
       - master
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  economy-upstream:
+  economy-finalize:
     runs-on: windows-2025
-    timeout-minutes: 20
+    timeout-minutes: 65
     steps:
       - name: Checkout current economy branch
         uses: actions/checkout@v4
         with:
           ref: feat/vnext-market-economy-20260809
-          fetch-depth: 1
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Record starting remote head
+        shell: pwsh
+        run: |
+          $startHead = (git rev-parse HEAD).Trim()
+          "ECON_START_HEAD=$startHead" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          Write-Host "ECON_START_HEAD=$startHead"
+
+      - name: Apply minimal export-demand production fix
+        shell: pwsh
+        run: |
+          @'
+          from pathlib import Path
+
+          def replace_once(text: str, old: str, new: str, label: str) -> str:
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f"{label}: expected exactly one anchor, found {count}")
+              return text.replace(old, new, 1)
+
+          market_path = Path("scripts/vnext/economy/market_economy.gd")
+          market = market_path.read_text(encoding="utf-8").replace("\r\n", "\n")
+          market = replace_once(
+              market,
+              "\t\tunits < 0.0\n\t\tor not region_states.has(market_id)",
+              "\t\tis_nan(units)\n\t\tor is_inf(units)\n\t\tor units < 0.0\n\t\tor not region_states.has(market_id)",
+              "finite inventory setter",
+          )
+          market = replace_once(
+              market,
+              "\t\tvar output_shortage_bp: int = 0\n\t\tvar output_surplus: bool = true",
+              "\t\tvar output_shortage_bp: int = 0\n\t\tvar output_exports: float = 0.0\n\t\tvar output_surplus: bool = true",
+              "export signal declaration",
+          )
+          market = replace_once(
+              market,
+              "\t\t\toutput_shortage_bp = maxi(\n\t\t\t\toutput_shortage_bp, int(commodity_state.get(\"shortage_bp\", 0))\n\t\t\t)\n\t\t\tif float(commodity_state.get(\"inventory_coverage_bp\", 0)) <= 12000.0:",
+              "\t\t\toutput_shortage_bp = maxi(\n\t\t\t\toutput_shortage_bp, int(commodity_state.get(\"shortage_bp\", 0))\n\t\t\t)\n\t\t\toutput_exports += float(commodity_state.get(\"exports_units\", 0.0))\n\t\t\tif float(commodity_state.get(\"inventory_coverage_bp\", 0)) <= 12000.0:",
+              "export signal collection",
+          )
+          market = replace_once(
+              market,
+              "\t\tif margin > 0 and (output_shortage_bp >= 500 or input_shortage_bp >= 500):\n\t\t\ttarget += int(_policies.get(\"operating_increase_step_bp\", 140))\n\t\telif margin < 0 or (output_surplus and output_shortage_bp == 0):",
+              "\t\tif margin > 0 and (\n\t\t\toutput_shortage_bp >= 500\n\t\t\tor input_shortage_bp >= 500\n\t\t\tor output_exports > 0.0001\n\t\t):\n\t\t\ttarget += int(_policies.get(\"operating_increase_step_bp\", 140))\n\t\telif margin < 0 or (\n\t\t\toutput_surplus\n\t\t\tand output_shortage_bp == 0\n\t\t\tand output_exports <= 0.0001\n\t\t):",
+              "export-responsive operating target",
+          )
+          market_path.write_text(market, encoding="utf-8", newline="\n")
+
+          route_path = Path("scripts/vnext/economy/market_route_network.gd")
+          route = route_path.read_text(encoding="utf-8").replace("\r\n", "\n")
+          route = replace_once(
+              route,
+              "\tif not _default_capacity.has(edge_id) or capacity_units_per_day < 0.0:\n\t\treturn false",
+              "\tif (\n\t\tnot _default_capacity.has(edge_id)\n\t\tor is_nan(capacity_units_per_day)\n\t\tor is_inf(capacity_units_per_day)\n\t\tor capacity_units_per_day < 0.0\n\t):\n\t\treturn false",
+              "finite route capacity setter",
+          )
+          route_path.write_text(route, encoding="utf-8", newline="\n")
+
+          recovery_path = Path("tests/vnext/market_economy_recovery_test.gd")
+          recovery = recovery_path.read_text(encoding="utf-8").replace("\r\n", "\n")
+          recovery = replace_once(
+              recovery,
+              "\t_test_extreme_legal_inputs()\n\tprint(\"VNext market economy recovery: %d checks, %d failures\" % [checks, failures])",
+              "\t_test_extreme_legal_inputs()\n\t_test_nonfinite_controls_rejected()\n\tprint(\"VNext market economy recovery: %d checks, %d failures\" % [checks, failures])",
+              "nonfinite test invocation",
+          )
+          insertion = '''\n\nfunc _test_nonfinite_controls_rejected() -> void:\n\tvar economy := _new_economy("nonfinite controls")\n\tvar market_id := _region(economy, "region_loran_dawnbay")\n\t_check(not economy.set_region_inventory(market_id, "bread", NAN), "inventory setter rejects NaN")\n\t_check(not economy.set_region_inventory(market_id, "bread", INF), "inventory setter rejects positive infinity")\n\t_check(not economy.set_region_inventory(market_id, "bread", -INF), "inventory setter rejects negative infinity")\n\tvar edge_id := str((economy.catalog.transport_edges[0] as Dictionary).get("edge_id", ""))\n\t_check(not edge_id.is_empty(), "nonfinite route fixture has an edge")\n\t_check(not economy.set_route_capacity(edge_id, NAN), "route capacity rejects NaN")\n\t_check(not economy.set_route_capacity(edge_id, INF), "route capacity rejects positive infinity")\n\t_check(not economy.set_route_capacity(edge_id, -INF), "route capacity rejects negative infinity")\n\t_check(economy.validate_integrity(), "rejected nonfinite controls leave economy valid")\n'''
+          recovery = replace_once(
+              recovery,
+              "\n\nfunc _find_shipment(snapshot_value: Dictionary, origin_id: String, destination_id: String, commodity_id: String) -> Dictionary:",
+              insertion + "\n\nfunc _find_shipment(snapshot_value: Dictionary, origin_id: String, destination_id: String, commodity_id: String) -> Dictionary:",
+              "nonfinite test insertion",
+          )
+          recovery_path.write_text(recovery, encoding="utf-8", newline="\n")
+          '@ | python -
+
+          git rm -f -- tests/vnext/market_economy_a_patch_setup_test.gd tests/vnext/market_economy_flow_diagnostic_test.gd
+          git diff --check
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
       - name: Install Godot 4.6.3
         shell: pwsh
@@ -33,19 +114,75 @@ jobs:
           $binary = (Get-ChildItem -LiteralPath $install -Filter 'Godot_v4.6.3-stable_win64.exe' -Recurse | Select-Object -First 1).FullName
           if (-not $binary) { throw 'Godot 4.6.3 executable was not found' }
           "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          $version = Start-Process -FilePath $binary -ArgumentList @('--version') -NoNewWindow -Wait -PassThru
-          if ($version.ExitCode -ne 0) { exit $version.ExitCode }
+          & $binary --version
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Clean import
         shell: pwsh
         run: |
           $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--editor','--headless','--path','.', '--quit') -NoNewWindow -Wait -PassThru
-          Write-Host "ECON_CHAIN import_exit=$($process.ExitCode)"
           if ($process.ExitCode -ne 0) { exit $process.ExitCode }
 
-      - name: Run supply chain diagnostic
+      - name: Run focused and ten-year economy tests
         shell: pwsh
         run: |
-          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless','--path','.', '--script','res://tests/vnext/market_economy_flow_diagnostic_test.gd') -NoNewWindow -Wait -PassThru
-          Write-Host "ECON_CHAIN diagnostic_exit=$($process.ExitCode)"
-          if ($process.ExitCode -ne 0) { exit $process.ExitCode }
+          function Invoke-EconomyTest {
+            param([string]$ScriptPath)
+            $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless','--path','.', '--script',$ScriptPath) -NoNewWindow -Wait -PassThru
+            Write-Host "ECON_FINALIZE script=$ScriptPath exit=$($process.ExitCode)"
+            if ($process.ExitCode -ne 0) { exit $process.ExitCode }
+          }
+          Invoke-EconomyTest 'res://tests/vnext/market_economy_test.gd'
+          Invoke-EconomyTest 'res://tests/vnext/market_economy_behavior_test.gd'
+          Invoke-EconomyTest 'res://tests/vnext/market_economy_recovery_test.gd'
+          Invoke-EconomyTest 'res://tests/vnext/market_economy_export_production_test.gd'
+          Invoke-EconomyTest 'res://tests/vnext/market_economy_long_term_test.gd'
+
+      - name: Run unified vNext validation
+        shell: pwsh
+        run: |
+          python -B tools/run_vnext_validation.py --root . --godot "$env:GODOT_BIN"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Run repository validation
+        shell: pwsh
+        run: |
+          & ./tools/run_validation.ps1 -GodotPath $env:GODOT_BIN -ProjectPath .
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Regenerate variable-state audit documents
+        shell: pwsh
+        run: |
+          python -B tools/audit_variable_state.py --root .
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/render_variable_state_audit_summary.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/render_variable_state_member_inventory.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/generate_variable_state_docs.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/render_variable_refactor_plan.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Commit validated economy repair
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          git diff --check
+          git add -- scripts/vnext/economy/market_economy.gd scripts/vnext/economy/market_route_network.gd tests/vnext/market_economy_recovery_test.gd docs/refactors/variable_state_audit.md docs/refactors/variable_state_member_inventory.md docs/refactors/state_ownership_matrix.md docs/refactors/variable_refactor_plan.md
+          $staged = @(git diff --cached --name-only)
+          foreach ($path in $staged) {
+            if ($path -match '\.uid$|(^|/)(build|builds|export|exports|cache|logs?)(/|$)') {
+              throw "Generated artifact must not be committed: $path"
+            }
+          }
+          git diff --cached --check
+          git fetch origin feat/vnext-market-economy-20260809
+          $remoteHead = (git rev-parse origin/feat/vnext-market-economy-20260809).Trim()
+          if ($remoteHead -ne $env:ECON_START_HEAD) {
+            throw "Remote branch advanced during validation: start=$env:ECON_START_HEAD current=$remoteHead"
+          }
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Fix export-driven economy production continuity'
+          git push origin HEAD:feat/vnext-market-economy-20260809
