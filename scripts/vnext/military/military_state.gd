@@ -394,6 +394,11 @@ func _active_action_valid(
 		return false
 	var reserved_link_id: String = str(action.get("reserved_link_id", ""))
 	if edge_index < link_ids.size():
+		var edge_count: float = float(link_ids.size())
+		var minimum_progress: float = float(edge_index) / edge_count
+		var maximum_progress: float = float(edge_index + 1) / edge_count
+		if progress + 0.0001 < minimum_progress or progress > maximum_progress + 0.0001:
+			return false
 		if formation.current_city_id != str(city_ids[edge_index]):
 			return false
 		if not reserved_link_id.is_empty() and reserved_link_id != str(link_ids[edge_index]):
@@ -404,6 +409,8 @@ func _active_action_valid(
 			return false
 	else:
 		if kind != "attack" or transport_state != "preparing":
+			return false
+		if progress < 0.95 or progress >= 1.0:
 			return false
 		if not reserved_link_id.is_empty():
 			return false
