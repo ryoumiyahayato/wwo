@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1705|1299|15|0|1287|5|32|16|63|933|538|289|
+|1688|1266|15|0|1256|5|32|16|60|911|537|288|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,705个生产成员字段逐项表
+## 1,688个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -1447,7 +1447,7 @@
 5 K leave_confirmation
 ```
 
-### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/vnext/map/military_map_adapter.gd`
+### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/vnext/politics/politics_pressure_input.gd`
 
 ```text
 @ scripts/v2_3/v2_3_formal_simulation.gd | V23FormalSimulation
@@ -1583,84 +1583,6 @@
 8 K _event_records
 9 K _known_event_ids
 10 K _read_event_ids
-@ scripts/vnext/map/military_map_adapter.gd | VNextMilitaryMapAdapter
-7 C OVERLAY_PATH
-8 C MODE_ROAD
-9 C MODE_RAIL
-10 C MODE_SHIPPING
-12 K errors
-13 K cities
-14 E countries
-15 K regions
-16 K ports
-17 K links
-18 K links_by_city
-19 K terrain_profiles
-20 K transport_profiles
-21 K supply_rules
-22 K battle_rules
-23 K region_overlays
-24 E country_overlays
-25 K city_overlays
-```
-
-### 第10段：`scripts/vnext/military/military_formation.gd` 至 `scripts/world_map/historical_map_identity_style.gd`
-
-```text
-@ scripts/vnext/military/military_formation.gd | VNextMilitaryFormation
-5 C ACTION_IDLE
-6 C ACTION_MOVING
-7 C ACTION_CONCENTRATING
-8 C ACTION_ATTACKING
-9 C ACTION_DEFENDING
-10 C STATUS_ACTIVE
-11 C STATUS_DESTROYED
-12 C RESOURCE_IDS
-13 C SUPPLY_STATUSES
-15 K formation_id
-16 E country_id
-17 A service_branch
-18 K parent_formation_id
-19 K personnel
-20 K equipment_sets
-21 K training
-22 K morale
-23 K organization
-24 K current_city_id
-25 A action_state
-26 A formation_status
-27 A supply_status
-28 A supply_level
-29 K supply_fill
-30 A defense_posture
-31 K daily_requirements
-@ scripts/vnext/military/military_service.gd | VNextMilitaryService
-7 C RESOURCE_IDS
-8 C EQUIPMENT_LOAD_PER_PERSON
-9 C CARGO_LOAD_WEIGHTS
-15 C EPSILON
-@ scripts/vnext/military/military_state.gd | VNextMilitaryState
-5 C SCHEMA_ID
-6 C ACTION_KINDS
-7 C TRANSPORT_STATES
-8 C MAX_COMPLETED_ACTIONS
-9 C MAX_BATTLE_RESULTS
-10 C MAX_CONTROL_HISTORY
-12 K formations
-13 K region_controls
-14 K region_garrisons
-15 K supply_inputs
-16 K active_actions
-17 K completed_actions
-18 K battle_results
-19 K control_history
-20 K last_simulated_hour
-21 A next_action_sequence
-24 A capacity_window_hour
-25 K link_capacity_used
-26 K link_queues
-@ scripts/vnext/military/military_state_invariants.gd | VNextMilitaryStateInvariants
-7 C EPSILON
 @ scripts/vnext/player/action_result.gd | VNextActionResult
 4 K success
 5 K code
@@ -1669,6 +1591,65 @@
 @ scripts/vnext/player/player_state.gd | VNextPlayerState
 4 C SNAPSHOT_SCHEMA_ID
 6 K _player_id
+@ scripts/vnext/politics/politics_pressure_input.gd | VNextPoliticsPressureInput
+7 C SNAPSHOT_SCHEMA_ID
+8 C MAX_PERIOD_DAYS
+9 C MIN_SIGNAL
+10 C MAX_SIGNAL
+12 C ECONOMIC_SIGNAL_KEYS
+19 C WAR_SIGNAL_KEYS
+26 K _period_days
+27 K _price_pressure
+28 K _unemployment_pressure
+29 K _fiscal_pressure
+30 K _shortage_pressure
+31 K _growth_signal
+32 K _war_pressure
+33 K _casualty_pressure
+34 K _mobilization_pressure
+35 K _military_result_signal
+```
+
+### 第10段：`scripts/vnext/politics/politics_update_service.gd` 至 `scripts/world_map/historical_map_identity_style.gd`
+
+```text
+@ scripts/vnext/politics/politics_update_service.gd | VNextPoliticsUpdateService
+8 C PRESSURE_SCALE
+9 C FORCE_DELTA_LIMIT
+10 C POLICY_REVIEW_COOLDOWN
+11 C POLICY_CHANGE_MARGIN
+12 C EMERGENCY_POLICY_PRESSURE
+13 C POLICY_PRIORITY_SIGNAL_THRESHOLD
+14 C POLICY_PRIORITY_BONUS
+15 C STRAINED_STREAK
+16 C CRISIS_STREAK
+17 C GOVERNMENT_CHANGE_STREAK
+18 C RECOVERY_TO_STABLE_STREAK
+19 C CRISIS_SUPPORT_THRESHOLD
+20 C CRISIS_CONTROL_THRESHOLD
+21 C CRISIS_LEGITIMACY_THRESHOLD
+22 C CRISIS_STABILITY_THRESHOLD
+23 C CRITICAL_SUPPORT_THRESHOLD
+24 C CRITICAL_CONTROL_THRESHOLD
+25 C CRITICAL_STABILITY_THRESHOLD
+26 C MAX_HISTORY
+27 C REPEAT_RETURN_MANDATE_MARGIN
+28 C REPEAT_RETURN_MANDATE_BENCHMARK_CAP
+30 C ECONOMIC_WEIGHTS
+37 C WAR_WEIGHTS
+43 C REGIME_PROCEDURAL_BASELINES
+@ scripts/vnext/politics/state_politics.gd | VNextStatePolitics
+7 C SNAPSHOT_SCHEMA_ID
+8 C FORCE_SUPPORT_THRESHOLD
+9 C FORCE_OPPOSITION_THRESHOLD
+10 C MAX_FORCE_HISTORY
+11 C MAX_POLICY_HISTORY
+12 C MAX_GOVERNMENT_CHANGE_HISTORY
+14 C REGIME_TYPES
+25 C POLICY_DOMAINS
+33 C PRESSURE_SIGNAL_KEYS
+44 C CAPACITY_KEYS
+52 K _state
 @ scripts/vnext/travel/location_state.gd | VNextLocationState
 4 C SNAPSHOT_SCHEMA_ID
 6 K _player_id
@@ -1976,4 +1957,3 @@
 7 C DETAIL_SELECTED_COLOR
 9 A _city_detail_catalog
 ```
-
