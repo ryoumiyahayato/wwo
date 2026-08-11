@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1688|1266|15|0|1256|5|32|16|60|911|537|288|
+|1756|1310|15|0|1288|5|32|16|63|944|545|295|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,688个生产成员字段逐项表
+## 1,756个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -688,16 +688,16 @@
 15 K position_structure
 16 K organization_relations
 @ scripts/core/models/population_group_data.gd | PopulationGroupData
-4 K id
-5 K region_id
-6 E population_count
-7 K social_class
-8 K occupation_category
-9 K average_income
-10 K average_education
-11 K unemployment_rate
-12 K public_political_leaning
-13 K basic_living_state
+5 K id
+6 K region_id
+7 E population_count
+8 K social_class
+9 K occupation_category
+10 K average_income
+11 K average_education
+12 K unemployment_rate
+13 K public_political_leaning
+14 K basic_living_state
 @ scripts/core/models/region_data.gd | RegionData
 4 K id
 5 K name
@@ -842,7 +842,7 @@
 8 C GRID_COLOR
 9 C REGION_BORDER_COLOR
 10 C RAIL_DARK_COLOR
-11 C RAIL_LIGHT_COLOR
+11 C RAIL_LIGHT
 12 C CONTROL_BORDER_DARK_COLOR
 13 C CONTROL_BORDER_COLOR
 14 C CONTESTED_COLOR
@@ -1447,7 +1447,7 @@
 5 K leave_confirmation
 ```
 
-### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/vnext/politics/politics_pressure_input.gd`
+### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/vnext/map/military_map_adapter.gd`
 
 ```text
 @ scripts/v2_3/v2_3_formal_simulation.gd | V23FormalSimulation
@@ -1583,6 +1583,84 @@
 8 K _event_records
 9 K _known_event_ids
 10 K _read_event_ids
+@ scripts/vnext/map/military_map_adapter.gd | VNextMilitaryMapAdapter
+7 C OVERLAY_PATH
+8 C MODE_ROAD
+9 C MODE_RAIL
+10 C MODE_SHIPPING
+12 K errors
+13 K cities
+14 E countries
+15 K regions
+16 K ports
+17 K links
+18 K links_by_city
+19 K terrain_profiles
+20 K transport_profiles
+21 K supply_rules
+22 K battle_rules
+23 K region_overlays
+24 E country_overlays
+25 K city_overlays
+```
+
+### 第10段：`scripts/vnext/military/military_formation.gd` 至 `scripts/world_map/historical_map_identity_style.gd`
+
+```text
+@ scripts/vnext/military/military_formation.gd | VNextMilitaryFormation
+5 C ACTION_IDLE
+6 C ACTION_MOVING
+7 C ACTION_CONCENTRATING
+8 C ACTION_ATTACKING
+9 C ACTION_DEFENDING
+10 C STATUS_ACTIVE
+11 C STATUS_DESTROYED
+12 C RESOURCE_IDS
+13 C SUPPLY_STATUSES
+15 K formation_id
+16 E country_id
+17 A service_branch
+18 K parent_formation_id
+19 K personnel
+20 K equipment_sets
+21 K training
+22 K morale
+23 K organization
+24 K current_city_id
+25 A action_state
+26 A formation_status
+27 A supply_status
+28 A supply_level
+29 K supply_fill
+30 A defense_posture
+31 K daily_requirements
+@ scripts/vnext/military/military_service.gd | VNextMilitaryService
+7 C RESOURCE_IDS
+8 C EQUIPMENT_LOAD_PER_PERSON
+9 C CARGO_LOAD_WEIGHTS
+15 C EPSILON
+@ scripts/vnext/military/military_state.gd | VNextMilitaryState
+5 C SCHEMA_ID
+6 C ACTION_KINDS
+7 C TRANSPORT_STATES
+8 C MAX_COMPLETED_ACTIONS
+9 C MAX_BATTLE_RESULTS
+10 C MAX_CONTROL_HISTORY
+12 K formations
+13 K region_controls
+14 K region_garrisons
+15 K supply_inputs
+16 K active_actions
+17 K completed_actions
+18 K battle_results
+19 K control_history
+20 K last_simulated_hour
+21 A next_action_sequence
+24 A capacity_window_hour
+25 K link_capacity_used
+26 K link_queues
+@ scripts/vnext/military/military_state_invariants.gd | VNextMilitaryStateInvariants
+7 C EPSILON
 @ scripts/vnext/player/action_result.gd | VNextActionResult
 4 K success
 5 K code
@@ -1608,11 +1686,6 @@
 33 K _casualty_pressure
 34 K _mobilization_pressure
 35 K _military_result_signal
-```
-
-### 第10段：`scripts/vnext/politics/politics_update_service.gd` 至 `scripts/world_map/historical_map_identity_style.gd`
-
-```text
 @ scripts/vnext/politics/politics_update_service.gd | VNextPoliticsUpdateService
 8 C PRESSURE_SCALE
 9 C FORCE_DELTA_LIMIT
