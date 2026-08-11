@@ -688,16 +688,16 @@
 15 K position_structure
 16 K organization_relations
 @ scripts/core/models/population_group_data.gd | PopulationGroupData
-5 K id
-6 K region_id
-7 E population_count
-8 K social_class
-9 K occupation_category
-10 K average_income
-11 K average_education
-12 K unemployment_rate
-13 K public_political_leaning
-14 K basic_living_state
+4 K id
+5 K region_id
+6 E population_count
+7 K social_class
+8 K occupation_category
+9 K average_income
+10 K average_education
+11 K unemployment_rate
+12 K public_political_leaning
+13 K basic_living_state
 @ scripts/core/models/region_data.gd | RegionData
 4 K id
 5 K name
