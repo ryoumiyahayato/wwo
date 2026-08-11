@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1686|1266|15|0|1256|5|32|16|60|911|536|287|
+|1688|1266|15|0|1256|5|32|16|60|911|537|288|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,686个生产成员字段逐项表
+## 1,688个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -1633,9 +1633,11 @@
 24 C CRITICAL_CONTROL_THRESHOLD
 25 C CRITICAL_STABILITY_THRESHOLD
 26 C MAX_HISTORY
-28 C ECONOMIC_WEIGHTS
-35 C WAR_WEIGHTS
-41 C REGIME_PROCEDURAL_BASELINES
+27 C REPEAT_RETURN_MANDATE_MARGIN
+28 C REPEAT_RETURN_MANDATE_BENCHMARK_CAP
+30 C ECONOMIC_WEIGHTS
+37 C WAR_WEIGHTS
+43 C REGIME_PROCEDURAL_BASELINES
 @ scripts/vnext/politics/state_politics.gd | VNextStatePolitics
 7 C SNAPSHOT_SCHEMA_ID
 8 C FORCE_SUPPORT_THRESHOLD
