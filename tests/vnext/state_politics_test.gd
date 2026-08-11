@@ -18,15 +18,18 @@ func _run() -> void:
 	_test_partition_equivalence()
 	_test_policy_cooldown_days()
 	_test_governing_composition_counterfactuals()
-	_test_leader_effect_is_finite_and_deterministic()
+	_test_actor_ids_are_semantically_neutral()
 	_test_crisis_and_transition_day_semantics()
 	_test_transition_selection_and_no_ping_pong()
+	_test_return_government_deadlock_escape()
 	_test_strict_transactional_restore()
+	_test_government_history_chain_restore()
 	_test_numeric_history_order()
 	_test_determinism_and_input_permutation()
 	_test_near_tie_policy_decision()
+	_test_near_tie_challenger_decision()
 	_test_decade_stability_and_midpoint_resume()
-	print("VNext state politics R1: %d checks, %d failures" % [checks, failures])
+	print("VNext state politics R2: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures > 0 or checks <= 0 else 0)
 
 
@@ -167,9 +170,10 @@ func _test_governing_composition_counterfactuals() -> void:
 		_check(not opposition_state.active_policy_ids().has("policy:loran_labor_relief"), "high global opposition influence does not dominate governing policy by itself")
 
 
-func _test_leader_effect_is_finite_and_deterministic() -> void:
+func _test_actor_ids_are_semantically_neutral() -> void:
 	var base_config := _load_fixture_config()
 	var alt_config := base_config.duplicate(true)
+	alt_config["government_id"] = "organization:loran_government_counterfactual"
 	alt_config["government_leader_id"] = "person:loran_premier_counterfactual"
 	var alt_forces := alt_config.get("forces", []) as Array
 	for index: int in range(alt_forces.size()):
@@ -178,19 +182,19 @@ func _test_leader_effect_is_finite_and_deterministic() -> void:
 			force["leader_id"] = "person:loran_premier_counterfactual"
 		alt_forces[index] = force
 	alt_config["forces"] = alt_forces
-	var base_a := VNextStatePolitics.create_from_config(base_config)
-	var base_b := VNextStatePolitics.create_from_config(base_config)
+	var base := VNextStatePolitics.create_from_config(base_config)
 	var alt := VNextStatePolitics.create_from_config(alt_config)
-	_check(base_a != null and base_b != null and alt != null, "leader counterfactuals create valid states")
-	if base_a == null or base_b == null or alt == null:
+	_check(base != null and alt != null, "actor-ID counterfactuals create valid states")
+	if base == null or alt == null:
 		return
 	var input := VNextPoliticsPressureInput.create(180, 25.0, 35.0, 20.0, 15.0, 5.0, 12.0, 4.0, 5.0, 2.0)
-	service.update(base_a, input)
-	service.update(base_b, input)
+	service.update(base, input)
 	service.update(alt, input)
-	_equal(_first_semantic_difference(base_a.snapshot(), base_b.snapshot()), "", "same leader produces deterministic replay")
-	_check(not is_equal_approx(base_a.legitimacy(), alt.legitimacy()), "leader identity has a finite operational effect")
-	_check(absf(base_a.legitimacy() - alt.legitimacy()) < 12.0, "leader effect remains bounded rather than dominating politics")
+	_check(is_equal_approx(base.legitimacy(), alt.legitimacy()), "leader ID spelling does not change legitimacy")
+	_check(is_equal_approx(base.stability(), alt.stability()), "leader ID spelling does not change stability")
+	_check(is_equal_approx(base.government_support(), alt.government_support()), "actor IDs do not change force support dynamics")
+	_equal(base.active_policy_ids(), alt.active_policy_ids(), "actor IDs do not change policy selection")
+	_equal(base.capacity_snapshot(), alt.capacity_snapshot(), "government ID spelling does not change capacity dynamics")
 
 
 func _test_crisis_and_transition_day_semantics() -> void:
@@ -258,11 +262,8 @@ func _test_transition_selection_and_no_ping_pong() -> void:
 	for index: int in range(1, long_history.size()):
 		var previous := long_history[index - 1]
 		var current := long_history[index]
-		var immediate_return := (
-			str(current.get("new_government_group_id", "")) == str(previous.get("old_government_group_id", ""))
-			and int(current.get("period", 0)) - int(previous.get("period", 0)) < VNextPoliticsUpdateService.RETURN_GOVERNMENT_PENALTY_DAYS
-		)
-		_check(not immediate_return, "transition history has no mechanical short-horizon ping-pong at index %d" % index)
+		var gap := int(current.get("period", 0)) - int(previous.get("period", 0))
+		_check(gap >= VNextPoliticsUpdateService.TRANSITION_COOLDOWN_DAYS, "no government transition can ping-pong before the normal cooldown at index %d" % index)
 
 
 func _test_strict_transactional_restore() -> void:
@@ -372,6 +373,7 @@ func _test_near_tie_policy_decision() -> void:
 	var a_policy := template.duplicate(true)
 	a_policy["policy_id"] = "policy:a_near_tie"
 	a_policy["name"] = "A near tie"
+	a_policy["fiscal_demand"] = float(template.get("fiscal_demand", 0.0)) + 0.000001
 	var z_policy := template.duplicate(true)
 	z_policy["policy_id"] = "policy:z_near_tie"
 	z_policy["name"] = "Z near tie"
@@ -387,10 +389,160 @@ func _test_near_tie_policy_decision() -> void:
 	if state_a == null or state_b == null:
 		return
 	var input := VNextPoliticsPressureInput.create(180, 70.0, 96.0, 45.0, 30.0, -25.0)
+	var score_a := service._policy_score(a_policy, state_a.snapshot(), input, 50.0)
+	var score_z := service._policy_score(z_policy, state_a.snapshot(), input, 50.0)
+	_check(score_a != score_z and is_equal_approx(score_a, score_z), "policy near tie uses a real non-zero approximate-equal epsilon")
 	service.update(state_a, input)
 	service.update(state_b, input)
 	_equal(_first_semantic_difference(state_a.snapshot(), state_b.snapshot()), "", "near-tie policy choice is deterministic under input permutation")
-	_check(state_a.active_policy_ids().has("policy:a_near_tie"), "near-tie policy decision uses stable lexical ID tie-break")
+	_check(state_a.active_policy_ids().has("policy:a_near_tie"), "approximate-equal policy decision uses stable lexical ID tie-break")
+
+
+func _test_government_history_chain_restore() -> void:
+	var base := _load_fixture()
+	var target := _load_fixture()
+	if base == null or target == null:
+		return
+	var valid := _synthetic_multi_transition_snapshot(base.snapshot())
+	var valid_restored := target.restore(valid)
+	_check(valid_restored, "valid multi-transition government history restores")
+	if not valid_restored:
+		return
+	var canonical := target.snapshot()
+
+	var permuted := valid.duplicate(true)
+	var permuted_history := (permuted.get("government_change_history", []) as Array).duplicate(true)
+	permuted_history.reverse()
+	permuted["government_change_history"] = permuted_history
+	_check(target.restore(permuted), "permuted valid government history restores")
+	_equal(_first_semantic_difference(target.snapshot(), canonical), "", "government history canonical order is deterministic")
+
+	var broken := valid.duplicate(true)
+	var broken_history := (broken.get("government_change_history", []) as Array).duplicate(true)
+	var second := (broken_history[1] as Dictionary).duplicate(true)
+	second["old_government_group_id"] = "organization:loran_conservative_bloc"
+	second["old_leader_id"] = "person:loran_conservative_leader"
+	broken_history[1] = second
+	broken["government_change_history"] = broken_history
+	var before := target.snapshot()
+	_check(not target.restore(broken), "broken old-to-new government history chain is rejected")
+	_equal(_first_semantic_difference(target.snapshot(), before), "", "broken history restore leaves live state unchanged")
+
+	var final_group_mismatch := valid.duplicate(true)
+	final_group_mismatch["government_group_id"] = "organization:loran_conservative_bloc"
+	final_group_mismatch["government_leader_id"] = "person:loran_conservative_leader"
+	_check(not target.restore(final_group_mismatch), "final history government must match current government")
+
+	var final_leader_mismatch := valid.duplicate(true)
+	final_leader_mismatch["government_leader_id"] = "person:loran_marshal_counterfactual"
+	var mismatch_forces := final_leader_mismatch.get("forces", []) as Array
+	for index: int in range(mismatch_forces.size()):
+		var force := mismatch_forces[index] as Dictionary
+		if str(force.get("force_id", "")) == "organization:loran_military_command":
+			force["leader_id"] = "person:loran_marshal_counterfactual"
+		mismatch_forces[index] = force
+	final_leader_mismatch["forces"] = mismatch_forces
+	_check(not target.restore(final_leader_mismatch), "final history leader must match current government leader")
+
+	var duplicate_period := valid.duplicate(true)
+	var duplicate_history := (duplicate_period.get("government_change_history", []) as Array).duplicate(true)
+	var duplicate_record := (duplicate_history[1] as Dictionary).duplicate(true)
+	duplicate_record["period"] = int((duplicate_history[0] as Dictionary).get("period", 0))
+	duplicate_history[1] = duplicate_record
+	duplicate_period["government_change_history"] = duplicate_history
+	_check(not target.restore(duplicate_period), "same-period government transition records are rejected as contradictory")
+
+	var empty := base.snapshot()
+	empty["government_change_history"] = []
+	_check(base.restore(empty), "empty government history remains valid before any transition")
+
+
+func _test_return_government_deadlock_escape() -> void:
+	var two_force := VNextStatePolitics.create_from_config(_limited_challenger_config(false))
+	_check(two_force != null, "two-force political system is valid")
+	if two_force == null:
+		return
+	var initial_group := two_force.government_group_id()
+	_check(bool(service.update(two_force, GENERATOR.severe_input(366)).get("success", false)), "two-force severe crisis reaches first transition horizon")
+	var first_history := two_force.government_change_history()
+	_check(first_history.size() == 1, "two-force system changes government once without immediate bounce")
+	if first_history.size() != 1:
+		return
+	var first_period := int((first_history[0] as Dictionary).get("period", 0))
+	var elapsed_since_first := two_force.period_index() - first_period
+	var before_eligibility := VNextPoliticsUpdateService.TRANSITION_COOLDOWN_DAYS - elapsed_since_first - 1
+	if before_eligibility > 0:
+		service.update(two_force, GENERATOR.severe_input(before_eligibility))
+	_equal(two_force.government_change_history().size(), 1, "former government cannot bounce back before normal cooldown")
+
+	service.update(two_force, GENERATOR.severe_input(2))
+	var returned_history := two_force.government_change_history()
+	_check(returned_history.size() >= 2, "two-force severe crisis has an exit after day 365")
+	if returned_history.size() >= 2:
+		var second := returned_history[1] as Dictionary
+		var age := int(second.get("period", 0)) - first_period
+		_check(age >= VNextPoliticsUpdateService.TRANSITION_COOLDOWN_DAYS, "return respects the 365-day transition cooldown")
+		_check(age < VNextPoliticsUpdateService.RETURN_GOVERNMENT_PENALTY_DAYS, "unique former government can return before day 720 under severe failure")
+		_equal(str(second.get("new_government_group_id", "")), initial_group, "former government can become the legitimate fallback")
+
+	var sparse := VNextStatePolitics.create_from_config(_limited_challenger_config(true))
+	_check(sparse != null, "sparse challenger political system is valid")
+	if sparse != null:
+		var sparse_initial := sparse.government_group_id()
+		service.update(sparse, GENERATOR.severe_input(366))
+		var sparse_history := sparse.government_change_history()
+		if sparse_history.size() == 1:
+			var sparse_first_period := int((sparse_history[0] as Dictionary).get("period", 0))
+			var sparse_remaining := VNextPoliticsUpdateService.TRANSITION_COOLDOWN_DAYS - (sparse.period_index() - sparse_first_period)
+			if sparse_remaining > 0:
+				service.update(sparse, GENERATOR.severe_input(sparse_remaining))
+			var sparse_return := sparse.government_change_history()
+			_check(sparse_return.size() >= 2, "sparse challenger system does not deadlock after cooldown")
+			if sparse_return.size() >= 2:
+				_equal(str((sparse_return[1] as Dictionary).get("new_government_group_id", "")), sparse_initial, "sparse system can use the former government as fallback")
+		else:
+			_check(false, "sparse challenger system produced its first transition")
+
+	var penalty_candidate := _synthetic_multi_transition_snapshot(_load_fixture().snapshot())
+	var penalty_history := penalty_candidate.get("government_change_history", []) as Array
+	var last := penalty_history.back() as Dictionary
+	var former_id := str(last.get("old_government_group_id", ""))
+	var last_period := int(last.get("period", 0))
+	penalty_candidate["period_index"] = last_period + VNextPoliticsUpdateService.RETURN_GOVERNMENT_PENALTY_DAYS - 1
+	_check(service._return_government_penalty(penalty_candidate, former_id, 0.0) > 0.0, "return penalty remains positive immediately before day 720")
+	penalty_candidate["period_index"] = last_period + VNextPoliticsUpdateService.RETURN_GOVERNMENT_PENALTY_DAYS
+	_equal(service._return_government_penalty(penalty_candidate, former_id, 0.0), 0.0, "return penalty decays fully at the 720-day boundary")
+
+
+func _test_near_tie_challenger_decision() -> void:
+	var incumbent := _minimal_challenger_force("organization:incumbent_test", "person:incumbent_test", 20.0, 80.0, false)
+	var a_force := _minimal_challenger_force("organization:a_near_challenger", "person:a_near_challenger", 40.0, -50.0, true)
+	var z_force := _minimal_challenger_force("organization:z_near_challenger", "person:z_near_challenger", 40.000001, -50.0, true)
+	var base_candidate := {
+		"regime_type": "federal_republic",
+		"government_id": "organization:test_government",
+		"government_group_id": "organization:incumbent_test",
+		"period_index": 500,
+		"government_change_history": [],
+	}
+	var only_a := base_candidate.duplicate(true)
+	only_a["forces"] = [incumbent, a_force]
+	var only_z := base_candidate.duplicate(true)
+	only_z["forces"] = [incumbent, z_force]
+	var selected_a := service._select_challenger(only_a, 50.0)
+	var selected_z := service._select_challenger(only_z, 50.0)
+	var score_a := float(selected_a.get("mandate_score", 0.0))
+	var score_z := float(selected_z.get("mandate_score", 0.0))
+	_check(score_a != score_z and is_equal_approx(score_a, score_z), "challenger near tie uses a real non-zero approximate-equal epsilon")
+
+	var combined_a := base_candidate.duplicate(true)
+	combined_a["forces"] = [z_force, incumbent, a_force]
+	var combined_b := base_candidate.duplicate(true)
+	combined_b["forces"] = [a_force, z_force, incumbent]
+	var result_a := service._select_challenger(combined_a, 50.0)
+	var result_b := service._select_challenger(combined_b, 50.0)
+	_equal(str((result_a.get("force", {}) as Dictionary).get("force_id", "")), "organization:a_near_challenger", "approximate-equal challenger uses lexical stable-ID tie-break")
+	_equal(result_a, result_b, "challenger selection is invariant to input order")
 
 
 func _test_decade_stability_and_midpoint_resume() -> void:
@@ -419,6 +571,87 @@ func _test_decade_stability_and_midpoint_resume() -> void:
 		service.update(replay, GENERATOR.normal_input(1900, period, 30))
 	service.update(replay, tail_input)
 	_equal(_first_semantic_difference(continuous.snapshot(), replay.snapshot()), "", "snapshot midpoint resume matches continuous deterministic decade")
+
+
+func _synthetic_multi_transition_snapshot(base: Dictionary) -> Dictionary:
+	var result := base.duplicate(true)
+	result["period_index"] = 600
+	result["government_group_id"] = "organization:loran_military_command"
+	result["government_leader_id"] = "person:loran_marshal"
+	result["government_change_history"] = [
+		_transition_record(
+			100,
+			"organization:loran_government_group",
+			"person:loran_premier",
+			"organization:loran_labor_caucus",
+			"person:loran_labor_leader"
+		),
+		_transition_record(
+			500,
+			"organization:loran_labor_caucus",
+			"person:loran_labor_leader",
+			"organization:loran_military_command",
+			"person:loran_marshal"
+		),
+	]
+	return result
+
+
+func _transition_record(period: int, old_group: String, old_leader: String, new_group: String, new_leader: String) -> Dictionary:
+	return {
+		"period": period,
+		"reason": "sustained_government_failure",
+		"old_government_group_id": old_group,
+		"new_government_group_id": new_group,
+		"old_leader_id": old_leader,
+		"new_leader_id": new_leader,
+		"political_pressure": 80.0,
+		"mandate_score": 70.0,
+		"procedure_score": 65.0,
+		"coalition_score": 60.0,
+	}
+
+
+func _limited_challenger_config(include_ineligible_third: bool) -> Dictionary:
+	var config := _load_fixture_config()
+	var selected: Array = []
+	for raw_force: Variant in config.get("forces", []) as Array:
+		var force := (raw_force as Dictionary).duplicate(true)
+		var force_id := str(force.get("force_id", ""))
+		if force_id == "organization:loran_government_group":
+			force["influence"] = 50.0
+			force["government_support"] = 80.0
+			force["base_government_support"] = 80.0
+			selected.append(force)
+		elif force_id == "organization:loran_labor_caucus":
+			force["influence"] = 50.0
+			force["government_support"] = -60.0
+			force["base_government_support"] = -60.0
+			selected.append(force)
+		elif include_ineligible_third and force_id == "organization:loran_conservative_bloc":
+			force["influence"] = 10.0
+			force["government_support"] = -40.0
+			force["base_government_support"] = -40.0
+			force["government_eligible"] = false
+			selected.append(force)
+	config["forces"] = selected
+	return config
+
+
+func _minimal_challenger_force(force_id: String, leader_id: String, influence: float, support: float, eligible: bool) -> Dictionary:
+	var preferences := {}
+	for domain: String in VNextStatePolitics.POLICY_DOMAINS:
+		preferences[domain] = 0.0
+	return {
+		"force_id": force_id,
+		"leader_id": leader_id,
+		"influence": influence,
+		"government_support": support,
+		"institutional_access": 70.0,
+		"mobilization_capacity": 70.0,
+		"government_eligible": eligible,
+		"policy_preferences": preferences,
+	}
 
 
 func _config_with_government(group_id: String) -> Dictionary:
