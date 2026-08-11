@@ -12,6 +12,7 @@ func _run() -> void:
 	_test_shortage_and_surplus_recovery()
 	_test_transport_recovery()
 	_test_extreme_legal_inputs()
+	_test_nonfinite_controls_rejected()
 	print("VNext market economy recovery: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures > 0 or checks <= 0 else 0)
 
@@ -104,6 +105,17 @@ func _test_extreme_legal_inputs() -> void:
 		_check(economy.validate_integrity(), "extreme legal day preserves accounting")
 	var final_price := economy.current_price(market_id, "bread")
 	_check(final_price <= int(ceil(float(initial_price) * pow(1.18, 3.0))), "extreme legal price remains within compounded daily movement bounds")
+
+
+func _test_nonfinite_controls_rejected() -> void:
+	var economy := _new_economy("nonfinite controls")
+	var market_id := _region(economy, "region_loran_dawnbay")
+	_check(not economy.set_region_inventory(market_id, "bread", NAN), "inventory setter rejects NaN")
+	_check(not economy.set_region_inventory(market_id, "bread", INF), "inventory setter rejects infinity")
+	var edge_id := str((economy.catalog.transport_edges[0] as Dictionary).get("edge_id", ""))
+	_check(not economy.set_route_capacity(edge_id, NAN), "route capacity rejects NaN")
+	_check(not economy.set_route_capacity(edge_id, INF), "route capacity rejects infinity")
+	_check(economy.validate_integrity(), "nonfinite controls leave economy valid")
 
 
 func _find_shipment(snapshot_value: Dictionary, origin_id: String, destination_id: String, commodity_id: String) -> Dictionary:

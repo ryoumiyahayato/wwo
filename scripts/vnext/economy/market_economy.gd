@@ -167,7 +167,9 @@ func inventory_units(market_id: String, commodity_id: String) -> float:
 
 func set_region_inventory(market_id: String, commodity_id: String, units: float) -> bool:
 	if (
-		units < 0.0
+		is_nan(units)
+		or is_inf(units)
+		or units < 0.0
 		or not region_states.has(market_id)
 		or not catalog.commodities.has(commodity_id)
 	):
@@ -797,36 +799,74 @@ func _finalize_unmet_demand() -> void:
 		region_states[region_id] = state
 
 
+func _in_transit_units_for(destination_id: String, commodity_id: String) -> float:
+	var total: float = 0.0
+	for shipment: Dictionary in shipments:
+		if (
+			str(shipment.get("destination_market_id", "")) == destination_id
+			and str(shipment.get("commodity_id", "")) == commodity_id
+			and str(shipment.get("status", "")) == "in_transit"
+		):
+			total += maxf(0.0, float(shipment.get("units", 0.0)))
+	return total
+
+
 func _schedule_shipments(day_index: int) -> void:
-	var shortages: Array[Dictionary] = []
+	var requests: Array[Dictionary] = []
 	for region_id: String in _region_ids:
 		var state: Dictionary = region_states[region_id] as Dictionary
+		var inventory: Dictionary = state.get("inventory", {}) as Dictionary
 		var commodity_states: Dictionary = state.get("commodities", {}) as Dictionary
 		for commodity_id: String in _commodity_ids:
 			var commodity_state: Dictionary = commodity_states[commodity_id] as Dictionary
-			var unmet: float = float(commodity_state.get("unmet_units", 0.0))
-			if unmet > 0.0001:
-				shortages.append({
-					"region_id": region_id,
-					"commodity_id": commodity_id,
-					"unmet": unmet,
-					"shortage_bp": int(commodity_state.get("shortage_bp", 0)),
-				})
-	shortages.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
-		if int(a.get("shortage_bp", 0)) == int(b.get("shortage_bp", 0)):
-			var a_key: String = str(a.get("region_id", "")) + str(a.get("commodity_id", ""))
-			var b_key: String = str(b.get("region_id", "")) + str(b.get("commodity_id", ""))
-			return a_key < b_key
-		return int(a.get("shortage_bp", 0)) > int(b.get("shortage_bp", 0))
+			var unmet: float = maxf(0.0, float(commodity_state.get("unmet_units", 0.0)))
+			var industrial_demand: float = maxf(0.0, float(commodity_state.get("industrial_demand_units", 0.0)))
+			var replenishment: float = 0.0
+			var target_stock: float = 0.0
+			if industrial_demand > 0.0001:
+				target_stock = float(commodity_state.get("target_stock_units", 0.0))
+				if target_stock <= 0.0:
+					target_stock = _target_stock_for(region_id, commodity_id)
+				var stock: float = maxf(0.0, float(inventory.get(commodity_id, 0.0)))
+				var in_transit: float = _in_transit_units_for(region_id, commodity_id)
+				replenishment = maxf(0.0, target_stock - stock - in_transit)
+			var requested: float = maxf(unmet, replenishment)
+			if requested <= 0.0001:
+				continue
+			var replenishment_bp: int = (
+				0 if target_stock <= 0.0 else clampi(
+					int(round(replenishment / maxf(1.0, target_stock) * BASIS_POINTS)),
+					0, BASIS_POINTS
+				)
+			)
+			requests.append({
+				"region_id": region_id,
+				"commodity_id": commodity_id,
+				"request_units": requested,
+				"shortage_bp": int(commodity_state.get("shortage_bp", 0)),
+				"industrial_replenishment_bp": replenishment_bp,
+			})
+	requests.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var a_shortage: int = int(a.get("shortage_bp", 0))
+		var b_shortage: int = int(b.get("shortage_bp", 0))
+		if a_shortage != b_shortage:
+			return a_shortage > b_shortage
+		var a_replenishment: int = int(a.get("industrial_replenishment_bp", 0))
+		var b_replenishment: int = int(b.get("industrial_replenishment_bp", 0))
+		if a_replenishment != b_replenishment:
+			return a_replenishment > b_replenishment
+		var a_key: String = str(a.get("region_id", "")) + str(a.get("commodity_id", ""))
+		var b_key: String = str(b.get("region_id", "")) + str(b.get("commodity_id", ""))
+		return a_key < b_key
 	)
 	var created: int = 0
 	var max_shipments: int = int(_policies.get("max_shipments_per_day", MAX_SHIPMENTS_PER_DAY))
-	for shortage: Dictionary in shortages:
+	for request: Dictionary in requests:
 		if created >= max_shipments:
 			break
-		var destination_id: String = str(shortage.get("region_id", ""))
-		var commodity_id: String = str(shortage.get("commodity_id", ""))
-		var remaining: float = float(shortage.get("unmet", 0.0))
+		var destination_id: String = str(request.get("region_id", ""))
+		var commodity_id: String = str(request.get("commodity_id", ""))
+		var remaining: float = float(request.get("request_units", 0.0))
 		var candidates: Array[Dictionary] = _supplier_candidates(
 			destination_id, commodity_id
 		)
@@ -985,6 +1025,30 @@ func _update_prices() -> void:
 		region_states[region_id] = state
 
 
+func _reachable_external_shortage_bp(origin_id: String, commodity_id: String) -> int:
+	var maximum_shortage_bp: int = 0
+	for destination_id: String in _region_ids:
+		if destination_id == origin_id:
+			continue
+		var destination_state: Dictionary = region_states[destination_id] as Dictionary
+		var destination_row: Dictionary = (destination_state.get("commodities", {}) as Dictionary).get(commodity_id, {}) as Dictionary
+		var shortage_bp: int = int(destination_row.get("shortage_bp", 0))
+		if shortage_bp <= maximum_shortage_bp or shortage_bp < 500:
+			continue
+		var route: Dictionary = routes.find_route(origin_id, destination_id)
+		if route.is_empty() or routes.route_capacity(route) <= 0.0001:
+			continue
+		if bool(route.get("cross_border", false)):
+			var origin_country: String = str((region_states[origin_id] as Dictionary).get("country_market_id", ""))
+			var destination_country: String = str(destination_state.get("country_market_id", ""))
+			var relation_key: String = origin_country + ">" + destination_country
+			var relation: Dictionary = catalog.trade_relations.get(relation_key, {}) as Dictionary
+			if relation.is_empty() or bool(relation.get("embargo", false)) or float(_trade_quota_remaining.get(relation_key, 0.0)) <= 0.0001:
+				continue
+		maximum_shortage_bp = shortage_bp
+	return maximum_shortage_bp
+
+
 func _update_site_targets() -> void:
 	for site_id: String in _production_site_ids:
 		var site: Dictionary = production_sites[site_id] as Dictionary
@@ -993,6 +1057,8 @@ func _update_site_targets() -> void:
 		var output_value_per_batch: float = 0.0
 		var input_cost_per_batch: float = 0.0
 		var output_shortage_bp: int = 0
+		var output_external_shortage_bp: int = 0
+		var output_exports: float = 0.0
 		var output_surplus: bool = true
 		for output: Dictionary in _dictionary_array(recipe.get("outputs", [])):
 			var commodity_id: String = str(output.get("commodity_id", ""))
@@ -1002,6 +1068,8 @@ func _update_site_targets() -> void:
 			output_shortage_bp = maxi(
 				output_shortage_bp, int(commodity_state.get("shortage_bp", 0))
 			)
+			output_external_shortage_bp = maxi(output_external_shortage_bp, _reachable_external_shortage_bp(region_id, commodity_id))
+			output_exports += float(commodity_state.get("exports_units", 0.0))
 			if float(commodity_state.get("inventory_coverage_bp", 0)) <= 12000.0:
 				output_surplus = false
 		for input: Dictionary in _dictionary_array(recipe.get("inputs", [])):
@@ -1012,9 +1080,14 @@ func _update_site_targets() -> void:
 		var margin: int = int(round(output_value_per_batch - input_cost_per_batch))
 		var target: int = clampi(int(site.get("operating_target_bp", 0)), 0, BASIS_POINTS)
 		var input_shortage_bp: int = int(site.get("last_input_shortage_bp", 0))
-		if margin > 0 and (output_shortage_bp >= 500 or input_shortage_bp >= 500):
+		if margin > 0 and (
+			output_shortage_bp >= 500
+			or output_external_shortage_bp >= 500
+			or input_shortage_bp >= 500
+			or output_exports > 0.0001
+		):
 			target += int(_policies.get("operating_increase_step_bp", 140))
-		elif margin < 0 or (output_surplus and output_shortage_bp == 0):
+		elif margin < 0 or (output_surplus and output_shortage_bp == 0 and output_external_shortage_bp < 500 and output_exports <= 0.0001):
 			target -= int(_policies.get("operating_decrease_step_bp", 100))
 		site["operating_target_bp"] = clampi(target, 0, BASIS_POINTS)
 		site["last_margin_centimes"] = margin * float(site.get("last_batches", 0.0))

@@ -61,7 +61,12 @@ func reset_daily_capacity() -> void:
 
 
 func set_edge_capacity(edge_id: String, capacity_units_per_day: float) -> bool:
-	if not _default_capacity.has(edge_id) or capacity_units_per_day < 0.0:
+	if (
+		not _default_capacity.has(edge_id)
+		or is_nan(capacity_units_per_day)
+		or is_inf(capacity_units_per_day)
+		or capacity_units_per_day < 0.0
+	):
 		return false
 	edge_capacity_overrides[edge_id] = capacity_units_per_day
 	edge_remaining_capacity[edge_id] = capacity_units_per_day
