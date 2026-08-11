@@ -709,14 +709,15 @@
 11 K organization_ids
 12 K social_influence
 @ scripts/core/models/relationship_data.gd | RelationshipData
-4 K character_a_id
-5 K character_b_id
-6 K familiarity
-7 K trust
-8 K affinity
-9 K interest_link
-10 K is_public
-11 K last_interaction_hour
+4 K id
+5 K character_a_id
+6 K character_b_id
+7 K familiarity
+8 K trust
+9 K affinity
+10 K interest_link
+11 K is_public
+12 K last_interaction_hour
 @ scripts/core/random_service_config.gd | RandomServiceConfig
 5 C DEFAULT_PATH
 7 A default_seed
@@ -1459,9 +1460,6 @@
 5 K authorizations
 6 A _next_sequence
 @ scripts/v2_3/v2_3_life_loop_interface.gd | V23LifeLoopInterface
-5 C V2_3_MENU_SCENE
-6 C V2_3_PANEL_IDS
-@ scripts/v2_3/v2_3_life_loop_simulation.gd | V23LifeLoopSimulation
 5 C V2_3_SCHEMA_VERSION
 6 C JULES_ID
 7 C LUCIEN_ID
