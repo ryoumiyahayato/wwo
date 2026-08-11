@@ -15,12 +15,13 @@ func _initialize() -> void:
 func _run() -> void:
 	_test_government_history_validation_matrix()
 	_test_sustained_severe_pressure_does_not_become_timer_clock()
+	_test_historical_return_floor_decays_away()
 	_test_repeat_return_responds_to_political_improvement()
 	_test_approximate_tie_boundaries()
 	_test_return_penalty_elapsed_partition()
 	_test_recovery_can_stabilize()
 	_test_mixed_decade_determinism_and_resume()
-	print("VNext state politics R3: %d checks, %d failures" % [checks, failures])
+	print("VNext state politics R4: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures > 0 or checks <= 0 else 0)
 
 
@@ -179,13 +180,17 @@ func _test_sustained_severe_pressure_does_not_become_timer_clock() -> void:
 	if first == null or replay == null:
 		return
 	var initial_group := first.government_group_id()
-	var first_run := _advance_severe(first, 2200)
-	var replay_run := _advance_severe(replay, 2200)
-	_check(bool(first_run.get("success", false)) and bool(replay_run.get("success", false)), "2200-day sustained severe runs complete")
+	var first_run := _advance_severe(first, 3650)
+	var replay_run := _advance_severe_daily(replay, 3650)
+	_check(bool(first_run.get("success", false)) and bool(replay_run.get("success", false)), "3650-day sustained severe chunked and daily runs complete")
 	var evidence := first_run.get("transitions", []) as Array
 	_check(evidence.size() >= 2, "sustained severe pressure permits multiple transition windows")
 	var comeback := false
 	var exact_cooldown_alternations := 0
+	var max_exact_cooldown_alternations := 0
+	var same_period_alternations := 0
+	var max_same_period_alternations := 0
+	var last_alternating_gap := -1
 	for index: int in range(evidence.size()):
 		var item := evidence[index] as Dictionary
 		if str(item.get("new", "")) == initial_group:
@@ -199,14 +204,112 @@ func _test_sustained_severe_pressure_does_not_become_timer_clock() -> void:
 			var alternates := str(previous.get("old", "")) == str(item.get("new", "")) and str(previous.get("new", "")) == str(item.get("old", ""))
 			if alternates and gap == VNextPoliticsUpdateService.TRANSITION_COOLDOWN_DAYS:
 				exact_cooldown_alternations += 1
+				max_exact_cooldown_alternations = maxi(max_exact_cooldown_alternations, exact_cooldown_alternations)
 			else:
 				exact_cooldown_alternations = 0
+			if alternates:
+				if gap == last_alternating_gap:
+					same_period_alternations += 1
+				else:
+					same_period_alternations = 1
+				last_alternating_gap = gap
+				max_same_period_alternations = maxi(max_same_period_alternations, same_period_alternations)
+			else:
+				same_period_alternations = 0
+				last_alternating_gap = -1
 			_check(gap >= VNextPoliticsUpdateService.TRANSITION_COOLDOWN_DAYS, "transition spacing respects cooldown at evidence index %d" % index)
 	_check(comeback, "former government can still make a politically eligible comeback")
-	_check(exact_cooldown_alternations < 3, "constant severe pressure does not settle into endless exact-cooldown A/B timer cycling")
-	_equal(_first_semantic_difference(first.snapshot(), replay.snapshot()), "", "sustained-pressure final state replays deterministically")
-	_equal(_transition_signature(evidence), _transition_signature(replay_run.get("transitions", []) as Array), "sustained-pressure transition evidence replays deterministically")
-	print("R3 sustained transition evidence: %s" % JSON.stringify(evidence))
+	_check(max_exact_cooldown_alternations < 3, "constant severe pressure never accumulates a long exact-cooldown A/B run")
+	_check(max_same_period_alternations < 3, "constant severe pressure does not settle into a repeated fixed-period A/B attractor")
+	_check(first.is_valid(), "3650-day sustained severe final state remains valid")
+	_check(is_finite(first.legitimacy()) and first.legitimacy() >= 0.0 and first.legitimacy() <= 100.0, "3650-day sustained severe legitimacy stays bounded")
+	_check(is_finite(first.stability()) and first.stability() >= 0.0 and first.stability() <= 100.0, "3650-day sustained severe stability stays bounded")
+	_equal(_first_semantic_difference(first.snapshot(), replay.snapshot()), "", "3650-day severe large-vs-daily partition is equivalent")
+	_equal(_transition_signature(evidence), _transition_signature(replay_run.get("transitions", []) as Array), "sustained-pressure transition evidence is partition invariant")
+	print("R4 sustained transition evidence: %s" % JSON.stringify(evidence))
+
+
+func _test_historical_return_floor_decays_away() -> void:
+	var seed := VNextStatePolitics.create_from_config(_limited_challenger_config())
+	if seed == null:
+		_check(false, "historical-floor fixture is valid")
+		return
+	var base := seed.snapshot()
+	var first_entry := _transition_record(
+		100,
+		"organization:loran_government_group",
+		"person:loran_premier",
+		"organization:loran_labor_caucus",
+		"person:loran_labor_leader"
+	)
+	first_entry["mandate_score"] = 80.0
+	var displacement := _transition_record(
+		500,
+		"organization:loran_labor_caucus",
+		"person:loran_labor_leader",
+		"organization:loran_government_group",
+		"person:loran_premier"
+	)
+	displacement["mandate_score"] = 72.0
+	base["government_change_history"] = [first_entry, displacement]
+	base["government_group_id"] = "organization:loran_government_group"
+	base["government_leader_id"] = "person:loran_premier"
+	base["instability_streak"] = 200
+	base["recovery_streak"] = 0
+	base["crisis_stage"] = "crisis"
+	var forces := base.get("forces", []) as Array
+	for index: int in range(forces.size()):
+		var force := (forces[index] as Dictionary).duplicate(true)
+		var force_id := str(force.get("force_id", ""))
+		if force_id == "organization:loran_government_group":
+			force["influence"] = 50.0
+			force["government_support"] = -80.0
+			force["base_government_support"] = -80.0
+		elif force_id == "organization:loran_labor_caucus":
+			force["influence"] = 50.0
+			force["government_support"] = 0.0
+			force["base_government_support"] = 0.0
+			force["institutional_access"] = 45.0
+			force["mobilization_capacity"] = 45.0
+			force["government_eligible"] = true
+		forces[index] = force
+	base["forces"] = forces
+
+	var requirements: Array[float] = []
+	for age: int in [365, 500, 719, 720, 721]:
+		var aged := base.duplicate(true)
+		aged["period_index"] = 500 + age
+		requirements.append(service._repeat_return_required_mandate(aged, 80.0))
+	_check(requirements[0] > requirements[1] and requirements[1] > requirements[2] and requirements[2] > requirements[3], "historical mandate uplift decays monotonically before the horizon")
+	_equal(requirements[3], float(VNextPoliticsUpdateService.CHALLENGER_MANDATE_THRESHOLD), "historical mandate uplift is zero at the 720-day horizon")
+	_equal(requirements[4], float(VNextPoliticsUpdateService.CHALLENGER_MANDATE_THRESHOLD), "historical mandate uplift remains zero after the horizon")
+	for required: float in requirements:
+		_check(required >= float(VNextPoliticsUpdateService.CHALLENGER_MANDATE_THRESHOLD) and required <= VNextPoliticsUpdateService.REPEAT_RETURN_MANDATE_BENCHMARK_CAP + VNextPoliticsUpdateService.REPEAT_RETURN_MANDATE_MARGIN, "historical return requirement stays bounded")
+
+	var recent := base.duplicate(true)
+	recent["period_index"] = 500 + VNextPoliticsUpdateService.TRANSITION_COOLDOWN_DAYS
+	var recent_result := service._select_challenger(recent, 100.0)
+	_check(recent_result.is_empty(), "recent direct return can be blocked by bounded historical hysteresis even when crisis removes the return penalty")
+
+	var horizon := base.duplicate(true)
+	horizon["period_index"] = 500 + VNextPoliticsUpdateService.RETURN_GOVERNMENT_PENALTY_DAYS
+	var horizon_result := service._select_challenger(horizon, 100.0)
+	_check(not horizon_result.is_empty(), "former government is ordinarily eligible once historical hysteresis expires")
+	if not horizon_result.is_empty():
+		var current_mandate := float(horizon_result.get("mandate_score", 0.0))
+		_check(current_mandate >= VNextPoliticsUpdateService.CHALLENGER_MANDATE_THRESHOLD, "expired-horizon current mandate clears normal threshold")
+		_check(current_mandate < 80.0, "expired-horizon current mandate is below stale prior entry mandate")
+		_check(float(horizon_result.get("coalition_score", 0.0)) > 0.0, "expired-horizon challenger has valid coalition evidence")
+		_check(float(horizon_result.get("procedure_score", 0.0)) > 0.0, "expired-horizon challenger has valid procedure evidence")
+
+	var public_state := VNextStatePolitics.new()
+	_check(public_state.restore(horizon), "expired-horizon liveness snapshot restores through public state path")
+	var transition_result := service.update(public_state, GENERATOR.severe_input(1))
+	_check(bool(transition_result.get("success", false)), "expired-horizon public update succeeds")
+	_check(bool(transition_result.get("government_changed", false)), "expired historical floor permits a real public-path government transition")
+	_equal(public_state.government_group_id(), "organization:loran_labor_caucus", "former government actually returns after finite hysteresis horizon")
+	_check(public_state.is_valid(), "post-return state and government history remain valid")
+	print("R4 historical return requirements [365,500,719,720,721]: %s" % JSON.stringify(requirements))
 
 
 func _test_repeat_return_responds_to_political_improvement() -> void:
@@ -470,6 +573,28 @@ func _advance_severe(state: VNextStatePolitics, days: int) -> Dictionary:
 				"pressure": float(change.get("political_pressure", 0.0)),
 			})
 		remaining -= step
+	return {"success": true, "transitions": transitions, "last_pressure": last_pressure}
+
+
+func _advance_severe_daily(state: VNextStatePolitics, days: int) -> Dictionary:
+	var transitions: Array[Dictionary] = []
+	var last_pressure := 0.0
+	for _day: int in range(days):
+		var result := service.update(state, GENERATOR.severe_input(1))
+		if not bool(result.get("success", false)):
+			return {"success": false, "transitions": transitions, "last_pressure": last_pressure}
+		last_pressure = float(result.get("political_pressure", 0.0))
+		for raw_change: Variant in result.get("government_changes", []) as Array:
+			var change := raw_change as Dictionary
+			transitions.append({
+				"period": int(change.get("period", 0)),
+				"old": str(change.get("old_government_group_id", "")),
+				"new": str(change.get("new_government_group_id", "")),
+				"mandate": float(change.get("mandate_score", 0.0)),
+				"coalition": float(change.get("coalition_score", 0.0)),
+				"procedure": float(change.get("procedure_score", 0.0)),
+				"pressure": float(change.get("political_pressure", 0.0)),
+			})
 	return {"success": true, "transitions": transitions, "last_pressure": last_pressure}
 
 
