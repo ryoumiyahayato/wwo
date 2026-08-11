@@ -111,8 +111,8 @@
 13 E daily_decision_count
 14 E long_term_evaluation_count
 @ scripts/ai/simple_ai_service.gd | SimpleAiService
-5 K rules
-6 K roster
+5 K roster
+6 K rules
 7 K states
 @ scripts/alpha/alpha_ai_service.gd | AlphaAiService
 5 C MAX_CANDIDATES
@@ -709,15 +709,14 @@
 11 K organization_ids
 12 K social_influence
 @ scripts/core/models/relationship_data.gd | RelationshipData
-4 K id
-5 K character_a_id
-6 K character_b_id
-7 K familiarity
-8 K trust
-9 K affinity
-10 K interest_link
-11 K is_public
-12 K last_interaction_hour
+4 K character_a_id
+5 K character_b_id
+6 K familiarity
+7 K trust
+8 K affinity
+9 K interest_link
+10 K is_public
+11 K last_interaction_hour
 @ scripts/core/random_service_config.gd | RandomServiceConfig
 5 C DEFAULT_PATH
 7 A default_seed
@@ -1865,7 +1864,7 @@
 127 K _v2_3_local_overlay
 128 K _v2_3_local_locations
 129 K _v2_3_local_location_points
-130 K _v2_3_local_lookup
+130 K _v2_3_local_location_lookup
 131 K _v2_3_local_edge_lookup
 132 A _v2_3_local_catalog_revision
 133 A _v2_3_local_overlay_revision
@@ -2030,3 +2029,4 @@
 7 C DETAIL_SELECTED_COLOR
 9 A _city_detail_catalog
 ```
+
