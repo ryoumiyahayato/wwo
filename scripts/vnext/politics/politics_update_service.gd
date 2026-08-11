@@ -640,8 +640,7 @@ func _select_challenger(candidate: Dictionary, total_pressure: float) -> Diction
 		if _is_direct_return_candidate(candidate, force_id):
 			var prior_entry_mandate := _previous_entry_mandate(candidate, force_id)
 			if prior_entry_mandate >= 0.0:
-				var benchmark := minf(prior_entry_mandate, REPEAT_RETURN_MANDATE_BENCHMARK_CAP)
-				var required_mandate := minf(100.0, benchmark + _repeat_return_mandate_margin(candidate))
+				var required_mandate := _repeat_return_required_mandate(candidate, prior_entry_mandate)
 				if mandate < required_mandate and not is_equal_approx(mandate, required_mandate):
 					continue
 		var best_force_id := str((best.get("force", {}) as Dictionary).get("force_id", ""))
@@ -721,12 +720,27 @@ func _previous_entry_mandate(candidate: Dictionary, challenger_id: String) -> fl
 	return -1.0
 
 
-func _repeat_return_mandate_margin(candidate: Dictionary) -> float:
+func _repeat_return_decay(candidate: Dictionary) -> float:
 	var age := _days_since_last_change(candidate, int(candidate.get("period_index", 0)))
 	if age >= RETURN_GOVERNMENT_PENALTY_DAYS:
 		return 0.0
-	var decay := 1.0 - float(age) / float(RETURN_GOVERNMENT_PENALTY_DAYS)
-	return REPEAT_RETURN_MANDATE_MARGIN * clampf(decay, 0.0, 1.0)
+	return clampf(1.0 - float(age) / float(RETURN_GOVERNMENT_PENALTY_DAYS), 0.0, 1.0)
+
+
+func _repeat_return_required_mandate(candidate: Dictionary, prior_entry_mandate: float) -> float:
+	var benchmark := minf(prior_entry_mandate, REPEAT_RETURN_MANDATE_BENCHMARK_CAP)
+	var historical_uplift := maxf(0.0, benchmark - float(CHALLENGER_MANDATE_THRESHOLD))
+	var decay := _repeat_return_decay(candidate)
+	return minf(
+		100.0,
+		float(CHALLENGER_MANDATE_THRESHOLD)
+			+ historical_uplift * decay
+			+ REPEAT_RETURN_MANDATE_MARGIN * decay
+	)
+
+
+func _repeat_return_mandate_margin(candidate: Dictionary) -> float:
+	return REPEAT_RETURN_MANDATE_MARGIN * _repeat_return_decay(candidate)
 
 
 func _apply_government_change(candidate: Dictionary, challenger_result: Dictionary, total_pressure: float) -> Dictionary:
