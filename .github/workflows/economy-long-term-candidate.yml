@@ -47,6 +47,21 @@ jobs:
           git diff --check
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
+      - name: Mirror final cleanup in evidence worktree
+        shell: pwsh
+        run: |
+          $cleanupPaths = @(
+            'tests/vnext/market_economy_a_patch_setup_test.gd',
+            'tests/vnext/market_economy_flow_diagnostic_test.gd',
+            '.github/workflows/economy-diagnostic-compare.yml',
+            '.github/workflows/economy-long-term-candidate.yml',
+            '.github/workflows/economy-finalize.yml'
+          )
+          git rm -f --ignore-unmatch -- $cleanupPaths
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
