@@ -464,7 +464,14 @@ static func _validate_snapshot(snapshot_value: Dictionary) -> bool:
 
 	if not _validate_policy_history(snapshot_value.get("policy_history") as Array, policy_ids, period):
 		return false
-	if not _validate_government_history(snapshot_value.get("government_change_history") as Array, force_ids, leader_by_force, period):
+	if not _validate_government_history(
+		snapshot_value.get("government_change_history") as Array,
+		force_ids,
+		leader_by_force,
+		period,
+		str(snapshot_value.get("government_group_id", "")),
+		str(snapshot_value.get("government_leader_id", ""))
+	):
 		return false
 	return true
 
@@ -582,10 +589,23 @@ static func _validate_policy_history(history: Array, policy_ids: Dictionary, cur
 	return true
 
 
-static func _validate_government_history(history: Array, force_ids: Dictionary, leader_by_force: Dictionary, current_period: int) -> bool:
+static func _validate_government_history(
+	history: Array,
+	force_ids: Dictionary,
+	leader_by_force: Dictionary,
+	current_period: int,
+	current_government_group_id: String,
+	current_government_leader_id: String
+) -> bool:
 	if history.size() > MAX_GOVERNMENT_CHANGE_HISTORY:
 		return false
-	for raw_record: Variant in history:
+	if history.is_empty():
+		return true
+
+	var ordered := _sorted_dictionary_array(history)
+	var previous: Dictionary = {}
+	var previous_period := -1
+	for raw_record: Variant in ordered:
 		if typeof(raw_record) != TYPE_DICTIONARY:
 			return false
 		var record := raw_record as Dictionary
@@ -598,19 +618,38 @@ static func _validate_government_history(history: Array, force_ids: Dictionary, 
 		]:
 			if not record.has(key):
 				return false
-		if _normalize_int(record.get("period"), 0, current_period) < 0 or record.get("reason") != "sustained_government_failure":
+		var record_period := _normalize_int(record.get("period"), 0, current_period)
+		if record_period < 0 or record.get("reason") != "sustained_government_failure":
 			return false
 		var old_group := str(record.get("old_government_group_id", ""))
 		var new_group := str(record.get("new_government_group_id", ""))
+		var old_leader := str(record.get("old_leader_id", ""))
+		var new_leader := str(record.get("new_leader_id", ""))
 		if old_group == new_group or not force_ids.has(old_group) or not force_ids.has(new_group):
 			return false
-		if str(leader_by_force.get(old_group, "")) != str(record.get("old_leader_id", "")):
+		if str(leader_by_force.get(old_group, "")) != old_leader:
 			return false
-		if str(leader_by_force.get(new_group, "")) != str(record.get("new_leader_id", "")):
+		if str(leader_by_force.get(new_group, "")) != new_leader:
 			return false
 		for score_key: String in ["political_pressure", "mandate_score", "procedure_score", "coalition_score"]:
 			if not _in_range_number(record.get(score_key), 0.0, 100.0):
 				return false
+
+		if not previous.is_empty():
+			if record_period <= previous_period:
+				return false
+			if old_group != str(previous.get("new_government_group_id", "")):
+				return false
+			if old_leader != str(previous.get("new_leader_id", "")):
+				return false
+		previous = record
+		previous_period = record_period
+
+	var last := ordered.back() as Dictionary
+	if str(last.get("new_government_group_id", "")) != current_government_group_id:
+		return false
+	if str(last.get("new_leader_id", "")) != current_government_leader_id:
+		return false
 	return true
 
 
@@ -703,25 +742,35 @@ static func _sorted_dictionary_array(raw_array: Array) -> Array[Dictionary]:
 		if typeof(raw_value) == TYPE_DICTIONARY:
 			result.append((raw_value as Dictionary).duplicate(true))
 	result.sort_custom(func(left: Dictionary, right: Dictionary) -> bool:
-		var left_has_period := left.has("period")
-		var right_has_period := right.has("period")
-		if left_has_period and right_has_period:
-			var left_period := int(left.get("period", 0))
-			var right_period := int(right.get("period", 0))
-			if left_period != right_period:
-				return left_period < right_period
-		var left_id := str(left.get("force_id", left.get("policy_id", left.get("new_government_group_id", left.get("action", "")))))
-		var right_id := str(right.get("force_id", right.get("policy_id", right.get("new_government_group_id", right.get("action", "")))))
-		if left_id != right_id:
-			return left_id < right_id
-		var left_support := float(left.get("support", 0.0))
-		var right_support := float(right.get("support", 0.0))
-		if not is_equal_approx(left_support, right_support):
-			return left_support < right_support
-		var left_delta := float(left.get("delta", 0.0))
-		var right_delta := float(right.get("delta", 0.0))
-		if not is_equal_approx(left_delta, right_delta):
-			return left_delta < right_delta
-		return str(left.get("replaced_policy_id", "")) < str(right.get("replaced_policy_id", ""))
+		return _dictionary_record_less(left, right)
 	)
 	return result
+
+
+static func _dictionary_record_less(left: Dictionary, right: Dictionary) -> bool:
+	var left_has_period := left.has("period")
+	var right_has_period := right.has("period")
+	if left_has_period != right_has_period:
+		return left_has_period
+	if left_has_period:
+		var left_period := int(left.get("period", 0))
+		var right_period := int(right.get("period", 0))
+		if left_period != right_period:
+			return left_period < right_period
+	for key: String in [
+		"force_id", "policy_id", "old_government_group_id", "new_government_group_id",
+		"old_leader_id", "new_leader_id", "replaced_policy_id", "action", "reason",
+	]:
+		var left_text := str(left.get(key, ""))
+		var right_text := str(right.get(key, ""))
+		if left_text != right_text:
+			return left_text < right_text
+	for key: String in [
+		"support", "delta", "political_pressure", "mandate_score",
+		"procedure_score", "coalition_score", "support_score",
+	]:
+		var left_number := float(left.get(key, 0.0))
+		var right_number := float(right.get(key, 0.0))
+		if left_number != right_number:
+			return left_number < right_number
+	return false
