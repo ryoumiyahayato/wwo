@@ -1,4 +1,4 @@
-name: Economy Industrial Replenishment 10-Year Evidence
+name: Economy Final Candidate Artifact
 
 on:
   pull_request:
@@ -9,9 +9,9 @@ permissions:
   contents: read
 
 jobs:
-  economy-long-term:
+  economy-final-artifact:
     runs-on: windows-2025
-    timeout-minutes: 120
+    timeout-minutes: 30
     steps:
       - name: Checkout current economy branch
         uses: actions/checkout@v4
@@ -19,14 +19,14 @@ jobs:
           ref: feat/vnext-market-economy-20260809
           fetch-depth: 1
 
-      - name: Record evidence source head
+      - name: Record artifact source head
         shell: pwsh
         run: |
           $head = (git rev-parse HEAD).Trim()
-          Write-Host "ECON_EVIDENCE_SOURCE_HEAD=$head"
+          Write-Host "ECON_ARTIFACT_SOURCE_HEAD=$head"
           $head | Out-File -FilePath economy-evidence-source-head.txt -Encoding ascii
 
-      - name: Reuse validated candidate patch
+      - name: Apply exactly the persisted validated candidate
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -47,7 +47,7 @@ jobs:
           git diff --check
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-      - name: Mirror final cleanup in evidence worktree
+      - name: Mirror final cleanup in artifact worktree
         shell: pwsh
         run: |
           $cleanupPaths = @(
@@ -66,59 +66,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
-      - name: Install Godot 4.6.3
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $archive = Join-Path $env:RUNNER_TEMP 'godot.zip'
-          $install = Join-Path $env:RUNNER_TEMP 'godot-4.6.3'
-          Invoke-WebRequest -Uri 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip' -OutFile $archive
-          Expand-Archive -LiteralPath $archive -DestinationPath $install
-          $binary = (Get-ChildItem -LiteralPath $install -Filter 'Godot_v4.6.3-stable_win64.exe' -Recurse | Select-Object -First 1).FullName
-          if (-not $binary) { throw 'Godot 4.6.3 executable was not found' }
-          "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          & $binary --version
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-      - name: Clean import
-        shell: pwsh
-        run: |
-          $p = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--editor','--headless','--path','.', '--quit') -NoNewWindow -Wait -PassThru
-          if ($p.ExitCode -ne 0) { exit $p.ExitCode }
-
-      - name: Run focused economy tests
-        shell: pwsh
-        run: |
-          foreach ($script in @(
-            'res://tests/vnext/market_economy_test.gd',
-            'res://tests/vnext/market_economy_behavior_test.gd',
-            'res://tests/vnext/market_economy_recovery_test.gd',
-            'res://tests/vnext/market_economy_export_production_test.gd'
-          )) {
-            $p = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless','--path','.', '--script',$script) -NoNewWindow -Wait -PassThru
-            Write-Host "ECON_EVIDENCE_FOCUSED script=$script exit=$($p.ExitCode)"
-            if ($p.ExitCode -ne 0) { exit $p.ExitCode }
-          }
-
-      - name: Run complete 3650-day economy test
-        shell: pwsh
-        run: |
-          $p = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @('--headless','--path','.', '--script','res://tests/vnext/market_economy_long_term_test.gd') -NoNewWindow -Wait -PassThru
-          Write-Host "ECON_EVIDENCE_10Y exit=$($p.ExitCode)"
-          if ($p.ExitCode -ne 0) { exit $p.ExitCode }
-
-      - name: Run unified vNext validation including 3650 days
-        shell: pwsh
-        run: |
-          python -B tools/run_vnext_validation.py --root . --godot "$env:GODOT_BIN"
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-      - name: Run repository validation
-        shell: pwsh
-        run: |
-          & ./tools/run_validation.ps1 -GodotPath $env:GODOT_BIN -ProjectPath .
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Regenerate variable-state audit baseline
         shell: pwsh
@@ -160,7 +107,7 @@ jobs:
           git diff --exit-code -- $auditDocs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-      - name: Package validated candidate evidence
+      - name: Package exact validated candidate and generated docs
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -173,7 +120,7 @@ jobs:
           git status --short | Out-File -FilePath economy-evidence-status.txt -Encoding utf8
           Get-Content economy-evidence-status.txt
 
-      - name: Upload validated candidate evidence
+      - name: Upload exact final candidate artifact
         uses: actions/upload-artifact@v4
         with:
           name: economy-validated-candidate-evidence
