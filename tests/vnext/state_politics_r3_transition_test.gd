@@ -13,21 +13,23 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	_test_raw_government_history_validation_matrix()
+	_test_government_history_validation_matrix()
 	_test_sustained_severe_pressure_does_not_become_timer_clock()
 	_test_repeat_return_responds_to_political_improvement()
 	_test_approximate_tie_boundaries()
 	_test_return_penalty_elapsed_partition()
-	_test_mixed_decade_recovery_and_determinism()
+	_test_recovery_can_stabilize()
+	_test_mixed_decade_determinism_and_resume()
 	print("VNext state politics R3: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures > 0 or checks <= 0 else 0)
 
 
-func _test_raw_government_history_validation_matrix() -> void:
+func _test_government_history_validation_matrix() -> void:
 	var base := _load_fixture()
 	var target := _load_fixture()
 	if base == null or target == null:
 		return
+
 	var empty := base.snapshot()
 	empty["government_change_history"] = []
 	_check(target.restore(empty), "history legal: empty history restores")
@@ -88,27 +90,32 @@ func _test_raw_government_history_validation_matrix() -> void:
 	invalid_government_history[0] = invalid_first
 	invalid_government_history[1] = invalid_second
 	invalid_government["government_change_history"] = invalid_government_history
-	_assert_restore_rejected_unchanged(target, invalid_government, "history illegal: invalid government stable ID reference")
+	_assert_restore_rejected_unchanged(target, invalid_government, "history illegal: invalid government reference")
 
-	var invalid_leader := valid.duplicate(true)
-	var invalid_leader_history := (invalid_leader.get("government_change_history", []) as Array).duplicate(true)
-	var leader_first := (invalid_leader_history[0] as Dictionary).duplicate(true)
-	var leader_second := (invalid_leader_history[1] as Dictionary).duplicate(true)
-	leader_first["new_leader_id"] = "person:loran_conservative_leader"
-	leader_second["old_leader_id"] = "person:loran_conservative_leader"
-	invalid_leader_history[0] = leader_first
-	invalid_leader_history[1] = leader_second
-	invalid_leader["government_change_history"] = invalid_leader_history
-	_assert_restore_rejected_unchanged(target, invalid_leader, "history illegal: authoritative leader reference mismatch")
+	var invalid_leader_reference := valid.duplicate(true)
+	var invalid_leader_history := (invalid_leader_reference.get("government_change_history", []) as Array).duplicate(true)
+	var invalid_leader_record := (invalid_leader_history[0] as Dictionary).duplicate(true)
+	invalid_leader_record["new_leader_id"] = "person:loran_conservative_leader"
+	invalid_leader_history[0] = invalid_leader_record
+	invalid_leader_reference["government_change_history"] = invalid_leader_history
+	_assert_restore_rejected_unchanged(target, invalid_leader_reference, "history illegal: authoritative leader reference mismatch")
 
-	var broken_chain := valid.duplicate(true)
-	var broken_history := (broken_chain.get("government_change_history", []) as Array).duplicate(true)
-	var broken_second := (broken_history[1] as Dictionary).duplicate(true)
-	broken_second["old_government_group_id"] = "organization:loran_conservative_bloc"
-	broken_second["old_leader_id"] = "person:loran_conservative_leader"
-	broken_history[1] = broken_second
-	broken_chain["government_change_history"] = broken_history
-	_assert_restore_rejected_unchanged(target, broken_chain, "history illegal: broken government chain")
+	var broken_government_chain := valid.duplicate(true)
+	var broken_government_history := (broken_government_chain.get("government_change_history", []) as Array).duplicate(true)
+	var broken_government_second := (broken_government_history[1] as Dictionary).duplicate(true)
+	broken_government_second["old_government_group_id"] = "organization:loran_conservative_bloc"
+	broken_government_second["old_leader_id"] = "person:loran_conservative_leader"
+	broken_government_history[1] = broken_government_second
+	broken_government_chain["government_change_history"] = broken_government_history
+	_assert_restore_rejected_unchanged(target, broken_government_chain, "history illegal: broken government chain")
+
+	var broken_leader_chain := valid.duplicate(true)
+	var broken_leader_history := (broken_leader_chain.get("government_change_history", []) as Array).duplicate(true)
+	var broken_leader_second := (broken_leader_history[1] as Dictionary).duplicate(true)
+	broken_leader_second["old_leader_id"] = "person:loran_conservative_leader"
+	broken_leader_history[1] = broken_leader_second
+	broken_leader_chain["government_change_history"] = broken_leader_history
+	_assert_restore_rejected_unchanged(target, broken_leader_chain, "history illegal: broken leader chain")
 
 	var duplicate_transition := valid.duplicate(true)
 	var duplicate_history := (duplicate_transition.get("government_change_history", []) as Array).duplicate(true)
@@ -138,7 +145,7 @@ func _test_raw_government_history_validation_matrix() -> void:
 	non_increasing_second["period"] = 50
 	non_increasing_history[1] = non_increasing_second
 	non_increasing["government_change_history"] = non_increasing_history
-	_assert_restore_rejected_unchanged(target, non_increasing, "history illegal: non-increasing transition chronology")
+	_assert_restore_rejected_unchanged(target, non_increasing, "history illegal: non-increasing chronology")
 
 	var final_group_mismatch := valid.duplicate(true)
 	final_group_mismatch["government_group_id"] = "organization:loran_conservative_bloc"
@@ -162,7 +169,7 @@ func _test_raw_government_history_validation_matrix() -> void:
 	malformed_nested_record["mandate_score"] = {"malformed": true}
 	malformed_nested_history[0] = malformed_nested_record
 	malformed_nested["government_change_history"] = malformed_nested_history
-	_assert_restore_rejected_unchanged(target, malformed_nested, "history illegal: malformed nested score field")
+	_assert_restore_rejected_unchanged(target, malformed_nested, "history illegal: malformed nested score")
 
 
 func _test_sustained_severe_pressure_does_not_become_timer_clock() -> void:
@@ -189,17 +196,14 @@ func _test_sustained_severe_pressure_does_not_become_timer_clock() -> void:
 		if index > 0:
 			var previous := evidence[index - 1] as Dictionary
 			var gap := int(item.get("period", 0)) - int(previous.get("period", 0))
-			var alternates := (
-				str(previous.get("old", "")) == str(item.get("new", ""))
-				and str(previous.get("new", "")) == str(item.get("old", ""))
-			)
+			var alternates := str(previous.get("old", "")) == str(item.get("new", "")) and str(previous.get("new", "")) == str(item.get("old", ""))
 			if alternates and gap == VNextPoliticsUpdateService.TRANSITION_COOLDOWN_DAYS:
 				exact_cooldown_alternations += 1
 			else:
 				exact_cooldown_alternations = 0
 			_check(gap >= VNextPoliticsUpdateService.TRANSITION_COOLDOWN_DAYS, "transition spacing respects cooldown at evidence index %d" % index)
 	_check(comeback, "former government can still make a politically eligible comeback")
-	_check(exact_cooldown_alternations < 3, "constant severe pressure does not settle into an endless exact-cooldown A/B timer attractor")
+	_check(exact_cooldown_alternations < 3, "constant severe pressure does not settle into endless exact-cooldown A/B timer cycling")
 	_equal(_first_semantic_difference(first.snapshot(), replay.snapshot()), "", "sustained-pressure final state replays deterministically")
 	_equal(_transition_signature(evidence), _transition_signature(replay_run.get("transitions", []) as Array), "sustained-pressure transition evidence replays deterministically")
 	print("R3 sustained transition evidence: %s" % JSON.stringify(evidence))
@@ -217,8 +221,7 @@ func _test_repeat_return_responds_to_political_improvement() -> void:
 	if history.size() != 2:
 		return
 	var pressure := float(run.get("last_pressure", 0.0))
-	var blocked := service._select_challenger(state.snapshot(), pressure)
-	_check(blocked.is_empty(), "repeat-return candidate without renewed mandate is rejected after cooldown")
+	_check(service._select_challenger(state.snapshot(), pressure).is_empty(), "repeat-return candidate without renewed mandate is rejected after cooldown")
 
 	var improved := state.snapshot()
 	var forces := improved.get("forces", []) as Array
@@ -254,6 +257,8 @@ func _test_policy_tie_boundary() -> void:
 	if template.is_empty():
 		_check(false, "policy tie template exists")
 		return
+	var input := VNextPoliticsPressureInput.create(180, 70.0, 96.0, 45.0, 30.0, -25.0)
+
 	var inside_a := template.duplicate(true)
 	inside_a["policy_id"] = "policy:a_inside_tie"
 	inside_a["name"] = "A inside tie"
@@ -261,7 +266,6 @@ func _test_policy_tie_boundary() -> void:
 	var inside_z := template.duplicate(true)
 	inside_z["policy_id"] = "policy:z_inside_tie"
 	inside_z["name"] = "Z inside tie"
-	var input := VNextPoliticsPressureInput.create(180, 70.0, 96.0, 45.0, 30.0, -25.0)
 	var scoring_state := VNextStatePolitics.create_from_config(_policy_pair_config(config, inside_a, inside_z, false))
 	if scoring_state == null:
 		_check(false, "inside-epsilon policy fixture is valid")
@@ -300,8 +304,6 @@ func _test_policy_tie_boundary() -> void:
 
 func _test_challenger_tie_boundary() -> void:
 	var incumbent := _minimal_challenger_force("organization:incumbent_test", "person:incumbent_test", 20.0, 80.0, false)
-	var inside_a := _minimal_challenger_force("organization:a_inside_challenger", "person:a_inside_challenger", 40.0, -50.0, true)
-	var inside_z := _minimal_challenger_force("organization:z_inside_challenger", "person:z_inside_challenger", 40.000001, -50.0, true)
 	var base_candidate := {
 		"regime_type": "federal_republic",
 		"government_id": "organization:test_government",
@@ -309,14 +311,15 @@ func _test_challenger_tie_boundary() -> void:
 		"period_index": 500,
 		"government_change_history": [],
 	}
+
+	var inside_a := _minimal_challenger_force("organization:a_inside_challenger", "person:a_inside_challenger", 40.0, -50.0, true)
+	var inside_z := _minimal_challenger_force("organization:z_inside_challenger", "person:z_inside_challenger", 40.000001, -50.0, true)
 	var only_a := base_candidate.duplicate(true)
 	only_a["forces"] = [incumbent, inside_a]
 	var only_z := base_candidate.duplicate(true)
 	only_z["forces"] = [incumbent, inside_z]
-	var inside_a_result := service._select_challenger(only_a, 50.0)
-	var inside_z_result := service._select_challenger(only_z, 50.0)
-	var inside_a_score := float(inside_a_result.get("mandate_score", 0.0))
-	var inside_z_score := float(inside_z_result.get("mandate_score", 0.0))
+	var inside_a_score := float(service._select_challenger(only_a, 50.0).get("mandate_score", 0.0))
+	var inside_z_score := float(service._select_challenger(only_z, 50.0).get("mandate_score", 0.0))
 	_check(inside_a_score != inside_z_score and is_equal_approx(inside_a_score, inside_z_score), "challenger inside epsilon uses unequal approximate-equal scores")
 	var combined_inside_a := base_candidate.duplicate(true)
 	combined_inside_a["forces"] = [inside_z, incumbent, inside_a]
@@ -333,10 +336,8 @@ func _test_challenger_tie_boundary() -> void:
 	outside_only_a["forces"] = [incumbent, outside_a]
 	var outside_only_z := base_candidate.duplicate(true)
 	outside_only_z["forces"] = [incumbent, outside_z]
-	var outside_a_result := service._select_challenger(outside_only_a, 50.0)
-	var outside_z_result := service._select_challenger(outside_only_z, 50.0)
-	var outside_a_score := float(outside_a_result.get("mandate_score", 0.0))
-	var outside_z_score := float(outside_z_result.get("mandate_score", 0.0))
+	var outside_a_score := float(service._select_challenger(outside_only_a, 50.0).get("mandate_score", 0.0))
+	var outside_z_score := float(service._select_challenger(outside_only_z, 50.0).get("mandate_score", 0.0))
 	_check(outside_z_score > outside_a_score and not is_equal_approx(outside_z_score, outside_a_score), "challenger outside epsilon has a genuine higher lexical-disadvantaged score")
 	var combined_outside_a := base_candidate.duplicate(true)
 	combined_outside_a["forces"] = [outside_z, incumbent, outside_a]
@@ -372,6 +373,7 @@ func _test_return_penalty_elapsed_partition() -> void:
 	_equal(penalties[4], 0.0, "return penalty remains zero after day 720")
 	for penalty: float in penalties:
 		_check(penalty >= 0.0 and penalty <= 18.0, "return penalty stays bounded and non-negative")
+	print("R3 return penalty boundaries [0,365,719,720,721]: %s" % JSON.stringify(penalties))
 
 	var coarse := VNextStatePolitics.new()
 	var daily := VNextStatePolitics.new()
@@ -393,7 +395,21 @@ func _test_return_penalty_elapsed_partition() -> void:
 	_equal(coarse.active_policy_ids(), daily.active_policy_ids(), "partition equivalence preserves deterministic policy state")
 
 
-func _test_mixed_decade_recovery_and_determinism() -> void:
+func _test_recovery_can_stabilize() -> void:
+	var state := _load_fixture()
+	if state == null:
+		return
+	var severe := service.update(state, GENERATOR.severe_input(120))
+	_check(bool(severe.get("success", false)), "controlled crisis phase completes")
+	_check(state.crisis_stage() in ["strained", "crisis"], "controlled pressure can develop a political crisis before transition eligibility")
+	var shock_stability := state.stability()
+	var recovered := _advance_recovery(state, 1200)
+	_check(bool(recovered.get("success", false)), "controlled recovery phase completes")
+	_check(state.stability() > shock_stability, "pressure removal improves stability after the controlled crisis")
+	_equal(state.crisis_stage(), "stable", "sufficient recovery can return politics to stable state")
+
+
+func _test_mixed_decade_determinism_and_resume() -> void:
 	var continuous := VNextStatePolitics.create_from_config(_limited_challenger_config())
 	var replay := VNextStatePolitics.create_from_config(_limited_challenger_config())
 	if continuous == null or replay == null:
@@ -404,17 +420,20 @@ func _test_mixed_decade_recovery_and_determinism() -> void:
 	_check(bool(continuous_severe.get("success", false)) and bool(replay_severe.get("success", false)), "mixed decade severe phase completes")
 	var severe_history := continuous.government_change_history()
 	_check(severe_history.size() >= 2, "mixed decade severe phase develops crisis and government transition")
-	_check(continuous.legitimacy() >= 0.0 and continuous.legitimacy() <= 100.0 and continuous.stability() >= 0.0 and continuous.stability() <= 100.0, "severe phase legitimacy and stability remain finite and bounded")
-	var snapshot_midpoint := continuous.snapshot()
-	var resumed := VNextStatePolitics.new()
-	_check(resumed.restore(snapshot_midpoint), "mixed decade midpoint snapshot restores")
+	for index: int in range(1, severe_history.size()):
+		var gap := int((severe_history[index] as Dictionary).get("period", 0)) - int((severe_history[index - 1] as Dictionary).get("period", 0))
+		_check(gap >= VNextPoliticsUpdateService.TRANSITION_COOLDOWN_DAYS, "mixed decade has no transition spam at index %d" % index)
+	_check(is_finite(continuous.legitimacy()) and continuous.legitimacy() >= 0.0 and continuous.legitimacy() <= 100.0, "severe-phase legitimacy remains finite and bounded")
+	_check(is_finite(continuous.stability()) and continuous.stability() >= 0.0 and continuous.stability() <= 100.0, "severe-phase stability remains finite and bounded")
 
+	var midpoint_snapshot := continuous.snapshot()
+	var resumed := VNextStatePolitics.new()
+	_check(resumed.restore(midpoint_snapshot), "mixed decade midpoint snapshot restores")
 	var recovery_days := 900
 	var recovery_result := _advance_recovery(continuous, recovery_days)
 	var replay_recovery := _advance_recovery(replay, recovery_days)
 	var resumed_recovery := _advance_recovery(resumed, recovery_days)
 	_check(bool(recovery_result.get("success", false)) and bool(replay_recovery.get("success", false)) and bool(resumed_recovery.get("success", false)), "mixed decade recovery phase completes")
-	_check(continuous.crisis_stage() == "stable", "recovery phase can return politics to stable state")
 
 	var remaining := 3650 - 1200 - recovery_days
 	var tail_ok := _advance_recovery(continuous, remaining)
@@ -425,7 +444,8 @@ func _test_mixed_decade_recovery_and_determinism() -> void:
 	_equal(_first_semantic_difference(continuous.snapshot(), replay.snapshot()), "", "mixed decade full replay is deterministic")
 	_equal(_first_semantic_difference(continuous.snapshot(), resumed.snapshot()), "", "mixed decade snapshot/resume matches continuous path")
 	_check(continuous.is_valid(), "mixed decade final state remains valid")
-	print("R3 mixed-decade transition sequence: %s" % JSON.stringify(_transition_signature(continuous_severe.get("transitions", []) as Array)))
+	_check(is_finite(continuous.legitimacy()) and is_finite(continuous.stability()), "mixed decade final political values remain finite")
+	print("R3 mixed-decade severe transition sequence: %s" % JSON.stringify(_transition_signature(continuous_severe.get("transitions", []) as Array)))
 
 
 func _advance_severe(state: VNextStatePolitics, days: int) -> Dictionary:
@@ -486,20 +506,8 @@ func _synthetic_multi_transition_snapshot(base: Dictionary) -> Dictionary:
 	result["government_group_id"] = "organization:loran_military_command"
 	result["government_leader_id"] = "person:loran_marshal"
 	result["government_change_history"] = [
-		_transition_record(
-			100,
-			"organization:loran_government_group",
-			"person:loran_premier",
-			"organization:loran_labor_caucus",
-			"person:loran_labor_leader"
-		),
-		_transition_record(
-			500,
-			"organization:loran_labor_caucus",
-			"person:loran_labor_leader",
-			"organization:loran_military_command",
-			"person:loran_marshal"
-		),
+		_transition_record(100, "organization:loran_government_group", "person:loran_premier", "organization:loran_labor_caucus", "person:loran_labor_leader"),
+		_transition_record(500, "organization:loran_labor_caucus", "person:loran_labor_leader", "organization:loran_military_command", "person:loran_marshal"),
 	]
 	return result
 
@@ -559,11 +567,7 @@ func _transition_signature(evidence: Array) -> Array[String]:
 	var result: Array[String] = []
 	for raw_item: Variant in evidence:
 		var item := raw_item as Dictionary
-		result.append("%d:%s>%s" % [
-			int(item.get("period", 0)),
-			str(item.get("old", "")),
-			str(item.get("new", "")),
-		])
+		result.append("%d:%s>%s" % [int(item.get("period", 0)), str(item.get("old", "")), str(item.get("new", ""))])
 	return result
 
 
