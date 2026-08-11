@@ -1,0 +1,741 @@
+{
+  "collisions": [
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/alpha/world.json#$/high_detail_people[1]/native_name",
+        "source:data/v2_2/lille_demo_people.json#$/people[1]/native_name",
+        "source:data/v2_3/social_people.json#$/people[1]/native_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "albert dumont",
+      "raw_names": [
+        "Albert Dumont"
+      ],
+      "source_files": [
+        "data/alpha/world.json",
+        "data/v2_2/lille_demo_people.json",
+        "data/v2_3/social_people.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[78]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[78]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "djibouti",
+      "raw_names": [
+        "Djibouti"
+      ],
+      "source_files": [
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/alpha/world.json#$/high_detail_people[2]/native_name",
+        "source:data/v2_3/social_people.json#$/people[2]/native_name",
+        "source:data/world_map/relationships.json#$/relationships[0]/native_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "jeanne leroy",
+      "raw_names": [
+        "Jeanne Leroy"
+      ],
+      "source_files": [
+        "data/alpha/world.json",
+        "data/v2_3/social_people.json",
+        "data/world_map/relationships.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/alpha/world.json#$/high_detail_people[3]/native_name",
+        "source:data/v2_3/social_people.json#$/people[3]/native_name",
+        "source:data/world_map/relationships.json#$/relationships[1]/native_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "jules martin",
+      "raw_names": [
+        "Jules Martin"
+      ],
+      "source_files": [
+        "data/alpha/world.json",
+        "data/v2_3/social_people.json",
+        "data/world_map/relationships.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[150]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[150]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "khiva",
+      "raw_names": [
+        "Khiva"
+      ],
+      "source_files": [
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[143]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[143]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "lagos",
+      "raw_names": [
+        "Lagos"
+      ],
+      "source_files": [
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/alpha/world.json#$/high_detail_people[4]/native_name",
+        "source:data/v2_3/social_people.json#$/people[5]/native_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "lucien moreau",
+      "raw_names": [
+        "Lucien Moreau"
+      ],
+      "source_files": [
+        "data/alpha/world.json",
+        "data/v2_3/social_people.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[38]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[38]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "luxembourg",
+      "raw_names": [
+        "Luxembourg"
+      ],
+      "source_files": [
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/alpha/world.json#$/high_detail_people[0]/native_name",
+        "source:data/v2_2/lille_demo_people.json#$/people[0]/native_name",
+        "source:data/v2_3/social_people.json#$/people[0]/native_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "pierre lefèvre",
+      "raw_names": [
+        "Pierre Lefèvre"
+      ],
+      "source_files": [
+        "data/alpha/world.json",
+        "data/v2_2/lille_demo_people.json",
+        "data/v2_3/social_people.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/world/demo_world.json#$/organizations[10]/position_structure/positions/worker/name",
+        "source:data/world/demo_world.json#$/organizations[11]/position_structure/positions/worker/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "产业雇员",
+      "raw_names": [
+        "产业雇员"
+      ],
+      "source_files": [
+        "data/world/demo_world.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/alpha/world.json#$/high_detail_people[3]/display_name_zh",
+        "source:data/v2_3/social_people.json#$/people[3]/display_name_zh"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "儒勒 马丁",
+      "raw_names": [
+        "儒勒·马丁"
+      ],
+      "source_files": [
+        "data/alpha/world.json",
+        "data/v2_3/social_people.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/world_map/relationships.json#$/relationships[9]/display_name_zh",
+        "source:data/world_map/relationships.json#$/relationships[9]/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "克莱尔 勒诺",
+      "raw_names": [
+        "克莱尔·勒诺"
+      ],
+      "source_files": [
+        "data/world_map/relationships.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/world_map/relationships.json#$/relationships[7]/display_name_zh",
+        "source:data/world_map/relationships.json#$/relationships[7]/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "勒内 博内",
+      "raw_names": [
+        "勒内·博内"
+      ],
+      "source_files": [
+        "data/world_map/relationships.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/v2_2/lille_demo_locations.json#$/locations[5]/name",
+        "source:data/v2_3/social_sandbox_rules.json#$/organizations[3]/display_name_zh"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "北部省省政府",
+      "raw_names": [
+        "北部省省政府"
+      ],
+      "source_files": [
+        "data/v2_2/lille_demo_locations.json",
+        "data/v2_3/social_sandbox_rules.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/alpha/world.json#$/high_detail_people[4]/display_name_zh",
+        "source:data/v2_3/social_people.json#$/people[5]/display_name_zh"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "吕西安 莫罗",
+      "raw_names": [
+        "吕西安·莫罗"
+      ],
+      "source_files": [
+        "data/alpha/world.json",
+        "data/v2_3/social_people.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/world/demo_world.json#$/organizations[2]/position_structure/positions/officer/name",
+        "source:data/world/demo_world.json#$/organizations[3]/position_structure/positions/officer/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "地区军官",
+      "raw_names": [
+        "地区军官"
+      ],
+      "source_files": [
+        "data/world/demo_world.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/world/demo_world.json#$/organizations[0]/position_structure/positions/regional_official/name",
+        "source:data/world/demo_world.json#$/organizations[1]/position_structure/positions/regional_official/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "地区官员",
+      "raw_names": [
+        "地区官员"
+      ],
+      "source_files": [
+        "data/world/demo_world.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/world/demo_world.json#$/organizations[12]/position_structure/positions/steward/name",
+        "source:data/world/demo_world.json#$/organizations[13]/position_structure/positions/steward/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "地区理事",
+      "raw_names": [
+        "地区理事"
+      ],
+      "source_files": [
+        "data/world/demo_world.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/world/demo_world.json#$/organizations[19]/position_structure/positions/organizer/name",
+        "source:data/world/demo_world.json#$/organizations[6]/position_structure/positions/organizer/name",
+        "source:data/world/demo_world.json#$/organizations[7]/position_structure/positions/organizer/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "地区组织员",
+      "raw_names": [
+        "地区组织员"
+      ],
+      "source_files": [
+        "data/world/demo_world.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/world/demo_world.json#$/organizations[4]/position_structure/positions/manager/name",
+        "source:data/world/demo_world.json#$/organizations[5]/position_structure/positions/manager/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "地区经理",
+      "raw_names": [
+        "地区经理"
+      ],
+      "source_files": [
+        "data/world/demo_world.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/alpha/presets.json#$/presets[6]/name",
+        "source:data/world/demo_world.json#$/organizations[8]/position_structure/positions/official/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "地方官员",
+      "raw_names": [
+        "地方官员"
+      ],
+      "source_files": [
+        "data/alpha/presets.json",
+        "data/world/demo_world.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/world_map/relationships.json#$/relationships[2]/display_name_zh",
+        "source:data/world_map/relationships.json#$/relationships[2]/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "埃莉斯 富尼耶",
+      "raw_names": [
+        "埃莉斯·富尼耶"
+      ],
+      "source_files": [
+        "data/world_map/relationships.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/world_map/relationships.json#$/relationships[6]/display_name_zh",
+        "source:data/world_map/relationships.json#$/relationships[6]/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "埃莱娜 福尔",
+      "raw_names": [
+        "埃莱娜·福尔"
+      ],
+      "source_files": [
+        "data/world_map/relationships.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/world/demo_world.json#$/organizations[6]/position_structure/positions/member/name",
+        "source:data/world/demo_world.json#$/organizations[7]/position_structure/positions/member/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "基层会员",
+      "raw_names": [
+        "基层会员"
+      ],
+      "source_files": [
+        "data/world/demo_world.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/world/demo_world.json#$/organizations[2]/position_structure/positions/enlisted/name",
+        "source:data/world/demo_world.json#$/organizations[3]/position_structure/positions/enlisted/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "基层成员",
+      "raw_names": [
+        "基层成员"
+      ],
+      "source_files": [
+        "data/world/demo_world.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/world/demo_world.json#$/organizations[0]/position_structure/positions/clerk/name",
+        "source:data/world/demo_world.json#$/organizations[1]/position_structure/positions/clerk/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "基层职员",
+      "raw_names": [
+        "基层职员"
+      ],
+      "source_files": [
+        "data/world/demo_world.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/world/demo_world.json#$/organizations[4]/position_structure/positions/executive/name",
+        "source:data/world/demo_world.json#$/organizations[5]/position_structure/positions/executive/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "总经理",
+      "raw_names": [
+        "总经理"
+      ],
+      "source_files": [
+        "data/world/demo_world.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/world/demo_world.json#$/organizations[16]/position_structure/positions/editor/name",
+        "source:data/world/demo_world.json#$/organizations[17]/position_structure/positions/editor/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "总编辑",
+      "raw_names": [
+        "总编辑"
+      ],
+      "source_files": [
+        "data/world/demo_world.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/world_map/relationships.json#$/relationships[1]/display_name_zh",
+        "source:data/world_map/relationships.json#$/relationships[1]/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "朱尔 马丁",
+      "raw_names": [
+        "朱尔·马丁"
+      ],
+      "source_files": [
+        "data/world_map/relationships.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/world_map/relationships.json#$/relationships[8]/display_name_zh",
+        "source:data/world_map/relationships.json#$/relationships[8]/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "波利娜 梅西耶",
+      "raw_names": [
+        "波利娜·梅西耶"
+      ],
+      "source_files": [
+        "data/world_map/relationships.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/alpha/world.json#$/country_profiles[0]/name",
+        "source:data/world/demo_world.json#$/countries[0]/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "洛岚联邦",
+      "raw_names": [
+        "洛岚联邦"
+      ],
+      "source_files": [
+        "data/alpha/world.json",
+        "data/world/demo_world.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/alpha/commodity_market_1900.json#$/commodities[28]/name_zh",
+        "source:data/alpha/economy.json#$/goods_and_services[2]/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "煤炭",
+      "raw_names": [
+        "煤炭"
+      ],
+      "source_files": [
+        "data/alpha/commodity_market_1900.json",
+        "data/alpha/economy.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/world_map/relationships.json#$/relationships[5]/display_name_zh",
+        "source:data/world_map/relationships.json#$/relationships[5]/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "玛丽 贝尔纳",
+      "raw_names": [
+        "玛丽·贝尔纳"
+      ],
+      "source_files": [
+        "data/world_map/relationships.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/alpha/world.json#$/high_detail_people[0]/display_name_zh",
+        "source:data/v2_2/lille_demo_people.json#$/people[0]/display_name_zh",
+        "source:data/v2_3/social_people.json#$/people[0]/display_name_zh"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "皮埃尔 勒费弗尔",
+      "raw_names": [
+        "皮埃尔·勒费弗尔"
+      ],
+      "source_files": [
+        "data/alpha/world.json",
+        "data/v2_2/lille_demo_people.json",
+        "data/v2_3/social_people.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/v2_2/lille_demo_locations.json#$/locations[0]/name",
+        "source:data/v2_3/lille_locations.json#$/locations[0]/display_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "皮埃尔住所",
+      "raw_names": [
+        "皮埃尔住所"
+      ],
+      "source_files": [
+        "data/v2_2/lille_demo_locations.json",
+        "data/v2_3/lille_locations.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/alpha/world.json#$/country_profiles[1]/name",
+        "source:data/world/demo_world.json#$/countries[1]/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "维斯塔联盟",
+      "raw_names": [
+        "维斯塔联盟"
+      ],
+      "source_files": [
+        "data/alpha/world.json",
+        "data/world/demo_world.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/alpha/world.json#$/high_detail_people[2]/display_name_zh",
+        "source:data/v2_3/social_people.json#$/people[2]/display_name_zh",
+        "source:data/world_map/relationships.json#$/relationships[0]/display_name_zh",
+        "source:data/world_map/relationships.json#$/relationships[0]/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "让娜 勒鲁瓦",
+      "raw_names": [
+        "让娜·勒鲁瓦"
+      ],
+      "source_files": [
+        "data/alpha/world.json",
+        "data/v2_3/social_people.json",
+        "data/world_map/relationships.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/world/demo_world.json#$/organizations[16]/position_structure/positions/correspondent/name",
+        "source:data/world/demo_world.json#$/organizations[17]/position_structure/positions/correspondent/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "资深通讯员",
+      "raw_names": [
+        "资深通讯员"
+      ],
+      "source_files": [
+        "data/world/demo_world.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/alpha/economy.json#$/enterprises[4]/name",
+        "source:data/world/demo_world.json#$/organizations[11]/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "赤丘重工联合厂",
+      "raw_names": [
+        "赤丘重工联合厂"
+      ],
+      "source_files": [
+        "data/alpha/economy.json",
+        "data/world/demo_world.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/world_map/relationships.json#$/relationships[3]/display_name_zh",
+        "source:data/world_map/relationships.json#$/relationships[3]/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "路易 莫罗",
+      "raw_names": [
+        "路易·莫罗"
+      ],
+      "source_files": [
+        "data/world_map/relationships.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/v2_2/lille_demo_locations.json#$/locations[1]/name",
+        "source:data/v2_3/social_sandbox_rules.json#$/organizations[0]/display_name_zh"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "里尔机械制造公司",
+      "raw_names": [
+        "里尔机械制造公司"
+      ],
+      "source_files": [
+        "data/v2_2/lille_demo_locations.json",
+        "data/v2_3/social_sandbox_rules.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/alpha/economy.json#$/enterprises[1]/name",
+        "source:data/world/demo_world.json#$/organizations[10]/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "铸原机械制造社",
+      "raw_names": [
+        "铸原机械制造社"
+      ],
+      "source_files": [
+        "data/alpha/economy.json",
+        "data/world/demo_world.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/alpha/world.json#$/high_detail_people[1]/display_name_zh",
+        "source:data/v2_2/lille_demo_people.json#$/people[1]/display_name_zh",
+        "source:data/v2_3/social_people.json#$/people[1]/display_name_zh"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "阿尔贝 迪蒙",
+      "raw_names": [
+        "阿尔贝·迪蒙"
+      ],
+      "source_files": [
+        "data/alpha/world.json",
+        "data/v2_2/lille_demo_people.json",
+        "data/v2_3/social_people.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/v2_2/lille_demo_locations.json#$/locations[4]/name",
+        "source:data/v2_3/lille_locations.json#$/locations[1]/display_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "阿尔贝住所",
+      "raw_names": [
+        "阿尔贝住所"
+      ],
+      "source_files": [
+        "data/v2_2/lille_demo_locations.json",
+        "data/v2_3/lille_locations.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/world/demo_world.json#$/organizations[4]/position_structure/positions/employee/name",
+        "source:data/world/demo_world.json#$/organizations[5]/position_structure/positions/employee/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "雇员",
+      "raw_names": [
+        "雇员"
+      ],
+      "source_files": [
+        "data/world/demo_world.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/world_map/relationships.json#$/relationships[4]/display_name_zh",
+        "source:data/world_map/relationships.json#$/relationships[4]/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "马塞尔 德洛姆",
+      "raw_names": [
+        "马塞尔·德洛姆"
+      ],
+      "source_files": [
+        "data/world_map/relationships.json"
+      ]
+    }
+  ],
+  "normalizer_id": "unicode_nfkc_casefold_safe_punctuation_v1",
+  "policy": {
+    "candidate_ids_are_not_authoritative": true,
+    "no_historical_contradiction_is_inferred": true,
+    "one_to_many_mappings_are_preserved": true
+  },
+  "schema_version": 1,
+  "summary": {
+    "candidate_collision_groups": 46,
+    "candidate_ids_in_collision_groups": 101
+  }
+}

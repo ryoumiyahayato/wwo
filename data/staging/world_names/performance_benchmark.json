@@ -1,0 +1,16 @@
+{
+  "artifact_counts": {
+    "aliases": 2232,
+    "coverage_files": 224,
+    "entities": 923
+  },
+  "elapsed_seconds": 12.369444,
+  "max_seconds": 4.257632,
+  "min_seconds": 4.034676,
+  "operation": "world_names.build_artifacts",
+  "platform": "Windows-11-10.0.26100-SP0",
+  "python": "3.12.13",
+  "repetitions": 3,
+  "schema_version": 1,
+  "skipped": false
+}

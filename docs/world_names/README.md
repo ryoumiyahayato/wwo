@@ -40,3 +40,16 @@ generated data/staging/world_names/ directory from source coverage. It writes:
 
 To write a separate Batch 2 report, pass
 --report-path docs/world_names/BATCH_2_REPORT.md --batch-label "BATCH 2".
+## Batch 3 non-authoritative review candidates
+
+The separate review-candidate tool reads excluded non-modern source records and
+writes only source-record-keyed candidates:
+
+- review_candidates.json: direct repository name observations with source
+  pointers and no authoritative identity.
+- candidate_collision_ledger.json: preserved normalized one-to-many groups for
+  manual review; no historical contradiction is inferred.
+- performance_benchmark.json: measured build timings and structural counts.
+
+Run it with:
+python -m tools.world_names.review_candidates --root D:/wwo --benchmark-repetitions 3
