@@ -1,0 +1,197 @@
+name: PR58 R3 one-shot patcher
+
+on:
+  push:
+    branches:
+      - feat/vnext-military-strategy-20260809
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.event.head_commit.message == 'chore: stage PR58 R3 patcher'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/vnext-military-strategy-20260809
+          fetch-depth: 0
+      - name: Apply reviewed R3 fixes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64
+          import json
+          import os
+          import re
+          import urllib.request
+
+          repo = "ryoumiyahayato/wwo"
+          service_blob = "3a9e5d60fbeb494e7bd39c4b6243be29d7e816a0"
+          token = os.environ["GITHUB_TOKEN"]
+          req = urllib.request.Request(
+              f"https://api.github.com/repos/{repo}/git/blobs/{service_blob}",
+              headers={
+                  "Authorization": f"Bearer {token}",
+                  "Accept": "application/vnd.github+json",
+                  "X-GitHub-Api-Version": "2022-11-28",
+              },
+          )
+          with urllib.request.urlopen(req) as response:
+              payload = json.load(response)
+          service_bytes = base64.b64decode(payload["content"])
+          Path("scripts/vnext/military/military_service.gd").write_bytes(service_bytes)
+
+          state_path = Path("scripts/vnext/military/military_state.gd")
+          source = state_path.read_text(encoding="utf-8")
+
+          validation_anchor = "\treturn true\n\n\nfunc add_formation(formation: VNextMilitaryFormation) -> bool:"
+          replacement = "\tif not VNextMilitaryStateInvariants.validate(self, map):\n\t\treturn false\n\treturn true\n\n\nfunc add_formation(formation: VNextMilitaryFormation) -> bool:"
+          if source.count(validation_anchor) != 1:
+              raise SystemExit("is_valid insertion anchor mismatch")
+          source = source.replace(validation_anchor, replacement, 1)
+
+          control_pattern = re.compile(r"func apply_region_control_change\([\s\S]*?\n\n\nfunc begin_capacity_window", re.MULTILINE)
+          control_replacement = '''func apply_region_control_change(
+\tregion_id: String,
+\tcontroller_id: String,
+\tcause: String,
+\teffective_hour: int,
+\tcontext: String,
+\tsource_action_id: String = ""
+) -> bool:
+\tif not region_controls.has(region_id) or controller_id.is_empty() or cause.is_empty() or context.is_empty():
+\t\treturn false
+\tif effective_hour != last_simulated_hour:
+\t\treturn false
+\tif context == "setup_fixture":
+\t\tif not source_action_id.is_empty() or not can_apply_setup_control_change():
+\t\t\treturn false
+\telif context == "battle":
+\t\tif cause != "strategic_attack_victory" or not _battle_control_claim_valid(region_id, controller_id, source_action_id):
+\t\t\treturn false
+\telse:
+\t\treturn false
+\tvar previous: String = str(region_controls[region_id])
+\tif previous == controller_id:
+\t\treturn true
+\tvar control_origin_controller_id: String = previous
+\tfor index: int in range(control_history.size() - 1, -1, -1):
+\t\tvar prior: Dictionary = control_history[index] as Dictionary
+\t\tif str(prior.get("region_id", "")) == region_id:
+\t\t\tcontrol_origin_controller_id = str(prior.get("control_origin_controller_id", prior.get("previous_controller_id", previous)))
+\t\t\tbreak
+\tvar source_action_kind: String = ""
+\tvar source_formation_id: String = ""
+\tvar source_target_region_id: String = ""
+\tvar source_controller_id: String = ""
+\tvar source_preparation_end_hour: int = -1
+\tif context == "battle":
+\t\tvar source_action: Dictionary = active_actions[source_action_id] as Dictionary
+\t\tvar source_formation: VNextMilitaryFormation = get_formation(str(source_action.get("formation_id", "")))
+\t\tsource_action_kind = str(source_action.get("kind", ""))
+\t\tsource_formation_id = str(source_action.get("formation_id", ""))
+\t\tsource_target_region_id = str(source_action.get("target_region_id", ""))
+\t\tsource_controller_id = source_formation.country_id if source_formation != null else ""
+\t\tsource_preparation_end_hour = int(source_action.get("preparation_end_hour", -1))
+\tregion_controls[region_id] = controller_id
+\tappend_control_history({
+\t\t"region_id": region_id,
+\t\t"previous_controller_id": previous,
+\t\t"controller_id": controller_id,
+\t\t"control_origin_controller_id": control_origin_controller_id,
+\t\t"cause": cause,
+\t\t"effective_hour": effective_hour,
+\t\t"context": context,
+\t\t"source_action_id": source_action_id,
+\t\t"source_action_kind": source_action_kind,
+\t\t"source_formation_id": source_formation_id,
+\t\t"source_target_region_id": source_target_region_id,
+\t\t"source_controller_id": source_controller_id,
+\t\t"source_preparation_end_hour": source_preparation_end_hour,
+\t})
+\treturn true
+
+
+func begin_capacity_window'''
+          source, count = control_pattern.subn(control_replacement, source, count=1)
+          if count != 1:
+              raise SystemExit("control mutation replacement mismatch")
+
+          begin_pattern = re.compile(r"func begin_capacity_window\(hour: int\) -> void:[\s\S]*?\n\n\nfunc queue_capacity_request", re.MULTILINE)
+          begin_replacement = '''func begin_capacity_window(hour: int) -> void:
+\tcapacity_window_hour = hour
+\tlink_capacity_used.clear()
+\tlink_queues.clear()
+\tfor action_id: String in _sorted_dictionary_keys(active_actions):
+\t\tvar action: Dictionary = active_actions[action_id] as Dictionary
+\t\taction["capacity_window_hour"] = hour
+\t\taction["capacity_link_id"] = ""
+\t\taction["capacity_used_this_window"] = 0.0
+\t\tactive_actions[action_id] = action
+
+
+func queue_capacity_request'''
+          source, count = begin_pattern.subn(begin_replacement, source, count=1)
+          if count != 1:
+              raise SystemExit("capacity-window replacement mismatch")
+
+          record_pattern = re.compile(r"func record_capacity_use\(link_id: String, amount: float\) -> void:[\s\S]*?\n\n\nfunc append_completed_action", re.MULTILINE)
+          record_replacement = '''func record_capacity_use(link_id: String, amount: float, action_id: String = "") -> void:
+\tif amount <= 0.0:
+\t\treturn
+\tif action_id.is_empty():
+\t\tvar queue: Array = link_queues.get(link_id, []) as Array
+\t\tif not queue.is_empty():
+\t\t\taction_id = str(queue.back())
+\tif action_id.is_empty() or not active_actions.has(action_id):
+\t\treturn
+\tvar action: Dictionary = active_actions[action_id] as Dictionary
+\tif int(action.get("capacity_window_hour", -2)) != capacity_window_hour:
+\t\taction["capacity_window_hour"] = capacity_window_hour
+\t\taction["capacity_link_id"] = ""
+\t\taction["capacity_used_this_window"] = 0.0
+\tvar previous_link_id: String = str(action.get("capacity_link_id", ""))
+\tif not previous_link_id.is_empty() and previous_link_id != link_id:
+\t\treturn
+\tlink_capacity_used[link_id] = float(link_capacity_used.get(link_id, 0.0)) + amount
+\taction["capacity_link_id"] = link_id
+\taction["capacity_used_this_window"] = float(action.get("capacity_used_this_window", 0.0)) + amount
+\tactive_actions[action_id] = action
+
+
+func append_completed_action'''
+          source, count = record_pattern.subn(record_replacement, source, count=1)
+          if count != 1:
+              raise SystemExit("capacity-use replacement mismatch")
+
+          state_path.write_text(source, encoding="utf-8", newline="\n")
+          Path(".github/workflows/pr58-r3-patcher.yml").unlink()
+          PY
+          git diff --check
+          python3 - <<'PY'
+          import subprocess
+          allowed = {
+              ".github/workflows/pr58-r3-patcher.yml",
+              "scripts/vnext/military/military_service.gd",
+              "scripts/vnext/military/military_state.gd",
+          }
+          changed = set(subprocess.check_output(["git", "diff", "--name-only"], text=True).splitlines())
+          unexpected = sorted(changed - allowed)
+          if unexpected:
+              raise SystemExit(f"unexpected patch scope: {unexpected}")
+          PY
+      - name: Commit normal fast-forward fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/vnext/military/military_service.gd scripts/vnext/military/military_state.gd .github/workflows/pr58-r3-patcher.yml
+          git commit -m "fix: close PR58 R3 military findings"
+          git push origin HEAD:feat/vnext-military-strategy-20260809
