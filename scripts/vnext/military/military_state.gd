@@ -620,7 +620,7 @@ func _transport_edge_state_valid(
 		return false
 	if load_remaining <= 0.0001 and not reserved_link_id.is_empty():
 		return false
-	var progress_cap: float = 0.94 if str(action.get("kind", "")) == "attack" else 1.0
+	var progress_cap: float = 0.94 if str(action.get("kind", "")) == "attack" else 0.999
 	var expected_progress: float = clampf((float(edge_index) + clampf(1.0 - load_remaining / load_total, 0.0, 1.0)) / edge_count, 0.0, progress_cap)
 	if absf(progress - expected_progress) > 0.001:
 		return false
