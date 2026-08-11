@@ -26,3 +26,17 @@ The default run scans all JSON files under `data/world_map/` for coverage. The
 modern GeoNames city shards and geometry/runtime support files are reported as
 read-only sources but are not staged as 1900 authoritative entities. Use
 `--include-modern-reference` only for a deliberately larger research export.
+## Batch 2 coverage and regression artifacts
+
+Batch 2 also scans every repository data/**/*.json source while excluding the
+generated data/staging/world_names/ directory from source coverage. It writes:
+
+- coverage_manifest.json: deterministic source paths, SHA-256 digests, parse
+  status, name-field counts, and staging status.
+- remaining_gaps.json: excluded name-bearing sources and field groups without
+  promoting them to authoritative entities.
+- deterministic_corpus.json: artifact/source hashes and normalizer regression
+  fixtures.
+
+To write a separate Batch 2 report, pass
+--report-path docs/world_names/BATCH_2_REPORT.md --batch-label "BATCH 2".

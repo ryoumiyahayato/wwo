@@ -12,6 +12,8 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 if str(REPOSITORY_ROOT) not in sys.path:
     sys.path.insert(0, str(REPOSITORY_ROOT))
 
+from tools.world_names import normalize_name as package_normalize_name  # noqa: E402
+from tools.world_names import world_names as package_module  # noqa: E402
 from tools.world_names.world_names import (  # noqa: E402
     NORMALIZER_ID,
     build_alias_records,
@@ -20,8 +22,9 @@ from tools.world_names.world_names import (  # noqa: E402
     build_search_index,
     normalize_name,
     validate_artifacts,
+    validate_coverage_manifest,
+    validate_deterministic_corpus,
 )
-
 
 def minimal_inventory() -> dict:
     return {
@@ -86,6 +89,11 @@ def minimal_inventory() -> dict:
     }
 
 
+class PackageImportTests(unittest.TestCase):
+    def test_lazy_package_exports_resolve_without_recursion(self) -> None:
+        self.assertEqual(package_module.__name__, "tools.world_names.world_names")
+        self.assertEqual(package_normalize_name("Alpha"), "alpha")
+
 class NormalizationTests(unittest.TestCase):
     def test_normalization_handles_width_case_punctuation_and_whitespace(self) -> None:
         self.assertEqual(normalize_name("  Ａlpha—Beta  "), "alpha beta")
@@ -125,6 +133,22 @@ class ArtifactTests(unittest.TestCase):
         self.assertTrue({"character", "organization", "institution", "city", "region", "country", "port"} <= entity_types)
         self.assertGreater(len(artifacts["collision_report"]["normalized_collisions"]), 0)
         self.assertGreater(len(artifacts["search_index"]["entries"]), 0)
+        coverage = artifacts["coverage_manifest"]
+        self.assertEqual(coverage["summary"]["parse_errors"], 0)
+        self.assertGreaterEqual(coverage["summary"]["data_json_files_scanned"], 200)
+        self.assertEqual(validate_coverage_manifest(coverage), [])
+        self.assertEqual(artifacts["remaining_gaps"]["summary"]["parse_errors"], 0)
+        self.assertEqual(
+            validate_deterministic_corpus(
+                artifacts["deterministic_corpus"],
+                artifacts["inventory"],
+                artifacts["aliases"],
+                artifacts["collision_report"],
+                artifacts["search_index"],
+                coverage,
+            ),
+            [],
+        )
 
 
 if __name__ == "__main__":

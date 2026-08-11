@@ -69365,7 +69365,7 @@
   "source_coverage": {
     "files": [
       {
-        "bytes": 9800,
+        "bytes": 9802,
         "name_bearing_record_count": 10,
         "note": "existing character name pool source",
         "record_count": 59,

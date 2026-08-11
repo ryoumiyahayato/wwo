@@ -10,12 +10,13 @@ stable-ID search index.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import subprocess
 import sys
 import unicodedata
-from collections import defaultdict
+from collections import Counter, defaultdict
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -111,6 +112,18 @@ PUNCTUATION_TRANSLATION = str.maketrans(
 )
 
 
+NORMALIZATION_REGRESSION_CASES: tuple[tuple[str, str], ...] = (
+    ("  Alpha" + chr(0x2014) + "Beta  ", "alpha beta"),
+    ("Alpha" + chr(0xA0) + "Beta", "alpha beta"),
+    (chr(0xFF21) + "lpha", "alpha"),
+    ("Caf" + chr(0xE9), "caf" + chr(0xE9)),
+    ("K" + chr(0xF6) + "ln", "k" + chr(0xF6) + "ln"),
+    (chr(0x5317) + chr(0x4EAC), chr(0x5317) + chr(0x4EAC)),
+    ("A/B", "a b"),
+    ("A" + chr(0x200B) + "B", "ab"),
+)
+
+GENERATED_STAGING_PREFIX = "data/staging/world_names/"
 @dataclass(frozen=True)
 class SourceSpec:
     relative_path: str
@@ -733,6 +746,368 @@ def scan_source_coverage(root: Path) -> dict[str, Any]:
     }
 
 
+def _is_name_like_field(field: str) -> bool:
+    lowered = field.casefold()
+    return field in NAME_FIELD_BY_KEY or "name" in lowered or lowered in {"label", "title"}
+
+
+def _coverage_status(relative_path: str, staged_files: set[str]) -> str:
+    if relative_path in staged_files:
+        return "staged"
+    if relative_path.startswith("data/world_map/city_detail/"):
+        return "modern_reference_scanned_only"
+    if relative_path.startswith("data/world_map/"):
+        return "world_map_scanned_only"
+    return "non_world_map_scanned_only"
+
+
+def _coverage_reason(status: str) -> str:
+    return {
+        "staged": "configured Batch 1 source or name-pool source",
+        "modern_reference_scanned_only": "modern reference source is not 1900 authority by default",
+        "world_map_scanned_only": "world-map JSON is read for coverage but is outside Batch 1 entity selectors",
+        "non_world_map_scanned_only": "outside the configured world-map entity catalogs; requires semantic review before staging",
+        "parse_error": "source could not be parsed; no names were staged",
+    }.get(status, "unclassified source status")
+
+
+def scan_repository_name_coverage(root: Path) -> dict[str, Any]:
+    """Scan every repository data JSON without promoting names to authority."""
+
+    staged_files = {spec.relative_path for spec in CORE_SPECS}
+    staged_files.update(
+        {
+            "data/world_map/historical/historical_admin1_1900.json",
+            "data/world_map/name_pool_fr.json",
+            "data/characters/character_generation.json",
+        }
+    )
+    files: list[dict[str, Any]] = []
+    data_root = root / "data"
+    if not data_root.exists():
+        return {
+            "schema_version": SCHEMA_VERSION,
+            "normalizer_id": NORMALIZER_ID,
+            "scope": {
+                "authoritative_promotion": "never",
+                "generated_staging_excluded": GENERATED_STAGING_PREFIX,
+            },
+            "summary": {"data_json_files_scanned": 0, "parse_errors": 0},
+            "files": [],
+            "staged_source_files": sorted(staged_files),
+        }
+
+    for path in sorted(data_root.rglob("*.json")):
+        relative_path = path.relative_to(root).as_posix()
+        if relative_path.startswith(GENERATED_STAGING_PREFIX):
+            continue
+        raw_bytes = b""
+        try:
+            raw_bytes = path.read_bytes()
+            data = json.loads(raw_bytes.decode("utf-8"))
+            record_count = 0
+            known_name_bearing_records = 0
+            unknown_name_like_bearing_records = 0
+            known_fields: Counter[str] = Counter()
+            unknown_fields: Counter[str] = Counter()
+            for node in _walk_dicts(data):
+                record_count += 1
+                known = [field for field in node if field in NAME_FIELD_BY_KEY]
+                unknown = [
+                    field
+                    for field in node
+                    if _is_name_like_field(field) and field not in NAME_FIELD_BY_KEY
+                ]
+                if known:
+                    known_name_bearing_records += 1
+                if unknown:
+                    unknown_name_like_bearing_records += 1
+                known_fields.update(known)
+                unknown_fields.update(unknown)
+            status = _coverage_status(relative_path, staged_files)
+            files.append(
+                {
+                    "source_file": relative_path,
+                    "sha256": hashlib.sha256(raw_bytes).hexdigest(),
+                    "status": status,
+                    "reason": _coverage_reason(status),
+                    "record_count": record_count,
+                    "name_bearing_record_count": known_name_bearing_records,
+                    "name_like_record_count": known_name_bearing_records
+                    + unknown_name_like_bearing_records,
+                    "known_name_field_counts": dict(sorted(known_fields.items())),
+                    "unknown_name_like_field_counts": dict(sorted(unknown_fields.items())),
+                }
+            )
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+            status = "parse_error"
+            files.append(
+                {
+                    "source_file": relative_path,
+                    "sha256": hashlib.sha256(raw_bytes).hexdigest(),
+                    "status": status,
+                    "reason": f"{_coverage_reason(status)}: {error}",
+                    "record_count": None,
+                    "name_bearing_record_count": 0,
+                    "name_like_record_count": 0,
+                    "known_name_field_counts": {},
+                    "unknown_name_like_field_counts": {},
+                }
+            )
+
+    files.sort(key=lambda item: item["source_file"])
+    known_occurrences = sum(
+        sum(row["known_name_field_counts"].values())
+        for row in files
+    )
+    unknown_occurrences = sum(
+        sum(row["unknown_name_like_field_counts"].values())
+        for row in files
+    )
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "normalizer_id": NORMALIZER_ID,
+        "scope": {
+            "authoritative_promotion": "never",
+            "generated_staging_excluded": GENERATED_STAGING_PREFIX,
+            "unsourced_translation_policy": "no_machine_or_external_translation",
+        },
+        "summary": {
+            "data_json_files_scanned": len(files),
+            "files_with_known_name_fields": sum(
+                1 for row in files if row["name_bearing_record_count"] > 0
+            ),
+            "files_with_name_like_fields": sum(
+                1 for row in files if row["name_like_record_count"] > 0
+            ),
+            "known_name_field_occurrences": known_occurrences,
+            "unknown_name_like_field_occurrences": unknown_occurrences,
+            "parse_errors": sum(1 for row in files if row["status"] == "parse_error"),
+            "staged_files": sum(1 for row in files if row["status"] == "staged"),
+            "modern_reference_files": sum(
+                1 for row in files if row["status"] == "modern_reference_scanned_only"
+            ),
+            "world_map_scanned_only_files": sum(
+                1 for row in files if row["status"] == "world_map_scanned_only"
+            ),
+            "non_world_map_scanned_only_files": sum(
+                1 for row in files if row["status"] == "non_world_map_scanned_only"
+            ),
+        },
+        "files": files,
+        "staged_source_files": sorted(staged_files),
+    }
+
+
+def validate_coverage_manifest(coverage: dict[str, Any]) -> list[str]:
+    errors: list[str] = []
+    if coverage.get("schema_version") != SCHEMA_VERSION:
+        errors.append("coverage manifest schema_version mismatch")
+    if coverage.get("normalizer_id") != NORMALIZER_ID:
+        errors.append("coverage manifest normalizer_id mismatch")
+    files = coverage.get("files")
+    if not isinstance(files, list):
+        return ["coverage manifest files is not a list"]
+    paths = [row.get("source_file") for row in files]
+    if paths != sorted(paths):
+        errors.append("coverage manifest files are not sorted")
+    if len(paths) != len(set(paths)):
+        errors.append("coverage manifest contains duplicate source files")
+    valid_statuses = {
+        "staged",
+        "modern_reference_scanned_only",
+        "world_map_scanned_only",
+        "non_world_map_scanned_only",
+        "parse_error",
+    }
+    for row in files:
+        if row.get("status") not in valid_statuses:
+            errors.append(f"coverage manifest has unknown status: {row.get('status')}")
+        digest = row.get("sha256")
+        if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
+            errors.append(f"coverage manifest has invalid sha256: {row.get('source_file')}")
+        if row.get("status") == "parse_error":
+            errors.append(f"coverage manifest parse error: {row.get('source_file')}")
+        for key in ("known_name_field_counts", "unknown_name_like_field_counts"):
+            values = row.get(key)
+            if not isinstance(values, dict) or list(values) != sorted(values):
+                errors.append(f"coverage manifest field counts are not sorted: {row.get('source_file')}/{key}")
+    return errors
+
+
+def build_remaining_gaps(coverage: dict[str, Any]) -> dict[str, Any]:
+    """Describe excluded name-bearing sources without guessing their authority."""
+
+    field_groups: dict[str, dict[str, Any]] = {}
+    source_files: list[dict[str, Any]] = []
+    for row in coverage.get("files", []):
+        if row.get("status") == "staged":
+            continue
+        known = row.get("known_name_field_counts", {})
+        unknown = row.get("unknown_name_like_field_counts", {})
+        if not known and not unknown and row.get("status") != "parse_error":
+            continue
+        source_files.append(
+            {
+                "source_file": row["source_file"],
+                "status": row["status"],
+                "reason": row["reason"],
+                "record_count": row["record_count"],
+                "name_bearing_record_count": row["name_bearing_record_count"],
+                "name_like_record_count": row["name_like_record_count"],
+                "known_name_field_counts": known,
+                "unknown_name_like_field_counts": unknown,
+            }
+        )
+        for field, count in sorted(known.items()):
+            group = field_groups.setdefault(
+                field,
+                {"field": field, "known_occurrences": 0, "unknown_occurrences": 0, "sources": []},
+            )
+            group["known_occurrences"] += count
+            group["sources"].append(
+                {"source_file": row["source_file"], "status": row["status"], "occurrences": count}
+            )
+        for field, count in sorted(unknown.items()):
+            group = field_groups.setdefault(
+                field,
+                {"field": field, "known_occurrences": 0, "unknown_occurrences": 0, "sources": []},
+            )
+            group["unknown_occurrences"] += count
+            group["sources"].append(
+                {"source_file": row["source_file"], "status": row["status"], "occurrences": count}
+            )
+
+    for group in field_groups.values():
+        group["sources"].sort(key=lambda item: (item["source_file"], item["status"]))
+    field_list = sorted(field_groups.values(), key=lambda item: item["field"])
+    source_files.sort(key=lambda item: item["source_file"])
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "normalizer_id": NORMALIZER_ID,
+        "policy": {
+            "stable_ids_are_authoritative": True,
+            "no_automatic_authority_promotion": True,
+            "no_unsourced_translation": True,
+        },
+        "summary": {
+            "excluded_source_files": len(source_files),
+            "excluded_known_name_occurrences": sum(
+                item["known_occurrences"] for item in field_list
+            ),
+            "excluded_unknown_name_like_occurrences": sum(
+                item["unknown_occurrences"] for item in field_list
+            ),
+            "parse_errors": sum(1 for item in source_files if item["status"] == "parse_error"),
+            "field_groups": len(field_list),
+        },
+        "field_groups": field_list,
+        "source_files": source_files,
+    }
+
+
+def validate_remaining_gaps(
+    gaps: dict[str, Any],
+    coverage: dict[str, Any],
+) -> list[str]:
+    if gaps != build_remaining_gaps(coverage):
+        return ["remaining gaps artifact does not replay deterministically from coverage"]
+    return []
+
+def build_deterministic_corpus(
+    inventory: dict[str, Any],
+    aliases: dict[str, Any],
+    collision_report: dict[str, Any],
+    search_index: dict[str, Any],
+    coverage: dict[str, Any],
+) -> dict[str, Any]:
+    artifact_documents = (
+        ("aliases.json", aliases),
+        ("collision_report.json", collision_report),
+        ("name_inventory.json", inventory),
+        ("search_index.json", search_index),
+    )
+    artifact_hashes = [
+        {
+            "artifact": name,
+            "sha256": hashlib.sha256(_canonical_json(document).encode("utf-8")).hexdigest(),
+        }
+        for name, document in artifact_documents
+    ]
+    source_hashes = [
+        {
+            "source_file": row["source_file"],
+            "sha256": row["sha256"],
+            "status": row["status"],
+        }
+        for row in coverage.get("files", [])
+    ]
+    fixture_rows = [
+        {"input": value, "expected": expected, "actual": normalize_name(value)}
+        for value, expected in NORMALIZATION_REGRESSION_CASES
+    ]
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "normalizer_id": NORMALIZER_ID,
+        "artifact_hashes": artifact_hashes,
+        "source_hashes": source_hashes,
+        "normalization_fixtures": fixture_rows,
+        "counts": {
+            "entities": len(inventory.get("entities", [])),
+            "aliases": len(aliases.get("aliases", [])),
+            "normalized_keys": len(search_index.get("entries", [])),
+            "normalized_collisions": collision_report.get("summary", {}).get("normalized_collisions", 0),
+            "coverage_files": len(coverage.get("files", [])),
+        },
+    }
+
+
+def validate_deterministic_corpus(
+    corpus: dict[str, Any],
+    inventory: dict[str, Any],
+    aliases: dict[str, Any],
+    collision_report: dict[str, Any],
+    search_index: dict[str, Any],
+    coverage: dict[str, Any],
+) -> list[str]:
+    errors: list[str] = []
+    if corpus.get("schema_version") != SCHEMA_VERSION:
+        errors.append("deterministic corpus schema_version mismatch")
+    if corpus.get("normalizer_id") != NORMALIZER_ID:
+        errors.append("deterministic corpus normalizer_id mismatch")
+    expected_fixtures = [
+        {"input": value, "expected": expected, "actual": normalize_name(value)}
+        for value, expected in NORMALIZATION_REGRESSION_CASES
+    ]
+    if corpus.get("normalization_fixtures") != expected_fixtures:
+        errors.append("deterministic corpus normalization fixtures mismatch")
+    documents = (
+        ("aliases.json", aliases),
+        ("collision_report.json", collision_report),
+        ("name_inventory.json", inventory),
+        ("search_index.json", search_index),
+    )
+    expected_hashes = [
+        {
+            "artifact": name,
+            "sha256": hashlib.sha256(_canonical_json(document).encode("utf-8")).hexdigest(),
+        }
+        for name, document in documents
+    ]
+    if corpus.get("artifact_hashes") != expected_hashes:
+        errors.append("deterministic corpus artifact hashes mismatch")
+    expected_source_hashes = [
+        {
+            "source_file": row["source_file"],
+            "sha256": row["sha256"],
+            "status": row["status"],
+        }
+        for row in coverage.get("files", [])
+    ]
+    if corpus.get("source_hashes") != expected_source_hashes:
+        errors.append("deterministic corpus source hashes mismatch")
+    return errors
+
 def build_alias_records(inventory: dict[str, Any]) -> dict[str, Any]:
     aliases: list[dict[str, Any]] = []
     for entity in inventory.get("entities", []):
@@ -1127,6 +1502,7 @@ def validate_artifacts(
 
 
 def build_artifacts(root: Path, include_modern_reference: bool = False) -> dict[str, Any]:
+    coverage_manifest = scan_repository_name_coverage(root)
     inventory = collect_inventory(root, include_modern_reference=include_modern_reference)
     aliases = build_alias_records(inventory)
     collision_report = build_collision_report(inventory, aliases)
@@ -1134,15 +1510,37 @@ def build_artifacts(root: Path, include_modern_reference: bool = False) -> dict[
         collision_report.get("id_name_disagreement_candidates", [])
     )
     search_index = build_search_index(aliases, inventory)
+    remaining_gaps = build_remaining_gaps(coverage_manifest)
+    deterministic_corpus = build_deterministic_corpus(
+        inventory,
+        aliases,
+        collision_report,
+        search_index,
+        coverage_manifest,
+    )
     errors = validate_artifacts(inventory, aliases, collision_report, search_index)
+    errors.extend(validate_coverage_manifest(coverage_manifest))
+    errors.extend(validate_remaining_gaps(remaining_gaps, coverage_manifest))
+    errors.extend(
+        validate_deterministic_corpus(
+            deterministic_corpus,
+            inventory,
+            aliases,
+            collision_report,
+            search_index,
+            coverage_manifest,
+        )
+    )
     return {
         "inventory": inventory,
         "aliases": aliases,
         "collision_report": collision_report,
         "search_index": search_index,
+        "coverage_manifest": coverage_manifest,
+        "remaining_gaps": remaining_gaps,
+        "deterministic_corpus": deterministic_corpus,
         "validation_errors": errors,
     }
-
 
 def _canonical_json(document: Any) -> str:
     return json.dumps(document, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
@@ -1167,7 +1565,7 @@ def _git_revision(root: Path, ref: str) -> str:
     return result.stdout.strip()
 
 
-def render_report(artifacts: dict[str, Any], starting_master: str, commit: str, push: str, draft_pr: str) -> str:
+def render_report(artifacts: dict[str, Any], starting_master: str, commit: str, push: str, draft_pr: str, batch_label: str = "BATCH 1") -> str:
     inventory = artifacts["inventory"]
     aliases = artifacts["aliases"]
     collisions = artifacts["collision_report"]
@@ -1186,7 +1584,7 @@ def render_report(artifacts: dict[str, Any], starting_master: str, commit: str, 
     search_result = f"PASS — {len(index['entries'])} normalized keys, {ambiguous} one-to-many collisions"
     return "\n".join(
         [
-            "# WWO WORLD NAMES & ALIASES — BATCH 1 REPORT",
+            f"# WWO WORLD NAMES & ALIASES — {batch_label} REPORT",
             "",
             f"Starting master: `{starting_master}`",
             "",
@@ -1238,6 +1636,8 @@ def _parse_args(argv: Sequence[str]) -> argparse.Namespace:
         help="staging output directory (default: data/staging/world_names)",
     )
     parser.add_argument("--include-modern-reference", action="store_true")
+    parser.add_argument("--report-path", default="docs/world_names/BATCH_1_REPORT.md")
+    parser.add_argument("--batch-label", default="BATCH 1")
     parser.add_argument("--starting-master", default=None)
     parser.add_argument("--commit", default="not created")
     parser.add_argument("--push", default="not attempted")
@@ -1259,12 +1659,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     write_json(output_root / "aliases.json", artifacts["aliases"])
     write_json(output_root / "collision_report.json", artifacts["collision_report"])
     write_json(output_root / "search_index.json", artifacts["search_index"])
+    write_json(output_root / "coverage_manifest.json", artifacts["coverage_manifest"])
+    write_json(output_root / "remaining_gaps.json", artifacts["remaining_gaps"])
+    write_json(output_root / "deterministic_corpus.json", artifacts["deterministic_corpus"])
 
     starting_master = args.starting_master or _git_revision(root, "origin/master")
-    report_path = root / "docs/world_names/BATCH_1_REPORT.md"
+    report_path = root / args.report_path
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text(
-        render_report(artifacts, starting_master, args.commit, args.push, args.draft_pr),
+        render_report(artifacts, starting_master, args.commit, args.push, args.draft_pr, args.batch_label),
         encoding="utf-8",
     )
     summary = {
@@ -1272,6 +1675,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         "aliases": len(artifacts["aliases"]["aliases"]),
         "normalized_keys": len(artifacts["search_index"]["entries"]),
         "normalized_collisions": artifacts["collision_report"]["summary"]["normalized_collisions"],
+        "coverage_files": len(artifacts["coverage_manifest"]["files"]),
+        "coverage_parse_errors": artifacts["coverage_manifest"]["summary"]["parse_errors"],
+        "excluded_source_files": artifacts["remaining_gaps"]["summary"]["excluded_source_files"],
         "validator": "PASS",
         "output_root": output_root.relative_to(root).as_posix(),
     }
