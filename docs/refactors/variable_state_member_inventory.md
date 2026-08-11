@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1637|1255|15|0|1255|5|32|16|60|900|530|282|
+|1682|1282|15|0|1266|5|32|16|62|923|536|288|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,637个生产成员字段逐项表
+## 1,682个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -1447,7 +1447,7 @@
 5 K leave_confirmation
 ```
 
-### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/vnext/world_runtime.gd`
+### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/vnext/spatial/spatial_capacity_window.gd`
 
 ```text
 @ scripts/v2_3/v2_3_formal_simulation.gd | V23FormalSimulation
@@ -1591,6 +1591,60 @@
 @ scripts/vnext/player/player_state.gd | VNextPlayerState
 4 C SNAPSHOT_SCHEMA_ID
 6 K _player_id
+@ scripts/vnext/spatial/infrastructure_link_state.gd | VNextInfrastructureLinkState
+7 C STATUS_OPERATIONAL
+8 C STATUS_CONSTRUCTION
+9 C STATUS_DAMAGED
+10 C STATUS_INTERRUPTED
+11 C STATUS_DESTROYED
+12 C STATUS_REPAIRING
+13 C STATUS_RESTORED
+15 C CONDITION_MIN
+16 C CONDITION_MAX
+17 C CAPACITY_EPSILON
+19 K _link_id
+20 K _link_type
+21 A _status
+22 K _nominal_capacity
+23 A _condition
+@ scripts/vnext/spatial/spatial_capacity_window.gd | VNextSpatialCapacityWindow
+7 C CAPACITY_EPSILON
+8 C MAX_JSON_SAFE_INTEGER
+10 K _catalog
+11 K _infrastructure
+12 K _current_hour
+13 K _requests
+```
+
+### 第10段：`scripts/vnext/spatial/spatial_catalog.gd` 至 `scripts/world_map/historical_map_identity_style.gd`
+
+```text
+@ scripts/vnext/spatial/spatial_catalog.gd | VNextSpatialCatalog
+9 C SOURCE_PATHS
+19 C LINK_TYPE_ROAD
+20 C LINK_TYPE_RAIL
+21 C LINK_TYPE_SHIPPING
+23 K _loaded
+24 K _errors
+25 E _countries
+26 K _regions
+27 K _cities
+28 K _ports
+29 K _links
+30 E _countries_by_id
+31 K _regions_by_id
+32 K _cities_by_id
+33 K _ports_by_id
+34 K _links_by_id
+35 K _places_by_id
+@ scripts/vnext/spatial/spatial_world.gd | VNextSpatialWorld
+7 C SNAPSHOT_SCHEMA_ID
+8 C DEFAULT_NOMINAL_CAPACITY_BY_TYPE
+14 K _catalog
+15 K _current_hour
+16 K _infrastructure
+17 K _territories
+18 K _capacity
 @ scripts/vnext/travel/location_state.gd | VNextLocationState
 4 C SNAPSHOT_SCHEMA_ID
 6 K _player_id
@@ -1608,11 +1662,6 @@
 9 K _wallet
 10 K _location
 11 K _event_knowledge
-```
-
-### 第10段：`scripts/world_map/historical_map_identity_style.gd` 至 `scripts/world_map/internal/world_map_data_impl.gd`
-
-```text
 @ scripts/world_map/historical_map_identity_style.gd | HistoricalMapIdentityStyle
 5 C PATTERN_PREFIX
 6 C PATTERN_SEPARATOR
@@ -1623,6 +1672,11 @@
 11 C CODE_PLATE_BLEND
 12 C CODE_COLUMN_CENTERS
 13 C CODE_ROW_CENTERS
+```
+
+### 第11段：`scripts/world_map/internal/world_map_canvas_impl.gd` 至 `scripts/world_map/internal/world_map_data_impl.gd`
+
+```text
 @ scripts/world_map/internal/world_map_canvas_impl.gd | PrototypeV2MapCanvas
 5 C WORLD_SIZE
 6 C WORLD_BOUNDS
@@ -1796,7 +1850,7 @@
 26 K errors
 ```
 
-### 第11段：`scripts/world_map/internal/world_map_interface_impl.gd` 至 `scripts/world_map/world_map_canvas_detail.gd`
+### 第12段：`scripts/world_map/internal/world_map_interface_impl.gd` 至 `scripts/world_map/world_map_canvas_detail.gd`
 
 ```text
 @ scripts/world_map/internal/world_map_interface_impl.gd | PrototypeV2Interface
