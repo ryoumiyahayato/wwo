@@ -111,8 +111,8 @@
 13 E daily_decision_count
 14 E long_term_evaluation_count
 @ scripts/ai/simple_ai_service.gd | SimpleAiService
-5 K roster
-6 K rules
+5 K rules
+6 K roster
 7 K states
 @ scripts/alpha/alpha_ai_service.gd | AlphaAiService
 5 C MAX_CANDIDATES
@@ -688,16 +688,16 @@
 15 K position_structure
 16 K organization_relations
 @ scripts/core/models/population_group_data.gd | PopulationGroupData
-5 K id
-6 K region_id
-7 E population_count
-8 K social_class
-9 K occupation_category
-10 K average_income
-11 K average_education
-12 K unemployment_rate
-13 K public_political_leaning
-14 K basic_living_state
+4 K id
+5 K region_id
+6 E population_count
+7 K social_class
+8 K occupation_category
+9 K average_income
+10 K average_education
+11 K unemployment_rate
+12 K public_political_leaning
+13 K basic_living_state
 @ scripts/core/models/region_data.gd | RegionData
 4 K id
 5 K name
@@ -842,7 +842,7 @@
 8 C GRID_COLOR
 9 C REGION_BORDER_COLOR
 10 C RAIL_DARK_COLOR
-11 C RAIL_LIGHT
+11 C RAIL_LIGHT_COLOR
 12 C CONTROL_BORDER_DARK_COLOR
 13 C CONTROL_BORDER_COLOR
 14 C CONTESTED_COLOR
@@ -1865,7 +1865,7 @@
 127 K _v2_3_local_overlay
 128 K _v2_3_local_locations
 129 K _v2_3_local_location_points
-130 K _v2_3_local_location_lookup
+130 K _v2_3_local_lookup
 131 K _v2_3_local_edge_lookup
 132 A _v2_3_local_catalog_revision
 133 A _v2_3_local_overlay_revision
