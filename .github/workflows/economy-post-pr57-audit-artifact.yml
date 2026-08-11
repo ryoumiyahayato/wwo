@@ -1,0 +1,94 @@
+name: Economy Post-PR57 Audit Artifact
+
+on:
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: economy-post-pr57-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generate-audit-artifact:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout reconciled economy branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/vnext-market-economy-20260809
+          fetch-depth: 1
+
+      - name: Record source HEAD
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/post-pr57-audit-artifact
+          git rev-parse HEAD | tee builds/post-pr57-audit-artifact/source-head.txt
+
+      - name: Generate official variable-state documents
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B tools/audit_variable_state.py --root .
+          python3 tools/render_variable_state_audit_summary.py
+          python3 tools/render_variable_state_member_inventory.py
+          python3 tools/generate_variable_state_docs.py
+          python3 tools/render_variable_refactor_plan.py
+          test -s docs/refactors/variable_state_audit.md
+          test -s docs/refactors/variable_state_member_inventory.md
+          test -s docs/refactors/state_ownership_matrix.md
+          test -s docs/refactors/variable_refactor_plan.md
+          sha256sum \
+            docs/refactors/variable_state_audit.md \
+            docs/refactors/variable_state_member_inventory.md \
+            docs/refactors/state_ownership_matrix.md \
+            docs/refactors/variable_refactor_plan.md \
+            | tee builds/post-pr57-audit-artifact/first.sha256
+          git diff -- \
+            docs/refactors/variable_state_audit.md \
+            docs/refactors/variable_state_member_inventory.md \
+            docs/refactors/state_ownership_matrix.md \
+            docs/refactors/variable_refactor_plan.md \
+            > builds/post-pr57-audit-artifact/generated.patch
+          git status --short > builds/post-pr57-audit-artifact/status.txt
+
+      - name: Regenerate and prove deterministic currentness
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B tools/audit_variable_state.py --root .
+          python3 tools/render_variable_state_audit_summary.py
+          python3 tools/render_variable_state_member_inventory.py
+          python3 tools/generate_variable_state_docs.py
+          python3 tools/render_variable_refactor_plan.py
+          sha256sum \
+            docs/refactors/variable_state_audit.md \
+            docs/refactors/variable_state_member_inventory.md \
+            docs/refactors/state_ownership_matrix.md \
+            docs/refactors/variable_refactor_plan.md \
+            | tee builds/post-pr57-audit-artifact/second.sha256
+          diff -u builds/post-pr57-audit-artifact/first.sha256 builds/post-pr57-audit-artifact/second.sha256
+          git diff --check
+
+      - name: Stage artifact files
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/post-pr57-audit-artifact/docs/refactors
+          cp docs/refactors/variable_state_audit.md builds/post-pr57-audit-artifact/docs/refactors/
+          cp docs/refactors/variable_state_member_inventory.md builds/post-pr57-audit-artifact/docs/refactors/
+          cp docs/refactors/state_ownership_matrix.md builds/post-pr57-audit-artifact/docs/refactors/
+          cp docs/refactors/variable_refactor_plan.md builds/post-pr57-audit-artifact/docs/refactors/
+
+      - name: Upload generated audit artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: economy-post-pr57-audit-artifact
+          path: builds/post-pr57-audit-artifact/
+          if-no-files-found: error
