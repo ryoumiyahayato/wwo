@@ -305,7 +305,7 @@ func append_battle_result(record: Dictionary) -> void:
 
 func append_control_history(record: Dictionary) -> void:
 	control_history.append(record.duplicate(true))
-	_trim_history(control_history, MAX_CONTROL_HISTORY)
+	_trim_control_history()
 
 
 func snapshot() -> Dictionary:
@@ -388,7 +388,7 @@ func restore(snapshot_value: Dictionary, map: VNextMilitaryMapAdapter = null) ->
 	candidate_state.capacity_window_hour = int(snapshot_value.get("capacity_window_hour", -1))
 	candidate_state.link_capacity_used = (used_value as Dictionary).duplicate(true)
 	candidate_state.link_queues = (queues_value as Dictionary).duplicate(true)
-	if not candidate_state.is_valid(map):
+	if not candidate_state.is_valid(map) or not VNextMilitaryStateInvariants.validate(candidate_state, map):
 		return false
 
 	formations = candidate_state.formations
@@ -783,6 +783,22 @@ func _dictionary_array(source: Array) -> Array[Dictionary]:
 		if raw_value is Dictionary:
 			result.append((raw_value as Dictionary).duplicate(true))
 	return result
+
+
+func _trim_control_history() -> void:
+	while control_history.size() > MAX_CONTROL_HISTORY:
+		var removable_index: int = -1
+		for index: int in range(control_history.size()):
+			var region_id: String = str((control_history[index] as Dictionary).get("region_id", ""))
+			for later_index: int in range(index + 1, control_history.size()):
+				if str((control_history[later_index] as Dictionary).get("region_id", "")) == region_id:
+					removable_index = index
+					break
+			if removable_index >= 0:
+				break
+		if removable_index < 0:
+			break
+		control_history.remove_at(removable_index)
 
 
 func _trim_history(history: Array[Dictionary], limit: int) -> void:

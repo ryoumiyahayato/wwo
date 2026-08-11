@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1704|1299|15|0|1287|5|32|16|63|933|536|287|
+|1705|1299|15|0|1287|5|32|16|63|933|538|289|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,704个生产成员字段逐项表
+## 1,705个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -1659,6 +1659,8 @@
 24 A capacity_window_hour
 25 K link_capacity_used
 26 K link_queues
+@ scripts/vnext/military/military_state_invariants.gd | VNextMilitaryStateInvariants
+7 C EPSILON
 @ scripts/vnext/player/action_result.gd | VNextActionResult
 4 K success
 5 K code
