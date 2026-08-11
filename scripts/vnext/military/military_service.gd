@@ -78,8 +78,10 @@ func setup_region_controller(
 ) -> bool:
 	if state == null or map == null or not map.has_region(region_id) or not map.has_country(controller_id) or cause.is_empty():
 		return false
+	if not state.can_apply_setup_control_change():
+		return false
 	var previous_controller_id: String = str(state.region_controls.get(region_id, ""))
-	if not state.apply_region_control_change(region_id, controller_id, cause, state.last_simulated_hour, "setup_fixture"):
+	if not state.apply_region_control_change(region_id, controller_id, cause, 0, "setup_fixture"):
 		return false
 	if previous_controller_id != controller_id:
 		var change: Dictionary = state.control_history.back() as Dictionary
@@ -264,6 +266,17 @@ func get_action(state: VNextMilitaryState, action_id: String) -> Dictionary:
 	return (state.active_actions.get(action_id, {}) as Dictionary).duplicate(true)
 
 
+func get_supply_shipments(state: VNextMilitaryState) -> Array[Dictionary]:
+	var shipments: Array[Dictionary] = []
+	if state == null:
+		return shipments
+	for action_id: String in _sorted_dictionary_keys(state.active_actions):
+		var action: Dictionary = state.active_actions[action_id] as Dictionary
+		if str(action.get("kind", "")) == "supply":
+			shipments.append(action.duplicate(true))
+	return shipments
+
+
 func get_link_capacity_view(state: VNextMilitaryState, map: VNextMilitaryMapAdapter, link_id: String) -> Dictionary:
 	if state == null or map == null or map.get_link(link_id).is_empty():
 		return {}
@@ -401,6 +414,47 @@ func _new_transport_action(
 	}
 
 
+func _new_supply_action(
+	state: VNextMilitaryState,
+	map: VNextMilitaryMapAdapter,
+	formation: VNextMilitaryFormation,
+	source_region_id: String,
+	resource_id: String,
+	amount: float,
+	route: Dictionary,
+	start_hour: int
+) -> Dictionary:
+	var action_id: String = _next_action_id(state)
+	var weight: float = VNextMilitaryState.supply_cargo_weight(resource_id)
+	var load: float = amount * weight
+	return {
+		"action_id": action_id,
+		"kind": "supply",
+		"destination_formation_id": formation.formation_id,
+		"owner_country_id": formation.country_id,
+		"source_region_id": source_region_id,
+		"resource_id": resource_id,
+		"cargo_amount_total": amount,
+		"cargo_amount_remaining": amount,
+		"origin_city_id": str((route.get("city_ids", []) as Array)[0]),
+		"destination_city_id": formation.current_city_id,
+		"current_city_id": str((route.get("city_ids", []) as Array)[0]),
+		"start_hour": start_hour,
+		"eta_hour": start_hour + maxi(1, _estimate_transport_hours(map, route, load)),
+		"progress": 0.0,
+		"route": route.duplicate(true),
+		"current_edge_index": 0,
+		"edge_request_hour": start_hour,
+		"edge_started_hour": -1,
+		"edge_elapsed_hours": 0,
+		"edge_load_total": load,
+		"edge_load_remaining": load,
+		"reserved_link_id": "",
+		"transport_state": "waiting_capacity",
+		"allow_enemy_destination": false,
+	}
+
+
 func _advance_one_hour(state: VNextMilitaryState, map: VNextMilitaryMapAdapter, hour: int) -> Dictionary:
 	state.begin_capacity_window(hour)
 	var budgets: Dictionary = {}
@@ -409,15 +463,16 @@ func _advance_one_hour(state: VNextMilitaryState, map: VNextMilitaryMapAdapter, 
 		budgets[link_id] = map.get_link_transport_capacity_per_hour(link_id)
 
 	var supply_context: Dictionary = _build_supply_context(state, map)
+	_create_supply_shipments(state, map, hour, supply_context)
 	var requests: Array[Dictionary] = []
 	_collect_movement_requests(state, map, hour, requests)
-	_collect_supply_requests(state, map, hour, supply_context, requests)
+	_collect_supply_transport_requests(state, map, hour, requests)
 	_sort_capacity_requests(requests)
 	for request: Dictionary in requests:
 		if str(request.get("request_kind", "")) == "movement":
-			_apply_movement_capacity_request(state, map, request, budgets, hour)
+			_apply_movement_capacity_request(state, request, budgets, hour)
 		else:
-			_apply_supply_capacity_request(state, request, budgets, supply_context)
+			_apply_supply_capacity_request(state, request, budgets, hour)
 
 	var supply_report: Dictionary = _finalize_supply_hour(state, map, supply_context)
 	var boundary_hour: int = hour + 1
@@ -457,6 +512,17 @@ func _build_supply_context(state: VNextMilitaryState, map: VNextMilitaryMapAdapt
 		sources_used[formation_id] = []
 		links_used[formation_id] = []
 
+	var context: Dictionary = {
+		"source_remaining": source_remaining,
+		"demand_remaining": demand_remaining,
+		"planned_remaining": demand_remaining.duplicate(true),
+		"demand_total": demand_total,
+		"delivered": delivered,
+		"sources_used": sources_used,
+		"links_used": links_used,
+	}
+	_consume_arrived_supply(state, context)
+
 	# Same-region supply has no transport-link reservation, but still competes for source quantity.
 	for formation_id: String in state.get_sorted_formation_ids():
 		if not demand_remaining.has(formation_id):
@@ -469,22 +535,103 @@ func _build_supply_context(state: VNextMilitaryState, map: VNextMilitaryMapAdapt
 			var need: float = float((demand_remaining[formation_id] as Dictionary).get(resource_id, 0.0))
 			var available: float = float((source_remaining[local_region] as Dictionary).get(resource_id, 0.0))
 			var amount: float = minf(need, available)
-			if amount <= 0.0:
+			if amount <= EPSILON:
 				continue
 			(demand_remaining[formation_id] as Dictionary)[resource_id] = need - amount
 			(source_remaining[local_region] as Dictionary)[resource_id] = available - amount
 			(delivered[formation_id] as Dictionary)[resource_id] = float((delivered[formation_id] as Dictionary).get(resource_id, 0.0)) + amount
+			((context["planned_remaining"] as Dictionary)[formation_id] as Dictionary)[resource_id] = maxf(0.0, float(((context["planned_remaining"] as Dictionary)[formation_id] as Dictionary).get(resource_id, 0.0)) - amount)
 			var source_list: Array = sources_used[formation_id] as Array
 			if not source_list.has(local_region):
 				source_list.append(local_region)
-	return {
-		"source_remaining": source_remaining,
-		"demand_remaining": demand_remaining,
-		"demand_total": demand_total,
-		"delivered": delivered,
-		"sources_used": sources_used,
-		"links_used": links_used,
-	}
+	return context
+
+
+func _consume_arrived_supply(state: VNextMilitaryState, context: Dictionary) -> void:
+	var demand_remaining: Dictionary = context["demand_remaining"] as Dictionary
+	var planned_remaining: Dictionary = context["planned_remaining"] as Dictionary
+	var delivered: Dictionary = context["delivered"] as Dictionary
+	var sources_used: Dictionary = context["sources_used"] as Dictionary
+	var links_used: Dictionary = context["links_used"] as Dictionary
+	var action_ids: Array[String] = _sorted_dictionary_keys(state.active_actions)
+	for action_id: String in action_ids:
+		if not state.active_actions.has(action_id):
+			continue
+		var action: Dictionary = state.active_actions[action_id] as Dictionary
+		if str(action.get("kind", "")) != "supply" or str(action.get("transport_state", "")) != "arrived":
+			continue
+		var formation_id: String = str(action.get("destination_formation_id", ""))
+		if not demand_remaining.has(formation_id):
+			continue
+		var formation: VNextMilitaryFormation = state.get_formation(formation_id)
+		if formation == null or formation.current_city_id != str(action.get("destination_city_id", "")):
+			continue
+		var resource_id: String = str(action.get("resource_id", ""))
+		var need: float = maxf(0.0, float((demand_remaining[formation_id] as Dictionary).get(resource_id, 0.0)))
+		var cargo_remaining: float = maxf(0.0, float(action.get("cargo_amount_remaining", 0.0)))
+		var amount: float = minf(need, cargo_remaining)
+		if amount <= EPSILON:
+			continue
+		(demand_remaining[formation_id] as Dictionary)[resource_id] = need - amount
+		(planned_remaining[formation_id] as Dictionary)[resource_id] = maxf(0.0, float((planned_remaining[formation_id] as Dictionary).get(resource_id, 0.0)) - amount)
+		(delivered[formation_id] as Dictionary)[resource_id] = float((delivered[formation_id] as Dictionary).get(resource_id, 0.0)) + amount
+		action["cargo_amount_remaining"] = cargo_remaining - amount
+		var source_region_id: String = str(action.get("source_region_id", ""))
+		var source_list: Array = sources_used[formation_id] as Array
+		if not source_list.has(source_region_id):
+			source_list.append(source_region_id)
+		for raw_link_id: Variant in (action.get("route", {}) as Dictionary).get("link_ids", []) as Array:
+			var link_id: String = str(raw_link_id)
+			var link_list: Array = links_used[formation_id] as Array
+			if not link_list.has(link_id):
+				link_list.append(link_id)
+		if float(action.get("cargo_amount_remaining", 0.0)) <= EPSILON:
+			state.remove_capacity_request(action_id)
+			state.active_actions.erase(action_id)
+		else:
+			state.active_actions[action_id] = action
+
+
+func _create_supply_shipments(state: VNextMilitaryState, map: VNextMilitaryMapAdapter, hour: int, context: Dictionary) -> void:
+	var planned_remaining: Dictionary = context["planned_remaining"] as Dictionary
+	var source_remaining: Dictionary = context["source_remaining"] as Dictionary
+	for formation_id: String in state.get_sorted_formation_ids():
+		if not planned_remaining.has(formation_id):
+			continue
+		var formation: VNextMilitaryFormation = state.get_formation(formation_id)
+		if formation == null or formation.formation_status != VNextMilitaryFormation.STATUS_ACTIVE:
+			continue
+		for source_region_id: String in _sorted_dictionary_keys(source_remaining):
+			if source_region_id == map.get_region_id_for_city(formation.current_city_id):
+				continue
+			var source_city_ids: Array[String] = map.get_city_ids_for_region(source_region_id)
+			if source_city_ids.is_empty():
+				continue
+			var route: Dictionary = map.find_route(source_city_ids[0], formation.current_city_id, [], formation.country_id, state.region_controls, false)
+			if not bool(route.get("reachable", false)):
+				continue
+			for resource_id: String in RESOURCE_IDS:
+				var needed: float = maxf(0.0, float((planned_remaining[formation_id] as Dictionary).get(resource_id, 0.0)))
+				var available: float = maxf(0.0, float((source_remaining[source_region_id] as Dictionary).get(resource_id, 0.0)))
+				if needed <= EPSILON or available <= EPSILON or _has_supply_commitment(state, formation_id, source_region_id, resource_id):
+					continue
+				var amount: float = minf(needed, available)
+				var action: Dictionary = _new_supply_action(state, map, formation, source_region_id, resource_id, amount, route, hour)
+				if action.is_empty():
+					continue
+				state.active_actions[str(action["action_id"])] = action
+				(source_remaining[source_region_id] as Dictionary)[resource_id] = available - amount
+				(planned_remaining[formation_id] as Dictionary)[resource_id] = needed - amount
+
+
+func _has_supply_commitment(state: VNextMilitaryState, formation_id: String, source_region_id: String, resource_id: String) -> bool:
+	for action_id: String in _sorted_dictionary_keys(state.active_actions):
+		var action: Dictionary = state.active_actions[action_id] as Dictionary
+		if str(action.get("kind", "")) != "supply":
+			continue
+		if str(action.get("destination_formation_id", "")) == formation_id and str(action.get("source_region_id", "")) == source_region_id and str(action.get("resource_id", "")) == resource_id:
+			return true
+	return false
 
 
 func _collect_movement_requests(
@@ -496,7 +643,7 @@ func _collect_movement_requests(
 	for action_id: String in _sorted_dictionary_keys(state.active_actions):
 		var action: Dictionary = state.active_actions[action_id] as Dictionary
 		var kind: String = str(action.get("kind", ""))
-		if kind == "defend" or str(action.get("transport_state", "")) == "preparing":
+		if kind in ["defend", "supply"] or str(action.get("transport_state", "")) == "preparing":
 			continue
 		var formation: VNextMilitaryFormation = state.get_formation(str(action.get("formation_id", "")))
 		if formation == null or formation.formation_status != VNextMilitaryFormation.STATUS_ACTIVE:
@@ -505,8 +652,6 @@ func _collect_movement_requests(
 		var link_ids: Array = route.get("link_ids", []) as Array
 		var edge_index: int = int(action.get("current_edge_index", -1))
 		if edge_index < 0 or edge_index >= link_ids.size():
-			continue
-		if float(action.get("edge_load_remaining", 0.0)) <= EPSILON:
 			continue
 		var link_id: String = str(link_ids[edge_index])
 		var can_enter: bool = map.can_enter_link(
@@ -522,6 +667,11 @@ func _collect_movement_requests(
 			action["transport_state"] = "interrupted" if map.get_link_transport_capacity_per_hour(link_id) <= 0.0 else "blocked"
 			state.active_actions[action_id] = action
 			continue
+		if float(action.get("edge_load_remaining", 0.0)) <= EPSILON:
+			action["reserved_link_id"] = ""
+			action["transport_state"] = "moving"
+			state.active_actions[action_id] = action
+			continue
 		action["transport_state"] = "waiting_capacity"
 		action["reserved_link_id"] = link_id
 		state.active_actions[action_id] = action
@@ -534,49 +684,58 @@ func _collect_movement_requests(
 		})
 
 
-func _collect_supply_requests(
+func _collect_supply_transport_requests(
 	state: VNextMilitaryState,
 	map: VNextMilitaryMapAdapter,
 	hour: int,
-	context: Dictionary,
 	requests: Array[Dictionary]
 ) -> void:
-	var demand_remaining: Dictionary = context["demand_remaining"] as Dictionary
-	var source_remaining: Dictionary = context["source_remaining"] as Dictionary
-	for formation_id: String in state.get_sorted_formation_ids():
-		if not demand_remaining.has(formation_id):
+	for action_id: String in _sorted_dictionary_keys(state.active_actions):
+		var action: Dictionary = state.active_actions[action_id] as Dictionary
+		if str(action.get("kind", "")) != "supply" or str(action.get("transport_state", "")) == "arrived":
 			continue
-		var formation: VNextMilitaryFormation = state.get_formation(formation_id)
-		if formation == null:
+		var formation: VNextMilitaryFormation = state.get_formation(str(action.get("destination_formation_id", "")))
+		if formation == null or formation.formation_status != VNextMilitaryFormation.STATUS_ACTIVE:
 			continue
-		for source_region_id: String in _sorted_dictionary_keys(source_remaining):
-			if source_region_id == map.get_region_id_for_city(formation.current_city_id):
-				continue
-			var source_city_ids: Array[String] = map.get_city_ids_for_region(source_region_id)
-			if source_city_ids.is_empty():
-				continue
-			var route: Dictionary = map.find_route(source_city_ids[0], formation.current_city_id, [], formation.country_id, state.region_controls, false)
-			if not bool(route.get("reachable", false)):
-				continue
-			for resource_id: String in RESOURCE_IDS:
-				if float((demand_remaining[formation_id] as Dictionary).get(resource_id, 0.0)) <= EPSILON:
-					continue
-				if float((source_remaining[source_region_id] as Dictionary).get(resource_id, 0.0)) <= EPSILON:
-					continue
-				requests.append({
-					"request_kind": "supply",
-					"request_hour": hour,
-					"request_id": "supply:%s:%s:%s" % [formation_id, source_region_id, resource_id],
-					"formation_id": formation_id,
-					"source_region_id": source_region_id,
-					"resource_id": resource_id,
-					"link_ids": (route.get("link_ids", []) as Array).duplicate(),
-				})
+		var route: Dictionary = action.get("route", {}) as Dictionary
+		var link_ids: Array = route.get("link_ids", []) as Array
+		var edge_index: int = int(action.get("current_edge_index", -1))
+		if edge_index < 0 or edge_index >= link_ids.size():
+			continue
+		var link_id: String = str(link_ids[edge_index])
+		var can_enter: bool = map.can_enter_link(
+			link_id,
+			str(action.get("current_city_id", "")),
+			str(action.get("destination_city_id", "")),
+			str(action.get("owner_country_id", "")),
+			state.region_controls,
+			false
+		)
+		if not can_enter:
+			action["reserved_link_id"] = ""
+			action["transport_state"] = "interrupted" if map.get_link_transport_capacity_per_hour(link_id) <= 0.0 else "blocked"
+			state.active_actions[action_id] = action
+			continue
+		if float(action.get("edge_load_remaining", 0.0)) <= EPSILON:
+			action["reserved_link_id"] = ""
+			action["transport_state"] = "moving"
+			state.active_actions[action_id] = action
+			continue
+		action["transport_state"] = "waiting_capacity"
+		action["reserved_link_id"] = link_id
+		state.active_actions[action_id] = action
+		requests.append({
+			"request_kind": "supply",
+			"request_hour": int(action.get("edge_request_hour", action.get("start_hour", hour))),
+			"request_id": action_id,
+			"formation_id": str(action.get("destination_formation_id", "")),
+			"resource_id": str(action.get("resource_id", "")),
+			"link_id": link_id,
+		})
 
 
 func _apply_movement_capacity_request(
 	state: VNextMilitaryState,
-	map: VNextMilitaryMapAdapter,
 	request: Dictionary,
 	budgets: Dictionary,
 	hour: int
@@ -608,47 +767,31 @@ func _apply_supply_capacity_request(
 	state: VNextMilitaryState,
 	request: Dictionary,
 	budgets: Dictionary,
-	context: Dictionary
+	hour: int
 ) -> void:
-	var formation_id: String = str(request.get("formation_id", ""))
-	var source_region_id: String = str(request.get("source_region_id", ""))
-	var resource_id: String = str(request.get("resource_id", ""))
-	var demand_remaining: Dictionary = context["demand_remaining"] as Dictionary
-	var source_remaining: Dictionary = context["source_remaining"] as Dictionary
-	if not demand_remaining.has(formation_id) or not source_remaining.has(source_region_id):
+	var action_id: String = str(request.get("request_id", ""))
+	if not state.active_actions.has(action_id):
 		return
-	var needed: float = maxf(0.0, float((demand_remaining[formation_id] as Dictionary).get(resource_id, 0.0)))
-	var source_available: float = maxf(0.0, float((source_remaining[source_region_id] as Dictionary).get(resource_id, 0.0)))
-	if needed <= EPSILON or source_available <= EPSILON:
+	var action: Dictionary = state.active_actions[action_id] as Dictionary
+	if str(action.get("kind", "")) != "supply":
 		return
-	var link_ids: Array = request.get("link_ids", []) as Array
-	if link_ids.is_empty():
-		return
-	var available_load: float = INF
-	for raw_link_id: Variant in link_ids:
-		var link_id: String = str(raw_link_id)
-		state.queue_capacity_request(link_id, str(request.get("request_id", "")))
-		available_load = minf(available_load, maxf(0.0, float(budgets.get(link_id, 0.0))))
-	var weight: float = maxf(0.01, float(CARGO_LOAD_WEIGHTS.get(resource_id, 1.0)))
-	var amount: float = minf(needed, source_available)
-	amount = minf(amount, available_load / weight)
-	if amount <= EPSILON:
-		return
-	var used_load: float = amount * weight
-	for raw_link_id: Variant in link_ids:
-		var link_id: String = str(raw_link_id)
-		budgets[link_id] = maxf(0.0, float(budgets.get(link_id, 0.0)) - used_load)
-		state.record_capacity_use(link_id, used_load)
-		var link_list: Array = (context["links_used"] as Dictionary)[formation_id] as Array
-		if not link_list.has(link_id):
-			link_list.append(link_id)
-	(demand_remaining[formation_id] as Dictionary)[resource_id] = needed - amount
-	(source_remaining[source_region_id] as Dictionary)[resource_id] = source_available - amount
-	var delivered: Dictionary = (context["delivered"] as Dictionary)[formation_id] as Dictionary
-	delivered[resource_id] = float(delivered.get(resource_id, 0.0)) + amount
-	var source_list: Array = (context["sources_used"] as Dictionary)[formation_id] as Array
-	if not source_list.has(source_region_id):
-		source_list.append(source_region_id)
+	var link_id: String = str(request.get("link_id", ""))
+	state.queue_capacity_request(link_id, action_id)
+	var available: float = maxf(0.0, float(budgets.get(link_id, 0.0)))
+	var remaining: float = maxf(0.0, float(action.get("edge_load_remaining", 0.0)))
+	var allocation: float = minf(available, remaining)
+	if allocation > EPSILON:
+		budgets[link_id] = available - allocation
+		state.record_capacity_use(link_id, allocation)
+		action["edge_load_remaining"] = maxf(0.0, remaining - allocation)
+		action["transport_state"] = "moving"
+		if int(action.get("edge_started_hour", -1)) < 0:
+			action["edge_started_hour"] = hour
+	else:
+		action["transport_state"] = "waiting_capacity"
+	if float(action.get("edge_load_remaining", 0.0)) <= EPSILON:
+		action["reserved_link_id"] = ""
+	state.active_actions[action_id] = action
 
 
 func _finalize_supply_hour(state: VNextMilitaryState, map: VNextMilitaryMapAdapter, context: Dictionary) -> Dictionary:
@@ -698,19 +841,24 @@ func _advance_actions_at_boundary(
 	completed: Array[Dictionary],
 	battles: Array[Dictionary]
 ) -> void:
+	_cleanup_all_destroyed_formation_references(state, boundary_hour, completed)
 	var action_ids: Array[String] = _sorted_dictionary_keys(state.active_actions)
 	for action_id: String in action_ids:
 		if not state.active_actions.has(action_id):
 			continue
 		var action: Dictionary = state.active_actions[action_id] as Dictionary
+		var kind: String = str(action.get("kind", ""))
+		if kind == "supply":
+			_advance_supply_action_at_boundary(state, map, action_id, boundary_hour)
+			continue
 		var formation: VNextMilitaryFormation = state.get_formation(str(action.get("formation_id", "")))
 		if formation == null:
+			state.remove_capacity_request(action_id)
 			state.active_actions.erase(action_id)
 			continue
 		if formation.formation_status == VNextMilitaryFormation.STATUS_DESTROYED:
 			_complete_interrupted_action(state, action, formation, boundary_hour, "formation_destroyed", completed)
 			continue
-		var kind: String = str(action.get("kind", ""))
 		if kind == "defend":
 			var start_hour: int = int(action.get("start_hour", boundary_hour - 1))
 			var eta_hour: int = int(action.get("eta_hour", boundary_hour))
@@ -726,19 +874,20 @@ func _advance_actions_at_boundary(
 					"success": true,
 				}
 				_record_completion(state, completion, completed)
+				state.remove_capacity_request(action_id)
 				state.active_actions.erase(action_id)
 			else:
 				state.active_actions[action_id] = action
 			continue
 
 		if str(action.get("transport_state", "")) == "preparing":
-			var prep_end: int = int(action.get("preparation_end_hour", boundary_hour + 1))
+			var prep_end: int = int(action.get("preparation_end_hour", -1))
 			if boundary_hour >= prep_end:
-				var battle: Dictionary = _resolve_attack(state, map, action, formation)
+				var battle: Dictionary = _resolve_attack(state, map, action, formation, completed)
 				battles.append(battle.duplicate(true))
 				state.append_battle_result(battle)
 				battle_resolved.emit(battle.duplicate(true))
-				formation.action_state = VNextMilitaryFormation.ACTION_IDLE if formation.formation_status == VNextMilitaryFormation.STATUS_ACTIVE else VNextMilitaryFormation.ACTION_IDLE
+				formation.action_state = VNextMilitaryFormation.ACTION_IDLE
 				formation.defense_posture = 1.0
 				var completion: Dictionary = battle.duplicate(true)
 				completion["kind"] = "attack"
@@ -746,13 +895,15 @@ func _advance_actions_at_boundary(
 				completion["completed_at_hour"] = boundary_hour
 				completion["route"] = (action.get("route", {}) as Dictionary).duplicate(true)
 				_record_completion(state, completion, completed)
+				state.remove_capacity_request(action_id)
 				state.active_actions.erase(action_id)
 			else:
-				action["progress"] = clampf(0.95 + 0.05 * float(boundary_hour - (prep_end - int(action.get("attack_preparation_hours", 1)))) / float(maxi(1, int(action.get("attack_preparation_hours", 1)))), 0.95, 0.999)
+				var prep_start: int = int(action.get("preparation_start_hour", prep_end - int(action.get("attack_preparation_hours", 1))))
+				action["progress"] = clampf(0.95 + 0.05 * float(boundary_hour - prep_start) / float(maxi(1, int(action.get("attack_preparation_hours", 1)))), 0.95, 0.999)
 				state.active_actions[action_id] = action
 			continue
 
-		if int(action.get("edge_started_hour", -1)) >= 0:
+		if str(action.get("transport_state", "")) == "moving" and int(action.get("edge_started_hour", -1)) >= 0:
 			action["edge_elapsed_hours"] = int(action.get("edge_elapsed_hours", 0)) + 1
 		var route: Dictionary = action.get("route", {}) as Dictionary
 		var link_ids: Array = route.get("link_ids", []) as Array
@@ -764,7 +915,8 @@ func _advance_actions_at_boundary(
 			continue
 		var link: Dictionary = map.get_link(str(link_ids[edge_index]))
 		var movement_hours: int = maxi(1, int(link.get("movement_hours", 1)))
-		if float(action.get("edge_load_remaining", 0.0)) <= EPSILON and int(action.get("edge_elapsed_hours", 0)) >= movement_hours:
+		if str(action.get("transport_state", "")) == "moving" and float(action.get("edge_load_remaining", 0.0)) <= EPSILON and int(action.get("edge_elapsed_hours", 0)) >= movement_hours:
+			state.remove_capacity_request(action_id)
 			edge_index += 1
 			action["current_edge_index"] = edge_index
 			action["reserved_link_id"] = ""
@@ -775,6 +927,9 @@ func _advance_actions_at_boundary(
 					action["transport_state"] = "preparing"
 					action["edge_load_total"] = 0.0
 					action["edge_load_remaining"] = 0.0
+					action["edge_started_hour"] = -1
+					action["edge_elapsed_hours"] = 0
+					action["preparation_start_hour"] = boundary_hour
 					action["preparation_end_hour"] = boundary_hour + maxi(1, int(action.get("attack_preparation_hours", 1)))
 					action["progress"] = 0.95
 					state.active_actions[action_id] = action
@@ -805,11 +960,147 @@ func _advance_actions_at_boundary(
 				action["progress"] = float(edge_index) / float(maxi(1, link_ids.size()))
 				state.active_actions[action_id] = action
 		else:
-			var edge_fraction: float = 0.0
 			var total_load: float = maxf(EPSILON, float(action.get("edge_load_total", 1.0)))
-			edge_fraction = clampf(1.0 - float(action.get("edge_load_remaining", total_load)) / total_load, 0.0, 1.0)
+			var edge_fraction: float = clampf(1.0 - float(action.get("edge_load_remaining", total_load)) / total_load, 0.0, 1.0)
 			action["progress"] = clampf((float(edge_index) + edge_fraction) / float(maxi(1, link_ids.size())), 0.0, 0.94 if kind == "attack" else 0.999)
 			state.active_actions[action_id] = action
+	_reconcile_transport_access(state, map)
+
+
+func _reconcile_transport_access(state: VNextMilitaryState, map: VNextMilitaryMapAdapter) -> void:
+	for action_id: String in _sorted_dictionary_keys(state.active_actions):
+		var action: Dictionary = state.active_actions[action_id] as Dictionary
+		var kind: String = str(action.get("kind", ""))
+		if kind == "defend" or str(action.get("transport_state", "")) in ["preparing", "arrived"]:
+			continue
+		var route: Dictionary = action.get("route", {}) as Dictionary
+		var link_ids: Array = route.get("link_ids", []) as Array
+		var edge_index: int = int(action.get("current_edge_index", -1))
+		if edge_index < 0 or edge_index >= link_ids.size():
+			continue
+		var link_id: String = str(link_ids[edge_index])
+		var current_city_id: String = ""
+		var destination_city_id: String = str(action.get("destination_city_id", ""))
+		var owner_country_id: String = ""
+		var allow_enemy_destination: bool = false
+		if kind == "supply":
+			current_city_id = str(action.get("current_city_id", ""))
+			owner_country_id = str(action.get("owner_country_id", ""))
+		else:
+			var formation: VNextMilitaryFormation = state.get_formation(str(action.get("formation_id", "")))
+			if formation == null or formation.formation_status != VNextMilitaryFormation.STATUS_ACTIVE:
+				continue
+			current_city_id = formation.current_city_id
+			owner_country_id = formation.country_id
+			allow_enemy_destination = bool(action.get("allow_enemy_destination", false))
+		if map.can_enter_link(link_id, current_city_id, destination_city_id, owner_country_id, state.region_controls, allow_enemy_destination):
+			continue
+		state.remove_capacity_request(action_id)
+		action["reserved_link_id"] = ""
+		action["transport_state"] = "interrupted" if map.get_link_transport_capacity_per_hour(link_id) <= 0.0 else "blocked"
+		state.active_actions[action_id] = action
+
+
+func _advance_supply_action_at_boundary(state: VNextMilitaryState, map: VNextMilitaryMapAdapter, action_id: String, boundary_hour: int) -> void:
+	if not state.active_actions.has(action_id):
+		return
+	var action: Dictionary = state.active_actions[action_id] as Dictionary
+	if str(action.get("transport_state", "")) == "arrived":
+		return
+	if str(action.get("transport_state", "")) == "moving" and int(action.get("edge_started_hour", -1)) >= 0:
+		action["edge_elapsed_hours"] = int(action.get("edge_elapsed_hours", 0)) + 1
+	var route: Dictionary = action.get("route", {}) as Dictionary
+	var link_ids: Array = route.get("link_ids", []) as Array
+	var city_ids: Array = route.get("city_ids", []) as Array
+	var edge_index: int = int(action.get("current_edge_index", -1))
+	if edge_index < 0 or edge_index >= link_ids.size():
+		action["reserved_link_id"] = ""
+		action["transport_state"] = "interrupted"
+		state.active_actions[action_id] = action
+		return
+	var link: Dictionary = map.get_link(str(link_ids[edge_index]))
+	var movement_hours: int = maxi(1, int(link.get("movement_hours", 1)))
+	if str(action.get("transport_state", "")) == "moving" and float(action.get("edge_load_remaining", 0.0)) <= EPSILON and int(action.get("edge_elapsed_hours", 0)) >= movement_hours:
+		state.remove_capacity_request(action_id)
+		edge_index += 1
+		action["current_edge_index"] = edge_index
+		action["reserved_link_id"] = ""
+		if edge_index >= link_ids.size():
+			action["current_city_id"] = str(action.get("destination_city_id", ""))
+			action["transport_state"] = "arrived"
+			action["edge_load_total"] = 0.0
+			action["edge_load_remaining"] = 0.0
+			action["edge_started_hour"] = -1
+			action["edge_elapsed_hours"] = 0
+			action["progress"] = 1.0
+			state.active_actions[action_id] = action
+			return
+		action["current_city_id"] = str(city_ids[edge_index])
+		action["edge_request_hour"] = boundary_hour
+		action["edge_started_hour"] = -1
+		action["edge_elapsed_hours"] = 0
+		var new_load: float = float(action.get("cargo_amount_remaining", 0.0)) * VNextMilitaryState.supply_cargo_weight(str(action.get("resource_id", "")))
+		action["edge_load_total"] = new_load
+		action["edge_load_remaining"] = new_load
+		action["transport_state"] = "waiting_capacity"
+		action["progress"] = float(edge_index) / float(maxi(1, link_ids.size()))
+		state.active_actions[action_id] = action
+		return
+	var total_load: float = maxf(EPSILON, float(action.get("edge_load_total", 1.0)))
+	var edge_fraction: float = clampf(1.0 - float(action.get("edge_load_remaining", total_load)) / total_load, 0.0, 1.0)
+	action["progress"] = clampf((float(edge_index) + edge_fraction) / float(maxi(1, link_ids.size())), 0.0, 0.999)
+	state.active_actions[action_id] = action
+
+
+func _cleanup_all_destroyed_formation_references(state: VNextMilitaryState, boundary_hour: int, completed: Array[Dictionary]) -> void:
+	for formation_id: String in state.get_sorted_formation_ids():
+		var formation: VNextMilitaryFormation = state.get_formation(formation_id)
+		if formation != null and formation.formation_status == VNextMilitaryFormation.STATUS_DESTROYED:
+			_cleanup_destroyed_formation_references(state, formation_id, boundary_hour, completed)
+
+
+func _cleanup_destroyed_formation_references(
+	state: VNextMilitaryState,
+	formation_id: String,
+	boundary_hour: int,
+	completed: Array[Dictionary],
+	preserve_action_id: String = ""
+) -> void:
+	var formation: VNextMilitaryFormation = state.get_formation(formation_id)
+	if formation == null or formation.formation_status != VNextMilitaryFormation.STATUS_DESTROYED:
+		return
+	formation.action_state = VNextMilitaryFormation.ACTION_IDLE
+	formation.defense_posture = 1.0
+	var action_ids: Array[String] = _sorted_dictionary_keys(state.active_actions)
+	for action_id: String in action_ids:
+		if action_id == preserve_action_id or not state.active_actions.has(action_id):
+			continue
+		var action: Dictionary = state.active_actions[action_id] as Dictionary
+		if str(action.get("kind", "")) == "supply":
+			if str(action.get("destination_formation_id", "")) == formation_id:
+				_cancel_supply_action(state, action, boundary_hour, "destination_formation_destroyed", completed)
+			continue
+		if str(action.get("formation_id", "")) == formation_id:
+			_complete_interrupted_action(state, action, formation, boundary_hour, "formation_destroyed", completed)
+
+
+func _cancel_supply_action(state: VNextMilitaryState, action: Dictionary, boundary_hour: int, reason: String, completed: Array[Dictionary]) -> void:
+	var action_id: String = str(action.get("action_id", ""))
+	var completion: Dictionary = {
+		"action_id": action_id,
+		"kind": "supply",
+		"destination_formation_id": str(action.get("destination_formation_id", "")),
+		"completed_at_hour": boundary_hour,
+		"success": false,
+		"outcome": "cancelled",
+		"reason": reason,
+		"resource_id": str(action.get("resource_id", "")),
+		"cargo_lost": maxf(0.0, float(action.get("cargo_amount_remaining", 0.0))),
+		"route": (action.get("route", {}) as Dictionary).duplicate(true),
+	}
+	_record_completion(state, completion, completed)
+	state.remove_capacity_request(action_id)
+	state.active_actions.erase(action_id)
 
 
 func _complete_interrupted_action(
@@ -820,8 +1111,9 @@ func _complete_interrupted_action(
 	reason: String,
 	completed: Array[Dictionary]
 ) -> void:
+	var action_id: String = str(action.get("action_id", ""))
 	var completion: Dictionary = {
-		"action_id": str(action.get("action_id", "")),
+		"action_id": action_id,
 		"kind": str(action.get("kind", "move")),
 		"formation_id": formation.formation_id,
 		"completed_at_hour": boundary_hour,
@@ -831,7 +1123,8 @@ func _complete_interrupted_action(
 		"route": (action.get("route", {}) as Dictionary).duplicate(true),
 	}
 	_record_completion(state, completion, completed)
-	state.active_actions.erase(str(action.get("action_id", "")))
+	state.remove_capacity_request(action_id)
+	state.active_actions.erase(action_id)
 
 
 func _record_completion(state: VNextMilitaryState, completion: Dictionary, completed: Array[Dictionary]) -> void:
@@ -898,7 +1191,8 @@ func _resolve_attack(
 	state: VNextMilitaryState,
 	map: VNextMilitaryMapAdapter,
 	action: Dictionary,
-	attacker: VNextMilitaryFormation
+	attacker: VNextMilitaryFormation,
+	completed: Array[Dictionary]
 ) -> Dictionary:
 	var target_city_id: String = str(action.get("destination_city_id", ""))
 	var target_region_id: String = str(action.get("target_region_id", map.get_region_id_for_city(target_city_id)))
@@ -949,12 +1243,17 @@ func _resolve_attack(
 	var pressure_denominator: float = maxf(1.0, float(attacker_personnel_before + int(defender_summary.get("formation_personnel", 0)) + garrison_personnel))
 	var mobilization_pressure: float = clampf(float(attacker_losses + defender_losses_total) / pressure_denominator, 0.0, 1.0)
 	attacker.apply_losses(attacker_losses)
-	_apply_defender_formation_losses(state, map, target_region_id, defender_country_id, defender_formation_losses)
+	var destroyed_defenders: Array[String] = _apply_defender_formation_losses(state, map, target_region_id, defender_country_id, defender_formation_losses)
 	state.region_garrisons[target_region_id] = maxi(0, garrison_personnel - garrison_losses)
+	var current_action_id: String = str(action.get("action_id", ""))
+	if attacker.formation_status == VNextMilitaryFormation.STATUS_DESTROYED:
+		_cleanup_destroyed_formation_references(state, attacker.formation_id, state.last_simulated_hour, completed, current_action_id)
+	for destroyed_formation_id: String in destroyed_defenders:
+		_cleanup_destroyed_formation_references(state, destroyed_formation_id, state.last_simulated_hour, completed)
 	var control_changed: bool = false
 	if outcome == "attacker_win" and attacker.formation_status == VNextMilitaryFormation.STATUS_ACTIVE and attacker.personnel > 0:
 		var previous_controller_id: String = defender_country_id
-		if state.apply_region_control_change(target_region_id, attacker.country_id, "strategic_attack_victory", state.last_simulated_hour, "battle"):
+		if state.apply_region_control_change(target_region_id, attacker.country_id, "strategic_attack_victory", state.last_simulated_hour, "battle", current_action_id):
 			control_changed = previous_controller_id != attacker.country_id
 			if control_changed:
 				var change: Dictionary = state.control_history.back() as Dictionary
@@ -965,7 +1264,7 @@ func _resolve_attack(
 	return {
 		"success": true,
 		"outcome": outcome,
-		"action_id": str(action.get("action_id", "")),
+		"action_id": current_action_id,
 		"attacker_formation_id": attacker.formation_id,
 		"attacker_country_id": attacker.country_id,
 		"defender_country_id": defender_country_id,
@@ -1052,7 +1351,8 @@ func _base_formation_power(formation: VNextMilitaryFormation, map: VNextMilitary
 	return maxf(0.0, float(formation.personnel) * formation.equipment_factor() * training_factor * morale_factor * supply_factor)
 
 
-func _apply_defender_formation_losses(state: VNextMilitaryState, map: VNextMilitaryMapAdapter, target_region_id: String, defender_country_id: String, losses: int) -> void:
+func _apply_defender_formation_losses(state: VNextMilitaryState, map: VNextMilitaryMapAdapter, target_region_id: String, defender_country_id: String, losses: int) -> Array[String]:
+	var destroyed_ids: Array[String] = []
 	var remaining_losses: int = maxi(0, losses)
 	for formation_id: String in state.get_sorted_formation_ids():
 		if remaining_losses <= 0:
@@ -1064,6 +1364,9 @@ func _apply_defender_formation_losses(state: VNextMilitaryState, map: VNextMilit
 			continue
 		var applied: int = formation.apply_losses(mini(remaining_losses, formation.personnel))
 		remaining_losses -= applied
+		if formation.formation_status == VNextMilitaryFormation.STATUS_DESTROYED:
+			destroyed_ids.append(formation_id)
+	return destroyed_ids
 
 
 func _supply_status(map: VNextMilitaryMapAdapter, level: float) -> String:
