@@ -1,4 +1,4 @@
-name: Economy Post-PR57 Audit Artifact
+name: Economy Post-PR57 Audit Blob Transfer
 
 on:
   pull_request:
@@ -7,88 +7,66 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-
-concurrency:
-  group: economy-post-pr57-audit-${{ github.ref }}
-  cancel-in-progress: true
+  contents: write
 
 jobs:
-  generate-audit-artifact:
+  transfer-generated-audit-blobs:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 5
     steps:
-      - name: Checkout reconciled economy branch
-        uses: actions/checkout@v4
-        with:
-          ref: feat/vnext-market-economy-20260809
-          fetch-depth: 1
-
-      - name: Record source HEAD
+      - name: Download validated generator artifact
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          mkdir -p builds/post-pr57-audit-artifact
-          git rev-parse HEAD | tee builds/post-pr57-audit-artifact/source-head.txt
+          curl -L --fail --retry 3 \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/9110466241/zip" \
+            -o artifact.zip
+          rm -rf artifact
+          mkdir artifact
+          unzip -q artifact.zip -d artifact
+          test "$(tr -d '\r\n' < artifact/source-head.txt)" = "4eb395919e3718800647e30c22de972448d79df8"
+          diff -u artifact/first.sha256 artifact/second.sha256
+          grep -Fx " M docs/refactors/variable_state_audit.md" artifact/status.txt
+          grep -Fx " M docs/refactors/variable_state_member_inventory.md" artifact/status.txt
+          test "$(wc -l < artifact/status.txt)" -eq 2
 
-      - name: Generate official variable-state documents
+      - name: Create exact dangling Git blobs only
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          python3 -B tools/audit_variable_state.py --root .
-          python3 tools/render_variable_state_audit_summary.py
-          python3 tools/render_variable_state_member_inventory.py
-          python3 tools/generate_variable_state_docs.py
-          python3 tools/render_variable_refactor_plan.py
-          test -s docs/refactors/variable_state_audit.md
-          test -s docs/refactors/variable_state_member_inventory.md
-          test -s docs/refactors/state_ownership_matrix.md
-          test -s docs/refactors/variable_refactor_plan.md
-          sha256sum \
-            docs/refactors/variable_state_audit.md \
-            docs/refactors/variable_state_member_inventory.md \
-            docs/refactors/state_ownership_matrix.md \
-            docs/refactors/variable_refactor_plan.md \
-            | tee builds/post-pr57-audit-artifact/first.sha256
-          git diff -- \
-            docs/refactors/variable_state_audit.md \
-            docs/refactors/variable_state_member_inventory.md \
-            docs/refactors/state_ownership_matrix.md \
-            docs/refactors/variable_refactor_plan.md \
-            > builds/post-pr57-audit-artifact/generated.patch
-          git status --short > builds/post-pr57-audit-artifact/status.txt
-
-      - name: Regenerate and prove deterministic currentness
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 -B tools/audit_variable_state.py --root .
-          python3 tools/render_variable_state_audit_summary.py
-          python3 tools/render_variable_state_member_inventory.py
-          python3 tools/generate_variable_state_docs.py
-          python3 tools/render_variable_refactor_plan.py
-          sha256sum \
-            docs/refactors/variable_state_audit.md \
-            docs/refactors/variable_state_member_inventory.md \
-            docs/refactors/state_ownership_matrix.md \
-            docs/refactors/variable_refactor_plan.md \
-            | tee builds/post-pr57-audit-artifact/second.sha256
-          diff -u builds/post-pr57-audit-artifact/first.sha256 builds/post-pr57-audit-artifact/second.sha256
-          git diff --check
-
-      - name: Stage artifact files
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p builds/post-pr57-audit-artifact/docs/refactors
-          cp docs/refactors/variable_state_audit.md builds/post-pr57-audit-artifact/docs/refactors/
-          cp docs/refactors/variable_state_member_inventory.md builds/post-pr57-audit-artifact/docs/refactors/
-          cp docs/refactors/state_ownership_matrix.md builds/post-pr57-audit-artifact/docs/refactors/
-          cp docs/refactors/variable_refactor_plan.md builds/post-pr57-audit-artifact/docs/refactors/
-
-      - name: Upload generated audit artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: economy-post-pr57-audit-artifact
-          path: builds/post-pr57-audit-artifact/
-          if-no-files-found: error
+          upload_blob() {
+            local rel="$1"
+            local expected="$2"
+            local file="artifact/docs/refactors/${rel}"
+            local local_sha
+            local_sha="$(git hash-object "${file}")"
+            test "${local_sha}" = "${expected}"
+            local payload
+            payload="$(python3 - "${file}" <<'PY'
+          import base64, json, pathlib, sys
+          data = pathlib.Path(sys.argv[1]).read_bytes()
+          print(json.dumps({"content": base64.b64encode(data).decode("ascii"), "encoding": "base64"}))
+          PY
+          )"
+            local response
+            response="$(curl -sS --fail \
+              -X POST \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/git/blobs" \
+              -d "${payload}")"
+            local actual
+            actual="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["sha"])' <<<"${response}")"
+            test "${actual}" = "${expected}"
+            echo "AUDIT_BLOB_OK ${rel} ${actual}"
+          }
+          upload_blob variable_state_audit.md 77f83e96d0681bbe5e04c21f98c494f90010abc1
+          upload_blob variable_state_member_inventory.md aecf555e653e5452608b2533d9c0d0125953c9da
