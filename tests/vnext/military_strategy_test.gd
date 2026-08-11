@@ -144,11 +144,12 @@ func _test_supply_completion_and_interruptions() -> void:
 		_check(str(shipment.get("current_city_id", "")) == str(shipment.get("destination_city_id", "")), "arrived cargo is at destination waypoint")
 		_check(is_equal_approx(float(shipment.get("cargo_amount_remaining", -1.0)), original_total), "arrival itself neither duplicates nor loses cargo")
 		_check(arrival_hour >= int(arrival_route.get("duration_hours", 0)), "arrival cannot precede route duration")
+		var settled_action_id := str(shipment.get("action_id", ""))
 		var settlement := service.advance_to_hour(completion, map, completion.last_simulated_hour + 1)
 		_check(bool(settlement.get("success", false)), "arrived cargo settles on following supply hour")
 		var delivered := (((settlement.get("supply", {}) as Dictionary).get("formation:arrival", {}) as Dictionary).get("delivered", {}) as Dictionary)
 		_check(float(delivered.get("food", 0.0)) > 0.0, "only arrived cargo contributes delivered supply")
-		_check(_find_supply(completion, "formation:arrival", "food").is_empty(), "fully delivered shipment is removed exactly once")
+		_check(not completion.active_actions.has(settled_action_id), "fully delivered shipment is removed exactly once")
 
 	var low := _remote_supply_state("formation:low_capacity", "rouen", 6000)
 	var rail_route := map.find_route("paris", "rouen", ["rail"])
