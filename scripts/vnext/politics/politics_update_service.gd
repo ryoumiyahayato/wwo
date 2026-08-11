@@ -24,6 +24,8 @@ const CRITICAL_SUPPORT_THRESHOLD: float = 35.0
 const CRITICAL_CONTROL_THRESHOLD: float = 26.0
 const CRITICAL_STABILITY_THRESHOLD: float = 30.0
 const MAX_HISTORY: int = 96
+const REPEAT_RETURN_MANDATE_MARGIN: float = 2.0
+const REPEAT_RETURN_MANDATE_BENCHMARK_CAP: float = 85.0
 
 const ECONOMIC_WEIGHTS: Dictionary = {
 	"price_pressure": 0.24,
@@ -635,6 +637,13 @@ func _select_challenger(candidate: Dictionary, total_pressure: float) -> Diction
 		):
 			penalty = minf(penalty, raw_mandate - float(CHALLENGER_MANDATE_THRESHOLD))
 		var mandate := clampf(raw_mandate - penalty, 0.0, 100.0)
+		if _is_direct_return_candidate(candidate, force_id):
+			var prior_entry_mandate := _previous_entry_mandate(candidate, force_id)
+			if prior_entry_mandate >= 0.0:
+				var benchmark := minf(prior_entry_mandate, REPEAT_RETURN_MANDATE_BENCHMARK_CAP)
+				var required_mandate := minf(100.0, benchmark + _repeat_return_mandate_margin(candidate))
+				if mandate < required_mandate and not is_equal_approx(mandate, required_mandate):
+					continue
 		var best_force_id := str((best.get("force", {}) as Dictionary).get("force_id", ""))
 		if _prefer_scored_candidate(mandate, force_id, best_score, best_force_id):
 			best_score = mandate
@@ -701,6 +710,23 @@ func _is_direct_return_candidate(candidate: Dictionary, challenger_id: String) -
 	if history.is_empty():
 		return false
 	return challenger_id == str((history.back() as Dictionary).get("old_government_group_id", ""))
+
+
+func _previous_entry_mandate(candidate: Dictionary, challenger_id: String) -> float:
+	var history := _sorted_history(candidate.get("government_change_history", []) as Array)
+	for index: int in range(history.size() - 1, -1, -1):
+		var record := history[index]
+		if str(record.get("new_government_group_id", "")) == challenger_id:
+			return float(record.get("mandate_score", 0.0))
+	return -1.0
+
+
+func _repeat_return_mandate_margin(candidate: Dictionary) -> float:
+	var age := _days_since_last_change(candidate, int(candidate.get("period_index", 0)))
+	if age >= RETURN_GOVERNMENT_PENALTY_DAYS:
+		return 0.0
+	var decay := 1.0 - float(age) / float(RETURN_GOVERNMENT_PENALTY_DAYS)
+	return REPEAT_RETURN_MANDATE_MARGIN * clampf(decay, 0.0, 1.0)
 
 
 func _apply_government_change(candidate: Dictionary, challenger_result: Dictionary, total_pressure: float) -> Dictionary:
