@@ -602,6 +602,11 @@ static func _validate_government_history(
 	if history.is_empty():
 		return true
 
+	# Persistence validation must reject malformed raw variants before sorting can filter them.
+	for raw_record: Variant in history:
+		if typeof(raw_record) != TYPE_DICTIONARY:
+			return false
+
 	var ordered := _sorted_dictionary_array(history)
 	var previous: Dictionary = {}
 	var previous_period := -1
