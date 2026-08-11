@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1689|1293|15|0|1287|5|32|16|65|931|538|290|
+|1688|1266|15|0|1256|5|32|16|60|911|537|288|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,689个生产成员字段逐项表
+## 1,688个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -1447,7 +1447,7 @@
 5 K leave_confirmation
 ```
 
-### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/vnext/economy/market_economy_catalog.gd`
+### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/vnext/politics/politics_pressure_input.gd`
 
 ```text
 @ scripts/v2_3/v2_3_formal_simulation.gd | V23FormalSimulation
@@ -1571,66 +1571,6 @@
 12 K next_retry_hours
 13 K active_needs
 14 K decision_history
-@ scripts/vnext/economy/market_economy.gd | VNextMarketEconomy
-9 C BASIS_POINTS
-10 C HOURS_PER_DAY
-11 C POPULATION_UNIT
-12 C HISTORY_LIMIT
-13 C MAX_SHIPMENTS_PER_DAY
-14 C MIN_PRICE_CENTIMES
-15 C SEASONAL_COMMODITY_CATEGORIES
-21 C DEFAULT_POLICIES
-41 K catalog
-42 K routes
-43 K region_states
-44 K production_sites
-45 K shipments
-46 K shipment_history
-47 K active_shocks
-48 K history
-49 K flow_totals
-50 E last_summary
-51 K initialization_error
-53 K _policies
-54 K _region_ids
-55 E _country_ids
-56 K _commodity_ids
-57 K _production_site_ids
-58 K _production_order
-59 K _trade_quota_remaining
-60 A _last_day_index
-61 A _next_shipment_sequence
-@ scripts/vnext/economy/market_economy_catalog.gd | VNextMarketEconomyCatalog
-7 C COMMODITY_MARKET_PATH
-8 C WORLD_PATH
-9 C INTEGRATION_PATH
-10 C HISTORICAL_MANIFEST_PATH
-11 C HISTORICAL_COUNTRY_TABLE_PATH
-15 C CATEGORY_PRICE_ELASTICITY_BP
-32 K commodities
-33 K recipes
-34 K production_sites
-35 K regions
-36 E countries
-37 K transport_edges
-38 K trade_relations
-39 K policies
-40 E source_summary
-41 K initialization_error
-43 K _source_region_to_market
-44 E _source_country_to_market
-```
-
-### 第10段：`scripts/vnext/economy/market_route_network.gd` 至 `scripts/world_map/historical_map_identity_style.gd`
-
-```text
-@ scripts/vnext/economy/market_route_network.gd | VNextMarketRouteNetwork
-6 K edges_by_id
-7 K adjacency
-8 K edge_capacity_overrides
-9 K edge_remaining_capacity
-10 K initialization_error
-12 K _default_capacity
 @ scripts/vnext/economy/personal_wallet.gd | VNextPersonalWallet
 4 C SNAPSHOT_SCHEMA_ID
 5 C MAX_BALANCE_MINOR
@@ -1651,6 +1591,65 @@
 @ scripts/vnext/player/player_state.gd | VNextPlayerState
 4 C SNAPSHOT_SCHEMA_ID
 6 K _player_id
+@ scripts/vnext/politics/politics_pressure_input.gd | VNextPoliticsPressureInput
+7 C SNAPSHOT_SCHEMA_ID
+8 C MAX_PERIOD_DAYS
+9 C MIN_SIGNAL
+10 C MAX_SIGNAL
+12 C ECONOMIC_SIGNAL_KEYS
+19 C WAR_SIGNAL_KEYS
+26 K _period_days
+27 K _price_pressure
+28 K _unemployment_pressure
+29 K _fiscal_pressure
+30 K _shortage_pressure
+31 K _growth_signal
+32 K _war_pressure
+33 K _casualty_pressure
+34 K _mobilization_pressure
+35 K _military_result_signal
+```
+
+### 第10段：`scripts/vnext/politics/politics_update_service.gd` 至 `scripts/world_map/historical_map_identity_style.gd`
+
+```text
+@ scripts/vnext/politics/politics_update_service.gd | VNextPoliticsUpdateService
+8 C PRESSURE_SCALE
+9 C FORCE_DELTA_LIMIT
+10 C POLICY_REVIEW_COOLDOWN
+11 C POLICY_CHANGE_MARGIN
+12 C EMERGENCY_POLICY_PRESSURE
+13 C POLICY_PRIORITY_SIGNAL_THRESHOLD
+14 C POLICY_PRIORITY_BONUS
+15 C STRAINED_STREAK
+16 C CRISIS_STREAK
+17 C GOVERNMENT_CHANGE_STREAK
+18 C RECOVERY_TO_STABLE_STREAK
+19 C CRISIS_SUPPORT_THRESHOLD
+20 C CRISIS_CONTROL_THRESHOLD
+21 C CRISIS_LEGITIMACY_THRESHOLD
+22 C CRISIS_STABILITY_THRESHOLD
+23 C CRITICAL_SUPPORT_THRESHOLD
+24 C CRITICAL_CONTROL_THRESHOLD
+25 C CRITICAL_STABILITY_THRESHOLD
+26 C MAX_HISTORY
+27 C REPEAT_RETURN_MANDATE_MARGIN
+28 C REPEAT_RETURN_MANDATE_BENCHMARK_CAP
+30 C ECONOMIC_WEIGHTS
+37 C WAR_WEIGHTS
+43 C REGIME_PROCEDURAL_BASELINES
+@ scripts/vnext/politics/state_politics.gd | VNextStatePolitics
+7 C SNAPSHOT_SCHEMA_ID
+8 C FORCE_SUPPORT_THRESHOLD
+9 C FORCE_OPPOSITION_THRESHOLD
+10 C MAX_FORCE_HISTORY
+11 C MAX_POLICY_HISTORY
+12 C MAX_GOVERNMENT_CHANGE_HISTORY
+14 C REGIME_TYPES
+25 C POLICY_DOMAINS
+33 C PRESSURE_SIGNAL_KEYS
+44 C CAPACITY_KEYS
+52 K _state
 @ scripts/vnext/travel/location_state.gd | VNextLocationState
 4 C SNAPSHOT_SCHEMA_ID
 6 K _player_id

@@ -1,94 +1,94 @@
-# 1900年二维社会与战争模拟（开发中）
+# 1900 2D Society and War Simulation (In Development)
 
-一个使用 Godot 制作的二维、离线、可暂停、实时推进的社会与战争模拟项目。玩家从架空国家的一名社会人物开始，通过技能、职业、组织和关系逐步获得影响力。
+A 2D, offline, pausable, real-time social and warfare simulation built with Godot. The player begins as an individual in a fictional country and gradually gains influence through skills, careers, organizations, and relationships.
 
-## 当前范围
+## Current Scope
 
-目标 P0 Demo 包含两个架空国家、双层二维地图、人物随机开局、行动与组织、简化 AI、继承、存档和开发工具。当前项目仍未达到 Demo，状态必须按下表理解：
+The target P0 Demo includes two fictional countries, a two-layer 2D map, randomized character starts, actions and organizations, simplified AI, succession, save/load support, and development tools. The project has not yet reached Demo status and must currently be understood according to the following:
 
-- 后台模拟与状态一致性：具备自动回归基线，当前统一验证通过。
-- 时间与单次学习行动：此前干净用户数据人工测试基本通过。
-- 社会主链：工作、第一条关系、第一个组织和职位入口已完成数值与内容修复，1000 个标准种子自动预算回归为 100%；本轮代理已在全新 `user://` Release 中通过可见控件完成工作、关系与组织流程，仍需用户独立人工复验。
-- 正式 UI：统一左侧抽屉、当前/最近行动分离、世界动态通知和人物发展建议已实现；本轮代理实际窗口操作通过，用户独立人工验收尚未完成。
-- 战争状态：当前世界权威状态为和平；地图线是国境/控制边界，和平期无军事控制压力，支持控制禁用。
-- Windows Release：当前 x86-64 单 EXE 已重新导出并由代理独立完成启动、保存、完全退出、重启加载和正常退出；未完成用户侧独立冒烟。
-- P0-R1：未通过。Demo：未达到。
+* Background simulation and state consistency: an automated regression baseline is in place, and the current unified validation suite passes.
+* Time progression and one-off learning actions: previous manual testing with clean user data largely passed.
+* Core social progression: work, the first relationship, and the first organization and position entry points have received balance and content fixes. Automated budget regression across 1,000 standard seeds now reaches 100%. In this round, the agent also completed the work, relationship, and organization flows through visible controls in a fresh Release `user://`; independent manual re-validation by the user is still required.
+* Production UI: the unified left-side drawer, separation of current and recent actions, world-event notifications, and character-development recommendations have been implemented. The agent has successfully exercised them through actual window interaction in this round, but independent user acceptance testing has not yet been completed.
+* War state: the current authoritative world state is peace. Map lines represent national borders and control boundaries. During peacetime there is no military control pressure, and control support is disabled.
+* Windows Release: the current x86-64 single-file EXE has been re-exported and independently tested by the agent for startup, saving, full exit, restart and load, and normal exit. Independent user-side smoke testing remains incomplete.
+* P0-R1: not passed. Demo: not reached.
 
-地图支持拖动、滚轮缩放、法理边界、实际管辖色、城市与铁路，以及和平期国境/控制边界。只有显式战争状态才显示争夺斜纹并允许前线控制支援；直接修改权威状态的控件只在开发模式中显示。
+The map supports panning, mouse-wheel zooming, de jure borders, de facto jurisdiction coloring, cities, railways, and national/control boundaries during peacetime. Contested hatching and frontline control support are shown only when the authoritative state explicitly indicates war. Controls that directly modify authoritative state are visible only in development mode.
 
-## 环境要求
+## Environment Requirements
 
-- Windows 11 x86-64（当前开发、审计与历史导出环境）
-- Godot 标准版 `4.6.3.stable.official.7d41c59c4`
-- Compatibility 渲染器
-- 强类型 GDScript
+* Windows 11 x86-64 (current development, audit, and historical export environment)
+* Godot Standard `4.6.3.stable.official.7d41c59c4`
+* Compatibility renderer
+* Strongly typed GDScript
 
-Windows 10 是目标兼容平台，但尚未完成实机验证。Linux 和 macOS 仅保持设计兼容，不宣称已测试。
+Windows 10 is a target compatibility platform, but has not yet been validated on real hardware. Linux and macOS remain design-compatible only; no testing is claimed.
 
-## 安装和运行
+## Installation and Running
 
-Godot 已由用户安装，不需要本项目下载或升级：
+Godot is installed separately by the user and does not need to be downloaded or upgraded by this project:
 
 ```powershell
 & 'D:\Tools\Godot-4.6.3\Godot_v4.6.3-stable_win64.exe' --path 'D:\wwo'
 ```
 
-## 测试
+## Testing
 
-干净检出不能直接假设 Godot 已生成全局 `class_name` 缓存。优先使用自举验证脚本；它会先执行 Headless 编辑器导入，再依次运行全部测试和启动检查，并把日志中的解析/加载错误视为失败，即使 Godot 进程返回 `0`：
+A clean checkout must not assume that Godot has already generated the global `class_name` cache. The bootstrap validation script should be used first. It performs a Headless editor import before running the full test suite and startup checks, and treats parse/load errors in the logs as failures even when the Godot process returns exit code `0`:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File 'D:\wwo\tools\run_validation.ps1'
 ```
 
-脚本覆盖：
+The script covers:
 
-- `tests/current_test_runner.gd`（继承并运行完整 M0 至 M9 综合套件）
-- `tests/p0_r1_logic_regression.gd`
-- `tests/p0_r1_player_journey_post_audit.gd`
-- `tests/p0_r1_safety_regression.gd`
-- `tests/state_consistency_regression.gd`
-- `tests/simulation_quality_regression.gd`
-- `tests/codex_audit_regression.gd`
-- `tests/early_game_reachability_regression.gd`（1000 个标准种子的实际预算路径）
-- Headless 主项目启动与解析日志检查
+* `tests/current_test_runner.gd` (inherits and runs the complete M0–M9 integrated suite)
+* `tests/p0_r1_logic_regression.gd`
+* `tests/p0_r1_player_journey_post_audit.gd`
+* `tests/p0_r1_safety_regression.gd`
+* `tests/state_consistency_regression.gd`
+* `tests/simulation_quality_regression.gd`
+* `tests/codex_audit_regression.gd`
+* `tests/early_game_reachability_regression.gd` (actual budget paths across 1,000 standard seeds)
+* Headless main-project startup and parse-log checks
 
-完整验收步骤见 `docs/TEST_PLAN.md` 和 `docs/P0_R1_VALIDATION.md`。
+See `docs/TEST_PLAN.md` and `docs/P0_R1_VALIDATION.md` for the complete acceptance procedure.
 
-## 导出
+## Export
 
-`export_presets.cfg` 提供 Windows Desktop x86-64、Linux x86-64 和 macOS Universal 预设。当前 Windows Release 使用以下命令导出：
+`export_presets.cfg` provides Windows Desktop x86-64, Linux x86-64, and macOS Universal presets. The current Windows Release is exported with:
 
 ```powershell
 & 'D:\Tools\Godot-4.6.3\Godot_v4.6.3-stable_win64.exe' --headless --path 'D:\wwo' --export-release 'Windows Desktop' 'D:\wwo\builds\windows\wwo-p0-r1.exe'
 ```
 
-Linux 与 macOS 未导出、未测试。
+Linux and macOS have not been exported or tested.
 
-## 当前验证事实
+## Current Validation Facts
 
-2026-07-13 使用精确 Godot 版本 `4.6.3.stable.official.7d41c59c4` 对提交 `9e92e77c422be782fd21baaa69ee7b41099ce8be` 进行了只读 Codex 审计：
+On 2026-07-13, a read-only Codex audit was performed against commit `9e92e77c422be782fd21baaa69ee7b41099ce8be` using the exact Godot version `4.6.3.stable.official.7d41c59c4`:
 
-- 原始源码的 Headless 进程虽然返回 `0`，日志实际包含强类型解析错误，因此启动不通过。
-- 临时影子副本只修复该单点后：原有总测试 `552/564`、P0-R1 逻辑 `35/35`、玩家旅程 `20/21`、安全回归 `25/26`、状态一致性 `240/240`、模拟质量 `50/50`。
-- 影子一年模拟约 `1,916 ms`，仍低于 10 秒预算，但旧的 `846 ms` 不能继续作为当前默认分支证据。
+* Although the Headless process for the original source returned `0`, the logs contained strongly typed parsing errors, so startup did not pass.
+* After fixing only that single issue in a temporary shadow copy: the original aggregate tests passed `552/564`, P0-R1 logic `35/35`, player journey `20/21`, safety regression `25/26`, state consistency `240/240`, and simulation quality `50/50`.
+* A one-year simulation in the shadow copy took approximately `1,916 ms`, still below the 10-second budget, but the older `846 ms` result can no longer be used as evidence for the current default branch.
 
-审计后默认分支已进一步修复：
+The default branch was further repaired after that audit:
 
-- 强类型 `is_surrounded()` 调用错误。
-- 干净检出导入和“退出码为 0 但有解析错误”的验证缺口。
-- 任意技能正式学习、实际行动主技能成长，以及训练、准备和资金充分后的明确保证成功路径。
-- 退休、死亡、长期监禁和失势退出原因的权威状态约束。
-- NPC 先按旧上下文结算已过去区间，再从边界应用新条件。
-- 存档活跃上限、激活种子、AI 覆盖和行动实例 ID 唯一性校验。
-- 1280×720 行动面板将开始按钮固定在滚动区外。
-- 备份快照测试按 JSON 语义归一化比较。
-- 继承事务在运行时活跃上限变化导致升级失败时，仍可完整恢复继承前名册；外部存档恢复继续强制执行配置上限。
+* The strongly typed `is_surrounded()` call error.
+* Validation gaps involving clean-checkout import and cases where the process returned exit code `0` despite parse errors.
+* Production learning for arbitrary skills, primary-skill growth from actual actions, and explicit guaranteed-success paths after sufficient training, preparation, and funding.
+* Authoritative-state constraints for retirement, death, long-term imprisonment, and loss-of-power exit reasons.
+* NPCs now settle elapsed intervals using the previous context before applying new conditions at the boundary.
+* Validation for active save limits, activation seeds, AI coverage, and uniqueness of action-instance IDs.
+* At 1280×720, the action panel now keeps the Start button fixed outside the scrollable region.
+* Backup snapshot tests now compare normalized JSON semantics.
+* Succession transactions now fully restore the pre-succession roster if an upgrade fails because the runtime active limit changes; external save restoration continues to enforce configured limits.
 
-2026-07-15 UI 重构前，在精确 Godot `4.6.3.stable.official.7d41c59c4` 上运行统一验证脚本并通过：综合 `570/570`、逻辑 `35/35`、当时的自动玩家旅程 `32/32`、安全 `26/26`、状态一致性 `41/41`、模拟质量 `50/50`、Codex 审计专项 `29/29`；这些数字仅保留为重构前基线。
+Before the UI refactor on 2026-07-15, the unified validation script passed using the exact Godot version `4.6.3.stable.official.7d41c59c4`: aggregate `570/570`, logic `35/35`, the then-current automated player journey `32/32`, safety `26/26`, state consistency `41/41`, simulation quality `50/50`, and Codex audit-specific tests `29/29`. These figures are retained only as the pre-refactor baseline.
 
-随后那套旧 UI 的自动与人工结果只能作为历史基线，不能继续证明当前玩家闭环。783 项自动测试是后台、逻辑和状态一致性回归基线。最新干净用户数据人工测试发现，工作、第一条关系和第一个组织仍缺少稳定可达路径，因此不能作为 P0-R1 完成证据。
+The automated and manual results from that old UI can only be treated as historical baselines and can no longer prove the current player loop. The 783 automated tests form a regression baseline for background simulation, logic, and state consistency. The latest manual testing with clean user data found that work, the first relationship, and the first organization still lacked reliably reachable paths, so those results cannot be used as evidence that P0-R1 is complete.
 
-2026-07-15 当前代码使用同一精确引擎重新运行统一验证：综合 `608/608`、逻辑 `38/38`、关闭开发模式的可见控件旅程 `99/99`、安全 `26/26`、状态一致性 `41/41`、模拟质量 `51/51`、Codex 审计 `107/107`；新增的 1000 种子实际预算回归中，30 日工作、60 日关系、90 日组织、180 日职位路径和职位成功线均为 `1000/1000`，无确定性死局。
+On 2026-07-15, the current code was rerun through unified validation using the same exact engine version: aggregate `608/608`, logic `38/38`, visible-control journey with development mode disabled `99/99`, safety `26/26`, state consistency `41/41`, simulation quality `51/51`, and Codex audit `107/107`. In the newly added 1,000-seed actual-budget regression, the 30-day work path, 60-day relationship path, 90-day organization path, 180-day position path, and position-success line all reached `1000/1000`, with no deterministic dead ends.
 
-随后从空 `user://` 启动当前 Release，代理仅通过可见控件完成新游戏、本职工作、关系、组织、最近结果、抽屉切换、和平禁用、三个月世界动态、保存、完全退出和加载往返。该实际窗口证据不等同于用户独立人工验收；P0-R1 仍未通过，Demo 仍未达到。
+The current Release was subsequently launched from an empty `user://`. Using only visible controls, the agent completed a new game, primary employment, relationship creation, organization creation, recent-result review, drawer switching, peacetime-disabled-state verification, three months of world-event progression, saving, full exit, and load round-trip. This actual-window evidence is not equivalent to independent manual acceptance testing by the user. P0-R1 remains unpassed, and the Demo has still not been reached.
