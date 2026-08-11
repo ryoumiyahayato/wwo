@@ -1,0 +1,1134 @@
+[
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1026].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "MMR-3279",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[103].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "BRA-612",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1055].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "VNM-456",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1219].polygons[2]",
+    "message": "polygon ring self-intersects",
+    "record_id": "VNM-429",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1236].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "CAN-633",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1236].polygons[2]",
+    "message": "polygon ring self-intersects",
+    "record_id": "CAN-633",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1252].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "USA-3561",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1257].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "USA-3521",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1268].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "MEX-2736",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1290].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "PAN-1418",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[129].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "LVA-5792",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1335].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "CHL-2691",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1337].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "CHL-2692",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1339].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "VEN-31",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1392].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "RUS-2388",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1410].polygons[2]",
+    "message": "polygon ring self-intersects",
+    "record_id": "OMN-2411",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1417].polygons[2]",
+    "message": "polygon ring self-intersects",
+    "record_id": "SAU-887",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1599].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "SDN-149",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1613].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "USA-3563",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[161].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "NOR-900",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[162].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "SWE-190",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[163].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "NOR-75",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1734].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "BRA-624",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1747].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "AUS-2651",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1748].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "AUS-2650",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1750].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "MDG-5880",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1753].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "MDG-5863",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[175].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "NOR-1062",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1762].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "AUS-2655",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1773].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "MOZ-1905",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1788].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "IDN-1933",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1819].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "PAN-1340",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1830].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "IDN-1931",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1861].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "LKA-2459",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1888].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "COL-1413",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1920].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "GAB-2624",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1981].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "CIV-3447",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[1982].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "CIV-3458",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2016].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "CHN-1775",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2025].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "CHN-1178",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2026].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "MEX-2707",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2037].polygons[3]",
+    "message": "polygon ring self-intersects",
+    "record_id": "YEM-151",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2077].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "USA-3542",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2081].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "USA-3552",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2083].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "USA-3557",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2085].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "USA-3558",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2096].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "MEX-2734",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2115].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "CHN-1820",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2118].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "CHN-1818",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2145].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "KOR-2502",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2166].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "JPN-1843",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2172].polygons[1]",
+    "message": "polygon ring self-intersects",
+    "record_id": "CAN-634",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2172].polygons[4]",
+    "message": "polygon ring self-intersects",
+    "record_id": "CAN-634",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2174].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "CAN-685",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2178].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "IND-2444",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2180].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "MMR-3275",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2215].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "VNM-485",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2236].polygons[1]",
+    "message": "polygon ring self-intersects",
+    "record_id": "IND-2445",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2250].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "IRL-78",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2345].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "GBR-2746",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2346].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "GBR-2745",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2354].polygons[3]",
+    "message": "polygon ring self-intersects",
+    "record_id": "RUS-2321",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2363].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "ISL-702",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2367].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "RUS-2612",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2398].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "SWE-184",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2410].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "NOR-913",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2411].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "NOR-915",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2412].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "NOR-910",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2430].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "TUR-2278",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2437].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "RUS-2603",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2440].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "GRC-2989",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2542].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "DNK-3418",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2543].polygons[1]",
+    "message": "polygon ring self-intersects",
+    "record_id": "GRL-2739",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2547].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "GRL-2741",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2548].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "GRL-2740",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2559].polygons[4]",
+    "message": "polygon ring self-intersects",
+    "record_id": "IND-2443",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2624].polygons[1]",
+    "message": "polygon ring self-intersects",
+    "record_id": "FRA-4603",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[267].polygons[1]",
+    "message": "polygon ring self-intersects",
+    "record_id": "BRA-594",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2757].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "ATF-5916",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2829].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "GRC-2990",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2889].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "DNK-3420",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2894].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "GBR-2747",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2987].polygons[1]",
+    "message": "polygon ring self-intersects",
+    "record_id": "MDV-5232",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2989].polygons[2]",
+    "message": "polygon ring self-intersects",
+    "record_id": "MDV-5231",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2995].polygons[2]",
+    "message": "polygon ring self-intersects",
+    "record_id": "MDV-5225",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2995].polygons[3]",
+    "message": "polygon ring self-intersects",
+    "record_id": "MDV-5225",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[2].polygons[3]",
+    "message": "polygon ring self-intersects",
+    "record_id": "IDN-1185",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[3082].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "CUB-1319",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[3110].polygons[2]",
+    "message": "polygon ring self-intersects",
+    "record_id": "MDV-5233",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[3111].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "MDV-5235",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[335].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "ALB-1504",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[3806].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "BRA-1294",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[3828].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "CAF-807",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[3].polygons[2]",
+    "message": "polygon ring self-intersects",
+    "record_id": "MYS-1186",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[408].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "DEU-1576",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[4349].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "USA-3548",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[438].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "RUS-2333",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[531].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "THA-432",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[574].polygons[2]",
+    "message": "polygon ring self-intersects",
+    "record_id": "KWT-1667",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[620].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "MMR-3273",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[621].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "BGD-2476",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[847].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "DEU-3488",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[953].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "RUS-2614",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "SELF_INTERSECTING_RING",
+    "dataset": "world_admin1.json",
+    "evidence": {},
+    "location": "world_admin1.json:regions[977].polygons[0]",
+    "message": "polygon ring self-intersects",
+    "record_id": "TKM-352",
+    "severity": "ERROR",
+    "suggested_action": ""
+  },
+  {
+    "code": "PLACEHOLDER_FOREIGN_KEY",
+    "dataset": "institutions.json",
+    "evidence": {
+      "placeholder": true,
+      "target_kinds": [
+        "institution"
+      ]
+    },
+    "location": "institutions.json:institutions[0].parent_institution_id",
+    "message": "parent institution reference 'interior_ministry_placeholder' does not resolve",
+    "record_id": "prefecture_nord",
+    "severity": "WARNING",
+    "suggested_action": "Keep the unresolved reference in findings/TODO until the source identity is established."
+  },
+  {
+    "code": "PLACEHOLDER_FOREIGN_KEY",
+    "dataset": "institutions.json",
+    "evidence": {
+      "placeholder": true,
+      "target_kinds": [
+        "institution"
+      ]
+    },
+    "location": "institutions.json:institutions[3].parent_institution_id",
+    "message": "parent institution reference 'labor_ministry_placeholder' does not resolve",
+    "record_id": "labor_inspectorate_nord",
+    "severity": "WARNING",
+    "suggested_action": "Keep the unresolved reference in findings/TODO until the source identity is established."
+  },
+  {
+    "code": "PLACEHOLDER_FOREIGN_KEY",
+    "dataset": "institutions.json",
+    "evidence": {
+      "placeholder": true,
+      "target_kinds": [
+        "administrative_unit",
+        "country"
+      ]
+    },
+    "location": "institutions.json:institutions[4].administrative_unit_id",
+    "message": "admin unit or country reference 'departement_seine_inferieure_placeholder' does not resolve",
+    "record_id": "prefecture_seine_inferieure",
+    "severity": "WARNING",
+    "suggested_action": "Keep the unresolved reference in findings/TODO until the source identity is established."
+  },
+  {
+    "code": "PLACEHOLDER_FOREIGN_KEY",
+    "dataset": "institutions.json",
+    "evidence": {
+      "placeholder": true,
+      "target_kinds": [
+        "institution"
+      ]
+    },
+    "location": "institutions.json:institutions[4].parent_institution_id",
+    "message": "parent institution reference 'interior_ministry_placeholder' does not resolve",
+    "record_id": "prefecture_seine_inferieure",
+    "severity": "WARNING",
+    "suggested_action": "Keep the unresolved reference in findings/TODO until the source identity is established."
+  },
+  {
+    "code": "PLACEHOLDER_FOREIGN_KEY",
+    "dataset": "institutions.json",
+    "evidence": {
+      "placeholder": true,
+      "target_kinds": [
+        "administrative_unit",
+        "country"
+      ]
+    },
+    "location": "institutions.json:institutions[5].administrative_unit_id",
+    "message": "admin unit or country reference 'commune_marseille_placeholder' does not resolve",
+    "record_id": "marseille_port_authority",
+    "severity": "WARNING",
+    "suggested_action": "Keep the unresolved reference in findings/TODO until the source identity is established."
+  },
+  {
+    "code": "PLACEHOLDER_FOREIGN_KEY",
+    "dataset": "institutions.json",
+    "evidence": {
+      "placeholder": true,
+      "target_kinds": [
+        "institution"
+      ]
+    },
+    "location": "institutions.json:institutions[5].parent_institution_id",
+    "message": "parent institution reference 'commerce_ministry_placeholder' does not resolve",
+    "record_id": "marseille_port_authority",
+    "severity": "WARNING",
+    "suggested_action": "Keep the unresolved reference in findings/TODO until the source identity is established."
+  }
+]
