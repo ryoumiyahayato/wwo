@@ -10,14 +10,14 @@ permissions:
 
 jobs:
   patch:
-    if: github.event.head_commit.message == 'chore: stage PR58 R3 patcher'
+    if: github.event.head_commit.message == 'chore: execute PR58 R3 fix'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: feat/vnext-military-strategy-20260809
           fetch-depth: 0
-      - name: Apply reviewed R3 fixes
+      - name: Apply R3 findings
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
@@ -25,173 +25,341 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          import base64
-          import json
-          import os
-          import re
-          import urllib.request
+          import base64, json, os, re, urllib.request
 
           repo = "ryoumiyahayato/wwo"
           service_blob = "3a9e5d60fbeb494e7bd39c4b6243be29d7e816a0"
           token = os.environ["GITHUB_TOKEN"]
           req = urllib.request.Request(
               f"https://api.github.com/repos/{repo}/git/blobs/{service_blob}",
-              headers={
-                  "Authorization": f"Bearer {token}",
-                  "Accept": "application/vnd.github+json",
-                  "X-GitHub-Api-Version": "2022-11-28",
-              },
+              headers={"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28"},
           )
           with urllib.request.urlopen(req) as response:
               payload = json.load(response)
-          service_bytes = base64.b64decode(payload["content"])
-          Path("scripts/vnext/military/military_service.gd").write_bytes(service_bytes)
+          service = base64.b64decode(payload["content"]).decode("utf-8")
+
+          old = "\t\t\t\tvar amount: float = minf(needed, available)"
+          new = "\t\t\t\tvar amount: float = minf(hourly_remote_demand, minf(needed, available))"
+          if service.count(old) != 1:
+              raise SystemExit("rolling pipeline batch anchor mismatch")
+          service = service.replace(old, new, 1)
+
+          setup_old = '''\tif not state.apply_region_control_change(region_id, controller_id, cause, 0, "setup_fixture"):\n\t\treturn false\n\tif previous_controller_id != controller_id:\n\t\tvar change: Dictionary = state.control_history.back() as Dictionary\n\t\tregion_control_changed.emit(change.duplicate(true))\n\treturn true'''
+          setup_new = '''\tif not state.apply_region_control_change(region_id, controller_id, cause, 0, "setup_fixture"):\n\t\treturn false\n\tif previous_controller_id != controller_id:\n\t\tvar change_index: int = state.control_history.size() - 1\n\t\tvar change: Dictionary = state.control_history[change_index] as Dictionary\n\t\tchange["control_origin_controller_id"] = map.get_initial_controller(region_id)\n\t\tchange["source_action_kind"] = ""\n\t\tchange["source_formation_id"] = ""\n\t\tchange["source_target_region_id"] = ""\n\t\tchange["source_controller_id"] = ""\n\t\tchange["source_preparation_end_hour"] = -1\n\t\tstate.control_history[change_index] = change\n\t\tregion_control_changed.emit(change.duplicate(true))\n\treturn true'''
+          if service.count(setup_old) != 1:
+              raise SystemExit("setup provenance anchor mismatch")
+          service = service.replace(setup_old, setup_new, 1)
+
+          battle_old = '''\t\tif state.apply_region_control_change(target_region_id, attacker.country_id, "strategic_attack_victory", state.last_simulated_hour, "battle", current_action_id):\n\t\t\tcontrol_changed = previous_controller_id != attacker.country_id\n\t\t\tif control_changed:\n\t\t\t\tvar change: Dictionary = state.control_history.back() as Dictionary\n\t\t\t\tregion_control_changed.emit(change.duplicate(true))'''
+          battle_new = '''\t\tif state.apply_region_control_change(target_region_id, attacker.country_id, "strategic_attack_victory", state.last_simulated_hour, "battle", current_action_id):\n\t\t\tcontrol_changed = previous_controller_id != attacker.country_id\n\t\t\tif control_changed:\n\t\t\t\tvar change_index: int = state.control_history.size() - 1\n\t\t\t\tvar change: Dictionary = state.control_history[change_index] as Dictionary\n\t\t\t\tvar origin_controller_id: String = map.get_initial_controller(target_region_id)\n\t\t\t\tfor history_index: int in range(change_index - 1, -1, -1):\n\t\t\t\t\tvar prior: Dictionary = state.control_history[history_index] as Dictionary\n\t\t\t\t\tif str(prior.get("region_id", "")) == target_region_id:\n\t\t\t\t\t\torigin_controller_id = str(prior.get("control_origin_controller_id", prior.get("previous_controller_id", origin_controller_id)))\n\t\t\t\t\t\tbreak\n\t\t\t\tchange["control_origin_controller_id"] = origin_controller_id\n\t\t\t\tchange["source_action_kind"] = "attack"\n\t\t\t\tchange["source_formation_id"] = attacker.formation_id\n\t\t\t\tchange["source_target_region_id"] = target_region_id\n\t\t\t\tchange["source_controller_id"] = attacker.country_id\n\t\t\t\tchange["source_preparation_end_hour"] = int(action.get("preparation_end_hour", -1))\n\t\t\t\tstate.control_history[change_index] = change\n\t\t\t\tregion_control_changed.emit(change.duplicate(true))'''
+          if service.count(battle_old) != 1:
+              raise SystemExit("battle provenance anchor mismatch")
+          service = service.replace(battle_old, battle_new, 1)
+          Path("scripts/vnext/military/military_service.gd").write_text(service, encoding="utf-8", newline="\n")
 
           state_path = Path("scripts/vnext/military/military_state.gd")
-          source = state_path.read_text(encoding="utf-8")
+          state = state_path.read_text(encoding="utf-8")
+          restore_old = "\tif not candidate_state.is_valid(map):\n\t\treturn false"
+          restore_new = "\tif not candidate_state.is_valid(map) or not VNextMilitaryStateInvariants.validate(candidate_state, map):\n\t\treturn false"
+          if state.count(restore_old) != 1:
+              raise SystemExit("restore invariant anchor mismatch")
+          state = state.replace(restore_old, restore_new, 1)
 
-          validation_anchor = "\treturn true\n\n\nfunc add_formation(formation: VNextMilitaryFormation) -> bool:"
-          replacement = "\tif not VNextMilitaryStateInvariants.validate(self, map):\n\t\treturn false\n\treturn true\n\n\nfunc add_formation(formation: VNextMilitaryFormation) -> bool:"
-          if source.count(validation_anchor) != 1:
-              raise SystemExit("is_valid insertion anchor mismatch")
-          source = source.replace(validation_anchor, replacement, 1)
+          history_old = '''func append_control_history(record: Dictionary) -> void:\n\tcontrol_history.append(record.duplicate(true))\n\t_trim_history(control_history, MAX_CONTROL_HISTORY)'''
+          history_new = '''func append_control_history(record: Dictionary) -> void:\n\tcontrol_history.append(record.duplicate(true))\n\t_trim_control_history()'''
+          if state.count(history_old) != 1:
+              raise SystemExit("control history trim anchor mismatch")
+          state = state.replace(history_old, history_new, 1)
 
-          control_pattern = re.compile(r"func apply_region_control_change\([\s\S]*?\n\n\nfunc begin_capacity_window", re.MULTILINE)
-          control_replacement = '''func apply_region_control_change(
-\tregion_id: String,
-\tcontroller_id: String,
-\tcause: String,
-\teffective_hour: int,
-\tcontext: String,
-\tsource_action_id: String = ""
-) -> bool:
-\tif not region_controls.has(region_id) or controller_id.is_empty() or cause.is_empty() or context.is_empty():
-\t\treturn false
-\tif effective_hour != last_simulated_hour:
-\t\treturn false
-\tif context == "setup_fixture":
-\t\tif not source_action_id.is_empty() or not can_apply_setup_control_change():
-\t\t\treturn false
-\telif context == "battle":
-\t\tif cause != "strategic_attack_victory" or not _battle_control_claim_valid(region_id, controller_id, source_action_id):
-\t\t\treturn false
-\telse:
-\t\treturn false
-\tvar previous: String = str(region_controls[region_id])
-\tif previous == controller_id:
-\t\treturn true
-\tvar control_origin_controller_id: String = previous
-\tfor index: int in range(control_history.size() - 1, -1, -1):
-\t\tvar prior: Dictionary = control_history[index] as Dictionary
-\t\tif str(prior.get("region_id", "")) == region_id:
-\t\t\tcontrol_origin_controller_id = str(prior.get("control_origin_controller_id", prior.get("previous_controller_id", previous)))
-\t\t\tbreak
-\tvar source_action_kind: String = ""
-\tvar source_formation_id: String = ""
-\tvar source_target_region_id: String = ""
-\tvar source_controller_id: String = ""
-\tvar source_preparation_end_hour: int = -1
-\tif context == "battle":
-\t\tvar source_action: Dictionary = active_actions[source_action_id] as Dictionary
-\t\tvar source_formation: VNextMilitaryFormation = get_formation(str(source_action.get("formation_id", "")))
-\t\tsource_action_kind = str(source_action.get("kind", ""))
-\t\tsource_formation_id = str(source_action.get("formation_id", ""))
-\t\tsource_target_region_id = str(source_action.get("target_region_id", ""))
-\t\tsource_controller_id = source_formation.country_id if source_formation != null else ""
-\t\tsource_preparation_end_hour = int(source_action.get("preparation_end_hour", -1))
-\tregion_controls[region_id] = controller_id
-\tappend_control_history({
-\t\t"region_id": region_id,
-\t\t"previous_controller_id": previous,
-\t\t"controller_id": controller_id,
-\t\t"control_origin_controller_id": control_origin_controller_id,
-\t\t"cause": cause,
-\t\t"effective_hour": effective_hour,
-\t\t"context": context,
-\t\t"source_action_id": source_action_id,
-\t\t"source_action_kind": source_action_kind,
-\t\t"source_formation_id": source_formation_id,
-\t\t"source_target_region_id": source_target_region_id,
-\t\t"source_controller_id": source_controller_id,
-\t\t"source_preparation_end_hour": source_preparation_end_hour,
-\t})
-\treturn true
+          trim_anchor = '''func _trim_history(history: Array[Dictionary], limit: int) -> void:\n\twhile history.size() > limit:\n\t\thistory.pop_front()'''
+          trim_replacement = '''func _trim_control_history() -> void:\n\twhile control_history.size() > MAX_CONTROL_HISTORY:\n\t\tvar removable_index: int = -1\n\t\tfor index: int in range(control_history.size()):\n\t\t\tvar region_id: String = str((control_history[index] as Dictionary).get("region_id", ""))\n\t\t\tfor later_index: int in range(index + 1, control_history.size()):\n\t\t\t\tif str((control_history[later_index] as Dictionary).get("region_id", "")) == region_id:\n\t\t\t\t\tremovable_index = index\n\t\t\t\t\tbreak\n\t\t\tif removable_index >= 0:\n\t\t\t\tbreak\n\t\tif removable_index < 0:\n\t\t\tbreak\n\t\tcontrol_history.remove_at(removable_index)\n\n\nfunc _trim_history(history: Array[Dictionary], limit: int) -> void:\n\twhile history.size() > limit:\n\t\thistory.pop_front()'''
+          if state.count(trim_anchor) != 1:
+              raise SystemExit("control history helper anchor mismatch")
+          state = state.replace(trim_anchor, trim_replacement, 1)
+          state_path.write_text(state, encoding="utf-8", newline="\n")
 
+          test = r'''extends SceneTree
 
-func begin_capacity_window'''
-          source, count = control_pattern.subn(control_replacement, source, count=1)
-          if count != 1:
-              raise SystemExit("control mutation replacement mismatch")
+var checks := 0
+var failures := 0
+var map: VNextMilitaryMapAdapter
+var service := VNextMilitaryService.new()
 
-          begin_pattern = re.compile(r"func begin_capacity_window\(hour: int\) -> void:[\s\S]*?\n\n\nfunc queue_capacity_request", re.MULTILINE)
-          begin_replacement = '''func begin_capacity_window(hour: int) -> void:
-\tcapacity_window_hour = hour
-\tlink_capacity_used.clear()
-\tlink_queues.clear()
-\tfor action_id: String in _sorted_dictionary_keys(active_actions):
-\t\tvar action: Dictionary = active_actions[action_id] as Dictionary
-\t\taction["capacity_window_hour"] = hour
-\t\taction["capacity_link_id"] = ""
-\t\taction["capacity_used_this_window"] = 0.0
-\t\tactive_actions[action_id] = action
+func _initialize() -> void:
+	_run.call_deferred()
 
+func _run() -> void:
+	map = VNextMilitaryMapAdapter.new()
+	_check(map.load_existing_map(), "R3 map loads")
+	if map != null and map.errors.is_empty():
+		_test_rolling_pipeline()
+		_test_capacity_and_source_limits()
+		_test_long_latency_high_capacity()
+		_test_pipeline_interrupt_restore_partition_determinism()
+		_test_strict_restore_matrix()
+	print("VNext military R3 findings: %d checks, %d failures" % [checks, failures])
+	quit(1 if failures > 0 or checks <= 0 else 0)
 
-func queue_capacity_request'''
-          source, count = begin_pattern.subn(begin_replacement, source, count=1)
-          if count != 1:
-              raise SystemExit("capacity-window replacement mismatch")
+func _test_rolling_pipeline() -> void:
+	var state := _remote("formation:r3_abundant", "marseille", 2000, _abundant())
+	var route := map.find_route("paris", "marseille", [], "country_fra", state.region_controls, false)
+	var transit := maxi(1, int(route.get("duration_hours", 1)))
+	var max_food_inflight := 0
+	var delivered_food := 0.0
+	var measured_demand := 0.0
+	var horizon := mini(1000, transit * 4 + 48)
+	for _hour: int in range(horizon):
+		var result := service.advance_to_hour(state, map, state.last_simulated_hour + 1)
+		_check(bool(result.get("success", false)), "abundant remote hour advances")
+		max_food_inflight = maxi(max_food_inflight, _supply_count(state, "formation:r3_abundant", "food"))
+		if state.last_simulated_hour > transit * 2:
+			var row: Dictionary = (result.get("supply", {}) as Dictionary).get("formation:r3_abundant", {}) as Dictionary
+			delivered_food += float((row.get("delivered", {}) as Dictionary).get("food", 0.0))
+			measured_demand += float((row.get("demand", {}) as Dictionary).get("food", 0.0))
+	_check(max_food_inflight >= 2, "rolling pipeline has simultaneous same-resource shipments")
+	_check(measured_demand > 0.0 and delivered_food / measured_demand > 0.80, "abundant remote steady throughput follows demand after warm-up")
+	var formation := state.get_formation("formation:r3_abundant")
+	_check(formation != null and formation.formation_status == VNextMilitaryFormation.STATUS_ACTIVE, "remote formation survives warm-up")
+	_check(formation.supply_status != "cut" and formation.supply_level >= 0.75, "abundant remote formation leaves chronic cut state")
+	_check(state.completed_actions.size() <= VNextMilitaryState.MAX_COMPLETED_ACTIONS and state.battle_results.size() <= VNextMilitaryState.MAX_BATTLE_RESULTS and state.control_history.size() <= VNextMilitaryState.MAX_CONTROL_HISTORY, "long-run histories remain bounded")
+	var saw_supply_completion := false
+	for record: Dictionary in state.completed_actions:
+		if str(record.get("kind", "")) == "supply" and bool(record.get("success", false)):
+			saw_supply_completion = true
+			var total := float(record.get("cargo_amount_total", -1.0))
+			_check(is_equal_approx(total, float(record.get("cargo_delivered", -2.0)) + float(record.get("cargo_lost", -3.0))), "successful supply completion conserves cargo")
+			break
+	_check(saw_supply_completion, "successful supply settlement leaves bounded completion provenance")
 
-          record_pattern = re.compile(r"func record_capacity_use\(link_id: String, amount: float\) -> void:[\s\S]*?\n\n\nfunc append_completed_action", re.MULTILINE)
-          record_replacement = '''func record_capacity_use(link_id: String, amount: float, action_id: String = "") -> void:
-\tif amount <= 0.0:
-\t\treturn
-\tif action_id.is_empty():
-\t\tvar queue: Array = link_queues.get(link_id, []) as Array
-\t\tif not queue.is_empty():
-\t\t\taction_id = str(queue.back())
-\tif action_id.is_empty() or not active_actions.has(action_id):
-\t\treturn
-\tvar action: Dictionary = active_actions[action_id] as Dictionary
-\tif int(action.get("capacity_window_hour", -2)) != capacity_window_hour:
-\t\taction["capacity_window_hour"] = capacity_window_hour
-\t\taction["capacity_link_id"] = ""
-\t\taction["capacity_used_this_window"] = 0.0
-\tvar previous_link_id: String = str(action.get("capacity_link_id", ""))
-\tif not previous_link_id.is_empty() and previous_link_id != link_id:
-\t\treturn
-\tlink_capacity_used[link_id] = float(link_capacity_used.get(link_id, 0.0)) + amount
-\taction["capacity_link_id"] = link_id
-\taction["capacity_used_this_window"] = float(action.get("capacity_used_this_window", 0.0)) + amount
-\tactive_actions[action_id] = action
+func _test_capacity_and_source_limits() -> void:
+	var capacity_state := _remote("formation:r3_capacity", "rouen", 6000, _abundant())
+	var rail := map.find_route("paris", "rouen", ["rail"], "country_fra", capacity_state.region_controls, false)
+	var link_id := str((rail.get("link_ids", []) as Array)[0])
+	var saved_capacity := int((map.links[link_id] as Dictionary).get("capacity_personnel", 0))
+	(map.links[link_id] as Dictionary)["capacity_personnel"] = 40
+	var max_inflight := 0
+	for _hour: int in range(96):
+		_check(_advance_one(capacity_state), "capacity-limited pipeline advances")
+		max_inflight = maxi(max_inflight, _supply_count(capacity_state, "formation:r3_capacity", "food"))
+	_check(max_inflight >= 2, "capacity-limited route still builds multiple-shipment pipeline")
+	_check(capacity_state.get_formation("formation:r3_capacity").supply_level < 0.95, "capacity scarcity produces shortage")
+	(map.links[link_id] as Dictionary)["capacity_personnel"] = saved_capacity
 
+	var source := _abundant()
+	source["food"] = 0.0
+	var source_state := _remote("formation:r3_source", "rouen", 2000, source)
+	for _hour: int in range(120):
+		_check(_advance_one(source_state), "source-limited pipeline advances")
+	var source_formation := source_state.get_formation("formation:r3_source")
+	_check(float(source_formation.supply_fill.get("food", 1.0)) < 0.05, "source scarcity, not transport serialization, limits food")
 
-func append_completed_action'''
-          source, count = record_pattern.subn(record_replacement, source, count=1)
-          if count != 1:
-              raise SystemExit("capacity-use replacement mismatch")
+func _test_long_latency_high_capacity() -> void:
+	var saved: Dictionary = {}
+	for link_id: String in map.links.keys():
+		var link: Dictionary = map.links[link_id] as Dictionary
+		saved[link_id] = {"movement_hours": int(link.get("movement_hours", 1)), "capacity_personnel": int(link.get("capacity_personnel", 0))}
+		link["movement_hours"] = maxi(2, int(link.get("movement_hours", 1)) * 3)
+		link["capacity_personnel"] = maxi(1, int(link.get("capacity_personnel", 0)) * 30)
+	var state := _remote("formation:r3_latency", "marseille", 1000, _abundant())
+	var route := map.find_route("paris", "marseille", [], "country_fra", state.region_controls, false)
+	var transit := int(route.get("duration_hours", 0))
+	var max_food := 0
+	var delivered := 0.0
+	var demand := 0.0
+	var horizon := mini(1400, transit * 3 + 48)
+	for _hour: int in range(horizon):
+		var result := service.advance_to_hour(state, map, state.last_simulated_hour + 1)
+		_check(bool(result.get("success", false)), "long-latency high-capacity hour advances")
+		max_food = maxi(max_food, _supply_count(state, "formation:r3_latency", "food"))
+		if state.last_simulated_hour > transit * 2:
+			var row: Dictionary = (result.get("supply", {}) as Dictionary).get("formation:r3_latency", {}) as Dictionary
+			delivered += float((row.get("delivered", {}) as Dictionary).get("food", 0.0))
+			demand += float((row.get("demand", {}) as Dictionary).get("food", 0.0))
+	_check(transit > 0 and max_food >= 3, "long latency increases in-transit inventory")
+	_check(demand > 0.0 and delivered / demand > 0.75, "high capacity preserves steady throughput despite long latency")
+	for link_id: String in saved.keys():
+		(map.links[link_id] as Dictionary)["movement_hours"] = int((saved[link_id] as Dictionary)["movement_hours"])
+		(map.links[link_id] as Dictionary)["capacity_personnel"] = int((saved[link_id] as Dictionary)["capacity_personnel"])
 
-          state_path.write_text(source, encoding="utf-8", newline="\n")
+func _test_pipeline_interrupt_restore_partition_determinism() -> void:
+	var interrupted := _remote("formation:r3_interrupt", "rouen", 2000, _abundant())
+	for _hour: int in range(4):
+		_check(_advance_one(interrupted), "pipeline warm-up before interruption")
+	var shipments := service.get_supply_shipments(interrupted)
+	_check(shipments.size() >= 4, "multiple shipments exist before interruption")
+	var first: Dictionary = shipments[0]
+	var edge := int(first.get("current_edge_index", 0))
+	var link_id := str(((first.get("route", {}) as Dictionary).get("link_ids", []) as Array)[edge])
+	var saved_capacity := int((map.links[link_id] as Dictionary).get("capacity_personnel", 0))
+	(map.links[link_id] as Dictionary)["capacity_personnel"] = 0
+	_check(_advance_one(interrupted), "multi-shipment capacity interruption advances")
+	var frozen := 0
+	for shipment: Dictionary in service.get_supply_shipments(interrupted):
+		if str(shipment.get("reserved_link_id", "")).is_empty() and str(shipment.get("transport_state", "")) in ["interrupted", "blocked"]:
+			frozen += 1
+	_check(frozen > 0, "pipeline shipments freeze without duplicate delivery")
+	(map.links[link_id] as Dictionary)["capacity_personnel"] = saved_capacity
+	_check(_advance_one(interrupted), "pipeline resumes after capacity recovery")
+
+	var continuous := _remote("formation:r3_resume", "marseille", 1200, _abundant())
+	for _hour: int in range(8):
+		_check(_advance_one(continuous), "multi-flight snapshot warm-up")
+	_check(_supply_count(continuous, "formation:r3_resume", "food") >= 2, "snapshot contains multiple same-resource shipments")
+	var snap := continuous.snapshot()
+	var restored := VNextMilitaryState.new()
+	_check(restored.restore(snap, map), "multiple in-flight pipeline snapshot restores")
+	_check(restored.snapshot() == snap, "restored pipeline snapshot is exact")
+	var target := continuous.last_simulated_hour + 120
+	_check(bool(service.advance_to_hour(continuous, map, target).get("success", false)), "continuous pipeline continuation advances")
+	_check(bool(service.advance_to_hour(restored, map, target).get("success", false)), "restored pipeline continuation advances")
+	_check(continuous.snapshot() == restored.snapshot(), "pipeline resume equals uninterrupted continuation")
+
+	var big := _remote("formation:r3_partition", "marseille", 1200, _abundant())
+	var sliced := _remote("formation:r3_partition", "marseille", 1200, _abundant())
+	_check(bool(service.advance_to_hour(big, map, 160).get("success", false)), "pipeline large advance succeeds")
+	for _hour: int in range(160):
+		_check(_advance_one(sliced), "pipeline sliced hour succeeds")
+	_check(big.snapshot() == sliced.snapshot(), "multi-shipment pipeline large vs sliced time is identical")
+
+	var order_a := _remote("formation:r3_order", "rouen", 1000, _abundant())
+	var order_b := _remote("formation:r3_order", "rouen", 1000, _abundant())
+	for _hour: int in range(5):
+		_check(_advance_one(order_a) and _advance_one(order_b), "determinism warm-up advances")
+	var ids: Array[String] = []
+	for raw_id: Variant in order_b.active_actions.keys(): ids.append(str(raw_id))
+	ids.sort(); ids.reverse()
+	var reordered: Dictionary = {}
+	for action_id: String in ids: reordered[action_id] = order_b.active_actions[action_id]
+	order_b.active_actions = reordered
+	_check(_advance_one(order_a) and _advance_one(order_b), "permuted insertion states advance")
+	_check(order_a.snapshot() == order_b.snapshot(), "capacity contention is insertion-order deterministic")
+
+func _test_strict_restore_matrix() -> void:
+	var state := _remote("formation:r3_strict", "rouen", 1000, _abundant())
+	for _hour: int in range(5): _check(_advance_one(state), "strict fixture advances")
+	var valid := state.snapshot()
+	var first_action: Dictionary = (valid.get("active_actions", []) as Array)[0] as Dictionary
+	var action_id := str(first_action.get("action_id", ""))
+	var current_link := str(first_action.get("capacity_link_id", ""))
+	if current_link.is_empty(): current_link = str(((first_action.get("route", {}) as Dictionary).get("link_ids", []) as Array)[int(first_action.get("current_edge_index", 0))])
+
+	var phantom := valid.duplicate(true)
+	for link: Dictionary in map.get_all_links():
+		var candidate := str(link.get("id", ""))
+		if candidate != current_link:
+			(phantom.get("link_capacity_used", {}) as Dictionary)[candidate] = 1.0
+			break
+	_check(_rejected(phantom), "phantom link capacity is transactionally rejected")
+
+	var wrong_aggregate := valid.duplicate(true)
+	if not current_link.is_empty(): (wrong_aggregate.get("link_capacity_used", {}) as Dictionary)[current_link] = 0.0
+	_check(_rejected(wrong_aggregate), "unexplained zero capacity aggregate is rejected")
+
+	var chronology := valid.duplicate(true)
+	var chronology_action: Dictionary = (chronology.get("active_actions", []) as Array)[0] as Dictionary
+	chronology_action["edge_request_hour"] = maxi(1, int(chronology_action.get("edge_started_hour", 0)) + 1)
+	chronology_action["edge_started_hour"] = int(chronology_action["edge_request_hour"]) - 1
+	_check(_rejected(chronology), "edge start before request is rejected")
+
+	var teleport_state := _new_state()
+	_check(bool(service.advance_to_hour(teleport_state, map, 1).get("success", false)), "control teleport fixture advances")
+	var teleport := teleport_state.snapshot()
+	(teleport.get("region_controls", {}) as Dictionary)["northern_industrial_belt"] = "country_bel"
+	_check(_rejected(teleport), "runtime controller change without provenance is rejected")
+
+	var active_reuse := valid.duplicate(true)
+	(active_reuse.get("battle_results", []) as Array).append({"action_id": action_id, "outcome":"attacker_win", "target_region_id":"northern_industrial_belt", "controller_country_id":"country_fra", "control_changed":false})
+	_check(_rejected(active_reuse), "active action cannot reuse retained battle identity")
+
+	var duplicate_lifecycle := valid.duplicate(true)
+	(duplicate_lifecycle.get("battle_results", []) as Array).append({"action_id":"military_action:000400"})
+	(duplicate_lifecycle.get("battle_results", []) as Array).append({"action_id":"military_action:000400"})
+	duplicate_lifecycle["next_action_sequence"] = 401
+	_check(_rejected(duplicate_lifecycle), "duplicate battle lifecycle identity is rejected")
+
+	var battle_high := valid.duplicate(true)
+	(battle_high.get("battle_results", []) as Array).append({"action_id":"military_action:000500"})
+	battle_high["next_action_sequence"] = 500
+	_check(_rejected(battle_high), "next sequence below battle high-water is rejected")
+
+	var control_high := teleport_state.snapshot()
+	(control_high.get("region_controls", {}) as Dictionary)["northern_industrial_belt"] = "country_bel"
+	(control_high.get("control_history", []) as Array).append({"region_id":"northern_industrial_belt","previous_controller_id":"country_fra","controller_id":"country_bel","control_origin_controller_id":"country_fra","cause":"strategic_attack_victory","effective_hour":1,"context":"battle","source_action_id":"military_action:000500","source_action_kind":"attack","source_formation_id":"formation:provenance","source_target_region_id":"northern_industrial_belt","source_controller_id":"country_bel","source_preparation_end_hour":1})
+	control_high["next_action_sequence"] = 500
+	_check(_rejected(control_high), "next sequence below control source high-water is rejected")
+
+	var orphan := valid.duplicate(true)
+	((orphan.get("active_actions", []) as Array)[0] as Dictionary)["reserved_link_id"] = "missing_link"
+	_check(_rejected(orphan), "orphan reservation is rejected")
+
+	var link_mismatch := valid.duplicate(true)
+	var mismatch_action: Dictionary = (link_mismatch.get("active_actions", []) as Array)[0] as Dictionary
+	for link: Dictionary in map.get_all_links():
+		var candidate := str(link.get("id", ""))
+		if candidate != current_link:
+			mismatch_action["capacity_link_id"] = candidate
+			break
+	_check(_rejected(link_mismatch), "allocation link mismatch is rejected")
+
+	var hour_mismatch := valid.duplicate(true)
+	((hour_mismatch.get("active_actions", []) as Array)[0] as Dictionary)["capacity_window_hour"] = int(hour_mismatch.get("capacity_window_hour", 0)) - 1
+	_check(_rejected(hour_mismatch), "allocation hour mismatch is rejected")
+
+func _remote(id: String, city: String, personnel: int, supply: Dictionary) -> VNextMilitaryState:
+	var state := _new_state()
+	_check(service.create_formation(state, map, id, "country_fra", city, personnel, {"equipment_factor":1.0}, 0.8, 0.8, 0.8), "remote formation created")
+	_check(service.set_supply_input(state, map, "paris_basin", supply), "remote source configured")
+	return state
+
+func _new_state() -> VNextMilitaryState:
+	var state := VNextMilitaryState.new()
+	_check(state.initialize(map), "R3 military state initializes")
+	return state
+
+func _abundant() -> Dictionary:
+	return {"food":100000.0,"ammunition":100000.0,"equipment":100000.0,"transport_capacity":100000.0}
+
+func _advance_one(state: VNextMilitaryState) -> bool:
+	return bool(service.advance_to_hour(state, map, state.last_simulated_hour + 1).get("success", false))
+
+func _supply_count(state: VNextMilitaryState, formation_id: String, resource_id: String) -> int:
+	var count := 0
+	for shipment: Dictionary in service.get_supply_shipments(state):
+		if str(shipment.get("destination_formation_id", "")) == formation_id and str(shipment.get("resource_id", "")) == resource_id:
+			count += 1
+	return count
+
+func _rejected(snapshot: Dictionary) -> bool:
+	var sentinel := _new_state()
+	_check(service.create_formation(sentinel, map, "formation:sentinel_r3", "country_fra", "paris", 100, {"equipment_factor":1.0}), "sentinel formation created")
+	var before := sentinel.snapshot()
+	return not sentinel.restore(snapshot, map) and sentinel.snapshot() == before
+
+func _check(condition: bool, label: String) -> void:
+	checks += 1
+	if condition:
+		return
+	failures += 1
+	push_error("FAIL: " + label)
+'''
+          Path("tests/vnext/military_r3_findings_test.gd").write_text(test, encoding="utf-8", newline="\n")
+
           Path(".github/workflows/pr58-r3-patcher.yml").unlink()
           PY
+
           git diff --check
-          python3 - <<'PY'
-          import subprocess
-          allowed = {
-              ".github/workflows/pr58-r3-patcher.yml",
-              "scripts/vnext/military/military_service.gd",
-              "scripts/vnext/military/military_state.gd",
-          }
-          changed = set(subprocess.check_output(["git", "diff", "--name-only"], text=True).splitlines())
-          unexpected = sorted(changed - allowed)
-          if unexpected:
-              raise SystemExit(f"unexpected patch scope: {unexpected}")
-          PY
+          python3 -B tools/audit_variable_state.py --root .
+          python3 tools/render_variable_state_audit_summary.py
+          python3 tools/render_variable_state_member_inventory.py
+          python3 tools/generate_variable_state_docs.py
+          python3 tools/render_variable_refactor_plan.py
+          git diff --check
       - name: Commit normal fast-forward fix
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add scripts/vnext/military/military_service.gd scripts/vnext/military/military_state.gd .github/workflows/pr58-r3-patcher.yml
+          git add scripts/vnext/military/military_service.gd scripts/vnext/military/military_state.gd scripts/vnext/military/military_state_invariants.gd tests/vnext/military_r3_findings_test.gd docs/refactors/variable_state_audit.md docs/refactors/variable_state_member_inventory.md docs/refactors/state_ownership_matrix.md docs/refactors/variable_refactor_plan.md .github/workflows/pr58-r3-patcher.yml
           git commit -m "fix: close PR58 R3 military findings"
           git push origin HEAD:feat/vnext-military-strategy-20260809
