@@ -52,11 +52,15 @@ only the canonical name. Missing place entries mean zero monthly flow, but
 the place still advances through the supplied elapsed period.
 
 Every elapsed period is processed through the same deterministic month step.
-Therefore twelve calls with one month and one call with twelve months produce
-the same state when they use the same monthly flows. Year/month conversion is
-pure arithmetic, so the December/January boundary is deterministic. A call
-does not advance time merely because it was made; its explicit elapsed or
-absolute month period is authoritative.
+Each month also applies bounded, deterministic coarse ageing: `under_18`
+progresses into `age_18_40`, `age_18_40` into `age_41_64`, and `age_41_64`
+into terminal `age_65_plus`; births enter `under_18`. Small persistent
+fixed-point remainders are part of the snapshot so partitioning time cannot
+change the result. Therefore twelve calls with one month and one call with
+twelve months produce the same state when they use the same monthly flows.
+Year/month conversion is pure arithmetic, so the December/January boundary is
+deterministic. A call does not advance time merely because it was made; its
+explicit elapsed or absolute month period is authoritative.
 
 For each month the accounting identity is:
 
@@ -87,19 +91,21 @@ reported only as aligned when all selected records share the same cursor.
 
 ## Snapshot and restore
 
-The `vnext_macro_population_v1` snapshot stores the external key contract and
+The `vnext_macro_population_v2` snapshot stores the external key contract and
 the sorted record list. It contains no geography metadata or person records.
 Restore validates a complete candidate set before committing it. It rejects
 negative values, non-finite values, unknown or duplicate place entries,
-malformed migration, and inconsistent age, sex, or urban/rural totals. Any
-rejected snapshot leaves the live population unchanged.
+malformed migration, inconsistent age, sex, or urban/rural totals, and invalid
+ageing remainders. Any rejected snapshot leaves the live population unchanged.
 
-An empty `VNextMacroPopulation.new()` is a restore shell. A live instance
-created with `create(place_ids)` or `initialize(place_ids)` requires those
-external keys to match on restore; this prevents a caller from silently
-changing the spatial fixture through a population snapshot. The shell path
-is useful for ordinary snapshot round trips and still validates the complete
-keyed record set.
+`create(place_ids)` or `initialize(place_ids)` binds the live instance to the
+caller-supplied spatial key contract. Restore requires that instance to
+already be initialized and requires the snapshot key list to match that
+contract exactly. The persisted key list is therefore a consistency check,
+not a way to establish geography. An empty `VNextMacroPopulation.new()` must
+not restore a snapshot because it has no external key contract. Setup
+initialization and initial state seeding are rejected after the first elapsed
+settlement; the canonical batch settlement API is the only live time advance.
 
 ## Relationship to Person
 
@@ -114,7 +120,10 @@ Focused coverage is in `tests/vnext/macro_population_test.gd` and is picked up
 automatically by `tools/run_vnext_validation.py`. It covers monthly evolution,
 flow accounting, aggregation, bucket consistency, twelve-month equivalence,
 calendar boundaries, deterministic replay, snapshot/resume, malformed restore,
-and long-run finite/bounded behavior.
+and long-run finite/bounded behavior. It also covers coarse ageing,
+12-month and large-vs-sliced equivalence, setup-only mutation boundaries,
+external-key restore attacks, transactional malformed restore, and the
+two-place batch settlement contract.
 
 This branch also requires the repository's unified `run_validation.ps1`, the
 vNext validation runner, the variable-state audit where applicable, Godot

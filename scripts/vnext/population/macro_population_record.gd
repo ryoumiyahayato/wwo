@@ -4,7 +4,7 @@ extends RefCounted
 ## This record deliberately contains no person, household, labor, economic,
 ## political, military, or AI state.
 
-const SNAPSHOT_SCHEMA_ID: String = "vnext_macro_population_record_v1"
+const SNAPSHOT_SCHEMA_ID: String = "vnext_macro_population_record_v2"
 const MAX_JSON_SAFE_INTEGER: int = 9_007_199_254_740_991
 
 const AGE_BUCKET_KEYS: PackedStringArray = [
@@ -15,12 +15,23 @@ const AGE_BUCKET_KEYS: PackedStringArray = [
 ]
 const SEX_KEYS: PackedStringArray = ["female", "male"]
 const URBAN_RURAL_KEYS: PackedStringArray = ["urban", "rural"]
+const AGEING_REMAINDER_KEYS: PackedStringArray = [
+	"under_18_to_age_18_40",
+	"age_18_40_to_age_41_64",
+	"age_41_64_to_age_65_plus",
+]
+const AGEING_DENOMINATORS: Dictionary = {
+	"under_18_to_age_18_40": 216,
+	"age_18_40_to_age_41_64": 276,
+	"age_41_64_to_age_65_plus": 288,
+}
 
 var _place_id: String = ""
 var _total_population: int = 0
 var _age_buckets: Dictionary = {}
 var _sex_structure: Dictionary = {}
 var _urban_rural: Dictionary = {}
+var _ageing_remainders: Dictionary = {}
 var _births: int = 0
 var _deaths: int = 0
 var _net_migration: int = 0
@@ -56,6 +67,8 @@ static func from_state(
 	for optional_field: String in ["births", "deaths", "net_migration", "last_settled_period"]:
 		if not candidate_state.has(optional_field):
 			candidate_state[optional_field] = 0
+	if not candidate_state.has("ageing_remainders"):
+		candidate_state["ageing_remainders"] = _zero_buckets(AGEING_REMAINDER_KEYS)
 	candidate_state["schema_id"] = SNAPSHOT_SCHEMA_ID
 	candidate_state["place_id"] = place_id_value
 
@@ -83,6 +96,10 @@ func sex_structure() -> Dictionary:
 
 func urban_rural_structure() -> Dictionary:
 	return _urban_rural.duplicate(true)
+
+
+func ageing_remainders() -> Dictionary:
+	return _ageing_remainders.duplicate(true)
 
 
 func working_age_population() -> int:
@@ -128,6 +145,7 @@ func is_valid() -> bool:
 		_age_buckets,
 		_sex_structure,
 		_urban_rural,
+		_ageing_remainders,
 		_births,
 		_deaths,
 		_net_migration,
@@ -142,6 +160,7 @@ func structure() -> Dictionary:
 		"age_buckets": age_buckets(),
 		"sex_structure": sex_structure(),
 		"urban_rural": urban_rural_structure(),
+		"ageing_remainders": ageing_remainders(),
 		"working_age_population": working_age_population(),
 		"births": _births,
 		"deaths": _deaths,
@@ -158,6 +177,7 @@ func snapshot() -> Dictionary:
 		"age_buckets": age_buckets(),
 		"sex_structure": sex_structure(),
 		"urban_rural": urban_rural_structure(),
+		"ageing_remainders": ageing_remainders(),
 		"births": _births,
 		"deaths": _deaths,
 		"net_migration": _net_migration,
@@ -166,7 +186,7 @@ func snapshot() -> Dictionary:
 
 
 func restore(snapshot_value: Dictionary) -> bool:
-	if snapshot_value.size() != 10:
+	if snapshot_value.size() != 11:
 		return false
 	for required_field: String in [
 		"schema_id",
@@ -175,6 +195,7 @@ func restore(snapshot_value: Dictionary) -> bool:
 		"age_buckets",
 		"sex_structure",
 		"urban_rural",
+		"ageing_remainders",
 		"births",
 		"deaths",
 		"net_migration",
@@ -223,7 +244,14 @@ func restore(snapshot_value: Dictionary) -> bool:
 	var normalized_urban_rural: Dictionary = _normalize_bucket_dictionary(
 		snapshot_value.get("urban_rural"), URBAN_RURAL_KEYS
 	)
-	if normalized_age_buckets.is_empty() or normalized_sex_structure.is_empty():
+	var normalized_ageing_remainders: Dictionary = _normalize_remainder_dictionary(
+		snapshot_value.get("ageing_remainders")
+	)
+	if (
+		normalized_age_buckets.is_empty()
+		or normalized_sex_structure.is_empty()
+		or normalized_ageing_remainders.is_empty()
+	):
 		return false
 	if normalized_urban_rural.is_empty():
 		return false
@@ -231,6 +259,7 @@ func restore(snapshot_value: Dictionary) -> bool:
 	var candidate_total: int = int(normalized_total["value"])
 	var candidate_births: int = int(normalized_births["value"])
 	var candidate_deaths: int = int(normalized_deaths["value"])
+	var candidate_ageing_remainders: Dictionary = normalized_ageing_remainders
 	var candidate_migration: int = int(normalized_migration["value"])
 	var candidate_period: int = int(normalized_period["value"])
 	if not _is_valid_state(
@@ -239,6 +268,7 @@ func restore(snapshot_value: Dictionary) -> bool:
 		normalized_age_buckets,
 		normalized_sex_structure,
 		normalized_urban_rural,
+		candidate_ageing_remainders,
 		candidate_births,
 		candidate_deaths,
 		candidate_migration,
@@ -251,6 +281,7 @@ func restore(snapshot_value: Dictionary) -> bool:
 	_age_buckets = normalized_age_buckets
 	_sex_structure = normalized_sex_structure
 	_urban_rural = normalized_urban_rural
+	_ageing_remainders = candidate_ageing_remainders
 	_births = candidate_births
 	_deaths = candidate_deaths
 	_net_migration = candidate_migration
@@ -277,6 +308,34 @@ func advance_empty_months(elapsed_months: int) -> bool:
 		return false
 	if elapsed_months > MAX_JSON_SAFE_INTEGER - _last_settled_period:
 		return false
+
+	var next_age: Dictionary = _age_buckets.duplicate()
+	var next_ageing_remainders: Dictionary = _ageing_remainders.duplicate()
+	for _month_index: int in range(elapsed_months):
+		var ageing_result: Dictionary = _age_one_month(
+			next_age, next_ageing_remainders
+		)
+		if ageing_result.is_empty():
+			return false
+		next_age = ageing_result["age_buckets"] as Dictionary
+		next_ageing_remainders = ageing_result["ageing_remainders"] as Dictionary
+
+	if not _is_valid_state(
+		_place_id,
+		_total_population,
+		next_age,
+		_sex_structure,
+		_urban_rural,
+		next_ageing_remainders,
+		_births,
+		_deaths,
+		_net_migration,
+		_last_settled_period + elapsed_months
+	):
+		return false
+
+	_age_buckets = next_age
+	_ageing_remainders = next_ageing_remainders
 	_last_settled_period += elapsed_months
 	return true
 
@@ -343,7 +402,15 @@ func _apply_one_month(
 		if _net_migration < -MAX_JSON_SAFE_INTEGER - monthly_net_migration:
 			return false
 
-	var next_age: Dictionary = _age_buckets.duplicate()
+	var ageing_result: Dictionary = _age_one_month(
+		_age_buckets, _ageing_remainders
+	)
+	if ageing_result.is_empty():
+		return false
+	var next_age: Dictionary = ageing_result["age_buckets"] as Dictionary
+	var next_ageing_remainders: Dictionary = (
+		ageing_result["ageing_remainders"] as Dictionary
+	)
 	var next_sex: Dictionary = _sex_structure.duplicate()
 	var next_urban_rural: Dictionary = _urban_rural.duplicate()
 	var birth_age: Dictionary = _zero_buckets(AGE_BUCKET_KEYS)
@@ -417,6 +484,7 @@ func _apply_one_month(
 		next_age,
 		next_sex,
 		next_urban_rural,
+		next_ageing_remainders,
 		_births + monthly_births,
 		_deaths + monthly_deaths,
 		_net_migration + monthly_net_migration,
@@ -428,6 +496,7 @@ func _apply_one_month(
 	_age_buckets = next_age
 	_sex_structure = next_sex
 	_urban_rural = next_urban_rural
+	_ageing_remainders = next_ageing_remainders
 	_births += monthly_births
 	_deaths += monthly_deaths
 	_net_migration += monthly_net_migration
@@ -441,6 +510,7 @@ static func _is_valid_state(
 	age_buckets_value: Dictionary,
 	sex_structure_value: Dictionary,
 	urban_rural_value: Dictionary,
+	ageing_remainders_value: Dictionary,
 	births_value: int,
 	deaths_value: int,
 	net_migration_value: int,
@@ -463,6 +533,8 @@ static func _is_valid_state(
 	if not _has_valid_bucket_values(sex_structure_value, SEX_KEYS):
 		return false
 	if not _has_valid_bucket_values(urban_rural_value, URBAN_RURAL_KEYS):
+		return false
+	if not _has_valid_remainder_values(ageing_remainders_value):
 		return false
 	return (
 		_sum_buckets(age_buckets_value, AGE_BUCKET_KEYS) == total_population_value
@@ -525,6 +597,118 @@ static func _zero_buckets(keys: PackedStringArray) -> Dictionary:
 	var result: Dictionary = {}
 	for key: String in keys:
 		result[key] = 0
+	return result
+
+
+static func _age_one_month(
+	age_buckets_value: Dictionary, ageing_remainders_value: Dictionary
+) -> Dictionary:
+	if not _has_valid_bucket_values(age_buckets_value, AGE_BUCKET_KEYS):
+		return {}
+	if not _has_valid_remainder_values(ageing_remainders_value):
+		return {}
+
+	var under_step: Dictionary = _ageing_step(
+		int(age_buckets_value["under_18"]),
+		int(ageing_remainders_value["under_18_to_age_18_40"]),
+		int(AGEING_DENOMINATORS["under_18_to_age_18_40"])
+	)
+	var age_18_step: Dictionary = _ageing_step(
+		int(age_buckets_value["age_18_40"]),
+		int(ageing_remainders_value["age_18_40_to_age_41_64"]),
+		int(AGEING_DENOMINATORS["age_18_40_to_age_41_64"])
+	)
+	var age_41_step: Dictionary = _ageing_step(
+		int(age_buckets_value["age_41_64"]),
+		int(ageing_remainders_value["age_41_64_to_age_65_plus"]),
+		int(AGEING_DENOMINATORS["age_41_64_to_age_65_plus"])
+	)
+	if under_step.is_empty() or age_18_step.is_empty() or age_41_step.is_empty():
+		return {}
+
+	var under_outflow: int = int(under_step["moved"])
+	var age_18_outflow: int = int(age_18_step["moved"])
+	var age_41_outflow: int = int(age_41_step["moved"])
+	var next_age: Dictionary = age_buckets_value.duplicate()
+	next_age["under_18"] = int(age_buckets_value["under_18"]) - under_outflow
+	next_age["age_18_40"] = (
+		int(age_buckets_value["age_18_40"])
+		+ under_outflow
+		- age_18_outflow
+	)
+	next_age["age_41_64"] = (
+		int(age_buckets_value["age_41_64"])
+		+ age_18_outflow
+		- age_41_outflow
+	)
+	next_age["age_65_plus"] = (
+		int(age_buckets_value["age_65_plus"]) + age_41_outflow
+	)
+	var next_remainders: Dictionary = ageing_remainders_value.duplicate()
+	next_remainders["under_18_to_age_18_40"] = int(under_step["remainder"])
+	next_remainders["age_18_40_to_age_41_64"] = int(age_18_step["remainder"])
+	next_remainders["age_41_64_to_age_65_plus"] = int(age_41_step["remainder"])
+	if not _has_valid_bucket_values(next_age, AGE_BUCKET_KEYS):
+		return {}
+	return {
+		"age_buckets": next_age,
+		"ageing_remainders": next_remainders,
+	}
+
+
+static func _ageing_step(
+	bucket_count: int, remainder: int, denominator: int
+) -> Dictionary:
+	if (
+		bucket_count < 0
+		or remainder < 0
+		or remainder >= denominator
+		or denominator <= 0
+	):
+		return {}
+	if bucket_count == 0:
+		return {"moved": 0, "remainder": 0}
+	var carry: int = bucket_count % denominator
+	var moved: int = int((bucket_count - carry) / denominator)
+	var combined_remainder: int = carry + remainder
+	if combined_remainder >= denominator:
+		moved += 1
+		combined_remainder -= denominator
+	if moved > bucket_count:
+		return {}
+	return {"moved": moved, "remainder": combined_remainder}
+
+
+static func _has_valid_remainder_values(
+	remainder_value: Dictionary
+) -> bool:
+	if not _has_exact_keys(remainder_value, AGEING_REMAINDER_KEYS):
+		return false
+	for key: String in AGEING_REMAINDER_KEYS:
+		var value: Variant = remainder_value.get(key)
+		if typeof(value) != TYPE_INT:
+			return false
+		var denominator: int = int(AGEING_DENOMINATORS[key])
+		if int(value) < 0 or int(value) >= denominator:
+			return false
+	return true
+
+
+static func _normalize_remainder_dictionary(value: Variant) -> Dictionary:
+	if typeof(value) != TYPE_DICTIONARY:
+		return {}
+	var source: Dictionary = value as Dictionary
+	if not _has_exact_keys(source, AGEING_REMAINDER_KEYS):
+		return {}
+	var result: Dictionary = {}
+	for key: String in AGEING_REMAINDER_KEYS:
+		var normalized: Dictionary = _normalize_nonnegative_integer(source.get(key))
+		if normalized.is_empty():
+			return {}
+		var remainder: int = int(normalized["value"])
+		if remainder >= int(AGEING_DENOMINATORS[key]):
+			return {}
+		result[key] = remainder
 	return result
 
 

@@ -11,10 +11,13 @@ func _initialize() -> void:
 func _run() -> void:
 	_test_keyed_queries_and_ownership_boundary()
 	_test_monthly_accounting_and_structure_consistency()
+	_test_two_place_batch_settlement()
 	_test_aggregation()
 	_test_monthly_equivalence_and_calendar_boundary()
 	_test_deterministic_replay()
 	_test_snapshot_restore_and_malformed_rejection()
+	_test_setup_mutation_boundary()
+	_test_age_progression_and_partition_equivalence()
 	_test_long_run_is_finite_and_bounded()
 	print("VNext macro population: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures > 0 or checks <= 0 else 0)
@@ -26,7 +29,14 @@ func _test_keyed_queries_and_ownership_boundary() -> void:
 		return
 	_check(population.has_place("place:alpha"), "place key is registered")
 	_check(population.has_place("region:beta"), "existing region key is accepted without a new ID kind")
-	_check(not population.register_place("population:alpha"), "population namespace is not a record identity")
+	_check(
+		not population.has_method("register_place"),
+		"place registration is not a public population geography API"
+	)
+	_check(
+		not population.has_method("settle_place"),
+		"single-place settlement cannot double-advance the world"
+	)
 	_equal(population.population_at("place:unknown"), -1, "unknown place query fails closed")
 	_equal(population.structure_at("place:unknown"), {}, "unknown structure query fails closed")
 	_check(
@@ -35,7 +45,10 @@ func _test_keyed_queries_and_ownership_boundary() -> void:
 	)
 
 	_check(
-		population.set_initial_state("place:alpha", _state(1000, 250, 350, 300, 100, 500, 500, 600, 400)),
+		population.set_initial_state(
+			"place:alpha",
+			_state(1000, 250, 350, 300, 100, 500, 500, 600, 400)
+		),
 		"place state can be seeded from a complete macro structure"
 	)
 	_equal(population.population_at("place:alpha"), 1000, "population_at returns the keyed total")
@@ -53,11 +66,17 @@ func _test_monthly_accounting_and_structure_consistency() -> void:
 	if population == null:
 		return
 	_check(
-		population.set_initial_state("place:alpha", _state(1000, 250, 350, 300, 100, 500, 500, 600, 400)),
+		population.set_initial_state(
+			"place:alpha",
+			_state(1000, 250, 350, 300, 100, 500, 500, 600, 400)
+		),
 		"accounting fixture is seeded"
 	)
 	_check(
-		population.settle_place("place:alpha", 1, 20, 5, -3),
+		population.settle_elapsed_months(
+			1,
+			{"place:alpha": {"births": 20, "deaths": 5, "net_migration": -3}}
+		),
 		"one month with births, deaths and net migration settles"
 	)
 	_equal(population.population_at("place:alpha"), 1012, "previous + births - deaths + migration is authoritative")
@@ -66,18 +85,62 @@ func _test_monthly_accounting_and_structure_consistency() -> void:
 	_equal(structure.get("deaths"), 5, "deaths are retained as cumulative macro flow")
 	_equal(structure.get("net_migration"), -3, "net migration is retained as signed cumulative macro flow")
 	_equal(structure.get("last_settled_period"), 1, "one elapsed month advances the period cursor once")
+	_equal(population.last_settled_period_at("region:beta"), 1, "all known places share the supplied world period")
 	_check(_structure_is_coherent(structure), "all macro structure axes remain nonnegative and reconcile")
-	_check(
-		population.settle_place("place:alpha", 1, 0, 0, 0),
-		"zero-flow month is still a real elapsed month"
-	)
-	_equal(population.last_settled_period_at("place:alpha"), 2, "settlement is driven by elapsed months, not call count")
+
 	var before: Dictionary = population.snapshot()
 	_check(
-		not population.settle_place("place:alpha", 1, 2000, 5000, 0),
+		not population.settle_elapsed_months(
+			1,
+			{"place:alpha": {"births": 0, "deaths": 5000, "net_migration": 0}}
+		),
 		"a transition that would make population negative is rejected"
 	)
 	_equal(population.snapshot(), before, "rejected transition is transactional")
+
+
+func _test_two_place_batch_settlement() -> void:
+	var forward := _new_population()
+	var reverse := _new_population()
+	if forward == null or reverse == null:
+		return
+	var alpha_state: Dictionary = _state(1000, 250, 350, 300, 100, 500, 500, 600, 400)
+	var beta_state: Dictionary = _state(500, 100, 175, 150, 75, 240, 260, 300, 200)
+	_check(forward.set_initial_state("place:alpha", alpha_state), "batch alpha fixture is seeded")
+	_check(forward.set_initial_state("region:beta", beta_state), "batch beta fixture is seeded")
+	_check(reverse.set_initial_state("place:alpha", alpha_state), "reordered alpha fixture is seeded")
+	_check(reverse.set_initial_state("region:beta", beta_state), "reordered beta fixture is seeded")
+	var forward_flows: Dictionary = {
+		"place:alpha": {"births": 20, "deaths": 5, "net_migration": -3},
+		"region:beta": {"births": 7, "deaths": 2, "net_migration": 4},
+	}
+	var reverse_flows: Dictionary = {
+		"region:beta": {"births": 7, "deaths": 2, "net_migration": 4},
+		"place:alpha": {"births": 20, "deaths": 5, "net_migration": -3},
+	}
+	_check(
+		forward.settle_elapsed_months(1, forward_flows),
+		"one canonical batch settles both places once"
+	)
+	_check(
+		reverse.settle_elapsed_months(1, reverse_flows),
+		"reordered canonical batch settles both places once"
+	)
+	_equal(
+		forward.snapshot(),
+		reverse.snapshot(),
+		"two-place batch result is insertion-order independent"
+	)
+	_equal(
+		forward.last_settled_period_at("place:alpha"),
+		1,
+		"batch advances alpha exactly one month"
+	)
+	_equal(
+		forward.last_settled_period_at("region:beta"),
+		1,
+		"batch advances beta exactly one month"
+	)
 
 
 func _test_aggregation() -> void:
@@ -85,11 +148,17 @@ func _test_aggregation() -> void:
 	if population == null:
 		return
 	_check(
-		population.set_initial_state("place:alpha", _state(1000, 250, 350, 300, 100, 500, 500, 600, 400)),
+		population.set_initial_state(
+			"place:alpha",
+			_state(1000, 250, 350, 300, 100, 500, 500, 600, 400)
+		),
 		"aggregation alpha fixture is seeded"
 	)
 	_check(
-		population.set_initial_state("region:beta", _state(500, 100, 175, 150, 75, 240, 260, 300, 200)),
+		population.set_initial_state(
+			"region:beta",
+			_state(500, 100, 175, 150, 75, 240, 260, 300, 200)
+		),
 		"aggregation beta fixture is seeded"
 	)
 	_equal(
@@ -98,7 +167,11 @@ func _test_aggregation() -> void:
 		"aggregate_population sums keyed records"
 	)
 	var aggregate: Dictionary = population.aggregate_structure(["place:alpha", "region:beta"])
-	_equal(aggregate.get("working_age_population"), 975, "aggregate structure sums meaningful age-derived working population")
+	_equal(
+		aggregate.get("working_age_population"),
+		975,
+		"aggregate structure sums meaningful age-derived working population"
+	)
 	_equal(
 		(aggregate.get("age_buckets") as Dictionary).get("under_18"),
 		350,
@@ -110,11 +183,19 @@ func _test_aggregation() -> void:
 		"aggregate structure sums urban/rural structure"
 	)
 	_check(
-		population.aggregate_structure(["place:alpha", "region:beta"]).get("periods_aligned"),
+		aggregate.get("periods_aligned"),
 		"aggregate period is meaningful when source periods are aligned"
 	)
-	_equal(population.aggregate_population(["place:alpha", "place:alpha"]), -1, "duplicate aggregation keys are rejected")
-	_equal(population.aggregate_population(["place:missing"]), -1, "unknown aggregation keys are rejected")
+	_equal(
+		population.aggregate_population(["place:alpha", "place:alpha"]),
+		-1,
+		"duplicate aggregation keys are rejected"
+	)
+	_equal(
+		population.aggregate_population(["place:missing"]),
+		-1,
+		"unknown aggregation keys are rejected"
+	)
 
 
 func _test_monthly_equivalence_and_calendar_boundary() -> void:
@@ -125,23 +206,35 @@ func _test_monthly_equivalence_and_calendar_boundary() -> void:
 	var seeded_state: Dictionary = _state(1000, 250, 350, 300, 100, 500, 500, 600, 400)
 	_check(one_call.set_initial_state("place:alpha", seeded_state), "12-month one-call fixture is seeded")
 	_check(twelve_calls.set_initial_state("place:alpha", seeded_state), "12-month repeated-call fixture is seeded")
+	var monthly_flow: Dictionary = {
+		"place:alpha": {"births": 4, "deaths": 2, "net_migration": -1},
+	}
 	_check(
-		one_call.settle_place("place:alpha", 12, 4, 2, -1),
+		one_call.settle_elapsed_months(12, monthly_flow),
 		"12-month equivalent settlement succeeds in one call"
 	)
 	for _month_index: int in range(12):
 		_check(
-			twelve_calls.settle_place("place:alpha", 1, 4, 2, -1),
+			twelve_calls.settle_elapsed_months(1, monthly_flow),
 			"one-month settlement succeeds in repeated-call fixture"
 		)
-	_equal(one_call.snapshot(), twelve_calls.snapshot(), "12 x 1 month equals one 12-month equivalent settlement")
+	_equal(
+		one_call.snapshot(),
+		twelve_calls.snapshot(),
+		"12 x 1 month equals one 12-month equivalent settlement"
+	)
 
 	var boundary := _new_population()
 	if boundary == null:
 		return
 	_check(boundary.settle_absolute_months(0, 11), "absolute months can advance to December 1900")
 	_check(
-		boundary.settle_year_month(1900, 12, 2, {"place:alpha": {"births": 1}}),
+		boundary.settle_year_month(
+			1900,
+			12,
+			2,
+			{"place:alpha": {"births": 1}}
+		),
 		"year/month settlement crosses December to January deterministically"
 	)
 	_equal(boundary.last_settled_period_at("place:alpha"), 13, "calendar boundary produces absolute cursor 13")
@@ -177,11 +270,19 @@ func _test_deterministic_replay() -> void:
 	_check(second.settle_elapsed_months(24, monthly_flows), "determinism replay settles the same 24 months")
 	_equal(first.snapshot(), second.snapshot(), "same seed and elapsed period replay exactly")
 	_check(
-		first.settle_absolute_months(24, 1, {"place:alpha": {"births": 1}}),
+		first.settle_absolute_months(
+			24,
+			1,
+			{"place:alpha": {"births": 1}}
+		),
 		"absolute settlement accepts the current cursor"
 	)
 	_check(
-		not first.settle_absolute_months(24, 1, {"place:alpha": {"births": 1}}),
+		not first.settle_absolute_months(
+			24,
+			1,
+			{"place:alpha": {"births": 1}}
+		),
 		"absolute settlement rejects an overlapping period"
 	)
 
@@ -190,13 +291,30 @@ func _test_snapshot_restore_and_malformed_rejection() -> void:
 	var source := _new_population()
 	if source == null:
 		return
-	_check(source.set_initial_state("place:alpha", _state(1000, 250, 350, 300, 100, 500, 500, 600, 400)), "snapshot source is seeded")
-	_check(source.settle_place("place:alpha", 3, 5, 2, 1), "snapshot source has settled state")
+	_check(
+		source.set_initial_state(
+			"place:alpha",
+			_state(1000, 250, 350, 300, 100, 500, 500, 600, 400)
+		),
+		"snapshot source is seeded"
+	)
+	_check(
+		source.settle_elapsed_months(
+			3,
+			{"place:alpha": {"births": 5, "deaths": 2, "net_migration": 1}}
+		),
+		"snapshot source has settled state"
+	)
 	var saved: Dictionary = source.snapshot()
-	var restored := VNextMacroPopulation.new()
-	_check(restored.restore(saved), "valid population snapshot restores into an empty shell")
+	var restored := VNextMacroPopulation.create(["place:alpha", "region:beta"])
+	if restored == null:
+		return
+	_check(restored.restore(saved), "valid snapshot restores into an externally keyed target")
 	_equal(restored.snapshot(), saved, "population snapshot round trip preserves complete state")
 	_equal(restored.population_at("place:alpha"), 1012, "restored query recovers population total")
+
+	var shell := VNextMacroPopulation.new()
+	_check(not shell.restore(saved), "empty shell cannot establish an external key contract")
 
 	var invalid_negative: Dictionary = saved.duplicate(true)
 	(invalid_negative["records"] as Array)[0]["total_population"] = -1
@@ -208,20 +326,43 @@ func _test_snapshot_restore_and_malformed_rejection() -> void:
 
 	var invalid_unknown_place: Dictionary = saved.duplicate(true)
 	(invalid_unknown_place["records"] as Array)[0]["place_id"] = "place:unknown"
-	_expect_restore_failure(restored, invalid_unknown_place, "unknown place")
+	_expect_restore_failure(restored, invalid_unknown_place, "unknown record place")
+
+	var invalid_known_and_record: Dictionary = saved.duplicate(true)
+	(invalid_known_and_record["known_place_ids"] as Array)[0] = "place:made_up"
+	(invalid_known_and_record["records"] as Array)[0]["place_id"] = "place:made_up"
+	_expect_restore_failure(
+		restored,
+		invalid_known_and_record,
+		"snapshot key contract changed with record"
+	)
+
+	var invalid_region_syntax: Dictionary = saved.duplicate(true)
+	(invalid_region_syntax["records"] as Array)[0]["place_id"] = "region:made_up"
+	_expect_restore_failure(
+		restored,
+		invalid_region_syntax,
+		"fabricated valid-syntax region key"
+	)
 
 	var invalid_age: Dictionary = saved.duplicate(true)
-	var invalid_age_buckets: Dictionary = (invalid_age["records"] as Array)[0]["age_buckets"]
+	var invalid_age_buckets: Dictionary = (
+		(invalid_age["records"] as Array)[0]["age_buckets"] as Dictionary
+	)
 	invalid_age_buckets["under_18"] = int(invalid_age_buckets["under_18"]) + 1
 	_expect_restore_failure(restored, invalid_age, "age bucket total mismatch")
 
 	var invalid_sex: Dictionary = saved.duplicate(true)
-	var invalid_sex_structure: Dictionary = (invalid_sex["records"] as Array)[0]["sex_structure"]
+	var invalid_sex_structure: Dictionary = (
+		(invalid_sex["records"] as Array)[0]["sex_structure"] as Dictionary
+	)
 	invalid_sex_structure["male"] = int(invalid_sex_structure["male"]) + 1
 	_expect_restore_failure(restored, invalid_sex, "sex total mismatch")
 
 	var invalid_urban_rural: Dictionary = saved.duplicate(true)
-	var invalid_urban: Dictionary = (invalid_urban_rural["records"] as Array)[0]["urban_rural"]
+	var invalid_urban: Dictionary = (
+		(invalid_urban_rural["records"] as Array)[0]["urban_rural"] as Dictionary
+	)
 	invalid_urban["urban"] = int(invalid_urban["urban"]) + 1
 	_expect_restore_failure(restored, invalid_urban_rural, "urban/rural total mismatch")
 
@@ -229,16 +370,137 @@ func _test_snapshot_restore_and_malformed_rejection() -> void:
 	(invalid_migration["records"] as Array)[0]["net_migration"] = "malformed"
 	_expect_restore_failure(restored, invalid_migration, "malformed migration")
 
-	var duplicate_record: Dictionary = saved.duplicate(true)
-	var duplicate_records: Array = duplicate_record["records"] as Array
-	duplicate_records.append((duplicate_records[0] as Dictionary).duplicate(true))
-	_expect_restore_failure(restored, duplicate_record, "duplicate place entry")
+	var invalid_duplicate_key: Dictionary = saved.duplicate(true)
+	var duplicate_known_ids: Array = invalid_duplicate_key["known_place_ids"] as Array
+	duplicate_known_ids.append("place:alpha")
+	_expect_restore_failure(
+		restored,
+		invalid_duplicate_key,
+		"duplicate known place key"
+	)
 
-	var before: Dictionary = restored.snapshot()
+	var invalid_duplicate: Dictionary = saved.duplicate(true)
+	var duplicate_records: Array = invalid_duplicate["records"] as Array
+	duplicate_records[1]["place_id"] = duplicate_records[0]["place_id"]
+	_expect_restore_failure(restored, invalid_duplicate, "duplicate place entry")
+
+	var invalid_missing_record: Dictionary = saved.duplicate(true)
+	(invalid_missing_record["records"] as Array).remove_at(1)
+	_expect_restore_failure(restored, invalid_missing_record, "missing record key")
+
 	var invalid_extra: Dictionary = saved.duplicate(true)
 	invalid_extra["unexpected"] = true
 	_check(not restored.restore(invalid_extra), "unknown snapshot field is rejected")
-	_equal(restored.snapshot(), before, "all malformed restore attempts leave live state unchanged")
+	_equal(
+		restored.snapshot(),
+		saved,
+		"all malformed restore attempts leave live state unchanged"
+	)
+
+
+func _test_setup_mutation_boundary() -> void:
+	var population := _new_population()
+	if population == null:
+		return
+	var initial_state: Dictionary = _state(1000, 250, 350, 300, 100, 500, 500, 600, 400)
+	_check(
+		population.set_initial_state("place:alpha", initial_state),
+		"setup state mutation succeeds before elapsed settlement"
+	)
+	_check(
+		not population.initialize(["place:alpha", "region:gamma"]),
+		"external place contract cannot be reinitialized after construction"
+	)
+	_check(
+		population.settle_elapsed_months(1),
+		"one elapsed month starts the immutable live phase"
+	)
+	var before: Dictionary = population.snapshot()
+	_check(
+		not population.set_initial_state("place:alpha", initial_state),
+		"set_initial_state fails after elapsed settlement"
+	)
+	_equal(
+		population.snapshot(),
+		before,
+		"late setup mutation leaves live state unchanged"
+	)
+	_check(
+		not population.has_method("register_place"),
+		"registering a new place is unavailable after settlement"
+	)
+	_check(
+		not population.initialize(["place:alpha", "region:gamma"]),
+		"late external key mutation remains rejected"
+	)
+	_equal(
+		population.snapshot(),
+		before,
+		"late key mutation attempts leave live state unchanged"
+	)
+
+
+func _test_age_progression_and_partition_equivalence() -> void:
+	var aging := _new_population()
+	if aging == null:
+		return
+	var aging_state: Dictionary = _state(100000, 50000, 10000, 30000, 10000, 50000, 50000, 60000, 40000)
+	_check(aging.set_initial_state("place:alpha", aging_state), "age progression fixture is seeded")
+	var before: Dictionary = aging.structure_at("place:alpha")
+	_check(aging.settle_elapsed_months(12), "zero-flow months still progress coarse age buckets")
+	var after: Dictionary = aging.structure_at("place:alpha")
+	_equal(after["total_population"], before["total_population"], "ageing alone conserves total population")
+	_check(
+		int(after["age_buckets"]["under_18"]) < int(before["age_buckets"]["under_18"]),
+		"under-18 bucket ages forward"
+	)
+	_check(
+		int(after["age_buckets"]["age_18_40"]) > int(before["age_buckets"]["age_18_40"]),
+		"under-18 outflow enters working-age bucket"
+	)
+	_check(
+		int(after["age_buckets"]["age_65_plus"]) > int(before["age_buckets"]["age_65_plus"]),
+		"41-64 outflow enters terminal older bucket"
+	)
+	_check(
+		int(after["working_age_population"]) != int(before["working_age_population"]),
+		"working-age query changes as coarse ages progress"
+	)
+	_check(_structure_is_coherent(after), "age progression preserves bucket coherence")
+
+	var large := _new_population()
+	var sliced := _new_population()
+	if large == null or sliced == null:
+		return
+	_check(large.set_initial_state("place:alpha", aging_state), "large-period fixture is seeded")
+	_check(sliced.set_initial_state("place:alpha", aging_state), "sliced-period fixture is seeded")
+	_check(large.settle_elapsed_months(120), "large elapsed period settles")
+	for _slice: int in range(12):
+		_check(sliced.settle_elapsed_months(10), "sliced elapsed period settles")
+	_equal(
+		large.snapshot(),
+		sliced.snapshot(),
+		"large elapsed period equals sliced elapsed periods"
+	)
+
+	var births := _new_population()
+	if births == null:
+		return
+	var empty_state: Dictionary = _state(0, 0, 0, 0, 0, 0, 0, 0, 0)
+	_check(births.set_initial_state("place:alpha", empty_state), "birth placement fixture is seeded")
+	_check(
+		births.settle_elapsed_months(
+			1,
+			{"place:alpha": {"births": 100}}
+		),
+		"birth-only month settles"
+	)
+	var birth_structure: Dictionary = births.structure_at("place:alpha")
+	_equal(
+		birth_structure["age_buckets"]["under_18"],
+		100,
+		"new births enter under-18 and do not skip age buckets"
+	)
 
 
 func _test_long_run_is_finite_and_bounded() -> void:
@@ -246,11 +508,17 @@ func _test_long_run_is_finite_and_bounded() -> void:
 	if population == null:
 		return
 	_check(
-		population.set_initial_state("place:alpha", _state(100000, 25000, 35000, 30000, 10000, 50000, 50000, 60000, 40000)),
+		population.set_initial_state(
+			"place:alpha",
+			_state(100000, 25000, 35000, 30000, 10000, 50000, 50000, 60000, 40000)
+		),
 		"long-run fixture is seeded"
 	)
 	_check(
-		population.settle_place("place:alpha", 120, 100, 90, -3),
+		population.settle_elapsed_months(
+			120,
+			{"place:alpha": {"births": 100, "deaths": 90, "net_migration": -3}}
+		),
 		"long-run monthly settlement remains bounded"
 	)
 	var structure: Dictionary = population.structure_at("place:alpha")
@@ -265,7 +533,10 @@ func _test_long_run_is_finite_and_bounded() -> void:
 	)
 	var before: Dictionary = population.snapshot()
 	_check(
-		not population.settle_place("place:alpha", 1, 0, 999999999, 0),
+		not population.settle_elapsed_months(
+			1,
+			{"place:alpha": {"births": 0, "deaths": 999999999, "net_migration": 0}}
+		),
 		"impossible long-run death transition is rejected"
 	)
 	_equal(population.snapshot(), before, "impossible long-run transition is transactional")
@@ -312,7 +583,10 @@ func _structure_is_coherent(structure: Dictionary) -> bool:
 		return false
 	if _sum(age) != total or _sum(sex) != total or _sum(urban_rural) != total:
 		return false
-	return int(structure.get("working_age_population", -1)) == int(age.get("age_18_40", 0)) + int(age.get("age_41_64", 0))
+	return (
+		int(structure.get("working_age_population", -1))
+		== int(age.get("age_18_40", 0)) + int(age.get("age_41_64", 0))
+	)
 
 
 func _sum(values: Dictionary) -> int:

@@ -3,7 +3,7 @@ extends RefCounted
 ## Slow, place-keyed population aggregates. It is intentionally independent
 ## from the person roster and from the vNext runtime clock.
 
-const SNAPSHOT_SCHEMA_ID: String = "vnext_macro_population_v1"
+const SNAPSHOT_SCHEMA_ID: String = "vnext_macro_population_v2"
 const MAX_JSON_SAFE_INTEGER: int = 9_007_199_254_740_991
 const MAX_SETTLEMENT_MONTHS_PER_CALL: int = 120_000
 const BASE_YEAR: int = 1900
@@ -27,6 +27,8 @@ static func create(initial_place_ids: Array[String] = []) -> VNextMacroPopulatio
 
 
 func initialize(place_ids: Array[String]) -> bool:
+	if _initialized:
+		return false
 	var candidate_known_ids: Dictionary = {}
 	var candidate_records: Dictionary = {}
 	for raw_place_id: Variant in place_ids:
@@ -73,26 +75,13 @@ func is_valid() -> bool:
 	return true
 
 
-func register_place(place_id: String, initial_state: Dictionary = {}) -> bool:
-	if not VNextMacroPopulationRecord._is_spatial_key(place_id):
-		return false
-	if _known_place_ids.has(place_id):
-		return false
-	var record: VNextMacroPopulationRecord
-	if initial_state.is_empty():
-		record = VNextMacroPopulationRecord.create_zero(place_id)
-	else:
-		record = VNextMacroPopulationRecord.from_state(place_id, initial_state)
-	if record == null or not record.is_valid():
-		return false
-	_known_place_ids[place_id] = true
-	_records[place_id] = record
-	_initialized = true
-	return true
-
 
 func set_initial_state(place_id: String, state_value: Dictionary) -> bool:
-	if not is_valid() or not _known_place_ids.has(place_id):
+	if (
+		not is_valid()
+		or not _known_place_ids.has(place_id)
+		or _has_elapsed_settlement()
+	):
 		return false
 	var candidate: VNextMacroPopulationRecord = (
 		VNextMacroPopulationRecord.from_state(place_id, state_value)
@@ -257,27 +246,6 @@ func settle_year_month(
 	)
 
 
-func settle_place(
-	place_id: String,
-	elapsed_months: int,
-	monthly_births: int = 0,
-	monthly_deaths: int = 0,
-	monthly_net_migration: int = 0,
-	start_absolute_month: int = -1
-) -> bool:
-	if not has_place(place_id):
-		return false
-	var flows: Dictionary = {
-		place_id: {
-			"births": monthly_births,
-			"deaths": monthly_deaths,
-			"net_migration": monthly_net_migration,
-		}
-	}
-	if start_absolute_month < 0:
-		return settle_elapsed_months(elapsed_months, flows)
-	return settle_absolute_months(start_absolute_month, elapsed_months, flows)
-
 
 func snapshot() -> Dictionary:
 	var records: Array[Dictionary] = []
@@ -294,6 +262,8 @@ func snapshot() -> Dictionary:
 
 
 func restore(snapshot_value: Dictionary) -> bool:
+	if not is_valid():
+		return false
 	if snapshot_value.size() != 3:
 		return false
 	for required_field: String in ["schema_id", "known_place_ids", "records"]:
@@ -306,7 +276,7 @@ func restore(snapshot_value: Dictionary) -> bool:
 	)
 	if candidate_known_ids.is_empty():
 		return false
-	if _initialized and candidate_known_ids != _known_place_ids:
+	if candidate_known_ids != _known_place_ids:
 		return false
 	if typeof(snapshot_value.get("records")) != TYPE_ARRAY:
 		return false
@@ -331,8 +301,6 @@ func restore(snapshot_value: Dictionary) -> bool:
 		if not candidate_records.has(str(raw_place_id)):
 			return false
 
-	_initialized = true
-	_known_place_ids = candidate_known_ids
 	_records = candidate_records
 	return true
 
@@ -438,6 +406,16 @@ func _record_at(place_id: String) -> VNextMacroPopulationRecord:
 	if not record_value is VNextMacroPopulationRecord:
 		return null
 	return record_value as VNextMacroPopulationRecord
+
+
+func _has_elapsed_settlement() -> bool:
+	for raw_record: Variant in _records.values():
+		if not raw_record is VNextMacroPopulationRecord:
+			return true
+		var record: VNextMacroPopulationRecord = raw_record as VNextMacroPopulationRecord
+		if record.last_settled_period() > 0:
+			return true
+	return false
 
 
 func _normalize_query_ids(place_ids: Array[String]) -> Array[String]:
