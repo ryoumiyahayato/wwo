@@ -1460,6 +1460,9 @@
 5 K authorizations
 6 A _next_sequence
 @ scripts/v2_3/v2_3_life_loop_interface.gd | V23LifeLoopInterface
+5 C V2_3_MENU_SCENE
+6 C V2_3_PANEL_IDS
+@ scripts/v2_3/v2_3_life_loop_simulation.gd | V23LifeLoopSimulation
 5 C V2_3_SCHEMA_VERSION
 6 C JULES_ID
 7 C LUCIEN_ID
