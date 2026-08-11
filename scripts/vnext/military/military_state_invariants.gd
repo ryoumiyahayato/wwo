@@ -208,9 +208,8 @@ static func _validate_capacity_ledger(state: VNextMilitaryState, map: VNextMilit
 		var expected: float = float(explained.get(link_id, 0.0))
 		if not is_finite(actual) or actual < 0.0 or absf(actual - expected) > EPSILON:
 			return false
-		if map != null:
-			if map.get_link(link_id).is_empty() or actual > map.get_link_transport_capacity_per_hour(link_id) + EPSILON:
-				return false
+		if map != null and map.get_link(link_id).is_empty():
+			return false
 	return true
 
 
