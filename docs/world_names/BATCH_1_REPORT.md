@@ -25,7 +25,7 @@ Modern GeoNames city shards and geometry/runtime files were read for source cove
 
 - Authoritative IDs changed: **NO**
 - Existing production world data rewritten: **NO**
-- Commit: `not created`
+- Commit: `b95058d` (implementation)
 - Push: `not attempted (GitHub unavailable in this environment)`
 - Draft PR: `none`
 
