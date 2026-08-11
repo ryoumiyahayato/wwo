@@ -143,11 +143,8 @@ func is_valid(map: VNextMilitaryMapAdapter = null) -> bool:
 		var used: float = float(link_capacity_used[raw_link_id])
 		if not is_finite(used) or used < 0.0:
 			return false
-		if map != null:
-			if map.get_link(link_id).is_empty():
-				return false
-			if used > map.get_link_transport_capacity_per_hour(link_id) + 0.0001:
-				return false
+		if map != null and map.get_link(link_id).is_empty():
+			return false
 
 	var queued_request_links: Dictionary = {}
 	for raw_link_id: Variant in link_queues.keys():
@@ -629,9 +626,7 @@ func _transport_edge_state_valid(
 		if link.is_empty():
 			return false
 		var requires_active_access: bool = transport_state == "moving" or not reserved_link_id.is_empty() or (transport_state == "waiting_capacity" and edge_request_hour <= capacity_window_hour)
-		if requires_active_access:
-			if map.get_link_transport_capacity_per_hour(current_link_id) <= 0.0:
-				return false
+		if requires_active_access and map.get_link_transport_capacity_per_hour(current_link_id) > 0.0:
 			if not map.can_enter_link(current_link_id, current_city_id, destination_city_id, owner_country_id, region_controls, allow_enemy_destination):
 				return false
 	return true
