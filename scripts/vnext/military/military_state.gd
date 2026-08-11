@@ -183,11 +183,6 @@ func is_valid(map: VNextMilitaryMapAdapter = null) -> bool:
 			continue
 		if not queued_request_links.has(action_id) or str(queued_request_links[action_id]) != reserved_link_id:
 			return false
-	for raw_used_link_id: Variant in link_capacity_used.keys():
-		var used_link_id: String = str(raw_used_link_id)
-		if float(link_capacity_used[raw_used_link_id]) > 0.0001:
-			if not link_queues.has(used_link_id) or (link_queues[used_link_id] as Array).is_empty():
-				return false
 	return true
 
 
