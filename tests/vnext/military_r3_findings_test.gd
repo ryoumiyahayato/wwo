@@ -110,16 +110,41 @@ func _test_pipeline_interrupt_restore_partition_determinism() -> void:
 	var first: Dictionary = shipments[0]
 	var edge := int(first.get("current_edge_index", 0))
 	var link_id := str(((first.get("route", {}) as Dictionary).get("link_ids", []) as Array)[edge])
+	var tracked: Dictionary = {}
+	for shipment: Dictionary in shipments:
+		var shipment_edge := int(shipment.get("current_edge_index", -1))
+		var shipment_links: Array = (shipment.get("route", {}) as Dictionary).get("link_ids", []) as Array
+		if shipment_edge >= 0 and shipment_edge < shipment_links.size() and str(shipment_links[shipment_edge]) == link_id:
+			tracked[str(shipment.get("action_id", ""))] = float(shipment.get("cargo_amount_remaining", 0.0))
+	_check(not tracked.is_empty(), "interruption fixture tracks current-link cargo")
 	var saved_capacity := int((map.links[link_id] as Dictionary).get("capacity_personnel", 0))
 	(map.links[link_id] as Dictionary)["capacity_personnel"] = 0
 	_check(_advance_one(interrupted), "multi-shipment capacity interruption advances")
 	var frozen := 0
-	for shipment: Dictionary in service.get_supply_shipments(interrupted):
-		if str(shipment.get("reserved_link_id", "")).is_empty() and str(shipment.get("transport_state", "")) in ["interrupted", "blocked"]:
+	for action_id: String in tracked.keys():
+		var live := _find_supply_by_id(interrupted, action_id)
+		if (
+			not live.is_empty()
+			and str(live.get("reserved_link_id", "")).is_empty()
+			and str(live.get("transport_state", "")) in ["interrupted", "blocked"]
+			and is_equal_approx(float(live.get("cargo_amount_remaining", -1.0)), float(tracked[action_id]))
+		):
 			frozen += 1
-	_check(frozen > 0, "pipeline shipments freeze without duplicate delivery")
+	_check(frozen == tracked.size(), "pipeline shipments freeze without duplicate delivery")
+	var duplicate_completion := false
+	for record: Dictionary in interrupted.completed_actions:
+		if tracked.has(str(record.get("action_id", ""))):
+			duplicate_completion = true
+			break
+	_check(not duplicate_completion, "capacity interruption does not settle tracked cargo")
+	var interrupted_snapshot := interrupted.snapshot()
+	var interruption_restored := VNextMilitaryState.new()
+	_check(interruption_restored.restore(interrupted_snapshot, map), "interrupted pipeline snapshot restores while capacity is zero")
+	_check(interruption_restored.snapshot() == interrupted_snapshot, "interrupted pipeline restore is exact")
 	(map.links[link_id] as Dictionary)["capacity_personnel"] = saved_capacity
 	_check(_advance_one(interrupted), "pipeline resumes after capacity recovery")
+	_check(_advance_one(interruption_restored), "restored pipeline resumes after capacity recovery")
+	_check(interrupted.snapshot() == interruption_restored.snapshot(), "interruption snapshot recovery matches continuous state")
 
 	var continuous := _remote("formation:r3_resume", "marseille", 1200, _abundant())
 	for _hour: int in range(8):
@@ -221,9 +246,36 @@ func _test_strict_restore_matrix() -> void:
 			break
 	_check(_rejected(link_mismatch), "allocation link mismatch is rejected")
 
-	var hour_mismatch := valid.duplicate(true)
-	((hour_mismatch.get("active_actions", []) as Array)[0] as Dictionary)["capacity_window_hour"] = int(hour_mismatch.get("capacity_window_hour", 0)) - 1
-	_check(_rejected(hour_mismatch), "allocation hour mismatch is rejected")
+	var current_window := int(valid.get("capacity_window_hour", -1))
+	var current_used: Dictionary = valid.get("link_capacity_used", {}) as Dictionary
+	var current_allocated_action: Dictionary = {}
+	for raw_action: Variant in valid.get("active_actions", []) as Array:
+		if not raw_action is Dictionary:
+			continue
+		var candidate_action := raw_action as Dictionary
+		var candidate_link := str(candidate_action.get("capacity_link_id", ""))
+		var candidate_used := float(candidate_action.get("capacity_used_this_window", 0.0))
+		if (
+			candidate_used > 0.0001
+			and not candidate_link.is_empty()
+			and int(candidate_action.get("capacity_window_hour", -2)) == current_window
+			and float(current_used.get(candidate_link, 0.0)) >= candidate_used - 0.0001
+		):
+			current_allocated_action = candidate_action
+			break
+	_check(not current_allocated_action.is_empty(), "strict fixture contains a real current-window allocation")
+	if not current_allocated_action.is_empty():
+		var hour_mismatch := valid.duplicate(true)
+		var mismatched_id := str(current_allocated_action.get("action_id", ""))
+		var mismatch_snapshot_action: Dictionary = {}
+		for raw_action: Variant in hour_mismatch.get("active_actions", []) as Array:
+			if raw_action is Dictionary and str((raw_action as Dictionary).get("action_id", "")) == mismatched_id:
+				mismatch_snapshot_action = raw_action as Dictionary
+				break
+		_check(not mismatch_snapshot_action.is_empty(), "current allocation action is found by stable ID")
+		if not mismatch_snapshot_action.is_empty():
+			mismatch_snapshot_action["capacity_window_hour"] = current_window - 1
+			_check(_rejected(hour_mismatch), "real current allocation hour mismatch is rejected")
 
 func _remote(id: String, city: String, personnel: int, supply: Dictionary) -> VNextMilitaryState:
 	var state := _new_state()
@@ -248,6 +300,12 @@ func _supply_count(state: VNextMilitaryState, formation_id: String, resource_id:
 		if str(shipment.get("destination_formation_id", "")) == formation_id and str(shipment.get("resource_id", "")) == resource_id:
 			count += 1
 	return count
+
+func _find_supply_by_id(state: VNextMilitaryState, action_id: String) -> Dictionary:
+	for shipment: Dictionary in service.get_supply_shipments(state):
+		if str(shipment.get("action_id", "")) == action_id:
+			return shipment
+	return {}
 
 func _rejected(snapshot: Dictionary) -> bool:
 	var sentinel := _new_state()
