@@ -1,4 +1,4 @@
-name: Economy Final Candidate Artifact
+name: Economy Candidate Blob Transfer
 
 on:
   pull_request:
@@ -6,135 +6,99 @@ on:
       - master
 
 permissions:
-  contents: read
+  actions: read
+  contents: write
 
 jobs:
-  economy-final-artifact:
-    runs-on: windows-2025
-    timeout-minutes: 30
+  transfer-validated-blobs:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
-      - name: Checkout current economy branch
-        uses: actions/checkout@v4
-        with:
-          ref: feat/vnext-market-economy-20260809
-          fetch-depth: 1
-
-      - name: Record artifact source head
-        shell: pwsh
-        run: |
-          $head = (git rev-parse HEAD).Trim()
-          Write-Host "ECON_ARTIFACT_SOURCE_HEAD=$head"
-          $head | Out-File -FilePath economy-evidence-source-head.txt -Encoding ascii
-
-      - name: Apply exactly the persisted validated candidate
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          @'
-          from pathlib import Path
-          workflow = Path('.github/workflows/economy-diagnostic-compare.yml').read_text(encoding='utf-8').replace('\r\n', '\n')
-          marker = '          from pathlib import Path\n'
-          start = workflow.index(marker)
-          end = workflow.index("          '@ | python -", start)
-          block = workflow[start:end]
-          lines = []
-          for line in block.splitlines():
-              lines.append(line[10:] if line.startswith('          ') else line)
-          script = '\n'.join(lines) + '\n'
-          exec(compile(script, '<economy-candidate-patch>', 'exec'), {})
-          '@ | python -
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          git diff --check
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-      - name: Mirror final cleanup in artifact worktree
-        shell: pwsh
-        run: |
-          $cleanupPaths = @(
-            'tests/vnext/market_economy_a_patch_setup_test.gd',
-            'tests/vnext/market_economy_flow_diagnostic_test.gd',
-            '.github/workflows/economy-diagnostic-compare.yml',
-            '.github/workflows/economy-long-term-candidate.yml',
-            '.github/workflows/economy-finalize.yml'
-          )
-          git rm -f --ignore-unmatch -- $cleanupPaths
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          git diff --check
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Regenerate variable-state audit baseline
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          python -B tools/audit_variable_state.py --root .
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          python tools/render_variable_state_audit_summary.py
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          python tools/render_variable_state_member_inventory.py
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          python tools/generate_variable_state_docs.py
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          python tools/render_variable_refactor_plan.py
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-          $auditDocs = @(
-            'docs/refactors/variable_state_audit.md',
-            'docs/refactors/variable_state_member_inventory.md',
-            'docs/refactors/state_ownership_matrix.md',
-            'docs/refactors/variable_refactor_plan.md'
-          )
-          foreach ($path in $auditDocs) {
-            if (-not (Test-Path $path) -or (Get-Item $path).Length -le 0) { throw "Missing audit document: $path" }
-          }
-          git add -- $auditDocs
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-          python -B tools/audit_variable_state.py --root .
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          python tools/render_variable_state_audit_summary.py
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          python tools/render_variable_state_member_inventory.py
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          python tools/generate_variable_state_docs.py
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          python tools/render_variable_refactor_plan.py
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          git diff --exit-code -- $auditDocs
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-      - name: Package exact validated candidate and generated docs
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          git diff --check
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          git diff --cached --check
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          git diff --no-ext-diff -- scripts/vnext/economy/market_economy.gd scripts/vnext/economy/market_route_network.gd tests/vnext/market_economy_recovery_test.gd | Out-File -FilePath economy-validated-production.patch -Encoding utf8
-          git diff --cached --no-ext-diff -- docs/refactors/variable_state_audit.md docs/refactors/variable_state_member_inventory.md docs/refactors/state_ownership_matrix.md docs/refactors/variable_refactor_plan.md | Out-File -FilePath economy-generated-audit.patch -Encoding utf8
-          git status --short | Out-File -FilePath economy-evidence-status.txt -Encoding utf8
-          Get-Content economy-evidence-status.txt
-
-      - name: Upload exact final candidate artifact
-        uses: actions/upload-artifact@v4
+      - name: Download exact validated candidate artifact
+        uses: actions/download-artifact@v4
         with:
           name: economy-validated-candidate-evidence
+          path: evidence
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ryoumiyahayato/wwo
+          run-id: 31488322634
+
+      - name: Verify and upload content-addressed blobs only
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from __future__ import annotations
+
+          import base64
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          from urllib.request import Request, urlopen
+
+          root = Path("evidence")
+          expected = {
+              "scripts/vnext/economy/market_economy.gd": "eb4442ebae92b578eebb2eb24e6598e7c82da4e9",
+              "scripts/vnext/economy/market_route_network.gd": "8340bc5d8da7f6b3fc757a106bad08d250e7602c",
+              "tests/vnext/market_economy_recovery_test.gd": "0b9f0a581c3569674950cbb2ffa7adf36b871009",
+              "docs/refactors/variable_state_audit.md": "a59494676535a4ee02dd56ac027dc2f6fe1b0f86",
+              "docs/refactors/variable_state_member_inventory.md": "73e6515a81b6d20c511026310ccc2b927821c0f6",
+              "docs/refactors/state_ownership_matrix.md": "0e1721e46de9e5ec3b3c4e3aea946e969f17aae5",
+              "docs/refactors/variable_refactor_plan.md": "268a1a0939cc32717338ca5acfe2c384c7d200c5",
+          }
+
+          source_head = (root / "economy-evidence-source-head.txt").read_text(encoding="utf-8-sig").strip()
+          assert source_head == "04c231b5a3027312f843fe7c2ded6db615624f0f", source_head
+
+          token = os.environ["GITHUB_TOKEN"]
+          repo = os.environ["GITHUB_REPOSITORY"]
+          api = f"https://api.github.com/repos/{repo}/git/blobs"
+          result: dict[str, str] = {}
+
+          for rel, expected_sha in expected.items():
+              data = (root / rel).read_bytes().replace(b"\r\n", b"\n")
+              header = b"blob " + str(len(data)).encode("ascii") + b"\0"
+              actual_sha = hashlib.sha1(header + data).hexdigest()
+              if actual_sha != expected_sha:
+                  raise SystemExit(f"artifact blob mismatch {rel}: {actual_sha} != {expected_sha}")
+
+              payload = json.dumps({
+                  "content": base64.b64encode(data).decode("ascii"),
+                  "encoding": "base64",
+              }).encode("utf-8")
+              req = Request(
+                  api,
+                  data=payload,
+                  method="POST",
+                  headers={
+                      "Accept": "application/vnd.github+json",
+                      "Authorization": f"Bearer {token}",
+                      "X-GitHub-Api-Version": "2022-11-28",
+                      "Content-Type": "application/json",
+                  },
+              )
+              with urlopen(req) as response:
+                  response_payload = json.load(response)
+              github_sha = str(response_payload["sha"])
+              if github_sha != expected_sha:
+                  raise SystemExit(f"GitHub blob mismatch {rel}: {github_sha} != {expected_sha}")
+              result[rel] = github_sha
+              print(f"ECON_BLOB_OK {expected_sha} {rel}")
+
+          Path("economy-blob-shas.json").write_text(
+              json.dumps({"source_head": source_head, "blobs": result}, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+      - name: Upload blob SHA evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: economy-final-blob-shas
           if-no-files-found: error
           retention-days: 7
-          path: |
-            economy-evidence-source-head.txt
-            economy-evidence-status.txt
-            economy-validated-production.patch
-            economy-generated-audit.patch
-            scripts/vnext/economy/market_economy.gd
-            scripts/vnext/economy/market_route_network.gd
-            tests/vnext/market_economy_recovery_test.gd
-            docs/refactors/variable_state_audit.md
-            docs/refactors/variable_state_member_inventory.md
-            docs/refactors/state_ownership_matrix.md
-            docs/refactors/variable_refactor_plan.md
+          path: economy-blob-shas.json
