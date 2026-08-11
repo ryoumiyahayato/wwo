@@ -724,7 +724,14 @@ func _repeat_return_decay(candidate: Dictionary) -> float:
 	var age := _days_since_last_change(candidate, int(candidate.get("period_index", 0)))
 	if age >= RETURN_GOVERNMENT_PENALTY_DAYS:
 		return 0.0
-	return clampf(1.0 - float(age) / float(RETURN_GOVERNMENT_PENALTY_DAYS), 0.0, 1.0)
+	if age <= TRANSITION_COOLDOWN_DAYS:
+		return 1.0
+	var decay_window := RETURN_GOVERNMENT_PENALTY_DAYS - TRANSITION_COOLDOWN_DAYS
+	return clampf(
+		1.0 - float(age - TRANSITION_COOLDOWN_DAYS) / float(decay_window),
+		0.0,
+		1.0
+	)
 
 
 func _repeat_return_required_mandate(candidate: Dictionary, prior_entry_mandate: float) -> float:
