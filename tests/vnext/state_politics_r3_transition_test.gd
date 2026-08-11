@@ -274,6 +274,8 @@ func _test_historical_return_floor_decays_away() -> void:
 			force["government_eligible"] = true
 		forces[index] = force
 	base["forces"] = forces
+	base["government_support"] = service._weighted_support(forces)
+	base["government_viability"] = false
 
 	var requirements: Array[float] = []
 	for age: int in [365, 500, 719, 720, 721]:
