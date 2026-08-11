@@ -172,10 +172,8 @@ func _advance_one_day(
 	var coalition_cohesion := _governing_cohesion(forces, current_group_id)
 	var policy_fit := _policy_fit(candidate, active, policies)
 	var policy_burden := _policy_burden(active, policies)
-	var leader_effect := _stable_actor_effect(str(candidate.get("government_leader_id", "")), 3.0)
-	var institution_effect := _stable_actor_effect(str(candidate.get("government_id", "")), 2.0)
 	var procedural_baseline := clampf(
-		float(REGIME_PROCEDURAL_BASELINES.get(str(candidate.get("regime_type", "")), 50.0)) + institution_effect,
+		float(REGIME_PROCEDURAL_BASELINES.get(str(candidate.get("regime_type", "")), 50.0)),
 		0.0,
 		100.0
 	)
@@ -188,8 +186,7 @@ func _advance_one_day(
 			+ procedural_baseline * 0.13
 			+ (100.0 - corruption) * 0.15
 			- total_pressure * 0.28
-			+ input.military_result_signal() * 0.08
-			+ leader_effect,
+			+ input.military_result_signal() * 0.08,
 		0.0,
 		100.0
 	)
@@ -202,8 +199,7 @@ func _advance_one_day(
 			+ coalition_cohesion * 0.08
 			- total_pressure * 0.42
 			- policy_burden * 0.12
-			+ input.military_result_signal() * 0.05
-			+ leader_effect * 0.5,
+			+ input.military_result_signal() * 0.05,
 		0.0,
 		100.0
 	)
@@ -212,7 +208,7 @@ func _advance_one_day(
 	candidate["stability"] = clampf(stability, 0.0, 100.0)
 	candidate["government_support"] = weighted_support
 
-	var unstable := _is_unstable(weighted_support, control, legitimacy, stability, coalition_cohesion, leader_effect, total_pressure)
+	var unstable := _is_unstable(weighted_support, control, legitimacy, stability, coalition_cohesion, total_pressure)
 	var instability_days := int(candidate.get("instability_streak", 0)) + 1 if unstable else maxi(0, int(candidate.get("instability_streak", 0)) - 1)
 	var recovery_days := int(candidate.get("recovery_streak", 0)) + 1 if not unstable else 0
 	candidate["instability_streak"] = instability_days
@@ -325,14 +321,13 @@ func _update_active_policy_implementation(candidate: Dictionary, control: float)
 	var policies := _sorted_policies(candidate.get("policies", []) as Array)
 	var forces := _sorted_forces(candidate.get("forces", []) as Array)
 	var group_id := str(candidate.get("government_group_id", ""))
-	var leader_effect := _stable_actor_effect(str(candidate.get("government_leader_id", "")), 3.0)
 	for index: int in range(active.size()):
 		var item := active[index]
 		var policy := _policy_by_id(policies, str(item.get("policy_id", "")))
 		if policy.is_empty():
 			continue
 		var alignment := _policy_governing_alignment(policy, forces, group_id)
-		var target := clampf((control / 100.0) * (0.72 + alignment * 0.0028) + leader_effect * 0.005, 0.10, 1.0)
+		var target := clampf((control / 100.0) * (0.72 + alignment * 0.0028), 0.10, 1.0)
 		item["implementation_strength"] = lerpf(float(item.get("implementation_strength", 0.0)), target, 0.01)
 		active[index] = item
 	return active
@@ -360,7 +355,9 @@ func _review_policies(candidate: Dictionary, input: VNextPoliticsPressureInput, 
 		if control < float(policy.get("required_control", 0.0)) * 0.45:
 			continue
 		var score := _policy_score(policy, candidate, input, total_pressure)
-		if score > best_score or (is_equal_approx(score, best_score) and str(policy.get("policy_id", "")) < str(best_policy.get("policy_id", "~"))):
+		var policy_id := str(policy.get("policy_id", ""))
+		var best_policy_id := str(best_policy.get("policy_id", ""))
+		if _prefer_scored_candidate(score, policy_id, best_score, best_policy_id):
 			best_score = score
 			best_policy = policy
 	if best_policy.is_empty():
@@ -422,8 +419,7 @@ func _policy_score(policy: Dictionary, candidate: Dictionary, input: VNextPoliti
 	var relief := _policy_relief_fit(policy, input)
 	var fiscal_penalty := float(policy.get("fiscal_demand", 0.0)) * (0.35 + input.fiscal_pressure() / 180.0)
 	var emergency_bonus := total_pressure * 0.08 if total_pressure >= 60.0 else 0.0
-	var leader_effect := _stable_actor_effect(str(candidate.get("government_leader_id", "")), 3.0)
-	return alignment * 0.54 + urgency * 0.24 + relief * 0.22 - fiscal_penalty * 0.12 + emergency_bonus + _policy_priority_bonus(policy, input) + leader_effect * 0.8
+	return alignment * 0.54 + urgency * 0.24 + relief * 0.22 - fiscal_penalty * 0.12 + emergency_bonus + _policy_priority_bonus(policy, input)
 
 
 func _active_policy_score(active: Array, policies: Array, candidate: Dictionary, input: VNextPoliticsPressureInput, total_pressure: float) -> float:
@@ -560,8 +556,7 @@ func _policy_burden(active_policies: Array, policies: Array) -> float:
 func _new_active_policy(policy_id: String, period: int, control: float, candidate: Dictionary) -> Dictionary:
 	var policy := _policy_by_id(candidate.get("policies", []) as Array, policy_id)
 	var alignment := _policy_governing_alignment(policy, candidate.get("forces", []) as Array, str(candidate.get("government_group_id", "")))
-	var leader_effect := _stable_actor_effect(str(candidate.get("government_leader_id", "")), 3.0)
-	var strength := clampf((control / 100.0) * (0.72 + alignment * 0.0028) + leader_effect * 0.005, 0.15, 1.0)
+	var strength := clampf((control / 100.0) * (0.72 + alignment * 0.0028), 0.15, 1.0)
 	return {
 		"policy_id": policy_id,
 		"started_period": period,
@@ -571,8 +566,8 @@ func _new_active_policy(policy_id: String, period: int, control: float, candidat
 	}
 
 
-func _is_unstable(weighted_support: float, control: float, legitimacy: float, stability: float, coalition_cohesion: float, leader_effect: float, total_pressure: float) -> bool:
-	var resilience := clampf((coalition_cohesion - 50.0) * 0.04 + leader_effect * 0.8, -6.0, 6.0)
+func _is_unstable(weighted_support: float, control: float, legitimacy: float, stability: float, coalition_cohesion: float, total_pressure: float) -> bool:
+	var resilience := clampf((coalition_cohesion - 50.0) * 0.04, -6.0, 6.0)
 	return (
 		total_pressure >= 45.0
 		or weighted_support < CRISIS_SUPPORT_THRESHOLD - resilience
@@ -630,10 +625,18 @@ func _select_challenger(candidate: Dictionary, total_pressure: float) -> Diction
 		)
 		var coalition := _challenger_coalition_feasibility(force, forces, current_group_id)
 		var procedure := _challenger_procedure_score(candidate, force, total_pressure)
-		var mandate := power * 0.30 + opposition * 0.25 + coalition * 0.30 + procedure * 0.15
-		mandate -= _return_government_penalty(candidate, force_id)
-		mandate = clampf(mandate, 0.0, 100.0)
-		if mandate > best_score or (is_equal_approx(mandate, best_score) and force_id < str((best.get("force", {}) as Dictionary).get("force_id", "~"))):
+		var raw_mandate := power * 0.30 + opposition * 0.25 + coalition * 0.30 + procedure * 0.15
+		var penalty := _return_government_penalty(candidate, force_id, total_pressure)
+		if (
+			_is_direct_return_candidate(candidate, force_id)
+			and total_pressure >= EMERGENCY_POLICY_PRESSURE
+			and _days_since_last_change(candidate, int(candidate.get("period_index", 0))) >= TRANSITION_COOLDOWN_DAYS
+			and raw_mandate >= CHALLENGER_MANDATE_THRESHOLD
+		):
+			penalty = minf(penalty, raw_mandate - float(CHALLENGER_MANDATE_THRESHOLD))
+		var mandate := clampf(raw_mandate - penalty, 0.0, 100.0)
+		var best_force_id := str((best.get("force", {}) as Dictionary).get("force_id", ""))
+		if _prefer_scored_candidate(mandate, force_id, best_score, best_force_id):
 			best_score = mandate
 			best = {
 				"force": force.duplicate(true),
@@ -667,20 +670,37 @@ func _challenger_procedure_score(candidate: Dictionary, challenger: Dictionary, 
 	var regime_base := float(REGIME_PROCEDURAL_BASELINES.get(str(candidate.get("regime_type", "")), 50.0))
 	var institutional := float(challenger.get("institutional_access", 0.0))
 	var mobilization := float(challenger.get("mobilization_capacity", 0.0))
-	var institution_effect := _stable_actor_effect(str(candidate.get("government_id", "")), 2.0)
-	var score := regime_base * 0.50 + institutional * 0.32 + mobilization * 0.12 + total_pressure * 0.06 + institution_effect
+	var score := regime_base * 0.50 + institutional * 0.32 + mobilization * 0.12 + total_pressure * 0.06
 	return clampf(score, 0.0, 100.0)
 
 
-func _return_government_penalty(candidate: Dictionary, challenger_id: String) -> float:
+func _return_government_penalty(candidate: Dictionary, challenger_id: String, total_pressure: float = 0.0) -> float:
 	var history := _sorted_history(candidate.get("government_change_history", []) as Array)
 	if history.is_empty():
 		return 0.0
 	var last: Dictionary = history.back() as Dictionary
 	if challenger_id != str(last.get("old_government_group_id", "")):
 		return 0.0
-	var age := int(candidate.get("period_index", 0)) - int(last.get("period", 0))
-	return 100.0 if age < RETURN_GOVERNMENT_PENALTY_DAYS else 0.0
+	var age := maxi(0, int(candidate.get("period_index", 0)) - int(last.get("period", 0)))
+	if age >= RETURN_GOVERNMENT_PENALTY_DAYS:
+		return 0.0
+	var decay := 1.0 - float(age) / float(RETURN_GOVERNMENT_PENALTY_DAYS)
+	var penalty := 18.0 * clampf(decay, 0.0, 1.0)
+	if age >= TRANSITION_COOLDOWN_DAYS and total_pressure >= EMERGENCY_POLICY_PRESSURE:
+		var crisis_relief := clampf(
+			(total_pressure - EMERGENCY_POLICY_PRESSURE) / (100.0 - EMERGENCY_POLICY_PRESSURE),
+			0.0,
+			1.0
+		)
+		penalty *= 1.0 - crisis_relief
+	return clampf(penalty, 0.0, 18.0)
+
+
+func _is_direct_return_candidate(candidate: Dictionary, challenger_id: String) -> bool:
+	var history := _sorted_history(candidate.get("government_change_history", []) as Array)
+	if history.is_empty():
+		return false
+	return challenger_id == str((history.back() as Dictionary).get("old_government_group_id", ""))
 
 
 func _apply_government_change(candidate: Dictionary, challenger_result: Dictionary, total_pressure: float) -> Dictionary:
@@ -794,14 +814,6 @@ func _position_alignment(left: float, right: float) -> float:
 	return clampf(1.0 - absf(left - right) / 100.0, -1.0, 1.0)
 
 
-func _stable_actor_effect(stable_id: String, maximum_abs: float) -> float:
-	var checksum := 0
-	for byte_value: int in stable_id.to_utf8_buffer():
-		checksum = (checksum * 31 + byte_value) % 9973
-	var normalized := (float(checksum % 2001) / 1000.0) - 1.0
-	return clampf(normalized * maximum_abs, -maximum_abs, maximum_abs)
-
-
 func _daily_alpha(monthly_alpha: float) -> float:
 	return 1.0 - pow(1.0 - monthly_alpha, 1.0 / float(MONTH_DAYS))
 
@@ -853,13 +865,42 @@ func _sorted_history(history: Array) -> Array[Dictionary]:
 		if typeof(raw_record) == TYPE_DICTIONARY:
 			result.append((raw_record as Dictionary).duplicate(true))
 	result.sort_custom(func(left: Dictionary, right: Dictionary) -> bool:
-		var left_period := int(left.get("period", 0))
-		var right_period := int(right.get("period", 0))
-		if left_period != right_period:
-			return left_period < right_period
-		return str(left.get("new_government_group_id", left.get("policy_id", ""))) < str(right.get("new_government_group_id", right.get("policy_id", "")))
+		return _history_record_less(left, right)
 	)
 	return result
+
+
+func _history_record_less(left: Dictionary, right: Dictionary) -> bool:
+	var left_period := int(left.get("period", 0))
+	var right_period := int(right.get("period", 0))
+	if left_period != right_period:
+		return left_period < right_period
+	for key: String in [
+		"old_government_group_id", "new_government_group_id",
+		"old_leader_id", "new_leader_id", "policy_id",
+		"replaced_policy_id", "action", "reason",
+	]:
+		var left_text := str(left.get(key, ""))
+		var right_text := str(right.get(key, ""))
+		if left_text != right_text:
+			return left_text < right_text
+	for key: String in [
+		"political_pressure", "mandate_score", "procedure_score",
+		"coalition_score", "support_score",
+	]:
+		var left_number := float(left.get(key, 0.0))
+		var right_number := float(right.get(key, 0.0))
+		if left_number != right_number:
+			return left_number < right_number
+	return false
+
+
+func _prefer_scored_candidate(score: float, stable_id: String, best_score: float, best_stable_id: String) -> bool:
+	if best_stable_id.is_empty():
+		return true
+	if is_equal_approx(score, best_score):
+		return stable_id < best_stable_id
+	return score > best_score
 
 
 func _fail(error_code: String, message: String) -> Dictionary:
