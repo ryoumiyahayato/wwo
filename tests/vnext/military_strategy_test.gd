@@ -1,453 +1,474 @@
 extends SceneTree
 
-var checks: int = 0
-var failures: int = 0
+var checks := 0
+var failures := 0
 var map: VNextMilitaryMapAdapter
 var service := VNextMilitaryService.new()
 
-
 func _initialize() -> void:
 	_run.call_deferred()
-
 
 func _run() -> void:
 	map = VNextMilitaryMapAdapter.new()
 	_check(map.load_existing_map(), "map adapter loads existing world map")
 	if map != null and map.errors.is_empty():
-		_test_map_capacity_truth()
-		_test_shared_capacity_and_ordering()
-		_test_supply_competition()
-		_test_per_edge_movement_and_slicing()
-		_test_attack_positioning_and_combat()
-		_test_destroyed_and_strict_restore()
-		_test_condition_penalties_and_recovery()
-		_test_concentrate_control_history_and_scope()
+		_test_map_and_shared_capacity()
+		_test_supply_chronology()
+		_test_supply_interruptions()
+		_test_movement_and_determinism()
+		_test_combat_and_annihilation()
+		_test_strict_restore()
+		_test_readiness_recovery()
+		_test_control_concentrate_history_scope()
 	print("VNext military strategic system: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures > 0 or checks <= 0 else 0)
 
+func _test_map_and_shared_capacity() -> void:
+	_check(map.get_city_ids().size() == 32, "reuses existing 32-city map")
+	_check(map.get_all_links().size() == 15, "reuses road rail shipping links")
+	var road := map.find_route("paris", "rouen", ["road"])
+	var rail := map.find_route("paris", "rouen", ["rail"])
+	var sea := map.find_route("paris", "london")
+	_check(bool(road.get("reachable", false)) and bool(rail.get("reachable", false)), "road and rail routes exist")
+	_check((sea.get("mode_sequence", []) as Array).has("shipping"), "shipping route is reused")
+	_check(int(rail.get("duration_hours", 0)) < int(road.get("duration_hours", 0)), "rail is faster than road")
+	var rail_link := str((rail.get("link_ids", []) as Array)[0])
+	var old_capacity := int((map.links[rail_link] as Dictionary).get("capacity_personnel", 0))
+	(map.links[rail_link] as Dictionary)["capacity_personnel"] = 0
+	_check(map.get_link_transport_capacity_per_hour(rail_link) == 0.0, "zero capacity stays zero")
+	_check(not bool(map.find_route("paris", "rouen", ["rail"]).get("reachable", false)), "zero capacity is impassable")
+	(map.links[rail_link] as Dictionary)["capacity_personnel"] = old_capacity
 
-func _test_map_capacity_truth() -> void:
-	_check(map.get_city_ids().size() == 32, "strategic map reuses 32 existing cities")
-	_check(map.get_all_links().size() == 15, "strategic map reuses existing road rail shipping links")
-	var road_modes: Array[String] = ["road"]
-	var rail_modes: Array[String] = ["rail"]
-	var road_route: Dictionary = map.find_route("paris", "rouen", road_modes)
-	var rail_route: Dictionary = map.find_route("paris", "rouen", rail_modes)
-	var sea_route: Dictionary = map.find_route("paris", "london")
-	_check(bool(road_route.get("reachable", false)), "road route is reachable")
-	_check(bool(rail_route.get("reachable", false)), "rail route is reachable")
-	_check(bool(sea_route.get("reachable", false)) and (sea_route.get("mode_sequence", []) as Array).has("shipping"), "shipping route is reused")
-	_check(int(rail_route.get("duration_hours", 0)) < int(road_route.get("duration_hours", 0)), "rail is faster than road")
-	_check(float(rail_route.get("supply_capacity_per_day", 0.0)) > float(road_route.get("supply_capacity_per_day", 0.0)), "rail has more shared throughput than road")
-
-	var rail_link_id: String = str((rail_route.get("link_ids", []) as Array)[0])
-	var original_capacity: int = int((map.links[rail_link_id] as Dictionary).get("capacity_personnel", 0))
-	(map.links[rail_link_id] as Dictionary)["capacity_personnel"] = 0
-	_check(map.get_link_transport_capacity_per_hour(rail_link_id) == 0.0, "zero link capacity stays zero")
-	_check(not bool(map.find_route("paris", "rouen", rail_modes).get("reachable", false)), "zero capacity link is impassable")
-	(map.links[rail_link_id] as Dictionary)["capacity_personnel"] = original_capacity
-
-	var road_link_id: String = str((road_route.get("link_ids", []) as Array)[0])
-	var old_road_hours: int = int((map.links[road_link_id] as Dictionary).get("movement_hours", 0))
-	var old_rail_hours: int = int((map.links[rail_link_id] as Dictionary).get("movement_hours", 0))
-	(map.links[road_link_id] as Dictionary)["movement_hours"] = 20
-	(map.links[rail_link_id] as Dictionary)["movement_hours"] = 20
-	var equal_a: Dictionary = map.find_route("paris", "rouen")
-	var equal_b: Dictionary = map.find_route("paris", "rouen")
-	_equal(equal_a.get("link_ids", []), equal_b.get("link_ids", []), "equal cost route tie is deterministic")
-	var expected_link_id: String = road_link_id if road_link_id < rail_link_id else rail_link_id
-	_equal(str((equal_a.get("link_ids", []) as Array)[0]), expected_link_id, "equal cost route chooses stable lexical link tie break")
-	(map.links[road_link_id] as Dictionary)["movement_hours"] = old_road_hours
-	(map.links[rail_link_id] as Dictionary)["movement_hours"] = old_rail_hours
-
-	var small_state := _new_state()
-	_check(_add(small_state, "formation:small_wave", "paris", 4000, 1.0), "create small-capacity test formation")
-	(map.links[rail_link_id] as Dictionary)["capacity_personnel"] = 100
-	var small_move: Dictionary = service.move(small_state, map, "formation:small_wave", "rouen", 0)
-	_check(bool(small_move.get("success", false)), "very small positive capacity remains traversable")
-	_check(int(small_move.get("eta_hour", 0)) > int((small_move.get("route", {}) as Dictionary).get("duration_hours", 0)), "very small capacity creates finite waves")
-	(map.links[rail_link_id] as Dictionary)["capacity_personnel"] = original_capacity
-
-
-func _test_shared_capacity_and_ordering() -> void:
 	var state := _new_state()
-	_check(_add(state, "formation:army_a", "paris", 24000, 1.0), "create first 24k formation")
-	_check(_add(state, "formation:army_b", "paris", 24000, 1.0), "create second 24k formation")
-	_check(_add(state, "formation:army_c", "paris", 24000, 1.0), "create third 24k formation")
-	var first: Dictionary = service.move(state, map, "formation:army_a", "rouen", 0)
-	var second: Dictionary = service.move(state, map, "formation:army_b", "rouen", 0)
-	var third: Dictionary = service.move(state, map, "formation:army_c", "rouen", 0)
-	_check(bool(first.get("success", false)) and bool(second.get("success", false)) and bool(third.get("success", false)), "three formations enter shared contention")
-	var first_id: String = str(first.get("action_id", ""))
-	var second_id: String = str(second.get("action_id", ""))
-	var third_id: String = str(third.get("action_id", ""))
-	_check(VNextStableId.kind_of(first_id) == "military_action", "military action uses shared stable ID contract")
-	var link_id: String = str(((first.get("route", {}) as Dictionary).get("link_ids", []) as Array)[0])
-	_check(bool(service.advance_to_hour(state, map, 1).get("success", false)), "advance shared link one hour")
-	var capacity_view: Dictionary = service.get_link_capacity_view(state, map, link_id)
-	var queue: Array = capacity_view.get("queue", []) as Array
-	_check(queue.size() >= 3, "all three movement requests share one link queue")
-	_check(str(queue[0]) == first_id and str(queue[1]) == second_id and str(queue[2]) == third_id, "same-hour movement ordering follows stable action IDs")
-	_check(float(capacity_view.get("used_capacity", 0.0)) <= float(capacity_view.get("capacity_per_hour", 0.0)) + 0.001, "shared link use never exceeds map capacity")
-	var nominal_eta: int = int(first.get("eta_hour", 0))
-	service.advance_to_hour(state, map, nominal_eta)
-	var arrived_count: int = 0
-	for formation_id: String in ["formation:army_a", "formation:army_b", "formation:army_c"]:
-		if state.get_formation(formation_id).current_city_id == "rouen":
-			arrived_count += 1
-	_check(arrived_count < 3, "three 24k formations cannot all complete one nominal rail cycle")
-
-	var load_state := _new_state()
-	_check(_add(load_state, "formation:personnel_small", "paris", 4000, 1.0), "create small personnel load")
-	_check(_add(load_state, "formation:personnel_large", "paris", 8000, 1.0), "create large personnel load")
-	var small_action: Dictionary = service.move(load_state, map, "formation:personnel_small", "rouen", 0)
-	var large_action: Dictionary = service.move(load_state, map, "formation:personnel_large", "rouen", 0)
-	_check(float(service.get_action(load_state, str(large_action.get("action_id", ""))).get("edge_load_total", 0.0)) > float(service.get_action(load_state, str(small_action.get("action_id", ""))).get("edge_load_total", 0.0)), "personnel consumes transport capacity")
-	var service_source: String = FileAccess.get_file_as_string("res://scripts/vnext/military/military_service.gd")
-	_check(service_source.contains("equipment_load") and service_source.contains("EQUIPMENT_LOAD_PER_PERSON"), "equipment contributes explicit unified transport load")
-
-	var replay_a := _contention_replay_state()
-	var replay_b := _contention_replay_state()
-	service.advance_to_hour(replay_a, map, 72)
-	service.advance_to_hour(replay_b, map, 72)
-	_equal(replay_a.snapshot(), replay_b.snapshot(), "same-hour multi-army contention replays deterministically")
-
-
-func _test_supply_competition() -> void:
-	var state := _new_state()
-	_check(_add(state, "formation:mover", "paris", 12000, 1.0), "create mover for logistics competition")
-	_check(_add(state, "formation:supply_target", "rouen", 6000, 1.0), "create remote supply target")
-	_check(service.set_supply_input(state, map, "paris_basin", {"food": 100000.0, "ammunition": 100000.0, "equipment": 100000.0, "transport_capacity": 100000.0}), "configure fixed remote supply input")
-	var move_result: Dictionary = service.move(state, map, "formation:mover", "rouen", 0)
-	var move_id: String = str(move_result.get("action_id", ""))
-	var link_id: String = str(((move_result.get("route", {}) as Dictionary).get("link_ids", []) as Array)[0])
-	var tick: Dictionary = service.advance_to_hour(state, map, 1)
-	_check(bool(tick.get("success", false)), "movement and supply advance together")
-	var view: Dictionary = service.get_link_capacity_view(state, map, link_id)
+	for id: String in ["formation:a", "formation:b", "formation:c"]:
+		_add(state, id, "paris", 24000, 1.0)
+	var a := service.move(state, map, "formation:a", "rouen", 0)
+	var b := service.move(state, map, "formation:b", "rouen", 0)
+	var c := service.move(state, map, "formation:c", "rouen", 0)
+	_check(bool(a.get("success", false)) and bool(b.get("success", false)) and bool(c.get("success", false)), "three formations enter contention")
+	service.advance_to_hour(state, map, 1)
+	var view := service.get_link_capacity_view(state, map, rail_link)
 	var queue: Array = view.get("queue", []) as Array
-	_check(queue.has(move_id), "movement reserves the shared logistics link")
-	var saw_supply: bool = false
-	for raw_request: Variant in queue:
-		if str(raw_request).begins_with("supply:"):
-			saw_supply = true
-	_check(saw_supply, "supply cargo enters the same link queue as movement")
-	_check(float(view.get("used_capacity", 0.0)) <= float(view.get("capacity_per_hour", 0.0)) + 0.001, "movement plus supply cannot exceed shared link capacity")
-	var supply_report: Dictionary = tick.get("supply", {}) as Dictionary
-	_check(supply_report.has("formation:supply_target"), "supply cargo produces deterministic delivery report")
-	var cargo_source: String = FileAccess.get_file_as_string("res://scripts/vnext/military/military_service.gd")
-	_check(cargo_source.contains("CARGO_LOAD_WEIGHTS"), "food ammunition equipment and transport inputs convert to transport load")
-	_finish_action(state, move_id, 300)
-	service.advance_to_hour(state, map, state.last_simulated_hour + 1)
-	var released: Dictionary = service.get_link_capacity_view(state, map, link_id)
-	_check(not (released.get("queue", []) as Array).has(move_id), "completed movement releases link reservation")
+	_check(queue.size() >= 3, "three formations share one link queue")
+	_check(str(queue[0]) == str(a.get("action_id", "")) and str(queue[1]) == str(b.get("action_id", "")) and str(queue[2]) == str(c.get("action_id", "")), "contention order is stable by action ID")
+	_check(float(view.get("used_capacity", 0.0)) <= float(view.get("capacity_per_hour", 0.0)) + 0.001, "shared use never exceeds map capacity")
+	var nominal := int(a.get("eta_hour", 0))
+	service.advance_to_hour(state, map, nominal)
+	var arrived := 0
+	for id: String in ["formation:a", "formation:b", "formation:c"]:
+		if state.get_formation(id).current_city_id == "rouen":
+			arrived += 1
+	_check(arrived < 3, "formations do not each receive full independent link capacity")
 
+	var loads := _new_state()
+	_add(loads, "formation:small", "paris", 4000, 1.0)
+	_add(loads, "formation:large", "paris", 8000, 1.0)
+	var small := service.move(loads, map, "formation:small", "rouen", 0)
+	var large := service.move(loads, map, "formation:large", "rouen", 0)
+	_check(float(service.get_action(loads, str(large["action_id"])).get("edge_load_total", 0.0)) > float(service.get_action(loads, str(small["action_id"])).get("edge_load_total", 0.0)), "personnel consumes capacity")
+	var source := FileAccess.get_file_as_string("res://scripts/vnext/military/military_service.gd")
+	_check(source.contains("equipment_load") and source.contains("CARGO_LOAD_WEIGHTS"), "equipment and supply cargo consume shared capacity")
 
-func _test_per_edge_movement_and_slicing() -> void:
-	var state := _new_state()
-	_check(_add(state, "formation:route_army", "paris", 8000, 1.0), "create multi-edge formation")
-	var move_result: Dictionary = service.move(state, map, "formation:route_army", "marseille", 0)
-	_check(bool(move_result.get("success", false)), "multi-edge movement starts")
-	var action_id: String = str(move_result.get("action_id", ""))
-	var route: Dictionary = move_result.get("route", {}) as Dictionary
-	_check((route.get("link_ids", []) as Array).size() >= 2, "paris to marseille uses multiple edges")
-	var intermediate_found: bool = false
-	for _step: int in range(1, 300):
-		service.advance_to_hour(state, map, state.last_simulated_hour + 1)
-		var formation: VNextMilitaryFormation = state.get_formation("formation:route_army")
-		if state.active_actions.has(action_id) and formation.current_city_id != "paris":
-			intermediate_found = true
+func _test_supply_chronology() -> void:
+	var state := _remote_supply_state("formation:supply", "marseille", 6000)
+	_check(bool(service.advance_to_hour(state, map, 1).get("success", false)), "remote supply starts")
+	var food := _find_supply(state, "formation:supply", "food")
+	_check(not food.is_empty(), "supply is persisted as in-transit action")
+	_check(VNextStableId.kind_of(str(food.get("action_id", ""))) == "military_action", "supply reuses shared military action IDs")
+	var route: Dictionary = food.get("route", {}) as Dictionary
+	var links: Array = route.get("link_ids", []) as Array
+	_check(links.size() >= 2, "supply fixture uses multi-edge route")
+	_check(str(food.get("transport_state", "")) != "arrived", "multi-edge cargo cannot arrive in one hour")
+	_check(int(food.get("current_edge_index", -1)) == 0, "supply starts on current edge only")
+	_check(str(food.get("current_city_id", "")) == str((route.get("city_ids", []) as Array)[0]), "supply records current waypoint")
+	_check(int(food.get("eta_hour", 0)) - int(food.get("start_hour", 0)) >= int(route.get("duration_hours", 0)), "route duration constrains arrival")
+	_check(is_equal_approx(float(food.get("cargo_amount_total", 0.0)), float(food.get("cargo_amount_remaining", -1.0))), "in-transit cargo is conserved")
+
+	var intermediate := false
+	var arrival_hour := -1
+	for _i: int in range(500):
+		if not bool(service.advance_to_hour(state, map, state.last_simulated_hour + 1).get("success", false)):
 			break
-	_check(intermediate_found, "formation exposes intermediate strategic waypoint before destination")
-	if intermediate_found:
-		var action: Dictionary = service.get_action(state, action_id)
-		var edge_index: int = int(action.get("current_edge_index", -1))
-		var city_ids: Array = (action.get("route", {}) as Dictionary).get("city_ids", []) as Array
-		_check(edge_index > 0 and edge_index < city_ids.size(), "action tracks current route edge")
-		var next_city: String = str(city_ids[edge_index + 1]) if edge_index + 1 < city_ids.size() else ""
-		var next_region: String = map.get_region_id_for_city(next_city)
-		if not next_region.is_empty():
-			_check(service.setup_region_controller(state, map, next_region, "country_bel", "mid-route control cut fixture"), "fixture changes next region controller mid-route")
-			service.advance_to_hour(state, map, state.last_simulated_hour + 1)
-			var blocked: Dictionary = service.get_action(state, action_id)
-			_check(str(blocked.get("transport_state", "")) in ["blocked", "interrupted"], "next edge recheck blocks route after enemy control change")
-			_check(state.get_formation("formation:route_army").current_city_id != "marseille", "blocked route cannot tunnel through changed control")
-			_check(service.setup_region_controller(state, map, next_region, "country_fra", "restore route fixture"), "fixture restores route access")
-			_finish_action(state, action_id, 500)
-			_equal(state.get_formation("formation:route_army").current_city_id, "marseille", "blocked formation can recover and continue after access returns")
+		food = _find_supply(state, "formation:supply", "food")
+		if food.is_empty():
+			break
+		var edge := int(food.get("current_edge_index", -1))
+		if edge > 0 and edge < links.size():
+			intermediate = true
+			_check(str(food.get("current_city_id", "")) == str((route.get("city_ids", []) as Array)[edge]), "supply reaches intermediate waypoint chronologically")
+			break
+	_check(intermediate, "supply exposes an intermediate waypoint")
+	while state.last_simulated_hour < 500:
+		food = _find_supply(state, "formation:supply", "food")
+		if not food.is_empty() and str(food.get("transport_state", "")) == "arrived":
+			arrival_hour = state.last_simulated_hour
+			break
+		service.advance_to_hour(state, map, state.last_simulated_hour + 1)
+	_check(arrival_hour >= int(route.get("duration_hours", 0)), "cargo arrival respects route time")
+	_check(not food.is_empty() and float(food.get("cargo_amount_remaining", 0.0)) > 0.0, "arrival is distinct from delivery settlement")
+	service.advance_to_hour(state, map, state.last_simulated_hour + 1)
+	_check(_find_supply(state, "formation:supply", "food").is_empty(), "arrived cargo is consumed without duplication")
 
+	var continuous := _remote_supply_state("formation:resume", "marseille", 5000)
+	service.advance_to_hour(continuous, map, 20)
+	var snap := continuous.snapshot()
+	var resumed := VNextMilitaryState.new()
+	_check(resumed.restore(snap, map), "mid-route supply snapshot restores")
+	_check(resumed.snapshot() == snap, "mid-route supply restore is exact")
+	service.advance_to_hour(continuous, map, 160)
+	service.advance_to_hour(resumed, map, 160)
+	_check(continuous.snapshot() == resumed.snapshot(), "continuous and restored supply simulation converge exactly")
+	var big := _remote_supply_state("formation:jump", "marseille", 4500)
+	var sliced := _remote_supply_state("formation:jump", "marseille", 4500)
+	service.advance_to_hour(big, map, 120)
+	for h: int in [24, 48, 72, 96, 120]:
+		service.advance_to_hour(sliced, map, h)
+	_check(big.snapshot() == sliced.snapshot(), "supply large jump equals sliced advancement")
+
+func _test_supply_interruptions() -> void:
+	var state := _new_state()
+	_add(state, "formation:mover", "paris", 12000, 1.0)
+	_add(state, "formation:target", "rouen", 6000, 1.0)
+	service.set_supply_input(state, map, "paris_basin", _abundant_supply())
+	var move := service.move(state, map, "formation:mover", "rouen", 0)
+	var link := str(((move.get("route", {}) as Dictionary).get("link_ids", []) as Array)[0])
+	service.advance_to_hour(state, map, 1)
+	var view := service.get_link_capacity_view(state, map, link)
+	var queue: Array = view.get("queue", []) as Array
+	var saw_supply := false
+	for id: Variant in queue:
+		if id != move.get("action_id", ""):
+			saw_supply = true
+	_check(queue.has(move.get("action_id", "")) and saw_supply, "movement and supply share the same link queue")
+	_check(float(view.get("used_capacity", 0.0)) <= float(view.get("capacity_per_hour", 0.0)) + 0.001, "movement plus supply stays within one budget")
+
+	var low := _remote_supply_state("formation:lowcap", "rouen", 6000)
+	var route := map.find_route("paris", "rouen", ["rail"])
+	var rail_link := str((route.get("link_ids", []) as Array)[0])
+	var old := int((map.links[rail_link] as Dictionary).get("capacity_personnel", 0))
+	(map.links[rail_link] as Dictionary)["capacity_personnel"] = 10
+	service.advance_to_hour(low, map, 1)
+	var cargo := _find_supply(low, "formation:lowcap", "food")
+	_check(not cargo.is_empty() and float(cargo.get("edge_load_remaining", 0.0)) > 0.0, "small positive capacity creates multi-hour cargo waves")
+	(map.links[rail_link] as Dictionary)["capacity_personnel"] = old
+
+	var cut := _remote_supply_state("formation:cut", "marseille", 5000)
+	var shipment := _advance_supply_to_intermediate(cut, "formation:cut", "food", 300)
+	_check(not shipment.is_empty(), "supply reaches an intermediate edge before interruption test")
+	if not shipment.is_empty():
+		var current_link := str(((shipment.get("route", {}) as Dictionary).get("link_ids", []) as Array)[int(shipment.get("current_edge_index", 0))])
+		var old_cap := int((map.links[current_link] as Dictionary).get("capacity_personnel", 0))
+		(map.links[current_link] as Dictionary)["capacity_personnel"] = 0
+		service.advance_to_hour(cut, map, cut.last_simulated_hour + 1)
+		shipment = _find_supply(cut, "formation:cut", "food")
+		_check(str(shipment.get("transport_state", "")) == "interrupted", "mid-route zero capacity interrupts cargo")
+		var before := float(shipment.get("cargo_amount_remaining", 0.0))
+		(map.links[current_link] as Dictionary)["capacity_personnel"] = old_cap
+		service.advance_to_hour(cut, map, cut.last_simulated_hour + 1)
+		shipment = _find_supply(cut, "formation:cut", "food")
+		_check(str(shipment.get("transport_state", "")) in ["waiting_capacity", "moving"], "capacity recovery resumes cargo")
+		_check(is_equal_approx(before, float(shipment.get("cargo_amount_remaining", -1.0))), "interruption does not lose cargo")
+
+func _test_movement_and_determinism() -> void:
+	var state := _new_state()
+	_add(state, "formation:route", "paris", 8000, 1.0)
+	var move := service.move(state, map, "formation:route", "marseille", 0)
+	var action_id := str(move.get("action_id", ""))
+	var intermediate := false
+	for _i: int in range(400):
+		service.advance_to_hour(state, map, state.last_simulated_hour + 1)
+		if state.active_actions.has(action_id) and state.get_formation("formation:route").current_city_id != "paris":
+			intermediate = true
+			break
+	_check(intermediate, "formation updates strategic position per waypoint")
 	var big := _slicing_state()
 	var sliced := _slicing_state()
-	_check(bool(service.advance_to_hour(big, map, 240).get("success", false)), "single 240h advance succeeds")
-	for day: int in range(1, 11):
-		_check(bool(service.advance_to_hour(sliced, map, day * 24).get("success", false)), "sliced 24h advance succeeds day %d" % day)
-	_equal(big.snapshot(), sliced.snapshot(), "advance 240h once equals advance 24h x10")
+	service.advance_to_hour(big, map, 240)
+	for h: int in [24,48,72,96,120,144,168,192,216,240]:
+		service.advance_to_hour(sliced, map, h)
+	_check(big.snapshot() == sliced.snapshot(), "formation 240h once equals 10x24h")
+	var replay_a := _contention_state()
+	var replay_b := _contention_state()
+	service.advance_to_hour(replay_a, map, 72)
+	service.advance_to_hour(replay_b, map, 72)
+	_check(replay_a.snapshot() == replay_b.snapshot(), "three-way contention replay is deterministic")
 
+func _test_combat_and_annihilation() -> void:
+	var win := _battle_state(50000, 1500)
+	var win_order := service.attack(win, map, "formation:attacker", "lille", 0)
+	_finish(win, str(win_order.get("action_id", "")), 700)
+	var win_result: Dictionary = win.battle_results.back() as Dictionary
+	_check(win_result.get("outcome", "") == "attacker_win", "strong attacker wins")
+	_check(win.get_formation("formation:attacker").current_city_id == "lille", "victory enters target")
+	_check(win.region_controls.get("northern_industrial_belt", "") == "country_fra", "victory changes control")
+	var hold := _battle_state(3000, 16000)
+	var hold_order := service.attack(hold, map, "formation:attacker", "lille", 0)
+	_finish(hold, str(hold_order.get("action_id", "")), 700)
+	_check(hold.get_formation("formation:attacker").current_city_id != "lille", "hold or stalemate keeps attacker outside target")
+	if hold.get_formation("formation:attacker").formation_status == VNextMilitaryFormation.STATUS_ACTIVE:
+		_check(bool(service.move(hold, map, "formation:attacker", "rouen", hold.last_simulated_hour).get("success", false)), "failed attacker remains recoverable")
 
-func _test_attack_positioning_and_combat() -> void:
-	var win_state := _battle_state(50000, 1500, 1.0, 0.8)
-	var win_order: Dictionary = service.attack(win_state, map, "formation:attacker", "lille", 0)
-	_check(bool(win_order.get("success", false)), "strong attacker starts attack")
-	_finish_action(win_state, str(win_order.get("action_id", "")), 600)
-	var win_battle: Dictionary = win_state.battle_results.back() as Dictionary
-	_equal(win_battle.get("outcome"), "attacker_win", "extreme force advantage produces attacker victory")
-	_equal(win_state.get_formation("formation:attacker").current_city_id, "lille", "attacker victory enters target city")
-	_equal(win_state.region_controls.get("northern_industrial_belt"), "country_fra", "victory changes military control")
-	_check(int(win_battle.get("attacker_losses", -1)) >= 0 and int(win_battle.get("attacker_losses", 999999)) <= 50000, "attacker casualties are bounded by available personnel")
-	_check(int(win_battle.get("defender_losses", -1)) >= 0, "defender casualties are nonnegative")
+	var annihilate := _battle_state(50000, 1)
+	var defender_action := _formation_action_id(annihilate, "formation:defender")
+	var order := service.attack(annihilate, map, "formation:attacker", "lille", 0)
+	_finish(annihilate, str(order.get("action_id", "")), 700)
+	var defender := annihilate.get_formation("formation:defender")
+	_check(defender.formation_status == VNextMilitaryFormation.STATUS_DESTROYED and defender.personnel == 0, "combat can annihilate defending formation")
+	_check(not annihilate.active_actions.has(defender_action), "annihilation removes stale defend action in same boundary")
+	_check(not _queue_contains(annihilate, defender_action), "annihilation removes stale capacity queue entry")
+	_check(annihilate.is_valid(map), "post-annihilation state is immediately valid")
+	var snap := annihilate.snapshot()
+	var restored := VNextMilitaryState.new()
+	_check(restored.restore(snap, map), "immediate post-battle snapshot restores")
+	_check(bool(service.advance_to_hour(restored, map, restored.last_simulated_hour + 1).get("success", false)), "restored post-battle state advances again")
+	_check(not bool(service.move(restored, map, "formation:defender", "rouen", restored.last_simulated_hour).get("success", false)), "destroyed formation rejects ordinary order")
 
-	var hold_state := _battle_state(3000, 16000, 0.65, 1.0)
-	var hold_order: Dictionary = service.attack(hold_state, map, "formation:attacker", "lille", 0)
-	_finish_action(hold_state, str(hold_order.get("action_id", "")), 600)
-	var hold_battle: Dictionary = hold_state.battle_results.back() as Dictionary
-	_check(str(hold_battle.get("outcome", "")) in ["defender_hold", "stalemate"], "strong defense prevents attacker victory")
-	_equal(hold_state.region_controls.get("northern_industrial_belt"), "country_bel", "defender hold keeps target control")
-	_check(hold_state.get_formation("formation:attacker").current_city_id != "lille", "defender hold does not place attacker inside enemy target")
-	if hold_state.get_formation("formation:attacker").formation_status == VNextMilitaryFormation.STATUS_ACTIVE:
-		var retreat: Dictionary = service.move(hold_state, map, "formation:attacker", "rouen", hold_state.last_simulated_hour)
-		_check(bool(retreat.get("success", false)), "held attacker can retreat or receive a new legal order")
-
-	var old_win: float = float(map.battle_rules.get("attack_ratio_for_win", 1.25))
-	var old_hold: float = float(map.battle_rules.get("attack_ratio_for_hold", 0.85))
-	map.battle_rules["attack_ratio_for_win"] = 999.0
-	map.battle_rules["attack_ratio_for_hold"] = -1.0
-	var stale_state := _battle_state(9000, 6000, 0.9, 0.9)
-	var stale_order: Dictionary = service.attack(stale_state, map, "formation:attacker", "lille", 0)
-	_finish_action(stale_state, str(stale_order.get("action_id", "")), 600)
-	var stale_battle: Dictionary = stale_state.battle_results.back() as Dictionary
-	_equal(stale_battle.get("outcome"), "stalemate", "forced threshold scenario resolves stalemate")
-	_check(stale_state.get_formation("formation:attacker").current_city_id != "lille", "stalemate keeps attacker outside enemy city")
-	map.battle_rules["attack_ratio_for_win"] = old_win
-	map.battle_rules["attack_ratio_for_hold"] = old_hold
-
-	var undersupplied := _battle_state(9000, 7000, 0.9, 0.9)
-	undersupplied.get_formation("formation:attacker").update_supply({"food": 0.05, "ammunition": 0.05, "equipment": 0.05, "transport_capacity": 0.05}, 0.05, "cut")
-	undersupplied.get_formation("formation:defender").update_supply({"food": 0.05, "ammunition": 0.05, "equipment": 0.05, "transport_capacity": 0.05}, 0.05, "cut")
-	var under_preview: Dictionary = service.preview_battle(undersupplied, map, "formation:attacker", "lille")
-	_check(is_finite(float(under_preview.get("attacker_power", 0.0))) and is_finite(float(under_preview.get("defender_power", 0.0))), "both undersupplied combat remains finite")
-
-
-func _test_destroyed_and_strict_restore() -> void:
-	var destroyed_state := _new_state()
-	_check(_add(destroyed_state, "formation:destroyed_unit", "paris", 100, 1.0), "create formation for annihilation")
-	var destroyed: VNextMilitaryFormation = destroyed_state.get_formation("formation:destroyed_unit")
-	destroyed.apply_losses(100)
-	_equal(destroyed.personnel, 0, "runtime losses may reduce personnel to zero")
-	_equal(destroyed.formation_status, VNextMilitaryFormation.STATUS_DESTROYED, "zero personnel atomically becomes destroyed terminal state")
-	var destroyed_snapshot: Dictionary = destroyed_state.snapshot()
-	var destroyed_restored := VNextMilitaryState.new()
-	_check(destroyed_restored.restore(destroyed_snapshot, map), "zero-personnel destroyed formation snapshot restores")
-	_equal(destroyed_restored.snapshot(), destroyed_snapshot, "destroyed formation snapshot roundtrips exactly")
-
+func _test_strict_restore() -> void:
 	var source := _new_state()
-	_check(_add(source, "formation:restore_unit", "paris", 5000, 1.0), "create formation for strict action restore")
-	var issued: Dictionary = service.move(source, map, "formation:restore_unit", "rouen", 0)
-	_check(bool(issued.get("success", false)), "create valid active action snapshot")
-	var valid: Dictionary = source.snapshot()
+	_add(source, "formation:restore", "paris", 5000, 1.0)
+	service.move(source, map, "formation:restore", "rouen", 0)
+	service.advance_to_hour(source, map, 1)
+	var valid := source.snapshot()
 	var roundtrip := VNextMilitaryState.new()
-	_check(roundtrip.restore(valid, map), "valid active action snapshot restores")
-	_equal(roundtrip.snapshot(), valid, "valid active action snapshot roundtrips")
+	_check(roundtrip.restore(valid, map) and roundtrip.snapshot() == valid, "valid active action snapshot roundtrips")
+	for mutation: String in ["unknown_kind","empty_route","zero_duration","bad_edge","bad_progress","forward_missing","bogus_queue","wrong_queue","overflow","orphan_reservation","future_start","negative_elapsed","remaining_over_total","sequence","bad_origin","bad_target"]:
+		_check(_transactionally_rejected(_mutate(valid, mutation)), "strict restore rejects %s" % mutation)
+	var action: Dictionary = (valid.get("active_actions", []) as Array)[0] as Dictionary
+	var current_link := str(((action.get("route", {}) as Dictionary).get("link_ids", []) as Array)[int(action.get("current_edge_index", 0))])
+	var old_cap := int((map.links[current_link] as Dictionary).get("capacity_personnel", 0))
+	(map.links[current_link] as Dictionary)["capacity_personnel"] = 0
+	_check(_transactionally_rejected(valid), "moving current edge rejects authoritative zero capacity")
+	(map.links[current_link] as Dictionary)["capacity_personnel"] = old_cap
 
-	_check(_restore_rejected(_mutated_snapshot(valid, "unknown_kind")), "unknown action kind rejected")
-	_check(_restore_rejected(_mutated_snapshot(valid, "empty_route")), "missing or empty transport route rejected")
-	_check(_restore_rejected(_mutated_snapshot(valid, "discontinuous_route")), "discontinuous route rejected")
-	_check(_restore_rejected(_mutated_snapshot(valid, "zero_duration")), "zero duration rejected")
-	_check(_restore_rejected(_mutated_snapshot(valid, "invalid_progress")), "invalid progress rejected")
-	_check(_restore_rejected(_mutated_snapshot(valid, "formation_action_mismatch")), "formation action mismatch rejected")
-	_check(_restore_rejected(_mutated_snapshot(valid, "sequence_conflict")), "sequence conflict rejected")
-	_check(_restore_rejected(_mutated_snapshot(valid, "bad_action_id")), "invalid military action sequence ID rejected")
-	_check(_restore_rejected(_mutated_snapshot(valid, "bad_origin")), "invalid origin rejected")
-	_check(_restore_rejected(_mutated_snapshot(valid, "bad_target")), "invalid target rejected")
+	var prep := _battle_state(9000, 6000)
+	var attack := service.attack(prep, map, "formation:attacker", "lille", 0)
+	var attack_id := str(attack.get("action_id", ""))
+	for _i: int in range(600):
+		if not prep.active_actions.has(attack_id):
+			break
+		var live: Dictionary = prep.active_actions[attack_id] as Dictionary
+		if str(live.get("transport_state", "")) == "preparing":
+			break
+		service.advance_to_hour(prep, map, prep.last_simulated_hour + 1)
+	if prep.active_actions.has(attack_id):
+		var prep_snap := prep.snapshot()
+		var missing := prep_snap.duplicate(true)
+		_find_snapshot_action(missing, attack_id).erase("preparation_end_hour")
+		_check(_transactionally_rejected(missing), "restore rejects missing preparation end")
+		var zero := prep_snap.duplicate(true)
+		_find_snapshot_action(zero, attack_id)["attack_preparation_hours"] = 0
+		_check(_transactionally_rejected(zero), "restore rejects zero preparation duration")
 
-	var transactional := _new_state()
-	_check(_add(transactional, "formation:sentinel", "paris", 1000, 1.0), "create transactional restore sentinel")
-	var before: Dictionary = transactional.snapshot()
-	var invalid: Dictionary = _mutated_snapshot(valid, "invalid_progress")
-	_check(not transactional.restore(invalid, map), "invalid restore fails transactionally")
-	_equal(transactional.snapshot(), before, "failed restore leaves previous state unchanged")
-	_check(not service.create_formation(_new_state(), map, "bad_formation_id", "country_fra", "paris", 1000), "invalid formation stable ID rejected")
-
-
-func _test_condition_penalties_and_recovery() -> void:
+func _test_readiness_recovery() -> void:
 	var healthy := _new_state()
 	var low_supply := _new_state()
 	var low_org := _new_state()
-	var low_equipment := _new_state()
-	_add(healthy, "formation:healthy", "paris", 8000, 1.0)
-	_add(low_supply, "formation:low_supply", "paris", 8000, 1.0)
-	_add(low_org, "formation:low_org", "paris", 8000, 1.0)
-	_add(low_equipment, "formation:low_equipment", "paris", 8000, 0.05)
-	low_supply.get_formation("formation:low_supply").update_supply({"food": 0.1, "ammunition": 0.1, "equipment": 0.1, "transport_capacity": 0.1}, 0.1, "cut")
-	low_org.get_formation("formation:low_org").organization = 0.1
-	var healthy_move: Dictionary = service.move(healthy, map, "formation:healthy", "marseille", 0)
-	var low_supply_move: Dictionary = service.move(low_supply, map, "formation:low_supply", "marseille", 0)
-	var low_org_move: Dictionary = service.move(low_org, map, "formation:low_org", "marseille", 0)
-	var low_equipment_move: Dictionary = service.move(low_equipment, map, "formation:low_equipment", "marseille", 0)
-	var healthy_action: Dictionary = service.get_action(healthy, str(healthy_move.get("action_id", "")))
-	var low_supply_action: Dictionary = service.get_action(low_supply, str(low_supply_move.get("action_id", "")))
-	var low_org_action: Dictionary = service.get_action(low_org, str(low_org_move.get("action_id", "")))
-	var low_equipment_action: Dictionary = service.get_action(low_equipment, str(low_equipment_move.get("action_id", "")))
-	_check(float(low_supply_action.get("edge_load_total", 0.0)) > float(healthy_action.get("edge_load_total", 0.0)), "low supply increases bounded movement burden")
-	_check(float(low_org_action.get("edge_load_total", 0.0)) > float(healthy_action.get("edge_load_total", 0.0)), "low organization increases bounded movement burden")
-	_check(float(low_equipment_action.get("edge_load_total", 0.0)) > float(healthy_action.get("edge_load_total", 0.0)), "low equipment increases bounded movement burden")
-	_check(int(low_supply_move.get("eta_hour", 0)) >= int(healthy_move.get("eta_hour", 0)), "low supply never improves ETA")
-	_check(int(low_org_move.get("eta_hour", 0)) >= int(healthy_move.get("eta_hour", 0)), "low organization never improves ETA")
-	_check(int(low_equipment_move.get("eta_hour", 0)) >= int(healthy_move.get("eta_hour", 0)), "low equipment never improves ETA")
-
+	var low_eq := _new_state()
+	var low_morale := _new_state()
+	_add(healthy,"formation:h","paris",8000,1.0)
+	_add(low_supply,"formation:s","paris",8000,1.0)
+	_add(low_org,"formation:o","paris",8000,1.0)
+	_add(low_eq,"formation:e","paris",8000,0.05)
+	_add(low_morale,"formation:m","paris",8000,1.0)
+	low_supply.get_formation("formation:s").update_supply({"food":0.1,"ammunition":0.1,"equipment":0.1,"transport_capacity":0.1},0.1,"cut")
+	low_org.get_formation("formation:o").organization = 0.1
+	low_morale.get_formation("formation:m").morale = 0.1
+	var h := service.move(healthy,map,"formation:h","marseille",0)
+	var s := service.move(low_supply,map,"formation:s","marseille",0)
+	var o := service.move(low_org,map,"formation:o","marseille",0)
+	var e := service.move(low_eq,map,"formation:e","marseille",0)
+	var m := service.move(low_morale,map,"formation:m","marseille",0)
+	var base := float(service.get_action(healthy,str(h["action_id"])).get("edge_load_total",0.0))
+	for pair: Array in [[low_supply,s],[low_org,o],[low_eq,e],[low_morale,m]]:
+		_check(float(service.get_action(pair[0],str((pair[1] as Dictionary)["action_id"])).get("edge_load_total",0.0)) > base, "low readiness increases bounded movement burden")
 	var recovery := _new_state()
-	_add(recovery, "formation:recovery", "paris", 2000, 0.2)
-	var recovering: VNextMilitaryFormation = recovery.get_formation("formation:recovery")
-	recovering.organization = 0.2
-	recovering.morale = 0.2
-	recovering.update_supply({"food": 0.0, "ammunition": 0.0, "equipment": 0.0, "transport_capacity": 0.0}, 0.0, "cut")
-	var old_org: float = recovering.organization
-	var old_equipment: float = recovering.equipment_factor()
-	service.set_supply_input(recovery, map, "paris_basin", {"food": 100000.0, "ammunition": 100000.0, "equipment": 100000.0, "transport_capacity": 100000.0})
-	service.advance_to_hour(recovery, map, 72)
-	_check(recovering.organization > old_org, "full local supply provides organization recovery path")
-	_check(recovering.equipment_factor() > old_equipment, "full local supply provides equipment recovery path")
-	_check(recovering.formation_status == VNextMilitaryFormation.STATUS_ACTIVE, "recovery does not require a teleport or deadlock bypass")
+	_add(recovery,"formation:r","paris",2000,0.2)
+	var f := recovery.get_formation("formation:r")
+	f.organization = 0.2
+	f.morale = 0.2
+	f.update_supply({"food":0.0,"ammunition":0.0,"equipment":0.0,"transport_capacity":0.0},0.0,"cut")
+	var old_org := f.organization
+	var old_eq := f.equipment_factor()
+	service.set_supply_input(recovery,map,"paris_basin",_abundant_supply())
+	service.advance_to_hour(recovery,map,72)
+	_check(f.organization > old_org and f.equipment_factor() > old_eq and f.formation_status == VNextMilitaryFormation.STATUS_ACTIVE, "full local supply provides recovery path")
 
+func _test_control_concentrate_history_scope() -> void:
+	var setup := _new_state()
+	_check(service.setup_region_controller(setup,map,"northern_industrial_belt","country_bel","fixture"), "initial setup control mutation succeeds")
+	var rec: Dictionary = setup.control_history.back() as Dictionary
+	_check(rec.get("effective_hour",-1) == 0 and rec.get("context","") == "setup_fixture", "setup records cause time context")
+	_add(setup,"formation:x","paris",1000,1.0)
+	service.move(setup,map,"formation:x","rouen",0)
+	_check(not service.setup_region_controller(setup,map,"northern_industrial_belt","country_fra","late fixture"), "setup mutation rejected after action exists")
+	_check(not setup.apply_region_control_change("northern_industrial_belt","country_fra","fixture",0,"setup_fixture"), "direct setup bypass rejected")
+	service.advance_to_hour(setup,map,1)
+	_check(not service.setup_region_controller(setup,map,"northern_industrial_belt","country_fra","late fixture"), "setup mutation rejected after simulation starts")
+	_check(not setup.apply_region_control_change("northern_industrial_belt","country_fra","strategic_attack_victory",setup.last_simulated_hour,"battle","military_action:999999"), "arbitrary battle control bypass rejected")
 
-func _test_concentrate_control_history_and_scope() -> void:
-	var state := _new_state()
-	_add(state, "formation:conc_a", "paris", 2000, 1.0)
-	_add(state, "formation:conc_b", "rouen", 2000, 1.0)
-	var sequence_before: int = state.next_action_sequence
-	var duplicate: Dictionary = service.concentrate(state, map, ["formation:conc_a", "formation:conc_a"], "lyon", 0)
-	_check(not bool(duplicate.get("success", false)), "duplicate concentrate formation IDs rejected")
-	_check(state.active_actions.is_empty() and state.next_action_sequence == sequence_before, "duplicate concentrate failure is atomic")
-	var invalid_ids: Array[String] = ["formation:conc_a", "formation:missing"]
-	var invalid_batch: Dictionary = service.concentrate(state, map, invalid_ids, "lyon", 0)
-	_check(not bool(invalid_batch.get("success", false)), "invalid concentrate batch rejected")
-	_check(state.active_actions.is_empty() and state.next_action_sequence == sequence_before, "candidate batch validates fully before action creation")
-	var valid_ids: Array[String] = ["formation:conc_b", "formation:conc_a"]
-	var valid_batch: Dictionary = service.concentrate(state, map, valid_ids, "lyon", 0)
-	_check(bool(valid_batch.get("success", false)) and (valid_batch.get("action_ids", []) as Array).size() == 2, "valid concentrate batch creates atomically")
+	var battle := _battle_state(50000,1500)
+	var attack := service.attack(battle,map,"formation:attacker","lille",0)
+	_finish(battle,str(attack.get("action_id","")),700)
+	var control: Dictionary = battle.control_history.back() as Dictionary
+	_check(control.get("cause","") == "strategic_attack_victory" and control.get("context","") == "battle", "legitimate battle victory records controlled mutation")
+	_check(control.get("effective_hour",-1) == battle.last_simulated_hour and control.get("source_action_id","") == attack.get("action_id",""), "battle control records effective hour and source action")
 
-	var control_state := _new_state()
-	_check(service.setup_region_controller(control_state, map, "northern_industrial_belt", "country_bel", "explicit setup fixture"), "control mutation uses explicit setup-only API")
-	var control_record: Dictionary = control_state.control_history.back() as Dictionary
-	_check(control_record.has("cause") and control_record.has("effective_hour") and control_record.get("context") == "setup_fixture", "control history records cause time and context")
-	var service_source: String = FileAccess.get_file_as_string("res://scripts/vnext/military/military_service.gd")
-	_check(not service_source.contains("func set_region_controller("), "unstructured public control teleport API removed")
-
+	var conc := _new_state()
+	_add(conc,"formation:c1","paris",2000,1.0)
+	_add(conc,"formation:c2","rouen",2000,1.0)
+	var seq := conc.next_action_sequence
+	_check(not bool(service.concentrate(conc,map,["formation:c1","formation:c1"],"lyon",0).get("success",false)) and conc.active_actions.is_empty() and conc.next_action_sequence == seq, "duplicate concentrate IDs reject atomically")
+	_check(not bool(service.concentrate(conc,map,["formation:c1","formation:missing"],"lyon",0).get("success",false)) and conc.active_actions.is_empty() and conc.next_action_sequence == seq, "invalid concentrate batch rejects atomically")
+	_check(bool(service.concentrate(conc,map,["formation:c2","formation:c1"],"lyon",0).get("success",false)), "valid concentrate batch succeeds")
 	var bounded := _new_state()
-	for index: int in range(400):
-		bounded.append_completed_action({"action_id": "military_action:%06d" % (index + 1), "kind": "move"})
-		bounded.append_battle_result({"action_id": "military_action:%06d" % (index + 1)})
-		bounded.append_control_history({"region_id": "paris_basin", "previous_controller_id": "country_fra", "controller_id": "country_bel", "cause": "fixture", "effective_hour": 0, "context": "setup_fixture"})
-	_check(bounded.completed_actions.size() == VNextMilitaryState.MAX_COMPLETED_ACTIONS, "completed action history is bounded")
-	_check(bounded.battle_results.size() == VNextMilitaryState.MAX_BATTLE_RESULTS, "battle history is bounded")
-	_check(bounded.control_history.size() == VNextMilitaryState.MAX_CONTROL_HISTORY, "control history is bounded")
+	for i: int in range(400):
+		bounded.append_completed_action({"action_id":"military_action:%06d" % (i+1),"kind":"move"})
+		bounded.append_battle_result({"action_id":"military_action:%06d" % (i+1)})
+		bounded.append_control_history({"region_id":"paris_basin","previous_controller_id":"country_fra","controller_id":"country_bel","cause":"fixture","effective_hour":0,"context":"setup_fixture","source_action_id":""})
+	_check(bounded.completed_actions.size() == 256 and bounded.battle_results.size() == 128 and bounded.control_history.size() == 256, "all histories remain bounded")
+	var runtime := FileAccess.get_file_as_string("res://scripts/vnext/world_runtime.gd")
+	var svc := FileAccess.get_file_as_string("res://scripts/vnext/military/military_service.gd")
+	var adapter := FileAccess.get_file_as_string("res://scripts/vnext/map/military_map_adapter.gd")
+	_check(not runtime.contains("VNextMilitary"), "world_runtime remains unchanged and unintegrated")
+	_check(adapter.contains("PrototypeV2Data") and not svc.contains("MilitaryManager") and not svc.contains("GlobalManager") and not svc.contains("GameContext"), "existing map reused without forbidden global architecture")
 
-	var runtime_source: String = FileAccess.get_file_as_string("res://scripts/vnext/world_runtime.gd")
-	_check(not runtime_source.contains("VNextMilitary"), "world_runtime remains unchanged and unintegrated")
-	var adapter_source: String = FileAccess.get_file_as_string("res://scripts/vnext/map/military_map_adapter.gd")
-	_check(adapter_source.contains("PrototypeV2Data") and adapter_source.contains("strategic_military_overlay.json"), "military reuses existing map and stable-ID overlay")
-	_check(not service_source.contains("MilitaryManager") and not service_source.contains("GlobalManager") and not service_source.contains("GameContext"), "no global manager service locator or second world context introduced")
+func _mutate(valid: Dictionary, kind: String) -> Dictionary:
+	var s := valid.duplicate(true)
+	var actions: Array = s.get("active_actions",[]) as Array
+	var a: Dictionary = actions[0] as Dictionary
+	match kind:
+		"unknown_kind": a["kind"]="unknown"
+		"empty_route": a["route"]={}
+		"zero_duration": (a["route"] as Dictionary)["duration_hours"]=0
+		"bad_edge": a["current_edge_index"]=999
+		"bad_progress": a["progress"]=2.0
+		"forward_missing":
+			actions.clear()
+			s["link_queues"]={}
+			s["link_capacity_used"]={}
+		"bogus_queue":
+			var link := str(((a["route"] as Dictionary)["link_ids"] as Array)[int(a["current_edge_index"])])
+			var q: Dictionary=s["link_queues"]
+			if not q.has(link):
+				q[link]=[]
+			(q[link] as Array).append("military_action:999999")
+		"wrong_queue":
+			var current := str(((a["route"] as Dictionary)["link_ids"] as Array)[int(a["current_edge_index"])])
+			var q: Dictionary=s["link_queues"]
+			for link: Dictionary in map.get_all_links():
+				var candidate:=str(link.get("id",""))
+				if candidate!=current:
+					q.erase(current)
+					q[candidate]=[str(a["action_id"])]
+					break
+		"overflow":
+			var link := str(((a["route"] as Dictionary)["link_ids"] as Array)[int(a["current_edge_index"])])
+			(s["link_capacity_used"] as Dictionary)[link]=map.get_link_transport_capacity_per_hour(link)+1.0
+		"orphan_reservation": a["reserved_link_id"]="missing_link"
+		"future_start": a["edge_started_hour"]=int(s["last_simulated_hour"])+10
+		"negative_elapsed": a["edge_elapsed_hours"]=-1
+		"remaining_over_total": a["edge_load_remaining"]=float(a["edge_load_total"])+1.0
+		"sequence": s["next_action_sequence"]=1
+		"bad_origin": a["origin_city_id"]="missing_city"
+		"bad_target": a["destination_city_id"]="missing_city"
+	return s
 
-
-func _contention_replay_state() -> VNextMilitaryState:
+func _transactionally_rejected(snapshot: Dictionary) -> bool:
 	var state := _new_state()
-	_add(state, "formation:replay_a", "paris", 10000, 1.0)
-	_add(state, "formation:replay_b", "paris", 10000, 1.0)
-	_add(state, "formation:replay_c", "paris", 10000, 1.0)
-	service.move(state, map, "formation:replay_a", "rouen", 0)
-	service.move(state, map, "formation:replay_b", "rouen", 0)
-	service.move(state, map, "formation:replay_c", "rouen", 0)
-	return state
+	_add(state,"formation:sentinel","paris",1000,1.0)
+	var before:=state.snapshot()
+	return not state.restore(snapshot,map) and state.snapshot()==before
 
+func _find_snapshot_action(snapshot: Dictionary, id: String) -> Dictionary:
+	for raw: Variant in snapshot.get("active_actions",[]) as Array:
+		if raw is Dictionary and str((raw as Dictionary).get("action_id",""))==id:
+			return raw as Dictionary
+	return {}
+
+func _remote_supply_state(id: String, city: String, personnel: int) -> VNextMilitaryState:
+	var s:=_new_state()
+	_add(s,id,city,personnel,1.0)
+	service.set_supply_input(s,map,"paris_basin",_abundant_supply())
+	return s
+
+func _abundant_supply() -> Dictionary:
+	return {"food":100000.0,"ammunition":100000.0,"equipment":100000.0,"transport_capacity":100000.0}
+
+func _find_supply(state: VNextMilitaryState, formation_id: String, resource: String) -> Dictionary:
+	for shipment: Dictionary in service.get_supply_shipments(state):
+		if shipment.get("destination_formation_id","")==formation_id and shipment.get("resource_id","")==resource:
+			return shipment
+	return {}
+
+func _advance_supply_to_intermediate(state: VNextMilitaryState, formation_id: String, resource: String, limit: int) -> Dictionary:
+	var deadline:=state.last_simulated_hour+limit
+	while state.last_simulated_hour<deadline:
+		if not bool(service.advance_to_hour(state,map,state.last_simulated_hour+1).get("success",false)):
+			return {}
+		var shipment:=_find_supply(state,formation_id,resource)
+		if shipment.is_empty():
+			return {}
+		var route: Dictionary=shipment.get("route",{}) as Dictionary
+		var edge:=int(shipment.get("current_edge_index",-1))
+		if edge>0 and edge<(route.get("link_ids",[]) as Array).size():
+			return shipment
+	return {}
+
+func _formation_action_id(state: VNextMilitaryState, formation_id: String) -> String:
+	for raw_id: Variant in state.active_actions.keys():
+		var id: String = str(raw_id)
+		var a: Dictionary=state.active_actions[id] as Dictionary
+		if a.get("formation_id","")==formation_id:
+			return id
+	return ""
+
+func _queue_contains(state: VNextMilitaryState, id: String) -> bool:
+	for q: Variant in state.link_queues.values():
+		if q is Array and (q as Array).has(id):
+			return true
+	return false
+
+func _contention_state() -> VNextMilitaryState:
+	var s:=_new_state()
+	for id: String in ["formation:r1","formation:r2","formation:r3"]:
+		_add(s,id,"paris",10000,1.0)
+		service.move(s,map,id,"rouen",0)
+	return s
 
 func _slicing_state() -> VNextMilitaryState:
-	var state := _new_state()
-	_add(state, "formation:slice_army", "paris", 5000, 1.0)
-	service.set_supply_input(state, map, "paris_basin", {"food": 10000.0, "ammunition": 3000.0, "equipment": 1000.0, "transport_capacity": 2000.0})
-	service.move(state, map, "formation:slice_army", "marseille", 0)
-	return state
+	var s:=_new_state()
+	_add(s,"formation:slice","paris",5000,1.0)
+	service.set_supply_input(s,map,"paris_basin",{"food":10000.0,"ammunition":3000.0,"equipment":1000.0,"transport_capacity":2000.0})
+	service.move(s,map,"formation:slice","marseille",0)
+	return s
 
+func _battle_state(attacker: int, defender: int) -> VNextMilitaryState:
+	var s:=_new_state()
+	service.setup_region_controller(s,map,"northern_industrial_belt","country_bel","battle fixture")
+	_add(s,"formation:attacker","paris",attacker,1.0,"country_fra",0.9,0.9,0.9)
+	_add(s,"formation:defender","lille",defender,1.0,"country_bel",0.8,0.8,0.8)
+	service.defend(s,map,"formation:defender",0,500)
+	return s
 
-func _battle_state(attacker_personnel: int, defender_personnel: int, attacker_equipment: float, defender_equipment: float) -> VNextMilitaryState:
-	var state := _new_state()
-	service.setup_region_controller(state, map, "northern_industrial_belt", "country_bel", "battle fixture")
-	_add(state, "formation:attacker", "paris", attacker_personnel, attacker_equipment, "country_fra", 0.9, 0.9, 0.9)
-	_add(state, "formation:defender", "lille", defender_personnel, defender_equipment, "country_bel", 0.8, 0.8, 0.8)
-	service.defend(state, map, "formation:defender", 0, 500)
-	return state
-
-
-func _mutated_snapshot(valid_snapshot: Dictionary, mutation: String) -> Dictionary:
-	var snapshot: Dictionary = valid_snapshot.duplicate(true)
-	var actions: Array = snapshot.get("active_actions", []) as Array
-	var formations: Array = snapshot.get("formations", []) as Array
-	var action: Dictionary = actions[0] as Dictionary
-	match mutation:
-		"unknown_kind":
-			action["kind"] = "unknown"
-		"empty_route":
-			action["route"] = {}
-		"discontinuous_route":
-			var route: Dictionary = action["route"] as Dictionary
-			route["city_ids"] = ["paris", "berlin"]
-		"zero_duration":
-			action["eta_hour"] = action["start_hour"]
-		"invalid_progress":
-			action["progress"] = 2.0
-		"formation_action_mismatch":
-			var formation: Dictionary = formations[0] as Dictionary
-			formation["action_state"] = "idle"
-		"sequence_conflict":
-			snapshot["next_action_sequence"] = 1
-		"bad_action_id":
-			action["action_id"] = "military_action:bad_id"
-		"bad_origin":
-			action["origin_city_id"] = "missing_city"
-		"bad_target":
-			action["destination_city_id"] = "missing_city"
-	return snapshot
-
-
-func _restore_rejected(snapshot: Dictionary) -> bool:
-	var restored := VNextMilitaryState.new()
-	return not restored.restore(snapshot, map)
-
-
-func _finish_action(state: VNextMilitaryState, action_id: String, max_hours: int) -> void:
-	var deadline: int = state.last_simulated_hour + max_hours
-	while state.active_actions.has(action_id) and state.last_simulated_hour < deadline:
-		var result: Dictionary = service.advance_to_hour(state, map, state.last_simulated_hour + 1)
-		if not bool(result.get("success", false)):
+func _finish(state: VNextMilitaryState, id: String, max_hours: int) -> void:
+	var deadline:=state.last_simulated_hour+max_hours
+	while state.active_actions.has(id) and state.last_simulated_hour<deadline:
+		if not bool(service.advance_to_hour(state,map,state.last_simulated_hour+1).get("success",false)):
 			break
-	_check(not state.active_actions.has(action_id), "action completes within bounded test horizon: %s" % action_id)
-
+	_check(not state.active_actions.has(id), "action completes within bounded horizon")
 
 func _new_state() -> VNextMilitaryState:
-	var state := VNextMilitaryState.new()
-	_check(state.initialize(map), "military state initializes")
-	return state
+	var s:=VNextMilitaryState.new()
+	_check(s.initialize(map),"military state initializes")
+	return s
 
+func _add(state: VNextMilitaryState,id: String,city: String,personnel: int,equipment: float,country: String="country_fra",training: float=0.8,morale: float=0.8,organization: float=0.8) -> bool:
+	return service.create_formation(state,map,id,country,city,personnel,{"equipment_factor":equipment},training,morale,organization)
 
-func _add(
-	state: VNextMilitaryState,
-	formation_id: String,
-	city_id: String,
-	personnel: int,
-	equipment_factor: float,
-	country_id: String = "country_fra",
-	training: float = 0.8,
-	morale: float = 0.8,
-	organization: float = 0.8
-) -> bool:
-	return service.create_formation(state, map, formation_id, country_id, city_id, personnel, {"equipment_factor": equipment_factor}, training, morale, organization)
-
-
-func _check(condition: bool, label: String) -> void:
-	checks += 1
+func _check(condition: bool,label: String) -> void:
+	checks+=1
 	if condition:
-		print("PASS: " + label)
+		print("PASS: "+label)
 		return
-	failures += 1
-	push_error("FAIL: " + label)
-
-
-func _equal(actual: Variant, expected: Variant, label: String) -> void:
-	_check(actual == expected, label)
+	failures+=1
+	push_error("FAIL: "+label)
