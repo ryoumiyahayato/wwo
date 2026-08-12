@@ -35,33 +35,33 @@ Largest files and high-cardinality structures are preserved in the machine-reada
 
 ## Load benchmark
 
-- Full world-data load (PrototypeV2Data.load_all): median 73.882 ms (min 69.187, max 104.070; n=7)
-- Geometry cache JSON parse: median 49.292 ms (min 39.239, max 55.718; n=7)
-- City-detail index JSON parse: median 1.894 ms (min 1.443, max 2.248; n=7)
+- Full world-data load (PrototypeV2Data.load_all): median 74.162 ms (min 68.033, max 80.034; n=7)
+- Geometry cache JSON parse: median 47.610 ms (min 41.175, max 55.827; n=7)
+- City-detail index JSON parse: median 2.259 ms (min 1.658, max 3.695; n=7)
 
 Per-file parse distributions are in runtime_file_parse in the JSON artifact.
 
 ## Geometry, index, and map query benchmark
 
-- Canvas setup (geometry conversion + ID indexes + spatial indexes + transport tie cache): median 59.076 ms (min 57.747, max 66.556; n=5)
-- View world: median 0.038 ms (min 0.036, max 0.048; n=5); visible counts { "countries": 1, "administrative_units": 0, "regions": 0, "cities": 0, "ports": 0, "institutions": 0, "organizations": 0, "rail": 0, "road": 0, "shipping": 0, "labels": 0 }.
-- View europe: median 0.037 ms (min 0.036, max 0.044; n=5); visible counts { "countries": 2, "administrative_units": 0, "regions": 0, "cities": 0, "ports": 0, "institutions": 0, "organizations": 0, "rail": 0, "road": 0, "shipping": 0, "labels": 0 }.
-- View france: median 0.057 ms (min 0.054, max 7.459; n=5); visible counts { "countries": 1, "administrative_units": 0, "regions": 0, "cities": 0, "ports": 0, "institutions": 0, "organizations": 0, "rail": 0, "road": 0, "shipping": 0, "labels": 0 }.
-- View player_location: median 0.075 ms (min 0.072, max 14.393; n=5); visible counts { "countries": 3, "administrative_units": 1, "regions": 1, "cities": 3, "ports": 2, "institutions": 4, "organizations": 4, "rail": 1, "road": 1, "shipping": 1, "labels": 0 }.
-- Representative ID lookups: median 5.914 ms (min 5.073, max 6.870; n=5) (5000 operations/sample).
-- Representative map point query: median 7.887 ms (min 7.581, max 8.636; n=5)
-- City-detail index configure: median 5.156 ms (min 5.060, max 6.559; n=5)
-- City-detail cold viewport query: median 177.710 ms (min 175.080, max 184.300; n=5)
-- City-detail warm viewport query: median 1.383 ms (min 1.353, max 1.597; n=5)
+- Canvas setup (geometry conversion + ID indexes + spatial indexes + transport tie cache): median 56.497 ms (min 55.452, max 63.001; n=5)
+- View world: median 0.037 ms (min 0.035, max 0.045; n=5); visible counts { "countries": 1, "administrative_units": 0, "regions": 0, "cities": 0, "ports": 0, "institutions": 0, "organizations": 0, "rail": 0, "road": 0, "shipping": 0, "labels": 0 }.
+- View europe: median 0.038 ms (min 0.038, max 0.044; n=5); visible counts { "countries": 2, "administrative_units": 0, "regions": 0, "cities": 0, "ports": 0, "institutions": 0, "organizations": 0, "rail": 0, "road": 0, "shipping": 0, "labels": 0 }.
+- View france: median 0.058 ms (min 0.054, max 7.516; n=5); visible counts { "countries": 1, "administrative_units": 0, "regions": 0, "cities": 0, "ports": 0, "institutions": 0, "organizations": 0, "rail": 0, "road": 0, "shipping": 0, "labels": 0 }.
+- View player_location: median 0.076 ms (min 0.072, max 14.272; n=5); visible counts { "countries": 3, "administrative_units": 1, "regions": 1, "cities": 3, "ports": 2, "institutions": 4, "organizations": 4, "rail": 1, "road": 1, "shipping": 1, "labels": 0 }.
+- Representative ID lookups: median 4.701 ms (min 4.676, max 4.739; n=5) (5000 operations/sample).
+- Representative map point query: median 7.571 ms (min 7.538, max 7.615; n=5)
+- City-detail index configure: median 4.974 ms (min 4.838, max 5.367; n=5)
+- City-detail cold viewport query: median 174.222 ms (min 169.078, max 180.672; n=5)
+- City-detail warm viewport query: median 1.377 ms (min 1.327, max 1.735; n=5)
 
 ## Synthetic scaling
 
 | Scale | Records | JSON bytes | Parse median | Index median | Lookup median |
 |---:|---:|---:|---:|---:|---:|
-| 1x | 1000 | 70.4 KiB | median 2.868 ms (min 2.550, max 3.209; n=5) | median 3.195 ms (min 3.007, max 3.416; n=5) | median 1.904 ms (min 1.895, max 1.955; n=5) |
-| 2x | 2000 | 141.4 KiB | median 5.973 ms (min 4.927, max 6.751; n=5) | median 6.673 ms (min 6.516, max 6.988; n=5) | median 2.042 ms (min 2.020, max 2.172; n=5) |
-| 5x | 5000 | 354.6 KiB | median 16.735 ms (min 12.101, max 18.463; n=5) | median 19.080 ms (min 18.165, max 21.075; n=5) | median 2.866 ms (min 2.737, max 3.224; n=5) |
-| 10x | 10000 | 713.8 KiB | median 32.269 ms (min 24.365, max 35.098; n=5) | median 41.076 ms (min 40.103, max 43.896; n=5) | median 2.743 ms (min 2.545, max 3.340; n=5) |
+| 1x | 1000 | 70.4 KiB | median 3.057 ms (min 2.926, max 3.491; n=5) | median 3.429 ms (min 3.124, max 3.901; n=5) | median 2.213 ms (min 2.104, max 2.469; n=5) |
+| 2x | 2000 | 141.4 KiB | median 5.935 ms (min 4.954, max 6.580; n=5) | median 7.828 ms (min 7.108, max 8.305; n=5) | median 2.145 ms (min 2.095, max 2.374; n=5) |
+| 5x | 5000 | 354.6 KiB | median 15.850 ms (min 12.299, max 24.055; n=5) | median 19.660 ms (min 19.009, max 24.400; n=5) | median 2.328 ms (min 2.250, max 2.578; n=5) |
+| 10x | 10000 | 713.8 KiB | median 32.136 ms (min 25.463, max 34.772; n=5) | median 42.682 ms (min 41.543, max 47.722; n=5) | median 6.925 ms (min 4.122, max 9.650; n=5) |
 
 Interpretation is intentionally conservative: use the measured distribution to decide when a future optimization is justified; no CI gate is set here.
 
@@ -112,7 +112,7 @@ Interpretation is intentionally conservative: use the measured distribution to d
 - 真实 process RSS/heap 未可靠测量：NOT MEASURED；decoded_data_bytes_estimate 是递归估算，不是 allocator 计数。
 - cold parse 是同一进程的 first-pass 样本，未重启进程，也未控制 OS 文件缓存。
 - benchmark 未改变生产 runtime，也未把 synthetic 数据写入正式 world data。
-- 远端 live master fetch 在本次环境中无法连接 GitHub；任务分支基于本地 origin/master 4b738ab8b0a21e8685aae95381717e9efd2327a8。
+- benchmark 使用固定的 repository-local 输入；live master fetch/push 状态属于交付环境，不影响测量结果。起始 master SHA 为 4b738ab8b0a21e8685aae95381717e9efd2327a8。
 
 Production code modified: NO
 Benchmark tooling is under tools/ and its harness test is under tests/; the JSON result is a local ignored artifact.

@@ -272,7 +272,7 @@ func _build_payload() -> Dictionary:
 			"真实 process RSS/heap 未可靠测量：NOT MEASURED；decoded_data_bytes_estimate 是递归估算，不是 allocator 计数。",
 			"cold parse 是同一进程的 first-pass 样本，未重启进程，也未控制 OS 文件缓存。",
 			"benchmark 未改变生产 runtime，也未把 synthetic 数据写入正式 world data。",
-			"远端 live master fetch 在本次环境中无法连接 GitHub；任务分支基于本地 origin/master 4b738ab8b0a21e8685aae95381717e9efd2327a8。",
+			"benchmark 使用固定的 repository-local 输入；live master fetch/push 状态属于交付环境，不影响测量结果。起始 master SHA 为 4b738ab8b0a21e8685aae95381717e9efd2327a8。",
 		],
 		"benchmark_elapsed_ms": float(Time.get_ticks_usec() - started_usec) / 1000.0,
 	}
