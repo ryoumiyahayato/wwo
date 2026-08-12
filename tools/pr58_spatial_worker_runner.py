@@ -11,3 +11,6 @@ if old not in text:
     raise RuntimeError("bootstrap matcher line not found")
 bootstrap.write_text(text.replace(old, new, 1), encoding="utf-8", newline="\n")
 runpy.run_path(str(bootstrap), run_name="__main__")
+
+fast_query = Path(__file__).with_name("pr58_spatial_effective_capacity_query.py")
+runpy.run_path(str(fast_query), run_name="__main__")
