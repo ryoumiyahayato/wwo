@@ -1,0 +1,72 @@
+name: PR65 reconcile after PR64
+
+on:
+  push:
+    branches:
+      - chore/world-data-foundation-audit-20260812
+    paths:
+      - ".github/workflows/pr65-reconcile-after-pr64.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout PR65 branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: chore/world-data-foundation-audit-20260812
+
+      - name: Merge master, replay official audit, and publish exact outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin master
+
+          git merge --no-ff origin/master -m "Merge master into PR #65 after PR #64"
+
+          out="local-artifacts/world-data-audit"
+          python3 tools/world_data/validate_world_data.py \
+            --root . --data-root data/world_map --output-dir "$out" --allow-errors
+          python3 tools/world_data/build_batch2_artifacts.py --root . --output-dir "$out"
+          python3 tools/world_data/build_batch3_contracts.py --root . --output-dir "$out"
+          python3 tools/world_data/build_batch4_run_manifest.py --root . --output-dir "$out"
+
+          python3 - <<'PY'
+          import json
+          from collections import Counter
+          from pathlib import Path
+          findings = json.loads(Path("local-artifacts/world-data-audit/findings.json").read_text(encoding="utf-8"))
+          counts = Counter(item.get("code") for item in findings)
+          expected = {"SELF_INTERSECTING_RING": 104, "PLACEHOLDER_FOREIGN_KEY": 6}
+          if len(findings) != 110 or {k: counts[k] for k in expected} != expected or set(counts) != set(expected):
+              raise SystemExit(f"unexpected source finding set: total={len(findings)} counts={dict(counts)}")
+          print(f"source findings preserved: total={len(findings)} counts={dict(counts)}")
+          PY
+
+          set +e
+          python3 tools/world_data/validate_world_data.py \
+            --root . --data-root data/world_map --output-dir /tmp/pr65-strict
+          strict_rc=$?
+          set -e
+          if [ "$strict_rc" -ne 1 ]; then
+            echo "strict validator expected exit 1 from retained source findings, got $strict_rc"
+            exit 1
+          fi
+
+          python3 -m unittest discover -s tests/world_data -p 'test_*.py'
+          python3 -m compileall -q tools/world_data tests/world_data
+          git diff --check
+
+          git add local-artifacts/world-data-audit
+          rm .github/workflows/pr65-reconcile-after-pr64.yml
+          git add -A .github/workflows/pr65-reconcile-after-pr64.yml
+
+          git commit -m "chore: reconcile world-data audit after PR #64"
+          git push origin HEAD:chore/world-data-foundation-audit-20260812
