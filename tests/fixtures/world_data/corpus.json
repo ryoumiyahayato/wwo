@@ -1,0 +1,229 @@
+{
+  "corpus_id": "wwo-world-data-golden-fixtures-batch-1",
+  "format_version": 1,
+  "source": {
+    "repository": "ryoumiyahayato/wwo",
+    "master_sha": "4b738ab8b0a21e8685aae95381717e9efd2327a8",
+    "data_root": "data/world_map",
+    "policy": "fixture-only; never authoritative gameplay data"
+  },
+  "fixtures": [
+    {
+      "fixture_id": "valid-minimal-country-region-city",
+      "category": "minimal_valid_hierarchy",
+      "classification": "VALID",
+      "expected": {"result": "VALID", "codes": []},
+      "provenance": {
+        "source_record_ids": {"countries.json": ["country_fra"], "regions.json": ["paris_basin"], "cities.json": ["paris"]},
+        "transform": "Selected one real country, one gameplay macro-region, and its capital; removed presentation-only fields while preserving IDs, hierarchy, coordinates, and loader-facing object levels."
+      },
+      "documents": {
+        "countries.json": {"prototype_only": true, "schema_version": 4, "countries": [{"id": "country_fra", "stable_id": "country_fra", "data_code": "FRA", "display_name_zh": "法国第三共和国", "name": "法国第三共和国", "native_name": "République française", "object_level": "country", "label_anchor": [2.5523, 46.6961], "capital_city_id": "paris"}]},
+        "regions.json": {"prototype_only": true, "schema_version": 4, "regions": [{"id": "paris_basin", "stable_id": "paris_basin", "name": "巴黎盆地", "native_name": "Bassin parisien", "object_level": "region", "parent_country_id": "country_fra", "label_anchor": [2.35, 48.55], "administrative_unit_ids": [], "institution_ids": []}], "administrative_units": []},
+        "cities.json": {"prototype_only": true, "schema_version": 3, "cities": [{"id": "paris", "name": "巴黎", "object_level": "city", "parent_country_id": "country_fra", "parent_region_id": "paris_basin", "lon_lat": [2.3522, 48.8566]}]}
+      }
+    },
+    {
+      "fixture_id": "valid-port-and-shipping",
+      "category": "port_shipping",
+      "classification": "VALID",
+      "expected": {"result": "VALID", "codes": []},
+      "provenance": {
+        "source_record_ids": {"countries.json": ["country_fra", "british_empire"], "regions.json": ["normandy"], "cities.json": ["le_havre", "london"], "ports.json": ["port_le_havre", "port_london"], "shipping_routes.json": ["shipping_channel"]},
+        "transform": "Selected the real English Channel port pair and route; retained endpoint IDs and waypoint geometry, minimizing labels and zoom metadata."
+      },
+      "documents": {
+        "countries.json": {"prototype_only": true, "schema_version": 4, "countries": [{"id": "country_fra", "name": "法国第三共和国", "object_level": "country"}, {"id": "british_empire", "name": "大英帝国", "object_level": "country"}]},
+        "regions.json": {"prototype_only": true, "schema_version": 4, "regions": [{"id": "normandy", "name": "诺曼底", "object_level": "region", "parent_country_id": "country_fra"}], "administrative_units": []},
+        "cities.json": {"prototype_only": true, "schema_version": 3, "cities": [{"id": "le_havre", "name": "勒阿弗尔", "object_level": "city", "parent_country_id": "country_fra", "parent_region_id": "normandy", "lon_lat": [0.1079, 49.4944]}, {"id": "london", "name": "伦敦", "object_level": "city", "parent_country_id": "british_empire", "parent_region_id": "", "lon_lat": [0.0, 51.5]}]},
+        "ports.json": {"prototype_only": true, "schema_version": 2, "ports": [{"id": "port_le_havre", "name": "勒阿弗尔港", "object_level": "port", "city_id": "le_havre", "parent_country_id": "country_fra", "parent_region_id": "normandy", "lon_lat": [0.1, 49.49]}, {"id": "port_london", "name": "伦敦港", "object_level": "port", "city_id": "london", "parent_country_id": "british_empire", "parent_region_id": "", "lon_lat": [0.0, 51.5]}]},
+        "shipping_routes.json": {"prototype_only": true, "schema_version": 2, "type": "shipping", "routes": [{"id": "shipping_channel", "type": "shipping", "from_port_id": "port_le_havre", "to_port_id": "port_london", "waypoints_lon_lat": [[0.1, 49.49], [-0.7, 50.1], [-0.2, 51.1], [0.0, 51.5]]}]}
+      }
+    },
+    {
+      "fixture_id": "valid-road-graph",
+      "category": "road_graph",
+      "classification": "VALID",
+      "expected": {"result": "VALID", "codes": []},
+      "provenance": {
+        "source_record_ids": {"countries.json": ["country_fra"], "regions.json": ["paris_basin"], "cities.json": ["paris", "rouen", "lille"], "road_segments.json": ["road_rouen_paris", "road_lille_rouen"]},
+        "transform": "Selected two real road links and only their endpoint cities; preserved directed endpoint topology."
+      },
+      "documents": {
+        "countries.json": {"prototype_only": true, "schema_version": 4, "countries": [{"id": "country_fra", "name": "法国第三共和国", "object_level": "country"}]},
+        "regions.json": {"prototype_only": true, "schema_version": 4, "regions": [{"id": "paris_basin", "name": "巴黎盆地", "object_level": "region", "parent_country_id": "country_fra"}], "administrative_units": []},
+        "cities.json": {"prototype_only": true, "schema_version": 3, "cities": [{"id": "paris", "name": "巴黎", "object_level": "city", "parent_country_id": "country_fra", "parent_region_id": "paris_basin", "lon_lat": [2.3522, 48.8566]}, {"id": "rouen", "name": "鲁昂", "object_level": "city", "parent_country_id": "country_fra", "parent_region_id": "paris_basin", "lon_lat": [1.0993, 49.4431]}, {"id": "lille", "name": "里尔", "object_level": "city", "parent_country_id": "country_fra", "parent_region_id": "paris_basin", "lon_lat": [3.0573, 50.6292]}]},
+        "road_segments.json": {"prototype_only": true, "schema_version": 2, "type": "road", "segments": [{"id": "road_rouen_paris", "type": "road", "from_city_id": "rouen", "to_city_id": "paris"}, {"id": "road_lille_rouen", "type": "road", "from_city_id": "lille", "to_city_id": "rouen"}]}
+      }
+    },
+    {
+      "fixture_id": "valid-rail-graph",
+      "category": "rail_graph",
+      "classification": "VALID",
+      "expected": {"result": "VALID", "codes": []},
+      "provenance": {
+        "source_record_ids": {"countries.json": ["country_fra"], "regions.json": ["paris_basin"], "cities.json": ["paris", "lille", "rouen"], "rail_segments.json": ["rail_paris_lille", "rail_paris_rouen"]},
+        "transform": "Selected two real rail links and endpoint cities; omitted labels and zoom-only presentation fields."
+      },
+      "documents": {
+        "countries.json": {"prototype_only": true, "schema_version": 4, "countries": [{"id": "country_fra", "name": "法国第三共和国", "object_level": "country"}]},
+        "regions.json": {"prototype_only": true, "schema_version": 4, "regions": [{"id": "paris_basin", "name": "巴黎盆地", "object_level": "region", "parent_country_id": "country_fra"}], "administrative_units": []},
+        "cities.json": {"prototype_only": true, "schema_version": 3, "cities": [{"id": "paris", "name": "巴黎", "object_level": "city", "parent_country_id": "country_fra", "parent_region_id": "paris_basin", "lon_lat": [2.3522, 48.8566]}, {"id": "lille", "name": "里尔", "object_level": "city", "parent_country_id": "country_fra", "parent_region_id": "paris_basin", "lon_lat": [3.0573, 50.6292]}, {"id": "rouen", "name": "鲁昂", "object_level": "city", "parent_country_id": "country_fra", "parent_region_id": "paris_basin", "lon_lat": [1.0993, 49.4431]}]},
+        "rail_segments.json": {"prototype_only": true, "schema_version": 2, "type": "rail", "segments": [{"id": "rail_paris_lille", "type": "rail", "from_city_id": "paris", "to_city_id": "lille"}, {"id": "rail_paris_rouen", "type": "rail", "from_city_id": "paris", "to_city_id": "rouen"}]}
+      }
+    },
+    {
+      "fixture_id": "valid-multimodal-transport",
+      "category": "multimodal_transport",
+      "classification": "VALID",
+      "expected": {"result": "VALID", "codes": []},
+      "provenance": {
+        "source_record_ids": {"countries.json": ["country_fra", "british_empire"], "regions.json": ["paris_basin", "normandy"], "cities.json": ["paris", "rouen", "le_havre", "london"], "ports.json": ["port_le_havre", "port_london"], "road_segments.json": ["road_rouen_paris"], "rail_segments.json": ["rail_paris_rouen", "rail_rouen_le_havre"], "shipping_routes.json": ["shipping_channel"]},
+        "transform": "Union of the smallest real endpoint and route samples needed to exercise road, rail, port, and shipping links in one connected multimodal bundle."
+      },
+      "documents": {
+        "countries.json": {"prototype_only": true, "schema_version": 4, "countries": [{"id": "country_fra", "name": "法国第三共和国", "object_level": "country"}, {"id": "british_empire", "name": "大英帝国", "object_level": "country"}]},
+        "regions.json": {"prototype_only": true, "schema_version": 4, "regions": [{"id": "paris_basin", "name": "巴黎盆地", "object_level": "region", "parent_country_id": "country_fra"}, {"id": "normandy", "name": "诺曼底", "object_level": "region", "parent_country_id": "country_fra"}], "administrative_units": []},
+        "cities.json": {"prototype_only": true, "schema_version": 3, "cities": [{"id": "paris", "name": "巴黎", "object_level": "city", "parent_country_id": "country_fra", "parent_region_id": "paris_basin", "lon_lat": [2.3522, 48.8566]}, {"id": "rouen", "name": "鲁昂", "object_level": "city", "parent_country_id": "country_fra", "parent_region_id": "normandy", "lon_lat": [1.0993, 49.4431]}, {"id": "le_havre", "name": "勒阿弗尔", "object_level": "city", "parent_country_id": "country_fra", "parent_region_id": "normandy", "lon_lat": [0.1079, 49.4944]}, {"id": "london", "name": "伦敦", "object_level": "city", "parent_country_id": "british_empire", "parent_region_id": "", "lon_lat": [0.0, 51.5]}]},
+        "ports.json": {"prototype_only": true, "schema_version": 2, "ports": [{"id": "port_le_havre", "name": "勒阿弗尔港", "object_level": "port", "city_id": "le_havre", "parent_country_id": "country_fra", "parent_region_id": "normandy", "lon_lat": [0.1, 49.49]}, {"id": "port_london", "name": "伦敦港", "object_level": "port", "city_id": "london", "parent_country_id": "british_empire", "parent_region_id": "", "lon_lat": [0.0, 51.5]}]},
+        "road_segments.json": {"prototype_only": true, "schema_version": 2, "type": "road", "segments": [{"id": "road_rouen_paris", "type": "road", "from_city_id": "rouen", "to_city_id": "paris"}]},
+        "rail_segments.json": {"prototype_only": true, "schema_version": 2, "type": "rail", "segments": [{"id": "rail_paris_rouen", "type": "rail", "from_city_id": "paris", "to_city_id": "rouen"}, {"id": "rail_rouen_le_havre", "type": "rail", "from_city_id": "rouen", "to_city_id": "le_havre"}]},
+        "shipping_routes.json": {"prototype_only": true, "schema_version": 2, "type": "shipping", "routes": [{"id": "shipping_channel", "type": "shipping", "from_port_id": "port_le_havre", "to_port_id": "port_london", "waypoints_lon_lat": [[0.1, 49.49], [-0.7, 50.1], [-0.2, 51.1], [0.0, 51.5]]}]}
+      }
+    },
+    {
+      "fixture_id": "valid-historical-entity-and-mapping",
+      "category": "historical_entity",
+      "classification": "VALID",
+      "expected": {"result": "VALID", "codes": []},
+      "provenance": {
+        "source_record_ids": {"historical_political_entities_1900.json": ["country_fra", "french_colonial_empire"], "historical/political_units_1900.json": ["country_fra"], "historical/cshapes_1900_snapshot.json": ["gw_220"], "historical/flags_1900.json": ["france_tricolour_1794"]},
+        "transform": "Selected the real 1900 France entity, its controller relation, one dated political unit, one geometry feature, and its flag record; geometry coordinates are reduced to one closed polygon."
+      },
+      "documents": {
+        "historical_political_entities_1900.json": {"schema_version": 1, "year": 1900, "prototype_only": true, "entities": [{"id": "country_fra", "name_zh": "法国第三共和国", "status": "sovereign", "members": ["FRA"], "core_members": ["FRA"]}, {"id": "french_colonial_empire", "name_zh": "法国殖民帝国", "status": "dependency", "members": ["DZA", "SEN"], "core_members": null}], "conflicts": []},
+        "historical/political_units_1900.json": {"schema_version": 1, "snapshot_date": "1900-03-12", "unit_count": 1, "units": [{"id": "country_fra", "source_name": "France", "name_zh": "法国第三共和国", "status": "sovereign", "controller_id": "", "geometry_feature_id": "gw_220", "flag_id": "france_tricolour_1794", "valid_from": "1886-01-01", "valid_to": "1919-06-27"}]},
+        "historical/cshapes_1900_snapshot.json": {"schema_version": 1, "snapshot_date": "1900-03-12", "feature_count": 1, "features": [{"id": "gw_220", "source_name": "France", "valid_from": "1886-01-01", "valid_to": "1919-06-27", "geometry": {"type": "Polygon", "coordinates": [[[[2.0, 48.0], [3.0, 48.0], [3.0, 49.0], [2.0, 49.0], [2.0, 48.0]]]]}}]},
+        "historical/flags_1900.json": {"schema_version": 1, "snapshot_date": "1900-03-12", "record_count": 1, "records": [{"id": "france_tricolour_1794", "unit_flag_mode": "local_historical_flag", "source": "French tricolour"}]}
+      }
+    },
+    {
+      "fixture_id": "valid-organization-institution-relation",
+      "category": "organization_institution_relation",
+      "classification": "VALID",
+      "expected": {"result": "VALID", "codes": []},
+      "provenance": {
+        "source_record_ids": {"countries.json": ["country_fra"], "regions.json": ["northern_industrial_belt"], "cities.json": ["lille"], "organizations.json": ["enterprise_lille_mechanical"], "institutions.json": ["prefecture_nord"], "relationships.json": ["jeanne"]},
+        "transform": "Selected one real city, enterprise, institution, and person-like relationship record; kept forward organization/institution and social references while removing prose fields."
+      },
+      "documents": {
+        "countries.json": {"prototype_only": true, "schema_version": 4, "countries": [{"id": "country_fra", "name": "法国第三共和国", "object_level": "country"}]},
+        "regions.json": {"prototype_only": true, "schema_version": 4, "regions": [{"id": "northern_industrial_belt", "name": "北部工业带", "object_level": "region", "parent_country_id": "country_fra"}], "administrative_units": []},
+        "cities.json": {"prototype_only": true, "schema_version": 3, "cities": [{"id": "lille", "name": "里尔", "object_level": "city", "parent_country_id": "country_fra", "parent_region_id": "northern_industrial_belt", "lon_lat": [3.0573, 50.6292]}]},
+        "organizations.json": {"prototype_only": true, "schema_version": 3, "catalog": [{"id": "enterprise_lille_mechanical", "name": "里尔机械制造公司", "native_name": "Manufacture mécanique de Lille", "object_level": "organization", "organization_kind": "enterprise", "city_id": "lille", "country_id": "country_fra", "parent_region_id": "northern_industrial_belt"}], "identities": {}},
+        "institutions.json": {"prototype_only": true, "schema_version": 3, "institutions": [{"id": "prefecture_nord", "name": "北部省省政府", "native_name": "Préfecture du Nord", "object_level": "institution", "city_id": "lille", "parent_country_id": "country_fra", "parent_region_id": "northern_industrial_belt", "parent_institution_id": "", "child_institution_ids": []}]},
+        "relationships.json": {"prototype_only": true, "schema_version": 2, "relationships": [{"id": "jeanne", "name": "让娜·勒鲁瓦", "city_id": "lille", "nationality_id": "country_fra", "region_id": "northern_industrial_belt", "employer_id": "enterprise_lille_mechanical"}]}
+      }
+    },
+    {
+      "fixture_id": "valid-geometry-metadata",
+      "category": "geometry_metadata",
+      "classification": "VALID",
+      "expected": {"result": "VALID", "codes": []},
+      "provenance": {
+        "source_record_ids": {"world_coastlines.json": ["ne_admin0_1159320637"], "historical/cshapes_1900_snapshot.json": ["gw_220"]},
+        "transform": "Selected one real modern coastline and one historical feature shape; minimized each to a closed rectangular ring while preserving geometry metadata fields and coordinate bounds."
+      },
+      "documents": {
+        "world_coastlines.json": {"schema_version": 1, "features": [{"id": "ne_admin0_1159320637", "stable_id": "ne_admin0_1159320637", "iso_a3": "FRA", "geometry_type": "Polygon", "outer_ring_count": 1, "hole_count": 0, "polygons": [{"outer": [[2.0, 48.0], [3.0, 48.0], [3.0, 49.0], [2.0, 49.0], [2.0, 48.0]], "holes": []}]}]},
+        "historical/cshapes_1900_snapshot.json": {"schema_version": 1, "snapshot_date": "1900-03-12", "feature_count": 1, "features": [{"id": "gw_220", "source_name": "France", "geometry": {"type": "Polygon", "coordinates": [[[[2.0, 48.0], [3.0, 48.0], [3.0, 49.0], [2.0, 49.0], [2.0, 48.0]]]]}}]}
+      }
+    },
+    {
+      "fixture_id": "warning-historical-alias-collision",
+      "category": "names_alias_collision",
+      "classification": "WARNING",
+      "expected": {"result": "WARNING", "codes": ["NO_CURRENT_RULE"]},
+      "provenance": {
+        "source_record_ids": {"historical_political_entities_1900.json": ["country_fra", "french_colonial_empire"], "historical/major_state_profiles_1900.json": ["country_fra", "french_colonial_empire"]},
+        "transform": "Retained the existing historical profile alias field and deliberately assigned the same alias to two distinct fixture entities to preserve an alias-collision edge case. The production repository has no current collision validator."
+      },
+      "documents": {
+        "historical_political_entities_1900.json": {"schema_version": 1, "year": 1900, "prototype_only": true, "entities": [{"id": "country_fra", "name_zh": "法国第三共和国", "status": "sovereign", "members": ["FRA"]}, {"id": "french_colonial_empire", "name_zh": "法国殖民帝国", "status": "dependency", "members": ["DZA"]}], "conflicts": []},
+        "historical/major_state_profiles_1900.json": {"schema_version": 1, "snapshot_date": "1900-03-12", "profiles": [{"entity_id": "country_fra", "rank": 6, "aliases": ["FRA"]}, {"entity_id": "french_colonial_empire", "rank": 60, "aliases": ["FRA"]}]}
+      }
+    },
+    {
+      "fixture_id": "invalid-duplicate-id",
+      "category": "malformed_duplicate_id",
+      "classification": "INVALID",
+      "expected": {"result": "INVALID", "codes": ["DUPLICATE_ID"]},
+      "base_fixture_id": "valid-multimodal-transport",
+      "provenance": {"source_record_ids": {"cities.json": ["paris", "rouen"]}, "transform": "Controlled mutation: duplicate the first city record without changing any other field."},
+      "mutations": [{"op": "duplicate_record", "dataset": "cities.json", "collection": "cities", "index": 0}]
+    },
+    {
+      "fixture_id": "invalid-missing-foreign-key",
+      "category": "malformed_missing_foreign_key",
+      "classification": "INVALID",
+      "expected": {"result": "INVALID", "codes": ["MISSING_FOREIGN_KEY"]},
+      "base_fixture_id": "valid-multimodal-transport",
+      "provenance": {"source_record_ids": {"cities.json": ["paris"], "countries.json": ["country_fra"]}, "transform": "Controlled mutation: replace one city parent_country_id with a non-existent stable ID."},
+      "mutations": [{"op": "set_value", "dataset": "cities.json", "collection": "cities", "index": 0, "field": "parent_country_id", "value": "country_missing"}]
+    },
+    {
+      "fixture_id": "invalid-coordinate",
+      "category": "malformed_invalid_coordinate",
+      "classification": "INVALID",
+      "expected": {"result": "INVALID", "codes": ["INVALID_COORDINATE"]},
+      "base_fixture_id": "valid-multimodal-transport",
+      "provenance": {"source_record_ids": {"cities.json": ["paris"]}, "transform": "Controlled mutation: move the Paris longitude to 181 degrees."},
+      "mutations": [{"op": "set_value", "dataset": "cities.json", "collection": "cities", "index": 0, "field": "lon_lat", "value": [181.0, 48.8566]}]
+    },
+    {
+      "fixture_id": "invalid-missing-endpoint",
+      "category": "malformed_missing_endpoint",
+      "classification": "INVALID",
+      "expected": {"result": "INVALID", "codes": ["MISSING_ENDPOINT"]},
+      "base_fixture_id": "valid-multimodal-transport",
+      "provenance": {"source_record_ids": {"road_segments.json": ["road_rouen_paris"]}, "transform": "Controlled mutation: remove one road to_city_id endpoint."},
+      "mutations": [{"op": "remove_field", "dataset": "road_segments.json", "collection": "segments", "index": 0, "field": "to_city_id"}]
+    },
+    {
+      "fixture_id": "invalid-duplicate-transport-edge",
+      "category": "malformed_duplicate_transport_edge",
+      "classification": "INVALID",
+      "expected": {"result": "INVALID", "codes": ["DUPLICATE_TRANSPORT_EDGE"]},
+      "base_fixture_id": "valid-multimodal-transport",
+      "provenance": {"source_record_ids": {"rail_segments.json": ["rail_paris_rouen"]}, "transform": "Controlled mutation: append the same rail endpoints under a distinct edge ID."},
+      "mutations": [{"op": "duplicate_edge", "dataset": "rail_segments.json", "collection": "segments", "index": 0, "new_id": "rail_duplicate_paris_rouen"}]
+    },
+    {
+      "fixture_id": "invalid-empty-required-value",
+      "category": "malformed_empty_required_value",
+      "classification": "INVALID",
+      "expected": {"result": "INVALID", "codes": ["EMPTY_REQUIRED_VALUE"]},
+      "base_fixture_id": "valid-multimodal-transport",
+      "provenance": {"source_record_ids": {"cities.json": ["paris"]}, "transform": "Controlled mutation: empty the required city name."},
+      "mutations": [{"op": "set_value", "dataset": "cities.json", "collection": "cities", "index": 0, "field": "name", "value": ""}]
+    },
+    {
+      "fixture_id": "invalid-geometry-metadata",
+      "category": "malformed_geometry_metadata",
+      "classification": "INVALID",
+      "expected": {"result": "INVALID", "codes": ["MALFORMED_GEOMETRY_METADATA"]},
+      "base_fixture_id": "valid-geometry-metadata",
+      "provenance": {"source_record_ids": {"world_coastlines.json": ["ne_admin0_1159320637"]}, "transform": "Controlled mutation: declare two outer rings while retaining one polygon."},
+      "mutations": [{"op": "set_value", "dataset": "world_coastlines.json", "collection": "features", "index": 0, "field": "outer_ring_count", "value": 2}]
+    },
+    {
+      "fixture_id": "invalid-historical-mapping",
+      "category": "malformed_invalid_historical_mapping",
+      "classification": "INVALID",
+      "expected": {"result": "INVALID", "codes": ["MISSING_FOREIGN_KEY"]},
+      "base_fixture_id": "valid-historical-entity-and-mapping",
+      "provenance": {"source_record_ids": {"historical/political_units_1900.json": ["country_fra"], "historical/cshapes_1900_snapshot.json": ["gw_220"]}, "transform": "Controlled mutation: point the dated political unit at a non-existent geometry feature."},
+      "mutations": [{"op": "set_value", "dataset": "historical/political_units_1900.json", "collection": "units", "index": 0, "field": "geometry_feature_id", "value": "gw_missing"}]
+    }
+  ]
+}
