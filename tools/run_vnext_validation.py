@@ -4,10 +4,14 @@
 from __future__ import annotations
 
 import argparse
+import os
+import queue
 import re
 import shutil
 import subprocess
 import sys
+import threading
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Sequence
@@ -26,6 +30,11 @@ SUCCESS_SUMMARY_PATTERN = re.compile(
     r"\b([1-9][0-9]*)\s+checks?,\s*0\s+failures?\b",
     re.IGNORECASE,
 )
+DEFAULT_IMPORT_TIMEOUT_SECONDS = 300
+DEFAULT_TEST_TIMEOUT_SECONDS = 300
+DEFAULT_LONG_TEST_TIMEOUT_SECONDS = 1200
+DEFAULT_HEARTBEAT_SECONDS = 60
+LONG_TEST_SCRIPT = "res://tests/vnext/market_economy_long_term_test.gd"
 
 
 class ValidationError(RuntimeError):
@@ -37,6 +46,8 @@ class ProcessResult:
     returncode: int
     stdout: str
     stderr: str
+    timed_out: bool = False
+    elapsed_seconds: float = 0.0
 
     @property
     def log(self) -> str:
@@ -103,6 +114,8 @@ def has_success_summary(log: str) -> bool:
 
 def evaluate_test_result(result: ProcessResult) -> list[str]:
     reasons: list[str] = []
+    if result.timed_out:
+        reasons.append(f"process timed out after {result.elapsed_seconds:.1f}s")
     if result.returncode != 0:
         reasons.append(f"process exit code is {result.returncode}")
     reasons.extend(find_log_failure_reasons(result.log))
@@ -113,24 +126,131 @@ def evaluate_test_result(result: ProcessResult) -> list[str]:
 
 def evaluate_import_result(result: ProcessResult) -> list[str]:
     reasons: list[str] = []
+    if result.timed_out:
+        reasons.append(f"process timed out after {result.elapsed_seconds:.1f}s")
     if result.returncode != 0:
         reasons.append(f"process exit code is {result.returncode}")
     reasons.extend(find_log_failure_reasons(result.log))
     return reasons
 
 
+def _positive_env_seconds(name: str, default: int) -> int:
+    raw_value = os.environ.get(name)
+    if raw_value is None:
+        return default
+    try:
+        value = int(raw_value)
+    except ValueError as exc:
+        raise ValidationError(f"{name} must be a positive integer, got {raw_value!r}") from exc
+    if value <= 0:
+        raise ValidationError(f"{name} must be a positive integer, got {value}")
+    return value
+
+
+def _command_timeout_seconds(command: Sequence[str]) -> int:
+    if "--editor" in command:
+        return _positive_env_seconds(
+            "VNEXT_IMPORT_TIMEOUT_SECONDS", DEFAULT_IMPORT_TIMEOUT_SECONDS
+        )
+    if LONG_TEST_SCRIPT in command:
+        return _positive_env_seconds(
+            "VNEXT_LONG_TEST_TIMEOUT_SECONDS", DEFAULT_LONG_TEST_TIMEOUT_SECONDS
+        )
+    return _positive_env_seconds("VNEXT_TEST_TIMEOUT_SECONDS", DEFAULT_TEST_TIMEOUT_SECONDS)
+
+
+def _command_label(command: Sequence[str]) -> str:
+    if "--editor" in command:
+        return "import/script scan"
+    if "--script" in command:
+        index = command.index("--script")
+        if index + 1 < len(command):
+            return command[index + 1]
+    return Path(command[0]).name if command else "process"
+
+
 def run_process(command: Sequence[str], root: Path) -> ProcessResult:
-    completed = subprocess.run(
+    timeout_seconds = _command_timeout_seconds(command)
+    heartbeat_seconds = _positive_env_seconds(
+        "VNEXT_HEARTBEAT_SECONDS", DEFAULT_HEARTBEAT_SECONDS
+    )
+    label = _command_label(command)
+    print(f"[vnext] START {label} (timeout={timeout_seconds}s)", flush=True)
+
+    started = time.monotonic()
+    process = subprocess.Popen(
         list(command),
         cwd=root,
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
         text=True,
         encoding="utf-8",
         errors="replace",
-        check=False,
+        bufsize=1,
     )
-    return ProcessResult(completed.returncode, completed.stdout, completed.stderr)
+    if process.stdout is None:
+        process.kill()
+        process.wait()
+        raise ValidationError(f"failed to capture process output for {label}")
+
+    output_queue: queue.Queue[str | None] = queue.Queue()
+
+    def read_output() -> None:
+        try:
+            for line in process.stdout:
+                output_queue.put(line)
+        finally:
+            output_queue.put(None)
+
+    reader = threading.Thread(target=read_output, name="vnext-output-reader", daemon=True)
+    reader.start()
+
+    output_parts: list[str] = []
+    stream_closed = False
+    timed_out = False
+    last_heartbeat = started
+    while True:
+        try:
+            item = output_queue.get(timeout=0.25)
+            if item is None:
+                stream_closed = True
+            else:
+                output_parts.append(item)
+                print(item, end="", flush=True)
+        except queue.Empty:
+            pass
+
+        now = time.monotonic()
+        elapsed = now - started
+        if not timed_out and elapsed >= timeout_seconds:
+            timed_out = True
+            print(
+                f"[vnext] TIMEOUT {label} after {elapsed:.1f}s; terminating process",
+                flush=True,
+            )
+            process.kill()
+        elif not timed_out and now - last_heartbeat >= heartbeat_seconds:
+            print(f"[vnext] HEARTBEAT {label} elapsed={elapsed:.1f}s", flush=True)
+            last_heartbeat = now
+
+        if process.poll() is not None and stream_closed:
+            break
+
+    reader.join(timeout=5.0)
+    returncode = process.wait()
+    elapsed = time.monotonic() - started
+    status = "TIMEOUT" if timed_out else ("PASS" if returncode == 0 else "FAIL")
+    print(
+        f"[vnext] END {label} status={status} exit={returncode} elapsed={elapsed:.1f}s",
+        flush=True,
+    )
+    return ProcessResult(
+        returncode=returncode,
+        stdout="".join(output_parts),
+        stderr="",
+        timed_out=timed_out,
+        elapsed_seconds=elapsed,
+    )
 
 
 def print_failure(test_label: str, result: ProcessResult, reasons: Sequence[str]) -> None:

@@ -62,6 +62,7 @@ var _commodity_ids: Array[String] = []
 var _production_site_ids: Array[String] = []
 var _production_order: Array[String] = []
 var _trade_quota_remaining: Dictionary = {}
+var _in_transit_units_by_destination: Dictionary = {}
 var _last_day_index: int = -1
 var _next_shipment_sequence: int = 1
 
@@ -381,6 +382,7 @@ func restore(snapshot_value: Dictionary) -> bool:
 	region_states = candidate_regions
 	production_sites = candidate_sites
 	shipments = candidate_shipments
+	_rebuild_in_transit_units_index()
 	history = candidate_history
 	shipment_history = candidate_shipment_history
 	active_shocks = candidate_shocks
@@ -393,6 +395,7 @@ func restore(snapshot_value: Dictionary) -> bool:
 		region_states = original_regions
 		production_sites = original_sites
 		shipments = original_shipments
+		_rebuild_in_transit_units_index()
 		history = original_history
 		shipment_history = original_shipment_history
 		active_shocks = original_shocks
@@ -426,6 +429,7 @@ func _clear_runtime_state() -> void:
 	_production_site_ids.clear()
 	_production_order.clear()
 	_trade_quota_remaining.clear()
+	_in_transit_units_by_destination.clear()
 	_last_day_index = -1
 	_next_shipment_sequence = 1
 
@@ -561,12 +565,14 @@ func _settle_single_day(day_index: int) -> void:
 	_reset_trade_quotas()
 	_reset_daily_metrics()
 	_deliver_shipments(day_index)
+	_rebuild_in_transit_units_index()
 	_apply_spoilage()
 	_build_daily_demand()
 	_run_production(day_index)
 	_consume_households()
 	_finalize_unmet_demand()
 	_schedule_shipments(day_index)
+	_rebuild_in_transit_units_index()
 	_update_prices()
 	_update_site_targets()
 	for region_id: String in _region_ids:
@@ -801,16 +807,30 @@ func _finalize_unmet_demand() -> void:
 		region_states[region_id] = state
 
 
-func _in_transit_units_for(destination_id: String, commodity_id: String) -> float:
-	var total: float = 0.0
+func _rebuild_in_transit_units_index() -> void:
+	_in_transit_units_by_destination.clear()
 	for shipment: Dictionary in shipments:
-		if (
-			str(shipment.get("destination_market_id", "")) == destination_id
-			and str(shipment.get("commodity_id", "")) == commodity_id
-			and str(shipment.get("status", "")) == "in_transit"
-		):
-			total += maxf(0.0, float(shipment.get("units", 0.0)))
-	return total
+		if str(shipment.get("status", "")) != "in_transit":
+			continue
+		var destination_id: String = str(shipment.get("destination_market_id", ""))
+		var commodity_id: String = str(shipment.get("commodity_id", ""))
+		var units: float = maxf(0.0, float(shipment.get("units", 0.0)))
+		if destination_id.is_empty() or commodity_id.is_empty() or units <= 0.000001:
+			continue
+		var commodity_totals: Dictionary = (
+			_in_transit_units_by_destination.get(destination_id, {}) as Dictionary
+		)
+		commodity_totals[commodity_id] = (
+			float(commodity_totals.get(commodity_id, 0.0)) + units
+		)
+		_in_transit_units_by_destination[destination_id] = commodity_totals
+
+
+func _in_transit_units_for(destination_id: String, commodity_id: String) -> float:
+	var commodity_totals: Dictionary = (
+		_in_transit_units_by_destination.get(destination_id, {}) as Dictionary
+	)
+	return maxf(0.0, float(commodity_totals.get(commodity_id, 0.0)))
 
 
 func _schedule_shipments(day_index: int) -> void:
@@ -963,7 +983,17 @@ func _update_prices() -> void:
 			var base_price: int = maxi(
 				MIN_PRICE_CENTIMES, int(commodity.get("base_price_centimes", 1))
 			)
-			var demand: float = maxf(0.001, float(commodity_state.get("demand_units", 0.0)))
+			var demand_units: float = maxf(0.0, float(commodity_state.get("demand_units", 0.0)))
+			var demand: float = maxf(0.001, demand_units)
+			var same_day_supply: float = maxf(0.0, float(commodity_state.get("supply_units", 0.0)))
+			var same_day_balance_pressure_bp: int = 0
+			if demand_units > 0.0001 or same_day_supply > 0.0001:
+				var balance_denominator: float = maxf(0.001, demand_units + same_day_supply)
+				same_day_balance_pressure_bp = clampi(
+					int(round((demand_units - same_day_supply) / balance_denominator * 8000.0)),
+					-3000,
+					3000
+				)
 			var target_days: float = float(commodity.get("target_stock_days", 10)) * float(
 				_policies.get("target_stock_days_scale_bp", BASIS_POINTS)
 			) / float(BASIS_POINTS)
@@ -981,7 +1011,11 @@ func _update_prices() -> void:
 				region_id, commodity_id
 			)
 			var target_multiplier_bp: int = (
-				BASIS_POINTS + stock_pressure_bp + shortage_pressure_bp + price_shock_bp
+				BASIS_POINTS
+				+ stock_pressure_bp
+				+ shortage_pressure_bp
+				+ same_day_balance_pressure_bp
+				+ price_shock_bp
 			)
 			var minimum_multiplier_bp: int = int(_policies.get("minimum_price_bp_of_base", 2500))
 			var maximum_multiplier_bp: int = int(_policies.get("maximum_price_bp_of_base", 12000))
@@ -1053,10 +1087,13 @@ func _update_site_targets() -> void:
 		var output_external_shortage_bp: int = 0
 		var output_exports: float = 0.0
 		var output_surplus: bool = true
+		var region_commodities: Dictionary = (
+			(region_states[region_id] as Dictionary).get("commodities", {}) as Dictionary
+		)
 		for output: Dictionary in _dictionary_array(recipe.get("outputs", [])):
 			var commodity_id: String = str(output.get("commodity_id", ""))
 			var units: float = float(output.get("units", 0.0))
-			var commodity_state: Dictionary = commodity_snapshot(region_id, commodity_id)
+			var commodity_state: Dictionary = region_commodities.get(commodity_id, {}) as Dictionary
 			output_value_per_batch += units * float(commodity_state.get("price_centimes", 0))
 			output_shortage_bp = maxi(
 				output_shortage_bp, int(commodity_state.get("shortage_bp", 0))
@@ -1067,8 +1104,9 @@ func _update_site_targets() -> void:
 				output_surplus = false
 		for input: Dictionary in _dictionary_array(recipe.get("inputs", [])):
 			var commodity_id: String = str(input.get("commodity_id", ""))
+			var commodity_state: Dictionary = region_commodities.get(commodity_id, {}) as Dictionary
 			input_cost_per_batch += float(input.get("units", 0.0)) * float(
-				commodity_snapshot(region_id, commodity_id).get("price_centimes", 0)
+				commodity_state.get("price_centimes", 0)
 			)
 		var margin: int = int(round(output_value_per_batch - input_cost_per_batch))
 		var target: int = clampi(int(site.get("operating_target_bp", 0)), 0, BASIS_POINTS)
