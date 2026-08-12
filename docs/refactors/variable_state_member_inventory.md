@@ -880,7 +880,7 @@
 5 K clock
 6 K map_service
 7 A save_service
-8 A autosave_path
+8 K autosave_path
 @ scripts/save/game_save_service.gd | GameSaveService
 4 C SAVE_VERSION
 5 C MANUAL_PATH
@@ -2061,3 +2061,4 @@
 7 C DETAIL_SELECTED_COLOR
 9 A _city_detail_catalog
 ```
+
