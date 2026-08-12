@@ -4,7 +4,7 @@
 
 - 第一批实现基于基础提交`b4a9d637e294aa53b0c0e2525260421dce3b5182`，由PR #30实施。
 - 引擎：Godot 4.6.3。
-- 范围：`project.godot`、`scripts/`、`scenes/`、`data/`、`resources/`。
+- 范围：`project.godot`、`scripts/`、`scenes/`、`resources/`以及显式 runtime config roots；`data/staging/`、`tests/`、`tools/`、`docs/`和报告 artifacts 不属于输入。
 - 本文件只提供静态成员索引证据，不持有审计结论、实施方案、多写入状态总结、UI副本总结或停止项。
 
 ## 静态扫描限制
@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1785|1331|15|0|1299|5|32|16|67|965|551|302|
+|1794|1336|15|0|488|5|32|16|67|970|445|207|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,785个生产成员字段逐项表
+## 1,794个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -1598,8 +1598,9 @@
 62 K _production_site_ids
 63 K _production_order
 64 K _trade_quota_remaining
-65 A _last_day_index
-66 A _next_shipment_sequence
+65 K _in_transit_units_by_destination
+66 A _last_day_index
+67 A _next_shipment_sequence
 @ scripts/vnext/economy/market_economy_catalog.gd | VNextMarketEconomyCatalog
 7 C COMMODITY_MARKET_PATH
 8 C WORLD_PATH
@@ -1643,6 +1644,15 @@
 8 K _event_records
 9 K _known_event_ids
 10 K _read_event_ids
+@ scripts/vnext/organization/organization_core.gd | VNextOrganizationCore
+8 C SNAPSHOT_SCHEMA_ID
+10 C _ORGANIZATION_FIELDS
+21 C _POSITION_FIELDS
+27 C _APPOINTMENT_FIELDS
+34 K _organizations
+35 K _reference_catalog_configured
+36 K _known_person_ids
+37 K _known_place_ids
 @ scripts/vnext/player/action_result.gd | VNextActionResult
 4 K success
 5 K code
