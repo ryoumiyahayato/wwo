@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import runpy
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -144,6 +145,8 @@ def main() -> None:
     patch_capacity_query()
     patch_service_final_query()
     patch_tests_docs()
+    optimizer = Path(__file__).with_name("pr58_spatial_batch_result_optimization.py")
+    runpy.run_path(str(optimizer), run_name="__main__")
     print("PR58 batch final Spatial reservation query applied successfully")
 
 
