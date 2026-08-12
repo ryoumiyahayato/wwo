@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 
-TOOL_VERSION = "world-data-dictionary-v1"
+TOOL_VERSION = "world-data-dictionary-v2"
 DATA_ROOTS = ("data/world_map", "data/vnext")
 SOURCE_ROOTS = ("scripts", "tests", "tools")
 JSON_SUFFIX = ".json"
@@ -126,11 +126,13 @@ ENUM_CONSTANT_FIELD_HINTS: dict[str, tuple[str, ...]] = {
     "CAPACITY_KEYS": ("capacity.<key>",),
 }
 
-ID_KIND_TARGETS: dict[str, tuple[str, ...]] = {
-    "organization": ("world_map.organizations",),
-    "person": ("world_map.characters",),
-    "policy": ("vnext.politics.state_politics_1900",),
-    "state": ("vnext.politics.state_politics_1900",),
+ID_KIND_TARGETS: dict[str, tuple[str, ...]] = {}
+
+DECLARED_EVIDENCE_SCOPES = {
+    "LOADER",
+    "VALIDATOR",
+    "SOURCE_CONFIG",
+    "RUNTIME_SNAPSHOT",
 }
 
 
@@ -193,6 +195,148 @@ def example_value(value: Any, depth: int = 0) -> Any:
 def leaf_name(field_path: str) -> str:
     path = field_path.replace("[]", "")
     return path.rsplit(".", 1)[-1]
+
+
+def normalize_field_path(path: str) -> str:
+    value = path.replace("\\", "/").strip().strip(".")
+    if value.startswith("document."):
+        value = value[len("document."):]
+    return value
+
+
+def function_context_by_line(text: str) -> dict[int, str]:
+    contexts: dict[int, str] = {}
+    current = "<module>"
+    for line_number, line in enumerate(text.splitlines(), 1):
+        match = re.match(r"\s*(?:static\s+)?func\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(", line)
+        if match:
+            current = match.group(1)
+        contexts[line_number] = current
+    return contexts
+
+
+def source_evidence_scope(source_relative: str, function: str = "<module>") -> str:
+    if source_relative.startswith("tests/"):
+        return "TEST"
+    if source_relative.startswith("tools/"):
+        return "TOOLING"
+    if source_relative.endswith("scripts/vnext/politics/state_politics.gd"):
+        if function in {
+            "snapshot",
+            "restore",
+            "_validate_snapshot",
+            "_validate_force",
+            "_validate_policy",
+            "_validate_policy_history",
+            "_validate_government_history",
+            "_validate_capacity",
+            "_validate_preference_dictionary",
+        }:
+            return "RUNTIME_SNAPSHOT"
+        return "SOURCE_CONFIG"
+    if "validate" in function.lower():
+        return "VALIDATOR"
+    return "LOADER"
+
+
+def source_field_path(
+    source_relative: str,
+    function: str,
+    receiver: str,
+    field_name: str,
+) -> str | None:
+    # Root document/config access is exact only for a single source contract.
+    # Collection variables do not carry enough structure by name alone.
+    if receiver in {"document", "config"}:
+        return field_name
+    if not source_relative.endswith("scripts/vnext/politics/state_politics.gd"):
+        return None
+    if function in {"restore", "_validate_snapshot"} and receiver == "snapshot_value":
+        return f"runtime_snapshot.{field_name}"
+    if function == "_validate_force" and receiver == "force":
+        return f"runtime_snapshot.forces[].{field_name}"
+    if function == "_validate_policy" and receiver == "policy":
+        return f"runtime_snapshot.policies[].{field_name}"
+    if function == "_validate_policy_history" and receiver == "record":
+        return f"runtime_snapshot.policy_history[].{field_name}"
+    if function == "_validate_government_history" and receiver == "record":
+        return f"runtime_snapshot.government_change_history[].{field_name}"
+    return None
+
+
+def geometry_coordinate_shape(value: Any) -> str:
+    if isinstance(value, list):
+        if not value:
+            return "array[empty]"
+        children = sorted({geometry_coordinate_shape(item) for item in value})
+        child_shape = children[0] if len(children) == 1 else "|".join(children)
+        return f"array[{child_shape}]"
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        return "number"
+    return json_type(value)
+
+
+def valid_geometry_coordinates(value: Any, geometry_type: str, depth: int = 0) -> bool:
+    expected_depths = {
+        "Point": 0,
+        "MultiPoint": 1,
+        "LineString": 1,
+        "MultiLineString": 2,
+        "Polygon": 2,
+        "MultiPolygon": 3,
+    }
+    expected_depth = expected_depths.get(geometry_type)
+    if expected_depth is None:
+        return False
+    if depth == expected_depth:
+        return isinstance(value, list) and len(value) >= 2 and all(
+            isinstance(item, (int, float)) and not isinstance(item, bool) for item in value
+        )
+    if not isinstance(value, list) or not value:
+        return False
+    return all(valid_geometry_coordinates(item, geometry_type, depth + 1) for item in value)
+
+
+def collect_geometry_evidence(dataset: "DatasetAccumulator", value: Any, source_path: str, location: str = "") -> None:
+    if isinstance(value, dict):
+        geometry = value.get("geometry")
+        if isinstance(geometry, dict) and ("type" in geometry or "coordinates" in geometry):
+            has_type = "type" in geometry
+            has_coordinates = "coordinates" in geometry
+            geometry_type = str(geometry.get("type", "<missing>"))
+            coordinates = geometry.get("coordinates")
+            dataset.geometry_records.append({
+                "source": source_path,
+                "location": location or "document",
+                "geometry_type": geometry_type,
+                "coordinate_shape": geometry_coordinate_shape(coordinates) if has_coordinates else "missing",
+                "valid": has_type and has_coordinates and valid_geometry_coordinates(coordinates, geometry_type),
+            })
+        for key in sorted(value, key=str):
+            child_location = f"{location}.{key}" if location else str(key)
+            collect_geometry_evidence(dataset, value[key], source_path, child_location)
+    elif isinstance(value, list):
+        for index, item in enumerate(value):
+            collect_geometry_evidence(dataset, item, source_path, f"{location}[{index}]")
+
+
+def summarize_geometry_evidence(records: list[dict[str, Any]]) -> dict[str, Any]:
+    by_type: dict[str, dict[str, Any]] = {}
+    invalid: list[dict[str, Any]] = []
+    for record in records:
+        geometry_type = record["geometry_type"]
+        entry = by_type.setdefault(
+            geometry_type,
+            {"record_count": 0, "coordinate_shapes": [], "invalid_count": 0},
+        )
+        entry["record_count"] += 1
+        entry["coordinate_shapes"].append(record["coordinate_shape"])
+        if not record["valid"]:
+            entry["invalid_count"] += 1
+            invalid.append(record)
+    for entry in by_type.values():
+        entry["coordinate_shapes"] = sorted(set(entry["coordinate_shapes"]))
+    return {"by_type": dict(sorted(by_type.items())), "invalid_records": invalid}
 
 
 def normalize_path(path: str) -> str:
@@ -289,6 +433,7 @@ class DatasetAccumulator:
         self.fields: dict[tuple[str, str], FieldAccumulator] = {}
         self.collections: dict[str, CollectionAccumulator] = {}
         self.errors: list[dict[str, str]] = []
+        self.geometry_records: list[dict[str, Any]] = []
 
     def add_scope(self, scope: str, count: int = 1) -> None:
         self.scopes[scope] += count
@@ -339,6 +484,7 @@ def observe_document(dataset: DatasetAccumulator, document: Any, source_path: st
     dataset.root_types.add(json_type(document))
     if isinstance(document, dict):
         walk_value(dataset, document, "", "document", source_path)
+    collect_geometry_evidence(dataset, document, source_path)
 
 
 def literal_default(expression: str | None) -> Any:
@@ -407,25 +553,39 @@ def extract_enum_constants(text: str, line_offset: int = 0) -> list[dict[str, An
     return result
 
 
-def extract_required_blocks(text: str) -> list[dict[str, Any]]:
+def extract_required_blocks(text: str, source_relative: str = "<unknown>") -> list[dict[str, Any]]:
     result: list[dict[str, Any]] = []
+    contexts = function_context_by_line(text)
     pattern = re.compile(
         r"for\s+([A-Za-z_][A-Za-z0-9_]*)\s*:\s*String\s+in\s*\[(.*?)\]",
         re.DOTALL,
     )
+    prefixes = {
+        "_validate_snapshot": "runtime_snapshot.",
+        "_validate_force": "runtime_snapshot.forces[].",
+        "_validate_policy": "runtime_snapshot.policies[].",
+        "_validate_policy_history": "runtime_snapshot.policy_history[].",
+        "_validate_government_history": "runtime_snapshot.government_change_history[].",
+    }
     for match in pattern.finditer(text):
         variable = match.group(1)
         values = sorted(set(re.findall(r"[\"']([^\"']+)[\"']", match.group(2))))
         if not values:
             continue
+        line = text.count("\n", 0, match.start()) + 1
+        function = contexts.get(line, "<module>")
+        scope = source_evidence_scope(source_relative, function)
+        prefix = prefixes.get(function, "")
         result.append({
             "variable": variable,
             "fields": values,
+            "field_paths": [normalize_field_path(prefix + value) for value in values],
             "required": "required" in variable.lower(),
-            "line": text.count("\n", 0, match.start()) + 1,
+            "line": line,
+            "function": function,
+            "evidence_scope": scope,
         })
     return result
-
 
 def analyze_source(repo_root: Path, path: Path) -> dict[str, Any] | None:
     try:
@@ -433,7 +593,9 @@ def analyze_source(repo_root: Path, path: Path) -> dict[str, Any] | None:
     except (OSError, UnicodeDecodeError):
         return None
     relative = path.relative_to(repo_root).as_posix()
+    contexts = function_context_by_line(text)
     targets = source_target_paths(relative, text)
+    exact_contract = len(targets) == 1
     path_refs: list[dict[str, Any]] = []
     for line_number, line in enumerate(text.splitlines(), 1):
         for match in re.finditer(r"(?:res://)?(data/(?:world_map|vnext)/[A-Za-z0-9_./-]+\.json)", line):
@@ -445,29 +607,41 @@ def analyze_source(repo_root: Path, path: Path) -> dict[str, Any] | None:
 
     accesses: list[dict[str, Any]] = []
     access_pattern = re.compile(
-        r"(?:\.get|\.has)\(\s*[\"']([^\"']+)[\"'](?:\s*,\s*([^\)]*))?\s*\)"
+        r"(?P<receiver>[A-Za-z_][A-Za-z0-9_]*)\.(?P<method>get|has)"
+        r"\(\s*[\"'](?P<field>[^\"']+)[\"'](?:\s*,\s*(?P<default>[^\)]*))?\s*\)"
     )
     bracket_pattern = re.compile(r"\[\s*[\"']([^\"']+)[\"']\s*\]")
     lines = text.splitlines()
     for line_number, line in enumerate(lines, 1):
+        function = contexts.get(line_number, "<module>")
+        evidence_scope = source_evidence_scope(relative, function)
         for match in access_pattern.finditer(line):
-            field_name = match.group(1)
-            default_expression = match.group(2).strip() if match.group(2) is not None else None
+            field_name = match.group("field")
+            receiver = match.group("receiver")
+            default_expression = match.group("default").strip() if match.group("default") is not None else None
             default = literal_default(default_expression)
-            kind = "has_check" if ".has(" in match.group(0) else "get"
+            kind = "has_check" if match.group("method") == "has" else "get"
+            field_path = source_field_path(relative, function, receiver, field_name) if exact_contract else None
             required = kind == "has_check" and "not" in line[:match.start()]
             id_kind = None
-            for id_match in re.finditer(r"_valid_id\([^,]*get\(\s*[\"']([^\"']+)[\"'][^)]*\)[^,]*,\s*[\"']([^\"']+)[\"']", line):
+            for id_match in re.finditer(
+                r"_valid_id\([^,]*get\(\s*[\"']([^\"']+)[\"'][^)]*\)[^,]*,\s*[\"']([^\"']+)[\"']",
+                line,
+            ):
                 if id_match.group(1) == field_name:
                     id_kind = id_match.group(2)
                     break
             accesses.append({
                 "field": field_name,
+                "field_path": normalize_field_path(field_path) if field_path is not None else None,
+                "path_kind": "EXACT_PATH" if field_path is not None else "LEAF_ONLY",
                 "line": line_number,
+                "function": function,
+                "evidence_scope": evidence_scope,
                 "kind": kind,
                 "default": default,
                 "default_expression": default_expression,
-                "has_explicit_default": match.group(2) is not None,
+                "has_explicit_default": match.group("default") is not None,
                 "required": required,
                 "id_kind": id_kind,
                 "type": type_from_line(line, field_name),
@@ -479,9 +653,14 @@ def analyze_source(repo_root: Path, path: Path) -> dict[str, Any] | None:
                 continue
             accesses.append({
                 "field": field_name,
+                "field_path": None,
+                "path_kind": "LEAF_ONLY",
                 "line": line_number,
+                "function": function,
+                "evidence_scope": evidence_scope,
                 "kind": "bracket_access",
                 "default": None,
+                "default_expression": None,
                 "has_explicit_default": False,
                 "required": False,
                 "type": None,
@@ -489,7 +668,9 @@ def analyze_source(repo_root: Path, path: Path) -> dict[str, Any] | None:
             })
 
     enums = extract_enum_constants(text)
-    required_blocks = extract_required_blocks(text)
+    for enum in enums:
+        enum["evidence_scope"] = source_evidence_scope(relative, "<module>")
+    required_blocks = extract_required_blocks(text, relative)
     if not targets and not path_refs and not enums and not required_blocks:
         return None
     return {
@@ -500,8 +681,9 @@ def analyze_source(repo_root: Path, path: Path) -> dict[str, Any] | None:
         "field_accesses": sorted(accesses, key=lambda item: (item["line"], item["field"], item["kind"])),
         "enum_constants": enums,
         "required_blocks": required_blocks,
+        "exact_contract": exact_contract,
+        "contract_scope": "EXACT_DATASET" if exact_contract else "MULTI_DATASET_OR_INFERRED",
     }
-
 
 def scan_sources(repo_root: Path) -> list[dict[str, Any]]:
     sources: list[dict[str, Any]] = []
@@ -523,118 +705,188 @@ def declared_evidence_for_field(
     field_path: str,
     sources: list[dict[str, Any]],
 ) -> dict[str, Any]:
-    leaf = leaf_name(field_path)
+    normalized_field = normalize_field_path(field_path)
+    leaf = leaf_name(normalized_field)
     declared_types: set[str] = set()
     defaults: list[Any] = []
     default_expressions: list[str] = []
     enum_values: set[str] = set()
     declared_id_kinds: set[str] = set()
-    required = False
+    required_by_scope: dict[str, bool] = {}
     evidence: list[dict[str, Any]] = []
+    heuristic_evidence: list[dict[str, Any]] = []
     usage: list[dict[str, Any]] = []
 
-    # Explicit stable-ID kind checks are declared relationship evidence.
     for source in sources:
         if dataset_id not in source["targets"]:
             continue
         for access in source["field_accesses"]:
             if access["field"] != leaf:
                 continue
-            usage.append({
+            if access.get("field_path") != normalized_field:
+                if access.get("field_path") is None:
+                    heuristic_evidence.append({
+                        "source": source["source"],
+                        "line": access["line"],
+                        "kind": "HEURISTIC_LEAF_MATCH",
+                        "evidence_scope": access.get("evidence_scope", "UNKNOWN"),
+                        "contract_scope": source.get("contract_scope", "UNKNOWN"),
+                        "field": access["field"],
+                        "field_path": None,
+                    })
+                continue
+            scope = access.get("evidence_scope")
+            row = {
                 "source": source["source"],
                 "line": access["line"],
-                "kind": access["kind"],
+                "evidence_scope": scope,
+                "contract_scope": source.get("contract_scope", "UNKNOWN"),
+                "field_path": normalized_field,
                 "text": access["text"],
-            })
+            }
+            if scope not in DECLARED_EVIDENCE_SCOPES:
+                heuristic_evidence.append({**row, "kind": "HEURISTIC_NON_SCHEMA_SOURCE"})
+                continue
+            usage.append({**row, "kind": access["kind"]})
             if access["has_explicit_default"]:
                 defaults.append(access["default"])
                 if access.get("default_expression") is not None:
                     default_expressions.append(str(access["default_expression"]))
-                evidence.append({
-                    "source": source["source"],
-                    "line": access["line"],
-                    "kind": "DECLARED_DEFAULT",
-                    "default": access["default"],
-                })
+                evidence.append({**row, "kind": "DECLARED_DEFAULT", "default": access["default"]})
             if access["type"] is not None:
                 declared_types.add(access["type"])
-                evidence.append({
-                    "source": source["source"],
-                    "line": access["line"],
-                    "kind": "DECLARED_TYPE",
-                    "type": access["type"],
-                })
+                evidence.append({**row, "kind": "DECLARED_TYPE", "type": access["type"]})
             if access.get("id_kind") is not None:
-                expected_kind = str(access["id_kind"])
-                declared_id_kinds.add(expected_kind)
+                declared_id_kinds.add(str(access["id_kind"]))
                 evidence.append({
-                    "source": source["source"],
-                    "line": access["line"],
-                    "kind": "DECLARED_ID_KIND",
-                    "expected_kind": expected_kind,
-                    "target_datasets": list(ID_KIND_TARGETS.get(expected_kind, ())),
+                    **row,
+                    "kind": "ID_KIND_CONSTRAINT",
+                    "expected_kind": str(access["id_kind"]),
                 })
             if access["required"]:
-                required = True
-                evidence.append({
-                    "source": source["source"],
-                    "line": access["line"],
-                    "kind": "DECLARED_REQUIRED",
-                })
+                required_by_scope[str(scope)] = True
+                evidence.append({**row, "kind": "DECLARED_REQUIRED"})
+        if not source.get("exact_contract", False):
+            continue
         for block in source["required_blocks"]:
-            if leaf in block["fields"]:
-                if block["required"]:
-                    required = True
-                evidence.append({
+            for block_path in block.get("field_paths", block["fields"]):
+                if normalize_field_path(block_path) != normalized_field:
+                    continue
+                scope = block.get("evidence_scope")
+                row = {
                     "source": source["source"],
                     "line": block["line"],
                     "kind": "DECLARED_FIELD_LIST",
                     "variable": block["variable"],
                     "required": block["required"],
-                })
-                if "numeric" in block["variable"].lower() or "support" in block["variable"].lower():
-                    declared_types.add("number")
-                elif "string" in block["variable"].lower():
-                    declared_types.add("string")
+                    "evidence_scope": scope,
+                    "contract_scope": source.get("contract_scope", "UNKNOWN"),
+                    "field_path": normalized_field,
+                }
+                if scope in DECLARED_EVIDENCE_SCOPES:
+                    if block["required"]:
+                        required_by_scope[str(scope)] = True
+                    evidence.append(row)
+                    if "numeric" in block["variable"].lower() or "support" in block["variable"].lower():
+                        declared_types.add("number")
+                    elif "string" in block["variable"].lower():
+                        declared_types.add("string")
+                else:
+                    heuristic_evidence.append({**row, "kind": "HEURISTIC_NON_SCHEMA_SOURCE"})
+        if not source.get("exact_contract", False):
+            continue
         for enum in source["enum_constants"]:
-            if leaf in enum["field_hints"] or any(field_path.endswith(hint) for hint in enum["field_hints"]):
-                enum_values.update(enum["values"])
-                evidence.append({
+            for hint in enum["field_hints"]:
+                hint_path = normalize_field_path(hint)
+                if hint_path != normalized_field and not normalized_field.endswith("." + hint_path):
+                    continue
+                scope = enum.get("evidence_scope")
+                row = {
                     "source": source["source"],
                     "line": enum["line"],
                     "kind": "DECLARED_ENUM",
                     "constant": enum["name"],
                     "values": enum["values"],
-                })
+                    "evidence_scope": scope,
+                    "contract_scope": source.get("contract_scope", "UNKNOWN"),
+                    "field_path": normalized_field,
+                }
+                if scope in DECLARED_EVIDENCE_SCOPES:
+                    enum_values.update(enum["values"])
+                    evidence.append(row)
+                else:
+                    heuristic_evidence.append({**row, "kind": "HEURISTIC_NON_SCHEMA_SOURCE"})
 
     unique_defaults = sorted({canonical(item): item for item in defaults}.items())
     return {
         "declared": bool(evidence),
         "types": sorted(declared_types),
-        "required": required if evidence else None,
+        "required": any(required_by_scope.values()) if evidence else None,
+        "required_by_scope": dict(sorted(required_by_scope.items())),
         "default": unique_defaults[0][1] if len(unique_defaults) == 1 else None,
         "default_explicitly_defined": bool(default_expressions),
         "default_expressions": sorted(set(default_expressions)),
         "defaults": [item[1] for item in unique_defaults],
         "enum_values": sorted(enum_values),
         "id_kinds": sorted(declared_id_kinds),
-        "foreign_key_targets": sorted({target for kind in declared_id_kinds for target in ID_KIND_TARGETS.get(kind, ())}),
+        "foreign_key_targets": [],
         "evidence": sorted(evidence, key=lambda item: (item["source"], item["line"], item["kind"])),
+        "heuristic_evidence": sorted(heuristic_evidence, key=lambda item: (item["source"], item["line"], item["kind"])),
         "usage": sorted(usage, key=lambda item: (item["source"], item["line"], item["kind"])),
     }
-
 
 def declared_only_fields(dataset_id: str, sources: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     result: dict[str, dict[str, Any]] = {}
     for source in sources:
-        if dataset_id not in source["targets"]:
+        if dataset_id not in source["targets"] or not source.get("exact_contract", False):
             continue
+        for access in source["field_accesses"]:
+            field_path = access.get("field_path")
+            if not field_path or not access.get("id_kind"):
+                continue
+            scope = access.get("evidence_scope")
+            if scope not in DECLARED_EVIDENCE_SCOPES:
+                continue
+            entry = result.setdefault(
+                field_path,
+                {
+                    "types": set(),
+                    "required": False,
+                    "evidence": [],
+                    "scopes": set(),
+                    "enum_values": set(),
+                    "id_kinds": set(),
+                },
+            )
+            entry["scopes"].add(scope)
+            entry["id_kinds"].add(str(access["id_kind"]))
+            entry["evidence"].append({
+                "source": source["source"],
+                "line": access["line"],
+                "kind": "ID_KIND_CONSTRAINT",
+                "expected_kind": str(access["id_kind"]),
+                "evidence_scope": scope,
+                "contract_scope": source.get("contract_scope", "UNKNOWN"),
+                "field_path": normalize_field_path(field_path),
+                "text": access["text"],
+            })
         for block in source["required_blocks"]:
-            for field_name in block["fields"]:
-                if not block["required"]:
-                    continue
-                entry = result.setdefault(field_name, {"types": set(), "required": False, "evidence": []})
+            if not block["required"] or block.get("evidence_scope") not in DECLARED_EVIDENCE_SCOPES:
+                continue
+            for field_path in block.get("field_paths", block["fields"]):
+                entry = result.setdefault(
+                    field_path,
+                    {
+                        "types": set(),
+                        "required": False,
+                        "evidence": [],
+                        "scopes": set(),
+                        "enum_values": set(),
+                        "id_kinds": set(),
+                    },
+                )
                 entry["required"] = True
+                entry["scopes"].add(block["evidence_scope"])
                 if "numeric" in block["variable"].lower() or "support" in block["variable"].lower():
                     entry["types"].add("number")
                 elif "string" in block["variable"].lower():
@@ -645,23 +897,42 @@ def declared_only_fields(dataset_id: str, sources: list[dict[str, Any]]) -> dict
                     "kind": "DECLARED_FIELD_LIST",
                     "variable": block["variable"],
                     "required": True,
+                    "evidence_scope": block["evidence_scope"],
+                    "field_path": field_path,
+                    "contract_scope": source.get("contract_scope", "UNKNOWN"),
                 })
         for enum in source["enum_constants"]:
+            if enum.get("evidence_scope") not in DECLARED_EVIDENCE_SCOPES:
+                continue
             for hint in enum["field_hints"]:
                 if "<key>" in hint:
                     continue
-                field_name = hint.rsplit(".", 1)[-1]
-                entry = result.setdefault(field_name, {"types": set(), "required": False, "evidence": []})
+                field_path = normalize_field_path(hint)
+                entry = result.setdefault(
+                    field_path,
+                    {
+                        "types": set(),
+                        "required": False,
+                        "evidence": [],
+                        "scopes": set(),
+                        "enum_values": set(),
+                        "id_kinds": set(),
+                    },
+                )
                 entry["types"].add("string")
+                entry["scopes"].add(enum["evidence_scope"])
+                entry["enum_values"].update(enum["values"])
                 entry["evidence"].append({
                     "source": source["source"],
                     "line": enum["line"],
                     "kind": "DECLARED_ENUM",
                     "constant": enum["name"],
                     "values": enum["values"],
+                    "evidence_scope": enum["evidence_scope"],
+                    "contract_scope": source.get("contract_scope", "UNKNOWN"),
+                    "field_path": field_path,
                 })
     return result
-
 
 def is_id_field(field_path: str, scope: str) -> tuple[bool, str | None]:
     leaf = leaf_name(field_path)
@@ -694,9 +965,18 @@ def render_field(field: FieldAccumulator, scope_count: int, declared: dict[str, 
     if item_type is not None:
         observed_type = f"{observed_type}<{item_type}>" if observed_type else f"array<{item_type}>"
     missing_count = max(scope_count - field.present_count, 0)
-    if declared["required"] is True and missing_count > 0:
+    source_required = any(
+        scope in {"LOADER", "VALIDATOR", "SOURCE_CONFIG"}
+        for scope in declared["required_by_scope"]
+    )
+    runtime_required = "RUNTIME_SNAPSHOT" in declared["required_by_scope"]
+    if runtime_required and source_required:
+        required_status = "source-config-and-runtime-snapshot-required"
+    elif runtime_required:
+        required_status = "runtime-snapshot-required"
+    elif source_required and missing_count > 0:
         required_status = "declared-required-but-missing"
-    elif declared["required"] is True:
+    elif source_required:
         required_status = "declared-required"
     elif field.types and missing_count == 0:
         required_status = "required-by-observation"
@@ -714,9 +994,13 @@ def render_field(field: FieldAccumulator, scope_count: int, declared: dict[str, 
     if missing_count > 0:
         notes.append("Field is absent in some records in this scope; absence is not treated as an explicit null.")
     if declared["declared"] and not field.types:
-        notes.append("DECLARED by loader/validator but not observed in the scoped JSON input.")
+        notes.append("DECLARED by exact loader/validator path evidence but not observed in the scoped JSON input.")
+    if runtime_required:
+        notes.append("Required by a runtime snapshot validator; this is not a source JSON requirement.")
     if declared["default"] is not None:
-        notes.append("Default is copied from explicit loader evidence; it is not a production-data default.")
+        notes.append("Default is copied from exact loader evidence; it is not a production-data default.")
+    if declared["id_kinds"]:
+        notes.append("ID_KIND_CONSTRAINT records stable-ID syntax/kind only; it does not prove catalog membership or a foreign key.")
     return {
         "field": field.field,
         "record_scope": field.scope,
@@ -727,7 +1011,7 @@ def render_field(field: FieldAccumulator, scope_count: int, declared: dict[str, 
         "nullable": field.nullable_count > 0,
         "required_by_observation": bool(field.types) and missing_count == 0,
         "required_status": required_status,
-        "optional_by_observation": bool(field.types) and missing_count > 0 and declared["required"] is not True,
+        "optional_by_observation": bool(field.types) and missing_count > 0 and not source_required,
         "default": declared["default"],
         "default_explicitly_defined": bool(declared["default_explicitly_defined"]),
         "default_expressions": declared["default_expressions"],
@@ -736,7 +1020,8 @@ def render_field(field: FieldAccumulator, scope_count: int, declared: dict[str, 
         "id_field": id_field,
         "id_kind": id_kind,
         "declared_id_kinds": declared["id_kinds"],
-        "declared_foreign_key_targets": declared["foreign_key_targets"],
+        "id_kind_constraints": declared["id_kinds"],
+        "declared_foreign_key_targets": [],
         "foreign_key": None,
         "enum_candidates": enum_values,
         "enum_evidence": enum_evidence,
@@ -748,14 +1033,17 @@ def render_field(field: FieldAccumulator, scope_count: int, declared: dict[str, 
         "missing_count": missing_count,
         "declared": declared["declared"],
         "declared_types": declared["types"],
-        "declared_required": declared["required"],
+        "declared_required": source_required,
+        "source_config_required": "SOURCE_CONFIG" in declared["required_by_scope"],
+        "runtime_snapshot_required": runtime_required,
+        "declared_evidence_scopes": sorted({item.get("evidence_scope", "UNKNOWN") for item in declared["evidence"]}),
         "declared_enum_values": declared["enum_values"],
         "declared_evidence": declared["evidence"],
+        "heuristic_evidence": declared["heuristic_evidence"],
         "loader_consumed": bool(declared["usage"]),
         "loader_usage": declared["usage"],
         "notes": notes,
     }
-
 
 def primary_record_path(dataset_id: str, collections: dict[str, CollectionAccumulator]) -> str:
     configured = PRIMARY_RECORD_PATHS.get(dataset_id)
@@ -807,68 +1095,50 @@ def fk_target_hints(field_path: str) -> list[str]:
     return list(mapping.get(base, ()))
 
 
-def attach_foreign_keys(datasets: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    field_values: dict[tuple[str, str], set[str]] = {}
-    for dataset in datasets:
-        for field in dataset["fields"]:
-            if not field["observed"]:
-                continue
-            values = set()
-            for value in field["example_values"]:
-                if isinstance(value, (str, int, float)) and not isinstance(value, bool):
-                    values.add(canonical(value))
-            # Examples are intentionally capped, so this is used only to
-            # describe candidates. Exact resolution is based on field shape and
-            # observed coverage rather than pretending examples are complete.
-            field_values[(dataset["dataset"], field["field"])] = values
-
+def attach_foreign_keys(
+    datasets: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
     relationships: list[dict[str, Any]] = []
+    candidates: list[dict[str, Any]] = []
     ambiguous: list[dict[str, Any]] = []
     for dataset in datasets:
         for field in dataset["fields"]:
             if not field["observed"] or not field["id_field"] or field["id_kind"] != "reference_candidate":
                 continue
-            declared_targets = list(field.get("declared_foreign_key_targets", []))
-            hints = declared_targets if declared_targets else fk_target_hints(field["field"])
-            evidence_kind = "DECLARED_VALIDATOR_ID_KIND" if declared_targets else "OBSERVED_HEURISTIC"
-            if not hints:
+            hints = fk_target_hints(field["field"])
+            available = [target for target in hints if any(item["dataset"] == target for item in datasets)]
+            if not available:
                 ambiguous.append({
                     "kind": "foreign_key_unclear_target",
                     "dataset": dataset["dataset"],
                     "field": field["field"],
                     "severity": "medium",
                     "risk": "high",
-                    "message": "ID-like field has no reliable target dataset from name or loader evidence.",
+                    "message": "ID-like field has no reliable target dataset from name or resolver evidence.",
                 })
                 continue
-            candidates = [target for target in hints if any(item["dataset"] == target for item in datasets)]
-            if len(candidates) == 1:
-                target = candidates[0]
-                relationship = {
-                    "from_dataset": dataset["dataset"],
-                    "from_field": field["field"],
-                    "to_dataset": target,
-                    "to_field": "id/stable_id or target-specific identifier",
-                    "evidence": evidence_kind,
-                    "confidence": "high" if declared_targets else "medium",
-                    "resolution": "validator ID kind identifies the target dataset" if declared_targets else "name-convention candidate; verify against target IDs before inserting new data",
-                }
-                field["foreign_key"] = relationship
-                relationships.append(relationship)
-            elif len(candidates) > 1:
-                issue = {
+            candidate = {
+                "from_dataset": dataset["dataset"],
+                "from_field": field["field"],
+                "candidates": available,
+                "to_field": "id/stable_id or target-specific identifier",
+                "evidence": "HEURISTIC_FK_CANDIDATE",
+                "confidence": "ambiguous" if len(available) > 1 else "candidate",
+                "resolution": "Name convention only; verify target IDs and resolver/catalog lookup before inserting data.",
+            }
+            field["foreign_key"] = candidate
+            candidates.append(candidate)
+            if len(available) > 1:
+                ambiguous.append({
                     "kind": "foreign_key_ambiguous_target",
                     "dataset": dataset["dataset"],
                     "field": field["field"],
-                    "candidates": candidates,
+                    "candidates": available,
                     "severity": "high",
                     "risk": "high",
-                    "message": "ID-like field matches multiple plausible target datasets.",
-                }
-                field["foreign_key"] = {"candidates": candidates, "confidence": "ambiguous", "evidence": evidence_kind}
-                ambiguous.append(issue)
-    return relationships, ambiguous
-
+                    "message": "ID-like field matches multiple plausible target datasets; no target was selected.",
+                })
+    return relationships, ambiguous, candidates
 
 def find_field(datasets: list[dict[str, Any]], dataset_id: str, leaf: str) -> list[dict[str, Any]]:
     for dataset in datasets:
@@ -883,7 +1153,7 @@ def build_findings(datasets: list[dict[str, Any]], relationships: list[dict[str,
         for field in dataset["fields"]:
             if field["observed_type_variants"]:
                 families = {type_family(value) for value in field["observed_type_variants"] if value != "null"}
-                if len(families) > 1:
+                if len(families) > 1 and not field.get("geometry_type_conditioned"):
                     findings.append({
                         "kind": "type_inconsistency",
                         "dataset": dataset["dataset"],
@@ -948,18 +1218,37 @@ def build_findings(datasets: list[dict[str, Any]], relationships: list[dict[str,
                     "message": message,
                 })
 
-    # Loader requirements that are not represented by observations are kept
-    # explicit, with no fake observed type or count.
+    # Runtime snapshot requirements are not source JSON defects.
     for dataset in datasets:
+        geometry = dataset.get("geometry_evidence", {})
+        if geometry.get("invalid_records"):
+            findings.append({
+                "kind": "malformed_geometry_structure",
+                "dataset": dataset["dataset"],
+                "field": "geometry.coordinates",
+                "severity": "high",
+                "risk": "high",
+                "message": "A geometry coordinates value does not match the nesting required by its geometry.type.",
+                "evidence": geometry["invalid_records"],
+            })
         for field in dataset["fields"]:
-            if field["declared"] and not field["observed"] and field["declared_required"]:
+            if field.get("runtime_snapshot_required") and not field["observed"]:
+                findings.append({
+                    "kind": "runtime_snapshot_field_not_source_config",
+                    "dataset": dataset["dataset"],
+                    "field": field["field"],
+                    "severity": "low",
+                    "risk": "medium",
+                    "message": "Runtime snapshot validator requires this field; it is not a source JSON required field.",
+                })
+            elif field["declared"] and not field["observed"] and field["declared_required"]:
                 findings.append({
                     "kind": "loader_expects_field_absent_from_data",
                     "dataset": dataset["dataset"],
                     "field": field["field"],
-                    "severity": "high",
+                    "severity": "medium",
                     "risk": "high",
-                    "message": "Declared loader/validator field is absent from the scoped source document; it may be derived during loading.",
+                    "message": "Exact loader/validator evidence marks this source field required but scoped data omits it.",
                 })
     return sorted(findings, key=lambda item: (
         {"high": 0, "medium": 1, "low": 2}.get(item.get("severity", "low"), 3),
@@ -1004,7 +1293,7 @@ def build_dictionary(repo_root: Path) -> dict[str, Any]:
         # are truly absent.  This avoids turning every validator's generic
         # string into a guessed schema field.
         for field_name, declaration in sorted(declared_only.items()):
-            if any(leaf_name(path) == field_name for path in observed_keys):
+            if field_name in observed_keys:
                 continue
             evidence = declaration["evidence"]
             fields.append({
@@ -1016,16 +1305,17 @@ def build_dictionary(repo_root: Path) -> dict[str, Any]:
                 "observed_item_type": None,
                 "nullable": None,
                 "required_by_observation": None,
-                "required_status": "declared-required" if declaration["required"] else "unknown",
+                "required_status": "runtime-snapshot-required" if "RUNTIME_SNAPSHOT" in declaration["scopes"] else "declared-required" if declaration["required"] else "unknown",
                 "optional_by_observation": False,
                 "default": None,
                 "default_explicitly_defined": False,
                 "default_expressions": [],
                 "defaults_observed_from_loader": [],
                 "unique": None,
-                "id_field": False,
+                "id_field": bool(declaration.get("id_kinds")),
                 "id_kind": None,
-                "declared_id_kinds": [],
+                "declared_id_kinds": sorted(declaration.get("id_kinds", set())),
+                "id_kind_constraints": sorted(declaration.get("id_kinds", set())),
                 "declared_foreign_key_targets": [],
                 "foreign_key": None,
                 "enum_candidates": [],
@@ -1038,13 +1328,33 @@ def build_dictionary(repo_root: Path) -> dict[str, Any]:
                 "missing_count": None,
                 "declared": True,
                 "declared_types": sorted(declaration["types"]),
-                "declared_required": declaration["required"],
-                "declared_enum_values": [],
+                "declared_required": declaration["required"] and "SOURCE_CONFIG" in declaration["scopes"],
+                "source_config_required": "SOURCE_CONFIG" in declaration["scopes"],
+                "runtime_snapshot_required": "RUNTIME_SNAPSHOT" in declaration["scopes"],
+                "declared_evidence_scopes": sorted(declaration["scopes"]),
+                "declared_enum_values": sorted(declaration["enum_values"]),
                 "declared_evidence": sorted(evidence, key=lambda item: (item["source"], item["line"], item["kind"])),
+                "heuristic_evidence": [],
                 "loader_consumed": True,
                 "loader_usage": [],
-                "notes": ["DECLARED by loader/validator but not observed in the scoped JSON input; this may be a derived runtime field."],
+                "notes": [
+                    "DECLARED by exact loader/validator path evidence but not observed in the scoped JSON input.",
+                    "Required by a runtime snapshot validator; this is not a source JSON requirement."
+                    if "RUNTIME_SNAPSHOT" in declaration["scopes"]
+                    else "This field is absent from the scoped source document.",
+                ],
             })
+        geometry_evidence = summarize_geometry_evidence(accumulator.geometry_records)
+        for field in fields:
+            if field["field"].startswith("features[].geometry.coordinates") and geometry_evidence["by_type"]:
+                field["geometry_type_conditioned"] = geometry_evidence["by_type"]
+                field["observed_type_unconditioned"] = field["observed_type"]
+                field["observed_type_variants_unconditioned"] = field["observed_type_variants"]
+                field["observed_type"] = "type-conditioned geometry coordinates"
+                field["observed_type_variants"] = ["type-conditioned"]
+                field["notes"].append(
+                    "Coordinate nesting is conditioned by geometry.type; Polygon/MultiPolygon depth differences are legal polymorphism."
+                )
         fields.sort(key=lambda item: (item["field"], item["record_scope"], not item["observed"]))
         collections = [
             {
@@ -1087,10 +1397,13 @@ def build_dictionary(repo_root: Path) -> dict[str, Any]:
                     "field_accesses": source["field_accesses"],
                     "enum_constants": source["enum_constants"],
                     "required_blocks": source["required_blocks"],
+                    "exact_contract": source.get("exact_contract", False),
+                    "contract_scope": source.get("contract_scope", "UNKNOWN"),
                 }
                 for source in dataset_sources
             ],
             "input_errors": sorted(accumulator.errors, key=lambda item: item["path"]),
+            "geometry_evidence": geometry_evidence,
             "notes": [
                 "Observed fields and values are derived from the current JSON inputs.",
                 "Declared evidence comes only from explicit loader/validator access, type, default, required-list, or enum evidence.",
@@ -1098,7 +1411,7 @@ def build_dictionary(repo_root: Path) -> dict[str, Any]:
             ],
         })
 
-    relationships, fk_issues = attach_foreign_keys(datasets)
+    relationships, fk_issues, fk_candidates = attach_foreign_keys(datasets)
     findings = build_findings(datasets, relationships, fk_issues)
     declared_count = sum(1 for dataset in datasets for field in dataset["fields"] if field["declared"])
     observed_only_count = sum(1 for dataset in datasets for field in dataset["fields"] if field["observed"] and not field["declared"])
@@ -1115,6 +1428,7 @@ def build_dictionary(repo_root: Path) -> dict[str, Any]:
         "source_roots": list(SOURCE_ROOTS),
         "datasets": datasets,
         "foreign_key_relationships": relationships,
+        "foreign_key_candidates": fk_candidates,
         "findings": findings,
         "summary": {
             "datasets_documented": len(datasets),
@@ -1124,6 +1438,7 @@ def build_dictionary(repo_root: Path) -> dict[str, Any]:
             "type_inconsistencies": type_inconsistency_count,
             "potential_obsolete_fields": obsolete_count,
             "foreign_key_relationships": len(relationships),
+            "foreign_key_candidates": len(fk_candidates),
             "ambiguous_relationships": len(fk_issues),
             "schema_ambiguities": ambiguity_count,
             "data_files_scanned": len(data_files),
@@ -1135,6 +1450,7 @@ def build_dictionary(repo_root: Path) -> dict[str, Any]:
             "production_data_modified": False,
             "observed_schema_is_normative": False,
             "declared_schema_is_normative": False,
+            "evidence_kinds": ["OBSERVED", "DECLARED", "HEURISTIC", "RUNTIME_SNAPSHOT", "ID_KIND_CONSTRAINT", "FOREIGN_KEY"],
         },
     }
 
@@ -1179,10 +1495,10 @@ def render_dataset_markdown(dataset: dict[str, Any]) -> str:
         "",
         "## Fields",
         "",
-        "`OBSERVED` values come from JSON. `DECLARED` values come from explicit loader/validator evidence and are not silently merged into observed facts.",
+        "`OBSERVED` values come from JSON. `DECLARED` requires exact normalized field-path evidence. `HEURISTIC` and `RUNTIME_SNAPSHOT` evidence never silently become source-schema authority.",
         "",
-        "| field | scope | observed type | nullable | required by observation | required status | missing / records | default | unique | ID | foreign key | enum candidates | min–max | examples | evidence |"
-        "| --- | --- | --- | --- | --- | --- | ---: | --- | --- | --- | --- | --- | --- | --- | --- |"
+        "| field | scope | observed type | nullable | required by observation | source config required | runtime snapshot required | required status | missing / records | default | unique | ID | foreign key / candidate | enum candidates | min–max | examples | evidence |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | ---: | --- | --- | --- | --- | --- | --- | --- | --- |",
     ])
     for field in dataset["fields"]:
         missing_records = f"{field['missing_count']} / {field['record_count']}" if field["missing_count"] is not None else "—"
@@ -1192,23 +1508,32 @@ def render_dataset_markdown(dataset: dict[str, Any]) -> str:
         fk = field["foreign_key"]
         fk_text = "—"
         if fk:
-            fk_text = fk.get("to_dataset", ", ".join(fk.get("candidates", [])))
+            target = fk.get("to_dataset", ", ".join(fk.get("candidates", [])))
+            fk_text = f"{fk.get('evidence', 'FOREIGN_KEY')}: {target}"
         range_text = "—"
         if field["numeric_min"] is not None:
             range_text = f"{field['numeric_min']}–{field['numeric_max']}"
+        id_parts = []
+        if field.get("id_kind"):
+            id_parts.append(field["id_kind"])
+        if field.get("declared_id_kinds"):
+            id_parts.append("ID_KIND_CONSTRAINT: " + ", ".join(field["declared_id_kinds"]))
+        id_text = "; ".join(id_parts) if id_parts else "—"
         lines.append(
-            "| {field} | {scope} | {observed} / declared `{declared_types}` | {nullable} | {required} | {status} | {missing} | {default} | {unique} | {id} | {fk} | {enum} | {range} | {examples} | {evidence} |".format(
+            "| {field} | {scope} | {observed} / declared `{declared_types}` | {nullable} | {required} | {source_config} | {runtime_snapshot} | {status} | {missing} | {default} | {unique} | {id} | {fk} | {enum} | {range} | {examples} | {evidence} |".format(
                 field=f"`{field['field']}`",
                 scope=f"`{field['record_scope']}`",
                 observed=field["observed_type"] or "UNOBSERVED",
                 declared_types=",".join(field["declared_types"]) or "—",
                 nullable=field["nullable"] if field["nullable"] is not None else "—",
                 required=field["required_by_observation"] if field["required_by_observation"] is not None else "—",
+                source_config=field.get("source_config_required", False),
+                runtime_snapshot=field.get("runtime_snapshot_required", False),
                 status=field["required_status"],
                 missing=missing_records,
                 default=markdown_cell(field["default"]),
                 unique=field["unique"] if field["unique"] is not None else "—",
-                id=field["id_kind"] or "—",
+                id=id_text,
                 fk=markdown_cell(fk_text),
                 enum=markdown_cell(field["enum_candidates"]),
                 range=range_text,
@@ -1220,6 +1545,15 @@ def render_dataset_markdown(dataset: dict[str, Any]) -> str:
         lines.extend(["", "## Input errors", ""])
         for error in dataset["input_errors"]:
             lines.append(f"- `{error['path']}`: {error['error']}")
+    lines.extend(["", "## Geometry evidence", ""])
+    geometry = dataset.get("geometry_evidence", {})
+    if geometry.get("by_type"):
+        for geometry_type, entry in geometry["by_type"].items():
+            lines.append(
+                f"- `{geometry_type}`: `{entry['record_count']}` records; shapes `{', '.join(entry['coordinate_shapes'])}`; malformed `{entry['invalid_count']}`."
+            )
+    else:
+        lines.append("- None observed.")
     lines.extend(["", "## Notes", ""])
     for note in dataset["notes"]:
         lines.append(f"- {note}")
@@ -1238,9 +1572,12 @@ def render_index_markdown(dictionary: dict[str, Any]) -> str:
         "## Evidence contract",
         "",
         "- `OBSERVED`: directly measured from the current JSON files.",
-        "- `DECLARED`: explicitly present in loader/validator field lists, type checks, defaults, or enum constants.",
+        "- `DECLARED`: exact normalized full-field-path evidence from a loader, validator, or source-config contract.",
+        "- `HEURISTIC`: leaf-only, test, tooling, and name-based evidence retained for review; it is not schema authority.",
+        "- `RUNTIME_SNAPSHOT`: restore/validator requirements for derived runtime state, not source JSON requirements.",
+        "- `ID_KIND_CONSTRAINT`: stable-ID syntax/kind validation only; it does not prove catalog membership.",
+        "- `FOREIGN_KEY`: only a resolved loader/catalog reference is declared; name-based links remain candidates or ambiguous.",
         "- `OBSERVED + DECLARED`: both kinds of evidence exist; differences remain visible in each field row.",
-        "- Heuristic foreign keys and enum candidates are labeled as such and must not be treated as authoritative without a source-level confirmation.",
         "",
         "## Summary",
         "",
@@ -1255,6 +1592,7 @@ def render_index_markdown(dictionary: dict[str, Any]) -> str:
         ("type inconsistencies", "type_inconsistencies"),
         ("potentially ignored/obsolete leads", "potential_obsolete_fields"),
         ("foreign-key relationships", "foreign_key_relationships"),
+        ("foreign-key candidates", "foreign_key_candidates"),
         ("ambiguous relationships", "ambiguous_relationships"),
         ("data files scanned", "data_files_scanned"),
         ("loader sources scanned", "loader_sources_scanned"),

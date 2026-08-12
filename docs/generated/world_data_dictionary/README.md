@@ -7,22 +7,26 @@ This reference is generated from `data/world_map/**`, pure JSON data under `data
 ## Evidence contract
 
 - `OBSERVED`: directly measured from the current JSON files.
-- `DECLARED`: explicitly present in loader/validator field lists, type checks, defaults, or enum constants.
+- `DECLARED`: exact normalized full-field-path evidence from a loader, validator, or source-config contract.
+- `HEURISTIC`: leaf-only, test, tooling, and name-based evidence retained for review; it is not schema authority.
+- `RUNTIME_SNAPSHOT`: restore/validator requirements for derived runtime state, not source JSON requirements.
+- `ID_KIND_CONSTRAINT`: stable-ID syntax/kind validation only; it does not prove catalog membership.
+- `FOREIGN_KEY`: only a resolved loader/catalog reference is declared; name-based links remain candidates or ambiguous.
 - `OBSERVED + DECLARED`: both kinds of evidence exist; differences remain visible in each field row.
-- Heuristic foreign keys and enum candidates are labeled as such and must not be treated as authoritative without a source-level confirmation.
 
 ## Summary
 
 | metric | value |
 | --- | ---: |
 | datasets documented | 30 |
-| fields documented | 1212 |
-| declared-schema fields | 454 |
-| observed-only fields | 758 |
-| type inconsistencies | 1 |
-| potentially ignored/obsolete leads | 682 |
-| foreign-key relationships | 38 |
-| ambiguous relationships | 52 |
+| fields documented | 1246 |
+| declared-schema fields | 60 |
+| observed-only fields | 1186 |
+| type inconsistencies | 0 |
+| potentially ignored/obsolete leads | 1121 |
+| foreign-key relationships | 0 |
+| foreign-key candidates | 47 |
+| ambiguous relationships | 56 |
 | data files scanned | 184 |
 | loader sources scanned | 96 |
 
@@ -30,7 +34,7 @@ This reference is generated from `data/world_map/**`, pure JSON data under `data
 
 | dataset | path | records | fields |
 | --- | --- | ---: | ---: |
-| [vnext.politics.state_politics_1900](vnext_politics_state_politics_1900.md) | `data/vnext/politics/state_politics_1900.json` | 1 | 83 |
+| [vnext.politics.state_politics_1900](vnext_politics_state_politics_1900.md) | `data/vnext/politics/state_politics_1900.json` | 1 | 117 |
 | [world_map.characters](world_map_characters.md) | `data/world_map/characters.json` | 1 | 90 |
 | [world_map.cities](world_map_cities.md) | `data/world_map/cities.json` | 32 | 21 |
 | [world_map.city_detail.LICENSE](world_map_city_detail_LICENSE.md) | `data/world_map/city_detail/LICENSE.json` | 1 | 5 |
@@ -67,36 +71,36 @@ The list is sorted by risk/severity and stable dataset/field order. High-risk it
 
 | # | risk | severity | kind | dataset | field | why it matters |
 | ---: | --- | --- | --- | --- | --- | --- |
-| 1 | high | high | `foreign_key_ambiguous_target` | `world_map.characters` | `identities.<key>.city_id` | ID-like field matches multiple plausible target datasets. |
-| 2 | high | high | `foreign_key_ambiguous_target` | `world_map.countries` | `countries[].geometry_feature_ids` | ID-like field matches multiple plausible target datasets. |
-| 3 | high | high | `foreign_key_ambiguous_target` | `world_map.countries` | `countries[].geometry_feature_ids[]` | ID-like field matches multiple plausible target datasets. |
-| 4 | high | high | `foreign_key_ambiguous_target` | `world_map.historical.political_units_1900` | `units[].geometry_feature_id` | ID-like field matches multiple plausible target datasets. |
-| 5 | high | high | `foreign_key_ambiguous_target` | `world_map.institutions` | `institutions[].city_id` | ID-like field matches multiple plausible target datasets. |
-| 6 | high | high | `foreign_key_ambiguous_target` | `world_map.organizations` | `catalog[].city_id` | ID-like field matches multiple plausible target datasets. |
-| 7 | high | high | `foreign_key_ambiguous_target` | `world_map.ports` | `ports[].city_id` | ID-like field matches multiple plausible target datasets. |
-| 8 | high | high | `foreign_key_ambiguous_target` | `world_map.relationships` | `relationships[].city_id` | ID-like field matches multiple plausible target datasets. |
-| 9 | high | high | `foreign_key_ambiguous_target` | `world_map.world_activity` | `items[].city_ids` | ID-like field matches multiple plausible target datasets. |
-| 10 | high | high | `foreign_key_ambiguous_target` | `world_map.world_activity` | `items[].city_ids[]` | ID-like field matches multiple plausible target datasets. |
-| 11 | high | high | `loader_expects_field_absent_from_data` | `vnext.politics.state_politics_1900` | `active_policies` | Declared loader/validator field is absent from the scoped source document; it may be derived during loading. |
-| 12 | high | high | `loader_expects_field_absent_from_data` | `vnext.politics.state_politics_1900` | `crisis_stage` | Declared loader/validator field is absent from the scoped source document; it may be derived during loading. |
-| 13 | high | high | `loader_expects_field_absent_from_data` | `vnext.politics.state_politics_1900` | `government_change_history` | Declared loader/validator field is absent from the scoped source document; it may be derived during loading. |
-| 14 | high | high | `loader_expects_field_absent_from_data` | `vnext.politics.state_politics_1900` | `government_viability` | Declared loader/validator field is absent from the scoped source document; it may be derived during loading. |
-| 15 | high | high | `loader_expects_field_absent_from_data` | `vnext.politics.state_politics_1900` | `instability_streak` | Declared loader/validator field is absent from the scoped source document; it may be derived during loading. |
-| 16 | high | high | `loader_expects_field_absent_from_data` | `vnext.politics.state_politics_1900` | `last_policy_review_period` | Declared loader/validator field is absent from the scoped source document; it may be derived during loading. |
-| 17 | high | high | `loader_expects_field_absent_from_data` | `vnext.politics.state_politics_1900` | `last_pressure_input` | Declared loader/validator field is absent from the scoped source document; it may be derived during loading. |
-| 18 | high | high | `loader_expects_field_absent_from_data` | `vnext.politics.state_politics_1900` | `last_support_delta` | Declared loader/validator field is absent from the scoped source document; it may be derived during loading. |
-| 19 | high | high | `loader_expects_field_absent_from_data` | `vnext.politics.state_politics_1900` | `period_index` | Declared loader/validator field is absent from the scoped source document; it may be derived during loading. |
-| 20 | high | high | `loader_expects_field_absent_from_data` | `vnext.politics.state_politics_1900` | `policy_history` | Declared loader/validator field is absent from the scoped source document; it may be derived during loading. |
-| 21 | high | high | `loader_expects_field_absent_from_data` | `vnext.politics.state_politics_1900` | `recovery_streak` | Declared loader/validator field is absent from the scoped source document; it may be derived during loading. |
-| 22 | high | high | `loader_expects_field_absent_from_data` | `vnext.politics.state_politics_1900` | `support_history` | Declared loader/validator field is absent from the scoped source document; it may be derived during loading. |
-| 23 | high | high | `type_inconsistency` | `world_map.historical.cshapes_1900_snapshot` | `features[].geometry.coordinates[][][]` | The same field has incompatible observed JSON types. |
-| 24 | high | medium | `duplicate_semantic_fields` | `world_map.countries` | `id / stable_id` | Both look like entity identifiers; the authoritative identity is not declared by the data file. |
-| 25 | high | medium | `duplicate_semantic_fields` | `world_map.map_geometry_cache` | `id / stable_id` | Both look like entity identifiers; the authoritative identity is not declared by the data file. |
-| 26 | high | medium | `duplicate_semantic_fields` | `world_map.regions` | `id / stable_id` | Both look like entity identifiers; the authoritative identity is not declared by the data file. |
-| 27 | high | medium | `duplicate_semantic_fields` | `world_map.world_coastlines` | `id / stable_id` | Both look like entity identifiers; the authoritative identity is not declared by the data file. |
-| 28 | high | medium | `foreign_key_unclear_target` | `vnext.politics.state_politics_1900` | `active_policy_ids` | ID-like field has no reliable target dataset from name or loader evidence. |
-| 29 | high | medium | `foreign_key_unclear_target` | `vnext.politics.state_politics_1900` | `active_policy_ids[]` | ID-like field has no reliable target dataset from name or loader evidence. |
-| 30 | high | medium | `foreign_key_unclear_target` | `world_map.characters` | `identities.<key>.employer_id` | ID-like field has no reliable target dataset from name or loader evidence. |
+| 1 | high | high | `foreign_key_ambiguous_target` | `vnext.politics.state_politics_1900` | `forces[].force_id` | ID-like field matches multiple plausible target datasets; no target was selected. |
+| 2 | high | high | `foreign_key_ambiguous_target` | `vnext.politics.state_politics_1900` | `government_group_id` | ID-like field matches multiple plausible target datasets; no target was selected. |
+| 3 | high | high | `foreign_key_ambiguous_target` | `vnext.politics.state_politics_1900` | `government_id` | ID-like field matches multiple plausible target datasets; no target was selected. |
+| 4 | high | high | `foreign_key_ambiguous_target` | `world_map.characters` | `identities.<key>.city_id` | ID-like field matches multiple plausible target datasets; no target was selected. |
+| 5 | high | high | `foreign_key_ambiguous_target` | `world_map.countries` | `countries[].geometry_feature_ids` | ID-like field matches multiple plausible target datasets; no target was selected. |
+| 6 | high | high | `foreign_key_ambiguous_target` | `world_map.countries` | `countries[].geometry_feature_ids[]` | ID-like field matches multiple plausible target datasets; no target was selected. |
+| 7 | high | high | `foreign_key_ambiguous_target` | `world_map.historical.political_units_1900` | `units[].geometry_feature_id` | ID-like field matches multiple plausible target datasets; no target was selected. |
+| 8 | high | high | `foreign_key_ambiguous_target` | `world_map.institutions` | `institutions[].city_id` | ID-like field matches multiple plausible target datasets; no target was selected. |
+| 9 | high | high | `foreign_key_ambiguous_target` | `world_map.organizations` | `catalog[].city_id` | ID-like field matches multiple plausible target datasets; no target was selected. |
+| 10 | high | high | `foreign_key_ambiguous_target` | `world_map.ports` | `ports[].city_id` | ID-like field matches multiple plausible target datasets; no target was selected. |
+| 11 | high | high | `foreign_key_ambiguous_target` | `world_map.relationships` | `relationships[].city_id` | ID-like field matches multiple plausible target datasets; no target was selected. |
+| 12 | high | high | `foreign_key_ambiguous_target` | `world_map.world_activity` | `items[].city_ids` | ID-like field matches multiple plausible target datasets; no target was selected. |
+| 13 | high | high | `foreign_key_ambiguous_target` | `world_map.world_activity` | `items[].city_ids[]` | ID-like field matches multiple plausible target datasets; no target was selected. |
+| 14 | high | medium | `duplicate_semantic_fields` | `world_map.countries` | `id / stable_id` | Both look like entity identifiers; the authoritative identity is not declared by the data file. |
+| 15 | high | medium | `duplicate_semantic_fields` | `world_map.map_geometry_cache` | `id / stable_id` | Both look like entity identifiers; the authoritative identity is not declared by the data file. |
+| 16 | high | medium | `duplicate_semantic_fields` | `world_map.regions` | `id / stable_id` | Both look like entity identifiers; the authoritative identity is not declared by the data file. |
+| 17 | high | medium | `duplicate_semantic_fields` | `world_map.world_coastlines` | `id / stable_id` | Both look like entity identifiers; the authoritative identity is not declared by the data file. |
+| 18 | high | medium | `foreign_key_unclear_target` | `vnext.politics.state_politics_1900` | `active_policy_ids` | ID-like field has no reliable target dataset from name or resolver evidence. |
+| 19 | high | medium | `foreign_key_unclear_target` | `vnext.politics.state_politics_1900` | `active_policy_ids[]` | ID-like field has no reliable target dataset from name or resolver evidence. |
+| 20 | high | medium | `foreign_key_unclear_target` | `vnext.politics.state_politics_1900` | `state_id` | ID-like field has no reliable target dataset from name or resolver evidence. |
+| 21 | high | medium | `foreign_key_unclear_target` | `world_map.characters` | `identities.<key>.employer_id` | ID-like field has no reliable target dataset from name or resolver evidence. |
+| 22 | high | medium | `foreign_key_unclear_target` | `world_map.characters` | `identities.<key>.jurisdiction_id` | ID-like field has no reliable target dataset from name or resolver evidence. |
+| 23 | high | medium | `foreign_key_unclear_target` | `world_map.characters` | `identities.<key>.nationality_id` | ID-like field has no reliable target dataset from name or resolver evidence. |
+| 24 | high | medium | `foreign_key_unclear_target` | `world_map.characters` | `identities.<key>.school_id` | ID-like field has no reliable target dataset from name or resolver evidence. |
+| 25 | high | medium | `foreign_key_unclear_target` | `world_map.characters` | `identities.<key>.union_id` | ID-like field has no reliable target dataset from name or resolver evidence. |
+| 26 | high | medium | `foreign_key_unclear_target` | `world_map.characters` | `identities.<key>.workplace_city_id` | ID-like field has no reliable target dataset from name or resolver evidence. |
+| 27 | high | medium | `foreign_key_unclear_target` | `world_map.cities` | `cities[].arrondissement_id` | ID-like field has no reliable target dataset from name or resolver evidence. |
+| 28 | high | medium | `foreign_key_unclear_target` | `world_map.cities` | `cities[].commune_id` | ID-like field has no reliable target dataset from name or resolver evidence. |
+| 29 | high | medium | `foreign_key_unclear_target` | `world_map.cities` | `cities[].departement_id` | ID-like field has no reliable target dataset from name or resolver evidence. |
+| 30 | high | medium | `foreign_key_unclear_target` | `world_map.city_detail.country_shards` | `cities[].curated_city_id` | ID-like field has no reliable target dataset from name or resolver evidence. |
 
 ## Generated files
 

@@ -60,9 +60,17 @@ def scan_dictionary(path: Path) -> list[str]:
                 errors.append(f"{dataset_id}.{key[0]}: present + missing does not equal records")
             if field.get("declared") and not field.get("declared_evidence"):
                 errors.append(f"{dataset_id}.{key[0]}: declared field has no evidence")
+            for evidence in field.get("declared_evidence", []):
+                if evidence.get("evidence_scope") not in {"LOADER", "VALIDATOR", "SOURCE_CONFIG", "RUNTIME_SNAPSHOT"}:
+                    errors.append(f"{dataset_id}.{key[0]}: declared evidence has invalid scope")
+            if field.get("declared_foreign_key_targets"):
+                errors.append(f"{dataset_id}.{key[0]}: ID-kind evidence cannot declare catalog FK targets")
     relationships = dictionary.get("foreign_key_relationships", [])
     if not isinstance(relationships, list):
         errors.append("foreign_key_relationships must be an array")
+    for relationship in relationships:
+        if relationship.get("evidence") != "DECLARED_FOREIGN_KEY":
+            errors.append("foreign_key_relationships may only contain resolved declared references")
     contract = dictionary.get("generation_contract", {})
     if contract.get("production_data_modified") is not False:
         errors.append("generation contract does not prove production_data_modified=false")

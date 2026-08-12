@@ -19,14 +19,19 @@ Attribution and license metadata for the city-detail source dataset.
 
 ## Fields
 
-`OBSERVED` values come from JSON. `DECLARED` values come from explicit loader/validator evidence and are not silently merged into observed facts.
+`OBSERVED` values come from JSON. `DECLARED` requires exact normalized field-path evidence. `HEURISTIC` and `RUNTIME_SNAPSHOT` evidence never silently become source-schema authority.
 
-| field | scope | observed type | nullable | required by observation | required status | missing / records | default | unique | ID | foreign key | enum candidates | min–max | examples | evidence || --- | --- | --- | --- | --- | --- | ---: | --- | --- | --- | --- | --- | --- | --- | --- |
-| `attribution` | `document` | string / declared `—` | False | True | required-by-observation | 0 / 1 | null | True | — | — | ["Contains GeoNames geographical data, licensed under CC BY 4.0."] | — | ["Contains GeoNames geographical data, licensed under CC BY 4.0."] | OBSERVED |
-| `dataset` | `document` | string / declared `—` | False | True | required-by-observation | 0 / 1 | null | True | — | — | ["modern_city_detail"] | — | ["modern_city_detail"] | OBSERVED |
-| `license` | `document` | string / declared `—` | False | True | required-by-observation | 0 / 1 | null | True | — | — | ["Creative Commons Attribution 4.0"] | — | ["Creative Commons Attribution 4.0"] | OBSERVED |
-| `license_url` | `document` | string / declared `—` | False | True | required-by-observation | 0 / 1 | null | True | — | — | ["https://creativecommons.org/licenses/by/4.0/"] | — | ["https://creativecommons.org/licenses/by/4.0/"] | OBSERVED |
-| `source` | `document` | string / declared `—` | False | True | required-by-observation | 0 / 1 | null | True | — | — | ["GeoNames"] | — | ["GeoNames"] | OBSERVED |
+| field | scope | observed type | nullable | required by observation | source config required | runtime snapshot required | required status | missing / records | default | unique | ID | foreign key / candidate | enum candidates | min–max | examples | evidence |
+| --- | --- | --- | --- | --- | --- | --- | --- | ---: | --- | --- | --- | --- | --- | --- | --- | --- |
+| `attribution` | `document` | string / declared `—` | False | True | False | False | required-by-observation | 0 / 1 | null | True | — | — | ["Contains GeoNames geographical data, licensed under CC BY 4.0."] | — | ["Contains GeoNames geographical data, licensed under CC BY 4.0."] | OBSERVED |
+| `dataset` | `document` | string / declared `—` | False | True | False | False | required-by-observation | 0 / 1 | null | True | — | — | ["modern_city_detail"] | — | ["modern_city_detail"] | OBSERVED |
+| `license` | `document` | string / declared `—` | False | True | False | False | required-by-observation | 0 / 1 | null | True | — | — | ["Creative Commons Attribution 4.0"] | — | ["Creative Commons Attribution 4.0"] | OBSERVED |
+| `license_url` | `document` | string / declared `—` | False | True | False | False | required-by-observation | 0 / 1 | null | True | — | — | ["https://creativecommons.org/licenses/by/4.0/"] | — | ["https://creativecommons.org/licenses/by/4.0/"] | OBSERVED |
+| `source` | `document` | string / declared `—` | False | True | False | False | required-by-observation | 0 / 1 | null | True | — | — | ["GeoNames"] | — | ["GeoNames"] | OBSERVED |
+
+## Geometry evidence
+
+- None observed.
 
 ## Notes
 

@@ -11,7 +11,11 @@ python tools/world_data_dictionary/generate.py --check
 ```
 
 The generator never writes to the input data roots. `OBSERVED` values are
-measured from JSON. `DECLARED` values require explicit source evidence such as
-a required-field list, type check, default expression, or enum constant. Name-
-based foreign-key candidates and small-cardinality enum candidates remain
-heuristics and are labeled as such.
+measured from JSON. `DECLARED` requires exact normalized full-field-path
+evidence from a loader, validator, or source-config contract. `HEURISTIC`
+leaf-only, test, tooling, and name-based evidence is retained for review and
+never becomes schema authority. `RUNTIME_SNAPSHOT` is restore/validator
+requirements for derived runtime state, not source JSON requirements.
+`ID_KIND_CONSTRAINT` proves stable-ID syntax/kind only, not catalog membership.
+`FOREIGN_KEY` requires a resolved loader/catalog reference; name-based links
+remain candidates or ambiguous.

@@ -47,7 +47,7 @@ class DictionaryScanTests(unittest.TestCase):
                         "present_count": 1,
                         "missing_count": 0,
                         "declared": True,
-                        "declared_evidence": [{"kind": "DECLARED_TYPE"}],
+                        "declared_evidence": [{"kind": "DECLARED_TYPE", "evidence_scope": "LOADER"}],
                     }],
                 }],
                 "foreign_key_relationships": [],
@@ -55,6 +55,30 @@ class DictionaryScanTests(unittest.TestCase):
                 "generation_contract": {"production_data_modified": False},
             }
             self.assertEqual(scan.scan_dictionary(self.write_dictionary(Path(temp_dir), value)), [])
+
+    def test_scan_rejects_declared_evidence_without_scope(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            value = {
+                "schema_version": 1,
+                "datasets": [{
+                    "dataset": "sample",
+                    "fields": [{
+                        "field": "items[].id",
+                        "record_scope": "items[]",
+                        "record_count": 1,
+                        "present_count": 1,
+                        "missing_count": 0,
+                        "declared": True,
+                        "declared_evidence": [{"kind": "DECLARED_TYPE"}],
+                    }],
+                }],
+                "foreign_key_relationships": [],
+                "summary": {"input_errors": 0},
+                "generation_contract": {"production_data_modified": False},
+            }
+            errors = scan.scan_dictionary(self.write_dictionary(Path(temp_dir), value))
+            self.assertTrue(any("declared evidence has invalid scope" in error for error in errors))
+
 
     def test_scan_rejects_inconsistent_coverage_and_missing_declared_evidence(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
