@@ -788,12 +788,14 @@ func _has_elapsed_settlement() -> bool:
 
 func _normalize_query_ids(place_ids: Array[String]) -> Array[String]:
 	var normalized: Array[String] = []
+	var seen: Dictionary = {}
 	for raw_place_id: Variant in place_ids:
 		if typeof(raw_place_id) != TYPE_STRING:
 			return []
 		var place_id: String = str(raw_place_id)
-		if not _records.has(place_id) or normalized.has(place_id):
+		if not _records.has(place_id) or seen.has(place_id):
 			return []
+		seen[place_id] = true
 		normalized.append(place_id)
 	return normalized
 

@@ -18,6 +18,7 @@ func _run() -> void:
 	_test_internal_migration_transactionality()
 	_test_snapshot_resume_continuation()
 	_test_indexed_full_settlement_path()
+	_test_query_normalization_regression()
 	_test_aggregation()
 	_test_monthly_equivalence_and_calendar_boundary()
 	_test_deterministic_replay()
@@ -520,6 +521,79 @@ func _test_indexed_full_settlement_path() -> void:
 		population.aggregate_population(population.known_place_ids()),
 		0,
 		"indexed aggregate lookup remains bounded and deterministic"
+	)
+
+
+func _test_query_normalization_regression() -> void:
+	var catalog := _catalog()
+	if catalog == null:
+		return
+	var ids: Array[String] = catalog.place_ids()
+	for region_id: String in catalog.region_ids():
+		ids.append("region:" + region_id)
+	_check(ids.size() > 10, "aggregate query regression uses a multi-key corpus")
+	var population := VNextMacroPopulation.create(catalog, ids)
+	_check(population != null, "aggregate query regression binds the full authority corpus")
+	if population == null or ids.is_empty():
+		return
+	var reverse_ids: Array[String] = ids.duplicate()
+	reverse_ids.reverse()
+	_equal(
+		population.aggregate_population(ids),
+		population.aggregate_population(reverse_ids),
+		"aggregate population is unchanged by valid query ordering"
+	)
+	_equal(
+		population.aggregate_structure(ids),
+		population.aggregate_structure(reverse_ids),
+		"aggregate structure is unchanged by valid query ordering"
+	)
+	var duplicate_ids: Array[String] = ids.duplicate()
+	duplicate_ids.append(ids[0])
+	_equal(
+		population.aggregate_population(duplicate_ids),
+		-1,
+		"duplicate aggregate query IDs remain rejected"
+	)
+	_equal(
+		population.aggregate_structure(duplicate_ids),
+		{},
+		"duplicate aggregate structure query IDs fail closed"
+	)
+	var unknown_ids: Array[String] = ids.duplicate()
+	unknown_ids[0] = "place:made_up_query_id"
+	_equal(
+		population.aggregate_population(unknown_ids),
+		-1,
+		"unknown aggregate query place remains rejected"
+	)
+	_equal(
+		population.aggregate_structure(unknown_ids),
+		{},
+		"unknown aggregate structure place fails closed"
+	)
+	var wrong_kind_ids: Array[String] = ids.duplicate()
+	wrong_kind_ids[0] = "region:made_up_query_id"
+	_equal(
+		population.aggregate_population(wrong_kind_ids),
+		-1,
+		"unknown aggregate query region remains rejected"
+	)
+	_equal(
+		population.aggregate_structure(wrong_kind_ids),
+		{},
+		"unknown aggregate structure region fails closed"
+	)
+	var source: String = FileAccess.get_file_as_string(
+		"res://scripts/vnext/population/macro_population.gd"
+	)
+	_check(
+		not source.contains("normalized.has(place_id)"),
+		"aggregate query normalization has no linear membership scan"
+	)
+	_check(
+		source.contains("var seen: Dictionary = {}"),
+		"aggregate query normalization uses an O(1) membership index"
 	)
 
 
