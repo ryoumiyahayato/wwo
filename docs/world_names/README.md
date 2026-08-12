@@ -5,10 +5,10 @@ This directory documents the Batch 1 names foundation. The generated files in
 not replace the production country, region, city, organization, institution,
 character, or port catalogs.
 
-Run the builder from the repository root with the bundled Python runtime:
+Run the builder from the repository root with Python available on `PATH`:
 
 ```powershell
-& 'C:\Users\agcrf\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' -m tools.world_names.world_names --root 'D:\wwo' --starting-master '4b738ab'
+python -m tools.world_names.world_names --root . --starting-master '4b738ab'
 ```
 
 The builder produces:
