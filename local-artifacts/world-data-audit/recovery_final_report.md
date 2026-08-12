@@ -80,7 +80,7 @@ The strict validator is intentionally not reported as clean: the existing geomet
 - JSON parse errors: 0.
 - Dangling foreign keys: 0.
 - Catalog duplicate/empty ID findings: 0.
-- `git diff --check`: run before each checkpoint; final source/artifact whitespace scan is required before Batch 4 commit.
+- `git diff --check`: pass; final source/artifact whitespace scan: pass.
 
 ## Resource safety
 
@@ -97,7 +97,7 @@ Any phase skipped or reduced for resource safety: no raster/geometry preprocessi
 - Batch 1 checkpoint: `a60a872`.
 - Batch 2 checkpoint: `1029afd`.
 - Batch 3 checkpoint: `991f4e1`.
-- Batch 4 checkpoint: pending this final validation and commit.
+- Batch 4 checkpoint: `0b64c9f chore(world-data): consolidate batch audit run manifest`.
 - Push: not attempted.
 - Pull request: none.
 - Live `origin/master`: `4b738ab8b0a21e8685aae95381717e9efd2327a8`.
