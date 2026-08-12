@@ -6,6 +6,7 @@ on:
       - feat/vnext-military-strategy-20260809
     paths:
       - "tools/pr58_spatial_capacity_integration_worker.py"
+      - "tools/pr58_spatial_worker_bootstrap.py"
       - ".github/workflows/pr58-spatial-integration-worker.yml"
   workflow_dispatch:
 
@@ -34,7 +35,7 @@ jobs:
           python-version: "3.11"
 
       - name: Apply Spatial capacity integration
-        run: python3 -B tools/pr58_spatial_capacity_integration_worker.py
+        run: python3 -B tools/pr58_spatial_worker_bootstrap.py
 
       - name: Regenerate variable-state documents
         run: |
