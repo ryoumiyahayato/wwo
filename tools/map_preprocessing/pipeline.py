@@ -210,6 +210,9 @@ def _raster_metadata(path: Path) -> dict[str, Any]:
 def _map_related(relative: Path) -> bool:
     lower = relative.as_posix().lower()
     suffix = relative.suffix.lower()
+    # Spatial runtime code is not a visual or geometry source asset.
+    if lower.startswith('scripts/vnext/spatial/'):
+        return False
     if suffix in RASTER_EXTENSIONS or suffix in VECTOR_EXTENSIONS:
         return True
     if lower.startswith("data/world_map/") and suffix in MAP_SOURCE_EXTENSIONS:

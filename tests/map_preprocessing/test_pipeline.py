@@ -191,6 +191,7 @@ class R1SafetyTests(unittest.TestCase):
         repository_root = Path(__file__).resolve().parents[2]
         inventory = pipeline.build_inventory(repository_root)
         self.assertEqual(inventory["summary"]["asset_count"], 273)
+        self.assertNotIn("scripts/vnext/spatial/spatial_map_projection.gd", {item["path"] for item in inventory["files"]})
         crosswalk = pipeline.build_crosswalk(repository_root, inventory)
         self.assertEqual(crosswalk["summary"]["entity_count"], 560)
         self.assertEqual(crosswalk["summary"]["current_country_geometry_resolved"], 177)
