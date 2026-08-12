@@ -32,10 +32,29 @@ jobs:
 
           git merge --no-ff origin/master -m "Merge master into PR #64 after PR #61"
 
-          python3 tools/provenance/generate_manifest.py --base-revision "$base_sha"
+          # The manifest inventories docs/**, including the reference matrix.
+          # Therefore finalize the matrix before hashing docs into the manifest.
           python3 tools/provenance/scan_reference_matrix.py --base-revision "$base_sha"
+          python3 tools/provenance/generate_manifest.py --base-revision "$base_sha"
           python3 tools/provenance/generate_regression_corpus.py --base-revision "$base_sha"
           python3 tools/provenance/generate_review_backlog.py --base-revision "$base_sha"
+
+          git add \
+            docs/data_sources/provenance_reference_matrix.json \
+            docs/data_sources/provenance_manifest.json \
+            tests/provenance/provenance_regression_corpus.json \
+            tests/provenance/provenance_review_backlog.json
+
+          # Second complete pass must be a fixed point before validation.
+          python3 tools/provenance/scan_reference_matrix.py --base-revision "$base_sha"
+          python3 tools/provenance/generate_manifest.py --base-revision "$base_sha"
+          python3 tools/provenance/generate_regression_corpus.py --base-revision "$base_sha"
+          python3 tools/provenance/generate_review_backlog.py --base-revision "$base_sha"
+          git diff --exit-code -- \
+            docs/data_sources/provenance_reference_matrix.json \
+            docs/data_sources/provenance_manifest.json \
+            tests/provenance/provenance_regression_corpus.json \
+            tests/provenance/provenance_review_backlog.json
 
           python3 tools/provenance/validate_manifest.py docs/data_sources/provenance_manifest.json
           python3 tools/provenance/validate_reference_matrix.py docs/data_sources/provenance_reference_matrix.json
@@ -44,27 +63,9 @@ jobs:
           python3 -m unittest discover -s tests/provenance -p 'test_*.py'
           python3 -m compileall -q tools/provenance tests/provenance
 
-          git add \
-            docs/data_sources/provenance_manifest.json \
-            docs/data_sources/provenance_reference_matrix.json \
-            tests/provenance/provenance_regression_corpus.json \
-            tests/provenance/provenance_review_backlog.json
-
-          python3 tools/provenance/generate_manifest.py --base-revision "$base_sha"
-          python3 tools/provenance/scan_reference_matrix.py --base-revision "$base_sha"
-          python3 tools/provenance/generate_regression_corpus.py --base-revision "$base_sha"
-          python3 tools/provenance/generate_review_backlog.py --base-revision "$base_sha"
-          git diff --exit-code -- \
-            docs/data_sources/provenance_manifest.json \
-            docs/data_sources/provenance_reference_matrix.json \
-            tests/provenance/provenance_regression_corpus.json \
-            tests/provenance/provenance_review_backlog.json
-
           rm .github/workflows/pr64-reconcile-after-pr61.yml
           git add -A .github/workflows/pr64-reconcile-after-pr61.yml
           git diff --check
 
-          if ! git diff --cached --quiet; then
-            git commit -m "chore: regenerate provenance after PR #61"
-          fi
+          git commit -m "chore: regenerate provenance after PR #61"
           git push origin HEAD:chore/data-asset-provenance-20260812
