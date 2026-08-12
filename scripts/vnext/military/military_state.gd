@@ -1,6 +1,6 @@
 class_name VNextMilitaryState
 extends RefCounted
-## Dynamic military state. Static geography and total link capacity remain in the map adapter.
+## Dynamic military state. Spatial owns physical infrastructure/capacity; this state keeps Military attribution only.
 
 const SCHEMA_ID: String = "vnext_military_state_v2"
 const ACTION_KINDS: PackedStringArray = ["deploy", "move", "concentrate", "defend", "attack", "supply"]
@@ -20,7 +20,7 @@ var control_history: Array[Dictionary] = []
 var last_simulated_hour: int = 0
 var next_action_sequence: int = 1
 
-# Current one-hour transport ledger. The map owns total capacity; this state owns only use/queue facts.
+# Last closed Military transport window: diagnostic attribution only, never a physical budget or authority.
 var capacity_window_hour: int = -1
 var link_capacity_used: Dictionary = {}
 var link_queues: Dictionary = {}
@@ -330,7 +330,7 @@ func snapshot() -> Dictionary:
 	}
 
 
-func restore(snapshot_value: Dictionary, map: VNextMilitaryMapAdapter = null) -> bool:
+func restore(snapshot_value: Dictionary, map: VNextMilitaryMapAdapter = null, spatial_world: VNextSpatialWorld = null) -> bool:
 	var formation_value: Variant = snapshot_value.get("formations", [])
 	var active_action_value: Variant = snapshot_value.get("active_actions", [])
 	var completed_value: Variant = snapshot_value.get("completed_actions", [])
@@ -385,7 +385,7 @@ func restore(snapshot_value: Dictionary, map: VNextMilitaryMapAdapter = null) ->
 	candidate_state.capacity_window_hour = int(snapshot_value.get("capacity_window_hour", -1))
 	candidate_state.link_capacity_used = (used_value as Dictionary).duplicate(true)
 	candidate_state.link_queues = (queues_value as Dictionary).duplicate(true)
-	if not candidate_state.is_valid(map) or not VNextMilitaryStateInvariants.validate(candidate_state, map):
+	if not candidate_state.is_valid(map) or not VNextMilitaryStateInvariants.validate(candidate_state, map, spatial_world):
 		return false
 
 	formations = candidate_state.formations

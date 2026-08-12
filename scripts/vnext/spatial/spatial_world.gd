@@ -160,6 +160,14 @@ func neighboring_place_ids(place_query: String, link_type: String = "") -> Array
 	return _catalog.neighboring_place_ids(place_query, link_type)
 
 
+func effective_capacity(link_id: String) -> float:
+	# Allocation-independent physical query for routing/access consumers. This
+	# reads the authoritative InfrastructureLinkState directly and never creates
+	# a second capacity ledger.
+	var state: VNextInfrastructureLinkState = _state_for_link(link_id)
+	return 0.0 if state == null else state.effective_capacity()
+
+
 func infrastructure_state(link_id: String) -> Dictionary:
 	if _catalog == null or not _infrastructure.has(link_id):
 		return {}
@@ -268,6 +276,12 @@ func request_capacity(
 	return _capacity.request_capacity(request_id, link_id, window_hour, demand)
 
 
+func request_capacity_batch(request_values: Array[Dictionary]) -> Dictionary:
+	if _capacity == null:
+		return {"success": false, "accepted": false, "reason": "invalid_world", "results": {}}
+	return _capacity.request_capacity_batch(request_values)
+
+
 func reserve_capacity(
 	request_id: String, link_id: String, window_hour: int, demand: Variant
 ) -> Dictionary:
@@ -282,6 +296,12 @@ func reservation_result(request_id: String, link_id: String, window_hour: int) -
 	if _capacity == null:
 		return {"success": false, "accepted": false, "reason": "invalid_world"}
 	return _capacity.reservation_result(request_id, link_id, window_hour)
+
+
+func reservation_results_batch(request_values: Array[Dictionary]) -> Dictionary:
+	if _capacity == null:
+		return {"success": false, "accepted": false, "reason": "invalid_world", "results": {}}
+	return _capacity.reservation_results_batch(request_values)
 
 
 func capacity_summary(link_id: String) -> Dictionary:

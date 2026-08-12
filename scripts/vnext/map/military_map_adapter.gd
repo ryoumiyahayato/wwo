@@ -2,7 +2,7 @@ class_name VNextMilitaryMapAdapter
 extends RefCounted
 ## Reads the existing world-map dataset and adds military-only semantics by stable ID.
 ## It never owns geometry, city records, or a second world map.
-## Link capacity in this adapter is the single total-capacity truth used by military logistics.
+## Spatial owns physical infrastructure and shared capacity; this adapter owns only Military semantics.
 
 const OVERLAY_PATH: String = "res://data/world_map/strategic_military_overlay.json"
 const MODE_ROAD: String = "road"
@@ -23,11 +23,16 @@ var battle_rules: Dictionary = {}
 var region_overlays: Dictionary = {}
 var country_overlays: Dictionary = {}
 var city_overlays: Dictionary = {}
+var spatial_world: VNextSpatialWorld = null
 
 
-func load_existing_map() -> bool:
+func load_existing_map(spatial_world_value: VNextSpatialWorld = null) -> bool:
 	errors.clear()
 	_clear_runtime_indexes()
+	spatial_world = spatial_world_value
+	if spatial_world == null or not spatial_world.is_valid():
+		errors.append("authoritative VNextSpatialWorld is required")
+		return false
 	var source := PrototypeV2Data.new()
 	if not source.load_all():
 		errors.append_array(source.errors)
@@ -37,6 +42,9 @@ func load_existing_map() -> bool:
 	if not _load_overlay():
 		return false
 	_build_network(source)
+	for link_id: String in _sorted_string_keys(links):
+		if spatial_world.infrastructure_state(link_id).is_empty():
+			errors.append("Military topology link missing from Spatial: %s" % link_id)
 	return errors.is_empty() and not cities.is_empty() and not links.is_empty()
 
 
@@ -177,16 +185,22 @@ func get_all_links() -> Array[Dictionary]:
 	return result
 
 
+func get_spatial_world() -> VNextSpatialWorld:
+	return spatial_world
+
+
+func get_spatial_capacity_summary(link_id: String) -> Dictionary:
+	if spatial_world == null or not spatial_world.is_valid():
+		return {}
+	return spatial_world.capacity_summary(link_id)
+
+
 func get_link_transport_capacity_per_hour(link_id: String) -> float:
-	var link: Dictionary = links.get(link_id, {}) as Dictionary
-	if link.is_empty():
+	# Compatibility query only. The value is read directly from authoritative
+	# Spatial InfrastructureLinkState and never from a Military-owned budget.
+	if spatial_world == null or not spatial_world.is_valid():
 		return 0.0
-	var total_capacity: float = maxf(0.0, float(link.get("capacity_personnel", 0.0)))
-	var reliability: float = clampf(float(link.get("reliability", 0.0)), 0.0, 1.0)
-	var movement_hours: float = maxf(1.0, float(link.get("movement_hours", 0.0)))
-	if total_capacity <= 0.0 or reliability <= 0.0:
-		return 0.0
-	return total_capacity * reliability / movement_hours
+	return maxf(0.0, spatial_world.effective_capacity(link_id))
 
 
 func find_route(
@@ -422,8 +436,6 @@ func _add_link(
 		"mode": mode,
 		"distance_km": maxf(0.1, distance_km),
 		"movement_hours": movement_hours,
-		"capacity_personnel": maxi(0, int(profile.get("capacity_personnel", 0))),
-		"reliability": clampf(float(profile.get("reliability", 0.0)), 0.0, 1.0),
 	}
 	links[link_id] = link
 	if not links_by_city.has(from_city_id):
@@ -477,15 +489,11 @@ func _build_route_result(
 	reversed_link_ids.reverse()
 	var route_links: Array[Dictionary] = []
 	var total_distance_km: float = 0.0
-	var reliability: float = 1.0
-	var capacity_personnel: int = 2147483647
 	var modes: Array[String] = []
 	for link_id: String in reversed_link_ids:
 		var link: Dictionary = get_link(link_id)
 		route_links.append(link)
 		total_distance_km += float(link.get("distance_km", 0.0))
-		reliability *= clampf(float(link.get("reliability", 1.0)), 0.0, 1.0)
-		capacity_personnel = mini(capacity_personnel, maxi(0, int(link.get("capacity_personnel", 0))))
 		var mode: String = str(link.get("mode", ""))
 		if not modes.has(mode):
 			modes.append(mode)
@@ -494,7 +502,7 @@ func _build_route_result(
 		var region_id: String = get_region_id_for_city(city_id)
 		if not region_ids.has(region_id):
 			region_ids.append(region_id)
-	var route: Dictionary = {
+	return {
 		"reachable": true,
 		"origin_city_id": origin_city_id,
 		"destination_city_id": destination_city_id,
@@ -504,12 +512,8 @@ func _build_route_result(
 		"region_ids": region_ids,
 		"total_distance_km": total_distance_km,
 		"duration_hours": int(distances[destination_city_id]),
-		"reliability": reliability,
-		"capacity_personnel": capacity_personnel if capacity_personnel < 2147483647 else 0,
 		"mode_sequence": modes,
 	}
-	route["supply_capacity_per_day"] = get_route_capacity_per_day(route)
-	return route
 
 
 func _take_lowest_cost_city(pending: Array[String], distances: Dictionary) -> String:

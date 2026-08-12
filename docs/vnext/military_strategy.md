@@ -81,3 +81,13 @@ The focused test covers map reuse, terrain, roads versus rail, ports and
 shipping, timed movement, deployment, concentration, supply interruption,
 combat outcomes, control changes, snapshot round trips, and a 240-day bounded
 run.
+
+## Post-PR62 Spatial physical-capacity boundary
+
+`VNextSpatialWorld` is the sole authority for physical infrastructure status, nominal/effective link capacity, and the active per-link/per-hour shared allocation window. Military owns only transport demand, Military access/controller eligibility, action progress, and current/historical allocation attribution.
+
+For every hour Military first collects all eligible movement and rolling-supply demand without applying progress. It then submits all requests to the current Spatial window, queries every final `reservation_result()` after the full request set exists, and only then applies progress. This two-phase submit/query/apply rule is required because Spatial canonical ordering may reallocate an earlier provisional result after a later request is inserted. Movement and supply therefore contend inside one physical Spatial budget, leaving the same authority available for future Economy demand.
+
+Spatial reservations are window-scoped. At the boundary Spatial rolls to the next hour and clears active requests; Military clears transient Spatial request references but retains bounded historical attribution (`capacity_window_hour`, `capacity_link_id`, `capacity_used_this_window`). Closed legal attribution is never compared retroactively with a later changed Spatial capacity. If current Spatial effective capacity is zero, the Military action remains persistent and becomes interrupted without movement/cargo progress; restoration permits a deterministic new-window request with the same Military action identity.
+
+Military snapshots persist formations, actions, shipment state, progress, and Military attribution only. Spatial snapshots persist infrastructure and the authoritative physical capacity window. Combined restore is candidate-first: any persisted non-empty current Spatial request reference must resolve to the same Spatial link/window/allocation, while closed historical attribution does not require an old Spatial reservation object. No service locator, duplicate world map, or Military-owned physical budget is introduced.

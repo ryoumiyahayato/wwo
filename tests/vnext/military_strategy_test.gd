@@ -3,14 +3,18 @@ extends SceneTree
 var checks := 0
 var failures := 0
 var map: VNextMilitaryMapAdapter
+var spatial: VNextSpatialWorld
+var _state_contexts: Dictionary = {}
 var service := VNextMilitaryService.new()
 
 func _initialize() -> void:
 	_run.call_deferred()
 
 func _run() -> void:
+	spatial = VNextSpatialWorld.create_from_legacy_world_map()
+	_check(spatial != null and spatial.is_valid(), "authoritative Spatial world loads")
 	map = VNextMilitaryMapAdapter.new()
-	_check(map.load_existing_map(), "map adapter loads existing world map")
+	_check(map.load_existing_map(spatial), "map adapter loads existing world map")
 	if map != null and map.errors.is_empty():
 		_test_shared_capacity_and_map()
 		_test_supply_chronology_and_resume()
@@ -34,11 +38,11 @@ func _test_shared_capacity_and_map() -> void:
 	_check((sea.get("mode_sequence", []) as Array).has("shipping"), "shipping is reused")
 	_check(int(rail.get("duration_hours", 0)) < int(road.get("duration_hours", 0)), "rail is faster than road")
 	var link_id := str((rail.get("link_ids", []) as Array)[0])
-	var original_capacity := int((map.links[link_id] as Dictionary).get("capacity_personnel", 0))
-	(map.links[link_id] as Dictionary)["capacity_personnel"] = 0
+	var original_capacity := float(spatial.infrastructure_state(link_id).get("nominal_capacity", 0.0))
+	_check(spatial.set_nominal_capacity(link_id, 0.0), "Spatial zero capacity fixture applies")
 	_check(map.get_link_transport_capacity_per_hour(link_id) == 0.0, "zero capacity stays impassable")
 	_check(not bool(map.find_route("paris", "rouen", ["rail"]).get("reachable", false)), "zero-capacity route is unreachable")
-	(map.links[link_id] as Dictionary)["capacity_personnel"] = original_capacity
+	_check(spatial.set_nominal_capacity(link_id, original_capacity), "Spatial capacity fixture restores")
 
 	var state := _new_state()
 	for id: String in ["formation:a", "formation:b", "formation:c"]:
@@ -145,7 +149,7 @@ func _test_supply_completion_and_interruptions() -> void:
 		_check(is_equal_approx(float(shipment.get("cargo_amount_remaining", -1.0)), original_total), "arrival itself neither duplicates nor loses cargo")
 		_check(arrival_hour >= int(arrival_route.get("duration_hours", 0)), "arrival cannot precede route duration")
 		var settled_action_id := str(shipment.get("action_id", ""))
-		var settlement := service.advance_to_hour(completion, map, completion.last_simulated_hour + 1)
+		var settlement := _advance_result(completion, completion.last_simulated_hour + 1)
 		_check(bool(settlement.get("success", false)), "arrived cargo settles on following supply hour")
 		var delivered := (((settlement.get("supply", {}) as Dictionary).get("formation:arrival", {}) as Dictionary).get("delivered", {}) as Dictionary)
 		_check(float(delivered.get("food", 0.0)) > 0.0, "only arrived cargo contributes delivered supply")
@@ -154,12 +158,12 @@ func _test_supply_completion_and_interruptions() -> void:
 	var low := _remote_supply_state("formation:low_capacity", "rouen", 6000)
 	var rail_route := map.find_route("paris", "rouen", ["rail"])
 	var rail_link := str((rail_route.get("link_ids", []) as Array)[0])
-	var original_capacity := int((map.links[rail_link] as Dictionary).get("capacity_personnel", 0))
-	(map.links[rail_link] as Dictionary)["capacity_personnel"] = 10
+	var original_capacity := float(spatial.infrastructure_state(rail_link).get("nominal_capacity", 0.0))
+	_check(spatial.set_nominal_capacity(rail_link, 10.0), "small Spatial capacity fixture applies")
 	_check(_advance(low, 1), "small-capacity supply hour advances")
 	var low_food := _find_supply(low, "formation:low_capacity", "food")
 	_check(not low_food.is_empty() and float(low_food.get("edge_load_remaining", 0.0)) > 0.0, "small positive capacity creates finite multi-hour supply waves")
-	(map.links[rail_link] as Dictionary)["capacity_personnel"] = original_capacity
+	_check(spatial.set_nominal_capacity(rail_link, original_capacity), "small Spatial capacity fixture restores")
 
 	var zero_cut := _remote_supply_state("formation:zero_cut", "marseille", 5000)
 	var zero_shipment := _advance_supply_to_intermediate(zero_cut, "formation:zero_cut", "food", 240)
@@ -168,13 +172,13 @@ func _test_supply_completion_and_interruptions() -> void:
 		var zero_route: Dictionary = zero_shipment.get("route", {}) as Dictionary
 		var zero_edge := int(zero_shipment.get("current_edge_index", 0))
 		var zero_link := str((zero_route.get("link_ids", []) as Array)[zero_edge])
-		var saved_capacity := int((map.links[zero_link] as Dictionary).get("capacity_personnel", 0))
+		var saved_capacity := float(spatial.infrastructure_state(zero_link).get("nominal_capacity", 0.0))
 		var cargo_before := float(zero_shipment.get("cargo_amount_remaining", 0.0))
-		(map.links[zero_link] as Dictionary)["capacity_personnel"] = 0
+		_check(spatial.set_infrastructure_status(zero_link, VNextInfrastructureLinkState.STATUS_INTERRUPTED), "authoritative Spatial interruption applies")
 		_check(_advance(zero_cut, zero_cut.last_simulated_hour + 1), "zero-capacity interruption hour advances")
 		zero_shipment = _find_supply(zero_cut, "formation:zero_cut", "food")
 		_check(str(zero_shipment.get("transport_state", "")) == "interrupted", "mid-route zero capacity interrupts cargo")
-		(map.links[zero_link] as Dictionary)["capacity_personnel"] = saved_capacity
+		_check(spatial.set_nominal_capacity(zero_link, saved_capacity) and spatial.restore_infrastructure(zero_link), "authoritative Spatial capacity recovers")
 		_check(_advance(zero_cut, zero_cut.last_simulated_hour + 1), "capacity recovery hour advances")
 		zero_shipment = _find_supply(zero_cut, "formation:zero_cut", "food")
 		_check(str(zero_shipment.get("transport_state", "")) in ["waiting_capacity", "moving"], "capacity recovery resumes cargo")
@@ -263,9 +267,12 @@ func _test_combat_position_and_defender_annihilation() -> void:
 	_check(not bool(service.move(restored, map, "formation:defender", "rouen", restored.last_simulated_hour).get("success", false)), "destroyed defender rejects normal command")
 
 func _test_attacker_annihilation() -> void:
+	# _battle_state() creates the isolated per-state Spatial/Military map context.
+	# Apply the forced-loss fixture to that authoritative context, not the map
+	# object from the previous test.
+	var state := _battle_state(1, 50000)
 	var old_loss := float(map.battle_rules.get("defender_win_loss_rate", 0.18))
 	map.battle_rules["defender_win_loss_rate"] = 1.0
-	var state := _battle_state(1, 50000)
 	var order := service.attack(state, map, "formation:attacker", "lille", 0)
 	var attack_id := str(order.get("action_id", ""))
 	_finish(state, attack_id, 500)
@@ -472,8 +479,35 @@ func _test_restore_readiness_concentrate_scope() -> void:
 	_check(adapter.contains("PrototypeV2Data") and not service_source.contains("MilitaryManager") and not service_source.contains("GlobalManager") and not service_source.contains("GameContext"), "map reuse and architecture scope remain intact")
 
 func _advance(state: VNextMilitaryState, target_hour: int) -> bool:
-	var result := service.advance_to_hour(state, map, target_hour)
-	return bool(result.get("success", false))
+	return bool(_advance_result(state, target_hour).get("success", false))
+
+
+func _advance_result(state: VNextMilitaryState, target_hour: int) -> Dictionary:
+	var context: Dictionary = _context_for_state(state)
+	var state_spatial: VNextSpatialWorld = context.get("spatial") as VNextSpatialWorld
+	var state_map: VNextMilitaryMapAdapter = context.get("map") as VNextMilitaryMapAdapter
+	if state_spatial.current_hour() < state.last_simulated_hour:
+		if not state_spatial.advance_to_hour(state.last_simulated_hour):
+			return {"success": false}
+	return service.advance_to_hour(state, state_map, target_hour)
+
+
+func _context_for_state(state: VNextMilitaryState) -> Dictionary:
+	var key: int = state.get_instance_id()
+	if _state_contexts.has(key):
+		return _state_contexts[key] as Dictionary
+	var state_spatial := VNextSpatialWorld.create_from_legacy_world_map()
+	if state_spatial == null or not state_spatial.is_valid():
+		return {}
+	if not state_spatial.advance_to_hour(state.last_simulated_hour):
+		return {}
+	var state_map := VNextMilitaryMapAdapter.new()
+	if not state_map.load_existing_map(state_spatial):
+		return {}
+	var context := {"spatial": state_spatial, "map": state_map}
+	_state_contexts[key] = context
+	return context
+
 
 func _remote_supply_state(id: String, city: String, personnel: int) -> VNextMilitaryState:
 	var state := _new_state()
@@ -560,12 +594,47 @@ func _transactionally_rejected(data: Dictionary) -> bool:
 	return not candidate.restore(data, map) and candidate.snapshot() == before
 
 func _new_state() -> VNextMilitaryState:
+	var state_spatial := VNextSpatialWorld.create_from_legacy_world_map()
+	_check(state_spatial != null and state_spatial.is_valid(), "Military fixture Spatial world initializes")
+	var state_map := VNextMilitaryMapAdapter.new()
+	_check(state_map.load_existing_map(state_spatial), "Military fixture adapter attaches Spatial world")
+	_configure_r4_spatial_capacity_baseline(state_spatial, state_map)
+	spatial = state_spatial
+	map = state_map
 	var state := VNextMilitaryState.new()
-	_check(state.initialize(map), "military state initializes")
+	_check(state.initialize(state_map), "military state initializes")
+	_state_contexts[state.get_instance_id()] = {"spatial": state_spatial, "map": state_map}
 	return state
+
 
 func _add(state: VNextMilitaryState, id: String, city: String, personnel: int, equipment: float, country: String = "country_fra", training: float = 0.8, morale: float = 0.8, organization: float = 0.8) -> bool:
 	return service.create_formation(state, map, id, country, city, personnel, {"equipment_factor": equipment}, training, morale, organization)
+
+func _configure_r4_spatial_capacity_baseline(
+	state_spatial: VNextSpatialWorld, state_map: VNextMilitaryMapAdapter
+) -> void:
+	# Preserve the exact pre-PR62 R4 physical-throughput fixture values while
+	# routing them through Spatial authority. This is test data, not production
+	# Military capacity authority.
+	for link: Dictionary in state_map.get_all_links():
+		var mode: String = str(link.get("mode", ""))
+		var personnel_capacity: float = 0.0
+		var reliability: float = 0.0
+		match mode:
+			"road":
+				personnel_capacity = 8000.0
+				reliability = 0.82
+			"rail":
+				personnel_capacity = 24000.0
+				reliability = 0.96
+			"shipping":
+				personnel_capacity = 50000.0
+				reliability = 0.78
+		var movement_hours: float = maxf(1.0, float(link.get("movement_hours", 1.0)))
+		var per_hour: float = personnel_capacity * reliability / movement_hours
+		if per_hour > 0.0:
+			_check(state_spatial.set_nominal_capacity(str(link.get("id", "")), per_hour), "R4 capacity fixture is owned by Spatial")
+
 
 func _check(condition: bool, label: String) -> void:
 	checks += 1

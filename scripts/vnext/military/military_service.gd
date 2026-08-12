@@ -1,6 +1,6 @@
 class_name VNextMilitaryService
 extends RefCounted
-## Strategic military operations over the existing world-map transport graph.
+## Strategic military operations over the existing world-map graph, consuming Spatial physical capacity.
 ## The caller supplies the external time boundary; this service never touches
 ## VNextWorldRuntime or creates a second world clock.
 
@@ -245,6 +245,9 @@ func advance_to_hour(
 ) -> Dictionary:
 	if state == null or map == null or not state.is_valid(map):
 		return _failure("军事状态无效。")
+	var spatial: VNextSpatialWorld = map.get_spatial_world()
+	if spatial == null or not spatial.is_valid() or spatial.current_hour() != state.last_simulated_hour:
+		return _failure("军事推进需要与当前边界同步的 Spatial authority。")
 	if target_hour < state.last_simulated_hour:
 		return _failure("军事时间不能倒退。")
 	var start_hour: int = state.last_simulated_hour
@@ -254,6 +257,8 @@ func advance_to_hour(
 	while state.last_simulated_hour < target_hour:
 		var hour: int = state.last_simulated_hour
 		var tick: Dictionary = _advance_one_hour(state, map, hour)
+		if not bool(tick.get("success", false)):
+			return _failure(str(tick.get("reason", "Spatial capacity window advance failed.")))
 		_merge_supply_report(supply_report, tick.get("supply", {}) as Dictionary)
 		for raw_completion: Variant in tick.get("completed_actions", []) as Array:
 			if raw_completion is Dictionary:
@@ -291,14 +296,17 @@ func get_supply_shipments(state: VNextMilitaryState) -> Array[Dictionary]:
 func get_link_capacity_view(state: VNextMilitaryState, map: VNextMilitaryMapAdapter, link_id: String) -> Dictionary:
 	if state == null or map == null or map.get_link(link_id).is_empty():
 		return {}
-	var total: float = map.get_link_transport_capacity_per_hour(link_id)
-	var used: float = maxf(0.0, float(state.link_capacity_used.get(link_id, 0.0)))
+	var summary: Dictionary = map.get_spatial_capacity_summary(link_id)
+	if summary.is_empty():
+		return {}
 	return {
 		"link_id": link_id,
 		"window_hour": state.capacity_window_hour,
-		"capacity_per_hour": total,
-		"used_capacity": used,
-		"available_capacity": maxf(0.0, total - used),
+		"spatial_window_hour": int(summary.get("window_hour", -1)),
+		"capacity_per_hour": float(summary.get("effective_capacity", 0.0)),
+		"used_capacity": float(summary.get("used_capacity", 0.0)),
+		"available_capacity": float(summary.get("remaining_capacity", 0.0)),
+		"military_attributed_capacity": maxf(0.0, float(state.link_capacity_used.get(link_id, 0.0))),
 		"queue": (state.link_queues.get(link_id, []) as Array).duplicate(true),
 	}
 
@@ -420,6 +428,7 @@ func _new_transport_action(
 		"edge_load_total": load,
 		"edge_load_remaining": load,
 		"reserved_link_id": "",
+		"spatial_request_id": "",
 		"transport_state": "waiting_capacity",
 		"allow_enemy_destination": allow_enemy_destination,
 		"capacity_window_hour": -1,
@@ -464,6 +473,7 @@ func _new_supply_action(
 		"edge_load_total": load,
 		"edge_load_remaining": load,
 		"reserved_link_id": "",
+		"spatial_request_id": "",
 		"transport_state": "waiting_capacity",
 		"allow_enemy_destination": false,
 		"capacity_window_hour": -1,
@@ -473,11 +483,10 @@ func _new_supply_action(
 
 
 func _advance_one_hour(state: VNextMilitaryState, map: VNextMilitaryMapAdapter, hour: int) -> Dictionary:
+	var spatial: VNextSpatialWorld = map.get_spatial_world()
+	if spatial == null or not spatial.is_valid() or spatial.current_hour() != hour:
+		return {"success": false, "reason": "Spatial capacity window is not synchronized."}
 	state.begin_capacity_window(hour)
-	var budgets: Dictionary = {}
-	for link: Dictionary in map.get_all_links():
-		var link_id: String = str(link.get("id", ""))
-		budgets[link_id] = map.get_link_transport_capacity_per_hour(link_id)
 
 	var supply_context: Dictionary = _build_supply_context(state, map)
 	_create_supply_shipments(state, map, hour, supply_context)
@@ -485,11 +494,50 @@ func _advance_one_hour(state: VNextMilitaryState, map: VNextMilitaryMapAdapter, 
 	_collect_movement_requests(state, map, hour, requests)
 	_collect_supply_transport_requests(state, map, hour, requests)
 	_sort_capacity_requests(requests)
+
+	# PASS 2: submit every eligible Military demand as one transactional Spatial
+	# batch. Reverse construction is deliberate: final results must still follow
+	# Spatial canonical request ordering rather than caller insertion order.
+	var submission_order: Array[Dictionary] = requests.duplicate(true)
+	submission_order.reverse()
+	var spatial_batch: Array[Dictionary] = []
+	for request: Dictionary in submission_order:
+		var spatial_request_id: String = _spatial_capacity_request_id(request, hour)
+		request["spatial_request_id"] = spatial_request_id
+		spatial_batch.append({
+			"request_id": spatial_request_id,
+			"link_id": str(request.get("link_id", "")),
+			"window_hour": hour,
+			"demand": float(request.get("requested_capacity", 0.0)),
+		})
+	if not spatial_batch.is_empty():
+		var batch_result: Dictionary = spatial.request_capacity_batch(spatial_batch)
+		if not bool(batch_result.get("accepted", false)):
+			return {"success": false, "reason": "Spatial rejected Military capacity batch: %s" % str(batch_result.get("reason", "unknown"))}
+
+	# PASS 3: query every final reservation result only after the full batch exists.
+	# The batch query is read-only and performs one canonical calculation for the
+	# complete result set; it is equivalent to final reservation_result() calls.
+	var final_query: Dictionary = spatial.reservation_results_batch(spatial_batch) if not spatial_batch.is_empty() else {"accepted": true, "results": {}}
+	if not bool(final_query.get("accepted", false)):
+		return {"success": false, "reason": "Spatial final reservation batch lookup failed."}
+	var final_results: Dictionary = final_query.get("results", {}) as Dictionary
+	var final_allocations: Dictionary = {}
+	for request: Dictionary in requests:
+		var action_id: String = str(request.get("request_id", ""))
+		var spatial_request_id: String = _spatial_capacity_request_id(request, hour)
+		request["spatial_request_id"] = spatial_request_id
+		var result: Dictionary = final_results.get(spatial_request_id, {}) as Dictionary
+		if not bool(result.get("accepted", false)):
+			return {"success": false, "reason": "Spatial final reservation lookup failed."}
+		final_allocations[action_id] = maxf(0.0, float(result.get("allocated_capacity", 0.0)))
+
+	# PASS 4: Military records attribution and progresses actions from final results.
 	for request: Dictionary in requests:
 		if str(request.get("request_kind", "")) == "movement":
-			_apply_movement_capacity_request(state, request, budgets, hour)
+			_apply_movement_capacity_request(state, request, final_allocations, hour)
 		else:
-			_apply_supply_capacity_request(state, request, budgets, hour)
+			_apply_supply_capacity_request(state, request, final_allocations, hour)
 
 	var supply_report: Dictionary = _finalize_supply_hour(state, map, supply_context)
 	var boundary_hour: int = hour + 1
@@ -497,7 +545,13 @@ func _advance_one_hour(state: VNextMilitaryState, map: VNextMilitaryMapAdapter, 
 	var completed: Array[Dictionary] = []
 	var battles: Array[Dictionary] = []
 	_advance_actions_at_boundary(state, map, boundary_hour, completed, battles)
-	return {"supply": supply_report, "completed_actions": completed, "battles": battles}
+
+	# Closing the physical window is authoritative in Spatial. Military keeps only
+	# historical attribution; no closed Spatial reservation object is required.
+	if not spatial.advance_to_hour(boundary_hour):
+		return {"success": false, "reason": "Spatial capacity window rollover failed."}
+	_clear_spatial_request_references(state)
+	return {"success": true, "supply": supply_report, "completed_actions": completed, "battles": battles}
 
 
 func _build_supply_context(state: VNextMilitaryState, map: VNextMilitaryMapAdapter) -> Dictionary:
@@ -703,20 +757,20 @@ func _collect_movement_requests(
 			continue
 		var link_id: String = str(link_ids[edge_index])
 		var can_enter: bool = map.can_enter_link(
-			link_id,
-			formation.current_city_id,
-			str(action.get("destination_city_id", "")),
-			formation.country_id,
-			state.region_controls,
-			bool(action.get("allow_enemy_destination", false))
+			link_id, formation.current_city_id, str(action.get("destination_city_id", "")),
+			formation.country_id, state.region_controls, bool(action.get("allow_enemy_destination", false))
 		)
 		if not can_enter:
+			_cancel_active_spatial_request(map, action)
 			action["reserved_link_id"] = ""
+			action["spatial_request_id"] = ""
 			action["transport_state"] = "interrupted" if map.get_link_transport_capacity_per_hour(link_id) <= 0.0 else "blocked"
 			state.active_actions[action_id] = action
 			continue
-		if float(action.get("edge_load_remaining", 0.0)) <= EPSILON:
+		var demand: float = maxf(0.0, float(action.get("edge_load_remaining", 0.0)))
+		if demand <= EPSILON:
 			action["reserved_link_id"] = ""
+			action["spatial_request_id"] = ""
 			action["transport_state"] = "moving"
 			state.active_actions[action_id] = action
 			continue
@@ -730,6 +784,7 @@ func _collect_movement_requests(
 			"formation_id": formation.formation_id,
 			"resource_id": "",
 			"link_id": link_id,
+			"requested_capacity": demand,
 		})
 
 
@@ -753,20 +808,20 @@ func _collect_supply_transport_requests(
 			continue
 		var link_id: String = str(link_ids[edge_index])
 		var can_enter: bool = map.can_enter_link(
-			link_id,
-			str(action.get("current_city_id", "")),
-			str(action.get("destination_city_id", "")),
-			str(action.get("owner_country_id", "")),
-			state.region_controls,
-			false
+			link_id, str(action.get("current_city_id", "")), str(action.get("destination_city_id", "")),
+			str(action.get("owner_country_id", "")), state.region_controls, false
 		)
 		if not can_enter:
+			_cancel_active_spatial_request(map, action)
 			action["reserved_link_id"] = ""
+			action["spatial_request_id"] = ""
 			action["transport_state"] = "interrupted" if map.get_link_transport_capacity_per_hour(link_id) <= 0.0 else "blocked"
 			state.active_actions[action_id] = action
 			continue
-		if float(action.get("edge_load_remaining", 0.0)) <= EPSILON:
+		var demand: float = maxf(0.0, float(action.get("edge_load_remaining", 0.0)))
+		if demand <= EPSILON:
 			action["reserved_link_id"] = ""
+			action["spatial_request_id"] = ""
 			action["transport_state"] = "moving"
 			state.active_actions[action_id] = action
 			continue
@@ -780,13 +835,14 @@ func _collect_supply_transport_requests(
 			"formation_id": str(action.get("destination_formation_id", "")),
 			"resource_id": str(action.get("resource_id", "")),
 			"link_id": link_id,
+			"requested_capacity": demand,
 		})
 
 
 func _apply_movement_capacity_request(
 	state: VNextMilitaryState,
 	request: Dictionary,
-	budgets: Dictionary,
+	final_allocations: Dictionary,
 	hour: int
 ) -> void:
 	var action_id: String = str(request.get("request_id", ""))
@@ -795,13 +851,13 @@ func _apply_movement_capacity_request(
 	var action: Dictionary = state.active_actions[action_id] as Dictionary
 	var link_id: String = str(request.get("link_id", ""))
 	state.queue_capacity_request(link_id, action_id)
-	var available: float = maxf(0.0, float(budgets.get(link_id, 0.0)))
 	var remaining: float = maxf(0.0, float(action.get("edge_load_remaining", 0.0)))
-	var allocation: float = minf(available, remaining)
+	var allocation: float = minf(remaining, maxf(0.0, float(final_allocations.get(action_id, 0.0))))
+	action["spatial_request_id"] = str(request.get("spatial_request_id", ""))
 	if allocation > EPSILON:
-		budgets[link_id] = available - allocation
 		state.record_capacity_use(link_id, allocation)
 		action = state.active_actions[action_id] as Dictionary
+		action["spatial_request_id"] = str(request.get("spatial_request_id", ""))
 		action["capacity_window_hour"] = state.capacity_window_hour
 		action["capacity_link_id"] = link_id
 		action["capacity_used_this_window"] = allocation
@@ -819,7 +875,7 @@ func _apply_movement_capacity_request(
 func _apply_supply_capacity_request(
 	state: VNextMilitaryState,
 	request: Dictionary,
-	budgets: Dictionary,
+	final_allocations: Dictionary,
 	hour: int
 ) -> void:
 	var action_id: String = str(request.get("request_id", ""))
@@ -830,13 +886,13 @@ func _apply_supply_capacity_request(
 		return
 	var link_id: String = str(request.get("link_id", ""))
 	state.queue_capacity_request(link_id, action_id)
-	var available: float = maxf(0.0, float(budgets.get(link_id, 0.0)))
 	var remaining: float = maxf(0.0, float(action.get("edge_load_remaining", 0.0)))
-	var allocation: float = minf(available, remaining)
+	var allocation: float = minf(remaining, maxf(0.0, float(final_allocations.get(action_id, 0.0))))
+	action["spatial_request_id"] = str(request.get("spatial_request_id", ""))
 	if allocation > EPSILON:
-		budgets[link_id] = available - allocation
 		state.record_capacity_use(link_id, allocation)
 		action = state.active_actions[action_id] as Dictionary
+		action["spatial_request_id"] = str(request.get("spatial_request_id", ""))
 		action["capacity_window_hour"] = state.capacity_window_hour
 		action["capacity_link_id"] = link_id
 		action["capacity_used_this_window"] = allocation
@@ -898,6 +954,7 @@ func _advance_actions_at_boundary(
 	completed: Array[Dictionary],
 	battles: Array[Dictionary]
 ) -> void:
+	_cancel_destroyed_formation_spatial_requests(state, map)
 	_cleanup_all_destroyed_formation_references(state, boundary_hour, completed)
 	var action_ids: Array[String] = _sorted_dictionary_keys(state.active_actions)
 	for action_id: String in action_ids:
@@ -1109,6 +1166,36 @@ func _advance_supply_action_at_boundary(state: VNextMilitaryState, map: VNextMil
 	state.active_actions[action_id] = action
 
 
+func _cancel_destroyed_formation_spatial_requests(
+	state: VNextMilitaryState, map: VNextMilitaryMapAdapter
+) -> void:
+	for formation_id: String in state.get_sorted_formation_ids():
+		var formation: VNextMilitaryFormation = state.get_formation(formation_id)
+		if formation != null and formation.formation_status == VNextMilitaryFormation.STATUS_DESTROYED:
+			_cancel_spatial_requests_for_formation(state, map, formation_id)
+
+
+func _cancel_spatial_requests_for_formation(
+	state: VNextMilitaryState,
+	map: VNextMilitaryMapAdapter,
+	formation_id: String,
+	preserve_action_id: String = ""
+) -> void:
+	for action_id: String in _sorted_dictionary_keys(state.active_actions):
+		if action_id == preserve_action_id or not state.active_actions.has(action_id):
+			continue
+		var action: Dictionary = state.active_actions[action_id] as Dictionary
+		var belongs_to_destroyed: bool = (
+			(str(action.get("kind", "")) == "supply" and str(action.get("destination_formation_id", "")) == formation_id)
+			or str(action.get("formation_id", "")) == formation_id
+		)
+		if not belongs_to_destroyed:
+			continue
+		_cancel_active_spatial_request(map, action)
+		action["spatial_request_id"] = ""
+		state.active_actions[action_id] = action
+
+
 func _cleanup_all_destroyed_formation_references(state: VNextMilitaryState, boundary_hour: int, completed: Array[Dictionary]) -> void:
 	for formation_id: String in state.get_sorted_formation_ids():
 		var formation: VNextMilitaryFormation = state.get_formation(formation_id)
@@ -1315,8 +1402,10 @@ func _resolve_attack(
 	state.region_garrisons[target_region_id] = maxi(0, garrison_personnel - garrison_losses)
 	var current_action_id: String = str(action.get("action_id", ""))
 	if attacker.formation_status == VNextMilitaryFormation.STATUS_DESTROYED:
+		_cancel_spatial_requests_for_formation(state, map, attacker.formation_id, current_action_id)
 		_cleanup_destroyed_formation_references(state, attacker.formation_id, state.last_simulated_hour, completed, current_action_id)
 	for destroyed_formation_id: String in destroyed_defenders:
+		_cancel_spatial_requests_for_formation(state, map, destroyed_formation_id)
 		_cleanup_destroyed_formation_references(state, destroyed_formation_id, state.last_simulated_hour, completed)
 	var control_changed: bool = false
 	if outcome == "attacker_win" and attacker.formation_status == VNextMilitaryFormation.STATUS_ACTIVE and attacker.personnel > 0:
@@ -1483,6 +1572,29 @@ func _sort_prepared_formations(prepared: Array[Dictionary]) -> void:
 			var swap: Dictionary = prepared[index]
 			prepared[index] = prepared[best_index]
 			prepared[best_index] = swap
+
+
+func _spatial_capacity_request_id(request: Dictionary, window_hour: int) -> String:
+	return "%016d|%016d|military|%s|%s" % [
+		int(request.get("request_hour", window_hour)), window_hour,
+		str(request.get("request_id", "")), str(request.get("request_kind", "")),
+	]
+
+
+func _cancel_active_spatial_request(map: VNextMilitaryMapAdapter, action: Dictionary) -> void:
+	var spatial: VNextSpatialWorld = map.get_spatial_world() if map != null else null
+	var request_id: String = str(action.get("spatial_request_id", ""))
+	var link_id: String = str(action.get("capacity_link_id", action.get("reserved_link_id", "")))
+	var window_hour: int = int(action.get("capacity_window_hour", -1))
+	if spatial != null and not request_id.is_empty() and not link_id.is_empty() and window_hour == spatial.current_hour():
+		spatial.cancel_capacity_request(request_id, link_id, window_hour)
+
+
+func _clear_spatial_request_references(state: VNextMilitaryState) -> void:
+	for action_id: String in _sorted_dictionary_keys(state.active_actions):
+		var action: Dictionary = state.active_actions[action_id] as Dictionary
+		action["spatial_request_id"] = ""
+		state.active_actions[action_id] = action
 
 
 func _sort_capacity_requests(requests: Array[Dictionary]) -> void:

@@ -7,7 +7,11 @@ extends RefCounted
 const EPSILON: float = 0.0001
 
 
-static func validate(state: VNextMilitaryState, map: VNextMilitaryMapAdapter) -> bool:
+static func validate(
+	state: VNextMilitaryState,
+	map: VNextMilitaryMapAdapter,
+	spatial_world: VNextSpatialWorld = null
+) -> bool:
 	if state == null:
 		return false
 	if not _validate_action_lifecycles(state):
@@ -16,7 +20,7 @@ static func validate(state: VNextMilitaryState, map: VNextMilitaryMapAdapter) ->
 		return false
 	if not _validate_transport_chronology(state):
 		return false
-	if not _validate_capacity_ledger(state, map):
+	if not _validate_capacity_ledger(state, map, spatial_world):
 		return false
 	return true
 
@@ -188,14 +192,18 @@ static func _validate_transport_chronology(state: VNextMilitaryState) -> bool:
 	return true
 
 
-static func _validate_capacity_ledger(state: VNextMilitaryState, map: VNextMilitaryMapAdapter) -> bool:
+static func _validate_capacity_ledger(
+	state: VNextMilitaryState,
+	map: VNextMilitaryMapAdapter,
+	spatial_world: VNextSpatialWorld = null
+) -> bool:
 	var explained: Dictionary = {}
 	for action_id: String in _sorted_dictionary_keys(state.active_actions):
 		var action: Dictionary = state.active_actions[action_id] as Dictionary
-		if not _validate_capacity_record(state, map, action, true, explained):
+		if not _validate_capacity_record(state, map, spatial_world, action, true, explained):
 			return false
 	for record: Dictionary in state.completed_actions:
-		if not _validate_capacity_record(state, map, record, false, explained):
+		if not _validate_capacity_record(state, map, spatial_world, record, false, explained):
 			return false
 
 	var link_ids: Dictionary = {}
@@ -216,6 +224,7 @@ static func _validate_capacity_ledger(state: VNextMilitaryState, map: VNextMilit
 static func _validate_capacity_record(
 	state: VNextMilitaryState,
 	map: VNextMilitaryMapAdapter,
+	spatial_world: VNextSpatialWorld,
 	record: Dictionary,
 	is_active: bool,
 	explained: Dictionary
@@ -223,10 +232,21 @@ static func _validate_capacity_record(
 	var window_hour: int = int(record.get("capacity_window_hour", -1))
 	var link_id: String = str(record.get("capacity_link_id", ""))
 	var used: float = float(record.get("capacity_used_this_window", 0.0))
+	var spatial_request_id: String = str(record.get("spatial_request_id", ""))
 	if not is_finite(used) or used < 0.0 or window_hour < -1 or window_hour > state.capacity_window_hour:
 		return false
+	if not spatial_request_id.is_empty():
+		# A persisted current reservation reference is legal only while Spatial still
+		# owns that exact current request. Closed historical attribution never needs it.
+		if spatial_world == null or window_hour != spatial_world.current_hour() or link_id.is_empty():
+			return false
+		var reservation: Dictionary = spatial_world.reservation_result(spatial_request_id, link_id, window_hour)
+		if not bool(reservation.get("accepted", false)):
+			return false
+		if absf(float(reservation.get("allocated_capacity", -1.0)) - used) > EPSILON:
+			return false
 	if used <= EPSILON:
-		return link_id.is_empty()
+		return link_id.is_empty() or not spatial_request_id.is_empty()
 	if link_id.is_empty() or map == null or map.get_link(link_id).is_empty():
 		return false
 	if not _capacity_link_matches_record(record, link_id, is_active):
