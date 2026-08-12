@@ -8,6 +8,7 @@ on:
       - "tools/pr58_spatial_capacity_integration_worker.py"
       - "tools/pr58_spatial_worker_bootstrap.py"
       - "tools/pr58_spatial_worker_runner.py"
+      - "tools/pr58_spatial_batch_extension.py"
       - ".github/workflows/pr58-spatial-integration-worker.yml"
   workflow_dispatch:
 
@@ -16,7 +17,7 @@ permissions:
 
 concurrency:
   group: pr58-spatial-integration-worker
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   integrate-and-validate:
@@ -36,7 +37,9 @@ jobs:
           python-version: "3.11"
 
       - name: Apply Spatial capacity integration
-        run: python3 -B tools/pr58_spatial_worker_runner.py
+        run: |
+          python3 -B tools/pr58_spatial_worker_runner.py
+          python3 -B tools/pr58_spatial_batch_extension.py
 
       - name: Install Godot 4.6.3
         run: |
@@ -99,13 +102,17 @@ jobs:
                   docs/refactors/state_ownership_matrix.md \
                   docs/refactors/variable_refactor_plan.md \
                   docs/vnext/military_strategy.md \
+                  docs/vnext/spatial_infrastructure.md \
                   scripts/vnext/map/military_map_adapter.gd \
                   scripts/vnext/military/military_service.gd \
                   scripts/vnext/military/military_state.gd \
                   scripts/vnext/military/military_state_invariants.gd \
+                  scripts/vnext/spatial/spatial_capacity_window.gd \
+                  scripts/vnext/spatial/spatial_world.gd \
                   tests/vnext/military_strategy_test.gd \
                   tests/vnext/military_r3_findings_test.gd \
-                  tests/vnext/military_spatial_capacity_integration_test.gd
+                  tests/vnext/military_spatial_capacity_integration_test.gd \
+                  tests/vnext/spatial_infrastructure_test.gd
           git diff --cached --check
           git commit -m "Integrate Military transport with Spatial capacity authority"
           git push origin HEAD:feat/vnext-military-strategy-20260809
