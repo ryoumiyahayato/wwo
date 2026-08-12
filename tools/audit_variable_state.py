@@ -15,7 +15,39 @@ from typing import Iterable
 
 SOURCE_SUFFIXES = {".gd", ".tscn", ".tres", ".godot", ".json", ".cfg"}
 IGNORED_PARTS = {".git", ".godot", "builds", ".ci-godot"}
-PRODUCTION_ROOTS = {"scripts", "scenes", "data", "resources"}
+
+# The variable-state audit inventories runtime source/config inputs, not every
+# text artifact in a checkout. Keep this boundary positive so a review export,
+# fixture, or staging batch cannot become an input merely by using a supported
+# file suffix. A new runtime data family must be added here when its loader is
+# introduced; it must not be discovered implicitly from all of data/**.
+RUNTIME_SOURCE_ROOTS = (
+    "scripts",
+    "scenes",
+    "resources",
+)
+RUNTIME_CONFIG_ROOTS = (
+    "data/alpha",
+    "data/balance",
+    "data/characters",
+    "data/scenarios",
+    "data/v2_2",
+    "data/v2_3",
+    "data/vnext",
+    "data/world",
+    "data/world_map",
+)
+RUNTIME_EXACT_FILES = ("project.godot",)
+NON_AUTHORITATIVE_ROOTS = (
+    "artifacts",
+    "builds",
+    "data/staging",
+    "docs",
+    "tests",
+    "tools",
+)
+NON_AUTHORITATIVE_EXACT_FILES = ("export_presets.cfg",)
+PRODUCTION_ROOTS = set(RUNTIME_SOURCE_ROOTS) | {"data", "resources"}
 STATE_CONCEPTS: dict[str, tuple[str, ...]] = {
     "current_player": ("player", "current_player", "active_player"),
     "current_country": ("country", "polity", "nation", "sovereign"),
@@ -97,10 +129,13 @@ class Member:
 
 
 def iter_source_files(root: Path) -> Iterable[Path]:
-    for path in root.rglob("*"):
+    for path in sorted(root.rglob("*"), key=lambda item: item.relative_to(root).as_posix()):
         if not path.is_file() or path.suffix.lower() not in SOURCE_SUFFIXES:
             continue
-        if any(part in IGNORED_PARTS for part in path.relative_to(root).parts):
+        path_name = path.relative_to(root).as_posix()
+        if any(part in IGNORED_PARTS for part in path_name.split("/")):
+            continue
+        if not is_discovery_path(path_name):
             continue
         yield path
 
@@ -117,8 +152,38 @@ def root_name(path: str) -> str:
     return path.split("/", 1)[0]
 
 
+def _is_path_under(path: str, root: str) -> bool:
+    return path == root or path.startswith(root + "/")
+
+
+def is_discovery_path(path: str) -> bool:
+    """Return whether a repository-relative path belongs to the audit input."""
+    normalized = path.replace("\\", "/").lstrip("./")
+    if normalized in NON_AUTHORITATIVE_EXACT_FILES:
+        return False
+    if any(_is_path_under(normalized, root) for root in NON_AUTHORITATIVE_ROOTS):
+        return False
+    if normalized in RUNTIME_EXACT_FILES:
+        return True
+    return any(
+        _is_path_under(normalized, root)
+        for root in RUNTIME_SOURCE_ROOTS + RUNTIME_CONFIG_ROOTS
+    )
+
+
+def discovery_contract() -> dict[str, object]:
+    return {
+        "source_suffixes": sorted(SOURCE_SUFFIXES),
+        "runtime_source_roots": list(RUNTIME_SOURCE_ROOTS),
+        "runtime_config_roots": list(RUNTIME_CONFIG_ROOTS),
+        "runtime_exact_files": list(RUNTIME_EXACT_FILES),
+        "non_authoritative_roots": list(NON_AUTHORITATIVE_ROOTS),
+        "non_authoritative_exact_files": list(NON_AUTHORITATIVE_EXACT_FILES),
+    }
+
+
 def is_production_path(path: str) -> bool:
-    return root_name(path) in PRODUCTION_ROOTS
+    return root_name(path) in PRODUCTION_ROOTS and is_discovery_path(path)
 
 
 def parse_autoloads(project_text: str) -> dict[str, str]:
@@ -540,6 +605,7 @@ def main() -> None:
 
     payload = {
         "baseline_note": "static scan of checked-out commit",
+        "discovery_contract": discovery_contract(),
         "autoloads": autoloads,
         "metrics": metrics,
         "members": [asdict(member) for member in members],

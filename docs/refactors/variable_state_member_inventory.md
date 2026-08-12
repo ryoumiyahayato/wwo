@@ -4,7 +4,7 @@
 
 - 第一批实现基于基础提交`b4a9d637e294aa53b0c0e2525260421dce3b5182`，由PR #30实施。
 - 引擎：Godot 4.6.3。
-- 范围：`project.godot`、`scripts/`、`scenes/`、`data/`、`resources/`。
+- 范围：`project.godot`、`scripts/`、`scenes/`、`resources/`以及显式 runtime config roots；`data/staging/`、`tests/`、`tools/`、`docs/`和报告 artifacts 不属于输入。
 - 本文件只提供静态成员索引证据，不持有审计结论、实施方案、多写入状态总结、UI副本总结或停止项。
 
 ## 静态扫描限制
@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1762|1309|15|0|1272|7|32|16|62|948|546|297|
+|1770|1313|15|0|467|7|32|16|62|952|444|206|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,762个生产成员字段逐项表
+## 1,770个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -1447,7 +1447,7 @@
 5 K leave_confirmation
 ```
 
-### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/vnext/politics/politics_pressure_input.gd`
+### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/vnext/player/player_state.gd`
 
 ```text
 @ scripts/v2_3/v2_3_formal_simulation.gd | V23FormalSimulation
@@ -1583,6 +1583,15 @@
 8 K _event_records
 9 K _known_event_ids
 10 K _read_event_ids
+@ scripts/vnext/organization/organization_core.gd | VNextOrganizationCore
+8 C SNAPSHOT_SCHEMA_ID
+10 C _ORGANIZATION_FIELDS
+21 C _POSITION_FIELDS
+27 C _APPOINTMENT_FIELDS
+34 K _organizations
+35 K _reference_catalog_configured
+36 K _known_person_ids
+37 K _known_place_ids
 @ scripts/vnext/player/action_result.gd | VNextActionResult
 4 K success
 5 K code
@@ -1591,6 +1600,11 @@
 @ scripts/vnext/player/player_state.gd | VNextPlayerState
 4 C SNAPSHOT_SCHEMA_ID
 6 K _player_id
+```
+
+### 第10段：`scripts/vnext/politics/politics_pressure_input.gd` 至 `scripts/world_map/historical_map_identity_style.gd`
+
+```text
 @ scripts/vnext/politics/politics_pressure_input.gd | VNextPoliticsPressureInput
 7 C SNAPSHOT_SCHEMA_ID
 8 C MAX_PERIOD_DAYS
@@ -1608,11 +1622,6 @@
 33 K _casualty_pressure
 34 K _mobilization_pressure
 35 K _military_result_signal
-```
-
-### 第10段：`scripts/vnext/politics/politics_update_service.gd` 至 `scripts/world_map/historical_map_identity_style.gd`
-
-```text
 @ scripts/vnext/politics/politics_update_service.gd | VNextPoliticsUpdateService
 8 C PRESSURE_SCALE
 9 C FORCE_DELTA_LIMIT
