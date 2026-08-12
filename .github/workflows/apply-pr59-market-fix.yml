@@ -1,40 +1,53 @@
-name: Apply PR59 market fix (scratch only)
+name: Validate fixed PR59 head (scratch only)
 
 on:
   push:
     branches:
       - fix/pr59-vnext-validation-20260812
     paths:
-      - tools/apply_pr59_market_fix.py
       - .github/workflows/apply-pr59-market-fix.yml
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  apply:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout fixed PR59 head
+        uses: actions/checkout@v4
         with:
-          ref: fix/pr59-vnext-validation-20260812
-          fetch-depth: 0
-      - name: Apply deterministic source patch
-        run: python tools/apply_pr59_market_fix.py
-      - name: Verify Python validation runner self-tests
-        run: python -m unittest tests/tools/test_run_vnext_validation.py
-      - name: Verify patch hygiene
-        shell: bash
+          ref: b5eadc370c3ea14e90e702b234d6aa4039bda7f7
+          fetch-depth: 2
+
+      - name: Check diff whitespace
+        run: git diff --check HEAD^ HEAD
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Test vNext validation runner
+        run: python -B tests/tools/test_run_vnext_validation.py
+
+      - name: Install Godot 4.6.3
+        shell: pwsh
         run: |
-          git diff --check
-          git diff -- scripts/vnext/economy/market_economy.gd
-      - name: Commit patched market source
-        shell: bash
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add scripts/vnext/economy/market_economy.gd
-          git diff --cached --quiet && exit 1
-          git commit -m "fix: stabilize and accelerate vNext long-run validation"
-          git push origin HEAD:fix/pr59-vnext-validation-20260812
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'godot.zip'
+          $install = Join-Path $env:RUNNER_TEMP 'godot-4.6.3'
+          Invoke-WebRequest -Uri 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip' -OutFile $archive
+          Expand-Archive -LiteralPath $archive -DestinationPath $install
+          $binary = (Get-ChildItem -LiteralPath $install -Filter 'Godot_v4.6.3-stable_win64.exe' -Recurse | Select-Object -First 1).FullName
+          if (-not $binary) { throw 'Godot 4.6.3 executable was not found after extraction' }
+          "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          & $binary --version
+
+      - name: Run unified vNext validation
+        shell: pwsh
+        env:
+          VNEXT_HEARTBEAT_SECONDS: "30"
+          VNEXT_LONG_TEST_TIMEOUT_SECONDS: "1200"
+        run: python -B tools/run_vnext_validation.py --root . --godot "$env:GODOT_BIN"
