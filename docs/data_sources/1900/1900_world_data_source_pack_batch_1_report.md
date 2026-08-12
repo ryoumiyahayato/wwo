@@ -6,7 +6,7 @@ This batch establishes an isolated, provenance-first staging pack for the 1900-0
 
 - Starting `origin/master`: `4b738ab8b0a21e8685aae95381717e9efd2327a`
 - Working branch: `data/1900-world-source-pack-20260812`
-- Working tree: `D:\wwo\worktrees\data-1900-world-source-pack-20260812`
+- Working tree: clean at publication preflight; local path intentionally omitted.
 - Snapshot date: `1900-03-12`
 - Runtime-authoritative data changed: **NO**
 - Runtime integration: **NO**
