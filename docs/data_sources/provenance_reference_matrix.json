@@ -2,7 +2,7 @@
   "schema_version": 1,
   "matrix_kind": "wwo_provenance_reference_matrix",
   "audit_batch": "BATCH_2",
-  "audit_base_revision": "HEAD",
+  "audit_base_revision": "165515f6ed5bcb922ad1a8b5d3ea905e30debc61",
   "generated_by": "tools/provenance/scan_reference_matrix.py",
   "scope": {
     "included_roots": [
@@ -29,19 +29,19 @@
   "summary": {
     "files_scanned": 578,
     "files_with_references": 55,
-    "references": 217,
+    "references": 231,
     "write_sites": 63,
-    "existing_targets": 187,
-    "fixture_references": 29,
-    "broken_references": 1,
-    "intentional_test_fixtures": 29,
+    "existing_targets": 193,
+    "fixture_references": 36,
+    "broken_references": 2,
+    "intentional_test_fixtures": 36,
     "target_directories": 8,
     "target_not_in_batch_1_manifest": 0,
     "unknown_license_references": 135,
     "producer_candidate_files": 3,
-    "candidate_edges": 5,
-    "candidate_edges_matching_canonical": 2,
-    "candidate_edges_source_missing": 0,
+    "candidate_edges": 10,
+    "candidate_edges_matching_canonical": 1,
+    "candidate_edges_source_missing": 1,
     "duplicate_hash_groups": 0
   },
   "files": [
@@ -4268,8 +4268,8 @@
     {
       "path": "tests/provenance/test_corpus_and_backlog.py",
       "file_type": "text/x-python",
-      "size_bytes": 3670,
-      "sha256": "30b41055237aef4e7f98dc4cdab6e27dc731dc8a5ca42abdd9467e99de316b67",
+      "size_bytes": 4622,
+      "sha256": "9834851a0824716aec7afe97228be1766196f519413b1680fee37e43be892b88",
       "role": "consumer",
       "reference_count": 4,
       "write_site_count": 0,
@@ -4278,20 +4278,20 @@
     {
       "path": "tests/provenance/test_provenance_validator.py",
       "file_type": "text/x-python",
-      "size_bytes": 6818,
-      "sha256": "08346b44a1954bc96d0ce43ef5ab381feae306e0ce9f82cce9633bc901e9ac73",
+      "size_bytes": 7603,
+      "sha256": "a7e5371d5dd208c3dc5a5425b15542a0cc95c2c8ea96454935a2edad713587f9",
       "role": "consumer",
-      "reference_count": 12,
+      "reference_count": 13,
       "write_site_count": 0,
       "issues": []
     },
     {
       "path": "tests/provenance/test_reference_matrix.py",
       "file_type": "text/x-python",
-      "size_bytes": 5260,
-      "sha256": "43b64ae29bb0760eda1bfc12a88d2a9f3189253ec146097bc704e21879f608e8",
+      "size_bytes": 8595,
+      "sha256": "bc5b312267ab99f909d6f8797fea8589ea563c8df2bc60120a4c6404b093fdf2",
       "role": "consumer",
-      "reference_count": 13,
+      "reference_count": 20,
       "write_site_count": 0,
       "issues": []
     },
@@ -5491,7 +5491,7 @@
       "size_bytes": 13531,
       "sha256": "50e1dc99bf532297f74de64df033c03f44d09ff75edf6934fac4ba6427e5250d",
       "role": "producer_and_consumer_candidate",
-      "reference_count": 2,
+      "reference_count": 3,
       "write_site_count": 1,
       "issues": [
         "PROVENANCE_INCOMPLETE"
@@ -5503,7 +5503,7 @@
       "size_bytes": 22121,
       "sha256": "bc9ad32e9ee990005c035efe93cb2e47600bfb90ed1d18c28c5218cef28364e7",
       "role": "producer_and_consumer_candidate",
-      "reference_count": 4,
+      "reference_count": 7,
       "write_site_count": 4,
       "issues": [
         "PROVENANCE_INCOMPLETE"
@@ -5535,7 +5535,7 @@
       "size_bytes": 6650,
       "sha256": "196e2f5d411ea2ba39113b61521555fcec981bc55488e309a634fed55cd4e935",
       "role": "producer_and_consumer_candidate",
-      "reference_count": 2,
+      "reference_count": 4,
       "write_site_count": 2,
       "issues": [
         "PROVENANCE_INCOMPLETE"
@@ -5564,8 +5564,8 @@
     {
       "path": "tools/provenance/generate_manifest.py",
       "file_type": "text/x-python",
-      "size_bytes": 45887,
-      "sha256": "d08ce736fe13eaf89b37f2121992312a71c8cc95bad5de56db394e453cf5dce3",
+      "size_bytes": 47339,
+      "sha256": "1eb422e5b444805d02b894c0d52aa46a74d4de6dfc1e84b28739d3b943a401cd",
       "role": "consumer",
       "reference_count": 37,
       "write_site_count": 2,
@@ -5574,8 +5574,8 @@
     {
       "path": "tools/provenance/generate_regression_corpus.py",
       "file_type": "text/x-python",
-      "size_bytes": 4584,
-      "sha256": "303b1d155a48cf2b9f47c6e922f3853d26ddddd6b458943dcbc24971be5c08fe",
+      "size_bytes": 4842,
+      "sha256": "ae6886581f7596982d1b7597855f7bd181ccb54cdc8d0652797f5b2086efcb40",
       "role": "write_site_without_static_target",
       "reference_count": 0,
       "write_site_count": 1,
@@ -5584,8 +5584,8 @@
     {
       "path": "tools/provenance/generate_review_backlog.py",
       "file_type": "text/x-python",
-      "size_bytes": 7656,
-      "sha256": "12a18b1924902df2db50c89421e81b7f4cb65480f7fbb1257e76c72a85047a55",
+      "size_bytes": 8193,
+      "sha256": "6072a798d4c3a86cbec0d10e69c874544798528597210470d3fcb00166d9d482",
       "role": "write_site_without_static_target",
       "reference_count": 0,
       "write_site_count": 1,
@@ -5594,8 +5594,8 @@
     {
       "path": "tools/provenance/scan_reference_matrix.py",
       "file_type": "text/x-python",
-      "size_bytes": 21313,
-      "sha256": "9cf726e24b33634645ea135d54c1a00bba00ff9583c667c9411db2feda34c001",
+      "size_bytes": 25452,
+      "sha256": "80e2af1003311538b6d768f4534eee8c0afd2ae549f5bf199cb04954b8c84e43",
       "role": "write_site_without_static_target",
       "reference_count": 0,
       "write_site_count": 3,
@@ -5604,8 +5604,8 @@
     {
       "path": "tools/provenance/validate_manifest.py",
       "file_type": "text/x-python",
-      "size_bytes": 16205,
-      "sha256": "89b0eb024036049d23d4d198f65614ff8f4c291675e930513f5dabd59e77a558",
+      "size_bytes": 16919,
+      "sha256": "a0f9ab1b2f2bc906a19b0b23d73a2c4eae0b9d052a1e37a86f1b5abb7c03b42b",
       "role": "unreferenced",
       "reference_count": 0,
       "write_site_count": 0,
@@ -5614,8 +5614,8 @@
     {
       "path": "tools/provenance/validate_reference_matrix.py",
       "file_type": "text/x-python",
-      "size_bytes": 19578,
-      "sha256": "5acf995e2d3addf87343cc6b30677145ce845a31d4ee1820369cd7f7af754bc3",
+      "size_bytes": 21905,
+      "sha256": "e197b1581fb71cb84cc5090a2706adae77b6316d2a3bf89c11754a5522d0326a",
       "role": "unreferenced",
       "reference_count": 0,
       "write_site_count": 0,
@@ -5624,8 +5624,8 @@
     {
       "path": "tools/provenance/validate_regression_corpus.py",
       "file_type": "text/x-python",
-      "size_bytes": 6557,
-      "sha256": "6b6a1c505303596c3270799869b418a36f2fd1e5e6024f9be6edaacbe14fe5a3",
+      "size_bytes": 7627,
+      "sha256": "deedff3e29becdafa182f450bf2128251c71124fde1a7525b3b7101312332698",
       "role": "unreferenced",
       "reference_count": 0,
       "write_site_count": 0,
@@ -5634,8 +5634,8 @@
     {
       "path": "tools/provenance/validate_review_backlog.py",
       "file_type": "text/x-python",
-      "size_bytes": 7876,
-      "sha256": "1fe10a0ef16c66185b9cfa7ec9f29b936d3b0e0f18d9fc29b18ea371121539f1",
+      "size_bytes": 8267,
+      "sha256": "30419a5d592a02ef8ddc7dd4010b70e0620bbfb58f1cd5062e3485fa435e1cfe",
       "role": "unreferenced",
       "reference_count": 0,
       "write_site_count": 0,
@@ -7945,6 +7945,29 @@
     },
     {
       "owner": "tests/provenance/test_provenance_validator.py",
+      "target": "data/duplicate.json",
+      "reference_kind": "resolved_output_variable",
+      "literal": "duplicate_path.write_bytes",
+      "line": 112,
+      "column": 9,
+      "context": "code_or_text",
+      "reference_scope": "repository",
+      "output_resolution": "resolved_constant",
+      "exists": false,
+      "target_type": "missing",
+      "target_sha256": null,
+      "target_manifest_kind": null,
+      "target_license": null,
+      "issues": [
+        "BROKEN_REFERENCE"
+      ],
+      "evidence": [
+        "tests/provenance/test_provenance_validator.py:112"
+      ],
+      "id": "ref-000098"
+    },
+    {
+      "owner": "tests/provenance/test_provenance_validator.py",
       "target": "data/source.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/source.json",
@@ -7963,7 +7986,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:112"
       ],
-      "id": "ref-000098"
+      "id": "ref-000099"
     },
     {
       "owner": "tests/provenance/test_provenance_validator.py",
@@ -7985,7 +8008,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:114"
       ],
-      "id": "ref-000099"
+      "id": "ref-000100"
     },
     {
       "owner": "tests/provenance/test_provenance_validator.py",
@@ -8007,7 +8030,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:122"
       ],
-      "id": "ref-000100"
+      "id": "ref-000101"
     },
     {
       "owner": "tests/provenance/test_provenance_validator.py",
@@ -8029,7 +8052,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:123"
       ],
-      "id": "ref-000101"
+      "id": "ref-000102"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8051,7 +8074,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:23"
       ],
-      "id": "ref-000102"
+      "id": "ref-000103"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8073,7 +8096,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:24"
       ],
-      "id": "ref-000103"
+      "id": "ref-000104"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8095,7 +8118,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:26"
       ],
-      "id": "ref-000104"
+      "id": "ref-000105"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8117,7 +8140,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:26"
       ],
-      "id": "ref-000105"
+      "id": "ref-000106"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8139,7 +8162,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:31"
       ],
-      "id": "ref-000106"
+      "id": "ref-000107"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8161,7 +8184,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:35"
       ],
-      "id": "ref-000107"
+      "id": "ref-000108"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8183,7 +8206,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:36"
       ],
-      "id": "ref-000108"
+      "id": "ref-000109"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8205,7 +8228,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:41"
       ],
-      "id": "ref-000109"
+      "id": "ref-000110"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8227,36 +8250,14 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:43"
       ],
-      "id": "ref-000110"
-    },
-    {
-      "owner": "tests/provenance/test_reference_matrix.py",
-      "target": "data/generated-at-runtime.json",
-      "reference_kind": "repository_path_literal",
-      "literal": "data/generated-at-runtime.json",
-      "line": 74,
-      "column": 22,
-      "context": "code_or_text",
-      "reference_scope": "test_fixture_relative",
-      "exists": null,
-      "target_type": "test_fixture_relative",
-      "target_sha256": null,
-      "target_manifest_kind": null,
-      "target_license": null,
-      "issues": [
-        "INTENTIONAL_TEST_FIXTURE"
-      ],
-      "evidence": [
-        "tests/provenance/test_reference_matrix.py:74"
-      ],
       "id": "ref-000111"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
-      "target": "data/missing.json",
+      "target": "data/other.json",
       "reference_kind": "repository_path_literal",
-      "literal": "data/missing.json",
-      "line": 88,
+      "literal": "data/other.json",
+      "line": 73,
       "column": 23,
       "context": "code_or_text",
       "reference_scope": "test_fixture_relative",
@@ -8269,7 +8270,7 @@
         "INTENTIONAL_TEST_FIXTURE"
       ],
       "evidence": [
-        "tests/provenance/test_reference_matrix.py:88"
+        "tests/provenance/test_reference_matrix.py:73"
       ],
       "id": "ref-000112"
     },
@@ -8278,7 +8279,183 @@
       "target": "data/source.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/source.json",
-      "line": 99,
+      "line": 75,
+      "column": 26,
+      "context": "code_or_text",
+      "reference_scope": "test_fixture_relative",
+      "exists": null,
+      "target_type": "test_fixture_relative",
+      "target_sha256": null,
+      "target_manifest_kind": null,
+      "target_license": null,
+      "issues": [
+        "INTENTIONAL_TEST_FIXTURE"
+      ],
+      "evidence": [
+        "tests/provenance/test_reference_matrix.py:75"
+      ],
+      "id": "ref-000113"
+    },
+    {
+      "owner": "tests/provenance/test_reference_matrix.py",
+      "target": "data/other.json",
+      "reference_kind": "repository_path_literal",
+      "literal": "data/other.json",
+      "line": 75,
+      "column": 57,
+      "context": "code_or_text",
+      "reference_scope": "test_fixture_relative",
+      "exists": null,
+      "target_type": "test_fixture_relative",
+      "target_sha256": null,
+      "target_manifest_kind": null,
+      "target_license": null,
+      "issues": [
+        "INTENTIONAL_TEST_FIXTURE"
+      ],
+      "evidence": [
+        "tests/provenance/test_reference_matrix.py:75"
+      ],
+      "id": "ref-000114"
+    },
+    {
+      "owner": "tests/provenance/test_reference_matrix.py",
+      "target": "data/output.json",
+      "reference_kind": "repository_path_literal",
+      "literal": "data/output.json",
+      "line": 76,
+      "column": 34,
+      "context": "code_or_text",
+      "reference_scope": "test_fixture_relative",
+      "exists": null,
+      "target_type": "test_fixture_relative",
+      "target_sha256": null,
+      "target_manifest_kind": null,
+      "target_license": null,
+      "issues": [
+        "INTENTIONAL_TEST_FIXTURE"
+      ],
+      "evidence": [
+        "tests/provenance/test_reference_matrix.py:76"
+      ],
+      "id": "ref-000115"
+    },
+    {
+      "owner": "tests/provenance/test_reference_matrix.py",
+      "target": "data/other.json",
+      "reference_kind": "repository_path_literal",
+      "literal": "data/other.json",
+      "line": 80,
+      "column": 88,
+      "context": "code_or_text",
+      "reference_scope": "test_fixture_relative",
+      "exists": null,
+      "target_type": "test_fixture_relative",
+      "target_sha256": null,
+      "target_manifest_kind": null,
+      "target_license": null,
+      "issues": [
+        "INTENTIONAL_TEST_FIXTURE"
+      ],
+      "evidence": [
+        "tests/provenance/test_reference_matrix.py:80"
+      ],
+      "id": "ref-000116"
+    },
+    {
+      "owner": "tests/provenance/test_reference_matrix.py",
+      "target": "data/output.json",
+      "reference_kind": "repository_path_literal",
+      "literal": "data/output.json",
+      "line": 90,
+      "column": 34,
+      "context": "code_or_text",
+      "reference_scope": "test_fixture_relative",
+      "exists": null,
+      "target_type": "test_fixture_relative",
+      "target_sha256": null,
+      "target_manifest_kind": null,
+      "target_license": null,
+      "issues": [
+        "INTENTIONAL_TEST_FIXTURE"
+      ],
+      "evidence": [
+        "tests/provenance/test_reference_matrix.py:90"
+      ],
+      "id": "ref-000117"
+    },
+    {
+      "owner": "tests/provenance/test_reference_matrix.py",
+      "target": "data/other.json",
+      "reference_kind": "repository_path_literal",
+      "literal": "data/other.json",
+      "line": 96,
+      "column": 35,
+      "context": "code_or_text",
+      "reference_scope": "test_fixture_relative",
+      "exists": null,
+      "target_type": "test_fixture_relative",
+      "target_sha256": null,
+      "target_manifest_kind": null,
+      "target_license": null,
+      "issues": [
+        "INTENTIONAL_TEST_FIXTURE"
+      ],
+      "evidence": [
+        "tests/provenance/test_reference_matrix.py:96"
+      ],
+      "id": "ref-000118"
+    },
+    {
+      "owner": "tests/provenance/test_reference_matrix.py",
+      "target": "data/generated-at-runtime.json",
+      "reference_kind": "repository_path_literal",
+      "literal": "data/generated-at-runtime.json",
+      "line": 130,
+      "column": 22,
+      "context": "code_or_text",
+      "reference_scope": "test_fixture_relative",
+      "exists": null,
+      "target_type": "test_fixture_relative",
+      "target_sha256": null,
+      "target_manifest_kind": null,
+      "target_license": null,
+      "issues": [
+        "INTENTIONAL_TEST_FIXTURE"
+      ],
+      "evidence": [
+        "tests/provenance/test_reference_matrix.py:130"
+      ],
+      "id": "ref-000119"
+    },
+    {
+      "owner": "tests/provenance/test_reference_matrix.py",
+      "target": "data/missing.json",
+      "reference_kind": "repository_path_literal",
+      "literal": "data/missing.json",
+      "line": 144,
+      "column": 23,
+      "context": "code_or_text",
+      "reference_scope": "test_fixture_relative",
+      "exists": null,
+      "target_type": "test_fixture_relative",
+      "target_sha256": null,
+      "target_manifest_kind": null,
+      "target_license": null,
+      "issues": [
+        "INTENTIONAL_TEST_FIXTURE"
+      ],
+      "evidence": [
+        "tests/provenance/test_reference_matrix.py:144"
+      ],
+      "id": "ref-000120"
+    },
+    {
+      "owner": "tests/provenance/test_reference_matrix.py",
+      "target": "data/source.json",
+      "reference_kind": "repository_path_literal",
+      "literal": "data/source.json",
+      "line": 155,
       "column": 24,
       "context": "code_or_text",
       "reference_scope": "test_fixture_relative",
@@ -8291,16 +8468,16 @@
         "INTENTIONAL_TEST_FIXTURE"
       ],
       "evidence": [
-        "tests/provenance/test_reference_matrix.py:99"
+        "tests/provenance/test_reference_matrix.py:155"
       ],
-      "id": "ref-000113"
+      "id": "ref-000121"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
       "target": "data/source.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/source.json",
-      "line": 99,
+      "line": 155,
       "column": 61,
       "context": "code_or_text",
       "reference_scope": "test_fixture_relative",
@@ -8313,9 +8490,9 @@
         "INTENTIONAL_TEST_FIXTURE"
       ],
       "evidence": [
-        "tests/provenance/test_reference_matrix.py:99"
+        "tests/provenance/test_reference_matrix.py:155"
       ],
-      "id": "ref-000114"
+      "id": "ref-000122"
     },
     {
       "owner": "tests/test_runner.gd",
@@ -8337,7 +8514,7 @@
       "evidence": [
         "tests/test_runner.gd:512"
       ],
-      "id": "ref-000115"
+      "id": "ref-000123"
     },
     {
       "owner": "tests/test_runner.gd",
@@ -8359,7 +8536,7 @@
       "evidence": [
         "tests/test_runner.gd:771"
       ],
-      "id": "ref-000116"
+      "id": "ref-000124"
     },
     {
       "owner": "tests/test_runner.gd",
@@ -8381,7 +8558,7 @@
       "evidence": [
         "tests/test_runner.gd:804"
       ],
-      "id": "ref-000117"
+      "id": "ref-000125"
     },
     {
       "owner": "tests/test_runner.gd",
@@ -8403,7 +8580,7 @@
       "evidence": [
         "tests/test_runner.gd:2267"
       ],
-      "id": "ref-000118"
+      "id": "ref-000126"
     },
     {
       "owner": "tests/v2_2/v2_2_performance_guard_test.gd",
@@ -8425,7 +8602,7 @@
       "evidence": [
         "tests/v2_2/v2_2_performance_guard_test.gd:27"
       ],
-      "id": "ref-000119"
+      "id": "ref-000127"
     },
     {
       "owner": "tests/v2_2/v2_2_performance_guard_test.gd",
@@ -8445,7 +8622,7 @@
       "evidence": [
         "tests/v2_2/v2_2_performance_guard_test.gd:36"
       ],
-      "id": "ref-000120"
+      "id": "ref-000128"
     },
     {
       "owner": "tests/v2_2/v2_2_performance_guard_test.gd",
@@ -8467,7 +8644,7 @@
       "evidence": [
         "tests/v2_2/v2_2_performance_guard_test.gd:60"
       ],
-      "id": "ref-000121"
+      "id": "ref-000129"
     },
     {
       "owner": "tests/v2_2/v2_2_performance_guard_test.gd",
@@ -8489,7 +8666,7 @@
       "evidence": [
         "tests/v2_2/v2_2_performance_guard_test.gd:64"
       ],
-      "id": "ref-000122"
+      "id": "ref-000130"
     },
     {
       "owner": "tests/v2_3/v2_3_controlled_world_test.gd",
@@ -8511,7 +8688,7 @@
       "evidence": [
         "tests/v2_3/v2_3_controlled_world_test.gd:225"
       ],
-      "id": "ref-000123"
+      "id": "ref-000131"
     },
     {
       "owner": "tests/variable_state/generate_current_save_v1_fixture.gd",
@@ -8533,7 +8710,7 @@
       "evidence": [
         "tests/variable_state/generate_current_save_v1_fixture.gd:8"
       ],
-      "id": "ref-000124"
+      "id": "ref-000132"
     },
     {
       "owner": "tests/variable_state/variable_state_behavior_baseline_test.gd",
@@ -8555,7 +8732,7 @@
       "evidence": [
         "tests/variable_state/variable_state_behavior_baseline_test.gd:9"
       ],
-      "id": "ref-000125"
+      "id": "ref-000133"
     },
     {
       "owner": "tests/vnext/state_politics_r3_transition_test.gd",
@@ -8577,7 +8754,7 @@
       "evidence": [
         "tests/vnext/state_politics_r3_transition_test.gd:4"
       ],
-      "id": "ref-000126"
+      "id": "ref-000134"
     },
     {
       "owner": "tests/vnext/state_politics_test.gd",
@@ -8599,7 +8776,7 @@
       "evidence": [
         "tests/vnext/state_politics_test.gd:4"
       ],
-      "id": "ref-000127"
+      "id": "ref-000135"
     },
     {
       "owner": "tools/audit_1900_commodity_economy.py",
@@ -8621,7 +8798,7 @@
       "evidence": [
         "tools/audit_1900_commodity_economy.py:8"
       ],
-      "id": "ref-000128"
+      "id": "ref-000136"
     },
     {
       "owner": "tools/audit_1900_economy_integration.py",
@@ -8643,7 +8820,7 @@
       "evidence": [
         "tools/audit_1900_economy_integration.py:11"
       ],
-      "id": "ref-000129"
+      "id": "ref-000137"
     },
     {
       "owner": "tools/audit_1900_economy_integration.py",
@@ -8665,7 +8842,7 @@
       "evidence": [
         "tools/audit_1900_economy_integration.py:12"
       ],
-      "id": "ref-000130"
+      "id": "ref-000138"
     },
     {
       "owner": "tools/audit_1900_economy_integration.py",
@@ -8687,7 +8864,7 @@
       "evidence": [
         "tools/audit_1900_economy_integration.py:13"
       ],
-      "id": "ref-000131"
+      "id": "ref-000139"
     },
     {
       "owner": "tools/audit_1900_economy_integration.py",
@@ -8709,7 +8886,7 @@
       "evidence": [
         "tools/audit_1900_economy_integration.py:14"
       ],
-      "id": "ref-000132"
+      "id": "ref-000140"
     },
     {
       "owner": "tools/audit_1900_economy_integration.py",
@@ -8731,7 +8908,7 @@
       "evidence": [
         "tools/audit_1900_economy_integration.py:15"
       ],
-      "id": "ref-000133"
+      "id": "ref-000141"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8753,7 +8930,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:595"
       ],
-      "id": "ref-000134"
+      "id": "ref-000142"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8773,7 +8950,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:604"
       ],
-      "id": "ref-000135"
+      "id": "ref-000143"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8795,7 +8972,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:605"
       ],
-      "id": "ref-000136"
+      "id": "ref-000144"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8815,7 +8992,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:628"
       ],
-      "id": "ref-000137"
+      "id": "ref-000145"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8835,7 +9012,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:812"
       ],
-      "id": "ref-000138"
+      "id": "ref-000146"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8855,7 +9032,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:812"
       ],
-      "id": "ref-000139"
+      "id": "ref-000147"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8875,7 +9052,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:812"
       ],
-      "id": "ref-000140"
+      "id": "ref-000148"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8897,7 +9074,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:812"
       ],
-      "id": "ref-000141"
+      "id": "ref-000149"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8919,7 +9096,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:856"
       ],
-      "id": "ref-000142"
+      "id": "ref-000150"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8941,7 +9118,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:856"
       ],
-      "id": "ref-000143"
+      "id": "ref-000151"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8963,7 +9140,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:900"
       ],
-      "id": "ref-000144"
+      "id": "ref-000152"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8985,7 +9162,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:900"
       ],
-      "id": "ref-000145"
+      "id": "ref-000153"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9007,7 +9184,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:900"
       ],
-      "id": "ref-000146"
+      "id": "ref-000154"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9029,7 +9206,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:944"
       ],
-      "id": "ref-000147"
+      "id": "ref-000155"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9051,7 +9228,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:944"
       ],
-      "id": "ref-000148"
+      "id": "ref-000156"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9073,7 +9250,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:944"
       ],
-      "id": "ref-000149"
+      "id": "ref-000157"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9095,7 +9272,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:944"
       ],
-      "id": "ref-000150"
+      "id": "ref-000158"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9115,7 +9292,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:988"
       ],
-      "id": "ref-000151"
+      "id": "ref-000159"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9137,7 +9314,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:988"
       ],
-      "id": "ref-000152"
+      "id": "ref-000160"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9159,7 +9336,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:988"
       ],
-      "id": "ref-000153"
+      "id": "ref-000161"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9181,7 +9358,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:1032"
       ],
-      "id": "ref-000154"
+      "id": "ref-000162"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9203,7 +9380,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:1032"
       ],
-      "id": "ref-000155"
+      "id": "ref-000163"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9225,7 +9402,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:1076"
       ],
-      "id": "ref-000156"
+      "id": "ref-000164"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9247,7 +9424,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:1076"
       ],
-      "id": "ref-000157"
+      "id": "ref-000165"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9269,7 +9446,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:1076"
       ],
-      "id": "ref-000158"
+      "id": "ref-000166"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9291,7 +9468,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:1120"
       ],
-      "id": "ref-000159"
+      "id": "ref-000167"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9313,7 +9490,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:1120"
       ],
-      "id": "ref-000160"
+      "id": "ref-000168"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9333,7 +9510,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:1164"
       ],
-      "id": "ref-000161"
+      "id": "ref-000169"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9353,7 +9530,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:1252"
       ],
-      "id": "ref-000162"
+      "id": "ref-000170"
     },
     {
       "owner": "tools/audit_formal_variable_state.py",
@@ -9373,7 +9550,7 @@
       "evidence": [
         "tools/audit_formal_variable_state.py:1001"
       ],
-      "id": "ref-000163"
+      "id": "ref-000171"
     },
     {
       "owner": "tools/build_1900_world_economy_estimates.py",
@@ -9393,7 +9570,7 @@
       "evidence": [
         "tools/build_1900_world_economy_estimates.py:13"
       ],
-      "id": "ref-000164"
+      "id": "ref-000172"
     },
     {
       "owner": "tools/compact_1900_world_economy_estimates.py",
@@ -9415,7 +9592,7 @@
       "evidence": [
         "tools/compact_1900_world_economy_estimates.py:75"
       ],
-      "id": "ref-000165"
+      "id": "ref-000173"
     },
     {
       "owner": "tools/compact_1900_world_economy_estimates.py",
@@ -9437,7 +9614,7 @@
       "evidence": [
         "tools/compact_1900_world_economy_estimates.py:91"
       ],
-      "id": "ref-000166"
+      "id": "ref-000174"
     },
     {
       "owner": "tools/historical_data/audit_1900_historical_provider.py",
@@ -9457,7 +9634,7 @@
       "evidence": [
         "tools/historical_data/audit_1900_historical_provider.py:12"
       ],
-      "id": "ref-000167"
+      "id": "ref-000175"
     },
     {
       "owner": "tools/historical_data/audit_1900_historical_provider.py",
@@ -9477,7 +9654,7 @@
       "evidence": [
         "tools/historical_data/audit_1900_historical_provider.py:13"
       ],
-      "id": "ref-000168"
+      "id": "ref-000176"
     },
     {
       "owner": "tools/historical_data/audit_1900_historical_provider.py",
@@ -9497,7 +9674,7 @@
       "evidence": [
         "tools/historical_data/audit_1900_historical_provider.py:14"
       ],
-      "id": "ref-000169"
+      "id": "ref-000177"
     },
     {
       "owner": "tools/historical_data/audit_major_state_detail_1900.py",
@@ -9519,7 +9696,7 @@
       "evidence": [
         "tools/historical_data/audit_major_state_detail_1900.py:7"
       ],
-      "id": "ref-000170"
+      "id": "ref-000178"
     },
     {
       "owner": "tools/historical_data/audit_major_state_detail_1900.py",
@@ -9541,7 +9718,7 @@
       "evidence": [
         "tools/historical_data/audit_major_state_detail_1900.py:8"
       ],
-      "id": "ref-000171"
+      "id": "ref-000179"
     },
     {
       "owner": "tools/historical_data/build_1900_entity_registry.py",
@@ -9561,7 +9738,7 @@
       "evidence": [
         "tools/historical_data/build_1900_entity_registry.py:15"
       ],
-      "id": "ref-000172"
+      "id": "ref-000180"
     },
     {
       "owner": "tools/historical_data/build_1900_entity_registry.py",
@@ -9581,7 +9758,28 @@
       "evidence": [
         "tools/historical_data/build_1900_entity_registry.py:16"
       ],
-      "id": "ref-000173"
+      "id": "ref-000181"
+    },
+    {
+      "owner": "tools/historical_data/build_1900_entity_registry.py",
+      "target": "data/world_map/historical/political_units_1900.json",
+      "reference_kind": "resolved_output_variable",
+      "literal": "OUTPUT_PATH.write_text",
+      "line": 211,
+      "column": 5,
+      "context": "code_or_text",
+      "reference_scope": "repository",
+      "output_resolution": "resolved_constant",
+      "exists": true,
+      "target_type": "file",
+      "target_sha256": "d62a8d9c566c1dfea9d57fc197a6fa3606c6be259782a582050aeaffa002c5f9",
+      "target_manifest_kind": "generated",
+      "target_license": "CC BY-NC-SA 4.0",
+      "issues": [],
+      "evidence": [
+        "tools/historical_data/build_1900_entity_registry.py:211"
+      ],
+      "id": "ref-000182"
     },
     {
       "owner": "tools/historical_data/build_1900_flag_registry.py",
@@ -9601,7 +9799,7 @@
       "evidence": [
         "tools/historical_data/build_1900_flag_registry.py:29"
       ],
-      "id": "ref-000174"
+      "id": "ref-000183"
     },
     {
       "owner": "tools/historical_data/build_1900_flag_registry.py",
@@ -9621,7 +9819,7 @@
       "evidence": [
         "tools/historical_data/build_1900_flag_registry.py:30"
       ],
-      "id": "ref-000175"
+      "id": "ref-000184"
     },
     {
       "owner": "tools/historical_data/build_1900_flag_registry.py",
@@ -9641,7 +9839,7 @@
       "evidence": [
         "tools/historical_data/build_1900_flag_registry.py:31"
       ],
-      "id": "ref-000176"
+      "id": "ref-000185"
     },
     {
       "owner": "tools/historical_data/build_1900_flag_registry.py",
@@ -9661,7 +9859,70 @@
       "evidence": [
         "tools/historical_data/build_1900_flag_registry.py:32"
       ],
-      "id": "ref-000177"
+      "id": "ref-000186"
+    },
+    {
+      "owner": "tools/historical_data/build_1900_flag_registry.py",
+      "target": "data/world_map/historical/political_units_1900.json",
+      "reference_kind": "resolved_output_variable",
+      "literal": "UNITS_PATH.write_text",
+      "line": 242,
+      "column": 5,
+      "context": "code_or_text",
+      "reference_scope": "repository",
+      "output_resolution": "resolved_constant",
+      "exists": true,
+      "target_type": "file",
+      "target_sha256": "d62a8d9c566c1dfea9d57fc197a6fa3606c6be259782a582050aeaffa002c5f9",
+      "target_manifest_kind": "generated",
+      "target_license": "CC BY-NC-SA 4.0",
+      "issues": [],
+      "evidence": [
+        "tools/historical_data/build_1900_flag_registry.py:242"
+      ],
+      "id": "ref-000187"
+    },
+    {
+      "owner": "tools/historical_data/build_1900_flag_registry.py",
+      "target": "data/world_map/historical/flags_1900.json",
+      "reference_kind": "resolved_output_variable",
+      "literal": "REGISTRY_PATH.write_text",
+      "line": 249,
+      "column": 5,
+      "context": "code_or_text",
+      "reference_scope": "repository",
+      "output_resolution": "resolved_constant",
+      "exists": true,
+      "target_type": "file",
+      "target_sha256": "8c74b37babc435aa11a672f36d127c697c1472775f9c39b7dc2c32d589f02bcd",
+      "target_manifest_kind": "generated",
+      "target_license": "MIXED_EXPLICIT_LICENSES",
+      "issues": [],
+      "evidence": [
+        "tools/historical_data/build_1900_flag_registry.py:249"
+      ],
+      "id": "ref-000188"
+    },
+    {
+      "owner": "tools/historical_data/build_1900_flag_registry.py",
+      "target": "data/world_map/historical/FLAG_ASSET_ATTRIBUTION.md",
+      "reference_kind": "resolved_output_variable",
+      "literal": "ATTRIBUTION_PATH.write_text",
+      "line": 250,
+      "column": 5,
+      "context": "code_or_text",
+      "reference_scope": "repository",
+      "output_resolution": "resolved_constant",
+      "exists": true,
+      "target_type": "file",
+      "target_sha256": "8cafbd20846fd68280ff1989ec141d14f6a6269879bc201233dd572782225b2a",
+      "target_manifest_kind": "generated",
+      "target_license": "MIXED_EXPLICIT_LICENSES",
+      "issues": [],
+      "evidence": [
+        "tools/historical_data/build_1900_flag_registry.py:250"
+      ],
+      "id": "ref-000189"
     },
     {
       "owner": "tools/historical_data/build_cshapes_1900_snapshot.py",
@@ -9681,7 +9942,7 @@
       "evidence": [
         "tools/historical_data/build_cshapes_1900_snapshot.py:25"
       ],
-      "id": "ref-000178"
+      "id": "ref-000190"
     },
     {
       "owner": "tools/historical_data/build_cshapes_1900_snapshot.py",
@@ -9701,7 +9962,49 @@
       "evidence": [
         "tools/historical_data/build_cshapes_1900_snapshot.py:26"
       ],
-      "id": "ref-000179"
+      "id": "ref-000191"
+    },
+    {
+      "owner": "tools/historical_data/build_cshapes_1900_snapshot.py",
+      "target": "data/world_map/historical/cshapes_1900_snapshot.json",
+      "reference_kind": "resolved_output_variable",
+      "literal": "OUTPUT_PATH.write_text",
+      "line": 160,
+      "column": 5,
+      "context": "code_or_text",
+      "reference_scope": "repository",
+      "output_resolution": "resolved_constant",
+      "exists": true,
+      "target_type": "file",
+      "target_sha256": "00b1a500dddd161f18710a0e6ff02b7ded80953f81ad96dbdd5fb7158c71a17e",
+      "target_manifest_kind": "generated",
+      "target_license": "CC BY-NC-SA 4.0",
+      "issues": [],
+      "evidence": [
+        "tools/historical_data/build_cshapes_1900_snapshot.py:160"
+      ],
+      "id": "ref-000192"
+    },
+    {
+      "owner": "tools/historical_data/build_cshapes_1900_snapshot.py",
+      "target": "data/world_map/historical/CShapes-2.0-ATTRIBUTION.md",
+      "reference_kind": "resolved_output_variable",
+      "literal": "ATTRIBUTION_PATH.write_text",
+      "line": 164,
+      "column": 5,
+      "context": "code_or_text",
+      "reference_scope": "repository",
+      "output_resolution": "resolved_constant",
+      "exists": true,
+      "target_type": "file",
+      "target_sha256": "a81143bfb4fcac6b8cf305415f24a2fa9cc307c7de4ebfb55026e76f4885236a",
+      "target_manifest_kind": "generated",
+      "target_license": "CC BY-NC-SA 4.0",
+      "issues": [],
+      "evidence": [
+        "tools/historical_data/build_cshapes_1900_snapshot.py:164"
+      ],
+      "id": "ref-000193"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -9721,7 +10024,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:33"
       ],
-      "id": "ref-000180"
+      "id": "ref-000194"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -9741,7 +10044,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:34"
       ],
-      "id": "ref-000181"
+      "id": "ref-000195"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -9761,7 +10064,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:36"
       ],
-      "id": "ref-000182"
+      "id": "ref-000196"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -9781,14 +10084,14 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:37"
       ],
-      "id": "ref-000183"
+      "id": "ref-000197"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/world_map/city_detail",
       "reference_kind": "repository_path_literal",
       "literal": "data/world_map/city_detail/",
-      "line": 406,
+      "line": 411,
       "column": 29,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -9799,16 +10102,16 @@
       "target_license": null,
       "issues": [],
       "evidence": [
-        "tools/provenance/generate_manifest.py:406"
+        "tools/provenance/generate_manifest.py:411"
       ],
-      "id": "ref-000184"
+      "id": "ref-000198"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/world_map/city_detail/LICENSE.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/world_map/city_detail/LICENSE.json",
-      "line": 445,
+      "line": 450,
       "column": 30,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -9819,16 +10122,16 @@
       "target_license": "Creative Commons Attribution 4.0",
       "issues": [],
       "evidence": [
-        "tools/provenance/generate_manifest.py:445"
+        "tools/provenance/generate_manifest.py:450"
       ],
-      "id": "ref-000185"
+      "id": "ref-000199"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/world_map/city_detail/index.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/world_map/city_detail/index.json",
-      "line": 445,
+      "line": 450,
       "column": 80,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -9839,16 +10142,16 @@
       "target_license": "Creative Commons Attribution 4.0",
       "issues": [],
       "evidence": [
-        "tools/provenance/generate_manifest.py:445"
+        "tools/provenance/generate_manifest.py:450"
       ],
-      "id": "ref-000186"
+      "id": "ref-000200"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/world_map/historical/political_units_1900.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/world_map/historical/political_units_1900.json",
-      "line": 575,
+      "line": 580,
       "column": 21,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -9859,16 +10162,16 @@
       "target_license": "CC BY-NC-SA 4.0",
       "issues": [],
       "evidence": [
-        "tools/provenance/generate_manifest.py:575"
+        "tools/provenance/generate_manifest.py:580"
       ],
-      "id": "ref-000187"
+      "id": "ref-000201"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/world_map/historical/political_units_1900.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/world_map/historical/political_units_1900.json",
-      "line": 597,
+      "line": 602,
       "column": 29,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -9879,16 +10182,16 @@
       "target_license": "CC BY-NC-SA 4.0",
       "issues": [],
       "evidence": [
-        "tools/provenance/generate_manifest.py:597"
+        "tools/provenance/generate_manifest.py:602"
       ],
-      "id": "ref-000188"
+      "id": "ref-000202"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/world_map/historical/political_units_1900.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/world_map/historical/political_units_1900.json",
-      "line": 619,
+      "line": 624,
       "column": 52,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -9899,16 +10202,16 @@
       "target_license": "CC BY-NC-SA 4.0",
       "issues": [],
       "evidence": [
-        "tools/provenance/generate_manifest.py:619"
+        "tools/provenance/generate_manifest.py:624"
       ],
-      "id": "ref-000189"
+      "id": "ref-000203"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/world_map/historical/historical_admin1_1900.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/world_map/historical/historical_admin1_1900.json",
-      "line": 650,
+      "line": 655,
       "column": 21,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -9921,16 +10224,16 @@
         "LICENSE_UNKNOWN"
       ],
       "evidence": [
-        "tools/provenance/generate_manifest.py:650"
+        "tools/provenance/generate_manifest.py:655"
       ],
-      "id": "ref-000190"
+      "id": "ref-000204"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/world_map/historical/major_state_profiles_1900.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/world_map/historical/major_state_profiles_1900.json",
-      "line": 662,
+      "line": 667,
       "column": 21,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -9943,16 +10246,16 @@
         "LICENSE_UNKNOWN"
       ],
       "evidence": [
-        "tools/provenance/generate_manifest.py:662"
+        "tools/provenance/generate_manifest.py:667"
       ],
-      "id": "ref-000191"
+      "id": "ref-000205"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/world_map/historical/major_economy_polity_crosswalk_1900.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/world_map/historical/major_economy_polity_crosswalk_1900.json",
-      "line": 674,
+      "line": 679,
       "column": 21,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -9965,16 +10268,16 @@
         "LICENSE_UNKNOWN"
       ],
       "evidence": [
-        "tools/provenance/generate_manifest.py:674"
+        "tools/provenance/generate_manifest.py:679"
       ],
-      "id": "ref-000192"
+      "id": "ref-000206"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/world_map/historical_political_entities_1900.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/world_map/historical_political_entities_1900.json",
-      "line": 686,
+      "line": 691,
       "column": 21,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -9987,16 +10290,16 @@
         "LICENSE_UNKNOWN"
       ],
       "evidence": [
-        "tools/provenance/generate_manifest.py:686"
+        "tools/provenance/generate_manifest.py:691"
       ],
-      "id": "ref-000193"
+      "id": "ref-000207"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/alpha/historical_world_economy_1900.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/alpha/historical_world_economy_1900.json",
-      "line": 710,
+      "line": 715,
       "column": 21,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -10009,16 +10312,16 @@
         "LICENSE_UNKNOWN"
       ],
       "evidence": [
-        "tools/provenance/generate_manifest.py:710"
+        "tools/provenance/generate_manifest.py:715"
       ],
-      "id": "ref-000194"
+      "id": "ref-000208"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/alpha/commodity_market_1900.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/alpha/commodity_market_1900.json",
-      "line": 728,
+      "line": 733,
       "column": 21,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -10031,16 +10334,16 @@
         "LICENSE_UNKNOWN"
       ],
       "evidence": [
-        "tools/provenance/generate_manifest.py:728"
+        "tools/provenance/generate_manifest.py:733"
       ],
-      "id": "ref-000195"
+      "id": "ref-000209"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/alpha/historical_household_budgets_1900.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/alpha/historical_household_budgets_1900.json",
-      "line": 746,
+      "line": 751,
       "column": 21,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -10053,16 +10356,16 @@
         "LICENSE_UNKNOWN"
       ],
       "evidence": [
-        "tools/provenance/generate_manifest.py:746"
+        "tools/provenance/generate_manifest.py:751"
       ],
-      "id": "ref-000196"
+      "id": "ref-000210"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/alpha/historical_transport_network_1900.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/alpha/historical_transport_network_1900.json",
-      "line": 766,
+      "line": 771,
       "column": 21,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -10075,16 +10378,16 @@
         "LICENSE_UNKNOWN"
       ],
       "evidence": [
-        "tools/provenance/generate_manifest.py:766"
+        "tools/provenance/generate_manifest.py:771"
       ],
-      "id": "ref-000197"
+      "id": "ref-000211"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/alpha/historical_world_economy_1900/countries_compact.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/alpha/historical_world_economy_1900/countries_compact.json",
-      "line": 784,
+      "line": 789,
       "column": 21,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -10097,16 +10400,16 @@
         "LICENSE_UNKNOWN"
       ],
       "evidence": [
-        "tools/provenance/generate_manifest.py:784"
+        "tools/provenance/generate_manifest.py:789"
       ],
-      "id": "ref-000198"
+      "id": "ref-000212"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/alpha/historical_world_economy_1900.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/alpha/historical_world_economy_1900.json",
-      "line": 785,
+      "line": 790,
       "column": 36,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -10119,16 +10422,16 @@
         "LICENSE_UNKNOWN"
       ],
       "evidence": [
-        "tools/provenance/generate_manifest.py:785"
+        "tools/provenance/generate_manifest.py:790"
       ],
-      "id": "ref-000199"
+      "id": "ref-000213"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/alpha/historical_world_economy_1900.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/alpha/historical_world_economy_1900.json",
-      "line": 786,
+      "line": 791,
       "column": 73,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -10141,16 +10444,16 @@
         "LICENSE_UNKNOWN"
       ],
       "evidence": [
-        "tools/provenance/generate_manifest.py:786"
+        "tools/provenance/generate_manifest.py:791"
       ],
-      "id": "ref-000200"
+      "id": "ref-000214"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/alpha/historical_world_economy_1900.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/alpha/historical_world_economy_1900.json",
-      "line": 796,
+      "line": 801,
       "column": 28,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -10163,16 +10466,16 @@
         "LICENSE_UNKNOWN"
       ],
       "evidence": [
-        "tools/provenance/generate_manifest.py:796"
+        "tools/provenance/generate_manifest.py:801"
       ],
-      "id": "ref-000201"
+      "id": "ref-000215"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/alpha/historical_world_economy_1900.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/alpha/historical_world_economy_1900.json",
-      "line": 799,
+      "line": 804,
       "column": 39,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -10185,16 +10488,16 @@
         "LICENSE_UNKNOWN"
       ],
       "evidence": [
-        "tools/provenance/generate_manifest.py:799"
+        "tools/provenance/generate_manifest.py:804"
       ],
-      "id": "ref-000202"
+      "id": "ref-000216"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/alpha/historical_transport_network_1900/transport_compact.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/alpha/historical_transport_network_1900/transport_compact.json",
-      "line": 803,
+      "line": 808,
       "column": 21,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -10207,16 +10510,16 @@
         "LICENSE_UNKNOWN"
       ],
       "evidence": [
-        "tools/provenance/generate_manifest.py:803"
+        "tools/provenance/generate_manifest.py:808"
       ],
-      "id": "ref-000203"
+      "id": "ref-000217"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/alpha/historical_transport_network_1900.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/alpha/historical_transport_network_1900.json",
-      "line": 804,
+      "line": 809,
       "column": 36,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -10229,16 +10532,16 @@
         "LICENSE_UNKNOWN"
       ],
       "evidence": [
-        "tools/provenance/generate_manifest.py:804"
+        "tools/provenance/generate_manifest.py:809"
       ],
-      "id": "ref-000204"
+      "id": "ref-000218"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/alpha/historical_transport_network_1900.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/alpha/historical_transport_network_1900.json",
-      "line": 815,
+      "line": 820,
       "column": 28,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -10251,16 +10554,16 @@
         "LICENSE_UNKNOWN"
       ],
       "evidence": [
-        "tools/provenance/generate_manifest.py:815"
+        "tools/provenance/generate_manifest.py:820"
       ],
-      "id": "ref-000205"
+      "id": "ref-000219"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/alpha/historical_transport_network_1900.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/alpha/historical_transport_network_1900.json",
-      "line": 818,
+      "line": 823,
       "column": 39,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -10273,16 +10576,16 @@
         "LICENSE_UNKNOWN"
       ],
       "evidence": [
-        "tools/provenance/generate_manifest.py:818"
+        "tools/provenance/generate_manifest.py:823"
       ],
-      "id": "ref-000206"
+      "id": "ref-000220"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "assets/historical_flags/1900",
       "reference_kind": "repository_path_literal",
       "literal": "assets/historical_flags/1900/",
-      "line": 918,
+      "line": 923,
       "column": 35,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -10293,16 +10596,16 @@
       "target_license": null,
       "issues": [],
       "evidence": [
-        "tools/provenance/generate_manifest.py:918"
+        "tools/provenance/generate_manifest.py:923"
       ],
-      "id": "ref-000207"
+      "id": "ref-000221"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "assets/prototype_v2/README.md",
       "reference_kind": "repository_path_literal",
       "literal": "assets/prototype_v2/README.md",
-      "line": 932,
+      "line": 937,
       "column": 27,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -10315,16 +10618,16 @@
         "LICENSE_UNKNOWN"
       ],
       "evidence": [
-        "tools/provenance/generate_manifest.py:932"
+        "tools/provenance/generate_manifest.py:937"
       ],
-      "id": "ref-000208"
+      "id": "ref-000222"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/world_map/city_detail",
       "reference_kind": "repository_path_literal",
       "literal": "data/world_map/city_detail/",
-      "line": 943,
+      "line": 948,
       "column": 35,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -10335,16 +10638,16 @@
       "target_license": null,
       "issues": [],
       "evidence": [
-        "tools/provenance/generate_manifest.py:943"
+        "tools/provenance/generate_manifest.py:948"
       ],
-      "id": "ref-000209"
+      "id": "ref-000223"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/world_map/world_coastlines.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/world_map/world_coastlines.json",
-      "line": 946,
+      "line": 951,
       "column": 14,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -10355,76 +10658,76 @@
       "target_license": "Public domain",
       "issues": [],
       "evidence": [
-        "tools/provenance/generate_manifest.py:946"
+        "tools/provenance/generate_manifest.py:951"
       ],
-      "id": "ref-000210"
+      "id": "ref-000224"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/world_map/world_admin1.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/world_map/world_admin1.json",
-      "line": 947,
+      "line": 952,
       "column": 14,
       "context": "code_or_text",
       "reference_scope": "repository",
       "exists": true,
       "target_type": "file",
       "target_sha256": "61210621bbdc7432041a3755765454fc52e7745c5b765f0fe3814765be584e00",
-      "target_manifest_kind": "generated",
-      "target_license": "Public domain",
-      "issues": [],
-      "evidence": [
-        "tools/provenance/generate_manifest.py:947"
-      ],
-      "id": "ref-000211"
-    },
-    {
-      "owner": "tools/provenance/generate_manifest.py",
-      "target": "data/world_map/regions.json",
-      "reference_kind": "repository_path_literal",
-      "literal": "data/world_map/regions.json",
-      "line": 948,
-      "column": 14,
-      "context": "code_or_text",
-      "reference_scope": "repository",
-      "exists": true,
-      "target_type": "file",
-      "target_sha256": "65e885135016f70eade124f8adf7030f5ce63b8983eb44d01e650cc87da5b1ba",
-      "target_manifest_kind": "generated",
-      "target_license": "Public domain",
-      "issues": [],
-      "evidence": [
-        "tools/provenance/generate_manifest.py:948"
-      ],
-      "id": "ref-000212"
-    },
-    {
-      "owner": "tools/provenance/generate_manifest.py",
-      "target": "data/world_map/world_coastlines.json",
-      "reference_kind": "repository_path_literal",
-      "literal": "data/world_map/world_coastlines.json",
-      "line": 952,
-      "column": 18,
-      "context": "code_or_text",
-      "reference_scope": "repository",
-      "exists": true,
-      "target_type": "file",
-      "target_sha256": "2c47f66e49af72baddc775087a02a943a8cfd3d1553ba8d441c131e87dc1c030",
       "target_manifest_kind": "generated",
       "target_license": "Public domain",
       "issues": [],
       "evidence": [
         "tools/provenance/generate_manifest.py:952"
       ],
-      "id": "ref-000213"
+      "id": "ref-000225"
+    },
+    {
+      "owner": "tools/provenance/generate_manifest.py",
+      "target": "data/world_map/regions.json",
+      "reference_kind": "repository_path_literal",
+      "literal": "data/world_map/regions.json",
+      "line": 953,
+      "column": 14,
+      "context": "code_or_text",
+      "reference_scope": "repository",
+      "exists": true,
+      "target_type": "file",
+      "target_sha256": "65e885135016f70eade124f8adf7030f5ce63b8983eb44d01e650cc87da5b1ba",
+      "target_manifest_kind": "generated",
+      "target_license": "Public domain",
+      "issues": [],
+      "evidence": [
+        "tools/provenance/generate_manifest.py:953"
+      ],
+      "id": "ref-000226"
+    },
+    {
+      "owner": "tools/provenance/generate_manifest.py",
+      "target": "data/world_map/world_coastlines.json",
+      "reference_kind": "repository_path_literal",
+      "literal": "data/world_map/world_coastlines.json",
+      "line": 957,
+      "column": 18,
+      "context": "code_or_text",
+      "reference_scope": "repository",
+      "exists": true,
+      "target_type": "file",
+      "target_sha256": "2c47f66e49af72baddc775087a02a943a8cfd3d1553ba8d441c131e87dc1c030",
+      "target_manifest_kind": "generated",
+      "target_license": "Public domain",
+      "issues": [],
+      "evidence": [
+        "tools/provenance/generate_manifest.py:957"
+      ],
+      "id": "ref-000227"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/world_map/world_admin1.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/world_map/world_admin1.json",
-      "line": 953,
+      "line": 958,
       "column": 18,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -10435,16 +10738,16 @@
       "target_license": "Public domain",
       "issues": [],
       "evidence": [
-        "tools/provenance/generate_manifest.py:953"
+        "tools/provenance/generate_manifest.py:958"
       ],
-      "id": "ref-000214"
+      "id": "ref-000228"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/world_map/regions.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/world_map/regions.json",
-      "line": 954,
+      "line": 959,
       "column": 18,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -10455,16 +10758,16 @@
       "target_license": "Public domain",
       "issues": [],
       "evidence": [
-        "tools/provenance/generate_manifest.py:954"
+        "tools/provenance/generate_manifest.py:959"
       ],
-      "id": "ref-000215"
+      "id": "ref-000229"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
       "target": "data/world_map/map_geometry_cache.json",
       "reference_kind": "repository_path_literal",
       "literal": "data/world_map/map_geometry_cache.json",
-      "line": 960,
+      "line": 965,
       "column": 27,
       "context": "code_or_text",
       "reference_scope": "repository",
@@ -10477,9 +10780,9 @@
         "LICENSE_UNKNOWN"
       ],
       "evidence": [
-        "tools/provenance/generate_manifest.py:960"
+        "tools/provenance/generate_manifest.py:965"
       ],
-      "id": "ref-000216"
+      "id": "ref-000230"
     },
     {
       "owner": "tools/render_variable_state_audit_summary.py",
@@ -10501,10 +10804,59 @@
       "evidence": [
         "tools/render_variable_state_audit_summary.py:70"
       ],
-      "id": "ref-000217"
+      "id": "ref-000231"
     }
   ],
   "candidate_edges": [
+    {
+      "source": "SOURCE_MISSING",
+      "generator": [
+        "tools/historical_data/build_cshapes_1900_snapshot.py"
+      ],
+      "output": "data/world_map/historical/CShapes-2.0-ATTRIBUTION.md",
+      "evidence": [
+        "tools/historical_data/build_cshapes_1900_snapshot.py:164"
+      ],
+      "confidence": "low",
+      "review_status": "REVIEW_REQUIRED",
+      "canonical_graph_match": false,
+      "issues": [
+        "CANDIDATE_NOT_CANONICAL",
+        "SOURCE_MISSING"
+      ]
+    },
+    {
+      "source": "assets/historical_flags/1900",
+      "generator": [
+        "tools/historical_data/build_1900_flag_registry.py"
+      ],
+      "output": "data/world_map/historical/FLAG_ASSET_ATTRIBUTION.md",
+      "evidence": [
+        "tools/historical_data/build_1900_flag_registry.py:250"
+      ],
+      "confidence": "low",
+      "review_status": "REVIEW_REQUIRED",
+      "canonical_graph_match": false,
+      "issues": [
+        "CANDIDATE_NOT_CANONICAL"
+      ]
+    },
+    {
+      "source": "data/world_map/historical/political_units_1900.json",
+      "generator": [
+        "tools/historical_data/build_1900_flag_registry.py"
+      ],
+      "output": "data/world_map/historical/FLAG_ASSET_ATTRIBUTION.md",
+      "evidence": [
+        "tools/historical_data/build_1900_flag_registry.py:250"
+      ],
+      "confidence": "low",
+      "review_status": "REVIEW_REQUIRED",
+      "canonical_graph_match": false,
+      "issues": [
+        "CANDIDATE_NOT_CANONICAL"
+      ]
+    },
     {
       "source": "data/world_map/historical/CShapes-2.0-ATTRIBUTION.md",
       "generator": [
@@ -10512,11 +10864,12 @@
       ],
       "output": "data/world_map/historical/cshapes_1900_snapshot.json",
       "evidence": [
+        "tools/historical_data/build_cshapes_1900_snapshot.py:160",
         "tools/historical_data/build_cshapes_1900_snapshot.py:25"
       ],
       "confidence": "medium",
       "review_status": "REVIEW_REQUIRED",
-      "canonical_graph_match": true,
+      "canonical_graph_match": false,
       "issues": [
         "CANDIDATE_NOT_CANONICAL"
       ]
@@ -10528,6 +10881,7 @@
       ],
       "output": "data/world_map/historical/flags_1900.json",
       "evidence": [
+        "tools/historical_data/build_1900_flag_registry.py:249",
         "tools/historical_data/build_1900_flag_registry.py:30"
       ],
       "confidence": "medium",
@@ -10544,6 +10898,7 @@
       ],
       "output": "data/world_map/historical/flags_1900.json",
       "evidence": [
+        "tools/historical_data/build_1900_flag_registry.py:249",
         "tools/historical_data/build_1900_flag_registry.py:30"
       ],
       "confidence": "medium",
@@ -10560,9 +10915,42 @@
       ],
       "output": "data/world_map/historical/flags_1900.json",
       "evidence": [
+        "tools/historical_data/build_1900_flag_registry.py:249",
         "tools/historical_data/build_1900_flag_registry.py:30"
       ],
       "confidence": "medium",
+      "review_status": "REVIEW_REQUIRED",
+      "canonical_graph_match": false,
+      "issues": [
+        "CANDIDATE_NOT_CANONICAL"
+      ]
+    },
+    {
+      "source": "assets/historical_flags/1900",
+      "generator": [
+        "tools/historical_data/build_1900_flag_registry.py"
+      ],
+      "output": "data/world_map/historical/political_units_1900.json",
+      "evidence": [
+        "tools/historical_data/build_1900_flag_registry.py:242"
+      ],
+      "confidence": "low",
+      "review_status": "REVIEW_REQUIRED",
+      "canonical_graph_match": false,
+      "issues": [
+        "CANDIDATE_NOT_CANONICAL"
+      ]
+    },
+    {
+      "source": "data/world_map/historical/FLAG_ASSET_ATTRIBUTION.md",
+      "generator": [
+        "tools/historical_data/build_1900_flag_registry.py"
+      ],
+      "output": "data/world_map/historical/political_units_1900.json",
+      "evidence": [
+        "tools/historical_data/build_1900_flag_registry.py:242"
+      ],
+      "confidence": "low",
       "review_status": "REVIEW_REQUIRED",
       "canonical_graph_match": false,
       "issues": [
@@ -10576,7 +10964,8 @@
       ],
       "output": "data/world_map/historical/political_units_1900.json",
       "evidence": [
-        "tools/historical_data/build_1900_entity_registry.py:16"
+        "tools/historical_data/build_1900_entity_registry.py:16",
+        "tools/historical_data/build_1900_entity_registry.py:211"
       ],
       "confidence": "medium",
       "review_status": "REVIEW_REQUIRED",
@@ -10590,10 +10979,228 @@
   "unresolved": [
     {
       "type": "BROKEN_REFERENCE",
+      "owner": "tests/provenance/test_provenance_validator.py",
+      "target": "data/duplicate.json",
+      "evidence": [
+        "tests/provenance/test_provenance_validator.py:112"
+      ]
+    },
+    {
+      "type": "BROKEN_REFERENCE",
       "owner": "tests/v2_2/v2_2_performance_guard_test.gd",
       "target": "data/prototype_v2/prototype_map_modes.json",
       "evidence": [
         "tests/v2_2/v2_2_performance_guard_test.gd:60"
+      ]
+    },
+    {
+      "type": "DYNAMIC_OUTPUT_UNRESOLVED",
+      "owner": "tests/tools/test_run_vnext_validation.py",
+      "target": "<dynamic-output>",
+      "expression": "root / relative",
+      "resolution": "unresolved",
+      "evidence": [
+        "tests/tools/test_run_vnext_validation.py:45"
+      ]
+    },
+    {
+      "type": "DYNAMIC_OUTPUT_UNRESOLVED",
+      "owner": "tests/tools/test_run_vnext_validation.py",
+      "target": "<dynamic-output>",
+      "expression": "root / relative",
+      "resolution": "unresolved",
+      "evidence": [
+        "tests/tools/test_run_vnext_validation.py:105"
+      ]
+    },
+    {
+      "type": "DYNAMIC_OUTPUT_UNRESOLVED",
+      "owner": "tools/audit_formal_variable_state.py",
+      "target": "<dynamic-output>",
+      "expression": "root / name",
+      "resolution": "unresolved",
+      "evidence": [
+        "tools/audit_formal_variable_state.py:1211"
+      ]
+    },
+    {
+      "type": "DYNAMIC_OUTPUT_UNRESOLVED",
+      "owner": "tools/generate_variable_state_docs.py",
+      "target": "<dynamic-output>",
+      "expression": "ROOT / \"docs\" / \"refactors\" / \"state_ownership_matrix.md\"",
+      "resolution": "unresolved",
+      "evidence": [
+        "tools/generate_variable_state_docs.py:61"
+      ]
+    },
+    {
+      "type": "DYNAMIC_OUTPUT_UNRESOLVED",
+      "owner": "tools/historical_data/build_1900_flag_registry.py",
+      "target": "<dynamic-output>",
+      "expression": "ASSET_DIR / f\"{flag_id}.png\"",
+      "resolution": "unresolved",
+      "evidence": [
+        "tools/historical_data/build_1900_flag_registry.py:191"
+      ]
+    },
+    {
+      "type": "DYNAMIC_OUTPUT_UNRESOLVED",
+      "owner": "tools/historical_data/build_1900_flag_registry_fast.py",
+      "target": "<dynamic-output>",
+      "expression": "ASSET_DIR / f\"{flag_id}.png\"",
+      "resolution": "unresolved",
+      "evidence": [
+        "tools/historical_data/build_1900_flag_registry_fast.py:137"
+      ]
+    },
+    {
+      "type": "DYNAMIC_OUTPUT_UNRESOLVED",
+      "owner": "tools/historical_data/build_1900_flag_registry_fast.py",
+      "target": "<dynamic-output>",
+      "expression": "source_specs.UNITS_PATH",
+      "resolution": "unresolved",
+      "evidence": [
+        "tools/historical_data/build_1900_flag_registry_fast.py:218"
+      ]
+    },
+    {
+      "type": "DYNAMIC_OUTPUT_UNRESOLVED",
+      "owner": "tools/historical_data/build_1900_flag_registry_fast.py",
+      "target": "<dynamic-output>",
+      "expression": "source_specs.REGISTRY_PATH",
+      "resolution": "unresolved",
+      "evidence": [
+        "tools/historical_data/build_1900_flag_registry_fast.py:235"
+      ]
+    },
+    {
+      "type": "DYNAMIC_OUTPUT_UNRESOLVED",
+      "owner": "tools/historical_data/build_1900_flag_registry_fast.py",
+      "target": "<dynamic-output>",
+      "expression": "source_specs.ATTRIBUTION_PATH",
+      "resolution": "unresolved",
+      "evidence": [
+        "tools/historical_data/build_1900_flag_registry_fast.py:239"
+      ]
+    },
+    {
+      "type": "DYNAMIC_OUTPUT_UNRESOLVED",
+      "owner": "tools/historical_data/research_1900_sources.py",
+      "target": "<dynamic-output>",
+      "expression": "output_dir / \"cshapes_2_0.geojson\"",
+      "resolution": "unresolved",
+      "evidence": [
+        "tools/historical_data/research_1900_sources.py:140"
+      ]
+    },
+    {
+      "type": "DYNAMIC_OUTPUT_UNRESOLVED",
+      "owner": "tools/historical_data/research_1900_sources.py",
+      "target": "<dynamic-output>",
+      "expression": "output_dir / \"cshapes_2_0.geojson\"",
+      "resolution": "unresolved",
+      "evidence": [
+        "tools/historical_data/research_1900_sources.py:144"
+      ]
+    },
+    {
+      "type": "DYNAMIC_OUTPUT_UNRESOLVED",
+      "owner": "tools/provenance/generate_regression_corpus.py",
+      "target": "<dynamic-output>",
+      "expression": "args.output if args.output.is_absolute() else root / args.output",
+      "resolution": "unresolved",
+      "evidence": [
+        "tools/provenance/generate_regression_corpus.py:123"
+      ]
+    },
+    {
+      "type": "DYNAMIC_OUTPUT_UNRESOLVED",
+      "owner": "tools/provenance/generate_review_backlog.py",
+      "target": "<dynamic-output>",
+      "expression": "args.output if args.output.is_absolute() else root / args.output",
+      "resolution": "unresolved",
+      "evidence": [
+        "tools/provenance/generate_review_backlog.py:193"
+      ]
+    },
+    {
+      "type": "DYNAMIC_OUTPUT_UNRESOLVED",
+      "owner": "tools/provenance/scan_reference_matrix.py",
+      "target": "<dynamic-output>",
+      "expression": "args.output if args.output.is_absolute() else root / args.output",
+      "resolution": "unresolved",
+      "evidence": [
+        "tools/provenance/scan_reference_matrix.py:548"
+      ]
+    },
+    {
+      "type": "DYNAMIC_OUTPUT_UNRESOLVED",
+      "owner": "tools/render_variable_refactor_plan.py",
+      "target": "<dynamic-output>",
+      "expression": "ROOT / \"docs\" / \"refactors\" / \"variable_refactor_plan.md\"",
+      "resolution": "unresolved",
+      "evidence": [
+        "tools/render_variable_refactor_plan.py:88"
+      ]
+    },
+    {
+      "type": "DYNAMIC_OUTPUT_UNRESOLVED",
+      "owner": "tools/render_variable_state_audit_summary.py",
+      "target": "<dynamic-output>",
+      "expression": "ROOT / \"docs\" / \"refactors\" / \"variable_state_audit.md\"",
+      "resolution": "unresolved",
+      "evidence": [
+        "tools/render_variable_state_audit_summary.py:154"
+      ]
+    },
+    {
+      "type": "DYNAMIC_OUTPUT_UNRESOLVED",
+      "owner": "tools/render_variable_state_member_inventory.py",
+      "target": "<dynamic-output>",
+      "expression": "ROOT / \"docs\" / \"refactors\" / \"variable_state_member_inventory.md\"",
+      "resolution": "unresolved",
+      "evidence": [
+        "tools/render_variable_state_member_inventory.py:115"
+      ]
+    },
+    {
+      "type": "DYNAMIC_OUTPUT_UNRESOLVED",
+      "owner": "tools/world_map/generate_city_shards.py",
+      "target": "<dynamic-output>",
+      "expression": "output / relative",
+      "resolution": "unresolved",
+      "evidence": [
+        "tools/world_map/generate_city_shards.py:407"
+      ]
+    },
+    {
+      "type": "DYNAMIC_OUTPUT_UNRESOLVED",
+      "owner": "tools/world_map/generate_city_shards.py",
+      "target": "<dynamic-output>",
+      "expression": "output / relative",
+      "resolution": "unresolved",
+      "evidence": [
+        "tools/world_map/generate_city_shards.py:434"
+      ]
+    },
+    {
+      "type": "DYNAMIC_OUTPUT_UNRESOLVED",
+      "owner": "tools/world_map/generate_city_shards.py",
+      "target": "<dynamic-output>",
+      "expression": "output / \"index.json\"",
+      "resolution": "unresolved",
+      "evidence": [
+        "tools/world_map/generate_city_shards.py:486"
+      ]
+    },
+    {
+      "type": "DYNAMIC_OUTPUT_UNRESOLVED",
+      "owner": "tools/world_map/generate_city_shards.py",
+      "target": "<dynamic-output>",
+      "expression": "output / \"LICENSE.json\"",
+      "resolution": "unresolved",
+      "evidence": [
+        "tools/world_map/generate_city_shards.py:487"
       ]
     },
     {
@@ -10729,7 +11336,7 @@
       "owner": "tests/provenance/test_reference_matrix.py",
       "target": "data/generated-at-runtime.json",
       "evidence": [
-        "tests/provenance/test_reference_matrix.py:74"
+        "tests/provenance/test_reference_matrix.py:130"
       ]
     },
     {
@@ -10737,7 +11344,39 @@
       "owner": "tests/provenance/test_reference_matrix.py",
       "target": "data/missing.json",
       "evidence": [
-        "tests/provenance/test_reference_matrix.py:88"
+        "tests/provenance/test_reference_matrix.py:144"
+      ]
+    },
+    {
+      "type": "INTENTIONAL_TEST_FIXTURE",
+      "owner": "tests/provenance/test_reference_matrix.py",
+      "target": "data/other.json",
+      "evidence": [
+        "tests/provenance/test_reference_matrix.py:73"
+      ]
+    },
+    {
+      "type": "INTENTIONAL_TEST_FIXTURE",
+      "owner": "tests/provenance/test_reference_matrix.py",
+      "target": "data/other.json",
+      "evidence": [
+        "tests/provenance/test_reference_matrix.py:75"
+      ]
+    },
+    {
+      "type": "INTENTIONAL_TEST_FIXTURE",
+      "owner": "tests/provenance/test_reference_matrix.py",
+      "target": "data/other.json",
+      "evidence": [
+        "tests/provenance/test_reference_matrix.py:80"
+      ]
+    },
+    {
+      "type": "INTENTIONAL_TEST_FIXTURE",
+      "owner": "tests/provenance/test_reference_matrix.py",
+      "target": "data/other.json",
+      "evidence": [
+        "tests/provenance/test_reference_matrix.py:96"
       ]
     },
     {
@@ -10783,6 +11422,22 @@
     {
       "type": "INTENTIONAL_TEST_FIXTURE",
       "owner": "tests/provenance/test_reference_matrix.py",
+      "target": "data/output.json",
+      "evidence": [
+        "tests/provenance/test_reference_matrix.py:76"
+      ]
+    },
+    {
+      "type": "INTENTIONAL_TEST_FIXTURE",
+      "owner": "tests/provenance/test_reference_matrix.py",
+      "target": "data/output.json",
+      "evidence": [
+        "tests/provenance/test_reference_matrix.py:90"
+      ]
+    },
+    {
+      "type": "INTENTIONAL_TEST_FIXTURE",
+      "owner": "tests/provenance/test_reference_matrix.py",
       "target": "data/source.json",
       "evidence": [
         "tests/provenance/test_reference_matrix.py:23"
@@ -10817,7 +11472,7 @@
       "owner": "tests/provenance/test_reference_matrix.py",
       "target": "data/source.json",
       "evidence": [
-        "tests/provenance/test_reference_matrix.py:99"
+        "tests/provenance/test_reference_matrix.py:75"
       ]
     },
     {
@@ -10825,7 +11480,26 @@
       "owner": "tests/provenance/test_reference_matrix.py",
       "target": "data/source.json",
       "evidence": [
-        "tests/provenance/test_reference_matrix.py:99"
+        "tests/provenance/test_reference_matrix.py:155"
+      ]
+    },
+    {
+      "type": "INTENTIONAL_TEST_FIXTURE",
+      "owner": "tests/provenance/test_reference_matrix.py",
+      "target": "data/source.json",
+      "evidence": [
+        "tests/provenance/test_reference_matrix.py:155"
+      ]
+    },
+    {
+      "type": "SOURCE_MISSING",
+      "generator": [
+        "tools/historical_data/build_cshapes_1900_snapshot.py"
+      ],
+      "source": "SOURCE_MISSING",
+      "output": "data/world_map/historical/CShapes-2.0-ATTRIBUTION.md",
+      "evidence": [
+        "tools/historical_data/build_cshapes_1900_snapshot.py:164"
       ]
     }
   ]

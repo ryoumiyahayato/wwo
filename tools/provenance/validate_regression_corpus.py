@@ -40,6 +40,14 @@ def file_sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def valid_generator(value: Any) -> bool:
+    return value == "GENERATOR_UNKNOWN" or (
+        isinstance(value, list)
+        and bool(value)
+        and all(isinstance(item, str) and item != "GENERATOR_UNKNOWN" for item in value)
+    )
+
+
 def validate_corpus(corpus: dict[str, Any], root: Path) -> dict[str, Any]:
     findings: list[dict[str, str]] = []
 
@@ -101,12 +109,20 @@ def validate_corpus(corpus: dict[str, Any], root: Path) -> dict[str, Any]:
         if entry is None:
             error("BROKEN_RECORD", str(path), "corpus record is absent from manifest")
             continue
+        if not valid_generator(record["generator"]):
+            error("INVALID_GENERATOR", str(path), "corpus generator must use the canonical sentinel or concrete list")
+        if not valid_generator(entry.get("generator")):
+            error("INVALID_GENERATOR", str(path), "manifest generator must use the canonical sentinel or concrete list")
         for field in REQUIRED_RECORD_FIELDS - {"issues", "derived_from", "generator"}:
             if record[field] != entry[field]:
                 error("RECORD_MISMATCH", str(path), f"field {field} differs from manifest")
-        for field in ("issues", "derived_from", "generator"):
-            if sorted(record[field]) != sorted(entry.get(field, [])):
+        for field in ("issues", "derived_from"):
+            if not isinstance(record[field], list) or not isinstance(entry.get(field), list):
+                error("CORPUS_SYNTAX", str(path), f"field {field} must be a list")
+            elif sorted(record[field]) != sorted(entry.get(field, [])):
                 error("RECORD_MISMATCH", str(path), f"field {field} differs from manifest")
+        if record["generator"] != entry.get("generator"):
+            error("RECORD_MISMATCH", str(path), "field generator differs from manifest")
         if record["license"] in {"LICENSE_UNKNOWN", "MIXED_EXPLICIT_AND_UNKNOWN"}:
             warning("LICENSE_UNKNOWN", str(path), "corpus preserves an unknown license warning")
 

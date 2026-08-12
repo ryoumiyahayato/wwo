@@ -32,7 +32,7 @@ class CorpusAndBacklogTests(unittest.TestCase):
             "known_source": "SOURCE_UNKNOWN",
             "license": "LICENSE_UNKNOWN",
             "derived_from": [],
-            "generator": ["GENERATOR_UNKNOWN"],
+            "generator": "GENERATOR_UNKNOWN",
             "issues": ["SOURCE_UNKNOWN", "LICENSE_UNKNOWN", "PROVENANCE_INCOMPLETE"],
             "evidence": ["data/source.json"],
             "review_status": "REVIEW_REQUIRED",
@@ -81,6 +81,20 @@ class CorpusAndBacklogTests(unittest.TestCase):
         self.assertTrue(result["valid"], result)
         self.assertEqual([item["rank"] for item in backlog["items"]], [1])
         self.assertEqual(backlog["items"][0]["path"], "data/source.json")
+
+    def test_corpus_malformed_generator_sentinel_fails(self) -> None:
+        corpus = generate_regression_corpus.build_corpus(self.root, "base")
+        corpus["records"][0]["generator"] = ["GENERATOR_UNKNOWN"]
+        result = validate_regression_corpus.validate_corpus(corpus, self.root)
+        self.assertFalse(result["valid"], result)
+        self.assertTrue(any(item["code"] == "INVALID_GENERATOR" for item in result["findings"]))
+
+    def test_malformed_backlog_record_fails(self) -> None:
+        backlog = generate_review_backlog.build_backlog(self.root, "base")
+        del backlog["items"][0]["safety"]
+        result = validate_review_backlog.validate_backlog(backlog, self.root)
+        self.assertFalse(result["valid"], result)
+        self.assertTrue(any(item["code"] == "MISSING_REQUIRED_FIELD" for item in result["findings"]))
 
     def test_corpus_hash_mismatch_fails(self) -> None:
         corpus = generate_regression_corpus.build_corpus(self.root, "base")

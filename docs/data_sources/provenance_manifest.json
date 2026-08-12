@@ -1,5 +1,5 @@
 {
-  "audit_base_revision": "UNSPECIFIED",
+  "audit_base_revision": "165515f6ed5bcb922ad1a8b5d3ea905e30debc61",
   "audit_batch": "WWO DATA & ASSET PROVENANCE AUDIT — BATCH 1",
   "dependency_graph": {
     "edges": [
@@ -4790,9 +4790,7 @@
         "assets/fonts/.gitkeep"
       ],
       "file_type": "application/octet-stream",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [],
       "kind": "source",
       "known_source": "WWO repository structure",
@@ -6804,9 +6802,7 @@
         "assets/icons/.gitkeep"
       ],
       "file_type": "application/octet-stream",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [],
       "kind": "source",
       "known_source": "WWO repository structure",
@@ -6830,9 +6826,7 @@
         "assets/placeholders/.gitkeep"
       ],
       "file_type": "application/octet-stream",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [],
       "kind": "source",
       "known_source": "WWO repository structure",
@@ -6856,9 +6850,7 @@
         "assets/prototype_v2/README.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -6885,9 +6877,7 @@
         "data/actions/.gitkeep"
       ],
       "file_type": "application/octet-stream",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [],
       "kind": "source",
       "known_source": "WWO repository structure",
@@ -6916,9 +6906,7 @@
         "data/alpha/commodity_market_1900.json:source_groups"
       ],
       "file_type": "application/json",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "GENERATOR_UNKNOWN",
         "LICENSE_UNKNOWN",
@@ -6945,9 +6933,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6973,9 +6959,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -7001,9 +6985,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -7205,9 +7187,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -7233,9 +7213,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -7261,9 +7239,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -7291,9 +7267,7 @@
         "data/balance/.gitkeep"
       ],
       "file_type": "application/octet-stream",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [],
       "kind": "source",
       "known_source": "WWO repository structure",
@@ -7315,9 +7289,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -7343,9 +7315,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -7371,9 +7341,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -7399,9 +7367,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -7427,9 +7393,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -7455,9 +7419,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -7485,9 +7447,7 @@
         "data/characters/.gitkeep"
       ],
       "file_type": "application/octet-stream",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [],
       "kind": "source",
       "known_source": "WWO repository structure",
@@ -7509,9 +7469,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -7539,9 +7497,7 @@
         "data/countries/.gitkeep"
       ],
       "file_type": "application/octet-stream",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [],
       "kind": "source",
       "known_source": "WWO repository structure",
@@ -7565,9 +7521,7 @@
         "data/organizations/.gitkeep"
       ],
       "file_type": "application/octet-stream",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [],
       "kind": "source",
       "known_source": "WWO repository structure",
@@ -7591,9 +7545,7 @@
         "data/regions/.gitkeep"
       ],
       "file_type": "application/octet-stream",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [],
       "kind": "source",
       "known_source": "WWO repository structure",
@@ -7615,9 +7567,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -7643,9 +7593,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -7671,9 +7619,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -7699,9 +7645,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -7727,9 +7671,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -7755,9 +7697,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -7783,9 +7723,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -7811,9 +7749,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -7839,9 +7775,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -7867,9 +7801,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -7895,9 +7827,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -7923,9 +7853,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -7951,9 +7879,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -7979,9 +7905,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -8007,9 +7931,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -8035,9 +7957,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -8063,9 +7983,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -8091,9 +8009,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -8119,9 +8035,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -8147,9 +8061,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -8175,9 +8087,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -8203,9 +8113,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -8231,9 +8139,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -8259,9 +8165,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -13975,9 +13879,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -14003,9 +13905,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -14517,9 +14417,7 @@
         "data/world_map/historical/historical_admin1_1900.json:source_basis"
       ],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -14548,9 +14446,7 @@
         "data/world_map/historical/major_economy_polity_crosswalk_1900.json:records"
       ],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -14578,9 +14474,7 @@
         "data/world_map/historical/major_state_profiles_1900.json:profiles"
       ],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -14640,9 +14534,7 @@
         "data/world_map/historical_political_entities_1900.json:prototype_only"
       ],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "OBSOLETE_OR_LEGACY_CANDIDATE",
@@ -14669,9 +14561,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -14699,9 +14589,7 @@
         "data/world_map/map_geometry_cache.json:generated_by"
       ],
       "file_type": "application/json",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "GENERATOR_UNKNOWN",
         "LICENSE_UNKNOWN",
@@ -14729,9 +14617,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -14757,9 +14643,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -14785,9 +14669,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -14813,9 +14695,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -14841,9 +14721,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -14873,9 +14751,7 @@
         "data/world_map/regions.json:source"
       ],
       "file_type": "application/json",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "GENERATOR_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -14902,9 +14778,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -14930,9 +14804,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -14958,9 +14830,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -14986,9 +14856,7 @@
       "derived_from": [],
       "evidence": [],
       "file_type": "application/json",
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -15018,9 +14886,7 @@
         "data/world_map/world_admin1.json:source"
       ],
       "file_type": "application/json",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "GENERATOR_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15051,9 +14917,7 @@
         "data/world_map/world_coastlines.json:source"
       ],
       "file_type": "application/json",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "GENERATOR_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15084,9 +14948,7 @@
         "docs/ALPHA_IMPLEMENTATION_AUDIT_2026-07-19.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15113,9 +14975,7 @@
         "docs/ALPHA_SYSTEMS.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15142,9 +15002,7 @@
         "docs/ARCHITECTURE.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15171,9 +15029,7 @@
         "docs/ARCHITECTURE_VARIABLE_REINTEGRATION_AUDIT_2026-07-30.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15200,9 +15056,7 @@
         "docs/BRANCH_CLEANUP_POLICY.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15229,9 +15083,7 @@
         "docs/CAUSALITY_AND_PLAYER_FEEDBACK.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15258,9 +15110,7 @@
         "docs/CODEX_AUDIT_REMEDIATION.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15287,9 +15137,7 @@
         "docs/COUNTRIES.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15316,9 +15164,7 @@
         "docs/DATA_MODEL.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15345,9 +15191,7 @@
         "docs/DECISIONS.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15374,9 +15218,7 @@
         "docs/DEMO_SCOPE.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15403,9 +15245,7 @@
         "docs/DEVELOPMENT_ROADMAP_REDESIGN.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15432,9 +15272,7 @@
         "docs/EVENT_AND_AI_SIMULATION.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15461,9 +15299,7 @@
         "docs/FAILURE_RECOVERY_AND_DIFFICULTY.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15490,9 +15326,7 @@
         "docs/GAME_DESIGN.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15519,9 +15353,7 @@
         "docs/GAME_VISION.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15548,9 +15380,7 @@
         "docs/HOUSEHOLD_AND_FAMILY_MODEL.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15577,9 +15407,7 @@
         "docs/INFORMATION_KNOWLEDGE_AND_MEDIA.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15606,9 +15434,7 @@
         "docs/KNOWN_GAPS.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15635,9 +15461,7 @@
         "docs/KNOWN_ISSUES.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15664,9 +15488,7 @@
         "docs/LAW_RIGHTS_AND_STATE_CAPACITY.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15693,9 +15515,7 @@
         "docs/MAP_DATA_AND_RENDERING.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15722,9 +15542,7 @@
         "docs/MAP_DENSITY_OPTIMIZATION_2026-07-22.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15751,9 +15569,7 @@
         "docs/MAP_DENSITY_REVIEW.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15780,9 +15596,7 @@
         "docs/P0_R1_VALIDATION.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15809,9 +15623,7 @@
         "docs/PERFORMANCE_BUDGET.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15838,9 +15650,7 @@
         "docs/PLANS.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15867,9 +15677,7 @@
         "docs/PLAYER_LAYERS_AND_PERMISSIONS.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15896,9 +15704,7 @@
         "docs/POLITICS_COALITIONS_AND_LEGITIMACY.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15925,9 +15731,7 @@
         "docs/PRODUCT_VISION.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15954,9 +15758,7 @@
         "docs/REGIONS.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -15983,9 +15785,7 @@
         "docs/ROADMAP.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16012,9 +15812,7 @@
         "docs/SAVE_FORMAT.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16041,9 +15839,7 @@
         "docs/SIMULATION_QUALITY_REPAIR.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16070,9 +15866,7 @@
         "docs/SIMULATION_RULES.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16099,9 +15893,7 @@
         "docs/SOCIAL_ORGANIZATION_INSTITUTION_MODEL.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16128,9 +15920,7 @@
         "docs/SOCIAL_SANDBOX_CONFORMANCE_AUDIT_2026-07-20.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16157,9 +15947,7 @@
         "docs/SOCIAL_SANDBOX_PROMPT_ALIGNMENT.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16186,9 +15974,7 @@
         "docs/SOCIAL_SANDBOX_TEST_PROTOCOL.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16215,9 +16001,7 @@
         "docs/SPATIAL_REACH_TRAVEL_AND_COMMUNICATION.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16244,9 +16028,7 @@
         "docs/STATE_AND_LIFE_ECONOMY.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16273,9 +16055,7 @@
         "docs/TEST_PLAN.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16302,9 +16082,7 @@
         "docs/TIME_ATTENTION_AND_ACTIVITY_MODEL.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16331,9 +16109,7 @@
         "docs/UI_INFORMATION_ARCHITECTURE.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16360,9 +16136,7 @@
         "docs/V2_3_SOCIAL_SANDBOX_REUSE_AUDIT.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16389,9 +16163,7 @@
         "docs/WORLD_BIBLE.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16418,9 +16190,7 @@
         "docs/WORLD_CITY_DATA_POLICY.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16447,9 +16217,7 @@
         "docs/WORLD_MARKET_WAR_TECH.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16476,9 +16244,7 @@
         "docs/audits/formal_product_gap_register_20260804.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16505,9 +16271,7 @@
         "docs/audits/formal_product_system_completeness_20260804.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16534,9 +16298,7 @@
         "docs/audits/formal_product_system_inventory_20260804.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16563,9 +16325,7 @@
         "docs/audits/variable_cleanup_candidates_20260803.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16592,9 +16352,7 @@
         "docs/audits/variable_state_audit_20260803.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16621,9 +16379,7 @@
         "docs/audits/variable_state_inventory_20260803.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16650,9 +16406,7 @@
         "docs/data_sources/README.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16666,8 +16420,8 @@
       ],
       "path": "docs/data_sources/README.md",
       "review_status": "REVIEW_REQUIRED",
-      "sha256": "80cb619fc5aad96e6125a0c14e675dff94a0afd4ad25249d38a3ca80af33cfd9",
-      "size_bytes": 2391,
+      "sha256": "adfb38a8a796a19608953412a243b52cb325e5c4b74a94293da94c7beafc8e9b",
+      "size_bytes": 2528,
       "source_locator": []
     },
     {
@@ -16679,9 +16433,7 @@
         "docs/data_sources/provenance_reference_matrix.json"
       ],
       "file_type": "application/json",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16695,8 +16447,8 @@
       ],
       "path": "docs/data_sources/provenance_reference_matrix.json",
       "review_status": "REVIEW_REQUIRED",
-      "sha256": "32bef375a0e0d032ccdfdf8a5d814f6f7325284dd813dab8a1182711a67c886d",
-      "size_bytes": 368900,
+      "sha256": "d7f602a9bf7dcc9a147caacb36f004da94e93b7a6d1b98c2d045293867ec954e",
+      "size_bytes": 391632,
       "source_locator": []
     },
     {
@@ -16708,9 +16460,7 @@
         "docs/economy/1900_economy_integration_phase2.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16737,9 +16487,7 @@
         "docs/economy/1900_economy_integration_phase2_validation.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16766,9 +16514,7 @@
         "docs/economy/1900_economy_system_audit_report.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16795,9 +16541,7 @@
         "docs/economy/1900_economy_ui_ai_stability_audit.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16824,9 +16568,7 @@
         "docs/economy/1900_market_economy_implementation_report.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16853,9 +16595,7 @@
         "docs/economy/1900_world_data_methodology.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16882,9 +16622,7 @@
         "docs/economy/1900_world_data_status.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16911,9 +16649,7 @@
         "docs/economy/formal_world_integration.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16940,9 +16676,7 @@
         "docs/performance/alpha_three_year_performance_gate.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16969,9 +16703,7 @@
         "docs/performance/formal_time_d01_validation.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -16998,9 +16730,7 @@
         "docs/refactors/formal_product_dependency_map.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17027,9 +16757,7 @@
         "docs/refactors/formal_product_system_ownership.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17056,9 +16784,7 @@
         "docs/refactors/formal_time_behavior_baseline.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17085,9 +16811,7 @@
         "docs/refactors/formal_time_single_source.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17114,9 +16838,7 @@
         "docs/refactors/state_ownership_matrix.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17143,9 +16865,7 @@
         "docs/refactors/variable_refactor_plan.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17172,9 +16892,7 @@
         "docs/refactors/variable_state_audit.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17201,9 +16919,7 @@
         "docs/refactors/variable_state_member_inventory.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17230,9 +16946,7 @@
         "docs/ui_spikes/holographic_workspace_spike.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17259,9 +16973,7 @@
         "docs/v2_2/V2_2_1_POLISH.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17288,9 +17000,7 @@
         "docs/v2_2/V2_2_BALANCE_VALUES.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17317,9 +17027,7 @@
         "docs/v2_2/V2_2_CLEANUP_MIGRATION.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17346,9 +17054,7 @@
         "docs/v2_2/V2_2_IMPLEMENTATION_STATUS.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17375,9 +17081,7 @@
         "docs/v2_2/V2_2_LIFE_LOOP.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17404,9 +17108,7 @@
         "docs/v2_2/V2_2_SAVE_SCHEMA.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17433,9 +17135,7 @@
         "docs/v2_2/V2_2_STATIC_AUDIT.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17462,9 +17162,7 @@
         "docs/v2_2/V2_2_TEST_PLAN.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17491,9 +17189,7 @@
         "docs/v2_2/V2_2_UI_BINDINGS.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17520,9 +17216,7 @@
         "docs/v2_3/V2_3_ARCHITECTURE_AUDIT.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17549,9 +17243,7 @@
         "docs/v2_3/V2_3_COMMUNICATION.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17578,9 +17270,7 @@
         "docs/v2_3/V2_3_IMPLEMENTATION_STATUS.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17607,9 +17297,7 @@
         "docs/v2_3/V2_3_KNOWLEDGE_MODEL.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17636,9 +17324,7 @@
         "docs/v2_3/V2_3_MIGRATION.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17665,9 +17351,7 @@
         "docs/v2_3/V2_3_RELATIONSHIPS.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17694,9 +17378,7 @@
         "docs/v2_3/V2_3_SAVE_SCHEMA.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17723,9 +17405,7 @@
         "docs/v2_3/V2_3_SPATIAL_MODEL.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17752,9 +17432,7 @@
         "docs/v2_3/V2_3_TEST_PLAN.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17781,9 +17459,7 @@
         "docs/v2_3/V2_3_TRAVEL_GRAPH.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17810,9 +17486,7 @@
         "docs/v2_3/V2_3_UI_BINDINGS.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17839,9 +17513,7 @@
         "docs/vnext/core_loop_integration.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17868,9 +17540,7 @@
         "docs/vnext/event_knowledge.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17897,9 +17567,7 @@
         "docs/vnext/location_travel.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17926,9 +17594,7 @@
         "docs/vnext/persistence.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17955,9 +17621,7 @@
         "docs/vnext/personal_economy.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -17984,9 +17648,7 @@
         "docs/vnext/player_action.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -18013,9 +17675,7 @@
         "docs/vnext/reuse_migration_inventory.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -18042,9 +17702,7 @@
         "docs/vnext/runtime_foundation.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -18071,9 +17729,7 @@
         "docs/vnext/stable_id_catalog.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -18100,9 +17756,7 @@
         "docs/vnext/validation.md"
       ],
       "file_type": "text/markdown",
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"

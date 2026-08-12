@@ -2,7 +2,7 @@
   "schema_version": 1,
   "backlog_kind": "wwo_provenance_review_backlog",
   "audit_batch": "BATCH_3",
-  "audit_base_revision": "HEAD",
+  "audit_base_revision": "165515f6ed5bcb922ad1a8b5d3ea905e30debc61",
   "source_manifest": "docs/data_sources/provenance_manifest.json",
   "source_matrix": "docs/data_sources/provenance_reference_matrix.json",
   "policy": {
@@ -12,11 +12,11 @@
     "automatic_asset_regeneration": false
   },
   "summary": {
-    "items": 173,
+    "items": 194,
     "top_priority": 120,
-    "source_missing_items": 1,
+    "source_missing_items": 3,
     "generator_unknown_items": 5,
-    "broken_reference_items": 1
+    "broken_reference_items": 2
   },
   "items": [
     {
@@ -41,6 +41,27 @@
       "rank": 1
     },
     {
+      "key": "edge:SOURCE_MISSING:data/world_map/historical/CShapes-2.0-ATTRIBUTION.md:tools/historical_data/build_cshapes_1900_snapshot.py",
+      "target_type": "dependency_edge",
+      "path": "data/world_map/historical/CShapes-2.0-ATTRIBUTION.md",
+      "owner": [
+        "tools/historical_data/build_cshapes_1900_snapshot.py"
+      ],
+      "priority": 110,
+      "issues": [
+        "CANDIDATE_NOT_CANONICAL",
+        "SOURCE_MISSING"
+      ],
+      "category": "candidate_dependency_edge",
+      "action": "Compare the candidate edge with the canonical manifest graph and promote only with explicit evidence.",
+      "safety": "Do not treat static path proximity as proof of derivation.",
+      "evidence": [
+        "tools/historical_data/build_cshapes_1900_snapshot.py:164"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 2
+    },
+    {
       "key": "file:data/world_map/regions.json",
       "target_type": "file",
       "path": "data/world_map/regions.json",
@@ -56,7 +77,7 @@
         "data/world_map/regions.json:source"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 2
+      "rank": 3
     },
     {
       "key": "file:data/world_map/world_admin1.json",
@@ -74,7 +95,7 @@
         "data/world_map/world_admin1.json:source"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 3
+      "rank": 4
     },
     {
       "key": "file:data/world_map/world_coastlines.json",
@@ -92,7 +113,7 @@
         "data/world_map/world_coastlines.json:source"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 4
+      "rank": 5
     },
     {
       "key": "file:data/alpha/commodity_market_1900.json",
@@ -112,7 +133,27 @@
         "data/alpha/commodity_market_1900.json:source_groups"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 5
+      "rank": 6
+    },
+    {
+      "key": "matrix:SOURCE_MISSING:['tools/historical_data/build_cshapes_1900_snapshot.py']:data/world_map/historical/CShapes-2.0-ATTRIBUTION.md",
+      "target_type": "reference",
+      "path": "data/world_map/historical/CShapes-2.0-ATTRIBUTION.md",
+      "owner": [
+        "tools/historical_data/build_cshapes_1900_snapshot.py"
+      ],
+      "priority": 100,
+      "issues": [
+        "SOURCE_MISSING"
+      ],
+      "category": "repository_reference",
+      "action": "Verify the reference against repository history or an explicit generator record; otherwise retain the sentinel and mark unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tools/historical_data/build_cshapes_1900_snapshot.py:164"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 7
     },
     {
       "key": "file:data/balance/map_rules.json",
@@ -129,7 +170,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 6
+      "rank": 8
     },
     {
       "key": "file:data/world_map/map_modes.json",
@@ -146,7 +187,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 7
+      "rank": 9
     },
     {
       "key": "file:data/world_map/ports.json",
@@ -163,7 +204,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 8
+      "rank": 10
     },
     {
       "key": "file:data/world_map/rail_segments.json",
@@ -180,7 +221,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 9
+      "rank": 11
     },
     {
       "key": "file:data/world_map/road_segments.json",
@@ -197,7 +238,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 10
+      "rank": 12
     },
     {
       "key": "file:data/world_map/shipping_routes.json",
@@ -214,7 +255,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 11
+      "rank": 13
     },
     {
       "key": "file:data/alpha/economy_integration_1900.json",
@@ -231,7 +272,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 12
+      "rank": 14
     },
     {
       "key": "file:data/alpha/historical_economy_coverage_1900.json",
@@ -248,7 +289,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 13
+      "rank": 15
     },
     {
       "key": "file:data/vnext/politics/state_politics_1900.json",
@@ -265,7 +306,25 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 14
+      "rank": 16
+    },
+    {
+      "key": "matrix:BROKEN_REFERENCE:tests/provenance/test_provenance_validator.py:data/duplicate.json",
+      "target_type": "reference",
+      "path": "data/duplicate.json",
+      "owner": "tests/provenance/test_provenance_validator.py",
+      "priority": 90,
+      "issues": [
+        "BROKEN_REFERENCE"
+      ],
+      "category": "repository_reference",
+      "action": "Verify the reference against repository history or an explicit generator record; otherwise retain the sentinel and mark unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tests/provenance/test_provenance_validator.py:112"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 17
     },
     {
       "key": "matrix:BROKEN_REFERENCE:tests/v2_2/v2_2_performance_guard_test.gd:data/prototype_v2/prototype_map_modes.json",
@@ -283,7 +342,7 @@
         "tests/v2_2/v2_2_performance_guard_test.gd:60"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 15
+      "rank": 18
     },
     {
       "key": "file:data/balance/action_rules.json",
@@ -300,7 +359,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 16
+      "rank": 19
     },
     {
       "key": "file:data/balance/continuity_rules.json",
@@ -317,7 +376,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 17
+      "rank": 20
     },
     {
       "key": "file:data/balance/random_service.json",
@@ -334,7 +393,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 18
+      "rank": 21
     },
     {
       "key": "file:data/balance/simulation_clock.json",
@@ -351,7 +410,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 19
+      "rank": 22
     },
     {
       "key": "file:data/balance/society_rules.json",
@@ -368,7 +427,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 20
+      "rank": 23
     },
     {
       "key": "file:data/characters/character_generation.json",
@@ -385,7 +444,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 21
+      "rank": 24
     },
     {
       "key": "file:data/scenarios/v2_2_lille_life_loop.json",
@@ -402,7 +461,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 22
+      "rank": 25
     },
     {
       "key": "file:data/scenarios/v2_3_lille_space_cognition.json",
@@ -419,7 +478,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 23
+      "rank": 26
     },
     {
       "key": "file:data/v2_2/lille_demo_employment.json",
@@ -436,7 +495,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 24
+      "rank": 27
     },
     {
       "key": "file:data/v2_2/lille_demo_living_costs.json",
@@ -453,7 +512,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 25
+      "rank": 28
     },
     {
       "key": "file:data/v2_2/lille_demo_locations.json",
@@ -470,7 +529,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 26
+      "rank": 29
     },
     {
       "key": "file:data/v2_2/lille_demo_people.json",
@@ -487,7 +546,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 27
+      "rank": 30
     },
     {
       "key": "file:data/v2_2/v2_2_balance.json",
@@ -504,7 +563,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 28
+      "rank": 31
     },
     {
       "key": "file:data/v2_3/communication_channels.json",
@@ -521,7 +580,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 29
+      "rank": 32
     },
     {
       "key": "file:data/v2_3/cross_border_locations.json",
@@ -538,7 +597,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 30
+      "rank": 33
     },
     {
       "key": "file:data/v2_3/cross_border_travel_graph.json",
@@ -555,7 +614,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 31
+      "rank": 34
     },
     {
       "key": "file:data/v2_3/knowledge_rules.json",
@@ -572,7 +631,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 32
+      "rank": 35
     },
     {
       "key": "file:data/v2_3/lille_finance.json",
@@ -589,7 +648,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 33
+      "rank": 36
     },
     {
       "key": "file:data/v2_3/lille_locations.json",
@@ -606,7 +665,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 34
+      "rank": 37
     },
     {
       "key": "file:data/v2_3/lille_travel_graph.json",
@@ -623,7 +682,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 35
+      "rank": 38
     },
     {
       "key": "file:data/v2_3/minute_clock.json",
@@ -640,7 +699,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 36
+      "rank": 39
     },
     {
       "key": "file:data/v2_3/relationship_rules.json",
@@ -657,7 +716,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 37
+      "rank": 40
     },
     {
       "key": "file:data/v2_3/social_people.json",
@@ -674,7 +733,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 38
+      "rank": 41
     },
     {
       "key": "file:data/v2_3/social_sandbox_rules.json",
@@ -691,7 +750,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 39
+      "rank": 42
     },
     {
       "key": "file:data/v2_3/transport_modes.json",
@@ -708,7 +767,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 40
+      "rank": 43
     },
     {
       "key": "file:data/v2_3/v2_3_balance.json",
@@ -725,7 +784,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 41
+      "rank": 44
     },
     {
       "key": "file:data/world/demo_world.json",
@@ -742,7 +801,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 42
+      "rank": 45
     },
     {
       "key": "file:data/world_map/characters.json",
@@ -759,7 +818,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 43
+      "rank": 46
     },
     {
       "key": "file:data/world_map/cities.json",
@@ -776,7 +835,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 44
+      "rank": 47
     },
     {
       "key": "file:data/world_map/countries.json",
@@ -793,7 +852,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 45
+      "rank": 48
     },
     {
       "key": "file:data/world_map/country_flag_palettes.json",
@@ -810,7 +869,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 46
+      "rank": 49
     },
     {
       "key": "file:data/world_map/institutions.json",
@@ -827,7 +886,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 47
+      "rank": 50
     },
     {
       "key": "file:data/world_map/name_pool_fr.json",
@@ -844,7 +903,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 48
+      "rank": 51
     },
     {
       "key": "file:data/world_map/organizations.json",
@@ -861,7 +920,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 49
+      "rank": 52
     },
     {
       "key": "file:data/world_map/relationships.json",
@@ -878,7 +937,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 50
+      "rank": 53
     },
     {
       "key": "file:data/world_map/world_activity.json",
@@ -895,7 +954,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 51
+      "rank": 54
     },
     {
       "key": "file:data/alpha/historical_household_budgets_1900.json",
@@ -915,7 +974,7 @@
         "tools/build_1900_world_economy_estimates.py:BUDGETS"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 52
+      "rank": 55
     },
     {
       "key": "file:data/alpha/historical_transport_network_1900.json",
@@ -936,7 +995,7 @@
         "tools/build_1900_world_economy_estimates.py:SEA"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 53
+      "rank": 56
     },
     {
       "key": "file:data/alpha/historical_transport_network_1900/transport_compact.json",
@@ -956,7 +1015,7 @@
         "data/alpha/historical_transport_network_1900/transport_compact.json"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 54
+      "rank": 57
     },
     {
       "key": "file:data/alpha/historical_world_economy_1900.json",
@@ -976,7 +1035,7 @@
         "tools/build_1900_world_economy_estimates.py:SOURCES"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 55
+      "rank": 58
     },
     {
       "key": "file:data/alpha/historical_world_economy_1900/countries_compact.json",
@@ -996,7 +1055,7 @@
         "data/alpha/historical_world_economy_1900/countries_compact.json"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 56
+      "rank": 59
     },
     {
       "key": "file:data/alpha/economy.json",
@@ -1013,7 +1072,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 57
+      "rank": 60
     },
     {
       "key": "file:data/alpha/politics.json",
@@ -1030,7 +1089,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 58
+      "rank": 61
     },
     {
       "key": "file:data/alpha/presets.json",
@@ -1047,7 +1106,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 59
+      "rank": 62
     },
     {
       "key": "file:data/alpha/world.json",
@@ -1064,7 +1123,7 @@
       "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
       "evidence": [],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 60
+      "rank": 63
     },
     {
       "key": "file:data/world_map/historical/historical_admin1_1900.json",
@@ -1083,7 +1142,7 @@
         "data/world_map/historical/historical_admin1_1900.json:source_basis"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 61
+      "rank": 64
     },
     {
       "key": "file:data/world_map/historical/major_economy_polity_crosswalk_1900.json",
@@ -1103,7 +1162,7 @@
         "data/world_map/historical/major_economy_polity_crosswalk_1900.json:records"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 62
+      "rank": 65
     },
     {
       "key": "file:data/world_map/historical/major_state_profiles_1900.json",
@@ -1122,7 +1181,7 @@
         "data/world_map/historical/major_state_profiles_1900.json:profiles"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 63
+      "rank": 66
     },
     {
       "key": "file:data/world_map/historical_political_entities_1900.json",
@@ -1143,7 +1202,7 @@
         "data/world_map/historical_political_entities_1900.json:prototype_only"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 64
+      "rank": 67
     },
     {
       "key": "file:assets/prototype_v2/README.md",
@@ -1161,7 +1220,7 @@
         "assets/prototype_v2/README.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 65
+      "rank": 68
     },
     {
       "key": "file:docs/ALPHA_IMPLEMENTATION_AUDIT_2026-07-19.md",
@@ -1179,7 +1238,7 @@
         "docs/ALPHA_IMPLEMENTATION_AUDIT_2026-07-19.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 66
+      "rank": 69
     },
     {
       "key": "file:docs/ALPHA_SYSTEMS.md",
@@ -1197,7 +1256,7 @@
         "docs/ALPHA_SYSTEMS.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 67
+      "rank": 70
     },
     {
       "key": "file:docs/ARCHITECTURE.md",
@@ -1215,7 +1274,7 @@
         "docs/ARCHITECTURE.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 68
+      "rank": 71
     },
     {
       "key": "file:docs/ARCHITECTURE_VARIABLE_REINTEGRATION_AUDIT_2026-07-30.md",
@@ -1233,7 +1292,7 @@
         "docs/ARCHITECTURE_VARIABLE_REINTEGRATION_AUDIT_2026-07-30.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 69
+      "rank": 72
     },
     {
       "key": "file:docs/BRANCH_CLEANUP_POLICY.md",
@@ -1251,7 +1310,7 @@
         "docs/BRANCH_CLEANUP_POLICY.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 70
+      "rank": 73
     },
     {
       "key": "file:docs/CAUSALITY_AND_PLAYER_FEEDBACK.md",
@@ -1269,7 +1328,7 @@
         "docs/CAUSALITY_AND_PLAYER_FEEDBACK.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 71
+      "rank": 74
     },
     {
       "key": "file:docs/CODEX_AUDIT_REMEDIATION.md",
@@ -1287,7 +1346,7 @@
         "docs/CODEX_AUDIT_REMEDIATION.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 72
+      "rank": 75
     },
     {
       "key": "file:docs/COUNTRIES.md",
@@ -1305,7 +1364,7 @@
         "docs/COUNTRIES.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 73
+      "rank": 76
     },
     {
       "key": "file:docs/DATA_MODEL.md",
@@ -1323,7 +1382,7 @@
         "docs/DATA_MODEL.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 74
+      "rank": 77
     },
     {
       "key": "file:docs/DECISIONS.md",
@@ -1341,7 +1400,7 @@
         "docs/DECISIONS.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 75
+      "rank": 78
     },
     {
       "key": "file:docs/DEMO_SCOPE.md",
@@ -1359,7 +1418,7 @@
         "docs/DEMO_SCOPE.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 76
+      "rank": 79
     },
     {
       "key": "file:docs/DEVELOPMENT_ROADMAP_REDESIGN.md",
@@ -1377,7 +1436,7 @@
         "docs/DEVELOPMENT_ROADMAP_REDESIGN.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 77
+      "rank": 80
     },
     {
       "key": "file:docs/EVENT_AND_AI_SIMULATION.md",
@@ -1395,7 +1454,7 @@
         "docs/EVENT_AND_AI_SIMULATION.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 78
+      "rank": 81
     },
     {
       "key": "file:docs/FAILURE_RECOVERY_AND_DIFFICULTY.md",
@@ -1413,7 +1472,7 @@
         "docs/FAILURE_RECOVERY_AND_DIFFICULTY.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 79
+      "rank": 82
     },
     {
       "key": "file:docs/GAME_DESIGN.md",
@@ -1431,7 +1490,7 @@
         "docs/GAME_DESIGN.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 80
+      "rank": 83
     },
     {
       "key": "file:docs/GAME_VISION.md",
@@ -1449,7 +1508,7 @@
         "docs/GAME_VISION.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 81
+      "rank": 84
     },
     {
       "key": "file:docs/HOUSEHOLD_AND_FAMILY_MODEL.md",
@@ -1467,7 +1526,7 @@
         "docs/HOUSEHOLD_AND_FAMILY_MODEL.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 82
+      "rank": 85
     },
     {
       "key": "file:docs/INFORMATION_KNOWLEDGE_AND_MEDIA.md",
@@ -1485,7 +1544,7 @@
         "docs/INFORMATION_KNOWLEDGE_AND_MEDIA.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 83
+      "rank": 86
     },
     {
       "key": "file:docs/KNOWN_GAPS.md",
@@ -1503,7 +1562,7 @@
         "docs/KNOWN_GAPS.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 84
+      "rank": 87
     },
     {
       "key": "file:docs/KNOWN_ISSUES.md",
@@ -1521,7 +1580,7 @@
         "docs/KNOWN_ISSUES.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 85
+      "rank": 88
     },
     {
       "key": "file:docs/LAW_RIGHTS_AND_STATE_CAPACITY.md",
@@ -1539,7 +1598,7 @@
         "docs/LAW_RIGHTS_AND_STATE_CAPACITY.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 86
+      "rank": 89
     },
     {
       "key": "file:docs/MAP_DATA_AND_RENDERING.md",
@@ -1557,7 +1616,7 @@
         "docs/MAP_DATA_AND_RENDERING.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 87
+      "rank": 90
     },
     {
       "key": "file:docs/MAP_DENSITY_OPTIMIZATION_2026-07-22.md",
@@ -1575,7 +1634,7 @@
         "docs/MAP_DENSITY_OPTIMIZATION_2026-07-22.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 88
+      "rank": 91
     },
     {
       "key": "file:docs/MAP_DENSITY_REVIEW.md",
@@ -1593,7 +1652,7 @@
         "docs/MAP_DENSITY_REVIEW.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 89
+      "rank": 92
     },
     {
       "key": "file:docs/P0_R1_VALIDATION.md",
@@ -1611,7 +1670,7 @@
         "docs/P0_R1_VALIDATION.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 90
+      "rank": 93
     },
     {
       "key": "file:docs/PERFORMANCE_BUDGET.md",
@@ -1629,7 +1688,7 @@
         "docs/PERFORMANCE_BUDGET.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 91
+      "rank": 94
     },
     {
       "key": "file:docs/PLANS.md",
@@ -1647,7 +1706,7 @@
         "docs/PLANS.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 92
+      "rank": 95
     },
     {
       "key": "file:docs/PLAYER_LAYERS_AND_PERMISSIONS.md",
@@ -1665,7 +1724,7 @@
         "docs/PLAYER_LAYERS_AND_PERMISSIONS.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 93
+      "rank": 96
     },
     {
       "key": "file:docs/POLITICS_COALITIONS_AND_LEGITIMACY.md",
@@ -1683,7 +1742,7 @@
         "docs/POLITICS_COALITIONS_AND_LEGITIMACY.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 94
+      "rank": 97
     },
     {
       "key": "file:docs/PRODUCT_VISION.md",
@@ -1701,7 +1760,7 @@
         "docs/PRODUCT_VISION.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 95
+      "rank": 98
     },
     {
       "key": "file:docs/REGIONS.md",
@@ -1719,7 +1778,7 @@
         "docs/REGIONS.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 96
+      "rank": 99
     },
     {
       "key": "file:docs/ROADMAP.md",
@@ -1737,7 +1796,7 @@
         "docs/ROADMAP.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 97
+      "rank": 100
     },
     {
       "key": "file:docs/SAVE_FORMAT.md",
@@ -1755,7 +1814,7 @@
         "docs/SAVE_FORMAT.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 98
+      "rank": 101
     },
     {
       "key": "file:docs/SIMULATION_QUALITY_REPAIR.md",
@@ -1773,7 +1832,7 @@
         "docs/SIMULATION_QUALITY_REPAIR.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 99
+      "rank": 102
     },
     {
       "key": "file:docs/SIMULATION_RULES.md",
@@ -1791,7 +1850,7 @@
         "docs/SIMULATION_RULES.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 100
+      "rank": 103
     },
     {
       "key": "file:docs/SOCIAL_ORGANIZATION_INSTITUTION_MODEL.md",
@@ -1809,7 +1868,7 @@
         "docs/SOCIAL_ORGANIZATION_INSTITUTION_MODEL.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 101
+      "rank": 104
     },
     {
       "key": "file:docs/SOCIAL_SANDBOX_CONFORMANCE_AUDIT_2026-07-20.md",
@@ -1827,7 +1886,7 @@
         "docs/SOCIAL_SANDBOX_CONFORMANCE_AUDIT_2026-07-20.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 102
+      "rank": 105
     },
     {
       "key": "file:docs/SOCIAL_SANDBOX_PROMPT_ALIGNMENT.md",
@@ -1845,7 +1904,7 @@
         "docs/SOCIAL_SANDBOX_PROMPT_ALIGNMENT.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 103
+      "rank": 106
     },
     {
       "key": "file:docs/SOCIAL_SANDBOX_TEST_PROTOCOL.md",
@@ -1863,7 +1922,7 @@
         "docs/SOCIAL_SANDBOX_TEST_PROTOCOL.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 104
+      "rank": 107
     },
     {
       "key": "file:docs/SPATIAL_REACH_TRAVEL_AND_COMMUNICATION.md",
@@ -1881,7 +1940,7 @@
         "docs/SPATIAL_REACH_TRAVEL_AND_COMMUNICATION.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 105
+      "rank": 108
     },
     {
       "key": "file:docs/STATE_AND_LIFE_ECONOMY.md",
@@ -1899,7 +1958,7 @@
         "docs/STATE_AND_LIFE_ECONOMY.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 106
+      "rank": 109
     },
     {
       "key": "file:docs/TEST_PLAN.md",
@@ -1917,7 +1976,7 @@
         "docs/TEST_PLAN.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 107
+      "rank": 110
     },
     {
       "key": "file:docs/TIME_ATTENTION_AND_ACTIVITY_MODEL.md",
@@ -1935,7 +1994,7 @@
         "docs/TIME_ATTENTION_AND_ACTIVITY_MODEL.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 108
+      "rank": 111
     },
     {
       "key": "file:docs/UI_INFORMATION_ARCHITECTURE.md",
@@ -1953,7 +2012,7 @@
         "docs/UI_INFORMATION_ARCHITECTURE.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 109
+      "rank": 112
     },
     {
       "key": "file:docs/V2_3_SOCIAL_SANDBOX_REUSE_AUDIT.md",
@@ -1971,7 +2030,7 @@
         "docs/V2_3_SOCIAL_SANDBOX_REUSE_AUDIT.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 110
+      "rank": 113
     },
     {
       "key": "file:docs/WORLD_BIBLE.md",
@@ -1989,7 +2048,7 @@
         "docs/WORLD_BIBLE.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 111
+      "rank": 114
     },
     {
       "key": "file:docs/WORLD_CITY_DATA_POLICY.md",
@@ -2007,7 +2066,7 @@
         "docs/WORLD_CITY_DATA_POLICY.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 112
+      "rank": 115
     },
     {
       "key": "file:docs/WORLD_MARKET_WAR_TECH.md",
@@ -2025,7 +2084,7 @@
         "docs/WORLD_MARKET_WAR_TECH.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 113
+      "rank": 116
     },
     {
       "key": "file:docs/audits/formal_product_gap_register_20260804.md",
@@ -2043,7 +2102,7 @@
         "docs/audits/formal_product_gap_register_20260804.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 114
+      "rank": 117
     },
     {
       "key": "file:docs/audits/formal_product_system_completeness_20260804.md",
@@ -2061,7 +2120,7 @@
         "docs/audits/formal_product_system_completeness_20260804.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 115
+      "rank": 118
     },
     {
       "key": "file:docs/audits/formal_product_system_inventory_20260804.md",
@@ -2079,7 +2138,7 @@
         "docs/audits/formal_product_system_inventory_20260804.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 116
+      "rank": 119
     },
     {
       "key": "file:docs/audits/variable_cleanup_candidates_20260803.md",
@@ -2097,7 +2156,7 @@
         "docs/audits/variable_cleanup_candidates_20260803.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 117
+      "rank": 120
     },
     {
       "key": "file:docs/audits/variable_state_audit_20260803.md",
@@ -2115,7 +2174,7 @@
         "docs/audits/variable_state_audit_20260803.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 118
+      "rank": 121
     },
     {
       "key": "file:docs/audits/variable_state_inventory_20260803.md",
@@ -2133,7 +2192,7 @@
         "docs/audits/variable_state_inventory_20260803.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 119
+      "rank": 122
     },
     {
       "key": "file:docs/data_sources/README.md",
@@ -2151,7 +2210,7 @@
         "docs/data_sources/README.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 120
+      "rank": 123
     },
     {
       "key": "file:docs/data_sources/provenance_reference_matrix.json",
@@ -2169,7 +2228,7 @@
         "docs/data_sources/provenance_reference_matrix.json"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 121
+      "rank": 124
     },
     {
       "key": "file:docs/economy/1900_economy_integration_phase2.md",
@@ -2187,7 +2246,7 @@
         "docs/economy/1900_economy_integration_phase2.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 122
+      "rank": 125
     },
     {
       "key": "file:docs/economy/1900_economy_integration_phase2_validation.md",
@@ -2205,7 +2264,7 @@
         "docs/economy/1900_economy_integration_phase2_validation.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 123
+      "rank": 126
     },
     {
       "key": "file:docs/economy/1900_economy_system_audit_report.md",
@@ -2223,7 +2282,7 @@
         "docs/economy/1900_economy_system_audit_report.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 124
+      "rank": 127
     },
     {
       "key": "file:docs/economy/1900_economy_ui_ai_stability_audit.md",
@@ -2241,7 +2300,7 @@
         "docs/economy/1900_economy_ui_ai_stability_audit.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 125
+      "rank": 128
     },
     {
       "key": "file:docs/economy/1900_market_economy_implementation_report.md",
@@ -2259,7 +2318,7 @@
         "docs/economy/1900_market_economy_implementation_report.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 126
+      "rank": 129
     },
     {
       "key": "file:docs/economy/1900_world_data_methodology.md",
@@ -2277,7 +2336,7 @@
         "docs/economy/1900_world_data_methodology.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 127
+      "rank": 130
     },
     {
       "key": "file:docs/economy/1900_world_data_status.md",
@@ -2295,7 +2354,7 @@
         "docs/economy/1900_world_data_status.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 128
+      "rank": 131
     },
     {
       "key": "file:docs/economy/formal_world_integration.md",
@@ -2313,7 +2372,7 @@
         "docs/economy/formal_world_integration.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 129
+      "rank": 132
     },
     {
       "key": "file:docs/performance/alpha_three_year_performance_gate.md",
@@ -2331,7 +2390,7 @@
         "docs/performance/alpha_three_year_performance_gate.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 130
+      "rank": 133
     },
     {
       "key": "file:docs/performance/formal_time_d01_validation.md",
@@ -2349,7 +2408,7 @@
         "docs/performance/formal_time_d01_validation.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 131
+      "rank": 134
     },
     {
       "key": "file:docs/refactors/formal_product_dependency_map.md",
@@ -2367,7 +2426,7 @@
         "docs/refactors/formal_product_dependency_map.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 132
+      "rank": 135
     },
     {
       "key": "file:docs/refactors/formal_product_system_ownership.md",
@@ -2385,7 +2444,7 @@
         "docs/refactors/formal_product_system_ownership.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 133
+      "rank": 136
     },
     {
       "key": "file:docs/refactors/formal_time_behavior_baseline.md",
@@ -2403,7 +2462,7 @@
         "docs/refactors/formal_time_behavior_baseline.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 134
+      "rank": 137
     },
     {
       "key": "file:docs/refactors/formal_time_single_source.md",
@@ -2421,7 +2480,7 @@
         "docs/refactors/formal_time_single_source.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 135
+      "rank": 138
     },
     {
       "key": "file:docs/refactors/state_ownership_matrix.md",
@@ -2439,7 +2498,7 @@
         "docs/refactors/state_ownership_matrix.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 136
+      "rank": 139
     },
     {
       "key": "file:docs/refactors/variable_refactor_plan.md",
@@ -2457,7 +2516,7 @@
         "docs/refactors/variable_refactor_plan.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 137
+      "rank": 140
     },
     {
       "key": "file:docs/refactors/variable_state_audit.md",
@@ -2475,7 +2534,7 @@
         "docs/refactors/variable_state_audit.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 138
+      "rank": 141
     },
     {
       "key": "file:docs/refactors/variable_state_member_inventory.md",
@@ -2493,7 +2552,7 @@
         "docs/refactors/variable_state_member_inventory.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 139
+      "rank": 142
     },
     {
       "key": "file:docs/ui_spikes/holographic_workspace_spike.md",
@@ -2511,7 +2570,7 @@
         "docs/ui_spikes/holographic_workspace_spike.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 140
+      "rank": 143
     },
     {
       "key": "file:docs/v2_2/V2_2_1_POLISH.md",
@@ -2529,7 +2588,7 @@
         "docs/v2_2/V2_2_1_POLISH.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 141
+      "rank": 144
     },
     {
       "key": "file:docs/v2_2/V2_2_BALANCE_VALUES.md",
@@ -2547,7 +2606,7 @@
         "docs/v2_2/V2_2_BALANCE_VALUES.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 142
+      "rank": 145
     },
     {
       "key": "file:docs/v2_2/V2_2_CLEANUP_MIGRATION.md",
@@ -2565,7 +2624,7 @@
         "docs/v2_2/V2_2_CLEANUP_MIGRATION.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 143
+      "rank": 146
     },
     {
       "key": "file:docs/v2_2/V2_2_IMPLEMENTATION_STATUS.md",
@@ -2583,7 +2642,7 @@
         "docs/v2_2/V2_2_IMPLEMENTATION_STATUS.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 144
+      "rank": 147
     },
     {
       "key": "file:docs/v2_2/V2_2_LIFE_LOOP.md",
@@ -2601,7 +2660,7 @@
         "docs/v2_2/V2_2_LIFE_LOOP.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 145
+      "rank": 148
     },
     {
       "key": "file:docs/v2_2/V2_2_SAVE_SCHEMA.md",
@@ -2619,7 +2678,7 @@
         "docs/v2_2/V2_2_SAVE_SCHEMA.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 146
+      "rank": 149
     },
     {
       "key": "file:docs/v2_2/V2_2_STATIC_AUDIT.md",
@@ -2637,7 +2696,7 @@
         "docs/v2_2/V2_2_STATIC_AUDIT.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 147
+      "rank": 150
     },
     {
       "key": "file:docs/v2_2/V2_2_TEST_PLAN.md",
@@ -2655,7 +2714,7 @@
         "docs/v2_2/V2_2_TEST_PLAN.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 148
+      "rank": 151
     },
     {
       "key": "file:docs/v2_2/V2_2_UI_BINDINGS.md",
@@ -2673,7 +2732,7 @@
         "docs/v2_2/V2_2_UI_BINDINGS.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 149
+      "rank": 152
     },
     {
       "key": "file:docs/v2_3/V2_3_ARCHITECTURE_AUDIT.md",
@@ -2691,7 +2750,7 @@
         "docs/v2_3/V2_3_ARCHITECTURE_AUDIT.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 150
+      "rank": 153
     },
     {
       "key": "file:docs/v2_3/V2_3_COMMUNICATION.md",
@@ -2709,7 +2768,7 @@
         "docs/v2_3/V2_3_COMMUNICATION.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 151
+      "rank": 154
     },
     {
       "key": "file:docs/v2_3/V2_3_IMPLEMENTATION_STATUS.md",
@@ -2727,7 +2786,7 @@
         "docs/v2_3/V2_3_IMPLEMENTATION_STATUS.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 152
+      "rank": 155
     },
     {
       "key": "file:docs/v2_3/V2_3_KNOWLEDGE_MODEL.md",
@@ -2745,7 +2804,7 @@
         "docs/v2_3/V2_3_KNOWLEDGE_MODEL.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 153
+      "rank": 156
     },
     {
       "key": "file:docs/v2_3/V2_3_MIGRATION.md",
@@ -2763,7 +2822,7 @@
         "docs/v2_3/V2_3_MIGRATION.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 154
+      "rank": 157
     },
     {
       "key": "file:docs/v2_3/V2_3_RELATIONSHIPS.md",
@@ -2781,7 +2840,7 @@
         "docs/v2_3/V2_3_RELATIONSHIPS.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 155
+      "rank": 158
     },
     {
       "key": "file:docs/v2_3/V2_3_SAVE_SCHEMA.md",
@@ -2799,7 +2858,7 @@
         "docs/v2_3/V2_3_SAVE_SCHEMA.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 156
+      "rank": 159
     },
     {
       "key": "file:docs/v2_3/V2_3_SPATIAL_MODEL.md",
@@ -2817,7 +2876,7 @@
         "docs/v2_3/V2_3_SPATIAL_MODEL.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 157
+      "rank": 160
     },
     {
       "key": "file:docs/v2_3/V2_3_TEST_PLAN.md",
@@ -2835,7 +2894,7 @@
         "docs/v2_3/V2_3_TEST_PLAN.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 158
+      "rank": 161
     },
     {
       "key": "file:docs/v2_3/V2_3_TRAVEL_GRAPH.md",
@@ -2853,7 +2912,7 @@
         "docs/v2_3/V2_3_TRAVEL_GRAPH.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 159
+      "rank": 162
     },
     {
       "key": "file:docs/v2_3/V2_3_UI_BINDINGS.md",
@@ -2871,7 +2930,7 @@
         "docs/v2_3/V2_3_UI_BINDINGS.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 160
+      "rank": 163
     },
     {
       "key": "file:docs/vnext/core_loop_integration.md",
@@ -2889,7 +2948,7 @@
         "docs/vnext/core_loop_integration.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 161
+      "rank": 164
     },
     {
       "key": "file:docs/vnext/event_knowledge.md",
@@ -2907,7 +2966,7 @@
         "docs/vnext/event_knowledge.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 162
+      "rank": 165
     },
     {
       "key": "file:docs/vnext/location_travel.md",
@@ -2925,7 +2984,7 @@
         "docs/vnext/location_travel.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 163
+      "rank": 166
     },
     {
       "key": "file:docs/vnext/persistence.md",
@@ -2943,7 +3002,7 @@
         "docs/vnext/persistence.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 164
+      "rank": 167
     },
     {
       "key": "file:docs/vnext/personal_economy.md",
@@ -2961,7 +3020,7 @@
         "docs/vnext/personal_economy.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 165
+      "rank": 168
     },
     {
       "key": "file:docs/vnext/player_action.md",
@@ -2979,7 +3038,7 @@
         "docs/vnext/player_action.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 166
+      "rank": 169
     },
     {
       "key": "file:docs/vnext/reuse_migration_inventory.md",
@@ -2997,7 +3056,7 @@
         "docs/vnext/reuse_migration_inventory.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 167
+      "rank": 170
     },
     {
       "key": "file:docs/vnext/runtime_foundation.md",
@@ -3015,7 +3074,7 @@
         "docs/vnext/runtime_foundation.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 168
+      "rank": 171
     },
     {
       "key": "file:docs/vnext/stable_id_catalog.md",
@@ -3033,7 +3092,7 @@
         "docs/vnext/stable_id_catalog.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 169
+      "rank": 172
     },
     {
       "key": "file:docs/vnext/validation.md",
@@ -3051,7 +3110,68 @@
         "docs/vnext/validation.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 170
+      "rank": 173
+    },
+    {
+      "key": "edge:assets/historical_flags/1900:data/world_map/historical/FLAG_ASSET_ATTRIBUTION.md:tools/historical_data/build_1900_flag_registry.py",
+      "target_type": "dependency_edge",
+      "path": "data/world_map/historical/FLAG_ASSET_ATTRIBUTION.md",
+      "owner": [
+        "tools/historical_data/build_1900_flag_registry.py"
+      ],
+      "priority": 45,
+      "issues": [
+        "CANDIDATE_NOT_CANONICAL"
+      ],
+      "category": "candidate_dependency_edge",
+      "action": "Compare the candidate edge with the canonical manifest graph and promote only with explicit evidence.",
+      "safety": "Do not treat static path proximity as proof of derivation.",
+      "evidence": [
+        "tools/historical_data/build_1900_flag_registry.py:250"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 174
+    },
+    {
+      "key": "edge:data/world_map/historical/political_units_1900.json:data/world_map/historical/FLAG_ASSET_ATTRIBUTION.md:tools/historical_data/build_1900_flag_registry.py",
+      "target_type": "dependency_edge",
+      "path": "data/world_map/historical/FLAG_ASSET_ATTRIBUTION.md",
+      "owner": [
+        "tools/historical_data/build_1900_flag_registry.py"
+      ],
+      "priority": 45,
+      "issues": [
+        "CANDIDATE_NOT_CANONICAL"
+      ],
+      "category": "candidate_dependency_edge",
+      "action": "Compare the candidate edge with the canonical manifest graph and promote only with explicit evidence.",
+      "safety": "Do not treat static path proximity as proof of derivation.",
+      "evidence": [
+        "tools/historical_data/build_1900_flag_registry.py:250"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 175
+    },
+    {
+      "key": "edge:data/world_map/historical/CShapes-2.0-ATTRIBUTION.md:data/world_map/historical/cshapes_1900_snapshot.json:tools/historical_data/build_cshapes_1900_snapshot.py",
+      "target_type": "dependency_edge",
+      "path": "data/world_map/historical/cshapes_1900_snapshot.json",
+      "owner": [
+        "tools/historical_data/build_cshapes_1900_snapshot.py"
+      ],
+      "priority": 45,
+      "issues": [
+        "CANDIDATE_NOT_CANONICAL"
+      ],
+      "category": "candidate_dependency_edge",
+      "action": "Compare the candidate edge with the canonical manifest graph and promote only with explicit evidence.",
+      "safety": "Do not treat static path proximity as proof of derivation.",
+      "evidence": [
+        "tools/historical_data/build_cshapes_1900_snapshot.py:160",
+        "tools/historical_data/build_cshapes_1900_snapshot.py:25"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 176
     },
     {
       "key": "edge:assets/historical_flags/1900:data/world_map/historical/flags_1900.json:tools/historical_data/build_1900_flag_registry.py",
@@ -3068,10 +3188,11 @@
       "action": "Compare the candidate edge with the canonical manifest graph and promote only with explicit evidence.",
       "safety": "Do not treat static path proximity as proof of derivation.",
       "evidence": [
+        "tools/historical_data/build_1900_flag_registry.py:249",
         "tools/historical_data/build_1900_flag_registry.py:30"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 171
+      "rank": 177
     },
     {
       "key": "edge:data/world_map/historical/FLAG_ASSET_ATTRIBUTION.md:data/world_map/historical/flags_1900.json:tools/historical_data/build_1900_flag_registry.py",
@@ -3088,10 +3209,11 @@
       "action": "Compare the candidate edge with the canonical manifest graph and promote only with explicit evidence.",
       "safety": "Do not treat static path proximity as proof of derivation.",
       "evidence": [
+        "tools/historical_data/build_1900_flag_registry.py:249",
         "tools/historical_data/build_1900_flag_registry.py:30"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 172
+      "rank": 178
     },
     {
       "key": "edge:data/world_map/historical/political_units_1900.json:data/world_map/historical/flags_1900.json:tools/historical_data/build_1900_flag_registry.py",
@@ -3108,10 +3230,293 @@
       "action": "Compare the candidate edge with the canonical manifest graph and promote only with explicit evidence.",
       "safety": "Do not treat static path proximity as proof of derivation.",
       "evidence": [
+        "tools/historical_data/build_1900_flag_registry.py:249",
         "tools/historical_data/build_1900_flag_registry.py:30"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 173
+      "rank": 179
+    },
+    {
+      "key": "edge:assets/historical_flags/1900:data/world_map/historical/political_units_1900.json:tools/historical_data/build_1900_flag_registry.py",
+      "target_type": "dependency_edge",
+      "path": "data/world_map/historical/political_units_1900.json",
+      "owner": [
+        "tools/historical_data/build_1900_flag_registry.py"
+      ],
+      "priority": 45,
+      "issues": [
+        "CANDIDATE_NOT_CANONICAL"
+      ],
+      "category": "candidate_dependency_edge",
+      "action": "Compare the candidate edge with the canonical manifest graph and promote only with explicit evidence.",
+      "safety": "Do not treat static path proximity as proof of derivation.",
+      "evidence": [
+        "tools/historical_data/build_1900_flag_registry.py:242"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 180
+    },
+    {
+      "key": "edge:data/world_map/historical/FLAG_ASSET_ATTRIBUTION.md:data/world_map/historical/political_units_1900.json:tools/historical_data/build_1900_flag_registry.py",
+      "target_type": "dependency_edge",
+      "path": "data/world_map/historical/political_units_1900.json",
+      "owner": [
+        "tools/historical_data/build_1900_flag_registry.py"
+      ],
+      "priority": 45,
+      "issues": [
+        "CANDIDATE_NOT_CANONICAL"
+      ],
+      "category": "candidate_dependency_edge",
+      "action": "Compare the candidate edge with the canonical manifest graph and promote only with explicit evidence.",
+      "safety": "Do not treat static path proximity as proof of derivation.",
+      "evidence": [
+        "tools/historical_data/build_1900_flag_registry.py:242"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 181
+    },
+    {
+      "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tests/tools/test_run_vnext_validation.py:<dynamic-output>",
+      "target_type": "reference",
+      "path": "<dynamic-output>",
+      "owner": "tests/tools/test_run_vnext_validation.py",
+      "priority": 40,
+      "issues": [
+        "DYNAMIC_OUTPUT_UNRESOLVED"
+      ],
+      "category": "repository_reference",
+      "action": "Resolve only from an explicit constant/path expression or repository evidence; otherwise retain the dynamic output as unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tests/tools/test_run_vnext_validation.py:105",
+        "tests/tools/test_run_vnext_validation.py:45"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 182
+    },
+    {
+      "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/audit_formal_variable_state.py:<dynamic-output>",
+      "target_type": "reference",
+      "path": "<dynamic-output>",
+      "owner": "tools/audit_formal_variable_state.py",
+      "priority": 40,
+      "issues": [
+        "DYNAMIC_OUTPUT_UNRESOLVED"
+      ],
+      "category": "repository_reference",
+      "action": "Resolve only from an explicit constant/path expression or repository evidence; otherwise retain the dynamic output as unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tools/audit_formal_variable_state.py:1211"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 183
+    },
+    {
+      "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/generate_variable_state_docs.py:<dynamic-output>",
+      "target_type": "reference",
+      "path": "<dynamic-output>",
+      "owner": "tools/generate_variable_state_docs.py",
+      "priority": 40,
+      "issues": [
+        "DYNAMIC_OUTPUT_UNRESOLVED"
+      ],
+      "category": "repository_reference",
+      "action": "Resolve only from an explicit constant/path expression or repository evidence; otherwise retain the dynamic output as unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tools/generate_variable_state_docs.py:61"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 184
+    },
+    {
+      "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/historical_data/build_1900_flag_registry.py:<dynamic-output>",
+      "target_type": "reference",
+      "path": "<dynamic-output>",
+      "owner": "tools/historical_data/build_1900_flag_registry.py",
+      "priority": 40,
+      "issues": [
+        "DYNAMIC_OUTPUT_UNRESOLVED"
+      ],
+      "category": "repository_reference",
+      "action": "Resolve only from an explicit constant/path expression or repository evidence; otherwise retain the dynamic output as unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tools/historical_data/build_1900_flag_registry.py:191"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 185
+    },
+    {
+      "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/historical_data/build_1900_flag_registry_fast.py:<dynamic-output>",
+      "target_type": "reference",
+      "path": "<dynamic-output>",
+      "owner": "tools/historical_data/build_1900_flag_registry_fast.py",
+      "priority": 40,
+      "issues": [
+        "DYNAMIC_OUTPUT_UNRESOLVED"
+      ],
+      "category": "repository_reference",
+      "action": "Resolve only from an explicit constant/path expression or repository evidence; otherwise retain the dynamic output as unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tools/historical_data/build_1900_flag_registry_fast.py:137",
+        "tools/historical_data/build_1900_flag_registry_fast.py:218",
+        "tools/historical_data/build_1900_flag_registry_fast.py:235",
+        "tools/historical_data/build_1900_flag_registry_fast.py:239"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 186
+    },
+    {
+      "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/historical_data/research_1900_sources.py:<dynamic-output>",
+      "target_type": "reference",
+      "path": "<dynamic-output>",
+      "owner": "tools/historical_data/research_1900_sources.py",
+      "priority": 40,
+      "issues": [
+        "DYNAMIC_OUTPUT_UNRESOLVED"
+      ],
+      "category": "repository_reference",
+      "action": "Resolve only from an explicit constant/path expression or repository evidence; otherwise retain the dynamic output as unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tools/historical_data/research_1900_sources.py:140",
+        "tools/historical_data/research_1900_sources.py:144"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 187
+    },
+    {
+      "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/provenance/generate_regression_corpus.py:<dynamic-output>",
+      "target_type": "reference",
+      "path": "<dynamic-output>",
+      "owner": "tools/provenance/generate_regression_corpus.py",
+      "priority": 40,
+      "issues": [
+        "DYNAMIC_OUTPUT_UNRESOLVED"
+      ],
+      "category": "repository_reference",
+      "action": "Resolve only from an explicit constant/path expression or repository evidence; otherwise retain the dynamic output as unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tools/provenance/generate_regression_corpus.py:123"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 188
+    },
+    {
+      "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/provenance/generate_review_backlog.py:<dynamic-output>",
+      "target_type": "reference",
+      "path": "<dynamic-output>",
+      "owner": "tools/provenance/generate_review_backlog.py",
+      "priority": 40,
+      "issues": [
+        "DYNAMIC_OUTPUT_UNRESOLVED"
+      ],
+      "category": "repository_reference",
+      "action": "Resolve only from an explicit constant/path expression or repository evidence; otherwise retain the dynamic output as unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tools/provenance/generate_review_backlog.py:193"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 189
+    },
+    {
+      "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/provenance/scan_reference_matrix.py:<dynamic-output>",
+      "target_type": "reference",
+      "path": "<dynamic-output>",
+      "owner": "tools/provenance/scan_reference_matrix.py",
+      "priority": 40,
+      "issues": [
+        "DYNAMIC_OUTPUT_UNRESOLVED"
+      ],
+      "category": "repository_reference",
+      "action": "Resolve only from an explicit constant/path expression or repository evidence; otherwise retain the dynamic output as unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tools/provenance/scan_reference_matrix.py:548"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 190
+    },
+    {
+      "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/render_variable_refactor_plan.py:<dynamic-output>",
+      "target_type": "reference",
+      "path": "<dynamic-output>",
+      "owner": "tools/render_variable_refactor_plan.py",
+      "priority": 40,
+      "issues": [
+        "DYNAMIC_OUTPUT_UNRESOLVED"
+      ],
+      "category": "repository_reference",
+      "action": "Resolve only from an explicit constant/path expression or repository evidence; otherwise retain the dynamic output as unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tools/render_variable_refactor_plan.py:88"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 191
+    },
+    {
+      "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/render_variable_state_audit_summary.py:<dynamic-output>",
+      "target_type": "reference",
+      "path": "<dynamic-output>",
+      "owner": "tools/render_variable_state_audit_summary.py",
+      "priority": 40,
+      "issues": [
+        "DYNAMIC_OUTPUT_UNRESOLVED"
+      ],
+      "category": "repository_reference",
+      "action": "Resolve only from an explicit constant/path expression or repository evidence; otherwise retain the dynamic output as unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tools/render_variable_state_audit_summary.py:154"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 192
+    },
+    {
+      "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/render_variable_state_member_inventory.py:<dynamic-output>",
+      "target_type": "reference",
+      "path": "<dynamic-output>",
+      "owner": "tools/render_variable_state_member_inventory.py",
+      "priority": 40,
+      "issues": [
+        "DYNAMIC_OUTPUT_UNRESOLVED"
+      ],
+      "category": "repository_reference",
+      "action": "Resolve only from an explicit constant/path expression or repository evidence; otherwise retain the dynamic output as unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tools/render_variable_state_member_inventory.py:115"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 193
+    },
+    {
+      "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/world_map/generate_city_shards.py:<dynamic-output>",
+      "target_type": "reference",
+      "path": "<dynamic-output>",
+      "owner": "tools/world_map/generate_city_shards.py",
+      "priority": 40,
+      "issues": [
+        "DYNAMIC_OUTPUT_UNRESOLVED"
+      ],
+      "category": "repository_reference",
+      "action": "Resolve only from an explicit constant/path expression or repository evidence; otherwise retain the dynamic output as unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tools/world_map/generate_city_shards.py:407",
+        "tools/world_map/generate_city_shards.py:434",
+        "tools/world_map/generate_city_shards.py:486",
+        "tools/world_map/generate_city_shards.py:487"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 194
     }
   ]
 }

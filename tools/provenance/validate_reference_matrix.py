@@ -26,6 +26,7 @@ LICENSE_UNKNOWN = scan_reference_matrix.LICENSE_UNKNOWN
 OUTPUT_MISSING = scan_reference_matrix.OUTPUT_MISSING
 SOURCE_MISSING = scan_reference_matrix.SOURCE_MISSING
 TARGET_NOT_IN_BATCH_1 = scan_reference_matrix.TARGET_NOT_IN_BATCH_1
+DYNAMIC_OUTPUT_UNRESOLVED = scan_reference_matrix.DYNAMIC_OUTPUT_UNRESOLVED
 MATRIX_KIND = scan_reference_matrix.MATRIX_KIND
 MANIFEST_RELATIVE = scan_reference_matrix.MANIFEST_RELATIVE
 SCOPE_ROOTS = scan_reference_matrix.SCOPE_ROOTS
@@ -38,6 +39,7 @@ KNOWN_REFERENCE_ISSUES = {
     OUTPUT_MISSING,
     SOURCE_MISSING,
     TARGET_NOT_IN_BATCH_1,
+    DYNAMIC_OUTPUT_UNRESOLVED,
     scan_reference_matrix.PROVENANCE_INCOMPLETE,
 }
 REQUIRED_FILE_FIELDS = {
@@ -90,6 +92,8 @@ def file_sha256(path: Path) -> str:
 
 def validate_matrix(matrix: dict[str, Any], root: Path) -> dict[str, Any]:
     findings: list[dict[str, str]] = []
+    manifest = load_manifest(root)
+    canonical = scan_reference_matrix.canonical_pairs(manifest)
     if matrix.get("schema_version") != 1:
         add_finding(findings, "ERROR", "MATRIX_SCHEMA", "", "schema_version must be 1")
     if matrix.get("matrix_kind") != MATRIX_KIND:
@@ -258,6 +262,27 @@ def validate_matrix(matrix: dict[str, Any], root: Path) -> dict[str, Any]:
             add_finding(findings, "ERROR", "CONTRADICTORY_EDGE", label, "missing output lacks OUTPUT_MISSING marker")
         if edge.get("source") == SOURCE_MISSING and SOURCE_MISSING not in edge_issues:
             add_finding(findings, "ERROR", "CONTRADICTORY_EDGE", label, "SOURCE_MISSING source lacks marker")
+        if (
+            isinstance(edge.get("source"), str)
+            and isinstance(edge.get("output"), str)
+            and isinstance(generator_values, list)
+            and generator_values
+            and all(isinstance(generator, str) for generator in generator_values)
+        ):
+            identity = (
+                edge["source"],
+                tuple(sorted(generator_values)),
+                edge["output"],
+            )
+            expected_match = identity in canonical
+            if edge.get("canonical_graph_match") is not expected_match:
+                add_finding(
+                    findings,
+                    "ERROR",
+                    "CANONICAL_MATCH_MISMATCH",
+                    label,
+                    "canonical_graph_match does not match source/generator/output identity",
+                )
         if CANDIDATE_NOT_CANONICAL in edge_issues:
             add_finding(findings, "WARNING", CANDIDATE_NOT_CANONICAL, label, "candidate edge requires provenance review")
         if SOURCE_MISSING in edge_issues:
@@ -279,6 +304,12 @@ def validate_matrix(matrix: dict[str, Any], root: Path) -> dict[str, Any]:
         for issue in edge.get("issues", []):
             if issue in {SOURCE_MISSING, OUTPUT_MISSING}:
                 expected_keys.add((issue, str(edge.get("generator", [""])), edge.get("output", edge.get("source", ""))))
+    for relative in sorted(file_by_path):
+        path = root / Path(relative)
+        text = "" if scan_reference_matrix.is_audit_output(relative) else scan_reference_matrix.read_text(path)
+        _, dynamic_issues = scan_reference_matrix.extract_bound_outputs(relative, text)
+        for item in dynamic_issues:
+            expected_keys.add((item["type"], str(item["owner"]), item["target"]))
     if unresolved_keys != expected_keys:
         add_finding(findings, "ERROR", "UNRESOLVED_MISMATCH", "unresolved", "unresolved list does not match embedded issue markers")
 
@@ -312,18 +343,26 @@ def validate_matrix(matrix: dict[str, Any], root: Path) -> dict[str, Any]:
     for item in unresolved:
         if not isinstance(item, dict) or not isinstance(item.get("evidence"), list):
             add_finding(findings, "ERROR", "MATRIX_SYNTAX", "unresolved", "unresolved records need evidence lists")
+        elif item.get("type") == DYNAMIC_OUTPUT_UNRESOLVED:
+            if item.get("target") != "<dynamic-output>" or item.get("resolution") != "unresolved" or not isinstance(item.get("expression"), str):
+                add_finding(findings, "ERROR", "MATRIX_SYNTAX", "unresolved", "dynamic output records must preserve an unresolved expression")
 
     errors = sum(item["severity"] == "ERROR" for item in findings)
     warnings = sum(item["severity"] == "WARNING" for item in findings)
     return {"valid": errors == 0, "errors": errors, "warnings": warnings, "findings": findings, "summary": summary}
 
 
-def load_manifest_paths(root: Path) -> set[str]:
+def load_manifest(root: Path) -> dict[str, Any]:
     path = root / MANIFEST_RELATIVE
     try:
         manifest = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, UnicodeDecodeError, json.JSONDecodeError):
-        return set()
+        return {}
+    return manifest if isinstance(manifest, dict) else {}
+
+
+def load_manifest_paths(root: Path) -> set[str]:
+    manifest = load_manifest(root)
     return {
         entry["path"]
         for entry in manifest.get("entries", [])

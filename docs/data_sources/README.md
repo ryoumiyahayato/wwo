@@ -37,7 +37,9 @@ become authoritative provenance automatically.
 Batch 3 adds two low-risk derived records under `tests/provenance/`:
 
 - `provenance_regression_corpus.json` pins a compact, deterministic copy of
-  manifest records and the manifest hash for regression checks.
+  manifest records and the manifest hash for regression checks. It is a
+  deterministic regression/drift snapshot, not independent historical evidence
+  and cannot establish source or license truth.
 - `provenance_review_backlog.json` ranks only evidence-backed review candidates
   from the manifest and reference matrix. It is not an instruction to modify
   authoritative data, infer licenses, or regenerate assets.

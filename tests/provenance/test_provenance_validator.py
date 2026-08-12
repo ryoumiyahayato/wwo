@@ -34,7 +34,7 @@ def entry(root: Path, relative: str, *, kind: str = "source", **overrides: objec
         "license": "CC0",
         "license_locator": [],
         "derived_from": [],
-        "generator": [validate_manifest.GENERATOR_UNKNOWN],
+        "generator": validate_manifest.GENERATOR_UNKNOWN,
         "confidence": "high",
         "review_status": "REVIEWED",
         "issues": [],
@@ -139,13 +139,22 @@ class ProvenanceValidatorTests(unittest.TestCase):
         manifest = valid_manifest(self.root)
         output = manifest["entries"][1]
         output["derived_from"] = []
-        output["generator"] = [validate_manifest.GENERATOR_UNKNOWN]
+        output["generator"] = validate_manifest.GENERATOR_UNKNOWN
         output["issues"] = [validate_manifest.GENERATOR_UNKNOWN, validate_manifest.SOURCE_MISSING, validate_manifest.PROVENANCE_INCOMPLETE]
         manifest["dependency_graph"]["edges"] = []
         result = validate_manifest.validate_manifest(manifest, self.root)
         self.assertTrue(result["valid"])
         self.assertTrue(any(item["code"] == validate_manifest.SOURCE_MISSING for item in result["findings"]))
         self.assertTrue(any(item["code"] == validate_manifest.GENERATOR_UNKNOWN for item in result["findings"]))
+
+    def test_malformed_generator_sentinel_is_error(self) -> None:
+        for malformed in ("('GENERATOR_UNKNOWN',)", [validate_manifest.GENERATOR_UNKNOWN], (validate_manifest.GENERATOR_UNKNOWN,), [7], 7):
+            with self.subTest(malformed=malformed):
+                manifest = valid_manifest(self.root)
+                manifest["entries"][1]["generator"] = malformed
+                result = validate_manifest.validate_manifest(manifest, self.root)
+                self.assertFalse(result["valid"], result)
+                self.assertTrue(any(item["code"] == "INVALID_GENERATOR" for item in result["findings"]))
 
     def test_real_manifest_generation_is_deterministic(self) -> None:
         first = generate_manifest.build_manifest(ROOT, "determinism-test")

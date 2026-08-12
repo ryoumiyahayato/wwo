@@ -61,8 +61,8 @@ def strip_resource_prefix(value: str) -> str:
 def as_list(value: Any) -> list[Any]:
     if value is None:
         return []
-    if isinstance(value, list):
-        return value
+    if isinstance(value, (list, tuple)):
+        return list(value)
     return [value]
 
 
@@ -200,7 +200,7 @@ def make_entry(root: Path, relative: str) -> dict[str, Any]:
         "license": LICENSE_UNKNOWN,
         "license_locator": [],
         "derived_from": [],
-        "generator": [GENERATOR_UNKNOWN],
+        "generator": GENERATOR_UNKNOWN,
         "confidence": "low",
         "review_status": "REVIEW_REQUIRED",
         "issues": [],
@@ -225,7 +225,7 @@ def set_details(
     license_name: str = LICENSE_UNKNOWN,
     license_locator: Iterable[str] = (),
     derived_from: Iterable[str] = (),
-    generator: Iterable[str] | str = (GENERATOR_UNKNOWN,),
+    generator: Iterable[str] | str = GENERATOR_UNKNOWN,
     confidence: str = "low",
     evidence: Iterable[str] = (),
     notes: Iterable[str] = (),
@@ -240,8 +240,10 @@ def set_details(
     entry["derived_from"] = unique(derived_from)
     raw_generators = [str(value) for value in as_list(generator) if str(value)]
     resolved_generators: list[str] = []
+    sentinel_seen = False
     for raw in raw_generators:
         if raw in {GENERATOR_UNKNOWN, SOURCE_UNKNOWN}:
+            sentinel_seen = True
             continue
         candidate = strip_resource_prefix(raw)
         if (Path(entry["path"]).anchor or candidate.startswith("/")):
@@ -250,12 +252,15 @@ def set_details(
             continue
         resolved_generators.append(candidate)
     if not resolved_generators:
-        entry["generator"] = [GENERATOR_UNKNOWN]
+        entry["generator"] = GENERATOR_UNKNOWN
         for raw in raw_generators:
             if raw not in {GENERATOR_UNKNOWN, SOURCE_UNKNOWN}:
                 entry["notes"].append(f"Declared generator not found: {raw}")
     else:
         entry["generator"] = unique(resolved_generators)
+        if sentinel_seen:
+            add_issue(entry, "CONTRADICTORY_PROVENANCE")
+            entry["notes"].append("Generator evidence mixes a sentinel with a concrete path.")
     entry["confidence"] = confidence
     entry["evidence"] = unique(evidence)
     entry["notes"] = unique([*entry["notes"], *notes])
@@ -275,7 +280,7 @@ def finalize_entry(entry: dict[str, Any]) -> None:
         add_issue(entry, "LICENSE_UNKNOWN")
 
     if entry["kind"] == "generated":
-        if entry["generator"] == [GENERATOR_UNKNOWN]:
+        if entry["generator"] == GENERATOR_UNKNOWN:
             add_issue(entry, GENERATOR_UNKNOWN)
         if not entry["derived_from"]:
             add_issue(entry, SOURCE_MISSING)
@@ -997,7 +1002,11 @@ def build_manifest(root: Path, base_revision: str = "UNSPECIFIED") -> dict[str, 
 
     edges: list[dict[str, Any]] = []
     for entry in entries:
-        generators = entry["generator"] if entry["generator"] else [GENERATOR_UNKNOWN]
+        generators = entry["generator"]
+        if isinstance(generators, str):
+            generators = [generators]
+        if not generators:
+            generators = [GENERATOR_UNKNOWN]
         for source in entry["derived_from"]:
             edges.append({
                 "source": source,

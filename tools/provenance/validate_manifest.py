@@ -139,9 +139,20 @@ def validate_manifest(manifest: dict[str, Any], root: Path) -> dict[str, Any]:
             add_finding(findings, "ERROR", "MANIFEST_SYNTAX", relative, "sha256 must be a lowercase SHA-256 hex digest")
         if entry["kind"] not in VALID_KINDS:
             add_finding(findings, "ERROR", "MANIFEST_SYNTAX", relative, "kind is not a recognized value")
-        for field in ("source_locator", "license_locator", "derived_from", "generator"):
+        for field in ("source_locator", "license_locator", "derived_from"):
             if not isinstance(entry[field], list) or not all(isinstance(item, str) for item in entry[field]):
                 add_finding(findings, "ERROR", "MANIFEST_SYNTAX", relative, f"{field} must be a list of strings")
+        generator_value = entry["generator"]
+        valid_generator = (
+            generator_value == GENERATOR_UNKNOWN
+            or (
+                isinstance(generator_value, list)
+                and bool(generator_value)
+                and all(isinstance(item, str) and item != GENERATOR_UNKNOWN for item in generator_value)
+            )
+        )
+        if not valid_generator:
+            add_finding(findings, "ERROR", "INVALID_GENERATOR", relative, "generator must be GENERATOR_UNKNOWN or a non-empty list of concrete repository paths")
         for field in ("known_source", "author_institution", "license", "confidence", "review_status"):
             if not isinstance(entry[field], str):
                 add_finding(findings, "ERROR", "MANIFEST_SYNTAX", relative, f"{field} must be a string")
@@ -189,18 +200,15 @@ def validate_manifest(manifest: dict[str, Any], root: Path) -> dict[str, Any]:
                     add_finding(findings, "WARNING", SOURCE_MISSING, relative, "generated output has no traceable source")
             elif SOURCE_MISSING in issue_set:
                 add_finding(findings, "ERROR", "CONTRADICTORY_PROVENANCE", relative, "generated entry has sources but is marked SOURCE_MISSING")
-            if entry["generator"] == [GENERATOR_UNKNOWN]:
+            if entry["generator"] == GENERATOR_UNKNOWN:
                 if GENERATOR_UNKNOWN not in issue_set:
                     add_finding(findings, "ERROR", "CONTRADICTORY_PROVENANCE", relative, "unknown generator is missing GENERATOR_UNKNOWN")
                 else:
                     add_finding(findings, "WARNING", GENERATOR_UNKNOWN, relative, "generator is not present or not documented")
-            elif GENERATOR_UNKNOWN in entry["generator"]:
-                add_finding(findings, "ERROR", "CONTRADICTORY_PROVENANCE", relative, "generator list mixes a sentinel with a concrete path")
-            for generator in entry["generator"]:
-                if generator == GENERATOR_UNKNOWN:
-                    continue
-                if not (root / Path(normalize_path(generator))).is_file():
-                    add_finding(findings, "ERROR", "CONTRADICTORY_PROVENANCE", relative, f"declared generator does not exist: {generator}")
+            elif isinstance(entry["generator"], list) and all(isinstance(generator, str) for generator in entry["generator"]):
+                for generator in entry["generator"]:
+                    if not (root / Path(normalize_path(generator))).is_file():
+                        add_finding(findings, "ERROR", "CONTRADICTORY_PROVENANCE", relative, f"declared generator does not exist: {generator}")
         for issue in sorted(issue_set):
             if issue in {SOURCE_MISSING, "SOURCE_LOCATOR_MISSING", "OBSOLETE_OR_LEGACY_CANDIDATE", "PROVENANCE_INCOMPLETE"}:
                 add_finding(findings, "WARNING", issue, relative, f"manifest records {issue}")

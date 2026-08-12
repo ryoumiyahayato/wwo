@@ -16,6 +16,7 @@ from typing import Any
 DEFAULT_OUTPUT = "tests/provenance/provenance_review_backlog.json"
 MANIFEST_RELATIVE = "docs/data_sources/provenance_manifest.json"
 MATRIX_RELATIVE = "docs/data_sources/provenance_reference_matrix.json"
+DYNAMIC_OUTPUT_UNRESOLVED = "DYNAMIC_OUTPUT_UNRESOLVED"
 
 SEVERITY = {
     "SOURCE_MISSING": 100,
@@ -27,6 +28,7 @@ SEVERITY = {
     "PROVENANCE_INCOMPLETE": 60,
     "OBSOLETE_OR_LEGACY_CANDIDATE": 55,
     "CANDIDATE_NOT_CANONICAL": 45,
+    DYNAMIC_OUTPUT_UNRESOLVED: 40,
     "INTENTIONAL_TEST_FIXTURE": 5,
 }
 CATEGORY_BONUS = {
@@ -100,6 +102,11 @@ def build_backlog(root: Path, base_revision: str) -> dict[str, Any]:
         owner = unresolved.get("owner", unresolved.get("generator", ""))
         target = unresolved.get("target", unresolved.get("output", ""))
         key = f"matrix:{issue}:{owner}:{target}"
+        action = (
+            "Resolve only from an explicit constant/path expression or repository evidence; otherwise retain the dynamic output as unresolved."
+            if issue == DYNAMIC_OUTPUT_UNRESOLVED
+            else "Verify the reference against repository history or an explicit generator record; otherwise retain the sentinel and mark unresolved."
+        )
         add_item(
             items,
             {
@@ -110,7 +117,7 @@ def build_backlog(root: Path, base_revision: str) -> dict[str, Any]:
                 "priority": item_priority([issue]),
                 "issues": [issue],
                 "category": "repository_reference",
-                "action": "Verify the reference against repository history or an explicit generator record; otherwise retain the sentinel and mark unresolved.",
+                "action": action,
                 "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
                 "evidence": sorted(unresolved.get("evidence", [])),
                 "review_status": "REVIEW_REQUIRED",

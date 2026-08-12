@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from tools.provenance import scan_reference_matrix, validate_reference_matrix  # noqa: E402
+from tools.provenance import generate_review_backlog, scan_reference_matrix, validate_reference_matrix  # noqa: E402
 
 
 class ReferenceMatrixTests(unittest.TestCase):
@@ -57,7 +57,8 @@ class ReferenceMatrixTests(unittest.TestCase):
     def test_matrix_detects_producer_and_consumer(self) -> None:
         matrix = scan_reference_matrix.build_matrix(self.root, "test-base")
         self.assertEqual(matrix["summary"]["files_scanned"], 2)
-        self.assertEqual(matrix["summary"]["references"], 3)
+        self.assertEqual(matrix["summary"]["references"], 4)
+        self.assertTrue(any(reference.get("output_resolution") == "resolved_constant" for reference in matrix["references"]))
         self.assertEqual(matrix["summary"]["producer_candidate_files"], 1)
         self.assertEqual(matrix["summary"]["candidate_edges"], 1)
         self.assertEqual(matrix["summary"]["candidate_edges_matching_canonical"], 1)
@@ -67,6 +68,61 @@ class ReferenceMatrixTests(unittest.TestCase):
         result = validate_reference_matrix.validate_matrix(matrix, self.root)
         self.assertTrue(result["valid"], result)
         self.assertEqual(result["errors"], 0)
+
+    def test_source_aware_canonical_mismatch_enters_backlog(self) -> None:
+        (self.root / "data/other.json").write_text('{"other": true}\n', encoding="utf-8")
+        (self.root / "scripts/generator.py").write_text(
+            'SOURCE_A = "data/source.json"\nSOURCE_B = "data/other.json"\n'
+            'OUTPUT_PATH = Path("data/output.json")\nOUTPUT_PATH.write_text("{}")\n',
+            encoding="utf-8",
+        )
+        matrix = scan_reference_matrix.build_matrix(self.root, "test-base")
+        mismatches = [edge for edge in matrix["candidate_edges"] if edge["source"] == "data/other.json"]
+        self.assertTrue(mismatches)
+        self.assertTrue(all(edge["canonical_graph_match"] is False for edge in mismatches))
+        self.assertTrue(all(scan_reference_matrix.CANDIDATE_NOT_CANONICAL in edge["issues"] for edge in mismatches))
+        (self.root / "docs/data_sources/provenance_reference_matrix.json").write_text(
+            json.dumps(matrix), encoding="utf-8"
+        )
+        backlog = generate_review_backlog.build_backlog(self.root, "test-base")
+        self.assertTrue(any(
+            item["target_type"] == "dependency_edge"
+            and item["path"] == "data/output.json"
+            and item["issues"] == [scan_reference_matrix.CANDIDATE_NOT_CANONICAL]
+            for item in backlog["items"]
+        ))
+        stale = json.loads(json.dumps(matrix))
+        for edge in stale["candidate_edges"]:
+            if edge["source"] == "data/other.json":
+                edge["canonical_graph_match"] = True
+        invalid = validate_reference_matrix.validate_matrix(stale, self.root)
+        self.assertFalse(invalid["valid"], invalid)
+        self.assertTrue(any(item["code"] == "CANONICAL_MATCH_MISMATCH" for item in invalid["findings"]))
+
+    def test_variable_bound_output_candidate_is_explicit(self) -> None:
+        (self.root / "scripts/dynamic.py").write_text(
+            'ASSET_DIR = source_specs.ASSET_DIR\nasset_path = ASSET_DIR / f"{name}.json"\n'
+            'asset_path.write_text("{}")\n',
+            encoding="utf-8",
+        )
+        matrix = scan_reference_matrix.build_matrix(self.root, "test-base")
+        unresolved = [
+            item for item in matrix["unresolved"]
+            if item["type"] == scan_reference_matrix.DYNAMIC_OUTPUT_UNRESOLVED
+            and item["owner"] == "scripts/dynamic.py"
+        ]
+        self.assertEqual(len(unresolved), 1)
+        self.assertEqual(unresolved[0]["target"], "<dynamic-output>")
+        self.assertFalse(any(edge["output"] == "<dynamic-output>" for edge in matrix["candidate_edges"]))
+        result = validate_reference_matrix.validate_matrix(matrix, self.root)
+        self.assertTrue(result["valid"], result)
+
+    def test_invalid_matrix_hash_is_error(self) -> None:
+        matrix = scan_reference_matrix.build_matrix(self.root, "test-base")
+        matrix["files"][0]["sha256"] = "not-a-hash"
+        result = validate_reference_matrix.validate_matrix(matrix, self.root)
+        self.assertFalse(result["valid"], result)
+        self.assertTrue(any(item["code"] == "INVALID_HASH" for item in result["findings"]))
 
     def test_fixture_relative_reference_is_explicit(self) -> None:
         (self.root / "tests").mkdir()

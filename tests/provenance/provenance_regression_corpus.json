@@ -2,9 +2,9 @@
   "schema_version": 1,
   "corpus_kind": "wwo_provenance_regression_corpus",
   "audit_batch": "BATCH_3",
-  "audit_base_revision": "HEAD",
+  "audit_base_revision": "165515f6ed5bcb922ad1a8b5d3ea905e30debc61",
   "source_manifest": "docs/data_sources/provenance_manifest.json",
-  "source_manifest_sha256": "3d63e56540ed60ca9e7e52008996ba763360442367390f40a92c86fa17df4aae",
+  "source_manifest_sha256": "9420fe1687a3502d63104c5d8423c2221418ab33c428c7913c6e6e9f6e259ec3",
   "source_manifest_summary": {
     "files_inventoried": 401,
     "source_known": 347,
@@ -4880,9 +4880,7 @@
       "known_source": "WWO repository structure",
       "license": "NOT_APPLICABLE",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": []
     },
     {
@@ -5915,9 +5913,7 @@
       "known_source": "WWO repository structure",
       "license": "NOT_APPLICABLE",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": []
     },
     {
@@ -5930,9 +5926,7 @@
       "known_source": "WWO repository structure",
       "license": "NOT_APPLICABLE",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": []
     },
     {
@@ -5945,9 +5939,7 @@
       "known_source": "WWO repository-authored prototype visual assets",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -5963,9 +5955,7 @@
       "known_source": "WWO repository structure",
       "license": "NOT_APPLICABLE",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": []
     },
     {
@@ -5983,9 +5973,7 @@
         "external:declared:uk_food_consumption_1909_1913",
         "external:declared:us_census_1900_manufactures"
       ],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "GENERATOR_UNKNOWN",
         "LICENSE_UNKNOWN",
@@ -6003,9 +5991,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6022,9 +6008,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6041,9 +6025,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6175,9 +6157,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6194,9 +6174,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6213,9 +6191,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6232,9 +6208,7 @@
       "known_source": "WWO repository structure",
       "license": "NOT_APPLICABLE",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": []
     },
     {
@@ -6247,9 +6221,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6266,9 +6238,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6285,9 +6255,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6304,9 +6272,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6323,9 +6289,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6342,9 +6306,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6361,9 +6323,7 @@
       "known_source": "WWO repository structure",
       "license": "NOT_APPLICABLE",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": []
     },
     {
@@ -6376,9 +6336,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6395,9 +6353,7 @@
       "known_source": "WWO repository structure",
       "license": "NOT_APPLICABLE",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": []
     },
     {
@@ -6410,9 +6366,7 @@
       "known_source": "WWO repository structure",
       "license": "NOT_APPLICABLE",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": []
     },
     {
@@ -6425,9 +6379,7 @@
       "known_source": "WWO repository structure",
       "license": "NOT_APPLICABLE",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": []
     },
     {
@@ -6440,9 +6392,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6459,9 +6409,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6478,9 +6426,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6497,9 +6443,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6516,9 +6460,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6535,9 +6477,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6554,9 +6494,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6573,9 +6511,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6592,9 +6528,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6611,9 +6545,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6630,9 +6562,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6649,9 +6579,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6668,9 +6596,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6687,9 +6613,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6706,9 +6630,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6725,9 +6647,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6744,9 +6664,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6763,9 +6681,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6782,9 +6698,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6801,9 +6715,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6820,9 +6732,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6839,9 +6749,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6858,9 +6766,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -6877,9 +6783,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -9898,9 +9802,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -9917,9 +9819,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -10125,9 +10025,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -10144,9 +10042,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -10163,9 +10059,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -10199,9 +10093,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "OBSOLETE_OR_LEGACY_CANDIDATE",
@@ -10219,9 +10111,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -10238,9 +10128,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "GENERATOR_UNKNOWN",
         "LICENSE_UNKNOWN",
@@ -10259,9 +10147,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -10278,9 +10164,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -10297,9 +10181,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -10316,9 +10198,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -10335,9 +10215,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -10356,9 +10234,7 @@
       "derived_from": [
         "external:natural-earth:admin1"
       ],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "GENERATOR_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10374,9 +10250,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -10393,9 +10267,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -10412,9 +10284,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -10431,9 +10301,7 @@
       "known_source": "SOURCE_UNKNOWN",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "('GENERATOR_UNKNOWN',)"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE",
@@ -10452,9 +10320,7 @@
       "derived_from": [
         "external:natural-earth:admin1"
       ],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "GENERATOR_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10472,9 +10338,7 @@
       "derived_from": [
         "external:natural-earth:admin0"
       ],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "GENERATOR_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10490,9 +10354,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10508,9 +10370,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10526,9 +10386,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10544,9 +10402,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10562,9 +10418,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10580,9 +10434,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10598,9 +10450,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10616,9 +10466,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10634,9 +10482,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10652,9 +10498,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10670,9 +10514,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10688,9 +10530,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10706,9 +10546,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10724,9 +10562,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10742,9 +10578,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10760,9 +10594,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10778,9 +10610,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10796,9 +10626,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10814,9 +10642,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10832,9 +10658,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10850,9 +10674,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10868,9 +10690,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10886,9 +10706,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10904,9 +10722,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10922,9 +10738,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10940,9 +10754,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10958,9 +10770,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10976,9 +10786,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -10994,9 +10802,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11012,9 +10818,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11030,9 +10834,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11048,9 +10850,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11066,9 +10866,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11084,9 +10882,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11102,9 +10898,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11120,9 +10914,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11138,9 +10930,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11156,9 +10946,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11174,9 +10962,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11192,9 +10978,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11210,9 +10994,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11228,9 +11010,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11246,9 +11026,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11264,9 +11042,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11282,9 +11058,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11300,9 +11074,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11318,9 +11090,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11336,9 +11106,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11354,9 +11122,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11372,9 +11138,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11390,9 +11154,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11408,9 +11170,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11426,9 +11186,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11444,9 +11202,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11455,16 +11211,14 @@
     {
       "path": "docs/data_sources/README.md",
       "file_type": "text/markdown",
-      "size_bytes": 2391,
-      "sha256": "80cb619fc5aad96e6125a0c14e675dff94a0afd4ad25249d38a3ca80af33cfd9",
+      "size_bytes": 2528,
+      "sha256": "adfb38a8a796a19608953412a243b52cb325e5c4b74a94293da94c7beafc8e9b",
       "category": "documentation",
       "kind": "source",
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11473,16 +11227,14 @@
     {
       "path": "docs/data_sources/provenance_reference_matrix.json",
       "file_type": "application/json",
-      "size_bytes": 368900,
-      "sha256": "32bef375a0e0d032ccdfdf8a5d814f6f7325284dd813dab8a1182711a67c886d",
+      "size_bytes": 391632,
+      "sha256": "d7f602a9bf7dcc9a147caacb36f004da94e93b7a6d1b98c2d045293867ec954e",
       "category": "documentation",
       "kind": "source",
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11498,9 +11250,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11516,9 +11266,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11534,9 +11282,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11552,9 +11298,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11570,9 +11314,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11588,9 +11330,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11606,9 +11346,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11624,9 +11362,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11642,9 +11378,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11660,9 +11394,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11678,9 +11410,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11696,9 +11426,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11714,9 +11442,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11732,9 +11458,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11750,9 +11474,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11768,9 +11490,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11786,9 +11506,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11804,9 +11522,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11822,9 +11538,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11840,9 +11554,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11858,9 +11570,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11876,9 +11586,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11894,9 +11602,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11912,9 +11618,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11930,9 +11634,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11948,9 +11650,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11966,9 +11666,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -11984,9 +11682,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -12002,9 +11698,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -12020,9 +11714,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -12038,9 +11730,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -12056,9 +11746,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -12074,9 +11762,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -12092,9 +11778,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -12110,9 +11794,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -12128,9 +11810,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -12146,9 +11826,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -12164,9 +11842,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -12182,9 +11858,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -12200,9 +11874,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -12218,9 +11890,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -12236,9 +11906,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -12254,9 +11922,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -12272,9 +11938,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -12290,9 +11954,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -12308,9 +11970,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -12326,9 +11986,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -12344,9 +12002,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"
@@ -12362,9 +12018,7 @@
       "known_source": "WWO repository documentation",
       "license": "LICENSE_UNKNOWN",
       "derived_from": [],
-      "generator": [
-        "GENERATOR_UNKNOWN"
-      ],
+      "generator": "GENERATOR_UNKNOWN",
       "issues": [
         "LICENSE_UNKNOWN",
         "PROVENANCE_INCOMPLETE"

@@ -50,6 +50,8 @@ def build_corpus(root: Path, base_revision: str, manifest_path: Path | None = No
     entries = manifest.get("entries", [])
     records = []
     for entry in entries:
+        generator_value = entry["generator"]
+        generator = generator_value if isinstance(generator_value, str) else sorted(generator_value)
         records.append(
             {
                 "path": entry["path"],
@@ -61,7 +63,7 @@ def build_corpus(root: Path, base_revision: str, manifest_path: Path | None = No
                 "known_source": entry["known_source"],
                 "license": entry["license"],
                 "derived_from": sorted(entry["derived_from"]),
-                "generator": sorted(entry["generator"]),
+                "generator": generator,
                 "issues": sorted(entry.get("issues", [])),
             }
         )

@@ -36,6 +36,12 @@ def load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def owner_key(value: Any) -> str:
+    if isinstance(value, list):
+        return ",".join(str(item) for item in value)
+    return str(value)
+
+
 def validate_backlog(backlog: dict[str, Any], root: Path) -> dict[str, Any]:
     findings: list[dict[str, str]] = []
 
@@ -77,7 +83,11 @@ def validate_backlog(backlog: dict[str, Any], root: Path) -> dict[str, Any]:
     entry_paths = {entry.get("path") for entry in entries if isinstance(entry, dict)}
     matrix_unresolved = matrix.get("unresolved", []) if isinstance(matrix, dict) else []
     matrix_issue_keys = {
-        (item.get("type"), item.get("owner", item.get("generator", "")), item.get("target", item.get("output", "")))
+        (
+            item.get("type"),
+            owner_key(item.get("owner", item.get("generator", ""))),
+            item.get("target", item.get("output", "")),
+        )
         for item in matrix_unresolved
         if isinstance(item, dict)
     }
@@ -113,7 +123,7 @@ def validate_backlog(backlog: dict[str, Any], root: Path) -> dict[str, Any]:
         if item["target_type"] == "reference":
             owner = item.get("owner", "")
             key_candidates = {
-                (issue, owner, item["path"])
+                (issue, owner_key(owner), item["path"])
                 for issue in issues
             }
             if not key_candidates.intersection(matrix_issue_keys):

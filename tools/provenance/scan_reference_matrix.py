@@ -34,6 +34,7 @@ TARGET_NOT_IN_BATCH_1 = "TARGET_NOT_IN_BATCH_1_MANIFEST"
 OUTPUT_MISSING = "OUTPUT_MISSING"
 CANDIDATE_NOT_CANONICAL = "CANDIDATE_NOT_CANONICAL"
 INTENTIONAL_TEST_FIXTURE = "INTENTIONAL_TEST_FIXTURE"
+DYNAMIC_OUTPUT_UNRESOLVED = "DYNAMIC_OUTPUT_UNRESOLVED"
 
 HASH_RE = re.compile(r"^[0-9a-f]{64}$")
 PATH_PATTERN = re.compile(
@@ -44,6 +45,9 @@ OUTPUT_MARKER_PATTERN = re.compile(
     r"SHARD_ROOT|DESTINATION(?:_PATH)?|MANIFEST_OUTPUT|INDEX_OUTPUT)\b",
     re.IGNORECASE,
 )
+ASSIGNMENT_PATTERN = re.compile(r"^\s*(?P<name>[A-Za-z_]\w*)\s*=\s*(?P<expression>[^#\n]+)")
+OUTPUT_CALL_PATTERN = re.compile(r"\b(?P<name>[A-Za-z_]\w*)\.(?P<api>write_(?:text|bytes))\s*\(")
+OUTPUT_FUNCTION_PATTERN = re.compile(r"\b(?P<function>json_dump|write_json|save_json)\s*\(\s*(?P<expression>[^,\n]+)")
 WRITE_PATTERNS = (
     ("python_path_write", re.compile(r"\.write_(?:text|bytes)\s*\(")),
     ("python_json_dump", re.compile(r"\bjson\.dump\s*\(")),
@@ -218,6 +222,9 @@ def extract_references(owner: str, text: str) -> list[dict[str, Any]]:
     return references
 
 
+
+
+
 def extract_write_sites(owner: str, text: str) -> list[dict[str, Any]]:
     sites: list[dict[str, Any]] = []
     for line_number, line in enumerate(text.splitlines(), start=1):
@@ -234,27 +241,75 @@ def extract_write_sites(owner: str, text: str) -> list[dict[str, Any]]:
     return sites
 
 
+def static_target(expression: str) -> str | None:
+    if "{" in expression or "}" in expression or " f\"" in expression or " f'" in expression:
+        return None
+    match = re.search(r"[\"']((?:res://)?(?:data|assets)/[A-Za-z0-9][A-Za-z0-9_./-]*)[\"']", expression)
+    return clean_target(match.group(1)) if match else None
+
+
+def pathish_name(name: str) -> bool:
+    lowered = name.lower()
+    return any(token in lowered for token in ("path", "file", "output", "asset", "registry", "shard", "destination", "cache"))
+
+
+def dynamic_expression(expression: str) -> bool:
+    return any(token in expression for token in ("/", "Path(", "joinpath", "glob(", "f\"", "f'", "source_specs.", "datetime"))
+
+
+def extract_bound_outputs(owner: str, text: str) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    bindings: dict[str, tuple[str | None, str]] = {}
+    lines = text.splitlines()
+    for line in lines:
+        match = ASSIGNMENT_PATTERN.match(line)
+        if not match or not pathish_name(match.group("name")):
+            continue
+        expression = match.group("expression").strip()
+        target = static_target(expression)
+        if target or dynamic_expression(expression):
+            bindings[match.group("name")] = (target, expression)
+    resolved: list[dict[str, Any]] = []
+    unresolved: list[dict[str, Any]] = []
+    for line_number, line in enumerate(lines, start=1):
+        call = OUTPUT_CALL_PATTERN.search(line)
+        if call and call.group("name") in bindings:
+            target, expression = bindings[call.group("name")]
+            if target:
+                resolved.append({"owner": owner, "target": target, "reference_kind": "resolved_output_variable", "literal": f"{call.group('name')}.{call.group('api')}", "line": line_number, "column": call.start("name") + 1, "context": "code_or_text", "reference_scope": "repository", "line_text": line.rstrip(), "output_resolution": "resolved_constant"})
+            else:
+                unresolved.append({"type": DYNAMIC_OUTPUT_UNRESOLVED, "owner": owner, "target": "<dynamic-output>", "expression": expression, "resolution": "unresolved", "evidence": [f"{owner}:{line_number}"],})
+        function_call = OUTPUT_FUNCTION_PATTERN.search(line)
+        if function_call and (dynamic_expression(function_call.group("expression")) or OUTPUT_MARKER_PATTERN.search(line)):
+            unresolved.append({"type": DYNAMIC_OUTPUT_UNRESOLVED, "owner": owner, "target": "<dynamic-output>", "expression": function_call.group("expression").strip(), "resolution": "unresolved", "evidence": [f"{owner}:{line_number}"],})
+    return resolved, unresolved
+
+
 def is_output_candidate(reference: dict[str, Any], write_sites: list[dict[str, Any]]) -> bool:
     if not write_sites or reference.get("reference_scope") != "repository":
         return False
+    if reference.get("output_resolution") == "resolved_constant":
+        return True
     line = reference["line_text"]
     if OUTPUT_MARKER_PATTERN.search(line):
         return True
     return any(site["line"] == reference["line"] for site in write_sites)
 
 
-def canonical_pairs(manifest: dict[str, Any]) -> set[tuple[str, str]]:
+def canonical_pairs(manifest: dict[str, Any]) -> set[tuple[str, tuple[str, ...], str]]:
     graph = manifest.get("dependency_graph", {})
     edges = graph.get("edges", []) if isinstance(graph, dict) else []
-    pairs: set[tuple[str, str]] = set()
+    pairs: set[tuple[str, tuple[str, ...], str]] = set()
     for edge in edges:
         if not isinstance(edge, dict):
             continue
         output = edge.get("output")
         generators = edge.get("generator", [])
-        if not isinstance(output, str) or not isinstance(generators, list):
+        source = edge.get("source")
+        if not isinstance(output, str) or not isinstance(source, str) or not isinstance(generators, list):
             continue
-        pairs.update((str(generator), output) for generator in generators if isinstance(generator, str))
+        generator_values = tuple(sorted(str(generator) for generator in generators if isinstance(generator, str)))
+        if generator_values:
+            pairs.add((source, generator_values, output))
     return pairs
 
 
@@ -269,6 +324,7 @@ def build_matrix(root: Path, base_revision: str, manifest_path: Path | None = No
     }
     canonical = canonical_pairs(manifest)
     files = scoped_files(root)
+    dynamic_output_issues: list[dict[str, Any]] = []
     file_records: list[dict[str, Any]] = []
     references: list[dict[str, Any]] = []
     write_sites: list[dict[str, Any]] = []
@@ -279,6 +335,9 @@ def build_matrix(root: Path, base_revision: str, manifest_path: Path | None = No
         path = root / Path(relative)
         text = "" if is_audit_output(relative) else read_text(path)
         owner_references = extract_references(relative, text)
+        bound_references, dynamic_issues = extract_bound_outputs(relative, text)
+        owner_references.extend(bound_references)
+        dynamic_output_issues.extend(dynamic_issues)
         owner_writes = [] if relative.startswith("tests/provenance/") else extract_write_sites(relative, text)
         per_file_references[relative].extend(owner_references)
         per_file_writes[relative].extend(owner_writes)
@@ -364,10 +423,7 @@ def build_matrix(root: Path, base_revision: str, manifest_path: Path | None = No
                     issues.append(SOURCE_MISSING)
                 if not output_reference["exists"]:
                     issues.append(OUTPUT_MISSING)
-                if (relative, output_reference["target"]) not in canonical:
-                    canonical_match = False
-                else:
-                    canonical_match = True
+                canonical_match = (source, (relative,), output_reference["target"]) in canonical
                 candidate_edges.append(
                     {
                         "source": source,
@@ -389,6 +445,18 @@ def build_matrix(root: Path, base_revision: str, manifest_path: Path | None = No
                     }
                 )
 
+    merged_edges: dict[tuple[str, tuple[str, ...], str], dict[str, Any]] = {}
+    for edge in candidate_edges:
+        key = (edge["source"], tuple(edge["generator"]), edge["output"])
+        existing = merged_edges.get(key)
+        if existing is None:
+            merged_edges[key] = edge
+        else:
+            existing["evidence"] = sorted(set(existing["evidence"] + edge["evidence"]))
+            existing["issues"] = sorted(set(existing["issues"] + edge["issues"]))
+            if edge["confidence"] == "medium":
+                existing["confidence"] = "medium"
+    candidate_edges = list(merged_edges.values())
     for record in file_records:
         record["issues"] = sorted(set(record["issues"]))
     for reference in references:
@@ -429,7 +497,7 @@ def build_matrix(root: Path, base_revision: str, manifest_path: Path | None = No
         if issue in {SOURCE_MISSING, OUTPUT_MISSING}
     ]
     unresolved = sorted(
-        reference_issues + candidate_issues,
+        reference_issues + candidate_issues + dynamic_output_issues,
         key=lambda item: (item["type"], item.get("owner", item.get("generator", [""])), item.get("target", item.get("output", ""))),
     )
 
