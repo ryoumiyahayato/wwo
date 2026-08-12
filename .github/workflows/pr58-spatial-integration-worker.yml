@@ -57,25 +57,29 @@ jobs:
           "$GODOT_BIN" --version
 
       - name: Focused Spatial validation
-        run: "$GODOT_BIN" --headless --path . --script tests/vnext/spatial_infrastructure_test.gd
+        run: |
+          "$GODOT_BIN" --headless --path . --script tests/vnext/spatial_infrastructure_test.gd
 
       - name: Focused Military strategy validation
-        run: "$GODOT_BIN" --headless --path . --script tests/vnext/military_strategy_test.gd
+        run: |
+          "$GODOT_BIN" --headless --path . --script tests/vnext/military_strategy_test.gd
 
       - name: Focused Military R3/R4 validation
-        run: "$GODOT_BIN" --headless --path . --script tests/vnext/military_r3_findings_test.gd
+        run: |
+          "$GODOT_BIN" --headless --path . --script tests/vnext/military_r3_findings_test.gd
 
       - name: Focused post-PR62 integration validation
-        run: "$GODOT_BIN" --headless --path . --script tests/vnext/military_spatial_capacity_integration_test.gd
+        run: |
+          "$GODOT_BIN" --headless --path . --script tests/vnext/military_spatial_capacity_integration_test.gd
 
       - name: Unified vNext validation
-        run: python3 -B tools/run_vnext_validation.py --root . --godot "$GODOT_BIN"
+        run: |
+          python3 -B tools/run_vnext_validation.py --root . --godot "$GODOT_BIN"
 
       - name: Verify generated documents and whitespace
         run: |
           set -euo pipefail
           git diff --check
-          git diff --exit-code --check
           git status --short
 
       - name: Commit validated integration
