@@ -12,29 +12,136 @@
     "gameplay_balancing": false,
     "modern_geometry_fallback_as_1900_fact": false,
     "exact_crosswalk_only_for_future_authoritative_candidates": true,
-    "ambiguous_crosswalks_forced": false
+    "ambiguous_crosswalks_forced": false,
+    "code_resolution_is_not_historical_identity": true,
+    "automatic_authority_requires_identity_evidence": true
   },
   "input_inventory": [
-    {"path": "data/world_map/historical_political_entities_1900.json", "role": "historical aggregate entities and event overlays", "records": 61, "secondary_records": 4, "prototype_only": true},
-    {"path": "data/world_map/historical/political_units_1900.json", "role": "CShapes-derived dated political units", "records": 151, "prototype_only": false},
-    {"path": "data/world_map/historical/cshapes_1900_snapshot.json", "role": "CShapes-derived geometry features", "records": 151, "prototype_only": false},
-    {"path": "data/world_map/historical/major_state_profiles_1900.json", "role": "gameplay-priority historical profiles", "records": 50, "prototype_only": false},
-    {"path": "data/world_map/historical/historical_admin1_1900.json", "role": "historical admin1 groups with geometry status", "records": 15, "prototype_only": false},
-    {"path": "data/world_map/historical/major_economy_polity_crosswalk_1900.json", "role": "economy-to-polity exceptions", "records": 2, "prototype_only": false},
-    {"path": "data/world_map/historical/flags_1900.json", "role": "historical flag registry", "records": 151, "prototype_only": false},
-    {"path": "data/world_map/countries.json", "role": "current canonical country inventory", "records": 177, "prototype_only": true},
-    {"path": "data/world_map/regions.json", "role": "current macro regions and administrative units", "records": 9, "secondary_records": 98, "prototype_only": true},
-    {"path": "data/world_map/cities.json", "role": "current city inventory", "records": 32, "prototype_only": true},
-    {"path": "data/world_map/ports.json", "role": "current port points", "records": 8, "prototype_only": true},
-    {"path": "data/world_map/rail_segments.json", "role": "current rail prototype", "records": 9, "prototype_only": true},
-    {"path": "data/world_map/shipping_routes.json", "role": "current maritime prototype", "records": 3, "prototype_only": true},
-    {"path": "data/world_map/organizations.json", "role": "current organization prototype", "records": 11, "prototype_only": true},
-    {"path": "data/world_map/institutions.json", "role": "current institution prototype", "records": 7, "prototype_only": true},
-    {"path": "data/world_map/characters.json", "role": "current character identities", "records": 0, "secondary_records": 2, "prototype_only": true},
-    {"path": "data/alpha/historical_world_economy_1900.json", "role": "estimated economy manifest", "records": 6, "secondary_records": 8, "prototype_only": false},
-    {"path": "data/alpha/historical_world_economy_1900/countries_compact.json", "role": "estimated economy country rows", "records": 50, "prototype_only": false},
-    {"path": "data/alpha/historical_transport_network_1900/transport_compact.json", "role": "estimated transport rows", "records": 93, "prototype_only": false},
-    {"path": "data/vnext/politics/state_politics_1900.json", "role": "fictional vNext politics fixture; excluded from historical facts", "records": 7, "secondary_records": 6, "prototype_only": false}
+    {
+      "path": "data/world_map/historical_political_entities_1900.json",
+      "role": "historical aggregate entities and event overlays",
+      "records": 61,
+      "secondary_records": 4,
+      "prototype_only": true
+    },
+    {
+      "path": "data/world_map/historical/political_units_1900.json",
+      "role": "CShapes-derived dated political units",
+      "records": 151,
+      "prototype_only": false
+    },
+    {
+      "path": "data/world_map/historical/cshapes_1900_snapshot.json",
+      "role": "CShapes-derived geometry features",
+      "records": 151,
+      "prototype_only": false
+    },
+    {
+      "path": "data/world_map/historical/major_state_profiles_1900.json",
+      "role": "gameplay-priority historical profiles",
+      "records": 50,
+      "prototype_only": false
+    },
+    {
+      "path": "data/world_map/historical/historical_admin1_1900.json",
+      "role": "historical admin1 groups with geometry status",
+      "records": 15,
+      "prototype_only": false
+    },
+    {
+      "path": "data/world_map/historical/major_economy_polity_crosswalk_1900.json",
+      "role": "economy-to-polity exceptions",
+      "records": 2,
+      "prototype_only": false
+    },
+    {
+      "path": "data/world_map/historical/flags_1900.json",
+      "role": "historical flag registry",
+      "records": 151,
+      "prototype_only": false
+    },
+    {
+      "path": "data/world_map/countries.json",
+      "role": "current canonical country inventory",
+      "records": 177,
+      "prototype_only": true
+    },
+    {
+      "path": "data/world_map/regions.json",
+      "role": "current macro regions and administrative units",
+      "records": 9,
+      "secondary_records": 98,
+      "prototype_only": true
+    },
+    {
+      "path": "data/world_map/cities.json",
+      "role": "current city inventory",
+      "records": 32,
+      "prototype_only": true
+    },
+    {
+      "path": "data/world_map/ports.json",
+      "role": "current port points",
+      "records": 8,
+      "prototype_only": true
+    },
+    {
+      "path": "data/world_map/rail_segments.json",
+      "role": "current rail prototype",
+      "records": 9,
+      "prototype_only": true
+    },
+    {
+      "path": "data/world_map/shipping_routes.json",
+      "role": "current maritime prototype",
+      "records": 3,
+      "prototype_only": true
+    },
+    {
+      "path": "data/world_map/organizations.json",
+      "role": "current organization prototype",
+      "records": 11,
+      "prototype_only": true
+    },
+    {
+      "path": "data/world_map/institutions.json",
+      "role": "current institution prototype",
+      "records": 7,
+      "prototype_only": true
+    },
+    {
+      "path": "data/world_map/characters.json",
+      "role": "current character identities",
+      "records": 0,
+      "secondary_records": 2,
+      "prototype_only": true
+    },
+    {
+      "path": "data/alpha/historical_world_economy_1900.json",
+      "role": "estimated economy manifest",
+      "records": 6,
+      "secondary_records": 8,
+      "prototype_only": false
+    },
+    {
+      "path": "data/alpha/historical_world_economy_1900/countries_compact.json",
+      "role": "estimated economy country rows",
+      "records": 50,
+      "prototype_only": false
+    },
+    {
+      "path": "data/alpha/historical_transport_network_1900/transport_compact.json",
+      "role": "estimated transport rows",
+      "records": 93,
+      "prototype_only": false
+    },
+    {
+      "path": "data/vnext/politics/state_politics_1900.json",
+      "role": "fictional vNext politics fixture; excluded from historical facts",
+      "records": 7,
+      "secondary_records": 6,
+      "prototype_only": false
+    }
   ],
   "named_historical_record_total": 283,
   "tracked_outputs": [
@@ -48,7 +155,21 @@
     "data/staging/1900/priority_backlog.json",
     "docs/data_sources/1900/coverage_matrix.md",
     "docs/data_sources/1900/1900_world_data_source_pack_batch_1_report.md",
-    "tools/historical_data/validate_1900_source_pack.py"
+    "tools/historical_data/validate_1900_source_pack.py",
+    "data/staging/1900/canonical_crosswalk.schema.json",
+    "data/staging/1900/source_records.schema.json",
+    "data/staging/1900/batch1_manifest.json",
+    "data/staging/1900/batch1_deterministic_corpus.json",
+    "tools/historical_data/build_1900_source_pack_batch1.py",
+    "tools/historical_data/crosswalk_policy.py",
+    "tools/historical_data/json_schema_validator.py",
+    "tools/historical_data/r1_contract.py",
+    "tools/historical_data/source_reference.py",
+    "tools/historical_data/test_1900_source_pack_batch1_determinism.py",
+    "tools/historical_data/test_1900_source_pack_r1.py",
+    "tools/historical_data/test_1900_source_pack_schema_negative.py",
+    "tools/historical_data/validate_1900_source_pack_r1.py",
+    "tools/historical_data/validate_1900_source_pack_schemas.py"
   ],
   "protected_paths": [
     "scripts/vnext/",

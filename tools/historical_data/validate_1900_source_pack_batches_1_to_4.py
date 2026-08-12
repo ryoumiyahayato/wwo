@@ -29,16 +29,21 @@ def run(script: Path, args: list[str]) -> dict[str, Any]:
 def main() -> int:
     checks = [
         run(ROOT / "tools" / "historical_data" / "validate_1900_source_pack.py", ["--quiet"]),
+        run(ROOT / "tools" / "historical_data" / "validate_1900_source_pack_r1.py", ["--quiet"]),
+        run(ROOT / "tools" / "historical_data" / "validate_1900_source_pack_schemas.py", ["--quiet"]),
         run(ROOT / "tools" / "historical_data" / "validate_1900_source_pack_batch2.py", []),
         run(ROOT / "tools" / "historical_data" / "validate_1900_source_pack_batch3.py", []),
         run(ROOT / "tools" / "historical_data" / "validate_1900_source_pack_batch4.py", []),
+        run(ROOT / "tools" / "historical_data" / "test_1900_source_pack_batch1_determinism.py", []),
         run(ROOT / "tools" / "historical_data" / "test_1900_source_pack_batch2_determinism.py", []),
         run(ROOT / "tools" / "historical_data" / "test_1900_source_pack_batch3_determinism.py", []),
         run(ROOT / "tools" / "historical_data" / "test_1900_source_pack_batch4_determinism.py", []),
+        run(ROOT / "tools" / "historical_data" / "test_1900_source_pack_schema_negative.py", []),
+        run(ROOT / "tools" / "historical_data" / "test_1900_source_pack_r1.py", []),
     ]
     overall_ok = all(check["exit_code"] == 0 and check.get("output", {}).get("ok") is True for check in checks)
     report = {
-        "schema_id": "wwo_1900_source_pack_batches_1_to_4_qa_report_v1",
+        "schema_id": "wwo_1900_source_pack_batches_1_to_4_qa_report_v2",
         "batches": [1, 2, 3, 4],
         "checks": checks,
         "overall_ok": overall_ok,

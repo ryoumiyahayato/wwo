@@ -9,6 +9,8 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
+from json_schema_validator import validate_json_document
+
 
 ROOT = Path(__file__).resolve().parents[2]
 STAGING = ROOT / "data" / "staging" / "1900"
@@ -36,6 +38,10 @@ def validate() -> tuple[list[str], dict[str, Any]]:
     manifest = load_json(MANIFEST_PATH)
     admin1 = load_json(ADMIN1_PATH)
     economy = load_json(ECONOMY_PATH)
+    errors.extend(
+        f"JSON Schema: {message}"
+        for message in validate_json_document(queue, schema)
+    )
     admin1_sha = sha256_file(ADMIN1_PATH)
     economy_sha = sha256_file(ECONOMY_PATH)
 

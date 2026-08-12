@@ -38,14 +38,14 @@ The existing vNext politics fixture is excluded from the source pack. The invent
 
 The crosswalk contains all 61 aggregate historical entities and all 177 current canonical country IDs. Matching is conservative: a composite, fragmented, contested, or personal-union entity is not collapsed into a modern country merely to improve coverage.
 
-| Status | Count |
+| Code-resolution / review status | Count |
 | --- | ---: |
-| EXACT | 40 |
-| LIKELY | 16 |
+| EXACT_CODE | 40 |
+| LIKELY_COMPOSITE | 16 |
 | AMBIGUOUS | 5 |
 | NO_MATCH | 0 |
 
-`EXACT` is reserved for a one-to-one current canonical ID resolution. `LIKELY` records a source-backed composite or otherwise qualified mapping. `AMBIGUOUS` preserves the uncertainty for review. The five ambiguous records are not automatic authoritative candidates.
+`EXACT_CODE` is exact only for the member-code-to-current-catalog lookup. It does not prove historical identity, successor relation, or authority. All 61 records currently have `historical_identity_status=UNVERIFIED`, no identity/successor evidence, and `automatic_authoritative_candidate=false`. The five ambiguous records remain unresolved.
 
 ## Source manifest
 
@@ -70,7 +70,7 @@ The first staging facts use the existing CShapes-derived repository snapshot and
 - Confidence split: 20 `high`, 8 `medium`.
 - No gameplay coefficient, production value, combat value, or inferred institutional score is staged.
 
-The source-record contract is defined in [`source_record.schema.json`](../../../data/staging/1900/source_record.schema.json). Stable IDs, explicit date intervals, source locators, ambiguity notes, conflict groups, and review status are mandatory fields.
+The source-record contract is defined in [`source_record.schema.json`](../../../data/staging/1900/source_record.schema.json) and wrapped by [`source_records.schema.json`](../../../data/staging/1900/source_records.schema.json). Stable IDs, explicit date intervals, repository-resolvable `source_reference` fragments, ambiguity notes, conflict groups, and review status are mandatory fields; `additionalProperties=false` is executed by the tracked local JSON Schema validator.
 
 ## Conflict handling
 
@@ -140,10 +140,10 @@ The standalone validator is [`validate_1900_source_pack.py`](../../../tools/hist
 - 0 errors and 0 warnings.
 - 50 backlog targets.
 - 7 manifest sources.
-- 61 crosswalk records with 40 EXACT, 16 LIKELY, 5 AMBIGUOUS, and 0 NO_MATCH.
+- 61 crosswalk records with 40 `EXACT_CODE`, 16 `LIKELY_COMPOSITE`, 5 `AMBIGUOUS`, and 0 `NO_MATCH`; 0 automatic authority candidates and 61 unverified historical identities.
 - 28 staging records with 20 `entity_exists` and 8 `sovereignty_relationship` facts.
 - 0 conflicts requiring review.
 
-The pack is confined to `data/staging/1900/`, `docs/data_sources/1900/`, and the dedicated validator. Protected runtime data, vNext scripts, workflows, and authoritative country/region/city/political-entity/institution/organization files are unchanged.
+The pack is confined to `data/staging/1900/`, `docs/data_sources/1900/`, and scoped historical-data tooling. Protected runtime data, vNext scripts, workflows, and authoritative country/region/city/political-entity/institution/organization files are unchanged.
 
 Repository-level `git diff --check`, the unified validation script, and the final branch handoff are recorded in the task handoff after those commands complete.

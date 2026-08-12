@@ -10,6 +10,9 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
+from json_schema_validator import validate_json_document
+from source_reference import validate_repository_source_reference
+
 
 ROOT = Path(__file__).resolve().parents[2]
 STAGING = ROOT / "data" / "staging" / "1900"
@@ -55,6 +58,10 @@ def validate() -> tuple[list[str], dict[str, Any]]:
     payload = load_json(RECORDS_PATH)
     manifest = load_json(MANIFEST_PATH)
     corpus = load_json(CORPUS_PATH)
+    errors.extend(
+        f"JSON Schema: {message}"
+        for message in validate_json_document(payload, schema)
+    )
 
     if schema.get("$id") != "wwo_1900_batch2_political_unit_records_v1":
         add_error(errors, "schema $id mismatch")
@@ -136,6 +143,10 @@ def validate() -> tuple[list[str], dict[str, Any]]:
         validate_date_interval(errors, unit_id, record.get("date_from", ""), record.get("date_to", ""))
         if not record.get("source_reference", "").endswith(f"#units.{unit_id}"):
             add_error(errors, f"{unit_id}: source_reference does not point to source unit")
+        for message in validate_repository_source_reference(
+            ROOT, record.get("source_reference"), expected_record_id=unit_id
+        ):
+            add_error(errors, f"{unit_id}: source_reference: {message}")
         if record.get("canonical_match") == "NO_MATCH" and record.get("canonical_entity_id") is not None:
             add_error(errors, f"{unit_id}: NO_MATCH must not carry a canonical entity ID")
 
@@ -175,6 +186,10 @@ def validate() -> tuple[list[str], dict[str, Any]]:
             if relation.get(key) != expected:
                 add_error(errors, f"{expected_relation_id}: field {key} differs from source snapshot")
         validate_date_interval(errors, expected_relation_id, relation.get("date_from", ""), relation.get("date_to", ""))
+        for message in validate_repository_source_reference(
+            ROOT, relation.get("source_reference"), expected_record_id=unit_id
+        ):
+            add_error(errors, f"{expected_relation_id}: source_reference: {message}")
 
     if set(relation_by_id) != expected_relation_ids:
         add_error(errors, "relationship record IDs do not exactly cover source controller links")

@@ -15,23 +15,40 @@
         "metrics": {
           "backlog_targets": 50,
           "canonical_digests": {
-            "canonical_crosswalk.json": "35ddaa5a03c4ea6f85eb82c50ead797b4f338318660f98e859fe47b39e0f8de0",
+            "batch1_deterministic_corpus.json": "d6122cf6664801d882ed60b1ec199a1c13d3c6ff1da682d87857222e5014b94e",
+            "batch1_manifest.json": "b10c84817b0b46e3e8b750206654aec4f8e6ac92ebac1eababc40b0bd8826024",
+            "canonical_crosswalk.json": "f86599467c125d9fc8dac81666734651a591a4989740278b654bfeb09f93f75d",
+            "canonical_crosswalk.schema.json": "20d529ce34ab42bd2e91d737b755737e59897d363cff2c668de93ed83bd63a4e",
             "conflict_register.json": "ad5fe07a6553865afb4345b8ec5e69e8faff93b9eb0c0c40aea9cb95aa3afac4",
-            "pack_manifest.json": "b544dd5350ea571d3426a9995e05190b7eff343686de0b865a3a2a02488f792a",
+            "pack_manifest.json": "c249dd345ce86ed111b8ec7c9f43404dff0ae4f24c4d1dfb0ce79dadfbbaffd4",
             "priority_backlog.json": "8cd2093d84519e003c1c16d681b081a746a9f17f6f28df6ccf7722249d7c196b",
             "source_manifest.json": "7f05f09e49bf71e0cb0574660f0ce24b60f9a4b1c751f0f56b91da566ec4d99e",
-            "source_record.schema.json": "da3ea07d0a69d15f6d117c73d5181fc7b8702279ec1992863dac1b7f9d9dbfab",
-            "source_records.json": "92dde92aeae32c2bfe4853d2003e83264c9ed60aee0d2d959f89952ac958bc3e"
+            "source_record.schema.json": "e751a20bfc3cdc9f9d98cc5a1de83e8b89dfafae72512f24ec46c33bea11a0e3",
+            "source_records.json": "92dde92aeae32c2bfe4853d2003e83264c9ed60aee0d2d959f89952ac958bc3e",
+            "source_records.schema.json": "44e370e7c3b8e3d370536361c3c32b0b5ec2ee80bd5214d8e2c080d8becab8c1"
           },
           "conflicts_requiring_review": 0,
           "crosswalk": {
+            "automatic_authoritative_candidate_count": 0,
             "canonical_country_ids": 177,
-            "records": 61,
-            "statuses": {
+            "classification": {
+              "AMBIGUOUS": 5,
+              "EXACT_CODE": 40,
+              "LIKELY_COMPOSITE": 16,
+              "NO_MATCH": 0
+            },
+            "code_resolution": {
               "AMBIGUOUS": 5,
               "EXACT": 40,
-              "LIKELY": 16,
+              "MULTI_MATCH": 16,
               "NO_MATCH": 0
+            },
+            "historical_identity": {
+              "UNVERIFIED": 61
+            },
+            "records": 61,
+            "successor_relation": {
+              "UNVERIFIED": 61
             }
           },
           "source_count": 7,
@@ -50,6 +67,42 @@
         "ok": true
       },
       "script": "tools/historical_data/validate_1900_source_pack.py"
+    },
+    {
+      "args": [
+        "--quiet"
+      ],
+      "exit_code": 0,
+      "output": {
+        "metrics": {
+          "automatic_authoritative_candidate_count": 0,
+          "historical_identity_unverified": 61,
+          "records": 28,
+          "resolved_source_references": 28
+        },
+        "ok": true
+      },
+      "script": "tools/historical_data/validate_1900_source_pack_r1.py"
+    },
+    {
+      "args": [
+        "--quiet"
+      ],
+      "exit_code": 0,
+      "output": {
+        "metrics": {
+          "checked": [
+            "canonical_crosswalk.json against canonical_crosswalk.schema.json",
+            "political_unit_records_1900.json against batch2_political_unit_records.schema.json",
+            "batch3_source_gap_candidates.json against batch3_source_gap_candidates.schema.json",
+            "batch4_coverage_review_queue.json against batch4_coverage_review_queue.schema.json",
+            "source_records.json records against source_record.schema.json"
+          ],
+          "error_count": 0
+        },
+        "ok": true
+      },
+      "script": "tools/historical_data/validate_1900_source_pack_schemas.py"
     },
     {
       "args": [],
@@ -144,6 +197,20 @@
       "args": [],
       "exit_code": 0,
       "output": {
+        "expected_crosswalk_sha256": "b2b26466daa35e47b08aef068997d841873cde5a7317c346e62a55947a53d304",
+        "ok": true,
+        "outputs_compared": [
+          "canonical_crosswalk.json",
+          "batch1_manifest.json",
+          "batch1_deterministic_corpus.json"
+        ]
+      },
+      "script": "tools/historical_data/test_1900_source_pack_batch1_determinism.py"
+    },
+    {
+      "args": [],
+      "exit_code": 0,
+      "output": {
         "expected_records_sha256": "77f15d349ff11a0d4753aa80851d7cb9bd8cc69a23ab84f41280836df2338771",
         "ok": true,
         "outputs_compared": [
@@ -182,6 +249,31 @@
         ]
       },
       "script": "tools/historical_data/test_1900_source_pack_batch4_determinism.py"
+    },
+    {
+      "args": [],
+      "exit_code": 0,
+      "output": {
+        "ok": true,
+        "schemas": [
+          "canonical_crosswalk.schema.json",
+          "batch2_political_unit_records.schema.json",
+          "batch3_source_gap_candidates.schema.json",
+          "batch4_coverage_review_queue.schema.json",
+          "source_record.schema.json",
+          "source_records.schema.json"
+        ]
+      },
+      "script": "tools/historical_data/test_1900_source_pack_schema_negative.py"
+    },
+    {
+      "args": [],
+      "exit_code": 0,
+      "output": {
+        "ok": true,
+        "tests": 3
+      },
+      "script": "tools/historical_data/test_1900_source_pack_r1.py"
     }
   ],
   "overall_ok": true,
@@ -190,5 +282,5 @@
     "no_gameplay_balance": true,
     "runtime_authority": false
   },
-  "schema_id": "wwo_1900_source_pack_batches_1_to_4_qa_report_v1"
+  "schema_id": "wwo_1900_source_pack_batches_1_to_4_qa_report_v2"
 }

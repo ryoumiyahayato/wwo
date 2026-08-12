@@ -12,7 +12,7 @@ fixtures.
 
 | Area | Existing records | Current evidence | 1900 coverage and gap | Crosswalk / geometry state |
 | --- | ---: | --- | --- | --- |
-| Political entities | 61 aggregate entities; 4 event/geometry overlays | `data/world_map/historical_political_entities_1900.json` | Broad named coverage, but the file is `prototype_only` and warns that modern polygons were aggregated or used as fallback. | 40 `EXACT`, 16 `LIKELY`, 5 `AMBIGUOUS`, 0 `NO_MATCH` against current country IDs. Composite entities do not receive a single forced ID. |
+| Political entities | 61 aggregate entities; 4 event/geometry overlays | `data/world_map/historical_political_entities_1900.json` | Broad named coverage, but the file is `prototype_only` and warns that modern polygons were aggregated or used as fallback. | 40 `EXACT_CODE`, 16 `LIKELY_COMPOSITE`, 5 `AMBIGUOUS`, 0 `NO_MATCH` for code resolution. Historical identity and successor relation remain unverified; composite entities do not receive a single forced ID. |
 | Dated political units | 151 units | `data/world_map/historical/political_units_1900.json` | Strongest existing dated political-unit layer; includes names, validity intervals, status, relationship, controller, and capital. | 151 corresponding CShapes geometry features; unit-level identity is not the same as a current country ID. |
 | Historical geometry | 151 features | `data/world_map/historical/cshapes_1900_snapshot.json` | Global dated geometry snapshot for the provider units. | The 61 aggregate entities have no guaranteed one-to-one geometry. Composite, fragmented, and contested records require composed or neutral rendering. |
 | Capitals | 151 provider capital fields | `political_units_1900.json` | Capital names and coordinates exist for provider units. | Only a small subset overlaps the current 32-city prototype; no global historical city crosswalk is complete. |
@@ -51,9 +51,9 @@ or territory decision.
 The five `AMBIGUOUS` records are Austria-Hungary, the Congo Free State,
 Arabian polities, Somali territories, and the South Africa war-zone overlay.
 They are kept in the crosswalk with their candidate current IDs and an explicit
-reason not to collapse them. The 16 `LIKELY` records also retain a set of
-candidate IDs because a composite empire, union, or colonial aggregate is not
-one current country.
+reason not to collapse them. The 16 `LIKELY_COMPOSITE` records also retain a set
+of candidate IDs because a composite empire, union, or colonial aggregate is
+not one current country. Code resolution is not historical identity proof.
 
 ## First safe staging boundary
 
@@ -66,8 +66,9 @@ one current country.
 All 28 remain `STAGED_NOT_RUNTIME`. The pack stores no GDP, industry output,
 legitimacy, ideology, combat strength, organization capability, or resource
 yield. The crosswalk covers all 61 existing aggregate historical entities, but
-only `EXACT` mappings are marked eligible for a future authoritative candidate
-export.
+all current mappings are code-resolution references only: none is an automatic
+authoritative candidate, and promotion requires explicit date-scoped
+identity/successor evidence.
 
 ## Source coverage
 

@@ -9,6 +9,8 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
+from json_schema_validator import validate_json_document
+
 
 ROOT = Path(__file__).resolve().parents[2]
 STAGING = ROOT / "data" / "staging" / "1900"
@@ -44,6 +46,10 @@ def validate() -> tuple[list[str], dict[str, Any]]:
     inventory = load_json(INVENTORY_PATH)
     corpus = load_json(CORPUS_PATH)
     manifest = load_json(MANIFEST_PATH)
+    errors.extend(
+        f"JSON Schema: {message}"
+        for message in validate_json_document(payload, schema)
+    )
 
     if schema.get("$id") != "wwo_1900_batch3_source_gap_candidates_v1":
         add_error(errors, "schema $id mismatch")

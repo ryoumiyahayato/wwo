@@ -19,12 +19,19 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
+from json_schema_validator import validate_json_document
+from r1_contract import validate_crosswalk_records, validate_source_record_reference
+
 
 ROOT = Path(__file__).resolve().parents[2]
 STAGING = ROOT / "data" / "staging" / "1900"
 
 PACK_FILES = (
     "source_record.schema.json",
+    "source_records.schema.json",
+    "canonical_crosswalk.schema.json",
+    "batch1_manifest.json",
+    "batch1_deterministic_corpus.json",
     "pack_manifest.json",
     "source_manifest.json",
     "canonical_crosswalk.json",
@@ -37,6 +44,7 @@ REQUIRED_SOURCE_RECORD_FIELDS = (
     "record_id",
     "entity_type",
     "canonical_entity_id",
+    "historical_entity_id",
     "historical_name",
     "normalized_name",
     "date_from",
@@ -44,9 +52,11 @@ REQUIRED_SOURCE_RECORD_FIELDS = (
     "fact_type",
     "value",
     "unit",
+    "source_id",
     "source_title",
     "source_author_or_institution",
     "source_locator",
+    "source_reference",
     "source_date",
     "source_type",
     "confidence",
@@ -177,6 +187,8 @@ def validate_pack_contract(
             validation.error(f"schema missing required fields: {sorted(missing)}")
         if schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema":
             validation.error("source record schema must declare JSON Schema 2020-12")
+        if schema.get("$id") != "https://wwo.example.invalid/schema/1900/source-record-v2.json":
+            validation.error("source record schema $id is unexpected")
 
     if not isinstance(pack, dict):
         validation.error("pack_manifest.json must be an object")
@@ -230,7 +242,7 @@ def validate_pack_contract(
                 validation.error("source manifest contains duplicate source_id values")
 
     if isinstance(crosswalk, dict):
-        if crosswalk.get("schema_id") != "wwo_1900_canonical_crosswalk_v1":
+        if crosswalk.get("schema_id") != "wwo_1900_canonical_crosswalk_v2":
             validation.error("unexpected crosswalk schema_id")
     else:
         validation.error("canonical_crosswalk.json must be an object")
@@ -258,77 +270,9 @@ def validate_crosswalk(
     countries: Any,
     source_ids: set[str],
 ) -> dict[str, Any]:
-    records = crosswalk.get("records", []) if isinstance(crosswalk, dict) else []
-    expected_entities = {
-        item.get("id")
-        for item in as_list(historical_entities.get("entities") if isinstance(historical_entities, dict) else [])
-        if isinstance(item, dict) and item.get("id")
-    }
-    country_ids = {
-        item.get("id")
-        for item in as_list(countries.get("countries") if isinstance(countries, dict) else [])
-        if isinstance(item, dict) and item.get("id")
-    }
-    if not isinstance(records, list):
-        validation.error("crosswalk.records must be a list")
-        records = []
-    seen: set[str] = set()
-    statuses: Counter[str] = Counter()
-    for index, record in enumerate(records):
-        label = f"crosswalk.records[{index}]"
-        if not isinstance(record, dict):
-            validation.error(f"{label} must be an object")
-            continue
-        entity_id = record.get("historical_entity_id")
-        if not isinstance(entity_id, str) or not entity_id:
-            validation.error(f"{label} missing historical_entity_id")
-            continue
-        if entity_id in seen:
-            validation.error(f"duplicate crosswalk historical_entity_id: {entity_id}")
-        seen.add(entity_id)
-        if entity_id not in expected_entities:
-            validation.error(f"crosswalk entity is not in existing historical aggregate file: {entity_id}")
-        member_codes = record.get("member_codes")
-        core_codes = record.get("core_member_codes")
-        canonical_ids = record.get("canonical_entity_ids")
-        if not isinstance(member_codes, list) or not member_codes:
-            validation.error(f"{label}.member_codes must be a non-empty list")
-        if not isinstance(core_codes, list):
-            validation.error(f"{label}.core_member_codes must be a list")
-        elif any(code not in member_codes for code in core_codes):
-            validation.error(f"{label}.core_member_codes must be a subset of member_codes")
-        if not isinstance(canonical_ids, list):
-            validation.error(f"{label}.canonical_entity_ids must be a list")
-        else:
-            for canonical_id in canonical_ids:
-                if canonical_id not in country_ids:
-                    validation.error(f"{label} references missing canonical country ID: {canonical_id}")
-        status = record.get("mapping_status")
-        if status not in {"EXACT", "LIKELY", "AMBIGUOUS", "NO_MATCH"}:
-            validation.error(f"{label}.mapping_status is unsupported: {status!r}")
-        else:
-            statuses[status] += 1
-        if not isinstance(record.get("automatic_authoritative_candidate"), bool):
-            validation.error(f"{label}.automatic_authoritative_candidate must be boolean")
-        elif record.get("automatic_authoritative_candidate") != (status == "EXACT"):
-            validation.error(f"{label} automatic candidate flag disagrees with mapping status")
-        if not record.get("mapping_reason"):
-            validation.error(f"{label} missing mapping_reason")
-        if record.get("source_id") not in source_ids:
-            validation.error(f"{label} references missing source_id: {record.get('source_id')!r}")
-        if not isinstance(record.get("source_paths"), list) or not record.get("source_paths"):
-            validation.error(f"{label}.source_paths must be a non-empty list")
-
-    if seen != expected_entities:
-        validation.error(
-            "crosswalk coverage does not match historical aggregate entities: "
-            f"missing={sorted(expected_entities - seen)}, extra={sorted(seen - expected_entities)}"
-        )
-    expected_summary = {key: statuses.get(key, 0) for key in ("EXACT", "LIKELY", "AMBIGUOUS", "NO_MATCH")}
-    if crosswalk.get("summary") != expected_summary:
-        validation.error(f"crosswalk summary mismatch: declared={crosswalk.get('summary')!r}, computed={expected_summary!r}")
-    return {"records": len(records), "statuses": expected_summary, "canonical_country_ids": len(country_ids)}
-
+    return validate_crosswalk_records(
+        validation, crosswalk, historical_entities, countries, source_ids, ROOT
+    )
 
 def validate_source_records(
     validation: Validation,
@@ -398,6 +342,7 @@ def validate_source_records(
                 validation.error(f"{label}.{field} must be non-empty")
         if record.get("source_id") not in source_ids:
             validation.error(f"{label} references missing source_id: {record.get('source_id')!r}")
+        validate_source_record_reference(validation, ROOT, label, record, source_ids)
         validate_source_date(record.get("source_date"), f"{label}.source_date", validation)
         source_type = record.get("source_type")
         if source_type not in ALLOWED_SOURCE_TYPES:
@@ -598,6 +543,35 @@ def run() -> int:
     historical_ids = aggregate_ids | unit_ids
     crosswalk_metrics = validate_crosswalk(validation, documents["canonical_crosswalk.json"], historical_entities, countries, source_ids)
     source_record_metrics = validate_source_records(validation, documents["source_records.json"], source_ids, current_country_ids, historical_ids)
+    schema_validation_errors = validate_json_document(
+        documents["canonical_crosswalk.json"], documents["canonical_crosswalk.schema.json"]
+    )
+    source_records_schema = documents["source_records.schema.json"]
+    if not isinstance(source_records_schema, dict):
+        validation.error("source_records.schema.json must be an object")
+    else:
+        if source_records_schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema":
+            validation.error("source records schema must declare JSON Schema 2020-12")
+        if source_records_schema.get("$id") != "wwo_1900_source_records_v2":
+            validation.error("source records schema $id is unexpected")
+        wrapper_schema = json.loads(json.dumps(source_records_schema))
+        wrapper_schema["properties"]["records"]["items"] = documents["source_record.schema.json"]
+        schema_validation_errors.extend(
+            f"source_records.json: {message}"
+            for message in validate_json_document(documents["source_records.json"], wrapper_schema)
+        )
+    for record_index, record in enumerate(
+        documents["source_records.json"].get("records", [])
+        if isinstance(documents["source_records.json"], dict)
+        else []
+    ):
+        schema_validation_errors.extend(
+            f"source_records.records[{record_index}]: {message}"
+            for message in validate_json_document(record, documents["source_record.schema.json"])
+        )
+    for message in schema_validation_errors:
+        validation.error(f"JSON Schema: {message}")
+
     conflict_count = validate_conflicts(validation, documents["conflict_register.json"], source_ids)
     backlog_count = validate_backlog(validation, documents["priority_backlog.json"], source_ids)
 
