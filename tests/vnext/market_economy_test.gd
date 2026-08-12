@@ -12,6 +12,7 @@ func _run() -> void:
 	_test_catalog_and_public_queries()
 	_test_production_chain()
 	_test_trade_capacity_and_isolation()
+	_test_in_transit_observability()
 	_test_supply_demand_feedback()
 	_test_snapshot_restore_and_json()
 	_test_determinism()
@@ -68,6 +69,10 @@ func _test_catalog_and_public_queries() -> void:
 		economy.commodity_snapshot(region_id, "wheat").has("exports_units"),
 		"commodity query exposes exports"
 	)
+	_check(
+		economy.commodity_snapshot(region_id, "wheat").has("in_transit_import_units"),
+		"commodity query exposes outstanding in-transit imports"
+	)
 
 
 func _test_production_chain() -> void:
@@ -114,22 +119,22 @@ func _test_trade_capacity_and_isolation() -> void:
 	var delivered: Dictionary = economy.commodity_snapshot(destination_id, "clothing")
 	_check(float(delivered.get("imports_units", 0.0)) > 0.0, "shipment delivery records imports")
 
-	var capped: VNextMarketEconomy = _new_economy("transport capacity")
+	var capped: VNextMarketEconomy = _new_economy("fixture transport budget")
 	var capped_origin: String = _region(capped, "region_loran_riverback")
 	var capped_destination: String = _region(capped, "region_loran_dawnbay")
 	_check(
-		capped.set_route_capacity("route:loran_dawnbay_riverback", 1.0),
-		"route capacity can be reduced"
+		capped.set_fixture_route_budget("route:loran_dawnbay_riverback", 1.0),
+		"fixture route budget can be reduced without claiming physical capacity authority"
 	)
 	_check(capped.set_region_inventory(capped_origin, "clothing", 200000.0), "capped origin stock prepared")
 	_check(capped.set_region_inventory(capped_destination, "clothing", 0.0), "capped destination stock prepared")
-	_check(bool(capped.settle_day(0).get("success", false)), "capacity-limited day settles")
+	_check(bool(capped.settle_day(0).get("success", false)), "fixture-budget-limited day settles")
 	var capped_shipment: Dictionary = _find_shipment(
 		capped.snapshot(), capped_origin, capped_destination, "clothing"
 	)
 	_check(
 		capped_shipment.is_empty() or float(capped_shipment.get("units", 0.0)) <= 1.0001,
-		"transport capacity limits delivered units"
+		"fixture transport budget limits isolated Economy shipment units"
 	)
 
 	var isolated: VNextMarketEconomy = _new_economy("isolated markets")
@@ -137,16 +142,85 @@ func _test_trade_capacity_and_isolation() -> void:
 	var isolated_destination: String = _region(isolated, "region_loran_dawnbay")
 	for edge: Dictionary in isolated.catalog.transport_edges:
 		_check(
-			isolated.set_route_capacity(str(edge.get("edge_id", "")), 0.0),
-			"all route capacities can be closed"
+			isolated.set_fixture_route_budget(str(edge.get("edge_id", "")), 0.0),
+			"all fixture route budgets can be closed"
 		)
 	_check(isolated.set_region_inventory(isolated_origin, "clothing", 200000.0), "isolated origin stock prepared")
 	_check(isolated.set_region_inventory(isolated_destination, "clothing", 0.0), "isolated destination stock prepared")
 	_check(bool(isolated.settle_day(0).get("success", false)), "isolated market day settles")
 	_check(
 		_find_shipment(isolated.snapshot(), isolated_origin, isolated_destination, "clothing").is_empty(),
-		"market isolation prevents cost-free teleportation"
+		"market fixture isolation prevents cost-free teleportation"
 	)
+
+
+func _test_in_transit_observability() -> void:
+	var economy: VNextMarketEconomy = _new_economy("in-transit observation")
+	var fast_origin: String = _region(economy, "region_loran_dawnbay")
+	var slow_origin: String = _region(economy, "region_loran_southridge")
+	var destination: String = _region(economy, "region_loran_riverback")
+	var fast_edge: String = "route:loran_dawnbay_riverback"
+	var slow_edge: String = "route:loran_riverback_southridge"
+	for edge: Dictionary in economy.catalog.transport_edges:
+		_check(
+			economy.set_fixture_route_budget(str(edge.get("edge_id", "")), 0.0),
+			"observation fixture closes unrelated route budget"
+		)
+	_check(economy.set_fixture_route_budget(fast_edge, 1.0), "18-hour fixture route is enabled")
+	_check(economy.set_fixture_route_budget(slow_edge, 1.0), "32-hour fixture route is enabled")
+	_check(economy.set_region_inventory(fast_origin, "clothing", 200000.0), "fast source stock prepared")
+	_check(economy.set_region_inventory(slow_origin, "clothing", 200000.0), "slow source stock prepared")
+	_check(economy.set_region_inventory(destination, "clothing", 0.0), "inbound destination depleted")
+	_check(bool(economy.settle_day(0).get("success", false)), "multi-route dispatch day settles")
+	var day0_snapshot: Dictionary = economy.snapshot()
+	var day0_outstanding: float = _outstanding_units(day0_snapshot, destination, "clothing")
+	var day0_observed: float = float(
+		economy.commodity_snapshot(destination, "clothing").get("in_transit_import_units", 0.0)
+	)
+	_check(_active_inbound_count(day0_snapshot, destination, "clothing") >= 2, "multiple simultaneous inbound shipments exist")
+	_check(day0_outstanding > 1.5, "multiple shipments contribute to outstanding pipeline quantity")
+	_check(is_equal_approx(day0_observed, day0_outstanding), "day-0 observation equals authoritative active cargo")
+
+	_check(economy.set_fixture_route_budget(fast_edge, 0.0), "fast route fixture budget closes after dispatch")
+	_check(economy.set_fixture_route_budget(slow_edge, 0.0), "slow route fixture budget closes after dispatch")
+	_check(bool(economy.settle_day(1).get("success", false)), "intermediate shipment day settles")
+	var day1_snapshot: Dictionary = economy.snapshot()
+	var day1_outstanding: float = _outstanding_units(day1_snapshot, destination, "clothing")
+	var day1_observed: float = float(
+		economy.commodity_snapshot(destination, "clothing").get("in_transit_import_units", 0.0)
+	)
+	_check(day1_outstanding > 0.0, "32-hour cargo remains active on intermediate day")
+	_check(day1_outstanding < day0_outstanding, "18-hour arrival partially clears simultaneous pipeline")
+	_check(is_equal_approx(day1_observed, day1_outstanding), "intermediate observation equals remaining active cargo")
+
+	var encoded: String = JSON.stringify(day1_snapshot)
+	var parsed: Variant = JSON.parse_string(encoded)
+	var restored: VNextMarketEconomy = _new_economy("in-transit resume")
+	_check(parsed is Dictionary and restored.restore(parsed as Dictionary), "in-transit snapshot resumes after JSON round trip")
+	var restored_observed: float = float(
+		restored.commodity_snapshot(destination, "clothing").get("in_transit_import_units", 0.0)
+	)
+	_check(is_equal_approx(restored_observed, day1_outstanding), "restored observation is rebuilt from active shipment queue")
+	var persisted_regions: Dictionary = restored.snapshot().get("region_states", {}) as Dictionary
+	var persisted_destination: Dictionary = persisted_regions.get(destination, {}) as Dictionary
+	var persisted_commodities: Dictionary = persisted_destination.get("commodities", {}) as Dictionary
+	_check(
+		not (persisted_commodities.get("clothing", {}) as Dictionary).has("in_transit_import_units"),
+		"derived in-transit observation is not duplicated in persisted market state"
+	)
+
+	_check(bool(economy.settle_day(2).get("success", false)), "final arrival day settles")
+	_check(bool(restored.settle_day(2).get("success", false)), "restored final arrival day settles")
+	_check(
+		is_zero_approx(float(economy.commodity_snapshot(destination, "clothing").get("in_transit_import_units", -1.0))),
+		"arrival clears current in-transit observation"
+	)
+	_check(
+		is_zero_approx(float(restored.commodity_snapshot(destination, "clothing").get("in_transit_import_units", -1.0))),
+		"arrival clears restored in-transit observation"
+	)
+	_check(economy.validate_integrity(), "multi-day observation repair preserves physical conservation")
+	_equal(JSON.stringify(restored.snapshot()), JSON.stringify(economy.snapshot()), "snapshot/resume replay remains deterministic through arrival")
 
 
 func _test_supply_demand_feedback() -> void:
@@ -260,9 +334,9 @@ func _test_snapshot_restore_and_json() -> void:
 	_check(restored.last_day_index() == original.last_day_index(), "JSON restore keeps the last settled day")
 	_check(restored.validate_integrity(), "JSON restore keeps physical conservation")
 	_equal(
-		int((restored_snapshot.get("route_network", {}) as Dictionary).get("edge_remaining_capacity", {}).size()),
-		int((saved.get("route_network", {}) as Dictionary).get("edge_remaining_capacity", {}).size()),
-		"JSON restore keeps every route capacity state")
+		int((restored_snapshot.get("route_network", {}) as Dictionary).get("fixture_edge_remaining_budget", {}).size()),
+		int((saved.get("route_network", {}) as Dictionary).get("fixture_edge_remaining_budget", {}).size()),
+		"JSON restore keeps every fixture route budget state")
 	var sample_region: String = _region(original, "region_loran_dawnbay")
 	_check(is_equal_approx(restored.inventory_units(sample_region, "bread"), original.inventory_units(sample_region, "bread")), "JSON restore keeps physical inventory")
 	_equal(restored.current_price(sample_region, "bread"), original.current_price(sample_region, "bread"), "JSON restore keeps price state")
@@ -310,6 +384,40 @@ func _find_shipment(
 		):
 			return shipment
 	return {}
+
+
+func _outstanding_units(
+	snapshot_value: Dictionary, destination_id: String, commodity_id: String
+) -> float:
+	var total: float = 0.0
+	for raw_value: Variant in snapshot_value.get("shipments", []) as Array:
+		if not raw_value is Dictionary:
+			continue
+		var shipment: Dictionary = raw_value as Dictionary
+		if (
+			str(shipment.get("destination_market_id", "")) == destination_id
+			and str(shipment.get("commodity_id", "")) == commodity_id
+			and str(shipment.get("status", "")) == "in_transit"
+		):
+			total += float(shipment.get("units", 0.0))
+	return total
+
+
+func _active_inbound_count(
+	snapshot_value: Dictionary, destination_id: String, commodity_id: String
+) -> int:
+	var count: int = 0
+	for raw_value: Variant in snapshot_value.get("shipments", []) as Array:
+		if not raw_value is Dictionary:
+			continue
+		var shipment: Dictionary = raw_value as Dictionary
+		if (
+			str(shipment.get("destination_market_id", "")) == destination_id
+			and str(shipment.get("commodity_id", "")) == commodity_id
+			and str(shipment.get("status", "")) == "in_transit"
+		):
+			count += 1
+	return count
 
 
 func _region(economy: VNextMarketEconomy, source_region_id: String) -> String:

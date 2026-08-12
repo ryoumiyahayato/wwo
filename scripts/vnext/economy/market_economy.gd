@@ -5,6 +5,11 @@ extends RefCounted
 ## The system owns physical commodity state and market observations only. It
 ## does not own people, personal money, politics, military state or runtime
 ## time. Callers provide an explicit day index and read typed query results.
+##
+## `routes` is an isolated Alpha Economy fixture / derived commercial network.
+## It is not authoritative physical topology or shared transport capacity.
+## Future gameplay integration must submit transport demand to Spatial and
+## retain only the resulting reservation/reference in Economy shipment state.
 
 const BASIS_POINTS: int = 10000
 const HOURS_PER_DAY: int = 24
@@ -186,16 +191,16 @@ func set_region_inventory(market_id: String, commodity_id: String, units: float)
 	return true
 
 
-func set_route_capacity(edge_id: String, capacity_units_per_day: float) -> bool:
+func set_fixture_route_budget(edge_id: String, units_per_day: float) -> bool:
 	if routes == null:
 		return false
-	return routes.set_edge_capacity(edge_id, capacity_units_per_day)
+	return routes.set_fixture_edge_budget(edge_id, units_per_day)
 
 
-func restore_route_capacity(edge_id: String) -> bool:
+func restore_fixture_route_budget(edge_id: String) -> bool:
 	if routes == null:
 		return false
-	return routes.restore_default_capacity(edge_id)
+	return routes.restore_default_fixture_budget(edge_id)
 
 
 func apply_market_shock(
@@ -348,6 +353,7 @@ func restore(snapshot_value: Dictionary) -> bool:
 	).duplicate(true)
 	var candidate_last_day: int = int(snapshot_value.get("last_day_index", -1))
 	var candidate_sequence: int = int(snapshot_value.get("next_shipment_sequence", 1))
+	_erase_legacy_in_transit_observations(candidate_regions)
 	if (
 		candidate_last_day < -1
 		or candidate_sequence < 1
@@ -551,7 +557,7 @@ func _seed_opening_inventory() -> void:
 
 func _settle_single_day(day_index: int) -> void:
 	_expire_shocks(day_index)
-	routes.reset_daily_capacity()
+	routes.reset_daily_fixture_budget()
 	_reset_trade_quotas()
 	_reset_daily_metrics()
 	_deliver_shipments(day_index)
@@ -585,6 +591,7 @@ func _reset_daily_metrics() -> void:
 			var commodity_state: Dictionary = commodity_states[commodity_id] as Dictionary
 			for metric_name: String in _metric_names():
 				commodity_state[metric_name] = 0.0
+			commodity_state.erase("in_transit_import_units")
 			commodity_state["inventory_opening_units"] = float(inventory.get(commodity_id, 0.0))
 			commodity_states[commodity_id] = commodity_state
 		state["commodities"] = commodity_states
@@ -618,10 +625,6 @@ func _deliver_shipments(day_index: int) -> void:
 			).get(commodity_id, {}) as Dictionary
 			commodity_state["imports_units"] = float(commodity_state.get("imports_units", 0.0)) + units
 			commodity_state["supply_units"] = float(commodity_state.get("supply_units", 0.0)) + units
-			commodity_state["in_transit_import_units"] = maxf(
-				0.0,
-				float(commodity_state.get("in_transit_import_units", 0.0)) - units
-			)
 			(state.get("commodities", {}) as Dictionary)[commodity_id] = commodity_state
 			state["inventory"] = inventory
 			region_states[destination_id] = state
@@ -746,7 +749,6 @@ func _run_production(day_index: int) -> void:
 		state["inventory"] = inventory
 		state["commodities"] = commodity_states
 		region_states[region_id] = state
-
 
 func _consume_households() -> void:
 	for region_id: String in _region_ids:
@@ -882,12 +884,12 @@ func _schedule_shipments(day_index: int) -> void:
 				quota = float(_trade_quota_remaining.get(relation_key, 0.0))
 			var units: float = minf(
 				remaining,
-				minf(float(candidate.get("surplus", 0.0)), routes.route_capacity(route))
+				minf(float(candidate.get("surplus", 0.0)), routes.route_fixture_budget(route))
 			)
 			units = minf(units, quota)
 			if units <= 0.0001:
 				continue
-			if not routes.consume_route_capacity(route, units):
+			if not routes.consume_fixture_budget(route, units):
 				continue
 			var origin_state: Dictionary = region_states[origin_id] as Dictionary
 			var origin_inventory: Dictionary = origin_state.get("inventory", {}) as Dictionary
@@ -903,15 +905,6 @@ func _schedule_shipments(day_index: int) -> void:
 			origin_state["inventory"] = origin_inventory
 			(origin_state.get("commodities", {}) as Dictionary)[commodity_id] = origin_commodity
 			region_states[origin_id] = origin_state
-			var destination_state: Dictionary = region_states[destination_id] as Dictionary
-			var destination_commodity: Dictionary = (
-				destination_state.get("commodities", {}) as Dictionary
-			).get(commodity_id, {}) as Dictionary
-			destination_commodity["in_transit_import_units"] = float(
-				destination_commodity.get("in_transit_import_units", 0.0)
-			) + units
-			(destination_state.get("commodities", {}) as Dictionary)[commodity_id] = destination_commodity
-			region_states[destination_id] = destination_state
 			if not relation.is_empty():
 				_trade_quota_remaining[relation_key] = maxf(0.0, quota - units)
 			var unit_price: int = int(origin_commodity.get("price_centimes", 1))
@@ -1036,7 +1029,7 @@ func _reachable_external_shortage_bp(origin_id: String, commodity_id: String) ->
 		if shortage_bp <= maximum_shortage_bp or shortage_bp < 500:
 			continue
 		var route: Dictionary = routes.find_route(origin_id, destination_id)
-		if route.is_empty() or routes.route_capacity(route) <= 0.0001:
+		if route.is_empty() or routes.route_fixture_budget(route) <= 0.0001:
 			continue
 		if bool(route.get("cross_border", false)):
 			var origin_country: String = str((region_states[origin_id] as Dictionary).get("country_market_id", ""))
@@ -1486,6 +1479,9 @@ func _region_snapshot(region_id: String) -> Dictionary:
 	for commodity_id: String in _commodity_ids:
 		var commodity_state: Dictionary = commodities[commodity_id] as Dictionary
 		commodity_state["inventory_units"] = float(inventory.get(commodity_id, 0.0))
+		commodity_state["in_transit_import_units"] = _in_transit_units_for(
+			region_id, commodity_id
+		)
 		commodity_state["commodity_id"] = commodity_id
 		commodity_state["name_zh"] = str((catalog.commodities[commodity_id] as Dictionary).get("name_zh", commodity_id))
 		commodities[commodity_id] = commodity_state
@@ -1510,6 +1506,7 @@ func _country_snapshot(country_id: String) -> Dictionary:
 		var row: Dictionary = _empty_commodity_state(0)
 		var demand_weight: float = 0.0
 		var inventory_total: float = 0.0
+		var in_transit_total: float = 0.0
 		for region_id: String in member_regions:
 			var state: Dictionary = region_states[region_id] as Dictionary
 			var inventory: Dictionary = state.get("inventory", {}) as Dictionary
@@ -1517,6 +1514,7 @@ func _country_snapshot(country_id: String) -> Dictionary:
 			for key: String in _metric_names():
 				row[key] = float(row.get(key, 0.0)) + float(source_row.get(key, 0.0))
 			inventory_total += float(inventory.get(commodity_id, 0.0))
+			in_transit_total += _in_transit_units_for(region_id, commodity_id)
 			var demand_value: float = float(source_row.get("demand_units", 0.0))
 			row["price_centimes"] = int(row.get("price_centimes", 0)) + int(
 				float(source_row.get("price_centimes", 0)) * demand_value
@@ -1526,6 +1524,7 @@ func _country_snapshot(country_id: String) -> Dictionary:
 			0 if demand_weight <= 0.0 else int(round(float(row.get("price_centimes", 0)) / demand_weight))
 		)
 		row["inventory_units"] = inventory_total
+		row["in_transit_import_units"] = in_transit_total
 		row["commodity_id"] = commodity_id
 		row["name_zh"] = str((catalog.commodities[commodity_id] as Dictionary).get("name_zh", commodity_id))
 		aggregate[commodity_id] = row
@@ -1738,6 +1737,22 @@ func _validate_candidate_regions(candidate: Dictionary) -> bool:
 	return true
 
 
+func _erase_legacy_in_transit_observations(candidate: Dictionary) -> void:
+	for region_id: String in _region_ids:
+		if not candidate.has(region_id):
+			continue
+		var state: Dictionary = candidate[region_id] as Dictionary
+		var commodities: Dictionary = state.get("commodities", {}) as Dictionary
+		for commodity_id: String in _commodity_ids:
+			if not commodities.has(commodity_id):
+				continue
+			var row: Dictionary = commodities[commodity_id] as Dictionary
+			row.erase("in_transit_import_units")
+			commodities[commodity_id] = row
+		state["commodities"] = commodities
+		candidate[region_id] = state
+
+
 func _validate_candidate_shipments(candidate: Array[Dictionary]) -> bool:
 	var seen_ids: Dictionary = {}
 	for shipment: Dictionary in candidate:
@@ -1816,7 +1831,7 @@ func _metric_names() -> Array[String]:
 		"supply_units", "demand_units", "household_demand_units",
 		"industrial_demand_units", "production_units", "industrial_input_units",
 		"consumed_units", "unmet_units", "imports_units", "exports_units",
-		"in_transit_import_units", "spoilage_units", "warehouse_overflow_units",
+		"spoilage_units", "warehouse_overflow_units",
 	]
 
 

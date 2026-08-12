@@ -1,23 +1,32 @@
 class_name VNextMarketRouteNetwork
 extends RefCounted
-## Sparse route graph for commodity movement between regional markets.
-## Every route consumes shared edge capacity and retains duration/cost terms.
+## NON-AUTHORITATIVE Economy fixture / derived commercial route network.
+##
+## These edges come from the Alpha economy calibration, not from authoritative
+## world-map geometry. This class does not own physical topology, infrastructure
+## operational state, or total/shared transport capacity. Its per-day fixture
+## budget only bounds isolated Economy candidate shipments until a later
+## integration adapter projects Spatial truth into economic reachability/cost.
+##
+## Future contract: Economy produces transport demand; VNextSpatialWorld owns
+## physical feasibility and shared per-link/per-hour allocation; Economy records
+## the accepted reservation/reference and shipment lifecycle.
 
 var edges_by_id: Dictionary = {}
 var adjacency: Dictionary = {}
-var edge_capacity_overrides: Dictionary = {}
-var edge_remaining_capacity: Dictionary = {}
+var fixture_edge_budget_overrides: Dictionary = {}
+var fixture_edge_remaining_budget: Dictionary = {}
 var initialization_error: String = ""
 
-var _default_capacity: Dictionary = {}
+var _default_fixture_budget: Dictionary = {}
 
 
 func configure(edges: Array[Dictionary]) -> bool:
 	edges_by_id.clear()
 	adjacency.clear()
-	edge_capacity_overrides.clear()
-	edge_remaining_capacity.clear()
-	_default_capacity.clear()
+	fixture_edge_budget_overrides.clear()
+	fixture_edge_remaining_budget.clear()
+	_default_fixture_budget.clear()
 	initialization_error = ""
 	for edge_value: Dictionary in edges:
 		var edge: Dictionary = edge_value.duplicate(true)
@@ -41,52 +50,54 @@ func configure(edges: Array[Dictionary]) -> bool:
 			else float(edge.get("duration_hours", 1)) / 24.0
 		)
 		edges_by_id[edge_id] = edge
-		_default_capacity[edge_id] = float(edge.get("capacity_units_per_day", 0.0))
+		# Legacy Alpha field name. Within this isolated Economy fixture it is a
+		# commercial throughput budget, not authoritative physical capacity.
+		_default_fixture_budget[edge_id] = float(edge.get("capacity_units_per_day", 0.0))
 		_append_direction(edge, false)
 		if bool(edge.get("bidirectional", false)):
 			_append_direction(edge, true)
-	reset_daily_capacity()
+	reset_daily_fixture_budget()
 	return not edges_by_id.is_empty()
 
 
-func reset_daily_capacity() -> void:
-	edge_remaining_capacity.clear()
-	for edge_id: String in _default_capacity:
-		edge_remaining_capacity[edge_id] = maxf(
+func reset_daily_fixture_budget() -> void:
+	fixture_edge_remaining_budget.clear()
+	for edge_id: String in _default_fixture_budget:
+		fixture_edge_remaining_budget[edge_id] = maxf(
 			0.0,
 			float(
-				edge_capacity_overrides.get(edge_id, _default_capacity[edge_id])
+				fixture_edge_budget_overrides.get(edge_id, _default_fixture_budget[edge_id])
 			)
 		)
 
 
-func set_edge_capacity(edge_id: String, capacity_units_per_day: float) -> bool:
+func set_fixture_edge_budget(edge_id: String, units_per_day: float) -> bool:
 	if (
-		not _default_capacity.has(edge_id)
-		or is_nan(capacity_units_per_day)
-		or is_inf(capacity_units_per_day)
-		or capacity_units_per_day < 0.0
+		not _default_fixture_budget.has(edge_id)
+		or is_nan(units_per_day)
+		or is_inf(units_per_day)
+		or units_per_day < 0.0
 	):
 		return false
-	edge_capacity_overrides[edge_id] = capacity_units_per_day
-	edge_remaining_capacity[edge_id] = capacity_units_per_day
+	fixture_edge_budget_overrides[edge_id] = units_per_day
+	fixture_edge_remaining_budget[edge_id] = units_per_day
 	return true
 
 
-func restore_default_capacity(edge_id: String) -> bool:
-	if not _default_capacity.has(edge_id):
+func restore_default_fixture_budget(edge_id: String) -> bool:
+	if not _default_fixture_budget.has(edge_id):
 		return false
-	edge_capacity_overrides.erase(edge_id)
-	edge_remaining_capacity[edge_id] = float(_default_capacity[edge_id])
+	fixture_edge_budget_overrides.erase(edge_id)
+	fixture_edge_remaining_budget[edge_id] = float(_default_fixture_budget[edge_id])
 	return true
 
 
-func default_edge_capacity(edge_id: String) -> float:
-	return float(_default_capacity.get(edge_id, 0.0))
+func default_fixture_edge_budget(edge_id: String) -> float:
+	return float(_default_fixture_budget.get(edge_id, 0.0))
 
 
-func remaining_capacity(edge_id: String) -> float:
-	return float(edge_remaining_capacity.get(edge_id, 0.0))
+func remaining_fixture_budget(edge_id: String) -> float:
+	return float(fixture_edge_remaining_budget.get(edge_id, 0.0))
 
 
 func find_route(origin_market_id: String, destination_market_id: String) -> Dictionary:
@@ -149,7 +160,7 @@ func find_route(origin_market_id: String, destination_market_id: String) -> Dict
 		for edge_value: Variant in neighbors:
 			var edge: Dictionary = edge_value as Dictionary
 			var edge_id: String = str(edge.get("edge_id", ""))
-			if remaining_capacity(edge_id) <= 0.000001:
+			if remaining_fixture_budget(edge_id) <= 0.000001:
 				continue
 			var neighbor: String = str(edge.get("to_market_id", ""))
 			if neighbor not in unvisited:
@@ -181,61 +192,61 @@ func find_route(origin_market_id: String, destination_market_id: String) -> Dict
 	return route
 
 
-func route_capacity(route: Dictionary) -> float:
-	var capacity: float = INF
+func route_fixture_budget(route: Dictionary) -> float:
+	var budget: float = INF
 	for raw_edge_id: Variant in route.get("edge_ids", []) as Array:
-		capacity = minf(capacity, remaining_capacity(str(raw_edge_id)))
-	return 0.0 if is_inf(capacity) else maxf(0.0, capacity)
+		budget = minf(budget, remaining_fixture_budget(str(raw_edge_id)))
+	return 0.0 if is_inf(budget) else maxf(0.0, budget)
 
 
-func consume_route_capacity(route: Dictionary, units: float) -> bool:
-	if units <= 0.0 or units > route_capacity(route) + 0.000001:
+func consume_fixture_budget(route: Dictionary, units: float) -> bool:
+	if units <= 0.0 or units > route_fixture_budget(route) + 0.000001:
 		return false
 	for raw_edge_id: Variant in route.get("edge_ids", []) as Array:
 		var edge_id: String = str(raw_edge_id)
-		edge_remaining_capacity[edge_id] = maxf(
-			0.0, remaining_capacity(edge_id) - units
+		fixture_edge_remaining_budget[edge_id] = maxf(
+			0.0, remaining_fixture_budget(edge_id) - units
 		)
 	return true
 
 
 func snapshot() -> Dictionary:
 	return {
-		"edge_capacity_overrides": edge_capacity_overrides.duplicate(true),
-		"edge_remaining_capacity": edge_remaining_capacity.duplicate(true),
+		"fixture_edge_budget_overrides": fixture_edge_budget_overrides.duplicate(true),
+		"fixture_edge_remaining_budget": fixture_edge_remaining_budget.duplicate(true),
 	}
 
 
 func restore(snapshot_value: Dictionary) -> bool:
 	if (
-		not snapshot_value.get("edge_capacity_overrides", {}) is Dictionary
-		or not snapshot_value.get("edge_remaining_capacity", {}) is Dictionary
+		not snapshot_value.get("fixture_edge_budget_overrides", {}) is Dictionary
+		or not snapshot_value.get("fixture_edge_remaining_budget", {}) is Dictionary
 	):
 		return false
 	var candidate_overrides: Dictionary = (
-		snapshot_value.get("edge_capacity_overrides", {}) as Dictionary
+		snapshot_value.get("fixture_edge_budget_overrides", {}) as Dictionary
 	).duplicate(true)
 	var candidate_remaining: Dictionary = (
-		snapshot_value.get("edge_remaining_capacity", {}) as Dictionary
+		snapshot_value.get("fixture_edge_remaining_budget", {}) as Dictionary
 	).duplicate(true)
 	for raw_edge_id: Variant in candidate_overrides:
 		var edge_id: String = str(raw_edge_id)
 		if (
-			not _default_capacity.has(edge_id)
+			not _default_fixture_budget.has(edge_id)
 			or float(candidate_overrides[raw_edge_id]) < 0.0
 		):
 			return false
-	for edge_id: String in _default_capacity:
+	for edge_id: String in _default_fixture_budget:
 		if not candidate_remaining.has(edge_id):
 			return false
 		var remaining: float = float(candidate_remaining[edge_id])
 		var maximum: float = float(
-			candidate_overrides.get(edge_id, _default_capacity[edge_id])
+			candidate_overrides.get(edge_id, _default_fixture_budget[edge_id])
 		)
 		if remaining < -0.000001 or remaining > maximum + 0.000001:
 			return false
-	edge_capacity_overrides = candidate_overrides
-	edge_remaining_capacity = candidate_remaining
+	fixture_edge_budget_overrides = candidate_overrides
+	fixture_edge_remaining_budget = candidate_remaining
 	return true
 
 
