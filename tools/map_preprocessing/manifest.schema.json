@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wwo.local/schemas/map-preprocessing-manifest.schema.json",
+  "title": "WWO candidate map cutout manifest",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generator_version",
+    "entity_id",
+    "source_file",
+    "source_hash",
+    "crop_bbox",
+    "mask_bbox",
+    "canvas_size",
+    "output_size",
+    "processing_parameters"
+  ],
+  "properties": {
+    "schema_version": {"type": "integer", "const": 1},
+    "generator_version": {"type": "string", "minLength": 1},
+    "entity_id": {"type": "string", "minLength": 1},
+    "source_file": {"type": "string", "minLength": 1},
+    "source_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "mask_source": {"type": "string"},
+    "mask_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "crop_bbox": {"$ref": "#/$defs/bbox"},
+    "requested_candidate_bbox": {"$ref": "#/$defs/bbox"},
+    "mask_bbox": {"$ref": "#/$defs/bbox"},
+    "canvas_size": {"$ref": "#/$defs/size"},
+    "output_size": {"$ref": "#/$defs/size"},
+    "output_file": {"type": "string", "minLength": 1},
+    "mask_file": {"type": "string", "minLength": 1},
+    "preview_file": {"type": "string", "minLength": 1},
+    "processing_parameters": {
+      "type": "object",
+      "required": ["canonical_canvas_size", "padding", "resampling", "alpha_mode", "original_preserved"],
+      "properties": {
+        "canonical_canvas_size": {"$ref": "#/$defs/size"},
+        "padding": {"type": "integer", "minimum": 0},
+        "resampling": {"type": "string"},
+        "source_bounds": {"type": ["array", "null"]},
+        "alpha_mode": {"type": "string"},
+        "original_preserved": {"type": "boolean", "const": true}
+      },
+      "additionalProperties": true
+    },
+    "mask_qa": {"type": "object"}
+  },
+  "$defs": {
+    "bbox": {
+      "type": "array",
+      "prefixItems": [
+        {"type": "integer"},
+        {"type": "integer"},
+        {"type": "integer", "minimum": 0},
+        {"type": "integer", "minimum": 0}
+      ],
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "size": {
+      "type": "array",
+      "prefixItems": [
+        {"type": "integer", "minimum": 1},
+        {"type": "integer", "minimum": 1}
+      ],
+      "minItems": 2,
+      "maxItems": 2
+    }
+  },
+  "additionalProperties": true
+}
