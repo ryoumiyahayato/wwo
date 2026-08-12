@@ -268,10 +268,58 @@ def _reject_nonfinite(value: str) -> Any:
 
 
 def load_json_documents(data_root: Path) -> tuple[dict[str, Any], list[Finding], dict[str, int]]:
+    data_root = data_root.resolve()
     documents: dict[str, Any] = {}
     findings: list[Finding] = []
     sizes: dict[str, int] = {}
-    for path in sorted(data_root.rglob("*.json")):
+    if not data_root.exists():
+        findings.append(
+            Finding(
+                "ERROR",
+                "DATA_ROOT_MISSING",
+                data_root.as_posix(),
+                data_root.as_posix(),
+                "data root does not exist; refusing to scan a fallback path",
+                evidence={"root": data_root.as_posix(), "reason": "missing directory"},
+                suggested_action="Pass an existing data root explicitly; the validator never falls back to the repository default.",
+            )
+        )
+        return documents, findings, sizes
+    if not data_root.is_dir():
+        findings.append(
+            Finding(
+                "ERROR",
+                "DATA_ROOT_NOT_DIRECTORY",
+                data_root.as_posix(),
+                data_root.as_posix(),
+                "data root exists but is not a directory",
+                evidence={"root": data_root.as_posix(), "reason": "file path supplied as root"},
+                suggested_action="Pass a directory containing the validator's JSON source tree.",
+            )
+        )
+        return documents, findings, sizes
+    json_paths = sorted(data_root.rglob("*.json"))
+    contract_paths = {spec.dataset for spec in CATALOG_SPECS}
+    contract_paths.add("map_geometry_cache.json")
+    has_contract_source = any(
+        path.relative_to(data_root).as_posix() in contract_paths
+        or path.relative_to(data_root).parts[:1] == ("city_detail",)
+        for path in json_paths
+    )
+    if not has_contract_source:
+        findings.append(
+            Finding(
+                "ERROR",
+                "DATA_ROOT_EMPTY",
+                data_root.as_posix(),
+                data_root.as_posix(),
+                "data root contains no JSON source documents in the validator contract",
+                evidence={"root": data_root.as_posix(), "reason": "no contract JSON source documents"},
+                suggested_action="Pass the authoritative world-data directory or a fixture with at least one contract JSON source document.",
+            )
+        )
+        return documents, findings, sizes
+    for path in json_paths:
         relative = path.relative_to(data_root).as_posix()
         sizes[relative] = path.stat().st_size
         try:
@@ -396,20 +444,83 @@ def segments_intersect(
     )
 
 
-def ring_self_intersects(ring: Sequence[Sequence[float]]) -> bool:
+def ring_intersection_candidates(ring: Sequence[Sequence[float]]) -> list[tuple[int, int]]:
+    """Return deterministic non-adjacent segment pairs for exact QA."""
     if len(ring) < 4:
-        return False
+        return []
     points = list(ring[:-1] if ring[0] == ring[-1] else ring)
     edge_count = len(points)
-    for left in range(edge_count):
+    if edge_count < 4:
+        return []
+    bounds = [
+        (
+            min(float(points[index][0]), float(points[(index + 1) % edge_count][0])),
+            min(float(points[index][1]), float(points[(index + 1) % edge_count][1])),
+            max(float(points[index][0]), float(points[(index + 1) % edge_count][0])),
+            max(float(points[index][1]), float(points[(index + 1) % edge_count][1])),
+        )
+        for index in range(edge_count)
+    ]
+    min_x = min(item[0] for item in bounds)
+    min_y = min(item[1] for item in bounds)
+    max_x = max(item[2] for item in bounds)
+    max_y = max(item[3] for item in bounds)
+    width = max_x - min_x
+    height = max_y - min_y
+    grid_side = max(1, min(64, math.ceil(math.sqrt(edge_count))))
+    cell_width = width / grid_side if width > 0.0 else 1.0
+    cell_height = height / grid_side if height > 0.0 else 1.0
+    epsilon = 1e-12
+    grid: dict[tuple[int, int], list[int]] = defaultdict(list)
+    long_segments: list[int] = []
+    max_cells_per_segment = max(16, grid_side * 4)
+
+    def cell_range(low: float, high: float, origin: float, size: float) -> tuple[int, int]:
+        first = math.floor((low - origin - epsilon) / size)
+        last = math.floor((high - origin + epsilon) / size)
+        return max(0, min(grid_side - 1, first)), max(0, min(grid_side - 1, last))
+
+    for index, (segment_min_x, segment_min_y, segment_max_x, segment_max_y) in enumerate(bounds):
+        cell_min_x, cell_max_x = cell_range(segment_min_x, segment_max_x, min_x, cell_width)
+        cell_min_y, cell_max_y = cell_range(segment_min_y, segment_max_y, min_y, cell_height)
+        cell_count = (cell_max_x - cell_min_x + 1) * (cell_max_y - cell_min_y + 1)
+        if cell_count > max_cells_per_segment:
+            long_segments.append(index)
+            continue
+        for cell_x in range(cell_min_x, cell_max_x + 1):
+            for cell_y in range(cell_min_y, cell_max_y + 1):
+                grid[(cell_x, cell_y)].append(index)
+
+    candidate_pairs: set[tuple[int, int]] = set()
+
+    def add_pair(left: int, right: int) -> None:
+        if left == right:
+            return
+        if left > right:
+            left, right = right, left
         left_end = (left + 1) % edge_count
-        for right in range(left + 1, edge_count):
-            right_end = (right + 1) % edge_count
-            if left == right or left_end == right or right_end == left:
-                continue
-            if segments_intersect(points[left], points[left_end], points[right], points[right_end]):
-                return True
-    return False
+        right_end = (right + 1) % edge_count
+        if left_end == right or right_end == left:
+            return
+        candidate_pairs.add((left, right))
+
+    for cell in sorted(grid):
+        members = grid[cell]
+        for position, left in enumerate(members):
+            for right in members[position + 1 :]:
+                add_pair(left, right)
+    for left in long_segments:
+        for right in range(edge_count):
+            add_pair(left, right)
+    return sorted(candidate_pairs)
+
+
+def ring_self_intersects(ring: Sequence[Sequence[float]]) -> bool:
+    points = list(ring[:-1] if len(ring) > 1 and ring[0] == ring[-1] else ring)
+    return any(
+        segments_intersect(points[left], points[(left + 1) % len(points)], points[right], points[(right + 1) % len(points)])
+        for left, right in ring_intersection_candidates(ring)
+    )
 
 
 def canonical_ring(ring: Sequence[Sequence[float]]) -> str:
@@ -458,7 +569,7 @@ def nested_field_names(value: Any, prefix: str = "") -> Iterator[str]:
 
 class WorldDataAudit:
     def __init__(self, data_root: Path) -> None:
-        self.data_root = data_root
+        self.data_root = data_root.resolve()
         self.documents: dict[str, Any] = {}
         self.sizes: dict[str, int] = {}
         self.findings: list[Finding] = []
@@ -485,14 +596,16 @@ class WorldDataAudit:
     def run(self) -> dict[str, Any]:
         self.documents, load_findings, self.sizes = load_json_documents(self.data_root)
         self.findings.extend(load_findings)
-        self._validate_root_schemas()
-        self._build_catalogs()
-        self._validate_references()
-        self._validate_dynamic_references()
-        self._validate_coordinates()
-        self._validate_geometries()
-        self._validate_geometry_cache()
-        self._validate_metadata_consistency()
+        root_contract_failed = any(finding.code.startswith("DATA_ROOT_") for finding in load_findings)
+        if not root_contract_failed:
+            self._validate_root_schemas()
+            self._build_catalogs()
+            self._validate_references()
+            self._validate_dynamic_references()
+            self._validate_coordinates()
+            self._validate_geometries()
+            self._validate_geometry_cache()
+            self._validate_metadata_consistency()
         inventory = self._build_inventory()
         coverage = self._build_coverage()
         staging = self._build_staging_candidates(inventory)
@@ -972,7 +1085,15 @@ class WorldDataAudit:
                 self.add("ERROR", "ZERO_AREA_GEOMETRY", ref.dataset, location, "polygon ring has zero area", ref.record_id)
             else:
                 nonzero_count += 1
-            if len(points) <= 300 and ring_self_intersects(points):
+            if any(
+                segments_intersect(
+                    points[left],
+                    points[(left + 1) % len(points)],
+                    points[right],
+                    points[(right + 1) % len(points)],
+                )
+                for left, right in ring_intersection_candidates(points)
+            ):
                 self.add("ERROR", "SELF_INTERSECTING_RING", ref.dataset, location, "polygon ring self-intersects", ref.record_id)
             digest = hashlib.sha256(canonical_ring(points).encode("utf-8")).hexdigest()
             if digest in duplicate_hashes:

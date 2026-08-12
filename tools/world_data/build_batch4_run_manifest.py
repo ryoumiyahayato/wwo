@@ -76,6 +76,12 @@ def build_manifest(repository_root: Path, output_dir: Path) -> dict[str, Any]:
     artifact_digest = hashlib.sha256(
         "".join(f"{row['path']}\t{row['sha256']}\n" for row in artifact_files).encode("utf-8")
     ).hexdigest()
+    remaining_work = [
+        f"Review {code_counts.get('SELF_INTERSECTING_RING', 0)} potential world_admin1 self-intersecting rings against source provenance.",
+        f"Resolve {code_counts.get('PLACEHOLDER_FOREIGN_KEY', 0)} placeholder institutional references with source-backed decisions.",
+        "Research 10 missing and 6 ambiguous historical identity mappings.",
+        "Expand sparse country-level transport, institution, organization, and person coverage only with approved sources.",
+    ]
     return {
         "schema_version": SCHEMA_VERSION,
         "batch_scope": ["BATCH 1", "BATCH 2", "BATCH 3", "BATCH 4"],
@@ -127,12 +133,7 @@ def build_manifest(repository_root: Path, output_dir: Path) -> dict[str, Any]:
             "loader_contract_gaps": len(batch3_loader.get("missing_direct_references", [])) + len(batch3_loader.get("missing_directory_references", [])),
             "manual_review_findings": code_counts.get("SELF_INTERSECTING_RING", 0) + code_counts.get("PLACEHOLDER_FOREIGN_KEY", 0),
         },
-        "remaining_work": [
-            "Review 104 potential world_admin1 self-intersecting rings against source provenance.",
-            "Resolve 6 placeholder institutional references with source-backed decisions.",
-            "Research 10 missing and 6 ambiguous historical identity mappings.",
-            "Expand sparse country-level transport, institution, organization, and person coverage only with approved sources.",
-        ],
+        "remaining_work": remaining_work,
         "artifacts": artifact_files,
         "artifact_digest": artifact_digest,
     }

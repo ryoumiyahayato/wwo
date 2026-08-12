@@ -4,7 +4,10 @@
 from __future__ import annotations
 
 import importlib.util
+import json
+import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from types import ModuleType
@@ -28,6 +31,35 @@ def load_tool() -> ModuleType:
 batch4 = load_tool()
 
 
+REPLAY_ARTIFACTS = (
+    "batch2_asset_manifest.json",
+    "batch2_asset_staging_candidates.json",
+    "batch2_data_manifest.json",
+    "batch2_gap_report.json",
+    "batch2_regression_manifest.json",
+    "batch3_gap_report.json",
+    "batch3_historical_flag_coverage.json",
+    "batch3_loader_contract.json",
+    "batch3_record_signature_manifest.json",
+    "batch3_staging_candidates.json",
+    "batch4_run_manifest.json",
+    "coverage.json",
+    "findings.json",
+    "inventory.json",
+    "normalization_candidates.json",
+    "staging_candidates.json",
+)
+
+
+def artifact_mismatches(generated: Path, tracked: Path) -> list[str]:
+    return [
+        name
+        for name in REPLAY_ARTIFACTS
+        if not (generated / name).is_file()
+        or (generated / name).read_bytes() != (tracked / name).read_bytes()
+    ]
+
+
 class Batch4RunManifestTests(unittest.TestCase):
     def test_manifest_consolidates_existing_batch_results(self) -> None:
         manifest = batch4.build_manifest(REPOSITORY_ROOT, OUTPUT_DIR)
@@ -47,7 +79,12 @@ class Batch4RunManifestTests(unittest.TestCase):
         self.assertEqual(gates["duplicate_catalog_ids"], 0)
         self.assertEqual(gates["flag_asset_gaps"], 0)
         self.assertEqual(gates["loader_contract_gaps"], 0)
-        self.assertEqual(gates["manual_review_findings"], 110)
+        expected_manual_findings = sum(
+            1
+            for finding in json.loads((OUTPUT_DIR / "findings.json").read_text(encoding="utf-8"))
+            if finding["code"] in {"SELF_INTERSECTING_RING", "PLACEHOLDER_FOREIGN_KEY"}
+        )
+        self.assertEqual(gates["manual_review_findings"], expected_manual_findings)
 
     def test_resource_policy_is_explicit(self) -> None:
         manifest = batch4.build_manifest(REPOSITORY_ROOT, OUTPUT_DIR)
@@ -60,6 +97,57 @@ class Batch4RunManifestTests(unittest.TestCase):
         first = batch4.build_manifest(REPOSITORY_ROOT, OUTPUT_DIR)
         second = batch4.build_manifest(REPOSITORY_ROOT, OUTPUT_DIR)
         self.assertEqual(first, second)
+
+    def test_official_generators_replay_tracked_artifacts_and_detect_mutation(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output = Path(temp_dir) / "artifacts"
+            commands = [
+                [
+                    sys.executable,
+                    str(REPOSITORY_ROOT / "tools" / "world_data" / "validate_world_data.py"),
+                    "--root",
+                    str(REPOSITORY_ROOT),
+                    "--data-root",
+                    str(REPOSITORY_ROOT / "data" / "world_map"),
+                    "--output-dir",
+                    str(output),
+                    "--allow-errors",
+                ],
+                [
+                    sys.executable,
+                    str(REPOSITORY_ROOT / "tools" / "world_data" / "build_batch2_artifacts.py"),
+                    "--root",
+                    str(REPOSITORY_ROOT),
+                    "--output-dir",
+                    str(output),
+                ],
+                [
+                    sys.executable,
+                    str(REPOSITORY_ROOT / "tools" / "world_data" / "build_batch3_contracts.py"),
+                    "--root",
+                    str(REPOSITORY_ROOT),
+                    "--output-dir",
+                    str(output),
+                ],
+                [
+                    sys.executable,
+                    str(REPOSITORY_ROOT / "tools" / "world_data" / "build_batch4_run_manifest.py"),
+                    "--root",
+                    str(REPOSITORY_ROOT),
+                    "--output-dir",
+                    str(output),
+                ],
+            ]
+            results = [subprocess.run(command, cwd=REPOSITORY_ROOT, capture_output=True, text=True, check=False) for command in commands]
+            self.assertEqual(results[0].returncode, 0, results[0].stderr)
+            self.assertEqual(results[1].returncode, 0, results[1].stderr)
+            self.assertEqual(results[2].returncode, 0, results[2].stderr)
+            self.assertEqual(results[3].returncode, 0, results[3].stderr)
+            self.assertEqual(artifact_mismatches(output, OUTPUT_DIR), [])
+
+            inventory = output / "inventory.json"
+            inventory.write_bytes(inventory.read_bytes() + b" ")
+            self.assertEqual(artifact_mismatches(output, OUTPUT_DIR), ["inventory.json"])
 
 
 if __name__ == "__main__":

@@ -3,9 +3,11 @@
 
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from types import ModuleType
@@ -70,6 +72,31 @@ class Batch2ArtifactTests(unittest.TestCase):
         self.assertEqual(self.data_manifest, batch2.build_data_manifest(REPOSITORY_ROOT))
         self.assertEqual(self.asset_manifest, batch2.build_asset_manifest(REPOSITORY_ROOT))
         self.assertEqual(self.regression_manifest, batch2.build_regression_manifest(REPOSITORY_ROOT))
+
+    def test_changed_asset_hash_is_reported_in_an_independent_fixture(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            data_path = root / "data" / "world_map" / "historical"
+            asset_path = root / "assets" / "historical_flags" / "1900" / "flag.png"
+            data_path.mkdir(parents=True)
+            asset_path.parent.mkdir(parents=True)
+            asset_path.write_bytes(b"not-a-real-png-but-a-stable-asset")
+            (data_path / "flags_1900.json").write_text(
+                json.dumps(
+                    {
+                        "records": {
+                            "flag_a": {
+                                "asset_path": "res://assets/historical_flags/1900/flag.png",
+                                "asset_sha256": "0" * 64,
+                            }
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            manifest = batch2.build_asset_manifest(root)
+        self.assertEqual(manifest["hash_mismatches"], ["flag_a"])
+        self.assertEqual(manifest["missing_assets"], [])
 
 
 if __name__ == "__main__":

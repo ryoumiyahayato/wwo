@@ -42,13 +42,13 @@ class Batch2CorpusExecutionTests(unittest.TestCase):
                 if case["kind"] == "json":
                     with tempfile.TemporaryDirectory() as temp_dir:
                         data_root = Path(temp_dir)
-                        (data_root / "fixture.json").write_text(case["text"], encoding="utf-8")
+                        (data_root / "countries.json").write_text(case["text"], encoding="utf-8")
                         documents, findings, _ = validator.load_json_documents(data_root)
                     self.assertEqual(bool(findings), expected["json_parse_error"])
                     if expected["json_parse_error"]:
                         self.assertEqual([finding.code for finding in findings], ["JSON_PARSE_ERROR"])
                     else:
-                        self.assertIn("fixture.json", documents)
+                        self.assertIn("countries.json", documents)
                 elif case["kind"] == "ring":
                     ring = case["ring"]
                     self.assertEqual(validator.ring_self_intersects(ring), expected["self_intersects"])

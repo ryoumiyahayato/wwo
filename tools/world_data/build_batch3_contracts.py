@@ -11,6 +11,7 @@ import argparse
 import hashlib
 import json
 import re
+from collections import Counter
 from pathlib import Path
 from typing import Any, Iterator, Mapping
 
@@ -197,12 +198,13 @@ def build_record_signatures(repository_root: Path) -> dict[str, Any]:
                 ids.append(obj["stable_id"])
                 id_field_counts["stable_id"] = id_field_counts.get("stable_id", 0) + 1
         sorted_ids = sorted(ids)
+        id_counts = Counter(ids)
         rows.append(
             {
                 "path": path.relative_to(repository_root).as_posix(),
                 "id_record_count": len(ids),
                 "id_field_counts": dict(sorted(id_field_counts.items())),
-                "duplicate_ids": sorted({item for item in ids if ids.count(item) > 1}),
+                "duplicate_ids": sorted(item for item, count in id_counts.items() if count > 1),
                 "id_digest": sha256_lines(sorted_ids),
             }
         )

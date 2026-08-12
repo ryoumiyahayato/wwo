@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from types import ModuleType
@@ -66,6 +68,39 @@ class Batch3ContractTests(unittest.TestCase):
         self.assertEqual(self.loader, batch3.build_loader_contract(REPOSITORY_ROOT))
         self.assertEqual(self.flags, batch3.build_flag_coverage(REPOSITORY_ROOT))
         self.assertEqual(self.signatures, batch3.build_record_signatures(REPOSITORY_ROOT))
+
+    def test_duplicate_id_ordering_uses_independent_fixtures(self) -> None:
+        def signature_for(rows: list[dict[str, object]]) -> dict[str, object]:
+            with tempfile.TemporaryDirectory() as temp_dir:
+                root = Path(temp_dir)
+                data_root = root / "data" / "world_map"
+                data_root.mkdir(parents=True)
+                (data_root / "fixture.json").write_text(json.dumps({"items": rows}), encoding="utf-8")
+                return batch3.build_record_signatures(root)
+
+        unique = signature_for([{"id": "b"}, {"id": "a"}])
+        one_duplicate = signature_for([{"id": "b"}, {"id": "a"}, {"id": "b"}])
+        multiple = signature_for(
+            [{"id": "z"}, {"id": "a"}, {"id": "z"}, {"id": "m"}, {"id": "a"}, {"id": "z"}]
+        )
+        self.assertEqual(unique["duplicate_id_file_count"], 0)
+        self.assertEqual(one_duplicate["files"][0]["duplicate_ids"], ["b"])
+        self.assertEqual(multiple["files"][0]["duplicate_ids"], ["a", "z"])
+        self.assertEqual(multiple, signature_for(
+            [{"id": "z"}, {"id": "a"}, {"id": "z"}, {"id": "m"}, {"id": "a"}, {"id": "z"}]
+        ))
+
+    def test_missing_loader_target_is_reported_in_an_independent_fixture(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            script_root = root / "scripts" / "world_map"
+            script_root.mkdir(parents=True)
+            (script_root / "fixture_loader.gd").write_text(
+                'const TARGET = "res://data/world_map/missing.json"\n', encoding="utf-8"
+            )
+            contract = batch3.build_loader_contract(root)
+        self.assertEqual(contract["missing_direct_references"], [("scripts/world_map/fixture_loader.gd", "res://data/world_map/missing.json")])
+        self.assertEqual(contract["contract_gate"], "REVIEW_REQUIRED")
 
 
 if __name__ == "__main__":
