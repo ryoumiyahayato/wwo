@@ -1,0 +1,313 @@
+{
+  "batch": 3,
+  "files": [
+    {
+      "path": "data/alpha/commodity_market_1900.json",
+      "promotion_status": "REVIEW_REQUIRED",
+      "prototype_only": null,
+      "purpose": "Existing commodity fixture; outside this source-gap candidate batch.",
+      "schema_id": "alpha_commodity_market_1900_v1",
+      "schema_version": null,
+      "sha256": "df094a57ec0f4eb80e01b44884349d33910959ff61f14df84cabd02ec663b571",
+      "source_class": "historical_fixture",
+      "top_level_keys": [
+        "calibration_notice_zh",
+        "calibration_year",
+        "commodities",
+        "config_version",
+        "international_market",
+        "policies",
+        "production_sites",
+        "recipes",
+        "region_overrides",
+        "schema_id",
+        "source_groups"
+      ],
+      "top_level_list_counts": {
+        "commodities": 67,
+        "production_sites": 49,
+        "recipes": 38,
+        "source_groups": 4
+      }
+    },
+    {
+      "path": "data/alpha/economy_integration_1900.json",
+      "promotion_status": "REVIEW_REQUIRED",
+      "prototype_only": null,
+      "purpose": "Existing economy integration fixture; outside this source-gap candidate batch.",
+      "schema_id": "alpha_economy_integration_1900_v1",
+      "schema_version": null,
+      "sha256": "9d5474333c36d48c7057a65aa1cb53e14b2129f0d4c0edc578668f6e3c714aab",
+      "source_class": "historical_fixture",
+      "top_level_keys": [
+        "calibration_year",
+        "config_version",
+        "countries",
+        "enterprise_assignment",
+        "government_procurement",
+        "historical_world_adapter",
+        "household_strata",
+        "policies",
+        "regions",
+        "schema_id",
+        "scope_notice_zh",
+        "trade_relations",
+        "transport_edges"
+      ],
+      "top_level_list_counts": {
+        "countries": 2,
+        "government_procurement": 4,
+        "household_strata": 3,
+        "regions": 8,
+        "trade_relations": 2,
+        "transport_edges": 9
+      }
+    },
+    {
+      "path": "data/alpha/historical_economy_coverage_1900.json",
+      "promotion_status": "REVIEW_REQUIRED",
+      "prototype_only": null,
+      "purpose": "Existing historical economy coverage policy and gaps.",
+      "schema_id": "historical_economy_coverage_1900_v1",
+      "schema_version": null,
+      "sha256": "76d8e5c1f68c44ebe4a7b643bbef356b4e48c7469b654d1eefb3c3092bd9756f",
+      "source_class": "historical_input",
+      "top_level_keys": [
+        "calibration_year",
+        "countries",
+        "dimensions",
+        "policy",
+        "schema_id"
+      ],
+      "top_level_list_counts": {
+        "countries": 15,
+        "dimensions": 11
+      }
+    },
+    {
+      "path": "data/alpha/historical_transport_network_1900/transport_compact.json",
+      "promotion_status": "REVIEW_REQUIRED",
+      "prototype_only": null,
+      "purpose": "Existing compact estimated transport rows; no new route facts added.",
+      "schema_id": "historical_transport_network_1900_compact_tables_v1",
+      "schema_version": null,
+      "sha256": "b7ab2d258726dfde23884821257a959a132b8ebf8a5f70fe8f6f2116ebac0d82",
+      "source_class": "estimated_historical_fixture",
+      "top_level_keys": [
+        "domestic_field_order",
+        "domestic_rows",
+        "maritime_field_order",
+        "maritime_rows",
+        "river_field_order",
+        "river_rows",
+        "schema_id"
+      ],
+      "top_level_list_counts": {
+        "domestic_field_order": 10,
+        "domestic_rows": 50,
+        "maritime_field_order": 9,
+        "maritime_rows": 30,
+        "river_field_order": 5,
+        "river_rows": 13
+      }
+    },
+    {
+      "path": "data/alpha/historical_world_economy_1900.json",
+      "promotion_status": "REVIEW_REQUIRED",
+      "prototype_only": null,
+      "purpose": "Existing bounded estimates; no new numeric facts added.",
+      "schema_id": "historical_world_economy_1900_estimates_v1",
+      "schema_version": null,
+      "sha256": "28fdcc791ca55aa165202e9728d4d98b78cd58577fa33af16d661143ee991b87",
+      "source_class": "estimated_historical_fixture",
+      "top_level_keys": [
+        "calibration_date",
+        "compact_country_table_path",
+        "config_version",
+        "coverage_summary",
+        "methodology",
+        "policy",
+        "schema_id",
+        "scope",
+        "source_manifest",
+        "world_residual_aggregates"
+      ],
+      "top_level_list_counts": {
+        "source_manifest": 6,
+        "world_residual_aggregates": 8
+      }
+    },
+    {
+      "path": "data/alpha/historical_world_economy_1900/countries_compact.json",
+      "promotion_status": "REVIEW_REQUIRED",
+      "prototype_only": null,
+      "purpose": "Existing compact estimated economy rows; no new numeric facts added.",
+      "schema_id": "historical_world_economy_1900_compact_country_table_v1",
+      "schema_version": null,
+      "sha256": "dfc178a7576ae9fa8a041d4d880534decd7270a5dc9368c01fa8c0ea43fb33f9",
+      "source_class": "estimated_historical_fixture",
+      "top_level_keys": [
+        "common_methods",
+        "field_order",
+        "rows",
+        "schema_id"
+      ],
+      "top_level_list_counts": {
+        "field_order": 36,
+        "rows": 50
+      }
+    },
+    {
+      "path": "data/world_map/cities.json",
+      "promotion_status": "REVIEW_REQUIRED",
+      "prototype_only": true,
+      "purpose": "Current city records; not historical facts.",
+      "schema_id": null,
+      "schema_version": 3,
+      "sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919",
+      "source_class": "current_prototype",
+      "top_level_keys": [
+        "cities",
+        "prototype_only",
+        "schema_version"
+      ],
+      "top_level_list_counts": {
+        "cities": 32
+      }
+    },
+    {
+      "path": "data/world_map/countries.json",
+      "promotion_status": "REFERENCE_ONLY",
+      "prototype_only": true,
+      "purpose": "Current canonical IDs used only for reference and crosswalk gaps.",
+      "schema_id": null,
+      "schema_version": 4,
+      "sha256": "29159c67775632ebc10a6062e731edf8005baafe79231d0e23ad33a2e631ac06",
+      "source_class": "canonical_reference",
+      "top_level_keys": [
+        "countries",
+        "hierarchy",
+        "historical_notice",
+        "name_coverage",
+        "prototype_only",
+        "schema_version"
+      ],
+      "top_level_list_counts": {
+        "countries": 177
+      }
+    },
+    {
+      "path": "data/world_map/historical/historical_admin1_1900.json",
+      "promotion_status": "REVIEW_REQUIRED",
+      "prototype_only": null,
+      "purpose": "Existing dated admin1 coverage; promotion remains separate.",
+      "schema_id": null,
+      "schema_version": 1,
+      "sha256": "b70eb630cc4b836214e74eb32b144f6d6502d85d35d3b079a0c28a0c3d791c4f",
+      "source_class": "historical_input",
+      "top_level_keys": [
+        "countries",
+        "policy",
+        "schema_version",
+        "snapshot_date"
+      ],
+      "top_level_list_counts": {
+        "countries": 15
+      }
+    },
+    {
+      "path": "data/world_map/ports.json",
+      "promotion_status": "REVIEW_REQUIRED",
+      "prototype_only": true,
+      "purpose": "Current port records; not historical facts.",
+      "schema_id": null,
+      "schema_version": 2,
+      "sha256": "05a11d928080289968ace21d86fa137bffe5463582b972ff2f10453e7a312eed",
+      "source_class": "current_prototype",
+      "top_level_keys": [
+        "ports",
+        "prototype_only",
+        "schema_version"
+      ],
+      "top_level_list_counts": {
+        "ports": 8
+      }
+    },
+    {
+      "path": "data/world_map/rail_segments.json",
+      "promotion_status": "REVIEW_REQUIRED",
+      "prototype_only": true,
+      "purpose": "Current rail prototype; not historical facts.",
+      "schema_id": null,
+      "schema_version": 2,
+      "sha256": "83303792e438cdfcec5f6c255038c14ff22cdc902ae3a8426d93e06e07779cf9",
+      "source_class": "current_prototype",
+      "top_level_keys": [
+        "prototype_only",
+        "schema_version",
+        "segments",
+        "type"
+      ],
+      "top_level_list_counts": {
+        "segments": 9
+      }
+    },
+    {
+      "path": "data/world_map/regions.json",
+      "promotion_status": "REFERENCE_ONLY",
+      "prototype_only": true,
+      "purpose": "Current region IDs used only for reference and crosswalk gaps.",
+      "schema_id": null,
+      "schema_version": 4,
+      "sha256": "65e885135016f70eade124f8adf7030f5ce63b8983eb44d01e650cc87da5b1ba",
+      "source_class": "canonical_reference",
+      "top_level_keys": [
+        "administrative_geometry_notice",
+        "administrative_units",
+        "coverage",
+        "focus_country_id",
+        "macro_region_notice",
+        "prototype_only",
+        "regions",
+        "schema_version",
+        "source"
+      ],
+      "top_level_list_counts": {
+        "administrative_units": 98,
+        "regions": 9
+      }
+    },
+    {
+      "path": "data/world_map/shipping_routes.json",
+      "promotion_status": "REVIEW_REQUIRED",
+      "prototype_only": true,
+      "purpose": "Current shipping prototype; not historical facts.",
+      "schema_id": null,
+      "schema_version": 2,
+      "sha256": "3812b7e48128bec0c19cab27fbb40303397087b0531591c761df541d532a5861",
+      "source_class": "current_prototype",
+      "top_level_keys": [
+        "prototype_only",
+        "routes",
+        "schema_version",
+        "type"
+      ],
+      "top_level_list_counts": {
+        "routes": 3
+      }
+    }
+  ],
+  "policy": {
+    "estimated_fixtures_are_not_promoted": true,
+    "inventory_is_digest_only": true,
+    "prototype_records_are_not_historical_facts": true,
+    "runtime_authority": false
+  },
+  "schema_id": "wwo_1900_batch3_repository_inventory_v1",
+  "snapshot_date": "1900-03-12",
+  "summary": {
+    "candidate_count": 52,
+    "candidate_source_file_count": 4,
+    "inventory_file_count": 13
+  }
+}
