@@ -1,4 +1,5 @@
 name: PR65 reconcile after PR64
+# One-shot reconciliation helper; self-deletes after successful replay.
 
 on:
   push:
