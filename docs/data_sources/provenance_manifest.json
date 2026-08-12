@@ -1,5 +1,5 @@
 {
-  "audit_base_revision": "4b738ab8b0a21e8685aae95381717e9efd2327a8",
+  "audit_base_revision": "UNSPECIFIED",
   "audit_batch": "WWO DATA & ASSET PROVENANCE AUDIT — BATCH 1",
   "dependency_graph": {
     "edges": [
@@ -16666,8 +16666,8 @@
       ],
       "path": "docs/data_sources/README.md",
       "review_status": "REVIEW_REQUIRED",
-      "sha256": "f1c41ca20d2017024bc70b9e174f22b6c46d926b9227c205238a0261c460dd22",
-      "size_bytes": 1621,
+      "sha256": "80cb619fc5aad96e6125a0c14e675dff94a0afd4ad25249d38a3ca80af33cfd9",
+      "size_bytes": 2391,
       "source_locator": []
     },
     {
@@ -16695,8 +16695,8 @@
       ],
       "path": "docs/data_sources/provenance_reference_matrix.json",
       "review_status": "REVIEW_REQUIRED",
-      "sha256": "acad72ff44f56be5854475d4519456ad3780e1a064a323e76db61850b76f4384",
-      "size_bytes": 361687,
+      "sha256": "32bef375a0e0d032ccdfdf8a5d814f6f7325284dd813dab8a1182711a67c886d",
+      "size_bytes": 368900,
       "source_locator": []
     },
     {

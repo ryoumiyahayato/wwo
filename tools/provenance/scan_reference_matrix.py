@@ -71,6 +71,10 @@ MIME_TYPES = {
 }
 TEXT_SUFFIXES = set(MIME_TYPES) | {".txt", ".cfg", ".godot"}
 
+def is_audit_output(relative: str) -> bool:
+    """Keep derived audit records out of the runtime producer/consumer scope."""
+    return relative.startswith("tests/provenance/") and Path(relative).suffix.lower() == ".json"
+
 
 def normalize_path(value: str) -> str:
     return value.replace("\\", "/").removeprefix("./").removeprefix("res://")
@@ -104,7 +108,7 @@ def git_tracked_files(root: Path) -> list[str]:
 def scoped_files(root: Path) -> list[str]:
     tracked = git_tracked_files(root)
     if tracked:
-        return tracked
+        return [relative for relative in tracked if not is_audit_output(relative)]
     files: list[str] = []
     for scope in SCOPE_ROOTS:
         directory = root / scope
@@ -112,7 +116,9 @@ def scoped_files(root: Path) -> list[str]:
             continue
         for path in directory.rglob("*"):
             if path.is_file() and path.suffix.lower() != ".uid":
-                files.append(path.relative_to(root).as_posix())
+                relative = path.relative_to(root).as_posix()
+                if not is_audit_output(relative):
+                    files.append(relative)
     return sorted(files)
 
 
@@ -127,6 +133,8 @@ def load_json(path: Path) -> dict[str, Any]:
 
 
 def read_text(path: Path) -> str:
+    if is_audit_output(path.as_posix()):
+        return ""
     if path.suffix.lower() not in TEXT_SUFFIXES:
         return ""
     try:
@@ -269,9 +277,9 @@ def build_matrix(root: Path, base_revision: str, manifest_path: Path | None = No
 
     for relative in files:
         path = root / Path(relative)
-        text = read_text(path)
+        text = "" if is_audit_output(relative) else read_text(path)
         owner_references = extract_references(relative, text)
-        owner_writes = extract_write_sites(relative, text)
+        owner_writes = [] if relative.startswith("tests/provenance/") else extract_write_sites(relative, text)
         per_file_references[relative].extend(owner_references)
         per_file_writes[relative].extend(owner_writes)
         for reference in owner_references:
@@ -290,7 +298,7 @@ def build_matrix(root: Path, base_revision: str, manifest_path: Path | None = No
                 reference.update(target_info(root, reference["target"], manifest_by_path))
             reference["evidence"] = [f"{relative}:{reference['line']}"]
             references.append(reference)
-        write_sites.extend(owner_writes)
+        write_sites.extend([] if relative.startswith("tests/provenance/") else owner_writes)
         file_records.append(
             {
                 "path": relative,

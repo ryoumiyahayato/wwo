@@ -92,6 +92,22 @@ class ReferenceMatrixTests(unittest.TestCase):
         self.assertTrue(result["valid"], result)
         self.assertTrue(any(item["code"] == scan_reference_matrix.BROKEN_REFERENCE for item in result["findings"]))
 
+    def test_provenance_json_records_are_not_runtime_references(self) -> None:
+        (self.root / "tests").mkdir()
+        (self.root / "tests/provenance").mkdir()
+        (self.root / "tests/provenance/audit_record.json").write_text(
+            '{"path": "data/source.json", "derived_from": ["data/source.json"]}\n',
+            encoding="utf-8",
+        )
+        matrix = scan_reference_matrix.build_matrix(self.root, "test-base")
+        self.assertNotIn(
+            "tests/provenance/audit_record.json",
+            {reference["owner"] for reference in matrix["references"]},
+        )
+        self.assertNotIn(
+            "tests/provenance/audit_record.json",
+            {record["path"] for record in matrix["files"]},
+        )
     def test_duplicate_gitkeep_placeholders_are_ignored(self) -> None:
         (self.root / "scripts/.gitkeep").write_bytes(b"")
         (self.root / "tools/.gitkeep").write_bytes(b"")

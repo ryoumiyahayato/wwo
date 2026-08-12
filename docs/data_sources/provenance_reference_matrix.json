@@ -2,7 +2,7 @@
   "schema_version": 1,
   "matrix_kind": "wwo_provenance_reference_matrix",
   "audit_batch": "BATCH_2",
-  "audit_base_revision": "4b738ab8b0a21e8685aae95381717e9efd2327a8",
+  "audit_base_revision": "HEAD",
   "generated_by": "tools/provenance/scan_reference_matrix.py",
   "scope": {
     "included_roots": [
@@ -27,14 +27,14 @@
   },
   "linked_manifest": "docs/data_sources/provenance_manifest.json",
   "summary": {
-    "files_scanned": 573,
-    "files_with_references": 54,
-    "references": 211,
-    "write_sites": 75,
+    "files_scanned": 578,
+    "files_with_references": 55,
+    "references": 217,
+    "write_sites": 63,
     "existing_targets": 187,
-    "fixture_references": 23,
+    "fixture_references": 29,
     "broken_references": 1,
-    "intentional_test_fixtures": 23,
+    "intentional_test_fixtures": 29,
     "target_directories": 8,
     "target_not_in_batch_1_manifest": 0,
     "unknown_license_references": 135,
@@ -4266,23 +4266,33 @@
       "issues": []
     },
     {
+      "path": "tests/provenance/test_corpus_and_backlog.py",
+      "file_type": "text/x-python",
+      "size_bytes": 3670,
+      "sha256": "30b41055237aef4e7f98dc4cdab6e27dc731dc8a5ca42abdd9467e99de316b67",
+      "role": "consumer",
+      "reference_count": 4,
+      "write_site_count": 0,
+      "issues": []
+    },
+    {
       "path": "tests/provenance/test_provenance_validator.py",
       "file_type": "text/x-python",
       "size_bytes": 6818,
       "sha256": "08346b44a1954bc96d0ce43ef5ab381feae306e0ce9f82cce9633bc901e9ac73",
       "role": "consumer",
       "reference_count": 12,
-      "write_site_count": 4,
+      "write_site_count": 0,
       "issues": []
     },
     {
       "path": "tests/provenance/test_reference_matrix.py",
       "file_type": "text/x-python",
-      "size_bytes": 4400,
-      "sha256": "ca16c18b3f2e18972a0ea28d27075dd8a1b626b3004349651037d1aa4c2b77fa",
+      "size_bytes": 5260,
+      "sha256": "43b64ae29bb0760eda1bfc12a88d2a9f3189253ec146097bc704e21879f608e8",
       "role": "consumer",
-      "reference_count": 11,
-      "write_site_count": 10,
+      "reference_count": 13,
+      "write_site_count": 0,
       "issues": []
     },
     {
@@ -5562,10 +5572,30 @@
       "issues": []
     },
     {
+      "path": "tools/provenance/generate_regression_corpus.py",
+      "file_type": "text/x-python",
+      "size_bytes": 4584,
+      "sha256": "303b1d155a48cf2b9f47c6e922f3853d26ddddd6b458943dcbc24971be5c08fe",
+      "role": "write_site_without_static_target",
+      "reference_count": 0,
+      "write_site_count": 1,
+      "issues": []
+    },
+    {
+      "path": "tools/provenance/generate_review_backlog.py",
+      "file_type": "text/x-python",
+      "size_bytes": 7656,
+      "sha256": "12a18b1924902df2db50c89421e81b7f4cb65480f7fbb1257e76c72a85047a55",
+      "role": "write_site_without_static_target",
+      "reference_count": 0,
+      "write_site_count": 1,
+      "issues": []
+    },
+    {
       "path": "tools/provenance/scan_reference_matrix.py",
       "file_type": "text/x-python",
-      "size_bytes": 20236,
-      "sha256": "4eb9e34024c4f585fc9401ebac9544acc3799dd788de051d60f445494240de8e",
+      "size_bytes": 21313,
+      "sha256": "9cf726e24b33634645ea135d54c1a00bba00ff9583c667c9411db2feda34c001",
       "role": "write_site_without_static_target",
       "reference_count": 0,
       "write_site_count": 3,
@@ -5586,6 +5616,26 @@
       "file_type": "text/x-python",
       "size_bytes": 19578,
       "sha256": "5acf995e2d3addf87343cc6b30677145ce845a31d4ee1820369cd7f7af754bc3",
+      "role": "unreferenced",
+      "reference_count": 0,
+      "write_site_count": 0,
+      "issues": []
+    },
+    {
+      "path": "tools/provenance/validate_regression_corpus.py",
+      "file_type": "text/x-python",
+      "size_bytes": 6557,
+      "sha256": "6b6a1c505303596c3270799869b418a36f2fd1e5e6024f9be6edaacbe14fe5a3",
+      "role": "unreferenced",
+      "reference_count": 0,
+      "write_site_count": 0,
+      "issues": []
+    },
+    {
+      "path": "tools/provenance/validate_review_backlog.py",
+      "file_type": "text/x-python",
+      "size_bytes": 7876,
+      "sha256": "1fe10a0ef16c66185b9cfa7ec9f29b936d3b0e0f18d9fc29b18ea371121539f1",
       "role": "unreferenced",
       "reference_count": 0,
       "write_site_count": 0,
@@ -7630,6 +7680,94 @@
       "id": "ref-000085"
     },
     {
+      "owner": "tests/provenance/test_corpus_and_backlog.py",
+      "target": "data/source.json",
+      "reference_kind": "repository_path_literal",
+      "literal": "data/source.json",
+      "line": 26,
+      "column": 22,
+      "context": "code_or_text",
+      "reference_scope": "test_fixture_relative",
+      "exists": null,
+      "target_type": "test_fixture_relative",
+      "target_sha256": null,
+      "target_manifest_kind": null,
+      "target_license": null,
+      "issues": [
+        "INTENTIONAL_TEST_FIXTURE"
+      ],
+      "evidence": [
+        "tests/provenance/test_corpus_and_backlog.py:26"
+      ],
+      "id": "ref-000086"
+    },
+    {
+      "owner": "tests/provenance/test_corpus_and_backlog.py",
+      "target": "data/source.json",
+      "reference_kind": "repository_path_literal",
+      "literal": "data/source.json",
+      "line": 37,
+      "column": 27,
+      "context": "code_or_text",
+      "reference_scope": "test_fixture_relative",
+      "exists": null,
+      "target_type": "test_fixture_relative",
+      "target_sha256": null,
+      "target_manifest_kind": null,
+      "target_license": null,
+      "issues": [
+        "INTENTIONAL_TEST_FIXTURE"
+      ],
+      "evidence": [
+        "tests/provenance/test_corpus_and_backlog.py:37"
+      ],
+      "id": "ref-000087"
+    },
+    {
+      "owner": "tests/provenance/test_corpus_and_backlog.py",
+      "target": "data/source.json",
+      "reference_kind": "repository_path_literal",
+      "literal": "data/source.json",
+      "line": 40,
+      "column": 23,
+      "context": "code_or_text",
+      "reference_scope": "test_fixture_relative",
+      "exists": null,
+      "target_type": "test_fixture_relative",
+      "target_sha256": null,
+      "target_manifest_kind": null,
+      "target_license": null,
+      "issues": [
+        "INTENTIONAL_TEST_FIXTURE"
+      ],
+      "evidence": [
+        "tests/provenance/test_corpus_and_backlog.py:40"
+      ],
+      "id": "ref-000088"
+    },
+    {
+      "owner": "tests/provenance/test_corpus_and_backlog.py",
+      "target": "data/source.json",
+      "reference_kind": "repository_path_literal",
+      "literal": "data/source.json",
+      "line": 83,
+      "column": 56,
+      "context": "code_or_text",
+      "reference_scope": "test_fixture_relative",
+      "exists": null,
+      "target_type": "test_fixture_relative",
+      "target_sha256": null,
+      "target_manifest_kind": null,
+      "target_license": null,
+      "issues": [
+        "INTENTIONAL_TEST_FIXTURE"
+      ],
+      "evidence": [
+        "tests/provenance/test_corpus_and_backlog.py:83"
+      ],
+      "id": "ref-000089"
+    },
+    {
       "owner": "tests/provenance/test_provenance_validator.py",
       "target": "data/source.json",
       "reference_kind": "repository_path_literal",
@@ -7649,7 +7787,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:49"
       ],
-      "id": "ref-000086"
+      "id": "ref-000090"
     },
     {
       "owner": "tests/provenance/test_provenance_validator.py",
@@ -7671,7 +7809,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:52"
       ],
-      "id": "ref-000087"
+      "id": "ref-000091"
     },
     {
       "owner": "tests/provenance/test_provenance_validator.py",
@@ -7693,7 +7831,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:54"
       ],
-      "id": "ref-000088"
+      "id": "ref-000092"
     },
     {
       "owner": "tests/provenance/test_provenance_validator.py",
@@ -7715,7 +7853,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:64"
       ],
-      "id": "ref-000089"
+      "id": "ref-000093"
     },
     {
       "owner": "tests/provenance/test_provenance_validator.py",
@@ -7737,7 +7875,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:64"
       ],
-      "id": "ref-000090"
+      "id": "ref-000094"
     },
     {
       "owner": "tests/provenance/test_provenance_validator.py",
@@ -7759,7 +7897,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:85"
       ],
-      "id": "ref-000091"
+      "id": "ref-000095"
     },
     {
       "owner": "tests/provenance/test_provenance_validator.py",
@@ -7781,7 +7919,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:86"
       ],
-      "id": "ref-000092"
+      "id": "ref-000096"
     },
     {
       "owner": "tests/provenance/test_provenance_validator.py",
@@ -7803,7 +7941,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:111"
       ],
-      "id": "ref-000093"
+      "id": "ref-000097"
     },
     {
       "owner": "tests/provenance/test_provenance_validator.py",
@@ -7825,7 +7963,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:112"
       ],
-      "id": "ref-000094"
+      "id": "ref-000098"
     },
     {
       "owner": "tests/provenance/test_provenance_validator.py",
@@ -7847,7 +7985,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:114"
       ],
-      "id": "ref-000095"
+      "id": "ref-000099"
     },
     {
       "owner": "tests/provenance/test_provenance_validator.py",
@@ -7869,7 +8007,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:122"
       ],
-      "id": "ref-000096"
+      "id": "ref-000100"
     },
     {
       "owner": "tests/provenance/test_provenance_validator.py",
@@ -7891,7 +8029,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:123"
       ],
-      "id": "ref-000097"
+      "id": "ref-000101"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -7913,7 +8051,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:23"
       ],
-      "id": "ref-000098"
+      "id": "ref-000102"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -7935,7 +8073,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:24"
       ],
-      "id": "ref-000099"
+      "id": "ref-000103"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -7957,7 +8095,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:26"
       ],
-      "id": "ref-000100"
+      "id": "ref-000104"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -7979,7 +8117,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:26"
       ],
-      "id": "ref-000101"
+      "id": "ref-000105"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8001,7 +8139,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:31"
       ],
-      "id": "ref-000102"
+      "id": "ref-000106"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8023,7 +8161,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:35"
       ],
-      "id": "ref-000103"
+      "id": "ref-000107"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8045,7 +8183,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:36"
       ],
-      "id": "ref-000104"
+      "id": "ref-000108"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8067,7 +8205,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:41"
       ],
-      "id": "ref-000105"
+      "id": "ref-000109"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8089,7 +8227,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:43"
       ],
-      "id": "ref-000106"
+      "id": "ref-000110"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8111,7 +8249,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:74"
       ],
-      "id": "ref-000107"
+      "id": "ref-000111"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8133,7 +8271,51 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:88"
       ],
-      "id": "ref-000108"
+      "id": "ref-000112"
+    },
+    {
+      "owner": "tests/provenance/test_reference_matrix.py",
+      "target": "data/source.json",
+      "reference_kind": "repository_path_literal",
+      "literal": "data/source.json",
+      "line": 99,
+      "column": 24,
+      "context": "code_or_text",
+      "reference_scope": "test_fixture_relative",
+      "exists": null,
+      "target_type": "test_fixture_relative",
+      "target_sha256": null,
+      "target_manifest_kind": null,
+      "target_license": null,
+      "issues": [
+        "INTENTIONAL_TEST_FIXTURE"
+      ],
+      "evidence": [
+        "tests/provenance/test_reference_matrix.py:99"
+      ],
+      "id": "ref-000113"
+    },
+    {
+      "owner": "tests/provenance/test_reference_matrix.py",
+      "target": "data/source.json",
+      "reference_kind": "repository_path_literal",
+      "literal": "data/source.json",
+      "line": 99,
+      "column": 61,
+      "context": "code_or_text",
+      "reference_scope": "test_fixture_relative",
+      "exists": null,
+      "target_type": "test_fixture_relative",
+      "target_sha256": null,
+      "target_manifest_kind": null,
+      "target_license": null,
+      "issues": [
+        "INTENTIONAL_TEST_FIXTURE"
+      ],
+      "evidence": [
+        "tests/provenance/test_reference_matrix.py:99"
+      ],
+      "id": "ref-000114"
     },
     {
       "owner": "tests/test_runner.gd",
@@ -8155,7 +8337,7 @@
       "evidence": [
         "tests/test_runner.gd:512"
       ],
-      "id": "ref-000109"
+      "id": "ref-000115"
     },
     {
       "owner": "tests/test_runner.gd",
@@ -8177,7 +8359,7 @@
       "evidence": [
         "tests/test_runner.gd:771"
       ],
-      "id": "ref-000110"
+      "id": "ref-000116"
     },
     {
       "owner": "tests/test_runner.gd",
@@ -8199,7 +8381,7 @@
       "evidence": [
         "tests/test_runner.gd:804"
       ],
-      "id": "ref-000111"
+      "id": "ref-000117"
     },
     {
       "owner": "tests/test_runner.gd",
@@ -8221,7 +8403,7 @@
       "evidence": [
         "tests/test_runner.gd:2267"
       ],
-      "id": "ref-000112"
+      "id": "ref-000118"
     },
     {
       "owner": "tests/v2_2/v2_2_performance_guard_test.gd",
@@ -8243,7 +8425,7 @@
       "evidence": [
         "tests/v2_2/v2_2_performance_guard_test.gd:27"
       ],
-      "id": "ref-000113"
+      "id": "ref-000119"
     },
     {
       "owner": "tests/v2_2/v2_2_performance_guard_test.gd",
@@ -8263,7 +8445,7 @@
       "evidence": [
         "tests/v2_2/v2_2_performance_guard_test.gd:36"
       ],
-      "id": "ref-000114"
+      "id": "ref-000120"
     },
     {
       "owner": "tests/v2_2/v2_2_performance_guard_test.gd",
@@ -8285,7 +8467,7 @@
       "evidence": [
         "tests/v2_2/v2_2_performance_guard_test.gd:60"
       ],
-      "id": "ref-000115"
+      "id": "ref-000121"
     },
     {
       "owner": "tests/v2_2/v2_2_performance_guard_test.gd",
@@ -8307,7 +8489,7 @@
       "evidence": [
         "tests/v2_2/v2_2_performance_guard_test.gd:64"
       ],
-      "id": "ref-000116"
+      "id": "ref-000122"
     },
     {
       "owner": "tests/v2_3/v2_3_controlled_world_test.gd",
@@ -8329,7 +8511,7 @@
       "evidence": [
         "tests/v2_3/v2_3_controlled_world_test.gd:225"
       ],
-      "id": "ref-000117"
+      "id": "ref-000123"
     },
     {
       "owner": "tests/variable_state/generate_current_save_v1_fixture.gd",
@@ -8351,7 +8533,7 @@
       "evidence": [
         "tests/variable_state/generate_current_save_v1_fixture.gd:8"
       ],
-      "id": "ref-000118"
+      "id": "ref-000124"
     },
     {
       "owner": "tests/variable_state/variable_state_behavior_baseline_test.gd",
@@ -8373,7 +8555,7 @@
       "evidence": [
         "tests/variable_state/variable_state_behavior_baseline_test.gd:9"
       ],
-      "id": "ref-000119"
+      "id": "ref-000125"
     },
     {
       "owner": "tests/vnext/state_politics_r3_transition_test.gd",
@@ -8395,7 +8577,7 @@
       "evidence": [
         "tests/vnext/state_politics_r3_transition_test.gd:4"
       ],
-      "id": "ref-000120"
+      "id": "ref-000126"
     },
     {
       "owner": "tests/vnext/state_politics_test.gd",
@@ -8417,7 +8599,7 @@
       "evidence": [
         "tests/vnext/state_politics_test.gd:4"
       ],
-      "id": "ref-000121"
+      "id": "ref-000127"
     },
     {
       "owner": "tools/audit_1900_commodity_economy.py",
@@ -8439,7 +8621,7 @@
       "evidence": [
         "tools/audit_1900_commodity_economy.py:8"
       ],
-      "id": "ref-000122"
+      "id": "ref-000128"
     },
     {
       "owner": "tools/audit_1900_economy_integration.py",
@@ -8461,7 +8643,7 @@
       "evidence": [
         "tools/audit_1900_economy_integration.py:11"
       ],
-      "id": "ref-000123"
+      "id": "ref-000129"
     },
     {
       "owner": "tools/audit_1900_economy_integration.py",
@@ -8483,7 +8665,7 @@
       "evidence": [
         "tools/audit_1900_economy_integration.py:12"
       ],
-      "id": "ref-000124"
+      "id": "ref-000130"
     },
     {
       "owner": "tools/audit_1900_economy_integration.py",
@@ -8505,7 +8687,7 @@
       "evidence": [
         "tools/audit_1900_economy_integration.py:13"
       ],
-      "id": "ref-000125"
+      "id": "ref-000131"
     },
     {
       "owner": "tools/audit_1900_economy_integration.py",
@@ -8527,7 +8709,7 @@
       "evidence": [
         "tools/audit_1900_economy_integration.py:14"
       ],
-      "id": "ref-000126"
+      "id": "ref-000132"
     },
     {
       "owner": "tools/audit_1900_economy_integration.py",
@@ -8549,7 +8731,7 @@
       "evidence": [
         "tools/audit_1900_economy_integration.py:15"
       ],
-      "id": "ref-000127"
+      "id": "ref-000133"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8571,7 +8753,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:595"
       ],
-      "id": "ref-000128"
+      "id": "ref-000134"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8591,7 +8773,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:604"
       ],
-      "id": "ref-000129"
+      "id": "ref-000135"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8613,7 +8795,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:605"
       ],
-      "id": "ref-000130"
+      "id": "ref-000136"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8633,7 +8815,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:628"
       ],
-      "id": "ref-000131"
+      "id": "ref-000137"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8653,7 +8835,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:812"
       ],
-      "id": "ref-000132"
+      "id": "ref-000138"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8673,7 +8855,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:812"
       ],
-      "id": "ref-000133"
+      "id": "ref-000139"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8693,7 +8875,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:812"
       ],
-      "id": "ref-000134"
+      "id": "ref-000140"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8715,7 +8897,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:812"
       ],
-      "id": "ref-000135"
+      "id": "ref-000141"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8737,7 +8919,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:856"
       ],
-      "id": "ref-000136"
+      "id": "ref-000142"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8759,7 +8941,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:856"
       ],
-      "id": "ref-000137"
+      "id": "ref-000143"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8781,7 +8963,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:900"
       ],
-      "id": "ref-000138"
+      "id": "ref-000144"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8803,7 +8985,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:900"
       ],
-      "id": "ref-000139"
+      "id": "ref-000145"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8825,7 +9007,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:900"
       ],
-      "id": "ref-000140"
+      "id": "ref-000146"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8847,7 +9029,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:944"
       ],
-      "id": "ref-000141"
+      "id": "ref-000147"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8869,7 +9051,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:944"
       ],
-      "id": "ref-000142"
+      "id": "ref-000148"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8891,7 +9073,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:944"
       ],
-      "id": "ref-000143"
+      "id": "ref-000149"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8913,7 +9095,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:944"
       ],
-      "id": "ref-000144"
+      "id": "ref-000150"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8933,7 +9115,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:988"
       ],
-      "id": "ref-000145"
+      "id": "ref-000151"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8955,7 +9137,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:988"
       ],
-      "id": "ref-000146"
+      "id": "ref-000152"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8977,7 +9159,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:988"
       ],
-      "id": "ref-000147"
+      "id": "ref-000153"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8999,7 +9181,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:1032"
       ],
-      "id": "ref-000148"
+      "id": "ref-000154"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9021,7 +9203,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:1032"
       ],
-      "id": "ref-000149"
+      "id": "ref-000155"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9043,7 +9225,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:1076"
       ],
-      "id": "ref-000150"
+      "id": "ref-000156"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9065,7 +9247,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:1076"
       ],
-      "id": "ref-000151"
+      "id": "ref-000157"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9087,7 +9269,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:1076"
       ],
-      "id": "ref-000152"
+      "id": "ref-000158"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9109,7 +9291,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:1120"
       ],
-      "id": "ref-000153"
+      "id": "ref-000159"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9131,7 +9313,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:1120"
       ],
-      "id": "ref-000154"
+      "id": "ref-000160"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9151,7 +9333,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:1164"
       ],
-      "id": "ref-000155"
+      "id": "ref-000161"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9171,7 +9353,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:1252"
       ],
-      "id": "ref-000156"
+      "id": "ref-000162"
     },
     {
       "owner": "tools/audit_formal_variable_state.py",
@@ -9191,7 +9373,7 @@
       "evidence": [
         "tools/audit_formal_variable_state.py:1001"
       ],
-      "id": "ref-000157"
+      "id": "ref-000163"
     },
     {
       "owner": "tools/build_1900_world_economy_estimates.py",
@@ -9211,7 +9393,7 @@
       "evidence": [
         "tools/build_1900_world_economy_estimates.py:13"
       ],
-      "id": "ref-000158"
+      "id": "ref-000164"
     },
     {
       "owner": "tools/compact_1900_world_economy_estimates.py",
@@ -9233,7 +9415,7 @@
       "evidence": [
         "tools/compact_1900_world_economy_estimates.py:75"
       ],
-      "id": "ref-000159"
+      "id": "ref-000165"
     },
     {
       "owner": "tools/compact_1900_world_economy_estimates.py",
@@ -9255,7 +9437,7 @@
       "evidence": [
         "tools/compact_1900_world_economy_estimates.py:91"
       ],
-      "id": "ref-000160"
+      "id": "ref-000166"
     },
     {
       "owner": "tools/historical_data/audit_1900_historical_provider.py",
@@ -9275,7 +9457,7 @@
       "evidence": [
         "tools/historical_data/audit_1900_historical_provider.py:12"
       ],
-      "id": "ref-000161"
+      "id": "ref-000167"
     },
     {
       "owner": "tools/historical_data/audit_1900_historical_provider.py",
@@ -9295,7 +9477,7 @@
       "evidence": [
         "tools/historical_data/audit_1900_historical_provider.py:13"
       ],
-      "id": "ref-000162"
+      "id": "ref-000168"
     },
     {
       "owner": "tools/historical_data/audit_1900_historical_provider.py",
@@ -9315,7 +9497,7 @@
       "evidence": [
         "tools/historical_data/audit_1900_historical_provider.py:14"
       ],
-      "id": "ref-000163"
+      "id": "ref-000169"
     },
     {
       "owner": "tools/historical_data/audit_major_state_detail_1900.py",
@@ -9337,7 +9519,7 @@
       "evidence": [
         "tools/historical_data/audit_major_state_detail_1900.py:7"
       ],
-      "id": "ref-000164"
+      "id": "ref-000170"
     },
     {
       "owner": "tools/historical_data/audit_major_state_detail_1900.py",
@@ -9359,7 +9541,7 @@
       "evidence": [
         "tools/historical_data/audit_major_state_detail_1900.py:8"
       ],
-      "id": "ref-000165"
+      "id": "ref-000171"
     },
     {
       "owner": "tools/historical_data/build_1900_entity_registry.py",
@@ -9379,7 +9561,7 @@
       "evidence": [
         "tools/historical_data/build_1900_entity_registry.py:15"
       ],
-      "id": "ref-000166"
+      "id": "ref-000172"
     },
     {
       "owner": "tools/historical_data/build_1900_entity_registry.py",
@@ -9399,7 +9581,7 @@
       "evidence": [
         "tools/historical_data/build_1900_entity_registry.py:16"
       ],
-      "id": "ref-000167"
+      "id": "ref-000173"
     },
     {
       "owner": "tools/historical_data/build_1900_flag_registry.py",
@@ -9419,7 +9601,7 @@
       "evidence": [
         "tools/historical_data/build_1900_flag_registry.py:29"
       ],
-      "id": "ref-000168"
+      "id": "ref-000174"
     },
     {
       "owner": "tools/historical_data/build_1900_flag_registry.py",
@@ -9439,7 +9621,7 @@
       "evidence": [
         "tools/historical_data/build_1900_flag_registry.py:30"
       ],
-      "id": "ref-000169"
+      "id": "ref-000175"
     },
     {
       "owner": "tools/historical_data/build_1900_flag_registry.py",
@@ -9459,7 +9641,7 @@
       "evidence": [
         "tools/historical_data/build_1900_flag_registry.py:31"
       ],
-      "id": "ref-000170"
+      "id": "ref-000176"
     },
     {
       "owner": "tools/historical_data/build_1900_flag_registry.py",
@@ -9479,7 +9661,7 @@
       "evidence": [
         "tools/historical_data/build_1900_flag_registry.py:32"
       ],
-      "id": "ref-000171"
+      "id": "ref-000177"
     },
     {
       "owner": "tools/historical_data/build_cshapes_1900_snapshot.py",
@@ -9499,7 +9681,7 @@
       "evidence": [
         "tools/historical_data/build_cshapes_1900_snapshot.py:25"
       ],
-      "id": "ref-000172"
+      "id": "ref-000178"
     },
     {
       "owner": "tools/historical_data/build_cshapes_1900_snapshot.py",
@@ -9519,7 +9701,7 @@
       "evidence": [
         "tools/historical_data/build_cshapes_1900_snapshot.py:26"
       ],
-      "id": "ref-000173"
+      "id": "ref-000179"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -9539,7 +9721,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:33"
       ],
-      "id": "ref-000174"
+      "id": "ref-000180"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -9559,7 +9741,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:34"
       ],
-      "id": "ref-000175"
+      "id": "ref-000181"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -9579,7 +9761,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:36"
       ],
-      "id": "ref-000176"
+      "id": "ref-000182"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -9599,7 +9781,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:37"
       ],
-      "id": "ref-000177"
+      "id": "ref-000183"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -9619,7 +9801,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:406"
       ],
-      "id": "ref-000178"
+      "id": "ref-000184"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -9639,7 +9821,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:445"
       ],
-      "id": "ref-000179"
+      "id": "ref-000185"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -9659,7 +9841,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:445"
       ],
-      "id": "ref-000180"
+      "id": "ref-000186"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -9679,7 +9861,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:575"
       ],
-      "id": "ref-000181"
+      "id": "ref-000187"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -9699,7 +9881,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:597"
       ],
-      "id": "ref-000182"
+      "id": "ref-000188"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -9719,7 +9901,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:619"
       ],
-      "id": "ref-000183"
+      "id": "ref-000189"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -9741,7 +9923,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:650"
       ],
-      "id": "ref-000184"
+      "id": "ref-000190"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -9763,7 +9945,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:662"
       ],
-      "id": "ref-000185"
+      "id": "ref-000191"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -9785,7 +9967,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:674"
       ],
-      "id": "ref-000186"
+      "id": "ref-000192"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -9807,7 +9989,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:686"
       ],
-      "id": "ref-000187"
+      "id": "ref-000193"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -9829,7 +10011,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:710"
       ],
-      "id": "ref-000188"
+      "id": "ref-000194"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -9851,7 +10033,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:728"
       ],
-      "id": "ref-000189"
+      "id": "ref-000195"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -9873,7 +10055,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:746"
       ],
-      "id": "ref-000190"
+      "id": "ref-000196"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -9895,7 +10077,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:766"
       ],
-      "id": "ref-000191"
+      "id": "ref-000197"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -9917,7 +10099,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:784"
       ],
-      "id": "ref-000192"
+      "id": "ref-000198"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -9939,7 +10121,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:785"
       ],
-      "id": "ref-000193"
+      "id": "ref-000199"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -9961,7 +10143,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:786"
       ],
-      "id": "ref-000194"
+      "id": "ref-000200"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -9983,7 +10165,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:796"
       ],
-      "id": "ref-000195"
+      "id": "ref-000201"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10005,7 +10187,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:799"
       ],
-      "id": "ref-000196"
+      "id": "ref-000202"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10027,7 +10209,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:803"
       ],
-      "id": "ref-000197"
+      "id": "ref-000203"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10049,7 +10231,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:804"
       ],
-      "id": "ref-000198"
+      "id": "ref-000204"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10071,7 +10253,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:815"
       ],
-      "id": "ref-000199"
+      "id": "ref-000205"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10093,7 +10275,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:818"
       ],
-      "id": "ref-000200"
+      "id": "ref-000206"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10113,7 +10295,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:918"
       ],
-      "id": "ref-000201"
+      "id": "ref-000207"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10135,7 +10317,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:932"
       ],
-      "id": "ref-000202"
+      "id": "ref-000208"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10155,7 +10337,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:943"
       ],
-      "id": "ref-000203"
+      "id": "ref-000209"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10175,7 +10357,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:946"
       ],
-      "id": "ref-000204"
+      "id": "ref-000210"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10195,7 +10377,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:947"
       ],
-      "id": "ref-000205"
+      "id": "ref-000211"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10215,7 +10397,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:948"
       ],
-      "id": "ref-000206"
+      "id": "ref-000212"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10235,7 +10417,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:952"
       ],
-      "id": "ref-000207"
+      "id": "ref-000213"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10255,7 +10437,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:953"
       ],
-      "id": "ref-000208"
+      "id": "ref-000214"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10275,7 +10457,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:954"
       ],
-      "id": "ref-000209"
+      "id": "ref-000215"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10297,7 +10479,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:960"
       ],
-      "id": "ref-000210"
+      "id": "ref-000216"
     },
     {
       "owner": "tools/render_variable_state_audit_summary.py",
@@ -10319,7 +10501,7 @@
       "evidence": [
         "tools/render_variable_state_audit_summary.py:70"
       ],
-      "id": "ref-000211"
+      "id": "ref-000217"
     }
   ],
   "candidate_edges": [
@@ -10416,6 +10598,38 @@
     },
     {
       "type": "INTENTIONAL_TEST_FIXTURE",
+      "owner": "tests/provenance/test_corpus_and_backlog.py",
+      "target": "data/source.json",
+      "evidence": [
+        "tests/provenance/test_corpus_and_backlog.py:26"
+      ]
+    },
+    {
+      "type": "INTENTIONAL_TEST_FIXTURE",
+      "owner": "tests/provenance/test_corpus_and_backlog.py",
+      "target": "data/source.json",
+      "evidence": [
+        "tests/provenance/test_corpus_and_backlog.py:37"
+      ]
+    },
+    {
+      "type": "INTENTIONAL_TEST_FIXTURE",
+      "owner": "tests/provenance/test_corpus_and_backlog.py",
+      "target": "data/source.json",
+      "evidence": [
+        "tests/provenance/test_corpus_and_backlog.py:40"
+      ]
+    },
+    {
+      "type": "INTENTIONAL_TEST_FIXTURE",
+      "owner": "tests/provenance/test_corpus_and_backlog.py",
+      "target": "data/source.json",
+      "evidence": [
+        "tests/provenance/test_corpus_and_backlog.py:83"
+      ]
+    },
+    {
+      "type": "INTENTIONAL_TEST_FIXTURE",
       "owner": "tests/provenance/test_provenance_validator.py",
       "target": "data/duplicate.json",
       "evidence": [
@@ -10596,6 +10810,22 @@
       "target": "data/source.json",
       "evidence": [
         "tests/provenance/test_reference_matrix.py:41"
+      ]
+    },
+    {
+      "type": "INTENTIONAL_TEST_FIXTURE",
+      "owner": "tests/provenance/test_reference_matrix.py",
+      "target": "data/source.json",
+      "evidence": [
+        "tests/provenance/test_reference_matrix.py:99"
+      ]
+    },
+    {
+      "type": "INTENTIONAL_TEST_FIXTURE",
+      "owner": "tests/provenance/test_reference_matrix.py",
+      "target": "data/source.json",
+      "evidence": [
+        "tests/provenance/test_reference_matrix.py:99"
       ]
     }
   ]

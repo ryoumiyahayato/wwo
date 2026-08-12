@@ -33,3 +33,13 @@ and candidate dependency edges under `scripts/**`, `scenes/**`, `shaders/**`,
 `tests/**`, and `tools/**`. Dynamic test fixtures are marked
 `INTENTIONAL_TEST_FIXTURE`; candidate edges remain review-required and do not
 become authoritative provenance automatically.
+
+Batch 3 adds two low-risk derived records under `tests/provenance/`:
+
+- `provenance_regression_corpus.json` pins a compact, deterministic copy of
+  manifest records and the manifest hash for regression checks.
+- `provenance_review_backlog.json` ranks only evidence-backed review candidates
+  from the manifest and reference matrix. It is not an instruction to modify
+  authoritative data, infer licenses, or regenerate assets.
+
+The reference matrix deliberately excludes JSON audit outputs under tests/provenance/ from its runtime producer/consumer scope. Those records are validated separately; excluding them prevents the audit from treating its own serialized evidence as game data references or stale runtime artifacts.
