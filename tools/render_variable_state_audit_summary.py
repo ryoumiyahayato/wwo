@@ -32,7 +32,7 @@ TEXT = r'''# 变量、状态所有权与数据流审计
 | 可推导成员候选 | 61 | __DERIVED_COUNT__ | -1 |
 | K类、不得修改字段 | 885 | __UNCLEAR_COUNT__ | 0 |
 
-以上当前值直接来自`tools/audit_variable_state.py`生成的inventory，不是手工估算。扫描器扫描`.gd`、`.tscn`、`.tres`、`.godot`、`.json`和`.cfg`；PR #29新增的测试GDScript和SAVE_VERSION=1 JSON fixture扩大了词法证据范围。`persisted_by_name`是在全部扫描源中，按同名字段与save、load、restore、snapshot等词推断的启发式，因此批准基线472和当前值__PERSISTED_COUNT__不能作为生产持久化字段的净变化比较；本报告不声称已经精确证明每一项增量的来源。第一批经qualified核验减少一份重复可写事实；该项是所有权结论，不是词法扫描器的独立计数器。
+以上当前值直接来自`tools/audit_variable_state.py`生成的inventory，不是手工估算；scanner 只读取显式 runtime discovery contract，contract 外的 staging/review/fixture/report 文件不会进入 inventory。扫描器扫描`.gd`、`.tscn`、`.tres`、`.godot`、`.json`和`.cfg`；PR #29新增的测试GDScript和SAVE_VERSION=1 JSON fixture扩大了词法证据范围。`persisted_by_name`是在全部扫描源中，按同名字段与save、load、restore、snapshot等词推断的启发式，因此批准基线472和当前值__PERSISTED_COUNT__不能作为生产持久化字段的净变化比较；本报告不声称已经精确证明每一项增量的来源。第一批经qualified核验减少一份重复可写事实；该项是所有权结论，不是词法扫描器的独立计数器。
 
 ## 2. 最严重的10组重复或混乱状态
 
@@ -132,8 +132,20 @@ TEXT = r'''# 变量、状态所有权与数据流审计
 - `state_ownership_matrix.md`持有当前与目标所有权矩阵。'''
 
 
-def main() -> None:
-    data = json.loads(INVENTORY.read_text(encoding="utf-8"))
+def format_discovery_scope(contract: dict[str, object]) -> str:
+    source_roots = ", ".join(f"`{value}/`" for value in contract["runtime_source_roots"])
+    config_roots = ", ".join(f"`{value}/`" for value in contract["runtime_config_roots"])
+    excluded_roots = ", ".join(f"`{value}/`" for value in contract["non_authoritative_roots"])
+    excluded_files = ", ".join(f"`{value}`" for value in contract["non_authoritative_exact_files"])
+    return (
+        "## Discovery contract\n\n"
+        f"- Runtime source roots: {source_roots}.\n"
+        f"- Runtime config roots: {config_roots}.\n"
+        f"- Explicitly excluded non-authoritative roots: {excluded_roots}; files: {excluded_files}.\n"
+    )
+
+
+def render_summary_text(data: dict[str, object]) -> str:
     metrics = data["metrics"]
     replacements = {
         "__MEMBER_COUNT__": f"{metrics['member_fields_total']:,}",
@@ -151,8 +163,19 @@ def main() -> None:
     text = TEXT
     for marker, value in replacements.items():
         text = text.replace(marker, value)
-    OUTPUT.write_text(text + "\n", encoding="utf-8")
-    print(f"wrote {OUTPUT}")
+    contract = data.get("discovery_contract", {})
+    text = text.replace("\n## 1. ", "\n\n" + format_discovery_scope(contract) + "\n## 1. ", 1)
+    return text + "\n"
+
+
+def render_summary_file(inventory: Path = INVENTORY, output: Path = OUTPUT) -> None:
+    data = json.loads(inventory.read_text(encoding="utf-8"))
+    output.write_text(render_summary_text(data), encoding="utf-8")
+    print(f"wrote {output}")
+
+
+def main() -> None:
+    render_summary_file()
 
 
 if __name__ == "__main__":
