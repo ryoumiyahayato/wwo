@@ -1590,5 +1590,17 @@ def main(argv: Sequence[str] | None = None) -> int:
     raise AssertionError(args.command)
 
 
+
+
+import sys as _sys
+
+if __name__ == "__main__" and __package__:
+    _sys.modules.setdefault(f"{__package__}.pipeline", _sys.modules[__name__])
+
+from .r1_manifest import install as _install_r1_boundary
+
+_install_r1_boundary(globals())
+del _install_r1_boundary
+
 if __name__ == "__main__":
     raise SystemExit(main())

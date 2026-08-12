@@ -9,10 +9,18 @@
     "entity_id",
     "source_file",
     "source_hash",
+    "source_dimensions",
+    "mask_hash",
+    "output_hash",
+    "preview_hash",
     "crop_bbox",
     "mask_bbox",
     "canvas_size",
     "output_size",
+    "output_file",
+    "mask_file",
+    "preview_file",
+    "coordinate_contract",
     "processing_parameters"
   ],
   "properties": {
@@ -21,8 +29,14 @@
     "entity_id": {"type": "string", "minLength": 1},
     "source_file": {"type": "string", "minLength": 1},
     "source_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-    "mask_source": {"type": "string"},
+    "source_dimensions": {"$ref": "#/$defs/size"},
+    "input_mask_file": {"type": ["string", "null"], "minLength": 1},
+    "input_mask_hash": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+    "input_mask_dimensions": {"anyOf": [{"$ref": "#/$defs/size"}, {"type": "null"}]},
+    "mask_source": {"type": "string", "minLength": 1},
     "mask_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "output_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "preview_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "crop_bbox": {"$ref": "#/$defs/bbox"},
     "requested_candidate_bbox": {"$ref": "#/$defs/bbox"},
     "mask_bbox": {"$ref": "#/$defs/bbox"},
@@ -31,15 +45,47 @@
     "output_file": {"type": "string", "minLength": 1},
     "mask_file": {"type": "string", "minLength": 1},
     "preview_file": {"type": "string", "minLength": 1},
+    "coordinate_contract": {
+      "type": "object",
+      "required": ["space", "mapping", "y_axis"],
+      "properties": {
+        "space": {"enum": ["PIXEL", "WGS84"]},
+        "mapping": {"type": "string", "minLength": 1},
+        "y_axis": {"type": "string", "minLength": 1},
+        "source_bounds": {
+          "type": "array",
+          "prefixItems": [
+            {"type": "number"}, {"type": "number"},
+            {"type": "number"}, {"type": "number"}
+          ],
+          "minItems": 4,
+          "maxItems": 4
+        }
+      },
+      "additionalProperties": true
+    },
     "processing_parameters": {
       "type": "object",
-      "required": ["canonical_canvas_size", "padding", "resampling", "alpha_mode", "original_preserved"],
+      "required": [
+        "canonical_canvas_size",
+        "padding",
+        "resampling",
+        "alpha_mode",
+        "mask_mode",
+        "mask_resampled",
+        "mask_resampling",
+        "original_preserved"
+      ],
       "properties": {
         "canonical_canvas_size": {"$ref": "#/$defs/size"},
         "padding": {"type": "integer", "minimum": 0},
-        "resampling": {"type": "string"},
+        "resampling": {"type": "string", "minLength": 1},
         "source_bounds": {"type": ["array", "null"]},
-        "alpha_mode": {"type": "string"},
+        "alpha_mode": {"type": "string", "minLength": 1},
+        "mask_mode": {"enum": ["alpha", "grayscale", "geometry"]},
+        "mask_input_alpha_availability": {"type": "string", "minLength": 1},
+        "mask_resampled": {"type": "boolean"},
+        "mask_resampling": {"type": "string", "minLength": 1},
         "original_preserved": {"type": "boolean", "const": true}
       },
       "additionalProperties": true
@@ -52,8 +98,8 @@
       "prefixItems": [
         {"type": "integer"},
         {"type": "integer"},
-        {"type": "integer", "minimum": 0},
-        {"type": "integer", "minimum": 0}
+        {"type": "integer", "minimum": 1},
+        {"type": "integer", "minimum": 1}
       ],
       "minItems": 4,
       "maxItems": 4

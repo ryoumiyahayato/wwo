@@ -48,3 +48,11 @@ fragments, holes, and candidate bounds.
 The only generated previews are candidate cutout previews produced when a
 caller supplies a suitable source. Large previews and binary candidates remain
 local-only.
+
+## R1 safety contract
+
+Writes are fail-closed to strict descendants of the ignored `artifacts/map-preprocessing/` tree. Repository root, `.git/`, `data/world_map/`, tracked authoritative files, outside paths, and canonical/symlink escapes are rejected rather than redirected. Source and input-mask hashes are captured before writes; source assets and masks are never overwritten. Sanitized entity-ID stems include a deterministic hash of the original ID and the manifest retains the original ID.
+
+`PIXEL` geometry maps directly to a top-left canvas. `WGS84` geometry requires explicit finite source bounds and records the mapping and y-axis convention. Malformed points/rings produce explicit errors. Mask mode is explicit (`alpha`, `grayscale`, or derived `geometry`); dimension mismatch is rejected unless nearest-neighbor resampling is opted in and recorded. Published manifests validate required fields, actual file references, dimensions, hashes, positive in-canvas bboxes, coordinate contract, alpha/mask semantics, and distinct paths.
+
+Generated visuals remain candidate-only and cannot become spatial authority. The source-absence status is derived from the inventory and provenance/license/coordinate-contract fields: with no approved source it is `BLOCKED_NO_SOURCE_MAP_ASSET`; a future approved source is not blocked by a permanent constant. Historical flag PNGs remain visual-only and are never map-space sources.
