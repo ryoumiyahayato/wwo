@@ -93,7 +93,7 @@
 @ scripts/action/player_action_context_service.gd | PlayerActionContextService
 5 C TARGET_DOMAIN_NONE
 6 C TARGET_DOMAIN_CHARACTER
-7 C TARGET_DOMAIN_MAP
+7 C TARGET_DOMAIN_ORGANIZATION
 8 C TARGET_DOMAIN_MAP
 10 K rules
 11 K society
