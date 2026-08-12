@@ -1,0 +1,70 @@
+{
+  "backlog": [
+    {
+      "id": "B4-01",
+      "item": "Preserve unique stable IDs across city-detail shards.",
+      "status": "no_action_needed",
+      "trigger": "duplicate_city_ids > 0"
+    },
+    {
+      "id": "B4-02",
+      "item": "Keep shard declared counts and index counts synchronized.",
+      "status": "no_action_needed",
+      "trigger": "count_mismatches > 0 or CITY_INDEX_COUNT issue"
+    },
+    {
+      "id": "B4-03",
+      "item": "Reject non-finite or out-of-range city coordinates before shard generation.",
+      "status": "no_action_needed",
+      "trigger": "invalid_city_coordinates > 0"
+    },
+    {
+      "id": "B4-04",
+      "item": "Keep all runtime-loader documents at schema_version 1 until an explicit migration exists.",
+      "status": "no_action_needed",
+      "trigger": "runtime_bad_schema is non-empty"
+    },
+    {
+      "id": "B4-05",
+      "item": "Review any runtime document that lacks prototype_only=true before promoting it to authoritative runtime input.",
+      "status": "review_only",
+      "trigger": "runtime_missing_prototype_flag is non-empty"
+    }
+  ],
+  "error_count": 0,
+  "input_root": "data/world_map",
+  "issues": [],
+  "metrics": {
+    "actual_shards": 156,
+    "count_mismatches": 0,
+    "duplicate_city_ids": 0,
+    "france_shard_count": 13,
+    "france_shard_record_count": 36871,
+    "index_country_entries": 144,
+    "index_record_count": 88927,
+    "invalid_bounds": 0,
+    "invalid_city_coordinates": 0,
+    "referenced_shards": 156,
+    "runtime_bad_schema": [],
+    "runtime_file_count": 16,
+    "runtime_missing": [],
+    "runtime_missing_prototype_flag": [],
+    "runtime_root_types": {
+      "dict": 16
+    },
+    "runtime_schema_versions": {
+      "1": 2,
+      "2": 5,
+      "3": 6,
+      "4": 3
+    },
+    "shard_record_count": 88927,
+    "stable_id_duplicate_arrays": 0,
+    "stable_id_missing": 0,
+    "stable_id_records_checked": 244
+  },
+  "schema_version": 1,
+  "tool_id": "wwo_world_data_quality_audit_batch_4",
+  "valid": true,
+  "warning_count": 0
+}
