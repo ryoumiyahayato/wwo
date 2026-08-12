@@ -11,6 +11,7 @@ func _initialize() -> void:
 func _run() -> void:
 	_test_shortage_and_surplus_recovery()
 	_test_transport_recovery()
+	_test_r1_route_snapshot_compatibility()
 	_test_extreme_legal_inputs()
 	_test_nonfinite_controls_rejected()
 	print("VNext market economy recovery: %d checks, %d failures" % [checks, failures])
@@ -74,16 +75,38 @@ func _test_transport_recovery() -> void:
 	var origin := _region(economy, "region_loran_riverback")
 	var destination := _region(economy, "region_loran_dawnbay")
 	for edge: Dictionary in economy.catalog.transport_edges:
-		_check(economy.set_route_capacity(str(edge.get("edge_id", "")), 0.0), "transport edge can be closed")
+		_check(economy.set_fixture_route_budget(str(edge.get("edge_id", "")), 0.0), "fixture route budget can be closed")
 	_check(economy.set_region_inventory(origin, "clothing", 200000.0), "transport recovery origin stock prepared")
 	_check(economy.set_region_inventory(destination, "clothing", 0.0), "transport recovery destination stock depleted")
 	_check(bool(economy.settle_day(0).get("success", false)), "closed-network day settles")
-	_check(_find_shipment(economy.snapshot(), origin, destination, "clothing").is_empty(), "closed transport prevents shipment")
+	_check(_find_shipment(economy.snapshot(), origin, destination, "clothing").is_empty(), "closed fixture network prevents shipment")
 	for edge: Dictionary in economy.catalog.transport_edges:
-		_check(economy.restore_route_capacity(str(edge.get("edge_id", ""))), "transport edge restores default capacity")
+		_check(economy.restore_fixture_route_budget(str(edge.get("edge_id", ""))), "fixture route budget restores default")
 	_check(bool(economy.settle_day(1).get("success", false)), "restored-network day settles")
-	_check(not _find_shipment(economy.snapshot(), origin, destination, "clothing").is_empty(), "restored transport resumes physical shipment")
+	_check(not _find_shipment(economy.snapshot(), origin, destination, "clothing").is_empty(), "restored fixture transport resumes physical shipment")
 	_check(economy.validate_integrity(), "transport recovery preserves physical accounting")
+
+
+func _test_r1_route_snapshot_compatibility() -> void:
+	var source := _new_economy("R1 route snapshot source")
+	var edge_id := str((source.catalog.transport_edges[0] as Dictionary).get("edge_id", ""))
+	_check(source.set_fixture_route_budget(edge_id, 3.0), "R1 compatibility fixture changes one route budget")
+	_check(bool(source.settle_day(0).get("success", false)), "R1 compatibility source settles")
+	var legacy := source.snapshot()
+	var route_state := (legacy.get("route_network", {}) as Dictionary).duplicate(true)
+	route_state["edge_capacity_overrides"] = route_state.get("fixture_edge_budget_overrides", {})
+	route_state["edge_remaining_capacity"] = route_state.get("fixture_edge_remaining_budget", {})
+	route_state.erase("fixture_edge_budget_overrides")
+	route_state.erase("fixture_edge_remaining_budget")
+	legacy["route_network"] = route_state
+	var restored := _new_economy("R1 route snapshot target")
+	_check(restored.restore(legacy), "R1 capacity-key route snapshot restores at the load boundary")
+	var normalized_route := restored.snapshot().get("route_network", {}) as Dictionary
+	_check(normalized_route.has("fixture_edge_budget_overrides"), "restored route snapshot normalizes to fixture-budget keys")
+	_check(normalized_route.has("fixture_edge_remaining_budget"), "restored route snapshot keeps normalized remaining fixture budget")
+	_check(not normalized_route.has("edge_capacity_overrides"), "restored route snapshot does not persist legacy physical-sounding override key")
+	_check(not normalized_route.has("edge_remaining_capacity"), "restored route snapshot does not persist legacy physical-sounding remaining key")
+	_check(restored.validate_integrity(), "R1 route snapshot normalization preserves physical accounting")
 
 
 func _test_extreme_legal_inputs() -> void:
@@ -113,8 +136,8 @@ func _test_nonfinite_controls_rejected() -> void:
 	_check(not economy.set_region_inventory(market_id, "bread", NAN), "inventory setter rejects NaN")
 	_check(not economy.set_region_inventory(market_id, "bread", INF), "inventory setter rejects infinity")
 	var edge_id := str((economy.catalog.transport_edges[0] as Dictionary).get("edge_id", ""))
-	_check(not economy.set_route_capacity(edge_id, NAN), "route capacity rejects NaN")
-	_check(not economy.set_route_capacity(edge_id, INF), "route capacity rejects infinity")
+	_check(not economy.set_fixture_route_budget(edge_id, NAN), "fixture route budget rejects NaN")
+	_check(not economy.set_fixture_route_budget(edge_id, INF), "fixture route budget rejects infinity")
 	_check(economy.validate_integrity(), "nonfinite controls leave economy valid")
 
 

@@ -218,17 +218,21 @@ func snapshot() -> Dictionary:
 
 
 func restore(snapshot_value: Dictionary) -> bool:
-	if (
-		not snapshot_value.get("fixture_edge_budget_overrides", {}) is Dictionary
-		or not snapshot_value.get("fixture_edge_remaining_budget", {}) is Dictionary
-	):
+	# R1 candidate snapshots used physical-sounding route-capacity key names.
+	# Accept them at the load boundary, but immediately normalize to the
+	# post-PR62 non-authoritative fixture-budget representation.
+	var overrides_value: Variant = snapshot_value.get(
+		"fixture_edge_budget_overrides",
+		snapshot_value.get("edge_capacity_overrides", {})
+	)
+	var remaining_value: Variant = snapshot_value.get(
+		"fixture_edge_remaining_budget",
+		snapshot_value.get("edge_remaining_capacity", {})
+	)
+	if not overrides_value is Dictionary or not remaining_value is Dictionary:
 		return false
-	var candidate_overrides: Dictionary = (
-		snapshot_value.get("fixture_edge_budget_overrides", {}) as Dictionary
-	).duplicate(true)
-	var candidate_remaining: Dictionary = (
-		snapshot_value.get("fixture_edge_remaining_budget", {}) as Dictionary
-	).duplicate(true)
+	var candidate_overrides: Dictionary = (overrides_value as Dictionary).duplicate(true)
+	var candidate_remaining: Dictionary = (remaining_value as Dictionary).duplicate(true)
 	for raw_edge_id: Variant in candidate_overrides:
 		var edge_id: String = str(raw_edge_id)
 		if (
