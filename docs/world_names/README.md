@@ -49,7 +49,17 @@ writes only source-record-keyed candidates:
   pointers and no authoritative identity.
 - candidate_collision_ledger.json: preserved normalized one-to-many groups for
   manual review; no historical contradiction is inferred.
-- performance_benchmark.json: measured build timings and structural counts.
+- artifact_manifest.json: deterministic paths, SHA-256 hashes, record counts,
+  schema versions, and a source-input fingerprint. It excludes this manifest
+  and excludes observational timing.
+- performance_benchmark.json: local-only NON_DETERMINISTIC_OBSERVATIONAL
+  timing output. It is ignored, is not part of the manifest, and must not be
+  used as evidence of byte-identical regeneration.
+
+The candidate validator independently rereads each source file, pointer,
+field, value, source hash, and source-record identity. The staged validator
+regenerates core and candidate artifacts from the tracked source tree and
+compares canonical output with the tracked artifacts.
 
 Run it with:
 python -m tools.world_names.review_candidates --root D:/wwo --benchmark-repetitions 3

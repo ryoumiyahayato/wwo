@@ -1,6 +1,6 @@
 # WWO WORLD NAMES & ALIASES - BATCH 3 REPORT
 
-Starting master: 4b738ab
+Starting master: 4d59e8ee47d4331332ee03c2668e766b620e4956
 
 ## Safe review candidates
 
@@ -14,7 +14,7 @@ Starting master: 4b738ab
 
 ## Coverage context
 
-- Repository data JSON files in coverage manifest: 224
+- Repository data JSON files in coverage manifest: 225
 - Coverage parse errors: 0
 - Unconfigured name-like occurrences retained as gaps: 1077
 
@@ -22,16 +22,14 @@ Starting master: 4b738ab
 
 - Base Batch 1/2 validator: PASS
 - Candidate validator: PASS
-- Benchmark operation: world_names.build_artifacts
-- Benchmark skipped: False
-- Benchmark repetitions: 3
-- Benchmark elapsed seconds: 12.369444
+- Benchmark: NON_DETERMINISTIC_OBSERVATIONAL (local-only; not tracked)
+- Wall-clock timing is excluded from deterministic semantic artifacts and manifest hashes
 
 ## Authority and delivery
 
 - Authoritative IDs changed: NO
 - Production catalogs rewritten: NO
-- Checkpoint: 2f0f3a0 (implementation)
-- Push: BLOCKED: network unavailable
+- Checkpoint: post-pr71-reconciliation
+- Push: pending
 - Draft PR: none
 - No merge performed by this task.

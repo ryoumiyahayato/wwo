@@ -1,87 +1,107 @@
 {
   "files": [
     {
-      "bytes": 1312891,
+      "bytes": 1277173,
       "path": "data/staging/world_names/aliases.json",
+      "record_count": 2232,
       "role": "alias staging",
       "schema_version": 1,
-      "sha256": "ca18448dbfd5c580cfcbdf2475ab6ac525d702592b934a8d4cb3ee9dbf94f1ac"
+      "sha256": "38acc9aa23873e48fea175afeb545337c8d9956382d4466a24936da5b707587c"
     },
     {
-      "bytes": 25788,
+      "bytes": 25047,
       "path": "data/staging/world_names/candidate_collision_ledger.json",
+      "record_count": 46,
       "role": "review-candidate collision ledger",
       "schema_version": 1,
-      "sha256": "73750b964c4a9ce0917ec59237a4d5e4382fd52977f16df2fa8574a2c28a5777"
+      "sha256": "9c336be2b7656947946cef0dc67ecec4502f96e5be2c0376d07b4da1357bb049"
     },
     {
-      "bytes": 264043,
+      "bytes": 252212,
       "path": "data/staging/world_names/collision_report.json",
+      "record_count": 138,
       "role": "collision report",
       "schema_version": 1,
-      "sha256": "03d20edb50a6b4a5dcf72ce0bdf38497682ae1c4da8eaf1520c727f0aeee1a6b"
+      "sha256": "039db137206e0e262f38d2b37da1a1556b3bd7fa1abba1c363bcd61dd2abeff6"
     },
     {
-      "bytes": 131759,
+      "bytes": 128694,
       "path": "data/staging/world_names/coverage_manifest.json",
+      "record_count": 225,
       "role": "repository coverage manifest",
       "schema_version": 1,
-      "sha256": "972cf7fe16574f0747d463e002fd837ce12bc174fe1871a99b332897adf393cf"
+      "sha256": "761b048940f83a18a1957ca05adfef28d144ffa18fd16d49dd27d305a5260672"
     },
     {
-      "bytes": 49711,
+      "bytes": 48756,
       "path": "data/staging/world_names/deterministic_corpus.json",
+      "record_count": 225,
       "role": "deterministic regression corpus",
       "schema_version": 1,
-      "sha256": "323822d36b0b45af96417dc5323640891f7b02a9e8e36ab3f2ad6ab888e88e1c"
+      "sha256": "0ceb8d03fc8565daf4218840ad174a2b256079cb427a6af41d1d2561e27339ea"
     },
     {
-      "bytes": 2428979,
+      "bytes": 2358152,
       "path": "data/staging/world_names/name_inventory.json",
+      "record_count": 923,
       "role": "entity inventory",
       "schema_version": 1,
-      "sha256": "a3530586f908a038615e8105950ef9677ad6c9f0f45fa567965c6c43850fd425"
+      "sha256": "34c7e87f83579dfea549808bcc526c4b24a836f812d47eb4349aaa208c006c17"
     },
     {
-      "bytes": 376,
-      "path": "data/staging/world_names/performance_benchmark.json",
-      "role": "performance benchmark",
-      "schema_version": 1,
-      "sha256": "1fe5990dda61e456ba1c38f1c30b27452ceca3cf23da99d09f49c27632793f12"
-    },
-    {
-      "bytes": 218600,
+      "bytes": 212186,
       "path": "data/staging/world_names/remaining_gaps.json",
+      "record_count": 185,
       "role": "remaining-gap ledger",
       "schema_version": 1,
-      "sha256": "77adb4ebd91da4760750e2f3e5624ffe2b042cb5d3e0ecdbb5108840a7ecb55a"
+      "sha256": "d2b5a12c7fc66b495626796b3b541d9534b65a30cf243bce050b8c244feb66b1"
     },
     {
-      "bytes": 723330,
+      "bytes": 708771,
       "path": "data/staging/world_names/review_candidates.json",
+      "record_count": 727,
       "role": "non-authoritative review candidates",
       "schema_version": 1,
-      "sha256": "270cba57eaf8c2710e7d3db721020c1f786703400540060fdfd96b7f36ed78d6"
+      "sha256": "1d654b32ca9715a09ac2f8165a35f8d0a966783aa87e1834c873d9ffc24af1ed"
     },
     {
-      "bytes": 112697,
+      "bytes": 106907,
       "path": "data/staging/world_names/search_index.json",
+      "record_count": 941,
       "role": "stable-id search index",
       "schema_version": 1,
-      "sha256": "15c4f7a73dc61baa3844aa3037feec9155252b7a787b22b7c8dc073d5bfe3419"
+      "sha256": "9f4ee76d5d356b5326cd51c2c1da3b66aac42a365a24f5b148aceb301747fd14"
     }
   ],
+  "generator": {
+    "name": "tools.world_names.world_names",
+    "schema_version": 1
+  },
   "manifest_kind": "world_names_staging",
   "policy": {
     "authoritative_production_data_rewritten": false,
     "manifest_excludes_itself": true,
-    "no_unsourced_translation": true
+    "no_unsourced_translation": true,
+    "observational_benchmark_excluded": true,
+    "staging_is_non_authoritative": true
   },
   "schema_version": 1,
+  "source_fingerprint": "749b904e9280f6acee4f49866d43547528dc9b62bb1b1a70bfa5f2d193573a8d",
   "summary": {
-    "artifact_file_count": 10,
-    "coverage_source_file_count": 224,
+    "artifact_file_count": 9,
+    "coverage_source_file_count": 225,
     "entity_count": 923,
+    "record_counts": {
+      "aliases.json": 2232,
+      "candidate_collision_ledger.json": 46,
+      "collision_report.json": 138,
+      "coverage_manifest.json": 225,
+      "deterministic_corpus.json": 225,
+      "name_inventory.json": 923,
+      "remaining_gaps.json": 185,
+      "review_candidates.json": 727,
+      "search_index.json": 941
+    },
     "review_candidate_count": 727
   },
   "validation": {

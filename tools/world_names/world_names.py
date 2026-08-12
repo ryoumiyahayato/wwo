@@ -19,7 +19,7 @@ import unicodedata
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from datetime import date
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from typing import Any, Iterable, Iterator, Sequence
 
 
@@ -249,6 +249,218 @@ def _json_pointer(path: str, key: str) -> str:
 
 def _source_ref(source_file: str, source_path: str, field: str) -> str:
     return f"{source_file}#{_json_pointer(source_path, field)}"
+
+
+def _is_repo_relative_path(value: Any) -> bool:
+    if not isinstance(value, str) or not value or "\\" in value:
+        return False
+    path = Path(value)
+    windows_path = PureWindowsPath(value)
+    return (
+        not path.is_absolute()
+        and not windows_path.is_absolute()
+        and path.as_posix() == value
+        and all(part not in {"", ".", ".."} for part in path.parts)
+    )
+
+
+def _source_pointer_tokens(pointer: str) -> list[str | int]:
+    """Parse the repository's stable mixed dot/slash JSON pointer notation."""
+
+    if not isinstance(pointer, str) or not pointer.startswith("$"):
+        raise ValueError(f"invalid source pointer: {pointer!r}")
+    tokens: list[str | int] = []
+    index = 1
+    while index < len(pointer):
+        marker = pointer[index]
+        if marker in "/.":
+            index += 1
+            start = index
+            while index < len(pointer) and pointer[index] not in "/.[":
+                index += 1
+            if start == index:
+                raise ValueError(f"empty source pointer segment: {pointer!r}")
+            token = pointer[start:index]
+            if marker == "/":
+                token = token.replace("~1", "/").replace("~0", "~")
+            tokens.append(token)
+            continue
+        if marker == "[":
+            end = pointer.find("]", index + 1)
+            if end < 0 or not pointer[index + 1 : end].isdigit():
+                raise ValueError(f"invalid source pointer index: {pointer!r}")
+            tokens.append(int(pointer[index + 1 : end]))
+            index = end + 1
+            continue
+        raise ValueError(f"invalid source pointer marker: {pointer!r}")
+    return tokens
+
+
+def _resolve_source_pointer(document: Any, pointer: str) -> tuple[Any, Any, str | int | None]:
+    tokens = _source_pointer_tokens(pointer)
+    current = document
+    parent: Any = None
+    parent_key: str | int | None = None
+    for token in tokens:
+        parent = current
+        parent_key = token
+        if isinstance(token, int):
+            if not isinstance(current, list) or token >= len(current):
+                raise KeyError(pointer)
+            current = current[token]
+        else:
+            if not isinstance(current, dict) or token not in current:
+                raise KeyError(pointer)
+            current = current[token]
+    return current, parent, parent_key
+
+
+def _resolve_source_record(document: Any, pointer: str) -> Any:
+    record_pointer = pointer.rsplit("/", 1)[0]
+    return _resolve_source_pointer(document, record_pointer)[0]
+
+
+def _source_value_contains(actual: Any, claimed: Any) -> bool:
+    if isinstance(actual, str):
+        return actual.strip() == claimed
+    if isinstance(actual, list):
+        return any(_source_value_contains(item, claimed) for item in actual)
+    return False
+
+
+def _resolve_alias_source(
+    document: Any,
+    pointer: str,
+    source_field: Any,
+) -> tuple[Any, Any, bool]:
+    """Resolve a generated alias pointer, including synthetic source records."""
+
+    try:
+        actual, _parent, _parent_key = _resolve_source_pointer(document, pointer)
+        return actual, _resolve_source_record(document, pointer), False
+    except (KeyError, TypeError, ValueError):
+        # historical_admin1_1900 and character-generation name pools expose
+        # scalar list members. The generator wraps those values in a
+        # synthetic {source_name: ...} record before creating an alias.
+        if source_field != "source_name" or "/" not in pointer:
+            raise
+        source_record_pointer = pointer.rsplit("/", 1)[0]
+        source_value, _parent, _parent_key = _resolve_source_pointer(
+            document, source_record_pointer
+        )
+        if not isinstance(source_value, str):
+            raise
+        return source_value, source_value, True
+
+
+def validate_alias_evidence(
+    root: Path,
+    aliases_document: dict[str, Any],
+    coverage_manifest: dict[str, Any],
+) -> list[str]:
+    """Re-read every alias source pointer and verify its claimed evidence."""
+
+    errors: list[str] = []
+    coverage_by_file = {
+        row.get("source_file"): row
+        for row in coverage_manifest.get("files", [])
+        if isinstance(row, dict)
+    }
+    source_cache: dict[str, Any] = {}
+    source_hash_cache: dict[str, str] = {}
+    for index, alias in enumerate(aliases_document.get("aliases", [])):
+        source_file = alias.get("source_file")
+        source = alias.get("source")
+        if not _is_repo_relative_path(source_file):
+            errors.append(f"alias {index} has invalid source_file: {source_file!r}")
+            continue
+        row = coverage_by_file.get(source_file)
+        if row is None:
+            errors.append(f"alias {index} source_file is absent from coverage: {source_file}")
+            continue
+        source_path = root / source_file
+        if not source_path.is_file():
+            errors.append(f"alias {index} source file is missing: {source_file}")
+            continue
+        try:
+            if source_file not in source_hash_cache:
+                source_hash_cache[source_file] = _canonical_source_sha256(source_path)
+            if source_hash_cache[source_file] != row.get("sha256"):
+                errors.append(f"alias {index} source file hash mismatch: {source_file}")
+        except OSError as error:
+            errors.append(f"alias {index} source file cannot be read: {source_file}: {error}")
+            continue
+        if not isinstance(source, str) or "#" not in source:
+            errors.append(f"alias {index} has malformed source reference")
+            continue
+        source_prefix, pointer = source.split("#", 1)
+        if source_prefix != source_file:
+            errors.append(f"alias {index} source_file/source mismatch: {source_file}")
+            continue
+        source_field = alias.get("source_field")
+        try:
+            if source_file not in source_cache:
+                source_cache[source_file] = json.loads(source_path.read_text(encoding="utf-8"))
+            document = source_cache[source_file]
+            actual, record, synthetic_record = _resolve_alias_source(
+                document, pointer, source_field
+            )
+            tokens = _source_pointer_tokens(pointer)
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError, KeyError, TypeError, ValueError) as error:
+            errors.append(f"alias {index} source pointer cannot be replayed: {source}: {error}")
+            continue
+
+        field_token: str | None = None
+        for token in reversed(tokens):
+            if isinstance(token, str):
+                field_token = token
+                break
+        if field_token != source_field or source_field not in NAME_FIELD_BY_KEY:
+            errors.append(f"alias {index} source_field does not match source pointer: {source}")
+        claimed_alias = alias.get("alias")
+        if not isinstance(claimed_alias, str) or not _source_value_contains(actual, claimed_alias):
+            errors.append(f"alias {index} source value mismatch: {source}")
+        if alias.get("language") != _language_for(source_field):
+            errors.append(f"alias {index} language does not replay from source field: {source}")
+        if isinstance(claimed_alias, str) and alias.get("script") != _script_for(claimed_alias):
+            errors.append(f"alias {index} script does not replay from source value: {source}")
+        entity_id = alias.get("entity_id")
+        entity_kind = alias.get("entity_id_kind")
+        if synthetic_record:
+            expected_key = f"source:{source_file}#{pointer.rsplit('/', 1)[0]}"
+            if entity_kind != "source_record_key" or entity_id != expected_key:
+                errors.append(f"alias {index} synthetic source identity mismatch: {source}")
+            record = {}
+        if not isinstance(record, dict):
+            errors.append(f"alias {index} source record is not an object: {source}")
+            continue
+        expected_from = _valid_date_value(record, "valid_from")
+        expected_to = _valid_date_value(record, "valid_to")
+        if alias.get("valid_from") != expected_from or alias.get("valid_to") != expected_to:
+            errors.append(f"alias {index} date evidence mismatch: {source}")
+        if entity_kind == "stable_id":
+            source_ids = {
+                record.get(key)
+                for key in ("stable_id", "entity_id", "id")
+                if isinstance(record.get(key), str) and record.get(key)
+            }
+            if entity_id not in source_ids:
+                errors.append(f"alias {index} Stable ID does not match source record: {source}")
+        elif entity_kind == "source_record_key":
+            expected_key = f"source:{source_file}#{pointer.rsplit('/', 1)[0]}"
+            if entity_id != expected_key:
+                errors.append(f"alias {index} source-record identity mismatch: {source}")
+        else:
+            errors.append(f"alias {index} has invalid entity_id_kind: {entity_kind!r}")
+
+        source_class = "historical" if alias.get("historical_period") == "1900-snapshot" else "current"
+        expected_alias_type = _field_alias_type(source_field, source_class)[1]
+        if alias.get("alias_type") != expected_alias_type:
+            errors.append(f"alias {index} alias_type does not match source field: {source}")
+        if alias.get("normalized_name", normalize_name(str(claimed_alias or ""))) != normalize_name(str(claimed_alias or "")):
+            errors.append(f"alias {index} normalized value mismatch: {source}")
+
+    return errors
 
 
 def _parse_date(value: Any) -> date | None:
@@ -703,6 +915,7 @@ def scan_source_coverage(root: Path) -> dict[str, Any]:
             note = "geometry/runtime support data; names are not entity authority"
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
+            size = len(_canonical_json(data).encode("utf-8"))
             dictionary_count, name_count = _count_name_records(data)
             record_count: int | None = dictionary_count
             if relative_path.startswith("data/world_map/city_detail/countries/"):
@@ -727,11 +940,12 @@ def scan_source_coverage(root: Path) -> dict[str, Any]:
     generation_path = root / "data/characters/character_generation.json"
     if generation_path.exists():
         data = json.loads(generation_path.read_text(encoding="utf-8"))
+        generation_size = len(_canonical_json(data).encode("utf-8"))
         dictionary_count, name_count = _count_name_records(data)
         files.append(
             {
                 "source_file": "data/characters/character_generation.json",
-                "bytes": generation_path.stat().st_size,
+                "bytes": generation_size,
                 "status": "staged",
                 "record_count": dictionary_count,
                 "name_bearing_record_count": name_count,
@@ -828,7 +1042,7 @@ def scan_repository_name_coverage(root: Path) -> dict[str, Any]:
             files.append(
                 {
                     "source_file": relative_path,
-                    "sha256": hashlib.sha256(raw_bytes).hexdigest(),
+                    "sha256": hashlib.sha256(_canonical_json(data).encode("utf-8")).hexdigest(),
                     "status": status,
                     "reason": _coverage_reason(status),
                     "record_count": record_count,
@@ -1391,20 +1605,68 @@ def _is_sorted_by(items: Sequence[Any], key: Any) -> bool:
     return list(items) == sorted(items, key=key)
 
 
+ALIAS_DOCUMENT_FIELDS = frozenset({"schema_version", "normalizer_id", "aliases"})
+ALIAS_FIELDS = frozenset({
+    "entity_id",
+    "entity_id_kind",
+    "entity_type",
+    "alias",
+    "language",
+    "script",
+    "valid_from",
+    "valid_to",
+    "alias_type",
+    "source",
+    "source_file",
+    "source_field",
+    "historical_period",
+    "confidence",
+})
+ALLOWED_LANGUAGES = frozenset({"und", "zh"})
+ALLOWED_SCRIPTS = frozenset({"Arab", "Cyrl", "Grek", "Hans", "Jpan", "Kore", "Latn", "und"})
+ALLOWED_ALIAS_TYPES = frozenset(alias_type for _field, (_kind, alias_type) in NAME_FIELD_BY_KEY.items())
+
+
 def validate_artifacts(
     inventory: dict[str, Any],
     aliases_document: dict[str, Any],
     collision_report: dict[str, Any],
     search_index: dict[str, Any],
+    *,
+    root: Path | None = None,
+    coverage_manifest: dict[str, Any] | None = None,
 ) -> list[str]:
     """Validate pointers, dates, uniqueness, deterministic ordering and index replay."""
 
     errors: list[str] = []
+    if not isinstance(inventory, dict):
+        return ["inventory document is not an object"]
+    if set(inventory) != {"schema_version", "normalizer_id", "scope", "source_coverage", "entities"}:
+        errors.append("inventory document has an invalid schema")
+    if not isinstance(aliases_document, dict):
+        return errors + ["aliases document is not an object"]
+    if set(aliases_document) != ALIAS_DOCUMENT_FIELDS:
+        errors.append("aliases document has an invalid schema")
+    if aliases_document.get("schema_version") != SCHEMA_VERSION:
+        errors.append("aliases schema_version mismatch")
+    if not isinstance(aliases_document.get("aliases"), list):
+        return errors + ["aliases are not a list"]
     entities = inventory.get("entities", [])
     aliases = aliases_document.get("aliases", [])
+    if not isinstance(entities, list):
+        return errors + ["inventory entities are not a list"]
+    if not isinstance(aliases, list):
+        return errors + ["aliases are not a list"]
+    if not isinstance(collision_report, dict) or not isinstance(search_index, dict):
+        return errors + ["collision report or search index is not an object"]
     entries = search_index.get("entries", [])
+    if not isinstance(entries, list):
+        return errors + ["search index entries are not a list"]
     entity_by_id: dict[str, dict[str, Any]] = {}
     for index, entity in enumerate(entities):
+        if not isinstance(entity, dict):
+            errors.append(f"inventory entity {index} is not an object")
+            continue
         entity_id = entity.get("entity_id")
         if not isinstance(entity_id, str) or not entity_id:
             errors.append(f"inventory entity {index} has an empty entity_id")
@@ -1429,10 +1691,29 @@ def validate_artifacts(
 
     duplicate_alias_keys: set[tuple[Any, ...]] = set()
     for index, alias in enumerate(aliases):
+        if not isinstance(alias, dict) or set(alias) != ALIAS_FIELDS:
+            errors.append(f"alias {index} has an invalid schema")
+            continue
         entity_id = alias.get("entity_id")
-        if not isinstance(entity_id, str) or entity_id not in entity_by_id:
+        if not isinstance(entity_id, str) or not entity_id or entity_id not in entity_by_id:
             errors.append(f"alias {index} points to unknown entity_id: {entity_id}")
         value = alias.get("alias")
+        for field in ("entity_id", "entity_id_kind", "entity_type", "alias", "language", "script",
+                      "alias_type", "source", "source_file", "source_field", "historical_period", "confidence"):
+            if not isinstance(alias.get(field), str) or not alias[field].strip():
+                errors.append(f"alias {index} field {field} is not a non-empty string")
+        if alias.get("language") not in ALLOWED_LANGUAGES:
+            errors.append(f"alias {index} has an invalid language")
+        if alias.get("script") not in ALLOWED_SCRIPTS:
+            errors.append(f"alias {index} has an invalid script")
+        if alias.get("alias_type") not in ALLOWED_ALIAS_TYPES:
+            errors.append(f"alias {index} has an invalid alias_type")
+        if alias.get("source_field") not in NAME_FIELD_BY_KEY:
+            errors.append(f"alias {index} has an invalid source_field")
+        if not _is_repo_relative_path(alias.get("source_file")):
+            errors.append(f"alias {index} has an invalid source_file")
+        if "#" not in alias.get("source", ""):
+            errors.append(f"alias {index} has a malformed source")
         if not isinstance(value, str) or not value.strip():
             errors.append(f"alias {index} has an empty alias")
         key = (
@@ -1466,7 +1747,10 @@ def validate_artifacts(
         errors.append("search index does not replay deterministically from aliases")
     if not _is_sorted_by(entries, lambda item: item.get("normalized_name", "")):
         errors.append("search index entries are not sorted by normalized_name")
-    for entry in entries:
+    for entry_index, entry in enumerate(entries):
+        if not isinstance(entry, dict):
+            errors.append(f"search index entry {entry_index} is not an object")
+            continue
         normalized = entry.get("normalized_name")
         entity_ids = entry.get("entity_ids")
         if not isinstance(normalized, str) or not normalized:
@@ -1485,6 +1769,12 @@ def validate_artifacts(
         errors.append("aliases normalizer_id mismatch")
     if search_index.get("normalizer_id") != NORMALIZER_ID:
         errors.append("search index normalizer_id mismatch")
+    expected_collision_report = build_collision_report(inventory, aliases_document)
+    expected_collision_report["summary"]["id_name_disagreement_candidates"] = len(
+        expected_collision_report.get("id_name_disagreement_candidates", [])
+    )
+    if collision_report != expected_collision_report:
+        errors.append("collision report does not replay deterministically from aliases")
 
     for entity in entities:
         canonical = entity.get("canonical_current_name")
@@ -1498,6 +1788,8 @@ def validate_artifacts(
         if canonical not in canonical_aliases:
             errors.append(f"canonical current name has no alias record: {entity['entity_id']}")
 
+    if root is not None and coverage_manifest is not None:
+        errors.extend(validate_alias_evidence(root, aliases_document, coverage_manifest))
     return errors
 
 
@@ -1518,7 +1810,14 @@ def build_artifacts(root: Path, include_modern_reference: bool = False) -> dict[
         search_index,
         coverage_manifest,
     )
-    errors = validate_artifacts(inventory, aliases, collision_report, search_index)
+    errors = validate_artifacts(
+        inventory,
+        aliases,
+        collision_report,
+        search_index,
+        root=root,
+        coverage_manifest=coverage_manifest,
+    )
     errors.extend(validate_coverage_manifest(coverage_manifest))
     errors.extend(validate_remaining_gaps(remaining_gaps, coverage_manifest))
     errors.extend(
@@ -1546,9 +1845,17 @@ def _canonical_json(document: Any) -> str:
     return json.dumps(document, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
 
+def _canonical_source_sha256(path: Path) -> str:
+    """Hash parsed JSON in canonical LF form, independent of checkout newlines."""
+
+    document = json.loads(path.read_text(encoding="utf-8"))
+    return hashlib.sha256(_canonical_json(document).encode("utf-8")).hexdigest()
+
+
 def write_json(path: Path, document: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(_canonical_json(document), encoding="utf-8")
+    with path.open("w", encoding="utf-8", newline="\n") as handle:
+        handle.write(_canonical_json(document))
 
 
 def _git_revision(root: Path, ref: str) -> str:

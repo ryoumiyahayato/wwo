@@ -69365,7 +69365,7 @@
   "source_coverage": {
     "files": [
       {
-        "bytes": 9802,
+        "bytes": 11780,
         "name_bearing_record_count": 10,
         "note": "existing character name pool source",
         "record_count": 59,
@@ -69373,7 +69373,7 @@
         "status": "staged"
       },
       {
-        "bytes": 6762,
+        "bytes": 8585,
         "name_bearing_record_count": 2,
         "note": "not a configured entity source",
         "record_count": 12,
@@ -69381,7 +69381,7 @@
         "status": "staged"
       },
       {
-        "bytes": 7449,
+        "bytes": 11034,
         "name_bearing_record_count": 32,
         "note": "not a configured entity source",
         "record_count": 33,
@@ -69389,7 +69389,7 @@
         "status": "staged"
       },
       {
-        "bytes": 239,
+        "bytes": 259,
         "name_bearing_record_count": 0,
         "note": "not a configured entity source",
         "record_count": 1,
@@ -69397,7 +69397,7 @@
         "status": "scanned_only"
       },
       {
-        "bytes": 3381,
+        "bytes": 4820,
         "name_bearing_record_count": 7,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 7,
@@ -69405,7 +69405,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 41921,
+        "bytes": 60325,
         "name_bearing_record_count": 94,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 94,
@@ -69413,7 +69413,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 43097,
+        "bytes": 62281,
         "name_bearing_record_count": 98,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 98,
@@ -69421,7 +69421,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 4754,
+        "bytes": 6778,
         "name_bearing_record_count": 10,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 10,
@@ -69429,7 +69429,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 6688,
+        "bytes": 9492,
         "name_bearing_record_count": 14,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 14,
@@ -69437,7 +69437,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 32234,
+        "bytes": 46348,
         "name_bearing_record_count": 72,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 72,
@@ -69445,7 +69445,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 35130,
+        "bytes": 50804,
         "name_bearing_record_count": 80,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 80,
@@ -69453,7 +69453,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 94983,
+        "bytes": 136592,
         "name_bearing_record_count": 213,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 213,
@@ -69461,7 +69461,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 5530,
+        "bytes": 7944,
         "name_bearing_record_count": 12,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 12,
@@ -69469,7 +69469,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 1621,
+        "bytes": 2280,
         "name_bearing_record_count": 3,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 3,
@@ -69477,7 +69477,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 57239,
+        "bytes": 83443,
         "name_bearing_record_count": 134,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 134,
@@ -69485,7 +69485,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 51153,
+        "bytes": 74042,
         "name_bearing_record_count": 117,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 117,
@@ -69493,7 +69493,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 5145,
+        "bytes": 7364,
         "name_bearing_record_count": 11,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 11,
@@ -69501,7 +69501,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 65386,
+        "bytes": 93735,
         "name_bearing_record_count": 145,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 145,
@@ -69509,7 +69509,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 305555,
+        "bytes": 439399,
         "name_bearing_record_count": 686,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 686,
@@ -69517,7 +69517,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 60176,
+        "bytes": 87160,
         "name_bearing_record_count": 138,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 138,
@@ -69525,7 +69525,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 5091,
+        "bytes": 7310,
         "name_bearing_record_count": 11,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 11,
@@ -69533,7 +69533,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 758,
+        "bytes": 1027,
         "name_bearing_record_count": 1,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 1,
@@ -69541,7 +69541,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 4858,
+        "bytes": 6882,
         "name_bearing_record_count": 10,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 10,
@@ -69549,7 +69549,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 12608,
+        "bytes": 18142,
         "name_bearing_record_count": 28,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 28,
@@ -69557,7 +69557,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 1654,
+        "bytes": 2313,
         "name_bearing_record_count": 3,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 3,
@@ -69565,7 +69565,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 10875,
+        "bytes": 15629,
         "name_bearing_record_count": 24,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 24,
@@ -69573,7 +69573,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 10194,
+        "bytes": 14753,
         "name_bearing_record_count": 23,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 23,
@@ -69581,7 +69581,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 60573,
+        "bytes": 87947,
         "name_bearing_record_count": 140,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 140,
@@ -69589,7 +69589,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 6033,
+        "bytes": 8642,
         "name_bearing_record_count": 13,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 13,
@@ -69597,7 +69597,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 594112,
+        "bytes": 849441,
         "name_bearing_record_count": 1309,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 1309,
@@ -69605,7 +69605,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 752,
+        "bytes": 1021,
         "name_bearing_record_count": 1,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 1,
@@ -69613,7 +69613,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 157368,
+        "bytes": 226277,
         "name_bearing_record_count": 353,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 353,
@@ -69621,7 +69621,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 1253540,
+        "bytes": 1815019,
         "name_bearing_record_count": 2879,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 2879,
@@ -69629,7 +69629,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 34297,
+        "bytes": 49191,
         "name_bearing_record_count": 76,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 76,
@@ -69637,7 +69637,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 75419,
+        "bytes": 108448,
         "name_bearing_record_count": 169,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 169,
@@ -69645,7 +69645,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 2957,
+        "bytes": 4201,
         "name_bearing_record_count": 6,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 6,
@@ -69653,7 +69653,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 15511,
+        "bytes": 22410,
         "name_bearing_record_count": 35,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 35,
@@ -69661,7 +69661,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 158497,
+        "bytes": 227601,
         "name_bearing_record_count": 354,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 354,
@@ -69669,7 +69669,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 1390213,
+        "bytes": 1990107,
         "name_bearing_record_count": 3076,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 3076,
@@ -69677,7 +69677,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 71695,
+        "bytes": 103554,
         "name_bearing_record_count": 163,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 163,
@@ -69685,7 +69685,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 4674,
+        "bytes": 6698,
         "name_bearing_record_count": 10,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 10,
@@ -69693,7 +69693,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 55635,
+        "bytes": 78719,
         "name_bearing_record_count": 118,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 118,
@@ -69701,7 +69701,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 17264,
+        "bytes": 24943,
         "name_bearing_record_count": 39,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 39,
@@ -69709,7 +69709,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 660548,
+        "bytes": 948637,
         "name_bearing_record_count": 1477,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 1477,
@@ -69717,7 +69717,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 151138,
+        "bytes": 218097,
         "name_bearing_record_count": 343,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 343,
@@ -69725,7 +69725,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 2925,
+        "bytes": 4169,
         "name_bearing_record_count": 6,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 6,
@@ -69733,7 +69733,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 846105,
+        "bytes": 1218629,
         "name_bearing_record_count": 1910,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 1910,
@@ -69741,7 +69741,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 3390,
+        "bytes": 4829,
         "name_bearing_record_count": 7,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 7,
@@ -69749,7 +69749,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 25463,
+        "bytes": 36847,
         "name_bearing_record_count": 58,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 58,
@@ -69757,7 +69757,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 5231,
+        "bytes": 7450,
         "name_bearing_record_count": 11,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 11,
@@ -69765,7 +69765,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 1659,
+        "bytes": 2318,
         "name_bearing_record_count": 3,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 3,
@@ -69773,7 +69773,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 2468,
+        "bytes": 3517,
         "name_bearing_record_count": 5,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 5,
@@ -69781,7 +69781,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 10416,
+        "bytes": 14780,
         "name_bearing_record_count": 22,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 22,
@@ -69789,7 +69789,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 126126,
+        "bytes": 181580,
         "name_bearing_record_count": 284,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 284,
@@ -69797,7 +69797,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 92971,
+        "bytes": 133020,
         "name_bearing_record_count": 205,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 205,
@@ -69805,7 +69805,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 119121,
+        "bytes": 171065,
         "name_bearing_record_count": 266,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 266,
@@ -69813,7 +69813,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 71214,
+        "bytes": 102098,
         "name_bearing_record_count": 158,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 158,
@@ -69821,7 +69821,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 33633,
+        "bytes": 48527,
         "name_bearing_record_count": 76,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 76,
@@ -69829,7 +69829,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 23501,
+        "bytes": 33520,
         "name_bearing_record_count": 51,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 51,
@@ -69837,7 +69837,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 166600,
+        "bytes": 240384,
         "name_bearing_record_count": 378,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 378,
@@ -69845,7 +69845,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 208424,
+        "bytes": 301903,
         "name_bearing_record_count": 479,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 479,
@@ -69853,7 +69853,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 66096,
+        "bytes": 95810,
         "name_bearing_record_count": 152,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 152,
@@ -69861,7 +69861,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 78193,
+        "bytes": 112977,
         "name_bearing_record_count": 178,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 178,
@@ -69869,7 +69869,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 9483,
+        "bytes": 13652,
         "name_bearing_record_count": 21,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 21,
@@ -69877,7 +69877,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 2868836,
+        "bytes": 4141480,
         "name_bearing_record_count": 6526,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 6526,
@@ -69885,7 +69885,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 46555,
+        "bytes": 67104,
         "name_bearing_record_count": 105,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 105,
@@ -69893,7 +69893,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 361653,
+        "bytes": 524747,
         "name_bearing_record_count": 836,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 836,
@@ -69901,7 +69901,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 6577,
+        "bytes": 9381,
         "name_bearing_record_count": 14,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 14,
@@ -69909,7 +69909,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 906485,
+        "bytes": 1302604,
         "name_bearing_record_count": 2031,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 2031,
@@ -69917,7 +69917,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 1622,
+        "bytes": 2281,
         "name_bearing_record_count": 3,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 3,
@@ -69925,7 +69925,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 19859,
+        "bytes": 28513,
         "name_bearing_record_count": 44,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 44,
@@ -69933,7 +69933,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 33040,
+        "bytes": 47934,
         "name_bearing_record_count": 76,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 76,
@@ -69941,7 +69941,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 785354,
+        "bytes": 1136038,
         "name_bearing_record_count": 1798,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 1798,
@@ -69949,7 +69949,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 26639,
+        "bytes": 38608,
         "name_bearing_record_count": 61,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 61,
@@ -69957,7 +69957,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 56345,
+        "bytes": 80599,
         "name_bearing_record_count": 124,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 124,
@@ -69965,7 +69965,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 6511,
+        "bytes": 9315,
         "name_bearing_record_count": 14,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 14,
@@ -69973,7 +69973,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 52131,
+        "bytes": 75215,
         "name_bearing_record_count": 118,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 118,
@@ -69981,7 +69981,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 67379,
+        "bytes": 97483,
         "name_bearing_record_count": 154,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 154,
@@ -69989,7 +69989,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 10407,
+        "bytes": 14966,
         "name_bearing_record_count": 23,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 23,
@@ -69997,7 +69997,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 20208,
+        "bytes": 29057,
         "name_bearing_record_count": 45,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 45,
@@ -70005,7 +70005,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 88466,
+        "bytes": 128515,
         "name_bearing_record_count": 205,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 205,
@@ -70013,7 +70013,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 15232,
+        "bytes": 21936,
         "name_bearing_record_count": 34,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 34,
@@ -70021,7 +70021,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 13153,
+        "bytes": 19077,
         "name_bearing_record_count": 30,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 30,
@@ -70029,7 +70029,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 4735,
+        "bytes": 6759,
         "name_bearing_record_count": 10,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 10,
@@ -70037,7 +70037,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 4997,
+        "bytes": 7216,
         "name_bearing_record_count": 11,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 11,
@@ -70045,7 +70045,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 32057,
+        "bytes": 46171,
         "name_bearing_record_count": 72,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 72,
@@ -70053,7 +70053,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 31510,
+        "bytes": 45429,
         "name_bearing_record_count": 71,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 71,
@@ -70061,7 +70061,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 14855,
+        "bytes": 21364,
         "name_bearing_record_count": 33,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 33,
@@ -70069,7 +70069,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 22779,
+        "bytes": 32993,
         "name_bearing_record_count": 52,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 52,
@@ -70077,7 +70077,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 2498,
+        "bytes": 3547,
         "name_bearing_record_count": 5,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 5,
@@ -70085,7 +70085,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 27555,
+        "bytes": 39914,
         "name_bearing_record_count": 63,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 63,
@@ -70093,7 +70093,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 11512,
+        "bytes": 16656,
         "name_bearing_record_count": 26,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 26,
@@ -70101,7 +70101,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 1621,
+        "bytes": 2280,
         "name_bearing_record_count": 3,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 3,
@@ -70109,7 +70109,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 39143,
+        "bytes": 56767,
         "name_bearing_record_count": 90,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 90,
@@ -70117,7 +70117,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 113443,
+        "bytes": 162657,
         "name_bearing_record_count": 252,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 252,
@@ -70125,7 +70125,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 15515,
+        "bytes": 22414,
         "name_bearing_record_count": 35,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 35,
@@ -70133,7 +70133,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 2883,
+        "bytes": 4127,
         "name_bearing_record_count": 6,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 6,
@@ -70141,7 +70141,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 8100,
+        "bytes": 11489,
         "name_bearing_record_count": 17,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 17,
@@ -70149,7 +70149,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 1189,
+        "bytes": 1653,
         "name_bearing_record_count": 2,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 2,
@@ -70157,7 +70157,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 28073,
+        "bytes": 40822,
         "name_bearing_record_count": 65,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 65,
@@ -70165,7 +70165,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 8536,
+        "bytes": 12315,
         "name_bearing_record_count": 19,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 19,
@@ -70173,7 +70173,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 838652,
+        "bytes": 1194991,
         "name_bearing_record_count": 1827,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 1827,
@@ -70181,7 +70181,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 237181,
+        "bytes": 340605,
         "name_bearing_record_count": 530,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 530,
@@ -70189,7 +70189,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 33665,
+        "bytes": 48559,
         "name_bearing_record_count": 76,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 76,
@@ -70197,7 +70197,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 238625,
+        "bytes": 344779,
         "name_bearing_record_count": 544,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 544,
@@ -70205,7 +70205,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 51152,
+        "bytes": 74236,
         "name_bearing_record_count": 118,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 118,
@@ -70213,7 +70213,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 24613,
+        "bytes": 35217,
         "name_bearing_record_count": 54,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 54,
@@ -70221,7 +70221,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 13978,
+        "bytes": 20292,
         "name_bearing_record_count": 32,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 32,
@@ -70229,7 +70229,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 31262,
+        "bytes": 44791,
         "name_bearing_record_count": 69,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 69,
@@ -70237,7 +70237,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 605088,
+        "bytes": 873482,
         "name_bearing_record_count": 1376,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 1376,
@@ -70245,7 +70245,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 218350,
+        "bytes": 313974,
         "name_bearing_record_count": 490,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 490,
@@ -70253,7 +70253,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 343679,
+        "bytes": 493513,
         "name_bearing_record_count": 768,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 768,
@@ -70261,7 +70261,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 1210,
+        "bytes": 1674,
         "name_bearing_record_count": 2,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 2,
@@ -70269,7 +70269,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 42269,
+        "bytes": 60673,
         "name_bearing_record_count": 94,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 94,
@@ -70277,7 +70277,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 56211,
+        "bytes": 81050,
         "name_bearing_record_count": 127,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 127,
@@ -70285,7 +70285,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 243563,
+        "bytes": 349717,
         "name_bearing_record_count": 544,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 544,
@@ -70293,7 +70293,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 16899,
+        "bytes": 24188,
         "name_bearing_record_count": 37,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 37,
@@ -70301,7 +70301,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 346311,
+        "bytes": 500045,
         "name_bearing_record_count": 788,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 788,
@@ -70309,7 +70309,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 46927,
+        "bytes": 67671,
         "name_bearing_record_count": 106,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 106,
@@ -70317,7 +70317,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 1202425,
+        "bytes": 1739334,
         "name_bearing_record_count": 2753,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 2753,
@@ -70325,7 +70325,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 62580,
+        "bytes": 90734,
         "name_bearing_record_count": 144,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 144,
@@ -70333,7 +70333,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 122841,
+        "bytes": 177320,
         "name_bearing_record_count": 279,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 279,
@@ -70341,7 +70341,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 42660,
+        "bytes": 61259,
         "name_bearing_record_count": 95,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 95,
@@ -70349,7 +70349,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 93578,
+        "bytes": 135187,
         "name_bearing_record_count": 213,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 213,
@@ -70357,7 +70357,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 1218,
+        "bytes": 1682,
         "name_bearing_record_count": 2,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 2,
@@ -70365,7 +70365,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 66401,
+        "bytes": 95140,
         "name_bearing_record_count": 147,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 147,
@@ -70373,7 +70373,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 5178,
+        "bytes": 7397,
         "name_bearing_record_count": 11,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 11,
@@ -70381,7 +70381,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 33389,
+        "bytes": 47893,
         "name_bearing_record_count": 74,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 74,
@@ -70389,7 +70389,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 2570,
+        "bytes": 3619,
         "name_bearing_record_count": 5,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 5,
@@ -70397,7 +70397,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 49393,
+        "bytes": 71502,
         "name_bearing_record_count": 113,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 113,
@@ -70405,7 +70405,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 1232,
+        "bytes": 1696,
         "name_bearing_record_count": 2,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 2,
@@ -70413,7 +70413,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 200473,
+        "bytes": 287907,
         "name_bearing_record_count": 448,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 448,
@@ -70421,7 +70421,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 27999,
+        "bytes": 40553,
         "name_bearing_record_count": 64,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 64,
@@ -70429,7 +70429,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 32223,
+        "bytes": 46727,
         "name_bearing_record_count": 74,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 74,
@@ -70437,7 +70437,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 379804,
+        "bytes": 548748,
         "name_bearing_record_count": 866,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 866,
@@ -70445,7 +70445,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 10109,
+        "bytes": 14473,
         "name_bearing_record_count": 22,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 22,
@@ -70453,7 +70453,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 35558,
+        "bytes": 51232,
         "name_bearing_record_count": 80,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 80,
@@ -70461,7 +70461,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 443332,
+        "bytes": 640746,
         "name_bearing_record_count": 1012,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 1012,
@@ -70469,7 +70469,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 3369040,
+        "bytes": 4842339,
         "name_bearing_record_count": 7555,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 7555,
@@ -70477,7 +70477,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 62128,
+        "bytes": 89892,
         "name_bearing_record_count": 142,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 142,
@@ -70485,7 +70485,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 748,
+        "bytes": 1017,
         "name_bearing_record_count": 1,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 1,
@@ -70493,7 +70493,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 3429,
+        "bytes": 4868,
         "name_bearing_record_count": 7,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 7,
@@ -70501,7 +70501,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 761,
+        "bytes": 1030,
         "name_bearing_record_count": 1,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 1,
@@ -70509,7 +70509,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 2105,
+        "bytes": 2959,
         "name_bearing_record_count": 4,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 4,
@@ -70517,7 +70517,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 202147,
+        "bytes": 290556,
         "name_bearing_record_count": 453,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 453,
@@ -70525,7 +70525,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 15703,
+        "bytes": 22602,
         "name_bearing_record_count": 35,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 35,
@@ -70533,7 +70533,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 14907,
+        "bytes": 21611,
         "name_bearing_record_count": 34,
         "note": "modern GeoNames reference; not treated as 1900 authority by default",
         "record_count": 34,
@@ -70541,7 +70541,7 @@
         "status": "scanned_only_modern_reference"
       },
       {
-        "bytes": 767019,
+        "bytes": 1092946,
         "name_bearing_record_count": 1671,
         "note": "not a configured entity source",
         "record_count": 1672,
@@ -70549,7 +70549,7 @@
         "status": "scanned_only"
       },
       {
-        "bytes": 837781,
+        "bytes": 1194128,
         "name_bearing_record_count": 1827,
         "note": "not a configured entity source",
         "record_count": 1828,
@@ -70557,7 +70557,7 @@
         "status": "scanned_only"
       },
       {
-        "bytes": 1717740,
+        "bytes": 2451997,
         "name_bearing_record_count": 3765,
         "note": "not a configured entity source",
         "record_count": 3766,
@@ -70565,7 +70565,7 @@
         "status": "scanned_only"
       },
       {
-        "bytes": 1265897,
+        "bytes": 1798914,
         "name_bearing_record_count": 2733,
         "note": "not a configured entity source",
         "record_count": 2734,
@@ -70573,7 +70573,7 @@
         "status": "scanned_only"
       },
       {
-        "bytes": 1825296,
+        "bytes": 2606938,
         "name_bearing_record_count": 4008,
         "note": "not a configured entity source",
         "record_count": 4009,
@@ -70581,7 +70581,7 @@
         "status": "scanned_only"
       },
       {
-        "bytes": 2415886,
+        "bytes": 3448493,
         "name_bearing_record_count": 5295,
         "note": "not a configured entity source",
         "record_count": 5296,
@@ -70589,7 +70589,7 @@
         "status": "scanned_only"
       },
       {
-        "bytes": 615431,
+        "bytes": 874473,
         "name_bearing_record_count": 1328,
         "note": "not a configured entity source",
         "record_count": 1329,
@@ -70597,7 +70597,7 @@
         "status": "scanned_only"
       },
       {
-        "bytes": 593749,
+        "bytes": 848306,
         "name_bearing_record_count": 1305,
         "note": "not a configured entity source",
         "record_count": 1306,
@@ -70605,7 +70605,7 @@
         "status": "scanned_only"
       },
       {
-        "bytes": 2041032,
+        "bytes": 2910619,
         "name_bearing_record_count": 4459,
         "note": "not a configured entity source",
         "record_count": 4460,
@@ -70613,7 +70613,7 @@
         "status": "scanned_only"
       },
       {
-        "bytes": 2095488,
+        "bytes": 2994910,
         "name_bearing_record_count": 4612,
         "note": "not a configured entity source",
         "record_count": 4613,
@@ -70621,7 +70621,7 @@
         "status": "scanned_only"
       },
       {
-        "bytes": 1955868,
+        "bytes": 2788795,
         "name_bearing_record_count": 4271,
         "note": "not a configured entity source",
         "record_count": 4272,
@@ -70629,7 +70629,7 @@
         "status": "scanned_only"
       },
       {
-        "bytes": 559383,
+        "bytes": 799120,
         "name_bearing_record_count": 1229,
         "note": "not a configured entity source",
         "record_count": 1230,
@@ -70637,7 +70637,7 @@
         "status": "scanned_only"
       },
       {
-        "bytes": 165746,
+        "bytes": 237588,
         "name_bearing_record_count": 368,
         "note": "not a configured entity source",
         "record_count": 369,
@@ -70645,7 +70645,7 @@
         "status": "scanned_only"
       },
       {
-        "bytes": 35669,
+        "bytes": 71687,
         "name_bearing_record_count": 1,
         "note": "not a configured entity source",
         "record_count": 304,
@@ -70653,7 +70653,7 @@
         "status": "scanned_only"
       },
       {
-        "bytes": 179447,
+        "bytes": 173233,
         "name_bearing_record_count": 178,
         "note": "not a configured entity source",
         "record_count": 179,
@@ -70661,7 +70661,7 @@
         "status": "staged"
       },
       {
-        "bytes": 4472,
+        "bytes": 7436,
         "name_bearing_record_count": 0,
         "note": "not a configured entity source",
         "record_count": 59,
@@ -70669,7 +70669,7 @@
         "status": "scanned_only"
       },
       {
-        "bytes": 523432,
+        "bytes": 2254215,
         "name_bearing_record_count": 302,
         "note": "not a configured entity source",
         "record_count": 455,
@@ -70677,7 +70677,7 @@
         "status": "scanned_only"
       },
       {
-        "bytes": 78692,
+        "bytes": 90592,
         "name_bearing_record_count": 0,
         "note": "not a configured entity source",
         "record_count": 65,
@@ -70685,7 +70685,7 @@
         "status": "scanned_only"
       },
       {
-        "bytes": 9592,
+        "bytes": 13291,
         "name_bearing_record_count": 15,
         "note": "not a configured entity source",
         "record_count": 17,
@@ -70693,7 +70693,7 @@
         "status": "staged"
       },
       {
-        "bytes": 1066,
+        "bytes": 1034,
         "name_bearing_record_count": 0,
         "note": "not a configured entity source",
         "record_count": 4,
@@ -70701,7 +70701,7 @@
         "status": "scanned_only"
       },
       {
-        "bytes": 13422,
+        "bytes": 16031,
         "name_bearing_record_count": 50,
         "note": "not a configured entity source",
         "record_count": 53,
@@ -70709,7 +70709,7 @@
         "status": "staged"
       },
       {
-        "bytes": 85456,
+        "bytes": 115561,
         "name_bearing_record_count": 302,
         "note": "not a configured entity source",
         "record_count": 304,
@@ -70717,7 +70717,7 @@
         "status": "staged"
       },
       {
-        "bytes": 17319,
+        "bytes": 27181,
         "name_bearing_record_count": 65,
         "note": "not a configured entity source",
         "record_count": 66,
@@ -70725,7 +70725,7 @@
         "status": "staged"
       },
       {
-        "bytes": 10590,
+        "bytes": 13642,
         "name_bearing_record_count": 8,
         "note": "not a configured entity source",
         "record_count": 23,
@@ -70733,7 +70733,7 @@
         "status": "staged"
       },
       {
-        "bytes": 2128382,
+        "bytes": 9551592,
         "name_bearing_record_count": 0,
         "note": "geometry/runtime support data; names are not entity authority",
         "record_count": 2835,
@@ -70741,7 +70741,7 @@
         "status": "scanned_only_geometry_support"
       },
       {
-        "bytes": 1963,
+        "bytes": 2425,
         "name_bearing_record_count": 0,
         "note": "not a configured entity source",
         "record_count": 16,
@@ -70749,7 +70749,7 @@
         "status": "scanned_only"
       },
       {
-        "bytes": 10615,
+        "bytes": 16397,
         "name_bearing_record_count": 62,
         "note": "not a configured entity source",
         "record_count": 63,
@@ -70757,7 +70757,7 @@
         "status": "staged"
       },
       {
-        "bytes": 11600,
+        "bytes": 14748,
         "name_bearing_record_count": 11,
         "note": "not a configured entity source",
         "record_count": 25,
@@ -70765,7 +70765,7 @@
         "status": "staged"
       },
       {
-        "bytes": 1929,
+        "bytes": 2795,
         "name_bearing_record_count": 8,
         "note": "not a configured entity source",
         "record_count": 9,
@@ -70773,7 +70773,7 @@
         "status": "staged"
       },
       {
-        "bytes": 1591,
+        "bytes": 2204,
         "name_bearing_record_count": 5,
         "note": "not a configured entity source",
         "record_count": 10,
@@ -70781,7 +70781,7 @@
         "status": "scanned_only"
       },
       {
-        "bytes": 451662,
+        "bytes": 1711522,
         "name_bearing_record_count": 107,
         "note": "not a configured entity source",
         "record_count": 220,
@@ -70789,7 +70789,7 @@
         "status": "staged"
       },
       {
-        "bytes": 6481,
+        "bytes": 8143,
         "name_bearing_record_count": 10,
         "note": "not a configured entity source",
         "record_count": 11,
@@ -70797,7 +70797,7 @@
         "status": "scanned_only"
       },
       {
-        "bytes": 468,
+        "bytes": 617,
         "name_bearing_record_count": 0,
         "note": "not a configured entity source",
         "record_count": 4,
@@ -70805,7 +70805,7 @@
         "status": "scanned_only"
       },
       {
-        "bytes": 859,
+        "bytes": 1637,
         "name_bearing_record_count": 3,
         "note": "not a configured entity source",
         "record_count": 4,
@@ -70813,7 +70813,7 @@
         "status": "scanned_only"
       },
       {
-        "bytes": 4600,
+        "bytes": 5822,
         "name_bearing_record_count": 0,
         "note": "not a configured entity source",
         "record_count": 8,
@@ -70821,7 +70821,7 @@
         "status": "scanned_only"
       },
       {
-        "bytes": 5897821,
+        "bytes": 19779830,
         "name_bearing_record_count": 4589,
         "note": "not a configured entity source",
         "record_count": 4592,
@@ -70829,7 +70829,7 @@
         "status": "scanned_only"
       },
       {
-        "bytes": 450480,
+        "bytes": 1598212,
         "name_bearing_record_count": 178,
         "note": "geometry/runtime support data; names are not entity authority",
         "record_count": 468,

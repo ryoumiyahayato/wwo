@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import copy
 import sys
 import unittest
 from pathlib import Path
@@ -125,6 +126,73 @@ class ArtifactTests(unittest.TestCase):
         collisions = build_collision_report(inventory, aliases)
         errors = validate_artifacts(inventory, aliases, collisions, index)
         self.assertTrue(any("inverted date range" in error for error in errors))
+
+
+    def test_validator_rejects_duplicate_unknown_and_malformed_alias_records(self) -> None:
+        inventory = minimal_inventory()
+        aliases = build_alias_records(inventory)
+        collisions = build_collision_report(inventory, aliases)
+        index = build_search_index(aliases, inventory)
+
+        duplicate_inventory = copy.deepcopy(inventory)
+        duplicate_inventory["entities"][1]["entity_id"] = "city_alpha"
+        duplicate_aliases = build_alias_records(duplicate_inventory)
+        duplicate_errors = validate_artifacts(
+            duplicate_inventory,
+            duplicate_aliases,
+            build_collision_report(duplicate_inventory, duplicate_aliases),
+            build_search_index(duplicate_aliases, duplicate_inventory),
+        )
+        self.assertTrue(any("duplicate inventory entity_id" in error for error in duplicate_errors))
+
+        unknown_aliases = copy.deepcopy(aliases)
+        unknown_aliases["aliases"][0]["entity_id"] = "missing_entity"
+        unknown_errors = validate_artifacts(
+            inventory,
+            unknown_aliases,
+            collisions,
+            build_search_index(unknown_aliases, inventory),
+        )
+        self.assertTrue(any("unknown entity_id" in error for error in unknown_errors))
+
+        malformed_aliases = copy.deepcopy(aliases)
+        del malformed_aliases["aliases"][0]["source_field"]
+        malformed_errors = validate_artifacts(
+            inventory,
+            malformed_aliases,
+            collisions,
+            index,
+        )
+        self.assertTrue(any("invalid schema" in error for error in malformed_errors))
+
+    def test_alias_source_replay_rejects_tampering_and_normalization_only_match(self) -> None:
+        artifacts = build_artifacts(REPOSITORY_ROOT)
+        aliases = copy.deepcopy(artifacts["aliases"])
+        alias = next(item for item in aliases["aliases"] if item["script"] == "Latn")
+        alias["alias"] = alias["alias"].upper()
+        errors = validate_artifacts(
+            artifacts["inventory"],
+            aliases,
+            artifacts["collision_report"],
+            artifacts["search_index"],
+            root=REPOSITORY_ROOT,
+            coverage_manifest=artifacts["coverage_manifest"],
+        )
+        self.assertTrue(any("source value mismatch" in error for error in errors))
+
+        missing_pointer = copy.deepcopy(artifacts["aliases"])
+        missing_pointer["aliases"][0]["source"] = (
+            missing_pointer["aliases"][0]["source"].split("#", 1)[0] + "#$.missing/path"
+        )
+        errors = validate_artifacts(
+            artifacts["inventory"],
+            missing_pointer,
+            artifacts["collision_report"],
+            artifacts["search_index"],
+            root=REPOSITORY_ROOT,
+            coverage_manifest=artifacts["coverage_manifest"],
+        )
+        self.assertTrue(any("source pointer cannot be replayed" in error for error in errors))
 
     def test_repository_build_is_valid_and_contains_required_entity_classes(self) -> None:
         artifacts = build_artifacts(REPOSITORY_ROOT)
