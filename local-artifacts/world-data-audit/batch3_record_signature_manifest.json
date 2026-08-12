@@ -1,0 +1,1830 @@
+{
+  "data_json_count": 183,
+  "duplicate_id_file_count": 3,
+  "files": [
+    {
+      "duplicate_ids": [
+        "fatigue",
+        "health",
+        "stress"
+      ],
+      "id_digest": "096a4642b2b2921ab4e4003db0cf7d5bfda37bab294b8b448c9085a0ad5b0ec4",
+      "id_field_counts": {
+        "id": 8
+      },
+      "id_record_count": 8,
+      "path": "data/world_map/characters.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "7d5f9119180b74f13732fd9aad296b6e8c414cf8c8a81f15ad4d63322d4d3fe7",
+      "id_field_counts": {
+        "id": 32
+      },
+      "id_record_count": 32,
+      "path": "data/world_map/cities.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "aea650bdf2bfbc946f39a3364c4748358fd3997b762df18a18b2572ec4b08434",
+      "id_field_counts": {
+        "id": 7
+      },
+      "id_record_count": 7,
+      "path": "data/world_map/city_detail/countries/AD.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "3c316bce5f509a6342e65b3accc0c4c7b7af2fea302d319e47576d6986b57e18",
+      "id_field_counts": {
+        "id": 94
+      },
+      "id_record_count": 94,
+      "path": "data/world_map/city_detail/countries/AE.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "53b6cffba11a6d4e1950f4a1dec965da4f7bbc80033af4b9a0f7afee11bf128d",
+      "id_field_counts": {
+        "id": 98
+      },
+      "id_record_count": 98,
+      "path": "data/world_map/city_detail/countries/AF.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "8b95e4c85e112dbbd06deecd5abf2dab9343e729375c580182d257a347a33b3e",
+      "id_field_counts": {
+        "id": 10
+      },
+      "id_record_count": 10,
+      "path": "data/world_map/city_detail/countries/AG.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "3cbdb8f3c2e5a3a7aed66b64a0e9a2668c1ca2da1f611e101ded318a01f20326",
+      "id_field_counts": {
+        "id": 14
+      },
+      "id_record_count": 14,
+      "path": "data/world_map/city_detail/countries/AI.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "7af75374e5f27305df13d8ce974cf0589bf2d0c52a8e9889d6cdc7f2b22c12ed",
+      "id_field_counts": {
+        "id": 72
+      },
+      "id_record_count": 72,
+      "path": "data/world_map/city_detail/countries/AL.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "9547dab621a585da2cdbfe69ad2484fe5caae0f4b641969ad37f53f2dc7fbda4",
+      "id_field_counts": {
+        "id": 80
+      },
+      "id_record_count": 80,
+      "path": "data/world_map/city_detail/countries/AM.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "84a452c2b7a76912660ac52a7dbe427ff0630683f9cc60135b553ce1aa0bc87f",
+      "id_field_counts": {
+        "id": 213
+      },
+      "id_record_count": 213,
+      "path": "data/world_map/city_detail/countries/AT.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "1a0c6ef8a0e0675d238e96dba7b8745bda326063805729a4588870c5484df36b",
+      "id_field_counts": {
+        "id": 12
+      },
+      "id_record_count": 12,
+      "path": "data/world_map/city_detail/countries/AW.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "71c369d6f14f21576a6186fc7bb2ba6bd41f07d9b9dd59cbed070ce1423f482a",
+      "id_field_counts": {
+        "id": 3
+      },
+      "id_record_count": 3,
+      "path": "data/world_map/city_detail/countries/AX.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "d06ace8dbe178a4fa20e7081a9a7aa91763f21a58b8948c044d5e1c14c320c60",
+      "id_field_counts": {
+        "id": 134
+      },
+      "id_record_count": 134,
+      "path": "data/world_map/city_detail/countries/AZ.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "2474729522025e47c5cc357c9b96e0ee34bd8b3b8d4d7b5d9c0eb5788f76c6a6",
+      "id_field_counts": {
+        "id": 117
+      },
+      "id_record_count": 117,
+      "path": "data/world_map/city_detail/countries/BA.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "86ca912907bf1552acf36576bc54899815914153160db2b246034ca3e89fea72",
+      "id_field_counts": {
+        "id": 11
+      },
+      "id_record_count": 11,
+      "path": "data/world_map/city_detail/countries/BB.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "6a930754aeb6e38c80126725854ca291e1320330297a2b7dbb1031bffa35bc27",
+      "id_field_counts": {
+        "id": 145
+      },
+      "id_record_count": 145,
+      "path": "data/world_map/city_detail/countries/BD.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "28387ea20a932756d0137bf8209207c012e8e56c0255d83afeac4f184f836e76",
+      "id_field_counts": {
+        "id": 686
+      },
+      "id_record_count": 686,
+      "path": "data/world_map/city_detail/countries/BE.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "34c5b5279fc88f34657a1f149962ad1f391cf90675efcf77472cc8bf05162b33",
+      "id_field_counts": {
+        "id": 138
+      },
+      "id_record_count": 138,
+      "path": "data/world_map/city_detail/countries/BG.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "d91ecba3992764bf9ac6738845b4e92f8bda51b7e06e4d16ddc320ba6baa8e7c",
+      "id_field_counts": {
+        "id": 11
+      },
+      "id_record_count": 11,
+      "path": "data/world_map/city_detail/countries/BH.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "ed69570edaea055146f8476279b35ba0e30897fefa0543d04bb5bc2a9854dfe0",
+      "id_field_counts": {
+        "id": 1
+      },
+      "id_record_count": 1,
+      "path": "data/world_map/city_detail/countries/BL.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "00e42dbbde1d7e9b062556e0faa8d4a7a56b260855525e585759a5a11200fbdf",
+      "id_field_counts": {
+        "id": 10
+      },
+      "id_record_count": 10,
+      "path": "data/world_map/city_detail/countries/BM.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "a4ae5148d365e635afa5be10113f657f441bcfe7ff4acb0e8c3b509037044b40",
+      "id_field_counts": {
+        "id": 28
+      },
+      "id_record_count": 28,
+      "path": "data/world_map/city_detail/countries/BN.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "4735a9715f917ade585cd5ba04880dd652c1375d4f75983c6f22b62385791c28",
+      "id_field_counts": {
+        "id": 3
+      },
+      "id_record_count": 3,
+      "path": "data/world_map/city_detail/countries/BQ.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "2638d573c44a1368a3e5d96d37bfc173d87c9c2ee41b07f31e470c53249ae1dc",
+      "id_field_counts": {
+        "id": 24
+      },
+      "id_record_count": 24,
+      "path": "data/world_map/city_detail/countries/BS.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "0ab3df31dc3b344f298e6a61a96a86f154fe1235b672df8b9ff5fc770b6831f0",
+      "id_field_counts": {
+        "id": 23
+      },
+      "id_record_count": 23,
+      "path": "data/world_map/city_detail/countries/BT.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "c73ee0a1ce694276987783d21d3885d46100ad98f7bb3324a226d1bc3781c76d",
+      "id_field_counts": {
+        "id": 140
+      },
+      "id_record_count": 140,
+      "path": "data/world_map/city_detail/countries/BY.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "3314215fdec74076f0cc3324f0552d5f36014c2b8cc373452ba20ee06c2ec588",
+      "id_field_counts": {
+        "id": 13
+      },
+      "id_record_count": 13,
+      "path": "data/world_map/city_detail/countries/BZ.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "a62500e9f0f9b74d637c7c89e5e88f592d6b32ea5333bb2fdd7e628467d5e32c",
+      "id_field_counts": {
+        "id": 1309
+      },
+      "id_record_count": 1309,
+      "path": "data/world_map/city_detail/countries/CA.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "9bfe4dd7540eb4f556cc3a236fc115e944e351a3309eccca73e7f220163add04",
+      "id_field_counts": {
+        "id": 1
+      },
+      "id_record_count": 1,
+      "path": "data/world_map/city_detail/countries/CC.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "3ed7a7e01402ae1bee5fea0b48164c00cb80084cb21c86c06a45466ac6dfca22",
+      "id_field_counts": {
+        "id": 353
+      },
+      "id_record_count": 353,
+      "path": "data/world_map/city_detail/countries/CH.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "5b61c398d02b1560c51f9d9133bb95fc25603798be199806a3ca66baa742f45b",
+      "id_field_counts": {
+        "id": 2879
+      },
+      "id_record_count": 2879,
+      "path": "data/world_map/city_detail/countries/CN.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "0c6562b887111c36c40ae843065a1ad36c4852b2354896e567255bf056b31a2a",
+      "id_field_counts": {
+        "id": 76
+      },
+      "id_record_count": 76,
+      "path": "data/world_map/city_detail/countries/CR.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "a7e12d294303cb85cb0319948954638af8ac57663ca5a4fb85f908d27ae62567",
+      "id_field_counts": {
+        "id": 169
+      },
+      "id_record_count": 169,
+      "path": "data/world_map/city_detail/countries/CU.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "405c6cefdf8f6edc80ccf20f5f2c32566787fe9393d387acdaeb6e4ecfb60113",
+      "id_field_counts": {
+        "id": 6
+      },
+      "id_record_count": 6,
+      "path": "data/world_map/city_detail/countries/CW.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "a8e1f165c8e81cf28cfc7f448d250c78e93c6959088bb6ade797e8566d40a836",
+      "id_field_counts": {
+        "id": 35
+      },
+      "id_record_count": 35,
+      "path": "data/world_map/city_detail/countries/CY.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "35cfc1f3850e018ee35fb4a85786584c44f0e10ca6c52e9bfb151ccf8fa5dbf9",
+      "id_field_counts": {
+        "id": 354
+      },
+      "id_record_count": 354,
+      "path": "data/world_map/city_detail/countries/CZ.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "ac2aba294d56c9516605b47f05879cb78464df09e14242161d5819212855fe8f",
+      "id_field_counts": {
+        "id": 3076
+      },
+      "id_record_count": 3076,
+      "path": "data/world_map/city_detail/countries/DE.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "64dcc7b4df247861c5a5824d76f508d648759117e8d2dc6187032f509a43624e",
+      "id_field_counts": {
+        "id": 163
+      },
+      "id_record_count": 163,
+      "path": "data/world_map/city_detail/countries/DK.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "6f832a702e14c5fc0f6310f2f3362e3d180aaa44cda13b16af2507ce74f9fd46",
+      "id_field_counts": {
+        "id": 10
+      },
+      "id_record_count": 10,
+      "path": "data/world_map/city_detail/countries/DM.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "1b95e582e02a54b776adfdffde0fe16c70d287c0c56afac46f85726092221b32",
+      "id_field_counts": {
+        "id": 118
+      },
+      "id_record_count": 118,
+      "path": "data/world_map/city_detail/countries/DO.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "cb3f0661493ea5452649d5ed850c9add95a1a72448df47e644455ef78c092713",
+      "id_field_counts": {
+        "id": 39
+      },
+      "id_record_count": 39,
+      "path": "data/world_map/city_detail/countries/EE.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "cfcacefe43e1eb64578e6d3b2bc3503bea87dce3cb71ad9cd56ba220e40c4cf1",
+      "id_field_counts": {
+        "id": 1477
+      },
+      "id_record_count": 1477,
+      "path": "data/world_map/city_detail/countries/ES.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "74c1309ee93b2cb65a35f36a00ec1b192d82c1eb888b66a69c8e0bc18557c640",
+      "id_field_counts": {
+        "id": 343
+      },
+      "id_record_count": 343,
+      "path": "data/world_map/city_detail/countries/FI.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "0039d3c10b7310b770853878c97096c93f9098a5c9155d10f320c4e0e82ab4c5",
+      "id_field_counts": {
+        "id": 6
+      },
+      "id_record_count": 6,
+      "path": "data/world_map/city_detail/countries/FO.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "d48d05c7374eba4188eb0c718af67c16414096b3ab40848b1a1ce6bf7d87b7b2",
+      "id_field_counts": {
+        "id": 1910
+      },
+      "id_record_count": 1910,
+      "path": "data/world_map/city_detail/countries/GB.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "c15eae7933824699ccb2209b6c0d574ba92c73335d88f76a05482d0384c6b880",
+      "id_field_counts": {
+        "id": 7
+      },
+      "id_record_count": 7,
+      "path": "data/world_map/city_detail/countries/GD.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "d776b062407478fcfe5d20845832da405765a07d3284156f9983712c00d38c27",
+      "id_field_counts": {
+        "id": 58
+      },
+      "id_record_count": 58,
+      "path": "data/world_map/city_detail/countries/GE.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "36e673b763790a0242bd024656867954ffd70a23d3fd36cf9dd5643242b55e97",
+      "id_field_counts": {
+        "id": 11
+      },
+      "id_record_count": 11,
+      "path": "data/world_map/city_detail/countries/GG.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "2a6ca761dc1500930e4038c120b12d9b72fc0e32b8311eb6a1b29d2673da44bd",
+      "id_field_counts": {
+        "id": 3
+      },
+      "id_record_count": 3,
+      "path": "data/world_map/city_detail/countries/GI.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "152dafbba545fdbd1dc3a7c642ca3b6a31a035dd9275a23929f26387b02917bd",
+      "id_field_counts": {
+        "id": 5
+      },
+      "id_record_count": 5,
+      "path": "data/world_map/city_detail/countries/GL.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "aee1a2ec638b25134bc02d786c9500e6ced4e1b508afc0b8640999d47287dc79",
+      "id_field_counts": {
+        "id": 22
+      },
+      "id_record_count": 22,
+      "path": "data/world_map/city_detail/countries/GP.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "12f3eecbf9329e6bb67531694e2a4017b2ef668fde296b3d25a6638d5b6821d1",
+      "id_field_counts": {
+        "id": 284
+      },
+      "id_record_count": 284,
+      "path": "data/world_map/city_detail/countries/GR.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "c36c80b426b10da11b7fee4eae2053d69d68abcd8dd339306db3036999927c99",
+      "id_field_counts": {
+        "id": 205
+      },
+      "id_record_count": 205,
+      "path": "data/world_map/city_detail/countries/GT.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "4eb2a0492521eca675c3ca6898673ae792b328dae04e1ca606a331c628985f12",
+      "id_field_counts": {
+        "id": 266
+      },
+      "id_record_count": 266,
+      "path": "data/world_map/city_detail/countries/HK.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "d303cb12d349555d96e350a5338fb4c58b9780a9184eca2dfc22028549b55a5e",
+      "id_field_counts": {
+        "id": 158
+      },
+      "id_record_count": 158,
+      "path": "data/world_map/city_detail/countries/HN.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "0ac9709ecdd34878d6c374cc50506d96a05ecdf594bbf2e1d37af0fb3ad2b4c4",
+      "id_field_counts": {
+        "id": 76
+      },
+      "id_record_count": 76,
+      "path": "data/world_map/city_detail/countries/HR.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "9ad5a1e722a108482147253902453bb77983117275c63ae492816fc061277f31",
+      "id_field_counts": {
+        "id": 51
+      },
+      "id_record_count": 51,
+      "path": "data/world_map/city_detail/countries/HT.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "97f7b966817f53964bf112914b66bbb873ef033cd38fd3dfa6b0cfcc678c45cd",
+      "id_field_counts": {
+        "id": 378
+      },
+      "id_record_count": 378,
+      "path": "data/world_map/city_detail/countries/HU.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "6c6e5953a7db15f5727474231c40ff586c2949940da86b808fb843b9a3cc6c87",
+      "id_field_counts": {
+        "id": 479
+      },
+      "id_record_count": 479,
+      "path": "data/world_map/city_detail/countries/ID.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "222815f6ddcd7338cf7818a261c90bbeba104539bdd7d279586b4091db95d812",
+      "id_field_counts": {
+        "id": 152
+      },
+      "id_record_count": 152,
+      "path": "data/world_map/city_detail/countries/IE.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "e5f6057b4f6c0db65ec02ef497a35efff23f243b8a1c8717673409dc1968da80",
+      "id_field_counts": {
+        "id": 178
+      },
+      "id_record_count": 178,
+      "path": "data/world_map/city_detail/countries/IL.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "3cedb0463c0d26ce75af18d3d261ae711fb791f12ff572def7a7b94a17bd44a1",
+      "id_field_counts": {
+        "id": 21
+      },
+      "id_record_count": 21,
+      "path": "data/world_map/city_detail/countries/IM.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "4e6ba92800fdceff1fbacb0f193a2fd49ac1510b7392dae1e8aab57ed3fffaf9",
+      "id_field_counts": {
+        "id": 6526
+      },
+      "id_record_count": 6526,
+      "path": "data/world_map/city_detail/countries/IN.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "97a9c770cabafadeb4b17578056ab95d500401b4cd3418cccab702e7e6c67544",
+      "id_field_counts": {
+        "id": 105
+      },
+      "id_record_count": 105,
+      "path": "data/world_map/city_detail/countries/IQ.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "43b5098b7391a623a6b961294c4778515390890e0ecb49f35564f8ea3daed120",
+      "id_field_counts": {
+        "id": 836
+      },
+      "id_record_count": 836,
+      "path": "data/world_map/city_detail/countries/IR.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "19245c7465ad91aca701cd6e8afad9154d6e035be0dffd9a256a784f9f3a6e17",
+      "id_field_counts": {
+        "id": 14
+      },
+      "id_record_count": 14,
+      "path": "data/world_map/city_detail/countries/IS.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "2569658694a8afc7056c32e705caf85af1bc484fc0d06aac2c72e336d113ec06",
+      "id_field_counts": {
+        "id": 2031
+      },
+      "id_record_count": 2031,
+      "path": "data/world_map/city_detail/countries/IT.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "8b5349ceaf6f4d3f5e0c9740a4011962cc013cf70dc7c15a0efc0555ebec500c",
+      "id_field_counts": {
+        "id": 3
+      },
+      "id_record_count": 3,
+      "path": "data/world_map/city_detail/countries/JE.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "1f6e3456aac5befd8ea1f65e44d92b760c608ae94f0488bbb1db99340176accb",
+      "id_field_counts": {
+        "id": 44
+      },
+      "id_record_count": 44,
+      "path": "data/world_map/city_detail/countries/JM.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "f5de2decd47a33a8f93c97bc74d0cccb2d9bb10f06818275cfdcff819b5a11b4",
+      "id_field_counts": {
+        "id": 76
+      },
+      "id_record_count": 76,
+      "path": "data/world_map/city_detail/countries/JO.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "2e6682174df2d07c3d2bdd2c4aad1334b03da725497092a84748f2ddf0868f3c",
+      "id_field_counts": {
+        "id": 1798
+      },
+      "id_record_count": 1798,
+      "path": "data/world_map/city_detail/countries/JP.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "68a80cf94985888d7d8c46baa51b3827f3745432ce9408665dc32a3f17452a4e",
+      "id_field_counts": {
+        "id": 61
+      },
+      "id_record_count": 61,
+      "path": "data/world_map/city_detail/countries/KG.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "92cc0640f31223fb71f9151b3a26cc95123d24965cb3095d6f8bbe715f0ab258",
+      "id_field_counts": {
+        "id": 124
+      },
+      "id_record_count": 124,
+      "path": "data/world_map/city_detail/countries/KH.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "2d606e0a4237c3b0e406abe74043268e82a0f8d96d6a612670903cd2ddcb86a1",
+      "id_field_counts": {
+        "id": 14
+      },
+      "id_record_count": 14,
+      "path": "data/world_map/city_detail/countries/KN.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "a59e797ffb07859894944ec957c54eda0c407686bcc1cfeb804b11a8e304fada",
+      "id_field_counts": {
+        "id": 118
+      },
+      "id_record_count": 118,
+      "path": "data/world_map/city_detail/countries/KP.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "b18391f643e4ad42101a29881933d15572376d44cb2c8f8a2b6b3b295cde5106",
+      "id_field_counts": {
+        "id": 154
+      },
+      "id_record_count": 154,
+      "path": "data/world_map/city_detail/countries/KR.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "4595d260354f63e67594920ea139cbf3bd0be9edc1e78cfac49d692c2077f353",
+      "id_field_counts": {
+        "id": 23
+      },
+      "id_record_count": 23,
+      "path": "data/world_map/city_detail/countries/KW.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "cf1d33442dade1d82b26cf449bd1b6604d525b9600325154b64d2cc849eff88a",
+      "id_field_counts": {
+        "id": 45
+      },
+      "id_record_count": 45,
+      "path": "data/world_map/city_detail/countries/KY.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "791c6ec4596fddc438db92dd695bcdb662a05c16c6fa49dcf02fe50c2ba0e7c0",
+      "id_field_counts": {
+        "id": 205
+      },
+      "id_record_count": 205,
+      "path": "data/world_map/city_detail/countries/KZ.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "01025f34ddc42a931af043c8a1f3cd88a2c0d8479424566d792666ed572e306e",
+      "id_field_counts": {
+        "id": 34
+      },
+      "id_record_count": 34,
+      "path": "data/world_map/city_detail/countries/LA.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "bc9dad9c2ae34229987eff06b5a89a5ef177ccea2193700c6d6c20de6c0c1a74",
+      "id_field_counts": {
+        "id": 30
+      },
+      "id_record_count": 30,
+      "path": "data/world_map/city_detail/countries/LB.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "d1026be5f391606519a9c37fa5474a8264c7155078be8ca5b4a8a8eaa4dcb17c",
+      "id_field_counts": {
+        "id": 10
+      },
+      "id_record_count": 10,
+      "path": "data/world_map/city_detail/countries/LC.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "4ab7a214c73e57748f1c0ab354dc07c3082ef5fbfc210acf87e3093973588064",
+      "id_field_counts": {
+        "id": 11
+      },
+      "id_record_count": 11,
+      "path": "data/world_map/city_detail/countries/LI.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "920db8e7cf34ebfa1ba8929041378badad244e89f50e1b385bc03423b4db04b6",
+      "id_field_counts": {
+        "id": 72
+      },
+      "id_record_count": 72,
+      "path": "data/world_map/city_detail/countries/LK.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "2c5e165065e5173ecf41be37d45ee0d1a51b8534ef73b04d76cbf55c73263e19",
+      "id_field_counts": {
+        "id": 71
+      },
+      "id_record_count": 71,
+      "path": "data/world_map/city_detail/countries/LT.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "ff01b49cc13cdb3a667eeb15dbeb866b0cfdfa453d58a78300ecf942e42ef639",
+      "id_field_counts": {
+        "id": 33
+      },
+      "id_record_count": 33,
+      "path": "data/world_map/city_detail/countries/LU.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "61715112b3db98e79a117ab83a71d9f7a3c97a2d37cbdaaaf689a0ab2f6a3d71",
+      "id_field_counts": {
+        "id": 52
+      },
+      "id_record_count": 52,
+      "path": "data/world_map/city_detail/countries/LV.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "43efcb4d69221fc488ab83719358eb7e8211087f996c352ff7563a7ee8aedd5b",
+      "id_field_counts": {
+        "id": 5
+      },
+      "id_record_count": 5,
+      "path": "data/world_map/city_detail/countries/MC.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "134ea93a94282390d2b8e30f3926ebefadf1901a2b2d0cea15480243a1947061",
+      "id_field_counts": {
+        "id": 63
+      },
+      "id_record_count": 63,
+      "path": "data/world_map/city_detail/countries/MD.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "09aa5ba02b162749ae6db9bebb78dc4ea4484b8928a74b30765467a21325b6ac",
+      "id_field_counts": {
+        "id": 26
+      },
+      "id_record_count": 26,
+      "path": "data/world_map/city_detail/countries/ME.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "ee56b534f28b37c880e6dd0904cdd07fe7d100aba8c4291e9a9e7a62f9b210ac",
+      "id_field_counts": {
+        "id": 3
+      },
+      "id_record_count": 3,
+      "path": "data/world_map/city_detail/countries/MF.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "a78a14c2b7679245d3c79e12b1bd7f78a14f50e3364d6481d1dd08c78fecccbe",
+      "id_field_counts": {
+        "id": 90
+      },
+      "id_record_count": 90,
+      "path": "data/world_map/city_detail/countries/MK.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "ae29debbfb21ab2fc4238ac2cab20866c28666e2595ee6de432389f937f3e3f7",
+      "id_field_counts": {
+        "id": 252
+      },
+      "id_record_count": 252,
+      "path": "data/world_map/city_detail/countries/MM.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "4621a9a88185bd4b07809d97c1b98897073f210baa0d773f6ccbe686a168e083",
+      "id_field_counts": {
+        "id": 35
+      },
+      "id_record_count": 35,
+      "path": "data/world_map/city_detail/countries/MN.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "7268b80d911d82bcb6a878ef7cd84caac639e424d4da3d1f692e9baa87157aa5",
+      "id_field_counts": {
+        "id": 6
+      },
+      "id_record_count": 6,
+      "path": "data/world_map/city_detail/countries/MO.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "80cef2186ca8e4a7817bca06d3cce8cfeab4cb0463448ebba7cda09e026e64b6",
+      "id_field_counts": {
+        "id": 17
+      },
+      "id_record_count": 17,
+      "path": "data/world_map/city_detail/countries/MQ.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "58f72a7a04be1ff114c8ac2062a524a39ccf4f43d7a951b7c653a9eb396a9f7f",
+      "id_field_counts": {
+        "id": 2
+      },
+      "id_record_count": 2,
+      "path": "data/world_map/city_detail/countries/MS.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "32241876fdfa937a9a3f8088050052e269dbbf3889a22d351ce8edecba73551d",
+      "id_field_counts": {
+        "id": 65
+      },
+      "id_record_count": 65,
+      "path": "data/world_map/city_detail/countries/MT.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "33fde4e03e5ac51ac1d3f5d5cd428ae3e966db839505476a0fb9eeb0e0332025",
+      "id_field_counts": {
+        "id": 19
+      },
+      "id_record_count": 19,
+      "path": "data/world_map/city_detail/countries/MV.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "c9c2b80372a02fadb85a0efe1adb011098046b037901cf84f4615a4e52f025c4",
+      "id_field_counts": {
+        "id": 1827
+      },
+      "id_record_count": 1827,
+      "path": "data/world_map/city_detail/countries/MX.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "a45226d24b5f28442615e64ed8cda87be677f357bae0ce2a14ccdde409cac49d",
+      "id_field_counts": {
+        "id": 530
+      },
+      "id_record_count": 530,
+      "path": "data/world_map/city_detail/countries/MY.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "94e51f7e0d2348c23622360ed334bfaa198ac6ac821c5e02cca507b3537b50c2",
+      "id_field_counts": {
+        "id": 76
+      },
+      "id_record_count": 76,
+      "path": "data/world_map/city_detail/countries/NI.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "c8ad9ea623b6181dc0b1f9b18075ba47483620f2c4ba692d5c717df24b0fee43",
+      "id_field_counts": {
+        "id": 544
+      },
+      "id_record_count": 544,
+      "path": "data/world_map/city_detail/countries/NL.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "61424d79cf32d173f386fb23790c8b6b8abb353d5f35fb4f6b2239209f0b169d",
+      "id_field_counts": {
+        "id": 118
+      },
+      "id_record_count": 118,
+      "path": "data/world_map/city_detail/countries/NO.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "f9db0efefdc655a7edcb5bb210709adfae393c5059098495f017a2532efd1221",
+      "id_field_counts": {
+        "id": 54
+      },
+      "id_record_count": 54,
+      "path": "data/world_map/city_detail/countries/NP.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "04b93a946f50cde60414b039ae9a29855b1f27603e39f73ca9bf0f17b0e1afad",
+      "id_field_counts": {
+        "id": 32
+      },
+      "id_record_count": 32,
+      "path": "data/world_map/city_detail/countries/OM.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "1251c0c4b793c32e4b1e482345fa1ebb9f90789808f02d3b7f993b948a93ea33",
+      "id_field_counts": {
+        "id": 69
+      },
+      "id_record_count": 69,
+      "path": "data/world_map/city_detail/countries/PA.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "a87a7e8d7f9ff45a28a9b97e2f8d11a3e00a7f6db8d6090e6640a95a9bfc41e4",
+      "id_field_counts": {
+        "id": 1376
+      },
+      "id_record_count": 1376,
+      "path": "data/world_map/city_detail/countries/PH.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "859f0a4ccca769bb10b53d121dbbd00db33f449348128a5eb7a06221e412f69f",
+      "id_field_counts": {
+        "id": 490
+      },
+      "id_record_count": 490,
+      "path": "data/world_map/city_detail/countries/PK.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "6292a564dc46e1644153dbd97da888b96f8e639fa0bce75e814edb664a7f7486",
+      "id_field_counts": {
+        "id": 768
+      },
+      "id_record_count": 768,
+      "path": "data/world_map/city_detail/countries/PL.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "1234d7d3269c53a9e409b2b023d29ebe9b07410f7cbfc54dfd9b626e45b96deb",
+      "id_field_counts": {
+        "id": 2
+      },
+      "id_record_count": 2,
+      "path": "data/world_map/city_detail/countries/PM.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "68a1489a9d55260aa36d46261f94e1242b6be1359ad9b8f488c75bcf4d7bed05",
+      "id_field_counts": {
+        "id": 94
+      },
+      "id_record_count": 94,
+      "path": "data/world_map/city_detail/countries/PR.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "4d319f88654a53ec9bb2ad0bdff781000794e9f80ea0eeec848b8958cf8a3055",
+      "id_field_counts": {
+        "id": 127
+      },
+      "id_record_count": 127,
+      "path": "data/world_map/city_detail/countries/PS.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "d59804e02bc021d47cd3851d395cc0d899a48bcb45de1647e53052ad99adc4f9",
+      "id_field_counts": {
+        "id": 544
+      },
+      "id_record_count": 544,
+      "path": "data/world_map/city_detail/countries/PT.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "40a6274728b4adf97e9f41f94ac5ab66008d20d3959c9b60ab01006dbba44bb6",
+      "id_field_counts": {
+        "id": 37
+      },
+      "id_record_count": 37,
+      "path": "data/world_map/city_detail/countries/QA.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "7f03604f0cf9a48625bdbb20c7e8c37c59605f7dacbe6cbac5085d02b8bb6ab5",
+      "id_field_counts": {
+        "id": 788
+      },
+      "id_record_count": 788,
+      "path": "data/world_map/city_detail/countries/RO.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "e385d22aad08ec997e10966549f200ddda0be02e69a98567c0e52aeceae25e0f",
+      "id_field_counts": {
+        "id": 106
+      },
+      "id_record_count": 106,
+      "path": "data/world_map/city_detail/countries/RS.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "1e56a158f5d5976fb8ba3fca1932be4442f12edf38429ffc3ba01342d3207b13",
+      "id_field_counts": {
+        "id": 2753
+      },
+      "id_record_count": 2753,
+      "path": "data/world_map/city_detail/countries/RU.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "8eddea59969c05d4fd755fa7cf6277f228eb9c97bab3bac175e0f1401cdc7436",
+      "id_field_counts": {
+        "id": 144
+      },
+      "id_record_count": 144,
+      "path": "data/world_map/city_detail/countries/SA.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "ac65b8955a16f92b6577b680aa3614230920999f348cd924e3a39a5be50d70d2",
+      "id_field_counts": {
+        "id": 279
+      },
+      "id_record_count": 279,
+      "path": "data/world_map/city_detail/countries/SE.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "140d0a1f6458f894e8a7f8ac6f35a9fa58a05457190eb516611ff679de60a406",
+      "id_field_counts": {
+        "id": 95
+      },
+      "id_record_count": 95,
+      "path": "data/world_map/city_detail/countries/SG.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "4d77cf62142a0ce9ad5b7a816daa4b014e3ef2571f30609e8c2c39ef83f7a2b0",
+      "id_field_counts": {
+        "id": 213
+      },
+      "id_record_count": 213,
+      "path": "data/world_map/city_detail/countries/SI.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "64aea80bbad388e7919d9dd76bbe2b3e5e4fe0a6c6700dcb7848058fd7cbdc8c",
+      "id_field_counts": {
+        "id": 2
+      },
+      "id_record_count": 2,
+      "path": "data/world_map/city_detail/countries/SJ.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "1ecd65dde8a6ccd383211e9bf5f1f440e1b3a4f66641bab00d117feb3f154df7",
+      "id_field_counts": {
+        "id": 147
+      },
+      "id_record_count": 147,
+      "path": "data/world_map/city_detail/countries/SK.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "00ad0e885f4744f1d43df8dbdd392b54706f2321e1b41892aff17511ab9bd1a1",
+      "id_field_counts": {
+        "id": 11
+      },
+      "id_record_count": 11,
+      "path": "data/world_map/city_detail/countries/SM.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "8319eff5244761002b627ce4a7849700b42adb0ef0f55b75845e363cec889f13",
+      "id_field_counts": {
+        "id": 74
+      },
+      "id_record_count": 74,
+      "path": "data/world_map/city_detail/countries/SV.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "73a879428ae342bd162a0d5dcd6471935acd4054657086f58eabc9f56da62013",
+      "id_field_counts": {
+        "id": 5
+      },
+      "id_record_count": 5,
+      "path": "data/world_map/city_detail/countries/SX.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "09ad4eef3910e22d8af4066a190562ebdf51f1130366bae1f1e1fef11f2de1b0",
+      "id_field_counts": {
+        "id": 113
+      },
+      "id_record_count": 113,
+      "path": "data/world_map/city_detail/countries/SY.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "2af82a889826572c13b36454ae2d5782f2d0842d11b2ec05061f4064a02d84e3",
+      "id_field_counts": {
+        "id": 2
+      },
+      "id_record_count": 2,
+      "path": "data/world_map/city_detail/countries/TC.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "cb539635ebdb6f676b3eb5228056b7555a549dff506d84aff3558f3be37b3b5e",
+      "id_field_counts": {
+        "id": 448
+      },
+      "id_record_count": 448,
+      "path": "data/world_map/city_detail/countries/TH.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "9c644bc8169728aa12705d30ba0c1508d5d6ef4f1ad4d1c19d325b0485adc952",
+      "id_field_counts": {
+        "id": 64
+      },
+      "id_record_count": 64,
+      "path": "data/world_map/city_detail/countries/TJ.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "ce2cd240a1f2f56c23a8a1284d7156b7311297b12849543bbe02f68249a6309b",
+      "id_field_counts": {
+        "id": 74
+      },
+      "id_record_count": 74,
+      "path": "data/world_map/city_detail/countries/TM.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "a61ebf4f4ec153a48f1336bf95ad04a3cae674dc99f366903cf81ee4b5ea714e",
+      "id_field_counts": {
+        "id": 866
+      },
+      "id_record_count": 866,
+      "path": "data/world_map/city_detail/countries/TR.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "729c79ff673b466d8ef12f476ccc0b4d0b843229743a43220cbf8c0481cf6900",
+      "id_field_counts": {
+        "id": 22
+      },
+      "id_record_count": 22,
+      "path": "data/world_map/city_detail/countries/TT.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "f58fedfde67d125cf1b071f730dbfa1a31b193b552d5a9e1d01cab82a10569c0",
+      "id_field_counts": {
+        "id": 80
+      },
+      "id_record_count": 80,
+      "path": "data/world_map/city_detail/countries/TW.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "896e5e083110e361d0edf5b2588efce1f96e40a79920051177aafc0b0713ac44",
+      "id_field_counts": {
+        "id": 1012
+      },
+      "id_record_count": 1012,
+      "path": "data/world_map/city_detail/countries/UA.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "bcfc4fb8d75f1c087c65a63f2c843c4ee802f8a4b512a7a8d253e056a114fef2",
+      "id_field_counts": {
+        "id": 7555
+      },
+      "id_record_count": 7555,
+      "path": "data/world_map/city_detail/countries/US.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "f255c7d3edfc84345f9a5f2de964c8c419896a801d7ae6caea7029acc36e4f18",
+      "id_field_counts": {
+        "id": 142
+      },
+      "id_record_count": 142,
+      "path": "data/world_map/city_detail/countries/UZ.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "28e3f438c5739c6c1efe96439bb15562ffd88025198e19f30ef575aa067d8329",
+      "id_field_counts": {
+        "id": 1
+      },
+      "id_record_count": 1,
+      "path": "data/world_map/city_detail/countries/VA.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "5847946daab002c42d287f6a57c9eda06fe7edd3649c6e79d0f0583d3eec4297",
+      "id_field_counts": {
+        "id": 7
+      },
+      "id_record_count": 7,
+      "path": "data/world_map/city_detail/countries/VC.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "e4a889a5d75ef0d6d4c1e579d198e8d5af0db8998b9654b3a76b1dec0f74d2f6",
+      "id_field_counts": {
+        "id": 1
+      },
+      "id_record_count": 1,
+      "path": "data/world_map/city_detail/countries/VG.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "034cad8dfd7d4998f462a41be2b4e2e4f85e81cf7858ca09ecc20b85941d4fdc",
+      "id_field_counts": {
+        "id": 4
+      },
+      "id_record_count": 4,
+      "path": "data/world_map/city_detail/countries/VI.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "d1f0c76656cf576931fbd68bf0140c84f76e4c115d2f26005f5c6beacf4cf5d0",
+      "id_field_counts": {
+        "id": 453
+      },
+      "id_record_count": 453,
+      "path": "data/world_map/city_detail/countries/VN.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "a1ead1c8f9a86f098ef7e42e32061254006727208cd92900d74486173170d033",
+      "id_field_counts": {
+        "id": 35
+      },
+      "id_record_count": 35,
+      "path": "data/world_map/city_detail/countries/XK.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "3cfa27f730b7ae86e50392be7da737605ccf5e0ea2d2acf4ea22ea1a3047fcdf",
+      "id_field_counts": {
+        "id": 34
+      },
+      "id_record_count": 34,
+      "path": "data/world_map/city_detail/countries/YE.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "43286bae324280aaf60c7daa93cd959a882a3015dce944ebaf3868672da5f21b",
+      "id_field_counts": {
+        "id": 1671
+      },
+      "id_record_count": 1671,
+      "path": "data/world_map/city_detail/france/FR-11.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "d34ec9a1e8bb3c88dff3783c097dbf28409494693771e4d61f623c57b9a4a151",
+      "id_field_counts": {
+        "id": 1827
+      },
+      "id_record_count": 1827,
+      "path": "data/world_map/city_detail/france/FR-24.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "492c2ca74e70ec6028ec84b0336e15967adec37f264297215f40c4c4fcc464a9",
+      "id_field_counts": {
+        "id": 3765
+      },
+      "id_record_count": 3765,
+      "path": "data/world_map/city_detail/france/FR-27.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "3df821f5f9aa0c710ade54972363e12e8499bc95cfeff2a348e962febe474915",
+      "id_field_counts": {
+        "id": 2733
+      },
+      "id_record_count": 2733,
+      "path": "data/world_map/city_detail/france/FR-28.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "1c0296d72f4d02c3859f1eb52fa32ebe43185194697a5a2114bd2b53bfceaac6",
+      "id_field_counts": {
+        "id": 4008
+      },
+      "id_record_count": 4008,
+      "path": "data/world_map/city_detail/france/FR-32.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "aabe833dde48ed9e9597be8973185ea809e2d78226b523a127b38845ecff195c",
+      "id_field_counts": {
+        "id": 5295
+      },
+      "id_record_count": 5295,
+      "path": "data/world_map/city_detail/france/FR-44.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "fe296cff35d4e068241451c2a3fc0a1b0f062d3cf4fe7f6185bea128ba73d141",
+      "id_field_counts": {
+        "id": 1328
+      },
+      "id_record_count": 1328,
+      "path": "data/world_map/city_detail/france/FR-52.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "e285fab7d8da6a0b9bc40f10b94e2e6e52d13f5a638eb646a014140f2d35d2d4",
+      "id_field_counts": {
+        "id": 1305
+      },
+      "id_record_count": 1305,
+      "path": "data/world_map/city_detail/france/FR-53.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "0aa64910ccec401b962524880a0fd8eab885c38ee2fd032e3f56878c00f9b9e2",
+      "id_field_counts": {
+        "id": 4459
+      },
+      "id_record_count": 4459,
+      "path": "data/world_map/city_detail/france/FR-75.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "1554a69f968539e5a12a4e3da25b3b4095a49767960789553e59f085f966e9e1",
+      "id_field_counts": {
+        "id": 4612
+      },
+      "id_record_count": 4612,
+      "path": "data/world_map/city_detail/france/FR-76.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "90e2d621e1c8737cba8c91aeb30290f24375c9d5ab971e61f578cfe51ec61167",
+      "id_field_counts": {
+        "id": 4271
+      },
+      "id_record_count": 4271,
+      "path": "data/world_map/city_detail/france/FR-84.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "36f11877866e8e02278c1dc35a7b70163e1e4459876a753a83e97e924064187c",
+      "id_field_counts": {
+        "id": 1229
+      },
+      "id_record_count": 1229,
+      "path": "data/world_map/city_detail/france/FR-93.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "30daa5399bad396b122ca763c6eeb416f94b184dd708922c5fecf85eb7a84f17",
+      "id_field_counts": {
+        "id": 368
+      },
+      "id_record_count": 368,
+      "path": "data/world_map/city_detail/france/FR-94.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "6eae8f60fb3e0bea76ddbe0e3a0b98905bd8785a6185a299edc067f0c92fc92d",
+      "id_field_counts": {
+        "id": 156
+      },
+      "id_record_count": 156,
+      "path": "data/world_map/city_detail/index.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "id_field_counts": {},
+      "id_record_count": 0,
+      "path": "data/world_map/city_detail/LICENSE.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "1db74278e3388d50bb1d4d44eb476fe0e6b69c74dcb6cdd05c49fa06be27b606",
+      "id_field_counts": {
+        "id": 177
+      },
+      "id_record_count": 177,
+      "path": "data/world_map/countries.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "id_field_counts": {},
+      "id_record_count": 0,
+      "path": "data/world_map/country_flag_palettes.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "79177f975a0fe02aea040cbd00233068b773f517497b48205c4a55fd16426469",
+      "id_field_counts": {
+        "id": 151
+      },
+      "id_record_count": 151,
+      "path": "data/world_map/historical/cshapes_1900_snapshot.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "eb51db1aa9b72263eafda49bf8c2533833165975804e3f4bb2397629feb7b10a",
+      "id_field_counts": {
+        "id": 61
+      },
+      "id_record_count": 61,
+      "path": "data/world_map/historical/flags_1900.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "id_field_counts": {},
+      "id_record_count": 0,
+      "path": "data/world_map/historical/historical_admin1_1900.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "id_field_counts": {},
+      "id_record_count": 0,
+      "path": "data/world_map/historical/major_economy_polity_crosswalk_1900.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "id_field_counts": {},
+      "id_record_count": 0,
+      "path": "data/world_map/historical/major_state_profiles_1900.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "e4ddc61e8b8370f9acc074d970257b7abda31ef04f7b115b415d8328e20347b3",
+      "id_field_counts": {
+        "id": 151
+      },
+      "id_record_count": 151,
+      "path": "data/world_map/historical/political_units_1900.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "bf90b09b2311d6b625639b4b1706e4797ac00e436f8c214e95c4b51a7b5ccf2c",
+      "id_field_counts": {
+        "id": 65
+      },
+      "id_record_count": 65,
+      "path": "data/world_map/historical_political_entities_1900.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "e73b514ee47acbb421c3351f748cbe5bec6aee87684e6e08eb9822a757622d15",
+      "id_field_counts": {
+        "id": 8
+      },
+      "id_record_count": 8,
+      "path": "data/world_map/institutions.json"
+    },
+    {
+      "duplicate_ids": [
+        "ne_admin0_1159320319",
+        "ne_admin0_1159320323",
+        "ne_admin0_1159320325",
+        "ne_admin0_1159320329",
+        "ne_admin0_1159320331",
+        "ne_admin0_1159320333",
+        "ne_admin0_1159320335",
+        "ne_admin0_1159320355",
+        "ne_admin0_1159320379",
+        "ne_admin0_1159320381",
+        "ne_admin0_1159320387",
+        "ne_admin0_1159320389",
+        "ne_admin0_1159320399",
+        "ne_admin0_1159320405",
+        "ne_admin0_1159320407",
+        "ne_admin0_1159320409",
+        "ne_admin0_1159320415",
+        "ne_admin0_1159320417",
+        "ne_admin0_1159320427",
+        "ne_admin0_1159320431",
+        "ne_admin0_1159320439",
+        "ne_admin0_1159320441",
+        "ne_admin0_1159320451",
+        "ne_admin0_1159320453",
+        "ne_admin0_1159320461",
+        "ne_admin0_1159320463",
+        "ne_admin0_1159320467",
+        "ne_admin0_1159320471",
+        "ne_admin0_1159320491",
+        "ne_admin0_1159320493",
+        "ne_admin0_1159320507",
+        "ne_admin0_1159320509",
+        "ne_admin0_1159320513",
+        "ne_admin0_1159320515",
+        "ne_admin0_1159320517",
+        "ne_admin0_1159320525",
+        "ne_admin0_1159320527",
+        "ne_admin0_1159320531",
+        "ne_admin0_1159320533",
+        "ne_admin0_1159320535",
+        "ne_admin0_1159320539",
+        "ne_admin0_1159320541",
+        "ne_admin0_1159320547",
+        "ne_admin0_1159320551",
+        "ne_admin0_1159320563",
+        "ne_admin0_1159320565",
+        "ne_admin0_1159320567",
+        "ne_admin0_1159320575",
+        "ne_admin0_1159320581",
+        "ne_admin0_1159320587",
+        "ne_admin0_1159320615",
+        "ne_admin0_1159320617",
+        "ne_admin0_1159320623",
+        "ne_admin0_1159320625",
+        "ne_admin0_1159320631",
+        "ne_admin0_1159320637",
+        "ne_admin0_1159320641",
+        "ne_admin0_1159320693",
+        "ne_admin0_1159320711",
+        "ne_admin0_1159320713",
+        "ne_admin0_1159320779",
+        "ne_admin0_1159320793",
+        "ne_admin0_1159320795",
+        "ne_admin0_1159320797",
+        "ne_admin0_1159320799",
+        "ne_admin0_1159320801",
+        "ne_admin0_1159320811",
+        "ne_admin0_1159320815",
+        "ne_admin0_1159320817",
+        "ne_admin0_1159320827",
+        "ne_admin0_1159320833",
+        "ne_admin0_1159320839",
+        "ne_admin0_1159320841",
+        "ne_admin0_1159320845",
+        "ne_admin0_1159320847",
+        "ne_admin0_1159320877",
+        "ne_admin0_1159320881",
+        "ne_admin0_1159320887",
+        "ne_admin0_1159320895",
+        "ne_admin0_1159320899",
+        "ne_admin0_1159320917",
+        "ne_admin0_1159320919",
+        "ne_admin0_1159320931",
+        "ne_admin0_1159320935",
+        "ne_admin0_1159320937",
+        "ne_admin0_1159320967",
+        "ne_admin0_1159320971",
+        "ne_admin0_1159320977",
+        "ne_admin0_1159320979",
+        "ne_admin0_1159320985",
+        "ne_admin0_1159321007",
+        "ne_admin0_1159321009",
+        "ne_admin0_1159321011",
+        "ne_admin0_1159321013",
+        "ne_admin0_1159321015",
+        "ne_admin0_1159321017",
+        "ne_admin0_1159321025",
+        "ne_admin0_1159321027",
+        "ne_admin0_1159321029",
+        "ne_admin0_1159321031",
+        "ne_admin0_1159321033",
+        "ne_admin0_1159321035",
+        "ne_admin0_1159321045",
+        "ne_admin0_1159321051",
+        "ne_admin0_1159321055",
+        "ne_admin0_1159321061",
+        "ne_admin0_1159321063",
+        "ne_admin0_1159321067",
+        "ne_admin0_1159321069",
+        "ne_admin0_1159321071",
+        "ne_admin0_1159321073",
+        "ne_admin0_1159321075",
+        "ne_admin0_1159321081",
+        "ne_admin0_1159321083",
+        "ne_admin0_1159321085",
+        "ne_admin0_1159321087",
+        "ne_admin0_1159321089",
+        "ne_admin0_1159321091",
+        "ne_admin0_1159321101",
+        "ne_admin0_1159321109",
+        "ne_admin0_1159321121",
+        "ne_admin0_1159321135",
+        "ne_admin0_1159321151",
+        "ne_admin0_1159321153",
+        "ne_admin0_1159321161",
+        "ne_admin0_1159321163",
+        "ne_admin0_1159321169",
+        "ne_admin0_1159321173",
+        "ne_admin0_1159321179",
+        "ne_admin0_1159321181",
+        "ne_admin0_1159321187",
+        "ne_admin0_1159321195",
+        "ne_admin0_1159321197",
+        "ne_admin0_1159321199",
+        "ne_admin0_1159321201",
+        "ne_admin0_1159321219",
+        "ne_admin0_1159321223",
+        "ne_admin0_1159321225",
+        "ne_admin0_1159321229",
+        "ne_admin0_1159321235",
+        "ne_admin0_1159321243",
+        "ne_admin0_1159321249",
+        "ne_admin0_1159321251",
+        "ne_admin0_1159321253",
+        "ne_admin0_1159321259",
+        "ne_admin0_1159321261",
+        "ne_admin0_1159321267",
+        "ne_admin0_1159321281",
+        "ne_admin0_1159321283",
+        "ne_admin0_1159321285",
+        "ne_admin0_1159321287",
+        "ne_admin0_1159321289",
+        "ne_admin0_1159321295",
+        "ne_admin0_1159321301",
+        "ne_admin0_1159321303",
+        "ne_admin0_1159321305",
+        "ne_admin0_1159321307",
+        "ne_admin0_1159321309",
+        "ne_admin0_1159321313",
+        "ne_admin0_1159321321",
+        "ne_admin0_1159321327",
+        "ne_admin0_1159321331",
+        "ne_admin0_1159321335",
+        "ne_admin0_1159321337",
+        "ne_admin0_1159321343",
+        "ne_admin0_1159321345",
+        "ne_admin0_1159321353",
+        "ne_admin0_1159321363",
+        "ne_admin0_1159321369",
+        "ne_admin0_1159321405",
+        "ne_admin0_1159321411",
+        "ne_admin0_1159321417",
+        "ne_admin0_1159321421",
+        "ne_admin0_1159321425",
+        "ne_admin0_1159321431",
+        "ne_admin0_1159321439",
+        "ne_admin0_1159321441"
+      ],
+      "id_digest": "35225b3187199d927a0378c61f7e57c5d11c61623a6ef5e01eac834ca3f7a302",
+      "id_field_counts": {
+        "id": 16,
+        "stable_id": 885
+      },
+      "id_record_count": 901,
+      "path": "data/world_map/map_geometry_cache.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "801ee0e15ecae5da93b4c7481439d90c32a70ee3f7ee63145327f5d9fb776086",
+      "id_field_counts": {
+        "id": 7
+      },
+      "id_record_count": 7,
+      "path": "data/world_map/map_modes.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "id_field_counts": {},
+      "id_record_count": 0,
+      "path": "data/world_map/name_pool_fr.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "17c18e2f759e4dd628fc019ca87378c798714eba884aba320c2f62e93e638089",
+      "id_field_counts": {
+        "id": 11
+      },
+      "id_record_count": 11,
+      "path": "data/world_map/organizations.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "e5b76fc0be9a92e93e2d2b551105532fa08593d65498b667b63c878b6eab1354",
+      "id_field_counts": {
+        "id": 8
+      },
+      "id_record_count": 8,
+      "path": "data/world_map/ports.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "0f5a80d5677169513eeab9af5a3b350316e08e49f077f28ecf2c54543bd92d44",
+      "id_field_counts": {
+        "id": 9
+      },
+      "id_record_count": 9,
+      "path": "data/world_map/rail_segments.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "77b2c6ad04af81d209f85583fb231a494f544dd34b34c05b1cb168a977a19fda",
+      "id_field_counts": {
+        "id": 107
+      },
+      "id_record_count": 107,
+      "path": "data/world_map/regions.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "625ad01017acc67bacf5ff4d1487fce963a95fe98d9c9d27a2eade5090d9ee5a",
+      "id_field_counts": {
+        "id": 10
+      },
+      "id_record_count": 10,
+      "path": "data/world_map/relationships.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "6a2919228fe82feee882cb016b3cb6b4d62ae540163ea0005e254b7e455da19d",
+      "id_field_counts": {
+        "id": 3
+      },
+      "id_record_count": 3,
+      "path": "data/world_map/road_segments.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "17acab6ce799da2f9dd53641aba321258fa9af16e1284091c59a5973707bd62e",
+      "id_field_counts": {
+        "id": 3
+      },
+      "id_record_count": 3,
+      "path": "data/world_map/shipping_routes.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "8c35f0bcd65270eac6237fc1bfbc45773703289b54a0c8e41cfb6c1dd2ed7ff2",
+      "id_field_counts": {
+        "id": 6
+      },
+      "id_record_count": 6,
+      "path": "data/world_map/world_activity.json"
+    },
+    {
+      "duplicate_ids": [],
+      "id_digest": "caf63f7f37d00557cc75bc40c1f134e39dea7410253ae2d95b8d5841cfca0ce4",
+      "id_field_counts": {
+        "id": 4589
+      },
+      "id_record_count": 4589,
+      "path": "data/world_map/world_admin1.json"
+    },
+    {
+      "duplicate_ids": [
+        "ne_admin0_1159321229"
+      ],
+      "id_digest": "3ec68780e3dd43dd4cf1058c9d1b2012f8e7f126a935d20426da999ae120c3f0",
+      "id_field_counts": {
+        "id": 177,
+        "stable_id": 1
+      },
+      "id_record_count": 178,
+      "path": "data/world_map/world_coastlines.json"
+    }
+  ],
+  "files_with_id_records": 177,
+  "record_signature_digest": "5bdd5f1f78fb5708b7ecd50cf23b27237c777cb497fe2ba359a0ee93cb8feb93",
+  "schema_version": "wwo_world_data_batch3_contracts_v1"
+}

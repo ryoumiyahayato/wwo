@@ -1,0 +1,19 @@
+{
+  "flag_coverage_gaps": {
+    "hash_mismatches": 0,
+    "missing_assets": 0,
+    "missing_flag_records": 0
+  },
+  "loader_contract_gaps": {
+    "missing_direct_references": [],
+    "missing_directory_references": []
+  },
+  "manual_or_historical_review_remains": true,
+  "notes": [
+    "Not-directly-literal-referenced JSON includes dynamically loaded shards and historical catalogs; it is not itself an error.",
+    "Flag coverage uses only political_units_1900.flag_id and flags_1900.records references.",
+    "No historical identity was inferred from names or aliases."
+  ],
+  "record_signature_duplicate_file_count": 3,
+  "schema_version": "wwo_world_data_batch3_contracts_v1"
+}
