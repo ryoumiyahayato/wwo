@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import sys
 import unittest
 from pathlib import Path
@@ -152,6 +153,80 @@ class TransportTopologyGraphTests(unittest.TestCase):
         self.assertEqual(first_order, second_order)
 
 
+    def test_impact_order_is_real(self) -> None:
+        findings = [
+            AUDIT.make_issue("SPATIAL", "AMBIGUOUS", "spatial", "P0", "spatial", impacts=["Spatial"]),
+            AUDIT.make_issue("ECONOMY", "AMBIGUOUS", "economy", "P3", "economy", impacts=["Economy"]),
+        ]
+        self.assertEqual(AUDIT.finalize_findings(findings)[0]["subject"], "economy")
+
+    def test_namespace_collision_is_broken_graph_identity(self) -> None:
+        graph = AUDIT.TransportGraph()
+        findings: list[dict[str, object]] = []
+        AUDIT.add_catalog_nodes(graph, [{"id": "shared"}], "city", findings)
+        AUDIT.add_catalog_nodes(graph, [{"id": "shared"}], "port", findings)
+        collision = next(row for row in findings if row["check"] == "CITY_PORT_ID_NAMESPACE_COLLISION")
+        self.assertEqual(collision["status"], "BROKEN_REFERENCE")
+        self.assertFalse(collision["authoritative_data_error_proven"])
+
+    def test_malformed_declared_transport_type_is_contract_error(self) -> None:
+        graph = AUDIT.TransportGraph()
+        findings: list[dict[str, object]] = []
+        AUDIT.validate_transport_records(
+            graph,
+            {
+                "data/world_map/road_segments.json": {"segments": [{"id": "wrong", "type": "shipping", "from_city_id": "a", "to_city_id": "b"}]},
+                "data/world_map/rail_segments.json": {"segments": []},
+                "data/world_map/shipping_routes.json": {"routes": []},
+            },
+            {"a": {"lon_lat": [0.0, 0.0]}, "b": {"lon_lat": [1.0, 0.0]}},
+            {},
+            findings,
+        )
+        finding = next(row for row in findings if row["check"] == "IMPOSSIBLE_ENDPOINT_TYPE")
+        self.assertEqual(finding["status"], "BROKEN_REFERENCE")
+        self.assertFalse(finding["authoritative_data_error_proven"])
+
+    def test_missing_geometry_anchor_is_detected_directly(self) -> None:
+        findings: list[dict[str, object]] = []
+        AUDIT.validate_geometry_cache(
+            ROOT,
+            {
+                "data/world_map/map_geometry_cache.json": {
+                    "anchors": {"cities": {"a": [0.0, 0.0]}, "ports": {}},
+                    "transport": {"road": [], "rail": [], "shipping": []},
+                }
+            },
+            {"road": [{"id": "road-a-b", "from_city_id": "a", "to_city_id": "b"}], "rail": [], "shipping": []},
+            {"a": {"major": False}, "b": {"major": False}},
+            {},
+            findings,
+        )
+        self.assertTrue(any(row["check"] == "MISSING_TRANSPORT_GEOMETRY_ANCHOR" for row in findings))
+
+    def test_multimodal_city_port_transfer_is_reachable(self) -> None:
+        graph = AUDIT.TransportGraph()
+        for node_id, node_type in (("a", "city"), ("b", "city"), ("port:a", "port"), ("port:b", "port")):
+            graph.add_node(node(node_id, node_type))
+        graph.add_edge(edge("road:a-b", "road", "a", "b"))
+        graph.add_edge(edge("shipping:a-b", "shipping", "port:a", "port:b"))
+        graph.add_edge(edge("transfer:a", "transfer", "port:a", "a"))
+        graph.add_edge(edge("transfer:b", "transfer", "port:b", "b"))
+
+        self.assertEqual(graph.reachable("port:a", {"transfer"}), ["a", "port:a"])
+        row = AUDIT.connectivity_row(
+            graph,
+            "city",
+            "a",
+            {"a": {"id": "a"}},
+            {"port:a": {"id": "port:a", "city_id": "a"}},
+            [],
+            [],
+        )
+        self.assertTrue(row["road_reachable"])
+        self.assertTrue(row["sea_reachable"])
+        self.assertTrue(row["multimodal_reachable"])
+
 class TransportTopologyAuditArtifactTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -180,6 +255,24 @@ class TransportTopologyAuditArtifactTests(unittest.TestCase):
         self.assertFalse(self.audit["summary"]["production_world_data_modified"])
         self.assertEqual(self.audit["candidate_fixes"], [])
 
+    def test_current_audit_declares_review_boundaries(self) -> None:
+        scope = self.audit["scope"]
+        self.assertIn("audit triage", scope["priority_policy"])
+        self.assertIn("independent source review", scope["repair_policy"])
+        self.assertIn("Explicit cities.json major", scope["major_entity_basis"])
+        self.assertIn("review-only", scope["port_connectivity_policy"])
+        for finding in self.audit["findings"]:
+            self.assertFalse(finding["authoritative_data_error_proven"])
+            self.assertFalse(finding["automatic_repair_authorized"])
+
+    def test_candidate_staging_file_is_non_authoritative(self) -> None:
+        candidate_path = ROOT / "data" / "staging" / "world_transport_topology_audit_batch1_candidate_fixes.json"
+        candidate = json.loads(candidate_path.read_text(encoding="utf-8"))
+        self.assertEqual(candidate["authority"], "NON_AUTHORITATIVE_STAGING_ONLY")
+        self.assertFalse(candidate["authoritative_data_write"])
+        self.assertFalse(candidate["runtime_consumed"])
+        self.assertFalse(candidate["automatic_apply"])
+        self.assertTrue(candidate["requires_independent_source_review"])
     def test_machine_output_is_byte_deterministic(self) -> None:
         first = AUDIT.canonical_bytes(
             AUDIT.build_audit(ROOT, "4b738ab8b0a21e8685aae95381717e9efd2327a8")

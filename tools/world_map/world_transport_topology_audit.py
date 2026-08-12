@@ -264,6 +264,27 @@ def directionality_of(record: dict[str, Any]) -> str:
     return "UNSPECIFIED"
 
 
+def classification_basis(check: str, status: str, evidence: dict[str, Any]) -> str:
+    if status == "BROKEN_REFERENCE":
+        return "concrete_schema_reference_or_loader_cache_evidence"
+    if check == "UNREACHABLE_MAJOR_NODE" and evidence.get("major") is True:
+        return "explicit_city_major_metadata"
+    if check == "ISOLATED_CITY":
+        if evidence.get("major") is True:
+            return "explicit_city_major_metadata"
+        return "explicit_non_major_metadata_coverage_heuristic"
+    if check == "MISSING_MAP_ANCHOR" and evidence.get("major") is True:
+        return "explicit_major_metadata_plus_loader_anchor_contract"
+    if check == "PORT_WITHOUT_SHIPPING_CONNECTIVITY":
+        return "declared_port_without_route_review_heuristic"
+    if check == "ISOLATED_ADMINISTRATIVE_REGION" and evidence.get("has_port") is True:
+        return "declared_port_in_region_review_heuristic"
+    if status == "EXPECTED_ISOLATION" and evidence.get("child_city_count", 1) == 0 and evidence.get("child_port_count", 1) == 0:
+        return "explicit_empty_child_catalog"
+    if status == "AMBIGUOUS":
+        return "missing_intent_or_directionality_review"
+    return "catalog_coverage_review_signal"
+
 def make_issue(
     check: str,
     status: str,
@@ -283,6 +304,12 @@ def make_issue(
         "check": check,
         "status": status,
         "priority": priority,
+        "priority_semantics": "AUDIT_TRIAGE_ONLY_NOT_CODE_REVIEW_SEVERITY",
+        "concrete_contract_error": status == "BROKEN_REFERENCE",
+        "authoritative_data_error_proven": False,
+        "automatic_repair_authorized": False,
+        "review_only": status != "BROKEN_REFERENCE",
+        "classification_basis": classification_basis(check, status, evidence or {}),
         "mode": mode,
         "subject": subject,
         "message": message,
@@ -303,6 +330,7 @@ def finding_sort_key(finding: dict[str, Any]) -> tuple[Any, ...]:
         default=99,
     )
     return (
+        impact_rank,
         PRIORITY_ORDER.get(str(finding.get("priority", "P3")), 99),
         STATUS_ORDER.get(str(finding.get("status", "AMBIGUOUS")), 99),
         str(finding.get("check", "")),
@@ -401,6 +429,16 @@ def loader_contract(root: Path) -> dict[str, Any]:
         "files": files,
         "required_tokens": required,
         "missing_tokens": missing_tokens,
+        "field_contract": {
+            mode: {
+                "source_path": spec["path"],
+                "collection": spec["collection"],
+                "endpoint_type": spec["endpoint_type"],
+                "from_key": spec["from_key"],
+                "to_key": spec["to_key"],
+            }
+            for mode, spec in sorted(MODE_SPECS.items())
+        },
         "interpretation": {
             "road_endpoints": "city",
             "rail_endpoints": "city",
@@ -446,6 +484,22 @@ def add_catalog_nodes(
                     source_paths=[source],
                     evidence={"first_index": catalog[node_id].get("_index"), "duplicate_index": index},
                     impacts=["Spatial", "Economy"],
+                )
+            )
+            continue
+        existing_node = graph.nodes.get(node_id)
+        if existing_node is not None and existing_node.node_type != node_type:
+            other_source = "data/world_map/ports.json" if node_type == "city" else "data/world_map/cities.json"
+            findings.append(
+                make_issue(
+                    "CITY_PORT_ID_NAMESPACE_COLLISION",
+                    "BROKEN_REFERENCE",
+                    node_id,
+                    "P0",
+                    "City and port catalogs reuse the same id; graph identity would be ambiguous.",
+                    source_paths=[source, other_source],
+                    evidence={"existing_node_type": existing_node.node_type, "colliding_id": node_id},
+                    impacts=["Economy", "Military", "Spatial"],
                 )
             )
             continue
@@ -1421,6 +1475,11 @@ def build_audit(root: Path, starting_master: str = DEFAULT_STARTING_MASTER) -> d
             "graph_role": "analysis_only",
             "directionality_assumption": "undirected_for_current_renderer_and_topology_QA; explicit directionality remains an ambiguity finding",
             "connectivity_policy": "No global all-places-connect invariant; isolation is classified from declared catalog relationships and current connectivity only.",
+            "priority_policy": "P0-P3 are audit triage labels only, not code-review severity or proof of authoritative data error.",
+            "repair_policy": "No finding authorizes automatic route creation or authoritative data repair; suspicious and ambiguous findings require independent source review.",
+            "major_entity_basis": "Explicit cities.json major boolean metadata; no real-world fame inference is used.",
+            "port_connectivity_policy": "A declared port without a current shipping route is a review-only coverage signal, not a validity invariant.",
+            "node_identity_policy": "City and port IDs are checked for namespace collision; current catalogs use disjoint IDs."
         },
         "source_manifest": source_manifest(root),
         "world_map_inventory": inventory,
@@ -1446,8 +1505,12 @@ def render_markdown(audit: dict[str, Any]) -> str:
         "## Scope and safety boundary",
         "",
         "This is a deterministic, read-only audit of the existing world-map transport source data and the current map loader contract. The graph is analysis-only; it is not a gameplay authority and does not integrate Economy, Military, or Spatial systems. No file under `data/world_map/` is rewritten by the tool.",
+        "The current loader registers source collections and draws transport geometry from index-aligned cached records; the audit records endpoint field semantics for QA but does not claim the renderer performs endpoint routing.",
         "",
-        "Classification policy: `EXPECTED_ISOLATION` means the catalog gives no evidence that a connection is required; `SUSPICIOUS_ISOLATION` is a review item with a major node, declared port, or administrative coverage signal; `BROKEN_REFERENCE` is a concrete schema/reference/cache failure; `AMBIGUOUS` requires domain confirmation because the current data does not declare intent or directionality.",
+        "Classification policy: `EXPECTED_ISOLATION` means the catalog gives no evidence that a connection is required; `SUSPICIOUS_ISOLATION` is a review-only signal based on explicit metadata or a documented coverage heuristic and does not prove authoritative data is wrong; `BROKEN_REFERENCE` is a concrete schema/reference/cache failure; `AMBIGUOUS` requires domain confirmation because the current data does not declare intent or directionality.",
+        "Priority policy: P0-P3 are audit triage labels, not code-review severity. Sparse current coverage may explain isolated cities, ports, and split components; no finding authorizes automatic route creation or authoritative data repair.",
+        "Major entities use the explicit `major` boolean in `cities.json`; no real-world fame inference is used. A declared port without a current shipping route is a review-only coverage signal, not a validity invariant.",
+        "Candidate staging is NON_AUTHORITATIVE, is not consumed by runtime, is never automatically applied, and requires independent source review before any separate authoritative change.",
         "",
         "## Summary",
         "",
@@ -1544,10 +1607,14 @@ def main(argv: Optional[list[str]] = None) -> int:
         write_output(args.markdown_output, render_markdown(audit).encode("utf-8"))
     if args.candidate_output:
         candidate_payload = {
-            "schema_version": "world-transport-topology-audit-candidates/v1",
+            "schema_version": "world-transport-topology-audit-candidates/v2",
             "starting_master": starting_master,
             "source_audit": "world_transport_topology_audit_batch1",
+            "authority": "NON_AUTHORITATIVE_STAGING_ONLY",
             "authoritative_data_write": False,
+            "runtime_consumed": False,
+            "automatic_apply": False,
+            "requires_independent_source_review": True,
             "candidate_fixes": audit["candidate_fixes"],
         }
         write_output(args.candidate_output, canonical_bytes(candidate_payload))

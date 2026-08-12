@@ -5,8 +5,12 @@ Starting master: `4b738ab8b0a21e8685aae95381717e9efd2327a8`
 ## Scope and safety boundary
 
 This is a deterministic, read-only audit of the existing world-map transport source data and the current map loader contract. The graph is analysis-only; it is not a gameplay authority and does not integrate Economy, Military, or Spatial systems. No file under `data/world_map/` is rewritten by the tool.
+The current loader registers source collections and draws transport geometry from index-aligned cached records; the audit records endpoint field semantics for QA but does not claim the renderer performs endpoint routing.
 
-Classification policy: `EXPECTED_ISOLATION` means the catalog gives no evidence that a connection is required; `SUSPICIOUS_ISOLATION` is a review item with a major node, declared port, or administrative coverage signal; `BROKEN_REFERENCE` is a concrete schema/reference/cache failure; `AMBIGUOUS` requires domain confirmation because the current data does not declare intent or directionality.
+Classification policy: `EXPECTED_ISOLATION` means the catalog gives no evidence that a connection is required; `SUSPICIOUS_ISOLATION` is a review-only signal based on explicit metadata or a documented coverage heuristic and does not prove authoritative data is wrong; `BROKEN_REFERENCE` is a concrete schema/reference/cache failure; `AMBIGUOUS` requires domain confirmation because the current data does not declare intent or directionality.
+Priority policy: P0-P3 are audit triage labels, not code-review severity. Sparse current coverage may explain isolated cities, ports, and split components; no finding authorizes automatic route creation or authoritative data repair.
+Major entities use the explicit `major` boolean in `cities.json`; no real-world fame inference is used. A declared port without a current shipping route is a review-only coverage signal, not a validity invariant.
+Candidate staging is NON_AUTHORITATIVE, is not consumed by runtime, is never automatically applied, and requires independent source review before any separate authoritative change.
 
 ## Summary
 
