@@ -65,8 +65,26 @@ jobs:
           "$GODOT_BIN" --headless --path . --script tests/vnext/spatial_infrastructure_test.gd
 
       - name: Focused Military strategy validation
+        id: military_strategy
         run: |
-          "$GODOT_BIN" --headless --path . --script tests/vnext/military_strategy_test.gd
+          set +e
+          "$GODOT_BIN" --headless --path . --script tests/vnext/military_strategy_test.gd > "$RUNNER_TEMP/military_strategy.log" 2>&1
+          status=$?
+          cat "$RUNNER_TEMP/military_strategy.log"
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Upload Military strategy diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr58-military-strategy-diagnostics
+          path: ${{ runner.temp }}/military_strategy.log
+          if-no-files-found: error
+
+      - name: Enforce Military strategy gate
+        if: steps.military_strategy.outputs.status != '0'
+        run: exit 1
 
       - name: Focused Military R3/R4 validation
         run: |
