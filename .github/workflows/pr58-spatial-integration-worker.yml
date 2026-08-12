@@ -9,6 +9,7 @@ on:
       - "tools/pr58_spatial_worker_bootstrap.py"
       - "tools/pr58_spatial_worker_runner.py"
       - "tools/pr58_spatial_batch_extension.py"
+      - "tools/pr58_spatial_batch_query_extension.py"
       - "tools/pr58_r4_capacity_fixture_extension.py"
       - ".github/workflows/pr58-spatial-integration-worker.yml"
   workflow_dispatch:
@@ -41,6 +42,7 @@ jobs:
         run: |
           python3 -B tools/pr58_spatial_worker_runner.py
           python3 -B tools/pr58_spatial_batch_extension.py
+          python3 -B tools/pr58_spatial_batch_query_extension.py
           python3 -B tools/pr58_r4_capacity_fixture_extension.py
 
       - name: Install Godot 4.6.3
