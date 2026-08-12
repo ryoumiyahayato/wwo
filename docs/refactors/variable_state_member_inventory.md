@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1757|1306|15|0|1270|6|32|16|62|946|546|297|
+|1762|1309|15|0|1272|7|32|16|62|948|546|297|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,757个生产成员字段逐项表
+## 1,762个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -1652,30 +1652,35 @@
 52 K _state
 @ scripts/vnext/population/macro_population.gd | VNextMacroPopulation
 6 C SNAPSHOT_SCHEMA_ID
-7 C MAX_JSON_SAFE_INTEGER
-8 C MAX_SETTLEMENT_MONTHS_PER_CALL
-9 C BASE_YEAR
-11 K _initialized
-13 K _known_place_ids
-14 K _records
+7 C LEGACY_SNAPSHOT_SCHEMA_ID
+8 C MAX_JSON_SAFE_INTEGER
+9 C MAX_SETTLEMENT_MONTHS_PER_CALL
+10 C BASE_YEAR
+12 K _initialized
+13 K _geography_authority
+16 K _known_place_ids
+17 K _ordered_place_ids
+18 K _records
 @ scripts/vnext/population/macro_population_record.gd | VNextMacroPopulationRecord
 7 C SNAPSHOT_SCHEMA_ID
-8 C MAX_JSON_SAFE_INTEGER
-10 C AGE_BUCKET_KEYS
-16 C SEX_KEYS
-17 C URBAN_RURAL_KEYS
-18 C AGEING_REMAINDER_KEYS
-23 C AGEING_DENOMINATORS
-29 K _place_id
-30 K _total_population
-31 K _age_buckets
-32 K _sex_structure
-33 K _urban_rural
-34 K _ageing_remainders
-35 K _births
-36 K _deaths
-37 I _net_migration
-40 K _last_settled_period
+8 C LEGACY_SNAPSHOT_SCHEMA_ID
+9 C MAX_JSON_SAFE_INTEGER
+11 C AGE_BUCKET_KEYS
+17 C SEX_KEYS
+18 C URBAN_RURAL_KEYS
+19 C AGEING_REMAINDER_KEYS
+24 C AGEING_DENOMINATORS
+30 K _place_id
+31 K _total_population
+32 K _age_buckets
+33 K _sex_structure
+34 K _urban_rural
+35 K _ageing_remainders
+36 K _births
+37 K _deaths
+38 I _external_immigration
+39 I _external_emigration
+42 K _last_settled_period
 @ scripts/vnext/spatial/infrastructure_link_state.gd | VNextInfrastructureLinkState
 7 C STATUS_OPERATIONAL
 8 C STATUS_CONSTRUCTION

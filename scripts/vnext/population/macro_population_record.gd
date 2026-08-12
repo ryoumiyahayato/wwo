@@ -4,7 +4,8 @@ extends RefCounted
 ## This record deliberately contains no person, household, labor, economic,
 ## political, military, or AI state.
 
-const SNAPSHOT_SCHEMA_ID: String = "vnext_macro_population_record_v2"
+const SNAPSHOT_SCHEMA_ID: String = "vnext_macro_population_record_v3"
+const LEGACY_SNAPSHOT_SCHEMA_ID: String = "vnext_macro_population_record_v2"
 const MAX_JSON_SAFE_INTEGER: int = 9_007_199_254_740_991
 
 const AGE_BUCKET_KEYS: PackedStringArray = [
@@ -34,7 +35,8 @@ var _urban_rural: Dictionary = {}
 var _ageing_remainders: Dictionary = {}
 var _births: int = 0
 var _deaths: int = 0
-var _net_migration: int = 0
+var _external_immigration: int = 0
+var _external_emigration: int = 0
 ## Cursor for the first absolute month that has not been settled yet.
 ## Absolute month 0 is January 1900.
 var _last_settled_period: int = 0
@@ -55,16 +57,54 @@ static func from_state(
 	if not _is_spatial_key(place_id_value):
 		return null
 	var candidate_state: Dictionary = state_value.duplicate(true)
-	if candidate_state.has("schema_id") and candidate_state.get("schema_id") != SNAPSHOT_SCHEMA_ID:
-		return null
+	if candidate_state.has("schema_id"):
+		var schema_id: Variant = candidate_state.get("schema_id")
+		if schema_id != SNAPSHOT_SCHEMA_ID and schema_id != LEGACY_SNAPSHOT_SCHEMA_ID:
+			return null
 	if candidate_state.has("place_id") and candidate_state.get("place_id") != place_id_value:
 		return null
+	var has_legacy_migration: bool = (
+		candidate_state.has("migration") or candidate_state.has("net_migration")
+	)
+	var has_explicit_external: bool = (
+		candidate_state.has("external_immigration")
+		or candidate_state.has("external_emigration")
+	)
+	if candidate_state.has("migration") and candidate_state.has("net_migration"):
+		return null
+	if has_legacy_migration and has_explicit_external:
+		return null
 	if candidate_state.has("migration"):
-		if candidate_state.has("net_migration"):
-			return null
 		candidate_state["net_migration"] = candidate_state.get("migration")
 		candidate_state.erase("migration")
-	for optional_field: String in ["births", "deaths", "net_migration", "last_settled_period"]:
+	if candidate_state.has("net_migration"):
+		var legacy_parts: Dictionary = _legacy_external_parts(
+			candidate_state.get("net_migration")
+		)
+		if legacy_parts.is_empty():
+			return null
+		candidate_state["external_immigration"] = legacy_parts[
+			"external_immigration"
+		]
+		candidate_state["external_emigration"] = legacy_parts[
+			"external_emigration"
+		]
+		candidate_state.erase("net_migration")
+	if (
+		candidate_state.has("external_immigration")
+		and not candidate_state.has("external_emigration")
+	) or (
+		candidate_state.has("external_emigration")
+		and not candidate_state.has("external_immigration")
+	):
+		return null
+	for optional_field: String in [
+		"births",
+		"deaths",
+		"external_immigration",
+		"external_emigration",
+		"last_settled_period",
+	]:
 		if not candidate_state.has(optional_field):
 			candidate_state[optional_field] = 0
 	if not candidate_state.has("ageing_remainders"):
@@ -76,7 +116,6 @@ static func from_state(
 	if not record.restore(candidate_state):
 		return null
 	return record
-
 
 func place_id() -> String:
 	return _place_id
@@ -116,12 +155,26 @@ func deaths() -> int:
 	return _deaths
 
 
+func external_immigration() -> int:
+	return _external_immigration
+
+
+func external_emigration() -> int:
+	return _external_emigration
+
+
+func external_net_migration() -> int:
+	return _external_immigration - _external_emigration
+
+
+## Compatibility alias for the former signed external input.
 func net_migration() -> int:
-	return _net_migration
+	return external_net_migration()
 
 
+## Compatibility alias for the former signed external input.
 func migration() -> int:
-	return _net_migration
+	return external_net_migration()
 
 
 func last_settled_period() -> int:
@@ -138,6 +191,118 @@ func age_bucket_population(bucket_name: String) -> int:
 	return int(_age_buckets.get(bucket_name, -1))
 
 
+func can_transfer(amount: int) -> bool:
+	return (
+		is_valid()
+		and _is_valid_nonnegative_int(amount)
+		and amount <= _total_population
+	)
+
+
+func transfer_composition(amount: int) -> Dictionary:
+	if not can_transfer(amount):
+		return {}
+	var age_parts: Dictionary = _proportional_parts(
+		amount, _age_buckets, "age_18_40", true
+	)
+	var sex_parts: Dictionary = _proportional_parts(
+		amount, _sex_structure, "female", true
+	)
+	var urban_rural_parts: Dictionary = _proportional_parts(
+		amount, _urban_rural, "rural", true
+	)
+	if (
+		age_parts.is_empty()
+		or sex_parts.is_empty()
+		or urban_rural_parts.is_empty()
+	):
+		return {}
+	return {
+		"amount": amount,
+		"age_buckets": age_parts,
+		"sex_structure": sex_parts,
+		"urban_rural": urban_rural_parts,
+	}
+
+
+func apply_transfer(composition: Dictionary, removing: bool) -> bool:
+	if not is_valid() or composition.size() != 4:
+		return false
+	for key: String in ["amount", "age_buckets", "sex_structure", "urban_rural"]:
+		if not composition.has(key):
+			return false
+	var normalized_amount: Dictionary = _normalize_nonnegative_integer(
+		composition.get("amount")
+	)
+	var age_parts: Dictionary = _normalize_bucket_dictionary(
+		composition.get("age_buckets"), AGE_BUCKET_KEYS
+	)
+	var sex_parts: Dictionary = _normalize_bucket_dictionary(
+		composition.get("sex_structure"), SEX_KEYS
+	)
+	var urban_rural_parts: Dictionary = _normalize_bucket_dictionary(
+		composition.get("urban_rural"), URBAN_RURAL_KEYS
+	)
+	if (
+		normalized_amount.is_empty()
+		or age_parts.is_empty()
+		or sex_parts.is_empty()
+		or urban_rural_parts.is_empty()
+	):
+		return false
+	var amount: int = int(normalized_amount["value"])
+	if (
+		_sum_buckets(age_parts, AGE_BUCKET_KEYS) != amount
+		or _sum_buckets(sex_parts, SEX_KEYS) != amount
+		or _sum_buckets(urban_rural_parts, URBAN_RURAL_KEYS) != amount
+	):
+		return false
+	var next_age: Dictionary = (
+		_subtract_parts(_age_buckets, age_parts)
+		if removing else _add_parts(_age_buckets, age_parts)
+	)
+	var next_sex: Dictionary = (
+		_subtract_parts(_sex_structure, sex_parts)
+		if removing else _add_parts(_sex_structure, sex_parts)
+	)
+	var next_urban_rural: Dictionary = (
+		_subtract_parts(_urban_rural, urban_rural_parts)
+		if removing else _add_parts(_urban_rural, urban_rural_parts)
+	)
+	if (
+		next_age.is_empty()
+		or next_sex.is_empty()
+		or next_urban_rural.is_empty()
+	):
+		return false
+	var next_total: int = (
+		_total_population - amount if removing else _total_population + amount
+	)
+	if (
+		next_total < 0
+		or next_total > MAX_JSON_SAFE_INTEGER
+		or not _is_valid_state(
+			_place_id,
+			next_total,
+			next_age,
+			next_sex,
+			next_urban_rural,
+			_ageing_remainders,
+			_births,
+			_deaths,
+			_external_immigration,
+			_external_emigration,
+			_last_settled_period
+		)
+	):
+		return false
+	_total_population = next_total
+	_age_buckets = next_age
+	_sex_structure = next_sex
+	_urban_rural = next_urban_rural
+	return true
+
+
 func is_valid() -> bool:
 	return _is_valid_state(
 		_place_id,
@@ -148,7 +313,8 @@ func is_valid() -> bool:
 		_ageing_remainders,
 		_births,
 		_deaths,
-		_net_migration,
+		_external_immigration,
+		_external_emigration,
 		_last_settled_period
 	)
 
@@ -164,7 +330,11 @@ func structure() -> Dictionary:
 		"working_age_population": working_age_population(),
 		"births": _births,
 		"deaths": _deaths,
-		"net_migration": _net_migration,
+		"external_immigration": _external_immigration,
+		"external_emigration": _external_emigration,
+		"external_net_migration": external_net_migration(),
+		# Compatibility projection for callers that only need a signed total.
+		"net_migration": external_net_migration(),
 		"last_settled_period": _last_settled_period,
 	}
 
@@ -180,13 +350,49 @@ func snapshot() -> Dictionary:
 		"ageing_remainders": ageing_remainders(),
 		"births": _births,
 		"deaths": _deaths,
-		"net_migration": _net_migration,
+		"external_immigration": _external_immigration,
+		"external_emigration": _external_emigration,
 		"last_settled_period": _last_settled_period,
 	}
 
 
 func restore(snapshot_value: Dictionary) -> bool:
-	if snapshot_value.size() != 11:
+	# v2 snapshots are accepted only through this explicit signed-external
+	# migration conversion; all other schemas remain rejected.
+	var candidate_snapshot: Dictionary = snapshot_value.duplicate(true)
+	if (
+		candidate_snapshot.size() == 11
+		and candidate_snapshot.get("schema_id") == LEGACY_SNAPSHOT_SCHEMA_ID
+	):
+		for legacy_field: String in [
+			"schema_id",
+			"place_id",
+			"total_population",
+			"age_buckets",
+			"sex_structure",
+			"urban_rural",
+			"ageing_remainders",
+			"births",
+			"deaths",
+			"net_migration",
+			"last_settled_period",
+		]:
+			if not candidate_snapshot.has(legacy_field):
+				return false
+		var legacy_parts: Dictionary = _legacy_external_parts(
+			candidate_snapshot.get("net_migration")
+		)
+		if legacy_parts.is_empty():
+			return false
+		candidate_snapshot.erase("net_migration")
+		candidate_snapshot["external_immigration"] = legacy_parts[
+			"external_immigration"
+		]
+		candidate_snapshot["external_emigration"] = legacy_parts[
+			"external_emigration"
+		]
+		candidate_snapshot["schema_id"] = SNAPSHOT_SCHEMA_ID
+	if candidate_snapshot.size() != 12:
 		return false
 	for required_field: String in [
 		"schema_id",
@@ -198,69 +404,73 @@ func restore(snapshot_value: Dictionary) -> bool:
 		"ageing_remainders",
 		"births",
 		"deaths",
-		"net_migration",
+		"external_immigration",
+		"external_emigration",
 		"last_settled_period",
 	]:
-		if not snapshot_value.has(required_field):
+		if not candidate_snapshot.has(required_field):
 			return false
-	if snapshot_value.get("schema_id") != SNAPSHOT_SCHEMA_ID:
+	if candidate_snapshot.get("schema_id") != SNAPSHOT_SCHEMA_ID:
 		return false
-	if typeof(snapshot_value.get("place_id")) != TYPE_STRING:
+	if typeof(candidate_snapshot.get("place_id")) != TYPE_STRING:
 		return false
-	var candidate_place_id: String = str(snapshot_value.get("place_id"))
+	var candidate_place_id: String = str(candidate_snapshot.get("place_id"))
 	if not _is_spatial_key(candidate_place_id):
 		return false
 
 	var normalized_total: Dictionary = _normalize_nonnegative_integer(
-		snapshot_value.get("total_population")
+		candidate_snapshot.get("total_population")
 	)
 	var normalized_births: Dictionary = _normalize_nonnegative_integer(
-		snapshot_value.get("births")
+		candidate_snapshot.get("births")
 	)
 	var normalized_deaths: Dictionary = _normalize_nonnegative_integer(
-		snapshot_value.get("deaths")
+		candidate_snapshot.get("deaths")
 	)
-	var normalized_migration: Dictionary = _normalize_signed_integer(
-		snapshot_value.get("net_migration")
+	var normalized_immigration: Dictionary = _normalize_nonnegative_integer(
+		candidate_snapshot.get("external_immigration")
+	)
+	var normalized_emigration: Dictionary = _normalize_nonnegative_integer(
+		candidate_snapshot.get("external_emigration")
 	)
 	var normalized_period: Dictionary = _normalize_nonnegative_integer(
-		snapshot_value.get("last_settled_period")
+		candidate_snapshot.get("last_settled_period")
 	)
 	if (
 		normalized_total.is_empty()
 		or normalized_births.is_empty()
 		or normalized_deaths.is_empty()
-		or normalized_migration.is_empty()
+		or normalized_immigration.is_empty()
+		or normalized_emigration.is_empty()
 		or normalized_period.is_empty()
 	):
 		return false
 
 	var normalized_age_buckets: Dictionary = _normalize_bucket_dictionary(
-		snapshot_value.get("age_buckets"), AGE_BUCKET_KEYS
+		candidate_snapshot.get("age_buckets"), AGE_BUCKET_KEYS
 	)
 	var normalized_sex_structure: Dictionary = _normalize_bucket_dictionary(
-		snapshot_value.get("sex_structure"), SEX_KEYS
+		candidate_snapshot.get("sex_structure"), SEX_KEYS
 	)
 	var normalized_urban_rural: Dictionary = _normalize_bucket_dictionary(
-		snapshot_value.get("urban_rural"), URBAN_RURAL_KEYS
+		candidate_snapshot.get("urban_rural"), URBAN_RURAL_KEYS
 	)
 	var normalized_ageing_remainders: Dictionary = _normalize_remainder_dictionary(
-		snapshot_value.get("ageing_remainders")
+		candidate_snapshot.get("ageing_remainders")
 	)
 	if (
 		normalized_age_buckets.is_empty()
 		or normalized_sex_structure.is_empty()
+		or normalized_urban_rural.is_empty()
 		or normalized_ageing_remainders.is_empty()
 	):
-		return false
-	if normalized_urban_rural.is_empty():
 		return false
 
 	var candidate_total: int = int(normalized_total["value"])
 	var candidate_births: int = int(normalized_births["value"])
 	var candidate_deaths: int = int(normalized_deaths["value"])
-	var candidate_ageing_remainders: Dictionary = normalized_ageing_remainders
-	var candidate_migration: int = int(normalized_migration["value"])
+	var candidate_immigration: int = int(normalized_immigration["value"])
+	var candidate_emigration: int = int(normalized_emigration["value"])
 	var candidate_period: int = int(normalized_period["value"])
 	if not _is_valid_state(
 		candidate_place_id,
@@ -268,10 +478,11 @@ func restore(snapshot_value: Dictionary) -> bool:
 		normalized_age_buckets,
 		normalized_sex_structure,
 		normalized_urban_rural,
-		candidate_ageing_remainders,
+		normalized_ageing_remainders,
 		candidate_births,
 		candidate_deaths,
-		candidate_migration,
+		candidate_immigration,
+		candidate_emigration,
 		candidate_period
 	):
 		return false
@@ -281,16 +492,19 @@ func restore(snapshot_value: Dictionary) -> bool:
 	_age_buckets = normalized_age_buckets
 	_sex_structure = normalized_sex_structure
 	_urban_rural = normalized_urban_rural
-	_ageing_remainders = candidate_ageing_remainders
+	_ageing_remainders = normalized_ageing_remainders
 	_births = candidate_births
 	_deaths = candidate_deaths
-	_net_migration = candidate_migration
+	_external_immigration = candidate_immigration
+	_external_emigration = candidate_emigration
 	_last_settled_period = candidate_period
 	return true
 
-
 func apply_monthly_settlement(
-	monthly_births: int, monthly_deaths: int, monthly_net_migration: int
+	monthly_births: int,
+	monthly_deaths: int,
+	monthly_external_immigration: int,
+	monthly_external_emigration: int = -1
 ) -> bool:
 	if not is_valid():
 		return false
@@ -298,9 +512,27 @@ func apply_monthly_settlement(
 		return false
 	if not _is_valid_nonnegative_int(monthly_deaths):
 		return false
-	if not _is_valid_signed_int(monthly_net_migration):
+	var resolved_immigration: int = monthly_external_immigration
+	var resolved_emigration: int = monthly_external_emigration
+	if monthly_external_emigration == -1:
+		var legacy_parts: Dictionary = _legacy_external_parts(
+			monthly_external_immigration
+		)
+		if legacy_parts.is_empty():
+			return false
+		resolved_immigration = int(legacy_parts["external_immigration"])
+		resolved_emigration = int(legacy_parts["external_emigration"])
+	if (
+		not _is_valid_nonnegative_int(resolved_immigration)
+		or not _is_valid_nonnegative_int(resolved_emigration)
+	):
 		return false
-	return _apply_one_month(monthly_births, monthly_deaths, monthly_net_migration)
+	return _apply_one_month(
+		monthly_births,
+		monthly_deaths,
+		resolved_immigration,
+		resolved_emigration
+	)
 
 
 func advance_empty_months(elapsed_months: int) -> bool:
@@ -329,7 +561,8 @@ func advance_empty_months(elapsed_months: int) -> bool:
 		next_ageing_remainders,
 		_births,
 		_deaths,
-		_net_migration,
+		_external_immigration,
+		_external_emigration,
 		_last_settled_period + elapsed_months
 	):
 		return false
@@ -348,9 +581,26 @@ static func normalize_monthly_flow(flow_value: Variant) -> Dictionary:
 		if typeof(raw_key) != TYPE_STRING:
 			return {}
 		var key: String = str(raw_key)
-		if not ["births", "deaths", "net_migration", "migration"].has(key):
+		if not [
+			"births",
+			"deaths",
+			"external_immigration",
+			"external_emigration",
+			"net_migration",
+			"migration",
+		].has(key):
 			return {}
+
+	var has_legacy_migration: bool = (
+		source.has("net_migration") or source.has("migration")
+	)
 	if source.has("migration") and source.has("net_migration"):
+		return {}
+	var has_explicit_external: bool = (
+		source.has("external_immigration")
+		or source.has("external_emigration")
+	)
+	if has_legacy_migration and has_explicit_external:
 		return {}
 
 	var normalized_births: Dictionary = _normalize_nonnegative_integer(
@@ -359,22 +609,67 @@ static func normalize_monthly_flow(flow_value: Variant) -> Dictionary:
 	var normalized_deaths: Dictionary = _normalize_nonnegative_integer(
 		source.get("deaths", 0)
 	)
-	var normalized_migration: Dictionary = _normalize_signed_integer(
-		source.get("net_migration", source.get("migration", 0))
-	)
 	if normalized_births.is_empty() or normalized_deaths.is_empty():
 		return {}
-	if normalized_migration.is_empty():
-		return {}
+
+	var immigration: int = 0
+	var emigration: int = 0
+	if has_legacy_migration:
+		var legacy_parts: Dictionary = _legacy_external_parts(
+			source.get("net_migration", source.get("migration"))
+		)
+		if legacy_parts.is_empty():
+			return {}
+		immigration = int(legacy_parts["external_immigration"])
+		emigration = int(legacy_parts["external_emigration"])
+	elif has_explicit_external:
+		var normalized_immigration: Dictionary = (
+			_normalize_nonnegative_integer(
+				source.get("external_immigration", 0)
+			)
+		)
+		var normalized_emigration: Dictionary = (
+			_normalize_nonnegative_integer(
+				source.get("external_emigration", 0)
+			)
+		)
+		if (
+			normalized_immigration.is_empty()
+			or normalized_emigration.is_empty()
+		):
+			return {}
+		immigration = int(normalized_immigration["value"])
+		emigration = int(normalized_emigration["value"])
+
 	return {
 		"births": int(normalized_births["value"]),
 		"deaths": int(normalized_deaths["value"]),
-		"net_migration": int(normalized_migration["value"]),
+		"external_immigration": immigration,
+		"external_emigration": emigration,
+	}
+
+
+static func _legacy_external_parts(value: Variant) -> Dictionary:
+	var normalized: Dictionary = _normalize_signed_integer(value)
+	if normalized.is_empty():
+		return {}
+	var signed_value: int = int(normalized["value"])
+	if signed_value >= 0:
+		return {
+			"external_immigration": signed_value,
+			"external_emigration": 0,
+		}
+	return {
+		"external_immigration": 0,
+		"external_emigration": -signed_value,
 	}
 
 
 func _apply_one_month(
-	monthly_births: int, monthly_deaths: int, monthly_net_migration: int
+	monthly_births: int,
+	monthly_deaths: int,
+	monthly_external_immigration: int,
+	monthly_external_emigration: int
 ) -> bool:
 	if monthly_births > MAX_JSON_SAFE_INTEGER - _total_population:
 		return false
@@ -382,25 +677,29 @@ func _apply_one_month(
 	if monthly_deaths > after_births_total:
 		return false
 	var after_deaths_total: int = after_births_total - monthly_deaths
-	if monthly_net_migration > 0:
-		if monthly_net_migration > MAX_JSON_SAFE_INTEGER - after_deaths_total:
-			return false
-	else:
-		var outbound_migration: int = -monthly_net_migration
-		if outbound_migration > after_deaths_total:
-			return false
+	if monthly_external_immigration > (
+		MAX_JSON_SAFE_INTEGER - after_deaths_total
+	):
+		return false
+	var after_immigration_total: int = (
+		after_deaths_total + monthly_external_immigration
+	)
+	if monthly_external_emigration > after_immigration_total:
+		return false
 	if _last_settled_period >= MAX_JSON_SAFE_INTEGER:
 		return false
 	if monthly_births > MAX_JSON_SAFE_INTEGER - _births:
 		return false
 	if monthly_deaths > MAX_JSON_SAFE_INTEGER - _deaths:
 		return false
-	if monthly_net_migration >= 0:
-		if _net_migration > MAX_JSON_SAFE_INTEGER - monthly_net_migration:
-			return false
-	else:
-		if _net_migration < -MAX_JSON_SAFE_INTEGER - monthly_net_migration:
-			return false
+	if monthly_external_immigration > (
+		MAX_JSON_SAFE_INTEGER - _external_immigration
+	):
+		return false
+	if monthly_external_emigration > (
+		MAX_JSON_SAFE_INTEGER - _external_emigration
+	):
+		return false
 
 	var ageing_result: Dictionary = _age_one_month(
 		_age_buckets, _ageing_remainders
@@ -450,34 +749,49 @@ func _apply_one_month(
 	if next_age.is_empty() or next_sex.is_empty() or next_urban_rural.is_empty():
 		return false
 
-	var migration_amount: int = abs(monthly_net_migration)
-	var migration_age: Dictionary = _proportional_parts(
-		migration_amount, next_age, "age_18_40", monthly_net_migration < 0
+	var immigration_age: Dictionary = _proportional_parts(
+		monthly_external_immigration, next_age, "age_18_40", false
 	)
-	var migration_sex: Dictionary = _proportional_parts(
-		migration_amount, next_sex, "female", monthly_net_migration < 0
+	var immigration_sex: Dictionary = _proportional_parts(
+		monthly_external_immigration, next_sex, "female", false
 	)
-	var migration_urban_rural: Dictionary = _proportional_parts(
-		migration_amount, next_urban_rural, "rural", monthly_net_migration < 0
+	var immigration_urban_rural: Dictionary = _proportional_parts(
+		monthly_external_immigration, next_urban_rural, "rural", false
 	)
 	if (
-		migration_age.is_empty()
-		or migration_sex.is_empty()
-		or migration_urban_rural.is_empty()
+		immigration_age.is_empty()
+		or immigration_sex.is_empty()
+		or immigration_urban_rural.is_empty()
 	):
 		return false
-	if monthly_net_migration > 0:
-		next_age = _add_parts(next_age, migration_age)
-		next_sex = _add_parts(next_sex, migration_sex)
-		next_urban_rural = _add_parts(next_urban_rural, migration_urban_rural)
-	else:
-		next_age = _subtract_parts(next_age, migration_age)
-		next_sex = _subtract_parts(next_sex, migration_sex)
-		next_urban_rural = _subtract_parts(next_urban_rural, migration_urban_rural)
+	next_age = _add_parts(next_age, immigration_age)
+	next_sex = _add_parts(next_sex, immigration_sex)
+	next_urban_rural = _add_parts(next_urban_rural, immigration_urban_rural)
 	if next_age.is_empty() or next_sex.is_empty() or next_urban_rural.is_empty():
 		return false
 
-	var next_total: int = after_deaths_total + monthly_net_migration
+	var emigration_age: Dictionary = _proportional_parts(
+		monthly_external_emigration, next_age, "age_18_40", true
+	)
+	var emigration_sex: Dictionary = _proportional_parts(
+		monthly_external_emigration, next_sex, "female", true
+	)
+	var emigration_urban_rural: Dictionary = _proportional_parts(
+		monthly_external_emigration, next_urban_rural, "rural", true
+	)
+	if (
+		emigration_age.is_empty()
+		or emigration_sex.is_empty()
+		or emigration_urban_rural.is_empty()
+	):
+		return false
+	next_age = _subtract_parts(next_age, emigration_age)
+	next_sex = _subtract_parts(next_sex, emigration_sex)
+	next_urban_rural = _subtract_parts(next_urban_rural, emigration_urban_rural)
+	if next_age.is_empty() or next_sex.is_empty() or next_urban_rural.is_empty():
+		return false
+
+	var next_total: int = after_immigration_total - monthly_external_emigration
 	if not _is_valid_state(
 		_place_id,
 		next_total,
@@ -487,7 +801,8 @@ func _apply_one_month(
 		next_ageing_remainders,
 		_births + monthly_births,
 		_deaths + monthly_deaths,
-		_net_migration + monthly_net_migration,
+		_external_immigration + monthly_external_immigration,
+		_external_emigration + monthly_external_emigration,
 		_last_settled_period + 1
 	):
 		return false
@@ -499,7 +814,8 @@ func _apply_one_month(
 	_ageing_remainders = next_ageing_remainders
 	_births += monthly_births
 	_deaths += monthly_deaths
-	_net_migration += monthly_net_migration
+	_external_immigration += monthly_external_immigration
+	_external_emigration += monthly_external_emigration
 	_last_settled_period += 1
 	return true
 
@@ -513,7 +829,8 @@ static func _is_valid_state(
 	ageing_remainders_value: Dictionary,
 	births_value: int,
 	deaths_value: int,
-	net_migration_value: int,
+	external_immigration_value: int,
+	external_emigration_value: int,
 	last_settled_period_value: int
 ) -> bool:
 	if not _is_spatial_key(place_id_value):
@@ -524,7 +841,9 @@ static func _is_valid_state(
 		return false
 	if not _is_valid_nonnegative_int(deaths_value):
 		return false
-	if not _is_valid_signed_int(net_migration_value):
+	if not _is_valid_nonnegative_int(external_immigration_value):
+		return false
+	if not _is_valid_nonnegative_int(external_emigration_value):
 		return false
 	if not _is_valid_nonnegative_int(last_settled_period_value):
 		return false
@@ -541,7 +860,6 @@ static func _is_valid_state(
 		and _sum_buckets(sex_structure_value, SEX_KEYS) == total_population_value
 		and _sum_buckets(urban_rural_value, URBAN_RURAL_KEYS) == total_population_value
 	)
-
 
 static func _has_valid_bucket_values(
 	bucket_value: Dictionary, expected_keys: PackedStringArray
