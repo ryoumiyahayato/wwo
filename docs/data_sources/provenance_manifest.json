@@ -16666,8 +16666,37 @@
       ],
       "path": "docs/data_sources/README.md",
       "review_status": "REVIEW_REQUIRED",
-      "sha256": "8b8061b528e95bbe34f8dcc764ad2e164684e6269aa6ec0b3c627de543734943",
-      "size_bytes": 1202,
+      "sha256": "f1c41ca20d2017024bc70b9e174f22b6c46d926b9227c205238a0261c460dd22",
+      "size_bytes": 1621,
+      "source_locator": []
+    },
+    {
+      "author_institution": "SOURCE_UNKNOWN",
+      "category": "documentation",
+      "confidence": "medium",
+      "derived_from": [],
+      "evidence": [
+        "docs/data_sources/provenance_reference_matrix.json"
+      ],
+      "file_type": "application/json",
+      "generator": [
+        "GENERATOR_UNKNOWN"
+      ],
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "kind": "source",
+      "known_source": "WWO repository documentation",
+      "license": "LICENSE_UNKNOWN",
+      "license_locator": [],
+      "notes": [
+        "Documentation is inventoried for citation and ownership review; no document license is inferred."
+      ],
+      "path": "docs/data_sources/provenance_reference_matrix.json",
+      "review_status": "REVIEW_REQUIRED",
+      "sha256": "acad72ff44f56be5854475d4519456ad3780e1a064a323e76db61850b76f4384",
+      "size_bytes": 361687,
       "source_locator": []
     },
     {
@@ -19721,14 +19750,14 @@
     "broken_provenance_chains": 10,
     "duplicate_hash_group_paths": [],
     "duplicate_hash_groups": 0,
-    "files_inventoried": 400,
+    "files_inventoried": 401,
     "generated_assets": 233,
     "generator_unknown_entries": 5,
     "license_known": 235,
-    "license_unknown": 165,
-    "license_warning_entries": 165,
-    "provenance_incomplete_entries": 168,
-    "source_known": 346,
+    "license_unknown": 166,
+    "license_warning_entries": 166,
+    "provenance_incomplete_entries": 169,
+    "source_known": 347,
     "source_missing_entries": 1,
     "source_unknown": 54
   }

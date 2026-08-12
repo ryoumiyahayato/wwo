@@ -26,3 +26,10 @@ Provenance policy:
 The manifest is generated from tracked files and is intended to be rerun after
 source or asset changes. Reviewers should inspect the repository evidence
 listed in each entry before treating a provenance chain as complete.
+
+Batch 2 adds `provenance_reference_matrix.json`. It statically inventories
+tracked producers, consumers, repository path literals, write-site candidates,
+and candidate dependency edges under `scripts/**`, `scenes/**`, `shaders/**`,
+`tests/**`, and `tools/**`. Dynamic test fixtures are marked
+`INTENTIONAL_TEST_FIXTURE`; candidate edges remain review-required and do not
+become authoritative provenance automatically.
