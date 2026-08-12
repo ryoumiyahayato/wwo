@@ -7,7 +7,7 @@ This report records the actual Batch 1 execution against the live repository sta
 - Live starting `origin/master`: `4b738ab8b0a21e8685aae95381717e9efd2327a8`
 - Branch: `chore/world-data-foundation-audit-20260812`
 - HEAD: `4b738ab8b0a21e8685aae95381717e9efd2327a8`
-- Dedicated worktree: `D:/wwo/.worktrees/world-data-foundation-audit-20260812`
+- Dedicated worktree: isolated worktree for this branch (local path intentionally omitted from tracked output).
 
 ## Phases actually completed
 

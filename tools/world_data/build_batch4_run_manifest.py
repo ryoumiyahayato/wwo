@@ -79,7 +79,7 @@ def build_manifest(repository_root: Path, output_dir: Path) -> dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
         "batch_scope": ["BATCH 1", "BATCH 2", "BATCH 3", "BATCH 4"],
-        "repository_root": str(repository_root).replace("\\", "/"),
+        "repository_root": ".",
         "authoritative_source_modified": False,
         "batch_results": {
             "batch1": {

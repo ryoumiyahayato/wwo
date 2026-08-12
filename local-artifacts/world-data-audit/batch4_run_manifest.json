@@ -140,6 +140,6 @@
     "Research 10 missing and 6 ambiguous historical identity mappings.",
     "Expand sparse country-level transport, institution, organization, and person coverage only with approved sources."
   ],
-  "repository_root": "D:/wwo/.worktrees/world-data-foundation-audit-20260812",
+  "repository_root": ".",
   "schema_version": "wwo_world_data_batch4_run_manifest_v1"
 }

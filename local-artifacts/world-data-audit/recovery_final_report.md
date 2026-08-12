@@ -10,7 +10,7 @@ Starting recovered HEAD:
 `1029afd10b140704315bc4f40da76c906e267245`
 
 Recovered working tree:
-Dedicated worktree `D:/wwo/.worktrees/world-data-foundation-audit-20260812`; it contained valid Batch 3 untracked outputs/tooling and no staged or unstaged tracked changes. The shared `D:/wwo` worktree was on a concurrent branch and was preserved.
+Dedicated isolated worktree; it contained the valid Batch 3 outputs/tooling and no staged or unstaged tracked changes. The shared main worktree was on a concurrent branch and was preserved.
 
 Existing work preserved:
 Batch 1 and Batch 2 checkpoint commits, all authoritative source data, all existing reports/manifests/staging outputs, and unrelated concurrent worktree changes.
