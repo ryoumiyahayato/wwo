@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sys
+import tempfile
 from pathlib import Path
 
 
@@ -46,8 +47,24 @@ def test_large_structure_inventory_and_categories_are_present() -> None:
     for summary in manifest["categories"].values():
         assert summary["largest_files"]
         assert summary["parse_error_count"] == 0
+
+
+def test_manifest_rejects_missing_and_malformed_inputs() -> None:
+    manifest = audit.build_manifest(ROOT)
+    manifest["files"] = manifest["files"][:-1]
+    errors = audit._validation(manifest, ROOT / "data" / "world_map")
+    assert any(error.startswith("missing files:") for error in errors)
+    assert "category file counts do not cover files" in errors
+
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        malformed = root / "malformed.json"
+        malformed.write_text("{not valid json", encoding="utf-8")
+        profile = audit._profile_file(root, malformed)
+        assert profile["parse_status"].startswith("error: JSONDecodeError")
 if __name__ == "__main__":
     test_full_world_map_coverage_is_valid_and_complete()
     test_manifest_serialization_and_report_are_deterministic()
     test_large_structure_inventory_and_categories_are_present()
-    print("World-data coverage audit tests: 3 passed")
+    test_manifest_rejects_missing_and_malformed_inputs()
+    print("World-data coverage audit tests: 4 passed")

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 import sys
+import tempfile
 from pathlib import Path
 
 
@@ -29,7 +31,31 @@ def test_quality_backlog_is_explicit_and_bounded() -> None:
     assert report["metrics"]["duplicate_city_ids"] == 0
 
 
+
+
+def test_quality_audit_reports_invalid_shard_geometry_and_coordinates() -> None:
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        city_root = root / "city_detail"
+        city_root.mkdir()
+        (city_root / "index.json").write_text(
+            json.dumps({"countries": [{"country_code": "US", "count": 1, "shards": [{"path": "US.json", "count": 1, "bounds": [0, 0, -1, 1]}]}]}),
+            encoding="utf-8",
+        )
+        (city_root / "US.json").write_text(
+            json.dumps({"count": 1, "bounds": [0, 0, -1, 1], "cities": [{"id": "city:invalid", "lon_lat": [181, 0]}]}),
+            encoding="utf-8",
+        )
+        issues: list[dict[str, str]] = []
+        metrics: dict[str, object] = {}
+        audit._check_city_shards(root, issues, metrics)
+        codes = {issue["code"] for issue in issues}
+        assert "CITY_BOUNDS" in codes
+        assert "CITY_COORDINATE" in codes
+        assert metrics["invalid_bounds"] == 1
+        assert metrics["invalid_city_coordinates"] == 1
 if __name__ == "__main__":
     test_world_data_quality_contract_passes()
     test_quality_backlog_is_explicit_and_bounded()
-    print("World-data quality audit tests: 2 passed")
+    test_quality_audit_reports_invalid_shard_geometry_and_coordinates()
+    print("World-data quality audit tests: 3 passed")

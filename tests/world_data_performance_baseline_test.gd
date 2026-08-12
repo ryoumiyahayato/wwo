@@ -22,6 +22,11 @@ func _run() -> void:
 func _test_result_schema_contract() -> void:
 	var errors: Array[String] = Benchmark.validate_result_schema(Benchmark.schema_probe())
 	_check(errors.is_empty(), "benchmark result schema probe is valid: %s" % [errors])
+	var limitations: Array = Benchmark.schema_probe().get("limitations", []) as Array
+	_check(limitations.has(Benchmark.BENCHMARK_SEMANTICS), "benchmark schema identifies machine-specific, non-universal timing semantics")
+	var invalid_probe: Dictionary = Benchmark.schema_probe().duplicate(true)
+	(invalid_probe["limitations"] as Array).clear()
+	_check(not Benchmark.validate_result_schema(invalid_probe).is_empty(), "benchmark result schema rejects missing timing semantics")
 
 
 func _test_runtime_world_data() -> void:

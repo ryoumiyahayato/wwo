@@ -38,8 +38,16 @@ def test_corpus_has_representative_runtime_and_geometry_samples() -> None:
     assert by_path["city_detail/countries/US.json"]["sample"]["representative_ids"]
 
 
+
+
+def test_corpus_validator_detects_changed_source_hash() -> None:
+    result = corpus.build_corpus(ROOT)
+    result["records"][0]["sha256"] = "0" * 64
+    errors = corpus.validate_corpus(result, ROOT)
+    assert any(error.startswith("source hash drift:") for error in errors)
 if __name__ == "__main__":
     test_corpus_covers_all_files_and_validates()
     test_corpus_replay_is_deterministic()
     test_corpus_has_representative_runtime_and_geometry_samples()
-    print("World-data regression corpus tests: 3 passed")
+    test_corpus_validator_detects_changed_source_hash()
+    print("World-data regression corpus tests: 4 passed")

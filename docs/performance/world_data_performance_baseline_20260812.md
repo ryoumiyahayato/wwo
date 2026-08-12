@@ -10,6 +10,7 @@ This is a measurement report. Production gameplay, authoritative map data, and w
 - Runtime: 4.6.3-stable (official) on Windows (13th Gen Intel(R) Core(TM) i7-13700H)
 - Iterations: 7 full samples, 5 map samples, 1000 lookup operations per lookup sample.
 - Synthetic scales: 1x, 2x, 5x, 10x; base 1000 records; synthetic data remains memory-only.
+- Benchmark semantics: MACHINE-SPECIFIC OBSERVATIONAL BASELINE; timings are not universal CI pass/fail thresholds.
 
 ## Dataset sizes
 
@@ -108,6 +109,8 @@ Interpretation is intentionally conservative: use the measured distribution to d
 | 20 | 基准分布未转化为回归阈值 | 连续三次 baseline 后仍无 median/p95 分布记录 |
 
 ## Measurement limits and handoff
+
+- Timing values are machine-specific observational baselines; they are not universal CI pass/fail thresholds.
 
 - 真实 process RSS/heap 未可靠测量：NOT MEASURED；decoded_data_bytes_estimate 是递归估算，不是 allocator 计数。
 - cold parse 是同一进程的 first-pass 样本，未重启进程，也未控制 OS 文件缓存。

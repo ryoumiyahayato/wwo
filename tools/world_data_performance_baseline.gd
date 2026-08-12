@@ -14,6 +14,7 @@ const LOOKUP_ITERATIONS: int = 1000
 const SYNTHETIC_ITERATIONS: int = 5
 const SYNTHETIC_BASE_RECORDS: int = 1000
 const SYNTHETIC_LOOKUPS: int = 1000
+const BENCHMARK_SEMANTICS: String = "Timing values are machine-specific observational baselines; they are not universal CI pass/fail thresholds."
 
 const RUNTIME_FILES: Dictionary = {
 	"world_coastlines": "res://data/world_map/world_coastlines.json",
@@ -219,6 +220,9 @@ static func validate_result_schema(payload: Dictionary) -> Array[String]:
 	var scaling: Variant = payload.get("synthetic_scaling", [])
 	if not scaling is Array or (scaling as Array).size() != 4:
 		errors.append("synthetic_scaling must contain four fixed scales")
+	var limitations: Variant = payload.get("limitations", [])
+	if not limitations is Array or not (limitations as Array).has(BENCHMARK_SEMANTICS):
+		errors.append("limitations must identify machine-specific observational semantics")
 	return errors
 
 
@@ -237,7 +241,7 @@ static func schema_probe() -> Dictionary:
 		"load_benchmark": {},
 		"map_benchmark": {},
 		"synthetic_scaling": [{"scale": 1}, {"scale": 2}, {"scale": 5}, {"scale": 10}],
-		"limitations": [],
+		"limitations": [BENCHMARK_SEMANTICS],
 	}
 
 
@@ -269,6 +273,7 @@ func _build_payload() -> Dictionary:
 		"candidate_optimizations": CANDIDATE_OPTIMIZATIONS,
 		"top_20_future_risks": TOP_RISKS,
 		"limitations": [
+			BENCHMARK_SEMANTICS,
 			"真实 process RSS/heap 未可靠测量：NOT MEASURED；decoded_data_bytes_estimate 是递归估算，不是 allocator 计数。",
 			"cold parse 是同一进程的 first-pass 样本，未重启进程，也未控制 OS 文件缓存。",
 			"benchmark 未改变生产 runtime，也未把 synthetic 数据写入正式 world data。",
@@ -891,6 +896,7 @@ func _render_markdown(payload: Dictionary) -> String:
 	])
 	lines.append("- Iterations: %d full samples, %d map samples, %d lookup operations per lookup sample." % [ITERATIONS, MAP_ITERATIONS, LOOKUP_ITERATIONS])
 	lines.append("- Synthetic scales: 1x, 2x, 5x, 10x; base %d records; synthetic data remains memory-only." % SYNTHETIC_BASE_RECORDS)
+	lines.append("- Benchmark semantics: MACHINE-SPECIFIC OBSERVATIONAL BASELINE; timings are not universal CI pass/fail thresholds.")
 	lines.append("")
 	lines.append("## Dataset sizes")
 	lines.append("")
