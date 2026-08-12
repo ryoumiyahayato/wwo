@@ -12,8 +12,11 @@ if old not in text:
 bootstrap.write_text(text.replace(old, new, 1), encoding="utf-8", newline="\n")
 runpy.run_path(str(bootstrap), run_name="__main__")
 
-fast_query = Path(__file__).with_name("pr58_spatial_effective_capacity_query.py")
-runpy.run_path(str(fast_query), run_name="__main__")
-
-batch_response = Path(__file__).with_name("pr58_spatial_batch_result_optimization.py")
-runpy.run_path(str(batch_response), run_name="__main__")
+for helper_name in [
+    "pr58_spatial_effective_capacity_query.py",
+    "pr58_spatial_batch_extension.py",
+    "pr58_spatial_batch_query_extension.py",
+    "pr58_spatial_batch_result_optimization.py",
+]:
+    helper = Path(__file__).with_name(helper_name)
+    runpy.run_path(str(helper), run_name="__main__")
