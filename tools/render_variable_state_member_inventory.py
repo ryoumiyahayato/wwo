@@ -78,7 +78,7 @@ def main() -> None:
 
 - 第一批实现基于基础提交`b4a9d637e294aa53b0c0e2525260421dce3b5182`，由PR #30实施。
 - 引擎：Godot 4.6.3。
-- 范围：`project.godot`、`scripts/`、`scenes/`、`data/`、`resources/`。
+- 范围：`project.godot`、`scripts/`、`scenes/`、`resources/`以及显式 runtime config roots；`data/staging/`、`tests/`、`tools/`、`docs/`和报告 artifacts 不属于输入。
 - 本文件只提供静态成员索引证据，不持有审计结论、实施方案、多写入状态总结、UI副本总结或停止项。
 
 ## 静态扫描限制
