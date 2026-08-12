@@ -1,0 +1,101 @@
+name: PR58 Spatial Integration Worker
+
+on:
+  push:
+    branches:
+      - feat/vnext-military-strategy-20260809
+    paths:
+      - "tools/pr58_spatial_capacity_integration_worker.py"
+      - ".github/workflows/pr58-spatial-integration-worker.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pr58-spatial-integration-worker
+  cancel-in-progress: false
+
+jobs:
+  integrate-and-validate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: feat/vnext-military-strategy-20260809
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Apply Spatial capacity integration
+        run: python3 -B tools/pr58_spatial_capacity_integration_worker.py
+
+      - name: Regenerate variable-state documents
+        run: |
+          set -euo pipefail
+          python3 -B tools/audit_variable_state.py --root .
+          python3 tools/render_variable_state_audit_summary.py
+          python3 tools/render_variable_state_member_inventory.py
+          python3 tools/generate_variable_state_docs.py
+          python3 tools/render_variable_refactor_plan.py
+
+      - name: Install Godot 4.6.3
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 -o "$RUNNER_TEMP/godot.zip" "https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_linux.x86_64.zip"
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          GODOT_BIN="$(find "$RUNNER_TEMP/godot" -type f -name 'Godot_v4.6.3-stable_linux.x86_64' | head -n 1)"
+          test -n "$GODOT_BIN"
+          chmod +x "$GODOT_BIN"
+          echo "GODOT_BIN=$GODOT_BIN" >> "$GITHUB_ENV"
+          "$GODOT_BIN" --version
+
+      - name: Focused Spatial validation
+        run: "$GODOT_BIN" --headless --path . --script tests/vnext/spatial_infrastructure_test.gd
+
+      - name: Focused Military strategy validation
+        run: "$GODOT_BIN" --headless --path . --script tests/vnext/military_strategy_test.gd
+
+      - name: Focused Military R3/R4 validation
+        run: "$GODOT_BIN" --headless --path . --script tests/vnext/military_r3_findings_test.gd
+
+      - name: Focused post-PR62 integration validation
+        run: "$GODOT_BIN" --headless --path . --script tests/vnext/military_spatial_capacity_integration_test.gd
+
+      - name: Unified vNext validation
+        run: python3 -B tools/run_vnext_validation.py --root . --godot "$GODOT_BIN"
+
+      - name: Verify generated documents and whitespace
+        run: |
+          set -euo pipefail
+          git diff --check
+          git diff --exit-code --check
+          git status --short
+
+      - name: Commit validated integration
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/world_map/strategic_military_overlay.json \
+                  docs/refactors/variable_state_audit.md \
+                  docs/refactors/variable_state_member_inventory.md \
+                  docs/refactors/state_ownership_matrix.md \
+                  docs/refactors/variable_refactor_plan.md \
+                  docs/vnext/military_strategy.md \
+                  scripts/vnext/map/military_map_adapter.gd \
+                  scripts/vnext/military/military_service.gd \
+                  scripts/vnext/military/military_state.gd \
+                  scripts/vnext/military/military_state_invariants.gd \
+                  tests/vnext/military_strategy_test.gd \
+                  tests/vnext/military_r3_findings_test.gd \
+                  tests/vnext/military_spatial_capacity_integration_test.gd
+          git diff --cached --check
+          git commit -m "Integrate Military transport with Spatial capacity authority"
+          git push origin HEAD:feat/vnext-military-strategy-20260809
