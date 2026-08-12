@@ -2,7 +2,7 @@
   "schema_version": 1,
   "matrix_kind": "wwo_provenance_reference_matrix",
   "audit_batch": "BATCH_2",
-  "audit_base_revision": "165515f6ed5bcb922ad1a8b5d3ea905e30debc61",
+  "audit_base_revision": "d725e720104c63cb52cff0379a204be57de8279a",
   "generated_by": "tools/provenance/scan_reference_matrix.py",
   "scope": {
     "included_roots": [
@@ -27,17 +27,17 @@
   },
   "linked_manifest": "docs/data_sources/provenance_manifest.json",
   "summary": {
-    "files_scanned": 578,
-    "files_with_references": 55,
-    "references": 231,
+    "files_scanned": 584,
+    "files_with_references": 57,
+    "references": 240,
     "write_sites": 63,
-    "existing_targets": 193,
+    "existing_targets": 202,
     "fixture_references": 36,
     "broken_references": 2,
     "intentional_test_fixtures": 36,
     "target_directories": 8,
     "target_not_in_batch_1_manifest": 0,
-    "unknown_license_references": 135,
+    "unknown_license_references": 142,
     "producer_candidate_files": 3,
     "candidate_edges": 10,
     "candidate_edges_matching_canonical": 1,
@@ -3516,6 +3516,56 @@
       "issues": []
     },
     {
+      "path": "scripts/vnext/spatial/infrastructure_link_state.gd",
+      "file_type": "text/x-gdscript",
+      "size_bytes": 6378,
+      "sha256": "5e7bc52e1076fa0128f376274990e8c6ff1a376e3dc8cb736ac99815b5dabc8b",
+      "role": "unreferenced",
+      "reference_count": 0,
+      "write_site_count": 0,
+      "issues": []
+    },
+    {
+      "path": "scripts/vnext/spatial/spatial_capacity_window.gd",
+      "file_type": "text/x-gdscript",
+      "size_bytes": 19092,
+      "sha256": "18a654d777c58c133ff609989f3627a7345113bf32dbb60f0012604dff4fc6be",
+      "role": "unreferenced",
+      "reference_count": 0,
+      "write_site_count": 0,
+      "issues": []
+    },
+    {
+      "path": "scripts/vnext/spatial/spatial_catalog.gd",
+      "file_type": "text/x-gdscript",
+      "size_bytes": 18597,
+      "sha256": "ce1040f2a8bcce52b97acdf27ceea43344e2292c0886289321ac5a9f773bfbdb",
+      "role": "consumer",
+      "reference_count": 7,
+      "write_site_count": 0,
+      "issues": []
+    },
+    {
+      "path": "scripts/vnext/spatial/spatial_map_projection.gd",
+      "file_type": "text/x-gdscript",
+      "size_bytes": 4625,
+      "sha256": "393af56d7e7f06bd30b45c23e63d69c4eaa3f091a0eaf255b069da36499aa792",
+      "role": "unreferenced",
+      "reference_count": 0,
+      "write_site_count": 0,
+      "issues": []
+    },
+    {
+      "path": "scripts/vnext/spatial/spatial_world.gd",
+      "file_type": "text/x-gdscript",
+      "size_bytes": 19223,
+      "sha256": "79e0fa7be37ce331934246701f5b75df7fbc341c0cb01ea4313f7d000afa1e86",
+      "role": "unreferenced",
+      "reference_count": 0,
+      "write_site_count": 0,
+      "issues": []
+    },
+    {
       "path": "scripts/vnext/travel/location_state.gd",
       "file_type": "text/x-gdscript",
       "size_bytes": 2116,
@@ -5292,6 +5342,16 @@
       "sha256": "2eba95abbd9500c104196104b1f45c81d4c30ff4913a43f63bc79d0e9572b01e",
       "role": "unreferenced",
       "reference_count": 0,
+      "write_site_count": 0,
+      "issues": []
+    },
+    {
+      "path": "tests/vnext/spatial_infrastructure_test.gd",
+      "file_type": "text/x-gdscript",
+      "size_bytes": 18216,
+      "sha256": "32fe42d6fb07d6c8a139ba4483e8192c403e28cd076c6eb7c1c12b624e62c40c",
+      "role": "consumer",
+      "reference_count": 2,
       "write_site_count": 0,
       "issues": []
     },
@@ -7160,6 +7220,158 @@
       "id": "ref-000061"
     },
     {
+      "owner": "scripts/vnext/spatial/spatial_catalog.gd",
+      "target": "data/world_map/countries.json",
+      "reference_kind": "resource_path",
+      "literal": "res://data/world_map/countries.json",
+      "line": 10,
+      "column": 22,
+      "context": "code_or_text",
+      "reference_scope": "repository",
+      "exists": true,
+      "target_type": "file",
+      "target_sha256": "29159c67775632ebc10a6062e731edf8005baafe79231d0e23ad33a2e631ac06",
+      "target_manifest_kind": "unknown",
+      "target_license": "LICENSE_UNKNOWN",
+      "issues": [
+        "LICENSE_UNKNOWN"
+      ],
+      "evidence": [
+        "scripts/vnext/spatial/spatial_catalog.gd:10"
+      ],
+      "id": "ref-000062"
+    },
+    {
+      "owner": "scripts/vnext/spatial/spatial_catalog.gd",
+      "target": "data/world_map/regions.json",
+      "reference_kind": "resource_path",
+      "literal": "res://data/world_map/regions.json",
+      "line": 11,
+      "column": 20,
+      "context": "code_or_text",
+      "reference_scope": "repository",
+      "exists": true,
+      "target_type": "file",
+      "target_sha256": "65e885135016f70eade124f8adf7030f5ce63b8983eb44d01e650cc87da5b1ba",
+      "target_manifest_kind": "generated",
+      "target_license": "Public domain",
+      "issues": [],
+      "evidence": [
+        "scripts/vnext/spatial/spatial_catalog.gd:11"
+      ],
+      "id": "ref-000063"
+    },
+    {
+      "owner": "scripts/vnext/spatial/spatial_catalog.gd",
+      "target": "data/world_map/cities.json",
+      "reference_kind": "resource_path",
+      "literal": "res://data/world_map/cities.json",
+      "line": 12,
+      "column": 19,
+      "context": "code_or_text",
+      "reference_scope": "repository",
+      "exists": true,
+      "target_type": "file",
+      "target_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919",
+      "target_manifest_kind": "unknown",
+      "target_license": "LICENSE_UNKNOWN",
+      "issues": [
+        "LICENSE_UNKNOWN"
+      ],
+      "evidence": [
+        "scripts/vnext/spatial/spatial_catalog.gd:12"
+      ],
+      "id": "ref-000064"
+    },
+    {
+      "owner": "scripts/vnext/spatial/spatial_catalog.gd",
+      "target": "data/world_map/ports.json",
+      "reference_kind": "resource_path",
+      "literal": "res://data/world_map/ports.json",
+      "line": 13,
+      "column": 18,
+      "context": "code_or_text",
+      "reference_scope": "repository",
+      "exists": true,
+      "target_type": "file",
+      "target_sha256": "05a11d928080289968ace21d86fa137bffe5463582b972ff2f10453e7a312eed",
+      "target_manifest_kind": "unknown",
+      "target_license": "LICENSE_UNKNOWN",
+      "issues": [
+        "LICENSE_UNKNOWN"
+      ],
+      "evidence": [
+        "scripts/vnext/spatial/spatial_catalog.gd:13"
+      ],
+      "id": "ref-000065"
+    },
+    {
+      "owner": "scripts/vnext/spatial/spatial_catalog.gd",
+      "target": "data/world_map/road_segments.json",
+      "reference_kind": "resource_path",
+      "literal": "res://data/world_map/road_segments.json",
+      "line": 14,
+      "column": 18,
+      "context": "code_or_text",
+      "reference_scope": "repository",
+      "exists": true,
+      "target_type": "file",
+      "target_sha256": "d34edf3ab6bf0f3b268ab3a88360133394985d20bf8acf816b8893c832b58689",
+      "target_manifest_kind": "unknown",
+      "target_license": "LICENSE_UNKNOWN",
+      "issues": [
+        "LICENSE_UNKNOWN"
+      ],
+      "evidence": [
+        "scripts/vnext/spatial/spatial_catalog.gd:14"
+      ],
+      "id": "ref-000066"
+    },
+    {
+      "owner": "scripts/vnext/spatial/spatial_catalog.gd",
+      "target": "data/world_map/rail_segments.json",
+      "reference_kind": "resource_path",
+      "literal": "res://data/world_map/rail_segments.json",
+      "line": 15,
+      "column": 17,
+      "context": "code_or_text",
+      "reference_scope": "repository",
+      "exists": true,
+      "target_type": "file",
+      "target_sha256": "83303792e438cdfcec5f6c255038c14ff22cdc902ae3a8426d93e06e07779cf9",
+      "target_manifest_kind": "unknown",
+      "target_license": "LICENSE_UNKNOWN",
+      "issues": [
+        "LICENSE_UNKNOWN"
+      ],
+      "evidence": [
+        "scripts/vnext/spatial/spatial_catalog.gd:15"
+      ],
+      "id": "ref-000067"
+    },
+    {
+      "owner": "scripts/vnext/spatial/spatial_catalog.gd",
+      "target": "data/world_map/shipping_routes.json",
+      "reference_kind": "resource_path",
+      "literal": "res://data/world_map/shipping_routes.json",
+      "line": 16,
+      "column": 21,
+      "context": "code_or_text",
+      "reference_scope": "repository",
+      "exists": true,
+      "target_type": "file",
+      "target_sha256": "3812b7e48128bec0c19cab27fbb40303397087b0531591c761df541d532a5861",
+      "target_manifest_kind": "unknown",
+      "target_license": "LICENSE_UNKNOWN",
+      "issues": [
+        "LICENSE_UNKNOWN"
+      ],
+      "evidence": [
+        "scripts/vnext/spatial/spatial_catalog.gd:16"
+      ],
+      "id": "ref-000068"
+    },
+    {
       "owner": "scripts/world_map/internal/world_map_data_impl.gd",
       "target": "data/world_map/world_coastlines.json",
       "reference_kind": "resource_path",
@@ -7177,7 +7389,7 @@
       "evidence": [
         "scripts/world_map/internal/world_map_data_impl.gd:7"
       ],
-      "id": "ref-000062"
+      "id": "ref-000069"
     },
     {
       "owner": "scripts/world_map/internal/world_map_data_impl.gd",
@@ -7199,7 +7411,7 @@
       "evidence": [
         "scripts/world_map/internal/world_map_data_impl.gd:8"
       ],
-      "id": "ref-000063"
+      "id": "ref-000070"
     },
     {
       "owner": "scripts/world_map/internal/world_map_data_impl.gd",
@@ -7219,7 +7431,7 @@
       "evidence": [
         "scripts/world_map/internal/world_map_data_impl.gd:9"
       ],
-      "id": "ref-000064"
+      "id": "ref-000071"
     },
     {
       "owner": "scripts/world_map/internal/world_map_data_impl.gd",
@@ -7241,7 +7453,7 @@
       "evidence": [
         "scripts/world_map/internal/world_map_data_impl.gd:10"
       ],
-      "id": "ref-000065"
+      "id": "ref-000072"
     },
     {
       "owner": "scripts/world_map/internal/world_map_data_impl.gd",
@@ -7263,7 +7475,7 @@
       "evidence": [
         "scripts/world_map/internal/world_map_data_impl.gd:11"
       ],
-      "id": "ref-000066"
+      "id": "ref-000073"
     },
     {
       "owner": "scripts/world_map/internal/world_map_data_impl.gd",
@@ -7285,7 +7497,7 @@
       "evidence": [
         "scripts/world_map/internal/world_map_data_impl.gd:12"
       ],
-      "id": "ref-000067"
+      "id": "ref-000074"
     },
     {
       "owner": "scripts/world_map/internal/world_map_data_impl.gd",
@@ -7307,7 +7519,7 @@
       "evidence": [
         "scripts/world_map/internal/world_map_data_impl.gd:13"
       ],
-      "id": "ref-000068"
+      "id": "ref-000075"
     },
     {
       "owner": "scripts/world_map/internal/world_map_data_impl.gd",
@@ -7329,7 +7541,7 @@
       "evidence": [
         "scripts/world_map/internal/world_map_data_impl.gd:14"
       ],
-      "id": "ref-000069"
+      "id": "ref-000076"
     },
     {
       "owner": "scripts/world_map/internal/world_map_data_impl.gd",
@@ -7351,7 +7563,7 @@
       "evidence": [
         "scripts/world_map/internal/world_map_data_impl.gd:15"
       ],
-      "id": "ref-000070"
+      "id": "ref-000077"
     },
     {
       "owner": "scripts/world_map/internal/world_map_data_impl.gd",
@@ -7373,7 +7585,7 @@
       "evidence": [
         "scripts/world_map/internal/world_map_data_impl.gd:16"
       ],
-      "id": "ref-000071"
+      "id": "ref-000078"
     },
     {
       "owner": "scripts/world_map/internal/world_map_data_impl.gd",
@@ -7395,7 +7607,7 @@
       "evidence": [
         "scripts/world_map/internal/world_map_data_impl.gd:17"
       ],
-      "id": "ref-000072"
+      "id": "ref-000079"
     },
     {
       "owner": "scripts/world_map/internal/world_map_data_impl.gd",
@@ -7417,7 +7629,7 @@
       "evidence": [
         "scripts/world_map/internal/world_map_data_impl.gd:18"
       ],
-      "id": "ref-000073"
+      "id": "ref-000080"
     },
     {
       "owner": "scripts/world_map/internal/world_map_data_impl.gd",
@@ -7439,7 +7651,7 @@
       "evidence": [
         "scripts/world_map/internal/world_map_data_impl.gd:19"
       ],
-      "id": "ref-000074"
+      "id": "ref-000081"
     },
     {
       "owner": "scripts/world_map/internal/world_map_data_impl.gd",
@@ -7461,7 +7673,7 @@
       "evidence": [
         "scripts/world_map/internal/world_map_data_impl.gd:20"
       ],
-      "id": "ref-000075"
+      "id": "ref-000082"
     },
     {
       "owner": "scripts/world_map/internal/world_map_data_impl.gd",
@@ -7483,7 +7695,7 @@
       "evidence": [
         "scripts/world_map/internal/world_map_data_impl.gd:21"
       ],
-      "id": "ref-000076"
+      "id": "ref-000083"
     },
     {
       "owner": "scripts/world_map/internal/world_map_data_impl.gd",
@@ -7505,7 +7717,7 @@
       "evidence": [
         "scripts/world_map/internal/world_map_data_impl.gd:22"
       ],
-      "id": "ref-000077"
+      "id": "ref-000084"
     },
     {
       "owner": "scripts/world_map/world_city_shard_catalog.gd",
@@ -7525,7 +7737,7 @@
       "evidence": [
         "scripts/world_map/world_city_shard_catalog.gd:7"
       ],
-      "id": "ref-000078"
+      "id": "ref-000085"
     },
     {
       "owner": "scripts/world_map/world_city_shard_catalog.gd",
@@ -7545,7 +7757,7 @@
       "evidence": [
         "scripts/world_map/world_city_shard_catalog.gd:8"
       ],
-      "id": "ref-000079"
+      "id": "ref-000086"
     },
     {
       "owner": "tests/alpha/alpha_character_development_test.gd",
@@ -7567,7 +7779,7 @@
       "evidence": [
         "tests/alpha/alpha_character_development_test.gd:15"
       ],
-      "id": "ref-000080"
+      "id": "ref-000087"
     },
     {
       "owner": "tests/alpha/alpha_labor_enterprise_test.gd",
@@ -7589,7 +7801,7 @@
       "evidence": [
         "tests/alpha/alpha_labor_enterprise_test.gd:15"
       ],
-      "id": "ref-000081"
+      "id": "ref-000088"
     },
     {
       "owner": "tests/alpha/alpha_organization_politics_test.gd",
@@ -7611,7 +7823,7 @@
       "evidence": [
         "tests/alpha/alpha_organization_politics_test.gd:15"
       ],
-      "id": "ref-000082"
+      "id": "ref-000089"
     },
     {
       "owner": "tests/alpha/alpha_world_topology_test.gd",
@@ -7633,7 +7845,7 @@
       "evidence": [
         "tests/alpha/alpha_world_topology_test.gd:38"
       ],
-      "id": "ref-000083"
+      "id": "ref-000090"
     },
     {
       "owner": "tests/codex_audit_regression.gd",
@@ -7655,7 +7867,7 @@
       "evidence": [
         "tests/codex_audit_regression.gd:26"
       ],
-      "id": "ref-000084"
+      "id": "ref-000091"
     },
     {
       "owner": "tests/p0_r1_player_journey_current.gd",
@@ -7677,7 +7889,7 @@
       "evidence": [
         "tests/p0_r1_player_journey_current.gd:509"
       ],
-      "id": "ref-000085"
+      "id": "ref-000092"
     },
     {
       "owner": "tests/provenance/test_corpus_and_backlog.py",
@@ -7699,7 +7911,7 @@
       "evidence": [
         "tests/provenance/test_corpus_and_backlog.py:26"
       ],
-      "id": "ref-000086"
+      "id": "ref-000093"
     },
     {
       "owner": "tests/provenance/test_corpus_and_backlog.py",
@@ -7721,7 +7933,7 @@
       "evidence": [
         "tests/provenance/test_corpus_and_backlog.py:37"
       ],
-      "id": "ref-000087"
+      "id": "ref-000094"
     },
     {
       "owner": "tests/provenance/test_corpus_and_backlog.py",
@@ -7743,7 +7955,7 @@
       "evidence": [
         "tests/provenance/test_corpus_and_backlog.py:40"
       ],
-      "id": "ref-000088"
+      "id": "ref-000095"
     },
     {
       "owner": "tests/provenance/test_corpus_and_backlog.py",
@@ -7765,7 +7977,7 @@
       "evidence": [
         "tests/provenance/test_corpus_and_backlog.py:83"
       ],
-      "id": "ref-000089"
+      "id": "ref-000096"
     },
     {
       "owner": "tests/provenance/test_provenance_validator.py",
@@ -7787,7 +7999,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:49"
       ],
-      "id": "ref-000090"
+      "id": "ref-000097"
     },
     {
       "owner": "tests/provenance/test_provenance_validator.py",
@@ -7809,7 +8021,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:52"
       ],
-      "id": "ref-000091"
+      "id": "ref-000098"
     },
     {
       "owner": "tests/provenance/test_provenance_validator.py",
@@ -7831,7 +8043,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:54"
       ],
-      "id": "ref-000092"
+      "id": "ref-000099"
     },
     {
       "owner": "tests/provenance/test_provenance_validator.py",
@@ -7853,7 +8065,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:64"
       ],
-      "id": "ref-000093"
+      "id": "ref-000100"
     },
     {
       "owner": "tests/provenance/test_provenance_validator.py",
@@ -7875,7 +8087,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:64"
       ],
-      "id": "ref-000094"
+      "id": "ref-000101"
     },
     {
       "owner": "tests/provenance/test_provenance_validator.py",
@@ -7897,7 +8109,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:85"
       ],
-      "id": "ref-000095"
+      "id": "ref-000102"
     },
     {
       "owner": "tests/provenance/test_provenance_validator.py",
@@ -7919,7 +8131,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:86"
       ],
-      "id": "ref-000096"
+      "id": "ref-000103"
     },
     {
       "owner": "tests/provenance/test_provenance_validator.py",
@@ -7941,7 +8153,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:111"
       ],
-      "id": "ref-000097"
+      "id": "ref-000104"
     },
     {
       "owner": "tests/provenance/test_provenance_validator.py",
@@ -7964,7 +8176,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:112"
       ],
-      "id": "ref-000098"
+      "id": "ref-000105"
     },
     {
       "owner": "tests/provenance/test_provenance_validator.py",
@@ -7986,7 +8198,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:112"
       ],
-      "id": "ref-000099"
+      "id": "ref-000106"
     },
     {
       "owner": "tests/provenance/test_provenance_validator.py",
@@ -8008,7 +8220,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:114"
       ],
-      "id": "ref-000100"
+      "id": "ref-000107"
     },
     {
       "owner": "tests/provenance/test_provenance_validator.py",
@@ -8030,7 +8242,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:122"
       ],
-      "id": "ref-000101"
+      "id": "ref-000108"
     },
     {
       "owner": "tests/provenance/test_provenance_validator.py",
@@ -8052,7 +8264,7 @@
       "evidence": [
         "tests/provenance/test_provenance_validator.py:123"
       ],
-      "id": "ref-000102"
+      "id": "ref-000109"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8074,7 +8286,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:23"
       ],
-      "id": "ref-000103"
+      "id": "ref-000110"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8096,7 +8308,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:24"
       ],
-      "id": "ref-000104"
+      "id": "ref-000111"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8118,7 +8330,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:26"
       ],
-      "id": "ref-000105"
+      "id": "ref-000112"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8140,7 +8352,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:26"
       ],
-      "id": "ref-000106"
+      "id": "ref-000113"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8162,7 +8374,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:31"
       ],
-      "id": "ref-000107"
+      "id": "ref-000114"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8184,7 +8396,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:35"
       ],
-      "id": "ref-000108"
+      "id": "ref-000115"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8206,7 +8418,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:36"
       ],
-      "id": "ref-000109"
+      "id": "ref-000116"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8228,7 +8440,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:41"
       ],
-      "id": "ref-000110"
+      "id": "ref-000117"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8250,7 +8462,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:43"
       ],
-      "id": "ref-000111"
+      "id": "ref-000118"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8272,7 +8484,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:73"
       ],
-      "id": "ref-000112"
+      "id": "ref-000119"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8294,7 +8506,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:75"
       ],
-      "id": "ref-000113"
+      "id": "ref-000120"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8316,7 +8528,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:75"
       ],
-      "id": "ref-000114"
+      "id": "ref-000121"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8338,7 +8550,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:76"
       ],
-      "id": "ref-000115"
+      "id": "ref-000122"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8360,7 +8572,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:80"
       ],
-      "id": "ref-000116"
+      "id": "ref-000123"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8382,7 +8594,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:90"
       ],
-      "id": "ref-000117"
+      "id": "ref-000124"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8404,7 +8616,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:96"
       ],
-      "id": "ref-000118"
+      "id": "ref-000125"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8426,7 +8638,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:130"
       ],
-      "id": "ref-000119"
+      "id": "ref-000126"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8448,7 +8660,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:144"
       ],
-      "id": "ref-000120"
+      "id": "ref-000127"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8470,7 +8682,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:155"
       ],
-      "id": "ref-000121"
+      "id": "ref-000128"
     },
     {
       "owner": "tests/provenance/test_reference_matrix.py",
@@ -8492,7 +8704,7 @@
       "evidence": [
         "tests/provenance/test_reference_matrix.py:155"
       ],
-      "id": "ref-000122"
+      "id": "ref-000129"
     },
     {
       "owner": "tests/test_runner.gd",
@@ -8514,7 +8726,7 @@
       "evidence": [
         "tests/test_runner.gd:512"
       ],
-      "id": "ref-000123"
+      "id": "ref-000130"
     },
     {
       "owner": "tests/test_runner.gd",
@@ -8536,7 +8748,7 @@
       "evidence": [
         "tests/test_runner.gd:771"
       ],
-      "id": "ref-000124"
+      "id": "ref-000131"
     },
     {
       "owner": "tests/test_runner.gd",
@@ -8558,7 +8770,7 @@
       "evidence": [
         "tests/test_runner.gd:804"
       ],
-      "id": "ref-000125"
+      "id": "ref-000132"
     },
     {
       "owner": "tests/test_runner.gd",
@@ -8580,7 +8792,7 @@
       "evidence": [
         "tests/test_runner.gd:2267"
       ],
-      "id": "ref-000126"
+      "id": "ref-000133"
     },
     {
       "owner": "tests/v2_2/v2_2_performance_guard_test.gd",
@@ -8602,7 +8814,7 @@
       "evidence": [
         "tests/v2_2/v2_2_performance_guard_test.gd:27"
       ],
-      "id": "ref-000127"
+      "id": "ref-000134"
     },
     {
       "owner": "tests/v2_2/v2_2_performance_guard_test.gd",
@@ -8622,7 +8834,7 @@
       "evidence": [
         "tests/v2_2/v2_2_performance_guard_test.gd:36"
       ],
-      "id": "ref-000128"
+      "id": "ref-000135"
     },
     {
       "owner": "tests/v2_2/v2_2_performance_guard_test.gd",
@@ -8644,7 +8856,7 @@
       "evidence": [
         "tests/v2_2/v2_2_performance_guard_test.gd:60"
       ],
-      "id": "ref-000129"
+      "id": "ref-000136"
     },
     {
       "owner": "tests/v2_2/v2_2_performance_guard_test.gd",
@@ -8666,7 +8878,7 @@
       "evidence": [
         "tests/v2_2/v2_2_performance_guard_test.gd:64"
       ],
-      "id": "ref-000130"
+      "id": "ref-000137"
     },
     {
       "owner": "tests/v2_3/v2_3_controlled_world_test.gd",
@@ -8688,7 +8900,7 @@
       "evidence": [
         "tests/v2_3/v2_3_controlled_world_test.gd:225"
       ],
-      "id": "ref-000131"
+      "id": "ref-000138"
     },
     {
       "owner": "tests/variable_state/generate_current_save_v1_fixture.gd",
@@ -8710,7 +8922,7 @@
       "evidence": [
         "tests/variable_state/generate_current_save_v1_fixture.gd:8"
       ],
-      "id": "ref-000132"
+      "id": "ref-000139"
     },
     {
       "owner": "tests/variable_state/variable_state_behavior_baseline_test.gd",
@@ -8732,7 +8944,49 @@
       "evidence": [
         "tests/variable_state/variable_state_behavior_baseline_test.gd:9"
       ],
-      "id": "ref-000133"
+      "id": "ref-000140"
+    },
+    {
+      "owner": "tests/vnext/spatial_infrastructure_test.gd",
+      "target": "data/world_map/regions.json",
+      "reference_kind": "resource_path",
+      "literal": "res://data/world_map/regions.json",
+      "line": 39,
+      "column": 33,
+      "context": "code_or_text",
+      "reference_scope": "repository",
+      "exists": true,
+      "target_type": "file",
+      "target_sha256": "65e885135016f70eade124f8adf7030f5ce63b8983eb44d01e650cc87da5b1ba",
+      "target_manifest_kind": "generated",
+      "target_license": "Public domain",
+      "issues": [],
+      "evidence": [
+        "tests/vnext/spatial_infrastructure_test.gd:39"
+      ],
+      "id": "ref-000141"
+    },
+    {
+      "owner": "tests/vnext/spatial_infrastructure_test.gd",
+      "target": "data/world_map/rail_segments.json",
+      "reference_kind": "resource_path",
+      "literal": "res://data/world_map/rail_segments.json",
+      "line": 40,
+      "column": 37,
+      "context": "code_or_text",
+      "reference_scope": "repository",
+      "exists": true,
+      "target_type": "file",
+      "target_sha256": "83303792e438cdfcec5f6c255038c14ff22cdc902ae3a8426d93e06e07779cf9",
+      "target_manifest_kind": "unknown",
+      "target_license": "LICENSE_UNKNOWN",
+      "issues": [
+        "LICENSE_UNKNOWN"
+      ],
+      "evidence": [
+        "tests/vnext/spatial_infrastructure_test.gd:40"
+      ],
+      "id": "ref-000142"
     },
     {
       "owner": "tests/vnext/state_politics_r3_transition_test.gd",
@@ -8754,7 +9008,7 @@
       "evidence": [
         "tests/vnext/state_politics_r3_transition_test.gd:4"
       ],
-      "id": "ref-000134"
+      "id": "ref-000143"
     },
     {
       "owner": "tests/vnext/state_politics_test.gd",
@@ -8776,7 +9030,7 @@
       "evidence": [
         "tests/vnext/state_politics_test.gd:4"
       ],
-      "id": "ref-000135"
+      "id": "ref-000144"
     },
     {
       "owner": "tools/audit_1900_commodity_economy.py",
@@ -8798,7 +9052,7 @@
       "evidence": [
         "tools/audit_1900_commodity_economy.py:8"
       ],
-      "id": "ref-000136"
+      "id": "ref-000145"
     },
     {
       "owner": "tools/audit_1900_economy_integration.py",
@@ -8820,7 +9074,7 @@
       "evidence": [
         "tools/audit_1900_economy_integration.py:11"
       ],
-      "id": "ref-000137"
+      "id": "ref-000146"
     },
     {
       "owner": "tools/audit_1900_economy_integration.py",
@@ -8842,7 +9096,7 @@
       "evidence": [
         "tools/audit_1900_economy_integration.py:12"
       ],
-      "id": "ref-000138"
+      "id": "ref-000147"
     },
     {
       "owner": "tools/audit_1900_economy_integration.py",
@@ -8864,7 +9118,7 @@
       "evidence": [
         "tools/audit_1900_economy_integration.py:13"
       ],
-      "id": "ref-000139"
+      "id": "ref-000148"
     },
     {
       "owner": "tools/audit_1900_economy_integration.py",
@@ -8886,7 +9140,7 @@
       "evidence": [
         "tools/audit_1900_economy_integration.py:14"
       ],
-      "id": "ref-000140"
+      "id": "ref-000149"
     },
     {
       "owner": "tools/audit_1900_economy_integration.py",
@@ -8908,7 +9162,7 @@
       "evidence": [
         "tools/audit_1900_economy_integration.py:15"
       ],
-      "id": "ref-000141"
+      "id": "ref-000150"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8930,7 +9184,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:595"
       ],
-      "id": "ref-000142"
+      "id": "ref-000151"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8950,7 +9204,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:604"
       ],
-      "id": "ref-000143"
+      "id": "ref-000152"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8972,7 +9226,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:605"
       ],
-      "id": "ref-000144"
+      "id": "ref-000153"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -8992,7 +9246,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:628"
       ],
-      "id": "ref-000145"
+      "id": "ref-000154"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9012,7 +9266,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:812"
       ],
-      "id": "ref-000146"
+      "id": "ref-000155"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9032,7 +9286,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:812"
       ],
-      "id": "ref-000147"
+      "id": "ref-000156"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9052,7 +9306,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:812"
       ],
-      "id": "ref-000148"
+      "id": "ref-000157"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9074,7 +9328,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:812"
       ],
-      "id": "ref-000149"
+      "id": "ref-000158"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9096,7 +9350,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:856"
       ],
-      "id": "ref-000150"
+      "id": "ref-000159"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9118,7 +9372,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:856"
       ],
-      "id": "ref-000151"
+      "id": "ref-000160"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9140,7 +9394,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:900"
       ],
-      "id": "ref-000152"
+      "id": "ref-000161"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9162,7 +9416,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:900"
       ],
-      "id": "ref-000153"
+      "id": "ref-000162"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9184,7 +9438,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:900"
       ],
-      "id": "ref-000154"
+      "id": "ref-000163"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9206,7 +9460,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:944"
       ],
-      "id": "ref-000155"
+      "id": "ref-000164"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9228,7 +9482,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:944"
       ],
-      "id": "ref-000156"
+      "id": "ref-000165"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9250,7 +9504,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:944"
       ],
-      "id": "ref-000157"
+      "id": "ref-000166"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9272,7 +9526,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:944"
       ],
-      "id": "ref-000158"
+      "id": "ref-000167"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9292,7 +9546,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:988"
       ],
-      "id": "ref-000159"
+      "id": "ref-000168"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9314,7 +9568,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:988"
       ],
-      "id": "ref-000160"
+      "id": "ref-000169"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9336,7 +9590,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:988"
       ],
-      "id": "ref-000161"
+      "id": "ref-000170"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9358,7 +9612,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:1032"
       ],
-      "id": "ref-000162"
+      "id": "ref-000171"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9380,7 +9634,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:1032"
       ],
-      "id": "ref-000163"
+      "id": "ref-000172"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9402,7 +9656,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:1076"
       ],
-      "id": "ref-000164"
+      "id": "ref-000173"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9424,7 +9678,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:1076"
       ],
-      "id": "ref-000165"
+      "id": "ref-000174"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9446,7 +9700,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:1076"
       ],
-      "id": "ref-000166"
+      "id": "ref-000175"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9468,7 +9722,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:1120"
       ],
-      "id": "ref-000167"
+      "id": "ref-000176"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9490,7 +9744,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:1120"
       ],
-      "id": "ref-000168"
+      "id": "ref-000177"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9510,7 +9764,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:1164"
       ],
-      "id": "ref-000169"
+      "id": "ref-000178"
     },
     {
       "owner": "tools/audit_formal_product_systems.py",
@@ -9530,7 +9784,7 @@
       "evidence": [
         "tools/audit_formal_product_systems.py:1252"
       ],
-      "id": "ref-000170"
+      "id": "ref-000179"
     },
     {
       "owner": "tools/audit_formal_variable_state.py",
@@ -9550,7 +9804,7 @@
       "evidence": [
         "tools/audit_formal_variable_state.py:1001"
       ],
-      "id": "ref-000171"
+      "id": "ref-000180"
     },
     {
       "owner": "tools/build_1900_world_economy_estimates.py",
@@ -9570,7 +9824,7 @@
       "evidence": [
         "tools/build_1900_world_economy_estimates.py:13"
       ],
-      "id": "ref-000172"
+      "id": "ref-000181"
     },
     {
       "owner": "tools/compact_1900_world_economy_estimates.py",
@@ -9592,7 +9846,7 @@
       "evidence": [
         "tools/compact_1900_world_economy_estimates.py:75"
       ],
-      "id": "ref-000173"
+      "id": "ref-000182"
     },
     {
       "owner": "tools/compact_1900_world_economy_estimates.py",
@@ -9614,7 +9868,7 @@
       "evidence": [
         "tools/compact_1900_world_economy_estimates.py:91"
       ],
-      "id": "ref-000174"
+      "id": "ref-000183"
     },
     {
       "owner": "tools/historical_data/audit_1900_historical_provider.py",
@@ -9634,7 +9888,7 @@
       "evidence": [
         "tools/historical_data/audit_1900_historical_provider.py:12"
       ],
-      "id": "ref-000175"
+      "id": "ref-000184"
     },
     {
       "owner": "tools/historical_data/audit_1900_historical_provider.py",
@@ -9654,7 +9908,7 @@
       "evidence": [
         "tools/historical_data/audit_1900_historical_provider.py:13"
       ],
-      "id": "ref-000176"
+      "id": "ref-000185"
     },
     {
       "owner": "tools/historical_data/audit_1900_historical_provider.py",
@@ -9674,7 +9928,7 @@
       "evidence": [
         "tools/historical_data/audit_1900_historical_provider.py:14"
       ],
-      "id": "ref-000177"
+      "id": "ref-000186"
     },
     {
       "owner": "tools/historical_data/audit_major_state_detail_1900.py",
@@ -9696,7 +9950,7 @@
       "evidence": [
         "tools/historical_data/audit_major_state_detail_1900.py:7"
       ],
-      "id": "ref-000178"
+      "id": "ref-000187"
     },
     {
       "owner": "tools/historical_data/audit_major_state_detail_1900.py",
@@ -9718,7 +9972,7 @@
       "evidence": [
         "tools/historical_data/audit_major_state_detail_1900.py:8"
       ],
-      "id": "ref-000179"
+      "id": "ref-000188"
     },
     {
       "owner": "tools/historical_data/build_1900_entity_registry.py",
@@ -9738,7 +9992,7 @@
       "evidence": [
         "tools/historical_data/build_1900_entity_registry.py:15"
       ],
-      "id": "ref-000180"
+      "id": "ref-000189"
     },
     {
       "owner": "tools/historical_data/build_1900_entity_registry.py",
@@ -9758,7 +10012,7 @@
       "evidence": [
         "tools/historical_data/build_1900_entity_registry.py:16"
       ],
-      "id": "ref-000181"
+      "id": "ref-000190"
     },
     {
       "owner": "tools/historical_data/build_1900_entity_registry.py",
@@ -9779,7 +10033,7 @@
       "evidence": [
         "tools/historical_data/build_1900_entity_registry.py:211"
       ],
-      "id": "ref-000182"
+      "id": "ref-000191"
     },
     {
       "owner": "tools/historical_data/build_1900_flag_registry.py",
@@ -9799,7 +10053,7 @@
       "evidence": [
         "tools/historical_data/build_1900_flag_registry.py:29"
       ],
-      "id": "ref-000183"
+      "id": "ref-000192"
     },
     {
       "owner": "tools/historical_data/build_1900_flag_registry.py",
@@ -9819,7 +10073,7 @@
       "evidence": [
         "tools/historical_data/build_1900_flag_registry.py:30"
       ],
-      "id": "ref-000184"
+      "id": "ref-000193"
     },
     {
       "owner": "tools/historical_data/build_1900_flag_registry.py",
@@ -9839,7 +10093,7 @@
       "evidence": [
         "tools/historical_data/build_1900_flag_registry.py:31"
       ],
-      "id": "ref-000185"
+      "id": "ref-000194"
     },
     {
       "owner": "tools/historical_data/build_1900_flag_registry.py",
@@ -9859,7 +10113,7 @@
       "evidence": [
         "tools/historical_data/build_1900_flag_registry.py:32"
       ],
-      "id": "ref-000186"
+      "id": "ref-000195"
     },
     {
       "owner": "tools/historical_data/build_1900_flag_registry.py",
@@ -9880,7 +10134,7 @@
       "evidence": [
         "tools/historical_data/build_1900_flag_registry.py:242"
       ],
-      "id": "ref-000187"
+      "id": "ref-000196"
     },
     {
       "owner": "tools/historical_data/build_1900_flag_registry.py",
@@ -9901,7 +10155,7 @@
       "evidence": [
         "tools/historical_data/build_1900_flag_registry.py:249"
       ],
-      "id": "ref-000188"
+      "id": "ref-000197"
     },
     {
       "owner": "tools/historical_data/build_1900_flag_registry.py",
@@ -9922,7 +10176,7 @@
       "evidence": [
         "tools/historical_data/build_1900_flag_registry.py:250"
       ],
-      "id": "ref-000189"
+      "id": "ref-000198"
     },
     {
       "owner": "tools/historical_data/build_cshapes_1900_snapshot.py",
@@ -9942,7 +10196,7 @@
       "evidence": [
         "tools/historical_data/build_cshapes_1900_snapshot.py:25"
       ],
-      "id": "ref-000190"
+      "id": "ref-000199"
     },
     {
       "owner": "tools/historical_data/build_cshapes_1900_snapshot.py",
@@ -9962,7 +10216,7 @@
       "evidence": [
         "tools/historical_data/build_cshapes_1900_snapshot.py:26"
       ],
-      "id": "ref-000191"
+      "id": "ref-000200"
     },
     {
       "owner": "tools/historical_data/build_cshapes_1900_snapshot.py",
@@ -9983,7 +10237,7 @@
       "evidence": [
         "tools/historical_data/build_cshapes_1900_snapshot.py:160"
       ],
-      "id": "ref-000192"
+      "id": "ref-000201"
     },
     {
       "owner": "tools/historical_data/build_cshapes_1900_snapshot.py",
@@ -10004,7 +10258,7 @@
       "evidence": [
         "tools/historical_data/build_cshapes_1900_snapshot.py:164"
       ],
-      "id": "ref-000193"
+      "id": "ref-000202"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10024,7 +10278,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:33"
       ],
-      "id": "ref-000194"
+      "id": "ref-000203"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10044,7 +10298,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:34"
       ],
-      "id": "ref-000195"
+      "id": "ref-000204"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10064,7 +10318,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:36"
       ],
-      "id": "ref-000196"
+      "id": "ref-000205"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10084,7 +10338,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:37"
       ],
-      "id": "ref-000197"
+      "id": "ref-000206"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10104,7 +10358,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:411"
       ],
-      "id": "ref-000198"
+      "id": "ref-000207"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10124,7 +10378,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:450"
       ],
-      "id": "ref-000199"
+      "id": "ref-000208"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10144,7 +10398,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:450"
       ],
-      "id": "ref-000200"
+      "id": "ref-000209"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10164,7 +10418,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:580"
       ],
-      "id": "ref-000201"
+      "id": "ref-000210"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10184,7 +10438,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:602"
       ],
-      "id": "ref-000202"
+      "id": "ref-000211"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10204,7 +10458,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:624"
       ],
-      "id": "ref-000203"
+      "id": "ref-000212"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10226,7 +10480,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:655"
       ],
-      "id": "ref-000204"
+      "id": "ref-000213"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10248,7 +10502,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:667"
       ],
-      "id": "ref-000205"
+      "id": "ref-000214"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10270,7 +10524,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:679"
       ],
-      "id": "ref-000206"
+      "id": "ref-000215"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10292,7 +10546,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:691"
       ],
-      "id": "ref-000207"
+      "id": "ref-000216"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10314,7 +10568,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:715"
       ],
-      "id": "ref-000208"
+      "id": "ref-000217"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10336,7 +10590,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:733"
       ],
-      "id": "ref-000209"
+      "id": "ref-000218"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10358,7 +10612,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:751"
       ],
-      "id": "ref-000210"
+      "id": "ref-000219"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10380,7 +10634,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:771"
       ],
-      "id": "ref-000211"
+      "id": "ref-000220"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10402,7 +10656,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:789"
       ],
-      "id": "ref-000212"
+      "id": "ref-000221"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10424,7 +10678,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:790"
       ],
-      "id": "ref-000213"
+      "id": "ref-000222"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10446,7 +10700,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:791"
       ],
-      "id": "ref-000214"
+      "id": "ref-000223"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10468,7 +10722,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:801"
       ],
-      "id": "ref-000215"
+      "id": "ref-000224"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10490,7 +10744,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:804"
       ],
-      "id": "ref-000216"
+      "id": "ref-000225"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10512,7 +10766,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:808"
       ],
-      "id": "ref-000217"
+      "id": "ref-000226"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10534,7 +10788,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:809"
       ],
-      "id": "ref-000218"
+      "id": "ref-000227"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10556,7 +10810,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:820"
       ],
-      "id": "ref-000219"
+      "id": "ref-000228"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10578,7 +10832,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:823"
       ],
-      "id": "ref-000220"
+      "id": "ref-000229"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10598,7 +10852,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:923"
       ],
-      "id": "ref-000221"
+      "id": "ref-000230"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10620,7 +10874,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:937"
       ],
-      "id": "ref-000222"
+      "id": "ref-000231"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10640,7 +10894,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:948"
       ],
-      "id": "ref-000223"
+      "id": "ref-000232"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10660,7 +10914,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:951"
       ],
-      "id": "ref-000224"
+      "id": "ref-000233"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10680,7 +10934,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:952"
       ],
-      "id": "ref-000225"
+      "id": "ref-000234"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10700,7 +10954,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:953"
       ],
-      "id": "ref-000226"
+      "id": "ref-000235"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10720,7 +10974,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:957"
       ],
-      "id": "ref-000227"
+      "id": "ref-000236"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10740,7 +10994,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:958"
       ],
-      "id": "ref-000228"
+      "id": "ref-000237"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10760,7 +11014,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:959"
       ],
-      "id": "ref-000229"
+      "id": "ref-000238"
     },
     {
       "owner": "tools/provenance/generate_manifest.py",
@@ -10782,7 +11036,7 @@
       "evidence": [
         "tools/provenance/generate_manifest.py:965"
       ],
-      "id": "ref-000230"
+      "id": "ref-000239"
     },
     {
       "owner": "tools/render_variable_state_audit_summary.py",
@@ -10804,7 +11058,7 @@
       "evidence": [
         "tools/render_variable_state_audit_summary.py:70"
       ],
-      "id": "ref-000231"
+      "id": "ref-000240"
     }
   ],
   "candidate_edges": [

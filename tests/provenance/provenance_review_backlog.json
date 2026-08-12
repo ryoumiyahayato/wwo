@@ -2,7 +2,7 @@
   "schema_version": 1,
   "backlog_kind": "wwo_provenance_review_backlog",
   "audit_batch": "BATCH_3",
-  "audit_base_revision": "165515f6ed5bcb922ad1a8b5d3ea905e30debc61",
+  "audit_base_revision": "d725e720104c63cb52cff0379a204be57de8279a",
   "source_manifest": "docs/data_sources/provenance_manifest.json",
   "source_matrix": "docs/data_sources/provenance_reference_matrix.json",
   "policy": {
@@ -12,7 +12,7 @@
     "automatic_asset_regeneration": false
   },
   "summary": {
-    "items": 194,
+    "items": 195,
     "top_priority": 120,
     "source_missing_items": 3,
     "generator_unknown_items": 5,
@@ -3077,6 +3077,24 @@
       "rank": 171
     },
     {
+      "key": "file:docs/vnext/spatial_infrastructure.md",
+      "target_type": "file",
+      "path": "docs/vnext/spatial_infrastructure.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/vnext/spatial_infrastructure.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 172
+    },
+    {
       "key": "file:docs/vnext/stable_id_catalog.md",
       "target_type": "file",
       "path": "docs/vnext/stable_id_catalog.md",
@@ -3092,7 +3110,7 @@
         "docs/vnext/stable_id_catalog.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 172
+      "rank": 173
     },
     {
       "key": "file:docs/vnext/validation.md",
@@ -3110,7 +3128,7 @@
         "docs/vnext/validation.md"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 173
+      "rank": 174
     },
     {
       "key": "edge:assets/historical_flags/1900:data/world_map/historical/FLAG_ASSET_ATTRIBUTION.md:tools/historical_data/build_1900_flag_registry.py",
@@ -3130,7 +3148,7 @@
         "tools/historical_data/build_1900_flag_registry.py:250"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 174
+      "rank": 175
     },
     {
       "key": "edge:data/world_map/historical/political_units_1900.json:data/world_map/historical/FLAG_ASSET_ATTRIBUTION.md:tools/historical_data/build_1900_flag_registry.py",
@@ -3150,7 +3168,7 @@
         "tools/historical_data/build_1900_flag_registry.py:250"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 175
+      "rank": 176
     },
     {
       "key": "edge:data/world_map/historical/CShapes-2.0-ATTRIBUTION.md:data/world_map/historical/cshapes_1900_snapshot.json:tools/historical_data/build_cshapes_1900_snapshot.py",
@@ -3171,7 +3189,7 @@
         "tools/historical_data/build_cshapes_1900_snapshot.py:25"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 176
+      "rank": 177
     },
     {
       "key": "edge:assets/historical_flags/1900:data/world_map/historical/flags_1900.json:tools/historical_data/build_1900_flag_registry.py",
@@ -3192,7 +3210,7 @@
         "tools/historical_data/build_1900_flag_registry.py:30"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 177
+      "rank": 178
     },
     {
       "key": "edge:data/world_map/historical/FLAG_ASSET_ATTRIBUTION.md:data/world_map/historical/flags_1900.json:tools/historical_data/build_1900_flag_registry.py",
@@ -3213,7 +3231,7 @@
         "tools/historical_data/build_1900_flag_registry.py:30"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 178
+      "rank": 179
     },
     {
       "key": "edge:data/world_map/historical/political_units_1900.json:data/world_map/historical/flags_1900.json:tools/historical_data/build_1900_flag_registry.py",
@@ -3234,7 +3252,7 @@
         "tools/historical_data/build_1900_flag_registry.py:30"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 179
+      "rank": 180
     },
     {
       "key": "edge:assets/historical_flags/1900:data/world_map/historical/political_units_1900.json:tools/historical_data/build_1900_flag_registry.py",
@@ -3254,7 +3272,7 @@
         "tools/historical_data/build_1900_flag_registry.py:242"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 180
+      "rank": 181
     },
     {
       "key": "edge:data/world_map/historical/FLAG_ASSET_ATTRIBUTION.md:data/world_map/historical/political_units_1900.json:tools/historical_data/build_1900_flag_registry.py",
@@ -3274,7 +3292,7 @@
         "tools/historical_data/build_1900_flag_registry.py:242"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 181
+      "rank": 182
     },
     {
       "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tests/tools/test_run_vnext_validation.py:<dynamic-output>",
@@ -3293,7 +3311,7 @@
         "tests/tools/test_run_vnext_validation.py:45"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 182
+      "rank": 183
     },
     {
       "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/audit_formal_variable_state.py:<dynamic-output>",
@@ -3311,7 +3329,7 @@
         "tools/audit_formal_variable_state.py:1211"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 183
+      "rank": 184
     },
     {
       "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/generate_variable_state_docs.py:<dynamic-output>",
@@ -3329,7 +3347,7 @@
         "tools/generate_variable_state_docs.py:61"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 184
+      "rank": 185
     },
     {
       "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/historical_data/build_1900_flag_registry.py:<dynamic-output>",
@@ -3347,7 +3365,7 @@
         "tools/historical_data/build_1900_flag_registry.py:191"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 185
+      "rank": 186
     },
     {
       "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/historical_data/build_1900_flag_registry_fast.py:<dynamic-output>",
@@ -3368,7 +3386,7 @@
         "tools/historical_data/build_1900_flag_registry_fast.py:239"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 186
+      "rank": 187
     },
     {
       "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/historical_data/research_1900_sources.py:<dynamic-output>",
@@ -3387,7 +3405,7 @@
         "tools/historical_data/research_1900_sources.py:144"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 187
+      "rank": 188
     },
     {
       "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/provenance/generate_regression_corpus.py:<dynamic-output>",
@@ -3405,7 +3423,7 @@
         "tools/provenance/generate_regression_corpus.py:123"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 188
+      "rank": 189
     },
     {
       "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/provenance/generate_review_backlog.py:<dynamic-output>",
@@ -3423,7 +3441,7 @@
         "tools/provenance/generate_review_backlog.py:193"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 189
+      "rank": 190
     },
     {
       "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/provenance/scan_reference_matrix.py:<dynamic-output>",
@@ -3441,7 +3459,7 @@
         "tools/provenance/scan_reference_matrix.py:548"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 190
+      "rank": 191
     },
     {
       "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/render_variable_refactor_plan.py:<dynamic-output>",
@@ -3459,7 +3477,7 @@
         "tools/render_variable_refactor_plan.py:88"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 191
+      "rank": 192
     },
     {
       "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/render_variable_state_audit_summary.py:<dynamic-output>",
@@ -3477,7 +3495,7 @@
         "tools/render_variable_state_audit_summary.py:154"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 192
+      "rank": 193
     },
     {
       "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/render_variable_state_member_inventory.py:<dynamic-output>",
@@ -3495,7 +3513,7 @@
         "tools/render_variable_state_member_inventory.py:115"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 193
+      "rank": 194
     },
     {
       "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/world_map/generate_city_shards.py:<dynamic-output>",
@@ -3516,7 +3534,7 @@
         "tools/world_map/generate_city_shards.py:487"
       ],
       "review_status": "REVIEW_REQUIRED",
-      "rank": 194
+      "rank": 195
     }
   ]
 }

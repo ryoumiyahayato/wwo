@@ -1,5 +1,5 @@
 {
-  "audit_base_revision": "165515f6ed5bcb922ad1a8b5d3ea905e30debc61",
+  "audit_base_revision": "d725e720104c63cb52cff0379a204be57de8279a",
   "audit_batch": "WWO DATA & ASSET PROVENANCE AUDIT — BATCH 1",
   "dependency_graph": {
     "edges": [
@@ -16447,8 +16447,8 @@
       ],
       "path": "docs/data_sources/provenance_reference_matrix.json",
       "review_status": "REVIEW_REQUIRED",
-      "sha256": "d7f602a9bf7dcc9a147caacb36f004da94e93b7a6d1b98c2d045293867ec954e",
-      "size_bytes": 391632,
+      "sha256": "9e500b04c8f8f998ccca36395737171352bca7378d986a7ae52b0577fcd8fb2d",
+      "size_bytes": 400248,
       "source_locator": []
     },
     {
@@ -16906,7 +16906,7 @@
       ],
       "path": "docs/refactors/variable_state_audit.md",
       "review_status": "REVIEW_REQUIRED",
-      "sha256": "9dcef3dd56142e9e4a327434cb5d77c621e2552ddca4de814597b43cdf669f5d",
+      "sha256": "f4a415b90cc41c9d71853faa84725c4a6aea914672404f45db6a0f55a9c5d8bf",
       "size_bytes": 11489,
       "source_locator": []
     },
@@ -16933,8 +16933,8 @@
       ],
       "path": "docs/refactors/variable_state_member_inventory.md",
       "review_status": "REVIEW_REQUIRED",
-      "sha256": "1a4d23823808e0c0baa3bdda563bee1ec5a708f96c838bc06e16452948f7bb42",
-      "size_bytes": 51904,
+      "sha256": "c4c7587d7a60f01c4f068ff302ce2472a86fbb2a5848e9ccc94b23eff076a6d5",
+      "size_bytes": 53093,
       "source_locator": []
     },
     {
@@ -17718,6 +17718,33 @@
       "review_status": "REVIEW_REQUIRED",
       "sha256": "ea623fdff4c3d83d1234f670edc3666260650be30aed12f8da74f07200d7670e",
       "size_bytes": 3086,
+      "source_locator": []
+    },
+    {
+      "author_institution": "SOURCE_UNKNOWN",
+      "category": "documentation",
+      "confidence": "medium",
+      "derived_from": [],
+      "evidence": [
+        "docs/vnext/spatial_infrastructure.md"
+      ],
+      "file_type": "text/markdown",
+      "generator": "GENERATOR_UNKNOWN",
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "kind": "source",
+      "known_source": "WWO repository documentation",
+      "license": "LICENSE_UNKNOWN",
+      "license_locator": [],
+      "notes": [
+        "Documentation is inventoried for citation and ownership review; no document license is inferred."
+      ],
+      "path": "docs/vnext/spatial_infrastructure.md",
+      "review_status": "REVIEW_REQUIRED",
+      "sha256": "f18f9d91cea03dba1f0fe556bb042a1518beaac160624ea296c66bf739b68ff4",
+      "size_bytes": 7957,
       "source_locator": []
     },
     {
@@ -19404,14 +19431,14 @@
     "broken_provenance_chains": 10,
     "duplicate_hash_group_paths": [],
     "duplicate_hash_groups": 0,
-    "files_inventoried": 401,
+    "files_inventoried": 402,
     "generated_assets": 233,
     "generator_unknown_entries": 5,
     "license_known": 235,
-    "license_unknown": 166,
-    "license_warning_entries": 166,
-    "provenance_incomplete_entries": 169,
-    "source_known": 347,
+    "license_unknown": 167,
+    "license_warning_entries": 167,
+    "provenance_incomplete_entries": 170,
+    "source_known": 348,
     "source_missing_entries": 1,
     "source_unknown": 54
   }
