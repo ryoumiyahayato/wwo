@@ -37,15 +37,6 @@ jobs:
       - name: Apply Spatial capacity integration
         run: python3 -B tools/pr58_spatial_worker_bootstrap.py
 
-      - name: Regenerate variable-state documents
-        run: |
-          set -euo pipefail
-          python3 -B tools/audit_variable_state.py --root .
-          python3 tools/render_variable_state_audit_summary.py
-          python3 tools/render_variable_state_member_inventory.py
-          python3 tools/generate_variable_state_docs.py
-          python3 tools/render_variable_refactor_plan.py
-
       - name: Install Godot 4.6.3
         run: |
           set -euo pipefail
@@ -56,6 +47,10 @@ jobs:
           chmod +x "$GODOT_BIN"
           echo "GODOT_BIN=$GODOT_BIN" >> "$GITHUB_ENV"
           "$GODOT_BIN" --version
+
+      - name: Import Godot project
+        run: |
+          "$GODOT_BIN" --headless --editor --path . --quit
 
       - name: Focused Spatial validation
         run: |
@@ -76,6 +71,15 @@ jobs:
       - name: Unified vNext validation
         run: |
           python3 -B tools/run_vnext_validation.py --root . --godot "$GODOT_BIN"
+
+      - name: Regenerate variable-state documents
+        run: |
+          set -euo pipefail
+          python3 -B tools/audit_variable_state.py --root .
+          python3 tools/render_variable_state_audit_summary.py
+          python3 tools/render_variable_state_member_inventory.py
+          python3 tools/generate_variable_state_docs.py
+          python3 tools/render_variable_refactor_plan.py
 
       - name: Verify generated documents and whitespace
         run: |
