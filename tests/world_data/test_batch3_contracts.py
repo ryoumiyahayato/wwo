@@ -102,6 +102,21 @@ class Batch3ContractTests(unittest.TestCase):
         self.assertEqual(contract["missing_direct_references"], [("scripts/world_map/fixture_loader.gd", "res://data/world_map/missing.json")])
         self.assertEqual(contract["contract_gate"], "REVIEW_REQUIRED")
 
+    def test_blank_asset_path_requires_explicit_documented_absence(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            historical = root / "data" / "world_map" / "historical"
+            historical.mkdir(parents=True)
+            (historical / "political_units_1900.json").write_text(
+                json.dumps({"units": [{"id": "unit_a", "flag_id": "flag_a"}]}), encoding="utf-8"
+            )
+            (historical / "flags_1900.json").write_text(
+                json.dumps({"records": {"flag_a": {"asset_path": "", "flag_type": "national"}}}), encoding="utf-8"
+            )
+            coverage = batch3.build_flag_coverage(root)
+        self.assertEqual(coverage["status_counts"], {"MISSING_ASSET": 1})
+        self.assertEqual(coverage["missing_asset_count"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()

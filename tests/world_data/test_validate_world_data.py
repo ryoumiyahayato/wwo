@@ -135,12 +135,77 @@ class WorldDataValidatorTests(unittest.TestCase):
             (data_root / "bad.json").write_text('{"value": NaN}\n', encoding="utf-8")
 
             documents, findings, sizes = validator.load_json_documents(data_root)
-            expected_size = (data_root / "bad.json").stat().st_size
+            expected_size = len('{"value": NaN}\n'.encode("utf-8"))
 
         self.assertEqual(documents["countries.json"]["countries"], [])
         self.assertNotIn("bad.json", documents)
         self.assertEqual(sizes["bad.json"], expected_size)
         self.assertEqual([finding.code for finding in findings], ["JSON_PARSE_ERROR"])
+
+    def test_configured_catalog_collection_rejects_scalar_or_missing_value(self) -> None:
+        for document in ({"schema_version": 1, "countries": "corrupt"}, {"schema_version": 1}):
+            with self.subTest(document=document), tempfile.TemporaryDirectory() as temp_dir:
+                data_root = Path(temp_dir)
+                (data_root / "countries.json").write_text(json.dumps(document), encoding="utf-8")
+                result = validator.WorldDataAudit(data_root).run()
+                findings = [item for item in result["findings"] if item["code"] == "CATALOG_COLLECTION_TYPE"]
+                self.assertEqual(len(findings), 1)
+                self.assertEqual(findings[0]["severity"], "ERROR")
+
+    def test_geometry_cache_rejects_malformed_triangulation_payload(self) -> None:
+        audit = validator.WorldDataAudit(Path("."))
+        audit.ids_by_kind["country"] = {"country_a"}
+        audit.documents = {
+            "map_geometry_cache.json": {
+                "country_lods": {
+                    "lod0": [
+                        {
+                            "country_id": "country_a",
+                            "polygons": [{"outer": [[0, 0], [1, 0], [0, 1]], "holes": [], "triangles": [0, 1, 3]}],
+                        }
+                    ]
+                }
+            }
+        }
+        audit._validate_geometry_cache()
+        self.assertIn("GEOMETRY_CACHE_TRIANGLES", {finding.code for finding in audit.findings})
+
+    def test_city_detail_shards_must_be_indexed_with_matching_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            data_root = Path(temp_dir)
+            shard_dir = data_root / "city_detail" / "countries"
+            shard_dir.mkdir(parents=True)
+            (data_root / "city_detail" / "index.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "countries": [
+                            {
+                                "country_code": "AA",
+                                "shards": [{"id": "AA", "path": "countries/AA.json", "count": 2, "bounds": [10, 10, 11, 11]}],
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (shard_dir / "AA.json").write_text(
+                json.dumps({"schema_version": 1, "country_code": "AA", "shard_id": "AA", "count": 1, "cities": [{"id": "city_a", "lon_lat": [0, 0]}]}),
+                encoding="utf-8",
+            )
+            (shard_dir / "BB.json").write_text(
+                json.dumps({"schema_version": 1, "country_code": "BB", "shard_id": "BB", "count": 0, "cities": []}),
+                encoding="utf-8",
+            )
+            result = validator.WorldDataAudit(data_root).run()
+        codes = {finding["code"] for finding in result["findings"]}
+        self.assertIn("UNINDEXED_CITY_DETAIL_SHARD", codes)
+        self.assertIn("CITY_DETAIL_INDEX_COUNT_MISMATCH", codes)
+        self.assertIn("CITY_DETAIL_INDEX_BOUNDS_MISMATCH", codes)
+
+    def test_unified_validation_invokes_world_data_regressions(self) -> None:
+        script = (REPOSITORY_ROOT / "tools" / "run_validation.ps1").read_text(encoding="utf-8")
+        self.assertIn('unittest discover -s "$ProjectPath/tests/world_data"', script)
 
     def test_geometry_helpers_detect_self_intersection_and_rotation_equivalence(self) -> None:
         simple_ring = [[0.0, 0.0], [2.0, 0.0], [2.0, 2.0], [0.0, 0.0]]

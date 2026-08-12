@@ -93,6 +93,19 @@ class Batch4RunManifestTests(unittest.TestCase):
         self.assertEqual(policy["concurrency"], "1 process; no process pool or thread pool")
         self.assertEqual(policy["large_temporary_artifacts"], [])
 
+    def test_all_specialized_dangling_codes_feed_the_final_gate(self) -> None:
+        self.assertEqual(
+            batch4.dangling_reference_count(
+                {
+                    "DANGLING_FOREIGN_KEY": 2,
+                    "DANGLING_ACTIVITY_ID": 1,
+                    "DANGLING_CITY_DETAIL_SHARD": 3,
+                    "SELF_INTERSECTING_RING": 99,
+                }
+            ),
+            6,
+        )
+
     def test_manifest_is_deterministic_before_adding_itself(self) -> None:
         first = batch4.build_manifest(REPOSITORY_ROOT, OUTPUT_DIR)
         second = batch4.build_manifest(REPOSITORY_ROOT, OUTPUT_DIR)

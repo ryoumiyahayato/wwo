@@ -98,6 +98,19 @@ class Batch2ArtifactTests(unittest.TestCase):
         self.assertEqual(manifest["hash_mismatches"], ["flag_a"])
         self.assertEqual(manifest["missing_assets"], [])
 
+    def test_data_manifest_normalizes_checkout_line_endings(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            data_root = root / "data" / "world_map"
+            data_root.mkdir(parents=True)
+            source = data_root / "countries.json"
+            source.write_bytes(b'{\r\n  "countries": []\r\n}\r\n')
+            crlf_manifest = batch2.build_data_manifest(root)
+            source.write_bytes(b'{\n  "countries": []\n}\n')
+            lf_manifest = batch2.build_data_manifest(root)
+        self.assertEqual(crlf_manifest, lf_manifest)
+        self.assertEqual(lf_manifest["files"][0]["bytes"], len(b'{\n  "countries": []\n}\n'))
+
 
 if __name__ == "__main__":
     unittest.main()

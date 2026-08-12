@@ -17,12 +17,19 @@ def read_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def canonical_file_bytes(path: Path) -> bytes:
+    if path.suffix.lower() in {".json", ".md", ".py", ".gd", ".ps1"}:
+        text = path.read_text(encoding="utf-8")
+        return text.replace("\r\n", "\n").replace("\r", "\n").encode("utf-8")
+    return path.read_bytes()
+
+
 def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
+    return hashlib.sha256(canonical_file_bytes(path)).hexdigest()
+
+
+def dangling_reference_count(code_counts: Mapping[str, Any]) -> int:
+    return sum(int(value) for code, value in code_counts.items() if str(code).startswith("DANGLING_"))
 
 
 def build_file_manifest(output_dir: Path) -> list[dict[str, Any]]:
@@ -30,11 +37,12 @@ def build_file_manifest(output_dir: Path) -> list[dict[str, Any]]:
     for path in sorted(output_dir.glob("*.json")):
         if path.name == "batch4_run_manifest.json":
             continue
+        content = canonical_file_bytes(path)
         rows.append(
             {
                 "path": path.name,
-                "bytes": path.stat().st_size,
-                "sha256": sha256_file(path),
+                "bytes": len(content),
+                "sha256": hashlib.sha256(content).hexdigest(),
             }
         )
     return rows
@@ -127,7 +135,7 @@ def build_manifest(repository_root: Path, output_dir: Path) -> dict[str, Any]:
         },
         "final_gates": {
             "json_parse_errors": len(batch2_data.get("parse_errors", [])),
-            "dangling_foreign_keys": code_counts.get("DANGLING_FOREIGN_KEY", 0),
+            "dangling_foreign_keys": dangling_reference_count(code_counts),
             "duplicate_catalog_ids": sum(code_counts.get(code, 0) for code in ("DUPLICATE_ID", "EMPTY_ID", "DUPLICATE_STABLE_ID")),
             "flag_asset_gaps": len(batch2_assets.get("missing_assets", [])) + len(batch2_assets.get("hash_mismatches", [])),
             "loader_contract_gaps": len(batch3_loader.get("missing_direct_references", [])) + len(batch3_loader.get("missing_directory_references", [])),

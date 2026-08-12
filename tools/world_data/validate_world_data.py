@@ -321,11 +321,14 @@ def load_json_documents(data_root: Path) -> tuple[dict[str, Any], list[Finding],
         return documents, findings, sizes
     for path in json_paths:
         relative = path.relative_to(data_root).as_posix()
-        sizes[relative] = path.stat().st_size
         try:
-            with path.open("r", encoding="utf-8") as handle:
-                value = json.load(handle, parse_constant=_reject_nonfinite)
+            text = path.read_text(encoding="utf-8")
+            canonical_text = text.replace("\r\n", "\n").replace("\r", "\n")
+            sizes[relative] = len(canonical_text.encode("utf-8"))
+            value = json.loads(canonical_text, parse_constant=_reject_nonfinite)
         except (OSError, UnicodeError, json.JSONDecodeError, ValueError) as exc:
+            if relative not in sizes:
+                sizes[relative] = path.stat().st_size
             findings.append(
                 Finding(
                     "ERROR",
@@ -668,9 +671,24 @@ class WorldDataAudit:
             }:
                 specs.append(CatalogSpec(dataset, "cities", "city_detail_city", "id", "city-detail records"))
 
+        validated_collections: set[tuple[str, str]] = set()
         for spec in specs:
+            collection_key = (spec.dataset, spec.collection)
+            document = self.documents.get(spec.dataset)
+            if collection_key not in validated_collections and isinstance(document, Mapping):
+                validated_collections.add(collection_key)
+                collection_value = document.get(spec.collection)
+                if not isinstance(collection_value, (list, Mapping)):
+                    self.add(
+                        "ERROR",
+                        "CATALOG_COLLECTION_TYPE",
+                        spec.dataset,
+                        f"{spec.dataset}:{spec.collection}",
+                        f"configured catalog collection {spec.collection!r} must be an array or object",
+                        evidence={"actual_type": type(collection_value).__name__},
+                    )
             seen: dict[str, RecordRef] = {}
-            for index, map_key, raw_row in iter_collection(self.documents.get(spec.dataset), spec.collection):
+            for index, map_key, raw_row in iter_collection(document, spec.collection):
                 location = f"{spec.dataset}:{spec.collection}[{map_key!r}]" if map_key else f"{spec.dataset}:{spec.collection}[{index}]"
                 if "__invalid_record__" in raw_row:
                     self.add(
@@ -896,6 +914,7 @@ class WorldDataAudit:
         index = self.documents.get("city_detail/index.json", {})
         if isinstance(index, Mapping):
             country_codes = set()
+            referenced_shards: set[str] = set()
             for ref in self._refs_for("city_detail/index.json", "countries"):
                 code = ref.record_id
                 country_codes.add(code)
@@ -908,14 +927,25 @@ class WorldDataAudit:
                         self.add("ERROR", "CITY_DETAIL_SHARD_PATH", ref.dataset, f"{ref.location}.shards[{shard_index}].path", "shard path is not a safe relative path", ref.record_id)
                         continue
                     normalized = Path("city_detail") / Path(shard_path)
-                    if normalized.as_posix() not in self.documents:
+                    normalized_path = normalized.as_posix()
+                    if normalized_path in referenced_shards:
+                        self.add("ERROR", "DUPLICATE_CITY_DETAIL_SHARD_REFERENCE", ref.dataset, f"{ref.location}.shards[{shard_index}].path", "shard file is referenced more than once by the runtime index", ref.record_id, {"path": normalized_path})
+                    referenced_shards.add(normalized_path)
+                    if normalized_path not in self.documents:
                         self.add("ERROR", "DANGLING_CITY_DETAIL_SHARD", ref.dataset, f"{ref.location}.shards[{shard_index}].path", f"shard file {shard_path!r} does not exist", ref.record_id)
                     else:
-                        shard_document = self.documents[normalized.as_posix()]
-                        self._validate_city_detail_shard(ref, shard_document, normalized.as_posix(), shard)
+                        shard_document = self.documents[normalized_path]
+                        self._validate_city_detail_shard(ref, shard_document, normalized_path, shard)
+            disk_shards = {
+                name
+                for name in self.documents
+                if name.startswith("city_detail/") and name not in {"city_detail/index.json", "city_detail/LICENSE.json"}
+            }
+            for unindexed_path in sorted(disk_shards - referenced_shards):
+                self.add("ERROR", "UNINDEXED_CITY_DETAIL_SHARD", unindexed_path, unindexed_path, "city-detail shard exists on disk but is not reachable through the runtime index")
             totals = index.get("totals", {})
             if isinstance(totals, Mapping):
-                actual_shards = len([name for name in self.documents if name.startswith("city_detail/") and name not in {"city_detail/index.json", "city_detail/LICENSE.json"}])
+                actual_shards = len(disk_shards)
                 actual_records = sum(len(list(iter_collection(document, "cities"))) for name, document in self.documents.items() if name.startswith("city_detail/") and name not in {"city_detail/index.json", "city_detail/LICENSE.json"})
                 if totals.get("shards") != actual_shards:
                     self.add("WARNING", "CITY_DETAIL_SHARD_COUNT", "city_detail/index.json", "city_detail/index.json:totals.shards", "index shard total differs from files on disk", evidence={"declared": totals.get("shards"), "actual": actual_shards})
@@ -941,6 +971,19 @@ class WorldDataAudit:
         declared_count = document.get("count")
         if declared_count != len(rows):
             self.add("ERROR", "CITY_DETAIL_COUNT_MISMATCH", dataset, dataset, "shard count differs from rows on disk", evidence={"declared": declared_count, "actual": len(rows)})
+        index_count = shard_metadata.get("count")
+        if index_count != len(rows):
+            self.add("ERROR", "CITY_DETAIL_INDEX_COUNT_MISMATCH", dataset, f"{index_ref.location}.shards", "runtime index shard count differs from rows on disk", evidence={"declared": index_count, "actual": len(rows)})
+        index_bounds = shard_metadata.get("bounds")
+        valid_bounds = (
+            isinstance(index_bounds, list)
+            and len(index_bounds) == 4
+            and all(number_is_finite(value) for value in index_bounds)
+            and float(index_bounds[0]) <= float(index_bounds[2])
+            and float(index_bounds[1]) <= float(index_bounds[3])
+        )
+        if not valid_bounds:
+            self.add("ERROR", "CITY_DETAIL_INDEX_BOUNDS", dataset, f"{index_ref.location}.shards", "runtime index shard bounds must be finite [min_lon, min_lat, max_lon, max_lat]")
         seen: set[str] = set()
         for index, _, row in rows:
             record_id = str(row.get("id", ""))
@@ -948,6 +991,11 @@ class WorldDataAudit:
                 self.add("ERROR", "DUPLICATE_ID", dataset, f"{dataset}:cities[{index}].id", "duplicate city-detail ID", record_id)
             seen.add(record_id)
             self._validate_coordinate_value(dataset, f"{dataset}:cities[{index}].lon_lat", row.get("lon_lat"), True, record_id, True)
+            coordinates = row.get("lon_lat")
+            if valid_bounds and coordinate_pair(coordinates):
+                lon, lat = float(coordinates[0]), float(coordinates[1])
+                if not (float(index_bounds[0]) <= lon <= float(index_bounds[2]) and float(index_bounds[1]) <= lat <= float(index_bounds[3])):
+                    self.add("ERROR", "CITY_DETAIL_INDEX_BOUNDS_MISMATCH", dataset, f"{dataset}:cities[{index}].lon_lat", "city coordinates fall outside runtime index shard bounds", record_id, {"bounds": index_bounds, "lon_lat": coordinates})
 
     def _refs_for(self, dataset: str, collection: str) -> list[RecordRef]:
         return [ref for refs in self.rows_by_kind.values() for ref in refs if ref.dataset == dataset and ref.collection == collection]
@@ -1150,6 +1198,12 @@ class WorldDataAudit:
                 region_id = str(entry.get("region_id", ""))
                 if region_id not in region_ids:
                     self.add("ERROR", "DANGLING_FOREIGN_KEY", "map_geometry_cache.json", f"map_geometry_cache.json:macro_regions[{entry_index}].region_id", "macro-region geometry points to an unknown region", region_id)
+                lods = entry.get("lods")
+                if not isinstance(lods, Mapping):
+                    self.add("ERROR", "GEOMETRY_CACHE_COLLECTION_TYPE", "map_geometry_cache.json", f"map_geometry_cache.json:macro_regions[{entry_index}].lods", "macro-region geometry LODs must be an object")
+                else:
+                    for lod_name, polygons in lods.items():
+                        self._validate_cache_polygons(polygons, f"map_geometry_cache.json:macro_regions[{entry_index}].lods.{lod_name}")
         transport = cache.get("transport", {})
         if isinstance(transport, Mapping):
             for transport_kind, entries in transport.items():
@@ -1189,6 +1243,44 @@ class WorldDataAudit:
             numeric = [float(value) for value in values if number_is_finite(value)]
             if len(numeric) != len(values) or numeric != sorted(numeric):
                 self.add("ERROR", "LOD_THRESHOLD_ORDER", "map_geometry_cache.json", "map_geometry_cache.json:lod_thresholds", "LOD thresholds must be finite and monotonically increasing")
+        war_example = cache.get("war_example")
+        if isinstance(war_example, Mapping):
+            self._validate_cache_polygon(war_example.get("control_polygon"), "map_geometry_cache.json:war_example.control_polygon")
+
+    def _validate_cache_polygons(self, polygons: Any, location: str) -> None:
+        if not isinstance(polygons, list):
+            self.add("ERROR", "GEOMETRY_CACHE_COLLECTION_TYPE", "map_geometry_cache.json", location, "cached polygons must be an array")
+            return
+        for polygon_index, polygon in enumerate(polygons):
+            self._validate_cache_polygon(polygon, f"{location}[{polygon_index}]")
+
+    def _validate_cache_polygon(self, polygon: Any, location: str) -> None:
+        if not isinstance(polygon, Mapping):
+            self.add("ERROR", "GEOMETRY_CACHE_POLYGON_TYPE", "map_geometry_cache.json", location, "cached polygon must be an object")
+            return
+        outer = polygon.get("outer")
+        if not isinstance(outer, list) or len(outer) < 3 or not all(coordinate_pair(point) for point in outer):
+            self.add("ERROR", "GEOMETRY_CACHE_OUTER", "map_geometry_cache.json", f"{location}.outer", "cached polygon outer must contain at least three finite coordinate pairs")
+            outer_length = 0
+        else:
+            outer_length = len(outer)
+        holes = polygon.get("holes", [])
+        if not isinstance(holes, list):
+            self.add("ERROR", "GEOMETRY_CACHE_HOLES", "map_geometry_cache.json", f"{location}.holes", "cached polygon holes must be arrays of finite coordinate rings")
+        else:
+            for hole_index, hole in enumerate(holes):
+                hole_location = f"{location}.holes[{hole_index}]"
+                if isinstance(hole, Mapping):
+                    self._validate_cache_polygon(hole, hole_location)
+                elif not isinstance(hole, list) or len(hole) < 3 or not all(coordinate_pair(point) for point in hole):
+                    self.add("ERROR", "GEOMETRY_CACHE_HOLES", "map_geometry_cache.json", hole_location, "cached polygon hole must be a finite coordinate ring or triangulated polygon object")
+        triangles = polygon.get("triangles")
+        if (
+            not isinstance(triangles, list)
+            or len(triangles) % 3 != 0
+            or any(not isinstance(value, int) or isinstance(value, bool) or value < 0 or value >= outer_length for value in triangles)
+        ):
+            self.add("ERROR", "GEOMETRY_CACHE_TRIANGLES", "map_geometry_cache.json", f"{location}.triangles", "cached triangle indices must be integer triplets within the outer vertex array")
 
     def _validate_cache_index(
         self,
@@ -1213,6 +1305,7 @@ class WorldDataAudit:
             seen.add(record_id)
             if record_id not in target_ids:
                 self.add("ERROR", "DANGLING_FOREIGN_KEY", dataset, f"{dataset}:{lod_name}[{index}].{id_field}", f"geometry cache points to an unknown {target_label}", record_id)
+            self._validate_cache_polygons(entry.get("polygons"), f"{dataset}:{lod_name}[{index}].polygons")
         missing = sorted(target_ids - seen)
         if missing:
             self.add("WARNING", "GEOMETRY_CACHE_COVERAGE", dataset, f"{dataset}:{lod_name}", f"geometry cache LOD is missing {len(missing)} {target_label} entries", evidence={"missing_sample": missing[:20]})

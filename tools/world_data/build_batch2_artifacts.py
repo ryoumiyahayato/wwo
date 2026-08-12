@@ -30,7 +30,14 @@ def sha256_bytes(value: bytes) -> str:
     return hashlib.sha256(value).hexdigest()
 
 
+def canonical_text_bytes(path: Path) -> bytes:
+    text = path.read_text(encoding="utf-8")
+    return text.replace("\r\n", "\n").replace("\r", "\n").encode("utf-8")
+
+
 def sha256_file(path: Path) -> str:
+    if path.suffix.lower() in {".json", ".md", ".py", ".gd", ".ps1"}:
+        return sha256_bytes(canonical_text_bytes(path))
     digest = hashlib.sha256()
     with path.open("rb") as handle:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
@@ -57,10 +64,11 @@ def build_data_manifest(repository_root: Path) -> dict[str, Any]:
     parse_errors: list[dict[str, str]] = []
     for path in sorted(data_root.rglob("*.json")):
         rel = relative_path(path, repository_root)
+        content = canonical_text_bytes(path)
         row: dict[str, Any] = {
             "path": rel,
-            "bytes": path.stat().st_size,
-            "sha256": sha256_file(path),
+            "bytes": len(content),
+            "sha256": sha256_bytes(content),
         }
         try:
             document = read_json(path)

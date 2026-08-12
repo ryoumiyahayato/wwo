@@ -26,12 +26,15 @@ def read_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def canonical_file_bytes(path: Path) -> bytes:
+    if path.suffix.lower() in {".json", ".md", ".py", ".gd", ".ps1"}:
+        text = path.read_text(encoding="utf-8")
+        return text.replace("\r\n", "\n").replace("\r", "\n").encode("utf-8")
+    return path.read_bytes()
+
+
 def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
+    return hashlib.sha256(canonical_file_bytes(path)).hexdigest()
 
 
 def sha256_lines(lines: list[str]) -> str:
@@ -135,15 +138,16 @@ def build_flag_coverage(repository_root: Path) -> dict[str, Any]:
         if not isinstance(flag_record, Mapping):
             status = "MISSING_FLAG_RECORD"
             asset_path = None
-        elif flag_id == "no_single_standard_flag" or not flag_record.get("asset_path"):
+        elif flag_id == "no_single_standard_flag" or flag_record.get("flag_type") == "documented_absence":
             status = "DOCUMENTED_ABSENCE"
             asset_path = flag_record.get("asset_path")
         else:
             asset_path_value = flag_record.get("asset_path")
-            local_path = resource_to_local_path(repository_root, asset_path_value)
-            if not local_path.is_file():
+            if not isinstance(asset_path_value, str) or not asset_path_value:
                 status = "MISSING_ASSET"
-            elif not isinstance(flag_record.get("asset_sha256"), str) or sha256_file(local_path) != flag_record["asset_sha256"]:
+            elif not resource_to_local_path(repository_root, asset_path_value).is_file():
+                status = "MISSING_ASSET"
+            elif not isinstance(flag_record.get("asset_sha256"), str) or sha256_file(resource_to_local_path(repository_root, asset_path_value)) != flag_record["asset_sha256"]:
                 status = "HASH_MISMATCH"
             else:
                 status = "VERIFIED_ASSET"

@@ -1,14 +1,14 @@
 {
-  "dataset_sha256": "63380bd60a75d6dd58a40267ccb93f80a947fefe08fee09c823f92162232fe00",
+  "dataset_sha256": "9ec5c676d0b46e2923eda3028b0b1a65d9afd4b7a43cda4b5adbd5cb364c022b",
   "file_count": 183,
   "files": [
     {
-      "bytes": 6762,
+      "bytes": 6738,
       "collection_sizes": {
         "identities": 2
       },
       "path": "data/world_map/characters.json",
-      "sha256": "3e801c64bd318872c9059db09d4c63a5d6fb98088c82e8e56d059ca031c9da62",
+      "sha256": "25144e0a1e6a3a6867620bdec1de4098570be56833b2dacc3cc9dae796338075",
       "top_level_keys": [
         "identities",
         "prototype_only",
@@ -17,12 +17,12 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 7449,
+      "bytes": 7411,
       "collection_sizes": {
         "cities": 32
       },
       "path": "data/world_map/cities.json",
-      "sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919",
+      "sha256": "860d1399a651a249d39e1ee224439f99f175ef1476d51d60572d815ea8bbda69",
       "top_level_keys": [
         "cities",
         "prototype_only",
@@ -31,13 +31,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 3381,
+      "bytes": 3380,
       "collection_sizes": {
         "bounds": 4,
         "cities": 7
       },
       "path": "data/world_map/city_detail/countries/AD.json",
-      "sha256": "d705b2b3cbc39fea83ae93a4a2b7b7343a6bc4aaa8c2b6083f114110f756889e",
+      "sha256": "2713fa95ed0d3c3aeca6f825d687ecd55ac94475bb013ac53f0ec74fd7b5bed1",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -55,13 +55,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 41921,
+      "bytes": 41920,
       "collection_sizes": {
         "bounds": 4,
         "cities": 94
       },
       "path": "data/world_map/city_detail/countries/AE.json",
-      "sha256": "5b2c185da2f244d7b18f3b20c54677af1850fdf22d37535c543d0b854604db49",
+      "sha256": "d65ae9b4316f262db8d5323000b0ae0b5077ccd8a5ebe5878ca9a79b7e6448e1",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -79,13 +79,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 43097,
+      "bytes": 43096,
       "collection_sizes": {
         "bounds": 4,
         "cities": 98
       },
       "path": "data/world_map/city_detail/countries/AF.json",
-      "sha256": "73d52a9627179726a7dbdad5940304ca736259323346f91b17b7e2b470a30850",
+      "sha256": "de82995b0b2857b7322a289ab28a89aa403bafb49f86295f79160bc6317148b9",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -103,13 +103,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 4754,
+      "bytes": 4753,
       "collection_sizes": {
         "bounds": 4,
         "cities": 10
       },
       "path": "data/world_map/city_detail/countries/AG.json",
-      "sha256": "1914a74f959a9ea856ffe38c75774c1dbd3d349947836936bca5f1c3c612b89c",
+      "sha256": "020bbd06faa056497f7b6fe3faf4f7dd6aee21f721b0e6a132ea3952d43bbcee",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -127,13 +127,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 6688,
+      "bytes": 6687,
       "collection_sizes": {
         "bounds": 4,
         "cities": 14
       },
       "path": "data/world_map/city_detail/countries/AI.json",
-      "sha256": "33be5cf99eb5bfaf1d8ec7fb8303215f961d8989204f5d6dbe2507da0f299dcb",
+      "sha256": "cab57f966ff368d35c28eef1ce90e2ee273c7bb57162bf6d4aaca9166f77e7b7",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -151,13 +151,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 32234,
+      "bytes": 32233,
       "collection_sizes": {
         "bounds": 4,
         "cities": 72
       },
       "path": "data/world_map/city_detail/countries/AL.json",
-      "sha256": "e33a04cf99b0deadd11102ae173f5a4c39ec813a9ef49abc6275b9bc724c6dc7",
+      "sha256": "ab972c7ba8c70b1617794d85e6f745d91efdefe36fa18d9b8792ad430e403313",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -175,13 +175,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 35130,
+      "bytes": 35129,
       "collection_sizes": {
         "bounds": 4,
         "cities": 80
       },
       "path": "data/world_map/city_detail/countries/AM.json",
-      "sha256": "c35b402732b471404735077d090d193adefd2d2ea78f7f4ba53406b483cf8de8",
+      "sha256": "74da5e96b799662e05ee92478b34385f03755c5b32c742dbbad39a32c6eade8e",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -199,13 +199,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 94983,
+      "bytes": 94982,
       "collection_sizes": {
         "bounds": 4,
         "cities": 213
       },
       "path": "data/world_map/city_detail/countries/AT.json",
-      "sha256": "0dfde92ce875b199eac82904a4665ed36bf89ca6336e63939976af8945e27b22",
+      "sha256": "b382243f9a8532acea8c1385cb2025fb379b993b3d4dae7e2d963fc87376bbb4",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -223,13 +223,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 5530,
+      "bytes": 5529,
       "collection_sizes": {
         "bounds": 4,
         "cities": 12
       },
       "path": "data/world_map/city_detail/countries/AW.json",
-      "sha256": "99857178a4a0c010fea73decdbdbd72467bf82c50b762a4409487f738ddd3daa",
+      "sha256": "91d411fc82c213f0cf2b1cbea88bc12155550f9108262cdcd34bc4889900d88e",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -247,13 +247,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 1621,
+      "bytes": 1620,
       "collection_sizes": {
         "bounds": 4,
         "cities": 3
       },
       "path": "data/world_map/city_detail/countries/AX.json",
-      "sha256": "2f9f3f2979cd254e03fde1cd08eb291040be9017057dc1d25788918c06a11b10",
+      "sha256": "777048c099ad05811a72a4f3d20fdae5d5640a5c63a6a9bedd6e56aa9fda06cf",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -271,2173 +271,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 57239,
+      "bytes": 57238,
       "collection_sizes": {
         "bounds": 4,
         "cities": 134
       },
       "path": "data/world_map/city_detail/countries/AZ.json",
-      "sha256": "79666191b13b1c67f73dc6874faf0e3cb44327862728ae4c0ffd5e46f3928ebf",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 51153,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 117
-      },
-      "path": "data/world_map/city_detail/countries/BA.json",
-      "sha256": "0b3dcea6c8a473b346786ec21f79b114437414eee90124fe038d20910911a5c0",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 5145,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 11
-      },
-      "path": "data/world_map/city_detail/countries/BB.json",
-      "sha256": "cb0b4ff3a06c65727ef2850116383cc56c3fdd7beddc0d9c607469c0c31566c0",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 65386,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 145
-      },
-      "path": "data/world_map/city_detail/countries/BD.json",
-      "sha256": "5402d294256891f7b74b3ca59e9c4256a0da59d5f3553fb1e2ae7abe9beca9d1",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 305555,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 686
-      },
-      "path": "data/world_map/city_detail/countries/BE.json",
-      "sha256": "f116e29a8694ac4e5f3ce6f0eaa23e0904c40c7d45d007e8ef72dd476a4f8da5",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 60176,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 138
-      },
-      "path": "data/world_map/city_detail/countries/BG.json",
-      "sha256": "9b2e5cbaa1f5a9fa915abeefea3dcbc98401be94b4fbd511a03990fb561071f2",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 5091,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 11
-      },
-      "path": "data/world_map/city_detail/countries/BH.json",
-      "sha256": "3262eeb4924b93b7af0e803f169c59ecad00c52f4bc7e7ba80ba61b5600f09ed",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 758,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 1
-      },
-      "path": "data/world_map/city_detail/countries/BL.json",
-      "sha256": "f15b10d642b862346a9072532ec0ce7d8a44f1debd698e2a9fda929e88e0c307",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 4858,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 10
-      },
-      "path": "data/world_map/city_detail/countries/BM.json",
-      "sha256": "11f1e6cca8605c6f92647ca2fd16b4ace54c7fa136f1806da8f543ccc95e304b",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 12608,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 28
-      },
-      "path": "data/world_map/city_detail/countries/BN.json",
-      "sha256": "d27ea62d9867003c40bd0ff400e67ffcdefd0b2e3fb88d99a1de84d88468e444",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 1654,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 3
-      },
-      "path": "data/world_map/city_detail/countries/BQ.json",
-      "sha256": "85b51c19342d9b39fa357f56d9f08dd3d8e5521c9cc2ad7463f32d90c6e23776",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 10875,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 24
-      },
-      "path": "data/world_map/city_detail/countries/BS.json",
-      "sha256": "894e1208d4421f559ebe75911efd11258d1a836160d348065c5002aa84bae3c2",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 10194,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 23
-      },
-      "path": "data/world_map/city_detail/countries/BT.json",
-      "sha256": "4e80dc3b684057552f0f7a7579619f1226ac4027de09d59d09428645de78f56f",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 60573,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 140
-      },
-      "path": "data/world_map/city_detail/countries/BY.json",
-      "sha256": "f05118f64a69e3c04d407369567b4fb92e3ff53a81902e0917ca695f3e2300ed",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 6033,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 13
-      },
-      "path": "data/world_map/city_detail/countries/BZ.json",
-      "sha256": "494d98ebc98231836b2fd8023e9d4ae147c0f97135d784e3709423169ae03fa4",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 594112,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 1309
-      },
-      "path": "data/world_map/city_detail/countries/CA.json",
-      "sha256": "f50c40d9c83444ae5c3f3571da98dc2e43422764aedde4c8b62bac08923e70f6",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 752,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 1
-      },
-      "path": "data/world_map/city_detail/countries/CC.json",
-      "sha256": "c85e8fcf2fd5e3717b254dc12c101c7bc33dd07544d901b0044081ae82eb6f41",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 157368,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 353
-      },
-      "path": "data/world_map/city_detail/countries/CH.json",
-      "sha256": "8f4401a7299d07ebc80b04cf810a3db9bf66b9ede2a5b31c0e3cf10938533650",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 1253540,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 2879
-      },
-      "path": "data/world_map/city_detail/countries/CN.json",
-      "sha256": "03c0af3aaf82aa2c903e013ec8b56c6756cc519e773b407d374e9740b4fa4375",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 34297,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 76
-      },
-      "path": "data/world_map/city_detail/countries/CR.json",
-      "sha256": "61d5729a9f91f26f38deb51f836248e1d29d775e5d5d3ee834a4b2ffdac1c290",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 75419,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 169
-      },
-      "path": "data/world_map/city_detail/countries/CU.json",
-      "sha256": "066fc18d6f59c7cde0ef646450f423d4303e382f99e5413f4df8e2490fdddad8",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 2957,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 6
-      },
-      "path": "data/world_map/city_detail/countries/CW.json",
-      "sha256": "12a32d8e9cb3f51c5b608f093461e4c2db20e920a099911b6c63842880beccb6",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 15511,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 35
-      },
-      "path": "data/world_map/city_detail/countries/CY.json",
-      "sha256": "77330ce3a4785e873844c7f69cf93690faabea51b9475a191da83f9fa9c517c1",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 158497,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 354
-      },
-      "path": "data/world_map/city_detail/countries/CZ.json",
-      "sha256": "4440904c827a3ba62e0b1bc667a77f69cbb5596377db6275c99e3fde137a434a",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 1390213,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 3076
-      },
-      "path": "data/world_map/city_detail/countries/DE.json",
-      "sha256": "62567d19f8eb97fa4780fbaad55659c1206ef838ac352a75fd1fd0a9edf1f9c6",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 71695,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 163
-      },
-      "path": "data/world_map/city_detail/countries/DK.json",
-      "sha256": "cf794317e21a6ef6b0637d10abe1f35363137f8f1358225740a0faa986bb78c6",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 4674,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 10
-      },
-      "path": "data/world_map/city_detail/countries/DM.json",
-      "sha256": "81899a97de9f656a01c67d332000227d79ad9743c21808fdf5c6ad9fc35e9936",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 55635,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 118
-      },
-      "path": "data/world_map/city_detail/countries/DO.json",
-      "sha256": "cbdc7a153e171b58f20d8226926d754f1a7200e2c02351524dcd4360c5b138e9",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 17264,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 39
-      },
-      "path": "data/world_map/city_detail/countries/EE.json",
-      "sha256": "0ead01cc4f330d557b088611123ea09922b7d13908509b18cd167cfc11f0c4da",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 660548,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 1477
-      },
-      "path": "data/world_map/city_detail/countries/ES.json",
-      "sha256": "88fe3c2f2fae7cf62080558f7784a259a65b7db9be2d38325348e609f1c84f61",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 151138,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 343
-      },
-      "path": "data/world_map/city_detail/countries/FI.json",
-      "sha256": "d8e6724c906766a0d84a5cac80cbc9fd913fba46cb8dc17b1ac8865f1ed1c5a5",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 2925,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 6
-      },
-      "path": "data/world_map/city_detail/countries/FO.json",
-      "sha256": "686860023b0cc147f44818eba24fe0415ccbeb78709c3eb49dc80e21732b591e",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 846105,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 1910
-      },
-      "path": "data/world_map/city_detail/countries/GB.json",
-      "sha256": "5c2bbf044c84188840938d2e45315ddfd02c60489eaadeabf49869c67d889854",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 3390,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 7
-      },
-      "path": "data/world_map/city_detail/countries/GD.json",
-      "sha256": "1b48365c8833cdbc73c8767e38dc8b0caf56593327803801f93c33bf48bf2091",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 25463,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 58
-      },
-      "path": "data/world_map/city_detail/countries/GE.json",
-      "sha256": "bfba64c2984f6f0bf9e8000a4e1b64401624d772d1d2233f2c7119995b7c4eb4",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 5231,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 11
-      },
-      "path": "data/world_map/city_detail/countries/GG.json",
-      "sha256": "311d0b096e4d557b5ab765d65c5c03624e1aebb5d7bcf9c28a8f34ac0ecdcfb4",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 1659,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 3
-      },
-      "path": "data/world_map/city_detail/countries/GI.json",
-      "sha256": "e53634875bc1531a099d4a4d91196e221c10e1053e1217f366825844f60cc2d0",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 2468,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 5
-      },
-      "path": "data/world_map/city_detail/countries/GL.json",
-      "sha256": "04d400ae3df9a4716794ec12a4dbb0791dc538c95485dada50e3d95bf160dd69",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 10416,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 22
-      },
-      "path": "data/world_map/city_detail/countries/GP.json",
-      "sha256": "fcf28ccb2be9fd448faeed3f1c766549dcc6b9678c52afac8cb926cd30002a97",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 126126,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 284
-      },
-      "path": "data/world_map/city_detail/countries/GR.json",
-      "sha256": "e3d8bc92b238642878a0c5eda19d5afb1e6088265cb94c316236929a0755fce6",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 92971,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 205
-      },
-      "path": "data/world_map/city_detail/countries/GT.json",
-      "sha256": "fb3a537c856af1a4d83cfe001d63757b3c072ec2ee55e862cdfe23f97526f7e2",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 119121,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 266
-      },
-      "path": "data/world_map/city_detail/countries/HK.json",
-      "sha256": "f77055c3a684660638de48c704c23281d4b2ce4660152f07a60cf9351684a10f",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 71214,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 158
-      },
-      "path": "data/world_map/city_detail/countries/HN.json",
-      "sha256": "99cb23e22aa6566f47fe150f6fb9463fc5c3803211b9983ac858fff3da1d59c9",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 33633,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 76
-      },
-      "path": "data/world_map/city_detail/countries/HR.json",
-      "sha256": "9877123dedfe0f7df90337543b2994c9eb24ef3d1908378538e10aa35118b83f",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 23501,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 51
-      },
-      "path": "data/world_map/city_detail/countries/HT.json",
-      "sha256": "489d6b9a904ba2484fa9d770ebd6f34d18e7b57cc429c53f05f4112121b0d897",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 166600,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 378
-      },
-      "path": "data/world_map/city_detail/countries/HU.json",
-      "sha256": "0fc2ce28eb5c64e6d1f3151294f6bb2dcd03d9bb87101ff101c95822e852e2d6",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 208424,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 479
-      },
-      "path": "data/world_map/city_detail/countries/ID.json",
-      "sha256": "f53e9faa569d0c2f486f9c8876b902805fcf05b07019eee6115d52bcd14eeb94",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 66096,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 152
-      },
-      "path": "data/world_map/city_detail/countries/IE.json",
-      "sha256": "78e216ef7b6d46a7fbda96c43d59032aebbae30bea12afb7fc31d69d423a19a8",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 78193,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 178
-      },
-      "path": "data/world_map/city_detail/countries/IL.json",
-      "sha256": "49b24e121b4d0714397e4e4743e92f0b45bdc8027c47b4e0ce54a901684f2a53",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 9483,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 21
-      },
-      "path": "data/world_map/city_detail/countries/IM.json",
-      "sha256": "76994d735f40368da98c33990d2b5782499f9a2c86ae0b82082794bf6a2690a6",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 2868836,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 6526
-      },
-      "path": "data/world_map/city_detail/countries/IN.json",
-      "sha256": "2853cc57e58cf18c4993aaefc758cc16fde000cf0f6b7e5e408129624061b68d",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 46555,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 105
-      },
-      "path": "data/world_map/city_detail/countries/IQ.json",
-      "sha256": "52583a4a4aa16beb30e59ad0d2b30e9fec07b3bc8076b2797f3f876dc266af47",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 361653,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 836
-      },
-      "path": "data/world_map/city_detail/countries/IR.json",
-      "sha256": "aa0f5aa09f242eee7c05d2b584e79619db4314ef378e4726bc0e5f056ec23151",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 6577,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 14
-      },
-      "path": "data/world_map/city_detail/countries/IS.json",
-      "sha256": "0b79ccf5033ebc9b2ea902015909c693a8956bdd414cd8d9cad7cf57649aa79b",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 906485,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 2031
-      },
-      "path": "data/world_map/city_detail/countries/IT.json",
-      "sha256": "771394a9bbc2d3dd45f25a6e5901b640d4a974fa91f2034b13bc4c1c573ddcda",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 1622,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 3
-      },
-      "path": "data/world_map/city_detail/countries/JE.json",
-      "sha256": "b930a6eda80b35645aa8831aac7689062489939e99e143ca714bb6d4b4f51eda",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 19859,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 44
-      },
-      "path": "data/world_map/city_detail/countries/JM.json",
-      "sha256": "48401564cd771076d624a80feeb611f277aed4bd2e745516b4b24d8eee1baf34",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 33040,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 76
-      },
-      "path": "data/world_map/city_detail/countries/JO.json",
-      "sha256": "11e25a0497cf487ae1420b847493b37c5bd5e16185d3dc3dab0540747be7b564",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 785354,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 1798
-      },
-      "path": "data/world_map/city_detail/countries/JP.json",
-      "sha256": "17e2aeaef5516d6f68efd40c93042bcfe50fbf7d25353e62693a64951e02ca5d",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 26639,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 61
-      },
-      "path": "data/world_map/city_detail/countries/KG.json",
-      "sha256": "098eaf038bc3c36f0565fcd6cf07191827ea4d90ebba6d6a298ae4ede6f4abdc",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 56345,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 124
-      },
-      "path": "data/world_map/city_detail/countries/KH.json",
-      "sha256": "cd4340e63d63b2758cd8c08bffab7e5b8a0c00aabf80c9646a1b40e4be8c5099",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 6511,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 14
-      },
-      "path": "data/world_map/city_detail/countries/KN.json",
-      "sha256": "b2c2bad63e9385ad04f8399395fda79ca4259bafc13b373af6b6637e18ca1ffc",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 52131,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 118
-      },
-      "path": "data/world_map/city_detail/countries/KP.json",
-      "sha256": "320f130d8d8a03e4a57094ce28d2e7f394ac102d35d239feeb010f8062dae2ec",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 67379,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 154
-      },
-      "path": "data/world_map/city_detail/countries/KR.json",
-      "sha256": "f2faf36d9750f84d76fa1efaccce53dca33e0badb52c1ae07fc32cb2e540614c",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 10407,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 23
-      },
-      "path": "data/world_map/city_detail/countries/KW.json",
-      "sha256": "ad90475c116f4106a45df9af17f4a57aa92e461a1e9bbb82c28b3a829b684a6a",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 20208,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 45
-      },
-      "path": "data/world_map/city_detail/countries/KY.json",
-      "sha256": "5a6f799892034d9670a47351ab5c86a0592b05c9c0341c0b91d0e005e459040a",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 88466,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 205
-      },
-      "path": "data/world_map/city_detail/countries/KZ.json",
-      "sha256": "703aad8b7aad99944dc685caaee0f82086550c0eee7ecf3354e6b026ff384349",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 15232,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 34
-      },
-      "path": "data/world_map/city_detail/countries/LA.json",
-      "sha256": "655bff91ce96fb0e9b3b41c8ad4ea5c2c4e1f80008f41314e0f5b0ccd3dd2c9e",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 13153,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 30
-      },
-      "path": "data/world_map/city_detail/countries/LB.json",
-      "sha256": "4eba97feafcf07deb7ef937ecdcb4b05c15bdf70690983111ac01a9d3cb8fa9d",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 4735,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 10
-      },
-      "path": "data/world_map/city_detail/countries/LC.json",
-      "sha256": "592b0ecc5453530beb4a159918c9f6d7038b5c30e6ec074b1408c55df2f5a0a7",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 4997,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 11
-      },
-      "path": "data/world_map/city_detail/countries/LI.json",
-      "sha256": "2d34b1f434fe25c60bee121ee469dec7e2fe75de864789b9da66a12813935ad4",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 32057,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 72
-      },
-      "path": "data/world_map/city_detail/countries/LK.json",
-      "sha256": "6ff14b527b066d66913610f1f72a18d058b4de99c620f3f9a15fe106b31791a2",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 31510,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 71
-      },
-      "path": "data/world_map/city_detail/countries/LT.json",
-      "sha256": "34cdb1897416155c5980fd1eb7b13313f8bf71304ef459c8b2e87cb01216ff69",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 14855,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 33
-      },
-      "path": "data/world_map/city_detail/countries/LU.json",
-      "sha256": "57f640775609341f489b5f3165069bdd258378787e90c45ec4e63a7ba0fea88f",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 22779,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 52
-      },
-      "path": "data/world_map/city_detail/countries/LV.json",
-      "sha256": "7b98d0bdc9d9fd34667191b69541472029a8d0ad9e92cb21114244b22bfa89cd",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 2498,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 5
-      },
-      "path": "data/world_map/city_detail/countries/MC.json",
-      "sha256": "d8f8440f44c28b34938daa1ca2ecec0d7de45bc40ce91e40eead1ab5f1b30065",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 27555,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 63
-      },
-      "path": "data/world_map/city_detail/countries/MD.json",
-      "sha256": "8add2288056bcd9d5943cadc3d1d8a5591d7ce723eba0d202377e8868dd82e17",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 11512,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 26
-      },
-      "path": "data/world_map/city_detail/countries/ME.json",
-      "sha256": "6c99c5d9cb78a9a0ff2c0e7700ffe95a3593ff3be6f4814ffe11048805680f3a",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 1621,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 3
-      },
-      "path": "data/world_map/city_detail/countries/MF.json",
-      "sha256": "d375590ad1d424bbc60eb61266f57a6f22c1aa5a170ce3fdb4ca92875d840201",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 39143,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 90
-      },
-      "path": "data/world_map/city_detail/countries/MK.json",
-      "sha256": "0ccabd2cb7eae90a29675d5b700ef234117a5a986684584c0c5ad09be95c56a7",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 113443,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 252
-      },
-      "path": "data/world_map/city_detail/countries/MM.json",
-      "sha256": "0b3a09b981a1dff4a4c0062438cf0848868124cd3a63e2a9097bf8e006c0f957",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 15515,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 35
-      },
-      "path": "data/world_map/city_detail/countries/MN.json",
-      "sha256": "bf8274242f2bfda741052a299a5386b71a83686d8ed7579f8799be528836be29",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 2883,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 6
-      },
-      "path": "data/world_map/city_detail/countries/MO.json",
-      "sha256": "8ae17dfde928a9f465a46bb2be2c388e5e967a7f3190ce62967845dba83b8585",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 8100,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 17
-      },
-      "path": "data/world_map/city_detail/countries/MQ.json",
-      "sha256": "585e5683a884e0cae251deae007919baeb3b34677b83b3a37e998402c7b75711",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 1189,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 2
-      },
-      "path": "data/world_map/city_detail/countries/MS.json",
-      "sha256": "7f2bf2454898379091bb4e9fec34b022d6a50307f4ea06a092cde02176c78f32",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 28073,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 65
-      },
-      "path": "data/world_map/city_detail/countries/MT.json",
-      "sha256": "1028e9552462ea098cd8004e95ae4d5e71dad745d576d280890d3dd1aaa316ce",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 8536,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 19
-      },
-      "path": "data/world_map/city_detail/countries/MV.json",
-      "sha256": "e5bca0dcf148fe95e8669237c4395fc309f95f9c224b87b0742a446921dc9869",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 838652,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 1827
-      },
-      "path": "data/world_map/city_detail/countries/MX.json",
-      "sha256": "10640d41de085fcfab950ac3a0f2ac937ae30d96f9640359e377393f985d165e",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 237181,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 530
-      },
-      "path": "data/world_map/city_detail/countries/MY.json",
-      "sha256": "89ad643ceea0e342bf01aea59c0b8dbbac001b560a035285a4d1d09b50cd8487",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 33665,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 76
-      },
-      "path": "data/world_map/city_detail/countries/NI.json",
-      "sha256": "0fe69bf237d0cc0f9988ab90a9cd6e5b0fd62fc961f870c5048ef1aa694d77d3",
-      "top_level_keys": [
-        "bounds",
-        "cities",
-        "continent",
-        "count",
-        "country_code",
-        "country_name",
-        "dataset",
-        "generated_at",
-        "license",
-        "schema_version",
-        "shard_id",
-        "source"
-      ],
-      "top_level_type": "object"
-    },
-    {
-      "bytes": 238625,
-      "collection_sizes": {
-        "bounds": 4,
-        "cities": 544
-      },
-      "path": "data/world_map/city_detail/countries/NL.json",
-      "sha256": "75b1252c1b74d31a0a5417b6dc28a96bdcd4c8f0c9e9b0ac7d384f9989beb716",
+      "sha256": "91d14f2dfd177de00b62ca2c1c1cfc73777e67113def2dbb406ac2bcdddfaedd",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -2458,10 +298,10 @@
       "bytes": 51152,
       "collection_sizes": {
         "bounds": 4,
-        "cities": 118
+        "cities": 117
       },
-      "path": "data/world_map/city_detail/countries/NO.json",
-      "sha256": "4124e99a488be01bcbb8b47df4190defbd80757af0e505c582c8dc7e11662b29",
+      "path": "data/world_map/city_detail/countries/BA.json",
+      "sha256": "ae1dadbc0f3db443411d2ded689f47cf828862c7aaf397ce86addf05cbc078c4",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -2479,13 +319,2173 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 24613,
+      "bytes": 5144,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 11
+      },
+      "path": "data/world_map/city_detail/countries/BB.json",
+      "sha256": "9739035ab55d4b298fecb8d56c713cc9fd102d16b17a8b428367fd4937fcb9c6",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 65385,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 145
+      },
+      "path": "data/world_map/city_detail/countries/BD.json",
+      "sha256": "494c63069903a3a07355991e07ff35f1cc04a092acb97ac4b143ec5ebe69589c",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 305554,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 686
+      },
+      "path": "data/world_map/city_detail/countries/BE.json",
+      "sha256": "df429e871f2bb06743e415080a713c6bf78394759a260602cf708b363f4696cb",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 60175,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 138
+      },
+      "path": "data/world_map/city_detail/countries/BG.json",
+      "sha256": "476dc7b125e89471d41117e014cd13c8ff6267d63c685f7f8c098e9707053807",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 5090,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 11
+      },
+      "path": "data/world_map/city_detail/countries/BH.json",
+      "sha256": "8ae19dfd8697e9b65e30d1a8b968718ac9a4562f97600cb6cdff613f9ca87167",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 757,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 1
+      },
+      "path": "data/world_map/city_detail/countries/BL.json",
+      "sha256": "eb3d58633d2978204f02680cce84d484b6862083c04379c22bcfdd20a1a359c9",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 4857,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 10
+      },
+      "path": "data/world_map/city_detail/countries/BM.json",
+      "sha256": "590a2d2d21cba6f372e902834def926a28c6caab8f5ac24398dea398f05bef27",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 12607,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 28
+      },
+      "path": "data/world_map/city_detail/countries/BN.json",
+      "sha256": "6437be10cc0861354b2d108647669f710b4112f092c8fc8ce9626e83456ca7b7",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 1653,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 3
+      },
+      "path": "data/world_map/city_detail/countries/BQ.json",
+      "sha256": "4059a2ab427e75336f9ea26c4e29474ae023f4ff5242d02fb4ed84777420ddd4",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 10874,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 24
+      },
+      "path": "data/world_map/city_detail/countries/BS.json",
+      "sha256": "e8e4a07a57636e7a99c34371299183c0d25f5eab449fe35064b7ce83af9769e6",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 10193,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 23
+      },
+      "path": "data/world_map/city_detail/countries/BT.json",
+      "sha256": "c2cb7711780d356fb83ddd27f077de878d96e3e0459ce89c9f738de645b958eb",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 60572,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 140
+      },
+      "path": "data/world_map/city_detail/countries/BY.json",
+      "sha256": "714826d6ba2fe9569db9d938221803f88427abf7be50fabd3d5c65b9d0e88ba6",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 6032,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 13
+      },
+      "path": "data/world_map/city_detail/countries/BZ.json",
+      "sha256": "0816917a7d45b6b8e8b50922307cda2c3cb86ad2550520fa918e7d15efc78b1b",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 594111,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 1309
+      },
+      "path": "data/world_map/city_detail/countries/CA.json",
+      "sha256": "e6be00db966a64dd6acee15915e11697040a16e42865bff606926befaf866129",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 751,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 1
+      },
+      "path": "data/world_map/city_detail/countries/CC.json",
+      "sha256": "bec3d4a0179c525cebd226649b04d3eade6b4b9b336d69ac6142b66a57a45864",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 157367,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 353
+      },
+      "path": "data/world_map/city_detail/countries/CH.json",
+      "sha256": "f11dd061044e17d82e820ca7b079c7bee6287ba714392914bd7fd5bf2a40de36",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 1253539,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 2879
+      },
+      "path": "data/world_map/city_detail/countries/CN.json",
+      "sha256": "2a2aa61855d09b1fc6816f49373d1584aced21a6de8926dbab0d00e60734a4e5",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 34296,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 76
+      },
+      "path": "data/world_map/city_detail/countries/CR.json",
+      "sha256": "de18c34279067a2f12da8c51a6af6e6d960f07339490279a485b2deaaae76470",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 75418,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 169
+      },
+      "path": "data/world_map/city_detail/countries/CU.json",
+      "sha256": "f8ce05ee94997afc685ee561fc6cf19d255f6f29862e547595ad44df5f100d1d",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 2956,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 6
+      },
+      "path": "data/world_map/city_detail/countries/CW.json",
+      "sha256": "35eb752947a9a2cff2f71239b9d279a28618ad6cc13d1db111a50294bdf5ff73",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 15510,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 35
+      },
+      "path": "data/world_map/city_detail/countries/CY.json",
+      "sha256": "50b5669d8702187e189383d2c68a39f44c005ee3c36c90006462194d84b8a14c",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 158496,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 354
+      },
+      "path": "data/world_map/city_detail/countries/CZ.json",
+      "sha256": "015d2776e0153de223ffd1acc8356825e537436691aeb739eec514d9a2b7cd10",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 1390212,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 3076
+      },
+      "path": "data/world_map/city_detail/countries/DE.json",
+      "sha256": "0b6ad13edb81cace52a3808c4b3f045901f934d9929c2e53ecb1d88996734e77",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 71694,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 163
+      },
+      "path": "data/world_map/city_detail/countries/DK.json",
+      "sha256": "487663270f72b9091d54fb66792a32f176c7484f4efefc007a5cf1d581b9fd61",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 4673,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 10
+      },
+      "path": "data/world_map/city_detail/countries/DM.json",
+      "sha256": "bf48bfd2f05171b99eff866488b6c5f48d1ddbc33215cc8842876a6452ea133d",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 55634,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 118
+      },
+      "path": "data/world_map/city_detail/countries/DO.json",
+      "sha256": "9cb1f9ead51c0c72260baf048749fe507a2be689e182b744a41e619b561e8930",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 17263,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 39
+      },
+      "path": "data/world_map/city_detail/countries/EE.json",
+      "sha256": "4efc4f0f72a314bd6bd5d8107b960a4cf732a3d6df484ae2d13988a27a48280d",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 660547,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 1477
+      },
+      "path": "data/world_map/city_detail/countries/ES.json",
+      "sha256": "62755f24b84bf98b687aacdb563d44976f609ad9431d20cc413d412b8f8eb922",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 151137,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 343
+      },
+      "path": "data/world_map/city_detail/countries/FI.json",
+      "sha256": "b63d3868dd58763ef0640a470af695695ab69080f89329ff560404a09800be5c",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 2924,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 6
+      },
+      "path": "data/world_map/city_detail/countries/FO.json",
+      "sha256": "857c60384fedacbb7077db29fb068ecddbf26c7f101fbfe4dcae103be42167f8",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 846104,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 1910
+      },
+      "path": "data/world_map/city_detail/countries/GB.json",
+      "sha256": "33b3d04f640a319017cd96c6da4eeb6abad22104e4536bcc5a8f1a2b83bbd91f",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 3389,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 7
+      },
+      "path": "data/world_map/city_detail/countries/GD.json",
+      "sha256": "7cd6d5aa20570934f0b728e5ea1e4b4d6c256e6dcdeb0fddeb8a279bc507fc2a",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 25462,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 58
+      },
+      "path": "data/world_map/city_detail/countries/GE.json",
+      "sha256": "20ca21c5a3ca3ddec1e241dda2c83dac63ada31f9dbe789854b407ec14d1d5e7",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 5230,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 11
+      },
+      "path": "data/world_map/city_detail/countries/GG.json",
+      "sha256": "6ba7e3b647d2c2153a6d45b15004cd022fe2133c2637a198ee39d36775e13c4c",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 1658,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 3
+      },
+      "path": "data/world_map/city_detail/countries/GI.json",
+      "sha256": "bf58072dbc28f7d4a6ed8f700652301d13cdd3ea34d914a9cbf9bee2d0babc5a",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 2467,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 5
+      },
+      "path": "data/world_map/city_detail/countries/GL.json",
+      "sha256": "e2b6ed87d03b85b1e3b09516d0339a51d10883d8120a1d64dd6be614b2a953f1",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 10415,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 22
+      },
+      "path": "data/world_map/city_detail/countries/GP.json",
+      "sha256": "9305ec65582805e0b9350a138d6a96f4b50599d5e83d822d2f72451cbd6a3c95",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 126125,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 284
+      },
+      "path": "data/world_map/city_detail/countries/GR.json",
+      "sha256": "a839f3283af05fb90c3e57d1b311e6fb4f6c097970bcbf9144c6faf59fd43658",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 92970,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 205
+      },
+      "path": "data/world_map/city_detail/countries/GT.json",
+      "sha256": "fde08f4702cd399522a7a0b6882d9405af4bb78aa63d30d1c49d614dc2b69b20",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 119120,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 266
+      },
+      "path": "data/world_map/city_detail/countries/HK.json",
+      "sha256": "8c33434ad0418fb86ce786934c49cf267398c9466fc2482849217e6668c1624e",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 71213,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 158
+      },
+      "path": "data/world_map/city_detail/countries/HN.json",
+      "sha256": "43c4fb952224246fc04a4e15ef3e2462e9788a674b5409f2efa8d0852f9d7c9d",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 33632,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 76
+      },
+      "path": "data/world_map/city_detail/countries/HR.json",
+      "sha256": "aa0bd3b44c2a1ac044b6e5f8d2e95973a3e5cd12e3fa3af83784ca5ffa12d8da",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 23500,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 51
+      },
+      "path": "data/world_map/city_detail/countries/HT.json",
+      "sha256": "7bd6a44db298f0723b4e42dccab54b79b894c30f562039a9c05a4499984c4946",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 166599,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 378
+      },
+      "path": "data/world_map/city_detail/countries/HU.json",
+      "sha256": "4d10fe9a305dd6a6b5af17d897cf486a334e55a4d117313a49cc32faa23a595e",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 208423,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 479
+      },
+      "path": "data/world_map/city_detail/countries/ID.json",
+      "sha256": "1f45bb31beaaed4aba3367fc5834ea686fa2f924d159c3d2a07bec70b0eedb30",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 66095,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 152
+      },
+      "path": "data/world_map/city_detail/countries/IE.json",
+      "sha256": "5b2a3f7dde88e250afe37f0971640693eed04226b97874c70c78537c0fd6b410",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 78192,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 178
+      },
+      "path": "data/world_map/city_detail/countries/IL.json",
+      "sha256": "561ed6126b113745da725b233cb4b12139c570325054c48fd1bd7e5cb7425b94",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 9482,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 21
+      },
+      "path": "data/world_map/city_detail/countries/IM.json",
+      "sha256": "b04b2ead7375ed509574aaa0e46ff3250a924c5687849e5cab6f08fffb81dd23",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 2868835,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 6526
+      },
+      "path": "data/world_map/city_detail/countries/IN.json",
+      "sha256": "fde386d64916d62551fc8879a550157282ea6fb7fcab4102046002a11eef0993",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 46554,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 105
+      },
+      "path": "data/world_map/city_detail/countries/IQ.json",
+      "sha256": "b5b99eb52608ccc402a07e0630f0a2cabe9cc7d2adbc8e2194f1cadc35dce774",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 361652,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 836
+      },
+      "path": "data/world_map/city_detail/countries/IR.json",
+      "sha256": "bcd1caa03569186e6ce964fd0d47dbd08339df25a323fa9239fcbb096bd39d28",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 6576,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 14
+      },
+      "path": "data/world_map/city_detail/countries/IS.json",
+      "sha256": "21c26c5143ee4cd569053d2ef9952edfb2194d8ba913bb0e5ec8f8c1e9f60f9a",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 906484,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 2031
+      },
+      "path": "data/world_map/city_detail/countries/IT.json",
+      "sha256": "27a0a1db756f0af7217d515db35236ed064647df6723e10b9a51f754ff383995",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 1621,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 3
+      },
+      "path": "data/world_map/city_detail/countries/JE.json",
+      "sha256": "9c7bffc70a1c10e3fc11876ba7d3ce4660d30de0b334dfe8b273614ff2e8f1c1",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 19858,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 44
+      },
+      "path": "data/world_map/city_detail/countries/JM.json",
+      "sha256": "fc604e96f49da264a2e25d5a9e2e23e9865c69df58b764e61d2dd295e7155bc3",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 33039,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 76
+      },
+      "path": "data/world_map/city_detail/countries/JO.json",
+      "sha256": "0c9391e0f2ec0484632fc9c56d66133fe4215cf4638917dc9ae6fd497f64b50b",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 785353,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 1798
+      },
+      "path": "data/world_map/city_detail/countries/JP.json",
+      "sha256": "73ead42b2c955fa29ddce6d9e1c5e2da0f42640733d6bbf2cbad801c398a700a",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 26638,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 61
+      },
+      "path": "data/world_map/city_detail/countries/KG.json",
+      "sha256": "162172aa4566ea12e3d6f9eeac7bb69217d19b47e17ed1f7acc393c8c79060e2",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 56344,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 124
+      },
+      "path": "data/world_map/city_detail/countries/KH.json",
+      "sha256": "4de161ef5c40eaec097432a7d205355013b32daff7a58ad77bee48857479a867",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 6510,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 14
+      },
+      "path": "data/world_map/city_detail/countries/KN.json",
+      "sha256": "e46b24e27207c91c340dcb756df10107796e4d0260ce79641870a109c9c73e0a",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 52130,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 118
+      },
+      "path": "data/world_map/city_detail/countries/KP.json",
+      "sha256": "1644c91b700547931fe0ad86b9cc606d5ec5f16eba59e736314453169aab7ecd",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 67378,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 154
+      },
+      "path": "data/world_map/city_detail/countries/KR.json",
+      "sha256": "351baedd21d0eea46bcd77d6db2a8f72b60227da67e986277ba6774a135a4694",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 10406,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 23
+      },
+      "path": "data/world_map/city_detail/countries/KW.json",
+      "sha256": "fe0ebc29b74e34fef9ad0f854ca6cb2c376b867ab14a41d2e9ac4e8aceb3c513",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 20207,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 45
+      },
+      "path": "data/world_map/city_detail/countries/KY.json",
+      "sha256": "ffbc461b585c42a0a47197d359fefb0febdca93d9c4b4d95ecf9beb283949962",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 88465,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 205
+      },
+      "path": "data/world_map/city_detail/countries/KZ.json",
+      "sha256": "f6368a6cf47f6aabcef32ad3094cff05e892ba0b583e0908b8ad0085daec17dd",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 15231,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 34
+      },
+      "path": "data/world_map/city_detail/countries/LA.json",
+      "sha256": "44055db53e3ab8c3f846a6a297542c8b483509263bf28b599b9f93021567aaed",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 13152,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 30
+      },
+      "path": "data/world_map/city_detail/countries/LB.json",
+      "sha256": "69c38f79aa043860437f2d1ed1e68b586da7d6a17b4aa944c133cb32e65ff1df",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 4734,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 10
+      },
+      "path": "data/world_map/city_detail/countries/LC.json",
+      "sha256": "01ea5ae9529c382d60dd0c8dab5e6f38ffd0d9d99a41804932a71e26c32c2086",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 4996,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 11
+      },
+      "path": "data/world_map/city_detail/countries/LI.json",
+      "sha256": "909e21be6e1b25734801933683a68f3a7a0d4404fe7ddf9125ab2c9f4501de5c",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 32056,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 72
+      },
+      "path": "data/world_map/city_detail/countries/LK.json",
+      "sha256": "0b780601c5890c2d27ccda0c0ddbb5002f0155c82b859032a09c930ed20ca232",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 31509,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 71
+      },
+      "path": "data/world_map/city_detail/countries/LT.json",
+      "sha256": "841277cedb1534e3cc2e7b66081878cad0bfa17986a185b33b8e4ba36b751657",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 14854,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 33
+      },
+      "path": "data/world_map/city_detail/countries/LU.json",
+      "sha256": "494459c9f80132f655ff31629a9026cea4d0308b635a088d46835cbc8f60c572",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 22778,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 52
+      },
+      "path": "data/world_map/city_detail/countries/LV.json",
+      "sha256": "9454eaade968b5b0e7cd792cb73321a10b0d37b2445d42f168a67229f4ad1edf",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 2497,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 5
+      },
+      "path": "data/world_map/city_detail/countries/MC.json",
+      "sha256": "4d5a9fe9c76ebe2feb6f7ebea19b75b2d3938fd71f6417fc7b27d466e92df880",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 27554,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 63
+      },
+      "path": "data/world_map/city_detail/countries/MD.json",
+      "sha256": "a5b7ba8af9e4898699139c42eaaf20e776be7c19249dbe0f3f7c9ace5a51fedf",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 11511,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 26
+      },
+      "path": "data/world_map/city_detail/countries/ME.json",
+      "sha256": "8f9da6363d169d53ec9bf898336352968d8a8fdee49aea115464d07b2492a2dd",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 1620,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 3
+      },
+      "path": "data/world_map/city_detail/countries/MF.json",
+      "sha256": "1e97e0780dfd4cadc8643bc1c3b19bf6538fcf8d271fef5784b980b8e15ce79a",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 39142,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 90
+      },
+      "path": "data/world_map/city_detail/countries/MK.json",
+      "sha256": "1be2e89a01cd1d75c443e4903576fdb79edac79277f09472a0aeda9bbb1b68c2",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 113442,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 252
+      },
+      "path": "data/world_map/city_detail/countries/MM.json",
+      "sha256": "b5e09e36e0c32c2d724a9d39d28ab25ca32e17b3f13d85523c2de2aeb903d2de",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 15514,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 35
+      },
+      "path": "data/world_map/city_detail/countries/MN.json",
+      "sha256": "020eb4f1f594e4e55cb105176644b900f71913bea2951fdd4ec432410e9cd36c",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 2882,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 6
+      },
+      "path": "data/world_map/city_detail/countries/MO.json",
+      "sha256": "ba5da6316a6971b57a410027af99e09e664b02efbc83d0a94b26241ce7a2a3b7",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 8099,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 17
+      },
+      "path": "data/world_map/city_detail/countries/MQ.json",
+      "sha256": "2e3c6077292afa92c8d83990f0a3d2b6df9aacac4dade689a31479400db33dbc",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 1188,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 2
+      },
+      "path": "data/world_map/city_detail/countries/MS.json",
+      "sha256": "1916a0cbf3f25b54d121a847058ae9af25c92f98e492e385746e2f9a0a129d36",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 28072,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 65
+      },
+      "path": "data/world_map/city_detail/countries/MT.json",
+      "sha256": "cbcc1c679df349199bcd763d80c7c19d7f4062685d3de9db1316b409d52404a0",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 8535,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 19
+      },
+      "path": "data/world_map/city_detail/countries/MV.json",
+      "sha256": "d284119c16a7629b758e075a63724b36a7d54025b1f453b508a6da3854e71645",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 838651,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 1827
+      },
+      "path": "data/world_map/city_detail/countries/MX.json",
+      "sha256": "f8ebdaa31b11b97a8563b80f8312129d9b6538f743829f27565be69f61635e6a",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 237180,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 530
+      },
+      "path": "data/world_map/city_detail/countries/MY.json",
+      "sha256": "986e35d2c135233707abdeac41c4a23ce35e04423b3474f46570d97d81940bb3",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 33664,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 76
+      },
+      "path": "data/world_map/city_detail/countries/NI.json",
+      "sha256": "a0b1604cb40dadf66b394ab6a5f6e0e973ccb89b82fc709f9606f5d7c222ba74",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 238624,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 544
+      },
+      "path": "data/world_map/city_detail/countries/NL.json",
+      "sha256": "ea970590be94c4b21dd2bbbb2e415df42e16633770c4aa9515243d63fb7edb86",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 51151,
+      "collection_sizes": {
+        "bounds": 4,
+        "cities": 118
+      },
+      "path": "data/world_map/city_detail/countries/NO.json",
+      "sha256": "e469c0b5bde240b8cf199548e92ed7136011770b4408b422a97290b6caa9c2da",
+      "top_level_keys": [
+        "bounds",
+        "cities",
+        "continent",
+        "count",
+        "country_code",
+        "country_name",
+        "dataset",
+        "generated_at",
+        "license",
+        "schema_version",
+        "shard_id",
+        "source"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 24612,
       "collection_sizes": {
         "bounds": 4,
         "cities": 54
       },
       "path": "data/world_map/city_detail/countries/NP.json",
-      "sha256": "a3e8e626739d5c7c99313831a2f299190bccd16380bff3839e8ec7b2e64b044a",
+      "sha256": "8445b81656e9ad98626722877bfd6fb8d68c1e564bf3018ee8116c4c955d9674",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -2503,13 +2503,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 13978,
+      "bytes": 13977,
       "collection_sizes": {
         "bounds": 4,
         "cities": 32
       },
       "path": "data/world_map/city_detail/countries/OM.json",
-      "sha256": "9d7e9f1b299884a98f8fbb4fced25d6cb9a1ac4b0159d6a039ed52579d99ce86",
+      "sha256": "d80e591c005619579e5b7722d0bbe09328375fc05894652fc050e07b77b916a4",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -2527,13 +2527,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 31262,
+      "bytes": 31261,
       "collection_sizes": {
         "bounds": 4,
         "cities": 69
       },
       "path": "data/world_map/city_detail/countries/PA.json",
-      "sha256": "687165ee83d6bdf266b131335bb5688986c06d96de0a1585914499cf1953281f",
+      "sha256": "884fcc7ae8177e479e3bcf2cc1d460e9895b7e3613382471bc2deaecc31505e4",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -2551,13 +2551,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 605088,
+      "bytes": 605087,
       "collection_sizes": {
         "bounds": 4,
         "cities": 1376
       },
       "path": "data/world_map/city_detail/countries/PH.json",
-      "sha256": "b859793b85eebb3b078ffcd22489c6aec9c0bedb1f15484b0b1c804a1d81e0ba",
+      "sha256": "82bb7389a025325a914d354898f6c965ad7b87a99a1186aca278a3f0c96d4b5f",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -2575,13 +2575,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 218350,
+      "bytes": 218349,
       "collection_sizes": {
         "bounds": 4,
         "cities": 490
       },
       "path": "data/world_map/city_detail/countries/PK.json",
-      "sha256": "c804e5d6177bc671291d808b24af9f532428a65b9c0d0dd046c06071305050bb",
+      "sha256": "df9e76a70bbe2f585ef96cd18aaf1cd2ab7f98ec67eb25e8996f99c28877ff2e",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -2599,13 +2599,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 343679,
+      "bytes": 343678,
       "collection_sizes": {
         "bounds": 4,
         "cities": 768
       },
       "path": "data/world_map/city_detail/countries/PL.json",
-      "sha256": "1c705a04df092f7c80a8bfa3c17acff3472ea42462f4ad569b9af9c5c5364c98",
+      "sha256": "4486e47271d497706bcb613636e9ff69316deff831d06ed83ec079bb59e17abc",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -2623,13 +2623,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 1210,
+      "bytes": 1209,
       "collection_sizes": {
         "bounds": 4,
         "cities": 2
       },
       "path": "data/world_map/city_detail/countries/PM.json",
-      "sha256": "4bc77d6125a6e1d918a88c31eeb7eab443e01654787cadc05391303983540bf3",
+      "sha256": "3f6dd4395b542f9a97bb9d8363ab6d8500abba19b83f91486ce68c2e5caf2c65",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -2647,13 +2647,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 42269,
+      "bytes": 42268,
       "collection_sizes": {
         "bounds": 4,
         "cities": 94
       },
       "path": "data/world_map/city_detail/countries/PR.json",
-      "sha256": "b0abf4afb514239c5e4d6e216bc7e169da17733171394719d241e1039ab8f887",
+      "sha256": "830e706f02031ba2a4d6191da8a56c6dcc99f878e2049872358b5adddfd99cf8",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -2671,13 +2671,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 56211,
+      "bytes": 56210,
       "collection_sizes": {
         "bounds": 4,
         "cities": 127
       },
       "path": "data/world_map/city_detail/countries/PS.json",
-      "sha256": "14f82688a1e4123d9d7f19a7e885f98a5835414f0bbeb4a67743aa3145d7e7ce",
+      "sha256": "9817c9a9605dbeca81f7c96b81c330e51dc2b87307b474372ee8b44611914729",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -2695,13 +2695,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 243563,
+      "bytes": 243562,
       "collection_sizes": {
         "bounds": 4,
         "cities": 544
       },
       "path": "data/world_map/city_detail/countries/PT.json",
-      "sha256": "615834fddceea09bf6fb44a06987a48f1bd5221697a8cd76ba3bc1ff17ac93e0",
+      "sha256": "df76185f3463b55cc5c03fd2f7b56588c638669dcb14db8ea3f2775b6a1bf872",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -2719,13 +2719,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 16899,
+      "bytes": 16898,
       "collection_sizes": {
         "bounds": 4,
         "cities": 37
       },
       "path": "data/world_map/city_detail/countries/QA.json",
-      "sha256": "1cbdebb52ed65b531acfeeb17e7aa78df53e7e6017efad6fd37d30fde13a88ab",
+      "sha256": "d3cd8143ed6a377ead124101a4e864e2eb944faf0f998c01f0827a7222eded60",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -2743,13 +2743,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 346311,
+      "bytes": 346310,
       "collection_sizes": {
         "bounds": 4,
         "cities": 788
       },
       "path": "data/world_map/city_detail/countries/RO.json",
-      "sha256": "f20b2abde344595b8f54a9b4d46cf295b4d4c380b3257ea63be95b44a1dfcbc6",
+      "sha256": "c9055a3c4f8915a3d41f6c5cdc87a48f2cfc37f4da7124dc56dd920b4027182a",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -2767,13 +2767,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 46927,
+      "bytes": 46926,
       "collection_sizes": {
         "bounds": 4,
         "cities": 106
       },
       "path": "data/world_map/city_detail/countries/RS.json",
-      "sha256": "0dd2d8c93e8036f1864d64b3159dbe5f2dcfc32ca7ac7c4ac860d5f5197eb6f4",
+      "sha256": "137900dc362be79fb714975aa27e39a5670629053355a2709d9f25cb883c867c",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -2791,13 +2791,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 1202425,
+      "bytes": 1202424,
       "collection_sizes": {
         "bounds": 4,
         "cities": 2753
       },
       "path": "data/world_map/city_detail/countries/RU.json",
-      "sha256": "039742cf4083e55560d00f3fe1926871323734a00c0890b55c93a6bb7a408744",
+      "sha256": "4db3f3ecdaaf7cb7fa59e66ba467914767aea9b75f0aac408e00c2c20b61894a",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -2815,13 +2815,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 62580,
+      "bytes": 62579,
       "collection_sizes": {
         "bounds": 4,
         "cities": 144
       },
       "path": "data/world_map/city_detail/countries/SA.json",
-      "sha256": "e83ccdb6ba45927774eae732d5e54452b5357277eb77e5235be70e5cff29864c",
+      "sha256": "a8ef145f4ec22073f145e54e8380b8f780b902c4698e03f4babdbcffc756dafb",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -2839,13 +2839,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 122841,
+      "bytes": 122840,
       "collection_sizes": {
         "bounds": 4,
         "cities": 279
       },
       "path": "data/world_map/city_detail/countries/SE.json",
-      "sha256": "f74943e78608d74c48f6440f68429480e2af459c8430dc97d921f8a3929f21ec",
+      "sha256": "c5bce8aa6482721508fbaf7165c0942030df46eb5a055b5e61c1f8e2f7a72712",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -2863,13 +2863,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 42660,
+      "bytes": 42659,
       "collection_sizes": {
         "bounds": 4,
         "cities": 95
       },
       "path": "data/world_map/city_detail/countries/SG.json",
-      "sha256": "4cb317afb3fe41641679f2cce12693a077cb46eb548e7c1526fd37e8abdbed78",
+      "sha256": "905f850e6905566b25648581bc4fefc1ec14c500b07f11376378196e1482cca1",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -2887,13 +2887,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 93578,
+      "bytes": 93577,
       "collection_sizes": {
         "bounds": 4,
         "cities": 213
       },
       "path": "data/world_map/city_detail/countries/SI.json",
-      "sha256": "f08214af4f79dea30215b7772bab86cd38dc1b6509f20d6eed890d33ae05f3f2",
+      "sha256": "f37b88cfbf855ea0e4d26c3697fd59837c7e38be1a37f3ca5491618e80e6ea17",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -2911,13 +2911,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 1218,
+      "bytes": 1217,
       "collection_sizes": {
         "bounds": 4,
         "cities": 2
       },
       "path": "data/world_map/city_detail/countries/SJ.json",
-      "sha256": "ae4d542661e4c98197ebf062c70b3d8c11f66a7d96797ddb38b36dd3e3b53c65",
+      "sha256": "68cd255b99d249f51896376a4188df6044eb67c25af435b35ceb290bd4cc2c52",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -2935,13 +2935,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 66401,
+      "bytes": 66400,
       "collection_sizes": {
         "bounds": 4,
         "cities": 147
       },
       "path": "data/world_map/city_detail/countries/SK.json",
-      "sha256": "d651001778450cb2bd2c98c2a83a2276b9e67a5f6dd9f29ca8c07eb90f15119f",
+      "sha256": "ee8c19aa46a5fe4840653c8acdb4f8fb925c85a8bf995e3781d9d48a6aec6712",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -2959,13 +2959,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 5178,
+      "bytes": 5177,
       "collection_sizes": {
         "bounds": 4,
         "cities": 11
       },
       "path": "data/world_map/city_detail/countries/SM.json",
-      "sha256": "7b2806d2887f883c975c39bfac8f647228ba3fd55db2c2fae6be33656f42a1b6",
+      "sha256": "d853e9447e8eb506f1c8603bc54fad6506ae9f129e9b9734a2e5fbb8ffb556df",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -2983,13 +2983,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 33389,
+      "bytes": 33388,
       "collection_sizes": {
         "bounds": 4,
         "cities": 74
       },
       "path": "data/world_map/city_detail/countries/SV.json",
-      "sha256": "7d06a33dd3d26e4f84580511a7b3ab0dcf55d2b257c0ef1f59934781c0f8fab5",
+      "sha256": "772a707f68db697831ec751332bf792e2458c46a6acb410a30cb8dc8fa19c37c",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -3007,13 +3007,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 2570,
+      "bytes": 2569,
       "collection_sizes": {
         "bounds": 4,
         "cities": 5
       },
       "path": "data/world_map/city_detail/countries/SX.json",
-      "sha256": "aa0d8f0135062bd8c49dae22eb4b84a21ef5a44387e7f63c8472d25d2b42c143",
+      "sha256": "e862cf34fe26c18ee4bea3d8a839b7e9b272cd69b7e4c6bb5222c701b40b8281",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -3031,13 +3031,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 49393,
+      "bytes": 49392,
       "collection_sizes": {
         "bounds": 4,
         "cities": 113
       },
       "path": "data/world_map/city_detail/countries/SY.json",
-      "sha256": "cc441defb772a689a31012a18da7c3927f08b9a8f4ce822aded84d1802871f94",
+      "sha256": "ec75fdbcc1a840eddcaec61fc6e0a40c632b19c7bc05fedb6fc8bcae83e3bf3d",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -3055,13 +3055,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 1232,
+      "bytes": 1231,
       "collection_sizes": {
         "bounds": 4,
         "cities": 2
       },
       "path": "data/world_map/city_detail/countries/TC.json",
-      "sha256": "597bd7c5cd912c1858e8b5a1649a027dc1cbccf3f7016597d84cd4cc7a1087e5",
+      "sha256": "a59fe0387b09f493d90119706a3fc81f718d9ee1fc1b0730efdae3bb80f875a5",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -3079,13 +3079,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 200473,
+      "bytes": 200472,
       "collection_sizes": {
         "bounds": 4,
         "cities": 448
       },
       "path": "data/world_map/city_detail/countries/TH.json",
-      "sha256": "0b5bc4cfdc0bd2a1aca4fdcbc730e3b7524dced738a5daf3091d239af7f6d2cd",
+      "sha256": "a1010418ea91c3a221269bfc6c96142f30228acaff030542df13e7e15c30611b",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -3103,13 +3103,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 27999,
+      "bytes": 27998,
       "collection_sizes": {
         "bounds": 4,
         "cities": 64
       },
       "path": "data/world_map/city_detail/countries/TJ.json",
-      "sha256": "271ced529ceed463d3c1bcf53f5f424fd02e95fce3518b3b54934ae8ea532233",
+      "sha256": "a042b8a2d6649aee1c09b8cc6ea2f4179fb811fe739a6bb0161944a86bd6c215",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -3127,13 +3127,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 32223,
+      "bytes": 32222,
       "collection_sizes": {
         "bounds": 4,
         "cities": 74
       },
       "path": "data/world_map/city_detail/countries/TM.json",
-      "sha256": "ba6e0f2066729e1a94654eba1ed6b34a4a3ecba635ab30a1ef20906c2c59013d",
+      "sha256": "e1e53e55275dfe2d28d9944853724786894039442f99edee96ee9fc325344a45",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -3151,13 +3151,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 379804,
+      "bytes": 379803,
       "collection_sizes": {
         "bounds": 4,
         "cities": 866
       },
       "path": "data/world_map/city_detail/countries/TR.json",
-      "sha256": "2877eb1a157e72f2baaaaab9859bc6c9eedac418740d4190b586cc70cf28036c",
+      "sha256": "0858fe9c0f79a7e598e6b4728e4db1d3c423e06ec7268e823e948557473b2466",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -3175,13 +3175,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 10109,
+      "bytes": 10108,
       "collection_sizes": {
         "bounds": 4,
         "cities": 22
       },
       "path": "data/world_map/city_detail/countries/TT.json",
-      "sha256": "d4a55c1ef4800352076081d9962b2475e80345f1a55be1d51c3f6d4c316f6495",
+      "sha256": "e446c0021261f673e2c431f192c85c859a899090e426ec3c16fc22888618b5f7",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -3199,13 +3199,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 35558,
+      "bytes": 35557,
       "collection_sizes": {
         "bounds": 4,
         "cities": 80
       },
       "path": "data/world_map/city_detail/countries/TW.json",
-      "sha256": "b1ba4d7d753bcfc240dc641399f3cf5386f9f0ecf6b2bcc1c869544003bce068",
+      "sha256": "310541bc7a3fdeb3a9c191ab0e185ecd3c61f3e35d71e0c53d5bc086ab9dbf48",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -3223,13 +3223,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 443332,
+      "bytes": 443331,
       "collection_sizes": {
         "bounds": 4,
         "cities": 1012
       },
       "path": "data/world_map/city_detail/countries/UA.json",
-      "sha256": "ed6abc8d0b1c71756c51e24699ccebb752fa8006e6572e009f7596d7238bd9ba",
+      "sha256": "3e8c84e1593148c90461fbd6b2244a941fd4f78f776027a2933cfaa50ba3e177",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -3247,13 +3247,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 3369040,
+      "bytes": 3369039,
       "collection_sizes": {
         "bounds": 4,
         "cities": 7555
       },
       "path": "data/world_map/city_detail/countries/US.json",
-      "sha256": "ce67ba457de276cd9215d1bc1367e6f21cb00100715d0014831fc658338164cd",
+      "sha256": "c5f7ee773ef09d26016da027fd9a0713c529333bd9facf36b6776ee7163819cc",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -3271,13 +3271,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 62128,
+      "bytes": 62127,
       "collection_sizes": {
         "bounds": 4,
         "cities": 142
       },
       "path": "data/world_map/city_detail/countries/UZ.json",
-      "sha256": "01e496026f3b7c917f7dae8d5abdc1c5216089163f436f963f39462a8c0eaae9",
+      "sha256": "8984a1a785787485923fbfa28d575ad973db098b3f55fc7e6dd387f89f51e3fe",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -3295,13 +3295,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 748,
+      "bytes": 747,
       "collection_sizes": {
         "bounds": 4,
         "cities": 1
       },
       "path": "data/world_map/city_detail/countries/VA.json",
-      "sha256": "507c4918d26c2487db93030beba0d9ea55e8dcf04d0e897e4af653a5269a8508",
+      "sha256": "d9e8e2f6dd7e1cd51cca21773ae23a9ddc5660c7dd6613c1f6e03aea7506a4f9",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -3319,13 +3319,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 3429,
+      "bytes": 3428,
       "collection_sizes": {
         "bounds": 4,
         "cities": 7
       },
       "path": "data/world_map/city_detail/countries/VC.json",
-      "sha256": "e7ea000bfe87606e52e9203994cc2941834f450ddddd65e83a7ad5b8afda26cf",
+      "sha256": "eef8ee05f6f3724ec9b3b00cb6fef8c663fb1857d487f9980203b761dbc2a3e9",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -3343,13 +3343,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 761,
+      "bytes": 760,
       "collection_sizes": {
         "bounds": 4,
         "cities": 1
       },
       "path": "data/world_map/city_detail/countries/VG.json",
-      "sha256": "7d1d21b4f1a2bdcac5b5ef3bddd7ea6cd186385ee2f5cce1e406263292768445",
+      "sha256": "2c14a2008bec61fa6d922b081d2bda3adc780681500a2081f9f9f8a9d4d5341f",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -3367,13 +3367,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 2105,
+      "bytes": 2104,
       "collection_sizes": {
         "bounds": 4,
         "cities": 4
       },
       "path": "data/world_map/city_detail/countries/VI.json",
-      "sha256": "4334d41fb19e89b5ffc971930d15b781dabc10859a9ddd7b935636d356043889",
+      "sha256": "52391b4d2de1a3fcf25dcd2899285ff1dc87afb81748f514025895b11b320540",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -3391,13 +3391,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 202147,
+      "bytes": 202146,
       "collection_sizes": {
         "bounds": 4,
         "cities": 453
       },
       "path": "data/world_map/city_detail/countries/VN.json",
-      "sha256": "f23797c630935ff3ec5989c1a537b62e3325291337f9634cb642d7120d03919d",
+      "sha256": "1fa373ba11e99680fbe67b17242e167393106e303301f1f86d233c9c3ec5fcc5",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -3415,13 +3415,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 15703,
+      "bytes": 15702,
       "collection_sizes": {
         "bounds": 4,
         "cities": 35
       },
       "path": "data/world_map/city_detail/countries/XK.json",
-      "sha256": "0fc5494bcef0f3fc7b20d0a4fa25cf3a30818f4ab1a92f4e98dc0ed9b3adf09f",
+      "sha256": "5b09615bd73f08d8fb5793c461a908cf0fe1e4b2748af0c9b6c383edc04239d2",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -3439,13 +3439,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 14907,
+      "bytes": 14906,
       "collection_sizes": {
         "bounds": 4,
         "cities": 34
       },
       "path": "data/world_map/city_detail/countries/YE.json",
-      "sha256": "522df9a7f4b9b12bd0c2401f30fa6571122c19d0a42ae4809e4c2efce230b0f9",
+      "sha256": "addcdbd3cfd61262b8057bc7dfd74257b68aba82c6fd2490aa01103f064c00b7",
       "top_level_keys": [
         "bounds",
         "cities",
@@ -3463,13 +3463,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 767019,
+      "bytes": 767018,
       "collection_sizes": {
         "bounds": 4,
         "cities": 1671
       },
       "path": "data/world_map/city_detail/france/FR-11.json",
-      "sha256": "d35c7095f1148db4d4ad94ff534ebec9685a5040df4f00e667139fa7e0791d97",
+      "sha256": "d644803ef3b9d1d3f42d7eb59abd5c1513693cf586a8d27a77c9dd3d504821b5",
       "top_level_keys": [
         "admin1_code",
         "bounds",
@@ -3489,13 +3489,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 837781,
+      "bytes": 837780,
       "collection_sizes": {
         "bounds": 4,
         "cities": 1827
       },
       "path": "data/world_map/city_detail/france/FR-24.json",
-      "sha256": "496935ac6b9bf4e946e8d9836f5fa66ee15a5d1fd7f26b4a36290e7ac863e83c",
+      "sha256": "46a2de5810cc22bbfb920c967c46045bdac42b85ecdc48f064adf5757ca0fe75",
       "top_level_keys": [
         "admin1_code",
         "bounds",
@@ -3515,13 +3515,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 1717740,
+      "bytes": 1717739,
       "collection_sizes": {
         "bounds": 4,
         "cities": 3765
       },
       "path": "data/world_map/city_detail/france/FR-27.json",
-      "sha256": "f0158050d4fa7a9f9af64fec305c4bb5dcbb2d147de92e532e87de58e60d807e",
+      "sha256": "108e13359810750f99e34f78f9aa064da620126db216f3892aff19da4f9604d4",
       "top_level_keys": [
         "admin1_code",
         "bounds",
@@ -3541,13 +3541,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 1265897,
+      "bytes": 1265896,
       "collection_sizes": {
         "bounds": 4,
         "cities": 2733
       },
       "path": "data/world_map/city_detail/france/FR-28.json",
-      "sha256": "b9ba10bee39afc886d08b1ea8a5fb3d149bd024d8327e4b71411b274e2749525",
+      "sha256": "9f024d7827557fc43a3b15f6c73def186377318fe877bc9c99f7a7e7e22c0d25",
       "top_level_keys": [
         "admin1_code",
         "bounds",
@@ -3567,13 +3567,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 1825296,
+      "bytes": 1825295,
       "collection_sizes": {
         "bounds": 4,
         "cities": 4008
       },
       "path": "data/world_map/city_detail/france/FR-32.json",
-      "sha256": "6bc4fb4351a73d175bb78b2bd9a277e7e2b0042fc83c40327daedef88edd1291",
+      "sha256": "b2fa214030e8b923504db9d5a384606c01d27385e9d77fc4bceec7cf9eda1c1c",
       "top_level_keys": [
         "admin1_code",
         "bounds",
@@ -3593,13 +3593,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 2415886,
+      "bytes": 2415885,
       "collection_sizes": {
         "bounds": 4,
         "cities": 5295
       },
       "path": "data/world_map/city_detail/france/FR-44.json",
-      "sha256": "05fea82263e032b00b70cfec29462576e2ae4a63fd7e2b50d3dda1082d7caafa",
+      "sha256": "2cb2269db1bb284afb128420515ea9663bfd2665606065c9b28a4e0af49ce30c",
       "top_level_keys": [
         "admin1_code",
         "bounds",
@@ -3619,13 +3619,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 615431,
+      "bytes": 615430,
       "collection_sizes": {
         "bounds": 4,
         "cities": 1328
       },
       "path": "data/world_map/city_detail/france/FR-52.json",
-      "sha256": "cb7458189e3a8b6b952bcebb9b826c20f6cd74bda48559786e5c459820a60684",
+      "sha256": "87896383ff426741fd5bd16b2ec2c5be020c15f9a1c4a2f3eea662c4a49be0b2",
       "top_level_keys": [
         "admin1_code",
         "bounds",
@@ -3645,13 +3645,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 593749,
+      "bytes": 593748,
       "collection_sizes": {
         "bounds": 4,
         "cities": 1305
       },
       "path": "data/world_map/city_detail/france/FR-53.json",
-      "sha256": "952fb2f8a5c086f1b57ac235b288dfd0085259ab1a2e4b7b8cb1bcaa2f080e2a",
+      "sha256": "21f1be55a948e1f023935eb99c5318e735ab054b679acd249fb88c8ff016dee3",
       "top_level_keys": [
         "admin1_code",
         "bounds",
@@ -3671,13 +3671,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 2041032,
+      "bytes": 2041031,
       "collection_sizes": {
         "bounds": 4,
         "cities": 4459
       },
       "path": "data/world_map/city_detail/france/FR-75.json",
-      "sha256": "576d79749625b19a595525f6fa7bbfc0229f06408c4e4846a3cf256a38a68a48",
+      "sha256": "4c197df9d4939ef8f9447bfd474dc4f42a4e47f9c65d574b3070f1a99b2f3057",
       "top_level_keys": [
         "admin1_code",
         "bounds",
@@ -3697,13 +3697,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 2095488,
+      "bytes": 2095487,
       "collection_sizes": {
         "bounds": 4,
         "cities": 4612
       },
       "path": "data/world_map/city_detail/france/FR-76.json",
-      "sha256": "139b704035850f56d07d1556b710e497247ce500088f5f56276979260422a1fb",
+      "sha256": "1a7d35f084827e64dbe3c4b872480c3104588f968f305a0d3d415be2bfc1b25d",
       "top_level_keys": [
         "admin1_code",
         "bounds",
@@ -3723,13 +3723,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 1955868,
+      "bytes": 1955867,
       "collection_sizes": {
         "bounds": 4,
         "cities": 4271
       },
       "path": "data/world_map/city_detail/france/FR-84.json",
-      "sha256": "ea862e08b43ba8dac4430bc28db9d07e882ef76851d25362c709c41885750d7f",
+      "sha256": "0e7d5e9ccb1e2e26c8ce477d466a4795a1c0b14bd89afd563b490445a3e3d8b4",
       "top_level_keys": [
         "admin1_code",
         "bounds",
@@ -3749,13 +3749,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 559383,
+      "bytes": 559382,
       "collection_sizes": {
         "bounds": 4,
         "cities": 1229
       },
       "path": "data/world_map/city_detail/france/FR-93.json",
-      "sha256": "00ff8b7f76aa072959354bce5fdb9982b9c786c8b9e7698c3c4e95fe51eb2e56",
+      "sha256": "e4b2ed4f8063e0275d7aa7e04d92821703136546c3be7d470ecda06ac7c82184",
       "top_level_keys": [
         "admin1_code",
         "bounds",
@@ -3775,13 +3775,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 165746,
+      "bytes": 165745,
       "collection_sizes": {
         "bounds": 4,
         "cities": 368
       },
       "path": "data/world_map/city_detail/france/FR-94.json",
-      "sha256": "120c7c3ebfe4b6848bcb1f36a13d7e025f4917477ff2eda38d3805bc3e890bd3",
+      "sha256": "69c1a763276e8a59f62027d3dda7758a278ea54903b105603b8478ba2d2e79aa",
       "top_level_keys": [
         "admin1_code",
         "bounds",
@@ -3801,7 +3801,7 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 35669,
+      "bytes": 35668,
       "collection_sizes": {
         "countries": 144,
         "geographic_scope": 3,
@@ -3810,7 +3810,7 @@
         "totals": 4
       },
       "path": "data/world_map/city_detail/index.json",
-      "sha256": "5ac8f49a56b0831d7ddacc767fcdf6439a38322650a0394d01fe6f187f0100b6",
+      "sha256": "de514037f04720493792b7961e39e698741bb4506b4dd91bd9f03ff7b8d7adaa",
       "top_level_keys": [
         "countries",
         "dataset",
@@ -3825,10 +3825,10 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 239,
+      "bytes": 238,
       "collection_sizes": {},
       "path": "data/world_map/city_detail/LICENSE.json",
-      "sha256": "9889c1555308a92506269fe23290f74b250bd0bbc8b622c340a1f55fab5bc936",
+      "sha256": "c1edc6f8a523ac6ab2cefe9a5bbb373934a1f04b7ade83e59f15c40d2b359b51",
       "top_level_keys": [
         "attribution",
         "dataset",
@@ -3839,13 +3839,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 179447,
+      "bytes": 173232,
       "collection_sizes": {
         "countries": 177,
         "name_coverage": 5
       },
       "path": "data/world_map/countries.json",
-      "sha256": "29159c67775632ebc10a6062e731edf8005baafe79231d0e23ad33a2e631ac06",
+      "sha256": "02b3d0882c224547d362a4ed9fdf6871c64f536e01b01c765d450e8288aacc3d",
       "top_level_keys": [
         "countries",
         "hierarchy",
@@ -3857,12 +3857,12 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 4472,
+      "bytes": 4409,
       "collection_sizes": {
         "palettes": 57
       },
       "path": "data/world_map/country_flag_palettes.json",
-      "sha256": "0a95dbb67a6f02007dedbd35892266862933ef2968f50800ad5e50c493772308",
+      "sha256": "d36c200d431d7d3b6ccc782538c094b202cffcfaa423594473faeddb160441df",
       "top_level_keys": [
         "palettes",
         "prototype_notice",
@@ -3908,13 +3908,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 9592,
+      "bytes": 9567,
       "collection_sizes": {
         "countries": 15,
         "policy": 3
       },
       "path": "data/world_map/historical/historical_admin1_1900.json",
-      "sha256": "b70eb630cc4b836214e74eb32b144f6d6502d85d35d3b079a0c28a0c3d791c4f",
+      "sha256": "690396058a7a6096211f819a12b7c9f52d51c67f905b50c86a1700831b23a6a3",
       "top_level_keys": [
         "countries",
         "policy",
@@ -3924,13 +3924,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 1066,
+      "bytes": 1034,
       "collection_sizes": {
         "policy": 3,
         "records": 2
       },
       "path": "data/world_map/historical/major_economy_polity_crosswalk_1900.json",
-      "sha256": "01580acf01f4701f2e76f7ceaef1ec41b01d870433ec978c382341fb25e72171",
+      "sha256": "7209dde2749a9902a874ff895efc4f685a006f07c720a713b0decb387a70f45b",
       "top_level_keys": [
         "policy",
         "records",
@@ -3940,13 +3940,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 13422,
+      "bytes": 13352,
       "collection_sizes": {
         "observer_notes_zh": 1,
         "profiles": 50
       },
       "path": "data/world_map/historical/major_state_profiles_1900.json",
-      "sha256": "cab6bfc14db75e991cd4cec86283e49467ca0680b6eef39584e1c56aeabe2466",
+      "sha256": "03935ba8016a868732f815891f00e396ab9cb59f6c11c7ae3d4c0116501cc1c3",
       "top_level_keys": [
         "observer_notes_zh",
         "profiles",
@@ -3975,13 +3975,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 17319,
+      "bytes": 17193,
       "collection_sizes": {
         "conflicts": 4,
         "entities": 61
       },
       "path": "data/world_map/historical_political_entities_1900.json",
-      "sha256": "4285b640c50cc678b012bcbc491d71f8aedb43258d32d9b2de9c260aafd99b95",
+      "sha256": "8aed226372b106e1a492466edf8acab61ea8a8b159473e4d574b81cb004cf0ba",
       "top_level_keys": [
         "approximation_notice",
         "conflicts",
@@ -3994,7 +3994,7 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 10590,
+      "bytes": 10574,
       "collection_sizes": {
         "country": 10,
         "institutions": 7,
@@ -4002,7 +4002,7 @@
         "official_permissions": 4
       },
       "path": "data/world_map/institutions.json",
-      "sha256": "f41f6ac544bc729340c02f4de16a053f88ee7e5b8dd3f976aba73105638d79d3",
+      "sha256": "dbfb1a35bcc63f5c2129f821cd28be33e704fc69b7fe2349c3a6a777637e50c2",
       "top_level_keys": [
         "country",
         "institutions",
@@ -4045,7 +4045,7 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 1963,
+      "bytes": 1940,
       "collection_sizes": {
         "detail_node_policy": 3,
         "label_budgets": 3,
@@ -4055,7 +4055,7 @@
         "zoom": 8
       },
       "path": "data/world_map/map_modes.json",
-      "sha256": "fb94900bb014ee5dcd0f53993dee16048fd8b6bcdc2cc5324c00eb8de65eea2b",
+      "sha256": "65c61c2817953902043ac542a2c95f5f32d15487d5531855aa1099801510546b",
       "top_level_keys": [
         "boundary_notice",
         "detail_node_policy",
@@ -4073,13 +4073,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 10615,
+      "bytes": 10542,
       "collection_sizes": {
         "family_names": 34,
         "given_names": 28
       },
       "path": "data/world_map/name_pool_fr.json",
-      "sha256": "a5ce3ad10b8d6d5257939ee11cc4dfcd126819ab7f4bc91224227cc8b6fed82f",
+      "sha256": "ed67332e77b22fd33cee22f342faef96d263132cd82a1aeb13024175fa48c229",
       "top_level_keys": [
         "culture_id",
         "family_names",
@@ -4092,13 +4092,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 11600,
+      "bytes": 11559,
       "collection_sizes": {
         "catalog": 11,
         "identities": 2
       },
       "path": "data/world_map/organizations.json",
-      "sha256": "7b2d9c5dc44050e91c030245a32a0ceea8bce52053371e62610c7fe1256531d9",
+      "sha256": "178341c4f522f56bfa1e5c8ab98ec0c3b677fe3b4265329c61291b2b78392533",
       "top_level_keys": [
         "catalog",
         "identities",
@@ -4108,12 +4108,12 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 1929,
+      "bytes": 1915,
       "collection_sizes": {
         "ports": 8
       },
       "path": "data/world_map/ports.json",
-      "sha256": "05a11d928080289968ace21d86fa137bffe5463582b972ff2f10453e7a312eed",
+      "sha256": "cbf735ad2daf640293ade56461412a1068a02a8e42493b8933c513fb79626230",
       "top_level_keys": [
         "ports",
         "prototype_only",
@@ -4122,12 +4122,12 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 1591,
+      "bytes": 1575,
       "collection_sizes": {
         "segments": 9
       },
       "path": "data/world_map/rail_segments.json",
-      "sha256": "83303792e438cdfcec5f6c255038c14ff22cdc902ae3a8426d93e06e07779cf9",
+      "sha256": "d5b1321a73e21cf1e1e2da6898734764467e0e85d62f3dda1c2d2d566d4bbeda",
       "top_level_keys": [
         "prototype_only",
         "schema_version",
@@ -4160,12 +4160,12 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 6481,
+      "bytes": 6465,
       "collection_sizes": {
         "relationships": 10
       },
       "path": "data/world_map/relationships.json",
-      "sha256": "e54d39945fb061f68cf1bca75996d2f0941704f6b53377616f0c0f8c492085e4",
+      "sha256": "803b7874c99ddf08c3e6b11118c2a48a128098be4fe054c23905f33cb3dcf72d",
       "top_level_keys": [
         "prototype_only",
         "relationships",
@@ -4174,12 +4174,12 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 468,
+      "bytes": 458,
       "collection_sizes": {
         "segments": 3
       },
       "path": "data/world_map/road_segments.json",
-      "sha256": "d34edf3ab6bf0f3b268ab3a88360133394985d20bf8acf816b8893c832b58689",
+      "sha256": "b0b15bf94ce4e5a8bee6ce6a756f78bcfabbded6bd8cebd6b06f11af7dfecaea",
       "top_level_keys": [
         "prototype_only",
         "schema_version",
@@ -4189,12 +4189,12 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 859,
+      "bytes": 849,
       "collection_sizes": {
         "routes": 3
       },
       "path": "data/world_map/shipping_routes.json",
-      "sha256": "3812b7e48128bec0c19cab27fbb40303397087b0531591c761df541d532a5861",
+      "sha256": "bee274fca9ec500c6b889faf2cc44cf3b8a7afeebfccb29a8a6ee0bbc65d7266",
       "top_level_keys": [
         "prototype_only",
         "routes",
@@ -4204,13 +4204,13 @@
       "top_level_type": "object"
     },
     {
-      "bytes": 4600,
+      "bytes": 4586,
       "collection_sizes": {
         "default_summary": 4,
         "items": 6
       },
       "path": "data/world_map/world_activity.json",
-      "sha256": "6039bee199be5752f5f18e0521cfa5d214912617a913ce680dbb3c53da2fe9db",
+      "sha256": "a74514c2ca6af4b18800b2d426e7ae48b4247bd751b171319ba9e84478d5f1ab",
       "top_level_keys": [
         "default_summary",
         "items",

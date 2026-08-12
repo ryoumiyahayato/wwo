@@ -73814,7 +73814,7 @@
   "file_count": 183,
   "files": [
     {
-      "bytes": 6762,
+      "bytes": 6738,
       "path": "characters.json",
       "root_keys": [
         "identities",
@@ -73826,7 +73826,7 @@
       }
     },
     {
-      "bytes": 7449,
+      "bytes": 7411,
       "path": "cities.json",
       "root_keys": [
         "cities",
@@ -73838,7 +73838,7 @@
       }
     },
     {
-      "bytes": 239,
+      "bytes": 238,
       "path": "city_detail/LICENSE.json",
       "root_keys": [
         "attribution",
@@ -73850,7 +73850,7 @@
       "schema_identifier": {}
     },
     {
-      "bytes": 3381,
+      "bytes": 3380,
       "path": "city_detail/countries/AD.json",
       "root_keys": [
         "bounds",
@@ -73871,7 +73871,7 @@
       }
     },
     {
-      "bytes": 41921,
+      "bytes": 41920,
       "path": "city_detail/countries/AE.json",
       "root_keys": [
         "bounds",
@@ -73892,7 +73892,7 @@
       }
     },
     {
-      "bytes": 43097,
+      "bytes": 43096,
       "path": "city_detail/countries/AF.json",
       "root_keys": [
         "bounds",
@@ -73913,7 +73913,7 @@
       }
     },
     {
-      "bytes": 4754,
+      "bytes": 4753,
       "path": "city_detail/countries/AG.json",
       "root_keys": [
         "bounds",
@@ -73934,7 +73934,7 @@
       }
     },
     {
-      "bytes": 6688,
+      "bytes": 6687,
       "path": "city_detail/countries/AI.json",
       "root_keys": [
         "bounds",
@@ -73955,7 +73955,7 @@
       }
     },
     {
-      "bytes": 32234,
+      "bytes": 32233,
       "path": "city_detail/countries/AL.json",
       "root_keys": [
         "bounds",
@@ -73976,7 +73976,7 @@
       }
     },
     {
-      "bytes": 35130,
+      "bytes": 35129,
       "path": "city_detail/countries/AM.json",
       "root_keys": [
         "bounds",
@@ -73997,7 +73997,7 @@
       }
     },
     {
-      "bytes": 94983,
+      "bytes": 94982,
       "path": "city_detail/countries/AT.json",
       "root_keys": [
         "bounds",
@@ -74018,7 +74018,7 @@
       }
     },
     {
-      "bytes": 5530,
+      "bytes": 5529,
       "path": "city_detail/countries/AW.json",
       "root_keys": [
         "bounds",
@@ -74039,7 +74039,7 @@
       }
     },
     {
-      "bytes": 1621,
+      "bytes": 1620,
       "path": "city_detail/countries/AX.json",
       "root_keys": [
         "bounds",
@@ -74060,7 +74060,7 @@
       }
     },
     {
-      "bytes": 57239,
+      "bytes": 57238,
       "path": "city_detail/countries/AZ.json",
       "root_keys": [
         "bounds",
@@ -74081,7 +74081,7 @@
       }
     },
     {
-      "bytes": 51153,
+      "bytes": 51152,
       "path": "city_detail/countries/BA.json",
       "root_keys": [
         "bounds",
@@ -74102,7 +74102,7 @@
       }
     },
     {
-      "bytes": 5145,
+      "bytes": 5144,
       "path": "city_detail/countries/BB.json",
       "root_keys": [
         "bounds",
@@ -74123,7 +74123,7 @@
       }
     },
     {
-      "bytes": 65386,
+      "bytes": 65385,
       "path": "city_detail/countries/BD.json",
       "root_keys": [
         "bounds",
@@ -74144,7 +74144,7 @@
       }
     },
     {
-      "bytes": 305555,
+      "bytes": 305554,
       "path": "city_detail/countries/BE.json",
       "root_keys": [
         "bounds",
@@ -74165,7 +74165,7 @@
       }
     },
     {
-      "bytes": 60176,
+      "bytes": 60175,
       "path": "city_detail/countries/BG.json",
       "root_keys": [
         "bounds",
@@ -74186,7 +74186,7 @@
       }
     },
     {
-      "bytes": 5091,
+      "bytes": 5090,
       "path": "city_detail/countries/BH.json",
       "root_keys": [
         "bounds",
@@ -74207,7 +74207,7 @@
       }
     },
     {
-      "bytes": 758,
+      "bytes": 757,
       "path": "city_detail/countries/BL.json",
       "root_keys": [
         "bounds",
@@ -74228,7 +74228,7 @@
       }
     },
     {
-      "bytes": 4858,
+      "bytes": 4857,
       "path": "city_detail/countries/BM.json",
       "root_keys": [
         "bounds",
@@ -74249,7 +74249,7 @@
       }
     },
     {
-      "bytes": 12608,
+      "bytes": 12607,
       "path": "city_detail/countries/BN.json",
       "root_keys": [
         "bounds",
@@ -74270,7 +74270,7 @@
       }
     },
     {
-      "bytes": 1654,
+      "bytes": 1653,
       "path": "city_detail/countries/BQ.json",
       "root_keys": [
         "bounds",
@@ -74291,7 +74291,7 @@
       }
     },
     {
-      "bytes": 10875,
+      "bytes": 10874,
       "path": "city_detail/countries/BS.json",
       "root_keys": [
         "bounds",
@@ -74312,7 +74312,7 @@
       }
     },
     {
-      "bytes": 10194,
+      "bytes": 10193,
       "path": "city_detail/countries/BT.json",
       "root_keys": [
         "bounds",
@@ -74333,7 +74333,7 @@
       }
     },
     {
-      "bytes": 60573,
+      "bytes": 60572,
       "path": "city_detail/countries/BY.json",
       "root_keys": [
         "bounds",
@@ -74354,7 +74354,7 @@
       }
     },
     {
-      "bytes": 6033,
+      "bytes": 6032,
       "path": "city_detail/countries/BZ.json",
       "root_keys": [
         "bounds",
@@ -74375,7 +74375,7 @@
       }
     },
     {
-      "bytes": 594112,
+      "bytes": 594111,
       "path": "city_detail/countries/CA.json",
       "root_keys": [
         "bounds",
@@ -74396,7 +74396,7 @@
       }
     },
     {
-      "bytes": 752,
+      "bytes": 751,
       "path": "city_detail/countries/CC.json",
       "root_keys": [
         "bounds",
@@ -74417,7 +74417,7 @@
       }
     },
     {
-      "bytes": 157368,
+      "bytes": 157367,
       "path": "city_detail/countries/CH.json",
       "root_keys": [
         "bounds",
@@ -74438,7 +74438,7 @@
       }
     },
     {
-      "bytes": 1253540,
+      "bytes": 1253539,
       "path": "city_detail/countries/CN.json",
       "root_keys": [
         "bounds",
@@ -74459,7 +74459,7 @@
       }
     },
     {
-      "bytes": 34297,
+      "bytes": 34296,
       "path": "city_detail/countries/CR.json",
       "root_keys": [
         "bounds",
@@ -74480,7 +74480,7 @@
       }
     },
     {
-      "bytes": 75419,
+      "bytes": 75418,
       "path": "city_detail/countries/CU.json",
       "root_keys": [
         "bounds",
@@ -74501,7 +74501,7 @@
       }
     },
     {
-      "bytes": 2957,
+      "bytes": 2956,
       "path": "city_detail/countries/CW.json",
       "root_keys": [
         "bounds",
@@ -74522,7 +74522,7 @@
       }
     },
     {
-      "bytes": 15511,
+      "bytes": 15510,
       "path": "city_detail/countries/CY.json",
       "root_keys": [
         "bounds",
@@ -74543,7 +74543,7 @@
       }
     },
     {
-      "bytes": 158497,
+      "bytes": 158496,
       "path": "city_detail/countries/CZ.json",
       "root_keys": [
         "bounds",
@@ -74564,7 +74564,7 @@
       }
     },
     {
-      "bytes": 1390213,
+      "bytes": 1390212,
       "path": "city_detail/countries/DE.json",
       "root_keys": [
         "bounds",
@@ -74585,7 +74585,7 @@
       }
     },
     {
-      "bytes": 71695,
+      "bytes": 71694,
       "path": "city_detail/countries/DK.json",
       "root_keys": [
         "bounds",
@@ -74606,7 +74606,7 @@
       }
     },
     {
-      "bytes": 4674,
+      "bytes": 4673,
       "path": "city_detail/countries/DM.json",
       "root_keys": [
         "bounds",
@@ -74627,7 +74627,7 @@
       }
     },
     {
-      "bytes": 55635,
+      "bytes": 55634,
       "path": "city_detail/countries/DO.json",
       "root_keys": [
         "bounds",
@@ -74648,7 +74648,7 @@
       }
     },
     {
-      "bytes": 17264,
+      "bytes": 17263,
       "path": "city_detail/countries/EE.json",
       "root_keys": [
         "bounds",
@@ -74669,7 +74669,7 @@
       }
     },
     {
-      "bytes": 660548,
+      "bytes": 660547,
       "path": "city_detail/countries/ES.json",
       "root_keys": [
         "bounds",
@@ -74690,7 +74690,7 @@
       }
     },
     {
-      "bytes": 151138,
+      "bytes": 151137,
       "path": "city_detail/countries/FI.json",
       "root_keys": [
         "bounds",
@@ -74711,7 +74711,7 @@
       }
     },
     {
-      "bytes": 2925,
+      "bytes": 2924,
       "path": "city_detail/countries/FO.json",
       "root_keys": [
         "bounds",
@@ -74732,7 +74732,7 @@
       }
     },
     {
-      "bytes": 846105,
+      "bytes": 846104,
       "path": "city_detail/countries/GB.json",
       "root_keys": [
         "bounds",
@@ -74753,7 +74753,7 @@
       }
     },
     {
-      "bytes": 3390,
+      "bytes": 3389,
       "path": "city_detail/countries/GD.json",
       "root_keys": [
         "bounds",
@@ -74774,7 +74774,7 @@
       }
     },
     {
-      "bytes": 25463,
+      "bytes": 25462,
       "path": "city_detail/countries/GE.json",
       "root_keys": [
         "bounds",
@@ -74795,7 +74795,7 @@
       }
     },
     {
-      "bytes": 5231,
+      "bytes": 5230,
       "path": "city_detail/countries/GG.json",
       "root_keys": [
         "bounds",
@@ -74816,7 +74816,7 @@
       }
     },
     {
-      "bytes": 1659,
+      "bytes": 1658,
       "path": "city_detail/countries/GI.json",
       "root_keys": [
         "bounds",
@@ -74837,7 +74837,7 @@
       }
     },
     {
-      "bytes": 2468,
+      "bytes": 2467,
       "path": "city_detail/countries/GL.json",
       "root_keys": [
         "bounds",
@@ -74858,7 +74858,7 @@
       }
     },
     {
-      "bytes": 10416,
+      "bytes": 10415,
       "path": "city_detail/countries/GP.json",
       "root_keys": [
         "bounds",
@@ -74879,7 +74879,7 @@
       }
     },
     {
-      "bytes": 126126,
+      "bytes": 126125,
       "path": "city_detail/countries/GR.json",
       "root_keys": [
         "bounds",
@@ -74900,7 +74900,7 @@
       }
     },
     {
-      "bytes": 92971,
+      "bytes": 92970,
       "path": "city_detail/countries/GT.json",
       "root_keys": [
         "bounds",
@@ -74921,7 +74921,7 @@
       }
     },
     {
-      "bytes": 119121,
+      "bytes": 119120,
       "path": "city_detail/countries/HK.json",
       "root_keys": [
         "bounds",
@@ -74942,7 +74942,7 @@
       }
     },
     {
-      "bytes": 71214,
+      "bytes": 71213,
       "path": "city_detail/countries/HN.json",
       "root_keys": [
         "bounds",
@@ -74963,7 +74963,7 @@
       }
     },
     {
-      "bytes": 33633,
+      "bytes": 33632,
       "path": "city_detail/countries/HR.json",
       "root_keys": [
         "bounds",
@@ -74984,7 +74984,7 @@
       }
     },
     {
-      "bytes": 23501,
+      "bytes": 23500,
       "path": "city_detail/countries/HT.json",
       "root_keys": [
         "bounds",
@@ -75005,7 +75005,7 @@
       }
     },
     {
-      "bytes": 166600,
+      "bytes": 166599,
       "path": "city_detail/countries/HU.json",
       "root_keys": [
         "bounds",
@@ -75026,7 +75026,7 @@
       }
     },
     {
-      "bytes": 208424,
+      "bytes": 208423,
       "path": "city_detail/countries/ID.json",
       "root_keys": [
         "bounds",
@@ -75047,7 +75047,7 @@
       }
     },
     {
-      "bytes": 66096,
+      "bytes": 66095,
       "path": "city_detail/countries/IE.json",
       "root_keys": [
         "bounds",
@@ -75068,7 +75068,7 @@
       }
     },
     {
-      "bytes": 78193,
+      "bytes": 78192,
       "path": "city_detail/countries/IL.json",
       "root_keys": [
         "bounds",
@@ -75089,7 +75089,7 @@
       }
     },
     {
-      "bytes": 9483,
+      "bytes": 9482,
       "path": "city_detail/countries/IM.json",
       "root_keys": [
         "bounds",
@@ -75110,7 +75110,7 @@
       }
     },
     {
-      "bytes": 2868836,
+      "bytes": 2868835,
       "path": "city_detail/countries/IN.json",
       "root_keys": [
         "bounds",
@@ -75131,7 +75131,7 @@
       }
     },
     {
-      "bytes": 46555,
+      "bytes": 46554,
       "path": "city_detail/countries/IQ.json",
       "root_keys": [
         "bounds",
@@ -75152,7 +75152,7 @@
       }
     },
     {
-      "bytes": 361653,
+      "bytes": 361652,
       "path": "city_detail/countries/IR.json",
       "root_keys": [
         "bounds",
@@ -75173,7 +75173,7 @@
       }
     },
     {
-      "bytes": 6577,
+      "bytes": 6576,
       "path": "city_detail/countries/IS.json",
       "root_keys": [
         "bounds",
@@ -75194,7 +75194,7 @@
       }
     },
     {
-      "bytes": 906485,
+      "bytes": 906484,
       "path": "city_detail/countries/IT.json",
       "root_keys": [
         "bounds",
@@ -75215,7 +75215,7 @@
       }
     },
     {
-      "bytes": 1622,
+      "bytes": 1621,
       "path": "city_detail/countries/JE.json",
       "root_keys": [
         "bounds",
@@ -75236,7 +75236,7 @@
       }
     },
     {
-      "bytes": 19859,
+      "bytes": 19858,
       "path": "city_detail/countries/JM.json",
       "root_keys": [
         "bounds",
@@ -75257,7 +75257,7 @@
       }
     },
     {
-      "bytes": 33040,
+      "bytes": 33039,
       "path": "city_detail/countries/JO.json",
       "root_keys": [
         "bounds",
@@ -75278,7 +75278,7 @@
       }
     },
     {
-      "bytes": 785354,
+      "bytes": 785353,
       "path": "city_detail/countries/JP.json",
       "root_keys": [
         "bounds",
@@ -75299,7 +75299,7 @@
       }
     },
     {
-      "bytes": 26639,
+      "bytes": 26638,
       "path": "city_detail/countries/KG.json",
       "root_keys": [
         "bounds",
@@ -75320,7 +75320,7 @@
       }
     },
     {
-      "bytes": 56345,
+      "bytes": 56344,
       "path": "city_detail/countries/KH.json",
       "root_keys": [
         "bounds",
@@ -75341,7 +75341,7 @@
       }
     },
     {
-      "bytes": 6511,
+      "bytes": 6510,
       "path": "city_detail/countries/KN.json",
       "root_keys": [
         "bounds",
@@ -75362,7 +75362,7 @@
       }
     },
     {
-      "bytes": 52131,
+      "bytes": 52130,
       "path": "city_detail/countries/KP.json",
       "root_keys": [
         "bounds",
@@ -75383,7 +75383,7 @@
       }
     },
     {
-      "bytes": 67379,
+      "bytes": 67378,
       "path": "city_detail/countries/KR.json",
       "root_keys": [
         "bounds",
@@ -75404,7 +75404,7 @@
       }
     },
     {
-      "bytes": 10407,
+      "bytes": 10406,
       "path": "city_detail/countries/KW.json",
       "root_keys": [
         "bounds",
@@ -75425,7 +75425,7 @@
       }
     },
     {
-      "bytes": 20208,
+      "bytes": 20207,
       "path": "city_detail/countries/KY.json",
       "root_keys": [
         "bounds",
@@ -75446,7 +75446,7 @@
       }
     },
     {
-      "bytes": 88466,
+      "bytes": 88465,
       "path": "city_detail/countries/KZ.json",
       "root_keys": [
         "bounds",
@@ -75467,7 +75467,7 @@
       }
     },
     {
-      "bytes": 15232,
+      "bytes": 15231,
       "path": "city_detail/countries/LA.json",
       "root_keys": [
         "bounds",
@@ -75488,7 +75488,7 @@
       }
     },
     {
-      "bytes": 13153,
+      "bytes": 13152,
       "path": "city_detail/countries/LB.json",
       "root_keys": [
         "bounds",
@@ -75509,7 +75509,7 @@
       }
     },
     {
-      "bytes": 4735,
+      "bytes": 4734,
       "path": "city_detail/countries/LC.json",
       "root_keys": [
         "bounds",
@@ -75530,7 +75530,7 @@
       }
     },
     {
-      "bytes": 4997,
+      "bytes": 4996,
       "path": "city_detail/countries/LI.json",
       "root_keys": [
         "bounds",
@@ -75551,7 +75551,7 @@
       }
     },
     {
-      "bytes": 32057,
+      "bytes": 32056,
       "path": "city_detail/countries/LK.json",
       "root_keys": [
         "bounds",
@@ -75572,7 +75572,7 @@
       }
     },
     {
-      "bytes": 31510,
+      "bytes": 31509,
       "path": "city_detail/countries/LT.json",
       "root_keys": [
         "bounds",
@@ -75593,7 +75593,7 @@
       }
     },
     {
-      "bytes": 14855,
+      "bytes": 14854,
       "path": "city_detail/countries/LU.json",
       "root_keys": [
         "bounds",
@@ -75614,7 +75614,7 @@
       }
     },
     {
-      "bytes": 22779,
+      "bytes": 22778,
       "path": "city_detail/countries/LV.json",
       "root_keys": [
         "bounds",
@@ -75635,7 +75635,7 @@
       }
     },
     {
-      "bytes": 2498,
+      "bytes": 2497,
       "path": "city_detail/countries/MC.json",
       "root_keys": [
         "bounds",
@@ -75656,7 +75656,7 @@
       }
     },
     {
-      "bytes": 27555,
+      "bytes": 27554,
       "path": "city_detail/countries/MD.json",
       "root_keys": [
         "bounds",
@@ -75677,7 +75677,7 @@
       }
     },
     {
-      "bytes": 11512,
+      "bytes": 11511,
       "path": "city_detail/countries/ME.json",
       "root_keys": [
         "bounds",
@@ -75698,7 +75698,7 @@
       }
     },
     {
-      "bytes": 1621,
+      "bytes": 1620,
       "path": "city_detail/countries/MF.json",
       "root_keys": [
         "bounds",
@@ -75719,7 +75719,7 @@
       }
     },
     {
-      "bytes": 39143,
+      "bytes": 39142,
       "path": "city_detail/countries/MK.json",
       "root_keys": [
         "bounds",
@@ -75740,7 +75740,7 @@
       }
     },
     {
-      "bytes": 113443,
+      "bytes": 113442,
       "path": "city_detail/countries/MM.json",
       "root_keys": [
         "bounds",
@@ -75761,7 +75761,7 @@
       }
     },
     {
-      "bytes": 15515,
+      "bytes": 15514,
       "path": "city_detail/countries/MN.json",
       "root_keys": [
         "bounds",
@@ -75782,7 +75782,7 @@
       }
     },
     {
-      "bytes": 2883,
+      "bytes": 2882,
       "path": "city_detail/countries/MO.json",
       "root_keys": [
         "bounds",
@@ -75803,7 +75803,7 @@
       }
     },
     {
-      "bytes": 8100,
+      "bytes": 8099,
       "path": "city_detail/countries/MQ.json",
       "root_keys": [
         "bounds",
@@ -75824,7 +75824,7 @@
       }
     },
     {
-      "bytes": 1189,
+      "bytes": 1188,
       "path": "city_detail/countries/MS.json",
       "root_keys": [
         "bounds",
@@ -75845,7 +75845,7 @@
       }
     },
     {
-      "bytes": 28073,
+      "bytes": 28072,
       "path": "city_detail/countries/MT.json",
       "root_keys": [
         "bounds",
@@ -75866,7 +75866,7 @@
       }
     },
     {
-      "bytes": 8536,
+      "bytes": 8535,
       "path": "city_detail/countries/MV.json",
       "root_keys": [
         "bounds",
@@ -75887,7 +75887,7 @@
       }
     },
     {
-      "bytes": 838652,
+      "bytes": 838651,
       "path": "city_detail/countries/MX.json",
       "root_keys": [
         "bounds",
@@ -75908,7 +75908,7 @@
       }
     },
     {
-      "bytes": 237181,
+      "bytes": 237180,
       "path": "city_detail/countries/MY.json",
       "root_keys": [
         "bounds",
@@ -75929,7 +75929,7 @@
       }
     },
     {
-      "bytes": 33665,
+      "bytes": 33664,
       "path": "city_detail/countries/NI.json",
       "root_keys": [
         "bounds",
@@ -75950,7 +75950,7 @@
       }
     },
     {
-      "bytes": 238625,
+      "bytes": 238624,
       "path": "city_detail/countries/NL.json",
       "root_keys": [
         "bounds",
@@ -75971,7 +75971,7 @@
       }
     },
     {
-      "bytes": 51152,
+      "bytes": 51151,
       "path": "city_detail/countries/NO.json",
       "root_keys": [
         "bounds",
@@ -75992,7 +75992,7 @@
       }
     },
     {
-      "bytes": 24613,
+      "bytes": 24612,
       "path": "city_detail/countries/NP.json",
       "root_keys": [
         "bounds",
@@ -76013,7 +76013,7 @@
       }
     },
     {
-      "bytes": 13978,
+      "bytes": 13977,
       "path": "city_detail/countries/OM.json",
       "root_keys": [
         "bounds",
@@ -76034,7 +76034,7 @@
       }
     },
     {
-      "bytes": 31262,
+      "bytes": 31261,
       "path": "city_detail/countries/PA.json",
       "root_keys": [
         "bounds",
@@ -76055,7 +76055,7 @@
       }
     },
     {
-      "bytes": 605088,
+      "bytes": 605087,
       "path": "city_detail/countries/PH.json",
       "root_keys": [
         "bounds",
@@ -76076,7 +76076,7 @@
       }
     },
     {
-      "bytes": 218350,
+      "bytes": 218349,
       "path": "city_detail/countries/PK.json",
       "root_keys": [
         "bounds",
@@ -76097,7 +76097,7 @@
       }
     },
     {
-      "bytes": 343679,
+      "bytes": 343678,
       "path": "city_detail/countries/PL.json",
       "root_keys": [
         "bounds",
@@ -76118,7 +76118,7 @@
       }
     },
     {
-      "bytes": 1210,
+      "bytes": 1209,
       "path": "city_detail/countries/PM.json",
       "root_keys": [
         "bounds",
@@ -76139,7 +76139,7 @@
       }
     },
     {
-      "bytes": 42269,
+      "bytes": 42268,
       "path": "city_detail/countries/PR.json",
       "root_keys": [
         "bounds",
@@ -76160,7 +76160,7 @@
       }
     },
     {
-      "bytes": 56211,
+      "bytes": 56210,
       "path": "city_detail/countries/PS.json",
       "root_keys": [
         "bounds",
@@ -76181,7 +76181,7 @@
       }
     },
     {
-      "bytes": 243563,
+      "bytes": 243562,
       "path": "city_detail/countries/PT.json",
       "root_keys": [
         "bounds",
@@ -76202,7 +76202,7 @@
       }
     },
     {
-      "bytes": 16899,
+      "bytes": 16898,
       "path": "city_detail/countries/QA.json",
       "root_keys": [
         "bounds",
@@ -76223,7 +76223,7 @@
       }
     },
     {
-      "bytes": 346311,
+      "bytes": 346310,
       "path": "city_detail/countries/RO.json",
       "root_keys": [
         "bounds",
@@ -76244,7 +76244,7 @@
       }
     },
     {
-      "bytes": 46927,
+      "bytes": 46926,
       "path": "city_detail/countries/RS.json",
       "root_keys": [
         "bounds",
@@ -76265,7 +76265,7 @@
       }
     },
     {
-      "bytes": 1202425,
+      "bytes": 1202424,
       "path": "city_detail/countries/RU.json",
       "root_keys": [
         "bounds",
@@ -76286,7 +76286,7 @@
       }
     },
     {
-      "bytes": 62580,
+      "bytes": 62579,
       "path": "city_detail/countries/SA.json",
       "root_keys": [
         "bounds",
@@ -76307,7 +76307,7 @@
       }
     },
     {
-      "bytes": 122841,
+      "bytes": 122840,
       "path": "city_detail/countries/SE.json",
       "root_keys": [
         "bounds",
@@ -76328,7 +76328,7 @@
       }
     },
     {
-      "bytes": 42660,
+      "bytes": 42659,
       "path": "city_detail/countries/SG.json",
       "root_keys": [
         "bounds",
@@ -76349,7 +76349,7 @@
       }
     },
     {
-      "bytes": 93578,
+      "bytes": 93577,
       "path": "city_detail/countries/SI.json",
       "root_keys": [
         "bounds",
@@ -76370,7 +76370,7 @@
       }
     },
     {
-      "bytes": 1218,
+      "bytes": 1217,
       "path": "city_detail/countries/SJ.json",
       "root_keys": [
         "bounds",
@@ -76391,7 +76391,7 @@
       }
     },
     {
-      "bytes": 66401,
+      "bytes": 66400,
       "path": "city_detail/countries/SK.json",
       "root_keys": [
         "bounds",
@@ -76412,7 +76412,7 @@
       }
     },
     {
-      "bytes": 5178,
+      "bytes": 5177,
       "path": "city_detail/countries/SM.json",
       "root_keys": [
         "bounds",
@@ -76433,7 +76433,7 @@
       }
     },
     {
-      "bytes": 33389,
+      "bytes": 33388,
       "path": "city_detail/countries/SV.json",
       "root_keys": [
         "bounds",
@@ -76454,7 +76454,7 @@
       }
     },
     {
-      "bytes": 2570,
+      "bytes": 2569,
       "path": "city_detail/countries/SX.json",
       "root_keys": [
         "bounds",
@@ -76475,7 +76475,7 @@
       }
     },
     {
-      "bytes": 49393,
+      "bytes": 49392,
       "path": "city_detail/countries/SY.json",
       "root_keys": [
         "bounds",
@@ -76496,7 +76496,7 @@
       }
     },
     {
-      "bytes": 1232,
+      "bytes": 1231,
       "path": "city_detail/countries/TC.json",
       "root_keys": [
         "bounds",
@@ -76517,7 +76517,7 @@
       }
     },
     {
-      "bytes": 200473,
+      "bytes": 200472,
       "path": "city_detail/countries/TH.json",
       "root_keys": [
         "bounds",
@@ -76538,7 +76538,7 @@
       }
     },
     {
-      "bytes": 27999,
+      "bytes": 27998,
       "path": "city_detail/countries/TJ.json",
       "root_keys": [
         "bounds",
@@ -76559,7 +76559,7 @@
       }
     },
     {
-      "bytes": 32223,
+      "bytes": 32222,
       "path": "city_detail/countries/TM.json",
       "root_keys": [
         "bounds",
@@ -76580,7 +76580,7 @@
       }
     },
     {
-      "bytes": 379804,
+      "bytes": 379803,
       "path": "city_detail/countries/TR.json",
       "root_keys": [
         "bounds",
@@ -76601,7 +76601,7 @@
       }
     },
     {
-      "bytes": 10109,
+      "bytes": 10108,
       "path": "city_detail/countries/TT.json",
       "root_keys": [
         "bounds",
@@ -76622,7 +76622,7 @@
       }
     },
     {
-      "bytes": 35558,
+      "bytes": 35557,
       "path": "city_detail/countries/TW.json",
       "root_keys": [
         "bounds",
@@ -76643,7 +76643,7 @@
       }
     },
     {
-      "bytes": 443332,
+      "bytes": 443331,
       "path": "city_detail/countries/UA.json",
       "root_keys": [
         "bounds",
@@ -76664,7 +76664,7 @@
       }
     },
     {
-      "bytes": 3369040,
+      "bytes": 3369039,
       "path": "city_detail/countries/US.json",
       "root_keys": [
         "bounds",
@@ -76685,7 +76685,7 @@
       }
     },
     {
-      "bytes": 62128,
+      "bytes": 62127,
       "path": "city_detail/countries/UZ.json",
       "root_keys": [
         "bounds",
@@ -76706,7 +76706,7 @@
       }
     },
     {
-      "bytes": 748,
+      "bytes": 747,
       "path": "city_detail/countries/VA.json",
       "root_keys": [
         "bounds",
@@ -76727,7 +76727,7 @@
       }
     },
     {
-      "bytes": 3429,
+      "bytes": 3428,
       "path": "city_detail/countries/VC.json",
       "root_keys": [
         "bounds",
@@ -76748,7 +76748,7 @@
       }
     },
     {
-      "bytes": 761,
+      "bytes": 760,
       "path": "city_detail/countries/VG.json",
       "root_keys": [
         "bounds",
@@ -76769,7 +76769,7 @@
       }
     },
     {
-      "bytes": 2105,
+      "bytes": 2104,
       "path": "city_detail/countries/VI.json",
       "root_keys": [
         "bounds",
@@ -76790,7 +76790,7 @@
       }
     },
     {
-      "bytes": 202147,
+      "bytes": 202146,
       "path": "city_detail/countries/VN.json",
       "root_keys": [
         "bounds",
@@ -76811,7 +76811,7 @@
       }
     },
     {
-      "bytes": 15703,
+      "bytes": 15702,
       "path": "city_detail/countries/XK.json",
       "root_keys": [
         "bounds",
@@ -76832,7 +76832,7 @@
       }
     },
     {
-      "bytes": 14907,
+      "bytes": 14906,
       "path": "city_detail/countries/YE.json",
       "root_keys": [
         "bounds",
@@ -76853,7 +76853,7 @@
       }
     },
     {
-      "bytes": 767019,
+      "bytes": 767018,
       "path": "city_detail/france/FR-11.json",
       "root_keys": [
         "admin1_code",
@@ -76876,7 +76876,7 @@
       }
     },
     {
-      "bytes": 837781,
+      "bytes": 837780,
       "path": "city_detail/france/FR-24.json",
       "root_keys": [
         "admin1_code",
@@ -76899,7 +76899,7 @@
       }
     },
     {
-      "bytes": 1717740,
+      "bytes": 1717739,
       "path": "city_detail/france/FR-27.json",
       "root_keys": [
         "admin1_code",
@@ -76922,7 +76922,7 @@
       }
     },
     {
-      "bytes": 1265897,
+      "bytes": 1265896,
       "path": "city_detail/france/FR-28.json",
       "root_keys": [
         "admin1_code",
@@ -76945,7 +76945,7 @@
       }
     },
     {
-      "bytes": 1825296,
+      "bytes": 1825295,
       "path": "city_detail/france/FR-32.json",
       "root_keys": [
         "admin1_code",
@@ -76968,7 +76968,7 @@
       }
     },
     {
-      "bytes": 2415886,
+      "bytes": 2415885,
       "path": "city_detail/france/FR-44.json",
       "root_keys": [
         "admin1_code",
@@ -76991,7 +76991,7 @@
       }
     },
     {
-      "bytes": 615431,
+      "bytes": 615430,
       "path": "city_detail/france/FR-52.json",
       "root_keys": [
         "admin1_code",
@@ -77014,7 +77014,7 @@
       }
     },
     {
-      "bytes": 593749,
+      "bytes": 593748,
       "path": "city_detail/france/FR-53.json",
       "root_keys": [
         "admin1_code",
@@ -77037,7 +77037,7 @@
       }
     },
     {
-      "bytes": 2041032,
+      "bytes": 2041031,
       "path": "city_detail/france/FR-75.json",
       "root_keys": [
         "admin1_code",
@@ -77060,7 +77060,7 @@
       }
     },
     {
-      "bytes": 2095488,
+      "bytes": 2095487,
       "path": "city_detail/france/FR-76.json",
       "root_keys": [
         "admin1_code",
@@ -77083,7 +77083,7 @@
       }
     },
     {
-      "bytes": 1955868,
+      "bytes": 1955867,
       "path": "city_detail/france/FR-84.json",
       "root_keys": [
         "admin1_code",
@@ -77106,7 +77106,7 @@
       }
     },
     {
-      "bytes": 559383,
+      "bytes": 559382,
       "path": "city_detail/france/FR-93.json",
       "root_keys": [
         "admin1_code",
@@ -77129,7 +77129,7 @@
       }
     },
     {
-      "bytes": 165746,
+      "bytes": 165745,
       "path": "city_detail/france/FR-94.json",
       "root_keys": [
         "admin1_code",
@@ -77152,7 +77152,7 @@
       }
     },
     {
-      "bytes": 35669,
+      "bytes": 35668,
       "path": "city_detail/index.json",
       "root_keys": [
         "countries",
@@ -77170,7 +77170,7 @@
       }
     },
     {
-      "bytes": 179447,
+      "bytes": 173232,
       "path": "countries.json",
       "root_keys": [
         "countries",
@@ -77185,7 +77185,7 @@
       }
     },
     {
-      "bytes": 4472,
+      "bytes": 4409,
       "path": "country_flag_palettes.json",
       "root_keys": [
         "palettes",
@@ -77227,7 +77227,7 @@
       }
     },
     {
-      "bytes": 9592,
+      "bytes": 9567,
       "path": "historical/historical_admin1_1900.json",
       "root_keys": [
         "countries",
@@ -77240,7 +77240,7 @@
       }
     },
     {
-      "bytes": 1066,
+      "bytes": 1034,
       "path": "historical/major_economy_polity_crosswalk_1900.json",
       "root_keys": [
         "policy",
@@ -77253,7 +77253,7 @@
       }
     },
     {
-      "bytes": 13422,
+      "bytes": 13352,
       "path": "historical/major_state_profiles_1900.json",
       "root_keys": [
         "observer_notes_zh",
@@ -77282,7 +77282,7 @@
       }
     },
     {
-      "bytes": 17319,
+      "bytes": 17193,
       "path": "historical_political_entities_1900.json",
       "root_keys": [
         "approximation_notice",
@@ -77298,7 +77298,7 @@
       }
     },
     {
-      "bytes": 10590,
+      "bytes": 10574,
       "path": "institutions.json",
       "root_keys": [
         "country",
@@ -77334,7 +77334,7 @@
       }
     },
     {
-      "bytes": 1963,
+      "bytes": 1940,
       "path": "map_modes.json",
       "root_keys": [
         "boundary_notice",
@@ -77355,7 +77355,7 @@
       }
     },
     {
-      "bytes": 10615,
+      "bytes": 10542,
       "path": "name_pool_fr.json",
       "root_keys": [
         "culture_id",
@@ -77371,7 +77371,7 @@
       }
     },
     {
-      "bytes": 11600,
+      "bytes": 11559,
       "path": "organizations.json",
       "root_keys": [
         "catalog",
@@ -77384,7 +77384,7 @@
       }
     },
     {
-      "bytes": 1929,
+      "bytes": 1915,
       "path": "ports.json",
       "root_keys": [
         "ports",
@@ -77396,7 +77396,7 @@
       }
     },
     {
-      "bytes": 1591,
+      "bytes": 1575,
       "path": "rail_segments.json",
       "root_keys": [
         "prototype_only",
@@ -77427,7 +77427,7 @@
       }
     },
     {
-      "bytes": 6481,
+      "bytes": 6465,
       "path": "relationships.json",
       "root_keys": [
         "prototype_only",
@@ -77439,7 +77439,7 @@
       }
     },
     {
-      "bytes": 468,
+      "bytes": 458,
       "path": "road_segments.json",
       "root_keys": [
         "prototype_only",
@@ -77452,7 +77452,7 @@
       }
     },
     {
-      "bytes": 859,
+      "bytes": 849,
       "path": "shipping_routes.json",
       "root_keys": [
         "prototype_only",
@@ -77465,7 +77465,7 @@
       }
     },
     {
-      "bytes": 4600,
+      "bytes": 4586,
       "path": "world_activity.json",
       "root_keys": [
         "default_summary",
