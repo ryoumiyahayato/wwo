@@ -14,3 +14,6 @@ runpy.run_path(str(bootstrap), run_name="__main__")
 
 fast_query = Path(__file__).with_name("pr58_spatial_effective_capacity_query.py")
 runpy.run_path(str(fast_query), run_name="__main__")
+
+batch_response = Path(__file__).with_name("pr58_spatial_batch_result_optimization.py")
+runpy.run_path(str(batch_response), run_name="__main__")
