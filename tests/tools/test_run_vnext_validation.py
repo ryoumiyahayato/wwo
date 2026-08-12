@@ -91,6 +91,41 @@ class LogAnalysisTests(unittest.TestCase):
         reasons = runner.evaluate_test_result(result)
         self.assertIn("process exit code is 3", reasons)
 
+    def test_timeout_is_reported_explicitly(self) -> None:
+        result = runner.ProcessResult(
+            1,
+            "Example: 7 checks, 0 failures",
+            "",
+            timed_out=True,
+            elapsed_seconds=12.5,
+        )
+        reasons = runner.evaluate_test_result(result)
+        self.assertIn("process timed out after 12.5s", reasons)
+
+
+class TimeoutSelectionTests(unittest.TestCase):
+    def test_long_term_test_has_separate_timeout_override(self) -> None:
+        command = (
+            "godot",
+            "--script",
+            runner.LONG_TEST_SCRIPT,
+        )
+        with mock.patch.dict(
+            "os.environ",
+            {"VNEXT_LONG_TEST_TIMEOUT_SECONDS": "777"},
+            clear=False,
+        ):
+            self.assertEqual(runner._command_timeout_seconds(command), 777)
+
+    def test_nonpositive_timeout_is_rejected(self) -> None:
+        with mock.patch.dict(
+            "os.environ",
+            {"VNEXT_TEST_TIMEOUT_SECONDS": "0"},
+            clear=False,
+        ):
+            with self.assertRaisesRegex(runner.ValidationError, "positive integer"):
+                runner._command_timeout_seconds(("godot", "--script", "res://tests/vnext/example_test.gd"))
+
 
 class ValidationFlowTests(unittest.TestCase):
     def test_import_runs_once_before_sorted_tests(self) -> None:
