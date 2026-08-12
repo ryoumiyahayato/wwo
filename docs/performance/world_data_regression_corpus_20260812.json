@@ -8948,6 +8948,50 @@
   ],
   "schema_version": 1,
   "source_manifest_tool_id": "wwo_world_data_coverage_audit_batch_2",
+  "summary": {
+    "categories": {
+      "city_detail_country_shard": {
+        "file_count": 143,
+        "file_size_bytes": 23094295,
+        "geometry_vertex_count": 0,
+        "record_count": 52056
+      },
+      "city_detail_metadata": {
+        "file_count": 2,
+        "file_size_bytes": 35908,
+        "geometry_vertex_count": 0,
+        "record_count": 300
+      },
+      "city_detail_region_shard": {
+        "file_count": 13,
+        "file_size_bytes": 16856316,
+        "geometry_vertex_count": 0,
+        "record_count": 36871
+      },
+      "historical": {
+        "file_count": 8,
+        "file_size_bytes": 6626800,
+        "geometry_vertex_count": 925954,
+        "record_count": 5235
+      },
+      "runtime_loader": {
+        "file_count": 16,
+        "file_size_bytes": 3274878,
+        "geometry_vertex_count": 200203,
+        "record_count": 544
+      },
+      "runtime_supporting": {
+        "file_count": 1,
+        "file_size_bytes": 4472,
+        "geometry_vertex_count": 0,
+        "record_count": 0
+      }
+    },
+    "file_count": 183,
+    "total_file_size_bytes": 49892669,
+    "total_geometry_vertex_count": 1126157,
+    "total_record_count": 95006
+  },
   "tool_id": "wwo_world_data_regression_corpus_batch_3",
   "validation": {
     "errors": [],

@@ -62,9 +62,17 @@ def test_manifest_rejects_missing_and_malformed_inputs() -> None:
         malformed.write_text("{not valid json", encoding="utf-8")
         profile = audit._profile_file(root, malformed)
         assert profile["parse_status"].startswith("error: JSONDecodeError")
+
+def test_manifest_rejects_unexpected_source_inventory() -> None:
+    manifest = audit.build_manifest(ROOT)
+    manifest["files"].append({**manifest["files"][0], "path": "unexpected_added.json"})
+    errors = audit._validation(manifest, ROOT / "data" / "world_map")
+    assert any(error.startswith("extra files:") for error in errors)
+
 if __name__ == "__main__":
     test_full_world_map_coverage_is_valid_and_complete()
     test_manifest_serialization_and_report_are_deterministic()
     test_large_structure_inventory_and_categories_are_present()
     test_manifest_rejects_missing_and_malformed_inputs()
-    print("World-data coverage audit tests: 4 passed")
+    test_manifest_rejects_unexpected_source_inventory()
+    print("World-data coverage audit tests: 5 passed")

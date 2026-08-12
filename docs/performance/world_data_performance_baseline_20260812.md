@@ -36,7 +36,7 @@ Largest files and high-cardinality structures are preserved in the machine-reada
 
 ## Load benchmark
 
-- Full world-data load (PrototypeV2Data.load_all): median 74.162 ms (min 68.033, max 80.034; n=7)
+- PrototypeV2Data.load_all() runtime-set load: median 74.162 ms (min 68.033, max 80.034; n=7)
 - Geometry cache JSON parse: median 47.610 ms (min 41.175, max 55.827; n=7)
 - City-detail index JSON parse: median 2.259 ms (min 1.658, max 3.695; n=7)
 

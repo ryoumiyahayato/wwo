@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from collections import Counter
 from pathlib import Path
@@ -20,6 +21,7 @@ SCHEMA_VERSION = 1
 TOOL_ID = "wwo_world_data_quality_audit_batch_4"
 DEFAULT_JSON = "docs/performance/world_data_quality_audit_20260812.json"
 DEFAULT_MARKDOWN = "docs/performance/world_data_quality_audit_20260812.md"
+CITY_ID_PATTERN = re.compile(r"^geonames:[0-9]+$")
 
 RUNTIME_FILES = (
     "world_coastlines.json",
@@ -73,6 +75,34 @@ def _issue(code: str, severity: str, path: str, message: str) -> dict[str, str]:
     return {"code": code, "severity": severity, "path": path, "message": message}
 
 
+def _city_record_locator(relative: str, record_index: int) -> str:
+    return f"city_detail/{relative}#cities[{record_index}]"
+
+
+def _validate_city_id(
+    record: dict[str, Any],
+    locator: str,
+    issues: list[dict[str, str]],
+) -> str | None:
+    if "id" not in record:
+        issues.append(_issue("CITY_ID_MISSING", "error", locator, "reason=missing stable id"))
+        return None
+    value = record["id"]
+    if not isinstance(value, str):
+        issues.append(_issue("CITY_ID_MALFORMED", "error", locator, "reason=stable id must be a string"))
+        return None
+    if value == "":
+        issues.append(_issue("CITY_ID_EMPTY", "error", locator, "reason=stable id is empty"))
+        return None
+    if value.strip() == "":
+        issues.append(_issue("CITY_ID_WHITESPACE", "error", locator, "reason=stable id is whitespace-only"))
+        return None
+    if value != value.strip() or CITY_ID_PATTERN.fullmatch(value) is None:
+        issues.append(_issue("CITY_ID_MALFORMED", "error", locator, "reason=stable id must match geonames:<numeric-id>"))
+        return None
+    return value
+
+
 def _check_city_shards(root: Path, issues: list[dict[str, str]], metrics: dict[str, Any]) -> None:
     city_root = root / "city_detail"
     index_path = city_root / "index.json"
@@ -93,7 +123,11 @@ def _check_city_shards(root: Path, issues: list[dict[str, str]], metrics: dict[s
         country_code = str(country.get("country_code", ""))
         if not country_code:
             issues.append(_issue("CITY_INDEX_CODE", "error", "city_detail/index.json", "country entry lacks country_code"))
-        for shard in country.get("shards", []):
+        shards = country.get("shards", [])
+        if not isinstance(shards, list):
+            issues.append(_issue("CITY_INDEX_SHARDS", "error", f"city_detail/index.json:{country_code}", "shards is not an array"))
+            continue
+        for shard in shards:
             if not isinstance(shard, dict):
                 issues.append(_issue("CITY_INDEX_SHARD", "error", "city_detail/index.json", "non-object shard reference"))
                 continue
@@ -111,32 +145,52 @@ def _check_city_shards(root: Path, issues: list[dict[str, str]], metrics: dict[s
     ref_set = set(referenced)
     for missing in sorted(ref_set - actual_set):
         issues.append(_issue("CITY_MISSING_SHARD", "error", missing, "index references missing shard"))
+    shard_documents: dict[str, Any] = {
+        relative: _load(city_root / relative) for relative in actual_shards
+    }
+    optional_orphans = 0
+    required_orphans = 0
     for unreferenced in sorted(actual_set - ref_set):
-        issues.append(_issue("CITY_UNREFERENCED_SHARD", "warning", unreferenced, "shard is not referenced by index"))
+        document = shard_documents.get(unreferenced)
+        if isinstance(document, dict) and document.get("optional") is True:
+            optional_orphans += 1
+            issues.append(_issue("CITY_OPTIONAL_ORPHAN_SHARD", "warning", f"city_detail/{unreferenced}", "classification=explicitly optional/non-runtime; shard is not referenced by index"))
+        else:
+            required_orphans += 1
+            issues.append(_issue("CITY_UNREFERENCED_SHARD", "error", f"city_detail/{unreferenced}", "classification=required runtime shard; shard is not referenced by index"))
     total_records = 0
-    duplicate_ids = 0
+    city_id_locations: dict[str, list[str]] = {}
     invalid_coordinates = 0
     count_mismatches = 0
     invalid_bounds = 0
     for relative in actual_shards:
-        path = city_root / relative
-        document = _load(path)
-        cities = document.get("cities", []) if isinstance(document, dict) else []
-        ids = [item.get("id") for item in cities if isinstance(item, dict) and item.get("id")]
-        unique_ids = set(ids)
-        duplicate_ids += len(ids) - len(unique_ids)
-        if len(ids) != len(unique_ids):
-            issues.append(_issue("CITY_DUPLICATE_ID", "error", f"city_detail/{relative}", "duplicate stable city id"))
+        document = shard_documents[relative]
+        if not isinstance(document, dict):
+            issues.append(_issue("CITY_SHARD_ROOT", "error", f"city_detail/{relative}", "shard root is not an object"))
+            document = {}
+        cities = document.get("cities", [])
+        if not isinstance(cities, list):
+            issues.append(_issue("CITY_RECORDS_ROOT", "error", f"city_detail/{relative}#cities", "reason=cities must be an array"))
+            cities = []
         if document.get("count") != len(cities):
             count_mismatches += 1
             issues.append(_issue("CITY_COUNT_MISMATCH", "error", f"city_detail/{relative}", f"declared {document.get('count')} != actual {len(cities)}"))
         if not _bounds_valid(document.get("bounds")):
             invalid_bounds += 1
             issues.append(_issue("CITY_BOUNDS", "error", f"city_detail/{relative}", "invalid geographic bounds"))
-        for index, item in enumerate(cities):
-            if not isinstance(item, dict) or not _point_valid(item.get("lon_lat")):
+        for record_index, item in enumerate(cities):
+            locator = _city_record_locator(relative, record_index)
+            if not isinstance(item, dict):
+                issues.append(_issue("CITY_RECORD", "error", locator, "reason=city record must be an object"))
                 invalid_coordinates += 1
-                issues.append(_issue("CITY_COORDINATE", "error", f"city_detail/{relative}#{index}", "invalid lon_lat"))
+                issues.append(_issue("CITY_COORDINATE", "error", locator, "invalid lon_lat"))
+                continue
+            city_id = _validate_city_id(item, locator, issues)
+            if city_id is not None:
+                city_id_locations.setdefault(city_id, []).append(locator)
+            if not _point_valid(item.get("lon_lat")):
+                invalid_coordinates += 1
+                issues.append(_issue("CITY_COORDINATE", "error", locator, "invalid lon_lat"))
         total_records += len(cities)
         reference = referenced.get(relative)
         if reference:
@@ -144,9 +198,27 @@ def _check_city_shards(root: Path, issues: list[dict[str, str]], metrics: dict[s
                 issues.append(_issue("CITY_INDEX_COUNT", "error", f"city_detail/index.json:{relative}", "index count differs from shard"))
             if reference["index"].get("bounds") != document.get("bounds"):
                 issues.append(_issue("CITY_INDEX_BOUNDS", "error", f"city_detail/index.json:{relative}", "index bounds differ from shard"))
+    same_shard_duplicate_ids = 0
+    cross_shard_duplicate_ids = 0
+    duplicate_city_ids = 0
+    for city_id in sorted(city_id_locations):
+        locations = sorted(city_id_locations[city_id])
+        if len(locations) < 2:
+            continue
+        duplicate_city_ids += len(locations) - 1
+        shard_paths = sorted({location.split("#", 1)[0] for location in locations})
+        if len(shard_paths) == 1:
+            same_shard_duplicate_ids += 1
+            code = "CITY_DUPLICATE_ID_SAME_SHARD"
+            reason = "reason=stable id occurs more than once within one shard"
+        else:
+            cross_shard_duplicate_ids += 1
+            code = "CITY_DUPLICATE_ID_CROSS_SHARD"
+            reason = "reason=stable id occurs across different shards"
+        issues.append(_issue(code, "error", locations[0], f"stable_id={city_id!r}; {reason}; conflicting_locations={'; '.join(locations)}"))
     france = next((item for item in index_countries if isinstance(item, dict) and item.get("country_code") == "FR"), None)
-    france_paths = [relative for relative in actual_shards if relative.startswith("france/")]
-    france_sum = sum(int(_load(city_root / relative).get("count", 0)) for relative in france_paths)
+    france_paths = [relative for relative in actual_shards if relative.startswith("france/") and relative in ref_set]
+    france_sum = sum(int(shard_documents[relative].get("count", 0)) for relative in france_paths if isinstance(shard_documents[relative], dict))
     if not isinstance(france, dict):
         issues.append(_issue("FR_INDEX_ENTRY", "error", "city_detail/index.json", "France aggregate entry is missing"))
     else:
@@ -160,14 +232,18 @@ def _check_city_shards(root: Path, issues: list[dict[str, str]], metrics: dict[s
         "actual_shards": len(actual_shards),
         "index_record_count": index_counts,
         "shard_record_count": total_records,
-        "duplicate_city_ids": duplicate_ids,
+        "duplicate_city_ids": duplicate_city_ids,
+        "same_shard_duplicate_ids": same_shard_duplicate_ids,
+        "cross_shard_duplicate_ids": cross_shard_duplicate_ids,
+        "city_stable_id_records_checked": sum(len(locations) for locations in city_id_locations.values()),
         "invalid_city_coordinates": invalid_coordinates,
         "count_mismatches": count_mismatches,
         "invalid_bounds": invalid_bounds,
         "france_shard_count": len(france_paths),
         "france_shard_record_count": france_sum,
+        "optional_orphan_shards": optional_orphans,
+        "required_orphan_shards": required_orphans,
     })
-
 
 def _check_runtime_files(root: Path, issues: list[dict[str, str]], metrics: dict[str, Any]) -> None:
     missing = []

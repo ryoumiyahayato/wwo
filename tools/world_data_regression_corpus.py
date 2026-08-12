@@ -111,12 +111,11 @@ def _sample_hash(payload: Any) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-def build_corpus(repository_root: Path) -> dict[str, Any]:
-    manifest = coverage.build_manifest(repository_root)
+def _records_from_manifest(repository_root: Path, manifest: dict[str, Any]) -> list[dict[str, Any]]:
     root = repository_root / "data" / "world_map"
     records: list[dict[str, Any]] = []
     for file_profile in manifest["files"]:
-        path = root / file_profile["path"]
+        path = root / str(file_profile["path"])
         parsed = json.loads(path.read_text(encoding="utf-8"))
         sample = _sample_payload(parsed)
         records.append(
@@ -133,59 +132,160 @@ def build_corpus(repository_root: Path) -> dict[str, Any]:
                 "sample_sha256": _sample_hash(sample),
             }
         )
-    corpus = {
+    return records
+
+
+def _summary(records: list[dict[str, Any]]) -> dict[str, Any]:
+    categories: dict[str, dict[str, int]] = {}
+    for record in records:
+        category = str(record["category"])
+        summary = categories.setdefault(
+            category,
+            {
+                "file_count": 0,
+                "file_size_bytes": 0,
+                "record_count": 0,
+                "geometry_vertex_count": 0,
+            },
+        )
+        summary["file_count"] += 1
+        summary["file_size_bytes"] += int(record["file_size_bytes"])
+        summary["record_count"] += int(record["record_count"])
+        summary["geometry_vertex_count"] += int(record["geometry_vertex_count"])
+    return {
+        "file_count": len(records),
+        "total_file_size_bytes": sum(int(record["file_size_bytes"]) for record in records),
+        "total_record_count": sum(int(record["record_count"]) for record in records),
+        "total_geometry_vertex_count": sum(int(record["geometry_vertex_count"]) for record in records),
+        "categories": dict(sorted(categories.items())),
+    }
+
+
+def _records_sha256(records: list[dict[str, Any]]) -> str:
+    return hashlib.sha256(
+        json.dumps(records, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+
+
+def _expected_projection(repository_root: Path) -> tuple[list[dict[str, Any]], dict[str, Any], dict[str, Any]]:
+    manifest = coverage.build_manifest(repository_root)
+    records = _records_from_manifest(repository_root, manifest)
+    return records, sorted({str(record["category"]) for record in records}), _summary(records)
+
+
+def build_corpus(repository_root: Path) -> dict[str, Any]:
+    records, categories, summary = _expected_projection(repository_root)
+    corpus: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         "tool_id": TOOL_ID,
         "input_root": "data/world_map",
         "source_manifest_tool_id": coverage.TOOL_ID,
         "file_count": len(records),
-        "categories": sorted({record["category"] for record in records}),
+        "categories": categories,
+        "summary": summary,
         "records": records,
+        "corpus_sha256": _records_sha256(records),
     }
-    errors = validate_corpus(corpus, repository_root)
+    errors = _validate_corpus_content(corpus, repository_root)
     corpus["validation"] = {"valid": not errors, "errors": errors}
-    corpus["corpus_sha256"] = hashlib.sha256(
-        json.dumps(corpus["records"], ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
-    ).hexdigest()
     return corpus
 
 
-def validate_corpus(corpus: dict[str, Any], repository_root: Path) -> list[str]:
+def _validate_corpus_content(corpus: dict[str, Any], repository_root: Path) -> list[str]:
     errors: list[str] = []
     if corpus.get("schema_version") != SCHEMA_VERSION:
         errors.append("schema_version mismatch")
     if corpus.get("tool_id") != TOOL_ID:
         errors.append("tool_id mismatch")
+    if corpus.get("input_root") != "data/world_map":
+        errors.append("input_root mismatch")
+    if corpus.get("source_manifest_tool_id") != coverage.TOOL_ID:
+        errors.append("source_manifest_tool_id mismatch")
     records = corpus.get("records")
     if not isinstance(records, list):
-        return ["records must be an array"]
-    paths = [record.get("path") for record in records if isinstance(record, dict)]
+        return errors + ["records must be an array"]
+    if any(not isinstance(record, dict) for record in records):
+        errors.append("non-object corpus record")
+    paths = [str(record.get("path", "")) for record in records if isinstance(record, dict)]
     if len(paths) != len(set(paths)):
         errors.append("duplicate corpus paths")
     root = repository_root / "data" / "world_map"
-    actual_paths = sorted(path.relative_to(root).as_posix() for path in root.rglob("*.json"))
+    try:
+        root_resolved = root.resolve()
+    except OSError:
+        root_resolved = root
+    actual_paths = sorted(path.relative_to(root).as_posix() for path in root.rglob("*.json") if path.is_file())
+    actual_set = set(actual_paths)
+    tracked_set = set(paths)
+    for missing in sorted(actual_set - tracked_set):
+        errors.append(f"missing source inventory entry: {missing}")
+    for unexpected in sorted(tracked_set - actual_set):
+        errors.append(f"unexpected source: {unexpected}")
     if sorted(paths) != actual_paths:
         errors.append("corpus paths do not match current world-map JSON set")
     for record in records:
         if not isinstance(record, dict):
-            errors.append("non-object corpus record")
             continue
         path = str(record.get("path", ""))
         source = root / path
+        try:
+            source.resolve().relative_to(root_resolved)
+        except ValueError:
+            errors.append(f"unexpected source: {path}")
+            continue
         if not source.is_file():
             errors.append(f"missing source: {path}")
+    expected_records, expected_categories, expected_summary = _expected_projection(repository_root)
+    expected_by_path = {str(record["path"]): record for record in expected_records}
+    for record in records:
+        if not isinstance(record, dict):
             continue
-        current_hash = hashlib.sha256(source.read_bytes()).hexdigest()
-        if current_hash != record.get("sha256"):
-            errors.append(f"source hash drift: {path}")
-        if not record.get("sample_sha256"):
-            errors.append(f"missing sample hash: {path}")
-    if int(corpus.get("file_count", -1)) != len(records):
+        path = str(record.get("path", ""))
+        expected = expected_by_path.get(path)
+        if expected is None:
+            continue
+        for field in (
+            "category",
+            "sha256",
+            "file_size_bytes",
+            "root_type",
+            "top_level_keys",
+            "record_count",
+            "geometry_vertex_count",
+            "sample",
+            "sample_sha256",
+        ):
+            if record.get(field) != expected[field]:
+                if field == "sha256":
+                    errors.append(f"source hash drift: {path}")
+                elif field == "sample_sha256":
+                    errors.append(f"sample hash drift: {path}")
+                elif field == "record_count":
+                    errors.append(f"record count drift: {path}")
+                elif field in {"sample", "top_level_keys", "root_type", "geometry_vertex_count"}:
+                    errors.append(f"derived summary drift: {path}:{field}")
+                else:
+                    errors.append(f"record metadata drift: {path}:{field}")
+        if record.get("sample_sha256") != _sample_hash(record.get("sample")):
+            errors.append(f"sample hash does not match stored sample: {path}")
+    if corpus.get("file_count") != len(expected_records):
         errors.append("file_count mismatch")
-    if not corpus.get("categories"):
-        errors.append("empty category list")
+    if corpus.get("categories") != expected_categories:
+        errors.append("categories summary mismatch")
+    if corpus.get("summary") != expected_summary:
+        errors.append("summary mismatch")
+    expected_corpus_sha256 = _records_sha256(records)
+    if corpus.get("corpus_sha256") != expected_corpus_sha256:
+        errors.append("corpus_sha256 mismatch")
     return errors
 
+
+def validate_corpus(corpus: dict[str, Any], repository_root: Path) -> list[str]:
+    errors = _validate_corpus_content(corpus, repository_root)
+    expected_validation = {"valid": not errors, "errors": errors}
+    if corpus.get("validation") != expected_validation:
+        errors.append("validation summary mismatch")
+    return errors
 
 def render_markdown(corpus: dict[str, Any]) -> str:
     by_category: dict[str, list[dict[str, Any]]] = {}

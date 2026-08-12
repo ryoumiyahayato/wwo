@@ -15,11 +15,16 @@ Read-only structural QA for city-detail references, runtime metadata and stable 
 | index_record_count | 88927 |
 | shard_record_count | 88927 |
 | duplicate_city_ids | 0 |
+| same_shard_duplicate_ids | 0 |
+| cross_shard_duplicate_ids | 0 |
+| city_stable_id_records_checked | 88927 |
 | invalid_city_coordinates | 0 |
 | count_mismatches | 0 |
 | invalid_bounds | 0 |
 | france_shard_count | 13 |
 | france_shard_record_count | 36871 |
+| optional_orphan_shards | 0 |
+| required_orphan_shards | 0 |
 | runtime_file_count | 16 |
 | runtime_missing | [] |
 | runtime_bad_schema | [] |

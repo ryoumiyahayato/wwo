@@ -595,7 +595,7 @@ func _measure_loads() -> Dictionary:
 		"full_world_data_load": _with_cold_warm(full_samples).merged({
 			"success": full_success,
 			"loaded_document_count": loaded_document_count,
-			"scope": "PrototypeV2Data.load_all",
+			"scope": "PrototypeV2Data.load_all() runtime-set load",
 		}),
 		"geometry_cache_parse": geometry_parse.merged({
 			"scope": "JSON parse of map_geometry_cache.json; conversion is measured below in canvas setup",
@@ -651,7 +651,7 @@ func _stats(samples: Array) -> Dictionary:
 
 func _measure_map_benchmarks() -> Dictionary:
 	if _last_runtime_data == null:
-		return {"error": "full world data load failed"}
+		return {"error": "PrototypeV2Data.load_all() runtime-set load failed"}
 	var canvas := PrototypeV2MapCanvas.new()
 	var setup_samples: Array = []
 	for _index: int in range(MAP_ITERATIONS):
@@ -920,7 +920,7 @@ func _render_markdown(payload: Dictionary) -> String:
 	lines.append("## Load benchmark")
 	lines.append("")
 	var loads: Dictionary = payload["load_benchmark"] as Dictionary
-	lines.append("- Full world-data load (PrototypeV2Data.load_all): %s" % _format_metric(loads.get("full_world_data_load", {}) as Dictionary))
+	lines.append("- PrototypeV2Data.load_all() runtime-set load: %s" % _format_metric(loads.get("full_world_data_load", {}) as Dictionary))
 	lines.append("- Geometry cache JSON parse: %s" % _format_metric(loads.get("geometry_cache_parse", {}) as Dictionary))
 	lines.append("- City-detail index JSON parse: %s" % _format_metric(loads.get("city_detail_index_parse", {}) as Dictionary))
 	lines.append("")
@@ -1008,7 +1008,7 @@ func _print_summary(payload: Dictionary) -> void:
 	print("Benchmark JSON: %s" % _json_output_path)
 	print("Benchmark Markdown: %s" % _markdown_output_path)
 	var loads: Dictionary = payload.get("load_benchmark", {}) as Dictionary
-	print("Full world-data load: %s" % _format_metric(loads.get("full_world_data_load", {}) as Dictionary))
+	print("PrototypeV2Data.load_all() runtime-set load: %s" % _format_metric(loads.get("full_world_data_load", {}) as Dictionary))
 	var maps: Dictionary = payload.get("map_benchmark", {}) as Dictionary
 	print("Canvas geometry/index setup: %s" % _format_metric(maps.get("canvas_setup_geometry_and_index", {}) as Dictionary))
 	var lookup: Dictionary = maps.get("representative_lookup", {}) as Dictionary

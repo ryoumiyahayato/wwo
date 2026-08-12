@@ -36,7 +36,9 @@
   "issues": [],
   "metrics": {
     "actual_shards": 156,
+    "city_stable_id_records_checked": 88927,
     "count_mismatches": 0,
+    "cross_shard_duplicate_ids": 0,
     "duplicate_city_ids": 0,
     "france_shard_count": 13,
     "france_shard_record_count": 36871,
@@ -44,7 +46,9 @@
     "index_record_count": 88927,
     "invalid_bounds": 0,
     "invalid_city_coordinates": 0,
+    "optional_orphan_shards": 0,
     "referenced_shards": 156,
+    "required_orphan_shards": 0,
     "runtime_bad_schema": [],
     "runtime_file_count": 16,
     "runtime_missing": [],
@@ -58,6 +62,7 @@
       "3": 6,
       "4": 3
     },
+    "same_shard_duplicate_ids": 0,
     "shard_record_count": 88927,
     "stable_id_duplicate_arrays": 0,
     "stable_id_missing": 0,
