@@ -4,7 +4,7 @@
 
 - 第一批实现基于基础提交`b4a9d637e294aa53b0c0e2525260421dce3b5182`，由PR #30实施。
 - 引擎：Godot 4.6.3。
-- 范围：`project.godot`、`scripts/`、`scenes/`、`data/`、`resources/`。
+- 范围：`project.godot`、`scripts/`、`scenes/`、`resources/`以及显式 runtime config roots；`data/staging/`、`tests/`、`tools/`、`docs/`和报告 artifacts 不属于输入。
 - 本文件只提供静态成员索引证据，不持有审计结论、实施方案、多写入状态总结、UI副本总结或停止项。
 
 ## 静态扫描限制
@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1802|1338|15|0|1300|5|32|16|65|968|552|302|
+|1810|1342|15|0|496|5|32|16|65|972|448|209|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,802个生产成员字段逐项表
+## 1,810个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -1605,7 +1605,7 @@
 26 K spatial_world
 ```
 
-### 第10段：`scripts/vnext/military/military_formation.gd` 至 `scripts/vnext/travel/travel_quote.gd`
+### 第10段：`scripts/vnext/military/military_formation.gd` 至 `scripts/vnext/spatial/spatial_world.gd`
 
 ```text
 @ scripts/vnext/military/military_formation.gd | VNextMilitaryFormation
@@ -1662,6 +1662,15 @@
 26 K link_queues
 @ scripts/vnext/military/military_state_invariants.gd | VNextMilitaryStateInvariants
 7 C EPSILON
+@ scripts/vnext/organization/organization_core.gd | VNextOrganizationCore
+8 C SNAPSHOT_SCHEMA_ID
+10 C _ORGANIZATION_FIELDS
+21 C _POSITION_FIELDS
+27 C _APPOINTMENT_FIELDS
+34 K _organizations
+35 K _reference_catalog_configured
+36 K _known_person_ids
+37 K _known_place_ids
 @ scripts/vnext/player/action_result.gd | VNextActionResult
 4 K success
 5 K code
@@ -1773,6 +1782,11 @@
 16 K _infrastructure
 17 K _territories
 18 K _capacity
+```
+
+### 第11段：`scripts/vnext/travel/location_state.gd` 至 `scripts/world_map/internal/world_map_canvas_impl.gd`
+
+```text
 @ scripts/vnext/travel/location_state.gd | VNextLocationState
 4 C SNAPSHOT_SCHEMA_ID
 6 K _player_id
@@ -1782,11 +1796,6 @@
 5 K _destination_place_id
 6 K _duration_minutes
 7 K _cost_minor
-```
-
-### 第11段：`scripts/vnext/world_runtime.gd` 至 `scripts/world_map/internal/world_map_controller_impl.gd`
-
-```text
 @ scripts/vnext/world_runtime.gd | VNextWorldRuntime
 4 C SNAPSHOT_SCHEMA_ID
 5 C MAX_JSON_SAFE_INTEGER
@@ -1961,6 +1970,11 @@
 183 K _perf_transport_rebuilds
 184 K _perf_v2_3_overlay_updates
 185 K _perf_v2_3_catalog_rebuilds
+```
+
+### 第12段：`scripts/world_map/internal/world_map_controller_impl.gd` 至 `scripts/world_map/world_map_canvas_detail.gd`
+
+```text
 @ scripts/world_map/internal/world_map_controller_impl.gd | PrototypeV2Main
 5 C DRAG_THRESHOLD
 7 D map_canvas
@@ -1972,11 +1986,6 @@
 14 A _press_position
 15 K _capture_path
 16 K _exit_after_capture
-```
-
-### 第12段：`scripts/world_map/internal/world_map_data_impl.gd` 至 `scripts/world_map/world_map_canvas_detail.gd`
-
-```text
 @ scripts/world_map/internal/world_map_data_impl.gd | PrototypeV2Data
 6 C FILES
 25 K records
@@ -2080,4 +2089,3 @@
 7 C DETAIL_SELECTED_COLOR
 9 A _city_detail_catalog
 ```
-

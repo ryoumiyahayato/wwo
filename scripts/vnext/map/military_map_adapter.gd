@@ -194,11 +194,12 @@ func get_spatial_capacity_summary(link_id: String) -> Dictionary:
 		return {}
 	return spatial_world.capacity_summary(link_id)
 
-
 func get_link_transport_capacity_per_hour(link_id: String) -> float:
 	# Compatibility query only. The value is read directly from authoritative
 	# Spatial InfrastructureLinkState and never from a Military-owned budget.
-	if spatial_world == null or not spatial_world.is_valid():
+	# The caller validates the Spatial world at the simulation boundary; this
+	# narrow read must not rescan every infrastructure and territory record.
+	if spatial_world == null:
 		return 0.0
 	return maxf(0.0, spatial_world.effective_capacity(link_id))
 
@@ -619,8 +620,8 @@ func _unreachable_route(reason: String) -> Dictionary:
 		"links": [],
 		"region_ids": [],
 		"duration_hours": 0,
-		"capacity_personnel": 0,
-		"supply_capacity_per_day": 0.0,
+
+
 		"mode_sequence": [],
 	}
 
