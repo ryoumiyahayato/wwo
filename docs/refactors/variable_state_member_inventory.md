@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1733|1293|15|0|1267|5|32|16|62|934|543|294|
+|1785|1331|15|0|1299|5|32|16|67|965|551|302|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,733个生产成员字段逐项表
+## 1,785个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -93,7 +93,7 @@
 @ scripts/action/player_action_context_service.gd | PlayerActionContextService
 5 C TARGET_DOMAIN_NONE
 6 C TARGET_DOMAIN_CHARACTER
-7 C TARGET_DOMAIN_ORGANIZATION
+7 C TARGET_DOMAIN_MAP
 8 C TARGET_DOMAIN_MAP
 10 K rules
 11 K society
@@ -1447,7 +1447,7 @@
 5 K leave_confirmation
 ```
 
-### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/vnext/politics/politics_pressure_input.gd`
+### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/vnext/economy/market_economy_catalog.gd`
 
 ```text
 @ scripts/v2_3/v2_3_formal_simulation.gd | V23FormalSimulation
@@ -1571,6 +1571,66 @@
 12 K next_retry_hours
 13 K active_needs
 14 K decision_history
+@ scripts/vnext/economy/market_economy.gd | VNextMarketEconomy
+14 C BASIS_POINTS
+15 C HOURS_PER_DAY
+16 C POPULATION_UNIT
+17 C HISTORY_LIMIT
+18 C MAX_SHIPMENTS_PER_DAY
+19 C MIN_PRICE_CENTIMES
+20 C SEASONAL_COMMODITY_CATEGORIES
+26 C DEFAULT_POLICIES
+46 K catalog
+47 K routes
+48 K region_states
+49 K production_sites
+50 K shipments
+51 K shipment_history
+52 K active_shocks
+53 K history
+54 K flow_totals
+55 E last_summary
+56 K initialization_error
+58 K _policies
+59 K _region_ids
+60 E _country_ids
+61 K _commodity_ids
+62 K _production_site_ids
+63 K _production_order
+64 K _trade_quota_remaining
+65 A _last_day_index
+66 A _next_shipment_sequence
+@ scripts/vnext/economy/market_economy_catalog.gd | VNextMarketEconomyCatalog
+7 C COMMODITY_MARKET_PATH
+8 C WORLD_PATH
+9 C INTEGRATION_PATH
+10 C HISTORICAL_MANIFEST_PATH
+11 C HISTORICAL_COUNTRY_TABLE_PATH
+15 C CATEGORY_PRICE_ELASTICITY_BP
+32 K commodities
+33 K recipes
+34 K production_sites
+35 K regions
+36 E countries
+37 K transport_edges
+38 K trade_relations
+39 K policies
+40 E source_summary
+41 K initialization_error
+43 K _source_region_to_market
+44 E _source_country_to_market
+```
+
+### 第10段：`scripts/vnext/economy/market_route_network.gd` 至 `scripts/world_map/historical_map_identity_style.gd`
+
+```text
+@ scripts/vnext/economy/market_route_network.gd | VNextMarketRouteNetwork
+15 K edges_by_id
+16 K adjacency
+17 K fixture_edge_budget_overrides
+18 K fixture_edge_remaining_budget
+19 K initialization_error
+21 K _default_fixture_budget
 @ scripts/vnext/economy/personal_wallet.gd | VNextPersonalWallet
 4 C SNAPSHOT_SCHEMA_ID
 5 C MAX_BALANCE_MINOR
@@ -1608,11 +1668,6 @@
 33 K _casualty_pressure
 34 K _mobilization_pressure
 35 K _military_result_signal
-```
-
-### 第10段：`scripts/vnext/politics/politics_update_service.gd` 至 `scripts/world_map/historical_map_identity_style.gd`
-
-```text
 @ scripts/vnext/politics/politics_update_service.gd | VNextPoliticsUpdateService
 8 C PRESSURE_SCALE
 9 C FORCE_DELTA_LIMIT
@@ -2006,4 +2061,3 @@
 7 C DETAIL_SELECTED_COLOR
 9 A _city_detail_catalog
 ```
-
