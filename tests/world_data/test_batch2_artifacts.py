@@ -84,8 +84,18 @@ class Batch2ArtifactTests(unittest.TestCase):
             (data_path / "flags_1900.json").write_text(
                 json.dumps(
                     {
+                        "schema_version": 1,
+                        "snapshot_date": "1900-03-12",
+                        "policy": {"source_asset_required_for_rendered_flag": True},
+                        "record_count": 1,
                         "records": {
                             "flag_a": {
+                                "id": "flag_a",
+                                "render_mode": "source_asset",
+                                "flag_type": "national_flag",
+                                "valid_from": "1890-01-01",
+                                "valid_to": "1910-01-01",
+                                "ratio": "2:3",
                                 "asset_path": "res://assets/historical_flags/1900/flag.png",
                                 "asset_sha256": "0" * 64,
                             }
@@ -97,6 +107,98 @@ class Batch2ArtifactTests(unittest.TestCase):
             manifest = batch2.build_asset_manifest(root)
         self.assertEqual(manifest["hash_mismatches"], ["flag_a"])
         self.assertEqual(manifest["missing_assets"], [])
+
+    def test_unrelated_world_map_records_are_not_classified_as_flag_catalog(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            historical = root / "data" / "world_map" / "historical"
+            historical.mkdir(parents=True)
+            asset_path = root / "assets" / "historical_flags" / "1900" / "flag.png"
+            asset_path.parent.mkdir(parents=True)
+            asset_path.write_bytes(b"fixture")
+            (historical / "flags_1900.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "snapshot_date": "1900-03-12",
+                        "policy": {"source_asset_required_for_rendered_flag": True},
+                        "record_count": 1,
+                        "records": {
+                            "flag_a": {
+                                "record": {
+                                    "id": "flag_a",
+                                    "render_mode": "source_asset",
+                                    "flag_type": "national_flag",
+                                    "valid_from": "1890-01-01",
+                                    "valid_to": "1910-01-01",
+                                    "ratio": "2:3",
+                                    "asset_path": "res://assets/historical_flags/1900/flag.png",
+                                    "asset_sha256": hashlib.sha256(b"fixture").hexdigest(),
+                                }
+                            }
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            unrelated = root / "data" / "world_map" / "world_map_notes.json"
+            unrelated.write_text(
+                json.dumps(
+                    {
+                        "records": {
+                            "not_a_flag": {
+                                "id": "not_a_flag",
+                                "asset_path": "res://assets/historical_flags/1900/flag.png",
+                            }
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            manifest = batch2.build_asset_manifest(root)
+        self.assertEqual(manifest["catalog_errors"], [])
+        self.assertEqual(manifest["referenced_asset_count"], 1)
+        self.assertEqual(manifest["source_asset_record_count"], 1)
+
+    def test_supported_reference_wrapper_is_discovered_without_broad_file_scan(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            historical = root / "data" / "world_map" / "historical"
+            historical.mkdir(parents=True)
+            asset_path = root / "assets" / "historical_flags" / "1900" / "flag.png"
+            asset_path.parent.mkdir(parents=True)
+            asset_path.write_bytes(b"fixture")
+            digest = hashlib.sha256(b"fixture").hexdigest()
+            (historical / "flags_1900.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "snapshot_date": "1900-03-12",
+                        "policy": {"source_asset_required_for_rendered_flag": True},
+                        "record_count": 1,
+                        "records": {
+                            "flag_a": {
+                                "reference": {
+                                    "resource": {
+                                        "id": "flag_a",
+                                        "render_mode": "source_asset",
+                                        "flag_type": "national_flag",
+                                        "valid_from": "1890-01-01",
+                                        "valid_to": "1910-01-01",
+                                        "ratio": "2:3",
+                                        "resource": {"asset_path": "res://assets/historical_flags/1900/flag.png"},
+                                        "asset_sha256": digest,
+                                    }
+                                }
+                            }
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            manifest = batch2.build_asset_manifest(root)
+        self.assertEqual(manifest["catalog_errors"], [])
+        self.assertEqual(manifest["verified_reference_ids"], ["flag_a"])
 
     def test_data_manifest_normalizes_checkout_line_endings(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

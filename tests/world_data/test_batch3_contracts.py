@@ -111,11 +111,73 @@ class Batch3ContractTests(unittest.TestCase):
                 json.dumps({"units": [{"id": "unit_a", "flag_id": "flag_a"}]}), encoding="utf-8"
             )
             (historical / "flags_1900.json").write_text(
-                json.dumps({"records": {"flag_a": {"asset_path": "", "flag_type": "national"}}}), encoding="utf-8"
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "snapshot_date": "1900-03-12",
+                        "policy": {"source_asset_required_for_rendered_flag": True},
+                        "record_count": 1,
+                        "records": {
+                            "flag_a": {
+                                "id": "flag_a",
+                                "asset_path": "",
+                                "render_mode": "source_asset",
+                                "flag_type": "national",
+                                "valid_from": "1890-01-01",
+                                "valid_to": "1910-01-01",
+                                "ratio": "2:3",
+                            }
+                        },
+                    }
+                ),
+                encoding="utf-8",
             )
             coverage = batch3.build_flag_coverage(root)
         self.assertEqual(coverage["status_counts"], {"MISSING_ASSET": 1})
         self.assertEqual(coverage["missing_asset_count"], 1)
+
+    def test_flag_coverage_ignores_unrelated_world_map_records(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            historical = root / "data" / "world_map" / "historical"
+            historical.mkdir(parents=True)
+            (historical / "political_units_1900.json").write_text(
+                json.dumps({"units": [{"id": "unit_a", "flag_id": "flag_a"}]}), encoding="utf-8"
+            )
+            (historical / "flags_1900.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "snapshot_date": "1900-03-12",
+                        "policy": {"source_asset_required_for_rendered_flag": True},
+                        "record_count": 1,
+                        "records": {
+                            "flag_a": {
+                                "id": "flag_a",
+                                "render_mode": "neutral_hatch",
+                                "flag_type": "documented_absence",
+                                "valid_from": "",
+                                "valid_to": "",
+                                "ratio": "",
+                                "asset_path": "",
+                            }
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (root / "data" / "world_map" / "unrelated.json").write_text(
+                json.dumps({"records": {"flag_but_not_catalog": {"id": "flag_but_not_catalog"}}}),
+                encoding="utf-8",
+            )
+            coverage = batch3.build_flag_coverage(root)
+        self.assertEqual(coverage["catalog_errors"], [])
+        self.assertEqual(coverage["flag_record_count"], 1)
+        self.assertEqual(coverage["status_counts"], {"DOCUMENTED_ABSENCE": 1})
+
+    def test_record_iterator_reaches_nested_supported_reference_objects(self) -> None:
+        nested = {"reference": {"resource": {"entries": [{"id": "wrapped"}]}}}
+        self.assertEqual([obj.get("id") for obj in batch3.iter_objects(nested) if obj.get("id")], ["wrapped"])
 
 
 if __name__ == "__main__":

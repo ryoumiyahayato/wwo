@@ -1,6 +1,7 @@
 {
   "asset_file_count": 60,
   "asset_root": "assets/historical_flags/1900",
+  "catalog_errors": [],
   "dimension_mismatches": [],
   "dimension_policy": "source_width/source_height describe upstream source metadata; rendered PNG dimensions are recorded, not compared as an equality contract",
   "hash_mismatches": [],
@@ -1215,6 +1216,7 @@
   },
   "schema_version": "wwo_world_data_batch2_artifacts_v1",
   "source": "data/world_map/historical/flags_1900.json",
+  "source_asset_record_count": 60,
   "verified_reference_ids": [
     "afghanistan_1880",
     "argentina_1861",

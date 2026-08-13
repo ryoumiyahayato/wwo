@@ -15,6 +15,19 @@ from collections import Counter
 from pathlib import Path
 from typing import Any, Iterator, Mapping
 
+try:
+    from tools.world_data.historical_flag_catalog import (
+        FLAG_REGISTRY_RELATIVE,
+        load_historical_flag_catalog,
+        resource_path_for_record,
+    )
+except ModuleNotFoundError:
+    from historical_flag_catalog import (  # type: ignore[no-redef]
+        FLAG_REGISTRY_RELATIVE,
+        load_historical_flag_catalog,
+        resource_path_for_record,
+    )
+
 
 SCHEMA_VERSION = "wwo_world_data_batch3_contracts_v1"
 RESOURCE_FILE_RE = re.compile(r"res://data/world_map/[A-Za-z0-9_./-]+\.json")
@@ -127,9 +140,8 @@ def build_loader_contract(repository_root: Path) -> dict[str, Any]:
 
 def build_flag_coverage(repository_root: Path) -> dict[str, Any]:
     units_document = read_json(repository_root / "data" / "world_map" / "historical" / "political_units_1900.json")
-    flags_document = read_json(repository_root / "data" / "world_map" / "historical" / "flags_1900.json")
+    flags_document, flags, catalog_errors = load_historical_flag_catalog(repository_root)
     units = units_document.get("units", [])
-    flags = flags_document.get("records", {})
     rows: list[dict[str, Any]] = []
     status_counts: dict[str, int] = {}
     for unit in units:
@@ -140,9 +152,9 @@ def build_flag_coverage(repository_root: Path) -> dict[str, Any]:
             asset_path = None
         elif flag_id == "no_single_standard_flag" or flag_record.get("flag_type") == "documented_absence":
             status = "DOCUMENTED_ABSENCE"
-            asset_path = flag_record.get("asset_path")
+            asset_path = resource_path_for_record(flag_record)
         else:
-            asset_path_value = flag_record.get("asset_path")
+            asset_path_value = resource_path_for_record(flag_record)
             if not isinstance(asset_path_value, str) or not asset_path_value:
                 status = "MISSING_ASSET"
             elif not resource_to_local_path(repository_root, asset_path_value).is_file():
@@ -167,13 +179,14 @@ def build_flag_coverage(repository_root: Path) -> dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
         "source": "data/world_map/historical/political_units_1900.json",
-        "flag_source": "data/world_map/historical/flags_1900.json",
+        "flag_source": FLAG_REGISTRY_RELATIVE,
         "unit_count": len(units),
         "flag_record_count": len(flags),
         "status_counts": dict(sorted(status_counts.items())),
         "missing_flag_record_count": status_counts.get("MISSING_FLAG_RECORD", 0),
         "missing_asset_count": status_counts.get("MISSING_ASSET", 0),
         "hash_mismatch_count": status_counts.get("HASH_MISMATCH", 0),
+        "catalog_errors": catalog_errors,
         "units": rows,
     }
 
@@ -296,6 +309,7 @@ def main() -> int:
     write_json(output_dir / "batch3_staging_candidates.json", staging)
     gate_passed = (
         loader["contract_gate"] == "PASS"
+        and not flags["catalog_errors"]
         and flags["missing_flag_record_count"] == 0
         and flags["missing_asset_count"] == 0
         and flags["hash_mismatch_count"] == 0
