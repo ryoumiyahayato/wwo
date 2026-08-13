@@ -14,6 +14,7 @@ func _run() -> void:
 	_test_infrastructure_state_and_capacity_formula()
 	_test_shared_capacity_contention_and_rollover()
 	_test_deterministic_request_permutation()
+	_test_batch_capacity_submission()
 	_test_territorial_mutation_and_projection()
 	_test_snapshot_restore_and_transactional_rejection()
 	_test_time_partition_and_bounded_state()
@@ -82,6 +83,7 @@ func _test_infrastructure_state_and_capacity_formula() -> void:
 	_equal(world.infrastructure_state(link_id).get("status"), "operational", "new link is operational")
 	_equal(world.infrastructure_state(link_id).get("nominal_capacity"), 100.0, "nominal capacity is authoritative")
 	_equal(world.infrastructure_state(link_id).get("effective_capacity"), 100.0, "operational effective capacity equals nominal")
+	_equal(world.effective_capacity(link_id), 100.0, "direct effective-capacity query matches authoritative state")
 	_check(world.set_infrastructure_status(link_id, VNextInfrastructureLinkState.STATUS_DAMAGED), "damaged status mutation is legal")
 	_equal(world.infrastructure_state(link_id).get("effective_capacity"), 50.0, "damaged status deterministically reduces capacity")
 	_check(world.set_infrastructure_status(link_id, VNextInfrastructureLinkState.STATUS_INTERRUPTED), "interrupted status mutation is legal")
@@ -135,6 +137,38 @@ func _test_deterministic_request_permutation() -> void:
 	second.request_capacity("request_z", "rail_paris_lille", 0, 80)
 	_equal(first.snapshot(), second.snapshot(), "request insertion permutation does not change snapshot")
 	_equal(first.capacity_summary("rail_paris_lille"), second.capacity_summary("rail_paris_lille"), "request insertion permutation does not change allocation")
+
+
+func _test_batch_capacity_submission() -> void:
+	var first := _world()
+	var second := _world()
+	if first == null or second == null:
+		return
+	_check(first.set_nominal_capacity("rail_paris_lille", 100), "batch fixture configures first capacity")
+	_check(second.set_nominal_capacity("rail_paris_lille", 100), "batch fixture configures second capacity")
+	var reverse_batch: Array[Dictionary] = [
+		{"request_id": "request_b", "link_id": "rail_paris_lille", "window_hour": 0, "demand": 60.0},
+		{"request_id": "request_a", "link_id": "rail_paris_lille", "window_hour": 0, "demand": 60.0},
+	]
+	var forward_batch: Array[Dictionary] = [
+		{"request_id": "request_a", "link_id": "rail_paris_lille", "window_hour": 0, "demand": 60.0},
+		{"request_id": "request_b", "link_id": "rail_paris_lille", "window_hour": 0, "demand": 60.0},
+	]
+	_check(first.request_capacity_batch(reverse_batch).get("accepted", false), "reverse batch is accepted transactionally")
+	_check(second.request_capacity_batch(forward_batch).get("accepted", false), "forward batch is accepted transactionally")
+	var final_batch: Dictionary = first.reservation_results_batch(reverse_batch)
+	_check(final_batch.get("accepted", false), "batch final reservation query is accepted")
+	_equal(((final_batch.get("results", {}) as Dictionary).get("request_a", {}) as Dictionary).get("allocated_capacity"), 60.0, "batch final query preserves canonical allocation")
+	_equal(first.reservation_result("request_a", "rail_paris_lille", 0).get("allocated_capacity"), 60.0, "batch canonical lower ID gets first allocation")
+	_equal(first.reservation_result("request_b", "rail_paris_lille", 0).get("allocated_capacity"), 40.0, "batch canonical higher ID gets partial allocation")
+	_equal(first.capacity_summary("rail_paris_lille"), second.capacity_summary("rail_paris_lille"), "batch insertion permutations have identical final allocation")
+	var before_invalid := first.snapshot()
+	var invalid_batch: Array[Dictionary] = [
+		{"request_id": "request_c", "link_id": "rail_paris_lille", "window_hour": 0, "demand": 10.0},
+		{"request_id": "request_c", "link_id": "rail_paris_lille", "window_hour": 0, "demand": 10.0},
+	]
+	_check(not first.request_capacity_batch(invalid_batch).get("accepted", false), "duplicate batch request is rejected")
+	_equal(first.snapshot(), before_invalid, "rejected batch leaves Spatial window unchanged")
 
 
 func _test_territorial_mutation_and_projection() -> void:

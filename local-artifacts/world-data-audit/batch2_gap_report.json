@@ -1,0 +1,21 @@
+{
+  "asset_gaps": {
+    "dimension_mismatches": [],
+    "hash_mismatches": [],
+    "missing_assets": [],
+    "orphan_assets": []
+  },
+  "data_parse_errors": [],
+  "existing_validator_code_counts": {
+    "PLACEHOLDER_FOREIGN_KEY": 6,
+    "SELF_INTERSECTING_RING": 104
+  },
+  "manual_or_historical_items_remain": true,
+  "notes": [
+    "Historical identity ambiguity is not resolved mechanically.",
+    "Geometry self-intersection findings remain in authoritative source data for review.",
+    "Missing coverage is recorded in coverage.json and is not filled with invented facts.",
+    "Source image dimensions are retained as metadata and are not treated as rendered PNG dimensions."
+  ],
+  "schema_version": "wwo_world_data_batch2_artifacts_v1"
+}

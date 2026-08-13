@@ -1,0 +1,607 @@
+{
+  "authoritative_source_modified": false,
+  "candidate_type": "verified_historical_flag_asset_index",
+  "entries": [
+    {
+      "asset_path": "res://assets/historical_flags/1900/afghanistan_1880.png",
+      "id": "afghanistan_1880",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "0e17e7edcbd97d3dac51f31327b050e90341e779a7f0fe18849e23d013f7ffd9",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/argentina_1861.png",
+      "id": "argentina_1861",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "39c4190ebec485f5c02eee2899222543835e24288a1d166d673600c3844dac1c",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/austria_hungary_civil_1869.png",
+      "id": "austria_hungary_civil_1869",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "4b47873d849ff1f2c9750d418a8ebb67a151f07d29e0583b25af4703474de56b",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/belgium_1831.png",
+      "id": "belgium_1831",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "80455869aaef6a981526e53a99d9e6572992515b142b74040724a54d071339bd",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/bolivia_1851.png",
+      "id": "bolivia_1851",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "e60a1526481bb11261bbb1142194f2cdf3e0fa0c5bb4074905274bfa7ed7828b",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/brazil_1889.png",
+      "id": "brazil_1889",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "7f99e1e9169b89955394cb260eaf86f4c79a5c39d4241d86abb49513de14fe3b",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/brunei_yellow_pre1906.png",
+      "id": "brunei_yellow_pre1906",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "ac695a598f8c8263678756a69465c4757efed43bfea135da0073269f3a102df2",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/bukhara_1868.png",
+      "id": "bukhara_1868",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "82a76e59ea0c42b9359b03575e0fd53147bcc8c8358b45ba38f5e93b13b17f60",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/bulgaria_1878.png",
+      "id": "bulgaria_1878",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "abaaa0247382edaef16e4a56d49c954bd0d8da7dfeae01ba00f2681b1611b49b",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/canada_red_ensign_1892.png",
+      "id": "canada_red_ensign_1892",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "fe8cff088784ec1cfa47feb74c543000cea7fe4f9b39b9ddcaf376d34686b08b",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/chile_1817.png",
+      "id": "chile_1817",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "2af8e749b2e71892e38882416c0b88b7afb8e19f0286c9ef554d2e478683d4e4",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/colombia_1861.png",
+      "id": "colombia_1861",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "4bb5692616861d54b4fa7f1c5ac236f7c3475c84e3583f2c7905240aedc0dac1",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/congo_free_state_1885.png",
+      "id": "congo_free_state_1885",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "af8fef05af0db90d3bf0a055a6f92bc494c2cee604247532b44a3780260165b5",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/costa_rica_1848.png",
+      "id": "costa_rica_1848",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "8bc5cd8201cc751d40f1d5e42aba7b131f6d524abfb43dd5c275d70dbaa5f274",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/denmark_dannebrog.png",
+      "id": "denmark_dannebrog",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "b849788847e585ab59556931283afb84ee201e638ee885c74b934a3e59434e91",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/dominican_1865.png",
+      "id": "dominican_1865",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "ee321d2247af3f2a9d4d6df91f2c6c7c93ecc329662f7f6cc1d1d930b124c9f8",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/ecuador_1860.png",
+      "id": "ecuador_1860",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "3651b88d004dc59d1d5d45a7880c40567c8ebdf71498933332fc5e92919187b1",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/egypt_1882.png",
+      "id": "egypt_1882",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "47f53080074025a3cc28862f1a11ef93dc1a3c746a6f52c1308632edd948c93f",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/el_salvador_1875.png",
+      "id": "el_salvador_1875",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "7c05cfe8bf2c1cea38e1ab8e61168f244d9bfa96325f66265d593be87f2049db",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/ethiopia_1897.png",
+      "id": "ethiopia_1897",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "c70c24824d4614f577db4923ecd78c50d2a19bb5848f69811f6cf16f21c22034",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "id": "france_tricolour_1794",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "f778bbd6ff6612c441fb2ac1ea3ea2b4c8408c4381e22ff389f2629e752929f5",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/german_empire_1867.png",
+      "id": "german_empire_1867",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "3a3db3b5c661fb9e43a2d968d9aa2f32a3526112a440b715493e3475401849d7",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/greece_1822.png",
+      "id": "greece_1822",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "e9da3fbc2f282f99260dd2332c148668d8374b76e7b04e443183695395763b33",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/guatemala_1871.png",
+      "id": "guatemala_1871",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "c95365439fb7a05aa41b9413f55c48d1f468fc2bc751f58019cb1954b47f2954",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/haiti_1859.png",
+      "id": "haiti_1859",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "add0c7f902f49459e8369c781c64bd0ec45ba823cde51c6ede65afff6bc85786",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/honduras_1898.png",
+      "id": "honduras_1898",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "5527994bdf18bc88baeffd9e9e112bfd0096956ad81c165913fa5fc79ff8a8f8",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/italy_1861.png",
+      "id": "italy_1861",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "1e35ec914575fa9df4cc87fc03429595c460d4e666d95fec5fea6564b84ed039",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/japan_1870.png",
+      "id": "japan_1870",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "a30de5913171f410f7815c3423c18691b47a701e30cbdc2be19749ccf21522fb",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/khiva_historical.png",
+      "id": "khiva_historical",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "4e6cd2dbdbaa08cb3ffc937c93cf1d3c488f3725ab60d8e9b907a182c630813d",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/korea_taegeuk_1897.png",
+      "id": "korea_taegeuk_1897",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "e8f0fad877186262f0afcc3cf54b0bff80af9028ccfcd2285558052f8f710804",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/liberia_1847.png",
+      "id": "liberia_1847",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "bd1422a7ea07bdc9aa3d05dd0580bfd1900d93e54c4b9e7111971615d8bfac3c",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/luxembourg_1845.png",
+      "id": "luxembourg_1845",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "1db34e361aeab8682922c2f2eb4e93256bdd5918ffc010a1787f9280c80cac94",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/mexico_1893.png",
+      "id": "mexico_1893",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "9ae575285e7b67c2120379c6055cc9516091f9d29dc3a1b37837eaeed9c5f6bf",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/montenegro_1876.png",
+      "id": "montenegro_1876",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "79e7b9b9aa95b302ffe5564ed9fd89825abd710f52fd5285549c11be9a9ddb9a",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/morocco_plain_red.png",
+      "id": "morocco_plain_red",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "77295e051e5c0b142084ae4d2b708748d3f331a2715fa09071fa73bfd17cc038",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/muscat_oman_plain_red.png",
+      "id": "muscat_oman_plain_red",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "c4810b67063d0b8b6833eb7ac4b48f77185b70bab11a703961cd2b6b72d0da34",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/nepal_historical_pennants.png",
+      "id": "nepal_historical_pennants",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "cf0b56a75d8bca4de47af60301a5bb29d69f1956f65e9cdcee2c6d5c68ab018d",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/netherlands_tricolour.png",
+      "id": "netherlands_tricolour",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "2cb51bb5f5ca4284c3c8aa77ba14fce20c1e75b013f38cf61a9952cf7a076de6",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/nicaragua_1896.png",
+      "id": "nicaragua_1896",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "2da793674643aa0f504d1b1987813b8c11022bffc6e6f85ec7da366f88777161",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/orange_free_state_1857.png",
+      "id": "orange_free_state_1857",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "64216330e2770a592ef8bdd9486b4c3d43ec66e337aa4b414b8ca521b33a99be",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/ottoman_1844.png",
+      "id": "ottoman_1844",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "1e6d1e456402fc73a5cb768cb23aedd3fd53c7a18cbb6474cfd2824c3f39122b",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/paraguay_1842.png",
+      "id": "paraguay_1842",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "d53ff8aaef96036d36c63987f5b518412e47ce7a4c3f12e3c2d4fd6a03fd7216",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/peru_1884.png",
+      "id": "peru_1884",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "8141867da9d4e23814a10ddfdf31855fd71334ac036cd7a1306b193913c3356c",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/portugal_1830.png",
+      "id": "portugal_1830",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "1bbe4cf0661a3a1dbee8a4bcb91875f1d6d585117966a7d9f444ffe73d2f1d81",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/qajar_persia_lion_sun.png",
+      "id": "qajar_persia_lion_sun",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "00a120b5dac85258bac909dc8647b6719e04657d3617dfe2f21cb7eaf78e5e00",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/qing_1889.png",
+      "id": "qing_1889",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "19900f739878e83804f524c1e23b2e9dd25a58b94229823e15e2a56123105e81",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/romania_1867.png",
+      "id": "romania_1867",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "d869305f04ed2e9fbc36fb7eba18d7cec13e4f57015b22dc01d2e74c9ada9d8f",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/russia_1896.png",
+      "id": "russia_1896",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "e26ac783d917278c6b4dd9c6d327cf04455c8c1acece7be977701e1882ea7a53",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/serbia_1882.png",
+      "id": "serbia_1882",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "d725f4362c9cea8b67eee6144e3dd53b6681f00dedb7a626b32d570e047794b0",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/siam_white_elephant_1855.png",
+      "id": "siam_white_elephant_1855",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "0c0a127313175483406020a81bcff67b9ab6d29a32af97d106fcc2dfb9d5dce6",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/spain_1875.png",
+      "id": "spain_1875",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "8658a602c85e3523f89c73a463bfefa18f6cc7e03b6c99e4b1b55f7057343e22",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/sweden_norway_union_1844.png",
+      "id": "sweden_norway_union_1844",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "aa76a2c802e9bf59d9b405e3a53b8f4a3a3f79be23c9b5ea3b18a65b018b48d6",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/switzerland_1889.png",
+      "id": "switzerland_1889",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "836459de8f98a414c4e394e28657474544e6e0f2e7a5771ba25712cd32394f11",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/transvaal_vierkleur_1857.png",
+      "id": "transvaal_vierkleur_1857",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "95233bb854e0351bf5f34d7d81bad7c0315dc00414f10aa52e638683862a6e4b",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/tunisia_1831.png",
+      "id": "tunisia_1831",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "fe967d290ad530222d625680d56a061cc940d0ef0fe252f3d5959944b0ef9ef8",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "id": "uk_union_1801",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "7d8aaebab8e7aa7c23b90f8207a3cdeef7816c5f0ee5c0b870388288855b2080",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uruguay_1830.png",
+      "id": "uruguay_1830",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "520569288e49cbd7e4e64459e211f43ca92aefadaca5d9f0ef0e11809e07d330",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/us_1896_45_star.png",
+      "id": "us_1896_45_star",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "a713f34e0834be572f9432e009422445b9d4d9cd03e7d0060194a9adb78d6dd2",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/venezuela_1863.png",
+      "id": "venezuela_1863",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "b77994a79578f893fa278c6e6a9247001c78498467585b7434ac3d7508eca042",
+      "snapshot_date": "1900-03-12"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/zanzibar_1896.png",
+      "id": "zanzibar_1896",
+      "rendered_dimensions": [
+        288,
+        192
+      ],
+      "sha256": "6cb5494efce31ee8df7a7d500c083a02aaa07b4e4210d9f055b3b488ff8e94b2",
+      "snapshot_date": "1900-03-12"
+    }
+  ],
+  "schema_version": "wwo_world_data_batch2_artifacts_v1"
+}

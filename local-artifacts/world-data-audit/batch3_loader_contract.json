@@ -1,0 +1,376 @@
+{
+  "contract_gate": "PASS",
+  "data_json_count": 184,
+  "literal_directory_reference_count": 2,
+  "literal_directory_references": [
+    {
+      "exists": true,
+      "json_file_count": 6,
+      "resource": "res://data/world_map/historical/",
+      "script": "scripts/formal/formal_world_economy_service.gd"
+    },
+    {
+      "exists": true,
+      "json_file_count": 158,
+      "resource": "res://data/world_map/city_detail/",
+      "script": "scripts/world_map/world_city_shard_catalog.gd"
+    }
+  ],
+  "literal_file_reference_count": 19,
+  "literal_file_references": [
+    {
+      "exists": true,
+      "resource": "res://data/world_map/historical/major_economy_polity_crosswalk_1900.json",
+      "script": "scripts/formal/formal_world_economy_service.gd"
+    },
+    {
+      "exists": true,
+      "resource": "res://data/world_map/historical/political_units_1900.json",
+      "script": "scripts/formal/formal_world_economy_service.gd"
+    },
+    {
+      "exists": true,
+      "resource": "res://data/world_map/characters.json",
+      "script": "scripts/world_map/internal/world_map_data_impl.gd"
+    },
+    {
+      "exists": true,
+      "resource": "res://data/world_map/cities.json",
+      "script": "scripts/world_map/internal/world_map_data_impl.gd"
+    },
+    {
+      "exists": true,
+      "resource": "res://data/world_map/countries.json",
+      "script": "scripts/world_map/internal/world_map_data_impl.gd"
+    },
+    {
+      "exists": true,
+      "resource": "res://data/world_map/institutions.json",
+      "script": "scripts/world_map/internal/world_map_data_impl.gd"
+    },
+    {
+      "exists": true,
+      "resource": "res://data/world_map/map_geometry_cache.json",
+      "script": "scripts/world_map/internal/world_map_data_impl.gd"
+    },
+    {
+      "exists": true,
+      "resource": "res://data/world_map/map_modes.json",
+      "script": "scripts/world_map/internal/world_map_data_impl.gd"
+    },
+    {
+      "exists": true,
+      "resource": "res://data/world_map/name_pool_fr.json",
+      "script": "scripts/world_map/internal/world_map_data_impl.gd"
+    },
+    {
+      "exists": true,
+      "resource": "res://data/world_map/organizations.json",
+      "script": "scripts/world_map/internal/world_map_data_impl.gd"
+    },
+    {
+      "exists": true,
+      "resource": "res://data/world_map/ports.json",
+      "script": "scripts/world_map/internal/world_map_data_impl.gd"
+    },
+    {
+      "exists": true,
+      "resource": "res://data/world_map/rail_segments.json",
+      "script": "scripts/world_map/internal/world_map_data_impl.gd"
+    },
+    {
+      "exists": true,
+      "resource": "res://data/world_map/regions.json",
+      "script": "scripts/world_map/internal/world_map_data_impl.gd"
+    },
+    {
+      "exists": true,
+      "resource": "res://data/world_map/relationships.json",
+      "script": "scripts/world_map/internal/world_map_data_impl.gd"
+    },
+    {
+      "exists": true,
+      "resource": "res://data/world_map/road_segments.json",
+      "script": "scripts/world_map/internal/world_map_data_impl.gd"
+    },
+    {
+      "exists": true,
+      "resource": "res://data/world_map/shipping_routes.json",
+      "script": "scripts/world_map/internal/world_map_data_impl.gd"
+    },
+    {
+      "exists": true,
+      "resource": "res://data/world_map/world_activity.json",
+      "script": "scripts/world_map/internal/world_map_data_impl.gd"
+    },
+    {
+      "exists": true,
+      "resource": "res://data/world_map/world_coastlines.json",
+      "script": "scripts/world_map/internal/world_map_data_impl.gd"
+    },
+    {
+      "exists": true,
+      "resource": "res://data/world_map/city_detail/index.json",
+      "script": "scripts/world_map/world_city_shard_catalog.gd"
+    }
+  ],
+  "missing_direct_json_paths": [],
+  "missing_direct_references": [],
+  "missing_directory_references": [],
+  "not_directly_literal_referenced_json": [
+    "res://data/world_map/city_detail/LICENSE.json",
+    "res://data/world_map/city_detail/countries/AD.json",
+    "res://data/world_map/city_detail/countries/AE.json",
+    "res://data/world_map/city_detail/countries/AF.json",
+    "res://data/world_map/city_detail/countries/AG.json",
+    "res://data/world_map/city_detail/countries/AI.json",
+    "res://data/world_map/city_detail/countries/AL.json",
+    "res://data/world_map/city_detail/countries/AM.json",
+    "res://data/world_map/city_detail/countries/AT.json",
+    "res://data/world_map/city_detail/countries/AW.json",
+    "res://data/world_map/city_detail/countries/AX.json",
+    "res://data/world_map/city_detail/countries/AZ.json",
+    "res://data/world_map/city_detail/countries/BA.json",
+    "res://data/world_map/city_detail/countries/BB.json",
+    "res://data/world_map/city_detail/countries/BD.json",
+    "res://data/world_map/city_detail/countries/BE.json",
+    "res://data/world_map/city_detail/countries/BG.json",
+    "res://data/world_map/city_detail/countries/BH.json",
+    "res://data/world_map/city_detail/countries/BL.json",
+    "res://data/world_map/city_detail/countries/BM.json",
+    "res://data/world_map/city_detail/countries/BN.json",
+    "res://data/world_map/city_detail/countries/BQ.json",
+    "res://data/world_map/city_detail/countries/BS.json",
+    "res://data/world_map/city_detail/countries/BT.json",
+    "res://data/world_map/city_detail/countries/BY.json",
+    "res://data/world_map/city_detail/countries/BZ.json",
+    "res://data/world_map/city_detail/countries/CA.json",
+    "res://data/world_map/city_detail/countries/CC.json",
+    "res://data/world_map/city_detail/countries/CH.json",
+    "res://data/world_map/city_detail/countries/CN.json",
+    "res://data/world_map/city_detail/countries/CR.json",
+    "res://data/world_map/city_detail/countries/CU.json",
+    "res://data/world_map/city_detail/countries/CW.json",
+    "res://data/world_map/city_detail/countries/CY.json",
+    "res://data/world_map/city_detail/countries/CZ.json",
+    "res://data/world_map/city_detail/countries/DE.json",
+    "res://data/world_map/city_detail/countries/DK.json",
+    "res://data/world_map/city_detail/countries/DM.json",
+    "res://data/world_map/city_detail/countries/DO.json",
+    "res://data/world_map/city_detail/countries/EE.json",
+    "res://data/world_map/city_detail/countries/ES.json",
+    "res://data/world_map/city_detail/countries/FI.json",
+    "res://data/world_map/city_detail/countries/FO.json",
+    "res://data/world_map/city_detail/countries/GB.json",
+    "res://data/world_map/city_detail/countries/GD.json",
+    "res://data/world_map/city_detail/countries/GE.json",
+    "res://data/world_map/city_detail/countries/GG.json",
+    "res://data/world_map/city_detail/countries/GI.json",
+    "res://data/world_map/city_detail/countries/GL.json",
+    "res://data/world_map/city_detail/countries/GP.json",
+    "res://data/world_map/city_detail/countries/GR.json",
+    "res://data/world_map/city_detail/countries/GT.json",
+    "res://data/world_map/city_detail/countries/HK.json",
+    "res://data/world_map/city_detail/countries/HN.json",
+    "res://data/world_map/city_detail/countries/HR.json",
+    "res://data/world_map/city_detail/countries/HT.json",
+    "res://data/world_map/city_detail/countries/HU.json",
+    "res://data/world_map/city_detail/countries/ID.json",
+    "res://data/world_map/city_detail/countries/IE.json",
+    "res://data/world_map/city_detail/countries/IL.json",
+    "res://data/world_map/city_detail/countries/IM.json",
+    "res://data/world_map/city_detail/countries/IN.json",
+    "res://data/world_map/city_detail/countries/IQ.json",
+    "res://data/world_map/city_detail/countries/IR.json",
+    "res://data/world_map/city_detail/countries/IS.json",
+    "res://data/world_map/city_detail/countries/IT.json",
+    "res://data/world_map/city_detail/countries/JE.json",
+    "res://data/world_map/city_detail/countries/JM.json",
+    "res://data/world_map/city_detail/countries/JO.json",
+    "res://data/world_map/city_detail/countries/JP.json",
+    "res://data/world_map/city_detail/countries/KG.json",
+    "res://data/world_map/city_detail/countries/KH.json",
+    "res://data/world_map/city_detail/countries/KN.json",
+    "res://data/world_map/city_detail/countries/KP.json",
+    "res://data/world_map/city_detail/countries/KR.json",
+    "res://data/world_map/city_detail/countries/KW.json",
+    "res://data/world_map/city_detail/countries/KY.json",
+    "res://data/world_map/city_detail/countries/KZ.json",
+    "res://data/world_map/city_detail/countries/LA.json",
+    "res://data/world_map/city_detail/countries/LB.json",
+    "res://data/world_map/city_detail/countries/LC.json",
+    "res://data/world_map/city_detail/countries/LI.json",
+    "res://data/world_map/city_detail/countries/LK.json",
+    "res://data/world_map/city_detail/countries/LT.json",
+    "res://data/world_map/city_detail/countries/LU.json",
+    "res://data/world_map/city_detail/countries/LV.json",
+    "res://data/world_map/city_detail/countries/MC.json",
+    "res://data/world_map/city_detail/countries/MD.json",
+    "res://data/world_map/city_detail/countries/ME.json",
+    "res://data/world_map/city_detail/countries/MF.json",
+    "res://data/world_map/city_detail/countries/MK.json",
+    "res://data/world_map/city_detail/countries/MM.json",
+    "res://data/world_map/city_detail/countries/MN.json",
+    "res://data/world_map/city_detail/countries/MO.json",
+    "res://data/world_map/city_detail/countries/MQ.json",
+    "res://data/world_map/city_detail/countries/MS.json",
+    "res://data/world_map/city_detail/countries/MT.json",
+    "res://data/world_map/city_detail/countries/MV.json",
+    "res://data/world_map/city_detail/countries/MX.json",
+    "res://data/world_map/city_detail/countries/MY.json",
+    "res://data/world_map/city_detail/countries/NI.json",
+    "res://data/world_map/city_detail/countries/NL.json",
+    "res://data/world_map/city_detail/countries/NO.json",
+    "res://data/world_map/city_detail/countries/NP.json",
+    "res://data/world_map/city_detail/countries/OM.json",
+    "res://data/world_map/city_detail/countries/PA.json",
+    "res://data/world_map/city_detail/countries/PH.json",
+    "res://data/world_map/city_detail/countries/PK.json",
+    "res://data/world_map/city_detail/countries/PL.json",
+    "res://data/world_map/city_detail/countries/PM.json",
+    "res://data/world_map/city_detail/countries/PR.json",
+    "res://data/world_map/city_detail/countries/PS.json",
+    "res://data/world_map/city_detail/countries/PT.json",
+    "res://data/world_map/city_detail/countries/QA.json",
+    "res://data/world_map/city_detail/countries/RO.json",
+    "res://data/world_map/city_detail/countries/RS.json",
+    "res://data/world_map/city_detail/countries/RU.json",
+    "res://data/world_map/city_detail/countries/SA.json",
+    "res://data/world_map/city_detail/countries/SE.json",
+    "res://data/world_map/city_detail/countries/SG.json",
+    "res://data/world_map/city_detail/countries/SI.json",
+    "res://data/world_map/city_detail/countries/SJ.json",
+    "res://data/world_map/city_detail/countries/SK.json",
+    "res://data/world_map/city_detail/countries/SM.json",
+    "res://data/world_map/city_detail/countries/SV.json",
+    "res://data/world_map/city_detail/countries/SX.json",
+    "res://data/world_map/city_detail/countries/SY.json",
+    "res://data/world_map/city_detail/countries/TC.json",
+    "res://data/world_map/city_detail/countries/TH.json",
+    "res://data/world_map/city_detail/countries/TJ.json",
+    "res://data/world_map/city_detail/countries/TM.json",
+    "res://data/world_map/city_detail/countries/TR.json",
+    "res://data/world_map/city_detail/countries/TT.json",
+    "res://data/world_map/city_detail/countries/TW.json",
+    "res://data/world_map/city_detail/countries/UA.json",
+    "res://data/world_map/city_detail/countries/US.json",
+    "res://data/world_map/city_detail/countries/UZ.json",
+    "res://data/world_map/city_detail/countries/VA.json",
+    "res://data/world_map/city_detail/countries/VC.json",
+    "res://data/world_map/city_detail/countries/VG.json",
+    "res://data/world_map/city_detail/countries/VI.json",
+    "res://data/world_map/city_detail/countries/VN.json",
+    "res://data/world_map/city_detail/countries/XK.json",
+    "res://data/world_map/city_detail/countries/YE.json",
+    "res://data/world_map/city_detail/france/FR-11.json",
+    "res://data/world_map/city_detail/france/FR-24.json",
+    "res://data/world_map/city_detail/france/FR-27.json",
+    "res://data/world_map/city_detail/france/FR-28.json",
+    "res://data/world_map/city_detail/france/FR-32.json",
+    "res://data/world_map/city_detail/france/FR-44.json",
+    "res://data/world_map/city_detail/france/FR-52.json",
+    "res://data/world_map/city_detail/france/FR-53.json",
+    "res://data/world_map/city_detail/france/FR-75.json",
+    "res://data/world_map/city_detail/france/FR-76.json",
+    "res://data/world_map/city_detail/france/FR-84.json",
+    "res://data/world_map/city_detail/france/FR-93.json",
+    "res://data/world_map/city_detail/france/FR-94.json",
+    "res://data/world_map/country_flag_palettes.json",
+    "res://data/world_map/historical/cshapes_1900_snapshot.json",
+    "res://data/world_map/historical/flags_1900.json",
+    "res://data/world_map/historical/historical_admin1_1900.json",
+    "res://data/world_map/historical/major_state_profiles_1900.json",
+    "res://data/world_map/historical_political_entities_1900.json",
+    "res://data/world_map/strategic_military_overlay.json",
+    "res://data/world_map/world_admin1.json"
+  ],
+  "production_script_count": 15,
+  "production_script_roots": [
+    "scripts/world_map",
+    "scripts/formal"
+  ],
+  "schema_version": "wwo_world_data_batch3_contracts_v1",
+  "script_digest": "842017e8065fc293d0ad70f2747421923477646f97a6a23056daa6fb2c67f303",
+  "world_map_data_loader_entries": [
+    {
+      "exists": true,
+      "key": "world_coastlines",
+      "resource": "res://data/world_map/world_coastlines.json"
+    },
+    {
+      "exists": true,
+      "key": "countries",
+      "resource": "res://data/world_map/countries.json"
+    },
+    {
+      "exists": true,
+      "key": "regions",
+      "resource": "res://data/world_map/regions.json"
+    },
+    {
+      "exists": true,
+      "key": "cities",
+      "resource": "res://data/world_map/cities.json"
+    },
+    {
+      "exists": true,
+      "key": "ports",
+      "resource": "res://data/world_map/ports.json"
+    },
+    {
+      "exists": true,
+      "key": "rail_segments",
+      "resource": "res://data/world_map/rail_segments.json"
+    },
+    {
+      "exists": true,
+      "key": "road_segments",
+      "resource": "res://data/world_map/road_segments.json"
+    },
+    {
+      "exists": true,
+      "key": "shipping_routes",
+      "resource": "res://data/world_map/shipping_routes.json"
+    },
+    {
+      "exists": true,
+      "key": "characters",
+      "resource": "res://data/world_map/characters.json"
+    },
+    {
+      "exists": true,
+      "key": "name_pool_fr",
+      "resource": "res://data/world_map/name_pool_fr.json"
+    },
+    {
+      "exists": true,
+      "key": "relationships",
+      "resource": "res://data/world_map/relationships.json"
+    },
+    {
+      "exists": true,
+      "key": "organizations",
+      "resource": "res://data/world_map/organizations.json"
+    },
+    {
+      "exists": true,
+      "key": "institutions",
+      "resource": "res://data/world_map/institutions.json"
+    },
+    {
+      "exists": true,
+      "key": "activity",
+      "resource": "res://data/world_map/world_activity.json"
+    },
+    {
+      "exists": true,
+      "key": "map_modes",
+      "resource": "res://data/world_map/map_modes.json"
+    },
+    {
+      "exists": true,
+      "key": "map_geometry_cache",
+      "resource": "res://data/world_map/map_geometry_cache.json"
+    }
+  ]
+}
