@@ -31,6 +31,11 @@ Read-only structural QA for city-detail references, runtime metadata and stable 
 | runtime_schema_versions | {"1": 2, "2": 5, "3": 6, "4": 3} |
 | runtime_missing_prototype_flag | [] |
 | runtime_root_types | {"dict": 16} |
+| runtime_supporting_file_count | 2 |
+| runtime_supporting_missing | [] |
+| runtime_supporting_bad_schema | [] |
+| runtime_supporting_schema_versions | {"1": 2} |
+| runtime_supporting_root_types | {"dict": 2} |
 | stable_id_records_checked | 244 |
 | stable_id_missing | 0 |
 | stable_id_duplicate_arrays | 0 |

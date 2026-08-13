@@ -62,6 +62,15 @@
       "3": 6,
       "4": 3
     },
+    "runtime_supporting_bad_schema": [],
+    "runtime_supporting_file_count": 2,
+    "runtime_supporting_missing": [],
+    "runtime_supporting_root_types": {
+      "dict": 2
+    },
+    "runtime_supporting_schema_versions": {
+      "1": 2
+    },
     "same_shard_duplicate_ids": 0,
     "shard_record_count": 88927,
     "stable_id_duplicate_arrays": 0,

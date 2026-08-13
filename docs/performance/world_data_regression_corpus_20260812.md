@@ -3,9 +3,9 @@
 Compact deterministic references to all world-map JSON inputs; authoritative data is not copied.
 
 - Corpus tool: `wwo_world_data_regression_corpus_batch_3` schema v1
-- Files covered: **183**
+- Files covered: **184**
 - Corpus validation: **PASS**
-- Corpus SHA-256: `25d0111883b7bec85e20dd0b5d1e64fa640850d44944a8d75d17376e468a2da7`
+- Corpus SHA-256: `bf49a2c88366b97bb9e482c6607125756e7c4b06a15130ecccd9fc6ddfb4a60c`
 
 ## Category matrix
 
@@ -16,7 +16,7 @@ Compact deterministic references to all world-map JSON inputs; authoritative dat
 | city_detail_region_shard | 13 | 36871 | 0 |
 | historical | 8 | 5235 | 925954 |
 | runtime_loader | 16 | 544 | 200203 |
-| runtime_supporting | 1 | 0 | 0 |
+| runtime_supporting | 2 | 0 | 0 |
 
 ## Representative sample matrix
 
@@ -202,6 +202,7 @@ Compact deterministic references to all world-map JSON inputs; authoritative dat
 | runtime_loader | `relationships.json` | `jeanne, jules, elise, louis, marcel, marie, helene, rene` | 0 | `e54d39945fb0` | `d4c7f75bb173` |
 | runtime_loader | `road_segments.json` | `road_rouen_paris, road_lille_rouen, road_lyon_strasbourg` | 0 | `d34edf3ab6bf` | `55336363eb7f` |
 | runtime_loader | `shipping_routes.json` | `shipping_channel, shipping_atlantic, shipping_mediterranean` | 0 | `3812b7e48128` | `6d7abcf9b119` |
+| runtime_supporting | `strategic_military_overlay.json` | `paris, lille, lyon, le_havre, marseille, berlin, london, plains` | 0 | `42e0536552c2` | `8fb308ef0023` |
 | runtime_loader | `world_activity.json` | `food_price_lille, factory_safety_notice, hiring_lille_mechanical, union_activity_nord, paris_lille_rail_delay, national_public_notice` | 0 | `6039bee199be` | `6cc2cba5ac42` |
 | historical | `world_admin1.json` | `ARG-1309, URY-8, IDN-1185, MYS-1186, CHL-2694, BOL-1936, BOL-1937, CHL-2693` | 0 | `61210621bbdc` | `df2a57b52ed8` |
 | runtime_loader | `world_coastlines.json` | `ne_admin0_1159320625, ne_admin0_1159321337, ne_admin0_1159321223, ne_admin0_1159320467, ne_admin0_1159321369, ne_admin0_1159320967, ne_admin0_1159321405, ne_admin0_1159321173` | 0 | `2c47f66e49af` | `8fb048895b36` |

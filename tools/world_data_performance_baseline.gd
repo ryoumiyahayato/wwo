@@ -15,6 +15,31 @@ const SYNTHETIC_ITERATIONS: int = 5
 const SYNTHETIC_BASE_RECORDS: int = 1000
 const SYNTHETIC_LOOKUPS: int = 1000
 const BENCHMARK_SEMANTICS: String = "Timing values are machine-specific observational baselines; they are not universal CI pass/fail thresholds."
+const SOURCE_BASELINE_MASTER: String = "83e4f305b52529625f4d86ad928bce451ea34b9f"
+
+const RUNTIME_LOADER_FILES: Dictionary = {
+	"world_coastlines": "res://data/world_map/world_coastlines.json",
+	"countries": "res://data/world_map/countries.json",
+	"regions": "res://data/world_map/regions.json",
+	"cities": "res://data/world_map/cities.json",
+	"ports": "res://data/world_map/ports.json",
+	"rail_segments": "res://data/world_map/rail_segments.json",
+	"road_segments": "res://data/world_map/road_segments.json",
+	"shipping_routes": "res://data/world_map/shipping_routes.json",
+	"characters": "res://data/world_map/characters.json",
+	"name_pool_fr": "res://data/world_map/name_pool_fr.json",
+	"relationships": "res://data/world_map/relationships.json",
+	"organizations": "res://data/world_map/organizations.json",
+	"institutions": "res://data/world_map/institutions.json",
+	"activity": "res://data/world_map/world_activity.json",
+	"map_modes": "res://data/world_map/map_modes.json",
+	"map_geometry_cache": "res://data/world_map/map_geometry_cache.json",
+}
+
+const RUNTIME_SUPPORTING_FILES: Dictionary = {
+	"country_flag_palettes": "res://data/world_map/country_flag_palettes.json",
+	"strategic_military_overlay": "res://data/world_map/strategic_military_overlay.json",
+}
 
 const RUNTIME_FILES: Dictionary = {
 	"world_coastlines": "res://data/world_map/world_coastlines.json",
@@ -33,6 +58,8 @@ const RUNTIME_FILES: Dictionary = {
 	"activity": "res://data/world_map/world_activity.json",
 	"map_modes": "res://data/world_map/map_modes.json",
 	"map_geometry_cache": "res://data/world_map/map_geometry_cache.json",
+	"country_flag_palettes": "res://data/world_map/country_flag_palettes.json",
+	"strategic_military_overlay": "res://data/world_map/strategic_military_overlay.json",
 }
 
 const PROFILE_GROUPS: Dictionary = {
@@ -65,6 +92,8 @@ const PROFILE_GROUPS: Dictionary = {
 		"res://data/world_map/relationships.json",
 		"res://data/world_map/world_activity.json",
 		"res://data/world_map/map_modes.json",
+		"res://data/world_map/country_flag_palettes.json",
+		"res://data/world_map/strategic_military_overlay.json",
 	],
 }
 
@@ -81,7 +110,7 @@ const GEOMETRY_ARRAY_KEYS: PackedStringArray = [
 ]
 
 const REQUIRED_TOP_LEVEL_KEYS: PackedStringArray = [
-	"schema_version", "benchmark_id", "workload", "runtime", "dataset_profile",
+	"schema_version", "benchmark_id", "workload", "runtime_source_inventory", "runtime", "dataset_profile",
 	"load_benchmark", "map_benchmark", "synthetic_scaling", "limitations",
 ]
 
@@ -236,6 +265,13 @@ static func schema_probe() -> Dictionary:
 			"lookup_iterations": LOOKUP_ITERATIONS,
 			"synthetic_scales": [1, 2, 5, 10],
 		},
+		"runtime_source_inventory": {
+			"loader_file_count": RUNTIME_LOADER_FILES.size(),
+			"loader_paths": RUNTIME_LOADER_FILES.values(),
+			"supporting_file_count": RUNTIME_SUPPORTING_FILES.size(),
+			"supporting_paths": RUNTIME_SUPPORTING_FILES.values(),
+			"source_inventory_file_count": RUNTIME_FILES.size(),
+		},
 		"runtime": {},
 		"dataset_profile": {},
 		"load_benchmark": {},
@@ -251,6 +287,7 @@ func _build_payload() -> Dictionary:
 	var load_results: Dictionary = _measure_loads()
 	var map_results: Dictionary = _measure_map_benchmarks()
 	var synthetic_results: Array[Dictionary] = _measure_synthetic_scaling()
+	var runtime_source_inventory: Dictionary = _runtime_source_inventory()
 	return {
 		"schema_version": SCHEMA_VERSION,
 		"benchmark_id": BENCHMARK_ID,
@@ -264,6 +301,7 @@ func _build_payload() -> Dictionary:
 			"synthetic_scales": [1, 2, 5, 10],
 			"input_policy": "fixed repository paths; synthetic records are generated deterministically in memory",
 		},
+		"runtime_source_inventory": runtime_source_inventory,
 		"runtime": _runtime_metadata(),
 		"dataset_profile": profile,
 		"load_benchmark": load_results,
@@ -277,9 +315,19 @@ func _build_payload() -> Dictionary:
 			"真实 process RSS/heap 未可靠测量：NOT MEASURED；decoded_data_bytes_estimate 是递归估算，不是 allocator 计数。",
 			"cold parse 是同一进程的 first-pass 样本，未重启进程，也未控制 OS 文件缓存。",
 			"benchmark 未改变生产 runtime，也未把 synthetic 数据写入正式 world data。",
-			"benchmark 使用固定的 repository-local 输入；live master fetch/push 状态属于交付环境，不影响测量结果。起始 master SHA 为 4b738ab8b0a21e8685aae95381717e9efd2327a8。",
+			"benchmark 使用固定的 repository-local 输入；live master fetch/push 状态属于交付环境，不影响测量结果。当前源清单基线 master SHA 为 %s；历史 timing 报告中的测量值未被回填或伪造。" % SOURCE_BASELINE_MASTER,
 		],
 		"benchmark_elapsed_ms": float(Time.get_ticks_usec() - started_usec) / 1000.0,
+	}
+
+
+func _runtime_source_inventory() -> Dictionary:
+	return {
+		"loader_file_count": RUNTIME_LOADER_FILES.size(),
+		"loader_paths": RUNTIME_LOADER_FILES.values(),
+		"supporting_file_count": RUNTIME_SUPPORTING_FILES.size(),
+		"supporting_paths": RUNTIME_SUPPORTING_FILES.values(),
+		"source_inventory_file_count": RUNTIME_FILES.size(),
 	}
 
 
@@ -882,7 +930,7 @@ func _render_markdown(payload: Dictionary) -> String:
 	var lines: PackedStringArray = []
 	lines.append("# WWO WORLD DATA PERFORMANCE BASELINE — BATCH 1")
 	lines.append("")
-	lines.append("Starting master: 4b738ab8b0a21e8685aae95381717e9efd2327a8")
+	lines.append("Source-inventory baseline master: %s" % SOURCE_BASELINE_MASTER)
 	lines.append("Branch: chore/world-data-performance-baseline-20260812")
 	lines.append("")
 	lines.append("This is a measurement report. Production gameplay, authoritative map data, and workflows were not modified.")
@@ -897,6 +945,13 @@ func _render_markdown(payload: Dictionary) -> String:
 	lines.append("- Iterations: %d full samples, %d map samples, %d lookup operations per lookup sample." % [ITERATIONS, MAP_ITERATIONS, LOOKUP_ITERATIONS])
 	lines.append("- Synthetic scales: 1x, 2x, 5x, 10x; base %d records; synthetic data remains memory-only." % SYNTHETIC_BASE_RECORDS)
 	lines.append("- Benchmark semantics: MACHINE-SPECIFIC OBSERVATIONAL BASELINE; timings are not universal CI pass/fail thresholds.")
+	var source_inventory: Dictionary = payload["runtime_source_inventory"] as Dictionary
+	lines.append("- Runtime source inventory: %d loader files + %d supporting files = %d benchmark parse sources." % [
+		int(source_inventory.get("loader_file_count", 0)),
+		int(source_inventory.get("supporting_file_count", 0)),
+		int(source_inventory.get("source_inventory_file_count", 0)),
+	])
+	lines.append("- Historical timing values are preserved; this reconciliation updates source inventory/provenance only.")
 	lines.append("")
 	lines.append("## Dataset sizes")
 	lines.append("")

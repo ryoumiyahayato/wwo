@@ -1156,14 +1156,56 @@
       "record_count": 544
     },
     "runtime_supporting": {
-      "decoded_array_count": 57,
-      "decoded_data_bytes_estimate": 25741,
-      "decoded_object_count": 59,
-      "decoded_scalar_count": 218,
-      "file_count": 1,
-      "file_size_bytes": 4472,
+      "decoded_array_count": 82,
+      "decoded_data_bytes_estimate": 49838,
+      "decoded_object_count": 98,
+      "decoded_scalar_count": 455,
+      "file_count": 2,
+      "file_size_bytes": 12941,
       "geometry_vertex_count": 0,
       "largest_arrays": [
+        {
+          "count": 10,
+          "file": "strategic_military_overlay.json",
+          "geometry_context": false,
+          "path": "$.country_overlays",
+          "record_like": false
+        },
+        {
+          "count": 9,
+          "file": "strategic_military_overlay.json",
+          "geometry_context": false,
+          "path": "$.region_overlays",
+          "record_like": false
+        },
+        {
+          "count": 7,
+          "file": "strategic_military_overlay.json",
+          "geometry_context": false,
+          "path": "$.city_overlays",
+          "record_like": false
+        },
+        {
+          "count": 7,
+          "file": "strategic_military_overlay.json",
+          "geometry_context": false,
+          "path": "$.terrain_profiles",
+          "record_like": false
+        },
+        {
+          "count": 4,
+          "file": "strategic_military_overlay.json",
+          "geometry_context": false,
+          "path": "$.country_overlays[1].resources",
+          "record_like": false
+        },
+        {
+          "count": 4,
+          "file": "strategic_military_overlay.json",
+          "geometry_context": false,
+          "path": "$.country_overlays[6].resources",
+          "record_like": false
+        },
         {
           "count": 4,
           "file": "country_flag_palettes.json",
@@ -1179,63 +1221,25 @@
           "record_like": false
         },
         {
-          "count": 3,
-          "file": "country_flag_palettes.json",
+          "count": 4,
+          "file": "strategic_military_overlay.json",
           "geometry_context": false,
-          "path": "$.palettes.AFG.colors",
+          "path": "$.region_overlays[1].resources",
           "record_like": false
         },
         {
-          "count": 3,
-          "file": "country_flag_palettes.json",
+          "count": 4,
+          "file": "strategic_military_overlay.json",
           "geometry_context": false,
-          "path": "$.palettes.ARG.colors",
-          "record_like": false
-        },
-        {
-          "count": 3,
-          "file": "country_flag_palettes.json",
-          "geometry_context": false,
-          "path": "$.palettes.AUS.colors",
-          "record_like": false
-        },
-        {
-          "count": 3,
-          "file": "country_flag_palettes.json",
-          "geometry_context": false,
-          "path": "$.palettes.BEL.colors",
-          "record_like": false
-        },
-        {
-          "count": 3,
-          "file": "country_flag_palettes.json",
-          "geometry_context": false,
-          "path": "$.palettes.BGR.colors",
-          "record_like": false
-        },
-        {
-          "count": 3,
-          "file": "country_flag_palettes.json",
-          "geometry_context": false,
-          "path": "$.palettes.BOL.colors",
-          "record_like": false
-        },
-        {
-          "count": 3,
-          "file": "country_flag_palettes.json",
-          "geometry_context": false,
-          "path": "$.palettes.BRA.colors",
-          "record_like": false
-        },
-        {
-          "count": 3,
-          "file": "country_flag_palettes.json",
-          "geometry_context": false,
-          "path": "$.palettes.CAN.colors",
+          "path": "$.resource_ids",
           "record_like": false
         }
       ],
       "largest_files": [
+        {
+          "bytes": 8469,
+          "path": "strategic_military_overlay.json"
+        },
         {
           "bytes": 4472,
           "path": "country_flag_palettes.json"
@@ -1248,49 +1252,49 @@
           "path": "$.palettes"
         },
         {
-          "count": 3,
-          "file": "country_flag_palettes.json",
+          "count": 11,
+          "file": "strategic_military_overlay.json",
           "path": "$"
         },
         {
-          "count": 2,
-          "file": "country_flag_palettes.json",
-          "path": "$.palettes.AFG"
+          "count": 9,
+          "file": "strategic_military_overlay.json",
+          "path": "$.battle_rules"
         },
         {
-          "count": 2,
-          "file": "country_flag_palettes.json",
-          "path": "$.palettes.ARG"
+          "count": 9,
+          "file": "strategic_military_overlay.json",
+          "path": "$.supply_rules"
         },
         {
-          "count": 2,
-          "file": "country_flag_palettes.json",
-          "path": "$.palettes.AUS"
+          "count": 6,
+          "file": "strategic_military_overlay.json",
+          "path": "$.country_overlays[0]"
         },
         {
-          "count": 2,
-          "file": "country_flag_palettes.json",
-          "path": "$.palettes.AUT"
+          "count": 6,
+          "file": "strategic_military_overlay.json",
+          "path": "$.country_overlays[1]"
         },
         {
-          "count": 2,
-          "file": "country_flag_palettes.json",
-          "path": "$.palettes.BEL"
+          "count": 6,
+          "file": "strategic_military_overlay.json",
+          "path": "$.country_overlays[2]"
         },
         {
-          "count": 2,
-          "file": "country_flag_palettes.json",
-          "path": "$.palettes.BGR"
+          "count": 6,
+          "file": "strategic_military_overlay.json",
+          "path": "$.country_overlays[3]"
         },
         {
-          "count": 2,
-          "file": "country_flag_palettes.json",
-          "path": "$.palettes.BOL"
+          "count": 6,
+          "file": "strategic_military_overlay.json",
+          "path": "$.country_overlays[4]"
         },
         {
-          "count": 2,
-          "file": "country_flag_palettes.json",
-          "path": "$.palettes.BRA"
+          "count": 6,
+          "file": "strategic_military_overlay.json",
+          "path": "$.country_overlays[5]"
         }
       ],
       "largest_records": [],
@@ -1298,7 +1302,7 @@
       "record_count": 0
     }
   },
-  "file_count": 183,
+  "file_count": 184,
   "files": [
     {
       "category": "runtime_loader",
@@ -24583,6 +24587,138 @@
       ]
     },
     {
+      "category": "runtime_supporting",
+      "decoded_array_count": 25,
+      "decoded_data_bytes_estimate": 24097,
+      "decoded_object_count": 39,
+      "decoded_scalar_count": 237,
+      "file_size_bytes": 8469,
+      "geometry_vertex_count": 0,
+      "largest_arrays": [
+        {
+          "count": 10,
+          "geometry_context": false,
+          "path": "$.country_overlays",
+          "record_like": false
+        },
+        {
+          "count": 9,
+          "geometry_context": false,
+          "path": "$.region_overlays",
+          "record_like": false
+        },
+        {
+          "count": 7,
+          "geometry_context": false,
+          "path": "$.city_overlays",
+          "record_like": false
+        },
+        {
+          "count": 7,
+          "geometry_context": false,
+          "path": "$.terrain_profiles",
+          "record_like": false
+        },
+        {
+          "count": 4,
+          "geometry_context": false,
+          "path": "$.country_overlays[1].resources",
+          "record_like": false
+        },
+        {
+          "count": 4,
+          "geometry_context": false,
+          "path": "$.country_overlays[6].resources",
+          "record_like": false
+        },
+        {
+          "count": 4,
+          "geometry_context": false,
+          "path": "$.region_overlays[1].resources",
+          "record_like": false
+        },
+        {
+          "count": 4,
+          "geometry_context": false,
+          "path": "$.resource_ids",
+          "record_like": false
+        },
+        {
+          "count": 3,
+          "geometry_context": false,
+          "path": "$.country_overlays[0].resources",
+          "record_like": false
+        },
+        {
+          "count": 3,
+          "geometry_context": false,
+          "path": "$.country_overlays[2].resources",
+          "record_like": false
+        }
+      ],
+      "largest_maps": [
+        {
+          "count": 11,
+          "path": "$"
+        },
+        {
+          "count": 9,
+          "path": "$.battle_rules"
+        },
+        {
+          "count": 9,
+          "path": "$.supply_rules"
+        },
+        {
+          "count": 6,
+          "path": "$.country_overlays[0]"
+        },
+        {
+          "count": 6,
+          "path": "$.country_overlays[1]"
+        },
+        {
+          "count": 6,
+          "path": "$.country_overlays[2]"
+        },
+        {
+          "count": 6,
+          "path": "$.country_overlays[3]"
+        },
+        {
+          "count": 6,
+          "path": "$.country_overlays[4]"
+        },
+        {
+          "count": 6,
+          "path": "$.country_overlays[5]"
+        },
+        {
+          "count": 6,
+          "path": "$.country_overlays[6]"
+        }
+      ],
+      "largest_records": [],
+      "parse_status": "ok",
+      "path": "strategic_military_overlay.json",
+      "record_count": 0,
+      "root_type": "dict",
+      "sha256": "42e0536552c26f8abefd95a91c3363573b5783fe7f2350cfed06e44d34b9eddb",
+      "top_level_keys": [
+        "base_dataset",
+        "battle_rules",
+        "city_overlays",
+        "country_overlays",
+        "overlay_kind",
+        "region_overlays",
+        "resource_ids",
+        "schema_version",
+        "supply_rules",
+        "terrain_profiles",
+        "transport_profiles"
+      ]
+    },
+    {
       "category": "runtime_loader",
       "decoded_array_count": 14,
       "decoded_data_bytes_estimate": 15166,
@@ -24984,6 +25120,10 @@
     "map_modes.json",
     "map_geometry_cache.json"
   ],
+  "runtime_supporting_paths": [
+    "country_flag_palettes.json",
+    "strategic_military_overlay.json"
+  ],
   "schema_families": [
     {
       "file_count": 13,
@@ -25082,6 +25222,23 @@
         "regions",
         "schema_version",
         "source"
+      ]
+    },
+    {
+      "file_count": 1,
+      "root_type": "dict",
+      "top_level_keys": [
+        "base_dataset",
+        "battle_rules",
+        "city_overlays",
+        "country_overlays",
+        "overlay_kind",
+        "region_overlays",
+        "resource_ids",
+        "schema_version",
+        "supply_rules",
+        "terrain_profiles",
+        "transport_profiles"
       ]
     },
     {
@@ -25328,7 +25485,7 @@
   ],
   "schema_version": 1,
   "tool_id": "wwo_world_data_coverage_audit_batch_2",
-  "total_file_size_bytes": 49892669,
+  "total_file_size_bytes": 49901138,
   "validation": {
     "errors": [],
     "valid": true

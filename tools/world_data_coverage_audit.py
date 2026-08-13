@@ -42,6 +42,11 @@ RUNTIME_LOADER_PATHS = (
     "map_geometry_cache.json",
 )
 
+RUNTIME_SUPPORTING_PATHS = (
+    "country_flag_palettes.json",
+    "strategic_military_overlay.json",
+)
+
 RECORD_ARRAY_KEYS = {
     "countries",
     "regions",
@@ -83,7 +88,7 @@ GEOMETRY_KEYS = {
 def _category(relative: str) -> str:
     if relative in RUNTIME_LOADER_PATHS:
         return "runtime_loader"
-    if relative == "country_flag_palettes.json":
+    if relative in RUNTIME_SUPPORTING_PATHS:
         return "runtime_supporting"
     if relative.startswith("historical/") or relative in {
         "historical_political_entities_1900.json",
@@ -315,6 +320,9 @@ def _validation(manifest: dict[str, Any], root: Path) -> list[str]:
     for required in RUNTIME_LOADER_PATHS:
         if required not in paths:
             errors.append(f"runtime loader file missing: {required}")
+    for required in RUNTIME_SUPPORTING_PATHS:
+        if required not in paths:
+            errors.append(f"runtime supporting file missing: {required}")
     for item in files:
         if item.get("parse_status") != "ok":
             errors.append(f"parse failure: {item.get('path')}")
@@ -348,6 +356,7 @@ def build_manifest(repository_root: Path) -> dict[str, Any]:
         "tool_id": TOOL_ID,
         "input_root": "data/world_map",
         "runtime_loader_paths": list(RUNTIME_LOADER_PATHS),
+        "runtime_supporting_paths": list(RUNTIME_SUPPORTING_PATHS),
         "file_count": len(files),
         "total_file_size_bytes": sum(int(item["file_size_bytes"]) for item in files),
         "categories": category_summary,
@@ -405,6 +414,20 @@ def render_markdown(manifest: dict[str, Any]) -> str:
     lines.extend(["", "## Runtime-loader matrix", "", "| Path | Present | Category | Bytes | SHA-256 prefix | Parse |", "|---|---|---|---:|---|---|"])
     by_path = {item["path"]: item for item in manifest["files"]}
     for path in manifest["runtime_loader_paths"]:
+        item = by_path.get(path, {})
+        lines.append(
+            "| `%s` | %s | %s | %s | `%s` | %s |"
+            % (
+                path,
+                "yes" if item else "NO",
+                item.get("category", ""),
+                _format_bytes(int(item.get("file_size_bytes", 0))),
+                str(item.get("sha256", ""))[:12],
+                item.get("parse_status", "missing"),
+            )
+        )
+    lines.extend(["", "## Runtime-supporting source matrix", "", "| Path | Present | Category | Bytes | SHA-256 prefix | Parse |", "|---|---|---|---:|---|---|"])
+    for path in manifest["runtime_supporting_paths"]:
         item = by_path.get(path, {})
         lines.append(
             "| `%s` | %s | %s | %s | `%s` | %s |"

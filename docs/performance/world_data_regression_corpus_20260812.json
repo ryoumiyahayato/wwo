@@ -7,8 +7,8 @@
     "runtime_loader",
     "runtime_supporting"
   ],
-  "corpus_sha256": "25d0111883b7bec85e20dd0b5d1e64fa640850d44944a8d75d17376e468a2da7",
-  "file_count": 183,
+  "corpus_sha256": "bf49a2c88366b97bb9e482c6607125756e7c4b06a15130ecccd9fc6ddfb4a60c",
+  "file_count": 184,
   "input_root": "data/world_map",
   "records": [
     {
@@ -8837,6 +8837,55 @@
       ]
     },
     {
+      "category": "runtime_supporting",
+      "file_size_bytes": 8469,
+      "geometry_vertex_count": 0,
+      "path": "strategic_military_overlay.json",
+      "record_count": 0,
+      "root_type": "dict",
+      "sample": {
+        "representative_geometry": [],
+        "representative_ids": [
+          "paris",
+          "lille",
+          "lyon",
+          "le_havre",
+          "marseille",
+          "berlin",
+          "london",
+          "plains"
+        ],
+        "root_keys": [
+          "base_dataset",
+          "battle_rules",
+          "city_overlays",
+          "country_overlays",
+          "overlay_kind",
+          "region_overlays",
+          "resource_ids",
+          "schema_version",
+          "supply_rules",
+          "terrain_profiles",
+          "transport_profiles"
+        ]
+      },
+      "sample_sha256": "8fb308ef002351271606292271c23924ec5f6b55205384c6cf96cd604b77c516",
+      "sha256": "42e0536552c26f8abefd95a91c3363573b5783fe7f2350cfed06e44d34b9eddb",
+      "top_level_keys": [
+        "base_dataset",
+        "battle_rules",
+        "city_overlays",
+        "country_overlays",
+        "overlay_kind",
+        "region_overlays",
+        "resource_ids",
+        "schema_version",
+        "supply_rules",
+        "terrain_profiles",
+        "transport_profiles"
+      ]
+    },
+    {
       "category": "runtime_loader",
       "file_size_bytes": 4600,
       "geometry_vertex_count": 0,
@@ -8981,14 +9030,14 @@
         "record_count": 544
       },
       "runtime_supporting": {
-        "file_count": 1,
-        "file_size_bytes": 4472,
+        "file_count": 2,
+        "file_size_bytes": 12941,
         "geometry_vertex_count": 0,
         "record_count": 0
       }
     },
-    "file_count": 183,
-    "total_file_size_bytes": 49892669,
+    "file_count": 184,
+    "total_file_size_bytes": 49901138,
     "total_geometry_vertex_count": 1126157,
     "total_record_count": 95006
   },

@@ -42,6 +42,11 @@ RUNTIME_FILES = (
     "map_geometry_cache.json",
 )
 
+RUNTIME_SUPPORTING_FILES = (
+    "country_flag_palettes.json",
+    "strategic_military_overlay.json",
+)
+
 
 def _load(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
@@ -278,6 +283,34 @@ def _check_runtime_files(root: Path, issues: list[dict[str, str]], metrics: dict
     })
 
 
+def _check_runtime_supporting_files(root: Path, issues: list[dict[str, str]], metrics: dict[str, Any]) -> None:
+    missing: list[str] = []
+    bad_schema: list[str] = []
+    schema_versions = Counter()
+    root_types = Counter()
+    for relative in RUNTIME_SUPPORTING_FILES:
+        path = root / relative
+        if not path.is_file():
+            missing.append(relative)
+            issues.append(_issue("RUNTIME_SUPPORTING_MISSING", "error", relative, "runtime-supporting source path is missing"))
+            continue
+        document = _load(path)
+        root_types[type(document).__name__] += 1
+        version = document.get("schema_version") if isinstance(document, dict) else None
+        if not isinstance(version, int) or isinstance(version, bool) or version <= 0:
+            bad_schema.append(relative)
+            issues.append(_issue("RUNTIME_SUPPORTING_SCHEMA", "error", relative, "expected object with a positive integer schema_version"))
+        else:
+            schema_versions[str(version)] += 1
+    metrics.update({
+        "runtime_supporting_file_count": len(RUNTIME_SUPPORTING_FILES),
+        "runtime_supporting_missing": missing,
+        "runtime_supporting_bad_schema": bad_schema,
+        "runtime_supporting_schema_versions": dict(sorted(schema_versions.items())),
+        "runtime_supporting_root_types": dict(root_types),
+    })
+
+
 def _check_stable_ids(root: Path, issues: list[dict[str, str]], metrics: dict[str, Any]) -> None:
     checks = {
         "countries.json": "countries",
@@ -314,6 +347,7 @@ def build_report(repository_root: Path) -> dict[str, Any]:
     metrics: dict[str, Any] = {}
     _check_city_shards(root, issues, metrics)
     _check_runtime_files(root, issues, metrics)
+    _check_runtime_supporting_files(root, issues, metrics)
     _check_stable_ids(root, issues, metrics)
     errors = [issue for issue in issues if issue["severity"] == "error"]
     warnings = [issue for issue in issues if issue["severity"] == "warning"]

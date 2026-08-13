@@ -1,6 +1,6 @@
 # WWO WORLD DATA PERFORMANCE BASELINE — BATCH 1
 
-Starting master: 4b738ab8b0a21e8685aae95381717e9efd2327a8
+Source-inventory baseline master: 83e4f305b52529625f4d86ad928bce451ea34b9f
 Branch: chore/world-data-performance-baseline-20260812
 
 This is a measurement report. Production gameplay, authoritative map data, and workflows were not modified.
@@ -11,6 +11,8 @@ This is a measurement report. Production gameplay, authoritative map data, and w
 - Iterations: 7 full samples, 5 map samples, 1000 lookup operations per lookup sample.
 - Synthetic scales: 1x, 2x, 5x, 10x; base 1000 records; synthetic data remains memory-only.
 - Benchmark semantics: MACHINE-SPECIFIC OBSERVATIONAL BASELINE; timings are not universal CI pass/fail thresholds.
+- Runtime source inventory: 16 loader files + 2 supporting files = 18 benchmark parse sources.
+- Historical timing values are preserved; this reconciliation updates source inventory/provenance only.
 
 ## Dataset sizes
 
@@ -28,7 +30,7 @@ This is a measurement report. Production gameplay, authoritative map data, and w
 | organizations | 1 | 11.3 KiB | 13 | 25 | 4 | 27.9 KiB |
 | characters | 1 | 6.6 KiB | 2 | 12 | 0 | 15.3 KiB |
 | institutions | 1 | 10.3 KiB | 7 | 23 | 7 | 26.3 KiB |
-| supporting_runtime_data | 4 | 23.1 KiB | 10 | 98 | 0 | 74.5 KiB |
+| supporting_runtime_data | 6 | 35.7 KiB | 10 | 196 | 0 | 112.8 KiB |
 | city_detail_shards | 156 | 38.10 MiB | 88927 | 89083 | 88927 | 130.75 MiB |
 | city_detail_index | 1 | 34.8 KiB | 300 | 304 | 0 | 127.7 KiB |
 

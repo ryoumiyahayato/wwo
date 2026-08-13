@@ -21,6 +21,9 @@ def test_world_data_quality_contract_passes() -> None:
     assert report["metrics"]["shard_record_count"] == 88927
     assert report["metrics"]["france_shard_count"] == 13
     assert report["metrics"]["france_shard_record_count"] == 36871
+    assert report["metrics"]["runtime_supporting_file_count"] == 2
+    assert report["metrics"]["runtime_supporting_missing"] == []
+    assert report["metrics"]["runtime_supporting_bad_schema"] == []
 
 
 def test_quality_backlog_is_explicit_and_bounded() -> None:

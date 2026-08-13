@@ -14,7 +14,7 @@ from tools import world_data_regression_corpus as corpus  # noqa: E402
 def test_corpus_covers_all_files_and_validates() -> None:
     result = corpus.build_corpus(ROOT)
     assert result["validation"]["valid"], result["validation"]["errors"]
-    assert result["file_count"] == 183
+    assert result["file_count"] == 184
     assert len(result["categories"]) == 6
     assert len(result["corpus_sha256"]) == 64
     assert all(record["sample_sha256"] for record in result["records"])
@@ -36,6 +36,7 @@ def test_corpus_has_representative_runtime_and_geometry_samples() -> None:
     assert by_path["cities.json"]["sample"]["representative_ids"]
     assert by_path["map_geometry_cache.json"]["sample"]["representative_geometry"]
     assert by_path["city_detail/countries/US.json"]["sample"]["representative_ids"]
+    assert by_path["strategic_military_overlay.json"]["category"] == "runtime_supporting"
 
 
 

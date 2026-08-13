@@ -27,6 +27,11 @@ func _test_result_schema_contract() -> void:
 	var invalid_probe: Dictionary = Benchmark.schema_probe().duplicate(true)
 	(invalid_probe["limitations"] as Array).clear()
 	_check(not Benchmark.validate_result_schema(invalid_probe).is_empty(), "benchmark result schema rejects missing timing semantics")
+	var inventory: Dictionary = Benchmark.schema_probe().get("runtime_source_inventory", {}) as Dictionary
+	_check(int(inventory.get("loader_file_count", 0)) == 16, "benchmark inventory preserves the 16-document loader set")
+	_check(int(inventory.get("supporting_file_count", 0)) == 2, "benchmark inventory includes both runtime-supporting sources")
+	_check(int(inventory.get("source_inventory_file_count", 0)) == 18, "benchmark inventory preserves the exact 18-source parse set")
+	_check((inventory.get("supporting_paths", []) as Array).has("res://data/world_map/strategic_military_overlay.json"), "benchmark inventory includes the current-master military overlay")
 
 
 func _test_runtime_world_data() -> void:

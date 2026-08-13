@@ -15,14 +15,20 @@ from tools import world_data_coverage_audit as audit  # noqa: E402
 def test_full_world_map_coverage_is_valid_and_complete() -> None:
     manifest = audit.build_manifest(ROOT)
     assert manifest["validation"]["valid"], manifest["validation"]["errors"]
-    assert manifest["file_count"] == 183
+    assert manifest["file_count"] == 184
     assert manifest["total_file_size_bytes"] > 49_000_000
     assert len(manifest["runtime_loader_paths"]) == 16
+    assert manifest["runtime_supporting_paths"] == [
+        "country_flag_palettes.json",
+        "strategic_military_overlay.json",
+    ]
     assert manifest["categories"]["runtime_loader"]["file_count"] == 16
+    assert manifest["categories"]["runtime_supporting"]["file_count"] == 2
     assert manifest["categories"]["city_detail_country_shard"]["file_count"] == 143
     assert manifest["categories"]["city_detail_region_shard"]["file_count"] == 13
     assert manifest["categories"]["historical"]["file_count"] == 8
     assert all(item["parse_status"] == "ok" for item in manifest["files"])
+    assert "uncategorized" not in manifest["categories"]
 
 
 def test_manifest_serialization_and_report_are_deterministic() -> None:

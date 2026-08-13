@@ -3,7 +3,7 @@
 Read-only deterministic inventory of every JSON file below `data/world_map`.
 
 - Tool: `wwo_world_data_coverage_audit_batch_2` schema v1
-- Files: **183**; raw size: **47.58 MiB**
+- Files: **184**; raw size: **47.59 MiB**
 - Manifest validation: **PASS**
 - Authoritative world-map JSON was not modified.
 
@@ -16,7 +16,7 @@ Read-only deterministic inventory of every JSON file below `data/world_map`.
 | city_detail_region_shard | 13 | 16.08 MiB | 36871 | 36884 | 36897 | 0 | 67.68 MiB | 0 |
 | historical | 8 | 6.32 MiB | 5235 | 5556 | 320135 | 925954 | 35.34 MiB | 0 |
 | runtime_loader | 16 | 3.12 MiB | 544 | 3920 | 120635 | 200203 | 19.19 MiB | 0 |
-| runtime_supporting | 1 | 4.4 KiB | 0 | 59 | 57 | 0 | 25.1 KiB | 0 |
+| runtime_supporting | 2 | 12.6 KiB | 0 | 98 | 82 | 0 | 48.7 KiB | 0 |
 
 ## Runtime-loader matrix
 
@@ -38,6 +38,13 @@ Read-only deterministic inventory of every JSON file below `data/world_map`.
 | `world_activity.json` | yes | runtime_loader | 4.5 KiB | `6039bee199be` | ok |
 | `map_modes.json` | yes | runtime_loader | 1.9 KiB | `fb94900bb014` | ok |
 | `map_geometry_cache.json` | yes | runtime_loader | 2.03 MiB | `816acc92ba54` | ok |
+
+## Runtime-supporting source matrix
+
+| Path | Present | Category | Bytes | SHA-256 prefix | Parse |
+|---|---|---|---:|---|---|
+| `country_flag_palettes.json` | yes | runtime_supporting | 4.4 KiB | `0a95dbb67a6f` | ok |
+| `strategic_military_overlay.json` | yes | runtime_supporting | 8.3 KiB | `42e0536552c2` | ok |
 
 ## Largest structures
 
@@ -82,9 +89,10 @@ Read-only deterministic inventory of every JSON file below `data/world_map`.
 | records | `regions.json` | `$.administrative_units` | 98 |
 | array | `map_geometry_cache.json` | `$.macro_regions[8].lods.lod4[6].triangles` | 2403 |
 | array | `map_geometry_cache.json` | `$.country_lods.lod4[159].polygons[7].triangles` | 1596 |
+| file | `strategic_military_overlay.json` | — | 8469 |
 | file | `country_flag_palettes.json` | — | 4472 |
-| array | `country_flag_palettes.json` | `$.palettes.AUT.colors` | 4 |
-| array | `country_flag_palettes.json` | `$.palettes.ZAF.colors` | 4 |
+| array | `strategic_military_overlay.json` | `$.country_overlays` | 10 |
+| array | `strategic_military_overlay.json` | `$.region_overlays` | 9 |
 
 ## Schema-family matrix
 
@@ -97,6 +105,7 @@ Read-only deterministic inventory of every JSON file below `data/world_map`.
 | dict | `attribution, dataset, license, license_url, source` | 1 |
 | dict | `audit, coordinate_system, features, prototype_only, schema_version, source` | 1 |
 | dict | `audit, regions, schema_version, source` | 1 |
+| dict | `base_dataset, battle_rules, city_overlays, country_overlays, overlay_kind, region_overlays, resource_ids, schema_version, supply_rules, terrain_profiles, transport_profiles` | 1 |
 | dict | `boundary_notice, detail_node_policy, label_budgets, levels, modes, peace_note, prototype_only, schema_version, shared_basemap_id, transport_legend, war_note, zoom` | 1 |
 | dict | `bounds, cities, continent, count, country_code, country_name, dataset, generated_at, license, schema_version, shard_id, source` | 143 |
 | dict | `catalog, identities, prototype_only, schema_version` | 1 |
