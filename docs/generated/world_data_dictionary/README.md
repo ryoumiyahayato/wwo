@@ -28,7 +28,7 @@ This reference is generated from `data/world_map/**`, pure JSON data under `data
 | foreign-key candidates | 50 |
 | ambiguous relationships | 63 |
 | data files scanned | 185 |
-| loader sources scanned | 116 |
+| loader sources scanned | 121 |
 
 ## Dataset reference
 
