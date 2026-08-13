@@ -13,6 +13,9 @@ var _flag_time: float = 0.0
 var _flag_palettes: Dictionary = {}
 var _flag_screen_polygons: Dictionary = {}
 var _flag_screen_bounds: Dictionary = {}
+var _performance_flag_timer_redraw_count: int = 0
+var _performance_flag_cache_rebuild_count: int = 0
+var _performance_flag_cache_rebuild_usec: int = 0
 
 @onready var _world_camera: Camera3D = %Camera3D
 
@@ -28,6 +31,7 @@ func _ready() -> void:
 func _on_flag_timer_timeout() -> void:
 	_flag_time += FLAG_TIMER_STEP
 	if space_level == WORLD and world_mode == WORLD_COUNTRIES and viewport_container.visible:
+		_performance_flag_timer_redraw_count += 1
 		queue_redraw()
 
 
@@ -171,6 +175,8 @@ func _load_flag_palettes() -> void:
 
 
 func _rebuild_country_flag_cache() -> void:
+	var performance_started_usec := Time.get_ticks_usec()
+	_performance_flag_cache_rebuild_count += 1
 	_flag_screen_polygons.clear()
 	_flag_screen_bounds.clear()
 	var basis: Basis = Basis(Vector3.RIGHT, tilt) * Basis(Vector3.UP, yaw)
@@ -201,6 +207,7 @@ func _rebuild_country_flag_cache() -> void:
 		_flag_screen_polygons[country_id] = visible_polygons
 		if has_bounds:
 			_flag_screen_bounds[country_id] = Rect2(minimum, maximum - minimum)
+	_performance_flag_cache_rebuild_usec += Time.get_ticks_usec() - performance_started_usec
 
 
 func _clip_visible_country_polygon(source: PackedVector3Array, basis: Basis) -> PackedVector2Array:
@@ -232,6 +239,22 @@ func _clip_visible_country_polygon(source: PackedVector3Array, basis: Basis) -> 
 	if output.size() > 3 and output[0].distance_to(output[output.size() - 1]) < 0.35:
 		output.resize(output.size() - 1)
 	return output
+
+
+func debug_performance_snapshot() -> Dictionary:
+	var snapshot: Dictionary = super.debug_performance_snapshot()
+	snapshot["flag_timer_redraw_count"] = _performance_flag_timer_redraw_count
+	snapshot["flag_cache_rebuild_count"] = _performance_flag_cache_rebuild_count
+	snapshot["flag_cache_rebuild_usec"] = _performance_flag_cache_rebuild_usec
+	snapshot["visible_flag_entity_count"] = _flag_screen_polygons.size()
+	return snapshot
+
+
+func debug_reset_performance_metrics() -> void:
+	super.debug_reset_performance_metrics()
+	_performance_flag_timer_redraw_count = 0
+	_performance_flag_cache_rebuild_count = 0
+	_performance_flag_cache_rebuild_usec = 0
 
 
 func _draw_country_flag_skins() -> void:

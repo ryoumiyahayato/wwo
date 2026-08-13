@@ -93,6 +93,7 @@ $tests = @(
     @{ Name = 'Formal world integration'; Script = 'res://tests/formal/formal_world_integration_test.gd'; TimeoutSeconds = 360 },
     @{ Name = 'Formal world ten-year balance'; Script = 'res://tests/formal/formal_world_long_term_balance_test.gd'; TimeoutSeconds = 420 },
     @{ Name = 'Formal hemisphere product surface'; Script = 'res://tests/v2_3/v2_3_player_interface_test.gd'; TimeoutSeconds = 180 },
+    @{ Name = 'Formal world performance regression'; Script = 'res://tests/formal/formal_world_performance_regression_test.gd'; TimeoutSeconds = 180 },
     @{ Name = 'Historical world economy data'; Script = 'res://tests/alpha/alpha_historical_world_economy_data_test.gd'; TimeoutSeconds = 120 },
 
     # Retained person/social service regressions. These do not own a map or a

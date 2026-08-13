@@ -76,6 +76,10 @@ var _hemisphere_radius: float = 220.0
 var _focus_bounds: Rect2 = Rect2(Vector2(-5.5, 41.0), Vector2(12.5, 11.0))
 
 var _projection_dirty: bool = true
+var _performance_draw_count: int = 0
+var _performance_draw_usec: int = 0
+var _performance_projection_rebuild_count: int = 0
+var _performance_projection_rebuild_usec: int = 0
 var _global_screen_segments: Array[PackedVector2Array] = []
 var _selected_country_segments: Array[PackedVector2Array] = []
 var _country_screen_anchors: Dictionary = {}
@@ -202,6 +206,8 @@ func _gui_input(event: InputEvent) -> void:
 
 
 func _draw() -> void:
+	var performance_started_usec := Time.get_ticks_usec()
+	_performance_draw_count += 1
 	_button_hits.clear()
 	if space_level == WORLD:
 		_draw_world_overlay()
@@ -215,6 +221,7 @@ func _draw() -> void:
 	_draw_breadcrumbs()
 	_draw_active_hud_panel()
 	_draw_data_errors()
+	_performance_draw_usec += Time.get_ticks_usec() - performance_started_usec
 
 
 func _notification(what: int) -> void:
@@ -565,6 +572,8 @@ func _mark_projection_dirty() -> void:
 func _ensure_projection_cache() -> void:
 	if not _projection_dirty:
 		return
+	var performance_started_usec := Time.get_ticks_usec()
+	_performance_projection_rebuild_count += 1
 	_projection_dirty = false
 	_global_screen_segments.clear()
 	_selected_country_segments.clear()
@@ -605,6 +614,23 @@ func _ensure_projection_cache() -> void:
 			_event_screen_positions[str(event.get("id", ""))] = _sphere_screen(event_rotated)
 
 	_rebuild_focus_cache()
+	_performance_projection_rebuild_usec += Time.get_ticks_usec() - performance_started_usec
+
+
+func debug_performance_snapshot() -> Dictionary:
+	return {
+		"draw_count": _performance_draw_count,
+		"draw_usec": _performance_draw_usec,
+		"projection_rebuild_count": _performance_projection_rebuild_count,
+		"projection_rebuild_usec": _performance_projection_rebuild_usec,
+	}
+
+
+func debug_reset_performance_metrics() -> void:
+	_performance_draw_count = 0
+	_performance_draw_usec = 0
+	_performance_projection_rebuild_count = 0
+	_performance_projection_rebuild_usec = 0
 
 
 func _project_unit_line(line: PackedVector3Array, basis: Basis) -> Array[PackedVector2Array]:

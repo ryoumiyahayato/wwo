@@ -51,6 +51,8 @@ var _historical_flag_document: Dictionary = {}
 var _historical_flag_records: Dictionary = {}
 var _geometry_feature_by_id: Dictionary = {}
 var _missing_flag_record_ids: Array[String] = []
+var _historical_flag_texture_by_id: Dictionary = {}
+var _performance_flag_resource_load_count: int = 0
 
 
 func _ready() -> void:
@@ -84,6 +86,7 @@ func _rebuild_historical_political_world() -> void:
 	_history_entity_by_id.clear()
 	_history_territories_by_entity.clear()
 	_flag_texture_by_entity.clear()
+	_historical_flag_texture_by_id.clear()
 
 	for unit_value: Variant in (_dated_units_document.get("units", []) as Array):
 		if unit_value is Dictionary:
@@ -210,25 +213,51 @@ func _legacy_navigation_key(entity_id: String, gwcode: int) -> String:
 		_: return "GW_%d" % gwcode
 
 
-func _flag_texture_for_entity(entity_id: String, _palette: Dictionary) -> ImageTexture:
+func _flag_texture_for_entity(entity_id: String, _palette: Dictionary) -> Texture2D:
 	if _flag_texture_by_entity.has(entity_id):
-		return _flag_texture_by_entity.get(entity_id) as ImageTexture
+		return _flag_texture_by_entity.get(entity_id) as Texture2D
 	var entity := _country_by_id.get(entity_id, {}) as Dictionary
 	var flag_id := str(entity.get("flag_id", "no_single_standard_flag"))
 	var flag_record := _historical_flag_records.get(flag_id, {}) as Dictionary
-	var image: Image
+	if _historical_flag_texture_by_id.has(flag_id):
+		var shared_texture := _historical_flag_texture_by_id.get(flag_id) as Texture2D
+		_flag_texture_by_entity[entity_id] = shared_texture
+		return shared_texture
+	var texture: Texture2D
 	if str(flag_record.get("render_mode", "")) == "source_asset":
-		image = Image.load_from_file(str(flag_record.get("asset_path", "")))
+		var source_texture := load(str(flag_record.get("asset_path", ""))) as Texture2D
+		_performance_flag_resource_load_count += 1
+		if source_texture != null:
+			var image := source_texture.get_image()
+			if image != null and not image.is_empty():
+				image.resize(
+					FLAG_TEXTURE_WIDTH,
+					FLAG_TEXTURE_HEIGHT,
+					Image.INTERPOLATE_LANCZOS
+				)
+				texture = ImageTexture.create_from_image(image)
 	else:
-		image = _neutral_documented_absence_image()
-	if image == null or image.is_empty():
+		texture = ImageTexture.create_from_image(_neutral_documented_absence_image())
+	if texture == null:
 		if flag_id not in _missing_flag_record_ids:
 			_missing_flag_record_ids.append(flag_id)
-		image = _neutral_documented_absence_image()
-	image.resize(FLAG_TEXTURE_WIDTH, FLAG_TEXTURE_HEIGHT, Image.INTERPOLATE_LANCZOS)
-	var texture := ImageTexture.create_from_image(image)
+		texture = ImageTexture.create_from_image(_neutral_documented_absence_image())
+	_historical_flag_texture_by_id[flag_id] = texture
 	_flag_texture_by_entity[entity_id] = texture
 	return texture
+
+
+func debug_performance_snapshot() -> Dictionary:
+	var snapshot: Dictionary = super.debug_performance_snapshot()
+	snapshot["flag_resource_load_count"] = _performance_flag_resource_load_count
+	snapshot["flag_id_texture_count"] = _historical_flag_texture_by_id.size()
+	snapshot["flag_entity_texture_count"] = _flag_texture_by_entity.size()
+	return snapshot
+
+
+func debug_reset_performance_metrics() -> void:
+	super.debug_reset_performance_metrics()
+	_performance_flag_resource_load_count = 0
 
 
 func _neutral_documented_absence_image() -> Image:
