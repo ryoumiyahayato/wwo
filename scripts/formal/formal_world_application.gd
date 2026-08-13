@@ -5,11 +5,15 @@ extends "res://scripts/ui_spikes/holographic_workspace/holographic_workspace_his
 ## units stay visible as background/non-player world actors.
 
 const LAUNCH_MODE_META: StringName = &"formal_world_launch_mode"
+const PACKAGED_PROBE_ARGUMENT: String = "--wwo-player-baseline-probe"
+const PACKAGED_PROBE_ENTITY_ID: String = "country_fra"
+const PACKAGED_PROBE_FLAG_ID: String = "france_tricolour_1794"
 
 var formal_simulation := FormalWorldSimulation.new()
 var economy_panel_open: bool = true
 var _formal_status: String = ""
 var _last_summary: Dictionary = {}
+var _packaged_probe_failures: int = 0
 
 
 func _ready() -> void:
@@ -34,6 +38,109 @@ func _ready() -> void:
 			_formal_status = "新的1900正式世界已建立。"
 		_last_summary = formal_simulation.world_summary()
 	queue_redraw()
+	if PACKAGED_PROBE_ARGUMENT in OS.get_cmdline_user_args():
+		_run_packaged_player_baseline_probe.call_deferred()
+
+
+func _run_packaged_player_baseline_probe() -> void:
+	await get_tree().process_frame
+	_packaged_probe_require(formal_simulation.initialized, "正式模拟未初始化")
+	_packaged_probe_require(_data_errors.is_empty(), "正式模拟产生数据错误")
+	_packaged_probe_require(_history_entity_by_id.size() == 151, "历史政治单元数量不正确")
+	_packaged_probe_require(_missing_flag_record_ids.is_empty(), "历史旗帜资源存在缺失")
+	var evidence := historical_evidence_report()
+	_packaged_probe_require(
+		int(evidence.get("unresolved_flag_count", -1)) == 0,
+		"历史旗帜证据仍未完全解析"
+	)
+
+	_ensure_projection_cache()
+	var france_point := _country_screen_anchors.get(PACKAGED_PROBE_ENTITY_ID, Vector2.INF) as Vector2
+	_packaged_probe_require(
+		france_point != Vector2.INF,
+		"默认半球视角没有法兰西选择锚点"
+	)
+	if france_point != Vector2.INF:
+		_packaged_probe_mouse_button(france_point, true)
+		_packaged_probe_mouse_button(france_point, false)
+	await get_tree().process_frame
+	_packaged_probe_require(
+		selected_country_id == PACKAGED_PROBE_ENTITY_ID,
+		"打包产品地图点击未选择法兰西政治单元"
+	)
+	_packaged_probe_require(info_open, "打包产品实体选择没有打开详情反馈")
+	_packaged_probe_require(
+		not formal_simulation.polity_summary(PACKAGED_PROBE_ENTITY_ID).is_empty(),
+		"打包产品选中实体没有政经详情"
+	)
+	var imported_flags := _historical_imported_flag_texture_by_id as Dictionary
+	_packaged_probe_require(
+		imported_flags.get(PACKAGED_PROBE_FLAG_ID) is Texture2D,
+		"打包产品没有通过导入Texture2D解析法兰西历史旗帜"
+	)
+
+	var date_before := _format_sim_datetime()
+	_packaged_probe_require(
+		await _packaged_probe_click_action("toggle_time_panel"),
+		"打包产品时间面板入口不可点击"
+	)
+	_packaged_probe_require(
+		await _packaged_probe_click_action("speed:4"),
+		"打包产品4倍速控件不可点击"
+	)
+	var clock := get_node("ClockTimer") as Timer
+	for _index: int in range(24):
+		clock.timeout.emit()
+	await get_tree().process_frame
+	_packaged_probe_require(
+		_format_sim_datetime() != date_before,
+		"打包产品时间推进没有改变可见日期"
+	)
+	_packaged_probe_require(
+		await _packaged_probe_click_action("toggle_pause"),
+		"打包产品暂停控件不可点击"
+	)
+	_packaged_probe_require(sim_paused, "打包产品暂停控件未暂停正式时间")
+
+	if _packaged_probe_failures > 0:
+		push_error(
+			"Packaged player baseline probe: %d failures" % _packaged_probe_failures
+		)
+	else:
+		print("Packaged player baseline probe: title, world, polity, resource, and time passed")
+	get_tree().quit(1 if _packaged_probe_failures > 0 else 0)
+
+
+func _packaged_probe_click_action(action: String) -> bool:
+	queue_redraw()
+	for _index: int in range(3):
+		await get_tree().process_frame
+	for index: int in range(_button_hits.size() - 1, -1, -1):
+		var record: Dictionary = _button_hits[index]
+		if str(record.get("action", "")) != action or not bool(record.get("enabled", false)):
+			continue
+		var rect: Rect2 = record.get("rect", Rect2()) as Rect2
+		_packaged_probe_mouse_button(rect.get_center(), true)
+		_packaged_probe_mouse_button(rect.get_center(), false)
+		await get_tree().process_frame
+		return true
+	return false
+
+
+func _packaged_probe_mouse_button(position: Vector2, pressed: bool) -> void:
+	var event := InputEventMouseButton.new()
+	event.button_index = MOUSE_BUTTON_LEFT
+	event.pressed = pressed
+	event.position = position
+	event.global_position = position
+	_gui_input(event)
+
+
+func _packaged_probe_require(condition: bool, message: String) -> void:
+	if condition:
+		return
+	_packaged_probe_failures += 1
+	push_error("Packaged player baseline probe: " + message)
 
 
 func _advance_simulation_minutes(minutes: int) -> void:

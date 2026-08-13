@@ -1,4 +1,5 @@
 {
+  "catalog_errors": [],
   "flag_record_count": 61,
   "flag_source": "data/world_map/historical/flags_1900.json",
   "hash_mismatch_count": 0,

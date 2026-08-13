@@ -51,6 +51,7 @@ var _historical_flag_document: Dictionary = {}
 var _historical_flag_records: Dictionary = {}
 var _geometry_feature_by_id: Dictionary = {}
 var _missing_flag_record_ids: Array[String] = []
+var _historical_imported_flag_texture_by_id: Dictionary = {}
 
 
 func _ready() -> void:
@@ -84,6 +85,7 @@ func _rebuild_historical_political_world() -> void:
 	_history_entity_by_id.clear()
 	_history_territories_by_entity.clear()
 	_flag_texture_by_entity.clear()
+	_historical_imported_flag_texture_by_id.clear()
 
 	for unit_value: Variant in (_dated_units_document.get("units", []) as Array):
 		if unit_value is Dictionary:
@@ -260,6 +262,7 @@ func _load_imported_flag_image(asset_path: String, flag_id: String) -> Image:
 			% [flag_id, asset_path]
 		)
 		return Image.new()
+	_historical_imported_flag_texture_by_id[flag_id] = resource
 	return imported_image.duplicate()
 
 

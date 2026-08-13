@@ -4,6 +4,7 @@ extends SceneTree
 ## invoking menu transition or save/load methods.
 
 const MENU_SCENE := "res://scenes/formal/formal_world_menu.tscn"
+const INTENDED_POLITY_ID := "country_fra"
 const TIME_SUPPORT := preload(
 	"res://tests/variable_state/formal_time_test_support.gd"
 )
@@ -12,6 +13,7 @@ var failures: int = 0
 var checks: int = 0
 var application_scene_count: int = 0
 var save_backup: Dictionary = {}
+var save_isolation_started: bool = false
 
 
 func _initialize() -> void:
@@ -25,11 +27,21 @@ func _run() -> void:
 	if not _require(not bool(save_backup.get("read_error", false)), "无法备份现有正式存档"):
 		await _finish()
 		return
+	save_isolation_started = true
 	if not _require(TIME_SUPPORT.cleanup_formal_save(), "无法建立隔离的无存档旅程"):
 		await _finish()
 		return
 
-	var change_error := change_scene_to_file(MENU_SCENE)
+	var configured_main_scene := str(
+		ProjectSettings.get_setting("application/run/main_scene", "")
+	)
+	if not _require(
+		configured_main_scene == MENU_SCENE,
+		"application/run/main_scene没有指向正式标题场景"
+	):
+		await _finish()
+		return
+	var change_error := change_scene_to_file(configured_main_scene)
 	if not _require(change_error == OK, "产品标题场景无法作为正式入口加载"):
 		await _finish()
 		return
@@ -61,6 +73,33 @@ func _run() -> void:
 		return
 
 	application._ensure_projection_cache()
+	var france_point := application._country_screen_anchors.get(
+		INTENDED_POLITY_ID, Vector2.INF
+	) as Vector2
+	if not _require(france_point != Vector2.INF, "默认半球视角没有法兰西选择锚点"):
+		await _finish()
+		return
+	_send_mouse_button(application, france_point, true)
+	_send_mouse_button(application, france_point, false)
+	await _settle_frames(3)
+	if not _require(
+		application.selected_country_id == INTENDED_POLITY_ID,
+		"地图点击未选择预期的法兰西政治单元"
+	):
+		await _finish()
+		return
+	if not _require(application.info_open, "实体选择没有打开可见详情反馈"):
+		await _finish()
+		return
+	if not _require(
+		not application.formal_simulation.polity_summary(INTENDED_POLITY_ID).is_empty(),
+		"所选政治单元没有可见政经详情数据"
+	):
+		await _finish()
+		return
+
+	# Lower-level map and evidence assertions are meaningful only after the
+	# player has entered the world and selected the intended polity above.
 	if not _require(application._history_entity_by_id.size() == 151, "世界地图未持有151个历史政治单元"):
 		await _finish()
 		return
@@ -75,31 +114,6 @@ func _run() -> void:
 		await _finish()
 		return
 	if not _require(application._missing_flag_record_ids.is_empty(), "历史旗帜运行时资源缺失"):
-		await _finish()
-		return
-
-	application.selected_country_id = ""
-	application._mark_projection_dirty()
-	application._ensure_projection_cache()
-	var france_point := application._country_screen_anchors.get(
-		"country_fra", Vector2.INF
-	) as Vector2
-	if not _require(france_point != Vector2.INF, "默认半球视角没有法兰西选择锚点"):
-		await _finish()
-		return
-	_send_mouse_button(application, france_point, true)
-	_send_mouse_button(application, france_point, false)
-	await _settle_frames(3)
-	if not _require(application.selected_country_id == "country_fra", "地图点击未选择法兰西"):
-		await _finish()
-		return
-	if not _require(application.info_open, "实体选择没有打开可见详情反馈"):
-		await _finish()
-		return
-	if not _require(
-		not application.formal_simulation.polity_summary("country_fra").is_empty(),
-		"所选实体没有可见政经详情数据"
-	):
 		await _finish()
 		return
 
@@ -129,6 +143,7 @@ func _run() -> void:
 		return
 
 	await _press_key(KEY_F5)
+	await _settle_frames(3)
 	if not _require(FileAccess.file_exists(FormalWorldSimulation.SAVE_PATH), "F5未创建正式存档"):
 		await _finish()
 		return
@@ -138,7 +153,7 @@ func _run() -> void:
 	var saved_date := application._format_sim_datetime()
 	var saved_economy := _visible_economy_signature(application)
 	var saved_polity := application.formal_simulation.polity_summary(
-		"country_fra"
+		INTENDED_POLITY_ID
 	).duplicate(true)
 
 	if not _require(await _click_action(application, "speed:4"), "保存后无法继续时间"):
@@ -155,6 +170,7 @@ func _run() -> void:
 		return
 
 	await _press_key(KEY_F9)
+	await _settle_frames(3)
 	if not _require(application._formal_status.contains("恢复"), "F9读取没有玩家可见反馈"):
 		await _finish()
 		return
@@ -166,7 +182,7 @@ func _run() -> void:
 		return
 	if not _require(
 		TIME_SUPPORT.first_semantic_difference(
-			application.formal_simulation.polity_summary("country_fra"), saved_polity
+			application.formal_simulation.polity_summary(INTENDED_POLITY_ID), saved_polity
 		).is_empty(),
 		"读取未恢复所选政治单元的玩家可见状态"
 	):
@@ -251,7 +267,7 @@ func _send_mouse_button(
 
 
 func _visible_economy_signature(application: FormalWorldApplication) -> String:
-	var polity := application.formal_simulation.polity_summary("country_fra")
+	var polity := application.formal_simulation.polity_summary(INTENDED_POLITY_ID)
 	var economy := polity.get("economy", {}) as Dictionary
 	var daily := economy.get("daily_totals", {}) as Dictionary
 	return "%d:%d:%d" % [
@@ -279,8 +295,35 @@ func _finish() -> void:
 	if current_scene != null:
 		current_scene.queue_free()
 		await process_frame
-	if not TIME_SUPPORT.restore_formal_save(save_backup):
-		failures += 1
-		push_error("Formal player journey: 无法恢复审计前正式存档")
+	if save_isolation_started:
+		if not TIME_SUPPORT.restore_formal_save(save_backup):
+			failures += 1
+			push_error("Formal player journey: 无法恢复审计前正式存档")
+		else:
+			var restored_backup := TIME_SUPPORT.backup_formal_save()
+			if not _require(
+				_save_artifacts_match(save_backup, restored_backup),
+				"正式旅程结束后没有逐件恢复原有存档及其备份工件"
+			):
+				push_error("Formal player journey: save artifact set changed")
 	print("Formal player journey: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures > 0 else 0)
+
+
+func _save_artifacts_match(left: Dictionary, right: Dictionary) -> bool:
+	if bool(right.get("read_error", false)):
+		return false
+	var left_artifacts := left.get("artifacts", {}) as Dictionary
+	var right_artifacts := right.get("artifacts", {}) as Dictionary
+	if left_artifacts.size() != right_artifacts.size():
+		return false
+	for suffix: String in TIME_SUPPORT.FORMAL_SAVE_ARTIFACT_SUFFIXES:
+		var left_artifact := left_artifacts.get(suffix, {}) as Dictionary
+		var right_artifact := right_artifacts.get(suffix, {}) as Dictionary
+		if bool(left_artifact.get("exists", false)) != bool(right_artifact.get("exists", false)):
+			return false
+		var left_bytes := left_artifact.get("bytes", PackedByteArray()) as PackedByteArray
+		var right_bytes := right_artifact.get("bytes", PackedByteArray()) as PackedByteArray
+		if left_bytes != right_bytes:
+			return false
+	return true

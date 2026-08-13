@@ -5,6 +5,7 @@ extends Control
 
 const WORLD_SCENE: String = "res://scenes/formal/formal_world_main.tscn"
 const LAUNCH_MODE_META: StringName = &"formal_world_launch_mode"
+const PACKAGED_PROBE_ARGUMENT: String = "--wwo-player-baseline-probe"
 const DISPLAY_VERSION: String = "V0.001"
 
 @onready var title_label: Label = %TitleLabel
@@ -22,6 +23,10 @@ func _ready() -> void:
 	prompt_label.text = "按任意键进入正式世界"
 	status_label.text = "已有正式世界存档，将自动继续。" if _formal_save_exists() else "将建立新的1900世界。"
 	grab_focus()
+	if PACKAGED_PROBE_ARGUMENT in OS.get_cmdline_user_args():
+		# This is an explicit release-smoke entry point. Normal players still
+		# enter through the title key handler below.
+		_enter_world.call_deferred("new")
 
 
 func _unhandled_key_input(event: InputEvent) -> void:

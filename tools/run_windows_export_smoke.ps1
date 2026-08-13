@@ -5,7 +5,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$failurePattern = '(?im)(SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Invalid call|Loaded resource as image file, this will not work on export|Failed loading resource|Resource file not found|[1-9][0-9]* failures)'
+$failurePattern = '(?im)(^ERROR:|SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Invalid call|Loaded resource as image file, this will not work on export|Failed loading resource|Resource file not found|[1-9][0-9]* failures)'
 
 if (-not (Test-Path -LiteralPath $GodotPath -PathType Leaf)) {
     throw "Godot executable not found: $GodotPath"
@@ -63,10 +63,11 @@ try {
     if (-not (Test-Path -LiteralPath $exportPath -PathType Leaf)) {
         throw "Windows release export did not create $exportPath"
     }
-    Invoke-GodotProcess -Name 'Exported product boot' -Executable $exportPath -Arguments @(
-        '--headless', '--quit-after', '60'
+    Invoke-GodotProcess -Name 'Packaged player baseline journey' -Executable $exportPath -Arguments @(
+        '--audio-driver', 'Dummy', '--rendering-method', 'gl_compatibility',
+        '--', '--wwo-player-baseline-probe'
     )
-    Write-Host "`nWindows export resource contract and packaged product boot passed."
+    Write-Host "`nWindows export resource contract and packaged player journey passed."
 }
 finally {
     $resolvedTemporaryRoot = [System.IO.Path]::GetFullPath($temporaryRoot)
