@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wwo.local/schemas/map-preprocessing-manifest.schema.json",
+  "title": "WWO candidate map cutout manifest",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generator_version",
+    "entity_id",
+    "source_contract",
+    "source_admission",
+    "source_file",
+    "source_hash",
+    "source_dimensions",
+    "mask_hash",
+    "output_hash",
+    "preview_hash",
+    "crop_bbox",
+    "mask_bbox",
+    "canvas_size",
+    "output_size",
+    "output_file",
+    "mask_file",
+    "preview_file",
+    "coordinate_contract",
+    "processing_parameters"
+  ],
+  "properties": {
+    "schema_version": {"type": "integer", "const": 1},
+    "generator_version": {"type": "string", "minLength": 1},
+    "entity_id": {"type": "string", "minLength": 1},
+    "source_contract": {"enum": ["approved_spatial", "synthetic_test"]},
+    "source_admission": {
+      "type": "object",
+      "required": ["status", "provenance_manifest", "provenance_record", "category", "license", "expected_sha256", "coordinate_convention", "review_status", "source_locator"],
+      "properties": {
+        "status": {"enum": ["approved", "synthetic_test"]},
+        "provenance_manifest": {"type": ["string", "null"]},
+        "provenance_record": {"type": ["string", "null"]},
+        "category": {"type": "string", "minLength": 1},
+        "license": {"type": ["string", "null"]},
+        "expected_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+        "coordinate_convention": {"type": ["string", "null"], "minLength": 1},
+        "review_status": {"type": ["string", "null"], "minLength": 1},
+        "source_locator": {"anyOf": [{"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1}, {"type": "null"}]}
+      },
+      "additionalProperties": false
+    },
+    "source_file": {"type": "string", "minLength": 1},
+    "source_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "source_dimensions": {"$ref": "#/$defs/size"},
+    "input_mask_file": {"type": ["string", "null"], "minLength": 1},
+    "input_mask_hash": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+    "input_mask_dimensions": {"anyOf": [{"$ref": "#/$defs/size"}, {"type": "null"}]},
+    "mask_source": {"type": "string", "minLength": 1},
+    "mask_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "output_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "preview_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "crop_bbox": {"$ref": "#/$defs/bbox"},
+    "requested_candidate_bbox": {"$ref": "#/$defs/bbox"},
+    "mask_bbox": {"$ref": "#/$defs/bbox"},
+    "canvas_size": {"$ref": "#/$defs/size"},
+    "output_size": {"$ref": "#/$defs/size"},
+    "output_file": {"type": "string", "minLength": 1},
+    "mask_file": {"type": "string", "minLength": 1},
+    "preview_file": {"type": "string", "minLength": 1},
+    "coordinate_contract": {
+      "type": "object",
+      "required": ["space", "mapping", "y_axis"],
+      "properties": {
+        "space": {"enum": ["PIXEL", "WGS84"]},
+        "mapping": {"type": "string", "minLength": 1},
+        "y_axis": {"type": "string", "minLength": 1},
+        "source_bounds": {
+          "type": "array",
+          "prefixItems": [
+            {"type": "number"}, {"type": "number"},
+            {"type": "number"}, {"type": "number"}
+          ],
+          "minItems": 4,
+          "maxItems": 4
+        }
+      },
+      "additionalProperties": true
+    },
+    "processing_parameters": {
+      "type": "object",
+      "required": [
+        "canonical_canvas_size",
+        "padding",
+        "resampling",
+        "alpha_mode",
+        "mask_mode",
+        "mask_resampled",
+        "mask_resampling",
+        "original_preserved"
+      ],
+      "properties": {
+        "canonical_canvas_size": {"$ref": "#/$defs/size"},
+        "padding": {"type": "integer", "minimum": 0},
+        "resampling": {"type": "string", "minLength": 1},
+        "source_bounds": {"type": ["array", "null"]},
+        "alpha_mode": {"type": "string", "minLength": 1},
+        "mask_mode": {"enum": ["alpha", "grayscale", "geometry"]},
+        "mask_input_alpha_availability": {"type": "string", "minLength": 1},
+        "mask_resampled": {"type": "boolean"},
+        "mask_resampling": {"type": "string", "minLength": 1},
+        "original_preserved": {"type": "boolean", "const": true}
+      },
+      "additionalProperties": true
+    },
+    "mask_qa": {"type": "object"}
+  },
+  "$defs": {
+    "bbox": {
+      "type": "array",
+      "prefixItems": [
+        {"type": "integer"},
+        {"type": "integer"},
+        {"type": "integer", "minimum": 1},
+        {"type": "integer", "minimum": 1}
+      ],
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "size": {
+      "type": "array",
+      "prefixItems": [
+        {"type": "integer", "minimum": 1},
+        {"type": "integer", "minimum": 1}
+      ],
+      "minItems": 2,
+      "maxItems": 2
+    }
+  },
+  "additionalProperties": true
+}
