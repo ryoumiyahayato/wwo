@@ -56,8 +56,12 @@ def artifact_mismatches(generated: Path, tracked: Path) -> list[str]:
         name
         for name in REPLAY_ARTIFACTS
         if not (generated / name).is_file()
-        or (generated / name).read_bytes() != (tracked / name).read_bytes()
+        or canonical_bytes(generated / name) != canonical_bytes(tracked / name)
     ]
+
+
+def canonical_bytes(path: Path) -> bytes:
+    return path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
 
 
 class Batch4RunManifestTests(unittest.TestCase):

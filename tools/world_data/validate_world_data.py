@@ -1824,8 +1824,12 @@ def write_outputs(result: Mapping[str, Any], output_dir: Path) -> None:
         "normalization_candidates.json": result["normalization_candidates"],
     }
     for name, value in files.items():
-        (output_dir / name).write_text(json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    (output_dir / "report.md").write_text(render_markdown(result), encoding="utf-8")
+        (output_dir / name).write_text(
+            json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+    (output_dir / "report.md").write_text(render_markdown(result), encoding="utf-8", newline="\n")
 
 
 def parse_args(argv: Sequence[str]) -> argparse.Namespace:

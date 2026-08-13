@@ -161,7 +161,11 @@ def main() -> int:
     output_dir.mkdir(parents=True, exist_ok=True)
     manifest = build_manifest(root, output_dir)
     path = output_dir / "batch4_run_manifest.json"
-    path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
     print(json.dumps({"artifact_file_count_before_manifest": len(manifest["artifacts"]), "final_gates": manifest["final_gates"], "output": path.as_posix()}, ensure_ascii=False, sort_keys=True))
     return 0
 
