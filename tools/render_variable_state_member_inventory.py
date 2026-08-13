@@ -112,7 +112,7 @@ def main() -> None:
             lines.append(render_path(path, grouped[path]))
         lines.append("```\n\n")
 
-    OUTPUT_PATH.write_text("".join(lines), encoding="utf-8")
+    OUTPUT_PATH.write_text("".join(lines).rstrip("\n") + "\n", encoding="utf-8")
     print(
         f"wrote {OUTPUT_PATH} with {len(members)} member rows "
         f"in {len(parts)} deterministic sections"

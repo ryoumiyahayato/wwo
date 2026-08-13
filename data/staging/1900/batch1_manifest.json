@@ -1,0 +1,53 @@
+{
+  "batch": 1,
+  "generator_version": "batch1_20260812_v2",
+  "input_files": {
+    "data/world_map/countries.json": "29159c67775632ebc10a6062e731edf8005baafe79231d0e23ad33a2e631ac06",
+    "data/world_map/historical_political_entities_1900.json": "4285b640c50cc678b012bcbc491d71f8aedb43258d32d9b2de9c260aafd99b95"
+  },
+  "outputs": {
+    "batch1_deterministic_corpus.json": {
+      "path": "data/staging/1900/batch1_deterministic_corpus.json",
+      "sha256": "64896030936632a910139a992ec6f77eb3a1a6bce551385b3c91d50d1d5964c0"
+    },
+    "canonical_crosswalk.json": {
+      "path": "data/staging/1900/canonical_crosswalk.json",
+      "records": 61,
+      "sha256": "b2b26466daa35e47b08aef068997d841873cde5a7317c346e62a55947a53d304"
+    },
+    "canonical_crosswalk.schema.json": {
+      "path": "data/staging/1900/canonical_crosswalk.schema.json",
+      "sha256": "a0644f3370eafe66040631701e715d0b2209b0d96ef3204b90ad3701d43bc392"
+    }
+  },
+  "protected_scope": {
+    "authoritative_runtime_data_changed": false,
+    "automatic_authority_candidates": 0,
+    "historical_identity_inferred": false,
+    "successor_relation_inferred": false
+  },
+  "runtime_authority": false,
+  "schema_id": "wwo_1900_source_pack_batch1_manifest_v2",
+  "snapshot_date": "1900-03-12",
+  "summary": {
+    "automatic_authoritative_candidate_count": 0,
+    "classification": {
+      "AMBIGUOUS": 5,
+      "EXACT_CODE": 40,
+      "LIKELY_COMPOSITE": 16,
+      "NO_MATCH": 0
+    },
+    "code_resolution": {
+      "AMBIGUOUS": 5,
+      "EXACT": 40,
+      "MULTI_MATCH": 16,
+      "NO_MATCH": 0
+    },
+    "historical_identity": {
+      "UNVERIFIED": 61
+    },
+    "successor_relation": {
+      "UNVERIFIED": 61
+    }
+  }
+}
