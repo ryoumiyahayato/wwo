@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "wwo_1900_batch2_political_unit_records_v1",
+  "title": "WWO 1900 Batch 2 political unit staging records",
+  "description": "Machine-readable, provenance-preserving staging records derived mechanically from the repository's dated political-unit snapshot. These records are not runtime authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_id", "batch", "snapshot_date", "source_snapshot", "policy", "summary", "units", "relationships"],
+  "properties": {
+    "schema_id": {"const": "wwo_1900_batch2_political_unit_records_v1"},
+    "batch": {"const": 2},
+    "snapshot_date": {"type": "string", "format": "date"},
+    "source_snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "record_count"],
+      "properties": {
+        "path": {"type": "string", "const": "data/world_map/historical/political_units_1900.json"},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "record_count": {"type": "integer", "const": 151}
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runtime_authority", "canonical_resolution", "historical_values", "modern_geometry_fallback"],
+      "properties": {
+        "runtime_authority": {"const": false},
+        "canonical_resolution": {"const": "EXACT_ID_ONLY; all other units remain NO_MATCH"},
+        "historical_values": {"const": "copied from the existing dated repository snapshot without inference"},
+        "modern_geometry_fallback": {"const": false}
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unit_count", "snapshot_active_count", "controller_link_count", "canonical_match_counts", "status_counts", "relationship_counts", "unresolved_controller_ids"],
+      "properties": {
+        "unit_count": {"type": "integer", "const": 151},
+        "snapshot_active_count": {"type": "integer", "const": 151},
+        "controller_link_count": {"type": "integer", "const": 96},
+        "canonical_match_counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["EXACT_ID", "NO_MATCH"],
+          "properties": {
+            "EXACT_ID": {"type": "integer", "const": 5},
+            "NO_MATCH": {"type": "integer", "const": 146}
+          }
+        },
+        "status_counts": {"type": "object", "additionalProperties": {"type": "integer"}},
+        "relationship_counts": {"type": "object", "additionalProperties": {"type": "integer"}},
+        "unresolved_controller_ids": {"type": "array", "const": []}
+      }
+    },
+    "units": {
+      "type": "array",
+      "minItems": 151,
+      "maxItems": 151,
+      "items": {"$ref": "#/$defs/unit"}
+    },
+    "relationships": {
+      "type": "array",
+      "minItems": 96,
+      "maxItems": 96,
+      "items": {"$ref": "#/$defs/relationship"}
+    }
+  },
+  "$defs": {
+    "unit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "record_id", "entity_type", "historical_unit_id", "canonical_entity_id", "canonical_match",
+        "gwcode", "historical_name", "normalized_name", "date_from", "date_to", "snapshot_active",
+        "status", "relationship", "controller_id", "capital", "area_km2", "geometry_feature_id",
+        "geometry_provider", "data_quality", "flag_id", "flag_mode", "flag_absence_reason",
+        "source_id", "source_title", "source_author_or_institution", "source_locator", "source_reference",
+        "source_date", "source_type", "confidence", "ambiguity_notes", "conflict_group",
+        "review_status", "runtime_authority"
+      ],
+      "properties": {
+        "record_id": {"type": "string", "pattern": "^1900-unit-.+$"},
+        "entity_type": {"const": "historical_political_unit"},
+        "historical_unit_id": {"type": "string", "minLength": 1},
+        "canonical_entity_id": {"type": ["string", "null"]},
+        "canonical_match": {"enum": ["EXACT_ID", "NO_MATCH"]},
+        "gwcode": {"type": "integer"},
+        "historical_name": {"type": "string", "minLength": 1},
+        "normalized_name": {"type": "string", "minLength": 1},
+        "date_from": {"type": "string", "format": "date"},
+        "date_to": {"type": "string", "format": "date"},
+        "snapshot_active": {"type": "boolean", "const": true},
+        "status": {"type": "string", "minLength": 1},
+        "relationship": {"type": "string", "minLength": 1},
+        "controller_id": {"type": ["string", "null"]},
+        "capital": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "lon", "lat"],
+          "properties": {
+            "name": {"type": "string", "minLength": 1},
+            "lon": {"type": "number"},
+            "lat": {"type": "number"}
+          }
+        },
+        "area_km2": {"type": "number", "exclusiveMinimum": 0},
+        "geometry_feature_id": {"type": "string", "minLength": 1},
+        "geometry_provider": {"const": "cshapes_2_0"},
+        "data_quality": {"const": "dated_historical_gis"},
+        "flag_id": {"type": "string", "minLength": 1},
+        "flag_mode": {"type": "string", "minLength": 1},
+        "flag_absence_reason": {"type": "string"},
+        "source_id": {"const": "src-cshapes-2.0"},
+        "source_title": {"type": "string", "minLength": 1},
+        "source_author_or_institution": {"type": "string", "minLength": 1},
+        "source_locator": {"type": "string", "format": "uri"},
+        "source_reference": {"type": "string", "minLength": 1},
+        "source_date": {"const": "2022"},
+        "source_type": {"const": "historical_gis"},
+        "confidence": {"const": "high"},
+        "ambiguity_notes": {"type": "string", "minLength": 1},
+        "conflict_group": {"type": ["string", "null"]},
+        "review_status": {"const": "STAGED_NOT_RUNTIME"},
+        "runtime_authority": {"const": false}
+      }
+    },
+    "relationship": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "record_id", "fact_type", "subject_historical_unit_id", "controller_historical_unit_id",
+        "relationship", "status", "date_from", "date_to", "snapshot_active",
+        "canonical_subject_entity_id", "canonical_controller_entity_id", "source_id", "source_title",
+        "source_author_or_institution", "source_locator", "source_reference", "source_date", "source_type",
+        "confidence", "ambiguity_notes", "conflict_group", "review_status", "runtime_authority"
+      ],
+      "properties": {
+        "record_id": {"type": "string", "pattern": "^1900-relationship-.+$"},
+        "fact_type": {"const": "sovereignty_relationship"},
+        "subject_historical_unit_id": {"type": "string", "minLength": 1},
+        "controller_historical_unit_id": {"type": "string", "minLength": 1},
+        "relationship": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "minLength": 1},
+        "date_from": {"type": "string", "format": "date"},
+        "date_to": {"type": "string", "format": "date"},
+        "snapshot_active": {"type": "boolean", "const": true},
+        "canonical_subject_entity_id": {"type": ["string", "null"]},
+        "canonical_controller_entity_id": {"type": ["string", "null"]},
+        "source_id": {"const": "src-cshapes-2.0"},
+        "source_title": {"type": "string", "minLength": 1},
+        "source_author_or_institution": {"type": "string", "minLength": 1},
+        "source_locator": {"type": "string", "format": "uri"},
+        "source_reference": {"type": "string", "minLength": 1},
+        "source_date": {"const": "2022"},
+        "source_type": {"const": "historical_gis"},
+        "confidence": {"const": "high"},
+        "ambiguity_notes": {"type": "string", "minLength": 1},
+        "conflict_group": {"type": ["string", "null"]},
+        "review_status": {"const": "STAGED_NOT_RUNTIME"},
+        "runtime_authority": {"const": false}
+      }
+    }
+  }
+}

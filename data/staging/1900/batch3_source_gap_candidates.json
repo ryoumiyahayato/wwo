@@ -1,0 +1,1757 @@
+{
+  "batch": 3,
+  "candidates": [
+    {
+      "candidate_id": "cities:alexandria",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 29,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "alexandria",
+        "label_priority": 72,
+        "lon_lat": [
+          29.9187,
+          31.2001
+        ],
+        "major": true,
+        "max_zoom": 200.0,
+        "min_zoom": 1.35,
+        "name": "亚历山大港",
+        "object_level": "city",
+        "parent_country_id": "ottoman_empire",
+        "parent_region_id": ""
+      },
+      "source_record_id": "alexandria",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:antwerp",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 15,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "antwerp",
+        "label_priority": 88,
+        "lon_lat": [
+          4.4025,
+          51.2194
+        ],
+        "major": true,
+        "max_zoom": 200.0,
+        "min_zoom": 1.4,
+        "name": "安特卫普",
+        "native_name": "Antwerpen",
+        "object_level": "city",
+        "parent_country_id": "country_bel",
+        "parent_region_id": ""
+      },
+      "source_record_id": "antwerp",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:beijing",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 27,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "beijing",
+        "label_priority": 94,
+        "lon_lat": [
+          116.4074,
+          39.9042
+        ],
+        "major": true,
+        "max_zoom": 200.0,
+        "min_zoom": 0.9,
+        "name": "北京",
+        "object_level": "city",
+        "parent_country_id": "qing_empire",
+        "parent_region_id": ""
+      },
+      "source_record_id": "beijing",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:berlin",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 20,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "berlin",
+        "label_priority": 94,
+        "lon_lat": [
+          13.405,
+          52.52
+        ],
+        "major": true,
+        "max_zoom": 200.0,
+        "min_zoom": 0.85,
+        "name": "柏林",
+        "object_level": "city",
+        "parent_country_id": "german_empire",
+        "parent_region_id": ""
+      },
+      "source_record_id": "berlin",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:bordeaux",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 7,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "bordeaux",
+        "label_priority": 80,
+        "lon_lat": [
+          -0.5792,
+          44.8378
+        ],
+        "major": true,
+        "max_zoom": 200.0,
+        "min_zoom": 1.75,
+        "name": "波尔多",
+        "object_level": "city",
+        "parent_country_id": "country_fra",
+        "parent_region_id": "aquitaine"
+      },
+      "source_record_id": "bordeaux",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:brest",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 5,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "brest",
+        "label_priority": 68,
+        "lon_lat": [
+          -4.4861,
+          48.3904
+        ],
+        "major": false,
+        "max_zoom": 200.0,
+        "min_zoom": 6.4,
+        "name": "布雷斯特",
+        "object_level": "city",
+        "parent_country_id": "country_fra",
+        "parent_region_id": "brittany"
+      },
+      "source_record_id": "brest",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:brussels",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 14,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "brussels",
+        "label_priority": 94,
+        "lon_lat": [
+          4.3517,
+          50.8503
+        ],
+        "major": true,
+        "max_zoom": 200.0,
+        "min_zoom": 0.95,
+        "name": "布鲁塞尔",
+        "native_name": "Bruxelles",
+        "object_level": "city",
+        "parent_country_id": "country_bel",
+        "parent_region_id": ""
+      },
+      "source_record_id": "brussels",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:buenos_aires",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 31,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "buenos_aires",
+        "label_priority": 70,
+        "lon_lat": [
+          -58.3816,
+          -34.6037
+        ],
+        "major": true,
+        "max_zoom": 200.0,
+        "min_zoom": 1.25,
+        "name": "布宜诺斯艾利斯",
+        "object_level": "city",
+        "parent_country_id": "argentine_republic",
+        "parent_region_id": ""
+      },
+      "source_record_id": "buenos_aires",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:calais",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 2,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "calais",
+        "label_priority": 61,
+        "lon_lat": [
+          1.8587,
+          50.9513
+        ],
+        "major": false,
+        "max_zoom": 200.0,
+        "min_zoom": 6.4,
+        "name": "加来",
+        "object_level": "city",
+        "parent_country_id": "country_fra",
+        "parent_region_id": "northern_industrial_belt"
+      },
+      "source_record_id": "calais",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:cologne",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 17,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "cologne",
+        "label_priority": 82,
+        "lon_lat": [
+          6.9603,
+          50.9375
+        ],
+        "major": true,
+        "max_zoom": 200.0,
+        "min_zoom": 1.8,
+        "name": "科隆",
+        "native_name": "Köln",
+        "object_level": "city",
+        "parent_country_id": "german_empire",
+        "parent_region_id": ""
+      },
+      "source_record_id": "cologne",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:dover",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 19,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "dover",
+        "label_priority": 70,
+        "lon_lat": [
+          1.3134,
+          51.1279
+        ],
+        "major": false,
+        "max_zoom": 200.0,
+        "min_zoom": 6.4,
+        "name": "多佛",
+        "native_name": "Dover",
+        "object_level": "city",
+        "parent_country_id": "british_empire",
+        "parent_region_id": ""
+      },
+      "source_record_id": "dover",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:ghent",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 13,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "ghent",
+        "label_priority": 86,
+        "lon_lat": [
+          3.7174,
+          51.0543
+        ],
+        "major": true,
+        "max_zoom": 200.0,
+        "min_zoom": 2.0,
+        "name": "根特",
+        "native_name": "Gent",
+        "object_level": "city",
+        "parent_country_id": "country_bel",
+        "parent_region_id": ""
+      },
+      "source_record_id": "ghent",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:istanbul",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 22,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "istanbul",
+        "label_priority": 84,
+        "lon_lat": [
+          28.5,
+          41.1
+        ],
+        "major": true,
+        "max_zoom": 200.0,
+        "min_zoom": 1.0,
+        "name": "君士坦丁堡",
+        "object_level": "city",
+        "parent_country_id": "ottoman_empire",
+        "parent_region_id": ""
+      },
+      "source_record_id": "istanbul",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:kolkata",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 30,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "kolkata",
+        "label_priority": 70,
+        "lon_lat": [
+          88.3639,
+          22.5726
+        ],
+        "major": true,
+        "max_zoom": 200.0,
+        "min_zoom": 1.35,
+        "name": "加尔各答",
+        "object_level": "city",
+        "parent_country_id": "british_empire",
+        "parent_region_id": ""
+      },
+      "source_record_id": "kolkata",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:kortrijk",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 11,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "kortrijk",
+        "label_priority": 78,
+        "lon_lat": [
+          3.2649,
+          50.828
+        ],
+        "major": false,
+        "max_zoom": 200.0,
+        "min_zoom": 6.4,
+        "name": "科特赖克",
+        "native_name": "Kortrijk",
+        "object_level": "city",
+        "parent_country_id": "country_bel",
+        "parent_region_id": ""
+      },
+      "source_record_id": "kortrijk",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:le_havre",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 4,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "le_havre",
+        "label_priority": 82,
+        "lon_lat": [
+          0.1079,
+          49.4944
+        ],
+        "major": true,
+        "max_zoom": 200.0,
+        "min_zoom": 1.65,
+        "name": "勒阿弗尔",
+        "object_level": "city",
+        "parent_country_id": "country_fra",
+        "parent_region_id": "normandy"
+      },
+      "source_record_id": "le_havre",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:lille",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 1,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "arrondissement_id": "arrondissement_lille",
+        "commune_id": "commune_lille",
+        "departement_id": "departement_nord",
+        "id": "lille",
+        "label_priority": 98,
+        "lon_lat": [
+          3.0573,
+          50.6292
+        ],
+        "major": true,
+        "max_zoom": 200.0,
+        "min_zoom": 1.65,
+        "name": "里尔",
+        "native_name": "Lille",
+        "object_level": "city",
+        "parent_country_id": "country_fra",
+        "parent_region_id": "northern_industrial_belt",
+        "player_city": true
+      },
+      "source_record_id": "lille",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:london",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 18,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "london",
+        "label_priority": 94,
+        "lon_lat": [
+          -0.1276,
+          51.5072
+        ],
+        "major": true,
+        "max_zoom": 200.0,
+        "min_zoom": 0.85,
+        "name": "伦敦",
+        "object_level": "city",
+        "parent_country_id": "british_empire",
+        "parent_region_id": ""
+      },
+      "source_record_id": "london",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:lyon",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 9,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "lyon",
+        "label_priority": 88,
+        "lon_lat": [
+          4.8357,
+          45.764
+        ],
+        "major": true,
+        "max_zoom": 200.0,
+        "min_zoom": 1.55,
+        "name": "里昂",
+        "object_level": "city",
+        "parent_country_id": "country_fra",
+        "parent_region_id": "rhone_valley"
+      },
+      "source_record_id": "lyon",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:marseille",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 10,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "marseille",
+        "label_priority": 90,
+        "lon_lat": [
+          5.3698,
+          43.2965
+        ],
+        "major": true,
+        "max_zoom": 200.0,
+        "min_zoom": 1.5,
+        "name": "马赛",
+        "object_level": "city",
+        "parent_country_id": "country_fra",
+        "parent_region_id": "mediterranean_coast"
+      },
+      "source_record_id": "marseille",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:moscow",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 24,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "moscow",
+        "label_priority": 82,
+        "lon_lat": [
+          37.6173,
+          55.7558
+        ],
+        "major": true,
+        "max_zoom": 200.0,
+        "min_zoom": 1.2,
+        "name": "莫斯科",
+        "object_level": "city",
+        "parent_country_id": "russian_empire",
+        "parent_region_id": ""
+      },
+      "source_record_id": "moscow",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:nantes",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 6,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "nantes",
+        "label_priority": 74,
+        "lon_lat": [
+          -1.5536,
+          47.2184
+        ],
+        "major": true,
+        "max_zoom": 200.0,
+        "min_zoom": 1.9,
+        "name": "南特",
+        "object_level": "city",
+        "parent_country_id": "country_fra",
+        "parent_region_id": "loire_valley"
+      },
+      "source_record_id": "nantes",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:new_york",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 26,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "new_york",
+        "label_priority": 84,
+        "lon_lat": [
+          -74.006,
+          40.7128
+        ],
+        "major": true,
+        "max_zoom": 200.0,
+        "min_zoom": 1.15,
+        "name": "纽约",
+        "object_level": "city",
+        "parent_country_id": "united_states",
+        "parent_region_id": ""
+      },
+      "source_record_id": "new_york",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:paris",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 0,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "paris",
+        "label_priority": 100,
+        "lon_lat": [
+          2.3522,
+          48.8566
+        ],
+        "major": true,
+        "max_zoom": 200.0,
+        "min_zoom": 0.85,
+        "name": "巴黎",
+        "object_level": "city",
+        "parent_country_id": "country_fra",
+        "parent_region_id": "paris_basin"
+      },
+      "source_record_id": "paris",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:rouen",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 3,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "rouen",
+        "label_priority": 76,
+        "lon_lat": [
+          1.0993,
+          49.4431
+        ],
+        "major": true,
+        "max_zoom": 200.0,
+        "min_zoom": 1.85,
+        "name": "鲁昂",
+        "object_level": "city",
+        "parent_country_id": "country_fra",
+        "parent_region_id": "normandy"
+      },
+      "source_record_id": "rouen",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:st_petersburg",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 23,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "st_petersburg",
+        "label_priority": 90,
+        "lon_lat": [
+          30.3351,
+          59.9343
+        ],
+        "major": true,
+        "max_zoom": 200.0,
+        "min_zoom": 0.9,
+        "name": "圣彼得堡",
+        "object_level": "city",
+        "parent_country_id": "russian_empire",
+        "parent_region_id": ""
+      },
+      "source_record_id": "st_petersburg",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:strasbourg",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 16,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "strasbourg",
+        "label_priority": 84,
+        "lon_lat": [
+          7.7521,
+          48.5734
+        ],
+        "major": true,
+        "max_zoom": 200.0,
+        "min_zoom": 1.7,
+        "name": "斯特拉斯堡",
+        "object_level": "city",
+        "parent_country_id": "german_empire",
+        "parent_region_id": "",
+        "theme_label_placeholder": true
+      },
+      "source_record_id": "strasbourg",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:tokyo",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 28,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "tokyo",
+        "label_priority": 90,
+        "lon_lat": [
+          139.6917,
+          35.6895
+        ],
+        "major": true,
+        "max_zoom": 200.0,
+        "min_zoom": 0.95,
+        "name": "东京",
+        "object_level": "city",
+        "parent_country_id": "japanese_empire",
+        "parent_region_id": ""
+      },
+      "source_record_id": "tokyo",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:toulouse",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 8,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "toulouse",
+        "label_priority": 72,
+        "lon_lat": [
+          1.4442,
+          43.6047
+        ],
+        "major": false,
+        "max_zoom": 200.0,
+        "min_zoom": 6.4,
+        "name": "图卢兹",
+        "object_level": "city",
+        "parent_country_id": "country_fra",
+        "parent_region_id": "aquitaine"
+      },
+      "source_record_id": "toulouse",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:tournai",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 12,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "tournai",
+        "label_priority": 76,
+        "lon_lat": [
+          3.3893,
+          50.6056
+        ],
+        "major": false,
+        "max_zoom": 200.0,
+        "min_zoom": 6.4,
+        "name": "图尔奈",
+        "native_name": "Tournai",
+        "object_level": "city",
+        "parent_country_id": "country_bel",
+        "parent_region_id": ""
+      },
+      "source_record_id": "tournai",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:vienna",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 21,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "vienna",
+        "label_priority": 86,
+        "lon_lat": [
+          16.3738,
+          48.2082
+        ],
+        "major": true,
+        "max_zoom": 200.0,
+        "min_zoom": 0.95,
+        "name": "维也纳",
+        "object_level": "city",
+        "parent_country_id": "austro_hungarian_empire",
+        "parent_region_id": ""
+      },
+      "source_record_id": "vienna",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "cities:washington",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "cities",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_identity_and_date",
+        "source_locator",
+        "historical_parent_crosswalk",
+        "historical_role_or_population"
+      ],
+      "runtime_authority": false,
+      "source_index": 25,
+      "source_path": "data/world_map/cities.json",
+      "source_record": {
+        "id": "washington",
+        "label_priority": 90,
+        "lon_lat": [
+          -77.0369,
+          38.9072
+        ],
+        "major": true,
+        "max_zoom": 200.0,
+        "min_zoom": 0.9,
+        "name": "华盛顿",
+        "object_level": "city",
+        "parent_country_id": "united_states",
+        "parent_region_id": ""
+      },
+      "source_record_id": "washington",
+      "source_sha256": "62466f51461eaacced57a350a30e98e7824cbbd2401d367ccced6b35a60de919"
+    },
+    {
+      "candidate_id": "ports:port_alexandria",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "ports",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_port_identity_and_date",
+        "source_locator",
+        "historical_owner_crosswalk",
+        "historical_city_crosswalk"
+      ],
+      "runtime_authority": false,
+      "source_index": 7,
+      "source_path": "data/world_map/ports.json",
+      "source_record": {
+        "city_id": "alexandria",
+        "id": "port_alexandria",
+        "label_priority": 64,
+        "lon_lat": [
+          29.92,
+          31.2
+        ],
+        "max_zoom": 6.2,
+        "min_zoom": 1.7,
+        "name": "亚历山大港",
+        "object_level": "port",
+        "parent_country_id": "ottoman_empire",
+        "parent_region_id": ""
+      },
+      "source_record_id": "port_alexandria",
+      "source_sha256": "05a11d928080289968ace21d86fa137bffe5463582b972ff2f10453e7a312eed"
+    },
+    {
+      "candidate_id": "ports:port_bordeaux",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "ports",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_port_identity_and_date",
+        "source_locator",
+        "historical_owner_crosswalk",
+        "historical_city_crosswalk"
+      ],
+      "runtime_authority": false,
+      "source_index": 3,
+      "source_path": "data/world_map/ports.json",
+      "source_record": {
+        "city_id": "bordeaux",
+        "id": "port_bordeaux",
+        "label_priority": 60,
+        "lon_lat": [
+          -0.58,
+          44.84
+        ],
+        "max_zoom": 96.0,
+        "min_zoom": 6.4,
+        "name": "波尔多港",
+        "object_level": "port",
+        "parent_country_id": "country_fra",
+        "parent_region_id": "aquitaine"
+      },
+      "source_record_id": "port_bordeaux",
+      "source_sha256": "05a11d928080289968ace21d86fa137bffe5463582b972ff2f10453e7a312eed"
+    },
+    {
+      "candidate_id": "ports:port_brest",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "ports",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_port_identity_and_date",
+        "source_locator",
+        "historical_owner_crosswalk",
+        "historical_city_crosswalk"
+      ],
+      "runtime_authority": false,
+      "source_index": 2,
+      "source_path": "data/world_map/ports.json",
+      "source_record": {
+        "city_id": "brest",
+        "id": "port_brest",
+        "label_priority": 58,
+        "lon_lat": [
+          -4.49,
+          48.39
+        ],
+        "max_zoom": 96.0,
+        "min_zoom": 6.4,
+        "name": "布雷斯特港",
+        "object_level": "port",
+        "parent_country_id": "country_fra",
+        "parent_region_id": "brittany"
+      },
+      "source_record_id": "port_brest",
+      "source_sha256": "05a11d928080289968ace21d86fa137bffe5463582b972ff2f10453e7a312eed"
+    },
+    {
+      "candidate_id": "ports:port_calais",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "ports",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_port_identity_and_date",
+        "source_locator",
+        "historical_owner_crosswalk",
+        "historical_city_crosswalk"
+      ],
+      "runtime_authority": false,
+      "source_index": 1,
+      "source_path": "data/world_map/ports.json",
+      "source_record": {
+        "city_id": "calais",
+        "id": "port_calais",
+        "label_priority": 60,
+        "lon_lat": [
+          1.85,
+          50.96
+        ],
+        "max_zoom": 96.0,
+        "min_zoom": 6.4,
+        "name": "加来港",
+        "object_level": "port",
+        "parent_country_id": "country_fra",
+        "parent_region_id": "northern_industrial_belt"
+      },
+      "source_record_id": "port_calais",
+      "source_sha256": "05a11d928080289968ace21d86fa137bffe5463582b972ff2f10453e7a312eed"
+    },
+    {
+      "candidate_id": "ports:port_le_havre",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "ports",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_port_identity_and_date",
+        "source_locator",
+        "historical_owner_crosswalk",
+        "historical_city_crosswalk"
+      ],
+      "runtime_authority": false,
+      "source_index": 0,
+      "source_path": "data/world_map/ports.json",
+      "source_record": {
+        "city_id": "le_havre",
+        "id": "port_le_havre",
+        "label_priority": 86,
+        "lon_lat": [
+          0.1,
+          49.49
+        ],
+        "max_zoom": 96.0,
+        "min_zoom": 1.65,
+        "name": "勒阿弗尔港",
+        "object_level": "port",
+        "parent_country_id": "country_fra",
+        "parent_region_id": "normandy"
+      },
+      "source_record_id": "port_le_havre",
+      "source_sha256": "05a11d928080289968ace21d86fa137bffe5463582b972ff2f10453e7a312eed"
+    },
+    {
+      "candidate_id": "ports:port_london",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "ports",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_port_identity_and_date",
+        "source_locator",
+        "historical_owner_crosswalk",
+        "historical_city_crosswalk"
+      ],
+      "runtime_authority": false,
+      "source_index": 5,
+      "source_path": "data/world_map/ports.json",
+      "source_record": {
+        "city_id": "london",
+        "id": "port_london",
+        "label_priority": 64,
+        "lon_lat": [
+          0.0,
+          51.5
+        ],
+        "max_zoom": 6.2,
+        "min_zoom": 1.7,
+        "name": "伦敦港",
+        "object_level": "port",
+        "parent_country_id": "british_empire",
+        "parent_region_id": ""
+      },
+      "source_record_id": "port_london",
+      "source_sha256": "05a11d928080289968ace21d86fa137bffe5463582b972ff2f10453e7a312eed"
+    },
+    {
+      "candidate_id": "ports:port_marseille",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "ports",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_port_identity_and_date",
+        "source_locator",
+        "historical_owner_crosswalk",
+        "historical_city_crosswalk"
+      ],
+      "runtime_authority": false,
+      "source_index": 4,
+      "source_path": "data/world_map/ports.json",
+      "source_record": {
+        "city_id": "marseille",
+        "id": "port_marseille",
+        "label_priority": 88,
+        "lon_lat": [
+          5.37,
+          43.29
+        ],
+        "max_zoom": 96.0,
+        "min_zoom": 1.6,
+        "name": "马赛港",
+        "object_level": "port",
+        "parent_country_id": "country_fra",
+        "parent_region_id": "mediterranean_coast"
+      },
+      "source_record_id": "port_marseille",
+      "source_sha256": "05a11d928080289968ace21d86fa137bffe5463582b972ff2f10453e7a312eed"
+    },
+    {
+      "candidate_id": "ports:port_new_york",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "ports",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_port_identity_and_date",
+        "source_locator",
+        "historical_owner_crosswalk",
+        "historical_city_crosswalk"
+      ],
+      "runtime_authority": false,
+      "source_index": 6,
+      "source_path": "data/world_map/ports.json",
+      "source_record": {
+        "city_id": "new_york",
+        "id": "port_new_york",
+        "label_priority": 64,
+        "lon_lat": [
+          -74.0,
+          40.7
+        ],
+        "max_zoom": 6.2,
+        "min_zoom": 1.7,
+        "name": "纽约港",
+        "object_level": "port",
+        "parent_country_id": "united_states",
+        "parent_region_id": ""
+      },
+      "source_record_id": "port_new_york",
+      "source_sha256": "05a11d928080289968ace21d86fa137bffe5463582b972ff2f10453e7a312eed"
+    },
+    {
+      "candidate_id": "rail_segments:rail_bordeaux_toulouse",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "rail_segments",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_line_existence_and_date",
+        "source_locator",
+        "historical_endpoint_crosswalk",
+        "operator_or_ownership_evidence"
+      ],
+      "runtime_authority": false,
+      "source_index": 8,
+      "source_path": "data/world_map/rail_segments.json",
+      "source_record": {
+        "from_city_id": "bordeaux",
+        "id": "rail_bordeaux_toulouse",
+        "main": false,
+        "max_zoom": 96.0,
+        "min_zoom": 6.4,
+        "to_city_id": "toulouse",
+        "type": "rail"
+      },
+      "source_record_id": "rail_bordeaux_toulouse",
+      "source_sha256": "83303792e438cdfcec5f6c255038c14ff22cdc902ae3a8426d93e06e07779cf9"
+    },
+    {
+      "candidate_id": "rail_segments:rail_lille_calais",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "rail_segments",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_line_existence_and_date",
+        "source_locator",
+        "historical_endpoint_crosswalk",
+        "operator_or_ownership_evidence"
+      ],
+      "runtime_authority": false,
+      "source_index": 1,
+      "source_path": "data/world_map/rail_segments.json",
+      "source_record": {
+        "from_city_id": "lille",
+        "id": "rail_lille_calais",
+        "main": false,
+        "max_zoom": 96.0,
+        "min_zoom": 6.4,
+        "to_city_id": "calais",
+        "type": "rail"
+      },
+      "source_record_id": "rail_lille_calais",
+      "source_sha256": "83303792e438cdfcec5f6c255038c14ff22cdc902ae3a8426d93e06e07779cf9"
+    },
+    {
+      "candidate_id": "rail_segments:rail_lyon_marseille",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "rail_segments",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_line_existence_and_date",
+        "source_locator",
+        "historical_endpoint_crosswalk",
+        "operator_or_ownership_evidence"
+      ],
+      "runtime_authority": false,
+      "source_index": 5,
+      "source_path": "data/world_map/rail_segments.json",
+      "source_record": {
+        "from_city_id": "lyon",
+        "id": "rail_lyon_marseille",
+        "label_priority": 96,
+        "main": true,
+        "max_zoom": 96.0,
+        "min_zoom": 1.55,
+        "name": "里昂—马赛铁路",
+        "to_city_id": "marseille",
+        "type": "rail"
+      },
+      "source_record_id": "rail_lyon_marseille",
+      "source_sha256": "83303792e438cdfcec5f6c255038c14ff22cdc902ae3a8426d93e06e07779cf9"
+    },
+    {
+      "candidate_id": "rail_segments:rail_nantes_bordeaux",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "rail_segments",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_line_existence_and_date",
+        "source_locator",
+        "historical_endpoint_crosswalk",
+        "operator_or_ownership_evidence"
+      ],
+      "runtime_authority": false,
+      "source_index": 7,
+      "source_path": "data/world_map/rail_segments.json",
+      "source_record": {
+        "from_city_id": "nantes",
+        "id": "rail_nantes_bordeaux",
+        "main": false,
+        "max_zoom": 96.0,
+        "min_zoom": 6.4,
+        "to_city_id": "bordeaux",
+        "type": "rail"
+      },
+      "source_record_id": "rail_nantes_bordeaux",
+      "source_sha256": "83303792e438cdfcec5f6c255038c14ff22cdc902ae3a8426d93e06e07779cf9"
+    },
+    {
+      "candidate_id": "rail_segments:rail_paris_lille",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "rail_segments",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_line_existence_and_date",
+        "source_locator",
+        "historical_endpoint_crosswalk",
+        "operator_or_ownership_evidence"
+      ],
+      "runtime_authority": false,
+      "source_index": 0,
+      "source_path": "data/world_map/rail_segments.json",
+      "source_record": {
+        "from_city_id": "paris",
+        "id": "rail_paris_lille",
+        "label_priority": 100,
+        "main": true,
+        "max_zoom": 96.0,
+        "min_zoom": 1.55,
+        "name": "巴黎—里尔铁路",
+        "to_city_id": "lille",
+        "type": "rail"
+      },
+      "source_record_id": "rail_paris_lille",
+      "source_sha256": "83303792e438cdfcec5f6c255038c14ff22cdc902ae3a8426d93e06e07779cf9"
+    },
+    {
+      "candidate_id": "rail_segments:rail_paris_lyon",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "rail_segments",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_line_existence_and_date",
+        "source_locator",
+        "historical_endpoint_crosswalk",
+        "operator_or_ownership_evidence"
+      ],
+      "runtime_authority": false,
+      "source_index": 4,
+      "source_path": "data/world_map/rail_segments.json",
+      "source_record": {
+        "from_city_id": "paris",
+        "id": "rail_paris_lyon",
+        "label_priority": 98,
+        "main": true,
+        "max_zoom": 96.0,
+        "min_zoom": 1.5,
+        "name": "巴黎—里昂铁路",
+        "to_city_id": "lyon",
+        "type": "rail"
+      },
+      "source_record_id": "rail_paris_lyon",
+      "source_sha256": "83303792e438cdfcec5f6c255038c14ff22cdc902ae3a8426d93e06e07779cf9"
+    },
+    {
+      "candidate_id": "rail_segments:rail_paris_nantes",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "rail_segments",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_line_existence_and_date",
+        "source_locator",
+        "historical_endpoint_crosswalk",
+        "operator_or_ownership_evidence"
+      ],
+      "runtime_authority": false,
+      "source_index": 6,
+      "source_path": "data/world_map/rail_segments.json",
+      "source_record": {
+        "from_city_id": "paris",
+        "id": "rail_paris_nantes",
+        "label_priority": 88,
+        "main": true,
+        "max_zoom": 96.0,
+        "min_zoom": 1.75,
+        "name": "巴黎—南特铁路",
+        "to_city_id": "nantes",
+        "type": "rail"
+      },
+      "source_record_id": "rail_paris_nantes",
+      "source_sha256": "83303792e438cdfcec5f6c255038c14ff22cdc902ae3a8426d93e06e07779cf9"
+    },
+    {
+      "candidate_id": "rail_segments:rail_paris_rouen",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "rail_segments",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_line_existence_and_date",
+        "source_locator",
+        "historical_endpoint_crosswalk",
+        "operator_or_ownership_evidence"
+      ],
+      "runtime_authority": false,
+      "source_index": 2,
+      "source_path": "data/world_map/rail_segments.json",
+      "source_record": {
+        "from_city_id": "paris",
+        "id": "rail_paris_rouen",
+        "label_priority": 92,
+        "main": true,
+        "max_zoom": 96.0,
+        "min_zoom": 1.6,
+        "name": "巴黎—鲁昂铁路",
+        "to_city_id": "rouen",
+        "type": "rail"
+      },
+      "source_record_id": "rail_paris_rouen",
+      "source_sha256": "83303792e438cdfcec5f6c255038c14ff22cdc902ae3a8426d93e06e07779cf9"
+    },
+    {
+      "candidate_id": "rail_segments:rail_rouen_le_havre",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "rail_segments",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_line_existence_and_date",
+        "source_locator",
+        "historical_endpoint_crosswalk",
+        "operator_or_ownership_evidence"
+      ],
+      "runtime_authority": false,
+      "source_index": 3,
+      "source_path": "data/world_map/rail_segments.json",
+      "source_record": {
+        "from_city_id": "rouen",
+        "id": "rail_rouen_le_havre",
+        "main": false,
+        "max_zoom": 96.0,
+        "min_zoom": 6.4,
+        "to_city_id": "le_havre",
+        "type": "rail"
+      },
+      "source_record_id": "rail_rouen_le_havre",
+      "source_sha256": "83303792e438cdfcec5f6c255038c14ff22cdc902ae3a8426d93e06e07779cf9"
+    },
+    {
+      "candidate_id": "shipping_routes:shipping_atlantic",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "shipping_routes",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_route_existence_and_date",
+        "source_locator",
+        "historical_port_crosswalk",
+        "route_semantics_evidence"
+      ],
+      "runtime_authority": false,
+      "source_index": 1,
+      "source_path": "data/world_map/shipping_routes.json",
+      "source_record": {
+        "from_port_id": "port_le_havre",
+        "id": "shipping_atlantic",
+        "max_zoom": 3.6,
+        "min_zoom": 0.95,
+        "name": "北大西洋航线",
+        "to_port_id": "port_new_york",
+        "type": "shipping",
+        "waypoints_lon_lat": [
+          [
+            0.1,
+            49.49
+          ],
+          [
+            -18.0,
+            50.0
+          ],
+          [
+            -43.0,
+            46.0
+          ],
+          [
+            -62.0,
+            42.0
+          ],
+          [
+            -74.0,
+            40.7
+          ]
+        ]
+      },
+      "source_record_id": "shipping_atlantic",
+      "source_sha256": "3812b7e48128bec0c19cab27fbb40303397087b0531591c761df541d532a5861"
+    },
+    {
+      "candidate_id": "shipping_routes:shipping_channel",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "shipping_routes",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_route_existence_and_date",
+        "source_locator",
+        "historical_port_crosswalk",
+        "route_semantics_evidence"
+      ],
+      "runtime_authority": false,
+      "source_index": 0,
+      "source_path": "data/world_map/shipping_routes.json",
+      "source_record": {
+        "from_port_id": "port_le_havre",
+        "id": "shipping_channel",
+        "max_zoom": 96.0,
+        "min_zoom": 1.55,
+        "name": "英吉利海峡航线",
+        "to_port_id": "port_london",
+        "type": "shipping",
+        "waypoints_lon_lat": [
+          [
+            0.1,
+            49.49
+          ],
+          [
+            -0.7,
+            50.1
+          ],
+          [
+            -0.2,
+            51.1
+          ],
+          [
+            0.0,
+            51.5
+          ]
+        ]
+      },
+      "source_record_id": "shipping_channel",
+      "source_sha256": "3812b7e48128bec0c19cab27fbb40303397087b0531591c761df541d532a5861"
+    },
+    {
+      "candidate_id": "shipping_routes:shipping_mediterranean",
+      "candidate_status": "UNVERIFIED_FOR_1900",
+      "category": "shipping_routes",
+      "historical_fact": false,
+      "notes": "Copied from a current repository prototype; this candidate is not a 1900 historical fact and is not eligible for runtime promotion without the required evidence.",
+      "required_evidence": [
+        "historical_route_existence_and_date",
+        "source_locator",
+        "historical_port_crosswalk",
+        "route_semantics_evidence"
+      ],
+      "runtime_authority": false,
+      "source_index": 2,
+      "source_path": "data/world_map/shipping_routes.json",
+      "source_record": {
+        "from_port_id": "port_marseille",
+        "id": "shipping_mediterranean",
+        "max_zoom": 6.2,
+        "min_zoom": 1.3,
+        "name": "地中海东部航线",
+        "to_port_id": "port_alexandria",
+        "type": "shipping",
+        "waypoints_lon_lat": [
+          [
+            5.37,
+            43.29
+          ],
+          [
+            10.0,
+            38.0
+          ],
+          [
+            18.0,
+            35.0
+          ],
+          [
+            25.0,
+            33.0
+          ],
+          [
+            29.92,
+            31.2
+          ]
+        ]
+      },
+      "source_record_id": "shipping_mediterranean",
+      "source_sha256": "3812b7e48128bec0c19cab27fbb40303397087b0531591c761df541d532a5861"
+    }
+  ],
+  "policy": {
+    "historical_fact": false,
+    "no_inference": true,
+    "runtime_authority": false,
+    "source_requirement": "Every candidate requires an external or repository source locator and a dated historical crosswalk before promotion."
+  },
+  "schema_id": "wwo_1900_batch3_source_gap_candidates_v1",
+  "snapshot_date": "1900-03-12",
+  "summary": {
+    "candidate_count": 52,
+    "category_counts": {
+      "cities": 32,
+      "ports": 8,
+      "rail_segments": 9,
+      "shipping_routes": 3
+    },
+    "source_file_counts": {
+      "data/world_map/cities.json": 32,
+      "data/world_map/ports.json": 8,
+      "data/world_map/rail_segments.json": 9,
+      "data/world_map/shipping_routes.json": 3
+    }
+  }
+}
