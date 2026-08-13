@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "wwo_1900_batch3_source_gap_candidates_v1",
+  "title": "WWO 1900 Batch 3 source-gap candidates",
+  "description": "Mechanically copied current-prototype records retained as unverified candidates. They are not historical facts and cannot enter runtime authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_id", "batch", "snapshot_date", "policy", "summary", "candidates"],
+  "properties": {
+    "schema_id": {"const": "wwo_1900_batch3_source_gap_candidates_v1"},
+    "batch": {"const": 3},
+    "snapshot_date": {"const": "1900-03-12"},
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["historical_fact", "runtime_authority", "source_requirement", "no_inference"],
+      "properties": {
+        "historical_fact": {"const": false},
+        "runtime_authority": {"const": false},
+        "source_requirement": {"const": "Every candidate requires an external or repository source locator and a dated historical crosswalk before promotion."},
+        "no_inference": {"const": true}
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidate_count", "category_counts", "source_file_counts"],
+      "properties": {
+        "candidate_count": {"const": 52},
+        "category_counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["cities", "ports", "rail_segments", "shipping_routes"],
+          "properties": {
+            "cities": {"const": 32},
+            "ports": {"const": 8},
+            "rail_segments": {"const": 9},
+            "shipping_routes": {"const": 3}
+          }
+        },
+        "source_file_counts": {"type": "object", "additionalProperties": {"type": "integer"}}
+      }
+    },
+    "candidates": {
+      "type": "array",
+      "minItems": 52,
+      "maxItems": 52,
+      "items": {"$ref": "#/$defs/candidate"}
+    }
+  },
+  "$defs": {
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidate_id", "category", "source_path", "source_record_id", "source_index", "source_sha256", "candidate_status", "historical_fact", "runtime_authority", "required_evidence", "source_record", "notes"],
+      "properties": {
+        "candidate_id": {"type": "string", "minLength": 1},
+        "category": {"enum": ["cities", "ports", "rail_segments", "shipping_routes"]},
+        "source_path": {"type": "string", "minLength": 1},
+        "source_record_id": {"type": "string", "minLength": 1},
+        "source_index": {"type": "integer", "minimum": 0},
+        "source_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "candidate_status": {"const": "UNVERIFIED_FOR_1900"},
+        "historical_fact": {"const": false},
+        "runtime_authority": {"const": false},
+        "required_evidence": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "source_record": {"type": "object"},
+        "notes": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}
