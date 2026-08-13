@@ -8,7 +8,7 @@
   "outputs": {
     "batch1_deterministic_corpus.json": {
       "path": "data/staging/1900/batch1_deterministic_corpus.json",
-      "sha256": "64896030936632a910139a992ec6f77eb3a1a6bce551385b3c91d50d1d5964c0"
+      "sha256": "8d681101f3da012ab02a297b01b9b9470b9f35448ba07890ac8b1c4a2d50ad78"
     },
     "canonical_crosswalk.json": {
       "path": "data/staging/1900/canonical_crosswalk.json",
@@ -17,7 +17,7 @@
     },
     "canonical_crosswalk.schema.json": {
       "path": "data/staging/1900/canonical_crosswalk.schema.json",
-      "sha256": "a0644f3370eafe66040631701e715d0b2209b0d96ef3204b90ad3701d43bc392"
+      "sha256": "d247b648c0be6bd970f217afde6d3e5e067fae52c8760d41bdea6c8aa42b3c6b"
     }
   },
   "protected_scope": {
