@@ -1,0 +1,62 @@
+{
+  "case_count": 6,
+  "case_ids": [
+    "finite_json",
+    "nonfinite_json",
+    "simple_square",
+    "bow_tie",
+    "zero_area_collinear",
+    "canonical_rotation"
+  ],
+  "corpus_schema_version": "wwo_world_data_qa_corpus_v1",
+  "expected_outcomes": [
+    {
+      "expected": {
+        "json_parse_error": false
+      },
+      "id": "finite_json",
+      "kind": "json"
+    },
+    {
+      "expected": {
+        "json_parse_error": true
+      },
+      "id": "nonfinite_json",
+      "kind": "json"
+    },
+    {
+      "expected": {
+        "nonzero_area": true,
+        "self_intersects": false
+      },
+      "id": "simple_square",
+      "kind": "ring"
+    },
+    {
+      "expected": {
+        "nonzero_area": false,
+        "self_intersects": true
+      },
+      "id": "bow_tie",
+      "kind": "ring"
+    },
+    {
+      "expected": {
+        "nonzero_area": false,
+        "self_intersects": false
+      },
+      "id": "zero_area_collinear",
+      "kind": "ring"
+    },
+    {
+      "expected": {
+        "canonical_equal": true
+      },
+      "id": "canonical_rotation",
+      "kind": "ring_equivalence"
+    }
+  ],
+  "fixture": "tests/world_data/fixtures/qa_corpus.json",
+  "fixture_sha256": "db6febff8303c222c40508aa930ae4456e5934b366255bd2cfab1997ebe48eb6",
+  "schema_version": "wwo_world_data_batch2_artifacts_v1"
+}

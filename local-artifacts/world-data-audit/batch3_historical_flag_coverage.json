@@ -1,0 +1,1375 @@
+{
+  "flag_record_count": 61,
+  "flag_source": "data/world_map/historical/flags_1900.json",
+  "hash_mismatch_count": 0,
+  "missing_asset_count": 0,
+  "missing_flag_record_count": 0,
+  "schema_version": "wwo_world_data_batch3_contracts_v1",
+  "source": "data/world_map/historical/political_units_1900.json",
+  "status_counts": {
+    "DOCUMENTED_ABSENCE": 6,
+    "VERIFIED_ASSET": 145
+  },
+  "unit_count": 151,
+  "units": [
+    {
+      "asset_path": "res://assets/historical_flags/1900/us_1896_45_star.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "us_1896_45_star",
+      "flag_mode": "local_historical_flag",
+      "source_name": "United States of America",
+      "status": "sovereign",
+      "unit_id": "united_states_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/us_1896_45_star.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "us_1896_45_star",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Alaska",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_3"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/us_1896_45_star.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "us_1896_45_star",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Hawaii",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_4"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/us_1896_45_star.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "us_1896_45_star",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Puerto Rico",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_6"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/canada_red_ensign_1892.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "canada_red_ensign_1892",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Canada",
+      "status": "dominion",
+      "unit_id": "dominion_of_canada"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Newfoundland",
+      "status": "colony",
+      "unit_id": "colony_of_newfoundland"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Bahamas",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_31"
+    },
+    {
+      "asset_path": "",
+      "coverage_status": "DOCUMENTED_ABSENCE",
+      "flag_id": "no_single_standard_flag",
+      "flag_mode": "documented_absence",
+      "source_name": "Cuba",
+      "status": "occupied",
+      "unit_id": "cuba_occupation_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/haiti_1859.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "haiti_1859",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Haiti",
+      "status": "sovereign",
+      "unit_id": "haiti_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/dominican_1865.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "dominican_1865",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Dominican Republic",
+      "status": "sovereign",
+      "unit_id": "dominican_republic_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Jamaica",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_51"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Trinidad and Tobago",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_52"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Barbados",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_53"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Guadeloupe",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_65"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Martinique",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_66"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/mexico_1893.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "mexico_1893",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Mexico",
+      "status": "sovereign",
+      "unit_id": "mexican_republic"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Belize",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_80"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/guatemala_1871.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "guatemala_1871",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Guatemala",
+      "status": "sovereign",
+      "unit_id": "guatemala_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/honduras_1898.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "honduras_1898",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Honduras",
+      "status": "sovereign",
+      "unit_id": "honduras_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/el_salvador_1875.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "el_salvador_1875",
+      "flag_mode": "local_historical_flag",
+      "source_name": "El Salvador",
+      "status": "sovereign",
+      "unit_id": "el_salvador_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/nicaragua_1896.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "nicaragua_1896",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Nicaragua",
+      "status": "sovereign",
+      "unit_id": "nicaragua_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/costa_rica_1848.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "costa_rica_1848",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Costa Rica",
+      "status": "sovereign",
+      "unit_id": "costa_rica_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/colombia_1861.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "colombia_1861",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Colombia",
+      "status": "sovereign",
+      "unit_id": "republic_of_colombia_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/venezuela_1863.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "venezuela_1863",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Venezuela",
+      "status": "sovereign",
+      "unit_id": "venezuela_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Guyana",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_110"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/netherlands_tricolour.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "netherlands_tricolour",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Surinam",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_115"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "French Guyana",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_120"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/ecuador_1860.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "ecuador_1860",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Ecuador",
+      "status": "sovereign",
+      "unit_id": "ecuador_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/peru_1884.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "peru_1884",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Peru",
+      "status": "sovereign",
+      "unit_id": "peru_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/brazil_1889.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "brazil_1889",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Brazil",
+      "status": "sovereign",
+      "unit_id": "brazil_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/bolivia_1851.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "bolivia_1851",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Bolivia",
+      "status": "sovereign",
+      "unit_id": "bolivia_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/paraguay_1842.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "paraguay_1842",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Paraguay",
+      "status": "sovereign",
+      "unit_id": "paraguay_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/chile_1817.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "chile_1817",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Chile",
+      "status": "sovereign",
+      "unit_id": "chile_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/argentina_1861.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "argentina_1861",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Argentina",
+      "status": "sovereign",
+      "unit_id": "argentina_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uruguay_1830.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uruguay_1830",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Uruguay",
+      "status": "sovereign",
+      "unit_id": "uruguay_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "local_historical_flag",
+      "source_name": "United Kingdom",
+      "status": "sovereign",
+      "unit_id": "british_isles_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/netherlands_tricolour.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "netherlands_tricolour",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Netherlands",
+      "status": "sovereign",
+      "unit_id": "kingdom_of_netherlands"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/belgium_1831.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "belgium_1831",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Belgium",
+      "status": "sovereign",
+      "unit_id": "kingdom_of_belgium"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/luxembourg_1845.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "luxembourg_1845",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Luxembourg",
+      "status": "sovereign",
+      "unit_id": "grand_duchy_of_luxembourg"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "flag_mode": "local_historical_flag",
+      "source_name": "France",
+      "status": "sovereign",
+      "unit_id": "country_fra"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/switzerland_1889.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "switzerland_1889",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Switzerland",
+      "status": "sovereign",
+      "unit_id": "swiss_confederation"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/spain_1875.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "spain_1875",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Spain",
+      "status": "sovereign",
+      "unit_id": "kingdom_of_spain"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/portugal_1830.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "portugal_1830",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Portugal",
+      "status": "sovereign",
+      "unit_id": "kingdom_of_portugal"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/german_empire_1867.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "german_empire_1867",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Germany (Prussia)",
+      "status": "sovereign",
+      "unit_id": "german_empire"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/austria_hungary_civil_1869.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "austria_hungary_civil_1869",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Austria-Hungary",
+      "status": "sovereign",
+      "unit_id": "austria_hungary"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/italy_1861.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "italy_1861",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Italy/Sardinia",
+      "status": "sovereign",
+      "unit_id": "kingdom_of_italy"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Malta",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_338"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/serbia_1882.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "serbia_1882",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Serbia",
+      "status": "sovereign",
+      "unit_id": "kingdom_of_serbia"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/montenegro_1876.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "montenegro_1876",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Montenegro",
+      "status": "sovereign",
+      "unit_id": "principality_of_montenegro"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/greece_1822.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "greece_1822",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Greece",
+      "status": "sovereign",
+      "unit_id": "kingdom_of_greece"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/bulgaria_1878.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "bulgaria_1878",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Bulgaria",
+      "status": "sovereign",
+      "unit_id": "principality_of_bulgaria"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/romania_1867.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "romania_1867",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Rumania",
+      "status": "sovereign",
+      "unit_id": "kingdom_of_romania"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/russia_1896.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "russia_1896",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Russia (Soviet Union)",
+      "status": "sovereign",
+      "unit_id": "russian_empire"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/sweden_norway_union_1844.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "sweden_norway_union_1844",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Sweden",
+      "status": "sovereign",
+      "unit_id": "sweden_norway_union"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/denmark_dannebrog.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "denmark_dannebrog",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Denmark",
+      "status": "sovereign",
+      "unit_id": "kingdom_of_denmark"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/denmark_dannebrog.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "denmark_dannebrog",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Iceland",
+      "status": "dependency",
+      "unit_id": "iceland_under_denmark"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/portugal_1830.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "portugal_1830",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Cape Verde",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_402"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/portugal_1830.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "portugal_1830",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Guinea-Bissau",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_404"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/spain_1875.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "spain_1875",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Equatorial Guinea",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_411"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Gambia",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_420"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "French West Africa",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_430"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Senegal",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_433"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Benin",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_434"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Cote D'Ivoire",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_437"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Guinea",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_438"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/liberia_1847.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "liberia_1847",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Liberia",
+      "status": "sovereign",
+      "unit_id": "republic_of_liberia"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Sierra Leone",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_451"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Ghana",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_452"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/german_empire_1867.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "german_empire_1867",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "German Togoland",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_460"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/german_empire_1867.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "german_empire_1867",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Kamerun",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_470"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Gabon",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_481"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Congo",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_484"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/congo_free_state_1885.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "congo_free_state_1885",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Congo, Democratic Republic of (Zaire)",
+      "status": "sovereign",
+      "unit_id": "congo_free_state"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Uganda",
+      "status": "protectorate",
+      "unit_id": "cshapes_gw_500"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Kenya",
+      "status": "protectorate",
+      "unit_id": "cshapes_gw_501"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/german_empire_1867.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "german_empire_1867",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Tanzania (Tanganyika)",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_510"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/zanzibar_1896.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "zanzibar_1896",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Zanzibar",
+      "status": "sovereign",
+      "unit_id": "sultanate_of_zanzibar"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "British Somaliland (Somaliland Republic)",
+      "status": "protectorate",
+      "unit_id": "cshapes_gw_521"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Djibouti",
+      "status": "protectorate",
+      "unit_id": "cshapes_gw_522"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/ethiopia_1897.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "ethiopia_1897",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Ethiopia",
+      "status": "sovereign",
+      "unit_id": "ethiopian_empire"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/italy_1861.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "italy_1861",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Eritrea",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_531"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/portugal_1830.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "portugal_1830",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Angola",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_540"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/portugal_1830.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "portugal_1830",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Mozambique",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_541"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Zimbabwe (Rhodesia)",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_552"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Malawi",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_553"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Cape Colony",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_561"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Natal",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_562"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/transvaal_vierkleur_1857.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "transvaal_vierkleur_1857",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Transvaal",
+      "status": "contested",
+      "unit_id": "south_african_republic"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/orange_free_state_1857.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "orange_free_state_1857",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Orange Free State",
+      "status": "contested",
+      "unit_id": "orange_free_state"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/german_empire_1867.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "german_empire_1867",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Namibia",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_565"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Lesotho",
+      "status": "protectorate",
+      "unit_id": "cshapes_gw_570"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Botswana",
+      "status": "protectorate",
+      "unit_id": "cshapes_gw_571"
+    },
+    {
+      "asset_path": "",
+      "coverage_status": "DOCUMENTED_ABSENCE",
+      "flag_id": "no_single_standard_flag",
+      "flag_mode": "documented_absence",
+      "source_name": "Swaziland (Eswatini)",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_572"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Madagascar (Malagasy)",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_580"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Reunion",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_585"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Mauritius",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_590"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/morocco_plain_red.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "morocco_plain_red",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Morocco",
+      "status": "sovereign",
+      "unit_id": "moroccan_sultanate"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/spain_1875.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "spain_1875",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Spanish West Africa",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_610"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Algeria",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_615"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/tunisia_1831.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "tunisia_1831",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Tunisia",
+      "status": "protectorate",
+      "unit_id": "beylicate_of_tunis"
+    },
+    {
+      "asset_path": "",
+      "coverage_status": "DOCUMENTED_ABSENCE",
+      "flag_id": "no_single_standard_flag",
+      "flag_mode": "documented_absence",
+      "source_name": "Sudan",
+      "status": "condominium",
+      "unit_id": "cshapes_gw_625"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/qajar_persia_lion_sun.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "qajar_persia_lion_sun",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Iran (Persia)",
+      "status": "sovereign",
+      "unit_id": "persia_qajar"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/ottoman_1844.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "ottoman_1844",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Turkey (Ottoman Empire)",
+      "status": "sovereign",
+      "unit_id": "ottoman_empire"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/egypt_1882.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "egypt_1882",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Egypt",
+      "status": "dependency",
+      "unit_id": "khedivate_of_egypt"
+    },
+    {
+      "asset_path": "",
+      "coverage_status": "DOCUMENTED_ABSENCE",
+      "flag_id": "no_single_standard_flag",
+      "flag_mode": "documented_absence",
+      "source_name": "United Arab Emirates",
+      "status": "protectorate",
+      "unit_id": "trucial_states"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/muscat_oman_plain_red.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "muscat_oman_plain_red",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Oman",
+      "status": "sovereign",
+      "unit_id": "sultanate_of_muscat_oman"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/afghanistan_1880.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "afghanistan_1880",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Afghanistan",
+      "status": "sovereign",
+      "unit_id": "emirate_of_afghanistan"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/qing_1889.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "qing_1889",
+      "flag_mode": "local_historical_flag",
+      "source_name": "China",
+      "status": "sovereign",
+      "unit_id": "qing_empire"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/japan_1870.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "japan_1870",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Taiwan",
+      "status": "dependency",
+      "unit_id": "taiwan_under_japan"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/korea_taegeuk_1897.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "korea_taegeuk_1897",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Korea",
+      "status": "sovereign",
+      "unit_id": "korean_empire"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/japan_1870.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "japan_1870",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Japan",
+      "status": "sovereign",
+      "unit_id": "empire_of_japan"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "India",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_750"
+    },
+    {
+      "asset_path": "",
+      "coverage_status": "DOCUMENTED_ABSENCE",
+      "flag_id": "no_single_standard_flag",
+      "flag_mode": "documented_absence",
+      "source_name": "Bhutan",
+      "status": "sovereign",
+      "unit_id": "kingdom_of_bhutan"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Sri Lanka (Ceylon)",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_780"
+    },
+    {
+      "asset_path": "",
+      "coverage_status": "DOCUMENTED_ABSENCE",
+      "flag_id": "no_single_standard_flag",
+      "flag_mode": "documented_absence",
+      "source_name": "Maldives",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_781"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/nepal_historical_pennants.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "nepal_historical_pennants",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Nepal",
+      "status": "sovereign",
+      "unit_id": "kingdom_of_nepal"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/siam_white_elephant_1855.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "siam_white_elephant_1855",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Thailand",
+      "status": "sovereign",
+      "unit_id": "kingdom_of_siam"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Cambodia (Kampuchea)",
+      "status": "protectorate",
+      "unit_id": "cshapes_gw_811"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Laos",
+      "status": "protectorate",
+      "unit_id": "cshapes_gw_812"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Vietnam (Annam/Cochin China/Tonkin)",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_815"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Federated Malay States",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_821"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Unfederated Malay States",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_822"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Sabah (North Borneo)",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_823"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Sarawak",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_824"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Straits Settlements",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_827"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/brunei_yellow_pre1906.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "brunei_yellow_pre1906",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Brunei",
+      "status": "dependency",
+      "unit_id": "sultanate_of_brunei"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/us_1896_45_star.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "us_1896_45_star",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Philippines",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_840"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/netherlands_tricolour.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "netherlands_tricolour",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Indonesia",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_850"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/portugal_1830.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "portugal_1830",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "East Timor",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_860"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "New South Wales",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_901"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Western Australia",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_902"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "South Australia",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_903"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Victoria",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_904"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Queensland",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_905"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Tasmania",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_906"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Papua",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_911"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/german_empire_1867.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "german_empire_1867",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "New Guinea (German New Guinea) (Kaiser Wilhelmsland)",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_912"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "New Zealand",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_920"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "New Caledonia and Dependencies",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_930"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Solomon Islands",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_940"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Fiji",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_950"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/austria_hungary_civil_1869.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "austria_hungary_civil_1869",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Bosnia",
+      "status": "occupied",
+      "unit_id": "cshapes_gw_3461"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/austria_hungary_civil_1869.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "austria_hungary_civil_1869",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Herzegovina",
+      "status": "occupied",
+      "unit_id": "cshapes_gw_3462"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Lagos",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_4781"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Southern Nigeria",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_4783"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Northern Nigeria",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_4784"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/italy_1861.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "italy_1861",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Italian Somaliland",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_5200"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Northeastern Rhodesia",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_5518"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "flag_mode": "controller_identification_flag",
+      "source_name": "Northwestern Rhodesia",
+      "status": "dependency",
+      "unit_id": "cshapes_gw_5519"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/bukhara_1868.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "bukhara_1868",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Bokhara",
+      "status": "protectorate",
+      "unit_id": "emirate_of_bukhara"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/khiva_historical.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "khiva_historical",
+      "flag_mode": "local_historical_flag",
+      "source_name": "Khiva",
+      "status": "protectorate",
+      "unit_id": "khanate_of_khiva"
+    }
+  ]
+}
