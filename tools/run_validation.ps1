@@ -90,6 +90,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Economy integration static audit failed' }
 if ($LASTEXITCODE -ne 0) { throw 'Historical world economy static audit failed' }
 
 $tests = @(
+	@{ Name = 'Canonical playable vertical slice'; Script = 'res://tests/formal/formal_world_vertical_slice_test.gd'; TimeoutSeconds = 300 },
 	@{ Name = 'Formal player release journey'; Script = 'res://tests/formal/formal_world_player_journey_smoke.gd'; TimeoutSeconds = 240 },
 	@{ Name = 'Formal Windows export resource contract'; Script = 'res://tests/formal/formal_world_export_resource_smoke.gd'; TimeoutSeconds = 180 },
     @{ Name = 'Formal world integration'; Script = 'res://tests/formal/formal_world_integration_test.gd'; TimeoutSeconds = 360 },

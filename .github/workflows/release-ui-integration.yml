@@ -7,6 +7,7 @@ on:
       - "project.godot"
       - "scenes/formal/**"
       - "scripts/formal/**"
+      - "data/formal/**"
       - "scenes/ui_spikes/holographic_workspace/**"
       - "scripts/ui_spikes/holographic_workspace/**"
       - "data/world_map/historical/**"
@@ -56,6 +57,7 @@ jobs:
           set -euo pipefail
           tests=(
             tests/formal/formal_world_player_journey_smoke.gd
+            tests/formal/formal_world_vertical_slice_test.gd
             tests/formal/formal_world_export_resource_smoke.gd
           )
           for test_script in "${tests[@]}"; do
@@ -100,6 +102,7 @@ jobs:
           path: |
             release-ui-import.log
             release-ui-formal_world_player_journey_smoke.log
+            release-ui-formal_world_vertical_slice_test.log
             release-ui-formal_world_export_resource_smoke.log
             release-ui-historical.log
             release-ui-formal.log

@@ -6,9 +6,10 @@ extends RefCounted
 signal state_changed(change: Dictionary)
 
 const SAVE_PATH: String = "user://formal_world_1900.json"
-const SCHEMA_ID: String = "formal_world_simulation_v2"
+const SCHEMA_ID: String = "formal_world_simulation_v3"
 
 var economy := FormalWorldEconomyService.new()
+var player_session := FormalPlayerSession.new()
 var initialized: bool = false
 var initialization_error: String = ""
 var total_minutes: int = 0
@@ -28,6 +29,10 @@ func initialize() -> bool:
 	total_minutes = 0
 	if not economy.configure():
 		initialization_error = economy.initialization_error
+		initialized = false
+		return false
+	if not player_session.configure():
+		initialization_error = player_session.initialization_error
 		initialized = false
 		return false
 	initialized = true
@@ -76,6 +81,118 @@ func first_polity_id() -> String:
 	return economy.first_polity_id()
 
 
+func player_summary() -> Dictionary:
+	return player_session.player_summary()
+
+
+func vertical_slice_summary() -> Dictionary:
+	var decision := player_session.decision_summary()
+	var route_id := str(decision.get("route_id", ""))
+	var commodity_id := str(decision.get("commodity_id", ""))
+	var destination_id := str(decision.get("destination_entity_id", ""))
+	var route := economy.route_summary(route_id)
+	var destination := economy.country_summary(destination_id)
+	var metrics := destination.get("daily_metrics", {}) as Dictionary
+	var commodity_metrics := metrics.get(commodity_id, {}) as Dictionary
+	var inventory := destination.get("inventory", {}) as Dictionary
+	var prices := destination.get("prices", {}) as Dictionary
+	var shipment: Dictionary = {}
+	var last_action := decision.get("last_action", {}) as Dictionary
+	if not last_action.is_empty():
+		shipment = economy.shipment_summary(str(last_action.get("shipment_id", "")))
+	else:
+		for candidate: Dictionary in economy.shipments:
+			if (
+				str(candidate.get("route_id", "")) == route_id
+				and str(candidate.get("commodity_id", "")) == commodity_id
+			):
+				shipment = candidate.duplicate(true)
+				break
+	var shipment_status := "not_scheduled"
+	var eta_hours := -1
+	var progress_bp := 0
+	if not shipment.is_empty():
+		shipment_status = str(shipment.get("status", "in_transit"))
+		eta_hours = maxi(0, int(shipment.get("arrival_hour", 0)) - _authoritative_total_hour())
+		var dispatch_hour := int(shipment.get("dispatch_hour", 0))
+		var duration := maxi(1, int(shipment.get("arrival_hour", 0)) - dispatch_hour)
+		progress_bp = int(round(clampf(
+			float(_authoritative_total_hour() - dispatch_hour) / float(duration),
+			0.0,
+			1.0
+		) * 10000.0))
+	elif not last_action.is_empty() and (
+		_authoritative_total_hour() >= int(last_action.get("arrival_hour", 0))
+	):
+		shipment_status = "delivered"
+		eta_hours = 0
+		progress_bp = 10000
+	return {
+		"player": player_session.player_summary(),
+		"decision": decision,
+		"route": route,
+		"shipment": shipment,
+		"shipment_status": shipment_status,
+		"eta_hours": eta_hours,
+		"progress_bp": progress_bp,
+		"destination": {
+			"entity_id": destination_id,
+			"name_zh": "埃及赫迪夫国",
+			"commodity_id": commodity_id,
+			"commodity_name_zh": "面包",
+			"price_centimes": int(prices.get(commodity_id, 0)),
+			"inventory_units": float(inventory.get(commodity_id, 0.0)),
+			"demand_units": float(commodity_metrics.get("demand", 0.0)),
+			"produced_units": float(commodity_metrics.get("produced", 0.0)),
+			"unmet_units": float(commodity_metrics.get("unmet", 0.0)),
+			"fulfillment_bp": int(
+				(destination.get("daily_totals", {}) as Dictionary).get(
+					"fulfillment_bp", 0
+				)
+			),
+		},
+	}
+
+
+func authorize_supply_transport_priority() -> Dictionary:
+	if not initialized:
+		return {"success": false, "code": "not_initialized", "message": "正式世界尚未初始化。"}
+	if not player_session.is_authorized_for_decision():
+		return {"success": false, "code": "not_authorized", "message": "当前岗位没有供应运输优先权。"}
+	var decision := player_session.decision_summary()
+	if not (decision.get("last_action", {}) as Dictionary).is_empty():
+		return {"success": false, "code": "already_authorized", "message": "当前运输已经完成优先授权。"}
+	var before := vertical_slice_summary()
+	var economy_before := economy.get_persistent_state()
+	var prioritized := economy.prioritize_in_transit_shipment(
+		str(decision.get("route_id", "")),
+		str(decision.get("commodity_id", "")),
+		_authoritative_total_hour()
+	)
+	if prioritized.is_empty():
+		return {"success": false, "code": "shipment_unavailable", "message": "当前没有可优先处理的面包运输。"}
+	var destination := before.get("destination", {}) as Dictionary
+	var action := {
+		"action_id": str(decision.get("action_id", "")),
+		"shipment_id": str(prioritized.get("shipment_id", "")),
+		"authorized_hour": _authoritative_total_hour(),
+		"original_arrival_hour": int(prioritized.get("original_arrival_hour", 0)),
+		"arrival_hour": int(prioritized.get("arrival_hour", 0)),
+		"inventory_before": float(destination.get("inventory_units", 0.0)),
+		"unmet_before": float(destination.get("unmet_units", 0.0)),
+	}
+	if not player_session.record_action(action):
+		economy.restore_persistent_state(economy_before)
+		return {"success": false, "code": "record_rejected", "message": "授权记录未通过会话校验。"}
+	state_changed.emit({"player_action": true, "economy": true, "transport": true})
+	return {
+		"success": true,
+		"code": "priority_authorized",
+		"message": "已批准面包运输优先通关，预计提前 1 日抵达亚历山大港。",
+		"action": action.duplicate(true),
+	}
+
+
 func date_time() -> Dictionary:
 	var value := V2DateTime.from_total_hour(_authoritative_total_hour())
 	value["minute"] = _minute_remainder
@@ -88,14 +205,16 @@ func get_persistent_state() -> Dictionary:
 		"total_minutes": total_minutes,
 		"minute_remainder": _minute_remainder,
 		"economy": economy.get_persistent_state(),
+		"player_session": player_session.snapshot(),
 	}
 
 
 func restore_persistent_state(state: Dictionary) -> bool:
 	var schema_id := str(state.get("schema_id", ""))
 	if (
-		schema_id not in ["formal_world_simulation_v1", SCHEMA_ID]
+		schema_id not in ["formal_world_simulation_v1", "formal_world_simulation_v2", SCHEMA_ID]
 		or not state.get("economy", {}) is Dictionary
+		or (schema_id == SCHEMA_ID and not state.get("player_session", {}) is Dictionary)
 	):
 		return false
 	var validated_time := _validated_time_state(state, schema_id)
@@ -104,12 +223,17 @@ func restore_persistent_state(state: Dictionary) -> bool:
 	var previous_total_minutes := total_minutes
 	var previous_initialized := initialized
 	var previous_economy := economy.get_persistent_state()
+	var previous_player_session := player_session.snapshot()
 	total_minutes = int(validated_time.get("total_minutes", -1))
 	if not economy.restore_persistent_state(
 		state.get("economy", {}) as Dictionary
+	) or (
+		schema_id == SCHEMA_ID
+		and not player_session.restore(state.get("player_session", {}) as Dictionary)
 	):
 		total_minutes = previous_total_minutes
 		economy.restore_persistent_state(previous_economy)
+		player_session.restore(previous_player_session)
 		initialized = previous_initialized
 		return false
 	initialized = true

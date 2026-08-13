@@ -8,6 +8,7 @@ const LAUNCH_MODE_META: StringName = &"formal_world_launch_mode"
 
 var formal_simulation := FormalWorldSimulation.new()
 var economy_panel_open: bool = true
+var vertical_slice_panel_open: bool = true
 var _formal_status: String = ""
 var _last_summary: Dictionary = {}
 
@@ -18,6 +19,7 @@ func _ready() -> void:
 		_formal_status = "正式世界初始化失败：%s" % formal_simulation.initialization_error
 		_data_errors.append(_formal_status)
 	else:
+		_bind_formal_player_surface()
 		var launch_mode := str(get_tree().get_meta(LAUNCH_MODE_META, "new"))
 		if get_tree().has_meta(LAUNCH_MODE_META):
 			get_tree().remove_meta(LAUNCH_MODE_META)
@@ -34,6 +36,34 @@ func _ready() -> void:
 			_formal_status = "新的1900正式世界已建立。"
 		_last_summary = formal_simulation.world_summary()
 	queue_redraw()
+
+
+func _bind_formal_player_surface() -> void:
+	var player := formal_simulation.player_summary()
+	var employment := player.get("employment", {}) as Dictionary
+	var profile := {
+		"id": str(player.get("person_id", "")),
+		"name": str(player.get("name_zh", "")),
+		"display_name_zh": str(player.get("name_zh", "")),
+		"nationality_id": str(player.get("country_id", "country_fra")),
+		"occupation": str(player.get("position_title_zh", "")),
+		"role": str(player.get("position_title_zh", "")),
+		"organization_position": str(player.get("position_title_zh", "")),
+		"position": str(player.get("position_title_zh", "")),
+		"city_id": str(player.get("city_id", "")),
+		"workplace_city_id": str(player.get("city_id", "")),
+		"region_id": str(player.get("region_id", "")),
+		"region": "%s · %s" % [
+			str(player.get("region_name_zh", "")),
+			str(player.get("city_name_zh", "")),
+		],
+		"current_work": str(employment.get("workplace_name_zh", "")),
+		"plan": "缓解埃及面包缺口并协调马赛—亚历山大港运输",
+		"primary_concern": "埃及粮食短缺与地中海航运时效",
+		"access_summary": "组织成员、雇佣与岗位授权分别来自正式权威状态",
+	}
+	_character_profiles = {"formal_player": profile}
+	active_character_key = "formal_player"
 
 
 func _advance_simulation_minutes(minutes: int) -> void:
@@ -123,8 +153,187 @@ func _unhandled_key_input(event: InputEvent) -> void:
 func _draw() -> void:
 	super._draw()
 	_draw_formal_world_status()
+	if vertical_slice_panel_open:
+		_draw_vertical_slice_panel()
 	if economy_panel_open:
 		_draw_formal_polity_panel()
+
+
+func _draw_vertical_slice_panel() -> void:
+	var size := get_viewport_rect().size
+	var rect := Rect2(18.0, 92.0, 365.0, size.y - 170.0)
+	_panel(
+		rect,
+		Color(0.014, 0.031, 0.037, 0.975),
+		Color(0.40, 0.73, 0.63, 0.52)
+	)
+	var summary := formal_simulation.vertical_slice_summary()
+	var player := summary.get("player", {}) as Dictionary
+	var destination := summary.get("destination", {}) as Dictionary
+	var route := summary.get("route", {}) as Dictionary
+	var shipment := summary.get("shipment", {}) as Dictionary
+	var decision := summary.get("decision", {}) as Dictionary
+	var last_action := decision.get("last_action", {}) as Dictionary
+	_draw_label(
+		rect.position + Vector2(18.0, 29.0),
+		"地中海粮食供应任务",
+		17,
+		Color(0.83, 0.96, 0.82, 1.0)
+	)
+	_draw_label(
+		rect.position + Vector2(18.0, 51.0),
+		"法国 · 地中海沿岸 · 马赛港",
+		9,
+		Color(0.70, 0.83, 0.78, 0.96)
+	)
+	var y := 78.0
+	_draw_label(rect.position + Vector2(18.0, y), "你的职位与授权", 12)
+	y += 19.0
+	y = _draw_panel_lines(rect, y, [
+		"人物：%s" % str(player.get("name_zh", "")),
+		"雇佣：%s" % str(
+			(player.get("employment", {}) as Dictionary).get(
+				"workplace_name_zh", ""
+			)
+		),
+		"组织成员：%s" % str(player.get("organization_name_zh", "")),
+		"岗位：%s" % str(player.get("position_title_zh", "")),
+		"授权：%s · %s" % [
+			"有效" if bool(player.get("authorized", false)) else "无效",
+			str(player.get("capability_id", "")),
+		],
+	], Color(0.83, 0.88, 0.82, 0.98), 9)
+	y += 4.0
+	_draw_label(rect.position + Vector2(18.0, y), "观察到的供应问题", 12)
+	y += 19.0
+	var demand := float(destination.get("demand_units", 0.0))
+	var unmet := float(destination.get("unmet_units", 0.0))
+	var problem_text := (
+		"尚未形成日结算；推进到运输计划出现。"
+		if demand <= 0.0
+		else "埃及面包：需求 %.1f · 缺口 %.1f" % [demand, unmet]
+	)
+	y = _draw_panel_lines(rect, y, [
+		problem_text,
+		"库存 %.1f · 生产 %.1f · 价格 %d 生丁" % [
+			float(destination.get("inventory_units", 0.0)),
+			float(destination.get("produced_units", 0.0)),
+			int(destination.get("price_centimes", 0)),
+		],
+		"地区综合满足率：%.1f%%" % (
+			float(destination.get("fulfillment_bp", 0)) / 100.0
+		),
+	], Color(0.96, 0.79, 0.55, 0.98), 9)
+	y += 4.0
+	_draw_label(rect.position + Vector2(18.0, y), "真实运输路线", 12)
+	y += 19.0
+	y = _draw_panel_lines(rect, y, [
+		"%s → %s · %s" % [
+			str(route.get("origin_port", "马赛")),
+			str(route.get("destination_port", "亚历山大港")),
+			_mode_name(str(route.get("mode", ""))),
+		],
+		"路线 %s · 容量 %.0f 单位/日 · 标准 %d 日" % [
+			str(route.get("route_id", "")),
+			float(route.get("capacity_units_per_day", 0.0)),
+			int(route.get("duration_hours", 0)) / 24,
+		],
+	], Color(0.72, 0.87, 0.91, 0.98), 9)
+	var shipment_status := str(summary.get("shipment_status", "not_scheduled"))
+	var shipment_line := "运输：尚未排定"
+	if shipment_status == "in_transit":
+		shipment_line = "运输：%.1f 面包 · ETA %d 小时 · 进度 %.1f%%" % [
+			float(shipment.get("units", 0.0)),
+			int(summary.get("eta_hours", -1)),
+			float(summary.get("progress_bp", 0)) / 100.0,
+		]
+	elif shipment_status == "delivered":
+		shipment_line = "运输：已抵达 · 进度 100.0%"
+	_draw_label(
+		rect.position + Vector2(18.0, y + 4.0),
+		shipment_line,
+		9,
+		Color(0.76, 0.92, 0.78, 1.0)
+	)
+	if not last_action.is_empty():
+		_draw_label(
+			rect.position + Vector2(18.0, y + 23.0),
+			"已授权：ETA 提前 1 日；到货后对比缺口 %.1f。" % float(
+				last_action.get("unmet_before", 0.0)
+			),
+			8,
+			Color(0.87, 0.91, 0.66, 0.98)
+		)
+	var row_one_y := rect.end.y - 73.0
+	_draw_button(
+		Rect2(rect.position.x + 16.0, row_one_y, 126.0, 28.0),
+		"定位地中海沿岸",
+		"vertical_slice_locate",
+		true
+	)
+	_draw_button(
+		Rect2(rect.position.x + 150.0, row_one_y, 78.0, 28.0),
+		"推进1日",
+		"vertical_slice_day",
+		true
+	)
+	_draw_button(
+		Rect2(rect.position.x + 236.0, row_one_y, 78.0, 28.0),
+		"推进7日",
+		"vertical_slice_week",
+		true
+	)
+	var action_used := not last_action.is_empty()
+	var can_authorize := (
+		bool(player.get("authorized", false))
+		and space_level == REGION
+		and selected_region_id == "mediterranean_coast"
+		and shipment_status == "in_transit"
+		and not action_used
+	)
+	_draw_button(
+		Rect2(rect.position.x + 16.0, rect.end.y - 38.0, 208.0, 28.0),
+		"已批准优先通关" if action_used else "批准面包运输优先通关",
+		"vertical_slice_authorize",
+		can_authorize
+	)
+	_draw_button(
+		Rect2(rect.position.x + 232.0, rect.end.y - 38.0, 82.0, 28.0),
+		"保存 F5",
+		"formal_save",
+		true
+	)
+
+
+func _mode_name(mode: String) -> String:
+	match mode:
+		"steamship": return "蒸汽船"
+		"river": return "河运"
+		_: return mode
+
+
+func _locate_vertical_slice_region() -> void:
+	selected_country_id = "country_fra"
+	_focus_selected_country()
+	selected_region_id = "mediterranean_coast"
+	_enter_region()
+	_formal_status = "已定位法国地中海沿岸与马赛港供应任务。"
+	queue_redraw()
+
+
+func _advance_vertical_slice_days(days: int) -> void:
+	if days <= 0:
+		return
+	_last_summary = formal_simulation.advance_minutes(days * 24 * 60)
+	_formal_status = "正式时间已推进 %d 日。" % days
+	queue_redraw()
+
+
+func _authorize_vertical_slice_transport() -> void:
+	var result := formal_simulation.authorize_supply_transport_priority()
+	_formal_status = str(result.get("message", "运输授权失败。"))
+	_last_summary = formal_simulation.world_summary()
+	queue_redraw()
 
 
 func _draw_formal_world_status() -> void:
@@ -318,6 +527,14 @@ func _draw_formal_panel_buttons(rect: Rect2) -> void:
 
 func _activate_button(action: String) -> void:
 	match action:
+		"vertical_slice_locate":
+			_locate_vertical_slice_region()
+		"vertical_slice_day":
+			_advance_vertical_slice_days(1)
+		"vertical_slice_week":
+			_advance_vertical_slice_days(7)
+		"vertical_slice_authorize":
+			_authorize_vertical_slice_transport()
 		"formal_economy_toggle":
 			_toggle_formal_economy_panel()
 		"formal_save":

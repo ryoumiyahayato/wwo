@@ -1,0 +1,36 @@
+{
+  "schema_id": "formal_player_session_1900_v1",
+  "player": {
+    "person_id": "person:etienne_moreau",
+    "name_zh": "埃蒂安·莫罗",
+    "country_id": "country_fra",
+    "region_id": "mediterranean_coast",
+    "region_name_zh": "地中海沿岸",
+    "city_id": "marseille",
+    "city_name_zh": "马赛"
+  },
+  "organization": {
+    "organization_id": "organization:marseille_port_authority",
+    "name_zh": "马赛港务机构",
+    "organization_kind": "port_authority",
+    "place_id": "place:marseille",
+    "position_id": "port_dispatcher",
+    "position_title_zh": "港口调度员",
+    "appointment_id": "opening_port_dispatcher",
+    "capability_id": "supply_transport.prioritize"
+  },
+  "employment": {
+    "employer_organization_id": "organization:marseille_port_authority",
+    "workplace_name_zh": "马赛港务机构 · 港务处",
+    "active": true
+  },
+  "decision": {
+    "action_id": "prioritize_egypt_bread",
+    "action_name_zh": "批准面包运输优先通关",
+    "route_id": "sea:006",
+    "commodity_id": "bread",
+    "origin_name_zh": "马赛",
+    "destination_name_zh": "亚历山大港",
+    "destination_entity_id": "khedivate_of_egypt"
+  }
+}
