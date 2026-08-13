@@ -5,9 +5,9 @@
 - 第一批实现基于基础提交`b4a9d637e294aa53b0c0e2525260421dce3b5182`，由PR #30实施。
 - 引擎：Godot 4.6.3；正式入口：`res://scenes/formal/formal_world_menu.tscn`。
 - 本报告持有审计结论；第一批实施记录由[`variable_refactor_plan.md`](variable_refactor_plan.md)单独持有。
-- 1,741个生产成员字段的静态逐项索引由[`variable_state_member_inventory.md`](variable_state_member_inventory.md)单独持有。
+- 1,810个生产成员字段的静态逐项索引由[`variable_state_member_inventory.md`](variable_state_member_inventory.md)单独持有。
 - 第一批只删除玩家所属国家的一个重复运行期成员，并机械调整继承回滚和SAVE_VERSION=1存档边界；未处理其他状态组。
-- 扫描范围为442个源/配置文件、204个GDScript文件。
+- 扫描范围为448个源/配置文件、209个GDScript文件。
 - 静态写入者、读取者、持久化、fallback和分类均为候选证据；不同对象的同名字段不能据此自动合并。
 
 
@@ -21,17 +21,17 @@
 
 | 指标 | 删除前批准基线 | 当前扫描值 | 净变化 |
 |---|---:|---:|---:|
-| 生产成员字段 | 1,613 | 1,741 | -1 |
-| 可写成员字段 | 1,243 | 1,297 | -1 |
+| 生产成员字段 | 1,613 | 1,810 | -1 |
+| 可写成员字段 | 1,243 | 1,342 | -1 |
 | 进程级全局可写字段 | 16 | 15 | -1 |
 | Autoload可写字段 | 0 | 0 | 0 |
-| 持久化关联候选（静态启发式） | 472 | 464 | 不可直接比较 |
+| 持久化关联候选（静态启发式） | 472 | 496 | 不可直接比较 |
 | UI显示副本候选 | 32 | 32 | 0 |
 | 命名缓存候选 | 16 | 16 | 0 |
-| 可推导成员候选 | 61 | 62 | -1 |
-| K类、不得修改字段 | 885 | 938 | 0 |
+| 可推导成员候选 | 61 | 65 | -1 |
+| K类、不得修改字段 | 885 | 972 | 0 |
 
-以上当前值直接来自`tools/audit_variable_state.py`生成的inventory，不是手工估算；scanner 只读取显式 runtime discovery contract，contract 外的 staging/review/fixture/report 文件不会进入 inventory。扫描器扫描`.gd`、`.tscn`、`.tres`、`.godot`、`.json`和`.cfg`；PR #29新增的测试GDScript和SAVE_VERSION=1 JSON fixture扩大了词法证据范围。`persisted_by_name`是在全部扫描源中，按同名字段与save、load、restore、snapshot等词推断的启发式，因此批准基线472和当前值464不能作为生产持久化字段的净变化比较；本报告不声称已经精确证明每一项增量的来源。第一批经qualified核验减少一份重复可写事实；该项是所有权结论，不是词法扫描器的独立计数器。
+以上当前值直接来自`tools/audit_variable_state.py`生成的inventory，不是手工估算；scanner 只读取显式 runtime discovery contract，contract 外的 staging/review/fixture/report 文件不会进入 inventory。扫描器扫描`.gd`、`.tscn`、`.tres`、`.godot`、`.json`和`.cfg`；PR #29新增的测试GDScript和SAVE_VERSION=1 JSON fixture扩大了词法证据范围。`persisted_by_name`是在全部扫描源中，按同名字段与save、load、restore、snapshot等词推断的启发式，因此批准基线472和当前值496不能作为生产持久化字段的净变化比较；本报告不声称已经精确证明每一项增量的来源。第一批经qualified核验减少一份重复可写事实；该项是所有权结论，不是词法扫描器的独立计数器。
 
 ## 2. 最严重的10组重复或混乱状态
 
