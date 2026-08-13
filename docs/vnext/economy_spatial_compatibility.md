@@ -12,14 +12,14 @@ The current adapter maps Economy route-edge IDs to Spatial link IDs. The mapping
 
 ## Physical transport sequence
 
-For each Economy settlement window with Spatial attached, the sequence is:
+For each Economy settlement window with Spatial attached, the shared-time coordinator must first select the matching absolute Spatial window (`day_index * 24`). Economy does not advance or privately roll that shared clock. The sequence is:
 
 1. Build all applicable commercial transport demand deterministically.
-2. Submit every demand request to Spatial for the current allocation window.
-3. Query the final allocation for every request after all submissions.
+2. Submit every demand request to Spatial for the current allocation window as one transactional batch.
+3. Query the final allocation for every request only after the complete batch exists.
 4. Apply only those final allocations to Economy inventories, trade quotas, exports and shipment progress.
 
-Economy does not consume sequential provisional allocations and does not maintain a competing total-capacity allocator. Partial or shared-link results are accepted exactly as returned by Spatial. The isolated fixture path remains available only when no Spatial authority is attached.
+If the shared Spatial window does not match the requested Economy day, settlement fails closed before Economy mutates market state or touches any Spatial reservation. Economy never clears Spatial reservations directly; the shared Spatial boundary owns rollover and removal. Economy does not consume sequential provisional allocations and does not maintain a competing total-capacity allocator. Partial or shared-link results are accepted exactly as returned by Spatial. The isolated fixture path remains available only when no Spatial authority is attached.
 
 ## Shipment and in-transit semantics
 

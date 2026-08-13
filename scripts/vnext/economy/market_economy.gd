@@ -58,7 +58,6 @@ var initialization_error: String = ""
 
 var _spatial_transport_world: VNextSpatialWorld = null
 var _spatial_route_links: Dictionary = {}
-var _spatial_transport_window_hour: int = 0
 
 var _policies: Dictionary = {}
 var _region_ids: Array[String] = []
@@ -108,6 +107,11 @@ func settle_day(day_index: int) -> Dictionary:
 		return _fail_result(
 			"non_sequential_day",
 			"市场日结必须从第%d天推进到第%d天" % [_last_day_index + 1, day_index]
+		)
+	if _spatial_transport_world != null and not _spatial_transport_window_ready_for_day(day_index):
+		return _fail_result(
+			"spatial_window_not_ready",
+			"Economy requires the shared Spatial window for day %d before settlement." % day_index
 		)
 	_settle_single_day(day_index)
 	return _ok(last_summary.duplicate(true))
@@ -247,14 +251,12 @@ func attach_spatial_transport_authority(
 		return false
 	_spatial_transport_world = spatial_world
 	_spatial_route_links = candidate_links
-	_spatial_transport_window_hour = candidate_hour
 	return true
 
 
 func detach_spatial_transport_authority() -> void:
 	_spatial_transport_world = null
 	_spatial_route_links.clear()
-	_spatial_transport_window_hour = 0
 
 
 func apply_shipment_progress(
@@ -517,7 +519,6 @@ func _clear_runtime_state() -> void:
 	_in_transit_units_by_destination.clear()
 	_spatial_transport_world = null
 	_spatial_route_links.clear()
-	_spatial_transport_window_hour = 0
 	_last_day_index = -1
 	_next_shipment_sequence = 1
 
@@ -1047,7 +1048,8 @@ func _schedule_shipments(day_index: int) -> void:
 func _schedule_spatial_shipments(day_index: int) -> void:
 	if _spatial_transport_world == null or not _spatial_transport_world.is_valid():
 		return
-	if not _advance_spatial_transport_window(day_index):
+	var window_hour: int = _spatial_transport_world.current_hour()
+	if not _spatial_transport_window_ready_for_day(day_index):
 		return
 	var requests: Array[Dictionary] = []
 	for region_id: String in _region_ids:
@@ -1146,40 +1148,34 @@ func _schedule_spatial_shipments(day_index: int) -> void:
 				"request_ids": request_ids,
 			})
 			remaining -= units
-	var submitted: Array[Dictionary] = []
+	var spatial_batch: Array[Dictionary] = []
 	for intent: Dictionary in intents:
 		var link_ids: Array = intent.get("link_ids", []) as Array
 		var request_ids: Array = intent.get("request_ids", []) as Array
 		for link_index: int in range(link_ids.size()):
-			var request_id: String = str(request_ids[link_index])
-			var link_id: String = str(link_ids[link_index])
-			var result: Dictionary = _spatial_transport_world.request_capacity(
-				request_id,
-				link_id,
-				_spatial_transport_window_hour,
-				float(intent.get("request_units", 0.0))
-			)
-			if not bool(result.get("accepted", false)):
-				_cancel_spatial_requests(submitted)
-				return
-			submitted.append({
-				"request_id": request_id,
-				"link_id": link_id,
-				"window_hour": _spatial_transport_window_hour,
+			spatial_batch.append({
+				"request_id": str(request_ids[link_index]),
+				"link_id": str(link_ids[link_index]),
+				"window_hour": window_hour,
+				"demand": float(intent.get("request_units", 0.0)),
 			})
+	if spatial_batch.is_empty():
+		return
+	var batch_result: Dictionary = _spatial_transport_world.request_capacity_batch(spatial_batch)
+	if not bool(batch_result.get("accepted", false)):
+		return
+	var final_query: Dictionary = _spatial_transport_world.reservation_results_batch(spatial_batch)
+	if not bool(final_query.get("accepted", false)):
+		return
+	var final_results: Dictionary = final_query.get("results", {}) as Dictionary
 	var final_allocations: Array[float] = []
 	for intent: Dictionary in intents:
 		var allocation: float = INF
 		var link_ids: Array = intent.get("link_ids", []) as Array
 		var request_ids: Array = intent.get("request_ids", []) as Array
 		for link_index: int in range(link_ids.size()):
-			var result: Dictionary = _spatial_transport_world.reservation_result(
-				str(request_ids[link_index]),
-				str(link_ids[link_index]),
-				_spatial_transport_window_hour
-			)
-			if not bool(result.get("success", false)):
-				_cancel_spatial_requests(submitted)
+			var result: Dictionary = final_results.get(str(request_ids[link_index]), {}) as Dictionary
+			if not bool(result.get("accepted", false)):
 				return
 			allocation = minf(allocation, float(result.get("allocated_capacity", 0.0)))
 		final_allocations.append(maxf(0.0, allocation))
@@ -1195,7 +1191,6 @@ func _schedule_spatial_shipments(day_index: int) -> void:
 		) + 0.000001:
 			allocated = 0.0
 		if allocated <= 0.0001:
-			_cancel_spatial_intent_requests(intent)
 			continue
 		var origin_id: String = str(intent.get("origin_market_id", ""))
 		var destination_id: String = str(intent.get("destination_market_id", ""))
@@ -1203,7 +1198,6 @@ func _schedule_spatial_shipments(day_index: int) -> void:
 		var origin_state: Dictionary = region_states[origin_id] as Dictionary
 		var origin_inventory: Dictionary = origin_state.get("inventory", {}) as Dictionary
 		if float(origin_inventory.get(commodity_id, 0.0)) + 0.000001 < allocated:
-			_cancel_spatial_intent_requests(intent)
 			continue
 		var origin_commodity: Dictionary = (
 			origin_state.get("commodities", {}) as Dictionary
@@ -1250,7 +1244,7 @@ func _schedule_spatial_shipments(day_index: int) -> void:
 			"spatial_allocation_units": allocated,
 			"spatial_link_ids": (intent.get("link_ids", []) as Array).duplicate(),
 			"spatial_request_ids": (intent.get("request_ids", []) as Array).duplicate(),
-			"spatial_window_hour": _spatial_transport_window_hour,
+			"spatial_window_hour": window_hour,
 			"goods_value_centimes": goods_value,
 			"freight_cost_centimes": freight,
 			"tariff_centimes": tariff,
@@ -1266,20 +1260,10 @@ func _schedule_spatial_shipments(day_index: int) -> void:
 		_next_shipment_sequence += 1
 
 
-func _advance_spatial_transport_window(day_index: int) -> bool:
-	if _spatial_transport_world == null or not _spatial_transport_world.is_valid():
+func _spatial_transport_window_ready_for_day(day_index: int) -> bool:
+	if _spatial_transport_world == null or not _spatial_transport_world.is_valid() or day_index < 0:
 		return false
-	var current_hour: int = _spatial_transport_world.current_hour()
-	if _last_day_index >= 0:
-		var elapsed_days: int = day_index - _last_day_index
-		if elapsed_days > 0:
-			var next_window_hour: int = _spatial_transport_window_hour + elapsed_days * HOURS_PER_DAY
-			if current_hour < next_window_hour:
-				if not _spatial_transport_world.advance_to_hour(next_window_hour):
-					return false
-			current_hour = _spatial_transport_world.current_hour()
-	_spatial_transport_window_hour = current_hour
-	return true
+	return _spatial_transport_world.current_hour() == day_index * HOURS_PER_DAY
 
 
 func _spatial_links_for_route(route: Dictionary) -> Array[String]:
@@ -1298,31 +1282,6 @@ func _spatial_links_for_route(route: Dictionary) -> Array[String]:
 			if link_id.is_empty() or not links.has(link_id):
 				links.append(link_id)
 	return links
-
-
-func _cancel_spatial_requests(requests: Array[Dictionary]) -> void:
-	if _spatial_transport_world == null:
-		return
-	for request: Dictionary in requests:
-		_spatial_transport_world.cancel_capacity_request(
-			str(request.get("request_id", "")),
-			str(request.get("link_id", "")),
-			int(request.get("window_hour", _spatial_transport_window_hour))
-		)
-
-
-func _cancel_spatial_intent_requests(intent: Dictionary) -> void:
-	if _spatial_transport_world == null:
-		return
-	var link_ids: Array = intent.get("link_ids", []) as Array
-	var request_ids: Array = intent.get("request_ids", []) as Array
-	for link_index: int in range(link_ids.size()):
-		_spatial_transport_world.cancel_capacity_request(
-			str(request_ids[link_index]),
-			str(link_ids[link_index]),
-			_spatial_transport_window_hour
-		)
-
 
 func _update_prices() -> void:
 	var smoothing_bp: int = clampi(

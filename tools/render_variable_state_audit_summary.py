@@ -170,7 +170,7 @@ def render_summary_text(data: dict[str, object]) -> str:
 
 def render_summary_file(inventory: Path = INVENTORY, output: Path = OUTPUT) -> None:
     data = json.loads(inventory.read_text(encoding="utf-8"))
-    output.write_text(render_summary_text(data), encoding="utf-8")
+    output.write_bytes(render_summary_text(data).encode("utf-8"))
     print(f"wrote {output}")
 
 

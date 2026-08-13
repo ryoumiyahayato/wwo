@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1867|1384|15|0|520|5|32|16|70|1007|451|212|
+|1866|1383|15|0|520|5|32|16|70|1006|451|212|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,867个生产成员字段逐项表
+## 1,866个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -1594,17 +1594,16 @@
 57 K initialization_error
 59 K _spatial_transport_world
 60 K _spatial_route_links
-61 K _spatial_transport_window_hour
-63 K _policies
-64 K _region_ids
-65 E _country_ids
-66 K _commodity_ids
-67 K _production_site_ids
-68 K _production_order
-69 K _trade_quota_remaining
-70 K _in_transit_units_by_destination
-71 A _last_day_index
-72 A _next_shipment_sequence
+62 K _policies
+63 K _region_ids
+64 E _country_ids
+65 K _commodity_ids
+66 K _production_site_ids
+67 K _production_order
+68 K _trade_quota_remaining
+69 K _in_transit_units_by_destination
+70 A _last_day_index
+71 A _next_shipment_sequence
 ```
 
 ### 第10段：`scripts/vnext/economy/market_economy_catalog.gd` 至 `scripts/vnext/politics/politics_update_service.gd`

@@ -47,6 +47,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact validation head
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $expected = "${{ github.event.pull_request.head.sha || github.sha }}"
+          $actual = (git rev-parse HEAD).Trim()
+          if ($actual -ne $expected) {
+            throw "Validation checked out $actual but expected exact head $expected"
+          }
 
       - name: Install Godot 4.6.3
         shell: pwsh
@@ -72,6 +85,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact validation head
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $expected = "${{ github.event.pull_request.head.sha || github.sha }}"
+          $actual = (git rev-parse HEAD).Trim()
+          if ($actual -ne $expected) {
+            throw "Validation checked out $actual but expected exact head $expected"
+          }
 
       - name: Install Godot 4.6.3
         shell: pwsh

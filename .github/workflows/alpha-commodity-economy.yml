@@ -37,7 +37,18 @@ jobs:
     env:
       GODOT_BIN: "${{ github.workspace }}/.ci-godot/Godot_v4.6.3-stable_linux.x86_64"
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout exact validation head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact validation head
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected="${{ github.event.pull_request.head.sha || github.sha }}"
+          actual="$(git rev-parse HEAD)"
+          test "$actual" = "$expected"
       - name: Download Godot 4.6.3
         shell: bash
         run: |

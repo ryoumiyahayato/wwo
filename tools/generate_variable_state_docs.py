@@ -58,7 +58,7 @@ TEXT = r'''# 状态所有权矩阵
 
 
 def main() -> None:
-    OUTPUT.write_text(TEXT + "\n", encoding="utf-8")
+    OUTPUT.write_bytes((TEXT + "\n").encode("utf-8"))
     print(f"wrote {OUTPUT}")
 
 
