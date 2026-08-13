@@ -1,0 +1,365 @@
+{
+  "schema_version": 1,
+  "base_dataset": "data/world_map",
+  "overlay_kind": "military_semantics_only",
+  "resource_ids": [
+    "food",
+    "ammunition",
+    "equipment",
+    "transport_capacity"
+  ],
+  "terrain_profiles": [
+    {
+      "id": "plains",
+      "movement_factor": 1.0,
+      "defense_factor": 1.0,
+      "supply_factor": 1.0
+    },
+    {
+      "id": "hills",
+      "movement_factor": 0.78,
+      "defense_factor": 1.18,
+      "supply_factor": 0.88
+    },
+    {
+      "id": "mountain",
+      "movement_factor": 0.55,
+      "defense_factor": 1.45,
+      "supply_factor": 0.62
+    },
+    {
+      "id": "coastal",
+      "movement_factor": 0.95,
+      "defense_factor": 1.05,
+      "supply_factor": 1.05
+    },
+    {
+      "id": "urban",
+      "movement_factor": 0.75,
+      "defense_factor": 1.35,
+      "supply_factor": 0.9
+    },
+    {
+      "id": "forest",
+      "movement_factor": 0.7,
+      "defense_factor": 1.2,
+      "supply_factor": 0.7
+    },
+    {
+      "id": "desert",
+      "movement_factor": 0.65,
+      "defense_factor": 1.1,
+      "supply_factor": 0.45
+    }
+  ],
+  "transport_profiles": [
+    {
+      "mode": "road",
+      "movement_speed_km_per_day": 75.0,
+      "minimum_movement_hours": 18
+    },
+    {
+      "mode": "rail",
+      "movement_speed_km_per_day": 320.0,
+      "minimum_movement_hours": 12
+    },
+    {
+      "mode": "shipping",
+      "movement_speed_km_per_day": 480.0,
+      "minimum_movement_hours": 24
+    }
+  ],
+  "supply_rules": {
+    "full_threshold": 0.95,
+    "strained_threshold": 0.75,
+    "low_threshold": 0.4,
+    "organization_loss_per_day_at_zero": 0.07,
+    "morale_loss_per_day_at_zero": 0.05,
+    "equipment_loss_per_day_at_zero": 0.025,
+    "personnel_loss_per_day_at_zero": 0.012,
+    "organization_recovery_per_day": 0.018,
+    "morale_recovery_per_day": 0.012
+  },
+  "battle_rules": {
+    "attack_ratio_for_win": 1.25,
+    "attack_ratio_for_hold": 0.85,
+    "attacker_win_loss_rate": 0.08,
+    "defender_win_loss_rate": 0.18,
+    "stalemate_loss_rate": 0.06,
+    "defender_garrison_loss_rate_on_win": 0.72,
+    "attack_preparation_hours": 24,
+    "defense_posture_multiplier": 1.2,
+    "minimum_power_factor": 0.35
+  },
+  "region_overlays": [
+    {
+      "region_id": "northern_industrial_belt",
+      "terrain_id": "plains",
+      "strategic_value": 0.9,
+      "resources": [
+        "coal",
+        "steel",
+        "rail_hub"
+      ],
+      "initial_controller_id": "country_fra",
+      "initial_garrison_personnel": 3500
+    },
+    {
+      "region_id": "paris_basin",
+      "terrain_id": "urban",
+      "strategic_value": 1.0,
+      "resources": [
+        "food",
+        "industry",
+        "rail_hub",
+        "capital"
+      ],
+      "initial_controller_id": "country_fra",
+      "initial_garrison_personnel": 5000
+    },
+    {
+      "region_id": "normandy",
+      "terrain_id": "coastal",
+      "strategic_value": 0.72,
+      "resources": [
+        "food",
+        "port_access"
+      ],
+      "initial_controller_id": "country_fra",
+      "initial_garrison_personnel": 2200
+    },
+    {
+      "region_id": "brittany",
+      "terrain_id": "coastal",
+      "strategic_value": 0.55,
+      "resources": [
+        "food",
+        "port_access"
+      ],
+      "initial_controller_id": "country_fra",
+      "initial_garrison_personnel": 1800
+    },
+    {
+      "region_id": "loire_valley",
+      "terrain_id": "plains",
+      "strategic_value": 0.58,
+      "resources": [
+        "food",
+        "rail_hub"
+      ],
+      "initial_controller_id": "country_fra",
+      "initial_garrison_personnel": 1800
+    },
+    {
+      "region_id": "aquitaine",
+      "terrain_id": "plains",
+      "strategic_value": 0.62,
+      "resources": [
+        "food",
+        "port_access"
+      ],
+      "initial_controller_id": "country_fra",
+      "initial_garrison_personnel": 2100
+    },
+    {
+      "region_id": "massif_central",
+      "terrain_id": "hills",
+      "strategic_value": 0.48,
+      "resources": [
+        "food",
+        "iron"
+      ],
+      "initial_controller_id": "country_fra",
+      "initial_garrison_personnel": 1600
+    },
+    {
+      "region_id": "rhone_valley",
+      "terrain_id": "hills",
+      "strategic_value": 0.76,
+      "resources": [
+        "industry",
+        "rail_hub",
+        "iron"
+      ],
+      "initial_controller_id": "country_fra",
+      "initial_garrison_personnel": 2600
+    },
+    {
+      "region_id": "mediterranean_coast",
+      "terrain_id": "coastal",
+      "strategic_value": 0.82,
+      "resources": [
+        "food",
+        "port_access",
+        "shipping_hub"
+      ],
+      "initial_controller_id": "country_fra",
+      "initial_garrison_personnel": 3000
+    }
+  ],
+  "country_overlays": [
+    {
+      "country_id": "country_bel",
+      "terrain_id": "plains",
+      "strategic_value": 0.78,
+      "resources": [
+        "coal",
+        "steel",
+        "rail_hub"
+      ],
+      "initial_controller_id": "country_bel",
+      "initial_garrison_personnel": 3000
+    },
+    {
+      "country_id": "german_empire",
+      "terrain_id": "plains",
+      "strategic_value": 0.88,
+      "resources": [
+        "coal",
+        "steel",
+        "industry",
+        "rail_hub"
+      ],
+      "initial_controller_id": "german_empire",
+      "initial_garrison_personnel": 5500
+    },
+    {
+      "country_id": "british_empire",
+      "terrain_id": "coastal",
+      "strategic_value": 0.9,
+      "resources": [
+        "port_access",
+        "shipping_hub",
+        "industry"
+      ],
+      "initial_controller_id": "british_empire",
+      "initial_garrison_personnel": 5000
+    },
+    {
+      "country_id": "austro_hungarian_empire",
+      "terrain_id": "hills",
+      "strategic_value": 0.76,
+      "resources": [
+        "iron",
+        "rail_hub"
+      ],
+      "initial_controller_id": "austro_hungarian_empire",
+      "initial_garrison_personnel": 3600
+    },
+    {
+      "country_id": "ottoman_empire",
+      "terrain_id": "hills",
+      "strategic_value": 0.72,
+      "resources": [
+        "port_access",
+        "food"
+      ],
+      "initial_controller_id": "ottoman_empire",
+      "initial_garrison_personnel": 3300
+    },
+    {
+      "country_id": "russian_empire",
+      "terrain_id": "plains",
+      "strategic_value": 0.82,
+      "resources": [
+        "food",
+        "coal",
+        "rail_hub"
+      ],
+      "initial_controller_id": "russian_empire",
+      "initial_garrison_personnel": 6000
+    },
+    {
+      "country_id": "united_states",
+      "terrain_id": "plains",
+      "strategic_value": 0.82,
+      "resources": [
+        "food",
+        "coal",
+        "industry",
+        "port_access"
+      ],
+      "initial_controller_id": "united_states",
+      "initial_garrison_personnel": 4200
+    },
+    {
+      "country_id": "qing_empire",
+      "terrain_id": "hills",
+      "strategic_value": 0.68,
+      "resources": [
+        "food",
+        "coal",
+        "port_access"
+      ],
+      "initial_controller_id": "qing_empire",
+      "initial_garrison_personnel": 4200
+    },
+    {
+      "country_id": "japanese_empire",
+      "terrain_id": "hills",
+      "strategic_value": 0.74,
+      "resources": [
+        "port_access",
+        "shipping_hub",
+        "industry"
+      ],
+      "initial_controller_id": "japanese_empire",
+      "initial_garrison_personnel": 3800
+    },
+    {
+      "country_id": "argentine_republic",
+      "terrain_id": "plains",
+      "strategic_value": 0.62,
+      "resources": [
+        "food",
+        "port_access"
+      ],
+      "initial_controller_id": "argentine_republic",
+      "initial_garrison_personnel": 2400
+    }
+  ],
+  "city_overlays": [
+    {
+      "city_id": "paris",
+      "role": "capital",
+      "strategic_value": 1.0,
+      "defense_factor": 1.2
+    },
+    {
+      "city_id": "lille",
+      "role": "rail_hub",
+      "strategic_value": 0.88,
+      "defense_factor": 1.08
+    },
+    {
+      "city_id": "lyon",
+      "role": "rail_hub",
+      "strategic_value": 0.84,
+      "defense_factor": 1.08
+    },
+    {
+      "city_id": "le_havre",
+      "role": "port",
+      "strategic_value": 0.8,
+      "defense_factor": 1.1
+    },
+    {
+      "city_id": "marseille",
+      "role": "port",
+      "strategic_value": 0.86,
+      "defense_factor": 1.12
+    },
+    {
+      "city_id": "berlin",
+      "role": "capital",
+      "strategic_value": 1.0,
+      "defense_factor": 1.2
+    },
+    {
+      "city_id": "london",
+      "role": "capital",
+      "strategic_value": 1.0,
+      "defense_factor": 1.2
+    }
+  ]
+}

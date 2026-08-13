@@ -91,6 +91,86 @@ func request_capacity(
 	return reservation_result(request_id, link_id, window_hour)
 
 
+func request_capacity_batch(request_values: Array[Dictionary]) -> Dictionary:
+	var rejected: Dictionary = {
+		"success": false,
+		"accepted": false,
+		"reason": "",
+		"results": {},
+	}
+	if not _is_internal_state_valid():
+		rejected["reason"] = "invalid_capacity_state"
+		return rejected
+	if request_values.is_empty():
+		rejected["reason"] = "empty_batch"
+		return rejected
+
+	var candidate_requests: Dictionary = {}
+	for link_id: String in _catalog.link_ids():
+		candidate_requests[link_id] = (_requests[link_id] as Dictionary).duplicate(true)
+	for request_value: Dictionary in request_values:
+		if not _has_fields(request_value, ["request_id", "link_id", "window_hour", "demand"]):
+			rejected["reason"] = "invalid_batch_request"
+			return rejected
+		if typeof(request_value.get("request_id")) != TYPE_STRING or typeof(request_value.get("link_id")) != TYPE_STRING:
+			rejected["reason"] = "invalid_batch_request"
+			return rejected
+		var request_id: String = str(request_value.get("request_id", ""))
+		var link_id: String = str(request_value.get("link_id", ""))
+		var window_hour: int = _parse_hour(request_value.get("window_hour"))
+		var demand: float = _parse_positive_finite(request_value.get("demand"))
+		if not _is_valid_request_id(request_id):
+			rejected["reason"] = "invalid_request_id"
+			return rejected
+		if not _catalog.has_link(link_id):
+			rejected["reason"] = "unknown_link"
+			return rejected
+		if window_hour != _current_hour:
+			rejected["reason"] = "wrong_window"
+			return rejected
+		if demand <= 0.0:
+			rejected["reason"] = "invalid_demand"
+			return rejected
+		if _request_exists_in(candidate_requests, request_id):
+			rejected["reason"] = "duplicate_request"
+			return rejected
+		(candidate_requests[link_id] as Dictionary)[request_id] = {
+			"request_id": request_id,
+			"link_id": link_id,
+			"window_hour": window_hour,
+			"demand": _round_capacity(demand),
+			"allocated_capacity": 0.0,
+		}
+
+	var previous_requests: Dictionary = _requests
+	_requests = candidate_requests
+	_recompute_allocations()
+	if not _is_internal_state_valid():
+		_requests = previous_requests
+		rejected["reason"] = "invalid_capacity_state"
+		return rejected
+
+	# Build the response from one canonical calculation. Calling
+	# reservation_result() once per member would recursively recalculate the whole
+	# window and turn a batch into O(n^2) while producing identical values.
+	var calculation: Dictionary = _calculate_allocations()
+	var usage_by_link: Dictionary = calculation.get("usage", {})
+	var results: Dictionary = {}
+	for request_value: Dictionary in request_values:
+		var request_id: String = str(request_value.get("request_id", ""))
+		var link_id: String = str(request_value.get("link_id", ""))
+		var request: Dictionary = (_requests[link_id] as Dictionary)[request_id]
+		var demand: float = float(request.get("demand", 0.0))
+		var allocated: float = float(request.get("allocated_capacity", 0.0))
+		var result: Dictionary = _result_base(request_id, link_id, _current_hour, demand, allocated)
+		result["success"] = true
+		result["accepted"] = true
+		result["status"] = _allocation_status(demand, allocated)
+		result["remaining_capacity"] = float((usage_by_link.get(link_id, {}) as Dictionary).get("remaining_capacity", 0.0))
+		results[request_id] = result
+	return {"success": true, "accepted": true, "reason": "", "results": results}
+
+
 func reserve_capacity(
 	request_id: String, link_id: String, window_hour: int, demand: Variant
 ) -> Dictionary:
@@ -127,6 +207,47 @@ func reservation_result(request_id: String, link_id: String, window_hour: int) -
 	result["status"] = _allocation_status(demand, allocated)
 	result["remaining_capacity"] = float(summary.get("remaining_capacity", 0.0))
 	return result
+
+
+func reservation_results_batch(request_values: Array[Dictionary]) -> Dictionary:
+	var rejected: Dictionary = {
+		"success": false,
+		"accepted": false,
+		"reason": "",
+		"results": {},
+	}
+	if not _is_internal_state_valid():
+		rejected["reason"] = "invalid_capacity_state"
+		return rejected
+	if request_values.is_empty():
+		rejected["reason"] = "empty_batch"
+		return rejected
+	var calculation: Dictionary = _calculate_allocations()
+	var usage_by_link: Dictionary = calculation.get("usage", {})
+	var results: Dictionary = {}
+	for request_value: Dictionary in request_values:
+		if not _has_fields(request_value, ["request_id", "link_id", "window_hour"]):
+			rejected["reason"] = "invalid_batch_request"
+			return rejected
+		var request_id: String = str(request_value.get("request_id", ""))
+		var link_id: String = str(request_value.get("link_id", ""))
+		var window_hour: int = _parse_hour(request_value.get("window_hour"))
+		if window_hour != _current_hour:
+			rejected["reason"] = "wrong_window"
+			return rejected
+		if not _requests.has(link_id) or not (_requests[link_id] as Dictionary).has(request_id):
+			rejected["reason"] = "unknown_request"
+			return rejected
+		var request: Dictionary = (_requests[link_id] as Dictionary)[request_id]
+		var demand: float = float(request.get("demand", 0.0))
+		var allocated: float = float(request.get("allocated_capacity", 0.0))
+		var result: Dictionary = _result_base(request_id, link_id, window_hour, demand, allocated)
+		result["success"] = true
+		result["accepted"] = true
+		result["status"] = _allocation_status(demand, allocated)
+		result["remaining_capacity"] = float((usage_by_link.get(link_id, {}) as Dictionary).get("remaining_capacity", 0.0))
+		results[request_id] = result
+	return {"success": true, "accepted": true, "reason": "", "results": results}
 
 
 func capacity_summary(link_id: String) -> Dictionary:
