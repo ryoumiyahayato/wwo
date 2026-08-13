@@ -218,7 +218,9 @@ func _flag_texture_for_entity(entity_id: String, _palette: Dictionary) -> ImageT
 	var flag_record := _historical_flag_records.get(flag_id, {}) as Dictionary
 	var image: Image
 	if str(flag_record.get("render_mode", "")) == "source_asset":
-		image = Image.load_from_file(str(flag_record.get("asset_path", "")))
+		image = _load_imported_flag_image(
+			str(flag_record.get("asset_path", "")), flag_id
+		)
 	else:
 		image = _neutral_documented_absence_image()
 	if image == null or image.is_empty():
@@ -229,6 +231,36 @@ func _flag_texture_for_entity(entity_id: String, _palette: Dictionary) -> ImageT
 	var texture := ImageTexture.create_from_image(image)
 	_flag_texture_by_entity[entity_id] = texture
 	return texture
+
+
+func _load_imported_flag_image(asset_path: String, flag_id: String) -> Image:
+	if (
+		asset_path.is_empty()
+		or not asset_path.begins_with("res://")
+		or not ResourceLoader.exists(asset_path, "Texture2D")
+	):
+		push_error(
+			"Historical evidence: flag '%s' has no importable Texture2D at %s"
+			% [flag_id, asset_path]
+		)
+		return Image.new()
+	var resource := ResourceLoader.load(
+		asset_path, "Texture2D", ResourceLoader.CACHE_MODE_REUSE
+	)
+	if not resource is Texture2D:
+		push_error(
+			"Historical evidence: flag '%s' did not load as Texture2D at %s"
+			% [flag_id, asset_path]
+		)
+		return Image.new()
+	var imported_image := (resource as Texture2D).get_image()
+	if imported_image == null or imported_image.is_empty():
+		push_error(
+			"Historical evidence: flag '%s' produced an empty imported image at %s"
+			% [flag_id, asset_path]
+		)
+		return Image.new()
+	return imported_image.duplicate()
 
 
 func _neutral_documented_absence_image() -> Image:

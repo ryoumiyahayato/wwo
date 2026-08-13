@@ -48,8 +48,22 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          "${GODOT_BIN}" --headless --audio-driver Dummy --path . --editor --quit-after 3 --log-file release-ui-import.log
+          "${GODOT_BIN}" --headless --audio-driver Dummy --path . --editor --quit --log-file release-ui-import.log
           if grep -Eq "SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|^ERROR:" release-ui-import.log; then cat release-ui-import.log; exit 1; fi
+      - name: Verify normal player release journey and export resources
+        shell: bash
+        run: |
+          set -euo pipefail
+          tests=(
+            tests/formal/formal_world_player_journey_smoke.gd
+            tests/formal/formal_world_export_resource_smoke.gd
+          )
+          for test_script in "${tests[@]}"; do
+            name="$(basename "${test_script}" .gd)"
+            log="release-ui-${name}.log"
+            timeout --signal=TERM 240s "${GODOT_BIN}" --headless --audio-driver Dummy --path . --script "res://${test_script}" --log-file "${log}"
+            if grep -Eq "SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|Assertion failed|[1-9][0-9]* failures|Loaded resource as image file, this will not work on export|Failed loading resource|Resource file not found|^ERROR:" "${log}"; then cat "${log}"; exit 1; fi
+          done
       - name: Verify historical hemisphere evidence
         shell: bash
         run: |
@@ -85,6 +99,8 @@ jobs:
           name: release-ui-logs
           path: |
             release-ui-import.log
+            release-ui-formal_world_player_journey_smoke.log
+            release-ui-formal_world_export_resource_smoke.log
             release-ui-historical.log
             release-ui-formal.log
             release-ui-capture.log
