@@ -1,0 +1,913 @@
+{
+  "authoritative_source_modified": false,
+  "candidate_type": "explicit_historical_unit_flag_index",
+  "entries": [
+    {
+      "asset_path": "res://assets/historical_flags/1900/us_1896_45_star.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "us_1896_45_star",
+      "unit_id": "united_states_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/us_1896_45_star.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "us_1896_45_star",
+      "unit_id": "cshapes_gw_3"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/us_1896_45_star.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "us_1896_45_star",
+      "unit_id": "cshapes_gw_4"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/us_1896_45_star.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "us_1896_45_star",
+      "unit_id": "cshapes_gw_6"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/canada_red_ensign_1892.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "canada_red_ensign_1892",
+      "unit_id": "dominion_of_canada"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "colony_of_newfoundland"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_31"
+    },
+    {
+      "asset_path": "",
+      "coverage_status": "DOCUMENTED_ABSENCE",
+      "flag_id": "no_single_standard_flag",
+      "unit_id": "cuba_occupation_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/haiti_1859.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "haiti_1859",
+      "unit_id": "haiti_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/dominican_1865.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "dominican_1865",
+      "unit_id": "dominican_republic_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_51"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_52"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_53"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "unit_id": "cshapes_gw_65"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "unit_id": "cshapes_gw_66"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/mexico_1893.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "mexico_1893",
+      "unit_id": "mexican_republic"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_80"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/guatemala_1871.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "guatemala_1871",
+      "unit_id": "guatemala_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/honduras_1898.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "honduras_1898",
+      "unit_id": "honduras_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/el_salvador_1875.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "el_salvador_1875",
+      "unit_id": "el_salvador_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/nicaragua_1896.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "nicaragua_1896",
+      "unit_id": "nicaragua_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/costa_rica_1848.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "costa_rica_1848",
+      "unit_id": "costa_rica_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/colombia_1861.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "colombia_1861",
+      "unit_id": "republic_of_colombia_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/venezuela_1863.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "venezuela_1863",
+      "unit_id": "venezuela_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_110"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/netherlands_tricolour.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "netherlands_tricolour",
+      "unit_id": "cshapes_gw_115"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "unit_id": "cshapes_gw_120"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/ecuador_1860.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "ecuador_1860",
+      "unit_id": "ecuador_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/peru_1884.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "peru_1884",
+      "unit_id": "peru_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/brazil_1889.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "brazil_1889",
+      "unit_id": "brazil_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/bolivia_1851.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "bolivia_1851",
+      "unit_id": "bolivia_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/paraguay_1842.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "paraguay_1842",
+      "unit_id": "paraguay_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/chile_1817.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "chile_1817",
+      "unit_id": "chile_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/argentina_1861.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "argentina_1861",
+      "unit_id": "argentina_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uruguay_1830.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uruguay_1830",
+      "unit_id": "uruguay_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "british_isles_1900"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/netherlands_tricolour.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "netherlands_tricolour",
+      "unit_id": "kingdom_of_netherlands"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/belgium_1831.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "belgium_1831",
+      "unit_id": "kingdom_of_belgium"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/luxembourg_1845.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "luxembourg_1845",
+      "unit_id": "grand_duchy_of_luxembourg"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "unit_id": "country_fra"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/switzerland_1889.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "switzerland_1889",
+      "unit_id": "swiss_confederation"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/spain_1875.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "spain_1875",
+      "unit_id": "kingdom_of_spain"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/portugal_1830.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "portugal_1830",
+      "unit_id": "kingdom_of_portugal"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/german_empire_1867.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "german_empire_1867",
+      "unit_id": "german_empire"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/austria_hungary_civil_1869.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "austria_hungary_civil_1869",
+      "unit_id": "austria_hungary"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/italy_1861.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "italy_1861",
+      "unit_id": "kingdom_of_italy"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_338"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/serbia_1882.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "serbia_1882",
+      "unit_id": "kingdom_of_serbia"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/montenegro_1876.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "montenegro_1876",
+      "unit_id": "principality_of_montenegro"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/greece_1822.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "greece_1822",
+      "unit_id": "kingdom_of_greece"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/bulgaria_1878.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "bulgaria_1878",
+      "unit_id": "principality_of_bulgaria"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/romania_1867.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "romania_1867",
+      "unit_id": "kingdom_of_romania"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/russia_1896.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "russia_1896",
+      "unit_id": "russian_empire"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/sweden_norway_union_1844.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "sweden_norway_union_1844",
+      "unit_id": "sweden_norway_union"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/denmark_dannebrog.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "denmark_dannebrog",
+      "unit_id": "kingdom_of_denmark"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/denmark_dannebrog.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "denmark_dannebrog",
+      "unit_id": "iceland_under_denmark"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/portugal_1830.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "portugal_1830",
+      "unit_id": "cshapes_gw_402"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/portugal_1830.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "portugal_1830",
+      "unit_id": "cshapes_gw_404"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/spain_1875.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "spain_1875",
+      "unit_id": "cshapes_gw_411"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_420"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "unit_id": "cshapes_gw_430"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "unit_id": "cshapes_gw_433"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "unit_id": "cshapes_gw_434"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "unit_id": "cshapes_gw_437"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "unit_id": "cshapes_gw_438"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/liberia_1847.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "liberia_1847",
+      "unit_id": "republic_of_liberia"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_451"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_452"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/german_empire_1867.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "german_empire_1867",
+      "unit_id": "cshapes_gw_460"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/german_empire_1867.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "german_empire_1867",
+      "unit_id": "cshapes_gw_470"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "unit_id": "cshapes_gw_481"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "unit_id": "cshapes_gw_484"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/congo_free_state_1885.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "congo_free_state_1885",
+      "unit_id": "congo_free_state"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_500"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_501"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/german_empire_1867.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "german_empire_1867",
+      "unit_id": "cshapes_gw_510"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/zanzibar_1896.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "zanzibar_1896",
+      "unit_id": "sultanate_of_zanzibar"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_521"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "unit_id": "cshapes_gw_522"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/ethiopia_1897.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "ethiopia_1897",
+      "unit_id": "ethiopian_empire"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/italy_1861.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "italy_1861",
+      "unit_id": "cshapes_gw_531"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/portugal_1830.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "portugal_1830",
+      "unit_id": "cshapes_gw_540"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/portugal_1830.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "portugal_1830",
+      "unit_id": "cshapes_gw_541"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_552"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_553"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_561"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_562"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/transvaal_vierkleur_1857.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "transvaal_vierkleur_1857",
+      "unit_id": "south_african_republic"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/orange_free_state_1857.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "orange_free_state_1857",
+      "unit_id": "orange_free_state"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/german_empire_1867.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "german_empire_1867",
+      "unit_id": "cshapes_gw_565"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_570"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_571"
+    },
+    {
+      "asset_path": "",
+      "coverage_status": "DOCUMENTED_ABSENCE",
+      "flag_id": "no_single_standard_flag",
+      "unit_id": "cshapes_gw_572"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "unit_id": "cshapes_gw_580"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "unit_id": "cshapes_gw_585"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_590"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/morocco_plain_red.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "morocco_plain_red",
+      "unit_id": "moroccan_sultanate"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/spain_1875.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "spain_1875",
+      "unit_id": "cshapes_gw_610"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "unit_id": "cshapes_gw_615"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/tunisia_1831.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "tunisia_1831",
+      "unit_id": "beylicate_of_tunis"
+    },
+    {
+      "asset_path": "",
+      "coverage_status": "DOCUMENTED_ABSENCE",
+      "flag_id": "no_single_standard_flag",
+      "unit_id": "cshapes_gw_625"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/qajar_persia_lion_sun.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "qajar_persia_lion_sun",
+      "unit_id": "persia_qajar"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/ottoman_1844.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "ottoman_1844",
+      "unit_id": "ottoman_empire"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/egypt_1882.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "egypt_1882",
+      "unit_id": "khedivate_of_egypt"
+    },
+    {
+      "asset_path": "",
+      "coverage_status": "DOCUMENTED_ABSENCE",
+      "flag_id": "no_single_standard_flag",
+      "unit_id": "trucial_states"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/muscat_oman_plain_red.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "muscat_oman_plain_red",
+      "unit_id": "sultanate_of_muscat_oman"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/afghanistan_1880.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "afghanistan_1880",
+      "unit_id": "emirate_of_afghanistan"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/qing_1889.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "qing_1889",
+      "unit_id": "qing_empire"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/japan_1870.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "japan_1870",
+      "unit_id": "taiwan_under_japan"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/korea_taegeuk_1897.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "korea_taegeuk_1897",
+      "unit_id": "korean_empire"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/japan_1870.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "japan_1870",
+      "unit_id": "empire_of_japan"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_750"
+    },
+    {
+      "asset_path": "",
+      "coverage_status": "DOCUMENTED_ABSENCE",
+      "flag_id": "no_single_standard_flag",
+      "unit_id": "kingdom_of_bhutan"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_780"
+    },
+    {
+      "asset_path": "",
+      "coverage_status": "DOCUMENTED_ABSENCE",
+      "flag_id": "no_single_standard_flag",
+      "unit_id": "cshapes_gw_781"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/nepal_historical_pennants.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "nepal_historical_pennants",
+      "unit_id": "kingdom_of_nepal"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/siam_white_elephant_1855.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "siam_white_elephant_1855",
+      "unit_id": "kingdom_of_siam"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "unit_id": "cshapes_gw_811"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "unit_id": "cshapes_gw_812"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "unit_id": "cshapes_gw_815"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_821"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_822"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_823"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_824"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_827"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/brunei_yellow_pre1906.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "brunei_yellow_pre1906",
+      "unit_id": "sultanate_of_brunei"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/us_1896_45_star.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "us_1896_45_star",
+      "unit_id": "cshapes_gw_840"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/netherlands_tricolour.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "netherlands_tricolour",
+      "unit_id": "cshapes_gw_850"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/portugal_1830.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "portugal_1830",
+      "unit_id": "cshapes_gw_860"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_901"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_902"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_903"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_904"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_905"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_906"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_911"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/german_empire_1867.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "german_empire_1867",
+      "unit_id": "cshapes_gw_912"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_920"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/france_tricolour_1794.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "france_tricolour_1794",
+      "unit_id": "cshapes_gw_930"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_940"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_950"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/austria_hungary_civil_1869.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "austria_hungary_civil_1869",
+      "unit_id": "cshapes_gw_3461"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/austria_hungary_civil_1869.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "austria_hungary_civil_1869",
+      "unit_id": "cshapes_gw_3462"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_4781"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_4783"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_4784"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/italy_1861.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "italy_1861",
+      "unit_id": "cshapes_gw_5200"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_5518"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/uk_union_1801.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "uk_union_1801",
+      "unit_id": "cshapes_gw_5519"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/bukhara_1868.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "bukhara_1868",
+      "unit_id": "emirate_of_bukhara"
+    },
+    {
+      "asset_path": "res://assets/historical_flags/1900/khiva_historical.png",
+      "coverage_status": "VERIFIED_ASSET",
+      "flag_id": "khiva_historical",
+      "unit_id": "khanate_of_khiva"
+    }
+  ],
+  "schema_version": "wwo_world_data_batch3_contracts_v1"
+}
