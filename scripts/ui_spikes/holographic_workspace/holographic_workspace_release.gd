@@ -185,7 +185,7 @@ func flag_coverage_report() -> Dictionary:
 	return {"explicit_count":explicit_count, "generated_count":generated_count, "unique_signatures":signatures.size()}
 
 
-func _visual_flag_signature(texture: ImageTexture) -> String:
+func _visual_flag_signature(texture: Texture2D) -> String:
 	if texture == null: return ""
 	var image := texture.get_image()
 	if image == null or image.is_empty(): return ""

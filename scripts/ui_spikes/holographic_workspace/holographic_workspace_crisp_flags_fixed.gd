@@ -9,6 +9,8 @@ var _flag_texture_by_entity: Dictionary = {}
 var _historical_outline_polygons: Dictionary = {}
 var _world_admin1_unit_cache: Dictionary = {}
 var _world_admin1_country_count: int = 0
+var _performance_outline_rebuild_count: int = 0
+var _performance_outline_rebuild_usec: int = 0
 
 
 func _ready() -> void:
@@ -74,7 +76,7 @@ func _draw_flag_polygon(
 ) -> void:
 	if polygon.size() < 3:
 		return
-	var texture: ImageTexture = _flag_texture_for_entity(entity_id, palette)
+	var texture: Texture2D = _flag_texture_for_entity(entity_id, palette)
 	if texture == null:
 		return
 	var safe_width: float = maxf(bounds.size.x, 1.0)
@@ -93,9 +95,9 @@ func _draw_flag_polygon(
 	draw_polygon(polygon, modulations, uvs, texture)
 
 
-func _flag_texture_for_entity(entity_id: String, palette: Dictionary) -> ImageTexture:
+func _flag_texture_for_entity(entity_id: String, palette: Dictionary) -> Texture2D:
 	if _flag_texture_by_entity.has(entity_id):
-		return _flag_texture_by_entity.get(entity_id) as ImageTexture
+		return _flag_texture_by_entity.get(entity_id) as Texture2D
 	var colors: PackedColorArray = palette.get("colors", PackedColorArray()) as PackedColorArray
 	if colors.is_empty():
 		return null
@@ -217,7 +219,7 @@ func _flag_texture_signature(entity_id: String) -> String:
 	var entity: Dictionary = _country_by_id.get(entity_id, {}) as Dictionary
 	if entity.is_empty():
 		return ""
-	var texture: ImageTexture = _flag_texture_for_entity(entity_id, _resolved_flag_palette(str(entity.get("iso_a3", ""))))
+	var texture: Texture2D = _flag_texture_for_entity(entity_id, _resolved_flag_palette(str(entity.get("iso_a3", ""))))
 	if texture == null:
 		return ""
 	var image: Image = texture.get_image()
@@ -242,25 +244,44 @@ func _screen_polygon_bounds(polygon: PackedVector2Array) -> Rect2:
 
 
 func _rebuild_merged_historical_outlines() -> void:
+	var performance_started_usec := Time.get_ticks_usec()
+	_performance_outline_rebuild_count += 1
 	_historical_outline_polygons.clear()
 	for entity_key_value: Variant in _flag_screen_polygons.keys():
 		var entity_id: String = str(entity_key_value)
 		var merged: Array[PackedVector2Array] = []
+		var merged_bounds: Array[Rect2] = []
 		for polygon_value: Variant in (_flag_screen_polygons.get(entity_id, []) as Array):
 			var polygon: PackedVector2Array = polygon_value
 			var absorbed: bool = false
 			var polygon_bounds: Rect2 = _screen_polygon_bounds(polygon).grow(1.2)
 			for index: int in range(merged.size()):
-				if not _screen_polygon_bounds(merged[index]).grow(1.2).intersects(polygon_bounds):
+				if not merged_bounds[index].intersects(polygon_bounds):
 					continue
 				var union_result: Array = Geometry2D.merge_polygons(merged[index], polygon)
 				if union_result.size() == 1:
 					merged[index] = union_result[0] as PackedVector2Array
+					merged_bounds[index] = _screen_polygon_bounds(merged[index]).grow(1.2)
 					absorbed = true
 					break
 			if not absorbed:
 				merged.append(polygon)
+				merged_bounds.append(polygon_bounds)
 		_historical_outline_polygons[entity_id] = merged
+	_performance_outline_rebuild_usec += Time.get_ticks_usec() - performance_started_usec
+
+
+func debug_performance_snapshot() -> Dictionary:
+	var snapshot: Dictionary = super.debug_performance_snapshot()
+	snapshot["outline_rebuild_count"] = _performance_outline_rebuild_count
+	snapshot["outline_rebuild_usec"] = _performance_outline_rebuild_usec
+	return snapshot
+
+
+func debug_reset_performance_metrics() -> void:
+	super.debug_reset_performance_metrics()
+	_performance_outline_rebuild_count = 0
+	_performance_outline_rebuild_usec = 0
 
 
 func _history_border_pulse_value(entity_id: String) -> float:
