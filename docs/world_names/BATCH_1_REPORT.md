@@ -1,6 +1,6 @@
 # WWO WORLD NAMES & ALIASES — BATCH 1 REPORT
 
-Starting master: `83e4f305b52529625f4d86ad928bce451ea34b9f`
+Starting master: `55384e2a2ef2f457fec33dfa82cde49dc9e136b0`
 
 ## Inventory
 
@@ -25,7 +25,7 @@ Modern GeoNames city shards and geometry/runtime files were read for source cove
 
 - Authoritative IDs changed: **NO**
 - Existing production world data rewritten: **NO**
-- Commit: `pending-reconciliation`
+- Commit: `pending-reconciliation-65-68`
 - Push: `pending`
 - Draft PR: `draft`
 

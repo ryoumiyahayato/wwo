@@ -1,6 +1,6 @@
 # WWO WORLD NAMES & ALIASES - BATCH 3 REPORT
 
-Starting master: 83e4f305b52529625f4d86ad928bce451ea34b9f
+Starting master: 55384e2a2ef2f457fec33dfa82cde49dc9e136b0
 
 ## Safe review candidates
 
@@ -29,7 +29,7 @@ Starting master: 83e4f305b52529625f4d86ad928bce451ea34b9f
 
 - Authoritative IDs changed: NO
 - Production catalogs rewritten: NO
-- Checkpoint: pending-reconciliation
+- Checkpoint: pending-reconciliation-65-68
 - Push: pending
 - Draft PR: none
 - No merge performed by this task.
