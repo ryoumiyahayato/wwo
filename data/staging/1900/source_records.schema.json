@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "wwo_1900_source_records_v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_id", "snapshot_date", "record_policy", "records"],
+  "properties": {
+    "schema_id": {"const": "wwo_1900_source_records_v1"},
+    "snapshot_date": {"type": "string", "format": "date"},
+    "record_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runtime_authority", "batch_scope", "embedded_capital_fields"],
+      "properties": {
+        "runtime_authority": {"const": false},
+        "batch_scope": {"type": "string", "minLength": 1},
+        "embedded_capital_fields": {"type": "string", "minLength": 1}
+      }
+    },
+    "records": {"type": "array", "minItems": 28, "maxItems": 28, "items": {"$ref": "source_record.schema.json"}}
+  }
+}

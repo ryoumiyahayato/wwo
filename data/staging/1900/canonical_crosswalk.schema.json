@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "wwo_1900_canonical_crosswalk_v2",
+  "title": "WWO 1900 code-resolution crosswalk",
+  "description": "Current-catalog code resolution is separate from historical identity and successor evidence. This document is staging-only.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_id", "snapshot_date", "scope", "classification_policy", "summary", "records"],
+  "properties": {
+    "schema_id": {"const": "wwo_1900_canonical_crosswalk_v2"},
+    "snapshot_date": {"type": "string", "format": "date"},
+    "scope": {"type": "string", "minLength": 1},
+    "classification_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code_resolution", "historical_identity", "successor_relation", "automatic_authority"],
+      "properties": {
+        "code_resolution": {"type": "string", "minLength": 1},
+        "historical_identity": {"type": "string", "minLength": 1},
+        "successor_relation": {"type": "string", "minLength": 1},
+        "automatic_authority": {"type": "string", "minLength": 1}
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code_resolution", "classification", "historical_identity", "successor_relation", "automatic_authoritative_candidate_count"],
+      "properties": {
+        "code_resolution": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["EXACT", "MULTI_MATCH", "AMBIGUOUS", "NO_MATCH"],
+          "properties": {
+            "EXACT": {"type": "integer", "minimum": 0},
+            "MULTI_MATCH": {"type": "integer", "minimum": 0},
+            "AMBIGUOUS": {"type": "integer", "minimum": 0},
+            "NO_MATCH": {"type": "integer", "minimum": 0}
+          }
+        },
+        "classification": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["EXACT_CODE", "LIKELY_COMPOSITE", "AMBIGUOUS", "NO_MATCH"],
+          "properties": {
+            "EXACT_CODE": {"type": "integer", "minimum": 0},
+            "LIKELY_COMPOSITE": {"type": "integer", "minimum": 0},
+            "AMBIGUOUS": {"type": "integer", "minimum": 0},
+            "NO_MATCH": {"type": "integer", "minimum": 0}
+          }
+        },
+        "historical_identity": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}},
+        "successor_relation": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}},
+        "automatic_authoritative_candidate_count": {"type": "integer", "minimum": 0}
+      }
+    },
+    "records": {"type": "array", "minItems": 61, "maxItems": 61, "items": {"$ref": "#/$defs/record"}}
+  },
+  "$defs": {
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_id", "source_reference", "date_from", "date_to", "target_entity_id", "evidence_type", "authority_consideration"],
+      "properties": {
+        "source_id": {"type": "string", "minLength": 1},
+        "source_reference": {"type": "string", "minLength": 1},
+        "date_from": {"type": "string", "format": "date"},
+        "date_to": {"type": "string", "format": "date"},
+        "target_entity_id": {"type": "string", "minLength": 1},
+        "evidence_type": {"enum": ["date_scoped_entity_identity", "date_scoped_successor_relation"]},
+        "authority_consideration": {"const": true}
+      }
+    },
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["historical_entity_id", "member_codes", "core_member_codes", "canonical_entity_ids", "code_resolution_status", "resolved_current_id", "resolved_current_ids", "classification_status", "historical_identity_status", "historical_identity_evidence", "successor_relation_status", "successor_evidence", "automatic_authoritative_candidate", "mapping_reason", "source_id", "source_paths"],
+      "properties": {
+        "historical_entity_id": {"type": "string", "minLength": 1},
+        "member_codes": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "core_member_codes": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "canonical_entity_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "code_resolution_status": {"enum": ["EXACT", "MULTI_MATCH", "AMBIGUOUS", "NO_MATCH"]},
+        "resolved_current_id": {"type": ["string", "null"]},
+        "resolved_current_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "classification_status": {"enum": ["EXACT_CODE", "LIKELY_COMPOSITE", "AMBIGUOUS", "NO_MATCH"]},
+        "historical_identity_status": {"enum": ["UNVERIFIED", "REVIEW_REQUIRED", "EXPLICIT_EVIDENCE"]},
+        "historical_identity_evidence": {"type": ["object", "null"], "anyOf": [{"type": "null"}, {"$ref": "#/$defs/evidence"}]},
+        "successor_relation_status": {"enum": ["UNVERIFIED", "REVIEW_REQUIRED", "EXPLICIT_EVIDENCE"]},
+        "successor_evidence": {"type": ["object", "null"], "anyOf": [{"type": "null"}, {"$ref": "#/$defs/evidence"}]},
+        "automatic_authoritative_candidate": {"type": "boolean"},
+        "mapping_reason": {"type": "string", "minLength": 1},
+        "source_id": {"type": "string", "minLength": 1},
+        "source_paths": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+      }
+    }
+  }
+}
