@@ -1,0 +1,110 @@
+{
+  "schema_id": "wwo_1900_source_manifest_v1",
+  "snapshot_date": "1900-03-12",
+  "manifest_policy": {
+    "citation_only": true,
+    "large_copyrighted_text_copying": false,
+    "runtime_integration": false,
+    "source_disagreement_requires_explicit_conflict_record": true
+  },
+  "sources": [
+    {
+      "source_id": "src-cshapes-2.0",
+      "title": "CShapes 2.0",
+      "author_or_institution": "ETH Zürich International Conflict Research; Schvitz, Rüegger, Girardin, Cederman, Weidmann, and Gleditsch",
+      "source_date": "2022",
+      "source_type": "historical_gis",
+      "source_locator": "https://beta.icr.ethz.ch/data/cshapes/",
+      "citation": "Schvitz et al. (2022), Mapping The International System, 1886-2017: The CShapes 2.0 Dataset, Journal of Conflict Resolution 66(1), 144-161, DOI 10.1177/00220027211013563.",
+      "license": "CC BY-NC-SA 4.0",
+      "coverage": ["political_entities", "dependent_territories", "capitals", "historical_geometry"],
+      "role": "Primary source for the first political-unit staging batch.",
+      "limitations": "The WWO snapshot is transformed and simplified from the provider data. CShapes is not a source for gameplay balance, exact administrative micro-history, or a license to use modern fallback geometry.",
+      "accessed_on": "2026-08-12"
+    },
+    {
+      "source_id": "src-cshapes-publication",
+      "title": "Mapping The International System, 1886-2017: The CShapes 2.0 Dataset",
+      "author_or_institution": "Journal of Conflict Resolution; ETH Zürich ICR",
+      "source_date": "2022",
+      "source_type": "scholarly_publication",
+      "source_locator": "https://doi.org/10.1177/00220027211013563",
+      "citation": "DOI 10.1177/00220027211013563.",
+      "license": "Publication terms apply; citation and source description only.",
+      "coverage": ["dataset_methodology", "historical_boundary_coding", "dependent_territories"],
+      "role": "Method and provenance reference for CShapes 2.0.",
+      "limitations": "The article explains dataset construction; it does not settle every local historical naming or sovereignty question.",
+      "accessed_on": "2026-08-12"
+    },
+    {
+      "source_id": "src-repository-existing-1900",
+      "title": "Existing WWO 1900 historical and canonical data at the task baseline",
+      "author_or_institution": "WWO repository at commit 4b738ab8b0a21e8685aae95381717e9efd2327a8",
+      "source_date": "2026-08-12",
+      "source_type": "repository_derived",
+      "source_locator": "https://github.com/ryoumiyahayato/wwo/tree/4b738ab8b0a21e8685aae95381717e9efd2327a8/data/world_map",
+      "citation": "Input files are listed in pack_manifest.json; this source represents repository evidence, not an independent historical authority.",
+      "license": "Repository license and upstream licenses apply.",
+      "coverage": ["existing_inventory", "canonical_country_ids", "existing_historical_entity_ids"],
+      "role": "Crosswalk and coverage baseline.",
+      "limitations": "Several existing files explicitly identify themselves as prototype, estimate, fallback, or gameplay-only data.",
+      "accessed_on": "2026-08-12"
+    },
+    {
+      "source_id": "src-statesman-1900",
+      "title": "The Statesman's Year-book: Statistical and Historical Annual of the States of the World for the Year 1900",
+      "author_or_institution": "Frederick Martin and John Scott Keltie, editors; Macmillan",
+      "source_date": "1900",
+      "source_type": "yearbook",
+      "source_locator": "https://ci.nii.ac.jp/ncid/BA45127799",
+      "citation": "37th annual publication, revised after official returns; bibliographic record and scan locator.",
+      "license": "Bibliographic/citation use only; verify host and edition terms before redistributing scans.",
+      "coverage": ["political_entities", "capitals", "government", "population", "ports", "railways", "trade", "military"],
+      "role": "Primary cross-check candidate for names, capitals, government descriptions, and contemporary statistics.",
+      "limitations": "Contemporary terminology and boundaries require normalization; tables may use different reference dates and imperial aggregates.",
+      "accessed_on": "2026-08-12"
+    },
+    {
+      "source_id": "src-us-census-1900",
+      "title": "1900 Census: Volume I. Population, Part 1",
+      "author_or_institution": "United States Census Office / U.S. Census Bureau",
+      "source_date": "1901",
+      "source_type": "census",
+      "source_locator": "https://www.census.gov/library/publications/1901/dec/vol-01-population.html",
+      "citation": "Final report of the Twelfth Census, taken in 1900; population, density, incorporated places, and urban/rural tables.",
+      "license": "U.S. government publication; repository stores citation and normalized facts only.",
+      "coverage": ["population", "urbanization", "cities", "administrative_units"],
+      "role": "High-confidence population and city source for U.S. records in a later batch.",
+      "limitations": "U.S.-only and uses census-specific concepts; it cannot fill global or colonial totals by itself.",
+      "accessed_on": "2026-08-12"
+    },
+    {
+      "source_id": "src-maddison-project",
+      "title": "Maddison Project Database",
+      "author_or_institution": "Groningen Growth and Development Centre, University of Groningen",
+      "source_date": "2024",
+      "source_type": "scholarly_dataset",
+      "source_locator": "https://www.rug.nl/ggdc/historicaldevelopment/maddison/",
+      "citation": "Historical GDP and population series with release documentation.",
+      "license": "CC BY 4.0 as recorded by the existing WWO economy source manifest; verify the selected release metadata.",
+      "coverage": ["population", "economic_history", "GDP_per_capita"],
+      "role": "Bounded historical-series candidate for later population/economic staging.",
+      "limitations": "Series are estimates and crosswalked country concepts; they must not be converted directly into gameplay coefficients.",
+      "accessed_on": "2026-08-12"
+    },
+    {
+      "source_id": "src-clio-infra",
+      "title": "Clio Infra historical datasets",
+      "author_or_institution": "Clio Infra / International Institute of Social History collaborators",
+      "source_date": "2016",
+      "source_type": "scholarly_dataset",
+      "source_locator": "https://clio-infra.eu/",
+      "citation": "Historical population and inequality datasets with source notes.",
+      "license": "Use the terms attached to the selected dataset release; citation-only in this batch.",
+      "coverage": ["population", "urbanization", "wellbeing"],
+      "role": "Secondary comparison source for population and urbanization estimates.",
+      "limitations": "Many series are harmonized to modern boundaries and must not be silently assigned to 1900 political units.",
+      "accessed_on": "2026-08-12"
+    }
+  ]
+}

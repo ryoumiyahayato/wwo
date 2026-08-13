@@ -1,0 +1,67 @@
+{
+  "batch": 2,
+  "generator_version": "batch2_20260812_v1",
+  "input": {
+    "canonical_country_count": 177,
+    "path": "data/world_map/historical/political_units_1900.json",
+    "sha256": "d62a8d9c566c1dfea9d57fc197a6fa3606c6be259782a582050aeaffa002c5f9",
+    "unit_count": 151
+  },
+  "outputs": {
+    "batch2_deterministic_corpus.json": {
+      "path": "data/staging/1900/batch2_deterministic_corpus.json",
+      "sha256": "fbff8d95182b5e3b137704202c71e1d9314a470aef2f30e7365c2710b0c7d614"
+    },
+    "batch2_political_unit_records.schema.json": {
+      "path": "data/staging/1900/batch2_political_unit_records.schema.json",
+      "sha256": "1a568e49b55f2be8b5b98314e13d8d6af54f9a9f1cecc64ff346958fc07c5414"
+    },
+    "political_unit_records_1900.json": {
+      "path": "data/staging/1900/political_unit_records_1900.json",
+      "relationships": 96,
+      "sha256": "77f15d349ff11a0d4753aa80851d7cb9bd8cc69a23ab84f41280836df2338771",
+      "units": 151
+    }
+  },
+  "protected_scope": {
+    "authoritative_runtime_data_changed": false,
+    "gameplay_balance_changed": false,
+    "modern_geometry_fallback_used": false,
+    "vnext_core_changed": false
+  },
+  "runtime_authority": false,
+  "schema_id": "wwo_1900_source_pack_batch2_manifest_v1",
+  "snapshot_date": "1900-03-12",
+  "summary": {
+    "canonical_match_counts": {
+      "EXACT_ID": 5,
+      "NO_MATCH": 146
+    },
+    "controller_link_count": 96,
+    "relationship_counts": {
+      "administered_territory": 2,
+      "belligerent_state": 2,
+      "controlled_territory": 78,
+      "crown_colony": 1,
+      "dual_control": 1,
+      "independent_state": 53,
+      "military_occupation": 1,
+      "protected_state": 2,
+      "protected_territory": 10,
+      "self_governing_dominion": 1
+    },
+    "snapshot_active_count": 151,
+    "status_counts": {
+      "colony": 1,
+      "condominium": 1,
+      "contested": 2,
+      "dependency": 78,
+      "dominion": 1,
+      "occupied": 3,
+      "protectorate": 12,
+      "sovereign": 53
+    },
+    "unit_count": 151,
+    "unresolved_controller_ids": []
+  }
+}
