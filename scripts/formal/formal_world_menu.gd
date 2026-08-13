@@ -30,11 +30,12 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	var key_event := event as InputEventKey
 	if not key_event.pressed or key_event.echo:
 		return
+	# Consume the key while this Control still belongs to its viewport. A
+	# successful scene change removes the menu before this callback returns.
+	get_viewport().set_input_as_handled()
 	if key_event.keycode == KEY_ESCAPE:
-		get_viewport().set_input_as_handled()
 		return
 	_enter_world("load" if _formal_save_exists() else "new")
-	get_viewport().set_input_as_handled()
 
 
 func _enter_world(mode: String) -> void:
