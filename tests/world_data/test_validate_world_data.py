@@ -72,7 +72,7 @@ class WorldDataValidatorTests(unittest.TestCase):
         self.assertEqual(counts["institution_count"], 7)
         self.assertEqual(counts["character_person_like_record_count"], 2)
         self.assertGreater(counts["modern_city_detail_record_count"], 80_000)
-        self.assertEqual(self.result["inventory"]["file_count"], 183)
+        self.assertEqual(self.result["inventory"]["file_count"], 184)
 
     def test_current_run_has_no_json_parse_errors_and_emits_coverage_and_staging(self) -> None:
         codes = {finding["code"] for finding in self.result["findings"]}

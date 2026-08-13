@@ -1,6 +1,6 @@
 {
-  "dataset_sha256": "9ec5c676d0b46e2923eda3028b0b1a65d9afd4b7a43cda4b5adbd5cb364c022b",
-  "file_count": 183,
+  "dataset_sha256": "aa57cd9597f861ef85bce7800988f4595762705f0e3829f36690eb941de512ca",
+  "file_count": 184,
   "files": [
     {
       "bytes": 6738,
@@ -4200,6 +4200,35 @@
         "routes",
         "schema_version",
         "type"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 8469,
+      "collection_sizes": {
+        "battle_rules": 9,
+        "city_overlays": 7,
+        "country_overlays": 10,
+        "region_overlays": 9,
+        "resource_ids": 4,
+        "supply_rules": 9,
+        "terrain_profiles": 7,
+        "transport_profiles": 3
+      },
+      "path": "data/world_map/strategic_military_overlay.json",
+      "sha256": "42e0536552c26f8abefd95a91c3363573b5783fe7f2350cfed06e44d34b9eddb",
+      "top_level_keys": [
+        "base_dataset",
+        "battle_rules",
+        "city_overlays",
+        "country_overlays",
+        "overlay_kind",
+        "region_overlays",
+        "resource_ids",
+        "schema_version",
+        "supply_rules",
+        "terrain_profiles",
+        "transport_profiles"
       ],
       "top_level_type": "object"
     },

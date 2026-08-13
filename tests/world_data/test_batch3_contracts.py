@@ -51,7 +51,7 @@ class Batch3ContractTests(unittest.TestCase):
         self.assertEqual(self.flags["status_counts"], {"DOCUMENTED_ABSENCE": 6, "VERIFIED_ASSET": 145})
 
     def test_record_signature_manifest_covers_all_json_and_surfaces_nested_candidates(self) -> None:
-        self.assertEqual(self.signatures["data_json_count"], 183)
+        self.assertEqual(self.signatures["data_json_count"], 184)
         self.assertEqual(self.signatures["duplicate_id_file_count"], 3)
         self.assertEqual(len(self.signatures["record_signature_digest"]), 64)
         candidate_paths = {row["path"] for row in self.signatures["files"] if row["duplicate_ids"]}

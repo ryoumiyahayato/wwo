@@ -69,7 +69,7 @@ class Batch4RunManifestTests(unittest.TestCase):
         manifest = batch4.build_manifest(REPOSITORY_ROOT, OUTPUT_DIR)
         self.assertEqual(manifest["batch_scope"], ["BATCH 1", "BATCH 2", "BATCH 3", "BATCH 4"])
         self.assertFalse(manifest["authoritative_source_modified"])
-        self.assertEqual(manifest["batch_results"]["batch1"]["inventory_files"], 183)
+        self.assertEqual(manifest["batch_results"]["batch1"]["inventory_files"], 184)
         self.assertEqual(manifest["batch_results"]["batch2"]["data_parse_errors"], 0)
         self.assertEqual(manifest["batch_results"]["batch2"]["verified_flag_assets"], 60)
         self.assertEqual(manifest["batch_results"]["batch3"]["loader_missing_direct_references"], 0)

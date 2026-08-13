@@ -81664,6 +81664,7 @@
     "relationships.json",
     "road_segments.json",
     "shipping_routes.json",
+    "strategic_military_overlay.json",
     "world_activity.json",
     "world_admin1.json",
     "world_coastlines.json"

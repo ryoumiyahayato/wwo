@@ -1,5 +1,5 @@
 {
-  "data_json_count": 183,
+  "data_json_count": 184,
   "duplicate_id_file_count": 3,
   "files": [
     {
@@ -1795,6 +1795,15 @@
     },
     {
       "duplicate_ids": [],
+      "id_digest": "a25049a63dc2e0e2caaf1091a5b35353982857dcf962b54e3e23563c55900a37",
+      "id_field_counts": {
+        "id": 7
+      },
+      "id_record_count": 7,
+      "path": "data/world_map/strategic_military_overlay.json"
+    },
+    {
+      "duplicate_ids": [],
       "id_digest": "8c35f0bcd65270eac6237fc1bfbc45773703289b54a0c8e41cfb6c1dd2ed7ff2",
       "id_field_counts": {
         "id": 6
@@ -1824,7 +1833,7 @@
       "path": "data/world_map/world_coastlines.json"
     }
   ],
-  "files_with_id_records": 177,
-  "record_signature_digest": "5bdd5f1f78fb5708b7ecd50cf23b27237c777cb497fe2ba359a0ee93cb8feb93",
+  "files_with_id_records": 178,
+  "record_signature_digest": "aef34b044f6f4df612f337788ef27c96f3d20e066db695c920c6f246a15fb3f1",
   "schema_version": "wwo_world_data_batch3_contracts_v1"
 }

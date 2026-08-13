@@ -4,7 +4,7 @@ This report is generated from `data/world_map/**/*.json` by the read-only valida
 
 ## Inventory
 
-- Files: 183
+- Files: 184
 - Countries: 177
 - Regions: 9
 - Curated cities: 32

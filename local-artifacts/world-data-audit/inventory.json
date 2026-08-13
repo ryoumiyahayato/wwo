@@ -73811,7 +73811,7 @@
     "shipping_link_count": 3
   },
   "duplicate_ids_by_kind": {},
-  "file_count": 183,
+  "file_count": 184,
   "files": [
     {
       "bytes": 6738,
@@ -77465,6 +77465,26 @@
       }
     },
     {
+      "bytes": 8469,
+      "path": "strategic_military_overlay.json",
+      "root_keys": [
+        "base_dataset",
+        "battle_rules",
+        "city_overlays",
+        "country_overlays",
+        "overlay_kind",
+        "region_overlays",
+        "resource_ids",
+        "schema_version",
+        "supply_rules",
+        "terrain_profiles",
+        "transport_profiles"
+      ],
+      "schema_identifier": {
+        "schema_version": 1
+      }
+    },
+    {
       "bytes": 4586,
       "path": "world_activity.json",
       "root_keys": [
@@ -78920,6 +78940,9 @@
     "shipping_routes.json": {
       "schema_version": 2
     },
+    "strategic_military_overlay.json": {
+      "schema_version": 1
+    },
     "world_activity.json": {
       "schema_version": 3
     },
@@ -80247,6 +80270,9 @@
     "regions.json:source.license",
     "regions.json:source.upstream_url",
     "relationships.json:relationships[].name_source",
+    "strategic_military_overlay.json:country_overlays[].resources",
+    "strategic_military_overlay.json:region_overlays[].resources",
+    "strategic_military_overlay.json:resource_ids",
     "world_activity.json:items[].source",
     "world_activity.json:items[].source_type",
     "world_admin1.json:source",

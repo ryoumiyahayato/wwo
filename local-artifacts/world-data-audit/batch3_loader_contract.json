@@ -1,6 +1,6 @@
 {
   "contract_gate": "PASS",
-  "data_json_count": 183,
+  "data_json_count": 184,
   "literal_directory_reference_count": 2,
   "literal_directory_references": [
     {
@@ -281,6 +281,7 @@
     "res://data/world_map/historical/historical_admin1_1900.json",
     "res://data/world_map/historical/major_state_profiles_1900.json",
     "res://data/world_map/historical_political_entities_1900.json",
+    "res://data/world_map/strategic_military_overlay.json",
     "res://data/world_map/world_admin1.json"
   ],
   "production_script_count": 15,

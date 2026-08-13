@@ -38,9 +38,9 @@ class Batch2ArtifactTests(unittest.TestCase):
         cls.regression_manifest = batch2.build_regression_manifest(REPOSITORY_ROOT)
 
     def test_data_manifest_covers_all_json_without_parse_errors(self) -> None:
-        self.assertEqual(self.data_manifest["file_count"], 183)
+        self.assertEqual(self.data_manifest["file_count"], 184)
         self.assertEqual(self.data_manifest["parse_errors"], [])
-        self.assertEqual(len(self.data_manifest["files"]), 183)
+        self.assertEqual(len(self.data_manifest["files"]), 184)
         self.assertEqual(len(self.data_manifest["dataset_sha256"]), 64)
 
     def test_historical_flag_assets_match_referenced_hashes(self) -> None:
