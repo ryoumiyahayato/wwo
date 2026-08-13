@@ -1,0 +1,111 @@
+{
+  "files": [
+    {
+      "bytes": 1277173,
+      "path": "data/staging/world_names/aliases.json",
+      "record_count": 2232,
+      "role": "alias staging",
+      "schema_version": 1,
+      "sha256": "38acc9aa23873e48fea175afeb545337c8d9956382d4466a24936da5b707587c"
+    },
+    {
+      "bytes": 213668,
+      "path": "data/staging/world_names/candidate_collision_ledger.json",
+      "record_count": 350,
+      "role": "review-candidate collision ledger",
+      "schema_version": 1,
+      "sha256": "eda69e081a8146936e7334f49dec88a7842082f7235156583151ceb15c1f44b0"
+    },
+    {
+      "bytes": 252212,
+      "path": "data/staging/world_names/collision_report.json",
+      "record_count": 138,
+      "role": "collision report",
+      "schema_version": 1,
+      "sha256": "039db137206e0e262f38d2b37da1a1556b3bd7fa1abba1c363bcd61dd2abeff6"
+    },
+    {
+      "bytes": 143530,
+      "path": "data/staging/world_names/coverage_manifest.json",
+      "record_count": 253,
+      "role": "repository coverage manifest",
+      "schema_version": 1,
+      "sha256": "afe1a6350e12fc4cc14b0aec1e758d62e42163676c6e2291b53b8d54e40eb9ef"
+    },
+    {
+      "bytes": 54688,
+      "path": "data/staging/world_names/deterministic_corpus.json",
+      "record_count": 253,
+      "role": "deterministic regression corpus",
+      "schema_version": 1,
+      "sha256": "d625da08acba41dd6c6d40ceb462c066d2dfa40e95d7e6e84a890bbcdd33b4bf"
+    },
+    {
+      "bytes": 2358416,
+      "path": "data/staging/world_names/name_inventory.json",
+      "record_count": 923,
+      "role": "entity inventory",
+      "schema_version": 1,
+      "sha256": "53cd326541e43366c19587b09e54fdb7d46f6589dc365e0a4ee2331134d3f683"
+    },
+    {
+      "bytes": 224142,
+      "path": "data/staging/world_names/remaining_gaps.json",
+      "record_count": 199,
+      "role": "remaining-gap ledger",
+      "schema_version": 1,
+      "sha256": "297035758e6490368097b87e0799246dcaeaed19a390cf9d43752cefef900c07"
+    },
+    {
+      "bytes": 1140212,
+      "path": "data/staging/world_names/review_candidates.json",
+      "record_count": 1156,
+      "role": "non-authoritative review candidates",
+      "schema_version": 1,
+      "sha256": "87e1edd526832c074dec4c3c863f530eb45a3f2a42053aca29a2ff93ed81515b"
+    },
+    {
+      "bytes": 106907,
+      "path": "data/staging/world_names/search_index.json",
+      "record_count": 941,
+      "role": "stable-id search index",
+      "schema_version": 1,
+      "sha256": "9f4ee76d5d356b5326cd51c2c1da3b66aac42a365a24f5b148aceb301747fd14"
+    }
+  ],
+  "generator": {
+    "name": "tools.world_names.world_names",
+    "schema_version": 1
+  },
+  "manifest_kind": "world_names_staging",
+  "policy": {
+    "authoritative_production_data_rewritten": false,
+    "manifest_excludes_itself": true,
+    "no_unsourced_translation": true,
+    "observational_benchmark_excluded": true,
+    "staging_is_non_authoritative": true
+  },
+  "schema_version": 1,
+  "source_fingerprint": "08d267f8bf6f32daf065a54d539ccec631d7f35f75b3101e004c5f441bd9f2b4",
+  "summary": {
+    "artifact_file_count": 9,
+    "coverage_source_file_count": 253,
+    "entity_count": 923,
+    "record_counts": {
+      "aliases.json": 2232,
+      "candidate_collision_ledger.json": 350,
+      "collision_report.json": 138,
+      "coverage_manifest.json": 253,
+      "deterministic_corpus.json": 253,
+      "name_inventory.json": 923,
+      "remaining_gaps.json": 199,
+      "review_candidates.json": 1156,
+      "search_index.json": 941
+    },
+    "review_candidate_count": 1156
+  },
+  "validation": {
+    "errors": [],
+    "status": "PASS"
+  }
+}

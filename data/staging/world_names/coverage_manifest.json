@@ -1,0 +1,3955 @@
+{
+  "files": [
+    {
+      "known_name_field_counts": {
+        "name_zh": 105
+      },
+      "name_bearing_record_count": 105,
+      "name_like_record_count": 176,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 289,
+      "sha256": "9ce7f8e9974c45f79106ed9b04b1d8c89bc82c0ee9333ed1d57be0431376c96f",
+      "source_file": "data/alpha/commodity_market_1900.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "title": 4,
+        "unit_name_zh": 67
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "name": 44
+      },
+      "name_bearing_record_count": 44,
+      "name_like_record_count": 44,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 45,
+      "sha256": "a6788e42ba976bb5d1e2a063365f738c054c5390da8ec14a35aa4e377b447a8e",
+      "source_file": "data/alpha/economy.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 34,
+      "sha256": "a9265d59cfff72a24d6a495ec786f71d630492d8cff9249772043d1877a43afe",
+      "source_file": "data/alpha/economy_integration_1900.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 17,
+      "sha256": "d3139c592a7231c8e2b2785bfa51f6aae31e77a31a4f484f3ecaa21d0a2e4e1a",
+      "source_file": "data/alpha/historical_economy_coverage_1900.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 15,
+      "sha256": "49f276a3d7cc9d155d8745cd401ce262c871f40b54a08ebdf83d7c4d16356278",
+      "source_file": "data/alpha/historical_household_budgets_1900.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 2,
+      "sha256": "47c0aa8136b6def8c560f3517b720deb8e0b2af87915b45b9321ce563a890550",
+      "source_file": "data/alpha/historical_transport_network_1900.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 1,
+      "sha256": "474c47b5cfabcbaa5f80aaeb542bf357eb77df72cefdbb02d3038b389e31f328",
+      "source_file": "data/alpha/historical_transport_network_1900/transport_compact.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 6,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 18,
+      "sha256": "7936847a3d0c46d5ed6a0a3faf261f9a0aa9187aa6ba5b45897d8a471af38db7",
+      "source_file": "data/alpha/historical_world_economy_1900.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "title": 6
+      }
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 2,
+      "sha256": "7c4c4fb9056c4b23bc1cc4f79d45717ad29b710a6966fa8c6a12e96681146524",
+      "source_file": "data/alpha/historical_world_economy_1900/countries_compact.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {
+        "name": 30
+      },
+      "name_bearing_record_count": 30,
+      "name_like_record_count": 30,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 41,
+      "sha256": "55b4c68c439f2a751b4fdf5e0580d8e682f13e7f99515cdfa9bf938a5186f877",
+      "source_file": "data/alpha/politics.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {
+        "name": 8
+      },
+      "name_bearing_record_count": 8,
+      "name_like_record_count": 8,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 17,
+      "sha256": "cac55e392365d25c53ea86e10c62ca8951977888fde84de88e05f0d3cbd51b18",
+      "source_file": "data/alpha/presets.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {
+        "display_name_zh": 8,
+        "name": 20,
+        "native_name": 8
+      },
+      "name_bearing_record_count": 28,
+      "name_like_record_count": 28,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 73,
+      "sha256": "0bb2ba62dae367c960c4acfac0ca2cbdac50eb25a52574474b44d8fabc5d4bde",
+      "source_file": "data/alpha/world.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 5,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 17,
+      "sha256": "523315720f7d525afd39c9c9cec11be6bd0a70f47fd48587710b04bf2f19e7d5",
+      "source_file": "data/balance/action_rules.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "label": 5
+      }
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 5,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 10,
+      "sha256": "409c17f635c71298228929f30ab42a0b5bfdf2532962490e48b3c18d262f85c8",
+      "source_file": "data/balance/continuity_rules.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "label": 5
+      }
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 1,
+      "sha256": "6840f082dbb041d2df09aac8832af6cd570094de6f9ffbea5d1bd6ad3bbf765b",
+      "source_file": "data/balance/map_rules.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 1,
+      "sha256": "426f2cb78dfc3b59d65a66897dddd7c25db653988f1bb014f777bcc271d7df93",
+      "source_file": "data/balance/random_service.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 1,
+      "sha256": "6df7af7ed7bbc1433dc1e15b2475dd89b70658af7d5fff45d522dda8a06476f3",
+      "source_file": "data/balance/simulation_clock.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 13,
+      "sha256": "16bd28618a29a74a13fd22d3913be699aeed6369803be57177847ebedffe59e0",
+      "source_file": "data/balance/society_rules.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {
+        "name": 10
+      },
+      "name_bearing_record_count": 10,
+      "name_like_record_count": 13,
+      "reason": "configured Batch 1 source or name-pool source",
+      "record_count": 59,
+      "sha256": "9a94ce1efe5c5e9d6fe3295f49cedea7a5936dc4cc83d4a52ce896ed3834d908",
+      "source_file": "data/characters/character_generation.json",
+      "status": "staged",
+      "unknown_name_like_field_counts": {
+        "country_names": 1,
+        "family_names": 2,
+        "given_names": 2
+      }
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 1,
+      "sha256": "2ef240ed927175f362fd983e559980f0b309b63928d9e5483a934126c60d0d9c",
+      "source_file": "data/scenarios/v2_2_lille_life_loop.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 1,
+      "sha256": "77dac6f98c9d60b5a33e9347e939d4d12cfdd4409545ffb70c808ea73c018a36",
+      "source_file": "data/scenarios/v2_3_lille_space_cognition.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 7,
+      "sha256": "64896030936632a910139a992ec6f77eb3a1a6bce551385b3c91d50d1d5964c0",
+      "source_file": "data/staging/1900/batch1_deterministic_corpus.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 12,
+      "sha256": "bb919921beeb5cc0ccaa301dec6b4fc6727d36a59fc7be2e2c0d7e56b7f4f6e6",
+      "source_file": "data/staging/1900/batch1_manifest.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 5,
+      "sha256": "fbff8d95182b5e3b137704202c71e1d9314a470aef2f30e7365c2710b0c7d614",
+      "source_file": "data/staging/1900/batch2_deterministic_corpus.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 11,
+      "sha256": "294df7a82d5d131f905c833036bc65515dfa268029b693e4be180fae95dbb0a7",
+      "source_file": "data/staging/1900/batch2_manifest.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {
+        "historical_name": 1,
+        "name": 1
+      },
+      "name_bearing_record_count": 2,
+      "name_like_record_count": 4,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 100,
+      "sha256": "19e6ba90654dadb2bc54cc0c52723e6d5213a9e704af1a902d86231b6fabd734",
+      "source_file": "data/staging/1900/batch2_political_unit_records.schema.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "normalized_name": 1,
+        "title": 1
+      }
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 19,
+      "sha256": "8e422b3df6b88df99a8a21fd1b0ef47b99ba4ccc317ca20b73975307e544e6fd",
+      "source_file": "data/staging/1900/batch2_qa_report.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 2,
+      "sha256": "e8d8de582c4569c76cf4897e91bb16766c4821b5e934b91a24bfeb7eeced2375",
+      "source_file": "data/staging/1900/batch3_deterministic_corpus.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 10,
+      "sha256": "bc21a00a693def6bfab4fcbba93f8a9d49e91838d4d8a33a4b7fb552cc86e15c",
+      "source_file": "data/staging/1900/batch3_manifest.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 25,
+      "sha256": "048e50cc3555d39097497ef51d1c95eea337bb2f26dd8a864d3b27e3d80bc7d7",
+      "source_file": "data/staging/1900/batch3_qa_report.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 29,
+      "sha256": "2190d230d6acc3cb8aecea4cb9009701c232743ee282cfbe796fab41b0df711e",
+      "source_file": "data/staging/1900/batch3_repository_inventory.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {
+        "name": 48,
+        "native_name": 8
+      },
+      "name_bearing_record_count": 48,
+      "name_like_record_count": 48,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 109,
+      "sha256": "e3e2aa06013f64a6a6af798522ea66a71a095d86df3b6bb83336caeda1a24118",
+      "source_file": "data/staging/1900/batch3_source_gap_candidates.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 1,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 40,
+      "sha256": "c15bfdb708b82a3f7bb5ac0a9ca1427bc74803d79739bb68826642fd2284eb02",
+      "source_file": "data/staging/1900/batch3_source_gap_candidates.schema.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "title": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "level_name_zh": 15
+      },
+      "name_bearing_record_count": 15,
+      "name_like_record_count": 16,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 356,
+      "sha256": "0412c986e36967ea1d9148f40dd8085b3a192648e2b9b6712db2a4376f93d174",
+      "source_file": "data/staging/1900/batch4_coverage_review_queue.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "admin1_unit_names": 1
+      }
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 2,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 59,
+      "sha256": "43168e7a6729e34813cd000795d93e2b9ca9ed441b82c2666059db9c367b6b97",
+      "source_file": "data/staging/1900/batch4_coverage_review_queue.schema.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "admin1_unit_names": 1,
+        "title": 1
+      }
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 1,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 4,
+      "sha256": "d2de8bce34c10f509973029aef49f9199575da5a7db024f1ed2fb681d5f57fa8",
+      "source_file": "data/staging/1900/batch4_deterministic_corpus.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "admin1_unit_names": 1
+      }
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 1,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 9,
+      "sha256": "3303739c1a88534182d8424841eff5f83f480148fff358c1f521c7b435fd8e4d",
+      "source_file": "data/staging/1900/batch4_manifest.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "admin1_unit_names": 1
+      }
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 1,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 45,
+      "sha256": "8f6131c4c6822f4e72c8efb240752db660d23bff29581aa0e8c05a885e19bb96",
+      "source_file": "data/staging/1900/batch4_qa_report.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "admin1_unit_names": 1
+      }
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 68,
+      "sha256": "b2b26466daa35e47b08aef068997d841873cde5a7317c346e62a55947a53d304",
+      "source_file": "data/staging/1900/canonical_crosswalk.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 1,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 69,
+      "sha256": "046536885b78432097fd1ce95b704ec6e46565b908cf4674d1dd1609dee0b084",
+      "source_file": "data/staging/1900/canonical_crosswalk.schema.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "title": 1
+      }
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 2,
+      "sha256": "9a953910c9547ab8be30f61a750dd7be3afaf08f609cbcc1f22742d4920d2ddf",
+      "source_file": "data/staging/1900/conflict_register.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 1,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 22,
+      "sha256": "e671521274dd47f750882843a9e13dbb86cdfe6d4e9dc204b524d22cbdd9f511",
+      "source_file": "data/staging/1900/pack_manifest.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "named_historical_record_total": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "historical_name": 151,
+        "name": 151
+      },
+      "name_bearing_record_count": 302,
+      "name_like_record_count": 453,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 405,
+      "sha256": "77f15d349ff11a0d4753aa80851d7cb9bd8cc69a23ab84f41280836df2338771",
+      "source_file": "data/staging/1900/political_unit_records_1900.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "normalized_name": 151
+      }
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 52,
+      "sha256": "876f702d69f37f6a6e23eb2ddeb466f160e9d6abce7af0ec12f82453d146f982",
+      "source_file": "data/staging/1900/priority_backlog.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 7,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 9,
+      "sha256": "a4bf333a9813ea60e82c4a9494e90762bd9f09b25cdb0794fc4296c95f97c7cb",
+      "source_file": "data/staging/1900/source_manifest.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "title": 7
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "historical_name": 1
+      },
+      "name_bearing_record_count": 1,
+      "name_like_record_count": 3,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 24,
+      "sha256": "a8b51f2e295aa43250d9a9dd1e27cb20119f6d7f06517862f69814d7ab9f0b34",
+      "source_file": "data/staging/1900/source_record.schema.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "normalized_name": 1,
+        "title": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "historical_name": 28,
+        "name": 28
+      },
+      "name_bearing_record_count": 56,
+      "name_like_record_count": 84,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 86,
+      "sha256": "914adf62a6d8eab052fcd048e762e3d9f3e0dcba55defb44191c774f42b50b7d",
+      "source_file": "data/staging/1900/source_records.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "normalized_name": 28
+      }
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 11,
+      "sha256": "851d1ebc94f5712b398de9ca3c784f7e356f4f94f87a9c36648847d73a841ae1",
+      "source_file": "data/staging/1900/source_records.schema.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 1,
+      "sha256": "bb09071800e052e4509928427ccf41d99b20359ef3b4dc740caeb53aefdeaa53",
+      "source_file": "data/staging/world_transport_topology_audit_batch1_candidate_fixes.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 2,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 9,
+      "sha256": "1c66b5394c54408fb28251e5f1eb2e4a682504a8a8c15f27144fcfba6d3196c4",
+      "source_file": "data/v2_2/lille_demo_employment.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "position_name": 2
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "name": 1
+      },
+      "name_bearing_record_count": 1,
+      "name_like_record_count": 2,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 4,
+      "sha256": "7c57e167e3cc65c7ddb5666bbbc09eb9d9822b8245118ae05139c5b682a1914d",
+      "source_file": "data/v2_2/lille_demo_living_costs.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "minor_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "name": 6
+      },
+      "name_bearing_record_count": 6,
+      "name_like_record_count": 6,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 7,
+      "sha256": "0a91c35fa62ffec642a1c876b469e70e53937668c3233e2da1df8a27daae4060",
+      "source_file": "data/v2_2/lille_demo_locations.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {
+        "display_name_zh": 2,
+        "native_name": 2
+      },
+      "name_bearing_record_count": 2,
+      "name_like_record_count": 5,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 11,
+      "sha256": "9969a18f021862e591a6c9391e303c974877b658488a7da0082d7be2b0a0a651",
+      "source_file": "data/v2_2/lille_demo_people.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "institution_name": 1,
+        "organization_name": 2,
+        "position_name": 2,
+        "target_display_name_zh": 1,
+        "target_native_name": 1,
+        "union_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 22,
+      "sha256": "6b74f588bbb851984ca386799292b0046b23eac2ce70759db9a74d9f295ea770",
+      "source_file": "data/v2_2/v2_2_balance.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 5,
+      "sha256": "21012edf354efbb5cef280280930f734268ae975b6e349d7eeea471b81334a94",
+      "source_file": "data/v2_3/communication_channels.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {
+        "display_name": 6
+      },
+      "name_bearing_record_count": 6,
+      "name_like_record_count": 6,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 13,
+      "sha256": "a72dbfa56ad1f47659c6711755b7e726a86d9d623f0f2b3efc1a1982e6f2bfc3",
+      "source_file": "data/v2_3/cross_border_locations.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 43,
+      "sha256": "2188e64c72dbbd3005afbc3b210ae2f3bf2e20a51be8b38bde9c89e81f239758",
+      "source_file": "data/v2_3/cross_border_travel_graph.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 3,
+      "sha256": "3454861b393374c002298e8f38a7d621a909291fbf1f31929f67f0906e7fa105",
+      "source_file": "data/v2_3/knowledge_rules.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {
+        "display_name": 3
+      },
+      "name_bearing_record_count": 3,
+      "name_like_record_count": 3,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 5,
+      "sha256": "9a3f5638d6cb05ec77206aef6f294b66bdf819e96b210ca8815cf722ea931ca1",
+      "source_file": "data/v2_3/lille_finance.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {
+        "display_name": 12
+      },
+      "name_bearing_record_count": 12,
+      "name_like_record_count": 12,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 25,
+      "sha256": "1fe0059f346f0ff7cd1b9ba4676c759643ff53efa221411c4c0b019c826433e1",
+      "source_file": "data/v2_3/lille_locations.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 91,
+      "sha256": "aece4ef4cf93677a244f8b11779e36d1a56edda7cff0f86cfe0c534fbabda3d7",
+      "source_file": "data/v2_3/lille_travel_graph.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 2,
+      "sha256": "be21fdb28068216fd48d8126d36cdbacd03382a246b1573dc7771afdbf11849e",
+      "source_file": "data/v2_3/minute_clock.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 15,
+      "sha256": "f592db61b64aad9a33b267ccddccb3777c4bc3c7395b1adc5cfe07022e335957",
+      "source_file": "data/v2_3/relationship_rules.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {
+        "display_name_zh": 6,
+        "native_name": 6
+      },
+      "name_bearing_record_count": 6,
+      "name_like_record_count": 6,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 18,
+      "sha256": "1c2648ffafc9f8de9ad132fa3d928c004b47a0fb55ca51c3853885da58cbfd65",
+      "source_file": "data/v2_3/social_people.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {
+        "display_name_zh": 6
+      },
+      "name_bearing_record_count": 6,
+      "name_like_record_count": 6,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 52,
+      "sha256": "4cd0a45da6c234e1c0162f8d56669ec6b783e880675d45f897801e174387ac75",
+      "source_file": "data/v2_3/social_sandbox_rules.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {
+        "display_name": 3
+      },
+      "name_bearing_record_count": 3,
+      "name_like_record_count": 3,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 6,
+      "sha256": "e6748915d04a1390f1f894e50b6db09378f7878880e7c737ba70ee083d5a8db0",
+      "source_file": "data/v2_3/transport_modes.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 6,
+      "sha256": "009363eb799c08c9c84786a10ab7c36d73ef8963de514567e8b2b348ca9791c7",
+      "source_file": "data/v2_3/v2_3_balance.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {
+        "name": 13
+      },
+      "name_bearing_record_count": 13,
+      "name_like_record_count": 13,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 41,
+      "sha256": "7eccb958c8fe6036df952df53823cf8b7a952d46f4f1515e6ae1b015330551ef",
+      "source_file": "data/vnext/politics/state_politics_1900.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {
+        "name": 98
+      },
+      "name_bearing_record_count": 98,
+      "name_like_record_count": 186,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 297,
+      "sha256": "be8abd5e3a53ddbb24de5ba3a3e570937acc2af8a849acb0490e584f8984d6b7",
+      "source_file": "data/world/demo_world.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "city_name": 80,
+        "city_names": 8
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "display_name_zh": 2,
+        "name": 2,
+        "native_name": 2
+      },
+      "name_bearing_record_count": 2,
+      "name_like_record_count": 12,
+      "reason": "configured Batch 1 source or name-pool source",
+      "record_count": 12,
+      "sha256": "a9f3d1f5ce42a1268aa2fe9f9438d85f71ee349c5ae2578d945b9c5f39b19fef",
+      "source_file": "data/world_map/characters.json",
+      "status": "staged",
+      "unknown_name_like_field_counts": {
+        "label": 6,
+        "name_source": 2,
+        "title": 2
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "name": 32,
+        "native_name": 8
+      },
+      "name_bearing_record_count": 32,
+      "name_like_record_count": 32,
+      "reason": "configured Batch 1 source or name-pool source",
+      "record_count": 33,
+      "sha256": "38c68d762d61cd5c6af3096396cc2a533cb92928dcc7d9418a051cac29f08b36",
+      "source_file": "data/world_map/cities.json",
+      "status": "staged",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 1,
+      "sha256": "ae94004b0fd10b28defa8e41e30e88de037f0383c29668c64b2ebe0c3bc75f3c",
+      "source_file": "data/world_map/city_detail/LICENSE.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 7,
+        "name": 7,
+        "native_name": 7
+      },
+      "name_bearing_record_count": 7,
+      "name_like_record_count": 8,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 8,
+      "sha256": "316ace48cb814f705ebeaf24806c00208b99edaaaf188a0fe52eb9548cf6031a",
+      "source_file": "data/world_map/city_detail/countries/AD.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 94,
+        "name": 94,
+        "native_name": 94
+      },
+      "name_bearing_record_count": 94,
+      "name_like_record_count": 95,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 95,
+      "sha256": "b67fad9ab19c32e7d0b350a60a8e03d03e4210edc177a0fe297bea8bb6e26d12",
+      "source_file": "data/world_map/city_detail/countries/AE.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 98,
+        "name": 98,
+        "native_name": 98
+      },
+      "name_bearing_record_count": 98,
+      "name_like_record_count": 99,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 99,
+      "sha256": "f22994628a1599ddd7634c2cc6044267fd8566ef8213f031431e9b19f5d4219c",
+      "source_file": "data/world_map/city_detail/countries/AF.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 10,
+        "name": 10,
+        "native_name": 10
+      },
+      "name_bearing_record_count": 10,
+      "name_like_record_count": 11,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 11,
+      "sha256": "b7180eafc54f82c782737ce3e435711f9a0fdd3ccb46545323eb573e4855eb9d",
+      "source_file": "data/world_map/city_detail/countries/AG.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 14,
+        "name": 14,
+        "native_name": 14
+      },
+      "name_bearing_record_count": 14,
+      "name_like_record_count": 15,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 15,
+      "sha256": "3637961a3fc3b765f02c58c8b2a26ae630e68f84f55f075c6f024e1c185eab0a",
+      "source_file": "data/world_map/city_detail/countries/AI.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 72,
+        "name": 72,
+        "native_name": 72
+      },
+      "name_bearing_record_count": 72,
+      "name_like_record_count": 73,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 73,
+      "sha256": "917e92acf9a7dab884e6debdd943722e2a097ea9cbe25b6631f5d53071062cde",
+      "source_file": "data/world_map/city_detail/countries/AL.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 80,
+        "name": 80,
+        "native_name": 80
+      },
+      "name_bearing_record_count": 80,
+      "name_like_record_count": 81,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 81,
+      "sha256": "041cf6c81959de3f23609b229cc8c28d0e2a9d77688e487de013fe6aa5f10713",
+      "source_file": "data/world_map/city_detail/countries/AM.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 213,
+        "name": 213,
+        "native_name": 213
+      },
+      "name_bearing_record_count": 213,
+      "name_like_record_count": 214,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 214,
+      "sha256": "65870e87597545d506c9ae22a9ab84e49de89a8960ee7f8f5a5e8285277810a5",
+      "source_file": "data/world_map/city_detail/countries/AT.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 12,
+        "name": 12,
+        "native_name": 12
+      },
+      "name_bearing_record_count": 12,
+      "name_like_record_count": 13,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 13,
+      "sha256": "893fd292d68da4a01f8e8c7638beb5e01d56a4812e9e1c5cc438aae61a48ea12",
+      "source_file": "data/world_map/city_detail/countries/AW.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 3,
+        "name": 3,
+        "native_name": 3
+      },
+      "name_bearing_record_count": 3,
+      "name_like_record_count": 4,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 4,
+      "sha256": "4cd30cef6233d417a91aae7d2599c012d03c19fc22264facae19354ee0782ad4",
+      "source_file": "data/world_map/city_detail/countries/AX.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 134,
+        "name": 134,
+        "native_name": 134
+      },
+      "name_bearing_record_count": 134,
+      "name_like_record_count": 135,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 135,
+      "sha256": "ef21a2a56c8e08b01684b30f382562b571b7ef8b5168919a35ac05e4beee8367",
+      "source_file": "data/world_map/city_detail/countries/AZ.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 117,
+        "name": 117,
+        "native_name": 117
+      },
+      "name_bearing_record_count": 117,
+      "name_like_record_count": 118,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 118,
+      "sha256": "7b472045c3ce2a48c18d8d2ecec8d6f9975ac6905770af29c3486a9af3542e55",
+      "source_file": "data/world_map/city_detail/countries/BA.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 11,
+        "name": 11,
+        "native_name": 11
+      },
+      "name_bearing_record_count": 11,
+      "name_like_record_count": 12,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 12,
+      "sha256": "707827b7cbab331f25a8156604846d7941421cb17d8ac3ea3fcf9f9421b17fe1",
+      "source_file": "data/world_map/city_detail/countries/BB.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 145,
+        "name": 145,
+        "native_name": 145
+      },
+      "name_bearing_record_count": 145,
+      "name_like_record_count": 146,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 146,
+      "sha256": "3eb742cf3cef4a8fc0adc48107f1ac4e5671abb4ac26533e33d806826cf712b7",
+      "source_file": "data/world_map/city_detail/countries/BD.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 686,
+        "name": 686,
+        "native_name": 686
+      },
+      "name_bearing_record_count": 686,
+      "name_like_record_count": 687,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 687,
+      "sha256": "14ddeafb843533edf2f771c29c8c3388a4f745a1884fc3f5280e9e901058cd0e",
+      "source_file": "data/world_map/city_detail/countries/BE.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 138,
+        "name": 138,
+        "native_name": 138
+      },
+      "name_bearing_record_count": 138,
+      "name_like_record_count": 139,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 139,
+      "sha256": "91881b8d456f219e83c4fc558715b0ee5fd67db67052931db7b470251d966d42",
+      "source_file": "data/world_map/city_detail/countries/BG.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 11,
+        "name": 11,
+        "native_name": 11
+      },
+      "name_bearing_record_count": 11,
+      "name_like_record_count": 12,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 12,
+      "sha256": "5a18be87f3bc0f2c1749fc708d4a89ebfbc75770f267adbbc00c7c42caf556d7",
+      "source_file": "data/world_map/city_detail/countries/BH.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 1,
+        "name": 1,
+        "native_name": 1
+      },
+      "name_bearing_record_count": 1,
+      "name_like_record_count": 2,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 2,
+      "sha256": "d1030e499e58a156e7b4f8ec98e896ea7349661477c93f46e45be71482f7d7ca",
+      "source_file": "data/world_map/city_detail/countries/BL.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 10,
+        "name": 10,
+        "native_name": 10
+      },
+      "name_bearing_record_count": 10,
+      "name_like_record_count": 11,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 11,
+      "sha256": "be233ec4ce131085c383ddedd0c61c29da3f2e0c9ca291de7ea8d28f4e8bbdc6",
+      "source_file": "data/world_map/city_detail/countries/BM.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 28,
+        "name": 28,
+        "native_name": 28
+      },
+      "name_bearing_record_count": 28,
+      "name_like_record_count": 29,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 29,
+      "sha256": "c774fe6df0791539f56b143ed6b200a2509552883255a118844bd3773401b83e",
+      "source_file": "data/world_map/city_detail/countries/BN.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 3,
+        "name": 3,
+        "native_name": 3
+      },
+      "name_bearing_record_count": 3,
+      "name_like_record_count": 4,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 4,
+      "sha256": "d350a027f8d1525c3bae5c31fdbd2da0ce16f8cef0160869d43c96b4e7ca995c",
+      "source_file": "data/world_map/city_detail/countries/BQ.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 24,
+        "name": 24,
+        "native_name": 24
+      },
+      "name_bearing_record_count": 24,
+      "name_like_record_count": 25,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 25,
+      "sha256": "2aefe2b517f023903ff78edf349cc91a979ecc0b09166379020edf1a9dbb61df",
+      "source_file": "data/world_map/city_detail/countries/BS.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 23,
+        "name": 23,
+        "native_name": 23
+      },
+      "name_bearing_record_count": 23,
+      "name_like_record_count": 24,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 24,
+      "sha256": "63df4d1bbc8bb418f3275e8a782f199ffc4ca6acfced206c0bd67cf351d464df",
+      "source_file": "data/world_map/city_detail/countries/BT.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 140,
+        "name": 140,
+        "native_name": 140
+      },
+      "name_bearing_record_count": 140,
+      "name_like_record_count": 141,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 141,
+      "sha256": "f5248ecef69cf6ce4b07efe3a9a6e068b075762b009f622c2902bb11334d74a8",
+      "source_file": "data/world_map/city_detail/countries/BY.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 13,
+        "name": 13,
+        "native_name": 13
+      },
+      "name_bearing_record_count": 13,
+      "name_like_record_count": 14,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 14,
+      "sha256": "8152351efb9c41c398f33f85d01932c493c0890326be27160d2a1ef1563f1ed1",
+      "source_file": "data/world_map/city_detail/countries/BZ.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 1309,
+        "name": 1309,
+        "native_name": 1309
+      },
+      "name_bearing_record_count": 1309,
+      "name_like_record_count": 1310,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 1310,
+      "sha256": "e4765d7ec6df9701cd91472e6323917e9afeb3571b5fb9063f35fe6f64d35553",
+      "source_file": "data/world_map/city_detail/countries/CA.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 1,
+        "name": 1,
+        "native_name": 1
+      },
+      "name_bearing_record_count": 1,
+      "name_like_record_count": 2,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 2,
+      "sha256": "b2e6fdc107adc753a0f622935f57b26b86c036ea941216d1f5e370926d0fe1b8",
+      "source_file": "data/world_map/city_detail/countries/CC.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 353,
+        "name": 353,
+        "native_name": 353
+      },
+      "name_bearing_record_count": 353,
+      "name_like_record_count": 354,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 354,
+      "sha256": "61ef91863f535afeea805ed118eba5568eb9368be86978529f6b8c8a592226ea",
+      "source_file": "data/world_map/city_detail/countries/CH.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 2879,
+        "name": 2879,
+        "native_name": 2879
+      },
+      "name_bearing_record_count": 2879,
+      "name_like_record_count": 2880,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 2880,
+      "sha256": "ae5b2eeca530bf329cb402bac40077e9156487c9eef3fbf630860b998d1e9ce1",
+      "source_file": "data/world_map/city_detail/countries/CN.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 76,
+        "name": 76,
+        "native_name": 76
+      },
+      "name_bearing_record_count": 76,
+      "name_like_record_count": 77,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 77,
+      "sha256": "529173dd2a1b06eafc718658e412c06fa84ec4cb9f2afa61d53b1cce3bce2995",
+      "source_file": "data/world_map/city_detail/countries/CR.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 169,
+        "name": 169,
+        "native_name": 169
+      },
+      "name_bearing_record_count": 169,
+      "name_like_record_count": 170,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 170,
+      "sha256": "72e2ce22753d8ac196e706409339ae0973590660882f155254418416a0979c41",
+      "source_file": "data/world_map/city_detail/countries/CU.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 6,
+        "name": 6,
+        "native_name": 6
+      },
+      "name_bearing_record_count": 6,
+      "name_like_record_count": 7,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 7,
+      "sha256": "d0a4bd53dd39ef6bc9e5e57d41a40ec05ced72c3b4418720610e7209a164ceae",
+      "source_file": "data/world_map/city_detail/countries/CW.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 35,
+        "name": 35,
+        "native_name": 35
+      },
+      "name_bearing_record_count": 35,
+      "name_like_record_count": 36,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 36,
+      "sha256": "cfded6412cc6741350d1a4330d4d60b3a73db1de2e40c00c6fed30c1860ce2a9",
+      "source_file": "data/world_map/city_detail/countries/CY.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 354,
+        "name": 354,
+        "native_name": 354
+      },
+      "name_bearing_record_count": 354,
+      "name_like_record_count": 355,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 355,
+      "sha256": "d3b795852dc0d0c941d129b579cafa91411d7c6cedde0ade1bf0479219f3b0e9",
+      "source_file": "data/world_map/city_detail/countries/CZ.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 3076,
+        "name": 3076,
+        "native_name": 3076
+      },
+      "name_bearing_record_count": 3076,
+      "name_like_record_count": 3077,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 3077,
+      "sha256": "0450bcc8426635875eef2896b03de29cb5cab6d3f6d28206d7393ba9d10859b1",
+      "source_file": "data/world_map/city_detail/countries/DE.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 163,
+        "name": 163,
+        "native_name": 163
+      },
+      "name_bearing_record_count": 163,
+      "name_like_record_count": 164,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 164,
+      "sha256": "a0378385d507eebf7cade86b429eb4747f99c9216baacce098390945357d1b36",
+      "source_file": "data/world_map/city_detail/countries/DK.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 10,
+        "name": 10,
+        "native_name": 10
+      },
+      "name_bearing_record_count": 10,
+      "name_like_record_count": 11,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 11,
+      "sha256": "c09d4af742cbbbf100c5df8a07e328f4864c141a921b99b810ed9361fa24b834",
+      "source_file": "data/world_map/city_detail/countries/DM.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 118,
+        "name": 118,
+        "native_name": 118
+      },
+      "name_bearing_record_count": 118,
+      "name_like_record_count": 119,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 119,
+      "sha256": "1ec8a410f6e650f2785793f3567a2700b96f4ac23b7ecd7fa0d236c59663060b",
+      "source_file": "data/world_map/city_detail/countries/DO.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 39,
+        "name": 39,
+        "native_name": 39
+      },
+      "name_bearing_record_count": 39,
+      "name_like_record_count": 40,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 40,
+      "sha256": "1f9ba0ff47598b9aa2b25a5023512ebfefe55052cc284f21b418623d538350c2",
+      "source_file": "data/world_map/city_detail/countries/EE.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 1477,
+        "name": 1477,
+        "native_name": 1477
+      },
+      "name_bearing_record_count": 1477,
+      "name_like_record_count": 1478,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 1478,
+      "sha256": "c94ef12df09e15c86aee2eb1a72e0fed8ac4bd11305bdf888a143b02ff826b36",
+      "source_file": "data/world_map/city_detail/countries/ES.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 343,
+        "name": 343,
+        "native_name": 343
+      },
+      "name_bearing_record_count": 343,
+      "name_like_record_count": 344,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 344,
+      "sha256": "2833c2b53bceee1349f2d1b294136d0c34fa1f2d9ad7ed372e1ffd0b108ca20c",
+      "source_file": "data/world_map/city_detail/countries/FI.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 6,
+        "name": 6,
+        "native_name": 6
+      },
+      "name_bearing_record_count": 6,
+      "name_like_record_count": 7,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 7,
+      "sha256": "9ffd94f83f09c1f6389de2e6cf9c20ac044b15965b49cbbe2e5a87ca1ecdd8d2",
+      "source_file": "data/world_map/city_detail/countries/FO.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 1910,
+        "name": 1910,
+        "native_name": 1910
+      },
+      "name_bearing_record_count": 1910,
+      "name_like_record_count": 1911,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 1911,
+      "sha256": "2c25ff19b32f85d933083f75d1b262b224530c27a76bad7405c2e1a7b9dd6450",
+      "source_file": "data/world_map/city_detail/countries/GB.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 7,
+        "name": 7,
+        "native_name": 7
+      },
+      "name_bearing_record_count": 7,
+      "name_like_record_count": 8,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 8,
+      "sha256": "b321ee9e95c62e94a51494f46d9a7ba775a6649ec9756c4d56235dd850c54efd",
+      "source_file": "data/world_map/city_detail/countries/GD.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 58,
+        "name": 58,
+        "native_name": 58
+      },
+      "name_bearing_record_count": 58,
+      "name_like_record_count": 59,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 59,
+      "sha256": "0b514082a33909c13cdb81dc201fb2fa66d24da298138c235de793e35791049c",
+      "source_file": "data/world_map/city_detail/countries/GE.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 11,
+        "name": 11,
+        "native_name": 11
+      },
+      "name_bearing_record_count": 11,
+      "name_like_record_count": 12,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 12,
+      "sha256": "ae64d1dd0ae0f9f0145b40e69868dba9d41de4df942285bf81515ad7959f142d",
+      "source_file": "data/world_map/city_detail/countries/GG.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 3,
+        "name": 3,
+        "native_name": 3
+      },
+      "name_bearing_record_count": 3,
+      "name_like_record_count": 4,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 4,
+      "sha256": "20500f7baee36bdac860b23919fbb2bf6a2ef08ebaa6ecb580ce0d4107394ab9",
+      "source_file": "data/world_map/city_detail/countries/GI.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 5,
+        "name": 5,
+        "native_name": 5
+      },
+      "name_bearing_record_count": 5,
+      "name_like_record_count": 6,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 6,
+      "sha256": "6f63401d1053796434b7bcf8d9115b6a1310d92886ede41767a2904d82bbebb5",
+      "source_file": "data/world_map/city_detail/countries/GL.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 22,
+        "name": 22,
+        "native_name": 22
+      },
+      "name_bearing_record_count": 22,
+      "name_like_record_count": 23,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 23,
+      "sha256": "c636bfe88975fb2a44db14204c1091d1de47c7df105afbba28ad4a78b4aa3561",
+      "source_file": "data/world_map/city_detail/countries/GP.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 284,
+        "name": 284,
+        "native_name": 284
+      },
+      "name_bearing_record_count": 284,
+      "name_like_record_count": 285,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 285,
+      "sha256": "d40990c0d9cf9e5bebe3f0ae5514376f56086e7f73538cf9cb6703e1e64a5349",
+      "source_file": "data/world_map/city_detail/countries/GR.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 205,
+        "name": 205,
+        "native_name": 205
+      },
+      "name_bearing_record_count": 205,
+      "name_like_record_count": 206,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 206,
+      "sha256": "8777a2a04c2f0cb8aa54942b938fadaf7e984b49528655b98defe3209f122e67",
+      "source_file": "data/world_map/city_detail/countries/GT.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 266,
+        "name": 266,
+        "native_name": 266
+      },
+      "name_bearing_record_count": 266,
+      "name_like_record_count": 267,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 267,
+      "sha256": "c9a150f615c651d27fa9668675f7f4bbe2884b55437a03ca99a2c5ab7b36ec72",
+      "source_file": "data/world_map/city_detail/countries/HK.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 158,
+        "name": 158,
+        "native_name": 158
+      },
+      "name_bearing_record_count": 158,
+      "name_like_record_count": 159,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 159,
+      "sha256": "efba5460e00cc5af937dea929cad3feba05dd6ac843fea2eb1d541d0ec1b1f14",
+      "source_file": "data/world_map/city_detail/countries/HN.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 76,
+        "name": 76,
+        "native_name": 76
+      },
+      "name_bearing_record_count": 76,
+      "name_like_record_count": 77,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 77,
+      "sha256": "4749644c141a7acff77ea3e89882ab212f77de97c4583620878148a8f7122c99",
+      "source_file": "data/world_map/city_detail/countries/HR.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 51,
+        "name": 51,
+        "native_name": 51
+      },
+      "name_bearing_record_count": 51,
+      "name_like_record_count": 52,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 52,
+      "sha256": "249fb711eb8acae16584592ec8463cd6c87b40cae73c24cd86c0dcdb139a0e4b",
+      "source_file": "data/world_map/city_detail/countries/HT.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 378,
+        "name": 378,
+        "native_name": 378
+      },
+      "name_bearing_record_count": 378,
+      "name_like_record_count": 379,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 379,
+      "sha256": "bb9995aefea7b86a8ab0de1aca15bbe554d933460652a6012450a75f9e43ad80",
+      "source_file": "data/world_map/city_detail/countries/HU.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 479,
+        "name": 479,
+        "native_name": 479
+      },
+      "name_bearing_record_count": 479,
+      "name_like_record_count": 480,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 480,
+      "sha256": "e0720f5a691572e816e19f27f739a3591dd30dcac12ac400bfcb46cc7ff27b84",
+      "source_file": "data/world_map/city_detail/countries/ID.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 152,
+        "name": 152,
+        "native_name": 152
+      },
+      "name_bearing_record_count": 152,
+      "name_like_record_count": 153,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 153,
+      "sha256": "8e1e910f6882f057d4159346df03ab0a973c8aa2f1e641816c17d0c07698d2a8",
+      "source_file": "data/world_map/city_detail/countries/IE.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 178,
+        "name": 178,
+        "native_name": 178
+      },
+      "name_bearing_record_count": 178,
+      "name_like_record_count": 179,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 179,
+      "sha256": "c53da5a09940879dfb2cfa46067854f14cfc12ffb6037f692e5c9dcdfc16a08e",
+      "source_file": "data/world_map/city_detail/countries/IL.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 21,
+        "name": 21,
+        "native_name": 21
+      },
+      "name_bearing_record_count": 21,
+      "name_like_record_count": 22,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 22,
+      "sha256": "35d641733578ae86858cf28fafab4a80cd687069a8a942fae1a90163a87380f5",
+      "source_file": "data/world_map/city_detail/countries/IM.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 6526,
+        "name": 6526,
+        "native_name": 6526
+      },
+      "name_bearing_record_count": 6526,
+      "name_like_record_count": 6527,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 6527,
+      "sha256": "a06222c8e82a6234e4c130c739de08cfd84de4a932398b4dcc06015e508ac0b1",
+      "source_file": "data/world_map/city_detail/countries/IN.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 105,
+        "name": 105,
+        "native_name": 105
+      },
+      "name_bearing_record_count": 105,
+      "name_like_record_count": 106,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 106,
+      "sha256": "a47caf8391b7ac8fd7068f4c57c802d265df8c514be19efb2bd46902bb2f182d",
+      "source_file": "data/world_map/city_detail/countries/IQ.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 836,
+        "name": 836,
+        "native_name": 836
+      },
+      "name_bearing_record_count": 836,
+      "name_like_record_count": 837,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 837,
+      "sha256": "2a2fd9869397efb1b7754070d3674d3e102c8bf975c133c30d992548f8bc75ed",
+      "source_file": "data/world_map/city_detail/countries/IR.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 14,
+        "name": 14,
+        "native_name": 14
+      },
+      "name_bearing_record_count": 14,
+      "name_like_record_count": 15,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 15,
+      "sha256": "8181c46f5df15cf9d84caf1969a47357001bd42584041a6f2137055bc556e3ff",
+      "source_file": "data/world_map/city_detail/countries/IS.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 2031,
+        "name": 2031,
+        "native_name": 2031
+      },
+      "name_bearing_record_count": 2031,
+      "name_like_record_count": 2032,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 2032,
+      "sha256": "48581399ae4c4062decdcef89cb6a947a69c73652c2002cf144f180029909076",
+      "source_file": "data/world_map/city_detail/countries/IT.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 3,
+        "name": 3,
+        "native_name": 3
+      },
+      "name_bearing_record_count": 3,
+      "name_like_record_count": 4,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 4,
+      "sha256": "cb90d9833031fad126a165a85c1bcf60adb59275e878ebca6d2ea7c4b5f3260e",
+      "source_file": "data/world_map/city_detail/countries/JE.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 44,
+        "name": 44,
+        "native_name": 44
+      },
+      "name_bearing_record_count": 44,
+      "name_like_record_count": 45,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 45,
+      "sha256": "a2839117219b9de77272c53353fdb8530a8e3fb8a93187d806f322c3897cefbe",
+      "source_file": "data/world_map/city_detail/countries/JM.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 76,
+        "name": 76,
+        "native_name": 76
+      },
+      "name_bearing_record_count": 76,
+      "name_like_record_count": 77,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 77,
+      "sha256": "454ebbb13f73f611d8df3cdeeb1f480134bf6d23cf00d7d1aeb6310b04f6d08d",
+      "source_file": "data/world_map/city_detail/countries/JO.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 1798,
+        "name": 1798,
+        "native_name": 1798
+      },
+      "name_bearing_record_count": 1798,
+      "name_like_record_count": 1799,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 1799,
+      "sha256": "a9cdc9c76f54fef94b72c3332fc67b35cdafe7d4693142eb76c90d5dd17e339c",
+      "source_file": "data/world_map/city_detail/countries/JP.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 61,
+        "name": 61,
+        "native_name": 61
+      },
+      "name_bearing_record_count": 61,
+      "name_like_record_count": 62,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 62,
+      "sha256": "44345c28344a9d2ac1c5e2a15b3f29908257e33a77d4c4874e0dd5fe6c79bf41",
+      "source_file": "data/world_map/city_detail/countries/KG.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 124,
+        "name": 124,
+        "native_name": 124
+      },
+      "name_bearing_record_count": 124,
+      "name_like_record_count": 125,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 125,
+      "sha256": "2e8d0500cc871de8fdacd639b0dbd8daeeb6be73b6e04b018dc2cf2cf2274036",
+      "source_file": "data/world_map/city_detail/countries/KH.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 14,
+        "name": 14,
+        "native_name": 14
+      },
+      "name_bearing_record_count": 14,
+      "name_like_record_count": 15,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 15,
+      "sha256": "e866d390abff4936f0d2274621b9daae1ca180dba430ad5e3976b453c0a8d7dc",
+      "source_file": "data/world_map/city_detail/countries/KN.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 118,
+        "name": 118,
+        "native_name": 118
+      },
+      "name_bearing_record_count": 118,
+      "name_like_record_count": 119,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 119,
+      "sha256": "51ad2204c6f51ce28de46205b60445265cf9e90ab5f3713c2030954621f31850",
+      "source_file": "data/world_map/city_detail/countries/KP.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 154,
+        "name": 154,
+        "native_name": 154
+      },
+      "name_bearing_record_count": 154,
+      "name_like_record_count": 155,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 155,
+      "sha256": "cac32caeb98e20f199b3c5e19e21378f3d51fbfdf23242b43b632efc0c58e1ee",
+      "source_file": "data/world_map/city_detail/countries/KR.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 23,
+        "name": 23,
+        "native_name": 23
+      },
+      "name_bearing_record_count": 23,
+      "name_like_record_count": 24,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 24,
+      "sha256": "1e4dc15c6792c60e3ca282341da2e5706bb7956c18c979239928c5b0730cf382",
+      "source_file": "data/world_map/city_detail/countries/KW.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 45,
+        "name": 45,
+        "native_name": 45
+      },
+      "name_bearing_record_count": 45,
+      "name_like_record_count": 46,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 46,
+      "sha256": "5147654f607998ee005fb8ede4ca485d8b1fa54be415f8093869e88e93e8ddd5",
+      "source_file": "data/world_map/city_detail/countries/KY.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 205,
+        "name": 205,
+        "native_name": 205
+      },
+      "name_bearing_record_count": 205,
+      "name_like_record_count": 206,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 206,
+      "sha256": "00cc8b34be4d98ed8acabf46780015c20d30a5236c48468f5eeb3d94a334272f",
+      "source_file": "data/world_map/city_detail/countries/KZ.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 34,
+        "name": 34,
+        "native_name": 34
+      },
+      "name_bearing_record_count": 34,
+      "name_like_record_count": 35,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 35,
+      "sha256": "636b91a0c92be21cb0c03a5780259ed7f12b0d49d8095f7381ae07ecc71114ca",
+      "source_file": "data/world_map/city_detail/countries/LA.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 30,
+        "name": 30,
+        "native_name": 30
+      },
+      "name_bearing_record_count": 30,
+      "name_like_record_count": 31,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 31,
+      "sha256": "57eeb2a76f4820a3d8e0965ce8335196aa700a30148e74530c6f05334790b7b4",
+      "source_file": "data/world_map/city_detail/countries/LB.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 10,
+        "name": 10,
+        "native_name": 10
+      },
+      "name_bearing_record_count": 10,
+      "name_like_record_count": 11,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 11,
+      "sha256": "380b004970fb7fd4074a0e7ccf5aa519ab377e5a6fb5d3b24c7253dd77778dd7",
+      "source_file": "data/world_map/city_detail/countries/LC.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 11,
+        "name": 11,
+        "native_name": 11
+      },
+      "name_bearing_record_count": 11,
+      "name_like_record_count": 12,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 12,
+      "sha256": "93a1aebcaeaadd202dd9bbbbf1e4a96a456d3c617480ce135dafaa6ac26e0611",
+      "source_file": "data/world_map/city_detail/countries/LI.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 72,
+        "name": 72,
+        "native_name": 72
+      },
+      "name_bearing_record_count": 72,
+      "name_like_record_count": 73,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 73,
+      "sha256": "df51c6d3a76f169a28504845d3acae437ea0fd52836706be0a9a49a1b9a85e9f",
+      "source_file": "data/world_map/city_detail/countries/LK.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 71,
+        "name": 71,
+        "native_name": 71
+      },
+      "name_bearing_record_count": 71,
+      "name_like_record_count": 72,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 72,
+      "sha256": "cc2ca1715d43a3890368dbe38b6af90bd40855b5c70b381556368e438c1a11ef",
+      "source_file": "data/world_map/city_detail/countries/LT.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 33,
+        "name": 33,
+        "native_name": 33
+      },
+      "name_bearing_record_count": 33,
+      "name_like_record_count": 34,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 34,
+      "sha256": "92dfaf014463f6cf84462c51793f12588a217d72b75c12ff29b85c8df678a26f",
+      "source_file": "data/world_map/city_detail/countries/LU.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 52,
+        "name": 52,
+        "native_name": 52
+      },
+      "name_bearing_record_count": 52,
+      "name_like_record_count": 53,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 53,
+      "sha256": "6c6c86dff5e35541f55cb10040845e4473b55cc02d8ccb39beb7f1b407583367",
+      "source_file": "data/world_map/city_detail/countries/LV.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 5,
+        "name": 5,
+        "native_name": 5
+      },
+      "name_bearing_record_count": 5,
+      "name_like_record_count": 6,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 6,
+      "sha256": "1bbc6e2d572d72e093040c299b4a153118ffca26af3d40cf0c653c73cb476f86",
+      "source_file": "data/world_map/city_detail/countries/MC.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 63,
+        "name": 63,
+        "native_name": 63
+      },
+      "name_bearing_record_count": 63,
+      "name_like_record_count": 64,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 64,
+      "sha256": "cf879d08c83d5f2b13872faed22f1f2cde21febaf62a400f9a9f9903de316172",
+      "source_file": "data/world_map/city_detail/countries/MD.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 26,
+        "name": 26,
+        "native_name": 26
+      },
+      "name_bearing_record_count": 26,
+      "name_like_record_count": 27,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 27,
+      "sha256": "ed0cf86fb3d373f194536259a245ae75760a8dd7cb6b52da513eb229f406c1a2",
+      "source_file": "data/world_map/city_detail/countries/ME.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 3,
+        "name": 3,
+        "native_name": 3
+      },
+      "name_bearing_record_count": 3,
+      "name_like_record_count": 4,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 4,
+      "sha256": "4c2bf4d4f9d3cae718e79000d251a4d24fe1243824b8540469990e73d5548340",
+      "source_file": "data/world_map/city_detail/countries/MF.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 90,
+        "name": 90,
+        "native_name": 90
+      },
+      "name_bearing_record_count": 90,
+      "name_like_record_count": 91,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 91,
+      "sha256": "7f7d99281aa9fea44158766cbcfb339ad4a646f3af9e609c4cd00d9c66dd51ce",
+      "source_file": "data/world_map/city_detail/countries/MK.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 252,
+        "name": 252,
+        "native_name": 252
+      },
+      "name_bearing_record_count": 252,
+      "name_like_record_count": 253,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 253,
+      "sha256": "48030f5d7e45672b2d7a35011f98e2252475bf06c2d3ee78d457a585cbebce42",
+      "source_file": "data/world_map/city_detail/countries/MM.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 35,
+        "name": 35,
+        "native_name": 35
+      },
+      "name_bearing_record_count": 35,
+      "name_like_record_count": 36,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 36,
+      "sha256": "819edfbf4ca2070aefc274dee123b67a5e29cdfc4b497866d89952ee762aacc5",
+      "source_file": "data/world_map/city_detail/countries/MN.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 6,
+        "name": 6,
+        "native_name": 6
+      },
+      "name_bearing_record_count": 6,
+      "name_like_record_count": 7,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 7,
+      "sha256": "99484be443e2635e0539f98e545b51aedf5e077fbc94e6f7ef57d03d190bfdbe",
+      "source_file": "data/world_map/city_detail/countries/MO.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 17,
+        "name": 17,
+        "native_name": 17
+      },
+      "name_bearing_record_count": 17,
+      "name_like_record_count": 18,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 18,
+      "sha256": "3a0cf0604818fe19fa7a4ab73795db689756b1a6c12de70804cfe672f3f46c8a",
+      "source_file": "data/world_map/city_detail/countries/MQ.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 2,
+        "name": 2,
+        "native_name": 2
+      },
+      "name_bearing_record_count": 2,
+      "name_like_record_count": 3,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 3,
+      "sha256": "7193ff518f33158b14f865906fef51a34de8545232e92ea6a765182939fb8f8c",
+      "source_file": "data/world_map/city_detail/countries/MS.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 65,
+        "name": 65,
+        "native_name": 65
+      },
+      "name_bearing_record_count": 65,
+      "name_like_record_count": 66,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 66,
+      "sha256": "773f4e78e21d0aa4a2bfb2949866bd6f64a09351d3a8ad53f77fce3c8f573d7f",
+      "source_file": "data/world_map/city_detail/countries/MT.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 19,
+        "name": 19,
+        "native_name": 19
+      },
+      "name_bearing_record_count": 19,
+      "name_like_record_count": 20,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 20,
+      "sha256": "252d7e169b0ef52efd80dc3dae41289911b2836960d6ddcf8a6009bc0dd3c43f",
+      "source_file": "data/world_map/city_detail/countries/MV.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 1827,
+        "name": 1827,
+        "native_name": 1827
+      },
+      "name_bearing_record_count": 1827,
+      "name_like_record_count": 1828,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 1828,
+      "sha256": "540ee37b8185e51539bb8e866e4318c257b34d0acc4f7a38dccbb40eb9bef358",
+      "source_file": "data/world_map/city_detail/countries/MX.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 530,
+        "name": 530,
+        "native_name": 530
+      },
+      "name_bearing_record_count": 530,
+      "name_like_record_count": 531,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 531,
+      "sha256": "daf6c8b9fe8376ff5190c27c3df03460aa2dbb6686a2e0bceef4fa7e087da844",
+      "source_file": "data/world_map/city_detail/countries/MY.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 76,
+        "name": 76,
+        "native_name": 76
+      },
+      "name_bearing_record_count": 76,
+      "name_like_record_count": 77,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 77,
+      "sha256": "bd6e8900c977dda911edbd6869be2ba13bc0c0a67d22413b306d5f9d04408b15",
+      "source_file": "data/world_map/city_detail/countries/NI.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 544,
+        "name": 544,
+        "native_name": 544
+      },
+      "name_bearing_record_count": 544,
+      "name_like_record_count": 545,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 545,
+      "sha256": "be091518c28f2a5cfa4fb2435b4b4d53d07e949e6fae19373a7b03e75b45cb16",
+      "source_file": "data/world_map/city_detail/countries/NL.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 118,
+        "name": 118,
+        "native_name": 118
+      },
+      "name_bearing_record_count": 118,
+      "name_like_record_count": 119,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 119,
+      "sha256": "b7c143945fc1f35eb51b53ea3e84b4aaada6832b38a52364b3a0949326d22a11",
+      "source_file": "data/world_map/city_detail/countries/NO.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 54,
+        "name": 54,
+        "native_name": 54
+      },
+      "name_bearing_record_count": 54,
+      "name_like_record_count": 55,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 55,
+      "sha256": "bc78f72c200d27deb0d794bb26dd92daced48c24ff0bef9929b2888c1bfa6eb2",
+      "source_file": "data/world_map/city_detail/countries/NP.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 32,
+        "name": 32,
+        "native_name": 32
+      },
+      "name_bearing_record_count": 32,
+      "name_like_record_count": 33,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 33,
+      "sha256": "6d407e03b1f3d238c71d095347084adfca4a18debff96265f7aab6c977c36c7c",
+      "source_file": "data/world_map/city_detail/countries/OM.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 69,
+        "name": 69,
+        "native_name": 69
+      },
+      "name_bearing_record_count": 69,
+      "name_like_record_count": 70,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 70,
+      "sha256": "e7fcb3c8b8bb0a94a0aa308be0b21ccb32abdc7a99d7ea3d4c1581d2ce635cc9",
+      "source_file": "data/world_map/city_detail/countries/PA.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 1376,
+        "name": 1376,
+        "native_name": 1376
+      },
+      "name_bearing_record_count": 1376,
+      "name_like_record_count": 1377,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 1377,
+      "sha256": "9a1929925ac2221d1f4a014a6b52a1a2322298c2580999b885325e55af1e4d0c",
+      "source_file": "data/world_map/city_detail/countries/PH.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 490,
+        "name": 490,
+        "native_name": 490
+      },
+      "name_bearing_record_count": 490,
+      "name_like_record_count": 491,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 491,
+      "sha256": "a32b11b3565ee3fb7c931e2dbe0d87046c51ba579fcec9ddf0d51e5dcda4a6ec",
+      "source_file": "data/world_map/city_detail/countries/PK.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 768,
+        "name": 768,
+        "native_name": 768
+      },
+      "name_bearing_record_count": 768,
+      "name_like_record_count": 769,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 769,
+      "sha256": "dc49f2f620c42c2e6fa8c6a67d86b00671d7affb7d0d42ccf1d86b9fe1cd4681",
+      "source_file": "data/world_map/city_detail/countries/PL.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 2,
+        "name": 2,
+        "native_name": 2
+      },
+      "name_bearing_record_count": 2,
+      "name_like_record_count": 3,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 3,
+      "sha256": "b239737b1c964516f2d3456a07dc1fbf85b39be4a2b1aae392e5a61c935ca498",
+      "source_file": "data/world_map/city_detail/countries/PM.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 94,
+        "name": 94,
+        "native_name": 94
+      },
+      "name_bearing_record_count": 94,
+      "name_like_record_count": 95,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 95,
+      "sha256": "aec6312462d04bb92547d62c6e2d1f65048c1def39e81029a2b4ab1d45d50e6b",
+      "source_file": "data/world_map/city_detail/countries/PR.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 127,
+        "name": 127,
+        "native_name": 127
+      },
+      "name_bearing_record_count": 127,
+      "name_like_record_count": 128,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 128,
+      "sha256": "1bbdcef896bd94b9039aac705a96b16c8ca7ee384dcc0866bcb7fa8cf8e405c4",
+      "source_file": "data/world_map/city_detail/countries/PS.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 544,
+        "name": 544,
+        "native_name": 544
+      },
+      "name_bearing_record_count": 544,
+      "name_like_record_count": 545,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 545,
+      "sha256": "7250aafa8ba2be62f5d2f0f112a505338e4903594f74294ab25cd781285c62b3",
+      "source_file": "data/world_map/city_detail/countries/PT.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 37,
+        "name": 37,
+        "native_name": 37
+      },
+      "name_bearing_record_count": 37,
+      "name_like_record_count": 38,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 38,
+      "sha256": "0f174b7ed884c8f765104b05dd57c6a470b305e168a7f1b6501e2d8ccbb9df7c",
+      "source_file": "data/world_map/city_detail/countries/QA.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 788,
+        "name": 788,
+        "native_name": 788
+      },
+      "name_bearing_record_count": 788,
+      "name_like_record_count": 789,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 789,
+      "sha256": "53b6d316e2ce09fe22e5a2c10c83c3a0ae47bb17ac8230727dfba57add80d781",
+      "source_file": "data/world_map/city_detail/countries/RO.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 106,
+        "name": 106,
+        "native_name": 106
+      },
+      "name_bearing_record_count": 106,
+      "name_like_record_count": 107,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 107,
+      "sha256": "6ad23df13a1d744445d289a248fa0e8e3950ccd5d8f812917f29b835ed6a0fd4",
+      "source_file": "data/world_map/city_detail/countries/RS.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 2753,
+        "name": 2753,
+        "native_name": 2753
+      },
+      "name_bearing_record_count": 2753,
+      "name_like_record_count": 2754,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 2754,
+      "sha256": "c10e1c1388e745d1b8fd0066fd24da916c2ca37ce3de68217be4b2ccc9bb6454",
+      "source_file": "data/world_map/city_detail/countries/RU.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 144,
+        "name": 144,
+        "native_name": 144
+      },
+      "name_bearing_record_count": 144,
+      "name_like_record_count": 145,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 145,
+      "sha256": "b277d59aa649666a748ce90ac148ae1db99d47fa619a4a15411b0fe1136ec1fd",
+      "source_file": "data/world_map/city_detail/countries/SA.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 279,
+        "name": 279,
+        "native_name": 279
+      },
+      "name_bearing_record_count": 279,
+      "name_like_record_count": 280,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 280,
+      "sha256": "526f8280161bc271781569b60786ac163616d9e0a301ee2f91b21f10b3fac8bb",
+      "source_file": "data/world_map/city_detail/countries/SE.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 95,
+        "name": 95,
+        "native_name": 95
+      },
+      "name_bearing_record_count": 95,
+      "name_like_record_count": 96,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 96,
+      "sha256": "4522901a317ecd8afb07d166104adffd87632af5fff8a3ef821a958d840d737b",
+      "source_file": "data/world_map/city_detail/countries/SG.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 213,
+        "name": 213,
+        "native_name": 213
+      },
+      "name_bearing_record_count": 213,
+      "name_like_record_count": 214,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 214,
+      "sha256": "5b978e09b280879b0948f0712beb203df13d1dca33f5551626c3842f34ce636b",
+      "source_file": "data/world_map/city_detail/countries/SI.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 2,
+        "name": 2,
+        "native_name": 2
+      },
+      "name_bearing_record_count": 2,
+      "name_like_record_count": 3,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 3,
+      "sha256": "dbc6c472429038bc217fd22c35291dcfab1b5c77d674a05ae22a4abd4d7eee55",
+      "source_file": "data/world_map/city_detail/countries/SJ.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 147,
+        "name": 147,
+        "native_name": 147
+      },
+      "name_bearing_record_count": 147,
+      "name_like_record_count": 148,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 148,
+      "sha256": "f1889da4ff3861fe3a3b8276358db783e341c8023afa19efa79d36c5a027bc7e",
+      "source_file": "data/world_map/city_detail/countries/SK.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 11,
+        "name": 11,
+        "native_name": 11
+      },
+      "name_bearing_record_count": 11,
+      "name_like_record_count": 12,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 12,
+      "sha256": "91af592470f31894ab0dc44bab521c7d4af56cf6e308ddc970b85cf509606e79",
+      "source_file": "data/world_map/city_detail/countries/SM.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 74,
+        "name": 74,
+        "native_name": 74
+      },
+      "name_bearing_record_count": 74,
+      "name_like_record_count": 75,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 75,
+      "sha256": "bc54622a8de5e336b3aa899e9fe6b3416bc51e55aa01732abe26191af2c524c0",
+      "source_file": "data/world_map/city_detail/countries/SV.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 5,
+        "name": 5,
+        "native_name": 5
+      },
+      "name_bearing_record_count": 5,
+      "name_like_record_count": 6,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 6,
+      "sha256": "09cbccac9b6585d26feedb9e1de5ebe60587b6eba4c4422da4d3f1296972c77b",
+      "source_file": "data/world_map/city_detail/countries/SX.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 113,
+        "name": 113,
+        "native_name": 113
+      },
+      "name_bearing_record_count": 113,
+      "name_like_record_count": 114,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 114,
+      "sha256": "6ecfe183944c31f81d2491b44e7bed66e6b6a7fca9b77611103c716fd76495f2",
+      "source_file": "data/world_map/city_detail/countries/SY.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 2,
+        "name": 2,
+        "native_name": 2
+      },
+      "name_bearing_record_count": 2,
+      "name_like_record_count": 3,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 3,
+      "sha256": "6515562c5bc2ec98a26b636c23825505e81cf21eb225b0ac74f1680a0c03e7b2",
+      "source_file": "data/world_map/city_detail/countries/TC.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 448,
+        "name": 448,
+        "native_name": 448
+      },
+      "name_bearing_record_count": 448,
+      "name_like_record_count": 449,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 449,
+      "sha256": "128103b751f409cbd2ba986ad8aecc74c8872fd07fe9464b9f53de4b95b8ac69",
+      "source_file": "data/world_map/city_detail/countries/TH.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 64,
+        "name": 64,
+        "native_name": 64
+      },
+      "name_bearing_record_count": 64,
+      "name_like_record_count": 65,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 65,
+      "sha256": "1cc5f9d97aa763ef214242294986b2446892a6ef6062bc7e80c9bda32466754a",
+      "source_file": "data/world_map/city_detail/countries/TJ.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 74,
+        "name": 74,
+        "native_name": 74
+      },
+      "name_bearing_record_count": 74,
+      "name_like_record_count": 75,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 75,
+      "sha256": "97b1a4a3b79d24532bd760bb23f38bda17fa675498b3168c353a40173c68ff92",
+      "source_file": "data/world_map/city_detail/countries/TM.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 866,
+        "name": 866,
+        "native_name": 866
+      },
+      "name_bearing_record_count": 866,
+      "name_like_record_count": 867,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 867,
+      "sha256": "4bdf468ea9fd1649884456416f747b625bbd9e8e754e7fb80bcc92ee5ea22b2d",
+      "source_file": "data/world_map/city_detail/countries/TR.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 22,
+        "name": 22,
+        "native_name": 22
+      },
+      "name_bearing_record_count": 22,
+      "name_like_record_count": 23,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 23,
+      "sha256": "10a91ebad09845e1e5328d6238f4081521f6a86a7dbe09c12380682a28fb12d1",
+      "source_file": "data/world_map/city_detail/countries/TT.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 80,
+        "name": 80,
+        "native_name": 80
+      },
+      "name_bearing_record_count": 80,
+      "name_like_record_count": 81,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 81,
+      "sha256": "cb4df8459e9750341c90e4ea0b1833b636c548623cd752e00070e6b2f80ca59a",
+      "source_file": "data/world_map/city_detail/countries/TW.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 1012,
+        "name": 1012,
+        "native_name": 1012
+      },
+      "name_bearing_record_count": 1012,
+      "name_like_record_count": 1013,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 1013,
+      "sha256": "68e60c71939d1af1acafd7e893c39f64c81e4562ea0320036a54d97a4b79d317",
+      "source_file": "data/world_map/city_detail/countries/UA.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 7555,
+        "name": 7555,
+        "native_name": 7555
+      },
+      "name_bearing_record_count": 7555,
+      "name_like_record_count": 7556,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 7556,
+      "sha256": "cb24ef0852e96421a22f4ae1e7492b714ce6ff92388fbf111475334ec27a405b",
+      "source_file": "data/world_map/city_detail/countries/US.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 142,
+        "name": 142,
+        "native_name": 142
+      },
+      "name_bearing_record_count": 142,
+      "name_like_record_count": 143,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 143,
+      "sha256": "dd1d5afbb85f8282bf7b9c3ffe939a47c3c4d21f62ed2e2b1ebbd89dca75a0ca",
+      "source_file": "data/world_map/city_detail/countries/UZ.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 1,
+        "name": 1,
+        "native_name": 1
+      },
+      "name_bearing_record_count": 1,
+      "name_like_record_count": 2,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 2,
+      "sha256": "0dd80107646a8d4aa70316deb44a2abf9047cc4b6420dfea1a12f4d5393a0b01",
+      "source_file": "data/world_map/city_detail/countries/VA.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 7,
+        "name": 7,
+        "native_name": 7
+      },
+      "name_bearing_record_count": 7,
+      "name_like_record_count": 8,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 8,
+      "sha256": "8efcf5d6519c35387eb95492cb0b93a2371635bf5a028f28b1430400c9515659",
+      "source_file": "data/world_map/city_detail/countries/VC.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 1,
+        "name": 1,
+        "native_name": 1
+      },
+      "name_bearing_record_count": 1,
+      "name_like_record_count": 2,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 2,
+      "sha256": "7ce09d50dcdc6aa71ae0855f7a83ae246e867560a9d011368c7e41845f10aee0",
+      "source_file": "data/world_map/city_detail/countries/VG.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 4,
+        "name": 4,
+        "native_name": 4
+      },
+      "name_bearing_record_count": 4,
+      "name_like_record_count": 5,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 5,
+      "sha256": "9d4fcabce79c1462be40edc551297fe8b142c602ce192c9a214117926ad8d39a",
+      "source_file": "data/world_map/city_detail/countries/VI.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 453,
+        "name": 453,
+        "native_name": 453
+      },
+      "name_bearing_record_count": 453,
+      "name_like_record_count": 454,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 454,
+      "sha256": "2ee8123048e507552ad06cda4d76220ae7b61c16a83e3db6f1868eaf627c862b",
+      "source_file": "data/world_map/city_detail/countries/VN.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 35,
+        "name": 35,
+        "native_name": 35
+      },
+      "name_bearing_record_count": 35,
+      "name_like_record_count": 36,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 36,
+      "sha256": "42b68adb2438daef9cffdc74bab0f7a8f3b0e02fa9fb1e333669088764756860",
+      "source_file": "data/world_map/city_detail/countries/XK.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 34,
+        "name": 34,
+        "native_name": 34
+      },
+      "name_bearing_record_count": 34,
+      "name_like_record_count": 35,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 35,
+      "sha256": "f46162433b84788c3d1dec0b74ab167991170caf19083ddf3063236ed367f59f",
+      "source_file": "data/world_map/city_detail/countries/YE.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 1671,
+        "name": 1671,
+        "native_name": 1671
+      },
+      "name_bearing_record_count": 1671,
+      "name_like_record_count": 1672,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 1672,
+      "sha256": "fdfb9917463fdd450916a735d92002a715a8f9f7e46980571ef1e51819e10dce",
+      "source_file": "data/world_map/city_detail/france/FR-11.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 1827,
+        "name": 1827,
+        "native_name": 1827
+      },
+      "name_bearing_record_count": 1827,
+      "name_like_record_count": 1828,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 1828,
+      "sha256": "82bcd6e9650b0d595b0549e9d9f52b64133b465930e762af4420c5d24651bbb6",
+      "source_file": "data/world_map/city_detail/france/FR-24.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 3765,
+        "name": 3765,
+        "native_name": 3765
+      },
+      "name_bearing_record_count": 3765,
+      "name_like_record_count": 3766,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 3766,
+      "sha256": "dacb5ced81c821a6862fd8630369728ca36b2d6b6c4f0512db73bbeff8be8502",
+      "source_file": "data/world_map/city_detail/france/FR-27.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 2733,
+        "name": 2733,
+        "native_name": 2733
+      },
+      "name_bearing_record_count": 2733,
+      "name_like_record_count": 2734,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 2734,
+      "sha256": "3dd8a6a28e1cf552c822189e55825ff7fd6d16dc564e26295eab07941f377201",
+      "source_file": "data/world_map/city_detail/france/FR-28.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 4008,
+        "name": 4008,
+        "native_name": 4008
+      },
+      "name_bearing_record_count": 4008,
+      "name_like_record_count": 4009,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 4009,
+      "sha256": "2e94e0e661065e0b88c9951805052e72d3a7bd839f6b0bf99ae2aeceafe13d61",
+      "source_file": "data/world_map/city_detail/france/FR-32.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 5295,
+        "name": 5295,
+        "native_name": 5295
+      },
+      "name_bearing_record_count": 5295,
+      "name_like_record_count": 5296,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 5296,
+      "sha256": "75a382eca012fa85c529f9ec43b78117de983950f6d6549dffb37ebbf3fa0e87",
+      "source_file": "data/world_map/city_detail/france/FR-44.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 1328,
+        "name": 1328,
+        "native_name": 1328
+      },
+      "name_bearing_record_count": 1328,
+      "name_like_record_count": 1329,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 1329,
+      "sha256": "fd37d68bad8ee653976572e699ac1b3524ade3b15cea323405af056f1a68e913",
+      "source_file": "data/world_map/city_detail/france/FR-52.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 1305,
+        "name": 1305,
+        "native_name": 1305
+      },
+      "name_bearing_record_count": 1305,
+      "name_like_record_count": 1306,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 1306,
+      "sha256": "dccaefbf0cdf4bbe6e9ad31b3e9f7a21f3b899f50743e07ae52708039d34345c",
+      "source_file": "data/world_map/city_detail/france/FR-53.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 4459,
+        "name": 4459,
+        "native_name": 4459
+      },
+      "name_bearing_record_count": 4459,
+      "name_like_record_count": 4460,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 4460,
+      "sha256": "4dd5143def5f83523aaafafba802b301bd8ef3ea00104f5a3c21f191336f7129",
+      "source_file": "data/world_map/city_detail/france/FR-75.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 4612,
+        "name": 4612,
+        "native_name": 4612
+      },
+      "name_bearing_record_count": 4612,
+      "name_like_record_count": 4613,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 4613,
+      "sha256": "773e6bea574e0ba704570616fefcfbd33fdd1d7f1e7ccaf4cf6157da786f1241",
+      "source_file": "data/world_map/city_detail/france/FR-76.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 4271,
+        "name": 4271,
+        "native_name": 4271
+      },
+      "name_bearing_record_count": 4271,
+      "name_like_record_count": 4272,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 4272,
+      "sha256": "ff40c42911e6849008ac6ef4da44109bda60b4608198aca908c49c9e36810f08",
+      "source_file": "data/world_map/city_detail/france/FR-84.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 1229,
+        "name": 1229,
+        "native_name": 1229
+      },
+      "name_bearing_record_count": 1229,
+      "name_like_record_count": 1230,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 1230,
+      "sha256": "005553c4b00add1049fa2f59cffb1b19da8b364feee1e615abd0764361e0a063",
+      "source_file": "data/world_map/city_detail/france/FR-93.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "ascii_name": 368,
+        "name": 368,
+        "native_name": 368
+      },
+      "name_bearing_record_count": 368,
+      "name_like_record_count": 369,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 369,
+      "sha256": "edf97dedc6fb62e13fa779a1b05a805e92928df476c731358d7d60bb28782491",
+      "source_file": "data/world_map/city_detail/france/FR-94.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "name": 1
+      },
+      "name_bearing_record_count": 1,
+      "name_like_record_count": 145,
+      "reason": "modern reference source is not 1900 authority by default",
+      "record_count": 304,
+      "sha256": "34a30c64661192d587aaf4df0c1b3d6528f19ac19f1901d36a9b08ff9c46dbe5",
+      "source_file": "data/world_map/city_detail/index.json",
+      "status": "modern_reference_scanned_only",
+      "unknown_name_like_field_counts": {
+        "country_name": 144
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "display_name_zh": 178,
+        "formal_name_zh": 178,
+        "name": 177,
+        "native_name": 178
+      },
+      "name_bearing_record_count": 178,
+      "name_like_record_count": 356,
+      "reason": "configured Batch 1 source or name-pool source",
+      "record_count": 179,
+      "sha256": "c92f2a557b50d8a952e99f70316348714fdd742b3ae2044da8218064869e1a6b",
+      "source_file": "data/world_map/countries.json",
+      "status": "staged",
+      "unknown_name_like_field_counts": {
+        "government_name": 177,
+        "name_coverage": 1,
+        "native_name_source": 177
+      }
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "world-map JSON is read for coverage but is outside Batch 1 entity selectors",
+      "record_count": 59,
+      "sha256": "879da7c0c9adca3e6d271cc9807fb8d45ebd66a19684594b0e583ae7a0f672f7",
+      "source_file": "data/world_map/country_flag_palettes.json",
+      "status": "world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {
+        "name": 151,
+        "source_name": 151
+      },
+      "name_bearing_record_count": 302,
+      "name_like_record_count": 302,
+      "reason": "world-map JSON is read for coverage but is outside Batch 1 entity selectors",
+      "record_count": 455,
+      "sha256": "ee1805eee998590f43640f716c02e76b45647a3c72a90cda87358fb7f4797d9f",
+      "source_file": "data/world_map/historical/cshapes_1900_snapshot.json",
+      "status": "world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "world-map JSON is read for coverage but is outside Batch 1 entity selectors",
+      "record_count": 65,
+      "sha256": "759c05799d65f281b96f9472b46f397a919b57e10b02c9be190102b73d2ce537",
+      "source_file": "data/world_map/historical/flags_1900.json",
+      "status": "world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {
+        "level_name_zh": 15
+      },
+      "name_bearing_record_count": 15,
+      "name_like_record_count": 16,
+      "reason": "configured Batch 1 source or name-pool source",
+      "record_count": 17,
+      "sha256": "a9c5270b1032fdd1fc13fc1472c03d23ae1435451ba4d3165c7ae9e97b0e7b47",
+      "source_file": "data/world_map/historical/historical_admin1_1900.json",
+      "status": "staged",
+      "unknown_name_like_field_counts": {
+        "modern_admin_names_forbidden": 1
+      }
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "world-map JSON is read for coverage but is outside Batch 1 entity selectors",
+      "record_count": 4,
+      "sha256": "e1d62dddd15eb54dcddea030bfd241caa0e83e7c19ed332faf1424107eb562a3",
+      "source_file": "data/world_map/historical/major_economy_polity_crosswalk_1900.json",
+      "status": "world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {
+        "aliases": 50
+      },
+      "name_bearing_record_count": 50,
+      "name_like_record_count": 50,
+      "reason": "configured Batch 1 source or name-pool source",
+      "record_count": 53,
+      "sha256": "0f6892fa9ff0509a8f9e9bad5c3fafd0bf40f9e2f97eaa107993397756cf3eaa",
+      "source_file": "data/world_map/historical/major_state_profiles_1900.json",
+      "status": "staged",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {
+        "name": 151,
+        "name_zh": 151,
+        "short_name_zh": 151,
+        "source_name": 151
+      },
+      "name_bearing_record_count": 302,
+      "name_like_record_count": 302,
+      "reason": "configured Batch 1 source or name-pool source",
+      "record_count": 304,
+      "sha256": "66585af36c77a7dd2201bc07b9a791e9bf047556bd5680372079d67e15b93743",
+      "source_file": "data/world_map/historical/political_units_1900.json",
+      "status": "staged",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {
+        "name_zh": 65,
+        "short_name_zh": 61
+      },
+      "name_bearing_record_count": 65,
+      "name_like_record_count": 65,
+      "reason": "configured Batch 1 source or name-pool source",
+      "record_count": 66,
+      "sha256": "c345027832a433b4c7505ec2ac48b9bc2c03fbd2df379c7fd93a37e22843a0c9",
+      "source_file": "data/world_map/historical_political_entities_1900.json",
+      "status": "staged",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {
+        "display_name_zh": 1,
+        "formal_name_zh": 1,
+        "name": 7,
+        "native_name": 8
+      },
+      "name_bearing_record_count": 8,
+      "name_like_record_count": 9,
+      "reason": "configured Batch 1 source or name-pool source",
+      "record_count": 23,
+      "sha256": "4fb5e88f4bfc4be2b66ba88ca7769eb58df907adbd164d6fe766e5e1bc3587bb",
+      "source_file": "data/world_map/institutions.json",
+      "status": "staged",
+      "unknown_name_like_field_counts": {
+        "government_name": 1
+      }
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "world-map JSON is read for coverage but is outside Batch 1 entity selectors",
+      "record_count": 2835,
+      "sha256": "7aab45c7cec338d3db4638786e2d82e0e3990575da006c187640346cfc7b66c6",
+      "source_file": "data/world_map/map_geometry_cache.json",
+      "status": "world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 7,
+      "reason": "world-map JSON is read for coverage but is outside Batch 1 entity selectors",
+      "record_count": 16,
+      "sha256": "71c5068dc397853814d9e6114963190747c611a59a7d7dc4d550f22806a222b1",
+      "source_file": "data/world_map/map_modes.json",
+      "status": "world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "label": 7
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "display_family_name_zh": 34,
+        "display_given_name_zh": 28,
+        "native_family_name": 34,
+        "native_given_name": 28
+      },
+      "name_bearing_record_count": 62,
+      "name_like_record_count": 63,
+      "reason": "configured Batch 1 source or name-pool source",
+      "record_count": 63,
+      "sha256": "3afff9a5b669c62a4f564200d9b8ce10262d8d118a198cce8472d2be39dc90c5",
+      "source_file": "data/world_map/name_pool_fr.json",
+      "status": "staged",
+      "unknown_name_like_field_counts": {
+        "family_names": 1,
+        "given_names": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "name": 11,
+        "native_name": 11
+      },
+      "name_bearing_record_count": 11,
+      "name_like_record_count": 11,
+      "reason": "configured Batch 1 source or name-pool source",
+      "record_count": 25,
+      "sha256": "7dddeaf7fd25fe39ae133fed1363f3576724ef9dfef359e3a10d4b4419098ce1",
+      "source_file": "data/world_map/organizations.json",
+      "status": "staged",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {
+        "name": 8
+      },
+      "name_bearing_record_count": 8,
+      "name_like_record_count": 8,
+      "reason": "configured Batch 1 source or name-pool source",
+      "record_count": 9,
+      "sha256": "2e6fa58a396de6b0228d7f006b1246d4ad61dd4b941fb1d444828690c10d1b82",
+      "source_file": "data/world_map/ports.json",
+      "status": "staged",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {
+        "name": 5
+      },
+      "name_bearing_record_count": 5,
+      "name_like_record_count": 5,
+      "reason": "world-map JSON is read for coverage but is outside Batch 1 entity selectors",
+      "record_count": 10,
+      "sha256": "0852a2bea9310cab3f1f1b209269f9b6cfe62bf778688be8238253ce98647577",
+      "source_file": "data/world_map/rail_segments.json",
+      "status": "world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {
+        "display_name_zh": 107,
+        "name": 107,
+        "native_name": 107
+      },
+      "name_bearing_record_count": 107,
+      "name_like_record_count": 205,
+      "reason": "configured Batch 1 source or name-pool source",
+      "record_count": 220,
+      "sha256": "394f6c6db0e61a0c1b8f5b902dcae1c4df6223618b002b200d55c80f5c74a683",
+      "source_file": "data/world_map/regions.json",
+      "status": "staged",
+      "unknown_name_like_field_counts": {
+        "jurisdiction_name": 98,
+        "modern_region_name": 96
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "display_name_zh": 10,
+        "name": 10,
+        "native_name": 10
+      },
+      "name_bearing_record_count": 10,
+      "name_like_record_count": 20,
+      "reason": "world-map JSON is read for coverage but is outside Batch 1 entity selectors",
+      "record_count": 11,
+      "sha256": "e68a4690eb078f5ce7da758fec562f9891fc07e6c0fb5d764008d1f5c5f74989",
+      "source_file": "data/world_map/relationships.json",
+      "status": "world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "name_source": 10
+      }
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "world-map JSON is read for coverage but is outside Batch 1 entity selectors",
+      "record_count": 4,
+      "sha256": "c408f1c950987c103dc3f044e6a48f60f788a38e7d16736e0697c245a61e72ac",
+      "source_file": "data/world_map/road_segments.json",
+      "status": "world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {
+        "name": 3
+      },
+      "name_bearing_record_count": 3,
+      "name_like_record_count": 3,
+      "reason": "world-map JSON is read for coverage but is outside Batch 1 entity selectors",
+      "record_count": 4,
+      "sha256": "07a77823559783192b100e00b46076e705d255792970f896010e9618da65737b",
+      "source_file": "data/world_map/shipping_routes.json",
+      "status": "world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 0,
+      "reason": "world-map JSON is read for coverage but is outside Batch 1 entity selectors",
+      "record_count": 39,
+      "sha256": "88575c4c0f43d660695627effb4d348b0e923b6ed95a923d7e1bc06225d0ee55",
+      "source_file": "data/world_map/strategic_military_overlay.json",
+      "status": "world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 6,
+      "reason": "world-map JSON is read for coverage but is outside Batch 1 entity selectors",
+      "record_count": 8,
+      "sha256": "a63493b5d6103595b275a8c4cab0ba1a7e1ba2caf994e417174f86024cc0e11d",
+      "source_file": "data/world_map/world_activity.json",
+      "status": "world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "title": 6
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "name": 4589,
+        "name_zh": 4589
+      },
+      "name_bearing_record_count": 4589,
+      "name_like_record_count": 4589,
+      "reason": "world-map JSON is read for coverage but is outside Batch 1 entity selectors",
+      "record_count": 4592,
+      "sha256": "f4fef644636ec33f41ea8445f42bb255dd5025d11b8bf83aef672aaed531bbf3",
+      "source_file": "data/world_map/world_admin1.json",
+      "status": "world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {
+        "display_name_zh": 177,
+        "name": 178
+      },
+      "name_bearing_record_count": 178,
+      "name_like_record_count": 178,
+      "reason": "world-map JSON is read for coverage but is outside Batch 1 entity selectors",
+      "record_count": 468,
+      "sha256": "8572eefe499cf4f06af62b39f487b53942b61f351323ff3791fdb20a36d602c5",
+      "source_file": "data/world_map/world_coastlines.json",
+      "status": "world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    }
+  ],
+  "normalizer_id": "unicode_nfkc_casefold_safe_punctuation_v1",
+  "schema_version": 1,
+  "scope": {
+    "authoritative_promotion": "never",
+    "generated_staging_excluded": "data/staging/world_names/",
+    "unsourced_translation_policy": "no_machine_or_external_translation"
+  },
+  "staged_source_files": [
+    "data/characters/character_generation.json",
+    "data/world_map/characters.json",
+    "data/world_map/cities.json",
+    "data/world_map/countries.json",
+    "data/world_map/historical/historical_admin1_1900.json",
+    "data/world_map/historical/major_state_profiles_1900.json",
+    "data/world_map/historical/political_units_1900.json",
+    "data/world_map/historical_political_entities_1900.json",
+    "data/world_map/institutions.json",
+    "data/world_map/name_pool_fr.json",
+    "data/world_map/organizations.json",
+    "data/world_map/ports.json",
+    "data/world_map/regions.json"
+  ],
+  "summary": {
+    "data_json_files_scanned": 253,
+    "files_with_known_name_fields": 198,
+    "files_with_name_like_fields": 212,
+    "known_name_field_occurrences": 279528,
+    "modern_reference_files": 158,
+    "non_world_map_scanned_only_files": 68,
+    "parse_errors": 0,
+    "staged_files": 13,
+    "unknown_name_like_field_occurrences": 1276,
+    "world_map_scanned_only_files": 14
+  }
+}

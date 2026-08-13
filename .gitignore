@@ -25,3 +25,4 @@ artifacts/
 # OS metadata
 .DS_Store
 Thumbs.db
+data/staging/world_names/performance_benchmark.json

@@ -1,0 +1,5790 @@
+{
+  "entries": [
+    {
+      "entity_ids": [
+        "marseille_port_authority"
+      ],
+      "normalized_name": "administration du port de marseille"
+    },
+    {
+      "entity_ids": [
+        "emirate_of_afghanistan"
+      ],
+      "normalized_name": "afg"
+    },
+    {
+      "entity_ids": [
+        "country_afg",
+        "emirate_of_afghanistan"
+      ],
+      "normalized_name": "afghanistan"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_01"
+      ],
+      "normalized_name": "ain"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_02"
+      ],
+      "normalized_name": "aisne"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_3"
+      ],
+      "normalized_name": "alaska"
+    },
+    {
+      "entity_ids": [
+        "country_alb"
+      ],
+      "normalized_name": "albania"
+    },
+    {
+      "entity_ids": [
+        "character_albert_dumont"
+      ],
+      "normalized_name": "albert dumont"
+    },
+    {
+      "entity_ids": [
+        "country_dza",
+        "cshapes_gw_615"
+      ],
+      "normalized_name": "algeria"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_03"
+      ],
+      "normalized_name": "allier"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_04"
+      ],
+      "normalized_name": "alpes de haute provence"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_06"
+      ],
+      "normalized_name": "alpes maritimes"
+    },
+    {
+      "entity_ids": [
+        "country_ago",
+        "cshapes_gw_540"
+      ],
+      "normalized_name": "angola"
+    },
+    {
+      "entity_ids": [
+        "country_ata"
+      ],
+      "normalized_name": "antarctica"
+    },
+    {
+      "entity_ids": [
+        "antwerp"
+      ],
+      "normalized_name": "antwerpen"
+    },
+    {
+      "entity_ids": [
+        "aquitaine"
+      ],
+      "normalized_name": "aquitaine"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_08"
+      ],
+      "normalized_name": "ardennes"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_07"
+      ],
+      "normalized_name": "ardèche"
+    },
+    {
+      "entity_ids": [
+        "argentina_1900"
+      ],
+      "normalized_name": "arg"
+    },
+    {
+      "entity_ids": [
+        "argentina_1900"
+      ],
+      "normalized_name": "argentina"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_09"
+      ],
+      "normalized_name": "ariège"
+    },
+    {
+      "entity_ids": [
+        "country_arm"
+      ],
+      "normalized_name": "armenia"
+    },
+    {
+      "entity_ids": [
+        "arrondissement_lille"
+      ],
+      "normalized_name": "arrondissement de lille"
+    },
+    {
+      "entity_ids": [
+        "association_civil_servants_nord"
+      ],
+      "normalized_name": "association des fonctionnaires du nord"
+    },
+    {
+      "entity_ids": [
+        "association_industry_commerce_nord"
+      ],
+      "normalized_name": "association industrielle et commerciale du nord"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_10"
+      ],
+      "normalized_name": "aube"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_11"
+      ],
+      "normalized_name": "aude"
+    },
+    {
+      "entity_ids": [
+        "australia_colonies_1900"
+      ],
+      "normalized_name": "aus"
+    },
+    {
+      "entity_ids": [
+        "country_aus"
+      ],
+      "normalized_name": "australia"
+    },
+    {
+      "entity_ids": [
+        "austria_hungary"
+      ],
+      "normalized_name": "austria hungary"
+    },
+    {
+      "entity_ids": [
+        "austria_hungary"
+      ],
+      "normalized_name": "aut"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_12"
+      ],
+      "normalized_name": "aveyron"
+    },
+    {
+      "entity_ids": [
+        "country_aze"
+      ],
+      "normalized_name": "azerbaijan"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_31"
+      ],
+      "normalized_name": "bahamas"
+    },
+    {
+      "entity_ids": [
+        "country_bgd"
+      ],
+      "normalized_name": "bangladesh"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_53"
+      ],
+      "normalized_name": "barbados"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_67"
+      ],
+      "normalized_name": "bas rhin"
+    },
+    {
+      "entity_ids": [
+        "paris_basin"
+      ],
+      "normalized_name": "bassin parisien"
+    },
+    {
+      "entity_ids": [
+        "kingdom_of_belgium"
+      ],
+      "normalized_name": "bel"
+    },
+    {
+      "entity_ids": [
+        "country_blr"
+      ],
+      "normalized_name": "belarus"
+    },
+    {
+      "entity_ids": [
+        "country_bel",
+        "kingdom_of_belgium"
+      ],
+      "normalized_name": "belgium"
+    },
+    {
+      "entity_ids": [
+        "country_blz",
+        "cshapes_gw_80"
+      ],
+      "normalized_name": "belize"
+    },
+    {
+      "entity_ids": [
+        "country_ben",
+        "cshapes_gw_434"
+      ],
+      "normalized_name": "benin"
+    },
+    {
+      "entity_ids": [
+        "principality_of_bulgaria"
+      ],
+      "normalized_name": "bgr"
+    },
+    {
+      "entity_ids": [
+        "country_btn",
+        "kingdom_of_bhutan"
+      ],
+      "normalized_name": "bhutan"
+    },
+    {
+      "entity_ids": [
+        "emirate_of_bukhara"
+      ],
+      "normalized_name": "bokhara"
+    },
+    {
+      "entity_ids": [
+        "bolivia_1900"
+      ],
+      "normalized_name": "bol"
+    },
+    {
+      "entity_ids": [
+        "bolivia_1900",
+        "country_bol"
+      ],
+      "normalized_name": "bolivia"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_3461"
+      ],
+      "normalized_name": "bosnia"
+    },
+    {
+      "entity_ids": [
+        "country_bih"
+      ],
+      "normalized_name": "bosnia and herzegovina"
+    },
+    {
+      "entity_ids": [
+        "country_bwa",
+        "cshapes_gw_571"
+      ],
+      "normalized_name": "botswana"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_13"
+      ],
+      "normalized_name": "bouches du rhône"
+    },
+    {
+      "entity_ids": [
+        "brazil_1900"
+      ],
+      "normalized_name": "bra"
+    },
+    {
+      "entity_ids": [
+        "brazil_1900",
+        "country_bra"
+      ],
+      "normalized_name": "brazil"
+    },
+    {
+      "entity_ids": [
+        "brittany"
+      ],
+      "normalized_name": "bretagne"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_521"
+      ],
+      "normalized_name": "british somaliland somaliland republic"
+    },
+    {
+      "entity_ids": [
+        "country_brn",
+        "sultanate_of_brunei"
+      ],
+      "normalized_name": "brunei"
+    },
+    {
+      "entity_ids": [
+        "brussels"
+      ],
+      "normalized_name": "bruxelles"
+    },
+    {
+      "entity_ids": [
+        "country_bgr",
+        "principality_of_bulgaria"
+      ],
+      "normalized_name": "bulgaria"
+    },
+    {
+      "entity_ids": [
+        "office_local_budget_records"
+      ],
+      "normalized_name": "bureau des archives budgétaires locales"
+    },
+    {
+      "entity_ids": [
+        "country_bfa"
+      ],
+      "normalized_name": "burkina faso"
+    },
+    {
+      "entity_ids": [
+        "country_bdi"
+      ],
+      "normalized_name": "burundi"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_14"
+      ],
+      "normalized_name": "calvados"
+    },
+    {
+      "entity_ids": [
+        "country_khm"
+      ],
+      "normalized_name": "cambodia"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_811"
+      ],
+      "normalized_name": "cambodia kampuchea"
+    },
+    {
+      "entity_ids": [
+        "country_cmr"
+      ],
+      "normalized_name": "cameroon"
+    },
+    {
+      "entity_ids": [
+        "dominion_of_canada"
+      ],
+      "normalized_name": "can"
+    },
+    {
+      "entity_ids": [
+        "country_can",
+        "dominion_of_canada"
+      ],
+      "normalized_name": "canada"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_15"
+      ],
+      "normalized_name": "cantal"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_561"
+      ],
+      "normalized_name": "cape colony"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_402"
+      ],
+      "normalized_name": "cape verde"
+    },
+    {
+      "entity_ids": [
+        "northern_industrial_belt"
+      ],
+      "normalized_name": "ceinture industrielle du nord"
+    },
+    {
+      "entity_ids": [
+        "country_caf"
+      ],
+      "normalized_name": "central african republic"
+    },
+    {
+      "entity_ids": [
+        "congo_free_state"
+      ],
+      "normalized_name": "cfs"
+    },
+    {
+      "entity_ids": [
+        "country_tcd"
+      ],
+      "normalized_name": "chad"
+    },
+    {
+      "entity_ids": [
+        "national_assembly"
+      ],
+      "normalized_name": "chambre des députés"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_16"
+      ],
+      "normalized_name": "charente"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_17"
+      ],
+      "normalized_name": "charente maritime"
+    },
+    {
+      "entity_ids": [
+        "swiss_confederation"
+      ],
+      "normalized_name": "che"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_18"
+      ],
+      "normalized_name": "cher"
+    },
+    {
+      "entity_ids": [
+        "chile_1900",
+        "country_chl"
+      ],
+      "normalized_name": "chile"
+    },
+    {
+      "entity_ids": [
+        "qing_empire"
+      ],
+      "normalized_name": "china"
+    },
+    {
+      "entity_ids": [
+        "chile_1900"
+      ],
+      "normalized_name": "chl"
+    },
+    {
+      "entity_ids": [
+        "qing_empire"
+      ],
+      "normalized_name": "chn"
+    },
+    {
+      "entity_ids": [
+        "republic_of_colombia_1900"
+      ],
+      "normalized_name": "col"
+    },
+    {
+      "entity_ids": [
+        "country_col",
+        "republic_of_colombia_1900"
+      ],
+      "normalized_name": "colombia"
+    },
+    {
+      "entity_ids": [
+        "committee_paris_lille_rail"
+      ],
+      "normalized_name": "commission de coordination ferroviaire paris lille"
+    },
+    {
+      "entity_ids": [
+        "committee_public_works_nord"
+      ],
+      "normalized_name": "commission des travaux publics du nord"
+    },
+    {
+      "entity_ids": [
+        "commune_lille"
+      ],
+      "normalized_name": "commune de lille"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_484"
+      ],
+      "normalized_name": "congo"
+    },
+    {
+      "entity_ids": [
+        "congo_free_state"
+      ],
+      "normalized_name": "congo democratic republic of zaire"
+    },
+    {
+      "entity_ids": [
+        "coop_lille_workers_consumption"
+      ],
+      "normalized_name": "coopérative ouvrière de consommation de lille"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_19"
+      ],
+      "normalized_name": "corrèze"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_2a"
+      ],
+      "normalized_name": "corse du sud"
+    },
+    {
+      "entity_ids": [
+        "costa_rica_1900",
+        "country_cri"
+      ],
+      "normalized_name": "costa rica"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_437"
+      ],
+      "normalized_name": "cote d ivoire"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_23"
+      ],
+      "normalized_name": "creuse"
+    },
+    {
+      "entity_ids": [
+        "country_hrv"
+      ],
+      "normalized_name": "croatia"
+    },
+    {
+      "entity_ids": [
+        "cuba_occupation_1900"
+      ],
+      "normalized_name": "cub"
+    },
+    {
+      "entity_ids": [
+        "country_cub",
+        "cuba_occupation_1900"
+      ],
+      "normalized_name": "cuba"
+    },
+    {
+      "entity_ids": [
+        "country_cyp"
+      ],
+      "normalized_name": "cyprus"
+    },
+    {
+      "entity_ids": [
+        "country_cze"
+      ],
+      "normalized_name": "czech republic"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_21"
+      ],
+      "normalized_name": "côte d or"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_22"
+      ],
+      "normalized_name": "côtes d armor"
+    },
+    {
+      "entity_ids": [
+        "country_cod"
+      ],
+      "normalized_name": "democratic republic of the congo"
+    },
+    {
+      "entity_ids": [
+        "country_dnk",
+        "kingdom_of_denmark"
+      ],
+      "normalized_name": "denmark"
+    },
+    {
+      "entity_ids": [
+        "german_empire"
+      ],
+      "normalized_name": "deu"
+    },
+    {
+      "entity_ids": [
+        "german_empire"
+      ],
+      "normalized_name": "deutsches reich"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_79"
+      ],
+      "normalized_name": "deux sèvres"
+    },
+    {
+      "entity_ids": [
+        "ottoman_empire"
+      ],
+      "normalized_name": "devlet i ʿalīye i ʿosmānīye"
+    },
+    {
+      "entity_ids": [
+        "country_dji",
+        "cshapes_gw_522"
+      ],
+      "normalized_name": "djibouti"
+    },
+    {
+      "entity_ids": [
+        "kingdom_of_denmark"
+      ],
+      "normalized_name": "dnk"
+    },
+    {
+      "entity_ids": [
+        "country_dom",
+        "dominican_republic_1900"
+      ],
+      "normalized_name": "dominican republic"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_24"
+      ],
+      "normalized_name": "dordogne"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_25"
+      ],
+      "normalized_name": "doubs"
+    },
+    {
+      "entity_ids": [
+        "dover"
+      ],
+      "normalized_name": "dover"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_26"
+      ],
+      "normalized_name": "drôme"
+    },
+    {
+      "entity_ids": [
+        "country_tls",
+        "cshapes_gw_860"
+      ],
+      "normalized_name": "east timor"
+    },
+    {
+      "entity_ids": [
+        "country_ecu",
+        "ecuador_1900"
+      ],
+      "normalized_name": "ecuador"
+    },
+    {
+      "entity_ids": [
+        "khedivate_of_egypt"
+      ],
+      "normalized_name": "egy"
+    },
+    {
+      "entity_ids": [
+        "country_egy",
+        "khedivate_of_egypt"
+      ],
+      "normalized_name": "egypt"
+    },
+    {
+      "entity_ids": [
+        "country_slv",
+        "el_salvador_1900"
+      ],
+      "normalized_name": "el salvador"
+    },
+    {
+      "entity_ids": [
+        "country_gnq",
+        "cshapes_gw_411"
+      ],
+      "normalized_name": "equatorial guinea"
+    },
+    {
+      "entity_ids": [
+        "country_eri",
+        "cshapes_gw_531"
+      ],
+      "normalized_name": "eritrea"
+    },
+    {
+      "entity_ids": [
+        "kingdom_of_spain"
+      ],
+      "normalized_name": "esp"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_91"
+      ],
+      "normalized_name": "essonne"
+    },
+    {
+      "entity_ids": [
+        "country_est"
+      ],
+      "normalized_name": "estonia"
+    },
+    {
+      "entity_ids": [
+        "country_swz"
+      ],
+      "normalized_name": "eswatini"
+    },
+    {
+      "entity_ids": [
+        "ethiopian_empire"
+      ],
+      "normalized_name": "eth"
+    },
+    {
+      "entity_ids": [
+        "country_eth",
+        "ethiopian_empire"
+      ],
+      "normalized_name": "ethiopia"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_27"
+      ],
+      "normalized_name": "eure"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_28"
+      ],
+      "normalized_name": "eure et loir"
+    },
+    {
+      "entity_ids": [
+        "country_flk"
+      ],
+      "normalized_name": "falkland islands"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_821"
+      ],
+      "normalized_name": "federated malay states"
+    },
+    {
+      "entity_ids": [
+        "country_fji",
+        "cshapes_gw_950"
+      ],
+      "normalized_name": "fiji"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_29"
+      ],
+      "normalized_name": "finistère"
+    },
+    {
+      "entity_ids": [
+        "country_fin"
+      ],
+      "normalized_name": "finland"
+    },
+    {
+      "entity_ids": [
+        "country_fra"
+      ],
+      "normalized_name": "fra"
+    },
+    {
+      "entity_ids": [
+        "country_fra"
+      ],
+      "normalized_name": "france"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_120"
+      ],
+      "normalized_name": "french guyana"
+    },
+    {
+      "entity_ids": [
+        "country_atf"
+      ],
+      "normalized_name": "french southern and antarctic lands"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_430"
+      ],
+      "normalized_name": "french west africa"
+    },
+    {
+      "entity_ids": [
+        "country_gab",
+        "cshapes_gw_481"
+      ],
+      "normalized_name": "gabon"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_420"
+      ],
+      "normalized_name": "gambia"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_30"
+      ],
+      "normalized_name": "gard"
+    },
+    {
+      "entity_ids": [
+        "british_isles_1900"
+      ],
+      "normalized_name": "gbr"
+    },
+    {
+      "entity_ids": [
+        "ghent"
+      ],
+      "normalized_name": "gent"
+    },
+    {
+      "entity_ids": [
+        "country_geo"
+      ],
+      "normalized_name": "georgia"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_460"
+      ],
+      "normalized_name": "german togoland"
+    },
+    {
+      "entity_ids": [
+        "german_empire"
+      ],
+      "normalized_name": "germany prussia"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_32"
+      ],
+      "normalized_name": "gers"
+    },
+    {
+      "entity_ids": [
+        "country_gha",
+        "cshapes_gw_452"
+      ],
+      "normalized_name": "ghana"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_33"
+      ],
+      "normalized_name": "gironde"
+    },
+    {
+      "entity_ids": [
+        "kingdom_of_greece"
+      ],
+      "normalized_name": "grc"
+    },
+    {
+      "entity_ids": [
+        "country_grc",
+        "kingdom_of_greece"
+      ],
+      "normalized_name": "greece"
+    },
+    {
+      "entity_ids": [
+        "country_grl"
+      ],
+      "normalized_name": "greenland"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_65"
+      ],
+      "normalized_name": "guadeloupe"
+    },
+    {
+      "entity_ids": [
+        "country_gtm",
+        "guatemala_1900"
+      ],
+      "normalized_name": "guatemala"
+    },
+    {
+      "entity_ids": [
+        "country_gin",
+        "cshapes_gw_438"
+      ],
+      "normalized_name": "guinea"
+    },
+    {
+      "entity_ids": [
+        "country_gnb",
+        "cshapes_gw_404"
+      ],
+      "normalized_name": "guinea bissau"
+    },
+    {
+      "entity_ids": [
+        "country_guy",
+        "cshapes_gw_110"
+      ],
+      "normalized_name": "guyana"
+    },
+    {
+      "entity_ids": [
+        "country_hti",
+        "haiti_1900"
+      ],
+      "normalized_name": "haiti"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_68"
+      ],
+      "normalized_name": "haut rhin"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_2b"
+      ],
+      "normalized_name": "haute corse"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_31"
+      ],
+      "normalized_name": "haute garonne"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_43"
+      ],
+      "normalized_name": "haute loire"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_52"
+      ],
+      "normalized_name": "haute marne"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_74"
+      ],
+      "normalized_name": "haute savoie"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_70"
+      ],
+      "normalized_name": "haute saône"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_87"
+      ],
+      "normalized_name": "haute vienne"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_05"
+      ],
+      "normalized_name": "hautes alpes"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_65"
+      ],
+      "normalized_name": "hautes pyrénées"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_92"
+      ],
+      "normalized_name": "hauts de seine"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_4"
+      ],
+      "normalized_name": "hawaii"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_3462"
+      ],
+      "normalized_name": "herzegovina"
+    },
+    {
+      "entity_ids": [
+        "country_hnd",
+        "honduras_1900"
+      ],
+      "normalized_name": "honduras"
+    },
+    {
+      "entity_ids": [
+        "austria_hungary"
+      ],
+      "normalized_name": "hun"
+    },
+    {
+      "entity_ids": [
+        "country_hun"
+      ],
+      "normalized_name": "hungary"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_34"
+      ],
+      "normalized_name": "hérault"
+    },
+    {
+      "entity_ids": [
+        "country_isl",
+        "iceland_under_denmark"
+      ],
+      "normalized_name": "iceland"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_35"
+      ],
+      "normalized_name": "ille et vilaine"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_750"
+      ],
+      "normalized_name": "ind"
+    },
+    {
+      "entity_ids": [
+        "country_ind",
+        "cshapes_gw_750"
+      ],
+      "normalized_name": "india"
+    },
+    {
+      "entity_ids": [
+        "country_idn",
+        "cshapes_gw_850"
+      ],
+      "normalized_name": "indonesia"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_36"
+      ],
+      "normalized_name": "indre"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_37"
+      ],
+      "normalized_name": "indre et loire"
+    },
+    {
+      "entity_ids": [
+        "labor_inspectorate_nord"
+      ],
+      "normalized_name": "inspection du travail du nord"
+    },
+    {
+      "entity_ids": [
+        "country_irn"
+      ],
+      "normalized_name": "iran"
+    },
+    {
+      "entity_ids": [
+        "persia_qajar"
+      ],
+      "normalized_name": "iran persia"
+    },
+    {
+      "entity_ids": [
+        "country_irq"
+      ],
+      "normalized_name": "iraq"
+    },
+    {
+      "entity_ids": [
+        "country_irl"
+      ],
+      "normalized_name": "ireland"
+    },
+    {
+      "entity_ids": [
+        "persia_qajar"
+      ],
+      "normalized_name": "irn"
+    },
+    {
+      "entity_ids": [
+        "country_isr"
+      ],
+      "normalized_name": "israel"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_38"
+      ],
+      "normalized_name": "isère"
+    },
+    {
+      "entity_ids": [
+        "kingdom_of_italy"
+      ],
+      "normalized_name": "ita"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_5200"
+      ],
+      "normalized_name": "italian somaliland"
+    },
+    {
+      "entity_ids": [
+        "country_ita"
+      ],
+      "normalized_name": "italy"
+    },
+    {
+      "entity_ids": [
+        "kingdom_of_italy"
+      ],
+      "normalized_name": "italy sardinia"
+    },
+    {
+      "entity_ids": [
+        "country_civ"
+      ],
+      "normalized_name": "ivory coast"
+    },
+    {
+      "entity_ids": [
+        "country_jam",
+        "cshapes_gw_51"
+      ],
+      "normalized_name": "jamaica"
+    },
+    {
+      "entity_ids": [
+        "empire_of_japan"
+      ],
+      "normalized_name": "japan"
+    },
+    {
+      "entity_ids": [
+        "country_jor"
+      ],
+      "normalized_name": "jordan"
+    },
+    {
+      "entity_ids": [
+        "empire_of_japan"
+      ],
+      "normalized_name": "jpn"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_39"
+      ],
+      "normalized_name": "jura"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_470"
+      ],
+      "normalized_name": "kamerun"
+    },
+    {
+      "entity_ids": [
+        "country_kaz"
+      ],
+      "normalized_name": "kazakhstan"
+    },
+    {
+      "entity_ids": [
+        "country_ken",
+        "cshapes_gw_501"
+      ],
+      "normalized_name": "kenya"
+    },
+    {
+      "entity_ids": [
+        "khanate_of_khiva"
+      ],
+      "normalized_name": "khiva"
+    },
+    {
+      "entity_ids": [
+        "korean_empire"
+      ],
+      "normalized_name": "kor"
+    },
+    {
+      "entity_ids": [
+        "korean_empire"
+      ],
+      "normalized_name": "korea"
+    },
+    {
+      "entity_ids": [
+        "kortrijk"
+      ],
+      "normalized_name": "kortrijk"
+    },
+    {
+      "entity_ids": [
+        "country_kos"
+      ],
+      "normalized_name": "kosovo"
+    },
+    {
+      "entity_ids": [
+        "country_kwt"
+      ],
+      "normalized_name": "kuwait"
+    },
+    {
+      "entity_ids": [
+        "country_kgz"
+      ],
+      "normalized_name": "kyrgyzstan"
+    },
+    {
+      "entity_ids": [
+        "cologne"
+      ],
+      "normalized_name": "köln"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_4781"
+      ],
+      "normalized_name": "lagos"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_40"
+      ],
+      "normalized_name": "landes"
+    },
+    {
+      "entity_ids": [
+        "country_lao",
+        "cshapes_gw_812"
+      ],
+      "normalized_name": "laos"
+    },
+    {
+      "entity_ids": [
+        "country_lva"
+      ],
+      "normalized_name": "latvia"
+    },
+    {
+      "entity_ids": [
+        "republic_of_liberia"
+      ],
+      "normalized_name": "lbr"
+    },
+    {
+      "entity_ids": [
+        "country_lbn"
+      ],
+      "normalized_name": "lebanon"
+    },
+    {
+      "entity_ids": [
+        "country_lso",
+        "cshapes_gw_570"
+      ],
+      "normalized_name": "lesotho"
+    },
+    {
+      "entity_ids": [
+        "country_lbr",
+        "republic_of_liberia"
+      ],
+      "normalized_name": "liberia"
+    },
+    {
+      "entity_ids": [
+        "country_lby"
+      ],
+      "normalized_name": "libya"
+    },
+    {
+      "entity_ids": [
+        "lille"
+      ],
+      "normalized_name": "lille"
+    },
+    {
+      "entity_ids": [
+        "country_ltu"
+      ],
+      "normalized_name": "lithuania"
+    },
+    {
+      "entity_ids": [
+        "mediterranean_coast"
+      ],
+      "normalized_name": "littoral méditerranéen"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_41"
+      ],
+      "normalized_name": "loir et cher"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_42"
+      ],
+      "normalized_name": "loire"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_44"
+      ],
+      "normalized_name": "loire atlantique"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_45"
+      ],
+      "normalized_name": "loiret"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_46"
+      ],
+      "normalized_name": "lot"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_47"
+      ],
+      "normalized_name": "lot et garonne"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_48"
+      ],
+      "normalized_name": "lozère"
+    },
+    {
+      "entity_ids": [
+        "kingdom_of_luxembourg"
+      ],
+      "normalized_name": "lux"
+    },
+    {
+      "entity_ids": [
+        "country_lux",
+        "grand_duchy_of_luxembourg"
+      ],
+      "normalized_name": "luxembourg"
+    },
+    {
+      "entity_ids": [
+        "country_mdg"
+      ],
+      "normalized_name": "madagascar"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_580"
+      ],
+      "normalized_name": "madagascar malagasy"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_49"
+      ],
+      "normalized_name": "maine et loire"
+    },
+    {
+      "entity_ids": [
+        "mairie_lille"
+      ],
+      "normalized_name": "mairie de lille"
+    },
+    {
+      "entity_ids": [
+        "country_mwi",
+        "cshapes_gw_553"
+      ],
+      "normalized_name": "malawi"
+    },
+    {
+      "entity_ids": [
+        "country_mys"
+      ],
+      "normalized_name": "malaysia"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_781"
+      ],
+      "normalized_name": "maldives"
+    },
+    {
+      "entity_ids": [
+        "country_mli"
+      ],
+      "normalized_name": "mali"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_338"
+      ],
+      "normalized_name": "malta"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_50"
+      ],
+      "normalized_name": "manche"
+    },
+    {
+      "entity_ids": [
+        "enterprise_lille_mechanical"
+      ],
+      "normalized_name": "manufacture mécanique de lille"
+    },
+    {
+      "entity_ids": [
+        "moroccan_sultanate"
+      ],
+      "normalized_name": "mar"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_51"
+      ],
+      "normalized_name": "marne"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_66"
+      ],
+      "normalized_name": "martinique"
+    },
+    {
+      "entity_ids": [
+        "massif_central"
+      ],
+      "normalized_name": "massif central"
+    },
+    {
+      "entity_ids": [
+        "country_mrt"
+      ],
+      "normalized_name": "mauritania"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_590"
+      ],
+      "normalized_name": "mauritius"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_53"
+      ],
+      "normalized_name": "mayenne"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_54"
+      ],
+      "normalized_name": "meurthe et moselle"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_55"
+      ],
+      "normalized_name": "meuse"
+    },
+    {
+      "entity_ids": [
+        "mexican_republic"
+      ],
+      "normalized_name": "mex"
+    },
+    {
+      "entity_ids": [
+        "country_mex",
+        "mexican_republic"
+      ],
+      "normalized_name": "mexico"
+    },
+    {
+      "entity_ids": [
+        "country_mda"
+      ],
+      "normalized_name": "moldova"
+    },
+    {
+      "entity_ids": [
+        "country_mng"
+      ],
+      "normalized_name": "mongolia"
+    },
+    {
+      "entity_ids": [
+        "country_mne",
+        "principality_of_montenegro"
+      ],
+      "normalized_name": "montenegro"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_56"
+      ],
+      "normalized_name": "morbihan"
+    },
+    {
+      "entity_ids": [
+        "country_mar",
+        "moroccan_sultanate"
+      ],
+      "normalized_name": "morocco"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_57"
+      ],
+      "normalized_name": "moselle"
+    },
+    {
+      "entity_ids": [
+        "country_moz",
+        "cshapes_gw_541"
+      ],
+      "normalized_name": "mozambique"
+    },
+    {
+      "entity_ids": [
+        "country_mmr"
+      ],
+      "normalized_name": "myanmar"
+    },
+    {
+      "entity_ids": [
+        "country_nam",
+        "cshapes_gw_565"
+      ],
+      "normalized_name": "namibia"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_562"
+      ],
+      "normalized_name": "natal"
+    },
+    {
+      "entity_ids": [
+        "country_npl",
+        "kingdom_of_nepal"
+      ],
+      "normalized_name": "nepal"
+    },
+    {
+      "entity_ids": [
+        "country_nld",
+        "kingdom_of_netherlands"
+      ],
+      "normalized_name": "netherlands"
+    },
+    {
+      "entity_ids": [
+        "country_ncl"
+      ],
+      "normalized_name": "new caledonia"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_930"
+      ],
+      "normalized_name": "new caledonia and dependencies"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_912"
+      ],
+      "normalized_name": "new guinea german new guinea kaiser wilhelmsland"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_901"
+      ],
+      "normalized_name": "new south wales"
+    },
+    {
+      "entity_ids": [
+        "country_nzl",
+        "cshapes_gw_920"
+      ],
+      "normalized_name": "new zealand"
+    },
+    {
+      "entity_ids": [
+        "colony_of_newfoundland"
+      ],
+      "normalized_name": "newfoundland"
+    },
+    {
+      "entity_ids": [
+        "country_nic",
+        "nicaragua_1900"
+      ],
+      "normalized_name": "nicaragua"
+    },
+    {
+      "entity_ids": [
+        "country_ner"
+      ],
+      "normalized_name": "niger"
+    },
+    {
+      "entity_ids": [
+        "country_nga"
+      ],
+      "normalized_name": "nigeria"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_58"
+      ],
+      "normalized_name": "nièvre"
+    },
+    {
+      "entity_ids": [
+        "kingdom_of_netherlands"
+      ],
+      "normalized_name": "nld"
+    },
+    {
+      "entity_ids": [
+        "sweden_norway_union"
+      ],
+      "normalized_name": "nor"
+    },
+    {
+      "entity_ids": [
+        "departement_nord"
+      ],
+      "normalized_name": "nord"
+    },
+    {
+      "entity_ids": [
+        "normandy"
+      ],
+      "normalized_name": "normandie"
+    },
+    {
+      "entity_ids": [
+        "country_prk"
+      ],
+      "normalized_name": "north korea"
+    },
+    {
+      "entity_ids": [
+        "country_mkd"
+      ],
+      "normalized_name": "north macedonia"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_5518"
+      ],
+      "normalized_name": "northeastern rhodesia"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_4784"
+      ],
+      "normalized_name": "northern nigeria"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_5519"
+      ],
+      "normalized_name": "northwestern rhodesia"
+    },
+    {
+      "entity_ids": [
+        "country_nor"
+      ],
+      "normalized_name": "norway"
+    },
+    {
+      "entity_ids": [
+        "kingdom_of_nepal"
+      ],
+      "normalized_name": "npl"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_920"
+      ],
+      "normalized_name": "nzl"
+    },
+    {
+      "entity_ids": [
+        "orange_free_state"
+      ],
+      "normalized_name": "ofs"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_60"
+      ],
+      "normalized_name": "oise"
+    },
+    {
+      "entity_ids": [
+        "country_omn",
+        "sultanate_of_muscat_oman"
+      ],
+      "normalized_name": "oman"
+    },
+    {
+      "entity_ids": [
+        "orange_free_state"
+      ],
+      "normalized_name": "orange free state"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_61"
+      ],
+      "normalized_name": "orne"
+    },
+    {
+      "entity_ids": [
+        "country_pak"
+      ],
+      "normalized_name": "pakistan"
+    },
+    {
+      "entity_ids": [
+        "country_psx"
+      ],
+      "normalized_name": "palestine"
+    },
+    {
+      "entity_ids": [
+        "country_pan"
+      ],
+      "normalized_name": "panama"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_911"
+      ],
+      "normalized_name": "papua"
+    },
+    {
+      "entity_ids": [
+        "country_png"
+      ],
+      "normalized_name": "papua new guinea"
+    },
+    {
+      "entity_ids": [
+        "country_pry",
+        "paraguay_1900"
+      ],
+      "normalized_name": "paraguay"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_75"
+      ],
+      "normalized_name": "paris"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_62"
+      ],
+      "normalized_name": "pas de calais"
+    },
+    {
+      "entity_ids": [
+        "peru_1900"
+      ],
+      "normalized_name": "per"
+    },
+    {
+      "entity_ids": [
+        "country_per",
+        "peru_1900"
+      ],
+      "normalized_name": "peru"
+    },
+    {
+      "entity_ids": [
+        "country_phl",
+        "cshapes_gw_840"
+      ],
+      "normalized_name": "philippines"
+    },
+    {
+      "entity_ids": [
+        "character_pierre_lefevre"
+      ],
+      "normalized_name": "pierre lefèvre"
+    },
+    {
+      "entity_ids": [
+        "country_pol"
+      ],
+      "normalized_name": "poland"
+    },
+    {
+      "entity_ids": [
+        "country_prt",
+        "kingdom_of_portugal"
+      ],
+      "normalized_name": "portugal"
+    },
+    {
+      "entity_ids": [
+        "kingdom_of_portugal"
+      ],
+      "normalized_name": "prt"
+    },
+    {
+      "entity_ids": [
+        "paraguay_1900"
+      ],
+      "normalized_name": "pry"
+    },
+    {
+      "entity_ids": [
+        "prefecture_seine_inferieure"
+      ],
+      "normalized_name": "préfecture de la seine inférieure"
+    },
+    {
+      "entity_ids": [
+        "prefecture_nord",
+        "workplace_prefecture_nord"
+      ],
+      "normalized_name": "préfecture du nord"
+    },
+    {
+      "entity_ids": [
+        "country_pri",
+        "cshapes_gw_6"
+      ],
+      "normalized_name": "puerto rico"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_63"
+      ],
+      "normalized_name": "puy de dôme"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_64"
+      ],
+      "normalized_name": "pyrénées atlantiques"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_66"
+      ],
+      "normalized_name": "pyrénées orientales"
+    },
+    {
+      "entity_ids": [
+        "country_qat"
+      ],
+      "normalized_name": "qatar"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_905"
+      ],
+      "normalized_name": "queensland"
+    },
+    {
+      "entity_ids": [
+        "country_cog"
+      ],
+      "normalized_name": "republic of the congo"
+    },
+    {
+      "entity_ids": [
+        "argentine_republic"
+      ],
+      "normalized_name": "república argentina"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_585"
+      ],
+      "normalized_name": "reunion"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_69"
+      ],
+      "normalized_name": "rhône"
+    },
+    {
+      "entity_ids": [
+        "country_rou"
+      ],
+      "normalized_name": "romania"
+    },
+    {
+      "entity_ids": [
+        "kingdom_of_romania"
+      ],
+      "normalized_name": "rou"
+    },
+    {
+      "entity_ids": [
+        "kingdom_of_romania"
+      ],
+      "normalized_name": "rumania"
+    },
+    {
+      "entity_ids": [
+        "russian_empire"
+      ],
+      "normalized_name": "rus"
+    },
+    {
+      "entity_ids": [
+        "russian_empire"
+      ],
+      "normalized_name": "russia soviet union"
+    },
+    {
+      "entity_ids": [
+        "country_rwa"
+      ],
+      "normalized_name": "rwanda"
+    },
+    {
+      "entity_ids": [
+        "country_fra"
+      ],
+      "normalized_name": "république française"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_823"
+      ],
+      "normalized_name": "sabah north borneo"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_824"
+      ],
+      "normalized_name": "sarawak"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_72"
+      ],
+      "normalized_name": "sarthe"
+    },
+    {
+      "entity_ids": [
+        "country_sau"
+      ],
+      "normalized_name": "saudi arabia"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_73"
+      ],
+      "normalized_name": "savoie"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_71"
+      ],
+      "normalized_name": "saône et loire"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_77"
+      ],
+      "normalized_name": "seine et marne"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_76"
+      ],
+      "normalized_name": "seine maritime"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_93"
+      ],
+      "normalized_name": "seine saint denis"
+    },
+    {
+      "entity_ids": [
+        "country_sen",
+        "cshapes_gw_433"
+      ],
+      "normalized_name": "senegal"
+    },
+    {
+      "entity_ids": [
+        "country_srb",
+        "kingdom_of_serbia"
+      ],
+      "normalized_name": "serbia"
+    },
+    {
+      "entity_ids": [
+        "country_sle",
+        "cshapes_gw_451"
+      ],
+      "normalized_name": "sierra leone"
+    },
+    {
+      "entity_ids": [
+        "country_svk"
+      ],
+      "normalized_name": "slovakia"
+    },
+    {
+      "entity_ids": [
+        "country_svn"
+      ],
+      "normalized_name": "slovenia"
+    },
+    {
+      "entity_ids": [
+        "country_slb",
+        "cshapes_gw_940"
+      ],
+      "normalized_name": "solomon islands"
+    },
+    {
+      "entity_ids": [
+        "country_som"
+      ],
+      "normalized_name": "somalia"
+    },
+    {
+      "entity_ids": [
+        "country_sol"
+      ],
+      "normalized_name": "somaliland"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_80"
+      ],
+      "normalized_name": "somme"
+    },
+    {
+      "entity_ids": [
+        "sous_prefecture_lille"
+      ],
+      "normalized_name": "sous préfecture de lille"
+    },
+    {
+      "entity_ids": [
+        "country_zaf"
+      ],
+      "normalized_name": "south africa"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_903"
+      ],
+      "normalized_name": "south australia"
+    },
+    {
+      "entity_ids": [
+        "country_kor"
+      ],
+      "normalized_name": "south korea"
+    },
+    {
+      "entity_ids": [
+        "country_sds"
+      ],
+      "normalized_name": "south sudan"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_4783"
+      ],
+      "normalized_name": "southern nigeria"
+    },
+    {
+      "entity_ids": [
+        "country_esp",
+        "kingdom_of_spain"
+      ],
+      "normalized_name": "spain"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_610"
+      ],
+      "normalized_name": "spanish west africa"
+    },
+    {
+      "entity_ids": [
+        "kingdom_of_serbia"
+      ],
+      "normalized_name": "srb"
+    },
+    {
+      "entity_ids": [
+        "country_lka"
+      ],
+      "normalized_name": "sri lanka"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_780"
+      ],
+      "normalized_name": "sri lanka ceylon"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_827"
+      ],
+      "normalized_name": "straits settlements"
+    },
+    {
+      "entity_ids": [
+        "country_sdn",
+        "cshapes_gw_625"
+      ],
+      "normalized_name": "sudan"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_115"
+      ],
+      "normalized_name": "surinam"
+    },
+    {
+      "entity_ids": [
+        "country_sur"
+      ],
+      "normalized_name": "suriname"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_572"
+      ],
+      "normalized_name": "swaziland eswatini"
+    },
+    {
+      "entity_ids": [
+        "sweden_norway_union"
+      ],
+      "normalized_name": "swe"
+    },
+    {
+      "entity_ids": [
+        "country_swe",
+        "sweden_norway_union"
+      ],
+      "normalized_name": "sweden"
+    },
+    {
+      "entity_ids": [
+        "country_che",
+        "swiss_confederation"
+      ],
+      "normalized_name": "switzerland"
+    },
+    {
+      "entity_ids": [
+        "union_metalworkers_nord"
+      ],
+      "normalized_name": "syndicat des ouvriers métallurgistes du nord"
+    },
+    {
+      "entity_ids": [
+        "country_syr"
+      ],
+      "normalized_name": "syria"
+    },
+    {
+      "entity_ids": [
+        "country_twn",
+        "taiwan_under_japan"
+      ],
+      "normalized_name": "taiwan"
+    },
+    {
+      "entity_ids": [
+        "country_tjk"
+      ],
+      "normalized_name": "tajikistan"
+    },
+    {
+      "entity_ids": [
+        "country_tza"
+      ],
+      "normalized_name": "tanzania"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_510"
+      ],
+      "normalized_name": "tanzania tanganyika"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_81"
+      ],
+      "normalized_name": "tarn"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_82"
+      ],
+      "normalized_name": "tarn et garonne"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_906"
+      ],
+      "normalized_name": "tasmania"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_90"
+      ],
+      "normalized_name": "territoire de belfort"
+    },
+    {
+      "entity_ids": [
+        "kingdom_of_siam"
+      ],
+      "normalized_name": "tha"
+    },
+    {
+      "entity_ids": [
+        "country_tha",
+        "kingdom_of_siam"
+      ],
+      "normalized_name": "thailand"
+    },
+    {
+      "entity_ids": [
+        "country_bhs"
+      ],
+      "normalized_name": "the bahamas"
+    },
+    {
+      "entity_ids": [
+        "country_gmb"
+      ],
+      "normalized_name": "the gambia"
+    },
+    {
+      "entity_ids": [
+        "country_tgo"
+      ],
+      "normalized_name": "togo"
+    },
+    {
+      "entity_ids": [
+        "tournai"
+      ],
+      "normalized_name": "tournai"
+    },
+    {
+      "entity_ids": [
+        "south_african_republic"
+      ],
+      "normalized_name": "transvaal"
+    },
+    {
+      "entity_ids": [
+        "country_tto",
+        "cshapes_gw_52"
+      ],
+      "normalized_name": "trinidad and tobago"
+    },
+    {
+      "entity_ids": [
+        "beylicate_of_tunis",
+        "country_tun"
+      ],
+      "normalized_name": "tunisia"
+    },
+    {
+      "entity_ids": [
+        "ottoman_empire"
+      ],
+      "normalized_name": "tur"
+    },
+    {
+      "entity_ids": [
+        "ottoman_empire"
+      ],
+      "normalized_name": "turkey ottoman empire"
+    },
+    {
+      "entity_ids": [
+        "country_cyn"
+      ],
+      "normalized_name": "turkish republic of northern cyprus"
+    },
+    {
+      "entity_ids": [
+        "country_tkm"
+      ],
+      "normalized_name": "turkmenistan"
+    },
+    {
+      "entity_ids": [
+        "country_uga",
+        "cshapes_gw_500"
+      ],
+      "normalized_name": "uganda"
+    },
+    {
+      "entity_ids": [
+        "country_ukr"
+      ],
+      "normalized_name": "ukraine"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_822"
+      ],
+      "normalized_name": "unfederated malay states"
+    },
+    {
+      "entity_ids": [
+        "union_mechanical_nord"
+      ],
+      "normalized_name": "union mécanique du nord"
+    },
+    {
+      "entity_ids": [
+        "country_are",
+        "trucial_states"
+      ],
+      "normalized_name": "united arab emirates"
+    },
+    {
+      "entity_ids": [
+        "british_isles_1900"
+      ],
+      "normalized_name": "united kingdom"
+    },
+    {
+      "entity_ids": [
+        "british_empire"
+      ],
+      "normalized_name": "united kingdom of great britain and ireland"
+    },
+    {
+      "entity_ids": [
+        "united_states",
+        "united_states_1900"
+      ],
+      "normalized_name": "united states of america"
+    },
+    {
+      "entity_ids": [
+        "country_ury",
+        "uruguay_1900"
+      ],
+      "normalized_name": "uruguay"
+    },
+    {
+      "entity_ids": [
+        "uruguay_1900"
+      ],
+      "normalized_name": "ury"
+    },
+    {
+      "entity_ids": [
+        "united_states_1900"
+      ],
+      "normalized_name": "usa"
+    },
+    {
+      "entity_ids": [
+        "country_uzb"
+      ],
+      "normalized_name": "uzbekistan"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_95"
+      ],
+      "normalized_name": "val d oise"
+    },
+    {
+      "entity_ids": [
+        "loire_valley"
+      ],
+      "normalized_name": "val de loire"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_94"
+      ],
+      "normalized_name": "val de marne"
+    },
+    {
+      "entity_ids": [
+        "rhone_valley"
+      ],
+      "normalized_name": "vallée du rhône"
+    },
+    {
+      "entity_ids": [
+        "country_vut"
+      ],
+      "normalized_name": "vanuatu"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_83"
+      ],
+      "normalized_name": "var"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_84"
+      ],
+      "normalized_name": "vaucluse"
+    },
+    {
+      "entity_ids": [
+        "venezuela_1900"
+      ],
+      "normalized_name": "ven"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_85"
+      ],
+      "normalized_name": "vendée"
+    },
+    {
+      "entity_ids": [
+        "country_ven",
+        "venezuela_1900"
+      ],
+      "normalized_name": "venezuela"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_904"
+      ],
+      "normalized_name": "victoria"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_86"
+      ],
+      "normalized_name": "vienne"
+    },
+    {
+      "entity_ids": [
+        "country_vnm"
+      ],
+      "normalized_name": "vietnam"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_815"
+      ],
+      "normalized_name": "vietnam annam cochin china tonkin"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_88"
+      ],
+      "normalized_name": "vosges"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_902"
+      ],
+      "normalized_name": "western australia"
+    },
+    {
+      "entity_ids": [
+        "country_sah"
+      ],
+      "normalized_name": "western sahara"
+    },
+    {
+      "entity_ids": [
+        "country_yem"
+      ],
+      "normalized_name": "yemen"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_89"
+      ],
+      "normalized_name": "yonne"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_78"
+      ],
+      "normalized_name": "yvelines"
+    },
+    {
+      "entity_ids": [
+        "country_zmb"
+      ],
+      "normalized_name": "zambia"
+    },
+    {
+      "entity_ids": [
+        "sultanate_of_zanzibar"
+      ],
+      "normalized_name": "zan"
+    },
+    {
+      "entity_ids": [
+        "sultanate_of_zanzibar"
+      ],
+      "normalized_name": "zanzibar"
+    },
+    {
+      "entity_ids": [
+        "south_african_republic"
+      ],
+      "normalized_name": "zar"
+    },
+    {
+      "entity_ids": [
+        "country_zwe"
+      ],
+      "normalized_name": "zimbabwe"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_552"
+      ],
+      "normalized_name": "zimbabwe rhodesia"
+    },
+    {
+      "entity_ids": [
+        "school_lille_workers_evening"
+      ],
+      "normalized_name": "école du soir ouvrière de lille"
+    },
+    {
+      "entity_ids": [
+        "austro_hungarian_empire"
+      ],
+      "normalized_name": "österreich ungarn"
+    },
+    {
+      "entity_ids": [
+        "russian_empire"
+      ],
+      "normalized_name": "россійская имперія"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_31"
+      ],
+      "normalized_name": "上加龙省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_43"
+      ],
+      "normalized_name": "上卢瓦尔省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_92"
+      ],
+      "normalized_name": "上塞纳省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_04"
+      ],
+      "normalized_name": "上普罗旺斯阿尔卑斯省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_65"
+      ],
+      "normalized_name": "上比利牛斯省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_2b"
+      ],
+      "normalized_name": "上科西嘉"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_70"
+      ],
+      "normalized_name": "上索恩省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_87"
+      ],
+      "normalized_name": "上维埃纳省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_68"
+      ],
+      "normalized_name": "上莱茵省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_74"
+      ],
+      "normalized_name": "上萨瓦省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_05"
+      ],
+      "normalized_name": "上阿尔卑斯省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_52"
+      ],
+      "normalized_name": "上马恩省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_67"
+      ],
+      "normalized_name": "下萊茵省"
+    },
+    {
+      "entity_ids": [
+        "country_btn",
+        "kingdom_of_bhutan"
+      ],
+      "normalized_name": "不丹"
+    },
+    {
+      "entity_ids": [
+        "kingdom_of_bhutan"
+      ],
+      "normalized_name": "不丹王国"
+    },
+    {
+      "entity_ids": [
+        "tokyo"
+      ],
+      "normalized_name": "东京"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_5518"
+      ],
+      "normalized_name": "东北罗得西亚"
+    },
+    {
+      "entity_ids": [
+        "country_tls"
+      ],
+      "normalized_name": "东帝汶"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_66"
+      ],
+      "normalized_name": "东比利牛斯省"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_501"
+      ],
+      "normalized_name": "东非保护国"
+    },
+    {
+      "entity_ids": [
+        "country_twn"
+      ],
+      "normalized_name": "中华民国"
+    },
+    {
+      "entity_ids": [
+        "massif_central"
+      ],
+      "normalized_name": "中央高原"
+    },
+    {
+      "entity_ids": [
+        "country_caf"
+      ],
+      "normalized_name": "中非共和国"
+    },
+    {
+      "entity_ids": [
+        "country_dnk",
+        "kingdom_of_denmark"
+      ],
+      "normalized_name": "丹麦"
+    },
+    {
+      "entity_ids": [
+        "kingdom_of_denmark"
+      ],
+      "normalized_name": "丹麦王国"
+    },
+    {
+      "entity_ids": [
+        "country_ukr"
+      ],
+      "normalized_name": "乌克兰"
+    },
+    {
+      "entity_ids": [
+        "country_uzb"
+      ],
+      "normalized_name": "乌兹别克斯坦"
+    },
+    {
+      "entity_ids": [
+        "country_uga"
+      ],
+      "normalized_name": "乌干达"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_500"
+      ],
+      "normalized_name": "乌干达保护国"
+    },
+    {
+      "entity_ids": [
+        "country_ury",
+        "uruguay_1900"
+      ],
+      "normalized_name": "乌拉圭"
+    },
+    {
+      "entity_ids": [
+        "uruguay_1900"
+      ],
+      "normalized_name": "乌拉圭东岸共和国"
+    },
+    {
+      "entity_ids": [
+        "country_tcd"
+      ],
+      "normalized_name": "乍得"
+    },
+    {
+      "entity_ids": [
+        "country_yem"
+      ],
+      "normalized_name": "也门"
+    },
+    {
+      "entity_ids": [
+        "alexandria",
+        "port_alexandria"
+      ],
+      "normalized_name": "亚历山大港"
+    },
+    {
+      "entity_ids": [
+        "country_arm"
+      ],
+      "normalized_name": "亚美尼亚"
+    },
+    {
+      "entity_ids": [
+        "country_isr"
+      ],
+      "normalized_name": "以色列"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_35"
+      ],
+      "normalized_name": "伊勒 维莱讷省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_78"
+      ],
+      "normalized_name": "伊夫林省"
+    },
+    {
+      "entity_ids": [
+        "country_irq"
+      ],
+      "normalized_name": "伊拉克"
+    },
+    {
+      "entity_ids": [
+        "country_irn"
+      ],
+      "normalized_name": "伊朗"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_38"
+      ],
+      "normalized_name": "伊泽尔省"
+    },
+    {
+      "entity_ids": [
+        "national_assembly"
+      ],
+      "normalized_name": "众议院"
+    },
+    {
+      "entity_ids": [
+        "london"
+      ],
+      "normalized_name": "伦敦"
+    },
+    {
+      "entity_ids": [
+        "port_london"
+      ],
+      "normalized_name": "伦敦港"
+    },
+    {
+      "entity_ids": [
+        "country_blz"
+      ],
+      "normalized_name": "伯利兹"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_402"
+      ],
+      "normalized_name": "佛得角"
+    },
+    {
+      "entity_ids": [
+        "russian_empire"
+      ],
+      "normalized_name": "俄罗斯帝国"
+    },
+    {
+      "entity_ids": [
+        "country_bgr",
+        "principality_of_bulgaria"
+      ],
+      "normalized_name": "保加利亚"
+    },
+    {
+      "entity_ids": [
+        "principality_of_bulgaria"
+      ],
+      "normalized_name": "保加利亚公国"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_23"
+      ],
+      "normalized_name": "克勒兹省"
+    },
+    {
+      "entity_ids": [
+        "country_hrv"
+      ],
+      "normalized_name": "克罗地亚"
+    },
+    {
+      "entity_ids": [
+        "country_gmb"
+      ],
+      "normalized_name": "冈比亚"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_420"
+      ],
+      "normalized_name": "冈比亚殖民地"
+    },
+    {
+      "entity_ids": [
+        "country_isl",
+        "iceland_under_denmark"
+      ],
+      "normalized_name": "冰岛"
+    },
+    {
+      "entity_ids": [
+        "country_gin"
+      ],
+      "normalized_name": "几内亚"
+    },
+    {
+      "entity_ids": [
+        "country_gnb"
+      ],
+      "normalized_name": "几内亚比绍"
+    },
+    {
+      "entity_ids": [
+        "country_cog"
+      ],
+      "normalized_name": "刚果共和国"
+    },
+    {
+      "entity_ids": [
+        "country_cod"
+      ],
+      "normalized_name": "刚果民主共和国"
+    },
+    {
+      "entity_ids": [
+        "congo_free_state"
+      ],
+      "normalized_name": "刚果自由邦"
+    },
+    {
+      "entity_ids": [
+        "country_lby"
+      ],
+      "normalized_name": "利比亚"
+    },
+    {
+      "entity_ids": [
+        "country_lbr",
+        "republic_of_liberia"
+      ],
+      "normalized_name": "利比里亚"
+    },
+    {
+      "entity_ids": [
+        "republic_of_liberia"
+      ],
+      "normalized_name": "利比里亚共和国"
+    },
+    {
+      "entity_ids": [
+        "kolkata"
+      ],
+      "normalized_name": "加尔各答"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_30"
+      ],
+      "normalized_name": "加尔省"
+    },
+    {
+      "entity_ids": [
+        "country_can"
+      ],
+      "normalized_name": "加拿大"
+    },
+    {
+      "entity_ids": [
+        "dominion_of_canada"
+      ],
+      "normalized_name": "加拿大自治领"
+    },
+    {
+      "entity_ids": [
+        "calais"
+      ],
+      "normalized_name": "加来"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_62"
+      ],
+      "normalized_name": "加来海峡省"
+    },
+    {
+      "entity_ids": [
+        "port_calais"
+      ],
+      "normalized_name": "加来港"
+    },
+    {
+      "entity_ids": [
+        "country_gha"
+      ],
+      "normalized_name": "加纳"
+    },
+    {
+      "entity_ids": [
+        "country_gab",
+        "cshapes_gw_481"
+      ],
+      "normalized_name": "加蓬"
+    },
+    {
+      "entity_ids": [
+        "le_havre"
+      ],
+      "normalized_name": "勒阿弗尔"
+    },
+    {
+      "entity_ids": [
+        "port_le_havre"
+      ],
+      "normalized_name": "勒阿弗尔港"
+    },
+    {
+      "entity_ids": [
+        "country_hun"
+      ],
+      "normalized_name": "匈牙利"
+    },
+    {
+      "entity_ids": [
+        "beijing"
+      ],
+      "normalized_name": "北京"
+    },
+    {
+      "entity_ids": [
+        "country_cyn"
+      ],
+      "normalized_name": "北塞浦路斯土耳其共和国"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_823"
+      ],
+      "normalized_name": "北婆罗洲"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_4784"
+      ],
+      "normalized_name": "北尼日利亚保护国"
+    },
+    {
+      "entity_ids": [
+        "northern_industrial_belt"
+      ],
+      "normalized_name": "北部工业带"
+    },
+    {
+      "entity_ids": [
+        "committee_public_works_nord"
+      ],
+      "normalized_name": "北部省公共工程委员会"
+    },
+    {
+      "entity_ids": [
+        "association_civil_servants_nord"
+      ],
+      "normalized_name": "北部省公务人员协会"
+    },
+    {
+      "entity_ids": [
+        "labor_inspectorate_nord"
+      ],
+      "normalized_name": "北部省劳动监察处"
+    },
+    {
+      "entity_ids": [
+        "association_industry_commerce_nord"
+      ],
+      "normalized_name": "北部省工业与商业协会"
+    },
+    {
+      "entity_ids": [
+        "union_mechanical_nord"
+      ],
+      "normalized_name": "北部省机械行业联合会"
+    },
+    {
+      "entity_ids": [
+        "prefecture_nord",
+        "workplace_prefecture_nord"
+      ],
+      "normalized_name": "北部省省政府"
+    },
+    {
+      "entity_ids": [
+        "union_metalworkers_nord"
+      ],
+      "normalized_name": "北部省金属工人工会"
+    },
+    {
+      "entity_ids": [
+        "country_mkd"
+      ],
+      "normalized_name": "北马其顿"
+    },
+    {
+      "entity_ids": [
+        "washington"
+      ],
+      "normalized_name": "华盛顿"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_4783"
+      ],
+      "normalized_name": "南尼日利亚保护国"
+    },
+    {
+      "entity_ids": [
+        "country_ata"
+      ],
+      "normalized_name": "南极洲"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_903"
+      ],
+      "normalized_name": "南澳大利亚殖民地"
+    },
+    {
+      "entity_ids": [
+        "nantes"
+      ],
+      "normalized_name": "南特"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_2a"
+      ],
+      "normalized_name": "南科西嘉"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_552"
+      ],
+      "normalized_name": "南罗得西亚"
+    },
+    {
+      "entity_ids": [
+        "country_sds"
+      ],
+      "normalized_name": "南苏丹"
+    },
+    {
+      "entity_ids": [
+        "south_africa_war_zone"
+      ],
+      "normalized_name": "南部非洲交战区"
+    },
+    {
+      "entity_ids": [
+        "country_zaf"
+      ],
+      "normalized_name": "南非"
+    },
+    {
+      "entity_ids": [
+        "south_african_republic"
+      ],
+      "normalized_name": "南非共和国"
+    },
+    {
+      "entity_ids": [
+        "country_bwa"
+      ],
+      "normalized_name": "博茨瓦纳"
+    },
+    {
+      "entity_ids": [
+        "country_qat"
+      ],
+      "normalized_name": "卡塔尔"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_14"
+      ],
+      "normalized_name": "卡尔瓦多斯省"
+    },
+    {
+      "entity_ids": [
+        "persia_qajar"
+      ],
+      "normalized_name": "卡扎尔波斯"
+    },
+    {
+      "entity_ids": [
+        "country_rwa"
+      ],
+      "normalized_name": "卢旺达"
+    },
+    {
+      "entity_ids": [
+        "country_lux"
+      ],
+      "normalized_name": "卢森堡"
+    },
+    {
+      "entity_ids": [
+        "grand_duchy_of_luxembourg"
+      ],
+      "normalized_name": "卢森堡大公国"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_41"
+      ],
+      "normalized_name": "卢瓦 谢尔省"
+    },
+    {
+      "entity_ids": [
+        "loire_valley"
+      ],
+      "normalized_name": "卢瓦尔河谷"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_42"
+      ],
+      "normalized_name": "卢瓦尔省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_45"
+      ],
+      "normalized_name": "卢瓦雷省"
+    },
+    {
+      "entity_ids": [
+        "country_ind"
+      ],
+      "normalized_name": "印度"
+    },
+    {
+      "entity_ids": [
+        "country_idn"
+      ],
+      "normalized_name": "印度尼西亚"
+    },
+    {
+      "entity_ids": [
+        "country_gtm",
+        "guatemala_1900"
+      ],
+      "normalized_name": "危地马拉"
+    },
+    {
+      "entity_ids": [
+        "guatemala_1900"
+      ],
+      "normalized_name": "危地马拉共和国"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_28"
+      ],
+      "normalized_name": "厄尔 卢瓦省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_27"
+      ],
+      "normalized_name": "厄尔省"
+    },
+    {
+      "entity_ids": [
+        "country_ecu",
+        "ecuador_1900"
+      ],
+      "normalized_name": "厄瓜多尔"
+    },
+    {
+      "entity_ids": [
+        "ecuador_1900"
+      ],
+      "normalized_name": "厄瓜多尔共和国"
+    },
+    {
+      "entity_ids": [
+        "country_eri"
+      ],
+      "normalized_name": "厄立特里亚"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_531"
+      ],
+      "normalized_name": "厄立特里亚殖民地"
+    },
+    {
+      "entity_ids": [
+        "country_syr"
+      ],
+      "normalized_name": "叙利亚"
+    },
+    {
+      "entity_ids": [
+        "country_cub"
+      ],
+      "normalized_name": "古巴"
+    },
+    {
+      "entity_ids": [
+        "cuba_occupation_1900"
+      ],
+      "normalized_name": "古巴军事占领区"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_33"
+      ],
+      "normalized_name": "吉伦特省"
+    },
+    {
+      "entity_ids": [
+        "country_kgz"
+      ],
+      "normalized_name": "吉尔吉斯斯坦"
+    },
+    {
+      "entity_ids": [
+        "country_dji"
+      ],
+      "normalized_name": "吉布提"
+    },
+    {
+      "entity_ids": [
+        "istanbul"
+      ],
+      "normalized_name": "君士坦丁堡"
+    },
+    {
+      "entity_ids": [
+        "country_kaz"
+      ],
+      "normalized_name": "哈萨克斯坦"
+    },
+    {
+      "entity_ids": [
+        "country_col",
+        "republic_of_colombia_1900"
+      ],
+      "normalized_name": "哥伦比亚"
+    },
+    {
+      "entity_ids": [
+        "republic_of_colombia_1900"
+      ],
+      "normalized_name": "哥伦比亚共和国"
+    },
+    {
+      "entity_ids": [
+        "costa_rica_1900",
+        "country_cri"
+      ],
+      "normalized_name": "哥斯达黎加"
+    },
+    {
+      "entity_ids": [
+        "costa_rica_1900"
+      ],
+      "normalized_name": "哥斯达黎加共和国"
+    },
+    {
+      "entity_ids": [
+        "country_cmr"
+      ],
+      "normalized_name": "喀麦隆"
+    },
+    {
+      "entity_ids": [
+        "toulouse"
+      ],
+      "normalized_name": "图卢兹"
+    },
+    {
+      "entity_ids": [
+        "tournai"
+      ],
+      "normalized_name": "图尔奈"
+    },
+    {
+      "entity_ids": [
+        "country_tkm"
+      ],
+      "normalized_name": "土库曼斯坦"
+    },
+    {
+      "entity_ids": [
+        "st_petersburg"
+      ],
+      "normalized_name": "圣彼得堡"
+    },
+    {
+      "entity_ids": [
+        "country_guy"
+      ],
+      "normalized_name": "圭亚那"
+    },
+    {
+      "entity_ids": [
+        "mediterranean_coast"
+      ],
+      "normalized_name": "地中海沿岸"
+    },
+    {
+      "entity_ids": [
+        "country_tza"
+      ],
+      "normalized_name": "坦桑尼亚"
+    },
+    {
+      "entity_ids": [
+        "country_egy"
+      ],
+      "normalized_name": "埃及"
+    },
+    {
+      "entity_ids": [
+        "khedivate_of_egypt"
+      ],
+      "normalized_name": "埃及赫迪夫国"
+    },
+    {
+      "entity_ids": [
+        "country_eth",
+        "ethiopian_empire"
+      ],
+      "normalized_name": "埃塞俄比亚"
+    },
+    {
+      "entity_ids": [
+        "ethiopian_empire"
+      ],
+      "normalized_name": "埃塞俄比亚帝国"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_91"
+      ],
+      "normalized_name": "埃松省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_02"
+      ],
+      "normalized_name": "埃纳省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_34"
+      ],
+      "normalized_name": "埃罗省"
+    },
+    {
+      "entity_ids": [
+        "country_tjk"
+      ],
+      "normalized_name": "塔吉克斯坦"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_82"
+      ],
+      "normalized_name": "塔恩 加龙省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_81"
+      ],
+      "normalized_name": "塔恩省"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_906"
+      ],
+      "normalized_name": "塔斯马尼亚殖民地"
+    },
+    {
+      "entity_ids": [
+        "country_sen",
+        "cshapes_gw_433"
+      ],
+      "normalized_name": "塞内加尔"
+    },
+    {
+      "entity_ids": [
+        "country_srb",
+        "kingdom_of_serbia"
+      ],
+      "normalized_name": "塞尔维亚"
+    },
+    {
+      "entity_ids": [
+        "kingdom_of_serbia"
+      ],
+      "normalized_name": "塞尔维亚王国"
+    },
+    {
+      "entity_ids": [
+        "country_sle"
+      ],
+      "normalized_name": "塞拉利昂"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_451"
+      ],
+      "normalized_name": "塞拉利昂殖民地"
+    },
+    {
+      "entity_ids": [
+        "country_cyp"
+      ],
+      "normalized_name": "塞浦路斯"
+    },
+    {
+      "entity_ids": [
+        "prefecture_seine_inferieure"
+      ],
+      "normalized_name": "塞纳 下游省省政府"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_93"
+      ],
+      "normalized_name": "塞纳 圣但尼省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_77"
+      ],
+      "normalized_name": "塞纳 马恩省"
+    },
+    {
+      "entity_ids": [
+        "country_mex",
+        "mexican_republic"
+      ],
+      "normalized_name": "墨西哥"
+    },
+    {
+      "entity_ids": [
+        "mexican_republic"
+      ],
+      "normalized_name": "墨西哥合众国"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_4"
+      ],
+      "normalized_name": "夏威夷领地"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_16"
+      ],
+      "normalized_name": "夏朗德省"
+    },
+    {
+      "entity_ids": [
+        "dover"
+      ],
+      "normalized_name": "多佛"
+    },
+    {
+      "entity_ids": [
+        "country_tgo"
+      ],
+      "normalized_name": "多哥"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_63"
+      ],
+      "normalized_name": "多姆山省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_24"
+      ],
+      "normalized_name": "多尔多涅省"
+    },
+    {
+      "entity_ids": [
+        "country_dom",
+        "dominican_republic_1900"
+      ],
+      "normalized_name": "多米尼加"
+    },
+    {
+      "entity_ids": [
+        "dominican_republic_1900"
+      ],
+      "normalized_name": "多米尼加共和国"
+    },
+    {
+      "entity_ids": [
+        "british_empire",
+        "british_isles_1900"
+      ],
+      "normalized_name": "大不列颠及爱尔兰联合王国"
+    },
+    {
+      "entity_ids": [
+        "empire_of_japan",
+        "japanese_empire"
+      ],
+      "normalized_name": "大日本帝国"
+    },
+    {
+      "entity_ids": [
+        "japanese_empire"
+      ],
+      "normalized_name": "大日本帝國"
+    },
+    {
+      "entity_ids": [
+        "qing_empire"
+      ],
+      "normalized_name": "大清國"
+    },
+    {
+      "entity_ids": [
+        "qing_empire"
+      ],
+      "normalized_name": "大清帝国"
+    },
+    {
+      "entity_ids": [
+        "british_empire"
+      ],
+      "normalized_name": "大英帝国"
+    },
+    {
+      "entity_ids": [
+        "british_empire_overseas"
+      ],
+      "normalized_name": "大英帝国海外领地"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_44"
+      ],
+      "normalized_name": "大西洋卢瓦尔省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_64"
+      ],
+      "normalized_name": "大西洋比利牛斯省"
+    },
+    {
+      "entity_ids": [
+        "korean_empire"
+      ],
+      "normalized_name": "大韩帝国"
+    },
+    {
+      "entity_ids": [
+        "country_kor"
+      ],
+      "normalized_name": "大韩民国"
+    },
+    {
+      "entity_ids": [
+        "orange_free_state"
+      ],
+      "normalized_name": "奥兰治自由邦"
+    },
+    {
+      "entity_ids": [
+        "austria_hungary",
+        "austro_hungarian_empire"
+      ],
+      "normalized_name": "奥匈帝国"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_10"
+      ],
+      "normalized_name": "奥布省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_11"
+      ],
+      "normalized_name": "奥德省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_61"
+      ],
+      "normalized_name": "奥恩省"
+    },
+    {
+      "entity_ids": [
+        "ottoman_empire"
+      ],
+      "normalized_name": "奥斯曼帝国"
+    },
+    {
+      "entity_ids": [
+        "country_ven",
+        "venezuela_1900"
+      ],
+      "normalized_name": "委内瑞拉"
+    },
+    {
+      "entity_ids": [
+        "venezuela_1900"
+      ],
+      "normalized_name": "委内瑞拉合众国"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_88"
+      ],
+      "normalized_name": "孚日省"
+    },
+    {
+      "entity_ids": [
+        "country_bgd"
+      ],
+      "normalized_name": "孟加拉国"
+    },
+    {
+      "entity_ids": [
+        "country_ago"
+      ],
+      "normalized_name": "安哥拉"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_37"
+      ],
+      "normalized_name": "安德尔 卢瓦尔省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_36"
+      ],
+      "normalized_name": "安德尔省"
+    },
+    {
+      "entity_ids": [
+        "antwerp"
+      ],
+      "normalized_name": "安特卫普"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_01"
+      ],
+      "normalized_name": "安省"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_553"
+      ],
+      "normalized_name": "尼亚萨兰"
+    },
+    {
+      "entity_ids": [
+        "country_nic",
+        "nicaragua_1900"
+      ],
+      "normalized_name": "尼加拉瓜"
+    },
+    {
+      "entity_ids": [
+        "nicaragua_1900"
+      ],
+      "normalized_name": "尼加拉瓜共和国"
+    },
+    {
+      "entity_ids": [
+        "kingdom_of_netherlands"
+      ],
+      "normalized_name": "尼德兰王国"
+    },
+    {
+      "entity_ids": [
+        "country_nga"
+      ],
+      "normalized_name": "尼日利亚"
+    },
+    {
+      "entity_ids": [
+        "country_ner"
+      ],
+      "normalized_name": "尼日尔"
+    },
+    {
+      "entity_ids": [
+        "country_npl",
+        "kingdom_of_nepal"
+      ],
+      "normalized_name": "尼泊尔"
+    },
+    {
+      "entity_ids": [
+        "kingdom_of_nepal"
+      ],
+      "normalized_name": "尼泊尔王国"
+    },
+    {
+      "entity_ids": [
+        "country_psx"
+      ],
+      "normalized_name": "巴勒斯坦"
+    },
+    {
+      "entity_ids": [
+        "country_bhs",
+        "cshapes_gw_31"
+      ],
+      "normalized_name": "巴哈马"
+    },
+    {
+      "entity_ids": [
+        "country_pak"
+      ],
+      "normalized_name": "巴基斯坦"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_53"
+      ],
+      "normalized_name": "巴巴多斯"
+    },
+    {
+      "entity_ids": [
+        "country_png"
+      ],
+      "normalized_name": "巴布亚新几内亚"
+    },
+    {
+      "entity_ids": [
+        "country_pry",
+        "paraguay_1900"
+      ],
+      "normalized_name": "巴拉圭"
+    },
+    {
+      "entity_ids": [
+        "paraguay_1900"
+      ],
+      "normalized_name": "巴拉圭共和国"
+    },
+    {
+      "entity_ids": [
+        "country_pan"
+      ],
+      "normalized_name": "巴拿马"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_570"
+      ],
+      "normalized_name": "巴苏陀兰"
+    },
+    {
+      "entity_ids": [
+        "brazil_1900",
+        "country_bra"
+      ],
+      "normalized_name": "巴西"
+    },
+    {
+      "entity_ids": [
+        "brazil_1900"
+      ],
+      "normalized_name": "巴西合众国"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_75",
+        "paris"
+      ],
+      "normalized_name": "巴黎"
+    },
+    {
+      "entity_ids": [
+        "committee_paris_lille_rail"
+      ],
+      "normalized_name": "巴黎 里尔铁路协调委员会"
+    },
+    {
+      "entity_ids": [
+        "paris_basin"
+      ],
+      "normalized_name": "巴黎盆地"
+    },
+    {
+      "entity_ids": [
+        "brittany"
+      ],
+      "normalized_name": "布列塔尼"
+    },
+    {
+      "entity_ids": [
+        "emirate_of_bukhara"
+      ],
+      "normalized_name": "布哈拉酋长国"
+    },
+    {
+      "entity_ids": [
+        "country_bfa"
+      ],
+      "normalized_name": "布基纳法索"
+    },
+    {
+      "entity_ids": [
+        "buenos_aires"
+      ],
+      "normalized_name": "布宜诺斯艾利斯"
+    },
+    {
+      "entity_ids": [
+        "south_africa_war_zone"
+      ],
+      "normalized_name": "布尔战争区"
+    },
+    {
+      "entity_ids": [
+        "country_bdi"
+      ],
+      "normalized_name": "布隆迪"
+    },
+    {
+      "entity_ids": [
+        "brest"
+      ],
+      "normalized_name": "布雷斯特"
+    },
+    {
+      "entity_ids": [
+        "port_brest"
+      ],
+      "normalized_name": "布雷斯特港"
+    },
+    {
+      "entity_ids": [
+        "brussels"
+      ],
+      "normalized_name": "布鲁塞尔"
+    },
+    {
+      "entity_ids": [
+        "khanate_of_khiva"
+      ],
+      "normalized_name": "希瓦汗国"
+    },
+    {
+      "entity_ids": [
+        "country_grc",
+        "kingdom_of_greece"
+      ],
+      "normalized_name": "希腊"
+    },
+    {
+      "entity_ids": [
+        "kingdom_of_greece"
+      ],
+      "normalized_name": "希腊王国"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_15"
+      ],
+      "normalized_name": "康塔尔省"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_561"
+      ],
+      "normalized_name": "开普殖民地"
+    },
+    {
+      "entity_ids": [
+        "german_empire"
+      ],
+      "normalized_name": "德国"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_79"
+      ],
+      "normalized_name": "德塞夫勒省"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_510"
+      ],
+      "normalized_name": "德属东非"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_470"
+      ],
+      "normalized_name": "德属喀麦隆"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_460"
+      ],
+      "normalized_name": "德属多哥兰"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_912"
+      ],
+      "normalized_name": "德属新几内亚"
+    },
+    {
+      "entity_ids": [
+        "german_colonial_empire"
+      ],
+      "normalized_name": "德属殖民地"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_565"
+      ],
+      "normalized_name": "德属西南非洲"
+    },
+    {
+      "entity_ids": [
+        "german_colonial_empire"
+      ],
+      "normalized_name": "德属领地"
+    },
+    {
+      "entity_ids": [
+        "german_empire"
+      ],
+      "normalized_name": "德意志帝国"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_26"
+      ],
+      "normalized_name": "德龙省"
+    },
+    {
+      "entity_ids": [
+        "country_ita",
+        "kingdom_of_italy"
+      ],
+      "normalized_name": "意大利"
+    },
+    {
+      "entity_ids": [
+        "kingdom_of_italy"
+      ],
+      "normalized_name": "意大利王国"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_5200"
+      ],
+      "normalized_name": "意属索马里兰"
+    },
+    {
+      "entity_ids": [
+        "country_slb"
+      ],
+      "normalized_name": "所罗门群岛"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_4781"
+      ],
+      "normalized_name": "拉各斯殖民地"
+    },
+    {
+      "entity_ids": [
+        "country_lva"
+      ],
+      "normalized_name": "拉脱维亚"
+    },
+    {
+      "entity_ids": [
+        "country_nor"
+      ],
+      "normalized_name": "挪威"
+    },
+    {
+      "entity_ids": [
+        "country_cze"
+      ],
+      "normalized_name": "捷克"
+    },
+    {
+      "entity_ids": [
+        "country_mda"
+      ],
+      "normalized_name": "摩尔多瓦"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_57"
+      ],
+      "normalized_name": "摩泽尔省"
+    },
+    {
+      "entity_ids": [
+        "country_mar",
+        "moroccan_sultanate"
+      ],
+      "normalized_name": "摩洛哥"
+    },
+    {
+      "entity_ids": [
+        "moroccan_sultanate"
+      ],
+      "normalized_name": "摩洛哥苏丹国"
+    },
+    {
+      "entity_ids": [
+        "country_brn"
+      ],
+      "normalized_name": "文莱"
+    },
+    {
+      "entity_ids": [
+        "sultanate_of_brunei"
+      ],
+      "normalized_name": "文莱苏丹国"
+    },
+    {
+      "entity_ids": [
+        "country_fji"
+      ],
+      "normalized_name": "斐济"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_950"
+      ],
+      "normalized_name": "斐济殖民地"
+    },
+    {
+      "entity_ids": [
+        "country_swz",
+        "cshapes_gw_572"
+      ],
+      "normalized_name": "斯威士兰"
+    },
+    {
+      "entity_ids": [
+        "country_svk"
+      ],
+      "normalized_name": "斯洛伐克"
+    },
+    {
+      "entity_ids": [
+        "country_svn"
+      ],
+      "normalized_name": "斯洛文尼亚"
+    },
+    {
+      "entity_ids": [
+        "strasbourg"
+      ],
+      "normalized_name": "斯特拉斯堡"
+    },
+    {
+      "entity_ids": [
+        "country_lka"
+      ],
+      "normalized_name": "斯里兰卡"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_901"
+      ],
+      "normalized_name": "新南威尔士殖民地"
+    },
+    {
+      "entity_ids": [
+        "country_ncl"
+      ],
+      "normalized_name": "新喀里多尼亚"
+    },
+    {
+      "entity_ids": [
+        "country_nzl"
+      ],
+      "normalized_name": "新西兰"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_920"
+      ],
+      "normalized_name": "新西兰殖民地"
+    },
+    {
+      "entity_ids": [
+        "empire_of_japan",
+        "japanese_empire"
+      ],
+      "normalized_name": "日本帝国"
+    },
+    {
+      "entity_ids": [
+        "taiwan_under_japan"
+      ],
+      "normalized_name": "日治台湾"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_85"
+      ],
+      "normalized_name": "旺代省"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_905"
+      ],
+      "normalized_name": "昆士兰殖民地"
+    },
+    {
+      "entity_ids": [
+        "chile_1900",
+        "country_chl"
+      ],
+      "normalized_name": "智利"
+    },
+    {
+      "entity_ids": [
+        "chile_1900"
+      ],
+      "normalized_name": "智利共和国"
+    },
+    {
+      "entity_ids": [
+        "kingdom_of_siam"
+      ],
+      "normalized_name": "暹罗"
+    },
+    {
+      "entity_ids": [
+        "kingdom_of_siam"
+      ],
+      "normalized_name": "暹罗王国"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_49"
+      ],
+      "normalized_name": "曼恩 卢瓦尔省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_40"
+      ],
+      "normalized_name": "朗德省"
+    },
+    {
+      "entity_ids": [
+        "country_prk"
+      ],
+      "normalized_name": "朝鲜民主主义人民共和国"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_25"
+      ],
+      "normalized_name": "杜省"
+    },
+    {
+      "entity_ids": [
+        "berlin"
+      ],
+      "normalized_name": "柏林"
+    },
+    {
+      "entity_ids": [
+        "country_khm"
+      ],
+      "normalized_name": "柬埔寨"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_811"
+      ],
+      "normalized_name": "柬埔寨保护国"
+    },
+    {
+      "entity_ids": [
+        "ghent"
+      ],
+      "normalized_name": "根特"
+    },
+    {
+      "entity_ids": [
+        "country_grl"
+      ],
+      "normalized_name": "格陵兰"
+    },
+    {
+      "entity_ids": [
+        "country_geo"
+      ],
+      "normalized_name": "格鲁吉亚"
+    },
+    {
+      "entity_ids": [
+        "sultanate_of_zanzibar"
+      ],
+      "normalized_name": "桑给巴尔苏丹国"
+    },
+    {
+      "entity_ids": [
+        "country_bel",
+        "kingdom_of_belgium"
+      ],
+      "normalized_name": "比利时"
+    },
+    {
+      "entity_ids": [
+        "kingdom_of_belgium"
+      ],
+      "normalized_name": "比利时王国"
+    },
+    {
+      "entity_ids": [
+        "country_mrt"
+      ],
+      "normalized_name": "毛里塔尼亚"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_590"
+      ],
+      "normalized_name": "毛里求斯殖民地"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_39"
+      ],
+      "normalized_name": "汝拉省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_84"
+      ],
+      "normalized_name": "沃克吕兹省"
+    },
+    {
+      "entity_ids": [
+        "country_sau"
+      ],
+      "normalized_name": "沙特阿拉伯"
+    },
+    {
+      "entity_ids": [
+        "country_fra"
+      ],
+      "normalized_name": "法兰西共和国"
+    },
+    {
+      "entity_ids": [
+        "french_colonial_empire"
+      ],
+      "normalized_name": "法兰西殖民帝国"
+    },
+    {
+      "entity_ids": [
+        "country_fra"
+      ],
+      "normalized_name": "法兰西第三共和国"
+    },
+    {
+      "entity_ids": [
+        "country_fra"
+      ],
+      "normalized_name": "法国"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_438"
+      ],
+      "normalized_name": "法属几内亚"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_484"
+      ],
+      "normalized_name": "法属刚果"
+    },
+    {
+      "entity_ids": [
+        "country_atf"
+      ],
+      "normalized_name": "法属南部和南极领地"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_815"
+      ],
+      "normalized_name": "法属印度支那越南诸保护地"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_120"
+      ],
+      "normalized_name": "法属圭亚那"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_930"
+      ],
+      "normalized_name": "法属新喀里多尼亚"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_522"
+      ],
+      "normalized_name": "法属索马里海岸"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_430"
+      ],
+      "normalized_name": "法属西非内陆领地"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_615"
+      ],
+      "normalized_name": "法属阿尔及利亚"
+    },
+    {
+      "entity_ids": [
+        "french_colonial_empire"
+      ],
+      "normalized_name": "法属领地"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_580"
+      ],
+      "normalized_name": "法属马达加斯加"
+    },
+    {
+      "entity_ids": [
+        "country_pol"
+      ],
+      "normalized_name": "波兰"
+    },
+    {
+      "entity_ids": [
+        "country_pri",
+        "cshapes_gw_6"
+      ],
+      "normalized_name": "波多黎各"
+    },
+    {
+      "entity_ids": [
+        "bordeaux"
+      ],
+      "normalized_name": "波尔多"
+    },
+    {
+      "entity_ids": [
+        "port_bordeaux"
+      ],
+      "normalized_name": "波尔多港"
+    },
+    {
+      "entity_ids": [
+        "persia_qajar"
+      ],
+      "normalized_name": "波斯"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_3461"
+      ],
+      "normalized_name": "波斯尼亚占领区"
+    },
+    {
+      "entity_ids": [
+        "country_bih"
+      ],
+      "normalized_name": "波斯尼亚和黑塞哥维那"
+    },
+    {
+      "entity_ids": [
+        "country_tha"
+      ],
+      "normalized_name": "泰国"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_48"
+      ],
+      "normalized_name": "洛泽尔省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_47"
+      ],
+      "normalized_name": "洛特 加龙省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_46"
+      ],
+      "normalized_name": "洛特省"
+    },
+    {
+      "entity_ids": [
+        "country_zwe"
+      ],
+      "normalized_name": "津巴布韦"
+    },
+    {
+      "entity_ids": [
+        "country_hnd",
+        "honduras_1900"
+      ],
+      "normalized_name": "洪都拉斯"
+    },
+    {
+      "entity_ids": [
+        "honduras_1900"
+      ],
+      "normalized_name": "洪都拉斯共和国"
+    },
+    {
+      "entity_ids": [
+        "country_hti",
+        "haiti_1900"
+      ],
+      "normalized_name": "海地"
+    },
+    {
+      "entity_ids": [
+        "haiti_1900"
+      ],
+      "normalized_name": "海地共和国"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_827"
+      ],
+      "normalized_name": "海峡殖民地"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_58"
+      ],
+      "normalized_name": "涅夫勒省"
+    },
+    {
+      "entity_ids": [
+        "qing_empire"
+      ],
+      "normalized_name": "清帝国"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_76"
+      ],
+      "normalized_name": "滨海塞纳省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_17"
+      ],
+      "normalized_name": "滨海夏朗德省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_06"
+      ],
+      "normalized_name": "滨海阿尔卑斯省"
+    },
+    {
+      "entity_ids": [
+        "country_aus"
+      ],
+      "normalized_name": "澳大利亚"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_32"
+      ],
+      "normalized_name": "热尔省"
+    },
+    {
+      "entity_ids": [
+        "country_irl"
+      ],
+      "normalized_name": "爱尔兰"
+    },
+    {
+      "entity_ids": [
+        "country_est"
+      ],
+      "normalized_name": "爱沙尼亚"
+    },
+    {
+      "entity_ids": [
+        "country_jam",
+        "cshapes_gw_51"
+      ],
+      "normalized_name": "牙买加"
+    },
+    {
+      "entity_ids": [
+        "country_tto",
+        "cshapes_gw_52"
+      ],
+      "normalized_name": "特立尼达和多巴哥"
+    },
+    {
+      "entity_ids": [
+        "trucial_states"
+      ],
+      "normalized_name": "特鲁西尔诸酋长国"
+    },
+    {
+      "entity_ids": [
+        "bolivia_1900",
+        "country_bol"
+      ],
+      "normalized_name": "玻利维亚"
+    },
+    {
+      "entity_ids": [
+        "bolivia_1900"
+      ],
+      "normalized_name": "玻利维亚共和国"
+    },
+    {
+      "entity_ids": [
+        "country_swe"
+      ],
+      "normalized_name": "瑞典"
+    },
+    {
+      "entity_ids": [
+        "sweden_norway_union"
+      ],
+      "normalized_name": "瑞典 挪威"
+    },
+    {
+      "entity_ids": [
+        "sweden_norway_union"
+      ],
+      "normalized_name": "瑞典 挪威联合王国"
+    },
+    {
+      "entity_ids": [
+        "country_che",
+        "swiss_confederation"
+      ],
+      "normalized_name": "瑞士"
+    },
+    {
+      "entity_ids": [
+        "swiss_confederation"
+      ],
+      "normalized_name": "瑞士联邦"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_65"
+      ],
+      "normalized_name": "瓜德罗普"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_60"
+      ],
+      "normalized_name": "瓦兹省"
+    },
+    {
+      "entity_ids": [
+        "country_vut"
+      ],
+      "normalized_name": "瓦努阿图"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_95"
+      ],
+      "normalized_name": "瓦勒德瓦兹省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_83"
+      ],
+      "normalized_name": "瓦尔省"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_585"
+      ],
+      "normalized_name": "留尼汪"
+    },
+    {
+      "entity_ids": [
+        "country_blr"
+      ],
+      "normalized_name": "白俄罗斯"
+    },
+    {
+      "entity_ids": [
+        "character_pierre_lefevre"
+      ],
+      "normalized_name": "皮埃尔 勒费弗尔"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_824"
+      ],
+      "normalized_name": "砂拉越王国"
+    },
+    {
+      "entity_ids": [
+        "country_flk"
+      ],
+      "normalized_name": "福克兰群岛"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_21"
+      ],
+      "normalized_name": "科多尔省"
+    },
+    {
+      "entity_ids": [
+        "country_kwt"
+      ],
+      "normalized_name": "科威特"
+    },
+    {
+      "entity_ids": [
+        "kortrijk"
+      ],
+      "normalized_name": "科特赖克"
+    },
+    {
+      "entity_ids": [
+        "country_civ"
+      ],
+      "normalized_name": "科特迪瓦"
+    },
+    {
+      "entity_ids": [
+        "country_kos"
+      ],
+      "normalized_name": "科索沃"
+    },
+    {
+      "entity_ids": [
+        "cologne"
+      ],
+      "normalized_name": "科隆"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_19"
+      ],
+      "normalized_name": "科雷兹省"
+    },
+    {
+      "entity_ids": [
+        "country_per",
+        "peru_1900"
+      ],
+      "normalized_name": "秘鲁"
+    },
+    {
+      "entity_ids": [
+        "peru_1900"
+      ],
+      "normalized_name": "秘鲁共和国"
+    },
+    {
+      "entity_ids": [
+        "country_tun"
+      ],
+      "normalized_name": "突尼斯"
+    },
+    {
+      "entity_ids": [
+        "beylicate_of_tunis"
+      ],
+      "normalized_name": "突尼斯贝伊国"
+    },
+    {
+      "entity_ids": [
+        "country_ltu"
+      ],
+      "normalized_name": "立陶宛"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_80"
+      ],
+      "normalized_name": "索姆省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_71"
+      ],
+      "normalized_name": "索恩 卢瓦尔省"
+    },
+    {
+      "entity_ids": [
+        "country_som"
+      ],
+      "normalized_name": "索马里"
+    },
+    {
+      "entity_ids": [
+        "country_sol"
+      ],
+      "normalized_name": "索马里兰"
+    },
+    {
+      "entity_ids": [
+        "somali_territories_1900"
+      ],
+      "normalized_name": "索马里诸领地"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_86"
+      ],
+      "normalized_name": "維埃納省"
+    },
+    {
+      "entity_ids": [
+        "country_jor"
+      ],
+      "normalized_name": "约旦"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_89"
+      ],
+      "normalized_name": "约讷省"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_562"
+      ],
+      "normalized_name": "纳塔尔殖民地"
+    },
+    {
+      "entity_ids": [
+        "country_nam"
+      ],
+      "normalized_name": "纳米比亚"
+    },
+    {
+      "entity_ids": [
+        "new_york"
+      ],
+      "normalized_name": "纽约"
+    },
+    {
+      "entity_ids": [
+        "port_new_york"
+      ],
+      "normalized_name": "纽约港"
+    },
+    {
+      "entity_ids": [
+        "colony_of_newfoundland"
+      ],
+      "normalized_name": "纽芬兰殖民地"
+    },
+    {
+      "entity_ids": [
+        "vienna"
+      ],
+      "normalized_name": "维也纳"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_904"
+      ],
+      "normalized_name": "维多利亚殖民地"
+    },
+    {
+      "entity_ids": [
+        "country_mmr"
+      ],
+      "normalized_name": "缅甸"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_13"
+      ],
+      "normalized_name": "罗讷河口省"
+    },
+    {
+      "entity_ids": [
+        "rhone_valley"
+      ],
+      "normalized_name": "罗讷河谷"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_69"
+      ],
+      "normalized_name": "罗讷省"
+    },
+    {
+      "entity_ids": [
+        "country_rou",
+        "kingdom_of_romania"
+      ],
+      "normalized_name": "罗马尼亚"
+    },
+    {
+      "entity_ids": [
+        "kingdom_of_romania"
+      ],
+      "normalized_name": "罗马尼亚王国"
+    },
+    {
+      "entity_ids": [
+        "united_states",
+        "united_states_1900"
+      ],
+      "normalized_name": "美利坚合众国"
+    },
+    {
+      "entity_ids": [
+        "united_states_1900"
+      ],
+      "normalized_name": "美国"
+    },
+    {
+      "entity_ids": [
+        "united_states_overseas"
+      ],
+      "normalized_name": "美国控制区"
+    },
+    {
+      "entity_ids": [
+        "united_states_overseas"
+      ],
+      "normalized_name": "美国海外控制区"
+    },
+    {
+      "entity_ids": [
+        "country_lao"
+      ],
+      "normalized_name": "老挝"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_812"
+      ],
+      "normalized_name": "老挝保护国"
+    },
+    {
+      "entity_ids": [
+        "country_ken"
+      ],
+      "normalized_name": "肯尼亚"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_50"
+      ],
+      "normalized_name": "芒什省"
+    },
+    {
+      "entity_ids": [
+        "country_fin"
+      ],
+      "normalized_name": "芬兰"
+    },
+    {
+      "entity_ids": [
+        "country_sdn"
+      ],
+      "normalized_name": "苏丹"
+    },
+    {
+      "entity_ids": [
+        "country_sur"
+      ],
+      "normalized_name": "苏里南"
+    },
+    {
+      "entity_ids": [
+        "british_isles_1900"
+      ],
+      "normalized_name": "英国"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_625"
+      ],
+      "normalized_name": "英埃苏丹"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_750"
+      ],
+      "normalized_name": "英属印度"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_110"
+      ],
+      "normalized_name": "英属圭亚那"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_940"
+      ],
+      "normalized_name": "英属所罗门群岛"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_911"
+      ],
+      "normalized_name": "英属新几内亚"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_80"
+      ],
+      "normalized_name": "英属洪都拉斯"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_521"
+      ],
+      "normalized_name": "英属索马里兰"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_780"
+      ],
+      "normalized_name": "英属锡兰"
+    },
+    {
+      "entity_ids": [
+        "british_empire_overseas"
+      ],
+      "normalized_name": "英属领地"
+    },
+    {
+      "entity_ids": [
+        "country_nld",
+        "kingdom_of_netherlands"
+      ],
+      "normalized_name": "荷兰"
+    },
+    {
+      "entity_ids": [
+        "dutch_colonial_empire"
+      ],
+      "normalized_name": "荷兰殖民帝国"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_850"
+      ],
+      "normalized_name": "荷属东印度"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_115"
+      ],
+      "normalized_name": "荷属圭亚那"
+    },
+    {
+      "entity_ids": [
+        "dutch_colonial_empire"
+      ],
+      "normalized_name": "荷属领地"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_56"
+      ],
+      "normalized_name": "莫尔比昂省"
+    },
+    {
+      "entity_ids": [
+        "moscow"
+      ],
+      "normalized_name": "莫斯科"
+    },
+    {
+      "entity_ids": [
+        "country_moz"
+      ],
+      "normalized_name": "莫桑比克"
+    },
+    {
+      "entity_ids": [
+        "country_lso"
+      ],
+      "normalized_name": "莱索托"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_29"
+      ],
+      "normalized_name": "菲尼斯泰尔省"
+    },
+    {
+      "entity_ids": [
+        "country_phl"
+      ],
+      "normalized_name": "菲律宾"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_840"
+      ],
+      "normalized_name": "菲律宾群岛"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_72"
+      ],
+      "normalized_name": "萨尔特省"
+    },
+    {
+      "entity_ids": [
+        "country_slv",
+        "el_salvador_1900"
+      ],
+      "normalized_name": "萨尔瓦多"
+    },
+    {
+      "entity_ids": [
+        "el_salvador_1900"
+      ],
+      "normalized_name": "萨尔瓦多共和国"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_73"
+      ],
+      "normalized_name": "萨瓦省"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_404"
+      ],
+      "normalized_name": "葡属几内亚"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_540"
+      ],
+      "normalized_name": "葡属安哥拉"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_860"
+      ],
+      "normalized_name": "葡属帝汶"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_541"
+      ],
+      "normalized_name": "葡属莫桑比克"
+    },
+    {
+      "entity_ids": [
+        "portuguese_empire"
+      ],
+      "normalized_name": "葡属领地"
+    },
+    {
+      "entity_ids": [
+        "country_prt",
+        "kingdom_of_portugal"
+      ],
+      "normalized_name": "葡萄牙"
+    },
+    {
+      "entity_ids": [
+        "portuguese_empire"
+      ],
+      "normalized_name": "葡萄牙殖民帝国"
+    },
+    {
+      "entity_ids": [
+        "kingdom_of_portugal"
+      ],
+      "normalized_name": "葡萄牙王国"
+    },
+    {
+      "entity_ids": [
+        "country_mng"
+      ],
+      "normalized_name": "蒙古国"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_5519"
+      ],
+      "normalized_name": "西北罗得西亚"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_411"
+      ],
+      "normalized_name": "西属几内亚"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_610"
+      ],
+      "normalized_name": "西属西非"
+    },
+    {
+      "entity_ids": [
+        "spanish_possessions"
+      ],
+      "normalized_name": "西属领地"
+    },
+    {
+      "entity_ids": [
+        "country_sah"
+      ],
+      "normalized_name": "西撒哈拉"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_902"
+      ],
+      "normalized_name": "西澳大利亚殖民地"
+    },
+    {
+      "entity_ids": [
+        "country_esp",
+        "kingdom_of_spain"
+      ],
+      "normalized_name": "西班牙"
+    },
+    {
+      "entity_ids": [
+        "spanish_possessions"
+      ],
+      "normalized_name": "西班牙海外领地"
+    },
+    {
+      "entity_ids": [
+        "kingdom_of_spain"
+      ],
+      "normalized_name": "西班牙王国"
+    },
+    {
+      "entity_ids": [
+        "departement_nord"
+      ],
+      "normalized_name": "诺尔省"
+    },
+    {
+      "entity_ids": [
+        "normandy"
+      ],
+      "normalized_name": "诺曼底"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_18"
+      ],
+      "normalized_name": "谢尔省"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_437"
+      ],
+      "normalized_name": "象牙海岸"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_571"
+      ],
+      "normalized_name": "贝专纳兰"
+    },
+    {
+      "entity_ids": [
+        "country_ben"
+      ],
+      "normalized_name": "贝宁"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_90"
+      ],
+      "normalized_name": "贝尔福地区"
+    },
+    {
+      "entity_ids": [
+        "office_local_budget_records"
+      ],
+      "normalized_name": "财政部地方预算档案处"
+    },
+    {
+      "entity_ids": [
+        "country_zmb"
+      ],
+      "normalized_name": "赞比亚"
+    },
+    {
+      "entity_ids": [
+        "country_gnq"
+      ],
+      "normalized_name": "赤道几内亚"
+    },
+    {
+      "entity_ids": [
+        "country_vnm"
+      ],
+      "normalized_name": "越南"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_434"
+      ],
+      "normalized_name": "达荷美"
+    },
+    {
+      "entity_ids": [
+        "lille"
+      ],
+      "normalized_name": "里尔"
+    },
+    {
+      "entity_ids": [
+        "arrondissement_lille"
+      ],
+      "normalized_name": "里尔区"
+    },
+    {
+      "entity_ids": [
+        "sous_prefecture_lille"
+      ],
+      "normalized_name": "里尔区副省长公署"
+    },
+    {
+      "entity_ids": [
+        "school_lille_workers_evening"
+      ],
+      "normalized_name": "里尔工人夜校"
+    },
+    {
+      "entity_ids": [
+        "coop_lille_workers_consumption"
+      ],
+      "normalized_name": "里尔工人消费合作社"
+    },
+    {
+      "entity_ids": [
+        "commune_lille"
+      ],
+      "normalized_name": "里尔市"
+    },
+    {
+      "entity_ids": [
+        "mairie_lille"
+      ],
+      "normalized_name": "里尔市政厅"
+    },
+    {
+      "entity_ids": [
+        "enterprise_lille_mechanical"
+      ],
+      "normalized_name": "里尔机械制造公司"
+    },
+    {
+      "entity_ids": [
+        "lyon"
+      ],
+      "normalized_name": "里昂"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_09"
+      ],
+      "normalized_name": "阿列日省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_03"
+      ],
+      "normalized_name": "阿列省"
+    },
+    {
+      "entity_ids": [
+        "aquitaine"
+      ],
+      "normalized_name": "阿基坦"
+    },
+    {
+      "entity_ids": [
+        "country_aze"
+      ],
+      "normalized_name": "阿塞拜疆"
+    },
+    {
+      "entity_ids": [
+        "country_afg",
+        "emirate_of_afghanistan"
+      ],
+      "normalized_name": "阿富汗"
+    },
+    {
+      "entity_ids": [
+        "emirate_of_afghanistan"
+      ],
+      "normalized_name": "阿富汗酋长国"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_07"
+      ],
+      "normalized_name": "阿尔代什省"
+    },
+    {
+      "entity_ids": [
+        "country_dza"
+      ],
+      "normalized_name": "阿尔及利亚"
+    },
+    {
+      "entity_ids": [
+        "country_alb"
+      ],
+      "normalized_name": "阿尔巴尼亚"
+    },
+    {
+      "entity_ids": [
+        "character_albert_dumont"
+      ],
+      "normalized_name": "阿尔贝 迪蒙"
+    },
+    {
+      "entity_ids": [
+        "arabian_polities"
+      ],
+      "normalized_name": "阿拉伯半岛诸政权"
+    },
+    {
+      "entity_ids": [
+        "country_are"
+      ],
+      "normalized_name": "阿拉伯联合酋长国"
+    },
+    {
+      "entity_ids": [
+        "arabian_polities"
+      ],
+      "normalized_name": "阿拉伯诸政权"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_3"
+      ],
+      "normalized_name": "阿拉斯加领地"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_22"
+      ],
+      "normalized_name": "阿摩尔滨海省"
+    },
+    {
+      "entity_ids": [
+        "country_omn",
+        "sultanate_of_muscat_oman"
+      ],
+      "normalized_name": "阿曼"
+    },
+    {
+      "entity_ids": [
+        "argentina_1900"
+      ],
+      "normalized_name": "阿根廷"
+    },
+    {
+      "entity_ids": [
+        "argentina_1900",
+        "argentine_republic"
+      ],
+      "normalized_name": "阿根廷共和国"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_08"
+      ],
+      "normalized_name": "阿登省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_12"
+      ],
+      "normalized_name": "阿韦龙省"
+    },
+    {
+      "entity_ids": [
+        "korean_empire"
+      ],
+      "normalized_name": "韩国"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_781"
+      ],
+      "normalized_name": "马尔代夫苏丹国"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_94"
+      ],
+      "normalized_name": "马恩河谷省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_51"
+      ],
+      "normalized_name": "马恩省"
+    },
+    {
+      "entity_ids": [
+        "country_mwi"
+      ],
+      "normalized_name": "马拉维"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_66"
+      ],
+      "normalized_name": "马提尼克"
+    },
+    {
+      "entity_ids": [
+        "sultanate_of_muscat_oman"
+      ],
+      "normalized_name": "马斯喀特和阿曼苏丹国"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_822"
+      ],
+      "normalized_name": "马来属邦"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_821"
+      ],
+      "normalized_name": "马来联邦"
+    },
+    {
+      "entity_ids": [
+        "country_mys"
+      ],
+      "normalized_name": "马来西亚"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_338"
+      ],
+      "normalized_name": "马耳他殖民地"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_53"
+      ],
+      "normalized_name": "马耶讷省"
+    },
+    {
+      "entity_ids": [
+        "marseille"
+      ],
+      "normalized_name": "马赛"
+    },
+    {
+      "entity_ids": [
+        "port_marseille"
+      ],
+      "normalized_name": "马赛港"
+    },
+    {
+      "entity_ids": [
+        "marseille_port_authority"
+      ],
+      "normalized_name": "马赛港务机构"
+    },
+    {
+      "entity_ids": [
+        "country_mdg"
+      ],
+      "normalized_name": "马达加斯加"
+    },
+    {
+      "entity_ids": [
+        "country_mli"
+      ],
+      "normalized_name": "马里"
+    },
+    {
+      "entity_ids": [
+        "rouen"
+      ],
+      "normalized_name": "鲁昂"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_452"
+      ],
+      "normalized_name": "黄金海岸殖民地"
+    },
+    {
+      "entity_ids": [
+        "country_lbn"
+      ],
+      "normalized_name": "黎巴嫩"
+    },
+    {
+      "entity_ids": [
+        "cshapes_gw_3462"
+      ],
+      "normalized_name": "黑塞哥维那占领区"
+    },
+    {
+      "entity_ids": [
+        "country_mne",
+        "principality_of_montenegro"
+      ],
+      "normalized_name": "黑山"
+    },
+    {
+      "entity_ids": [
+        "principality_of_montenegro"
+      ],
+      "normalized_name": "黑山公国"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_55"
+      ],
+      "normalized_name": "默兹省"
+    },
+    {
+      "entity_ids": [
+        "departement_fr_54"
+      ],
+      "normalized_name": "默尔特 摩泽尔省"
+    }
+  ],
+  "normalizer_id": "unicode_nfkc_casefold_safe_punctuation_v1",
+  "policy": {
+    "non_authoritative_source_records_excluded": true,
+    "one_to_many_name_collisions_are_preserved": true,
+    "stable_ids_are_authoritative": true
+  },
+  "schema_version": 1
+}
