@@ -27,6 +27,10 @@ A shipment stores its total units, delivered/progress units and remaining units.
 
 A shipment created today remains represented after the tick when delivery takes multiple days. It remains active until all units are delivered or the shipment is explicitly cancelled or otherwise resolved. Delivery removes the active record only after the outstanding quantity reaches zero; the completed record is retained in shipment history.
 
+When `VNextSpatialWorld` is attached, `apply_shipment_progress()` treats the supplied Economy `day_index` only as a requested progress reference. Its canonical day-start hour (`day_index * 24`) must not be later than `Spatial.current_hour()`, and the call never advances Spatial time. A request that exhausts a shipment is additionally accepted only at or after the shipment's stored `arrival_day`, which is derived from its dispatch day and the existing route-duration contract. These checks complete before any delivery, inventory, shipment-queue, or in-transit mutation.
+
+When no Spatial authority is attached, the explicit fixture contract remains: `day_index` must be nonnegative, must not precede Economy's last settled day, and must not precede the shipment's dispatch day. It is a caller-supplied fixture reference rather than an independently advancing physical clock. Day-zero and later partial progress remain valid after dispatch, while final delivery still follows the shipment's stored arrival boundary. This fallback is confined to the detached fixture mode and is not a second physical-time authority.
+
 ## Persistence boundary
 
 Economy snapshots own region market state, production sites, active shipments, shipment history, cumulative flows, shocks, trade quotas, sequence and the isolated fixture state needed for deterministic Economy replay. Spatial world state and live Spatial reservations are not copied into an Economy snapshot. A resumed Spatial-integrated simulation must reattach the same authoritative Spatial world and runtime route mapping before submitting new transport demand.

@@ -267,18 +267,33 @@ func apply_shipment_progress(
 		or is_nan(delivered_units)
 		or is_inf(delivered_units)
 		or delivered_units <= 0.0
+		or day_index < 0
 		or day_index < _last_day_index
 	):
 		return _fail_result("invalid_shipment_progress", "shipment progress is invalid")
+	if _spatial_transport_world != null and not _spatial_progress_time_is_ready(day_index):
+		return _fail_result(
+			"spatial_time_not_ready",
+			"shipment progress is later than the authoritative Spatial time"
+		)
 	for index: int in range(shipments.size()):
 		var shipment: Dictionary = shipments[index] as Dictionary
 		if str(shipment.get("shipment_id", "")) != shipment_id:
 			continue
-		if day_index < int(shipment.get("dispatch_day", -1)):
+		var dispatch_day: int = int(shipment.get("dispatch_day", -1))
+		if day_index < dispatch_day:
 			return _fail_result("invalid_shipment_progress", "progress precedes dispatch")
 		var remaining: float = float(shipment.get("units", 0.0))
 		if delivered_units > remaining + 0.000001:
 			return _fail_result("invalid_shipment_progress", "progress exceeds outstanding cargo")
+		if (
+			delivered_units + 0.000001 >= remaining
+			and day_index < int(shipment.get("arrival_day", -1))
+		):
+			return _fail_result(
+				"shipment_arrival_not_ready",
+				"final shipment delivery precedes its established arrival boundary"
+			)
 		_apply_shipment_delivery(index, minf(delivered_units, remaining), day_index)
 		_rebuild_in_transit_units_index()
 		return _ok({"shipment_id": shipment_id, "delivered_units": delivered_units})
@@ -1264,6 +1279,12 @@ func _spatial_transport_window_ready_for_day(day_index: int) -> bool:
 	if _spatial_transport_world == null or not _spatial_transport_world.is_valid() or day_index < 0:
 		return false
 	return _spatial_transport_world.current_hour() == day_index * HOURS_PER_DAY
+
+
+func _spatial_progress_time_is_ready(day_index: int) -> bool:
+	if _spatial_transport_world == null or not _spatial_transport_world.is_valid() or day_index < 0:
+		return false
+	return day_index * HOURS_PER_DAY <= _spatial_transport_world.current_hour()
 
 
 func _spatial_links_for_route(route: Dictionary) -> Array[String]:
