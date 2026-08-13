@@ -89,6 +89,10 @@ if ($LASTEXITCODE -ne 0) { throw 'Economy integration static audit failed' }
 & python "$ProjectPath/tools/audit_1900_world_economy_compact.py"
 if ($LASTEXITCODE -ne 0) { throw 'Historical world economy static audit failed' }
 
+Write-Host "`n=== World data audit regressions ==="
+& python -m unittest discover -s "$ProjectPath/tests/world_data" -p 'test_*.py' -v
+if ($LASTEXITCODE -ne 0) { throw 'World data audit regression suite failed' }
+
 $tests = @(
     @{ Name = 'Formal world integration'; Script = 'res://tests/formal/formal_world_integration_test.gd'; TimeoutSeconds = 360 },
     @{ Name = 'Formal world ten-year balance'; Script = 'res://tests/formal/formal_world_long_term_balance_test.gd'; TimeoutSeconds = 420 },
