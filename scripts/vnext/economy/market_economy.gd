@@ -1047,7 +1047,8 @@ func _schedule_shipments(day_index: int) -> void:
 func _schedule_spatial_shipments(day_index: int) -> void:
 	if _spatial_transport_world == null or not _spatial_transport_world.is_valid():
 		return
-	_spatial_transport_window_hour = _spatial_transport_world.current_hour()
+	if not _advance_spatial_transport_window(day_index):
+		return
 	var requests: Array[Dictionary] = []
 	for region_id: String in _region_ids:
 		var state: Dictionary = region_states[region_id] as Dictionary
@@ -1263,6 +1264,22 @@ func _schedule_spatial_shipments(day_index: int) -> void:
 			"status": "in_transit",
 		})
 		_next_shipment_sequence += 1
+
+
+func _advance_spatial_transport_window(day_index: int) -> bool:
+	if _spatial_transport_world == null or not _spatial_transport_world.is_valid():
+		return false
+	var current_hour: int = _spatial_transport_world.current_hour()
+	if _last_day_index >= 0:
+		var elapsed_days: int = day_index - _last_day_index
+		if elapsed_days > 0:
+			var next_window_hour: int = _spatial_transport_window_hour + elapsed_days * HOURS_PER_DAY
+			if current_hour < next_window_hour:
+				if not _spatial_transport_world.advance_to_hour(next_window_hour):
+					return false
+			current_hour = _spatial_transport_world.current_hour()
+	_spatial_transport_window_hour = current_hour
+	return true
 
 
 func _spatial_links_for_route(route: Dictionary) -> Array[String]:
