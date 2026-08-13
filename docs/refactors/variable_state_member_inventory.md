@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1810|1342|15|0|496|5|32|16|65|972|448|209|
+|1839|1358|15|0|499|7|32|16|65|986|450|211|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,810个生产成员字段逐项表
+## 1,839个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -1605,7 +1605,7 @@
 26 K spatial_world
 ```
 
-### 第10段：`scripts/vnext/military/military_formation.gd` 至 `scripts/vnext/spatial/spatial_world.gd`
+### 第10段：`scripts/vnext/military/military_formation.gd` 至 `scripts/vnext/spatial/infrastructure_link_state.gd`
 
 ```text
 @ scripts/vnext/military/military_formation.gd | VNextMilitaryFormation
@@ -1733,6 +1733,37 @@
 33 C PRESSURE_SIGNAL_KEYS
 44 C CAPACITY_KEYS
 52 K _state
+@ scripts/vnext/population/macro_population.gd | VNextMacroPopulation
+6 C SNAPSHOT_SCHEMA_ID
+7 C LEGACY_SNAPSHOT_SCHEMA_ID
+8 C MAX_JSON_SAFE_INTEGER
+9 C MAX_SETTLEMENT_MONTHS_PER_CALL
+10 C BASE_YEAR
+12 K _initialized
+13 K _geography_authority
+16 K _known_place_ids
+17 K _ordered_place_ids
+18 K _records
+@ scripts/vnext/population/macro_population_record.gd | VNextMacroPopulationRecord
+7 C SNAPSHOT_SCHEMA_ID
+8 C LEGACY_SNAPSHOT_SCHEMA_ID
+9 C MAX_JSON_SAFE_INTEGER
+11 C AGE_BUCKET_KEYS
+17 C SEX_KEYS
+18 C URBAN_RURAL_KEYS
+19 C AGEING_REMAINDER_KEYS
+24 C AGEING_DENOMINATORS
+30 K _place_id
+31 K _total_population
+32 K _age_buckets
+33 K _sex_structure
+34 K _urban_rural
+35 K _ageing_remainders
+36 K _births
+37 K _deaths
+38 I _external_immigration
+39 I _external_emigration
+42 K _last_settled_period
 @ scripts/vnext/spatial/infrastructure_link_state.gd | VNextInfrastructureLinkState
 7 C STATUS_OPERATIONAL
 8 C STATUS_CONSTRUCTION
@@ -1749,6 +1780,11 @@
 21 A _status
 22 K _nominal_capacity
 23 A _condition
+```
+
+### 第11段：`scripts/vnext/spatial/spatial_capacity_window.gd` 至 `scripts/world_map/historical_map_identity_style.gd`
+
+```text
 @ scripts/vnext/spatial/spatial_capacity_window.gd | VNextSpatialCapacityWindow
 7 C CAPACITY_EPSILON
 8 C MAX_JSON_SAFE_INTEGER
@@ -1782,11 +1818,6 @@
 16 K _infrastructure
 17 K _territories
 18 K _capacity
-```
-
-### 第11段：`scripts/vnext/travel/location_state.gd` 至 `scripts/world_map/internal/world_map_canvas_impl.gd`
-
-```text
 @ scripts/vnext/travel/location_state.gd | VNextLocationState
 4 C SNAPSHOT_SCHEMA_ID
 6 K _player_id
@@ -1814,6 +1845,11 @@
 11 C CODE_PLATE_BLEND
 12 C CODE_COLUMN_CENTERS
 13 C CODE_ROW_CENTERS
+```
+
+### 第12段：`scripts/world_map/internal/world_map_canvas_impl.gd` 至 `scripts/world_map/internal/world_map_data_impl.gd`
+
+```text
 @ scripts/world_map/internal/world_map_canvas_impl.gd | PrototypeV2MapCanvas
 5 C WORLD_SIZE
 6 C WORLD_BOUNDS
@@ -1970,11 +2006,6 @@
 183 K _perf_transport_rebuilds
 184 K _perf_v2_3_overlay_updates
 185 K _perf_v2_3_catalog_rebuilds
-```
-
-### 第12段：`scripts/world_map/internal/world_map_controller_impl.gd` 至 `scripts/world_map/world_map_canvas_detail.gd`
-
-```text
 @ scripts/world_map/internal/world_map_controller_impl.gd | PrototypeV2Main
 5 C DRAG_THRESHOLD
 7 D map_canvas
@@ -1990,6 +2021,11 @@
 6 C FILES
 25 K records
 26 K errors
+```
+
+### 第13段：`scripts/world_map/internal/world_map_interface_impl.gd` 至 `scripts/world_map/world_map_canvas_detail.gd`
+
+```text
 @ scripts/world_map/internal/world_map_interface_impl.gd | PrototypeV2Interface
 9 C INK
 10 C INK_MUTED

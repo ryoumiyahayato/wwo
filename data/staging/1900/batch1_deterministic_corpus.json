@@ -6,7 +6,7 @@
     "batch1_deterministic_corpus.json"
   ],
   "expected_crosswalk_sha256": "b2b26466daa35e47b08aef068997d841873cde5a7317c346e62a55947a53d304",
-  "expected_schema_sha256": "a0644f3370eafe66040631701e715d0b2209b0d96ef3204b90ad3701d43bc392",
+  "expected_schema_sha256": "d247b648c0be6bd970f217afde6d3e5e067fae52c8760d41bdea6c8aa42b3c6b",
   "expected_summary": {
     "automatic_authoritative_candidate_count": 0,
     "classification": {
