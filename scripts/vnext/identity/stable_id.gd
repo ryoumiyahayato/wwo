@@ -38,6 +38,8 @@ static func compose(candidate_kind: String, candidate_local_id: String) -> Strin
 
 
 static func _is_supported_kind(candidate_kind: String) -> bool:
+	if candidate_kind == "formation" or candidate_kind == "military_action":
+		return true
 	return (
 		candidate_kind == "person"
 		or candidate_kind == "place"

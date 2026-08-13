@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1770|1313|15|0|467|7|32|16|62|952|444|206|
+|1839|1358|15|0|499|7|32|16|65|986|450|211|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,770个生产成员字段逐项表
+## 1,839个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -1447,7 +1447,7 @@
 5 K leave_confirmation
 ```
 
-### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/vnext/player/player_state.gd`
+### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/vnext/map/military_map_adapter.gd`
 
 ```text
 @ scripts/v2_3/v2_3_formal_simulation.gd | V23FormalSimulation
@@ -1583,6 +1583,85 @@
 8 K _event_records
 9 K _known_event_ids
 10 K _read_event_ids
+@ scripts/vnext/map/military_map_adapter.gd | VNextMilitaryMapAdapter
+7 C OVERLAY_PATH
+8 C MODE_ROAD
+9 C MODE_RAIL
+10 C MODE_SHIPPING
+12 K errors
+13 K cities
+14 E countries
+15 K regions
+16 K ports
+17 K links
+18 K links_by_city
+19 K terrain_profiles
+20 K transport_profiles
+21 K supply_rules
+22 K battle_rules
+23 K region_overlays
+24 E country_overlays
+25 K city_overlays
+26 K spatial_world
+```
+
+### 第10段：`scripts/vnext/military/military_formation.gd` 至 `scripts/vnext/spatial/infrastructure_link_state.gd`
+
+```text
+@ scripts/vnext/military/military_formation.gd | VNextMilitaryFormation
+5 C ACTION_IDLE
+6 C ACTION_MOVING
+7 C ACTION_CONCENTRATING
+8 C ACTION_ATTACKING
+9 C ACTION_DEFENDING
+10 C STATUS_ACTIVE
+11 C STATUS_DESTROYED
+12 C RESOURCE_IDS
+13 C SUPPLY_STATUSES
+15 K formation_id
+16 E country_id
+17 A service_branch
+18 K parent_formation_id
+19 K personnel
+20 K equipment_sets
+21 K training
+22 K morale
+23 K organization
+24 K current_city_id
+25 A action_state
+26 A formation_status
+27 A supply_status
+28 A supply_level
+29 K supply_fill
+30 A defense_posture
+31 K daily_requirements
+@ scripts/vnext/military/military_service.gd | VNextMilitaryService
+7 C RESOURCE_IDS
+8 C EQUIPMENT_LOAD_PER_PERSON
+9 C CARGO_LOAD_WEIGHTS
+15 C EPSILON
+@ scripts/vnext/military/military_state.gd | VNextMilitaryState
+5 C SCHEMA_ID
+6 C ACTION_KINDS
+7 C TRANSPORT_STATES
+8 C MAX_COMPLETED_ACTIONS
+9 C MAX_BATTLE_RESULTS
+10 C MAX_CONTROL_HISTORY
+12 K formations
+13 K region_controls
+14 K region_garrisons
+15 K supply_inputs
+16 K active_actions
+17 K completed_actions
+18 K battle_results
+19 K control_history
+20 K last_simulated_hour
+21 A next_action_sequence
+24 A capacity_window_hour
+25 K link_capacity_used
+26 K link_queues
+@ scripts/vnext/military/military_state_invariants.gd | VNextMilitaryStateInvariants
+7 C EPSILON
 @ scripts/vnext/organization/organization_core.gd | VNextOrganizationCore
 8 C SNAPSHOT_SCHEMA_ID
 10 C _ORGANIZATION_FIELDS
@@ -1600,11 +1679,6 @@
 @ scripts/vnext/player/player_state.gd | VNextPlayerState
 4 C SNAPSHOT_SCHEMA_ID
 6 K _player_id
-```
-
-### 第10段：`scripts/vnext/politics/politics_pressure_input.gd` 至 `scripts/world_map/historical_map_identity_style.gd`
-
-```text
 @ scripts/vnext/politics/politics_pressure_input.gd | VNextPoliticsPressureInput
 7 C SNAPSHOT_SCHEMA_ID
 8 C MAX_PERIOD_DAYS
@@ -1706,6 +1780,11 @@
 21 A _status
 22 K _nominal_capacity
 23 A _condition
+```
+
+### 第11段：`scripts/vnext/spatial/spatial_capacity_window.gd` 至 `scripts/world_map/historical_map_identity_style.gd`
+
+```text
 @ scripts/vnext/spatial/spatial_capacity_window.gd | VNextSpatialCapacityWindow
 7 C CAPACITY_EPSILON
 8 C MAX_JSON_SAFE_INTEGER
@@ -1768,7 +1847,7 @@
 13 C CODE_ROW_CENTERS
 ```
 
-### 第11段：`scripts/world_map/internal/world_map_canvas_impl.gd` 至 `scripts/world_map/internal/world_map_data_impl.gd`
+### 第12段：`scripts/world_map/internal/world_map_canvas_impl.gd` 至 `scripts/world_map/internal/world_map_data_impl.gd`
 
 ```text
 @ scripts/world_map/internal/world_map_canvas_impl.gd | PrototypeV2MapCanvas
@@ -1944,7 +2023,7 @@
 26 K errors
 ```
 
-### 第12段：`scripts/world_map/internal/world_map_interface_impl.gd` 至 `scripts/world_map/world_map_canvas_detail.gd`
+### 第13段：`scripts/world_map/internal/world_map_interface_impl.gd` 至 `scripts/world_map/world_map_canvas_detail.gd`
 
 ```text
 @ scripts/world_map/internal/world_map_interface_impl.gd | PrototypeV2Interface
@@ -2046,4 +2125,3 @@
 7 C DETAIL_SELECTED_COLOR
 9 A _city_detail_catalog
 ```
-

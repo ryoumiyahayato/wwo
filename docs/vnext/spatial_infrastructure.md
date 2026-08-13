@@ -104,10 +104,15 @@ unfulfilled. Zero effective capacity produces zero allocation and zero
 remaining capacity.
 
 At a boundary, the active request set is cleared and a new window begins.
-There is no unbounded reservation history. `capacity_summary()` exposes
+There is no unbounded reservation history. `effective_capacity(link_id)` exposes the authoritative physical capacity without evaluating current reservations, for routing/access checks that do not need allocation state. `capacity_summary()` exposes
 authoritative nominal, effective, used and remaining capacity plus the sorted
 current reservations. Future Economy/Military adapters should submit demand to
 this contract instead of implementing a second capacity ledger.
+
+
+### Transactional batch submission
+
+`request_capacity_batch()` is the minimal shared-contract extension for domains that may submit many same-window requests. It validates the complete batch before mutation, inserts the accepted requests transactionally, performs one canonical allocation recomputation plus one linear response calculation, and then exposes the same final reservation values through `reservation_results_batch()` or individual `reservation_result()` queries. Request-ID sorting, effective-capacity bounds, zero-capacity behavior, rollover, snapshot and restore semantics are unchanged. The batch API exists to avoid repeated O(n²) reallocations when persistent Military logistics creates many simultaneous requests; it does not grant Military any capacity authority.
 
 ## Territorial facts
 
