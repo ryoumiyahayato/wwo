@@ -1,0 +1,159 @@
+{
+  "batches": [
+    1,
+    2,
+    3
+  ],
+  "checks": [
+    {
+      "args": [
+        "--quiet"
+      ],
+      "exit_code": 0,
+      "output": {
+        "metrics": {
+          "backlog_targets": 50,
+          "canonical_digests": {
+            "canonical_crosswalk.json": "35ddaa5a03c4ea6f85eb82c50ead797b4f338318660f98e859fe47b39e0f8de0",
+            "conflict_register.json": "ad5fe07a6553865afb4345b8ec5e69e8faff93b9eb0c0c40aea9cb95aa3afac4",
+            "pack_manifest.json": "b544dd5350ea571d3426a9995e05190b7eff343686de0b865a3a2a02488f792a",
+            "priority_backlog.json": "8cd2093d84519e003c1c16d681b081a746a9f17f6f28df6ccf7722249d7c196b",
+            "source_manifest.json": "7f05f09e49bf71e0cb0574660f0ce24b60f9a4b1c751f0f56b91da566ec4d99e",
+            "source_record.schema.json": "da3ea07d0a69d15f6d117c73d5181fc7b8702279ec1992863dac1b7f9d9dbfab",
+            "source_records.json": "92dde92aeae32c2bfe4853d2003e83264c9ed60aee0d2d959f89952ac958bc3e"
+          },
+          "conflicts_requiring_review": 0,
+          "crosswalk": {
+            "canonical_country_ids": 177,
+            "records": 61,
+            "statuses": {
+              "AMBIGUOUS": 5,
+              "EXACT": 40,
+              "LIKELY": 16,
+              "NO_MATCH": 0
+            }
+          },
+          "source_count": 7,
+          "source_records": {
+            "confidence_counts": {
+              "high": 20,
+              "medium": 8
+            },
+            "fact_counts": {
+              "entity_exists": 20,
+              "sovereignty_relationship": 8
+            },
+            "records": 28
+          }
+        },
+        "ok": true
+      },
+      "script": "tools/historical_data/validate_1900_source_pack.py"
+    },
+    {
+      "args": [],
+      "exit_code": 0,
+      "output": {
+        "errors": [],
+        "metrics": {
+          "canonical_match_counts": {
+            "EXACT_ID": 5,
+            "NO_MATCH": 146
+          },
+          "corpus_sha256": "fbff8d95182b5e3b137704202c71e1d9314a470aef2f30e7365c2710b0c7d614",
+          "manifest_sha256": "294df7a82d5d131f905c833036bc65515dfa268029b693e4be180fae95dbb0a7",
+          "records_sha256": "77f15d349ff11a0d4753aa80851d7cb9bd8cc69a23ab84f41280836df2338771",
+          "relationship_counts": {
+            "administered_territory": 2,
+            "belligerent_state": 2,
+            "controlled_territory": 78,
+            "crown_colony": 1,
+            "dual_control": 1,
+            "independent_state": 53,
+            "military_occupation": 1,
+            "protected_state": 2,
+            "protected_territory": 10,
+            "self_governing_dominion": 1
+          },
+          "schema_sha256": "1a568e49b55f2be8b5b98314e13d8d6af54f9a9f1cecc64ff346958fc07c5414",
+          "source_sha256": "d62a8d9c566c1dfea9d57fc197a6fa3606c6be259782a582050aeaffa002c5f9",
+          "source_units": 151,
+          "staged_relationships": 96,
+          "staged_units": 151,
+          "status_counts": {
+            "colony": 1,
+            "condominium": 1,
+            "contested": 2,
+            "dependency": 78,
+            "dominion": 1,
+            "occupied": 3,
+            "protectorate": 12,
+            "sovereign": 53
+          }
+        },
+        "ok": true
+      },
+      "script": "tools/historical_data/validate_1900_source_pack_batch2.py"
+    },
+    {
+      "args": [],
+      "exit_code": 0,
+      "output": {
+        "errors": [],
+        "metrics": {
+          "candidate_count": 52,
+          "category_counts": {
+            "cities": 32,
+            "ports": 8,
+            "rail_segments": 9,
+            "shipping_routes": 3
+          },
+          "corpus_sha256": "e8d8de582c4569c76cf4897e91bb16766c4821b5e934b91a24bfeb7eeced2375",
+          "inventory_file_count": 13,
+          "inventory_sha256": "2190d230d6acc3cb8aecea4cb9009701c232743ee282cfbe796fab41b0df711e",
+          "manifest_sha256": "bc21a00a693def6bfab4fcbba93f8a9d49e91838d4d8a33a4b7fb552cc86e15c",
+          "records_sha256": "e3e2aa06013f64a6a6af798522ea66a71a095d86df3b6bb83336caeda1a24118",
+          "schema_sha256": "0191b38f4c2a1d8aab94bb922665641ef5e3e658c42ece8a0ff4f0e0f42e7c08"
+        },
+        "ok": true
+      },
+      "script": "tools/historical_data/validate_1900_source_pack_batch3.py"
+    },
+    {
+      "args": [],
+      "exit_code": 0,
+      "output": {
+        "expected_records_sha256": "77f15d349ff11a0d4753aa80851d7cb9bd8cc69a23ab84f41280836df2338771",
+        "ok": true,
+        "outputs_compared": [
+          "political_unit_records_1900.json",
+          "batch2_manifest.json",
+          "batch2_deterministic_corpus.json"
+        ]
+      },
+      "script": "tools/historical_data/test_1900_source_pack_batch2_determinism.py"
+    },
+    {
+      "args": [],
+      "exit_code": 0,
+      "output": {
+        "expected_records_sha256": "e3e2aa06013f64a6a6af798522ea66a71a095d86df3b6bb83336caeda1a24118",
+        "ok": true,
+        "outputs_compared": [
+          "batch3_source_gap_candidates.json",
+          "batch3_repository_inventory.json",
+          "batch3_deterministic_corpus.json",
+          "batch3_manifest.json"
+        ]
+      },
+      "script": "tools/historical_data/test_1900_source_pack_batch3_determinism.py"
+    }
+  ],
+  "overall_ok": true,
+  "policy": {
+    "determinism_requires_byte_identical_outputs": true,
+    "no_gameplay_balance": true,
+    "runtime_authority": false
+  },
+  "schema_id": "wwo_1900_source_pack_batches_1_to_3_qa_report_v1"
+}
