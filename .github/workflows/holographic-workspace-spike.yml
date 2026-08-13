@@ -93,7 +93,7 @@ jobs:
             --audio-driver Dummy \
             --path . \
             --editor \
-            --quit-after 3 \
+            --quit \
             --log-file godot-import.log
           if grep -Eq "SCRIPT ERROR|^ERROR:" godot-import.log; then
             cat godot-import.log

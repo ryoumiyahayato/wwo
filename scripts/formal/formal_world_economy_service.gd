@@ -217,6 +217,54 @@ func polity_ids_for_economy(economy_id: String) -> Array[String]:
 	return DataRecordUtils.to_string_array(economy_polity_ids.get(economy_id, []))
 
 
+func route_summary(route_id: String) -> Dictionary:
+	for route: Dictionary in routes:
+		if str(route.get("route_id", "")) == route_id:
+			return route.duplicate(true)
+	return {}
+
+
+func shipment_summary(shipment_id: String) -> Dictionary:
+	for shipment: Dictionary in shipments:
+		if str(shipment.get("shipment_id", "")) == shipment_id:
+			return shipment.duplicate(true)
+	return {}
+
+
+## Applies a transport-domain priority to an existing in-transit shipment.
+## It never creates goods or changes route capacity; it only reduces one day
+## of port handling while retaining at least one hour of remaining transit.
+func prioritize_in_transit_shipment(
+	route_id: String,
+	commodity_id: String,
+	current_total_hour: int
+) -> Dictionary:
+	if current_total_hour != total_hour:
+		return {}
+	for index: int in range(shipments.size()):
+		var shipment := shipments[index] as Dictionary
+		if (
+			str(shipment.get("route_id", "")) != route_id
+			or str(shipment.get("commodity_id", "")) != commodity_id
+			or str(shipment.get("status", "")) != "in_transit"
+			or bool(shipment.get("priority_authorized", false))
+		):
+			continue
+		var original_arrival_hour := int(shipment.get("arrival_hour", -1))
+		if original_arrival_hour <= current_total_hour:
+			continue
+		var prioritized_arrival_hour := maxi(
+			current_total_hour + 1, original_arrival_hour - HOURS_PER_DAY
+		)
+		shipment["priority_authorized"] = true
+		shipment["priority_authorized_hour"] = current_total_hour
+		shipment["original_arrival_hour"] = original_arrival_hour
+		shipment["arrival_hour"] = prioritized_arrival_hour
+		shipments[index] = shipment
+		return shipment.duplicate(true)
+	return {}
+
+
 func formal_verified_countries() -> Array[Dictionary]:
 	return _historical.formal_countries()
 
@@ -489,6 +537,8 @@ func _build_routes() -> void:
 				10.0, float(record.get("capacity_index", 1)) * 18.0
 			),
 			"mode": str(record.get("mode", "steamship")),
+			"origin_port": str(record.get("origin_port", "")),
+			"destination_port": str(record.get("destination_port", "")),
 			"confidence_bp": int(record.get("confidence_bp", 0)),
 		})
 	for record: Dictionary in _historical.river_corridors:
@@ -911,6 +961,19 @@ func _validate_candidate_state(
 			or arrival_hour <= dispatch_hour
 		):
 			return false
+		if bool(shipment.get("priority_authorized", false)):
+			var original_arrival_hour := int(
+				shipment.get("original_arrival_hour", -1)
+			)
+			var priority_hour := int(
+				shipment.get("priority_authorized_hour", -1)
+			)
+			if (
+				original_arrival_hour <= arrival_hour
+				or priority_hour < dispatch_hour
+				or priority_hour > expected_total_hour
+			):
+				return false
 	return true
 
 
