@@ -56,3 +56,12 @@ Writes are fail-closed to strict descendants of the ignored `artifacts/map-prepr
 `PIXEL` geometry maps directly to a top-left canvas. `WGS84` geometry requires explicit finite source bounds and records the mapping and y-axis convention. Malformed points/rings produce explicit errors. Mask mode is explicit (`alpha`, `grayscale`, or derived `geometry`); dimension mismatch is rejected unless nearest-neighbor resampling is opted in and recorded. Published manifests validate required fields, actual file references, dimensions, hashes, positive in-canvas bboxes, coordinate contract, alpha/mask semantics, and distinct paths.
 
 Generated visuals remain candidate-only and cannot become spatial authority. The source-absence status is derived from the inventory and provenance/license/coordinate-contract fields: with no approved source it is `BLOCKED_NO_SOURCE_MAP_ASSET`; a future approved source is not blocked by a permanent constant. Historical flag PNGs remain visual-only and are never map-space sources.
+
+Source admission is explicit. The default `approved_spatial` contract resolves
+the existing `docs/data_sources/provenance_manifest.json` by canonical path and
+requires a unique approved map-visual PNG record with matching size/hash,
+license, locator, review status, and coordinate convention. Missing, unrelated,
+historical-flag, malformed, or hash-mismatched records fail closed. Synthetic
+fixtures require the explicit CLI/API contract `synthetic_test`; their manifest
+state is marked synthetic and they are excluded from real repository source
+discovery.

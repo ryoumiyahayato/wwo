@@ -19,6 +19,7 @@ TOOL_VERSION = safe.TOOL_VERSION
 SCHEMA_VERSION = legacy.SCHEMA_VERSION
 SUPPORTED_COORDINATE_SPACES = safe.SUPPORTED_COORDINATE_SPACES
 SUPPORTED_MASK_MODES = safe.SUPPORTED_MASK_MODES
+SOURCE_CONTRACTS = safe.SOURCE_CONTRACTS
 APPROVED_CANDIDATE_ROOT = safe.APPROVED_CANDIDATE_ROOT
 
 
@@ -28,9 +29,11 @@ def install(namespace: dict[str, Any]) -> None:
         "SCHEMA_VERSION": SCHEMA_VERSION,
         "SUPPORTED_COORDINATE_SPACES": SUPPORTED_COORDINATE_SPACES,
         "SUPPORTED_MASK_MODES": SUPPORTED_MASK_MODES,
+        "SOURCE_CONTRACTS": SOURCE_CONTRACTS,
         "APPROVED_CANDIDATE_ROOT": APPROVED_CANDIDATE_ROOT,
         "validate_candidate_output_dir": safe.validate_candidate_output_dir,
         "candidate_source_status": safe.candidate_source_status,
+        "admit_source": lambda root, value, source_contract="approved_spatial": safe.admit_source(legacy, root, value, source_contract),
         "resolve_unique_provider": safe.resolve_unique_provider,
         "build_inventory": build_inventory,
         "geometry_qa": geometry_qa,
@@ -201,14 +204,15 @@ def _coordinate_contract(coordinate_space: str, source_bounds: Sequence[float] |
     return {"space": "WGS84", "mapping": "equirectangular_canvas", "source_bounds": bounds, "y_axis": "north_to_top"}
 
 
-def process_cutout(root: Path | str, source_path: Path | str, entity_id: str, output_dir: Path | str, mask_path: Path | str | None = None, geometry_file: Path | str | None = None, geometry_id: str | None = None, canonical_size: tuple[int, int] | None = None, padding: int = 0, source_bounds: Sequence[float] | None = None, coordinate_space: str = "PIXEL", mask_mode: str | None = None, allow_mask_resample: bool = False) -> dict[str, Any]:
+def process_cutout(root: Path | str, source_path: Path | str, entity_id: str, output_dir: Path | str, mask_path: Path | str | None = None, geometry_file: Path | str | None = None, geometry_id: str | None = None, canonical_size: tuple[int, int] | None = None, padding: int = 0, source_bounds: Sequence[float] | None = None, coordinate_space: str = "PIXEL", mask_mode: str | None = None, allow_mask_resample: bool = False, source_contract: str = "approved_spatial") -> dict[str, Any]:
     root_path = Path(root).resolve()
     if not isinstance(entity_id, str) or not entity_id.strip():
         raise ValueError("entity_id must be a non-empty string")
     if padding < 0:
         raise ValueError("padding must be non-negative")
     output = safe.validate_candidate_output_dir(root_path, output_dir)
-    source = safe.resolve_input_path(root_path, source_path, "source")
+    source_admission = safe.admit_source(legacy, root_path, source_path, source_contract)
+    source = source_admission["path"]
     source_hash = legacy._file_hash(source)
     original_width, original_height, pixels = read_png_rgba(source)
     source_dimensions = [original_width, original_height]
@@ -297,6 +301,18 @@ def process_cutout(root: Path | str, source_path: Path | str, entity_id: str, ou
     legacy.write_png_rgba(preview_path, crop_width, crop_height, legacy._preview_pixels(crop_width, crop_height, cutout))
     manifest = {
         "schema_version": SCHEMA_VERSION, "generator_version": TOOL_VERSION, "entity_id": entity_id,
+        "source_contract": source_admission["contract"],
+        "source_admission": {
+            "status": source_admission["status"],
+            "provenance_manifest": source_admission["record_file"],
+            "provenance_record": source_admission["record"].get("path") if source_admission["record"] else None,
+            "category": source_admission["category"],
+            "license": source_admission["record"].get("license") if source_admission["record"] else None,
+            "expected_sha256": source_admission["record"].get("sha256") if source_admission["record"] else None,
+            "coordinate_convention": source_admission["record"].get("coordinate_convention") if source_admission["record"] else None,
+            "review_status": source_admission["record"].get("review_status") if source_admission["record"] else None,
+            "source_locator": source_admission["record"].get("source_locator") if source_admission["record"] else None,
+        },
         "source_file": legacy._relative_path(root_path, source), "source_hash": source_hash, "source_dimensions": source_dimensions,
         "input_mask_file": legacy._relative_path(root_path, input_mask_file) if input_mask_file is not None else None,
         "input_mask_hash": input_mask_hash, "input_mask_dimensions": input_mask_dimensions,

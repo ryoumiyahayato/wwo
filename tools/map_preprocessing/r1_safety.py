@@ -12,11 +12,18 @@ from collections import Counter
 from pathlib import Path
 from typing import Any, Iterator, Sequence
 
-TOOL_VERSION = "1.1.0"
+TOOL_VERSION = "1.2.0"
 SCHEMA_VERSION = 1
 APPROVED_CANDIDATE_ROOT = Path("artifacts/map-preprocessing")
 SUPPORTED_COORDINATE_SPACES = {"PIXEL", "WGS84"}
 SUPPORTED_MASK_MODES = {"alpha", "grayscale"}
+SOURCE_CONTRACTS = {"approved_spatial", "synthetic_test"}
+SOURCE_ADMISSION_STATUSES = {"approved", "synthetic_test"}
+PROVENANCE_MANIFEST_PATH = Path("docs/data_sources/provenance_manifest.json")
+APPROVED_SOURCE_CATEGORIES = {"map_visual_source", "map_raster_source"}
+APPROVED_SOURCE_REVIEW_STATUSES = {"APPROVED", "REVIEWED_APPROVED", "APPROVED_FOR_MAP_PREPROCESSING"}
+UNLICENSED_VALUES = {"", "LICENSE_UNKNOWN", "MIXED_EXPLICIT_AND_UNKNOWN", "NOT_APPLICABLE"}
+SUPPORTED_SOURCE_FILE_TYPES = {"image/png"}
 
 
 def install(namespace: dict[str, Any]) -> None:
@@ -27,8 +34,13 @@ def install(namespace: dict[str, Any]) -> None:
         "APPROVED_CANDIDATE_ROOT": APPROVED_CANDIDATE_ROOT,
         "SUPPORTED_COORDINATE_SPACES": SUPPORTED_COORDINATE_SPACES,
         "SUPPORTED_MASK_MODES": SUPPORTED_MASK_MODES,
+        "SOURCE_CONTRACTS": SOURCE_CONTRACTS,
+        "SOURCE_ADMISSION_STATUSES": SOURCE_ADMISSION_STATUSES,
+        "PROVENANCE_MANIFEST_PATH": PROVENANCE_MANIFEST_PATH,
+        "SUPPORTED_SOURCE_FILE_TYPES": SUPPORTED_SOURCE_FILE_TYPES,
         "validate_candidate_output_dir": validate_candidate_output_dir,
         "candidate_source_status": candidate_source_status,
+        "admit_source": lambda root, value, source_contract="approved_spatial": admit_source(legacy, root, value, source_contract),
         "resolve_unique_provider": resolve_unique_provider,
         "build_inventory": lambda root: build_inventory(legacy, root),
         "geometry_qa": lambda root: geometry_qa(legacy, root),
@@ -93,6 +105,103 @@ def resolve_input_path(root: Path, value: Path | str, label: str) -> Path:
     if not resolved.is_file():
         raise ValueError(f"{label} does not exist as a file: {path}")
     return resolved
+
+
+def _relative_source_key(root: Path, path: Path) -> str:
+    try:
+        return path.resolve(strict=False).relative_to(root.resolve()).as_posix()
+    except ValueError:
+        return path.resolve(strict=False).as_posix()
+
+
+def _is_historical_flag_path(root: Path, value: Path | str) -> bool:
+    path = Path(value)
+    if not path.is_absolute():
+        path = root / path
+    relative = _relative_source_key(root, path).casefold()
+    return relative == "assets/historical_flags" or relative.startswith("assets/historical_flags/")
+
+
+def _load_provenance_records(legacy: Any, root: Path) -> tuple[Path, list[dict[str, Any]]]:
+    manifest_path = (root / PROVENANCE_MANIFEST_PATH).resolve(strict=False)
+    if not manifest_path.is_file():
+        raise ValueError(f"provenance manifest is missing: {PROVENANCE_MANIFEST_PATH.as_posix()}")
+    try:
+        document = legacy._load_json(manifest_path)
+    except Exception as exc:
+        raise ValueError(f"provenance manifest is not valid JSON: {type(exc).__name__}") from exc
+    if not isinstance(document, dict) or not isinstance(document.get("entries"), list):
+        raise ValueError("provenance manifest entries must be a list")
+    records: list[dict[str, Any]] = []
+    seen_paths: set[str] = set()
+    for index, value in enumerate(document["entries"]):
+        if not isinstance(value, dict):
+            raise ValueError(f"provenance manifest entry {index} is not an object")
+        path = value.get("path")
+        if not isinstance(path, str) or not path or Path(path).is_absolute() or "\\" in path or ".." in Path(path).parts or Path(path).as_posix() != path:
+            raise ValueError(f"provenance manifest entry {index} has an invalid path")
+        if path in seen_paths:
+            raise ValueError(f"provenance manifest contains duplicate path: {path}")
+        seen_paths.add(path)
+        records.append(value)
+    return manifest_path, records
+
+
+def _record_license(record: dict[str, Any]) -> str:
+    value = record.get("license")
+    return value.strip() if isinstance(value, str) else ""
+
+
+def _record_is_approved_visual_source(record: dict[str, Any], source: Path) -> bool:
+    category = record.get("category")
+    file_type = record.get("file_type")
+    review_status = record.get("review_status")
+    license_name = _record_license(record)
+    if category not in APPROVED_SOURCE_CATEGORIES:
+        return False
+    if file_type not in SUPPORTED_SOURCE_FILE_TYPES:
+        return False
+    if source.suffix.casefold() not in {".png"}:
+        return False
+    if record.get("kind") not in {"source", "generated"} or review_status not in APPROVED_SOURCE_REVIEW_STATUSES:
+        return False
+    coordinate_convention = record.get("coordinate_convention")
+    if not isinstance(coordinate_convention, str) or not coordinate_convention.strip() or coordinate_convention == "not_declared":
+        return False
+    if license_name in UNLICENSED_VALUES:
+        return False
+    if not isinstance(record.get("source_locator"), list) or not any(isinstance(item, str) and item.strip() for item in record["source_locator"]):
+        return False
+    size_bytes = record.get("size_bytes")
+    if not isinstance(size_bytes, int) or isinstance(size_bytes, bool) or size_bytes <= 0 or size_bytes != source.stat().st_size:
+        return False
+    expected_hash = record.get("sha256")
+    return isinstance(expected_hash, str) and re.fullmatch(r"[0-9a-f]{64}", expected_hash) is not None
+
+
+def admit_source(legacy: Any, root: Path | str, value: Path | str, source_contract: str = "approved_spatial") -> dict[str, Any]:
+    if source_contract not in SOURCE_CONTRACTS:
+        raise ValueError(f"source_contract must be one of {sorted(SOURCE_CONTRACTS)}")
+    root_path = Path(root).resolve()
+    if _is_historical_flag_path(root_path, value):
+        raise ValueError("historical flag assets are visual-only and cannot be map sources")
+    source = resolve_input_path(root_path, value, "source")
+    if is_within(source, (root_path / APPROVED_CANDIDATE_ROOT).resolve(strict=False)):
+        raise ValueError("candidate outputs cannot be admitted as source assets")
+    source_key = _relative_source_key(root_path, source)
+    if source_contract == "synthetic_test":
+        return {"path": source, "contract": source_contract, "status": "synthetic_test", "record_file": None, "record": None, "category": "synthetic_test"}
+    manifest_path, records = _load_provenance_records(legacy, root_path)
+    matches = [record for record in records if record.get("path") == source_key]
+    if len(matches) != 1:
+        raise ValueError("source has no unique provenance record")
+    record = matches[0]
+    if not _record_is_approved_visual_source(record, source):
+        raise ValueError("source provenance record is not approved for visual map preprocessing")
+    actual_hash = legacy._file_hash(source)
+    if record.get("sha256") != actual_hash:
+        raise ValueError("source content hash does not match the provenance record")
+    return {"path": source, "contract": source_contract, "status": "approved", "record_file": _relative_source_key(root_path, manifest_path), "record": record, "category": record["category"]}
 
 
 def _png_chunks(data: bytes, signature: bytes) -> Iterator[tuple[bytes, bytes]]:
@@ -266,9 +375,28 @@ def geometry_qa(legacy: Any, root: Path | str) -> dict[str, Any]:
     return result
 
 
-def candidate_source_status(inventory: dict[str, Any]) -> dict[str, Any]:
-    sources = sorted(str(record["path"]) for record in inventory.get("files", []) if record.get("category") in {"raster", "vector"} and not str(record.get("path", "")).lower().startswith("assets/historical_flags/") and record.get("coordinate_convention") not in (None, "not_declared") and isinstance(record.get("source_provenance"), dict) and record["source_provenance"].get("license"))
-    return {"status": "available", "reason": "Approved source is inventoried with provenance, license, and coordinate convention.", "sources": sources} if sources else {"status": "blocked", "reason": "BLOCKED_NO_SOURCE_MAP_ASSET", "sources": []}
+def candidate_source_status(inventory: dict[str, Any], root: Path | str | None = None, legacy: Any | None = None) -> dict[str, Any]:
+    sources: set[str] = set()
+    if root is None or legacy is None:
+        sources = {str(record["path"]) for record in inventory.get("files", []) if record.get("category") in {"raster", "vector"} and not str(record.get("path", "")).lower().startswith("assets/historical_flags/") and record.get("coordinate_convention") not in (None, "not_declared") and isinstance(record.get("source_provenance"), dict) and record["source_provenance"].get("license")}
+    if root is not None and legacy is not None:
+        root_path = Path(root).resolve()
+        try:
+            _, records = _load_provenance_records(legacy, root_path)
+        except ValueError:
+            records = []
+        for record in records:
+            path = record.get("path")
+            if not isinstance(path, str) or path.lower().startswith("assets/historical_flags/"):
+                continue
+            try:
+                candidate = resolve_input_path(root_path, path, "provenance source")
+            except ValueError:
+                continue
+            if _relative_source_key(root_path, candidate) == path and _record_is_approved_visual_source(record, candidate) and legacy._file_hash(candidate) == record.get("sha256"):
+                sources.add(path)
+    ordered = sorted(sources)
+    return {"status": "available", "reason": "Approved source is inventoried with provenance, license, and coordinate convention.", "sources": ordered} if ordered else {"status": "blocked", "reason": "BLOCKED_NO_SOURCE_MAP_ASSET", "sources": []}
 
 
 def resolve_unique_provider(matches: Sequence[dict[str, Any]]) -> tuple[dict[str, Any] | None, str]:
@@ -277,7 +405,7 @@ def resolve_unique_provider(matches: Sequence[dict[str, Any]]) -> tuple[dict[str
 
 def build_crosswalk(legacy: Any, root: Path | str, inventory: dict[str, Any] | None = None) -> dict[str, Any]:
     root_path = Path(root).resolve()
-    status = candidate_source_status(inventory if inventory is not None else build_inventory(legacy, root_path))
+    status = candidate_source_status(inventory if inventory is not None else build_inventory(legacy, root_path), root_path, legacy)
     original_point, original_candidate = legacy._point, legacy._no_map_mask_candidate
     legacy._point = lambda value: _point(legacy, value)
     legacy._no_map_mask_candidate = lambda: {"status": "not_generated", "reason": status["reason"], "source_raster_candidates": status["sources"]}

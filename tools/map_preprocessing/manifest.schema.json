@@ -7,6 +7,8 @@
     "schema_version",
     "generator_version",
     "entity_id",
+    "source_contract",
+    "source_admission",
     "source_file",
     "source_hash",
     "source_dimensions",
@@ -27,6 +29,23 @@
     "schema_version": {"type": "integer", "const": 1},
     "generator_version": {"type": "string", "minLength": 1},
     "entity_id": {"type": "string", "minLength": 1},
+    "source_contract": {"enum": ["approved_spatial", "synthetic_test"]},
+    "source_admission": {
+      "type": "object",
+      "required": ["status", "provenance_manifest", "provenance_record", "category", "license", "expected_sha256", "coordinate_convention", "review_status", "source_locator"],
+      "properties": {
+        "status": {"enum": ["approved", "synthetic_test"]},
+        "provenance_manifest": {"type": ["string", "null"]},
+        "provenance_record": {"type": ["string", "null"]},
+        "category": {"type": "string", "minLength": 1},
+        "license": {"type": ["string", "null"]},
+        "expected_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+        "coordinate_convention": {"type": ["string", "null"], "minLength": 1},
+        "review_status": {"type": ["string", "null"], "minLength": 1},
+        "source_locator": {"anyOf": [{"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1}, {"type": "null"}]}
+      },
+      "additionalProperties": false
+    },
     "source_file": {"type": "string", "minLength": 1},
     "source_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "source_dimensions": {"$ref": "#/$defs/size"},

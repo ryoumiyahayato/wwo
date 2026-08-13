@@ -16,7 +16,7 @@ _ORIGINAL_BUILD_INVENTORY = legacy.build_inventory
 _ORIGINAL_GEOMETRY_QA = legacy.geometry_qa
 _ORIGINAL_BUILD_CROSSWALK = legacy.build_crosswalk
 
-TOOL_VERSION = "1.1.0"
+TOOL_VERSION = "1.2.0"
 SCHEMA_VERSION = legacy.SCHEMA_VERSION
 
 
@@ -41,13 +41,25 @@ def validate_manifest(manifest: dict[str, Any], root: Path | str | None = None, 
     errors: list[str] = []
     if not isinstance(manifest, dict):
         return ["manifest.object"]
-    required = ("schema_version", "generator_version", "entity_id", "source_file", "source_hash", "source_dimensions", "mask_hash", "output_hash", "preview_hash", "crop_bbox", "mask_bbox", "canvas_size", "output_size", "output_file", "mask_file", "preview_file", "coordinate_contract", "processing_parameters")
+    required = ("schema_version", "generator_version", "entity_id", "source_contract", "source_admission", "source_file", "source_hash", "source_dimensions", "mask_hash", "output_hash", "preview_hash", "crop_bbox", "mask_bbox", "canvas_size", "output_size", "output_file", "mask_file", "preview_file", "coordinate_contract", "processing_parameters")
     errors.extend("missing:" + key for key in required if key not in manifest)
     if manifest.get("schema_version") != SCHEMA_VERSION:
         errors.append("schema_version")
-    for key in ("generator_version", "entity_id", "source_file", "output_file", "mask_file", "preview_file"):
+    for key in ("generator_version", "entity_id", "source_contract", "source_file", "output_file", "mask_file", "preview_file"):
         if not isinstance(manifest.get(key), str) or not manifest[key].strip():
             errors.append(key)
+    if manifest.get("source_contract") not in safe.SOURCE_CONTRACTS:
+        errors.append("source_contract")
+    admission = manifest.get("source_admission")
+    if not isinstance(admission, dict) or admission.get("status") not in safe.SOURCE_ADMISSION_STATUSES or admission.get("category") in (None, ""):
+        errors.append("source_admission")
+    elif admission.get("status") == "synthetic_test":
+        if manifest.get("source_contract") != "synthetic_test" or admission.get("category") != "synthetic_test" or any(admission.get(key) is not None for key in ("provenance_manifest", "provenance_record", "license", "expected_sha256", "coordinate_convention", "review_status", "source_locator")):
+            errors.append("source_admission.synthetic")
+    elif manifest.get("source_contract") != "approved_spatial" or admission.get("category") not in safe.APPROVED_SOURCE_CATEGORIES or not isinstance(admission.get("provenance_manifest"), str) or not isinstance(admission.get("provenance_record"), str) or not isinstance(admission.get("license"), str) or not admission["license"].strip() or not _valid_hash(admission.get("expected_sha256")) or not isinstance(admission.get("coordinate_convention"), str) or not admission["coordinate_convention"].strip() or admission.get("review_status") not in safe.APPROVED_SOURCE_REVIEW_STATUSES or not isinstance(admission.get("source_locator"), list) or not any(isinstance(item, str) and item.strip() for item in admission["source_locator"]):
+        errors.append("source_admission.approved")
+    if manifest.get("source_contract") == "synthetic_test" and isinstance(admission, dict) and admission.get("status") != "synthetic_test":
+        errors.append("source_admission.synthetic_status")
     for key in ("source_hash", "mask_hash", "output_hash", "preview_hash"):
         if not _valid_hash(manifest.get(key)):
             errors.append(key)
@@ -138,6 +150,27 @@ def validate_manifest(manifest: dict[str, Any], root: Path | str | None = None, 
     if len({safe.canonical_key(path) for path in paths}) != len(paths):
         errors.append("referenced_files_distinct")
     if source_file is not None:
+        try:
+            admission = safe.admit_source(legacy, root_path, manifest["source_file"], manifest.get("source_contract"))
+            expected_admission = manifest.get("source_admission", {})
+            actual_record = admission.get("record") or {}
+            if (
+                admission.get("status") != expected_admission.get("status")
+                or admission.get("category") != expected_admission.get("category")
+                or admission.get("record_file") != expected_admission.get("provenance_manifest")
+                or actual_record.get("path") != expected_admission.get("provenance_record")
+            ):
+                errors.append("source_admission.actual")
+            if admission.get("status") == "approved" and (
+                actual_record.get("sha256") != expected_admission.get("expected_sha256")
+                or actual_record.get("license") != expected_admission.get("license")
+                or actual_record.get("coordinate_convention") != expected_admission.get("coordinate_convention")
+                or actual_record.get("review_status") != expected_admission.get("review_status")
+                or actual_record.get("source_locator") != expected_admission.get("source_locator")
+            ):
+                errors.append("source_admission.integrity")
+        except (KeyError, TypeError, ValueError):
+            errors.append("source_admission.actual")
         if legacy._file_hash(source_file) != manifest["source_hash"]:
             errors.append("source_hash.actual")
         try:
@@ -184,7 +217,7 @@ def run_repository(root: Path | str, output_dir: Path | str = "artifacts/map-pre
     legacy._write_json(output / "inventory.json", inventory)
     legacy._write_json(output / "crosswalk.json", crosswalk)
     legacy._write_json(output / "geometry_qa.json", qa)
-    status = safe.candidate_source_status(inventory)
+    status = safe.candidate_source_status(inventory, root_path, legacy)
     summary = {"schema_version": legacy.SCHEMA_VERSION, "tool_version": TOOL_VERSION, "input_root": ".", "inventory_sha256": legacy.stable_hash(inventory), "crosswalk_sha256": legacy.stable_hash(crosswalk), "geometry_qa_sha256": legacy.stable_hash(qa), "source_assets_discovered": inventory["summary"], "entities_with_geometry": sum(1 for record in crosswalk["records"] if record["geometry_status"] in {"resolved", "resolved_point", "composed"}), "candidate_masks_generated": 0, "candidate_cutout_status": "READY_SOURCE_AVAILABLE" if status["status"] == "available" else "BLOCKED_NO_SOURCE_MAP_ASSET", "candidate_cutout_reason": status["reason"], "candidate_source_assets": status["sources"], "geometry_qa": qa["summary"]}
     legacy._write_json(output / "run_summary.json", summary)
     legacy._write_json(output / "benchmark.json", {"schema_version": legacy.SCHEMA_VERSION, "tool_version": TOOL_VERSION, "benchmarks_ms": {}})
@@ -225,6 +258,7 @@ def main(legacy_module: Any, argv: Sequence[str] | None = None) -> int:
     preprocess.add_argument("--coordinate-space", choices=sorted(safe.SUPPORTED_COORDINATE_SPACES), default="PIXEL")
     preprocess.add_argument("--mask-mode", choices=sorted(safe.SUPPORTED_MASK_MODES))
     preprocess.add_argument("--allow-mask-resample", action="store_true")
+    preprocess.add_argument("--source-contract", choices=sorted(safe.SOURCE_CONTRACTS), default="approved_spatial")
     manifest_parser = sub.add_parser("validate-manifest")
     manifest_parser.add_argument("--path", required=True)
     args = parser.parse_args(argv)
@@ -263,7 +297,7 @@ def main(legacy_module: Any, argv: Sequence[str] | None = None) -> int:
     size = None if args.canonical_width is None and args.canonical_height is None else (args.canonical_width, args.canonical_height)
     if size is not None and (size[0] is None or size[1] is None):
         raise SystemExit("canonical width and height must be supplied together")
-    manifest = boundary.process_cutout(root, args.source, args.entity_id, args.output_dir, mask_path=args.mask, geometry_file=args.geometry_file, geometry_id=args.geometry_id, canonical_size=size, padding=args.padding, source_bounds=args.source_bounds, coordinate_space=args.coordinate_space, mask_mode=args.mask_mode, allow_mask_resample=args.allow_mask_resample)
+    manifest = boundary.process_cutout(root, args.source, args.entity_id, args.output_dir, mask_path=args.mask, geometry_file=args.geometry_file, geometry_id=args.geometry_id, canonical_size=size, padding=args.padding, source_bounds=args.source_bounds, coordinate_space=args.coordinate_space, mask_mode=args.mask_mode, allow_mask_resample=args.allow_mask_resample, source_contract=args.source_contract)
     print(legacy._stable_json({"entity_id": manifest["entity_id"], "output_file": manifest["output_file"], "output_size": manifest["output_size"], "mask_qa": manifest["mask_qa"]["summary"]}))
     return 0
 
@@ -273,4 +307,4 @@ def install(namespace: dict[str, Any]) -> None:
     namespace["_r1_original_geometry_qa"] = _ORIGINAL_GEOMETRY_QA
     namespace["_r1_original_build_crosswalk"] = _ORIGINAL_BUILD_CROSSWALK
     namespace["_r1_original_extract_polygons"] = _ORIGINAL_EXTRACT_POLYGONS
-    namespace.update({"TOOL_VERSION": TOOL_VERSION, "SCHEMA_VERSION": SCHEMA_VERSION, "APPROVED_CANDIDATE_ROOT": safe.APPROVED_CANDIDATE_ROOT, "SUPPORTED_COORDINATE_SPACES": safe.SUPPORTED_COORDINATE_SPACES, "SUPPORTED_MASK_MODES": safe.SUPPORTED_MASK_MODES, "validate_candidate_output_dir": safe.validate_candidate_output_dir, "candidate_source_status": safe.candidate_source_status, "resolve_unique_provider": safe.resolve_unique_provider, "extract_polygons": lambda value, location="geometry": safe._extract_polygons(legacy, value, location, _ORIGINAL_EXTRACT_POLYGONS), "_file_hash": legacy._file_hash, "_entity_output_stem": boundary._entity_output_stem, "build_inventory": boundary.build_inventory, "geometry_qa": boundary.geometry_qa, "build_crosswalk": boundary.build_crosswalk, "read_png_rgba": boundary.read_png_rgba, "_read_png_header": lambda path: safe.read_png_header(legacy, path), "_raster_metadata": lambda path: safe.raster_metadata(legacy, path), "_mask_from_rgba": boundary.mask_from_rgba, "_rasterize_polygons": boundary.rasterize_polygons, "process_cutout": boundary.process_cutout, "validate_manifest": validate_manifest, "_output_path": safe.validate_candidate_output_dir, "run_repository": run_repository, "deterministic_replay": deterministic_replay, "main": lambda argv=None: main(legacy, argv)})
+    namespace.update({"TOOL_VERSION": TOOL_VERSION, "SCHEMA_VERSION": SCHEMA_VERSION, "APPROVED_CANDIDATE_ROOT": safe.APPROVED_CANDIDATE_ROOT, "SUPPORTED_COORDINATE_SPACES": safe.SUPPORTED_COORDINATE_SPACES, "SUPPORTED_MASK_MODES": safe.SUPPORTED_MASK_MODES, "SOURCE_CONTRACTS": safe.SOURCE_CONTRACTS, "validate_candidate_output_dir": safe.validate_candidate_output_dir, "candidate_source_status": safe.candidate_source_status, "admit_source": lambda root, value, source_contract="approved_spatial": safe.admit_source(legacy, root, value, source_contract), "resolve_unique_provider": safe.resolve_unique_provider, "extract_polygons": lambda value, location="geometry": safe._extract_polygons(legacy, value, location, _ORIGINAL_EXTRACT_POLYGONS), "_file_hash": legacy._file_hash, "_entity_output_stem": boundary._entity_output_stem, "build_inventory": boundary.build_inventory, "geometry_qa": boundary.geometry_qa, "build_crosswalk": boundary.build_crosswalk, "read_png_rgba": boundary.read_png_rgba, "_read_png_header": lambda path: safe.read_png_header(legacy, path), "_raster_metadata": lambda path: safe.raster_metadata(legacy, path), "_mask_from_rgba": boundary.mask_from_rgba, "_rasterize_polygons": boundary.rasterize_polygons, "process_cutout": boundary.process_cutout, "validate_manifest": validate_manifest, "_output_path": safe.validate_candidate_output_dir, "run_repository": run_repository, "deterministic_replay": deterministic_replay, "main": lambda argv=None: main(legacy, argv)})

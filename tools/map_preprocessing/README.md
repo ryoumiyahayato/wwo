@@ -41,3 +41,17 @@ Every write is fail-closed to a strict descendant of `artifacts/map-preprocessin
 Geometry uses an explicit coordinate contract: `PIXEL` means top-left canvas pixels; `WGS84` requires finite source bounds and records the equirectangular mapping and y-axis convention. Malformed points/rings are errors, not filtered vertices. Mask input requires explicit `alpha` or `grayscale` mode; dimension mismatch is rejected unless nearest-neighbor resampling is explicitly enabled and recorded. Published manifests are validated against the actual files, dimensions, hashes, bboxes, coordinate contract, mask semantics, and path separation.
 
 Generated visuals are candidate-only and never spatial authority. The current repository has no approved map raster/vector source, so real candidate cutouts remain `0` with dynamic status `BLOCKED_NO_SOURCE_MAP_ASSET`. Historical flag PNGs are excluded from spatial sourcing.
+
+## Source admission
+
+`approved_spatial` is the default and fail-closed contract. It accepts only a
+PNG whose canonical repository path has exactly one matching record in the
+existing `docs/data_sources/provenance_manifest.json`. The record must declare
+an approved map-visual category, matching byte size and SHA-256, a non-empty
+source locator and license, an approved review status, and a coordinate
+convention. The manifest copies those admission fields for auditability.
+
+`synthetic_test` is an explicit test-only opt-in (`--source-contract
+synthetic_test`). Its outputs are marked `synthetic_test` and carry no
+provenance admission. It does not make an arbitrary repository file an
+approved source and is never counted by repository source discovery.

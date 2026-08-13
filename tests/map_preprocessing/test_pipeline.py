@@ -30,6 +30,91 @@ def rgb_png(width: int, height: int, color: tuple[int, int, int]) -> bytes:
 
 
 class R1SafetyTests(unittest.TestCase):
+    def test_source_admission_requires_explicit_contract_and_rejects_flags(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "assets" / "unrelated.png"
+            mask = root / "mask.png"
+            flag = root / "assets" / "historical_flags" / "1900" / "fixture.png"
+            source.parent.mkdir(parents=True)
+            flag.parent.mkdir(parents=True)
+            pipeline.write_png_rgba(source, 2, 2, solid(2, 2, (10, 20, 30, 255)))
+            pipeline.write_png_rgba(flag, 2, 2, solid(2, 2, (30, 20, 10, 255)))
+            pipeline.write_png_rgba(mask, 2, 2, gray_mask(2, 2, {(0, 0)}))
+            with self.assertRaises(ValueError):
+                pipeline.process_cutout(root, source, "default/entity", root / "artifacts/map-preprocessing/default", mask_path=mask, mask_mode="grayscale")
+            with self.assertRaises(ValueError):
+                pipeline.process_cutout(root, flag, "flag/entity", root / "artifacts/map-preprocessing/flag", mask_path=mask, mask_mode="grayscale", source_contract="synthetic_test")
+            manifest = pipeline.process_cutout(root, source, "synthetic/entity", root / "artifacts/map-preprocessing/synthetic", mask_path=mask, mask_mode="grayscale", source_contract="synthetic_test")
+            self.assertEqual(manifest["source_contract"], "synthetic_test")
+            self.assertEqual(manifest["source_admission"]["status"], "synthetic_test")
+            self.assertEqual(manifest["source_admission"]["category"], "synthetic_test")
+            with self.assertRaises(ValueError):
+                pipeline.main(["--root", str(root), "preprocess", "--source", "assets/unrelated.png", "--entity-id", "cli/default", "--output-dir", "artifacts/map-preprocessing/cli-default", "--mask", "mask.png", "--mask-mode", "grayscale"])
+            self.assertEqual(pipeline.main(["--root", str(root), "preprocess", "--source", "assets/unrelated.png", "--entity-id", "cli/synthetic", "--output-dir", "artifacts/map-preprocessing/cli-synthetic", "--mask", "mask.png", "--mask-mode", "grayscale", "--source-contract", "synthetic_test"]), 0)
+
+    def test_source_admission_uses_provenance_identity_and_hash(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "assets" / "approved_map.png"
+            mask = root / "mask.png"
+            source.parent.mkdir(parents=True)
+            pipeline.write_png_rgba(source, 2, 2, solid(2, 2, (90, 100, 110, 255)))
+            pipeline.write_png_rgba(mask, 2, 2, gray_mask(2, 2, {(1, 1)}))
+            source_hash = pipeline._file_hash(source)
+            provenance = {
+                "schema_version": 1,
+                "entries": [{
+                    "path": "assets/approved_map.png",
+                    "file_type": "image/png",
+                    "size_bytes": source.stat().st_size,
+                    "sha256": source_hash,
+                    "category": "map_visual_source",
+                    "kind": "source",
+                    "known_source": "approved test map",
+                    "source_locator": ["https://example.invalid/approved-map"],
+                    "author_institution": "test",
+                    "license": "CC0",
+                    "derived_from": [],
+                    "generator": "test",
+                    "confidence": "high",
+                    "review_status": "APPROVED",
+                    "coordinate_convention": "pixel_origin_top_left",
+                }],
+            }
+            provenance_path = root / "docs" / "data_sources" / "provenance_manifest.json"
+            provenance_path.parent.mkdir(parents=True)
+            provenance_path.write_text(json.dumps(provenance), encoding="utf-8")
+            admission = pipeline.admit_source(root, source)
+            self.assertEqual(admission["status"], "approved")
+            self.assertEqual(admission["record"]["sha256"], source_hash)
+            status = pipeline.candidate_source_status(pipeline.build_inventory(root), root, pipeline)
+            self.assertEqual(status["status"], "available")
+            self.assertEqual(status["sources"], ["assets/approved_map.png"])
+            manifest = pipeline.process_cutout(root, source, "approved/entity", root / "artifacts/map-preprocessing/approved", mask_path=mask, mask_mode="grayscale")
+            self.assertEqual(manifest["source_admission"]["status"], "approved")
+            self.assertEqual(pipeline.validate_manifest(manifest, root, root / "artifacts/map-preprocessing/approved"), [])
+            provenance["entries"][0]["sha256"] = "0" * 64
+            provenance_path.write_text(json.dumps(provenance), encoding="utf-8")
+            with self.assertRaises(ValueError):
+                pipeline.admit_source(root, source)
+
+    def test_source_admission_rejects_unrelated_and_malformed_records(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "assets" / "visual.png"
+            source.parent.mkdir(parents=True)
+            pipeline.write_png_rgba(source, 1, 1, solid(1, 1, (1, 2, 3, 255)))
+            base = {"path": "assets/visual.png", "file_type": "image/png", "size_bytes": source.stat().st_size, "sha256": pipeline._file_hash(source), "kind": "source", "known_source": "visual", "source_locator": ["https://example.invalid/visual"], "author_institution": "test", "license": "CC0", "derived_from": [], "generator": "test", "confidence": "high", "review_status": "APPROVED", "coordinate_convention": "pixel_origin_top_left"}
+            path = root / "docs/data_sources/provenance_manifest.json"
+            path.parent.mkdir(parents=True)
+            for changes in ({"category": "project_visual_asset"}, {"category": "map_visual_source", "license": "LICENSE_UNKNOWN"}, {"category": "map_visual_source", "review_status": "REVIEW_REQUIRED"}, {"category": "map_visual_source", "coordinate_convention": None}):
+                record = dict(base)
+                record.update(changes)
+                path.write_text(json.dumps({"entries": [record]}), encoding="utf-8")
+                with self.assertRaises(ValueError):
+                    pipeline.admit_source(root, source)
+
     def test_output_root_containment_rejects_dangerous_paths_and_accepts_candidate(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -49,7 +134,7 @@ class R1SafetyTests(unittest.TestCase):
             pipeline.write_png_rgba(mask, 3, 3, gray_mask(3, 3, {(1, 1)}))
             before = mask.read_bytes()
             with self.assertRaises(ValueError):
-                pipeline.process_cutout(root, source, "entity/alias", mask.parent, mask_path=mask, mask_mode="grayscale")
+                pipeline.process_cutout(root, source, "entity/alias", mask.parent, mask_path=mask, mask_mode="grayscale", source_contract="synthetic_test")
             self.assertEqual(mask.read_bytes(), before)
 
     def test_sanitized_ids_have_traceable_collision_safe_names(self) -> None:
@@ -59,8 +144,8 @@ class R1SafetyTests(unittest.TestCase):
             mask = root / "mask.png"
             pipeline.write_png_rgba(source, 2, 2, solid(2, 2, (10, 20, 30, 255)))
             pipeline.write_png_rgba(mask, 2, 2, gray_mask(2, 2, {(0, 0)}))
-            first = pipeline.process_cutout(root, source, "a/b", root / "artifacts/map-preprocessing/a", mask_path=mask, mask_mode="grayscale")
-            second = pipeline.process_cutout(root, source, "a_b", root / "artifacts/map-preprocessing/b", mask_path=mask, mask_mode="grayscale")
+            first = pipeline.process_cutout(root, source, "a/b", root / "artifacts/map-preprocessing/a", mask_path=mask, mask_mode="grayscale", source_contract="synthetic_test")
+            second = pipeline.process_cutout(root, source, "a_b", root / "artifacts/map-preprocessing/b", mask_path=mask, mask_mode="grayscale", source_contract="synthetic_test")
             self.assertNotEqual(first["output_file"], second["output_file"])
             self.assertEqual(first["entity_id"], "a/b")
             self.assertEqual(second["entity_id"], "a_b")
@@ -98,7 +183,7 @@ class R1SafetyTests(unittest.TestCase):
             output = root / "artifacts/map-preprocessing/manifest"
             pipeline.write_png_rgba(source, 3, 3, solid(3, 3, (10, 20, 30, 255)))
             pipeline.write_png_rgba(mask, 3, 3, gray_mask(3, 3, {(1, 1)}))
-            manifest = pipeline.process_cutout(root, source, "manifest/entity", output, mask_path=mask, mask_mode="grayscale")
+            manifest = pipeline.process_cutout(root, source, "manifest/entity", output, mask_path=mask, mask_mode="grayscale", source_contract="synthetic_test")
             self.assertEqual(pipeline.validate_manifest(manifest, root, output), [])
             manifest["mask_hash"] = "0" * 64
             self.assertIn("mask_hash.actual", pipeline.validate_manifest(manifest, root, output))
@@ -138,8 +223,8 @@ class R1SafetyTests(unittest.TestCase):
             pipeline.write_png_rgba(source, 4, 4, solid(4, 4, (10, 20, 30, 255)))
             pipeline.write_png_rgba(mask, 2, 2, gray_mask(2, 2, {(0, 0)}))
             with self.assertRaises(ValueError):
-                pipeline.process_cutout(root, source, "dims", root / "artifacts/map-preprocessing/no", mask_path=mask, mask_mode="grayscale")
-            manifest = pipeline.process_cutout(root, source, "dims", root / "artifacts/map-preprocessing/yes", mask_path=mask, mask_mode="grayscale", allow_mask_resample=True)
+                pipeline.process_cutout(root, source, "dims", root / "artifacts/map-preprocessing/no", mask_path=mask, mask_mode="grayscale", source_contract="synthetic_test")
+            manifest = pipeline.process_cutout(root, source, "dims", root / "artifacts/map-preprocessing/yes", mask_path=mask, mask_mode="grayscale", allow_mask_resample=True, source_contract="synthetic_test")
             self.assertTrue(manifest["processing_parameters"]["mask_resampled"])
             self.assertEqual(manifest["input_mask_dimensions"], [2, 2])
 
@@ -152,7 +237,7 @@ class R1SafetyTests(unittest.TestCase):
             pipeline.write_png_rgba(source, 2, 2, solid(2, 2, (10, 20, 30, 255)))
             mask.write_bytes(rgb_png(2, 2, (255, 255, 255)))
             with self.assertRaises(ValueError):
-                pipeline.process_cutout(root, source, 'alpha/entity', output, mask_path=mask, mask_mode='alpha')
+                pipeline.process_cutout(root, source, 'alpha/entity', output, mask_path=mask, mask_mode='alpha', source_contract='synthetic_test')
 
     def test_mask_mode_is_explicit(self) -> None:
         with self.assertRaises(ValueError):
@@ -190,7 +275,7 @@ class R1SafetyTests(unittest.TestCase):
     def test_repository_crosswalk_counts_and_no_source_status(self) -> None:
         repository_root = Path(__file__).resolve().parents[2]
         inventory = pipeline.build_inventory(repository_root)
-        self.assertEqual(inventory["summary"]["asset_count"], 273)
+        self.assertEqual(inventory["summary"]["asset_count"], 278)
         self.assertNotIn("scripts/vnext/spatial/spatial_map_projection.gd", {item["path"] for item in inventory["files"]})
         crosswalk = pipeline.build_crosswalk(repository_root, inventory)
         self.assertEqual(crosswalk["summary"]["entity_count"], 560)
@@ -208,8 +293,8 @@ class R1SafetyTests(unittest.TestCase):
             pipeline.write_png_rgba(mask, 4, 3, gray_mask(4, 3, {(1, 1), (2, 1)}))
             source_before = source.read_bytes()
             mask_before = mask.read_bytes()
-            first = pipeline.process_cutout(root, source, "sample/entity", root / "artifacts/map-preprocessing/replay-a", mask_path=mask, mask_mode="grayscale", padding=1)
-            second = pipeline.process_cutout(root, source, "sample/entity", root / "artifacts/map-preprocessing/replay-b", mask_path=mask, mask_mode="grayscale", padding=1)
+            first = pipeline.process_cutout(root, source, "sample/entity", root / "artifacts/map-preprocessing/replay-a", mask_path=mask, mask_mode="grayscale", padding=1, source_contract="synthetic_test")
+            second = pipeline.process_cutout(root, source, "sample/entity", root / "artifacts/map-preprocessing/replay-b", mask_path=mask, mask_mode="grayscale", padding=1, source_contract="synthetic_test")
             self.assertEqual(first, second)
             self.assertEqual(pipeline.validate_manifest(first, root, root / 'artifacts/map-preprocessing/replay-a'), [])
             first_files = {path.name: path.read_bytes() for path in (root / 'artifacts/map-preprocessing/replay-a').iterdir() if path.is_file()}
@@ -221,7 +306,8 @@ class R1SafetyTests(unittest.TestCase):
         schema_path = Path(__file__).resolve().parents[2] / "tools" / "map_preprocessing" / "manifest.schema.json"
         schema = json.loads(schema_path.read_text(encoding="utf-8"))
         required = set(schema["required"])
-        self.assertTrue({"source_dimensions", "mask_hash", "output_hash", "preview_hash", "coordinate_contract", "processing_parameters"}.issubset(required))
+        self.assertTrue({"source_dimensions", "mask_hash", "output_hash", "preview_hash", "coordinate_contract", "processing_parameters", "source_contract", "source_admission"}.issubset(required))
+        self.assertTrue({"coordinate_convention", "review_status", "source_locator"}.issubset(schema["properties"]["source_admission"]["required"]))
         self.assertEqual(schema["$defs"]["bbox"]["prefixItems"][2]["minimum"], 1)
     def test_declared_wgs84_geometry_requires_wgs84_contract(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -231,8 +317,8 @@ class R1SafetyTests(unittest.TestCase):
             pipeline.write_png_rgba(source, 4, 4, solid(4, 4, (90, 110, 130, 255)))
             geometry.write_text(json.dumps({'coordinate_system': 'WGS84 longitude/latitude', 'features': [{'id': 'geo', 'polygons': [{'outer': [[0, 0], [2, 0], [2, 2], [0, 2]]}]}]}), encoding='utf-8')
             with self.assertRaises(ValueError):
-                pipeline.process_cutout(root, source, 'geo/entity', root / 'artifacts/map-preprocessing/geo-pixel', geometry_file=geometry, geometry_id='geo')
-            manifest = pipeline.process_cutout(root, source, 'geo/entity', root / 'artifacts/map-preprocessing/geo-wgs84', geometry_file=geometry, geometry_id='geo', coordinate_space='WGS84', source_bounds=[0, 0, 2, 2])
+                pipeline.process_cutout(root, source, 'geo/entity', root / 'artifacts/map-preprocessing/geo-pixel', geometry_file=geometry, geometry_id='geo', source_contract='synthetic_test')
+            manifest = pipeline.process_cutout(root, source, 'geo/entity', root / 'artifacts/map-preprocessing/geo-wgs84', geometry_file=geometry, geometry_id='geo', coordinate_space='WGS84', source_bounds=[0, 0, 2, 2], source_contract='synthetic_test')
             self.assertEqual(manifest['coordinate_contract']['space'], 'WGS84')
     def test_geometry_process_accepts_top_level_list_shape(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -241,7 +327,7 @@ class R1SafetyTests(unittest.TestCase):
             geometry = root / 'regions.json'
             pipeline.write_png_rgba(source, 4, 4, solid(4, 4, (90, 110, 130, 255)))
             geometry.write_text(json.dumps([{'id': 'list-poly', 'outer': [[1, 1], [3, 1], [3, 3], [1, 3]]}]), encoding='utf-8')
-            manifest = pipeline.process_cutout(root, source, 'list/entity', root / 'artifacts/map-preprocessing/list', geometry_file=geometry, geometry_id='list-poly')
+            manifest = pipeline.process_cutout(root, source, 'list/entity', root / 'artifacts/map-preprocessing/list', geometry_file=geometry, geometry_id='list-poly', source_contract='synthetic_test')
             self.assertEqual(manifest['mask_bbox'], [1, 1, 2, 2])
             self.assertEqual(manifest['processing_parameters']['mask_mode'], 'geometry')
 
