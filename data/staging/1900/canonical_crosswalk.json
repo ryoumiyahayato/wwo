@@ -1,0 +1,2023 @@
+{
+  "classification_policy": {
+    "automatic_authority": "False unless an allowed identity/successor evidence object supplies source, fragment, date scope, and target entity.",
+    "code_resolution": "Member codes resolve only to current catalog IDs; no names or normalized names create authority.",
+    "historical_identity": "Code resolution is not proof that a 1900 historical entity is the current catalog entity.",
+    "successor_relation": "Successor or sovereignty relations require explicit date-scoped entity-specific evidence."
+  },
+  "records": [
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_fra"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [
+        "FRA"
+      ],
+      "historical_entity_id": "country_fra",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "FRA"
+      ],
+      "resolved_current_id": "country_fra",
+      "resolved_current_ids": [
+        "country_fra"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_dza",
+        "country_tun",
+        "country_sen",
+        "country_mli",
+        "country_mrt",
+        "country_ben",
+        "country_ner",
+        "country_tcd",
+        "country_caf",
+        "country_cog",
+        "country_gab",
+        "country_civ",
+        "country_gin",
+        "country_bfa",
+        "country_mdg",
+        "country_dji",
+        "country_vnm",
+        "country_khm",
+        "country_lao",
+        "country_ncl"
+      ],
+      "classification_status": "LIKELY_COMPOSITE",
+      "code_resolution_status": "MULTI_MATCH",
+      "core_member_codes": [],
+      "historical_entity_id": "french_colonial_empire",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "All member codes resolve to a current catalog ID set. The historical aggregate is not collapsed into one current entity; identity and control remain unverified.",
+      "member_codes": [
+        "DZA",
+        "TUN",
+        "SEN",
+        "MLI",
+        "MRT",
+        "BEN",
+        "NER",
+        "TCD",
+        "CAF",
+        "COG",
+        "GAB",
+        "CIV",
+        "GIN",
+        "BFA",
+        "MDG",
+        "DJI",
+        "VNM",
+        "KHM",
+        "LAO",
+        "NCL"
+      ],
+      "resolved_current_id": null,
+      "resolved_current_ids": [
+        "country_dza",
+        "country_tun",
+        "country_sen",
+        "country_mli",
+        "country_mrt",
+        "country_ben",
+        "country_ner",
+        "country_tcd",
+        "country_caf",
+        "country_cog",
+        "country_gab",
+        "country_civ",
+        "country_gin",
+        "country_bfa",
+        "country_mdg",
+        "country_dji",
+        "country_vnm",
+        "country_khm",
+        "country_lao",
+        "country_ncl"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "british_empire",
+        "country_irl"
+      ],
+      "classification_status": "LIKELY_COMPOSITE",
+      "code_resolution_status": "MULTI_MATCH",
+      "core_member_codes": [
+        "GBR"
+      ],
+      "historical_entity_id": "british_isles_1900",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "All member codes resolve to a current catalog ID set. The historical aggregate is not collapsed into one current entity; identity and control remain unverified.",
+      "member_codes": [
+        "GBR",
+        "IRL"
+      ],
+      "resolved_current_id": null,
+      "resolved_current_ids": [
+        "british_empire",
+        "country_irl"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_can",
+        "country_aus",
+        "country_nzl",
+        "country_ind",
+        "country_pak",
+        "country_bgd",
+        "country_lka",
+        "country_mmr",
+        "country_mys",
+        "country_brn",
+        "country_fji",
+        "country_ken",
+        "country_uga",
+        "country_nga",
+        "country_gha",
+        "country_sle",
+        "country_gmb",
+        "country_bwa",
+        "country_zwe",
+        "country_zmb",
+        "country_mwi",
+        "country_lso",
+        "country_swz",
+        "country_cyp",
+        "country_egy",
+        "country_sdn",
+        "country_are",
+        "country_qat",
+        "country_kwt",
+        "country_bhs",
+        "country_jam",
+        "country_blz",
+        "country_guy",
+        "country_flk",
+        "country_png",
+        "country_slb",
+        "country_vut"
+      ],
+      "classification_status": "LIKELY_COMPOSITE",
+      "code_resolution_status": "MULTI_MATCH",
+      "core_member_codes": [],
+      "historical_entity_id": "british_empire_overseas",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "All member codes resolve to a current catalog ID set. The historical aggregate is not collapsed into one current entity; identity and control remain unverified.",
+      "member_codes": [
+        "CAN",
+        "AUS",
+        "NZL",
+        "IND",
+        "PAK",
+        "BGD",
+        "LKA",
+        "MMR",
+        "MYS",
+        "BRN",
+        "FJI",
+        "KEN",
+        "UGA",
+        "NGA",
+        "GHA",
+        "SLE",
+        "GMB",
+        "BWA",
+        "ZWE",
+        "ZMB",
+        "MWI",
+        "LSO",
+        "SWZ",
+        "CYP",
+        "EGY",
+        "SDN",
+        "ARE",
+        "QAT",
+        "KWT",
+        "BHS",
+        "JAM",
+        "BLZ",
+        "GUY",
+        "FLK",
+        "PNG",
+        "SLB",
+        "VUT"
+      ],
+      "resolved_current_id": null,
+      "resolved_current_ids": [
+        "country_can",
+        "country_aus",
+        "country_nzl",
+        "country_ind",
+        "country_pak",
+        "country_bgd",
+        "country_lka",
+        "country_mmr",
+        "country_mys",
+        "country_brn",
+        "country_fji",
+        "country_ken",
+        "country_uga",
+        "country_nga",
+        "country_gha",
+        "country_sle",
+        "country_gmb",
+        "country_bwa",
+        "country_zwe",
+        "country_zmb",
+        "country_mwi",
+        "country_lso",
+        "country_swz",
+        "country_cyp",
+        "country_egy",
+        "country_sdn",
+        "country_are",
+        "country_qat",
+        "country_kwt",
+        "country_bhs",
+        "country_jam",
+        "country_blz",
+        "country_guy",
+        "country_flk",
+        "country_png",
+        "country_slb",
+        "country_vut"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "german_empire"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "german_empire",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "DEU"
+      ],
+      "resolved_current_id": "german_empire",
+      "resolved_current_ids": [
+        "german_empire"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_nam",
+        "country_tza",
+        "country_rwa",
+        "country_bdi",
+        "country_cmr",
+        "country_tgo"
+      ],
+      "classification_status": "LIKELY_COMPOSITE",
+      "code_resolution_status": "MULTI_MATCH",
+      "core_member_codes": [],
+      "historical_entity_id": "german_colonial_empire",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "All member codes resolve to a current catalog ID set. The historical aggregate is not collapsed into one current entity; identity and control remain unverified.",
+      "member_codes": [
+        "NAM",
+        "TZA",
+        "RWA",
+        "BDI",
+        "CMR",
+        "TGO"
+      ],
+      "resolved_current_id": null,
+      "resolved_current_ids": [
+        "country_nam",
+        "country_tza",
+        "country_rwa",
+        "country_bdi",
+        "country_cmr",
+        "country_tgo"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "austro_hungarian_empire",
+        "country_hun",
+        "country_cze",
+        "country_svk",
+        "country_svn",
+        "country_hrv",
+        "country_bih"
+      ],
+      "classification_status": "AMBIGUOUS",
+      "code_resolution_status": "AMBIGUOUS",
+      "core_member_codes": [
+        "AUT",
+        "HUN"
+      ],
+      "historical_entity_id": "austria_hungary",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "Existing source classification is fragmented, contested, personal-union, or otherwise unsafe to collapse; current IDs are reference resolutions only.",
+      "member_codes": [
+        "AUT",
+        "HUN",
+        "CZE",
+        "SVK",
+        "SVN",
+        "HRV",
+        "BIH"
+      ],
+      "resolved_current_id": null,
+      "resolved_current_ids": [
+        "austro_hungarian_empire",
+        "country_hun",
+        "country_cze",
+        "country_svk",
+        "country_svn",
+        "country_hrv",
+        "country_bih"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "russian_empire",
+        "country_ukr",
+        "country_blr",
+        "country_mda",
+        "country_est",
+        "country_lva",
+        "country_ltu",
+        "country_fin",
+        "country_pol",
+        "country_geo",
+        "country_arm",
+        "country_aze",
+        "country_kaz",
+        "country_kgz",
+        "country_tjk",
+        "country_tkm",
+        "country_uzb"
+      ],
+      "classification_status": "LIKELY_COMPOSITE",
+      "code_resolution_status": "MULTI_MATCH",
+      "core_member_codes": [
+        "RUS"
+      ],
+      "historical_entity_id": "russian_empire",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "All member codes resolve to a current catalog ID set. The historical aggregate is not collapsed into one current entity; identity and control remain unverified.",
+      "member_codes": [
+        "RUS",
+        "UKR",
+        "BLR",
+        "MDA",
+        "EST",
+        "LVA",
+        "LTU",
+        "FIN",
+        "POL",
+        "GEO",
+        "ARM",
+        "AZE",
+        "KAZ",
+        "KGZ",
+        "TJK",
+        "TKM",
+        "UZB"
+      ],
+      "resolved_current_id": null,
+      "resolved_current_ids": [
+        "russian_empire",
+        "country_ukr",
+        "country_blr",
+        "country_mda",
+        "country_est",
+        "country_lva",
+        "country_ltu",
+        "country_fin",
+        "country_pol",
+        "country_geo",
+        "country_arm",
+        "country_aze",
+        "country_kaz",
+        "country_kgz",
+        "country_tjk",
+        "country_tkm",
+        "country_uzb"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "ottoman_empire",
+        "country_syr",
+        "country_irq",
+        "country_lbn",
+        "country_isr",
+        "country_psx",
+        "country_jor",
+        "country_lby",
+        "country_alb",
+        "country_mkd",
+        "country_yem"
+      ],
+      "classification_status": "LIKELY_COMPOSITE",
+      "code_resolution_status": "MULTI_MATCH",
+      "core_member_codes": [
+        "TUR"
+      ],
+      "historical_entity_id": "ottoman_empire",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "All member codes resolve to a current catalog ID set. The historical aggregate is not collapsed into one current entity; identity and control remain unverified.",
+      "member_codes": [
+        "TUR",
+        "SYR",
+        "IRQ",
+        "LBN",
+        "ISR",
+        "PSE",
+        "JOR",
+        "LBY",
+        "ALB",
+        "MKD",
+        "YEM"
+      ],
+      "resolved_current_id": null,
+      "resolved_current_ids": [
+        "ottoman_empire",
+        "country_syr",
+        "country_irq",
+        "country_lbn",
+        "country_isr",
+        "country_psx",
+        "country_jor",
+        "country_lby",
+        "country_alb",
+        "country_mkd",
+        "country_yem"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "qing_empire",
+        "country_mng"
+      ],
+      "classification_status": "LIKELY_COMPOSITE",
+      "code_resolution_status": "MULTI_MATCH",
+      "core_member_codes": [
+        "CHN"
+      ],
+      "historical_entity_id": "qing_empire",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "All member codes resolve to a current catalog ID set. The historical aggregate is not collapsed into one current entity; identity and control remain unverified.",
+      "member_codes": [
+        "CHN",
+        "MNG"
+      ],
+      "resolved_current_id": null,
+      "resolved_current_ids": [
+        "qing_empire",
+        "country_mng"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "japanese_empire",
+        "country_twn"
+      ],
+      "classification_status": "LIKELY_COMPOSITE",
+      "code_resolution_status": "MULTI_MATCH",
+      "core_member_codes": [
+        "JPN"
+      ],
+      "historical_entity_id": "empire_of_japan",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "All member codes resolve to a current catalog ID set. The historical aggregate is not collapsed into one current entity; identity and control remain unverified.",
+      "member_codes": [
+        "JPN",
+        "TWN"
+      ],
+      "resolved_current_id": null,
+      "resolved_current_ids": [
+        "japanese_empire",
+        "country_twn"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_kor"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "korean_empire",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "KOR"
+      ],
+      "resolved_current_id": "country_kor",
+      "resolved_current_ids": [
+        "country_kor"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "united_states"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "united_states_1900",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "USA"
+      ],
+      "resolved_current_id": "united_states",
+      "resolved_current_ids": [
+        "united_states"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_phl",
+        "country_pri",
+        "country_cub"
+      ],
+      "classification_status": "LIKELY_COMPOSITE",
+      "code_resolution_status": "MULTI_MATCH",
+      "core_member_codes": [],
+      "historical_entity_id": "united_states_overseas",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "All member codes resolve to a current catalog ID set. The historical aggregate is not collapsed into one current entity; identity and control remain unverified.",
+      "member_codes": [
+        "PHL",
+        "PRI",
+        "CUB"
+      ],
+      "resolved_current_id": null,
+      "resolved_current_ids": [
+        "country_phl",
+        "country_pri",
+        "country_cub"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_ita",
+        "country_eri"
+      ],
+      "classification_status": "LIKELY_COMPOSITE",
+      "code_resolution_status": "MULTI_MATCH",
+      "core_member_codes": [
+        "ITA"
+      ],
+      "historical_entity_id": "kingdom_of_italy",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "All member codes resolve to a current catalog ID set. The historical aggregate is not collapsed into one current entity; identity and control remain unverified.",
+      "member_codes": [
+        "ITA",
+        "ERI"
+      ],
+      "resolved_current_id": null,
+      "resolved_current_ids": [
+        "country_ita",
+        "country_eri"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_esp"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "kingdom_of_spain",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "ESP"
+      ],
+      "resolved_current_id": "country_esp",
+      "resolved_current_ids": [
+        "country_esp"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_sah",
+        "country_gnq"
+      ],
+      "classification_status": "LIKELY_COMPOSITE",
+      "code_resolution_status": "MULTI_MATCH",
+      "core_member_codes": [],
+      "historical_entity_id": "spanish_possessions",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "All member codes resolve to a current catalog ID set. The historical aggregate is not collapsed into one current entity; identity and control remain unverified.",
+      "member_codes": [
+        "ESH",
+        "GNQ"
+      ],
+      "resolved_current_id": null,
+      "resolved_current_ids": [
+        "country_sah",
+        "country_gnq"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_prt"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "kingdom_of_portugal",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "PRT"
+      ],
+      "resolved_current_id": "country_prt",
+      "resolved_current_ids": [
+        "country_prt"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_ago",
+        "country_moz",
+        "country_gnb",
+        "country_tls"
+      ],
+      "classification_status": "LIKELY_COMPOSITE",
+      "code_resolution_status": "MULTI_MATCH",
+      "core_member_codes": [],
+      "historical_entity_id": "portuguese_empire",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "All member codes resolve to a current catalog ID set. The historical aggregate is not collapsed into one current entity; identity and control remain unverified.",
+      "member_codes": [
+        "AGO",
+        "MOZ",
+        "GNB",
+        "TLS"
+      ],
+      "resolved_current_id": null,
+      "resolved_current_ids": [
+        "country_ago",
+        "country_moz",
+        "country_gnb",
+        "country_tls"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_bel"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "kingdom_of_belgium",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "BEL"
+      ],
+      "resolved_current_id": "country_bel",
+      "resolved_current_ids": [
+        "country_bel"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_cod"
+      ],
+      "classification_status": "AMBIGUOUS",
+      "code_resolution_status": "AMBIGUOUS",
+      "core_member_codes": [],
+      "historical_entity_id": "congo_free_state",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "Existing source classification is fragmented, contested, personal-union, or otherwise unsafe to collapse; current IDs are reference resolutions only.",
+      "member_codes": [
+        "COD"
+      ],
+      "resolved_current_id": null,
+      "resolved_current_ids": [
+        "country_cod"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_nld"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "kingdom_of_netherlands",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "NLD"
+      ],
+      "resolved_current_id": "country_nld",
+      "resolved_current_ids": [
+        "country_nld"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_idn",
+        "country_sur"
+      ],
+      "classification_status": "LIKELY_COMPOSITE",
+      "code_resolution_status": "MULTI_MATCH",
+      "core_member_codes": [],
+      "historical_entity_id": "dutch_colonial_empire",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "All member codes resolve to a current catalog ID set. The historical aggregate is not collapsed into one current entity; identity and control remain unverified.",
+      "member_codes": [
+        "IDN",
+        "SUR"
+      ],
+      "resolved_current_id": null,
+      "resolved_current_ids": [
+        "country_idn",
+        "country_sur"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_swe",
+        "country_nor"
+      ],
+      "classification_status": "LIKELY_COMPOSITE",
+      "code_resolution_status": "MULTI_MATCH",
+      "core_member_codes": [],
+      "historical_entity_id": "sweden_norway_union",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "All member codes resolve to a current catalog ID set. The historical aggregate is not collapsed into one current entity; identity and control remain unverified.",
+      "member_codes": [
+        "SWE",
+        "NOR"
+      ],
+      "resolved_current_id": null,
+      "resolved_current_ids": [
+        "country_swe",
+        "country_nor"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_dnk",
+        "country_grl",
+        "country_isl"
+      ],
+      "classification_status": "LIKELY_COMPOSITE",
+      "code_resolution_status": "MULTI_MATCH",
+      "core_member_codes": [
+        "DNK"
+      ],
+      "historical_entity_id": "kingdom_of_denmark",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "All member codes resolve to a current catalog ID set. The historical aggregate is not collapsed into one current entity; identity and control remain unverified.",
+      "member_codes": [
+        "DNK",
+        "GRL",
+        "ISL"
+      ],
+      "resolved_current_id": null,
+      "resolved_current_ids": [
+        "country_dnk",
+        "country_grl",
+        "country_isl"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_che"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "swiss_confederation",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "CHE"
+      ],
+      "resolved_current_id": "country_che",
+      "resolved_current_ids": [
+        "country_che"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_rou"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "kingdom_of_romania",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "ROU"
+      ],
+      "resolved_current_id": "country_rou",
+      "resolved_current_ids": [
+        "country_rou"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_srb"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "kingdom_of_serbia",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "SRB"
+      ],
+      "resolved_current_id": "country_srb",
+      "resolved_current_ids": [
+        "country_srb"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_mne"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "principality_of_montenegro",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "MNE"
+      ],
+      "resolved_current_id": "country_mne",
+      "resolved_current_ids": [
+        "country_mne"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_bgr"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "principality_of_bulgaria",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "BGR"
+      ],
+      "resolved_current_id": "country_bgr",
+      "resolved_current_ids": [
+        "country_bgr"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_grc"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "kingdom_of_greece",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "GRC"
+      ],
+      "resolved_current_id": "country_grc",
+      "resolved_current_ids": [
+        "country_grc"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_irn"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "persia_qajar",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "IRN"
+      ],
+      "resolved_current_id": "country_irn",
+      "resolved_current_ids": [
+        "country_irn"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_afg"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "emirate_of_afghanistan",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "AFG"
+      ],
+      "resolved_current_id": "country_afg",
+      "resolved_current_ids": [
+        "country_afg"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_tha"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "kingdom_of_siam",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "THA"
+      ],
+      "resolved_current_id": "country_tha",
+      "resolved_current_ids": [
+        "country_tha"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_npl"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "kingdom_of_nepal",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "NPL"
+      ],
+      "resolved_current_id": "country_npl",
+      "resolved_current_ids": [
+        "country_npl"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_btn"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "kingdom_of_bhutan",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "BTN"
+      ],
+      "resolved_current_id": "country_btn",
+      "resolved_current_ids": [
+        "country_btn"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_eth"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "ethiopian_empire",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "ETH"
+      ],
+      "resolved_current_id": "country_eth",
+      "resolved_current_ids": [
+        "country_eth"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_lbr"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "republic_of_liberia",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "LBR"
+      ],
+      "resolved_current_id": "country_lbr",
+      "resolved_current_ids": [
+        "country_lbr"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_mar"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "moroccan_sultanate",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "MAR"
+      ],
+      "resolved_current_id": "country_mar",
+      "resolved_current_ids": [
+        "country_mar"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_sau"
+      ],
+      "classification_status": "AMBIGUOUS",
+      "code_resolution_status": "AMBIGUOUS",
+      "core_member_codes": [],
+      "historical_entity_id": "arabian_polities",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "Existing source classification is fragmented, contested, personal-union, or otherwise unsafe to collapse; current IDs are reference resolutions only.",
+      "member_codes": [
+        "SAU"
+      ],
+      "resolved_current_id": null,
+      "resolved_current_ids": [
+        "country_sau"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_omn"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "sultanate_of_muscat_oman",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "OMN"
+      ],
+      "resolved_current_id": "country_omn",
+      "resolved_current_ids": [
+        "country_omn"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_som"
+      ],
+      "classification_status": "AMBIGUOUS",
+      "code_resolution_status": "AMBIGUOUS",
+      "core_member_codes": [],
+      "historical_entity_id": "somali_territories_1900",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "Existing source classification is fragmented, contested, personal-union, or otherwise unsafe to collapse; current IDs are reference resolutions only.",
+      "member_codes": [
+        "SOM"
+      ],
+      "resolved_current_id": null,
+      "resolved_current_ids": [
+        "country_som"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_zaf"
+      ],
+      "classification_status": "AMBIGUOUS",
+      "code_resolution_status": "AMBIGUOUS",
+      "core_member_codes": [],
+      "historical_entity_id": "south_africa_war_zone",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "Existing source classification is fragmented, contested, personal-union, or otherwise unsafe to collapse; current IDs are reference resolutions only.",
+      "member_codes": [
+        "ZAF"
+      ],
+      "resolved_current_id": null,
+      "resolved_current_ids": [
+        "country_zaf"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_mex"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "mexican_republic",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "MEX"
+      ],
+      "resolved_current_id": "country_mex",
+      "resolved_current_ids": [
+        "country_mex"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_gtm"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "guatemala_1900",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "GTM"
+      ],
+      "resolved_current_id": "country_gtm",
+      "resolved_current_ids": [
+        "country_gtm"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_hnd"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "honduras_1900",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "HND"
+      ],
+      "resolved_current_id": "country_hnd",
+      "resolved_current_ids": [
+        "country_hnd"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_slv"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "el_salvador_1900",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "SLV"
+      ],
+      "resolved_current_id": "country_slv",
+      "resolved_current_ids": [
+        "country_slv"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_nic"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "nicaragua_1900",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "NIC"
+      ],
+      "resolved_current_id": "country_nic",
+      "resolved_current_ids": [
+        "country_nic"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_cri"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "costa_rica_1900",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "CRI"
+      ],
+      "resolved_current_id": "country_cri",
+      "resolved_current_ids": [
+        "country_cri"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_col",
+        "country_pan"
+      ],
+      "classification_status": "LIKELY_COMPOSITE",
+      "code_resolution_status": "MULTI_MATCH",
+      "core_member_codes": [
+        "COL"
+      ],
+      "historical_entity_id": "republic_of_colombia_1900",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "All member codes resolve to a current catalog ID set. The historical aggregate is not collapsed into one current entity; identity and control remain unverified.",
+      "member_codes": [
+        "COL",
+        "PAN"
+      ],
+      "resolved_current_id": null,
+      "resolved_current_ids": [
+        "country_col",
+        "country_pan"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_ven"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "venezuela_1900",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "VEN"
+      ],
+      "resolved_current_id": "country_ven",
+      "resolved_current_ids": [
+        "country_ven"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_ecu"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "ecuador_1900",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "ECU"
+      ],
+      "resolved_current_id": "country_ecu",
+      "resolved_current_ids": [
+        "country_ecu"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_per"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "peru_1900",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "PER"
+      ],
+      "resolved_current_id": "country_per",
+      "resolved_current_ids": [
+        "country_per"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_bol"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "bolivia_1900",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "BOL"
+      ],
+      "resolved_current_id": "country_bol",
+      "resolved_current_ids": [
+        "country_bol"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_chl"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "chile_1900",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "CHL"
+      ],
+      "resolved_current_id": "country_chl",
+      "resolved_current_ids": [
+        "country_chl"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "argentine_republic"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "argentina_1900",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "ARG"
+      ],
+      "resolved_current_id": "argentine_republic",
+      "resolved_current_ids": [
+        "argentine_republic"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_pry"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "paraguay_1900",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "PRY"
+      ],
+      "resolved_current_id": "country_pry",
+      "resolved_current_ids": [
+        "country_pry"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_ury"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "uruguay_1900",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "URY"
+      ],
+      "resolved_current_id": "country_ury",
+      "resolved_current_ids": [
+        "country_ury"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_bra"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "brazil_1900",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "BRA"
+      ],
+      "resolved_current_id": "country_bra",
+      "resolved_current_ids": [
+        "country_bra"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_hti"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "haiti_1900",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "HTI"
+      ],
+      "resolved_current_id": "country_hti",
+      "resolved_current_ids": [
+        "country_hti"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    },
+    {
+      "automatic_authoritative_candidate": false,
+      "canonical_entity_ids": [
+        "country_dom"
+      ],
+      "classification_status": "EXACT_CODE",
+      "code_resolution_status": "EXACT",
+      "core_member_codes": [],
+      "historical_entity_id": "dominican_republic_1900",
+      "historical_identity_evidence": null,
+      "historical_identity_status": "UNVERIFIED",
+      "mapping_reason": "The single member code resolves to one current catalog ID. This is exact code resolution only; historical identity and successor relation remain unverified.",
+      "member_codes": [
+        "DOM"
+      ],
+      "resolved_current_id": "country_dom",
+      "resolved_current_ids": [
+        "country_dom"
+      ],
+      "source_id": "src-repository-existing-1900",
+      "source_paths": [
+        "data/world_map/historical_political_entities_1900.json",
+        "data/world_map/countries.json"
+      ],
+      "successor_evidence": null,
+      "successor_relation_status": "UNVERIFIED"
+    }
+  ],
+  "schema_id": "wwo_1900_canonical_crosswalk_v2",
+  "scope": "All 61 aggregate historical entities in data/world_map/historical_political_entities_1900.json",
+  "snapshot_date": "1900-03-12",
+  "summary": {
+    "automatic_authoritative_candidate_count": 0,
+    "classification": {
+      "AMBIGUOUS": 5,
+      "EXACT_CODE": 40,
+      "LIKELY_COMPOSITE": 16,
+      "NO_MATCH": 0
+    },
+    "code_resolution": {
+      "AMBIGUOUS": 5,
+      "EXACT": 40,
+      "MULTI_MATCH": 16,
+      "NO_MATCH": 0
+    },
+    "historical_identity": {
+      "UNVERIFIED": 61
+    },
+    "successor_relation": {
+      "UNVERIFIED": 61
+    }
+  }
+}

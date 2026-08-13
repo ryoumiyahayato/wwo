@@ -1,0 +1,15 @@
+{
+  "schema_id": "wwo_1900_conflict_register_v1",
+  "snapshot_date": "1900-03-12",
+  "policy": {
+    "required_fields": ["conflict_id", "fact_key", "source_a", "source_b", "values", "date_or_reference_difference", "possible_explanation", "recommended_review", "review_status"],
+    "required_status": "CONFLICT_REVIEW_REQUIRED",
+    "do_not_choose_silently": true
+  },
+  "conflicts": [],
+  "notes": [
+    "No two independently cited values were merged into the first staging batch without review.",
+    "The existing historical_political_entities_1900.json conflict paths are event/geometry overlays, not source-value disagreements, so they remain inventory findings rather than being copied as fact conflicts here.",
+    "A future disagreement must add both source values and date/reference context before a fact can be promoted."
+  ]
+}
