@@ -3,6 +3,104 @@
     {
       "authority": "non_authoritative",
       "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[104]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[104]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "abu dhabi",
+      "raw_names": [
+        "Abu Dhabi"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[67]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[67]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "accra",
+      "raw_names": [
+        "Accra"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[79]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[79]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "addis ababa",
+      "raw_names": [
+        "Addis Ababa"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[131]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[131]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "adelaide",
+      "raw_names": [
+        "Adelaide"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[106]/historical_name",
+        "source:data/staging/1900/source_records.json#$/records[13]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[106]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "afghanistan",
+      "raw_names": [
+        "Afghanistan"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[1]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[1]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "alaska",
+      "raw_names": [
+        "Alaska"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
         "source:data/alpha/world.json#$/high_detail_people[1]/native_name",
         "source:data/v2_2/lille_demo_people.json#$/people[1]/native_name",
         "source:data/v2_3/social_people.json#$/people[1]/native_name"
@@ -21,6 +119,1162 @@
     {
       "authority": "non_authoritative",
       "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[98]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[98]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "algeria",
+      "raw_names": [
+        "Algeria"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[98]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[98]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "algiers",
+      "raw_names": [
+        "Algiers"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[36]/capital/name",
+        "source:data/staging/1900/source_records.json#$/records[6]/value/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[36]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "amsterdam",
+      "raw_names": [
+        "Amsterdam"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[81]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[81]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "angola",
+      "raw_names": [
+        "Angola"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[93]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[93]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "antananarivo",
+      "raw_names": [
+        "Antananarivo"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[33]/historical_name",
+        "source:data/staging/1900/source_records.json#$/records[18]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[33]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "argentina",
+      "raw_names": [
+        "Argentina"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[80]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[80]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "asmara",
+      "raw_names": [
+        "Asmara"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[31]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[31]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "asuncion",
+      "raw_names": [
+        "Asuncion"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[49]/capital/name",
+        "source:data/staging/1900/source_records.json#$/records[11]/value/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[49]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "athens",
+      "raw_names": [
+        "Athens"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[44]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[44]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "austria hungary",
+      "raw_names": [
+        "Austria-Hungary"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[6]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[6]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "bahamas",
+      "raw_names": [
+        "Bahamas"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[125]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[125]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "bandar seri begawan",
+      "raw_names": [
+        "Bandar Seri Begawan"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[116]/capital/name",
+        "source:data/staging/1900/source_records.json#$/records[14]/value/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[116]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "bangkok",
+      "raw_names": [
+        "Bangkok"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[59]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[59]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "banjul",
+      "raw_names": [
+        "Banjul"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[12]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[12]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "barbados",
+      "raw_names": [
+        "Barbados"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[13]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[13]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "basse terre",
+      "raw_names": [
+        "Basse-Terre"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[107]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[107]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "beijing",
+      "raw_names": [
+        "Beijing"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[37]/historical_name",
+        "source:data/staging/1900/source_records.json#$/records[5]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[37]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "belgium",
+      "raw_names": [
+        "Belgium"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[47]/capital/name",
+        "source:data/staging/1900/source_records.json#$/records[9]/value/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[47]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "belgrade",
+      "raw_names": [
+        "Belgrade"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[16]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[16]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "belize",
+      "raw_names": [
+        "Belize"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[16]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[16]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "belize city",
+      "raw_names": [
+        "Belize City"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[62]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[62]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "benin",
+      "raw_names": [
+        "Benin"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[77]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[77]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "berbera",
+      "raw_names": [
+        "Berbera"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[43]/capital/name",
+        "source:data/staging/1900/source_records.json#$/records[2]/value/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[43]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "berlin",
+      "raw_names": [
+        "Berlin"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[40]/capital/name",
+        "source:data/staging/1900/source_records.json#$/records[7]/value/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[40]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "bern",
+      "raw_names": [
+        "Bern"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[112]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[112]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "bhutan",
+      "raw_names": [
+        "Bhutan"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[88]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[88]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "bloemfontein",
+      "raw_names": [
+        "Bloemfontein"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[22]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[22]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "bogota",
+      "raw_names": [
+        "Bogota"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[149]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[149]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "bokhara",
+      "raw_names": [
+        "Bokhara"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[57]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[57]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "bolama",
+      "raw_names": [
+        "Bolama"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[30]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[30]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "bolivia",
+      "raw_names": [
+        "Bolivia"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[72]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[72]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "boma",
+      "raw_names": [
+        "Boma"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[141]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[141]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "bosnia",
+      "raw_names": [
+        "Bosnia"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[91]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[91]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "botswana",
+      "raw_names": [
+        "Botswana"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[29]/historical_name",
+        "source:data/staging/1900/source_records.json#$/records[19]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[29]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "brazil",
+      "raw_names": [
+        "Brazil"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[71]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[71]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "brazzaville",
+      "raw_names": [
+        "Brazzaville"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[12]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[12]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "bridgetown",
+      "raw_names": [
+        "Bridgetown"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[133]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[133]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "brisbane",
+      "raw_names": [
+        "Brisbane"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[77]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[77]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "british somaliland somaliland republic",
+      "raw_names": [
+        "British Somaliland (Somaliland Republic)"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[125]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[125]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "brunei",
+      "raw_names": [
+        "Brunei"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[37]/capital/name",
+        "source:data/staging/1900/source_records.json#$/records[5]/value/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[37]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "brussels",
+      "raw_names": [
+        "Brussels"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[51]/capital/name",
+        "source:data/staging/1900/source_records.json#$/records[8]/value/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[51]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "bucharest",
+      "raw_names": [
+        "Bucharest"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[33]/capital/name",
+        "source:data/staging/1900/source_records.json#$/records[18]/value/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[33]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "buenos aires",
+      "raw_names": [
+        "Buenos Aires"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[149]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[149]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "bukhara",
+      "raw_names": [
+        "Bukhara"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[50]/historical_name",
+        "source:data/staging/1900/source_records.json#$/records[10]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[50]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "bulgaria",
+      "raw_names": [
+        "Bulgaria"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[103]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[103]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "cairo",
+      "raw_names": [
+        "Cairo"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[111]/capital/name",
+        "source:data/staging/1900/source_records.json#$/records[22]/value/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[111]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "calcutta",
+      "raw_names": [
+        "Calcutta"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[117]/historical_name",
+        "source:data/staging/1900/source_records.json#$/records[24]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[117]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "cambodia kampuchea",
+      "raw_names": [
+        "Cambodia (Kampuchea)"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[4]/historical_name",
+        "source:data/staging/1900/source_records.json#$/records[20]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[4]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "canada",
+      "raw_names": [
+        "Canada"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[85]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[85]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "cape colony",
+      "raw_names": [
+        "Cape Colony"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[85]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[85]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "cape town",
+      "raw_names": [
+        "Cape Town"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[56]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[56]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "cape verde",
+      "raw_names": [
+        "Cape Verde"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[23]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[23]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "caracas",
+      "raw_names": [
+        "Caracas"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[26]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[26]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "cayenne",
+      "raw_names": [
+        "Cayenne"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[48]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[48]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "cetinje",
+      "raw_names": [
+        "Cetinje"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[32]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[32]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "chile",
+      "raw_names": [
+        "Chile"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[107]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[107]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "china",
+      "raw_names": [
+        "China"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[147]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[147]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "chipata fort jameson",
+      "raw_names": [
+        "Chipata (Fort Jameson)"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[22]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[22]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "colombia",
+      "raw_names": [
+        "Colombia"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[113]/capital/name",
+        "source:data/staging/1900/source_records.json#$/records[23]/value/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[113]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "colombo",
+      "raw_names": [
+        "Colombo"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[64]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[64]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "conakry",
+      "raw_names": [
+        "Conakry"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[71]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[71]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "congo",
+      "raw_names": [
+        "Congo"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[72]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[72]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "congo democratic republic of zaire",
+      "raw_names": [
+        "Congo, Democratic Republic of (Zaire)"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[54]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[54]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "copenhagen",
+      "raw_names": [
+        "Copenhagen"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[21]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[21]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "costa rica",
+      "raw_names": [
+        "Costa Rica"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[63]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[63]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "cote d ivoire",
+      "raw_names": [
+        "Cote D'Ivoire"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[7]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[7]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "cuba",
+      "raw_names": [
+        "Cuba"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[61]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[61]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "dakar",
+      "raw_names": [
+        "Dakar"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[54]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[54]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "denmark",
+      "raw_names": [
+        "Denmark"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[128]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[128]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "dili",
+      "raw_names": [
+        "Dili"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[78]/capital/name",
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[78]/historical_name",
         "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[78]/capital/name",
         "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[78]/source_name"
       ],
@@ -30,6 +1284,839 @@
         "Djibouti"
       ],
       "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[75]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[75]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "dodoma",
+      "raw_names": [
+        "Dodoma"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[9]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[9]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "dominican republic",
+      "raw_names": [
+        "Dominican Republic"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[69]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[69]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "duala",
+      "raw_names": [
+        "Duala"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[128]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[128]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "east timor",
+      "raw_names": [
+        "East Timor"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[27]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[27]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "ecuador",
+      "raw_names": [
+        "Ecuador"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[103]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[103]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "egypt",
+      "raw_names": [
+        "Egypt"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[19]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[19]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "el salvador",
+      "raw_names": [
+        "El Salvador"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[58]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[58]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "equatorial guinea",
+      "raw_names": [
+        "Equatorial Guinea"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[80]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[80]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "eritrea",
+      "raw_names": [
+        "Eritrea"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[79]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[79]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "ethiopia",
+      "raw_names": [
+        "Ethiopia"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[120]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[120]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "federated malay states",
+      "raw_names": [
+        "Federated Malay States"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[140]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[140]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "fiji",
+      "raw_names": [
+        "Fiji"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[14]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[14]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "fort de france",
+      "raw_names": [
+        "Fort-de-France"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[39]/historical_name",
+        "source:data/staging/1900/source_records.json#$/records[1]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[39]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "france",
+      "raw_names": [
+        "France"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[66]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[66]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "freetown",
+      "raw_names": [
+        "Freetown"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[26]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[26]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "french guyana",
+      "raw_names": [
+        "French Guyana"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[60]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[60]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "french west africa",
+      "raw_names": [
+        "French West Africa"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[70]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[70]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "gabon",
+      "raw_names": [
+        "Gabon"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[91]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[91]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "gaborone",
+      "raw_names": [
+        "Gaborone"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[59]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[59]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "gambia",
+      "raw_names": [
+        "Gambia"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[24]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[24]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "georgetown",
+      "raw_names": [
+        "Georgetown"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[68]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[68]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "german togoland",
+      "raw_names": [
+        "German Togoland"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[43]/historical_name",
+        "source:data/staging/1900/source_records.json#$/records[2]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[43]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "germany prussia",
+      "raw_names": [
+        "Germany (Prussia)"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[67]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[67]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "ghana",
+      "raw_names": [
+        "Ghana"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[63]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[63]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "grand bassam",
+      "raw_names": [
+        "Grand Bassam"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[49]/historical_name",
+        "source:data/staging/1900/source_records.json#$/records[11]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[49]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "greece",
+      "raw_names": [
+        "Greece"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[13]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[13]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "guadeloupe",
+      "raw_names": [
+        "Guadeloupe"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[17]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[17]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "guatemala",
+      "raw_names": [
+        "Guatemala"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[17]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[17]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "guatemala city",
+      "raw_names": [
+        "Guatemala City"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[64]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[64]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "guinea",
+      "raw_names": [
+        "Guinea"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[57]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[57]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "guinea bissau",
+      "raw_names": [
+        "Guinea-Bissau"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[24]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[24]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "guyana",
+      "raw_names": [
+        "Guyana"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[8]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[8]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "haiti",
+      "raw_names": [
+        "Haiti"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[83]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[83]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "harare",
+      "raw_names": [
+        "Harare"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[7]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[7]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "havana",
+      "raw_names": [
+        "Havana"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[2]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[2]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "hawaii",
+      "raw_names": [
+        "Hawaii"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[142]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[142]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "herzegovina",
+      "raw_names": [
+        "Herzegovina"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[134]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[134]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "hobart",
+      "raw_names": [
+        "Hobart"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[18]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[18]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "honduras",
+      "raw_names": [
+        "Honduras"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[2]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[2]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "honolulu",
+      "raw_names": [
+        "Honolulu"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[119]/capital/name",
+        "source:data/staging/1900/source_records.json#$/records[25]/value/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[119]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "hue",
+      "raw_names": [
+        "Hue"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[55]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[55]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "iceland",
+      "raw_names": [
+        "Iceland"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[111]/historical_name",
+        "source:data/staging/1900/source_records.json#$/records[22]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[111]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "india",
+      "raw_names": [
+        "India"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[127]/historical_name",
+        "source:data/staging/1900/source_records.json#$/records[27]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[127]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "indonesia",
+      "raw_names": [
+        "Indonesia"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[101]/historical_name",
+        "source:data/staging/1900/source_records.json#$/records[12]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[101]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "iran persia",
+      "raw_names": [
+        "Iran (Persia)"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[102]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[102]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "istanbul",
+      "raw_names": [
+        "Istanbul"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[146]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[146]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "italian somaliland",
+      "raw_names": [
+        "Italian Somaliland"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[45]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[45]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "italy sardinia",
+      "raw_names": [
+        "Italy/Sardinia"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[127]/capital/name",
+        "source:data/staging/1900/source_records.json#$/records[27]/value/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[127]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "jakarta",
+      "raw_names": [
+        "Jakarta"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[10]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[10]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "jamaica",
+      "raw_names": [
+        "Jamaica"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[110]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[110]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "japan",
+      "raw_names": [
+        "Japan"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
         "data/world_map/historical/cshapes_1900_snapshot.json"
       ]
     },
@@ -54,6 +2141,22 @@
     {
       "authority": "non_authoritative",
       "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[121]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[121]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "johor bahru",
+      "raw_names": [
+        "Johor Bahru"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
         "source:data/alpha/world.json#$/high_detail_people[3]/native_name",
         "source:data/v2_3/social_people.json#$/people[3]/native_name",
         "source:data/world_map/relationships.json#$/relationships[1]/native_name"
@@ -72,6 +2175,126 @@
     {
       "authority": "non_authoritative",
       "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[1]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[1]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "juneau",
+      "raw_names": [
+        "Juneau"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[106]/capital/name",
+        "source:data/staging/1900/source_records.json#$/records[13]/value/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[106]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "kabul",
+      "raw_names": [
+        "Kabul"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[69]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[69]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "kamerun",
+      "raw_names": [
+        "Kamerun"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[73]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[73]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "kampala",
+      "raw_names": [
+        "Kampala"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[115]/capital/name",
+        "source:data/staging/1900/source_records.json#$/records[15]/value/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[115]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "kathmandu",
+      "raw_names": [
+        "Kathmandu"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[74]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[74]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "kenya",
+      "raw_names": [
+        "Kenya"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[100]/capital/name",
+        "source:data/staging/1900/source_records.json#$/records[21]/value/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[100]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "khartoum",
+      "raw_names": [
+        "Khartoum"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[150]/capital/name",
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[150]/historical_name",
         "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[150]/capital/name",
         "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[150]/source_name"
       ],
@@ -81,12 +2304,113 @@
         "Khiva"
       ],
       "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
         "data/world_map/historical/cshapes_1900_snapshot.json"
       ]
     },
     {
       "authority": "non_authoritative",
       "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[10]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[10]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "kingston",
+      "raw_names": [
+        "Kingston"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[136]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[136]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "kokopo",
+      "raw_names": [
+        "Kokopo"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[109]/historical_name",
+        "source:data/staging/1900/source_records.json#$/records[16]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[109]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "korea",
+      "raw_names": [
+        "Korea"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[120]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[120]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "kuala lumpur",
+      "raw_names": [
+        "Kuala Lumpur"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[123]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[123]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "kuching",
+      "raw_names": [
+        "Kuching"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[30]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[30]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "la paz",
+      "raw_names": [
+        "La Paz"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[143]/capital/name",
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[143]/historical_name",
         "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[143]/capital/name",
         "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[143]/source_name"
       ],
@@ -96,6 +2420,201 @@
         "Lagos"
       ],
       "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[118]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[118]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "laos",
+      "raw_names": [
+        "Laos"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[90]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[90]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "lesotho",
+      "raw_names": [
+        "Lesotho"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[65]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[65]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "liberia",
+      "raw_names": [
+        "Liberia"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[70]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[70]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "libreville",
+      "raw_names": [
+        "Libreville"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[84]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[84]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "lilongwe",
+      "raw_names": [
+        "Lilongwe"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[28]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[28]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "lima",
+      "raw_names": [
+        "Lima"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[42]/capital/name",
+        "source:data/staging/1900/source_records.json#$/records[4]/value/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[42]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "lisbon",
+      "raw_names": [
+        "Lisbon"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[148]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[148]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "livingstone",
+      "raw_names": [
+        "Livingstone"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[145]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[145]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "lokoja",
+      "raw_names": [
+        "Lokoja"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[68]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[68]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "lome",
+      "raw_names": [
+        "Lome"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[35]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[35]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "london",
+      "raw_names": [
+        "London"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[81]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[81]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "luanda",
+      "raw_names": [
+        "Luanda"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
         "data/world_map/historical/cshapes_1900_snapshot.json"
       ]
     },
@@ -118,6 +2637,8 @@
     {
       "authority": "non_authoritative",
       "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[38]/capital/name",
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[38]/historical_name",
         "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[38]/capital/name",
         "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[38]/source_name"
       ],
@@ -127,6 +2648,875 @@
         "Luxembourg"
       ],
       "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[93]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[93]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "madagascar malagasy",
+      "raw_names": [
+        "Madagascar (Malagasy)"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[41]/capital/name",
+        "source:data/staging/1900/source_records.json#$/records[3]/value/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[41]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "madrid",
+      "raw_names": [
+        "Madrid"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[58]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[58]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "malabo",
+      "raw_names": [
+        "Malabo"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[84]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[84]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "malawi",
+      "raw_names": [
+        "Malawi"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[114]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[114]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "maldives",
+      "raw_names": [
+        "Maldives"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[114]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[114]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "male",
+      "raw_names": [
+        "Male"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[46]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[46]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "malta",
+      "raw_names": [
+        "Malta"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[20]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[20]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "managua",
+      "raw_names": [
+        "Managua"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[126]/capital/name",
+        "source:data/staging/1900/source_records.json#$/records[26]/value/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[126]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "manila",
+      "raw_names": [
+        "Manila"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[82]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[82]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "maputo",
+      "raw_names": [
+        "Maputo"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[14]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[14]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "martinique",
+      "raw_names": [
+        "Martinique"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[90]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[90]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "maseru",
+      "raw_names": [
+        "Maseru"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[105]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[105]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "masqat",
+      "raw_names": [
+        "Masqat"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[95]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[95]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "mauritius",
+      "raw_names": [
+        "Mauritius"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[92]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[92]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "mbabane",
+      "raw_names": [
+        "Mbabane"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[132]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[132]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "melbourne",
+      "raw_names": [
+        "Melbourne"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[15]/historical_name",
+        "source:data/staging/1900/source_records.json#$/records[17]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[15]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "mexico",
+      "raw_names": [
+        "Mexico"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[15]/capital/name",
+        "source:data/staging/1900/source_records.json#$/records[17]/value/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[15]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "mexico city",
+      "raw_names": [
+        "Mexico City"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[146]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[146]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "mogadishu",
+      "raw_names": [
+        "Mogadishu"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[74]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[74]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "mombasa",
+      "raw_names": [
+        "Mombasa"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[65]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[65]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "monrovia",
+      "raw_names": [
+        "Monrovia"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[48]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[48]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "montenegro",
+      "raw_names": [
+        "Montenegro"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[34]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[34]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "montevideo",
+      "raw_names": [
+        "Montevideo"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[96]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[96]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "morocco",
+      "raw_names": [
+        "Morocco"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[142]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[142]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "mostar",
+      "raw_names": [
+        "Mostar"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[82]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[82]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "mozambique",
+      "raw_names": [
+        "Mozambique"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[89]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[89]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "namibia",
+      "raw_names": [
+        "Namibia"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[6]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[6]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "nassau",
+      "raw_names": [
+        "Nassau"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[86]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[86]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "natal",
+      "raw_names": [
+        "Natal"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[115]/historical_name",
+        "source:data/staging/1900/source_records.json#$/records[15]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[115]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "nepal",
+      "raw_names": [
+        "Nepal"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[36]/historical_name",
+        "source:data/staging/1900/source_records.json#$/records[6]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[36]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "netherlands",
+      "raw_names": [
+        "Netherlands"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[138]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[138]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "new caledonia and dependencies",
+      "raw_names": [
+        "New Caledonia and Dependencies"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[136]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[136]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "new guinea german new guinea kaiser wilhelmsland",
+      "raw_names": [
+        "New Guinea (German New Guinea) (Kaiser Wilhelmsland)"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[129]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[129]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "new south wales",
+      "raw_names": [
+        "New South Wales"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[137]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[137]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "new zealand",
+      "raw_names": [
+        "New Zealand"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[5]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[5]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "newfoundland",
+      "raw_names": [
+        "Newfoundland"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[20]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[20]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "nicaragua",
+      "raw_names": [
+        "Nicaragua"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[147]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[147]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "northeastern rhodesia",
+      "raw_names": [
+        "Northeastern Rhodesia"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[145]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[145]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "northern nigeria",
+      "raw_names": [
+        "Northern Nigeria"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[148]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[148]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "northwestern rhodesia",
+      "raw_names": [
+        "Northwestern Rhodesia"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[138]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[138]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "nouméa",
+      "raw_names": [
+        "Nouméa"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[144]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[144]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "old calabar calabar",
+      "raw_names": [
+        "Old Calabar (Calabar)"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[105]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[105]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "oman",
+      "raw_names": [
+        "Oman"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[88]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[88]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "orange free state",
+      "raw_names": [
+        "Orange Free State"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[4]/capital/name",
+        "source:data/staging/1900/source_records.json#$/records[20]/value/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[4]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "ottawa",
+      "raw_names": [
+        "Ottawa"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[135]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[135]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "papua",
+      "raw_names": [
+        "Papua"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[31]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[31]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "paraguay",
+      "raw_names": [
+        "Paraguay"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[25]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[25]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "paramaribo",
+      "raw_names": [
+        "Paramaribo"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[39]/capital/name",
+        "source:data/staging/1900/source_records.json#$/records[1]/value/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[39]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "paris",
+      "raw_names": [
+        "Paris"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[130]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[130]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "perth",
+      "raw_names": [
+        "Perth"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[28]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[28]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "peru",
+      "raw_names": [
+        "Peru"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[126]/historical_name",
+        "source:data/staging/1900/source_records.json#$/records[26]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[126]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "philippines",
+      "raw_names": [
+        "Philippines"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[117]/capital/name",
+        "source:data/staging/1900/source_records.json#$/records[24]/value/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[117]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "phnom penh",
+      "raw_names": [
+        "Phnom Penh"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
         "data/world_map/historical/cshapes_1900_snapshot.json"
       ]
     },
@@ -146,6 +3536,1459 @@
         "data/alpha/world.json",
         "data/v2_2/lille_demo_people.json",
         "data/v2_3/social_people.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[86]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[86]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "pietermatritzburg",
+      "raw_names": [
+        "Pietermatritzburg"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[8]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[8]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "port au prince",
+      "raw_names": [
+        "Port-au-Prince"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[95]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[95]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "port louis",
+      "raw_names": [
+        "Port Louis"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[135]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[135]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "port moresby",
+      "raw_names": [
+        "Port Moresby"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[11]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[11]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "port of spain",
+      "raw_names": [
+        "Port-of-Spain"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[62]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[62]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "porto novo",
+      "raw_names": [
+        "Porto-Novo"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[42]/historical_name",
+        "source:data/staging/1900/source_records.json#$/records[4]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[42]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "portugal",
+      "raw_names": [
+        "Portugal"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[56]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[56]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "praia",
+      "raw_names": [
+        "Praia"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[87]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[87]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "pretoria",
+      "raw_names": [
+        "Pretoria"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[3]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[3]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "puerto rico",
+      "raw_names": [
+        "Puerto Rico"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[133]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[133]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "queensland",
+      "raw_names": [
+        "Queensland"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[27]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[27]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "quito",
+      "raw_names": [
+        "Quito"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[96]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[96]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "rabat",
+      "raw_names": [
+        "Rabat"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[94]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[94]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "reunion",
+      "raw_names": [
+        "Reunion"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[55]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[55]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "reykjavik",
+      "raw_names": [
+        "Reykjavik"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[29]/capital/name",
+        "source:data/staging/1900/source_records.json#$/records[19]/value/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[29]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "rio de janeiro",
+      "raw_names": [
+        "Rio de Janeiro"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[45]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[45]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "rome",
+      "raw_names": [
+        "Rome"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[51]/historical_name",
+        "source:data/staging/1900/source_records.json#$/records[8]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[51]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "rumania",
+      "raw_names": [
+        "Rumania"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[52]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[52]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "russia soviet union",
+      "raw_names": [
+        "Russia (Soviet Union)"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[122]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[122]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "sabah north borneo",
+      "raw_names": [
+        "Sabah (North Borneo)"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[94]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[94]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "saint denis",
+      "raw_names": [
+        "Saint-Denis"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[60]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[60]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "saint louis",
+      "raw_names": [
+        "Saint-Louis"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[52]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[52]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "saint petersburg petrograd",
+      "raw_names": [
+        "Saint Petersburg (Petrograd)"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[21]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[21]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "san jose",
+      "raw_names": [
+        "San Jose"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[3]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[3]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "san juan",
+      "raw_names": [
+        "San Juan"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[19]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[19]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "san salvador",
+      "raw_names": [
+        "San Salvador"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[122]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[122]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "sandakan elopura",
+      "raw_names": [
+        "Sandakan (Elopura)"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[32]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[32]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "santiago",
+      "raw_names": [
+        "Santiago"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[9]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[9]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "santo domingo",
+      "raw_names": [
+        "Santo Domingo"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[141]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[141]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "sarajevo",
+      "raw_names": [
+        "Sarajevo"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[123]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[123]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "sarawak",
+      "raw_names": [
+        "Sarawak"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[61]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[61]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "senegal",
+      "raw_names": [
+        "Senegal"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[109]/capital/name",
+        "source:data/staging/1900/source_records.json#$/records[16]/value/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[109]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "seoul",
+      "raw_names": [
+        "Seoul"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[47]/historical_name",
+        "source:data/staging/1900/source_records.json#$/records[9]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[47]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "serbia",
+      "raw_names": [
+        "Serbia"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[66]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[66]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "sierra leone",
+      "raw_names": [
+        "Sierra Leone"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[124]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[124]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "singapore city",
+      "raw_names": [
+        "Singapore City"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[50]/capital/name",
+        "source:data/staging/1900/source_records.json#$/records[10]/value/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[50]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "sofia",
+      "raw_names": [
+        "Sofia"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[139]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[139]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "solomon islands",
+      "raw_names": [
+        "Solomon Islands"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[131]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[131]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "south australia",
+      "raw_names": [
+        "South Australia"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[144]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[144]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "southern nigeria",
+      "raw_names": [
+        "Southern Nigeria"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[41]/historical_name",
+        "source:data/staging/1900/source_records.json#$/records[3]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[41]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "spain",
+      "raw_names": [
+        "Spain"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[97]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[97]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "spanish west africa",
+      "raw_names": [
+        "Spanish West Africa"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[113]/historical_name",
+        "source:data/staging/1900/source_records.json#$/records[23]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[113]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "sri lanka ceylon",
+      "raw_names": [
+        "Sri Lanka (Ceylon)"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[5]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[5]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "st john s",
+      "raw_names": [
+        "St. John's"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[53]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[53]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "stockholm",
+      "raw_names": [
+        "Stockholm"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[124]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[124]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "straits settlements",
+      "raw_names": [
+        "Straits Settlements"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[100]/historical_name",
+        "source:data/staging/1900/source_records.json#$/records[21]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[100]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "sudan",
+      "raw_names": [
+        "Sudan"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[25]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[25]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "surinam",
+      "raw_names": [
+        "Surinam"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[140]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[140]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "suva",
+      "raw_names": [
+        "Suva"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[92]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[92]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "swaziland eswatini",
+      "raw_names": [
+        "Swaziland (Eswatini)"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[53]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[53]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "sweden",
+      "raw_names": [
+        "Sweden"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[40]/historical_name",
+        "source:data/staging/1900/source_records.json#$/records[7]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[40]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "switzerland",
+      "raw_names": [
+        "Switzerland"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[129]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[129]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "sydney",
+      "raw_names": [
+        "Sydney"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[108]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[108]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "taipei",
+      "raw_names": [
+        "Taipei"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[108]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[108]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "taiwan",
+      "raw_names": [
+        "Taiwan"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[75]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[75]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "tanzania tanganyika",
+      "raw_names": [
+        "Tanzania (Tanganyika)"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[134]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[134]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "tasmania",
+      "raw_names": [
+        "Tasmania"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[18]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[18]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "tegucigalpa",
+      "raw_names": [
+        "Tegucigalpa"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[101]/capital/name",
+        "source:data/staging/1900/source_records.json#$/records[12]/value/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[101]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "tehran",
+      "raw_names": [
+        "Tehran"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[116]/historical_name",
+        "source:data/staging/1900/source_records.json#$/records[14]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[116]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "thailand",
+      "raw_names": [
+        "Thailand"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[112]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[112]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "thimphu",
+      "raw_names": [
+        "Thimphu"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[110]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[110]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "tokyo",
+      "raw_names": [
+        "Tokyo"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[87]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[87]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "transvaal",
+      "raw_names": [
+        "Transvaal"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[11]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[11]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "trinidad and tobago",
+      "raw_names": [
+        "Trinidad and Tobago"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[139]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[139]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "tulaghi",
+      "raw_names": [
+        "Tulaghi"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[99]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[99]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "tunis",
+      "raw_names": [
+        "Tunis"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[99]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[99]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "tunisia",
+      "raw_names": [
+        "Tunisia"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[102]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[102]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "turkey ottoman empire",
+      "raw_names": [
+        "Turkey (Ottoman Empire)"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[73]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[73]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "uganda",
+      "raw_names": [
+        "Uganda"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[121]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[121]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "unfederated malay states",
+      "raw_names": [
+        "Unfederated Malay States"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[104]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[104]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "united arab emirates",
+      "raw_names": [
+        "United Arab Emirates"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[35]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[35]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "united kingdom",
+      "raw_names": [
+        "United Kingdom"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[0]/historical_name",
+        "source:data/staging/1900/source_records.json#$/records[0]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[0]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "united states of america",
+      "raw_names": [
+        "United States of America"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[34]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[34]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "uruguay",
+      "raw_names": [
+        "Uruguay"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[46]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[46]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "valletta",
+      "raw_names": [
+        "Valletta"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[23]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[23]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "venezuela",
+      "raw_names": [
+        "Venezuela"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[132]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[132]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "victoria",
+      "raw_names": [
+        "Victoria"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[44]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[44]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "vienna",
+      "raw_names": [
+        "Vienna"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[118]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[118]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "vientiane",
+      "raw_names": [
+        "Vientiane"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[119]/historical_name",
+        "source:data/staging/1900/source_records.json#$/records[25]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[119]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "vietnam annam cochin china tonkin",
+      "raw_names": [
+        "Vietnam (Annam/Cochin China/Tonkin)"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[97]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[97]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "villa cisneros",
+      "raw_names": [
+        "Villa Cisneros"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[0]/capital/name",
+        "source:data/staging/1900/source_records.json#$/records[0]/value/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[0]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "washington",
+      "raw_names": [
+        "Washington"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/staging/1900/source_records.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[137]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[137]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "wellington",
+      "raw_names": [
+        "Wellington"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[130]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[130]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "western australia",
+      "raw_names": [
+        "Western Australia"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[89]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[89]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "windhoek",
+      "raw_names": [
+        "Windhoek"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[76]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[76]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "zanzibar",
+      "raw_names": [
+        "Zanzibar"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[76]/capital/name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[76]/capital/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "zanzibar city",
+      "raw_names": [
+        "Zanzibar City"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/political_unit_records_1900.json#$/units[83]/historical_name",
+        "source:data/world_map/historical/cshapes_1900_snapshot.json#$/features[83]/source_name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "zimbabwe rhodesia",
+      "raw_names": [
+        "Zimbabwe (Rhodesia)"
+      ],
+      "source_files": [
+        "data/staging/1900/political_unit_records_1900.json",
+        "data/world_map/historical/cshapes_1900_snapshot.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/batch3_source_gap_candidates.json#$/candidates[0]/source_record/name",
+        "source:data/staging/1900/batch3_source_gap_candidates.json#$/candidates[32]/source_record/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "亚历山大港",
+      "raw_names": [
+        "亚历山大港"
+      ],
+      "source_files": [
+        "data/staging/1900/batch3_source_gap_candidates.json"
       ]
     },
     {
@@ -212,6 +5055,22 @@
     {
       "authority": "non_authoritative",
       "candidate_ids": [
+        "source:data/staging/1900/batch3_source_gap_candidates.json#$/candidates[49]/source_record/name",
+        "source:data/world_map/shipping_routes.json#$/routes[1]/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "北大西洋航线",
+      "raw_names": [
+        "北大西洋航线"
+      ],
+      "source_files": [
+        "data/staging/1900/batch3_source_gap_candidates.json",
+        "data/world_map/shipping_routes.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
         "source:data/v2_2/lille_demo_locations.json#$/locations[5]/name",
         "source:data/v2_3/social_sandbox_rules.json#$/organizations[3]/display_name_zh"
       ],
@@ -239,6 +5098,22 @@
       "source_files": [
         "data/alpha/world.json",
         "data/v2_3/social_people.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/batch3_source_gap_candidates.json#$/candidates[51]/source_record/name",
+        "source:data/world_map/shipping_routes.json#$/routes[2]/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "地中海东部航线",
+      "raw_names": [
+        "地中海东部航线"
+      ],
+      "source_files": [
+        "data/staging/1900/batch3_source_gap_candidates.json",
+        "data/world_map/shipping_routes.json"
       ]
     },
     {
@@ -411,6 +5286,70 @@
     {
       "authority": "non_authoritative",
       "candidate_ids": [
+        "source:data/staging/1900/batch3_source_gap_candidates.json#$/candidates[46]/source_record/name",
+        "source:data/world_map/rail_segments.json#$/segments[6]/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "巴黎 南特铁路",
+      "raw_names": [
+        "巴黎—南特铁路"
+      ],
+      "source_files": [
+        "data/staging/1900/batch3_source_gap_candidates.json",
+        "data/world_map/rail_segments.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/batch3_source_gap_candidates.json#$/candidates[44]/source_record/name",
+        "source:data/world_map/rail_segments.json#$/segments[0]/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "巴黎 里尔铁路",
+      "raw_names": [
+        "巴黎—里尔铁路"
+      ],
+      "source_files": [
+        "data/staging/1900/batch3_source_gap_candidates.json",
+        "data/world_map/rail_segments.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/batch3_source_gap_candidates.json#$/candidates[45]/source_record/name",
+        "source:data/world_map/rail_segments.json#$/segments[4]/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "巴黎 里昂铁路",
+      "raw_names": [
+        "巴黎—里昂铁路"
+      ],
+      "source_files": [
+        "data/staging/1900/batch3_source_gap_candidates.json",
+        "data/world_map/rail_segments.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/batch3_source_gap_candidates.json#$/candidates[47]/source_record/name",
+        "source:data/world_map/rail_segments.json#$/segments[2]/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "巴黎 鲁昂铁路",
+      "raw_names": [
+        "巴黎—鲁昂铁路"
+      ],
+      "source_files": [
+        "data/staging/1900/batch3_source_gap_candidates.json",
+        "data/world_map/rail_segments.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
         "source:data/world/demo_world.json#$/organizations[4]/position_structure/positions/executive/name",
         "source:data/world/demo_world.json#$/organizations[5]/position_structure/positions/executive/name"
       ],
@@ -552,6 +5491,23 @@
     {
       "authority": "non_authoritative",
       "candidate_ids": [
+        "source:data/staging/1900/batch4_coverage_review_queue.json#$/admin1_queue[10]/source_record/level_name_zh",
+        "source:data/staging/1900/batch4_coverage_review_queue.json#$/admin1_queue[7]/source_record/level_name_zh",
+        "source:data/staging/1900/batch4_coverage_review_queue.json#$/admin1_queue[8]/source_record/level_name_zh",
+        "source:data/staging/1900/batch4_coverage_review_queue.json#$/admin1_queue[9]/source_record/level_name_zh"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "省",
+      "raw_names": [
+        "省"
+      ],
+      "source_files": [
+        "data/staging/1900/batch4_coverage_review_queue.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
         "source:data/alpha/world.json#$/country_profiles[1]/name",
         "source:data/world/demo_world.json#$/countries[1]/name"
       ],
@@ -563,6 +5519,22 @@
       "source_files": [
         "data/alpha/world.json",
         "data/world/demo_world.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/batch3_source_gap_candidates.json#$/candidates[50]/source_record/name",
+        "source:data/world_map/shipping_routes.json#$/routes[0]/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "英吉利海峡航线",
+      "raw_names": [
+        "英吉利海峡航线"
+      ],
+      "source_files": [
+        "data/staging/1900/batch3_source_gap_candidates.json",
+        "data/world_map/shipping_routes.json"
       ]
     },
     {
@@ -644,6 +5616,22 @@
       "source_files": [
         "data/v2_2/lille_demo_locations.json",
         "data/v2_3/social_sandbox_rules.json"
+      ]
+    },
+    {
+      "authority": "non_authoritative",
+      "candidate_ids": [
+        "source:data/staging/1900/batch3_source_gap_candidates.json#$/candidates[42]/source_record/name",
+        "source:data/world_map/rail_segments.json#$/segments[5]/name"
+      ],
+      "collision_kind": "review_candidate_normalized_collision",
+      "normalized_name": "里昂 马赛铁路",
+      "raw_names": [
+        "里昂—马赛铁路"
+      ],
+      "source_files": [
+        "data/staging/1900/batch3_source_gap_candidates.json",
+        "data/world_map/rail_segments.json"
       ]
     },
     {
@@ -735,7 +5723,7 @@
   },
   "schema_version": 1,
   "summary": {
-    "candidate_collision_groups": 46,
-    "candidate_ids_in_collision_groups": 101
+    "candidate_collision_groups": 350,
+    "candidate_ids_in_collision_groups": 775
   }
 }

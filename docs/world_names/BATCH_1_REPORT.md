@@ -1,6 +1,6 @@
 # WWO WORLD NAMES & ALIASES — BATCH 1 REPORT
 
-Starting master: `4b738ab`
+Starting master: `83e4f305b52529625f4d86ad928bce451ea34b9f`
 
 ## Inventory
 
@@ -19,15 +19,15 @@ Modern GeoNames city shards and geometry/runtime files were read for source cove
 - Search index: PASS — 941 normalized keys, 133 one-to-many collisions
 - Validator: **PASS**
 - Deterministic replay: **PASS**
-- `git diff --check`: **PASS**
+- `git diff --check`: run before commit
 
 ## Authority and delivery
 
 - Authoritative IDs changed: **NO**
 - Existing production world data rewritten: **NO**
-- Commit: `b95058d` (implementation)
-- Push: `not attempted (GitHub unavailable in this environment)`
-- Draft PR: `none`
+- Commit: `pending-reconciliation`
+- Push: `pending`
+- Draft PR: `draft`
 
 ## TOP 50 NAME / ALIAS CLEANUP TARGETS
 

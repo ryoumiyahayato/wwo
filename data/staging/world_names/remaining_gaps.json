@@ -1,6 +1,38 @@
 {
   "field_groups": [
     {
+      "field": "admin1_unit_names",
+      "known_occurrences": 0,
+      "sources": [
+        {
+          "occurrences": 1,
+          "source_file": "data/staging/1900/batch4_coverage_review_queue.json",
+          "status": "non_world_map_scanned_only"
+        },
+        {
+          "occurrences": 1,
+          "source_file": "data/staging/1900/batch4_coverage_review_queue.schema.json",
+          "status": "non_world_map_scanned_only"
+        },
+        {
+          "occurrences": 1,
+          "source_file": "data/staging/1900/batch4_deterministic_corpus.json",
+          "status": "non_world_map_scanned_only"
+        },
+        {
+          "occurrences": 1,
+          "source_file": "data/staging/1900/batch4_manifest.json",
+          "status": "non_world_map_scanned_only"
+        },
+        {
+          "occurrences": 1,
+          "source_file": "data/staging/1900/batch4_qa_report.json",
+          "status": "non_world_map_scanned_only"
+        }
+      ],
+      "unknown_occurrences": 5
+    },
+    {
       "field": "ascii_name",
       "known_occurrences": 88927,
       "sources": [
@@ -1668,6 +1700,33 @@
       "unknown_occurrences": 0
     },
     {
+      "field": "historical_name",
+      "known_occurrences": 181,
+      "sources": [
+        {
+          "occurrences": 1,
+          "source_file": "data/staging/1900/batch2_political_unit_records.schema.json",
+          "status": "non_world_map_scanned_only"
+        },
+        {
+          "occurrences": 151,
+          "source_file": "data/staging/1900/political_unit_records_1900.json",
+          "status": "non_world_map_scanned_only"
+        },
+        {
+          "occurrences": 1,
+          "source_file": "data/staging/1900/source_record.schema.json",
+          "status": "non_world_map_scanned_only"
+        },
+        {
+          "occurrences": 28,
+          "source_file": "data/staging/1900/source_records.json",
+          "status": "non_world_map_scanned_only"
+        }
+      ],
+      "unknown_occurrences": 0
+    },
+    {
       "field": "institution_name",
       "known_occurrences": 0,
       "sources": [
@@ -1702,6 +1761,18 @@
       "unknown_occurrences": 17
     },
     {
+      "field": "level_name_zh",
+      "known_occurrences": 15,
+      "sources": [
+        {
+          "occurrences": 15,
+          "source_file": "data/staging/1900/batch4_coverage_review_queue.json",
+          "status": "non_world_map_scanned_only"
+        }
+      ],
+      "unknown_occurrences": 0
+    },
+    {
       "field": "minor_name",
       "known_occurrences": 0,
       "sources": [
@@ -1715,7 +1786,7 @@
     },
     {
       "field": "name",
-      "known_occurrences": 94084,
+      "known_occurrences": 94312,
       "sources": [
         {
           "occurrences": 44,
@@ -1735,6 +1806,26 @@
         {
           "occurrences": 20,
           "source_file": "data/alpha/world.json",
+          "status": "non_world_map_scanned_only"
+        },
+        {
+          "occurrences": 1,
+          "source_file": "data/staging/1900/batch2_political_unit_records.schema.json",
+          "status": "non_world_map_scanned_only"
+        },
+        {
+          "occurrences": 48,
+          "source_file": "data/staging/1900/batch3_source_gap_candidates.json",
+          "status": "non_world_map_scanned_only"
+        },
+        {
+          "occurrences": 151,
+          "source_file": "data/staging/1900/political_unit_records_1900.json",
+          "status": "non_world_map_scanned_only"
+        },
+        {
+          "occurrences": 28,
+          "source_file": "data/staging/1900/source_records.json",
           "status": "non_world_map_scanned_only"
         },
         {
@@ -2605,12 +2696,29 @@
       "unknown_occurrences": 0
     },
     {
+      "field": "named_historical_record_total",
+      "known_occurrences": 0,
+      "sources": [
+        {
+          "occurrences": 1,
+          "source_file": "data/staging/1900/pack_manifest.json",
+          "status": "non_world_map_scanned_only"
+        }
+      ],
+      "unknown_occurrences": 1
+    },
+    {
       "field": "native_name",
-      "known_occurrences": 88953,
+      "known_occurrences": 88961,
       "sources": [
         {
           "occurrences": 8,
           "source_file": "data/alpha/world.json",
+          "status": "non_world_map_scanned_only"
+        },
+        {
+          "occurrences": 8,
+          "source_file": "data/staging/1900/batch3_source_gap_candidates.json",
           "status": "non_world_map_scanned_only"
         },
         {
@@ -3412,6 +3520,33 @@
       "unknown_occurrences": 0
     },
     {
+      "field": "normalized_name",
+      "known_occurrences": 0,
+      "sources": [
+        {
+          "occurrences": 1,
+          "source_file": "data/staging/1900/batch2_political_unit_records.schema.json",
+          "status": "non_world_map_scanned_only"
+        },
+        {
+          "occurrences": 151,
+          "source_file": "data/staging/1900/political_unit_records_1900.json",
+          "status": "non_world_map_scanned_only"
+        },
+        {
+          "occurrences": 1,
+          "source_file": "data/staging/1900/source_record.schema.json",
+          "status": "non_world_map_scanned_only"
+        },
+        {
+          "occurrences": 28,
+          "source_file": "data/staging/1900/source_records.json",
+          "status": "non_world_map_scanned_only"
+        }
+      ],
+      "unknown_occurrences": 181
+    },
+    {
       "field": "organization_name",
       "known_occurrences": 0,
       "sources": [
@@ -3491,12 +3626,42 @@
           "status": "non_world_map_scanned_only"
         },
         {
+          "occurrences": 1,
+          "source_file": "data/staging/1900/batch2_political_unit_records.schema.json",
+          "status": "non_world_map_scanned_only"
+        },
+        {
+          "occurrences": 1,
+          "source_file": "data/staging/1900/batch3_source_gap_candidates.schema.json",
+          "status": "non_world_map_scanned_only"
+        },
+        {
+          "occurrences": 1,
+          "source_file": "data/staging/1900/batch4_coverage_review_queue.schema.json",
+          "status": "non_world_map_scanned_only"
+        },
+        {
+          "occurrences": 1,
+          "source_file": "data/staging/1900/canonical_crosswalk.schema.json",
+          "status": "non_world_map_scanned_only"
+        },
+        {
+          "occurrences": 7,
+          "source_file": "data/staging/1900/source_manifest.json",
+          "status": "non_world_map_scanned_only"
+        },
+        {
+          "occurrences": 1,
+          "source_file": "data/staging/1900/source_record.schema.json",
+          "status": "non_world_map_scanned_only"
+        },
+        {
           "occurrences": 6,
           "source_file": "data/world_map/world_activity.json",
           "status": "world_map_scanned_only"
         }
       ],
-      "unknown_occurrences": 16
+      "unknown_occurrences": 28
     },
     {
       "field": "union_name",
@@ -3630,6 +3795,191 @@
       "status": "non_world_map_scanned_only",
       "unknown_name_like_field_counts": {
         "label": 5
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "historical_name": 1,
+        "name": 1
+      },
+      "name_bearing_record_count": 2,
+      "name_like_record_count": 4,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 100,
+      "source_file": "data/staging/1900/batch2_political_unit_records.schema.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "normalized_name": 1,
+        "title": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "name": 48,
+        "native_name": 8
+      },
+      "name_bearing_record_count": 48,
+      "name_like_record_count": 48,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 109,
+      "source_file": "data/staging/1900/batch3_source_gap_candidates.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {}
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 1,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 40,
+      "source_file": "data/staging/1900/batch3_source_gap_candidates.schema.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "title": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "level_name_zh": 15
+      },
+      "name_bearing_record_count": 15,
+      "name_like_record_count": 16,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 356,
+      "source_file": "data/staging/1900/batch4_coverage_review_queue.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "admin1_unit_names": 1
+      }
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 2,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 59,
+      "source_file": "data/staging/1900/batch4_coverage_review_queue.schema.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "admin1_unit_names": 1,
+        "title": 1
+      }
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 1,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 4,
+      "source_file": "data/staging/1900/batch4_deterministic_corpus.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "admin1_unit_names": 1
+      }
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 1,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 9,
+      "source_file": "data/staging/1900/batch4_manifest.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "admin1_unit_names": 1
+      }
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 1,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 45,
+      "source_file": "data/staging/1900/batch4_qa_report.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "admin1_unit_names": 1
+      }
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 1,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 69,
+      "source_file": "data/staging/1900/canonical_crosswalk.schema.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "title": 1
+      }
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 1,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 22,
+      "source_file": "data/staging/1900/pack_manifest.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "named_historical_record_total": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "historical_name": 151,
+        "name": 151
+      },
+      "name_bearing_record_count": 302,
+      "name_like_record_count": 453,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 405,
+      "source_file": "data/staging/1900/political_unit_records_1900.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "normalized_name": 151
+      }
+    },
+    {
+      "known_name_field_counts": {},
+      "name_bearing_record_count": 0,
+      "name_like_record_count": 7,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 9,
+      "source_file": "data/staging/1900/source_manifest.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "title": 7
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "historical_name": 1
+      },
+      "name_bearing_record_count": 1,
+      "name_like_record_count": 3,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 24,
+      "source_file": "data/staging/1900/source_record.schema.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "normalized_name": 1,
+        "title": 1
+      }
+    },
+    {
+      "known_name_field_counts": {
+        "historical_name": 28,
+        "name": 28
+      },
+      "name_bearing_record_count": 56,
+      "name_like_record_count": 84,
+      "reason": "outside the configured world-map entity catalogs; requires semantic review before staging",
+      "record_count": 86,
+      "source_file": "data/staging/1900/source_records.json",
+      "status": "non_world_map_scanned_only",
+      "unknown_name_like_field_counts": {
+        "normalized_name": 28
       }
     },
     {
@@ -6405,10 +6755,10 @@
     }
   ],
   "summary": {
-    "excluded_known_name_occurrences": 277042,
-    "excluded_source_files": 185,
-    "excluded_unknown_name_like_occurrences": 509,
-    "field_groups": 21,
+    "excluded_known_name_occurrences": 277474,
+    "excluded_source_files": 199,
+    "excluded_unknown_name_like_occurrences": 708,
+    "field_groups": 26,
     "parse_errors": 0
   }
 }

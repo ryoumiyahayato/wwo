@@ -70813,6 +70813,14 @@
         "status": "scanned_only"
       },
       {
+        "bytes": 8469,
+        "name_bearing_record_count": 0,
+        "note": "not a configured entity source",
+        "record_count": 39,
+        "source_file": "data/world_map/strategic_military_overlay.json",
+        "status": "scanned_only"
+      },
+      {
         "bytes": 5822,
         "name_bearing_record_count": 0,
         "note": "not a configured entity source",
@@ -70852,6 +70860,6 @@
       "data/world_map/ports.json",
       "data/world_map/regions.json"
     ],
-    "world_map_json_files": 183
+    "world_map_json_files": 184
   }
 }
