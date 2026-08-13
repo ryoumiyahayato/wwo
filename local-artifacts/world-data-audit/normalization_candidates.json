@@ -1,0 +1,14 @@
+{
+  "candidates": [
+    {
+      "candidate": "Pope Air Force Base (historical)",
+      "current": "Pope Air Force Base  (historical)",
+      "dataset": "city_detail/countries/US.json",
+      "kind": "whitespace",
+      "location": "cities[6035].ascii_name",
+      "safe": true
+    }
+  ],
+  "policy": "candidate report only; no normalization is applied automatically",
+  "schema_version": 1
+}

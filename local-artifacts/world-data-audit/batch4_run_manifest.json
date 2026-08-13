@@ -1,0 +1,145 @@
+{
+  "artifact_digest": "1756acf8bf497c9ff6c0be523fd1196552349fe81b0fda704b35ff6fae8ac25e",
+  "artifacts": [
+    {
+      "bytes": 40656,
+      "path": "batch2_asset_manifest.json",
+      "sha256": "90b04ec06c713eac89b42c27cf14f6fae6aa6e8e8321ce5a0b757ed5cbabf9b0"
+    },
+    {
+      "bytes": 18606,
+      "path": "batch2_asset_staging_candidates.json",
+      "sha256": "585ad6e1c15700bd420477d4f6f7eef625f59708549a9e21e7ad9226bb269ada"
+    },
+    {
+      "bytes": 104186,
+      "path": "batch2_data_manifest.json",
+      "sha256": "01fcb1376742c3d9cd6fb39f9cf8ae5cdef17f0c35a3f9d59ad67023b2e8b991"
+    },
+    {
+      "bytes": 747,
+      "path": "batch2_gap_report.json",
+      "sha256": "99272c63a496e8490eb9bdd6d684661f804ac81c7d2788ab88fd6f1df6748aa9"
+    },
+    {
+      "bytes": 1319,
+      "path": "batch2_regression_manifest.json",
+      "sha256": "44cfb3b86c4cbf053ad2d15843683c88ca71b1bcccb561761185684bbefa71d0"
+    },
+    {
+      "bytes": 684,
+      "path": "batch3_gap_report.json",
+      "sha256": "d8c3a3d1a5cf706de3b4be94670936d925282b762bf39000e87f11ee41cd0994"
+    },
+    {
+      "bytes": 48546,
+      "path": "batch3_historical_flag_coverage.json",
+      "sha256": "1ae42a88c871812bcb9af77875656134f04bddadfa8e821f161c28ed1ad0435d"
+    },
+    {
+      "bytes": 15708,
+      "path": "batch3_loader_contract.json",
+      "sha256": "a8fb631c85cc9378c348df33002f85dea641cdec2a6418954129dabe00f51aa3"
+    },
+    {
+      "bytes": 55602,
+      "path": "batch3_record_signature_manifest.json",
+      "sha256": "7483fa76dcb44d709c16957081e246ea3a8e966901b4e63927fa1d2b12fc20bc"
+    },
+    {
+      "bytes": 30990,
+      "path": "batch3_staging_candidates.json",
+      "sha256": "2af41bfea7af8ebe206e6fb5391f18477eb4841ee63caa94b6fb8a432fef1c9c"
+    },
+    {
+      "bytes": 364638,
+      "path": "coverage.json",
+      "sha256": "6e639085747a6efb12b1e9492b0d9b784a45fa0f65d4bcb5f61322d0ff33d50a"
+    },
+    {
+      "bytes": 33880,
+      "path": "findings.json",
+      "sha256": "b3bb70cdbb7336d0fa141c9c091d1db9a21958b0d111887fb428bc13bdf1c67e"
+    },
+    {
+      "bytes": 2153401,
+      "path": "inventory.json",
+      "sha256": "a656cd21d5a28a1d69c5836bc233523e1d6cc0843c3a1a288327ba90a5eba7f5"
+    },
+    {
+      "bytes": 392,
+      "path": "normalization_candidates.json",
+      "sha256": "2ddeade04a9ce044a5c1c672006e4fa83f3af34e6da441977e4acf269b2f66eb"
+    },
+    {
+      "bytes": 1925015,
+      "path": "staging_candidates.json",
+      "sha256": "a811ed32e16a40457ecb91149c239797fffdaec2e611826dca8ae8f4ccc40cc2"
+    }
+  ],
+  "authoritative_source_modified": false,
+  "batch_results": {
+    "batch1": {
+      "code_counts": {
+        "PLACEHOLDER_FOREIGN_KEY": 6,
+        "SELF_INTERSECTING_RING": 104
+      },
+      "coverage_country_rows": 177,
+      "finding_count": 110,
+      "inventory_files": 184,
+      "severity_counts": {
+        "ERROR": 104,
+        "WARNING": 6
+      }
+    },
+    "batch2": {
+      "asset_hash_mismatches": 0,
+      "asset_missing": 0,
+      "corpus_cases": 6,
+      "data_files": 184,
+      "data_parse_errors": 0,
+      "manual_or_historical_items_remain": true,
+      "verified_flag_assets": 60
+    },
+    "batch3": {
+      "historical_units": 151,
+      "loader_entries": 16,
+      "loader_missing_direct_references": 0,
+      "loader_missing_directory_references": 0,
+      "manual_or_historical_items_remain": true,
+      "nested_duplicate_candidate_files": 3,
+      "signature_files": 184,
+      "verified_or_documented_flag_units": 151
+    },
+    "batch4": {
+      "artifact_digest_before_manifest": "1756acf8bf497c9ff6c0be523fd1196552349fe81b0fda704b35ff6fae8ac25e",
+      "artifact_file_count_before_manifest": 15,
+      "concurrency": "1 process; no process pool or thread pool",
+      "large_temporary_artifacts": [],
+      "resource_intensive_phases_executed": [],
+      "resource_safety_reduction": "No raster/geometry preprocessing; no repeated benchmark loop; scans and tests were sequential."
+    }
+  },
+  "batch_scope": [
+    "BATCH 1",
+    "BATCH 2",
+    "BATCH 3",
+    "BATCH 4"
+  ],
+  "final_gates": {
+    "dangling_foreign_keys": 0,
+    "duplicate_catalog_ids": 0,
+    "flag_asset_gaps": 0,
+    "json_parse_errors": 0,
+    "loader_contract_gaps": 0,
+    "manual_review_findings": 110
+  },
+  "remaining_work": [
+    "Review 104 potential world_admin1 self-intersecting rings against source provenance.",
+    "Resolve 6 placeholder institutional references with source-backed decisions.",
+    "Research 10 missing and 6 ambiguous historical identity mappings.",
+    "Expand sparse country-level transport, institution, organization, and person coverage only with approved sources."
+  ],
+  "repository_root": ".",
+  "schema_version": "wwo_world_data_batch4_run_manifest_v1"
+}
