@@ -1,56 +1,38 @@
 # vNext Economy / Spatial Compatibility Boundary
 
-This note records the post-PR62 reconciliation for the isolated vNext market-economy candidate. It does not wire Economy into `VNextSpatialWorld`; gameplay integration remains a later PR.
+This document records the local Economy closeout boundary. Economy models commercial intent and shipment state; `VNextSpatialWorld` remains the sole authority for physical transport topology, operational links, capacity windows and final allocation.
 
-## Authority after PR #62
+## Runtime authority boundary
 
-`VNextSpatialWorld` is the authority for physical topology and connectivity, link existence/type, infrastructure operational state and condition, nominal/effective/used/remaining physical capacity, and the current shared per-link/per-hour allocation window.
+`VNextSpatialWorld` owns physical connectivity, infrastructure state, nominal/effective/used/remaining link capacity, and shared per-link/per-hour reservations. Economy must not publish or persist a second authoritative physical-capacity ledger.
 
-Economy owns commodity supply/demand, inventories, production, economic shipment intent, trade policy/quota, commercial routing cost/modifiers, shipment lifecycle and economic attribution. Economy must not publish or persist a competing authoritative physical-capacity ledger.
+`VNextMarketRouteNetwork` remains a non-authoritative commercial fixture for isolated Alpha regression paths. Its legacy daily route budget is only a test fixture and can gate the fallback Economy-only path; it does not describe Spatial capacity and must not be used as a second allocator when Spatial is attached.
 
-## Current Alpha route fixture
+The current adapter maps Economy route-edge IDs to Spatial link IDs. The mapping is an integration reference, not a new topology authority.
 
-`VNextMarketRouteNetwork` remains only as a **non-authoritative Economy fixture / derived commercial network** for the existing eight-region Alpha regression. Its source rows come from `data/alpha/economy_integration_1900.json`; they are not the authoritative world-map geometry used by Spatial.
+## Physical transport sequence
 
-The legacy source field `capacity_units_per_day` is interpreted inside this isolated fixture as a per-day **commercial fixture budget**. The production-facing Economy API therefore exposes `set_fixture_route_budget()` rather than a physical-capacity mutation. The fixture budget can make an isolated Economy test path unavailable, but it does not change Spatial link status, condition, topology, nominal/effective capacity, or shared reservations.
+For each Economy settlement window with Spatial attached, the sequence is:
 
-The fixture exists to preserve already-reviewed Economy behavior until integration. It must not become the permanent physical transport API.
+1. Build all applicable commercial transport demand deterministically.
+2. Submit every demand request to Spatial for the current allocation window.
+3. Query the final allocation for every request after all submissions.
+4. Apply only those final allocations to Economy inventories, trade quotas, exports and shipment progress.
 
-## Route fact classification
+Economy does not consume sequential provisional allocations and does not maintain a competing total-capacity allocator. Partial or shared-link results are accepted exactly as returned by Spatial. The isolated fixture path remains available only when no Spatial authority is attached.
 
-| Economy route fact | Classification now | Post-integration authority |
-|---|---|---|
-| source/destination connectivity | E — Alpha fixture-only | A — Spatial topology |
-| route identity / edge IDs | E — Alpha fixture identity | Spatial IDs/reference projected into Economy |
-| travel duration | E — Alpha fixture calibration | derived from authoritative Spatial/world-map route data |
-| physical capacity | not Economy-owned | A — Spatial only |
-| fixture daily throughput budget | E — isolated Economy fixture | removed/replaced by Spatial allocation |
-| trade quota / embargo | B — economic policy/trade constraint | Economy |
-| freight/commercial transport cost | C — economic derived cost | Economy, derived from Spatial inputs plus commercial modifiers |
-| distance used for economic cost | C/E — fixture-derived observation | derived from Spatial/world-map truth; no Economy geometry authority |
-| risk/reliability commercial modifier | C — economic modifier | Economy unless a physical component is supplied by Spatial |
-| physical operational availability | not Economy-owned | A — Spatial only |
-| shipment queue and lifecycle | D — shipment domain state | Economy |
-| reservation/allocation | fixture budget only in isolated tests | Spatial allocates; Economy stores reservation/reference and shipment outcome |
+## Shipment and in-transit semantics
 
-## Deferred shared-capacity integration contract
+A shipment stores its total units, delivered/progress units and remaining units. `in_transit_import_units` is the derived sum of outstanding units in active shipments for the queried destination and commodity. It is not “units moved today,” is not reset at the daily tick, and is not duplicated as mutable region commodity state.
 
-A later integration adapter should follow this direction:
-
-1. Economy produces transport demand: source, destination, cargo, physical load and requested timing.
-2. The adapter resolves authoritative Spatial/world-map links and submits capacity requests to `VNextSpatialWorld` / `VNextSpatialCapacityWindow`.
-3. Spatial decides physical feasibility and full/partial/unfulfilled shared allocation for the current hour window.
-4. Economy decides whether the resulting shipment is economically desirable and records shipment state plus the Spatial reservation/reference.
-5. Economy never writes Spatial topology, infrastructure status/condition or capacity dictionaries.
-
-No `world_runtime.gd` wiring, service locator, Military dependency or cross-domain scheduler is introduced by this reconciliation.
+A shipment created today remains represented after the tick when delivery takes multiple days. It remains active until all units are delivered or the shipment is explicitly cancelled or otherwise resolved. Delivery removes the active record only after the outstanding quantity reaches zero; the completed record is retained in shipment history.
 
 ## Persistence boundary
 
-Economy snapshots continue to own region market state, production sites, active shipments, shipment history, cumulative physical flows, shocks, trade quotas, sequence and the isolated fixture route-budget state needed for deterministic Alpha replay. They do not copy `VNextSpatialWorld` state.
+Economy snapshots own region market state, production sites, active shipments, shipment history, cumulative flows, shocks, trade quotas, sequence and the isolated fixture state needed for deterministic Economy replay. Spatial world state and live Spatial reservations are not copied into an Economy snapshot. A resumed Spatial-integrated simulation must reattach the same authoritative Spatial world and runtime route mapping before submitting new transport demand.
 
-When future Spatial integration replaces the fixture budget, Economy should persist only the Economy-owned shipment/reference information required to validate or resume its relationship to the authoritative Spatial reservation.
+Snapshot/restore canonicalizes the serialized Economy copy for deterministic replay without mutating the live simulation state. The active shipment queue and its derived in-transit index are rebuilt after restore.
 
-## In-transit observation
+## Verification
 
-`in_transit_import_units` means the **current outstanding active shipment quantity** for the queried destination/commodity. It is derived from Economy's authoritative active shipment queue at snapshot/query time; it is not a resettable daily metric and is not duplicated in persisted region commodity state.
+The focused Economy tests cover delayed delivery, partial progress, concurrent shipments, delivery removal, mid-transit restore and deterministic continuation. `market_economy_spatial_integration_test.gd` exercises shared Spatial-link contention and verifies that Economy applies only final Spatial allocation. The vNext validation workflow runs the focused suite and the ten-year Economy test in separate lanes; neither lane removes substantive assertions.

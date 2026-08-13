@@ -100,7 +100,11 @@ func remaining_fixture_budget(edge_id: String) -> float:
 	return float(fixture_edge_remaining_budget.get(edge_id, 0.0))
 
 
-func find_route(origin_market_id: String, destination_market_id: String) -> Dictionary:
+func find_route(
+	origin_market_id: String,
+	destination_market_id: String,
+	use_fixture_budget: bool = true
+) -> Dictionary:
 	if origin_market_id.is_empty() or destination_market_id.is_empty():
 		return {}
 	if origin_market_id == destination_market_id:
@@ -160,7 +164,7 @@ func find_route(origin_market_id: String, destination_market_id: String) -> Dict
 		for edge_value: Variant in neighbors:
 			var edge: Dictionary = edge_value as Dictionary
 			var edge_id: String = str(edge.get("edge_id", ""))
-			if remaining_fixture_budget(edge_id) <= 0.000001:
+			if use_fixture_budget and remaining_fixture_budget(edge_id) <= 0.000001:
 				continue
 			var neighbor: String = str(edge.get("to_market_id", ""))
 			if neighbor not in unvisited:

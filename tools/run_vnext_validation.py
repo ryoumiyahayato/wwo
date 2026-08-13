@@ -35,6 +35,7 @@ DEFAULT_TEST_TIMEOUT_SECONDS = 300
 DEFAULT_LONG_TEST_TIMEOUT_SECONDS = 1200
 DEFAULT_HEARTBEAT_SECONDS = 60
 LONG_TEST_SCRIPT = "res://tests/vnext/market_economy_long_term_test.gd"
+VALIDATION_SUITES = ("all", "focused", "long-run")
 
 
 class ValidationError(RuntimeError):
@@ -81,7 +82,11 @@ def resolve_godot(godot_value: str) -> Path:
     return Path(located).resolve()
 
 
-def discover_test_scripts(root: Path) -> list[Path]:
+def discover_test_scripts(root: Path, suite: str = "all") -> list[Path]:
+    if suite not in VALIDATION_SUITES:
+        raise ValidationError(
+            f"unknown validation suite {suite!r}; expected one of {', '.join(VALIDATION_SUITES)}"
+        )
     tests_root = root / "tests" / "vnext"
     if not tests_root.is_dir():
         raise ValidationError(f"vNext test directory does not exist: {tests_root}")
@@ -92,8 +97,15 @@ def discover_test_scripts(root: Path) -> list[Path]:
         if path.is_file() and path.name.endswith("_test.gd")
     ]
     discovered.sort(key=lambda path: path.relative_to(root).as_posix())
+    long_test_name = Path(LONG_TEST_SCRIPT).name
+    if suite == "focused":
+        discovered = [path for path in discovered if path.name != long_test_name]
+    elif suite == "long-run":
+        discovered = [path for path in discovered if path.name == long_test_name]
     if not discovered:
-        raise ValidationError("no vNext test scripts found under tests/vnext")
+        raise ValidationError(
+            f"no vNext test scripts found for suite {suite!r} under tests/vnext"
+        )
     return discovered
 
 
@@ -264,8 +276,8 @@ def print_failure(test_label: str, result: ProcessResult, reasons: Sequence[str]
     print(result.log if result.log else "<no output>")
 
 
-def run_validation(root: Path, godot: Path) -> int:
-    tests = discover_test_scripts(root)
+def run_validation(root: Path, godot: Path, suite: str = "all") -> int:
+    tests = discover_test_scripts(root, suite)
 
     import_command = (
         str(godot),
@@ -302,7 +314,7 @@ def run_validation(root: Path, godot: Path) -> int:
             print_failure(relative, result, reasons)
             return 1
 
-    print(f"VNext validation: {len(tests)} test scripts passed")
+    print(f"VNext validation ({suite}): {len(tests)} test scripts passed")
     return 0
 
 
@@ -310,6 +322,12 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run all vNext Godot validation tests.")
     parser.add_argument("--root", required=True, help="repository root")
     parser.add_argument("--godot", required=True, help="Godot executable path or command")
+    parser.add_argument(
+        "--suite",
+        choices=VALIDATION_SUITES,
+        default="all",
+        help="validation lane to run (all, focused, or long-run)",
+    )
     return parser.parse_args(argv)
 
 
@@ -318,7 +336,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         root = normalize_root(args.root)
         godot = resolve_godot(args.godot)
-        return run_validation(root, godot)
+        return run_validation(root, godot, args.suite)
     except ValidationError as exc:
         print(f"VNext validation setup failed: {exc}", file=sys.stderr)
         return 2

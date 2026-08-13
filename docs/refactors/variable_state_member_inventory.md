@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1794|1336|15|0|488|5|32|16|67|970|445|207|
+|1798|1339|15|0|488|5|32|16|67|973|445|207|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,794个生产成员字段逐项表
+## 1,798个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -1447,7 +1447,7 @@
 5 K leave_confirmation
 ```
 
-### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/vnext/economy/market_economy_catalog.gd`
+### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/vnext/economy/market_economy.gd`
 
 ```text
 @ scripts/v2_3/v2_3_formal_simulation.gd | V23FormalSimulation
@@ -1578,29 +1578,38 @@
 17 C HISTORY_LIMIT
 18 C MAX_SHIPMENTS_PER_DAY
 19 C MIN_PRICE_CENTIMES
-20 C SEASONAL_COMMODITY_CATEGORIES
-26 C DEFAULT_POLICIES
-46 K catalog
-47 K routes
-48 K region_states
-49 K production_sites
-50 K shipments
-51 K shipment_history
-52 K active_shocks
-53 K history
-54 K flow_totals
-55 E last_summary
-56 K initialization_error
-58 K _policies
-59 K _region_ids
-60 E _country_ids
-61 K _commodity_ids
-62 K _production_site_ids
-63 K _production_order
-64 K _trade_quota_remaining
-65 K _in_transit_units_by_destination
-66 A _last_day_index
-67 A _next_shipment_sequence
+20 C SNAPSHOT_FLOAT_QUANTUM
+21 C SEASONAL_COMMODITY_CATEGORIES
+27 C DEFAULT_POLICIES
+47 K catalog
+48 K routes
+49 K region_states
+50 K production_sites
+51 K shipments
+52 K shipment_history
+53 K active_shocks
+54 K history
+55 K flow_totals
+56 E last_summary
+57 K initialization_error
+59 K _spatial_transport_world
+60 K _spatial_route_links
+61 K _spatial_transport_window_hour
+63 K _policies
+64 K _region_ids
+65 E _country_ids
+66 K _commodity_ids
+67 K _production_site_ids
+68 K _production_order
+69 K _trade_quota_remaining
+70 K _in_transit_units_by_destination
+71 A _last_day_index
+72 A _next_shipment_sequence
+```
+
+### 第10段：`scripts/vnext/economy/market_economy_catalog.gd` 至 `scripts/vnext/travel/travel_quote.gd`
+
+```text
 @ scripts/vnext/economy/market_economy_catalog.gd | VNextMarketEconomyCatalog
 7 C COMMODITY_MARKET_PATH
 8 C WORLD_PATH
@@ -1620,11 +1629,6 @@
 41 K initialization_error
 43 K _source_region_to_market
 44 E _source_country_to_market
-```
-
-### 第10段：`scripts/vnext/economy/market_route_network.gd` 至 `scripts/world_map/historical_map_identity_style.gd`
-
-```text
 @ scripts/vnext/economy/market_route_network.gd | VNextMarketRouteNetwork
 15 K edges_by_id
 16 K adjacency
@@ -1773,6 +1777,11 @@
 5 K _destination_place_id
 6 K _duration_minutes
 7 K _cost_minor
+```
+
+### 第11段：`scripts/vnext/world_runtime.gd` 至 `scripts/world_map/internal/world_map_controller_impl.gd`
+
+```text
 @ scripts/vnext/world_runtime.gd | VNextWorldRuntime
 4 C SNAPSHOT_SCHEMA_ID
 5 C MAX_JSON_SAFE_INTEGER
@@ -1791,11 +1800,6 @@
 11 C CODE_PLATE_BLEND
 12 C CODE_COLUMN_CENTERS
 13 C CODE_ROW_CENTERS
-```
-
-### 第11段：`scripts/world_map/internal/world_map_canvas_impl.gd` 至 `scripts/world_map/internal/world_map_data_impl.gd`
-
-```text
 @ scripts/world_map/internal/world_map_canvas_impl.gd | PrototypeV2MapCanvas
 5 C WORLD_SIZE
 6 C WORLD_BOUNDS
@@ -1963,15 +1967,15 @@
 14 A _press_position
 15 K _capture_path
 16 K _exit_after_capture
+```
+
+### 第12段：`scripts/world_map/internal/world_map_data_impl.gd` 至 `scripts/world_map/world_map_canvas_detail.gd`
+
+```text
 @ scripts/world_map/internal/world_map_data_impl.gd | PrototypeV2Data
 6 C FILES
 25 K records
 26 K errors
-```
-
-### 第12段：`scripts/world_map/internal/world_map_interface_impl.gd` 至 `scripts/world_map/world_map_canvas_detail.gd`
-
-```text
 @ scripts/world_map/internal/world_map_interface_impl.gd | PrototypeV2Interface
 9 C INK
 10 C INK_MUTED

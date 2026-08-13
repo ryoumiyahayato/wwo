@@ -62,6 +62,46 @@ class DiscoverTests(unittest.TestCase):
             with self.assertRaisesRegex(runner.ValidationError, "no vNext test scripts"):
                 runner.discover_test_scripts(root)
 
+    def test_focused_and_long_run_suites_partition_the_long_test(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            for relative in (
+                "tests/vnext/market_economy_long_term_test.gd",
+                "tests/vnext/market_economy_test.gd",
+                "tests/vnext/nested/a_test.gd",
+            ):
+                path = root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("", encoding="utf-8")
+
+            focused = [
+                path.relative_to(root).as_posix()
+                for path in runner.discover_test_scripts(root, "focused")
+            ]
+            long_run = [
+                path.relative_to(root).as_posix()
+                for path in runner.discover_test_scripts(root, "long-run")
+            ]
+
+            self.assertEqual(
+                focused,
+                [
+                    "tests/vnext/market_economy_test.gd",
+                    "tests/vnext/nested/a_test.gd",
+                ],
+            )
+            self.assertEqual(
+                long_run,
+                ["tests/vnext/market_economy_long_term_test.gd"],
+            )
+
+    def test_unknown_suite_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            (root / "tests" / "vnext").mkdir(parents=True)
+            with self.assertRaisesRegex(runner.ValidationError, "unknown validation suite"):
+                runner.discover_test_scripts(root, "skipped")
+
 
 class LogAnalysisTests(unittest.TestCase):
     def test_fatal_pattern_is_detected(self) -> None:

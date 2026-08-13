@@ -17,6 +17,7 @@ const POPULATION_UNIT: float = 1_000_000.0
 const HISTORY_LIMIT: int = 366
 const MAX_SHIPMENTS_PER_DAY: int = 256
 const MIN_PRICE_CENTIMES: int = 1
+const SNAPSHOT_FLOAT_QUANTUM: float = 0.000000001
 const SEASONAL_COMMODITY_CATEGORIES: Dictionary = {
 	"agricultural_food": true,
 	"processed_food": true,
@@ -54,6 +55,10 @@ var history: Array[Dictionary] = []
 var flow_totals: Dictionary = {}
 var last_summary: Dictionary = {}
 var initialization_error: String = ""
+
+var _spatial_transport_world: VNextSpatialWorld = null
+var _spatial_route_links: Dictionary = {}
+var _spatial_transport_window_hour: int = 0
 
 var _policies: Dictionary = {}
 var _region_ids: Array[String] = []
@@ -204,6 +209,80 @@ func restore_fixture_route_budget(edge_id: String) -> bool:
 	return routes.restore_default_fixture_budget(edge_id)
 
 
+func attach_spatial_transport_authority(
+	spatial_world: VNextSpatialWorld,
+	route_edge_to_links: Dictionary,
+	window_hour: int = -1
+) -> bool:
+	if spatial_world == null or not spatial_world.is_valid() or routes == null:
+		return false
+	if route_edge_to_links.is_empty():
+		return false
+	var candidate_links: Dictionary = {}
+	for raw_edge_id: Variant in route_edge_to_links:
+		var edge_id: String = str(raw_edge_id)
+		if not routes.edges_by_id.has(edge_id):
+			return false
+		var raw_links: Variant = route_edge_to_links[raw_edge_id]
+		var links: Array[String] = []
+		if raw_links is String:
+			links.append(str(raw_links))
+		elif raw_links is Array:
+			for raw_link_id: Variant in raw_links as Array:
+				if raw_link_id is String:
+					links.append(str(raw_link_id))
+		if links.is_empty():
+			return false
+		for link_id: String in links:
+			if not spatial_world.catalog().has_link(link_id):
+				return false
+		candidate_links[edge_id] = links
+	if candidate_links.size() != routes.edges_by_id.size():
+		return false
+	for raw_edge_id: Variant in routes.edges_by_id:
+		if not candidate_links.has(str(raw_edge_id)):
+			return false
+	var candidate_hour: int = spatial_world.current_hour() if window_hour < 0 else window_hour
+	if candidate_hour != spatial_world.current_hour() or candidate_hour < 0:
+		return false
+	_spatial_transport_world = spatial_world
+	_spatial_route_links = candidate_links
+	_spatial_transport_window_hour = candidate_hour
+	return true
+
+
+func detach_spatial_transport_authority() -> void:
+	_spatial_transport_world = null
+	_spatial_route_links.clear()
+	_spatial_transport_window_hour = 0
+
+
+func apply_shipment_progress(
+	shipment_id: String, delivered_units: float, day_index: int
+) -> Dictionary:
+	if (
+		shipment_id.is_empty()
+		or is_nan(delivered_units)
+		or is_inf(delivered_units)
+		or delivered_units <= 0.0
+		or day_index < _last_day_index
+	):
+		return _fail_result("invalid_shipment_progress", "shipment progress is invalid")
+	for index: int in range(shipments.size()):
+		var shipment: Dictionary = shipments[index] as Dictionary
+		if str(shipment.get("shipment_id", "")) != shipment_id:
+			continue
+		if day_index < int(shipment.get("dispatch_day", -1)):
+			return _fail_result("invalid_shipment_progress", "progress precedes dispatch")
+		var remaining: float = float(shipment.get("units", 0.0))
+		if delivered_units > remaining + 0.000001:
+			return _fail_result("invalid_shipment_progress", "progress exceeds outstanding cargo")
+		_apply_shipment_delivery(index, minf(delivered_units, remaining), day_index)
+		_rebuild_in_transit_units_index()
+		return _ok({"shipment_id": shipment_id, "delivered_units": delivered_units})
+	return _fail_result("unknown_shipment", "shipment does not exist")
+
+
 func apply_market_shock(
 	shock_id: String,
 	market_id: String,
@@ -286,6 +365,7 @@ func validate_integrity() -> bool:
 	for shipment: Dictionary in shipments:
 		if (
 			float(shipment.get("units", 0.0)) <= 0.0
+			or not _shipment_progress_is_conserved(shipment)
 			or not region_states.has(str(shipment.get("origin_market_id", "")))
 			or not region_states.has(str(shipment.get("destination_market_id", "")))
 			or int(shipment.get("arrival_day", -1)) <= int(shipment.get("dispatch_day", -1))
@@ -296,7 +376,7 @@ func validate_integrity() -> bool:
 
 
 func snapshot() -> Dictionary:
-	return {
+	var snapshot_value: Dictionary = {
 		"schema_id": "vnext_market_economy_state_v1",
 		"last_day_index": _last_day_index,
 		"next_shipment_sequence": _next_shipment_sequence,
@@ -310,6 +390,7 @@ func snapshot() -> Dictionary:
 		"trade_quota_remaining": _trade_quota_remaining.duplicate(true),
 		"route_network": routes.snapshot() if routes != null else {},
 	}
+	return _canonicalize_snapshot_value(snapshot_value) as Dictionary
 
 
 func restore(snapshot_value: Dictionary) -> bool:
@@ -354,7 +435,11 @@ func restore(snapshot_value: Dictionary) -> bool:
 	).duplicate(true)
 	var candidate_last_day: int = int(snapshot_value.get("last_day_index", -1))
 	var candidate_sequence: int = int(snapshot_value.get("next_shipment_sequence", 1))
+	_normalize_candidate_numeric_types(candidate_regions, candidate_sites, candidate_shipments, candidate_shipment_history, candidate_history)
 	_erase_legacy_in_transit_observations(candidate_regions)
+	_normalize_candidate_shipments(candidate_shipments)
+	_normalize_candidate_flow_totals(candidate_flow_totals)
+	_normalize_candidate_quota_types(candidate_quotas)
 	if (
 		candidate_last_day < -1
 		or candidate_sequence < 1
@@ -430,6 +515,9 @@ func _clear_runtime_state() -> void:
 	_production_order.clear()
 	_trade_quota_remaining.clear()
 	_in_transit_units_by_destination.clear()
+	_spatial_transport_world = null
+	_spatial_route_links.clear()
+	_spatial_transport_window_hour = 0
 	_last_day_index = -1
 	_next_shipment_sequence = 1
 
@@ -619,25 +707,7 @@ func _deliver_shipments(day_index: int) -> void:
 		var shipment: Dictionary = shipments[index] as Dictionary
 		if int(shipment.get("arrival_day", 0)) > day_index:
 			continue
-		var destination_id: String = str(shipment.get("destination_market_id", ""))
-		var commodity_id: String = str(shipment.get("commodity_id", ""))
-		var units: float = maxf(0.0, float(shipment.get("units", 0.0)))
-		if region_states.has(destination_id) and units > 0.0:
-			var state: Dictionary = region_states[destination_id] as Dictionary
-			var inventory: Dictionary = state.get("inventory", {}) as Dictionary
-			inventory[commodity_id] = float(inventory.get(commodity_id, 0.0)) + units
-			var commodity_state: Dictionary = (
-				state.get("commodities", {}) as Dictionary
-			).get(commodity_id, {}) as Dictionary
-			commodity_state["imports_units"] = float(commodity_state.get("imports_units", 0.0)) + units
-			commodity_state["supply_units"] = float(commodity_state.get("supply_units", 0.0)) + units
-			(state.get("commodities", {}) as Dictionary)[commodity_id] = commodity_state
-			state["inventory"] = inventory
-			region_states[destination_id] = state
-		shipment["status"] = "delivered"
-		shipment["delivered_day"] = day_index
-		shipment_history.append(shipment.duplicate(true))
-		shipments.remove_at(index)
+		_apply_shipment_delivery(index, float(shipment.get("units", 0.0)), day_index)
 
 
 func _apply_spoilage() -> void:
@@ -834,6 +904,9 @@ func _in_transit_units_for(destination_id: String, commodity_id: String) -> floa
 
 
 func _schedule_shipments(day_index: int) -> void:
+	if _spatial_transport_world != null:
+		_schedule_spatial_shipments(day_index)
+		return
 	var requests: Array[Dictionary] = []
 	for region_id: String in _region_ids:
 		var state: Dictionary = region_states[region_id] as Dictionary
@@ -949,6 +1022,11 @@ func _schedule_shipments(day_index: int) -> void:
 				"destination_market_id": destination_id,
 				"commodity_id": commodity_id,
 				"units": units,
+				"total_units": units,
+				"delivered_units": 0.0,
+				"progress_units": 0.0,
+				"last_progress_day": day_index,
+				"transport_demand_units": units,
 				"goods_value_centimes": goods_value,
 				"freight_cost_centimes": freight,
 				"tariff_centimes": tariff,
@@ -964,6 +1042,269 @@ func _schedule_shipments(day_index: int) -> void:
 			_next_shipment_sequence += 1
 			remaining -= units
 			created += 1
+
+
+func _schedule_spatial_shipments(day_index: int) -> void:
+	if _spatial_transport_world == null or not _spatial_transport_world.is_valid():
+		return
+	_spatial_transport_window_hour = _spatial_transport_world.current_hour()
+	var requests: Array[Dictionary] = []
+	for region_id: String in _region_ids:
+		var state: Dictionary = region_states[region_id] as Dictionary
+		var inventory: Dictionary = state.get("inventory", {}) as Dictionary
+		var commodity_states: Dictionary = state.get("commodities", {}) as Dictionary
+		for commodity_id: String in _commodity_ids:
+			var commodity_state: Dictionary = commodity_states[commodity_id] as Dictionary
+			var unmet: float = maxf(0.0, float(commodity_state.get("unmet_units", 0.0)))
+			var industrial_demand: float = maxf(
+				0.0, float(commodity_state.get("industrial_demand_units", 0.0))
+			)
+			var replenishment: float = 0.0
+			var target_stock: float = 0.0
+			if industrial_demand > 0.0001:
+				target_stock = float(commodity_state.get("target_stock_units", 0.0))
+				if target_stock <= 0.0:
+					target_stock = _target_stock_for(region_id, commodity_id)
+				var stock: float = maxf(0.0, float(inventory.get(commodity_id, 0.0)))
+				var in_transit: float = _in_transit_units_for(region_id, commodity_id)
+				replenishment = maxf(0.0, target_stock - stock - in_transit)
+			var requested: float = maxf(unmet, replenishment)
+			if requested <= 0.0001:
+				continue
+			var replenishment_bp: int = (
+				0 if target_stock <= 0.0 else clampi(
+					int(round(replenishment / maxf(1.0, target_stock) * BASIS_POINTS)),
+					0, BASIS_POINTS
+				)
+			)
+			requests.append({
+				"region_id": region_id,
+				"commodity_id": commodity_id,
+				"request_units": requested,
+				"shortage_bp": int(commodity_state.get("shortage_bp", 0)),
+				"industrial_replenishment_bp": replenishment_bp,
+			})
+	requests.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var a_shortage: int = int(a.get("shortage_bp", 0))
+		var b_shortage: int = int(b.get("shortage_bp", 0))
+		if a_shortage != b_shortage:
+			return a_shortage > b_shortage
+		var a_replenishment: int = int(a.get("industrial_replenishment_bp", 0))
+		var b_replenishment: int = int(b.get("industrial_replenishment_bp", 0))
+		if a_replenishment != b_replenishment:
+			return a_replenishment > b_replenishment
+		var a_key: String = str(a.get("region_id", "")) + str(a.get("commodity_id", ""))
+		var b_key: String = str(b.get("region_id", "")) + str(b.get("commodity_id", ""))
+		return a_key < b_key
+	)
+	var intents: Array[Dictionary] = []
+	var local_surplus: Dictionary = {}
+	var local_quota: Dictionary = _trade_quota_remaining.duplicate(true)
+	for request: Dictionary in requests:
+		var destination_id: String = str(request.get("region_id", ""))
+		var commodity_id: String = str(request.get("commodity_id", ""))
+		var remaining: float = float(request.get("request_units", 0.0))
+		for candidate: Dictionary in _supplier_candidates(destination_id, commodity_id):
+			if remaining <= 0.0001:
+				break
+			var origin_id: String = str(candidate.get("origin_market_id", ""))
+			var route: Dictionary = candidate.get("route", {}) as Dictionary
+			var link_ids: Array[String] = _spatial_links_for_route(route)
+			if link_ids.is_empty():
+				continue
+			var relation: Dictionary = candidate.get("relation", {}) as Dictionary
+			var relation_key: String = str(candidate.get("relation_key", ""))
+			var quota: float = INF
+			if not relation.is_empty():
+				quota = float(local_quota.get(relation_key, 0.0))
+			var surplus_key: String = origin_id + "|" + commodity_id
+			var surplus: float = float(local_surplus.get(
+				surplus_key, float(candidate.get("surplus", 0.0))
+			))
+			var units: float = minf(remaining, minf(surplus, quota))
+			if units <= 0.0001:
+				continue
+			local_surplus[surplus_key] = maxf(0.0, surplus - units)
+			if not relation.is_empty():
+				local_quota[relation_key] = maxf(0.0, quota - units)
+			var intent_index: int = intents.size()
+			var request_ids: Array[String] = []
+			for link_index: int in range(link_ids.size()):
+				request_ids.append(
+					"economy_transport:%d:%d:%d" % [day_index, intent_index, link_index]
+				)
+			intents.append({
+				"origin_market_id": origin_id,
+				"destination_market_id": destination_id,
+				"commodity_id": commodity_id,
+				"route": route,
+				"relation": relation,
+				"relation_key": relation_key,
+				"request_units": units,
+				"link_ids": link_ids,
+				"request_ids": request_ids,
+			})
+			remaining -= units
+	var submitted: Array[Dictionary] = []
+	for intent: Dictionary in intents:
+		var link_ids: Array = intent.get("link_ids", []) as Array
+		var request_ids: Array = intent.get("request_ids", []) as Array
+		for link_index: int in range(link_ids.size()):
+			var request_id: String = str(request_ids[link_index])
+			var link_id: String = str(link_ids[link_index])
+			var result: Dictionary = _spatial_transport_world.request_capacity(
+				request_id,
+				link_id,
+				_spatial_transport_window_hour,
+				float(intent.get("request_units", 0.0))
+			)
+			if not bool(result.get("accepted", false)):
+				_cancel_spatial_requests(submitted)
+				return
+			submitted.append({
+				"request_id": request_id,
+				"link_id": link_id,
+				"window_hour": _spatial_transport_window_hour,
+			})
+	var final_allocations: Array[float] = []
+	for intent: Dictionary in intents:
+		var allocation: float = INF
+		var link_ids: Array = intent.get("link_ids", []) as Array
+		var request_ids: Array = intent.get("request_ids", []) as Array
+		for link_index: int in range(link_ids.size()):
+			var result: Dictionary = _spatial_transport_world.reservation_result(
+				str(request_ids[link_index]),
+				str(link_ids[link_index]),
+				_spatial_transport_window_hour
+			)
+			if not bool(result.get("success", false)):
+				_cancel_spatial_requests(submitted)
+				return
+			allocation = minf(allocation, float(result.get("allocated_capacity", 0.0)))
+		final_allocations.append(maxf(0.0, allocation))
+	for intent_index: int in range(intents.size()):
+		var intent: Dictionary = intents[intent_index] as Dictionary
+		var allocated: float = minf(
+			final_allocations[intent_index], float(intent.get("request_units", 0.0))
+		)
+		var relation: Dictionary = intent.get("relation", {}) as Dictionary
+		var relation_key: String = str(intent.get("relation_key", ""))
+		if not relation.is_empty() and allocated > float(
+			_trade_quota_remaining.get(relation_key, 0.0)
+		) + 0.000001:
+			allocated = 0.0
+		if allocated <= 0.0001:
+			_cancel_spatial_intent_requests(intent)
+			continue
+		var origin_id: String = str(intent.get("origin_market_id", ""))
+		var destination_id: String = str(intent.get("destination_market_id", ""))
+		var commodity_id: String = str(intent.get("commodity_id", ""))
+		var origin_state: Dictionary = region_states[origin_id] as Dictionary
+		var origin_inventory: Dictionary = origin_state.get("inventory", {}) as Dictionary
+		if float(origin_inventory.get(commodity_id, 0.0)) + 0.000001 < allocated:
+			_cancel_spatial_intent_requests(intent)
+			continue
+		var origin_commodity: Dictionary = (
+			origin_state.get("commodities", {}) as Dictionary
+		).get(commodity_id, {}) as Dictionary
+		origin_inventory[commodity_id] = maxf(
+			0.0, float(origin_inventory.get(commodity_id, 0.0)) - allocated
+		)
+		origin_commodity["exports_units"] = float(
+			origin_commodity.get("exports_units", 0.0)
+		) + allocated
+		origin_state["inventory"] = origin_inventory
+		(origin_state.get("commodities", {}) as Dictionary)[commodity_id] = origin_commodity
+		region_states[origin_id] = origin_state
+		if not relation.is_empty():
+			_trade_quota_remaining[relation_key] = maxf(
+				0.0, float(_trade_quota_remaining.get(relation_key, 0.0)) - allocated
+			)
+		var route: Dictionary = intent.get("route", {}) as Dictionary
+		var unit_price: int = int(origin_commodity.get("price_centimes", 1))
+		var goods_value: int = maxi(1, int(round(float(unit_price) * allocated)))
+		var freight: int = maxi(
+			0, int(round(float(route.get("cost_centimes_per_unit", 0.0)) * allocated))
+		)
+		var tariff: int = maxi(
+			0,
+			int(round(
+				float(goods_value) * float(relation.get("tariff_bp", 0)) / BASIS_POINTS
+			))
+		)
+		var arrival_day: int = day_index + maxi(
+			1, int(ceil(float(route.get("duration_hours", HOURS_PER_DAY)) / 24.0))
+		)
+		shipments.append({
+			"shipment_id": "shipment:vnext_market:%d" % _next_shipment_sequence,
+			"origin_market_id": origin_id,
+			"destination_market_id": destination_id,
+			"commodity_id": commodity_id,
+			"units": allocated,
+			"total_units": allocated,
+			"delivered_units": 0.0,
+			"progress_units": 0.0,
+			"last_progress_day": day_index,
+			"transport_demand_units": float(intent.get("request_units", 0.0)),
+			"spatial_allocation_units": allocated,
+			"spatial_link_ids": (intent.get("link_ids", []) as Array).duplicate(),
+			"spatial_request_ids": (intent.get("request_ids", []) as Array).duplicate(),
+			"spatial_window_hour": _spatial_transport_window_hour,
+			"goods_value_centimes": goods_value,
+			"freight_cost_centimes": freight,
+			"tariff_centimes": tariff,
+			"landed_cost_centimes": goods_value + freight + tariff,
+			"dispatch_day": day_index,
+			"arrival_day": arrival_day,
+			"duration_hours": int(route.get("duration_hours", 0)),
+			"distance_days": float(route.get("distance_days", 0.0)),
+			"route_edge_ids": (route.get("edge_ids", []) as Array).duplicate(),
+			"cross_border": bool(route.get("cross_border", false)),
+			"status": "in_transit",
+		})
+		_next_shipment_sequence += 1
+
+
+func _spatial_links_for_route(route: Dictionary) -> Array[String]:
+	var links: Array[String] = []
+	for raw_edge_id: Variant in route.get("edge_ids", []) as Array:
+		var edge_id: String = str(raw_edge_id)
+		if not _spatial_route_links.has(edge_id):
+			return []
+		var raw_links: Variant = _spatial_route_links[edge_id]
+		if raw_links is String:
+			raw_links = [raw_links]
+		if not raw_links is Array:
+			return []
+		for raw_link_id: Variant in raw_links as Array:
+			var link_id: String = str(raw_link_id)
+			if link_id.is_empty() or not links.has(link_id):
+				links.append(link_id)
+	return links
+
+
+func _cancel_spatial_requests(requests: Array[Dictionary]) -> void:
+	if _spatial_transport_world == null:
+		return
+	for request: Dictionary in requests:
+		_spatial_transport_world.cancel_capacity_request(
+			str(request.get("request_id", "")),
+			str(request.get("link_id", "")),
+			int(request.get("window_hour", _spatial_transport_window_hour))
+		)
+
+
+func _cancel_spatial_intent_requests(intent: Dictionary) -> void:
+	if _spatial_transport_world == null:
+		return
+	var link_ids: Array = intent.get("link_ids", []) as Array
+	var request_ids: Array = intent.get("request_ids", []) as Array
+	for link_index: int in range(link_ids.size()):
+		_spatial_transport_world.cancel_capacity_request(
+			str(request_ids[link_index]),
+			str(link_ids[link_index]),
+			_spatial_transport_window_hour
+		)
 
 
 func _update_prices() -> void:
@@ -1062,8 +1403,14 @@ func _reachable_external_shortage_bp(origin_id: String, commodity_id: String) ->
 		var shortage_bp: int = int(destination_row.get("shortage_bp", 0))
 		if shortage_bp <= maximum_shortage_bp or shortage_bp < 500:
 			continue
-		var route: Dictionary = routes.find_route(origin_id, destination_id)
-		if route.is_empty() or routes.route_fixture_budget(route) <= 0.0001:
+		var route: Dictionary = routes.find_route(
+			origin_id, destination_id, _spatial_transport_world == null
+		)
+		if route.is_empty():
+			continue
+		if _spatial_transport_world == null and routes.route_fixture_budget(route) <= 0.0001:
+			continue
+		if _spatial_transport_world != null and _spatial_links_for_route(route).is_empty():
 			continue
 		if bool(route.get("cross_border", false)):
 			var origin_country: String = str((region_states[origin_id] as Dictionary).get("country_market_id", ""))
@@ -1208,7 +1555,9 @@ func _supplier_candidates(destination_id: String, commodity_id: String) -> Array
 	for origin_id: String in _region_ids:
 		if origin_id == destination_id:
 			continue
-		var route: Dictionary = routes.find_route(origin_id, destination_id)
+		var route: Dictionary = routes.find_route(
+			origin_id, destination_id, _spatial_transport_world == null
+		)
 		if route.is_empty():
 			continue
 		var relation: Dictionary = {}
@@ -1801,6 +2150,7 @@ func _validate_candidate_shipments(candidate: Array[Dictionary]) -> bool:
 		if (
 			shipment_id.is_empty()
 			or float(shipment.get("units", 0.0)) <= 0.0
+			or not _shipment_progress_is_conserved(shipment)
 			or int(shipment.get("arrival_day", -1)) <= int(shipment.get("dispatch_day", -1))
 			or not region_states.has(str(shipment.get("origin_market_id", "")))
 			or not region_states.has(str(shipment.get("destination_market_id", "")))
@@ -1808,6 +2158,150 @@ func _validate_candidate_shipments(candidate: Array[Dictionary]) -> bool:
 		):
 			return false
 	return true
+
+
+func _normalize_candidate_shipments(candidate: Array[Dictionary]) -> void:
+	for shipment: Dictionary in candidate:
+		var outstanding: float = maxf(0.0, float(shipment.get("units", 0.0)))
+		var delivered: float = maxf(0.0, float(shipment.get("delivered_units", 0.0)))
+		var total: float = float(shipment.get("total_units", outstanding + delivered))
+		if not shipment.has("total_units"):
+			shipment["total_units"] = total
+		if not shipment.has("delivered_units"):
+			shipment["delivered_units"] = delivered
+		if not shipment.has("progress_units"):
+			shipment["progress_units"] = delivered
+		if not shipment.has("last_progress_day"):
+			shipment["last_progress_day"] = int(shipment.get("dispatch_day", -1))
+		if not shipment.has("transport_demand_units"):
+			shipment["transport_demand_units"] = total
+		if not shipment.has("status"):
+			shipment["status"] = "in_transit"
+func _canonicalize_snapshot_value(value: Variant) -> Variant:
+	if value is Dictionary:
+		var dictionary: Dictionary = value as Dictionary
+		for key: Variant in dictionary:
+			dictionary[key] = _canonicalize_snapshot_value(dictionary[key])
+		return dictionary
+	if value is Array:
+		var array: Array = value as Array
+		for index: int in range(array.size()):
+			array[index] = _canonicalize_snapshot_value(array[index])
+		return array
+	if typeof(value) == TYPE_FLOAT:
+		var numeric_value: float = float(value)
+		if is_nan(numeric_value) or is_inf(numeric_value):
+			return numeric_value
+		return snappedf(numeric_value, SNAPSHOT_FLOAT_QUANTUM)
+	return value
+
+
+func _normalize_candidate_numeric_types(
+	candidate_regions: Dictionary,
+	candidate_sites: Dictionary,
+	candidate_shipments: Array[Dictionary],
+	candidate_shipment_history: Array[Dictionary],
+	candidate_history: Array[Dictionary]
+) -> void:
+	for region_id: String in candidate_regions:
+		var state: Dictionary = candidate_regions[region_id] as Dictionary
+		state["population"] = int(state.get("population", 0))
+		state["labor_force_bp"] = int(state.get("labor_force_bp", 0))
+		state["nonmodeled_employment_bp"] = int(state.get("nonmodeled_employment_bp", 0))
+		var employment: Dictionary = state.get("employment", {}) as Dictionary
+		for key: String in ["labor_force", "employed", "unemployed", "unemployment_bp", "modeled_industry_workers", "modeled_industry_capacity", "vacancies", "production_pressure_bp"]:
+			if employment.has(key):
+				employment[key] = int(employment[key])
+		state["employment"] = employment
+		var demand_modifiers: Dictionary = state.get("demand_modifiers_bp", {}) as Dictionary
+		for commodity_id: String in demand_modifiers:
+			demand_modifiers[commodity_id] = int(demand_modifiers[commodity_id])
+		state["demand_modifiers_bp"] = demand_modifiers
+		var commodities: Dictionary = state.get("commodities", {}) as Dictionary
+		for commodity_id: String in commodities:
+			var commodity: Dictionary = commodities[commodity_id] as Dictionary
+			for key: String in ["price_centimes", "target_price_centimes", "inventory_coverage_bp", "shortage_bp"]:
+				if commodity.has(key):
+					commodity[key] = int(commodity[key])
+			commodities[commodity_id] = commodity
+		state["commodities"] = commodities
+		candidate_regions[region_id] = state
+	for site_id: String in candidate_sites:
+		var site: Dictionary = candidate_sites[site_id] as Dictionary
+		for key: String in ["last_operating_bp", "last_input_shortage_bp"]:
+			if site.has(key):
+				site[key] = int(site[key])
+		candidate_sites[site_id] = site
+	_normalize_shipment_numeric_types(candidate_shipments, false)
+	_normalize_shipment_numeric_types(candidate_shipment_history, true)
+	for entry: Dictionary in candidate_history:
+		entry["day_index"] = int(entry.get("day_index", -1))
+		var markets: Dictionary = entry.get("markets", {}) as Dictionary
+		for market_id: String in markets:
+			var market: Dictionary = markets[market_id] as Dictionary
+			for commodity_id: String in market:
+				var commodity: Dictionary = market[commodity_id] as Dictionary
+				for key: String in ["price_centimes", "inventory_coverage_bp", "shortage_bp"]:
+					if commodity.has(key):
+						commodity[key] = int(commodity[key])
+				for key: String in [
+					"demand_units", "inventory_units", "supply_units", "production_units",
+					"imports_units", "exports_units", "unmet_units", "in_transit_import_units"
+				]:
+					if commodity.has(key):
+						commodity[key] = float(commodity[key])
+				market[commodity_id] = commodity
+			markets[market_id] = market
+		entry["markets"] = markets
+
+
+func _normalize_candidate_flow_totals(candidate: Dictionary) -> void:
+	for flow_name: String in [
+		"initial_inventory", "production", "industrial_inputs",
+		"household_consumption", "spoilage", "warehouse_overflow"
+	]:
+		var values: Dictionary = candidate.get(flow_name, {}) as Dictionary
+		for commodity_id: String in values:
+			values[commodity_id] = float(values[commodity_id])
+		candidate[flow_name] = values
+
+
+func _normalize_candidate_quota_types(candidate: Dictionary) -> void:
+	for relation_key: String in candidate:
+		candidate[relation_key] = float(candidate[relation_key])
+
+
+func _normalize_shipment_numeric_types(
+	collection: Array[Dictionary], include_delivered_day: bool
+) -> void:
+	for shipment: Dictionary in collection:
+		for key: String in ["dispatch_day", "arrival_day", "duration_hours", "last_progress_day", "spatial_window_hour"]:
+			if shipment.has(key):
+				shipment[key] = int(shipment[key])
+		if include_delivered_day and shipment.has("delivered_day"):
+			shipment["delivered_day"] = int(shipment["delivered_day"])
+		for key: String in ["goods_value_centimes", "freight_cost_centimes", "tariff_centimes", "landed_cost_centimes"]:
+			if shipment.has(key):
+				shipment[key] = int(shipment[key])
+
+
+func _shipment_progress_is_conserved(shipment: Dictionary) -> bool:
+	var outstanding: float = float(shipment.get("units", 0.0))
+	var total: float = float(shipment.get("total_units", -1.0))
+	var delivered: float = float(shipment.get("delivered_units", -1.0))
+	var progress: float = float(shipment.get("progress_units", -1.0))
+	if (
+		is_nan(outstanding) or is_inf(outstanding) or outstanding < -0.000001
+		or is_nan(total) or is_inf(total) or total <= 0.0
+		or is_nan(delivered) or is_inf(delivered) or delivered < -0.000001
+		or is_nan(progress) or is_inf(progress) or progress < -0.000001
+	):
+		return false
+	return (
+		is_equal_approx(delivered, progress)
+		and absf(total - outstanding - delivered) <= 0.000001
+		and delivered <= total + 0.000001
+	)
 
 
 func _validate_candidate_flow_totals(candidate: Dictionary) -> bool:
@@ -1906,6 +2400,8 @@ func _dictionary_array(value: Variant) -> Array[Dictionary]:
 	return result
 
 
+
+
 func _ok(data: Dictionary = {}) -> Dictionary:
 	return {"success": true, "code": "ok", "message": "", "data": data}
 
@@ -1917,3 +2413,39 @@ func _fail_result(code: String, message: String) -> Dictionary:
 func _fail(message: String) -> bool:
 	initialization_error = message
 	return false
+
+
+func _apply_shipment_delivery(index: int, delivered_units: float, day_index: int) -> void:
+	if index < 0 or index >= shipments.size() or delivered_units <= 0.000001:
+		return
+	var shipment: Dictionary = shipments[index] as Dictionary
+	var destination_id: String = str(shipment.get("destination_market_id", ""))
+	var commodity_id: String = str(shipment.get("commodity_id", ""))
+	var units: float = minf(
+		delivered_units, maxf(0.0, float(shipment.get("units", 0.0)))
+	)
+	if region_states.has(destination_id) and units > 0.0:
+		var state: Dictionary = region_states[destination_id] as Dictionary
+		var inventory: Dictionary = state.get("inventory", {}) as Dictionary
+		inventory[commodity_id] = float(inventory.get(commodity_id, 0.0)) + units
+		var commodity_state: Dictionary = (
+			state.get("commodities", {}) as Dictionary
+		).get(commodity_id, {}) as Dictionary
+		commodity_state["imports_units"] = float(commodity_state.get("imports_units", 0.0)) + units
+		commodity_state["supply_units"] = float(commodity_state.get("supply_units", 0.0)) + units
+		(state.get("commodities", {}) as Dictionary)[commodity_id] = commodity_state
+		state["inventory"] = inventory
+		region_states[destination_id] = state
+	shipment["units"] = maxf(0.0, float(shipment.get("units", 0.0)) - units)
+	shipment["delivered_units"] = float(shipment.get("delivered_units", 0.0)) + units
+	shipment["progress_units"] = float(shipment.get("progress_units", 0.0)) + units
+	shipment["last_progress_day"] = day_index
+	if float(shipment.get("units", 0.0)) <= 0.000001:
+		shipment["units"] = 0.0
+		shipment["status"] = "delivered"
+		shipment["delivered_day"] = day_index
+		shipment_history.append(shipment.duplicate(true))
+		shipments.remove_at(index)
+	else:
+		shipment["status"] = "in_transit"
+		shipments[index] = shipment

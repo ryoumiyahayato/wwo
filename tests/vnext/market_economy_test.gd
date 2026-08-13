@@ -10,6 +10,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	_test_catalog_and_public_queries()
+	_test_partial_in_transit_progress()
 	_test_production_chain()
 	_test_trade_capacity_and_isolation()
 	_test_in_transit_observability()
@@ -159,6 +160,7 @@ func _test_in_transit_observability() -> void:
 	var fast_origin: String = _region(economy, "region_loran_dawnbay")
 	var slow_origin: String = _region(economy, "region_loran_southridge")
 	var destination: String = _region(economy, "region_loran_riverback")
+	var commodity_id: String = "coal"
 	var fast_edge: String = "route:loran_dawnbay_riverback"
 	var slow_edge: String = "route:loran_riverback_southridge"
 	for edge: Dictionary in economy.catalog.transport_edges:
@@ -168,16 +170,16 @@ func _test_in_transit_observability() -> void:
 		)
 	_check(economy.set_fixture_route_budget(fast_edge, 1.0), "18-hour fixture route is enabled")
 	_check(economy.set_fixture_route_budget(slow_edge, 1.0), "32-hour fixture route is enabled")
-	_check(economy.set_region_inventory(fast_origin, "clothing", 200000.0), "fast source stock prepared")
-	_check(economy.set_region_inventory(slow_origin, "clothing", 200000.0), "slow source stock prepared")
-	_check(economy.set_region_inventory(destination, "clothing", 0.0), "inbound destination depleted")
+	_check(economy.set_region_inventory(fast_origin, commodity_id, 200000.0), "fast source stock prepared")
+	_check(economy.set_region_inventory(slow_origin, commodity_id, 200000.0), "slow source stock prepared")
+	_check(economy.set_region_inventory(destination, commodity_id, 0.0), "inbound destination depleted")
 	_check(bool(economy.settle_day(0).get("success", false)), "multi-route dispatch day settles")
 	var day0_snapshot: Dictionary = economy.snapshot()
-	var day0_outstanding: float = _outstanding_units(day0_snapshot, destination, "clothing")
+	var day0_outstanding: float = _outstanding_units(day0_snapshot, destination, commodity_id)
 	var day0_observed: float = float(
-		economy.commodity_snapshot(destination, "clothing").get("in_transit_import_units", 0.0)
+		economy.commodity_snapshot(destination, commodity_id).get("in_transit_import_units", 0.0)
 	)
-	_check(_active_inbound_count(day0_snapshot, destination, "clothing") >= 2, "multiple simultaneous inbound shipments exist")
+	_check(_active_inbound_count(day0_snapshot, destination, commodity_id) >= 2, "multiple simultaneous inbound shipments exist")
 	_check(day0_outstanding > 1.5, "multiple shipments contribute to outstanding pipeline quantity")
 	_check(is_equal_approx(day0_observed, day0_outstanding), "day-0 observation equals authoritative active cargo")
 
@@ -185,9 +187,9 @@ func _test_in_transit_observability() -> void:
 	_check(economy.set_fixture_route_budget(slow_edge, 0.0), "slow route fixture budget closes after dispatch")
 	_check(bool(economy.settle_day(1).get("success", false)), "intermediate shipment day settles")
 	var day1_snapshot: Dictionary = economy.snapshot()
-	var day1_outstanding: float = _outstanding_units(day1_snapshot, destination, "clothing")
+	var day1_outstanding: float = _outstanding_units(day1_snapshot, destination, commodity_id)
 	var day1_observed: float = float(
-		economy.commodity_snapshot(destination, "clothing").get("in_transit_import_units", 0.0)
+		economy.commodity_snapshot(destination, commodity_id).get("in_transit_import_units", 0.0)
 	)
 	_check(day1_outstanding > 0.0, "32-hour cargo remains active on intermediate day")
 	_check(day1_outstanding < day0_outstanding, "18-hour arrival partially clears simultaneous pipeline")
@@ -196,31 +198,91 @@ func _test_in_transit_observability() -> void:
 	var encoded: String = JSON.stringify(day1_snapshot)
 	var parsed: Variant = JSON.parse_string(encoded)
 	var restored: VNextMarketEconomy = _new_economy("in-transit resume")
+	_check(parsed is Dictionary and economy.restore(parsed as Dictionary), "baseline restores from the same in-transit snapshot")
 	_check(parsed is Dictionary and restored.restore(parsed as Dictionary), "in-transit snapshot resumes after JSON round trip")
 	var restored_observed: float = float(
-		restored.commodity_snapshot(destination, "clothing").get("in_transit_import_units", 0.0)
+		restored.commodity_snapshot(destination, commodity_id).get("in_transit_import_units", 0.0)
 	)
 	_check(is_equal_approx(restored_observed, day1_outstanding), "restored observation is rebuilt from active shipment queue")
 	var persisted_regions: Dictionary = restored.snapshot().get("region_states", {}) as Dictionary
 	var persisted_destination: Dictionary = persisted_regions.get(destination, {}) as Dictionary
 	var persisted_commodities: Dictionary = persisted_destination.get("commodities", {}) as Dictionary
 	_check(
-		not (persisted_commodities.get("clothing", {}) as Dictionary).has("in_transit_import_units"),
+		not (persisted_commodities.get(commodity_id, {}) as Dictionary).has("in_transit_import_units"),
 		"derived in-transit observation is not duplicated in persisted market state"
+	)
+	var replayed: VNextMarketEconomy = _new_economy("in-transit deterministic replay")
+	_check(parsed is Dictionary and replayed.restore(parsed as Dictionary), "same persisted snapshot restores into a second replay")
+	_equal(
+		JSON.stringify(restored.snapshot()),
+		JSON.stringify(replayed.snapshot()),
+		"restored snapshots are identical before continuation"
 	)
 
 	_check(bool(economy.settle_day(2).get("success", false)), "final arrival day settles")
 	_check(bool(restored.settle_day(2).get("success", false)), "restored final arrival day settles")
+	_check(bool(replayed.settle_day(2).get("success", false)), "replayed final arrival day settles")
 	_check(
-		is_zero_approx(float(economy.commodity_snapshot(destination, "clothing").get("in_transit_import_units", -1.0))),
+		is_zero_approx(float(economy.commodity_snapshot(destination, commodity_id).get("in_transit_import_units", -1.0))),
 		"arrival clears current in-transit observation"
 	)
 	_check(
-		is_zero_approx(float(restored.commodity_snapshot(destination, "clothing").get("in_transit_import_units", -1.0))),
+		is_zero_approx(float(restored.commodity_snapshot(destination, commodity_id).get("in_transit_import_units", -1.0))),
 		"arrival clears restored in-transit observation"
 	)
 	_check(economy.validate_integrity(), "multi-day observation repair preserves physical conservation")
 	_equal(JSON.stringify(restored.snapshot()), JSON.stringify(economy.snapshot()), "snapshot/resume replay remains deterministic through arrival")
+	_equal(JSON.stringify(restored.snapshot()), JSON.stringify(replayed.snapshot()), "snapshot/resume continuation is deterministic")
+
+func _test_partial_in_transit_progress() -> void:
+	var economy: VNextMarketEconomy = _new_economy("partial in-transit progress")
+	var origin: String = _region(economy, "region_loran_southridge")
+	var destination: String = _region(economy, "region_loran_riverback")
+	var commodity_id: String = "coal"
+	var slow_edge: String = "route:loran_riverback_southridge"
+	for edge: Dictionary in economy.catalog.transport_edges:
+		_check(economy.set_fixture_route_budget(str(edge.get("edge_id", "")), 0.0), "partial-progress fixture closes unrelated route budget")
+	_check(economy.set_fixture_route_budget(slow_edge, 10.0), "partial-progress slow route is enabled")
+	_check(economy.set_region_inventory(origin, commodity_id, 200000.0), "partial-progress source stock prepared")
+	_check(economy.set_region_inventory(destination, commodity_id, 0.0), "partial-progress destination depleted")
+	_check(bool(economy.settle_day(0).get("success", false)), "partial-progress dispatch day settles")
+	var dispatched: Dictionary = _find_shipment(economy.snapshot(), origin, destination, commodity_id)
+	_check(not dispatched.is_empty(), "partial-progress creates a shipment")
+	var shipment_id: String = str(dispatched.get("shipment_id", ""))
+	var total_units: float = float(dispatched.get("total_units", 0.0))
+	var partial_units: float = total_units * 0.5
+	var inventory_before: float = economy.inventory_units(destination, commodity_id)
+	var progress: Dictionary = economy.apply_shipment_progress(shipment_id, partial_units, 0)
+	_check(bool(progress.get("success", false)), "partial progress is accepted before arrival")
+	var after_progress: Dictionary = economy.snapshot()
+	var active: Dictionary = _find_shipment(after_progress, origin, destination, commodity_id)
+	_check(not active.is_empty(), "partially progressed shipment remains active")
+	_check(is_equal_approx(float(active.get("units", 0.0)), total_units - partial_units), "outstanding units exclude delivered partial cargo")
+	_check(is_equal_approx(float(active.get("delivered_units", 0.0)), partial_units), "shipment records delivered partial cargo")
+	_check(is_equal_approx(float(active.get("progress_units", 0.0)), partial_units), "shipment records cumulative progress")
+	_check(is_equal_approx(economy.inventory_units(destination, commodity_id) - inventory_before, partial_units), "partial delivery enters destination inventory")
+	_check(is_equal_approx(_outstanding_units(after_progress, destination, commodity_id), total_units - partial_units), "in-transit metric remains outstanding cargo")
+	_check(_active_inbound_count(after_progress, destination, commodity_id) == 1, "partial progress does not remove active shipment")
+	_check(economy.validate_integrity(), "partial progress preserves physical conservation")
+	_check(economy.set_fixture_route_budget(slow_edge, 0.0), "partial-progress route closes after dispatch")
+	var saved: Dictionary = economy.snapshot()
+	var parsed: Variant = JSON.parse_string(JSON.stringify(saved))
+	var restored: VNextMarketEconomy = _new_economy("partial in-transit restore")
+	_check(parsed is Dictionary and restored.restore(parsed as Dictionary), "partial shipment restores from JSON mid-transit")
+	_check(parsed is Dictionary and economy.restore(parsed as Dictionary), "partial baseline restores from the same JSON snapshot")
+	_equal(JSON.stringify(restored.snapshot()), JSON.stringify(economy.snapshot()), "partial mid-transit restore is exact before continuation")
+	var history_before: int = (saved.get("shipment_history", []) as Array).size()
+	_check(bool(economy.settle_day(1).get("success", false)), "partial shipment intermediate day settles")
+	_check(bool(restored.settle_day(1).get("success", false)), "restored partial shipment intermediate day settles")
+	_check(bool(economy.settle_day(2).get("success", false)), "partial shipment delivery day settles")
+	_check(bool(restored.settle_day(2).get("success", false)), "restored partial shipment delivery day settles")
+	var delivered_snapshot: Dictionary = economy.snapshot()
+	var restored_delivered_snapshot: Dictionary = restored.snapshot()
+	_check(_active_inbound_count(delivered_snapshot, destination, commodity_id) == 0, "delivery removes the completed shipment")
+	_check(is_zero_approx(_outstanding_units(delivered_snapshot, destination, commodity_id)), "delivery removes outstanding in-transit units")
+	_check((delivered_snapshot.get("shipment_history", []) as Array).size() > history_before, "delivery records shipment history")
+	_check(economy.validate_integrity() and restored.validate_integrity(), "partial restore continuation preserves conservation")
+	_equal(JSON.stringify(restored_delivered_snapshot), JSON.stringify(delivered_snapshot), "partial restore continuation is deterministic")
 
 
 func _test_supply_demand_feedback() -> void:
