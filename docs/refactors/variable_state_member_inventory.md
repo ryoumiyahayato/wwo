@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1895|1399|15|0|523|7|32|16|70|1020|453|214|
+|1901|1401|15|0|523|7|32|16|70|1022|453|214|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,895个生产成员字段逐项表
+## 1,901个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -737,10 +737,14 @@
 8 K entries
 @ scripts/formal/formal_world_application.gd | FormalWorldApplication
 7 C LAUNCH_MODE_META
-9 A formal_simulation
-10 G economy_panel_open
-11 K _formal_status
-12 E _last_summary
+8 C PACKAGED_PROBE_ARGUMENT
+9 C PACKAGED_PROBE_ENTITY_ID
+10 C PACKAGED_PROBE_FLAG_ID
+12 A formal_simulation
+13 G economy_panel_open
+14 K _formal_status
+15 E _last_summary
+16 K _packaged_probe_failures
 @ scripts/formal/formal_world_economy_service.gd | FormalWorldEconomyService
 8 C HOURS_PER_DAY
 9 C BASIS_POINTS
@@ -771,12 +775,13 @@
 @ scripts/formal/formal_world_menu.gd | FormalWorldMenu
 6 C WORLD_SCENE
 7 C LAUNCH_MODE_META
-8 C DISPLAY_VERSION
-10 D title_label
-11 D version_label
-12 D prompt_label
-13 D status_label
-15 K _entering
+8 C PACKAGED_PROBE_ARGUMENT
+9 C DISPLAY_VERSION
+11 D title_label
+12 D version_label
+13 D prompt_label
+14 D status_label
+16 K _entering
 @ scripts/formal/formal_world_simulation.gd | FormalWorldSimulation
 8 C SAVE_PATH
 9 C SCHEMA_ID
@@ -1051,6 +1056,7 @@
 51 K _historical_flag_records
 52 K _geometry_feature_by_id
 53 K _missing_flag_record_ids
+54 K _historical_imported_flag_texture_by_id
 @ scripts/ui_spikes/holographic_workspace/holographic_workspace_history.gd | holographic_workspace_history
 3 C WORLD_HISTORICAL_ENTITY_FOCUS
 4 C HISTORY_ZOOM_MIN

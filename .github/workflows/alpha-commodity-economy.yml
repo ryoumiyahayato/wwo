@@ -81,7 +81,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          "${GODOT_BIN}" --headless --audio-driver Dummy --path . --editor --quit-after 4 --log-file formal-economy-import.log
+          "${GODOT_BIN}" --headless --audio-driver Dummy --path . --editor --quit --log-file formal-economy-import.log
           if grep -Eq "SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|^ERROR:" formal-economy-import.log; then
             cat formal-economy-import.log
             exit 1

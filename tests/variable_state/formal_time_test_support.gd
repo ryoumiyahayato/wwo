@@ -1,30 +1,42 @@
 extends RefCounted
 ## Stateless helpers for formal-time behavior tests only.
 
+const FORMAL_SAVE_ARTIFACT_SUFFIXES: Array[String] = ["", ".bak", ".tmp"]
+
 
 static func backup_formal_save() -> Dictionary:
 	var result := {
 		"exists": false,
 		"read_error": false,
 		"bytes": PackedByteArray(),
+		"artifacts": {},
 	}
-	var path: String = FormalWorldSimulation.SAVE_PATH
-	if not FileAccess.file_exists(path):
-		return result
-	var file := FileAccess.open(path, FileAccess.READ)
-	if file == null:
-		result["exists"] = true
-		result["read_error"] = true
-		return result
-	result["exists"] = true
-	result["bytes"] = file.get_buffer(file.get_length())
-	file.close()
+	var artifacts: Dictionary = result["artifacts"] as Dictionary
+	for suffix: String in FORMAL_SAVE_ARTIFACT_SUFFIXES:
+		var path: String = FormalWorldSimulation.SAVE_PATH + suffix
+		var artifact := {
+			"exists": FileAccess.file_exists(path),
+			"read_error": false,
+			"bytes": PackedByteArray(),
+		}
+		if bool(artifact["exists"]):
+			var file := FileAccess.open(path, FileAccess.READ)
+			if file == null:
+				artifact["read_error"] = true
+				result["read_error"] = true
+			else:
+				artifact["bytes"] = file.get_buffer(file.get_length())
+				file.close()
+		artifacts[suffix] = artifact
+		if suffix.is_empty():
+			result["exists"] = bool(artifact["exists"])
+			result["bytes"] = artifact["bytes"]
 	return result
 
 
 static func cleanup_formal_save() -> bool:
 	var success := true
-	for suffix: String in ["", ".bak", ".tmp"]:
+	for suffix: String in FORMAL_SAVE_ARTIFACT_SUFFIXES:
 		var path: String = FormalWorldSimulation.SAVE_PATH + suffix
 		if not FileAccess.file_exists(path):
 			continue
@@ -35,16 +47,43 @@ static func cleanup_formal_save() -> bool:
 
 
 static func restore_formal_save(backup: Dictionary) -> bool:
-	if not cleanup_formal_save():
+	if not backup.has("exists") and not backup.has("artifacts"):
 		return false
-	if not bool(backup.get("exists", false)):
-		return true
 	if bool(backup.get("read_error", false)):
 		return false
-	var file := FileAccess.open(FormalWorldSimulation.SAVE_PATH, FileAccess.WRITE)
+	if not cleanup_formal_save():
+		return false
+	var artifacts := backup.get("artifacts", {}) as Dictionary
+	if artifacts.is_empty():
+		return _restore_formal_save_artifact(
+			"",
+			bool(backup.get("exists", false)),
+			backup.get("bytes", PackedByteArray()) as PackedByteArray
+		)
+	for suffix: String in FORMAL_SAVE_ARTIFACT_SUFFIXES:
+		var artifact := artifacts.get(suffix, {}) as Dictionary
+		if bool(artifact.get("read_error", false)):
+			return false
+		if not bool(artifact.get("exists", false)):
+			continue
+		if not _restore_formal_save_artifact(
+			suffix,
+			true,
+			artifact.get("bytes", PackedByteArray()) as PackedByteArray
+		):
+			return false
+	return true
+
+
+static func _restore_formal_save_artifact(
+	suffix: String, exists: bool, bytes: PackedByteArray
+) -> bool:
+	if not exists:
+		return true
+	var file := FileAccess.open(FormalWorldSimulation.SAVE_PATH + suffix, FileAccess.WRITE)
 	if file == null:
 		return false
-	file.store_buffer(backup.get("bytes", PackedByteArray()) as PackedByteArray)
+	file.store_buffer(bytes)
 	file.flush()
 	file.close()
 	return true

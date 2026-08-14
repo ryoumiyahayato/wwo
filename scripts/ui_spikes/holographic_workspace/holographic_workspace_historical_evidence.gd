@@ -51,6 +51,7 @@ var _historical_flag_document: Dictionary = {}
 var _historical_flag_records: Dictionary = {}
 var _geometry_feature_by_id: Dictionary = {}
 var _missing_flag_record_ids: Array[String] = []
+var _historical_imported_flag_texture_by_id: Dictionary = {}
 
 
 func _ready() -> void:
@@ -84,6 +85,7 @@ func _rebuild_historical_political_world() -> void:
 	_history_entity_by_id.clear()
 	_history_territories_by_entity.clear()
 	_flag_texture_by_entity.clear()
+	_historical_imported_flag_texture_by_id.clear()
 
 	for unit_value: Variant in (_dated_units_document.get("units", []) as Array):
 		if unit_value is Dictionary:
@@ -218,7 +220,9 @@ func _flag_texture_for_entity(entity_id: String, _palette: Dictionary) -> ImageT
 	var flag_record := _historical_flag_records.get(flag_id, {}) as Dictionary
 	var image: Image
 	if str(flag_record.get("render_mode", "")) == "source_asset":
-		image = Image.load_from_file(str(flag_record.get("asset_path", "")))
+		image = _load_imported_flag_image(
+			str(flag_record.get("asset_path", "")), flag_id
+		)
 	else:
 		image = _neutral_documented_absence_image()
 	if image == null or image.is_empty():
@@ -229,6 +233,37 @@ func _flag_texture_for_entity(entity_id: String, _palette: Dictionary) -> ImageT
 	var texture := ImageTexture.create_from_image(image)
 	_flag_texture_by_entity[entity_id] = texture
 	return texture
+
+
+func _load_imported_flag_image(asset_path: String, flag_id: String) -> Image:
+	if (
+		asset_path.is_empty()
+		or not asset_path.begins_with("res://")
+		or not ResourceLoader.exists(asset_path, "Texture2D")
+	):
+		push_error(
+			"Historical evidence: flag '%s' has no importable Texture2D at %s"
+			% [flag_id, asset_path]
+		)
+		return Image.new()
+	var resource := ResourceLoader.load(
+		asset_path, "Texture2D", ResourceLoader.CACHE_MODE_REUSE
+	)
+	if not resource is Texture2D:
+		push_error(
+			"Historical evidence: flag '%s' did not load as Texture2D at %s"
+			% [flag_id, asset_path]
+		)
+		return Image.new()
+	var imported_image := (resource as Texture2D).get_image()
+	if imported_image == null or imported_image.is_empty():
+		push_error(
+			"Historical evidence: flag '%s' produced an empty imported image at %s"
+			% [flag_id, asset_path]
+		)
+		return Image.new()
+	_historical_imported_flag_texture_by_id[flag_id] = resource
+	return imported_image.duplicate()
 
 
 func _neutral_documented_absence_image() -> Image:

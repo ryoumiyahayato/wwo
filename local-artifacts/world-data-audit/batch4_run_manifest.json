@@ -1,10 +1,10 @@
 {
-  "artifact_digest": "1756acf8bf497c9ff6c0be523fd1196552349fe81b0fda704b35ff6fae8ac25e",
+  "artifact_digest": "c590da279aca2385af47eae7f534a416d3b422af7e93a0ef2b13b715b6535df8",
   "artifacts": [
     {
-      "bytes": 40656,
+      "bytes": 40715,
       "path": "batch2_asset_manifest.json",
-      "sha256": "90b04ec06c713eac89b42c27cf14f6fae6aa6e8e8321ce5a0b757ed5cbabf9b0"
+      "sha256": "4b3518c65d1792a0ba5a3f0e443da778a841d2ccb1a13b099b5936282965a69a"
     },
     {
       "bytes": 18606,
@@ -32,14 +32,14 @@
       "sha256": "d8c3a3d1a5cf706de3b4be94670936d925282b762bf39000e87f11ee41cd0994"
     },
     {
-      "bytes": 48546,
+      "bytes": 48570,
       "path": "batch3_historical_flag_coverage.json",
-      "sha256": "1ae42a88c871812bcb9af77875656134f04bddadfa8e821f161c28ed1ad0435d"
+      "sha256": "f570caa664c0f2710db1a85e066e9b9deabaa60faec8a341a2953b2ce3882c54"
     },
     {
       "bytes": 15708,
       "path": "batch3_loader_contract.json",
-      "sha256": "a8fb631c85cc9378c348df33002f85dea641cdec2a6418954129dabe00f51aa3"
+      "sha256": "e86e11fb048f3969a44a16f7c7a13ba089094aba90dbdd6c8c9957c0316c4df8"
     },
     {
       "bytes": 55602,
@@ -112,7 +112,7 @@
       "verified_or_documented_flag_units": 151
     },
     "batch4": {
-      "artifact_digest_before_manifest": "1756acf8bf497c9ff6c0be523fd1196552349fe81b0fda704b35ff6fae8ac25e",
+      "artifact_digest_before_manifest": "c590da279aca2385af47eae7f534a416d3b422af7e93a0ef2b13b715b6535df8",
       "artifact_file_count_before_manifest": 15,
       "concurrency": "1 process; no process pool or thread pool",
       "large_temporary_artifacts": [],

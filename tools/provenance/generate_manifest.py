@@ -18,6 +18,21 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any, Iterable
 
+try:
+    from tools.world_data.historical_flag_catalog import (
+        FLAG_REGISTRY_RELATIVE,
+        resource_path_for_record,
+        source_asset_records,
+        validate_historical_flag_catalog,
+    )
+except ModuleNotFoundError:
+    from historical_flag_catalog import (  # type: ignore[no-redef]
+        FLAG_REGISTRY_RELATIVE,
+        resource_path_for_record,
+        source_asset_records,
+        validate_historical_flag_catalog,
+    )
+
 
 SCHEMA_VERSION = 1
 MANIFEST_RELATIVE = "docs/data_sources/provenance_manifest.json"
@@ -594,11 +609,8 @@ def apply_historical_provenance(
         )
         return True
     if relative == FLAG_REGISTRY and isinstance(document, dict):
-        records = document.get("records", {})
-        source_records = [
-            record for record in records.values()
-            if isinstance(record, dict) and record.get("render_mode") == "source_asset"
-        ]
+        _records, catalog_errors = validate_historical_flag_catalog(document)
+        source_records = list(source_asset_records(_records).values()) if not catalog_errors else []
         refs: list[str] = ["data/world_map/historical/political_units_1900.json"]
         names: list[str] = []
         locators: list[str] = []
@@ -629,10 +641,9 @@ def apply_historical_provenance(
         flag_document = load_json(root / FLAG_REGISTRY)
         source_records = []
         if isinstance(flag_document, dict):
-            source_records = [
-                record for record in flag_document.get("records", {}).values()
-                if isinstance(record, dict) and record.get("render_mode") == "source_asset"
-            ]
+            records, catalog_errors = validate_historical_flag_catalog(flag_document)
+            if not catalog_errors:
+                source_records = list(source_asset_records(records).values())
         refs = [FLAG_REGISTRY]
         licenses = [str(record.get("source_license") or LICENSE_UNKNOWN) for record in source_records]
         locators = [str(record.get("source_page") or "") for record in source_records]
@@ -886,10 +897,11 @@ def build_manifest(root: Path, base_revision: str = "UNSPECIFIED") -> dict[str, 
     flag_document = load_json(root / FLAG_REGISTRY)
     flag_records: dict[str, dict[str, Any]] = {}
     if isinstance(flag_document, dict):
-        for record in flag_document.get("records", {}).values():
-            if isinstance(record, dict) and record.get("asset_path"):
-                asset_path = strip_resource_prefix(str(record["asset_path"]))
-                flag_records[asset_path] = record
+        records, catalog_errors = validate_historical_flag_catalog(flag_document)
+        if not catalog_errors:
+            for record in source_asset_records(records).values():
+                asset_path = strip_resource_prefix(resource_path_for_record(record))
+                flag_records[asset_path] = dict(record)
 
     entries: list[dict[str, Any]] = []
     for relative in tracked_files(root):

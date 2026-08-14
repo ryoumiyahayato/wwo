@@ -14,6 +14,21 @@ import struct
 from pathlib import Path
 from typing import Any, Mapping
 
+try:
+    from tools.world_data.historical_flag_catalog import (
+        FLAG_REGISTRY_RELATIVE,
+        load_historical_flag_catalog,
+        resource_path_for_record,
+        source_asset_records,
+    )
+except ModuleNotFoundError:
+    from historical_flag_catalog import (  # type: ignore[no-redef]
+        FLAG_REGISTRY_RELATIVE,
+        load_historical_flag_catalog,
+        resource_path_for_record,
+        source_asset_records,
+    )
+
 
 SCHEMA_VERSION = "wwo_world_data_batch2_artifacts_v1"
 
@@ -114,9 +129,7 @@ def resource_to_local_path(repository_root: Path, resource: Any) -> Path | None:
 
 
 def build_asset_manifest(repository_root: Path) -> dict[str, Any]:
-    flag_path = repository_root / "data" / "world_map" / "historical" / "flags_1900.json"
-    flag_document = read_json(flag_path)
-    records = flag_document.get("records", {}) if isinstance(flag_document, dict) else {}
+    flag_document, records, catalog_errors = load_historical_flag_catalog(repository_root)
     asset_root = repository_root / "assets" / "historical_flags" / "1900"
     asset_files = sorted(asset_root.glob("*.png"))
     references: list[dict[str, Any]] = []
@@ -125,7 +138,7 @@ def build_asset_manifest(repository_root: Path) -> dict[str, Any]:
     for record_id, record in sorted(records.items(), key=lambda item: str(item[0])):
         if not isinstance(record, Mapping):
             continue
-        resource = record.get("asset_path")
+        resource = resource_path_for_record(record)
         local_path = resource_to_local_path(repository_root, resource)
         if local_path is None:
             continue
@@ -166,9 +179,10 @@ def build_asset_manifest(repository_root: Path) -> dict[str, Any]:
         key = "unknown" if dimensions is None else f"{dimensions[0]}x{dimensions[1]}"
         rendered_dimension_counts[key] = rendered_dimension_counts.get(key, 0) + 1
 
+    source_records = source_asset_records(records)
     return {
         "schema_version": SCHEMA_VERSION,
-        "source": "data/world_map/historical/flags_1900.json",
+        "source": FLAG_REGISTRY_RELATIVE,
         "asset_root": "assets/historical_flags/1900",
         "dimension_policy": "source_width/source_height describe upstream source metadata; rendered PNG dimensions are recorded, not compared as an equality contract",
         "record_count": len(records),
@@ -181,6 +195,8 @@ def build_asset_manifest(repository_root: Path) -> dict[str, Any]:
         "hash_mismatches": hash_mismatches,
         "dimension_mismatches": [],
         "orphan_assets": orphan_assets,
+        "catalog_errors": catalog_errors,
+        "source_asset_record_count": len(source_records),
     }
 
 
@@ -290,7 +306,7 @@ def main() -> int:
     write_json(output_dir / "batch2_gap_report.json", gap_report)
     write_json(output_dir / "batch2_asset_staging_candidates.json", asset_staging)
 
-    gate_passed = not data_manifest["parse_errors"] and not any(
+    gate_passed = not data_manifest["parse_errors"] and not asset_manifest["catalog_errors"] and not any(
         asset_manifest[key] for key in ("missing_assets", "hash_mismatches", "orphan_assets")
     )
     summary = {
