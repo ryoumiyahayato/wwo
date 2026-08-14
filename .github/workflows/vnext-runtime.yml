@@ -17,14 +17,25 @@ permissions:
   contents: read
 
 jobs:
-  vnext-runtime:
+  vnext-focused:
     runs-on: windows-latest
-    timeout-minutes: 20
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact validation head
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $expected = "${{ github.event.pull_request.head.sha || github.sha }}"
+          $actual = (git rev-parse HEAD).Trim()
+          if ($actual -ne $expected) {
+            throw "Validation checked out $actual but expected exact head $expected"
+          }
 
       - name: Check diff whitespace
         run: git diff --check HEAD^ HEAD
@@ -52,4 +63,52 @@ jobs:
 
       - name: Run unified vNext validation
         shell: pwsh
-        run: python -B tools/run_vnext_validation.py --root . --godot "$env:GODOT_BIN"
+        run: python -B tools/run_vnext_validation.py --root . --godot "$env:GODOT_BIN" --suite focused
+
+  vnext-long-run:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact validation head
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $expected = "${{ github.event.pull_request.head.sha || github.sha }}"
+          $actual = (git rev-parse HEAD).Trim()
+          if ($actual -ne $expected) {
+            throw "Validation checked out $actual but expected exact head $expected"
+          }
+
+      - name: Check diff whitespace
+        run: git diff --check HEAD^ HEAD
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Test vNext validation runner
+        run: python -B tests/tools/test_run_vnext_validation.py
+
+      - name: Install Godot 4.6.3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'godot.zip'
+          $install = Join-Path $env:RUNNER_TEMP 'godot-4.6.3'
+          Invoke-WebRequest -Uri 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip' -OutFile $archive
+          Expand-Archive -LiteralPath $archive -DestinationPath $install
+          $binary = (Get-ChildItem -LiteralPath $install -Filter 'Godot_v4.6.3-stable_win64.exe' -Recurse | Select-Object -First 1).FullName
+          if (-not $binary) { throw 'Godot 4.6.3 executable was not found after extraction' }
+          "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          & $binary --version
+
+      - name: Run vNext long-run validation
+        shell: pwsh
+        run: python -B tools/run_vnext_validation.py --root . --godot "$env:GODOT_BIN" --suite long-run

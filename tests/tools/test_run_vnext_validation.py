@@ -62,6 +62,46 @@ class DiscoverTests(unittest.TestCase):
             with self.assertRaisesRegex(runner.ValidationError, "no vNext test scripts"):
                 runner.discover_test_scripts(root)
 
+    def test_focused_and_long_run_suites_partition_the_long_test(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            for relative in (
+                "tests/vnext/market_economy_long_term_test.gd",
+                "tests/vnext/market_economy_test.gd",
+                "tests/vnext/nested/a_test.gd",
+            ):
+                path = root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("", encoding="utf-8")
+
+            focused = [
+                path.relative_to(root).as_posix()
+                for path in runner.discover_test_scripts(root, "focused")
+            ]
+            long_run = [
+                path.relative_to(root).as_posix()
+                for path in runner.discover_test_scripts(root, "long-run")
+            ]
+
+            self.assertEqual(
+                focused,
+                [
+                    "tests/vnext/market_economy_test.gd",
+                    "tests/vnext/nested/a_test.gd",
+                ],
+            )
+            self.assertEqual(
+                long_run,
+                ["tests/vnext/market_economy_long_term_test.gd"],
+            )
+
+    def test_unknown_suite_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            (root / "tests" / "vnext").mkdir(parents=True)
+            with self.assertRaisesRegex(runner.ValidationError, "unknown validation suite"):
+                runner.discover_test_scripts(root, "skipped")
+
 
 class LogAnalysisTests(unittest.TestCase):
     def test_fatal_pattern_is_detected(self) -> None:
@@ -90,6 +130,41 @@ class LogAnalysisTests(unittest.TestCase):
         result = runner.ProcessResult(3, "Example: 7 checks, 0 failures", "")
         reasons = runner.evaluate_test_result(result)
         self.assertIn("process exit code is 3", reasons)
+
+    def test_timeout_is_reported_explicitly(self) -> None:
+        result = runner.ProcessResult(
+            1,
+            "Example: 7 checks, 0 failures",
+            "",
+            timed_out=True,
+            elapsed_seconds=12.5,
+        )
+        reasons = runner.evaluate_test_result(result)
+        self.assertIn("process timed out after 12.5s", reasons)
+
+
+class TimeoutSelectionTests(unittest.TestCase):
+    def test_long_term_test_has_separate_timeout_override(self) -> None:
+        command = (
+            "godot",
+            "--script",
+            runner.LONG_TEST_SCRIPT,
+        )
+        with mock.patch.dict(
+            "os.environ",
+            {"VNEXT_LONG_TEST_TIMEOUT_SECONDS": "777"},
+            clear=False,
+        ):
+            self.assertEqual(runner._command_timeout_seconds(command), 777)
+
+    def test_nonpositive_timeout_is_rejected(self) -> None:
+        with mock.patch.dict(
+            "os.environ",
+            {"VNEXT_TEST_TIMEOUT_SECONDS": "0"},
+            clear=False,
+        ):
+            with self.assertRaisesRegex(runner.ValidationError, "positive integer"):
+                runner._command_timeout_seconds(("godot", "--script", "res://tests/vnext/example_test.gd"))
 
 
 class ValidationFlowTests(unittest.TestCase):

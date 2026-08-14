@@ -85,7 +85,7 @@ qualified所有权结论同时减少一份重复可写事实。其他状态组�
 
 
 def main() -> None:
-    OUTPUT.write_text(TEXT + "\n", encoding="utf-8")
+    OUTPUT.write_bytes((TEXT + "\n").encode("utf-8"))
     print(f"wrote {OUTPUT}")
 
 
