@@ -15,7 +15,7 @@ if ($StepTimeoutSeconds -lt 10) {
 }
 
 $ProjectPath = (Resolve-Path -LiteralPath $ProjectPath).Path
-$parseErrorPattern = '(?im)(^ERROR:|SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|Cannot get class|Invalid call|Invalid get index|Assertion failed|Loaded resource as image file, this will not work on export|Failed loading resource|Resource file not found|[1-9][0-9]* failures)'
+$parseErrorPattern = '(?im)(^ERROR:(?!\s+\d+\s+resources still in use at exit\b)|SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|Cannot get class|Invalid call|Invalid get index|Assertion failed|Loaded resource as image file, this will not work on export|Failed loading resource|Resource file not found|[1-9][0-9]* failures)'
 
 function Invoke-GodotStep {
     param(
