@@ -61,22 +61,26 @@ func _gui_input(event: InputEvent) -> void:
 			and Rect2(viewport_container.position, viewport_container.size).has_point(wheel_event.position)
 		):
 			if wheel_event.button_index == MOUSE_BUTTON_WHEEL_UP:
-				_set_world_zoom(world_zoom * HISTORY_ZOOM_FACTOR)
+				_set_world_zoom(world_zoom * HISTORY_ZOOM_FACTOR, wheel_event.position)
 				accept_event()
 				return
 			if wheel_event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-				_set_world_zoom(world_zoom / HISTORY_ZOOM_FACTOR)
+				_set_world_zoom(world_zoom / HISTORY_ZOOM_FACTOR, wheel_event.position)
 				accept_event()
 				return
 	super._gui_input(event)
 
 
-func _set_world_zoom(value: float) -> void:
+func _set_world_zoom(value: float, anchor: Vector2 = Vector2(INF, INF)) -> void:
 	var next_zoom: float = clampf(value, HISTORY_ZOOM_MIN, HISTORY_ZOOM_MAX)
 	if is_equal_approx(next_zoom, world_zoom):
 		return
+	# History navigation obeys the same center invariant as the formal globe:
+	# zoom changes radius only and never translates the viewport center.
+	_reset_world_view_center()
 	world_zoom = next_zoom
 	_apply_world_zoom_geometry()
+	_reset_world_view_center()
 	_mark_projection_dirty()
 	_sync_moon_visibility()
 	hover_country_id = ""
@@ -342,6 +346,10 @@ func _rebuild_historical_political_world() -> void:
 	_country_anchor_units.clear()
 	_history_entity_by_id.clear()
 	_history_territories_by_entity.clear()
+	_interaction_adjacency_by_entity.clear()
+	_interaction_color_index_by_entity.clear()
+	_interaction_coloring_ready = false
+	_reset_static_surface_build_progress()
 
 	var entity_values: Array = _history_document.get("entities", []) as Array
 	for entity_value: Variant in entity_values:
@@ -369,6 +377,8 @@ func _rebuild_historical_political_world() -> void:
 
 	_mark_projection_dirty()
 	_history_focus_dirty = true
+	if has_method("_build_interaction_adjacency_coloring"):
+		call("_build_interaction_adjacency_coloring")
 
 
 func _build_historical_entity(config: Dictionary, provisional: bool) -> void:

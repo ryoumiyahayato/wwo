@@ -12,6 +12,8 @@ const CAMERA_ORTHO_SIZE: float = 2.55
 const EDGE_BAND: float = 58.0
 const DRAG_THRESHOLD: float = 5.0
 const MOTION_EPSILON: float = 0.0005
+const HEMISPHERE_TILT_LIMIT: float = 1.45
+const DRAG_TILT_RADIANS_PER_PIXEL: float = 0.0048
 const FOCUS_VIEWPORT_SIZE: Vector2i = Vector2i(720, 600)
 const WORKSPACE_VIEWPORT_SIZE: Vector2i = Vector2i(600, 520)
 
@@ -71,11 +73,23 @@ var _data_errors: Array[String] = []
 
 var _button_hits: Array[Dictionary] = []
 var _hemisphere_center: Vector2 = Vector2.ZERO
+var _layout_hemisphere_center: Vector2 = Vector2.ZERO
+var _world_view_center_offset: Vector2 = Vector2.ZERO
 var _hemisphere_rect: Rect2 = Rect2()
 var _hemisphere_radius: float = 220.0
 var _focus_bounds: Rect2 = Rect2(Vector2(-5.5, 41.0), Vector2(12.5, 11.0))
 
+## Physical land is deliberately kept separate from dated political ownership.
+## The source is an existing coastline dataset used only as a land-shape
+## approximation; it must never create a 1900 political entity.
+var _physical_land_polygons: Array[PackedVector3Array] = []
+var _physical_land_holes: Array = []
+var _physical_land_source_feature_count: int = 0
+var _physical_land_has_antarctica: bool = false
+
 var _projection_dirty: bool = true
+var _projection_revision: int = 0
+var _projection_cache_revision: int = -1
 var _global_screen_segments: Array[PackedVector2Array] = []
 var _selected_country_segments: Array[PackedVector2Array] = []
 var _country_screen_anchors: Dictionary = {}
@@ -99,8 +113,10 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	var hover_spin: float = _edge_hover_spin()
-	if absf(angular_velocity) > MOTION_EPSILON or absf(hover_spin) > MOTION_EPSILON:
+	var hover_tilt: float = _edge_hover_tilt()
+	if absf(angular_velocity) > MOTION_EPSILON or absf(hover_spin) > MOTION_EPSILON or absf(hover_tilt) > MOTION_EPSILON:
 		yaw += (angular_velocity + hover_spin) * delta
+		tilt = clampf(tilt + hover_tilt * delta, -HEMISPHERE_TILT_LIMIT, HEMISPHERE_TILT_LIMIT)
 		angular_velocity = lerpf(angular_velocity, 0.0, minf(1.0, delta * 6.5))
 		_mark_projection_dirty()
 		queue_redraw()
@@ -171,10 +187,15 @@ func _gui_input(event: InputEvent) -> void:
 			angular_velocity = 0.0
 			_start_motion()
 			accept_event()
-		elif not mouse_button.pressed and dragging:
+		elif not mouse_button.pressed:
+			var was_dragging := dragging
 			dragging = false
-			if not drag_moved:
-				_select_global_object_at(mouse_button.position, true)
+			# A click in the map work area is also a valid background/ocean
+			# deselection when it did not start a drag.  UI panels are excluded
+			# so their clicks cannot clear a political selection.
+			if not was_dragging or not drag_moved:
+				if not _position_hits_ui(mouse_button.position):
+					_select_global_object_at(mouse_button.position, not was_dragging or not drag_moved)
 			accept_event()
 		return
 
@@ -188,21 +209,28 @@ func _gui_input(event: InputEvent) -> void:
 			if mouse_motion.position.distance_to(drag_start) > DRAG_THRESHOLD:
 				drag_moved = true
 			yaw += motion_delta.x * 0.006
-			tilt = clampf(tilt + motion_delta.y * 0.0025, -0.62, 0.12)
+			tilt = clampf(
+				tilt + motion_delta.y * DRAG_TILT_RADIANS_PER_PIXEL,
+				-HEMISPHERE_TILT_LIMIT,
+				HEMISPHERE_TILT_LIMIT
+			)
 			angular_velocity = motion_delta.x * 0.018
 			_start_motion()
 			_mark_projection_dirty()
 			queue_redraw()
 		elif _hemisphere_rect.has_point(mouse_motion.position):
 			_select_global_object_at(mouse_motion.position, false)
-			if absf(_edge_hover_spin()) > MOTION_EPSILON:
+			if _edge_navigation_active():
 				_start_motion()
 		else:
 			_clear_global_hover()
 
 
 func _draw() -> void:
+	var frame_start_usec: int = Time.get_ticks_usec()
 	_button_hits.clear()
+	if has_method("_begin_map_render_audit"):
+		call("_begin_map_render_audit")
 	if space_level == WORLD:
 		_draw_world_overlay()
 	elif space_level == REGION:
@@ -215,6 +243,8 @@ func _draw() -> void:
 	_draw_breadcrumbs()
 	_draw_active_hud_panel()
 	_draw_data_errors()
+	if has_method("_record_map_render_frame_profile"):
+		call("_record_map_render_frame_profile", Time.get_ticks_usec() - frame_start_usec)
 
 
 func _notification(what: int) -> void:
@@ -274,6 +304,11 @@ func _load_all_data() -> void:
 
 
 func _load_countries_and_coastlines(document: Dictionary) -> void:
+	_physical_land_polygons.clear()
+	_physical_land_holes.clear()
+	_physical_land_source_feature_count = 0
+	_physical_land_has_antarctica = false
+	_coastline_unit_lines.clear()
 	var features: Array = document.get("features", []) as Array
 	for feature_value: Variant in features:
 		if not feature_value is Dictionary:
@@ -281,6 +316,9 @@ func _load_countries_and_coastlines(document: Dictionary) -> void:
 		var feature: Dictionary = feature_value as Dictionary
 		var iso: String = str(feature.get("iso_a3", feature.get("source_iso_a3", ""))).to_upper()
 		var country_id: String = _country_id_from_feature(feature, iso)
+		_physical_land_source_feature_count += 1
+		if iso == "ATA" or str(feature.get("name", "")).to_lower().contains("antarct"):
+			_physical_land_has_antarctica = true
 		var unit_polygons: Array = []
 		var largest_score: float = -1.0
 		var largest_units: PackedVector3Array = PackedVector3Array()
@@ -296,6 +334,20 @@ func _load_countries_and_coastlines(document: Dictionary) -> void:
 			var unit_line: PackedVector3Array = _to_unit_line(simplified)
 			unit_polygons.append(unit_line)
 			_coastline_unit_lines.append(unit_line)
+			# Physical land is a correctness layer, not a screen-space decoration.
+			# A 20-point RDP ring can fold across a concavity in large coastlines
+			# (Canada and Antarctica are especially sensitive), leaving the
+			# triangulator no valid surface or creating a long bridge.  Keep the
+			# validated source-resolution cap used by political geometry; camera
+			# projection and clipping provide the visual LOD later.
+			var physical_outer := _simplify_line(outer, 120)
+			_physical_land_polygons.append(_to_unit_line(physical_outer))
+			var physical_holes: Array[PackedVector3Array] = []
+			for hole_value: Variant in (polygon.get("holes", []) as Array):
+				var hole: PackedVector2Array = _points_from_raw(hole_value)
+				if hole.size() >= 3:
+					physical_holes.append(_to_unit_line(_simplify_line(hole, 12)))
+			_physical_land_holes.append(physical_holes)
 			var score: float = absf(_polygon_area_score(simplified))
 			if score > largest_score:
 				largest_score = score
@@ -342,6 +394,20 @@ func _load_regions(document: Dictionary) -> void:
 				if outer.size() > 2:
 					region_polygons.append(_simplify_line(outer, 100))
 		_region_polygons[region_id] = region_polygons
+
+
+func physical_land_source_report() -> Dictionary:
+	return {
+		"source": "res://data/world_map/world_coastlines.json",
+		"source_is_modern_geometry_approximation": true,
+		"feature_count": _physical_land_source_feature_count,
+		"polygon_count": _physical_land_polygons.size(),
+		"has_antarctica": _physical_land_has_antarctica,
+		"source_has_antarctica": _physical_land_has_antarctica,
+		"antarctica_source_truth": "present" if _physical_land_has_antarctica else "absent",
+		"coverage_status": "source_has_no_antarctica" if not _physical_land_has_antarctica else "source_includes_antarctica",
+		"political_ownership_attached": false,
+	}
 
 
 func _read_document(path: String) -> Dictionary:
@@ -518,12 +584,39 @@ func _apply_layout() -> void:
 	var x: float = maxf(16.0, (left_area_width - viewport_size.x) * 0.5)
 	var y: float = maxf(82.0, (size.y - viewport_size.y) * 0.5)
 	viewport_container.position = Vector2(x, y)
-	_hemisphere_center = viewport_container.position + viewport_size * 0.5
+	_layout_hemisphere_center = viewport_container.position + viewport_size * 0.5
+	_hemisphere_center = _layout_hemisphere_center + _world_view_center_offset
 	_hemisphere_radius = minf(viewport_size.y / CAMERA_ORTHO_SIZE, viewport_size.x * 0.49)
 	_hemisphere_rect = Rect2(
 		_hemisphere_center - Vector2(_hemisphere_radius, _hemisphere_radius),
 		Vector2(_hemisphere_radius * 2.0, _hemisphere_radius * 2.0)
 	)
+	_clamp_world_view_center_offset()
+
+
+func _clamp_world_view_center_offset() -> void:
+	if viewport_container == null:
+		return
+	var maximum_offset := Vector2(
+		viewport_container.size.x * 0.46,
+		viewport_container.size.y * 0.46
+	)
+	_world_view_center_offset.x = clampf(
+		_world_view_center_offset.x,
+		-maximum_offset.x,
+		maximum_offset.x
+	)
+	_world_view_center_offset.y = clampf(
+		_world_view_center_offset.y,
+		-maximum_offset.y,
+		maximum_offset.y
+	)
+	_hemisphere_center = _layout_hemisphere_center + _world_view_center_offset
+
+
+func _reset_world_view_center() -> void:
+	_world_view_center_offset = Vector2.ZERO
+	_hemisphere_center = _layout_hemisphere_center
 
 
 func _set_layout(layout_id: int) -> void:
@@ -558,14 +651,31 @@ func _edge_hover_spin() -> float:
 	return (right_power - left_power) * 0.32
 
 
+func _edge_hover_tilt() -> float:
+	if space_level != WORLD or world_mode != WORLD_COUNTRIES or dragging:
+		return 0.0
+	var position: Vector2 = get_local_mouse_position()
+	if not _hemisphere_rect.has_point(position) or _position_hits_ui(position):
+		return 0.0
+	var top_power: float = clampf((_hemisphere_rect.position.y + EDGE_BAND - position.y) / EDGE_BAND, 0.0, 1.0)
+	var bottom_power: float = clampf((position.y - (_hemisphere_rect.end.y - EDGE_BAND)) / EDGE_BAND, 0.0, 1.0)
+	return (bottom_power - top_power) * 0.24
+
+
+func _edge_navigation_active() -> bool:
+	return absf(_edge_hover_spin()) > MOTION_EPSILON or absf(_edge_hover_tilt()) > MOTION_EPSILON
+
+
 func _mark_projection_dirty() -> void:
 	_projection_dirty = true
+	_projection_revision += 1
 
 
 func _ensure_projection_cache() -> void:
 	if not _projection_dirty:
 		return
 	_projection_dirty = false
+	_projection_cache_revision = _projection_revision
 	_global_screen_segments.clear()
 	_selected_country_segments.clear()
 	_country_screen_anchors.clear()
@@ -1350,6 +1460,7 @@ func _return_to_global_world() -> void:
 	hover_region_id = ""
 	_set_world_layer_visible(true)
 	_set_info_open(false)
+	_reset_world_view_center()
 	_mark_projection_dirty()
 	queue_redraw()
 

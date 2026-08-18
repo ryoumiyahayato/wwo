@@ -91,6 +91,9 @@ if ($LASTEXITCODE -ne 0) { throw 'Historical world economy static audit failed' 
 
 $tests = @(
     @{ Name = 'Formal world integration'; Script = 'res://tests/formal/formal_world_integration_test.gd'; TimeoutSeconds = 360 },
+    @{ Name = 'Formal map correctness'; Script = 'res://tests/map/map_correctness_probe.gd'; TimeoutSeconds = 240 },
+    @{ Name = 'Formal map source topology'; Script = 'res://tests/map/topology_probe.gd'; TimeoutSeconds = 240 },
+    @{ Name = 'Formal dynamic map flag audit'; Script = 'res://tests/map/map_dynamic_flag_probe.gd'; TimeoutSeconds = 420 },
     @{ Name = 'Formal world ten-year balance'; Script = 'res://tests/formal/formal_world_long_term_balance_test.gd'; TimeoutSeconds = 420 },
     @{ Name = 'Formal hemisphere product surface'; Script = 'res://tests/v2_3/v2_3_player_interface_test.gd'; TimeoutSeconds = 180 },
     @{ Name = 'Historical world economy data'; Script = 'res://tests/alpha/alpha_historical_world_economy_data_test.gd'; TimeoutSeconds = 120 },

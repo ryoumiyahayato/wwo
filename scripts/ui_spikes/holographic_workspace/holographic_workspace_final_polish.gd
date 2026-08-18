@@ -4,7 +4,7 @@ extends "res://scripts/ui_spikes/holographic_workspace/holographic_workspace_cri
 func _draw_country_flag_skins() -> void:
 	var zoom_mix: float = clampf(inverse_lerp(HISTORY_ZOOM_MIN, HISTORY_ZOOM_MAX, world_zoom), 0.0, 1.0)
 	var base_alpha: float = lerpf(0.40, 0.18, zoom_mix)
-	for entity_key_value: Variant in _flag_screen_polygons.keys():
+	for entity_key_value: Variant in _flag_screen_triangle_records.keys():
 		var entity_id: String = str(entity_key_value)
 		var entity: Dictionary = _country_by_id.get(entity_id, {}) as Dictionary
 		var palette: Dictionary = _resolved_flag_palette(str(entity.get("iso_a3", "")))
@@ -19,9 +19,7 @@ func _draw_country_flag_skins() -> void:
 			alpha = maxf(alpha, 0.56)
 		elif entity_id == hover_country_id:
 			alpha = maxf(alpha, 0.48)
-		for polygon_value: Variant in (_flag_screen_polygons.get(entity_id, []) as Array):
-			var polygon: PackedVector2Array = polygon_value
-			_draw_flag_polygon(polygon, _screen_polygon_bounds(polygon), palette, entity_id, alpha)
+		_draw_country_flag_triangles(entity_id, palette, alpha)
 
 
 func _draw_world_admin1_layer() -> void:

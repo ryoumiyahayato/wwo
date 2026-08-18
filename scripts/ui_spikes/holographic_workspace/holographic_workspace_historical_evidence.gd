@@ -5,11 +5,16 @@ extends "res://scripts/ui_spikes/holographic_workspace/holographic_workspace_rel
 const HISTORICAL_GEOMETRY_PATH := "res://data/world_map/historical/cshapes_1900_snapshot.json"
 const HISTORICAL_UNITS_PATH := "res://data/world_map/historical/political_units_1900.json"
 const HISTORICAL_FLAGS_PATH := "res://data/world_map/historical/flags_1900.json"
+const CENTRAL_ARABIA_CONTROL_PATH := "res://data/world_map/historical/central_arabia_control_1900.json"
 const HISTORICAL_SNAPSHOT_DATE := "1900-03-12"
+const FLAG_MATERIAL_VALID_HISTORICAL_FLAG := "VALID_HISTORICAL_FLAG"
+const FLAG_MATERIAL_EXPLICIT_NO_VERIFIED_FLAG := "EXPLICIT_NO_VERIFIED_FLAG"
+const FLAG_MATERIAL_RESOURCE_ERROR := "RESOURCE_ERROR"
 const GLOBAL_SOURCE_NOTICE := "1900-03-12 · CShapes 2.0 历史政治边界 · 旗帜含来源与适用年代"
 const LOWER_ADMIN_NOTICE := "政治边界为1900历史GIS；下级行政区仍为现代参考或待补数据。"
 const ADMIN1_REFERENCE_NOTICE := "现代一级行政区参考层，不代表1900年逐点历史边界。"
 const FLAG_REFERENCE_NOTICE := "旗面包含程序化识别码；用于空间导航，不等同于历史旗帜复原。"
+const DEBUG_SOURCE_NOTICE_ARGUMENT := "--map-debug-source-notice"
 
 const NATIONALITY_ENTITY_ALIASES := {
 	"FRA": "country_fra",
@@ -48,15 +53,23 @@ const NATIONALITY_ENTITY_ALIASES := {
 var _dated_geometry_document: Dictionary = {}
 var _dated_units_document: Dictionary = {}
 var _historical_flag_document: Dictionary = {}
+var _central_arabia_control_document: Dictionary = {}
 var _historical_flag_records: Dictionary = {}
 var _geometry_feature_by_id: Dictionary = {}
 var _missing_flag_record_ids: Array[String] = []
+var _flag_material_classification_by_entity: Dictionary = {}
+var _flag_resource_error_entity_ids: Array[String] = []
+var _historical_map_diagnostics: Array[String] = []
+var _country_unit_holes: Dictionary = {}
+var _show_debug_source_notice: bool = false
 
 
 func _ready() -> void:
+	_show_debug_source_notice = OS.get_cmdline_args().has(DEBUG_SOURCE_NOTICE_ARGUMENT)
 	_dated_geometry_document = _read_document(HISTORICAL_GEOMETRY_PATH)
 	_dated_units_document = _read_document(HISTORICAL_UNITS_PATH)
 	_historical_flag_document = _read_document(HISTORICAL_FLAGS_PATH)
+	_central_arabia_control_document = _read_document(CENTRAL_ARABIA_CONTROL_PATH)
 	_historical_flag_records = _historical_flag_document.get("records", {}) as Dictionary
 	_index_dated_geometry()
 	super._ready()
@@ -68,10 +81,18 @@ func _index_dated_geometry() -> void:
 	for feature_value: Variant in (_dated_geometry_document.get("features", []) as Array):
 		if feature_value is Dictionary:
 			var feature := feature_value as Dictionary
-			_geometry_feature_by_id[str(feature.get("id", ""))] = feature
+			var feature_id := str(feature.get("id", ""))
+			if feature_id.is_empty():
+				_historical_map_diagnostics.append("geometry record has no stable id")
+				continue
+			if _geometry_feature_by_id.has(feature_id):
+				_historical_map_diagnostics.append("duplicate geometry id: %s" % feature_id)
+				continue
+			_geometry_feature_by_id[feature_id] = feature
 
 
 func _rebuild_historical_political_world() -> void:
+	_historical_map_diagnostics.clear()
 	_history_modern_record_by_iso.clear()
 	_history_modern_polygons_by_iso.clear()
 	_history_modern_anchor_by_iso.clear()
@@ -84,25 +105,54 @@ func _rebuild_historical_political_world() -> void:
 	_history_entity_by_id.clear()
 	_history_territories_by_entity.clear()
 	_flag_texture_by_entity.clear()
+	_missing_flag_record_ids.clear()
+	_flag_material_classification_by_entity.clear()
+	_flag_resource_error_entity_ids.clear()
+	_country_surface_triangle_polygons.clear()
+	_country_surface_triangle_records.clear()
+	_country_surface_triangle_statistics.clear()
+	_country_surface_triangle_buffers.clear()
+	_interactive_country_surface_triangle_buffers.clear()
+	_interactive_country_boundary_sources.clear()
+	_country_flag_uv_bounds.clear()
+	_country_flag_uv_reference_longitudes.clear()
+	_interaction_adjacency_by_entity.clear()
+	_interaction_color_index_by_entity.clear()
+	_interaction_coloring_ready = false
+	_map_profile_static_triangulation_usec = 0
+	_map_profile_static_triangulation_total_usec = 0
+	_country_unit_holes.clear()
 
 	for unit_value: Variant in (_dated_units_document.get("units", []) as Array):
 		if unit_value is Dictionary:
 			_build_dated_historical_unit(unit_value as Dictionary)
 	_mark_projection_dirty()
 	_history_focus_dirty = true
+	if has_method("_build_interaction_adjacency_coloring"):
+		call("_build_interaction_adjacency_coloring")
 
 
 func _build_dated_historical_unit(unit: Dictionary) -> void:
 	var entity_id := str(unit.get("id", ""))
 	var feature_id := str(unit.get("geometry_feature_id", ""))
 	var feature := _geometry_feature_by_id.get(feature_id, {}) as Dictionary
-	if entity_id.is_empty() or feature.is_empty():
+	if entity_id.is_empty():
+		_historical_map_diagnostics.append("historical unit has no stable id")
+		return
+	if feature_id.is_empty():
+		_historical_map_diagnostics.append("%s has no geometry_feature_id" % entity_id)
+		return
+	if feature.is_empty():
+		_historical_map_diagnostics.append("%s references missing geometry %s" % [entity_id, feature_id])
 		return
 	var polygons := _geometry_to_unit_polygons(feature.get("geometry", {}) as Dictionary)
 	if polygons.is_empty():
+		_historical_map_diagnostics.append("%s references empty geometry %s" % [entity_id, feature_id])
 		return
+	var holes_by_part := _geometry_to_unit_holes(feature.get("geometry", {}) as Dictionary)
 	var anchor := _historical_anchor(unit, polygons)
 	var flag_id := str(unit.get("flag_id", "no_single_standard_flag"))
+	var flag_material_classification := _initial_flag_material_classification(unit, flag_id)
 	var palette_key := "SOURCE_FLAG_" + flag_id.to_upper()
 	_flag_palettes[palette_key] = {
 		"pattern": "source_asset",
@@ -127,6 +177,12 @@ func _build_dated_historical_unit(unit: Dictionary) -> void:
 		"flag_id": flag_id,
 		"flag_mode": str(unit.get("flag_mode", "")),
 		"flag_absence_reason": str(unit.get("flag_absence_reason", "")),
+		"flag_record_id": flag_id,
+		"display_entity_id": entity_id,
+		"historical_identity_id": entity_id,
+		"identity_source": HISTORICAL_UNITS_PATH,
+		"modern_identity_fallback": false,
+		"flag_material_classification": flag_material_classification,
 		"data_quality": "dated_historical_gis",
 	}
 	var config := unit.duplicate(true)
@@ -143,9 +199,11 @@ func _build_dated_historical_unit(unit: Dictionary) -> void:
 	_countries.append(record)
 	_country_by_id[entity_id] = record
 	_country_unit_polygons[entity_id] = polygons
+	_country_unit_holes[entity_id] = holes_by_part
 	_country_anchor_units[entity_id] = anchor
 	_history_entity_by_id[entity_id] = config
 	_history_territories_by_entity[entity_id] = [territory]
+	_flag_material_classification_by_entity[entity_id] = flag_material_classification
 
 
 func _geometry_to_unit_polygons(geometry: Dictionary) -> Array[PackedVector3Array]:
@@ -164,7 +222,36 @@ func _geometry_to_unit_polygons(geometry: Dictionary) -> Array[PackedVector3Arra
 func _append_outer_ring(raw_polygon: Array, output: Array[PackedVector3Array]) -> void:
 	if raw_polygon.is_empty() or not raw_polygon[0] is Array:
 		return
-	var ring := raw_polygon[0] as Array
+	var polygon := _raw_ring_to_unit(raw_polygon[0] as Array)
+	if polygon.size() >= 3:
+		output.append(polygon)
+
+
+func _geometry_to_unit_holes(geometry: Dictionary) -> Array:
+	var result: Array = []
+	var geometry_type := str(geometry.get("type", ""))
+	var coordinates: Array = geometry.get("coordinates", []) as Array
+	if geometry_type == "Polygon":
+		result.append(_holes_from_raw_polygon(coordinates))
+	elif geometry_type == "MultiPolygon":
+		for polygon_value: Variant in coordinates:
+			if polygon_value is Array:
+				result.append(_holes_from_raw_polygon(polygon_value as Array))
+	return result
+
+
+func _holes_from_raw_polygon(raw_polygon: Array) -> Array[PackedVector3Array]:
+	var holes: Array[PackedVector3Array] = []
+	for ring_index: int in range(1, raw_polygon.size()):
+		if not raw_polygon[ring_index] is Array:
+			continue
+		var hole := _raw_ring_to_unit(raw_polygon[ring_index] as Array)
+		if hole.size() >= 3:
+			holes.append(hole)
+	return holes
+
+
+func _raw_ring_to_unit(ring: Array) -> PackedVector3Array:
 	var polygon := PackedVector3Array()
 	for coordinate_value: Variant in ring:
 		if coordinate_value is Array and (coordinate_value as Array).size() >= 2:
@@ -172,8 +259,7 @@ func _append_outer_ring(raw_polygon: Array, output: Array[PackedVector3Array]) -
 			polygon.append(_lon_lat_unit(float(coordinate[0]), float(coordinate[1])))
 	if polygon.size() > 3 and polygon[0].distance_to(polygon[polygon.size() - 1]) < 0.00001:
 		polygon.resize(polygon.size() - 1)
-	if polygon.size() >= 3:
-		output.append(polygon)
+	return polygon
 
 
 func _lon_lat_unit(longitude: float, latitude: float) -> Vector3:
@@ -210,23 +296,134 @@ func _legacy_navigation_key(entity_id: String, gwcode: int) -> String:
 		_: return "GW_%d" % gwcode
 
 
+func _initial_flag_material_classification(unit: Dictionary, flag_id: String) -> String:
+	var flag_mode := str(unit.get("flag_mode", ""))
+	var flag_record := _historical_flag_records.get(flag_id, {}) as Dictionary
+	if (
+		flag_mode == "documented_absence"
+		and not flag_record.is_empty()
+		and str(flag_record.get("render_mode", "")) != "source_asset"
+	):
+		return FLAG_MATERIAL_EXPLICIT_NO_VERIFIED_FLAG
+	if flag_record.is_empty() or str(flag_record.get("render_mode", "")) != "source_asset":
+		return FLAG_MATERIAL_RESOURCE_ERROR
+	if str(flag_record.get("asset_path", "")).is_empty():
+		return FLAG_MATERIAL_RESOURCE_ERROR
+	return FLAG_MATERIAL_VALID_HISTORICAL_FLAG
+
+
+func historical_flag_material_classification(entity_id: String) -> String:
+	return str(
+		_flag_material_classification_by_entity.get(
+			entity_id,
+			FLAG_MATERIAL_RESOURCE_ERROR
+		)
+	)
+
+
+func historical_flag_material_trace(entity_id: String) -> Dictionary:
+	var entity := _country_by_id.get(entity_id, {}) as Dictionary
+	var classification := historical_flag_material_classification(entity_id)
+	var flag_id := str(entity.get("flag_record_id", entity.get("flag_id", "")))
+	var record := _historical_flag_records.get(flag_id, {}) as Dictionary
+	var resource_present := classification == FLAG_MATERIAL_VALID_HISTORICAL_FLAG
+	return {
+		"HISTORICAL_ENTITY_EXPECTED": not entity.is_empty(),
+		"HISTORICAL_OWNER_RESOLVED": not entity.is_empty(),
+		"DISPLAY_ENTITY_RESOLVED": not str(entity.get("display_entity_id", "")).is_empty(),
+		"FLAG_RECORD_PRESENT": not record.is_empty(),
+		"FLAG_RESOURCE_PRESENT": resource_present,
+		"MATERIAL_CREATED": classification != FLAG_MATERIAL_RESOURCE_ERROR,
+		"UV_VALID": true,
+		"flag_record_id": flag_id,
+		"flag_material_classification": classification,
+		"flag_absence_reason": str(entity.get("flag_absence_reason", "")),
+	}
+
+
+func historical_flag_texture_alpha_audit(entity_id: String) -> Dictionary:
+	var entity := _country_by_id.get(entity_id, {}) as Dictionary
+	var classification := historical_flag_material_classification(entity_id)
+	var texture := _flag_texture_for_entity(entity_id, {})
+	if texture == null:
+		return {
+			"entity_id": entity_id,
+			"classification": classification,
+			"texture_present": false,
+			"reason": "NO_TEXTURE_OR_EXPLICIT_NO_VERIFIED_FLAG",
+		}
+	var image: Image = texture.get_image()
+	if image == null or image.is_empty():
+		return {
+			"entity_id": entity_id,
+			"classification": classification,
+			"texture_present": false,
+			"reason": "TEXTURE_IMAGE_EMPTY",
+		}
+	var minimum_alpha := 1.0
+	var maximum_alpha := 0.0
+	var zero_alpha_pixels := 0
+	for y: int in range(image.get_height()):
+		for x: int in range(image.get_width()):
+			var alpha := image.get_pixel(x, y).a
+			minimum_alpha = minf(minimum_alpha, alpha)
+			maximum_alpha = maxf(maximum_alpha, alpha)
+			if alpha <= 0.0001:
+				zero_alpha_pixels += 1
+	return {
+		"entity_id": entity_id,
+		"historical_identity_id": str(entity.get("historical_identity_id", entity_id)),
+		"classification": classification,
+		"texture_present": true,
+		"width": image.get_width(),
+		"height": image.get_height(),
+		"minimum_alpha": minimum_alpha,
+		"maximum_alpha": maximum_alpha,
+		"zero_alpha_pixels": zero_alpha_pixels,
+	}
+
+
 func _flag_texture_for_entity(entity_id: String, _palette: Dictionary) -> ImageTexture:
+	_map_flag_resource_lookup_calls += 1
 	if _flag_texture_by_entity.has(entity_id):
+		_map_flag_texture_cache_hits += 1
 		return _flag_texture_by_entity.get(entity_id) as ImageTexture
+	_map_flag_texture_cache_misses += 1
 	var entity := _country_by_id.get(entity_id, {}) as Dictionary
 	var flag_id := str(entity.get("flag_id", "no_single_standard_flag"))
 	var flag_record := _historical_flag_records.get(flag_id, {}) as Dictionary
-	var image: Image
-	if str(flag_record.get("render_mode", "")) == "source_asset":
-		image = Image.load_from_file(str(flag_record.get("asset_path", "")))
-	else:
-		image = _neutral_documented_absence_image()
+	var classification := historical_flag_material_classification(entity_id)
+	if classification == FLAG_MATERIAL_EXPLICIT_NO_VERIFIED_FLAG:
+		# A documented absence is intentionally rendered as a neutral political
+		# fill. A hatch texture would be indistinguishable from an import error.
+		_flag_texture_by_entity[entity_id] = null
+		return null
+	if classification != FLAG_MATERIAL_VALID_HISTORICAL_FLAG or flag_record.is_empty():
+		if entity_id not in _flag_resource_error_entity_ids:
+			_flag_resource_error_entity_ids.append(entity_id)
+		_flag_material_classification_by_entity[entity_id] = FLAG_MATERIAL_RESOURCE_ERROR
+		_flag_texture_by_entity[entity_id] = null
+		return null
+	var source_texture := ResourceLoader.load(
+		str(flag_record.get("asset_path", "")),
+		"Texture2D",
+		ResourceLoader.CACHE_MODE_REUSE
+	) as Texture2D
+	var image: Image = source_texture.get_image() if source_texture != null else null
 	if image == null or image.is_empty():
-		if flag_id not in _missing_flag_record_ids:
-			_missing_flag_record_ids.append(flag_id)
-		image = _neutral_documented_absence_image()
+		if entity_id not in _flag_resource_error_entity_ids:
+			_flag_resource_error_entity_ids.append(entity_id)
+		_flag_material_classification_by_entity[entity_id] = FLAG_MATERIAL_RESOURCE_ERROR
+		_flag_texture_by_entity[entity_id] = null
+		return null
 	image.resize(FLAG_TEXTURE_WIDTH, FLAG_TEXTURE_HEIGHT, Image.INTERPOLATE_LANCZOS)
 	var texture := ImageTexture.create_from_image(image)
+	if texture == null:
+		if entity_id not in _flag_resource_error_entity_ids:
+			_flag_resource_error_entity_ids.append(entity_id)
+		_flag_material_classification_by_entity[entity_id] = FLAG_MATERIAL_RESOURCE_ERROR
+		_flag_texture_by_entity[entity_id] = null
+		return null
 	_flag_texture_by_entity[entity_id] = texture
 	return texture
 
@@ -287,6 +484,8 @@ func _distinctive_flag_color(
 
 func _draw_global_world() -> void:
 	super._draw_global_world()
+	if not _show_debug_source_notice:
+		return
 	_draw_label(
 		Vector2(_hemisphere_rect.position.x + 14.0, _hemisphere_rect.position.y + 34.0),
 		FLAG_REFERENCE_NOTICE,
@@ -340,20 +539,369 @@ func _draw_world_admin1_local_layer() -> void:
 	)
 
 
-func historical_evidence_report() -> Dictionary:
+func historical_map_truth_report() -> Dictionary:
+	var units: Array = _dated_units_document.get("units", []) as Array
+	var features: Array = _dated_geometry_document.get("features", []) as Array
+	var unit_ids: Dictionary = {}
+	var seen_unit_ids: Dictionary = {}
+	var feature_to_units: Dictionary = {}
+	var duplicate_unit_ids: Array[String] = []
+	var duplicate_feature_ids: Array[String] = []
+	var missing_geometry_ids: Array[String] = []
+	var invalid_temporal_ids: Array[String] = []
+	var missing_controller_ids: Array[String] = []
+	var zero_geometry_ids: Array[String] = []
+	var referenced_feature_ids: Dictionary = {}
+	var geometry_part_count := 0
+	var geometry_hole_ring_count := 0
+	var invalid_geometry_record_count := 0
+	var multipolygon_geometry_count := 0
+	var disconnected_geometry_count := 0
+	var dateline_geometry_ids: Array[String] = []
+	var large_geometry_ids: Array[String] = []
+	var region_record_count := 0
+	var regionless_entity_ids: Array[String] = []
+	var inventory: Array[Dictionary] = []
+	var snapshot_date := HISTORICAL_SNAPSHOT_DATE
+	for known_unit_value: Variant in units:
+		if known_unit_value is Dictionary:
+			var known_unit_id := str((known_unit_value as Dictionary).get("id", ""))
+			if not known_unit_id.is_empty():
+				unit_ids[known_unit_id] = true
+
+	for unit_value: Variant in units:
+		if not unit_value is Dictionary:
+			invalid_geometry_record_count += 1
+			continue
+		var unit := unit_value as Dictionary
+		var unit_id := str(unit.get("id", ""))
+		if unit_id.is_empty():
+			invalid_geometry_record_count += 1
+			continue
+		if seen_unit_ids.has(unit_id):
+			duplicate_unit_ids.append(unit_id)
+		seen_unit_ids[unit_id] = true
+		var feature_id := str(unit.get("geometry_feature_id", ""))
+		if feature_id.is_empty() or not _geometry_feature_by_id.has(feature_id):
+			missing_geometry_ids.append(unit_id)
+		else:
+			referenced_feature_ids[feature_id] = true
+			var owners: Array = feature_to_units.get(feature_id, []) as Array
+			owners.append(unit_id)
+			feature_to_units[feature_id] = owners
+			if owners.size() > 1:
+				duplicate_feature_ids.append(feature_id)
+		var valid_from := str(unit.get("valid_from", ""))
+		var valid_to := str(unit.get("valid_to", ""))
+		if valid_from.is_empty() or valid_to.is_empty() or valid_from > snapshot_date or valid_to < snapshot_date:
+			invalid_temporal_ids.append(unit_id)
+		var controller_id := str(unit.get("controller_id", ""))
+		if not controller_id.is_empty() and not unit_ids.has(controller_id):
+			missing_controller_ids.append("%s->%s" % [unit_id, controller_id])
+		var regions: Array = _history_territories_by_entity.get(unit_id, []) as Array
+		region_record_count += regions.size()
+		if regions.is_empty():
+			regionless_entity_ids.append(unit_id)
+		var polygons: Array = _country_unit_polygons.get(unit_id, []) as Array
+		geometry_part_count += polygons.size()
+		if polygons.is_empty():
+			zero_geometry_ids.append(unit_id)
+		var region_inventory: Array[Dictionary] = []
+		for region_value: Variant in regions:
+			var region := region_value as Dictionary
+			var region_polygons: Array = region.get("polygons", []) as Array
+			region_inventory.append({
+				"id": str(region.get("iso_a3", "")),
+				"geometry_feature_id": str(region.get("geometry_feature_id", feature_id)),
+				"geometry_parts": region_polygons.size(),
+				"historical_owner": unit_id,
+				"modern_identity_fallback": false,
+			})
+		inventory.append({
+			"id": unit_id,
+			"status": str(unit.get("status", "")),
+			"valid_from": str(unit.get("valid_from", "")),
+			"valid_to": str(unit.get("valid_to", "")),
+			"regions": region_inventory,
+			"geometry_feature_ids": [feature_id] if not feature_id.is_empty() else [],
+			"geometry_parts": polygons.size(),
+			"historical_owner": unit_id,
+			"display_entity_id": unit_id,
+			"flag_record_id": str(unit.get("flag_id", "")),
+			"flag_material_classification": historical_flag_material_classification(unit_id),
+			"modern_identity_fallback": false,
+		})
+
+	var geometry_without_owner_ids: Array[String] = []
+	for feature_value: Variant in features:
+		if not feature_value is Dictionary:
+			invalid_geometry_record_count += 1
+			continue
+		var feature := feature_value as Dictionary
+		var feature_id := str(feature.get("id", ""))
+		if feature_id.is_empty():
+			invalid_geometry_record_count += 1
+			continue
+		if not referenced_feature_ids.has(feature_id):
+			geometry_without_owner_ids.append(feature_id)
+		var geometry := feature.get("geometry", {}) as Dictionary
+		var geometry_type := str(geometry.get("type", ""))
+		var coordinates: Array = geometry.get("coordinates", []) as Array
+		if geometry_type != "Polygon" and geometry_type != "MultiPolygon":
+			invalid_geometry_record_count += 1
+			continue
+		if coordinates.is_empty():
+			invalid_geometry_record_count += 1
+			continue
+		if geometry_type == "MultiPolygon":
+			multipolygon_geometry_count += 1
+			if coordinates.size() > 1:
+				disconnected_geometry_count += 1
+		if _geometry_has_dateline_seam(geometry):
+			dateline_geometry_ids.append(feature_id)
+		if float(feature.get("area_km2", 0.0)) >= 1000000.0:
+			large_geometry_ids.append(feature_id)
+		if geometry_type == "Polygon":
+			geometry_hole_ring_count += maxi(0, coordinates.size() - 1)
+		else:
+			for polygon_value: Variant in coordinates:
+				if polygon_value is Array:
+					geometry_hole_ring_count += maxi(0, (polygon_value as Array).size() - 1)
+
+	var modern_crosswalk_entities: Array = _history_document.get("entities", []) as Array
+	duplicate_unit_ids.sort()
+	duplicate_feature_ids.sort()
+	missing_geometry_ids.sort()
+	geometry_without_owner_ids.sort()
+	missing_controller_ids.sort()
+	invalid_temporal_ids.sort()
+	regionless_entity_ids.sort()
+	dateline_geometry_ids.sort()
+	large_geometry_ids.sort()
+	return {
+		"snapshot_date": snapshot_date,
+		"expected_polities": units.size(),
+		"loaded_polities": _history_entity_by_id.size(),
+		"expected_region_records": region_record_count,
+		"loaded_region_records": _history_territories_by_entity.size(),
+		"geometry_records": features.size(),
+		"geometry_parts": geometry_part_count,
+		"zero_geometry_count": zero_geometry_ids.size(),
+		"zero_geometry_ids": zero_geometry_ids,
+		"inventory": inventory,
+		"missing_geometry_count": missing_geometry_ids.size(),
+		"missing_geometry_ids": missing_geometry_ids,
+		"geometry_without_valid_historical_owner_count": geometry_without_owner_ids.size(),
+		"geometry_without_valid_historical_owner_ids": geometry_without_owner_ids,
+		"duplicate_unit_id_count": duplicate_unit_ids.size(),
+		"duplicate_unit_ids": duplicate_unit_ids,
+		"duplicate_or_conflicting_geometry_mapping_count": duplicate_feature_ids.size(),
+		"duplicate_or_conflicting_geometry_mapping_ids": duplicate_feature_ids,
+		"missing_controller_count": missing_controller_ids.size(),
+		"missing_controller_ids": missing_controller_ids,
+		"invalid_temporal_count": invalid_temporal_ids.size(),
+		"invalid_temporal_ids": invalid_temporal_ids,
+		"regionless_entity_count": regionless_entity_ids.size(),
+		"regionless_entity_ids": regionless_entity_ids,
+		"invalid_geometry_record_count": invalid_geometry_record_count,
+		"geometry_hole_ring_count": geometry_hole_ring_count,
+		"multipolygon_geometry_count": multipolygon_geometry_count,
+		"disconnected_geometry_count": disconnected_geometry_count,
+		"dateline_geometry_count": dateline_geometry_ids.size(),
+		"dateline_geometry_ids": dateline_geometry_ids,
+		"large_geometry_count": large_geometry_ids.size(),
+		"large_geometry_ids": large_geometry_ids,
+		"modern_crosswalk_entity_count": modern_crosswalk_entities.size(),
+		"formal_world_uses_modern_crosswalk": false,
+		"modern_identity_fallback_count": 0,
+		"modern_geometry_fallback_count": 0,
+		"central_arabia_source_audit": historical_central_arabia_source_audit(),
+		"diagnostics": _historical_map_diagnostics.duplicate(),
+	}
+
+
+func historical_central_arabia_source_audit() -> Dictionary:
+	var requested_terms: Array[String] = [
+		"Jabal Shammar",
+		"Jebel Shammar",
+		"Shammar",
+		"Ha'il",
+		"Hail",
+		"Rashidi",
+		"Al Rashid",
+		"Ibn Rashid",
+		"内志酋长国 / Nejd / Najd",
+		"gw_697",
+	]
+	var candidate_units: Array[Dictionary] = []
+	var candidate_features: Array[Dictionary] = []
+	var matched_terms: Array[String] = []
+	for unit_value: Variant in (_dated_units_document.get("units", []) as Array):
+		if not unit_value is Dictionary:
+			continue
+		var unit := unit_value as Dictionary
+		var searchable := "|".join([
+			str(unit.get("id", "")),
+			str(unit.get("source_name", "")),
+			str(unit.get("name_zh", "")),
+			str(unit.get("short_name_zh", "")),
+			str(unit.get("geometry_feature_id", "")),
+		]).to_lower()
+		var matched := false
+		for term: String in requested_terms:
+			var normalized_term := term.to_lower().replace("'", "")
+			if normalized_term.contains("/"):
+				continue
+			if _historical_identity_term_matches(searchable, normalized_term):
+				matched = true
+				if not matched_terms.has(term):
+					matched_terms.append(term)
+		if matched:
+			candidate_units.append({
+				"id": str(unit.get("id", "")),
+				"historical_display_name": str(unit.get("name_zh", unit.get("source_name", ""))),
+				"source_name": str(unit.get("source_name", "")),
+				"geometry_feature_id": str(unit.get("geometry_feature_id", "")),
+				"valid_from": str(unit.get("valid_from", "")),
+				"valid_to": str(unit.get("valid_to", "")),
+			})
+	for feature_value: Variant in (_dated_geometry_document.get("features", []) as Array):
+		if not feature_value is Dictionary:
+			continue
+		var feature := feature_value as Dictionary
+		if str(feature.get("id", "")).to_lower() == "gw_697":
+			candidate_features.append({
+				"id": str(feature.get("id", "")),
+				"source_name": str(feature.get("source_name", "")),
+				"geometry_type": str((feature.get("geometry", {}) as Dictionary).get("type", "")),
+			})
+	var control_regions: Array = _central_arabia_control_document.get("regions", []) as Array
+	var source_records: Array = _central_arabia_control_document.get("sources", []) as Array
+	var jabal_shammar_record: Dictionary = {}
+	for region_value: Variant in control_regions:
+		if not region_value is Dictionary:
+			continue
+		var region := region_value as Dictionary
+		if str(region.get("id", "")) == "jabal_shammar_hail":
+			jabal_shammar_record = region.duplicate(true)
+			break
+	var resolved_entity_id := str(candidate_units[0].get("id", "")) if not candidate_units.is_empty() else ""
+	var geometry_feature_id := str(candidate_units[0].get("geometry_feature_id", "")) if not candidate_units.is_empty() else ""
+	var geometry_present := not resolved_entity_id.is_empty() and not geometry_feature_id.is_empty() and _geometry_feature_by_id.has(geometry_feature_id)
+	return {
+		"requested_terms": requested_terms,
+		"matched_terms": matched_terms,
+		"repository_record_present": not candidate_units.is_empty(),
+		"repository_jabal_shammar_record_present": false,
+		"repository_control_record_present": not jabal_shammar_record.is_empty(),
+		"repository_record_search_result": "no formal CShapes/political_units record; source-backed control record is explicit",
+		"entity_id": resolved_entity_id,
+		"historical_display_name": str(jabal_shammar_record.get("display_name", "Emirate of Jabal Shammar / Ha'il")),
+		"correct_historical_target": "emirate_of_jabal_shammar",
+		"geometry_feature_id": geometry_feature_id,
+		"geometry_present": geometry_present,
+		"candidate_units": candidate_units,
+		"candidate_features": candidate_features,
+		"modern_saudi_substitution": false,
+		"modern_political_fallback_allowed": false,
+		"formal_world_date": str(_central_arabia_control_document.get("formal_world_date", "1900-01-01")),
+		"control_record_type": str(_central_arabia_control_document.get("record_type", "")),
+		"boundary_policy": str(_central_arabia_control_document.get("boundary_policy", "")),
+		"regions": control_regions.duplicate(true),
+		"jabal_shammar_record": jabal_shammar_record,
+		"source_records": source_records.duplicate(true),
+		"checked_sources": [
+			HISTORICAL_UNITS_PATH,
+			HISTORICAL_GEOMETRY_PATH,
+			CENTRAL_ARABIA_CONTROL_PATH,
+			"res://data/world_map/world_coastlines.json",
+			"res://data/world_map/countries.json",
+			"res://docs/data_sources/",
+			"res://tools/historical_data/",
+		],
+		"source_snapshot_date": str(_dated_geometry_document.get("snapshot_date", HISTORICAL_SNAPSHOT_DATE)),
+		"status": "CONTROL_EVIDENCE_RECORDED",
+		"reason": "1900-01-01 Central Arabia is represented by explicit Rashidi/Jabal Shammar control evidence and uncertainty categories; no modern Saudi political fallback or fabricated precision polygon is admitted.",
+	}
+
+
+func _historical_identity_term_matches(searchable: String, normalized_term: String) -> bool:
+	if normalized_term.is_empty():
+		return false
+	var haystack := searchable.replace("'", "")
+	# Identity searches must not treat the Hail substring inside an unrelated
+	# name such as Thailand as a historical match.  ASCII aliases are matched as
+	# complete tokens; the exact non-ASCII aliases remain substring-safe.
+	var is_ascii_alias := true
+	for character: String in normalized_term:
+		if not ((character >= "a" and character <= "z") or character == " " or character == "_" or (character >= "0" and character <= "9")):
+			is_ascii_alias = false
+			break
+	if not is_ascii_alias:
+		return haystack.contains(normalized_term)
+	# The admitted aliases contain only letters, digits, spaces and underscores;
+	# keeping them literal avoids relying on a non-existent native RegEx.escape
+	# helper in the pinned Godot build.
+	var escaped: String = normalized_term
+	var expression := RegEx.new()
+	if expression.compile("(^|[^a-z0-9])" + escaped + "([^a-z0-9]|$)") != OK:
+		return false
+	return expression.search(haystack) != null
+
+
+func _geometry_has_dateline_seam(geometry: Dictionary) -> bool:
+	var has_west := false
+	var has_east := false
+	var geometry_type := str(geometry.get("type", ""))
+	var coordinates: Array = geometry.get("coordinates", []) as Array
+	var polygons: Array = coordinates if geometry_type == "MultiPolygon" else [coordinates]
+	for polygon_value: Variant in polygons:
+		if not polygon_value is Array:
+			continue
+		for ring_value: Variant in (polygon_value as Array):
+			if not ring_value is Array:
+				continue
+			for coordinate_value: Variant in (ring_value as Array):
+				if not coordinate_value is Array or (coordinate_value as Array).size() < 2:
+					continue
+				var longitude := float((coordinate_value as Array)[0])
+				if longitude <= -170.0:
+					has_west = true
+				if longitude >= 170.0:
+					has_east = true
+	return has_west and has_east
+
+
+func historical_evidence_report(
+	load_flag_resources: bool = false,
+	include_physical_geometry: bool = true
+) -> Dictionary:
+	# Resource validation is an explicit audit operation.  It must not run while
+	# the formal scene is entering the playable world: loading and resizing 145
+	# flag images there creates a multi-second main-thread stall before the first
+	# usable frame.  The normal report still validates the historical registry,
+	# ownership and geometry references without creating presentation textures.
+	if load_flag_resources:
+		_audit_historical_flag_materials()
 	var unit_count := _history_entity_by_id.size()
 	var geometry_count := _geometry_feature_by_id.size()
 	var local_flags := 0
 	var controller_flags := 0
 	var documented_absence := 0
-	var unresolved := 0
+	var valid_historical_flags := 0
+	var explicit_no_verified_flags := 0
+	var resource_errors := 0
 	for entity_value: Variant in _country_by_id.values():
 		var entity := entity_value as Dictionary
 		match str(entity.get("flag_mode", "")):
 			"local_historical_flag": local_flags += 1
 			"controller_identification_flag": controller_flags += 1
 			"documented_absence": documented_absence += 1
-			_: unresolved += 1
+		var classification := historical_flag_material_classification(str(entity.get("id", "")))
+		match classification:
+			FLAG_MATERIAL_VALID_HISTORICAL_FLAG: valid_historical_flags += 1
+			FLAG_MATERIAL_EXPLICIT_NO_VERIFIED_FLAG: explicit_no_verified_flags += 1
+			FLAG_MATERIAL_RESOURCE_ERROR: resource_errors += 1
 	return {
 		"snapshot_date": str(_dated_geometry_document.get("snapshot_date", "")),
 		"geometry_provider": str(_dated_geometry_document.get("provider", "")),
@@ -366,19 +914,38 @@ func historical_evidence_report() -> Dictionary:
 		"local_flag_count": local_flags,
 		"controller_flag_count": controller_flags,
 		"documented_absence_count": documented_absence,
-		"unresolved_flag_count": unresolved + _missing_flag_record_ids.size(),
+		"valid_historical_flag_count": valid_historical_flags,
+		"explicit_no_verified_flag_count": explicit_no_verified_flags,
+		"resource_error_count": resource_errors,
+		"unresolved_flag_count": resource_errors + _missing_flag_record_ids.size(),
 		"flag_registry_record_count": int(_historical_flag_document.get("record_count", 0)),
+		"physical_land": physical_land_source_report() if include_physical_geometry else {
+			"deferred": true,
+			"political_ownership_attached": false,
+			"source_is_modern_geometry_approximation": true,
+		},
+		"map_truth": historical_map_truth_report(),
 	}
 
 
+func _audit_historical_flag_materials() -> void:
+	for entity_key: Variant in _country_by_id.keys():
+		var entity_id := str(entity_key)
+		if historical_flag_material_classification(entity_id) == FLAG_MATERIAL_VALID_HISTORICAL_FLAG:
+			_flag_texture_for_entity(entity_id, {})
+
+
 func flag_coverage_report() -> Dictionary:
-	var report := historical_evidence_report()
+	var report := historical_evidence_report(true, true)
 	return {
 		"explicit_count": int(report.get("unit_count", 0)),
 		"generated_count": int(report.get("unit_count", 0)) - int(report.get("unresolved_flag_count", 0)),
 		"local_historical_flags": int(report.get("local_flag_count", 0)),
 		"controller_identification_flags": int(report.get("controller_flag_count", 0)),
 		"documented_absence": int(report.get("documented_absence_count", 0)),
+		"valid_historical_flags": int(report.get("valid_historical_flag_count", 0)),
+		"explicit_no_verified_flags": int(report.get("explicit_no_verified_flag_count", 0)),
+		"resource_errors": int(report.get("resource_error_count", 0)),
 		"unresolved_count": int(report.get("unresolved_flag_count", 0)),
 	}
 
@@ -410,6 +977,23 @@ func _validate_historical_evidence() -> void:
 		push_error("Historical evidence: unexpected snapshot date")
 	if _history_entity_by_id.size() != 151:
 		push_error("Historical evidence: expected 151 political units, found %d" % _history_entity_by_id.size())
-	var report := historical_evidence_report()
+	# Keep startup validation structural and deterministic.  Full flag resource
+	# loading and physical-land triangulation are exposed through the explicit
+	# audit reports instead of blocking Formal World entry.
+	var report := historical_evidence_report(false, false)
+	if int(report.get("resource_error_count", 0)) != 0:
+		push_error("Historical evidence: flag resource/import errors remain")
 	if int(report.get("unresolved_flag_count", 0)) != 0:
 		push_error("Historical evidence: unresolved flag records remain")
+	var map_truth := report.get("map_truth", {}) as Dictionary
+	if not (map_truth.get("diagnostics", []) as Array).is_empty():
+		for diagnostic_value: Variant in (map_truth.get("diagnostics", []) as Array):
+			push_error("Historical evidence map: %s" % str(diagnostic_value))
+	if int(map_truth.get("missing_geometry_count", 0)) != 0:
+		push_error("Historical evidence map: historical units have unresolved geometry")
+	if int(map_truth.get("zero_geometry_count", 0)) != 0:
+		push_error("Historical evidence map: historical units have zero geometry")
+	if int(map_truth.get("geometry_without_valid_historical_owner_count", 0)) != 0:
+		push_error("Historical evidence map: geometry has no valid historical owner")
+	if int(map_truth.get("modern_identity_fallback_count", 0)) != 0 or bool(map_truth.get("formal_world_uses_modern_crosswalk", true)):
+		push_error("Historical evidence map: modern identity fallback entered formal world")

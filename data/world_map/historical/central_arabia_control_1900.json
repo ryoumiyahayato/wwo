@@ -1,0 +1,132 @@
+{
+  "formal_world_date": "1900-01-01",
+  "record_type": "historical_control_evidence",
+  "political_entity_creation_from_this_record": false,
+  "modern_political_fallback": false,
+  "boundary_policy": "Use control evidence without fabricating a modern-precision frontier. Physical land remains visible when the dated political GIS has no admissible owner.",
+  "sources": [
+    {
+      "id": "lorimer_qdl_central_arabia_1900",
+      "title": "Gazetteer of the Persian Gulf, Oman and Central Arabia, historical chapters",
+      "publisher": "Qatar Digital Library / J. G. Lorimer",
+      "date": "1908-1915",
+      "url": "https://www.qdl.qa/en/archive/81055/vdc_100023575947.0x000041",
+      "reuse_status": "Repository source citation; no copied map geometry",
+      "supports": "The 1900-1902 struggle for Southern Najd and the Rashidi/Jabal Shammar political influence in central Arabia.",
+      "uncertainty": "Retrospective gazetteer and sphere-of-influence language do not provide a modern cadastral frontier."
+    },
+    {
+      "id": "lorimer_qdl_jabal_shammar",
+      "title": "Jabal Shammar entry, Gazetteer of the Persian Gulf, Oman and Central Arabia",
+      "publisher": "Qatar Digital Library / J. G. Lorimer",
+      "date": "1908-1915",
+      "url": "https://www.qdl.qa/en/archive/81055/vdc_100023515720.0x000049",
+      "reuse_status": "Repository source citation; no copied map geometry",
+      "supports": "Jabal Shammar/Ha'il as a historical principality and the reach of Rashidi influence toward Qasim and eastern Arabia.",
+      "uncertainty": "The entry describes influence and dependency relationships, not a single fixed polygon for every locality."
+    },
+    {
+      "id": "lorimer_qdl_al_rashid_genealogy",
+      "title": "Al Rashid genealogy and rulers",
+      "publisher": "Qatar Digital Library",
+      "date": "1908-1915",
+      "url": "https://qdl.qa/en/archive/81055/vdc_100023515185.0x000041",
+      "reuse_status": "Repository source citation; no copied map geometry",
+      "supports": "Abdul Aziz bin Matab as Emir of Jabal Shammar from 1897 to 1906, including the formal-world date.",
+      "uncertainty": "A ruler date does not by itself prove the exact boundary of every controlled district."
+    }
+  ],
+  "regions": [
+    {
+      "id": "riyadh_southern_najd",
+      "display_name": "Riyadh / Southern Najd",
+      "controller": "Emirate of Jabal Shammar / Rashidi sphere of control",
+      "controller_identity": "emirate_of_jabal_shammar",
+      "category": "KNOWN_CONTROL_APPROXIMATE_BOUNDARY",
+      "boundary_confidence": "medium",
+      "repository_representation": "control_evidence_only",
+      "geometry_source": "No new political polygon admitted from this record",
+      "physical_land_visible": true,
+      "modern_saudi_fallback": false,
+      "notes": "Do not label this as an independent Saudi or Nejd polity on 1900-01-01; Riyadh was retaken by Ibn Saud only in 1902."
+    },
+    {
+      "id": "qasim",
+      "display_name": "Qasim",
+      "controller": "Rashidi/Jabal Shammar influence and contested control",
+      "controller_identity": "emirate_of_jabal_shammar",
+      "category": "KNOWN_CONTROL_APPROXIMATE_BOUNDARY",
+      "boundary_confidence": "medium",
+      "repository_representation": "control_evidence_only",
+      "geometry_source": "No new political polygon admitted from this record",
+      "physical_land_visible": true,
+      "modern_saudi_fallback": false,
+      "notes": "The historical source describes reach and influence; it is not treated as a modern administrative boundary."
+    },
+    {
+      "id": "jabal_shammar_hail",
+      "display_name": "Emirate of Jabal Shammar / Ha'il",
+      "controller": "Abdul Aziz bin Matab Al Rashid / Rashidi Emirate",
+      "controller_identity": "emirate_of_jabal_shammar",
+      "category": "KNOWN_HISTORICAL_POLITY",
+      "boundary_confidence": "high_for_core_polity_medium_for_frontier",
+      "repository_representation": "historical_control_evidence_only",
+      "geometry_source": "No CShapes polygon is silently invented or substituted",
+      "physical_land_visible": true,
+      "modern_saudi_fallback": false,
+      "notes": "The repository may later admit a separately licensed approximate geometry only through the historical-source provenance workflow."
+    },
+    {
+      "id": "hasa_eastern_coast",
+      "display_name": "Hasa / Eastern coast",
+      "controller": "Ottoman authority with local and tribal autonomy described separately",
+      "controller_identity": "ottoman_empire",
+      "category": "KNOWN_CONTROL_APPROXIMATE_BOUNDARY",
+      "boundary_confidence": "medium",
+      "repository_representation": "existing_ottoman_identity_plus_control_note",
+      "geometry_source": "Existing dated political GIS only where its owner is explicitly mapped",
+      "physical_land_visible": true,
+      "modern_saudi_fallback": false,
+      "notes": "Do not merge Hasa into a modern Saudi polygon."
+    },
+    {
+      "id": "trucial_coast",
+      "display_name": "Trucial coast",
+      "controller": "Treaty sheikhdoms with British treaty relationship",
+      "controller_identity": "documented_dependency_or_local_authority",
+      "category": "KNOWN_DEPENDENCY",
+      "boundary_confidence": "medium",
+      "repository_representation": "dependency_control_note",
+      "geometry_source": "No new unified political polygon",
+      "physical_land_visible": true,
+      "modern_saudi_fallback": false,
+      "notes": "The coast is not represented as a single modern national identity."
+    },
+    {
+      "id": "muscat_oman",
+      "display_name": "Muscat / Oman",
+      "controller": "Sultanate of Muscat and Oman",
+      "controller_identity": "muscat_oman",
+      "category": "KNOWN_HISTORICAL_POLITY",
+      "boundary_confidence": "high_for_core_polity_medium_for_frontier",
+      "repository_representation": "existing_historical_identity_if_geometry_is_present",
+      "geometry_source": "Dated political GIS only where explicitly mapped",
+      "physical_land_visible": true,
+      "modern_saudi_fallback": false,
+      "notes": "Oman is kept distinct from Hasa and the Rashidi sphere."
+    },
+    {
+      "id": "hejaz_boundary",
+      "display_name": "Hejaz boundary",
+      "controller": "Ottoman Hejaz authority / boundary requiring local-source review",
+      "controller_identity": "ottoman_empire",
+      "category": "EXPLICITLY_UNRESOLVED_HISTORICAL_AREA",
+      "boundary_confidence": "low_to_medium",
+      "repository_representation": "explicit_uncertainty_note",
+      "geometry_source": "No fabricated polygon",
+      "physical_land_visible": true,
+      "modern_saudi_fallback": false,
+      "notes": "The uncertainty is visible as a documented unresolved control area, never as a silent modern-country fallback."
+    }
+  ]
+}

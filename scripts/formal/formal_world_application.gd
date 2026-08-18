@@ -329,6 +329,12 @@ func _activate_button(action: String) -> void:
 
 
 func _selected_polity_entity_id() -> String:
+	# An empty map selection is a real neutral state.  Do not silently replace
+	# it with the player's home polity or a first/default polity in the formal
+	# panel; doing so makes an ocean/background click look like a stale country
+	# selection even though the map highlight has already been cleared.
+	if selected_country_id.is_empty():
+		return ""
 	if formal_simulation.has_polity(selected_country_id):
 		return selected_country_id
 
