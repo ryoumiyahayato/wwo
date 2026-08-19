@@ -235,18 +235,18 @@ func _add_explicit_relation(subject_id: String, raw_relation: Dictionary) -> boo
 		if valid_to < valid_from:
 			return _fail("authority relation %s has inverted validity" % relation_id)
 
-	var confidence_bp := raw_relation.get("confidence_bp", 10000)
+	var confidence_bp: Variant = raw_relation.get("confidence_bp", 10000)
 	if typeof(confidence_bp) != TYPE_INT:
 		return _fail("authority relation %s confidence_bp must be an integer" % relation_id)
 	if int(confidence_bp) < 0 or int(confidence_bp) > 10000:
 		return _fail("authority relation %s confidence_bp is out of range" % relation_id)
-	var provenance_value := raw_relation.get("provenance", {})
+	var provenance_value: Variant = raw_relation.get("provenance", {})
 	if not provenance_value is Dictionary:
 		return _fail("authority relation %s provenance must be an object" % relation_id)
-	var scope_value := raw_relation.get("scope", "")
+	var scope_value: Variant = raw_relation.get("scope", "")
 	if typeof(scope_value) != TYPE_STRING:
 		return _fail("authority relation %s scope must be a string" % relation_id)
-	var uncertainty_value := raw_relation.get("uncertainty", "")
+	var uncertainty_value: Variant = raw_relation.get("uncertainty", "")
 	if typeof(uncertainty_value) != TYPE_STRING:
 		return _fail("authority relation %s uncertainty must be a string" % relation_id)
 
