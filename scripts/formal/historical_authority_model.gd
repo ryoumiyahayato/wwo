@@ -31,7 +31,6 @@ const PRESENTATION_CONTROLLER_PRIORITY: Array[String] = [
 	"condominium_party",
 	"personal_sovereign",
 	"sovereign",
-	"claimant",
 	"legacy_controller",
 ]
 
@@ -304,9 +303,9 @@ func _legacy_relationship_type(relationship: String) -> String:
 	match relationship:
 		"military_occupation":
 			return "occupier"
-		"controlled_territory", "crown_colony":
+		"controlled_territory", "crown_colony", "administered_territory":
 			return "administrator"
-		"protectorate", "protected_state":
+		"protectorate", "protected_state", "protected_territory":
 			return "protector"
 		"condominium":
 			return "condominium_party"
