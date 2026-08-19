@@ -9,6 +9,7 @@ const SAVE_PATH: String = "user://formal_world_1900.json"
 const SCHEMA_ID: String = "formal_world_simulation_v2"
 
 var economy := FormalWorldEconomyService.new()
+var authority := HistoricalAuthorityModel.new()
 var initialized: bool = false
 var initialization_error: String = ""
 var total_minutes: int = 0
@@ -28,6 +29,10 @@ func initialize() -> bool:
 	total_minutes = 0
 	if not economy.configure():
 		initialization_error = economy.initialization_error
+		initialized = false
+		return false
+	if not authority.configure_from_path(FormalWorldEconomyService.POLITICAL_UNITS_PATH):
+		initialization_error = authority.initialization_error
 		initialized = false
 		return false
 	initialized = true
@@ -65,7 +70,60 @@ func country_summary(entity_id: String) -> Dictionary:
 
 
 func polity_summary(entity_id: String) -> Dictionary:
-	return economy.polity_summary(entity_id)
+	var result := economy.polity_summary(entity_id)
+	if result.is_empty():
+		return result
+	# controller_id remains a deterministic presentation compatibility value.
+	# sovereign_id is populated only from an explicit sovereign relation.
+	result["controller_id"] = authority.legacy_presentation_controller(entity_id)
+	result["sovereign_id"] = authority.first_sovereign_id(entity_id)
+	return result
+
+
+func get_authority_relations(entity_id: String) -> Array[Dictionary]:
+	return authority.get_authority_relations(entity_id)
+
+
+func get_relations_by_type(
+	entity_id: String, relationship_type: String
+) -> Array[Dictionary]:
+	return authority.get_relations_by_type(entity_id, relationship_type)
+
+
+func get_sovereigns(entity_id: String) -> Array[Dictionary]:
+	return authority.get_sovereigns(entity_id)
+
+
+func get_protectors(entity_id: String) -> Array[Dictionary]:
+	return authority.get_protectors(entity_id)
+
+
+func get_administrators(entity_id: String) -> Array[Dictionary]:
+	return authority.get_administrators(entity_id)
+
+
+func get_occupiers(entity_id: String) -> Array[Dictionary]:
+	return authority.get_occupiers(entity_id)
+
+
+func get_de_facto_controllers(entity_id: String) -> Array[Dictionary]:
+	return authority.get_de_facto_controllers(entity_id)
+
+
+func get_foreign_relations_controllers(entity_id: String) -> Array[Dictionary]:
+	return authority.get_foreign_relations_controllers(entity_id)
+
+
+func get_claimants(entity_id: String) -> Array[Dictionary]:
+	return authority.get_claimants(entity_id)
+
+
+func get_active_relations(entity_id: String, date: String) -> Array[Dictionary]:
+	return authority.get_active_relations(entity_id, date)
+
+
+func legacy_presentation_controller(entity_id: String) -> String:
+	return authority.legacy_presentation_controller(entity_id)
 
 
 func has_polity(entity_id: String) -> bool:
