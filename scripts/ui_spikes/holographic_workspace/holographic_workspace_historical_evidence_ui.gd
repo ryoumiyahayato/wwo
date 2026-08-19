@@ -1,4 +1,4 @@
-extends "res://scripts/ui_spikes/holographic_workspace/holographic_workspace_historical_evidence.gd"
+extends "res://scripts/ui_spikes/holographic_workspace/holographic_workspace_historical_authority.gd"
 ## Presentation copy for the dated evidence provider.
 
 

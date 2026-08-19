@@ -94,6 +94,7 @@ Write-Host "`n=== World data audit regressions ==="
 if ($LASTEXITCODE -ne 0) { throw 'World data audit regression suite failed' }
 
 $tests = @(
+	@{ Name = 'Historical authority model'; Script = 'res://tests/formal/historical_authority_model_test.gd'; TimeoutSeconds = 180 },
 	@{ Name = 'Formal player release journey'; Script = 'res://tests/formal/formal_world_player_journey_smoke.gd'; TimeoutSeconds = 240 },
 	@{ Name = 'Formal Windows export resource contract'; Script = 'res://tests/formal/formal_world_export_resource_smoke.gd'; TimeoutSeconds = 180 },
     @{ Name = 'Formal world integration'; Script = 'res://tests/formal/formal_world_integration_test.gd'; TimeoutSeconds = 360 },
