@@ -15,6 +15,14 @@ The production evidence provider currently exposes only 50 bounded
 major-economy aggregates, classified `ESTIMATED` and
 `NEAR_1900_SUPPORTED`. It exposes no regional or city Population facts.
 
+The actual Formal product constructs exactly one `VNextMacroPopulation` in
+immutable evidence-owner mode from that provider. In this mode, total
+Population and its bounds/provenance are authoritative runtime demographic
+state, while age, sex, urban/rural, labor, demand, regional, and city detail
+remain unavailable. The zero-valued backing records used to bind canonical
+identities are not demographic observations and are never exposed through the
+evidence observation surface.
+
 The owned fields are deliberately limited to:
 
 - total population;
@@ -123,7 +131,21 @@ validate once per Population revision, then use the deterministic unit index.
 Repeated field lookups are O(1); settlement and snapshot are O(number of bound
 PopulationUnits). Snapshot output remains sorted by PopulationUnitId.
 
+Evidence-owner mode exposes `observation_at` and an immutable,
+deterministically ordered `observation_snapshot`. Each observation preserves
+the canonical `PopulationUnitId`, estimate and bounds, precision,
+applicability, dates, source/method/confidence, and provider/catalog lineage.
+Unsupported structural and geographic queries fail closed. Evidence-owner
+mode cannot settle or mutate.
+
 ## Snapshot and restore
+
+The Formal product's current Population state is immutable initialization
+evidence. It therefore persists only a compatibility reference containing the
+observation schema, provider/catalog revisions, fact count, and state kind;
+the 50-source-fact catalog is not copied into Formal saves. Restore validates
+that reference against the already constructed authority. Formal Economy
+state remains separately persisted and does not consume Population.
 
 The `vnext_macro_population_v4` snapshot stores the PopulationUnit contract,
 Population/provider/catalog revisions, per-unit fact lineage and the sorted

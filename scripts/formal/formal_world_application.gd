@@ -31,6 +31,11 @@ var formal_simulation := FormalWorldSimulation.new()
 var product_runtime_gate := ProductRuntimeGate.new()
 var _vnext_spatial_world: VNextSpatialWorld = null
 var product_spatial_projection := ProductSpatialProjection.new()
+var _population_evidence_provider: VNextPopulationEvidenceProvider = null
+var _vnext_population: VNextMacroPopulation = null
+var _population_crosswalk: VNextTypedCrosswalkCatalog = null
+var _economic_region_catalog: VNextEconomicRegionCatalog = null
+var product_population_projection := ProductPopulationProjection.new()
 var economy_panel_open: bool = false
 var developer_mode_enabled: bool = false
 var _formal_status: String = ""
@@ -38,10 +43,14 @@ var _last_summary: Dictionary = {}
 var _packaged_probe_failures: int = 0
 var _spatial_initial_snapshot: Dictionary = {}
 var _spatial_construction_usec: int = 0
+var _population_construction_usec: int = 0
+var _population_snapshot_usec: int = 0
+var _selected_population_unit_id: String = ""
 
 
 func _ready() -> void:
 	_construct_vnext_spatial_runtime()
+	_construct_vnext_population_runtime()
 	active_character_key = "product_session"
 	activity_unread = 0
 	history_war_layer_visible = false
@@ -49,6 +58,8 @@ func _ready() -> void:
 	_clear_rejected_presentation_state()
 	if _vnext_spatial_world == null or not product_spatial_projection.is_valid():
 		_data_errors.append("vNext Spatial product owner failed to initialize")
+	if _vnext_population == null or not product_population_projection.is_valid():
+		_data_errors.append("vNext Population product owner failed to initialize")
 	if not formal_simulation.initialize():
 		_formal_status = "正式世界初始化失败：%s" % formal_simulation.initialization_error
 		_data_errors.append(_formal_status)
@@ -103,6 +114,25 @@ func _run_packaged_player_baseline_probe() -> void:
 	_packaged_probe_require(
 		product_spatial_projection.normal_city_views(PACKAGED_PROBE_ENTITY_ID).is_empty(),
 		"prototype Spatial城市被提升为1900正式城市真相"
+	)
+	_packaged_probe_require(
+		_vnext_population != null
+		and _vnext_population.is_read_only_evidence_owner()
+		and product_population_projection.is_valid()
+		and product_population_projection.owner_instance_id()
+			== _vnext_population.get_instance_id()
+		and product_population_projection.supported_fact_count() == 50,
+		"正式产品未构造唯一只读vNext Population运行时"
+	)
+	var population_selection := product_population_projection.geographic_selection_view(
+		PACKAGED_PROBE_ENTITY_ID, _political_query_date()
+	)
+	_packaged_probe_require(
+		str(population_selection.get("status", ""))
+			== ProductPopulationProjection.GEOGRAPHIC_UNAVAILABLE
+		and not bool(population_selection.get("crosswalk_used", true))
+		and population_selection.get("population") == null,
+		"无有效crosswalk时政治单元被错误映射为Population"
 	)
 	_packaged_probe_require(_missing_flag_record_ids.is_empty(), "历史旗帜资源存在缺失")
 	var evidence := historical_evidence_report()
@@ -164,7 +194,7 @@ func _run_packaged_player_baseline_probe() -> void:
 			"Packaged player baseline probe: %d failures" % _packaged_probe_failures
 		)
 	else:
-		print("Packaged player baseline probe: title, world, polity, resource, and time passed")
+		print("Packaged player baseline probe: title, world, polity, Population, resource, and time passed")
 	get_tree().quit(1 if _packaged_probe_failures > 0 else 0)
 
 
@@ -290,6 +320,42 @@ func _construct_vnext_spatial_runtime() -> bool:
 	_spatial_initial_snapshot = world.snapshot()
 	_spatial_construction_usec = Time.get_ticks_usec() - started_usec
 	return true
+
+
+func _construct_vnext_population_runtime() -> bool:
+	var started_usec := Time.get_ticks_usec()
+	var provider := VNextPopulationEvidenceProvider.new()
+	if not provider.load_current_evidence():
+		_population_construction_usec = Time.get_ticks_usec() - started_usec
+		return false
+	var population := VNextMacroPopulation.create_from_evidence(provider)
+	if population == null or not population.is_read_only_evidence_owner():
+		_population_construction_usec = Time.get_ticks_usec() - started_usec
+		return false
+	var crosswalk := VNextTypedCrosswalkCatalog.new()
+	if not crosswalk.load_records([], "product_population_crosswalk_empty_v1"):
+		_population_construction_usec = Time.get_ticks_usec() - started_usec
+		return false
+	var economic_regions := VNextEconomicRegionCatalog.new()
+	if not economic_regions.initialize_empty():
+		_population_construction_usec = Time.get_ticks_usec() - started_usec
+		return false
+	var projection := ProductPopulationProjection.new()
+	if not projection.initialize(population, provider, crosswalk, economic_regions):
+		_population_construction_usec = Time.get_ticks_usec() - started_usec
+		return false
+	_population_evidence_provider = provider
+	_vnext_population = population
+	_population_crosswalk = crosswalk
+	_economic_region_catalog = economic_regions
+	product_population_projection = projection
+	var population_ids: Array[String] = projection.population_unit_ids()
+	_selected_population_unit_id = population_ids[0] if not population_ids.is_empty() else ""
+	_population_construction_usec = Time.get_ticks_usec() - started_usec
+	var snapshot_started_usec := Time.get_ticks_usec()
+	var observation_snapshot: Dictionary = projection.observation_snapshot()
+	_population_snapshot_usec = Time.get_ticks_usec() - snapshot_started_usec
+	return int(observation_snapshot.get("supported_fact_count", -1)) == 50
 
 
 func _synchronize_spatial_time() -> bool:
@@ -492,6 +558,10 @@ func _draw_active_hud_panel() -> void:
 			_draw_infrastructure_actual_panel(rect)
 		"spatial_reference":
 			_draw_spatial_reference_panel(rect)
+		"population":
+			_draw_population_panel(rect)
+		"population_evidence":
+			_draw_population_evidence_panel(rect)
 		"integration":
 			_draw_integration_panel(rect)
 		"provenance":
@@ -520,15 +590,87 @@ func _draw_integration_panel(rect: Rect2) -> void:
 		"INFRASTRUCTURE HISTORY — NOT AVAILABLE",
 		"TIME — ACTIVE · FormalWorldSimulation",
 		"ECONOMY — ACTIVE · FormalWorldEconomyService",
+		"VNEXT POPULATION — ACTIVE · 50 estimated aggregate facts",
+		"POPULATION GEOGRAPHIC PROJECTION — NOT AVAILABLE · 0 mappings",
+		"FORMAL ECONOMY CONSUMES VNEXT POPULATION — NO",
+		"ECONOMIC GEOGRAPHY — EMPTY / NOT AVAILABLE",
 		"E1 PRODUCT INTEGRATION — NO",
 	]
-	_draw_panel_lines(rect, 84.0, lines, Color(0.82, 0.86, 0.80, 0.98), 11)
-	_draw_label(rect.position + Vector2(28.0, rect.size.y - 72.0), "L local · C city · I infrastructure · R developer reference · F12 owners", 9, Color(0.91, 0.72, 0.43, 0.96))
+	_draw_panel_lines(rect, 84.0, lines, Color(0.82, 0.86, 0.80, 0.98), 10)
+	_draw_label(rect.position + Vector2(28.0, rect.size.y - 72.0), "N Population · L local · C city · I infrastructure · F12 owners", 9, Color(0.91, 0.72, 0.43, 0.96))
 	var button_y := rect.end.y - 48.0
-	_draw_button(Rect2(rect.position.x + 28.0, button_y, 82.0, 28.0), "LOCAL", "product_local_geography", true)
-	_draw_button(Rect2(rect.position.x + 120.0, button_y, 82.0, 28.0), "CITY", "product_city_status", true)
-	_draw_button(Rect2(rect.position.x + 212.0, button_y, 118.0, 28.0), "INFRASTRUCTURE", "product_infrastructure", true)
+	_draw_button(Rect2(rect.position.x + 28.0, button_y, 112.0, 28.0), "POPULATION", "product_population", true)
+	_draw_button(Rect2(rect.position.x + 150.0, button_y, 82.0, 28.0), "LOCAL", "product_local_geography", true)
+	_draw_button(Rect2(rect.position.x + 242.0, button_y, 82.0, 28.0), "CITY", "product_city_status", true)
 	_draw_button(Rect2(rect.end.x - 190.0, button_y, 162.0, 28.0), "DEVELOPER OWNERS", "product_enable_provenance", true)
+
+
+func _draw_population_panel(rect: Rect2) -> void:
+	_draw_label(rect.position + Vector2(28.0, 44.0), "POPULATION", 22, Color(0.95, 0.84, 0.58, 1.0))
+	var status: Dictionary = _population_runtime_status()
+	var selection: Dictionary = product_population_projection.geographic_selection_view(
+		_spatial_selected_country_id(), _political_query_date()
+	)
+	var lines: Array[String] = [
+		"OWNER — ACTIVE · VNextMacroPopulation · AUTHORITATIVE DEMOGRAPHIC OWNER",
+		"SUPPORTED FACTS — %d bounded aggregate estimates" % int(status.get("supported_fact_count", 0)),
+		"PRECISION — ESTIMATED",
+		"APPLICABILITY — NEAR_1900_SUPPORTED",
+		"PROVIDER — %s" % str(status.get("provider_revision", "NOT AVAILABLE")),
+		"GEOGRAPHIC CROSSWALK — %s · %d records" % [
+			str(status.get("crosswalk_status", "NOT AVAILABLE")),
+			int(status.get("crosswalk_count", -1)),
+		],
+		"SELECTED POLITICAL UNIT — %s" % str(selection.get("political_unit_id", "NONE")),
+		"POPULATION — %s" % str(selection.get("status", ProductPopulationProjection.GEOGRAPHIC_UNAVAILABLE)),
+		"No zero, allocation, regional estimate, city value, labor, or demand is inferred.",
+	]
+	_draw_panel_lines(rect, 84.0, lines, Color(0.82, 0.86, 0.80, 0.98), 10)
+	_draw_label(
+		rect.position + Vector2(28.0, rect.size.y - 78.0),
+		"Runtime authority is not a claim of exact historical observation.",
+		9,
+		Color(0.94, 0.68, 0.39, 1.0)
+	)
+	_draw_button(
+		Rect2(rect.position.x + 28.0, rect.end.y - 48.0, 178.0, 28.0),
+		"INSPECT EVIDENCE",
+		"product_population_evidence",
+		true
+	)
+
+
+func _draw_population_evidence_panel(rect: Rect2) -> void:
+	_draw_label(rect.position + Vector2(28.0, 44.0), "POPULATION EVIDENCE", 22, Color(0.95, 0.84, 0.58, 1.0))
+	var fact: Dictionary = product_population_projection.evidence_at(
+		_selected_population_unit_id
+	)
+	if fact.is_empty():
+		_draw_unavailable_panel(rect, "POPULATION EVIDENCE", "No supported aggregate fact is available.", "No substitute is generated.")
+		return
+	var provenance: Dictionary = fact.get("provenance", {}) as Dictionary
+	var lines: Array[String] = [
+		"AUTHORITATIVE RUNTIME DEMOGRAPHIC STATE · NOT AN EXACT OBSERVATION",
+		"PopulationUnitId — %s" % str(fact.get("population_unit_id", "")),
+		"Estimate — %d" % int(fact.get("total_population", -1)),
+		"Bounds — %d to %d" % [int(fact.get("lower_bound", -1)), int(fact.get("upper_bound", -1))],
+		"Confidence — %d bp" % int(fact.get("confidence_bp", -1)),
+		"Precision — %s" % str(provenance.get("precision", "UNKNOWN")),
+		"Applicability — %s" % str(provenance.get("applicability", "UNAVAILABLE")),
+		"Support / reference — %s / %s" % [
+			str(provenance.get("valid_from", "")), str(provenance.get("reference_date", "")),
+		],
+		"Provider revision — %s" % str(fact.get("provider_revision", "")),
+		"Method — %s" % str(fact.get("method", "")),
+		"Age / sex / urban-rural / labor / demand — NOT AVAILABLE",
+	]
+	_draw_panel_lines(rect, 82.0, lines, Color(0.82, 0.86, 0.80, 0.98), 9)
+	_draw_button(
+		Rect2(rect.position.x + 28.0, rect.end.y - 48.0, 180.0, 28.0),
+		"POPULATION STATUS",
+		"product_population",
+		true
+	)
 
 
 func _draw_local_geography_panel(rect: Rect2) -> void:
@@ -618,6 +760,32 @@ func _spatial_selected_country_id() -> String:
 	return "country_fra"
 
 
+func _population_runtime_status() -> Dictionary:
+	if _vnext_population == null or not product_population_projection.is_valid():
+		return {
+			"status": "NOT INTEGRATED",
+			"supported_fact_count": 0,
+			"crosswalk_status": "NOT AVAILABLE",
+			"crosswalk_count": -1,
+			"economic_geography_status": "NOT AVAILABLE",
+		}
+	return {
+		"status": "ACTIVE",
+		"owner": "VNextMacroPopulation",
+		"mode": "AUTHORITATIVE DEMOGRAPHIC OWNER",
+		"supported_fact_count": product_population_projection.supported_fact_count(),
+		"provider_revision": product_population_projection.provider_revision(),
+		"catalog_revision": product_population_projection.catalog_revision(),
+		"precision": VNextFactProvenance.ESTIMATED,
+		"applicability": VNextFactProvenance.NEAR_1900_SUPPORTED,
+		"crosswalk_status": product_population_projection.crosswalk_status(),
+		"crosswalk_count": product_population_projection.crosswalk_count(),
+		"geographic_projection": "LIMITED / NOT AVAILABLE",
+		"economic_geography_status": product_population_projection.economic_geography_status(),
+		"formal_economy_consumer": false,
+	}
+
+
 func _draw_provenance_panel(rect: Rect2) -> void:
 	var provenance := product_runtime_provenance()
 	var presentation := provenance.get("presentation_state", {}) as Dictionary
@@ -642,9 +810,9 @@ func _draw_provenance_panel(rect: Rect2) -> void:
 		var owner_text := "%s: %s" % [str(owner.get("label", "OWNER")), str(owner.get("status", ""))]
 		if str(owner.get("owner", "NONE")) != "NONE":
 			owner_text += " · %s · %s" % [str(owner.get("owner", "")), str(owner.get("mode", ""))]
-		_draw_label(rect.position + Vector2(28.0, y), owner_text, 9, Color(0.82, 0.86, 0.80, 0.98))
-		y += 21.0
-	_draw_label(rect.position + Vector2(28.0, y + 4.0), "E1 PRODUCT INTEGRATION: NO", 10, Color(0.94, 0.68, 0.39, 1.0))
+		_draw_label(rect.position + Vector2(28.0, y), owner_text, 8, Color(0.82, 0.86, 0.80, 0.98))
+		y += 18.0
+	_draw_label(rect.position + Vector2(28.0, y + 3.0), "E1 PRODUCT INTEGRATION: NO", 9, Color(0.94, 0.68, 0.39, 1.0))
 
 
 func _runtime_owner_specs() -> Array[Dictionary]:
@@ -674,6 +842,17 @@ func _runtime_owner_specs() -> Array[Dictionary]:
 	var local_status := product_spatial_projection.historical_local_geography_status(country_id)
 	var city_status := product_spatial_projection.historical_city_status(country_id)
 	var infrastructure_status := product_spatial_projection.infrastructure_historical_status(country_id)
+	var population_active := (
+		_vnext_population != null
+		and _vnext_population.is_read_only_evidence_owner()
+		and product_population_projection.is_valid()
+	)
+	var population_mode := (
+		"AUTHORITATIVE DEMOGRAPHIC OWNER · %d ESTIMATED FACTS"
+		% product_population_projection.supported_fact_count()
+		if population_active
+		else ""
+	)
 	return [
 		{"label": "PRODUCT ENTRY", "owner": self, "mode": "AUTHORITATIVE"},
 		{"label": "WORLD/POLITICAL OWNER", "owner": self if political_active else null, "mode": political_mode},
@@ -684,8 +863,10 @@ func _runtime_owner_specs() -> Array[Dictionary]:
 		{"label": "INFRASTRUCTURE HISTORICAL STATUS", "owner": null, "status": str(infrastructure_status.get("status", "NOT AVAILABLE")), "mode": str(infrastructure_status.get("applicability", "UNAVAILABLE"))},
 		{"label": "TIME OWNER", "owner": formal_simulation if formal_simulation.initialized else null, "mode": "AUTHORITATIVE"},
 		{"label": "ECONOMY OWNER", "owner": formal_simulation.economy if formal_simulation.initialized else null, "mode": "AUTHORITATIVE"},
-		{"label": "POPULATION OWNER", "owner": null, "detail": "Aggregate economy inputs are not a population simulation."},
+		{"label": "POPULATION OWNER", "owner": _vnext_population if population_active else null, "mode": population_mode},
+		{"label": "POPULATION GEOGRAPHIC PROJECTION", "owner": null, "status": "NOT AVAILABLE", "mode": "0 VALIDATED MAPPINGS"},
 		{"label": "VNEXT POPULATION CONSUMER", "owner": null, "status": "NO", "detail": "Formal Economy remains transitional."},
+		{"label": "ECONOMIC GEOGRAPHY STATUS", "owner": null, "status": product_population_projection.economic_geography_status(), "mode": "NO REGIONS OR MEMBERSHIPS"},
 		{"label": "ORGANIZATION OWNER", "owner": null},
 		{"label": "POLITICS OWNER", "owner": null},
 		{"label": "MILITARY OWNER", "owner": null},
@@ -705,7 +886,7 @@ func _domain_owner_state() -> Dictionary:
 		"vnext_spatial": {"owner": _vnext_spatial_world, "claimed_active": _vnext_spatial_world != null and _vnext_spatial_world.is_valid()},
 		"time": {"owner": formal_simulation if formal_simulation.initialized else null, "claimed_active": formal_simulation.initialized},
 		"economy": {"owner": formal_simulation.economy if formal_simulation.initialized else null, "claimed_active": formal_simulation.initialized},
-		"population": {"owner": null, "claimed_active": false},
+		"population": {"owner": _vnext_population, "claimed_active": _vnext_population != null and _vnext_population.is_read_only_evidence_owner()},
 		"organization": {"owner": null, "claimed_active": not _institutions.is_empty()},
 		"politics": {"owner": null, "claimed_active": not _world_events.is_empty() or not _country_profile.is_empty()},
 		"military": {"owner": null, "claimed_active": not _history_conflicts.is_empty() or history_war_layer_visible},
@@ -726,6 +907,12 @@ func _presentation_state() -> Dictionary:
 			0 if _vnext_spatial_world == null else _vnext_spatial_world.get_instance_id()
 		),
 		"spatial_projection_owner_instance_id": product_spatial_projection.owner_instance_id(),
+		"population_owner_instance_id": (
+			0 if _vnext_population == null else _vnext_population.get_instance_id()
+		),
+		"population_projection_owner_instance_id": product_population_projection.owner_instance_id(),
+		"population_supported_fact_count": product_population_projection.supported_fact_count(),
+		"population_crosswalk_count": product_population_projection.crosswalk_count(),
 	}
 
 
@@ -772,6 +959,14 @@ func runtime_evidence_snapshot() -> Dictionary:
 		"historical_city": product_spatial_projection.historical_city_status(country_id),
 		"historical_infrastructure": product_spatial_projection.infrastructure_historical_status(country_id),
 		"spatial_construction_usec": _spatial_construction_usec,
+		"population": _population_runtime_status(),
+		"population_observation": product_population_projection.observation_snapshot(),
+		"population_persistence_reference": product_population_projection.persistence_reference(),
+		"population_selection": product_population_projection.geographic_selection_view(
+			country_id, _political_query_date()
+		),
+		"population_construction_usec": _population_construction_usec,
+		"population_snapshot_usec": _population_snapshot_usec,
 		"legacy_prototype_content_visible": _prototype_presentation_count() > 0,
 		"synthetic_fixture": _fixture_dependency_count() > 0,
 	}
@@ -913,6 +1108,11 @@ func _time_source_description() -> String:
 
 
 func _load_formal_state() -> SaveOperationResult:
+	if not _population_runtime_compatible():
+		return SaveOperationResult.fail(
+			"population_runtime_revision_incompatible",
+			"Immutable Population runtime is incompatible; Formal state was not restored."
+		)
 	var result := formal_simulation.load_from_user()
 	if result.success:
 		_last_summary = formal_simulation.world_summary()
@@ -923,6 +1123,17 @@ func _load_formal_state() -> SaveOperationResult:
 				result.path
 			)
 	return result
+
+
+func _population_runtime_compatible() -> bool:
+	if (
+		_vnext_population == null
+		or _population_evidence_provider == null
+		or not product_population_projection.is_valid()
+	):
+		return false
+	var reference: Dictionary = product_population_projection.persistence_reference()
+	return product_population_projection.is_persistence_reference_compatible(reference)
 
 
 func _toggle_formal_economy_panel() -> void:
@@ -943,6 +1154,10 @@ func _save_formal_state_from_ui() -> void:
 
 
 func _load_formal_state_from_ui() -> void:
+	if not _population_runtime_compatible():
+		_formal_status = "Immutable Population runtime is incompatible; Formal state was not restored."
+		queue_redraw()
+		return
 	var result := formal_simulation.load_from_user()
 	_formal_status = result.message
 	if _formal_status.is_empty():
@@ -971,6 +1186,10 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	match key_event.keycode:
 		KEY_E:
 			_toggle_formal_economy_panel()
+		KEY_N:
+			_open_product_panel("population")
+		KEY_V:
+			_open_product_panel("population_evidence")
 		KEY_P:
 			_open_product_panel("politics")
 		KEY_O:
@@ -1226,6 +1445,10 @@ func _activate_button(action: String) -> void:
 		"product_spatial_reference":
 			developer_mode_enabled = true
 			_open_product_panel("spatial_reference")
+		"product_population":
+			_open_product_panel("population")
+		"product_population_evidence":
+			_open_product_panel("population_evidence")
 		"product_integration", "toggle_country_panel", "toggle_activity_panel", "mark_read":
 			_open_product_panel("integration")
 		"product_provenance":

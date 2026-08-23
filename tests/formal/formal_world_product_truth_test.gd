@@ -148,8 +148,8 @@ func _check_runtime_provenance(application: FormalWorldApplication) -> void:
 	var owners := _owners_by_label(provenance.get("owners", []) as Array)
 	_check(_owner_name(owners, "TIME OWNER") == "FormalWorldSimulation", "Formal clock owner is runtime-derived")
 	_check(_owner_name(owners, "ECONOMY OWNER") == "FormalWorldEconomyService", "Formal economy owner is runtime-derived")
+	_check(_owner_name(owners, "POPULATION OWNER") == "VNextMacroPopulation", "vNext Population owner is runtime-derived")
 	for absent_label: String in [
-		"POPULATION OWNER",
 		"ORGANIZATION OWNER",
 		"POLITICS OWNER",
 		"MILITARY OWNER",
@@ -165,6 +165,8 @@ func _check_runtime_provenance(application: FormalWorldApplication) -> void:
 		"spike_cities",
 		"false_domain_activation",
 		"default_entry",
+		"population_single_owner",
+		"population_geographic_crosswalk",
 	]:
 		_check(str(gate.get(gate_name, "")) == "PASS", "product integration gate passes: " + gate_name)
 

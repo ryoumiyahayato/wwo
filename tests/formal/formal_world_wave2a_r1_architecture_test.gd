@@ -455,15 +455,20 @@ func _test_actual_product_regression() -> void:
 		str(runtime_provenance.get("patch_sha256", "")),
 	])
 	_check(
-		str((owners.get("POPULATION OWNER", {}) as Dictionary).get("status", "")) == "NOT INTEGRATED"
+		str((owners.get("POPULATION OWNER", {}) as Dictionary).get("owner", ""))
+			== "VNextMacroPopulation"
+		and str((owners.get("POPULATION OWNER", {}) as Dictionary).get("status", "")) == "ACTIVE"
 		and str((owners.get("VNEXT POPULATION CONSUMER", {}) as Dictionary).get("status", "")) == "NO",
-		"R1-17/R1-18 no Economy consumer or product UI claims Population integration"
+		"R1 boundary remains intact when one Population owner activates without an Economy consumer"
 	)
 	var provenance_head := str(runtime_provenance.get("base_head", ""))
 	var worktree_status := str(runtime_provenance.get("working_tree_status", ""))
 	var patch_sha256 := str(runtime_provenance.get("patch_sha256", ""))
 	var review_patch_state := (
-		provenance_head == "18fe9c52d3f97505a50e3bcc6dc095aa8f217c7e"
+		provenance_head in [
+			"18fe9c52d3f97505a50e3bcc6dc095aa8f217c7e",
+			"063509e758fe1b4473964cbd5c043130338ce111",
+		]
 		and worktree_status == "DIRTY"
 		and patch_sha256.length() == 64
 	)

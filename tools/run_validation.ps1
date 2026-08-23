@@ -108,6 +108,7 @@ Write-Host "`n=== World data audit regressions ==="
 if ($LASTEXITCODE -ne 0) { throw 'World data audit regression suite failed' }
 
 $tests = @(
+	@{ Name = 'Wave 2B-1 Population runtime activation'; Script = 'res://tests/formal/formal_world_wave2b1_population_runtime_test.gd'; TimeoutSeconds = 180 },
 	@{ Name = 'Wave 2A-R1 architecture reconciliation'; Script = 'res://tests/formal/formal_world_wave2a_r1_architecture_test.gd'; TimeoutSeconds = 180 },
 	@{ Name = 'Wave 1 vNext Spatial product contract'; Script = 'res://tests/formal/formal_world_wave1_spatial_test.gd'; TimeoutSeconds = 180 },
 	@{ Name = 'Formal player release journey'; Script = 'res://tests/formal/formal_world_player_journey_smoke.gd'; TimeoutSeconds = 240 },
@@ -147,7 +148,7 @@ $tests = @(
 )
 
 if ($SkipLongTermBalance) {
-    Write-Host "`nSkipping the ten-year balance test because this invocation is scoped to Wave 0."
+    Write-Host "`nSkipping the ten-year balance test for this scoped integration validation."
     $tests = @($tests | Where-Object { $_.Name -ne 'Formal world ten-year balance' })
 }
 

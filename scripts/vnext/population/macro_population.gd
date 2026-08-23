@@ -4,6 +4,8 @@ extends RefCounted
 ## from the person roster and from the vNext runtime clock.
 
 const SNAPSHOT_SCHEMA_ID: String = "vnext_macro_population_v4"
+const OBSERVATION_SCHEMA_ID: String = "vnext_macro_population_observation_v1"
+const PERSISTENCE_REFERENCE_SCHEMA_ID: String = "vnext_macro_population_reference_v1"
 const MAX_JSON_SAFE_INTEGER: int = 9_007_199_254_740_991
 const MAX_SETTLEMENT_MONTHS_PER_CALL: int = 120_000
 const BASE_YEAR: int = 1900
@@ -19,6 +21,8 @@ var _population_revision: int = 0
 var _provider_revision: String = ""
 var _validated_revision: int = -1
 var _validated_result: bool = false
+var _read_only_evidence_owner: bool = false
+var _evidence_by_unit_id: Dictionary = {}
 
 
 func _init(
@@ -37,6 +41,30 @@ static func create(
 ) -> VNextMacroPopulation:
 	var population := VNextMacroPopulation.new()
 	if not population.initialize(geography_authority, initial_place_ids, provider_revision):
+		return null
+	return population
+
+
+static func create_from_evidence(
+	provider: VNextPopulationEvidenceProvider
+) -> VNextMacroPopulation:
+	if provider == null or not provider.is_loaded():
+		return null
+	var population := VNextMacroPopulation.new()
+	if not population.initialize(
+		provider.catalog(), provider.population_unit_ids(), provider.revision()
+	):
+		return null
+	var candidate_evidence: Dictionary = {}
+	for unit_id: String in provider.population_unit_ids():
+		var fact: Dictionary = provider.fact_at(unit_id)
+		if not _is_valid_total_evidence_fact(unit_id, fact):
+			return null
+		candidate_evidence[unit_id] = fact.duplicate(true)
+	population._read_only_evidence_owner = true
+	population._evidence_by_unit_id = candidate_evidence
+	population._validated_revision = -1
+	if not population.is_valid():
 		return null
 	return population
 
@@ -133,9 +161,22 @@ func _validate_full_state() -> bool:
 			or not VNextFactProvenance.is_valid(_lineage_by_unit_id[place_id] as Dictionary)
 		):
 			return false
+		if _read_only_evidence_owner:
+			if (
+				not _evidence_by_unit_id.has(place_id)
+				or not _is_valid_total_evidence_fact(
+					place_id, _evidence_by_unit_id[place_id] as Dictionary
+				)
+			):
+				return false
 	return (
 		ordered_seen.size() == _known_place_ids.size()
 		and _lineage_by_unit_id.size() == _known_place_ids.size()
+		and (
+			_evidence_by_unit_id.size() == _known_place_ids.size()
+			if _read_only_evidence_owner
+			else _evidence_by_unit_id.is_empty()
+		)
 		and _population_revision > 0
 		and not _provider_revision.is_empty()
 	)
@@ -149,6 +190,7 @@ func set_initial_state(
 ) -> bool:
 	if (
 		not is_valid()
+		or _read_only_evidence_owner
 		or not _known_place_ids.has(place_id)
 		or not _authority_has_population_unit_id(_geography_authority, place_id)
 		or _has_elapsed_settlement()
@@ -199,6 +241,9 @@ func record_count() -> int:
 func population_at(place_id: String) -> int:
 	if not is_valid():
 		return -1
+	if _read_only_evidence_owner:
+		var evidence: Dictionary = _evidence_by_unit_id.get(place_id, {}) as Dictionary
+		return int(evidence.get("total_population", -1))
 	var record: VNextMacroPopulationRecord = _trusted_record_at(place_id)
 	if record == null:
 		return -1
@@ -208,6 +253,8 @@ func population_at(place_id: String) -> int:
 func working_age_at(place_id: String) -> int:
 	if not is_valid():
 		return -1
+	if _read_only_evidence_owner:
+		return -1
 	var record: VNextMacroPopulationRecord = _trusted_record_at(place_id)
 	if record == null:
 		return -1
@@ -216,6 +263,8 @@ func working_age_at(place_id: String) -> int:
 
 func age_bucket_at(place_id: String, bucket_name: String) -> int:
 	if not is_valid():
+		return -1
+	if _read_only_evidence_owner:
 		return -1
 	var record: VNextMacroPopulationRecord = _trusted_record_at(place_id)
 	if record == null:
@@ -230,6 +279,8 @@ func age_18_40_at(place_id: String) -> int:
 func structure_at(place_id: String) -> Dictionary:
 	if not is_valid():
 		return {}
+	if _read_only_evidence_owner:
+		return {}
 	var record: VNextMacroPopulationRecord = _trusted_record_at(place_id)
 	if record == null:
 		return {}
@@ -239,6 +290,8 @@ func structure_at(place_id: String) -> Dictionary:
 func record_snapshot_at(place_id: String) -> Dictionary:
 	if not is_valid():
 		return {}
+	if _read_only_evidence_owner:
+		return observation_at(place_id)
 	var record: VNextMacroPopulationRecord = _trusted_record_at(place_id)
 	if record == null:
 		return {}
@@ -252,6 +305,64 @@ func record_snapshot_at(place_id: String) -> Dictionary:
 	}
 
 
+func is_read_only_evidence_owner() -> bool:
+	return is_valid() and _read_only_evidence_owner
+
+
+func supported_fact_count() -> int:
+	return _evidence_by_unit_id.size() if is_read_only_evidence_owner() else 0
+
+
+func catalog_revision() -> String:
+	return _geography_authority.revision() if is_valid() else ""
+
+
+func observation_at(unit_id: String) -> Dictionary:
+	if not is_read_only_evidence_owner() or not _evidence_by_unit_id.has(unit_id):
+		return {}
+	var result: Dictionary = (_evidence_by_unit_id[unit_id] as Dictionary).duplicate(true)
+	result["population_revision"] = _population_revision
+	result["provider_revision"] = _provider_revision
+	result["catalog_revision"] = _geography_authority.revision()
+	result["authority"] = "VNextMacroPopulation"
+	result["authoritative_runtime_demographic_state"] = true
+	result["exact_historical_observation"] = false
+	result["demographic_detail_status"] = "NOT AVAILABLE"
+	return result
+
+
+func observation_snapshot() -> Dictionary:
+	if not is_read_only_evidence_owner():
+		return {}
+	var facts: Array[Dictionary] = []
+	for unit_id: String in population_unit_ids():
+		var fact: Dictionary = observation_at(unit_id)
+		if fact.is_empty():
+			return {}
+		facts.append(fact)
+	return {
+		"schema_id": OBSERVATION_SCHEMA_ID,
+		"population_revision": _population_revision,
+		"provider_revision": _provider_revision,
+		"catalog_revision": _geography_authority.revision(),
+		"supported_fact_count": facts.size(),
+		"facts": facts,
+	}
+
+
+func persistence_reference() -> Dictionary:
+	if not is_read_only_evidence_owner():
+		return {}
+	return {
+		"schema_id": PERSISTENCE_REFERENCE_SCHEMA_ID,
+		"population_revision": _population_revision,
+		"provider_revision": _provider_revision,
+		"catalog_revision": _geography_authority.revision(),
+		"supported_fact_count": supported_fact_count(),
+		"state_kind": "IMMUTABLE_INITIALIZATION_DERIVED",
+	}
+
+
 func population_revision() -> int:
 	return _population_revision
 
@@ -262,6 +373,8 @@ func provider_revision() -> String:
 
 func last_settled_period_at(place_id: String) -> int:
 	if not is_valid():
+		return -1
+	if _read_only_evidence_owner:
 		return -1
 	var record: VNextMacroPopulationRecord = _trusted_record_at(place_id)
 	if record == null:
@@ -288,10 +401,7 @@ func aggregate_population(place_ids: Array[String]) -> int:
 		return -1
 	var result: int = 0
 	for place_id: String in normalized_ids:
-		var record: VNextMacroPopulationRecord = _trusted_record_at(place_id)
-		if record == null:
-			return -1
-		var population_value: int = record.total_population()
+		var population_value: int = population_at(place_id)
 		if population_value < 0 or population_value > MAX_JSON_SAFE_INTEGER - result:
 			return -1
 		result += population_value
@@ -300,6 +410,8 @@ func aggregate_population(place_ids: Array[String]) -> int:
 
 func aggregate_structure(place_ids: Array[String]) -> Dictionary:
 	if not is_valid():
+		return {}
+	if _read_only_evidence_owner:
 		return {}
 	var normalized_ids: Array[String] = _normalize_query_ids(place_ids)
 	if normalized_ids.is_empty() and not place_ids.is_empty():
@@ -329,6 +441,8 @@ func settle(
 	monthly_flows_by_place: Dictionary = {},
 	internal_migration_flows: Array = []
 ) -> bool:
+	if _read_only_evidence_owner:
+		return false
 	return settle_elapsed_months(
 		elapsed_months, monthly_flows_by_place, internal_migration_flows
 	)
@@ -339,6 +453,8 @@ func settle_elapsed_months(
 	monthly_flows_by_place: Dictionary = {},
 	internal_migration_flows: Array = []
 ) -> bool:
+	if _read_only_evidence_owner:
+		return false
 	return _settle_records(
 		elapsed_months,
 		-1,
@@ -354,6 +470,8 @@ func settle_absolute_months(
 	monthly_flows_by_place: Dictionary = {},
 	internal_migration_flows: Array = []
 ) -> bool:
+	if _read_only_evidence_owner:
+		return false
 	if not _is_valid_absolute_month(start_absolute_month):
 		return false
 	return _settle_records(
@@ -372,6 +490,8 @@ func settle_year_month(
 	monthly_flows_by_place: Dictionary = {},
 	internal_migration_flows: Array = []
 ) -> bool:
+	if _read_only_evidence_owner:
+		return false
 	var start_absolute_month: int = absolute_month_from_year_month(
 		start_year, start_month
 	)
@@ -389,6 +509,8 @@ func settle_year_month(
 func settle_internal_migration(
 	internal_migration_flows: Array
 ) -> bool:
+	if _read_only_evidence_owner:
+		return false
 	if (
 		not is_valid()
 		or not _has_elapsed_settlement()
@@ -419,6 +541,8 @@ func settle_internal_migration(
 func snapshot() -> Dictionary:
 	if not is_valid():
 		return {}
+	if _read_only_evidence_owner:
+		return observation_snapshot()
 	var records: Array[Dictionary] = []
 	for place_id: String in known_place_ids():
 		var record_view: Dictionary = record_snapshot_at(place_id)
@@ -436,7 +560,7 @@ func snapshot() -> Dictionary:
 
 
 func restore(snapshot_value: Dictionary) -> bool:
-	if not is_valid():
+	if not is_valid() or _read_only_evidence_owner:
 		return false
 	var candidate_snapshot: Dictionary = snapshot_value.duplicate(true)
 	if candidate_snapshot.size() != 6:
@@ -537,6 +661,26 @@ static func year_month_from_absolute_month(absolute_month: int) -> Dictionary:
 		"year": BASE_YEAR + year_offset,
 		"month": absolute_month % 12 + 1,
 	}
+
+
+static func _is_valid_total_evidence_fact(unit_id: String, fact: Dictionary) -> bool:
+	if str(fact.get("population_unit_id", "")) != unit_id:
+		return false
+	var total: int = int(fact.get("total_population", -1))
+	var lower: int = int(fact.get("lower_bound", -1))
+	var upper: int = int(fact.get("upper_bound", -1))
+	var confidence_bp: int = int(fact.get("confidence_bp", -1))
+	var provenance: Dictionary = fact.get("provenance", {}) as Dictionary
+	return (
+		VNextPopulationUnitId.is_valid(unit_id)
+		and total >= 0 and lower >= 0 and lower <= total and upper >= total
+		and confidence_bp >= 0 and confidence_bp <= VNextFactProvenance.BASIS_POINTS
+		and not str(fact.get("method", "")).is_empty()
+		and str(fact.get("source_classification", "")) == "BOUNDED_AGGREGATE_ESTIMATE"
+		and VNextFactProvenance.is_valid(provenance)
+		and str(provenance.get("precision", "")) == VNextFactProvenance.ESTIMATED
+		and str(provenance.get("applicability", "")) == VNextFactProvenance.NEAR_1900_SUPPORTED
+	)
 
 
 func _settle_records(

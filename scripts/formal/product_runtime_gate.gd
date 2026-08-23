@@ -59,6 +59,12 @@ func runtime_report(
 	var projection_owner_id := int(
 		presentation_state.get("spatial_projection_owner_instance_id", -1)
 	)
+	var population_owner_id := int(
+		presentation_state.get("population_owner_instance_id", 0)
+	)
+	var population_projection_owner_id := int(
+		presentation_state.get("population_projection_owner_instance_id", -1)
+	)
 	return {
 		"prototype_dependency": (
 			"PASS" if prototype_visible_count == 0 else "FAIL"
@@ -86,7 +92,18 @@ func runtime_report(
 		),
 		"spatial_single_owner": (
 			"PASS"
-			if spatial_owner_id > 0 and spatial_owner_id == projection_owner_id
+			if spatial_owner_id != 0 and spatial_owner_id == projection_owner_id
+			else "FAIL"
+		),
+		"population_single_owner": (
+			"PASS"
+			if population_owner_id != 0
+			and population_owner_id == population_projection_owner_id
+			else "FAIL"
+		),
+		"population_geographic_crosswalk": (
+			"PASS"
+			if int(presentation_state.get("population_crosswalk_count", -1)) == 0
 			else "FAIL"
 		),
 		"default_entry": (

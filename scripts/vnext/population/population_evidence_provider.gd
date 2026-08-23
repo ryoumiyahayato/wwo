@@ -1,7 +1,7 @@
 class_name VNextPopulationEvidenceProvider
 extends RefCounted
 ## Read-only production evidence boundary. It intentionally supplies no
-## regional or city facts and is not wired into the product root in Wave 2A-R1.
+## regional or city facts; Wave 2B-1 activates these aggregate facts unchanged.
 
 const SOURCE_PATH: String = "res://data/alpha/historical_world_economy_1900/countries_compact.json"
 const SOURCE_MANIFEST_PATH: String = "res://data/alpha/historical_world_economy_1900.json"
