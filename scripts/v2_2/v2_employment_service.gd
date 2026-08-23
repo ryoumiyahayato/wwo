@@ -253,6 +253,39 @@ func change_contract_status(
 	)
 
 
+func change_contract_status_by_id(
+	contract_id: String,
+	person_id: String,
+	status: String,
+	total_hour: int,
+	cause_event_id: String
+) -> V2LifeLoopResult:
+	if status not in ["active", "resigned", "dismissed", "retired"]:
+		return V2LifeLoopResult.fail(
+			"invalid_contract_status", "劳动合同状态无效", status
+		)
+	var contract: Dictionary = contracts.get(contract_id, {}) as Dictionary
+	if contract.is_empty():
+		return V2LifeLoopResult.fail("unknown_contract", "找不到劳动合同", contract_id)
+	if str(contract.get("person_id", "")) != person_id:
+		return V2LifeLoopResult.fail(
+			"contract_person_mismatch", "劳动合同不属于当前人物", contract_id
+		)
+	if str(contract.get("contract_status", "")) == status:
+		return V2LifeLoopResult.ok(
+			"劳动合同已经是目标状态",
+			{"contract": contract.duplicate(true), "already_changed": true}
+		)
+	contract["contract_status"] = status
+	contract["status_changed_datetime"] = V2DateTime.iso_from_total_hour(total_hour)
+	contract["status_cause_event_id"] = cause_event_id
+	contracts[contract_id] = contract
+	return V2LifeLoopResult.ok(
+		"劳动合同状态已更新", {"contract": contract.duplicate(true)},
+		[person_id, contract_id]
+	)
+
+
 func get_persistent_state() -> Dictionary:
 	return {
 		"contracts": contracts.duplicate(true),

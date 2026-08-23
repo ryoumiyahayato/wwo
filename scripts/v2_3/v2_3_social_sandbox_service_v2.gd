@@ -11,6 +11,10 @@ var _product: V23ProductSimulation
 var _submit_options: Dictionary = {}
 var _last_reservation_metadata: Dictionary = {}
 
+const EMPLOYMENT_BOUND_METHODS: PackedStringArray = [
+	"reliable_work", "ask_raise", "quit_job", "disobey_order",
+]
+
 
 func attach_product(product: V23ProductSimulation) -> void:
 	_product = product
@@ -46,6 +50,18 @@ func submit_intent(
 				method_id,
 				[actor_id, target_id]
 			)
+	var employment_contract_id: String = ""
+	if method_id in EMPLOYMENT_BOUND_METHODS:
+		employment_contract_id = _unique_active_employment_contract_id(
+			actor_id
+		)
+		if employment_contract_id.is_empty():
+			return V2LifeLoopResult.fail(
+				"employment_contract_required",
+				"该行动需要唯一且当前有效的劳动合同。",
+				method_id,
+				[actor_id]
+			)
 	var current_hour: int = int(options.get("current_hour", _last_processed_hour))
 	var requested_start: int = int(options.get("start_hour", -1))
 	if requested_start >= 0 and requested_start <= current_hour:
@@ -72,6 +88,8 @@ func submit_intent(
 		task["position_id"] = position_id
 	if not commitment_id.is_empty():
 		task["commitment_id"] = commitment_id
+	if not employment_contract_id.is_empty():
+		task["employment_contract_id"] = employment_contract_id
 	for raw_key: Variant in _last_reservation_metadata.keys():
 		task[str(raw_key)] = _last_reservation_metadata[raw_key]
 	if tasks.has(task_id):
@@ -582,6 +600,16 @@ func _prepare_proposal(
 			proposal["failure_step"] = "commitment_prerequisite"
 			proposal["failure_reason"] = commitment_failure
 			return proposal
+	if str(task.get("method_id", "")) in EMPLOYMENT_BOUND_METHODS:
+		var employment_failure: String = (
+			_current_employment_prerequisite_failure(task)
+		)
+		if not employment_failure.is_empty():
+			proposal["prepared"] = false
+			proposal["success"] = false
+			proposal["failure_step"] = "employment_prerequisite"
+			proposal["failure_reason"] = employment_failure
+			return proposal
 	if not bool(proposal.get("prepared", false)):
 		return proposal
 	var target_id: String = str(task.get("target_id", ""))
@@ -662,6 +690,30 @@ func _current_commitment_prerequisite_failure(task: Dictionary) -> String:
 		and str(commitment.get("beneficiary_id", "")) != target_id
 	):
 		return "计划对象已不是该承诺的受益人"
+	return ""
+
+
+func _current_employment_prerequisite_failure(task: Dictionary) -> String:
+	var contract_id: String = _employment_contract_id_for_task(task)
+	if contract_id.is_empty():
+		return "计划缺少可唯一重建的劳动合同关系"
+	var contract: Dictionary = _employment.contracts.get(contract_id, {}) as Dictionary
+	if contract.is_empty():
+		return "计划对应的劳动合同已不存在"
+	if str(contract.get("person_id", "")) != str(task.get("actor_id", "")):
+		return "计划人物已不是该劳动合同的雇员"
+	if str(contract.get("contract_status", "")) != "active":
+		return "计划对应的劳动合同已不再有效"
+	var employer_id: String = str(contract.get("employer_organization_id", ""))
+	var organization_id: String = str(task.get("organization_id", ""))
+	if not organization_id.is_empty() and employer_id != organization_id:
+		return "计划对应的雇主关系已经变化"
+	var workplace_id: String = str(contract.get("workplace_location_id", ""))
+	workplace_id = str(V23LifeLoopSimulation.LOCATION_ALIASES.get(
+		workplace_id, workplace_id
+	))
+	if workplace_id != str(task.get("location_id", "")):
+		return "计划对应的工作地点已经变化"
 	return ""
 
 
@@ -748,6 +800,8 @@ func _apply_effect(
 	match method_id:
 		"ask_raise":
 			return _apply_raise(task, event_id, current_hour)
+		"quit_job":
+			return _apply_bound_employment_exit(task, event_id, current_hour)
 		"support_candidate":
 			return _apply_candidate_support(task, 18, event_id, current_hour)
 		"oppose_candidate":
@@ -760,7 +814,8 @@ func _apply_effect(
 			)
 		"disobey_order":
 			return _adjust_employment_risk(
-				str(task.get("actor_id", "")), 80, event_id, current_hour
+				str(task.get("actor_id", "")), 80, event_id, current_hour,
+				_employment_contract_id_for_task(task)
 			)
 		"sabotage":
 			return _apply_task_sabotage(task, event_id, current_hour)
@@ -875,6 +930,46 @@ func _applicable_open_commitment_id(actor_id: String, target_id: String) -> Stri
 			candidate_ids.append(commitment_id)
 	candidate_ids.sort()
 	return candidate_ids.front() if not candidate_ids.is_empty() else ""
+
+
+func _unique_active_employment_contract_id(person_id: String) -> String:
+	var candidate_ids: Array[String] = []
+	for contract_id_variant: Variant in _employment.contracts.keys():
+		var contract_id: String = str(contract_id_variant)
+		var contract: Dictionary = _employment.contracts[contract_id] as Dictionary
+		if (
+			str(contract.get("person_id", "")) == person_id
+			and str(contract.get("contract_status", "")) == "active"
+		):
+			candidate_ids.append(contract_id)
+	candidate_ids.sort()
+	return candidate_ids.front() if candidate_ids.size() == 1 else ""
+
+
+func _employment_contract_id_for_task(task: Dictionary) -> String:
+	var bound_id: String = str(task.get("employment_contract_id", ""))
+	if not bound_id.is_empty():
+		return bound_id
+	var actor_id: String = str(task.get("actor_id", ""))
+	var organization_id: String = str(task.get("organization_id", ""))
+	var task_location_id: String = str(task.get("location_id", ""))
+	var candidate_ids: Array[String] = []
+	for contract_id_variant: Variant in _employment.contracts.keys():
+		var contract_id: String = str(contract_id_variant)
+		var contract: Dictionary = _employment.contracts[contract_id] as Dictionary
+		var workplace_id: String = str(contract.get("workplace_location_id", ""))
+		workplace_id = str(V23LifeLoopSimulation.LOCATION_ALIASES.get(
+			workplace_id, workplace_id
+		))
+		if (
+			str(contract.get("person_id", "")) == actor_id
+			and str(contract.get("contract_status", "")) == "active"
+			and str(contract.get("employer_organization_id", "")) == organization_id
+			and workplace_id == task_location_id
+		):
+			candidate_ids.append(contract_id)
+	candidate_ids.sort()
+	return candidate_ids.front() if candidate_ids.size() == 1 else ""
 
 
 func _proposal_conflict_keys(
@@ -1041,33 +1136,43 @@ func _apply_raise(
 	task: Dictionary, event_id: String, current_hour: int
 ) -> V2LifeLoopResult:
 	var actor_id: String = str(task.get("actor_id", ""))
-	for contract_id_variant: Variant in _employment.contracts.keys():
-		var contract_id: String = str(contract_id_variant)
-		var contract: Dictionary = _employment.contracts[contract_id] as Dictionary
-		if str(contract.get("person_id", "")) != actor_id:
-			continue
-		if str(contract.get("contract_status", "")) != "active":
-			return V2LifeLoopResult.fail("inactive_contract", "当前劳动合同不再有效")
-		var previous_wage: int = int(contract.get("base_wage_centimes", 0))
-		var increase: int = maxi(10, ceili(float(previous_wage) * 0.05))
-		contract["base_wage_centimes"] = previous_wage + increase
-		var history: Array = contract.get("wage_history", []) as Array
-		history.append({
-			"event_id": event_id,
-			"datetime": V2DateTime.iso_from_total_hour(current_hour),
-			"previous_wage_centimes": previous_wage,
-			"new_wage_centimes": previous_wage + increase,
-		})
-		while history.size() > 16:
-			history.pop_front()
-		contract["wage_history"] = history
-		_employment.contracts[contract_id] = contract
-		return V2LifeLoopResult.ok(
-			"加薪谈判改变了实际劳动合同",
-			{"contract": contract.duplicate(true), "wage_delta_centimes": increase},
-			[actor_id, contract_id]
-		)
-	return V2LifeLoopResult.fail("contract_not_found", "人物没有可谈判的劳动合同")
+	var contract_id: String = _employment_contract_id_for_task(task)
+	var contract: Dictionary = _employment.contracts.get(contract_id, {}) as Dictionary
+	if contract.is_empty() or str(contract.get("person_id", "")) != actor_id:
+		return V2LifeLoopResult.fail("contract_not_found", "人物没有可谈判的劳动合同")
+	if str(contract.get("contract_status", "")) != "active":
+		return V2LifeLoopResult.fail("inactive_contract", "当前劳动合同不再有效")
+	var previous_wage: int = int(contract.get("base_wage_centimes", 0))
+	var increase: int = maxi(10, ceili(float(previous_wage) * 0.05))
+	contract["base_wage_centimes"] = previous_wage + increase
+	var history: Array = contract.get("wage_history", []) as Array
+	history.append({
+		"event_id": event_id,
+		"datetime": V2DateTime.iso_from_total_hour(current_hour),
+		"previous_wage_centimes": previous_wage,
+		"new_wage_centimes": previous_wage + increase,
+	})
+	while history.size() > 16:
+		history.pop_front()
+	contract["wage_history"] = history
+	_employment.contracts[contract_id] = contract
+	return V2LifeLoopResult.ok(
+		"加薪谈判改变了实际劳动合同",
+		{"contract": contract.duplicate(true), "wage_delta_centimes": increase},
+		[actor_id, contract_id]
+	)
+
+
+func _apply_bound_employment_exit(
+	task: Dictionary, event_id: String, current_hour: int
+) -> V2LifeLoopResult:
+	return _employment.change_contract_status_by_id(
+		_employment_contract_id_for_task(task),
+		str(task.get("actor_id", "")),
+		"resigned",
+		current_hour,
+		event_id
+	)
 
 
 func _apply_candidate_support(
@@ -1108,10 +1213,13 @@ func _adjust_employment_risk(
 	person_id: String,
 	delta: int,
 	event_id: String,
-	current_hour: int
+	current_hour: int,
+	bound_contract_id: String = ""
 ) -> V2LifeLoopResult:
 	for contract_id_variant: Variant in _employment.contracts.keys():
 		var contract_id: String = str(contract_id_variant)
+		if not bound_contract_id.is_empty() and contract_id != bound_contract_id:
+			continue
 		var contract: Dictionary = _employment.contracts[contract_id] as Dictionary
 		if str(contract.get("person_id", "")) != person_id:
 			continue

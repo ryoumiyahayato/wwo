@@ -10,6 +10,9 @@ func _test_declared_conflicts(sandbox: V23SocialSandboxServiceV2) -> void:
 	_test_vacant_position_control()
 	_test_stale_commitment_revalidation()
 	_test_open_commitment_control()
+	_test_stale_employment_revalidation()
+	_test_active_employment_control()
+	_test_temporary_work_without_employment()
 
 
 func _test_stale_position_revalidation() -> void:
@@ -280,6 +283,143 @@ static func _successful_repay_events_for(
 		if (
 			str(event.get("task_id", "")) == task_id
 			and str(event.get("method_id", "")) == "repay_favor"
+			and bool(event.get("success", false))
+		):
+			count += 1
+	return count
+
+
+func _test_stale_employment_revalidation() -> void:
+	var simulation := V23ProductSimulationV2.new()
+	test.expect(simulation.initialize(), "过期劳动关系回归环境可初始化")
+	if not simulation.initialized:
+		return
+	var sandbox := simulation.social_sandbox as V23SocialSandboxServiceV2
+	var actor_id: String = V2LifeLoopSimulation.PIERRE_ID
+	var task: Dictionary = _submit_employment_task(
+		simulation, sandbox, actor_id, "reliable_work"
+	)
+	test.expect(not task.is_empty(), "通过正式沙盒建立劳动关系绑定任务")
+	if task.is_empty():
+		return
+	var task_id: String = str(task.get("task_id", ""))
+	var contract_id: String = str(task.get("employment_contract_id", ""))
+	test.expect(not contract_id.is_empty(), "劳动关系绑定任务保存具体合同 ID")
+	var snapshot: Dictionary = V23SaveService.new().build_snapshot(simulation)
+	var saved_sandbox: Dictionary = snapshot.get("social_sandbox_state", {}) as Dictionary
+	var saved_tasks: Dictionary = saved_sandbox.get("tasks", {}) as Dictionary
+	test.equal(
+		str((saved_tasks.get(task_id, {}) as Dictionary).get(
+			"employment_contract_id", ""
+		)),
+		contract_id,
+		"现有可扩展任务存档保留劳动合同绑定"
+	)
+	_cancel_other_social_tasks(sandbox, task_id)
+	var organization_before: Dictionary = simulation.organizations.get_persistent_state()
+	var contract_count_before: int = simulation.employment.contracts.size()
+	var termination: V2LifeLoopResult = simulation.employment.change_contract_status_by_id(
+		contract_id, actor_id, "resigned", simulation.clock.total_hours,
+		"test:earlier_employment_termination"
+	)
+	test.expect(termination.success, "通过权威就业 API 先行终止绑定合同")
+	if not termination.success:
+		return
+	var terminated_before: Dictionary = (
+		simulation.employment.contracts.get(contract_id, {}) as Dictionary
+	).duplicate(true)
+	var due_hour: int = int(task.get("end_hour", simulation.clock.total_hours + 1))
+	simulation.advance_hours(maxi(0, due_hour - simulation.clock.total_hours))
+	var stored_task: Dictionary = sandbox.tasks.get(task_id, {}) as Dictionary
+	test.equal(str(stored_task.get("status", "")), "failed", "过期劳动关系任务正常失败")
+	test.equal(str(stored_task.get("failure_step", "")), "employment_prerequisite", "失败归类为就业前置条件重验")
+	test.expect(str(stored_task.get("failure_step", "")) != "atomic_commit", "就业现实变化不归类为原子提交故障")
+	test.equal(simulation.employment.contracts.get(contract_id, {}), terminated_before, "先行合同终止状态和因果没有被回滚")
+	test.equal(simulation.employment.contracts.size(), contract_count_before, "过期任务没有创建替代劳动合同")
+	test.equal(simulation.organizations.get_persistent_state(), organization_before, "无关组织权威状态没有被过期任务改变")
+	test.equal(_successful_method_events_for(sandbox, task_id, "reliable_work"), 0, "过期任务没有虚假成功工作事件")
+
+
+func _test_active_employment_control() -> void:
+	var simulation := V23ProductSimulationV2.new()
+	test.expect(simulation.initialize(), "有效劳动关系控制环境可初始化")
+	if not simulation.initialized:
+		return
+	var sandbox := simulation.social_sandbox as V23SocialSandboxServiceV2
+	var task: Dictionary = _submit_employment_task(
+		simulation, sandbox, V2LifeLoopSimulation.PIERRE_ID, "reliable_work"
+	)
+	test.expect(not task.is_empty(), "有效劳动关系可建立正式工作任务")
+	if task.is_empty():
+		return
+	var task_id: String = str(task.get("task_id", ""))
+	task.erase("employment_contract_id")
+	sandbox.tasks[task_id] = task
+	test.equal(
+		sandbox._current_employment_prerequisite_failure(task), "",
+		"旧待处理任务可从唯一雇主和工作地点安全重建合同"
+	)
+	_cancel_other_social_tasks(sandbox, task_id)
+	var due_hour: int = int(task.get("end_hour", simulation.clock.total_hours + 1))
+	simulation.advance_hours(maxi(0, due_hour - simulation.clock.total_hours))
+	var stored_task: Dictionary = sandbox.tasks.get(task_id, {}) as Dictionary
+	test.expect(str(stored_task.get("status", "")) in ["completed", "failed"], "有效劳动关系任务进入既有结果管线")
+	test.expect(str(stored_task.get("failure_step", "")) != "employment_prerequisite", "当前有效合同不产生就业前置失败")
+
+
+func _test_temporary_work_without_employment() -> void:
+	var simulation := V23ProductSimulationV2.new()
+	test.expect(simulation.initialize(), "无合同临时工作控制环境可初始化")
+	if not simulation.initialized:
+		return
+	var actor_id: String = V2LifeLoopSimulation.PIERRE_ID
+	var contract: Dictionary = simulation.employment.contract_for_person(actor_id)
+	var termination: V2LifeLoopResult = simulation.employment.change_contract_status_by_id(
+		str(contract.get("contract_id", "")), actor_id, "resigned",
+		simulation.clock.total_hours, "test:temporary_work_no_employment"
+	)
+	test.expect(termination.success, "临时工作控制场景通过权威 API 结束既有合同")
+	var sandbox := simulation.social_sandbox as V23SocialSandboxServiceV2
+	var task: Dictionary = _submit_employment_task(
+		simulation, sandbox, actor_id, "temporary_work"
+	)
+	test.expect(not task.is_empty(), "临时工作不要求已有有效劳动合同")
+	if task.is_empty():
+		return
+	var task_id: String = str(task.get("task_id", ""))
+	_cancel_other_social_tasks(sandbox, task_id)
+	var due_hour: int = int(task.get("end_hour", simulation.clock.total_hours + 1))
+	simulation.advance_hours(maxi(0, due_hour - simulation.clock.total_hours))
+	var stored_task: Dictionary = sandbox.tasks.get(task_id, {}) as Dictionary
+	test.expect(str(stored_task.get("failure_step", "")) != "employment_prerequisite", "非就业绑定方法不进入就业前置重验")
+
+
+static func _submit_employment_task(
+	simulation: V23ProductSimulationV2,
+	sandbox: V23SocialSandboxServiceV2,
+	actor_id: String,
+	method_id: String
+) -> Dictionary:
+	var goal: Dictionary = _goal(sandbox.goals_for(actor_id), "maintenance")
+	var result: V2LifeLoopResult = sandbox.submit_intent(
+		actor_id,
+		str(goal.get("goal_id", "")),
+		method_id,
+		"",
+		"player",
+		{"current_hour": simulation.clock.total_hours, "preparation": 700}
+	)
+	return result.data.get("task", {}) as Dictionary if result.success else {}
+
+
+static func _successful_method_events_for(
+	sandbox: V23SocialSandboxServiceV2, task_id: String, method_id: String
+) -> int:
+	var count: int = 0
+	for event: Dictionary in sandbox.event_ledger:
+		if (
+			str(event.get("task_id", "")) == task_id
+			and str(event.get("method_id", "")) == method_id
 			and bool(event.get("success", false))
 		):
 			count += 1
