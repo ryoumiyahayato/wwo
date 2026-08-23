@@ -36,6 +36,16 @@ func submit_intent(
 			method_id,
 			[actor_id]
 		)
+	var commitment_id: String = ""
+	if method_id == "repay_favor":
+		commitment_id = _applicable_open_commitment_id(actor_id, target_id)
+		if commitment_id.is_empty():
+			return V2LifeLoopResult.fail(
+				"no_open_commitment",
+				"没有可以履行的既有承诺，不能安排偿还人情。",
+				method_id,
+				[actor_id, target_id]
+			)
 	var current_hour: int = int(options.get("current_hour", _last_processed_hour))
 	var requested_start: int = int(options.get("start_hour", -1))
 	if requested_start >= 0 and requested_start <= current_hour:
@@ -60,6 +70,8 @@ func submit_intent(
 	var position_id: String = _position_id_from_goal(goal)
 	if not position_id.is_empty():
 		task["position_id"] = position_id
+	if not commitment_id.is_empty():
+		task["commitment_id"] = commitment_id
 	for raw_key: Variant in _last_reservation_metadata.keys():
 		task[str(raw_key)] = _last_reservation_metadata[raw_key]
 	if tasks.has(task_id):
@@ -560,6 +572,16 @@ func _prepare_proposal(
 	task: Dictionary, current_hour: int
 ) -> Dictionary:
 	var proposal: Dictionary = super._prepare_proposal(task, current_hour)
+	if str(task.get("method_id", "")) == "repay_favor":
+		var commitment_failure: String = (
+			_current_commitment_prerequisite_failure(task)
+		)
+		if not commitment_failure.is_empty():
+			proposal["prepared"] = false
+			proposal["success"] = false
+			proposal["failure_step"] = "commitment_prerequisite"
+			proposal["failure_reason"] = commitment_failure
+			return proposal
 	if not bool(proposal.get("prepared", false)):
 		return proposal
 	var target_id: String = str(task.get("target_id", ""))
@@ -579,14 +601,13 @@ func _prepare_proposal(
 	var position_id: String = str(task.get("position_id", ""))
 	if not position_id.is_empty():
 		proposal["conflict_key"] = position_id
-		var membership: Dictionary = _organizations.get_membership(
-			str(task.get("actor_id", "")),
-			str(_organizations.get_position(position_id).get("organization_id", ""))
-		)
-		if int(membership.get("participation", 0)) < 200:
+		var position_failure: String = _current_position_prerequisite_failure(task)
+		if not position_failure.is_empty():
+			proposal["prepared"] = false
 			proposal["success"] = false
 			proposal["failure_step"] = "position_prerequisite"
-			proposal["failure_reason"] = "组织参与不足，尚不能直接取得职位"
+			proposal["failure_reason"] = position_failure
+			return proposal
 	proposal["guaranteed_success"] = false
 	if bool(proposal.get("prepared", false)):
 		proposal["success"] = int(proposal.get("roll", 1000)) < int(
@@ -596,6 +617,52 @@ func _prepare_proposal(
 			proposal["failure_step"] = "outcome_resolution"
 			proposal["failure_reason"] = "方法已执行，但结果未达到成功条件"
 	return proposal
+
+
+func _current_position_prerequisite_failure(task: Dictionary) -> String:
+	var position_id: String = str(task.get("position_id", ""))
+	var position: Dictionary = _organizations.get_position(position_id)
+	if position.is_empty():
+		return "组织职位已不存在"
+	var expected_organization_id: String = str(task.get("organization_id", ""))
+	var current_organization_id: String = str(position.get("organization_id", ""))
+	if (
+		expected_organization_id.is_empty()
+		or current_organization_id != expected_organization_id
+	):
+		return "组织职位已不属于计划中的组织"
+	var actor_id: String = str(task.get("actor_id", ""))
+	var membership: Dictionary = _organizations.get_membership(
+		actor_id, current_organization_id
+	)
+	if (
+		membership.is_empty()
+		or str(membership.get("status", "active")) != "active"
+	):
+		return "人物已不再是该组织的有效成员"
+	if int(membership.get("participation", 0)) < 200:
+		return "当前组织参与不足，尚不能直接取得职位"
+	if not str(position.get("holder_person_id", "")).is_empty():
+		return "职位已不再空缺"
+	return ""
+
+
+func _current_commitment_prerequisite_failure(task: Dictionary) -> String:
+	var commitment_id: String = str(task.get("commitment_id", ""))
+	var commitment: Dictionary = commitments.get(commitment_id, {}) as Dictionary
+	if commitment.is_empty():
+		return "计划对应的既有承诺已不存在"
+	if str(commitment.get("status", "")) != "open":
+		return "计划对应的既有承诺已不再开放"
+	if str(commitment.get("promisor_id", "")) != str(task.get("actor_id", "")):
+		return "计划人物已不是该承诺的承诺人"
+	var target_id: String = str(task.get("target_id", ""))
+	if (
+		not target_id.is_empty()
+		and str(commitment.get("beneficiary_id", "")) != target_id
+	):
+		return "计划对象已不是该承诺的受益人"
+	return ""
 
 
 func _resolve_batch(
@@ -729,7 +796,41 @@ func _apply_effect(
 			return _organizations.claim_position(
 				str(task.get("actor_id", "")), position_id, current_hour, event_id
 			)
+		"repay_favor":
+			return _settle_task_commitment(task, event_id, current_hour)
 	return super._apply_effect(task, method, event_id, current_hour, discovered)
+
+
+func _settle_task_commitment(
+	task: Dictionary, event_id: String, current_hour: int
+) -> V2LifeLoopResult:
+	var failure_reason: String = _current_commitment_prerequisite_failure(task)
+	if not failure_reason.is_empty():
+		return V2LifeLoopResult.fail(
+			"no_open_commitment", failure_reason,
+			str(task.get("commitment_id", ""))
+		)
+	var commitment_id: String = str(task.get("commitment_id", ""))
+	var commitment: Dictionary = commitments[commitment_id] as Dictionary
+	commitment["status"] = "kept"
+	commitment["settled_event_id"] = event_id
+	commitment["settled_hour"] = current_hour
+	commitments[commitment_id] = commitment
+	var actor_id: String = str(task.get("actor_id", ""))
+	var beneficiary_id: String = str(commitment.get("beneficiary_id", ""))
+	var relation: V2LifeLoopResult = _apply_relationship_effect(
+		actor_id, beneficiary_id, "promise_kept", event_id, current_hour
+	)
+	if not relation.success:
+		return relation
+	return V2LifeLoopResult.ok(
+		"承诺已经履行",
+		{
+			"commitment": commitment.duplicate(true),
+			"relationship": relation.data.duplicate(true),
+		},
+		[actor_id, beneficiary_id, commitment_id]
+	)
 
 
 func _settle_commitment(
@@ -756,6 +857,24 @@ func _settle_commitment(
 			"no_open_commitment", "没有可以履行的既有承诺，不能把偿还人情变成新承诺。"
 		)
 	return super._settle_commitment(actor_id, target_id, event_id, current_hour)
+
+
+func _applicable_open_commitment_id(actor_id: String, target_id: String) -> String:
+	var candidate_ids: Array[String] = []
+	for commitment_id_variant: Variant in commitments.keys():
+		var commitment_id: String = str(commitment_id_variant)
+		var commitment: Dictionary = commitments[commitment_id] as Dictionary
+		if (
+			str(commitment.get("promisor_id", "")) == actor_id
+			and str(commitment.get("status", "")) == "open"
+			and (
+				target_id.is_empty()
+				or str(commitment.get("beneficiary_id", "")) == target_id
+			)
+		):
+			candidate_ids.append(commitment_id)
+	candidate_ids.sort()
+	return candidate_ids.front() if not candidate_ids.is_empty() else ""
 
 
 func _proposal_conflict_keys(
