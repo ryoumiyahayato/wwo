@@ -14,6 +14,7 @@ var economy_panel_open: bool = true
 var _formal_status: String = ""
 var _last_summary: Dictionary = {}
 var _packaged_probe_failures: int = 0
+var _presented_political_revision: int = -1
 
 
 func _ready() -> void:
@@ -36,6 +37,7 @@ func _ready() -> void:
 				)
 		else:
 			_formal_status = "新的1900正式世界已建立。"
+		_sync_political_presentation(true)
 		_last_summary = formal_simulation.world_summary()
 	queue_redraw()
 	if PACKAGED_PROBE_ARGUMENT in OS.get_cmdline_user_args():
@@ -46,7 +48,15 @@ func _run_packaged_player_baseline_probe() -> void:
 	await get_tree().process_frame
 	_packaged_probe_require(formal_simulation.initialized, "正式模拟未初始化")
 	_packaged_probe_require(_data_errors.is_empty(), "正式模拟产生数据错误")
-	_packaged_probe_require(_history_entity_by_id.size() == 151, "历史政治单元数量不正确")
+	_packaged_probe_require(
+		_history_entity_by_id.size()
+		== formal_simulation.politics.active_entity_count(),
+		"地图没有使用日期政治权威的有效实体集合"
+	)
+	_packaged_probe_require(
+		_history_entity_by_id.size() == 146,
+		"1900-01-01有效政治单元数量不正确"
+	)
 	_packaged_probe_require(_missing_flag_record_ids.is_empty(), "历史旗帜资源存在缺失")
 	var evidence := historical_evidence_report()
 	_packaged_probe_require(
@@ -146,6 +156,7 @@ func _packaged_probe_require(condition: bool, message: String) -> void:
 func _advance_simulation_minutes(minutes: int) -> void:
 	if formal_simulation.initialized and minutes > 0:
 		_last_summary = formal_simulation.advance_minutes(minutes)
+		_sync_political_presentation()
 
 
 func _format_sim_datetime() -> String:
@@ -168,6 +179,7 @@ func _time_source_description() -> String:
 func _load_formal_state() -> SaveOperationResult:
 	var result := formal_simulation.load_from_user()
 	if result.success:
+		_sync_political_presentation(true)
 		_last_summary = formal_simulation.world_summary()
 	return result
 
@@ -199,6 +211,7 @@ func _load_formal_state_from_ui() -> void:
 			else "没有可恢复的正式世界存档。"
 		)
 	if result.success:
+		_sync_political_presentation(true)
 		_last_summary = formal_simulation.world_summary()
 	queue_redraw()
 
@@ -289,7 +302,11 @@ func _draw_formal_panel_header(rect: Rect2) -> void:
 	)
 	_draw_label(
 		rect.position + Vector2(20.0, 54.0),
-		"151个历史政治单元共同构成世界；50个主要政权使用高细节经济。",
+		"%d个日期有效政治单元（目录%d）；%d个主要政权运行高细节经济。" % [
+			int(_last_summary.get("world_political_unit_count", 0)),
+			int(_last_summary.get("political_catalog_record_count", 0)),
+			int(_last_summary.get("major_economy_count", 0)),
+		],
 		9,
 		Color(0.76, 0.81, 0.78, 0.95)
 	)
@@ -457,3 +474,33 @@ func _compact_integer(value: int) -> String:
 	if value >= 1000:
 		return "%.1f千" % (float(value) / 1000.0)
 	return str(value)
+
+
+func _rebuild_historical_political_world() -> void:
+	if formal_simulation.politics.is_configured():
+		_dated_units_document = {
+			"units": formal_simulation.politics.active_entities(),
+		}
+	super._rebuild_historical_political_world()
+
+
+func _sync_political_presentation(force: bool = false) -> void:
+	if not formal_simulation.initialized:
+		return
+	var revision := formal_simulation.politics.active_set_revision()
+	if not force and revision == _presented_political_revision:
+		return
+	var previous_selection := selected_country_id
+	_rebuild_historical_political_world()
+	_presented_political_revision = revision
+	if (
+		not previous_selection.is_empty()
+		and formal_simulation.politics.entity_exists(previous_selection)
+	):
+		selected_country_id = previous_selection
+	else:
+		selected_country_id = ""
+		hover_country_id = ""
+		selected_historical_territory_iso = ""
+	_mark_projection_dirty()
+	queue_redraw()
