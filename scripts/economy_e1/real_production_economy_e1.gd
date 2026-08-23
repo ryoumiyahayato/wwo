@@ -17,6 +17,42 @@ const PHASE_WAITING_FOR_TRANSPORT: String = "WAITING_FOR_TRANSPORT"
 const PHASE_ALLOCATED: String = "ALLOCATED"
 const HISTORY_LIMIT: int = 64
 const MAX_DIAGNOSTIC_ERRORS: int = 32
+const PERSISTENT_STATE_FIELDS: Array[String] = [
+	"catalog_identity", "cumulative_flows", "history", "industry_states",
+	"known_request_ids", "known_shipment_ids", "last_day_index", "market_states",
+	"next_shipment_sequence", "resource_states", "schema_id", "shipment_history", "shipments",
+]
+const MARKET_STATE_FIELDS: Array[String] = [
+	"daily_metrics", "demand", "enabled", "fulfilled", "inventory", "last_flow",
+	"market_id", "moving_average_daily_demand", "price", "region_id", "target_stock", "unmet",
+]
+const INDUSTRY_STATE_FIELDS: Array[String] = [
+	"daily_metrics", "input_buffers", "input_satisfaction_bp", "labor_satisfaction_bp",
+	"last_actual_output", "last_planned_output", "producer_id", "production_constraint_reason",
+	"region_id", "utilization_bp",
+]
+const RESOURCE_STATE_FIELDS: Array[String] = ["available_quantity", "resource_id"]
+const MARKET_DAILY_METRIC_FIELDS: Array[String] = [
+	"arrivals", "demand_allocations", "household_system_consumed", "shortage_bp", "stock_pressure_bp",
+]
+const INDUSTRY_DAILY_METRIC_FIELDS: Array[String] = ["output", "process_inputs_consumed", "replenished"]
+const DAILY_FLOW_FIELDS: Array[String] = [
+	"arrivals", "closing_industry_buffers", "closing_market_inventory", "dispatched",
+	"household_system_consumed", "losses", "moved_to_industry_buffers", "opening_industry_buffers",
+	"opening_market_inventory", "process_inputs_consumed", "produced",
+]
+const HISTORY_FIELDS: Array[String] = [
+	"arrivals", "day_index", "dispatched", "household_system_consumed", "in_transit_quantity",
+	"phase", "process_inputs_consumed", "produced", "transport_allocated_quantity", "transport_requested_quantity",
+]
+const ACTIVE_SHIPMENT_FIELDS: Array[String] = [
+	"arrival_day", "arrival_time", "commodity_id", "destination_region_id", "dispatch_day", "dispatch_time",
+	"origin_region_id", "quantity", "request_id", "route_id", "shipment_id", "status", "transport_cost",
+]
+const DELIVERED_SHIPMENT_FIELDS: Array[String] = [
+	"arrival_day", "arrival_time", "commodity_id", "delivered_day", "destination_region_id", "dispatch_day",
+	"dispatch_time", "origin_region_id", "quantity", "request_id", "route_id", "shipment_id", "status", "transport_cost",
+]
 
 const DEFAULT_POLICIES: Dictionary = {
 	"moving_average_days": 7,
@@ -68,6 +104,9 @@ var _day_context: Dictionary = {}
 
 
 func configure(configuration: Dictionary) -> bool:
+	if _phase != PHASE_UNCONFIGURED and _phase != PHASE_READY:
+		initialization_error = "configure requires UNCONFIGURED or READY, got %s" % _phase
+		return false
 	var built: Dictionary = _build_configuration(configuration)
 	if not bool(built.get("success", false)):
 		initialization_error = str(built.get("message", "invalid E1 configuration"))
@@ -390,11 +429,12 @@ func validate_state() -> Dictionary:
 	if drift_count > 0:
 		errors.append("unexplained physical drift: %d" % global_drift)
 	var shipment_index: Dictionary = {}
+	var shipment_boundary_day: int = maxi(_last_day_index, _active_day_index)
 	for delivered: Dictionary in _shipment_history:
-		if not _validate_delivered_shipment(delivered, shipment_index):
+		if not _validate_delivered_shipment(delivered, shipment_index, shipment_boundary_day, _known_request_ids):
 			errors.append("invalid delivered shipment")
 	for shipment: Dictionary in _shipments:
-		if not _validate_active_shipment(shipment, shipment_index):
+		if not _validate_active_shipment(shipment, shipment_index, shipment_boundary_day, _known_request_ids):
 			errors.append("invalid active shipment")
 	for producer_id: String in _producer_ids:
 		var state: Dictionary = _industry_states.get(producer_id, {}) as Dictionary
@@ -535,6 +575,15 @@ func _build_configuration(configuration: Dictionary) -> Dictionary:
 		var energy_result: Dictionary = _normalize_requirements(source.get("energy_requirements", []), commodities, "energy")
 		if not bool(energy_result.get("success", false)):
 			return _configuration_failure(str(energy_result.get("message", "invalid energy requirement")))
+		var input_ids: Dictionary = {}
+		for input_requirement: Dictionary in inputs_result.get("data", []) as Array:
+			input_ids[str(input_requirement.get("commodity_id", ""))] = true
+		for energy_requirement: Dictionary in energy_result.get("data", []) as Array:
+			var energy_commodity_id: String = str(energy_requirement.get("commodity_id", ""))
+			if input_ids.has(energy_commodity_id):
+				return _configuration_failure(
+					"recipe %s uses commodity %s in both inputs and energy_requirements" % [recipe_id, energy_commodity_id]
+				)
 		var labor_result: Dictionary = _normalize_labor_requirements(source.get("labor_requirements", []))
 		if not bool(labor_result.get("success", false)):
 			return _configuration_failure(str(labor_result.get("message", "invalid labor requirement")))
@@ -1059,7 +1108,11 @@ func _update_prices() -> void:
 			var demand: int = int(demand_map.get(commodity_id, 0))
 			shortage_metrics[commodity_id] = 0 if demand <= 0 else E1Numeric.mul_div_floor(int(unmet_map.get(commodity_id, 0)), E1Numeric.BASIS_POINTS, demand)
 			var target: int = int(target_map.get(commodity_id, 0))
-			pressure_metrics[commodity_id] = 0 if target <= 0 else E1Numeric.mul_div_floor(target - _market_inventory(region_id, commodity_id), E1Numeric.BASIS_POINTS, target)
+			pressure_metrics[commodity_id] = 0 if target <= 0 else clampi(
+				E1Numeric.mul_div_floor(target - _market_inventory(region_id, commodity_id), E1Numeric.BASIS_POINTS, target),
+				-E1Numeric.BASIS_POINTS,
+				E1Numeric.BASIS_POINTS
+			)
 		_market_states[region_id] = market
 
 
@@ -1524,18 +1577,24 @@ func _proportional_allocations(rows: Array[Dictionary], available: int) -> Dicti
 
 
 func _validate_persistent_candidate(candidate: Dictionary) -> Dictionary:
-	if str(candidate.get("schema_id", "")) != STATE_SCHEMA:
-		return _fail_result("state_schema_mismatch", "persistent state schema mismatch")
-	for required_field: String in [
-		"catalog_identity", "last_day_index", "next_shipment_sequence",
-		"market_states", "industry_states", "resource_states", "shipments",
-		"shipment_history", "history", "cumulative_flows", "known_request_ids",
-		"known_shipment_ids",
-	]:
+	for required_field: String in PERSISTENT_STATE_FIELDS:
 		if not candidate.has(required_field):
 			return _fail_result("invalid_persistent_state", "persistent state is missing %s" % required_field)
+	if not _has_exact_string_keys(candidate, PERSISTENT_STATE_FIELDS):
+		return _fail_result("invalid_persistent_state", "persistent state contains an unknown field")
+	var schema_value: Variant = candidate.get("schema_id")
+	if not schema_value is String or str(schema_value) != STATE_SCHEMA:
+		return _fail_result("state_schema_mismatch", "persistent state schema mismatch")
+	var raw_last_day: Variant = candidate.get("last_day_index")
+	if not raw_last_day is int or int(raw_last_day) < -1:
+		return _fail_result("invalid_persistent_state", "invalid last day index")
+	var sequence: Dictionary = _as_int(candidate.get("next_shipment_sequence"), "shipment sequence", false)
+	if not bool(sequence.get("success", false)):
+		return _fail_result("invalid_persistent_state", "invalid shipment sequence")
 	var candidate_identity: Variant = candidate.get("catalog_identity", {})
-	if not candidate_identity is Dictionary or E1Numeric.canonical_json(candidate_identity) != E1Numeric.canonical_json(_catalog_identity):
+	if not candidate_identity is Dictionary or not _has_exact_string_keys(candidate_identity, ["catalog_hash", "catalog_revision", "schema_version"]):
+		return _fail_result("catalog_mismatch", "persistent state catalog identity is malformed")
+	if E1Numeric.canonical_json(candidate_identity) != E1Numeric.canonical_json(_catalog_identity):
 		return _fail_result("catalog_mismatch", "persistent state catalog identity mismatch")
 	var market_value: Variant = candidate.get("market_states", {})
 	var industry_value: Variant = candidate.get("industry_states", {})
@@ -1548,22 +1607,28 @@ func _validate_persistent_candidate(candidate: Dictionary) -> Dictionary:
 	var market_states: Dictionary = (market_value as Dictionary).duplicate(true)
 	var industry_states: Dictionary = (industry_value as Dictionary).duplicate(true)
 	var resource_states: Dictionary = (resource_value as Dictionary).duplicate(true)
-	if E1Numeric.sorted_string_keys(market_states) != _region_ids or E1Numeric.sorted_string_keys(industry_states) != _producer_ids or E1Numeric.sorted_string_keys(resource_states) != E1Numeric.sorted_string_keys(_resource_states):
+	if not _has_exact_string_keys(market_states, _region_ids) or not _has_exact_string_keys(industry_states, _producer_ids) or not _has_exact_string_keys(resource_states, E1Numeric.sorted_string_keys(_resource_states)):
 		return _fail_result("invalid_persistent_state", "persistent state references an unknown mutable object")
 	for region_id: String in _region_ids:
-		var market_candidate: Dictionary = market_states[region_id] as Dictionary
+		var raw_market_candidate: Variant = market_states.get(region_id)
+		if not raw_market_candidate is Dictionary:
+			return _fail_result("invalid_persistent_state", "market state %s is not a dictionary" % region_id)
+		var market_candidate: Dictionary = raw_market_candidate as Dictionary
 		var region_definition: Dictionary = _regions[region_id] as Dictionary
-		if str(market_candidate.get("region_id", "")) != region_id or str(market_candidate.get("market_id", "")) != str(region_definition.get("market_id", "")) or not _validate_market_candidate(market_candidate):
+		if not market_candidate.get("region_id") is String or not market_candidate.get("market_id") is String or not market_candidate.get("enabled") is bool or str(market_candidate.get("region_id")) != region_id or str(market_candidate.get("market_id")) != str(region_definition.get("market_id", "")) or bool(market_candidate.get("enabled")) != bool(region_definition.get("enabled", true)) or not _validate_market_candidate(market_candidate, int(raw_last_day)):
 			return _fail_result("invalid_persistent_state", "invalid market state %s" % region_id)
 	for producer_id: String in _producer_ids:
-		var industry_candidate: Dictionary = industry_states[producer_id] as Dictionary
+		var raw_industry_candidate: Variant = industry_states.get(producer_id)
+		if not raw_industry_candidate is Dictionary:
+			return _fail_result("invalid_persistent_state", "industry state %s is not a dictionary" % producer_id)
+		var industry_candidate: Dictionary = raw_industry_candidate as Dictionary
 		var producer_definition: Dictionary = _producer_definitions[producer_id] as Dictionary
-		if str(industry_candidate.get("producer_id", "")) != producer_id or str(industry_candidate.get("region_id", "")) != str(producer_definition.get("region_id", "")) or not _validate_industry_candidate(industry_candidate):
+		if not industry_candidate.get("producer_id") is String or not industry_candidate.get("region_id") is String or str(industry_candidate.get("producer_id")) != producer_id or str(industry_candidate.get("region_id")) != str(producer_definition.get("region_id", "")) or not _validate_industry_candidate(industry_candidate, int(raw_last_day)):
 			return _fail_result("invalid_persistent_state", "invalid industry state %s" % producer_id)
 	for resource_id: String in E1Numeric.sorted_string_keys(_resource_states):
-		var resource: Dictionary = resource_states[resource_id] as Dictionary
-		if str(resource.get("resource_id", "")) != resource_id or not resource.get("available_quantity") is int or int(resource.get("available_quantity", -1)) < 0:
-			return _fail_result("invalid_persistent_state", "negative resource quantity %s" % resource_id)
+		var raw_resource: Variant = resource_states.get(resource_id)
+		if not raw_resource is Dictionary or not _validate_resource_candidate(raw_resource as Dictionary, resource_id):
+			return _fail_result("invalid_persistent_state", "invalid resource state %s" % resource_id)
 	var shipments_result: Dictionary = _validated_dictionary_array(shipments_value, "active shipments")
 	var shipment_history_result: Dictionary = _validated_dictionary_array(shipment_history_value, "shipment history")
 	var history_result: Dictionary = _validated_dictionary_array(candidate.get("history", []), "daily history")
@@ -1576,35 +1641,31 @@ func _validate_persistent_candidate(candidate: Dictionary) -> Dictionary:
 		return _fail_result("invalid_persistent_state", "persistent history exceeds configured limit")
 	var previous_history_day: int = -1
 	for summary: Dictionary in history:
-		var history_day: Variant = summary.get("day_index", -1)
-		if not history_day is int or int(history_day) < 0 or int(history_day) <= previous_history_day:
+		if not _validate_history_record(summary, int(raw_last_day)) or int(summary.get("day_index")) <= previous_history_day:
 			return _fail_result("invalid_persistent_state", "persistent history day ordering is invalid")
-		previous_history_day = int(history_day)
-	var known_shipments: Dictionary = {}
-	for shipment: Dictionary in shipments:
-		if not _validate_active_shipment(shipment, known_shipments):
-			return _fail_result("invalid_persistent_state", "invalid active shipment")
-	for shipment: Dictionary in shipment_history:
-		if not _validate_delivered_shipment(shipment, known_shipments):
-			return _fail_result("invalid_persistent_state", "duplicate or invalid delivered shipment")
+		previous_history_day = int(summary.get("day_index"))
+	if int(raw_last_day) == -1 and not history.is_empty():
+		return _fail_result("invalid_persistent_state", "history exists before the first day")
+	if int(raw_last_day) >= 0 and (history.is_empty() or previous_history_day != int(raw_last_day)):
+		return _fail_result("invalid_persistent_state", "persistent history does not end at last_day_index")
 	var known_requests_result: Dictionary = _validated_string_array_to_set(candidate.get("known_request_ids", []), "known request IDs")
 	var known_shipments_result: Dictionary = _validated_string_array_to_set(candidate.get("known_shipment_ids", []), "known shipment IDs")
 	if not bool(known_requests_result.get("success", false)) or not bool(known_shipments_result.get("success", false)):
 		return _fail_result("invalid_persistent_state", "persistent ID index is malformed")
 	var known_requests: Dictionary = known_requests_result.get("data", {}) as Dictionary
+	var known_shipments: Dictionary = {}
+	for shipment: Dictionary in shipments:
+		if not _validate_active_shipment(shipment, known_shipments, int(raw_last_day), known_requests):
+			return _fail_result("invalid_persistent_state", "invalid active shipment")
+	for shipment: Dictionary in shipment_history:
+		if not _validate_delivered_shipment(shipment, known_shipments, int(raw_last_day), known_requests):
+			return _fail_result("invalid_persistent_state", "duplicate or invalid delivered shipment")
 	var supplied_known_shipments: Dictionary = known_shipments_result.get("data", {}) as Dictionary
-	if supplied_known_shipments.size() != known_shipments.size():
+	if supplied_known_shipments.size() != known_shipments.size() or E1Numeric.sorted_string_keys(supplied_known_shipments) != E1Numeric.sorted_string_keys(known_shipments):
 		return _fail_result("invalid_persistent_state", "known shipment index is incomplete")
-	for shipment_id: String in E1Numeric.sorted_string_keys(known_shipments):
-		if not supplied_known_shipments.has(shipment_id):
-			return _fail_result("invalid_persistent_state", "known shipment index mismatch")
 	var cumulative: Dictionary = (cumulative_value as Dictionary).duplicate(true)
 	if not _validate_cumulative_flows(cumulative):
 		return _fail_result("invalid_persistent_state", "invalid cumulative physical flows")
-	var raw_last_day: Variant = candidate.get("last_day_index", -2)
-	var sequence: Dictionary = _as_int(candidate.get("next_shipment_sequence", 0), "shipment sequence", false)
-	if not raw_last_day is int or int(raw_last_day) < -1 or not bool(sequence.get("success", false)):
-		return _fail_result("invalid_persistent_state", "invalid persistent counters")
 	var expected_drifts: Dictionary = _candidate_physical_drift_by_commodity(market_states, industry_states, shipments, cumulative)
 	if _count_nonzero_drift(expected_drifts) > 0:
 		return _fail_result("invalid_persistent_state", "persistent state has physical drift")
@@ -1623,94 +1684,303 @@ func _validate_persistent_candidate(candidate: Dictionary) -> Dictionary:
 	})
 
 
-func _validate_market_candidate(market: Dictionary) -> bool:
-	var inventory: Variant = market.get("inventory", {})
-	var prices: Variant = market.get("price", {})
-	if not inventory is Dictionary or not prices is Dictionary:
+func _has_exact_string_keys(value: Variant, expected: Array[String]) -> bool:
+	if not value is Dictionary:
 		return false
-	if E1Numeric.sorted_string_keys(inventory as Dictionary) != _commodity_ids or E1Numeric.sorted_string_keys(prices as Dictionary) != _commodity_ids:
+	var source: Dictionary = value as Dictionary
+	for raw_key: Variant in source.keys():
+		if not raw_key is String:
+			return false
+	return E1Numeric.sorted_string_keys(source) == expected
+
+
+func _validate_integer_map(
+	value: Variant,
+	allowed_ids: Array[String],
+	require_exact_keys: bool,
+	minimum: int,
+	maximum: int = -1
+) -> bool:
+	if not value is Dictionary:
 		return false
-	for commodity_id: String in _commodity_ids:
-		var inventory_value: Variant = (inventory as Dictionary).get(commodity_id, -1)
-		var price_value: Variant = (prices as Dictionary).get(commodity_id, 0)
-		if not inventory_value is int or not price_value is int or int(inventory_value) < 0 or int(price_value) <= 0:
+	var source: Dictionary = value as Dictionary
+	for raw_key: Variant in source.keys():
+		if not raw_key is String or not allowed_ids.has(str(raw_key)):
+			return false
+		var number: Variant = source[raw_key]
+		if not number is int or int(number) < minimum or (maximum >= 0 and int(number) > maximum):
+			return false
+	if require_exact_keys and E1Numeric.sorted_string_keys(source) != allowed_ids:
+		return false
+	return true
+
+
+func _validate_string_integer_map(value: Variant, minimum: int, maximum: int = -1) -> bool:
+	if not value is Dictionary:
+		return false
+	var source: Dictionary = value as Dictionary
+	for raw_key: Variant in source.keys():
+		if not raw_key is String or str(raw_key).is_empty():
+			return false
+		var number: Variant = source[raw_key]
+		if not number is int or int(number) < minimum or (maximum >= 0 and int(number) > maximum):
 			return false
 	return true
 
 
-func _validate_industry_candidate(industry: Dictionary) -> bool:
-	var producer_id: String = str(industry.get("producer_id", ""))
-	var buffers: Variant = industry.get("input_buffers", {})
-	if producer_id.is_empty() or not _producer_definitions.has(producer_id) or not buffers is Dictionary:
+func _validate_market_daily_metrics(value: Variant, last_day_index: int) -> bool:
+	if not value is Dictionary:
 		return false
-	var state: Dictionary = industry
-	if E1Numeric.sorted_string_keys(buffers as Dictionary) != E1Numeric.sorted_string_keys((_producer_definitions[producer_id] as Dictionary).get("initial_input_buffers", {}) as Dictionary):
+	var metrics: Dictionary = value as Dictionary
+	if metrics.is_empty():
+		return last_day_index < 0
+	if last_day_index < 0:
 		return false
-	for commodity_id: String in E1Numeric.sorted_string_keys(buffers as Dictionary):
-		var buffer_value: Variant = (buffers as Dictionary).get(commodity_id, -1)
-		if not buffer_value is int or int(buffer_value) < 0:
+	for raw_key: Variant in metrics.keys():
+		if not raw_key is String or not MARKET_DAILY_METRIC_FIELDS.has(str(raw_key)):
 			return false
-	var utilization_value: Variant = state.get("utilization_bp", -1)
-	var actual_value: Variant = state.get("last_actual_output", -1)
-	var planned_value: Variant = state.get("last_planned_output", -1)
-	var labor_satisfaction: Variant = state.get("labor_satisfaction_bp", -1)
-	var input_satisfaction: Variant = state.get("input_satisfaction_bp", -1)
-	return utilization_value is int and actual_value is int and planned_value is int and labor_satisfaction is int and input_satisfaction is int and int(utilization_value) >= 0 and int(utilization_value) <= E1Numeric.BASIS_POINTS and int(actual_value) >= 0 and int(planned_value) >= 0 and int(labor_satisfaction) >= 0 and int(labor_satisfaction) <= E1Numeric.BASIS_POINTS and int(input_satisfaction) >= 0 and int(input_satisfaction) <= E1Numeric.BASIS_POINTS
-
-
-func _validate_active_shipment(shipment: Dictionary, known: Dictionary) -> bool:
-	var shipment_id_value: Variant = shipment.get("shipment_id", "")
-	var shipment_id: String = str(shipment_id_value)
-	if not shipment_id_value is String or shipment_id.is_empty() or known.has(shipment_id) or str(shipment.get("status", "")) != "in_transit":
+	if last_day_index >= 0 and (not metrics.has("shortage_bp") or not metrics.has("stock_pressure_bp")):
 		return false
-	var quantity: Variant = shipment.get("quantity", 0)
-	var dispatch_day: Variant = shipment.get("dispatch_day", -1)
-	var arrival_day: Variant = shipment.get("arrival_day", -1)
-	var transport_cost: Variant = shipment.get("transport_cost", -1)
-	if not quantity is int or not dispatch_day is int or not arrival_day is int or not transport_cost is int or int(quantity) <= 0 or int(dispatch_day) < 0 or int(arrival_day) <= int(dispatch_day) or int(transport_cost) < 0:
+	if metrics.has("arrivals") and (not metrics["arrivals"] is int or int(metrics["arrivals"]) < 0):
 		return false
-	if not shipment.get("origin_region_id", "") is String or not shipment.get("destination_region_id", "") is String or not shipment.get("commodity_id", "") is String or not shipment.get("route_id", "") is String or str(shipment.get("route_id", "")).is_empty() or not _regions.has(str(shipment.get("origin_region_id", ""))) or not _regions.has(str(shipment.get("destination_region_id", ""))) or not _commodities.has(str(shipment.get("commodity_id", ""))):
+	if metrics.has("household_system_consumed") and (not metrics["household_system_consumed"] is int or int(metrics["household_system_consumed"]) < 0):
 		return false
-	known[shipment_id] = true
+	if metrics.has("demand_allocations") and not _validate_string_integer_map(metrics["demand_allocations"], 0):
+		return false
+	if metrics.has("shortage_bp") and not _validate_integer_map(metrics["shortage_bp"], _commodity_ids, true, 0, E1Numeric.BASIS_POINTS):
+		return false
+	if metrics.has("stock_pressure_bp") and not _validate_integer_map(metrics["stock_pressure_bp"], _commodity_ids, true, -E1Numeric.BASIS_POINTS, E1Numeric.BASIS_POINTS):
+		return false
 	return true
 
 
-func _validate_delivered_shipment(shipment: Dictionary, known: Dictionary) -> bool:
-	if str(shipment.get("status", "")) != "delivered" or not shipment.has("delivered_day"):
+func _validate_industry_daily_metrics(value: Variant, last_day_index: int, producer_id: String, actual_output: int) -> bool:
+	if not value is Dictionary:
 		return false
-	var delivered_day: Variant = shipment.get("delivered_day", -1)
-	var arrival_day: Variant = shipment.get("arrival_day", -1)
-	if not delivered_day is int or not arrival_day is int or int(delivered_day) < int(arrival_day):
+	var metrics: Dictionary = value as Dictionary
+	if metrics.is_empty():
+		return last_day_index < 0
+	if not _has_exact_string_keys(metrics, INDUSTRY_DAILY_METRIC_FIELDS):
 		return false
-	return _validate_shipment_identity_only(shipment, known)
+	if not _validate_integer_map(metrics.get("process_inputs_consumed"), _commodity_ids, false, 0) or not _validate_integer_map(metrics.get("replenished"), _commodity_ids, false, 0) or not _validate_integer_map(metrics.get("output"), _commodity_ids, false, 0):
+		return false
+	var recipe: Dictionary = _recipes[str((_producer_definitions[producer_id] as Dictionary).get("recipe_id", ""))] as Dictionary
+	var output: Dictionary = metrics.get("output") as Dictionary
+	var output_commodity_id: String = str(recipe.get("output_commodity_id", ""))
+	return output.has(output_commodity_id) and int(output.get(output_commodity_id, -1)) == actual_output
 
 
-func _validate_shipment_identity_only(shipment: Dictionary, known: Dictionary) -> bool:
-	var shipment_id_value: Variant = shipment.get("shipment_id", "")
+func _validate_daily_flow_record(flow: Dictionary) -> bool:
+	if not _has_exact_string_keys(flow, DAILY_FLOW_FIELDS):
+		return false
+	for field: String in DAILY_FLOW_FIELDS:
+		var value: Variant = flow.get(field)
+		if not value is int or int(value) < 0:
+			return false
+	var expected: int = int(flow.get("opening_market_inventory")) + int(flow.get("opening_industry_buffers"))
+	expected += int(flow.get("arrivals")) + int(flow.get("produced"))
+	expected -= int(flow.get("process_inputs_consumed")) + int(flow.get("household_system_consumed"))
+	expected -= int(flow.get("dispatched")) + int(flow.get("losses"))
+	var closing: int = int(flow.get("closing_market_inventory")) + int(flow.get("closing_industry_buffers"))
+	return expected == closing
+
+
+func _validate_history_record(summary: Dictionary, last_day_index: int) -> bool:
+	if not _has_exact_string_keys(summary, HISTORY_FIELDS):
+		return false
+	var day_index: Variant = summary.get("day_index")
+	var phase: Variant = summary.get("phase")
+	if not day_index is int or int(day_index) < 0 or int(day_index) > last_day_index or not phase is String or str(phase) != PHASE_ALLOCATED:
+		return false
+	for field: String in ["transport_requested_quantity", "transport_allocated_quantity", "in_transit_quantity"]:
+		var quantity: Variant = summary.get(field)
+		if not quantity is int or int(quantity) < 0:
+			return false
+	if int(summary.get("transport_allocated_quantity")) > int(summary.get("transport_requested_quantity")):
+		return false
+	for field: String in ["produced", "process_inputs_consumed", "household_system_consumed", "arrivals", "dispatched"]:
+		if not _validate_integer_map(summary.get(field), _commodity_ids, false, 0):
+			return false
+	return true
+
+
+func _valid_constraint_reason(reason: String, producer_id: String) -> bool:
+	if reason == "capacity" or reason == "disabled" or reason == "labor":
+		return true
+	var producer: Dictionary = _producer_definitions[producer_id] as Dictionary
+	var recipe: Dictionary = _recipes[str(producer.get("recipe_id", ""))] as Dictionary
+	if reason.begins_with("input:"):
+		var commodity_id: String = reason.trim_prefix("input:")
+		for requirement: Dictionary in _combined_requirements(recipe):
+			if str(requirement.get("commodity_id", "")) == commodity_id:
+				return true
+	if reason.begins_with("resource:"):
+		return reason.trim_prefix("resource:") == str(producer.get("resource_source_id", "")) and not str(producer.get("resource_source_id", "")).is_empty()
+	return false
+
+
+func _validate_market_candidate(market: Dictionary, last_day_index: int) -> bool:
+	if not _has_exact_string_keys(market, MARKET_STATE_FIELDS):
+		return false
+	if not market.get("region_id") is String or not market.get("market_id") is String or not market.get("enabled") is bool:
+		return false
+	var inventory: Variant = market.get("inventory")
+	var prices: Variant = market.get("price")
+	if not _validate_integer_map(inventory, _commodity_ids, true, 0) or not _validate_integer_map(prices, _commodity_ids, true, 1):
+		return false
+	var demand: Variant = market.get("demand")
+	var fulfilled: Variant = market.get("fulfilled")
+	var unmet: Variant = market.get("unmet")
+	if not _validate_integer_map(demand, _commodity_ids, false, 0) or not _validate_integer_map(fulfilled, _commodity_ids, false, 0) or not _validate_integer_map(unmet, _commodity_ids, false, 0):
+		return false
+	if last_day_index < 0 and (not (demand as Dictionary).is_empty() or not (fulfilled as Dictionary).is_empty() or not (unmet as Dictionary).is_empty()):
+		return false
+	if E1Numeric.sorted_string_keys(demand as Dictionary) != E1Numeric.sorted_string_keys(fulfilled as Dictionary) or E1Numeric.sorted_string_keys(demand as Dictionary) != E1Numeric.sorted_string_keys(unmet as Dictionary):
+		return false
+	for commodity_id: String in E1Numeric.sorted_string_keys(demand as Dictionary):
+		var requested: int = int((demand as Dictionary).get(commodity_id, 0))
+		var fulfilled_quantity: int = int((fulfilled as Dictionary).get(commodity_id, 0))
+		var unmet_quantity: int = int((unmet as Dictionary).get(commodity_id, 0))
+		if fulfilled_quantity > requested or unmet_quantity != requested - fulfilled_quantity:
+			return false
+	var moving: Variant = market.get("moving_average_daily_demand")
+	var target_stock: Variant = market.get("target_stock")
+	if not _validate_integer_map(moving, _commodity_ids, false, 0) or not _validate_integer_map(target_stock, _commodity_ids, false, 0):
+		return false
+	if E1Numeric.sorted_string_keys(moving as Dictionary) != E1Numeric.sorted_string_keys(target_stock as Dictionary):
+		return false
+	if last_day_index < 0 and (not (moving as Dictionary).is_empty() or not (target_stock as Dictionary).is_empty()):
+		return false
+	if last_day_index >= 0 and (E1Numeric.sorted_string_keys(moving as Dictionary) != _commodity_ids or E1Numeric.sorted_string_keys(target_stock as Dictionary) != _commodity_ids):
+		return false
+	for commodity_id: String in E1Numeric.sorted_string_keys(moving as Dictionary):
+		var commodity: Dictionary = _commodities[commodity_id] as Dictionary
+		var expected_target: int = int((moving as Dictionary).get(commodity_id, 0)) * int(commodity.get("target_stock_days", 0))
+		if int((target_stock as Dictionary).get(commodity_id, -1)) != expected_target:
+			return false
+	var last_flow: Variant = market.get("last_flow")
+	if not last_flow is Dictionary or (last_day_index < 0 and not (last_flow as Dictionary).is_empty()) or (last_day_index >= 0 and (last_flow as Dictionary).is_empty()):
+		return false
+	if not (last_flow as Dictionary).is_empty():
+		if not _has_exact_string_keys(last_flow, _commodity_ids):
+			return false
+		for commodity_id: String in _commodity_ids:
+			var raw_flow: Variant = (last_flow as Dictionary).get(commodity_id)
+			if not raw_flow is Dictionary or not _validate_daily_flow_record(raw_flow as Dictionary):
+				return false
+	var daily_metrics: Variant = market.get("daily_metrics")
+	if not _validate_market_daily_metrics(daily_metrics, last_day_index):
+		return false
+	return true
+
+
+func _validate_industry_candidate(industry: Dictionary, last_day_index: int) -> bool:
+	if not _has_exact_string_keys(industry, INDUSTRY_STATE_FIELDS):
+		return false
+	var producer_id_value: Variant = industry.get("producer_id")
+	var region_id_value: Variant = industry.get("region_id")
+	var producer_id: String = str(producer_id_value)
+	if not producer_id_value is String or not region_id_value is String or producer_id.is_empty() or not _producer_definitions.has(producer_id):
+		return false
+	var buffers: Variant = industry.get("input_buffers")
+	var producer_definition: Dictionary = _producer_definitions[producer_id] as Dictionary
+	var expected_buffer_ids: Array[String] = E1Numeric.sorted_string_keys(producer_definition.get("initial_input_buffers", {}) as Dictionary)
+	if not _validate_integer_map(buffers, expected_buffer_ids, true, 0):
+		return false
+	var utilization_value: Variant = industry.get("utilization_bp")
+	var actual_value: Variant = industry.get("last_actual_output")
+	var planned_value: Variant = industry.get("last_planned_output")
+	var labor_satisfaction: Variant = industry.get("labor_satisfaction_bp")
+	var input_satisfaction: Variant = industry.get("input_satisfaction_bp")
+	if not utilization_value is int or not actual_value is int or not planned_value is int or not labor_satisfaction is int or not input_satisfaction is int:
+		return false
+	if int(utilization_value) < 0 or int(utilization_value) > E1Numeric.BASIS_POINTS or int(actual_value) < 0 or int(planned_value) < 0 or int(actual_value) > int(planned_value) or int(planned_value) > int(producer_definition.get("installed_capacity_per_day", 0)):
+		return false
+	if int(labor_satisfaction) < 0 or int(labor_satisfaction) > E1Numeric.BASIS_POINTS or int(input_satisfaction) < 0 or int(input_satisfaction) > E1Numeric.BASIS_POINTS:
+		return false
+	var constraint_reason: Variant = industry.get("production_constraint_reason")
+	if not constraint_reason is String or not _valid_constraint_reason(str(constraint_reason), producer_id):
+		return false
+	var daily_metrics: Variant = industry.get("daily_metrics")
+	if not _validate_industry_daily_metrics(daily_metrics, last_day_index, producer_id, int(actual_value)):
+		return false
+	return true
+
+
+func _validate_resource_candidate(resource: Dictionary, resource_id: String) -> bool:
+	if not _has_exact_string_keys(resource, RESOURCE_STATE_FIELDS):
+		return false
+	var resource_id_value: Variant = resource.get("resource_id")
+	var available: Variant = resource.get("available_quantity")
+	if not resource_id_value is String or str(resource_id_value) != resource_id or not available is int or int(available) < 0:
+		return false
+	if int(available) > int((_resource_definitions[resource_id] as Dictionary).get("initial_available_quantity", 0)):
+		return false
+	return true
+
+
+func _validate_active_shipment(shipment: Dictionary, known: Dictionary, last_day_index: int, known_requests: Dictionary) -> bool:
+	if not _has_exact_string_keys(shipment, ACTIVE_SHIPMENT_FIELDS):
+		return false
+	if not shipment.get("status") is String or str(shipment.get("status")) != "in_transit":
+		return false
+	return _validate_shipment_common(shipment, known, last_day_index, known_requests, false)
+
+
+func _validate_delivered_shipment(shipment: Dictionary, known: Dictionary, last_day_index: int, known_requests: Dictionary) -> bool:
+	if not _has_exact_string_keys(shipment, DELIVERED_SHIPMENT_FIELDS):
+		return false
+	if not shipment.get("status") is String or str(shipment.get("status")) != "delivered":
+		return false
+	var delivered_day: Variant = shipment.get("delivered_day")
+	if not delivered_day is int or int(delivered_day) < 0 or int(delivered_day) > last_day_index:
+		return false
+	return _validate_shipment_common(shipment, known, last_day_index, known_requests, true)
+
+
+func _validate_shipment_common(shipment: Dictionary, known: Dictionary, last_day_index: int, known_requests: Dictionary, delivered: bool) -> bool:
+	var shipment_id_value: Variant = shipment.get("shipment_id")
+	var request_id_value: Variant = shipment.get("request_id")
+	var origin_value: Variant = shipment.get("origin_region_id")
+	var destination_value: Variant = shipment.get("destination_region_id")
+	var commodity_value: Variant = shipment.get("commodity_id")
+	var route_value: Variant = shipment.get("route_id")
+	if not shipment_id_value is String or not request_id_value is String or not origin_value is String or not destination_value is String or not commodity_value is String or not route_value is String:
+		return false
 	var shipment_id: String = str(shipment_id_value)
-	var quantity: Variant = shipment.get("quantity", 0)
-	var dispatch_day: Variant = shipment.get("dispatch_day", -1)
-	var arrival_day: Variant = shipment.get("arrival_day", -1)
-	var transport_cost: Variant = shipment.get("transport_cost", -1)
-	if not shipment_id_value is String or shipment_id.is_empty() or known.has(shipment_id) or not quantity is int or not dispatch_day is int or not arrival_day is int or not transport_cost is int:
+	var request_id: String = str(request_id_value)
+	if shipment_id.is_empty() or request_id.is_empty() or str(route_value).is_empty() or known.has(shipment_id) or not known_requests.has(request_id):
 		return false
-	if int(quantity) <= 0 or int(dispatch_day) < 0 or int(arrival_day) <= int(dispatch_day) or int(transport_cost) < 0:
+	if not _regions.has(str(origin_value)) or not _regions.has(str(destination_value)) or not _commodities.has(str(commodity_value)):
 		return false
-	if not shipment.get("origin_region_id", "") is String or not shipment.get("destination_region_id", "") is String or not shipment.get("commodity_id", "") is String or not shipment.get("route_id", "") is String or str(shipment.get("route_id", "")).is_empty() or not _regions.has(str(shipment.get("origin_region_id", ""))) or not _regions.has(str(shipment.get("destination_region_id", ""))) or not _commodities.has(str(shipment.get("commodity_id", ""))):
+	var quantity: Variant = shipment.get("quantity")
+	var dispatch_day: Variant = shipment.get("dispatch_day")
+	var dispatch_time: Variant = shipment.get("dispatch_time")
+	var arrival_day: Variant = shipment.get("arrival_day")
+	var arrival_time: Variant = shipment.get("arrival_time")
+	var transport_cost: Variant = shipment.get("transport_cost")
+	if not quantity is int or not dispatch_day is int or not dispatch_time is int or not arrival_day is int or not arrival_time is int or not transport_cost is int:
 		return false
+	if int(quantity) <= 0 or int(dispatch_day) < 0 or int(dispatch_time) != int(dispatch_day) or int(arrival_day) <= int(dispatch_day) or int(arrival_time) != int(arrival_day) or int(transport_cost) < 0 or int(dispatch_day) > last_day_index:
+		return false
+	if delivered:
+		if int(shipment.get("delivered_day", -1)) < int(arrival_day):
+			return false
+	else:
+		if int(arrival_day) <= last_day_index:
+			return false
 	known[shipment_id] = true
 	return true
 
 
 func _validate_cumulative_flows(cumulative: Dictionary) -> bool:
-	for flow_name: String in ["produced", "process_inputs_consumed", "household_system_consumed", "losses"]:
+	var flow_names: Array[String] = ["household_system_consumed", "losses", "process_inputs_consumed", "produced"]
+	if not _has_exact_string_keys(cumulative, flow_names):
+		return false
+	for flow_name: String in flow_names:
 		var values: Variant = cumulative.get(flow_name, {})
-		if not values is Dictionary or E1Numeric.sorted_string_keys(values as Dictionary) != _commodity_ids:
+		if not _validate_integer_map(values, _commodity_ids, true, 0):
 			return false
-		for commodity_id: String in _commodity_ids:
-			var flow_value: Variant = (values as Dictionary).get(commodity_id, -1)
-			if not flow_value is int or int(flow_value) < 0:
-				return false
 	return true
 
 

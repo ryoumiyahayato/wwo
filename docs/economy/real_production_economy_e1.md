@@ -91,6 +91,54 @@ ALLOCATED --finalize_day--> READY
 allocation.  `get_persistent_state` and restore are restricted to the READY
 boundary so a partial day cannot be saved or replaced.
 
+`configure` is also a lifecycle boundary.  It is accepted only from
+`UNCONFIGURED` or `READY`; a successful call from `READY` deliberately replaces
+the catalog and resets the E1 mutable state.  Calls from
+`WAITING_FOR_TRANSPORT` or `ALLOCATED` fail before any live state is cleared or
+changed.  E1 does not perform live migration or reconfiguration of a
+half-settled day.
+
+## R1 physical and persistence contracts
+
+Recipe requirement categories are disjoint by construction.  After each list
+has been normalized, a commodity ID appearing in both `inputs` and
+`energy_requirements` rejects catalog configuration with no candidate state
+publication.  Duplicate commodity IDs within either list remain errors; E1
+does not overwrite, sum, or choose between colliding categories.
+
+The writer emits the following exact `STATE_SCHEMA` fields.  Restore is
+parse → candidate build → complete validation → atomic commit.  There are no
+implicit defaults or old-version migrations in E1 R1.
+
+| Persisted field | Restore policy and validation |
+|---|---|
+| `schema_id` | **REQUIRED**; exact `STATE_SCHEMA` string |
+| `catalog_identity` | **REQUIRED**; exact schema/revision/hash identity of the configured catalog |
+| `last_day_index`, `next_shipment_sequence` | **REQUIRED**; integer counters with valid READY-boundary ranges |
+| `market_states` | **REQUIRED**; exact configured region IDs and complete market records: inventory, price, demand, fulfilled, unmet, moving demand, target stock, last flow, and daily metrics |
+| `industry_states` | **REQUIRED**; exact configured producer IDs and complete industry records: utilization, input buffers, planned/actual output, labor/input satisfaction, constraint reason, and daily metrics |
+| `resource_states` | **REQUIRED**; exact configured resource IDs and nonnegative bounded source quantities |
+| `shipments`, `shipment_history` | **REQUIRED**; complete typed shipment records, request/region/commodity references, lifecycle timing, duplicate protection, and active/delivered phase consistency |
+| `history` | **REQUIRED**; bounded, ordered, complete daily summaries ending at `last_day_index` |
+| `cumulative_flows` | **REQUIRED**; exact physical-flow categories and commodity IDs with nonnegative quantities |
+| `known_request_ids`, `known_shipment_ids` | **REQUIRED**; typed stable-ID indexes; the shipment index must equal the active/history union |
+
+All authoritative nested maps reject malformed containers, unknown IDs,
+negative physical quantities, invalid basis-point values, invalid prices,
+inconsistent fulfilled/unmet demand, `last_actual_output` greater than
+`last_planned_output`, invalid shipment timing, and physical conservation
+drift.  Empty daily maps are valid only for the initial `last_day_index = -1`
+state where that is exactly what the current writer emits.
+
+`E1-NUM-001 MINOR — DEFERRED`: the numeric core is unchanged in R1.  A broad
+overflow-only catalog bound would require a separate numeric design review;
+R1 does not add saturating arithmetic or change physical quantities.
+
+The following values are **DERIVED / MUST NOT BE PERSISTED**: current phase,
+active day context, frozen demand/labor snapshots, transport requests,
+pending allocations, transient daily flow, and `last_summary` (reconstructed
+from history).  A failed restore leaves the live state unchanged.
+
 ## Frozen-candidate, provisional, and internal contracts
 
 ### Frozen candidate
@@ -266,15 +314,20 @@ performance gate and not a long-run simulation.
 
 ## Failure behavior audit
 
-The focused runner completes 40 checks and verifies fail-closed behavior for
+The focused runner completes 59 checks (the original 40 plus 19 R1 regressions)
+and verifies fail-closed behavior for
 unknown recipe commodity, unknown producer region, duplicate producer ID,
 duplicate recipe ID, negative capacity, invalid utilization, invalid call
 order, unknown allocation request, allocation above request, dispatch before
 earliest dispatch, duplicate allocation, duplicate shipment delivery, missing
 persistence history, mismatched persistent state identity, and non-sequential
-prepare.  Configuration rejects malformed authoritative records; restore
-parses and validates a candidate before commit.  A wrong catalog identity and
-malformed persistence candidates leave the current state hash unchanged.
+prepare.  R1 additionally covers requirement-category collisions, complete
+market/industry restore fields, nested-map validation, output-plan ordering,
+active and delivered shipment round trips, and configure rejection during
+`WAITING_FOR_TRANSPORT` and `ALLOCATED`.  Configuration rejects malformed
+authoritative records; restore parses and validates a candidate before commit.
+A wrong catalog identity and malformed persistence candidates leave the current
+state hash unchanged.
 
 ## Alpha economy salvage and consolidation
 

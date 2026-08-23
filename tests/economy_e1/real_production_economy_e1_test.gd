@@ -37,6 +37,9 @@ func _run() -> void:
 	_test_e1_17_save_restore()
 	_test_e1_18_source_mismatch()
 	_test_failure_behavior()
+	_test_r1_recipe_requirement_contract()
+	_test_r1_persistent_schema()
+	_test_r1_configure_phase_guard()
 	_test_alpha_catalog_salvage()
 	_print_reference_trace()
 	_print_complexity_sanity()
@@ -448,6 +451,143 @@ func _test_failure_behavior() -> void:
 	mismatched_industry["producer_id"] = "fixture:coal_site"
 	var mismatched_identity_rejected: bool = not restore_target.restore_persistent_state(mismatched_identity_state)
 	_case("FAIL mismatched persistent identity", mismatched_identity_rejected and restore_target.get_authoritative_state_hash() == restore_before)
+
+
+func _test_r1_recipe_requirement_contract() -> void:
+	var collision_config: Dictionary = _fixture_config()
+	var collision_recipe: Dictionary = (collision_config["recipes"] as Array)[0] as Dictionary
+	collision_recipe["energy_requirements"] = [{"commodity_id": "coal", "quantity_per_output": 1_000_000}]
+	var collision_economy: Variant = _new_fixture()
+	_settle(collision_economy, 0)
+	var collision_before: String = collision_economy.get_authoritative_state_hash()
+	var collision_rejected: bool = not collision_economy.configure(collision_config)
+	_case(
+		"R1 PHYS collision rejects",
+		collision_rejected and collision_economy.initialization_error.contains("both inputs and energy_requirements")
+	)
+	_case("R1 PHYS collision is atomic", collision_economy.get_authoritative_state_hash() == collision_before and collision_economy.get_phase() == "READY")
+
+	var duplicate_input_config: Dictionary = _fixture_config()
+	var duplicate_input_recipe: Dictionary = (duplicate_input_config["recipes"] as Array)[0] as Dictionary
+	(duplicate_input_recipe["inputs"] as Array).append({"commodity_id": "coal", "quantity_per_output": 1_000_000})
+	_case("R1 PHYS duplicate input rejects", not _configure(duplicate_input_config))
+	var duplicate_energy_config: Dictionary = _fixture_config()
+	var duplicate_energy_recipe: Dictionary = (duplicate_energy_config["recipes"] as Array)[0] as Dictionary
+	duplicate_energy_recipe["energy_requirements"] = [
+		{"commodity_id": "coal", "quantity_per_output": 1_000_000},
+		{"commodity_id": "coal", "quantity_per_output": 1_000_000},
+	]
+	_case("R1 PHYS duplicate energy rejects", not _configure(duplicate_energy_config))
+
+	var split_config: Dictionary = _fixture_config({"miner_enabled": false})
+	var split_recipe: Dictionary = (split_config["recipes"] as Array)[0] as Dictionary
+	split_recipe["inputs"] = [{"commodity_id": "iron_ore", "quantity_per_output": 2_000_000}]
+	split_recipe["energy_requirements"] = [{"commodity_id": "coal", "quantity_per_output": 1_000_000}]
+	var split_economy: Variant = EconomyScript.new()
+	var split_configured: bool = split_economy.configure(split_config)
+	_case("R1 PHYS distinct categories valid", split_configured)
+	var normal_economy: Variant = _new_fixture({"miner_enabled": false})
+	var normal_settled: bool = _settle(normal_economy, 0)
+	var split_settled: bool = _settle(split_economy, 0)
+	var normal_industry: Dictionary = normal_economy.get_industry_state("fixture:steel_site")
+	var split_industry: Dictionary = split_economy.get_industry_state("fixture:steel_site")
+	var normal_market: Dictionary = normal_economy.get_market_state("fixture:steel")
+	var split_market: Dictionary = split_economy.get_market_state("fixture:steel")
+	_case(
+		"R1 PHYS normal production unchanged",
+		normal_settled and split_settled
+		and int(normal_industry.get("last_actual_output", -1)) == int(split_industry.get("last_actual_output", -2))
+		and (normal_industry.get("input_buffers", {}) as Dictionary) == (split_industry.get("input_buffers", {}) as Dictionary)
+		and int((normal_market.get("inventory", {}) as Dictionary).get("steel", -1)) == int((split_market.get("inventory", {}) as Dictionary).get("steel", -2))
+	)
+
+
+func _test_r1_persistent_schema() -> void:
+	var original: Variant = _new_fixture({"miner_enabled": false})
+	_settle(original, 0)
+	var saved: Dictionary = original.get_persistent_state()
+
+	var missing_demand: Dictionary = saved.duplicate(true)
+	((missing_demand["market_states"] as Dictionary)["fixture:steel"] as Dictionary).erase("demand")
+	_assert_restore_rejected("R1 PERSIST missing demand", missing_demand)
+	var missing_moving: Dictionary = saved.duplicate(true)
+	((missing_moving["market_states"] as Dictionary)["fixture:steel"] as Dictionary).erase("moving_average_daily_demand")
+	_assert_restore_rejected("R1 PERSIST missing moving demand", missing_moving)
+	var missing_target: Dictionary = saved.duplicate(true)
+	((missing_target["market_states"] as Dictionary)["fixture:steel"] as Dictionary).erase("target_stock")
+	_assert_restore_rejected("R1 PERSIST missing target stock", missing_target)
+	var missing_constraint: Dictionary = saved.duplicate(true)
+	((missing_constraint["industry_states"] as Dictionary)["fixture:steel_site"] as Dictionary).erase("production_constraint_reason")
+	_assert_restore_rejected("R1 PERSIST missing industry constraint", missing_constraint)
+	var impossible_output: Dictionary = saved.duplicate(true)
+	var impossible_industry: Dictionary = (impossible_output["industry_states"] as Dictionary)["fixture:steel_site"] as Dictionary
+	impossible_industry["last_actual_output"] = int(impossible_industry.get("last_planned_output", 0)) + 1
+	_assert_restore_rejected("R1 PERSIST actual exceeds planned", impossible_output)
+	var malformed_nested: Dictionary = saved.duplicate(true)
+	((malformed_nested["market_states"] as Dictionary)["fixture:steel"] as Dictionary)["daily_metrics"] = []
+	_assert_restore_rejected("R1 PERSIST malformed nested dictionary", malformed_nested)
+
+	var restored: Variant = _new_fixture({"miner_enabled": false})
+	var restored_ok: bool = restored.restore_persistent_state(saved)
+	_case(
+		"R1 PERSIST current writer round trip",
+		restored_ok and restored.get_authoritative_state_hash() == original.get_authoritative_state_hash() and restored.get_persistent_state() == saved
+	)
+
+	var shipment_options: Dictionary = {"miner_enabled": false, "steel_enabled": false, "initial_market_inventory": {"fixture:source": {"coal": 2_000}}}
+	var active_source: Variant = _new_fixture(shipment_options)
+	var active_intents: Array[Dictionary] = [_transport_intent("r1:shipment", 1_000)]
+	var active_allocations: Array[Dictionary] = [_allocation("r1:shipment", 1_000, 2)]
+	var active_ok: bool = _settle(active_source, 0, _empty_records(), _default_labor(), active_intents, active_allocations)
+	var active_saved: Dictionary = active_source.get_persistent_state()
+	var active_hash: String = active_source.get_authoritative_state_hash()
+	var active_restored: Variant = _new_fixture(shipment_options)
+	var active_restore_ok: bool = active_restored.restore_persistent_state(active_saved)
+	var delivered_ok: bool = _settle(active_source, 1) and _settle(active_source, 2)
+	var delivered_saved: Dictionary = active_source.get_persistent_state()
+	var delivered_restored: Variant = _new_fixture(shipment_options)
+	var delivered_restore_ok: bool = delivered_restored.restore_persistent_state(delivered_saved)
+	_case("R1 PERSIST active shipment writer round trip", active_ok and active_restore_ok and active_restored.get_authoritative_state_hash() == active_hash)
+	_case("R1 PERSIST delivered shipment writer round trip", delivered_ok and delivered_restore_ok and delivered_restored.get_authoritative_state_hash() == active_source.get_authoritative_state_hash())
+
+
+func _test_r1_configure_phase_guard() -> void:
+	var unconfigured: Variant = EconomyScript.new()
+	_case("R1 STATE configure from UNCONFIGURED", bool(unconfigured.configure(_fixture_config())) and unconfigured.get_phase() == "READY")
+
+	var ready: Variant = _new_fixture()
+	var replacement: Dictionary = _fixture_config({"initial_market_inventory": {"fixture:source": {"coal": 7}}})
+	var ready_configured: bool = ready.configure(replacement)
+	_case(
+		"R1 STATE configure from READY permitted",
+		ready_configured and ready.get_phase() == "READY" and int((ready.get_market_state("fixture:source").get("inventory", {}) as Dictionary).get("coal", -1)) == 7
+	)
+
+	var waiting: Variant = _new_fixture()
+	waiting.prepare_day(0, _empty_records(), _default_labor())
+	var waiting_before: String = waiting.get_authoritative_state_hash()
+	var waiting_rejected: bool = not waiting.configure(_fixture_config({"catalog_revision": "r1:waiting-attempt"}))
+	_case("R1 STATE configure during WAITING rejects atomically", waiting_rejected and waiting.get_authoritative_state_hash() == waiting_before and waiting.get_phase() == "WAITING_FOR_TRANSPORT")
+
+	var allocated: Variant = _new_fixture({"miner_enabled": false, "steel_enabled": false, "initial_market_inventory": {"fixture:source": {"coal": 500}}})
+	var allocated_intents: Array[Dictionary] = [_transport_intent("r1:allocated", 100)]
+	var allocated_prepared: Dictionary = allocated.prepare_day(0, _empty_records(), _default_labor(), allocated_intents)
+	var allocated_records: Array[Dictionary] = [_allocation("r1:allocated", 100, 1)]
+	var allocated_applied: Dictionary = allocated.apply_transport_allocations(allocated_records)
+	var allocated_before: String = allocated.get_authoritative_state_hash()
+	var allocated_rejected: bool = not allocated.configure(_fixture_config({"catalog_revision": "r1:allocated-attempt"}))
+	_case(
+		"R1 STATE configure during ALLOCATED rejects atomically",
+		bool(allocated_prepared.get("success", false)) and bool(allocated_applied.get("success", false))
+		and allocated_rejected and allocated.get_authoritative_state_hash() == allocated_before and allocated.get_phase() == "ALLOCATED"
+	)
+
+
+func _assert_restore_rejected(label: String, candidate: Dictionary) -> void:
+	var target: Variant = _new_fixture({"miner_enabled": false})
+	var before: String = target.get_authoritative_state_hash()
+	var rejected: bool = not target.restore_persistent_state(candidate)
+	_case(label, rejected and target.get_authoritative_state_hash() == before)
 
 
 func _test_alpha_catalog_salvage() -> void:
