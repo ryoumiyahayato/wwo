@@ -1,14 +1,15 @@
 class_name FormalWorldSimulation
 extends RefCounted
 ## Formal product composition root. It owns the 151-unit historical political
-## world and the separate 50-polity high-detail economy roster.
+## world, the 50-polity high-detail economy roster and derived military state.
 
 signal state_changed(change: Dictionary)
 
 const SAVE_PATH: String = "user://formal_world_1900.json"
-const SCHEMA_ID: String = "formal_world_simulation_v2"
+const SCHEMA_ID: String = "formal_world_simulation_v3"
 
 var economy := FormalWorldEconomyService.new()
+var military := FormalWorldMilitaryService.new()
 var initialized: bool = false
 var initialization_error: String = ""
 var total_minutes: int = 0
@@ -30,6 +31,10 @@ func initialize() -> bool:
 		initialization_error = economy.initialization_error
 		initialized = false
 		return false
+	if not military.configure(economy, _authoritative_total_hour()):
+		initialization_error = military.initialization_error
+		initialized = false
+		return false
 	initialized = true
 	state_changed.emit({"initialized": true})
 	return true
@@ -37,35 +42,54 @@ func initialize() -> bool:
 
 func advance_minutes(minutes: int) -> Dictionary:
 	if not initialized or minutes <= 0:
-		return economy.world_summary()
+		return world_summary()
 	var previous_total_hour := _authoritative_total_hour()
-	total_minutes += minutes
-	var current_total_hour := _authoritative_total_hour()
-	var elapsed_hours := current_total_hour - previous_total_hour
+	var target_total_minutes := total_minutes + minutes
+	var target_total_hour := int(target_total_minutes / 60)
+	var settled_hour := previous_total_hour
+	# Economy and military share daily boundaries. Advancing in boundary-sized
+	# chunks makes a 30-day jump identical to thirty one-day jumps while avoiding
+	# a full military-world scan every simulation hour.
+	while settled_hour < target_total_hour:
+		var next_day_boundary := (int(settled_hour / 24) + 1) * 24
+		var next_hour := mini(target_total_hour, next_day_boundary)
+		total_minutes = next_hour * 60
+		economy.settle_hour_range(settled_hour, next_hour)
+		if next_hour % 24 == 0:
+			military.settle_day(next_hour)
+		settled_hour = next_hour
+	total_minutes = target_total_minutes
+	var elapsed_hours := target_total_hour - previous_total_hour
 	if elapsed_hours > 0:
-		var summary := economy.settle_hour_range(
-			previous_total_hour, current_total_hour
-		)
 		state_changed.emit({
 			"time": true,
 			"economy": true,
+			"military": true,
 			"hours": elapsed_hours,
 		})
-		return summary
-	state_changed.emit({"time": true, "economy": false, "hours": 0})
-	return economy.world_summary()
+		return world_summary()
+	state_changed.emit({"time": true, "economy": false, "military": false, "hours": 0})
+	return world_summary()
 
 
 func world_summary() -> Dictionary:
-	return economy.world_summary()
+	var result := economy.world_summary()
+	result["military"] = military.world_summary()
+	return result
 
 
 func country_summary(entity_id: String) -> Dictionary:
-	return economy.country_summary(entity_id)
+	var result := economy.country_summary(entity_id)
+	if not result.is_empty():
+		result["military"] = military.country_assessment(entity_id)
+	return result
 
 
 func polity_summary(entity_id: String) -> Dictionary:
-	return economy.polity_summary(entity_id)
+	var result := economy.polity_summary(entity_id)
+	if not result.is_empty() and bool(result.get("has_detailed_economy", false)):
+		result["military"] = military.country_assessment(entity_id)
+	return result
 
 
 func has_polity(entity_id: String) -> bool:
@@ -88,14 +112,20 @@ func get_persistent_state() -> Dictionary:
 		"total_minutes": total_minutes,
 		"minute_remainder": _minute_remainder,
 		"economy": economy.get_persistent_state(),
+		"military": military.get_persistent_state(),
 	}
 
 
 func restore_persistent_state(state: Dictionary) -> bool:
 	var schema_id := str(state.get("schema_id", ""))
 	if (
-		schema_id not in ["formal_world_simulation_v1", SCHEMA_ID]
+		schema_id not in [
+			"formal_world_simulation_v1",
+			"formal_world_simulation_v2",
+			SCHEMA_ID,
+		]
 		or not state.get("economy", {}) is Dictionary
+		or (schema_id == SCHEMA_ID and not state.get("military", {}) is Dictionary)
 	):
 		return false
 	var validated_time := _validated_time_state(state, schema_id)
@@ -104,12 +134,35 @@ func restore_persistent_state(state: Dictionary) -> bool:
 	var previous_total_minutes := total_minutes
 	var previous_initialized := initialized
 	var previous_economy := economy.get_persistent_state()
+	var previous_military := military.get_persistent_state()
 	total_minutes = int(validated_time.get("total_minutes", -1))
 	if not economy.restore_persistent_state(
 		state.get("economy", {}) as Dictionary
 	):
 		total_minutes = previous_total_minutes
 		economy.restore_persistent_state(previous_economy)
+		military.restore_persistent_state(
+			previous_military, economy, int(previous_total_minutes / 60)
+		)
+		initialized = previous_initialized
+		return false
+	var military_restored := false
+	if schema_id == SCHEMA_ID:
+		military_restored = military.restore_persistent_state(
+			state.get("military", {}) as Dictionary,
+			economy,
+			_authoritative_total_hour()
+		)
+	else:
+		# Older saves predate military readiness state. Rebuild it from the
+		# already-restored authoritative economy at the saved hour.
+		military_restored = military.configure(economy, _authoritative_total_hour())
+	if not military_restored:
+		total_minutes = previous_total_minutes
+		economy.restore_persistent_state(previous_economy)
+		military.restore_persistent_state(
+			previous_military, economy, int(previous_total_minutes / 60)
+		)
 		initialized = previous_initialized
 		return false
 	initialized = true
@@ -231,7 +284,7 @@ func _validated_time_state(state: Dictionary, schema_id: String) -> Dictionary:
 	var saved_total_hour := int(economy_state.get("total_hour", -1))
 	if saved_total_hour < 0:
 		return {}
-	if schema_id == SCHEMA_ID and (
+	if schema_id in ["formal_world_simulation_v2", SCHEMA_ID] and (
 		not state.has("total_minutes") or not state.has("minute_remainder")
 	):
 		return {}

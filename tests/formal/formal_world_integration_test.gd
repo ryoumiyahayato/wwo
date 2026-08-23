@@ -70,6 +70,7 @@ func _check_formal_economy() -> void:
 		int(initial.get("route_count", 0)) >= 30,
 		"正式经济使用历史稀疏航路"
 	)
+	_check_military_capability(simulation)
 	var after := simulation.advance_minutes(90 * 24 * 60)
 	_check(int(after.get("total_hour", 0)) == 90 * 24, "90日结算完成")
 	_check(
@@ -89,6 +90,68 @@ func _check_formal_economy() -> void:
 		"正式经济恢复后摘要等价"
 	)
 	_check_economy_restore_is_atomic(restored.economy)
+
+
+func _check_military_capability(simulation: FormalWorldSimulation) -> void:
+	var military_summary := simulation.military.world_summary()
+	_check(
+		int(military_summary.get("assessment_count", 0)) == 50,
+		"正式世界为全部高细节经济体生成军事能力评估"
+	)
+	var united_states := simulation.military.country_assessment("united_states_1900")
+	var qing := simulation.military.country_assessment("qing_empire")
+	_check(
+		float(united_states.get("potential_capability", 0.0))
+		> float(united_states.get("available_capability", 0.0))
+		and float(united_states.get("available_capability", 0.0))
+		> float(united_states.get("operational_effectiveness", 0.0)),
+		"潜在、可用与作战能力保持独立层级"
+	)
+	var us_pillars := united_states.get("potential_components", {}) as Dictionary
+	var qing_pillars := qing.get("potential_components", {}) as Dictionary
+	_check(
+		float(qing_pillars.get("manpower", 0.0))
+		> float(us_pillars.get("manpower", 0.0))
+		and float(qing_pillars.get("industry", 0.0))
+		< float(us_pillars.get("industry", 0.0)),
+		"人口优势不会抹去工业能力瓶颈"
+	)
+	var home := simulation.military.project_capability(
+		"united_states_1900", "united_states_1900"
+	)
+	var overseas := simulation.military.project_capability(
+		"united_states_1900", "british_isles_1900"
+	)
+	_check(
+		bool(home.get("success", false)) and bool(overseas.get("success", false)),
+		"本土与海外作战区域均可确定性评估"
+	)
+	_check(
+		float(home.get("projectable_capability", 0.0))
+		> float(overseas.get("projectable_capability", 0.0)),
+		"同一国家本土防御能力高于跨洋投送能力"
+	)
+	var posture_simulation := FormalWorldSimulation.new()
+	_check(posture_simulation.initialize(), "动员惯性夹具可初始化")
+	if not posture_simulation.initialized:
+		return
+	var before_level := float(posture_simulation.military.country_assessment(
+		"united_states_1900"
+	).get("mobilization_level", 0.0))
+	_check(
+		posture_simulation.military.set_operational_posture(
+			"united_states_1900", 1.0, 1.0
+		),
+		"正式军事服务接受受限动员与准备目标"
+	)
+	posture_simulation.advance_minutes(24 * 60)
+	var after_level := float(posture_simulation.military.country_assessment(
+		"united_states_1900"
+	).get("mobilization_level", 0.0))
+	_check(
+		after_level > before_level and after_level < 1.0,
+		"动员具有日结惯性而非瞬时满战备"
+	)
 
 
 func _check_world_roster(

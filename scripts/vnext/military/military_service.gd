@@ -18,6 +18,8 @@ signal action_completed(action: Dictionary)
 signal battle_resolved(result: Dictionary)
 signal region_control_changed(change: Dictionary)
 
+var capability_model := VNextMilitaryCapabilityModel.new()
+
 
 func create_formation(
 	state: VNextMilitaryState,
@@ -356,7 +358,8 @@ func preview_battle(state: VNextMilitaryState, map: VNextMilitaryMapAdapter, att
 	var target_region_id: String = map.get_region_id_for_city(target_city_id)
 	var terrain: Dictionary = map.get_region_terrain(target_region_id)
 	var defender_summary: Dictionary = _defender_summary(state, map, target_region_id, target_city_id)
-	var attacker_power: float = _attacker_power(attacker, map, target_region_id)
+	var attacker_assessment := _formation_assessment(attacker, map, target_region_id, "attack")
+	var attacker_power: float = float(attacker_assessment.get("operational_effectiveness", 0.0))
 	var defender_power: float = float(defender_summary.get("power", 0.0))
 	return {
 		"attacker_power": attacker_power,
@@ -366,6 +369,7 @@ func preview_battle(state: VNextMilitaryState, map: VNextMilitaryMapAdapter, att
 		"attacker_supply_level": attacker.supply_level,
 		"defender_supply_level": float(defender_summary.get("average_supply_level", 0.0)),
 		"defender_posture_multiplier": float(defender_summary.get("posture_multiplier", 1.0)),
+		"attacker_assessment": attacker_assessment,
 		"factors": ["兵力", "装备", "补给", "地形", "防御姿态", "组织", "士气"],
 	}
 
@@ -1466,13 +1470,9 @@ func _resolve_attack(
 
 
 func _attacker_power(formation: VNextMilitaryFormation, map: VNextMilitaryMapAdapter, target_region_id: String) -> float:
-	var terrain: Dictionary = map.get_region_terrain(target_region_id)
-	var minimum_power_factor: float = _battle_rule(map, "minimum_power_factor", 0.35)
-	var training_factor: float = 0.45 + formation.training * 0.2 + formation.organization * 0.35
-	var morale_factor: float = 0.45 + formation.morale * 0.55
-	var supply_factor: float = maxf(minimum_power_factor, 0.35 + formation.supply_level * 0.65)
-	var terrain_factor: float = 1.0 / maxf(1.0, float(terrain.get("defense_factor", 1.0)))
-	return maxf(0.0, float(formation.personnel) * formation.equipment_factor() * training_factor * morale_factor * supply_factor * terrain_factor)
+	return float(_formation_assessment(
+		formation, map, target_region_id, "attack"
+	).get("operational_effectiveness", 0.0))
 
 
 func _defender_summary(state: VNextMilitaryState, map: VNextMilitaryMapAdapter, target_region_id: String, target_city_id: String) -> Dictionary:
@@ -1515,11 +1515,31 @@ func _defender_summary(state: VNextMilitaryState, map: VNextMilitaryMapAdapter, 
 
 
 func _base_formation_power(formation: VNextMilitaryFormation, map: VNextMilitaryMapAdapter) -> float:
-	var minimum_power_factor: float = _battle_rule(map, "minimum_power_factor", 0.35)
-	var training_factor: float = 0.45 + formation.training * 0.2 + formation.organization * 0.35
-	var morale_factor: float = 0.45 + formation.morale * 0.55
-	var supply_factor: float = maxf(minimum_power_factor, 0.35 + formation.supply_level * 0.65)
-	return maxf(0.0, float(formation.personnel) * formation.equipment_factor() * training_factor * morale_factor * supply_factor)
+	return float(capability_model.formation_effectiveness(
+		formation,
+		"attack",
+		1.0,
+		1.0,
+		1.0,
+		_battle_rule(map, "minimum_power_factor", 0.35)
+	).get("operational_effectiveness", 0.0))
+
+
+func _formation_assessment(
+	formation: VNextMilitaryFormation,
+	map: VNextMilitaryMapAdapter,
+	target_region_id: String,
+	role: String
+) -> Dictionary:
+	var terrain := map.get_region_terrain(target_region_id)
+	return capability_model.formation_effectiveness(
+		formation,
+		role,
+		float(terrain.get("defense_factor", 1.0)),
+		1.0,
+		1.0,
+		_battle_rule(map, "minimum_power_factor", 0.35)
+	)
 
 
 func _apply_defender_formation_losses(state: VNextMilitaryState, map: VNextMilitaryMapAdapter, target_region_id: String, defender_country_id: String, losses: int) -> Array[String]:

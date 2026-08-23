@@ -213,6 +213,18 @@ func economy_entity_for_polity(polity_id: String) -> String:
 	return str(economy_by_polity_id.get(polity_id, ""))
 
 
+func economy_entity_ids() -> Array[String]:
+	var ids: Array[String] = []
+	for raw_id: Variant in country_states.keys():
+		ids.append(str(raw_id))
+	ids.sort()
+	return ids
+
+
+func transport_routes() -> Array[Dictionary]:
+	return routes.duplicate(true)
+
+
 func polity_ids_for_economy(economy_id: String) -> Array[String]:
 	return DataRecordUtils.to_string_array(economy_polity_ids.get(economy_id, []))
 
@@ -771,6 +783,7 @@ func _production_factor(record: Dictionary, commodity: Dictionary) -> float:
 		"industrial_material",
 		"capital_good",
 		"manufactured_good",
+		"military_good",
 		"processed_food",
 		"textile",
 	]:
