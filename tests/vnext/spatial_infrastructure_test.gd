@@ -104,14 +104,14 @@ func _test_shared_capacity_contention_and_rollover() -> void:
 		return
 	var link_id: String = "rail_paris_lille"
 	_check(world.set_nominal_capacity(link_id, 100), "contention fixture configures rail capacity")
-	var first: Dictionary = world.request_capacity("request_b", link_id, 0, 60)
-	var second: Dictionary = world.request_capacity("request_a", link_id, 0, 60)
+	var first: Dictionary = _submit_legacy_capacity(world, "request_b", link_id, 0, 60)
+	var second: Dictionary = _submit_legacy_capacity(world, "request_a", link_id, 0, 60)
 	_check(bool(first.get("accepted", false)) and bool(second.get("accepted", false)), "same-hour fixture requests are accepted")
 	_equal(world.reservation_result("request_a", link_id, 0).get("allocated_capacity"), 60.0, "canonical lower request ID receives first allocation")
 	_equal(world.reservation_result("request_b", link_id, 0).get("allocated_capacity"), 40.0, "contention produces deterministic partial allocation")
 	_equal(world.used_capacity(link_id), 100.0, "used capacity never exceeds effective capacity")
 	_equal(world.remaining_capacity(link_id), 0.0, "remaining capacity is authoritative")
-	_check(not world.request_capacity("request_a", link_id, 0, 1).get("accepted", false), "duplicate request ID is rejected")
+	_check(not _submit_legacy_capacity(world, "request_a", link_id, 0, 1).get("accepted", false), "duplicate request ID is rejected")
 	_check(world.set_infrastructure_status(link_id, VNextInfrastructureLinkState.STATUS_INTERRUPTED), "interruption can occur with active reservations")
 	_equal(world.used_capacity(link_id), 0.0, "interruption removes usable allocation")
 	_equal(world.remaining_capacity(link_id), 0.0, "zero-capacity behavior is explicit")
@@ -120,8 +120,8 @@ func _test_shared_capacity_contention_and_rollover() -> void:
 	_check(world.advance_hours(1), "hour boundary advances explicitly")
 	_equal(world.current_hour(), 1, "capacity window rolls to next absolute hour")
 	_equal(world.capacity_summary(link_id).get("reservations").size(), 0, "window rollover drops completed reservations")
-	_check(not world.request_capacity("old_window", link_id, 0, 1).get("accepted", false), "past-hour request is rejected")
-	_check(world.request_capacity("new_window", link_id, 1, 20).get("accepted", false), "current-hour request is accepted")
+	_check(not _submit_legacy_capacity(world, "old_window", link_id, 0, 1).get("accepted", false), "past-hour request is rejected")
+	_check(_submit_legacy_capacity(world, "new_window", link_id, 1, 20).get("accepted", false), "current-hour request is accepted")
 
 
 func _test_deterministic_request_permutation() -> void:
@@ -131,10 +131,10 @@ func _test_deterministic_request_permutation() -> void:
 		return
 	_check(first.set_nominal_capacity("rail_paris_lille", 100), "permutation fixture configures first capacity")
 	_check(second.set_nominal_capacity("rail_paris_lille", 100), "permutation fixture configures second capacity")
-	first.request_capacity("request_z", "rail_paris_lille", 0, 80)
-	first.request_capacity("request_a", "rail_paris_lille", 0, 80)
-	second.request_capacity("request_a", "rail_paris_lille", 0, 80)
-	second.request_capacity("request_z", "rail_paris_lille", 0, 80)
+	_submit_legacy_capacity(first, "request_z", "rail_paris_lille", 0, 80)
+	_submit_legacy_capacity(first, "request_a", "rail_paris_lille", 0, 80)
+	_submit_legacy_capacity(second, "request_a", "rail_paris_lille", 0, 80)
+	_submit_legacy_capacity(second, "request_z", "rail_paris_lille", 0, 80)
 	_equal(first.snapshot(), second.snapshot(), "request insertion permutation does not change snapshot")
 	_equal(first.capacity_summary("rail_paris_lille"), second.capacity_summary("rail_paris_lille"), "request insertion permutation does not change allocation")
 
@@ -211,7 +211,7 @@ func _test_snapshot_restore_and_transactional_rejection() -> void:
 	_check(source.set_nominal_capacity("rail_paris_lille", 100), "snapshot fixture configures capacity")
 	_check(source.set_sovereign_owner("northern_industrial_belt", "british_empire"), "snapshot fixture changes owner")
 	_check(source.set_military_controller("northern_industrial_belt", "british_empire"), "snapshot fixture changes controller")
-	_check(source.request_capacity("snapshot_request", "rail_paris_lille", 0, 70).get("accepted", false), "snapshot fixture creates reservation")
+	_check(_submit_legacy_capacity(source, "snapshot_request", "rail_paris_lille", 0, 70).get("accepted", false), "snapshot fixture creates reservation")
 	var saved: Dictionary = source.snapshot()
 	_check(target.restore(saved), "complete spatial snapshot restores")
 	_equal(target.snapshot(), saved, "snapshot restore preserves infrastructure, territory and capacity")
@@ -294,6 +294,21 @@ func _expect_restore_failure(world: VNextSpatialWorld, malformed: Dictionary, la
 	var before: Dictionary = world.snapshot()
 	_check(not world.restore(malformed), "%s snapshot is rejected" % label)
 	_equal(world.snapshot(), before, "%s restore is transactional" % label)
+
+
+func _submit_legacy_capacity(
+	world: VNextSpatialWorld,
+	request_id: String,
+	link_id: String,
+	window_hour: int,
+	demand: Variant
+) -> Dictionary:
+	return world.request_capacity_batch([{
+		"request_id": request_id,
+		"link_id": link_id,
+		"window_hour": window_hour,
+		"demand": demand,
+	}])
 
 
 func _catalog() -> VNextSpatialCatalog:

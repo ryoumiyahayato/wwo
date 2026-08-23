@@ -268,28 +268,19 @@ func get_territorial_facts(entity_query: String) -> Dictionary:
 	return (value as Dictionary).duplicate(true)
 
 
-func request_capacity(
-	request_id: String, link_id: String, window_hour: int, demand: Variant
-) -> Dictionary:
-	if _capacity == null:
-		return {"success": false, "accepted": false, "reason": "invalid_world"}
-	return _capacity.request_capacity(request_id, link_id, window_hour, demand)
-
-
+# LEGACY TRANSPORT COMPATIBILITY PATH. Existing Economy and Military callers
+# require coordinated migration to the Shared Transport cycle. New consumers
+# must collect generic requests through that cycle instead of calling this API.
 func request_capacity_batch(request_values: Array[Dictionary]) -> Dictionary:
 	if _capacity == null:
 		return {"success": false, "accepted": false, "reason": "invalid_world", "results": {}}
 	return _capacity.request_capacity_batch(request_values)
 
 
-func reserve_capacity(
-	request_id: String, link_id: String, window_hour: int, demand: Variant
-) -> Dictionary:
-	return request_capacity(request_id, link_id, window_hour, demand)
-
-
+# LEGACY TRANSPORT COMPATIBILITY PATH. Military action cancellation is the only
+# runtime caller. It releases capacity and cannot admit or increase demand.
 func cancel_capacity_request(request_id: String, link_id: String, window_hour: int) -> bool:
-	return _capacity != null and _capacity.cancel_capacity_request(request_id, link_id, window_hour)
+	return _capacity != null and _capacity._cancel_capacity_request(request_id, link_id, window_hour)
 
 
 func reservation_result(request_id: String, link_id: String, window_hour: int) -> Dictionary:

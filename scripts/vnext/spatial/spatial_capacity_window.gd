@@ -56,41 +56,9 @@ func advance_hours(elapsed_hours: int) -> bool:
 	return advance_to_hour(_current_hour + elapsed_hours)
 
 
-func request_capacity(
-	request_id: String, link_id: String, window_hour: int, demand: Variant
-) -> Dictionary:
-	var rejected: Dictionary = _result_base(request_id, link_id, window_hour, 0.0, 0.0)
-	if not _is_internal_state_valid():
-		rejected["reason"] = "invalid_capacity_state"
-		return rejected
-	if not _is_valid_request_id(request_id):
-		rejected["reason"] = "invalid_request_id"
-		return rejected
-	if not _catalog.has_link(link_id):
-		rejected["reason"] = "unknown_link"
-		return rejected
-	if window_hour != _current_hour:
-		rejected["reason"] = "wrong_window"
-		return rejected
-	var normalized_demand: float = _parse_positive_finite(demand)
-	if normalized_demand <= 0.0:
-		rejected["reason"] = "invalid_demand"
-		return rejected
-	if _request_exists(request_id):
-		rejected["reason"] = "duplicate_request"
-		return rejected
-	var link_requests: Dictionary = _requests[link_id]
-	link_requests[request_id] = {
-		"request_id": request_id,
-		"link_id": link_id,
-		"window_hour": window_hour,
-		"demand": _round_capacity(normalized_demand),
-		"allocated_capacity": 0.0,
-	}
-	_recompute_allocations()
-	return reservation_result(request_id, link_id, window_hour)
-
-
+# LEGACY TRANSPORT COMPATIBILITY PATH. Economy and Military still submit here
+# until an authorized product-line migration collects all domain demand into one
+# Shared Transport cycle. New consumers must not use this link-level allocator.
 func request_capacity_batch(request_values: Array[Dictionary]) -> Dictionary:
 	var rejected: Dictionary = {
 		"success": false,
@@ -171,13 +139,9 @@ func request_capacity_batch(request_values: Array[Dictionary]) -> Dictionary:
 	return {"success": true, "accepted": true, "reason": "", "results": results}
 
 
-func reserve_capacity(
-	request_id: String, link_id: String, window_hour: int, demand: Variant
-) -> Dictionary:
-	return request_capacity(request_id, link_id, window_hour, demand)
-
-
-func cancel_capacity_request(request_id: String, link_id: String, window_hour: int) -> bool:
+# Internal implementation for the legacy Military cancellation wrapper. This
+# can release an old-window reservation but cannot admit or increase demand.
+func _cancel_capacity_request(request_id: String, link_id: String, window_hour: int) -> bool:
 	if not _is_internal_state_valid() or window_hour != _current_hour:
 		return false
 	if not _requests.has(link_id) or not (_requests[link_id] as Dictionary).has(request_id):

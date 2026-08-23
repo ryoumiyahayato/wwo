@@ -560,6 +560,76 @@ func _test_public_api_bypass_prevention() -> void:
 	_check(not allocator.has_method("restore") and not allocator.has_method("snapshot"),
 		"PERSISTENCE allocation cycle/result remain transient")
 
+	var legacy_world := VNextSpatialWorld.new()
+	var legacy_window := VNextSpatialCapacityWindow.new()
+	for removed_method: String in ["request_capacity", "reserve_capacity"]:
+		_check(not legacy_world.has_method(removed_method),
+			"BYPASS legacy SpatialWorld no longer admits demand through %s" % removed_method)
+		_check(not legacy_window.has_method(removed_method),
+			"BYPASS capacity window no longer admits demand through %s" % removed_method)
+	_check(legacy_world.has_method("request_capacity_batch"),
+		"LEGACY boundary retains the product-required batch compatibility path")
+	_check(legacy_world.has_method("cancel_capacity_request"),
+		"LEGACY boundary retains Military cancellation pending product migration")
+	_check(not legacy_window.has_method("cancel_capacity_request"),
+		"BYPASS cancellation implementation is internal below SpatialWorld")
+
+	var world_source: String = FileAccess.get_file_as_string(
+		"res://scripts/vnext/spatial/spatial_world.gd"
+	)
+	var window_source: String = FileAccess.get_file_as_string(
+		"res://scripts/vnext/spatial/spatial_capacity_window.gd"
+	)
+	for removed_declaration: String in ["func request_capacity(", "func reserve_capacity("]:
+		_check(not world_source.contains(removed_declaration),
+			"BYPASS SpatialWorld source cannot reintroduce %s" % removed_declaration)
+		_check(not window_source.contains(removed_declaration),
+			"BYPASS capacity-window source cannot reintroduce %s" % removed_declaration)
+	_check(world_source.contains("LEGACY TRANSPORT COMPATIBILITY PATH")
+		and window_source.contains("LEGACY TRANSPORT COMPATIBILITY PATH"),
+		"LEGACY batch and cancellation paths carry explicit compatibility fencing")
+	var world_batch_marker: int = world_source.find("# LEGACY TRANSPORT COMPATIBILITY PATH")
+	var world_batch_declaration: int = world_source.find("func request_capacity_batch(")
+	var window_batch_marker: int = window_source.find("# LEGACY TRANSPORT COMPATIBILITY PATH")
+	var window_batch_declaration: int = window_source.find("func request_capacity_batch(")
+	_check(world_batch_marker >= 0 and world_batch_marker < world_batch_declaration
+		and world_batch_declaration - world_batch_marker < 400,
+		"LEGACY SpatialWorld batch declaration is directly fenced")
+	_check(window_batch_marker >= 0 and window_batch_marker < window_batch_declaration
+		and window_batch_declaration - window_batch_marker < 400,
+		"LEGACY capacity-window batch declaration is directly fenced")
+	_check(world_source.contains("Military action cancellation is the only"),
+		"LEGACY cancellation retains its exact runtime-caller classification")
+
+	var core_sources: Array[String] = [
+		"shared_transport_allocation_result.gd",
+		"shared_transport_edge.gd",
+		"shared_transport_request.gd",
+		"shared_transport_route.gd",
+		"spatial_shared_transport_topology.gd",
+		"spatial_transport_allocator.gd",
+	]
+	for core_filename: String in core_sources:
+		var core_source: String = FileAccess.get_file_as_string(
+			"res://scripts/vnext/spatial/shared_transport/%s" % core_filename
+		)
+		for forbidden_call: String in [
+			"request_capacity(", "reserve_capacity(",
+			"cancel_capacity_request(", "request_capacity_batch(",
+		]:
+			_check(not core_source.contains(forbidden_call),
+				"BYPASS new core %s cannot call legacy %s" % [core_filename, forbidden_call])
+
+	var freeze_record: String = FileAccess.get_file_as_string(
+		"res://docs/vnext/shared_transport_component_freeze.md"
+	)
+	_check(freeze_record.contains("e93ad2f")
+		and freeze_record.contains("## Canonical component line"),
+		"PROVENANCE freeze record fixes e93ad2f as the canonical component line")
+	_check(freeze_record.contains("c41f07f50ac355b8c85b961cd3d633fa17f37ba9")
+		and freeze_record.contains("not based on"),
+		"PROVENANCE component freeze cannot imply trusted-product integration")
+
 
 func _test_adversarial_conservation_and_finiteness() -> void:
 	var edges: Array = []

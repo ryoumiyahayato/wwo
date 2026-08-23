@@ -66,7 +66,7 @@ func _run() -> void:
 	)
 
 	_check(
-		bool(spatial_world.request_capacity("military:day0:safety", shared_link_id, 0, 10.0).get("accepted", false)),
+		bool(_submit_legacy_capacity(spatial_world, "military:day0:safety", shared_link_id, 0, 10.0).get("accepted", false)),
 		"other-domain demand exists in the day zero Spatial window"
 	)
 	var before_stale_attempt: String = JSON.stringify(spatial_world.capacity_summary(shared_link_id))
@@ -80,7 +80,7 @@ func _run() -> void:
 	_check(spatial_world.advance_to_hour(24), "shared time authority advances Spatial to day one")
 	_check(spatial_world.current_hour() == 24, "day one uses the externally selected absolute window")
 	_check(
-		bool(spatial_world.request_capacity("military:day1:safety", shared_link_id, 24, 10.0).get("accepted", false)),
+		bool(_submit_legacy_capacity(spatial_world, "military:day1:safety", shared_link_id, 24, 10.0).get("accepted", false)),
 		"other-domain demand is submitted before Economy in the same day-one window"
 	)
 	_check(bool(economy.settle_day(1).get("success", false)), "day one submits into the externally selected Spatial window")
@@ -148,6 +148,21 @@ func _request_ids(reservations: Array) -> Array[String]:
 		if raw_reservation is Dictionary:
 			request_ids.append(str((raw_reservation as Dictionary).get("request_id", "")))
 	return request_ids
+
+
+func _submit_legacy_capacity(
+	world: VNextSpatialWorld,
+	request_id: String,
+	link_id: String,
+	window_hour: int,
+	demand: Variant
+) -> Dictionary:
+	return world.request_capacity_batch([{
+		"request_id": request_id,
+		"link_id": link_id,
+		"window_hour": window_hour,
+		"demand": demand,
+	}])
 
 
 func _sum_reservation_demand(reservations: Array) -> float:

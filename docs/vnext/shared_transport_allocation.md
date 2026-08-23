@@ -180,9 +180,18 @@ The Shared Transport directory exposes no request_capacity, reserve_capacity,
 cancel, cancel_capacity_request or allocate_request method. Focused tests scan
 against their reintroduction.
 
-The older VNextSpatialWorld/VNextSpatialCapacityWindow runtime still exposes
-link-level legacy methods plus its separate batch API. Economy and Military
-currently use that old batch API; legacy Spatial tests call the single-request
-wrapper. Removing or routing those runtime APIs through this core requires the
-explicitly excluded product integration/migration task. This standalone core
-does not call them or include them in its public surface.
+The unused `request_capacity()` and `reserve_capacity()` admission methods were
+removed from both the older VNextSpatialWorld and VNextSpatialCapacityWindow.
+Their old test fixtures now use one-member batches, so no discoverable public
+single-request admission path remains.
+
+`request_capacity_batch()` remains a **LEGACY TRANSPORT COMPATIBILITY PATH**.
+Economy and Military still call it and must be migrated together in an
+authorized product-integration task. Military also uses the legacy
+`cancel_capacity_request()` wrapper while cancelling active actions; the
+implementation below SpatialWorld is internal and cancellation can only
+release, never admit or increase, capacity. Focused tests require these legacy
+classifications and reject any call from Shared Transport core sources.
+
+See `shared_transport_component_freeze.md` for provenance, the canonical-line
+rule and the future product orchestration seam.
