@@ -1,7 +1,9 @@
 param(
     [string]$GodotPath = 'D:\Tools\Godot-4.6.3\Godot_v4.6.3-stable_win64.exe',
+    [string]$PythonPath = 'python',
     [string]$ProjectPath = (Split-Path -Parent $PSScriptRoot),
-    [int]$StepTimeoutSeconds = 120
+    [int]$StepTimeoutSeconds = 120,
+    [switch]$SkipLongTermBalance
 )
 
 $ErrorActionPreference = 'Stop'
@@ -82,20 +84,28 @@ $null = Invoke-GodotStep -Name 'Clean import and script scan' -Arguments @(
 ) -TimeoutSeconds 180
 
 Write-Host "`n=== 1900 economy static audits ==="
-& python "$ProjectPath/tools/audit_1900_commodity_economy.py"
+& $PythonPath "$ProjectPath/tools/audit_1900_commodity_economy.py"
 if ($LASTEXITCODE -ne 0) { throw 'Commodity economy static audit failed' }
-& python "$ProjectPath/tools/audit_1900_economy_integration.py"
+& $PythonPath "$ProjectPath/tools/audit_1900_economy_integration.py"
 if ($LASTEXITCODE -ne 0) { throw 'Economy integration static audit failed' }
-& python "$ProjectPath/tools/audit_1900_world_economy_compact.py"
+& $PythonPath "$ProjectPath/tools/audit_1900_world_economy_compact.py"
 if ($LASTEXITCODE -ne 0) { throw 'Historical world economy static audit failed' }
 
+Write-Host "`n=== Wave 0 product path gates ==="
+& $PythonPath "$ProjectPath/tools/validate_wave0_product_path.py"
+if ($LASTEXITCODE -ne 0) { throw 'Wave 0 product path gate failed' }
+& $PythonPath -m unittest discover -s "$ProjectPath/tests/tools" -p 'test_validate_wave0_product_path.py' -v
+if ($LASTEXITCODE -ne 0) { throw 'Wave 0 evidence gate regression failed' }
+
 Write-Host "`n=== World data audit regressions ==="
-& python -m unittest discover -s "$ProjectPath/tests/world_data" -p 'test_*.py' -v
+& $PythonPath -m unittest discover -s "$ProjectPath/tests/world_data" -p 'test_*.py' -v
 if ($LASTEXITCODE -ne 0) { throw 'World data audit regression suite failed' }
 
 $tests = @(
 	@{ Name = 'Formal player release journey'; Script = 'res://tests/formal/formal_world_player_journey_smoke.gd'; TimeoutSeconds = 240 },
 	@{ Name = 'Formal Windows export resource contract'; Script = 'res://tests/formal/formal_world_export_resource_smoke.gd'; TimeoutSeconds = 180 },
+    @{ Name = 'Wave 0 product truth'; Script = 'res://tests/formal/formal_world_product_truth_test.gd'; TimeoutSeconds = 180 },
+    @{ Name = 'Wave 0 30-day and one-year simulation'; Script = 'res://tests/formal/formal_world_wave0_one_year_test.gd'; TimeoutSeconds = 300 },
     @{ Name = 'Formal world integration'; Script = 'res://tests/formal/formal_world_integration_test.gd'; TimeoutSeconds = 360 },
     @{ Name = 'Formal world ten-year balance'; Script = 'res://tests/formal/formal_world_long_term_balance_test.gd'; TimeoutSeconds = 420 },
     @{ Name = 'Formal hemisphere product surface'; Script = 'res://tests/v2_3/v2_3_player_interface_test.gd'; TimeoutSeconds = 180 },
@@ -128,6 +138,11 @@ $tests = @(
     @{ Name = 'Quarantined save-migration fixture'; Script = 'res://tests/alpha/alpha_save_and_migration_test.gd' }
 )
 
+if ($SkipLongTermBalance) {
+    Write-Host "`nSkipping the ten-year balance test because this invocation is scoped to Wave 0."
+    $tests = @($tests | Where-Object { $_.Name -ne 'Formal world ten-year balance' })
+}
+
 foreach ($test in $tests) {
     $timeout = if ($test.ContainsKey('TimeoutSeconds')) {
         [int]$test.TimeoutSeconds
@@ -144,4 +159,9 @@ $null = Invoke-GodotStep -Name 'Headless formal product startup' -Arguments @(
     '--headless', '--path', $ProjectPath, '--quit-after', '5'
 ) -TimeoutSeconds 30
 
-Write-Host "`nFormal hemisphere world, long-term balance and retained service validation passed."
+if ($SkipLongTermBalance) {
+    Write-Host "`nFormal hemisphere Wave 0 scope and retained service validation passed; ten-year balance was not run."
+}
+else {
+    Write-Host "`nFormal hemisphere world, long-term balance and retained service validation passed."
+}

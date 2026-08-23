@@ -1,7 +1,7 @@
 {
   "contract_gate": "PASS",
   "data_json_count": 184,
-  "literal_directory_reference_count": 2,
+  "literal_directory_reference_count": 3,
   "literal_directory_references": [
     {
       "exists": true,
@@ -13,10 +13,16 @@
       "exists": true,
       "json_file_count": 158,
       "resource": "res://data/world_map/city_detail/",
+      "script": "scripts/formal/product_runtime_gate.gd"
+    },
+    {
+      "exists": true,
+      "json_file_count": 158,
+      "resource": "res://data/world_map/city_detail/",
       "script": "scripts/world_map/world_city_shard_catalog.gd"
     }
   ],
-  "literal_file_reference_count": 19,
+  "literal_file_reference_count": 22,
   "literal_file_references": [
     {
       "exists": true,
@@ -27,6 +33,21 @@
       "exists": true,
       "resource": "res://data/world_map/historical/political_units_1900.json",
       "script": "scripts/formal/formal_world_economy_service.gd"
+    },
+    {
+      "exists": true,
+      "resource": "res://data/world_map/city_detail/index.json",
+      "script": "scripts/formal/product_runtime_gate.gd"
+    },
+    {
+      "exists": true,
+      "resource": "res://data/world_map/country_flag_palettes.json",
+      "script": "scripts/formal/product_runtime_gate.gd"
+    },
+    {
+      "exists": true,
+      "resource": "res://data/world_map/world_admin1.json",
+      "script": "scripts/formal/product_runtime_gate.gd"
     },
     {
       "exists": true,
@@ -275,22 +296,20 @@
     "res://data/world_map/city_detail/france/FR-84.json",
     "res://data/world_map/city_detail/france/FR-93.json",
     "res://data/world_map/city_detail/france/FR-94.json",
-    "res://data/world_map/country_flag_palettes.json",
     "res://data/world_map/historical/cshapes_1900_snapshot.json",
     "res://data/world_map/historical/flags_1900.json",
     "res://data/world_map/historical/historical_admin1_1900.json",
     "res://data/world_map/historical/major_state_profiles_1900.json",
     "res://data/world_map/historical_political_entities_1900.json",
-    "res://data/world_map/strategic_military_overlay.json",
-    "res://data/world_map/world_admin1.json"
+    "res://data/world_map/strategic_military_overlay.json"
   ],
-  "production_script_count": 15,
+  "production_script_count": 17,
   "production_script_roots": [
     "scripts/world_map",
     "scripts/formal"
   ],
   "schema_version": "wwo_world_data_batch3_contracts_v1",
-  "script_digest": "417043f3c2d44b1e1d189f4a15eee1a203462d4556c5a985ae028f1fec88d04b",
+  "script_digest": "f672022ea4cb2bf91a6a8614aa8e555824146ec7ffc2a4b5eff84914cd593881",
   "world_map_data_loader_entries": [
     {
       "exists": true,
