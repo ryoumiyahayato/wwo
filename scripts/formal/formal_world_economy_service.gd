@@ -12,8 +12,9 @@ const MAX_SHIPMENTS_PER_DAY: int = 96
 const MAX_SUPPLIERS_PER_SHORTAGE: int = 4
 const EXPECTED_MAJOR_ROSTER_COUNT: int = 50
 const PRIMARY_PLAYABLE_LIMIT: int = 30
+const MIN_POLITICAL_PRODUCTION_EFFICIENCY_BP: int = 6000
+const MAX_POLITICAL_PRODUCTION_EFFICIENCY_BP: int = 10500
 const COMMODITY_CATALOG_PATH: String = "res://data/alpha/commodity_market_1900.json"
-const POLITICAL_UNITS_PATH: String = "res://data/world_map/historical/political_units_1900.json"
 const CROSSWALK_PATH: String = "res://data/world_map/historical/major_economy_polity_crosswalk_1900.json"
 
 var country_states: Dictionary = {}
@@ -24,6 +25,7 @@ var routes: Array[Dictionary] = []
 var shipments: Array[Dictionary] = []
 var history: Array[Dictionary] = []
 var initialization_error: String = ""
+var _political_modifiers: Dictionary = {}
 
 var _authoritative_hour_source: Callable = Callable()
 var total_hour: int:
@@ -43,7 +45,7 @@ var _last_day_index: int = -1
 var _political_unit_count: int = 0
 
 
-func configure() -> bool:
+func configure(political_authority: FormalDatedPoliticalAuthority) -> bool:
 	country_states.clear()
 	polity_records.clear()
 	economy_polity_ids.clear()
@@ -51,6 +53,7 @@ func configure() -> bool:
 	routes.clear()
 	shipments.clear()
 	history.clear()
+	_political_modifiers.clear()
 	_routes_by_country.clear()
 	_crosswalk_records.clear()
 	_commodities.clear()
@@ -58,11 +61,13 @@ func configure() -> bool:
 	_next_shipment_sequence = 1
 	_political_unit_count = 0
 	initialization_error = ""
+	if political_authority == null or political_authority.all_records().is_empty():
+		return _fail("正式经济缺少统一历史政治权威")
 	if not _historical.configure():
 		return _fail(_historical.initialization_error)
 	if not _load_commodity_catalog():
 		return false
-	if not _load_polity_registry():
+	if not _load_polity_registry(political_authority):
 		return false
 	if not _load_crosswalk():
 		return false
@@ -134,11 +139,8 @@ func world_summary() -> Dictionary:
 		# Compatibility alias. This is the high-detail economy roster, not world total.
 		"country_count": country_states.size(),
 		"major_economy_count": country_states.size(),
-		"world_political_unit_count": _political_unit_count,
+		"historical_political_record_count": _political_unit_count,
 		"detailed_polity_unit_count": economy_by_polity_id.size(),
-		"background_polity_count": maxi(
-			0, _political_unit_count - economy_by_polity_id.size()
-		),
 		"primary_playable_count": (
 			leading_power_count
 			+ great_power_count
@@ -174,6 +176,11 @@ func country_summary(entity_id: String) -> Dictionary:
 	if state.is_empty():
 		return {}
 	var result := state.duplicate(true)
+	result["political_production_efficiency_bp"] = int(
+		(_political_modifiers.get(economy_id, {}) as Dictionary).get(
+			"production_efficiency_bp", BASIS_POINTS
+		)
+	)
 	result["top_shortages"] = _top_country_shortages(state, 8)
 	result["active_shipments"] = _shipment_count_for(economy_id)
 	return result
@@ -221,15 +228,58 @@ func formal_verified_countries() -> Array[Dictionary]:
 	return _historical.formal_countries()
 
 
+func political_inputs() -> Dictionary:
+	var economies: Dictionary = {}
+	for raw_id: Variant in country_states:
+		var economy_id := str(raw_id)
+		var state := country_states[economy_id] as Dictionary
+		economies[economy_id] = {
+			"economy_entity_id": economy_id,
+			"daily_totals": (
+				state.get("daily_totals", {}) as Dictionary
+			).duplicate(true),
+			"prices": (state.get("prices", {}) as Dictionary).duplicate(true),
+			"last_settlement_hour": int(state.get("last_settlement_hour", 0)),
+		}
+	return {
+		"economies": economies,
+		"polity_economy_links": economy_by_polity_id.duplicate(true),
+	}
+
+
+func set_political_modifiers(modifiers: Dictionary) -> bool:
+	var candidate: Dictionary = {}
+	for raw_id: Variant in modifiers:
+		var economy_id := str(raw_id)
+		if not country_states.has(economy_id) or not modifiers[raw_id] is Dictionary:
+			return false
+		var efficiency := int(
+			(modifiers[raw_id] as Dictionary).get(
+				"production_efficiency_bp", BASIS_POINTS
+			)
+		)
+		if (
+			efficiency < MIN_POLITICAL_PRODUCTION_EFFICIENCY_BP
+			or efficiency > MAX_POLITICAL_PRODUCTION_EFFICIENCY_BP
+		):
+			return false
+		candidate[economy_id] = {
+			"production_efficiency_bp": efficiency,
+		}
+	_political_modifiers = candidate
+	return true
+
+
 func get_persistent_state() -> Dictionary:
 	return {
-		"schema_id": "formal_world_economy_state_v3",
+		"schema_id": "formal_world_economy_state_v4",
 		"total_hour": total_hour,
 		"country_states": country_states.duplicate(true),
 		"shipments": shipments.duplicate(true),
 		"history": history.duplicate(true),
 		"next_shipment_sequence": _next_shipment_sequence,
 		"last_day_index": _last_day_index,
+		"political_modifiers": _political_modifiers.duplicate(true),
 	}
 
 
@@ -240,6 +290,7 @@ func restore_persistent_state(state: Dictionary) -> bool:
 			"formal_world_economy_state_v1",
 			"formal_world_economy_state_v2",
 			"formal_world_economy_state_v3",
+			"formal_world_economy_state_v4",
 		]
 		or not state.get("country_states", {}) is Dictionary
 		or not state.get("shipments", []) is Array
@@ -282,6 +333,13 @@ func restore_persistent_state(state: Dictionary) -> bool:
 	var candidate_last_day_index: int = int(
 		state.get("last_day_index", expected_last_day_index)
 	)
+	var candidate_political_modifiers: Dictionary = {}
+	if schema_id == "formal_world_economy_state_v4":
+		if not state.get("political_modifiers", {}) is Dictionary:
+			return false
+		candidate_political_modifiers = (
+			(state.get("political_modifiers", {}) as Dictionary).duplicate(true)
+		)
 	while candidate_history.size() > HISTORY_LIMIT:
 		candidate_history.pop_front()
 	if not _validate_candidate_state(
@@ -290,6 +348,8 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		candidate_last_day_index,
 		saved_total_hour
 	):
+		return false
+	if not set_political_modifiers(candidate_political_modifiers):
 		return false
 	country_states = candidate_country_states
 	shipments = candidate_shipments
@@ -315,19 +375,13 @@ func _load_commodity_catalog() -> bool:
 	return not _commodities.is_empty()
 
 
-func _load_polity_registry() -> bool:
-	var document := _read_document(POLITICAL_UNITS_PATH)
-	if document.is_empty():
-		return false
-	var units := document.get("units", []) as Array
-	_political_unit_count = int(document.get("unit_count", units.size()))
-	for raw_unit: Variant in units:
-		if not raw_unit is Dictionary:
-			continue
-		var unit := (raw_unit as Dictionary).duplicate(true)
-		var entity_id := str(unit.get("id", ""))
-		if entity_id.is_empty():
-			continue
+func _load_polity_registry(
+	political_authority: FormalDatedPoliticalAuthority
+) -> bool:
+	var records := political_authority.all_records()
+	_political_unit_count = records.size()
+	for entity_id: String in _sorted_keys(records):
+		var unit := (records[entity_id] as Dictionary).duplicate(true)
 		unit["entity_id"] = entity_id
 		unit["playability_tier"] = "background_npc"
 		unit["playability_tier_zh"] = "背景政治单元"
@@ -550,6 +604,11 @@ func _settle_country(entity_id: String, settlement_hour: int) -> void:
 	var produced_total := 0.0
 	var consumed_total := 0.0
 	var unmet_total := 0.0
+	var production_efficiency := float(
+		(_political_modifiers.get(entity_id, {}) as Dictionary).get(
+			"production_efficiency_bp", BASIS_POINTS
+		)
+	) / float(BASIS_POINTS)
 	for raw_id: Variant in _commodities:
 		var commodity_id := str(raw_id)
 		var commodity := _commodities[commodity_id] as Dictionary
@@ -562,7 +621,9 @@ func _settle_country(entity_id: String, settlement_hour: int) -> void:
 			commodity
 		)
 		var production_factor := _production_factor(state, commodity)
-		var produced := maxf(0.0, demand * production_factor)
+		var produced := maxf(
+			0.0, demand * production_factor * production_efficiency
+		)
 		inventory[commodity_id] = float(inventory.get(commodity_id, 0.0)) + produced
 		var consumed := minf(demand, float(inventory.get(commodity_id, 0.0)))
 		inventory[commodity_id] = maxf(
@@ -932,6 +993,14 @@ func _read_document(path: String) -> Dictionary:
 		_fail("正式世界数据根节点必须是对象：%s" % path)
 		return {}
 	return (parser.data as Dictionary).duplicate(true)
+
+
+func _sorted_keys(dictionary: Dictionary) -> Array[String]:
+	var result: Array[String] = []
+	for raw_key: Variant in dictionary:
+		result.append(str(raw_key))
+	result.sort()
+	return result
 
 
 func _fail(message: String) -> bool:

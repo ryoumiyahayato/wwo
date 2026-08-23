@@ -49,8 +49,8 @@ func _check_world_summary(view: FormalWorldApplication) -> void:
 	test.equal(int(summary.get("commodity_count", 0)), 67, "界面读取67种正式商品")
 	test.equal(
 		int(summary.get("world_political_unit_count", 0)),
-		151,
-		"界面显示完整151单元政治世界"
+		146,
+		"界面显示1900年1月1日有效的146单元政治世界"
 	)
 	test.equal(
 		int(summary.get("major_economy_count", 0)),
@@ -64,8 +64,8 @@ func _check_world_summary(view: FormalWorldApplication) -> void:
 	)
 	test.equal(
 		int(summary.get("background_polity_count", 0)),
-		96,
-		"界面区分96个纯背景单元"
+		91,
+		"界面区分91个当日有效纯背景单元"
 	)
 
 

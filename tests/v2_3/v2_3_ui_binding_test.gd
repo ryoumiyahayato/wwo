@@ -24,8 +24,8 @@ func _check_simulation_binding() -> void:
 	var summary := simulation.world_summary()
 	test.equal(
 		int(summary.get("world_political_unit_count", 0)),
-		151,
-		"UI状态源持有151个地图政治单元"
+		146,
+		"UI状态源持有1900年1月1日有效的146个政治单元"
 	)
 	test.equal(
 		int(summary.get("major_economy_count", 0)),
@@ -39,8 +39,8 @@ func _check_simulation_binding() -> void:
 	)
 	test.equal(
 		int(summary.get("background_polity_count", 0)),
-		96,
-		"UI状态源区分96个纯背景地图单元"
+		91,
+		"UI状态源区分91个当日有效纯背景政治单元"
 	)
 	var australia := simulation.polity_summary("cshapes_gw_901")
 	test.expect(
