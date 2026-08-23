@@ -10,6 +10,7 @@ const GLOBAL_SOURCE_NOTICE := "1900-03-12 · CShapes 2.0 历史政治边界 · �
 const LOWER_ADMIN_NOTICE := "政治边界为1900历史GIS；下级行政区仍为现代参考或待补数据。"
 const ADMIN1_REFERENCE_NOTICE := "现代一级行政区参考层，不代表1900年逐点历史边界。"
 const FLAG_REFERENCE_NOTICE := "旗面包含程序化识别码；用于空间导航，不等同于历史旗帜复原。"
+const TEMPORAL_UNAVAILABLE_PALETTE: String = "TEMPORALLY_UNAVAILABLE_LAND"
 
 const NATIONALITY_ENTITY_ALIASES := {
 	"FRA": "country_fra",
@@ -47,6 +48,9 @@ const NATIONALITY_ENTITY_ALIASES := {
 
 var _dated_geometry_document: Dictionary = {}
 var _dated_units_document: Dictionary = {}
+var _dated_political_catalog := FormalDatedPoliticalCatalog.new()
+var _active_political_query_date: String = ""
+var _temporally_unavailable_land_by_unit_id: Dictionary = {}
 var _historical_flag_document: Dictionary = {}
 var _historical_flag_records: Dictionary = {}
 var _geometry_feature_by_id: Dictionary = {}
@@ -59,6 +63,10 @@ func _ready() -> void:
 	_dated_units_document = _read_document(HISTORICAL_UNITS_PATH)
 	_historical_flag_document = _read_document(HISTORICAL_FLAGS_PATH)
 	_historical_flag_records = _historical_flag_document.get("records", {}) as Dictionary
+	if not _dated_political_catalog.load_documents(
+		_dated_units_document, _dated_geometry_document
+	):
+		push_error("Historical evidence: dated political catalog failed to load")
 	_index_dated_geometry()
 	super._ready()
 	_validate_historical_evidence()
@@ -84,14 +92,97 @@ func _rebuild_historical_political_world() -> void:
 	_country_anchor_units.clear()
 	_history_entity_by_id.clear()
 	_history_territories_by_entity.clear()
+	_temporally_unavailable_land_by_unit_id.clear()
 	_flag_texture_by_entity.clear()
 	_historical_imported_flag_texture_by_id.clear()
 
-	for unit_value: Variant in (_dated_units_document.get("units", []) as Array):
-		if unit_value is Dictionary:
-			_build_dated_historical_unit(unit_value as Dictionary)
+	_active_political_query_date = _political_query_date()
+	for unit: Dictionary in _dated_political_catalog.active_units_on(
+		_active_political_query_date
+	):
+		_build_dated_historical_unit(unit)
+	for unit: Dictionary in _dated_political_catalog.temporally_unavailable_units_on(
+		_active_political_query_date
+	):
+		_build_temporally_unavailable_land(unit)
 	_mark_projection_dirty()
 	_history_focus_dirty = true
+
+
+func _political_query_date() -> String:
+	return HISTORICAL_SNAPSHOT_DATE
+
+
+func refresh_historical_political_world_for_current_date() -> bool:
+	var query_date: String = _political_query_date()
+	if not VNextFactProvenance.is_iso_date(query_date) or not _dated_political_catalog.is_loaded():
+		return false
+	if query_date == _active_political_query_date:
+		return true
+	_rebuild_historical_political_world()
+	return _active_political_query_date == query_date
+
+
+func active_political_unit_ids_on(query_date: String) -> Array[String]:
+	return _dated_political_catalog.active_unit_ids_on(query_date)
+
+
+func political_temporal_status(unit_id: String, query_date: String) -> String:
+	return _dated_political_catalog.temporal_status(unit_id, query_date)
+
+
+func temporally_unavailable_land_status(unit_id: String) -> Dictionary:
+	var value: Variant = _temporally_unavailable_land_by_unit_id.get(unit_id, {})
+	return (value as Dictionary).duplicate(true) if value is Dictionary else {}
+
+
+func _build_temporally_unavailable_land(unit: Dictionary) -> void:
+	var unit_id: String = str(unit.get("id", ""))
+	var feature_id: String = str(unit.get("geometry_feature_id", ""))
+	var feature: Dictionary = _dated_political_catalog.reference_feature_for_unit(unit_id)
+	var polygons := _geometry_to_unit_polygons(feature.get("geometry", {}) as Dictionary)
+	if unit_id.is_empty() or feature_id.is_empty() or polygons.is_empty():
+		return
+	var render_id: String = "temporal_unavailable_" + feature_id
+	_flag_palettes[TEMPORAL_UNAVAILABLE_PALETTE] = {
+		"pattern": "solid",
+		"colors": PackedColorArray([Color(0.31, 0.34, 0.34, 1.0)]),
+	}
+	var record: Dictionary = {
+		"id": render_id,
+		"iso_a3": TEMPORAL_UNAVAILABLE_PALETTE,
+		"name": "政治状态暂不可用",
+		"name_zh": "政治状态暂不可用",
+		"short_name_zh": "时间资料缺口",
+		"label_rank": 99,
+		"status": "temporally_unavailable",
+		"provisional": true,
+		"player_selectable": false,
+		"source_candidate_unit_id": unit_id,
+		"political_identity_available": false,
+		"physical_geometry_applicability": VNextFactProvenance.REFERENCE_ONLY,
+		"political_applicability": VNextFactProvenance.TEMPORALLY_UNKNOWN,
+	}
+	_countries.append(record)
+	_country_by_id[render_id] = record
+	_country_unit_polygons[render_id] = polygons
+	# Deliberately omit an anchor and historical entity record. The reference
+	# geometry keeps land observable but cannot be selected as political truth.
+	_temporally_unavailable_land_by_unit_id[unit_id] = {
+		"source_candidate_unit_id": unit_id,
+		"source_name": str(unit.get("source_name", unit_id)),
+		"query_date": _active_political_query_date,
+		"candidate_valid_from": str(unit.get("valid_from", "")),
+		"candidate_valid_to": str(unit.get("valid_to", "")),
+		"physical_land_status": "PRESENT · REFERENCE GEOMETRY",
+		"physical_geometry_applicability": VNextFactProvenance.REFERENCE_ONLY,
+		"predecessor_available": false,
+		"political_identity_status": VNextFactProvenance.TEMPORALLY_UNKNOWN,
+		"legal_sovereignty_status": VNextFactProvenance.UNAVAILABLE,
+		"effective_control_status": VNextFactProvenance.UNAVAILABLE,
+		"player_selectable": false,
+		"render_id": render_id,
+	}
 
 
 func _build_dated_historical_unit(unit: Dictionary) -> void:
@@ -384,6 +475,8 @@ func historical_evidence_report() -> Dictionary:
 	var unresolved := 0
 	for entity_value: Variant in _country_by_id.values():
 		var entity := entity_value as Dictionary
+		if str(entity.get("status", "")) == "temporally_unavailable":
+			continue
 		match str(entity.get("flag_mode", "")):
 			"local_historical_flag": local_flags += 1
 			"controller_identification_flag": controller_flags += 1
@@ -391,6 +484,19 @@ func historical_evidence_report() -> Dictionary:
 			_: unresolved += 1
 	return {
 		"snapshot_date": str(_dated_geometry_document.get("snapshot_date", "")),
+		"reference_date": _dated_political_catalog.reference_date(),
+		"query_date": _active_political_query_date,
+		"catalog_unit_count": _dated_political_catalog.total_record_count(),
+		"temporally_unavailable_count": (
+			_dated_political_catalog.total_record_count() - unit_count
+		),
+		"physical_reference_land_count": _temporally_unavailable_land_by_unit_id.size(),
+		"political_truth_complete": _temporally_unavailable_land_by_unit_id.is_empty(),
+		"political_truth_status": (
+			"ACTIVE · COMPLETE"
+			if _temporally_unavailable_land_by_unit_id.is_empty()
+			else "ACTIVE · PARTIAL · TEMPORAL GAPS EXPLICIT"
+		),
 		"geometry_provider": str(_dated_geometry_document.get("provider", "")),
 		"geometry_license": str((_dated_geometry_document.get("source", {}) as Dictionary).get("license", "")),
 		"commercial_use_allowed": bool((_dated_geometry_document.get("source", {}) as Dictionary).get("commercial_use_allowed", true)),
@@ -443,8 +549,23 @@ func navigation_coverage_report() -> Dictionary:
 func _validate_historical_evidence() -> void:
 	if str(_dated_geometry_document.get("snapshot_date", "")) != HISTORICAL_SNAPSHOT_DATE:
 		push_error("Historical evidence: unexpected snapshot date")
-	if _history_entity_by_id.size() != 151:
-		push_error("Historical evidence: expected 151 political units, found %d" % _history_entity_by_id.size())
+	if _dated_political_catalog.total_record_count() != 151:
+		push_error("Historical evidence: expected 151 catalog political units")
+	if _history_entity_by_id.size() != _dated_political_catalog.active_unit_ids_on(
+		_active_political_query_date
+	).size():
+		push_error("Historical evidence: active political query does not match date")
+	if _temporally_unavailable_land_by_unit_id.size() != (
+		_dated_political_catalog.total_record_count() - _history_entity_by_id.size()
+	):
+		push_error("Historical evidence: unavailable political land projection is incomplete")
+	for unit_id: String in _temporally_unavailable_land_by_unit_id:
+		var unavailable := _temporally_unavailable_land_by_unit_id[unit_id] as Dictionary
+		if (
+			bool(unavailable.get("player_selectable", true))
+			or _country_anchor_units.has(str(unavailable.get("render_id", "")))
+		):
+			push_error("Historical evidence: temporal gap became selectable political truth")
 	var report := historical_evidence_report()
 	if int(report.get("unresolved_flag_count", 0)) != 0:
 		push_error("Historical evidence: unresolved flag records remain")

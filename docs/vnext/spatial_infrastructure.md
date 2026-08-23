@@ -14,9 +14,7 @@ or Military.
 - link existence and route type (`road`, `rail`, `shipping`);
 - dynamic infrastructure status and bounded physical condition;
 - nominal capacity, effective capacity, used capacity and remaining capacity;
-- the current hour-level shared-capacity window and deterministic allocation;
-- sovereign owner, administrative parent and military controller facts for
-  catalog regions, cities and ports.
+- the current hour-level shared-capacity window and deterministic allocation.
 
 `VNextSpatialCatalog` is the read-only normalized skeleton. It reuses the
 existing files under `data/world_map/` and keeps their lower-case IDs as
@@ -32,6 +30,8 @@ Spatial does not own:
 - the formal Hemisphere scene, map camera or UI selection state;
 - a global clock, service locator, singleton or universal event bus;
 - a second world-map JSON or a global spatial-cell grid.
+- legal sovereignty, administrative authority, effective political control,
+  or military control.
 
 Economy does **not** own total transport capacity. Military does **not** own
 total transport capacity. Hemisphere does **not** own spatial truth. Future
@@ -57,7 +57,7 @@ The loader validates IDs and cross-file references, copies records into a
 read-only normalized query boundary, and sorts every returned collection by the
 map-owned ID. It does not rewrite the source files or build a parallel
 geometry dataset. Regions, cities and ports are the first spatial units;
-geography remains static while territorial facts are mutable.
+geography remains static while controller truth is owned outside Spatial.
 
 ## Dynamic infrastructure
 
@@ -114,26 +114,23 @@ this contract instead of implementing a second capacity ledger.
 
 `request_capacity_batch()` is the minimal shared-contract extension for domains that may submit many same-window requests. It validates the complete batch before mutation, inserts the accepted requests transactionally, performs one canonical allocation recomputation plus one linear response calculation, and then exposes the same final reservation values through `reservation_results_batch()` or individual `reservation_result()` queries. Request-ID sorting, effective-capacity bounds, zero-capacity behavior, rollover, snapshot and restore semantics are unchanged. The batch API exists to avoid repeated O(n²) reallocations when persistent Military logistics creates many simultaneous requests; it does not grant Military any capacity authority.
 
-## Territorial facts
+## Political and military control overlays
 
-`VNextSpatialWorld` exposes explicit mutations:
-
-- `set_sovereign_owner()`;
-- `set_administrative_parent()`;
-- `set_military_controller()`;
-- `set_territorial_facts()` for an atomic combined update.
-
-Owner and controller IDs must exist in the reused country catalog. An
-administrative parent is empty, a known country, or a known region. Self
-parents and cycles are rejected. Query methods return copies, so callers do
-not receive a writable reference to authoritative dictionaries.
+`VNextPoliticalControlOverlay` owns dated legal, administrative and effective
+political control keyed by a Spatial place. `VNextMilitaryControlOverlay` owns
+military control separately. Spatial validates only that an attached place
+exists. Controller changes do not mutate physical place identity or the
+Spatial snapshot. These overlays are ownership foundations, not Politics or
+Military gameplay.
 
 ## Projection
 
 `VNextSpatialMapProjection` is a read-only debug/test projection. Each call
-reads the current world and returns sorted region facts, infrastructure status
+reads the current world and returns sorted physical region facts, infrastructure status
 and capacity, derived port status, important nodes and important links. It is
 deliberately not connected to or substituted for the formal Hemisphere UI.
+Optional control overlays are projected under separate nested fields rather
+than flattened into Spatial identity.
 
 For a rail link changed to `interrupted`, a new projection reports
 `status = "interrupted"` and `effective_capacity = 0`. Port status is a
@@ -143,8 +140,8 @@ derived summary of connected shipping links (`operational`, `degraded`,
 ## Snapshot / restore
 
 `VNextSpatialWorld.snapshot()` persists the schema ID, current hour, one
-infrastructure record per link, one territorial record per place and the
-bounded active capacity window. Reservations include their demand and the
+infrastructure record per link and the bounded active capacity window. It does
+not persist political or military controller rows. Reservations include their demand and the
 derived allocation; link usage includes nominal, effective, used and remaining
 capacity so malformed persisted values are detectable.
 
@@ -152,14 +149,14 @@ Restore is transactional:
 
 ```text
 raw shape/type/reference validation
--> candidate infrastructure and territorial state
+-> candidate physical infrastructure state
 -> candidate capacity allocation and usage validation
 -> complete candidate validation
 -> assignment to live state
 ```
 
-Unknown places or links, duplicate or orphan reservations, wrong windows,
-invalid owners/controllers/statuses, negative or non-finite capacities,
+Unknown links, duplicate or orphan reservations, wrong windows,
+invalid statuses, negative or non-finite capacities,
 `used > effective`, malformed collection items, and administrative cycles are
 rejected. A failed restore leaves the live world byte-for-byte equivalent at
 the snapshot boundary.

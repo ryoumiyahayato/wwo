@@ -79,7 +79,10 @@ func _run_packaged_player_baseline_probe() -> void:
 	await get_tree().process_frame
 	_packaged_probe_require(formal_simulation.initialized, "正式模拟未初始化")
 	_packaged_probe_require(_data_errors.is_empty(), "正式模拟产生数据错误")
-	_packaged_probe_require(_history_entity_by_id.size() == 151, "历史政治单元数量不正确")
+	_packaged_probe_require(
+		_history_entity_by_id.size() == 146,
+		"1900-01-01有效历史政治单元数量不正确"
+	)
 	_packaged_probe_require(
 		_prototype_presentation_count() == 0,
 		"正式产品仍展示prototype_only内容"
@@ -298,7 +301,18 @@ func _synchronize_spatial_time() -> bool:
 			_spatial_initial_snapshot
 		):
 			return false
-	return _vnext_spatial_world.advance_to_hour(target_hour)
+	if not _vnext_spatial_world.advance_to_hour(target_hour):
+		return false
+	return refresh_historical_political_world_for_current_date()
+
+
+func _political_query_date() -> String:
+	var value: Dictionary = formal_simulation.date_time()
+	return "%04d-%02d-%02d" % [
+		int(value.get("year", 1900)),
+		int(value.get("month", 1)),
+		int(value.get("day", 1)),
+	]
 
 
 func _prototype_presentation_count() -> int:
@@ -373,7 +387,11 @@ func _draw_corners() -> void:
 	_draw_corner(
 		country_rect,
 		country_title,
-		"151 units · 1900-03-12 · read-only projection",
+		"%d active · %d temporal gaps · %s" % [
+			_history_entity_by_id.size(),
+			int(historical_evidence_report().get("temporally_unavailable_count", 0)),
+			_political_query_date(),
+		],
 		"product_integration",
 		Color(0.72, 0.64, 0.38, 0.22),
 		compact
@@ -602,10 +620,23 @@ func _spatial_selected_country_id() -> String:
 
 func _draw_provenance_panel(rect: Rect2) -> void:
 	var provenance := product_runtime_provenance()
+	var presentation := provenance.get("presentation_state", {}) as Dictionary
 	_draw_label(rect.position + Vector2(28.0, 38.0), "PRODUCT RUNTIME PROVENANCE", 20, Color(0.95, 0.84, 0.58, 1.0))
-	_draw_label(rect.position + Vector2(28.0, 62.0), "BUILD HEAD  " + str(provenance.get("build_head", "NOT AVAILABLE")), 8)
-	_draw_label(rect.position + Vector2(28.0, 80.0), "PRODUCT ENTRY  " + str(provenance.get("product_entry", "")), 8)
-	var y := 104.0
+	_draw_label(rect.position + Vector2(28.0, 60.0), "BASE HEAD  " + str(provenance.get("base_head", "NOT AVAILABLE")), 8)
+	_draw_label(rect.position + Vector2(28.0, 76.0), "WORKTREE  " + str(provenance.get("working_tree_status", "NOT AVAILABLE")), 8)
+	_draw_label(rect.position + Vector2(28.0, 92.0), "PATCH SHA-256  " + str(provenance.get("patch_sha256", "NOT AVAILABLE")), 8)
+	_draw_label(rect.position + Vector2(28.0, 108.0), "PRODUCT ENTRY  " + str(provenance.get("product_entry", "")), 8)
+	_draw_label(rect.position + Vector2(28.0, 124.0), "RUNTIME SCENE  " + str(provenance.get("runtime_scene", "")), 8)
+	_draw_label(
+		rect.position + Vector2(28.0, 140.0),
+		"EVIDENCE FLAGS  prototype=%d fixture=%d spike=%d" % [
+			int(presentation.get("prototype_visible_count", -1)),
+			int(presentation.get("fixture_dependency_count", -1)),
+			int(presentation.get("spike_city_count", -1)),
+		],
+		8
+	)
+	var y := 164.0
 	for owner_value: Variant in (provenance.get("owners", []) as Array):
 		var owner := owner_value as Dictionary
 		var owner_text := "%s: %s" % [str(owner.get("label", "OWNER")), str(owner.get("status", ""))]
@@ -617,9 +648,22 @@ func _draw_provenance_panel(rect: Rect2) -> void:
 
 
 func _runtime_owner_specs() -> Array[Dictionary]:
+	var evidence: Dictionary = historical_evidence_report()
 	var political_active := (
-		_history_entity_by_id.size() == 151
-		and int(historical_evidence_report().get("unit_count", 0)) == 151
+		not _history_entity_by_id.is_empty()
+		and int(evidence.get("unit_count", 0)) == _history_entity_by_id.size()
+		and str(evidence.get("query_date", "")) == _political_query_date()
+	)
+	var political_gap_count: int = int(evidence.get("temporally_unavailable_count", 0))
+	var political_mode: String = (
+		"AUTHORITATIVE DATED DATA"
+		if political_gap_count == 0
+		else "AUTHORITATIVE DATED DATA · PARTIAL (%d TEMPORAL GAPS)" % political_gap_count
+	)
+	var geometry_mode: String = (
+		"READ-ONLY PROJECTION"
+		if political_gap_count == 0
+		else "READ-ONLY · %d REFERENCE LAND GAPS" % political_gap_count
 	)
 	var spatial_active := (
 		_vnext_spatial_world != null
@@ -632,8 +676,8 @@ func _runtime_owner_specs() -> Array[Dictionary]:
 	var infrastructure_status := product_spatial_projection.infrastructure_historical_status(country_id)
 	return [
 		{"label": "PRODUCT ENTRY", "owner": self, "mode": "AUTHORITATIVE"},
-		{"label": "WORLD/POLITICAL OWNER", "owner": self if political_active else null, "mode": "AUTHORITATIVE DATED DATA"},
-		{"label": "POLITICAL GEOMETRY PROJECTION", "owner": self if political_active else null, "mode": "READ-ONLY PROJECTION"},
+		{"label": "WORLD/POLITICAL OWNER", "owner": self if political_active else null, "mode": political_mode},
+		{"label": "POLITICAL GEOMETRY PROJECTION", "owner": self if political_active else null, "mode": geometry_mode},
 		{"label": "VNEXT SPATIAL OWNER", "owner": _vnext_spatial_world if spatial_active else null, "mode": "TRANSITIONAL · HISTORICAL GATE REQUIRED"},
 		{"label": "HISTORICAL LOCAL GEOGRAPHY STATUS", "owner": null, "status": str(local_status.get("status", "NOT AVAILABLE")), "mode": str(local_status.get("applicability", "UNAVAILABLE"))},
 		{"label": "HISTORICAL CITY DATA STATUS", "owner": null, "status": str(city_status.get("status", "NOT AVAILABLE")), "mode": str(city_status.get("applicability", "UNAVAILABLE"))},
@@ -641,6 +685,7 @@ func _runtime_owner_specs() -> Array[Dictionary]:
 		{"label": "TIME OWNER", "owner": formal_simulation if formal_simulation.initialized else null, "mode": "AUTHORITATIVE"},
 		{"label": "ECONOMY OWNER", "owner": formal_simulation.economy if formal_simulation.initialized else null, "mode": "AUTHORITATIVE"},
 		{"label": "POPULATION OWNER", "owner": null, "detail": "Aggregate economy inputs are not a population simulation."},
+		{"label": "VNEXT POPULATION CONSUMER", "owner": null, "status": "NO", "detail": "Formal Economy remains transitional."},
 		{"label": "ORGANIZATION OWNER", "owner": null},
 		{"label": "POLITICS OWNER", "owner": null},
 		{"label": "MILITARY OWNER", "owner": null},
@@ -649,12 +694,14 @@ func _runtime_owner_specs() -> Array[Dictionary]:
 
 
 func product_runtime_provenance() -> Dictionary:
-	return ProductRuntimeProvenance.capture(_runtime_owner_specs())
+	var result: Dictionary = ProductRuntimeProvenance.capture(_runtime_owner_specs())
+	result["presentation_state"] = _presentation_state()
+	return result
 
 
 func _domain_owner_state() -> Dictionary:
 	return {
-		"world": {"owner": self if _history_entity_by_id.size() == 151 else null, "claimed_active": true},
+		"world": {"owner": self if not _history_entity_by_id.is_empty() else null, "claimed_active": true},
 		"vnext_spatial": {"owner": _vnext_spatial_world, "claimed_active": _vnext_spatial_world != null and _vnext_spatial_world.is_valid()},
 		"time": {"owner": formal_simulation if formal_simulation.initialized else null, "claimed_active": formal_simulation.initialized},
 		"economy": {"owner": formal_simulation.economy if formal_simulation.initialized else null, "claimed_active": formal_simulation.initialized},
@@ -821,7 +868,7 @@ func _go_back() -> void:
 
 func _breadcrumb_text() -> String:
 	if world_mode != WORLD_HISTORICAL_ENTITY_FOCUS:
-		return "世界 / 1900-03-12 dated political projection"
+		return "世界 / %s dated political query" % _political_query_date()
 	var entity := _history_entity_by_id.get(selected_country_id, {}) as Dictionary
 	var text := "世界 / 1900政治单元 / " + str(entity.get("short_name_zh", entity.get("name_zh", selected_country_id)))
 	if space_level == REGION:

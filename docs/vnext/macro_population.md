@@ -2,20 +2,18 @@
 
 ## Ownership and authority boundary
 
-`VNextMacroPopulation` is a slow, place-keyed aggregate. It is not a second
+`VNextMacroPopulation` is a slow, `PopulationUnitId`-keyed aggregate. It is not a second
 person roster and it does not create `Person` records. The model is intended
 for millions or hundreds of millions of people without creating one object
 per person.
 
-Construction requires a loaded `VNextSpatialCatalog` from the existing
-Spatial/world-map authority plus an explicit list of keys. Population asks
-that catalog whether each `place:<map_id>` or supported
-`region:<map_id>` exists. A lexical string is never accepted as geography
-authority, and a missing/unloaded catalog fails construction explicitly.
-Population may cache the accepted key set for deterministic snapshots, but it
-does not create geography, country records, region ownership, or a second
-geography registry. Spatial owns map identity/topology; Population owns only
-demographic aggregates.
+Construction requires a loaded `VNextPopulationUnitCatalog`. The sole accepted
+identity shape is `population:<local_id>`; `place:<x>` and `region:<x>` cannot
+address demographic state. Geographic relationships are supplied later by
+typed crosswalks, never by aliasing Population identity to Spatial identity.
+The production evidence provider currently exposes only 50 bounded
+major-economy aggregates, classified `ESTIMATED` and
+`NEAR_1900_SUPPORTED`. It exposes no regional or city Population facts.
 
 The owned fields are deliberately limited to:
 
@@ -43,7 +41,7 @@ monthly input is a per-place flow dictionary:
 
 `BT`text
 {
-  "place:paris": {
+  "population:country_fra": {
     "births": 20,
     "deaths": 5,
     "external_immigration": 2,
@@ -91,20 +89,20 @@ Internal migration is a separate bounded batch of aggregate transfers:
 `BT`text
 [
   {
-    "origin_place_id": "place:paris",
-    "destination_place_id": "place:lille",
+    "origin_population_unit_id": "population:country_fra",
+    "destination_population_unit_id": "population:another_unit",
     "amount": 100
   }
 ]
 `BT`
 
-Both endpoints must be in the external Spatial authority and in the
+Both endpoints must be in the PopulationUnit authority and in the live
 Population binding. Amounts are finite, integral, nonnegative, and JSON-safe.
 A self-flow is rejected explicitly. A batch is fully validated before any
 live state is committed; an unknown endpoint, malformed amount, or
 insufficient origin rejects the entire batch with no partial mutation.
 
-The normalized flow list is sorted by `(origin_place_id, destination_place_id)`
+The normalized flow list is sorted by canonical PopulationUnit endpoint IDs
 and duplicate pairs are combined, so input ordering cannot change the result.
 Transfers conserve total Population exactly. Each transferred amount is
 deterministically partitioned across age, sex, and urban/rural buckets using
@@ -116,38 +114,32 @@ phase.
 
 ## Queries and indexed validation
 
-The public query surface includes `population_at(place_id)`,
-`working_age_at(place_id)`, `structure_at(place_id)`,
-`aggregate_population(place_ids)`, `aggregate_structure(place_ids)`, coarse
+The public query surface includes indexed unit queries for total, working-age,
+structure and aggregate state, plus coarse
 `age_bucket_at` / `age_18_40_at`, and period queries.
 
 Unknown keys and duplicate aggregation keys fail closed. Public operations
-validate the bound authority and all records once at their boundary, then use
-the deterministic place?record index for inner loops. Settlement and snapshot
-therefore do not repeatedly invoke whole-population validation for each
-record; simple full-place operations are linear in the number of records.
-Snapshot output remains sorted by place ID.
+validate once per Population revision, then use the deterministic unit index.
+Repeated field lookups are O(1); settlement and snapshot are O(number of bound
+PopulationUnits). Snapshot output remains sorted by PopulationUnitId.
 
 ## Snapshot and restore
 
-The `vnext_macro_population_v3` snapshot stores the external key contract and
-the sorted record list. Record snapshots store explicit
+The `vnext_macro_population_v4` snapshot stores the PopulationUnit contract,
+Population/provider/catalog revisions, per-unit fact lineage and the sorted
+record list. Record snapshots store explicit
 `external_immigration` and `external_emigration` fields; they contain no
-geography metadata or Person records. Restore validates a complete candidate
+geography aliases or Person records. Restore validates a complete candidate
 set before committing it. It rejects negative values, NaN/Inf, unknown or
 duplicate place entries, malformed flow state, inconsistent age, sex, or
 urban/rural totals, and invalid ageing remainders. Any rejected snapshot
 leaves the live population unchanged.
 
-A v2 snapshot is accepted only through the explicit record-level conversion
-from its signed external `net_migration` field. It is not silently
-reinterpreted as an internal transfer. Other schema changes are rejected.
-`create(geography_authority, place_ids)` or
-`initialize(geography_authority, place_ids)` binds the live instance to the
-loaded external Spatial contract. Restore requires that instance to already
+Legacy place/region-keyed snapshots fail closed because they cannot prove a
+canonical PopulationUnit identity. Restore requires the instance to already
 be initialized and requires the snapshot key list to match that contract
 exactly. The persisted key list is therefore a consistency check, not a way
-to establish geography. An empty `VNextMacroPopulation.new()` must not
+to establish Population identity. An empty `VNextMacroPopulation.new()` must not
 restore a snapshot. Setup initialization and initial state seeding are
 rejected after the first elapsed settlement; the canonical batch settlement
 API is the only live time advance.
@@ -164,8 +156,8 @@ specifically tracked people in the Person layer.
 Focused coverage is in `tests/vnext/macro_population_test.gd` and is picked up
 automatically by `tools/run_vnext_validation.py`. It covers:
 
-- Spatial authority binding, known/unknown place and region IDs, wrong-kind
-  rejection, authority-unavailable construction, and snapshot authority
+- PopulationUnit authority binding, alias/wrong-kind rejection,
+  authority-unavailable construction, and snapshot authority
   attacks;
 - external-flow accounting and the explicit legacy signed-input boundary;
 - internal A?B conservation, multiple-flow ordering determinism, self-flow,

@@ -1,44 +1,50 @@
 class_name VNextMacroPopulation
 extends RefCounted
-## Slow, place-keyed population aggregates. It is intentionally independent
+## Slow, PopulationUnit-keyed population aggregates. It is intentionally independent
 ## from the person roster and from the vNext runtime clock.
 
-const SNAPSHOT_SCHEMA_ID: String = "vnext_macro_population_v3"
-const LEGACY_SNAPSHOT_SCHEMA_ID: String = "vnext_macro_population_v2"
+const SNAPSHOT_SCHEMA_ID: String = "vnext_macro_population_v4"
 const MAX_JSON_SAFE_INTEGER: int = 9_007_199_254_740_991
 const MAX_SETTLEMENT_MONTHS_PER_CALL: int = 120_000
 const BASE_YEAR: int = 1900
 
 var _initialized: bool = false
-var _geography_authority: VNextSpatialCatalog = null
-## Cached binding to the external Spatial authority. Population owns no
-## geography and never treats lexical key shape as existence authority.
+var _geography_authority: VNextPopulationUnitCatalog = null
+## Population identity is independent of every geographic identifier space.
 var _known_place_ids: Dictionary = {}
 var _ordered_place_ids: Array[String] = []
 var _records: Dictionary = {}
+var _lineage_by_unit_id: Dictionary = {}
+var _population_revision: int = 0
+var _provider_revision: String = ""
+var _validated_revision: int = -1
+var _validated_result: bool = false
 
 
 func _init(
-	geography_authority: VNextSpatialCatalog = null,
-	initial_place_ids: Array[String] = []
+	geography_authority: VNextPopulationUnitCatalog = null,
+	initial_place_ids: Array[String] = [],
+	provider_revision: String = ""
 ) -> void:
 	if geography_authority != null and not initial_place_ids.is_empty():
-		initialize(geography_authority, initial_place_ids)
+		initialize(geography_authority, initial_place_ids, provider_revision)
 
 
 static func create(
-	geography_authority: VNextSpatialCatalog = null,
-	initial_place_ids: Array[String] = []
+	geography_authority: VNextPopulationUnitCatalog = null,
+	initial_place_ids: Array[String] = [],
+	provider_revision: String = ""
 ) -> VNextMacroPopulation:
 	var population := VNextMacroPopulation.new()
-	if not population.initialize(geography_authority, initial_place_ids):
+	if not population.initialize(geography_authority, initial_place_ids, provider_revision):
 		return null
 	return population
 
 
 func initialize(
-	geography_authority: VNextSpatialCatalog,
-	place_ids: Array[String]
+	geography_authority: VNextPopulationUnitCatalog,
+	place_ids: Array[String],
+	provider_revision: String = ""
 ) -> bool:
 	if _initialized:
 		return false
@@ -51,7 +57,7 @@ func initialize(
 		if typeof(raw_place_id) != TYPE_STRING:
 			return false
 		var place_id: String = str(raw_place_id)
-		if not _authority_has_geography_id(geography_authority, place_id):
+		if not _authority_has_population_unit_id(geography_authority, place_id):
 			return false
 		if candidate_known_ids.has(place_id):
 			return false
@@ -72,10 +78,25 @@ func initialize(
 	_known_place_ids = candidate_known_ids
 	_ordered_place_ids = candidate_ordered_ids
 	_records = candidate_records
+	_provider_revision = provider_revision if not provider_revision.is_empty() else geography_authority.revision()
+	for unit_id: String in candidate_ordered_ids:
+		_lineage_by_unit_id[unit_id] = VNextFactProvenance.unavailable(
+			"uninitialized_population_state", _provider_revision
+		)
+	_population_revision = 1
+	_validated_revision = -1
 	return true
 
 
 func is_valid() -> bool:
+	if _validated_revision == _population_revision:
+		return _validated_result
+	_validated_result = _validate_full_state()
+	_validated_revision = _population_revision
+	return _validated_result
+
+
+func _validate_full_state() -> bool:
 	if (
 		not _initialized
 		or _geography_authority == null
@@ -98,7 +119,7 @@ func is_valid() -> bool:
 			return false
 		var place_id: String = str(raw_place_id)
 		if (
-			not _authority_has_geography_id(_geography_authority, place_id)
+			not _authority_has_population_unit_id(_geography_authority, place_id)
 			or not _records.has(place_id)
 		):
 			return false
@@ -106,17 +127,30 @@ func is_valid() -> bool:
 		if not record_value is VNextMacroPopulationRecord:
 			return false
 		var record: VNextMacroPopulationRecord = record_value as VNextMacroPopulationRecord
-		if not record.is_valid() or record.place_id() != place_id:
+		if (
+			not record.is_valid() or record.population_unit_id() != place_id
+			or not _lineage_by_unit_id.has(place_id)
+			or not VNextFactProvenance.is_valid(_lineage_by_unit_id[place_id] as Dictionary)
+		):
 			return false
-	return ordered_seen.size() == _known_place_ids.size()
+	return (
+		ordered_seen.size() == _known_place_ids.size()
+		and _lineage_by_unit_id.size() == _known_place_ids.size()
+		and _population_revision > 0
+		and not _provider_revision.is_empty()
+	)
 
 
 
-func set_initial_state(place_id: String, state_value: Dictionary) -> bool:
+func set_initial_state(
+	place_id: String,
+	state_value: Dictionary,
+	lineage: Dictionary = {}
+) -> bool:
 	if (
 		not is_valid()
 		or not _known_place_ids.has(place_id)
-		or not _authority_has_geography_id(_geography_authority, place_id)
+		or not _authority_has_population_unit_id(_geography_authority, place_id)
 		or _has_elapsed_settlement()
 	):
 		return false
@@ -125,11 +159,24 @@ func set_initial_state(place_id: String, state_value: Dictionary) -> bool:
 	)
 	if candidate == null or not candidate.is_valid():
 		return false
+	var candidate_lineage: Dictionary = (
+		lineage.duplicate(true)
+		if not lineage.is_empty()
+		else VNextFactProvenance.unavailable("unspecified_population_initialization", _provider_revision)
+	)
+	if not VNextFactProvenance.is_valid(candidate_lineage):
+		return false
 	_records[place_id] = candidate
+	_lineage_by_unit_id[place_id] = candidate_lineage
+	_mark_mutated()
 	return true
 
 
 func known_place_ids() -> Array[String]:
+	return _ordered_place_ids.duplicate()
+
+
+func population_unit_ids() -> Array[String]:
 	return _ordered_place_ids.duplicate()
 
 
@@ -139,6 +186,10 @@ func place_ids() -> Array[String]:
 
 func has_place(place_id: String) -> bool:
 	return is_valid() and _known_place_ids.has(place_id)
+
+
+func has_population_unit(unit_id: String) -> bool:
+	return is_valid() and _known_place_ids.has(unit_id)
 
 
 func record_count() -> int:
@@ -191,7 +242,22 @@ func record_snapshot_at(place_id: String) -> Dictionary:
 	var record: VNextMacroPopulationRecord = _trusted_record_at(place_id)
 	if record == null:
 		return {}
-	return record.snapshot()
+	return {
+		"population_unit_id": place_id,
+		"population_revision": _population_revision,
+		"provider_revision": _provider_revision,
+		"catalog_revision": _geography_authority.revision(),
+		"lineage": (_lineage_by_unit_id[place_id] as Dictionary).duplicate(true),
+		"state": record.snapshot(),
+	}
+
+
+func population_revision() -> int:
+	return _population_revision
+
+
+func provider_revision() -> String:
+	return _provider_revision
 
 
 func last_settled_period_at(place_id: String) -> int:
@@ -345,6 +411,7 @@ func settle_internal_migration(
 	):
 		return false
 	_records = candidate_records
+	_mark_mutated()
 	return true
 
 
@@ -354,13 +421,16 @@ func snapshot() -> Dictionary:
 		return {}
 	var records: Array[Dictionary] = []
 	for place_id: String in known_place_ids():
-		var record: VNextMacroPopulationRecord = _trusted_record_at(place_id)
-		if record == null:
+		var record_view: Dictionary = record_snapshot_at(place_id)
+		if record_view.is_empty():
 			return {}
-		records.append(record.snapshot())
+		records.append(record_view)
 	return {
 		"schema_id": SNAPSHOT_SCHEMA_ID,
-		"known_place_ids": known_place_ids(),
+		"known_population_unit_ids": population_unit_ids(),
+		"population_revision": _population_revision,
+		"provider_revision": _provider_revision,
+		"catalog_revision": _geography_authority.revision(),
 		"records": records,
 	}
 
@@ -369,27 +439,30 @@ func restore(snapshot_value: Dictionary) -> bool:
 	if not is_valid():
 		return false
 	var candidate_snapshot: Dictionary = snapshot_value.duplicate(true)
-	# The v2 top-level snapshot is upgraded only through this explicit
-	# record-level signed-external migration conversion.
-	if (
-		candidate_snapshot.size() == 3
-		and candidate_snapshot.get("schema_id") == LEGACY_SNAPSHOT_SCHEMA_ID
-	):
-		candidate_snapshot["schema_id"] = SNAPSHOT_SCHEMA_ID
-	if candidate_snapshot.size() != 3:
+	if candidate_snapshot.size() != 6:
 		return false
-	for required_field: String in ["schema_id", "known_place_ids", "records"]:
+	for required_field: String in [
+		"schema_id", "known_population_unit_ids", "population_revision",
+		"provider_revision", "catalog_revision", "records",
+	]:
 		if not candidate_snapshot.has(required_field):
 			return false
 	if candidate_snapshot.get("schema_id") != SNAPSHOT_SCHEMA_ID:
 		return false
+	var candidate_revision: int = int(candidate_snapshot.get("population_revision", -1))
+	if (
+		candidate_revision <= 0
+		or str(candidate_snapshot.get("provider_revision", "")) != _provider_revision
+		or str(candidate_snapshot.get("catalog_revision", "")) != _geography_authority.revision()
+	):
+		return false
 	var candidate_known_ids: Dictionary = _normalize_place_id_array(
-		candidate_snapshot.get("known_place_ids")
+		candidate_snapshot.get("known_population_unit_ids")
 	)
 	if candidate_known_ids.is_empty():
 		return false
 	for raw_place_id: Variant in candidate_known_ids.keys():
-		if not _authority_has_geography_id(
+		if not _authority_has_population_unit_id(
 			_geography_authority, str(raw_place_id)
 		):
 			return false
@@ -402,16 +475,35 @@ func restore(snapshot_value: Dictionary) -> bool:
 		return false
 
 	var candidate_records: Dictionary = {}
+	var candidate_lineage: Dictionary = {}
 	for raw_record: Variant in raw_records:
 		if typeof(raw_record) != TYPE_DICTIONARY:
 			return false
-		var candidate_record := VNextMacroPopulationRecord.new()
-		if not candidate_record.restore(raw_record as Dictionary):
+		var record_view := raw_record as Dictionary
+		for field_name: String in [
+			"population_unit_id", "population_revision", "provider_revision",
+			"catalog_revision", "lineage", "state",
+		]:
+			if not record_view.has(field_name):
+				return false
+		var view_unit_id: String = str(record_view.get("population_unit_id", ""))
+		var lineage: Dictionary = record_view.get("lineage", {}) as Dictionary
+		if (
+			int(record_view.get("population_revision", -1)) != candidate_revision
+			or str(record_view.get("provider_revision", "")) != _provider_revision
+			or str(record_view.get("catalog_revision", "")) != _geography_authority.revision()
+			or not VNextFactProvenance.is_valid(lineage)
+			or not record_view.get("state", {}) is Dictionary
+		):
 			return false
-		var place_id: String = candidate_record.place_id()
-		if not candidate_known_ids.has(place_id) or candidate_records.has(place_id):
+		var candidate_record := VNextMacroPopulationRecord.new()
+		if not candidate_record.restore(record_view.get("state", {}) as Dictionary):
+			return false
+		var place_id: String = candidate_record.population_unit_id()
+		if place_id != view_unit_id or not candidate_known_ids.has(place_id) or candidate_records.has(place_id):
 			return false
 		candidate_records[place_id] = candidate_record
+		candidate_lineage[place_id] = lineage.duplicate(true)
 	if candidate_records.size() != candidate_known_ids.size():
 		return false
 	for raw_place_id: Variant in candidate_known_ids.keys():
@@ -419,6 +511,9 @@ func restore(snapshot_value: Dictionary) -> bool:
 			return false
 
 	_records = candidate_records
+	_lineage_by_unit_id = candidate_lineage
+	_population_revision = candidate_revision
+	_validated_revision = -1
 	return true
 
 
@@ -523,6 +618,7 @@ func _settle_records(
 	):
 		return false
 	_records = candidate_records
+	_mark_mutated(elapsed_months)
 	return true
 
 
@@ -534,7 +630,7 @@ func _normalize_flows(monthly_flows_by_place: Dictionary) -> Dictionary:
 		var place_id: String = str(raw_place_id)
 		if (
 			not _known_place_ids.has(place_id)
-			or not _authority_has_geography_id(_geography_authority, place_id)
+			or not _authority_has_population_unit_id(_geography_authority, place_id)
 		):
 			return {}
 		var flow: Dictionary = VNextMacroPopulationRecord.normalize_monthly_flow(
@@ -555,23 +651,12 @@ func _trusted_record_at(place_id: String) -> VNextMacroPopulationRecord:
 	return record_value as VNextMacroPopulationRecord
 
 
-func _authority_has_geography_id(
-	authority: VNextSpatialCatalog, candidate: String
+func _authority_has_population_unit_id(
+	authority: VNextPopulationUnitCatalog, candidate: String
 ) -> bool:
 	if authority == null or not authority.is_loaded():
 		return false
-	var separator: int = candidate.find(":")
-	if separator <= 0 or separator >= candidate.length() - 1:
-		return false
-	var kind: String = candidate.left(separator)
-	var local_id: String = candidate.substr(separator + 1)
-	if not VNextMacroPopulationRecord._is_valid_local_id(local_id):
-		return false
-	if kind == "place":
-		return authority.has_place(candidate)
-	if kind == "region":
-		return authority.has_region(local_id)
-	return false
+	return VNextPopulationUnitId.is_valid(candidate) and authority.has_population_unit(candidate)
 
 
 func _clone_records() -> Dictionary:
@@ -597,22 +682,22 @@ func _normalize_internal_migration_flows(flows: Array) -> Array:
 		if source.size() != 3:
 			return []
 		for required_key: String in [
-			"origin_place_id", "destination_place_id", "amount"
+			"origin_population_unit_id", "destination_population_unit_id", "amount"
 		]:
 			if not source.has(required_key):
 				return []
 		if (
-			typeof(source.get("origin_place_id")) != TYPE_STRING
-			or typeof(source.get("destination_place_id")) != TYPE_STRING
+			typeof(source.get("origin_population_unit_id")) != TYPE_STRING
+			or typeof(source.get("destination_population_unit_id")) != TYPE_STRING
 		):
 			return []
-		var origin: String = str(source.get("origin_place_id"))
-		var destination: String = str(source.get("destination_place_id"))
+		var origin: String = str(source.get("origin_population_unit_id"))
+		var destination: String = str(source.get("destination_population_unit_id"))
 		if (
 			not _known_place_ids.has(origin)
 			or not _known_place_ids.has(destination)
-			or not _authority_has_geography_id(_geography_authority, origin)
-			or not _authority_has_geography_id(_geography_authority, destination)
+			or not _authority_has_population_unit_id(_geography_authority, origin)
+			or not _authority_has_population_unit_id(_geography_authority, destination)
 			or origin == destination
 		):
 			return []
@@ -632,8 +717,8 @@ func _normalize_internal_migration_flows(flows: Array) -> Array:
 	for pair_key: String in pair_keys:
 		var separator: int = pair_key.find("\n")
 		normalized.append({
-			"origin_place_id": pair_key.left(separator),
-			"destination_place_id": pair_key.substr(separator + 1),
+			"origin_population_unit_id": pair_key.left(separator),
+			"destination_population_unit_id": pair_key.substr(separator + 1),
 			"amount": int(by_pair[pair_key]),
 		})
 	return normalized
@@ -670,8 +755,8 @@ func _apply_internal_migration_batch(
 	var compositions_by_origin: Dictionary = {}
 	var incoming_by_destination: Dictionary = {}
 	for flow: Dictionary in normalized_flows:
-		var origin: String = str(flow["origin_place_id"])
-		var destination: String = str(flow["destination_place_id"])
+		var origin: String = str(flow["origin_population_unit_id"])
+		var destination: String = str(flow["destination_population_unit_id"])
 		var amount: int = int(flow["amount"])
 		var working_value: Variant = source_working.get(origin)
 		var working: VNextMacroPopulationRecord
@@ -808,7 +893,7 @@ func _normalize_place_id_array(value: Variant) -> Dictionary:
 		if typeof(raw_place_id) != TYPE_STRING:
 			return {}
 		var place_id: String = str(raw_place_id)
-		if not VNextMacroPopulationRecord._is_spatial_key(place_id):
+		if not VNextPopulationUnitId.is_valid(place_id):
 			return {}
 		if result.has(place_id):
 			return {}
@@ -876,3 +961,8 @@ func _add_aggregate_structure(result: Dictionary, value: Dictionary) -> bool:
 
 static func _is_valid_absolute_month(absolute_month: int) -> bool:
 	return absolute_month >= 0 and absolute_month <= MAX_JSON_SAFE_INTEGER
+
+
+func _mark_mutated(delta: int = 1) -> void:
+	_population_revision += maxi(1, delta)
+	_validated_revision = -1

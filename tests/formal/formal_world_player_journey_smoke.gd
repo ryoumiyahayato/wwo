@@ -100,7 +100,11 @@ func _run() -> void:
 
 	# Lower-level map and evidence assertions are meaningful only after the
 	# player has entered the world and selected the intended polity above.
-	if not _require(application._history_entity_by_id.size() == 151, "世界地图未持有151个历史政治单元"):
+	if not _require(
+		application._history_entity_by_id.size() == 146
+		and int(application.historical_evidence_report().get("catalog_unit_count", 0)) == 151,
+		"1900-01-01地图未按日期从151单元目录中筛选有效政治单元"
+	):
 		await _finish()
 		return
 	if not _require(application._flag_screen_polygons.size() >= 12, "当前半球没有形成可见政治实体图形"):

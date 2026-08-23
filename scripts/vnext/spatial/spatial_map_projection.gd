@@ -3,22 +3,27 @@ extends RefCounted
 ## Debug/test projection. It reads Spatial facts and owns no mutable world state.
 
 
-func project(world: VNextSpatialWorld) -> Dictionary:
+func project(
+	world: VNextSpatialWorld,
+	political_overlay: VNextPoliticalControlOverlay = null,
+	military_overlay: VNextMilitaryControlOverlay = null
+) -> Dictionary:
 	if world == null or not world.is_valid():
 		return {}
 	var catalog: VNextSpatialCatalog = world.catalog()
 	var regions: Array[Dictionary] = []
 	for region_id: String in catalog.region_ids():
 		var region: Dictionary = catalog.get_region(region_id)
-		var facts: Dictionary = world.get_territorial_facts(region_id)
-		regions.append({
+		var projected_region: Dictionary = {
 			"id": region_id,
 			"place_id": VNextSpatialCatalog.map_id_to_place_id(region_id),
 			"name": str(region.get("name", "")),
-			"sovereign_owner_id": str(facts.get("sovereign_owner_id", "")),
-			"administrative_parent_id": str(facts.get("administrative_parent_id", "")),
-			"military_controller_id": str(facts.get("military_controller_id", "")),
-		})
+		}
+		if political_overlay != null and political_overlay.is_valid():
+			projected_region["political_control"] = political_overlay.control_at(region_id)
+		if military_overlay != null and military_overlay.is_valid():
+			projected_region["military_control"] = military_overlay.control_at(region_id)
+		regions.append(projected_region)
 
 	var infrastructure: Array[Dictionary] = []
 	var important_links: Array[Dictionary] = []
@@ -87,8 +92,12 @@ func project(world: VNextSpatialWorld) -> Dictionary:
 	}
 
 
-func build(world: VNextSpatialWorld) -> Dictionary:
-	return project(world)
+func build(
+	world: VNextSpatialWorld,
+	political_overlay: VNextPoliticalControlOverlay = null,
+	military_overlay: VNextMilitaryControlOverlay = null
+) -> Dictionary:
+	return project(world, political_overlay, military_overlay)
 
 
 func _port_status(world: VNextSpatialWorld, port_id: String) -> String:

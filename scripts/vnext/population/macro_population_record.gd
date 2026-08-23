@@ -1,11 +1,10 @@
 class_name VNextMacroPopulationRecord
 extends RefCounted
-## One bounded macro population state keyed by an existing place/region ID.
+## One bounded macro population state keyed by one canonical PopulationUnitId.
 ## This record deliberately contains no person, household, labor, economic,
 ## political, military, or AI state.
 
-const SNAPSHOT_SCHEMA_ID: String = "vnext_macro_population_record_v3"
-const LEGACY_SNAPSHOT_SCHEMA_ID: String = "vnext_macro_population_record_v2"
+const SNAPSHOT_SCHEMA_ID: String = "vnext_macro_population_record_v4"
 const MAX_JSON_SAFE_INTEGER: int = 9_007_199_254_740_991
 
 const AGE_BUCKET_KEYS: PackedStringArray = [
@@ -54,14 +53,14 @@ static func create_zero(place_id_value: String) -> VNextMacroPopulationRecord:
 static func from_state(
 	place_id_value: String, state_value: Dictionary
 ) -> VNextMacroPopulationRecord:
-	if not _is_spatial_key(place_id_value):
+	if not _is_population_unit_id(place_id_value):
 		return null
 	var candidate_state: Dictionary = state_value.duplicate(true)
 	if candidate_state.has("schema_id"):
 		var schema_id: Variant = candidate_state.get("schema_id")
-		if schema_id != SNAPSHOT_SCHEMA_ID and schema_id != LEGACY_SNAPSHOT_SCHEMA_ID:
+		if schema_id != SNAPSHOT_SCHEMA_ID:
 			return null
-	if candidate_state.has("place_id") and candidate_state.get("place_id") != place_id_value:
+	if candidate_state.has("population_unit_id") and candidate_state.get("population_unit_id") != place_id_value:
 		return null
 	var has_legacy_migration: bool = (
 		candidate_state.has("migration") or candidate_state.has("net_migration")
@@ -110,14 +109,14 @@ static func from_state(
 	if not candidate_state.has("ageing_remainders"):
 		candidate_state["ageing_remainders"] = _zero_buckets(AGEING_REMAINDER_KEYS)
 	candidate_state["schema_id"] = SNAPSHOT_SCHEMA_ID
-	candidate_state["place_id"] = place_id_value
+	candidate_state["population_unit_id"] = place_id_value
 
 	var record := VNextMacroPopulationRecord.new()
 	if not record.restore(candidate_state):
 		return null
 	return record
 
-func place_id() -> String:
+func population_unit_id() -> String:
 	return _place_id
 
 
@@ -321,7 +320,7 @@ func is_valid() -> bool:
 
 func structure() -> Dictionary:
 	return {
-		"place_id": _place_id,
+		"population_unit_id": _place_id,
 		"total_population": _total_population,
 		"age_buckets": age_buckets(),
 		"sex_structure": sex_structure(),
@@ -342,7 +341,7 @@ func structure() -> Dictionary:
 func snapshot() -> Dictionary:
 	return {
 		"schema_id": SNAPSHOT_SCHEMA_ID,
-		"place_id": _place_id,
+		"population_unit_id": _place_id,
 		"total_population": _total_population,
 		"age_buckets": age_buckets(),
 		"sex_structure": sex_structure(),
@@ -357,46 +356,12 @@ func snapshot() -> Dictionary:
 
 
 func restore(snapshot_value: Dictionary) -> bool:
-	# v2 snapshots are accepted only through this explicit signed-external
-	# migration conversion; all other schemas remain rejected.
 	var candidate_snapshot: Dictionary = snapshot_value.duplicate(true)
-	if (
-		candidate_snapshot.size() == 11
-		and candidate_snapshot.get("schema_id") == LEGACY_SNAPSHOT_SCHEMA_ID
-	):
-		for legacy_field: String in [
-			"schema_id",
-			"place_id",
-			"total_population",
-			"age_buckets",
-			"sex_structure",
-			"urban_rural",
-			"ageing_remainders",
-			"births",
-			"deaths",
-			"net_migration",
-			"last_settled_period",
-		]:
-			if not candidate_snapshot.has(legacy_field):
-				return false
-		var legacy_parts: Dictionary = _legacy_external_parts(
-			candidate_snapshot.get("net_migration")
-		)
-		if legacy_parts.is_empty():
-			return false
-		candidate_snapshot.erase("net_migration")
-		candidate_snapshot["external_immigration"] = legacy_parts[
-			"external_immigration"
-		]
-		candidate_snapshot["external_emigration"] = legacy_parts[
-			"external_emigration"
-		]
-		candidate_snapshot["schema_id"] = SNAPSHOT_SCHEMA_ID
 	if candidate_snapshot.size() != 12:
 		return false
 	for required_field: String in [
 		"schema_id",
-		"place_id",
+		"population_unit_id",
 		"total_population",
 		"age_buckets",
 		"sex_structure",
@@ -412,10 +377,10 @@ func restore(snapshot_value: Dictionary) -> bool:
 			return false
 	if candidate_snapshot.get("schema_id") != SNAPSHOT_SCHEMA_ID:
 		return false
-	if typeof(candidate_snapshot.get("place_id")) != TYPE_STRING:
+	if typeof(candidate_snapshot.get("population_unit_id")) != TYPE_STRING:
 		return false
-	var candidate_place_id: String = str(candidate_snapshot.get("place_id"))
-	if not _is_spatial_key(candidate_place_id):
+	var candidate_place_id: String = str(candidate_snapshot.get("population_unit_id"))
+	if not _is_population_unit_id(candidate_place_id):
 		return false
 
 	var normalized_total: Dictionary = _normalize_nonnegative_integer(
@@ -833,7 +798,7 @@ static func _is_valid_state(
 	external_emigration_value: int,
 	last_settled_period_value: int
 ) -> bool:
-	if not _is_spatial_key(place_id_value):
+	if not _is_population_unit_id(place_id_value):
 		return false
 	if not _is_valid_nonnegative_int(total_population_value):
 		return false
@@ -1170,15 +1135,8 @@ static func _is_valid_signed_int(candidate_value: int) -> bool:
 	)
 
 
-static func _is_spatial_key(candidate_value: String) -> bool:
-	if (
-		VNextStableId.is_valid(candidate_value)
-		and VNextStableId.kind_of(candidate_value) == "place"
-	):
-		return true
-	if not candidate_value.begins_with("region:"):
-		return false
-	return _is_valid_local_id(candidate_value.substr("region:".length()))
+static func _is_population_unit_id(candidate_value: String) -> bool:
+	return VNextPopulationUnitId.is_valid(candidate_value)
 
 
 static func _is_valid_local_id(candidate_local_id: String) -> bool:

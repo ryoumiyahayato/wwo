@@ -1,10 +1,10 @@
 class_name VNextSpatialWorld
 extends RefCounted
-## Authoritative Spatial / Infrastructure fact layer.
-## Static topology is supplied by VNextSpatialCatalog. This class owns all
-## dynamic facts and accepts explicit hours instead of owning a global clock.
+## Authoritative physical Spatial / Infrastructure fact layer.
+## Political, administrative and military control are deliberately external.
 
-const SNAPSHOT_SCHEMA_ID: String = "vnext_spatial_world_v1"
+const SNAPSHOT_SCHEMA_ID: String = "vnext_spatial_world_v2"
+const LEGACY_SNAPSHOT_SCHEMA_ID: String = "vnext_spatial_world_v1"
 const DEFAULT_NOMINAL_CAPACITY_BY_TYPE: Dictionary = {
 	VNextSpatialCatalog.LINK_TYPE_ROAD: 100.0,
 	VNextSpatialCatalog.LINK_TYPE_RAIL: 1000.0,
@@ -14,7 +14,6 @@ const DEFAULT_NOMINAL_CAPACITY_BY_TYPE: Dictionary = {
 var _catalog: VNextSpatialCatalog = null
 var _current_hour: int = 0
 var _infrastructure: Dictionary = {}
-var _territories: Dictionary = {}
 var _capacity: VNextSpatialCapacityWindow = null
 
 
@@ -51,31 +50,12 @@ func initialize(catalog_value: VNextSpatialCatalog) -> bool:
 			return false
 		candidate_infrastructure[link_id] = state
 
-	var candidate_territories: Dictionary = {}
-	for place_map_id: String in catalog_value.place_map_ids():
-		var place: Dictionary = catalog_value.get_place(place_map_id)
-		if place.is_empty():
-			return false
-		var owner_id: String = str(place.get("parent_country_id", ""))
-		var place_kind: String = _place_kind(place)
-		var parent_id: String = ""
-		if place_kind != "region":
-			parent_id = str(place.get("parent_region_id", ""))
-		candidate_territories[place_map_id] = {
-			"entity_id": place_map_id,
-			"entity_kind": place_kind,
-			"sovereign_owner_id": owner_id,
-			"administrative_parent_id": parent_id,
-			"military_controller_id": owner_id,
-		}
-
 	var candidate_capacity := VNextSpatialCapacityWindow.new()
 	if not candidate_capacity.initialize(catalog_value, candidate_infrastructure, 0):
 		return false
 	_catalog = catalog_value
 	_current_hour = 0
 	_infrastructure = candidate_infrastructure
-	_territories = candidate_territories
 	_capacity = candidate_capacity
 	return _is_internal_state_valid()
 
@@ -201,73 +181,6 @@ func restore_infrastructure(link_id: String) -> bool:
 	return set_infrastructure_status(link_id, VNextInfrastructureLinkState.STATUS_RESTORED)
 
 
-func set_territorial_facts(
-	entity_query: String,
-	sovereign_owner_id: String,
-	administrative_parent_query: String,
-	military_controller_id: String
-) -> bool:
-	if not _is_internal_state_valid():
-		return false
-	var entity_id: String = _entity_query_to_map_id(entity_query)
-	if entity_id.is_empty():
-		return false
-	var parent_id: String = _administrative_query_to_map_id(administrative_parent_query)
-	if not administrative_parent_query.is_empty() and parent_id.is_empty():
-		return false
-	var candidate_territories: Dictionary = _duplicate_territories()
-	var current: Dictionary = candidate_territories[entity_id]
-	candidate_territories[entity_id] = {
-		"entity_id": entity_id,
-		"entity_kind": str(current.get("entity_kind", "")),
-		"sovereign_owner_id": sovereign_owner_id,
-		"administrative_parent_id": parent_id,
-		"military_controller_id": military_controller_id,
-	}
-	if not _validate_territory_collection(candidate_territories):
-		return false
-	_territories = candidate_territories
-	return true
-
-
-func set_sovereign_owner(entity_query: String, owner_id: String) -> bool:
-	var current: Dictionary = get_territorial_facts(entity_query)
-	if current.is_empty():
-		return false
-	return set_territorial_facts(
-		entity_query, owner_id, str(current.get("administrative_parent_id", "")),
-		str(current.get("military_controller_id", ""))
-	)
-
-
-func set_administrative_parent(entity_query: String, parent_query: String) -> bool:
-	var current: Dictionary = get_territorial_facts(entity_query)
-	if current.is_empty():
-		return false
-	return set_territorial_facts(
-		entity_query, str(current.get("sovereign_owner_id", "")), parent_query,
-		str(current.get("military_controller_id", ""))
-	)
-
-
-func set_military_controller(entity_query: String, controller_id: String) -> bool:
-	var current: Dictionary = get_territorial_facts(entity_query)
-	if current.is_empty():
-		return false
-	return set_territorial_facts(
-		entity_query, str(current.get("sovereign_owner_id", "")),
-		str(current.get("administrative_parent_id", "")), controller_id
-	)
-
-
-func get_territorial_facts(entity_query: String) -> Dictionary:
-	var entity_id: String = _entity_query_to_map_id(entity_query)
-	var value: Variant = _territories.get(entity_id, {})
-	if typeof(value) != TYPE_DICTIONARY:
-		return {}
-	return (value as Dictionary).duplicate(true)
-
-
 func request_capacity(
 	request_id: String, link_id: String, window_hour: int, demand: Variant
 ) -> Dictionary:
@@ -324,14 +237,10 @@ func snapshot() -> Dictionary:
 	var infrastructure: Array[Dictionary] = []
 	for link_id: String in _catalog.link_ids():
 		infrastructure.append(_state_for_link(link_id).snapshot())
-	var territories: Array[Dictionary] = []
-	for entity_id: String in _catalog.place_map_ids():
-		territories.append((_territories[entity_id] as Dictionary).duplicate(true))
 	return {
 		"schema_id": SNAPSHOT_SCHEMA_ID,
 		"current_hour": _current_hour,
 		"infrastructure": infrastructure,
-		"territories": territories,
 		"capacity_window": _capacity.snapshot(),
 	}
 
@@ -339,24 +248,37 @@ func snapshot() -> Dictionary:
 func restore(snapshot_value: Dictionary) -> bool:
 	if not _is_internal_state_valid():
 		return false
-	if snapshot_value.size() != 5 or snapshot_value.get("schema_id") != SNAPSHOT_SCHEMA_ID:
+	var candidate_snapshot: Dictionary = snapshot_value.duplicate(true)
+	if candidate_snapshot.get("schema_id") == LEGACY_SNAPSHOT_SCHEMA_ID:
+		# Legacy controller rows are compatibility input only. Spatial deliberately
+		# drops them rather than restoring cross-domain authority.
+		if (
+			candidate_snapshot.size() != 5
+			or not candidate_snapshot.has("territories")
+			or typeof(candidate_snapshot.get("territories")) != TYPE_ARRAY
+			or not _legacy_control_rows_are_well_formed(
+				candidate_snapshot.get("territories") as Array
+			)
+		):
+			return false
+		candidate_snapshot.erase("territories")
+		candidate_snapshot["schema_id"] = SNAPSHOT_SCHEMA_ID
+	if candidate_snapshot.size() != 4 or candidate_snapshot.get("schema_id") != SNAPSHOT_SCHEMA_ID:
 		return false
-	if not _has_fields(snapshot_value, [
-		"schema_id", "current_hour", "infrastructure", "territories", "capacity_window",
+	if not _has_fields(candidate_snapshot, [
+		"schema_id", "current_hour", "infrastructure", "capacity_window",
 	]):
 		return false
-	var candidate_hour: int = _parse_hour(snapshot_value.get("current_hour"))
+	var candidate_hour: int = _parse_hour(candidate_snapshot.get("current_hour"))
 	if candidate_hour < 0:
 		return false
-	if typeof(snapshot_value.get("infrastructure")) != TYPE_ARRAY:
+	if typeof(candidate_snapshot.get("infrastructure")) != TYPE_ARRAY:
 		return false
-	if typeof(snapshot_value.get("territories")) != TYPE_ARRAY:
-		return false
-	if typeof(snapshot_value.get("capacity_window")) != TYPE_DICTIONARY:
+	if typeof(candidate_snapshot.get("capacity_window")) != TYPE_DICTIONARY:
 		return false
 
 	var candidate_infrastructure: Dictionary = {}
-	for raw_value: Variant in (snapshot_value.get("infrastructure") as Array):
+	for raw_value: Variant in (candidate_snapshot.get("infrastructure") as Array):
 		if typeof(raw_value) != TYPE_DICTIONARY:
 			return false
 		var state := VNextInfrastructureLinkState.new()
@@ -374,51 +296,24 @@ func restore(snapshot_value: Dictionary) -> bool:
 		if not candidate_infrastructure.has(link_id):
 			return false
 
-	var candidate_territories: Dictionary = {}
-	for raw_value: Variant in (snapshot_value.get("territories") as Array):
-		if typeof(raw_value) != TYPE_DICTIONARY:
-			return false
-		var territory: Dictionary = raw_value
-		if territory.size() != 5 or not _has_fields(territory, [
-			"entity_id", "entity_kind", "sovereign_owner_id",
-			"administrative_parent_id", "military_controller_id",
-		]) or not _all_string_fields(territory, [
-			"entity_id", "entity_kind", "sovereign_owner_id",
-			"administrative_parent_id", "military_controller_id",
-		]):
-			return false
-		var entity_id: String = str(territory.get("entity_id"))
-		if candidate_territories.has(entity_id):
-			return false
-		candidate_territories[entity_id] = territory.duplicate(true)
-	if candidate_territories.size() != _catalog.place_map_ids().size():
-		return false
-	for entity_id: String in _catalog.place_map_ids():
-		if not candidate_territories.has(entity_id):
-			return false
-
 	var candidate := VNextSpatialWorld.new()
 	candidate._catalog = _catalog
 	candidate._current_hour = candidate_hour
 	candidate._infrastructure = candidate_infrastructure
-	candidate._territories = candidate_territories
 	candidate._capacity = VNextSpatialCapacityWindow.new()
 	if not candidate._validate_infrastructure_collection():
-		return false
-	if not candidate._validate_territory_collection(candidate_territories):
 		return false
 	if not candidate._capacity.initialize(
 		_catalog, candidate_infrastructure, candidate_hour
 	):
 		return false
-	if not candidate._capacity.restore(snapshot_value.get("capacity_window") as Dictionary):
+	if not candidate._capacity.restore(candidate_snapshot.get("capacity_window") as Dictionary):
 		return false
 	if not candidate._is_internal_state_valid():
 		return false
 
 	_current_hour = candidate._current_hour
 	_infrastructure = candidate._infrastructure
-	_territories = candidate._territories
 	_capacity = candidate._capacity
 	return true
 
@@ -427,8 +322,6 @@ func _is_internal_state_valid() -> bool:
 	if _catalog == null or not _catalog.is_loaded() or _capacity == null:
 		return false
 	if not _validate_infrastructure_collection():
-		return false
-	if not _validate_territory_collection(_territories):
 		return false
 	return _capacity.is_valid() and _capacity.current_hour() == _current_hour
 
@@ -447,48 +340,43 @@ func _validate_infrastructure_collection() -> bool:
 	return true
 
 
-func _validate_territory_collection(territories: Dictionary) -> bool:
-	if territories.size() != _catalog.place_map_ids().size():
+func _legacy_control_rows_are_well_formed(rows: Array) -> bool:
+	if rows.size() != _catalog.place_map_ids().size():
 		return false
-	for entity_id: String in _catalog.place_map_ids():
-		if not territories.has(entity_id):
+	var seen: Dictionary = {}
+	for raw_row: Variant in rows:
+		if not raw_row is Dictionary:
 			return false
-		var value: Variant = territories.get(entity_id)
-		if typeof(value) != TYPE_DICTIONARY:
-			return false
-		var territory: Dictionary = value
-		if territory.size() != 5 or not _has_fields(territory, [
+		var row := raw_row as Dictionary
+		if row.size() != 5 or not _has_fields(row, [
 			"entity_id", "entity_kind", "sovereign_owner_id",
 			"administrative_parent_id", "military_controller_id",
-		]) or not _all_string_fields(territory, [
+		]) or not _all_string_fields(row, [
 			"entity_id", "entity_kind", "sovereign_owner_id",
 			"administrative_parent_id", "military_controller_id",
 		]):
 			return false
-		if str(territory.get("entity_id")) != entity_id:
+		var entity_id: String = str(row.get("entity_id", ""))
+		if seen.has(entity_id) or not _catalog.has_place(entity_id):
 			return false
 		var place: Dictionary = _catalog.get_place(entity_id)
-		if place.is_empty() or _place_kind(place) != str(territory.get("entity_kind")):
+		if str(row.get("entity_kind", "")) != str(
+			place.get("object_level", place.get("spatial_kind", ""))
+		):
 			return false
-		if not _catalog.has_country(str(territory.get("sovereign_owner_id"))):
+		if (
+			not _catalog.has_country(str(row.get("sovereign_owner_id", "")))
+			or not _catalog.has_country(str(row.get("military_controller_id", "")))
+		):
 			return false
-		if not _catalog.has_country(str(territory.get("military_controller_id"))):
-			return false
-		var parent_id: String = str(territory.get("administrative_parent_id"))
+		var parent_id: String = str(row.get("administrative_parent_id", ""))
 		if not parent_id.is_empty() and not (
 			_catalog.has_country(parent_id) or _catalog.has_region(parent_id)
 		):
 			return false
 		if parent_id == entity_id:
 			return false
-	for entity_id: String in _catalog.place_map_ids():
-		var seen: Dictionary = {entity_id: true}
-		var cursor: String = str(territories[entity_id].get("administrative_parent_id", ""))
-		while not cursor.is_empty() and _catalog.has_region(cursor):
-			if seen.has(cursor):
-				return false
-			seen[cursor] = true
-			cursor = str(territories.get(cursor, {}).get("administrative_parent_id", ""))
+		seen[entity_id] = true
 	return true
 
 
@@ -513,33 +401,6 @@ func _state_for_link(link_id: String) -> VNextInfrastructureLinkState:
 	if not value is VNextInfrastructureLinkState:
 		return null
 	return value as VNextInfrastructureLinkState
-
-
-func _entity_query_to_map_id(entity_query: String) -> String:
-	if _catalog == null:
-		return ""
-	var map_id: String = VNextSpatialCatalog.place_query_to_map_id(entity_query)
-	return map_id if _catalog.has_place(map_id) else ""
-
-
-func _administrative_query_to_map_id(parent_query: String) -> String:
-	if parent_query.is_empty():
-		return ""
-	if _catalog.has_country(parent_query):
-		return parent_query
-	var map_id: String = VNextSpatialCatalog.place_query_to_map_id(parent_query)
-	return map_id if _catalog.has_region(map_id) else ""
-
-
-func _duplicate_territories() -> Dictionary:
-	var output: Dictionary = {}
-	for entity_id: String in _catalog.place_map_ids():
-		output[entity_id] = (_territories[entity_id] as Dictionary).duplicate(true)
-	return output
-
-
-static func _place_kind(place: Dictionary) -> String:
-	return str(place.get("object_level", place.get("spatial_kind", "")))
 
 
 static func _parse_hour(value: Variant) -> int:

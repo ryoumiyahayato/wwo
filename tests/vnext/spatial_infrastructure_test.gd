@@ -175,30 +175,36 @@ func _test_territorial_mutation_and_projection() -> void:
 	var world := _world()
 	if world == null:
 		return
-	var initial: Dictionary = world.get_territorial_facts("northern_industrial_belt")
-	_equal(initial.get("sovereign_owner_id"), "country_fra", "region starts with legacy sovereign owner")
-	_equal(initial.get("military_controller_id"), "country_fra", "region starts with legacy military controller")
-	_check(world.set_sovereign_owner("northern_industrial_belt", "british_empire"), "sovereign owner mutation uses explicit API")
-	_check(world.set_military_controller("northern_industrial_belt", "british_empire"), "military controller mutation uses explicit API")
-	_equal(world.get_territorial_facts("northern_industrial_belt").get("sovereign_owner_id"), "british_empire", "owner query reflects authoritative mutation")
-	var before_invalid: Dictionary = world.get_territorial_facts("northern_industrial_belt")
-	_check(not world.set_sovereign_owner("northern_industrial_belt", "country:not_real"), "unknown owner is rejected")
-	_equal(world.get_territorial_facts("northern_industrial_belt"), before_invalid, "invalid owner leaves territorial state unchanged")
-	_check(not world.set_administrative_parent("northern_industrial_belt", "northern_industrial_belt"), "self administrative parent is rejected")
-	_check(world.set_administrative_parent("northern_industrial_belt", "paris_basin"), "region administrative parent mutation is legal")
-	_check(not world.set_administrative_parent("paris_basin", "northern_industrial_belt"), "administrative parent cycle is rejected")
-	_check(world.set_administrative_parent("northern_industrial_belt", ""), "administrative parent can be cleared at boundary")
+	var catalog: VNextSpatialCatalog = world.catalog()
+	var political := VNextPoliticalControlOverlay.create(catalog, ["country_fra", "british_empire"])
+	var military := VNextMilitaryControlOverlay.create(catalog, ["country_fra", "british_empire"])
+	_check(political != null and military != null, "controller overlays initialize outside Spatial")
+	if political == null or military == null:
+		return
+	var physical_before: Dictionary = world.get_region("northern_industrial_belt")
+	_check(political.set_control(
+		"northern_industrial_belt", "country_fra", "country_fra", "british_empire", "1900-01-01"
+	), "political controller mutation uses external overlay")
+	_check(military.set_controller(
+		"northern_industrial_belt", "british_empire", "1900-01-01"
+	), "military controller mutation uses separate overlay")
+	_equal(world.get_region("northern_industrial_belt"), physical_before, "control changes do not mutate physical place identity")
+	_check(not world.snapshot().has("territories"), "Spatial snapshot excludes controller truth")
 
 	var projection := VNextSpatialMapProjection.new()
-	var before_projection: Dictionary = projection.project(world)
+	var before_projection: Dictionary = projection.project(world, political, military)
 	var before_link: Dictionary = _record_by_id(before_projection.get("infrastructure", []), "rail_paris_lille")
 	_equal(before_link.get("status"), "operational", "projection exposes current infrastructure status")
 	_check(world.set_infrastructure_status("rail_paris_lille", VNextInfrastructureLinkState.STATUS_INTERRUPTED), "projection fixture interrupts rail link")
-	var after_projection: Dictionary = projection.project(world)
+	var after_projection: Dictionary = projection.project(world, political, military)
 	var after_link: Dictionary = _record_by_id(after_projection.get("infrastructure", []), "rail_paris_lille")
 	_equal(after_link.get("status"), VNextInfrastructureLinkState.STATUS_INTERRUPTED, "projection synchronizes interrupted rail status")
 	var region_projection: Dictionary = _record_by_id(after_projection.get("regions", []), "northern_industrial_belt")
-	_equal(region_projection.get("sovereign_owner_id"), "british_empire", "projection exposes current region owner")
+	_equal(
+		(region_projection.get("political_control", {}) as Dictionary).get("effective_controller_id"),
+		"british_empire",
+		"projection reads current region controller from external overlay"
+	)
 	_equal(after_projection.get("ports").size(), 8, "projection includes port status records")
 	_check(after_projection.has("important_nodes") and after_projection.has("important_links"), "projection includes important nodes and links")
 
@@ -209,12 +215,10 @@ func _test_snapshot_restore_and_transactional_rejection() -> void:
 	if source == null or target == null:
 		return
 	_check(source.set_nominal_capacity("rail_paris_lille", 100), "snapshot fixture configures capacity")
-	_check(source.set_sovereign_owner("northern_industrial_belt", "british_empire"), "snapshot fixture changes owner")
-	_check(source.set_military_controller("northern_industrial_belt", "british_empire"), "snapshot fixture changes controller")
 	_check(source.request_capacity("snapshot_request", "rail_paris_lille", 0, 70).get("accepted", false), "snapshot fixture creates reservation")
 	var saved: Dictionary = source.snapshot()
 	_check(target.restore(saved), "complete spatial snapshot restores")
-	_equal(target.snapshot(), saved, "snapshot restore preserves infrastructure, territory and capacity")
+	_equal(target.snapshot(), saved, "snapshot restore preserves physical infrastructure and capacity")
 	var json_parser := JSON.new()
 	_check(json_parser.parse(JSON.stringify(saved)) == OK, "spatial snapshot serializes as JSON")
 	if json_parser.data is Dictionary:
@@ -223,17 +227,10 @@ func _test_snapshot_restore_and_transactional_rejection() -> void:
 		_equal(json_target.snapshot(), saved, "JSON round trip preserves spatial state")
 
 	var malformed_cases: Array[Dictionary] = []
-	var unknown_place: Dictionary = saved.duplicate(true)
-	var unknown_place_territories: Array = unknown_place["territories"]
-	unknown_place_territories[0]["entity_id"] = "missing_place"
-	malformed_cases.append({"snapshot": unknown_place, "label": "unknown place"})
 	var unknown_link: Dictionary = saved.duplicate(true)
 	var unknown_link_infra: Array = unknown_link["infrastructure"]
 	unknown_link_infra[0]["link_id"] = "rail_missing"
 	malformed_cases.append({"snapshot": unknown_link, "label": "unknown link"})
-	var invalid_owner: Dictionary = saved.duplicate(true)
-	(invalid_owner["territories"] as Array)[0]["sovereign_owner_id"] = "country:not_real"
-	malformed_cases.append({"snapshot": invalid_owner, "label": "invalid owner"})
 	var invalid_status: Dictionary = saved.duplicate(true)
 	(invalid_status["infrastructure"] as Array)[0]["status"] = "not_a_status"
 	malformed_cases.append({"snapshot": invalid_status, "label": "invalid infrastructure status"})
@@ -260,12 +257,12 @@ func _test_snapshot_restore_and_transactional_rejection() -> void:
 	(wrong_window["capacity_window"] as Dictionary)["reservations"][0]["window_hour"] = 99
 	malformed_cases.append({"snapshot": wrong_window, "label": "wrong reservation window"})
 	var malformed_collection: Dictionary = saved.duplicate(true)
-	var untyped_territories: Array = []
-	for item: Variant in malformed_collection["territories"] as Array:
-		untyped_territories.append(item)
-	untyped_territories.append(42)
-	malformed_collection["territories"] = untyped_territories
-	malformed_cases.append({"snapshot": malformed_collection, "label": "malformed collection item"})
+	var untyped_infrastructure: Array = []
+	for item: Variant in malformed_collection["infrastructure"] as Array:
+		untyped_infrastructure.append(item)
+	untyped_infrastructure.append(42)
+	malformed_collection["infrastructure"] = untyped_infrastructure
+	malformed_cases.append({"snapshot": malformed_collection, "label": "malformed infrastructure item"})
 
 	for case: Dictionary in malformed_cases:
 		_expect_restore_failure(target, case["snapshot"] as Dictionary, str(case["label"]))
@@ -284,7 +281,7 @@ func _test_time_partition_and_bounded_state() -> void:
 	_equal(partitioned.snapshot(), jumped.snapshot(), "24x1 hour equals 1x24 hour state")
 	var snapshot: Dictionary = partitioned.snapshot()
 	_check(snapshot.get("infrastructure").size() == 15, "persistent infrastructure state remains one record per link")
-	_check(snapshot.get("territories").size() == 49, "persistent territorial state remains one record per place")
+	_check(not snapshot.has("territories"), "persistent Spatial state contains no political territory records")
 	var capacity_window: Dictionary = snapshot.get("capacity_window")
 	_check(capacity_window.get("reservations").size() == 0, "completed windows do not grow persistent reservation history")
 	_check(not JSON.stringify(snapshot).contains("health"), "state model does not substitute a universal health field")

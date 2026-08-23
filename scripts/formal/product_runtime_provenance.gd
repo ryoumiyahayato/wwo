@@ -3,6 +3,7 @@ extends RefCounted
 ## Compact diagnostic assembled from the objects constructed by the product root.
 
 const NOT_AVAILABLE: String = "NOT AVAILABLE"
+static var _worktree_provenance_cache: Dictionary = {}
 
 
 static func capture(owner_specs: Array[Dictionary]) -> Dictionary:
@@ -26,8 +27,13 @@ static func capture(owner_specs: Array[Dictionary]) -> Dictionary:
 			"mode": str(spec.get("mode", "")),
 			"detail": str(spec.get("detail", "")),
 		})
+	var build_head: String = resolve_build_head()
+	var worktree: Dictionary = resolve_worktree_provenance()
 	return {
-		"build_head": resolve_build_head(),
+		"build_head": build_head,
+		"base_head": build_head,
+		"working_tree_status": str(worktree.get("status", NOT_AVAILABLE)),
+		"patch_sha256": str(worktree.get("patch_sha256", NOT_AVAILABLE)),
 		"product_entry": str(
 			ProjectSettings.get_setting("application/run/main_scene", "")
 		),
@@ -35,6 +41,55 @@ static func capture(owner_specs: Array[Dictionary]) -> Dictionary:
 		"owners": records,
 		"e1_product_integration": false,
 	}
+
+
+static func resolve_worktree_provenance() -> Dictionary:
+	if not _worktree_provenance_cache.is_empty():
+		return _worktree_provenance_cache.duplicate(true)
+	var project_root := ProjectSettings.globalize_path("res://").trim_suffix("/")
+	if _resolve_git_directory(project_root).is_empty():
+		return _cache_worktree_provenance(NOT_AVAILABLE, NOT_AVAILABLE)
+	var status_output: Array = []
+	var status_exit: int = OS.execute(
+		"git",
+		PackedStringArray([
+			"-C", project_root, "status", "--porcelain=v1", "--untracked-files=all",
+		]),
+		status_output,
+		true
+	)
+	if status_exit != 0:
+		return _cache_worktree_provenance(NOT_AVAILABLE, NOT_AVAILABLE)
+	var status_text: String = "".join(status_output)
+	if status_text.strip_edges().is_empty():
+		return _cache_worktree_provenance("CLEAN", "NONE")
+	var diff_output: Array = []
+	var diff_exit: int = OS.execute(
+		"git",
+		PackedStringArray([
+			"-C", project_root, "diff", "--binary", "--no-ext-diff", "HEAD", "--", ".",
+		]),
+		diff_output,
+		true
+	)
+	if diff_exit != 0:
+		return _cache_worktree_provenance("DIRTY", NOT_AVAILABLE)
+	var patch_text: String = "".join(diff_output)
+	if patch_text.is_empty():
+		return _cache_worktree_provenance("DIRTY", NOT_AVAILABLE)
+	var context := HashingContext.new()
+	if context.start(HashingContext.HASH_SHA256) != OK:
+		return _cache_worktree_provenance("DIRTY", NOT_AVAILABLE)
+	context.update(patch_text.to_utf8_buffer())
+	return _cache_worktree_provenance("DIRTY", context.finish().hex_encode())
+
+
+static func _cache_worktree_provenance(status: String, patch_sha256: String) -> Dictionary:
+	_worktree_provenance_cache = {
+		"status": status,
+		"patch_sha256": patch_sha256,
+	}
+	return _worktree_provenance_cache.duplicate(true)
 
 
 static func resolve_build_head() -> String:

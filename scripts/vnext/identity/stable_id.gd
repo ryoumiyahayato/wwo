@@ -48,6 +48,8 @@ static func _is_supported_kind(candidate_kind: String) -> bool:
 		or candidate_kind == "economy"
 		or candidate_kind == "state"
 		or candidate_kind == "policy"
+		or candidate_kind == "population"
+		or candidate_kind == "economic_region"
 	)
 
 

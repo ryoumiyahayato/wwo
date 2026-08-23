@@ -36,15 +36,15 @@ func _test_external_geography_authority() -> void:
 	if catalog == null:
 		return
 	_check(
-		VNextMacroPopulation.create(catalog, ["place:paris"]) != null,
+		VNextMacroPopulation.create(catalog, ["population:paris"]) != null,
 		"known external place ID is accepted"
 	)
 	_check(
-		VNextMacroPopulation.create(catalog, ["place:made_up"]) == null,
+		VNextMacroPopulation.create(catalog, ["population:made_up"]) == null,
 		"unknown external place ID is rejected"
 	)
 	_check(
-		VNextMacroPopulation.create(catalog, ["region:northern_industrial_belt"]) != null,
+		VNextMacroPopulation.create(catalog, ["population:northern_industrial_belt"]) != null,
 		"known external region ID is accepted"
 	)
 	_check(
@@ -56,40 +56,40 @@ func _test_external_geography_authority() -> void:
 		"wrong geography ID kind is rejected"
 	)
 	_check(
-		VNextMacroPopulation.create(null, ["place:paris"]) == null,
+		VNextMacroPopulation.create(null, ["population:paris"]) == null,
 		"missing external geography authority fails explicitly"
 	)
 
-	var source := VNextMacroPopulation.create(catalog, ["place:paris"])
-	var target := VNextMacroPopulation.create(catalog, ["place:paris"])
+	var source := VNextMacroPopulation.create(catalog, ["population:paris"])
+	var target := VNextMacroPopulation.create(catalog, ["population:paris"])
 	if source == null or target == null:
 		return
 	_check(
 		source.set_initial_state(
-			"place:paris",
+			"population:paris",
 			_state(1000, 250, 350, 300, 100, 500, 500, 600, 400)
 		),
 		"authority snapshot source is seeded"
 	)
 	var saved: Dictionary = source.snapshot()
 	var unknown_snapshot: Dictionary = saved.duplicate(true)
-	(unknown_snapshot["known_place_ids"] as Array)[0] = "place:not_in_authority"
-	(unknown_snapshot["records"] as Array)[0]["place_id"] = "place:not_in_authority"
+	(unknown_snapshot["known_population_unit_ids"] as Array)[0] = "population:not_in_authority"
+	(unknown_snapshot["records"] as Array)[0]["place_id"] = "population:not_in_authority"
 	_expect_restore_failure(
 		target,
 		unknown_snapshot,
 		"snapshot cannot introduce an externally unknown geography"
 	)
 	var malformed_snapshot: Dictionary = saved.duplicate(true)
-	(malformed_snapshot["known_place_ids"] as Array)[0] = "place:BadCase"
-	(malformed_snapshot["records"] as Array)[0]["place_id"] = "place:BadCase"
+	(malformed_snapshot["known_population_unit_ids"] as Array)[0] = "population:BadCase"
+	(malformed_snapshot["records"] as Array)[0]["place_id"] = "population:BadCase"
 	_expect_restore_failure(
 		target,
 		malformed_snapshot,
 		"malformed geography key is rejected transactionally"
 	)
 	var wrong_kind_snapshot: Dictionary = saved.duplicate(true)
-	(wrong_kind_snapshot["known_place_ids"] as Array)[0] = "country:country_fra"
+	(wrong_kind_snapshot["known_population_unit_ids"] as Array)[0] = "country:country_fra"
 	(wrong_kind_snapshot["records"] as Array)[0]["place_id"] = "country:country_fra"
 	_expect_restore_failure(
 		target,
@@ -103,13 +103,13 @@ func _test_internal_migration_conservation_and_determinism() -> void:
 	if population == null:
 		return
 	var before_total: int = population.aggregate_population(_migration_ids())
-	var before_origin: int = population.population_at("place:paris")
-	var before_destination: int = population.population_at("place:lille")
+	var before_origin: int = population.population_at("population:paris")
+	var before_destination: int = population.population_at("population:lille")
 	_check(
 		population.settle_internal_migration(
 			[{
-				"origin_place_id": "place:paris",
-				"destination_place_id": "place:lille",
+				"origin_population_unit_id": "population:paris",
+				"destination_population_unit_id": "population:lille",
 				"amount": 100,
 			}]
 		),
@@ -121,12 +121,12 @@ func _test_internal_migration_conservation_and_determinism() -> void:
 		"internal migration conserves world total"
 	)
 	_equal(
-		population.population_at("place:paris"),
+		population.population_at("population:paris"),
 		before_origin - 100,
 		"internal migration removes the bounded amount from origin"
 	)
 	_equal(
-		population.population_at("place:lille"),
+		population.population_at("population:lille"),
 		before_destination + 100,
 		"internal migration adds the bounded amount to destination"
 	)
@@ -142,23 +142,23 @@ func _test_internal_migration_conservation_and_determinism() -> void:
 		return
 	var flows: Array = [
 		{
-			"origin_place_id": "place:paris",
-			"destination_place_id": "place:lille",
+			"origin_population_unit_id": "population:paris",
+			"destination_population_unit_id": "population:lille",
 			"amount": 100,
 		},
 		{
-			"origin_place_id": "place:lille",
-			"destination_place_id": "place:rouen",
+			"origin_population_unit_id": "population:lille",
+			"destination_population_unit_id": "population:rouen",
 			"amount": 40,
 		},
 		{
-			"origin_place_id": "place:rouen",
-			"destination_place_id": "place:paris",
+			"origin_population_unit_id": "population:rouen",
+			"destination_population_unit_id": "population:paris",
 			"amount": 25,
 		},
 		{
-			"origin_place_id": "place:paris",
-			"destination_place_id": "place:rouen",
+			"origin_population_unit_id": "population:paris",
+			"destination_population_unit_id": "population:rouen",
 			"amount": 30,
 		},
 	]
@@ -186,18 +186,18 @@ func _test_internal_migration_shapes_and_external_delta() -> void:
 	if many_origins == null:
 		return
 	var before_total: int = many_origins.aggregate_population(_migration_ids())
-	var before_lille: int = many_origins.population_at("place:lille")
+	var before_lille: int = many_origins.population_at("population:lille")
 	_check(
 		many_origins.settle_internal_migration(
 			[
 				{
-					"origin_place_id": "place:paris",
-					"destination_place_id": "place:lille",
+					"origin_population_unit_id": "population:paris",
+					"destination_population_unit_id": "population:lille",
 					"amount": 100,
 				},
 				{
-					"origin_place_id": "place:rouen",
-					"destination_place_id": "place:lille",
+					"origin_population_unit_id": "population:rouen",
+					"destination_population_unit_id": "population:lille",
 					"amount": 50,
 				},
 			]
@@ -210,7 +210,7 @@ func _test_internal_migration_shapes_and_external_delta() -> void:
 		"multiple origins to one destination conserve total"
 	)
 	_equal(
-		many_origins.population_at("place:lille"),
+		many_origins.population_at("population:lille"),
 		before_lille + 150,
 		"multiple origins combine exactly at one destination"
 	)
@@ -218,21 +218,21 @@ func _test_internal_migration_shapes_and_external_delta() -> void:
 	var many_destinations := _new_migration_population()
 	if many_destinations == null:
 		return
-	var before_paris: int = many_destinations.population_at("place:paris")
-	var before_lille_again: int = many_destinations.population_at("place:lille")
-	var before_rouen: int = many_destinations.population_at("place:rouen")
+	var before_paris: int = many_destinations.population_at("population:paris")
+	var before_lille_again: int = many_destinations.population_at("population:lille")
+	var before_rouen: int = many_destinations.population_at("population:rouen")
 	before_total = many_destinations.aggregate_population(_migration_ids())
 	_check(
 		many_destinations.settle_internal_migration(
 			[
 				{
-					"origin_place_id": "place:paris",
-					"destination_place_id": "place:lille",
+					"origin_population_unit_id": "population:paris",
+					"destination_population_unit_id": "population:lille",
 					"amount": 75,
 				},
 				{
-					"origin_place_id": "place:paris",
-					"destination_place_id": "place:rouen",
+					"origin_population_unit_id": "population:paris",
+					"destination_population_unit_id": "population:rouen",
 					"amount": 25,
 				},
 			]
@@ -245,17 +245,17 @@ func _test_internal_migration_shapes_and_external_delta() -> void:
 		"one origin to multiple destinations conserve total"
 	)
 	_equal(
-		many_destinations.population_at("place:paris"),
+		many_destinations.population_at("population:paris"),
 		before_paris - 100,
 		"one origin loses the exact combined amount"
 	)
 	_equal(
-		many_destinations.population_at("place:lille"),
+		many_destinations.population_at("population:lille"),
 		before_lille_again + 75,
 		"first destination receives its exact flow"
 	)
 	_equal(
-		many_destinations.population_at("place:rouen"),
+		many_destinations.population_at("population:rouen"),
 		before_rouen + 25,
 		"second destination receives its exact flow"
 	)
@@ -265,7 +265,7 @@ func _test_internal_migration_shapes_and_external_delta() -> void:
 		return
 	_check(
 		external.set_initial_state(
-			"place:paris",
+			"population:paris",
 			_state(1000, 250, 350, 300, 100, 500, 500, 600, 400)
 		),
 		"external delta fixture is seeded"
@@ -274,7 +274,7 @@ func _test_internal_migration_shapes_and_external_delta() -> void:
 	_check(
 		external.settle_elapsed_months(
 			1,
-			{"place:paris": {"external_immigration": 17}}
+			{"population:paris": {"external_immigration": 17}}
 		),
 		"external immigration settles"
 	)
@@ -287,7 +287,7 @@ func _test_internal_migration_shapes_and_external_delta() -> void:
 	_check(
 		external.settle_elapsed_months(
 			1,
-			{"place:paris": {"external_emigration": 5}}
+			{"population:paris": {"external_emigration": 5}}
 		),
 		"external emigration settles"
 	)
@@ -305,13 +305,13 @@ func _test_internal_migration_shapes_and_external_delta() -> void:
 		mixed.settle_elapsed_months(
 			1,
 			{
-				"place:paris": {"external_immigration": 20},
-				"place:lille": {"external_emigration": 7},
+				"population:paris": {"external_immigration": 20},
+				"population:lille": {"external_emigration": 7},
 			},
 			[
 				{
-					"origin_place_id": "place:paris",
-					"destination_place_id": "place:lille",
+					"origin_population_unit_id": "population:paris",
+					"destination_population_unit_id": "population:lille",
 					"amount": 100,
 				}
 			]
@@ -333,8 +333,8 @@ func _test_internal_migration_transactionality() -> void:
 	_check(
 		not unknown_origin.settle_internal_migration(
 			[{
-				"origin_place_id": "place:made_up",
-				"destination_place_id": "place:lille",
+				"origin_population_unit_id": "population:made_up",
+				"destination_population_unit_id": "population:lille",
 				"amount": 1,
 			}]
 		),
@@ -349,8 +349,8 @@ func _test_internal_migration_transactionality() -> void:
 	_check(
 		not unknown_destination.settle_internal_migration(
 			[{
-				"origin_place_id": "place:paris",
-				"destination_place_id": "place:made_up",
+				"origin_population_unit_id": "population:paris",
+				"destination_population_unit_id": "population:made_up",
 				"amount": 1,
 			}]
 		),
@@ -369,8 +369,8 @@ func _test_internal_migration_transactionality() -> void:
 	_check(
 		not self_flow.settle_internal_migration(
 			[{
-				"origin_place_id": "place:paris",
-				"destination_place_id": "place:paris",
+				"origin_population_unit_id": "population:paris",
+				"destination_population_unit_id": "population:paris",
 				"amount": 0,
 			}]
 		),
@@ -385,8 +385,8 @@ func _test_internal_migration_transactionality() -> void:
 	_check(
 		not insufficient.settle_internal_migration(
 			[{
-				"origin_place_id": "place:paris",
-				"destination_place_id": "place:lille",
+				"origin_population_unit_id": "population:paris",
+				"destination_population_unit_id": "population:lille",
 				"amount": 999999999,
 			}]
 		),
@@ -402,13 +402,13 @@ func _test_internal_migration_transactionality() -> void:
 		not malformed.settle_internal_migration(
 			[
 				{
-					"origin_place_id": "place:paris",
-					"destination_place_id": "place:lille",
+					"origin_population_unit_id": "population:paris",
+					"destination_population_unit_id": "population:lille",
 					"amount": 10,
 				},
 				{
-					"origin_place_id": "place:lille",
-					"destination_place_id": "place:made_up",
+					"origin_population_unit_id": "population:lille",
+					"destination_population_unit_id": "population:made_up",
 					"amount": 10,
 				},
 			]
@@ -423,8 +423,8 @@ func _test_internal_migration_transactionality() -> void:
 	_check(
 		not malformed.settle_internal_migration(
 			[{
-				"origin_place_id": "place:paris",
-				"destination_place_id": "place:lille",
+				"origin_population_unit_id": "population:paris",
+				"destination_population_unit_id": "population:lille",
 				"amount": INF,
 			}]
 		),
@@ -433,8 +433,8 @@ func _test_internal_migration_transactionality() -> void:
 	_check(
 		not malformed.settle_internal_migration(
 			[{
-				"origin_place_id": "place:paris",
-				"destination_place_id": "place:lille",
+				"origin_population_unit_id": "population:paris",
+				"destination_population_unit_id": "population:lille",
 				"amount": -1,
 			}]
 		),
@@ -450,8 +450,8 @@ func _test_snapshot_resume_continuation() -> void:
 	var seeded_state: Dictionary = _state(
 		100000, 50000, 10000, 30000, 10000, 50000, 50000, 60000, 40000
 	)
-	_check(ageing_a.set_initial_state("place:paris", seeded_state), "ageing remainder source is seeded")
-	_check(ageing_b.set_initial_state("place:paris", seeded_state), "ageing remainder target is seeded")
+	_check(ageing_a.set_initial_state("population:paris", seeded_state), "ageing remainder source is seeded")
+	_check(ageing_b.set_initial_state("population:paris", seeded_state), "ageing remainder target is seeded")
 	_check(ageing_a.settle_elapsed_months(5), "ageing remainder advances partially")
 	var saved: Dictionary = ageing_a.snapshot()
 	_check(ageing_b.restore(saved), "ageing remainder snapshot restores")
@@ -467,8 +467,8 @@ func _test_snapshot_resume_continuation() -> void:
 	var full_b := _new_population()
 	if full_a == null or full_b == null:
 		return
-	_check(full_a.set_initial_state("place:paris", seeded_state), "full resume source is seeded")
-	_check(full_b.set_initial_state("place:paris", seeded_state), "full resume target is seeded")
+	_check(full_a.set_initial_state("population:paris", seeded_state), "full resume source is seeded")
+	_check(full_b.set_initial_state("population:paris", seeded_state), "full resume target is seeded")
 	_check(full_a.settle_elapsed_months(4), "full resume source advances X")
 	saved = full_a.snapshot()
 	_check(full_a.settle_elapsed_months(8), "full resume source advances Y")
@@ -487,8 +487,8 @@ func _test_snapshot_resume_continuation() -> void:
 	saved = migration_a.snapshot()
 	_check(migration_b.restore(saved), "migration snapshot restores before transfer")
 	var flows: Array = [{
-		"origin_place_id": "place:paris",
-		"destination_place_id": "place:lille",
+		"origin_population_unit_id": "population:paris",
+		"destination_population_unit_id": "population:lille",
 		"amount": 75,
 	}]
 	_check(migration_a.settle_internal_migration(flows), "migration source continues after snapshot")
@@ -504,9 +504,7 @@ func _test_indexed_full_settlement_path() -> void:
 	var catalog := _catalog()
 	if catalog == null:
 		return
-	var ids: Array[String] = catalog.place_ids()
-	for region_id: String in catalog.region_ids():
-		ids.append("region:" + region_id)
+	var ids: Array[String] = catalog.population_unit_ids()
 	var population := VNextMacroPopulation.create(catalog, ids)
 	_check(population != null, "indexed settlement fixture binds all catalog geography keys")
 	if population == null:
@@ -528,9 +526,7 @@ func _test_query_normalization_regression() -> void:
 	var catalog := _catalog()
 	if catalog == null:
 		return
-	var ids: Array[String] = catalog.place_ids()
-	for region_id: String in catalog.region_ids():
-		ids.append("region:" + region_id)
+	var ids: Array[String] = catalog.population_unit_ids()
 	_check(ids.size() > 10, "aggregate query regression uses a multi-key corpus")
 	var population := VNextMacroPopulation.create(catalog, ids)
 	_check(population != null, "aggregate query regression binds the full authority corpus")
@@ -561,7 +557,7 @@ func _test_query_normalization_regression() -> void:
 		"duplicate aggregate structure query IDs fail closed"
 	)
 	var unknown_ids: Array[String] = ids.duplicate()
-	unknown_ids[0] = "place:made_up_query_id"
+	unknown_ids[0] = "population:made_up_query_id"
 	_equal(
 		population.aggregate_population(unknown_ids),
 		-1,
@@ -601,8 +597,8 @@ func _test_keyed_queries_and_ownership_boundary() -> void:
 	var population := _new_population()
 	if population == null:
 		return
-	_check(population.has_place("place:paris"), "place key is registered")
-	_check(population.has_place("region:northern_industrial_belt"), "existing region key is accepted without a new ID kind")
+	_check(population.has_place("population:paris"), "place key is registered")
+	_check(population.has_place("population:northern_industrial_belt"), "existing region key is accepted without a new ID kind")
 	_check(
 		not population.has_method("register_place"),
 		"place registration is not a public population geography API"
@@ -611,25 +607,26 @@ func _test_keyed_queries_and_ownership_boundary() -> void:
 		not population.has_method("settle_place"),
 		"single-place settlement cannot double-advance the world"
 	)
-	_equal(population.population_at("place:unknown"), -1, "unknown place query fails closed")
-	_equal(population.structure_at("place:unknown"), {}, "unknown structure query fails closed")
+	_equal(population.population_at("population:unknown"), -1, "unknown place query fails closed")
+	_equal(population.structure_at("population:unknown"), {}, "unknown structure query fails closed")
 	_check(
-		not VNextStableId.is_valid("population:alpha"),
-		"shared stable ID contract remains unchanged and has no population kind"
+		VNextStableId.is_valid("population:alpha")
+		and VNextPopulationUnitId.is_valid("population:alpha"),
+		"shared stable ID contract includes the canonical PopulationUnit kind"
 	)
 
 	_check(
 		population.set_initial_state(
-			"place:paris",
+			"population:paris",
 			_state(1000, 250, 350, 300, 100, 500, 500, 600, 400)
 		),
 		"place state can be seeded from a complete macro structure"
 	)
-	_equal(population.population_at("place:paris"), 1000, "population_at returns the keyed total")
-	_equal(population.working_age_at("place:paris"), 650, "working_age_at derives 18-64 from coarse buckets")
-	_equal(population.age_18_40_at("place:paris"), 350, "age_18_40_at exposes the requested coarse bucket")
+	_equal(population.population_at("population:paris"), 1000, "population_at returns the keyed total")
+	_equal(population.working_age_at("population:paris"), 650, "working_age_at derives 18-64 from coarse buckets")
+	_equal(population.age_18_40_at("population:paris"), 350, "age_18_40_at exposes the requested coarse bucket")
 	_equal(
-		(population.structure_at("place:paris").get("sex_structure") as Dictionary).get("male"),
+		(population.structure_at("population:paris").get("sex_structure") as Dictionary).get("male"),
 		500,
 		"structure_at exposes sex structure"
 	)
@@ -641,7 +638,7 @@ func _test_monthly_accounting_and_structure_consistency() -> void:
 		return
 	_check(
 		population.set_initial_state(
-			"place:paris",
+			"population:paris",
 			_state(1000, 250, 350, 300, 100, 500, 500, 600, 400)
 		),
 		"accounting fixture is seeded"
@@ -650,7 +647,7 @@ func _test_monthly_accounting_and_structure_consistency() -> void:
 		population.settle_elapsed_months(
 			1,
 			{
-				"place:paris": {
+				"population:paris": {
 					"births": 20,
 					"deaths": 5,
 					"external_immigration": 2,
@@ -661,11 +658,11 @@ func _test_monthly_accounting_and_structure_consistency() -> void:
 		"one month with explicit external flows settles"
 	)
 	_equal(
-		population.population_at("place:paris"),
+		population.population_at("population:paris"),
 		1012,
 		"previous + births + external immigration - deaths - external emigration is authoritative"
 	)
-	var structure: Dictionary = population.structure_at("place:paris")
+	var structure: Dictionary = population.structure_at("population:paris")
 	_equal(structure.get("births"), 20, "births are retained as cumulative macro flow")
 	_equal(structure.get("deaths"), 5, "deaths are retained as cumulative macro flow")
 	_equal(structure.get("external_immigration"), 2, "external immigration is retained explicitly")
@@ -673,11 +670,11 @@ func _test_monthly_accounting_and_structure_consistency() -> void:
 	_equal(structure.get("external_net_migration"), -3, "external net migration is a derived projection")
 	_equal(structure.get("net_migration"), -3, "legacy net migration is only a compatibility projection")
 	_check(
-		not population.record_snapshot_at("place:paris").has("net_migration"),
+		not population.record_snapshot_at("population:paris").has("net_migration"),
 		"population snapshots do not store an ambiguous signed migration field"
 	)
 	_equal(structure.get("last_settled_period"), 1, "one elapsed month advances the period cursor once")
-	_equal(population.last_settled_period_at("region:northern_industrial_belt"), 1, "all known places share the supplied world period")
+	_equal(population.last_settled_period_at("population:northern_industrial_belt"), 1, "all known places share the supplied world period")
 	_check(_structure_is_coherent(structure), "all macro structure axes remain nonnegative and reconcile")
 
 	var before: Dictionary = population.snapshot()
@@ -685,7 +682,7 @@ func _test_monthly_accounting_and_structure_consistency() -> void:
 		not population.settle_elapsed_months(
 			1,
 			{
-				"place:paris": {
+				"population:paris": {
 					"external_immigration": 1,
 					"external_emigration": 1,
 					"net_migration": 0,
@@ -697,7 +694,7 @@ func _test_monthly_accounting_and_structure_consistency() -> void:
 	_check(
 		not population.settle_elapsed_months(
 			1,
-			{"place:paris": {"births": 0, "deaths": 5000, "net_migration": 0}}
+			{"population:paris": {"births": 0, "deaths": 5000, "net_migration": 0}}
 		),
 		"a transition that would make population negative is rejected"
 	)
@@ -711,17 +708,17 @@ func _test_two_place_batch_settlement() -> void:
 		return
 	var alpha_state: Dictionary = _state(1000, 250, 350, 300, 100, 500, 500, 600, 400)
 	var beta_state: Dictionary = _state(500, 100, 175, 150, 75, 240, 260, 300, 200)
-	_check(forward.set_initial_state("place:paris", alpha_state), "batch alpha fixture is seeded")
-	_check(forward.set_initial_state("region:northern_industrial_belt", beta_state), "batch beta fixture is seeded")
-	_check(reverse.set_initial_state("place:paris", alpha_state), "reordered alpha fixture is seeded")
-	_check(reverse.set_initial_state("region:northern_industrial_belt", beta_state), "reordered beta fixture is seeded")
+	_check(forward.set_initial_state("population:paris", alpha_state), "batch alpha fixture is seeded")
+	_check(forward.set_initial_state("population:northern_industrial_belt", beta_state), "batch beta fixture is seeded")
+	_check(reverse.set_initial_state("population:paris", alpha_state), "reordered alpha fixture is seeded")
+	_check(reverse.set_initial_state("population:northern_industrial_belt", beta_state), "reordered beta fixture is seeded")
 	var forward_flows: Dictionary = {
-		"place:paris": {"births": 20, "deaths": 5, "net_migration": -3},
-		"region:northern_industrial_belt": {"births": 7, "deaths": 2, "net_migration": 4},
+		"population:paris": {"births": 20, "deaths": 5, "net_migration": -3},
+		"population:northern_industrial_belt": {"births": 7, "deaths": 2, "net_migration": 4},
 	}
 	var reverse_flows: Dictionary = {
-		"region:northern_industrial_belt": {"births": 7, "deaths": 2, "net_migration": 4},
-		"place:paris": {"births": 20, "deaths": 5, "net_migration": -3},
+		"population:northern_industrial_belt": {"births": 7, "deaths": 2, "net_migration": 4},
+		"population:paris": {"births": 20, "deaths": 5, "net_migration": -3},
 	}
 	_check(
 		forward.settle_elapsed_months(1, forward_flows),
@@ -737,12 +734,12 @@ func _test_two_place_batch_settlement() -> void:
 		"two-place batch result is insertion-order independent"
 	)
 	_equal(
-		forward.last_settled_period_at("place:paris"),
+		forward.last_settled_period_at("population:paris"),
 		1,
 		"batch advances alpha exactly one month"
 	)
 	_equal(
-		forward.last_settled_period_at("region:northern_industrial_belt"),
+		forward.last_settled_period_at("population:northern_industrial_belt"),
 		1,
 		"batch advances beta exactly one month"
 	)
@@ -754,24 +751,24 @@ func _test_aggregation() -> void:
 		return
 	_check(
 		population.set_initial_state(
-			"place:paris",
+			"population:paris",
 			_state(1000, 250, 350, 300, 100, 500, 500, 600, 400)
 		),
 		"aggregation alpha fixture is seeded"
 	)
 	_check(
 		population.set_initial_state(
-			"region:northern_industrial_belt",
+			"population:northern_industrial_belt",
 			_state(500, 100, 175, 150, 75, 240, 260, 300, 200)
 		),
 		"aggregation beta fixture is seeded"
 	)
 	_equal(
-		population.aggregate_population(["place:paris", "region:northern_industrial_belt"]),
+		population.aggregate_population(["population:paris", "population:northern_industrial_belt"]),
 		1500,
 		"aggregate_population sums keyed records"
 	)
-	var aggregate: Dictionary = population.aggregate_structure(["place:paris", "region:northern_industrial_belt"])
+	var aggregate: Dictionary = population.aggregate_structure(["population:paris", "population:northern_industrial_belt"])
 	_equal(
 		aggregate.get("working_age_population"),
 		975,
@@ -792,12 +789,12 @@ func _test_aggregation() -> void:
 		"aggregate period is meaningful when source periods are aligned"
 	)
 	_equal(
-		population.aggregate_population(["place:paris", "place:paris"]),
+		population.aggregate_population(["population:paris", "population:paris"]),
 		-1,
 		"duplicate aggregation keys are rejected"
 	)
 	_equal(
-		population.aggregate_population(["place:missing"]),
+		population.aggregate_population(["population:missing"]),
 		-1,
 		"unknown aggregation keys are rejected"
 	)
@@ -809,10 +806,10 @@ func _test_monthly_equivalence_and_calendar_boundary() -> void:
 	if one_call == null or twelve_calls == null:
 		return
 	var seeded_state: Dictionary = _state(1000, 250, 350, 300, 100, 500, 500, 600, 400)
-	_check(one_call.set_initial_state("place:paris", seeded_state), "12-month one-call fixture is seeded")
-	_check(twelve_calls.set_initial_state("place:paris", seeded_state), "12-month repeated-call fixture is seeded")
+	_check(one_call.set_initial_state("population:paris", seeded_state), "12-month one-call fixture is seeded")
+	_check(twelve_calls.set_initial_state("population:paris", seeded_state), "12-month repeated-call fixture is seeded")
 	var monthly_flow: Dictionary = {
-		"place:paris": {"births": 4, "deaths": 2, "net_migration": -1},
+		"population:paris": {"births": 4, "deaths": 2, "net_migration": -1},
 	}
 	_check(
 		one_call.settle_elapsed_months(12, monthly_flow),
@@ -838,13 +835,13 @@ func _test_monthly_equivalence_and_calendar_boundary() -> void:
 			1900,
 			12,
 			2,
-			{"place:paris": {"births": 1}}
+			{"population:paris": {"births": 1}}
 		),
 		"year/month settlement crosses December to January deterministically"
 	)
-	_equal(boundary.last_settled_period_at("place:paris"), 13, "calendar boundary produces absolute cursor 13")
+	_equal(boundary.last_settled_period_at("population:paris"), 13, "calendar boundary produces absolute cursor 13")
 	_equal(
-		boundary.next_settlement_year_month_at("place:paris"),
+		boundary.next_settlement_year_month_at("population:paris"),
 		{"year": 1901, "month": 2},
 		"next settlement period is February 1901 after two settled months"
 	)
@@ -866,10 +863,10 @@ func _test_deterministic_replay() -> void:
 	if first == null or second == null:
 		return
 	var seeded_state: Dictionary = _state(10000, 2500, 3500, 3000, 1000, 5000, 5000, 6000, 4000)
-	_check(first.set_initial_state("place:paris", seeded_state), "determinism source is seeded")
-	_check(second.set_initial_state("place:paris", seeded_state), "determinism replay is seeded")
+	_check(first.set_initial_state("population:paris", seeded_state), "determinism source is seeded")
+	_check(second.set_initial_state("population:paris", seeded_state), "determinism replay is seeded")
 	var monthly_flows: Dictionary = {
-		"place:paris": {"births": 31, "deaths": 17, "migration": -4},
+		"population:paris": {"births": 31, "deaths": 17, "migration": -4},
 	}
 	_check(first.settle_elapsed_months(24, monthly_flows), "determinism source settles 24 months")
 	_check(second.settle_elapsed_months(24, monthly_flows), "determinism replay settles the same 24 months")
@@ -878,7 +875,7 @@ func _test_deterministic_replay() -> void:
 		first.settle_absolute_months(
 			24,
 			1,
-			{"place:paris": {"births": 1}}
+			{"population:paris": {"births": 1}}
 		),
 		"absolute settlement accepts the current cursor"
 	)
@@ -886,7 +883,7 @@ func _test_deterministic_replay() -> void:
 		not first.settle_absolute_months(
 			24,
 			1,
-			{"place:paris": {"births": 1}}
+			{"population:paris": {"births": 1}}
 		),
 		"absolute settlement rejects an overlapping period"
 	)
@@ -898,7 +895,7 @@ func _test_snapshot_restore_and_malformed_rejection() -> void:
 		return
 	_check(
 		source.set_initial_state(
-			"place:paris",
+			"population:paris",
 			_state(1000, 250, 350, 300, 100, 500, 500, 600, 400)
 		),
 		"snapshot source is seeded"
@@ -906,56 +903,42 @@ func _test_snapshot_restore_and_malformed_rejection() -> void:
 	_check(
 		source.settle_elapsed_months(
 			3,
-			{"place:paris": {"births": 5, "deaths": 2, "net_migration": 1}}
+			{"population:paris": {"births": 5, "deaths": 2, "net_migration": 1}}
 		),
 		"snapshot source has settled state"
 	)
 	var saved: Dictionary = source.snapshot()
-	var restored := VNextMacroPopulation.create(_catalog(), ["place:paris", "region:northern_industrial_belt"])
+	var restored := VNextMacroPopulation.create(_catalog(), ["population:paris", "population:northern_industrial_belt"])
 	if restored == null:
 		return
 	_check(restored.restore(saved), "valid snapshot restores into an externally keyed target")
 	_equal(restored.snapshot(), saved, "population snapshot round trip preserves complete state")
-	_equal(restored.population_at("place:paris"), 1012, "restored query recovers population total")
+	_equal(restored.population_at("population:paris"), 1012, "restored query recovers population total")
 	var legacy_snapshot: Dictionary = saved.duplicate(true)
-	legacy_snapshot["schema_id"] = "vnext_macro_population_v2"
-	for raw_record: Variant in legacy_snapshot["records"] as Array:
-		var legacy_record: Dictionary = raw_record as Dictionary
-		legacy_record["schema_id"] = "vnext_macro_population_record_v2"
-		legacy_record["net_migration"] = (
-			int(legacy_record["external_immigration"])
-			- int(legacy_record["external_emigration"])
-		)
-		legacy_record.erase("external_immigration")
-		legacy_record.erase("external_emigration")
+	legacy_snapshot["schema_id"] = "vnext_macro_population_v3"
 	_check(
-		restored.restore(legacy_snapshot),
-		"legacy signed external snapshot converts explicitly"
-	)
-	_equal(
-		restored.snapshot(),
-		saved,
-		"legacy conversion produces the same v3 snapshot"
+		not restored.restore(legacy_snapshot),
+		"legacy place-keyed snapshot fails closed at the canonical identity boundary"
 	)
 
 	var shell := VNextMacroPopulation.new()
 	_check(not shell.restore(saved), "empty shell cannot establish an external key contract")
 
 	var invalid_negative: Dictionary = saved.duplicate(true)
-	(invalid_negative["records"] as Array)[0]["total_population"] = -1
+	(((invalid_negative["records"] as Array)[0] as Dictionary)["state"] as Dictionary)["total_population"] = -1
 	_expect_restore_failure(restored, invalid_negative, "negative population")
 
 	var invalid_nonfinite: Dictionary = saved.duplicate(true)
-	(invalid_nonfinite["records"] as Array)[0]["births"] = INF
+	(((invalid_nonfinite["records"] as Array)[0] as Dictionary)["state"] as Dictionary)["births"] = INF
 	_expect_restore_failure(restored, invalid_nonfinite, "non-finite flow")
 
 	var invalid_unknown_place: Dictionary = saved.duplicate(true)
-	(invalid_unknown_place["records"] as Array)[0]["place_id"] = "place:unknown"
+	(invalid_unknown_place["records"] as Array)[0]["population_unit_id"] = "population:unknown"
 	_expect_restore_failure(restored, invalid_unknown_place, "unknown record place")
 
 	var invalid_known_and_record: Dictionary = saved.duplicate(true)
-	(invalid_known_and_record["known_place_ids"] as Array)[0] = "place:made_up"
-	(invalid_known_and_record["records"] as Array)[0]["place_id"] = "place:made_up"
+	(invalid_known_and_record["known_population_unit_ids"] as Array)[0] = "population:made_up"
+	(invalid_known_and_record["records"] as Array)[0]["population_unit_id"] = "population:made_up"
 	_expect_restore_failure(
 		restored,
 		invalid_known_and_record,
@@ -963,7 +946,7 @@ func _test_snapshot_restore_and_malformed_rejection() -> void:
 	)
 
 	var invalid_region_syntax: Dictionary = saved.duplicate(true)
-	(invalid_region_syntax["records"] as Array)[0]["place_id"] = "region:made_up"
+	(invalid_region_syntax["records"] as Array)[0]["population_unit_id"] = "region:made_up"
 	_expect_restore_failure(
 		restored,
 		invalid_region_syntax,
@@ -972,32 +955,32 @@ func _test_snapshot_restore_and_malformed_rejection() -> void:
 
 	var invalid_age: Dictionary = saved.duplicate(true)
 	var invalid_age_buckets: Dictionary = (
-		(invalid_age["records"] as Array)[0]["age_buckets"] as Dictionary
+		(((invalid_age["records"] as Array)[0] as Dictionary)["state"] as Dictionary)["age_buckets"] as Dictionary
 	)
 	invalid_age_buckets["under_18"] = int(invalid_age_buckets["under_18"]) + 1
 	_expect_restore_failure(restored, invalid_age, "age bucket total mismatch")
 
 	var invalid_sex: Dictionary = saved.duplicate(true)
 	var invalid_sex_structure: Dictionary = (
-		(invalid_sex["records"] as Array)[0]["sex_structure"] as Dictionary
+		(((invalid_sex["records"] as Array)[0] as Dictionary)["state"] as Dictionary)["sex_structure"] as Dictionary
 	)
 	invalid_sex_structure["male"] = int(invalid_sex_structure["male"]) + 1
 	_expect_restore_failure(restored, invalid_sex, "sex total mismatch")
 
 	var invalid_urban_rural: Dictionary = saved.duplicate(true)
 	var invalid_urban: Dictionary = (
-		(invalid_urban_rural["records"] as Array)[0]["urban_rural"] as Dictionary
+		(((invalid_urban_rural["records"] as Array)[0] as Dictionary)["state"] as Dictionary)["urban_rural"] as Dictionary
 	)
 	invalid_urban["urban"] = int(invalid_urban["urban"]) + 1
 	_expect_restore_failure(restored, invalid_urban_rural, "urban/rural total mismatch")
 
 	var invalid_migration: Dictionary = saved.duplicate(true)
-	(invalid_migration["records"] as Array)[0]["external_immigration"] = "malformed"
+	(((invalid_migration["records"] as Array)[0] as Dictionary)["state"] as Dictionary)["external_immigration"] = "malformed"
 	_expect_restore_failure(restored, invalid_migration, "malformed migration")
 
 	var invalid_duplicate_key: Dictionary = saved.duplicate(true)
-	var duplicate_known_ids: Array = invalid_duplicate_key["known_place_ids"] as Array
-	duplicate_known_ids.append("place:paris")
+	var duplicate_known_ids: Array = invalid_duplicate_key["known_population_unit_ids"] as Array
+	duplicate_known_ids.append("population:paris")
 	_expect_restore_failure(
 		restored,
 		invalid_duplicate_key,
@@ -1006,7 +989,7 @@ func _test_snapshot_restore_and_malformed_rejection() -> void:
 
 	var invalid_duplicate: Dictionary = saved.duplicate(true)
 	var duplicate_records: Array = invalid_duplicate["records"] as Array
-	duplicate_records[1]["place_id"] = duplicate_records[0]["place_id"]
+	duplicate_records[1]["population_unit_id"] = duplicate_records[0]["population_unit_id"]
 	_expect_restore_failure(restored, invalid_duplicate, "duplicate place entry")
 
 	var invalid_missing_record: Dictionary = saved.duplicate(true)
@@ -1029,11 +1012,11 @@ func _test_setup_mutation_boundary() -> void:
 		return
 	var initial_state: Dictionary = _state(1000, 250, 350, 300, 100, 500, 500, 600, 400)
 	_check(
-		population.set_initial_state("place:paris", initial_state),
+		population.set_initial_state("population:paris", initial_state),
 		"setup state mutation succeeds before elapsed settlement"
 	)
 	_check(
-		not population.initialize(_catalog(), ["place:paris", "region:normandy"]),
+		not population.initialize(_catalog(), ["population:paris", "region:normandy"]),
 		"external place contract cannot be reinitialized after construction"
 	)
 	_check(
@@ -1042,7 +1025,7 @@ func _test_setup_mutation_boundary() -> void:
 	)
 	var before: Dictionary = population.snapshot()
 	_check(
-		not population.set_initial_state("place:paris", initial_state),
+		not population.set_initial_state("population:paris", initial_state),
 		"set_initial_state fails after elapsed settlement"
 	)
 	_equal(
@@ -1055,7 +1038,7 @@ func _test_setup_mutation_boundary() -> void:
 		"registering a new place is unavailable after settlement"
 	)
 	_check(
-		not population.initialize(_catalog(), ["place:paris", "region:normandy"]),
+		not population.initialize(_catalog(), ["population:paris", "region:normandy"]),
 		"late external key mutation remains rejected"
 	)
 	_equal(
@@ -1070,10 +1053,10 @@ func _test_age_progression_and_partition_equivalence() -> void:
 	if aging == null:
 		return
 	var aging_state: Dictionary = _state(100000, 50000, 10000, 30000, 10000, 50000, 50000, 60000, 40000)
-	_check(aging.set_initial_state("place:paris", aging_state), "age progression fixture is seeded")
-	var before: Dictionary = aging.structure_at("place:paris")
+	_check(aging.set_initial_state("population:paris", aging_state), "age progression fixture is seeded")
+	var before: Dictionary = aging.structure_at("population:paris")
 	_check(aging.settle_elapsed_months(12), "zero-flow months still progress coarse age buckets")
-	var after: Dictionary = aging.structure_at("place:paris")
+	var after: Dictionary = aging.structure_at("population:paris")
 	_equal(after["total_population"], before["total_population"], "ageing alone conserves total population")
 	_check(
 		int(after["age_buckets"]["under_18"]) < int(before["age_buckets"]["under_18"]),
@@ -1097,8 +1080,8 @@ func _test_age_progression_and_partition_equivalence() -> void:
 	var sliced := _new_population()
 	if large == null or sliced == null:
 		return
-	_check(large.set_initial_state("place:paris", aging_state), "large-period fixture is seeded")
-	_check(sliced.set_initial_state("place:paris", aging_state), "sliced-period fixture is seeded")
+	_check(large.set_initial_state("population:paris", aging_state), "large-period fixture is seeded")
+	_check(sliced.set_initial_state("population:paris", aging_state), "sliced-period fixture is seeded")
 	_check(large.settle_elapsed_months(120), "large elapsed period settles")
 	for _slice: int in range(12):
 		_check(sliced.settle_elapsed_months(10), "sliced elapsed period settles")
@@ -1112,15 +1095,15 @@ func _test_age_progression_and_partition_equivalence() -> void:
 	if births == null:
 		return
 	var empty_state: Dictionary = _state(0, 0, 0, 0, 0, 0, 0, 0, 0)
-	_check(births.set_initial_state("place:paris", empty_state), "birth placement fixture is seeded")
+	_check(births.set_initial_state("population:paris", empty_state), "birth placement fixture is seeded")
 	_check(
 		births.settle_elapsed_months(
 			1,
-			{"place:paris": {"births": 100}}
+			{"population:paris": {"births": 100}}
 		),
 		"birth-only month settles"
 	)
-	var birth_structure: Dictionary = births.structure_at("place:paris")
+	var birth_structure: Dictionary = births.structure_at("population:paris")
 	_equal(
 		birth_structure["age_buckets"]["under_18"],
 		100,
@@ -1134,7 +1117,7 @@ func _test_long_run_is_finite_and_bounded() -> void:
 		return
 	_check(
 		population.set_initial_state(
-			"place:paris",
+			"population:paris",
 			_state(100000, 25000, 35000, 30000, 10000, 50000, 50000, 60000, 40000)
 		),
 		"long-run fixture is seeded"
@@ -1142,11 +1125,11 @@ func _test_long_run_is_finite_and_bounded() -> void:
 	_check(
 		population.settle_elapsed_months(
 			120,
-			{"place:paris": {"births": 100, "deaths": 90, "net_migration": -3}}
+			{"population:paris": {"births": 100, "deaths": 90, "net_migration": -3}}
 		),
 		"long-run monthly settlement remains bounded"
 	)
-	var structure: Dictionary = population.structure_at("place:paris")
+	var structure: Dictionary = population.structure_at("population:paris")
 	_check(_structure_is_coherent(structure), "long-run structure remains coherent")
 	_check(
 		int(structure["total_population"]) < VNextMacroPopulation.MAX_JSON_SAFE_INTEGER,
@@ -1160,30 +1143,40 @@ func _test_long_run_is_finite_and_bounded() -> void:
 	_check(
 		not population.settle_elapsed_months(
 			1,
-			{"place:paris": {"births": 0, "deaths": 999999999, "net_migration": 0}}
+			{"population:paris": {"births": 0, "deaths": 999999999, "net_migration": 0}}
 		),
 		"impossible long-run death transition is rejected"
 	)
 	_equal(population.snapshot(), before, "impossible long-run transition is transactional")
 
 
-func _catalog() -> VNextSpatialCatalog:
-	var catalog := VNextSpatialCatalog.new()
-	if not catalog.load_legacy_world_map():
+func _catalog() -> VNextPopulationUnitCatalog:
+	var catalog := VNextPopulationUnitCatalog.new()
+	var records: Array[Dictionary] = []
+	for local_id: String in [
+		"paris", "lille", "rouen", "northern_industrial_belt", "normandy",
+		"unit_06", "unit_07", "unit_08", "unit_09", "unit_10", "unit_11", "unit_12",
+	]:
+		records.append({
+			"population_unit_id": VNextPopulationUnitId.compose(local_id),
+			"scope_kind": "major_economy_aggregate",
+			"source_entity_id": local_id,
+		})
+	if not catalog.load_records(records, "macro_population_test_catalog_v1"):
 		return null
 	return catalog
 
 
 func _new_population() -> VNextMacroPopulation:
 	var population := VNextMacroPopulation.create(
-		_catalog(), ["place:paris", "region:northern_industrial_belt"]
+		_catalog(), ["population:paris", "population:northern_industrial_belt"]
 	)
 	_check(population != null, "population fixture creates a keyed macro owner")
 	return population
 
 
 func _migration_ids() -> Array[String]:
-	return ["place:paris", "place:lille", "place:rouen"]
+	return ["population:paris", "population:lille", "population:rouen"]
 
 
 func _new_migration_population() -> VNextMacroPopulation:
@@ -1193,21 +1186,21 @@ func _new_migration_population() -> VNextMacroPopulation:
 		return null
 	_check(
 		population.set_initial_state(
-			"place:paris",
+			"population:paris",
 			_state(1000, 250, 350, 300, 100, 500, 500, 600, 400)
 		),
 		"migration origin fixture is seeded"
 	)
 	_check(
 		population.set_initial_state(
-			"place:lille",
+			"population:lille",
 			_state(500, 100, 175, 150, 75, 240, 260, 300, 200)
 		),
 		"migration destination fixture is seeded"
 	)
 	_check(
 		population.set_initial_state(
-			"place:rouen",
+			"population:rouen",
 			_state(250, 50, 100, 75, 25, 120, 130, 150, 100)
 		),
 		"migration third-place fixture is seeded"

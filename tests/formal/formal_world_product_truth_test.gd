@@ -61,7 +61,11 @@ func _check_default_entry() -> void:
 
 func _check_runtime_truth(application: FormalWorldApplication) -> void:
 	_check(application.formal_simulation.initialized, "FormalWorldSimulation initializes")
-	_check(application._history_entity_by_id.size() == 151, "dated 151-unit political world remains available")
+	_check(
+		application._history_entity_by_id.size() == 146
+		and int(application.historical_evidence_report().get("catalog_unit_count", 0)) == 151,
+		"151-unit dated catalog remains available while January 1 presentation fails closed"
+	)
 	_check(
 		str(application.historical_evidence_report().get("snapshot_date", "")) == "1900-03-12",
 		"political projection retains the dated snapshot"

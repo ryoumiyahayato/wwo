@@ -333,13 +333,13 @@
     "res://data/world_map/historical_political_entities_1900.json",
     "res://data/world_map/strategic_military_overlay.json"
   ],
-  "production_script_count": 19,
+  "production_script_count": 20,
   "production_script_roots": [
     "scripts/world_map",
     "scripts/formal"
   ],
   "schema_version": "wwo_world_data_batch3_contracts_v1",
-  "script_digest": "b4ca4be35bda85886598d7e6687cd0070bb3d483db9014fef96eb16f0600b2fb",
+  "script_digest": "5efeb624f6341ff1e859cfa668cc631fc79f446bd05c2e96d0a2f6efae57c58c",
   "world_map_data_loader_entries": [
     {
       "exists": true,
