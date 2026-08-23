@@ -429,12 +429,13 @@ func validate_state() -> Dictionary:
 	if drift_count > 0:
 		errors.append("unexplained physical drift: %d" % global_drift)
 	var shipment_index: Dictionary = {}
+	var shipment_request_index: Dictionary = {}
 	var shipment_boundary_day: int = maxi(_last_day_index, _active_day_index)
 	for delivered: Dictionary in _shipment_history:
-		if not _validate_delivered_shipment(delivered, shipment_index, shipment_boundary_day, _known_request_ids):
+		if not _validate_delivered_shipment(delivered, shipment_index, shipment_request_index, shipment_boundary_day, _known_request_ids):
 			errors.append("invalid delivered shipment")
 	for shipment: Dictionary in _shipments:
-		if not _validate_active_shipment(shipment, shipment_index, shipment_boundary_day, _known_request_ids):
+		if not _validate_active_shipment(shipment, shipment_index, shipment_request_index, shipment_boundary_day, _known_request_ids):
 			errors.append("invalid active shipment")
 	for producer_id: String in _producer_ids:
 		var state: Dictionary = _industry_states.get(producer_id, {}) as Dictionary
@@ -1654,11 +1655,12 @@ func _validate_persistent_candidate(candidate: Dictionary) -> Dictionary:
 		return _fail_result("invalid_persistent_state", "persistent ID index is malformed")
 	var known_requests: Dictionary = known_requests_result.get("data", {}) as Dictionary
 	var known_shipments: Dictionary = {}
+	var known_shipment_requests: Dictionary = {}
 	for shipment: Dictionary in shipments:
-		if not _validate_active_shipment(shipment, known_shipments, int(raw_last_day), known_requests):
+		if not _validate_active_shipment(shipment, known_shipments, known_shipment_requests, int(raw_last_day), known_requests):
 			return _fail_result("invalid_persistent_state", "invalid active shipment")
 	for shipment: Dictionary in shipment_history:
-		if not _validate_delivered_shipment(shipment, known_shipments, int(raw_last_day), known_requests):
+		if not _validate_delivered_shipment(shipment, known_shipments, known_shipment_requests, int(raw_last_day), known_requests):
 			return _fail_result("invalid_persistent_state", "duplicate or invalid delivered shipment")
 	var supplied_known_shipments: Dictionary = known_shipments_result.get("data", {}) as Dictionary
 	if supplied_known_shipments.size() != known_shipments.size() or E1Numeric.sorted_string_keys(supplied_known_shipments) != E1Numeric.sorted_string_keys(known_shipments):
@@ -1919,15 +1921,27 @@ func _validate_resource_candidate(resource: Dictionary, resource_id: String) -> 
 	return true
 
 
-func _validate_active_shipment(shipment: Dictionary, known: Dictionary, last_day_index: int, known_requests: Dictionary) -> bool:
+func _validate_active_shipment(
+	shipment: Dictionary,
+	known: Dictionary,
+	request_index: Dictionary,
+	last_day_index: int,
+	known_requests: Dictionary
+) -> bool:
 	if not _has_exact_string_keys(shipment, ACTIVE_SHIPMENT_FIELDS):
 		return false
 	if not shipment.get("status") is String or str(shipment.get("status")) != "in_transit":
 		return false
-	return _validate_shipment_common(shipment, known, last_day_index, known_requests, false)
+	return _validate_shipment_common(shipment, known, request_index, last_day_index, known_requests, false)
 
 
-func _validate_delivered_shipment(shipment: Dictionary, known: Dictionary, last_day_index: int, known_requests: Dictionary) -> bool:
+func _validate_delivered_shipment(
+	shipment: Dictionary,
+	known: Dictionary,
+	request_index: Dictionary,
+	last_day_index: int,
+	known_requests: Dictionary
+) -> bool:
 	if not _has_exact_string_keys(shipment, DELIVERED_SHIPMENT_FIELDS):
 		return false
 	if not shipment.get("status") is String or str(shipment.get("status")) != "delivered":
@@ -1935,10 +1949,17 @@ func _validate_delivered_shipment(shipment: Dictionary, known: Dictionary, last_
 	var delivered_day: Variant = shipment.get("delivered_day")
 	if not delivered_day is int or int(delivered_day) < 0 or int(delivered_day) > last_day_index:
 		return false
-	return _validate_shipment_common(shipment, known, last_day_index, known_requests, true)
+	return _validate_shipment_common(shipment, known, request_index, last_day_index, known_requests, true)
 
 
-func _validate_shipment_common(shipment: Dictionary, known: Dictionary, last_day_index: int, known_requests: Dictionary, delivered: bool) -> bool:
+func _validate_shipment_common(
+	shipment: Dictionary,
+	known: Dictionary,
+	request_index: Dictionary,
+	last_day_index: int,
+	known_requests: Dictionary,
+	delivered: bool
+) -> bool:
 	var shipment_id_value: Variant = shipment.get("shipment_id")
 	var request_id_value: Variant = shipment.get("request_id")
 	var origin_value: Variant = shipment.get("origin_region_id")
@@ -1949,7 +1970,7 @@ func _validate_shipment_common(shipment: Dictionary, known: Dictionary, last_day
 		return false
 	var shipment_id: String = str(shipment_id_value)
 	var request_id: String = str(request_id_value)
-	if shipment_id.is_empty() or request_id.is_empty() or str(route_value).is_empty() or known.has(shipment_id) or not known_requests.has(request_id):
+	if shipment_id.is_empty() or request_id.is_empty() or str(route_value).is_empty() or known.has(shipment_id) or request_index.has(request_id) or not known_requests.has(request_id):
 		return false
 	if not _regions.has(str(origin_value)) or not _regions.has(str(destination_value)) or not _commodities.has(str(commodity_value)):
 		return false
@@ -1970,6 +1991,7 @@ func _validate_shipment_common(shipment: Dictionary, known: Dictionary, last_day
 		if int(arrival_day) <= last_day_index:
 			return false
 	known[shipment_id] = true
+	request_index[request_id] = true
 	return true
 
 

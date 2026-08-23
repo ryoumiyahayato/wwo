@@ -39,6 +39,7 @@ func _run() -> void:
 	_test_failure_behavior()
 	_test_r1_recipe_requirement_contract()
 	_test_r1_persistent_schema()
+	_test_r2_shipment_request_uniqueness()
 	_test_r1_configure_phase_guard()
 	_test_alpha_catalog_salvage()
 	_print_reference_trace()
@@ -549,6 +550,109 @@ func _test_r1_persistent_schema() -> void:
 	var delivered_restore_ok: bool = delivered_restored.restore_persistent_state(delivered_saved)
 	_case("R1 PERSIST active shipment writer round trip", active_ok and active_restore_ok and active_restored.get_authoritative_state_hash() == active_hash)
 	_case("R1 PERSIST delivered shipment writer round trip", delivered_ok and delivered_restore_ok and delivered_restored.get_authoritative_state_hash() == active_source.get_authoritative_state_hash())
+
+
+func _test_r2_shipment_request_uniqueness() -> void:
+	var shipment_options: Dictionary = {
+		"miner_enabled": false,
+		"steel_enabled": false,
+		"initial_market_inventory": {"fixture:source": {"coal": 3_000}},
+	}
+	var active_source: Variant = _new_fixture(shipment_options)
+	var active_intents: Array[Dictionary] = [
+		_transport_intent("r2:request:one", 1_000),
+		_transport_intent("r2:request:two", 1_000),
+	]
+	var active_allocations: Array[Dictionary] = [
+		_allocation("r2:request:one", 1_000, 3),
+		_allocation("r2:request:two", 1_000, 3),
+	]
+	var active_ok: bool = _settle(
+		active_source,
+		0,
+		_empty_records(),
+		_default_labor(),
+		active_intents,
+		active_allocations
+	)
+	var active_saved: Dictionary = active_source.get_persistent_state()
+	var active_shipments: Array = (active_saved.get("shipments", []) as Array).duplicate(true)
+	var active_setup_valid: bool = active_ok and active_shipments.size() == 2
+
+	var duplicate_active_candidate: Dictionary = active_saved.duplicate(true)
+	var duplicate_active_rejected: bool = false
+	var duplicate_active_hash_unchanged: bool = false
+	if active_setup_valid:
+		var first_active: Dictionary = active_shipments[0] as Dictionary
+		var second_active: Dictionary = active_shipments[1] as Dictionary
+		second_active["request_id"] = str(first_active.get("request_id", ""))
+		duplicate_active_candidate["shipments"] = active_shipments
+		var duplicate_active_target: Variant = _new_fixture(shipment_options)
+		var duplicate_active_before: String = duplicate_active_target.get_authoritative_state_hash()
+		duplicate_active_rejected = not duplicate_active_target.restore_persistent_state(duplicate_active_candidate)
+		duplicate_active_hash_unchanged = duplicate_active_target.get_authoritative_state_hash() == duplicate_active_before
+	_case("R2-01 duplicate request IDs across active shipments reject", active_setup_valid and duplicate_active_rejected)
+	_case("R2-02 duplicate request restore is atomic", active_setup_valid and duplicate_active_hash_unchanged)
+
+	var distinct_target: Variant = _new_fixture(shipment_options)
+	var distinct_restore_ok: bool = distinct_target.restore_persistent_state(active_saved)
+	_case(
+		"R2-03 distinct request IDs remain valid",
+		active_setup_valid and distinct_restore_ok and distinct_target.get_authoritative_state_hash() == active_source.get_authoritative_state_hash()
+	)
+
+	var lifecycle_source: Variant = _new_fixture(shipment_options)
+	var lifecycle_intents: Array[Dictionary] = [
+		_transport_intent("r2:lifecycle:delivered", 1_000),
+		_transport_intent("r2:lifecycle:active", 1_000),
+	]
+	var lifecycle_allocations: Array[Dictionary] = [
+		_allocation("r2:lifecycle:delivered", 1_000, 1),
+		_allocation("r2:lifecycle:active", 1_000, 3),
+	]
+	var lifecycle_day_zero: bool = _settle(
+		lifecycle_source,
+		0,
+		_empty_records(),
+		_default_labor(),
+		lifecycle_intents,
+		lifecycle_allocations
+	)
+	var lifecycle_day_one: bool = _settle(lifecycle_source, 1)
+	var lifecycle_saved: Dictionary = lifecycle_source.get_persistent_state()
+	var lifecycle_history: Array = (lifecycle_saved.get("shipment_history", []) as Array).duplicate(true)
+	var lifecycle_active: Array = (lifecycle_saved.get("shipments", []) as Array).duplicate(true)
+	var lifecycle_setup_valid: bool = lifecycle_day_zero and lifecycle_day_one and lifecycle_history.size() == 1 and lifecycle_active.size() == 1
+	var cross_collection_candidate: Dictionary = lifecycle_saved.duplicate(true)
+	var cross_collection_rejected: bool = false
+	var cross_collection_hash_unchanged: bool = false
+	if lifecycle_setup_valid:
+		var delivered_record: Dictionary = lifecycle_history[0] as Dictionary
+		var active_record: Dictionary = lifecycle_active[0] as Dictionary
+		active_record["request_id"] = str(delivered_record.get("request_id", ""))
+		cross_collection_candidate["shipments"] = lifecycle_active
+		var cross_collection_target: Variant = _new_fixture(shipment_options)
+		var cross_collection_before: String = cross_collection_target.get_authoritative_state_hash()
+		cross_collection_rejected = not cross_collection_target.restore_persistent_state(cross_collection_candidate)
+		cross_collection_hash_unchanged = cross_collection_target.get_authoritative_state_hash() == cross_collection_before
+	_case(
+		"R2-04 duplicate request ID across active and history rejects",
+		lifecycle_setup_valid and cross_collection_rejected and cross_collection_hash_unchanged
+	)
+
+	var duplicate_shipment_candidate: Dictionary = lifecycle_saved.duplicate(true)
+	var duplicate_shipment_rejected: bool = false
+	if lifecycle_setup_valid:
+		var duplicate_history_record: Dictionary = lifecycle_history[0] as Dictionary
+		var duplicate_active_record: Dictionary = lifecycle_active[0] as Dictionary
+		duplicate_active_record["shipment_id"] = str(duplicate_history_record.get("shipment_id", ""))
+		duplicate_shipment_candidate["shipments"] = lifecycle_active
+		var known_shipment_ids: Array[String] = [str(duplicate_history_record.get("shipment_id", ""))]
+		known_shipment_ids.sort()
+		duplicate_shipment_candidate["known_shipment_ids"] = known_shipment_ids
+		var duplicate_shipment_target: Variant = _new_fixture(shipment_options)
+		duplicate_shipment_rejected = not duplicate_shipment_target.restore_persistent_state(duplicate_shipment_candidate)
+	_case("R2-05 duplicate shipment IDs remain rejected", lifecycle_setup_valid and duplicate_shipment_rejected)
 
 
 func _test_r1_configure_phase_guard() -> void:
