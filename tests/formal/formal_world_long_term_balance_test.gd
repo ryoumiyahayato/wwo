@@ -1,7 +1,7 @@
 extends SceneTree
-## Ten-year balance guard for the actual 151-unit hemisphere world and its
-## 50-polity high-detail economy. The two-country/eight-region fixture is not
-## instantiated anywhere in this test.
+## Ten-year balance guard for the dated political world and its 50-record
+## high-detail economy catalog. Entity validity can change over the interval;
+## the test therefore checks authority agreement instead of freezing 1900-03-12.
 
 const YEARS: int = 10
 const HOURS_PER_YEAR: int = 365 * 24
@@ -39,12 +39,19 @@ func _run() -> void:
 			"第%d年世界需求满足率不发生系统性崩溃" % year
 		)
 		_check(
-			int(summary.get("world_political_unit_count", 0)) == 151,
-			"第%d年完整政治世界仍存在" % year
+			int(summary.get("world_political_unit_count", 0))
+			== simulation.politics.active_entity_count(),
+			"第%d年政治摘要与日期权威保持一致" % year
 		)
 		_check(
-			int(summary.get("major_economy_count", 0)) == 50,
-			"第%d年主要政权高细节目录保持50个" % year
+			int(summary.get("political_catalog_record_count", 0)) == 151
+			and int(summary.get("major_economy_catalog_count", 0)) == 50,
+			"第%d年日期变化不丢弃历史政治或经济证据目录" % year
+		)
+		_check(
+			int(summary.get("major_economy_count", 0)) > 0
+			and int(summary.get("major_economy_count", 0)) <= 50,
+			"第%d年仅日期有效政权参与经济结算" % year
 		)
 	var elapsed_usec := Time.get_ticks_usec() - started_usec
 	var final_summary := economy.world_summary()
