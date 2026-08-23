@@ -22,7 +22,7 @@
       "script": "scripts/world_map/world_city_shard_catalog.gd"
     }
   ],
-  "literal_file_reference_count": 22,
+  "literal_file_reference_count": 28,
   "literal_file_references": [
     {
       "exists": true,
@@ -48,6 +48,36 @@
       "exists": true,
       "resource": "res://data/world_map/world_admin1.json",
       "script": "scripts/formal/product_runtime_gate.gd"
+    },
+    {
+      "exists": true,
+      "resource": "res://data/world_map/cities.json",
+      "script": "scripts/formal/product_spatial_projection.gd"
+    },
+    {
+      "exists": true,
+      "resource": "res://data/world_map/ports.json",
+      "script": "scripts/formal/product_spatial_projection.gd"
+    },
+    {
+      "exists": true,
+      "resource": "res://data/world_map/rail_segments.json",
+      "script": "scripts/formal/product_spatial_projection.gd"
+    },
+    {
+      "exists": true,
+      "resource": "res://data/world_map/regions.json",
+      "script": "scripts/formal/product_spatial_projection.gd"
+    },
+    {
+      "exists": true,
+      "resource": "res://data/world_map/road_segments.json",
+      "script": "scripts/formal/product_spatial_projection.gd"
+    },
+    {
+      "exists": true,
+      "resource": "res://data/world_map/shipping_routes.json",
+      "script": "scripts/formal/product_spatial_projection.gd"
     },
     {
       "exists": true,
@@ -303,13 +333,13 @@
     "res://data/world_map/historical_political_entities_1900.json",
     "res://data/world_map/strategic_military_overlay.json"
   ],
-  "production_script_count": 17,
+  "production_script_count": 19,
   "production_script_roots": [
     "scripts/world_map",
     "scripts/formal"
   ],
   "schema_version": "wwo_world_data_batch3_contracts_v1",
-  "script_digest": "f672022ea4cb2bf91a6a8614aa8e555824146ec7ffc2a4b5eff84914cd593881",
+  "script_digest": "b4ca4be35bda85886598d7e6687cd0070bb3d483db9014fef96eb16f0600b2fb",
   "world_map_data_loader_entries": [
     {
       "exists": true,

@@ -17,22 +17,38 @@ const ORGANIZATION_UNAVAILABLE: String = (
 	"Current organization runtime not integrated."
 )
 const MILITARY_UNAVAILABLE: String = "Dynamic military runtime not integrated."
+const LOCAL_GEOGRAPHY_UNAVAILABLE: String = (
+	"Detailed historical subdivision is not available for normal 1900 gameplay."
+)
+const CITY_HISTORY_UNAVAILABLE: String = (
+	"Historical city runtime is not available for normal 1900 gameplay."
+)
+const INFRASTRUCTURE_HISTORY_UNAVAILABLE: String = (
+	"Historical infrastructure attributes are not available."
+)
 
 var formal_simulation := FormalWorldSimulation.new()
 var product_runtime_gate := ProductRuntimeGate.new()
+var _vnext_spatial_world: VNextSpatialWorld = null
+var product_spatial_projection := ProductSpatialProjection.new()
 var economy_panel_open: bool = false
 var developer_mode_enabled: bool = false
 var _formal_status: String = ""
 var _last_summary: Dictionary = {}
 var _packaged_probe_failures: int = 0
+var _spatial_initial_snapshot: Dictionary = {}
+var _spatial_construction_usec: int = 0
 
 
 func _ready() -> void:
+	_construct_vnext_spatial_runtime()
 	active_character_key = "product_session"
 	activity_unread = 0
 	history_war_layer_visible = false
 	super._ready()
 	_clear_rejected_presentation_state()
+	if _vnext_spatial_world == null or not product_spatial_projection.is_valid():
+		_data_errors.append("vNext Spatial product owner failed to initialize")
 	if not formal_simulation.initialize():
 		_formal_status = "正式世界初始化失败：%s" % formal_simulation.initialization_error
 		_data_errors.append(_formal_status)
@@ -52,6 +68,8 @@ func _ready() -> void:
 		else:
 			_formal_status = "新的1900正式世界已建立。"
 		_last_summary = formal_simulation.world_summary()
+		if not _synchronize_spatial_time():
+			_data_errors.append("vNext Spatial time synchronization failed")
 	queue_redraw()
 	if PACKAGED_PROBE_ARGUMENT in OS.get_cmdline_user_args():
 		_run_packaged_player_baseline_probe.call_deferred()
@@ -69,6 +87,20 @@ func _run_packaged_player_baseline_probe() -> void:
 	_packaged_probe_require(_spike_city_count() == 0, "正式产品仍注入spike城市")
 	_packaged_probe_require(_world_events.is_empty(), "正式产品仍播种静态机构议程事件")
 	_packaged_probe_require(_history_conflicts.is_empty(), "正式产品仍加载静态军事冲突")
+	_packaged_probe_require(
+		_vnext_spatial_world != null
+		and _vnext_spatial_world.is_valid()
+		and product_spatial_projection.is_valid(),
+		"正式产品未构造唯一vNext Spatial运行时"
+	)
+	_packaged_probe_require(
+		product_spatial_projection.normal_region_views(PACKAGED_PROBE_ENTITY_ID).is_empty(),
+		"prototype Spatial地区被提升为1900正式地方真相"
+	)
+	_packaged_probe_require(
+		product_spatial_projection.normal_city_views(PACKAGED_PROBE_ENTITY_ID).is_empty(),
+		"prototype Spatial城市被提升为1900正式城市真相"
+	)
 	_packaged_probe_require(_missing_flag_record_ids.is_empty(), "历史旗帜资源存在缺失")
 	var evidence := historical_evidence_report()
 	_packaged_probe_require(
@@ -236,6 +268,39 @@ func _clear_rejected_presentation_state() -> void:
 	history_war_layer_visible = false
 
 
+func _construct_vnext_spatial_runtime() -> bool:
+	var started_usec := Time.get_ticks_usec()
+	var catalog := VNextSpatialCatalog.new()
+	if not catalog.load_legacy_world_map():
+		_spatial_construction_usec = Time.get_ticks_usec() - started_usec
+		return false
+	var world := VNextSpatialWorld.create(catalog)
+	if world == null or not world.is_valid():
+		_spatial_construction_usec = Time.get_ticks_usec() - started_usec
+		return false
+	var projection := ProductSpatialProjection.new()
+	if not projection.initialize(world):
+		_spatial_construction_usec = Time.get_ticks_usec() - started_usec
+		return false
+	_vnext_spatial_world = world
+	product_spatial_projection = projection
+	_spatial_initial_snapshot = world.snapshot()
+	_spatial_construction_usec = Time.get_ticks_usec() - started_usec
+	return true
+
+
+func _synchronize_spatial_time() -> bool:
+	if _vnext_spatial_world == null or not _vnext_spatial_world.is_valid():
+		return false
+	var target_hour := formal_simulation.total_minutes / 60
+	if target_hour < _vnext_spatial_world.current_hour():
+		if _spatial_initial_snapshot.is_empty() or not _vnext_spatial_world.restore(
+			_spatial_initial_snapshot
+		):
+			return false
+	return _vnext_spatial_world.advance_to_hour(target_hour)
+
+
 func _prototype_presentation_count() -> int:
 	return (
 		_regions.size()
@@ -323,8 +388,8 @@ func _draw_corners() -> void:
 	)
 	_draw_corner(
 		truth_rect,
-		"PRODUCT TRUTH BASELINE",
-		"P/O/M unavailable · F12 owners",
+		"SPATIAL HISTORICAL BOUNDARY",
+		"vNext owner active · local truth gated",
 		"product_integration",
 		Color(0.72, 0.50, 0.25, 0.22),
 		compact
@@ -402,7 +467,13 @@ func _draw_active_hud_panel() -> void:
 		"military":
 			_draw_unavailable_panel(rect, "MILITARY", MILITARY_UNAVAILABLE, "Legacy static conflict overlays are not rendered.")
 		"city_status":
-			_draw_unavailable_panel(rect, "CITY", "NOT AVAILABLE YET", "No approved historical city runtime is integrated. No city state is invented.")
+			_draw_city_actual_panel(rect)
+		"local_geography":
+			_draw_local_geography_panel(rect)
+		"infrastructure":
+			_draw_infrastructure_actual_panel(rect)
+		"spatial_reference":
+			_draw_spatial_reference_panel(rect)
 		"integration":
 			_draw_integration_panel(rect)
 		"provenance":
@@ -424,23 +495,109 @@ func _draw_integration_panel(rect: Rect2) -> void:
 	_draw_label(rect.position + Vector2(28.0, 44.0), "PRODUCT INTEGRATION STATUS", 22, Color(0.95, 0.84, 0.58, 1.0))
 	var lines: Array[String] = [
 		"WORLD / POLITICAL — ACTIVE · authoritative dated data",
+		"POLITICAL GEOMETRY PROJECTION — ACTIVE · read-only",
+		"VNEXT SPATIAL — ACTIVE · VNextSpatialWorld",
+		"HISTORICAL LOCAL GEOGRAPHY — NOT AVAILABLE",
+		"HISTORICAL CITY DATA — NOT AVAILABLE",
+		"INFRASTRUCTURE HISTORY — NOT AVAILABLE",
 		"TIME — ACTIVE · FormalWorldSimulation",
 		"ECONOMY — ACTIVE · FormalWorldEconomyService",
-		"LOCAL GEOGRAPHY — NOT AVAILABLE YET",
-		"CITY — NOT AVAILABLE YET",
-		"POPULATION — NOT INTEGRATED",
-		"ORGANIZATION — NOT INTEGRATED",
-		"POLITICS — NOT INTEGRATED",
-		"MILITARY — NOT INTEGRATED",
 		"E1 PRODUCT INTEGRATION — NO",
 	]
 	_draw_panel_lines(rect, 84.0, lines, Color(0.82, 0.86, 0.80, 0.98), 11)
-	_draw_label(rect.position + Vector2(28.0, rect.size.y - 72.0), "Developer owners are runtime-derived; F12 is the keyboard shortcut.", 10, Color(0.91, 0.72, 0.43, 0.96))
+	_draw_label(rect.position + Vector2(28.0, rect.size.y - 72.0), "L local · C city · I infrastructure · R developer reference · F12 owners", 9, Color(0.91, 0.72, 0.43, 0.96))
 	var button_y := rect.end.y - 48.0
-	_draw_button(Rect2(rect.position.x + 28.0, button_y, 118.0, 28.0), "POLITICS", "product_politics", true)
-	_draw_button(Rect2(rect.position.x + 156.0, button_y, 138.0, 28.0), "ORGANIZATION", "product_organization", true)
-	_draw_button(Rect2(rect.position.x + 304.0, button_y, 118.0, 28.0), "MILITARY", "product_military", true)
+	_draw_button(Rect2(rect.position.x + 28.0, button_y, 82.0, 28.0), "LOCAL", "product_local_geography", true)
+	_draw_button(Rect2(rect.position.x + 120.0, button_y, 82.0, 28.0), "CITY", "product_city_status", true)
+	_draw_button(Rect2(rect.position.x + 212.0, button_y, 118.0, 28.0), "INFRASTRUCTURE", "product_infrastructure", true)
 	_draw_button(Rect2(rect.end.x - 190.0, button_y, 162.0, 28.0), "DEVELOPER OWNERS", "product_enable_provenance", true)
+
+
+func _draw_local_geography_panel(rect: Rect2) -> void:
+	var country_id := _spatial_selected_country_id()
+	var status := product_spatial_projection.historical_local_geography_status(country_id)
+	_draw_unavailable_panel(
+		rect,
+		"DETAILED HISTORICAL SUBDIVISION",
+		"NOT AVAILABLE YET",
+		"%s catalog is fenced from normal presentation." % str(
+			status.get("applicability", "UNAVAILABLE")
+		)
+	)
+	_draw_label(rect.position + Vector2(28.0, 202.0), "Modern Admin-1 and gameplay macro-regions are not 1900 political truth.", 10, Color(0.78, 0.84, 0.80, 0.96))
+
+
+func _draw_city_actual_panel(rect: Rect2) -> void:
+	var country_id := _spatial_selected_country_id()
+	var status := product_spatial_projection.historical_city_status(country_id)
+	_draw_unavailable_panel(
+		rect,
+		"CITY",
+		CITY_HISTORY_UNAVAILABLE,
+		"%s catalog anchors are not normal product truth." % str(
+			status.get("applicability", "UNAVAILABLE")
+		)
+	)
+	_draw_label(rect.position + Vector2(28.0, 202.0), "No population, economy, politics, administration, or infrastructure is inferred.", 10, Color(0.78, 0.84, 0.80, 0.96))
+	if developer_mode_enabled:
+		_draw_button(Rect2(rect.position.x + 28.0, rect.end.y - 48.0, 188.0, 28.0), "DEVELOPER REFERENCES", "product_spatial_reference", true)
+
+
+func _draw_infrastructure_actual_panel(rect: Rect2) -> void:
+	var country_id := _spatial_selected_country_id()
+	var status := product_spatial_projection.infrastructure_historical_status(country_id)
+	_draw_unavailable_panel(
+		rect,
+		"PORT / RAIL / ROAD / SHIPPING",
+		INFRASTRUCTURE_HISTORY_UNAVAILABLE,
+		"Catalog topology applicability: %s" % str(status.get("applicability", "UNAVAILABLE"))
+	)
+	var lines: Array[String] = [
+		"Prototype topology is fenced from normal presentation.",
+		"Capacities/statuses are synthetic vNext defaults and are not presented.",
+		"Wave 1 adapter exposes no reservation or direct-capacity API.",
+	]
+	if developer_mode_enabled:
+		var counts := product_spatial_projection.infrastructure_reference_counts(country_id)
+		lines.push_front(
+			"Developer reference counts — ports %d · rail %d · roads %d · shipping %d" % [
+				int(counts.get("ports", 0)), int(counts.get("rail", 0)),
+				int(counts.get("roads", 0)), int(counts.get("shipping", 0)),
+			]
+		)
+	_draw_panel_lines(rect, 210.0, lines, Color(0.78, 0.84, 0.80, 0.96), 10)
+
+
+func _draw_spatial_reference_panel(rect: Rect2) -> void:
+	_draw_label(rect.position + Vector2(28.0, 44.0), "DEVELOPER SPATIAL REFERENCE", 21, Color(0.95, 0.84, 0.58, 1.0))
+	_draw_label(rect.position + Vector2(28.0, 70.0), "NOT NORMAL 1900 PLAYER TRUTH", 11, Color(0.94, 0.68, 0.39, 1.0))
+	var country_id := _spatial_selected_country_id()
+	var cities := product_spatial_projection.developer_city_reference_views(country_id)
+	if cities.is_empty():
+		_draw_label(rect.position + Vector2(28.0, 110.0), "No catalog city anchor is available for this political unit.", 11)
+		return
+	var city := cities[0]
+	var location := city.get("location", []) as Array
+	var location_text := "UNAVAILABLE"
+	if location.size() == 2:
+		location_text = "%.4f, %.4f" % [float(location[0]), float(location[1])]
+	var lines: Array[String] = [
+		"Stable identity: %s" % str(city.get("stable_id", "")),
+		"Catalog name: %s" % str(city.get("name", "")),
+		"Reference coordinate: %s" % location_text,
+		"Provenance: %s" % str(city.get("provenance", "")),
+		"Applicability: %s" % str(city.get("applicability", "UNAVAILABLE")),
+		"Historical role: UNAVAILABLE",
+		"Population / economy / politics: UNAVAILABLE",
+		"Administration / infrastructure: UNAVAILABLE",
+	]
+	_draw_panel_lines(rect, 108.0, lines, Color(0.82, 0.86, 0.80, 0.98), 10)
+
+
+func _spatial_selected_country_id() -> String:
+	if not selected_country_id.is_empty():
+		return selected_country_id
+	return "country_fra"
 
 
 func _draw_provenance_panel(rect: Rect2) -> void:
@@ -452,7 +609,7 @@ func _draw_provenance_panel(rect: Rect2) -> void:
 	for owner_value: Variant in (provenance.get("owners", []) as Array):
 		var owner := owner_value as Dictionary
 		var owner_text := "%s: %s" % [str(owner.get("label", "OWNER")), str(owner.get("status", ""))]
-		if str(owner.get("status", "")) == "ACTIVE":
+		if str(owner.get("owner", "NONE")) != "NONE":
 			owner_text += " · %s · %s" % [str(owner.get("owner", "")), str(owner.get("mode", ""))]
 		_draw_label(rect.position + Vector2(28.0, y), owner_text, 9, Color(0.82, 0.86, 0.80, 0.98))
 		y += 21.0
@@ -460,16 +617,29 @@ func _draw_provenance_panel(rect: Rect2) -> void:
 
 
 func _runtime_owner_specs() -> Array[Dictionary]:
-	var spatial_active := (
+	var political_active := (
 		_history_entity_by_id.size() == 151
 		and int(historical_evidence_report().get("unit_count", 0)) == 151
 	)
+	var spatial_active := (
+		_vnext_spatial_world != null
+		and _vnext_spatial_world.is_valid()
+		and product_spatial_projection.is_valid()
+	)
+	var country_id := _spatial_selected_country_id()
+	var local_status := product_spatial_projection.historical_local_geography_status(country_id)
+	var city_status := product_spatial_projection.historical_city_status(country_id)
+	var infrastructure_status := product_spatial_projection.infrastructure_historical_status(country_id)
 	return [
 		{"label": "PRODUCT ENTRY", "owner": self, "mode": "AUTHORITATIVE"},
-		{"label": "WORLD/POLITICAL OWNER", "owner": self if spatial_active else null, "mode": "AUTHORITATIVE"},
+		{"label": "WORLD/POLITICAL OWNER", "owner": self if political_active else null, "mode": "AUTHORITATIVE DATED DATA"},
+		{"label": "POLITICAL GEOMETRY PROJECTION", "owner": self if political_active else null, "mode": "READ-ONLY PROJECTION"},
+		{"label": "VNEXT SPATIAL OWNER", "owner": _vnext_spatial_world if spatial_active else null, "mode": "TRANSITIONAL · HISTORICAL GATE REQUIRED"},
+		{"label": "HISTORICAL LOCAL GEOGRAPHY STATUS", "owner": null, "status": str(local_status.get("status", "NOT AVAILABLE")), "mode": str(local_status.get("applicability", "UNAVAILABLE"))},
+		{"label": "HISTORICAL CITY DATA STATUS", "owner": null, "status": str(city_status.get("status", "NOT AVAILABLE")), "mode": str(city_status.get("applicability", "UNAVAILABLE"))},
+		{"label": "INFRASTRUCTURE HISTORICAL STATUS", "owner": null, "status": str(infrastructure_status.get("status", "NOT AVAILABLE")), "mode": str(infrastructure_status.get("applicability", "UNAVAILABLE"))},
 		{"label": "TIME OWNER", "owner": formal_simulation if formal_simulation.initialized else null, "mode": "AUTHORITATIVE"},
 		{"label": "ECONOMY OWNER", "owner": formal_simulation.economy if formal_simulation.initialized else null, "mode": "AUTHORITATIVE"},
-		{"label": "SPATIAL OWNER", "owner": self if spatial_active else null, "mode": "READ-ONLY PROJECTION"},
 		{"label": "POPULATION OWNER", "owner": null, "detail": "Aggregate economy inputs are not a population simulation."},
 		{"label": "ORGANIZATION OWNER", "owner": null},
 		{"label": "POLITICS OWNER", "owner": null},
@@ -485,6 +655,7 @@ func product_runtime_provenance() -> Dictionary:
 func _domain_owner_state() -> Dictionary:
 	return {
 		"world": {"owner": self if _history_entity_by_id.size() == 151 else null, "claimed_active": true},
+		"vnext_spatial": {"owner": _vnext_spatial_world, "claimed_active": _vnext_spatial_world != null and _vnext_spatial_world.is_valid()},
 		"time": {"owner": formal_simulation if formal_simulation.initialized else null, "claimed_active": formal_simulation.initialized},
 		"economy": {"owner": formal_simulation.economy if formal_simulation.initialized else null, "claimed_active": formal_simulation.initialized},
 		"population": {"owner": null, "claimed_active": false},
@@ -495,10 +666,19 @@ func _domain_owner_state() -> Dictionary:
 
 
 func _presentation_state() -> Dictionary:
+	var country_id := _spatial_selected_country_id()
 	return {
 		"prototype_visible_count": _prototype_presentation_count(),
 		"fixture_dependency_count": _fixture_dependency_count(),
 		"spike_city_count": _spike_city_count(),
+		"spatial_normal_product_count": (
+			product_spatial_projection.normal_region_views(country_id).size()
+			+ product_spatial_projection.normal_city_views(country_id).size()
+		),
+		"spatial_owner_instance_id": (
+			0 if _vnext_spatial_world == null else _vnext_spatial_world.get_instance_id()
+		),
+		"spatial_projection_owner_instance_id": product_spatial_projection.owner_instance_id(),
 	}
 
 
@@ -532,12 +712,19 @@ func product_integration_gate_report() -> Dictionary:
 
 
 func runtime_evidence_snapshot() -> Dictionary:
+	var country_id := _spatial_selected_country_id()
 	return {
 		"provenance": product_runtime_provenance(),
 		"integration_gate": product_integration_gate_report(),
 		"selected_country": selected_country_id,
 		"selected_region": selected_region_id,
 		"selected_city": selected_city_id,
+		"spatial_owner_instance_id": 0 if _vnext_spatial_world == null else _vnext_spatial_world.get_instance_id(),
+		"spatial_projection_owner_instance_id": product_spatial_projection.owner_instance_id(),
+		"historical_local_geography": product_spatial_projection.historical_local_geography_status(country_id),
+		"historical_city": product_spatial_projection.historical_city_status(country_id),
+		"historical_infrastructure": product_spatial_projection.infrastructure_historical_status(country_id),
+		"spatial_construction_usec": _spatial_construction_usec,
 		"legacy_prototype_content_visible": _prototype_presentation_count() > 0,
 		"synthetic_fixture": _fixture_dependency_count() > 0,
 	}
@@ -657,6 +844,8 @@ func _draw_history_layer_controls() -> void:
 func _advance_simulation_minutes(minutes: int) -> void:
 	if formal_simulation.initialized and minutes > 0:
 		_last_summary = formal_simulation.advance_minutes(minutes)
+		if not _synchronize_spatial_time():
+			_formal_status = "vNext Spatial time synchronization failed."
 
 
 func _format_sim_datetime() -> String:
@@ -680,6 +869,12 @@ func _load_formal_state() -> SaveOperationResult:
 	var result := formal_simulation.load_from_user()
 	if result.success:
 		_last_summary = formal_simulation.world_summary()
+		if not _synchronize_spatial_time():
+			return SaveOperationResult.fail(
+				"spatial_time_sync_failed",
+				"Formal state restored but vNext Spatial time synchronization failed.",
+				result.path
+			)
 	return result
 
 
@@ -711,6 +906,8 @@ func _load_formal_state_from_ui() -> void:
 		)
 	if result.success:
 		_last_summary = formal_simulation.world_summary()
+		if not _synchronize_spatial_time():
+			_formal_status = "Formal state restored; vNext Spatial time synchronization failed."
 	queue_redraw()
 
 
@@ -735,6 +932,13 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			_open_product_panel("military")
 		KEY_C:
 			_open_product_panel("city_status")
+		KEY_L:
+			_open_product_panel("local_geography")
+		KEY_I:
+			_open_product_panel("infrastructure")
+		KEY_R:
+			developer_mode_enabled = true
+			_open_product_panel("spatial_reference")
 		KEY_F12:
 			developer_mode_enabled = not developer_mode_enabled
 			if developer_mode_enabled:
@@ -968,6 +1172,13 @@ func _activate_button(action: String) -> void:
 			_open_product_panel("military")
 		"product_city_status":
 			_open_product_panel("city_status")
+		"product_local_geography":
+			_open_product_panel("local_geography")
+		"product_infrastructure":
+			_open_product_panel("infrastructure")
+		"product_spatial_reference":
+			developer_mode_enabled = true
+			_open_product_panel("spatial_reference")
 		"product_integration", "toggle_country_panel", "toggle_activity_panel", "mark_read":
 			_open_product_panel("integration")
 		"product_provenance":

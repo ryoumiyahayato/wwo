@@ -53,6 +53,12 @@ func runtime_report(
 		var domain := domain_value as Dictionary
 		if bool(domain.get("claimed_active", false)) and domain.get("owner") == null:
 			false_domain_count += 1
+	var spatial_owner_id := int(
+		presentation_state.get("spatial_owner_instance_id", 0)
+	)
+	var projection_owner_id := int(
+		presentation_state.get("spatial_projection_owner_instance_id", -1)
+	)
 	return {
 		"prototype_dependency": (
 			"PASS" if prototype_visible_count == 0 else "FAIL"
@@ -70,6 +76,19 @@ func runtime_report(
 			"PASS" if false_domain_count == 0 else "FAIL"
 		),
 		"false_domain_count": false_domain_count,
+		"spatial_prototype_truth": (
+			"PASS"
+			if int(presentation_state.get("spatial_normal_product_count", -1)) == 0
+			else "FAIL"
+		),
+		"spatial_normal_product_count": int(
+			presentation_state.get("spatial_normal_product_count", -1)
+		),
+		"spatial_single_owner": (
+			"PASS"
+			if spatial_owner_id > 0 and spatial_owner_id == projection_owner_id
+			else "FAIL"
+		),
 		"default_entry": (
 			"PASS"
 			if entry_scene == "res://scenes/formal/formal_world_menu.tscn"

@@ -97,11 +97,18 @@ if ($LASTEXITCODE -ne 0) { throw 'Wave 0 product path gate failed' }
 & $PythonPath -m unittest discover -s "$ProjectPath/tests/tools" -p 'test_validate_wave0_product_path.py' -v
 if ($LASTEXITCODE -ne 0) { throw 'Wave 0 evidence gate regression failed' }
 
+Write-Host "`n=== Wave 1 Spatial product gates ==="
+& $PythonPath "$ProjectPath/tools/validate_wave1_spatial_product.py"
+if ($LASTEXITCODE -ne 0) { throw 'Wave 1 Spatial product gate failed' }
+& $PythonPath -m unittest discover -s "$ProjectPath/tests/tools" -p 'test_validate_wave1_spatial_product.py' -v
+if ($LASTEXITCODE -ne 0) { throw 'Wave 1 Spatial gate regression failed' }
+
 Write-Host "`n=== World data audit regressions ==="
 & $PythonPath -m unittest discover -s "$ProjectPath/tests/world_data" -p 'test_*.py' -v
 if ($LASTEXITCODE -ne 0) { throw 'World data audit regression suite failed' }
 
 $tests = @(
+	@{ Name = 'Wave 1 vNext Spatial product contract'; Script = 'res://tests/formal/formal_world_wave1_spatial_test.gd'; TimeoutSeconds = 180 },
 	@{ Name = 'Formal player release journey'; Script = 'res://tests/formal/formal_world_player_journey_smoke.gd'; TimeoutSeconds = 240 },
 	@{ Name = 'Formal Windows export resource contract'; Script = 'res://tests/formal/formal_world_export_resource_smoke.gd'; TimeoutSeconds = 180 },
     @{ Name = 'Wave 0 product truth'; Script = 'res://tests/formal/formal_world_product_truth_test.gd'; TimeoutSeconds = 180 },

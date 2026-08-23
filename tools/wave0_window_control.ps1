@@ -212,7 +212,8 @@ switch ($Action) {
     'Key' {
         $keyMap = @{
             'ENTER' = 0x0D; 'ESCAPE' = 0x1B; 'F5' = 0x74; 'F9' = 0x78;
-            'F12' = 0x7B; 'C' = 0x43; 'M' = 0x4D; 'O' = 0x4F; 'P' = 0x50
+            'F12' = 0x7B; 'C' = 0x43; 'I' = 0x49; 'L' = 0x4C;
+            'M' = 0x4D; 'O' = 0x4F; 'P' = 0x50; 'R' = 0x52
         }
         $normalizedKey = $Key.ToUpperInvariant()
         if (-not $keyMap.ContainsKey($normalizedKey)) {
