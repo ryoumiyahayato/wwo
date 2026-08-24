@@ -126,6 +126,6 @@ func _check_local_detail_budget(view: FormalWorldApplication) -> void:
 	)
 	test.expect(
 		view._history_entity_by_id.size()
-		== view.formal_simulation.politics.active_entity_count(),
+		== view.formal_simulation.political_authority.active_entity_count(),
 		"区域细化不会删减当前日期有效的政治单元"
 	)
