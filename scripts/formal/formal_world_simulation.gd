@@ -1,13 +1,16 @@
 class_name FormalWorldSimulation
 extends RefCounted
-## Formal product composition root. It owns the 151-unit historical political
-## world and the separate 50-polity high-detail economy roster.
+## Formal product composition root. Immutable evidence, current political
+## identity, and economic aggregates remain separate owned boundaries.
 
 signal state_changed(change: Dictionary)
 
 const SAVE_PATH: String = "user://formal_world_1900.json"
-const SCHEMA_ID: String = "formal_world_simulation_v2"
+const SCHEMA_ID: String = "formal_world_simulation_v3"
+const EVIDENCE_STATE_SCHEMA_ID: String = "historical_political_evidence_v1"
 
+var historical_evidence := HistoricalPoliticalEvidenceCatalog.new()
+var political_registry := RuntimePoliticalEntityRegistry.new()
 var economy := FormalWorldEconomyService.new()
 var initialized: bool = false
 var initialization_error: String = ""
@@ -26,7 +29,15 @@ func _init() -> void:
 func initialize() -> bool:
 	initialization_error = ""
 	total_minutes = 0
-	if not economy.configure():
+	if not historical_evidence.configure():
+		initialization_error = historical_evidence.initialization_error
+		initialized = false
+		return false
+	if not political_registry.configure(historical_evidence):
+		initialization_error = political_registry.initialization_error
+		initialized = false
+		return false
+	if not economy.configure(political_registry):
 		initialization_error = economy.initialization_error
 		initialized = false
 		return false
@@ -57,7 +68,15 @@ func advance_minutes(minutes: int) -> Dictionary:
 
 
 func world_summary() -> Dictionary:
-	return economy.world_summary()
+	var result := economy.world_summary()
+	result["world_political_unit_count"] = political_registry.entity_count()
+	result["historical_political_record_count"] = historical_evidence.record_count()
+	result["background_polity_count"] = maxi(
+		0,
+		political_registry.entity_count()
+		- int(result.get("detailed_polity_unit_count", 0))
+	)
+	return result
 
 
 func country_summary(entity_id: String) -> Dictionary:
@@ -65,15 +84,60 @@ func country_summary(entity_id: String) -> Dictionary:
 
 
 func polity_summary(entity_id: String) -> Dictionary:
-	return economy.polity_summary(entity_id)
+	var result := CurrentWorldPoliticalProjection.polity_summary(
+		entity_id, political_registry, historical_evidence
+	)
+	if result.is_empty():
+		return {}
+	var economy_id := economy.economy_entity_for_polity(entity_id)
+	var detailed := not economy_id.is_empty()
+	result["has_detailed_economy"] = detailed
+	result["economy_entity_id"] = economy_id
+	result["major_roster"] = detailed
+	result["primary_playable"] = false
+	result["playability_tier"] = "background_npc"
+	result["playability_tier_zh"] = "背景政治单元"
+	if detailed:
+		var economy_summary := economy.country_summary(economy_id)
+		result["economy"] = economy_summary
+		result["rank"] = int(economy_summary.get("rank", 0))
+		result["playability_tier"] = str(
+			economy_summary.get("playability_tier", "secondary_roster")
+		)
+		result["playability_tier_zh"] = str(
+			economy_summary.get("playability_tier_zh", "次要政权候选")
+		)
+		result["primary_playable"] = bool(
+			economy_summary.get("primary_playable", false)
+		)
+	return result
 
 
 func has_polity(entity_id: String) -> bool:
-	return economy.has_polity(entity_id)
+	return political_registry.has_entity(entity_id)
 
 
 func first_polity_id() -> String:
-	return economy.first_polity_id()
+	var ids := political_registry.entity_ids()
+	return ids[0] if not ids.is_empty() else ""
+
+
+func current_world_political_units() -> Array[Dictionary]:
+	return CurrentWorldPoliticalProjection.map_units(
+		political_registry, historical_evidence
+	)
+
+
+func historical_political_evidence_units() -> Array[Dictionary]:
+	return historical_evidence.records()
+
+
+func historical_record(source_historical_id: String) -> Dictionary:
+	return historical_evidence.record(source_historical_id)
+
+
+func historical_records_active_on(date: String) -> Array[Dictionary]:
+	return historical_evidence.records_active_on(date)
 
 
 func date_time() -> Dictionary:
@@ -87,34 +151,77 @@ func get_persistent_state() -> Dictionary:
 		"schema_id": SCHEMA_ID,
 		"total_minutes": total_minutes,
 		"minute_remainder": _minute_remainder,
+		"historical_evidence": {
+			"schema_id": EVIDENCE_STATE_SCHEMA_ID,
+			"fingerprint": historical_evidence.fingerprint(),
+		},
+		"runtime_politics": political_registry.snapshot(),
 		"economy": economy.get_persistent_state(),
 	}
 
 
 func restore_persistent_state(state: Dictionary) -> bool:
+	var candidate := FormalWorldSimulation.new()
+	if not candidate.initialize():
+		return false
+	if not candidate._restore_candidate_state(state):
+		return false
+	_adopt_candidate(candidate)
+	state_changed.emit({"restored": true})
+	return true
+
+
+func _restore_candidate_state(state: Dictionary) -> bool:
 	var schema_id := str(state.get("schema_id", ""))
 	if (
-		schema_id not in ["formal_world_simulation_v1", SCHEMA_ID]
+		schema_id not in [
+			"formal_world_simulation_v1",
+			"formal_world_simulation_v2",
+			SCHEMA_ID,
+		]
 		or not state.get("economy", {}) is Dictionary
 	):
 		return false
 	var validated_time := _validated_time_state(state, schema_id)
 	if validated_time.is_empty():
 		return false
-	var previous_total_minutes := total_minutes
-	var previous_initialized := initialized
-	var previous_economy := economy.get_persistent_state()
+	if schema_id == SCHEMA_ID:
+		if (
+			not state.get("historical_evidence", {}) is Dictionary
+			or not state.get("runtime_politics", {}) is Dictionary
+		):
+			return false
+		var evidence_state := state.get("historical_evidence", {}) as Dictionary
+		if (
+			str(evidence_state.get("schema_id", ""))
+			!= EVIDENCE_STATE_SCHEMA_ID
+			or str(evidence_state.get("fingerprint", ""))
+			!= historical_evidence.fingerprint()
+			or not political_registry.restore_snapshot(
+				state.get("runtime_politics", {}) as Dictionary,
+				historical_evidence
+			)
+		):
+			return false
 	total_minutes = int(validated_time.get("total_minutes", -1))
 	if not economy.restore_persistent_state(
 		state.get("economy", {}) as Dictionary
 	):
-		total_minutes = previous_total_minutes
-		economy.restore_persistent_state(previous_economy)
-		initialized = previous_initialized
 		return false
 	initialized = true
-	state_changed.emit({"restored": true})
 	return true
+
+
+func _adopt_candidate(candidate: FormalWorldSimulation) -> void:
+	total_minutes = candidate.total_minutes
+	historical_evidence = candidate.historical_evidence
+	political_registry = candidate.political_registry
+	economy = candidate.economy
+	economy.bind_authoritative_hour_source(
+		Callable(self, "_authoritative_total_hour")
+	)
+	initialized = true
+	initialization_error = ""
 
 
 func save_to_user() -> SaveOperationResult:
@@ -231,7 +338,7 @@ func _validated_time_state(state: Dictionary, schema_id: String) -> Dictionary:
 	var saved_total_hour := int(economy_state.get("total_hour", -1))
 	if saved_total_hour < 0:
 		return {}
-	if schema_id == SCHEMA_ID and (
+	if schema_id in ["formal_world_simulation_v2", SCHEMA_ID] and (
 		not state.has("total_minutes") or not state.has("minute_remainder")
 	):
 		return {}

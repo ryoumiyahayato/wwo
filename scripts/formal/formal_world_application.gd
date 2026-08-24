@@ -1,12 +1,11 @@
 class_name FormalWorldApplication
 extends "res://scripts/ui_spikes/holographic_workspace/holographic_workspace_historical_admin_runtime.gd"
-## Formal product scene: the complete dated political world is the map authority.
-## Fifty ranked polities receive high-detail economy; all remaining political
-## units stay visible as background/non-player world actors.
+## Formal product scene. The map consumes a projection of current runtime
+## political identities; historical evidence remains available to history UI.
 
 const LAUNCH_MODE_META: StringName = &"formal_world_launch_mode"
 const PACKAGED_PROBE_ARGUMENT: String = "--wwo-player-baseline-probe"
-const PACKAGED_PROBE_ENTITY_ID: String = "country_fra"
+const PACKAGED_PROBE_ENTITY_ID: String = "state:country_fra"
 const PACKAGED_PROBE_FLAG_ID: String = "france_tricolour_1794"
 
 var formal_simulation := FormalWorldSimulation.new()
@@ -14,10 +13,12 @@ var economy_panel_open: bool = true
 var _formal_status: String = ""
 var _last_summary: Dictionary = {}
 var _packaged_probe_failures: int = 0
+var _immutable_historical_evidence_report: Dictionary = {}
 
 
 func _ready() -> void:
 	super._ready()
+	_immutable_historical_evidence_report = super.historical_evidence_report()
 	if not formal_simulation.initialize():
 		_formal_status = "正式世界初始化失败：%s" % formal_simulation.initialization_error
 		_data_errors.append(_formal_status)
@@ -36,6 +37,7 @@ func _ready() -> void:
 				)
 		else:
 			_formal_status = "新的1900正式世界已建立。"
+		_sync_political_presentation()
 		_last_summary = formal_simulation.world_summary()
 	queue_redraw()
 	if PACKAGED_PROBE_ARGUMENT in OS.get_cmdline_user_args():
@@ -46,7 +48,11 @@ func _run_packaged_player_baseline_probe() -> void:
 	await get_tree().process_frame
 	_packaged_probe_require(formal_simulation.initialized, "正式模拟未初始化")
 	_packaged_probe_require(_data_errors.is_empty(), "正式模拟产生数据错误")
-	_packaged_probe_require(_history_entity_by_id.size() == 151, "历史政治单元数量不正确")
+	_packaged_probe_require(_history_entity_by_id.size() == 146, "运行时政治实体数量不正确")
+	_packaged_probe_require(
+		formal_simulation.historical_evidence.record_count() == 151,
+		"历史政治证据数量不正确"
+	)
 	_packaged_probe_require(_missing_flag_record_ids.is_empty(), "历史旗帜资源存在缺失")
 	var evidence := historical_evidence_report()
 	_packaged_probe_require(
@@ -168,6 +174,7 @@ func _time_source_description() -> String:
 func _load_formal_state() -> SaveOperationResult:
 	var result := formal_simulation.load_from_user()
 	if result.success:
+		_sync_political_presentation()
 		_last_summary = formal_simulation.world_summary()
 	return result
 
@@ -199,6 +206,7 @@ func _load_formal_state_from_ui() -> void:
 			else "没有可恢复的正式世界存档。"
 		)
 	if result.success:
+		_sync_political_presentation()
 		_last_summary = formal_simulation.world_summary()
 	queue_redraw()
 
@@ -289,7 +297,7 @@ func _draw_formal_panel_header(rect: Rect2) -> void:
 	)
 	_draw_label(
 		rect.position + Vector2(20.0, 54.0),
-		"151个历史政治单元共同构成世界；50个主要政权使用高细节经济。",
+		"146个运行时政治实体构成当前世界；151条历史证据保持只读。",
 		9,
 		Color(0.76, 0.81, 0.78, 0.95)
 	)
@@ -440,13 +448,48 @@ func _selected_polity_entity_id() -> String:
 		return selected_country_id
 
 	var home_id := _home_historical_entity_id()
+	if not home_id.begins_with("state:"):
+		home_id = formal_simulation.political_registry.runtime_id_for_source(home_id)
 	if formal_simulation.has_polity(home_id):
 		return home_id
 
-	if formal_simulation.has_polity("country_fra"):
-		return "country_fra"
+	if formal_simulation.has_polity("state:country_fra"):
+		return "state:country_fra"
 
 	return formal_simulation.first_polity_id()
+
+
+func _rebuild_historical_political_world() -> void:
+	if not formal_simulation.initialized:
+		super._rebuild_historical_political_world()
+		return
+	var historical_document := _dated_units_document
+	_dated_units_document = {
+		"units": formal_simulation.current_world_political_units(),
+	}
+	super._rebuild_historical_political_world()
+	_dated_units_document = historical_document
+
+
+func _sync_political_presentation() -> void:
+	if not formal_simulation.initialized:
+		return
+	var previous_selection := selected_country_id
+	_rebuild_historical_political_world()
+	if formal_simulation.has_polity(previous_selection):
+		selected_country_id = previous_selection
+	else:
+		selected_country_id = ""
+		hover_country_id = ""
+		selected_historical_territory_iso = ""
+	_mark_projection_dirty()
+	queue_redraw()
+
+
+func historical_evidence_report() -> Dictionary:
+	if _immutable_historical_evidence_report.is_empty():
+		return super.historical_evidence_report()
+	return _immutable_historical_evidence_report.duplicate(true)
 
 
 func _compact_integer(value: int) -> String:

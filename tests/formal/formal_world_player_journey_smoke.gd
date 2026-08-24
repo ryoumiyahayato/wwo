@@ -4,7 +4,7 @@ extends SceneTree
 ## invoking menu transition or save/load methods.
 
 const MENU_SCENE := "res://scenes/formal/formal_world_menu.tscn"
-const INTENDED_POLITY_ID := "country_fra"
+const INTENDED_POLITY_ID := "state:country_fra"
 const TIME_SUPPORT := preload(
 	"res://tests/variable_state/formal_time_test_support.gd"
 )
@@ -100,7 +100,13 @@ func _run() -> void:
 
 	# Lower-level map and evidence assertions are meaningful only after the
 	# player has entered the world and selected the intended polity above.
-	if not _require(application._history_entity_by_id.size() == 151, "世界地图未持有151个历史政治单元"):
+	if not _require(application._history_entity_by_id.size() == 146, "当前地图未持有146个运行时政治实体"):
+		await _finish()
+		return
+	if not _require(
+		application.formal_simulation.historical_evidence.record_count() == 151,
+		"历史页面未保留151条政治证据"
+	):
 		await _finish()
 		return
 	if not _require(application._flag_screen_polygons.size() >= 12, "当前半球没有形成可见政治实体图形"):
@@ -110,6 +116,9 @@ func _run() -> void:
 		await _finish()
 		return
 	var evidence := application.historical_evidence_report()
+	if not _require(int(evidence.get("unit_count", -1)) == 151, "历史证据报告未保留151条记录"):
+		await _finish()
+		return
 	if not _require(int(evidence.get("unresolved_flag_count", -1)) == 0, "历史旗帜覆盖仍有未解析记录"):
 		await _finish()
 		return

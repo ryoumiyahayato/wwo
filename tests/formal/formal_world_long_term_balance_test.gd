@@ -1,5 +1,5 @@
 extends SceneTree
-## Ten-year balance guard for the actual 151-unit hemisphere world and its
+## Ten-year balance guard for the 146-entity runtime world and its
 ## 50-polity high-detail economy. The two-country/eight-region fixture is not
 ## instantiated anywhere in this test.
 
@@ -39,7 +39,7 @@ func _run() -> void:
 			"第%d年世界需求满足率不发生系统性崩溃" % year
 		)
 		_check(
-			int(summary.get("world_political_unit_count", 0)) == 151,
+			int(summary.get("world_political_unit_count", 0)) == 146,
 			"第%d年完整政治世界仍存在" % year
 		)
 		_check(
@@ -47,7 +47,7 @@ func _run() -> void:
 			"第%d年主要政权高细节目录保持50个" % year
 		)
 	var elapsed_usec := Time.get_ticks_usec() - started_usec
-	var final_summary := economy.world_summary()
+	var final_summary := simulation.world_summary()
 	_check(
 		int(final_summary.get("fulfillment_bp", -1)) >= MIN_FINAL_FULFILLMENT_BP,
 		"十年末世界需求满足率保持在30%以上"

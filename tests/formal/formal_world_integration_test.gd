@@ -47,7 +47,7 @@ func _check_formal_economy() -> void:
 		return
 	var economy := simulation.economy
 	var initial := simulation.world_summary()
-	_check_world_roster(initial, economy)
+	_check_world_roster(initial, economy, simulation)
 	var first_polity_id := simulation.first_polity_id()
 	_check(not first_polity_id.is_empty(), "正式组合根暴露确定性首个政治单元")
 	_check(
@@ -58,10 +58,7 @@ func _check_formal_economy() -> void:
 		not simulation.has_polity("missing_formal_polity"),
 		"正式组合根拒绝未知政治单元"
 	)
-	_check(
-		first_polity_id == economy.first_polity_id(),
-		"正式组合根查询与经济服务结果一致"
-	)
+	_check(first_polity_id.begins_with("state:"), "正式组合根暴露runtime政治ID")
 	_check(
 		int(initial.get("commodity_count", 0)) >= 60,
 		"正式经济直接读取完整商品目录"
@@ -92,11 +89,17 @@ func _check_formal_economy() -> void:
 
 
 func _check_world_roster(
-	initial: Dictionary, economy: FormalWorldEconomyService
+	initial: Dictionary,
+	economy: FormalWorldEconomyService,
+	simulation: FormalWorldSimulation
 ) -> void:
 	_check(
-		int(initial.get("world_political_unit_count", 0)) == 151,
-		"世界地图包含151个1900政治单元，而非只有50国"
+		int(initial.get("world_political_unit_count", 0)) == 146,
+		"当前世界包含146个1900-01-01运行时政治实体"
+	)
+	_check(
+		int(initial.get("historical_political_record_count", 0)) == 151,
+		"历史证据目录独立保留151条记录"
 	)
 	_check(
 		int(initial.get("major_economy_count", 0)) == 50,
@@ -115,8 +118,8 @@ func _check_world_roster(
 		"第31至50位保留为次要政权候选"
 	)
 	_check(
-		int(initial.get("background_polity_count", 0)) == 96,
-		"其余96个地图政治单元作为纯背景世界存在"
+		int(initial.get("background_polity_count", 0)) == 91,
+		"其余91个运行时政治实体作为纯背景世界存在"
 	)
 	_check(
 		not economy.country_states.has("country:loran_federation")
@@ -125,11 +128,11 @@ func _check_world_roster(
 	)
 	_check_australia_crosswalk(economy)
 	_check(
-		economy.economy_entity_for_polity("grand_duchy_of_luxembourg")
+		economy.economy_entity_for_polity("state:grand_duchy_of_luxembourg")
 		== "kingdom_of_luxembourg",
 		"卢森堡经济旧名显式映射到卢森堡大公国地图单元"
 	)
-	var background := economy.polity_summary("cshapes_gw_31")
+	var background := simulation.polity_summary("state:cshapes_gw_31")
 	_check(not background.is_empty(), "背景政治单元仍可在半球选择")
 	_check(
 		not bool(background.get("has_detailed_economy", true)),
@@ -141,7 +144,7 @@ func _check_australia_crosswalk(economy: FormalWorldEconomyService) -> void:
 	var polity_ids := economy.polity_ids_for_economy("australia_colonies_1900")
 	_check(polity_ids.size() == 6, "澳大利亚经济聚合体覆盖六个自治殖民地")
 	for index: int in range(901, 907):
-		var polity_id := "cshapes_gw_%d" % index
+		var polity_id := "state:cshapes_gw_%d" % index
 		_check(
 			economy.economy_entity_for_polity(polity_id)
 			== "australia_colonies_1900",
@@ -334,8 +337,8 @@ func _check_runtime_application(application: FormalWorldApplication) -> void:
 	)
 	var runtime_summary := application.formal_simulation.world_summary()
 	_check(
-		int(runtime_summary.get("world_political_unit_count", 0)) == 151,
-		"正式半球运行时持有完整政治世界"
+		int(runtime_summary.get("world_political_unit_count", 0)) == 146,
+		"正式半球运行时持有146个当前政治实体"
 	)
 	_check(
 		int(runtime_summary.get("major_economy_count", 0)) == 50,
@@ -346,6 +349,7 @@ func _check_runtime_application(application: FormalWorldApplication) -> void:
 		"正式半球运行时将高细节经济绑定到55个地图单元"
 	)
 	var first_polity_id := application.formal_simulation.first_polity_id()
+	_check(first_polity_id.begins_with("state:"), "正式UI选择使用runtime政治ID")
 	application.selected_country_id = first_polity_id
 	_check(
 		application._selected_polity_entity_id() == first_polity_id,
