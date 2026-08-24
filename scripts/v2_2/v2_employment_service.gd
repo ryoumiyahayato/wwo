@@ -152,6 +152,8 @@ func settle_due_pay(
 	for contract_id_variant: Variant in contracts.keys():
 		var contract_id: String = str(contract_id_variant)
 		var contract: Dictionary = contracts[contract_id] as Dictionary
+		if str(contract.get("contract_status", "")) != "active":
+			continue
 		if int(contract.get("next_pay_hour", -1)) != total_hour:
 			continue
 		var result: V2LifeLoopResult = (
@@ -188,6 +190,13 @@ func force_settle(
 	if not contracts.has(contract_id):
 		return V2LifeLoopResult.fail("unknown_contract", "找不到劳动合同", contract_id)
 	var contract: Dictionary = contracts[contract_id] as Dictionary
+	if str(contract.get("contract_status", "")) != "active":
+		return V2LifeLoopResult.fail(
+			"inactive_contract",
+			"非在职劳动合同不能执行工资结算",
+			contract_id,
+			[contract_id]
+		)
 	return (
 		_settle_weekly(contract, total_hour, households, ledger, notifications)
 		if str(contract.get("wage_period", "")) == "weekly"
@@ -517,28 +526,3 @@ static func _is_last_shift_hour(contract: Dictionary, hour: int) -> bool:
 	for raw_segment: Variant in contract.get("shift_segments", []) as Array:
 		last_end = maxi(last_end, int((raw_segment as Dictionary).get("end_hour", 0)))
 	return hour == last_end - 1
-
-
-static func _payroll_entry(
-	household_id: String,
-	person_id: String,
-	amount_centimes: int,
-	category: String,
-	total_hour: int,
-	contract_id: String,
-	source_event_id: String,
-	idempotency_key: String,
-	description: String
-) -> Dictionary:
-	return {
-		"household_id": household_id,
-		"person_id": person_id,
-		"amount_centimes": amount_centimes,
-		"direction": "income",
-		"category": category,
-		"total_hour": total_hour,
-		"source_entity_id": contract_id,
-		"source_event_id": source_event_id,
-		"idempotency_key": idempotency_key,
-		"description": description,
-	}
