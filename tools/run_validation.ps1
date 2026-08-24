@@ -96,6 +96,7 @@ if ($LASTEXITCODE -ne 0) { throw 'World data audit regression suite failed' }
 $tests = @(
 	@{ Name = 'Runtime political identity foundation'; Script = 'res://tests/formal/runtime_political_identity_foundation_test.gd'; TimeoutSeconds = 240 },
 	@{ Name = 'Formal economy 30-day and one-year golden'; Script = 'res://tests/formal/formal_world_economy_golden_test.gd'; TimeoutSeconds = 240 },
+	@{ Name = 'Formal economic boundary closure'; Script = 'res://tests/formal/formal_world_economic_boundary_closure_test.gd'; TimeoutSeconds = 240 },
 	@{ Name = 'Formal player release journey'; Script = 'res://tests/formal/formal_world_player_journey_smoke.gd'; TimeoutSeconds = 240 },
 	@{ Name = 'Formal Windows export resource contract'; Script = 'res://tests/formal/formal_world_export_resource_smoke.gd'; TimeoutSeconds = 180 },
     @{ Name = 'Formal world integration'; Script = 'res://tests/formal/formal_world_integration_test.gd'; TimeoutSeconds = 360 },
@@ -161,6 +162,26 @@ if ($politicalHashOne -ne $politicalHashTwo) {
     throw "Runtime political snapshot differs across fresh processes: $politicalHashOne != $politicalHashTwo"
 }
 Write-Host "Runtime political fresh-process deterministic hash: $politicalHashOne"
+
+$economicProbeArguments = @(
+    '--headless', '--path', $ProjectPath,
+    '--script', 'res://tests/formal/formal_world_economic_snapshot_probe.gd'
+)
+$economicProbeOne = Invoke-GodotStep -Name 'Formal economic fresh-process hash A' -Arguments $economicProbeArguments -TimeoutSeconds 180
+$economicProbeTwo = Invoke-GodotStep -Name 'Formal economic fresh-process hash B' -Arguments $economicProbeArguments -TimeoutSeconds 180
+$economicHashPattern = '(?m)^FORMAL_ECONOMIC_SNAPSHOT_SHA256=([0-9a-f]{64})$'
+if ($economicProbeOne -notmatch $economicHashPattern) {
+    throw 'Formal economic snapshot probe A did not emit a canonical hash'
+}
+$economicHashOne = $Matches[1]
+if ($economicProbeTwo -notmatch $economicHashPattern) {
+    throw 'Formal economic snapshot probe B did not emit a canonical hash'
+}
+$economicHashTwo = $Matches[1]
+if ($economicHashOne -ne $economicHashTwo) {
+    throw "Formal economic snapshot differs across fresh processes: $economicHashOne != $economicHashTwo"
+}
+Write-Host "Formal economic fresh-process deterministic hash: $economicHashOne"
 
 $null = Invoke-GodotStep -Name 'Headless formal product startup' -Arguments @(
     '--headless', '--path', $ProjectPath, '--quit-after', '5'

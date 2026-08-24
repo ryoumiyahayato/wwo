@@ -253,7 +253,7 @@ func _test_save_load_round_trip() -> void:
 		"读取恢复economy.total_hour"
 	)
 	_equal(
-		simulation.economy.get_persistent_state(),
+		(simulation.get_persistent_state().get("economy", {}) as Dictionary),
 		saved_economy,
 		"读取恢复完整正式经济持久化状态"
 	)
@@ -290,7 +290,7 @@ func _test_restore_failure_atomicity() -> void:
 		"恢复失败后minute_remainder不变"
 	)
 	_equal(
-		simulation.economy.get_persistent_state(),
+		(simulation.get_persistent_state().get("economy", {}) as Dictionary),
 		before.get("economy", {}) as Dictionary,
 		"恢复失败后完整经济状态不变"
 	)

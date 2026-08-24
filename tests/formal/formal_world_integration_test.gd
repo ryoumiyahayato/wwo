@@ -85,12 +85,12 @@ func _check_formal_economy() -> void:
 		restored.world_summary() == simulation.world_summary(),
 		"正式经济恢复后摘要等价"
 	)
-	_check_economy_restore_is_atomic(restored.economy)
+	_check_economy_restore_is_atomic(restored)
 
 
 func _check_world_roster(
 	initial: Dictionary,
-	economy: FormalWorldEconomyService,
+	economy: FormalWorldEconomyView,
 	simulation: FormalWorldSimulation
 ) -> void:
 	_check(
@@ -140,7 +140,7 @@ func _check_world_roster(
 	)
 
 
-func _check_australia_crosswalk(economy: FormalWorldEconomyService) -> void:
+func _check_australia_crosswalk(economy: FormalWorldEconomyView) -> void:
 	var polity_ids := economy.polity_ids_for_economy("australia_colonies_1900")
 	_check(polity_ids.size() == 6, "澳大利亚经济聚合体覆盖六个自治殖民地")
 	for index: int in range(901, 907):
@@ -244,14 +244,14 @@ func _check_formal_atomic_save_recovery() -> void:
 			var valid_save := verification_source.save_to_user()
 			_check(valid_save.success, "临时校验失败测试先建立有效主档")
 			var primary_before := FileAccess.get_file_as_string(primary_path)
+			var invalid_candidate := verification_source.get_persistent_state()
 			_check(
-				_corrupt_first_inventory(verification_source),
+				_corrupt_first_inventory(invalid_candidate),
 				"临时校验失败测试可构造无效候选快照"
 			)
-			var rejected_save := verification_source.save_to_user()
 			_check(
-				not rejected_save.success,
-				"临时文件状态校验失败时原子保存返回失败"
+				not verification_source.restore_persistent_state(invalid_candidate),
+				"无效经济候选在进入活动实例前被拒绝"
 			)
 			_check(
 				FileAccess.get_file_as_string(primary_path) == primary_before,
@@ -387,12 +387,11 @@ func _check_runtime_application(application: FormalWorldApplication) -> void:
 	)
 
 
-func _check_economy_restore_is_atomic(
-	economy: FormalWorldEconomyService
-) -> void:
-	var before := economy.get_persistent_state()
+func _check_economy_restore_is_atomic(simulation: FormalWorldSimulation) -> void:
+	var before := simulation.get_persistent_state()
 	var rejected := before.duplicate(true)
-	var candidate_states := rejected.get("country_states", {}) as Dictionary
+	var rejected_economy := rejected.get("economy", {}) as Dictionary
+	var candidate_states := rejected_economy.get("country_states", {}) as Dictionary
 	var economy_ids: Array[String] = []
 	for raw_id: Variant in candidate_states:
 		economy_ids.append(str(raw_id))
@@ -413,26 +412,29 @@ func _check_economy_restore_is_atomic(
 	inventory[commodity_ids[0]] = -1.0
 	candidate_state["inventory"] = inventory
 	candidate_states[economy_id] = candidate_state
-	rejected["country_states"] = candidate_states
+	rejected_economy["country_states"] = candidate_states
+	rejected["economy"] = rejected_economy
 	_check(
-		not economy.restore_persistent_state(rejected),
+		not simulation.restore_persistent_state(rejected),
 		"正式经济拒绝负库存恢复候选"
 	)
 	_check(
-		economy.get_persistent_state() == before,
+		simulation.get_persistent_state() == before,
 		"正式经济失败恢复前后持久状态完全一致"
 	)
 
 
-func _corrupt_first_inventory(simulation: FormalWorldSimulation) -> bool:
+func _corrupt_first_inventory(snapshot: Dictionary) -> bool:
+	var economy_state := snapshot.get("economy", {}) as Dictionary
+	var country_states := economy_state.get("country_states", {}) as Dictionary
 	var economy_ids: Array[String] = []
-	for raw_id: Variant in simulation.economy.country_states:
+	for raw_id: Variant in country_states:
 		economy_ids.append(str(raw_id))
 	economy_ids.sort()
 	if economy_ids.is_empty():
 		return false
 	var economy_id := economy_ids[0]
-	var country_state := simulation.economy.country_states[economy_id] as Dictionary
+	var country_state := country_states[economy_id] as Dictionary
 	var inventory := country_state.get("inventory", {}) as Dictionary
 	var commodity_ids: Array[String] = []
 	for raw_id: Variant in inventory:
@@ -442,7 +444,9 @@ func _corrupt_first_inventory(simulation: FormalWorldSimulation) -> bool:
 		return false
 	inventory[commodity_ids[0]] = -1.0
 	country_state["inventory"] = inventory
-	simulation.economy.country_states[economy_id] = country_state
+	country_states[economy_id] = country_state
+	economy_state["country_states"] = country_states
+	snapshot["economy"] = economy_state
 	return true
 
 

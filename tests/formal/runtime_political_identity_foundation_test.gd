@@ -318,18 +318,15 @@ func _test_v3_round_trip_and_atomic_rejection(
 
 	var mapping_rejected := before.duplicate(true)
 	var economy_state := mapping_rejected.get("economy", {}) as Dictionary
-	var country_states := economy_state.get("country_states", {}) as Dictionary
-	var first_economy_id := str((country_states.keys() as Array)[0])
-	var first_country := (country_states[first_economy_id] as Dictionary).duplicate(true)
-	first_country.erase("polity_ids")
-	country_states[first_economy_id] = first_country
-	economy_state["country_states"] = country_states
+	var static_reference := economy_state.get("static_evidence", {}) as Dictionary
+	static_reference["fingerprint"] = "invalid"
+	economy_state["static_evidence"] = static_reference
 	mapping_rejected["economy"] = economy_state
 	_expect(
 		not restored.restore_persistent_state(mapping_rejected),
-		"v4 missing economy-to-runtime mapping is rejected"
+		"v5 static economic evidence mismatch is rejected"
 	)
-	_expect(restored.get_persistent_state() == before, "mapping rejection is atomic")
+	_expect(restored.get_persistent_state() == before, "static rejection is atomic")
 
 
 func _test_v2_candidate_migration(simulation: FormalWorldSimulation) -> void:

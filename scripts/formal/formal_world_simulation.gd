@@ -13,7 +13,13 @@ var _historical_evidence := HistoricalPoliticalEvidenceCatalog.new()
 var _political_registry := RuntimePoliticalEntityRegistry.new()
 var _historical_evidence_view := HistoricalPoliticalEvidenceView.new()
 var _political_registry_view := RuntimePoliticalEntityView.new()
-var economy := FormalWorldEconomyService.new()
+var _economic_evidence := FormalWorldEconomicEvidenceCatalog.new()
+var _economic_static_view := FormalWorldEconomicStaticView.new()
+var _population_input_view := FormalWorldPopulationInputView.new()
+var _economy := FormalWorldEconomyService.new()
+var economy: FormalWorldEconomyView:
+	get:
+		return economy_view()
 var initialized: bool = false
 var initialization_error: String = ""
 var total_minutes: int = 0
@@ -24,7 +30,7 @@ var _minute_remainder: int:
 
 
 func _init() -> void:
-	economy.bind_authoritative_hour_source(
+	_economy.bind_authoritative_hour_source(
 		Callable(self, "_authoritative_total_hour")
 	)
 
@@ -44,9 +50,17 @@ func initialize() -> bool:
 		initialization_error = _political_registry.initialization_error
 		initialized = false
 		return false
+	if not _economic_evidence.configure():
+		initialization_error = _economic_evidence.initialization_error
+		initialized = false
+		return false
 	_refresh_read_only_views()
-	if not economy.configure(_political_registry_view):
-		initialization_error = economy.initialization_error
+	if not _economy.configure(
+		_political_registry_view,
+		_economic_static_view,
+		_population_input_view
+	):
+		initialization_error = _economy.initialization_error
 		initialized = false
 		return false
 	initialized = true
@@ -62,15 +76,25 @@ func political_registry_view() -> RuntimePoliticalEntityView:
 	return _political_registry_view
 
 
+func economy_view() -> FormalWorldEconomyView:
+	if not _economy.is_configured():
+		return FormalWorldEconomyView.new()
+	return FormalWorldEconomyView.new(_economy.read_only_snapshot())
+
+
+func economy_regression_snapshot() -> Dictionary:
+	return _economy.legacy_regression_snapshot()
+
+
 func advance_minutes(minutes: int) -> Dictionary:
 	if not initialized or minutes <= 0:
-		return economy.world_summary()
+		return _economy.world_summary()
 	var previous_total_hour := _authoritative_total_hour()
 	total_minutes += minutes
 	var current_total_hour := _authoritative_total_hour()
 	var elapsed_hours := current_total_hour - previous_total_hour
 	if elapsed_hours > 0:
-		var summary := economy.settle_hour_range(
+		var summary := _economy.settle_hour_range(
 			previous_total_hour, current_total_hour
 		)
 		state_changed.emit({
@@ -80,11 +104,11 @@ func advance_minutes(minutes: int) -> Dictionary:
 		})
 		return summary
 	state_changed.emit({"time": true, "economy": false, "hours": 0})
-	return economy.world_summary()
+	return _economy.world_summary()
 
 
 func world_summary() -> Dictionary:
-	var result := economy.world_summary()
+	var result := _economy.world_summary()
 	result["world_political_unit_count"] = _political_registry.entity_count()
 	result["historical_political_record_count"] = _historical_evidence.record_count()
 	result["background_polity_count"] = maxi(
@@ -96,7 +120,7 @@ func world_summary() -> Dictionary:
 
 
 func country_summary(entity_id: String) -> Dictionary:
-	return economy.country_summary(entity_id)
+	return _economy.country_summary(entity_id)
 
 
 func polity_summary(entity_id: String) -> Dictionary:
@@ -105,7 +129,7 @@ func polity_summary(entity_id: String) -> Dictionary:
 	)
 	if result.is_empty():
 		return {}
-	var economy_id := economy.economy_entity_for_polity(entity_id)
+	var economy_id := _economy.economy_entity_for_polity(entity_id)
 	var detailed := not economy_id.is_empty()
 	result["has_detailed_economy"] = detailed
 	result["economy_entity_id"] = economy_id
@@ -114,7 +138,7 @@ func polity_summary(entity_id: String) -> Dictionary:
 	result["playability_tier"] = "background_npc"
 	result["playability_tier_zh"] = "背景政治单元"
 	if detailed:
-		var economy_summary := economy.country_summary(economy_id)
+		var economy_summary := _economy.country_summary(economy_id)
 		result["economy"] = economy_summary
 		result["rank"] = int(economy_summary.get("rank", 0))
 		result["playability_tier"] = str(
@@ -172,7 +196,7 @@ func get_persistent_state() -> Dictionary:
 			"fingerprint": _historical_evidence.fingerprint(),
 		},
 		"runtime_politics": _political_registry.snapshot(),
-		"economy": economy.get_persistent_state(),
+		"economy": _economy.get_persistent_state(),
 	}
 
 
@@ -220,10 +244,10 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 		):
 			return false
 		_refresh_read_only_views()
-		if not economy.bind_runtime_political_view(_political_registry_view):
+		if not _economy.bind_runtime_political_view(_political_registry_view):
 			return false
 	total_minutes = int(validated_time.get("total_minutes", -1))
-	if not economy.restore_persistent_state(
+	if not _economy.restore_persistent_state(
 		state.get("economy", {}) as Dictionary
 	):
 		return false
@@ -237,8 +261,11 @@ func _adopt_candidate(candidate: FormalWorldSimulation) -> void:
 	_political_registry = candidate._political_registry
 	_historical_evidence_view = candidate._historical_evidence_view
 	_political_registry_view = candidate._political_registry_view
-	economy = candidate.economy
-	economy.bind_authoritative_hour_source(
+	_economic_evidence = candidate._economic_evidence
+	_economic_static_view = candidate._economic_static_view
+	_population_input_view = candidate._population_input_view
+	_economy = candidate._economy
+	_economy.bind_authoritative_hour_source(
 		Callable(self, "_authoritative_total_hour")
 	)
 	initialized = true
@@ -251,6 +278,12 @@ func _refresh_read_only_views() -> void:
 	)
 	_political_registry_view = RuntimePoliticalEntityView.new(
 		_political_registry.snapshot()
+	)
+	_economic_static_view = FormalWorldEconomicStaticView.new(
+		_economic_evidence.economic_snapshot()
+	)
+	_population_input_view = FormalWorldPopulationInputView.new(
+		_economic_evidence.population_snapshot()
 	)
 
 

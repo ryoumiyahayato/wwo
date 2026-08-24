@@ -26,7 +26,7 @@ func _run() -> void:
 		for checkpoint_day: int in CHECKPOINT_DAYS:
 			for _day: int in range(previous_day, checkpoint_day):
 				simulation.advance_minutes(24 * 60)
-			var digest := _economic_digest(simulation.economy)
+			var digest := _economic_digest(simulation.economy_regression_snapshot())
 			print("FORMAL_ECONOMY_GOLDEN_%d=%s" % [checkpoint_day, digest])
 			if EXPECTED_DIGESTS.has(checkpoint_day):
 				_check(
@@ -38,8 +38,8 @@ func _run() -> void:
 	quit(1 if failures > 0 else 0)
 
 
-func _economic_digest(economy: Variant) -> String:
-	var state: Dictionary = economy.get_persistent_state().duplicate(true)
+func _economic_digest(regression_state: Dictionary) -> String:
+	var state: Dictionary = regression_state.duplicate(true)
 	state.erase("schema_id")
 	var country_states := state.get("country_states", {}) as Dictionary
 	for economy_id_value: Variant in country_states:

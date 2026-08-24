@@ -76,7 +76,7 @@ func _run() -> void:
 	})
 
 
-func _state_is_numerically_sound(economy: FormalWorldEconomyService) -> bool:
+func _state_is_numerically_sound(economy: FormalWorldEconomyView) -> bool:
 	for raw_state: Variant in economy.country_states.values():
 		var state := raw_state as Dictionary
 		if not state.get("inventory", {}) is Dictionary:
