@@ -47,8 +47,8 @@ func _check_formal_map(
 	var summary := view.formal_simulation.world_summary()
 	test.equal(
 		int(summary.get("world_political_unit_count", 0)),
-		151,
-		"全球层持有151个历史政治单元"
+		146,
+		"全球层持有1900年1月1日当日有效的146个政治单元"
 	)
 	test.equal(
 		int(summary.get("major_economy_count", 0)),
@@ -125,6 +125,7 @@ func _check_local_detail_budget(view: FormalWorldApplication) -> void:
 		"历史区域目录只覆盖有证据政权而非全世界盲目展开"
 	)
 	test.expect(
-		view._history_entity_by_id.size() == 151,
-		"区域细化不会删减全球政治单元"
+		view._history_entity_by_id.size()
+		== view.formal_simulation.politics.active_entity_count(),
+		"区域细化不会删减当前日期有效的政治单元"
 	)
