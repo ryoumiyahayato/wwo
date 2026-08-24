@@ -14,9 +14,6 @@ var politics := FormalPoliticalSimulationService.new()
 var initialized: bool = false
 var initialization_error: String = ""
 var total_minutes: int = 0
-var _minute_remainder: int:
-	get:
-		return total_minutes % 60
 
 
 func _init() -> void:
@@ -224,7 +221,7 @@ func first_polity_id() -> String:
 
 func date_time() -> Dictionary:
 	var value := V2DateTime.from_total_hour(_authoritative_total_hour())
-	value["minute"] = _minute_remainder
+	value["minute"] = _minute_remainder()
 	return value
 
 
@@ -232,7 +229,7 @@ func get_persistent_state() -> Dictionary:
 	return {
 		"schema_id": SCHEMA_ID,
 		"total_minutes": total_minutes,
-		"minute_remainder": _minute_remainder,
+		"minute_remainder": _minute_remainder(),
 		"political_authority": political_authority.get_persistent_state(),
 		"economy": economy.get_persistent_state(),
 		"politics": politics.get_persistent_state(),
@@ -435,6 +432,10 @@ func _read_snapshot_file(path: String) -> SaveOperationResult:
 
 func _authoritative_total_hour() -> int:
 	return int(total_minutes / 60)
+
+
+func _minute_remainder() -> int:
+	return total_minutes % 60
 
 
 func _validated_time_state(state: Dictionary, schema_id: String) -> Dictionary:
