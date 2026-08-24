@@ -1,7 +1,8 @@
 class_name FormalWorldEconomyService
 extends RefCounted
-## Formal 1900 world economy. The historical map contains every dated political
-## unit, while only the ranked major-economy roster receives high-detail economy.
+## Formal 1900 world economy. Political existence and ownership come only from
+## FormalDatedPoliticalAuthority; this service owns economic state and the
+## stable economy-to-polity crosswalk, but never a second political registry.
 ## One economy may cover several map units, as with the six Australian colonies.
 ## The retired two-country/eight-region Alpha world is never loaded here.
 
@@ -13,11 +14,9 @@ const MAX_SUPPLIERS_PER_SHORTAGE: int = 4
 const EXPECTED_MAJOR_ROSTER_COUNT: int = 50
 const PRIMARY_PLAYABLE_LIMIT: int = 30
 const COMMODITY_CATALOG_PATH: String = "res://data/alpha/commodity_market_1900.json"
-const POLITICAL_UNITS_PATH: String = "res://data/world_map/historical/political_units_1900.json"
 const CROSSWALK_PATH: String = "res://data/world_map/historical/major_economy_polity_crosswalk_1900.json"
 
 var country_states: Dictionary = {}
-var polity_records: Dictionary = {}
 var economy_polity_ids: Dictionary = {}
 var economy_by_polity_id: Dictionary = {}
 var routes: Array[Dictionary] = []
@@ -26,6 +25,7 @@ var history: Array[Dictionary] = []
 var initialization_error: String = ""
 
 var _authoritative_hour_source: Callable = Callable()
+var _political_authority: FormalDatedPoliticalAuthority = null
 var total_hour: int:
 	get:
 		assert(
@@ -40,12 +40,10 @@ var _routes_by_country: Dictionary = {}
 var _crosswalk_records: Dictionary = {}
 var _next_shipment_sequence: int = 1
 var _last_day_index: int = -1
-var _political_unit_count: int = 0
 
 
-func configure() -> bool:
+func configure(political_authority: FormalDatedPoliticalAuthority) -> bool:
 	country_states.clear()
-	polity_records.clear()
 	economy_polity_ids.clear()
 	economy_by_polity_id.clear()
 	routes.clear()
@@ -56,13 +54,13 @@ func configure() -> bool:
 	_commodities.clear()
 	_last_day_index = -1
 	_next_shipment_sequence = 1
-	_political_unit_count = 0
+	_political_authority = political_authority
 	initialization_error = ""
+	if _political_authority == null or not _political_authority.is_configured():
+		return _fail("正式经济缺少已初始化的日期政治权威")
 	if not _historical.configure():
 		return _fail(_historical.initialization_error)
 	if not _load_commodity_catalog():
-		return false
-	if not _load_polity_registry():
 		return false
 	if not _load_crosswalk():
 		return false
@@ -77,7 +75,7 @@ func configure() -> bool:
 				initialization_error,
 			]
 		)
-	if _political_unit_count <= country_states.size():
+	if _political_authority.total_record_count() <= country_states.size():
 		return _fail("世界政治单元目录不得等同于主要政权目录")
 	if _commodities.is_empty():
 		return _fail("正式世界商品目录为空")
@@ -100,7 +98,9 @@ func settle_hour_range(
 	return world_summary()
 
 
-func world_summary() -> Dictionary:
+func world_summary(query_total_hour: int = -1) -> Dictionary:
+	var summary_hour := total_hour if query_total_hour < 0 else query_total_hour
+	var political_date := V2DateTime.date_from_total_hour(summary_hour)
 	var population := 0
 	var demand := 0.0
 	var consumed := 0.0
@@ -112,8 +112,9 @@ func world_summary() -> Dictionary:
 	var major_power_count := 0
 	var primary_playable_count := 0
 	var secondary_roster_count := 0
-	for raw_state: Variant in country_states.values():
-		var state := raw_state as Dictionary
+	var active_economy_ids := _active_economy_ids(summary_hour)
+	for economy_id: String in active_economy_ids:
+		var state := country_states[economy_id] as Dictionary
 		population += int(state.get("population", 0))
 		var totals := state.get("daily_totals", {}) as Dictionary
 		demand += float(totals.get("demand_units", 0.0))
@@ -130,14 +131,21 @@ func world_summary() -> Dictionary:
 			"primary_playable": primary_playable_count += 1
 			"secondary_roster": secondary_roster_count += 1
 	return {
-		"total_hour": total_hour,
-		# Compatibility alias. This is the high-detail economy roster, not world total.
-		"country_count": country_states.size(),
-		"major_economy_count": country_states.size(),
-		"world_political_unit_count": _political_unit_count,
-		"detailed_polity_unit_count": economy_by_polity_id.size(),
+		"total_hour": summary_hour,
+		"political_date": political_date,
+		# Compatibility aliases describe currently active simulation participants.
+		"country_count": active_economy_ids.size(),
+		"major_economy_count": active_economy_ids.size(),
+		"major_economy_catalog_count": country_states.size(),
+		"world_political_unit_count": (
+			_political_authority.active_entity_ids_on(political_date).size()
+		),
+		"political_catalog_record_count": _political_authority.total_record_count(),
+		"detailed_polity_unit_count": _active_detailed_polity_count(summary_hour),
 		"background_polity_count": maxi(
-			0, _political_unit_count - economy_by_polity_id.size()
+			0,
+			_political_authority.active_entity_ids_on(political_date).size()
+			- _active_detailed_polity_count(summary_hour)
 		),
 		"primary_playable_count": (
 			leading_power_count
@@ -152,7 +160,10 @@ func world_summary() -> Dictionary:
 		"crosswalk_exception_count": _crosswalk_records.size(),
 		"population": population,
 		"commodity_count": _commodities.size(),
-		"active_shipments": shipments.size(),
+		"active_shipments": (
+			shipments.size() - _suspended_shipment_count(summary_hour)
+		),
+		"suspended_shipments": _suspended_shipment_count(summary_hour),
 		"route_count": routes.size(),
 		"verified_country_count": verified,
 		"bounded_country_count": bounded,
@@ -162,7 +173,7 @@ func world_summary() -> Dictionary:
 		"fulfillment_bp": BASIS_POINTS if demand <= 0.0 else int(
 			round(clampf(consumed / demand, 0.0, 1.0) * BASIS_POINTS)
 		),
-		"top_shortages": _top_world_shortages(8),
+		"top_shortages": _top_world_shortages(8, summary_hour),
 	}
 
 
@@ -174,13 +185,18 @@ func country_summary(entity_id: String) -> Dictionary:
 	if state.is_empty():
 		return {}
 	var result := state.duplicate(true)
+	var active_polity_ids := _active_polity_ids_for_economy(economy_id)
+	result["active_polity_ids"] = active_polity_ids
+	result["political_availability"] = (
+		"active" if not active_polity_ids.is_empty() else "temporally_unavailable"
+	)
 	result["top_shortages"] = _top_country_shortages(state, 8)
 	result["active_shipments"] = _shipment_count_for(economy_id)
 	return result
 
 
 func polity_summary(entity_id: String) -> Dictionary:
-	var polity := polity_records.get(entity_id, {}) as Dictionary
+	var polity := _political_authority.active_entity(entity_id)
 	if polity.is_empty():
 		return {}
 	var result := polity.duplicate(true)
@@ -189,19 +205,33 @@ func polity_summary(entity_id: String) -> Dictionary:
 	result["has_detailed_economy"] = detailed
 	result["economy_entity_id"] = economy_id
 	if detailed:
-		result["economy"] = country_summary(economy_id)
+		var economy_summary := country_summary(economy_id)
+		result["rank"] = int(economy_summary.get("rank", 0))
+		result["playability_tier"] = str(
+			economy_summary.get("playability_tier", "secondary_roster")
+		)
+		result["playability_tier_zh"] = str(
+			economy_summary.get("playability_tier_zh", "次要目录")
+		)
+		result["major_roster"] = true
+		result["primary_playable"] = bool(
+			economy_summary.get("primary_playable", false)
+		)
+		result["economy"] = economy_summary
+	else:
+		result["playability_tier"] = "background_npc"
+		result["playability_tier_zh"] = "背景政治单元"
+		result["major_roster"] = false
+		result["primary_playable"] = false
 	return result
 
 
 func has_polity(entity_id: String) -> bool:
-	return polity_records.has(entity_id)
+	return _political_authority.entity_exists(entity_id)
 
 
 func first_polity_id() -> String:
-	var ids: Array[String] = []
-	for raw_id: Variant in polity_records.keys():
-		ids.append(str(raw_id))
-	ids.sort()
+	var ids := _political_authority.active_entity_ids()
 	return ids[0] if not ids.is_empty() else ""
 
 
@@ -219,6 +249,14 @@ func polity_ids_for_economy(economy_id: String) -> Array[String]:
 
 func formal_verified_countries() -> Array[Dictionary]:
 	return _historical.formal_countries()
+
+
+func validate_authoritative_state() -> bool:
+	return (
+		_political_authority != null
+		and _political_authority.synchronize()
+		and _validate_state()
+	)
 
 
 func get_persistent_state() -> Dictionary:
@@ -315,35 +353,6 @@ func _load_commodity_catalog() -> bool:
 	return not _commodities.is_empty()
 
 
-func _load_polity_registry() -> bool:
-	var document := _read_document(POLITICAL_UNITS_PATH)
-	if document.is_empty():
-		return false
-	var units := document.get("units", []) as Array
-	_political_unit_count = int(document.get("unit_count", units.size()))
-	for raw_unit: Variant in units:
-		if not raw_unit is Dictionary:
-			continue
-		var unit := (raw_unit as Dictionary).duplicate(true)
-		var entity_id := str(unit.get("id", ""))
-		if entity_id.is_empty():
-			continue
-		unit["entity_id"] = entity_id
-		unit["playability_tier"] = "background_npc"
-		unit["playability_tier_zh"] = "背景政治单元"
-		unit["major_roster"] = false
-		unit["primary_playable"] = false
-		unit["economy_entity_id"] = ""
-		polity_records[entity_id] = unit
-	if polity_records.size() != _political_unit_count:
-		return _fail(
-			"1900政治单元目录计数不一致：声明%d，加载%d" % [
-				_political_unit_count, polity_records.size(),
-			]
-		)
-	return true
-
-
 func _load_crosswalk() -> bool:
 	var document := _read_document(CROSSWALK_PATH)
 	if document.is_empty():
@@ -359,7 +368,7 @@ func _load_crosswalk() -> bool:
 		if economy_id.is_empty() or polity_ids.is_empty():
 			return _fail("主要经济体交叉表记录缺少ID")
 		for polity_id: String in polity_ids:
-			if not polity_records.has(polity_id):
+			if not _political_authority.has_catalog_entity(polity_id):
 				return _fail("交叉表引用未知政治单元：%s" % polity_id)
 		_crosswalk_records[economy_id] = record
 	return true
@@ -445,20 +454,10 @@ func _initialize_country(record: Dictionary) -> void:
 	economy_polity_ids[entity_id] = polity_ids.duplicate()
 	for polity_id: String in polity_ids:
 		economy_by_polity_id[polity_id] = entity_id
-		var polity := polity_records[polity_id] as Dictionary
-		polity["rank"] = rank
-		polity["playability_tier"] = str(tier.get("id", "secondary_roster"))
-		polity["playability_tier_zh"] = str(
-			tier.get("name_zh", "次要目录")
-		)
-		polity["major_roster"] = true
-		polity["primary_playable"] = rank > 0 and rank <= PRIMARY_PLAYABLE_LIMIT
-		polity["economy_entity_id"] = entity_id
-		polity_records[polity_id] = polity
 
 
 func _resolve_polity_ids(economy_id: String) -> Array[String]:
-	if polity_records.has(economy_id):
+	if _political_authority.has_catalog_entity(economy_id):
 		return [economy_id]
 	var crosswalk := _crosswalk_records.get(economy_id, {}) as Dictionary
 	return DataRecordUtils.to_string_array(crosswalk.get("polity_ids", []))
@@ -530,11 +529,15 @@ func _settle_day(settlement_hour: int) -> void:
 	if day_index <= _last_day_index:
 		return
 	_deliver_shipments(settlement_hour)
-	for raw_id: Variant in country_states:
-		_settle_country(str(raw_id), settlement_hour)
+	# Production and demand accrued over the elapsed day use the political
+	# context that existed inside that interval. Deliveries and new dispatches
+	# below use the authority at the midnight commit boundary.
+	var elapsed_interval_hour := maxi(0, settlement_hour - 1)
+	for economy_id: String in _active_economy_ids(elapsed_interval_hour):
+		_settle_country(economy_id, settlement_hour)
 	_schedule_shortage_shipments(settlement_hour)
 	_last_day_index = day_index
-	var summary := world_summary()
+	var summary := world_summary(settlement_hour)
 	summary["day_index"] = day_index
 	history.append(summary)
 	while history.size() > HISTORY_LIMIT:
@@ -611,7 +614,9 @@ func _schedule_shortage_shipments(settlement_hour: int) -> void:
 	var created := 0
 	var receiver_ids: Array[String] = []
 	for raw_id: Variant in country_states:
-		receiver_ids.append(str(raw_id))
+		var receiver_id := str(raw_id)
+		if _economy_is_politically_active(receiver_id, settlement_hour):
+			receiver_ids.append(receiver_id)
 	receiver_ids.sort()
 	for receiver_id: String in receiver_ids:
 		if created >= MAX_SHIPMENTS_PER_DAY:
@@ -622,7 +627,9 @@ func _schedule_shortage_shipments(settlement_hour: int) -> void:
 				break
 			var commodity_id := str(shortage.get("commodity_id", ""))
 			var remaining := float(shortage.get("unmet", 0.0))
-			var suppliers := _candidate_suppliers(receiver_id, commodity_id)
+			var suppliers := _candidate_suppliers(
+				receiver_id, commodity_id, settlement_hour
+			)
 			for supplier: Dictionary in suppliers:
 				if remaining <= 0.0001 or created >= MAX_SHIPMENTS_PER_DAY:
 					break
@@ -681,6 +688,13 @@ func _deliver_shipments(settlement_hour: int) -> void:
 			continue
 		var destination_id := str(shipment.get("destination_entity_id", ""))
 		var origin_id := str(shipment.get("origin_entity_id", ""))
+		if (
+			not _economy_is_politically_active(origin_id, settlement_hour)
+			or not _economy_is_politically_active(
+				destination_id, settlement_hour
+			)
+		):
+			continue
 		var commodity_id := str(shipment.get("commodity_id", ""))
 		var units := float(shipment.get("units", 0.0))
 		var value := int(shipment.get("value_centimes", 0))
@@ -707,14 +721,20 @@ func _deliver_shipments(settlement_hour: int) -> void:
 		shipments.remove_at(index)
 
 
-func _candidate_suppliers(receiver_id: String, commodity_id: String) -> Array[Dictionary]:
+func _candidate_suppliers(
+	receiver_id: String, commodity_id: String, settlement_hour: int
+) -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	for raw_index: Variant in _routes_by_country.get(receiver_id, []) as Array:
 		var route := routes[int(raw_index)] as Dictionary
 		var origin := str(route.get("from", ""))
 		var destination := str(route.get("to", ""))
 		var other := destination if origin == receiver_id else origin
-		if other == receiver_id or not country_states.has(other):
+		if (
+			other == receiver_id
+			or not country_states.has(other)
+			or not _economy_is_politically_active(other, settlement_hour)
+		):
 			continue
 		var state := country_states[other] as Dictionary
 		var available := float(
@@ -820,10 +840,14 @@ func _top_country_shortages(state: Dictionary, limit: int) -> Array[Dictionary]:
 	return rows
 
 
-func _top_world_shortages(limit: int) -> Array[Dictionary]:
+func _top_world_shortages(
+	limit: int, query_total_hour: int = -1
+) -> Array[Dictionary]:
 	var rows: Array[Dictionary] = []
-	for raw_state: Variant in country_states.values():
-		rows.append_array(_top_country_shortages(raw_state as Dictionary, 3))
+	for economy_id: String in _active_economy_ids(query_total_hour):
+		rows.append_array(_top_country_shortages(
+			country_states[economy_id] as Dictionary, 3
+		))
 	rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return float(a.get("unmet", 0.0)) > float(b.get("unmet", 0.0))
 	)
@@ -858,7 +882,7 @@ func _validate_candidate_state(
 	candidate_last_day_index: int,
 	expected_total_hour: int
 ) -> bool:
-	if _political_unit_count != polity_records.size():
+	if _political_authority == null or not _political_authority.is_configured():
 		return false
 	if expected_total_hour < 0:
 		return false
@@ -885,13 +909,8 @@ func _validate_candidate_state(
 			return false
 		for polity_id: String in polity_ids:
 			if (
-				not polity_records.has(polity_id)
+				not _political_authority.has_catalog_entity(polity_id)
 				or str(economy_by_polity_id.get(polity_id, "")) != economy_id
-				or not bool(
-					(polity_records[polity_id] as Dictionary).get(
-						"major_roster", false
-					)
-				)
 			):
 				return false
 		for value: Variant in (state.get("inventory", {}) as Dictionary).values():
@@ -912,6 +931,63 @@ func _validate_candidate_state(
 		):
 			return false
 	return true
+
+
+func _active_polity_ids_for_economy(
+	economy_id: String, query_total_hour: int = -1
+) -> Array[String]:
+	var result: Array[String] = []
+	var query_date := _political_authority.current_date()
+	if query_total_hour >= 0:
+		query_date = V2DateTime.date_from_total_hour(query_total_hour)
+	for polity_id: String in polity_ids_for_economy(economy_id):
+		if _political_authority.entity_exists_on(polity_id, query_date):
+			result.append(polity_id)
+	return result
+
+
+func _economy_is_politically_active(
+	economy_id: String, query_total_hour: int = -1
+) -> bool:
+	return not _active_polity_ids_for_economy(
+		economy_id, query_total_hour
+	).is_empty()
+
+
+func _active_economy_ids(query_total_hour: int = -1) -> Array[String]:
+	var result: Array[String] = []
+	for raw_id: Variant in country_states.keys():
+		var economy_id := str(raw_id)
+		if _economy_is_politically_active(economy_id, query_total_hour):
+			result.append(economy_id)
+	result.sort()
+	return result
+
+
+func _active_detailed_polity_count(query_total_hour: int = -1) -> int:
+	var count := 0
+	var query_date := _political_authority.current_date()
+	if query_total_hour >= 0:
+		query_date = V2DateTime.date_from_total_hour(query_total_hour)
+	for raw_id: Variant in economy_by_polity_id.keys():
+		if _political_authority.entity_exists_on(str(raw_id), query_date):
+			count += 1
+	return count
+
+
+func _suspended_shipment_count(query_total_hour: int = -1) -> int:
+	var count := 0
+	for shipment: Dictionary in shipments:
+		if (
+			not _economy_is_politically_active(
+				str(shipment.get("origin_entity_id", "")), query_total_hour
+			)
+			or not _economy_is_politically_active(
+				str(shipment.get("destination_entity_id", "")), query_total_hour
+			)
+		):
+			count += 1
+	return count
 
 
 func _read_document(path: String) -> Dictionary:

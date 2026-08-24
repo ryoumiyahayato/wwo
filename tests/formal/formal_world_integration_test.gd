@@ -48,6 +48,16 @@ func _check_formal_economy() -> void:
 	var economy := simulation.economy
 	var initial := simulation.world_summary()
 	_check_world_roster(initial, economy)
+	_check(
+		simulation.politics.provenance().get("catalog_sha256", "") != "",
+		"日期政治权威保留源目录指纹"
+	)
+	_check(
+		not simulation.has_polity("cshapes_gw_522")
+		and simulation.politics.temporal_status("cshapes_gw_522")
+		== "outside_validity_interval",
+		"尚未生效的政治单元保持明确的日期不可用状态"
+	)
 	var first_polity_id := simulation.first_polity_id()
 	_check(not first_polity_id.is_empty(), "正式组合根暴露确定性首个政治单元")
 	_check(
@@ -77,6 +87,11 @@ func _check_formal_economy() -> void:
 		"主要政权长期需求满足率有效"
 	)
 	_check(
+		int(after.get("world_political_unit_count", 0)) == 151
+		and simulation.has_polity("cshapes_gw_522"),
+		"日期推进激活随后生效的政治单元并供经济与UI共同查询"
+	)
+	_check(
 		_no_negative_inventory(economy.country_states),
 		"所有高细节政权库存非负"
 	)
@@ -95,8 +110,12 @@ func _check_world_roster(
 	initial: Dictionary, economy: FormalWorldEconomyService
 ) -> void:
 	_check(
-		int(initial.get("world_political_unit_count", 0)) == 151,
-		"世界地图包含151个1900政治单元，而非只有50国"
+		int(initial.get("world_political_unit_count", 0)) == 146,
+		"1900-01-01只暴露有效期覆盖当天的146个政治单元"
+	)
+	_check(
+		int(initial.get("political_catalog_record_count", 0)) == 151,
+		"日期过滤不丢弃151条历史政治证据"
 	)
 	_check(
 		int(initial.get("major_economy_count", 0)) == 50,
@@ -115,8 +134,8 @@ func _check_world_roster(
 		"第31至50位保留为次要政权候选"
 	)
 	_check(
-		int(initial.get("background_polity_count", 0)) == 96,
-		"其余96个地图政治单元作为纯背景世界存在"
+		int(initial.get("background_polity_count", 0)) == 91,
+		"当日其余91个有效地图政治单元作为背景世界存在"
 	)
 	_check(
 		not economy.country_states.has("country:loran_federation")
@@ -169,6 +188,33 @@ func _check_formal_simulation() -> void:
 		restored_simulation.world_summary() == simulation.world_summary(),
 		"组合根恢复后世界摘要等价"
 	)
+	var before_rejected := restored_simulation.get_persistent_state()
+	var rejected := before_rejected.duplicate(true)
+	var rejected_politics := rejected.get("politics", {}) as Dictionary
+	rejected_politics["current_date"] = "1900-01-01"
+	rejected["politics"] = rejected_politics
+	_check(
+		not restored_simulation.restore_persistent_state(rejected),
+		"组合根拒绝政治日期与经济时间不一致的候选世界"
+	)
+	_check(
+		restored_simulation.get_persistent_state() == before_rejected,
+		"跨域候选恢复失败时当前世界完全不变"
+	)
+	var batched := FormalWorldSimulation.new()
+	var stepped := FormalWorldSimulation.new()
+	_check(
+		batched.initialize() and stepped.initialize(),
+		"日期边界确定性测试可初始化两个正式世界"
+	)
+	if batched.initialized and stepped.initialized:
+		batched.advance_minutes(40 * 24 * 60)
+		for _day: int in range(40):
+			stepped.advance_minutes(24 * 60)
+		_check(
+			batched.get_persistent_state() == stepped.get_persistent_state(),
+			"跨政治生效日期的大步与逐日推进产生相同世界状态"
+		)
 
 
 func _check_formal_atomic_save_recovery() -> void:
@@ -334,8 +380,13 @@ func _check_runtime_application(application: FormalWorldApplication) -> void:
 	)
 	var runtime_summary := application.formal_simulation.world_summary()
 	_check(
-		int(runtime_summary.get("world_political_unit_count", 0)) == 151,
-		"正式半球运行时持有完整政治世界"
+		int(runtime_summary.get("world_political_unit_count", 0)) == 146,
+		"正式半球运行时只呈现1900-01-01日期有效政治世界"
+	)
+	_check(
+		application._history_entity_by_id.size()
+		== application.formal_simulation.politics.active_entity_count(),
+		"正式半球地图实体集合来自统一日期政治权威"
 	)
 	_check(
 		int(runtime_summary.get("major_economy_count", 0)) == 50,

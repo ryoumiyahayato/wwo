@@ -43,8 +43,18 @@ func _run() -> void:
 			var summary := view.formal_simulation.world_summary()
 			test.equal(
 				int(summary.get("world_political_unit_count", 0)),
+				146,
+				"产品世界呈现1900-01-01日期有效政治单元"
+			)
+			test.equal(
+				int(summary.get("political_catalog_record_count", 0)),
 				151,
-				"产品世界包含151个历史政治单元"
+				"产品世界保留全部151条历史政治证据"
+			)
+			test.equal(
+				view._history_entity_by_id.size(),
+				view.formal_simulation.politics.active_entity_count(),
+				"产品地图与日期政治权威使用同一实体集合"
 			)
 			test.equal(
 				int(summary.get("major_economy_count", 0)),
