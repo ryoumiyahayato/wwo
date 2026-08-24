@@ -73,6 +73,14 @@ func _check_formal_economy() -> void:
 	var after := simulation.advance_minutes(90 * 24 * 60)
 	_check(int(after.get("total_hour", 0)) == 90 * 24, "90日结算完成")
 	_check(
+		int(after.get("world_political_unit_count", 0)) == 151,
+		"跨越历史有效期边界后五个新政治单元确定性激活"
+	)
+	_check(
+		int(after.get("recorded_historical_boundary_count", 0)) == 5,
+		"政治历史保留五次可解释的日期激活记录"
+	)
+	_check(
 		int(after.get("fulfillment_bp", -1)) >= 0,
 		"主要政权长期需求满足率有效"
 	)
@@ -95,8 +103,12 @@ func _check_world_roster(
 	initial: Dictionary, economy: FormalWorldEconomyService
 ) -> void:
 	_check(
-		int(initial.get("world_political_unit_count", 0)) == 151,
-		"世界地图包含151个1900政治单元，而非只有50国"
+		int(initial.get("historical_political_record_count", 0)) == 151,
+		"统一日期权威保留151条历史政治记录"
+	)
+	_check(
+		int(initial.get("world_political_unit_count", 0)) == 146,
+		"1900年1月1日只激活146个有效政治单元"
 	)
 	_check(
 		int(initial.get("major_economy_count", 0)) == 50,
@@ -115,8 +127,8 @@ func _check_world_roster(
 		"第31至50位保留为次要政权候选"
 	)
 	_check(
-		int(initial.get("background_polity_count", 0)) == 96,
-		"其余96个地图政治单元作为纯背景世界存在"
+		int(initial.get("background_polity_count", 0)) == 91,
+		"其余91个当日有效政治单元作为纯背景世界存在"
 	)
 	_check(
 		not economy.country_states.has("country:loran_federation")
@@ -334,8 +346,8 @@ func _check_runtime_application(application: FormalWorldApplication) -> void:
 	)
 	var runtime_summary := application.formal_simulation.world_summary()
 	_check(
-		int(runtime_summary.get("world_political_unit_count", 0)) == 151,
-		"正式半球运行时持有完整政治世界"
+		int(runtime_summary.get("world_political_unit_count", 0)) == 146,
+		"正式半球运行时持有当日有效政治世界"
 	)
 	_check(
 		int(runtime_summary.get("major_economy_count", 0)) == 50,
