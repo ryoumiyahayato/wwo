@@ -142,6 +142,26 @@ foreach ($test in $tests) {
     ) -TimeoutSeconds $timeout
 }
 
+$politicalProbeArguments = @(
+    '--headless', '--path', $ProjectPath,
+    '--script', 'res://tests/formal/runtime_political_snapshot_probe.gd'
+)
+$politicalProbeOne = Invoke-GodotStep -Name 'Runtime political fresh-process hash A' -Arguments $politicalProbeArguments -TimeoutSeconds 120
+$politicalProbeTwo = Invoke-GodotStep -Name 'Runtime political fresh-process hash B' -Arguments $politicalProbeArguments -TimeoutSeconds 120
+$politicalHashPattern = '(?m)^RUNTIME_POLITICAL_SNAPSHOT_SHA256=([0-9a-f]{64})$'
+if ($politicalProbeOne -notmatch $politicalHashPattern) {
+    throw 'Runtime political snapshot probe A did not emit a canonical hash'
+}
+$politicalHashOne = $Matches[1]
+if ($politicalProbeTwo -notmatch $politicalHashPattern) {
+    throw 'Runtime political snapshot probe B did not emit a canonical hash'
+}
+$politicalHashTwo = $Matches[1]
+if ($politicalHashOne -ne $politicalHashTwo) {
+    throw "Runtime political snapshot differs across fresh processes: $politicalHashOne != $politicalHashTwo"
+}
+Write-Host "Runtime political fresh-process deterministic hash: $politicalHashOne"
+
 $null = Invoke-GodotStep -Name 'Headless formal product startup' -Arguments @(
     '--headless', '--path', $ProjectPath, '--quit-after', '5'
 ) -TimeoutSeconds 30

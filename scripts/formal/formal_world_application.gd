@@ -14,12 +14,20 @@ var _formal_status: String = ""
 var _last_summary: Dictionary = {}
 var _packaged_probe_failures: int = 0
 var _immutable_historical_evidence_report: Dictionary = {}
+var _historical_evidence_surface_building: bool = false
 
 
 func _ready() -> void:
+	var formal_initialized := formal_simulation.initialize()
+	if formal_initialized:
+		_dated_units_document = {
+			"units": formal_simulation.historical_political_evidence_units(),
+		}
+	_historical_evidence_surface_building = true
 	super._ready()
+	_historical_evidence_surface_building = false
 	_immutable_historical_evidence_report = super.historical_evidence_report()
-	if not formal_simulation.initialize():
+	if not formal_initialized:
 		_formal_status = "正式世界初始化失败：%s" % formal_simulation.initialization_error
 		_data_errors.append(_formal_status)
 	else:
@@ -50,7 +58,7 @@ func _run_packaged_player_baseline_probe() -> void:
 	_packaged_probe_require(_data_errors.is_empty(), "正式模拟产生数据错误")
 	_packaged_probe_require(_history_entity_by_id.size() == 146, "运行时政治实体数量不正确")
 	_packaged_probe_require(
-		formal_simulation.historical_evidence.record_count() == 151,
+		formal_simulation.historical_evidence_view().record_count() == 151,
 		"历史政治证据数量不正确"
 	)
 	_packaged_probe_require(_missing_flag_record_ids.is_empty(), "历史旗帜资源存在缺失")
@@ -327,9 +335,11 @@ func _draw_polity_content(
 			str(polity.get("relationship", "")),
 		],
 	]
-	var controller_id := str(polity.get("controller_id", ""))
-	if not controller_id.is_empty():
-		polity_lines.append("控制方：%s" % controller_id)
+	for relation_value: Variant in polity.get("authority_relations", []) as Array:
+		if relation_value is Dictionary:
+			polity_lines.append(
+				_authority_relation_label(relation_value as Dictionary)
+			)
 	y = _draw_panel_lines(
 		rect,
 		y,
@@ -378,7 +388,7 @@ func _draw_detailed_economy(
 func _draw_background_polity_notice(rect: Rect2, y: float) -> void:
 	_draw_label(
 		rect.position + Vector2(20.0, y),
-		"该单元属于背景世界：保留边界、归属与外交存在，不运行高细节经济。",
+		"该单元属于背景世界：保留身份、来源元数据与经济映射，不运行高细节经济。",
 		9,
 		Color(0.91, 0.70, 0.45, 0.98)
 	)
@@ -449,7 +459,9 @@ func _selected_polity_entity_id() -> String:
 
 	var home_id := _home_historical_entity_id()
 	if not home_id.begins_with("state:"):
-		home_id = formal_simulation.political_registry.runtime_id_for_source(home_id)
+		home_id = formal_simulation.political_registry_view().runtime_id_for_source(
+			home_id
+		)
 	if formal_simulation.has_polity(home_id):
 		return home_id
 
@@ -460,7 +472,10 @@ func _selected_polity_entity_id() -> String:
 
 
 func _rebuild_historical_political_world() -> void:
-	if not formal_simulation.initialized:
+	if (
+		_historical_evidence_surface_building
+		or not formal_simulation.initialized
+	):
 		super._rebuild_historical_political_world()
 		return
 	var historical_document := _dated_units_document
@@ -490,6 +505,23 @@ func historical_evidence_report() -> Dictionary:
 	if _immutable_historical_evidence_report.is_empty():
 		return super.historical_evidence_report()
 	return _immutable_historical_evidence_report.duplicate(true)
+
+
+func _authority_relation_label(relation: Dictionary) -> String:
+	var relation_names := {
+		"administration": "行政关系",
+		"occupation": "占领关系",
+		"protection": "保护关系",
+		"legacy_controller": "历史兼容关系",
+	}
+	var relation_type := str(relation.get("relation_type", ""))
+	return "%s：%s → %s（%s 至 %s）" % [
+		str(relation_names.get(relation_type, relation_type)),
+		str(relation.get("source_runtime_id", "")),
+		str(relation.get("target_runtime_id", "")),
+		str(relation.get("valid_from", "")),
+		str(relation.get("valid_to", "")),
+	]
 
 
 func _compact_integer(value: int) -> String:

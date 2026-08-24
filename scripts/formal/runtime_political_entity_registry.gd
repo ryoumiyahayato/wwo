@@ -3,7 +3,8 @@ extends RefCounted
 ## Sole owner of political identities in the current formal world. Historical
 ## validity queries never mutate this registry.
 
-const SCHEMA_ID: String = "runtime_political_registry_v1"
+const SCHEMA_ID: String = "runtime_political_registry_v2"
+const LEGACY_SCHEMA_ID: String = "runtime_political_registry_v1"
 const INITIAL_DATE: String = "1900-01-01"
 const EXPECTED_INITIAL_ENTITY_COUNT: int = 146
 const ALLOWED_RELATION_KINDS: Array[String] = [
@@ -22,8 +23,9 @@ var _authority_relations: Array[Dictionary] = []
 
 
 func configure(evidence: HistoricalPoliticalEvidenceCatalog) -> bool:
+	if _configured:
+		return _fail("Runtime political registry is already initialized")
 	initialization_error = ""
-	_configured = false
 	_evidence_fingerprint = ""
 	_entities_by_runtime_id.clear()
 	_runtime_id_by_source_id.clear()
@@ -106,11 +108,12 @@ func authority_relations() -> Array[Dictionary]:
 	return _authority_relations.duplicate(true)
 
 
-func compatibility_controller_id(runtime_id: String) -> String:
+func authority_relations_for_target(runtime_id: String) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
 	for relation: Dictionary in _authority_relations:
-		if str(relation.get("subject_runtime_id", "")) == runtime_id:
-			return str(relation.get("authority_runtime_id", ""))
-	return ""
+		if str(relation.get("target_runtime_id", "")) == runtime_id:
+			result.append(relation.duplicate(true))
+	return result
 
 
 func snapshot() -> Dictionary:
@@ -129,7 +132,7 @@ func restore_snapshot(
 	if evidence == null or not evidence.is_configured():
 		return false
 	if (
-		str(snapshot_value.get("schema_id", "")) != SCHEMA_ID
+		str(snapshot_value.get("schema_id", "")) not in [SCHEMA_ID, LEGACY_SCHEMA_ID]
 		or str(snapshot_value.get("evidence_fingerprint", ""))
 		!= evidence.fingerprint()
 		or not snapshot_value.get("entities", []) is Array
@@ -178,29 +181,44 @@ func restore_snapshot(
 	if candidate_source_ids != expected_sources:
 		return false
 
+	var expected_relations := _expected_authority_relations(
+		evidence, candidate_sources
+	)
 	var candidate_relations: Array[Dictionary] = []
-	var relation_keys: Dictionary = {}
-	for relation_value: Variant in snapshot_value.get("authority_relations", []) as Array:
-		if not relation_value is Dictionary:
+	if str(snapshot_value.get("schema_id", "")) == LEGACY_SCHEMA_ID:
+		var legacy_relations := DataRecordUtils.to_dictionary_array(
+			snapshot_value.get("authority_relations", [])
+		)
+		_sort_legacy_relations(legacy_relations)
+		if legacy_relations != _legacy_authority_relations(expected_relations):
 			return false
-		var relation := (relation_value as Dictionary).duplicate(true)
-		var subject_id := str(relation.get("subject_runtime_id", ""))
-		var authority_id := str(relation.get("authority_runtime_id", ""))
-		var relation_kind := str(relation.get("relation_kind", ""))
-		var relation_key := "%s|%s|%s" % [subject_id, relation_kind, authority_id]
-		if (
-			not candidate_entities.has(subject_id)
-			or not candidate_entities.has(authority_id)
-			or relation_kind not in ALLOWED_RELATION_KINDS
-			or relation_keys.has(relation_key)
-			or not relation.get("provenance", {}) is Dictionary
-		):
+		candidate_relations = expected_relations
+	else:
+		var relation_keys: Dictionary = {}
+		for relation_value: Variant in snapshot_value.get("authority_relations", []) as Array:
+			if not relation_value is Dictionary:
+				return false
+			var relation := (relation_value as Dictionary).duplicate(true)
+			var source_id := str(relation.get("source_runtime_id", ""))
+			var target_id := str(relation.get("target_runtime_id", ""))
+			var relation_type := str(relation.get("relation_type", ""))
+			var relation_key := "%s|%s|%s" % [target_id, relation_type, source_id]
+			if (
+				relation.keys().size() != 6
+				or not candidate_entities.has(source_id)
+				or not candidate_entities.has(target_id)
+				or relation_type not in ALLOWED_RELATION_KINDS
+				or relation_keys.has(relation_key)
+				or not relation.get("provenance", {}) is Dictionary
+				or str(relation.get("valid_from", "")).is_empty()
+				or str(relation.get("valid_to", "")).is_empty()
+			):
+				return false
+			relation_keys[relation_key] = true
+			candidate_relations.append(relation)
+		_sort_relations(candidate_relations)
+		if candidate_relations != expected_relations:
 			return false
-		relation_keys[relation_key] = true
-		candidate_relations.append(relation)
-	_sort_relations(candidate_relations)
-	if candidate_relations != _expected_authority_relations(evidence, candidate_sources):
-		return false
 
 	_entities_by_runtime_id = candidate_entities
 	_runtime_id_by_source_id = candidate_sources
@@ -218,7 +236,10 @@ func _seed_authority_relations(
 		evidence, _runtime_id_by_source_id
 	)
 	for relation: Dictionary in _authority_relations:
-		if str(relation.get("authority_runtime_id", "")).is_empty():
+		if (
+			str(relation.get("source_runtime_id", "")).is_empty()
+			or str(relation.get("target_runtime_id", "")).is_empty()
+		):
 			return _fail("Historical controller is not an initial runtime entity")
 	return true
 
@@ -234,15 +255,17 @@ func _expected_authority_relations(
 			continue
 		var subject_source_id := str(record.get("source_historical_id", ""))
 		result.append({
-			"subject_runtime_id": str(
-				runtime_ids_by_source.get(subject_source_id, "")
-			),
-			"authority_runtime_id": str(
+			"source_runtime_id": str(
 				runtime_ids_by_source.get(controller_source_id, "")
 			),
-			"relation_kind": _relation_kind_for(
+			"target_runtime_id": str(
+				runtime_ids_by_source.get(subject_source_id, "")
+			),
+			"relation_type": _relation_kind_for(
 				str(record.get("relationship", ""))
 			),
+			"valid_from": str(record.get("valid_from", "")),
+			"valid_to": str(record.get("valid_to", "")),
 			"provenance": {
 				"source_historical_id": subject_source_id,
 				"source_field": "controller_id",
@@ -272,6 +295,39 @@ func _valid_seed_lineage(lineage: Dictionary) -> bool:
 
 
 func _sort_relations(relations: Array[Dictionary]) -> void:
+	relations.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var a_key := "%s|%s|%s" % [
+			str(a.get("target_runtime_id", "")),
+			str(a.get("relation_type", "")),
+			str(a.get("source_runtime_id", "")),
+		]
+		var b_key := "%s|%s|%s" % [
+			str(b.get("target_runtime_id", "")),
+			str(b.get("relation_type", "")),
+			str(b.get("source_runtime_id", "")),
+		]
+		return a_key < b_key
+	)
+
+
+func _legacy_authority_relations(
+	typed_relations: Array[Dictionary]
+) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for relation: Dictionary in typed_relations:
+		result.append({
+			"subject_runtime_id": str(relation.get("target_runtime_id", "")),
+			"authority_runtime_id": str(relation.get("source_runtime_id", "")),
+			"relation_kind": str(relation.get("relation_type", "")),
+			"provenance": (
+				relation.get("provenance", {}) as Dictionary
+			).duplicate(true),
+		})
+	_sort_legacy_relations(result)
+	return result
+
+
+func _sort_legacy_relations(relations: Array[Dictionary]) -> void:
 	relations.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		var a_key := "%s|%s|%s" % [
 			str(a.get("subject_runtime_id", "")),

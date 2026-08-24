@@ -104,7 +104,7 @@ func _run() -> void:
 		await _finish()
 		return
 	if not _require(
-		application.formal_simulation.historical_evidence.record_count() == 151,
+		application.formal_simulation.historical_evidence_view().record_count() == 151,
 		"历史页面未保留151条政治证据"
 	):
 		await _finish()

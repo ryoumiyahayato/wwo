@@ -36,13 +36,13 @@ var _historical := AlphaHistoricalWorldEconomyData.new()
 var _commodities: Dictionary = {}
 var _routes_by_country: Dictionary = {}
 var _crosswalk_records: Dictionary = {}
-var _political_registry: RuntimePoliticalEntityRegistry = null
+var _political_registry: RuntimePoliticalEntityView = null
 var _next_shipment_sequence: int = 1
 var _last_day_index: int = -1
 var _political_unit_count: int = 0
 
 
-func configure(political_registry: RuntimePoliticalEntityRegistry) -> bool:
+func configure(political_registry: RuntimePoliticalEntityView) -> bool:
 	country_states.clear()
 	economy_polity_ids.clear()
 	economy_by_polity_id.clear()
@@ -82,6 +82,21 @@ func configure(political_registry: RuntimePoliticalEntityRegistry) -> bool:
 	if _commodities.is_empty():
 		return _fail("正式世界商品目录为空")
 	return _validate_state()
+
+
+func bind_runtime_political_view(
+	political_registry: RuntimePoliticalEntityView
+) -> bool:
+	if political_registry == null or not political_registry.is_configured():
+		return false
+	if (
+		_political_unit_count > 0
+		and _political_unit_count != political_registry.entity_count()
+	):
+		return false
+	_political_registry = political_registry
+	_political_unit_count = political_registry.entity_count()
+	return true
 
 
 func bind_authoritative_hour_source(source: Callable) -> void:

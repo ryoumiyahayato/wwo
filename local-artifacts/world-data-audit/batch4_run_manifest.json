@@ -1,5 +1,5 @@
 {
-  "artifact_digest": "3821908b523605cbf2f92d051fbf7edd8edc89ac856f08b6c8442e284cf6652c",
+  "artifact_digest": "9e178176e34eaffa66e307227fd02b6f1d0c41cae3a5ed3f0d27ffc403c5fe40",
   "artifacts": [
     {
       "bytes": 40715,
@@ -39,7 +39,7 @@
     {
       "bytes": 15908,
       "path": "batch3_loader_contract.json",
-      "sha256": "590449528e9476142217607014cfa263190ac72e5582ff6179ce289fcfb20e7c"
+      "sha256": "6a574b95ebaa404a3acc2c1383e551ea944aadd03a5d5d69fbf65ae035fd0322"
     },
     {
       "bytes": 55602,
@@ -112,7 +112,7 @@
       "verified_or_documented_flag_units": 151
     },
     "batch4": {
-      "artifact_digest_before_manifest": "3821908b523605cbf2f92d051fbf7edd8edc89ac856f08b6c8442e284cf6652c",
+      "artifact_digest_before_manifest": "9e178176e34eaffa66e307227fd02b6f1d0c41cae3a5ed3f0d27ffc403c5fe40",
       "artifact_file_count_before_manifest": 15,
       "concurrency": "1 process; no process pool or thread pool",
       "large_temporary_artifacts": [],

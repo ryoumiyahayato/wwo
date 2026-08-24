@@ -15,8 +15,9 @@ var _sorted_source_ids: Array[String] = []
 
 
 func configure(path: String = DEFAULT_PATH) -> bool:
+	if _configured:
+		return _fail("Historical political evidence is already initialized")
 	initialization_error = ""
-	_configured = false
 	_fingerprint = ""
 	_snapshot_date = ""
 	_records_by_source_id.clear()
@@ -137,6 +138,15 @@ func source_ids_active_on(date: String) -> Array[String]:
 	for candidate: Dictionary in records_active_on(date):
 		result.append(str(candidate.get("source_historical_id", "")))
 	return result
+
+
+func read_only_snapshot() -> Dictionary:
+	return {
+		"configured": _configured,
+		"fingerprint": _fingerprint,
+		"snapshot_date": _snapshot_date,
+		"records": records(),
+	}
 
 
 func _is_valid_date(value: String) -> bool:

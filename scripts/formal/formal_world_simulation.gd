@@ -9,12 +9,15 @@ const SAVE_PATH: String = "user://formal_world_1900.json"
 const SCHEMA_ID: String = "formal_world_simulation_v3"
 const EVIDENCE_STATE_SCHEMA_ID: String = "historical_political_evidence_v1"
 
-var historical_evidence := HistoricalPoliticalEvidenceCatalog.new()
-var political_registry := RuntimePoliticalEntityRegistry.new()
+var _historical_evidence := HistoricalPoliticalEvidenceCatalog.new()
+var _political_registry := RuntimePoliticalEntityRegistry.new()
+var _historical_evidence_view := HistoricalPoliticalEvidenceView.new()
+var _political_registry_view := RuntimePoliticalEntityView.new()
 var economy := FormalWorldEconomyService.new()
 var initialized: bool = false
 var initialization_error: String = ""
 var total_minutes: int = 0
+var _initialization_attempted: bool = false
 var _minute_remainder: int:
 	get:
 		return total_minutes % 60
@@ -27,23 +30,36 @@ func _init() -> void:
 
 
 func initialize() -> bool:
+	if _initialization_attempted:
+		initialization_error = "Formal world composition is already initialized"
+		return false
+	_initialization_attempted = true
 	initialization_error = ""
 	total_minutes = 0
-	if not historical_evidence.configure():
-		initialization_error = historical_evidence.initialization_error
+	if not _historical_evidence.configure():
+		initialization_error = _historical_evidence.initialization_error
 		initialized = false
 		return false
-	if not political_registry.configure(historical_evidence):
-		initialization_error = political_registry.initialization_error
+	if not _political_registry.configure(_historical_evidence):
+		initialization_error = _political_registry.initialization_error
 		initialized = false
 		return false
-	if not economy.configure(political_registry):
+	_refresh_read_only_views()
+	if not economy.configure(_political_registry_view):
 		initialization_error = economy.initialization_error
 		initialized = false
 		return false
 	initialized = true
 	state_changed.emit({"initialized": true})
 	return true
+
+
+func historical_evidence_view() -> HistoricalPoliticalEvidenceView:
+	return _historical_evidence_view
+
+
+func political_registry_view() -> RuntimePoliticalEntityView:
+	return _political_registry_view
 
 
 func advance_minutes(minutes: int) -> Dictionary:
@@ -69,11 +85,11 @@ func advance_minutes(minutes: int) -> Dictionary:
 
 func world_summary() -> Dictionary:
 	var result := economy.world_summary()
-	result["world_political_unit_count"] = political_registry.entity_count()
-	result["historical_political_record_count"] = historical_evidence.record_count()
+	result["world_political_unit_count"] = _political_registry.entity_count()
+	result["historical_political_record_count"] = _historical_evidence.record_count()
 	result["background_polity_count"] = maxi(
 		0,
-		political_registry.entity_count()
+		_political_registry.entity_count()
 		- int(result.get("detailed_polity_unit_count", 0))
 	)
 	return result
@@ -85,7 +101,7 @@ func country_summary(entity_id: String) -> Dictionary:
 
 func polity_summary(entity_id: String) -> Dictionary:
 	var result := CurrentWorldPoliticalProjection.polity_summary(
-		entity_id, political_registry, historical_evidence
+		entity_id, _political_registry_view, _historical_evidence_view
 	)
 	if result.is_empty():
 		return {}
@@ -114,30 +130,30 @@ func polity_summary(entity_id: String) -> Dictionary:
 
 
 func has_polity(entity_id: String) -> bool:
-	return political_registry.has_entity(entity_id)
+	return _political_registry.has_entity(entity_id)
 
 
 func first_polity_id() -> String:
-	var ids := political_registry.entity_ids()
+	var ids := _political_registry.entity_ids()
 	return ids[0] if not ids.is_empty() else ""
 
 
 func current_world_political_units() -> Array[Dictionary]:
 	return CurrentWorldPoliticalProjection.map_units(
-		political_registry, historical_evidence
+		_political_registry_view, _historical_evidence_view
 	)
 
 
 func historical_political_evidence_units() -> Array[Dictionary]:
-	return historical_evidence.records()
+	return _historical_evidence_view.records()
 
 
 func historical_record(source_historical_id: String) -> Dictionary:
-	return historical_evidence.record(source_historical_id)
+	return _historical_evidence_view.record(source_historical_id)
 
 
 func historical_records_active_on(date: String) -> Array[Dictionary]:
-	return historical_evidence.records_active_on(date)
+	return _historical_evidence_view.records_active_on(date)
 
 
 func date_time() -> Dictionary:
@@ -153,9 +169,9 @@ func get_persistent_state() -> Dictionary:
 		"minute_remainder": _minute_remainder,
 		"historical_evidence": {
 			"schema_id": EVIDENCE_STATE_SCHEMA_ID,
-			"fingerprint": historical_evidence.fingerprint(),
+			"fingerprint": _historical_evidence.fingerprint(),
 		},
-		"runtime_politics": political_registry.snapshot(),
+		"runtime_politics": _political_registry.snapshot(),
 		"economy": economy.get_persistent_state(),
 	}
 
@@ -196,12 +212,15 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 			str(evidence_state.get("schema_id", ""))
 			!= EVIDENCE_STATE_SCHEMA_ID
 			or str(evidence_state.get("fingerprint", ""))
-			!= historical_evidence.fingerprint()
-			or not political_registry.restore_snapshot(
+			!= _historical_evidence.fingerprint()
+			or not _political_registry.restore_snapshot(
 				state.get("runtime_politics", {}) as Dictionary,
-				historical_evidence
+				_historical_evidence
 			)
 		):
+			return false
+		_refresh_read_only_views()
+		if not economy.bind_runtime_political_view(_political_registry_view):
 			return false
 	total_minutes = int(validated_time.get("total_minutes", -1))
 	if not economy.restore_persistent_state(
@@ -214,14 +233,25 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 
 func _adopt_candidate(candidate: FormalWorldSimulation) -> void:
 	total_minutes = candidate.total_minutes
-	historical_evidence = candidate.historical_evidence
-	political_registry = candidate.political_registry
+	_historical_evidence = candidate._historical_evidence
+	_political_registry = candidate._political_registry
+	_historical_evidence_view = candidate._historical_evidence_view
+	_political_registry_view = candidate._political_registry_view
 	economy = candidate.economy
 	economy.bind_authoritative_hour_source(
 		Callable(self, "_authoritative_total_hour")
 	)
 	initialized = true
 	initialization_error = ""
+
+
+func _refresh_read_only_views() -> void:
+	_historical_evidence_view = HistoricalPoliticalEvidenceView.new(
+		_historical_evidence.read_only_snapshot()
+	)
+	_political_registry_view = RuntimePoliticalEntityView.new(
+		_political_registry.snapshot()
+	)
 
 
 func save_to_user() -> SaveOperationResult:

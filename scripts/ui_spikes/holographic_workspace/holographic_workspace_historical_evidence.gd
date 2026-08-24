@@ -3,7 +3,6 @@ extends "res://scripts/ui_spikes/holographic_workspace/holographic_workspace_rel
 ## Global political geometry never falls back to modern Natural Earth polygons.
 
 const HISTORICAL_GEOMETRY_PATH := "res://data/world_map/historical/cshapes_1900_snapshot.json"
-const HISTORICAL_UNITS_PATH := "res://data/world_map/historical/political_units_1900.json"
 const HISTORICAL_FLAGS_PATH := "res://data/world_map/historical/flags_1900.json"
 const HISTORICAL_SNAPSHOT_DATE := "1900-03-12"
 const GLOBAL_SOURCE_NOTICE := "1900-03-12 · CShapes 2.0 历史政治边界 · 旗帜含来源与适用年代"
@@ -56,7 +55,6 @@ var _historical_imported_flag_texture_by_id: Dictionary = {}
 
 func _ready() -> void:
 	_dated_geometry_document = _read_document(HISTORICAL_GEOMETRY_PATH)
-	_dated_units_document = _read_document(HISTORICAL_UNITS_PATH)
 	_historical_flag_document = _read_document(HISTORICAL_FLAGS_PATH)
 	_historical_flag_records = _historical_flag_document.get("records", {}) as Dictionary
 	_index_dated_geometry()
@@ -118,8 +116,6 @@ func _build_dated_historical_unit(unit: Dictionary) -> void:
 		"short_name_zh": str(unit.get("short_name_zh", unit.get("name_zh", entity_id))),
 		"label_rank": int(unit.get("label_rank", 5)),
 		"status": str(unit.get("status", "sovereign")),
-		"sovereign_id": str(unit.get("sovereign_id", "")),
-		"controller_id": str(unit.get("controller_id", "")),
 		"source_historical_id": str(unit.get("source_historical_id", entity_id)),
 		"detail_mode": "single",
 		"provisional": false,
