@@ -116,4 +116,39 @@ func _run() -> void:
 		):
 			minimum_wage = int(transaction.get("amount_centimes", -1))
 	test.equal(minimum_wage, 0, "缺勤扣款大于周薪时基本工资下限保持0")
+	var resigned_sim := V2LifeLoopSimulation.new()
+	test.expect(resigned_sim.initialize(), "离职工资测试模拟可初始化")
+	var resigned_contract := resigned_sim.employment.contract_for_person(pierre)
+	var resigned_contract_id := str(resigned_contract.get("contract_id", ""))
+	var resigned_pay_hour := int(resigned_contract.get("next_pay_hour", -1))
+	var resign_result := resigned_sim.employment.change_contract_status(
+		pierre,
+		"resigned",
+		resigned_sim.clock.total_hours,
+		"test:resignation"
+	)
+	test.expect(resign_result.success, "正式劳动合同可变更为已辞职")
+	resigned_sim.advance_hours(
+		resigned_pay_hour - resigned_sim.clock.total_hours + 1
+	)
+	var resigned_wages := 0
+	for transaction: Dictionary in resigned_sim.ledger.transactions:
+		if (
+			str(transaction.get("category", "")) == "wage"
+			and str(transaction.get("person_id", "")) == pierre
+		):
+			resigned_wages += 1
+	test.equal(resigned_wages, 0, "已辞职合同到原发薪时点不会继续发工资")
+	var forced_inactive := resigned_sim.employment.force_settle(
+		resigned_contract_id,
+		resigned_pay_hour,
+		resigned_sim.households,
+		resigned_sim.ledger,
+		resigned_sim.notifications
+	)
+	test.expect(
+		not forced_inactive.success
+		and forced_inactive.error_code == "inactive_contract",
+		"强制结算同样拒绝非在职劳动合同"
+	)
 	test.finish(self, "V2.2 employment")
