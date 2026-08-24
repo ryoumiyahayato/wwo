@@ -53,13 +53,24 @@ func advance_minutes(minutes: int) -> Dictionary:
 	if not initialized or minutes <= 0:
 		return world_summary()
 	var previous_total_minutes := total_minutes
-	var previous_economy := economy.get_persistent_state()
-	var previous_politics := politics.get_persistent_state()
-	var previous_authority := political_authority.get_persistent_state()
 	var previous_total_hour := _authoritative_total_hour()
 	var target_total_minutes := total_minutes + minutes
 	var current_total_hour := int(target_total_minutes / 60)
 	var elapsed_hours := current_total_hour - previous_total_hour
+	var crosses_day_boundary := (
+		int(previous_total_hour / FormalWorldEconomyService.HOURS_PER_DAY)
+		!= int(current_total_hour / FormalWorldEconomyService.HOURS_PER_DAY)
+	)
+	var previous_economy: Dictionary = {}
+	var previous_politics: Dictionary = {}
+	var previous_authority: Dictionary = {}
+	if crosses_day_boundary:
+		# A daily political failure occurs only at a crossed midnight. Snapshot the
+		# authoritative domains once per such call, rather than cloning the full
+		# economy on ordinary minute/hour ticks.
+		previous_economy = economy.get_persistent_state()
+		previous_politics = politics.get_persistent_state()
+		previous_authority = political_authority.get_persistent_state()
 	while previous_total_hour < current_total_hour:
 		var next_day_hour := (
 			int(previous_total_hour / FormalWorldEconomyService.HOURS_PER_DAY) + 1
