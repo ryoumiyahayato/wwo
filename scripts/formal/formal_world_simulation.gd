@@ -52,6 +52,10 @@ func initialize() -> bool:
 func advance_minutes(minutes: int) -> Dictionary:
 	if not initialized or minutes <= 0:
 		return world_summary()
+	var previous_total_minutes := total_minutes
+	var previous_economy := economy.get_persistent_state()
+	var previous_politics := politics.get_persistent_state()
+	var previous_authority := political_authority.get_persistent_state()
 	var previous_total_hour := _authoritative_total_hour()
 	var target_total_minutes := total_minutes + minutes
 	var current_total_hour := int(target_total_minutes / 60)
@@ -68,20 +72,29 @@ func advance_minutes(minutes: int) -> Dictionary:
 				segment_hour / FormalWorldEconomyService.HOURS_PER_DAY
 			)
 			if political_authority.advance_to_day(day_index).is_empty():
-				initialization_error = "正式历史政治权威无法推进到当前日期"
-				initialized = false
-				state_changed.emit({"simulation_error": initialization_error})
-				return world_summary()
+				return _rollback_failed_advance(
+					previous_total_minutes,
+					previous_economy,
+					previous_politics,
+					previous_authority,
+					"正式历史政治权威无法推进到当前日期"
+				)
 			if not politics.settle_day(day_index, _political_inputs(false)):
-				initialization_error = "正式政治日结算拒绝了正式世界状态"
-				initialized = false
-				state_changed.emit({"simulation_error": initialization_error})
-				return world_summary()
+				return _rollback_failed_advance(
+					previous_total_minutes,
+					previous_economy,
+					previous_politics,
+					previous_authority,
+					"正式政治日结算拒绝了正式世界状态"
+				)
 			if not economy.set_political_modifiers(politics.economy_modifiers()):
-				initialization_error = "正式政治经济联动状态无效"
-				initialized = false
-				state_changed.emit({"simulation_error": initialization_error})
-				return world_summary()
+				return _rollback_failed_advance(
+					previous_total_minutes,
+					previous_economy,
+					previous_politics,
+					previous_authority,
+					"正式政治经济联动状态无效"
+				)
 		previous_total_hour = segment_hour
 	total_minutes = target_total_minutes
 	state_changed.emit({
@@ -89,6 +102,51 @@ func advance_minutes(minutes: int) -> Dictionary:
 		"economy": elapsed_hours > 0,
 		"politics": elapsed_hours > 0,
 		"hours": elapsed_hours,
+	})
+	return world_summary()
+
+
+func _rollback_failed_advance(
+	previous_total_minutes: int,
+	previous_economy: Dictionary,
+	previous_politics: Dictionary,
+	previous_authority: Dictionary,
+	message: String
+) -> Dictionary:
+	total_minutes = previous_total_minutes
+	var expected_day := int(
+		previous_total_minutes
+		/ (60 * FormalWorldEconomyService.HOURS_PER_DAY)
+	)
+	var authority_restored := political_authority.restore_persistent_state(
+		previous_authority, expected_day
+	)
+	var politics_restored := false
+	if authority_restored:
+		politics_restored = politics.restore_persistent_state(
+			previous_politics, political_authority.snapshot(false)
+		)
+	var economy_restored := economy.restore_persistent_state(previous_economy)
+	var modifiers_restored := false
+	if authority_restored and politics_restored and economy_restored:
+		modifiers_restored = economy.set_political_modifiers(
+			politics.economy_modifiers()
+		)
+	if not (
+		authority_restored
+		and politics_restored
+		and economy_restored
+		and modifiers_restored
+	):
+		initialization_error = "%s；正式世界原子回滚失败" % message
+		initialized = false
+		state_changed.emit({"simulation_error": initialization_error})
+		return world_summary()
+	initialization_error = message
+	initialized = true
+	state_changed.emit({
+		"simulation_error": initialization_error,
+		"rolled_back": true,
 	})
 	return world_summary()
 
