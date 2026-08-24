@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1901|1401|15|0|523|7|32|16|70|1022|453|214|
+|1929|1420|15|0|529|7|32|16|70|1037|455|216|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,901个生产成员字段逐项表
+## 1,929个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -618,7 +618,7 @@
 23 K failure_result
 ```
 
-### 第4段：`scripts/core/models/character_data.gd` 至 `scripts/map/map_control_service.gd`
+### 第4段：`scripts/core/models/character_data.gd` 至 `scripts/formal/formal_world_economy_service.gd`
 
 ```text
 @ scripts/core/models/character_data.gd | CharacterData
@@ -735,6 +735,32 @@
 5 C DEFAULT_MAX_ENTRIES
 7 A max_entries
 8 K entries
+@ scripts/formal/formal_dated_political_authority.gd | FormalDatedPoliticalAuthority
+6 C SCHEMA_ID
+7 C CATALOG_PATH
+11 K initialization_error
+12 K _records
+13 K _active_records
+14 K _introduced_records
+15 K _catalog_identity
+16 A _current_day_index
+17 K _last_boundary_change
+@ scripts/formal/formal_political_simulation_service.gd | FormalPoliticalSimulationService
+7 C SCHEMA_ID
+8 C LEGACY_SCHEMA_ID
+9 C BASIS_POINTS
+10 C HISTORY_LIMIT
+11 C DAYS_PER_YEAR
+12 C PHASES
+16 K polity_states
+17 K transition_history
+18 K phase_history
+19 K historical_boundary_history
+20 K initialization_error
+21 K _polity_records
+22 K _historically_active_ids
+23 K _authority_catalog_fingerprint
+24 A _last_day_index
 @ scripts/formal/formal_world_application.gd | FormalWorldApplication
 7 C LAUNCH_MODE_META
 8 C PACKAGED_PROBE_ARGUMENT
@@ -753,25 +779,32 @@
 12 C MAX_SUPPLIERS_PER_SHORTAGE
 13 C EXPECTED_MAJOR_ROSTER_COUNT
 14 C PRIMARY_PLAYABLE_LIMIT
-15 C COMMODITY_CATALOG_PATH
-16 C POLITICAL_UNITS_PATH
-17 C CROSSWALK_PATH
-19 E country_states
-20 K polity_records
-21 K economy_polity_ids
-22 K economy_by_polity_id
-23 K routes
-24 K shipments
-25 K history
-26 K initialization_error
-28 A _authoritative_hour_source
-37 A _historical
-38 K _commodities
-39 E _routes_by_country
-40 K _crosswalk_records
-41 A _next_shipment_sequence
-42 A _last_day_index
-43 E _political_unit_count
+15 C MIN_POLITICAL_PRODUCTION_EFFICIENCY_BP
+16 C MAX_POLITICAL_PRODUCTION_EFFICIENCY_BP
+17 C COMMODITY_CATALOG_PATH
+18 C CROSSWALK_PATH
+20 E country_states
+21 K polity_records
+22 K economy_polity_ids
+23 K economy_by_polity_id
+24 K routes
+25 K shipments
+26 K history
+27 K initialization_error
+28 K _political_modifiers
+30 A _authoritative_hour_source
+39 A _historical
+40 K _commodities
+41 E _routes_by_country
+42 K _crosswalk_records
+43 A _next_shipment_sequence
+44 A _last_day_index
+45 E _political_unit_count
+```
+
+### 第5段：`scripts/formal/formal_world_menu.gd` 至 `scripts/simulation/society_rules_config.gd`
+
+```text
 @ scripts/formal/formal_world_menu.gd | FormalWorldMenu
 6 C WORLD_SCENE
 7 C LAUNCH_MODE_META
@@ -785,10 +818,12 @@
 @ scripts/formal/formal_world_simulation.gd | FormalWorldSimulation
 8 C SAVE_PATH
 9 C SCHEMA_ID
-11 A economy
-12 K initialized
-13 K initialization_error
-14 K total_minutes
+11 A political_authority
+12 A economy
+13 A politics
+14 K initialized
+15 K initialization_error
+16 K total_minutes
 @ scripts/map/map_control_service.gd | MapControlService
 11 C STAGE_STABLE
 12 C STAGE_WEAKENING
@@ -802,11 +837,6 @@
 21 K _frontline_edges
 22 K _units_by_grid_position
 23 K _war_state
-```
-
-### 第5段：`scripts/map/map_rules_config.gd` 至 `scripts/simulation/world_activity_service.gd`
-
-```text
 @ scripts/map/map_rules_config.gd | MapRulesConfig
 5 C DEFAULT_PATH
 7 A tile_width
@@ -951,6 +981,11 @@
 12 K lifecycle_rules
 13 K ai_rules
 14 K error_message
+```
+
+### 第6段：`scripts/simulation/society_simulation_service.gd` 至 `scripts/ui_spikes/holographic_workspace/holographic_workspace_interaction_probe.gd`
+
+```text
 @ scripts/simulation/society_simulation_service.gd | SocietySimulationService
 5 C DOMAIN_ACTION_CATEGORIES
 13 C STARTER_LEADER_ORGANIZATION_IDS
@@ -980,11 +1015,6 @@
 13 C VALID_SUBJECT_TYPES
 17 K _events
 18 A _next_event_id
-```
-
-### 第6段：`scripts/ui_spikes/holographic_workspace/holographic_hemisphere_3d.gd` 至 `scripts/ui_spikes/holographic_workspace/holographic_workspace_release_probe.gd`
-
-```text
 @ scripts/ui_spikes/holographic_workspace/holographic_hemisphere_3d.gd | holographic_hemisphere_3d
 3 C LAT_SEGMENTS
 4 C LON_SEGMENTS
@@ -1082,6 +1112,11 @@
 @ scripts/ui_spikes/holographic_workspace/holographic_workspace_interaction_probe.gd | holographic_workspace_interaction_probe
 3 C TARGET_SCENE
 5 K workspace
+```
+
+### 第7段：`scripts/ui_spikes/holographic_workspace/holographic_workspace_polish.gd` 至 `scripts/v2_2/v2_life_loop_result.gd`
+
+```text
 @ scripts/ui_spikes/holographic_workspace/holographic_workspace_polish.gd | holographic_workspace_polish
 3 C REGION_CITY_SUPPLEMENTS
 29 K selected_administrative_unit_id
@@ -1098,11 +1133,6 @@
 @ scripts/ui_spikes/holographic_workspace/holographic_workspace_release_probe.gd | holographic_workspace_release_probe
 3 C TARGET_SCENE
 5 K workspace
-```
-
-### 第7段：`scripts/ui_spikes/holographic_workspace/holographic_workspace_runtime.gd` 至 `scripts/v2_2/v2_life_loop_simulation.gd`
-
-```text
 @ scripts/ui_spikes/holographic_workspace/holographic_workspace_runtime.gd | holographic_workspace_runtime
 3 C WORLD
 4 C REGION
@@ -1251,6 +1281,11 @@
 9 K affected_entity_ids
 10 K suggested_alternatives
 11 K data
+```
+
+### 第8段：`scripts/v2_2/v2_life_loop_simulation.gd` 至 `scripts/v2_3/v2_3_finance_config.gd`
+
+```text
 @ scripts/v2_2/v2_life_loop_simulation.gd | V2LifeLoopSimulation
 7 C SCHEMA_VERSION
 8 C DEFAULT_REVIEW_SAVE_PATH
@@ -1279,11 +1314,6 @@
 33 K last_hour_processing_usec
 34 K maximum_hour_processing_usec
 35 K hours_processed
-```
-
-### 第8段：`scripts/v2_2/v2_life_loop_ui_binding.gd` 至 `scripts/v2_3/v2_3_formal_schedule_interface.gd`
-
-```text
 @ scripts/v2_2/v2_life_loop_ui_binding.gd | V2LifeLoopUiBinding
 7 K simulation
 8 A save_service
@@ -1431,6 +1461,11 @@
 5 C PATH
 7 K document
 8 K errors
+```
+
+### 第9段：`scripts/v2_3/v2_3_finance_service.gd` 至 `scripts/v2_3/v2_3_survival_autonomy_service.gd`
+
+```text
 @ scripts/v2_3/v2_3_finance_service.gd | V23FinanceService
 5 C HOURS_PER_DAY
 6 C DAYS_PER_YEAR
@@ -1451,11 +1486,6 @@
 6 C FORMAL_PANEL_IDS
 @ scripts/v2_3/v2_3_formal_schedule_interface.gd | V23FormalScheduleInterface
 5 K leave_confirmation
-```
-
-### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/vnext/economy/market_economy.gd`
-
-```text
 @ scripts/v2_3/v2_3_formal_simulation.gd | V23FormalSimulation
 5 A finance_config
 6 A finance
@@ -1577,6 +1607,11 @@
 12 K next_retry_hours
 13 K active_needs
 14 K decision_history
+```
+
+### 第10段：`scripts/vnext/economy/market_economy.gd` 至 `scripts/vnext/politics/politics_pressure_input.gd`
+
+```text
 @ scripts/vnext/economy/market_economy.gd | VNextMarketEconomy
 14 C BASIS_POINTS
 15 C HOURS_PER_DAY
@@ -1610,11 +1645,6 @@
 69 K _in_transit_units_by_destination
 70 A _last_day_index
 71 A _next_shipment_sequence
-```
-
-### 第10段：`scripts/vnext/economy/market_economy_catalog.gd` 至 `scripts/vnext/politics/politics_update_service.gd`
-
-```text
 @ scripts/vnext/economy/market_economy_catalog.gd | VNextMarketEconomyCatalog
 7 C COMMODITY_MARKET_PATH
 8 C WORLD_PATH
@@ -1761,6 +1791,11 @@
 33 K _casualty_pressure
 34 K _mobilization_pressure
 35 K _military_result_signal
+```
+
+### 第11段：`scripts/vnext/politics/politics_update_service.gd` 至 `scripts/world_map/historical_map_identity_style.gd`
+
+```text
 @ scripts/vnext/politics/politics_update_service.gd | VNextPoliticsUpdateService
 8 C PRESSURE_SCALE
 9 C FORCE_DELTA_LIMIT
@@ -1786,11 +1821,6 @@
 30 C ECONOMIC_WEIGHTS
 37 C WAR_WEIGHTS
 43 C REGIME_PROCEDURAL_BASELINES
-```
-
-### 第11段：`scripts/vnext/politics/state_politics.gd` 至 `scripts/world_map/historical_map_identity_style.gd`
-
-```text
 @ scripts/vnext/politics/state_politics.gd | VNextStatePolitics
 7 C SNAPSHOT_SCHEMA_ID
 8 C FORCE_SUPPORT_THRESHOLD
