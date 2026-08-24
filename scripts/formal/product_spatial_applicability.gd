@@ -41,4 +41,3 @@ static func classify_document(document: Dictionary) -> String:
 		"temporally_unknown":
 			return TEMPORALLY_UNKNOWN
 	return TEMPORALLY_UNKNOWN
-
