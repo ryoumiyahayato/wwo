@@ -93,6 +93,7 @@ jobs:
           mkdir -p builds/formal-economy
           tests=(
             tests/formal/formal_world_integration_test.gd
+            tests/formal/formal_world_daily_rollback_test.gd
             tests/formal/formal_world_long_term_balance_test.gd
             tests/alpha/alpha_historical_world_economy_data_test.gd
             tests/alpha/alpha_economy_ui_audit_test.gd
