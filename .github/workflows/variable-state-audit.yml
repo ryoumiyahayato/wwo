@@ -69,6 +69,17 @@ jobs:
           test -s docs/refactors/state_ownership_matrix.md
           test -s docs/refactors/variable_refactor_plan.md
 
+      - name: Upload regenerated audit documents
+        uses: actions/upload-artifact@v4
+        with:
+          name: variable-state-generated-docs
+          path: |
+            docs/refactors/variable_state_audit.md
+            docs/refactors/variable_state_member_inventory.md
+            docs/refactors/state_ownership_matrix.md
+            docs/refactors/variable_refactor_plan.md
+          if-no-files-found: error
+
       - name: Verify committed audit documents are current
         run: |
           set -euo pipefail
