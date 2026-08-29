@@ -23,6 +23,8 @@ func _ready() -> void:
 		_dated_units_document = {
 			"units": formal_simulation.historical_political_evidence_units(),
 		}
+		if not bind_historical_provenance_gate(formal_simulation.provenance_gate()):
+			_data_errors.append("正式世界未能绑定 HistoricalProvenanceGate")
 	_historical_evidence_surface_building = true
 	super._ready()
 	_historical_evidence_surface_building = false

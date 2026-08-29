@@ -230,7 +230,13 @@ func _test_mutation_boundaries(simulation: FormalWorldSimulation) -> void:
 	)
 
 	var catalog := HistoricalPoliticalEvidenceCatalog.new()
-	_expect(catalog.configure(), "catalog guard fixture initializes")
+	_expect(
+		catalog.configure(
+			HistoricalPoliticalEvidenceCatalog.DEFAULT_PATH,
+			simulation.provenance_gate()
+		),
+		"catalog guard fixture initializes through provenance gate"
+	)
 	var catalog_count := catalog.record_count()
 	var catalog_fingerprint := catalog.fingerprint()
 	_expect(not catalog.configure(), "second catalog initialization fails closed")

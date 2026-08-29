@@ -14,7 +14,10 @@ var _records_by_source_id: Dictionary = {}
 var _sorted_source_ids: Array[String] = []
 
 
-func configure(path: String = DEFAULT_PATH) -> bool:
+func configure(
+	path: String = DEFAULT_PATH,
+	provenance_gate: HistoricalProvenanceGate = null
+) -> bool:
 	if _configured:
 		return _fail("Historical political evidence is already initialized")
 	initialization_error = ""
@@ -22,6 +25,8 @@ func configure(path: String = DEFAULT_PATH) -> bool:
 	_snapshot_date = ""
 	_records_by_source_id.clear()
 	_sorted_source_ids.clear()
+	if provenance_gate == null:
+		return _fail("Historical political evidence requires provenance admission")
 
 	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
@@ -58,6 +63,12 @@ func configure(path: String = DEFAULT_PATH) -> bool:
 			or valid_from > valid_to
 		):
 			return _fail("历史政治证据记录无效或重复：%s" % source_id)
+		if not provenance_gate.admit_runtime_fact(
+			"political_identity:" + source_id,
+			"political_identity",
+			_provenance_assertion(record)
+		):
+			return _fail("历史政治证据 provenance admission 失败：%s" % source_id)
 		record["source_historical_id"] = source_id
 		record["provenance"] = {
 			"dataset": path,
@@ -175,6 +186,30 @@ func _is_valid_date(value: String) -> bool:
 		and day >= 1
 		and day <= V2DateTime.days_in_month(year, month)
 	)
+
+
+func _provenance_assertion(record: Dictionary) -> Dictionary:
+	var source_id := str(record.get("id", ""))
+	var valid_from := str(record.get("valid_from", ""))
+	var valid_to := str(record.get("valid_to", ""))
+	return {
+		"lower_bound": null,
+		"observation_period": {"from": valid_from, "to": valid_to},
+		"spatial_scope": {"kind": "political_unit", "id": source_id},
+		"subject_id": source_id,
+		"unit": "identity_record",
+		"upper_bound": null,
+		"value": {
+			"controller_id": str(record.get("controller_id", "")),
+			"geometry_feature_id": str(record.get("geometry_feature_id", "")),
+			"id": source_id,
+			"relationship": str(record.get("relationship", "")),
+			"source_name": str(record.get("source_name", "")),
+			"status": str(record.get("status", "")),
+			"valid_from": valid_from,
+			"valid_to": valid_to,
+		},
+	}
 
 
 func _fail(message: String) -> bool:

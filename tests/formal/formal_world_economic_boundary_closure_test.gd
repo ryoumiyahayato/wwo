@@ -158,7 +158,10 @@ func _check_observer_contract(simulation: FormalWorldSimulation) -> void:
 
 func _check_second_initialization_fails(simulation: FormalWorldSimulation) -> void:
 	var catalog := FormalWorldEconomicEvidenceCatalog.new()
-	_check(catalog.configure(), "economic evidence catalog initializes once")
+	_check(
+		catalog.configure(simulation.provenance_gate()),
+		"economic evidence catalog initializes once through provenance gate"
+	)
 	_check(not catalog.configure(), "economic evidence catalog second initialization fails closed")
 	var static_view := FormalWorldEconomicStaticView.new(catalog.economic_snapshot())
 	var population_view := FormalWorldPopulationInputView.new(catalog.population_snapshot())

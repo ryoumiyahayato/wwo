@@ -51,10 +51,31 @@ var _historical_flag_records: Dictionary = {}
 var _geometry_feature_by_id: Dictionary = {}
 var _missing_flag_record_ids: Array[String] = []
 var _historical_imported_flag_texture_by_id: Dictionary = {}
+var _historical_provenance_foundation: HistoricalProvenanceFoundation = null
+var _historical_provenance_gate: HistoricalProvenanceGate = null
+var _historical_spatial_provenance_valid: bool = false
+
+
+func bind_historical_provenance_gate(gate: HistoricalProvenanceGate) -> bool:
+	if gate == null or _historical_provenance_gate != null:
+		return false
+	_historical_provenance_gate = gate
+	return true
 
 
 func _ready() -> void:
 	_dated_geometry_document = _read_document(HISTORICAL_GEOMETRY_PATH)
+	if _historical_provenance_gate == null:
+		_historical_provenance_foundation = HistoricalProvenanceFoundation.new()
+		if _historical_provenance_foundation.load_current():
+			_historical_provenance_gate = _historical_provenance_foundation.gate()
+	if not HistoricalProvenanceFoundation.admit_spatial_boundary_document(
+		_historical_provenance_gate, _dated_geometry_document
+	):
+		_data_errors.append("历史边界未通过 Provenance admission")
+		_dated_geometry_document = {}
+	else:
+		_historical_spatial_provenance_valid = true
 	_historical_flag_document = _read_document(HISTORICAL_FLAGS_PATH)
 	_historical_flag_records = _historical_flag_document.get("records", {}) as Dictionary
 	_index_dated_geometry()
@@ -400,6 +421,7 @@ func historical_evidence_report() -> Dictionary:
 		"documented_absence_count": documented_absence,
 		"unresolved_flag_count": unresolved + _missing_flag_record_ids.size(),
 		"flag_registry_record_count": int(_historical_flag_document.get("record_count", 0)),
+		"spatial_provenance_verified": _historical_spatial_provenance_valid,
 	}
 
 
@@ -438,6 +460,8 @@ func navigation_coverage_report() -> Dictionary:
 
 
 func _validate_historical_evidence() -> void:
+	if not _historical_spatial_provenance_valid:
+		push_error("Historical evidence: spatial boundary provenance admission failed")
 	if str(_dated_geometry_document.get("snapshot_date", "")) != HISTORICAL_SNAPSHOT_DATE:
 		push_error("Historical evidence: unexpected snapshot date")
 	if _history_entity_by_id.size() != 151:

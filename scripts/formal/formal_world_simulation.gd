@@ -9,6 +9,7 @@ const SAVE_PATH: String = "user://formal_world_1900.json"
 const SCHEMA_ID: String = "formal_world_simulation_v4"
 const EVIDENCE_STATE_SCHEMA_ID: String = "historical_political_evidence_v1"
 
+var _provenance := HistoricalProvenanceFoundation.new()
 var _historical_evidence := HistoricalPoliticalEvidenceCatalog.new()
 var _political_registry := RuntimePoliticalEntityRegistry.new()
 var _historical_evidence_view := HistoricalPoliticalEvidenceView.new()
@@ -44,7 +45,14 @@ func initialize() -> bool:
 	_initialization_attempted = true
 	initialization_error = ""
 	total_minutes = 0
-	if not _historical_evidence.configure():
+	if not _provenance.load_current():
+		initialization_error = _provenance.initialization_error
+		initialized = false
+		return false
+	if not _historical_evidence.configure(
+		HistoricalPoliticalEvidenceCatalog.DEFAULT_PATH,
+		_provenance.gate()
+	):
 		initialization_error = _historical_evidence.initialization_error
 		initialized = false
 		return false
@@ -52,7 +60,7 @@ func initialize() -> bool:
 		initialization_error = _political_registry.initialization_error
 		initialized = false
 		return false
-	if not _economic_evidence.configure():
+	if not _economic_evidence.configure(_provenance.gate()):
 		initialization_error = _economic_evidence.initialization_error
 		initialized = false
 		return false
@@ -78,6 +86,10 @@ func initialize() -> bool:
 
 func historical_evidence_view() -> HistoricalPoliticalEvidenceView:
 	return _historical_evidence_view
+
+
+func provenance_gate() -> HistoricalProvenanceGate:
+	return _provenance.gate()
 
 
 func political_registry_view() -> RuntimePoliticalEntityView:
@@ -279,6 +291,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 
 func _adopt_candidate(candidate: FormalWorldSimulation) -> void:
 	total_minutes = candidate.total_minutes
+	_provenance = candidate._provenance
 	_historical_evidence = candidate._historical_evidence
 	_political_registry = candidate._political_registry
 	_historical_evidence_view = candidate._historical_evidence_view

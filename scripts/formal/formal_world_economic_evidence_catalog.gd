@@ -28,10 +28,12 @@ var _economic_snapshot: Dictionary = {}
 var _population_snapshot: Dictionary = {}
 
 
-func configure() -> bool:
+func configure(provenance_gate: HistoricalProvenanceGate = null) -> bool:
 	if _configured:
 		return _fail("Formal economic evidence is already initialized")
 	initialization_error = ""
+	if provenance_gate == null:
+		return _fail("Formal economic evidence requires provenance admission")
 	var historical := AlphaHistoricalWorldEconomyData.new()
 	if not historical.configure():
 		return _fail(historical.initialization_error)
@@ -49,10 +51,30 @@ func configure() -> bool:
 
 	var economic_records: Array[Dictionary] = []
 	var population_records: Array[Dictionary] = []
+	var population_date := str(historical.world_manifest.get("calibration_date", ""))
+	if population_date.is_empty():
+		return _fail("正式人口输入缺少 calibration_date")
 	for source_record: Dictionary in historical.simulation_countries():
 		var economic_record := source_record.duplicate(true)
+		var economy_entity_id := str(source_record.get("entity_id", ""))
+		var population := source_record.get("population", {}) as Dictionary
+		var population_assertion := {
+			"lower_bound": population.get("lower", 0),
+			"observation_period": {"from": population_date, "to": population_date},
+			"spatial_scope": {"kind": "major_economy_aggregate", "id": economy_entity_id},
+			"subject_id": "population:" + economy_entity_id,
+			"unit": "persons",
+			"upper_bound": population.get("upper", 0),
+			"value": population.get("value", 0),
+		}
+		if not provenance_gate.admit_runtime_fact(
+			"population_aggregate:population:" + economy_entity_id,
+			"population_aggregate",
+			population_assertion
+		):
+			return _fail("正式人口输入 provenance admission 失败：%s" % economy_entity_id)
 		var population_record := {
-			"economy_entity_id": str(source_record.get("entity_id", "")),
+			"economy_entity_id": economy_entity_id,
 			"population": (
 				(source_record.get("population", {}) as Dictionary).duplicate(true)
 			),

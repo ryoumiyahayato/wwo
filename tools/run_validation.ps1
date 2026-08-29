@@ -1,6 +1,7 @@
 param(
     [string]$GodotPath = 'D:\Tools\Godot-4.6.3\Godot_v4.6.3-stable_win64.exe',
     [string]$ProjectPath = (Split-Path -Parent $PSScriptRoot),
+    [string]$PythonPath = '',
     [int]$StepTimeoutSeconds = 120
 )
 
@@ -12,6 +13,22 @@ if (-not (Test-Path -LiteralPath $GodotPath -PathType Leaf)) {
 }
 if ($StepTimeoutSeconds -lt 10) {
     throw 'StepTimeoutSeconds must be at least 10.'
+}
+
+if ([string]::IsNullOrWhiteSpace($PythonPath)) {
+    $pythonCommand = Get-Command python -ErrorAction SilentlyContinue
+    if ($null -ne $pythonCommand) {
+        $PythonPath = $pythonCommand.Source
+    }
+    if ([string]::IsNullOrWhiteSpace($PythonPath) -or $PythonPath -like '*\WindowsApps\python.exe') {
+        $bundledPython = Join-Path $env:APPDATA 'uv\python\cpython-3.10.20-windows-x86_64-none\python.exe'
+        if (Test-Path -LiteralPath $bundledPython -PathType Leaf) {
+            $PythonPath = $bundledPython
+        }
+    }
+}
+if (-not (Test-Path -LiteralPath $PythonPath -PathType Leaf)) {
+    throw "Python executable not found: $PythonPath"
 }
 
 $ProjectPath = (Resolve-Path -LiteralPath $ProjectPath).Path
@@ -82,18 +99,23 @@ $null = Invoke-GodotStep -Name 'Clean import and script scan' -Arguments @(
 ) -TimeoutSeconds 180
 
 Write-Host "`n=== 1900 economy static audits ==="
-& python "$ProjectPath/tools/audit_1900_commodity_economy.py"
+& $PythonPath "$ProjectPath/tools/audit_1900_commodity_economy.py"
 if ($LASTEXITCODE -ne 0) { throw 'Commodity economy static audit failed' }
-& python "$ProjectPath/tools/audit_1900_economy_integration.py"
+& $PythonPath "$ProjectPath/tools/audit_1900_economy_integration.py"
 if ($LASTEXITCODE -ne 0) { throw 'Economy integration static audit failed' }
-& python "$ProjectPath/tools/audit_1900_world_economy_compact.py"
+& $PythonPath "$ProjectPath/tools/audit_1900_world_economy_compact.py"
 if ($LASTEXITCODE -ne 0) { throw 'Historical world economy static audit failed' }
 
+Write-Host "`n=== Historical provenance deterministic generation ==="
+& $PythonPath "$ProjectPath/tools/provenance/generate_historical_provenance.py" --check
+if ($LASTEXITCODE -ne 0) { throw 'Historical provenance generated catalog check failed' }
+
 Write-Host "`n=== World data audit regressions ==="
-& python -m unittest discover -s "$ProjectPath/tests/world_data" -p 'test_*.py' -v
+& $PythonPath -m unittest discover -s "$ProjectPath/tests/world_data" -p 'test_*.py' -v
 if ($LASTEXITCODE -ne 0) { throw 'World data audit regression suite failed' }
 
 $tests = @(
+	@{ Name = 'Historical provenance foundation'; Script = 'res://tests/formal/historical_provenance_foundation_test.gd'; TimeoutSeconds = 180 },
 	@{ Name = 'Runtime political identity foundation'; Script = 'res://tests/formal/runtime_political_identity_foundation_test.gd'; TimeoutSeconds = 240 },
 	@{ Name = 'Formal economy 30-day and one-year golden'; Script = 'res://tests/formal/formal_world_economy_golden_test.gd'; TimeoutSeconds = 240 },
 	@{ Name = 'Formal economic boundary closure'; Script = 'res://tests/formal/formal_world_economic_boundary_closure_test.gd'; TimeoutSeconds = 240 },
