@@ -254,8 +254,8 @@ func _test_v3_round_trip_and_atomic_rejection(
 	simulation: FormalWorldSimulation
 ) -> void:
 	var state := simulation.get_persistent_state()
-	_expect(str(state.get("schema_id", "")) == "formal_world_simulation_v3", "save schema is v3")
-	_expect(state.get("runtime_politics", {}) is Dictionary, "v3 saves runtime registry")
+	_expect(str(state.get("schema_id", "")) == "formal_world_simulation_v4", "save schema is v4")
+	_expect(state.get("runtime_politics", {}) is Dictionary, "v4 saves runtime registry")
 	var restored := FormalWorldSimulation.new()
 	_expect(restored.initialize(), "v3 restore candidate initializes")
 	_expect(restored.restore_persistent_state(state), "v3 candidate restore succeeds")
@@ -324,16 +324,13 @@ func _test_v3_round_trip_and_atomic_rejection(
 	mapping_rejected["economy"] = economy_state
 	_expect(
 		not restored.restore_persistent_state(mapping_rejected),
-		"v5 static economic evidence mismatch is rejected"
+		"v6 static economic evidence mismatch is rejected"
 	)
 	_expect(restored.get_persistent_state() == before, "static rejection is atomic")
 
 
 func _test_v2_candidate_migration(simulation: FormalWorldSimulation) -> void:
-	var current := simulation.get_persistent_state()
-	var legacy_economy := (
-		current.get("economy", {}) as Dictionary
-	).duplicate(true)
+	var legacy_economy := simulation.economy_regression_snapshot()
 	legacy_economy["schema_id"] = "formal_world_economy_state_v3"
 	var country_states := legacy_economy.get("country_states", {}) as Dictionary
 	for economy_id_value: Variant in country_states:

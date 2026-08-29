@@ -19,6 +19,19 @@ var country_states: Dictionary:
 		return (_snapshot.get("country_states", {}) as Dictionary).duplicate(true)
 
 
+var market_states: Dictionary:
+	get:
+		return (_snapshot.get("market_states", {}) as Dictionary).duplicate(true)
+
+
+var economic_aggregate_states: Dictionary:
+	get:
+		return (
+			(_snapshot.get("economic_aggregate_states", {}) as Dictionary)
+			.duplicate(true)
+		)
+
+
 var economy_by_polity_id: Dictionary:
 	get:
 		return (
@@ -70,6 +83,26 @@ func polity_ids_for_economy(economy_id: String) -> Array[String]:
 	)
 
 
+func market_id_for_economic_aggregate(economic_aggregate_id: String) -> String:
+	return str(
+		economic_aggregate_states.get(economic_aggregate_id, {}).get(
+			"pricing_market_id", ""
+		)
+	)
+
+
+func economic_aggregate_id_for_market(market_id: String) -> String:
+	return str(
+		market_states.get(market_id, {}).get(
+			"source_economic_aggregate_id", ""
+		)
+	)
+
+
+func market_registry() -> Dictionary:
+	return (_snapshot.get("market_registry", {}) as Dictionary).duplicate(true)
+
+
 func observation() -> Dictionary:
 	return {
 		"schema_id": str(_snapshot.get("schema_id", "")),
@@ -80,10 +113,8 @@ func observation() -> Dictionary:
 		),
 		"economic_state": {
 			"total_hour": total_hour,
-			"country_states": (
-				(_snapshot.get("dynamic_country_states", {}) as Dictionary)
-				.duplicate(true)
-			),
+			"economic_aggregates": economic_aggregate_states,
+			"markets": market_states,
 			"shipments": shipments,
 		},
 		"derived_view": {

@@ -270,14 +270,14 @@ func _test_restore_failure_atomicity() -> void:
 	var before: Dictionary = SUPPORT.simulation_state(simulation)
 	var rejected: Dictionary = before.duplicate(true)
 	var rejected_economy: Dictionary = rejected.get("economy", {}) as Dictionary
-	var rejected_countries: Dictionary = rejected_economy.get("country_states", {}) as Dictionary
+	var rejected_countries: Dictionary = rejected_economy.get("market_states", {}) as Dictionary
 	var ids: Array = rejected_countries.keys()
 	ids.sort()
 	_check(not ids.is_empty(), "原子性测试拥有正式国家集合")
 	if ids.is_empty():
 		return
 	rejected_countries.erase(ids[0])
-	rejected_economy["country_states"] = rejected_countries
+	rejected_economy["market_states"] = rejected_countries
 	rejected["economy"] = rejected_economy
 	_check(
 		not simulation.restore_persistent_state(rejected),

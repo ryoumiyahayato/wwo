@@ -257,7 +257,7 @@ func _test_economy_restore_day_boundaries() -> void:
 		)
 		if total_hour == 23:
 			var legacy_world := saved_world.duplicate(true)
-			var legacy := (legacy_world.get("economy", {}) as Dictionary).duplicate(true)
+			var legacy := simulation.economy_regression_snapshot()
 			legacy["schema_id"] = "formal_world_economy_state_v1"
 			legacy.erase("last_day_index")
 			legacy_world["economy"] = legacy

@@ -391,7 +391,7 @@ func _check_economy_restore_is_atomic(simulation: FormalWorldSimulation) -> void
 	var before := simulation.get_persistent_state()
 	var rejected := before.duplicate(true)
 	var rejected_economy := rejected.get("economy", {}) as Dictionary
-	var candidate_states := rejected_economy.get("country_states", {}) as Dictionary
+	var candidate_states := rejected_economy.get("market_states", {}) as Dictionary
 	var economy_ids: Array[String] = []
 	for raw_id: Variant in candidate_states:
 		economy_ids.append(str(raw_id))
@@ -412,7 +412,7 @@ func _check_economy_restore_is_atomic(simulation: FormalWorldSimulation) -> void
 	inventory[commodity_ids[0]] = -1.0
 	candidate_state["inventory"] = inventory
 	candidate_states[economy_id] = candidate_state
-	rejected_economy["country_states"] = candidate_states
+	rejected_economy["market_states"] = candidate_states
 	rejected["economy"] = rejected_economy
 	_check(
 		not simulation.restore_persistent_state(rejected),
@@ -426,7 +426,7 @@ func _check_economy_restore_is_atomic(simulation: FormalWorldSimulation) -> void
 
 func _corrupt_first_inventory(snapshot: Dictionary) -> bool:
 	var economy_state := snapshot.get("economy", {}) as Dictionary
-	var country_states := economy_state.get("country_states", {}) as Dictionary
+	var country_states := economy_state.get("market_states", {}) as Dictionary
 	var economy_ids: Array[String] = []
 	for raw_id: Variant in country_states:
 		economy_ids.append(str(raw_id))
@@ -445,7 +445,7 @@ func _corrupt_first_inventory(snapshot: Dictionary) -> bool:
 	inventory[commodity_ids[0]] = -1.0
 	country_state["inventory"] = inventory
 	country_states[economy_id] = country_state
-	economy_state["country_states"] = country_states
+	economy_state["market_states"] = country_states
 	snapshot["economy"] = economy_state
 	return true
 

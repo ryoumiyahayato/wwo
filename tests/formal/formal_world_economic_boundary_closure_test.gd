@@ -80,7 +80,7 @@ func _check_population_contract(simulation: FormalWorldSimulation) -> void:
 	_check(not str(facts.get("population_fingerprint", "")).is_empty(), "population fingerprint exposed")
 	var dynamic_states := (
 		observation.get("economic_state", {}) as Dictionary
-	).get("country_states", {}) as Dictionary
+	).get("markets", {}) as Dictionary
 	for state_value: Variant in dynamic_states.values():
 		var state := state_value as Dictionary
 		_check(not state.has("population"), "economy dynamic state owns no population truth")
@@ -91,8 +91,8 @@ func _check_population_contract(simulation: FormalWorldSimulation) -> void:
 func _check_static_dynamic_save_boundary(simulation: FormalWorldSimulation) -> void:
 	var economy_state := simulation.get_persistent_state().get("economy", {}) as Dictionary
 	_check(
-		str(economy_state.get("schema_id", "")) == "formal_world_economy_state_v5",
-		"production save uses dynamic-only v5 schema"
+		str(economy_state.get("schema_id", "")) == "formal_world_economy_state_v6",
+		"production save uses market-scoped dynamic-only v6 schema"
 	)
 	_check(economy_state.has("static_evidence"), "save references static evidence revision")
 	_check(economy_state.has("population_input"), "save references population input revision")
@@ -100,7 +100,8 @@ func _check_static_dynamic_save_boundary(simulation: FormalWorldSimulation) -> v
 	_check(not economy_state.has("routes"), "save excludes static route capability evidence")
 	_check(not economy_state.has("projection"), "save excludes derived projections")
 	_check(not economy_state.has("ui_history"), "save excludes UI history")
-	for state_value: Variant in (economy_state.get("country_states", {}) as Dictionary).values():
+	_check(not economy_state.has("country_states"), "v6 save excludes legacy country-state projection")
+	for state_value: Variant in (economy_state.get("market_states", {}) as Dictionary).values():
 		var state := state_value as Dictionary
 		for forbidden: String in [
 			"population", "production", "infrastructure", "income_per_capita",
@@ -137,8 +138,8 @@ func _check_v4_candidate_migration(simulation: FormalWorldSimulation) -> void:
 	_check(restored.restore_persistent_state(legacy_world), "v4 mixed-state save migrates through candidate")
 	var migrated_economy := restored.get_persistent_state().get("economy", {}) as Dictionary
 	_check(
-		str(migrated_economy.get("schema_id", "")) == "formal_world_economy_state_v5",
-		"v4 migration adopts dynamic-only v5 state"
+		str(migrated_economy.get("schema_id", "")) == "formal_world_economy_state_v6",
+		"v4 migration adopts market-scoped dynamic-only v6 state"
 	)
 	_check(not migrated_economy.has("history"), "v4 derived history is not adopted as authority")
 
@@ -164,11 +165,21 @@ func _check_second_initialization_fails(simulation: FormalWorldSimulation) -> vo
 	var service := FormalWorldEconomyService.new()
 	service.bind_authoritative_hour_source(func() -> int: return 0)
 	_check(
-		service.configure(simulation.political_registry_view(), static_view, population_view),
+		service.configure(
+			simulation.political_registry_view(),
+			simulation.market_registry_view(),
+			static_view,
+			population_view
+		),
 		"economy owner initializes from immutable inputs"
 	)
 	_check(
-		not service.configure(simulation.political_registry_view(), static_view, population_view),
+		not service.configure(
+			simulation.political_registry_view(),
+			simulation.market_registry_view(),
+			static_view,
+			population_view
+		),
 		"second economy owner configuration fails closed"
 	)
 

@@ -12,12 +12,12 @@ const MAX_SHIPMENTS_PER_DAY: int = 96
 const MAX_SUPPLIERS_PER_SHORTAGE: int = 4
 const EXPECTED_MAJOR_ROSTER_COUNT: int = 50
 const PRIMARY_PLAYABLE_LIMIT: int = 30
-const STATE_SCHEMA_ID: String = "formal_world_economy_state_v5"
+const STATE_SCHEMA_ID: String = "formal_world_economy_state_v6"
 
 var initialization_error: String = ""
 ## Internal authoritative containers. FormalWorldSimulation never exposes this
 ## service; consumers receive FormalWorldEconomyView copies only.
-var country_states: Dictionary = {}
+var market_states: Dictionary = {}
 var economy_polity_ids: Dictionary = {}
 var economy_by_polity_id: Dictionary = {}
 var routes: Array[Dictionary] = []
@@ -40,6 +40,7 @@ var _crosswalk_records: Dictionary = {}
 ## population fingerprints. It avoids per-day copies and is never persisted.
 var _calculation_inputs: Dictionary = {}
 var _political_registry: RuntimePoliticalEntityView = null
+var _market_registry: FormalWorldMarketView = null
 var _static_evidence: FormalWorldEconomicStaticView = null
 var _population_input: FormalWorldPopulationInputView = null
 var _next_shipment_sequence: int = 1
@@ -51,12 +52,13 @@ var _configured: bool = false
 
 func configure(
 	political_registry: RuntimePoliticalEntityView,
+	market_registry: FormalWorldMarketView,
 	static_evidence: FormalWorldEconomicStaticView,
 	population_input: FormalWorldPopulationInputView
 ) -> bool:
 	if _configured:
 		return _fail("Formal economy is already initialized")
-	country_states.clear()
+	market_states.clear()
 	economy_polity_ids.clear()
 	economy_by_polity_id.clear()
 	routes.clear()
@@ -70,12 +72,15 @@ func configure(
 	_next_shipment_sequence = 1
 	_political_unit_count = 0
 	_political_registry = political_registry
+	_market_registry = market_registry
 	_static_evidence = static_evidence
 	_population_input = population_input
 	_state_revision = 0
 	initialization_error = ""
 	if _political_registry == null or not _political_registry.is_configured():
 		return _fail("正式经济需要已配置的 runtime political registry")
+	if _market_registry == null or not _market_registry.is_configured():
+		return _fail("正式经济需要已配置的 market registry")
 	if _static_evidence == null or not _static_evidence.is_configured():
 		return _fail("正式经济需要已配置的静态经济证据")
 	if _population_input == null or not _population_input.is_configured():
@@ -87,15 +92,17 @@ func configure(
 		_cache_calculation_input(record)
 		_initialize_country(record)
 	_build_routes()
-	if country_states.size() != EXPECTED_MAJOR_ROSTER_COUNT:
+	if market_states.size() != EXPECTED_MAJOR_ROSTER_COUNT:
 		return _fail(
-			"主要政权高细节经济目录应为%d，当前为%d：%s" % [
+			"正式市场目录应为%d，当前为%d：%s" % [
 				EXPECTED_MAJOR_ROSTER_COUNT,
-				country_states.size(),
+				market_states.size(),
 				initialization_error,
 			]
 		)
-	if _political_unit_count <= country_states.size():
+	if _market_registry.market_count() != market_states.size():
+		return _fail("Market registry 与经济市场状态不一致")
+	if _political_unit_count <= market_states.size():
 		return _fail("世界政治单元目录不得等同于主要政权目录")
 	if _commodities.is_empty():
 		return _fail("正式世界商品目录为空")
@@ -150,9 +157,10 @@ func world_summary() -> Dictionary:
 	var major_power_count := 0
 	var primary_playable_count := 0
 	var secondary_roster_count := 0
-	for economy_id_value: Variant in country_states:
-		var economy_id := str(economy_id_value)
-		var state := country_states[economy_id] as Dictionary
+	for market_id_value: Variant in market_states:
+		var market_id := str(market_id_value)
+		var economy_id := _market_registry.economic_aggregate_id_for_market(market_id)
+		var state := market_states[market_id] as Dictionary
 		var static_record := _calculation_inputs[economy_id] as Dictionary
 		population += int(static_record.get("population", 0))
 		var totals := state.get("daily_totals", {}) as Dictionary
@@ -172,8 +180,10 @@ func world_summary() -> Dictionary:
 	return {
 		"total_hour": total_hour,
 		# Compatibility alias. This is the high-detail economy roster, not world total.
-		"country_count": country_states.size(),
-		"major_economy_count": country_states.size(),
+		"country_count": market_states.size(),
+		"major_economy_count": market_states.size(),
+		"market_count": market_states.size(),
+		"market_revision": _market_registry.revision(),
 		"world_political_unit_count": _political_unit_count,
 		"detailed_polity_unit_count": economy_by_polity_id.size(),
 		"background_polity_count": maxi(
@@ -208,12 +218,15 @@ func world_summary() -> Dictionary:
 
 func country_summary(entity_id: String) -> Dictionary:
 	var economy_id := entity_id
-	if not country_states.has(economy_id):
+	if _market_registry.market_id_for_economic_aggregate(economy_id).is_empty():
 		economy_id = economy_entity_for_polity(entity_id)
-	var state := country_states.get(economy_id, {}) as Dictionary
+	var market_id := _market_registry.market_id_for_economic_aggregate(economy_id)
+	var state := market_states.get(market_id, {}) as Dictionary
 	if state.is_empty():
 		return {}
 	var result := _project_country_state(economy_id, state)
+	result["economic_aggregate_id"] = economy_id
+	result["market_id"] = market_id
 	result["top_shortages"] = _top_country_shortages(state, 8)
 	result["active_shipments"] = _shipment_count_for(economy_id)
 	return result
@@ -235,13 +248,41 @@ func formal_verified_countries() -> Array[Dictionary]:
 	return _static_evidence.formal_verified_countries()
 
 
+func market_id_for_economic_aggregate(economic_aggregate_id: String) -> String:
+	return _market_registry.market_id_for_economic_aggregate(economic_aggregate_id)
+
+
+func economic_aggregate_id_for_market(market_id: String) -> String:
+	return _market_registry.economic_aggregate_id_for_market(market_id)
+
+
+func _has_economic_aggregate(economic_aggregate_id: String) -> bool:
+	var market_id := _market_registry.market_id_for_economic_aggregate(
+		economic_aggregate_id
+	)
+	return not market_id.is_empty() and market_states.has(market_id)
+
+
+func _economic_aggregate_ids() -> Array[String]:
+	var result: Array[String] = []
+	for market_id_value: Variant in market_states:
+		var market_id := str(market_id_value)
+		var economic_aggregate_id := _market_registry.economic_aggregate_id_for_market(
+			market_id
+		)
+		if not economic_aggregate_id.is_empty() and market_states.has(market_id):
+			result.append(economic_aggregate_id)
+	return result
+
+
 func read_only_snapshot() -> Dictionary:
 	var summaries: Dictionary = {}
-	for economy_id_value: Variant in country_states:
-		var economy_id := str(economy_id_value)
+	for market_id_value: Variant in market_states:
+		var market_id := str(market_id_value)
+		var economy_id := _market_registry.economic_aggregate_id_for_market(market_id)
 		summaries[economy_id] = country_summary(economy_id)
 	return {
-		"schema_id": "formal_world_economy_observation_v1",
+		"schema_id": "formal_world_economy_observation_v2",
 		"domain_owner": "FormalWorldEconomyService",
 		"state_revision": _state_revision,
 		"total_hour": total_hour,
@@ -250,9 +291,19 @@ func read_only_snapshot() -> Dictionary:
 			"static_evidence_fingerprint": _static_evidence.fingerprint(),
 			"population_revision": _population_input.revision(),
 			"population_fingerprint": _population_input.fingerprint(),
+			"market_revision": _market_registry.revision(),
+			"market_mapping_fingerprint": _market_registry.mapping_fingerprint(),
 		},
+		"market_registry": {
+			"revision": _market_registry.revision(),
+			"mapping_fingerprint": _market_registry.mapping_fingerprint(),
+			"markets": _market_registry.markets(),
+		},
+		"economic_aggregate_states": _economic_aggregate_observation_snapshot(),
+		"market_states": _market_observation_snapshot(),
+		# Compatibility projection for existing product/UI consumers. It is derived
+		# from explicit aggregate-to-market mapping and is never persisted as v6.
 		"country_states": _projected_country_states(),
-		"dynamic_country_states": _dynamic_states_snapshot(),
 		"economy_polity_ids": economy_polity_ids.duplicate(true),
 		"economy_by_polity_id": economy_by_polity_id.duplicate(true),
 		"routes": routes.duplicate(true),
@@ -272,10 +323,24 @@ func legacy_regression_snapshot() -> Dictionary:
 		"total_hour": total_hour,
 		"country_states": _projected_country_states(),
 		"shipments": shipments.duplicate(true),
-		"history": history.duplicate(true),
+		"history": _legacy_history_snapshot(),
 		"next_shipment_sequence": _next_shipment_sequence,
 		"last_day_index": _last_day_index,
 	}
+
+
+func _legacy_history_snapshot() -> Array[Dictionary]:
+	var result := DataRecordUtils.to_dictionary_array(history)
+	for row: Dictionary in result:
+		row.erase("market_count")
+		row.erase("market_revision")
+		var shortages := DataRecordUtils.to_dictionary_array(
+			row.get("top_shortages", [])
+		)
+		for shortage: Dictionary in shortages:
+			shortage.erase("market_id")
+		row["top_shortages"] = shortages
+	return result
 
 
 func get_persistent_state() -> Dictionary:
@@ -290,7 +355,7 @@ func get_persistent_state() -> Dictionary:
 			"revision": _population_input.revision(),
 			"fingerprint": _population_input.fingerprint(),
 		},
-		"country_states": _dynamic_states_snapshot(),
+		"market_states": _market_states_snapshot(),
 		"shipments": shipments.duplicate(true),
 		"next_shipment_sequence": _next_shipment_sequence,
 		"last_day_index": _last_day_index,
@@ -305,37 +370,53 @@ func restore_persistent_state(state: Dictionary) -> bool:
 			"formal_world_economy_state_v2",
 			"formal_world_economy_state_v3",
 			"formal_world_economy_state_v4",
+			"formal_world_economy_state_v5",
 			STATE_SCHEMA_ID,
 		]
-		or not state.get("country_states", {}) is Dictionary
 		or not state.get("shipments", []) is Array
 	):
+		return false
+	var saved_state_field := (
+		"market_states" if schema_id == STATE_SCHEMA_ID else "country_states"
+	)
+	if not state.get(saved_state_field, {}) is Dictionary:
 		return false
 	if schema_id == STATE_SCHEMA_ID and not _references_match(state):
 		return false
 	var saved_total_hour := int(state.get("total_hour", -1))
 	if saved_total_hour < 0 or saved_total_hour != total_hour:
 		return false
-	var saved_country_states: Dictionary = (
-		(state.get("country_states", {}) as Dictionary).duplicate(true)
+	var saved_states: Dictionary = (
+		(state.get(saved_state_field, {}) as Dictionary).duplicate(true)
 	)
-	if saved_country_states.size() != country_states.size():
+	if saved_states.size() != market_states.size():
 		return false
-	var candidate_country_states: Dictionary = {}
-	for raw_id: Variant in saved_country_states:
-		var economy_id := str(raw_id)
-		if (
-			not country_states.has(economy_id)
-			or not saved_country_states[economy_id] is Dictionary
+	var candidate_market_states: Dictionary = {}
+	for raw_id: Variant in saved_states:
+		var saved_id := str(raw_id)
+		if not saved_states[saved_id] is Dictionary:
+			return false
+		var market_id := saved_id
+		var economy_id := _market_registry.economic_aggregate_id_for_market(market_id)
+		if schema_id != STATE_SCHEMA_ID:
+			economy_id = saved_id
+			market_id = _market_registry.market_id_for_economic_aggregate(economy_id)
+		if market_id.is_empty() or not market_states.has(market_id):
+			return false
+		var saved_economic_state := saved_states[saved_id] as Dictionary
+		if schema_id == STATE_SCHEMA_ID and (
+			str(saved_economic_state.get("market_id", "")) != market_id
+			or str(
+				saved_economic_state.get("source_economic_aggregate_id", "")
+			) != economy_id
 		):
 			return false
-		var saved_country := saved_country_states[economy_id] as Dictionary
 		if schema_id != STATE_SCHEMA_ID and not _legacy_static_matches(
-			economy_id, saved_country, schema_id
+			economy_id, saved_economic_state, schema_id
 		):
 			return false
-		candidate_country_states[economy_id] = _compose_country_state(
-			economy_id, saved_country
+		candidate_market_states[market_id] = _compose_market_state(
+			market_id, saved_economic_state
 		)
 	var candidate_shipments: Array[Dictionary] = (
 		DataRecordUtils.to_dictionary_array(state.get("shipments", []))
@@ -352,21 +433,19 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		state.get("last_day_index", expected_last_day_index)
 	)
 	if not _validate_candidate_state(
-		candidate_country_states,
+		candidate_market_states,
 		candidate_shipments,
 		candidate_last_day_index,
 		saved_total_hour
 	):
 		return false
-	country_states = candidate_country_states
+	market_states = candidate_market_states
 	shipments = candidate_shipments
 	history.clear()
 	_next_shipment_sequence = candidate_next_shipment_sequence
 	_last_day_index = candidate_last_day_index
 	_state_revision += 1
 	return true
-
-
 func _load_injected_inputs() -> bool:
 	for commodity: Dictionary in _static_evidence.commodities():
 		var commodity_id := str(commodity.get("commodity_id", ""))
@@ -387,6 +466,10 @@ func _load_injected_inputs() -> bool:
 func _initialize_country(record: Dictionary) -> void:
 	var entity_id := str(record.get("entity_id", ""))
 	if entity_id.is_empty():
+		return
+	var market_id := _market_registry.market_id_for_economic_aggregate(entity_id)
+	if market_id.is_empty() or market_states.has(market_id):
+		_fail("主要经济聚合缺少唯一 Market identity：%s" % entity_id)
 		return
 	var polity_ids := _resolve_polity_ids(entity_id)
 	if polity_ids.is_empty():
@@ -427,8 +510,9 @@ func _initialize_country(record: Dictionary) -> void:
 			"imports": 0.0,
 			"exports": 0.0,
 		}
-	country_states[entity_id] = {
-		"entity_id": entity_id,
+	market_states[market_id] = {
+		"market_id": market_id,
+		"source_economic_aggregate_id": entity_id,
 		"inventory": inventory,
 		"prices": prices,
 		"daily_metrics": daily_metrics,
@@ -440,6 +524,8 @@ func _initialize_country(record: Dictionary) -> void:
 		"tariff_revenue_centimes": 0,
 		"last_settlement_hour": 0,
 	}
+
+
 	economy_polity_ids[entity_id] = polity_ids.duplicate()
 	for polity_id: String in polity_ids:
 		economy_by_polity_id[polity_id] = entity_id
@@ -528,8 +614,8 @@ func _add_route(route: Dictionary) -> void:
 		origin.is_empty()
 		or destination.is_empty()
 		or origin == destination
-		or not country_states.has(origin)
-		or not country_states.has(destination)
+		or not _has_economic_aggregate(origin)
+		or not _has_economic_aggregate(destination)
 	):
 		return
 	routes.append(route.duplicate(true))
@@ -544,8 +630,8 @@ func _settle_day(settlement_hour: int) -> void:
 	if day_index <= _last_day_index:
 		return
 	_deliver_shipments(settlement_hour)
-	for raw_id: Variant in country_states:
-		_settle_country(str(raw_id), settlement_hour)
+	for economy_id: String in _economic_aggregate_ids():
+		_settle_country(economy_id, settlement_hour)
 	_schedule_shortage_shipments(settlement_hour)
 	_last_day_index = day_index
 	var summary := world_summary()
@@ -560,7 +646,8 @@ func _settle_day(settlement_hour: int) -> void:
 
 
 func _settle_country(entity_id: String, settlement_hour: int) -> void:
-	var state := country_states[entity_id] as Dictionary
+	var market_id := _market_registry.market_id_for_economic_aggregate(entity_id)
+	var state := market_states[market_id] as Dictionary
 	var calculation_input := _calculation_inputs[entity_id] as Dictionary
 	var population := int(calculation_input.get("population", 0))
 	var income_per_capita := int(calculation_input.get("income_per_capita", 0))
@@ -628,19 +715,20 @@ func _settle_country(entity_id: String, settlement_hour: int) -> void:
 		),
 	}
 	state["last_settlement_hour"] = settlement_hour
-	country_states[entity_id] = state
+	market_states[market_id] = state
 
 
 func _schedule_shortage_shipments(settlement_hour: int) -> void:
 	var created := 0
-	var receiver_ids: Array[String] = []
-	for raw_id: Variant in country_states:
-		receiver_ids.append(str(raw_id))
+	var receiver_ids := _economic_aggregate_ids()
 	receiver_ids.sort()
 	for receiver_id: String in receiver_ids:
 		if created >= MAX_SHIPMENTS_PER_DAY:
 			break
-		var receiver := country_states[receiver_id] as Dictionary
+		var receiver_market_id := (
+			_market_registry.market_id_for_economic_aggregate(receiver_id)
+		)
+		var receiver := market_states[receiver_market_id] as Dictionary
 		for shortage: Dictionary in _top_country_shortages(receiver, 10):
 			if created >= MAX_SHIPMENTS_PER_DAY:
 				break
@@ -652,7 +740,10 @@ func _schedule_shortage_shipments(settlement_hour: int) -> void:
 					break
 				var origin_id := str(supplier.get("country_id", ""))
 				var route := supplier.get("route", {}) as Dictionary
-				var origin := country_states[origin_id] as Dictionary
+				var origin_market_id := (
+					_market_registry.market_id_for_economic_aggregate(origin_id)
+				)
+				var origin := market_states[origin_market_id] as Dictionary
 				var origin_inventory := origin.get("inventory", {}) as Dictionary
 				var available := float(origin_inventory.get(commodity_id, 0.0))
 				var origin_demand := float(
@@ -674,7 +765,7 @@ func _schedule_shortage_shipments(settlement_hour: int) -> void:
 				origin_metrics[commodity_id] = origin_row
 				origin["inventory"] = origin_inventory
 				origin["daily_metrics"] = origin_metrics
-				country_states[origin_id] = origin
+				market_states[origin_market_id] = origin
 				var price := int(
 					(origin.get("prices", {}) as Dictionary).get(commodity_id, 1)
 				)
@@ -708,8 +799,11 @@ func _deliver_shipments(settlement_hour: int) -> void:
 		var commodity_id := str(shipment.get("commodity_id", ""))
 		var units := float(shipment.get("units", 0.0))
 		var value := int(shipment.get("value_centimes", 0))
-		if country_states.has(destination_id):
-			var destination := country_states[destination_id] as Dictionary
+		if _has_economic_aggregate(destination_id):
+			var destination_market_id := (
+				_market_registry.market_id_for_economic_aggregate(destination_id)
+			)
+			var destination := market_states[destination_market_id] as Dictionary
 			var inventory := destination.get("inventory", {}) as Dictionary
 			inventory[commodity_id] = float(inventory.get(commodity_id, 0.0)) + units
 			var metrics := destination.get("daily_metrics", {}) as Dictionary
@@ -721,13 +815,16 @@ func _deliver_shipments(settlement_hour: int) -> void:
 			destination["trade_balance_centimes"] = int(
 				destination.get("trade_balance_centimes", 0)
 			) - value
-			country_states[destination_id] = destination
-		if country_states.has(origin_id):
-			var origin := country_states[origin_id] as Dictionary
+			market_states[destination_market_id] = destination
+		if _has_economic_aggregate(origin_id):
+			var origin_market_id := (
+				_market_registry.market_id_for_economic_aggregate(origin_id)
+			)
+			var origin := market_states[origin_market_id] as Dictionary
 			origin["trade_balance_centimes"] = int(
 				origin.get("trade_balance_centimes", 0)
 			) + value
-			country_states[origin_id] = origin
+			market_states[origin_market_id] = origin
 		shipments.remove_at(index)
 
 
@@ -738,9 +835,10 @@ func _candidate_suppliers(receiver_id: String, commodity_id: String) -> Array[Di
 		var origin := str(route.get("from", ""))
 		var destination := str(route.get("to", ""))
 		var other := destination if origin == receiver_id else origin
-		if other == receiver_id or not country_states.has(other):
+		if other == receiver_id or not _has_economic_aggregate(other):
 			continue
-		var state := country_states[other] as Dictionary
+		var other_market_id := _market_registry.market_id_for_economic_aggregate(other)
+		var state := market_states[other_market_id] as Dictionary
 		var available := float(
 			(state.get("inventory", {}) as Dictionary).get(commodity_id, 0.0)
 		)
@@ -830,7 +928,10 @@ func _top_country_shortages(state: Dictionary, limit: int) -> Array[Dictionary]:
 		var unmet := float(row.get("unmet", 0.0))
 		if unmet > 0.0001:
 			rows.append({
-				"entity_id": str(state.get("entity_id", "")),
+				"entity_id": str(
+					state.get("source_economic_aggregate_id", "")
+				),
+				"market_id": str(state.get("market_id", "")),
 				"commodity_id": commodity_id,
 				"name_zh": str(
 					(_commodities.get(commodity_id, {}) as Dictionary).get(
@@ -850,7 +951,7 @@ func _top_country_shortages(state: Dictionary, limit: int) -> Array[Dictionary]:
 
 func _top_world_shortages(limit: int) -> Array[Dictionary]:
 	var rows: Array[Dictionary] = []
-	for raw_state: Variant in country_states.values():
+	for raw_state: Variant in market_states.values():
 		rows.append_array(_top_country_shortages(raw_state as Dictionary, 3))
 	rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return float(a.get("unmet", 0.0)) > float(b.get("unmet", 0.0))
@@ -873,7 +974,7 @@ func _shipment_count_for(entity_id: String) -> int:
 
 func _validate_state() -> bool:
 	return _validate_candidate_state(
-		country_states,
+		market_states,
 		shipments,
 		_last_day_index,
 		total_hour
@@ -881,7 +982,7 @@ func _validate_state() -> bool:
 
 
 func _validate_candidate_state(
-	candidate_country_states: Dictionary,
+	candidate_market_states: Dictionary,
 	candidate_shipments: Array[Dictionary],
 	candidate_last_day_index: int,
 	expected_total_hour: int
@@ -889,6 +990,8 @@ func _validate_candidate_state(
 	if (
 		_political_registry == null
 		or not _political_registry.is_configured()
+		or _market_registry == null
+		or not _market_registry.is_configured()
 		or _political_unit_count != _political_registry.entity_count()
 	):
 		return false
@@ -901,16 +1004,21 @@ func _validate_candidate_state(
 	)
 	if candidate_last_day_index != expected_last_day_index:
 		return false
-	if candidate_country_states.size() != EXPECTED_MAJOR_ROSTER_COUNT:
+	if (
+		candidate_market_states.size() != EXPECTED_MAJOR_ROSTER_COUNT
+		or candidate_market_states.size() != _market_registry.market_count()
+	):
 		return false
-	for raw_id: Variant in candidate_country_states:
-		var economy_id := str(raw_id)
-		if not candidate_country_states[economy_id] is Dictionary:
+	for raw_id: Variant in candidate_market_states:
+		var market_id := str(raw_id)
+		var economy_id := _market_registry.economic_aggregate_id_for_market(market_id)
+		if economy_id.is_empty() or not candidate_market_states[market_id] is Dictionary:
 			return false
-		var state := candidate_country_states[economy_id] as Dictionary
+		var state := candidate_market_states[market_id] as Dictionary
 		var polity_ids := polity_ids_for_economy(economy_id)
 		if (
-			str(state.get("entity_id", "")) != economy_id
+			str(state.get("market_id", "")) != market_id
+			or str(state.get("source_economic_aggregate_id", "")) != economy_id
 			or _population_input.population(economy_id) <= 0
 			or _static_evidence.country(economy_id).is_empty()
 			or polity_ids.is_empty()
@@ -932,8 +1040,12 @@ func _validate_candidate_state(
 		var arrival_hour := int(shipment.get("arrival_hour", -1))
 		if (
 			float(shipment.get("units", 0.0)) <= 0.0
-			or not candidate_country_states.has(origin_id)
-			or not candidate_country_states.has(destination_id)
+			or not candidate_market_states.has(
+				_market_registry.market_id_for_economic_aggregate(origin_id)
+			)
+			or not candidate_market_states.has(
+				_market_registry.market_id_for_economic_aggregate(destination_id)
+			)
 			or dispatch_hour < 0
 			or dispatch_hour > expected_total_hour
 			or arrival_hour <= dispatch_hour
@@ -969,22 +1081,69 @@ func _references_match(state: Dictionary) -> bool:
 	)
 
 
-func _dynamic_states_snapshot() -> Dictionary:
+func _market_states_snapshot() -> Dictionary:
 	var result: Dictionary = {}
-	for economy_id_value: Variant in country_states:
-		var economy_id := str(economy_id_value)
-		result[economy_id] = _dynamic_state_from(
-			country_states[economy_id] as Dictionary
+	for market_id_value: Variant in market_states:
+		var market_id := str(market_id_value)
+		var state := market_states[market_id] as Dictionary
+		var snapshot := _dynamic_state_from(state)
+		snapshot["market_id"] = market_id
+		snapshot["source_economic_aggregate_id"] = str(
+			state.get("source_economic_aggregate_id", "")
 		)
+		result[market_id] = snapshot
+	return result
+
+
+func _market_observation_snapshot() -> Dictionary:
+	var result: Dictionary = {}
+	for market_id_value: Variant in market_states:
+		var market_id := str(market_id_value)
+		var state := market_states[market_id] as Dictionary
+		var snapshot := {
+			"market_id": market_id,
+			"source_economic_aggregate_id": str(
+				state.get("source_economic_aggregate_id", "")
+			),
+		}
+		for key: String in [
+			"inventory", "prices", "daily_metrics", "daily_totals",
+			"last_settlement_hour",
+		]:
+			var value: Variant = state.get(key)
+			snapshot[key] = (
+				value.duplicate(true) if value is Dictionary or value is Array else value
+			)
+		result[market_id] = snapshot
+	return result
+
+
+func _economic_aggregate_observation_snapshot() -> Dictionary:
+	var result: Dictionary = {}
+	for economy_id: String in _economic_aggregate_ids():
+		var market_id := _market_registry.market_id_for_economic_aggregate(economy_id)
+		var state := market_states[market_id] as Dictionary
+		result[economy_id] = {
+			"economic_aggregate_id": economy_id,
+			"pricing_market_id": market_id,
+			"gold_reserve_units": float(state.get("gold_reserve_units", 0.0)),
+			"trade_balance_centimes": int(
+				state.get("trade_balance_centimes", 0)
+			),
+			"tariff_revenue_centimes": int(
+				state.get("tariff_revenue_centimes", 0)
+			),
+		}
 	return result
 
 
 func _projected_country_states() -> Dictionary:
 	var result: Dictionary = {}
-	for economy_id_value: Variant in country_states:
-		var economy_id := str(economy_id_value)
+	for market_id_value: Variant in market_states:
+		var market_id := str(market_id_value)
+		var economy_id := _market_registry.economic_aggregate_id_for_market(market_id)
 		result[economy_id] = _project_country_state(
-			economy_id, country_states[economy_id] as Dictionary
+			economy_id, market_states[market_id] as Dictionary
 		)
 	return result
 
@@ -1060,8 +1219,8 @@ func _dynamic_state_from(state: Dictionary) -> Dictionary:
 	return result
 
 
-func _compose_country_state(economy_id: String, saved: Dictionary) -> Dictionary:
-	var result := (country_states[economy_id] as Dictionary).duplicate(true)
+func _compose_market_state(market_id: String, saved: Dictionary) -> Dictionary:
+	var result := (market_states[market_id] as Dictionary).duplicate(true)
 	var dynamic := _dynamic_state_from(saved)
 	for key_value: Variant in dynamic:
 		result[str(key_value)] = dynamic[key_value]
@@ -1071,8 +1230,9 @@ func _compose_country_state(economy_id: String, saved: Dictionary) -> Dictionary
 func _legacy_static_matches(
 	economy_id: String, saved: Dictionary, schema_id: String
 ) -> bool:
+	var market_id := _market_registry.market_id_for_economic_aggregate(economy_id)
 	var expected := _project_country_state(
-		economy_id, country_states[economy_id] as Dictionary
+		economy_id, market_states[market_id] as Dictionary
 	)
 	var saved_polity_ids := DataRecordUtils.to_string_array(
 		saved.get("polity_ids", [])

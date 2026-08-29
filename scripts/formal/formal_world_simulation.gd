@@ -6,7 +6,7 @@ extends RefCounted
 signal state_changed(change: Dictionary)
 
 const SAVE_PATH: String = "user://formal_world_1900.json"
-const SCHEMA_ID: String = "formal_world_simulation_v3"
+const SCHEMA_ID: String = "formal_world_simulation_v4"
 const EVIDENCE_STATE_SCHEMA_ID: String = "historical_political_evidence_v1"
 
 var _historical_evidence := HistoricalPoliticalEvidenceCatalog.new()
@@ -16,6 +16,8 @@ var _political_registry_view := RuntimePoliticalEntityView.new()
 var _economic_evidence := FormalWorldEconomicEvidenceCatalog.new()
 var _economic_static_view := FormalWorldEconomicStaticView.new()
 var _population_input_view := FormalWorldPopulationInputView.new()
+var _market_registry := FormalWorldMarketRegistry.new()
+var _market_registry_view := FormalWorldMarketView.new()
 var _economy := FormalWorldEconomyService.new()
 var economy: FormalWorldEconomyView:
 	get:
@@ -55,8 +57,14 @@ func initialize() -> bool:
 		initialized = false
 		return false
 	_refresh_read_only_views()
+	if not _configure_market_registry():
+		initialization_error = _market_registry.initialization_error
+		initialized = false
+		return false
+	_refresh_read_only_views()
 	if not _economy.configure(
 		_political_registry_view,
+		_market_registry_view,
 		_economic_static_view,
 		_population_input_view
 	):
@@ -74,6 +82,10 @@ func historical_evidence_view() -> HistoricalPoliticalEvidenceView:
 
 func political_registry_view() -> RuntimePoliticalEntityView:
 	return _political_registry_view
+
+
+func market_registry_view() -> FormalWorldMarketView:
+	return _market_registry_view
 
 
 func economy_view() -> FormalWorldEconomyView:
@@ -196,6 +208,7 @@ func get_persistent_state() -> Dictionary:
 			"fingerprint": _historical_evidence.fingerprint(),
 		},
 		"runtime_politics": _political_registry.snapshot(),
+		"markets": _market_registry.get_persistent_state(),
 		"economy": _economy.get_persistent_state(),
 	}
 
@@ -217,6 +230,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 		schema_id not in [
 			"formal_world_simulation_v1",
 			"formal_world_simulation_v2",
+			"formal_world_simulation_v3",
 			SCHEMA_ID,
 		]
 		or not state.get("economy", {}) is Dictionary
@@ -225,7 +239,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 	var validated_time := _validated_time_state(state, schema_id)
 	if validated_time.is_empty():
 		return false
-	if schema_id == SCHEMA_ID:
+	if schema_id in ["formal_world_simulation_v3", SCHEMA_ID]:
 		if (
 			not state.get("historical_evidence", {}) is Dictionary
 			or not state.get("runtime_politics", {}) is Dictionary
@@ -246,6 +260,14 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 		_refresh_read_only_views()
 		if not _economy.bind_runtime_political_view(_political_registry_view):
 			return false
+	if schema_id == SCHEMA_ID:
+		if (
+			not state.get("markets", {}) is Dictionary
+			or not _market_registry.validate_persistent_state(
+				state.get("markets", {}) as Dictionary
+			)
+		):
+			return false
 	total_minutes = int(validated_time.get("total_minutes", -1))
 	if not _economy.restore_persistent_state(
 		state.get("economy", {}) as Dictionary
@@ -264,6 +286,8 @@ func _adopt_candidate(candidate: FormalWorldSimulation) -> void:
 	_economic_evidence = candidate._economic_evidence
 	_economic_static_view = candidate._economic_static_view
 	_population_input_view = candidate._population_input_view
+	_market_registry = candidate._market_registry
+	_market_registry_view = candidate._market_registry_view
 	_economy = candidate._economy
 	_economy.bind_authoritative_hour_source(
 		Callable(self, "_authoritative_total_hour")
@@ -284,6 +308,20 @@ func _refresh_read_only_views() -> void:
 	)
 	_population_input_view = FormalWorldPopulationInputView.new(
 		_economic_evidence.population_snapshot()
+	)
+	_market_registry_view = FormalWorldMarketView.new(
+		_market_registry.read_only_snapshot()
+	)
+
+
+func _configure_market_registry() -> bool:
+	var economic_aggregate_ids: Array[String] = []
+	for record: Dictionary in _economic_static_view.countries():
+		var economic_aggregate_id := str(record.get("entity_id", ""))
+		if not economic_aggregate_id.is_empty():
+			economic_aggregate_ids.append(economic_aggregate_id)
+	return _market_registry.configure(
+		economic_aggregate_ids, _political_registry_view.entity_ids()
 	)
 
 
@@ -401,7 +439,11 @@ func _validated_time_state(state: Dictionary, schema_id: String) -> Dictionary:
 	var saved_total_hour := int(economy_state.get("total_hour", -1))
 	if saved_total_hour < 0:
 		return {}
-	if schema_id in ["formal_world_simulation_v2", SCHEMA_ID] and (
+	if schema_id in [
+		"formal_world_simulation_v2",
+		"formal_world_simulation_v3",
+		SCHEMA_ID,
+	] and (
 		not state.has("total_minutes") or not state.has("minute_remainder")
 	):
 		return {}
