@@ -1,0 +1,375 @@
+{
+  "schema_id": "wwo_economic_geography_commodity_compatibility_r1_v2",
+  "schema_version": 2,
+  "concepts": [
+    {
+      "compatibility_key": "commodity:coal",
+      "historical_concept_id": "coal",
+      "concept_kind": "commodity",
+      "mapping_status": "DIRECT",
+      "resolution_status": "CANONICAL_DIRECT",
+      "notes": "Existing catalog identity is sufficient for qualitative coal endowment and mining evidence. Namespaced compatibility key prevents commodity/sector identity collisions.",
+      "canonical_commodity_id": "coal"
+    },
+    {
+      "compatibility_key": "commodity:coke",
+      "historical_concept_id": "coke",
+      "concept_kind": "commodity",
+      "mapping_status": "DIRECT",
+      "resolution_status": "CANONICAL_DIRECT",
+      "notes": "Existing catalog identity covers coke; coking-coal quality is not inferred. Namespaced compatibility key prevents commodity/sector identity collisions.",
+      "canonical_commodity_id": "coke"
+    },
+    {
+      "compatibility_key": "commodity:copper",
+      "historical_concept_id": "copper",
+      "concept_kind": "commodity",
+      "canonical_commodity_id": "copper",
+      "mapping_status": "DIRECT",
+      "resolution_status": "CANONICAL_DIRECT",
+      "notes": "Existing canonical commodity identity resolves this pilot reference; no duplicate commodity identity is created."
+    },
+    {
+      "compatibility_key": "commodity:copper_ore",
+      "historical_concept_id": "copper_ore",
+      "concept_kind": "commodity",
+      "mapping_status": "DIRECT",
+      "resolution_status": "CANONICAL_DIRECT",
+      "notes": "Existing catalog identity covers ore; smelting is represented separately as a sector. Namespaced compatibility key prevents commodity/sector identity collisions.",
+      "canonical_commodity_id": "copper_ore"
+    },
+    {
+      "compatibility_key": "commodity:cotton_cloth",
+      "historical_concept_id": "cotton_cloth",
+      "concept_kind": "commodity",
+      "mapping_status": "DIRECT",
+      "resolution_status": "CANONICAL_DIRECT",
+      "notes": "Existing catalog identity covers cloth output; spinning and yarn capacity remain sector-only. Namespaced compatibility key prevents commodity/sector identity collisions.",
+      "canonical_commodity_id": "cotton_cloth"
+    },
+    {
+      "compatibility_key": "commodity:crude_petroleum",
+      "historical_concept_id": "crude_petroleum",
+      "concept_kind": "commodity",
+      "mapping_status": "DIRECT",
+      "resolution_status": "CANONICAL_DIRECT",
+      "notes": "Existing catalog identity covers crude petroleum; no pilot quantity is asserted. Namespaced compatibility key prevents commodity/sector identity collisions.",
+      "canonical_commodity_id": "crude_petroleum"
+    },
+    {
+      "compatibility_key": "commodity:iron_ore",
+      "historical_concept_id": "iron_ore",
+      "concept_kind": "commodity",
+      "mapping_status": "DIRECT",
+      "resolution_status": "CANONICAL_DIRECT",
+      "notes": "Existing catalog identity is sufficient; origin and ore grade remain unsourced in this pilot. Namespaced compatibility key prevents commodity/sector identity collisions.",
+      "canonical_commodity_id": "iron_ore"
+    },
+    {
+      "compatibility_key": "commodity:jute",
+      "historical_concept_id": "jute",
+      "concept_kind": "commodity",
+      "mapping_status": "DIRECT",
+      "resolution_status": "CANONICAL_DIRECT",
+      "notes": "Existing catalog identity covers raw jute; gunny cloth is represented through the jute_textiles sector and not invented as a new commodity. Namespaced compatibility key prevents commodity/sector identity collisions.",
+      "canonical_commodity_id": "jute"
+    },
+    {
+      "compatibility_key": "commodity:limestone",
+      "historical_concept_id": "limestone",
+      "concept_kind": "commodity",
+      "canonical_commodity_id": "limestone",
+      "mapping_status": "DIRECT",
+      "resolution_status": "CANONICAL_DIRECT",
+      "notes": "Existing canonical commodity identity resolves this pilot reference; no duplicate commodity identity is created."
+    },
+    {
+      "compatibility_key": "commodity:machinery",
+      "historical_concept_id": "machinery",
+      "concept_kind": "commodity",
+      "mapping_status": "DIRECT",
+      "resolution_status": "CANONICAL_DIRECT",
+      "notes": "Existing catalog identity covers general machinery; machine-tool subtypes are sector detail. Namespaced compatibility key prevents commodity/sector identity collisions.",
+      "canonical_commodity_id": "machinery"
+    },
+    {
+      "compatibility_key": "commodity:pig_iron",
+      "historical_concept_id": "pig_iron",
+      "concept_kind": "commodity",
+      "mapping_status": "DIRECT",
+      "resolution_status": "CANONICAL_DIRECT",
+      "notes": "Existing catalog identity covers pig iron; furnace technology is sector evidence, not a new commodity. Namespaced compatibility key prevents commodity/sector identity collisions.",
+      "canonical_commodity_id": "pig_iron"
+    },
+    {
+      "compatibility_key": "commodity:potatoes",
+      "historical_concept_id": "potatoes",
+      "concept_kind": "commodity",
+      "canonical_commodity_id": "potatoes",
+      "mapping_status": "DIRECT",
+      "resolution_status": "CANONICAL_DIRECT",
+      "notes": "Existing canonical commodity identity resolves this pilot reference; no duplicate commodity identity is created."
+    },
+    {
+      "compatibility_key": "commodity:raw_cotton",
+      "historical_concept_id": "raw_cotton",
+      "concept_kind": "commodity",
+      "mapping_status": "DIRECT",
+      "resolution_status": "CANONICAL_DIRECT",
+      "notes": "Existing catalog identity covers raw cotton; yarn is not silently added as a commodity. Namespaced compatibility key prevents commodity/sector identity collisions.",
+      "canonical_commodity_id": "raw_cotton"
+    },
+    {
+      "compatibility_key": "commodity:raw_silk",
+      "historical_concept_id": "raw_silk",
+      "concept_kind": "commodity",
+      "mapping_status": "DIRECT",
+      "resolution_status": "CANONICAL_DIRECT",
+      "notes": "Existing catalog identity covers raw silk; reeling is represented separately as a sector. Namespaced compatibility key prevents commodity/sector identity collisions.",
+      "canonical_commodity_id": "raw_silk"
+    },
+    {
+      "compatibility_key": "commodity:rice",
+      "historical_concept_id": "rice",
+      "concept_kind": "commodity",
+      "mapping_status": "DIRECT",
+      "resolution_status": "CANONICAL_DIRECT",
+      "notes": "Existing catalog identity covers rice; local varieties and harvest timing remain future work. Namespaced compatibility key prevents commodity/sector identity collisions.",
+      "canonical_commodity_id": "rice"
+    },
+    {
+      "compatibility_key": "commodity:steel",
+      "historical_concept_id": "steel",
+      "concept_kind": "commodity",
+      "mapping_status": "DIRECT",
+      "resolution_status": "CANONICAL_DIRECT",
+      "notes": "Existing catalog identity covers steel; finished-product subtypes are not split here. Namespaced compatibility key prevents commodity/sector identity collisions.",
+      "canonical_commodity_id": "steel"
+    },
+    {
+      "compatibility_key": "commodity:tea",
+      "historical_concept_id": "tea",
+      "concept_kind": "commodity",
+      "mapping_status": "DIRECT",
+      "resolution_status": "CANONICAL_DIRECT",
+      "notes": "Existing catalog identity covers tea; plantation and processing distinctions remain future work. Namespaced compatibility key prevents commodity/sector identity collisions.",
+      "canonical_commodity_id": "tea"
+    },
+    {
+      "compatibility_key": "commodity:timber",
+      "historical_concept_id": "timber",
+      "concept_kind": "commodity",
+      "mapping_status": "DIRECT",
+      "resolution_status": "CANONICAL_DIRECT",
+      "notes": "Existing catalog identity is used for timber endowment; species and forest-management evidence remain future work. Namespaced compatibility key prevents commodity/sector identity collisions.",
+      "canonical_commodity_id": "timber"
+    },
+    {
+      "compatibility_key": "commodity:wheat",
+      "historical_concept_id": "wheat",
+      "concept_kind": "commodity",
+      "mapping_status": "DIRECT",
+      "resolution_status": "CANONICAL_DIRECT",
+      "notes": "Existing catalog identity covers wheat; variety and yield are not modeled here. Namespaced compatibility key prevents commodity/sector identity collisions.",
+      "canonical_commodity_id": "wheat"
+    },
+    {
+      "compatibility_key": "commodity:wool",
+      "historical_concept_id": "wool",
+      "concept_kind": "commodity",
+      "mapping_status": "DIRECT",
+      "resolution_status": "CANONICAL_DIRECT",
+      "notes": "Existing catalog identity covers wool; regional grades remain future work. Namespaced compatibility key prevents commodity/sector identity collisions.",
+      "canonical_commodity_id": "wool"
+    },
+    {
+      "compatibility_key": "commodity:wool_cloth",
+      "historical_concept_id": "wool_cloth",
+      "concept_kind": "commodity",
+      "canonical_commodity_id": "wool_cloth",
+      "mapping_status": "DIRECT",
+      "resolution_status": "CANONICAL_DIRECT",
+      "notes": "Existing canonical commodity identity resolves this pilot reference; no duplicate commodity identity is created."
+    },
+    {
+      "compatibility_key": "industrial_sector:coal_mining",
+      "historical_concept_id": "coal_mining",
+      "concept_kind": "industrial_sector",
+      "canonical_sector_id": "coal_mining",
+      "mapping_status": "SECTOR_ONLY",
+      "resolution_status": "SECTOR_ONLY",
+      "notes": "Sector-scoped identity resolves through the existing sector catalog; it is not a commodity alias or production quantity."
+    },
+    {
+      "compatibility_key": "industrial_sector:coke_production",
+      "historical_concept_id": "coke_production",
+      "concept_kind": "industrial_sector",
+      "canonical_sector_id": "coke_production",
+      "mapping_status": "SECTOR_ONLY",
+      "resolution_status": "SECTOR_ONLY",
+      "notes": "Sector-scoped identity resolves through the existing sector catalog; it is not a commodity alias or production quantity."
+    },
+    {
+      "compatibility_key": "industrial_sector:copper_mining",
+      "historical_concept_id": "copper_mining",
+      "concept_kind": "industrial_sector",
+      "canonical_sector_id": "copper_mining",
+      "mapping_status": "SECTOR_ONLY",
+      "resolution_status": "SECTOR_ONLY",
+      "notes": "Sector-scoped identity resolves through the existing sector catalog; it is not a commodity alias or production quantity."
+    },
+    {
+      "compatibility_key": "industrial_sector:copper_smelting",
+      "historical_concept_id": "copper_smelting",
+      "concept_kind": "industrial_sector",
+      "canonical_sector_id": "copper_smelting",
+      "mapping_status": "SECTOR_ONLY",
+      "resolution_status": "SECTOR_ONLY",
+      "notes": "Sector-scoped identity resolves through the existing sector catalog; it is not a commodity alias or production quantity."
+    },
+    {
+      "compatibility_key": "industrial_sector:cotton_spinning",
+      "historical_concept_id": "cotton_spinning",
+      "concept_kind": "industrial_sector",
+      "mapping_status": "SECTOR_ONLY",
+      "resolution_status": "SECTOR_ONLY",
+      "notes": "The canonical commodity catalog has raw_cotton and cotton_cloth but no separate yarn identity; do not create historical_yarn or e1_yarn. Namespaced compatibility key prevents commodity/sector identity collisions.",
+      "canonical_sector_id": "cotton_textiles"
+    },
+    {
+      "compatibility_key": "industrial_sector:cotton_textiles",
+      "historical_concept_id": "cotton_textiles",
+      "concept_kind": "industrial_sector",
+      "canonical_sector_id": "cotton_textiles",
+      "mapping_status": "SECTOR_ONLY",
+      "resolution_status": "SECTOR_ONLY",
+      "notes": "Sector-scoped identity resolves through the existing sector catalog; it is not a commodity alias or production quantity."
+    },
+    {
+      "compatibility_key": "industrial_sector:food_processing",
+      "historical_concept_id": "food_processing",
+      "concept_kind": "industrial_sector",
+      "canonical_sector_id": "food_processing",
+      "mapping_status": "SECTOR_ONLY",
+      "resolution_status": "SECTOR_ONLY",
+      "notes": "Sector-scoped identity resolves through the existing sector catalog; it is not a commodity alias or production quantity."
+    },
+    {
+      "compatibility_key": "industrial_sector:iron_and_steel",
+      "historical_concept_id": "iron_and_steel",
+      "concept_kind": "industrial_sector",
+      "mapping_status": "COLLAPSED_SECTOR",
+      "resolution_status": "SECTOR_ONLY",
+      "notes": "Historical sources often discuss iron and steel together; the pilot keeps pig_iron and steel commodities separate where stated, while the broad sector alias remains steelmaking. Namespaced compatibility key prevents commodity/sector identity collisions.",
+      "canonical_sector_id": "steelmaking"
+    },
+    {
+      "compatibility_key": "industrial_sector:iron_ore_mining",
+      "historical_concept_id": "iron_ore_mining",
+      "concept_kind": "industrial_sector",
+      "canonical_sector_id": "iron_ore_mining",
+      "mapping_status": "SECTOR_ONLY",
+      "resolution_status": "SECTOR_ONLY",
+      "notes": "Sector-scoped identity resolves through the existing sector catalog; it is not a commodity alias or production quantity."
+    },
+    {
+      "compatibility_key": "industrial_sector:jute_milling",
+      "historical_concept_id": "jute_milling",
+      "concept_kind": "industrial_sector",
+      "mapping_status": "SECTOR_ONLY",
+      "resolution_status": "SECTOR_ONLY",
+      "notes": "Jute mill capacity is a sector claim; it is not a new commodity identity. Namespaced compatibility key prevents commodity/sector identity collisions.",
+      "canonical_sector_id": "jute_textiles"
+    },
+    {
+      "compatibility_key": "industrial_sector:jute_textiles",
+      "historical_concept_id": "jute_textiles",
+      "concept_kind": "industrial_sector",
+      "canonical_sector_id": "jute_textiles",
+      "mapping_status": "SECTOR_ONLY",
+      "resolution_status": "SECTOR_ONLY",
+      "notes": "Sector-scoped identity resolves through the existing sector catalog; it is not a commodity alias or production quantity."
+    },
+    {
+      "compatibility_key": "industrial_sector:machinery",
+      "historical_concept_id": "machinery",
+      "concept_kind": "industrial_sector",
+      "canonical_sector_id": "machinery",
+      "mapping_status": "SECTOR_ONLY",
+      "resolution_status": "SECTOR_ONLY",
+      "notes": "Sector-scoped identity resolves through the existing sector catalog; it is not a commodity alias or production quantity."
+    },
+    {
+      "compatibility_key": "industrial_sector:pig_iron",
+      "historical_concept_id": "pig_iron",
+      "concept_kind": "industrial_sector",
+      "canonical_sector_id": "pig_iron",
+      "mapping_status": "SECTOR_ONLY",
+      "resolution_status": "SECTOR_ONLY",
+      "notes": "Sector-scoped identity resolves through the existing sector catalog; it is not a commodity alias or production quantity."
+    },
+    {
+      "compatibility_key": "industrial_sector:quarrying",
+      "historical_concept_id": "quarrying",
+      "concept_kind": "industrial_sector",
+      "canonical_sector_id": "quarrying",
+      "mapping_status": "SECTOR_ONLY",
+      "resolution_status": "SECTOR_ONLY",
+      "notes": "Sector-scoped identity resolves through the existing sector catalog; it is not a commodity alias or production quantity."
+    },
+    {
+      "compatibility_key": "industrial_sector:shipbuilding",
+      "historical_concept_id": "shipbuilding",
+      "concept_kind": "industrial_sector",
+      "mapping_status": "SECTOR_ONLY",
+      "resolution_status": "SECTOR_ONLY",
+      "notes": "The canonical catalog has no ship commodity; shipbuilding remains a sector evidence record. Namespaced compatibility key prevents commodity/sector identity collisions.",
+      "canonical_sector_id": "shipbuilding"
+    },
+    {
+      "compatibility_key": "industrial_sector:silk_reeling",
+      "historical_concept_id": "silk_reeling",
+      "concept_kind": "industrial_sector",
+      "mapping_status": "SECTOR_ONLY",
+      "resolution_status": "SECTOR_ONLY",
+      "notes": "Reeling is an industrial process attached to raw_silk; no separate reeled_silk commodity is created. Namespaced compatibility key prevents commodity/sector identity collisions.",
+      "canonical_sector_id": "silk_textiles"
+    },
+    {
+      "compatibility_key": "industrial_sector:silk_textiles",
+      "historical_concept_id": "silk_textiles",
+      "concept_kind": "industrial_sector",
+      "canonical_sector_id": "silk_textiles",
+      "mapping_status": "SECTOR_ONLY",
+      "resolution_status": "SECTOR_ONLY",
+      "notes": "Sector-scoped identity resolves through the existing sector catalog; it is not a commodity alias or production quantity."
+    },
+    {
+      "compatibility_key": "industrial_sector:steelmaking",
+      "historical_concept_id": "steelmaking",
+      "concept_kind": "industrial_sector",
+      "canonical_sector_id": "steelmaking",
+      "mapping_status": "SECTOR_ONLY",
+      "resolution_status": "SECTOR_ONLY",
+      "notes": "Sector-scoped identity resolves through the existing sector catalog; it is not a commodity alias or production quantity."
+    },
+    {
+      "compatibility_key": "industrial_sector:tinplate",
+      "historical_concept_id": "tinplate",
+      "concept_kind": "industrial_sector",
+      "canonical_sector_id": "tinplate",
+      "mapping_status": "SECTOR_ONLY",
+      "resolution_status": "SECTOR_ONLY",
+      "notes": "Sector-scoped identity resolves through the existing sector catalog; it is not a commodity alias or production quantity."
+    },
+    {
+      "compatibility_key": "industrial_sector:wool_textiles",
+      "historical_concept_id": "wool_textiles",
+      "concept_kind": "industrial_sector",
+      "canonical_sector_id": "wool_textiles",
+      "mapping_status": "SECTOR_ONLY",
+      "resolution_status": "SECTOR_ONLY",
+      "notes": "Sector-scoped identity resolves through the existing sector catalog; it is not a commodity alias or production quantity."
+    }
+  ]
+}

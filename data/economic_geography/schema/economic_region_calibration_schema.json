@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_id": "wwo_economic_geography_calibration_schema_r1_v2",
+  "schema_version": 2,
+  "title": "WWO 1900 economic geography evidence-prior calibration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_id",
+    "schema_version",
+    "target_year",
+    "calibration_records"
+  ],
+  "properties": {
+    "schema_id": {
+      "const": "wwo_economic_geography_calibration_schema_r1_v2"
+    },
+    "schema_version": {
+      "const": 2
+    },
+    "target_year": {
+      "const": 1900
+    },
+    "calibration_notice": {
+      "type": "string",
+      "minLength": 1
+    },
+    "calibration_records": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/calibration_record"
+      }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_:-]*$"
+    },
+    "calibration_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "economic_region_id",
+        "subject_type",
+        "commodity_or_sector_id",
+        "calibration_role",
+        "capacity_low",
+        "capacity_baseline",
+        "capacity_high",
+        "canonical_unit",
+        "runtime_usage",
+        "forbidden_runtime_uses",
+        "calibration_method",
+        "declared_source_assertion_range",
+        "source_assertion_ids",
+        "confidence",
+        "notes"
+      ],
+      "properties": {
+        "economic_region_id": {
+          "$ref": "#/$defs/id"
+        },
+        "subject_type": {
+          "enum": [
+            "COMMODITY",
+            "SECTOR"
+          ]
+        },
+        "commodity_or_sector_id": {
+          "$ref": "#/$defs/id"
+        },
+        "calibration_role": {
+          "enum": [
+            "EVIDENCE_PRIOR_ONLY",
+            "DIRECT_PHYSICAL_PRODUCTION_CAPACITY"
+          ]
+        },
+        "capacity_low": {
+          "type": "number"
+        },
+        "capacity_baseline": {
+          "type": "number"
+        },
+        "capacity_high": {
+          "type": "number"
+        },
+        "canonical_unit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "runtime_usage": {
+          "type": "string",
+          "minLength": 1
+        },
+        "forbidden_runtime_uses": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "calibration_method": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "method_id",
+            "method_kind",
+            "description",
+            "explicit_extrapolation"
+          ],
+          "properties": {
+            "method_id": {
+              "$ref": "#/$defs/id"
+            },
+            "method_kind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": {
+              "type": "string",
+              "minLength": 1
+            },
+            "explicit_extrapolation": {
+              "type": "boolean"
+            },
+            "extrapolation_justification": {
+              "type": "string"
+            }
+          }
+        },
+        "declared_source_assertion_range": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "low",
+            "high",
+            "canonical_unit"
+          ],
+          "properties": {
+            "low": {
+              "type": "number"
+            },
+            "high": {
+              "type": "number"
+            },
+            "canonical_unit": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "source_assertion_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "confidence": {
+          "enum": [
+            "LOW",
+            "MEDIUM",
+            "HIGH",
+            "UNASSESSED"
+          ]
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

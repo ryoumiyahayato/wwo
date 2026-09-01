@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_id": "wwo_economic_geography_source_registry_schema_r1_v2",
+  "schema_version": 2,
+  "title": "WWO economic geography source registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_id",
+    "schema_version",
+    "sources"
+  ],
+  "properties": {
+    "schema_id": {
+      "const": "wwo_economic_geography_source_registry_schema_r1_v2"
+    },
+    "schema_version": {
+      "const": 2
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/source"
+      }
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_id",
+        "title",
+        "author_or_institution",
+        "publication_date",
+        "source_class",
+        "observation_from",
+        "observation_to",
+        "observation_period_notes",
+        "accessed_at",
+        "version_or_edition",
+        "locator",
+        "reliability_notes"
+      ],
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_:-]*$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "author_or_institution": {
+          "type": "string",
+          "minLength": 1
+        },
+        "publication_date": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_class": {
+          "enum": [
+            "PRIMARY_OFFICIAL_STATISTICS",
+            "CONTEMPORARY_OFFICIAL_REPORT",
+            "CONTEMPORARY_REFERENCE",
+            "LATER_SCHOLARLY_SYNTHESIS",
+            "MODERN_SPATIAL_REFERENCE",
+            "INTERNAL_PROJECT_CATALOG",
+            "OTHER"
+          ]
+        },
+        "observation_from": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "observation_to": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "observation_period_notes": {
+          "type": "string",
+          "minLength": 1
+        },
+        "stable_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "archive_reference": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "accessed_at": {
+          "type": "string",
+          "format": "date"
+        },
+        "version_or_edition": {
+          "type": "string",
+          "minLength": 1
+        },
+        "locator": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reliability_notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "stable_url"
+          ]
+        },
+        {
+          "required": [
+            "archive_reference"
+          ]
+        }
+      ]
+    }
+  }
+}

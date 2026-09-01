@@ -1,0 +1,260 @@
+{
+  "schema_id": "wwo_economic_region_calibration_1900_r1_v2",
+  "schema_version": 2,
+  "target_year": 1900,
+  "calibration_notice": "All current records are EVIDENCE_PRIOR_ONLY. ordinal_capacity_index_0_5 is a bounded qualitative prior and is forbidden from representing tonnes, workers, money, physical installed capacity, production multipliers, yield, or direct runtime output.",
+  "calibration_records": [
+    {
+      "economic_region_id": "economic_region_ruhr_coal_steel_1900",
+      "subject_type": "COMMODITY",
+      "commodity_or_sector_id": "coal",
+      "capacity_low": 3.0,
+      "capacity_baseline": 4.0,
+      "capacity_high": 5.0,
+      "canonical_unit": "ordinal_capacity_index_0_5",
+      "calibration_method": {
+        "method_id": "ordinal_evidence_band_to_capacity_index_v1",
+        "method_kind": "ORDINAL_BAND_MAPPING",
+        "explicit_extrapolation": false,
+        "description": "Illustrative mapping of qualitative evidence into a bounded 0-5 prior; it is not a historical quantity conversion."
+      },
+      "confidence": "LOW",
+      "notes": "Contract example only; replace with a source-derived range before runtime calibration. R1 lock: ordinal_capacity_index_0_5 is evidence-prior-only and cannot become tonnes, workers, money, physical installed capacity, a production multiplier, yield, or direct runtime output.",
+      "source_assertion_ids": [
+        "economic_region_ruhr_coal_steel_1900__resource__coal"
+      ],
+      "declared_source_assertion_range": {
+        "low": 0.0,
+        "high": 5.0,
+        "canonical_unit": "ordinal_capacity_index_0_5"
+      },
+      "calibration_role": "EVIDENCE_PRIOR_ONLY",
+      "runtime_usage": "NONE",
+      "forbidden_runtime_uses": [
+        "TONNES",
+        "WORKERS",
+        "MONEY",
+        "PHYSICAL_INSTALLED_CAPACITY",
+        "PRODUCTION_MULTIPLIER",
+        "YIELD",
+        "DIRECT_RUNTIME_OUTPUT"
+      ]
+    },
+    {
+      "economic_region_id": "economic_region_lancashire_cotton_1900",
+      "subject_type": "SECTOR",
+      "commodity_or_sector_id": "cotton_textiles",
+      "capacity_low": 3.0,
+      "capacity_baseline": 4.0,
+      "capacity_high": 5.0,
+      "canonical_unit": "ordinal_capacity_index_0_5",
+      "calibration_method": {
+        "method_id": "ordinal_evidence_band_to_capacity_index_v1",
+        "method_kind": "ORDINAL_BAND_MAPPING",
+        "explicit_extrapolation": false,
+        "description": "Illustrative mapping of qualitative evidence into a bounded 0-5 prior; it is not a historical quantity conversion."
+      },
+      "confidence": "LOW",
+      "notes": "Contract example only; sector evidence is retained separately from cotton_cloth commodity identity. R1 lock: ordinal_capacity_index_0_5 is evidence-prior-only and cannot become tonnes, workers, money, physical installed capacity, a production multiplier, yield, or direct runtime output.",
+      "source_assertion_ids": [
+        "economic_region_lancashire_cotton_1900__industrial__cotton_textiles"
+      ],
+      "declared_source_assertion_range": {
+        "low": 0.0,
+        "high": 5.0,
+        "canonical_unit": "ordinal_capacity_index_0_5"
+      },
+      "calibration_role": "EVIDENCE_PRIOR_ONLY",
+      "runtime_usage": "NONE",
+      "forbidden_runtime_uses": [
+        "TONNES",
+        "WORKERS",
+        "MONEY",
+        "PHYSICAL_INSTALLED_CAPACITY",
+        "PRODUCTION_MULTIPLIER",
+        "YIELD",
+        "DIRECT_RUNTIME_OUTPUT"
+      ]
+    },
+    {
+      "economic_region_id": "economic_region_south_wales_coalfield_1900",
+      "subject_type": "COMMODITY",
+      "commodity_or_sector_id": "coal",
+      "capacity_low": 4.0,
+      "capacity_baseline": 5.0,
+      "capacity_high": 5.0,
+      "canonical_unit": "ordinal_capacity_index_0_5",
+      "calibration_method": {
+        "method_id": "ordinal_evidence_band_to_capacity_index_v1",
+        "method_kind": "ORDINAL_BAND_MAPPING",
+        "explicit_extrapolation": false,
+        "description": "Illustrative mapping of qualitative evidence into a bounded 0-5 prior; it is not a historical quantity conversion."
+      },
+      "confidence": "LOW",
+      "notes": "Contract example only; it does not encode the source's reported annual output. R1 lock: ordinal_capacity_index_0_5 is evidence-prior-only and cannot become tonnes, workers, money, physical installed capacity, a production multiplier, yield, or direct runtime output.",
+      "source_assertion_ids": [
+        "economic_region_south_wales_coalfield_1900__resource__coal"
+      ],
+      "declared_source_assertion_range": {
+        "low": 0.0,
+        "high": 5.0,
+        "canonical_unit": "ordinal_capacity_index_0_5"
+      },
+      "calibration_role": "EVIDENCE_PRIOR_ONLY",
+      "runtime_usage": "NONE",
+      "forbidden_runtime_uses": [
+        "TONNES",
+        "WORKERS",
+        "MONEY",
+        "PHYSICAL_INSTALLED_CAPACITY",
+        "PRODUCTION_MULTIPLIER",
+        "YIELD",
+        "DIRECT_RUNTIME_OUTPUT"
+      ]
+    },
+    {
+      "economic_region_id": "economic_region_donbas_coal_metals_1900",
+      "subject_type": "COMMODITY",
+      "commodity_or_sector_id": "coal",
+      "capacity_low": 3.0,
+      "capacity_baseline": 4.0,
+      "capacity_high": 5.0,
+      "canonical_unit": "ordinal_capacity_index_0_5",
+      "calibration_method": {
+        "method_id": "ordinal_evidence_band_to_capacity_index_v1",
+        "method_kind": "ORDINAL_BAND_MAPPING",
+        "explicit_extrapolation": false,
+        "description": "Illustrative mapping of qualitative evidence into a bounded 0-5 prior; it is not a historical quantity conversion."
+      },
+      "confidence": "LOW",
+      "notes": "Contract example only; the cross-boundary proxy uncertainty is not resolved by the index. R1 lock: ordinal_capacity_index_0_5 is evidence-prior-only and cannot become tonnes, workers, money, physical installed capacity, a production multiplier, yield, or direct runtime output.",
+      "source_assertion_ids": [
+        "economic_region_donbas_coal_metals_1900__resource__coal"
+      ],
+      "declared_source_assertion_range": {
+        "low": 0.0,
+        "high": 5.0,
+        "canonical_unit": "ordinal_capacity_index_0_5"
+      },
+      "calibration_role": "EVIDENCE_PRIOR_ONLY",
+      "runtime_usage": "NONE",
+      "forbidden_runtime_uses": [
+        "TONNES",
+        "WORKERS",
+        "MONEY",
+        "PHYSICAL_INSTALLED_CAPACITY",
+        "PRODUCTION_MULTIPLIER",
+        "YIELD",
+        "DIRECT_RUNTIME_OUTPUT"
+      ]
+    },
+    {
+      "economic_region_id": "economic_region_pennsylvania_coal_steel_1900",
+      "subject_type": "SECTOR",
+      "commodity_or_sector_id": "steelmaking",
+      "capacity_low": 4.0,
+      "capacity_baseline": 5.0,
+      "capacity_high": 5.0,
+      "canonical_unit": "ordinal_capacity_index_0_5",
+      "calibration_method": {
+        "method_id": "ordinal_evidence_band_to_capacity_index_v1",
+        "method_kind": "ORDINAL_BAND_MAPPING",
+        "explicit_extrapolation": false,
+        "description": "Illustrative mapping of qualitative evidence into a bounded 0-5 prior; it is not a historical quantity conversion."
+      },
+      "confidence": "LOW",
+      "notes": "Contract example only; imported iron ore and local fuel geography still require separate numeric calibration. R1 lock: ordinal_capacity_index_0_5 is evidence-prior-only and cannot become tonnes, workers, money, physical installed capacity, a production multiplier, yield, or direct runtime output.",
+      "source_assertion_ids": [
+        "economic_region_pennsylvania_coal_steel_1900__industrial__steelmaking"
+      ],
+      "declared_source_assertion_range": {
+        "low": 0.0,
+        "high": 5.0,
+        "canonical_unit": "ordinal_capacity_index_0_5"
+      },
+      "calibration_role": "EVIDENCE_PRIOR_ONLY",
+      "runtime_usage": "NONE",
+      "forbidden_runtime_uses": [
+        "TONNES",
+        "WORKERS",
+        "MONEY",
+        "PHYSICAL_INSTALLED_CAPACITY",
+        "PRODUCTION_MULTIPLIER",
+        "YIELD",
+        "DIRECT_RUNTIME_OUTPUT"
+      ]
+    },
+    {
+      "economic_region_id": "economic_region_bengal_delta_jute_rice_1900",
+      "subject_type": "SECTOR",
+      "commodity_or_sector_id": "jute_textiles",
+      "capacity_low": 3.0,
+      "capacity_baseline": 4.0,
+      "capacity_high": 5.0,
+      "canonical_unit": "ordinal_capacity_index_0_5",
+      "calibration_method": {
+        "method_id": "ordinal_evidence_band_to_capacity_index_v1",
+        "method_kind": "ORDINAL_BAND_MAPPING",
+        "explicit_extrapolation": false,
+        "description": "Illustrative mapping of qualitative evidence into a bounded 0-5 prior; it is not a historical quantity conversion."
+      },
+      "confidence": "LOW",
+      "notes": "Contract example only; historical Bengal's cross-boundary crop and mill geography is not converted into output tonnes. R1 lock: ordinal_capacity_index_0_5 is evidence-prior-only and cannot become tonnes, workers, money, physical installed capacity, a production multiplier, yield, or direct runtime output.",
+      "source_assertion_ids": [
+        "economic_region_bengal_delta_jute_rice_1900__industrial__jute_textiles"
+      ],
+      "declared_source_assertion_range": {
+        "low": 0.0,
+        "high": 5.0,
+        "canonical_unit": "ordinal_capacity_index_0_5"
+      },
+      "calibration_role": "EVIDENCE_PRIOR_ONLY",
+      "runtime_usage": "NONE",
+      "forbidden_runtime_uses": [
+        "TONNES",
+        "WORKERS",
+        "MONEY",
+        "PHYSICAL_INSTALLED_CAPACITY",
+        "PRODUCTION_MULTIPLIER",
+        "YIELD",
+        "DIRECT_RUNTIME_OUTPUT"
+      ]
+    },
+    {
+      "economic_region_id": "economic_region_lower_yangtze_silk_port_1900",
+      "subject_type": "SECTOR",
+      "commodity_or_sector_id": "silk_textiles",
+      "capacity_low": 2.0,
+      "capacity_baseline": 3.0,
+      "capacity_high": 4.0,
+      "canonical_unit": "ordinal_capacity_index_0_5",
+      "calibration_method": {
+        "method_id": "ordinal_evidence_band_to_capacity_index_v1",
+        "method_kind": "ORDINAL_BAND_MAPPING",
+        "explicit_extrapolation": false,
+        "description": "Illustrative mapping of qualitative evidence into a bounded 0-5 prior; it is not a historical quantity conversion."
+      },
+      "confidence": "LOW",
+      "notes": "Contract example only; raw_silk, reeling, and silk-textile identities remain explicitly separated. R1 lock: ordinal_capacity_index_0_5 is evidence-prior-only and cannot become tonnes, workers, money, physical installed capacity, a production multiplier, yield, or direct runtime output.",
+      "source_assertion_ids": [
+        "economic_region_lower_yangtze_silk_port_1900__industrial__silk_textiles"
+      ],
+      "declared_source_assertion_range": {
+        "low": 0.0,
+        "high": 5.0,
+        "canonical_unit": "ordinal_capacity_index_0_5"
+      },
+      "calibration_role": "EVIDENCE_PRIOR_ONLY",
+      "runtime_usage": "NONE",
+      "forbidden_runtime_uses": [
+        "TONNES",
+        "WORKERS",
+        "MONEY",
+        "PHYSICAL_INSTALLED_CAPACITY",
+        "PRODUCTION_MULTIPLIER",
+        "YIELD",
+        "DIRECT_RUNTIME_OUTPUT"
+      ]
+    }
+  ]
+}

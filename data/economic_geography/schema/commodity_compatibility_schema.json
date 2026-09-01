@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_id": "wwo_economic_geography_commodity_compatibility_schema_r1_v2",
+  "schema_version": 2,
+  "title": "WWO economic geography commodity and sector compatibility",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_id",
+    "schema_version",
+    "concepts"
+  ],
+  "properties": {
+    "schema_id": {
+      "const": "wwo_economic_geography_commodity_compatibility_schema_r1_v2"
+    },
+    "schema_version": {
+      "const": 2
+    },
+    "concepts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/concept"
+      }
+    }
+  },
+  "$defs": {
+    "concept": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "compatibility_key",
+        "historical_concept_id",
+        "concept_kind",
+        "resolution_status",
+        "mapping_status",
+        "notes"
+      ],
+      "properties": {
+        "compatibility_key": {
+          "type": "string",
+          "pattern": "^(commodity|industrial_sector):[a-z0-9][a-z0-9_:-]*$"
+        },
+        "historical_concept_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_:-]*$"
+        },
+        "concept_kind": {
+          "enum": [
+            "commodity",
+            "industrial_sector"
+          ]
+        },
+        "canonical_commodity_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "canonical_sector_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "resolution_status": {
+          "enum": [
+            "CANONICAL_DIRECT",
+            "COMPATIBLE_ALIAS",
+            "SECTOR_ONLY",
+            "FUTURE_GAP_UNRESOLVED"
+          ]
+        },
+        "mapping_status": {
+          "enum": [
+            "DIRECT",
+            "COLLAPSED_SECTOR",
+            "SECTOR_ONLY",
+            "UNRESOLVED"
+          ]
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "concept_kind": {
+                "const": "commodity"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "canonical_commodity_id"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "concept_kind": {
+                "const": "industrial_sector"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "canonical_sector_id"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

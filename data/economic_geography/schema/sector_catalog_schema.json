@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "wwo://schemas/economic-geography/sector-catalog-v1",
+  "title": "WWO economic geography sector catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_id", "schema_version", "catalog_notice", "sectors"],
+  "properties": {
+    "schema_id": {"const": "wwo_economic_geography_sector_catalog_v1"},
+    "schema_version": {"const": 1},
+    "catalog_notice": {"type": "string", "minLength": 1},
+    "sectors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["sector_id", "sector_group", "label"],
+        "properties": {
+          "sector_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_:-]*$"},
+          "sector_group": {"enum": ["extraction", "agriculture", "heavy_industry", "manufacturing", "infrastructure"]},
+          "label": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}
