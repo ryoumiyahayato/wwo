@@ -16,7 +16,7 @@ static func validate(
 		return false
 	if not _validate_action_lifecycles(state):
 		return false
-	if not _validate_control_provenance(state, map):
+	if not _validate_control_claims(state, map):
 		return false
 	if not _validate_transport_chronology(state):
 		return false
@@ -28,7 +28,7 @@ static func validate(
 static func _validate_action_lifecycles(state: VNextMilitaryState) -> bool:
 	var completed_by_id: Dictionary = {}
 	var battle_by_id: Dictionary = {}
-	var control_source_ids: Dictionary = {}
+	var control_claim_source_ids: Dictionary = {}
 	var maximum_sequence: int = 0
 
 	for record: Dictionary in state.completed_actions:
@@ -53,14 +53,15 @@ static func _validate_action_lifecycles(state: VNextMilitaryState) -> bool:
 		battle_by_id[action_id] = record
 		maximum_sequence = maxi(maximum_sequence, sequence)
 
-	for record: Dictionary in state.control_history:
-		var source_action_id: String = str(record.get("source_action_id", ""))
-		if source_action_id.is_empty():
-			continue
-		var sequence: int = _action_sequence(source_action_id)
-		if sequence < 1 or control_source_ids.has(source_action_id):
+	for record: Dictionary in state.control_claims:
+		var battle_value: Variant = record.get("battle_result", {})
+		if not battle_value is Dictionary:
 			return false
-		control_source_ids[source_action_id] = str(record.get("region_id", ""))
+		var source_action_id: String = str((battle_value as Dictionary).get("action_id", ""))
+		var sequence: int = _action_sequence(source_action_id)
+		if sequence < 1 or control_claim_source_ids.has(source_action_id):
+			return false
+		control_claim_source_ids[source_action_id] = str(record.get("location", ""))
 		maximum_sequence = maxi(maximum_sequence, sequence)
 		if completed_by_id.has(source_action_id):
 			var completion: Dictionary = completed_by_id[source_action_id] as Dictionary
@@ -68,18 +69,16 @@ static func _validate_action_lifecycles(state: VNextMilitaryState) -> bool:
 				return false
 		if battle_by_id.has(source_action_id):
 			var battle: Dictionary = battle_by_id[source_action_id] as Dictionary
-			if str(battle.get("target_region_id", "")) != str(record.get("region_id", "")):
+			if str(battle.get("target_region_id", "")) != str(record.get("location", "")):
 				return false
-			if str(battle.get("controller_country_id", "")) != str(record.get("controller_id", "")):
-				return false
-			if str(battle.get("outcome", "")) != "attacker_win" or not bool(battle.get("control_changed", false)):
+			if str(battle.get("outcome", "")) != "attacker_win":
 				return false
 
 	for action_id: String in _sorted_dictionary_keys(state.active_actions):
 		var sequence: int = _action_sequence(action_id)
 		if sequence < 1:
 			return false
-		if completed_by_id.has(action_id) or battle_by_id.has(action_id) or control_source_ids.has(action_id):
+		if completed_by_id.has(action_id) or battle_by_id.has(action_id) or control_claim_source_ids.has(action_id):
 			return false
 		maximum_sequence = maxi(maximum_sequence, sequence)
 
@@ -101,71 +100,33 @@ static func _completed_record_valid(record: Dictionary) -> bool:
 	return true
 
 
-static func _validate_control_provenance(state: VNextMilitaryState, map: VNextMilitaryMapAdapter) -> bool:
-	if map == null:
-		return true
-	var latest_by_region: Dictionary = {}
-	var previous_by_region: Dictionary = {}
-	var previous_effective_hour: int = -1
-
-	for record: Dictionary in state.control_history:
-		var region_id: String = str(record.get("region_id", ""))
-		var previous_controller_id: String = str(record.get("previous_controller_id", ""))
-		var controller_id: String = str(record.get("controller_id", ""))
-		var origin_controller_id: String = str(record.get("control_origin_controller_id", ""))
-		var context: String = str(record.get("context", ""))
-		var cause: String = str(record.get("cause", ""))
-		var effective_hour: int = int(record.get("effective_hour", -1))
-		var source_action_id: String = str(record.get("source_action_id", ""))
-		if region_id.is_empty() or not map.has_region(region_id) or not map.has_country(previous_controller_id) or not map.has_country(controller_id):
+static func _validate_control_claims(
+	state: VNextMilitaryState, map: VNextMilitaryMapAdapter
+) -> bool:
+	var seen_action_ids: Dictionary = {}
+	for record: Dictionary in state.control_claims:
+		var claim := VNextMilitaryControlClaim.new()
+		if not claim.restore(record) or claim.timestamp > state.last_simulated_hour:
 			return false
-		if effective_hour < 0 or effective_hour > state.last_simulated_hour or effective_hour < previous_effective_hour:
+		if map != null and not map.has_region(claim.location):
 			return false
-		previous_effective_hour = effective_hour
-		var initial_controller_id: String = map.get_initial_controller(region_id)
-		if origin_controller_id != initial_controller_id:
+		var action_id: String = str(claim.battle_result.get("action_id", ""))
+		if seen_action_ids.has(action_id):
 			return false
-		if previous_by_region.has(region_id):
-			var previous_record: Dictionary = previous_by_region[region_id] as Dictionary
-			if previous_controller_id != str(previous_record.get("controller_id", "")):
+		seen_action_ids[action_id] = true
+		var matched_battle: bool = false
+		for battle: Dictionary in state.battle_results:
+			if str(battle.get("action_id", "")) != action_id:
+				continue
+			if (
+				str(battle.get("outcome", "")) != "attacker_win"
+				or str(battle.get("target_region_id", "")) != claim.location
+			):
 				return false
-			if origin_controller_id != str(previous_record.get("control_origin_controller_id", "")):
-				return false
-		elif context == "setup_fixture" and previous_controller_id != initial_controller_id:
+			matched_battle = true
+			break
+		if not matched_battle:
 			return false
-
-		if context == "setup_fixture":
-			if effective_hour != 0 or not source_action_id.is_empty():
-				return false
-		elif context == "battle":
-			if cause != "strategic_attack_victory" or _action_sequence(source_action_id) < 1:
-				return false
-			if str(record.get("source_action_kind", "")) != "attack":
-				return false
-			if VNextStableId.kind_of(str(record.get("source_formation_id", ""))) != "formation":
-				return false
-			if str(record.get("source_target_region_id", "")) != region_id:
-				return false
-			if str(record.get("source_controller_id", "")) != controller_id:
-				return false
-			var preparation_end_hour: int = int(record.get("source_preparation_end_hour", -1))
-			if preparation_end_hour < 0 or preparation_end_hour > effective_hour:
-				return false
-		else:
-			return false
-
-		previous_by_region[region_id] = record
-		latest_by_region[region_id] = record
-
-	for region_id: String in _sorted_dictionary_keys(state.region_controls):
-		var current_controller_id: String = str(state.region_controls[region_id])
-		if latest_by_region.has(region_id):
-			var latest: Dictionary = latest_by_region[region_id] as Dictionary
-			if str(latest.get("controller_id", "")) != current_controller_id:
-				return false
-		else:
-			if current_controller_id != map.get_initial_controller(region_id):
-				return false
 	return true
 
 

@@ -26,7 +26,7 @@ func _run() -> void:
 
 func _test_rolling_pipeline() -> void:
 	var state := _remote("formation:r3_abundant", "marseille", 2000, _abundant())
-	var route := map.find_route("paris", "marseille", [], "country_fra", state.region_controls, false)
+	var route := map.find_route("paris", "marseille", [], "country_fra", false)
 	var transit := maxi(1, int(route.get("duration_hours", 1)))
 	var max_food_inflight := 0
 	var delivered_food := 0.0
@@ -45,7 +45,7 @@ func _test_rolling_pipeline() -> void:
 	var formation := state.get_formation("formation:r3_abundant")
 	_check(formation != null and formation.formation_status == VNextMilitaryFormation.STATUS_ACTIVE, "remote formation survives warm-up")
 	_check(formation.supply_status != "cut" and formation.supply_level >= 0.75, "abundant remote formation leaves chronic cut state")
-	_check(state.completed_actions.size() <= VNextMilitaryState.MAX_COMPLETED_ACTIONS and state.battle_results.size() <= VNextMilitaryState.MAX_BATTLE_RESULTS and state.control_history.size() <= VNextMilitaryState.MAX_CONTROL_HISTORY, "long-run histories remain bounded")
+	_check(state.completed_actions.size() <= VNextMilitaryState.MAX_COMPLETED_ACTIONS and state.battle_results.size() <= VNextMilitaryState.MAX_BATTLE_RESULTS and state.control_claims.size() <= VNextMilitaryState.MAX_CONTROL_CLAIMS, "long-run Military histories remain bounded")
 	var saw_supply_completion := false
 	for record: Dictionary in state.completed_actions:
 		if str(record.get("kind", "")) == "supply" and bool(record.get("success", false)):
@@ -57,7 +57,7 @@ func _test_rolling_pipeline() -> void:
 
 func _test_capacity_and_source_limits() -> void:
 	var capacity_state := _remote("formation:r3_capacity", "rouen", 6000, _abundant())
-	var rail := map.find_route("paris", "rouen", ["rail"], "country_fra", capacity_state.region_controls, false)
+	var rail := map.find_route("paris", "rouen", ["rail"], "country_fra", false)
 	var link_id := str((rail.get("link_ids", []) as Array)[0])
 	var saved_capacity := float(spatial.infrastructure_state(link_id).get("nominal_capacity", 0.0))
 	_check(spatial.set_nominal_capacity(link_id, 40.0), "R3 Spatial capacity limit applies")
@@ -91,7 +91,7 @@ func _test_long_latency_high_capacity() -> void:
 		saved[link_id] = {"movement_hours": int(link.get("movement_hours", 1)), "nominal_capacity": nominal}
 		link["movement_hours"] = maxi(2, int(link.get("movement_hours", 1)) * 3)
 		_check(state_spatial.set_nominal_capacity(link_id, maxf(1.0, nominal * 30.0)), "R3 high Spatial capacity applies")
-	var route := state_map.find_route("paris", "marseille", [], "country_fra", state.region_controls, false)
+	var route := state_map.find_route("paris", "marseille", [], "country_fra", false)
 	var transit := int(route.get("duration_hours", 0))
 	var max_food := 0
 	var delivered := 0.0
@@ -152,6 +152,7 @@ func _test_pipeline_interrupt_restore_partition_determinism() -> void:
 	var interruption_restored := VNextMilitaryState.new()
 	_check(interruption_restored.restore(interrupted_snapshot, map), "interrupted pipeline snapshot restores while capacity is zero")
 	_check(interruption_restored.snapshot() == interrupted_snapshot, "interrupted pipeline restore is exact")
+	_check(service.set_external_supply_allocation(interruption_restored, map, "paris_basin", _abundant()), "restored pipeline receives fresh external allocation")
 	_check(spatial.set_nominal_capacity(link_id, saved_capacity) and spatial.restore_infrastructure(link_id), "R3 authoritative Spatial interruption recovers")
 	_check(_advance_one(interrupted), "pipeline resumes after capacity recovery")
 	_check(_advance_one(interruption_restored), "restored pipeline resumes after capacity recovery")
@@ -165,6 +166,7 @@ func _test_pipeline_interrupt_restore_partition_determinism() -> void:
 	var restored := VNextMilitaryState.new()
 	_check(restored.restore(snap, map), "multiple in-flight pipeline snapshot restores")
 	_check(restored.snapshot() == snap, "restored pipeline snapshot is exact")
+	_check(service.set_external_supply_allocation(restored, map, "paris_basin", _abundant()), "restored multi-flight pipeline receives fresh external allocation")
 	var target := continuous.last_simulated_hour + 120
 	_check(bool(_advance_result(continuous, target).get("success", false)), "continuous pipeline continuation advances")
 	_check(bool(_advance_result(restored, target).get("success", false)), "restored pipeline continuation advances")
@@ -199,29 +201,23 @@ func _test_strict_restore_matrix() -> void:
 	var current_link := str(first_action.get("capacity_link_id", ""))
 	if current_link.is_empty(): current_link = str(((first_action.get("route", {}) as Dictionary).get("link_ids", []) as Array)[int(first_action.get("current_edge_index", 0))])
 
-	var phantom := valid.duplicate(true)
-	for link: Dictionary in map.get_all_links():
-		var candidate := str(link.get("id", ""))
-		if candidate != current_link:
-			(phantom.get("link_capacity_used", {}) as Dictionary)[candidate] = 1.0
-			break
-	_check(_rejected(phantom), "phantom link capacity is transactionally rejected")
+	var external_control := valid.duplicate(true)
+	external_control["region_controls"] = {}
+	_check(_rejected(external_control), "legacy Military controller truth is transactionally rejected")
 
-	var wrong_aggregate := valid.duplicate(true)
-	if not current_link.is_empty(): (wrong_aggregate.get("link_capacity_used", {}) as Dictionary)[current_link] = 0.0
-	_check(_rejected(wrong_aggregate), "unexplained zero capacity aggregate is rejected")
+	var external_capacity := valid.duplicate(true)
+	external_capacity["link_capacity_used"] = {}
+	_check(_rejected(external_capacity), "external transport capacity truth is transactionally rejected")
+
+	var external_supply := valid.duplicate(true)
+	external_supply["supply_inputs"] = {}
+	_check(_rejected(external_supply), "external Economy supply truth is transactionally rejected")
 
 	var chronology := valid.duplicate(true)
 	var chronology_action: Dictionary = (chronology.get("active_actions", []) as Array)[0] as Dictionary
 	chronology_action["edge_request_hour"] = maxi(1, int(chronology_action.get("edge_started_hour", 0)) + 1)
 	chronology_action["edge_started_hour"] = int(chronology_action["edge_request_hour"]) - 1
 	_check(_rejected(chronology), "edge start before request is rejected")
-
-	var teleport_state := _new_state()
-	_check(bool(_advance_result(teleport_state, 1).get("success", false)), "control teleport fixture advances")
-	var teleport := teleport_state.snapshot()
-	(teleport.get("region_controls", {}) as Dictionary)["northern_industrial_belt"] = "country_bel"
-	_check(_rejected(teleport), "runtime controller change without provenance is rejected")
 
 	var active_reuse := valid.duplicate(true)
 	(active_reuse.get("battle_results", []) as Array).append({"action_id": action_id, "outcome":"attacker_win", "target_region_id":"northern_industrial_belt", "controller_country_id":"country_fra", "control_changed":false})
@@ -238,12 +234,6 @@ func _test_strict_restore_matrix() -> void:
 	battle_high["next_action_sequence"] = 500
 	_check(_rejected(battle_high), "next sequence below battle high-water is rejected")
 
-	var control_high := teleport_state.snapshot()
-	(control_high.get("region_controls", {}) as Dictionary)["northern_industrial_belt"] = "country_bel"
-	(control_high.get("control_history", []) as Array).append({"region_id":"northern_industrial_belt","previous_controller_id":"country_fra","controller_id":"country_bel","control_origin_controller_id":"country_fra","cause":"strategic_attack_victory","effective_hour":1,"context":"battle","source_action_id":"military_action:000500","source_action_kind":"attack","source_formation_id":"formation:provenance","source_target_region_id":"northern_industrial_belt","source_controller_id":"country_bel","source_preparation_end_hour":1})
-	control_high["next_action_sequence"] = 500
-	_check(_rejected(control_high), "next sequence below control source high-water is rejected")
-
 	var orphan := valid.duplicate(true)
 	((orphan.get("active_actions", []) as Array)[0] as Dictionary)["reserved_link_id"] = "missing_link"
 	_check(_rejected(orphan), "orphan reservation is rejected")
@@ -258,7 +248,6 @@ func _test_strict_restore_matrix() -> void:
 	_check(_rejected(link_mismatch), "allocation link mismatch is rejected")
 
 	var current_window := int(valid.get("capacity_window_hour", -1))
-	var current_used: Dictionary = valid.get("link_capacity_used", {}) as Dictionary
 	var current_allocated_action: Dictionary = {}
 	for raw_action: Variant in valid.get("active_actions", []) as Array:
 		if not raw_action is Dictionary:
@@ -270,7 +259,6 @@ func _test_strict_restore_matrix() -> void:
 			candidate_used > 0.0001
 			and not candidate_link.is_empty()
 			and int(candidate_action.get("capacity_window_hour", -2)) == current_window
-			and float(current_used.get(candidate_link, 0.0)) >= candidate_used - 0.0001
 		):
 			current_allocated_action = candidate_action
 			break
@@ -285,12 +273,12 @@ func _test_strict_restore_matrix() -> void:
 				break
 		_check(not mismatch_snapshot_action.is_empty(), "current allocation action is found by stable ID")
 		if not mismatch_snapshot_action.is_empty():
-			mismatch_snapshot_action["capacity_window_hour"] = current_window - 1
-			_check(_rejected(hour_mismatch), "real current allocation hour mismatch is rejected")
+			mismatch_snapshot_action["capacity_window_hour"] = current_window + 1
+			_check(_rejected(hour_mismatch), "future allocation attribution is rejected")
 
 func _remote(id: String, city: String, personnel: int, supply: Dictionary) -> VNextMilitaryState:
 	var state := _new_state()
-	_check(service.create_formation(state, map, id, "country_fra", city, personnel, {"equipment_factor":1.0}, 0.8, 0.8, 0.8), "remote formation created")
+	_check(service.create_formation(state, map, id, "country_fra", city, personnel, {"equipment_factor":1.0}, 0.8, 0.8, 0.8, {}, "organization:test_military"), "remote formation created")
 	_check(service.set_supply_input(state, map, "paris_basin", supply), "remote source configured")
 	return state
 
@@ -359,7 +347,7 @@ func _find_supply_by_id(state: VNextMilitaryState, action_id: String) -> Diction
 
 func _rejected(snapshot: Dictionary) -> bool:
 	var sentinel := _new_state()
-	_check(service.create_formation(sentinel, map, "formation:sentinel_r3", "country_fra", "paris", 100, {"equipment_factor":1.0}), "sentinel formation created")
+	_check(service.create_formation(sentinel, map, "formation:sentinel_r3", "country_fra", "paris", 100, {"equipment_factor":1.0}, 0.65, 0.7, 0.7, {}, "organization:test_military"), "sentinel formation created")
 	var before := sentinel.snapshot()
 	return not sentinel.restore(snapshot, map) and sentinel.snapshot() == before
 

@@ -2,23 +2,37 @@ class_name VNextMilitaryState
 extends RefCounted
 ## Dynamic military state. Spatial owns physical infrastructure/capacity; this state keeps Military attribution only.
 
-const SCHEMA_ID: String = "vnext_military_state_v2"
+const SCHEMA_ID: String = "vnext_military_state_v3"
 const ACTION_KINDS: PackedStringArray = ["deploy", "move", "concentrate", "defend", "attack", "supply"]
 const TRANSPORT_STATES: PackedStringArray = ["waiting_capacity", "moving", "blocked", "interrupted", "preparing", "arrived"]
 const MAX_COMPLETED_ACTIONS: int = 256
 const MAX_BATTLE_RESULTS: int = 128
-const MAX_CONTROL_HISTORY: int = 256
+const MAX_CONTROL_CLAIMS: int = 256
+const SNAPSHOT_FIELDS: PackedStringArray = [
+	"schema_id",
+	"last_simulated_hour",
+	"next_action_sequence",
+	"formations",
+	"region_garrisons",
+	"active_actions",
+	"completed_actions",
+	"battle_results",
+	"control_claims",
+	"capacity_window_hour",
+]
 
 var formations: Dictionary = {}
-var region_controls: Dictionary = {}
 var region_garrisons: Dictionary = {}
-var supply_inputs: Dictionary = {}
 var active_actions: Dictionary = {}
 var completed_actions: Array[Dictionary] = []
 var battle_results: Array[Dictionary] = []
-var control_history: Array[Dictionary] = []
+var control_claims: Array[Dictionary] = []
 var last_simulated_hour: int = 0
 var next_action_sequence: int = 1
+
+# External hourly/daily availability is injected runtime context. It is never
+# authoritative Economy stock and is deliberately excluded from snapshots.
+var _external_supply_allocations: Dictionary = {}
 
 # Last closed Military transport window: diagnostic attribution only, never a physical budget or authority.
 var capacity_window_hour: int = -1
@@ -30,51 +44,40 @@ func initialize(map: VNextMilitaryMapAdapter) -> bool:
 	if map == null:
 		return false
 	formations.clear()
-	region_controls.clear()
 	region_garrisons.clear()
-	supply_inputs.clear()
+	_external_supply_allocations.clear()
 	active_actions.clear()
 	completed_actions.clear()
 	battle_results.clear()
-	control_history.clear()
+	control_claims.clear()
 	link_capacity_used.clear()
 	link_queues.clear()
 	last_simulated_hour = 0
 	next_action_sequence = 1
 	capacity_window_hour = -1
 	for region_id: String in map.get_region_ids():
-		var controller_id: String = map.get_initial_controller(region_id)
-		if controller_id.is_empty():
-			return false
-		region_controls[region_id] = controller_id
 		region_garrisons[region_id] = map.get_initial_garrison(region_id)
 	return is_valid(map)
 
 
 func is_valid(map: VNextMilitaryMapAdapter = null) -> bool:
-	if last_simulated_hour < 0 or next_action_sequence < 1 or region_controls.is_empty():
+	if last_simulated_hour < 0 or next_action_sequence < 1 or region_garrisons.is_empty():
 		return false
 	if capacity_window_hour > last_simulated_hour:
 		return false
 	if capacity_window_hour >= 0 and capacity_window_hour != last_simulated_hour - 1:
 		return false
-	if completed_actions.size() > MAX_COMPLETED_ACTIONS or battle_results.size() > MAX_BATTLE_RESULTS or control_history.size() > MAX_CONTROL_HISTORY:
+	if completed_actions.size() > MAX_COMPLETED_ACTIONS or battle_results.size() > MAX_BATTLE_RESULTS or control_claims.size() > MAX_CONTROL_CLAIMS:
 		return false
 
-	for region_id: String in _sorted_dictionary_keys(region_controls):
-		var controller_id: String = str(region_controls[region_id])
-		if controller_id.is_empty() or not region_garrisons.has(region_id):
-			return false
+	for region_id: String in _sorted_dictionary_keys(region_garrisons):
 		var garrison_value: float = float(region_garrisons[region_id])
 		if not is_finite(garrison_value) or garrison_value < 0.0:
 			return false
-		if map != null and (not map.has_region(region_id) or not map.has_country(controller_id)):
+		if map != null and not map.has_region(region_id):
 			return false
-	for raw_garrison_id: Variant in region_garrisons.keys():
-		if not region_controls.has(str(raw_garrison_id)):
-			return false
-	for raw_input_id: Variant in supply_inputs.keys():
-		var input: Variant = supply_inputs[raw_input_id]
+	for raw_input_id: Variant in _external_supply_allocations.keys():
+		var input: Variant = _external_supply_allocations[raw_input_id]
 		if not input is Dictionary or not _is_supply_input_valid(input as Dictionary):
 			return false
 		if map != null and not map.has_region(str(raw_input_id)):
@@ -103,8 +106,11 @@ func is_valid(map: VNextMilitaryMapAdapter = null) -> bool:
 		if VNextStableId.kind_of(battle_id) != "military_action":
 			return false
 		maximum_sequence = maxi(maximum_sequence, _action_sequence(battle_id))
-	for record: Dictionary in control_history:
-		if not _control_record_valid(record, map):
+	for record: Dictionary in control_claims:
+		var claim := VNextMilitaryControlClaim.new()
+		if not claim.restore(record):
+			return false
+		if map != null and not map.has_region(claim.location):
 			return false
 
 	var active_formation_ids: Dictionary = {}
@@ -202,10 +208,10 @@ func get_sorted_formation_ids() -> Array[String]:
 	return ids
 
 
-func set_supply_input(region_id: String, input: Dictionary) -> bool:
-	if region_id.is_empty() or not region_controls.has(region_id) or not _is_supply_input_valid(input):
+func set_external_supply_allocation(region_id: String, input: Dictionary) -> bool:
+	if region_id.is_empty() or not region_garrisons.has(region_id) or not _is_supply_input_valid(input):
 		return false
-	supply_inputs[region_id] = {
+	_external_supply_allocations[region_id] = {
 		"food": float(input.get("food", 0.0)),
 		"ammunition": float(input.get("ammunition", 0.0)),
 		"equipment": float(input.get("equipment", 0.0)),
@@ -214,51 +220,8 @@ func set_supply_input(region_id: String, input: Dictionary) -> bool:
 	return true
 
 
-func can_apply_setup_control_change() -> bool:
-	if last_simulated_hour != 0 or not active_actions.is_empty() or not completed_actions.is_empty() or not battle_results.is_empty():
-		return false
-	if capacity_window_hour != -1 or not link_capacity_used.is_empty() or not link_queues.is_empty():
-		return false
-	for record: Dictionary in control_history:
-		if str(record.get("context", "")) != "setup_fixture" or int(record.get("effective_hour", -1)) != 0:
-			return false
-	return true
-
-
-func apply_region_control_change(
-	region_id: String,
-	controller_id: String,
-	cause: String,
-	effective_hour: int,
-	context: String,
-	source_action_id: String = ""
-) -> bool:
-	if not region_controls.has(region_id) or controller_id.is_empty() or cause.is_empty() or context.is_empty():
-		return false
-	if effective_hour != last_simulated_hour:
-		return false
-	if context == "setup_fixture":
-		if not source_action_id.is_empty() or not can_apply_setup_control_change():
-			return false
-	elif context == "battle":
-		if cause != "strategic_attack_victory" or not _battle_control_claim_valid(region_id, controller_id, source_action_id):
-			return false
-	else:
-		return false
-	var previous: String = str(region_controls[region_id])
-	if previous == controller_id:
-		return true
-	region_controls[region_id] = controller_id
-	append_control_history({
-		"region_id": region_id,
-		"previous_controller_id": previous,
-		"controller_id": controller_id,
-		"cause": cause,
-		"effective_hour": effective_hour,
-		"context": context,
-		"source_action_id": source_action_id,
-	})
-	return true
+func external_supply_allocations() -> Dictionary:
+	return _external_supply_allocations.duplicate(true)
 
 
 func begin_capacity_window(hour: int) -> void:
@@ -300,9 +263,15 @@ func append_battle_result(record: Dictionary) -> void:
 	_trim_history(battle_results, MAX_BATTLE_RESULTS)
 
 
-func append_control_history(record: Dictionary) -> void:
-	control_history.append(record.duplicate(true))
-	_trim_control_history()
+func append_control_claim(claim: VNextMilitaryControlClaim) -> bool:
+	if claim == null or not claim.is_valid() or claim.timestamp != last_simulated_hour:
+		return false
+	for record: Dictionary in control_claims:
+		if str((record.get("battle_result", {}) as Dictionary).get("action_id", "")) == str(claim.battle_result.get("action_id", "")):
+			return false
+	control_claims.append(claim.snapshot())
+	_trim_history(control_claims, MAX_CONTROL_CLAIMS)
+	return true
 
 
 func snapshot() -> Dictionary:
@@ -317,37 +286,31 @@ func snapshot() -> Dictionary:
 		"last_simulated_hour": last_simulated_hour,
 		"next_action_sequence": next_action_sequence,
 		"formations": formation_snapshots,
-		"region_controls": region_controls.duplicate(true),
 		"region_garrisons": region_garrisons.duplicate(true),
-		"supply_inputs": supply_inputs.duplicate(true),
 		"active_actions": action_snapshots,
 		"completed_actions": completed_actions.duplicate(true),
 		"battle_results": battle_results.duplicate(true),
-		"control_history": control_history.duplicate(true),
+		"control_claims": control_claims.duplicate(true),
 		"capacity_window_hour": capacity_window_hour,
-		"link_capacity_used": link_capacity_used.duplicate(true),
-		"link_queues": link_queues.duplicate(true),
 	}
 
 
 func restore(snapshot_value: Dictionary, map: VNextMilitaryMapAdapter = null, spatial_world: VNextSpatialWorld = null) -> bool:
+	if not _has_exact_snapshot_fields(snapshot_value):
+		return false
 	var formation_value: Variant = snapshot_value.get("formations", [])
 	var active_action_value: Variant = snapshot_value.get("active_actions", [])
 	var completed_value: Variant = snapshot_value.get("completed_actions", [])
 	var battle_value: Variant = snapshot_value.get("battle_results", [])
-	var history_value: Variant = snapshot_value.get("control_history", [])
-	var controls_value: Variant = snapshot_value.get("region_controls", {})
+	var claims_value: Variant = snapshot_value.get("control_claims", [])
 	var garrisons_value: Variant = snapshot_value.get("region_garrisons", {})
-	var inputs_value: Variant = snapshot_value.get("supply_inputs", {})
-	var used_value: Variant = snapshot_value.get("link_capacity_used", {})
-	var queues_value: Variant = snapshot_value.get("link_queues", {})
 	if snapshot_value.get("schema_id", "") != SCHEMA_ID:
 		return false
-	if not formation_value is Array or not active_action_value is Array or not completed_value is Array or not battle_value is Array or not history_value is Array:
+	if not formation_value is Array or not active_action_value is Array or not completed_value is Array or not battle_value is Array or not claims_value is Array:
 		return false
-	if not controls_value is Dictionary or not garrisons_value is Dictionary or not inputs_value is Dictionary or not used_value is Dictionary or not queues_value is Dictionary:
+	if not garrisons_value is Dictionary:
 		return false
-	if not _array_contains_only_dictionaries(completed_value as Array) or not _array_contains_only_dictionaries(battle_value as Array) or not _array_contains_only_dictionaries(history_value as Array):
+	if not _array_contains_only_dictionaries(completed_value as Array) or not _array_contains_only_dictionaries(battle_value as Array) or not _array_contains_only_dictionaries(claims_value as Array):
 		return false
 	if int(snapshot_value.get("last_simulated_hour", -1)) < 0 or int(snapshot_value.get("next_action_sequence", 0)) < 1:
 		return false
@@ -374,34 +337,55 @@ func restore(snapshot_value: Dictionary, map: VNextMilitaryMapAdapter = null, sp
 	var candidate_state := VNextMilitaryState.new()
 	candidate_state.formations = candidate_formations
 	candidate_state.active_actions = candidate_actions
-	candidate_state.region_controls = (controls_value as Dictionary).duplicate(true)
 	candidate_state.region_garrisons = (garrisons_value as Dictionary).duplicate(true)
-	candidate_state.supply_inputs = (inputs_value as Dictionary).duplicate(true)
 	candidate_state.completed_actions = _dictionary_array(completed_value as Array)
 	candidate_state.battle_results = _dictionary_array(battle_value as Array)
-	candidate_state.control_history = _dictionary_array(history_value as Array)
+	candidate_state.control_claims = _dictionary_array(claims_value as Array)
 	candidate_state.last_simulated_hour = int(snapshot_value["last_simulated_hour"])
 	candidate_state.next_action_sequence = int(snapshot_value["next_action_sequence"])
 	candidate_state.capacity_window_hour = int(snapshot_value.get("capacity_window_hour", -1))
-	candidate_state.link_capacity_used = (used_value as Dictionary).duplicate(true)
-	candidate_state.link_queues = (queues_value as Dictionary).duplicate(true)
+	candidate_state._rebuild_transient_transport_attribution()
 	if not candidate_state.is_valid(map) or not VNextMilitaryStateInvariants.validate(candidate_state, map, spatial_world):
 		return false
 
 	formations = candidate_state.formations
 	active_actions = candidate_state.active_actions
-	region_controls = candidate_state.region_controls
 	region_garrisons = candidate_state.region_garrisons
-	supply_inputs = candidate_state.supply_inputs
+	_external_supply_allocations.clear()
 	completed_actions = candidate_state.completed_actions
 	battle_results = candidate_state.battle_results
-	control_history = candidate_state.control_history
+	control_claims = candidate_state.control_claims
 	last_simulated_hour = candidate_state.last_simulated_hour
 	next_action_sequence = candidate_state.next_action_sequence
 	capacity_window_hour = candidate_state.capacity_window_hour
 	link_capacity_used = candidate_state.link_capacity_used
 	link_queues = candidate_state.link_queues
 	return true
+
+
+func _rebuild_transient_transport_attribution() -> void:
+	link_capacity_used.clear()
+	link_queues.clear()
+	for action_id: String in _sorted_dictionary_keys(active_actions):
+		var action: Dictionary = active_actions[action_id] as Dictionary
+		var reserved_link_id: String = str(action.get("reserved_link_id", ""))
+		if not reserved_link_id.is_empty():
+			if not link_queues.has(reserved_link_id):
+				link_queues[reserved_link_id] = []
+			(link_queues[reserved_link_id] as Array).append(action_id)
+		_accumulate_current_capacity_attribution(action)
+	for record: Dictionary in completed_actions:
+		_accumulate_current_capacity_attribution(record)
+
+
+func _accumulate_current_capacity_attribution(record: Dictionary) -> void:
+	if int(record.get("capacity_window_hour", -1)) != capacity_window_hour:
+		return
+	var link_id: String = str(record.get("capacity_link_id", ""))
+	var used: float = float(record.get("capacity_used_this_window", 0.0))
+	if link_id.is_empty() or not is_finite(used) or used <= 0.0:
+		return
+	link_capacity_used[link_id] = float(link_capacity_used.get(link_id, 0.0)) + used
 
 
 func _active_action_valid(
@@ -464,6 +448,14 @@ func _active_action_valid(
 	if kind == "attack":
 		var preparation_hours_contract: int = int(action.get("attack_preparation_hours", 0))
 		if preparation_hours_contract <= 0 or eta_hour - start_hour < route_duration + preparation_hours_contract:
+			return false
+		if VNextStableId.kind_of(str(action.get("political_authorization_id", ""))) != "event":
+			return false
+		if VNextStableId.kind_of(str(action.get("political_state_id", ""))) != "state":
+			return false
+		if VNextStableId.kind_of(str(action.get("order_authorization_id", ""))) != "event":
+			return false
+		if str(action.get("issuing_organization_id", "")) != formation.unit_organization_id:
 			return false
 
 	var city_ids: Array = route.get("city_ids", []) as Array
@@ -627,7 +619,7 @@ func _transport_edge_state_valid(
 			return false
 		var requires_active_access: bool = transport_state == "moving" or not reserved_link_id.is_empty() or (transport_state == "waiting_capacity" and edge_request_hour <= capacity_window_hour)
 		if requires_active_access and map.get_link_transport_capacity_per_hour(current_link_id) > 0.0:
-			if not map.can_enter_link(current_link_id, current_city_id, destination_city_id, owner_country_id, region_controls, allow_enemy_destination):
+			if not map.can_enter_link(current_link_id, current_city_id, destination_city_id, owner_country_id, allow_enemy_destination):
 				return false
 	return true
 
@@ -670,21 +662,6 @@ func _transport_route_valid(
 	return route_duration == calculated_duration
 
 
-func _battle_control_claim_valid(region_id: String, controller_id: String, action_id: String) -> bool:
-	if VNextStableId.kind_of(action_id) != "military_action" or not active_actions.has(action_id):
-		return false
-	var action: Dictionary = active_actions[action_id] as Dictionary
-	if str(action.get("kind", "")) != "attack" or str(action.get("target_region_id", "")) != region_id:
-		return false
-	if str(action.get("transport_state", "")) != "preparing":
-		return false
-	var preparation_end: int = int(action.get("preparation_end_hour", -1))
-	if preparation_end < 0 or preparation_end > last_simulated_hour:
-		return false
-	var formation: VNextMilitaryFormation = get_formation(str(action.get("formation_id", "")))
-	return formation != null and formation.formation_status == VNextMilitaryFormation.STATUS_ACTIVE and formation.country_id == controller_id
-
-
 func _current_transport_link_id(action: Dictionary) -> String:
 	var route_value: Variant = action.get("route", {})
 	if not route_value is Dictionary:
@@ -705,29 +682,6 @@ func _history_action_record_valid(record: Dictionary) -> bool:
 		return false
 	var kind: String = str(record.get("kind", ""))
 	return ACTION_KINDS.has(kind)
-
-
-func _control_record_valid(record: Dictionary, map: VNextMilitaryMapAdapter) -> bool:
-	var region_id: String = str(record.get("region_id", ""))
-	var previous_id: String = str(record.get("previous_controller_id", ""))
-	var controller_id: String = str(record.get("controller_id", ""))
-	var cause: String = str(record.get("cause", ""))
-	var context: String = str(record.get("context", ""))
-	var source_action_id: String = str(record.get("source_action_id", ""))
-	var effective_hour: int = int(record.get("effective_hour", -1))
-	if region_id.is_empty() or previous_id.is_empty() or controller_id.is_empty() or cause.is_empty() or context.is_empty() or effective_hour < 0 or effective_hour > last_simulated_hour:
-		return false
-	if context == "setup_fixture":
-		if effective_hour != 0 or not source_action_id.is_empty():
-			return false
-	elif context == "battle":
-		if cause != "strategic_attack_victory" or VNextStableId.kind_of(source_action_id) != "military_action":
-			return false
-	else:
-		return false
-	if map != null and (not map.has_region(region_id) or not map.has_country(previous_id) or not map.has_country(controller_id)):
-		return false
-	return true
 
 
 func _action_sequence(action_id: String) -> int:
@@ -764,6 +718,15 @@ func _array_contains_only_dictionaries(source: Array) -> bool:
 	return true
 
 
+func _has_exact_snapshot_fields(snapshot_value: Dictionary) -> bool:
+	if snapshot_value.size() != SNAPSHOT_FIELDS.size():
+		return false
+	for field: String in SNAPSHOT_FIELDS:
+		if not snapshot_value.has(field):
+			return false
+	return true
+
+
 func _is_supply_input_valid(input: Dictionary) -> bool:
 	for resource_id: String in ["food", "ammunition", "equipment", "transport_capacity"]:
 		var value: float = float(input.get(resource_id, 0.0))
@@ -778,22 +741,6 @@ func _dictionary_array(source: Array) -> Array[Dictionary]:
 		if raw_value is Dictionary:
 			result.append((raw_value as Dictionary).duplicate(true))
 	return result
-
-
-func _trim_control_history() -> void:
-	while control_history.size() > MAX_CONTROL_HISTORY:
-		var removable_index: int = -1
-		for index: int in range(control_history.size()):
-			var region_id: String = str((control_history[index] as Dictionary).get("region_id", ""))
-			for later_index: int in range(index + 1, control_history.size()):
-				if str((control_history[later_index] as Dictionary).get("region_id", "")) == region_id:
-					removable_index = index
-					break
-			if removable_index >= 0:
-				break
-		if removable_index < 0:
-			break
-		control_history.remove_at(removable_index)
 
 
 func _trim_history(history: Array[Dictionary], limit: int) -> void:

@@ -13,9 +13,9 @@ const RESOURCE_IDS: PackedStringArray = ["food", "ammunition", "equipment", "tra
 const SUPPLY_STATUSES: PackedStringArray = ["full", "strained", "low", "cut"]
 
 var formation_id: String = ""
+var unit_organization_id: String = ""
 var country_id: String = ""
 var service_branch: String = "army"
-var parent_formation_id: String = ""
 var personnel: int = 0
 var equipment_sets: Dictionary = {}
 var training: float = 0.0
@@ -41,15 +41,22 @@ func configure(
 	starting_morale: float,
 	starting_organization: float,
 	starting_city_id: String,
-	requirements: Dictionary = {}
+	requirements: Dictionary = {},
+	organization_id: String = ""
 ) -> bool:
-	if VNextStableId.kind_of(id) != "formation" or owner_country_id.is_empty() or starting_city_id.is_empty():
+	if (
+		VNextStableId.kind_of(id) != "formation"
+		or VNextStableId.kind_of(organization_id) != "organization"
+		or owner_country_id.is_empty()
+		or starting_city_id.is_empty()
+	):
 		return false
 	if starting_personnel < 0:
 		return false
 	if not _is_unit_float_valid(starting_training) or not _is_unit_float_valid(starting_morale) or not _is_unit_float_valid(starting_organization):
 		return false
 	formation_id = id
+	unit_organization_id = organization_id
 	country_id = owner_country_id
 	service_branch = branch if not branch.is_empty() else "army"
 	personnel = starting_personnel
@@ -76,7 +83,13 @@ func configure(
 
 
 func is_valid() -> bool:
-	if VNextStableId.kind_of(formation_id) != "formation" or country_id.is_empty() or current_city_id.is_empty() or personnel < 0:
+	if (
+		VNextStableId.kind_of(formation_id) != "formation"
+		or VNextStableId.kind_of(unit_organization_id) != "organization"
+		or country_id.is_empty()
+		or current_city_id.is_empty()
+		or personnel < 0
+	):
 		return false
 	if formation_status not in [STATUS_ACTIVE, STATUS_DESTROYED]:
 		return false
@@ -173,9 +186,9 @@ func update_supply(
 func to_dict() -> Dictionary:
 	return {
 		"formation_id": formation_id,
+		"unit_organization_id": unit_organization_id,
 		"country_id": country_id,
 		"service_branch": service_branch,
-		"parent_formation_id": parent_formation_id,
 		"personnel": personnel,
 		"equipment_sets": equipment_sets.duplicate(true),
 		"training": training,
@@ -217,10 +230,10 @@ func restore(data: Dictionary) -> bool:
 		float(data.get("morale", -1.0)),
 		float(data.get("organization", -1.0)),
 		str(data.get("current_city_id", "")),
-		restored_requirements as Dictionary
+		restored_requirements as Dictionary,
+		str(data.get("unit_organization_id", ""))
 	):
 		return false
-	parent_formation_id = str(data.get("parent_formation_id", ""))
 	action_state = str(data.get("action_state", ACTION_IDLE))
 	formation_status = restored_status
 	supply_status = str(data.get("supply_status", "cut"))

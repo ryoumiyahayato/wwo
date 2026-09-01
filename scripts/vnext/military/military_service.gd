@@ -16,7 +16,7 @@ const EPSILON: float = 0.0001
 
 signal action_completed(action: Dictionary)
 signal battle_resolved(result: Dictionary)
-signal region_control_changed(change: Dictionary)
+signal military_control_claimed(claim: Dictionary)
 
 
 func create_formation(
@@ -30,16 +30,21 @@ func create_formation(
 	training: float = 0.65,
 	morale: float = 0.7,
 	organization: float = 0.7,
-	daily_requirements: Dictionary = {}
+	daily_requirements: Dictionary = {},
+	unit_organization_id: String = ""
 ) -> bool:
 	if state == null or map == null or not state.is_valid(map):
 		return false
 	if VNextStableId.kind_of(formation_id) != "formation" or personnel <= 0:
 		return false
-	if not map.has_country(country_id) or not map.has_city(city_id):
+	if (
+		not map.has_country(country_id)
+		or not map.has_city(city_id)
+		or VNextStableId.kind_of(unit_organization_id) != "organization"
+	):
 		return false
 	var region_id: String = map.get_region_id_for_city(city_id)
-	if str(state.region_controls.get(region_id, "")) != country_id:
+	if map.get_military_controller(region_id) != country_id:
 		return false
 	var formation := VNextMilitaryFormation.new()
 	if not formation.configure(
@@ -52,10 +57,22 @@ func create_formation(
 		morale,
 		organization,
 		city_id,
-		daily_requirements
+		daily_requirements,
+		unit_organization_id
 	):
 		return false
 	return state.add_formation(formation)
+
+
+func set_external_supply_allocation(
+	state: VNextMilitaryState,
+	map: VNextMilitaryMapAdapter,
+	region_id: String,
+	input: Dictionary
+) -> bool:
+	if state == null or map == null or not map.has_region(region_id):
+		return false
+	return state.set_external_supply_allocation(region_id, input)
 
 
 func set_supply_input(
@@ -64,37 +81,9 @@ func set_supply_input(
 	region_id: String,
 	input: Dictionary
 ) -> bool:
-	if state == null or map == null or not map.has_region(region_id):
-		return false
-	return state.set_supply_input(region_id, input)
-
-
-func setup_region_controller(
-	state: VNextMilitaryState,
-	map: VNextMilitaryMapAdapter,
-	region_id: String,
-	controller_id: String,
-	cause: String = "military test/setup fixture"
-) -> bool:
-	if state == null or map == null or not map.has_region(region_id) or not map.has_country(controller_id) or cause.is_empty():
-		return false
-	if not state.can_apply_setup_control_change():
-		return false
-	var previous_controller_id: String = str(state.region_controls.get(region_id, ""))
-	if not state.apply_region_control_change(region_id, controller_id, cause, 0, "setup_fixture"):
-		return false
-	if previous_controller_id != controller_id:
-		var change_index: int = state.control_history.size() - 1
-		var change: Dictionary = state.control_history[change_index] as Dictionary
-		change["control_origin_controller_id"] = map.get_initial_controller(region_id)
-		change["source_action_kind"] = ""
-		change["source_formation_id"] = ""
-		change["source_target_region_id"] = ""
-		change["source_controller_id"] = ""
-		change["source_preparation_end_hour"] = -1
-		state.control_history[change_index] = change
-		region_control_changed.emit(change.duplicate(true))
-	return true
+	# Compatibility name for callers supplying a non-persistent external
+	# allocation. The value is not Economy inventory or regional production.
+	return set_external_supply_allocation(state, map, region_id, input)
 
 
 func deploy(
@@ -142,7 +131,7 @@ func concentrate(
 			owner_id = formation.country_id
 		elif owner_id != formation.country_id:
 			return _failure("集中不能混合不同控制方的部队。")
-		var route: Dictionary = map.find_route(formation.current_city_id, destination_city_id, [], owner_id, state.region_controls, false)
+		var route: Dictionary = map.find_route(formation.current_city_id, destination_city_id, [], owner_id, false)
 		if not bool(route.get("reachable", false)):
 			return _failure("集中路线不可通行。")
 		if not _movement_allowed_for_condition(formation, route):
@@ -174,7 +163,7 @@ func defend(
 	if formation == null or not formation.can_receive_orders():
 		return _failure("该部队当前不能建立防御姿态。")
 	var region_id: String = map.get_region_id_for_city(formation.current_city_id)
-	if str(state.region_controls.get(region_id, "")) != formation.country_id:
+	if map.get_military_controller(region_id) != formation.country_id:
 		return _failure("部队不在己方控制区，不能建立防御姿态。")
 	var action_id: String = _next_action_id(state)
 	state.active_actions[action_id] = {
@@ -202,7 +191,9 @@ func attack(
 	map: VNextMilitaryMapAdapter,
 	formation_id: String,
 	target_city_id: String,
-	start_hour: int
+	start_hour: int,
+	political_authorization: VNextPoliticalWarAuthorization = null,
+	order_authorization: VNextMilitaryOrderAuthorization = null
 ) -> Dictionary:
 	if state == null or map == null or start_hour != state.last_simulated_hour:
 		return _failure("进攻行动参数无效。")
@@ -212,10 +203,26 @@ func attack(
 	if not map.has_city(target_city_id):
 		return _failure("进攻目标城市不存在。")
 	var target_region_id: String = map.get_region_id_for_city(target_city_id)
-	var target_controller_id: String = str(state.region_controls.get(target_region_id, ""))
+	var target_controller_id: String = map.get_military_controller(target_region_id)
 	if target_controller_id.is_empty() or target_controller_id == formation.country_id:
 		return _failure("进攻目标必须是敌方控制区。")
-	var route: Dictionary = map.find_route(formation.current_city_id, target_city_id, [], formation.country_id, state.region_controls, true)
+	if (
+		political_authorization == null
+		or not political_authorization.allows_attack(
+			formation.country_id, target_controller_id, start_hour
+		)
+	):
+		return _failure("进攻缺少有效的政治战争授权。")
+	if (
+		order_authorization == null
+		or not order_authorization.allows_order(
+			formation.formation_id, formation.unit_organization_id, start_hour
+		)
+	):
+		return _failure("进攻缺少有效的组织命令授权。")
+	var route: Dictionary = map.find_route(
+		formation.current_city_id, target_city_id, [], formation.country_id, true
+	)
 	if not bool(route.get("reachable", false)):
 		return _failure("进攻路线不可通行。")
 	if not _movement_allowed_for_condition(formation, route):
@@ -224,6 +231,10 @@ func attack(
 	var action: Dictionary = _new_transport_action(action_id, "attack", formation, target_city_id, start_hour, route, map, true)
 	action["target_region_id"] = target_region_id
 	action["attack_preparation_hours"] = maxi(1, int(_battle_rule(map, "attack_preparation_hours", 24.0)))
+	action["political_authorization_id"] = political_authorization.authorization_id
+	action["political_state_id"] = political_authorization.state_id
+	action["order_authorization_id"] = order_authorization.authorization_id
+	action["issuing_organization_id"] = order_authorization.organization_id
 	action["eta_hour"] = int(action["eta_hour"]) + int(action["attack_preparation_hours"])
 	state.active_actions[action_id] = action
 	formation.action_state = VNextMilitaryFormation.ACTION_ATTACKING
@@ -233,7 +244,6 @@ func attack(
 		"target_region_id": target_region_id,
 		"target_city_id": target_city_id,
 		"eta_hour": int(action["eta_hour"]),
-		"war_status": "active",
 		"route": route.duplicate(true),
 	}
 
@@ -334,7 +344,7 @@ func get_formation_view(state: VNextMilitaryState, map: VNextMilitaryMapAdapter,
 func get_region_view(state: VNextMilitaryState, map: VNextMilitaryMapAdapter, region_id: String) -> Dictionary:
 	if state == null or map == null:
 		return {}
-	var result: Dictionary = map.get_region_report(region_id, state.region_controls)
+	var result: Dictionary = map.get_region_report(region_id)
 	if result.is_empty():
 		return {}
 	var stationed: Array[Dictionary] = []
@@ -386,7 +396,7 @@ func _issue_transport_action(
 		return _failure("该部队当前不能接收新的移动命令。")
 	if not map.has_city(destination_city_id):
 		return _failure("移动目标城市不存在。")
-	var route: Dictionary = map.find_route(formation.current_city_id, destination_city_id, [], formation.country_id, state.region_controls, allow_enemy_destination)
+	var route: Dictionary = map.find_route(formation.current_city_id, destination_city_id, [], formation.country_id, allow_enemy_destination)
 	if not bool(route.get("reachable", false)):
 		return _failure(str(route.get("reason", "移动路线不可通行。")))
 	if not _movement_allowed_for_condition(formation, route):
@@ -556,8 +566,9 @@ func _advance_one_hour(state: VNextMilitaryState, map: VNextMilitaryMapAdapter, 
 
 func _build_supply_context(state: VNextMilitaryState, map: VNextMilitaryMapAdapter) -> Dictionary:
 	var source_remaining: Dictionary = {}
-	for source_region_id: String in _sorted_dictionary_keys(state.supply_inputs):
-		var source_input: Dictionary = state.supply_inputs[source_region_id] as Dictionary
+	var external_allocations: Dictionary = state.external_supply_allocations()
+	for source_region_id: String in _sorted_dictionary_keys(external_allocations):
+		var source_input: Dictionary = external_allocations[source_region_id] as Dictionary
 		var remaining: Dictionary = {}
 		for resource_id: String in RESOURCE_IDS:
 			remaining[resource_id] = maxf(0.0, float(source_input.get(resource_id, 0.0)) / 24.0)
@@ -697,7 +708,7 @@ func _create_supply_shipments(state: VNextMilitaryState, map: VNextMilitaryMapAd
 			var source_city_ids: Array[String] = map.get_city_ids_for_region(source_region_id)
 			if source_city_ids.is_empty():
 				continue
-			var route: Dictionary = map.find_route(source_city_ids[0], formation.current_city_id, [], formation.country_id, state.region_controls, false)
+			var route: Dictionary = map.find_route(source_city_ids[0], formation.current_city_id, [], formation.country_id, false)
 			if not bool(route.get("reachable", false)):
 				continue
 			var pipeline_hours: int = maxi(1, int(route.get("duration_hours", 1)) + 1)
@@ -758,7 +769,7 @@ func _collect_movement_requests(
 		var link_id: String = str(link_ids[edge_index])
 		var can_enter: bool = map.can_enter_link(
 			link_id, formation.current_city_id, str(action.get("destination_city_id", "")),
-			formation.country_id, state.region_controls, bool(action.get("allow_enemy_destination", false))
+			formation.country_id, bool(action.get("allow_enemy_destination", false))
 		)
 		if not can_enter:
 			_cancel_active_spatial_request(map, action)
@@ -809,7 +820,7 @@ func _collect_supply_transport_requests(
 		var link_id: String = str(link_ids[edge_index])
 		var can_enter: bool = map.can_enter_link(
 			link_id, str(action.get("current_city_id", "")), str(action.get("destination_city_id", "")),
-			str(action.get("owner_country_id", "")), state.region_controls, false
+			str(action.get("owner_country_id", "")), false
 		)
 		if not can_enter:
 			_cancel_active_spatial_request(map, action)
@@ -1107,7 +1118,7 @@ func _reconcile_transport_access(state: VNextMilitaryState, map: VNextMilitaryMa
 			current_city_id = formation.current_city_id
 			owner_country_id = formation.country_id
 			allow_enemy_destination = bool(action.get("allow_enemy_destination", false))
-		if map.can_enter_link(link_id, current_city_id, destination_city_id, owner_country_id, state.region_controls, allow_enemy_destination):
+		if map.can_enter_link(link_id, current_city_id, destination_city_id, owner_country_id, allow_enemy_destination):
 			continue
 		state.remove_capacity_request(action_id)
 		action["reserved_link_id"] = ""
@@ -1352,7 +1363,7 @@ func _resolve_attack(
 	var target_city_id: String = str(action.get("destination_city_id", ""))
 	var target_region_id: String = str(action.get("target_region_id", map.get_region_id_for_city(target_city_id)))
 	var fallback_city_id: String = str(action.get("fallback_city_id", attacker.current_city_id))
-	var defender_country_id: String = str(state.region_controls.get(target_region_id, ""))
+	var defender_country_id: String = map.get_military_controller(target_region_id)
 	if defender_country_id.is_empty() or defender_country_id == attacker.country_id:
 		attacker.current_city_id = fallback_city_id
 		return {
@@ -1362,8 +1373,7 @@ func _resolve_attack(
 			"action_id": str(action.get("action_id", "")),
 			"target_region_id": target_region_id,
 			"target_city_id": target_city_id,
-			"control_changed": false,
-			"war_status": "resolved",
+			"control_claim": {},
 		}
 	var terrain: Dictionary = map.get_region_terrain(target_region_id)
 	var defender_summary: Dictionary = _defender_summary(state, map, target_region_id, target_city_id)
@@ -1407,32 +1417,13 @@ func _resolve_attack(
 	for destroyed_formation_id: String in destroyed_defenders:
 		_cancel_spatial_requests_for_formation(state, map, destroyed_formation_id)
 		_cleanup_destroyed_formation_references(state, destroyed_formation_id, state.last_simulated_hour, completed)
-	var control_changed: bool = false
+	var should_claim_control: bool = false
 	if outcome == "attacker_win" and attacker.formation_status == VNextMilitaryFormation.STATUS_ACTIVE and attacker.personnel > 0:
-		var previous_controller_id: String = defender_country_id
-		if state.apply_region_control_change(target_region_id, attacker.country_id, "strategic_attack_victory", state.last_simulated_hour, "battle", current_action_id):
-			control_changed = previous_controller_id != attacker.country_id
-			if control_changed:
-				var change_index: int = state.control_history.size() - 1
-				var change: Dictionary = state.control_history[change_index] as Dictionary
-				var origin_controller_id: String = map.get_initial_controller(target_region_id)
-				for history_index: int in range(change_index - 1, -1, -1):
-					var prior: Dictionary = state.control_history[history_index] as Dictionary
-					if str(prior.get("region_id", "")) == target_region_id:
-						origin_controller_id = str(prior.get("control_origin_controller_id", prior.get("previous_controller_id", origin_controller_id)))
-						break
-				change["control_origin_controller_id"] = origin_controller_id
-				change["source_action_kind"] = "attack"
-				change["source_formation_id"] = attacker.formation_id
-				change["source_target_region_id"] = target_region_id
-				change["source_controller_id"] = attacker.country_id
-				change["source_preparation_end_hour"] = int(action.get("preparation_end_hour", -1))
-				state.control_history[change_index] = change
-				region_control_changed.emit(change.duplicate(true))
+		should_claim_control = defender_country_id != attacker.country_id
 		attacker.current_city_id = target_city_id
 	else:
 		attacker.current_city_id = fallback_city_id
-	return {
+	var result: Dictionary = {
 		"success": true,
 		"outcome": outcome,
 		"action_id": current_action_id,
@@ -1448,9 +1439,7 @@ func _resolve_attack(
 		"defender_losses": defender_losses_total,
 		"casualties": {"attacker": attacker_losses, "defender": defender_losses_total},
 		"mobilization_pressure": mobilization_pressure,
-		"war_status": "resolved",
-		"control_changed": control_changed,
-		"controller_country_id": str(state.region_controls.get(target_region_id, defender_country_id)),
+		"control_claim": {},
 		"attacker_final_city_id": attacker.current_city_id,
 		"factors": {
 			"personnel": attacker_personnel_before,
@@ -1463,6 +1452,26 @@ func _resolve_attack(
 			"defender_morale": float(defender_summary.get("average_morale", 0.0)),
 		},
 	}
+	if should_claim_control:
+		var claim := VNextMilitaryControlClaim.new()
+		if claim.configure(
+			target_region_id,
+			{
+				"formation_id": attacker.formation_id,
+				"country_id": attacker.country_id,
+				"city_id": attacker.current_city_id,
+				"personnel": attacker.personnel,
+			},
+			result,
+			{
+				"expected_controller_id": defender_country_id,
+				"candidate_controller_id": attacker.country_id,
+			},
+			state.last_simulated_hour
+		) and state.append_control_claim(claim):
+			result["control_claim"] = claim.snapshot()
+			military_control_claimed.emit(claim.snapshot())
+	return result
 
 
 func _attacker_power(formation: VNextMilitaryFormation, map: VNextMilitaryMapAdapter, target_region_id: String) -> float:
@@ -1476,7 +1485,7 @@ func _attacker_power(formation: VNextMilitaryFormation, map: VNextMilitaryMapAda
 
 
 func _defender_summary(state: VNextMilitaryState, map: VNextMilitaryMapAdapter, target_region_id: String, target_city_id: String) -> Dictionary:
-	var defender_country_id: String = str(state.region_controls.get(target_region_id, ""))
+	var defender_country_id: String = map.get_military_controller(target_region_id)
 	var terrain: Dictionary = map.get_region_terrain(target_region_id)
 	var terrain_factor: float = float(terrain.get("defense_factor", 1.0))
 	var city_factor: float = map.get_city_defense_factor(target_city_id)

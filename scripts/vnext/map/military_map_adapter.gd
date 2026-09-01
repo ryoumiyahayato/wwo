@@ -106,14 +106,12 @@ func get_port_ids_for_city(city_id: String) -> Array[String]:
 	return result
 
 
-func get_initial_controller(region_id: String) -> String:
-	var overlay: Dictionary = _overlay_for_region(region_id)
-	var configured: String = str(overlay.get("initial_controller_id", ""))
-	if not configured.is_empty() and has_country(configured):
-		return configured
-	if regions.has(region_id):
-		return str((regions[region_id] as Dictionary).get("parent_country_id", ""))
-	return region_id if has_country(region_id) else ""
+func get_military_controller(region_id: String) -> String:
+	if spatial_world == null or not has_region(region_id):
+		return ""
+	return str(
+		spatial_world.get_territorial_facts(region_id).get("military_controller_id", "")
+	)
 
 
 func get_initial_garrison(region_id: String) -> int:
@@ -121,7 +119,7 @@ func get_initial_garrison(region_id: String) -> int:
 	return maxi(0, int(overlay.get("initial_garrison_personnel", 0)))
 
 
-func get_region_report(region_id: String, controls: Dictionary = {}) -> Dictionary:
+func get_region_report(region_id: String) -> Dictionary:
 	if not has_region(region_id):
 		return {}
 	var overlay: Dictionary = _overlay_for_region(region_id)
@@ -152,7 +150,7 @@ func get_region_report(region_id: String, controls: Dictionary = {}) -> Dictiona
 		var port: Dictionary = ports[port_id] as Dictionary
 		if get_region_id_for_city(str(port.get("city_id", ""))) == region_id:
 			port_ids.append(port_id)
-	var controller_id: String = str(controls.get(region_id, get_initial_controller(region_id)))
+	var controller_id: String = get_military_controller(region_id)
 	return {
 		"region_id": region_id,
 		"name": _region_name(region_id),
@@ -166,7 +164,6 @@ func get_region_report(region_id: String, controls: Dictionary = {}) -> Dictiona
 		"rail_link_ids": rail_ids,
 		"shipping_link_ids": shipping_ids,
 		"port_ids": port_ids,
-		"resources": DataRecordUtils.to_string_array(overlay.get("resources", [])),
 		"strategic_value": clampf(float(overlay.get("strategic_value", 0.5)), 0.0, 1.0),
 		"controller_country_id": controller_id,
 		"controller_name": _country_name(controller_id),
@@ -209,7 +206,6 @@ func find_route(
 	destination_city_id: String,
 	allowed_modes: Array[String] = [],
 	controller_country_id: String = "",
-	controls: Dictionary = {},
 	allow_enemy_destination: bool = false
 ) -> Dictionary:
 	if not has_city(origin_city_id) or not has_city(destination_city_id):
@@ -234,7 +230,7 @@ func find_route(
 			if get_link_transport_capacity_per_hour(link_id) <= 0.0:
 				continue
 			var next_city_id: String = _other_city(link, current_city_id)
-			if next_city_id.is_empty() or not _route_edge_allowed(current_city_id, next_city_id, destination_city_id, controller_country_id, controls, allow_enemy_destination):
+			if next_city_id.is_empty() or not _route_edge_allowed(current_city_id, next_city_id, destination_city_id, controller_country_id, allow_enemy_destination):
 				continue
 			var movement_hours: float = maxf(1.0, float(link.get("movement_hours", 0.0)))
 			var candidate_cost: float = float(distances[current_city_id]) + movement_hours
@@ -259,7 +255,6 @@ func can_enter_link(
 	from_city_id: String,
 	destination_city_id: String,
 	controller_country_id: String,
-	controls: Dictionary,
 	allow_enemy_destination: bool
 ) -> bool:
 	var link: Dictionary = links.get(link_id, {}) as Dictionary
@@ -268,7 +263,7 @@ func can_enter_link(
 	var next_city_id: String = _other_city(link, from_city_id)
 	if next_city_id.is_empty():
 		return false
-	return _route_edge_allowed(from_city_id, next_city_id, destination_city_id, controller_country_id, controls, allow_enemy_destination)
+	return _route_edge_allowed(from_city_id, next_city_id, destination_city_id, controller_country_id, allow_enemy_destination)
 
 
 func get_route_capacity_per_day(route: Dictionary) -> float:
@@ -353,7 +348,7 @@ func _load_overlay() -> bool:
 		errors.append("military semantics overlay must be a JSON object")
 		return false
 	var document: Dictionary = parsed as Dictionary
-	if int(document.get("schema_version", -1)) != 1:
+	if int(document.get("schema_version", -1)) != 2:
 		errors.append("unsupported military semantics overlay schema")
 		return false
 	for raw_profile: Variant in document.get("terrain_profiles", []) as Array:
@@ -452,15 +447,14 @@ func _route_edge_allowed(
 	next_city_id: String,
 	destination_city_id: String,
 	controller_country_id: String,
-	controls: Dictionary,
 	allow_enemy_destination: bool
 ) -> bool:
 	if controller_country_id.is_empty():
 		return true
 	var current_region_id: String = get_region_id_for_city(current_city_id)
 	var next_region_id: String = get_region_id_for_city(next_city_id)
-	var current_controller: String = str(controls.get(current_region_id, get_initial_controller(current_region_id)))
-	var next_controller: String = str(controls.get(next_region_id, get_initial_controller(next_region_id)))
+	var current_controller: String = get_military_controller(current_region_id)
+	var next_controller: String = get_military_controller(next_region_id)
 	if current_controller != controller_country_id:
 		return false
 	if next_controller == controller_country_id:

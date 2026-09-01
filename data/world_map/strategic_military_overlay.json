@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "base_dataset": "data/world_map",
   "overlay_kind": "military_semantics_only",
   "resource_ids": [
@@ -96,104 +96,54 @@
       "region_id": "northern_industrial_belt",
       "terrain_id": "plains",
       "strategic_value": 0.9,
-      "resources": [
-        "coal",
-        "steel",
-        "rail_hub"
-      ],
-      "initial_controller_id": "country_fra",
       "initial_garrison_personnel": 3500
     },
     {
       "region_id": "paris_basin",
       "terrain_id": "urban",
       "strategic_value": 1.0,
-      "resources": [
-        "food",
-        "industry",
-        "rail_hub",
-        "capital"
-      ],
-      "initial_controller_id": "country_fra",
       "initial_garrison_personnel": 5000
     },
     {
       "region_id": "normandy",
       "terrain_id": "coastal",
       "strategic_value": 0.72,
-      "resources": [
-        "food",
-        "port_access"
-      ],
-      "initial_controller_id": "country_fra",
       "initial_garrison_personnel": 2200
     },
     {
       "region_id": "brittany",
       "terrain_id": "coastal",
       "strategic_value": 0.55,
-      "resources": [
-        "food",
-        "port_access"
-      ],
-      "initial_controller_id": "country_fra",
       "initial_garrison_personnel": 1800
     },
     {
       "region_id": "loire_valley",
       "terrain_id": "plains",
       "strategic_value": 0.58,
-      "resources": [
-        "food",
-        "rail_hub"
-      ],
-      "initial_controller_id": "country_fra",
       "initial_garrison_personnel": 1800
     },
     {
       "region_id": "aquitaine",
       "terrain_id": "plains",
       "strategic_value": 0.62,
-      "resources": [
-        "food",
-        "port_access"
-      ],
-      "initial_controller_id": "country_fra",
       "initial_garrison_personnel": 2100
     },
     {
       "region_id": "massif_central",
       "terrain_id": "hills",
       "strategic_value": 0.48,
-      "resources": [
-        "food",
-        "iron"
-      ],
-      "initial_controller_id": "country_fra",
       "initial_garrison_personnel": 1600
     },
     {
       "region_id": "rhone_valley",
       "terrain_id": "hills",
       "strategic_value": 0.76,
-      "resources": [
-        "industry",
-        "rail_hub",
-        "iron"
-      ],
-      "initial_controller_id": "country_fra",
       "initial_garrison_personnel": 2600
     },
     {
       "region_id": "mediterranean_coast",
       "terrain_id": "coastal",
       "strategic_value": 0.82,
-      "resources": [
-        "food",
-        "port_access",
-        "shipping_hub"
-      ],
-      "initial_controller_id": "country_fra",
       "initial_garrison_personnel": 3000
     }
   ],
@@ -202,119 +152,60 @@
       "country_id": "country_bel",
       "terrain_id": "plains",
       "strategic_value": 0.78,
-      "resources": [
-        "coal",
-        "steel",
-        "rail_hub"
-      ],
-      "initial_controller_id": "country_bel",
       "initial_garrison_personnel": 3000
     },
     {
       "country_id": "german_empire",
       "terrain_id": "plains",
       "strategic_value": 0.88,
-      "resources": [
-        "coal",
-        "steel",
-        "industry",
-        "rail_hub"
-      ],
-      "initial_controller_id": "german_empire",
       "initial_garrison_personnel": 5500
     },
     {
       "country_id": "british_empire",
       "terrain_id": "coastal",
       "strategic_value": 0.9,
-      "resources": [
-        "port_access",
-        "shipping_hub",
-        "industry"
-      ],
-      "initial_controller_id": "british_empire",
       "initial_garrison_personnel": 5000
     },
     {
       "country_id": "austro_hungarian_empire",
       "terrain_id": "hills",
       "strategic_value": 0.76,
-      "resources": [
-        "iron",
-        "rail_hub"
-      ],
-      "initial_controller_id": "austro_hungarian_empire",
       "initial_garrison_personnel": 3600
     },
     {
       "country_id": "ottoman_empire",
       "terrain_id": "hills",
       "strategic_value": 0.72,
-      "resources": [
-        "port_access",
-        "food"
-      ],
-      "initial_controller_id": "ottoman_empire",
       "initial_garrison_personnel": 3300
     },
     {
       "country_id": "russian_empire",
       "terrain_id": "plains",
       "strategic_value": 0.82,
-      "resources": [
-        "food",
-        "coal",
-        "rail_hub"
-      ],
-      "initial_controller_id": "russian_empire",
       "initial_garrison_personnel": 6000
     },
     {
       "country_id": "united_states",
       "terrain_id": "plains",
       "strategic_value": 0.82,
-      "resources": [
-        "food",
-        "coal",
-        "industry",
-        "port_access"
-      ],
-      "initial_controller_id": "united_states",
       "initial_garrison_personnel": 4200
     },
     {
       "country_id": "qing_empire",
       "terrain_id": "hills",
       "strategic_value": 0.68,
-      "resources": [
-        "food",
-        "coal",
-        "port_access"
-      ],
-      "initial_controller_id": "qing_empire",
       "initial_garrison_personnel": 4200
     },
     {
       "country_id": "japanese_empire",
       "terrain_id": "hills",
       "strategic_value": 0.74,
-      "resources": [
-        "port_access",
-        "shipping_hub",
-        "industry"
-      ],
-      "initial_controller_id": "japanese_empire",
       "initial_garrison_personnel": 3800
     },
     {
       "country_id": "argentine_republic",
       "terrain_id": "plains",
       "strategic_value": 0.62,
-      "resources": [
-        "food",
-        "port_access"
-      ],
-      "initial_controller_id": "argentine_republic",
       "initial_garrison_personnel": 2400
     }
   ],

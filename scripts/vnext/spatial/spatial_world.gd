@@ -260,6 +260,51 @@ func set_military_controller(entity_query: String, controller_id: String) -> boo
 	)
 
 
+func apply_military_control_claim(claim_value: Dictionary) -> bool:
+	# Spatial validates and commits the candidate. The Military claim is evidence,
+	# never a second controller record.
+	if claim_value.get("schema_id", "") != "vnext_military_control_claim_v1":
+		return false
+	if int(claim_value.get("timestamp", -1)) != _current_hour:
+		return false
+	var location_id: String = str(claim_value.get("location", ""))
+	var presence_value: Variant = claim_value.get("military_presence", {})
+	var battle_value: Variant = claim_value.get("battle_result", {})
+	var outcome_value: Variant = claim_value.get("candidate_control_outcome", {})
+	if not presence_value is Dictionary or not battle_value is Dictionary or not outcome_value is Dictionary:
+		return false
+	var presence: Dictionary = presence_value as Dictionary
+	var battle: Dictionary = battle_value as Dictionary
+	var outcome: Dictionary = outcome_value as Dictionary
+	if str(battle.get("outcome", "")) != "attacker_win":
+		return false
+	if str(battle.get("target_region_id", "")) != location_id:
+		return false
+	if VNextStableId.kind_of(str(battle.get("action_id", ""))) != "military_action":
+		return false
+	if (
+		VNextStableId.kind_of(str(presence.get("formation_id", ""))) != "formation"
+		or str(battle.get("attacker_formation_id", "")) != str(presence.get("formation_id", ""))
+		or str(battle.get("attacker_country_id", "")) != str(presence.get("country_id", ""))
+	):
+		return false
+	var expected_controller_id: String = str(outcome.get("expected_controller_id", ""))
+	var candidate_controller_id: String = str(outcome.get("candidate_controller_id", ""))
+	if (
+		expected_controller_id.is_empty()
+		or candidate_controller_id.is_empty()
+		or expected_controller_id == candidate_controller_id
+		or expected_controller_id != str(battle.get("defender_country_id", ""))
+		or candidate_controller_id != str(presence.get("country_id", ""))
+		or int(presence.get("personnel", 0)) <= 0
+	):
+		return false
+	var current: Dictionary = get_territorial_facts(location_id)
+	if str(current.get("military_controller_id", "")) != expected_controller_id:
+		return false
+	return set_military_controller(location_id, candidate_controller_id)
+
+
 func get_territorial_facts(entity_query: String) -> Dictionary:
 	var entity_id: String = _entity_query_to_map_id(entity_query)
 	var value: Variant = _territories.get(entity_id, {})

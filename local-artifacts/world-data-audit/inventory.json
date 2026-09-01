@@ -77465,7 +77465,7 @@
       }
     },
     {
-      "bytes": 8469,
+      "bytes": 6020,
       "path": "strategic_military_overlay.json",
       "root_keys": [
         "base_dataset",
@@ -77481,7 +77481,7 @@
         "transport_profiles"
       ],
       "schema_identifier": {
-        "schema_version": 1
+        "schema_version": 2
       }
     },
     {
@@ -78941,7 +78941,7 @@
       "schema_version": 2
     },
     "strategic_military_overlay.json": {
-      "schema_version": 1
+      "schema_version": 2
     },
     "world_activity.json": {
       "schema_version": 3
@@ -80270,8 +80270,6 @@
     "regions.json:source.license",
     "regions.json:source.upstream_url",
     "relationships.json:relationships[].name_source",
-    "strategic_military_overlay.json:country_overlays[].resources",
-    "strategic_military_overlay.json:region_overlays[].resources",
     "strategic_military_overlay.json:resource_ids",
     "world_activity.json:items[].source",
     "world_activity.json:items[].source_type",

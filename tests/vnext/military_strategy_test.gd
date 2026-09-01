@@ -86,6 +86,7 @@ func _test_supply_chronology_and_resume() -> void:
 	var resumed := VNextMilitaryState.new()
 	_check(resumed.restore(snap, map), "mid-route cargo snapshot restores")
 	_check(resumed.snapshot() == snap, "mid-route cargo restore is exact")
+	_check(service.set_external_supply_allocation(resumed, map, "paris_basin", _abundant_supply()), "restored cargo receives fresh external allocation")
 	var target_hour := state.last_simulated_hour + 96
 	_check(_advance(state, target_hour), "continuous cargo simulation advances")
 	_check(_advance(resumed, target_hour), "restored cargo simulation advances")
@@ -193,14 +194,16 @@ func _test_supply_completion_and_interruptions() -> void:
 		var control_cities: Array = control_route.get("city_ids", []) as Array
 		var next_city := str(control_cities[control_edge + 1])
 		var next_region := map.get_region_id_for_city(next_city)
-		var previous_controller := str(control_cut.region_controls.get(next_region, ""))
+		var control_context: Dictionary = _context_for_state(control_cut)
+		var control_spatial: VNextSpatialWorld = control_context.get("spatial") as VNextSpatialWorld
+		var previous_controller := str(control_spatial.get_territorial_facts(next_region).get("military_controller_id", ""))
 		var preserved_cargo := float(control_shipment.get("cargo_amount_remaining", 0.0))
-		control_cut.region_controls[next_region] = "country_bel"
+		_check(control_spatial.set_military_controller(next_region, "country_bel"), "Spatial controller cut applies")
 		_check(control_cut.is_valid(map), "future edge controller change preserves pending state validity")
 		_check(_advance(control_cut, control_cut.last_simulated_hour + 1), "controller cut hour advances")
 		control_shipment = _find_supply(control_cut, "formation:control_cut", "food")
 		_check(str(control_shipment.get("transport_state", "")) in ["blocked", "interrupted"], "mid-route controller change blocks cargo")
-		control_cut.region_controls[next_region] = previous_controller
+		_check(control_spatial.set_military_controller(next_region, previous_controller), "Spatial controller cut restores")
 		_check(_advance(control_cut, control_cut.last_simulated_hour + 1), "controller recovery hour advances")
 		control_shipment = _find_supply(control_cut, "formation:control_cut", "food")
 		_check(str(control_shipment.get("transport_state", "")) in ["waiting_capacity", "moving"], "controller access recovery resumes cargo")
@@ -233,20 +236,23 @@ func _test_formation_movement_partition() -> void:
 
 func _test_combat_position_and_defender_annihilation() -> void:
 	var win := _battle_state(50000, 1500)
-	var win_order := service.attack(win, map, "formation:attacker", "lille", 0)
+	var win_order := _authorized_attack(win, "formation:attacker", "lille", 0)
 	_finish(win, str(win_order.get("action_id", "")), 500)
 	_check(not win.battle_results.is_empty(), "winning battle resolves")
 	if not win.battle_results.is_empty():
 		var battle: Dictionary = win.battle_results.back() as Dictionary
 		_check(battle.get("outcome", "") == "attacker_win", "extreme advantage produces attacker win")
 		_check(win.get_formation("formation:attacker").current_city_id == "lille", "victory enters target")
-		_check(win.region_controls.get("northern_industrial_belt", "") == "country_fra", "victory changes target control")
-		var control: Dictionary = win.control_history.back() as Dictionary
-		_check(control.get("cause", "") == "strategic_attack_victory" and control.get("context", "") == "battle", "battle victory records cause and context")
-		_check(control.get("effective_hour", -1) == win.last_simulated_hour and control.get("source_action_id", "") == win_order.get("action_id", ""), "battle control records effective hour and source action")
+		var win_context: Dictionary = _context_for_state(win)
+		var win_spatial: VNextSpatialWorld = win_context.get("spatial") as VNextSpatialWorld
+		_check(str(win_spatial.get_territorial_facts("northern_industrial_belt").get("military_controller_id", "")) == "country_bel", "victory does not mutate authoritative Spatial control")
+		var claim: Dictionary = battle.get("control_claim", {}) as Dictionary
+		_check(not claim.is_empty() and win.control_claims.size() == 1, "victory records a Military control claim")
+		_check(win_spatial.apply_military_control_claim(claim), "Spatial validates and commits the Military claim")
+		_check(str(win_spatial.get_territorial_facts("northern_industrial_belt").get("military_controller_id", "")) == "country_fra", "Spatial remains the controller owner")
 
 	var hold := _battle_state(3000, 16000)
-	var hold_order := service.attack(hold, map, "formation:attacker", "lille", 0)
+	var hold_order := _authorized_attack(hold, "formation:attacker", "lille", 0)
 	_finish(hold, str(hold_order.get("action_id", "")), 500)
 	_check(hold.get_formation("formation:attacker").current_city_id != "lille", "hold or stalemate never teleports attacker into target")
 	if hold.get_formation("formation:attacker").formation_status == VNextMilitaryFormation.STATUS_ACTIVE:
@@ -254,7 +260,7 @@ func _test_combat_position_and_defender_annihilation() -> void:
 
 	var annihilate := _battle_state(50000, 1)
 	var defender_action := _formation_action_id(annihilate, "formation:defender")
-	var attack := service.attack(annihilate, map, "formation:attacker", "lille", 0)
+	var attack := _authorized_attack(annihilate, "formation:attacker", "lille", 0)
 	_finish(annihilate, str(attack.get("action_id", "")), 500)
 	var defender := annihilate.get_formation("formation:defender")
 	_check(defender.personnel == 0 and defender.formation_status == VNextMilitaryFormation.STATUS_DESTROYED, "combat annihilates active defender")
@@ -273,7 +279,7 @@ func _test_attacker_annihilation() -> void:
 	var state := _battle_state(1, 50000)
 	var old_loss := float(map.battle_rules.get("defender_win_loss_rate", 0.18))
 	map.battle_rules["defender_win_loss_rate"] = 1.0
-	var order := service.attack(state, map, "formation:attacker", "lille", 0)
+	var order := _authorized_attack(state, "formation:attacker", "lille", 0)
 	var attack_id := str(order.get("action_id", ""))
 	_finish(state, attack_id, 500)
 	var attacker := state.get_formation("formation:attacker")
@@ -301,8 +307,6 @@ func _test_strict_restore_extensions() -> void:
 
 	var reverse := valid.duplicate(true)
 	(reverse.get("active_actions", []) as Array).clear()
-	reverse["link_queues"] = {}
-	reverse["link_capacity_used"] = {}
 	_check(_transactionally_rejected(reverse), "non-idle formation without action rejects transactionally")
 
 	var discontinuous := valid.duplicate(true)
@@ -341,46 +345,20 @@ func _test_strict_restore_extensions() -> void:
 	load_action["edge_load_remaining"] = float(load_action.get("edge_load_total", 0.0)) + 1.0
 	_check(_transactionally_rejected(load_overflow), "remaining load above total rejects transactionally")
 
-	var bogus_queue := valid.duplicate(true)
-	var queue_action: Dictionary = (bogus_queue.get("active_actions", []) as Array)[0] as Dictionary
-	var queue_link := str(((queue_action.get("route", {}) as Dictionary).get("link_ids", []) as Array)[int(queue_action.get("current_edge_index", 0))])
-	var queues: Dictionary = bogus_queue.get("link_queues", {}) as Dictionary
-	if not queues.has(queue_link):
-		queues[queue_link] = []
-	(queues[queue_link] as Array).append("military_action:999999")
-	_check(_transactionally_rejected(bogus_queue), "bogus queue request rejects transactionally")
+	var external_queue := valid.duplicate(true)
+	external_queue["link_queues"] = {}
+	_check(_transactionally_rejected(external_queue), "external transport queue truth rejects transactionally")
 
-	var wrong_queue := valid.duplicate(true)
-	var wrong_action: Dictionary = (wrong_queue.get("active_actions", []) as Array)[0] as Dictionary
-	var current_link := str(((wrong_action.get("route", {}) as Dictionary).get("link_ids", []) as Array)[int(wrong_action.get("current_edge_index", 0))])
-	var wrong_queues: Dictionary = wrong_queue.get("link_queues", {}) as Dictionary
-	for link: Dictionary in map.get_all_links():
-		var candidate := str(link.get("id", ""))
-		if candidate != current_link:
-			wrong_queues.erase(current_link)
-			wrong_queues[candidate] = [str(wrong_action.get("action_id", ""))]
-			break
-	_check(_transactionally_rejected(wrong_queue), "queue on wrong link rejects transactionally")
-
-	var capacity_overflow := valid.duplicate(true)
-	(capacity_overflow.get("link_capacity_used", {}) as Dictionary)[current_link] = map.get_link_transport_capacity_per_hour(current_link) + 1.0
-	_check(_transactionally_rejected(capacity_overflow), "capacity ledger overflow rejects transactionally")
+	var external_capacity := valid.duplicate(true)
+	external_capacity["link_capacity_used"] = {}
+	_check(_transactionally_rejected(external_capacity), "external transport capacity truth rejects transactionally")
 
 	var orphan_reservation := valid.duplicate(true)
 	((orphan_reservation.get("active_actions", []) as Array)[0] as Dictionary)["reserved_link_id"] = "missing_link"
 	_check(_transactionally_rejected(orphan_reservation), "orphan reservation rejects transactionally")
 
-	var inaccessible := valid.duplicate(true)
-	var access_action: Dictionary = (inaccessible.get("active_actions", []) as Array)[0] as Dictionary
-	var access_route: Dictionary = access_action.get("route", {}) as Dictionary
-	var access_edge := int(access_action.get("current_edge_index", 0))
-	var next_city := str((access_route.get("city_ids", []) as Array)[access_edge + 1])
-	var next_region := map.get_region_id_for_city(next_city)
-	(inaccessible.get("region_controls", {}) as Dictionary)[next_region] = "country_bel"
-	_check(_transactionally_rejected(inaccessible), "moving current edge with incompatible controller rejects transactionally")
-
 	var prep_state := _battle_state(9000, 6000)
-	var prep_order := service.attack(prep_state, map, "formation:attacker", "lille", 0)
+	var prep_order := _authorized_attack(prep_state, "formation:attacker", "lille", 0)
 	var prep_id := str(prep_order.get("action_id", ""))
 	var reached_preparing := false
 	for _i: int in range(400):
@@ -403,17 +381,16 @@ func _test_strict_restore_extensions() -> void:
 		_check(_transactionally_rejected(zero_prep), "zero preparation duration rejects transactionally")
 
 func _test_control_boundary() -> void:
-	var setup := _new_state()
-	_check(service.setup_region_controller(setup, map, "northern_industrial_belt", "country_bel", "initial fixture"), "initial fixture setup succeeds")
-	var record: Dictionary = setup.control_history.back() as Dictionary
-	_check(record.get("effective_hour", -1) == 0 and record.get("context", "") == "setup_fixture", "setup control records hour and context")
-	_add(setup, "formation:control", "paris", 1000, 1.0)
-	service.move(setup, map, "formation:control", "rouen", 0)
-	_check(not service.setup_region_controller(setup, map, "northern_industrial_belt", "country_fra", "late fixture"), "setup mutation rejects after action exists")
-	_check(not setup.apply_region_control_change("northern_industrial_belt", "country_fra", "fixture", 0, "setup_fixture"), "direct setup bypass rejects after action exists")
-	_check(_advance(setup, 1), "control boundary fixture advances")
-	_check(not service.setup_region_controller(setup, map, "northern_industrial_belt", "country_fra", "late fixture"), "setup mutation rejects after simulation starts")
-	_check(not setup.apply_region_control_change("northern_industrial_belt", "country_fra", "strategic_attack_victory", setup.last_simulated_hour, "battle", "military_action:999999"), "direct arbitrary battle-control bypass rejects")
+	var state := _new_state()
+	var before := state.snapshot()
+	var facts_before := spatial.get_territorial_facts("northern_industrial_belt")
+	_check(spatial.set_military_controller("northern_industrial_belt", "country_bel"), "Spatial controller fixture applies")
+	var facts_after := spatial.get_territorial_facts("northern_industrial_belt")
+	_check(state.snapshot() == before, "Spatial control changes do not create duplicate Military state")
+	_check(str(facts_after.get("sovereign_owner_id", "")) == str(facts_before.get("sovereign_owner_id", "")), "military controller change does not modify sovereignty")
+	var snapshot_value := state.snapshot()
+	_check(not snapshot_value.has("region_controls") and not snapshot_value.has("control_history"), "Military snapshot contains no territorial control truth")
+	_check(not service.has_method("setup_region_controller") and not state.has_method("apply_region_control_change"), "Military exposes no territorial control mutation API")
 
 func _test_restore_readiness_concentrate_scope() -> void:
 	var restore_state := _new_state()
@@ -425,17 +402,10 @@ func _test_restore_readiness_concentrate_scope() -> void:
 	_check(roundtrip.restore(valid, map) and roundtrip.snapshot() == valid, "valid transport snapshot roundtrips")
 	var missing := valid.duplicate(true)
 	(missing.get("active_actions", []) as Array).clear()
-	missing["link_queues"] = {}
-	missing["link_capacity_used"] = {}
 	_check(_transactionally_rejected(missing), "reverse formation/action mismatch rejects transactionally")
 	var bogus := valid.duplicate(true)
-	var action: Dictionary = (bogus.get("active_actions", []) as Array)[0] as Dictionary
-	var link := str(((action.get("route", {}) as Dictionary).get("link_ids", []) as Array)[int(action.get("current_edge_index", 0))])
-	var queues: Dictionary = bogus.get("link_queues", {}) as Dictionary
-	if not queues.has(link):
-		queues[link] = []
-	(queues[link] as Array).append("military_action:999999")
-	_check(_transactionally_rejected(bogus), "bogus queue request rejects transactionally")
+	bogus["link_queues"] = {"link:bogus": ["military_action:999999"]}
+	_check(_transactionally_rejected(bogus), "external transport queue field rejects transactionally")
 
 	var healthy := _new_state()
 	var low := _new_state()
@@ -470,8 +440,7 @@ func _test_restore_readiness_concentrate_scope() -> void:
 	for index: int in range(400):
 		bounded.append_completed_action({"action_id":"military_action:%06d" % (index + 1),"kind":"move"})
 		bounded.append_battle_result({"action_id":"military_action:%06d" % (index + 1)})
-		bounded.append_control_history({"region_id":"paris_basin","previous_controller_id":"country_fra","controller_id":"country_bel","cause":"fixture","effective_hour":0,"context":"setup_fixture","source_action_id":""})
-	_check(bounded.completed_actions.size() == 256 and bounded.battle_results.size() == 128 and bounded.control_history.size() == 256, "completed battle and control histories remain bounded")
+	_check(bounded.completed_actions.size() == 256 and bounded.battle_results.size() == 128, "completed action and battle histories remain bounded")
 	var runtime := FileAccess.get_file_as_string("res://scripts/vnext/world_runtime.gd")
 	var service_source := FileAccess.get_file_as_string("res://scripts/vnext/military/military_service.gd")
 	var adapter := FileAccess.get_file_as_string("res://scripts/vnext/map/military_map_adapter.gd")
@@ -554,7 +523,7 @@ func _slicing_state() -> VNextMilitaryState:
 
 func _battle_state(attacker: int, defender: int) -> VNextMilitaryState:
 	var state := _new_state()
-	service.setup_region_controller(state, map, "northern_industrial_belt", "country_bel", "battle fixture")
+	_check(spatial.set_military_controller("northern_industrial_belt", "country_bel"), "battle fixture controller is owned by Spatial")
 	_add(state, "formation:attacker", "paris", attacker, 1.0, "country_fra", 0.9, 0.9, 0.9)
 	_add(state, "formation:defender", "lille", defender, 1.0, "country_bel", 0.8, 0.8, 0.8)
 	service.defend(state, map, "formation:defender", 0, 500)
@@ -608,7 +577,25 @@ func _new_state() -> VNextMilitaryState:
 
 
 func _add(state: VNextMilitaryState, id: String, city: String, personnel: int, equipment: float, country: String = "country_fra", training: float = 0.8, morale: float = 0.8, organization: float = 0.8) -> bool:
-	return service.create_formation(state, map, id, country, city, personnel, {"equipment_factor": equipment}, training, morale, organization)
+	return service.create_formation(state, map, id, country, city, personnel, {"equipment_factor": equipment}, training, morale, organization, {}, "organization:test_military")
+
+
+func _authorized_attack(state: VNextMilitaryState, formation_id: String, target_city_id: String, start_hour: int) -> Dictionary:
+	var context: Dictionary = _context_for_state(state)
+	var state_map: VNextMilitaryMapAdapter = context.get("map") as VNextMilitaryMapAdapter
+	var formation: VNextMilitaryFormation = state.get_formation(formation_id)
+	if state_map == null or formation == null:
+		return {"success": false}
+	var target_region_id := state_map.get_region_id_for_city(target_city_id)
+	var defender_country_id := state_map.get_military_controller(target_region_id)
+	var sequence := state.next_action_sequence
+	var political := VNextPoliticalWarAuthorization.new()
+	if not political.configure("event:test_war_%06d" % sequence, "state:test_authority", formation.country_id, [defender_country_id], start_hour, start_hour + 1000):
+		return {"success": false}
+	var order := VNextMilitaryOrderAuthorization.new()
+	if not order.configure("event:test_order_%06d" % sequence, formation.unit_organization_id, formation_id, start_hour, start_hour + 1000):
+		return {"success": false}
+	return service.attack(state, state_map, formation_id, target_city_id, start_hour, political, order)
 
 func _configure_r4_spatial_capacity_baseline(
 	state_spatial: VNextSpatialWorld, state_map: VNextMilitaryMapAdapter

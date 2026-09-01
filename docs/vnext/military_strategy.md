@@ -1,93 +1,118 @@
-# vNext Strategic Military System
+# vNext Strategic Military Domain
 
-This slice adds strategic military state and logistics without adding a second
-world map or connecting to `scripts/vnext/world_runtime.gd`.
+This slice provides deterministic strategic formations, logistics attribution,
+and battle calculation. It does not add Military gameplay to
+`scripts/vnext/world_runtime.gd`, a second world map, diplomacy simulation, an
+Organization system, production, or manpower recruitment.
 
-## Map reuse
+## Authority graph
 
-`VNextMilitaryMapAdapter` loads the existing `PrototypeV2Data` dataset:
+Military owns formation operational identity (`formation:*`), readiness,
+requested/received/consumed supply, movement and battle actions, battle results,
+garrisons, and non-authoritative `VNextMilitaryControlClaim` evidence.
 
-- `data/world_map/cities.json`
-- `data/world_map/countries.json`
-- `data/world_map/regions.json`
-- `data/world_map/ports.json`
-- `data/world_map/road_segments.json`
-- `data/world_map/rail_segments.json`
-- `data/world_map/shipping_routes.json`
+Military references, but does not own:
 
-The only new map data is `data/world_map/strategic_military_overlay.json`.
-It contains stable-ID military semantics: terrain profiles, transport
-profiles, resource labels, strategic values, initial control, garrisons, and
-city defense roles. It does not contain duplicate city geometry, borders, or
-transport topology.
+- Political state identity or war state. `VNextPoliticalWarAuthorization` is a
+  bounded permission supplied by Political; it cannot create or end a war or
+  modify sovereignty.
+- Organization identity, hierarchy, membership, positions, or capabilities.
+  Every formation references one `organization:*` owner, and an attack requires
+  a `VNextMilitaryOrderAuthorization` for that exact formation and organization.
+- territorial ownership or current control. `VNextSpatialWorld` remains the sole
+  owner of sovereign owner, administrative parent, and military controller.
+- regional production, Economy inventory, population pools, or transport-network
+  capacity. These are external inputs or queries, never Military state.
 
-Cities without an existing macro-region use their existing country ID as a
-strategic fallback region. This keeps foreign cities queryable while preserving
-the current map data model.
+The formation's `country_id` is an operational affiliation reference used to
+validate Political permission and Spatial access. It is not state identity,
+sovereignty, or authority to change either fact.
 
-## Strategic units and actions
+## Map and control boundary
 
-`VNextMilitaryFormation` represents a formation rather than individual
-soldiers. It stores personnel, equipment factor, training, morale,
-organization, location, action state, and supply state.
+`VNextMilitaryMapAdapter` reuses `PrototypeV2Data` cities, countries, regions,
+ports, and road/rail/shipping topology. It requires an authoritative
+`VNextSpatialWorld` and reads current `military_controller_id` directly from it.
 
-`VNextMilitaryService` supports deploy, move, concentrate, defend, and attack.
-Actions reserve a stable action ID at the current military-hour boundary and
-complete only when the supplied military hour reaches their ETA. Routes are
-Dijkstra paths over existing road, rail, and shipping links; an absent path is
-unreachable, never an implicit teleport. Route personnel capacity creates
-transport waves for oversized formations.
+`data/world_map/strategic_military_overlay.json` contains only Military semantics:
+terrain and movement profiles, supply/readiness rules, battle rules, strategic
+values, garrison fixtures, and city defense roles. Regional resource lists and
+initial controller facts are deliberately absent.
 
-## Logistics
+An attacker victory updates formation presence and creates a
+`VNextMilitaryControlClaim` containing:
 
-The service accepts fixed regional supply inputs. Economy integration can later
-replace those inputs without changing military formulas. For each formation,
-food, ammunition, equipment, and transport-capacity demand are delivered only
-through controlled regions and existing transport links.
+- location;
+- military presence;
+- battle result;
+- candidate control outcome;
+- timestamp.
 
-Route capacity is the bottleneck shared by all resources on that route. Rail is
-faster, more reliable, and higher-capacity than road in the overlay; ports are
-required for shipping links. A control change in an intermediate region makes
-the route unavailable. Low or cut supply reduces organization, morale,
-equipment readiness, and eventually personnel, with all values clamped to
-finite non-negative ranges.
+The battle does not mutate territory. Spatial independently validates the claim,
+checks the expected current controller, and may commit the candidate controller.
+Applying that claim never changes sovereign owner or administrative parent.
 
-## Strategic combat and control
+## Actions and authorization
 
-Combat is deterministic. Attacker and defender power include personnel,
-equipment, training, organization, morale, supply, terrain defense, city
-defense, garrisons, and defense posture. Ratio thresholds classify an attack as
-attacker win, defender hold, or stalemate. Results expose an active/resolved war
-status, attacker/defender casualties, bounded mobilization pressure, loss
-records, and control changes. A win changes only the military state's region
-controller and control history. The formal map UI and political legitimacy are
-integration responsibilities.
+`VNextMilitaryService` supports the existing deploy, move, concentrate, defend,
+attack, supply, and deterministic battle calculations. Routes are Dijkstra paths
+over existing transport links; absent paths remain unreachable.
 
-## Persistence and verification
+Attack additionally requires two external contracts at the action boundary:
 
-`VNextMilitaryState.snapshot()` stores dynamic formations, actions, controls,
-garrisons, supply inputs, battle results, and control history. Restore validates
-schema, formation IDs, action IDs, action time ranges, map references when a map
-is provided, and finite supply/state values.
+1. a valid `VNextPoliticalWarAuthorization` matching attacker, opponent, and
+   hour;
+2. a valid `VNextMilitaryOrderAuthorization` matching formation, organization,
+   capability, and hour.
+
+Military stores only authorization provenance IDs on the action. It does not
+persist either external contract or infer war state from a battle.
+
+## Supply and transport
+
+Military may own requested, received, and consumed supply plus the resulting
+readiness effects. A caller may inject an external supply allocation for the
+current runtime, but that allocation is not Economy production or stock and is
+not saved. Restore callers must obtain and inject a fresh allocation.
+
+`VNextSpatialWorld` is the sole authority for infrastructure status, nominal and
+effective capacity, and the active shared allocation window. Military submits
+demand, applies Spatial's final allocation, and keeps only action-level
+attribution needed to explain progress. Derived queue and aggregate attribution
+are rebuilt after restore and are excluded from the Military snapshot.
+
+## Persistence
+
+`VNextMilitaryState.snapshot()` uses the strict `vnext_military_state_v3`
+schema. It contains formations, garrisons, actions, completed actions, battle
+results, control claims, the Military clock/action sequence, and the last
+attribution window identifier.
+
+It contains no territorial-control truth, Economy stock or allocation truth,
+population truth, transport-network capacity truth, or external authorization
+snapshots. Restore rejects unknown root fields and applies candidate-first, so a
+polluted or malformed snapshot cannot partially modify live Military state.
 
 Focused verification:
 
 ```text
+Godot --headless --path . --script res://tests/vnext/military_domain_boundary_closure_test.gd
 Godot --headless --path . --script res://tests/vnext/military_strategy_test.gd
+Godot --headless --path . --script res://tests/vnext/military_spatial_capacity_integration_test.gd
+Godot --headless --path . --script res://tests/vnext/military_r3_findings_test.gd
 python tools/run_vnext_validation.py --root . --godot <Godot executable>
 ```
 
-The focused test covers map reuse, terrain, roads versus rail, ports and
-shipping, timed movement, deployment, concentration, supply interruption,
-combat outcomes, control changes, snapshot round trips, and a 240-day bounded
-run.
+The boundary test covers authorization rejection, Organization identity seams,
+Military inability to create territorial ownership, Spatial's sole controller
+authority, snapshot pollution rejection, deterministic restore, and unchanged
+deterministic battle outputs.
 
-## Post-PR62 Spatial physical-capacity boundary
+## Remaining limitations
 
-`VNextSpatialWorld` is the sole authority for physical infrastructure status, nominal/effective link capacity, and the active per-link/per-hour shared allocation window. Military owns only transport demand, Military access/controller eligibility, action progress, and current/historical allocation attribution.
-
-For every hour Military first collects all eligible movement and rolling-supply demand without applying progress. It then submits all requests to the current Spatial window, queries every final `reservation_result()` after the full request set exists, and only then applies progress. This two-phase submit/query/apply rule is required because Spatial canonical ordering may reallocate an earlier provisional result after a later request is inserted. Movement and supply therefore contend inside one physical Spatial budget, leaving the same authority available for future Economy demand.
-
-Spatial reservations are window-scoped. At the boundary Spatial rolls to the next hour and clears active requests; Military clears transient Spatial request references but retains bounded historical attribution (`capacity_window_hour`, `capacity_link_id`, `capacity_used_this_window`). Closed legal attribution is never compared retroactively with a later changed Spatial capacity. If current Spatial effective capacity is zero, the Military action remains persistent and becomes interrupted without movement/cargo progress; restoration permits a deterministic new-window request with the same Military action identity.
-
-Military snapshots persist formations, actions, shipment state, progress, and Military attribution only. Spatial snapshots persist infrastructure and the authoritative physical capacity window. Combined restore is candidate-first: any persisted non-empty current Spatial request reference must resolve to the same Spatial link/window/allocation, while closed historical attribution does not require an old Spatial reservation object. No service locator, duplicate world map, or Military-owned physical budget is introduced.
+This is a foundation seam, not a complete Military domain. Political still needs
+a real diplomacy/war-authority issuer and revocation policy. Organization still
+needs to own unit organizations, command appointments, hierarchy, and capability
+evaluation. Economy/Population/Transport integrations still need boundary-time
+allocation contracts and orchestration. Claim acceptance policy beyond Spatial's
+minimal structural/current-controller validation is also future integration work.

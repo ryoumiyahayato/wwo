@@ -30,11 +30,12 @@ func _add(state: VNextMilitaryState, map: VNextMilitaryMapAdapter, id: String, c
 	_check(service.create_formation(
 		state, map, id, "country_fra", city, personnel,
 		{"equipment_factor": 0.0}, 0.9, 0.9, 0.9,
-		{"food": 2400.0, "ammunition": 240.0, "equipment": 48.0, "transport_capacity": 24.0}
+		{"food": 2400.0, "ammunition": 240.0, "equipment": 48.0, "transport_capacity": 24.0},
+		"organization:test_military"
 	), "formation created: %s" % id)
 
 func _rail_link(map: VNextMilitaryMapAdapter, state: VNextMilitaryState) -> String:
-	var route := map.find_route("paris", "rouen", ["rail"], "country_fra", state.region_controls, false)
+	var route := map.find_route("paris", "rouen", ["rail"], "country_fra", false)
 	var ids: Array = route.get("link_ids", []) as Array
 	return "" if ids.is_empty() else str(ids[0])
 
@@ -158,6 +159,7 @@ func _test_authority_boundary_source() -> void:
 	var service_source := FileAccess.get_file_as_string("res://scripts/vnext/military/military_service.gd")
 	var overlay := FileAccess.get_file_as_string("res://data/world_map/strategic_military_overlay.json")
 	_check(not overlay.contains("capacity_personnel") and not overlay.contains("supply_capacity_per_day") and not overlay.contains("\\\"reliability\\\""), "Military overlay no longer defines physical capacity")
+	_check(not overlay.contains("initial_controller_id") and not overlay.contains("\\\"resources\\\""), "Military overlay contains no controller or regional resource truth")
 	_check(adapter_source.contains("spatial_world.infrastructure_state") and service_source.contains("spatial.request_capacity_batch") and service_source.contains("spatial.reservation_results_batch"), "Military consumes Spatial physical authority")
 	_check(not service_source.contains("var budgets: Dictionary"), "Military-local physical budget removed")
 	_check(service_source.contains("_cancel_spatial_requests_for_formation") and service_source.contains("cancel_capacity_request"), "annihilation cleanup releases current Spatial requests")
