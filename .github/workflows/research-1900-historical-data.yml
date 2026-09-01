@@ -71,14 +71,5 @@ jobs:
           python -B tests/tools/test_historical_provenance_eol_contract.py
           python -B tools/provenance/generate_historical_provenance.py
           python -B tools/provenance/generate_historical_provenance.py --check
-      - name: Upload generated Historical Provenance candidate
-        if: matrix.os == 'ubuntu-latest'
-        uses: actions/upload-artifact@v4
-        with:
-          name: historical-provenance-generated
-          if-no-files-found: error
-          path: |
-            data/provenance/historical_source_registry.json
-            data/provenance/historical_fact_evidence.json
       - name: Verify committed Historical Provenance catalogs are current
         run: git diff --exit-code -- data/provenance/historical_source_registry.json data/provenance/historical_fact_evidence.json
