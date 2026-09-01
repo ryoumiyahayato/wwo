@@ -9,6 +9,7 @@ on:
       - "scenes/ui_spikes/holographic_workspace/**"
       - "scripts/ui_spikes/holographic_workspace/**"
       - "shaders/ui_spikes/holographic_workspace/**"
+      - "tests/formal/historical_evidence_bootstrap_regression_test.gd"
       - "data/world_map/cities.json"
       - "data/world_map/regions.json"
       - "data/world_map/world_coastlines.json"
@@ -97,6 +98,21 @@ jobs:
             --log-file godot-import.log
           if grep -Eq "SCRIPT ERROR|^ERROR:" godot-import.log; then
             cat godot-import.log
+            exit 1
+          fi
+
+      - name: Run historical evidence bootstrap regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          "${GODOT_BIN}" \
+            --headless \
+            --audio-driver Dummy \
+            --path . \
+            --script res://tests/formal/historical_evidence_bootstrap_regression_test.gd \
+            --log-file godot-historical-evidence-bootstrap.log
+          if grep -Eq "SCRIPT ERROR|^ERROR:" godot-historical-evidence-bootstrap.log; then
+            cat godot-historical-evidence-bootstrap.log
             exit 1
           fi
 
@@ -198,6 +214,7 @@ jobs:
           name: holographic-workspace-godot-logs
           path: |
             godot-import.log
+            godot-historical-evidence-bootstrap.log
             godot-spike.log
             godot-interaction-probe.log
             godot-admin1-probe.log
