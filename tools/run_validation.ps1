@@ -122,6 +122,7 @@ $tests = @(
 	@{ Name = 'Formal market identity foundation'; Script = 'res://tests/formal/formal_world_market_identity_foundation_test.gd'; TimeoutSeconds = 240 },
 	@{ Name = 'Organization foundation'; Script = 'res://tests/vnext/organization_core_test.gd'; TimeoutSeconds = 180 },
 	@{ Name = 'Formal organization composition'; Script = 'res://tests/formal/formal_world_organization_composition_test.gd'; TimeoutSeconds = 360 },
+	@{ Name = 'Current world domain convergence'; Script = 'res://tests/vnext/current_world_domain_convergence_test.gd'; TimeoutSeconds = 180 },
 	@{ Name = 'Formal player release journey'; Script = 'res://tests/formal/formal_world_player_journey_smoke.gd'; TimeoutSeconds = 240 },
 	@{ Name = 'Formal Windows export resource contract'; Script = 'res://tests/formal/formal_world_export_resource_smoke.gd'; TimeoutSeconds = 180 },
     @{ Name = 'Formal world integration'; Script = 'res://tests/formal/formal_world_integration_test.gd'; TimeoutSeconds = 360 },
