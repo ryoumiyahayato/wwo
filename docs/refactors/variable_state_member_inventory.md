@@ -17,7 +17,7 @@
 
 |成员|可写|全局|Autoload|持久化|兼容|UI|缓存|派生|K类|源文件|GDScript|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|1901|1401|15|0|523|7|32|16|70|1022|453|214|
+|2264|1649|15|0|633|7|32|16|74|1232|504|265|
 
 ## A–K分类说明
 
@@ -33,7 +33,7 @@
 - **J**：无用字段候选。
 - **K**：语义不明确，暂时不得修改。
 
-## 1,901个生产成员字段逐项表
+## 2,264个生产成员字段逐项表
 
 每个代码块中的文件标题后依次列出：`声明行 分类 字段`。
 
@@ -618,7 +618,7 @@
 23 K failure_result
 ```
 
-### 第4段：`scripts/core/models/character_data.gd` 至 `scripts/map/map_control_service.gd`
+### 第4段：`scripts/core/models/character_data.gd` 至 `scripts/formal/formal_world_economy_view.gd`
 
 ```text
 @ scripts/core/models/character_data.gd | CharacterData
@@ -736,15 +736,40 @@
 7 A max_entries
 8 K entries
 @ scripts/formal/formal_world_application.gd | FormalWorldApplication
-7 C LAUNCH_MODE_META
-8 C PACKAGED_PROBE_ARGUMENT
-9 C PACKAGED_PROBE_ENTITY_ID
-10 C PACKAGED_PROBE_FLAG_ID
-12 A formal_simulation
-13 G economy_panel_open
-14 K _formal_status
-15 E _last_summary
-16 K _packaged_probe_failures
+6 C LAUNCH_MODE_META
+7 C PACKAGED_PROBE_ARGUMENT
+8 C PACKAGED_PROBE_ENTITY_ID
+9 C PACKAGED_PROBE_FLAG_ID
+11 A formal_simulation
+12 G economy_panel_open
+13 K _formal_status
+14 E _last_summary
+15 K _packaged_probe_failures
+16 E _immutable_historical_evidence_report
+17 K _historical_evidence_surface_building
+@ scripts/formal/formal_world_economic_evidence_catalog.gd | FormalWorldEconomicEvidenceCatalog
+6 C REVISION
+7 C POPULATION_REVISION
+8 C COMMODITY_PATH
+9 C CROSSWALK_PATH
+12 C SOURCE_PATHS
+23 K initialization_error
+24 K _configured
+25 K _fingerprint
+26 K _population_fingerprint
+27 K _economic_snapshot
+28 K _population_snapshot
+@ scripts/formal/formal_world_economic_static_view.gd | FormalWorldEconomicStaticView
+5 K _revision
+6 K _fingerprint
+7 E _countries
+8 E _country_by_id
+9 E _formal_verified_countries
+10 K _commodities
+11 K _crosswalk_records
+12 K _maritime_corridors
+13 K _river_corridors
+14 K _provenance
 @ scripts/formal/formal_world_economy_service.gd | FormalWorldEconomyService
 8 C HOURS_PER_DAY
 9 C BASIS_POINTS
@@ -753,25 +778,52 @@
 12 C MAX_SUPPLIERS_PER_SHORTAGE
 13 C EXPECTED_MAJOR_ROSTER_COUNT
 14 C PRIMARY_PLAYABLE_LIMIT
-15 C COMMODITY_CATALOG_PATH
-16 C POLITICAL_UNITS_PATH
-17 C CROSSWALK_PATH
-19 E country_states
-20 K polity_records
+15 C STATE_SCHEMA_ID
+17 K initialization_error
+20 K market_states
 21 K economy_polity_ids
 22 K economy_by_polity_id
 23 K routes
 24 K shipments
 25 K history
-26 K initialization_error
-28 A _authoritative_hour_source
-37 A _historical
-38 K _commodities
-39 E _routes_by_country
-40 K _crosswalk_records
-41 A _next_shipment_sequence
-42 A _last_day_index
-43 E _political_unit_count
+27 A _authoritative_hour_source
+36 K _commodities
+37 E _routes_by_country
+38 K _crosswalk_records
+41 K _calculation_inputs
+42 K _political_registry
+43 K _market_registry
+44 K _static_evidence
+45 K _population_input
+46 A _next_shipment_sequence
+47 A _last_day_index
+48 E _political_unit_count
+49 K _state_revision
+50 K _configured
+@ scripts/formal/formal_world_economy_view.gd | FormalWorldEconomyView
+5 K _snapshot
+```
+
+### 第5段：`scripts/formal/formal_world_market_registry.gd` 至 `scripts/map/regional_influence_service.gd`
+
+```text
+@ scripts/formal/formal_world_market_registry.gd | FormalWorldMarketRegistry
+5 C REVISION
+6 C STATE_SCHEMA_ID
+7 C SNAPSHOT_SCHEMA_ID
+8 C EXPECTED_COMPATIBILITY_MARKET_COUNT
+10 K initialization_error
+11 K _configured
+12 K _markets_by_id
+13 K _market_by_economic_aggregate_id
+14 K _economic_aggregate_by_market_id
+15 K _mapping_fingerprint
+@ scripts/formal/formal_world_market_view.gd | FormalWorldMarketView
+5 K _revision
+6 K _mapping_fingerprint
+7 K _markets_by_id
+8 K _market_by_economic_aggregate_id
+9 K _economic_aggregate_by_market_id
 @ scripts/formal/formal_world_menu.gd | FormalWorldMenu
 6 C WORLD_SCENE
 7 C LAUNCH_MODE_META
@@ -782,13 +834,84 @@
 13 D prompt_label
 14 D status_label
 16 K _entering
+@ scripts/formal/formal_world_organization_view.gd | FormalWorldOrganizationView
+7 K _snapshot
+8 K _organizations
+@ scripts/formal/formal_world_population_input_view.gd | FormalWorldPopulationInputView
+5 K _revision
+6 K _fingerprint
+7 K _records_by_economy_id
+8 K _provenance
 @ scripts/formal/formal_world_simulation.gd | FormalWorldSimulation
-8 C SAVE_PATH
-9 C SCHEMA_ID
-11 A economy
-12 K initialized
-13 K initialization_error
-14 K total_minutes
+10 C SAVE_PATH
+11 C SCHEMA_ID
+12 C EVIDENCE_STATE_SCHEMA_ID
+14 A _provenance
+15 A _historical_evidence
+16 A _political_registry
+17 A _historical_evidence_view
+18 A _political_registry_view
+19 A _economic_evidence
+20 A _economic_static_view
+21 A _population_input_view
+22 A _market_registry
+23 A _market_registry_view
+24 A _economy
+25 K _organization
+26 K _organization_person_reference_ids
+27 K _organization_place_reference_ids
+28 K _organization_composition_error
+32 K initialized
+33 K initialization_error
+34 K total_minutes
+35 K _initialization_attempted
+@ scripts/formal/historical_political_evidence_catalog.gd | HistoricalPoliticalEvidenceCatalog
+6 C DEFAULT_PATH
+7 C EXPECTED_RECORD_COUNT
+9 K initialization_error
+10 K _configured
+11 K _fingerprint
+12 K _snapshot_date
+13 K _records_by_source_id
+14 K _sorted_source_ids
+@ scripts/formal/historical_political_evidence_view.gd | HistoricalPoliticalEvidenceView
+6 K _configured
+7 K _fingerprint
+8 K _snapshot_date
+9 K _records_by_source_id
+10 K _sorted_source_ids
+@ scripts/formal/market_identity.gd | MarketIdentity
+5 C LEGACY_AGGREGATE_PREFIX
+6 C LEGACY_APPLICABILITY_MODE
+8 K _market_id
+9 K _source_economic_aggregate_id
+10 K _applicability
+11 K _revision
+12 K _provenance
+@ scripts/formal/runtime_political_entity.gd | RuntimePoliticalEntity
+6 C STATUS_ACTIVE
+7 C ORIGIN_HISTORICAL_SEED
+9 K runtime_id
+10 K source_historical_ids
+11 A lifecycle_status
+12 K lineage
+@ scripts/formal/runtime_political_entity_registry.gd | RuntimePoliticalEntityRegistry
+6 C SCHEMA_ID
+7 C LEGACY_SCHEMA_ID
+8 C INITIAL_DATE
+9 C EXPECTED_INITIAL_ENTITY_COUNT
+10 C ALLOWED_RELATION_KINDS
+17 K initialization_error
+18 K _configured
+19 K _evidence_fingerprint
+20 K _entities_by_runtime_id
+21 K _runtime_id_by_source_id
+22 K _authority_relations
+@ scripts/formal/runtime_political_entity_view.gd | RuntimePoliticalEntityView
+6 K _configured
+7 K _entities_by_runtime_id
+8 K _runtime_id_by_source_id
+9 K _authority_relations
 @ scripts/map/map_control_service.gd | MapControlService
 11 C STAGE_STABLE
 12 C STAGE_WEAKENING
@@ -802,11 +925,6 @@
 21 K _frontline_edges
 22 K _units_by_grid_position
 23 K _war_state
-```
-
-### 第5段：`scripts/map/map_rules_config.gd` 至 `scripts/simulation/world_activity_service.gd`
-
-```text
 @ scripts/map/map_rules_config.gd | MapRulesConfig
 5 C DEFAULT_PATH
 7 A tile_width
@@ -842,6 +960,11 @@
 13 K initialization_error
 @ scripts/map/regional_influence_service.gd | RegionalInfluenceService
 7 K rules
+```
+
+### 第6段：`scripts/map/strategic_map_canvas.gd` 至 `scripts/simulation/world_activity_service.gd`
+
+```text
 @ scripts/map/strategic_map_canvas.gd | StrategicMapCanvas
 7 C MAP_BACKGROUND
 8 C GRID_COLOR
@@ -868,6 +991,49 @@
 8 C LEGACY_BASE_ORGANIZATION_IDS
 19 K organizations
 20 K _positions_by_character
+@ scripts/provenance/historical_evidence_catalog.gd | HistoricalEvidenceCatalog
+5 C SCHEMA_ID
+7 K _facts_by_id
+8 K _errors
+@ scripts/provenance/historical_fact_evidence.gd | HistoricalFactEvidence
+5 C REQUIRED_FIELDS
+27 K fact_id
+28 K domain
+29 K subject_id
+30 K value
+31 K unit
+32 K source_id
+33 K source_version
+34 K source_locator
+35 K observation_period
+36 K spatial_scope
+37 K methodology
+38 K confidence
+39 K lower_bound
+40 K upper_bound
+41 K license
+42 K review_status
+43 K generator
+44 K input_hash
+45 K output_hash
+@ scripts/provenance/historical_provenance_foundation.gd | HistoricalProvenanceFoundation
+5 C SOURCE_REGISTRY_PATH
+6 C EVIDENCE_CATALOG_PATH
+7 C SPATIAL_BOUNDARY_FACT_ID
+9 A _registry
+10 A _catalog
+11 K _gate
+12 K initialization_error
+@ scripts/provenance/historical_provenance_gate.gd | HistoricalProvenanceGate
+5 C VERIFIED
+7 K _registry
+8 K _catalog
+9 K _errors
+@ scripts/provenance/historical_source_registry.gd | HistoricalSourceRegistry
+5 C REQUIRED_FIELDS
+9 C SCHEMA_ID
+11 K _sources_by_id
+12 K _errors
 @ scripts/relationship/relationship_service.gd | RelationshipService
 7 K roster
 8 K defaults
@@ -982,7 +1148,7 @@
 18 A _next_event_id
 ```
 
-### 第6段：`scripts/ui_spikes/holographic_workspace/holographic_hemisphere_3d.gd` 至 `scripts/ui_spikes/holographic_workspace/holographic_workspace_release_probe.gd`
+### 第7段：`scripts/ui_spikes/holographic_workspace/holographic_hemisphere_3d.gd` 至 `scripts/ui_spikes/holographic_workspace/holographic_workspace_release_probe.gd`
 
 ```text
 @ scripts/ui_spikes/holographic_workspace/holographic_hemisphere_3d.gd | holographic_hemisphere_3d
@@ -1042,21 +1208,23 @@
 13 K _historical_admin_by_entity
 @ scripts/ui_spikes/holographic_workspace/holographic_workspace_historical_evidence.gd | holographic_workspace_historical_evidence
 5 C HISTORICAL_GEOMETRY_PATH
-6 C HISTORICAL_UNITS_PATH
-7 C HISTORICAL_FLAGS_PATH
-8 C HISTORICAL_SNAPSHOT_DATE
-9 C GLOBAL_SOURCE_NOTICE
-10 C LOWER_ADMIN_NOTICE
-11 C ADMIN1_REFERENCE_NOTICE
-12 C FLAG_REFERENCE_NOTICE
-14 C NATIONALITY_ENTITY_ALIASES
-48 K _dated_geometry_document
-49 K _dated_units_document
-50 K _historical_flag_document
-51 K _historical_flag_records
-52 K _geometry_feature_by_id
-53 K _missing_flag_record_ids
-54 K _historical_imported_flag_texture_by_id
+6 C HISTORICAL_FLAGS_PATH
+7 C HISTORICAL_SNAPSHOT_DATE
+8 C GLOBAL_SOURCE_NOTICE
+9 C LOWER_ADMIN_NOTICE
+10 C ADMIN1_REFERENCE_NOTICE
+11 C FLAG_REFERENCE_NOTICE
+13 C NATIONALITY_ENTITY_ALIASES
+47 K _dated_geometry_document
+48 K _dated_units_document
+49 K _historical_flag_document
+50 K _historical_flag_records
+51 K _geometry_feature_by_id
+52 K _missing_flag_record_ids
+53 K _historical_imported_flag_texture_by_id
+54 K _historical_provenance_foundation
+55 K _historical_provenance_gate
+56 K _historical_spatial_provenance_valid
 @ scripts/ui_spikes/holographic_workspace/holographic_workspace_history.gd | holographic_workspace_history
 3 C WORLD_HISTORICAL_ENTITY_FOCUS
 4 C HISTORY_ZOOM_MIN
@@ -1100,7 +1268,7 @@
 5 K workspace
 ```
 
-### 第7段：`scripts/ui_spikes/holographic_workspace/holographic_workspace_runtime.gd` 至 `scripts/v2_2/v2_life_loop_simulation.gd`
+### 第8段：`scripts/ui_spikes/holographic_workspace/holographic_workspace_runtime.gd` 至 `scripts/v2_2/v2_life_loop_simulation.gd`
 
 ```text
 @ scripts/ui_spikes/holographic_workspace/holographic_workspace_runtime.gd | holographic_workspace_runtime
@@ -1281,7 +1449,7 @@
 35 K hours_processed
 ```
 
-### 第8段：`scripts/v2_2/v2_life_loop_ui_binding.gd` 至 `scripts/v2_3/v2_3_formal_schedule_interface.gd`
+### 第9段：`scripts/v2_2/v2_life_loop_ui_binding.gd` 至 `scripts/v2_3/v2_3_formal_schedule_interface.gd`
 
 ```text
 @ scripts/v2_2/v2_life_loop_ui_binding.gd | V2LifeLoopUiBinding
@@ -1453,7 +1621,7 @@
 5 K leave_confirmation
 ```
 
-### 第9段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/vnext/economy/market_economy.gd`
+### 第10段：`scripts/v2_3/v2_3_formal_simulation.gd` 至 `scripts/vnext/economic_geography/economic_geography_service.gd`
 
 ```text
 @ scripts/v2_3/v2_3_formal_simulation.gd | V23FormalSimulation
@@ -1577,6 +1745,38 @@
 12 K next_retry_hours
 13 K active_needs
 14 K decision_history
+@ scripts/vnext/economic_geography/economic_geography_candidate.gd | VNextEconomicGeographyCandidate
+5 C SCHEMA_ID
+6 C ASSIGNED
+7 C UNASSIGNED
+9 K _configured
+10 A _expected_revision
+11 K _before_assignment
+12 K _target_assignment
+13 K _territory_catalog_binding
+14 K _market_identity_binding
+15 K _fingerprint
+@ scripts/vnext/economic_geography/economic_geography_service.gd | VNextEconomicGeographyService
+8 C CANDIDATE
+9 C TERRITORY_UNIT
+11 C SNAPSHOT_SCHEMA_ID
+12 C FINGERPRINT_SCHEMA_ID
+13 C ASSIGNED
+14 C UNASSIGNED
+16 K _configured
+17 K _territory_catalog
+18 K _market_provider
+19 K _territory_catalog_binding
+20 K _market_identity_binding
+21 K _assigned_market_by_territory
+22 K _revision
+23 K _state_fingerprint
+24 K _errors
+```
+
+### 第11段：`scripts/vnext/economy/market_economy.gd` 至 `scripts/vnext/observation/observation_record.gd`
+
+```text
 @ scripts/vnext/economy/market_economy.gd | VNextMarketEconomy
 14 C BASIS_POINTS
 15 C HOURS_PER_DAY
@@ -1610,11 +1810,6 @@
 69 K _in_transit_units_by_destination
 70 A _last_day_index
 71 A _next_shipment_sequence
-```
-
-### 第10段：`scripts/vnext/economy/market_economy_catalog.gd` 至 `scripts/vnext/politics/politics_update_service.gd`
-
-```text
 @ scripts/vnext/economy/market_economy_catalog.gd | VNextMarketEconomyCatalog
 7 C COMMODITY_MARKET_PATH
 8 C WORLD_PATH
@@ -1727,15 +1922,113 @@
 26 K link_queues
 @ scripts/vnext/military/military_state_invariants.gd | VNextMilitaryStateInvariants
 7 C EPSILON
+@ scripts/vnext/observation/observation_contract.gd | VNextObservationContract
+7 C SCHEMA_ID
+8 C INVALIDATION_SCHEMA_ID
+9 C UNSPECIFIED_WORLD_REVISION
+11 C STATUS_OK
+12 C STATUS_INVALID_REQUEST
+13 C STATUS_UNKNOWN_OBSERVER
+14 C STATUS_REVISION_MISMATCH
+15 C STATUS_VISIBILITY_UNAVAILABLE
+16 C STATUS_QUERY_UNAVAILABLE
+18 C FRESHNESS_FRESH
+19 C FRESHNESS_STALE
+20 C FRESHNESS_UNKNOWN
+22 C TRUTH_CAPABILITY
+23 C RESTRICTED_CAPABILITY
+@ scripts/vnext/observation/observation_invalidation.gd | VNextObservationInvalidation
+4 C CONTRACT
+6 A _new_world_revision
+7 K _changed_scopes
+8 K _cause_id
+@ scripts/vnext/observation/observation_query_port.gd | VNextObservationQueryPort
+4 C CONTRACT
+@ scripts/vnext/observation/observation_record.gd | VNextObservationRecord
+4 C STABLE_ID
+6 K _subject_id
+7 A _world_revision
+8 K _fields
+```
+
+### 第12段：`scripts/vnext/observation/observation_request.gd` 至 `scripts/vnext/population/macro_population.gd`
+
+```text
+@ scripts/vnext/observation/observation_request.gd | VNextObservationRequest
+4 C CONTRACT
+5 C STABLE_ID
+7 K _observer_actor_id
+8 K _scope
+9 K _subject_ids
+10 A _expected_world_revision
+11 K _requested_fields
+12 K _requested_capabilities
+13 A _validation_error
+@ scripts/vnext/observation/observation_response.gd | VNextObservationResponse
+4 C CONTRACT
+6 A _schema_id
+7 K _observation_id
+8 A _world_revision
+9 K _observer_actor_id
+10 K _observed_at
+11 A _status
+12 K _error_code
+13 A _stale
+14 K _revision_mismatch
+15 K _records
+@ scripts/vnext/observation/observed_field.gd | VNextObservedField
+4 C CONTRACT
+6 K _field_id
+7 K _perceived_value
+8 K _confidence
+9 K _acquired_at
+10 K _observed_state_at
+11 K _provenance_references
+12 A _freshness_state
+13 K _extensions
+@ scripts/vnext/observation/synthetic_observation_provider.gd | VNextSyntheticObservationProvider
+7 C FIELD
+8 C RECORD
+10 C OBSERVER_A_ID
+11 C OBSERVER_B_ID
+12 C QA_OBSERVER_ID
+13 C SUBJECT_X_ID
+15 C PUBLIC_FIELD_ID
+16 C RESTRICTED_FIELD_ID
+17 C HIDDEN_FIELD_ID
+19 C INITIAL_WORLD_REVISION
+20 C INITIAL_OBSERVED_AT
+22 K _visibility_resolver
+23 A _world_revision
+24 A _observed_at
+25 K _truth_by_subject
+26 A _capture_hook
+@ scripts/vnext/observation/synthetic_visibility_resolver.gd | VNextSyntheticObservationVisibilityResolver
+4 C CONTRACT
+6 C OBSERVER_A_ID
+7 C OBSERVER_B_ID
+8 C QA_OBSERVER_ID
+9 C SUBJECT_X_ID
+11 K _known_observers
+12 K _capabilities_by_observer
+@ scripts/vnext/organization/organization_capability_catalog.gd | VNextOrganizationCapabilityCatalog
+7 C MANAGE_APPOINTMENTS
+9 C _CAPABILITY_IDS
 @ scripts/vnext/organization/organization_core.gd | VNextOrganizationCore
 8 C SNAPSHOT_SCHEMA_ID
-10 C _ORGANIZATION_FIELDS
-21 C _POSITION_FIELDS
-27 C _APPOINTMENT_FIELDS
-34 K _organizations
-35 K _reference_catalog_configured
-36 K _known_person_ids
-37 K _known_place_ids
+9 C LEGACY_SNAPSHOT_SCHEMA_ID
+11 C _ORGANIZATION_FIELDS
+22 C _POSITION_FIELDS
+28 C _APPOINTMENT_FIELDS
+35 K _organizations
+36 K _revision
+37 K _reference_catalog_configured
+38 K _reference_catalog
+@ scripts/vnext/organization/organization_kind_catalog.gd | VNextOrganizationKindCatalog
+7 C _KIND_IDS
+@ scripts/vnext/organization/organization_reference_catalog.gd | VNextOrganizationReferenceCatalog
+7 K _person_ids
+8 K _place_ids
 @ scripts/vnext/player/action_result.gd | VNextActionResult
 4 K success
 5 K code
@@ -1786,11 +2079,6 @@
 30 C ECONOMIC_WEIGHTS
 37 C WAR_WEIGHTS
 43 C REGIME_PROCEDURAL_BASELINES
-```
-
-### 第11段：`scripts/vnext/politics/state_politics.gd` 至 `scripts/world_map/historical_map_identity_style.gd`
-
-```text
 @ scripts/vnext/politics/state_politics.gd | VNextStatePolitics
 7 C SNAPSHOT_SCHEMA_ID
 8 C FORCE_SUPPORT_THRESHOLD
@@ -1814,6 +2102,11 @@
 16 K _known_place_ids
 17 K _ordered_place_ids
 18 K _records
+```
+
+### 第13段：`scripts/vnext/population/macro_population_record.gd` 至 `scripts/vnext/transactions/transaction_command.gd`
+
+```text
 @ scripts/vnext/population/macro_population_record.gd | VNextMacroPopulationRecord
 7 C SNAPSHOT_SCHEMA_ID
 8 C LEGACY_SNAPSHOT_SCHEMA_ID
@@ -1834,6 +2127,41 @@
 38 I _external_immigration
 39 I _external_emigration
 42 K _last_settled_period
+@ scripts/vnext/population/population_authority.gd | VNextPopulationAuthority
+8 C TERRITORY_UNIT
+9 C POPULATION_STATE
+12 C POPULATION_CANDIDATE
+15 C CONSERVATION_VALIDATOR
+19 C SNAPSHOT_SCHEMA_ID
+20 C FINGERPRINT_SCHEMA_ID
+21 C _SNAPSHOT_FIELDS
+28 C _RECORD_FIELDS
+30 K _territory_catalog
+31 K _states_by_id
+32 K _revision
+33 K _last_error
+@ scripts/vnext/population/population_candidate.gd | VNextPopulationCandidate
+5 C TRANSFER
+6 C RESTORE
+8 K _configured
+9 K _operation
+10 A _expected_revision
+11 A _target_revision
+12 K _expected_authority_fingerprint
+13 K _territory_catalog_binding
+14 K _records
+15 K _state_fingerprint
+16 K _source_territory_unit_id
+17 K _destination_territory_unit_id
+18 K _amount
+@ scripts/vnext/population/population_conservation_validator.gd | VNextPopulationConservationValidator
+5 C POPULATION_STATE
+@ scripts/vnext/population/population_state.gd | VNextPopulationState
+8 C TERRITORY_UNIT
+9 C MAX_JSON_SAFE_INTEGER
+11 K _configured
+12 K _territory_unit_id
+13 K _total_population
 @ scripts/vnext/spatial/infrastructure_link_state.gd | VNextInfrastructureLinkState
 7 C STATUS_OPERATIONAL
 8 C STATUS_CONSTRUCTION
@@ -1883,6 +2211,101 @@
 16 K _infrastructure
 17 K _territories
 18 K _capacity
+@ scripts/vnext/territory/territorial_control_ledger.gd | VNextTerritorialControlLedger
+9 C SNAPSHOT_SCHEMA_ID
+10 C CANDIDATE_SCHEMA_ID
+11 C FINGERPRINT_SCHEMA_ID
+12 C POLITICAL_REFERENCE_SCHEMA_ID
+15 C CONTROLLED
+16 C UNCONTROLLED
+17 C OPERATION_INITIALIZE
+18 C OPERATION_CHANGE
+19 C MAX_JSON_SAFE_INTEGER
+21 C ASSIGNMENT_FIELDS
+26 C CANDIDATE_FIELDS
+36 C SNAPSHOT_FIELDS
+45 K _configured
+46 K _territory_catalog
+47 K _political_entity_view
+48 K _territory_catalog_binding
+49 K _political_entity_fingerprint
+50 K _assignments_by_territory
+51 K _revision
+52 K _errors
+@ scripts/vnext/territory/territory_unit.gd | VNextTerritoryUnit
+8 C STABLE_ID
+10 K _configured
+11 K _territory_unit_id
+12 K _catalog_version
+13 K _geometry_ref
+14 K _source_snapshot_ref
+15 K _neighbor_ids
+@ scripts/vnext/territory/territory_unit_catalog.gd | VNextTerritoryUnitCatalog
+8 C TERRITORY_UNIT
+10 C FINGERPRINT_SCHEMA
+12 K _configured
+13 K _sealed
+14 K _catalog_version
+15 K _fingerprint
+16 K _units_by_id
+17 K _ordered_ids
+18 K _errors
+@ scripts/vnext/transactions/synthetic_transaction_participant.gd | VNextSyntheticTransactionParticipant
+4 K _participant_id
+5 K _value
+6 K _prepare_failure
+7 K _local_validation_failure
+8 E _adopt_count
+9 K _prepare_order_log
+10 K _shared_prepare_order_log
+@ scripts/vnext/transactions/transaction_candidate_bundle.gd | VNextTransactionCandidateBundle
+4 K _transaction_id
+5 K _command_id
+6 A _base_world_revision
+7 K _participant_ids
+8 K _before_snapshots
+9 K _candidates
+10 K _fingerprint
+@ scripts/vnext/transactions/transaction_command.gd | VNextTransactionCommand
+4 K _transaction_id
+5 K _command_id
+6 A _expected_world_revision
+7 K _required_participant_ids
+8 K _payload
+9 A _validation_failure
+```
+
+### 第14段：`scripts/vnext/transactions/transaction_contract.gd` 至 `scripts/world_map/historical_map_identity_style.gd`
+
+```text
+@ scripts/vnext/transactions/transaction_contract.gd | VNextTransactionContract
+4 C STATUS_COMMITTED
+5 C STATUS_REJECTED
+7 C FAILURE_NONE
+8 C FAILURE_MALFORMED_COMMAND
+9 C FAILURE_DUPLICATE_PARTICIPANT
+10 C FAILURE_STALE_REVISION
+11 C FAILURE_MISSING_PARTICIPANT
+12 C FAILURE_PREPARE
+13 C FAILURE_LOCAL_VALIDATION
+14 C FAILURE_CROSS_DOMAIN_VALIDATION
+15 C FAILURE_CONSERVATION_VALIDATION
+@ scripts/vnext/transactions/transaction_result.gd | VNextTransactionResult
+4 A _status
+5 A _failure_code
+6 K _transaction_id
+7 K _command_id
+8 A _world_revision_before
+9 A _world_revision_after
+10 K _participant_ids
+11 K _candidate_fingerprint
+12 K _candidate_bundle
+@ scripts/vnext/transactions/world_transaction_coordinator.gd | VNextWorldTransactionCoordinator
+4 K _world_revision
+5 K _participants
+6 K _cross_domain_validators
+7 K _conservation_validators
+8 K _commit_barrier_active
 @ scripts/vnext/travel/location_state.gd | VNextLocationState
 4 C SNAPSHOT_SCHEMA_ID
 6 K _player_id
@@ -1912,7 +2335,7 @@
 13 C CODE_ROW_CENTERS
 ```
 
-### 第12段：`scripts/world_map/internal/world_map_canvas_impl.gd` 至 `scripts/world_map/internal/world_map_data_impl.gd`
+### 第15段：`scripts/world_map/internal/world_map_canvas_impl.gd` 至 `scripts/world_map/internal/world_map_data_impl.gd`
 
 ```text
 @ scripts/world_map/internal/world_map_canvas_impl.gd | PrototypeV2MapCanvas
@@ -2088,7 +2511,7 @@
 26 K errors
 ```
 
-### 第13段：`scripts/world_map/internal/world_map_interface_impl.gd` 至 `scripts/world_map/world_map_canvas_detail.gd`
+### 第16段：`scripts/world_map/internal/world_map_interface_impl.gd` 至 `scripts/world_map/world_map_canvas_detail.gd`
 
 ```text
 @ scripts/world_map/internal/world_map_interface_impl.gd | PrototypeV2Interface
