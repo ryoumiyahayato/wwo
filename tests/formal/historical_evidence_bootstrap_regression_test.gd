@@ -1,4 +1,5 @@
 extends SceneTree
+## Regression boundary: historical evidence may bootstrap independently without becoming runtime political authority.
 
 const SurfaceScript = preload(
 	"res://scripts/ui_spikes/holographic_workspace/holographic_workspace_historical_evidence_ui.gd"
