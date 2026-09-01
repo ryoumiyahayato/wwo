@@ -231,7 +231,8 @@ func _test_economy_restore_day_boundaries() -> void:
 		if total_hour > previous_total_hour:
 			simulation.advance_minutes((total_hour - previous_total_hour) * 60)
 		previous_total_hour = total_hour
-		var saved := simulation.economy.get_persistent_state()
+		var saved_world := simulation.get_persistent_state()
+		var saved := saved_world.get("economy", {}) as Dictionary
 		_equal(
 			int(saved.get("last_day_index", -99)),
 			expected_last_day_index,
@@ -240,12 +241,12 @@ func _test_economy_restore_day_boundaries() -> void:
 			]
 		)
 		_check(
-			simulation.economy.restore_persistent_state(saved),
+			simulation.restore_persistent_state(saved_world),
 			"%d小时合法经济状态可恢复" % total_hour
 		)
 		_equal(
 			int(
-				simulation.economy.get_persistent_state().get(
+				(simulation.get_persistent_state().get("economy", {}) as Dictionary).get(
 					"last_day_index", -99
 				)
 			),
@@ -255,16 +256,18 @@ func _test_economy_restore_day_boundaries() -> void:
 			]
 		)
 		if total_hour == 23:
-			var legacy := saved.duplicate(true)
+			var legacy_world := saved_world.duplicate(true)
+			var legacy := simulation.economy_regression_snapshot()
 			legacy["schema_id"] = "formal_world_economy_state_v1"
 			legacy.erase("last_day_index")
+			legacy_world["economy"] = legacy
 			_check(
-				simulation.economy.restore_persistent_state(legacy),
+				simulation.restore_persistent_state(legacy_world),
 				"23小时旧经济schema缺少日结字段时可恢复"
 			)
 			_equal(
 				int(
-					simulation.economy.get_persistent_state().get(
+					(simulation.get_persistent_state().get("economy", {}) as Dictionary).get(
 						"last_day_index", -99
 					)
 				),
@@ -272,19 +275,23 @@ func _test_economy_restore_day_boundaries() -> void:
 				"23小时旧经济schema缺字段时派生为-1"
 			)
 		if total_hour == 25:
-			var before := simulation.economy.get_persistent_state()
+			var before := simulation.get_persistent_state()
 			var too_large := before.duplicate(true)
-			too_large["last_day_index"] = 2
+			var too_large_economy := too_large.get("economy", {}) as Dictionary
+			too_large_economy["last_day_index"] = 2
+			too_large["economy"] = too_large_economy
 			_assert_economy_rejected_without_mutation(
-				simulation.economy,
+				simulation,
 				too_large,
 				before,
 				"25小时last_day_index过大"
 			)
 			var too_small := before.duplicate(true)
-			too_small["last_day_index"] = 0
+			var too_small_economy := too_small.get("economy", {}) as Dictionary
+			too_small_economy["last_day_index"] = 0
+			too_small["economy"] = too_small_economy
 			_assert_economy_rejected_without_mutation(
-				simulation.economy,
+				simulation,
 				too_small,
 				before,
 				"25小时last_day_index过小"
@@ -319,13 +326,13 @@ func _test_legacy_save_time_compatibility() -> void:
 
 
 func _assert_economy_rejected_without_mutation(
-	economy: FormalWorldEconomyService,
+	simulation: FormalWorldSimulation,
 	rejected: Dictionary,
 	before: Dictionary,
 	label: String
 ) -> void:
-	_check(not economy.restore_persistent_state(rejected), "%s被拒绝" % label)
-	_equal(economy.get_persistent_state(), before, "%s拒绝后经济状态完全一致" % label)
+	_check(not simulation.restore_persistent_state(rejected), "%s被拒绝" % label)
+	_equal(simulation.get_persistent_state(), before, "%s拒绝后经济状态完全一致" % label)
 
 
 func _assert_rejected_without_mutation(

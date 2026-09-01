@@ -1,6 +1,7 @@
 param(
     [string]$GodotPath = 'D:\Tools\Godot-4.6.3\Godot_v4.6.3-stable_win64.exe',
     [string]$ProjectPath = (Split-Path -Parent $PSScriptRoot),
+    [string]$PythonPath = '',
     [int]$StepTimeoutSeconds = 120
 )
 
@@ -12,6 +13,22 @@ if (-not (Test-Path -LiteralPath $GodotPath -PathType Leaf)) {
 }
 if ($StepTimeoutSeconds -lt 10) {
     throw 'StepTimeoutSeconds must be at least 10.'
+}
+
+if ([string]::IsNullOrWhiteSpace($PythonPath)) {
+    $pythonCommand = Get-Command python -ErrorAction SilentlyContinue
+    if ($null -ne $pythonCommand) {
+        $PythonPath = $pythonCommand.Source
+    }
+    if ([string]::IsNullOrWhiteSpace($PythonPath) -or $PythonPath -like '*\WindowsApps\python.exe') {
+        $bundledPython = Join-Path $env:APPDATA 'uv\python\cpython-3.10.20-windows-x86_64-none\python.exe'
+        if (Test-Path -LiteralPath $bundledPython -PathType Leaf) {
+            $PythonPath = $bundledPython
+        }
+    }
+}
+if (-not (Test-Path -LiteralPath $PythonPath -PathType Leaf)) {
+    throw "Python executable not found: $PythonPath"
 }
 
 $ProjectPath = (Resolve-Path -LiteralPath $ProjectPath).Path
@@ -82,18 +99,30 @@ $null = Invoke-GodotStep -Name 'Clean import and script scan' -Arguments @(
 ) -TimeoutSeconds 180
 
 Write-Host "`n=== 1900 economy static audits ==="
-& python "$ProjectPath/tools/audit_1900_commodity_economy.py"
+& $PythonPath "$ProjectPath/tools/audit_1900_commodity_economy.py"
 if ($LASTEXITCODE -ne 0) { throw 'Commodity economy static audit failed' }
-& python "$ProjectPath/tools/audit_1900_economy_integration.py"
+& $PythonPath "$ProjectPath/tools/audit_1900_economy_integration.py"
 if ($LASTEXITCODE -ne 0) { throw 'Economy integration static audit failed' }
-& python "$ProjectPath/tools/audit_1900_world_economy_compact.py"
+& $PythonPath "$ProjectPath/tools/audit_1900_world_economy_compact.py"
 if ($LASTEXITCODE -ne 0) { throw 'Historical world economy static audit failed' }
 
+Write-Host "`n=== Historical provenance deterministic generation ==="
+& $PythonPath "$ProjectPath/tools/provenance/generate_historical_provenance.py" --check
+if ($LASTEXITCODE -ne 0) { throw 'Historical provenance generated catalog check failed' }
+
 Write-Host "`n=== World data audit regressions ==="
-& python -m unittest discover -s "$ProjectPath/tests/world_data" -p 'test_*.py' -v
+& $PythonPath -m unittest discover -s "$ProjectPath/tests/world_data" -p 'test_*.py' -v
 if ($LASTEXITCODE -ne 0) { throw 'World data audit regression suite failed' }
 
 $tests = @(
+	@{ Name = 'Historical provenance foundation'; Script = 'res://tests/formal/historical_provenance_foundation_test.gd'; TimeoutSeconds = 180 },
+	@{ Name = 'Runtime political identity foundation'; Script = 'res://tests/formal/runtime_political_identity_foundation_test.gd'; TimeoutSeconds = 240 },
+	@{ Name = 'Formal economy 30-day and one-year golden'; Script = 'res://tests/formal/formal_world_economy_golden_test.gd'; TimeoutSeconds = 240 },
+	@{ Name = 'Formal economic boundary closure'; Script = 'res://tests/formal/formal_world_economic_boundary_closure_test.gd'; TimeoutSeconds = 240 },
+	@{ Name = 'Formal market identity foundation'; Script = 'res://tests/formal/formal_world_market_identity_foundation_test.gd'; TimeoutSeconds = 240 },
+	@{ Name = 'Organization foundation'; Script = 'res://tests/vnext/organization_core_test.gd'; TimeoutSeconds = 180 },
+	@{ Name = 'Formal organization composition'; Script = 'res://tests/formal/formal_world_organization_composition_test.gd'; TimeoutSeconds = 360 },
+	@{ Name = 'Current world domain convergence'; Script = 'res://tests/vnext/current_world_domain_convergence_test.gd'; TimeoutSeconds = 180 },
 	@{ Name = 'Formal player release journey'; Script = 'res://tests/formal/formal_world_player_journey_smoke.gd'; TimeoutSeconds = 240 },
 	@{ Name = 'Formal Windows export resource contract'; Script = 'res://tests/formal/formal_world_export_resource_smoke.gd'; TimeoutSeconds = 180 },
     @{ Name = 'Formal world integration'; Script = 'res://tests/formal/formal_world_integration_test.gd'; TimeoutSeconds = 360 },
@@ -139,6 +168,86 @@ foreach ($test in $tests) {
         '--headless', '--path', $ProjectPath, '--script', $test.Script
     ) -TimeoutSeconds $timeout
 }
+
+$politicalProbeArguments = @(
+    '--headless', '--path', $ProjectPath,
+    '--script', 'res://tests/formal/runtime_political_snapshot_probe.gd'
+)
+$politicalProbeOne = Invoke-GodotStep -Name 'Runtime political fresh-process hash A' -Arguments $politicalProbeArguments -TimeoutSeconds 120
+$politicalProbeTwo = Invoke-GodotStep -Name 'Runtime political fresh-process hash B' -Arguments $politicalProbeArguments -TimeoutSeconds 120
+$politicalHashPattern = '(?m)^RUNTIME_POLITICAL_SNAPSHOT_SHA256=([0-9a-f]{64})$'
+if ($politicalProbeOne -notmatch $politicalHashPattern) {
+    throw 'Runtime political snapshot probe A did not emit a canonical hash'
+}
+$politicalHashOne = $Matches[1]
+if ($politicalProbeTwo -notmatch $politicalHashPattern) {
+    throw 'Runtime political snapshot probe B did not emit a canonical hash'
+}
+$politicalHashTwo = $Matches[1]
+if ($politicalHashOne -ne $politicalHashTwo) {
+    throw "Runtime political snapshot differs across fresh processes: $politicalHashOne != $politicalHashTwo"
+}
+Write-Host "Runtime political fresh-process deterministic hash: $politicalHashOne"
+
+$marketProbeArguments = @(
+    '--headless', '--path', $ProjectPath,
+    '--script', 'res://tests/formal/formal_world_market_snapshot_probe.gd'
+)
+$marketProbeOne = Invoke-GodotStep -Name 'Formal market fresh-process hash A' -Arguments $marketProbeArguments -TimeoutSeconds 120
+$marketProbeTwo = Invoke-GodotStep -Name 'Formal market fresh-process hash B' -Arguments $marketProbeArguments -TimeoutSeconds 120
+$marketHashPattern = '(?m)^FORMAL_MARKET_SNAPSHOT_SHA256=([0-9a-f]{64})$'
+if ($marketProbeOne -notmatch $marketHashPattern) {
+    throw 'Formal market snapshot probe A did not emit a canonical hash'
+}
+$marketHashOne = $Matches[1]
+if ($marketProbeTwo -notmatch $marketHashPattern) {
+    throw 'Formal market snapshot probe B did not emit a canonical hash'
+}
+$marketHashTwo = $Matches[1]
+if ($marketHashOne -ne $marketHashTwo) {
+    throw "Formal market snapshot differs across fresh processes: $marketHashOne != $marketHashTwo"
+}
+Write-Host "Formal market fresh-process deterministic hash: $marketHashOne"
+
+$economicProbeArguments = @(
+    '--headless', '--path', $ProjectPath,
+    '--script', 'res://tests/formal/formal_world_economic_snapshot_probe.gd'
+)
+$economicProbeOne = Invoke-GodotStep -Name 'Formal economic fresh-process hash A' -Arguments $economicProbeArguments -TimeoutSeconds 180
+$economicProbeTwo = Invoke-GodotStep -Name 'Formal economic fresh-process hash B' -Arguments $economicProbeArguments -TimeoutSeconds 180
+$economicHashPattern = '(?m)^FORMAL_ECONOMIC_SNAPSHOT_SHA256=([0-9a-f]{64})$'
+if ($economicProbeOne -notmatch $economicHashPattern) {
+    throw 'Formal economic snapshot probe A did not emit a canonical hash'
+}
+$economicHashOne = $Matches[1]
+if ($economicProbeTwo -notmatch $economicHashPattern) {
+    throw 'Formal economic snapshot probe B did not emit a canonical hash'
+}
+$economicHashTwo = $Matches[1]
+if ($economicHashOne -ne $economicHashTwo) {
+    throw "Formal economic snapshot differs across fresh processes: $economicHashOne != $economicHashTwo"
+}
+Write-Host "Formal economic fresh-process deterministic hash: $economicHashOne"
+
+$formalFingerprintProbeArguments = @(
+    '--headless', '--path', $ProjectPath,
+    '--script', 'res://tests/formal/formal_world_fingerprint_probe.gd'
+)
+$formalFingerprintProbeOne = Invoke-GodotStep -Name 'Formal world fingerprint fresh-process A' -Arguments $formalFingerprintProbeArguments -TimeoutSeconds 180
+$formalFingerprintProbeTwo = Invoke-GodotStep -Name 'Formal world fingerprint fresh-process B' -Arguments $formalFingerprintProbeArguments -TimeoutSeconds 180
+$formalFingerprintPattern = '(?m)^FORMAL_WORLD_FINGERPRINT_SHA256=([0-9a-f]{64})$'
+if ($formalFingerprintProbeOne -notmatch $formalFingerprintPattern) {
+    throw 'Formal world fingerprint probe A did not emit a canonical hash'
+}
+$formalFingerprintOne = $Matches[1]
+if ($formalFingerprintProbeTwo -notmatch $formalFingerprintPattern) {
+    throw 'Formal world fingerprint probe B did not emit a canonical hash'
+}
+$formalFingerprintTwo = $Matches[1]
+if ($formalFingerprintOne -ne $formalFingerprintTwo) {
+    throw "Formal world fingerprint differs across fresh processes: $formalFingerprintOne != $formalFingerprintTwo"
+}
+Write-Host "Formal world fresh-process deterministic fingerprint: $formalFingerprintOne"
 
 $null = Invoke-GodotStep -Name 'Headless formal product startup' -Arguments @(
     '--headless', '--path', $ProjectPath, '--quit-after', '5'

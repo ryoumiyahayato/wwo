@@ -1,5 +1,5 @@
 {
-  "artifact_digest": "c590da279aca2385af47eae7f534a416d3b422af7e93a0ef2b13b715b6535df8",
+  "artifact_digest": "095821320ad9837155ec398c896d36ecba42a21b05f566afce257fedde43b271",
   "artifacts": [
     {
       "bytes": 40715,
@@ -14,7 +14,7 @@
     {
       "bytes": 104186,
       "path": "batch2_data_manifest.json",
-      "sha256": "01fcb1376742c3d9cd6fb39f9cf8ae5cdef17f0c35a3f9d59ad67023b2e8b991"
+      "sha256": "ca618a0f1b04d540cae5d531776f66c047667af4824149b69bf3865632d3f2ba"
     },
     {
       "bytes": 747,
@@ -37,14 +37,14 @@
       "sha256": "f570caa664c0f2710db1a85e066e9b9deabaa60faec8a341a2953b2ce3882c54"
     },
     {
-      "bytes": 15708,
+      "bytes": 15928,
       "path": "batch3_loader_contract.json",
-      "sha256": "e86e11fb048f3969a44a16f7c7a13ba089094aba90dbdd6c8c9957c0316c4df8"
+      "sha256": "4b10f372a9d539a6565fb998b0fefaba998fbf2a530ebb50175e50b077ba143c"
     },
     {
       "bytes": 55602,
       "path": "batch3_record_signature_manifest.json",
-      "sha256": "7483fa76dcb44d709c16957081e246ea3a8e966901b4e63927fa1d2b12fc20bc"
+      "sha256": "b4bf130793be40f95bebbfba57fb7a8e14e25caee1a472d2a83d00b375c0d625"
     },
     {
       "bytes": 30990,
@@ -112,7 +112,7 @@
       "verified_or_documented_flag_units": 151
     },
     "batch4": {
-      "artifact_digest_before_manifest": "c590da279aca2385af47eae7f534a416d3b422af7e93a0ef2b13b715b6535df8",
+      "artifact_digest_before_manifest": "095821320ad9837155ec398c896d36ecba42a21b05f566afce257fedde43b271",
       "artifact_file_count_before_manifest": 15,
       "concurrency": "1 process; no process pool or thread pool",
       "large_temporary_artifacts": [],

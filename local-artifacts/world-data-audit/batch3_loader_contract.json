@@ -1,13 +1,19 @@
 {
   "contract_gate": "PASS",
   "data_json_count": 184,
-  "literal_directory_reference_count": 2,
+  "literal_directory_reference_count": 3,
   "literal_directory_references": [
     {
       "exists": true,
       "json_file_count": 6,
       "resource": "res://data/world_map/historical/",
-      "script": "scripts/formal/formal_world_economy_service.gd"
+      "script": "scripts/formal/formal_world_economic_evidence_catalog.gd"
+    },
+    {
+      "exists": true,
+      "json_file_count": 6,
+      "resource": "res://data/world_map/historical/",
+      "script": "scripts/formal/historical_political_evidence_catalog.gd"
     },
     {
       "exists": true,
@@ -21,12 +27,12 @@
     {
       "exists": true,
       "resource": "res://data/world_map/historical/major_economy_polity_crosswalk_1900.json",
-      "script": "scripts/formal/formal_world_economy_service.gd"
+      "script": "scripts/formal/formal_world_economic_evidence_catalog.gd"
     },
     {
       "exists": true,
       "resource": "res://data/world_map/historical/political_units_1900.json",
-      "script": "scripts/formal/formal_world_economy_service.gd"
+      "script": "scripts/formal/historical_political_evidence_catalog.gd"
     },
     {
       "exists": true,
@@ -284,13 +290,13 @@
     "res://data/world_map/strategic_military_overlay.json",
     "res://data/world_map/world_admin1.json"
   ],
-  "production_script_count": 15,
+  "production_script_count": 30,
   "production_script_roots": [
     "scripts/world_map",
     "scripts/formal"
   ],
   "schema_version": "wwo_world_data_batch3_contracts_v1",
-  "script_digest": "417043f3c2d44b1e1d189f4a15eee1a203462d4556c5a985ae028f1fec88d04b",
+  "script_digest": "2e8a0befbf39e28f691208ad42f01d411c1185783e0aced250f45d80eb7c87f4",
   "world_map_data_loader_entries": [
     {
       "exists": true,

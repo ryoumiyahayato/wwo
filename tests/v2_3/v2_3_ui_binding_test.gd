@@ -24,8 +24,8 @@ func _check_simulation_binding() -> void:
 	var summary := simulation.world_summary()
 	test.equal(
 		int(summary.get("world_political_unit_count", 0)),
-		151,
-		"UI状态源持有151个地图政治单元"
+		146,
+		"UI状态源持有146个运行时政治实体"
 	)
 	test.equal(
 		int(summary.get("major_economy_count", 0)),
@@ -39,10 +39,10 @@ func _check_simulation_binding() -> void:
 	)
 	test.equal(
 		int(summary.get("background_polity_count", 0)),
-		96,
-		"UI状态源区分96个纯背景地图单元"
+		91,
+		"UI状态源区分91个纯背景运行时实体"
 	)
-	var australia := simulation.polity_summary("cshapes_gw_901")
+	var australia := simulation.polity_summary("state:cshapes_gw_901")
 	test.expect(
 		bool(australia.get("has_detailed_economy", false)),
 		"澳大利亚殖民地地图单元可投影聚合经济"
@@ -52,7 +52,7 @@ func _check_simulation_binding() -> void:
 		"australia_colonies_1900",
 		"地图选择绑定到正确经济聚合体"
 	)
-	var background := simulation.polity_summary("cshapes_gw_31")
+	var background := simulation.polity_summary("state:cshapes_gw_31")
 	test.expect(not background.is_empty(), "背景政治单元具有正式选择投影")
 	test.expect(
 		not bool(background.get("has_detailed_economy", true)),
@@ -99,7 +99,7 @@ func _check_scene_binding() -> void:
 		) != null,
 		"场景绑定真实三维半球"
 	)
-	view.selected_country_id = "cshapes_gw_901"
+	view.selected_country_id = "state:cshapes_gw_901"
 	var selected := view.formal_simulation.polity_summary(
 		view._selected_polity_entity_id()
 	)

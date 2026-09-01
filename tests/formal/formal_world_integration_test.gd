@@ -47,7 +47,7 @@ func _check_formal_economy() -> void:
 		return
 	var economy := simulation.economy
 	var initial := simulation.world_summary()
-	_check_world_roster(initial, economy)
+	_check_world_roster(initial, economy, simulation)
 	var first_polity_id := simulation.first_polity_id()
 	_check(not first_polity_id.is_empty(), "正式组合根暴露确定性首个政治单元")
 	_check(
@@ -58,10 +58,7 @@ func _check_formal_economy() -> void:
 		not simulation.has_polity("missing_formal_polity"),
 		"正式组合根拒绝未知政治单元"
 	)
-	_check(
-		first_polity_id == economy.first_polity_id(),
-		"正式组合根查询与经济服务结果一致"
-	)
+	_check(first_polity_id.begins_with("state:"), "正式组合根暴露runtime政治ID")
 	_check(
 		int(initial.get("commodity_count", 0)) >= 60,
 		"正式经济直接读取完整商品目录"
@@ -88,15 +85,21 @@ func _check_formal_economy() -> void:
 		restored.world_summary() == simulation.world_summary(),
 		"正式经济恢复后摘要等价"
 	)
-	_check_economy_restore_is_atomic(restored.economy)
+	_check_economy_restore_is_atomic(restored)
 
 
 func _check_world_roster(
-	initial: Dictionary, economy: FormalWorldEconomyService
+	initial: Dictionary,
+	economy: FormalWorldEconomyView,
+	simulation: FormalWorldSimulation
 ) -> void:
 	_check(
-		int(initial.get("world_political_unit_count", 0)) == 151,
-		"世界地图包含151个1900政治单元，而非只有50国"
+		int(initial.get("world_political_unit_count", 0)) == 146,
+		"当前世界包含146个1900-01-01运行时政治实体"
+	)
+	_check(
+		int(initial.get("historical_political_record_count", 0)) == 151,
+		"历史证据目录独立保留151条记录"
 	)
 	_check(
 		int(initial.get("major_economy_count", 0)) == 50,
@@ -115,8 +118,8 @@ func _check_world_roster(
 		"第31至50位保留为次要政权候选"
 	)
 	_check(
-		int(initial.get("background_polity_count", 0)) == 96,
-		"其余96个地图政治单元作为纯背景世界存在"
+		int(initial.get("background_polity_count", 0)) == 91,
+		"其余91个运行时政治实体作为纯背景世界存在"
 	)
 	_check(
 		not economy.country_states.has("country:loran_federation")
@@ -125,11 +128,11 @@ func _check_world_roster(
 	)
 	_check_australia_crosswalk(economy)
 	_check(
-		economy.economy_entity_for_polity("grand_duchy_of_luxembourg")
+		economy.economy_entity_for_polity("state:grand_duchy_of_luxembourg")
 		== "kingdom_of_luxembourg",
 		"卢森堡经济旧名显式映射到卢森堡大公国地图单元"
 	)
-	var background := economy.polity_summary("cshapes_gw_31")
+	var background := simulation.polity_summary("state:cshapes_gw_31")
 	_check(not background.is_empty(), "背景政治单元仍可在半球选择")
 	_check(
 		not bool(background.get("has_detailed_economy", true)),
@@ -137,11 +140,11 @@ func _check_world_roster(
 	)
 
 
-func _check_australia_crosswalk(economy: FormalWorldEconomyService) -> void:
+func _check_australia_crosswalk(economy: FormalWorldEconomyView) -> void:
 	var polity_ids := economy.polity_ids_for_economy("australia_colonies_1900")
 	_check(polity_ids.size() == 6, "澳大利亚经济聚合体覆盖六个自治殖民地")
 	for index: int in range(901, 907):
-		var polity_id := "cshapes_gw_%d" % index
+		var polity_id := "state:cshapes_gw_%d" % index
 		_check(
 			economy.economy_entity_for_polity(polity_id)
 			== "australia_colonies_1900",
@@ -241,14 +244,14 @@ func _check_formal_atomic_save_recovery() -> void:
 			var valid_save := verification_source.save_to_user()
 			_check(valid_save.success, "临时校验失败测试先建立有效主档")
 			var primary_before := FileAccess.get_file_as_string(primary_path)
+			var invalid_candidate := verification_source.get_persistent_state()
 			_check(
-				_corrupt_first_inventory(verification_source),
+				_corrupt_first_inventory(invalid_candidate),
 				"临时校验失败测试可构造无效候选快照"
 			)
-			var rejected_save := verification_source.save_to_user()
 			_check(
-				not rejected_save.success,
-				"临时文件状态校验失败时原子保存返回失败"
+				not verification_source.restore_persistent_state(invalid_candidate),
+				"无效经济候选在进入活动实例前被拒绝"
 			)
 			_check(
 				FileAccess.get_file_as_string(primary_path) == primary_before,
@@ -334,8 +337,8 @@ func _check_runtime_application(application: FormalWorldApplication) -> void:
 	)
 	var runtime_summary := application.formal_simulation.world_summary()
 	_check(
-		int(runtime_summary.get("world_political_unit_count", 0)) == 151,
-		"正式半球运行时持有完整政治世界"
+		int(runtime_summary.get("world_political_unit_count", 0)) == 146,
+		"正式半球运行时持有146个当前政治实体"
 	)
 	_check(
 		int(runtime_summary.get("major_economy_count", 0)) == 50,
@@ -346,6 +349,7 @@ func _check_runtime_application(application: FormalWorldApplication) -> void:
 		"正式半球运行时将高细节经济绑定到55个地图单元"
 	)
 	var first_polity_id := application.formal_simulation.first_polity_id()
+	_check(first_polity_id.begins_with("state:"), "正式UI选择使用runtime政治ID")
 	application.selected_country_id = first_polity_id
 	_check(
 		application._selected_polity_entity_id() == first_polity_id,
@@ -383,12 +387,11 @@ func _check_runtime_application(application: FormalWorldApplication) -> void:
 	)
 
 
-func _check_economy_restore_is_atomic(
-	economy: FormalWorldEconomyService
-) -> void:
-	var before := economy.get_persistent_state()
+func _check_economy_restore_is_atomic(simulation: FormalWorldSimulation) -> void:
+	var before := simulation.get_persistent_state()
 	var rejected := before.duplicate(true)
-	var candidate_states := rejected.get("country_states", {}) as Dictionary
+	var rejected_economy := rejected.get("economy", {}) as Dictionary
+	var candidate_states := rejected_economy.get("market_states", {}) as Dictionary
 	var economy_ids: Array[String] = []
 	for raw_id: Variant in candidate_states:
 		economy_ids.append(str(raw_id))
@@ -409,26 +412,29 @@ func _check_economy_restore_is_atomic(
 	inventory[commodity_ids[0]] = -1.0
 	candidate_state["inventory"] = inventory
 	candidate_states[economy_id] = candidate_state
-	rejected["country_states"] = candidate_states
+	rejected_economy["market_states"] = candidate_states
+	rejected["economy"] = rejected_economy
 	_check(
-		not economy.restore_persistent_state(rejected),
+		not simulation.restore_persistent_state(rejected),
 		"正式经济拒绝负库存恢复候选"
 	)
 	_check(
-		economy.get_persistent_state() == before,
+		simulation.get_persistent_state() == before,
 		"正式经济失败恢复前后持久状态完全一致"
 	)
 
 
-func _corrupt_first_inventory(simulation: FormalWorldSimulation) -> bool:
+func _corrupt_first_inventory(snapshot: Dictionary) -> bool:
+	var economy_state := snapshot.get("economy", {}) as Dictionary
+	var country_states := economy_state.get("market_states", {}) as Dictionary
 	var economy_ids: Array[String] = []
-	for raw_id: Variant in simulation.economy.country_states:
+	for raw_id: Variant in country_states:
 		economy_ids.append(str(raw_id))
 	economy_ids.sort()
 	if economy_ids.is_empty():
 		return false
 	var economy_id := economy_ids[0]
-	var country_state := simulation.economy.country_states[economy_id] as Dictionary
+	var country_state := country_states[economy_id] as Dictionary
 	var inventory := country_state.get("inventory", {}) as Dictionary
 	var commodity_ids: Array[String] = []
 	for raw_id: Variant in inventory:
@@ -438,7 +444,9 @@ func _corrupt_first_inventory(simulation: FormalWorldSimulation) -> bool:
 		return false
 	inventory[commodity_ids[0]] = -1.0
 	country_state["inventory"] = inventory
-	simulation.economy.country_states[economy_id] = country_state
+	country_states[economy_id] = country_state
+	economy_state["market_states"] = country_states
+	snapshot["economy"] = economy_state
 	return true
 
 
