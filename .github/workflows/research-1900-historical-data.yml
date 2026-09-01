@@ -5,9 +5,15 @@ on:
     branches:
       - master
     paths:
+      - ".gitattributes"
       - "tools/historical_data/**"
+      - "tools/provenance/generate_historical_provenance.py"
+      - "tests/tools/test_historical_provenance_eol_contract.py"
+      - "data/provenance/historical_source_registry.json"
+      - "data/provenance/historical_fact_evidence.json"
       - ".github/workflows/research-1900-historical-data.yml"
       - "data/world_map/historical/**"
+      - "data/alpha/historical_world_economy_1900/countries_compact.json"
       - "assets/historical_flags/**"
       - "scripts/ui_spikes/holographic_workspace/**"
       - "scenes/ui_spikes/holographic_workspace/**"
@@ -40,3 +46,39 @@ jobs:
           test "$(python3 -c "import json; print(json.load(open('data/world_map/historical/cshapes_1900_snapshot.json', encoding='utf-8'))['feature_count'])")" = "151"
           test "$(python3 -c "import json; print(json.load(open('data/world_map/historical/major_state_profiles_1900.json', encoding='utf-8'))['profiles'].__len__())")" = "50"
           test "$(find assets/historical_flags/1900 -type f -name '*.png' | wc -l)" = "60"
+
+  provenance-eol-contract:
+    name: Provenance EOL contract (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify canonical source bytes and Historical Provenance contract
+        run: |
+          python -B tests/tools/test_historical_provenance_eol_contract.py
+          python -B tools/provenance/generate_historical_provenance.py
+          python -B tools/provenance/generate_historical_provenance.py --check
+      - name: Upload generated Historical Provenance candidate
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: historical-provenance-generated
+          if-no-files-found: error
+          path: |
+            data/provenance/historical_source_registry.json
+            data/provenance/historical_fact_evidence.json
+      - name: Verify committed Historical Provenance catalogs are current
+        run: git diff --exit-code -- data/provenance/historical_source_registry.json data/provenance/historical_fact_evidence.json

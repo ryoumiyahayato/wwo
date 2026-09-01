@@ -21,18 +21,43 @@ SPATIAL_PATH = "res://data/world_map/historical/cshapes_1900_snapshot.json"
 POPULATION_PATH = "res://data/alpha/historical_world_economy_1900/countries_compact.json"
 POPULATION_MANIFEST_PATH = "res://data/alpha/historical_world_economy_1900.json"
 GENERATOR = "tools/provenance/generate_historical_provenance.py:v1"
+CANONICAL_TEXTUAL_PROVENANCE_SOURCES = frozenset(
+    {POLITICAL_PATH, SPATIAL_PATH, POPULATION_PATH}
+)
+
+
+class ProvenanceSourceContractError(RuntimeError):
+    """Raised when an admitted textual source is not checked out as canonical LF."""
 
 
 def local_path(resource_path: str) -> Path:
     return ROOT / resource_path.removeprefix("res://")
 
 
+def validate_provenance_source_bytes(resource_path: str, content: bytes) -> bytes:
+    """Fail closed for non-canonical EOLs without normalizing source identity."""
+    if resource_path in CANONICAL_TEXTUAL_PROVENANCE_SOURCES and b"\r" in content:
+        raise ProvenanceSourceContractError(
+            "provenance source checkout violates canonical LF contract: "
+            f"{resource_path}"
+        )
+    return content
+
+
+def provenance_source_bytes(resource_path: str) -> bytes:
+    return validate_provenance_source_bytes(
+        resource_path, local_path(resource_path).read_bytes()
+    )
+
+
 def read_json(resource_path: str) -> dict[str, Any]:
+    if resource_path in CANONICAL_TEXTUAL_PROVENANCE_SOURCES:
+        return json.loads(provenance_source_bytes(resource_path).decode("utf-8"))
     return json.loads(local_path(resource_path).read_text(encoding="utf-8"))
 
 
 def file_sha256(resource_path: str) -> str:
-    return hashlib.sha256(local_path(resource_path).read_bytes()).hexdigest()
+    return hashlib.sha256(provenance_source_bytes(resource_path)).hexdigest()
 
 
 def canonical_json(value: Any) -> str:
@@ -244,6 +269,11 @@ def build() -> tuple[dict[str, Any], dict[str, Any]]:
     return registry, catalog
 
 
+def write_json(path: Path, value: Any) -> None:
+    payload = (json.dumps(value, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
+    path.write_bytes(payload)
+
+
 def main() -> None:
     registry, catalog = build()
     output_dir = ROOT / "data" / "provenance"
@@ -262,12 +292,8 @@ def main() -> None:
         )
         return
     output_dir.mkdir(parents=True, exist_ok=True)
-    (output_dir / "historical_source_registry.json").write_text(
-        json.dumps(registry, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
-    (output_dir / "historical_fact_evidence.json").write_text(
-        json.dumps(catalog, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
+    write_json(output_dir / "historical_source_registry.json", registry)
+    write_json(output_dir / "historical_fact_evidence.json", catalog)
 
 
 if __name__ == "__main__":
