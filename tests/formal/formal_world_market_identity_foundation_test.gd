@@ -164,7 +164,10 @@ func _check_economy_scope_and_observer(simulation: FormalWorldSimulation) -> voi
 func _check_persistence_and_atomicity(simulation: FormalWorldSimulation) -> void:
 	simulation.advance_minutes(30 * 24 * 60)
 	var state := simulation.get_persistent_state()
-	_check(str(state.get("schema_id", "")) == "formal_world_simulation_v4", "world save is v4")
+	_check(
+		str(state.get("schema_id", "")) == FormalWorldSimulation.SCHEMA_ID,
+		"world save schema is current"
+	)
 	var market_state := state.get("markets", {}) as Dictionary
 	_check(
 		str(market_state.get("schema_id", "")) == "formal_world_market_state_v1",

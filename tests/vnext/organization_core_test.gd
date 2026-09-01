@@ -571,8 +571,14 @@ func _test_snapshot_determinism_and_round_trip() -> void:
 	)
 
 	var saved: Dictionary = core.snapshot()
-	_equal(saved.size(), 2, "organization snapshot has exactly two top-level fields")
-	_equal(saved.get("schema_id"), "vnext_organization_core_v1", "organization snapshot schema is explicit")
+	_equal(saved.size(), 4, "organization snapshot has exactly four top-level fields")
+	_equal(saved.get("schema_id"), "vnext_organization_core_v2", "organization snapshot schema is explicit")
+	_equal(saved.get("revision"), 6, "organization revision counts committed mutations")
+	_equal(
+		saved.get("state_fingerprint"),
+		core.state_fingerprint(),
+		"organization snapshot binds its deterministic state fingerprint"
+	)
 	var saved_organizations: Array = saved.get("organizations") as Array
 	_equal(
 		_saved_organization_ids(saved_organizations),
@@ -623,6 +629,22 @@ func _test_snapshot_determinism_and_round_trip() -> void:
 	)
 	if normalized != null:
 		_equal(normalized.snapshot(), saved, "restore canonicalizes ordering deterministically")
+	var legacy := {
+		"schema_id": VNextOrganizationCore.LEGACY_SNAPSHOT_SCHEMA_ID,
+		"organizations": saved.get("organizations", []).duplicate(true),
+	}
+	var legacy_restored := _new_core()
+	_check(
+		legacy_restored != null and legacy_restored.restore(legacy),
+		"legacy v1 organization snapshot migrates explicitly"
+	)
+	if legacy_restored != null:
+		_equal(legacy_restored.revision(), 0, "legacy organization migration uses deterministic revision zero")
+		_equal(
+			legacy_restored.organization_ids(),
+			core.organization_ids(),
+			"legacy organization migration preserves structural identities"
+		)
 
 
 func _test_restore_rejections_are_transactional() -> void:
@@ -764,6 +786,7 @@ func _test_restore_rejections_are_transactional() -> void:
 		inactive.get("organizations") as Array, "organization:root"
 	)
 	inactive_root["active"] = false
+	_refresh_snapshot_fingerprint(inactive)
 	_check(core.restore(inactive), "inactive organization snapshot is structurally restorable")
 	_check(
 		not core.has_capability(
@@ -784,6 +807,13 @@ func _expect_restore_failure(
 	var before: Dictionary = core.snapshot()
 	_check(not core.restore(rejected), "%s restore is rejected" % label)
 	_equal(core.snapshot(), before, "%s rejection is transactional" % label)
+
+
+func _refresh_snapshot_fingerprint(snapshot_value: Dictionary) -> void:
+	snapshot_value["state_fingerprint"] = JSON.stringify({
+		"revision": int(snapshot_value.get("revision", 0)),
+		"organizations": snapshot_value.get("organizations", []),
+	}).sha256_text()
 
 
 func _saved_organization_ids(records: Array) -> Array[String]:

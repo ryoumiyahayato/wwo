@@ -260,8 +260,11 @@ func _test_v3_round_trip_and_atomic_rejection(
 	simulation: FormalWorldSimulation
 ) -> void:
 	var state := simulation.get_persistent_state()
-	_expect(str(state.get("schema_id", "")) == "formal_world_simulation_v4", "save schema is v4")
-	_expect(state.get("runtime_politics", {}) is Dictionary, "v4 saves runtime registry")
+	_expect(
+		str(state.get("schema_id", "")) == FormalWorldSimulation.SCHEMA_ID,
+		"save schema is current"
+	)
+	_expect(state.get("runtime_politics", {}) is Dictionary, "current save includes runtime registry")
 	var restored := FormalWorldSimulation.new()
 	_expect(restored.initialize(), "v3 restore candidate initializes")
 	_expect(restored.restore_persistent_state(state), "v3 candidate restore succeeds")

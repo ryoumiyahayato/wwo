@@ -5,7 +5,8 @@ extends RefCounted
 ## Position and appointment IDs are local to their organization; they are not
 ## VNextStableId values and must never be treated as a new stable-ID kind.
 
-const SNAPSHOT_SCHEMA_ID: String = "vnext_organization_core_v1"
+const SNAPSHOT_SCHEMA_ID: String = "vnext_organization_core_v2"
+const LEGACY_SNAPSHOT_SCHEMA_ID: String = "vnext_organization_core_v1"
 
 const _ORGANIZATION_FIELDS: Array[String] = [
 	"organization_id",
@@ -32,6 +33,7 @@ const _APPOINTMENT_FIELDS: Array[String] = [
 ]
 
 var _organizations: Dictionary = {}
+var _revision: int = 0
 var _reference_catalog_configured: bool = false
 var _reference_catalog: VNextOrganizationReferenceCatalog = null
 
@@ -95,6 +97,14 @@ func capability_catalog_fingerprint() -> String:
 
 func organization_ids() -> Array[String]:
 	return _sorted_dictionary_keys(_organizations)
+
+
+func revision() -> int:
+	return _revision
+
+
+func state_fingerprint() -> String:
+	return _fingerprint_for(_revision, _organizations)
 
 
 func has_organization(organization_id: String) -> bool:
@@ -212,7 +222,7 @@ func set_parent_organization(
 	candidate_state[organization_id] = candidate
 	if not _validate_organizations(candidate_state):
 		return false
-	_organizations = candidate_state
+	_adopt_mutation(candidate_state)
 	return true
 
 
@@ -227,7 +237,7 @@ func set_organization_active(organization_id: String, active: bool) -> bool:
 	candidate_state[organization_id] = candidate
 	if not _validate_organizations(candidate_state):
 		return false
-	_organizations = candidate_state
+	_adopt_mutation(candidate_state)
 	return true
 
 
@@ -254,7 +264,7 @@ func define_capability(organization_id: String, capability_id: String) -> bool:
 	candidate_state[organization_id] = candidate
 	if not _validate_organizations(candidate_state):
 		return false
-	_organizations = candidate_state
+	_adopt_mutation(candidate_state)
 	return true
 
 
@@ -313,7 +323,7 @@ func define_position(
 	candidate_state[organization_id] = candidate
 	if not _validate_organizations(candidate_state):
 		return false
-	_organizations = candidate_state
+	_adopt_mutation(candidate_state)
 	return true
 
 
@@ -354,7 +364,7 @@ func grant_capability(
 	candidate_state[organization_id] = candidate
 	if not _validate_organizations(candidate_state):
 		return false
-	_organizations = candidate_state
+	_adopt_mutation(candidate_state)
 	return true
 
 
@@ -386,7 +396,7 @@ func revoke_capability(
 	candidate_state[organization_id] = candidate
 	if not _validate_organizations(candidate_state):
 		return false
-	_organizations = candidate_state
+	_adopt_mutation(candidate_state)
 	return true
 
 
@@ -436,7 +446,7 @@ func add_member(organization_id: String, person_id: String) -> bool:
 	candidate_state[organization_id] = candidate
 	if not _validate_organizations(candidate_state):
 		return false
-	_organizations = candidate_state
+	_adopt_mutation(candidate_state)
 	return true
 
 
@@ -469,7 +479,7 @@ func remove_member(organization_id: String, person_id: String) -> bool:
 	candidate_state[organization_id] = candidate
 	if not _validate_organizations(candidate_state):
 		return false
-	_organizations = candidate_state
+	_adopt_mutation(candidate_state)
 	return true
 
 
@@ -556,7 +566,7 @@ func create_appointment(
 	candidate_state[organization_id] = candidate
 	if not _validate_organizations(candidate_state):
 		return false
-	_organizations = candidate_state
+	_adopt_mutation(candidate_state)
 	return true
 
 
@@ -594,7 +604,7 @@ func remove_appointment(organization_id: String, appointment_id: String) -> bool
 	candidate_state[organization_id] = candidate
 	if not _validate_organizations(candidate_state):
 		return false
-	_organizations = candidate_state
+	_adopt_mutation(candidate_state)
 	return true
 
 
@@ -671,21 +681,33 @@ func capabilities_for_person(
 
 
 func snapshot() -> Dictionary:
-	var saved_organizations: Array[Dictionary] = []
-	for organization_id: String in organization_ids():
-		saved_organizations.append(_snapshot_organization(_organizations[organization_id] as Dictionary))
+	var saved_organizations := _snapshot_organizations(_organizations)
 	return {
 		"schema_id": SNAPSHOT_SCHEMA_ID,
+		"revision": _revision,
 		"organizations": saved_organizations,
+		"state_fingerprint": _fingerprint_for(_revision, _organizations),
 	}
 
 
 ## Decodes and validates the complete candidate before replacing live state.
 ## No field of the current state is changed on any rejection path.
 func restore(snapshot_value: Dictionary) -> bool:
-	if not _has_exact_fields(snapshot_value, ["schema_id", "organizations"]):
-		return false
-	if snapshot_value.get("schema_id") != SNAPSHOT_SCHEMA_ID:
+	var schema_id: String = str(snapshot_value.get("schema_id", ""))
+	var candidate_revision: int = 0
+	if schema_id == SNAPSHOT_SCHEMA_ID:
+		if not _has_exact_fields(
+			snapshot_value,
+			["schema_id", "revision", "organizations", "state_fingerprint"]
+		):
+			return false
+		candidate_revision = _normalize_nonnegative_int(snapshot_value.get("revision"))
+		if candidate_revision < 0:
+			return false
+	elif schema_id == LEGACY_SNAPSHOT_SCHEMA_ID:
+		if not _has_exact_fields(snapshot_value, ["schema_id", "organizations"]):
+			return false
+	else:
 		return false
 	var raw_organizations: Variant = snapshot_value.get("organizations")
 	if typeof(raw_organizations) != TYPE_ARRAY:
@@ -705,7 +727,14 @@ func restore(snapshot_value: Dictionary) -> bool:
 
 	if not _validate_organizations(candidate_state):
 		return false
+	if (
+		schema_id == SNAPSHOT_SCHEMA_ID
+		and str(snapshot_value.get("state_fingerprint", ""))
+		!= _fingerprint_for(candidate_revision, candidate_state)
+	):
+		return false
 	_organizations = candidate_state
+	_revision = candidate_revision
 	return true
 
 
@@ -716,8 +745,27 @@ func _commit_organization_state(
 	candidate_state[organization_id] = candidate_organization
 	if not _validate_organizations(candidate_state):
 		return false
-	_organizations = candidate_state
+	_adopt_mutation(candidate_state)
 	return true
+
+
+func _adopt_mutation(candidate_state: Dictionary) -> void:
+	_organizations = candidate_state
+	_revision += 1
+
+
+func _snapshot_organizations(source: Dictionary) -> Array[Dictionary]:
+	var output: Array[Dictionary] = []
+	for organization_id: String in _sorted_dictionary_keys(source):
+		output.append(_snapshot_organization(source[organization_id] as Dictionary))
+	return output
+
+
+func _fingerprint_for(revision_value: int, source: Dictionary) -> String:
+	return JSON.stringify({
+		"revision": revision_value,
+		"organizations": _snapshot_organizations(source),
+	}).sha256_text()
 
 
 func _is_mutable_organization(organization_id: String) -> bool:
@@ -1149,6 +1197,21 @@ func _normalize_positive_int(candidate_value: Variant) -> int:
 	if candidate_type == TYPE_FLOAT:
 		var candidate_float: float = float(candidate_value)
 		if not is_finite(candidate_float) or candidate_float <= 0.0:
+			return -1
+		if candidate_float != floor(candidate_float):
+			return -1
+		return int(candidate_float)
+	return -1
+
+
+func _normalize_nonnegative_int(candidate_value: Variant) -> int:
+	var candidate_type: int = typeof(candidate_value)
+	if candidate_type == TYPE_INT:
+		var candidate_int: int = int(candidate_value)
+		return candidate_int if candidate_int >= 0 else -1
+	if candidate_type == TYPE_FLOAT:
+		var candidate_float: float = float(candidate_value)
+		if not is_finite(candidate_float) or candidate_float < 0.0:
 			return -1
 		if candidate_float != floor(candidate_float):
 			return -1

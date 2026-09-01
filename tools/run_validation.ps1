@@ -120,6 +120,8 @@ $tests = @(
 	@{ Name = 'Formal economy 30-day and one-year golden'; Script = 'res://tests/formal/formal_world_economy_golden_test.gd'; TimeoutSeconds = 240 },
 	@{ Name = 'Formal economic boundary closure'; Script = 'res://tests/formal/formal_world_economic_boundary_closure_test.gd'; TimeoutSeconds = 240 },
 	@{ Name = 'Formal market identity foundation'; Script = 'res://tests/formal/formal_world_market_identity_foundation_test.gd'; TimeoutSeconds = 240 },
+	@{ Name = 'Organization foundation'; Script = 'res://tests/vnext/organization_core_test.gd'; TimeoutSeconds = 180 },
+	@{ Name = 'Formal organization composition'; Script = 'res://tests/formal/formal_world_organization_composition_test.gd'; TimeoutSeconds = 360 },
 	@{ Name = 'Formal player release journey'; Script = 'res://tests/formal/formal_world_player_journey_smoke.gd'; TimeoutSeconds = 240 },
 	@{ Name = 'Formal Windows export resource contract'; Script = 'res://tests/formal/formal_world_export_resource_smoke.gd'; TimeoutSeconds = 180 },
     @{ Name = 'Formal world integration'; Script = 'res://tests/formal/formal_world_integration_test.gd'; TimeoutSeconds = 360 },
@@ -225,6 +227,26 @@ if ($economicHashOne -ne $economicHashTwo) {
     throw "Formal economic snapshot differs across fresh processes: $economicHashOne != $economicHashTwo"
 }
 Write-Host "Formal economic fresh-process deterministic hash: $economicHashOne"
+
+$formalFingerprintProbeArguments = @(
+    '--headless', '--path', $ProjectPath,
+    '--script', 'res://tests/formal/formal_world_fingerprint_probe.gd'
+)
+$formalFingerprintProbeOne = Invoke-GodotStep -Name 'Formal world fingerprint fresh-process A' -Arguments $formalFingerprintProbeArguments -TimeoutSeconds 180
+$formalFingerprintProbeTwo = Invoke-GodotStep -Name 'Formal world fingerprint fresh-process B' -Arguments $formalFingerprintProbeArguments -TimeoutSeconds 180
+$formalFingerprintPattern = '(?m)^FORMAL_WORLD_FINGERPRINT_SHA256=([0-9a-f]{64})$'
+if ($formalFingerprintProbeOne -notmatch $formalFingerprintPattern) {
+    throw 'Formal world fingerprint probe A did not emit a canonical hash'
+}
+$formalFingerprintOne = $Matches[1]
+if ($formalFingerprintProbeTwo -notmatch $formalFingerprintPattern) {
+    throw 'Formal world fingerprint probe B did not emit a canonical hash'
+}
+$formalFingerprintTwo = $Matches[1]
+if ($formalFingerprintOne -ne $formalFingerprintTwo) {
+    throw "Formal world fingerprint differs across fresh processes: $formalFingerprintOne != $formalFingerprintTwo"
+}
+Write-Host "Formal world fresh-process deterministic fingerprint: $formalFingerprintOne"
 
 $null = Invoke-GodotStep -Name 'Headless formal product startup' -Arguments @(
     '--headless', '--path', $ProjectPath, '--quit-after', '5'

@@ -290,13 +290,13 @@
     "res://data/world_map/strategic_military_overlay.json",
     "res://data/world_map/world_admin1.json"
   ],
-  "production_script_count": 28,
+  "production_script_count": 29,
   "production_script_roots": [
     "scripts/world_map",
     "scripts/formal"
   ],
   "schema_version": "wwo_world_data_batch3_contracts_v1",
-  "script_digest": "f8918f1407a621219296351811434aeba78a0246d569901fd0cb2a8fe332aa38",
+  "script_digest": "eddbd3b3ac3fd5acebc5303921a9683cfc007c39bfbdbec97d77dfd4822b697a",
   "world_map_data_loader_entries": [
     {
       "exists": true,
