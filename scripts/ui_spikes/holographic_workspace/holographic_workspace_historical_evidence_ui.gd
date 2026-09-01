@@ -11,35 +11,24 @@ func _ready() -> void:
 func _bootstrap_historical_political_evidence() -> bool:
 	if not _dated_units_document.is_empty():
 		return true
-	var provenance_gate := _historical_provenance_gate
-	if provenance_gate == null:
-		var provenance_foundation := HistoricalProvenanceFoundation.new()
-		if not provenance_foundation.load_current():
-			_data_errors.append(
-				"历史政治证据 bootstrap provenance 初始化失败：%s"
-				% provenance_foundation.initialization_error
-			)
-			return false
-		provenance_gate = provenance_foundation.gate()
-		if not bind_historical_provenance_gate(provenance_gate):
-			_data_errors.append("历史政治证据 bootstrap 无法绑定 Provenance gate")
-			return false
-	var catalog := HistoricalPoliticalEvidenceCatalog.new()
-	if not catalog.configure(
-		HistoricalPoliticalEvidenceCatalog.DEFAULT_PATH,
-		provenance_gate
-	):
+	var bootstrap := HistoricalEvidenceStandaloneBootstrap.build(
+		_historical_provenance_gate
+	)
+	if not bool(bootstrap.get("success", false)):
 		_data_errors.append(
 			"历史政治证据 bootstrap admission 失败：%s"
-			% catalog.initialization_error
+			% str(bootstrap.get("error", "unknown error"))
 		)
 		return false
-	var admitted_records := catalog.records()
-	if admitted_records.size() != HistoricalPoliticalEvidenceCatalog.EXPECTED_RECORD_COUNT:
-		_data_errors.append(
-			"历史政治证据 bootstrap 数量错误：%d" % admitted_records.size()
+	var bootstrap_gate := bootstrap.get("gate") as HistoricalProvenanceGate
+	if _historical_provenance_gate == null:
+		if not bind_historical_provenance_gate(bootstrap_gate):
+			_data_errors.append("历史政治证据 bootstrap 无法绑定 Provenance gate")
+			return false
+		_historical_provenance_foundation = (
+			bootstrap.get("foundation") as HistoricalProvenanceFoundation
 		)
-		return false
+	var admitted_records := bootstrap.get("records", []) as Array
 	_dated_units_document = {"units": admitted_records}
 	return true
 
@@ -96,4 +85,4 @@ func _draw_historical_entity_focus() -> void:
 		flag_copy = "无单一标准旗：" + str(entity.get("flag_absence_reason", "已记录为中性显示"))
 	_draw_label(rect.position + Vector2(12.0, 67.0), flag_copy, 9, Color(0.91, 0.75, 0.44, 0.92))
 	_draw_button(Rect2(rect.position.x + 12.0, rect.end.y - 38.0, 98.0, 28.0), "返回全球", "history_back_global", true)
-	_draw_button(Rect2(rect.end.x - 136.0, rect.end.y - 38.0, 124.0, 28.0), "进入辖区", "enter_region", not selected_historical_territory_iso.is_empty() or territories.size() == 1)
+	_draw_button(Rect2(rect.end.x - 136.0, rect.end.y - 38.0, 124.0, 28.0), "进入辖区", not selected_historical_territory_iso.is_empty() or territories.size() == 1)
