@@ -2,6 +2,48 @@ extends "res://scripts/ui_spikes/holographic_workspace/holographic_workspace_his
 ## Presentation copy for the dated evidence provider.
 
 
+func _ready() -> void:
+	if _dated_units_document.is_empty():
+		_bootstrap_historical_political_evidence()
+	super._ready()
+
+
+func _bootstrap_historical_political_evidence() -> bool:
+	if not _dated_units_document.is_empty():
+		return true
+	var provenance_gate := _historical_provenance_gate
+	if provenance_gate == null:
+		var provenance_foundation := HistoricalProvenanceFoundation.new()
+		if not provenance_foundation.load_current():
+			_data_errors.append(
+				"历史政治证据 bootstrap provenance 初始化失败：%s"
+				% provenance_foundation.initialization_error
+			)
+			return false
+		provenance_gate = provenance_foundation.gate()
+		if not bind_historical_provenance_gate(provenance_gate):
+			_data_errors.append("历史政治证据 bootstrap 无法绑定 Provenance gate")
+			return false
+	var catalog := HistoricalPoliticalEvidenceCatalog.new()
+	if not catalog.configure(
+		HistoricalPoliticalEvidenceCatalog.DEFAULT_PATH,
+		provenance_gate
+	):
+		_data_errors.append(
+			"历史政治证据 bootstrap admission 失败：%s"
+			% catalog.initialization_error
+		)
+		return false
+	var admitted_records := catalog.records()
+	if admitted_records.size() != HistoricalPoliticalEvidenceCatalog.EXPECTED_RECORD_COUNT:
+		_data_errors.append(
+			"历史政治证据 bootstrap 数量错误：%d" % admitted_records.size()
+		)
+		return false
+	_dated_units_document = {"units": admitted_records}
+	return true
+
+
 func _draw_historical_entity_focus() -> void:
 	var entity: Dictionary = _history_entity_by_id.get(selected_country_id, {}) as Dictionary
 	var rect: Rect2 = _history_focus_rect()
