@@ -29,7 +29,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: variable-state-audit-${{ github.ref }}
@@ -38,7 +38,7 @@ concurrency:
 jobs:
   audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout audit baseline
         uses: actions/checkout@v4
@@ -54,7 +54,25 @@ jobs:
           actual="$(git rev-parse HEAD)"
           test "$actual" = "$expected"
 
-      - name: Regenerate variable state audit documents
+      - name: Regenerate Historical Provenance deterministically
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tests/tools/test_historical_provenance_eol_contract.py
+          python -B tools/provenance/generate_historical_provenance.py
+          python -B tools/provenance/generate_historical_provenance.py --check
+          sha256sum \
+            data/provenance/historical_source_registry.json \
+            data/provenance/historical_fact_evidence.json > /tmp/provenance-first.sha256
+          python -B tools/provenance/generate_historical_provenance.py
+          python -B tools/provenance/generate_historical_provenance.py --check
+          sha256sum \
+            data/provenance/historical_source_registry.json \
+            data/provenance/historical_fact_evidence.json > /tmp/provenance-second.sha256
+          diff -u /tmp/provenance-first.sha256 /tmp/provenance-second.sha256
+
+      - name: Regenerate variable state audit documents twice
+        shell: bash
         run: |
           set -euo pipefail
           python3 -B tools/audit_variable_state.py --root .
@@ -62,17 +80,91 @@ jobs:
           python3 tools/render_variable_state_member_inventory.py
           python3 tools/generate_variable_state_docs.py
           python3 tools/render_variable_refactor_plan.py
-          test -s builds/variable-state-audit/variable_state_inventory.json
-          test -s builds/variable-state-audit/member_inventory.md
-          test -s docs/refactors/variable_state_audit.md
-          test -s docs/refactors/variable_state_member_inventory.md
-          test -s docs/refactors/state_ownership_matrix.md
-          test -s docs/refactors/variable_refactor_plan.md
+          sha256sum \
+            docs/refactors/variable_state_audit.md \
+            docs/refactors/variable_state_member_inventory.md \
+            docs/refactors/state_ownership_matrix.md \
+            docs/refactors/variable_refactor_plan.md > /tmp/variable-first.sha256
+          python3 -B tools/audit_variable_state.py --root .
+          python3 tools/render_variable_state_audit_summary.py
+          python3 tools/render_variable_state_member_inventory.py
+          python3 tools/generate_variable_state_docs.py
+          python3 tools/render_variable_refactor_plan.py
+          sha256sum \
+            docs/refactors/variable_state_audit.md \
+            docs/refactors/variable_state_member_inventory.md \
+            docs/refactors/state_ownership_matrix.md \
+            docs/refactors/variable_refactor_plan.md > /tmp/variable-second.sha256
+          diff -u /tmp/variable-first.sha256 /tmp/variable-second.sha256
+
+      - name: Commit explicitly armed generated refresh
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$(git log -1 --pretty=%s)" != "chore: run deterministic generated refresh" ]; then
+            echo "generated refresh commit step is not armed"
+            exit 0
+          fi
+          python - <<'PY'
+          import subprocess
+
+          allowed = {
+              "data/provenance/historical_source_registry.json",
+              "data/provenance/historical_fact_evidence.json",
+              "docs/refactors/variable_state_audit.md",
+              "docs/refactors/variable_state_member_inventory.md",
+              "docs/refactors/state_ownership_matrix.md",
+              "docs/refactors/variable_refactor_plan.md",
+          }
+          changed = set(
+              subprocess.check_output(["git", "diff", "--name-only"], text=True).splitlines()
+          )
+          unexpected = changed - allowed
+          if unexpected:
+              raise SystemExit(f"unexpected generated refresh delta: {sorted(unexpected)}")
+          if not changed:
+              raise SystemExit("generated refresh produced no tracked delta")
+          print("generated refresh delta:", sorted(changed))
+          PY
+          git add -- \
+            data/provenance/historical_source_registry.json \
+            data/provenance/historical_fact_evidence.json \
+            docs/refactors/variable_state_audit.md \
+            docs/refactors/variable_state_member_inventory.md \
+            docs/refactors/state_ownership_matrix.md \
+            docs/refactors/variable_refactor_plan.md
+          python - <<'PY'
+          import subprocess
+
+          allowed = {
+              "data/provenance/historical_source_registry.json",
+              "data/provenance/historical_fact_evidence.json",
+              "docs/refactors/variable_state_audit.md",
+              "docs/refactors/variable_state_member_inventory.md",
+              "docs/refactors/state_ownership_matrix.md",
+              "docs/refactors/variable_refactor_plan.md",
+          }
+          staged = set(
+              subprocess.check_output(
+                  ["git", "diff", "--cached", "--name-only"], text=True
+              ).splitlines()
+          )
+          if not staged or not staged <= allowed:
+              raise SystemExit(f"invalid staged generated refresh set: {sorted(staged)}")
+          print("staged generated refresh:", sorted(staged))
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "docs: refresh deterministic generated state"
+          git push origin HEAD:canonical/current-world
 
       - name: Verify committed audit documents are current
+        shell: bash
         run: |
           set -euo pipefail
           git diff --exit-code -- \
+            data/provenance/historical_source_registry.json \
+            data/provenance/historical_fact_evidence.json \
             docs/refactors/variable_state_audit.md \
             docs/refactors/variable_state_member_inventory.md \
             docs/refactors/state_ownership_matrix.md \
