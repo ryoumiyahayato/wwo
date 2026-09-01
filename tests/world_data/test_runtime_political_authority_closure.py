@@ -6,6 +6,9 @@ ROOT = Path(__file__).resolve().parents[2]
 SCRIPTS = ROOT / "scripts"
 FORMAL_SIMULATION = SCRIPTS / "formal" / "formal_world_simulation.gd"
 CATALOG = SCRIPTS / "formal" / "historical_political_evidence_catalog.gd"
+STANDALONE_BOOTSTRAP = (
+    SCRIPTS / "formal" / "historical_evidence_standalone_bootstrap.gd"
+)
 
 
 class RuntimePoliticalAuthorityClosureTest(unittest.TestCase):
@@ -26,10 +29,15 @@ class RuntimePoliticalAuthorityClosureTest(unittest.TestCase):
             [],
         )
 
-    def test_formal_simulation_is_the_only_runtime_owner_constructor(self) -> None:
+    def test_historical_evidence_constructors_stay_in_admission_boundaries(self) -> None:
         self.assertEqual(
             self._gd_sources_containing("HistoricalPoliticalEvidenceCatalog.new()"),
-            [FORMAL_SIMULATION.relative_to(ROOT)],
+            sorted(
+                [
+                    FORMAL_SIMULATION.relative_to(ROOT),
+                    STANDALONE_BOOTSTRAP.relative_to(ROOT),
+                ]
+            ),
         )
         self.assertEqual(
             self._gd_sources_containing("RuntimePoliticalEntityRegistry.new()"),
@@ -46,10 +54,12 @@ class RuntimePoliticalAuthorityClosureTest(unittest.TestCase):
         application = (
             SCRIPTS / "formal" / "formal_world_application.gd"
         ).read_text(encoding="utf-8")
+        bootstrap = STANDALONE_BOOTSTRAP.read_text(encoding="utf-8")
         self.assertIn("RuntimePoliticalEntityView", economy)
         self.assertNotIn("RuntimePoliticalEntityRegistry", economy)
         self.assertIn("RuntimePoliticalEntityView", projection)
         self.assertIn("HistoricalPoliticalEvidenceView", projection)
+        self.assertNotIn("RuntimePoliticalEntityRegistry.new()", bootstrap)
         self.assertNotIn("compatibility_controller_id", projection)
         self.assertNotIn("controller_id", application)
         self.assertNotIn("控制方", application)
