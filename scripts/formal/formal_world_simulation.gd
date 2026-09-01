@@ -1,12 +1,14 @@
 class_name FormalWorldSimulation
 extends RefCounted
 ## Formal product composition root. Immutable evidence, current political
-## identity, and economic aggregates remain separate owned boundaries.
+## identity, economic aggregates, and OrganizationCore remain separate owned
+## boundaries. This root owns composition and lifecycle, never a second copy of
+## organization authority.
 
 signal state_changed(change: Dictionary)
 
 const SAVE_PATH: String = "user://formal_world_1900.json"
-const SCHEMA_ID: String = "formal_world_simulation_v4"
+const SCHEMA_ID: String = "formal_world_simulation_v5"
 const EVIDENCE_STATE_SCHEMA_ID: String = "historical_political_evidence_v1"
 
 var _provenance := HistoricalProvenanceFoundation.new()
@@ -20,6 +22,10 @@ var _population_input_view := FormalWorldPopulationInputView.new()
 var _market_registry := FormalWorldMarketRegistry.new()
 var _market_registry_view := FormalWorldMarketView.new()
 var _economy := FormalWorldEconomyService.new()
+var _organization: VNextOrganizationCore = null
+var _organization_person_reference_ids: Array[String] = []
+var _organization_place_reference_ids: Array[String] = []
+var _organization_composition_error: String = ""
 var economy: FormalWorldEconomyView:
 	get:
 		return economy_view()
@@ -32,7 +38,42 @@ var _minute_remainder: int:
 		return total_minutes % 60
 
 
-func _init() -> void:
+func _init(
+	organization_core_value: VNextOrganizationCore = null,
+	organization_person_reference_ids: Array[String] = [],
+	organization_place_reference_ids: Array[String] = []
+) -> void:
+	_organization_person_reference_ids = organization_person_reference_ids.duplicate()
+	_organization_person_reference_ids.sort()
+	_organization_place_reference_ids = organization_place_reference_ids.duplicate()
+	_organization_place_reference_ids.sort()
+	var reference_catalog := VNextOrganizationReferenceCatalog.create(
+		_organization_person_reference_ids,
+		_organization_place_reference_ids
+	)
+	if reference_catalog == null:
+		_organization_composition_error = "Organization reference provider is invalid"
+	else:
+		_organization = (
+			organization_core_value
+			if organization_core_value != null
+			else VNextOrganizationCore.new()
+		)
+		if not _organization.has_reference_catalog():
+			if not _organization.configure_reference_catalog(
+				_organization_person_reference_ids,
+				_organization_place_reference_ids
+			):
+				_organization_composition_error = (
+					"Organization reference provider is missing or cannot be bound"
+				)
+		elif (
+			_organization.reference_catalog_fingerprint()
+			!= reference_catalog.fingerprint()
+		):
+			_organization_composition_error = (
+				"Organization reference provider does not match the injected core"
+			)
 	_economy.bind_authoritative_hour_source(
 		Callable(self, "_authoritative_total_hour")
 	)
@@ -45,6 +86,19 @@ func initialize() -> bool:
 	_initialization_attempted = true
 	initialization_error = ""
 	total_minutes = 0
+	if (
+		_organization == null
+		or not _organization_composition_error.is_empty()
+		or not _organization.has_reference_catalog()
+		or not _organization.is_valid()
+	):
+		initialization_error = (
+			_organization_composition_error
+			if not _organization_composition_error.is_empty()
+			else "Organization composition is invalid"
+		)
+		initialized = false
+		return false
 	if not _provenance.load_current():
 		initialization_error = _provenance.initialization_error
 		initialized = false
@@ -104,6 +158,16 @@ func economy_view() -> FormalWorldEconomyView:
 	if not _economy.is_configured():
 		return FormalWorldEconomyView.new()
 	return FormalWorldEconomyView.new(_economy.read_only_snapshot())
+
+
+func organization_view() -> FormalWorldOrganizationView:
+	if _organization == null:
+		return FormalWorldOrganizationView.new()
+	return FormalWorldOrganizationView.new(_organization.snapshot())
+
+
+func organization_query_port() -> FormalWorldOrganizationView:
+	return organization_view()
 
 
 func economy_regression_snapshot() -> Dictionary:
@@ -222,11 +286,26 @@ func get_persistent_state() -> Dictionary:
 		"runtime_politics": _political_registry.snapshot(),
 		"markets": _market_registry.get_persistent_state(),
 		"economy": _economy.get_persistent_state(),
+		"organization": _organization.snapshot(),
 	}
 
 
+func authoritative_fingerprint() -> String:
+	if not initialized or _organization == null:
+		return ""
+	return JSON.stringify({
+		"schema_id": "formal_world_authoritative_fingerprint_v1",
+		"total_minutes": total_minutes,
+		"historical_evidence": _historical_evidence.fingerprint(),
+		"runtime_politics": JSON.stringify(_political_registry.snapshot()).sha256_text(),
+		"markets": JSON.stringify(_market_registry.get_persistent_state()).sha256_text(),
+		"economy": JSON.stringify(_economy.get_persistent_state()).sha256_text(),
+		"organization": _organization.state_fingerprint(),
+	}).sha256_text()
+
+
 func restore_persistent_state(state: Dictionary) -> bool:
-	var candidate := FormalWorldSimulation.new()
+	var candidate := _new_candidate_world()
 	if not candidate.initialize():
 		return false
 	if not candidate._restore_candidate_state(state):
@@ -243,6 +322,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 			"formal_world_simulation_v1",
 			"formal_world_simulation_v2",
 			"formal_world_simulation_v3",
+			"formal_world_simulation_v4",
 			SCHEMA_ID,
 		]
 		or not state.get("economy", {}) is Dictionary
@@ -251,7 +331,11 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 	var validated_time := _validated_time_state(state, schema_id)
 	if validated_time.is_empty():
 		return false
-	if schema_id in ["formal_world_simulation_v3", SCHEMA_ID]:
+	if schema_id in [
+		"formal_world_simulation_v3",
+		"formal_world_simulation_v4",
+		SCHEMA_ID,
+	]:
 		if (
 			not state.get("historical_evidence", {}) is Dictionary
 			or not state.get("runtime_politics", {}) is Dictionary
@@ -272,11 +356,19 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 		_refresh_read_only_views()
 		if not _economy.bind_runtime_political_view(_political_registry_view):
 			return false
-	if schema_id == SCHEMA_ID:
+	if schema_id in ["formal_world_simulation_v4", SCHEMA_ID]:
 		if (
 			not state.get("markets", {}) is Dictionary
 			or not _market_registry.validate_persistent_state(
 				state.get("markets", {}) as Dictionary
+			)
+		):
+			return false
+	if schema_id == SCHEMA_ID:
+		if (
+			not state.get("organization", {}) is Dictionary
+			or not _organization.restore(
+				state.get("organization", {}) as Dictionary
 			)
 		):
 			return false
@@ -302,11 +394,37 @@ func _adopt_candidate(candidate: FormalWorldSimulation) -> void:
 	_market_registry = candidate._market_registry
 	_market_registry_view = candidate._market_registry_view
 	_economy = candidate._economy
+	_organization = candidate._organization
+	_organization_person_reference_ids = (
+		candidate._organization_person_reference_ids.duplicate()
+	)
+	_organization_place_reference_ids = (
+		candidate._organization_place_reference_ids.duplicate()
+	)
+	_organization_composition_error = ""
 	_economy.bind_authoritative_hour_source(
 		Callable(self, "_authoritative_total_hour")
 	)
 	initialized = true
 	initialization_error = ""
+	_initialization_attempted = true
+
+
+func reset_world() -> bool:
+	var candidate := _new_candidate_world()
+	if not candidate.initialize():
+		return false
+	_adopt_candidate(candidate)
+	state_changed.emit({"reset": true})
+	return true
+
+
+func _new_candidate_world() -> FormalWorldSimulation:
+	return FormalWorldSimulation.new(
+		null,
+		_organization_person_reference_ids,
+		_organization_place_reference_ids
+	)
 
 
 func _refresh_read_only_views() -> void:
@@ -368,7 +486,7 @@ func _verify_temporary_save(absolute_path: String) -> String:
 	var loaded := _read_snapshot_file(absolute_path)
 	if not loaded.success:
 		return "临时存档校验失败：%s" % loaded.message
-	var candidate := FormalWorldSimulation.new()
+	var candidate := _new_candidate_world()
 	if not candidate.initialize():
 		return "临时存档校验失败：正式世界初始化失败：%s" % (
 			candidate.initialization_error
@@ -455,6 +573,7 @@ func _validated_time_state(state: Dictionary, schema_id: String) -> Dictionary:
 	if schema_id in [
 		"formal_world_simulation_v2",
 		"formal_world_simulation_v3",
+		"formal_world_simulation_v4",
 		SCHEMA_ID,
 	] and (
 		not state.has("total_minutes") or not state.has("minute_remainder")
