@@ -1,0 +1,62 @@
+name: Historical evidence repair artifact refresh
+
+on:
+  push:
+    branches:
+      - canonical/current-world
+    paths:
+      - ".github/workflows/historical-evidence-refresh-artifacts.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    if: github.repository == 'ryoumiyahayato/wwo' && github.ref == 'refs/heads/canonical/current-world'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact repair head
+        uses: actions/checkout@v4
+        with:
+          ref: canonical/current-world
+          fetch-depth: 2
+
+      - name: Regenerate deterministic artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B tools/audit_variable_state.py --root .
+          python3 tools/render_variable_state_audit_summary.py
+          python3 tools/render_variable_state_member_inventory.py
+          python3 tools/generate_variable_state_docs.py
+          python3 tools/render_variable_refactor_plan.py
+          tmp="$(mktemp -d)"
+          python3 tools/world_data/validate_world_data.py --root . --data-root data/world_map --output-dir "$tmp" --allow-errors
+          python3 tools/world_data/build_batch2_artifacts.py --root . --output-dir "$tmp"
+          python3 tools/world_data/build_batch3_contracts.py --root . --output-dir "$tmp"
+          python3 tools/world_data/build_batch4_run_manifest.py --root . --output-dir "$tmp"
+          cp "$tmp/batch3_loader_contract.json" local-artifacts/world-data-audit/batch3_loader_contract.json
+          cp "$tmp/batch4_run_manifest.json" local-artifacts/world-data-audit/batch4_run_manifest.json
+
+      - name: Commit repair-induced deterministic refresh
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- \
+            docs/refactors/variable_state_audit.md \
+            docs/refactors/variable_state_member_inventory.md \
+            docs/refactors/state_ownership_matrix.md \
+            docs/refactors/variable_refactor_plan.md \
+            local-artifacts/world-data-audit/batch3_loader_contract.json \
+            local-artifacts/world-data-audit/batch4_run_manifest.json
+          if git diff --cached --quiet; then
+            echo "No deterministic refresh required"
+            exit 0
+          fi
+          git diff --cached --check
+          git commit -m "chore: refresh repair-induced deterministic audits"
+          git push origin HEAD:canonical/current-world
