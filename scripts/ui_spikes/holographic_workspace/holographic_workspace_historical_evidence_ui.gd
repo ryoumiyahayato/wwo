@@ -85,4 +85,4 @@ func _draw_historical_entity_focus() -> void:
 		flag_copy = "无单一标准旗：" + str(entity.get("flag_absence_reason", "已记录为中性显示"))
 	_draw_label(rect.position + Vector2(12.0, 67.0), flag_copy, 9, Color(0.91, 0.75, 0.44, 0.92))
 	_draw_button(Rect2(rect.position.x + 12.0, rect.end.y - 38.0, 98.0, 28.0), "返回全球", "history_back_global", true)
-	_draw_button(Rect2(rect.end.x - 136.0, rect.end.y - 38.0, 124.0, 28.0), "进入辖区", not selected_historical_territory_iso.is_empty() or territories.size() == 1)
+	_draw_button(Rect2(rect.end.x - 136.0, rect.end.y - 38.0, 124.0, 28.0), "进入辖区", "enter_region", not selected_historical_territory_iso.is_empty() or territories.size() == 1)
