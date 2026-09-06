@@ -1,0 +1,243 @@
+name: Current World Batch4 Deterministic Proof
+
+on:
+  push:
+    branches:
+      - ci/current-world-batch4-proof-20260903
+
+permissions:
+  contents: read
+
+jobs:
+  prove-batch4:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      TARGET_SHA: cd0a0479789d432f9a940c4bd63f747fe9ef47b9
+    steps:
+      - name: Check out exact tested tree
+        uses: actions/checkout@v4
+        with:
+          ref: cd0a0479789d432f9a940c4bd63f747fe9ef47b9
+          fetch-depth: 1
+
+      - name: Verify target and prepare independent clean contexts
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual="$(git rev-parse HEAD)"
+          echo "TARGET_SHA=$TARGET_SHA"
+          echo "CHECKED_OUT_SHA=$actual"
+          test "$actual" = "$TARGET_SHA"
+
+          proof="$RUNNER_TEMP/current-world-batch4-proof"
+          run1="$RUNNER_TEMP/wwo-proof-run1"
+          run2="$RUNNER_TEMP/wwo-proof-run2"
+          out1="$RUNNER_TEMP/wwo-proof-output1"
+          out2="$RUNNER_TEMP/wwo-proof-output2"
+          rm -rf "$proof" "$run1" "$run2" "$out1" "$out2"
+          mkdir -p "$proof/tracked" "$proof/run1" "$proof/run2" "$out1" "$out2"
+
+          cp local-artifacts/world-data-audit/batch4_run_manifest.json "$proof/tracked/batch4_run_manifest.json"
+          tracked_sha="$(sha256sum "$proof/tracked/batch4_run_manifest.json" | awk '{print $1}')"
+          echo "TRACKED_SHA=$tracked_sha"
+
+          # Two independent clean contexts from the same exact immutable checkout.
+          # Keep .git metadata identical and explicit even though the official generators
+          # are root/output-dir driven, so Git context cannot differ between runs.
+          cp -a "$GITHUB_WORKSPACE/." "$run1/"
+          cp -a "$GITHUB_WORKSPACE/." "$run2/"
+          test "$(git -C "$run1" rev-parse HEAD)" = "$TARGET_SHA"
+          test "$(git -C "$run2" rev-parse HEAD)" = "$TARGET_SHA"
+
+          {
+            echo "PROOF_DIR=$proof"
+            echo "RUN1_DIR=$run1"
+            echo "RUN2_DIR=$run2"
+            echo "OUT1_DIR=$out1"
+            echo "OUT2_DIR=$out2"
+            echo "TRACKED_SHA=$tracked_sha"
+          } >> "$GITHUB_ENV"
+
+      - name: Run official generation chain independently twice
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          run_chain() {
+            root="$1"
+            out="$2"
+            python3 "$root/tools/world_data/validate_world_data.py" \
+              --root "$root" \
+              --data-root "$root/data/world_map" \
+              --output-dir "$out" \
+              --allow-errors
+            python3 "$root/tools/world_data/build_batch2_artifacts.py" \
+              --root "$root" \
+              --output-dir "$out"
+            python3 "$root/tools/world_data/build_batch3_contracts.py" \
+              --root "$root" \
+              --output-dir "$out"
+            python3 "$root/tools/world_data/build_batch4_run_manifest.py" \
+              --root "$root" \
+              --output-dir "$out"
+          }
+
+          (cd "$RUN1_DIR" && run_chain "$RUN1_DIR" "$OUT1_DIR")
+          (cd "$RUN2_DIR" && run_chain "$RUN2_DIR" "$OUT2_DIR")
+
+          cp "$OUT1_DIR/batch4_run_manifest.json" "$PROOF_DIR/run1/batch4_run_manifest.json"
+          cp "$OUT2_DIR/batch4_run_manifest.json" "$PROOF_DIR/run2/batch4_run_manifest.json"
+
+          generated_1_sha="$(sha256sum "$PROOF_DIR/run1/batch4_run_manifest.json" | awk '{print $1}')"
+          generated_2_sha="$(sha256sum "$PROOF_DIR/run2/batch4_run_manifest.json" | awk '{print $1}')"
+          echo "GENERATED_1_SHA=$generated_1_sha"
+          echo "GENERATED_2_SHA=$generated_2_sha"
+          {
+            echo "GENERATED_1_SHA=$generated_1_sha"
+            echo "GENERATED_2_SHA=$generated_2_sha"
+          } >> "$GITHUB_ENV"
+
+      - name: Build structured semantic diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - "$PROOF_DIR/tracked/batch4_run_manifest.json" "$PROOF_DIR/run1/batch4_run_manifest.json" "$PROOF_DIR/run2/batch4_run_manifest.json" "$PROOF_DIR/batch4-semantic-diff.json" <<'PY'
+          import hashlib
+          import json
+          import sys
+          from pathlib import Path
+
+          tracked_path, run1_path, run2_path, output_path = map(Path, sys.argv[1:])
+
+          def load(path):
+              return json.loads(path.read_text(encoding="utf-8"))
+
+          def sha(path):
+              return hashlib.sha256(path.read_bytes()).hexdigest()
+
+          def compare(a, b):
+              added = []
+              removed = []
+              changed_paths = []
+              changed_scalars = []
+
+              def walk(left, right, path="$"):
+                  if isinstance(left, dict) and isinstance(right, dict):
+                      lkeys = set(left)
+                      rkeys = set(right)
+                      for key in sorted(rkeys - lkeys):
+                          added.append(f"{path}.{key}")
+                      for key in sorted(lkeys - rkeys):
+                          removed.append(f"{path}.{key}")
+                      for key in sorted(lkeys & rkeys):
+                          walk(left[key], right[key], f"{path}.{key}")
+                      return
+                  if isinstance(left, list) and isinstance(right, list):
+                      common = min(len(left), len(right))
+                      for index in range(common):
+                          walk(left[index], right[index], f"{path}[{index}]")
+                      for index in range(common, len(right)):
+                          added.append(f"{path}[{index}]")
+                      for index in range(common, len(left)):
+                          removed.append(f"{path}[{index}]")
+                      return
+                  if left != right:
+                      changed_paths.append(path)
+                      if not isinstance(left, (dict, list)) and not isinstance(right, (dict, list)):
+                          changed_scalars.append({"path": path, "tracked_or_left": left, "generated_or_right": right})
+
+              walk(a, b)
+              return {
+                  "semantic_equal": a == b,
+                  "added_keys": added,
+                  "removed_keys": removed,
+                  "changed_keys": changed_paths,
+                  "changed_scalar_values": changed_scalars,
+              }
+
+          tracked = load(tracked_path)
+          run1 = load(run1_path)
+          run2 = load(run2_path)
+          result = {
+              "run1_vs_run2": compare(run1, run2),
+              "tracked_vs_run1": compare(tracked, run1),
+          }
+          result["run1_vs_run2"]["byte_equal"] = sha(run1_path) == sha(run2_path)
+          result["tracked_vs_run1"]["byte_equal"] = sha(tracked_path) == sha(run1_path)
+          Path(output_path).write_text(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
+          print(json.dumps(result, ensure_ascii=False, sort_keys=True))
+          PY
+
+      - name: Run existing official replay test against exact target
+        id: replay
+        shell: bash
+        run: |
+          set +e
+          cd "$GITHUB_WORKSPACE"
+          python3 -B -m unittest tests.world_data.test_batch4_run_manifest.Batch4RunManifestTests.test_official_generators_replay_tracked_artifacts_and_detect_mutation \
+            >"$PROOF_DIR/official-replay-test.txt" 2>&1
+          rc=$?
+          cat "$PROOF_DIR/official-replay-test.txt"
+          echo "OFFICIAL_REPLAY_RC=$rc" >> "$GITHUB_ENV"
+          exit 0
+
+      - name: Write proof summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          pyver="$(python3 --version 2>&1)"
+          os="$(uname -a)"
+          gen_equal=NO
+          tracked_equal=NO
+          test "$GENERATED_1_SHA" = "$GENERATED_2_SHA" && gen_equal=YES || true
+          test "$GENERATED_1_SHA" = "$TRACKED_SHA" && tracked_equal=YES || true
+          semantic_equal="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1],encoding="utf-8")); print("YES" if d["tracked_vs_run1"]["semantic_equal"] else "NO")' "$PROOF_DIR/batch4-semantic-diff.json")"
+          byte_equal="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1],encoding="utf-8")); print("YES" if d["tracked_vs_run1"]["byte_equal"] else "NO")' "$PROOF_DIR/batch4-semantic-diff.json")"
+          cat > "$PROOF_DIR/proof-summary.txt" <<EOF
+          target commit SHA: $TARGET_SHA
+          tracked SHA: $TRACKED_SHA
+          generated #1 SHA: $GENERATED_1_SHA
+          generated #2 SHA: $GENERATED_2_SHA
+          generated1 == generated2: $gen_equal
+          generated == tracked: $tracked_equal
+          semantic_equal tracked vs run1: $semantic_equal
+          byte_equal tracked vs run1: $byte_equal
+          official replay return code: $OFFICIAL_REPLAY_RC
+          generation context: two independent full filesystem copies (including .git) from exact target checkout; generation outputs stored in separate external temp directories
+          official commands (cwd = each independent repository root):
+            python3 tools/world_data/validate_world_data.py --root <root> --data-root <root>/data/world_map --output-dir <out> --allow-errors
+            python3 tools/world_data/build_batch2_artifacts.py --root <root> --output-dir <out>
+            python3 tools/world_data/build_batch3_contracts.py --root <root> --output-dir <out>
+            python3 tools/world_data/build_batch4_run_manifest.py --root <root> --output-dir <out>
+          runner OS: $os
+          Python version: $pyver
+          EOF
+          cat "$PROOF_DIR/proof-summary.txt"
+
+      - name: Upload deterministic proof artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: current-world-batch4-proof-${{ env.TARGET_SHA }}
+          path: ${{ env.PROOF_DIR }}
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Enforce initial proof gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$GENERATED_1_SHA" != "$GENERATED_2_SHA" ]; then
+            echo "CLASSIFICATION=GENERATOR NONDETERMINISM"
+            exit 1
+          fi
+          if [ "$GENERATED_1_SHA" != "$TRACKED_SHA" ]; then
+            echo "CLASSIFICATION=STALE TRACKED ARTIFACT"
+            exit 0
+          fi
+          if [ "$OFFICIAL_REPLAY_RC" != "0" ]; then
+            echo "CLASSIFICATION=REPLAY HARNESS DEFECT"
+            exit 1
+          fi
+          echo "CLASSIFICATION=TRACKED ARTIFACT CURRENT"
