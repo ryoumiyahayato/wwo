@@ -1,0 +1,283 @@
+name: World Data Canonical Path Order Repair
+
+on:
+  push:
+    branches:
+      - ci/world-data-canonical-path-order-repair-20260906
+
+permissions:
+  contents: write
+
+jobs:
+  build-repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BASE_SHA: cd0a0479789d432f9a940c4bd63f747fe9ef47b9
+      FIX_BRANCH: fix/world-data-canonical-path-order-20260906
+    steps:
+      - name: Check out isolated repair branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/world-data-canonical-path-order-20260906
+          fetch-depth: 0
+
+      - name: Verify fixed baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$BASE_SHA"
+          test "$(git ls-remote origin "refs/heads/$FIX_BRANCH" | cut -f1)" = "$BASE_SHA"
+          python3 - <<'PY'
+          import hashlib
+          from pathlib import Path
+          root = Path('.')
+          rows = []
+          for path in sorted(root.joinpath('data/world_map').rglob('*'), key=lambda p: p.relative_to(root).as_posix()):
+              if path.is_file():
+                  rows.append((path.relative_to(root).as_posix(), hashlib.sha256(path.read_bytes()).hexdigest()))
+          Path('/tmp/world-data-before.txt').write_text('\n'.join(f'{p}\t{h}' for p,h in rows) + '\n', encoding='utf-8')
+          print(f'WORLD_DATA_SOURCE_FILE_COUNT_BEFORE={len(rows)}')
+          PY
+
+      - name: Apply canonical path-order repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > tools/world_data/path_order.py <<'PY'
+          """Cross-platform canonical ordering for repository-derived paths.
+
+          Canonical collation is the case-sensitive Unicode/code-point order of a
+          normalized relative POSIX path string.  The comparison never uses native
+          ``Path`` ordering, filesystem enumeration order, host separators, casefold,
+          ``os.name``, or platform-specific branches.  With this rule ``LICENSE.json``
+          sorts before ``countries/...`` because ``L`` precedes ``c`` by code point.
+
+          Callers pass the stable semantic root for the path set.  Repository scans
+          use the repository root; scans of an external generated-artifact directory
+          use that directory as the stable root.  Adding the same common prefix to
+          every path does not change this ordering.
+          """
+
+          from __future__ import annotations
+
+          from collections.abc import Iterable
+          from pathlib import Path
+
+
+          def canonical_relative_posix_path(path: Path, root: Path) -> str:
+              """Return the normalized relative POSIX string used as the sort key."""
+              return path.relative_to(root).as_posix()
+
+
+          def canonical_path_sort(paths: Iterable[Path], root: Path) -> list[Path]:
+              """Materialize *paths* in the repository's one canonical path order."""
+              return sorted(paths, key=lambda path: canonical_relative_posix_path(path, root))
+          PY
+
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_exact(path: str, old: str, new: str) -> None:
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{path}: expected exactly one replacement, found {count}: {old!r}')
+              p.write_text(text.replace(old, new), encoding='utf-8', newline='\n')
+
+          p = 'tools/world_data/build_batch2_artifacts.py'
+          replace_exact(p, 'from typing import Any, Mapping\n', 'from typing import Any, Iterable, Mapping\n')
+          replace_exact(
+              p,
+              '        source_asset_records,\n    )\nexcept ModuleNotFoundError:\n',
+              '        source_asset_records,\n    )\n    from tools.world_data.path_order import canonical_path_sort\nexcept ModuleNotFoundError:\n',
+          )
+          replace_exact(
+              p,
+              '        source_asset_records,\n    )\n\n\nSCHEMA_VERSION',
+              '        source_asset_records,\n    )\n    from path_order import canonical_path_sort  # type: ignore[no-redef]\n\n\nSCHEMA_VERSION',
+          )
+          replace_exact(
+              p,
+              'def build_data_manifest(repository_root: Path) -> dict[str, Any]:\n    data_root = repository_root / "data" / "world_map"\n    rows: list[dict[str, Any]] = []\n    parse_errors: list[dict[str, str]] = []\n    for path in sorted(data_root.rglob("*.json")):\n',
+              'def build_data_manifest(repository_root: Path, data_paths: Iterable[Path] | None = None) -> dict[str, Any]:\n    data_root = repository_root / "data" / "world_map"\n    rows: list[dict[str, Any]] = []\n    parse_errors: list[dict[str, str]] = []\n    paths = data_root.rglob("*.json") if data_paths is None else data_paths\n    for path in canonical_path_sort(paths, repository_root):\n',
+          )
+          replace_exact(
+              p,
+              '    asset_files = sorted(asset_root.glob("*.png"))\n',
+              '    asset_files = canonical_path_sort(asset_root.glob("*.png"), repository_root)\n',
+          )
+
+          p = 'tools/world_data/build_batch3_contracts.py'
+          replace_exact(p, 'from typing import Any, Iterator, Mapping\n', 'from typing import Any, Iterable, Iterator, Mapping\n')
+          replace_exact(
+              p,
+              '        resource_path_for_record,\n    )\nexcept ModuleNotFoundError:\n',
+              '        resource_path_for_record,\n    )\n    from tools.world_data.path_order import canonical_path_sort\nexcept ModuleNotFoundError:\n',
+          )
+          replace_exact(
+              p,
+              '        resource_path_for_record,\n    )\n\n\nSCHEMA_VERSION',
+              '        resource_path_for_record,\n    )\n    from path_order import canonical_path_sort  # type: ignore[no-redef]\n\n\nSCHEMA_VERSION',
+          )
+          replace_exact(
+              p,
+              '    scripts = sorted(path for root in script_roots for path in root.rglob("*.gd"))\n    data_files = sorted(repository_root.joinpath("data", "world_map").rglob("*.json"))\n',
+              '    scripts = canonical_path_sort((path for root in script_roots for path in root.rglob("*.gd")), repository_root)\n    data_files = canonical_path_sort(repository_root.joinpath("data", "world_map").rglob("*.json"), repository_root)\n',
+          )
+          replace_exact(
+              p,
+              '            matches = sorted(path for path in local.rglob("*.json")) if local.is_dir() else []\n',
+              '            matches = canonical_path_sort(local.rglob("*.json"), repository_root) if local.is_dir() else []\n',
+          )
+          replace_exact(
+              p,
+              'def build_record_signatures(repository_root: Path) -> dict[str, Any]:\n    rows: list[dict[str, Any]] = []\n    for path in sorted(repository_root.joinpath("data", "world_map").rglob("*.json")):\n',
+              'def build_record_signatures(repository_root: Path, data_paths: Iterable[Path] | None = None) -> dict[str, Any]:\n    rows: list[dict[str, Any]] = []\n    paths = repository_root.joinpath("data", "world_map").rglob("*.json") if data_paths is None else data_paths\n    for path in canonical_path_sort(paths, repository_root):\n',
+          )
+
+          p = 'tools/world_data/build_batch4_run_manifest.py'
+          replace_exact(p, 'from typing import Any, Mapping\n', 'from typing import Any, Mapping\n\ntry:\n    from tools.world_data.path_order import canonical_path_sort\nexcept ModuleNotFoundError:\n    from path_order import canonical_path_sort  # type: ignore[no-redef]\n')
+          replace_exact(
+              p,
+              '    for path in sorted(output_dir.glob("*.json")):\n',
+              '    for path in canonical_path_sort(output_dir.glob("*.json"), output_dir):\n',
+          )
+          PY
+
+          cat > tests/world_data/test_canonical_path_order.py <<'PY'
+          #!/usr/bin/env python3
+          """Regression tests for the cross-platform world-data path-order contract."""
+
+          from __future__ import annotations
+
+          import tempfile
+          import unittest
+          from pathlib import Path
+
+          from tools.world_data.build_batch2_artifacts import build_data_manifest
+          from tools.world_data.build_batch3_contracts import build_record_signatures
+          from tools.world_data.path_order import canonical_path_sort, canonical_relative_posix_path
+
+
+          class CanonicalPathOrderTests(unittest.TestCase):
+              def test_mixed_case_paths_use_one_case_sensitive_posix_order(self) -> None:
+                  root = Path('/synthetic/repository')
+                  paths = [
+                      root / 'data/world_map/city_detail/index.json',
+                      root / 'data/world_map/city_detail/countries/foo.json',
+                      root / 'data/world_map/city_detail/LICENSE.json',
+                  ]
+                  ordered = [canonical_relative_posix_path(path, root) for path in canonical_path_sort(paths, root)]
+                  self.assertEqual(
+                      ordered,
+                      [
+                          'data/world_map/city_detail/LICENSE.json',
+                          'data/world_map/city_detail/countries/foo.json',
+                          'data/world_map/city_detail/index.json',
+                      ],
+                  )
+
+              def test_batch2_and_batch3_are_insertion_order_independent(self) -> None:
+                  with tempfile.TemporaryDirectory() as temp_dir:
+                      root = Path(temp_dir)
+                      paths = [
+                          root / 'data/world_map/city_detail/index.json',
+                          root / 'data/world_map/city_detail/countries/foo.json',
+                          root / 'data/world_map/city_detail/LICENSE.json',
+                      ]
+                      documents = [
+                          '{"id":"index","items":[1]}\n',
+                          '{"id":"foo","items":[2]}\n',
+                          '{"id":"license","items":[3]}\n',
+                      ]
+                      for path, text in zip(paths, documents):
+                          path.parent.mkdir(parents=True, exist_ok=True)
+                          path.write_text(text, encoding='utf-8', newline='\n')
+
+                      forward_data = build_data_manifest(root, paths)
+                      reverse_data = build_data_manifest(root, reversed(paths))
+                      self.assertEqual(forward_data['files'], reverse_data['files'])
+                      self.assertEqual(forward_data['dataset_sha256'], reverse_data['dataset_sha256'])
+
+                      forward_signatures = build_record_signatures(root, paths)
+                      reverse_signatures = build_record_signatures(root, reversed(paths))
+                      self.assertEqual(forward_signatures['files'], reverse_signatures['files'])
+                      self.assertEqual(
+                          forward_signatures['record_signature_digest'],
+                          reverse_signatures['record_signature_digest'],
+                      )
+
+
+          if __name__ == '__main__':
+              unittest.main()
+          PY
+
+          python3 -m py_compile tools/world_data/path_order.py tools/world_data/build_batch2_artifacts.py tools/world_data/build_batch3_contracts.py tools/world_data/build_batch4_run_manifest.py tests/world_data/test_canonical_path_order.py
+
+      - name: Run focused regression before artifact refresh
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest tests.world_data.test_canonical_path_order
+
+      - name: Refresh official tracked generator artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="$GITHUB_WORKSPACE"
+          out="$GITHUB_WORKSPACE/local-artifacts/world-data-audit"
+          python3 tools/world_data/validate_world_data.py --root "$root" --data-root "$root/data/world_map" --output-dir "$out" --allow-errors
+          python3 tools/world_data/build_batch2_artifacts.py --root "$root" --output-dir "$out"
+          python3 tools/world_data/build_batch3_contracts.py --root "$root" --output-dir "$out"
+          python3 tools/world_data/build_batch4_run_manifest.py --root "$root" --output-dir "$out"
+
+      - name: Verify source data unchanged and run world-data tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code "$BASE_SHA" -- data/world_map data/provenance
+          python3 - <<'PY'
+          import hashlib
+          from pathlib import Path
+          root = Path('.')
+          rows = []
+          for path in sorted(root.joinpath('data/world_map').rglob('*'), key=lambda p: p.relative_to(root).as_posix()):
+              if path.is_file():
+                  rows.append((path.relative_to(root).as_posix(), hashlib.sha256(path.read_bytes()).hexdigest()))
+          after = '\n'.join(f'{p}\t{h}' for p,h in rows) + '\n'
+          before = Path('/tmp/world-data-before.txt').read_text(encoding='utf-8')
+          if after != before:
+              raise SystemExit('world-data source path/SHA set changed')
+          print(f'WORLD_DATA_SOURCE_FILE_COUNT_AFTER={len(rows)}')
+          PY
+          python3 -B -m unittest discover -s tests/world_data -p 'test_*.py'
+          python3 -B -m unittest tests.world_data.test_batch4_run_manifest.Batch4RunManifestTests.test_official_generators_replay_tracked_artifacts_and_detect_mutation
+
+      - name: Audit repair scope and commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo 'Changed paths:'
+          git status --short
+          python3 - <<'PY'
+          import subprocess
+          allowed_prefixes = (
+              'tools/world_data/',
+              'tests/world_data/',
+              'local-artifacts/world-data-audit/',
+          )
+          changed = subprocess.check_output(['git','status','--porcelain'], text=True).splitlines()
+          paths = [line[3:] for line in changed]
+          bad = [path for path in paths if not path.startswith(allowed_prefixes)]
+          if bad:
+              raise SystemExit(f'out-of-scope paths changed: {bad}')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tools/world_data tests/world_data local-artifacts/world-data-audit
+          git commit -m 'fix: canonicalize world-data path ordering'
+          candidate="$(git rev-parse HEAD)"
+          echo "CANDIDATE_SHA=$candidate"
+          git push origin "HEAD:refs/heads/$FIX_BRANCH"
