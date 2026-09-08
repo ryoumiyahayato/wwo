@@ -4,13 +4,42 @@ extends RefCounted
 const SNAPSHOT_SCHEMA_ID: String = "vnext_player_state_v1"
 
 var _player_id: String = ""
+var _person_authority: RefCounted = null
 
 
-func _init(initial_player_id: String = "") -> void:
+func _init(initial_player_id: String = "", person_authority: RefCounted = null) -> void:
+	if person_authority != null:
+		bind_person_authority(person_authority)
 	if initial_player_id.is_empty():
 		return
-	if _is_valid_player_id(initial_player_id):
-		_player_id = initial_player_id
+	set_player_id(initial_player_id)
+
+
+func bind_person_authority(person_authority: RefCounted) -> bool:
+	if person_authority == null or not person_authority.has_method("has_person"):
+		return false
+	if _person_authority != null and _person_authority != person_authority:
+		return false
+	if not _player_id.is_empty() and not bool(person_authority.call("has_person", _player_id)):
+		return false
+	_person_authority = person_authority
+	return true
+
+
+func has_person_authority() -> bool:
+	return _person_authority != null
+
+
+func set_player_id(candidate_player_id: String) -> bool:
+	if not _is_valid_player_id(candidate_player_id):
+		return false
+	if (
+		_person_authority != null
+		and not bool(_person_authority.call("has_person", candidate_player_id))
+	):
+		return false
+	_player_id = candidate_player_id
+	return true
 
 
 func player_id() -> String:
@@ -18,7 +47,12 @@ func player_id() -> String:
 
 
 func is_valid() -> bool:
-	return _is_valid_player_id(_player_id)
+	if not _is_valid_player_id(_player_id):
+		return false
+	return (
+		_person_authority == null
+		or bool(_person_authority.call("has_person", _player_id))
+	)
 
 
 func snapshot() -> Dictionary:
@@ -42,6 +76,11 @@ func restore(snapshot_value: Dictionary) -> bool:
 
 	var candidate_player_id: String = candidate_player_id_value
 	if not _is_valid_player_id(candidate_player_id):
+		return false
+	if (
+		_person_authority != null
+		and not bool(_person_authority.call("has_person", candidate_player_id))
+	):
 		return false
 
 	_player_id = candidate_player_id
