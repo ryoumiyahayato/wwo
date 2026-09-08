@@ -1,15 +1,20 @@
 class_name FormalWorldSimulation
 extends RefCounted
 ## Formal product composition root. Immutable evidence, current political
-## identity, economic aggregates, and OrganizationCore remain separate owned
-## boundaries. This root owns composition and lifecycle, never a second copy of
-## organization authority.
+## identity, economic aggregates, Population-backed named persons, and
+## OrganizationCore remain separate owned boundaries. This root owns
+## composition and lifecycle, never a second copy of domain authority.
 
 signal state_changed(change: Dictionary)
 
 const SAVE_PATH: String = "user://formal_world_1900.json"
-const SCHEMA_ID: String = "formal_world_simulation_v5"
+const SCHEMA_ID: String = "formal_world_simulation_v6"
+const PREVIOUS_SCHEMA_ID: String = "formal_world_simulation_v5"
 const EVIDENCE_STATE_SCHEMA_ID: String = "historical_political_evidence_v1"
+const DEFAULT_FORMAL_PERSON_ID: String = "person:formal_generated_country_fra_0001"
+const DEFAULT_FORMAL_PERSON_CLAIM_ID: String = "formal_population_claim:country_fra:0001"
+const DEFAULT_FORMAL_PERSON_TERRITORY_ID: String = "country_fra"
+const DEFAULT_FORMAL_PERSON_PLACE_ID: String = "place:paris"
 
 var _provenance := HistoricalProvenanceFoundation.new()
 var _historical_evidence := HistoricalPoliticalEvidenceCatalog.new()
@@ -22,10 +27,14 @@ var _population_input_view := FormalWorldPopulationInputView.new()
 var _market_registry := FormalWorldMarketRegistry.new()
 var _market_registry_view := FormalWorldMarketView.new()
 var _economy := FormalWorldEconomyService.new()
+var _spatial_catalog := VNextSpatialCatalog.new()
+var _person_authority: VNextNamedPersonOverlay = null
+var _player_state := VNextPlayerState.new()
 var _organization: VNextOrganizationCore = null
 var _organization_person_reference_ids: Array[String] = []
 var _organization_place_reference_ids: Array[String] = []
 var _organization_composition_error: String = ""
+var _explicit_organization_reference_injection: bool = false
 var economy: FormalWorldEconomyView:
 	get:
 		return economy_view()
@@ -47,19 +56,24 @@ func _init(
 	_organization_person_reference_ids.sort()
 	_organization_place_reference_ids = organization_place_reference_ids.duplicate()
 	_organization_place_reference_ids.sort()
-	var reference_catalog := VNextOrganizationReferenceCatalog.create(
-		_organization_person_reference_ids,
-		_organization_place_reference_ids
+	_explicit_organization_reference_injection = (
+		organization_core_value != null
+		or not _organization_person_reference_ids.is_empty()
+		or not _organization_place_reference_ids.is_empty()
 	)
-	if reference_catalog == null:
-		_organization_composition_error = "Organization reference provider is invalid"
-	else:
-		_organization = (
-			organization_core_value
-			if organization_core_value != null
-			else VNextOrganizationCore.new()
+	_organization = (
+		organization_core_value
+		if organization_core_value != null
+		else VNextOrganizationCore.new()
+	)
+	if _explicit_organization_reference_injection:
+		var reference_catalog := VNextOrganizationReferenceCatalog.create(
+			_organization_person_reference_ids,
+			_organization_place_reference_ids
 		)
-		if not _organization.has_reference_catalog():
+		if reference_catalog == null:
+			_organization_composition_error = "Organization reference provider is invalid"
+		elif not _organization.has_reference_catalog():
 			if not _organization.configure_reference_catalog(
 				_organization_person_reference_ids,
 				_organization_place_reference_ids
@@ -86,12 +100,7 @@ func initialize() -> bool:
 	_initialization_attempted = true
 	initialization_error = ""
 	total_minutes = 0
-	if (
-		_organization == null
-		or not _organization_composition_error.is_empty()
-		or not _organization.has_reference_catalog()
-		or not _organization.is_valid()
-	):
+	if _organization == null or not _organization_composition_error.is_empty():
 		initialization_error = (
 			_organization_composition_error
 			if not _organization_composition_error.is_empty()
@@ -119,6 +128,9 @@ func initialize() -> bool:
 		initialized = false
 		return false
 	_refresh_read_only_views()
+	if not _configure_formal_person_composition():
+		initialized = false
+		return false
 	if not _configure_market_registry():
 		initialization_error = _market_registry.initialization_error
 		initialized = false
@@ -170,6 +182,46 @@ func organization_query_port() -> FormalWorldOrganizationView:
 	return organization_view()
 
 
+func formal_person_count() -> int:
+	return _person_authority.person_count() if _person_authority != null else 0
+
+
+func formal_person_ids() -> Array[String]:
+	return _person_authority.person_ids() if _person_authority != null else []
+
+
+func has_formal_person(person_id: String) -> bool:
+	return _person_authority != null and _person_authority.has_person(person_id)
+
+
+func formal_person(person_id: String) -> Dictionary:
+	return _person_authority.person(person_id) if _person_authority != null else {}
+
+
+func formal_person_population_claim(person_id: String) -> Dictionary:
+	return _person_authority.population_claim(person_id) if _person_authority != null else {}
+
+
+func formal_person_anonymous_population(population_territory_id: String) -> int:
+	return (
+		_person_authority.anonymous_population_for_territory(population_territory_id)
+		if _person_authority != null
+		else -1
+	)
+
+
+func organization_person_reference_ids() -> Array[String]:
+	return _organization_person_reference_ids.duplicate()
+
+
+func player_person_id() -> String:
+	return _player_state.player_id()
+
+
+func select_player_person(person_id: String) -> bool:
+	return _player_state.set_player_id(person_id)
+
+
 func economy_regression_snapshot() -> Dictionary:
 	return _economy.legacy_regression_snapshot()
 
@@ -199,6 +251,7 @@ func world_summary() -> Dictionary:
 	var result := _economy.world_summary()
 	result["world_political_unit_count"] = _political_registry.entity_count()
 	result["historical_political_record_count"] = _historical_evidence.record_count()
+	result["formal_person_count"] = formal_person_count()
 	result["background_polity_count"] = maxi(
 		0,
 		_political_registry.entity_count()
@@ -286,20 +339,24 @@ func get_persistent_state() -> Dictionary:
 		"runtime_politics": _political_registry.snapshot(),
 		"markets": _market_registry.get_persistent_state(),
 		"economy": _economy.get_persistent_state(),
+		"persons": _person_authority.snapshot(),
+		"player": _player_state.snapshot(),
 		"organization": _organization.snapshot(),
 	}
 
 
 func authoritative_fingerprint() -> String:
-	if not initialized or _organization == null:
+	if not initialized or _organization == null or _person_authority == null:
 		return ""
 	return JSON.stringify({
-		"schema_id": "formal_world_authoritative_fingerprint_v1",
+		"schema_id": "formal_world_authoritative_fingerprint_v2",
 		"total_minutes": total_minutes,
 		"historical_evidence": _historical_evidence.fingerprint(),
 		"runtime_politics": JSON.stringify(_political_registry.snapshot()).sha256_text(),
 		"markets": JSON.stringify(_market_registry.get_persistent_state()).sha256_text(),
 		"economy": JSON.stringify(_economy.get_persistent_state()).sha256_text(),
+		"persons": _person_authority.state_fingerprint(),
+		"player": JSON.stringify(_player_state.snapshot()).sha256_text(),
 		"organization": _organization.state_fingerprint(),
 	}).sha256_text()
 
@@ -323,6 +380,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 			"formal_world_simulation_v2",
 			"formal_world_simulation_v3",
 			"formal_world_simulation_v4",
+			PREVIOUS_SCHEMA_ID,
 			SCHEMA_ID,
 		]
 		or not state.get("economy", {}) is Dictionary
@@ -334,6 +392,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 	if schema_id in [
 		"formal_world_simulation_v3",
 		"formal_world_simulation_v4",
+		PREVIOUS_SCHEMA_ID,
 		SCHEMA_ID,
 	]:
 		if (
@@ -356,7 +415,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 		_refresh_read_only_views()
 		if not _economy.bind_runtime_political_view(_political_registry_view):
 			return false
-	if schema_id in ["formal_world_simulation_v4", SCHEMA_ID]:
+	if schema_id in ["formal_world_simulation_v4", PREVIOUS_SCHEMA_ID, SCHEMA_ID]:
 		if (
 			not state.get("markets", {}) is Dictionary
 			or not _market_registry.validate_persistent_state(
@@ -365,6 +424,17 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 		):
 			return false
 	if schema_id == SCHEMA_ID:
+		if (
+			not state.get("persons", {}) is Dictionary
+			or not state.get("player", {}) is Dictionary
+			or not _person_authority.restore(state.get("persons", {}) as Dictionary)
+		):
+			return false
+		if not _rebind_player_and_organization_for_restored_persons():
+			return false
+		if not _player_state.restore(state.get("player", {}) as Dictionary):
+			return false
+	if schema_id in [PREVIOUS_SCHEMA_ID, SCHEMA_ID]:
 		if (
 			not state.get("organization", {}) is Dictionary
 			or not _organization.restore(
@@ -394,12 +464,18 @@ func _adopt_candidate(candidate: FormalWorldSimulation) -> void:
 	_market_registry = candidate._market_registry
 	_market_registry_view = candidate._market_registry_view
 	_economy = candidate._economy
+	_spatial_catalog = candidate._spatial_catalog
+	_person_authority = candidate._person_authority
+	_player_state = candidate._player_state
 	_organization = candidate._organization
 	_organization_person_reference_ids = (
 		candidate._organization_person_reference_ids.duplicate()
 	)
 	_organization_place_reference_ids = (
 		candidate._organization_place_reference_ids.duplicate()
+	)
+	_explicit_organization_reference_injection = (
+		candidate._explicit_organization_reference_injection
 	)
 	_organization_composition_error = ""
 	_economy.bind_authoritative_hour_source(
@@ -420,11 +496,13 @@ func reset_world() -> bool:
 
 
 func _new_candidate_world() -> FormalWorldSimulation:
-	return FormalWorldSimulation.new(
-		null,
-		_organization_person_reference_ids,
-		_organization_place_reference_ids
-	)
+	if _explicit_organization_reference_injection:
+		return FormalWorldSimulation.new(
+			null,
+			_organization_person_reference_ids,
+			_organization_place_reference_ids
+		)
+	return FormalWorldSimulation.new()
 
 
 func _refresh_read_only_views() -> void:
@@ -443,6 +521,111 @@ func _refresh_read_only_views() -> void:
 	_market_registry_view = FormalWorldMarketView.new(
 		_market_registry.read_only_snapshot()
 	)
+
+
+func _configure_formal_person_composition() -> bool:
+	if not _population_input_view.is_configured():
+		initialization_error = "Formal Population input is not configured"
+		return false
+	if not _spatial_catalog.load_legacy_world_map():
+		initialization_error = "Formal Person composition cannot bind Spatial places"
+		return false
+	_person_authority = VNextNamedPersonOverlay.create(
+		Callable(_population_input_view, "population"),
+		Callable(_spatial_catalog, "has_place"),
+		_population_input_view.fingerprint()
+	)
+	if _person_authority == null:
+		initialization_error = "Formal Person authority could not be created"
+		return false
+	var person_ids_to_materialize: Array[String] = (
+		_organization_person_reference_ids.duplicate()
+		if _explicit_organization_reference_injection
+		and not _organization_person_reference_ids.is_empty()
+		else [DEFAULT_FORMAL_PERSON_ID]
+	)
+	for index: int in person_ids_to_materialize.size():
+		var person_id: String = person_ids_to_materialize[index]
+		var claim_id := (
+			DEFAULT_FORMAL_PERSON_CLAIM_ID
+			if person_id == DEFAULT_FORMAL_PERSON_ID
+			else "formal_population_claim:explicit:%04d" % index
+		)
+		if not _person_authority.materialize(
+			person_id,
+			claim_id,
+			DEFAULT_FORMAL_PERSON_TERRITORY_ID,
+			{
+				"birth_year": 1870,
+				"sex": "unspecified",
+				"basis": "generated_simulation_assumption",
+				"joint_distribution_claimed": false,
+			},
+			DEFAULT_FORMAL_PERSON_PLACE_ID,
+			{
+				"kind": "generated",
+				"basis": "simulation_assumption",
+				"population_source_revision": _population_input_view.revision(),
+				"population_source_fingerprint": _population_input_view.fingerprint(),
+				"prototype_character_source": false,
+				"legacy_loran_vesta_source": false,
+			}
+		):
+			initialization_error = "Formal Person materialization failed: %s" % (
+				_person_authority.last_error()
+			)
+			return false
+	if not _explicit_organization_reference_injection:
+		_organization_person_reference_ids = _person_authority.person_ids()
+		_organization_place_reference_ids = [DEFAULT_FORMAL_PERSON_PLACE_ID]
+	if not _bind_organization_reference_catalog():
+		return false
+	_player_state = VNextPlayerState.new()
+	if not _player_state.bind_person_authority(_person_authority):
+		initialization_error = "PlayerState could not bind Formal Person authority"
+		return false
+	var person_ids := _person_authority.person_ids()
+	if person_ids.is_empty() or not _player_state.set_player_id(person_ids[0]):
+		initialization_error = "PlayerState could not select a Formal Person"
+		return false
+	return true
+
+
+func _bind_organization_reference_catalog() -> bool:
+	var expected := VNextOrganizationReferenceCatalog.create(
+		_organization_person_reference_ids,
+		_organization_place_reference_ids
+	)
+	if expected == null:
+		initialization_error = "Organization reference provider is invalid"
+		return false
+	if not _organization.has_reference_catalog():
+		if not _organization.configure_reference_catalog(
+			_organization_person_reference_ids,
+			_organization_place_reference_ids
+		):
+			initialization_error = "Organization reference provider cannot be bound"
+			return false
+	elif _organization.reference_catalog_fingerprint() != expected.fingerprint():
+		initialization_error = "Organization reference provider does not match Formal Person authority"
+		return false
+	if not _organization.is_valid():
+		initialization_error = "Organization composition is invalid"
+		return false
+	return true
+
+
+func _rebind_player_and_organization_for_restored_persons() -> bool:
+	_organization_person_reference_ids = _person_authority.person_ids()
+	if not _explicit_organization_reference_injection:
+		_organization_place_reference_ids = [DEFAULT_FORMAL_PERSON_PLACE_ID]
+	_organization = VNextOrganizationCore.new()
+	if not _bind_organization_reference_catalog():
+		return false
+	_player_state = VNextPlayerState.new()
+	if not _player_state.bind_person_authority(_person_authority):
+		return false
+	return true
 
 
 func _configure_market_registry() -> bool:
@@ -574,6 +757,7 @@ func _validated_time_state(state: Dictionary, schema_id: String) -> Dictionary:
 		"formal_world_simulation_v2",
 		"formal_world_simulation_v3",
 		"formal_world_simulation_v4",
+		PREVIOUS_SCHEMA_ID,
 		SCHEMA_ID,
 	] and (
 		not state.has("total_minutes") or not state.has("minute_remainder")
