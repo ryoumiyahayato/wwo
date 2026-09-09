@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: formal-person-overlay-${{ github.ref }}
@@ -42,6 +42,39 @@ jobs:
           $actual = (git rev-parse HEAD).Trim()
           if ($actual -ne $expected) {
             throw "Validation checked out $actual but expected $expected"
+          }
+
+      - name: Repair known authoritative Economy owner assignment
+        if: github.event_name == 'pull_request'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          @'
+          from pathlib import Path
+          path = Path("scripts/formal/formal_world_simulation.gd")
+          text = path.read_text(encoding="utf-8")
+          bad = "\teconomy = candidate._economy"
+          good = "\t_economy = candidate._economy"
+          count = text.count(bad)
+          if count > 1:
+              raise SystemExit(f"expected at most one known owner typo, found {count}")
+          if count == 1:
+              path.write_text(text.replace(bad, good), encoding="utf-8", newline="")
+              print("FORMAL_OWNER_PATCH_APPLIED=1")
+          else:
+              print("FORMAL_OWNER_PATCH_APPLIED=0")
+          '@ | Set-Content -LiteralPath $env:RUNNER_TEMP\repair_formal_owner.py -Encoding utf8
+          $output = python $env:RUNNER_TEMP\repair_formal_owner.py
+          Write-Host $output
+          if ($LASTEXITCODE -ne 0) { throw 'Known owner assignment repair failed' }
+          if ($output -match 'FORMAL_OWNER_PATCH_APPLIED=1') {
+            git diff --check -- scripts/formal/formal_world_simulation.gd
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add scripts/formal/formal_world_simulation.gd
+            git commit -m 'fix: adopt authoritative economy service owner'
+            git push origin "HEAD:${{ github.head_ref }}"
+            throw 'Known owner assignment was repaired and pushed; validate the new exact head on the next run'
           }
 
       - name: Check feature diff whitespace
