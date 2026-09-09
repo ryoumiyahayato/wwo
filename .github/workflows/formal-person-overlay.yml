@@ -56,16 +56,22 @@ jobs:
           text = path.read_text(encoding="utf-8")
           changed = False
 
-          owner_bad = "economy = candidate._economy"
-          owner_good = "_economy = candidate._economy"
-          owner_count = text.count(owner_bad)
-          if owner_count > 1:
-              raise SystemExit(f"expected at most one Economy owner typo, found {owner_count}")
-          if owner_count == 1:
-              text = text.replace(owner_bad, owner_good)
+          owner_target = "_economy = candidate._economy"
+          lines = text.splitlines(keepends=True)
+          owner_indexes = []
+          for index, line in enumerate(lines):
+              if line.strip().lstrip("_") == "economy = candidate._economy":
+                  owner_indexes.append(index)
+          if len(owner_indexes) != 1:
+              raise SystemExit(f"expected exactly one Economy owner assignment line, found {len(owner_indexes)}")
+          owner_index = owner_indexes[0]
+          current_owner = lines[owner_index].strip()
+          if current_owner != owner_target:
+              newline = "\r\n" if lines[owner_index].endswith("\r\n") else "\n"
+              indent = lines[owner_index][: len(lines[owner_index]) - len(lines[owner_index].lstrip())]
+              lines[owner_index] = indent + owner_target + newline
+              text = "".join(lines)
               changed = True
-          if owner_good not in text:
-              raise SystemExit("authoritative Economy owner assignment is missing")
 
           array_old = '''\tvar person_ids_to_materialize: Array[String] = (\n\t\t_organization_person_reference_ids.duplicate()\n\t\tif _explicit_organization_reference_injection\n\t\tand not _organization_person_reference_ids.is_empty()\n\t\telse [DEFAULT_FORMAL_PERSON_ID]\n\t)'''
           array_new = '''\tvar person_ids_to_materialize: Array[String] = []\n\tif (\n\t\t_explicit_organization_reference_injection\n\t\tand not _organization_person_reference_ids.is_empty()\n\t):\n\t\tperson_ids_to_materialize.assign(_organization_person_reference_ids)\n\telse:\n\t\tperson_ids_to_materialize.append(DEFAULT_FORMAL_PERSON_ID)'''
@@ -92,9 +98,9 @@ jobs:
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
             git add scripts/formal/formal_world_simulation.gd
-            git commit -m 'fix: repair formal person composition typing and ownership'
+            git commit -m 'fix: normalize formal person composition ownership'
             git push origin "HEAD:${{ github.head_ref }}"
-            throw 'Exact Formal composition repairs were pushed; validate the new exact head on the next run'
+            throw 'Exact Formal composition repair was pushed; validate the new exact head on the next run'
           }
 
       - name: Check feature diff whitespace
