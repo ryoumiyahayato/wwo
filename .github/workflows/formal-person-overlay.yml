@@ -44,37 +44,57 @@ jobs:
             throw "Validation checked out $actual but expected $expected"
           }
 
-      - name: Repair known authoritative Economy owner assignment
+      - name: Apply exact known Formal composition repairs
         if: github.event_name == 'pull_request'
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
           @'
           from pathlib import Path
+
           path = Path("scripts/formal/formal_world_simulation.gd")
           text = path.read_text(encoding="utf-8")
-          bad = "\teconomy = candidate._economy"
-          good = "\t_economy = candidate._economy"
-          count = text.count(bad)
-          if count > 1:
-              raise SystemExit(f"expected at most one known owner typo, found {count}")
-          if count == 1:
-              path.write_text(text.replace(bad, good), encoding="utf-8", newline="")
-              print("FORMAL_OWNER_PATCH_APPLIED=1")
+          changed = False
+
+          owner_bad = "economy = candidate._economy"
+          owner_good = "_economy = candidate._economy"
+          owner_count = text.count(owner_bad)
+          if owner_count > 1:
+              raise SystemExit(f"expected at most one Economy owner typo, found {owner_count}")
+          if owner_count == 1:
+              text = text.replace(owner_bad, owner_good)
+              changed = True
+          if owner_good not in text:
+              raise SystemExit("authoritative Economy owner assignment is missing")
+
+          array_old = '''\tvar person_ids_to_materialize: Array[String] = (\n\t\t_organization_person_reference_ids.duplicate()\n\t\tif _explicit_organization_reference_injection\n\t\tand not _organization_person_reference_ids.is_empty()\n\t\telse [DEFAULT_FORMAL_PERSON_ID]\n\t)'''
+          array_new = '''\tvar person_ids_to_materialize: Array[String] = []\n\tif (\n\t\t_explicit_organization_reference_injection\n\t\tand not _organization_person_reference_ids.is_empty()\n\t):\n\t\tperson_ids_to_materialize.assign(_organization_person_reference_ids)\n\telse:\n\t\tperson_ids_to_materialize.append(DEFAULT_FORMAL_PERSON_ID)'''
+          array_count = text.count(array_old)
+          if array_count > 1:
+              raise SystemExit(f"expected at most one untyped Person-ID block, found {array_count}")
+          if array_count == 1:
+              text = text.replace(array_old, array_new)
+              changed = True
+          if array_new not in text:
+              raise SystemExit("typed Person-ID materialization block is missing")
+
+          if changed:
+              path.write_text(text, encoding="utf-8", newline="")
+              print("FORMAL_COMPOSITION_PATCH_APPLIED=1")
           else:
-              print("FORMAL_OWNER_PATCH_APPLIED=0")
-          '@ | Set-Content -LiteralPath $env:RUNNER_TEMP\repair_formal_owner.py -Encoding utf8
-          $output = python $env:RUNNER_TEMP\repair_formal_owner.py
+              print("FORMAL_COMPOSITION_PATCH_APPLIED=0")
+          '@ | Set-Content -LiteralPath $env:RUNNER_TEMP\repair_formal_composition.py -Encoding utf8
+          $output = python $env:RUNNER_TEMP\repair_formal_composition.py
           Write-Host $output
-          if ($LASTEXITCODE -ne 0) { throw 'Known owner assignment repair failed' }
-          if ($output -match 'FORMAL_OWNER_PATCH_APPLIED=1') {
+          if ($LASTEXITCODE -ne 0) { throw 'Exact Formal composition repair failed' }
+          if ($output -match 'FORMAL_COMPOSITION_PATCH_APPLIED=1') {
             git diff --check -- scripts/formal/formal_world_simulation.gd
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
             git add scripts/formal/formal_world_simulation.gd
-            git commit -m 'fix: adopt authoritative economy service owner'
+            git commit -m 'fix: repair formal person composition typing and ownership'
             git push origin "HEAD:${{ github.head_ref }}"
-            throw 'Known owner assignment was repaired and pushed; validate the new exact head on the next run'
+            throw 'Exact Formal composition repairs were pushed; validate the new exact head on the next run'
           }
 
       - name: Check feature diff whitespace
