@@ -463,7 +463,7 @@ func _adopt_candidate(candidate: FormalWorldSimulation) -> void:
 	_population_input_view = candidate._population_input_view
 	_market_registry = candidate._market_registry
 	_market_registry_view = candidate._market_registry_view
-	_economy = candidate._economy
+	__economy = candidate._economy
 	_spatial_catalog = candidate._spatial_catalog
 	_person_authority = candidate._person_authority
 	_player_state = candidate._player_state
@@ -538,12 +538,14 @@ func _configure_formal_person_composition() -> bool:
 	if _person_authority == null:
 		initialization_error = "Formal Person authority could not be created"
 		return false
-	var person_ids_to_materialize: Array[String] = (
-		_organization_person_reference_ids.duplicate()
-		if _explicit_organization_reference_injection
+	var person_ids_to_materialize: Array[String] = []
+	if (
+		_explicit_organization_reference_injection
 		and not _organization_person_reference_ids.is_empty()
-		else [DEFAULT_FORMAL_PERSON_ID]
-	)
+	):
+		person_ids_to_materialize.assign(_organization_person_reference_ids)
+	else:
+		person_ids_to_materialize.append(DEFAULT_FORMAL_PERSON_ID)
 	for index: int in person_ids_to_materialize.size():
 		var person_id: String = person_ids_to_materialize[index]
 		var claim_id := (
