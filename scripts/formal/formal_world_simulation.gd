@@ -1,7 +1,7 @@
 class_name FormalWorldSimulation
 extends RefCounted
 ## Formal product composition root. Immutable evidence, current political
-## identity, economic aggregates, Population-backed named persons, and
+## identity, economic aggregates, Population-evidence-backed named persons, and
 ## OrganizationCore remain separate owned boundaries. This root owns
 ## composition and lifecycle, never a second copy of domain authority.
 
@@ -565,8 +565,10 @@ func _configure_formal_person_composition() -> bool:
 			{
 				"kind": "generated",
 				"basis": "simulation_assumption",
+				"population_source_kind": "formal_population_evidence_aggregate",
 				"population_source_revision": _population_input_view.revision(),
 				"population_source_fingerprint": _population_input_view.fingerprint(),
+				"territory_mutation_converged": false,
 				"prototype_character_source": false,
 				"legacy_loran_vesta_source": false,
 			}
