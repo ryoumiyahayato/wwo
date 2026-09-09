@@ -2,14 +2,15 @@ class_name VNextPlayerState
 extends RefCounted
 
 const SNAPSHOT_SCHEMA_ID: String = "vnext_player_state_v1"
+const _SNAPSHOT_FIELDS: Array[String] = ["schema_id", "player_id"]
 
 var _player_id: String = ""
 var _person_authority: RefCounted = null
 
 
 func _init(initial_player_id: String = "", person_authority: RefCounted = null) -> void:
-	if person_authority != null:
-		bind_person_authority(person_authority)
+	if person_authority != null and not bind_person_authority(person_authority):
+		return
 	if initial_player_id.is_empty():
 		return
 	set_player_id(initial_player_id)
@@ -63,13 +64,12 @@ func snapshot() -> Dictionary:
 
 
 func restore(snapshot_value: Dictionary) -> bool:
+	if not _has_exact_fields(snapshot_value, _SNAPSHOT_FIELDS):
+		return false
 	var candidate_schema_id: Variant = snapshot_value.get("schema_id")
-	var has_player_id: bool = snapshot_value.has("player_id")
 	var candidate_player_id_value: Variant = snapshot_value.get("player_id")
 
 	if candidate_schema_id != SNAPSHOT_SCHEMA_ID:
-		return false
-	if not has_player_id:
 		return false
 	if typeof(candidate_player_id_value) != TYPE_STRING:
 		return false
@@ -92,3 +92,12 @@ static func _is_valid_player_id(candidate_player_id: String) -> bool:
 		VNextStableId.is_valid(candidate_player_id)
 		and VNextStableId.kind_of(candidate_player_id) == "person"
 	)
+
+
+static func _has_exact_fields(value: Dictionary, expected_fields: Array[String]) -> bool:
+	if value.size() != expected_fields.size():
+		return false
+	for field_name: String in expected_fields:
+		if not value.has(field_name):
+			return false
+	return true
