@@ -1,10 +1,25 @@
 class_name VNextNamedPersonOverlay
 extends RefCounted
-## Stable named-person coverage over an existing Population authority/query port.
-## This overlay owns identity/claim/lifecycle references only. It never owns or
-## mutates aggregate population totals.
+## Stable named-person coverage over an existing authoritative Population total
+## query. This overlay owns identity/claim/lifecycle references only. It never
+## owns or mutates aggregate population totals, and it does not imply convergence
+## with the separate mutable territory Population authority.
 
 const SNAPSHOT_SCHEMA_ID: String = "vnext_named_person_overlay_v1"
+const _SNAPSHOT_FIELDS: Array[String] = [
+	"schema_id",
+	"population_source_fingerprint",
+	"persons",
+]
+const _RECORD_FIELDS: Array[String] = [
+	"person_id",
+	"claim_id",
+	"population_territory_id",
+	"basic_demographic_identity",
+	"current_place_id",
+	"alive",
+	"provenance",
+]
 
 var _population_total_query: Callable
 var _place_exists_query: Callable
@@ -92,6 +107,7 @@ func population_claim(person_id: String) -> Dictionary:
 		"claim_id": str(record.get("claim_id", "")),
 		"territory_id": str(record.get("population_territory_id", "")),
 		"coverage": 1,
+		"active": bool(record.get("alive", false)),
 	}
 
 
@@ -121,16 +137,16 @@ func materialize(
 		return _fail("duplicate or empty population claim")
 	if population_territory_id.is_empty():
 		return _fail("population territory claim is empty")
-	if current_place_id.is_empty() or not bool(_place_exists_query.call(current_place_id)):
+	if not _place_exists(current_place_id):
 		return _fail("current place does not exist")
 	if basic_demographic_identity.is_empty():
 		return _fail("basic demographic identity is required")
 	if provenance.is_empty():
 		return _fail("provenance is required")
-	var population_total := int(_population_total_query.call(population_territory_id))
+	var population_total := _population_total_for(population_territory_id)
 	if population_total <= 0:
 		return _fail("population territory has no authoritative population")
-	if _claimed_count_for_territory(population_territory_id) >= population_total:
+	if _active_claimed_count_for_territory(population_territory_id) >= population_total:
 		return _fail("population claim exceeds authoritative population")
 	var record := {
 		"person_id": person_id,
@@ -149,10 +165,10 @@ func materialize(
 func anonymous_population_for_territory(population_territory_id: String) -> int:
 	if not is_configured():
 		return -1
-	var total := int(_population_total_query.call(population_territory_id))
+	var total := _population_total_for(population_territory_id)
 	if total < 0:
 		return -1
-	return total - _alive_claimed_count_for_territory(population_territory_id)
+	return total - _active_claimed_count_for_territory(population_territory_id)
 
 
 func snapshot() -> Dictionary:
@@ -170,23 +186,46 @@ func restore(snapshot_value: Dictionary) -> bool:
 	_last_error = ""
 	if not is_configured():
 		return _fail("named person overlay is not configured")
+	if not _has_exact_fields(snapshot_value, _SNAPSHOT_FIELDS):
+		return _fail("named person snapshot header is invalid")
 	if (
-		str(snapshot_value.get("schema_id", "")) != SNAPSHOT_SCHEMA_ID
-		or str(snapshot_value.get("population_source_fingerprint", ""))
+		typeof(snapshot_value.get("schema_id")) != TYPE_STRING
+		or snapshot_value.get("schema_id") != SNAPSHOT_SCHEMA_ID
+		or typeof(snapshot_value.get("population_source_fingerprint")) != TYPE_STRING
+		or snapshot_value.get("population_source_fingerprint")
 		!= _population_source_fingerprint
-		or not snapshot_value.get("persons", []) is Array
+		or typeof(snapshot_value.get("persons")) != TYPE_ARRAY
 	):
 		return _fail("named person snapshot header is invalid")
+
 	var candidate_persons: Dictionary = {}
 	var candidate_claims: Dictionary = {}
-	for raw_record: Variant in snapshot_value.get("persons", []) as Array:
-		if not raw_record is Dictionary:
+	var active_claim_counts: Dictionary = {}
+	for raw_record: Variant in snapshot_value.get("persons") as Array:
+		if typeof(raw_record) != TYPE_DICTIONARY:
 			return _fail("named person snapshot record is invalid")
 		var record := (raw_record as Dictionary).duplicate(true)
-		var person_id := str(record.get("person_id", ""))
-		var claim_id := str(record.get("claim_id", ""))
-		var territory_id := str(record.get("population_territory_id", ""))
-		var place_id := str(record.get("current_place_id", ""))
+		if not _has_exact_fields(record, _RECORD_FIELDS):
+			return _fail("named person snapshot record is invalid")
+		if (
+			typeof(record.get("person_id")) != TYPE_STRING
+			or typeof(record.get("claim_id")) != TYPE_STRING
+			or typeof(record.get("population_territory_id")) != TYPE_STRING
+			or typeof(record.get("current_place_id")) != TYPE_STRING
+			or typeof(record.get("basic_demographic_identity")) != TYPE_DICTIONARY
+			or typeof(record.get("provenance")) != TYPE_DICTIONARY
+			or typeof(record.get("alive")) != TYPE_BOOL
+		):
+			return _fail("named person snapshot record failed validation")
+
+		var person_id: String = record.get("person_id") as String
+		var claim_id: String = record.get("claim_id") as String
+		var territory_id: String = record.get("population_territory_id") as String
+		var place_id: String = record.get("current_place_id") as String
+		var demographic_identity: Dictionary = (
+			record.get("basic_demographic_identity") as Dictionary
+		)
+		var provenance: Dictionary = record.get("provenance") as Dictionary
 		if (
 			not VNextStableId.is_valid(person_id)
 			or VNextStableId.kind_of(person_id) != "person"
@@ -194,27 +233,24 @@ func restore(snapshot_value: Dictionary) -> bool:
 			or claim_id.is_empty()
 			or candidate_claims.has(claim_id)
 			or territory_id.is_empty()
-			or int(_population_total_query.call(territory_id)) <= 0
-			or place_id.is_empty()
-			or not bool(_place_exists_query.call(place_id))
-			or not record.get("basic_demographic_identity", {}) is Dictionary
-			or (record.get("basic_demographic_identity", {}) as Dictionary).is_empty()
-			or not record.get("provenance", {}) is Dictionary
-			or (record.get("provenance", {}) as Dictionary).is_empty()
-			or typeof(record.get("alive")) != TYPE_BOOL
+			or _population_total_for(territory_id) <= 0
+			or not _place_exists(place_id)
+			or demographic_identity.is_empty()
+			or provenance.is_empty()
 		):
 			return _fail("named person snapshot record failed validation")
 		candidate_persons[person_id] = record
 		candidate_claims[claim_id] = person_id
-	var claim_counts: Dictionary = {}
-	for record_value: Variant in candidate_persons.values():
-		var record := record_value as Dictionary
-		var territory_id := str(record.get("population_territory_id", ""))
-		claim_counts[territory_id] = int(claim_counts.get(territory_id, 0)) + 1
-	for raw_territory_id: Variant in claim_counts.keys():
-		var territory_id := str(raw_territory_id)
-		if int(claim_counts[territory_id]) > int(_population_total_query.call(territory_id)):
+		if bool(record.get("alive")):
+			active_claim_counts[territory_id] = (
+				int(active_claim_counts.get(territory_id, 0)) + 1
+			)
+
+	for raw_territory_id: Variant in active_claim_counts.keys():
+		var territory_id: String = str(raw_territory_id)
+		if int(active_claim_counts[territory_id]) > _population_total_for(territory_id):
 			return _fail("named person claims violate population conservation")
+
 	_persons_by_id = candidate_persons
 	_person_id_by_claim_id = candidate_claims
 	return true
@@ -224,16 +260,7 @@ func state_fingerprint() -> String:
 	return JSON.stringify(snapshot()).sha256_text()
 
 
-func _claimed_count_for_territory(territory_id: String) -> int:
-	var count: int = 0
-	for raw_record: Variant in _persons_by_id.values():
-		var record := raw_record as Dictionary
-		if str(record.get("population_territory_id", "")) == territory_id:
-			count += 1
-	return count
-
-
-func _alive_claimed_count_for_territory(territory_id: String) -> int:
+func _active_claimed_count_for_territory(territory_id: String) -> int:
 	var count: int = 0
 	for raw_record: Variant in _persons_by_id.values():
 		var record := raw_record as Dictionary
@@ -243,6 +270,31 @@ func _alive_claimed_count_for_territory(territory_id: String) -> int:
 		):
 			count += 1
 	return count
+
+
+func _population_total_for(population_territory_id: String) -> int:
+	if population_territory_id.is_empty() or not _population_total_query.is_valid():
+		return -1
+	var raw_total: Variant = _population_total_query.call(population_territory_id)
+	if typeof(raw_total) != TYPE_INT:
+		return -1
+	return int(raw_total)
+
+
+func _place_exists(place_id: String) -> bool:
+	if place_id.is_empty() or not _place_exists_query.is_valid():
+		return false
+	var raw_exists: Variant = _place_exists_query.call(place_id)
+	return typeof(raw_exists) == TYPE_BOOL and bool(raw_exists)
+
+
+static func _has_exact_fields(value: Dictionary, expected_fields: Array[String]) -> bool:
+	if value.size() != expected_fields.size():
+		return false
+	for field_name: String in expected_fields:
+		if not value.has(field_name):
+			return false
+	return true
 
 
 func _fail(message: String) -> bool:
