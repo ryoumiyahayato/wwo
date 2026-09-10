@@ -44,6 +44,52 @@ jobs:
             throw "Validation checked out $actual but expected $expected"
           }
 
+      - name: Guard Formal economy candidate adoption invariant
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $path = 'scripts/formal/formal_world_simulation.gd'
+          $content = Get-Content -LiteralPath $path -Raw
+          $functionMatch = [regex]::Match(
+            $content,
+            '(?ms)^func _adopt_candidate\(candidate: FormalWorldSimulation\) -> void:\r?\n(?<body>.*?)(?=^func \w+\()'
+          )
+          if (-not $functionMatch.Success) {
+            throw 'Could not isolate _adopt_candidate() in FormalWorldSimulation'
+          }
+
+          $body = $functionMatch.Groups['body'].Value
+          $assignmentMatches = [regex]::Matches(
+            $body,
+            '(?m)^\s*_economy = candidate\._economy\s*$'
+          )
+          if ($assignmentMatches.Count -ne 1) {
+            throw "Expected exactly one '_economy = candidate._economy' in _adopt_candidate(); found $($assignmentMatches.Count)"
+          }
+          if ([regex]::IsMatch($body, '(?m)^\s*economy = candidate\._economy\s*$')) {
+            throw "Forbidden 'economy = candidate._economy' found in _adopt_candidate()"
+          }
+          if ([regex]::IsMatch($body, '(?m)^\s*__economy = candidate\._economy\s*$')) {
+            throw "Forbidden '__economy = candidate._economy' found in _adopt_candidate()"
+          }
+
+          $rebindMatches = [regex]::Matches(
+            $body,
+            '(?m)^\s*_economy\.bind_authoritative_hour_source\(\s*$'
+          )
+          if ($rebindMatches.Count -ne 1) {
+            throw "Expected exactly one authoritative-hour rebind owned by _economy in _adopt_candidate(); found $($rebindMatches.Count)"
+          }
+          if ($rebindMatches[0].Index -le $assignmentMatches[0].Index) {
+            throw 'Authoritative-hour rebind must occur after adopting candidate._economy'
+          }
+          if ([regex]::IsMatch(
+            $body,
+            '(?m)^\s*(?:economy|__economy)\.bind_authoritative_hour_source\('
+          )) {
+            throw 'Authoritative-hour rebind must use _economy as its owner'
+          }
+
       - name: Check feature diff whitespace
         shell: pwsh
         run: |
