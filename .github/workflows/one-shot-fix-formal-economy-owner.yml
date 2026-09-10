@@ -26,8 +26,8 @@ jobs:
           from pathlib import Path
           path = Path('scripts/formal/formal_world_simulation.gd')
           text = path.read_text(encoding='utf-8')
-          old = '\teconomy = candidate._economy\n'
-          new = '\t_economy = candidate._economy\n'
+          old = 'economy = candidate._economy'
+          new = '_economy = candidate._economy'
           count = text.count(old)
           if count != 1:
               raise SystemExit(f'expected exactly one economy owner assignment, found {count}')
@@ -35,8 +35,7 @@ jobs:
           Path('.github/workflows/one-shot-fix-formal-economy-owner.yml').unlink()
           PY
           git diff --check
-          git diff --exit-code -- scripts/formal/formal_world_simulation.gd && exit 1 || true
-          grep -F $'\t_economy = candidate._economy' scripts/formal/formal_world_simulation.gd
+          test "$(grep -Fc '_economy = candidate._economy' scripts/formal/formal_world_simulation.gd)" -eq 1
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add scripts/formal/formal_world_simulation.gd .github/workflows/one-shot-fix-formal-economy-owner.yml
