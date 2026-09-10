@@ -367,8 +367,7 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		return false
 	if not candidate._restore_candidate_state(state):
 		return false
-	if not _adopt_candidate(candidate):
-		return false
+	_adopt_candidate(candidate)
 	state_changed.emit({"restored": true})
 	return true
 
@@ -452,14 +451,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 	return true
 
 
-func _adopt_candidate(candidate: FormalWorldSimulation) -> bool:
-	if (
-		candidate._person_authority == null
-		or not candidate._person_authority.rebind_population_total_query(
-			Callable(self, "_formal_population_total")
-		)
-	):
-		return false
+func _adopt_candidate(candidate: FormalWorldSimulation) -> void:
 	total_minutes = candidate.total_minutes
 	_provenance = candidate._provenance
 	_historical_evidence = candidate._historical_evidence
@@ -474,6 +466,13 @@ func _adopt_candidate(candidate: FormalWorldSimulation) -> bool:
 	_economy = candidate._economy
 	_spatial_catalog = candidate._spatial_catalog
 	_person_authority = candidate._person_authority
+	var person_population_query_rebound := (
+		_person_authority != null
+		and _person_authority.rebind_population_total_query(
+			Callable(self, "_formal_population_total")
+		)
+	)
+	assert(person_population_query_rebound)
 	_player_state = candidate._player_state
 	_organization = candidate._organization
 	_organization_person_reference_ids = (
@@ -492,15 +491,13 @@ func _adopt_candidate(candidate: FormalWorldSimulation) -> bool:
 	initialized = true
 	initialization_error = ""
 	_initialization_attempted = true
-	return true
 
 
 func reset_world() -> bool:
 	var candidate := _new_candidate_world()
 	if not candidate.initialize():
 		return false
-	if not _adopt_candidate(candidate):
-		return false
+	_adopt_candidate(candidate)
 	state_changed.emit({"reset": true})
 	return true
 
