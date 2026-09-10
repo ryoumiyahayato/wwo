@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: formal-person-overlay-${{ github.ref }}
@@ -42,65 +42,6 @@ jobs:
           $actual = (git rev-parse HEAD).Trim()
           if ($actual -ne $expected) {
             throw "Validation checked out $actual but expected $expected"
-          }
-
-      - name: Apply exact known Formal composition repairs
-        if: github.event_name == 'pull_request'
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          @'
-          from pathlib import Path
-
-          path = Path("scripts/formal/formal_world_simulation.gd")
-          text = path.read_text(encoding="utf-8")
-          changed = False
-
-          owner_target = "_economy = candidate._economy"
-          lines = text.splitlines(keepends=True)
-          owner_indexes = []
-          for index, line in enumerate(lines):
-              if line.strip().lstrip("_") == "economy = candidate._economy":
-                  owner_indexes.append(index)
-          if len(owner_indexes) != 1:
-              raise SystemExit(f"expected exactly one Economy owner assignment line, found {len(owner_indexes)}")
-          owner_index = owner_indexes[0]
-          current_owner = lines[owner_index].strip()
-          if current_owner != owner_target:
-              newline = "\r\n" if lines[owner_index].endswith("\r\n") else "\n"
-              indent = lines[owner_index][: len(lines[owner_index]) - len(lines[owner_index].lstrip())]
-              lines[owner_index] = indent + owner_target + newline
-              text = "".join(lines)
-              changed = True
-
-          array_old = '''\tvar person_ids_to_materialize: Array[String] = (\n\t\t_organization_person_reference_ids.duplicate()\n\t\tif _explicit_organization_reference_injection\n\t\tand not _organization_person_reference_ids.is_empty()\n\t\telse [DEFAULT_FORMAL_PERSON_ID]\n\t)'''
-          array_new = '''\tvar person_ids_to_materialize: Array[String] = []\n\tif (\n\t\t_explicit_organization_reference_injection\n\t\tand not _organization_person_reference_ids.is_empty()\n\t):\n\t\tperson_ids_to_materialize.assign(_organization_person_reference_ids)\n\telse:\n\t\tperson_ids_to_materialize.append(DEFAULT_FORMAL_PERSON_ID)'''
-          array_count = text.count(array_old)
-          if array_count > 1:
-              raise SystemExit(f"expected at most one untyped Person-ID block, found {array_count}")
-          if array_count == 1:
-              text = text.replace(array_old, array_new)
-              changed = True
-          if array_new not in text:
-              raise SystemExit("typed Person-ID materialization block is missing")
-
-          if changed:
-              path.write_text(text, encoding="utf-8", newline="")
-              print("FORMAL_COMPOSITION_PATCH_APPLIED=1")
-          else:
-              print("FORMAL_COMPOSITION_PATCH_APPLIED=0")
-          '@ | Set-Content -LiteralPath $env:RUNNER_TEMP\repair_formal_composition.py -Encoding utf8
-          $output = python $env:RUNNER_TEMP\repair_formal_composition.py
-          Write-Host $output
-          if ($LASTEXITCODE -ne 0) { throw 'Exact Formal composition repair failed' }
-          if ($output -match 'FORMAL_COMPOSITION_PATCH_APPLIED=1') {
-            git diff --check -- scripts/formal/formal_world_simulation.gd
-            git config user.name 'github-actions[bot]'
-            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git add scripts/formal/formal_world_simulation.gd
-            git commit -m 'fix: normalize formal person composition ownership'
-            git push origin "HEAD:${{ github.head_ref }}"
-            throw 'Exact Formal composition repair was pushed; validate the new exact head on the next run'
           }
 
       - name: Check feature diff whitespace
