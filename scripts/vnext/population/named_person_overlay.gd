@@ -70,6 +70,17 @@ func is_configured() -> bool:
 	)
 
 
+func rebind_population_total_query(population_total_query: Callable) -> bool:
+	if (
+		not population_total_query.is_valid()
+		or not _place_exists_query.is_valid()
+		or _population_source_fingerprint.is_empty()
+	):
+		return false
+	_population_total_query = population_total_query
+	return true
+
+
 func last_error() -> String:
 	return _last_error
 
