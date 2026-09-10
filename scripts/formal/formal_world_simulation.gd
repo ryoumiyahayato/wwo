@@ -367,7 +367,8 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		return false
 	if not candidate._restore_candidate_state(state):
 		return false
-	_adopt_candidate(candidate)
+	if not _adopt_candidate(candidate):
+		return false
 	state_changed.emit({"restored": true})
 	return true
 
@@ -451,7 +452,14 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 	return true
 
 
-func _adopt_candidate(candidate: FormalWorldSimulation) -> void:
+func _adopt_candidate(candidate: FormalWorldSimulation) -> bool:
+	if (
+		candidate._person_authority == null
+		or not candidate._person_authority.rebind_population_total_query(
+			Callable(self, "_formal_population_total")
+		)
+	):
+		return false
 	total_minutes = candidate.total_minutes
 	_provenance = candidate._provenance
 	_historical_evidence = candidate._historical_evidence
@@ -463,7 +471,7 @@ func _adopt_candidate(candidate: FormalWorldSimulation) -> void:
 	_population_input_view = candidate._population_input_view
 	_market_registry = candidate._market_registry
 	_market_registry_view = candidate._market_registry_view
-	_economy = candidate._economy
+	economy = candidate._economy
 	_spatial_catalog = candidate._spatial_catalog
 	_person_authority = candidate._person_authority
 	_player_state = candidate._player_state
@@ -484,13 +492,15 @@ func _adopt_candidate(candidate: FormalWorldSimulation) -> void:
 	initialized = true
 	initialization_error = ""
 	_initialization_attempted = true
+	return true
 
 
 func reset_world() -> bool:
 	var candidate := _new_candidate_world()
 	if not candidate.initialize():
 		return false
-	_adopt_candidate(candidate)
+	if not _adopt_candidate(candidate):
+		return false
 	state_changed.emit({"reset": true})
 	return true
 
@@ -523,6 +533,12 @@ func _refresh_read_only_views() -> void:
 	)
 
 
+func _formal_population_total(population_territory_id: String) -> int:
+	if not _population_input_view.is_configured():
+		return -1
+	return _population_input_view.population(population_territory_id)
+
+
 func _configure_formal_person_composition() -> bool:
 	if not _population_input_view.is_configured():
 		initialization_error = "Formal Population input is not configured"
@@ -531,7 +547,7 @@ func _configure_formal_person_composition() -> bool:
 		initialization_error = "Formal Person composition cannot bind Spatial places"
 		return false
 	_person_authority = VNextNamedPersonOverlay.create(
-		Callable(_population_input_view, "population"),
+		Callable(self, "_formal_population_total"),
 		Callable(_spatial_catalog, "has_place"),
 		_population_input_view.fingerprint()
 	)
