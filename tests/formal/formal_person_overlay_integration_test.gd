@@ -72,7 +72,7 @@ func _test_ordinary_formal_composition() -> void:
 	)
 	_equal(provenance.get("territory_mutation_converged"), false, "default Person does not claim mutable territory Population convergence")
 	_equal(provenance.get("prototype_character_source"), false, "prototype character data is explicitly excluded")
-	_equal(provenance.get("legacy_loran_vesta_source"), false, "default Person does not claim mutable territory Population convergence")
+	_equal(provenance.get("legacy_loran_vesta_source"), false, "legacy Loran/Vesta person data is explicitly excluded")
 
 
 func _test_current_schema_round_trip() -> void:
