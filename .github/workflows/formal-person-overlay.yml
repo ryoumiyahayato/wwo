@@ -160,6 +160,15 @@ jobs:
             throw 'Formal Person integration success summary is missing'
           }
 
+      - name: Upload Formal Person test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formal-person-overlay-logs
+          path: |
+            builds/formal-person-overlay/*.log
+          if-no-files-found: warn
+
       - name: Run existing Formal validation baseline
         shell: pwsh
         run: |
