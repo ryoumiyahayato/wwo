@@ -471,7 +471,7 @@ func _adopt_candidate(candidate: FormalWorldSimulation) -> bool:
 	_population_input_view = candidate._population_input_view
 	_market_registry = candidate._market_registry
 	_market_registry_view = candidate._market_registry_view
-	economy = candidate._economy
+	_economy = candidate._economy
 	_spatial_catalog = candidate._spatial_catalog
 	_person_authority = candidate._person_authority
 	_player_state = candidate._player_state
