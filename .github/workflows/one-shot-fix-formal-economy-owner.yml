@@ -1,0 +1,46 @@
+name: One-shot correct Formal economy owner
+
+on:
+  push:
+    branches:
+      - feature/formal-person-overlay-integration-20260908
+    paths:
+      - ".github/workflows/one-shot-fix-formal-economy-owner.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/formal-person-overlay-integration-20260908
+          fetch-depth: 0
+      - name: Correct exact owner line and remove workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('scripts/formal/formal_world_simulation.gd')
+          text = path.read_text(encoding='utf-8')
+          old = '\t__economy = candidate._economy'
+          new = '\t_economy = candidate._economy'
+          if text.count(old) != 1:
+              raise SystemExit(f'expected one exact double-underscore line, found {text.count(old)}')
+          text = text.replace(old, new)
+          if text.count('\t_economy = candidate._economy') != 1:
+              raise SystemExit('correct owner line verification failed')
+          path.write_text(text, encoding='utf-8')
+          Path('.github/workflows/one-shot-fix-formal-economy-owner.yml').unlink()
+          PY
+          git diff --check
+          test "$(grep -Ec '^[[:space:]]*_economy = candidate\._economy$' scripts/formal/formal_world_simulation.gd)" -eq 1
+          test "$(grep -Ec '^[[:space:]]*__economy = candidate\._economy$' scripts/formal/formal_world_simulation.gd || true)" -eq 0
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add scripts/formal/formal_world_simulation.gd .github/workflows/one-shot-fix-formal-economy-owner.yml
+          git commit -m 'fix: correct restored economy owner field'
+          git push origin HEAD:feature/formal-person-overlay-integration-20260908
