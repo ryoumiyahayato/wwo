@@ -2026,6 +2026,7 @@ func _candidate_effective_delegation(
 		if source_kind != "delegation":
 			return {}
 		current_id = source_id
+	return {}
 
 
 func _candidate_delegation_graph_has_cycle(delegations: Dictionary) -> bool:
