@@ -1050,31 +1050,40 @@ func _effective_source_scope(source_kind: String, source_id: String) -> Dictiona
 func _delegator_matches_source(
 	context: Dictionary, source_kind: String, source_id: String, at_time: int
 ) -> bool:
+	if not _acting_context_valid(context):
+		return false
 	if source_kind == "authority":
 		if not _authority_grants.has(source_id):
 			return false
 		var grant: Dictionary = _authority_grants[source_id] as Dictionary
-		var resolution := _resolve_grant(
-			grant,
-			context,
-			str(grant.get("operation", "")),
-			STAGE_DELEGATION,
-			"",
-			"",
-			"",
-			0.0,
-			at_time,
-			""
-		)
-		return str(resolution.get("status", "")) == STATUS_AUTHORIZED
+		if str(context.get("authority_basis", "")) != source_id:
+			return false
+		if not str(context.get("delegation_id", "")).is_empty():
+			return false
+		if str(grant.get("represented_entity", "")) != str(context.get("represented_organization_id", "")):
+			return false
+		if not _holder_matches_context(grant.get("holder", {}) as Dictionary, context):
+			return false
+		if not _grant_time_valid(grant, at_time):
+			return false
+		if not bool(grant.get("delegable", false)):
+			return false
+		var constraint_record: Dictionary = grant.get("additional_constraints", {}) as Dictionary
+		return _string_array(constraint_record.get("allowed_stages", [])).has(STAGE_DELEGATION)
 	if source_kind == "delegation":
 		if not _delegations.has(source_id):
 			return false
 		var source_record: Dictionary = _delegations[source_id] as Dictionary
+		var effective := _effective_delegation(source_id, at_time, {})
+		if effective.is_empty():
+			return false
 		return (
 			bool(source_record.get("redelegable", false))
 			and str(source_record.get("recipient_person_id", "")) == str(context.get("person_id", ""))
-			and not _effective_delegation(source_id, at_time, {}).is_empty()
+			and str(context.get("delegation_id", "")) == source_id
+			and str(context.get("authority_basis", "")) == str(effective.get("source_authority_id", ""))
+			and str(context.get("represented_organization_id", "")) == str(effective.get("represented_entity", ""))
+			and _string_array(effective.get("allowed_stages", [])).has(STAGE_DELEGATION)
 		)
 	return false
 
