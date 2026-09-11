@@ -25,12 +25,15 @@ func _run() -> void:
 	_test_position_authority_and_acting_identity()
 	_test_scoped_authority_and_expiry()
 	_test_company_decision_signature_execution_boundary()
+	_test_representation_organization_boundary()
 	_test_delegation_subset_and_revocation()
+	_test_delegation_exclusive_conflict_symmetry()
 	_test_structure_relations_do_not_imply_authority()
 	_test_exclusive_and_concurrent_authority()
 	_test_legacy_capability_projection()
 	_test_government_party_military_union_semantics()
 	_test_snapshot_round_trip_and_atomic_rejection()
+	_test_decision_delegation_round_trip_and_corruption()
 	print("Organization authority foundation: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures > 0 or checks <= 0 else 0)
 
@@ -383,6 +386,88 @@ func _test_company_decision_signature_execution_boundary() -> void:
 			_check(not quorum_authority.finalize_proposal_step("quorum_case", "vote", 1), "insufficient quorum cannot finalize as approval")
 
 
+func _test_representation_organization_boundary() -> void:
+	var core := _new_core()
+	if core == null:
+		_check(false, "representation boundary fixture creates core")
+		return
+	for organization_id: String in ["organization:org_a", "organization:org_b"]:
+		_check(core.register_organization(organization_id, "company", "place:capital"), "%s registers" % organization_id)
+		_check(core.define_position(organization_id, "director", "Director", 1), "%s director position registers" % organization_id)
+		_check(core.add_member(organization_id, "person:alice"), "Alice joins %s" % organization_id)
+		_check(core.create_appointment(organization_id, "director_alice", "person:alice", "director"), "Alice director appointment registers in %s" % organization_id)
+	var authority := _new_authority(core)
+	if authority == null:
+		_check(false, "representation boundary authority fixture creates")
+		return
+	_check(authority.define_decision_body({
+		"decision_body_id": "org_a_body",
+		"organization_id": "organization:org_a",
+		"eligible_participants": [{"kind": "person", "person_id": "person:alice", "position_id": "", "weight": 1}],
+		"active": true,
+	}), "Org A DecisionBody registers")
+	_check(authority.define_procedure({
+		"procedure_id": "org_a_procedure",
+		"organization_id": "organization:org_a",
+		"steps": [_step("approve", "org_a_body", 1, 1, 1, 2, "eligible_count", "reject")],
+		"deadline": 100,
+	}), "Org A Procedure registers")
+	for stage_record: Dictionary in [
+		{"id": "authority.org_a.propose", "org": "organization:org_a", "stage": VNextOrganizationAuthorityFoundation.STAGE_PROPOSAL},
+		{"id": "authority.org_a.sign", "org": "organization:org_a", "stage": VNextOrganizationAuthorityFoundation.STAGE_REPRESENTATION},
+		{"id": "authority.org_a.execute", "org": "organization:org_a", "stage": VNextOrganizationAuthorityFoundation.STAGE_DOMAIN_EXECUTION},
+		{"id": "authority.org_b.propose", "org": "organization:org_b", "stage": VNextOrganizationAuthorityFoundation.STAGE_PROPOSAL},
+		{"id": "authority.org_b.sign", "org": "organization:org_b", "stage": VNextOrganizationAuthorityFoundation.STAGE_REPRESENTATION},
+		{"id": "authority.org_b.execute", "org": "organization:org_b", "stage": VNextOrganizationAuthorityFoundation.STAGE_DOMAIN_EXECUTION},
+	]:
+		_check(authority.add_authority_grant(_grant(
+			str(stage_record.id),
+			VNextOrganizationAuthorityFoundation.position_holder(str(stage_record.org), "director"),
+			str(stage_record.org),
+			"organization.shared_operation",
+			[str(stage_record.stage)]
+		)), "%s compatible authority registers" % stage_record.id)
+	var org_a_proposer := VNextOrganizationAuthorityFoundation.acting_context(
+		"person:alice", "organization:org_a", "organization:org_a", "authority.org_a.propose", "director_alice"
+	)
+	var org_b_proposer := VNextOrganizationAuthorityFoundation.acting_context(
+		"person:alice", "organization:org_b", "organization:org_b", "authority.org_b.propose", "director_alice"
+	)
+	var wrong_proposal := _proposal_record(
+		"wrong_org_create", "organization:org_a", "organization.shared_operation", org_b_proposer, "org_a_procedure", "d".repeat(64)
+	)
+	_check(not authority.create_proposal(wrong_proposal), "Org B ActingContext cannot create an Org A proposal despite compatible operation/scope")
+	_check(authority.create_proposal(_proposal_record(
+		"org_a_proposal", "organization:org_a", "organization.shared_operation", org_a_proposer, "org_a_procedure", "e".repeat(64)
+	)), "same Person using Org A ActingContext can create Org A proposal")
+	_check(authority.cast_vote("org_a_proposal", "approve", "person:alice", 1, "yes", false, 1), "Org A approval vote records")
+	_check(authority.finalize_proposal_step("org_a_proposal", "approve", 2), "Org A proposal approves")
+	var org_b_signer := VNextOrganizationAuthorityFoundation.acting_context(
+		"person:alice", "organization:org_b", "organization:org_b", "authority.org_b.sign", "director_alice"
+	)
+	_check(not authority.sign_proposal("org_a_proposal", 1, "signature.wrong_org", org_b_signer, 3), "Org B ActingContext cannot sign an Org A proposal")
+	var org_a_signer := VNextOrganizationAuthorityFoundation.acting_context(
+		"person:alice", "organization:org_a", "organization:org_a", "authority.org_a.sign", "director_alice"
+	)
+	_check(authority.sign_proposal("org_a_proposal", 1, "signature.org_a", org_a_signer, 3), "Org A ActingContext signs Org A proposal")
+	var org_b_executor := VNextOrganizationAuthorityFoundation.acting_context(
+		"person:alice", "organization:org_b", "organization:org_b", "authority.org_b.execute", "director_alice"
+	)
+	_equal(
+		_status(authority.authorize_domain_execution("org_a_proposal", org_b_executor, 4)),
+		VNextOrganizationAuthorityFoundation.STATUS_OUT_OF_SCOPE,
+		"Org B ActingContext cannot authorize execution of Org A proposal"
+	)
+	var org_a_executor := VNextOrganizationAuthorityFoundation.acting_context(
+		"person:alice", "organization:org_a", "organization:org_a", "authority.org_a.execute", "director_alice"
+	)
+	_equal(
+		_status(authority.authorize_domain_execution("org_a_proposal", org_a_executor, 4)),
+		VNextOrganizationAuthorityFoundation.STATUS_AUTHORIZED_FOR_DOMAIN_EXECUTION,
+		"same Person using Org A ActingContext authorizes only the Org A boundary"
+	)
+
+
 func _test_delegation_subset_and_revocation() -> void:
 	var core := _new_core()
 	if core == null:
@@ -503,6 +588,60 @@ func _test_delegation_subset_and_revocation() -> void:
 		VNextOrganizationAuthorityFoundation.STATUS_DELEGATION_INVALID,
 		"source delegation revocation invalidates downstream redelegation"
 	)
+
+
+func _test_delegation_exclusive_conflict_symmetry() -> void:
+	var core := _new_core()
+	if core == null:
+		_check(false, "delegation exclusivity fixture creates core")
+		return
+	_check(core.register_organization("organization:delegation_exclusive", "company", "place:capital"), "delegation exclusivity organization registers")
+	_check(core.define_position("organization:delegation_exclusive", "director", "Director", 1), "delegation exclusivity director registers")
+	_check(core.add_member("organization:delegation_exclusive", "person:alice"), "delegation exclusivity Alice membership registers")
+	_check(core.create_appointment("organization:delegation_exclusive", "director_alice", "person:alice", "director"), "delegation exclusivity director appointment registers")
+	var authority := _new_authority(core)
+	if authority == null:
+		_check(false, "delegation exclusivity authority fixture creates")
+		return
+	for root_record: Dictionary in [
+		{"id": "authority.delegation.forward", "operation": "organization.delegate_forward"},
+		{"id": "authority.delegation.reverse", "operation": "organization.delegate_reverse"},
+	]:
+		_check(authority.add_authority_grant(_grant(
+			str(root_record.id),
+			VNextOrganizationAuthorityFoundation.position_holder("organization:delegation_exclusive", "director"),
+			"organization:delegation_exclusive",
+			str(root_record.operation),
+			[VNextOrganizationAuthorityFoundation.STAGE_REPRESENTATION, VNextOrganizationAuthorityFoundation.STAGE_DELEGATION],
+			["counterparty:a", "counterparty:b"],
+			["place:capital", "place:branch"],
+			["subject:supply", "subject:service"],
+			100.0,
+			0,
+			100,
+			true
+		)), "%s root delegation authority registers" % root_record.id)
+	var forward_context := VNextOrganizationAuthorityFoundation.acting_context(
+		"person:alice", "organization:delegation_exclusive", "organization:delegation_exclusive", "authority.delegation.forward", "director_alice"
+	)
+	var concurrent_a := _delegation_record("delegation.concurrent.a", "authority", "authority.delegation.forward", forward_context, "person:bob", ["counterparty:a"], ["place:capital"], ["subject:supply"], 50.0, 1, 50, false)
+	var concurrent_b := _delegation_record("delegation.concurrent.b", "authority", "authority.delegation.forward", forward_context, "person:carol", ["counterparty:a"], ["place:capital"], ["subject:supply"], 50.0, 1, 50, false)
+	_check(authority.create_delegation(concurrent_a), "first concurrent delegation registers")
+	_check(authority.create_delegation(concurrent_b), "overlapping concurrent plus concurrent delegation remains allowed")
+	var new_exclusive := _delegation_record("delegation.exclusive.after_concurrent", "authority", "authority.delegation.forward", forward_context, "person:dana", ["counterparty:a"], ["place:capital"], ["subject:supply"], 50.0, 1, 50, false)
+	new_exclusive["exclusive_or_concurrent"] = "exclusive"
+	_check(not authority.create_delegation(new_exclusive), "existing concurrent then new exclusive overlapping delegation fails closed")
+	var disjoint_exclusive := _delegation_record("delegation.exclusive.disjoint", "authority", "authority.delegation.forward", forward_context, "person:dana", ["counterparty:b"], ["place:branch"], ["subject:service"], 50.0, 1, 50, false)
+	disjoint_exclusive["exclusive_or_concurrent"] = "exclusive"
+	_check(authority.create_delegation(disjoint_exclusive), "disjoint exclusive delegation is allowed under existing scope-overlap semantics")
+	var reverse_context := VNextOrganizationAuthorityFoundation.acting_context(
+		"person:alice", "organization:delegation_exclusive", "organization:delegation_exclusive", "authority.delegation.reverse", "director_alice"
+	)
+	var existing_exclusive := _delegation_record("delegation.exclusive.first", "authority", "authority.delegation.reverse", reverse_context, "person:bob", ["counterparty:a"], ["place:capital"], ["subject:supply"], 50.0, 1, 50, false)
+	existing_exclusive["exclusive_or_concurrent"] = "exclusive"
+	_check(authority.create_delegation(existing_exclusive), "exclusive delegation can register first")
+	var new_concurrent := _delegation_record("delegation.concurrent.after_exclusive", "authority", "authority.delegation.reverse", reverse_context, "person:carol", ["counterparty:a"], ["place:capital"], ["subject:supply"], 50.0, 1, 50, false)
+	_check(not authority.create_delegation(new_concurrent), "existing exclusive then new concurrent overlapping delegation fails closed")
 
 
 func _test_structure_relations_do_not_imply_authority() -> void:
@@ -822,6 +961,227 @@ func _test_snapshot_round_trip_and_atomic_rejection() -> void:
 		var incompatible := _new_authority(changed_core)
 		if incompatible != null:
 			_check(not incompatible.restore(saved), "snapshot pinned to exact Organization structure fingerprint fails closed after structure drift")
+
+
+func _test_decision_delegation_round_trip_and_corruption() -> void:
+	var core := _new_core()
+	if core == null:
+		_check(false, "decision/delegation persistence fixture creates core")
+		return
+	_check(core.register_organization("organization:persist_full", "association", "place:capital"), "persistence organization registers")
+	_check(core.register_organization("organization:persist_other", "association", "place:branch"), "persistence alternate organization registers")
+	_check(core.define_position("organization:persist_full", "director", "Director", 1), "persistence director position registers")
+	_check(core.add_member("organization:persist_full", "person:alice"), "persistence director member registers")
+	_check(core.create_appointment("organization:persist_full", "director_alice", "person:alice", "director"), "persistence director appointment registers")
+	var authority := _new_authority(core)
+	if authority == null:
+		_check(false, "decision/delegation persistence authority creates")
+		return
+	_check(authority.define_decision_body({
+		"decision_body_id": "persist_body",
+		"organization_id": "organization:persist_full",
+		"eligible_participants": [{"kind": "person", "person_id": "person:alice", "position_id": "", "weight": 1}],
+		"active": true,
+	}), "non-empty persisted DecisionBody registers")
+	_check(authority.define_procedure({
+		"procedure_id": "persist_procedure",
+		"organization_id": "organization:persist_full",
+		"steps": [_step("persist_vote", "persist_body", 1, 1, 1, 2, "eligible_count", "reject")],
+		"deadline": 100,
+	}), "non-empty persisted Procedure registers")
+	_check(authority.add_authority_grant(_grant(
+		"authority.persist.propose",
+		VNextOrganizationAuthorityFoundation.position_holder("organization:persist_full", "director"),
+		"organization:persist_full",
+		"organization.persist_action",
+		[VNextOrganizationAuthorityFoundation.STAGE_PROPOSAL]
+	)), "persisted proposal grant registers")
+	var sign_grant := _grant(
+		"authority.persist.sign",
+		VNextOrganizationAuthorityFoundation.position_holder("organization:persist_full", "director"),
+		"organization:persist_full",
+		"organization.persist_action",
+		[VNextOrganizationAuthorityFoundation.STAGE_REPRESENTATION]
+	)
+	sign_grant["additional_constraints"] = VNextOrganizationAuthorityFoundation.constraints([VNextOrganizationAuthorityFoundation.STAGE_REPRESENTATION], "persist_procedure")
+	_check(authority.add_authority_grant(sign_grant), "persisted signature grant with Procedure constraint registers")
+	var execute_grant := _grant(
+		"authority.persist.execute",
+		VNextOrganizationAuthorityFoundation.position_holder("organization:persist_full", "director"),
+		"organization:persist_full",
+		"organization.persist_action",
+		[VNextOrganizationAuthorityFoundation.STAGE_DOMAIN_EXECUTION]
+	)
+	execute_grant["additional_constraints"] = VNextOrganizationAuthorityFoundation.constraints([VNextOrganizationAuthorityFoundation.STAGE_DOMAIN_EXECUTION], "persist_procedure")
+	_check(authority.add_authority_grant(execute_grant), "persisted execution-boundary grant with Procedure constraint registers")
+	_check(authority.add_authority_grant(_grant(
+		"authority.persist.delegate",
+		VNextOrganizationAuthorityFoundation.position_holder("organization:persist_full", "director"),
+		"organization:persist_full",
+		"organization.persist_delegated",
+		[VNextOrganizationAuthorityFoundation.STAGE_REPRESENTATION, VNextOrganizationAuthorityFoundation.STAGE_DELEGATION],
+		["counterparty:persist"],
+		["place:capital"],
+		["subject:persist"],
+		100.0,
+		0,
+		100,
+		true
+	)), "persisted delegation root grant registers")
+	var proposer := VNextOrganizationAuthorityFoundation.acting_context("person:alice", "organization:persist_full", "organization:persist_full", "authority.persist.propose", "director_alice")
+	_check(authority.create_proposal(_proposal_record("persist_decision", "organization:persist_full", "organization.persist_action", proposer, "persist_procedure", "f".repeat(64))), "non-empty persisted Proposal registers")
+	_check(authority.cast_vote("persist_decision", "persist_vote", "person:alice", 1, "yes", false, 1), "persisted approval vote records")
+	_check(authority.finalize_proposal_step("persist_decision", "persist_vote", 2), "persisted decision result finalizes")
+	var signer := VNextOrganizationAuthorityFoundation.acting_context("person:alice", "organization:persist_full", "organization:persist_full", "authority.persist.sign", "director_alice")
+	_check(authority.sign_proposal("persist_decision", 1, "signature.persist", signer, 3), "persisted representation signature records")
+	var root_delegator := VNextOrganizationAuthorityFoundation.acting_context("person:alice", "organization:persist_full", "organization:persist_full", "authority.persist.delegate", "director_alice")
+	var delegation_bob := _delegation_record("delegation.persist.bob", "authority", "authority.persist.delegate", root_delegator, "person:bob", ["counterparty:persist"], ["place:capital"], ["subject:persist"], 50.0, 1, 50, true)
+	_check(authority.create_delegation(delegation_bob), "persisted root delegation registers")
+	var bob_context := VNextOrganizationAuthorityFoundation.acting_context("person:bob", "organization:persist_full", "organization:persist_full", "authority.persist.delegate", "", false, "", "delegation.persist.bob")
+	var delegation_carol := _delegation_record("delegation.persist.carol", "delegation", "delegation.persist.bob", bob_context, "person:carol", ["counterparty:persist"], ["place:capital"], ["subject:persist"], 50.0, 1, 50, true)
+	var delegation_dana := _delegation_record("delegation.persist.dana", "delegation", "delegation.persist.bob", bob_context, "person:dana", ["counterparty:persist"], ["place:capital"], ["subject:persist"], 50.0, 1, 50, false)
+	_check(authority.create_delegation(delegation_carol), "persisted redelegation registers")
+	_check(authority.create_delegation(delegation_dana), "overlapping persisted concurrent sibling delegation registers")
+	_check(authority.add_power_relation({
+		"relation_id": "relation.persist.full.accountability",
+		"relation_type": "accountability",
+		"source_entity": "position:director",
+		"target_entity": "organization:persist_full",
+		"represented_organization_id": "organization:persist_full",
+		"scope": {"reporting": true},
+		"valid_from": 0,
+		"valid_until": -1,
+		"basis": {"kind": "charter", "id": "charter.persist_full"},
+	}), "persisted power relation registers")
+	_check(authority.record_power_transfer({
+		"transfer_id": "transfer.persist.full.appointment",
+		"transfer_type": "appointment_change",
+		"source_ref": "position:director",
+		"target_ref": "person:alice",
+		"basis_ref": "appointment:director_alice",
+		"effective_at": 0,
+		"authority_id": "authority.persist.propose",
+		"relation_id": "relation.persist.full.accountability",
+		"delegation_id": "delegation.persist.bob",
+	}), "persisted transfer can reference persisted delegation")
+	var saved := authority.snapshot()
+	_check(not (saved.get("decision_bodies", []) as Array).is_empty(), "Gate 14 fixture persists non-empty decision bodies")
+	_check(not (saved.get("procedures", []) as Array).is_empty(), "Gate 14 fixture persists non-empty procedures")
+	_check(not (saved.get("proposals", []) as Array).is_empty(), "Gate 14 fixture persists non-empty proposals")
+	_check(not (saved.get("delegations", []) as Array).is_empty(), "Gate 14 fixture persists non-empty delegations")
+	var restored := _new_authority(core)
+	_check(restored != null and restored.restore(saved), "non-empty decision/delegation snapshot restores into a fresh authority foundation")
+	if restored == null:
+		return
+	_equal(restored.snapshot(), saved, "non-empty decision/delegation snapshot round trip is semantically identical")
+	_equal(restored.state_fingerprint(), authority.state_fingerprint(), "non-empty decision/delegation fingerprint survives round trip")
+	_equal(restored.decision_body("persist_body"), authority.decision_body("persist_body"), "DecisionBody survives round trip")
+	_equal(restored.procedure("persist_procedure"), authority.procedure("persist_procedure"), "Procedure survives round trip")
+	var restored_proposal := restored.proposal("persist_decision")
+	_equal(int(restored_proposal.get("version", 0)), 1, "proposal version survives round trip")
+	_equal(str(restored_proposal.get("status", "")), "approved", "approval result survives round trip")
+	_equal(str(restored_proposal.get("decision_id", "")), "decision:persist_decision:v1", "decision identity survives round trip")
+	_check(not (restored_proposal.get("step_results", {}) as Dictionary).is_empty(), "decision step result survives round trip")
+	var restored_signatures: Array = restored_proposal.get("signatures", []) as Array
+	_equal(restored_signatures.size(), 1, "representation signature count survives round trip")
+	if not restored_signatures.is_empty():
+		_equal(str((restored_signatures[0] as Dictionary).get("signature_id", "")), "signature.persist", "representation signature identity survives round trip")
+	var restored_bob := restored.delegation("delegation.persist.bob")
+	var restored_carol := restored.delegation("delegation.persist.carol")
+	_equal(str(restored_bob.get("source_id", "")), "authority.persist.delegate", "root delegation source survives round trip")
+	_equal(str(restored_bob.get("recipient_person_id", "")), "person:bob", "root delegation recipient survives round trip")
+	_equal(restored_bob.get("target_scope", []), ["counterparty:persist"], "root delegation target scope survives round trip")
+	_equal(restored_bob.get("spatial_scope", []), ["place:capital"], "root delegation spatial scope survives round trip")
+	_equal(restored_bob.get("subject_scope", []), ["subject:persist"], "root delegation subject scope survives round trip")
+	_equal(float(restored_bob.get("amount_or_quantity_limit", -1.0)), 50.0, "root delegation amount survives round trip")
+	_equal(int(restored_bob.get("valid_from", -1)), 1, "root delegation valid_from survives round trip")
+	_equal(int(restored_bob.get("valid_until", -1)), 50, "root delegation valid_until survives round trip")
+	_equal(int(restored_bob.get("revoked_at", -2)), -1, "root delegation revocation state survives round trip")
+	_equal(str(restored_carol.get("source_id", "")), "delegation.persist.bob", "redelegation immediate source survives round trip")
+	_equal(str((restored_carol.get("delegator_context", {}) as Dictionary).get("person_id", "")), "person:bob", "redelegator identity survives round trip")
+	var carol_context := VNextOrganizationAuthorityFoundation.acting_context("person:carol", "organization:persist_full", "organization:persist_full", "authority.persist.delegate", "", false, "", "delegation.persist.carol")
+	var inside := restored.resolve_authority(carol_context, "organization.persist_delegated", VNextOrganizationAuthorityFoundation.STAGE_REPRESENTATION, "counterparty:persist", "place:capital", "subject:persist", 50.0, 10)
+	_equal(_status(inside), VNextOrganizationAuthorityFoundation.STATUS_AUTHORIZED, "restored redelegation authorizes inside immediate delegated scope")
+	_equal(inside.get("basis_chain", []), ["authority.persist.delegate", "delegation.persist.bob", "delegation.persist.carol"], "restored redelegation derives exact basis ancestry")
+	_equal(
+		_status(restored.resolve_authority(carol_context, "organization.persist_delegated", VNextOrganizationAuthorityFoundation.STAGE_REPRESENTATION, "counterparty:persist", "place:branch", "subject:persist", 10.0, 10)),
+		VNextOrganizationAuthorityFoundation.STATUS_OUT_OF_SCOPE,
+		"restored redelegation rejects outside delegated spatial scope"
+	)
+	var execute_context := VNextOrganizationAuthorityFoundation.acting_context("person:alice", "organization:persist_full", "organization:persist_full", "authority.persist.execute", "director_alice")
+	_equal(
+		_status(restored.authorize_domain_execution("persist_decision", execute_context, 10)),
+		VNextOrganizationAuthorityFoundation.STATUS_AUTHORIZED_FOR_DOMAIN_EXECUTION,
+		"restored approved and signed decision preserves execution-boundary behavior"
+	)
+
+	var scope_expansion := saved.duplicate(true)
+	_snapshot_record(scope_expansion, "delegations", "delegation_id", "delegation.persist.carol")["spatial_scope"] = ["place:branch", "place:capital"]
+	_expect_semantic_restore_rejected_atomic(restored, scope_expansion, "expanded immediate-source delegation scope")
+
+	var amount_expansion := saved.duplicate(true)
+	_snapshot_record(amount_expansion, "delegations", "delegation_id", "delegation.persist.carol")["amount_or_quantity_limit"] = 51.0
+	_expect_semantic_restore_rejected_atomic(restored, amount_expansion, "expanded immediate-source delegation amount")
+
+	var time_expansion := saved.duplicate(true)
+	_snapshot_record(time_expansion, "delegations", "delegation_id", "delegation.persist.carol")["valid_until"] = 51
+	_expect_semantic_restore_rejected_atomic(restored, time_expansion, "expanded immediate-source delegation validity")
+
+	var wrong_delegator := saved.duplicate(true)
+	_snapshot_record(wrong_delegator, "delegations", "delegation_id", "delegation.persist.carol")["delegator_context"] = VNextOrganizationAuthorityFoundation.acting_context("person:dana", "organization:persist_full", "organization:persist_full", "authority.persist.delegate", "", false, "", "delegation.persist.bob")
+	_expect_semantic_restore_rejected_atomic(restored, wrong_delegator, "wrong immediate-source delegation holder")
+
+	var cycle := saved.duplicate(true)
+	var cycle_bob := _snapshot_record(cycle, "delegations", "delegation_id", "delegation.persist.bob")
+	cycle_bob["source_kind"] = "delegation"
+	cycle_bob["source_id"] = "delegation.persist.carol"
+	cycle_bob["delegator_context"] = VNextOrganizationAuthorityFoundation.acting_context("person:carol", "organization:persist_full", "organization:persist_full", "authority.persist.delegate", "", false, "", "delegation.persist.carol")
+	_expect_semantic_restore_rejected_atomic(restored, cycle, "complete delegation graph cycle")
+
+	var exclusive_conflict := saved.duplicate(true)
+	_snapshot_record(exclusive_conflict, "delegations", "delegation_id", "delegation.persist.carol")["exclusive_or_concurrent"] = "exclusive"
+	_expect_semantic_restore_rejected_atomic(restored, exclusive_conflict, "exclusive/concurrent persisted delegation overlap")
+
+	var cross_org_proposal := saved.duplicate(true)
+	_snapshot_record(cross_org_proposal, "proposals", "proposal_id", "persist_decision")["organization_id"] = "organization:persist_other"
+	_expect_semantic_restore_rejected_atomic(restored, cross_org_proposal, "cross-organization persisted proposal representation")
+
+
+func _snapshot_record(
+	snapshot_value: Dictionary, collection_key: String, id_field: String, record_id: String
+) -> Dictionary:
+	for raw_record: Variant in snapshot_value.get(collection_key, []) as Array:
+		var record: Dictionary = raw_record as Dictionary
+		if str(record.get(id_field, "")) == record_id:
+			return record
+	return {}
+
+
+func _refresh_snapshot_fingerprint(snapshot_value: Dictionary) -> void:
+	snapshot_value["state_fingerprint"] = JSON.stringify({
+		"schema_id": str(snapshot_value.get("schema_id", "")),
+		"structure_fingerprint": str(snapshot_value.get("structure_fingerprint", "")),
+		"reference_fingerprint": str(snapshot_value.get("reference_fingerprint", "")),
+		"state": {
+			"revision": int(snapshot_value.get("revision", 0)),
+			"authority_grants": snapshot_value.get("authority_grants", []),
+			"decision_bodies": snapshot_value.get("decision_bodies", []),
+			"procedures": snapshot_value.get("procedures", []),
+			"proposals": snapshot_value.get("proposals", []),
+			"delegations": snapshot_value.get("delegations", []),
+			"power_relations": snapshot_value.get("power_relations", []),
+			"power_transfers": snapshot_value.get("power_transfers", []),
+		},
+	}).sha256_text()
+
+
+func _expect_semantic_restore_rejected_atomic(
+	restored: VNextOrganizationAuthorityFoundation, corrupted: Dictionary, label: String
+) -> void:
+	_refresh_snapshot_fingerprint(corrupted)
+	var before := restored.snapshot()
+	_check(not restored.restore(corrupted), "%s rejects even with recomputed valid fingerprint" % label)
+	_equal(restored.snapshot(), before, "%s restore failure remains atomic" % label)
 
 
 func _new_core() -> VNextOrganizationCore:

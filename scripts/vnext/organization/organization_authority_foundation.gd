@@ -249,7 +249,7 @@ func add_authority_grant(record: Dictionary) -> bool:
 	var authority_id: String = str(normalized.get("authority_id", ""))
 	if _authority_grants.has(authority_id):
 		return false
-	if not _authority_references_valid(normalized, _decision_bodies):
+	if not _authority_references_valid(normalized, _decision_bodies, _procedures):
 		return false
 	if _has_exclusive_authority_conflict(normalized, _authority_grants):
 		return false
@@ -331,6 +331,8 @@ func create_proposal(record: Dictionary) -> bool:
 	):
 		return false
 	var context: Dictionary = normalized.get("proposer_context", {}) as Dictionary
+	if str(context.get("represented_organization_id", "")) != organization_id:
+		return false
 	var resolution := resolve_authority(
 		context,
 		str(normalized.get("operation", "")),
@@ -512,6 +514,10 @@ func sign_proposal(
 		or int(proposal_record.get("version", 0)) != expected_version
 	):
 		return false
+	if not _acting_context_valid(context):
+		return false
+	if str(context.get("represented_organization_id", "")) != str(proposal_record.get("organization_id", "")):
+		return false
 	var resolution := resolve_authority(
 		context,
 		str(proposal_record.get("operation", "")),
@@ -555,6 +561,10 @@ func authorize_domain_execution(
 	var proposal_record: Dictionary = _proposals[proposal_id] as Dictionary
 	if str(proposal_record.get("status", "")) != "approved":
 		return {"status": STATUS_AWAITING_APPROVAL}
+	if not _acting_context_valid(context):
+		return {"status": STATUS_INVALID_ACTING_CONTEXT}
+	if str(context.get("represented_organization_id", "")) != str(proposal_record.get("organization_id", "")):
+		return {"status": STATUS_OUT_OF_SCOPE}
 	if (proposal_record.get("signatures", []) as Array).is_empty():
 		return {"status": STATUS_APPROVED_NOT_REPRESENTABLE}
 	var resolution := resolve_authority(
@@ -647,7 +657,7 @@ func create_delegation(record: Dictionary) -> bool:
 		return false
 	if _delegation_person_cycle(source_kind, source_id, str(normalized.get("recipient_person_id", ""))):
 		return false
-	if _has_delegation_exclusive_conflict(normalized):
+	if _has_delegation_exclusive_conflict(normalized, _delegations):
 		return false
 	var candidate := _delegations.duplicate(true)
 	candidate[delegation_id] = normalized
@@ -1750,7 +1760,9 @@ func _normalize_power_transfer(record: Dictionary) -> Dictionary:
 	}
 
 
-func _authority_references_valid(record: Dictionary, bodies: Dictionary) -> bool:
+func _authority_references_valid(
+	record: Dictionary, bodies: Dictionary, procedures: Dictionary
+) -> bool:
 	var represented := str(record.get("represented_entity", ""))
 	if not _organization_core.has_organization(represented):
 		return false
@@ -1774,7 +1786,7 @@ func _authority_references_valid(record: Dictionary, bodies: Dictionary) -> bool
 		if not _known_place_ids.has(place_id):
 			return false
 	var required_procedure_id := str((record.get("additional_constraints", {}) as Dictionary).get("required_procedure_id", ""))
-	if not required_procedure_id.is_empty() and not _procedures.has(required_procedure_id):
+	if not required_procedure_id.is_empty() and not procedures.has(required_procedure_id):
 		return false
 	return true
 
@@ -1820,26 +1832,25 @@ func _validate_complete_state(
 		if not _procedure_references_valid(procedures[procedure_id] as Dictionary, bodies):
 			return false
 	for authority_id: String in _sorted_keys(grants):
-		if not _authority_references_valid(grants[authority_id] as Dictionary, bodies):
+		if not _authority_references_valid(grants[authority_id] as Dictionary, bodies, procedures):
 			return false
 		if _has_exclusive_authority_conflict(grants[authority_id] as Dictionary, grants, authority_id):
 			return false
 	for proposal_id: String in _sorted_keys(proposals):
 		var proposal_record: Dictionary = proposals[proposal_id] as Dictionary
-		if not procedures.has(str(proposal_record.get("procedure_id", ""))):
+		var procedure_id := str(proposal_record.get("procedure_id", ""))
+		var organization_id := str(proposal_record.get("organization_id", ""))
+		if not procedures.has(procedure_id):
 			return false
-		if not _organization_core.has_organization(str(proposal_record.get("organization_id", ""))):
+		if not _organization_core.has_organization(organization_id):
 			return false
-	for delegation_id: String in _sorted_keys(delegations):
-		var delegation_record: Dictionary = delegations[delegation_id] as Dictionary
-		var source_kind := str(delegation_record.get("source_kind", ""))
-		var source_id := str(delegation_record.get("source_id", ""))
-		if source_kind == "authority" and not grants.has(source_id):
+		if str((procedures[procedure_id] as Dictionary).get("organization_id", "")) != organization_id:
 			return false
-		if source_kind == "delegation" and not delegations.has(source_id):
+		var proposer_context: Dictionary = proposal_record.get("proposer_context", {}) as Dictionary
+		if str(proposer_context.get("represented_organization_id", "")) != organization_id:
 			return false
-		if source_id == delegation_id:
-			return false
+	if not _validate_delegation_graph(grants, delegations):
+		return false
 	for relation_id: String in _sorted_keys(relations):
 		if not _organization_core.has_organization(str((relations[relation_id] as Dictionary).get("represented_organization_id", ""))):
 			return false
@@ -1855,6 +1866,208 @@ func _validate_complete_state(
 		if not delegation_id.is_empty() and not delegations.has(delegation_id):
 			return false
 	return true
+
+
+func _validate_delegation_graph(grants: Dictionary, delegations: Dictionary) -> bool:
+	if _candidate_delegation_graph_has_cycle(delegations):
+		return false
+	for delegation_id: String in _sorted_keys(delegations):
+		var delegation_record: Dictionary = delegations[delegation_id] as Dictionary
+		var source_kind := str(delegation_record.get("source_kind", ""))
+		var source_id := str(delegation_record.get("source_id", ""))
+		if source_id == delegation_id:
+			return false
+		if source_kind == "authority" and not grants.has(source_id):
+			return false
+		if source_kind == "delegation" and not delegations.has(source_id):
+			return false
+		var source_scope := _candidate_source_scope(source_kind, source_id, grants, delegations)
+		if source_scope.is_empty() or not bool(source_scope.get("delegable", false)):
+			return false
+		if not _delegation_scope_is_subset(delegation_record, source_scope):
+			return false
+		var delegator_context: Dictionary = delegation_record.get("delegator_context", {}) as Dictionary
+		if not _candidate_delegator_matches_source(
+			delegator_context,
+			source_kind,
+			source_id,
+			int(delegation_record.get("valid_from", 0)),
+			grants,
+			delegations
+		):
+			return false
+		if _candidate_delegation_person_cycle(
+			source_kind,
+			source_id,
+			str(delegation_record.get("recipient_person_id", "")),
+			delegations
+		):
+			return false
+		if _has_delegation_exclusive_conflict(delegation_record, delegations, delegation_id):
+			return false
+	return true
+
+
+func _candidate_source_scope(
+	source_kind: String, source_id: String, grants: Dictionary, delegations: Dictionary
+) -> Dictionary:
+	if source_kind == "authority":
+		if not grants.has(source_id):
+			return {}
+		var grant: Dictionary = grants[source_id] as Dictionary
+		return {
+			"target_scope": grant.get("target_scope", []),
+			"spatial_scope": grant.get("spatial_scope", []),
+			"subject_scope": grant.get("subject_scope", []),
+			"amount_or_quantity_limit": float(grant.get("amount_or_quantity_limit", -1.0)),
+			"valid_from": int(grant.get("valid_from", 0)),
+			"valid_until": int(grant.get("valid_until", -1)),
+			"delegable": bool(grant.get("delegable", false)),
+			"redelegable": bool(grant.get("delegable", false)),
+		}
+	if source_kind == "delegation" and delegations.has(source_id):
+		var delegation_record: Dictionary = delegations[source_id] as Dictionary
+		return {
+			"target_scope": delegation_record.get("target_scope", []),
+			"spatial_scope": delegation_record.get("spatial_scope", []),
+			"subject_scope": delegation_record.get("subject_scope", []),
+			"amount_or_quantity_limit": float(delegation_record.get("amount_or_quantity_limit", -1.0)),
+			"valid_from": int(delegation_record.get("valid_from", 0)),
+			"valid_until": int(delegation_record.get("valid_until", -1)),
+			"delegable": bool(delegation_record.get("redelegable", false)),
+			"redelegable": bool(delegation_record.get("redelegable", false)),
+		}
+	return {}
+
+
+func _candidate_delegator_matches_source(
+	context: Dictionary,
+	source_kind: String,
+	source_id: String,
+	at_time: int,
+	grants: Dictionary,
+	delegations: Dictionary
+) -> bool:
+	if not _acting_context_valid(context):
+		return false
+	if source_kind == "authority":
+		if not grants.has(source_id):
+			return false
+		var grant: Dictionary = grants[source_id] as Dictionary
+		if str(context.get("authority_basis", "")) != source_id:
+			return false
+		if not str(context.get("delegation_id", "")).is_empty():
+			return false
+		if str(grant.get("represented_entity", "")) != str(context.get("represented_organization_id", "")):
+			return false
+		if not _holder_matches_context(grant.get("holder", {}) as Dictionary, context):
+			return false
+		if not _grant_time_valid(grant, at_time):
+			return false
+		if not bool(grant.get("delegable", false)):
+			return false
+		var constraint_record: Dictionary = grant.get("additional_constraints", {}) as Dictionary
+		return _string_array(constraint_record.get("allowed_stages", [])).has(STAGE_DELEGATION)
+	if source_kind == "delegation":
+		if not delegations.has(source_id):
+			return false
+		var source_record: Dictionary = delegations[source_id] as Dictionary
+		var effective := _candidate_effective_delegation(source_id, at_time, grants, delegations)
+		if effective.is_empty():
+			return false
+		return (
+			bool(source_record.get("redelegable", false))
+			and str(source_record.get("recipient_person_id", "")) == str(context.get("person_id", ""))
+			and str(context.get("delegation_id", "")) == source_id
+			and str(context.get("authority_basis", "")) == str(effective.get("source_authority_id", ""))
+			and str(context.get("represented_organization_id", "")) == str(effective.get("represented_entity", ""))
+			and _string_array(effective.get("allowed_stages", [])).has(STAGE_DELEGATION)
+		)
+	return false
+
+
+func _candidate_effective_delegation(
+	delegation_id: String, at_time: int, grants: Dictionary, delegations: Dictionary
+) -> Dictionary:
+	if not delegations.has(delegation_id):
+		return {}
+	var leaf: Dictionary = delegations[delegation_id] as Dictionary
+	var current_id := delegation_id
+	var visited: Dictionary = {}
+	var delegation_chain: Array[String] = []
+	while true:
+		if visited.has(current_id) or not delegations.has(current_id):
+			return {}
+		visited[current_id] = true
+		var record: Dictionary = delegations[current_id] as Dictionary
+		if not _delegation_time_valid(record, at_time):
+			return {}
+		delegation_chain.push_front(current_id)
+		var source_kind := str(record.get("source_kind", ""))
+		var source_id := str(record.get("source_id", ""))
+		if source_kind == "authority":
+			if not grants.has(source_id):
+				return {}
+			var grant: Dictionary = grants[source_id] as Dictionary
+			if not _grant_time_valid(grant, at_time):
+				return {}
+			var basis_chain: Array[String] = [source_id]
+			for chain_id: String in delegation_chain:
+				basis_chain.append(chain_id)
+			return {
+				"source_authority_id": source_id,
+				"recipient_person_id": str(leaf.get("recipient_person_id", "")),
+				"represented_entity": str(grant.get("represented_entity", "")),
+				"operation": str(grant.get("operation", "")),
+				"allowed_stages": (grant.get("additional_constraints", {}) as Dictionary).get("allowed_stages", []),
+				"required_procedure_id": str((grant.get("additional_constraints", {}) as Dictionary).get("required_procedure_id", "")),
+				"basis_chain": basis_chain,
+			}
+		if source_kind != "delegation":
+			return {}
+		current_id = source_id
+
+
+func _candidate_delegation_graph_has_cycle(delegations: Dictionary) -> bool:
+	var state: Dictionary = {}
+	for start_id: String in _sorted_keys(delegations):
+		if int(state.get(start_id, 0)) == 2:
+			continue
+		var path: Array[String] = []
+		var current_id := start_id
+		while delegations.has(current_id):
+			var color := int(state.get(current_id, 0))
+			if color == 1:
+				return true
+			if color == 2:
+				break
+			state[current_id] = 1
+			path.append(current_id)
+			var record: Dictionary = delegations[current_id] as Dictionary
+			if str(record.get("source_kind", "")) != "delegation":
+				break
+			current_id = str(record.get("source_id", ""))
+		for path_id: String in path:
+			state[path_id] = 2
+	return false
+
+
+func _candidate_delegation_person_cycle(
+	source_kind: String, source_id: String, recipient_person_id: String, delegations: Dictionary
+) -> bool:
+	var current_kind := source_kind
+	var current_id := source_id
+	var visited: Dictionary = {}
+	while current_kind == "delegation":
+		if visited.has(current_id) or not delegations.has(current_id):
+			return true
+		visited[current_id] = true
+		var record: Dictionary = delegations[current_id] as Dictionary
+		if str(record.get("recipient_person_id", "")) == recipient_person_id:
+			return true
+		current_kind = str(record.get("source_kind", ""))
+		current_id = str(record.get("source_id", ""))
+	return false
 
 
 func _has_exclusive_authority_conflict(
@@ -1881,12 +2094,16 @@ func _has_exclusive_authority_conflict(
 	return false
 
 
-func _has_delegation_exclusive_conflict(new_record: Dictionary) -> bool:
-	if str(new_record.get("exclusive_or_concurrent", "")) != "exclusive":
-		return false
-	for delegation_id: String in _sorted_keys(_delegations):
-		var existing: Dictionary = _delegations[delegation_id] as Dictionary
+func _has_delegation_exclusive_conflict(
+	new_record: Dictionary, source: Dictionary, ignore_id: String = ""
+) -> bool:
+	for delegation_id: String in _sorted_keys(source):
+		if delegation_id == ignore_id:
+			continue
+		var existing: Dictionary = source[delegation_id] as Dictionary
 		if str(existing.get("source_kind", "")) != str(new_record.get("source_kind", "")) or str(existing.get("source_id", "")) != str(new_record.get("source_id", "")):
+			continue
+		if str(existing.get("exclusive_or_concurrent", "")) != "exclusive" and str(new_record.get("exclusive_or_concurrent", "")) != "exclusive":
 			continue
 		if not _time_ranges_overlap(existing, new_record):
 			continue
