@@ -230,6 +230,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Continue'
+          $env:PYTHONPATH = (Resolve-Path '.').Path
           & python tests/world_data/test_batch4_run_manifest.py Batch4RunManifestTests.test_official_generators_replay_tracked_artifacts_and_detect_mutation
           $exitCode = $LASTEXITCODE
           if ($exitCode -ne 0) {
