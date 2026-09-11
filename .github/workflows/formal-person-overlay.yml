@@ -160,18 +160,22 @@ jobs:
             throw 'Formal Person integration success summary is missing'
           }
 
-      - name: Upload Formal Person test logs
+      - name: Run existing Formal validation baseline
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force -Path builds/formal-person-overlay | Out-Null
+          $formalLog = 'builds/formal-person-overlay/formal_validation.log'
+          & powershell -ExecutionPolicy Bypass -File tools/run_validation.ps1 -GodotPath $env:GODOT_BIN 2>&1 | Tee-Object -FilePath $formalLog
+          $exitCode = $LASTEXITCODE
+          if ($exitCode -ne 0) { throw "Existing Formal validation failed with exit code $exitCode" }
+
+      - name: Upload Formal Person validation logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: formal-person-overlay-logs
           path: |
+            builds/formal-person-overlay/formal_validation.log
             builds/formal-person-overlay/*.log
           if-no-files-found: warn
-
-      - name: Run existing Formal validation baseline
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          powershell -ExecutionPolicy Bypass -File tools/run_validation.ps1 -GodotPath $env:GODOT_BIN
-          if ($LASTEXITCODE -ne 0) { throw "Existing Formal validation failed with exit code $LASTEXITCODE" }
