@@ -1,0 +1,81 @@
+name: Formal Military authorized DEFEND candidate
+
+on:
+  pull_request:
+    branches:
+      - canonical/current-world
+    paths:
+      - ".github/workflows/formal-military-authorized-defend-candidate.yml"
+      - "scripts/formal/formal_world_simulation.gd"
+      - "scripts/vnext/military/military_authority_bridge.gd"
+      - "scripts/vnext/military/military_state.gd"
+      - "tests/formal/formal_military_authorized_defend_integration_test.gd"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formal-military-authorized-defend-candidate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dedicated-authorized-defend:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Verify exact candidate head
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $expected = "${{ github.event.pull_request.head.sha }}"
+          $actual = (git rev-parse HEAD).Trim()
+          if ($actual -ne $expected) { throw "Validation checked out $actual but expected $expected" }
+
+      - name: Install Godot 4.6.3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'godot.zip'
+          $install = Join-Path $env:RUNNER_TEMP 'godot-4.6.3'
+          Invoke-WebRequest -Uri 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip' -OutFile $archive
+          Expand-Archive -LiteralPath $archive -DestinationPath $install
+          $binary = (Get-ChildItem -LiteralPath $install -Filter 'Godot_v4.6.3-stable_win64.exe' -Recurse | Select-Object -First 1).FullName
+          if (-not $binary) { throw 'Godot 4.6.3 executable was not found' }
+          "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          & $binary --version
+
+      - name: Run dedicated Formal Military authorized DEFEND integration test
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force -Path builds/formal-military-authorized-defend | Out-Null
+          $logPath = 'builds/formal-military-authorized-defend/dedicated.log'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--audio-driver', 'Dummy', '--path', '.',
+            '--script', 'res://tests/formal/formal_military_authorized_defend_integration_test.gd',
+            '--log-file', $logPath
+          ) -Wait -PassThru -NoNewWindow
+          if (-not (Test-Path -LiteralPath $logPath -PathType Leaf)) { throw 'Dedicated integration log was not created' }
+          $content = Get-Content -LiteralPath $logPath -Raw
+          Write-Host $content
+          if ($process.ExitCode -ne 0) { throw "Dedicated integration test failed with exit code $($process.ExitCode)" }
+          if ($content -match 'SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|Assertion failed|[1-9][0-9]* failures|^ERROR:') {
+            throw 'Dedicated integration log contains a fatal script/type/assertion failure'
+          }
+          if ($content -notmatch 'Formal Military authorized DEFEND integration: ([1-9][0-9]*) checks, 0 failures') {
+            throw 'Dedicated integration success summary is missing'
+          }
+
+      - name: Upload dedicated log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formal-military-authorized-defend-candidate-log
+          path: builds/formal-military-authorized-defend/dedicated.log
+          if-no-files-found: warn
