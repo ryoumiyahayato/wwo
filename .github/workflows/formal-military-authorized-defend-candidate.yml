@@ -95,95 +95,95 @@ jobs:
           start = lines.index('\tawait _press_key(KEY_F5)')
           end = lines.index('\tvar saved_date := application._format_sim_datetime()')
           replacement = r'''
-          \tvar diag_sim := application.formal_simulation
-          \tvar diag_snapshot := diag_sim.get_persistent_state()
-          \tvar diag_source_fingerprint := diag_sim.authoritative_fingerprint()
-          \tprint("PR83DIAG snapshot_schema=" + str(diag_snapshot.get("schema_id", "")))
-          \tprint("PR83DIAG stored_snapshot_fingerprint_present=" + str(diag_snapshot.has("fingerprint")))
-          \tprint("PR83DIAG stored_snapshot_fingerprint=" + str(diag_snapshot.get("fingerprint", "<ABSENT>")))
-          \tprint("PR83DIAG source_authoritative_fingerprint=" + diag_source_fingerprint)
+          	var diag_sim := application.formal_simulation
+          	var diag_snapshot := diag_sim.get_persistent_state()
+          	var diag_source_fingerprint := diag_sim.authoritative_fingerprint()
+          	print("PR83DIAG snapshot_schema=" + str(diag_snapshot.get("schema_id", "")))
+          	print("PR83DIAG stored_snapshot_fingerprint_present=" + str(diag_snapshot.has("fingerprint")))
+          	print("PR83DIAG stored_snapshot_fingerprint=" + str(diag_snapshot.get("fingerprint", "<ABSENT>")))
+          	print("PR83DIAG source_authoritative_fingerprint=" + diag_source_fingerprint)
           
-          \tvar diag_json := JSON.stringify(diag_snapshot)
-          \tprint("PR83DIAG json_encode=PASS bytes=" + str(diag_json.length()))
-          \tvar diag_parsed_variant: Variant = JSON.parse_string(diag_json)
-          \tvar diag_parse_ok := diag_parsed_variant is Dictionary
-          \tprint("PR83DIAG json_parse=" + ("PASS" if diag_parse_ok else "FAIL") + " type=" + type_string(typeof(diag_parsed_variant)))
+          	var diag_json := JSON.stringify(diag_snapshot)
+          	print("PR83DIAG json_encode=PASS bytes=" + str(diag_json.length()))
+          	var diag_parsed_variant: Variant = JSON.parse_string(diag_json)
+          	var diag_parse_ok := diag_parsed_variant is Dictionary
+          	print("PR83DIAG json_parse=" + ("PASS" if diag_parse_ok else "FAIL") + " type=" + type_string(typeof(diag_parsed_variant)))
           
-          \tvar diag_result: SaveOperationResult = diag_sim.save_to_user()
-          \tprint("PR83DIAG direct_save_success=" + str(diag_result.success))
-          \tprint("PR83DIAG direct_save_error_code=" + diag_result.error_code)
-          \tprint("PR83DIAG direct_save_message=" + diag_result.message)
-          \tprint("PR83DIAG direct_save_path=" + diag_result.path)
-          \tprint("PR83DIAG save_path_exists_after_direct=" + str(FileAccess.file_exists(FormalWorldSimulation.SAVE_PATH)))
+          	var diag_result: SaveOperationResult = diag_sim.save_to_user()
+          	print("PR83DIAG direct_save_success=" + str(diag_result.success))
+          	print("PR83DIAG direct_save_error_code=" + diag_result.error_code)
+          	print("PR83DIAG direct_save_message=" + diag_result.message)
+          	print("PR83DIAG direct_save_path=" + diag_result.path)
+          	print("PR83DIAG save_path_exists_after_direct=" + str(FileAccess.file_exists(FormalWorldSimulation.SAVE_PATH)))
           
-          \tif not diag_result.success:
-          \t\tvar diag_candidate := diag_sim._new_candidate_world()
-          \t\tvar diag_candidate_init := diag_candidate.initialize()
-          \t\tprint("PR83DIAG fresh_formal_initialize=" + str(diag_candidate_init) + " error=" + diag_candidate.initialization_error)
-          \t\tvar diag_formal_restore := false
-          \t\tif diag_candidate_init and diag_parse_ok:
-          \t\t\tdiag_formal_restore = diag_candidate.restore_persistent_state(diag_parsed_variant as Dictionary)
-          \t\tprint("PR83DIAG formal_parsed_restore=" + str(diag_formal_restore))
-          \t\tprint("PR83DIAG restored_authoritative_fingerprint=" + (diag_candidate.authoritative_fingerprint() if diag_formal_restore else "<UNAVAILABLE>"))
+          	if not diag_result.success:
+          		var diag_candidate := diag_sim._new_candidate_world()
+          		var diag_candidate_init := diag_candidate.initialize()
+          		print("PR83DIAG fresh_formal_initialize=" + str(diag_candidate_init) + " error=" + diag_candidate.initialization_error)
+          		var diag_formal_restore := false
+          		if diag_candidate_init and diag_parse_ok:
+          			diag_formal_restore = diag_candidate.restore_persistent_state(diag_parsed_variant as Dictionary)
+          		print("PR83DIAG formal_parsed_restore=" + str(diag_formal_restore))
+          		print("PR83DIAG restored_authoritative_fingerprint=" + (diag_candidate.authoritative_fingerprint() if diag_formal_restore else "<UNAVAILABLE>"))
           
-          \t\tvar diag_first_diff := ""
-          \t\tif diag_parse_ok:
-          \t\t\tvar diag_parsed := diag_parsed_variant as Dictionary
-          \t\t\tfor raw_section: Variant in diag_snapshot.keys():
-          \t\t\t\tvar section := str(raw_section)
-          \t\t\t\tif JSON.stringify(diag_snapshot.get(raw_section)) != JSON.stringify(diag_parsed.get(section)):
-          \t\t\t\t\tdiag_first_diff = section
-          \t\t\t\t\tbreak
-          \t\tprint("PR83DIAG first_json_roundtrip_differing_section=" + (diag_first_diff if not diag_first_diff.is_empty() else "<NONE>"))
+          		var diag_first_diff := ""
+          		if diag_parse_ok:
+          			var diag_parsed := diag_parsed_variant as Dictionary
+          			for raw_section: Variant in diag_snapshot.keys():
+          				var section := str(raw_section)
+          				if JSON.stringify(diag_snapshot.get(raw_section)) != JSON.stringify(diag_parsed.get(section)):
+          					diag_first_diff = section
+          					break
+          		print("PR83DIAG first_json_roundtrip_differing_section=" + (diag_first_diff if not diag_first_diff.is_empty() else "<NONE>"))
           
-          \t\tvar diag_authority_source := diag_sim._organization_authority
-          \t\tvar diag_authority_snapshot := diag_authority_source.snapshot()
-          \t\tvar diag_authority_parsed_variant: Variant = JSON.parse_string(JSON.stringify(diag_authority_snapshot))
-          \t\tvar diag_authority_fresh := VNextOrganizationAuthorityFoundation.create(
-          \t\t\tdiag_sim._organization,
-          \t\t\tdiag_sim._person_authority.person_ids(),
-          \t\t\tdiag_sim._organization_place_reference_ids
-          \t\t)
-          \t\tvar diag_authority_restore := (
-          \t\t\tdiag_authority_fresh != null
-          \t\t\tand diag_authority_parsed_variant is Dictionary
-          \t\t\tand diag_authority_fresh.restore(diag_authority_parsed_variant as Dictionary)
-          \t\t)
-          \t\tprint("PR83DIAG authority_json_roundtrip_restore=" + str(diag_authority_restore))
-          \t\tprint("PR83DIAG authority_source_fingerprint=" + diag_authority_source.state_fingerprint())
-          \t\tprint("PR83DIAG authority_restored_fingerprint=" + (diag_authority_fresh.state_fingerprint() if diag_authority_restore else "<UNAVAILABLE>"))
+          		var diag_authority_source := diag_sim._organization_authority
+          		var diag_authority_snapshot := diag_authority_source.snapshot()
+          		var diag_authority_parsed_variant: Variant = JSON.parse_string(JSON.stringify(diag_authority_snapshot))
+          		var diag_authority_fresh := VNextOrganizationAuthorityFoundation.create(
+          			diag_sim._organization,
+          			diag_sim._person_authority.person_ids(),
+          			diag_sim._organization_place_reference_ids
+          		)
+          		var diag_authority_restore := (
+          			diag_authority_fresh != null
+          			and diag_authority_parsed_variant is Dictionary
+          			and diag_authority_fresh.restore(diag_authority_parsed_variant as Dictionary)
+          		)
+          		print("PR83DIAG authority_json_roundtrip_restore=" + str(diag_authority_restore))
+          		print("PR83DIAG authority_source_fingerprint=" + diag_authority_source.state_fingerprint())
+          		print("PR83DIAG authority_restored_fingerprint=" + (diag_authority_fresh.state_fingerprint() if diag_authority_restore else "<UNAVAILABLE>"))
           
-          \t\tvar diag_military_source := diag_sim._military_state
-          \t\tvar diag_military_snapshot := diag_military_source.snapshot()
-          \t\tvar diag_military_parsed_variant: Variant = JSON.parse_string(JSON.stringify(diag_military_snapshot))
-          \t\tvar diag_military_fresh := VNextMilitaryState.new()
-          \t\tvar diag_military_init := diag_military_fresh.initialize(diag_sim._military_map)
-          \t\tvar diag_military_restore := (
-          \t\t\tdiag_military_init
-          \t\t\tand diag_military_parsed_variant is Dictionary
-          \t\t\tand diag_military_fresh.restore(
-          \t\t\t\tdiag_military_parsed_variant as Dictionary,
-          \t\t\t\tdiag_sim._military_map,
-          \t\t\t\tdiag_sim._spatial_world
-          \t\t\t)
-          \t\t)
-          \t\tprint("PR83DIAG military_json_roundtrip_restore=" + str(diag_military_restore))
-          \t\tprint("PR83DIAG military_source_fingerprint=" + diag_military_source.state_fingerprint())
-          \t\tprint("PR83DIAG military_restored_fingerprint=" + (diag_military_fresh.state_fingerprint() if diag_military_restore else "<UNAVAILABLE>"))
-          \t\tawait _finish()
-          \t\treturn
+          		var diag_military_source := diag_sim._military_state
+          		var diag_military_snapshot := diag_military_source.snapshot()
+          		var diag_military_parsed_variant: Variant = JSON.parse_string(JSON.stringify(diag_military_snapshot))
+          		var diag_military_fresh := VNextMilitaryState.new()
+          		var diag_military_init := diag_military_fresh.initialize(diag_sim._military_map)
+          		var diag_military_restore := (
+          			diag_military_init
+          			and diag_military_parsed_variant is Dictionary
+          			and diag_military_fresh.restore(
+          				diag_military_parsed_variant as Dictionary,
+          				diag_sim._military_map,
+          				diag_sim._spatial_world
+          			)
+          		)
+          		print("PR83DIAG military_json_roundtrip_restore=" + str(diag_military_restore))
+          		print("PR83DIAG military_source_fingerprint=" + diag_military_source.state_fingerprint())
+          		print("PR83DIAG military_restored_fingerprint=" + (diag_military_fresh.state_fingerprint() if diag_military_restore else "<UNAVAILABLE>"))
+          		await _finish()
+          		return
           
-          \tif not TIME_SUPPORT.cleanup_formal_save():
-          \t\tprint("PR83DIAG direct_save_cleanup=FAIL")
-          \t\tawait _finish()
-          \t\treturn
-          \tprint("PR83DIAG direct_save_cleanup=PASS")
-          \tawait _press_key(KEY_F5)
-          \tawait _settle_frames(3)
-          \tprint("PR83DIAG actual_f5_save_path_exists=" + str(FileAccess.file_exists(FormalWorldSimulation.SAVE_PATH)))
-          \tprint("PR83DIAG actual_f5_status=" + application._formal_status)
-          \tawait _finish()
-          \treturn
+          	if not TIME_SUPPORT.cleanup_formal_save():
+          		print("PR83DIAG direct_save_cleanup=FAIL")
+          		await _finish()
+          		return
+          	print("PR83DIAG direct_save_cleanup=PASS")
+          	await _press_key(KEY_F5)
+          	await _settle_frames(3)
+          	print("PR83DIAG actual_f5_save_path_exists=" + str(FileAccess.file_exists(FormalWorldSimulation.SAVE_PATH)))
+          	print("PR83DIAG actual_f5_status=" + application._formal_status)
+          	await _finish()
+          	return
           '''.strip('\n').splitlines()
           target_path.write_text('\n'.join(lines[:start] + replacement + lines[end:]) + '\n', encoding='utf-8')
           print(target_path)
