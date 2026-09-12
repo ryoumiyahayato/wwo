@@ -63,7 +63,8 @@ func _load_historical_admin_records() -> void:
 
 
 func _legacy_navigation_key(entity_id: String, gwcode: int) -> String:
-	var profile := _major_state_profile_by_entity.get(entity_id, {}) as Dictionary
+	var source_id := _historical_source_entity_id(entity_id)
+	var profile := _major_state_profile_by_entity.get(source_id, {}) as Dictionary
 	for alias_value: Variant in (profile.get("aliases", []) as Array):
 		var alias := str(alias_value).strip_edges().to_upper()
 		if alias.length() == 3:
@@ -74,18 +75,21 @@ func _legacy_navigation_key(entity_id: String, gwcode: int) -> String:
 func _home_historical_entity_id() -> String:
 	var profile := _character_profiles.get(active_character_key, {}) as Dictionary
 	var nationality_id := str(profile.get("nationality_id", ""))
-	if _history_entity_by_id.has(nationality_id):
-		return nationality_id
+	var runtime_id := _runtime_entity_id_for_historical_source(nationality_id)
+	if _history_entity_by_id.has(runtime_id):
+		return runtime_id
 	var alias := nationality_id.trim_prefix("country_").to_upper() if nationality_id.begins_with("country_") else nationality_id.to_upper()
 	var mapped_entity := str(_entity_by_nationality_alias.get(alias, ""))
-	if _history_entity_by_id.has(mapped_entity):
-		return mapped_entity
-	return FOCUS_COUNTRY_ID
+	runtime_id = _runtime_entity_id_for_historical_source(mapped_entity)
+	if _history_entity_by_id.has(runtime_id):
+		return runtime_id
+	return _runtime_entity_id_for_historical_source(FOCUS_COUNTRY_ID)
 
 
 func _draw_historical_entity_focus() -> void:
 	super._draw_historical_entity_focus()
-	var profile := _major_state_profile_by_entity.get(selected_country_id, {}) as Dictionary
+	var selected_source_id := _historical_source_entity_id(selected_country_id)
+	var profile := _major_state_profile_by_entity.get(selected_source_id, {}) as Dictionary
 	if profile.is_empty():
 		return
 	var rect := _history_focus_rect()
@@ -106,9 +110,9 @@ func _draw_historical_entity_focus() -> void:
 func _observer_note_for(target_entity_id: String) -> String:
 	var document := _read_document(MAJOR_STATE_PROFILE_PATH)
 	var observer_notes := document.get("observer_notes_zh", {}) as Dictionary
-	var home_entity_id := _home_historical_entity_id()
+	var home_entity_id := _historical_source_entity_id(_home_historical_entity_id())
 	var by_target := observer_notes.get(home_entity_id, {}) as Dictionary
-	return str(by_target.get(target_entity_id, ""))
+	return str(by_target.get(_historical_source_entity_id(target_entity_id), ""))
 
 
 func _default_historical_territory_iso(entity_id: String) -> String:
@@ -116,7 +120,9 @@ func _default_historical_territory_iso(entity_id: String) -> String:
 	if territories.is_empty():
 		return ""
 	var preferred_isos: Array[String] = []
-	var state_profile := _major_state_profile_by_entity.get(entity_id, {}) as Dictionary
+	var state_profile := _major_state_profile_by_entity.get(
+		_historical_source_entity_id(entity_id), {}
+	) as Dictionary
 	for alias_value: Variant in (state_profile.get("aliases", []) as Array):
 		var alias := str(alias_value).to_upper()
 		if not alias.is_empty() and alias not in preferred_isos:
@@ -137,7 +143,12 @@ func _default_historical_territory_iso(entity_id: String) -> String:
 
 
 func _enter_region() -> void:
-	if world_mode == WORLD_HISTORICAL_ENTITY_FOCUS and _historical_admin_by_entity.has(selected_country_id):
+	if (
+		world_mode == WORLD_HISTORICAL_ENTITY_FOCUS
+		and _historical_admin_by_entity.has(
+			_historical_source_entity_id(selected_country_id)
+		)
+	):
 		if selected_historical_territory_iso.is_empty():
 			selected_historical_territory_iso = _default_historical_territory_iso(
 				selected_country_id
@@ -155,14 +166,21 @@ func _enter_region() -> void:
 
 
 func _draw_region_map() -> void:
-	if world_mode == WORLD_HISTORICAL_ENTITY_FOCUS and _historical_admin_by_entity.has(selected_country_id):
+	if (
+		world_mode == WORLD_HISTORICAL_ENTITY_FOCUS
+		and _historical_admin_by_entity.has(
+			_historical_source_entity_id(selected_country_id)
+		)
+	):
 		_draw_historical_admin_index()
 		return
 	super._draw_region_map()
 
 
 func _draw_historical_admin_index() -> void:
-	var country := _historical_admin_by_entity.get(selected_country_id, {}) as Dictionary
+	var country := _historical_admin_by_entity.get(
+		_historical_source_entity_id(selected_country_id), {}
+	) as Dictionary
 	var units := country.get("runtime_units", []) as Array
 	var rect := _main_content_rect(110.0, 166.0, 104.0)
 	_panel(rect, Color(0.018, 0.039, 0.046, 0.97), Color(0.67, 0.62, 0.42, 0.38))
@@ -221,7 +239,13 @@ func _activate_button(action: String) -> void:
 
 
 func _go_back() -> void:
-	if world_mode == WORLD_HISTORICAL_ENTITY_FOCUS and space_level == REGION and _historical_admin_by_entity.has(selected_country_id):
+	if (
+		world_mode == WORLD_HISTORICAL_ENTITY_FOCUS
+		and space_level == REGION
+		and _historical_admin_by_entity.has(
+			_historical_source_entity_id(selected_country_id)
+		)
+	):
 		space_level = WORLD
 		selected_admin_unit_id = ""
 		admin_page_index = 0
@@ -238,12 +262,32 @@ func _breadcrumb_text() -> String:
 
 
 func _historical_admin_unit_name(unit_id: String) -> String:
-	var country := _historical_admin_by_entity.get(selected_country_id, {}) as Dictionary
+	var country := _historical_admin_by_entity.get(
+		_historical_source_entity_id(selected_country_id), {}
+	) as Dictionary
 	for unit_value: Variant in (country.get("runtime_units", []) as Array):
 		var unit := unit_value as Dictionary
 		if str(unit.get("id", "")) == unit_id:
 			return str(unit.get("name_zh", unit_id))
 	return unit_id
+
+
+func _historical_source_entity_id(entity_id: String) -> String:
+	var entity := _history_entity_by_id.get(entity_id, {}) as Dictionary
+	return str(entity.get("source_historical_id", entity_id))
+
+
+func _runtime_entity_id_for_historical_source(source_id: String) -> String:
+	if source_id.is_empty():
+		return ""
+	if _history_entity_by_id.has(source_id):
+		return source_id
+	for runtime_id_value: Variant in _history_entity_by_id:
+		var runtime_id := str(runtime_id_value)
+		var entity := _history_entity_by_id[runtime_id] as Dictionary
+		if str(entity.get("source_historical_id", "")) == source_id:
+			return runtime_id
+	return source_id
 
 
 func historical_admin_coverage_report() -> Dictionary:

@@ -12,7 +12,7 @@ import hashlib
 import json
 import struct
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Iterable, Mapping
 
 try:
     from tools.world_data.historical_flag_catalog import (
@@ -21,6 +21,7 @@ try:
         resource_path_for_record,
         source_asset_records,
     )
+    from tools.world_data.path_order import canonical_path_sort
 except ModuleNotFoundError:
     from historical_flag_catalog import (  # type: ignore[no-redef]
         FLAG_REGISTRY_RELATIVE,
@@ -28,6 +29,7 @@ except ModuleNotFoundError:
         resource_path_for_record,
         source_asset_records,
     )
+    from path_order import canonical_path_sort  # type: ignore[no-redef]
 
 
 SCHEMA_VERSION = "wwo_world_data_batch2_artifacts_v1"
@@ -73,11 +75,12 @@ def png_dimensions(path: Path) -> list[int] | None:
     return [width, height]
 
 
-def build_data_manifest(repository_root: Path) -> dict[str, Any]:
+def build_data_manifest(repository_root: Path, data_paths: Iterable[Path] | None = None) -> dict[str, Any]:
     data_root = repository_root / "data" / "world_map"
     rows: list[dict[str, Any]] = []
     parse_errors: list[dict[str, str]] = []
-    for path in sorted(data_root.rglob("*.json")):
+    paths = data_root.rglob("*.json") if data_paths is None else data_paths
+    for path in canonical_path_sort(paths, repository_root):
         rel = relative_path(path, repository_root)
         content = canonical_text_bytes(path)
         row: dict[str, Any] = {
@@ -131,7 +134,7 @@ def resource_to_local_path(repository_root: Path, resource: Any) -> Path | None:
 def build_asset_manifest(repository_root: Path) -> dict[str, Any]:
     flag_document, records, catalog_errors = load_historical_flag_catalog(repository_root)
     asset_root = repository_root / "assets" / "historical_flags" / "1900"
-    asset_files = sorted(asset_root.glob("*.png"))
+    asset_files = canonical_path_sort(asset_root.glob("*.png"), repository_root)
     references: list[dict[str, Any]] = []
     referenced_paths: set[str] = set()
 

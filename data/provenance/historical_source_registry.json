@@ -1,0 +1,55 @@
+{
+  "schema_id": "historical_source_registry_v1",
+  "sources": [
+    {
+      "source_id": "cshapes-2.0-wwo-snapshot-1900",
+      "title": "CShapes 2.0 transformed WWO boundary snapshot",
+      "publisher": "ETH Zürich ICR; repository transformation by WWO",
+      "version": "2.0 / snapshot schema_version=1",
+      "license": "CC BY-NC-SA 4.0",
+      "locator": "res://data/world_map/historical/cshapes_1900_snapshot.json",
+      "access_metadata": {
+        "checkpoint": "c41f07f50ac355b8c85b961cd3d633fa17f37ba9",
+        "source_page": "https://icr.ethz.ch/data/cshapes/",
+        "upstream_content_hash": "384b1ea90b9419f30a858d7ec237c85a22c60d1b35b5f85f215a1204f9989d42",
+        "snapshot_date": "1900-03-12"
+      },
+      "content_hash": "00b1a500dddd161f18710a0e6ff02b7ded80953f81ad96dbdd5fb7158c71a17e"
+    },
+    {
+      "source_id": "wwo-political-identities-1900-v1",
+      "title": "WWO dated political identity catalog for 1900",
+      "publisher": "WWO repository; normalized from CShapes 2.0",
+      "version": "political_units_1900.schema_version=1",
+      "license": "CC BY-NC-SA 4.0; repository transformation terms apply",
+      "locator": "res://data/world_map/historical/political_units_1900.json",
+      "access_metadata": {
+        "checkpoint": "c41f07f50ac355b8c85b961cd3d633fa17f37ba9",
+        "upstream_source_id": "src-cshapes-2.0",
+        "snapshot_date": "1900-03-12"
+      },
+      "content_hash": "d62a8d9c566c1dfea9d57fc197a6fa3606c6be259782a582050aeaffa002c5f9"
+    },
+    {
+      "source_id": "wwo-population-aggregate-estimates-1900-v1",
+      "title": "WWO bounded 1900 population aggregate estimate table",
+      "publisher": "WWO repository; derived compilation",
+      "version": "historical_world_economy_1900_compact_country_table_v1",
+      "license": "Mixed upstream terms; see the linked WWO source manifest",
+      "locator": "res://data/alpha/historical_world_economy_1900/countries_compact.json",
+      "access_metadata": {
+        "checkpoint": "c41f07f50ac355b8c85b961cd3d633fa17f37ba9",
+        "manifest": "res://data/alpha/historical_world_economy_1900.json",
+        "source_ids": [
+          "bls_1901_family_budget",
+          "cepii_tradhist",
+          "cow_nmc_v7",
+          "maddison_2023",
+          "wfp_global_ports",
+          "world_bank_rail_modern"
+        ]
+      },
+      "content_hash": "e8d3175cf3fbc49904a052ed3b2638238a83a91524b8ca2cd15f7082873a52cb"
+    }
+  ]
+}

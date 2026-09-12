@@ -5,7 +5,8 @@ extends RefCounted
 ## Position and appointment IDs are local to their organization; they are not
 ## VNextStableId values and must never be treated as a new stable-ID kind.
 
-const SNAPSHOT_SCHEMA_ID: String = "vnext_organization_core_v1"
+const SNAPSHOT_SCHEMA_ID: String = "vnext_organization_core_v2"
+const LEGACY_SNAPSHOT_SCHEMA_ID: String = "vnext_organization_core_v1"
 
 const _ORGANIZATION_FIELDS: Array[String] = [
 	"organization_id",
@@ -32,9 +33,9 @@ const _APPOINTMENT_FIELDS: Array[String] = [
 ]
 
 var _organizations: Dictionary = {}
+var _revision: int = 0
 var _reference_catalog_configured: bool = false
-var _known_person_ids: Dictionary = {}
-var _known_place_ids: Dictionary = {}
+var _reference_catalog: VNextOrganizationReferenceCatalog = null
 
 
 static func create(
@@ -52,41 +53,58 @@ func is_valid() -> bool:
 	return _validate_organizations(_organizations)
 
 
-## Reference catalogs are optional. When configured, every referenced person and
-## place must be present; the catalogs themselves remain outside the snapshot.
-## They may only be configured before organizations are registered.
+## The external reference catalog is required before any non-empty Person or
+## Place reference can be accepted. It remains outside the snapshot and may only
+## be configured before organizations are registered.
 func configure_reference_catalog(
 	person_ids: Array[String], place_ids: Array[String]
 ) -> bool:
 	if not _organizations.is_empty() or _reference_catalog_configured:
 		return false
-
-	var candidate_person_ids: Dictionary = {}
-	for raw_person_id: Variant in person_ids:
-		if typeof(raw_person_id) != TYPE_STRING:
-			return false
-		var person_id: String = str(raw_person_id)
-		if not _is_valid_person_id(person_id) or candidate_person_ids.has(person_id):
-			return false
-		candidate_person_ids[person_id] = true
-
-	var candidate_place_ids: Dictionary = {}
-	for raw_place_id: Variant in place_ids:
-		if typeof(raw_place_id) != TYPE_STRING:
-			return false
-		var place_id: String = str(raw_place_id)
-		if not _is_valid_place_id(place_id) or candidate_place_ids.has(place_id):
-			return false
-		candidate_place_ids[place_id] = true
-
+	var candidate_catalog := VNextOrganizationReferenceCatalog.create(person_ids, place_ids)
+	if candidate_catalog == null:
+		return false
 	_reference_catalog_configured = true
-	_known_person_ids = candidate_person_ids
-	_known_place_ids = candidate_place_ids
+	_reference_catalog = candidate_catalog
 	return true
+
+
+func has_reference_catalog() -> bool:
+	return _reference_catalog_configured and _reference_catalog != null
+
+
+func reference_catalog_fingerprint() -> String:
+	if not has_reference_catalog():
+		return ""
+	return _reference_catalog.fingerprint()
+
+
+func organization_kind_ids() -> Array[String]:
+	return VNextOrganizationKindCatalog.ids()
+
+
+func organization_kind_catalog_fingerprint() -> String:
+	return VNextOrganizationKindCatalog.fingerprint()
+
+
+func known_capability_ids() -> Array[String]:
+	return VNextOrganizationCapabilityCatalog.ids()
+
+
+func capability_catalog_fingerprint() -> String:
+	return VNextOrganizationCapabilityCatalog.fingerprint()
 
 
 func organization_ids() -> Array[String]:
 	return _sorted_dictionary_keys(_organizations)
+
+
+func revision() -> int:
+	return _revision
+
+
+func state_fingerprint() -> String:
+	return _fingerprint_for(_revision, _organizations)
 
 
 func has_organization(organization_id: String) -> bool:
@@ -137,7 +155,7 @@ func register_organization(
 ) -> bool:
 	if (
 		not _is_valid_organization_id(organization_id)
-		or not _is_valid_local_id(organization_kind)
+		or not VNextOrganizationKindCatalog.is_known(organization_kind)
 		or _organizations.has(organization_id)
 		or not _is_valid_optional_place_id(primary_place_id_value)
 		or not _is_valid_optional_parent_id(parent_organization_id_value)
@@ -204,7 +222,7 @@ func set_parent_organization(
 	candidate_state[organization_id] = candidate
 	if not _validate_organizations(candidate_state):
 		return false
-	_organizations = candidate_state
+	_adopt_mutation(candidate_state)
 	return true
 
 
@@ -219,7 +237,7 @@ func set_organization_active(organization_id: String, active: bool) -> bool:
 	candidate_state[organization_id] = candidate
 	if not _validate_organizations(candidate_state):
 		return false
-	_organizations = candidate_state
+	_adopt_mutation(candidate_state)
 	return true
 
 
@@ -246,7 +264,7 @@ func define_capability(organization_id: String, capability_id: String) -> bool:
 	candidate_state[organization_id] = candidate
 	if not _validate_organizations(candidate_state):
 		return false
-	_organizations = candidate_state
+	_adopt_mutation(candidate_state)
 	return true
 
 
@@ -305,7 +323,7 @@ func define_position(
 	candidate_state[organization_id] = candidate
 	if not _validate_organizations(candidate_state):
 		return false
-	_organizations = candidate_state
+	_adopt_mutation(candidate_state)
 	return true
 
 
@@ -346,7 +364,7 @@ func grant_capability(
 	candidate_state[organization_id] = candidate
 	if not _validate_organizations(candidate_state):
 		return false
-	_organizations = candidate_state
+	_adopt_mutation(candidate_state)
 	return true
 
 
@@ -378,13 +396,28 @@ func revoke_capability(
 	candidate_state[organization_id] = candidate
 	if not _validate_organizations(candidate_state):
 		return false
-	_organizations = candidate_state
+	_adopt_mutation(candidate_state)
 	return true
 
 
 func member_ids(organization_id: String) -> Array[String]:
 	var record: Dictionary = _organizations.get(organization_id, {}) as Dictionary
 	return _copy_sorted_string_array(record.get("member_ids", []))
+
+
+## Derived from the authoritative organization records on every call. The
+## detached result cannot mutate membership state and is sorted by organization.
+func memberships_for_person(person_id: String) -> Array[Dictionary]:
+	var output: Array[Dictionary] = []
+	if not _is_known_person_id(person_id):
+		return output
+	for organization_id: String in organization_ids():
+		if member_ids(organization_id).has(person_id):
+			output.append({
+				"organization_id": organization_id,
+				"person_id": person_id,
+			})
+	return output
 
 
 func is_member(organization_id: String, person_id: String) -> bool:
@@ -413,7 +446,7 @@ func add_member(organization_id: String, person_id: String) -> bool:
 	candidate_state[organization_id] = candidate
 	if not _validate_organizations(candidate_state):
 		return false
-	_organizations = candidate_state
+	_adopt_mutation(candidate_state)
 	return true
 
 
@@ -446,7 +479,7 @@ func remove_member(organization_id: String, person_id: String) -> bool:
 	candidate_state[organization_id] = candidate
 	if not _validate_organizations(candidate_state):
 		return false
-	_organizations = candidate_state
+	_adopt_mutation(candidate_state)
 	return true
 
 
@@ -463,6 +496,22 @@ func appointment(organization_id: String, appointment_id: String) -> Dictionary:
 	var appointments: Dictionary = organization_record.get("appointments", {}) as Dictionary
 	var record: Dictionary = appointments.get(appointment_id, {}) as Dictionary
 	return record.duplicate(true)
+
+
+## Derived reverse view ordered by organization ID and then appointment ID.
+## Appointment dictionaries are deep-detached from the authoritative records.
+func appointments_for_person(person_id: String) -> Array[Dictionary]:
+	var output: Array[Dictionary] = []
+	if not _is_known_person_id(person_id):
+		return output
+	for organization_id: String in organization_ids():
+		for appointment_id: String in appointment_ids(organization_id):
+			var record: Dictionary = appointment(organization_id, appointment_id)
+			if str(record.get("person_id", "")) != person_id:
+				continue
+			record["organization_id"] = organization_id
+			output.append(record)
+	return output
 
 
 func create_appointment(
@@ -517,7 +566,7 @@ func create_appointment(
 	candidate_state[organization_id] = candidate
 	if not _validate_organizations(candidate_state):
 		return false
-	_organizations = candidate_state
+	_adopt_mutation(candidate_state)
 	return true
 
 
@@ -555,7 +604,7 @@ func remove_appointment(organization_id: String, appointment_id: String) -> bool
 	candidate_state[organization_id] = candidate
 	if not _validate_organizations(candidate_state):
 		return false
-	_organizations = candidate_state
+	_adopt_mutation(candidate_state)
 	return true
 
 
@@ -564,6 +613,7 @@ func has_capability(
 ) -> bool:
 	if (
 		not _is_valid_person_id(person_id)
+		or not _is_known_person_id(person_id)
 		or not _is_valid_organization_id(organization_id)
 		or not _is_valid_capability_id(capability_id)
 		or not _organizations.has(organization_id)
@@ -613,6 +663,7 @@ func capabilities_for_person(
 	var output: Array[String] = []
 	if (
 		not _is_valid_person_id(person_id)
+		or not _is_known_person_id(person_id)
 		or not _is_valid_organization_id(organization_id)
 		or not _organizations.has(organization_id)
 		or not is_organization_active(organization_id)
@@ -630,21 +681,33 @@ func capabilities_for_person(
 
 
 func snapshot() -> Dictionary:
-	var saved_organizations: Array[Dictionary] = []
-	for organization_id: String in organization_ids():
-		saved_organizations.append(_snapshot_organization(_organizations[organization_id] as Dictionary))
+	var saved_organizations := _snapshot_organizations(_organizations)
 	return {
 		"schema_id": SNAPSHOT_SCHEMA_ID,
+		"revision": _revision,
 		"organizations": saved_organizations,
+		"state_fingerprint": _fingerprint_for(_revision, _organizations),
 	}
 
 
 ## Decodes and validates the complete candidate before replacing live state.
 ## No field of the current state is changed on any rejection path.
 func restore(snapshot_value: Dictionary) -> bool:
-	if not _has_exact_fields(snapshot_value, ["schema_id", "organizations"]):
-		return false
-	if snapshot_value.get("schema_id") != SNAPSHOT_SCHEMA_ID:
+	var schema_id: String = str(snapshot_value.get("schema_id", ""))
+	var candidate_revision: int = 0
+	if schema_id == SNAPSHOT_SCHEMA_ID:
+		if not _has_exact_fields(
+			snapshot_value,
+			["schema_id", "revision", "organizations", "state_fingerprint"]
+		):
+			return false
+		candidate_revision = _normalize_nonnegative_int(snapshot_value.get("revision"))
+		if candidate_revision < 0:
+			return false
+	elif schema_id == LEGACY_SNAPSHOT_SCHEMA_ID:
+		if not _has_exact_fields(snapshot_value, ["schema_id", "organizations"]):
+			return false
+	else:
 		return false
 	var raw_organizations: Variant = snapshot_value.get("organizations")
 	if typeof(raw_organizations) != TYPE_ARRAY:
@@ -664,7 +727,14 @@ func restore(snapshot_value: Dictionary) -> bool:
 
 	if not _validate_organizations(candidate_state):
 		return false
+	if (
+		schema_id == SNAPSHOT_SCHEMA_ID
+		and str(snapshot_value.get("state_fingerprint", ""))
+		!= _fingerprint_for(candidate_revision, candidate_state)
+	):
+		return false
 	_organizations = candidate_state
+	_revision = candidate_revision
 	return true
 
 
@@ -675,8 +745,27 @@ func _commit_organization_state(
 	candidate_state[organization_id] = candidate_organization
 	if not _validate_organizations(candidate_state):
 		return false
-	_organizations = candidate_state
+	_adopt_mutation(candidate_state)
 	return true
+
+
+func _adopt_mutation(candidate_state: Dictionary) -> void:
+	_organizations = candidate_state
+	_revision += 1
+
+
+func _snapshot_organizations(source: Dictionary) -> Array[Dictionary]:
+	var output: Array[Dictionary] = []
+	for organization_id: String in _sorted_dictionary_keys(source):
+		output.append(_snapshot_organization(source[organization_id] as Dictionary))
+	return output
+
+
+func _fingerprint_for(revision_value: int, source: Dictionary) -> String:
+	return JSON.stringify({
+		"revision": revision_value,
+		"organizations": _snapshot_organizations(source),
+	}).sha256_text()
 
 
 func _is_mutable_organization(organization_id: String) -> bool:
@@ -709,7 +798,7 @@ func _decode_organization(raw_organization: Dictionary) -> Dictionary:
 	var parent_id: String = str(raw_organization.get("parent_organization_id"))
 	if (
 		not _is_valid_organization_id(organization_id)
-		or not _is_valid_local_id(organization_kind)
+		or not VNextOrganizationKindCatalog.is_known(organization_kind)
 		or not _is_valid_optional_place_id(primary_place_id_value)
 		or not _is_valid_optional_parent_id(parent_id)
 		or not _is_known_place_id(primary_place_id_value)
@@ -865,7 +954,7 @@ func _validate_organizations(candidate_state: Dictionary) -> bool:
 			record.get("organization_id") != organization_id
 			or not _is_valid_organization_id(organization_id)
 			or typeof(record.get("organization_kind")) != TYPE_STRING
-			or not _is_valid_local_id(str(record.get("organization_kind")))
+			or not VNextOrganizationKindCatalog.is_known(str(record.get("organization_kind")))
 			or typeof(record.get("primary_place_id")) != TYPE_STRING
 			or not _is_valid_optional_place_id(str(record.get("primary_place_id")))
 			or not _is_known_place_id(str(record.get("primary_place_id")))
@@ -1068,11 +1157,13 @@ func _is_valid_optional_parent_id(candidate_value: String) -> bool:
 
 
 func _is_known_person_id(person_id: String) -> bool:
-	return not _reference_catalog_configured or _known_person_ids.has(person_id)
+	return has_reference_catalog() and _reference_catalog.has_person(person_id)
 
 
 func _is_known_place_id(place_id: String) -> bool:
-	return place_id.is_empty() or not _reference_catalog_configured or _known_place_ids.has(place_id)
+	return place_id.is_empty() or (
+		has_reference_catalog() and _reference_catalog.has_place(place_id)
+	)
 
 
 func _is_valid_local_id(candidate_value: String) -> bool:
@@ -1086,13 +1177,7 @@ func _is_valid_local_id(candidate_value: String) -> bool:
 
 
 func _is_valid_capability_id(candidate_value: String) -> bool:
-	if candidate_value.is_empty():
-		return false
-	for character_index: int in candidate_value.length():
-		var character: String = candidate_value.substr(character_index, 1)
-		if not "abcdefghijklmnopqrstuvwxyz0123456789_.-".contains(character):
-			return false
-	return true
+	return VNextOrganizationCapabilityCatalog.is_known(candidate_value)
 
 
 func _are_valid_unique_capabilities(capability_ids_value: Array[String]) -> bool:
@@ -1112,6 +1197,21 @@ func _normalize_positive_int(candidate_value: Variant) -> int:
 	if candidate_type == TYPE_FLOAT:
 		var candidate_float: float = float(candidate_value)
 		if not is_finite(candidate_float) or candidate_float <= 0.0:
+			return -1
+		if candidate_float != floor(candidate_float):
+			return -1
+		return int(candidate_float)
+	return -1
+
+
+func _normalize_nonnegative_int(candidate_value: Variant) -> int:
+	var candidate_type: int = typeof(candidate_value)
+	if candidate_type == TYPE_INT:
+		var candidate_int: int = int(candidate_value)
+		return candidate_int if candidate_int >= 0 else -1
+	if candidate_type == TYPE_FLOAT:
+		var candidate_float: float = float(candidate_value)
+		if not is_finite(candidate_float) or candidate_float < 0.0:
 			return -1
 		if candidate_float != floor(candidate_float):
 			return -1

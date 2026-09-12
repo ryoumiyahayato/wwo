@@ -3,7 +3,7 @@ extends SceneTree
 
 const FLAGS_PATH := "res://data/world_map/historical/flags_1900.json"
 const HISTORICAL_FLAG_ASSET_PREFIX := "res://assets/historical_flags/1900/"
-const INTENDED_ENTITY_ID := "country_fra"
+const INTENDED_ENTITY_ID := "state:country_fra"
 const INTENDED_FLAG_ID := "france_tricolour_1794"
 const SUPPORTED_REFERENCE_KEYS: Array[String] = [
 	"data",

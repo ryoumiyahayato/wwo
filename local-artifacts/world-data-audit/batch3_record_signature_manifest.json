@@ -26,6 +26,13 @@
     },
     {
       "duplicate_ids": [],
+      "id_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "id_field_counts": {},
+      "id_record_count": 0,
+      "path": "data/world_map/city_detail/LICENSE.json"
+    },
+    {
+      "duplicate_ids": [],
       "id_digest": "aea650bdf2bfbc946f39a3364c4748358fd3997b762df18a18b2572ec4b08434",
       "id_field_counts": {
         "id": 7
@@ -1439,13 +1446,6 @@
     },
     {
       "duplicate_ids": [],
-      "id_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "id_field_counts": {},
-      "id_record_count": 0,
-      "path": "data/world_map/city_detail/LICENSE.json"
-    },
-    {
-      "duplicate_ids": [],
       "id_digest": "1db74278e3388d50bb1d4d44eb476fe0e6b69c74dcb6cdd05c49fa06be27b606",
       "id_field_counts": {
         "id": 177
@@ -1834,6 +1834,6 @@
     }
   ],
   "files_with_id_records": 178,
-  "record_signature_digest": "aef34b044f6f4df612f337788ef27c96f3d20e066db695c920c6f246a15fb3f1",
+  "record_signature_digest": "41c7abc78eaba39afd8c2ce68c4bcf2091304406c3a2bac7c7d95de266ae433e",
   "schema_version": "wwo_world_data_batch3_contracts_v1"
 }
