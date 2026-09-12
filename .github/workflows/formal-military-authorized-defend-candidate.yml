@@ -64,7 +64,9 @@ jobs:
             'scripts/vnext/organization/organization_authority_foundation.gd',
             'tests/vnext/organization_authority_foundation_test.gd'
           )
-          if (($changed | Sort-Object) -join "`n" -ne ($expected | Sort-Object) -join "`n") {
+          $changedKey = (($changed | Sort-Object) -join "`n")
+          $expectedKey = (($expected | Sort-Object) -join "`n")
+          if ($changedKey -ne $expectedKey) {
             throw "Unexpected changed files: $($changed -join ', ')"
           }
           git diff -- scripts/vnext/organization/organization_authority_foundation.gd tests/vnext/organization_authority_foundation_test.gd
