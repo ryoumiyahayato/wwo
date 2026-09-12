@@ -8,77 +8,75 @@ on:
       - ".github/workflows/formal-military-authorized-defend-candidate.yml"
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: formal-military-authorized-defend-candidate-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  optional-authority-integer-product-correction:
+  authority-focused:
     runs-on: windows-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
     steps:
-      - name: Checkout PR branch
+      - name: Checkout exact product correction head
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: feature/formal-military-authorized-defend-20260912
+          ref: 54e973926ce44cbf5a4b7022f3a687f33715bb85
 
-      - name: Verify product files still match previous product HEAD
+      - name: Verify exact product correction head
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          git diff --exit-code 9afe035475e21e603f796e7569c65aecc082da0c -- scripts/vnext/organization/organization_authority_foundation.gd tests/vnext/organization_authority_foundation_test.gd
+          $expected = '54e973926ce44cbf5a4b7022f3a687f33715bb85'
+          $actual = (git rev-parse HEAD).Trim()
+          Write-Host "Authority focused product HEAD: $actual"
+          if ($actual -ne $expected) { throw "Authority focused checked out $actual but expected $expected" }
 
-      - name: Apply minimum optional integer correction and regression
+      - name: Install Godot 4.6.3
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $script = @'
-          from pathlib import Path
+          $archive = Join-Path $env:RUNNER_TEMP 'godot.zip'
+          $install = Join-Path $env:RUNNER_TEMP 'godot-4.6.3'
+          Invoke-WebRequest -Uri 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip' -OutFile $archive
+          Expand-Archive -LiteralPath $archive -DestinationPath $install
+          $binary = (Get-ChildItem -LiteralPath $install -Filter 'Godot_v4.6.3-stable_win64.exe' -Recurse | Select-Object -First 1).FullName
+          if (-not $binary) { throw 'Godot 4.6.3 executable was not found' }
+          "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          & $binary --version
 
-          source_path = Path('scripts/vnext/organization/organization_authority_foundation.gd')
-          test_path = Path('tests/vnext/organization_authority_foundation_test.gd')
-
-          source = source_path.read_text(encoding='utf-8')
-          old_helper = '''func _optional_nonnegative_int(value: Variant) -> int:\n\tif typeof(value) != TYPE_INT:\n\t\treturn -2\n\treturn int(value) if int(value) >= -1 else -2\n'''
-          new_helper = '''func _optional_nonnegative_int(value: Variant) -> int:\n\tif typeof(value) == TYPE_INT:\n\t\treturn int(value) if int(value) >= -1 else -2\n\tif typeof(value) != TYPE_FLOAT:\n\t\treturn -2\n\tvar candidate := float(value)\n\tif not is_finite(candidate) or candidate < -1.0 or candidate != floor(candidate):\n\t\treturn -2\n\treturn int(candidate)\n'''
-          if source.count(old_helper) != 1:
-              raise SystemExit(f'expected exactly one optional helper match, got {source.count(old_helper)}')
-          source_path.write_text(source.replace(old_helper, new_helper, 1), encoding='utf-8')
-
-          tests = test_path.read_text(encoding='utf-8')
-          marker = '''\tvar fractional_revision := saved.duplicate(true)\n\tfractional_revision["revision"] = 1.5\n\t_expect_semantic_restore_rejected_atomic(restored, fractional_revision, "fractional persisted revision")\n'''
-          replacement = marker + '''\n\tvar fractional_optional_valid_until := saved.duplicate(true)\n\t_snapshot_record(fractional_optional_valid_until, "delegations", "delegation_id", "delegation.persist.bob")["valid_until"] = 1.5\n\t_expect_semantic_restore_rejected_atomic(restored, fractional_optional_valid_until, "fractional persisted optional valid_until")\n'''
-          if tests.count(marker) != 1:
-              raise SystemExit(f'expected exactly one fractional revision marker, got {tests.count(marker)}')
-          test_path.write_text(tests.replace(marker, replacement, 1), encoding='utf-8')
-          '@
-          $patcher = Join-Path $env:RUNNER_TEMP 'pr83_optional_integer_patch.py'
-          Set-Content -LiteralPath $patcher -Value $script -Encoding utf8
-          python $patcher
-          git diff --check
-          $changed = @(git diff --name-only)
-          $expected = @(
-            'scripts/vnext/organization/organization_authority_foundation.gd',
-            'tests/vnext/organization_authority_foundation_test.gd'
-          )
-          $changedKey = (($changed | Sort-Object) -join "`n")
-          $expectedKey = (($expected | Sort-Object) -join "`n")
-          if ($changedKey -ne $expectedKey) {
-            throw "Unexpected changed files: $($changed -join ', ')"
-          }
-          git diff -- scripts/vnext/organization/organization_authority_foundation.gd tests/vnext/organization_authority_foundation_test.gd
-
-      - name: Commit forward product correction
+      - name: Prime Godot script class cache
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -- scripts/vnext/organization/organization_authority_foundation.gd tests/vnext/organization_authority_foundation_test.gd
-          git commit -m 'fix: normalize optional authority JSON integers'
-          $newHead = (git rev-parse HEAD).Trim()
-          Write-Host "NEW PRODUCT HEAD: $newHead"
-          git push origin HEAD:feature/formal-military-authorized-defend-20260912
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--editor', '--path', '.', '--quit'
+          ) -Wait -PassThru -NoNewWindow
+          if ($process.ExitCode -ne 0) { throw "Godot project import failed with exit code $($process.ExitCode)" }
+
+      - name: Run Organization Authority focused regression
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force -Path builds/pr83-authority-focused | Out-Null
+          $logPath = 'builds/pr83-authority-focused/authority.log'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--path', '.',
+            '--script', 'res://tests/vnext/organization_authority_foundation_test.gd',
+            '--log-file', $logPath
+          ) -Wait -PassThru -NoNewWindow
+          if (-not (Test-Path -LiteralPath $logPath -PathType Leaf)) { throw 'Authority focused log was not created' }
+          $content = Get-Content -LiteralPath $logPath -Raw
+          Write-Host $content
+          if ($process.ExitCode -ne 0) { throw "Authority focused failed with exit code $($process.ExitCode)" }
+          if ($content -notmatch 'Organization authority foundation: ([1-9][0-9]*) checks, 0 failures') { throw 'Authority focused did not report PASS / 0 failures' }
+
+      - name: Upload Authority focused log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr83-authority-focused
+          path: builds/pr83-authority-focused/authority.log
+          if-no-files-found: warn
