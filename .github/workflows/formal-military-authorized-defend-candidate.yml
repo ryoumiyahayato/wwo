@@ -50,6 +50,15 @@ jobs:
           "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           & $binary --version
 
+      - name: Prime Godot script class cache
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--editor', '--path', '.', '--quit'
+          ) -Wait -PassThru -NoNewWindow
+          if ($process.ExitCode -ne 0) { throw "Godot project import failed with exit code $($process.ExitCode)" }
+
       - name: Run dedicated Formal Military authorized DEFEND integration test
         shell: pwsh
         run: |
