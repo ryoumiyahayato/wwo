@@ -8,8 +8,9 @@ extends RefCounted
 signal state_changed(change: Dictionary)
 
 const SAVE_PATH: String = "user://formal_world_1900.json"
-const SCHEMA_ID: String = "formal_world_simulation_v6"
-const PREVIOUS_SCHEMA_ID: String = "formal_world_simulation_v5"
+const SCHEMA_ID: String = "formal_world_simulation_v7"
+const PREVIOUS_SCHEMA_ID: String = "formal_world_simulation_v6"
+const LEGACY_ORGANIZATION_SCHEMA_ID: String = "formal_world_simulation_v5"
 const EVIDENCE_STATE_SCHEMA_ID: String = "historical_political_evidence_v1"
 const DEFAULT_FORMAL_PERSON_ID: String = "person:formal_generated_country_fra_0001"
 const DEFAULT_FORMAL_PERSON_CLAIM_ID: String = "formal_population_claim:country_fra:0001"
@@ -28,9 +29,15 @@ var _market_registry := FormalWorldMarketRegistry.new()
 var _market_registry_view := FormalWorldMarketView.new()
 var _economy := FormalWorldEconomyService.new()
 var _spatial_catalog := VNextSpatialCatalog.new()
+var _spatial_world: VNextSpatialWorld = null
 var _person_authority: VNextNamedPersonOverlay = null
 var _player_state := VNextPlayerState.new()
 var _organization: VNextOrganizationCore = null
+var _organization_authority: VNextOrganizationAuthorityFoundation = null
+var _military_map: VNextMilitaryMapAdapter = null
+var _military_state: VNextMilitaryState = null
+var _military_service := VNextMilitaryService.new()
+var _military_authority_bridge: VNextMilitaryAuthorityBridge = null
 var _organization_person_reference_ids: Array[String] = []
 var _organization_place_reference_ids: Array[String] = []
 var _organization_composition_error: String = ""
@@ -131,6 +138,12 @@ func initialize() -> bool:
 	if not _configure_formal_person_composition():
 		initialized = false
 		return false
+	if not _configure_organization_authority():
+		initialized = false
+		return false
+	if not _configure_military_composition():
+		initialized = false
+		return false
 	if not _configure_market_registry():
 		initialization_error = _market_registry.initialization_error
 		initialized = false
@@ -220,6 +233,35 @@ func player_person_id() -> String:
 
 func select_player_person(person_id: String) -> bool:
 	return _player_state.set_player_id(person_id)
+
+
+func player_defend_formation(
+	acting_context: Dictionary,
+	formation_id: String,
+	duration_hours: int
+) -> Dictionary:
+	if not initialized or _military_authority_bridge == null:
+		return {
+			"success": false,
+			"status": VNextMilitaryAuthorityBridge.RESULT_DOMAIN_REJECTED,
+			"authority_status": "",
+			"authorization": {},
+			"domain_result": {"success": false, "message": "Formal Military composition is unavailable."},
+		}
+	if str(acting_context.get("person_id", "")) != player_person_id():
+		return {
+			"success": false,
+			"status": VNextMilitaryAuthorityBridge.RESULT_AUTHORITY_DENIED,
+			"authority_status": VNextOrganizationAuthorityFoundation.STATUS_INVALID_ACTING_CONTEXT,
+			"authorization": {},
+			"domain_result": {},
+		}
+	return _military_authority_bridge.defend(
+		acting_context,
+		formation_id,
+		duration_hours,
+		_authoritative_total_hour()
+	)
 
 
 func economy_regression_snapshot() -> Dictionary:
@@ -342,14 +384,22 @@ func get_persistent_state() -> Dictionary:
 		"persons": _person_authority.snapshot(),
 		"player": _player_state.snapshot(),
 		"organization": _organization.snapshot(),
+		"organization_authority": _organization_authority.snapshot(),
+		"military_state": _military_state.snapshot(),
 	}
 
 
 func authoritative_fingerprint() -> String:
-	if not initialized or _organization == null or _person_authority == null:
+	if (
+		not initialized
+		or _organization == null
+		or _person_authority == null
+		or _organization_authority == null
+		or _military_state == null
+	):
 		return ""
 	return JSON.stringify({
-		"schema_id": "formal_world_authoritative_fingerprint_v2",
+		"schema_id": "formal_world_authoritative_fingerprint_v3",
 		"total_minutes": total_minutes,
 		"historical_evidence": _historical_evidence.fingerprint(),
 		"runtime_politics": JSON.stringify(_political_registry.snapshot()).sha256_text(),
@@ -358,6 +408,8 @@ func authoritative_fingerprint() -> String:
 		"persons": _person_authority.state_fingerprint(),
 		"player": JSON.stringify(_player_state.snapshot()).sha256_text(),
 		"organization": _organization.state_fingerprint(),
+		"organization_authority": _organization_authority.state_fingerprint(),
+		"military_state": _military_state.state_fingerprint(),
 	}).sha256_text()
 
 
@@ -380,6 +432,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 			"formal_world_simulation_v2",
 			"formal_world_simulation_v3",
 			"formal_world_simulation_v4",
+			LEGACY_ORGANIZATION_SCHEMA_ID,
 			PREVIOUS_SCHEMA_ID,
 			SCHEMA_ID,
 		]
@@ -392,6 +445,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 	if schema_id in [
 		"formal_world_simulation_v3",
 		"formal_world_simulation_v4",
+		LEGACY_ORGANIZATION_SCHEMA_ID,
 		PREVIOUS_SCHEMA_ID,
 		SCHEMA_ID,
 	]:
@@ -415,7 +469,12 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 		_refresh_read_only_views()
 		if not _economy.bind_runtime_political_view(_political_registry_view):
 			return false
-	if schema_id in ["formal_world_simulation_v4", PREVIOUS_SCHEMA_ID, SCHEMA_ID]:
+	if schema_id in [
+		"formal_world_simulation_v4",
+		LEGACY_ORGANIZATION_SCHEMA_ID,
+		PREVIOUS_SCHEMA_ID,
+		SCHEMA_ID,
+	]:
 		if (
 			not state.get("markets", {}) is Dictionary
 			or not _market_registry.validate_persistent_state(
@@ -423,7 +482,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 			)
 		):
 			return false
-	if schema_id == SCHEMA_ID:
+	if schema_id in [PREVIOUS_SCHEMA_ID, SCHEMA_ID]:
 		if (
 			not state.get("persons", {}) is Dictionary
 			or not state.get("player", {}) is Dictionary
@@ -434,11 +493,27 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 			return false
 		if not _player_state.restore(state.get("player", {}) as Dictionary):
 			return false
-	if schema_id in [PREVIOUS_SCHEMA_ID, SCHEMA_ID]:
+	if schema_id in [LEGACY_ORGANIZATION_SCHEMA_ID, PREVIOUS_SCHEMA_ID, SCHEMA_ID]:
 		if (
 			not state.get("organization", {}) is Dictionary
 			or not _organization.restore(
 				state.get("organization", {}) as Dictionary
+			)
+		):
+			return false
+		if not _configure_organization_authority():
+			return false
+	if schema_id == SCHEMA_ID:
+		if (
+			not state.get("organization_authority", {}) is Dictionary
+			or not state.get("military_state", {}) is Dictionary
+			or not _organization_authority.restore(
+				state.get("organization_authority", {}) as Dictionary
+			)
+			or not _military_state.restore(
+				state.get("military_state", {}) as Dictionary,
+				_military_map,
+				_spatial_world
 			)
 		):
 			return false
@@ -465,6 +540,7 @@ func _adopt_candidate(candidate: FormalWorldSimulation) -> void:
 	_market_registry_view = candidate._market_registry_view
 	_economy = candidate._economy
 	_spatial_catalog = candidate._spatial_catalog
+	_spatial_world = candidate._spatial_world
 	_person_authority = candidate._person_authority
 	var person_population_query_rebound := (
 		_person_authority != null
@@ -475,6 +551,10 @@ func _adopt_candidate(candidate: FormalWorldSimulation) -> void:
 	assert(person_population_query_rebound)
 	_player_state = candidate._player_state
 	_organization = candidate._organization
+	_organization_authority = candidate._organization_authority
+	_military_map = candidate._military_map
+	_military_state = candidate._military_state
+	_military_service = candidate._military_service
 	_organization_person_reference_ids = (
 		candidate._organization_person_reference_ids.duplicate()
 	)
@@ -485,6 +565,8 @@ func _adopt_candidate(candidate: FormalWorldSimulation) -> void:
 		candidate._explicit_organization_reference_injection
 	)
 	_organization_composition_error = ""
+	var military_bridge_rebound := _configure_military_authority_bridge()
+	assert(military_bridge_rebound)
 	_economy.bind_authoritative_hour_source(
 		Callable(self, "_authoritative_total_hour")
 	)
@@ -604,6 +686,53 @@ func _configure_formal_person_composition() -> bool:
 	var person_ids := _person_authority.person_ids()
 	if person_ids.is_empty() or not _player_state.set_player_id(person_ids[0]):
 		initialization_error = "PlayerState could not select a Formal Person"
+		return false
+	return true
+
+
+func _configure_organization_authority() -> bool:
+	if _organization == null or _person_authority == null:
+		initialization_error = "Organization Authority dependencies are unavailable"
+		return false
+	_organization_authority = VNextOrganizationAuthorityFoundation.create(
+		_organization,
+		_person_authority.person_ids(),
+		_organization_place_reference_ids
+	)
+	if _organization_authority == null:
+		initialization_error = "Organization Authority foundation could not be composed"
+		return false
+	if _military_state != null:
+		return _configure_military_authority_bridge()
+	return true
+
+
+func _configure_military_composition() -> bool:
+	_spatial_world = VNextSpatialWorld.create(_spatial_catalog)
+	if _spatial_world == null or not _spatial_world.is_valid():
+		initialization_error = "Formal Military composition cannot bind Spatial authority"
+		return false
+	_military_map = VNextMilitaryMapAdapter.new()
+	if not _military_map.load_existing_map(_spatial_world):
+		initialization_error = "Formal Military map adapter could not bind Spatial authority"
+		return false
+	_military_state = VNextMilitaryState.new()
+	if not _military_state.initialize(_military_map):
+		initialization_error = "Formal MilitaryState could not initialize"
+		return false
+	_military_service = VNextMilitaryService.new()
+	return _configure_military_authority_bridge()
+
+
+func _configure_military_authority_bridge() -> bool:
+	_military_authority_bridge = VNextMilitaryAuthorityBridge.create(
+		_organization_authority,
+		_military_state,
+		_military_service,
+		_military_map
+	)
+	if _military_authority_bridge == null:
+		initialization_error = "Formal Military Authority bridge could not be composed"
 		return false
 	return true
 
@@ -774,6 +903,7 @@ func _validated_time_state(state: Dictionary, schema_id: String) -> Dictionary:
 		"formal_world_simulation_v2",
 		"formal_world_simulation_v3",
 		"formal_world_simulation_v4",
+		LEGACY_ORGANIZATION_SCHEMA_ID,
 		PREVIOUS_SCHEMA_ID,
 		SCHEMA_ID,
 	] and (
