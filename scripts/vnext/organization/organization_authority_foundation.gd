@@ -2327,9 +2327,14 @@ func _nonnegative_int(value: Variant) -> int:
 
 
 func _optional_nonnegative_int(value: Variant) -> int:
-	if typeof(value) != TYPE_INT:
+	if typeof(value) == TYPE_INT:
+		return int(value) if int(value) >= -1 else -2
+	if typeof(value) != TYPE_FLOAT:
 		return -2
-	return int(value) if int(value) >= -1 else -2
+	var candidate := float(value)
+	if not is_finite(candidate) or candidate < -1.0 or candidate != floor(candidate):
+		return -2
+	return int(candidate)
 
 
 func _nonnegative_float(value: Variant) -> float:

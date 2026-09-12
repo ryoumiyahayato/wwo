@@ -1130,6 +1130,10 @@ func _test_decision_delegation_round_trip_and_corruption() -> void:
 	fractional_revision["revision"] = 1.5
 	_expect_semantic_restore_rejected_atomic(restored, fractional_revision, "fractional persisted revision")
 
+	var fractional_optional_valid_until := saved.duplicate(true)
+	_snapshot_record(fractional_optional_valid_until, "delegations", "delegation_id", "delegation.persist.bob")["valid_until"] = 1.5
+	_expect_semantic_restore_rejected_atomic(restored, fractional_optional_valid_until, "fractional persisted optional valid_until")
+
 	var scope_expansion := saved.duplicate(true)
 	_snapshot_record(scope_expansion, "delegations", "delegation_id", "delegation.persist.carol")["spatial_scope"] = ["place:branch", "place:capital"]
 	_expect_semantic_restore_rejected_atomic(restored, scope_expansion, "expanded immediate-source delegation scope")
