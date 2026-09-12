@@ -8,88 +8,75 @@ on:
       - ".github/workflows/formal-military-authorized-defend-candidate.yml"
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: formal-military-authorized-defend-candidate-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  proposal-json-integer-product-correction:
+  authority-focused:
     runs-on: windows-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
     steps:
-      - name: Checkout PR branch
+      - name: Checkout exact product correction head
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: feature/formal-military-authorized-defend-20260912
+          ref: fea3c363a2ae6dc572ba9ff0869d43af3271df97
 
-      - name: Apply schema-local Proposal JSON integer correction
+      - name: Verify exact product correction head
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $previousProduct = '54e973926ce44cbf5a4b7022f3a687f33715bb85'
-          $changed = @(git diff --name-only $previousProduct -- scripts/vnext/organization/organization_authority_foundation.gd tests/vnext/organization_authority_foundation_test.gd)
-          if ($changed.Count -gt 0) {
-            Write-Host "Product correction already present; no-op. Changed product files: $($changed -join ', ')"
-            exit 0
-          }
+          $expected = 'fea3c363a2ae6dc572ba9ff0869d43af3271df97'
+          $actual = (git rev-parse HEAD).Trim()
+          Write-Host "Authority focused product HEAD: $actual"
+          if ($actual -ne $expected) { throw "Authority focused checked out $actual but expected $expected" }
 
-          $script = @'
-          from pathlib import Path
-
-          source_path = Path('scripts/vnext/organization/organization_authority_foundation.gd')
-          test_path = Path('tests/vnext/organization_authority_foundation_test.gd')
-
-          source = source_path.read_text(encoding='utf-8')
-          old = '''func _normalize_proposal(record: Dictionary) -> Dictionary:\n\tif not _has_exact_fields(record, [\n\t\t"proposal_id", "organization_id", "operation", "target_id", "spatial_place_id",\n\t\t"subject_id", "amount_or_quantity", "content_fingerprint", "version",\n\t\t"proposer_context", "procedure_id", "created_at", "status", "step_results",\n\t\t"votes", "signatures", "decision_id",\n\t]):\n\t\treturn {}\n\tvar proposal_id := str(record.get("proposal_id", ""))\n\tvar organization_id := str(record.get("organization_id", ""))\n\tvar operation := str(record.get("operation", ""))\n\tvar place_id := str(record.get("spatial_place_id", ""))\n\tvar amount := _nonnegative_float(record.get("amount_or_quantity"))\n\tvar version := _positive_int(record.get("version"))\n\tvar created_at := _nonnegative_int(record.get("created_at"))\n\tif (\n\t\tnot _is_valid_token(proposal_id)\n\t\tor not _is_valid_organization_id(organization_id)\n\t\tor not _is_valid_operation(operation)\n\t\tor (not place_id.is_empty() and not _known_place_ids.has(place_id))\n\t\tor amount < 0.0\n\t\tor str(record.get("content_fingerprint", "")).length() != 64\n\t\tor version <= 0\n\t\tor not _acting_context_valid(record.get("proposer_context", {}) as Dictionary)\n\t\tor not _is_valid_token(str(record.get("procedure_id", "")))\n\t\tor created_at < 0\n\t\tor str(record.get("status", "")) not in ["proposed", "approved", "rejected"]\n\t\tor typeof(record.get("step_results")) != TYPE_DICTIONARY\n\t\tor typeof(record.get("votes")) != TYPE_ARRAY\n\t\tor typeof(record.get("signatures")) != TYPE_ARRAY\n\t):\n\t\treturn {}\n\treturn record.duplicate(true)\n'''
-          new = '''func _normalize_proposal(record: Dictionary) -> Dictionary:\n\tif not _has_exact_fields(record, [\n\t\t"proposal_id", "organization_id", "operation", "target_id", "spatial_place_id",\n\t\t"subject_id", "amount_or_quantity", "content_fingerprint", "version",\n\t\t"proposer_context", "procedure_id", "created_at", "status", "step_results",\n\t\t"votes", "signatures", "decision_id",\n\t]):\n\t\treturn {}\n\tvar proposal_id := str(record.get("proposal_id", ""))\n\tvar organization_id := str(record.get("organization_id", ""))\n\tvar operation := str(record.get("operation", ""))\n\tvar place_id := str(record.get("spatial_place_id", ""))\n\tvar amount := _nonnegative_float(record.get("amount_or_quantity"))\n\tvar version := _positive_int(record.get("version"))\n\tvar created_at := _nonnegative_int(record.get("created_at"))\n\tif (\n\t\tnot _is_valid_token(proposal_id)\n\t\tor not _is_valid_organization_id(organization_id)\n\t\tor not _is_valid_operation(operation)\n\t\tor (not place_id.is_empty() and not _known_place_ids.has(place_id))\n\t\tor amount < 0.0\n\t\tor str(record.get("content_fingerprint", "")).length() != 64\n\t\tor version <= 0\n\t\tor not _acting_context_valid(record.get("proposer_context", {}) as Dictionary)\n\t\tor not _is_valid_token(str(record.get("procedure_id", "")))\n\t\tor created_at < 0\n\t\tor str(record.get("status", "")) not in ["proposed", "approved", "rejected"]\n\t\tor typeof(record.get("step_results")) != TYPE_DICTIONARY\n\t\tor typeof(record.get("votes")) != TYPE_ARRAY\n\t\tor typeof(record.get("signatures")) != TYPE_ARRAY\n\t):\n\t\treturn {}\n\tvar normalized := record.duplicate(true)\n\tnormalized["version"] = version\n\tnormalized["created_at"] = created_at\n\n\tvar normalized_votes: Array = []\n\tfor raw_vote: Variant in record.get("votes") as Array:\n\t\tif typeof(raw_vote) != TYPE_DICTIONARY:\n\t\t\treturn {}\n\t\tvar vote: Dictionary = (raw_vote as Dictionary).duplicate(true)\n\t\tvar proposal_version := _positive_int(vote.get("proposal_version"))\n\t\tvar cast_at := _nonnegative_int(vote.get("cast_at"))\n\t\tif proposal_version <= 0 or cast_at < 0:\n\t\t\treturn {}\n\t\tvote["proposal_version"] = proposal_version\n\t\tvote["cast_at"] = cast_at\n\t\tnormalized_votes.append(vote)\n\tnormalized["votes"] = normalized_votes\n\n\tvar normalized_signatures: Array = []\n\tfor raw_signature: Variant in record.get("signatures") as Array:\n\t\tif typeof(raw_signature) != TYPE_DICTIONARY:\n\t\t\treturn {}\n\t\tvar signature: Dictionary = (raw_signature as Dictionary).duplicate(true)\n\t\tvar proposal_version := _positive_int(signature.get("proposal_version"))\n\t\tvar signed_at := _nonnegative_int(signature.get("signed_at"))\n\t\tif proposal_version <= 0 or signed_at < 0:\n\t\t\treturn {}\n\t\tsignature["proposal_version"] = proposal_version\n\t\tsignature["signed_at"] = signed_at\n\t\tnormalized_signatures.append(signature)\n\tnormalized["signatures"] = normalized_signatures\n\n\tvar normalized_step_results: Dictionary = {}\n\tvar step_results: Dictionary = record.get("step_results") as Dictionary\n\tfor raw_step_id: Variant in step_results.keys():\n\t\tif typeof(raw_step_id) != TYPE_STRING:\n\t\t\treturn {}\n\t\tvar raw_result: Variant = step_results.get(raw_step_id)\n\t\tif typeof(raw_result) != TYPE_DICTIONARY:\n\t\t\treturn {}\n\t\tvar result: Dictionary = (raw_result as Dictionary).duplicate(true)\n\t\tfor field: String in [\n\t\t\t"eligible_weight", "participating_weight", "yes_weight", "no_weight", "abstain_weight",\n\t\t\t"eligible_count", "participating_count", "yes_count", "no_count", "abstain_count",\n\t\t]:\n\t\t\tvar integer_value := _nonnegative_int(result.get(field))\n\t\t\tif integer_value < 0:\n\t\t\t\treturn {}\n\t\t\tresult[field] = integer_value\n\t\tnormalized_step_results[str(raw_step_id)] = result\n\tnormalized["step_results"] = normalized_step_results\n\treturn normalized\n'''
-          if source.count(old) != 1:
-              raise SystemExit(f'expected exactly one Proposal normalizer match, got {source.count(old)}')
-          source_path.write_text(source.replace(old, new, 1), encoding='utf-8')
-
-          tests = test_path.read_text(encoding='utf-8')
-          positive_marker = '''\tif json_restore_ok:\n\t\t_equal(json_restored.state_fingerprint(), authority.state_fingerprint(), "Authority fingerprint survives JSON round trip")\n'''
-          positive_addition = '''\t\tvar json_proposal := json_restored.proposal("persist_decision")\n\t\tvar json_votes: Array = json_proposal.get("votes", []) as Array\n\t\tvar json_signatures: Array = json_proposal.get("signatures", []) as Array\n\t\tvar json_step_results: Dictionary = json_proposal.get("step_results", {}) as Dictionary\n\t\tvar json_step_result: Dictionary = json_step_results.get("persist_vote", {}) as Dictionary\n\t\tvar proposal_json_integer_types_ok := (\n\t\t\ttypeof(json_proposal.get("version")) == TYPE_INT\n\t\t\tand typeof(json_proposal.get("created_at")) == TYPE_INT\n\t\t\tand not json_votes.is_empty()\n\t\t\tand typeof((json_votes[0] as Dictionary).get("proposal_version")) == TYPE_INT\n\t\t\tand typeof((json_votes[0] as Dictionary).get("cast_at")) == TYPE_INT\n\t\t\tand not json_signatures.is_empty()\n\t\t\tand typeof((json_signatures[0] as Dictionary).get("proposal_version")) == TYPE_INT\n\t\t\tand typeof((json_signatures[0] as Dictionary).get("signed_at")) == TYPE_INT\n\t\t)\n\t\tfor field: String in [\n\t\t\t"eligible_weight", "participating_weight", "yes_weight", "no_weight", "abstain_weight",\n\t\t\t"eligible_count", "participating_count", "yes_count", "no_count", "abstain_count",\n\t\t]:\n\t\t\tproposal_json_integer_types_ok = (\n\t\t\t\tproposal_json_integer_types_ok\n\t\t\t\tand typeof(json_step_result.get(field)) == TYPE_INT\n\t\t\t)\n\t\t_check(proposal_json_integer_types_ok, "integer-valued persisted Proposal JSON numerics canonicalize to TYPE_INT")\n'''
-          if tests.count(positive_marker) != 1:
-              raise SystemExit(f'expected exactly one JSON restore positive marker, got {tests.count(positive_marker)}')
-          tests = tests.replace(positive_marker, positive_marker + positive_addition, 1)
-
-          negative_marker = '''\tvar fractional_optional_valid_until := saved.duplicate(true)\n\t_snapshot_record(fractional_optional_valid_until, "delegations", "delegation_id", "delegation.persist.bob")["valid_until"] = 1.5\n\t_expect_semantic_restore_rejected_atomic(restored, fractional_optional_valid_until, "fractional persisted optional valid_until")\n'''
-          negative_addition = '''\n\tvar fractional_proposal_vote_cast_at := saved.duplicate(true)\n\tvar fractional_proposal_votes: Array = _snapshot_record(fractional_proposal_vote_cast_at, "proposals", "proposal_id", "persist_decision").get("votes", []) as Array\n\tvar fractional_proposal_vote: Dictionary = fractional_proposal_votes[0] as Dictionary\n\tfractional_proposal_vote["cast_at"] = 1.5\n\t_expect_semantic_restore_rejected_atomic(restored, fractional_proposal_vote_cast_at, "fractional persisted proposal vote cast_at")\n'''
-          if tests.count(negative_marker) != 1:
-              raise SystemExit(f'expected exactly one optional valid_until marker, got {tests.count(negative_marker)}')
-          test_path.write_text(tests.replace(negative_marker, negative_marker + negative_addition, 1), encoding='utf-8')
-          '@
-          $patcher = Join-Path $env:RUNNER_TEMP 'pr83_proposal_integer_patch.py'
-          Set-Content -LiteralPath $patcher -Value $script -Encoding utf8
-          python $patcher
-          git diff --check
-          $changed = @(git diff --name-only)
-          $expected = @(
-            'scripts/vnext/organization/organization_authority_foundation.gd',
-            'tests/vnext/organization_authority_foundation_test.gd'
-          )
-          $changedKey = (($changed | Sort-Object) -join "`n")
-          $expectedKey = (($expected | Sort-Object) -join "`n")
-          if ($changedKey -ne $expectedKey) {
-            throw "Unexpected changed files: $($changed -join ', ')"
-          }
-          git diff -- scripts/vnext/organization/organization_authority_foundation.gd tests/vnext/organization_authority_foundation_test.gd
-
-      - name: Commit forward product correction
+      - name: Install Godot 4.6.3
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          if (-not (git status --porcelain -- scripts/vnext/organization/organization_authority_foundation.gd tests/vnext/organization_authority_foundation_test.gd)) {
-            Write-Host 'No product changes to commit.'
-            exit 0
-          }
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -- scripts/vnext/organization/organization_authority_foundation.gd tests/vnext/organization_authority_foundation_test.gd
-          git commit -m 'fix: canonicalize persisted proposal JSON integers'
-          $newHead = (git rev-parse HEAD).Trim()
-          Write-Host "NEW PRODUCT HEAD: $newHead"
-          git push origin HEAD:feature/formal-military-authorized-defend-20260912
+          $archive = Join-Path $env:RUNNER_TEMP 'godot.zip'
+          $install = Join-Path $env:RUNNER_TEMP 'godot-4.6.3'
+          Invoke-WebRequest -Uri 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip' -OutFile $archive
+          Expand-Archive -LiteralPath $archive -DestinationPath $install
+          $binary = (Get-ChildItem -LiteralPath $install -Filter 'Godot_v4.6.3-stable_win64.exe' -Recurse | Select-Object -First 1).FullName
+          if (-not $binary) { throw 'Godot 4.6.3 executable was not found' }
+          "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          & $binary --version
+
+      - name: Prime Godot script class cache
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--editor', '--path', '.', '--quit'
+          ) -Wait -PassThru -NoNewWindow
+          if ($process.ExitCode -ne 0) { throw "Godot project import failed with exit code $($process.ExitCode)" }
+
+      - name: Run Organization Authority focused regression
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force -Path builds/pr83-authority-focused | Out-Null
+          $logPath = 'builds/pr83-authority-focused/authority.log'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--path', '.',
+            '--script', 'res://tests/vnext/organization_authority_foundation_test.gd',
+            '--log-file', $logPath
+          ) -Wait -PassThru -NoNewWindow
+          if (-not (Test-Path -LiteralPath $logPath -PathType Leaf)) { throw 'Authority focused log was not created' }
+          $content = Get-Content -LiteralPath $logPath -Raw
+          Write-Host $content
+          if ($process.ExitCode -ne 0) { throw "Authority focused failed with exit code $($process.ExitCode)" }
+          if ($content -notmatch 'Organization authority foundation: ([1-9][0-9]*) checks, 0 failures') { throw 'Authority focused did not report PASS / 0 failures' }
+
+      - name: Upload Authority focused log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr83-authority-focused
+          path: builds/pr83-authority-focused/authority.log
+          if-no-files-found: warn
