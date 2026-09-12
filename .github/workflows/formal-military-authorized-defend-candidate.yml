@@ -88,3 +88,119 @@ jobs:
           name: formal-military-authorized-defend-candidate-log
           path: builds/formal-military-authorized-defend/dedicated.log
           if-no-files-found: warn
+
+  export-world-data-replay-artifacts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Verify exact candidate head
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected='${{ github.event.pull_request.head.sha }}'
+          actual="$(git rev-parse HEAD)"
+          echo "Expected HEAD: $expected"
+          echo "Actual HEAD:   $actual"
+          if [[ "$actual" != "$expected" ]]; then
+            echo "Validation checked out $actual but expected $expected" >&2
+            exit 1
+          fi
+
+      - name: Run official World Data generator chain in fresh temporary output
+        shell: bash
+        run: |
+          set -euo pipefail
+          temp_output="$(mktemp -d "$RUNNER_TEMP/pr83-world-data-replay.XXXXXX")"
+          echo "TEMP_OUTPUT=$temp_output" >> "$GITHUB_ENV"
+          echo "Fresh output: $temp_output"
+
+          python tools/world_data/validate_world_data.py \
+            --root . \
+            --data-root data/world_map \
+            --output-dir "$temp_output" \
+            --allow-errors
+
+          python tools/world_data/build_batch2_artifacts.py \
+            --root . \
+            --output-dir "$temp_output"
+
+          python tools/world_data/build_batch3_contracts.py \
+            --root . \
+            --output-dir "$temp_output"
+
+          python tools/world_data/build_batch4_run_manifest.py \
+            --root . \
+            --output-dir "$temp_output"
+
+      - name: Verify replay mismatch is exactly the two expected artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from __future__ import annotations
+
+          import importlib.util
+          import os
+          import sys
+          from pathlib import Path
+
+          root = Path.cwd()
+          helper_path = root / "tests" / "world_data" / "test_batch4_run_manifest.py"
+          spec = importlib.util.spec_from_file_location("pr83_batch4_test_helper", helper_path)
+          if spec is None or spec.loader is None:
+              raise SystemExit(f"could not load helper: {helper_path}")
+          helper = importlib.util.module_from_spec(spec)
+          sys.modules[spec.name] = helper
+          spec.loader.exec_module(helper)
+
+          generated = Path(os.environ["TEMP_OUTPUT"])
+          tracked = root / "local-artifacts" / "world-data-audit"
+          actual = sorted(helper.artifact_mismatches(generated, tracked))
+          expected = sorted([
+              "batch3_loader_contract.json",
+              "batch4_run_manifest.json",
+          ])
+          print("Replay mismatches:")
+          for name in actual:
+              print(f"  {name}")
+          if actual != expected:
+              raise SystemExit(f"unexpected replay mismatch set: actual={actual!r} expected={expected!r}")
+          PY
+
+      - name: Export exact official replay bytes only
+        shell: bash
+        run: |
+          set -euo pipefail
+          export_dir='builds/pr83-world-data-replay'
+          rm -rf "$export_dir"
+          mkdir -p "$export_dir"
+
+          cp -- "$TEMP_OUTPUT/batch3_loader_contract.json" "$export_dir/batch3_loader_contract.json"
+          cp -- "$TEMP_OUTPUT/batch4_run_manifest.json" "$export_dir/batch4_run_manifest.json"
+
+          cmp -- "$TEMP_OUTPUT/batch3_loader_contract.json" "$export_dir/batch3_loader_contract.json"
+          cmp -- "$TEMP_OUTPUT/batch4_run_manifest.json" "$export_dir/batch4_run_manifest.json"
+
+          mapfile -t exported < <(find "$export_dir" -maxdepth 1 -type f -printf '%f\n' | sort)
+          expected=(batch3_loader_contract.json batch4_run_manifest.json)
+          if [[ "${exported[*]}" != "${expected[*]}" ]]; then
+            printf 'Unexpected export contents: %s\n' "${exported[*]}" >&2
+            exit 1
+          fi
+
+          git diff --exit-code -- . ':!builds/pr83-world-data-replay'
+
+      - name: Upload official World Data replay artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr83-official-world-data-replay
+          path: |
+            builds/pr83-world-data-replay/batch3_loader_contract.json
+            builds/pr83-world-data-replay/batch4_run_manifest.json
+          if-no-files-found: error
