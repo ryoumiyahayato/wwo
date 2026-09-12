@@ -1069,6 +1069,17 @@ func _test_decision_delegation_round_trip_and_corruption() -> void:
 	_check(not (saved.get("procedures", []) as Array).is_empty(), "Gate 14 fixture persists non-empty procedures")
 	_check(not (saved.get("proposals", []) as Array).is_empty(), "Gate 14 fixture persists non-empty proposals")
 	_check(not (saved.get("delegations", []) as Array).is_empty(), "Gate 14 fixture persists non-empty delegations")
+	var json_text := JSON.stringify(saved)
+	var parsed_variant: Variant = JSON.parse_string(json_text)
+	_check(parsed_variant is Dictionary, "non-empty Authority snapshot JSON round trip parses to Dictionary")
+	var parsed_snapshot: Dictionary = {}
+	if parsed_variant is Dictionary:
+		parsed_snapshot = parsed_variant as Dictionary
+	var json_restored := _new_authority(core)
+	var json_restore_ok := json_restored != null and json_restored.restore(parsed_snapshot)
+	_check(json_restore_ok, "non-empty Authority snapshot restores after JSON round trip")
+	if json_restore_ok:
+		_equal(json_restored.state_fingerprint(), authority.state_fingerprint(), "Authority fingerprint survives JSON round trip")
 	var restored := _new_authority(core)
 	_check(restored != null and restored.restore(saved), "non-empty decision/delegation snapshot restores into a fresh authority foundation")
 	if restored == null:
@@ -1114,6 +1125,10 @@ func _test_decision_delegation_round_trip_and_corruption() -> void:
 		VNextOrganizationAuthorityFoundation.STATUS_AUTHORIZED_FOR_DOMAIN_EXECUTION,
 		"restored approved and signed decision preserves execution-boundary behavior"
 	)
+
+	var fractional_revision := saved.duplicate(true)
+	fractional_revision["revision"] = 1.5
+	_expect_semantic_restore_rejected_atomic(restored, fractional_revision, "fractional persisted revision")
 
 	var scope_expansion := saved.duplicate(true)
 	_snapshot_record(scope_expansion, "delegations", "delegation_id", "delegation.persist.carol")["spatial_scope"] = ["place:branch", "place:capital"]

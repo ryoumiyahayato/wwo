@@ -2305,15 +2305,25 @@ func _sanitize_token(value: String) -> String:
 
 
 func _positive_int(value: Variant) -> int:
-	if typeof(value) != TYPE_INT:
+	if typeof(value) == TYPE_INT:
+		return int(value) if int(value) > 0 else -1
+	if typeof(value) != TYPE_FLOAT:
 		return -1
-	return int(value) if int(value) > 0 else -1
+	var candidate := float(value)
+	if not is_finite(candidate) or candidate <= 0.0 or candidate != floor(candidate):
+		return -1
+	return int(candidate)
 
 
 func _nonnegative_int(value: Variant) -> int:
-	if typeof(value) != TYPE_INT:
+	if typeof(value) == TYPE_INT:
+		return int(value) if int(value) >= 0 else -1
+	if typeof(value) != TYPE_FLOAT:
 		return -1
-	return int(value) if int(value) >= 0 else -1
+	var candidate := float(value)
+	if not is_finite(candidate) or candidate < 0.0 or candidate != floor(candidate):
+		return -1
+	return int(candidate)
 
 
 func _optional_nonnegative_int(value: Variant) -> int:
