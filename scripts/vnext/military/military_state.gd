@@ -330,6 +330,10 @@ func snapshot() -> Dictionary:
 	}
 
 
+func state_fingerprint() -> String:
+	return JSON.stringify(snapshot()).sha256_text()
+
+
 func restore(snapshot_value: Dictionary, map: VNextMilitaryMapAdapter = null, spatial_world: VNextSpatialWorld = null) -> bool:
 	var formation_value: Variant = snapshot_value.get("formations", [])
 	var active_action_value: Variant = snapshot_value.get("active_actions", [])
