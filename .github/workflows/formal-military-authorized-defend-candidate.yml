@@ -6,10 +6,6 @@ on:
       - canonical/current-world
     paths:
       - ".github/workflows/formal-military-authorized-defend-candidate.yml"
-      - "scripts/formal/formal_world_simulation.gd"
-      - "scripts/vnext/military/military_authority_bridge.gd"
-      - "scripts/vnext/military/military_state.gd"
-      - "tests/formal/formal_military_authorized_defend_integration_test.gd"
 
 permissions:
   contents: read
@@ -19,23 +15,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  dedicated-authorized-defend:
+  f5-save-diagnostic:
     runs-on: windows-latest
     timeout-minutes: 30
     steps:
-      - name: Checkout exact candidate head
+      - name: Checkout exact diagnosed product head
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: f5f01c65035e1cc43c5c718260b5173692164c4c
 
-      - name: Verify exact candidate head
+      - name: Verify exact diagnosed product head
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $expected = "${{ github.event.pull_request.head.sha }}"
+          $expected = 'f5f01c65035e1cc43c5c718260b5173692164c4c'
           $actual = (git rev-parse HEAD).Trim()
-          if ($actual -ne $expected) { throw "Validation checked out $actual but expected $expected" }
+          Write-Host "Diagnostic baseline HEAD: $actual"
+          if ($actual -ne $expected) { throw "Diagnostic checked out $actual but expected $expected" }
 
       - name: Install Godot 4.6.3
         shell: pwsh
@@ -59,148 +56,139 @@ jobs:
           ) -Wait -PassThru -NoNewWindow
           if ($process.ExitCode -ne 0) { throw "Godot project import failed with exit code $($process.ExitCode)" }
 
-      - name: Run dedicated Formal Military authorized DEFEND integration test
+      - name: Generate runner-only player-journey-derived diagnostic
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          New-Item -ItemType Directory -Force -Path builds/formal-military-authorized-defend | Out-Null
-          $logPath = 'builds/formal-military-authorized-defend/dedicated.log'
+          New-Item -ItemType Directory -Force -Path builds/pr83-f5-diagnostic | Out-Null
+          $python = @'
+          from pathlib import Path
+
+          source_path = Path('tests/formal/formal_world_player_journey_smoke.gd')
+          target_path = Path('builds/pr83-f5-diagnostic/formal_world_f5_save_diagnostic.gd')
+          lines = source_path.read_text(encoding='utf-8').splitlines()
+          start = lines.index('\tawait _press_key(KEY_F5)')
+          end = lines.index('\tvar saved_date := application._format_sim_datetime()')
+          replacement = r'''
+          	var diag_sim := application.formal_simulation
+          	var diag_snapshot := diag_sim.get_persistent_state()
+          	var diag_source_fingerprint := diag_sim.authoritative_fingerprint()
+          	print("PR83DIAG snapshot_schema=" + str(diag_snapshot.get("schema_id", "")))
+          	print("PR83DIAG stored_snapshot_fingerprint_present=" + str(diag_snapshot.has("fingerprint")))
+          	print("PR83DIAG stored_snapshot_fingerprint=" + str(diag_snapshot.get("fingerprint", "<ABSENT>")))
+          	print("PR83DIAG source_authoritative_fingerprint=" + diag_source_fingerprint)
+          
+          	var diag_json := JSON.stringify(diag_snapshot)
+          	print("PR83DIAG json_encode=PASS bytes=" + str(diag_json.length()))
+          	var diag_parsed_variant: Variant = JSON.parse_string(diag_json)
+          	var diag_parse_ok := diag_parsed_variant is Dictionary
+          	print("PR83DIAG json_parse=" + ("PASS" if diag_parse_ok else "FAIL") + " type=" + type_string(typeof(diag_parsed_variant)))
+          
+          	var diag_result: SaveOperationResult = diag_sim.save_to_user()
+          	print("PR83DIAG direct_save_success=" + str(diag_result.success))
+          	print("PR83DIAG direct_save_error_code=" + diag_result.error_code)
+          	print("PR83DIAG direct_save_message=" + diag_result.message)
+          	print("PR83DIAG direct_save_path=" + diag_result.path)
+          	print("PR83DIAG save_path_exists_after_direct=" + str(FileAccess.file_exists(FormalWorldSimulation.SAVE_PATH)))
+          
+          	if not diag_result.success:
+          		var diag_candidate := diag_sim._new_candidate_world()
+          		var diag_candidate_init := diag_candidate.initialize()
+          		print("PR83DIAG fresh_formal_initialize=" + str(diag_candidate_init) + " error=" + diag_candidate.initialization_error)
+          		var diag_formal_restore := false
+          		if diag_candidate_init and diag_parse_ok:
+          			diag_formal_restore = diag_candidate.restore_persistent_state(diag_parsed_variant as Dictionary)
+          		print("PR83DIAG formal_parsed_restore=" + str(diag_formal_restore))
+          		print("PR83DIAG restored_authoritative_fingerprint=" + (diag_candidate.authoritative_fingerprint() if diag_formal_restore else "<UNAVAILABLE>"))
+          
+          		var diag_first_diff := ""
+          		if diag_parse_ok:
+          			var diag_parsed := diag_parsed_variant as Dictionary
+          			for raw_section: Variant in diag_snapshot.keys():
+          				var section := str(raw_section)
+          				if JSON.stringify(diag_snapshot.get(raw_section)) != JSON.stringify(diag_parsed.get(section)):
+          					diag_first_diff = section
+          					break
+          		print("PR83DIAG first_json_roundtrip_differing_section=" + (diag_first_diff if not diag_first_diff.is_empty() else "<NONE>"))
+          
+          		var diag_authority_source := diag_sim._organization_authority
+          		var diag_authority_snapshot := diag_authority_source.snapshot()
+          		var diag_authority_parsed_variant: Variant = JSON.parse_string(JSON.stringify(diag_authority_snapshot))
+          		var diag_authority_fresh := VNextOrganizationAuthorityFoundation.create(
+          			diag_sim._organization,
+          			diag_sim._person_authority.person_ids(),
+          			diag_sim._organization_place_reference_ids
+          		)
+          		var diag_authority_restore := (
+          			diag_authority_fresh != null
+          			and diag_authority_parsed_variant is Dictionary
+          			and diag_authority_fresh.restore(diag_authority_parsed_variant as Dictionary)
+          		)
+          		print("PR83DIAG authority_json_roundtrip_restore=" + str(diag_authority_restore))
+          		print("PR83DIAG authority_source_fingerprint=" + diag_authority_source.state_fingerprint())
+          		print("PR83DIAG authority_restored_fingerprint=" + (diag_authority_fresh.state_fingerprint() if diag_authority_restore else "<UNAVAILABLE>"))
+          
+          		var diag_military_source := diag_sim._military_state
+          		var diag_military_snapshot := diag_military_source.snapshot()
+          		var diag_military_parsed_variant: Variant = JSON.parse_string(JSON.stringify(diag_military_snapshot))
+          		var diag_military_fresh := VNextMilitaryState.new()
+          		var diag_military_init := diag_military_fresh.initialize(diag_sim._military_map)
+          		var diag_military_restore := (
+          			diag_military_init
+          			and diag_military_parsed_variant is Dictionary
+          			and diag_military_fresh.restore(
+          				diag_military_parsed_variant as Dictionary,
+          				diag_sim._military_map,
+          				diag_sim._spatial_world
+          			)
+          		)
+          		print("PR83DIAG military_json_roundtrip_restore=" + str(diag_military_restore))
+          		print("PR83DIAG military_source_fingerprint=" + diag_military_source.state_fingerprint())
+          		print("PR83DIAG military_restored_fingerprint=" + (diag_military_fresh.state_fingerprint() if diag_military_restore else "<UNAVAILABLE>"))
+          		await _finish()
+          		return
+          
+          	if not TIME_SUPPORT.cleanup_formal_save():
+          		print("PR83DIAG direct_save_cleanup=FAIL")
+          		await _finish()
+          		return
+          	print("PR83DIAG direct_save_cleanup=PASS")
+          	await _press_key(KEY_F5)
+          	await _settle_frames(3)
+          	print("PR83DIAG actual_f5_save_path_exists=" + str(FileAccess.file_exists(FormalWorldSimulation.SAVE_PATH)))
+          	print("PR83DIAG actual_f5_status=" + application._formal_status)
+          	await _finish()
+          	return
+          '''.strip('\n').splitlines()
+          target_path.write_text('\n'.join(lines[:start] + replacement + lines[end:]) + '\n', encoding='utf-8')
+          print(target_path)
+          '@
+          $pythonPath = 'builds/pr83-f5-diagnostic/make_probe.py'
+          Set-Content -LiteralPath $pythonPath -Value $python -Encoding utf8
+          python $pythonPath
+          if (-not (Test-Path -LiteralPath 'builds/pr83-f5-diagnostic/formal_world_f5_save_diagnostic.gd')) { throw 'Diagnostic script was not generated' }
+          git diff --exit-code -- . ':!builds/pr83-f5-diagnostic'
+
+      - name: Run runner-only F5 save diagnostic
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $logPath = 'builds/pr83-f5-diagnostic/diagnostic.log'
           $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
             '--headless', '--audio-driver', 'Dummy', '--path', '.',
-            '--script', 'res://tests/formal/formal_military_authorized_defend_integration_test.gd',
+            '--script', 'res://builds/pr83-f5-diagnostic/formal_world_f5_save_diagnostic.gd',
             '--log-file', $logPath
           ) -Wait -PassThru -NoNewWindow
-          if (-not (Test-Path -LiteralPath $logPath -PathType Leaf)) { throw 'Dedicated integration log was not created' }
+          if (-not (Test-Path -LiteralPath $logPath -PathType Leaf)) { throw 'Diagnostic log was not created' }
           $content = Get-Content -LiteralPath $logPath -Raw
           Write-Host $content
-          if ($process.ExitCode -ne 0) { throw "Dedicated integration test failed with exit code $($process.ExitCode)" }
-          if ($content -match 'SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|Assertion failed|[1-9][0-9]* failures|^ERROR:') {
-            throw 'Dedicated integration log contains a fatal script/type/assertion failure'
-          }
-          if ($content -notmatch 'Formal Military authorized DEFEND integration: ([1-9][0-9]*) checks, 0 failures') {
-            throw 'Dedicated integration success summary is missing'
-          }
+          if ($content -notmatch 'PR83DIAG direct_save_success=') { throw 'Direct-save diagnostic output is missing' }
+          if ($process.ExitCode -ne 0) { throw "Diagnostic script failed with exit code $($process.ExitCode)" }
 
-      - name: Upload dedicated log
+      - name: Upload F5 diagnostic log
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: formal-military-authorized-defend-candidate-log
-          path: builds/formal-military-authorized-defend/dedicated.log
+          name: pr83-f5-save-diagnostic
+          path: builds/pr83-f5-diagnostic/diagnostic.log
           if-no-files-found: warn
-
-  export-world-data-replay-artifacts:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - name: Checkout exact candidate head
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      - name: Verify exact candidate head
-        shell: bash
-        run: |
-          set -euo pipefail
-          expected='${{ github.event.pull_request.head.sha }}'
-          actual="$(git rev-parse HEAD)"
-          echo "Expected HEAD: $expected"
-          echo "Actual HEAD:   $actual"
-          if [[ "$actual" != "$expected" ]]; then
-            echo "Validation checked out $actual but expected $expected" >&2
-            exit 1
-          fi
-
-      - name: Run official World Data generator chain in fresh temporary output
-        shell: bash
-        run: |
-          set -euo pipefail
-          temp_output="$(mktemp -d "$RUNNER_TEMP/pr83-world-data-replay.XXXXXX")"
-          echo "TEMP_OUTPUT=$temp_output" >> "$GITHUB_ENV"
-          echo "Fresh output: $temp_output"
-
-          python tools/world_data/validate_world_data.py \
-            --root . \
-            --data-root data/world_map \
-            --output-dir "$temp_output" \
-            --allow-errors
-
-          python tools/world_data/build_batch2_artifacts.py \
-            --root . \
-            --output-dir "$temp_output"
-
-          python tools/world_data/build_batch3_contracts.py \
-            --root . \
-            --output-dir "$temp_output"
-
-          python tools/world_data/build_batch4_run_manifest.py \
-            --root . \
-            --output-dir "$temp_output"
-
-      - name: Verify replay mismatch is exactly the two expected artifacts
-        shell: bash
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          from __future__ import annotations
-
-          import importlib.util
-          import os
-          import sys
-          from pathlib import Path
-
-          root = Path.cwd()
-          helper_path = root / "tests" / "world_data" / "test_batch4_run_manifest.py"
-          spec = importlib.util.spec_from_file_location("pr83_batch4_test_helper", helper_path)
-          if spec is None or spec.loader is None:
-              raise SystemExit(f"could not load helper: {helper_path}")
-          helper = importlib.util.module_from_spec(spec)
-          sys.modules[spec.name] = helper
-          spec.loader.exec_module(helper)
-
-          generated = Path(os.environ["TEMP_OUTPUT"])
-          tracked = root / "local-artifacts" / "world-data-audit"
-          actual = sorted(helper.artifact_mismatches(generated, tracked))
-          expected = sorted([
-              "batch3_loader_contract.json",
-              "batch4_run_manifest.json",
-          ])
-          print("Replay mismatches:")
-          for name in actual:
-              print(f"  {name}")
-          if actual != expected:
-              raise SystemExit(f"unexpected replay mismatch set: actual={actual!r} expected={expected!r}")
-          PY
-
-      - name: Export exact official replay bytes only
-        shell: bash
-        run: |
-          set -euo pipefail
-          export_dir='builds/pr83-world-data-replay'
-          rm -rf "$export_dir"
-          mkdir -p "$export_dir"
-
-          cp -- "$TEMP_OUTPUT/batch3_loader_contract.json" "$export_dir/batch3_loader_contract.json"
-          cp -- "$TEMP_OUTPUT/batch4_run_manifest.json" "$export_dir/batch4_run_manifest.json"
-
-          cmp -- "$TEMP_OUTPUT/batch3_loader_contract.json" "$export_dir/batch3_loader_contract.json"
-          cmp -- "$TEMP_OUTPUT/batch4_run_manifest.json" "$export_dir/batch4_run_manifest.json"
-
-          mapfile -t exported < <(find "$export_dir" -maxdepth 1 -type f -printf '%f\n' | sort)
-          expected=(batch3_loader_contract.json batch4_run_manifest.json)
-          if [[ "${exported[*]}" != "${expected[*]}" ]]; then
-            printf 'Unexpected export contents: %s\n' "${exported[*]}" >&2
-            exit 1
-          fi
-
-          git diff --exit-code -- . ':!builds/pr83-world-data-replay'
-
-      - name: Upload official World Data replay artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: pr83-official-world-data-replay
-          path: |
-            builds/pr83-world-data-replay/batch3_loader_contract.json
-            builds/pr83-world-data-replay/batch4_run_manifest.json
-          if-no-files-found: error
