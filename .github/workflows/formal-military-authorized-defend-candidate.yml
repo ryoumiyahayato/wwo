@@ -15,9 +15,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  f5-save-diagnostic:
+  full-formal:
     runs-on: windows-latest
-    timeout-minutes: 30
+    timeout-minutes: 90
     steps:
       - name: Checkout exact product head
         uses: actions/checkout@v4
@@ -31,8 +31,13 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $expected = 'fea3c363a2ae6dc572ba9ff0869d43af3271df97'
           $actual = (git rev-parse HEAD).Trim()
-          Write-Host "F5 diagnostic product HEAD: $actual"
-          if ($actual -ne $expected) { throw "Diagnostic checked out $actual but expected $expected" }
+          Write-Host "Full Formal product HEAD: $actual"
+          if ($actual -ne $expected) { throw "Full Formal checked out $actual but expected $expected" }
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
       - name: Install Godot 4.6.3
         shell: pwsh
@@ -47,148 +52,31 @@ jobs:
           "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           & $binary --version
 
-      - name: Prime Godot script class cache
+      - name: Prepare isolated user data
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
-            '--headless', '--editor', '--path', '.', '--quit'
-          ) -Wait -PassThru -NoNewWindow
-          if ($process.ExitCode -ne 0) { throw "Godot project import failed with exit code $($process.ExitCode)" }
+          $userDataRoot = Join-Path $env:RUNNER_TEMP 'pr83-full-formal-user-data'
+          if (Test-Path -LiteralPath $userDataRoot) {
+            Remove-Item -LiteralPath $userDataRoot -Recurse -Force
+          }
+          New-Item -ItemType Directory -Force -Path $userDataRoot | Out-Null
+          "APPDATA=$userDataRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
-      - name: Generate runner-only player-journey-derived diagnostic
+      - name: Run Full Formal validation
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          New-Item -ItemType Directory -Force -Path builds/pr83-f5-diagnostic | Out-Null
-          $python = @'
-          from pathlib import Path
+          New-Item -ItemType Directory -Force -Path builds/pr83-full-formal | Out-Null
+          $logPath = 'builds/pr83-full-formal/full_formal.log'
+          & powershell -ExecutionPolicy Bypass -File tools/run_validation.ps1 -GodotPath $env:GODOT_BIN 2>&1 | Tee-Object -FilePath $logPath
+          $exitCode = $LASTEXITCODE
+          if ($exitCode -ne 0) { throw "Full Formal validation failed with exit code $exitCode" }
 
-          source_path = Path('tests/formal/formal_world_player_journey_smoke.gd')
-          target_path = Path('builds/pr83-f5-diagnostic/formal_world_f5_save_diagnostic.gd')
-          lines = source_path.read_text(encoding='utf-8').splitlines()
-          start = lines.index('\tawait _press_key(KEY_F5)')
-          end = lines.index('\tvar saved_date := application._format_sim_datetime()')
-          replacement = r'''
-          	var diag_sim := application.formal_simulation
-          	var diag_snapshot := diag_sim.get_persistent_state()
-          	var diag_source_fingerprint := diag_sim.authoritative_fingerprint()
-          	print("PR83DIAG snapshot_schema=" + str(diag_snapshot.get("schema_id", "")))
-          	print("PR83DIAG stored_snapshot_fingerprint_present=" + str(diag_snapshot.has("fingerprint")))
-          	print("PR83DIAG stored_snapshot_fingerprint=" + str(diag_snapshot.get("fingerprint", "<ABSENT>")))
-          	print("PR83DIAG source_authoritative_fingerprint=" + diag_source_fingerprint)
-          
-          	var diag_json := JSON.stringify(diag_snapshot)
-          	print("PR83DIAG json_encode=PASS bytes=" + str(diag_json.length()))
-          	var diag_parsed_variant: Variant = JSON.parse_string(diag_json)
-          	var diag_parse_ok := diag_parsed_variant is Dictionary
-          	print("PR83DIAG json_parse=" + ("PASS" if diag_parse_ok else "FAIL") + " type=" + type_string(typeof(diag_parsed_variant)))
-          
-          	var diag_result: SaveOperationResult = diag_sim.save_to_user()
-          	print("PR83DIAG direct_save_success=" + str(diag_result.success))
-          	print("PR83DIAG direct_save_error_code=" + diag_result.error_code)
-          	print("PR83DIAG direct_save_message=" + diag_result.message)
-          	print("PR83DIAG direct_save_path=" + diag_result.path)
-          	print("PR83DIAG save_path_exists_after_direct=" + str(FileAccess.file_exists(FormalWorldSimulation.SAVE_PATH)))
-          
-          	if not diag_result.success:
-          		var diag_candidate := diag_sim._new_candidate_world()
-          		var diag_candidate_init := diag_candidate.initialize()
-          		print("PR83DIAG fresh_formal_initialize=" + str(diag_candidate_init) + " error=" + diag_candidate.initialization_error)
-          		var diag_formal_restore := false
-          		if diag_candidate_init and diag_parse_ok:
-          			diag_formal_restore = diag_candidate.restore_persistent_state(diag_parsed_variant as Dictionary)
-          		print("PR83DIAG formal_parsed_restore=" + str(diag_formal_restore))
-          		print("PR83DIAG restored_authoritative_fingerprint=" + (diag_candidate.authoritative_fingerprint() if diag_formal_restore else "<UNAVAILABLE>"))
-          
-          		var diag_first_diff := ""
-          		if diag_parse_ok:
-          			var diag_parsed := diag_parsed_variant as Dictionary
-          			for raw_section: Variant in diag_snapshot.keys():
-          				var section := str(raw_section)
-          				if JSON.stringify(diag_snapshot.get(raw_section)) != JSON.stringify(diag_parsed.get(section)):
-          					diag_first_diff = section
-          					break
-          		print("PR83DIAG first_json_roundtrip_differing_section=" + (diag_first_diff if not diag_first_diff.is_empty() else "<NONE>"))
-          
-          		var diag_authority_source := diag_sim._organization_authority
-          		var diag_authority_snapshot := diag_authority_source.snapshot()
-          		var diag_authority_parsed_variant: Variant = JSON.parse_string(JSON.stringify(diag_authority_snapshot))
-          		var diag_authority_fresh := VNextOrganizationAuthorityFoundation.create(
-          			diag_sim._organization,
-          			diag_sim._person_authority.person_ids(),
-          			diag_sim._organization_place_reference_ids
-          		)
-          		var diag_authority_restore := (
-          			diag_authority_fresh != null
-          			and diag_authority_parsed_variant is Dictionary
-          			and diag_authority_fresh.restore(diag_authority_parsed_variant as Dictionary)
-          		)
-          		print("PR83DIAG authority_json_roundtrip_restore=" + str(diag_authority_restore))
-          		print("PR83DIAG authority_source_fingerprint=" + diag_authority_source.state_fingerprint())
-          		print("PR83DIAG authority_restored_fingerprint=" + (diag_authority_fresh.state_fingerprint() if diag_authority_restore else "<UNAVAILABLE>"))
-          
-          		var diag_military_source := diag_sim._military_state
-          		var diag_military_snapshot := diag_military_source.snapshot()
-          		var diag_military_parsed_variant: Variant = JSON.parse_string(JSON.stringify(diag_military_snapshot))
-          		var diag_military_fresh := VNextMilitaryState.new()
-          		var diag_military_init := diag_military_fresh.initialize(diag_sim._military_map)
-          		var diag_military_restore := (
-          			diag_military_init
-          			and diag_military_parsed_variant is Dictionary
-          			and diag_military_fresh.restore(
-          				diag_military_parsed_variant as Dictionary,
-          				diag_sim._military_map,
-          				diag_sim._spatial_world
-          			)
-          		)
-          		print("PR83DIAG military_json_roundtrip_restore=" + str(diag_military_restore))
-          		print("PR83DIAG military_source_fingerprint=" + diag_military_source.state_fingerprint())
-          		print("PR83DIAG military_restored_fingerprint=" + (diag_military_fresh.state_fingerprint() if diag_military_restore else "<UNAVAILABLE>"))
-          		await _finish()
-          		return
-          
-          	if not TIME_SUPPORT.cleanup_formal_save():
-          		print("PR83DIAG direct_save_cleanup=FAIL")
-          		await _finish()
-          		return
-          	print("PR83DIAG direct_save_cleanup=PASS")
-          	await _press_key(KEY_F5)
-          	await _settle_frames(3)
-          	print("PR83DIAG actual_f5_save_path_exists=" + str(FileAccess.file_exists(FormalWorldSimulation.SAVE_PATH)))
-          	print("PR83DIAG actual_f5_status=" + application._formal_status)
-          	await _finish()
-          	return
-          '''.strip('\n').splitlines()
-          target_path.write_text('\n'.join(lines[:start] + replacement + lines[end:]) + '\n', encoding='utf-8')
-          print(target_path)
-          '@
-          $pythonPath = 'builds/pr83-f5-diagnostic/make_probe.py'
-          Set-Content -LiteralPath $pythonPath -Value $python -Encoding utf8
-          python $pythonPath
-          if (-not (Test-Path -LiteralPath 'builds/pr83-f5-diagnostic/formal_world_f5_save_diagnostic.gd')) { throw 'Diagnostic script was not generated' }
-          git diff --exit-code -- . ':!builds/pr83-f5-diagnostic'
-
-      - name: Run runner-only F5 save diagnostic
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $logPath = 'builds/pr83-f5-diagnostic/diagnostic.log'
-          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
-            '--headless', '--audio-driver', 'Dummy', '--path', '.',
-            '--script', 'res://builds/pr83-f5-diagnostic/formal_world_f5_save_diagnostic.gd',
-            '--log-file', $logPath
-          ) -Wait -PassThru -NoNewWindow
-          if (-not (Test-Path -LiteralPath $logPath -PathType Leaf)) { throw 'Diagnostic log was not created' }
-          $content = Get-Content -LiteralPath $logPath -Raw
-          Write-Host $content
-          if ($content -notmatch 'PR83DIAG direct_save_success=') { throw 'Direct-save diagnostic output is missing' }
-          if ($process.ExitCode -ne 0) { throw "Diagnostic script failed with exit code $($process.ExitCode)" }
-
-      - name: Upload F5 diagnostic log
+      - name: Upload Full Formal log
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pr83-f5-save-diagnostic
-          path: builds/pr83-f5-diagnostic/diagnostic.log
+          name: pr83-full-formal
+          path: builds/pr83-full-formal/full_formal.log
           if-no-files-found: warn
