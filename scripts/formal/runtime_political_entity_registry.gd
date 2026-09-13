@@ -169,7 +169,15 @@ func restore_snapshot(
 			or not _valid_seed_lineage(lineage_value as Dictionary)
 		):
 			return false
+		var lineage := lineage_value as Dictionary
 		candidate["source_historical_ids"] = sources
+		candidate["lineage"] = {
+			"origin_kind": str(lineage.get("origin_kind", "")),
+			"origin_tick": int(lineage.get("origin_tick", -1)),
+			"predecessor_runtime_ids": DataRecordUtils.to_string_array(
+				lineage.get("predecessor_runtime_ids", [])
+			),
+		}
 		candidate_entities[runtime_id] = candidate
 		candidate_sources[sources[0]] = runtime_id
 
