@@ -62,8 +62,12 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          & $env:GODOT_BIN --headless --editor --path . --quit
-          if ($LASTEXITCODE -ne 0) { throw "Godot project import failed with exit code $LASTEXITCODE" }
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--editor', '--path', '.', '--quit'
+          ) -Wait -PassThru -NoNewWindow
+          if ($process.ExitCode -ne 0) {
+            throw "Godot project import failed with exit code $($process.ExitCode)"
+          }
 
       - name: Run autonomous Formal world soak
         shell: pwsh
@@ -71,9 +75,17 @@ jobs:
           $ErrorActionPreference = 'Stop'
           New-Item -ItemType Directory -Force -Path builds/autonomous-formal-world-soak | Out-Null
           $logPath = 'builds/autonomous-formal-world-soak/soak.log'
-          & $env:GODOT_BIN --headless --path . --script res://tests/formal/autonomous_formal_world_soak_test.gd 2>&1 | Tee-Object -FilePath $logPath
-          $exitCode = $LASTEXITCODE
-          if ($exitCode -ne 0) { throw "Autonomous Formal World Soak failed with exit code $exitCode" }
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--path', '.', '--script',
+            'res://tests/formal/autonomous_formal_world_soak_test.gd'
+          ) -Wait -PassThru -NoNewWindow -RedirectStandardOutput $logPath -RedirectStandardError 'builds/autonomous-formal-world-soak/soak.stderr.log'
+          if (Test-Path -LiteralPath 'builds/autonomous-formal-world-soak/soak.stderr.log') {
+            Get-Content -LiteralPath 'builds/autonomous-formal-world-soak/soak.stderr.log' | Tee-Object -FilePath $logPath -Append
+          }
+          Get-Content -LiteralPath $logPath
+          if ($process.ExitCode -ne 0) {
+            throw "Autonomous Formal World Soak failed with exit code $($process.ExitCode)"
+          }
           $log = Get-Content -LiteralPath $logPath -Raw
           if ($log -notmatch 'Autonomous Formal World Soak: [0-9]+ checks, 0 failures') {
             throw 'Autonomous Formal World Soak did not emit a zero-failure completion marker'
@@ -87,5 +99,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: autonomous-formal-world-soak
-          path: builds/autonomous-formal-world-soak/soak.log
+          path: |
+            builds/autonomous-formal-world-soak/soak.log
+            builds/autonomous-formal-world-soak/soak.stderr.log
           if-no-files-found: warn
