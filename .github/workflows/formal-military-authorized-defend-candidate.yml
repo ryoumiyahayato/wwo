@@ -1,0 +1,82 @@
+name: Formal Military authorized DEFEND candidate
+
+on:
+  pull_request:
+    branches:
+      - canonical/current-world
+    paths:
+      - ".github/workflows/formal-military-authorized-defend-candidate.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formal-military-authorized-defend-candidate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  full-formal:
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout exact product head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: fea3c363a2ae6dc572ba9ff0869d43af3271df97
+
+      - name: Verify exact product head
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $expected = 'fea3c363a2ae6dc572ba9ff0869d43af3271df97'
+          $actual = (git rev-parse HEAD).Trim()
+          Write-Host "Full Formal product HEAD: $actual"
+          if ($actual -ne $expected) { throw "Full Formal checked out $actual but expected $expected" }
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Godot 4.6.3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'godot.zip'
+          $install = Join-Path $env:RUNNER_TEMP 'godot-4.6.3'
+          Invoke-WebRequest -Uri 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip' -OutFile $archive
+          Expand-Archive -LiteralPath $archive -DestinationPath $install
+          $binary = (Get-ChildItem -LiteralPath $install -Filter 'Godot_v4.6.3-stable_win64.exe' -Recurse | Select-Object -First 1).FullName
+          if (-not $binary) { throw 'Godot 4.6.3 executable was not found' }
+          "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          & $binary --version
+
+      - name: Prepare isolated user data
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $userDataRoot = Join-Path $env:RUNNER_TEMP 'pr83-full-formal-user-data'
+          if (Test-Path -LiteralPath $userDataRoot) {
+            Remove-Item -LiteralPath $userDataRoot -Recurse -Force
+          }
+          New-Item -ItemType Directory -Force -Path $userDataRoot | Out-Null
+          "APPDATA=$userDataRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Run Full Formal validation
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force -Path builds/pr83-full-formal | Out-Null
+          $logPath = 'builds/pr83-full-formal/full_formal.log'
+          & powershell -ExecutionPolicy Bypass -File tools/run_validation.ps1 -GodotPath $env:GODOT_BIN 2>&1 | Tee-Object -FilePath $logPath
+          $exitCode = $LASTEXITCODE
+          if ($exitCode -ne 0) { throw "Full Formal validation failed with exit code $exitCode" }
+
+      - name: Upload Full Formal log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr83-full-formal
+          path: builds/pr83-full-formal/full_formal.log
+          if-no-files-found: warn

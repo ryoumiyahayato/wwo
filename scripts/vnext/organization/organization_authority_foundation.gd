@@ -1635,7 +1635,58 @@ func _normalize_proposal(record: Dictionary) -> Dictionary:
 		or typeof(record.get("signatures")) != TYPE_ARRAY
 	):
 		return {}
-	return record.duplicate(true)
+	var normalized := record.duplicate(true)
+	normalized["version"] = version
+	normalized["created_at"] = created_at
+
+	var normalized_votes: Array = []
+	for raw_vote: Variant in record.get("votes") as Array:
+		if typeof(raw_vote) != TYPE_DICTIONARY:
+			return {}
+		var vote: Dictionary = (raw_vote as Dictionary).duplicate(true)
+		var proposal_version := _positive_int(vote.get("proposal_version"))
+		var cast_at := _nonnegative_int(vote.get("cast_at"))
+		if proposal_version <= 0 or cast_at < 0:
+			return {}
+		vote["proposal_version"] = proposal_version
+		vote["cast_at"] = cast_at
+		normalized_votes.append(vote)
+	normalized["votes"] = normalized_votes
+
+	var normalized_signatures: Array = []
+	for raw_signature: Variant in record.get("signatures") as Array:
+		if typeof(raw_signature) != TYPE_DICTIONARY:
+			return {}
+		var signature: Dictionary = (raw_signature as Dictionary).duplicate(true)
+		var proposal_version := _positive_int(signature.get("proposal_version"))
+		var signed_at := _nonnegative_int(signature.get("signed_at"))
+		if proposal_version <= 0 or signed_at < 0:
+			return {}
+		signature["proposal_version"] = proposal_version
+		signature["signed_at"] = signed_at
+		normalized_signatures.append(signature)
+	normalized["signatures"] = normalized_signatures
+
+	var normalized_step_results: Dictionary = {}
+	var step_results: Dictionary = record.get("step_results") as Dictionary
+	for raw_step_id: Variant in step_results.keys():
+		if typeof(raw_step_id) != TYPE_STRING:
+			return {}
+		var raw_result: Variant = step_results.get(raw_step_id)
+		if typeof(raw_result) != TYPE_DICTIONARY:
+			return {}
+		var result: Dictionary = (raw_result as Dictionary).duplicate(true)
+		for field: String in [
+			"eligible_weight", "participating_weight", "yes_weight", "no_weight", "abstain_weight",
+			"eligible_count", "participating_count", "yes_count", "no_count", "abstain_count",
+		]:
+			var integer_value := _nonnegative_int(result.get(field))
+			if integer_value < 0:
+				return {}
+			result[field] = integer_value
+		normalized_step_results[str(raw_step_id)] = result
+	normalized["step_results"] = normalized_step_results
+	return normalized
 
 
 func _normalize_delegation(record: Dictionary) -> Dictionary:
@@ -2305,21 +2356,36 @@ func _sanitize_token(value: String) -> String:
 
 
 func _positive_int(value: Variant) -> int:
-	if typeof(value) != TYPE_INT:
+	if typeof(value) == TYPE_INT:
+		return int(value) if int(value) > 0 else -1
+	if typeof(value) != TYPE_FLOAT:
 		return -1
-	return int(value) if int(value) > 0 else -1
+	var candidate := float(value)
+	if not is_finite(candidate) or candidate <= 0.0 or candidate != floor(candidate):
+		return -1
+	return int(candidate)
 
 
 func _nonnegative_int(value: Variant) -> int:
-	if typeof(value) != TYPE_INT:
+	if typeof(value) == TYPE_INT:
+		return int(value) if int(value) >= 0 else -1
+	if typeof(value) != TYPE_FLOAT:
 		return -1
-	return int(value) if int(value) >= 0 else -1
+	var candidate := float(value)
+	if not is_finite(candidate) or candidate < 0.0 or candidate != floor(candidate):
+		return -1
+	return int(candidate)
 
 
 func _optional_nonnegative_int(value: Variant) -> int:
-	if typeof(value) != TYPE_INT:
+	if typeof(value) == TYPE_INT:
+		return int(value) if int(value) >= -1 else -2
+	if typeof(value) != TYPE_FLOAT:
 		return -2
-	return int(value) if int(value) >= -1 else -2
+	var candidate := float(value)
+	if not is_finite(candidate) or candidate < -1.0 or candidate != floor(candidate):
+		return -2
+	return int(candidate)
 
 
 func _nonnegative_float(value: Variant) -> float:
