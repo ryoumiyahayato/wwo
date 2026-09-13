@@ -379,7 +379,12 @@ func restore(snapshot_value: Dictionary, map: VNextMilitaryMapAdapter = null, sp
 	candidate_state.formations = candidate_formations
 	candidate_state.active_actions = candidate_actions
 	candidate_state.region_controls = (controls_value as Dictionary).duplicate(true)
-	candidate_state.region_garrisons = (garrisons_value as Dictionary).duplicate(true)
+	candidate_state.region_garrisons = {}
+	for raw_region_id: Variant in (garrisons_value as Dictionary).keys():
+		var region_id := str(raw_region_id)
+		candidate_state.region_garrisons[region_id] = int(
+			(garrisons_value as Dictionary)[raw_region_id]
+		)
 	candidate_state.supply_inputs = (inputs_value as Dictionary).duplicate(true)
 	candidate_state.completed_actions = _dictionary_array(completed_value as Array)
 	candidate_state.battle_results = _dictionary_array(battle_value as Array)
