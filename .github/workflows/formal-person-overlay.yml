@@ -1,0 +1,181 @@
+name: Formal person overlay validation
+
+on:
+  pull_request:
+    branches:
+      - canonical/current-world
+    paths:
+      - ".github/workflows/formal-person-overlay.yml"
+      - "scripts/formal/**"
+      - "scripts/vnext/player/**"
+      - "scripts/vnext/population/**"
+      - "scripts/vnext/organization/**"
+      - "tests/formal/**"
+      - "tests/vnext/**"
+      - "tools/run_validation.ps1"
+      - "tools/run_vnext_validation.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formal-person-overlay-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout exact feature head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact validation head
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $expected = "${{ github.event.pull_request.head.sha || github.sha }}"
+          $actual = (git rev-parse HEAD).Trim()
+          if ($actual -ne $expected) {
+            throw "Validation checked out $actual but expected $expected"
+          }
+
+      - name: Guard Formal economy candidate adoption invariant
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $path = 'scripts/formal/formal_world_simulation.gd'
+          $content = Get-Content -LiteralPath $path -Raw
+          $functionMatch = [regex]::Match(
+            $content,
+            '(?ms)^func _adopt_candidate\(candidate: FormalWorldSimulation\) -> void:\r?\n(?<body>.*?)(?=^func \w+\()'
+          )
+          if (-not $functionMatch.Success) {
+            throw 'Could not isolate _adopt_candidate() in FormalWorldSimulation'
+          }
+
+          $body = $functionMatch.Groups['body'].Value
+          $assignmentMatches = [regex]::Matches(
+            $body,
+            '(?m)^\s*_economy = candidate\._economy\s*$'
+          )
+          if ($assignmentMatches.Count -ne 1) {
+            throw "Expected exactly one '_economy = candidate._economy' in _adopt_candidate(); found $($assignmentMatches.Count)"
+          }
+          if ([regex]::IsMatch($body, '(?m)^\s*economy = candidate\._economy\s*$')) {
+            throw "Forbidden 'economy = candidate._economy' found in _adopt_candidate()"
+          }
+          if ([regex]::IsMatch($body, '(?m)^\s*__economy = candidate\._economy\s*$')) {
+            throw "Forbidden '__economy = candidate._economy' found in _adopt_candidate()"
+          }
+
+          $rebindMatches = [regex]::Matches(
+            $body,
+            '(?m)^\s*_economy\.bind_authoritative_hour_source\(\s*$'
+          )
+          if ($rebindMatches.Count -ne 1) {
+            throw "Expected exactly one authoritative-hour rebind owned by _economy in _adopt_candidate(); found $($rebindMatches.Count)"
+          }
+          if ($rebindMatches[0].Index -le $assignmentMatches[0].Index) {
+            throw 'Authoritative-hour rebind must occur after adopting candidate._economy'
+          }
+          if ([regex]::IsMatch(
+            $body,
+            '(?m)^\s*(?:economy|__economy)\.bind_authoritative_hour_source\('
+          )) {
+            throw 'Authoritative-hour rebind must use _economy as its owner'
+          }
+
+      - name: Check feature diff whitespace
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          git fetch origin canonical/current-world --no-tags
+          git diff --check origin/canonical/current-world...HEAD
+          if ($LASTEXITCODE -ne 0) { throw 'Feature diff whitespace check failed' }
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Godot 4.6.3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'godot.zip'
+          $install = Join-Path $env:RUNNER_TEMP 'godot-4.6.3'
+          Invoke-WebRequest -Uri 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip' -OutFile $archive
+          Expand-Archive -LiteralPath $archive -DestinationPath $install
+          $binary = (Get-ChildItem -LiteralPath $install -Filter 'Godot_v4.6.3-stable_win64.exe' -Recurse | Select-Object -First 1).FullName
+          if (-not $binary) { throw 'Godot 4.6.3 executable was not found' }
+          "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          & $binary --version
+
+      - name: Prepare isolated user data
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $userDataRoot = Join-Path $env:RUNNER_TEMP 'formal-person-overlay-user-data'
+          if (Test-Path -LiteralPath $userDataRoot) {
+            Remove-Item -LiteralPath $userDataRoot -Recurse -Force
+          }
+          New-Item -ItemType Directory -Force -Path $userDataRoot | Out-Null
+          "APPDATA=$userDataRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Run vNext focused regression suite
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          python -B tools/run_vnext_validation.py --root . --godot "$env:GODOT_BIN" --suite focused
+          if ($LASTEXITCODE -ne 0) { throw "vNext focused validation failed with exit code $LASTEXITCODE" }
+
+      - name: Run dedicated Formal Person integration test
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force -Path builds/formal-person-overlay | Out-Null
+          $logPath = 'builds/formal-person-overlay/formal_person_overlay_integration_test.log'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--audio-driver', 'Dummy', '--path', '.',
+            '--script', 'res://tests/formal/formal_person_overlay_integration_test.gd',
+            '--log-file', $logPath
+          ) -Wait -PassThru -NoNewWindow
+          if (-not (Test-Path -LiteralPath $logPath -PathType Leaf)) {
+            throw 'Formal Person integration log was not created'
+          }
+          $content = Get-Content -LiteralPath $logPath -Raw
+          Write-Host $content
+          if ($process.ExitCode -ne 0) {
+            throw "Formal Person integration test failed with exit code $($process.ExitCode)"
+          }
+          if ($content -match 'SCRIPT ERROR|Parse Error|Failed to load script|Could not resolve class|Could not find type|Assertion failed|[1-9][0-9]* failures|^ERROR:') {
+            throw 'Formal Person integration log contains a fatal script/type/assertion failure'
+          }
+          if ($content -notmatch 'Formal person overlay integration: ([1-9][0-9]*) checks, 0 failures') {
+            throw 'Formal Person integration success summary is missing'
+          }
+
+      - name: Run existing Formal validation baseline
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force -Path builds/formal-person-overlay | Out-Null
+          $formalLog = 'builds/formal-person-overlay/formal_validation.log'
+          & powershell -ExecutionPolicy Bypass -File tools/run_validation.ps1 -GodotPath $env:GODOT_BIN 2>&1 | Tee-Object -FilePath $formalLog
+          $exitCode = $LASTEXITCODE
+          if ($exitCode -ne 0) { throw "Existing Formal validation failed with exit code $exitCode" }
+
+      - name: Upload Formal Person validation logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formal-person-overlay-logs
+          path: |
+            builds/formal-person-overlay/formal_validation.log
+            builds/formal-person-overlay/*.log
+          if-no-files-found: warn
