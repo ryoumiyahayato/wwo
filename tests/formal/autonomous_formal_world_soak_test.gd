@@ -219,16 +219,24 @@ func _economic_change_metrics(
 		var final_prices := final_market.get("prices", {}) as Dictionary
 		var inventory_changed := false
 		var price_changed := false
-		for raw_commodity_id: Variant in initial_inventory:
-			var commodity_id := str(raw_commodity_id)
-			var opening_units := float(initial_inventory.get(commodity_id, 0.0))
-			var closing_units := float(final_inventory.get(commodity_id, opening_units))
+		for raw_inventory_commodity_id: Variant in initial_inventory:
+			var inventory_commodity_id := str(raw_inventory_commodity_id)
+			var opening_units := float(
+				initial_inventory.get(inventory_commodity_id, 0.0)
+			)
+			var closing_units := float(
+				final_inventory.get(inventory_commodity_id, opening_units)
+			)
 			if absf(closing_units - opening_units) > 0.0001:
 				inventory_changed = true
-		for raw_commodity_id: Variant in initial_prices:
-			var commodity_id := str(raw_commodity_id)
-			var opening_price := maxi(1, int(initial_prices.get(commodity_id, 1)))
-			var closing_price := maxi(1, int(final_prices.get(commodity_id, opening_price)))
+		for raw_price_commodity_id: Variant in initial_prices:
+			var price_commodity_id := str(raw_price_commodity_id)
+			var opening_price := maxi(
+				1, int(initial_prices.get(price_commodity_id, 1))
+			)
+			var closing_price := maxi(
+				1, int(final_prices.get(price_commodity_id, opening_price))
+			)
 			if closing_price != opening_price:
 				price_changed = true
 				max_price_change_bp = maxi(
