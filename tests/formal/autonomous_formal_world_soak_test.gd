@@ -8,6 +8,18 @@ extends SceneTree
 const TOTAL_DAYS: int = 365
 const SAVE_RESTORE_DAY: int = 180
 const MINUTES_PER_DAY: int = 24 * 60
+const AUTHORITATIVE_DOMAIN_ORDER: Array[String] = [
+	"total_minutes",
+	"historical_evidence",
+	"runtime_politics",
+	"markets",
+	"economy",
+	"persons",
+	"player",
+	"organization",
+	"organization_authority",
+	"military_state",
+]
 
 var failures: int = 0
 var checks: int = 0
@@ -49,6 +61,7 @@ func _run() -> void:
 	# No PlayerState mutation and no player-facing domain entry point is invoked.
 	simulation.advance_minutes(SAVE_RESTORE_DAY * MINUTES_PER_DAY)
 	var midpoint_fingerprint := simulation.authoritative_fingerprint()
+	print("AUTONOMOUS_180D_PRE_SAVE_FINGERPRINT=%s" % midpoint_fingerprint)
 	_check(
 		midpoint_fingerprint != initial_fingerprint,
 		"world truth changes after 180 autonomous days without player input"
@@ -72,14 +85,19 @@ func _run() -> void:
 			decoded_midpoint_variant as Dictionary
 		)
 	_check(restore_ok, "midpoint autonomous world restores")
+	var post_restore_fingerprint := ""
 	if restore_ok:
+		var post_restore_state := restored.get_persistent_state()
+		post_restore_fingerprint = restored.authoritative_fingerprint()
+		print("AUTONOMOUS_180D_POST_RESTORE_FINGERPRINT=%s" % post_restore_fingerprint)
+		if post_restore_fingerprint != midpoint_fingerprint:
+			_report_first_authoritative_difference(midpoint_state, post_restore_state)
 		_check(
-			restored.authoritative_fingerprint() == midpoint_fingerprint,
+			post_restore_fingerprint == midpoint_fingerprint,
 			"restore preserves the authoritative midpoint fingerprint"
 		)
 		_check(
-			(restored.get_persistent_state().get("player", {}) as Dictionary)
-			== initial_player,
+			(post_restore_state.get("player", {}) as Dictionary) == initial_player,
 			"restore does not invent player activity"
 		)
 
@@ -90,6 +108,7 @@ func _run() -> void:
 	restored.advance_minutes((TOTAL_DAYS - SAVE_RESTORE_DAY) * MINUTES_PER_DAY)
 	var final_state := restored.get_persistent_state()
 	var final_fingerprint := restored.authoritative_fingerprint()
+	print("AUTONOMOUS_365D_RESTORED_FINGERPRINT=%s" % final_fingerprint)
 	var final_economy := restored.economy
 	var final_markets := final_economy.market_states
 	var change_metrics := _economic_change_metrics(initial_markets, final_markets)
@@ -129,10 +148,13 @@ func _run() -> void:
 	# there is no seed to hide or global random source to control.
 	var reference := FormalWorldSimulation.new()
 	_check(reference.initialize(), "determinism reference world initializes")
+	var reference_fingerprint := ""
 	if reference.initialized:
 		reference.advance_minutes(TOTAL_DAYS * MINUTES_PER_DAY)
+		reference_fingerprint = reference.authoritative_fingerprint()
+		print("AUTONOMOUS_365D_UNINTERRUPTED_FINGERPRINT=%s" % reference_fingerprint)
 		_check(
-			reference.authoritative_fingerprint() == final_fingerprint,
+			reference_fingerprint == final_fingerprint,
 			"uninterrupted and save-restored autonomous runs are deterministic-equivalent"
 		)
 
@@ -173,9 +195,243 @@ func _run() -> void:
 		"final_fulfillment_bp": int(
 			restored.world_summary().get("fulfillment_bp", -1)
 		),
+		"pre_save_180d_authoritative_fingerprint": midpoint_fingerprint,
+		"post_restore_180d_authoritative_fingerprint": post_restore_fingerprint,
 		"final_authoritative_fingerprint": final_fingerprint,
+		"uninterrupted_final_authoritative_fingerprint": reference_fingerprint,
 	}
 	_finish(diagnostic)
+
+
+func _report_first_authoritative_difference(
+	before_state: Dictionary,
+	after_state: Dictionary
+) -> void:
+	for domain: String in AUTHORITATIVE_DOMAIN_ORDER:
+		var before_has := before_state.has(domain)
+		var after_has := after_state.has(domain)
+		var before_value: Variant = before_state.get(domain, null)
+		var after_value: Variant = after_state.get(domain, null)
+		var before_fingerprint := _diagnostic_fingerprint(before_value) if before_has else "<missing>"
+		var after_fingerprint := _diagnostic_fingerprint(after_value) if after_has else "<missing>"
+		print(
+			"AUTONOMOUS_180D_DOMAIN_FINGERPRINT domain=%s pre=%s post=%s"
+			% [domain, before_fingerprint, after_fingerprint]
+		)
+		if not before_has:
+			_print_first_difference(domain, {
+				"path": domain,
+				"before": null,
+				"after": after_value,
+				"before_type": "NIL",
+				"after_type": type_string(typeof(after_value)),
+				"category": "EXTRA",
+			})
+			return
+		if not after_has:
+			_print_first_difference(domain, {
+				"path": domain,
+				"before": before_value,
+				"after": null,
+				"before_type": type_string(typeof(before_value)),
+				"after_type": "NIL",
+				"category": "MISSING",
+			})
+			return
+		if before_fingerprint == after_fingerprint:
+			continue
+		var difference := _first_difference(before_value, after_value, domain)
+		if difference.is_empty():
+			difference = {
+				"path": domain,
+				"before": before_value,
+				"after": after_value,
+				"before_type": type_string(typeof(before_value)),
+				"after_type": type_string(typeof(after_value)),
+				"category": "VALUE",
+			}
+		_print_first_difference(domain, difference)
+		return
+	print("AUTONOMOUS_180D_FIRST_MISMATCH_DOMAIN=<unresolved>")
+
+
+func _first_difference(before: Variant, after: Variant, path: String) -> Dictionary:
+	var before_type := typeof(before)
+	var after_type := typeof(after)
+	if before_type != after_type:
+		return {
+			"path": path,
+			"before": before,
+			"after": after,
+			"before_type": type_string(before_type),
+			"after_type": type_string(after_type),
+			"category": "TYPE",
+		}
+	match before_type:
+		TYPE_DICTIONARY:
+			return _first_dictionary_difference(
+				before as Dictionary,
+				after as Dictionary,
+				path
+			)
+		TYPE_ARRAY:
+			return _first_array_difference(before as Array, after as Array, path)
+		_:
+			if before != after:
+				return {
+					"path": path,
+					"before": before,
+					"after": after,
+					"before_type": type_string(before_type),
+					"after_type": type_string(after_type),
+					"category": "VALUE",
+				}
+	return {}
+
+
+func _first_dictionary_difference(
+	before: Dictionary,
+	after: Dictionary,
+	path: String
+) -> Dictionary:
+	for raw_key: Variant in before.keys():
+		if not after.has(raw_key):
+			return {
+				"path": _dictionary_path(path, raw_key),
+				"before": before[raw_key],
+				"after": null,
+				"before_type": type_string(typeof(before[raw_key])),
+				"after_type": "NIL",
+				"category": "MISSING",
+			}
+	for raw_key: Variant in after.keys():
+		if not before.has(raw_key):
+			return {
+				"path": _dictionary_path(path, raw_key),
+				"before": null,
+				"after": after[raw_key],
+				"before_type": "NIL",
+				"after_type": type_string(typeof(after[raw_key])),
+				"category": "EXTRA",
+			}
+	for raw_key: Variant in before.keys():
+		var difference := _first_difference(
+			before[raw_key],
+			after[raw_key],
+			_dictionary_path(path, raw_key)
+		)
+		if not difference.is_empty():
+			return difference
+	var before_keys := before.keys()
+	var after_keys := after.keys()
+	if before_keys != after_keys:
+		return {
+			"path": path,
+			"before": before_keys,
+			"after": after_keys,
+			"before_type": "Dictionary key order",
+			"after_type": "Dictionary key order",
+			"category": "ORDERING",
+		}
+	return {}
+
+
+func _first_array_difference(before: Array, after: Array, path: String) -> Dictionary:
+	var shared_size := mini(before.size(), after.size())
+	var first_content_difference: Dictionary = {}
+	for index: int in range(shared_size):
+		var difference := _first_difference(
+			before[index], after[index], "%s[%d]" % [path, index]
+		)
+		if not difference.is_empty():
+			first_content_difference = difference
+			break
+	if before.size() == after.size() and not first_content_difference.is_empty():
+		if _arrays_are_strict_permutations(before, after):
+			return {
+				"path": path,
+				"before": before,
+				"after": after,
+				"before_type": "Array order",
+				"after_type": "Array order",
+				"category": "ORDERING",
+			}
+	if not first_content_difference.is_empty():
+		return first_content_difference
+	if before.size() > after.size():
+		return {
+			"path": "%s[%d]" % [path, shared_size],
+			"before": before[shared_size],
+			"after": null,
+			"before_type": type_string(typeof(before[shared_size])),
+			"after_type": "NIL",
+			"category": "MISSING",
+		}
+	if after.size() > before.size():
+		return {
+			"path": "%s[%d]" % [path, shared_size],
+			"before": null,
+			"after": after[shared_size],
+			"before_type": "NIL",
+			"after_type": type_string(typeof(after[shared_size])),
+			"category": "EXTRA",
+		}
+	return {}
+
+
+func _arrays_are_strict_permutations(before: Array, after: Array) -> bool:
+	if before.size() != after.size():
+		return false
+	var before_counts: Dictionary = {}
+	var after_counts: Dictionary = {}
+	for value: Variant in before:
+		var signature := _typed_signature(value)
+		before_counts[signature] = int(before_counts.get(signature, 0)) + 1
+	for value: Variant in after:
+		var signature := _typed_signature(value)
+		after_counts[signature] = int(after_counts.get(signature, 0)) + 1
+	return before_counts == after_counts
+
+
+func _typed_signature(value: Variant) -> String:
+	return "%s:%s" % [type_string(typeof(value)), JSON.stringify(value)]
+
+
+func _dictionary_path(path: String, key: Variant) -> String:
+	return "%s[%s]" % [path, JSON.stringify(key)]
+
+
+func _diagnostic_fingerprint(value: Variant) -> String:
+	return JSON.stringify(value).sha256_text()
+
+
+func _print_first_difference(domain: String, difference: Dictionary) -> void:
+	print("AUTONOMOUS_180D_FIRST_MISMATCH_DOMAIN=%s" % domain)
+	print("AUTONOMOUS_180D_FIRST_MISMATCH_PATH=%s" % str(difference.get("path", domain)))
+	print(
+		"AUTONOMOUS_180D_BEFORE_VALUE=%s"
+		% _diagnostic_value_text(difference.get("before", null))
+	)
+	print(
+		"AUTONOMOUS_180D_BEFORE_TYPE=%s"
+		% str(difference.get("before_type", "NIL"))
+	)
+	print(
+		"AUTONOMOUS_180D_AFTER_VALUE=%s"
+		% _diagnostic_value_text(difference.get("after", null))
+	)
+	print(
+		"AUTONOMOUS_180D_AFTER_TYPE=%s"
+		% str(difference.get("after_type", "NIL"))
+	)
+	print("AUTONOMOUS_180D_MISMATCH_CATEGORY=%s" % str(difference.get("category", "VALUE")))
+
+
+func _diagnostic_value_text(value: Variant) -> String:
+	var rendered := JSON.stringify(value)
+	if rendered.length() <= 512:
+		return rendered
+	return rendered.substr(0, 509) + "..."
 
 
 func _economic_activity_metrics(
