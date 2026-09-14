@@ -258,7 +258,12 @@ func _report_first_authoritative_difference(
 func _first_difference(before: Variant, after: Variant, path: String) -> Dictionary:
 	var before_type := typeof(before)
 	var after_type := typeof(after)
+	var representation_changed := (
+		_diagnostic_fingerprint(before) != _diagnostic_fingerprint(after)
+	)
 	if before_type != after_type:
+		if not representation_changed:
+			return {}
 		return {
 			"path": path,
 			"before": before,
@@ -277,7 +282,7 @@ func _first_difference(before: Variant, after: Variant, path: String) -> Diction
 		TYPE_ARRAY:
 			return _first_array_difference(before as Array, after as Array, path)
 		_:
-			if before != after:
+			if representation_changed:
 				return {
 					"path": path,
 					"before": before,
@@ -428,6 +433,8 @@ func _print_first_difference(domain: String, difference: Dictionary) -> void:
 
 
 func _diagnostic_value_text(value: Variant) -> String:
+	if typeof(value) == TYPE_FLOAT:
+		return "%.17f" % float(value)
 	var rendered := JSON.stringify(value)
 	if rendered.length() <= 512:
 		return rendered
