@@ -327,17 +327,9 @@ func _first_dictionary_difference(
 		)
 		if not difference.is_empty():
 			return difference
-	var before_keys := before.keys()
-	var after_keys := after.keys()
-	if before_keys != after_keys:
-		return {
-			"path": path,
-			"before": before_keys,
-			"after": after_keys,
-			"before_type": "Dictionary key order",
-			"after_type": "Dictionary key order",
-			"category": "ORDERING",
-		}
+	# Dictionary insertion order is not authoritative for this fingerprint:
+	# JSON.stringify() sorts Dictionary keys by default. Report only content/type
+	# differences that can actually alter the canonical JSON representation.
 	return {}
 
 
