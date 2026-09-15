@@ -30,7 +30,7 @@ static func write_verified(
 	var file: FileAccess = FileAccess.open(temporary_path, FileAccess.WRITE)
 	if file == null:
 		return error_string(FileAccess.get_open_error())
-	file.store_string(JSON.stringify(snapshot, "\t", false, true))
+	file.store_string(JSON.stringify(snapshot, "\t", false))
 	file.flush()
 	file.close()
 
