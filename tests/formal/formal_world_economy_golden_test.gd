@@ -25,6 +25,7 @@ func _run() -> void:
 	_check_fulfillment_restore_typing()
 	_check_trade_balance_restore_typing()
 	_check_tariff_revenue_restore_typing()
+	_check_last_settlement_hour_restore_typing()
 	var simulation: Variant = SIMULATION_SCRIPT.new()
 	_check(simulation.initialize(), "golden economy world initializes")
 	if simulation.initialized:
@@ -157,6 +158,38 @@ func _check_tariff_revenue_restore_typing() -> void:
 	_check(fractional_target.get_persistent_state() == before_reject, "fractional tariff-revenue rejection is atomic")
 
 
+func _check_last_settlement_hour_restore_typing() -> void:
+	var source: Variant = SIMULATION_SCRIPT.new()
+	_check(source.initialize(), "settlement-hour restore source initializes")
+	if not source.initialized:
+		return
+	source.advance_minutes(24 * 60)
+	var base_state: Dictionary = source.get_persistent_state()
+	var opening_value: Variant = _last_settlement_hour_value(base_state)
+	_check(opening_value == 24 and typeof(opening_value) == TYPE_INT, "last settlement hour starts as int after one day")
+	if typeof(opening_value) != TYPE_INT:
+		return
+
+	var integral_candidate := base_state.duplicate(true)
+	_set_last_settlement_hour_value(integral_candidate, float(opening_value))
+	var integral_target: Variant = SIMULATION_SCRIPT.new()
+	_check(integral_target.initialize(), "integral-float settlement-hour target initializes")
+	if integral_target.initialized:
+		_check(integral_target.restore_persistent_state(integral_candidate), "last settlement hour restore accepts integral float")
+		var restored_value: Variant = _last_settlement_hour_value(integral_target.get_persistent_state())
+		_check(restored_value == opening_value and typeof(restored_value) == TYPE_INT, "integral last settlement hour restores as int")
+
+	var fractional_target: Variant = SIMULATION_SCRIPT.new()
+	_check(fractional_target.initialize(), "fractional settlement-hour target initializes")
+	if not fractional_target.initialized:
+		return
+	var before_reject: Dictionary = fractional_target.get_persistent_state().duplicate(true)
+	var fractional_candidate := base_state.duplicate(true)
+	_set_last_settlement_hour_value(fractional_candidate, float(opening_value) + 0.5)
+	_check(not fractional_target.restore_persistent_state(fractional_candidate), "last settlement hour restore rejects fractional float")
+	_check(fractional_target.get_persistent_state() == before_reject, "fractional settlement-hour rejection is atomic")
+
+
 func _price_value(snapshot: Dictionary) -> Variant:
 	var market := _restore_market(snapshot)
 	return (market.get("prices", {}) as Dictionary).get(RESTORE_COMMODITY_ID, null)
@@ -195,6 +228,14 @@ func _tariff_revenue_value(snapshot: Dictionary) -> Variant:
 
 func _set_tariff_revenue_value(snapshot: Dictionary, value: Variant) -> void:
 	_restore_market(snapshot)["tariff_revenue_centimes"] = value
+
+
+func _last_settlement_hour_value(snapshot: Dictionary) -> Variant:
+	return _restore_market(snapshot).get("last_settlement_hour", null)
+
+
+func _set_last_settlement_hour_value(snapshot: Dictionary, value: Variant) -> void:
+	_restore_market(snapshot)["last_settlement_hour"] = value
 
 
 func _restore_market(snapshot: Dictionary) -> Dictionary:
