@@ -1,5 +1,8 @@
 extends SceneTree
 
+const PRICE_RESTORE_TEST_MARKET_ID := "market:legacy_aggregate:united_states_1900"
+const PRICE_RESTORE_TEST_COMMODITY_ID := "wheat"
+
 var failures := 0
 var checks := 0
 
@@ -11,6 +14,7 @@ func _initialize() -> void:
 func _run() -> void:
 	_check_historical_catalog()
 	_check_formal_economy()
+	_check_economy_v6_price_restore_canonicalization()
 	_check_formal_simulation()
 	_check_formal_atomic_save_recovery()
 	await _check_product_scenes()
@@ -86,6 +90,71 @@ func _check_formal_economy() -> void:
 		"正式经济恢复后摘要等价"
 	)
 	_check_economy_restore_is_atomic(restored)
+
+
+func _check_economy_v6_price_restore_canonicalization() -> void:
+	var source := FormalWorldSimulation.new()
+	_check(source.initialize(), "价格恢复类型测试源可初始化")
+	if not source.initialized:
+		return
+	var base_state := source.get_persistent_state()
+	var opening_price: Variant = _v6_price_value(base_state)
+	_check(
+		opening_price == 120 and typeof(opening_price) == TYPE_INT,
+		"正式v6美国小麦基准价格为int 120"
+	)
+
+	var parsed_integral: Variant = JSON.parse_string("120")
+	_check(
+		parsed_integral == 120.0 and typeof(parsed_integral) == TYPE_FLOAT,
+		"JSON整数价格解析为float 120.0"
+	)
+	var integral_candidate := base_state.duplicate(true)
+	_check(
+		_set_v6_price_value(integral_candidate, parsed_integral),
+		"可构造float 120.0价格恢复候选"
+	)
+	var integral_target := FormalWorldSimulation.new()
+	_check(integral_target.initialize(), "整数float价格恢复目标可初始化")
+	if integral_target.initialized:
+		_check(
+			integral_target.restore_persistent_state(integral_candidate),
+			"v6价格接受mathematically integral float"
+		)
+		var restored_price: Variant = _v6_price_value(
+			integral_target.get_persistent_state()
+		)
+		_check(restored_price == 120, "120.0恢复后价格值仍为120")
+		_check(
+			typeof(restored_price) == TYPE_INT,
+			"120.0恢复后价格Variant类型规范化为int"
+		)
+
+	var parsed_fractional: Variant = JSON.parse_string("120.5")
+	_check(
+		parsed_fractional == 120.5 and typeof(parsed_fractional) == TYPE_FLOAT,
+		"JSON fractional价格解析为float 120.5"
+	)
+	var fractional_target := FormalWorldSimulation.new()
+	_check(fractional_target.initialize(), "fractional价格拒绝目标可初始化")
+	if not fractional_target.initialized:
+		return
+	var before_fractional_reject := (
+		fractional_target.get_persistent_state().duplicate(true)
+	)
+	var fractional_candidate := before_fractional_reject.duplicate(true)
+	_check(
+		_set_v6_price_value(fractional_candidate, parsed_fractional),
+		"可构造float 120.5价格恢复候选"
+	)
+	_check(
+		not fractional_target.restore_persistent_state(fractional_candidate),
+		"v6价格拒绝fractional float 120.5"
+	)
+	_check(
+		fractional_target.get_persistent_state() == before_fractional_reject,
+		"fractional价格恢复失败保持整个正式状态原子不变"
+	)
 
 
 func _check_world_roster(
@@ -422,6 +491,35 @@ func _check_economy_restore_is_atomic(simulation: FormalWorldSimulation) -> void
 		simulation.get_persistent_state() == before,
 		"正式经济失败恢复前后持久状态完全一致"
 	)
+
+
+func _v6_price_value(snapshot: Dictionary) -> Variant:
+	var economy_state := snapshot.get("economy", {}) as Dictionary
+	var market_states := economy_state.get("market_states", {}) as Dictionary
+	if not market_states.has(PRICE_RESTORE_TEST_MARKET_ID):
+		return null
+	var market_state := market_states[PRICE_RESTORE_TEST_MARKET_ID] as Dictionary
+	var prices := market_state.get("prices", {}) as Dictionary
+	return prices.get(PRICE_RESTORE_TEST_COMMODITY_ID, null)
+
+
+func _set_v6_price_value(snapshot: Dictionary, value: Variant) -> bool:
+	var economy_state := snapshot.get("economy", {}) as Dictionary
+	var market_states := economy_state.get("market_states", {}) as Dictionary
+	if not market_states.has(PRICE_RESTORE_TEST_MARKET_ID):
+		return false
+	var market_state := market_states[PRICE_RESTORE_TEST_MARKET_ID] as Dictionary
+	if not market_state.get("prices", {}) is Dictionary:
+		return false
+	var prices := market_state.get("prices", {}) as Dictionary
+	if not prices.has(PRICE_RESTORE_TEST_COMMODITY_ID):
+		return false
+	prices[PRICE_RESTORE_TEST_COMMODITY_ID] = value
+	market_state["prices"] = prices
+	market_states[PRICE_RESTORE_TEST_MARKET_ID] = market_state
+	economy_state["market_states"] = market_states
+	snapshot["economy"] = economy_state
+	return true
 
 
 func _corrupt_first_inventory(snapshot: Dictionary) -> bool:
