@@ -23,6 +23,7 @@ func _initialize() -> void:
 func _run() -> void:
 	_check_price_restore_typing()
 	_check_fulfillment_restore_typing()
+	_check_trade_balance_restore_typing()
 	var simulation: Variant = SIMULATION_SCRIPT.new()
 	_check(simulation.initialize(), "golden economy world initializes")
 	if simulation.initialized:
@@ -103,6 +104,32 @@ func _check_fulfillment_restore_typing() -> void:
 	_check(fractional_target.get_persistent_state() == before_reject, "fractional fulfillment rejection is atomic")
 
 
+func _check_trade_balance_restore_typing() -> void:
+	var source: Variant = SIMULATION_SCRIPT.new()
+	_check(source.initialize(), "trade-balance restore source initializes")
+	if not source.initialized:
+		return
+	var base_state: Dictionary = source.get_persistent_state()
+	var integral_candidate := base_state.duplicate(true)
+	_set_trade_balance_value(integral_candidate, 132892589.0)
+	var integral_target: Variant = SIMULATION_SCRIPT.new()
+	_check(integral_target.initialize(), "integral-float trade-balance target initializes")
+	if integral_target.initialized:
+		_check(integral_target.restore_persistent_state(integral_candidate), "trade balance restore accepts integral float")
+		var restored_value: Variant = _trade_balance_value(integral_target.get_persistent_state())
+		_check(restored_value == 132892589 and typeof(restored_value) == TYPE_INT, "integral trade balance restores as int")
+
+	var fractional_target: Variant = SIMULATION_SCRIPT.new()
+	_check(fractional_target.initialize(), "fractional trade-balance target initializes")
+	if not fractional_target.initialized:
+		return
+	var before_reject: Dictionary = fractional_target.get_persistent_state().duplicate(true)
+	var fractional_candidate := base_state.duplicate(true)
+	_set_trade_balance_value(fractional_candidate, 132892589.5)
+	_check(not fractional_target.restore_persistent_state(fractional_candidate), "trade balance restore rejects fractional float")
+	_check(fractional_target.get_persistent_state() == before_reject, "fractional trade-balance rejection is atomic")
+
+
 func _price_value(snapshot: Dictionary) -> Variant:
 	var market := _restore_market(snapshot)
 	return (market.get("prices", {}) as Dictionary).get(RESTORE_COMMODITY_ID, null)
@@ -125,6 +152,14 @@ func _set_fulfillment_value(snapshot: Dictionary, value: Variant) -> void:
 	var totals := market.get("daily_totals", {}) as Dictionary
 	totals["fulfillment_bp"] = value
 	market["daily_totals"] = totals
+
+
+func _trade_balance_value(snapshot: Dictionary) -> Variant:
+	return _restore_market(snapshot).get("trade_balance_centimes", null)
+
+
+func _set_trade_balance_value(snapshot: Dictionary, value: Variant) -> void:
+	_restore_market(snapshot)["trade_balance_centimes"] = value
 
 
 func _restore_market(snapshot: Dictionary) -> Dictionary:
