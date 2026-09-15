@@ -1,0 +1,105 @@
+name: Autonomous Formal World Soak
+
+on:
+  pull_request:
+    branches:
+      - canonical/current-world
+    paths:
+      - ".github/workflows/autonomous-formal-world-soak.yml"
+      - "scripts/formal/**"
+      - "scripts/vnext/**"
+      - "tests/formal/autonomous_formal_world_soak_test.gd"
+  push:
+    branches:
+      - canonical/current-world
+    paths:
+      - ".github/workflows/autonomous-formal-world-soak.yml"
+      - "scripts/formal/**"
+      - "scripts/vnext/**"
+      - "tests/formal/autonomous_formal_world_soak_test.gd"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: autonomous-formal-world-soak-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  soak:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Godot 4.6.3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'godot.zip'
+          $install = Join-Path $env:RUNNER_TEMP 'godot-4.6.3'
+          Invoke-WebRequest -Uri 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip' -OutFile $archive
+          Expand-Archive -LiteralPath $archive -DestinationPath $install
+          $binary = (Get-ChildItem -LiteralPath $install -Filter 'Godot_v4.6.3-stable_win64.exe' -Recurse | Select-Object -First 1).FullName
+          if (-not $binary) { throw 'Godot 4.6.3 executable was not found' }
+          "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          & $binary --version
+
+      - name: Prepare isolated user data
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $userDataRoot = Join-Path $env:RUNNER_TEMP 'autonomous-formal-world-soak-user-data'
+          if (Test-Path -LiteralPath $userDataRoot) {
+            Remove-Item -LiteralPath $userDataRoot -Recurse -Force
+          }
+          New-Item -ItemType Directory -Force -Path $userDataRoot | Out-Null
+          "APPDATA=$userDataRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Prime Godot script class cache
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--editor', '--path', '.', '--quit'
+          ) -Wait -PassThru -NoNewWindow
+          if ($process.ExitCode -ne 0) {
+            throw "Godot project import failed with exit code $($process.ExitCode)"
+          }
+
+      - name: Run autonomous Formal world soak
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force -Path builds/autonomous-formal-world-soak | Out-Null
+          $logPath = 'builds/autonomous-formal-world-soak/soak.log'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--path', '.', '--script',
+            'res://tests/formal/autonomous_formal_world_soak_test.gd'
+          ) -Wait -PassThru -NoNewWindow -RedirectStandardOutput $logPath -RedirectStandardError 'builds/autonomous-formal-world-soak/soak.stderr.log'
+          if (Test-Path -LiteralPath 'builds/autonomous-formal-world-soak/soak.stderr.log') {
+            Get-Content -LiteralPath 'builds/autonomous-formal-world-soak/soak.stderr.log' | Tee-Object -FilePath $logPath -Append
+          }
+          Get-Content -LiteralPath $logPath
+          if ($process.ExitCode -ne 0) {
+            throw "Autonomous Formal World Soak failed with exit code $($process.ExitCode)"
+          }
+          $log = Get-Content -LiteralPath $logPath -Raw
+          if ($log -notmatch 'Autonomous Formal World Soak: [0-9]+ checks, 0 failures') {
+            throw 'Autonomous Formal World Soak did not emit a zero-failure completion marker'
+          }
+          if ($log -notmatch 'AUTONOMOUS_FORMAL_WORLD_SOAK=') {
+            throw 'Autonomous Formal World Soak did not emit its diagnostic summary'
+          }
+
+      - name: Upload soak log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: autonomous-formal-world-soak
+          path: |
+            builds/autonomous-formal-world-soak/soak.log
+            builds/autonomous-formal-world-soak/soak.stderr.log
+          if-no-files-found: warn
