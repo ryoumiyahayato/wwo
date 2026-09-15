@@ -48,8 +48,8 @@ func _run() -> void:
 
 
 func _check_contract_fixtures() -> void:
-	var counterexample_1 := _codec.f64_from_bits(COUNTEREXAMPLE_1_BITS)
-	var counterexample_2 := _codec.f64_from_bits(COUNTEREXAMPLE_2_BITS)
+	var counterexample_1: Dictionary = _codec.f64_from_bits(COUNTEREXAMPLE_1_BITS)
+	var counterexample_2: Dictionary = _codec.f64_from_bits(COUNTEREXAMPLE_2_BITS)
 	_check(bool(counterexample_1.get("ok", false)), "counterexample #1 fixture decodes from canonical bits")
 	_check(bool(counterexample_2.get("ok", false)), "counterexample #2 fixture decodes from canonical bits")
 	if bool(counterexample_1.get("ok", false)) and bool(counterexample_2.get("ok", false)):
@@ -65,7 +65,7 @@ func _check_contract_fixtures() -> void:
 				"array": [0.0, 7, null, {"deep": counterexample_1.get("value")}],
 			},
 		}
-		var fixture_encoded := _codec.encode_variant_tree(fixture)
+		var fixture_encoded: Dictionary = _codec.encode_variant_tree(fixture)
 		_check(bool(fixture_encoded.get("ok", false)), "nested fixture exact-codec encodes")
 		if bool(fixture_encoded.get("ok", false)):
 			var fixture_envelope := fixture_encoded.get("value") as Dictionary
@@ -94,10 +94,10 @@ func _check_contract_fixtures() -> void:
 		_check(_codec.f64_bits(float(zeros["positive"])) == "0000000000000000", "+0.0 sign bit is preserved")
 		_check(_codec.f64_bits(float(zeros["negative"])) == "8000000000000000", "-0.0 sign bit is preserved")
 
-	var max_finite := _codec.f64_from_bits("7fefffffffffffff")
-	var min_subnormal := _codec.f64_from_bits("0000000000000001")
-	var min_i64 := _codec.i64_from_bits("8000000000000000")
-	var max_i64 := _codec.i64_from_bits("7fffffffffffffff")
+	var max_finite: Dictionary = _codec.f64_from_bits("7fefffffffffffff")
+	var min_subnormal: Dictionary = _codec.f64_from_bits("0000000000000001")
+	var min_i64: Dictionary = _codec.i64_from_bits("8000000000000000")
+	var max_i64: Dictionary = _codec.i64_from_bits("7fffffffffffffff")
 	_check(bool(max_finite.get("ok", false)) and bool(min_subnormal.get("ok", false)), "finite f64 boundary fixtures decode")
 	_check(bool(min_i64.get("ok", false)) and bool(max_i64.get("ok", false)), "signed i64 boundary fixtures decode")
 	if (
@@ -117,9 +117,9 @@ func _check_contract_fixtures() -> void:
 		if bool(boundaries_roundtrip.get("ok", false)):
 			_check(_codec.strict_equal(boundaries, boundaries_roundtrip.get("value")), "finite f64 and i64 boundaries remain bit/type exact")
 
-	var nan_value := _codec.f64_from_bits("7ff8000000000000")
-	var positive_inf := _codec.f64_from_bits("7ff0000000000000")
-	var negative_inf := _codec.f64_from_bits("fff0000000000000")
+	var nan_value: Dictionary = _codec.f64_from_bits("7ff8000000000000")
+	var positive_inf: Dictionary = _codec.f64_from_bits("7ff0000000000000")
+	var negative_inf: Dictionary = _codec.f64_from_bits("fff0000000000000")
 	_check(
 		bool(nan_value.get("ok", false))
 		and not bool(_codec.encode_variant_tree({"v": nan_value.get("value")}).get("ok", false)),
@@ -144,7 +144,7 @@ func _check_contract_fixtures() -> void:
 
 
 func _check_malformed_envelopes() -> void:
-	var source_float := _codec.f64_from_bits(COUNTEREXAMPLE_1_BITS)
+	var source_float: Dictionary = _codec.f64_from_bits(COUNTEREXAMPLE_1_BITS)
 	if not bool(source_float.get("ok", false)):
 		_check(false, "malformed-test source float is available")
 		return
@@ -154,7 +154,7 @@ func _check_malformed_envelopes() -> void:
 		"int": 120,
 		"null": null,
 	}
-	var encoded := _codec.encode_variant_tree(fixture)
+	var encoded: Dictionary = _codec.encode_variant_tree(fixture)
 	_check(bool(encoded.get("ok", false)), "malformed-test base envelope encodes")
 	if not bool(encoded.get("ok", false)):
 		return
@@ -267,14 +267,14 @@ func _check_real_180d_snapshot() -> Dictionary:
 	var original_fingerprint := simulation.authoritative_fingerprint()
 	_check(not original_fingerprint.is_empty(), "real 180d authoritative fingerprint exists")
 
-	var counts := _codec.count_numeric_leaves(original_state)
+	var counts: Dictionary = _codec.count_numeric_leaves(original_state)
 	_check(int(counts.get("non_string_keys", -1)) == 0, "real 180d snapshot contains only string Dictionary keys")
 
 	var legacy_text := JSON.stringify(original_state, "\t", false, true)
 	var legacy_bytes := legacy_text.to_utf8_buffer().size()
 
 	var encode_start := Time.get_ticks_usec()
-	var encoded := _codec.encode_variant_tree(original_state)
+	var encoded: Dictionary = _codec.encode_variant_tree(original_state)
 	_check(bool(encoded.get("ok", false)), "real 180d snapshot exact-codec encodes")
 	if not bool(encoded.get("ok", false)):
 		printerr("EXACT_CODEC_180D_ENCODE_ERROR=%s" % encoded.get("error", ""))
@@ -284,7 +284,7 @@ func _check_real_180d_snapshot() -> Dictionary:
 	var encode_usec := Time.get_ticks_usec() - encode_start
 	var exact_bytes := exact_text.to_utf8_buffer().size()
 
-	var second_encoded := _codec.encode_variant_tree(original_state)
+	var second_encoded: Dictionary = _codec.encode_variant_tree(original_state)
 	_check(bool(second_encoded.get("ok", false)), "real 180d snapshot second encode succeeds")
 	var deterministic := false
 	var manifest_deterministic := false
@@ -295,19 +295,19 @@ func _check_real_180d_snapshot() -> Dictionary:
 	_check(manifest_deterministic, "numeric manifest ordering/content is deterministic")
 	_check(deterministic, "complete exact codec JSON output is deterministic for identical snapshot")
 
-	var payload_numeric_counts := _codec.count_numeric_leaves(envelope["payload"])
+	var payload_numeric_counts: Dictionary = _codec.count_numeric_leaves(envelope["payload"])
 	_check(int(payload_numeric_counts.get("total", -1)) == 0, "no numeric leaves escape into exact-codec payload")
 
 	var decode_start := Time.get_ticks_usec()
 	var parsed: Variant = JSON.parse_string(exact_text)
 	_check(parsed is Dictionary, "exact codec envelope survives Godot JSON parse")
-	var decoded := _codec.decode_variant_tree(parsed)
+	var decoded: Dictionary = _codec.decode_variant_tree(parsed)
 	var decode_usec := Time.get_ticks_usec() - decode_start
 	_check(bool(decoded.get("ok", false)), "parsed exact codec envelope decodes")
 	if not bool(decoded.get("ok", false)):
 		printerr("EXACT_CODEC_180D_DECODE_ERROR=%s" % decoded.get("error", ""))
 		return {}
-	var reconstructed := decoded.get("value")
+	var reconstructed: Variant = decoded.get("value")
 	_check(reconstructed is Dictionary, "decoded exact codec value is normal Formal snapshot Dictionary")
 	_check(_codec.strict_equal(original_state, reconstructed), "real 180d snapshot is recursively value/type/bit exact")
 
@@ -382,7 +382,7 @@ func _check_real_180d_snapshot() -> Dictionary:
 
 
 func _codec_roundtrip(value: Variant) -> Dictionary:
-	var encoded := _codec.encode_variant_tree(value)
+	var encoded: Dictionary = _codec.encode_variant_tree(value)
 	if not bool(encoded.get("ok", false)):
 		return encoded
 	var text := JSON.stringify(encoded.get("value"), "", false, true)
@@ -392,7 +392,7 @@ func _codec_roundtrip(value: Variant) -> Dictionary:
 
 func _expect_decode_failure(envelope: Dictionary, label: String) -> void:
 	_malformed_checks += 1
-	var result := _codec.decode_variant_tree(envelope)
+	var result: Dictionary = _codec.decode_variant_tree(envelope)
 	_check(not bool(result.get("ok", false)), "malformed envelope rejected: %s" % label)
 
 
