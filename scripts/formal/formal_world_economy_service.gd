@@ -416,6 +416,8 @@ func restore_persistent_state(state: Dictionary) -> bool:
 				return false
 			if not _canonicalize_v6_daily_fulfillment_bp(saved_economic_state):
 				return false
+			if not _canonicalize_v6_trade_balance_centimes(saved_economic_state):
+				return false
 		if schema_id != STATE_SCHEMA_ID and not _legacy_static_matches(
 			economy_id, saved_economic_state, schema_id
 		):
@@ -1269,6 +1271,27 @@ func _canonicalize_v6_daily_fulfillment_bp(saved: Dictionary) -> bool:
 				return false
 			daily_totals["fulfillment_bp"] = int(numeric_fulfillment)
 			saved["daily_totals"] = daily_totals
+			return true
+		_:
+			return false
+
+
+func _canonicalize_v6_trade_balance_centimes(saved: Dictionary) -> bool:
+	if not saved.has("trade_balance_centimes"):
+		return true
+	var raw_balance: Variant = saved["trade_balance_centimes"]
+	match typeof(raw_balance):
+		TYPE_INT:
+			return true
+		TYPE_FLOAT:
+			var numeric_balance := float(raw_balance)
+			if (
+				is_nan(numeric_balance)
+				or is_inf(numeric_balance)
+				or floor(numeric_balance) != numeric_balance
+			):
+				return false
+			saved["trade_balance_centimes"] = int(numeric_balance)
 			return true
 		_:
 			return false
