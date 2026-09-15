@@ -75,9 +75,10 @@ func _run() -> void:
 		"player state remains untouched during autonomous advancement"
 	)
 
-	# Exercise the persisted JSON boundary rather than handing the in-memory
-	# Dictionary directly to restore.
-	var encoded_midpoint := JSON.stringify(midpoint_state)
+	# Exercise the persisted JSON precision contract rather than handing the
+	# in-memory Dictionary directly to restore. Text indentation and key order are
+	# irrelevant here; full precision must match the production AtomicJsonFileStore.
+	var encoded_midpoint := JSON.stringify(midpoint_state, "", true, true)
 	var decoded_midpoint_variant: Variant = JSON.parse_string(encoded_midpoint)
 	_check(decoded_midpoint_variant is Dictionary, "midpoint save payload JSON round-trips")
 	var restored := FormalWorldSimulation.new()
@@ -285,12 +286,12 @@ func _report_float_roundtrip_probe(
 		and typeof(post_value) == TYPE_FLOAT
 	):
 		print(
-			"AUTONOMOUS_180D_FLOAT_PROBE_DECODED_MINUS_PRE=%.17g"
-			% (float(decoded_value) - float(pre_value))
+			"AUTONOMOUS_180D_FLOAT_PROBE_DECODED_MINUS_PRE=%s"
+			% JSON.stringify(float(decoded_value) - float(pre_value), "", true, true)
 		)
 		print(
-			"AUTONOMOUS_180D_FLOAT_PROBE_POST_MINUS_DECODED=%.17g"
-			% (float(post_value) - float(decoded_value))
+			"AUTONOMOUS_180D_FLOAT_PROBE_POST_MINUS_DECODED=%s"
+			% JSON.stringify(float(post_value) - float(decoded_value), "", true, true)
 		)
 
 
@@ -314,8 +315,8 @@ func _print_float_probe_value(label: String, value: Variant) -> void:
 	)
 	if typeof(value) == TYPE_FLOAT:
 		print(
-			"AUTONOMOUS_180D_FLOAT_PROBE_%s_G17=%.17g"
-			% [label, float(value)]
+			"AUTONOMOUS_180D_FLOAT_PROBE_%s_FULL_PRECISION_JSON=%s"
+			% [label, JSON.stringify(value, "", true, true)]
 		)
 
 
