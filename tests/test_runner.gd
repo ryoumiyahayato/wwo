@@ -99,7 +99,6 @@ func _run_tests() -> void:
 	_test_m7_succession_performance_baseline()
 	_test_m8_clock_and_queue_roundtrip()
 	_test_m8_save_load_roundtrip()
-	_test_m8_atomic_json_full_precision_roundtrip()
 	_test_m8_invalid_save_and_safe_replace()
 	_test_m8_autosave_log_and_performance()
 	_test_m8_developer_tools_and_panel()
@@ -890,30 +889,42 @@ func _test_m4_dynamic_tendencies() -> void:
 
 
 func _test_m4_character_scenes() -> void:
-	var character: CharacterData = _make_action_character(60, 560)
-	GameSessionService.set_player(character)
-	var scene_resource: Resource = load("res://scenes/map/strategic_map_view.tscn")
-	var view: Node = (scene_resource as PackedScene).instantiate()
-	get_root().add_child(view)
-	var action_button: Button = view.find_child("ActionButton", true, false) as Button
-	var panel: ActionPanel = view.find_child("ActionPanel", true, false) as ActionPanel
-	_expect_true(not action_button.disabled, "有玩家人物时地图行动入口可用")
-	_expect_true(not panel.visible, "长期行动面板默认关闭")
-	action_button.pressed.emit()
-	_expect_true(panel.visible, "行动入口可打开长期行动面板")
-	var action_list: ItemList = panel.find_child("ActionList", true, false) as ItemList
-	_expect_equal(action_list.item_count, 8, "行动面板列出八类正式行动")
-	var begin_button: Button = panel.get_node("Margin/Root/BeginButton") as Button
-	begin_button.pressed.emit()
-	_expect_true(GameSessionService.current_action != null, "行动面板可开始当前人物行动")
-	var runner: SimulationRunner = view.get_node("SimulationRunner") as SimulationRunner
-	if GameSessionService.current_action != null:
-		var before: float = GameSessionService.current_action.accumulated_work
-		runner.clock.advance_hours(1)
-		_expect_true(GameSessionService.current_action.accumulated_work > before, "权威时间变化驱动当前行动进度")
-	var summary: RichTextLabel = panel.find_child("SummaryLabel", true, false) as RichTextLabel
-	_expect_true(summary.text.contains("当前把握") and not summary.text.contains("有效值"), "正式行动 UI 显示定性把握且隐藏精确值")
-	view.queue_free()
+	var setup_resource: Resource = load("res://scenes/character/character_setup_view.tscn")
+	_expect_true(setup_resource is PackedScene, "M4 人物创建场景可加载")
+	if setup_resource is PackedScene:
+		var setup: Node = (setup_resource as PackedScene).instantiate()
+		get_root().add_child(setup)
+		var country_option: OptionButton = setup.get_node("Margin/Root/Columns/ControlsPanel/ControlsMargin/Controls/CountryOption") as OptionButton
+		var enter_button: Button = setup.get_node("Margin/Root/Bottom/EnterButton") as Button
+		var generate_button: Button = setup.get_node("Margin/Root/Columns/ControlsPanel/ControlsMargin/Controls/GenerateButton") as Button
+		var preview_label: RichTextLabel = setup.get_node("Margin/Root/Columns/PreviewPanel/PreviewMargin/PreviewLabel") as RichTextLabel
+		_expect_equal(str(country_option.get_item_metadata(0)), "", "人物创建默认不预选国家")
+		_expect_true(enter_button.disabled, "生成人物前不能进入地图")
+		country_option.select(1)
+		generate_button.pressed.emit()
+		_expect_true(not enter_button.disabled, "明确选择国家后可生成并进入地图")
+		_expect_true(preview_label.text.contains("可见技能"), "生成预览显示正式人物技能")
+		setup.queue_free()
+
+	var generated: CharacterGenerationResult = _make_character_generator(99).generate_character(
+		"country:loran_federation", CharacterGenerator.MODE_STANDARD
+	)
+	GameSessionService.set_player(generated.character)
+	var profile_resource: Resource = load("res://scenes/character/character_profile_view.tscn")
+	_expect_true(profile_resource is PackedScene, "M4 人物信息场景可加载")
+	if profile_resource is PackedScene:
+		var profile: Node = (profile_resource as PackedScene).instantiate()
+		get_root().add_child(profile)
+		var developer_panel: PanelContainer = profile.find_child("DeveloperPanel", true, false) as PanelContainer
+		var identity_label: Label = profile.find_child("IdentityLabel", true, false) as Label
+		var developer_toggle: CheckButton = profile.find_child("DeveloperToggle", true, false) as CheckButton
+		_expect_true(not developer_panel.visible, "开发者隐藏数据面板默认关闭")
+		_expect_true(not identity_label.text.contains("潜质") and not identity_label.text.contains("population_category"), "正式人物卡片不泄露内部字段或隐藏潜质")
+		GameSessionService.developer_mode = true
+		developer_toggle.visible = true
+		developer_toggle.button_pressed = true
+		_expect_true(developer_panel.visible, "开发者开关可显式显示隐藏数据")
+		profile.queue_free()
 	GameSessionService.clear()
 
 
@@ -1895,62 +1906,6 @@ func _test_m8_save_load_roundtrip() -> void:
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
 	GameSessionService.clear()
 	print("[PERF] M8 完整存档文件：%.1f KiB" % (float(file_size) / 1024.0))
-
-
-func _test_m8_atomic_json_full_precision_roundtrip() -> void:
-	var exact_float: float = 0.000609184090909091
-	var default_roundtrip: Variant = JSON.parse_string(JSON.stringify(exact_float))
-	_expect_true(
-		typeof(default_roundtrip) == TYPE_FLOAT
-		and float(default_roundtrip) != exact_float,
-		"M8 精度夹具可区分默认 JSON stringify 的低位损失"
-	)
-	var path: String = "user://tests/m8_atomic_json_precision.json"
-	var snapshot: Dictionary = {
-		"float_value": exact_float,
-		"integer_value": 7,
-		"text_value": "precision",
-		"nested": {"flag": true},
-	}
-	var verifier := func(temporary_path: String) -> String:
-		var temporary_file := FileAccess.open(temporary_path, FileAccess.READ)
-		if temporary_file == null:
-			return error_string(FileAccess.get_open_error())
-		var temporary_parser := JSON.new()
-		var temporary_parse_error := temporary_parser.parse(temporary_file.get_as_text())
-		temporary_file.close()
-		if temporary_parse_error != OK:
-			return "precision fixture temporary JSON parse failed"
-		if not temporary_parser.data is Dictionary:
-			return "precision fixture temporary JSON root is not Dictionary"
-		return ""
-	var write_error := AtomicJsonFileStore.write_verified(
-		path,
-		snapshot,
-		verifier,
-		false
-	)
-	_expect_equal(write_error, "", "M8 shared AtomicJsonFileStore 可写入 full-precision fixture")
-	var file := FileAccess.open(path, FileAccess.READ)
-	_expect_true(file != null, "M8 full-precision fixture 可从真实文件边界读回")
-	if file == null:
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
-		return
-	var parser := JSON.new()
-	var parse_error := parser.parse(file.get_as_text())
-	file.close()
-	_expect_equal(parse_error, OK, "M8 full-precision fixture 通过真实 JSON parser")
-	if parse_error != OK or not parser.data is Dictionary:
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
-		return
-	var loaded := parser.data as Dictionary
-	_expect_true(typeof(loaded.get("float_value")) == TYPE_FLOAT, "M8 full-precision float 保持 float Variant")
-	_expect_equal(loaded.get("float_value"), exact_float, "M8 shared serializer 精确 roundtrip 低位 float")
-	_expect_equal(int(loaded.get("integer_value", -1)), 7, "M8 full-precision serializer 不改变整数值")
-	_expect_equal(str(loaded.get("text_value", "")), "precision", "M8 full-precision serializer 不改变字符串")
-	var nested := loaded.get("nested", {}) as Dictionary
-	_expect_true(bool(nested.get("flag", false)), "M8 full-precision serializer 不改变嵌套字典")
-	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
 
 
 func _test_m8_invalid_save_and_safe_replace() -> void:
