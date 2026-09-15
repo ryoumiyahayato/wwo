@@ -418,6 +418,8 @@ func restore_persistent_state(state: Dictionary) -> bool:
 				return false
 			if not _canonicalize_v6_trade_balance_centimes(saved_economic_state):
 				return false
+			if not _canonicalize_v6_tariff_revenue_centimes(saved_economic_state):
+				return false
 		if schema_id != STATE_SCHEMA_ID and not _legacy_static_matches(
 			economy_id, saved_economic_state, schema_id
 		):
@@ -1292,6 +1294,27 @@ func _canonicalize_v6_trade_balance_centimes(saved: Dictionary) -> bool:
 			):
 				return false
 			saved["trade_balance_centimes"] = int(numeric_balance)
+			return true
+		_:
+			return false
+
+
+func _canonicalize_v6_tariff_revenue_centimes(saved: Dictionary) -> bool:
+	if not saved.has("tariff_revenue_centimes"):
+		return true
+	var raw_revenue: Variant = saved["tariff_revenue_centimes"]
+	match typeof(raw_revenue):
+		TYPE_INT:
+			return true
+		TYPE_FLOAT:
+			var numeric_revenue := float(raw_revenue)
+			if (
+				is_nan(numeric_revenue)
+				or is_inf(numeric_revenue)
+				or floor(numeric_revenue) != numeric_revenue
+			):
+				return false
+			saved["tariff_revenue_centimes"] = int(numeric_revenue)
 			return true
 		_:
 			return false
