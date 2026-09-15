@@ -1,9 +1,11 @@
 extends SceneTree
-## Focused M8 persistence regression for the real low-order float counterexample.
+## Focused M8 persistence regression for the real 180d authoritative float.
 ##
-## Keep strict equality here. This test is expected to remain red until the
-## persistence representation contract can preserve the authoritative float
-## bit-exactly through the real AtomicJsonFileStore boundary.
+## Keep strict bit equality here. The authoritative source value is constructed
+## from its observed IEEE-754 bytes so the fixture itself does not pass through
+## GDScript's decimal-literal parser before exercising AtomicJsonFileStore.
+
+const EXPECTED_SOURCE_HEX := "3f43f634dfb491bb"
 
 var _failures: int = 0
 var _checks: int = 0
@@ -14,13 +16,31 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var exact_float: float = 0.000609184090909091
-	var default_roundtrip: Variant = JSON.parse_string(JSON.stringify(exact_float))
-	_expect_true(
-		typeof(default_roundtrip) == TYPE_FLOAT
-		and float(default_roundtrip) != exact_float,
-		"M8 precision fixture distinguishes default JSON stringify low-order loss"
+	var exact_float := _authoritative_counterexample()
+	_expect_equal(
+		_ieee754_hex(exact_float),
+		EXPECTED_SOURCE_HEX,
+		"M8 fixture holds the real 180d authoritative IEEE-754 value"
 	)
+
+	var full_precision_text := JSON.stringify(exact_float, "", true, true)
+	var direct_parse := full_precision_text.to_float()
+	var json_parse: Variant = JSON.parse_string(full_precision_text)
+	_expect_equal(
+		full_precision_text,
+		"0.0006091840909090909",
+		"M8 fixture reproduces Godot full-precision decimal text"
+	)
+	_expect_true(
+		_ieee754_hex(direct_parse) != EXPECTED_SOURCE_HEX,
+		"M8 counterexample reproduces String.to_float bit loss"
+	)
+	_expect_true(
+		typeof(json_parse) == TYPE_FLOAT
+		and _ieee754_hex(float(json_parse)) == _ieee754_hex(direct_parse),
+		"M8 counterexample reproduces JSON parser's same numeric conversion result"
+	)
+
 	var path: String = "user://tests/m8_atomic_json_precision.json"
 	var snapshot: Dictionary = {
 		"float_value": exact_float,
@@ -63,13 +83,41 @@ func _run() -> void:
 		return
 	var loaded := parser.data as Dictionary
 	_expect_true(typeof(loaded.get("float_value")) == TYPE_FLOAT, "M8 full-precision float remains float Variant")
-	_expect_equal(loaded.get("float_value"), exact_float, "M8 shared serializer bit-exactly round-trips counterexample float")
+	if typeof(loaded.get("float_value")) == TYPE_FLOAT:
+		_expect_equal(
+			_ieee754_hex(float(loaded.get("float_value"))),
+			EXPECTED_SOURCE_HEX,
+			"M8 shared serializer bit-exactly round-trips real counterexample float"
+		)
 	_expect_equal(int(loaded.get("integer_value", -1)), 7, "M8 serializer does not change integer value")
 	_expect_equal(str(loaded.get("text_value", "")), "precision", "M8 serializer does not change string")
 	var nested := loaded.get("nested", {}) as Dictionary
 	_expect_true(bool(nested.get("flag", false)), "M8 serializer does not change nested Dictionary")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
 	_finish()
+
+
+func _authoritative_counterexample() -> float:
+	# Little-endian bytes emitted by PackedByteArray.encode_double() for the real
+	# 180d jewelry_watches.produced value. decode_double() preserves those bits.
+	var bytes := PackedByteArray()
+	bytes.resize(8)
+	bytes[0] = 0xbb
+	bytes[1] = 0x91
+	bytes[2] = 0xb4
+	bytes[3] = 0xdf
+	bytes[4] = 0x34
+	bytes[5] = 0xf6
+	bytes[6] = 0x43
+	bytes[7] = 0x3f
+	return bytes.decode_double(0)
+
+
+func _ieee754_hex(value: float) -> String:
+	var bytes := PackedByteArray()
+	bytes.resize(8)
+	bytes.encode_double(0, value)
+	return "%016x" % bytes.decode_u64(0)
 
 
 func _expect_true(condition: bool, description: String) -> void:
