@@ -414,6 +414,8 @@ func restore_persistent_state(state: Dictionary) -> bool:
 				return false
 			if not _canonicalize_v6_prices(saved_economic_state):
 				return false
+			if not _canonicalize_v6_daily_fulfillment_bp(saved_economic_state):
+				return false
 		if schema_id != STATE_SCHEMA_ID and not _legacy_static_matches(
 			economy_id, saved_economic_state, schema_id
 		):
@@ -1245,6 +1247,31 @@ func _canonicalize_v6_prices(saved: Dictionary) -> bool:
 				return false
 	saved["prices"] = canonical_prices
 	return true
+
+
+func _canonicalize_v6_daily_fulfillment_bp(saved: Dictionary) -> bool:
+	if not saved.get("daily_totals", {}) is Dictionary:
+		return false
+	var daily_totals := saved.get("daily_totals", {}) as Dictionary
+	if not daily_totals.has("fulfillment_bp"):
+		return true
+	var raw_fulfillment: Variant = daily_totals["fulfillment_bp"]
+	match typeof(raw_fulfillment):
+		TYPE_INT:
+			return true
+		TYPE_FLOAT:
+			var numeric_fulfillment := float(raw_fulfillment)
+			if (
+				is_nan(numeric_fulfillment)
+				or is_inf(numeric_fulfillment)
+				or floor(numeric_fulfillment) != numeric_fulfillment
+			):
+				return false
+			daily_totals["fulfillment_bp"] = int(numeric_fulfillment)
+			saved["daily_totals"] = daily_totals
+			return true
+		_:
+			return false
 
 
 func _compose_market_state(market_id: String, saved: Dictionary) -> Dictionary:
