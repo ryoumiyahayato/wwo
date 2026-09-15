@@ -12,6 +12,8 @@ const MINUTES_PER_DAY: int = 24 * 60
 const FORMAT_ID: String = "wwo.formal.exact-json.v1"
 const COUNTEREXAMPLE_1_BITS: String = "3f43f634dfb491bb"
 const COUNTEREXAMPLE_2_BITS: String = "40c3169901b276ea"
+const POSITIVE_ZERO_BITS: String = "0000000000000000"
+const NEGATIVE_ZERO_BITS: String = "8000000000000000"
 const JEWELRY_MARKET_ID := "market:legacy_aggregate:sultanate_of_zanzibar"
 const JEWELRY_COMMODITY_ID := "jewelry_watches"
 const JAPAN_MARKET_ID := "market:legacy_aggregate:empire_of_japan"
@@ -50,9 +52,29 @@ func _run() -> void:
 func _check_contract_fixtures() -> void:
 	var counterexample_1: Dictionary = _codec.f64_from_bits(COUNTEREXAMPLE_1_BITS)
 	var counterexample_2: Dictionary = _codec.f64_from_bits(COUNTEREXAMPLE_2_BITS)
+	var positive_zero: Dictionary = _codec.f64_from_bits(POSITIVE_ZERO_BITS)
+	var negative_zero: Dictionary = _codec.f64_from_bits(NEGATIVE_ZERO_BITS)
 	_check(bool(counterexample_1.get("ok", false)), "counterexample #1 fixture decodes from canonical bits")
 	_check(bool(counterexample_2.get("ok", false)), "counterexample #2 fixture decodes from canonical bits")
-	if bool(counterexample_1.get("ok", false)) and bool(counterexample_2.get("ok", false)):
+	_check(bool(positive_zero.get("ok", false)), "+0.0 fixture decodes from canonical bits")
+	_check(bool(negative_zero.get("ok", false)), "-0.0 fixture decodes from canonical bits")
+	if bool(positive_zero.get("ok", false)):
+		_check(
+			_codec.f64_bits(float(positive_zero.get("value"))) == POSITIVE_ZERO_BITS,
+			"+0.0 source fixture has canonical positive-zero bits"
+		)
+	if bool(negative_zero.get("ok", false)):
+		_check(
+			_codec.f64_bits(float(negative_zero.get("value"))) == NEGATIVE_ZERO_BITS,
+			"-0.0 source fixture has canonical negative-zero bits"
+		)
+
+	if (
+		bool(counterexample_1.get("ok", false))
+		and bool(counterexample_2.get("ok", false))
+		and bool(positive_zero.get("ok", false))
+		and bool(negative_zero.get("ok", false))
+	):
 		var fixture := {
 			"f1": counterexample_1.get("value"),
 			"f2": counterexample_2.get("value"),
@@ -61,8 +83,13 @@ func _check_contract_fixtures() -> void:
 			"bool_value": true,
 			"literal_null": null,
 			"nested": {
-				"0": -0.0,
-				"array": [0.0, 7, null, {"deep": counterexample_1.get("value")}],
+				"0": negative_zero.get("value"),
+				"array": [
+					positive_zero.get("value"),
+					7,
+					null,
+					{"deep": counterexample_1.get("value")},
+				],
 			},
 		}
 		var fixture_encoded: Dictionary = _codec.encode_variant_tree(fixture)
@@ -83,16 +110,32 @@ func _check_contract_fixtures() -> void:
 			_check(typeof(restored_dict["bool_value"]) == TYPE_BOOL, "bool is not treated as integer")
 			_check(typeof(restored_dict["literal_null"]) == TYPE_NIL, "literal null remains null")
 			var nested := restored_dict["nested"] as Dictionary
-			_check(_codec.f64_bits(float(nested["0"])) == "8000000000000000", "Dictionary key \"0\" signed zero is exact")
+			_check(
+				_codec.f64_bits(float(nested["0"])) == NEGATIVE_ZERO_BITS,
+				"Dictionary key \"0\" negative zero is exact"
+			)
 			var array := nested["array"] as Array
-			_check(_codec.f64_bits(float(array[0])) == "0000000000000000", "Array index 0 positive zero is exact")
+			_check(
+				_codec.f64_bits(float(array[0])) == POSITIVE_ZERO_BITS,
+				"Array index 0 positive zero is exact"
+			)
 
-	var signed_zero := _codec_roundtrip({"positive": 0.0, "negative": -0.0})
-	_check(bool(signed_zero.get("ok", false)), "+0.0/-0.0 fixture round-trips")
-	if bool(signed_zero.get("ok", false)):
-		var zeros := signed_zero.get("value") as Dictionary
-		_check(_codec.f64_bits(float(zeros["positive"])) == "0000000000000000", "+0.0 sign bit is preserved")
-		_check(_codec.f64_bits(float(zeros["negative"])) == "8000000000000000", "-0.0 sign bit is preserved")
+	if bool(positive_zero.get("ok", false)) and bool(negative_zero.get("ok", false)):
+		var signed_zero := _codec_roundtrip({
+			"positive": positive_zero.get("value"),
+			"negative": negative_zero.get("value"),
+		})
+		_check(bool(signed_zero.get("ok", false)), "+0.0/-0.0 fixture round-trips")
+		if bool(signed_zero.get("ok", false)):
+			var zeros := signed_zero.get("value") as Dictionary
+			_check(
+				_codec.f64_bits(float(zeros["positive"])) == POSITIVE_ZERO_BITS,
+				"+0.0 sign bit is preserved"
+			)
+			_check(
+				_codec.f64_bits(float(zeros["negative"])) == NEGATIVE_ZERO_BITS,
+				"-0.0 sign bit is preserved"
+			)
 
 	var max_finite: Dictionary = _codec.f64_from_bits("7fefffffffffffff")
 	var min_subnormal: Dictionary = _codec.f64_from_bits("0000000000000001")
@@ -115,7 +158,10 @@ func _check_contract_fixtures() -> void:
 		var boundaries_roundtrip := _codec_roundtrip(boundaries)
 		_check(bool(boundaries_roundtrip.get("ok", false)), "finite f64 and i64 boundary fixture round-trips")
 		if bool(boundaries_roundtrip.get("ok", false)):
-			_check(_codec.strict_equal(boundaries, boundaries_roundtrip.get("value")), "finite f64 and i64 boundaries remain bit/type exact")
+			_check(
+				_codec.strict_equal(boundaries, boundaries_roundtrip.get("value")),
+				"finite f64 and i64 boundaries remain bit/type exact"
+			)
 
 	var nan_value: Dictionary = _codec.f64_from_bits("7ff8000000000000")
 	var positive_inf: Dictionary = _codec.f64_from_bits("7ff0000000000000")
@@ -200,16 +246,12 @@ func _check_malformed_envelopes() -> void:
 
 	var invalid_array_index := base.duplicate(true)
 	var invalid_index_entry := (invalid_array_index["numbers"] as Array)[f64_index] as Dictionary
-	invalid_index_entry["path"] = [
-		{"key": "arr"}, {"index": "99"},
-	]
+	invalid_index_entry["path"] = [{"key": "arr"}, {"index": "99"}]
 	_expect_decode_failure(invalid_array_index, "array index out of bounds")
 
 	var malformed_segment := base.duplicate(true)
 	var malformed_segment_entry := (malformed_segment["numbers"] as Array)[f64_index] as Dictionary
-	malformed_segment_entry["path"] = [
-		{"key": "arr", "index": "0"},
-	]
+	malformed_segment_entry["path"] = [{"key": "arr", "index": "0"}]
 	_expect_decode_failure(malformed_segment, "path segment with both key and index")
 
 	var missing_discriminator := base.duplicate(true)
@@ -246,9 +288,7 @@ func _check_malformed_envelopes() -> void:
 
 	var malformed_index_text := base.duplicate(true)
 	var malformed_index_entry := (malformed_index_text["numbers"] as Array)[f64_index] as Dictionary
-	malformed_index_entry["path"] = [
-		{"key": "arr"}, {"index": "01"},
-	]
+	malformed_index_entry["path"] = [{"key": "arr"}, {"index": "01"}]
 	_expect_decode_failure(malformed_index_text, "non-canonical array index text")
 
 	var nonfinite_load := base.duplicate(true)
