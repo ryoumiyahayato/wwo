@@ -404,13 +404,16 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		if market_id.is_empty() or not market_states.has(market_id):
 			return false
 		var saved_economic_state := saved_states[saved_id] as Dictionary
-		if schema_id == STATE_SCHEMA_ID and (
-			str(saved_economic_state.get("market_id", "")) != market_id
-			or str(
-				saved_economic_state.get("source_economic_aggregate_id", "")
-			) != economy_id
-		):
-			return false
+		if schema_id == STATE_SCHEMA_ID:
+			if (
+				str(saved_economic_state.get("market_id", "")) != market_id
+				or str(
+					saved_economic_state.get("source_economic_aggregate_id", "")
+				) != economy_id
+			):
+				return false
+			if not _canonicalize_v6_prices(saved_economic_state):
+				return false
 		if schema_id != STATE_SCHEMA_ID and not _legacy_static_matches(
 			economy_id, saved_economic_state, schema_id
 		):
@@ -1217,6 +1220,31 @@ func _dynamic_state_from(state: Dictionary) -> Dictionary:
 			var value: Variant = state[key]
 			result[key] = value.duplicate(true) if value is Dictionary or value is Array else value
 	return result
+
+
+func _canonicalize_v6_prices(saved: Dictionary) -> bool:
+	if not saved.get("prices", {}) is Dictionary:
+		return false
+	var prices := saved.get("prices", {}) as Dictionary
+	var canonical_prices: Dictionary = {}
+	for raw_commodity_id: Variant in prices:
+		var raw_price: Variant = prices[raw_commodity_id]
+		match typeof(raw_price):
+			TYPE_INT:
+				canonical_prices[raw_commodity_id] = raw_price
+			TYPE_FLOAT:
+				var numeric_price := float(raw_price)
+				if (
+					is_nan(numeric_price)
+					or is_inf(numeric_price)
+					or floor(numeric_price) != numeric_price
+				):
+					return false
+				canonical_prices[raw_commodity_id] = int(numeric_price)
+			_:
+				return false
+	saved["prices"] = canonical_prices
+	return true
 
 
 func _compose_market_state(market_id: String, saved: Dictionary) -> Dictionary:
