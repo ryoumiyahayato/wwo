@@ -48,7 +48,7 @@ static func decode(document: Dictionary) -> Dictionary:
 	var payload_bytes: PackedByteArray = Marshalls.base64_to_raw(payload_text)
 	if payload_bytes.is_empty():
 		return _fail("正式世界精确载荷无法解码")
-	var decoded: Variant = bytes_to_var(payload_bytes, false)
+	var decoded: Variant = bytes_to_var(payload_bytes)
 	if not decoded is Dictionary:
 		return _fail("正式世界精确载荷不是快照对象")
 	var snapshot := decoded as Dictionary
