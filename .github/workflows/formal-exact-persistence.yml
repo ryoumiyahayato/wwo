@@ -122,3 +122,186 @@ jobs:
             builds/formal-exact-persistence/roundtrip.log
             builds/formal-exact-persistence/roundtrip.stderr.log
           if-no-files-found: warn
+
+  world-data-audit-evidence:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact evidence head
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $expected = "${{ github.event.pull_request.head.sha || github.sha }}"
+          $actual = (git rev-parse HEAD).Trim()
+          if ($actual -ne $expected) {
+            throw "Evidence checkout is $actual but expected exact head $expected"
+          }
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run official world-data generator chain
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $outputDir = 'builds/pr86-world-data-regeneration'
+          $logPath = Join-Path $outputDir 'generator.log'
+          if (Test-Path -LiteralPath $outputDir) {
+            Remove-Item -LiteralPath $outputDir -Recurse -Force
+          }
+          New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
+
+          function Invoke-Generator([string[]] $Arguments) {
+            & python @Arguments 2>&1 | Tee-Object -FilePath $logPath -Append
+            $code = $LASTEXITCODE
+            if ($code -ne 0) {
+              throw "Generator failed with exit code $code: python $($Arguments -join ' ')"
+            }
+          }
+
+          Invoke-Generator @(
+            'tools/world_data/validate_world_data.py',
+            '--root', '.',
+            '--data-root', 'data/world_map',
+            '--output-dir', $outputDir,
+            '--allow-errors'
+          )
+          Invoke-Generator @(
+            'tools/world_data/build_batch2_artifacts.py',
+            '--root', '.',
+            '--output-dir', $outputDir
+          )
+          Invoke-Generator @(
+            'tools/world_data/build_batch3_contracts.py',
+            '--root', '.',
+            '--output-dir', $outputDir
+          )
+          Invoke-Generator @(
+            'tools/world_data/build_batch4_run_manifest.py',
+            '--root', '.',
+            '--output-dir', $outputDir
+          )
+
+      - name: Validate exact regenerated evidence
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          @'
+          import json
+          import subprocess
+          from pathlib import Path
+
+          generated = Path('builds/pr86-world-data-regeneration')
+          tracked = Path('local-artifacts/world-data-audit')
+          replay_artifacts = (
+              'batch2_asset_manifest.json',
+              'batch2_asset_staging_candidates.json',
+              'batch2_data_manifest.json',
+              'batch2_gap_report.json',
+              'batch2_regression_manifest.json',
+              'batch3_gap_report.json',
+              'batch3_historical_flag_coverage.json',
+              'batch3_loader_contract.json',
+              'batch3_record_signature_manifest.json',
+              'batch3_staging_candidates.json',
+              'batch4_run_manifest.json',
+              'coverage.json',
+              'findings.json',
+              'inventory.json',
+              'normalization_candidates.json',
+              'staging_candidates.json',
+          )
+
+          def canonical_bytes(path: Path) -> bytes:
+              return path.read_bytes().replace(b'\r\n', b'\n').replace(b'\r', b'\n')
+
+          mismatches = [
+              name
+              for name in replay_artifacts
+              if not (generated / name).is_file()
+              or canonical_bytes(generated / name) != canonical_bytes(tracked / name)
+          ]
+          expected = ['batch3_loader_contract.json', 'batch4_run_manifest.json']
+          print(f'mismatches={mismatches}')
+          if mismatches != expected:
+              raise SystemExit(f'unexpected mismatch set: {mismatches!r}; expected {expected!r}')
+
+          batch3 = json.loads((generated / 'batch3_loader_contract.json').read_text(encoding='utf-8'))
+          tracked_batch3 = json.loads((tracked / 'batch3_loader_contract.json').read_text(encoding='utf-8'))
+          for key in ('contract_gate', 'production_script_count', 'script_digest', 'missing_direct_references', 'missing_directory_references'):
+              print(f'batch3.{key}={batch3[key]!r}')
+          print(f'batch3.production_script_count.before={tracked_batch3["production_script_count"]!r}')
+          print(f'batch3.script_digest.before={tracked_batch3["script_digest"]!r}')
+          if batch3['contract_gate'] != 'PASS':
+              raise SystemExit(f'Batch 3 contract_gate is not PASS: {batch3["contract_gate"]!r}')
+          if batch3['missing_direct_references'] != []:
+              raise SystemExit(f'Batch 3 missing_direct_references is not empty: {batch3["missing_direct_references"]!r}')
+          if batch3['missing_directory_references'] != []:
+              raise SystemExit(f'Batch 3 missing_directory_references is not empty: {batch3["missing_directory_references"]!r}')
+
+          batch4 = json.loads((generated / 'batch4_run_manifest.json').read_text(encoding='utf-8'))
+          tracked_batch4 = json.loads((tracked / 'batch4_run_manifest.json').read_text(encoding='utf-8'))
+          print(f'batch4.authoritative_source_modified={batch4["authoritative_source_modified"]!r}')
+          print(f'batch4.final_gates={batch4["final_gates"]!r}')
+          print(f'batch4.artifact_digest={batch4["artifact_digest"]!r}')
+          print(f'batch4.batch_results.batch4={batch4["batch_results"]["batch4"]!r}')
+          if batch4['authoritative_source_modified'] is not False:
+              raise SystemExit('Batch 4 authoritative_source_modified is not false')
+          if batch4['final_gates'] != tracked_batch4['final_gates']:
+              raise SystemExit(
+                  f'Batch 4 final_gates changed from tracked baseline: '
+                  f'{tracked_batch4["final_gates"]!r} -> {batch4["final_gates"]!r}'
+              )
+          new_policy = dict(batch4['batch_results']['batch4'])
+          old_policy = dict(tracked_batch4['batch_results']['batch4'])
+          new_policy.pop('artifact_digest_before_manifest', None)
+          old_policy.pop('artifact_digest_before_manifest', None)
+          if new_policy != old_policy:
+              raise SystemExit(f'Batch 4 resource policy changed: {old_policy!r} -> {new_policy!r}')
+
+          head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          summary = {
+              'head': head,
+              'mismatches': mismatches,
+              'batch3': {
+                  'production_script_count': batch3['production_script_count'],
+                  'script_digest': batch3['script_digest'],
+                  'contract_gate': batch3['contract_gate'],
+                  'missing_direct_references': batch3['missing_direct_references'],
+                  'missing_directory_references': batch3['missing_directory_references'],
+              },
+              'batch4': {
+                  'authoritative_source_modified': batch4['authoritative_source_modified'],
+                  'final_gates': batch4['final_gates'],
+                  'artifact_digest': batch4['artifact_digest'],
+                  'batch_results_batch4': batch4['batch_results']['batch4'],
+              },
+          }
+          (generated / 'evidence_summary.json').write_text(
+              json.dumps(summary, indent=2, sort_keys=True) + '\n',
+              encoding='utf-8',
+              newline='\n',
+          )
+          print(json.dumps(summary, indent=2, sort_keys=True))
+          '@ | python -
+          if ($LASTEXITCODE -ne 0) {
+            throw "Evidence validation failed with exit code $LASTEXITCODE"
+          }
+
+      - name: Upload regenerated world-data evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr86-world-data-regeneration
+          path: |
+            builds/pr86-world-data-regeneration/batch3_loader_contract.json
+            builds/pr86-world-data-regeneration/batch4_run_manifest.json
+            builds/pr86-world-data-regeneration/evidence_summary.json
+            builds/pr86-world-data-regeneration/generator.log
+          if-no-files-found: error
