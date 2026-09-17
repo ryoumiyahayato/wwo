@@ -162,7 +162,7 @@ jobs:
             & python @Arguments 2>&1 | Tee-Object -FilePath $logPath -Append
             $code = $LASTEXITCODE
             if ($code -ne 0) {
-              throw "Generator failed with exit code $code: python $($Arguments -join ' ')"
+              throw "Generator failed with exit code ${code}: python $($Arguments -join ' ')"
             }
           }
 
