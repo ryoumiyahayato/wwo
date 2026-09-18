@@ -121,6 +121,22 @@ func _run() -> void:
 		"one-year autonomous run never mutates PlayerState"
 	)
 	_check(
+		(final_state.get("runtime_politics", {}) as Dictionary) == initial_runtime_politics,
+		"baseline autonomous loop leaves runtime politics unchanged"
+	)
+	_check(
+		(final_state.get("organization", {}) as Dictionary) == initial_organization,
+		"baseline autonomous loop leaves Organization unchanged"
+	)
+	_check(
+		(final_state.get("organization_authority", {}) as Dictionary) == initial_organization_authority,
+		"baseline autonomous loop leaves Organization Authority unchanged"
+	)
+	_check(
+		(final_state.get("military_state", {}) as Dictionary) == initial_military,
+		"baseline autonomous loop leaves Military unchanged"
+	)
+	_check(
 		int(change_metrics.get("inventory_changed_markets", 0)) > 0,
 		"one-year run changes real inventories"
 	)
@@ -131,6 +147,18 @@ func _run() -> void:
 	_check(
 		int(activity_metrics.get("shortage_days_after_restore", 0)) > 0,
 		"post-restore autonomous settlement produces observable shortages"
+	)
+	_check(
+		int(activity_metrics.get("production_cycles", 0)) > 0,
+		"autonomous economy executes production cycles"
+	)
+	_check(
+		int(activity_metrics.get("shipments_dispatched", 0)) > 0,
+		"autonomous economy dispatches shipments"
+	)
+	_check(
+		int(activity_metrics.get("shipments_delivered", 0)) > 0,
+		"autonomous economy delivers shipments"
 	)
 	_check(
 		_state_is_numerically_sound(final_economy),
