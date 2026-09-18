@@ -793,9 +793,16 @@ func save_to_user() -> SaveOperationResult:
 			SAVE_PATH
 		)
 	var snapshot := get_persistent_state()
+	var persistence_document := FormalWorldPersistenceDocument.encode(snapshot)
+	if persistence_document.is_empty():
+		return SaveOperationResult.fail(
+			"encode_error",
+			"正式世界精确持久化载荷编码失败",
+			SAVE_PATH
+		)
 	var write_error := AtomicJsonFileStore.write_verified(
 		SAVE_PATH,
-		snapshot,
+		persistence_document,
 		Callable(self, "_verify_temporary_save"),
 		true
 	)
@@ -887,7 +894,21 @@ func _read_snapshot_file(path: String) -> SaveOperationResult:
 			"存档根节点必须是对象",
 			path
 		)
-	return SaveOperationResult.ok(path, parser.data as Dictionary)
+	var decoded := FormalWorldPersistenceDocument.decode(parser.data as Dictionary)
+	if not bool(decoded.get("success", false)):
+		return SaveOperationResult.fail(
+			"invalid_snapshot",
+			str(decoded.get("error", "正式世界持久化文档无效")),
+			path
+		)
+	var snapshot: Variant = decoded.get("snapshot", {})
+	if not snapshot is Dictionary:
+		return SaveOperationResult.fail(
+			"invalid_snapshot",
+			"正式世界持久化载荷不是快照对象",
+			path
+		)
+	return SaveOperationResult.ok(path, snapshot as Dictionary)
 
 
 func _authoritative_total_hour() -> int:
