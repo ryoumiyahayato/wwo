@@ -20,9 +20,6 @@ const AUTHORITATIVE_DOMAIN_ORDER: Array[String] = [
 	"organization_authority",
 	"military_state",
 ]
-const FLOAT_PROBE_MARKET_ID := "market:legacy_aggregate:sultanate_of_zanzibar"
-const FLOAT_PROBE_COMMODITY_ID := "jewelry_watches"
-const FLOAT_PROBE_METRIC := "produced"
 
 var failures: int = 0
 var checks: int = 0
@@ -75,20 +72,13 @@ func _run() -> void:
 		"player state remains untouched during autonomous advancement"
 	)
 
-	# Exercise the persisted JSON precision contract rather than handing the
-	# in-memory Dictionary directly to restore. Text indentation and key order are
-	# irrelevant here; full precision must match the production AtomicJsonFileStore.
-	var encoded_midpoint := JSON.stringify(midpoint_state, "", true, true)
-	var decoded_midpoint_variant: Variant = JSON.parse_string(encoded_midpoint)
-	_check(decoded_midpoint_variant is Dictionary, "midpoint save payload JSON round-trips")
+	_cleanup_formal_save()
+	var save_result := simulation.save_to_user()
+	_check(save_result.success, "midpoint autonomous world saves through production save_to_user")
 	var restored := FormalWorldSimulation.new()
-	_check(restored.initialize(), "restore target initializes")
-	var restore_ok := false
-	if decoded_midpoint_variant is Dictionary:
-		restore_ok = restored.restore_persistent_state(
-			decoded_midpoint_variant as Dictionary
-		)
-	_check(restore_ok, "midpoint autonomous world restores")
+	var load_result := restored.load_from_user()
+	var restore_ok := load_result.success
+	_check(restore_ok, "fresh midpoint world loads through production load_from_user")
 	var post_restore_fingerprint := ""
 	if restore_ok:
 		var post_restore_state := restored.get_persistent_state()
@@ -96,12 +86,6 @@ func _run() -> void:
 		print("AUTONOMOUS_180D_POST_RESTORE_FINGERPRINT=%s" % post_restore_fingerprint)
 		if post_restore_fingerprint != midpoint_fingerprint:
 			_report_first_authoritative_difference(midpoint_state, post_restore_state)
-			if decoded_midpoint_variant is Dictionary:
-				_report_float_roundtrip_probe(
-					midpoint_state,
-					decoded_midpoint_variant as Dictionary,
-					post_restore_state
-				)
 		_check(
 			post_restore_fingerprint == midpoint_fingerprint,
 			"restore preserves the authoritative midpoint fingerprint"
@@ -210,6 +194,7 @@ func _run() -> void:
 		"final_authoritative_fingerprint": final_fingerprint,
 		"uninterrupted_final_authoritative_fingerprint": reference_fingerprint,
 	}
+	_cleanup_formal_save()
 	_finish(diagnostic)
 
 
@@ -263,61 +248,6 @@ func _report_first_authoritative_difference(
 		_print_first_difference(domain, difference)
 		return
 	print("AUTONOMOUS_180D_FIRST_MISMATCH_DOMAIN=<unresolved>")
-
-
-func _report_float_roundtrip_probe(
-	pre_save_state: Dictionary,
-	decoded_state: Dictionary,
-	post_restore_state: Dictionary
-) -> void:
-	var pre_value: Variant = _float_probe_value(pre_save_state)
-	var decoded_value: Variant = _float_probe_value(decoded_state)
-	var post_value: Variant = _float_probe_value(post_restore_state)
-	print(
-		"AUTONOMOUS_180D_FLOAT_PROBE_PATH=economy[\"market_states\"][\"%s\"][\"daily_metrics\"][\"%s\"][\"%s\"]"
-		% [FLOAT_PROBE_MARKET_ID, FLOAT_PROBE_COMMODITY_ID, FLOAT_PROBE_METRIC]
-	)
-	_print_float_probe_value("PRE_SAVE", pre_value)
-	_print_float_probe_value("JSON_DECODED", decoded_value)
-	_print_float_probe_value("POST_RESTORE", post_value)
-	if (
-		typeof(pre_value) == TYPE_FLOAT
-		and typeof(decoded_value) == TYPE_FLOAT
-		and typeof(post_value) == TYPE_FLOAT
-	):
-		print(
-			"AUTONOMOUS_180D_FLOAT_PROBE_DECODED_MINUS_PRE=%s"
-			% JSON.stringify(float(decoded_value) - float(pre_value), "", true, true)
-		)
-		print(
-			"AUTONOMOUS_180D_FLOAT_PROBE_POST_MINUS_DECODED=%s"
-			% JSON.stringify(float(post_value) - float(decoded_value), "", true, true)
-		)
-
-
-func _float_probe_value(snapshot: Dictionary) -> Variant:
-	var economy := snapshot.get("economy", {}) as Dictionary
-	var markets := economy.get("market_states", {}) as Dictionary
-	var market := markets.get(FLOAT_PROBE_MARKET_ID, {}) as Dictionary
-	var metrics := market.get("daily_metrics", {}) as Dictionary
-	var commodity := metrics.get(FLOAT_PROBE_COMMODITY_ID, {}) as Dictionary
-	return commodity.get(FLOAT_PROBE_METRIC, null)
-
-
-func _print_float_probe_value(label: String, value: Variant) -> void:
-	print(
-		"AUTONOMOUS_180D_FLOAT_PROBE_%s_TYPE=%s"
-		% [label, type_string(typeof(value))]
-	)
-	print(
-		"AUTONOMOUS_180D_FLOAT_PROBE_%s_JSON=%s"
-		% [label, JSON.stringify(value)]
-	)
-	if typeof(value) == TYPE_FLOAT:
-		print(
-			"AUTONOMOUS_180D_FLOAT_PROBE_%s_FULL_PRECISION_JSON=%s"
-			% [label, JSON.stringify(value, "", true, true)]
-		)
 
 
 func _first_difference(before: Variant, after: Variant, path: String) -> Dictionary:
@@ -594,6 +524,15 @@ func _state_is_numerically_sound(economy: FormalWorldEconomyView) -> bool:
 			if price <= 0 or price >= 2_000_000_000:
 				return false
 	return true
+
+
+func _cleanup_formal_save() -> void:
+	for path: String in [
+		FormalWorldSimulation.SAVE_PATH,
+		FormalWorldSimulation.SAVE_PATH + AtomicJsonFileStore.BACKUP_SUFFIX,
+	]:
+		if FileAccess.file_exists(path):
+			DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
 
 
 func _finish(diagnostic: Dictionary) -> void:
