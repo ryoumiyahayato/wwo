@@ -404,24 +404,13 @@ func restore_persistent_state(state: Dictionary) -> bool:
 		if market_id.is_empty() or not market_states.has(market_id):
 			return false
 		var saved_economic_state := saved_states[saved_id] as Dictionary
-		if schema_id == STATE_SCHEMA_ID:
-			if (
-				str(saved_economic_state.get("market_id", "")) != market_id
-				or str(
-					saved_economic_state.get("source_economic_aggregate_id", "")
-				) != economy_id
-			):
-				return false
-			if not _canonicalize_v6_prices(saved_economic_state):
-				return false
-			if not _canonicalize_v6_daily_fulfillment_bp(saved_economic_state):
-				return false
-			if not _canonicalize_v6_trade_balance_centimes(saved_economic_state):
-				return false
-			if not _canonicalize_v6_tariff_revenue_centimes(saved_economic_state):
-				return false
-			if not _canonicalize_v6_last_settlement_hour(saved_economic_state):
-				return false
+		if schema_id == STATE_SCHEMA_ID and (
+			str(saved_economic_state.get("market_id", "")) != market_id
+			or str(
+				saved_economic_state.get("source_economic_aggregate_id", "")
+			) != economy_id
+		):
+			return false
 		if schema_id != STATE_SCHEMA_ID and not _legacy_static_matches(
 			economy_id, saved_economic_state, schema_id
 		):
@@ -1228,119 +1217,6 @@ func _dynamic_state_from(state: Dictionary) -> Dictionary:
 			var value: Variant = state[key]
 			result[key] = value.duplicate(true) if value is Dictionary or value is Array else value
 	return result
-
-
-func _canonicalize_v6_prices(saved: Dictionary) -> bool:
-	if not saved.get("prices", {}) is Dictionary:
-		return false
-	var prices := saved.get("prices", {}) as Dictionary
-	var canonical_prices: Dictionary = {}
-	for raw_commodity_id: Variant in prices:
-		var raw_price: Variant = prices[raw_commodity_id]
-		match typeof(raw_price):
-			TYPE_INT:
-				canonical_prices[raw_commodity_id] = raw_price
-			TYPE_FLOAT:
-				var numeric_price := float(raw_price)
-				if (
-					is_nan(numeric_price)
-					or is_inf(numeric_price)
-					or floor(numeric_price) != numeric_price
-				):
-					return false
-				canonical_prices[raw_commodity_id] = int(numeric_price)
-			_:
-				return false
-	saved["prices"] = canonical_prices
-	return true
-
-
-func _canonicalize_v6_daily_fulfillment_bp(saved: Dictionary) -> bool:
-	if not saved.get("daily_totals", {}) is Dictionary:
-		return false
-	var daily_totals := saved.get("daily_totals", {}) as Dictionary
-	if not daily_totals.has("fulfillment_bp"):
-		return true
-	var raw_fulfillment: Variant = daily_totals["fulfillment_bp"]
-	match typeof(raw_fulfillment):
-		TYPE_INT:
-			return true
-		TYPE_FLOAT:
-			var numeric_fulfillment := float(raw_fulfillment)
-			if (
-				is_nan(numeric_fulfillment)
-				or is_inf(numeric_fulfillment)
-				or floor(numeric_fulfillment) != numeric_fulfillment
-			):
-				return false
-			daily_totals["fulfillment_bp"] = int(numeric_fulfillment)
-			saved["daily_totals"] = daily_totals
-			return true
-		_:
-			return false
-
-
-func _canonicalize_v6_trade_balance_centimes(saved: Dictionary) -> bool:
-	if not saved.has("trade_balance_centimes"):
-		return true
-	var raw_balance: Variant = saved["trade_balance_centimes"]
-	match typeof(raw_balance):
-		TYPE_INT:
-			return true
-		TYPE_FLOAT:
-			var numeric_balance := float(raw_balance)
-			if (
-				is_nan(numeric_balance)
-				or is_inf(numeric_balance)
-				or floor(numeric_balance) != numeric_balance
-			):
-				return false
-			saved["trade_balance_centimes"] = int(numeric_balance)
-			return true
-		_:
-			return false
-
-
-func _canonicalize_v6_tariff_revenue_centimes(saved: Dictionary) -> bool:
-	if not saved.has("tariff_revenue_centimes"):
-		return true
-	var raw_revenue: Variant = saved["tariff_revenue_centimes"]
-	match typeof(raw_revenue):
-		TYPE_INT:
-			return true
-		TYPE_FLOAT:
-			var numeric_revenue := float(raw_revenue)
-			if (
-				is_nan(numeric_revenue)
-				or is_inf(numeric_revenue)
-				or floor(numeric_revenue) != numeric_revenue
-			):
-				return false
-			saved["tariff_revenue_centimes"] = int(numeric_revenue)
-			return true
-		_:
-			return false
-
-
-func _canonicalize_v6_last_settlement_hour(saved: Dictionary) -> bool:
-	if not saved.has("last_settlement_hour"):
-		return true
-	var raw_hour: Variant = saved["last_settlement_hour"]
-	match typeof(raw_hour):
-		TYPE_INT:
-			return true
-		TYPE_FLOAT:
-			var numeric_hour := float(raw_hour)
-			if (
-				is_nan(numeric_hour)
-				or is_inf(numeric_hour)
-				or floor(numeric_hour) != numeric_hour
-			):
-				return false
-			saved["last_settlement_hour"] = int(numeric_hour)
-			return true
-		_:
-			return false
 
 
 func _compose_market_state(market_id: String, saved: Dictionary) -> Dictionary:
