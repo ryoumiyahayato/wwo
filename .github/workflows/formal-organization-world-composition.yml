@@ -79,6 +79,18 @@ jobs:
           New-Item -ItemType Directory -Force -Path $userDataRoot | Out-Null
           "APPDATA=$userDataRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
+      - name: Verify generated world-data audit artifacts
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          python tools/world_data/build_batch3_contracts.py --root .
+          if ($LASTEXITCODE -ne 0) { throw 'Batch 3 world-data generator failed' }
+          python tools/world_data/build_batch4_run_manifest.py --root .
+          if ($LASTEXITCODE -ne 0) { throw 'Batch 4 world-data generator failed' }
+          git diff -- local-artifacts/world-data-audit/batch3_loader_contract.json local-artifacts/world-data-audit/batch4_run_manifest.json
+          git diff --exit-code -- local-artifacts/world-data-audit/batch3_loader_contract.json local-artifacts/world-data-audit/batch4_run_manifest.json
+          if ($LASTEXITCODE -ne 0) { throw 'Generated world-data audit artifacts are stale' }
+
       - name: Prime Godot script class cache
         shell: pwsh
         run: |
