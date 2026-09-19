@@ -240,8 +240,9 @@ func _test_v7_production_migration() -> void:
 	var current := FormalWorldSimulation.new()
 	_check(current.initialize(), "v7 migration source initializes")
 	var legacy := current.get_persistent_state().duplicate(true)
-	legacy["schema_id"] = FormalWorldSimulation.PREVIOUS_SCHEMA_ID
+	legacy["schema_id"] = FormalWorldSimulation.ORGANIZATION_BASELINE_SCHEMA_ID
 	legacy.erase("organization_composition")
+	legacy.erase("organization_responsibilities")
 	legacy["organization"] = VNextOrganizationCore.new().snapshot()
 
 	var migrated := FormalWorldSimulation.new()
