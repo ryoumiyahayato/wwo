@@ -1054,6 +1054,7 @@ func _validated_time_state(state: Dictionary, schema_id: String) -> Dictionary:
 		"formal_world_simulation_v3",
 		"formal_world_simulation_v4",
 		LEGACY_ORGANIZATION_SCHEMA_ID,
+		LEGACY_PERSON_SCHEMA_ID,
 		PREVIOUS_SCHEMA_ID,
 		SCHEMA_ID,
 	] and (
