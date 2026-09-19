@@ -32,12 +32,18 @@ func _test_unique_composition_and_empty_state() -> void:
 	_check(first.initialize(), "Formal initializes with its composed OrganizationCore")
 	_check(second.initialize(), "second Formal world initializes independently")
 	_check(first._organization == authority, "initialization retains exactly one authoritative OrganizationCore instance")
-	_check(first._organization.has_reference_catalog(), "Formal wires an explicit empty reference provider")
-	_equal(first.organization_view().organization_count(), 0, "formal product starts with legal empty Organization state")
+	_check(first._organization.has_reference_catalog(), "Formal wires the current Person/Place reference provider")
+	var production_count := first.organization_evidence_view().materialized_count()
+	_check(production_count > 0, "Formal production Organization evidence is non-empty")
+	_equal(
+		first.organization_view().organization_count(),
+		production_count,
+		"formal product materializes the qualified production Organization roster"
+	)
 	_equal(
 		first.organization_view().snapshot(),
 		second.organization_view().snapshot(),
-		"empty Organization initialization is deterministic"
+		"production Organization initialization is deterministic"
 	)
 	_equal(
 		first.authoritative_fingerprint(),
@@ -45,11 +51,15 @@ func _test_unique_composition_and_empty_state() -> void:
 		"fresh equivalent Formal worlds have the same world fingerprint"
 	)
 	_check(first.organization_query_port() is FormalWorldOrganizationView, "Formal exposes an Organization query port")
-	var empty_saved := first.get_persistent_state()
-	var empty_restored := FormalWorldSimulation.new()
-	_check(empty_restored.initialize(), "empty Organization round-trip target initializes")
-	_check(empty_restored.restore_persistent_state(empty_saved), "empty Organization current-schema save loads")
-	_equal(empty_restored.get_persistent_state(), empty_saved, "empty Organization current-schema round trip is identical")
+	var production_saved := first.get_persistent_state()
+	var production_restored := FormalWorldSimulation.new()
+	_check(production_restored.initialize(), "production Organization round-trip target initializes")
+	_check(production_restored.restore_persistent_state(production_saved), "production Organization current-schema save loads")
+	_equal(
+		production_restored.get_persistent_state(),
+		production_saved,
+		"production Organization current-schema round trip is identical"
+	)
 
 
 func _test_reference_wiring_fail_closed() -> void:
@@ -216,13 +226,21 @@ func _test_legacy_world_migration() -> void:
 	_check(first.initialize() and second.initialize(), "legacy migration targets initialize")
 	_check(first.restore_persistent_state(legacy), "legacy v4 save without Organization loads successfully")
 	_check(second.restore_persistent_state(legacy), "legacy v4 migration replays successfully")
-	_equal(first.organization_view().organization_count(), 0, "legacy migration produces legal empty Organization state")
+	_equal(
+		first.organization_view().organization_count(),
+		first.organization_evidence_view().materialized_count(),
+		"legacy migration adopts the current qualified production Organization baseline"
+	)
 	_equal(
 		first.organization_view().snapshot(),
 		second.organization_view().snapshot(),
-		"legacy empty Organization migration is deterministic"
+		"legacy production Organization migration is deterministic"
 	)
-	_equal(first.get_persistent_state().get("schema_id"), FormalWorldSimulation.SCHEMA_ID, "legacy load emits current v5 schema")
+	_equal(
+		first.get_persistent_state().get("schema_id"),
+		FormalWorldSimulation.SCHEMA_ID,
+		"legacy load emits the current Formal schema"
+	)
 
 
 func _test_reset_lifecycle() -> void:
