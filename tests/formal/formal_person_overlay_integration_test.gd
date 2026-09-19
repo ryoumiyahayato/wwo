@@ -131,15 +131,26 @@ func _test_v5_backward_compatibility() -> void:
 	var current := source.get_persistent_state()
 	var v5 := _downgrade_to_v5(current)
 	var expected_economy := (v5.get("economy") as Dictionary).duplicate(true)
-	var expected_organization := (v5.get("organization") as Dictionary).duplicate(true)
+	var legacy_empty_core := VNextOrganizationCore.create(
+		source.organization_person_reference_ids(),
+		source._organization_place_reference_ids
+	)
+	_check(legacy_empty_core != null, "ordinary v5 migration reconstructs canonical empty Organization baseline")
+	if legacy_empty_core == null:
+		return
+	v5["organization"] = legacy_empty_core.snapshot()
 
 	var restored := FormalWorldSimulation.new()
 	_check(restored.initialize(), "v5 ordinary migration target initializes")
-	_check(restored.restore_persistent_state(v5), "actual v5 snapshot without Person/Player fields restores")
+	_check(restored.restore_persistent_state(v5), "actual empty-baseline v5 snapshot without Person/Player fields restores")
 	if not restored.initialized:
 		return
 	_equal(restored.get_persistent_state().get("economy"), expected_economy, "v5 migration preserves Economy state")
-	_equal(restored.get_persistent_state().get("organization"), expected_organization, "v5 migration preserves Organization state")
+	_equal(
+		restored.organization_view().organization_ids(),
+		restored.organization_evidence_view().organization_ids(),
+		"ordinary v5 migration upgrades the canonical empty baseline to current production Organizations"
+	)
 	_equal(restored.total_minutes, 125, "v5 migration preserves formal time")
 	_check(restored.formal_person_count() > 0, "v5 migration deterministically materializes current Formal Person overlay")
 	_check(restored.has_formal_person(restored.player_person_id()), "v5 migration binds Player to migrated current Person authority")
