@@ -315,6 +315,27 @@ func read_only_snapshot() -> Dictionary:
 	}
 
 
+func read_only_country_observation_snapshot() -> Dictionary:
+	## Compact detached observation for country-level operational consumers.
+	## It deliberately excludes mutable/large Economy internals (market states,
+	## routes, shipments, and bounded history) while preserving the existing
+	## FormalWorldEconomyView query contract used by Organization monitoring.
+	var summaries: Dictionary = {}
+	for market_id_value: Variant in market_states:
+		var market_id := str(market_id_value)
+		var economy_id := _market_registry.economic_aggregate_id_for_market(market_id)
+		summaries[economy_id] = country_summary(economy_id)
+	return {
+		"schema_id": "formal_world_economy_observation_v2",
+		"domain_owner": "FormalWorldEconomyService",
+		"state_revision": _state_revision,
+		"total_hour": total_hour,
+		"economy_polity_ids": economy_polity_ids.duplicate(true),
+		"economy_by_polity_id": economy_by_polity_id.duplicate(true),
+		"country_summaries": summaries,
+	}
+
+
 func legacy_regression_snapshot() -> Dictionary:
 	## The golden harness hashes the trusted v4 shape so formula regressions stay
 	## detectable while the production save schema excludes static/derived data.
