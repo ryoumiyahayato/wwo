@@ -215,9 +215,9 @@ func review_settled_day(
 	if day_index != _last_completed_review_day + 1:
 		return false
 
-	var candidate := _responsibilities.duplicate(true)
-	for organization_id: String in _sorted_keys(candidate):
-		var record := (candidate[organization_id] as Dictionary).duplicate(true)
+	var candidate: Dictionary = {}
+	for organization_id: String in _sorted_keys(_responsibilities):
+		var record := (_responsibilities[organization_id] as Dictionary).duplicate(true)
 		record["review_count"] = int(record.get("review_count", 0)) + 1
 		record["last_reviewed_day"] = day_index
 		record["last_reviewed_hour"] = settlement_hour
