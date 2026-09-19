@@ -8,8 +8,9 @@ extends RefCounted
 signal state_changed(change: Dictionary)
 
 const SAVE_PATH: String = "user://formal_world_1900.json"
-const SCHEMA_ID: String = "formal_world_simulation_v8"
-const PREVIOUS_SCHEMA_ID: String = "formal_world_simulation_v7"
+const SCHEMA_ID: String = "formal_world_simulation_v9"
+const PREVIOUS_SCHEMA_ID: String = "formal_world_simulation_v8"
+const ORGANIZATION_BASELINE_SCHEMA_ID: String = "formal_world_simulation_v7"
 const FORMAL_PERSON_SCHEMA_ID: String = "formal_world_simulation_v6"
 const LEGACY_ORGANIZATION_SCHEMA_ID: String = "formal_world_simulation_v5"
 const ORGANIZATION_COMPOSITION_STATE_SCHEMA_ID: String = "formal_organization_composition_state_v1"
@@ -37,6 +38,7 @@ var _player_state := VNextPlayerState.new()
 var _organization: VNextOrganizationCore = null
 var _organization_evidence := FormalWorldOrganizationEvidenceCatalog.new()
 var _organization_evidence_view := FormalWorldOrganizationEvidenceView.new()
+var _organization_responsibilities := FormalWorldOrganizationResponsibilityService.new()
 var _organization_authority: VNextOrganizationAuthorityFoundation = null
 var _military_map: VNextMilitaryMapAdapter = null
 var _military_state: VNextMilitaryState = null
@@ -169,6 +171,9 @@ func initialize() -> bool:
 		initialization_error = _economy.initialization_error
 		initialized = false
 		return false
+	if not _configure_organization_responsibilities(_authoritative_total_hour()):
+		initialized = false
+		return false
 	initialized = true
 	state_changed.emit({"initialized": true})
 	return true
@@ -210,6 +215,18 @@ func organization_evidence_view() -> FormalWorldOrganizationEvidenceView:
 	return FormalWorldOrganizationEvidenceView.new(
 		_organization_evidence.read_only_snapshot()
 	)
+
+
+func organization_responsibility_view() -> FormalWorldOrganizationResponsibilityView:
+	if not _organization_responsibilities.is_configured():
+		return FormalWorldOrganizationResponsibilityView.new()
+	return FormalWorldOrganizationResponsibilityView.new(
+		_organization_responsibilities.read_only_snapshot()
+	)
+
+
+func organization_responsibility_query_port() -> FormalWorldOrganizationResponsibilityView:
+	return organization_responsibility_view()
 
 
 func formal_person_count() -> int:
@@ -288,21 +305,53 @@ func economy_regression_snapshot() -> Dictionary:
 func advance_minutes(minutes: int) -> Dictionary:
 	if not initialized or minutes <= 0:
 		return _economy.world_summary()
-	var previous_total_hour := _authoritative_total_hour()
-	total_minutes += minutes
-	var current_total_hour := _authoritative_total_hour()
-	var elapsed_hours := current_total_hour - previous_total_hour
-	if elapsed_hours > 0:
-		var summary := _economy.settle_hour_range(
-			previous_total_hour, current_total_hour
+	var starting_total_hour := _authoritative_total_hour()
+	var target_total_minutes := total_minutes + minutes
+	var target_total_hour := int(target_total_minutes / 60)
+	var settled_through_hour := starting_total_hour
+	var responsibility_review_days := 0
+
+	# Formal composition owns causal cross-domain ordering. Each crossed day is
+	# settled by Economy first, then observed through a detached Economy view by
+	# Organization responsibilities. This preserves history across caller chunk sizes.
+	while true:
+		var next_day_boundary_hour := (
+			int(settled_through_hour / FormalWorldEconomyService.HOURS_PER_DAY) + 1
+		) * FormalWorldEconomyService.HOURS_PER_DAY
+		if next_day_boundary_hour > target_total_hour:
+			break
+		total_minutes = next_day_boundary_hour * 60
+		_economy.settle_hour_range(
+			settled_through_hour, next_day_boundary_hour
 		)
-		state_changed.emit({
-			"time": true,
-			"economy": true,
-			"hours": elapsed_hours,
-		})
-		return summary
-	state_changed.emit({"time": true, "economy": false, "hours": 0})
+		var reviewed := _organization_responsibilities.review_settled_day(
+			next_day_boundary_hour,
+			organization_view(),
+			_political_registry_view,
+			economy_view()
+		)
+		assert(
+			reviewed,
+			"Organization responsibility review failed at settled day boundary %d"
+			% next_day_boundary_hour
+		)
+		responsibility_review_days += 1
+		settled_through_hour = next_day_boundary_hour
+
+	total_minutes = target_total_minutes
+	var current_total_hour := _authoritative_total_hour()
+	if current_total_hour > settled_through_hour:
+		_economy.settle_hour_range(
+			settled_through_hour, current_total_hour
+		)
+	var elapsed_hours := current_total_hour - starting_total_hour
+	state_changed.emit({
+		"time": true,
+		"economy": elapsed_hours > 0,
+		"organization_responsibilities": responsibility_review_days > 0,
+		"hours": elapsed_hours,
+		"responsibility_review_days": responsibility_review_days,
+	})
 	return _economy.world_summary()
 
 
@@ -405,6 +454,7 @@ func get_persistent_state() -> Dictionary:
 			"schema_id": ORGANIZATION_COMPOSITION_STATE_SCHEMA_ID,
 			"fingerprint": _organization_evidence.fingerprint(),
 		},
+		"organization_responsibilities": _organization_responsibilities.snapshot(),
 		"organization_authority": _organization_authority.snapshot(),
 		"military_state": _military_state.snapshot(),
 	}
@@ -416,11 +466,12 @@ func authoritative_fingerprint() -> String:
 		or _organization == null
 		or _person_authority == null
 		or _organization_authority == null
+		or not _organization_responsibilities.is_configured()
 		or _military_state == null
 	):
 		return ""
 	return JSON.stringify({
-		"schema_id": "formal_world_authoritative_fingerprint_v4",
+		"schema_id": "formal_world_authoritative_fingerprint_v5",
 		"total_minutes": total_minutes,
 		"historical_evidence": _historical_evidence.fingerprint(),
 		"runtime_politics": JSON.stringify(_political_registry.snapshot()).sha256_text(),
@@ -430,6 +481,7 @@ func authoritative_fingerprint() -> String:
 		"player": JSON.stringify(_player_state.snapshot()).sha256_text(),
 		"organization": _organization.state_fingerprint(),
 		"organization_composition": _organization_evidence.fingerprint(),
+		"organization_responsibilities": _organization_responsibilities.state_fingerprint(),
 		"organization_authority": _organization_authority.state_fingerprint(),
 		"military_state": _military_state.state_fingerprint(),
 	}).sha256_text()
@@ -456,6 +508,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 			"formal_world_simulation_v4",
 			LEGACY_ORGANIZATION_SCHEMA_ID,
 			FORMAL_PERSON_SCHEMA_ID,
+			ORGANIZATION_BASELINE_SCHEMA_ID,
 			PREVIOUS_SCHEMA_ID,
 			SCHEMA_ID,
 		]
@@ -470,6 +523,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 		"formal_world_simulation_v4",
 		LEGACY_ORGANIZATION_SCHEMA_ID,
 		FORMAL_PERSON_SCHEMA_ID,
+		ORGANIZATION_BASELINE_SCHEMA_ID,
 		PREVIOUS_SCHEMA_ID,
 		SCHEMA_ID,
 	]:
@@ -497,6 +551,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 		"formal_world_simulation_v4",
 		LEGACY_ORGANIZATION_SCHEMA_ID,
 		FORMAL_PERSON_SCHEMA_ID,
+		ORGANIZATION_BASELINE_SCHEMA_ID,
 		PREVIOUS_SCHEMA_ID,
 		SCHEMA_ID,
 	]:
@@ -507,7 +562,12 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 			)
 		):
 			return false
-	if schema_id in [FORMAL_PERSON_SCHEMA_ID, PREVIOUS_SCHEMA_ID, SCHEMA_ID]:
+	if schema_id in [
+		FORMAL_PERSON_SCHEMA_ID,
+		ORGANIZATION_BASELINE_SCHEMA_ID,
+		PREVIOUS_SCHEMA_ID,
+		SCHEMA_ID,
+	]:
 		if (
 			not state.get("persons", {}) is Dictionary
 			or not state.get("player", {}) is Dictionary
@@ -528,7 +588,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 			return false
 		if not _configure_organization_authority():
 			return false
-	elif schema_id == PREVIOUS_SCHEMA_ID:
+	elif schema_id == ORGANIZATION_BASELINE_SCHEMA_ID:
 		if (
 			not state.get("organization", {}) is Dictionary
 			or not _is_canonical_empty_organization_snapshot(
@@ -538,7 +598,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 			return false
 		if not _configure_organization_authority():
 			return false
-	elif schema_id == SCHEMA_ID:
+	elif schema_id in [PREVIOUS_SCHEMA_ID, SCHEMA_ID]:
 		if (
 			not state.get("organization", {}) is Dictionary
 			or not state.get("organization_composition", {}) is Dictionary
@@ -559,7 +619,11 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 			return false
 		if not _configure_organization_authority():
 			return false
-	if schema_id in [PREVIOUS_SCHEMA_ID, SCHEMA_ID]:
+	if schema_id in [
+		ORGANIZATION_BASELINE_SCHEMA_ID,
+		PREVIOUS_SCHEMA_ID,
+		SCHEMA_ID,
+	]:
 		if (
 			not state.get("organization_authority", {}) is Dictionary
 			or not state.get("military_state", {}) is Dictionary
@@ -578,6 +642,23 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 		state.get("economy", {}) as Dictionary
 	):
 		return false
+	if not _configure_organization_responsibilities(_authoritative_total_hour()):
+		return false
+	if schema_id == SCHEMA_ID:
+		if (
+			not state.get("organization_responsibilities", {}) is Dictionary
+			or not _organization_responsibilities.restore(
+				state.get("organization_responsibilities", {}) as Dictionary,
+				organization_view(),
+				organization_evidence_view(),
+				_political_registry_view,
+				economy_view(),
+				_authoritative_total_hour()
+			)
+		):
+			return false
+	# Older saves have no institutional monitoring history. Their migration baseline
+	# starts at the saved authoritative hour; the first later day boundary reviews.
 	initialized = true
 	return true
 
@@ -588,6 +669,7 @@ func _adopt_candidate(candidate: FormalWorldSimulation) -> void:
 	_historical_evidence = candidate._historical_evidence
 	_organization_evidence = candidate._organization_evidence
 	_organization_evidence_view = candidate._organization_evidence_view
+	_organization_responsibilities = candidate._organization_responsibilities
 	_political_registry = candidate._political_registry
 	_historical_evidence_view = candidate._historical_evidence_view
 	_political_registry_view = candidate._political_registry_view
@@ -771,6 +853,22 @@ func _configure_production_organization_composition() -> bool:
 		):
 			initialization_error = "Formal Organization production composition failed: %s" % organization_id
 			return false
+	return true
+
+
+func _configure_organization_responsibilities(baseline_hour: int) -> bool:
+	_organization_responsibilities = FormalWorldOrganizationResponsibilityService.new()
+	if not _organization_responsibilities.configure(
+		organization_view(),
+		organization_evidence_view(),
+		_political_registry_view,
+		economy_view(),
+		baseline_hour
+	):
+		initialization_error = _organization_responsibilities.initialization_error
+		if initialization_error.is_empty():
+			initialization_error = "Formal Organization responsibilities could not be composed"
+		return false
 	return true
 
 
@@ -1020,6 +1118,7 @@ func _validated_time_state(state: Dictionary, schema_id: String) -> Dictionary:
 		"formal_world_simulation_v3",
 		"formal_world_simulation_v4",
 		LEGACY_ORGANIZATION_SCHEMA_ID,
+		ORGANIZATION_BASELINE_SCHEMA_ID,
 		PREVIOUS_SCHEMA_ID,
 		SCHEMA_ID,
 	] and (
