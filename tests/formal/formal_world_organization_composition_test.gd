@@ -18,6 +18,7 @@ func _run() -> void:
 	_test_nonempty_round_trip_and_fingerprints()
 	_test_world_atomic_restore_rejections()
 	_test_legacy_world_migration()
+	_test_v7_production_migration()
 	_test_reset_lifecycle()
 	_test_scope_and_owner_boundaries()
 	print("Formal organization composition: %d checks, %d failures" % [checks, failures])
@@ -32,12 +33,18 @@ func _test_unique_composition_and_empty_state() -> void:
 	_check(first.initialize(), "Formal initializes with its composed OrganizationCore")
 	_check(second.initialize(), "second Formal world initializes independently")
 	_check(first._organization == authority, "initialization retains exactly one authoritative OrganizationCore instance")
-	_check(first._organization.has_reference_catalog(), "Formal wires an explicit empty reference provider")
-	_equal(first.organization_view().organization_count(), 0, "formal product starts with legal empty Organization state")
+	_check(first._organization.has_reference_catalog(), "Formal wires the Organization reference provider")
+	var evidence := first.organization_evidence_view()
+	_check(evidence.organization_count() > 0, "formal product composes a non-empty production Organization baseline")
+	_equal(
+		first.organization_view().organization_count(),
+		evidence.organization_count(),
+		"production Organization runtime roster matches immutable composition evidence"
+	)
 	_equal(
 		first.organization_view().snapshot(),
 		second.organization_view().snapshot(),
-		"empty Organization initialization is deterministic"
+		"production Organization initialization is deterministic"
 	)
 	_equal(
 		first.authoritative_fingerprint(),
@@ -45,11 +52,11 @@ func _test_unique_composition_and_empty_state() -> void:
 		"fresh equivalent Formal worlds have the same world fingerprint"
 	)
 	_check(first.organization_query_port() is FormalWorldOrganizationView, "Formal exposes an Organization query port")
-	var empty_saved := first.get_persistent_state()
-	var empty_restored := FormalWorldSimulation.new()
-	_check(empty_restored.initialize(), "empty Organization round-trip target initializes")
-	_check(empty_restored.restore_persistent_state(empty_saved), "empty Organization current-schema save loads")
-	_equal(empty_restored.get_persistent_state(), empty_saved, "empty Organization current-schema round trip is identical")
+	var production_saved := first.get_persistent_state()
+	var production_restored := FormalWorldSimulation.new()
+	_check(production_restored.initialize(), "production Organization round-trip target initializes")
+	_check(production_restored.restore_persistent_state(production_saved), "production Organization current-schema save loads")
+	_equal(production_restored.get_persistent_state(), production_saved, "production Organization current-schema round trip is identical")
 
 
 func _test_reference_wiring_fail_closed() -> void:
@@ -113,7 +120,7 @@ func _test_nonempty_round_trip_and_fingerprints() -> void:
 		_check(false, "round-trip fixtures initialize")
 		return
 	var saved := source.get_persistent_state()
-	_equal(saved.get("schema_id"), FormalWorldSimulation.SCHEMA_ID, "Formal save schema is explicitly v5")
+	_equal(saved.get("schema_id"), FormalWorldSimulation.SCHEMA_ID, "Formal save schema is explicitly current")
 	_check(saved.get("organization") is Dictionary, "Formal authoritative save contains Organization snapshot")
 	var organization_state: Dictionary = saved.get("organization") as Dictionary
 	_equal(organization_state.get("revision"), 7, "Organization revision is persisted by its owner")
@@ -132,10 +139,10 @@ func _test_nonempty_round_trip_and_fingerprints() -> void:
 		equivalent.authoritative_fingerprint(),
 		"same complete world produces the same deterministic world fingerprint"
 	)
-	var empty := FormalWorldSimulation.new()
-	_check(empty.initialize(), "empty comparison world initializes")
+	var production := FormalWorldSimulation.new()
+	_check(production.initialize(), "production comparison world initializes")
 	_check(
-		empty.authoritative_fingerprint() != source.authoritative_fingerprint(),
+		production.authoritative_fingerprint() != source.authoritative_fingerprint(),
 		"Organization state contributes to the world fingerprint"
 	)
 	var restored := FormalWorldSimulation.new(null, PERSON_IDS, PLACE_IDS)
@@ -216,13 +223,47 @@ func _test_legacy_world_migration() -> void:
 	_check(first.initialize() and second.initialize(), "legacy migration targets initialize")
 	_check(first.restore_persistent_state(legacy), "legacy v4 save without Organization loads successfully")
 	_check(second.restore_persistent_state(legacy), "legacy v4 migration replays successfully")
-	_equal(first.organization_view().organization_count(), 0, "legacy migration produces legal empty Organization state")
+	_equal(
+		first.organization_view().organization_count(),
+		first.organization_evidence_view().organization_count(),
+		"legacy migration receives the deterministic production Organization baseline"
+	)
 	_equal(
 		first.organization_view().snapshot(),
 		second.organization_view().snapshot(),
-		"legacy empty Organization migration is deterministic"
+		"legacy Organization migration is deterministic"
 	)
-	_equal(first.get_persistent_state().get("schema_id"), FormalWorldSimulation.SCHEMA_ID, "legacy load emits current v5 schema")
+	_equal(first.get_persistent_state().get("schema_id"), FormalWorldSimulation.SCHEMA_ID, "legacy load emits current schema")
+
+
+func _test_v7_production_migration() -> void:
+	var current := FormalWorldSimulation.new()
+	_check(current.initialize(), "v7 migration source initializes")
+	var legacy := current.get_persistent_state().duplicate(true)
+	legacy["schema_id"] = FormalWorldSimulation.PREVIOUS_SCHEMA_ID
+	legacy.erase("organization_composition")
+	legacy["organization"] = VNextOrganizationCore.new().snapshot()
+
+	var migrated := FormalWorldSimulation.new()
+	_check(migrated.initialize(), "v7 migration target initializes")
+	_check(
+		migrated.restore_persistent_state(legacy),
+		"canonical empty v7 Organization baseline migrates to production composition"
+	)
+	_equal(
+		migrated.organization_view().organization_count(),
+		migrated.organization_evidence_view().organization_count(),
+		"v7 migration materializes the production Organization roster"
+	)
+
+	var conflicting := legacy.duplicate(true)
+	conflicting["organization"] = current.organization_view().snapshot()
+	var rejected := FormalWorldSimulation.new()
+	_check(rejected.initialize(), "conflicting v7 migration target initializes")
+	_check(
+		not rejected.restore_persistent_state(conflicting),
+		"non-empty v7 Organization snapshot fails migration closed"
+	)
 
 
 func _test_reset_lifecycle() -> void:
@@ -246,6 +287,9 @@ func _test_scope_and_owner_boundaries() -> void:
 	_check(not source.contains("appointment_table"), "Formal owns no second appointment table")
 	_check(not source.contains("WorldTransactionCoordinator"), "Organization is not integrated with Transaction Coordinator")
 	_check(not source.contains("VNextStatePolitics"), "Formal composition introduces no StatePolitics dual-write")
+	_check(not source.contains("data/world_map/organizations.json"), "Formal composition does not ingest prototype organizations")
+	_check(not source.contains("data/world_map/institutions.json"), "Formal composition does not ingest prototype institutions")
+	_check(not source.contains("scripts/v2_2"), "Formal composition does not revive legacy Organization runtime")
 	var organization_source := FileAccess.get_file_as_string("res://scripts/vnext/organization/organization_core.gd")
 	_check(not organization_source.contains("payroll"), "Organization gameplay payroll is not introduced")
 	_check(not organization_source.contains("election"), "Organization gameplay elections are not introduced")

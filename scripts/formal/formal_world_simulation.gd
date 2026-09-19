@@ -8,9 +8,11 @@ extends RefCounted
 signal state_changed(change: Dictionary)
 
 const SAVE_PATH: String = "user://formal_world_1900.json"
-const SCHEMA_ID: String = "formal_world_simulation_v7"
-const PREVIOUS_SCHEMA_ID: String = "formal_world_simulation_v6"
+const SCHEMA_ID: String = "formal_world_simulation_v8"
+const PREVIOUS_SCHEMA_ID: String = "formal_world_simulation_v7"
+const FORMAL_PERSON_SCHEMA_ID: String = "formal_world_simulation_v6"
 const LEGACY_ORGANIZATION_SCHEMA_ID: String = "formal_world_simulation_v5"
+const ORGANIZATION_COMPOSITION_STATE_SCHEMA_ID: String = "formal_organization_composition_state_v1"
 const EVIDENCE_STATE_SCHEMA_ID: String = "historical_political_evidence_v1"
 const DEFAULT_FORMAL_PERSON_ID: String = "person:formal_generated_country_fra_0001"
 const DEFAULT_FORMAL_PERSON_CLAIM_ID: String = "formal_population_claim:country_fra:0001"
@@ -33,6 +35,8 @@ var _spatial_world: VNextSpatialWorld = null
 var _person_authority: VNextNamedPersonOverlay = null
 var _player_state := VNextPlayerState.new()
 var _organization: VNextOrganizationCore = null
+var _organization_evidence := FormalWorldOrganizationEvidenceCatalog.new()
+var _organization_evidence_view := FormalWorldOrganizationEvidenceView.new()
 var _organization_authority: VNextOrganizationAuthorityFoundation = null
 var _military_map: VNextMilitaryMapAdapter = null
 var _military_state: VNextMilitaryState = null
@@ -126,6 +130,10 @@ func initialize() -> bool:
 		initialization_error = _historical_evidence.initialization_error
 		initialized = false
 		return false
+	if not _organization_evidence.configure(_historical_evidence):
+		initialization_error = _organization_evidence.initialization_error
+		initialized = false
+		return false
 	if not _political_registry.configure(_historical_evidence):
 		initialization_error = _political_registry.initialization_error
 		initialized = false
@@ -136,6 +144,9 @@ func initialize() -> bool:
 		return false
 	_refresh_read_only_views()
 	if not _configure_formal_person_composition():
+		initialized = false
+		return false
+	if not _configure_production_organization_composition():
 		initialized = false
 		return false
 	if not _configure_organization_authority():
@@ -193,6 +204,12 @@ func organization_view() -> FormalWorldOrganizationView:
 
 func organization_query_port() -> FormalWorldOrganizationView:
 	return organization_view()
+
+
+func organization_evidence_view() -> FormalWorldOrganizationEvidenceView:
+	return FormalWorldOrganizationEvidenceView.new(
+		_organization_evidence.read_only_snapshot()
+	)
 
 
 func formal_person_count() -> int:
@@ -384,6 +401,10 @@ func get_persistent_state() -> Dictionary:
 		"persons": _person_authority.snapshot(),
 		"player": _player_state.snapshot(),
 		"organization": _organization.snapshot(),
+		"organization_composition": {
+			"schema_id": ORGANIZATION_COMPOSITION_STATE_SCHEMA_ID,
+			"fingerprint": _organization_evidence.fingerprint(),
+		},
 		"organization_authority": _organization_authority.snapshot(),
 		"military_state": _military_state.snapshot(),
 	}
@@ -399,7 +420,7 @@ func authoritative_fingerprint() -> String:
 	):
 		return ""
 	return JSON.stringify({
-		"schema_id": "formal_world_authoritative_fingerprint_v3",
+		"schema_id": "formal_world_authoritative_fingerprint_v4",
 		"total_minutes": total_minutes,
 		"historical_evidence": _historical_evidence.fingerprint(),
 		"runtime_politics": JSON.stringify(_political_registry.snapshot()).sha256_text(),
@@ -408,6 +429,7 @@ func authoritative_fingerprint() -> String:
 		"persons": _person_authority.state_fingerprint(),
 		"player": JSON.stringify(_player_state.snapshot()).sha256_text(),
 		"organization": _organization.state_fingerprint(),
+		"organization_composition": _organization_evidence.fingerprint(),
 		"organization_authority": _organization_authority.state_fingerprint(),
 		"military_state": _military_state.state_fingerprint(),
 	}).sha256_text()
@@ -433,6 +455,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 			"formal_world_simulation_v3",
 			"formal_world_simulation_v4",
 			LEGACY_ORGANIZATION_SCHEMA_ID,
+			FORMAL_PERSON_SCHEMA_ID,
 			PREVIOUS_SCHEMA_ID,
 			SCHEMA_ID,
 		]
@@ -446,6 +469,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 		"formal_world_simulation_v3",
 		"formal_world_simulation_v4",
 		LEGACY_ORGANIZATION_SCHEMA_ID,
+		FORMAL_PERSON_SCHEMA_ID,
 		PREVIOUS_SCHEMA_ID,
 		SCHEMA_ID,
 	]:
@@ -472,6 +496,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 	if schema_id in [
 		"formal_world_simulation_v4",
 		LEGACY_ORGANIZATION_SCHEMA_ID,
+		FORMAL_PERSON_SCHEMA_ID,
 		PREVIOUS_SCHEMA_ID,
 		SCHEMA_ID,
 	]:
@@ -482,7 +507,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 			)
 		):
 			return false
-	if schema_id in [PREVIOUS_SCHEMA_ID, SCHEMA_ID]:
+	if schema_id in [FORMAL_PERSON_SCHEMA_ID, PREVIOUS_SCHEMA_ID, SCHEMA_ID]:
 		if (
 			not state.get("persons", {}) is Dictionary
 			or not state.get("player", {}) is Dictionary
@@ -493,7 +518,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 			return false
 		if not _player_state.restore(state.get("player", {}) as Dictionary):
 			return false
-	if schema_id in [LEGACY_ORGANIZATION_SCHEMA_ID, PREVIOUS_SCHEMA_ID, SCHEMA_ID]:
+	if schema_id in [LEGACY_ORGANIZATION_SCHEMA_ID, FORMAL_PERSON_SCHEMA_ID]:
 		if (
 			not state.get("organization", {}) is Dictionary
 			or not _organization.restore(
@@ -503,7 +528,38 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 			return false
 		if not _configure_organization_authority():
 			return false
-	if schema_id == SCHEMA_ID:
+	elif schema_id == PREVIOUS_SCHEMA_ID:
+		if (
+			not state.get("organization", {}) is Dictionary
+			or not _is_canonical_empty_organization_snapshot(
+				state.get("organization", {}) as Dictionary
+			)
+		):
+			return false
+		if not _configure_organization_authority():
+			return false
+	elif schema_id == SCHEMA_ID:
+		if (
+			not state.get("organization", {}) is Dictionary
+			or not state.get("organization_composition", {}) is Dictionary
+		):
+			return false
+		var organization_composition_state := (
+			state.get("organization_composition", {}) as Dictionary
+		)
+		if (
+			str(organization_composition_state.get("schema_id", ""))
+			!= ORGANIZATION_COMPOSITION_STATE_SCHEMA_ID
+			or str(organization_composition_state.get("fingerprint", ""))
+			!= _organization_evidence.fingerprint()
+			or not _organization.restore(
+				state.get("organization", {}) as Dictionary
+			)
+		):
+			return false
+		if not _configure_organization_authority():
+			return false
+	if schema_id in [PREVIOUS_SCHEMA_ID, SCHEMA_ID]:
 		if (
 			not state.get("organization_authority", {}) is Dictionary
 			or not state.get("military_state", {}) is Dictionary
@@ -530,6 +586,8 @@ func _adopt_candidate(candidate: FormalWorldSimulation) -> void:
 	total_minutes = candidate.total_minutes
 	_provenance = candidate._provenance
 	_historical_evidence = candidate._historical_evidence
+	_organization_evidence = candidate._organization_evidence
+	_organization_evidence_view = candidate._organization_evidence_view
 	_political_registry = candidate._political_registry
 	_historical_evidence_view = candidate._historical_evidence_view
 	_political_registry_view = candidate._political_registry_view
@@ -597,6 +655,9 @@ func _new_candidate_world() -> FormalWorldSimulation:
 func _refresh_read_only_views() -> void:
 	_historical_evidence_view = HistoricalPoliticalEvidenceView.new(
 		_historical_evidence.read_only_snapshot()
+	)
+	_organization_evidence_view = FormalWorldOrganizationEvidenceView.new(
+		_organization_evidence.read_only_snapshot()
 	)
 	_political_registry_view = RuntimePoliticalEntityView.new(
 		_political_registry.snapshot()
@@ -690,6 +751,29 @@ func _configure_formal_person_composition() -> bool:
 	return true
 
 
+func _configure_production_organization_composition() -> bool:
+	if _explicit_organization_reference_injection:
+		return true
+	if _organization == null or not _organization_evidence.is_configured():
+		initialization_error = "Formal Organization production composition evidence is unavailable"
+		return false
+	if not _organization.organization_ids().is_empty():
+		initialization_error = "Formal Organization production composition requires an empty OrganizationCore"
+		return false
+	for organization_id: String in _organization_evidence.organization_ids():
+		var evidence_record := _organization_evidence.record(organization_id)
+		if not _organization.register_organization(
+			organization_id,
+			str(evidence_record.get("organization_kind", "")),
+			"",
+			"",
+			true
+		):
+			initialization_error = "Formal Organization production composition failed: %s" % organization_id
+			return false
+	return true
+
+
 func _configure_organization_authority() -> bool:
 	if _organization == null or _person_authority == null:
 		initialization_error = "Organization Authority dependencies are unavailable"
@@ -768,10 +852,21 @@ func _rebind_player_and_organization_for_restored_persons() -> bool:
 	_organization = VNextOrganizationCore.new()
 	if not _bind_organization_reference_catalog():
 		return false
+	if not _configure_production_organization_composition():
+		return false
 	_player_state = VNextPlayerState.new()
 	if not _player_state.bind_person_authority(_person_authority):
 		return false
 	return true
+
+
+func _is_canonical_empty_organization_snapshot(snapshot: Dictionary) -> bool:
+	if str(snapshot.get("schema_id", "")) != VNextOrganizationCore.SNAPSHOT_SCHEMA_ID:
+		return false
+	var organizations_value: Variant = snapshot.get("organizations", [])
+	if not organizations_value is Array or not (organizations_value as Array).is_empty():
+		return false
+	return int(snapshot.get("revision", -1)) == 0
 
 
 func _configure_market_registry() -> bool:
