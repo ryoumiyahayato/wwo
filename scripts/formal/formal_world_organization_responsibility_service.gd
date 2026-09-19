@@ -279,11 +279,16 @@ func review_settled_day(
 		var fulfillment_bp := int(
 			(daily_totals_value as Dictionary).get("fulfillment_bp", -1)
 		)
-		var shortages := DataRecordUtils.to_dictionary_array(
+		var observed_shortages := DataRecordUtils.to_dictionary_array(
 			country_summary.get("top_shortages", [])
 		)
-		if fulfillment_bp < 0 or fulfillment_bp > 10000 or not _variant_is_finite(shortages):
+		if (
+			fulfillment_bp < 0
+			or fulfillment_bp > 10000
+			or not _variant_is_finite(observed_shortages)
+		):
 			return false
+		var shortages := _compact_shortage_summary(observed_shortages)
 		record["current_fulfillment_bp"] = fulfillment_bp
 		record["current_shortages"] = shortages.duplicate(true)
 		if shortages.is_empty():
@@ -829,6 +834,19 @@ func _economy_entity_for_source_polity(
 	if runtime_polity_id.is_empty():
 		return ""
 	return economy_view.economy_entity_for_polity(runtime_polity_id)
+
+
+func _compact_shortage_summary(observed_shortages: Array[Dictionary]) -> Array[Dictionary]:
+	var output: Array[Dictionary] = []
+	for observed: Dictionary in observed_shortages:
+		var commodity_id := str(observed.get("commodity_id", ""))
+		if commodity_id.is_empty():
+			continue
+		output.append({
+			"commodity_id": commodity_id,
+			"name_zh": str(observed.get("name_zh", commodity_id)),
+		})
+	return output
 
 
 func _case_id(organization_id: String, episode_sequence: int) -> String:
