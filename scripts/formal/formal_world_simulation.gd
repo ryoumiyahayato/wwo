@@ -201,6 +201,14 @@ func economy_view() -> FormalWorldEconomyView:
 	return FormalWorldEconomyView.new(_economy.read_only_snapshot())
 
 
+func _organization_responsibility_economy_view() -> FormalWorldEconomyView:
+	if not _economy.is_configured():
+		return FormalWorldEconomyView.new()
+	return FormalWorldEconomyView.new(
+		_economy.read_only_country_observation_snapshot()
+	)
+
+
 func organization_view() -> FormalWorldOrganizationView:
 	if _organization == null:
 		return FormalWorldOrganizationView.new()
@@ -328,7 +336,7 @@ func advance_minutes(minutes: int) -> Dictionary:
 			next_day_boundary_hour,
 			organization_view(),
 			_political_registry_view,
-			economy_view()
+			_organization_responsibility_economy_view()
 		)
 		assert(
 			reviewed,
@@ -862,7 +870,7 @@ func _configure_organization_responsibilities(baseline_hour: int) -> bool:
 		organization_view(),
 		organization_evidence_view(),
 		_political_registry_view,
-		economy_view(),
+		_organization_responsibility_economy_view(),
 		baseline_hour
 	):
 		initialization_error = _organization_responsibilities.initialization_error
