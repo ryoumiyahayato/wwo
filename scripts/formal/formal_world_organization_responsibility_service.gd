@@ -693,12 +693,15 @@ func _validate_runtime_records(
 			):
 				return false
 		elif status == STATUS_MONITORING:
-			if (
-				not current_case.is_empty()
-				or not current_shortages.is_empty()
-				or fulfillment_bp < 0
-				or fulfillment_bp > 10000
-			):
+			if not current_case.is_empty() or not current_shortages.is_empty():
+				return false
+			# A fresh or migrated baseline has not yet performed an institutional
+			# observation. It must not fabricate a fulfillment value from current
+			# Economy state. After the first settled-day review, fulfillment is real.
+			if review_count == 0:
+				if fulfillment_bp != -1:
+					return false
+			elif fulfillment_bp < 0 or fulfillment_bp > 10000:
 				return false
 		else:
 			if (
