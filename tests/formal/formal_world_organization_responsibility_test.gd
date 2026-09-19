@@ -640,7 +640,9 @@ func _economy_fixture(
 		"country_summaries": {
 			economy_entity_id: {
 				"economic_aggregate_id": economy_entity_id,
-				"fulfillment_bp": fulfillment_bp,
+				"daily_totals": {
+					"fulfillment_bp": fulfillment_bp,
+				},
 				"top_shortages": shortages.duplicate(true),
 				"active_shipments": 0,
 			},
