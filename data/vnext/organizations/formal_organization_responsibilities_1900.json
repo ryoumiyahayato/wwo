@@ -1,0 +1,14 @@
+{
+  "schema_id": "formal_organization_responsibility_rules_v1",
+  "rule_version": "economic_supply_continuity_v1",
+  "standing_responsibility": {
+    "responsibility_id": "economic_supply_continuity",
+    "eligible_organization_kind": "government_body",
+    "basis_class": "generated_simulation_assumption",
+    "observation_source": "FormalWorldEconomyView.country_summary",
+    "observation_semantics": "internal_institutional_operational_observation",
+    "review_cadence": "settled_simulation_day_boundary",
+    "attention_signal": "top_shortages_non_empty"
+  },
+  "semantic_note": "This is a game-simulation standing responsibility inferred for production governing institutions. It does not assert a historically exact office, mandate, person, appointment, budget, or policy power."
+}
