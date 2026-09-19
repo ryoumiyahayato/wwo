@@ -475,7 +475,9 @@ func restore(
 	for raw_record: Variant in snapshot_value.get("responsibilities", []) as Array:
 		if not raw_record is Dictionary:
 			return false
-		var record := (raw_record as Dictionary).duplicate(true)
+		var record := _normalized_responsibility_record(
+			raw_record as Dictionary
+		)
 		if not _has_exact_fields(record, _RESPONSIBILITY_FIELDS):
 			return false
 		var organization_id := str(record.get("organization_id", ""))
@@ -508,6 +510,58 @@ func restore(
 	_revision = revision
 	_responsibilities = candidate
 	return true
+
+
+func _normalized_responsibility_record(raw_record: Dictionary) -> Dictionary:
+	var record := raw_record.duplicate(true)
+	for field: String in [
+		"last_reviewed_day",
+		"last_reviewed_hour",
+		"review_count",
+		"current_fulfillment_bp",
+		"episode_count",
+		"closed_episode_count",
+		"recovered_episode_count",
+		"cumulative_attention_days",
+		"max_episode_duration_days",
+	]:
+		if record.has(field):
+			record[field] = int(record[field])
+
+	var current_case_value: Variant = record.get("current_case", {})
+	if current_case_value is Dictionary:
+		var current_case := (current_case_value as Dictionary).duplicate(true)
+		for field: String in [
+			"episode_sequence",
+			"opened_day",
+			"opened_hour",
+			"last_reviewed_day",
+			"last_reviewed_hour",
+			"duration_days",
+			"current_fulfillment_bp",
+			"max_shortage_count",
+		]:
+			if current_case.has(field):
+				current_case[field] = int(current_case[field])
+		record["current_case"] = current_case
+
+	var last_closed_case_value: Variant = record.get("last_closed_case", {})
+	if last_closed_case_value is Dictionary:
+		var last_closed_case := (last_closed_case_value as Dictionary).duplicate(true)
+		for field: String in [
+			"episode_sequence",
+			"opened_day",
+			"opened_hour",
+			"closed_day",
+			"closed_hour",
+			"duration_days",
+			"final_fulfillment_bp",
+			"max_shortage_count",
+		]:
+			if last_closed_case.has(field):
+				last_closed_case[field] = int(last_closed_case[field])
+		record["last_closed_case"] = last_closed_case
+	return record
 
 
 func _load_rule() -> bool:
