@@ -273,7 +273,12 @@ func review_settled_day(
 			candidate[organization_id] = record
 			continue
 
-		var fulfillment_bp := int(country_summary.get("fulfillment_bp", -1))
+		var daily_totals_value: Variant = country_summary.get("daily_totals", {})
+		if not daily_totals_value is Dictionary:
+			return false
+		var fulfillment_bp := int(
+			(daily_totals_value as Dictionary).get("fulfillment_bp", -1)
+		)
 		var shortages := DataRecordUtils.to_dictionary_array(
 			country_summary.get("top_shortages", [])
 		)
