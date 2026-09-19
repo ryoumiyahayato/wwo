@@ -1,0 +1,24 @@
+{
+  "schema_id": "formal_organization_composition_1900_v1",
+  "snapshot_date": "1900-03-12",
+  "rules": [
+    {
+      "rule_id": "independent_sovereign_governing_institution_v1",
+      "basis": "institutional_inference",
+      "source_domain": "political_identity",
+      "eligible_relationship": "independent_state",
+      "eligible_status": "sovereign",
+      "organization_kind": "government_body",
+      "organization_id_prefix": "gov_",
+      "active": true,
+      "inference_statement": "A source-backed independent sovereign polity implies the existence of a governing institutional actor; exact historical institution name, office hierarchy, membership, appointments, and location are not asserted."
+    }
+  ],
+  "forbidden_source_paths": [
+    "res://data/world_map/organizations.json",
+    "res://data/world_map/institutions.json",
+    "res://data/vnext/politics/state_politics_1900.json",
+    "res://data/v2_2",
+    "res://scripts/v2_2"
+  ]
+}
