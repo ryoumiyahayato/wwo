@@ -2,6 +2,37 @@ extends "res://scripts/ui_spikes/holographic_workspace/holographic_workspace_his
 ## Presentation copy for the dated evidence provider.
 
 
+func _ready() -> void:
+	if _dated_units_document.is_empty():
+		_bootstrap_historical_political_evidence()
+	super._ready()
+
+
+func _bootstrap_historical_political_evidence() -> bool:
+	if not _dated_units_document.is_empty():
+		return true
+	var bootstrap := HistoricalEvidenceStandaloneBootstrap.build(
+		_historical_provenance_gate
+	)
+	if not bool(bootstrap.get("success", false)):
+		_data_errors.append(
+			"历史政治证据 bootstrap admission 失败：%s"
+			% str(bootstrap.get("error", "unknown error"))
+		)
+		return false
+	var bootstrap_gate := bootstrap.get("gate") as HistoricalProvenanceGate
+	if _historical_provenance_gate == null:
+		if not bind_historical_provenance_gate(bootstrap_gate):
+			_data_errors.append("历史政治证据 bootstrap 无法绑定 Provenance gate")
+			return false
+		_historical_provenance_foundation = (
+			bootstrap.get("foundation") as HistoricalProvenanceFoundation
+		)
+	var admitted_records := bootstrap.get("records", []) as Array
+	_dated_units_document = {"units": admitted_records}
+	return true
+
+
 func _draw_historical_entity_focus() -> void:
 	var entity: Dictionary = _history_entity_by_id.get(selected_country_id, {}) as Dictionary
 	var rect: Rect2 = _history_focus_rect()

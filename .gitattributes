@@ -1,1 +1,10 @@
 data/staging/world_names/*.json text eol=lf
+
+# Historical Provenance source-byte identity: admitted textual sources are canonical LF.
+data/world_map/historical/political_units_1900.json text eol=lf
+data/world_map/historical/cshapes_1900_snapshot.json text eol=lf
+data/alpha/historical_world_economy_1900/countries_compact.json text eol=lf
+
+# Historical Provenance generated-output formatting is independently canonical LF.
+data/provenance/historical_source_registry.json text eol=lf
+data/provenance/historical_fact_evidence.json text eol=lf

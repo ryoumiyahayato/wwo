@@ -9,6 +9,7 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	_test_controlled_catalogs_and_fail_closed_references()
 	_test_identity_and_hierarchy()
 	_test_membership_positions_and_appointments()
 	_test_capability_authorization_and_inactive_semantics()
@@ -29,6 +30,112 @@ func _new_core() -> VNextOrganizationCore:
 	)
 
 
+func _test_controlled_catalogs_and_fail_closed_references() -> void:
+	var first: VNextOrganizationCore = _new_core()
+	var second: VNextOrganizationCore = _new_core()
+	_check(first != null and second != null, "controlled catalog fixtures create cores")
+	if first == null or second == null:
+		return
+	_equal(
+		first.organization_kind_ids(),
+		[
+			"association",
+			"company",
+			"corporation",
+			"enterprise",
+			"faction",
+			"government_body",
+			"guild",
+			"military_institution",
+			"party",
+			"union",
+		],
+		"organization kind catalog has deterministic controlled ordering"
+	)
+	_equal(
+		first.organization_kind_catalog_fingerprint(),
+		second.organization_kind_catalog_fingerprint(),
+		"organization kind catalog fingerprint is deterministic"
+	)
+	_equal(
+		first.known_capability_ids(),
+		["organization.manage_appointments"],
+		"capability registry contains only the current organization authorization"
+	)
+	_equal(
+		first.capability_catalog_fingerprint(),
+		second.capability_catalog_fingerprint(),
+		"capability registry fingerprint is deterministic"
+	)
+	_check(
+		first.register_organization("organization:known_kind", "company"),
+		"known organization kind is accepted"
+	)
+	_check(
+		not first.register_organization("organization:unknown_kind", "ministry"),
+		"unknown organization kind is rejected"
+	)
+	_check(
+		not first.register_organization("organization:malformed_kind", "Government Body"),
+		"malformed organization kind is rejected"
+	)
+	_check(
+		not first.register_organization("company:wrong_namespace", "company"),
+		"company does not introduce a parallel stable ID namespace"
+	)
+	_check(
+		not first.register_organization("organization:", "company"),
+		"malformed organization stable ID is rejected"
+	)
+
+	var missing_catalog := VNextOrganizationCore.create()
+	_check(missing_catalog != null, "core may exist before an external reference view is supplied")
+	if missing_catalog != null:
+		_check(
+			missing_catalog.register_organization("organization:no_refs", "association"),
+			"organization with no Person or Place reference needs no catalog lookup"
+		)
+		_check(
+			not missing_catalog.add_member("organization:no_refs", "person:alice"),
+			"missing reference catalog fails closed for Person references"
+		)
+		_check(
+			not missing_catalog.register_organization(
+				"organization:missing_place_catalog", "company", "place:capital"
+			),
+			"missing reference catalog fails closed for Place references"
+		)
+	_check(
+		not first.add_member("organization:known_kind", "person:unknown"),
+		"unknown Person reference fails closed"
+	)
+	_check(
+		not first.add_member("organization:known_kind", "place:capital"),
+		"wrong stable ID kind fails closed for Person reference"
+	)
+	_check(
+		not first.register_organization(
+			"organization:wrong_place_kind", "company", "person:alice"
+		),
+		"wrong stable ID kind fails closed for Place reference"
+	)
+	_check(
+		first.add_member("organization:known_kind", "person:alice"),
+		"known Person reference creates valid membership"
+	)
+	if missing_catalog != null:
+		_expect_restore_failure(
+			missing_catalog,
+			first.snapshot(),
+			"snapshot references without required reference catalog"
+		)
+	_equal(
+		first.reference_catalog_fingerprint(),
+		second.reference_catalog_fingerprint(),
+		"detached reference catalog fingerprint is deterministic"
+	)
+
+
 func _test_identity_and_hierarchy() -> void:
 	var core: VNextOrganizationCore = _new_core()
 	_check(core != null, "reference catalogs create a vNext organization core")
@@ -37,7 +144,7 @@ func _test_identity_and_hierarchy() -> void:
 	_check(core.is_valid(), "empty organization core is structurally valid")
 	_check(
 		core.register_organization(
-			"organization:world_council", "institution", "place:capital"
+			"organization:world_council", "association", "place:capital"
 		),
 		"organization identity accepts an organization stable ID and place reference"
 	)
@@ -53,7 +160,7 @@ func _test_identity_and_hierarchy() -> void:
 	_check(
 		core.register_organization(
 			"organization:branch_council",
-			"institution",
+			"association",
 			"",
 			"organization:transport_union"
 		),
@@ -61,19 +168,19 @@ func _test_identity_and_hierarchy() -> void:
 	)
 	_check(
 		not core.register_organization(
-			"organization:orphan", "institution", "", "organization:missing"
+			"organization:orphan", "association", "", "organization:missing"
 		),
 		"missing hierarchy parent is rejected"
 	)
 	_check(
 		not core.register_organization(
-			"organization:self_parent", "institution", "", "organization:self_parent"
+			"organization:self_parent", "association", "", "organization:self_parent"
 		),
 		"self parent is rejected"
 	)
 	_check(
 		not core.register_organization(
-			"organization:world_council", "institution", "place:capital"
+			"organization:world_council", "association", "place:capital"
 		),
 		"duplicate organization identity is rejected"
 	)
@@ -107,13 +214,13 @@ func _test_identity_and_hierarchy() -> void:
 	_equal(core.snapshot(), before_cycle, "cycle rejection leaves hierarchy unchanged")
 	_check(
 		not core.register_organization(
-			"organization:bad_place", "institution", "place:unknown"
+			"organization:bad_place", "association", "place:unknown"
 		),
 		"configured reference catalog rejects unknown place IDs"
 	)
 	_check(
 		not core.register_organization(
-			"organization:bad_id", "institution", "place:Capital"
+			"organization:bad_id", "association", "place:Capital"
 		),
 		"stable ID validation rejects malformed place IDs"
 	)
@@ -129,7 +236,7 @@ func _test_membership_positions_and_appointments() -> void:
 		"membership fixture organization registers"
 	)
 	_check(
-		core.define_capability("organization:party", "party.manage_internal_appointments"),
+		core.define_capability("organization:party", "organization.manage_appointments"),
 		"organization declares a capability before it can be granted"
 	)
 	_check(
@@ -138,7 +245,7 @@ func _test_membership_positions_and_appointments() -> void:
 			"secretary",
 			"Secretary",
 			1,
-			["party.manage_internal_appointments"]
+			["organization.manage_appointments"]
 		),
 		"position definition accepts a local deterministic position ID"
 	)
@@ -167,6 +274,74 @@ func _test_membership_positions_and_appointments() -> void:
 			"secretary"
 		),
 		"membership-backed appointment is created"
+	)
+	_check(
+		core.register_organization("organization:association", "association", "place:branch"),
+		"second organization registers for reverse-query ordering"
+	)
+	_check(
+		core.define_position("organization:association", "chair", "Chair", 1),
+		"second organization position registers"
+	)
+	_check(
+		core.add_member("organization:association", "person:alice"),
+		"same Person may have membership in another organization"
+	)
+	_check(
+		core.create_appointment(
+			"organization:association", "chair_alice", "person:alice", "chair"
+		),
+		"same Person may have an appointment in another organization"
+	)
+	_equal(
+		core.memberships_for_person("person:alice"),
+		[
+			{
+				"organization_id": "organization:association",
+				"person_id": "person:alice",
+			},
+			{
+				"organization_id": "organization:party",
+				"person_id": "person:alice",
+			},
+		],
+		"reverse membership query is deterministic and derived from membership truth"
+	)
+	_equal(
+		core.appointments_for_person("person:alice"),
+		[
+			{
+				"appointment_id": "chair_alice",
+				"person_id": "person:alice",
+				"position_id": "chair",
+				"requires_membership": true,
+				"organization_id": "organization:association",
+			},
+			{
+				"appointment_id": "secretary_alice",
+				"person_id": "person:alice",
+				"position_id": "secretary",
+				"requires_membership": true,
+				"organization_id": "organization:party",
+			},
+		],
+		"reverse appointment query is deterministic"
+	)
+	var detached_memberships: Array[Dictionary] = core.memberships_for_person("person:alice")
+	detached_memberships[0]["organization_id"] = "organization:mutated"
+	detached_memberships.append({"organization_id": "organization:fake", "person_id": "person:alice"})
+	_equal(
+		core.memberships_for_person("person:alice").size(),
+		2,
+		"reverse membership result mutation cannot alter authoritative state"
+	)
+	var detached_appointments: Array[Dictionary] = core.appointments_for_person("person:alice")
+	detached_appointments[0]["person_id"] = "person:bob"
+	detached_appointments.clear()
+	_equal(
+		core.appointments_for_person("person:alice").size(),
+		2,
+		"reverse appointment result mutation cannot alter authoritative state"
 	)
 	_check(
 		not core.create_appointment(
@@ -249,12 +424,14 @@ func _test_capability_authorization_and_inactive_semantics() -> void:
 		_check(false, "authorization fixture creates a core")
 		return
 	_check(
-		core.register_organization("organization:military_office", "ministry", "place:capital"),
+		core.register_organization(
+			"organization:military_office", "military_institution", "place:capital"
+		),
 		"authorization fixture organization registers"
 	)
 	_check(
 		core.define_capability(
-			"organization:military_office", "military.issue_strategic_order"
+			"organization:military_office", "organization.manage_appointments"
 		),
 		"military capability is declared as authorization data"
 	)
@@ -271,7 +448,7 @@ func _test_capability_authorization_and_inactive_semantics() -> void:
 		core.grant_capability(
 			"organization:military_office",
 			"war_minister",
-			"military.issue_strategic_order"
+			"organization.manage_appointments"
 		),
 		"capability grant is attached to a position"
 	)
@@ -289,7 +466,7 @@ func _test_capability_authorization_and_inactive_semantics() -> void:
 		core.has_capability(
 			"person:alice",
 			"organization:military_office",
-			"military.issue_strategic_order"
+			"organization.manage_appointments"
 		),
 		"authorization query grants capability from current appointment"
 	)
@@ -297,14 +474,14 @@ func _test_capability_authorization_and_inactive_semantics() -> void:
 		core.capabilities_for_person(
 			"person:alice", "organization:military_office"
 		),
-		["military.issue_strategic_order"],
+		["organization.manage_appointments"],
 		"capability query returns deterministic declared grants"
 	)
 	_check(
 		not core.has_capability(
 			"person:bob",
 			"organization:military_office",
-			"military.issue_strategic_order"
+			"organization.manage_appointments"
 		),
 		"unappointed person has no authorization"
 	)
@@ -324,7 +501,7 @@ func _test_capability_authorization_and_inactive_semantics() -> void:
 		not core.has_capability(
 			"person:alice",
 			"organization:military_office",
-			"military.issue_strategic_order"
+			"organization.manage_appointments"
 		),
 		"inactive organization grants no authorization"
 	)
@@ -340,7 +517,7 @@ func _test_capability_authorization_and_inactive_semantics() -> void:
 		core.has_capability(
 			"person:alice",
 			"organization:military_office",
-			"military.issue_strategic_order"
+			"organization.manage_appointments"
 		),
 		"reactivated organization restores authorization from retained appointment"
 	)
@@ -348,7 +525,7 @@ func _test_capability_authorization_and_inactive_semantics() -> void:
 		core.revoke_capability(
 			"organization:military_office",
 			"war_minister",
-			"military.issue_strategic_order"
+			"organization.manage_appointments"
 		),
 		"capability grant can be revoked without executing military behavior"
 	)
@@ -356,7 +533,7 @@ func _test_capability_authorization_and_inactive_semantics() -> void:
 		not core.has_capability(
 			"person:alice",
 			"organization:military_office",
-			"military.issue_strategic_order"
+			"organization.manage_appointments"
 		),
 		"revoked capability is no longer authorized"
 	)
@@ -376,12 +553,12 @@ func _test_snapshot_determinism_and_round_trip() -> void:
 		"persistence fixture registers alpha"
 	)
 	_check(
-		core.define_capability("organization:alpha", "party.vote_internal"),
+		core.define_capability("organization:alpha", "organization.manage_appointments"),
 		"persistence fixture defines capability"
 	)
 	_check(
 		core.define_position(
-			"organization:alpha", "chair", "Chair", 2, ["party.vote_internal"]
+			"organization:alpha", "chair", "Chair", 2, ["organization.manage_appointments"]
 		),
 		"persistence fixture defines position"
 	)
@@ -394,8 +571,14 @@ func _test_snapshot_determinism_and_round_trip() -> void:
 	)
 
 	var saved: Dictionary = core.snapshot()
-	_equal(saved.size(), 2, "organization snapshot has exactly two top-level fields")
-	_equal(saved.get("schema_id"), "vnext_organization_core_v1", "organization snapshot schema is explicit")
+	_equal(saved.size(), 4, "organization snapshot has exactly four top-level fields")
+	_equal(saved.get("schema_id"), "vnext_organization_core_v2", "organization snapshot schema is explicit")
+	_equal(saved.get("revision"), 6, "organization revision counts committed mutations")
+	_equal(
+		saved.get("state_fingerprint"),
+		core.state_fingerprint(),
+		"organization snapshot binds its deterministic state fingerprint"
+	)
 	var saved_organizations: Array = saved.get("organizations") as Array
 	_equal(
 		_saved_organization_ids(saved_organizations),
@@ -446,6 +629,22 @@ func _test_snapshot_determinism_and_round_trip() -> void:
 	)
 	if normalized != null:
 		_equal(normalized.snapshot(), saved, "restore canonicalizes ordering deterministically")
+	var legacy := {
+		"schema_id": VNextOrganizationCore.LEGACY_SNAPSHOT_SCHEMA_ID,
+		"organizations": saved.get("organizations", []).duplicate(true),
+	}
+	var legacy_restored := _new_core()
+	_check(
+		legacy_restored != null and legacy_restored.restore(legacy),
+		"legacy v1 organization snapshot migrates explicitly"
+	)
+	if legacy_restored != null:
+		_equal(legacy_restored.revision(), 0, "legacy organization migration uses deterministic revision zero")
+		_equal(
+			legacy_restored.organization_ids(),
+			core.organization_ids(),
+			"legacy organization migration preserves structural identities"
+		)
 
 
 func _test_restore_rejections_are_transactional() -> void:
@@ -454,23 +653,27 @@ func _test_restore_rejections_are_transactional() -> void:
 		_check(false, "restore fixture creates a core")
 		return
 	_check(
-		core.register_organization("organization:root", "institution", "place:capital"),
+		core.register_organization("organization:root", "association", "place:capital"),
 		"restore fixture registers root"
 	)
 	_check(
 		core.register_organization(
-			"organization:child", "institution", "place:branch", "organization:root"
+			"organization:child", "association", "place:branch", "organization:root"
 		),
 		"restore fixture registers child"
 	)
 	_check(core.add_member("organization:root", "person:alice"), "restore fixture adds member")
 	_check(
-		core.define_capability("organization:root", "internal.appoint"),
+		core.define_capability("organization:root", "organization.manage_appointments"),
 		"restore fixture defines capability"
 	)
 	_check(
 		core.define_position(
-			"organization:root", "secretary", "Secretary", 1, ["internal.appoint"]
+			"organization:root",
+			"secretary",
+			"Secretary",
+			1,
+			["organization.manage_appointments"]
 		),
 		"restore fixture defines position"
 	)
@@ -496,6 +699,41 @@ func _test_restore_rejections_are_transactional() -> void:
 	)
 	(duplicate_member_root.get("member_ids") as Array).append("person:alice")
 	_expect_restore_failure(core, duplicate_member, "duplicate membership")
+
+	var unknown_kind: Dictionary = valid.duplicate(true)
+	var unknown_kind_root: Dictionary = _find_organization(
+		unknown_kind.get("organizations") as Array, "organization:root"
+	)
+	unknown_kind_root["organization_kind"] = "institution"
+	_expect_restore_failure(core, unknown_kind, "unknown organization kind")
+
+	var unknown_person: Dictionary = valid.duplicate(true)
+	var unknown_person_root: Dictionary = _find_organization(
+		unknown_person.get("organizations") as Array, "organization:root"
+	)
+	(unknown_person_root.get("member_ids") as Array)[0] = "person:unknown"
+	_expect_restore_failure(core, unknown_person, "unknown Person reference")
+
+	var wrong_person_kind: Dictionary = valid.duplicate(true)
+	var wrong_person_kind_root: Dictionary = _find_organization(
+		wrong_person_kind.get("organizations") as Array, "organization:root"
+	)
+	(wrong_person_kind_root.get("member_ids") as Array)[0] = "place:capital"
+	_expect_restore_failure(core, wrong_person_kind, "wrong Person stable ID kind")
+
+	var unknown_place: Dictionary = valid.duplicate(true)
+	var unknown_place_root: Dictionary = _find_organization(
+		unknown_place.get("organizations") as Array, "organization:root"
+	)
+	unknown_place_root["primary_place_id"] = "place:unknown"
+	_expect_restore_failure(core, unknown_place, "unknown Place reference")
+
+	var wrong_place_kind: Dictionary = valid.duplicate(true)
+	var wrong_place_kind_root: Dictionary = _find_organization(
+		wrong_place_kind.get("organizations") as Array, "organization:root"
+	)
+	wrong_place_kind_root["primary_place_id"] = "person:alice"
+	_expect_restore_failure(core, wrong_place_kind, "wrong Place stable ID kind")
 
 	var missing_position: Dictionary = valid.duplicate(true)
 	var missing_position_root: Dictionary = _find_organization(
@@ -548,9 +786,12 @@ func _test_restore_rejections_are_transactional() -> void:
 		inactive.get("organizations") as Array, "organization:root"
 	)
 	inactive_root["active"] = false
+	_refresh_snapshot_fingerprint(inactive)
 	_check(core.restore(inactive), "inactive organization snapshot is structurally restorable")
 	_check(
-		not core.has_capability("person:alice", "organization:root", "internal.appoint"),
+		not core.has_capability(
+			"person:alice", "organization:root", "organization.manage_appointments"
+		),
 		"restored inactive organization is fail-closed for authorization"
 	)
 	_check(
@@ -566,6 +807,13 @@ func _expect_restore_failure(
 	var before: Dictionary = core.snapshot()
 	_check(not core.restore(rejected), "%s restore is rejected" % label)
 	_equal(core.snapshot(), before, "%s rejection is transactional" % label)
+
+
+func _refresh_snapshot_fingerprint(snapshot_value: Dictionary) -> void:
+	snapshot_value["state_fingerprint"] = JSON.stringify({
+		"revision": int(snapshot_value.get("revision", 0)),
+		"organizations": snapshot_value.get("organizations", []),
+	}).sha256_text()
 
 
 func _saved_organization_ids(records: Array) -> Array[String]:
