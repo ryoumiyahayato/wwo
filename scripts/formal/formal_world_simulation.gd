@@ -549,7 +549,11 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 			return false
 		var saved_organization := state.get("organization", {}) as Dictionary
 		if (
-			schema_id == PREVIOUS_SCHEMA_ID
+			schema_id in [
+				LEGACY_ORGANIZATION_SCHEMA_ID,
+				LEGACY_PERSON_SCHEMA_ID,
+				PREVIOUS_SCHEMA_ID,
+			]
 			and not _explicit_organization_reference_injection
 			and not _organization_snapshot_is_canonical_empty(saved_organization)
 		):
