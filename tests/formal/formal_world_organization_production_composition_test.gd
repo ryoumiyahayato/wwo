@@ -12,6 +12,7 @@ func _run() -> void:
 	_test_production_roster()
 	_test_provenance_and_classification()
 	_test_player_independence()
+	_test_v7_empty_migration_and_conflict_rejection()
 	_test_prototype_exclusion()
 	print(
 		"Formal Organization production composition: %d checks, %d failures"
@@ -135,6 +136,61 @@ func _test_player_independence() -> void:
 		first.organization_evidence_view().fingerprint(),
 		second.organization_evidence_view().fingerprint(),
 		"Organization evidence fingerprint is deterministic across fresh worlds"
+	)
+
+
+func _test_v7_empty_migration_and_conflict_rejection() -> void:
+	var source := FormalWorldSimulation.new()
+	_check(source.initialize(), "v7 migration source initializes")
+	if not source.initialized:
+		return
+	var legacy := source.get_persistent_state()
+	legacy["schema_id"] = FormalWorldSimulation.PREVIOUS_SCHEMA_ID
+	legacy.erase("organization_evidence")
+	var empty_core := VNextOrganizationCore.create(
+		source.organization_person_reference_ids(),
+		source._organization_place_reference_ids
+	)
+	_check(empty_core != null, "legacy empty Organization core can be reconstructed")
+	if empty_core == null:
+		return
+	var empty_authority := VNextOrganizationAuthorityFoundation.create(
+		empty_core,
+		source.formal_person_ids(),
+		source._organization_place_reference_ids
+	)
+	_check(empty_authority != null, "legacy empty Organization Authority can be reconstructed")
+	if empty_authority == null:
+		return
+	legacy["organization"] = empty_core.snapshot()
+	legacy["organization_authority"] = empty_authority.snapshot()
+
+	var migrated := FormalWorldSimulation.new()
+	_check(migrated.initialize(), "v7 empty migration target initializes")
+	_check(
+		migrated.restore_persistent_state(legacy),
+		"canonical empty v7 Organization state migrates to production roster"
+	)
+	if migrated.initialized:
+		_equal(
+			migrated.organization_view().organization_ids(),
+			migrated.organization_evidence_view().organization_ids(),
+			"v7 empty migration materializes exactly the qualified current roster"
+		)
+		_equal(
+			migrated.get_persistent_state().get("schema_id"),
+			FormalWorldSimulation.SCHEMA_ID,
+			"v7 migration emits current v8 schema"
+		)
+
+	var conflicting := source.get_persistent_state()
+	conflicting["schema_id"] = FormalWorldSimulation.PREVIOUS_SCHEMA_ID
+	conflicting.erase("organization_evidence")
+	var rejected := FormalWorldSimulation.new()
+	_check(rejected.initialize(), "v7 conflict target initializes")
+	_check(
+		not rejected.restore_persistent_state(conflicting),
+		"non-empty v7 Organization state fails closed without explicit legacy references"
 	)
 
 
