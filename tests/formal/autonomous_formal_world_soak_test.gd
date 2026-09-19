@@ -17,6 +17,7 @@ const AUTHORITATIVE_DOMAIN_ORDER: Array[String] = [
 	"persons",
 	"player",
 	"organization",
+	"organization_responsibilities",
 	"organization_authority",
 	"military_state",
 ]
