@@ -296,7 +296,7 @@
     "scripts/formal"
   ],
   "schema_version": "wwo_world_data_batch3_contracts_v1",
-  "script_digest": "23a5c5f9d98ecb07ee0a406f1c046c00380d6f5eec3bd0826d118b1eec15e97f",
+  "script_digest": "bba97876a4ec584a7b3b8474c5aa9fe57d0d9b71d2b88aca16dfc3ef3b29df83",
   "world_map_data_loader_entries": [
     {
       "exists": true,
