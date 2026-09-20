@@ -53,6 +53,31 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Generate official world-data audit refresh candidate
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $output = 'builds/formal-organization-standing-responsibilities/official-world-data-audit'
+          if (Test-Path -LiteralPath $output) { Remove-Item -LiteralPath $output -Recurse -Force }
+          New-Item -ItemType Directory -Force -Path $output | Out-Null
+          python tools/world_data/validate_world_data.py --root . --data-root data/world_map --output-dir $output --allow-errors
+          if ($LASTEXITCODE -ne 0) { throw 'World-data validator generation failed' }
+          python tools/world_data/build_batch2_artifacts.py --root . --output-dir $output
+          if ($LASTEXITCODE -ne 0) { throw 'Batch 2 generation failed' }
+          python tools/world_data/build_batch3_contracts.py --root . --output-dir $output
+          if ($LASTEXITCODE -ne 0) { throw 'Batch 3 generation failed' }
+          python tools/world_data/build_batch4_run_manifest.py --root . --output-dir $output
+          if ($LASTEXITCODE -ne 0) { throw 'Batch 4 generation failed' }
+
+      - name: Upload official world-data refresh candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: formal-world-data-refresh-candidate
+          path: |
+            builds/formal-organization-standing-responsibilities/official-world-data-audit/batch3_loader_contract.json
+            builds/formal-organization-standing-responsibilities/official-world-data-audit/batch4_run_manifest.json
+          if-no-files-found: error
+
       - name: Install Godot 4.6.3
         shell: pwsh
         run: |
