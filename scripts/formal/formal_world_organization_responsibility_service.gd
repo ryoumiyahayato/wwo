@@ -217,7 +217,7 @@ func review_settled_day(
 
 	var candidate: Dictionary = {}
 	for organization_id: String in _sorted_keys(_responsibilities):
-		var record := (_responsibilities[organization_id] as Dictionary).duplicate(true)
+		var record := (_responsibilities[organization_id] as Dictionary).duplicate(false)
 		record["review_count"] = int(record.get("review_count", 0)) + 1
 		record["last_reviewed_day"] = day_index
 		record["last_reviewed_hour"] = settlement_hour
@@ -302,7 +302,7 @@ func review_settled_day(
 			record["status"] = STATUS_MONITORING
 		else:
 			var current_case := (
-				(record.get("current_case", {}) as Dictionary).duplicate(true)
+				(record.get("current_case", {}) as Dictionary).duplicate(false)
 			)
 			if current_case.is_empty():
 				var episode_sequence := int(record.get("episode_count", 0)) + 1
@@ -853,7 +853,7 @@ func _close_current_case(
 	final_fulfillment_bp: int
 ) -> void:
 	var current_case := (
-		(record.get("current_case", {}) as Dictionary).duplicate(true)
+		(record.get("current_case", {}) as Dictionary).duplicate(false)
 	)
 	if current_case.is_empty():
 		return
