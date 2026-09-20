@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - codex/formal-organization-standing-responsibility-baseline
+  pull_request:
+    branches:
+      - canonical/current-world
 
 jobs:
   generate:
