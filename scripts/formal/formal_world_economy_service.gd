@@ -316,21 +316,27 @@ func read_only_snapshot() -> Dictionary:
 
 
 func read_only_country_observation_snapshot() -> Dictionary:
-	## Compact detached observation for country-level operational consumers.
-	## It deliberately excludes mutable/large Economy internals (market states,
-	## routes, shipments, and bounded history) while preserving the existing
-	## FormalWorldEconomyView query contract used by Organization monitoring.
+	## Narrow detached observation for Organization supply-continuity monitoring.
+	## Economy remains the sole owner of market state; this projects only the facts
+	## the responsibility observer consumes and preserves the existing query view.
 	var summaries: Dictionary = {}
 	for market_id_value: Variant in market_states:
 		var market_id := str(market_id_value)
 		var economy_id := _market_registry.economic_aggregate_id_for_market(market_id)
-		summaries[economy_id] = country_summary(economy_id)
+		var state := market_states[market_id] as Dictionary
+		var daily_totals := state.get("daily_totals", {}) as Dictionary
+		summaries[economy_id] = {
+			"economic_aggregate_id": economy_id,
+			"daily_totals": {
+				"fulfillment_bp": int(daily_totals.get("fulfillment_bp", -1)),
+			},
+			"top_shortages": _top_country_shortages(state, 8),
+		}
 	return {
 		"schema_id": "formal_world_economy_observation_v2",
 		"domain_owner": "FormalWorldEconomyService",
 		"state_revision": _state_revision,
 		"total_hour": total_hour,
-		"economy_polity_ids": economy_polity_ids.duplicate(true),
 		"economy_by_polity_id": economy_by_polity_id.duplicate(true),
 		"country_summaries": summaries,
 	}
