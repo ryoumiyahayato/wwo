@@ -318,10 +318,13 @@ func advance_minutes(minutes: int) -> Dictionary:
 	var target_total_hour := int(target_total_minutes / 60)
 	var settled_through_hour := starting_total_hour
 	var responsibility_review_days := 0
+	var responsibility_organization_view: FormalWorldOrganizationView = null
 
 	# Formal composition owns causal cross-domain ordering. Each crossed day is
-	# settled by Economy first, then observed through a detached Economy view by
-	# Organization responsibilities. This preserves history across caller chunk sizes.
+	# settled by Economy first, then observed through detached read views by
+	# Organization responsibilities. The structural Organization view is immutable
+	# during one advance call, so build it once on first review and never cache it
+	# across calls. Economy observations remain fresh for every settled day.
 	while true:
 		var next_day_boundary_hour := (
 			int(settled_through_hour / FormalWorldEconomyService.HOURS_PER_DAY) + 1
@@ -332,9 +335,11 @@ func advance_minutes(minutes: int) -> Dictionary:
 		_economy.settle_hour_range(
 			settled_through_hour, next_day_boundary_hour
 		)
+		if responsibility_organization_view == null:
+			responsibility_organization_view = organization_view()
 		var reviewed := _organization_responsibilities.review_settled_day(
 			next_day_boundary_hour,
-			organization_view(),
+			responsibility_organization_view,
 			_political_registry_view,
 			_organization_responsibility_economy_view()
 		)
