@@ -1,0 +1,42 @@
+name: Temporary responsibility artifact refresh
+
+on:
+  push:
+    branches:
+      - codex/formal-organization-standing-responsibility-baseline
+
+jobs:
+  generate:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/formal-organization-standing-responsibility-baseline
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Generate official world-data artifacts
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $output = Join-Path $env:RUNNER_TEMP 'responsibility-artifact-refresh'
+          if (Test-Path -LiteralPath $output) { Remove-Item -LiteralPath $output -Recurse -Force }
+          $commands = @(
+            @('tools/world_data/validate_world_data.py', '--root', '.', '--data-root', 'data/world_map', '--output-dir', $output, '--allow-errors'),
+            @('tools/world_data/build_batch2_artifacts.py', '--root', '.', '--output-dir', $output),
+            @('tools/world_data/build_batch3_contracts.py', '--root', '.', '--output-dir', $output),
+            @('tools/world_data/build_batch4_run_manifest.py', '--root', '.', '--output-dir', $output)
+          )
+          foreach ($command in $commands) {
+            & python -B @command
+            if ($LASTEXITCODE -ne 0) { throw "Generator failed: $($command[0]) exit $LASTEXITCODE" }
+          }
+          @'
+          import base64
+          import sys
+          from pathlib import Path
+          out = Path(sys.argv[1])
+          for name in ("batch3_loader_contract.json", "batch4_run_manifest.json"):
+              raw = (out / name).read_bytes()
+              print(f"OFFICIAL_ARTIFACT_BASE64:{name}:" + base64.b64encode(raw).decode("ascii"))
+          '@ | python - $output
