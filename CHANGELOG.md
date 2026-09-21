@@ -4,6 +4,11 @@
 
 ## Unreleased
 
+### Canonical checkpoint
+
+- 2026-09-21：PR #89 `Formal Organization Standing Responsibility Baseline: Economic Supply Continuity` 已以正常 merge commit 合入 `canonical/current-world`。当前 canonical checkpoint 为 `7dbe5faa4593e86bf4e3dac34171df96b0d5433d`；授权 feature HEAD 为 `3934a9b7ac08ffc5e82ff8dec0d2ba6114ea8eef`。合并后复核 `canonical/current-world` 与该 merge commit 完全一致（ahead 0 / behind 0）。此 checkpoint 建立 Formal v9、53 个 production governing Organizations 的 `economic_supply_continuity` standing responsibilities、detached Economy observation、deterministic case lifecycle 与 exact persistence；未包含 post-merge cleanup、refactor 或下一阶段功能开发。后续主线开发应以该 SHA 为 canonical 基准。
+
+
 ### Current status
 
 - P0-R1 未通过，Demo 未达到；本轮代理已完成全新 `user://` 可见控件与新 Release 往返，仍需用户独立人工复验。
