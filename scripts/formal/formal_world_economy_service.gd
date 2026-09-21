@@ -39,6 +39,9 @@ var _crosswalk_records: Dictionary = {}
 ## Non-authoritative calculation cache pinned to the injected static and
 ## population fingerprints. It avoids per-day copies and is never persisted.
 var _calculation_inputs: Dictionary = {}
+## Non-authoritative settled-day projection cache. Rows are derived only from
+## daily_metrics, are never persisted, and can be rebuilt deterministically.
+var _daily_shortage_rows_by_market_id: Dictionary = {}
 var _political_registry: RuntimePoliticalEntityView = null
 var _market_registry: FormalWorldMarketView = null
 var _static_evidence: FormalWorldEconomicStaticView = null
@@ -67,6 +70,7 @@ func configure(
 	_routes_by_country.clear()
 	_crosswalk_records.clear()
 	_calculation_inputs.clear()
+	_daily_shortage_rows_by_market_id.clear()
 	_commodities.clear()
 	_last_day_index = -1
 	_next_shipment_sequence = 1
@@ -315,6 +319,33 @@ func read_only_snapshot() -> Dictionary:
 	}
 
 
+func read_only_country_observation_snapshot() -> Dictionary:
+	## Narrow detached observation for Organization supply-continuity monitoring.
+	## Economy remains the sole owner of market state; this projects only the facts
+	## the responsibility observer consumes and preserves the existing query view.
+	var summaries: Dictionary = {}
+	for market_id_value: Variant in market_states:
+		var market_id := str(market_id_value)
+		var economy_id := _market_registry.economic_aggregate_id_for_market(market_id)
+		var state := market_states[market_id] as Dictionary
+		var daily_totals := state.get("daily_totals", {}) as Dictionary
+		summaries[economy_id] = {
+			"economic_aggregate_id": economy_id,
+			"daily_totals": {
+				"fulfillment_bp": int(daily_totals.get("fulfillment_bp", -1)),
+			},
+			"top_shortages": _top_country_shortage_identities(state, 8),
+		}
+	return {
+		"schema_id": "formal_world_economy_observation_v2",
+		"domain_owner": "FormalWorldEconomyService",
+		"state_revision": _state_revision,
+		"total_hour": total_hour,
+		"economy_by_polity_id": economy_by_polity_id.duplicate(true),
+		"country_summaries": summaries,
+	}
+
+
 func legacy_regression_snapshot() -> Dictionary:
 	## The golden harness hashes the trusted v4 shape so formula regressions stay
 	## detectable while the production save schema excludes static/derived data.
@@ -440,6 +471,7 @@ func restore_persistent_state(state: Dictionary) -> bool:
 	):
 		return false
 	market_states = candidate_market_states
+	_daily_shortage_rows_by_market_id.clear()
 	shipments = candidate_shipments
 	history.clear()
 	_next_shipment_sequence = candidate_next_shipment_sequence
@@ -716,6 +748,7 @@ func _settle_country(entity_id: String, settlement_hour: int) -> void:
 	}
 	state["last_settlement_hour"] = settlement_hour
 	market_states[market_id] = state
+	_rebuild_daily_shortage_rows(market_id, state)
 
 
 func _schedule_shortage_shipments(settlement_hour: int) -> void:
@@ -920,6 +953,59 @@ func _opening_gold_units(record: Dictionary, population_value: int) -> float:
 
 
 func _top_country_shortages(state: Dictionary, limit: int) -> Array[Dictionary]:
+	var cached_rows := _settled_day_shortage_rows(state)
+	var output: Array[Dictionary] = []
+	var row_count := mini(maxi(limit, 0), cached_rows.size())
+	for index: int in row_count:
+		output.append((cached_rows[index] as Dictionary).duplicate(false))
+	return output
+
+
+func _top_country_shortage_identities(
+	state: Dictionary, limit: int
+) -> Array[Dictionary]:
+	var cached_rows := _settled_day_shortage_rows(state)
+	var output: Array[Dictionary] = []
+	var row_count := mini(maxi(limit, 0), cached_rows.size())
+	for index: int in row_count:
+		var row := cached_rows[index] as Dictionary
+		var commodity_id := str(row.get("commodity_id", ""))
+		output.append({
+			"commodity_id": commodity_id,
+			"name_zh": str(row.get("name_zh", commodity_id)),
+		})
+	return output
+
+
+func _settled_day_shortage_rows(state: Dictionary) -> Array:
+	var market_id := str(state.get("market_id", ""))
+	var settlement_hour := int(state.get("last_settlement_hour", -1))
+	var cached := (
+		_daily_shortage_rows_by_market_id.get(market_id, {}) as Dictionary
+	)
+	if (
+		not market_id.is_empty()
+		and int(cached.get("settlement_hour", -2)) == settlement_hour
+		and cached.get("rows", []) is Array
+	):
+		return cached.get("rows", []) as Array
+	var rows := _build_sorted_shortage_rows(state)
+	if not market_id.is_empty():
+		_daily_shortage_rows_by_market_id[market_id] = {
+			"settlement_hour": settlement_hour,
+			"rows": rows,
+		}
+	return rows
+
+
+func _rebuild_daily_shortage_rows(market_id: String, state: Dictionary) -> void:
+	_daily_shortage_rows_by_market_id[market_id] = {
+		"settlement_hour": int(state.get("last_settlement_hour", -1)),
+		"rows": _build_sorted_shortage_rows(state),
+	}
+
+
+func _build_sorted_shortage_rows(state: Dictionary) -> Array[Dictionary]:
 	var rows: Array[Dictionary] = []
 	var metrics := state.get("daily_metrics", {}) as Dictionary
 	for raw_id: Variant in metrics:
@@ -944,8 +1030,6 @@ func _top_country_shortages(state: Dictionary, limit: int) -> Array[Dictionary]:
 	rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return float(a.get("unmet", 0.0)) > float(b.get("unmet", 0.0))
 	)
-	if rows.size() > limit:
-		rows.resize(limit)
 	return rows
 
 

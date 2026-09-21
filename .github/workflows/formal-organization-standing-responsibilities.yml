@@ -1,0 +1,156 @@
+name: Formal organization standing responsibilities
+
+on:
+  pull_request:
+    branches:
+      - canonical/current-world
+    paths:
+      - ".github/workflows/formal-organization-standing-responsibilities.yml"
+      - "data/vnext/organizations/**"
+      - "scripts/formal/**"
+      - "scripts/vnext/organization/**"
+      - "tests/formal/**"
+      - "tools/run_validation.ps1"
+      - "tools/run_vnext_validation.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formal-organization-standing-responsibilities-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout exact feature head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact validation head
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $expected = "${{ github.event.pull_request.head.sha || github.sha }}"
+          $actual = (git rev-parse HEAD).Trim()
+          if ($actual -ne $expected) { throw "Validation checked out $actual but expected $expected" }
+
+      - name: Check feature diff whitespace
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          git fetch origin canonical/current-world --no-tags
+          git diff --check origin/canonical/current-world...HEAD
+          if ($LASTEXITCODE -ne 0) { throw 'Feature diff whitespace check failed' }
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Godot 4.6.3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'godot.zip'
+          $install = Join-Path $env:RUNNER_TEMP 'godot-4.6.3'
+          Invoke-WebRequest -Uri 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip' -OutFile $archive
+          Expand-Archive -LiteralPath $archive -DestinationPath $install
+          $binary = (Get-ChildItem -LiteralPath $install -Filter 'Godot_v4.6.3-stable_win64.exe' -Recurse | Select-Object -First 1).FullName
+          if (-not $binary) { throw 'Godot 4.6.3 executable was not found' }
+          "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          & $binary --version
+
+      - name: Prepare isolated user data
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $userDataRoot = Join-Path $env:RUNNER_TEMP 'formal-organization-standing-responsibilities-user-data'
+          if (Test-Path -LiteralPath $userDataRoot) { Remove-Item -LiteralPath $userDataRoot -Recurse -Force }
+          New-Item -ItemType Directory -Force -Path $userDataRoot | Out-Null
+          "APPDATA=$userDataRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          New-Item -ItemType Directory -Force -Path builds/formal-organization-standing-responsibilities | Out-Null
+
+      - name: Prime Godot script class cache
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--editor', '--path', '.', '--quit'
+          ) -Wait -PassThru -NoNewWindow
+          if ($process.ExitCode -ne 0) {
+            throw "Godot project import failed with exit code $($process.ExitCode)"
+          }
+
+      - name: Run vNext focused regression suite
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          python -B tools/run_vnext_validation.py --root . --godot "$env:GODOT_BIN" --suite focused
+          if ($LASTEXITCODE -ne 0) { throw "vNext focused validation failed with exit code $LASTEXITCODE" }
+
+      - name: Run standing responsibility production test
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $logPath = 'builds/formal-organization-standing-responsibilities/responsibility.log'
+          $stderrPath = 'builds/formal-organization-standing-responsibilities/responsibility.stderr.log'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--audio-driver', 'Dummy', '--path', '.', '--script',
+            'res://tests/formal/formal_world_organization_responsibility_test.gd'
+          ) -Wait -PassThru -NoNewWindow -RedirectStandardOutput $logPath -RedirectStandardError $stderrPath
+          if (Test-Path -LiteralPath $stderrPath) {
+            Get-Content -LiteralPath $stderrPath | Tee-Object -FilePath $logPath -Append
+          }
+          Get-Content -LiteralPath $logPath
+          if ($process.ExitCode -ne 0) {
+            throw "Standing responsibility test failed with exit code $($process.ExitCode)"
+          }
+          $content = Get-Content -LiteralPath $logPath -Raw
+          if ($content -notmatch 'Formal organization standing responsibilities: ([1-9][0-9]*) checks, 0 failures') {
+            throw 'Standing responsibility zero-failure summary is missing'
+          }
+          if ($content -notmatch 'FORMAL_ORGANIZATION_RESPONSIBILITY_PRODUCTION=') {
+            throw 'Standing responsibility production diagnostic is missing'
+          }
+
+      - name: Run existing Organization composition regression
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $logPath = 'builds/formal-organization-standing-responsibilities/organization-composition.log'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--audio-driver', 'Dummy', '--path', '.', '--script',
+            'res://tests/formal/formal_world_organization_composition_test.gd',
+            '--log-file', $logPath
+          ) -Wait -PassThru -NoNewWindow
+          Get-Content -LiteralPath $logPath
+          if ($process.ExitCode -ne 0) {
+            throw "Existing Organization composition test failed with exit code $($process.ExitCode)"
+          }
+          $content = Get-Content -LiteralPath $logPath -Raw
+          if ($content -notmatch 'Formal organization composition: ([1-9][0-9]*) checks, 0 failures') {
+            throw 'Existing Organization composition success summary is missing'
+          }
+
+      - name: Run existing Formal validation baseline
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $formalLog = 'builds/formal-organization-standing-responsibilities/formal-validation.log'
+          & powershell -ExecutionPolicy Bypass -File tools/run_validation.ps1 -GodotPath $env:GODOT_BIN 2>&1 | Tee-Object -FilePath $formalLog
+          $exitCode = $LASTEXITCODE
+          if ($exitCode -ne 0) { throw "Existing Formal validation failed with exit code $exitCode" }
+
+      - name: Upload validation logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formal-organization-standing-responsibilities-logs
+          path: builds/formal-organization-standing-responsibilities/*.log
+          if-no-files-found: warn
