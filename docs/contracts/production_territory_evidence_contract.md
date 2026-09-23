@@ -14,7 +14,7 @@ IDs and registry ordering are independent of runtime order, filesystem enumerati
 
 Every record exposes the normalized fields required by the production gate: dataset/provider/version provenance, source and download pages, local resource binding, SHA-256, snapshot and validity dates, geometry scope/granularity/count/CRS, derivation kind/parents/method/parameters, historical target and fit, normalized license/distribution facts, prototype status, and explicit admission status/reason.
 
-Repository-backed records bind existing resource paths and verify their hashes. The registry does not duplicate polygon payloads.
+Repository-backed records bind existing resource paths and verify their hashes. JSON resources use SHA-256 over UTF-8 text after CRLF/CR is normalized to LF, so Git checkout line-ending policy cannot change evidence identity; non-JSON resources use raw file SHA-256. The registry does not duplicate polygon payloads.
 
 ## Admission status model
 
