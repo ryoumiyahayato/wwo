@@ -93,7 +93,7 @@ func _test_production_composition_and_ownership() -> void:
 		)
 	var person := world.formal_person(FormalWorldSimulation.DEFAULT_FORMAL_PERSON_ID)
 	_equal(
-		str(person.get("place_id", "")),
+		str(person.get("current_place_id", "")),
 		FormalWorldSimulation.DEFAULT_FORMAL_PERSON_PLACE_ID,
 		"existing Person place binding still consumes composed Spatial catalog"
 	)
