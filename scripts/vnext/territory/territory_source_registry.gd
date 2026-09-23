@@ -171,7 +171,7 @@ func audit_report() -> Dictionary:
 				report["REJECTED_SOURCE_COUNT"] = int(report["REJECTED_SOURCE_COUNT"]) + 1
 		if bool(record.get("prototype_only", false)):
 			report["PROTOTYPE_SOURCE_COUNT"] = int(report["PROTOTYPE_SOURCE_COUNT"]) + 1
-		var license_restricted := (
+		var license_restricted: bool = (
 			record.get("redistribution_allowed") == false
 			or record.get("derivative_work_allowed") == false
 			or record.get("commercial_use_allowed") == false
