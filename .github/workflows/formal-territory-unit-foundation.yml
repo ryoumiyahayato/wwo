@@ -149,8 +149,19 @@ jobs:
       - name: Run Formal Spatial regression
         shell: pwsh
         run: |
-          & $env:GODOT_BIN --headless --audio-driver Dummy --path . --script res://tests/formal/formal_spatial_authority_integration_test.gd
-          if ($LASTEXITCODE -ne 0) { throw 'Formal Spatial regression failed' }
+          $ErrorActionPreference = 'Stop'
+          $logPath = 'builds/formal-territory-unit/formal_spatial_regression.log'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--audio-driver', 'Dummy', '--path', '.',
+            '--script', 'res://tests/formal/formal_spatial_authority_integration_test.gd',
+            '--log-file', $logPath
+          ) -Wait -PassThru -NoNewWindow
+          if (Test-Path -LiteralPath $logPath) { Get-Content -LiteralPath $logPath }
+          if ($process.ExitCode -ne 0) { throw 'Formal Spatial regression failed' }
+          $text = Get-Content -LiteralPath $logPath -Raw
+          if ($text -notmatch 'Formal Spatial authority integration: ([1-9][0-9]*) checks, 0 failures') {
+            throw 'Formal Spatial zero-failure summary is missing'
+          }
 
       - name: Run full repository validation
         shell: pwsh
