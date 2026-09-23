@@ -2,7 +2,9 @@ extends SceneTree
 ## Regression gate for #85: Formal authoritative persistence must be exact.
 
 const SAVE_RESTORE_DAYS: int = 180
+const CONTINUATION_HOURS: int = 49
 const MINUTES_PER_DAY: int = 24 * 60
+const SPATIAL_LINK_ID: String = "rail_paris_lille"
 const FIXTURE_PATH: String = "user://formal_exact_persistence_fixture.json"
 const COUNTEREXAMPLE_1_BITS: String = "3f43f634dfb491bb"
 const COUNTEREXAMPLE_2_BITS: String = "40c3169901b276ea"
@@ -92,9 +94,36 @@ func _check_real_180_day_roundtrip() -> Dictionary:
 	if not simulation.initialized:
 		return {}
 	simulation.advance_minutes(SAVE_RESTORE_DAYS * MINUTES_PER_DAY)
+	_check(
+		simulation.set_spatial_nominal_capacity(SPATIAL_LINK_ID, 640.0),
+		"180-day gate mutates authoritative Spatial nominal capacity"
+	)
+	_check(
+		simulation.set_spatial_infrastructure_condition(SPATIAL_LINK_ID, 0.8),
+		"180-day gate mutates authoritative Spatial condition"
+	)
+	_check(
+		simulation.set_spatial_infrastructure_status(SPATIAL_LINK_ID, "damaged"),
+		"180-day gate mutates authoritative Spatial status"
+	)
+	var reservation := simulation.request_spatial_capacity(
+		"formal_exact_persistence_reservation", SPATIAL_LINK_ID, 120.0
+	)
+	_check(
+		bool(reservation.get("accepted", false)),
+		"180-day gate creates an active authoritative Spatial capacity reservation"
+	)
 	var before_snapshot := simulation.get_persistent_state()
+	var before_spatial := simulation.spatial_snapshot()
+	var before_spatial_fingerprint := simulation.spatial_authoritative_fingerprint()
 	var before_fingerprint := simulation.authoritative_fingerprint()
 	_check(not before_fingerprint.is_empty(), "180-day authoritative fingerprint exists before save")
+	_check(before_snapshot.has("spatial"), "Formal exact snapshot includes Spatial authority")
+	_check(
+		int(before_spatial.get("current_hour", -1))
+		== int(simulation.total_minutes / 60),
+		"Spatial snapshot hour equals Formal authoritative hour before save"
+	)
 
 	var save_result := simulation.save_to_user()
 	_check(save_result.success, "180-day Formal world saves through production save_to_user")
@@ -122,12 +151,43 @@ func _check_real_180_day_roundtrip() -> Dictionary:
 		_strict_equal(before_snapshot, load_result.snapshot),
 		"real 180-day authoritative snapshot preserves strict recursive value/type equality"
 	)
+	var after_spatial_fingerprint := restored.spatial_authoritative_fingerprint()
 	var after_fingerprint := restored.authoritative_fingerprint()
 	print("FORMAL_EXACT_180D_PRE_FINGERPRINT=%s" % before_fingerprint)
 	print("FORMAL_EXACT_180D_POST_FINGERPRINT=%s" % after_fingerprint)
 	_check(
+		_strict_equal(restored.spatial_snapshot(), before_spatial),
+		"real 180-day Spatial snapshot preserves infrastructure and active capacity window exactly"
+	)
+	_check(
+		after_spatial_fingerprint == before_spatial_fingerprint,
+		"real 180-day Spatial authoritative fingerprint is identical after persistence"
+	)
+	_check(
 		after_fingerprint == before_fingerprint,
 		"real 180-day authoritative fingerprint is identical after production persistence"
+	)
+	var restored_reservations := (
+		restored.spatial_capacity_summary(SPATIAL_LINK_ID).get("reservations", []) as Array
+	)
+	_check(
+		restored_reservations.size() == 1,
+		"active current-hour Spatial capacity reservation survives production save/load"
+	)
+	var continuation_minutes := CONTINUATION_HOURS * 60
+	simulation.advance_minutes(continuation_minutes)
+	restored.advance_minutes(continuation_minutes)
+	_check(
+		_strict_equal(simulation.get_persistent_state(), restored.get_persistent_state()),
+		"saved continuation equals uninterrupted continuation with Spatial authority"
+	)
+	_check(
+		simulation.authoritative_fingerprint() == restored.authoritative_fingerprint(),
+		"saved and uninterrupted continuation fingerprints remain exact"
+	)
+	_check(
+		restored.spatial_capacity_summary(SPATIAL_LINK_ID).get("reservations", []).is_empty(),
+		"Spatial capacity window rolls over deterministically after continuation"
 	)
 	return before_snapshot
 
