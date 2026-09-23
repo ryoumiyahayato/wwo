@@ -1,6 +1,6 @@
 {
-  "dataset_sha256": "d71b837bc8c14845ae3458f9f61ccfbeb666fb18de563acdb532badb6d4aaf7e",
-  "file_count": 184,
+  "dataset_sha256": "4b2c59f3a2f5ad98d45d1a4ccbdfa153b5f735cd606cfb142c5efa9c81199772",
+  "file_count": 185,
   "files": [
     {
       "bytes": 6738,
@@ -4229,6 +4229,20 @@
         "supply_rules",
         "terrain_profiles",
         "transport_profiles"
+      ],
+      "top_level_type": "object"
+    },
+    {
+      "bytes": 11894,
+      "collection_sizes": {
+        "sources": 7
+      },
+      "path": "data/world_map/territory_source_registry.json",
+      "sha256": "5644b4167a9e7f7a3af4cc395289d4c3f3a1235fd7abc992d33e76daa0074af7",
+      "top_level_keys": [
+        "historical_target_date",
+        "schema_id",
+        "sources"
       ],
       "top_level_type": "object"
     },
