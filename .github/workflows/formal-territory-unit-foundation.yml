@@ -75,6 +75,15 @@ jobs:
           "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           & $binary --version
 
+      - name: Prepare isolated user data
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $userDataRoot = Join-Path $env:RUNNER_TEMP 'formal-territory-unit-user-data'
+          if (Test-Path -LiteralPath $userDataRoot) { Remove-Item -LiteralPath $userDataRoot -Recurse -Force }
+          New-Item -ItemType Directory -Force -Path $userDataRoot | Out-Null
+          "APPDATA=$userDataRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
       - name: Prime Godot script class cache
         shell: pwsh
         run: |
