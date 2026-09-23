@@ -79,8 +79,15 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          & $env:GODOT_BIN --headless --editor --path . --quit
-          if ($LASTEXITCODE -ne 0) { throw 'Godot project import failed' }
+          New-Item -ItemType Directory -Force -Path builds/formal-territory-unit | Out-Null
+          $logPath = 'builds/formal-territory-unit/godot_import.log'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--editor', '--path', '.', '--quit', '--log-file', $logPath
+          ) -Wait -PassThru -NoNewWindow
+          if (Test-Path -LiteralPath $logPath) { Get-Content -LiteralPath $logPath }
+          if ($process.ExitCode -ne 0) {
+            throw "Godot project import failed with exit code $($process.ExitCode)"
+          }
 
       - name: Run production TerritoryUnit catalog gate
         shell: pwsh
