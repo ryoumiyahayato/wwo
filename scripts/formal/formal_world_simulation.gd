@@ -876,7 +876,7 @@ func _formal_population_total(population_territory_id: String) -> int:
 
 func _configure_spatial_composition() -> bool:
 	# Ownership closure: until a source-backed sealed TerritoryUnitCatalog exists,
-	# VNextTerritorialControlLedger is deliberately not production-composed.
+	# the alternate territory-control ledger remains outside Formal production.
 	# Current controller facts therefore have exactly one writable production
 	# owner: this SpatialWorld's legacy-place territorial state.
 	if TERRITORIAL_CONTROL_LEDGER_PRODUCTION_COMPOSED:
