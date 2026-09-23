@@ -215,7 +215,13 @@ func _source_hash_status(record: VNextTerritorySourceRecord) -> String:
 		return "RESOURCE_MISSING"
 	if declared_hash.is_empty():
 		return ADMISSION.UNRESOLVED
-	return ADMISSION.PASS if FileAccess.get_sha256(local_path) == declared_hash else "HASH_MISMATCH"
+	var actual_hash: String
+	if local_path.get_extension().to_lower() == "json":
+		var canonical_text := FileAccess.get_file_as_string(local_path).replace("\r\n", "\n").replace("\r", "\n")
+		actual_hash = canonical_text.sha256_text()
+	else:
+		actual_hash = FileAccess.get_sha256(local_path)
+	return ADMISSION.PASS if actual_hash == declared_hash else "HASH_MISMATCH"
 
 
 func _derivation_traceability_status(
