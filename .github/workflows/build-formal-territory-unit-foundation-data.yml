@@ -1,0 +1,58 @@
+name: Build Formal TerritoryUnit foundation data
+
+on:
+  push:
+    branches:
+      - feature/formal-territory-unit-foundation
+    paths:
+      - "tools/historical_data/build_1900_territory_adjacency.py"
+      - ".github/workflows/build-formal-territory-unit-foundation-data.yml"
+      - "scripts/formal/formal_world_simulation.gd"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/formal-territory-unit-foundation
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install geometry dependency
+        run: python -m pip install --disable-pip-version-check "shapely==2.1.2"
+
+      - name: Build source-derived TerritoryUnit adjacency
+        run: python -B tools/historical_data/build_1900_territory_adjacency.py --root .
+
+      - name: Refresh world-data audit manifests affected by Formal composition
+        run: |
+          python -B tools/world_data/build_batch3_contracts.py --root . --output-dir local-artifacts/world-data-audit
+          python -B tools/world_data/build_batch4_run_manifest.py --root . --output-dir local-artifacts/world-data-audit
+
+      - name: Commit generated deterministic artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            data/vnext/territory/cshapes_1900_land_adjacency.json \
+            local-artifacts/world-data-audit/batch3_loader_contract.json \
+            local-artifacts/world-data-audit/batch4_run_manifest.json
+          if git diff --cached --quiet; then
+            echo "Generated TerritoryUnit foundation artifacts are current"
+            exit 0
+          fi
+          git commit -m "chore: generate production territory identity artifacts"
+          git push origin HEAD:feature/formal-territory-unit-foundation

@@ -12,7 +12,8 @@ const SCHEMA_ID: String = "formal_world_simulation_v10"
 const PREVIOUS_SCHEMA_ID: String = "formal_world_simulation_v8"
 const SPATIAL_BASELINE_SCHEMA_ID: String = "formal_world_simulation_v9"
 const TERRITORIAL_CONTROL_OWNER: String = "VNextSpatialWorld"
-const TERRITORY_AUTHORITY_PRODUCTION_STATUS: String = "SPATIAL_LEGACY_PLACE_AUTHORITY__TERRITORIAL_CONTROL_LEDGER_NON_PRODUCTION_UNCOMPOSED"
+const TERRITORY_AUTHORITY_PRODUCTION_STATUS: String = "SPATIAL_LEGACY_PLACE_CONTROL__TERRITORY_UNIT_CATALOG_PRODUCTION_IDENTITY_ONLY__TERRITORIAL_CONTROL_LEDGER_NON_PRODUCTION_UNCOMPOSED"
+const TERRITORY_UNIT_CATALOG_PRODUCTION_COMPOSED: bool = true
 const TERRITORIAL_CONTROL_LEDGER_PRODUCTION_COMPOSED: bool = false
 const ORGANIZATION_BASELINE_SCHEMA_ID: String = "formal_world_simulation_v7"
 const FORMAL_PERSON_SCHEMA_ID: String = "formal_world_simulation_v6"
@@ -37,6 +38,8 @@ var _market_registry_view := FormalWorldMarketView.new()
 var _economy := FormalWorldEconomyService.new()
 var _spatial_catalog := VNextSpatialCatalog.new()
 var _spatial_world: VNextSpatialWorld = null
+var _territory_catalog_provider := VNextProductionTerritoryUnitCatalogProvider.new()
+var _territory_unit_catalog: VNextTerritoryUnitCatalog = null
 var _person_authority: VNextNamedPersonOverlay = null
 var _player_state := VNextPlayerState.new()
 var _organization: VNextOrganizationCore = null
@@ -152,6 +155,9 @@ func initialize() -> bool:
 	if not _configure_spatial_composition():
 		initialized = false
 		return false
+	if not _configure_territory_identity_composition():
+		initialized = false
+		return false
 	if not _configure_formal_person_composition():
 		initialized = false
 		return false
@@ -206,6 +212,26 @@ func economy_view() -> FormalWorldEconomyView:
 	if not _economy.is_configured():
 		return FormalWorldEconomyView.new()
 	return FormalWorldEconomyView.new(_economy.read_only_snapshot())
+
+
+func territory_unit_catalog() -> VNextTerritoryUnitCatalog:
+	return _territory_unit_catalog if _territory_unit_catalog != null and _territory_unit_catalog.is_sealed() else null
+
+
+func territory_unit_catalog_binding() -> Dictionary:
+	return _territory_unit_catalog.binding() if _territory_unit_catalog != null else {}
+
+
+func territory_unit_catalog_fingerprint() -> String:
+	return _territory_unit_catalog.fingerprint() if _territory_unit_catalog != null else ""
+
+
+func territory_unit_count() -> int:
+	return _territory_unit_catalog.unit_count() if _territory_unit_catalog != null else 0
+
+
+func territory_unit_id_for_political_unit(political_unit_id: String) -> String:
+	return _territory_catalog_provider.territory_unit_id_for_political_unit(political_unit_id) if _territory_catalog_provider != null else ""
 
 
 func _organization_responsibility_economy_view() -> FormalWorldEconomyView:
@@ -561,17 +587,20 @@ func authoritative_fingerprint() -> String:
 		or _spatial_world == null
 		or not _spatial_world.is_valid()
 		or _spatial_world.current_hour() != _authoritative_total_hour()
+		or _territory_unit_catalog == null
+		or not _territory_unit_catalog.is_sealed()
 		or _military_state == null
 	):
 		return ""
 	return JSON.stringify({
-		"schema_id": "formal_world_authoritative_fingerprint_v6",
+		"schema_id": "formal_world_authoritative_fingerprint_v7",
 		"total_minutes": total_minutes,
 		"historical_evidence": _historical_evidence.fingerprint(),
 		"runtime_politics": JSON.stringify(_political_registry.snapshot()).sha256_text(),
 		"markets": JSON.stringify(_market_registry.get_persistent_state()).sha256_text(),
 		"economy": JSON.stringify(_economy.get_persistent_state()).sha256_text(),
 		"spatial": spatial_authoritative_fingerprint(),
+		"territory_identity": _territory_unit_catalog.fingerprint(),
 		"persons": _person_authority.state_fingerprint(),
 		"player": JSON.stringify(_player_state.snapshot()).sha256_text(),
 		"organization": _organization.state_fingerprint(),
@@ -794,6 +823,8 @@ func _adopt_candidate(candidate: FormalWorldSimulation) -> void:
 	_economy = candidate._economy
 	_spatial_catalog = candidate._spatial_catalog
 	_spatial_world = candidate._spatial_world
+	_territory_catalog_provider = candidate._territory_catalog_provider
+	_territory_unit_catalog = candidate._territory_unit_catalog
 	_person_authority = candidate._person_authority
 	var person_population_query_rebound := (
 		_person_authority != null
@@ -875,10 +906,9 @@ func _formal_population_total(population_territory_id: String) -> int:
 
 
 func _configure_spatial_composition() -> bool:
-	# Ownership closure: until a source-backed sealed TerritoryUnitCatalog exists,
-	# the alternate territory-control ledger remains outside Formal production.
-	# Current controller facts therefore have exactly one writable production
-	# owner: this SpatialWorld's legacy-place territorial state.
+	# TerritoryUnit identity is immutable and separate from mutable controller state.
+	# The alternate territorial-control ledger remains uncomposed so controller
+	# facts still have exactly one writable production owner: SpatialWorld.
 	if TERRITORIAL_CONTROL_LEDGER_PRODUCTION_COMPOSED:
 		initialization_error = "Duplicate production territorial-control authority is forbidden"
 		return false
@@ -890,6 +920,23 @@ func _configure_spatial_composition() -> bool:
 		initialization_error = "Formal Spatial authority could not be composed"
 		return false
 	return _spatial_world.current_hour() == _authoritative_total_hour()
+
+
+func _configure_territory_identity_composition() -> bool:
+	if not TERRITORY_UNIT_CATALOG_PRODUCTION_COMPOSED:
+		initialization_error = "Formal production TerritoryUnit identity is disabled"
+		return false
+	_territory_catalog_provider = VNextProductionTerritoryUnitCatalogProvider.new()
+	if not _territory_catalog_provider.load():
+		initialization_error = "Formal TerritoryUnit catalog could not load: %s" % (
+			"; ".join(_territory_catalog_provider.errors())
+		)
+		return false
+	_territory_unit_catalog = _territory_catalog_provider.catalog()
+	if _territory_unit_catalog == null or not _territory_unit_catalog.is_sealed():
+		initialization_error = "Formal TerritoryUnit catalog did not seal"
+		return false
+	return _territory_unit_catalog.unit_count() > 0
 
 
 func _configure_formal_person_composition() -> bool:

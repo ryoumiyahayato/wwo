@@ -1,0 +1,119 @@
+name: Formal TerritoryUnit identity foundation
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/formal-territory-unit-foundation.yml"
+      - "data/vnext/territory/**"
+      - "data/world_map/historical/cshapes_1900_snapshot.json"
+      - "data/world_map/historical/political_units_1900.json"
+      - "scripts/vnext/territory/**"
+      - "scripts/formal/**"
+      - "tests/vnext/territory/**"
+      - "tests/formal/**"
+      - "tools/historical_data/build_1900_territory_adjacency.py"
+      - "tools/run_vnext_validation.py"
+      - "tools/run_validation.ps1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formal-territory-unit-foundation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout exact feature head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact validation head
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $expected = "${{ github.event.pull_request.head.sha || github.sha }}"
+          $actual = (git rev-parse HEAD).Trim()
+          if ($actual -ne $expected) { throw "Validation checked out $actual but expected $expected" }
+
+      - name: Check feature diff whitespace
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          git fetch origin feature/formal-spatial-authority-integration --no-tags
+          git diff --check origin/feature/formal-spatial-authority-integration...HEAD
+          if ($LASTEXITCODE -ne 0) { throw 'Feature diff whitespace check failed' }
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Verify generated adjacency is exact
+        shell: pwsh
+        run: |
+          python -m pip install --disable-pip-version-check "shapely==2.1.2"
+          python -B tools/historical_data/build_1900_territory_adjacency.py --root . --check
+          if ($LASTEXITCODE -ne 0) { throw 'TerritoryUnit adjacency replay failed' }
+
+      - name: Install Godot 4.6.3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'godot.zip'
+          $install = Join-Path $env:RUNNER_TEMP 'godot-4.6.3'
+          Invoke-WebRequest -Uri 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip' -OutFile $archive
+          Expand-Archive -LiteralPath $archive -DestinationPath $install
+          $binary = (Get-ChildItem -LiteralPath $install -Filter 'Godot_v4.6.3-stable_win64.exe' -Recurse | Select-Object -First 1).FullName
+          if (-not $binary) { throw 'Godot 4.6.3 executable was not found' }
+          "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          & $binary --version
+
+      - name: Prime Godot script class cache
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & $env:GODOT_BIN --headless --editor --path . --quit
+          if ($LASTEXITCODE -ne 0) { throw 'Godot project import failed' }
+
+      - name: Run production TerritoryUnit catalog gate
+        shell: pwsh
+        run: |
+          & $env:GODOT_BIN --headless --audio-driver Dummy --path . --script res://tests/vnext/territory/production_territory_unit_catalog_test.gd
+          if ($LASTEXITCODE -ne 0) { throw 'Production TerritoryUnit catalog gate failed' }
+
+      - name: Run Formal Territory identity composition gate
+        shell: pwsh
+        run: |
+          & $env:GODOT_BIN --headless --audio-driver Dummy --path . --script res://tests/formal/formal_territory_identity_foundation_test.gd
+          if ($LASTEXITCODE -ne 0) { throw 'Formal Territory identity composition gate failed' }
+
+      - name: Run vNext focused validation
+        shell: pwsh
+        run: |
+          python -B tools/run_vnext_validation.py --root . --godot "$env:GODOT_BIN" --suite focused
+          if ($LASTEXITCODE -ne 0) { throw 'vNext focused validation failed' }
+
+      - name: Run Formal exact persistence
+        shell: pwsh
+        run: |
+          & $env:GODOT_BIN --headless --path . --script res://tests/formal/formal_exact_persistence_roundtrip_test.gd
+          if ($LASTEXITCODE -ne 0) { throw 'Formal exact persistence failed' }
+
+      - name: Run Formal Spatial regression
+        shell: pwsh
+        run: |
+          & $env:GODOT_BIN --headless --audio-driver Dummy --path . --script res://tests/formal/formal_spatial_authority_integration_test.gd
+          if ($LASTEXITCODE -ne 0) { throw 'Formal Spatial regression failed' }
+
+      - name: Run full repository validation
+        shell: pwsh
+        run: |
+          & powershell -ExecutionPolicy Bypass -File tools/run_validation.ps1 -GodotPath $env:GODOT_BIN
+          if ($LASTEXITCODE -ne 0) { throw 'Full repository validation failed' }
