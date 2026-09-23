@@ -279,7 +279,10 @@ func _test_detached_reads() -> void:
 
 func _test_live_registry_classification_and_audit() -> void:
 	var live := VNextTerritorySourceRegistry.new()
-	_check(live.configure_from_path(), "live production evidence registry configures")
+	var live_configured := live.configure_from_path()
+	if not live_configured:
+		print("LIVE_TERRITORY_SOURCE_REGISTRY_ERRORS=%s" % JSON.stringify(live.errors()))
+	_check(live_configured, "live production evidence registry configures")
 	if not live.is_configured():
 		return
 
