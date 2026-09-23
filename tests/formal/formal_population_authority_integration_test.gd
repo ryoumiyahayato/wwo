@@ -24,6 +24,7 @@ func _run() -> void:
 	_test_production_composition_and_evidence_mapping()
 	_test_transfer_conservation_and_consumer_boundaries()
 	_test_population_restore_atomicity_and_fingerprint()
+	_test_mutated_population_save_load_continuation_equivalence()
 	_test_v10_deterministic_population_baseline_migration()
 	_test_owner_surface()
 	print("Formal Population authority integration: %d checks, %d failures" % [checks, failures])
@@ -181,6 +182,87 @@ func _test_population_restore_atomicity_and_fingerprint() -> void:
 	_check(not world.restore_persistent_state(malformed), "corrupted Population snapshot is rejected atomically")
 	_equal(world.get_persistent_state(), before, "failed Population restore leaves whole Formal state unchanged")
 	_equal(world.authoritative_fingerprint(), before_fingerprint, "failed Population restore leaves whole Formal fingerprint unchanged")
+
+
+func _test_mutated_population_save_load_continuation_equivalence() -> void:
+	_cleanup_formal_save()
+	var uninterrupted := FormalWorldSimulation.new()
+	_check(
+		uninterrupted.initialize(),
+		"mutated Population continuation source initializes"
+	)
+	if not uninterrupted.initialized:
+		_cleanup_formal_save()
+		return
+	var transfer := uninterrupted.prepare_population_transfer(
+		FRANCE_TERRITORY, US_TERRITORY, 123, uninterrupted.population_revision()
+	)
+	_check(
+		transfer != null and uninterrupted.adopt_population_candidate(transfer),
+		"mutated Population continuation source adopts transfer before save"
+	)
+	uninterrupted.advance_minutes(73)
+	var midpoint_population := uninterrupted.population_snapshot()
+	var midpoint_population_fingerprint := (
+		uninterrupted.population_authoritative_fingerprint()
+	)
+	var save_result := uninterrupted.save_to_user()
+	_check(
+		save_result.success,
+		"mutated Population state saves through production Formal persistence"
+	)
+	if not save_result.success:
+		_cleanup_formal_save()
+		return
+
+	var restored := FormalWorldSimulation.new()
+	var load_result := restored.load_from_user()
+	_check(
+		load_result.success,
+		"mutated Population state loads through production Formal persistence"
+	)
+	if not load_result.success:
+		_cleanup_formal_save()
+		return
+	_equal(
+		restored.population_snapshot(),
+		midpoint_population,
+		"mutated Population snapshot is exact immediately after save/load"
+	)
+	_equal(
+		restored.population_authoritative_fingerprint(),
+		midpoint_population_fingerprint,
+		"mutated Population fingerprint is exact immediately after save/load"
+	)
+
+	var continuation_minutes := 49 * 60 + 17
+	uninterrupted.advance_minutes(continuation_minutes)
+	restored.advance_minutes(continuation_minutes)
+	_equal(
+		restored.get_persistent_state(),
+		uninterrupted.get_persistent_state(),
+		"mutated Population save/load continuation equals uninterrupted continuation"
+	)
+	_equal(
+		restored.authoritative_fingerprint(),
+		uninterrupted.authoritative_fingerprint(),
+		"mutated Population continuation preserves complete Formal fingerprint equivalence"
+	)
+	_equal(
+		restored.population_authoritative_fingerprint(),
+		uninterrupted.population_authoritative_fingerprint(),
+		"Population authority fingerprint remains continuation-equivalent"
+	)
+	_cleanup_formal_save()
+
+
+func _cleanup_formal_save() -> void:
+	for path: String in [
+		FormalWorldSimulation.SAVE_PATH,
+		FormalWorldSimulation.SAVE_PATH + AtomicJsonFileStore.BACKUP_SUFFIX,
+	]:
+		if FileAccess.file_exists(path):
+			DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
 
 
 func _test_v10_deterministic_population_baseline_migration() -> void:
