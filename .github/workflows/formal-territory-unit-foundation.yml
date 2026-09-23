@@ -126,8 +126,16 @@ jobs:
       - name: Run Formal exact persistence
         shell: pwsh
         run: |
-          & $env:GODOT_BIN --headless --path . --script res://tests/formal/formal_exact_persistence_roundtrip_test.gd
-          if ($LASTEXITCODE -ne 0) { throw 'Formal exact persistence failed' }
+          $ErrorActionPreference = 'Stop'
+          $logPath = 'builds/formal-territory-unit/formal_exact_persistence.log'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--path', '.',
+            '--script', 'res://tests/formal/formal_exact_persistence_roundtrip_test.gd',
+            '--log-file', $logPath
+          ) -Wait -PassThru -NoNewWindow
+          if (Test-Path -LiteralPath $logPath) { Get-Content -LiteralPath $logPath }
+          Write-Host "GODOT_EXACT_PERSISTENCE_EXIT_CODE=$($process.ExitCode)"
+          if ($process.ExitCode -ne 0) { throw 'Formal exact persistence failed' }
 
       - name: Run Formal Spatial regression
         shell: pwsh
