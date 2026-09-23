@@ -54,6 +54,34 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Refresh official world-data audit for territory registry
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $root = (Get-Location).Path
+          $output = Join-Path $root 'local-artifacts/world-data-audit'
+
+          python tools/world_data/validate_world_data.py --root $root --data-root (Join-Path $root 'data/world_map') --output-dir $output --allow-errors
+          if ($LASTEXITCODE -ne 0) { throw 'validate_world_data failed' }
+          python tools/world_data/build_batch2_artifacts.py --root $root --output-dir $output
+          if ($LASTEXITCODE -ne 0) { throw 'build_batch2_artifacts failed' }
+          python tools/world_data/build_batch3_contracts.py --root $root --output-dir $output
+          if ($LASTEXITCODE -ne 0) { throw 'build_batch3_contracts failed' }
+          python tools/world_data/build_batch4_run_manifest.py --root $root --output-dir $output
+          if ($LASTEXITCODE -ne 0) { throw 'build_batch4_run_manifest failed' }
+
+          python -m unittest discover -s tests/world_data -p 'test_*.py' -v
+          if ($LASTEXITCODE -ne 0) { throw 'world-data regression suite failed after refresh' }
+          python -c "import json,pathlib; p=pathlib.Path('local-artifacts/world-data-audit/batch4_run_manifest.json'); x=json.loads(p.read_text(encoding='utf-8')); g=x['final_gates']; assert x['authoritative_source_modified'] is False; assert g['json_parse_errors']==0; assert g['loader_contract_gaps']==0; print('authoritative_source_modified=false'); print('json_parse_errors=0'); print('loader_contract_gaps=0')"
+          if ($LASTEXITCODE -ne 0) { throw 'world-data final gates failed after refresh' }
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add local-artifacts/world-data-audit tests/world_data/test_batch2_artifacts.py tests/world_data/test_batch3_contracts.py tests/world_data/test_batch4_run_manifest.py tests/world_data/test_validate_world_data.py
+          if (git diff --cached --quiet) { throw 'official generator produced no tracked changes' }
+          git commit -m "chore: refresh world data audit artifacts"
+          git push origin HEAD:feature/production-territory-evidence-contract
+
       - name: Install Godot 4.6.3
         shell: pwsh
         run: |
@@ -188,34 +216,6 @@ jobs:
           if ($content -notmatch 'Formal person overlay integration: ([1-9][0-9]*) checks, 0 failures') {
             throw 'Person overlay integration zero-failure summary is missing'
           }
-
-      - name: Refresh official world-data audit for territory registry
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $root = (Get-Location).Path
-          $output = Join-Path $root 'local-artifacts/world-data-audit'
-
-          python tools/world_data/validate_world_data.py --root $root --data-root (Join-Path $root 'data/world_map') --output-dir $output --allow-errors
-          if ($LASTEXITCODE -ne 0) { throw 'validate_world_data failed' }
-          python tools/world_data/build_batch2_artifacts.py --root $root --output-dir $output
-          if ($LASTEXITCODE -ne 0) { throw 'build_batch2_artifacts failed' }
-          python tools/world_data/build_batch3_contracts.py --root $root --output-dir $output
-          if ($LASTEXITCODE -ne 0) { throw 'build_batch3_contracts failed' }
-          python tools/world_data/build_batch4_run_manifest.py --root $root --output-dir $output
-          if ($LASTEXITCODE -ne 0) { throw 'build_batch4_run_manifest failed' }
-
-          python -m unittest discover -s tests/world_data -p 'test_*.py' -v
-          if ($LASTEXITCODE -ne 0) { throw 'world-data regression suite failed after refresh' }
-          python -c "import json,pathlib; p=pathlib.Path('local-artifacts/world-data-audit/batch4_run_manifest.json'); x=json.loads(p.read_text(encoding='utf-8')); g=x['final_gates']; assert x['authoritative_source_modified'] is False; assert g['json_parse_errors']==0; assert g['loader_contract_gaps']==0; print('authoritative_source_modified=false'); print('json_parse_errors=0'); print('loader_contract_gaps=0')"
-          if ($LASTEXITCODE -ne 0) { throw 'world-data final gates failed after refresh' }
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add local-artifacts/world-data-audit tests/world_data/test_batch2_artifacts.py tests/world_data/test_batch3_contracts.py tests/world_data/test_batch4_run_manifest.py tests/world_data/test_validate_world_data.py
-          if (git diff --cached --quiet) { throw 'official generator produced no tracked changes' }
-          git commit -m "chore: refresh world data audit artifacts"
-          git push origin HEAD:feature/production-territory-evidence-contract
 
       - name: Run full repository validation
         shell: pwsh
