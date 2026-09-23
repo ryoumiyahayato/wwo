@@ -12,11 +12,11 @@ func _initialize() -> void:
 func _run() -> void:
 	_test_formal_territory_identity_composition()
 	print("Formal Territory identity foundation: %d checks, %d failures" % [checks, failures])
-	if failures > 0:
-		quit(1)
-		return
-	print("FORMAL_TERRITORY_IDENTITY_FOUNDATION_COMPLETE=1")
-	quit(0)
+	var exit_code: int = 1 if failures > 0 or checks <= 0 else 0
+	if exit_code == 0:
+		print("FORMAL_TERRITORY_IDENTITY_FOUNDATION_COMPLETE=1")
+	print("FORMAL_TERRITORY_IDENTITY_FOUNDATION_EXIT_CODE=%d" % exit_code)
+	quit(exit_code)
 
 
 func _test_formal_territory_identity_composition() -> void:
