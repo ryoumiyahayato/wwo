@@ -14,12 +14,12 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	_test_v9_deterministic_baseline_migration()
 	_test_production_composition_and_ownership()
 	_test_formal_clock_partition_invariance()
 	_test_spatial_exact_restore()
 	_test_corrupted_spatial_restore_is_atomic()
 	_test_spatial_fingerprint_boundary()
-	_test_v9_deterministic_baseline_migration()
 	print("Formal Spatial authority integration: %d checks, %d failures" % [checks, failures])
 	if failures > 0:
 		quit(1)
@@ -334,4 +334,9 @@ func _check(condition: bool, label: String) -> void:
 
 
 func _equal(actual: Variant, expected: Variant, label: String) -> void:
-	_check(actual == expected, "%s | expected=%s actual=%s" % [label, str(expected), str(actual)])
+	checks += 1
+	if actual == expected:
+		print("PASS: " + label)
+		return
+	failures += 1
+	push_error("FAIL: %s | expected=%s actual=%s" % [label, str(expected), str(actual)])
