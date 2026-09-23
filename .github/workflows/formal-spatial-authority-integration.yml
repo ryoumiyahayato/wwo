@@ -92,15 +92,41 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          & $env:GODOT_BIN --headless --audio-driver Dummy --path . --script res://tests/formal/formal_spatial_authority_integration_test.gd
-          if ($LASTEXITCODE -ne 0) { throw "Formal Spatial integration failed with exit code $LASTEXITCODE" }
+          $logPath = 'builds/formal-spatial-authority/formal_spatial_authority_integration.log'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--audio-driver', 'Dummy', '--path', '.',
+            '--script', 'res://tests/formal/formal_spatial_authority_integration_test.gd',
+            '--log-file', $logPath
+          ) -Wait -PassThru -NoNewWindow
+          Get-Content -LiteralPath $logPath
+          if ($process.ExitCode -ne 0) { throw "Formal Spatial authority integration failed with exit code $($process.ExitCode)" }
+          $content = Get-Content -LiteralPath $logPath -Raw
+          if ($content -notmatch 'Formal Spatial authority integration: ([1-9][0-9]*) checks, 0 failures') {
+            throw 'Formal Spatial authority zero-failure summary is missing'
+          }
+          if ($content -notmatch 'FORMAL_SPATIAL_AUTHORITY_INTEGRATION_COMPLETE=1') {
+            throw 'Formal Spatial authority completion marker is missing'
+          }
 
       - name: Run Formal Spatial persistence integration
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          & $env:GODOT_BIN --headless --audio-driver Dummy --path . --script res://tests/formal/formal_spatial_persistence_integration_test.gd
-          if ($LASTEXITCODE -ne 0) { throw "Formal Spatial persistence integration failed with exit code $LASTEXITCODE" }
+          $logPath = 'builds/formal-spatial-authority/formal_spatial_persistence_integration.log'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--audio-driver', 'Dummy', '--path', '.',
+            '--script', 'res://tests/formal/formal_spatial_persistence_integration_test.gd',
+            '--log-file', $logPath
+          ) -Wait -PassThru -NoNewWindow
+          Get-Content -LiteralPath $logPath
+          if ($process.ExitCode -ne 0) { throw "Formal Spatial persistence integration failed with exit code $($process.ExitCode)" }
+          $content = Get-Content -LiteralPath $logPath -Raw
+          if ($content -notmatch 'Formal Spatial persistence integration: ([1-9][0-9]*) checks, 0 failures') {
+            throw 'Formal Spatial persistence zero-failure summary is missing'
+          }
+          if ($content -notmatch 'FORMAL_SPATIAL_PERSISTENCE_INTEGRATION_COMPLETE=1') {
+            throw 'Formal Spatial persistence completion marker is missing'
+          }
 
       - name: Run vNext focused validation
         shell: pwsh
@@ -113,22 +139,55 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          & $env:GODOT_BIN --headless --audio-driver Dummy --path . --script res://tests/formal/formal_exact_persistence_roundtrip_test.gd
-          if ($LASTEXITCODE -ne 0) { throw "Formal exact persistence failed with exit code $LASTEXITCODE" }
+          $logPath = 'builds/formal-spatial-authority/formal_exact_persistence.log'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--path', '.',
+            '--script', 'res://tests/formal/formal_exact_persistence_roundtrip_test.gd',
+            '--log-file', $logPath
+          ) -Wait -PassThru -NoNewWindow
+          Get-Content -LiteralPath $logPath
+          if ($process.ExitCode -ne 0) { throw "Formal exact persistence failed with exit code $($process.ExitCode)" }
+          $content = Get-Content -LiteralPath $logPath -Raw
+          if ($content -notmatch 'Formal Exact Persistence: ([1-9][0-9]*) checks, 0 failures') {
+            throw 'Formal exact persistence zero-failure summary is missing'
+          }
+          if ($content -notmatch 'FORMAL_EXACT_PERSISTENCE_COMPLETE=1') {
+            throw 'Formal exact persistence completion marker is missing'
+          }
 
       - name: Run Military integration regression
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          & $env:GODOT_BIN --headless --audio-driver Dummy --path . --script res://tests/formal/formal_military_authorized_defend_integration_test.gd
-          if ($LASTEXITCODE -ne 0) { throw "Military integration regression failed with exit code $LASTEXITCODE" }
+          $logPath = 'builds/formal-spatial-authority/formal_military_integration.log'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--audio-driver', 'Dummy', '--path', '.',
+            '--script', 'res://tests/formal/formal_military_authorized_defend_integration_test.gd',
+            '--log-file', $logPath
+          ) -Wait -PassThru -NoNewWindow
+          Get-Content -LiteralPath $logPath
+          if ($process.ExitCode -ne 0) { throw "Military integration regression failed with exit code $($process.ExitCode)" }
+          $content = Get-Content -LiteralPath $logPath -Raw
+          if ($content -notmatch 'Formal Military authorized DEFEND integration: ([1-9][0-9]*) checks, 0 failures') {
+            throw 'Military integration zero-failure summary is missing'
+          }
 
       - name: Run Person overlay integration regression
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          & $env:GODOT_BIN --headless --audio-driver Dummy --path . --script res://tests/formal/formal_person_overlay_integration_test.gd
-          if ($LASTEXITCODE -ne 0) { throw "Person overlay integration regression failed with exit code $LASTEXITCODE" }
+          $logPath = 'builds/formal-spatial-authority/formal_person_overlay_integration.log'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--audio-driver', 'Dummy', '--path', '.',
+            '--script', 'res://tests/formal/formal_person_overlay_integration_test.gd',
+            '--log-file', $logPath
+          ) -Wait -PassThru -NoNewWindow
+          Get-Content -LiteralPath $logPath
+          if ($process.ExitCode -ne 0) { throw "Person overlay integration regression failed with exit code $($process.ExitCode)" }
+          $content = Get-Content -LiteralPath $logPath -Raw
+          if ($content -notmatch 'Formal person overlay integration: ([1-9][0-9]*) checks, 0 failures') {
+            throw 'Person overlay integration zero-failure summary is missing'
+          }
 
       - name: Run full repository validation
         shell: pwsh
