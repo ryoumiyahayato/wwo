@@ -1,0 +1,1128 @@
+{
+  "derivation": {
+    "kind": "shared_boundary_on_committed_geometry",
+    "minimum_shared_boundary_degrees_exclusive": 1e-09,
+    "political_identity_used": false,
+    "population_used": false,
+    "synthetic_geometry_used": false
+  },
+  "feature_count": 151,
+  "geometry_provider": "cshapes_2_0",
+  "records": [
+    {
+      "geometry_feature_id": "gw_2",
+      "neighbor_geometry_feature_ids": [
+        "gw_20",
+        "gw_70"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_3",
+      "neighbor_geometry_feature_ids": [
+        "gw_20"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_4",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_6",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_20",
+      "neighbor_geometry_feature_ids": [
+        "gw_2",
+        "gw_3",
+        "gw_21"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_21",
+      "neighbor_geometry_feature_ids": [
+        "gw_20"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_31",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_40",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_41",
+      "neighbor_geometry_feature_ids": [
+        "gw_42"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_42",
+      "neighbor_geometry_feature_ids": [
+        "gw_41"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_51",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_52",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_53",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_65",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_66",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_70",
+      "neighbor_geometry_feature_ids": [
+        "gw_2",
+        "gw_80",
+        "gw_90"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_80",
+      "neighbor_geometry_feature_ids": [
+        "gw_70"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_90",
+      "neighbor_geometry_feature_ids": [
+        "gw_70",
+        "gw_91",
+        "gw_92"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_91",
+      "neighbor_geometry_feature_ids": [
+        "gw_90",
+        "gw_92",
+        "gw_93"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_92",
+      "neighbor_geometry_feature_ids": [
+        "gw_90",
+        "gw_91"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_93",
+      "neighbor_geometry_feature_ids": [
+        "gw_91",
+        "gw_94"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_94",
+      "neighbor_geometry_feature_ids": [
+        "gw_93",
+        "gw_100"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_100",
+      "neighbor_geometry_feature_ids": [
+        "gw_94",
+        "gw_101",
+        "gw_130",
+        "gw_135",
+        "gw_140"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_101",
+      "neighbor_geometry_feature_ids": [
+        "gw_100",
+        "gw_110",
+        "gw_140"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_110",
+      "neighbor_geometry_feature_ids": [
+        "gw_101",
+        "gw_115",
+        "gw_140"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_115",
+      "neighbor_geometry_feature_ids": [
+        "gw_110",
+        "gw_140"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_120",
+      "neighbor_geometry_feature_ids": [
+        "gw_140"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_130",
+      "neighbor_geometry_feature_ids": [
+        "gw_100",
+        "gw_135"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_135",
+      "neighbor_geometry_feature_ids": [
+        "gw_100",
+        "gw_130",
+        "gw_140",
+        "gw_145",
+        "gw_155"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_140",
+      "neighbor_geometry_feature_ids": [
+        "gw_100",
+        "gw_101",
+        "gw_110",
+        "gw_115",
+        "gw_120",
+        "gw_135",
+        "gw_145",
+        "gw_150",
+        "gw_160",
+        "gw_165"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_145",
+      "neighbor_geometry_feature_ids": [
+        "gw_135",
+        "gw_140",
+        "gw_150",
+        "gw_155",
+        "gw_160"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_150",
+      "neighbor_geometry_feature_ids": [
+        "gw_140",
+        "gw_145",
+        "gw_160"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_155",
+      "neighbor_geometry_feature_ids": [
+        "gw_135",
+        "gw_145",
+        "gw_160"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_160",
+      "neighbor_geometry_feature_ids": [
+        "gw_140",
+        "gw_145",
+        "gw_150",
+        "gw_155",
+        "gw_165"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_165",
+      "neighbor_geometry_feature_ids": [
+        "gw_140",
+        "gw_160"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_200",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_210",
+      "neighbor_geometry_feature_ids": [
+        "gw_211",
+        "gw_255"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_211",
+      "neighbor_geometry_feature_ids": [
+        "gw_210",
+        "gw_212",
+        "gw_220",
+        "gw_255"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_212",
+      "neighbor_geometry_feature_ids": [
+        "gw_211"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_220",
+      "neighbor_geometry_feature_ids": [
+        "gw_211",
+        "gw_225",
+        "gw_230",
+        "gw_255",
+        "gw_325"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_225",
+      "neighbor_geometry_feature_ids": [
+        "gw_220",
+        "gw_255",
+        "gw_300",
+        "gw_325"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_230",
+      "neighbor_geometry_feature_ids": [
+        "gw_220",
+        "gw_235"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_235",
+      "neighbor_geometry_feature_ids": [
+        "gw_230"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_255",
+      "neighbor_geometry_feature_ids": [
+        "gw_210",
+        "gw_211",
+        "gw_220",
+        "gw_225",
+        "gw_300",
+        "gw_365"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_300",
+      "neighbor_geometry_feature_ids": [
+        "gw_225",
+        "gw_255",
+        "gw_325",
+        "gw_340",
+        "gw_360",
+        "gw_365",
+        "gw_3461"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_325",
+      "neighbor_geometry_feature_ids": [
+        "gw_220",
+        "gw_225",
+        "gw_300"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_338",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_340",
+      "neighbor_geometry_feature_ids": [
+        "gw_300",
+        "gw_355",
+        "gw_640"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_341",
+      "neighbor_geometry_feature_ids": [
+        "gw_640",
+        "gw_3462"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_350",
+      "neighbor_geometry_feature_ids": [
+        "gw_640"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_355",
+      "neighbor_geometry_feature_ids": [
+        "gw_340",
+        "gw_360",
+        "gw_640"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_360",
+      "neighbor_geometry_feature_ids": [
+        "gw_300",
+        "gw_355",
+        "gw_365"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_365",
+      "neighbor_geometry_feature_ids": [
+        "gw_255",
+        "gw_300",
+        "gw_360",
+        "gw_380",
+        "gw_630",
+        "gw_640",
+        "gw_700",
+        "gw_710",
+        "gw_7020",
+        "gw_7030"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_380",
+      "neighbor_geometry_feature_ids": [
+        "gw_365"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_390",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_395",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_402",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_404",
+      "neighbor_geometry_feature_ids": [
+        "gw_433",
+        "gw_438"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_411",
+      "neighbor_geometry_feature_ids": [
+        "gw_481"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_420",
+      "neighbor_geometry_feature_ids": [
+        "gw_433"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_430",
+      "neighbor_geometry_feature_ids": [
+        "gw_433",
+        "gw_434",
+        "gw_437",
+        "gw_438",
+        "gw_452",
+        "gw_460",
+        "gw_484",
+        "gw_600",
+        "gw_610",
+        "gw_615",
+        "gw_640",
+        "gw_4784"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_433",
+      "neighbor_geometry_feature_ids": [
+        "gw_404",
+        "gw_420",
+        "gw_430",
+        "gw_438"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_434",
+      "neighbor_geometry_feature_ids": [
+        "gw_430",
+        "gw_460",
+        "gw_4784"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_437",
+      "neighbor_geometry_feature_ids": [
+        "gw_430",
+        "gw_438",
+        "gw_450",
+        "gw_452"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_438",
+      "neighbor_geometry_feature_ids": [
+        "gw_404",
+        "gw_430",
+        "gw_433",
+        "gw_437",
+        "gw_450",
+        "gw_451"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_450",
+      "neighbor_geometry_feature_ids": [
+        "gw_437",
+        "gw_438",
+        "gw_451"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_451",
+      "neighbor_geometry_feature_ids": [
+        "gw_438",
+        "gw_450"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_452",
+      "neighbor_geometry_feature_ids": [
+        "gw_430",
+        "gw_437",
+        "gw_460"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_460",
+      "neighbor_geometry_feature_ids": [
+        "gw_430",
+        "gw_434",
+        "gw_452"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_470",
+      "neighbor_geometry_feature_ids": [
+        "gw_481",
+        "gw_484",
+        "gw_4783",
+        "gw_4784"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_481",
+      "neighbor_geometry_feature_ids": [
+        "gw_411",
+        "gw_470",
+        "gw_484"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_484",
+      "neighbor_geometry_feature_ids": [
+        "gw_430",
+        "gw_470",
+        "gw_481",
+        "gw_490",
+        "gw_625"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_490",
+      "neighbor_geometry_feature_ids": [
+        "gw_484",
+        "gw_500",
+        "gw_510",
+        "gw_540",
+        "gw_625",
+        "gw_5518",
+        "gw_5519"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_500",
+      "neighbor_geometry_feature_ids": [
+        "gw_490",
+        "gw_501",
+        "gw_510",
+        "gw_625"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_501",
+      "neighbor_geometry_feature_ids": [
+        "gw_500",
+        "gw_530",
+        "gw_625",
+        "gw_5200"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_510",
+      "neighbor_geometry_feature_ids": [
+        "gw_490",
+        "gw_500",
+        "gw_541",
+        "gw_553",
+        "gw_5518"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_511",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_521",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_522",
+      "neighbor_geometry_feature_ids": [
+        "gw_530",
+        "gw_531"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_530",
+      "neighbor_geometry_feature_ids": [
+        "gw_501",
+        "gw_522",
+        "gw_531",
+        "gw_625",
+        "gw_5200"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_531",
+      "neighbor_geometry_feature_ids": [
+        "gw_522",
+        "gw_530",
+        "gw_625"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_540",
+      "neighbor_geometry_feature_ids": [
+        "gw_490",
+        "gw_565",
+        "gw_5519"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_541",
+      "neighbor_geometry_feature_ids": [
+        "gw_510",
+        "gw_552",
+        "gw_553",
+        "gw_563",
+        "gw_572"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_552",
+      "neighbor_geometry_feature_ids": [
+        "gw_541",
+        "gw_563",
+        "gw_571",
+        "gw_5519"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_553",
+      "neighbor_geometry_feature_ids": [
+        "gw_510",
+        "gw_541",
+        "gw_5518"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_561",
+      "neighbor_geometry_feature_ids": [
+        "gw_562",
+        "gw_563",
+        "gw_564",
+        "gw_565",
+        "gw_570",
+        "gw_571"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_562",
+      "neighbor_geometry_feature_ids": [
+        "gw_561",
+        "gw_563",
+        "gw_564"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_563",
+      "neighbor_geometry_feature_ids": [
+        "gw_541",
+        "gw_552",
+        "gw_561",
+        "gw_562",
+        "gw_564",
+        "gw_571",
+        "gw_572"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_564",
+      "neighbor_geometry_feature_ids": [
+        "gw_561",
+        "gw_562",
+        "gw_563",
+        "gw_570"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_565",
+      "neighbor_geometry_feature_ids": [
+        "gw_540",
+        "gw_561",
+        "gw_571"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_570",
+      "neighbor_geometry_feature_ids": [
+        "gw_561",
+        "gw_564"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_571",
+      "neighbor_geometry_feature_ids": [
+        "gw_552",
+        "gw_561",
+        "gw_563",
+        "gw_565"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_572",
+      "neighbor_geometry_feature_ids": [
+        "gw_541",
+        "gw_563"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_580",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_585",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_590",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_600",
+      "neighbor_geometry_feature_ids": [
+        "gw_430",
+        "gw_615"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_610",
+      "neighbor_geometry_feature_ids": [
+        "gw_430"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_615",
+      "neighbor_geometry_feature_ids": [
+        "gw_430",
+        "gw_600",
+        "gw_616"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_616",
+      "neighbor_geometry_feature_ids": [
+        "gw_615",
+        "gw_640"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_625",
+      "neighbor_geometry_feature_ids": [
+        "gw_484",
+        "gw_490",
+        "gw_500",
+        "gw_501",
+        "gw_530",
+        "gw_531",
+        "gw_651"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_630",
+      "neighbor_geometry_feature_ids": [
+        "gw_365",
+        "gw_640",
+        "gw_700",
+        "gw_750"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_640",
+      "neighbor_geometry_feature_ids": [
+        "gw_340",
+        "gw_341",
+        "gw_350",
+        "gw_355",
+        "gw_365",
+        "gw_430",
+        "gw_616",
+        "gw_630",
+        "gw_651"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_651",
+      "neighbor_geometry_feature_ids": [
+        "gw_625",
+        "gw_640"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_696",
+      "neighbor_geometry_feature_ids": [
+        "gw_698"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_698",
+      "neighbor_geometry_feature_ids": [
+        "gw_696"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_700",
+      "neighbor_geometry_feature_ids": [
+        "gw_365",
+        "gw_630",
+        "gw_750",
+        "gw_7020"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_710",
+      "neighbor_geometry_feature_ids": [
+        "gw_365",
+        "gw_730",
+        "gw_750",
+        "gw_760",
+        "gw_790",
+        "gw_812",
+        "gw_815"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_713",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_730",
+      "neighbor_geometry_feature_ids": [
+        "gw_710"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_740",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_750",
+      "neighbor_geometry_feature_ids": [
+        "gw_630",
+        "gw_700",
+        "gw_710",
+        "gw_760",
+        "gw_790",
+        "gw_800",
+        "gw_812"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_760",
+      "neighbor_geometry_feature_ids": [
+        "gw_710",
+        "gw_750"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_780",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_781",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_790",
+      "neighbor_geometry_feature_ids": [
+        "gw_710",
+        "gw_750"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_800",
+      "neighbor_geometry_feature_ids": [
+        "gw_750",
+        "gw_811",
+        "gw_812",
+        "gw_821",
+        "gw_827"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_811",
+      "neighbor_geometry_feature_ids": [
+        "gw_800",
+        "gw_812",
+        "gw_815"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_812",
+      "neighbor_geometry_feature_ids": [
+        "gw_710",
+        "gw_750",
+        "gw_800",
+        "gw_811",
+        "gw_815"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_815",
+      "neighbor_geometry_feature_ids": [
+        "gw_710",
+        "gw_811",
+        "gw_812"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_821",
+      "neighbor_geometry_feature_ids": [
+        "gw_800",
+        "gw_822",
+        "gw_827"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_822",
+      "neighbor_geometry_feature_ids": [
+        "gw_821"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_823",
+      "neighbor_geometry_feature_ids": [
+        "gw_850"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_824",
+      "neighbor_geometry_feature_ids": [
+        "gw_835",
+        "gw_850"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_827",
+      "neighbor_geometry_feature_ids": [
+        "gw_800",
+        "gw_821"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_835",
+      "neighbor_geometry_feature_ids": [
+        "gw_824"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_840",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_850",
+      "neighbor_geometry_feature_ids": [
+        "gw_823",
+        "gw_824",
+        "gw_911"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_860",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_901",
+      "neighbor_geometry_feature_ids": [
+        "gw_904",
+        "gw_905"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_902",
+      "neighbor_geometry_feature_ids": [
+        "gw_903"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_903",
+      "neighbor_geometry_feature_ids": [
+        "gw_902",
+        "gw_905"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_904",
+      "neighbor_geometry_feature_ids": [
+        "gw_901"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_905",
+      "neighbor_geometry_feature_ids": [
+        "gw_901",
+        "gw_903"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_906",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_911",
+      "neighbor_geometry_feature_ids": [
+        "gw_850",
+        "gw_912"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_912",
+      "neighbor_geometry_feature_ids": [
+        "gw_911"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_920",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_930",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_940",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_950",
+      "neighbor_geometry_feature_ids": []
+    },
+    {
+      "geometry_feature_id": "gw_3461",
+      "neighbor_geometry_feature_ids": [
+        "gw_300"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_3462",
+      "neighbor_geometry_feature_ids": [
+        "gw_341"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_4781",
+      "neighbor_geometry_feature_ids": [
+        "gw_4783",
+        "gw_4784"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_4783",
+      "neighbor_geometry_feature_ids": [
+        "gw_470",
+        "gw_4781",
+        "gw_4784"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_4784",
+      "neighbor_geometry_feature_ids": [
+        "gw_430",
+        "gw_434",
+        "gw_470",
+        "gw_4781",
+        "gw_4783"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_5200",
+      "neighbor_geometry_feature_ids": [
+        "gw_501",
+        "gw_530"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_5518",
+      "neighbor_geometry_feature_ids": [
+        "gw_490",
+        "gw_510",
+        "gw_553",
+        "gw_5519"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_5519",
+      "neighbor_geometry_feature_ids": [
+        "gw_490",
+        "gw_540",
+        "gw_552",
+        "gw_5518"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_7020",
+      "neighbor_geometry_feature_ids": [
+        "gw_365",
+        "gw_700",
+        "gw_7030"
+      ]
+    },
+    {
+      "geometry_feature_id": "gw_7030",
+      "neighbor_geometry_feature_ids": [
+        "gw_365",
+        "gw_7020"
+      ]
+    }
+  ],
+  "schema_id": "cshapes_1900_land_adjacency_v1",
+  "snapshot_date": "1900-03-12",
+  "source_dataset_sha256": "384b1ea90b9419f30a858d7ec237c85a22c60d1b35b5f85f215a1204f9989d42",
+  "undirected_edge_count": 193
+}
