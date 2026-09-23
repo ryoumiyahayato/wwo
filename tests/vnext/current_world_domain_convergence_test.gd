@@ -122,9 +122,24 @@ func _run() -> void:
 	var formal_source: String = FileAccess.get_file_as_string(
 		"res://scripts/formal/formal_world_simulation.gd"
 	)
+	var population_service_source: String = FileAccess.get_file_as_string(
+		"res://scripts/formal/formal_world_population_authority_service.gd"
+	)
+	_check(
+		formal_source.contains("FormalWorldPopulationAuthorityService"),
+		"Formal composes the Current World Population authority service"
+	)
+	_check(
+		population_service_source.contains("VNextPopulationAuthority"),
+		"Formal Population service owns the composed VNextPopulationAuthority"
+	)
+	_check(
+		not formal_source.contains("VNextMacroPopulation")
+		and not population_service_source.contains("VNextMacroPopulation"),
+		"VNextMacroPopulation remains uncomposed"
+	)
 	for domain_type: String in [
 		"VNextTerritorialControlLedger",
-		"VNextPopulationAuthority",
 		"VNextEconomicGeographyService",
 	]:
 		_check(not formal_source.contains(domain_type), "%s is not composed into Formal" % domain_type)

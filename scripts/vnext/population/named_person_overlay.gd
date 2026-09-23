@@ -174,12 +174,11 @@ func materialize(
 
 
 func anonymous_population_for_territory(population_territory_id: String) -> int:
+	## Named Person records are overlays/references, not units removed from POP.
+	## Keep this compatibility query equal to the authoritative aggregate total.
 	if not is_configured():
 		return -1
-	var total := _population_total_for(population_territory_id)
-	if total < 0:
-		return -1
-	return total - _active_claimed_count_for_territory(population_territory_id)
+	return _population_total_for(population_territory_id)
 
 
 func snapshot() -> Dictionary:

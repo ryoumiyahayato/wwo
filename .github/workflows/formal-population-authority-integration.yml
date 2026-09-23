@@ -1,0 +1,160 @@
+name: Formal Population authority integration
+
+on:
+  pull_request:
+    branches:
+      - feature/formal-territory-unit-foundation
+    paths:
+      - ".github/workflows/formal-population-authority-integration.yml"
+      - "scripts/formal/**"
+      - "scripts/vnext/population/**"
+      - "scripts/vnext/territory/**"
+      - "tests/formal/**"
+      - "tests/vnext/**"
+      - "tools/run_vnext_validation.py"
+      - "tools/run_validation.ps1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formal-population-authority-integration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout exact feature head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact validation head
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $expected = "${{ github.event.pull_request.head.sha || github.sha }}"
+          $actual = (git rev-parse HEAD).Trim()
+          if ($actual -ne $expected) { throw "Validation checked out $actual but expected $expected" }
+
+      - name: Check Population diff whitespace
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          git fetch origin feature/formal-territory-unit-foundation --no-tags
+          git diff --check origin/feature/formal-territory-unit-foundation...HEAD
+          if ($LASTEXITCODE -ne 0) { throw 'Population feature diff whitespace check failed' }
+
+      - name: Install Godot 4.6.3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'godot.zip'
+          $install = Join-Path $env:RUNNER_TEMP 'godot-4.6.3'
+          Invoke-WebRequest -Uri 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip' -OutFile $archive
+          Expand-Archive -LiteralPath $archive -DestinationPath $install
+          $binary = (Get-ChildItem -LiteralPath $install -Filter 'Godot_v4.6.3-stable_win64.exe' -Recurse | Select-Object -First 1).FullName
+          if (-not $binary) { throw 'Godot 4.6.3 executable was not found' }
+          "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          & $binary --version
+
+      - name: Prepare isolated user data
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $userDataRoot = Join-Path $env:RUNNER_TEMP 'formal-population-authority-user-data'
+          if (Test-Path -LiteralPath $userDataRoot) { Remove-Item -LiteralPath $userDataRoot -Recurse -Force }
+          New-Item -ItemType Directory -Force -Path $userDataRoot | Out-Null
+          "APPDATA=$userDataRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          New-Item -ItemType Directory -Force -Path builds/formal-population-authority | Out-Null
+
+      - name: Prime Godot script class cache
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $logPath = 'builds/formal-population-authority/godot_import.log'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--editor', '--path', '.', '--quit', '--log-file', $logPath
+          ) -Wait -PassThru -NoNewWindow
+          if (Test-Path -LiteralPath $logPath) { Get-Content -LiteralPath $logPath }
+          if ($process.ExitCode -ne 0) { throw "Godot project import failed with exit code $($process.ExitCode)" }
+
+      - name: Run Formal Population authority integration
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $logPath = 'builds/formal-population-authority/formal_population_authority.log'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--audio-driver', 'Dummy', '--path', '.',
+            '--script', 'res://tests/formal/formal_population_authority_integration_test.gd',
+            '--log-file', $logPath
+          ) -Wait -PassThru -NoNewWindow
+          if (Test-Path -LiteralPath $logPath) { Get-Content -LiteralPath $logPath }
+          if ($process.ExitCode -ne 0) { throw 'Formal Population authority integration failed' }
+          $text = Get-Content -LiteralPath $logPath -Raw
+          if ($text -notmatch 'FORMAL_POPULATION_AUTHORITY_INTEGRATION_COMPLETE=1') {
+            throw 'Formal Population completion marker is missing'
+          }
+
+      - name: Run vNext focused validation
+        shell: pwsh
+        run: |
+          python -B tools/run_vnext_validation.py --root . --godot "$env:GODOT_BIN" --suite focused
+          if ($LASTEXITCODE -ne 0) { throw 'vNext focused validation failed' }
+
+      - name: Run Formal exact persistence
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $logPath = 'builds/formal-population-authority/formal_exact_persistence.log'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--path', '.',
+            '--script', 'res://tests/formal/formal_exact_persistence_roundtrip_test.gd',
+            '--log-file', $logPath
+          ) -Wait -PassThru -NoNewWindow
+          if (Test-Path -LiteralPath $logPath) { Get-Content -LiteralPath $logPath }
+          if ($process.ExitCode -ne 0) { throw 'Formal exact persistence failed' }
+
+      - name: Run Person overlay regression
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $logPath = 'builds/formal-population-authority/formal_person_overlay.log'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--audio-driver', 'Dummy', '--path', '.',
+            '--script', 'res://tests/formal/formal_person_overlay_integration_test.gd',
+            '--log-file', $logPath
+          ) -Wait -PassThru -NoNewWindow
+          if (Test-Path -LiteralPath $logPath) { Get-Content -LiteralPath $logPath }
+          if ($process.ExitCode -ne 0) { throw 'Person overlay regression failed' }
+
+      - name: Run Military regression
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $logPath = 'builds/formal-population-authority/formal_military.log'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--audio-driver', 'Dummy', '--path', '.',
+            '--script', 'res://tests/formal/formal_military_authorized_defend_integration_test.gd',
+            '--log-file', $logPath
+          ) -Wait -PassThru -NoNewWindow
+          if (Test-Path -LiteralPath $logPath) { Get-Content -LiteralPath $logPath }
+          if ($process.ExitCode -ne 0) { throw 'Military regression failed' }
+
+      - name: Run full repository validation
+        shell: pwsh
+        run: |
+          & powershell -ExecutionPolicy Bypass -File tools/run_validation.ps1 -GodotPath $env:GODOT_BIN 2>&1 | Tee-Object -FilePath builds/formal-population-authority/full-validation.log
+          if ($LASTEXITCODE -ne 0) { throw 'Full repository validation failed' }
+
+      - name: Upload validation logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formal-population-authority-validation
+          path: builds/formal-population-authority/*.log
+          if-no-files-found: warn

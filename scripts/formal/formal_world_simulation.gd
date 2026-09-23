@@ -8,9 +8,10 @@ extends RefCounted
 signal state_changed(change: Dictionary)
 
 const SAVE_PATH: String = "user://formal_world_1900.json"
-const SCHEMA_ID: String = "formal_world_simulation_v10"
+const SCHEMA_ID: String = "formal_world_simulation_v11"
 const PREVIOUS_SCHEMA_ID: String = "formal_world_simulation_v8"
 const SPATIAL_BASELINE_SCHEMA_ID: String = "formal_world_simulation_v9"
+const POPULATION_BASELINE_SCHEMA_ID: String = "formal_world_simulation_v10"
 const TERRITORIAL_CONTROL_OWNER: String = "VNextSpatialWorld"
 const TERRITORY_AUTHORITY_PRODUCTION_STATUS: String = "SPATIAL_LEGACY_PLACE_CONTROL__TERRITORY_UNIT_CATALOG_PRODUCTION_IDENTITY_ONLY__TERRITORIAL_CONTROL_LEDGER_NON_PRODUCTION_UNCOMPOSED"
 const TERRITORY_UNIT_CATALOG_PRODUCTION_COMPOSED: bool = true
@@ -22,7 +23,7 @@ const ORGANIZATION_COMPOSITION_STATE_SCHEMA_ID: String = "formal_organization_co
 const EVIDENCE_STATE_SCHEMA_ID: String = "historical_political_evidence_v1"
 const DEFAULT_FORMAL_PERSON_ID: String = "person:formal_generated_country_fra_0001"
 const DEFAULT_FORMAL_PERSON_CLAIM_ID: String = "formal_population_claim:country_fra:0001"
-const DEFAULT_FORMAL_PERSON_TERRITORY_ID: String = "country_fra"
+const DEFAULT_FORMAL_PERSON_TERRITORY_ID: String = "territory_unit:gw_220"
 const DEFAULT_FORMAL_PERSON_PLACE_ID: String = "place:paris"
 
 var _provenance := HistoricalProvenanceFoundation.new()
@@ -40,6 +41,7 @@ var _spatial_catalog := VNextSpatialCatalog.new()
 var _spatial_world: VNextSpatialWorld = null
 var _territory_catalog_provider := VNextProductionTerritoryUnitCatalogProvider.new()
 var _territory_unit_catalog: VNextTerritoryUnitCatalog = null
+var _population_authority := FormalWorldPopulationAuthorityService.new()
 var _person_authority: VNextNamedPersonOverlay = null
 var _player_state := VNextPlayerState.new()
 var _organization: VNextOrganizationCore = null
@@ -158,6 +160,9 @@ func initialize() -> bool:
 	if not _configure_territory_identity_composition():
 		initialized = false
 		return false
+	if not _configure_population_authority_composition():
+		initialized = false
+		return false
 	if not _configure_formal_person_composition():
 		initialized = false
 		return false
@@ -228,6 +233,56 @@ func territory_unit_catalog_fingerprint() -> String:
 
 func territory_unit_count() -> int:
 	return _territory_unit_catalog.unit_count() if _territory_unit_catalog != null else 0
+
+
+func population_authoritative_fingerprint() -> String:
+	return _population_authority.fingerprint() if _population_authority != null else ""
+
+
+func population_snapshot() -> Dictionary:
+	return _population_authority.snapshot() if _population_authority != null else {}
+
+
+func population_revision() -> int:
+	return _population_authority.revision() if _population_authority != null else -1
+
+
+func population_initialized_territory_count() -> int:
+	return _population_authority.initialized_territory_count() if _population_authority != null else 0
+
+
+func population_uninitialized_territory_count() -> int:
+	return _population_authority.uninitialized_territory_count() if _population_authority != null else -1
+
+
+func population_unmapped_evidence_ids() -> Array[String]:
+	return _population_authority.unmapped_evidence_ids() if _population_authority != null else []
+
+
+func population_total_for_territory(territory_unit_id: String) -> int:
+	return _population_authority.population_for_territory(territory_unit_id) if _population_authority != null else -1
+
+
+func prepare_population_transfer(
+	source_territory_unit_id: String,
+	destination_territory_unit_id: String,
+	amount: Variant,
+	expected_revision: Variant
+) -> VNextPopulationCandidate:
+	if _population_authority == null:
+		return null
+	return _population_authority.prepare_transfer(
+		source_territory_unit_id,
+		destination_territory_unit_id,
+		amount,
+		expected_revision
+	)
+
+
+func adopt_population_candidate(candidate: VNextPopulationCandidate) -> bool:
+	if _population_authority == null:
+		return false
+	return _population_authority.adopt_candidate(candidate)
 
 
 func territory_unit_id_for_political_unit(political_unit_id: String) -> String:
@@ -564,6 +619,7 @@ func get_persistent_state() -> Dictionary:
 		"markets": _market_registry.get_persistent_state(),
 		"economy": _economy.get_persistent_state(),
 		"spatial": _spatial_world.snapshot(),
+		"population": _population_authority.snapshot(),
 		"persons": _person_authority.snapshot(),
 		"player": _player_state.snapshot(),
 		"organization": _organization.snapshot(),
@@ -589,11 +645,13 @@ func authoritative_fingerprint() -> String:
 		or _spatial_world.current_hour() != _authoritative_total_hour()
 		or _territory_unit_catalog == null
 		or not _territory_unit_catalog.is_sealed()
+		or _population_authority == null
+		or not _population_authority.is_configured()
 		or _military_state == null
 	):
 		return ""
 	return JSON.stringify({
-		"schema_id": "formal_world_authoritative_fingerprint_v7",
+		"schema_id": "formal_world_authoritative_fingerprint_v8",
 		"total_minutes": total_minutes,
 		"historical_evidence": _historical_evidence.fingerprint(),
 		"runtime_politics": JSON.stringify(_political_registry.snapshot()).sha256_text(),
@@ -601,6 +659,7 @@ func authoritative_fingerprint() -> String:
 		"economy": JSON.stringify(_economy.get_persistent_state()).sha256_text(),
 		"spatial": spatial_authoritative_fingerprint(),
 		"territory_identity": _territory_unit_catalog.fingerprint(),
+		"population": _population_authority.fingerprint(),
 		"persons": _person_authority.state_fingerprint(),
 		"player": JSON.stringify(_player_state.snapshot()).sha256_text(),
 		"organization": _organization.state_fingerprint(),
@@ -635,6 +694,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 			ORGANIZATION_BASELINE_SCHEMA_ID,
 			PREVIOUS_SCHEMA_ID,
 			SPATIAL_BASELINE_SCHEMA_ID,
+			POPULATION_BASELINE_SCHEMA_ID,
 			SCHEMA_ID,
 		]
 		or not state.get("economy", {}) is Dictionary
@@ -651,6 +711,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 		ORGANIZATION_BASELINE_SCHEMA_ID,
 		PREVIOUS_SCHEMA_ID,
 		SPATIAL_BASELINE_SCHEMA_ID,
+		POPULATION_BASELINE_SCHEMA_ID,
 		SCHEMA_ID,
 	]:
 		if (
@@ -680,6 +741,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 		ORGANIZATION_BASELINE_SCHEMA_ID,
 		PREVIOUS_SCHEMA_ID,
 		SPATIAL_BASELINE_SCHEMA_ID,
+		POPULATION_BASELINE_SCHEMA_ID,
 		SCHEMA_ID,
 	]:
 		if (
@@ -689,11 +751,20 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 			)
 		):
 			return false
+	if schema_id == SCHEMA_ID:
+		if (
+			not state.get("population", {}) is Dictionary
+			or not _population_authority.restore(
+				state.get("population", {}) as Dictionary
+			)
+		):
+			return false
 	if schema_id in [
 		FORMAL_PERSON_SCHEMA_ID,
 		ORGANIZATION_BASELINE_SCHEMA_ID,
 		PREVIOUS_SCHEMA_ID,
 		SPATIAL_BASELINE_SCHEMA_ID,
+		POPULATION_BASELINE_SCHEMA_ID,
 		SCHEMA_ID,
 	]:
 		if (
@@ -726,7 +797,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 			return false
 		if not _configure_organization_authority():
 			return false
-	elif schema_id in [PREVIOUS_SCHEMA_ID, SPATIAL_BASELINE_SCHEMA_ID, SCHEMA_ID]:
+	elif schema_id in [PREVIOUS_SCHEMA_ID, SPATIAL_BASELINE_SCHEMA_ID, POPULATION_BASELINE_SCHEMA_ID, SCHEMA_ID]:
 		if (
 			not state.get("organization", {}) is Dictionary
 			or not state.get("organization_composition", {}) is Dictionary
@@ -748,7 +819,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 		if not _configure_organization_authority():
 			return false
 	total_minutes = int(validated_time.get("total_minutes", -1))
-	if schema_id == SCHEMA_ID:
+	if schema_id in [POPULATION_BASELINE_SCHEMA_ID, SCHEMA_ID]:
 		if (
 			not state.get("spatial", {}) is Dictionary
 			or not _spatial_world.restore(state.get("spatial", {}) as Dictionary)
@@ -765,6 +836,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 		ORGANIZATION_BASELINE_SCHEMA_ID,
 		PREVIOUS_SCHEMA_ID,
 		SPATIAL_BASELINE_SCHEMA_ID,
+		POPULATION_BASELINE_SCHEMA_ID,
 		SCHEMA_ID,
 	]:
 		if (
@@ -786,7 +858,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 		return false
 	if not _configure_organization_responsibilities(_authoritative_total_hour()):
 		return false
-	if schema_id in [SPATIAL_BASELINE_SCHEMA_ID, SCHEMA_ID]:
+	if schema_id in [SPATIAL_BASELINE_SCHEMA_ID, POPULATION_BASELINE_SCHEMA_ID, SCHEMA_ID]:
 		if (
 			not state.get("organization_responsibilities", {}) is Dictionary
 			or not _organization_responsibilities.restore(
@@ -825,6 +897,7 @@ func _adopt_candidate(candidate: FormalWorldSimulation) -> void:
 	_spatial_world = candidate._spatial_world
 	_territory_catalog_provider = candidate._territory_catalog_provider
 	_territory_unit_catalog = candidate._territory_unit_catalog
+	_population_authority = candidate._population_authority
 	_person_authority = candidate._person_authority
 	var person_population_query_rebound := (
 		_person_authority != null
@@ -900,9 +973,9 @@ func _refresh_read_only_views() -> void:
 
 
 func _formal_population_total(population_territory_id: String) -> int:
-	if not _population_input_view.is_configured():
+	if _population_authority == null or not _population_authority.is_configured():
 		return -1
-	return _population_input_view.population(population_territory_id)
+	return _population_authority.population_for_reference(population_territory_id)
 
 
 func _configure_spatial_composition() -> bool:
@@ -939,9 +1012,24 @@ func _configure_territory_identity_composition() -> bool:
 	return _territory_unit_catalog.unit_count() > 0
 
 
+func _configure_population_authority_composition() -> bool:
+	_population_authority = FormalWorldPopulationAuthorityService.new()
+	if not _population_authority.configure(
+		_territory_unit_catalog,
+		_territory_catalog_provider,
+		_economic_static_view,
+		_population_input_view
+	):
+		initialization_error = "Formal Population authority could not compose: %s" % (
+			_population_authority.initialization_error
+		)
+		return false
+	return true
+
+
 func _configure_formal_person_composition() -> bool:
-	if not _population_input_view.is_configured():
-		initialization_error = "Formal Population input is not configured"
+	if _population_authority == null or not _population_authority.is_configured():
+		initialization_error = "Formal Population authority is not configured"
 		return false
 	if _spatial_world == null or not _spatial_world.is_valid() or not _spatial_catalog.is_loaded():
 		initialization_error = "Formal Person composition cannot bind Spatial places"
@@ -983,10 +1071,10 @@ func _configure_formal_person_composition() -> bool:
 			{
 				"kind": "generated",
 				"basis": "simulation_assumption",
-				"population_source_kind": "formal_population_evidence_aggregate",
+				"population_source_kind": "formal_current_world_population_authority",
 				"population_source_revision": _population_input_view.revision(),
 				"population_source_fingerprint": _population_input_view.fingerprint(),
-				"territory_mutation_converged": false,
+				"territory_mutation_converged": true,
 				"prototype_character_source": false,
 				"legacy_loran_vesta_source": false,
 			}
@@ -1307,6 +1395,7 @@ func _validated_time_state(state: Dictionary, schema_id: String) -> Dictionary:
 		ORGANIZATION_BASELINE_SCHEMA_ID,
 		PREVIOUS_SCHEMA_ID,
 		SPATIAL_BASELINE_SCHEMA_ID,
+		POPULATION_BASELINE_SCHEMA_ID,
 		SCHEMA_ID,
 	] and (
 		not state.has("total_minutes") or not state.has("minute_remainder")

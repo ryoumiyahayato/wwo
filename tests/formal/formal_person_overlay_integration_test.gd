@@ -60,17 +60,17 @@ func _test_ordinary_formal_composition() -> void:
 	_check(bool(claim.get("active", false)), "living default Person contributes active named coverage")
 	_equal(
 		world.formal_person_anonymous_population(FormalWorldSimulation.DEFAULT_FORMAL_PERSON_TERRITORY_ID),
-		40_699_999,
-		"named materialization does not increase France authoritative aggregate population"
+		40_700_000,
+		"named materialization does not subtract from France authoritative aggregate population"
 	)
 	_equal(provenance.get("kind"), "generated", "default Person provenance is explicitly generated")
 	_equal(provenance.get("basis"), "simulation_assumption", "default Person provenance is explicitly a simulation assumption")
 	_equal(
 		provenance.get("population_source_kind"),
-		"formal_population_evidence_aggregate",
-		"default Person identifies Formal population evidence as its population source"
+		"formal_current_world_population_authority",
+		"default Person identifies Current World Population authority as its population source"
 	)
-	_equal(provenance.get("territory_mutation_converged"), false, "default Person does not claim direct mutable territory Population convergence")
+	_equal(provenance.get("territory_mutation_converged"), true, "default Person reads the composed mutable territory Population authority")
 	_equal(provenance.get("prototype_character_source"), false, "prototype character data is explicitly excluded")
 	_equal(provenance.get("legacy_loran_vesta_source"), false, "legacy Loran/Vesta person data is explicitly excluded")
 
@@ -181,7 +181,10 @@ func _test_source_boundaries() -> void:
 	_check(not formal_source.contains("data/world_map/characters.json"), "Formal Person composition does not read prototype characters")
 	_check(not formal_source.contains("CharacterRosterService"), "Formal Person composition does not import legacy CharacterRoster")
 	_check(not formal_source.contains("SocietySimulationService"), "Formal Person composition does not import legacy SocietySimulation")
-	_check(not formal_source.contains("VNextPopulationAuthority"), "Formal Person overlay does not falsely claim direct mutable territory Population convergence")
+	_check(
+		formal_source.contains("FormalWorldPopulationAuthorityService"),
+		"Formal Person overlay now consumes the composed Current World Population authority boundary"
+	)
 	_check(not overlay_source.contains("initialize_population("), "Named overlay cannot initialize aggregate Population")
 	_check(not overlay_source.contains("prepare_transfer("), "Named overlay cannot mutate aggregate Population through transfer")
 	_check(not overlay_source.contains("cash"), "Named overlay owns no cash")

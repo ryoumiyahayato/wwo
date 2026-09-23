@@ -78,12 +78,12 @@ func _test_population_coverage_and_anonymous_count() -> void:
 	_check(_materialize(overlay, "person:one", "claim:one", "country_fra", "place:paris"), "first population share is claimed")
 	_equal(
 		overlay.anonymous_population_for_territory("country_fra"),
-		2,
-		"anonymous population equals authoritative population minus active named coverage"
+		3,
+		"named Person overlay does not subtract from authoritative aggregate population"
 	)
 	_check(_materialize(overlay, "person:two", "claim:two", "country_fra", "place:lille"), "second population share is claimed")
 	_check(_materialize(overlay, "person:three", "claim:three", "country_fra", "place:paris"), "third population share reaches authoritative total")
-	_equal(overlay.anonymous_population_for_territory("country_fra"), 0, "full named coverage leaves zero anonymous population")
+	_equal(overlay.anonymous_population_for_territory("country_fra"), 3, "full named coverage still leaves authoritative aggregate unchanged")
 	var before := overlay.snapshot()
 	_check(
 		not _materialize(overlay, "person:four", "claim:four", "country_fra", "place:paris"),

@@ -66,7 +66,7 @@ func _test_production_composition_and_ownership() -> void:
 		return
 	var state := world.get_persistent_state()
 	var spatial := world.spatial_snapshot()
-	_equal(str(state.get("schema_id", "")), "formal_world_simulation_v10", "Formal schema advances to v10")
+	_equal(str(state.get("schema_id", "")), FormalWorldSimulation.SCHEMA_ID, "Formal schema matches current production schema")
 	_check(not spatial.is_empty(), "Formal initialization creates one valid Spatial authority")
 	_equal(world.spatial_current_hour(), 0, "initial Spatial hour is Formal hour zero")
 	_equal(
