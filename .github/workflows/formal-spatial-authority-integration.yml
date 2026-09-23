@@ -95,6 +95,13 @@ jobs:
           & $env:GODOT_BIN --headless --audio-driver Dummy --path . --script res://tests/formal/formal_spatial_authority_integration_test.gd
           if ($LASTEXITCODE -ne 0) { throw "Formal Spatial integration failed with exit code $LASTEXITCODE" }
 
+      - name: Run Formal Spatial persistence integration
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & $env:GODOT_BIN --headless --audio-driver Dummy --path . --script res://tests/formal/formal_spatial_persistence_integration_test.gd
+          if ($LASTEXITCODE -ne 0) { throw "Formal Spatial persistence integration failed with exit code $LASTEXITCODE" }
+
       - name: Run vNext focused validation
         shell: pwsh
         run: |
