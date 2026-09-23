@@ -106,8 +106,16 @@ jobs:
       - name: Run Formal Territory identity composition gate
         shell: pwsh
         run: |
-          & $env:GODOT_BIN --headless --audio-driver Dummy --path . --script res://tests/formal/formal_territory_identity_foundation_test.gd
-          if ($LASTEXITCODE -ne 0) { throw 'Formal Territory identity composition gate failed' }
+          $ErrorActionPreference = 'Stop'
+          $logPath = 'builds/formal-territory-unit/formal_composition.log'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--audio-driver', 'Dummy', '--path', '.',
+            '--script', 'res://tests/formal/formal_territory_identity_foundation_test.gd',
+            '--log-file', $logPath
+          ) -Wait -PassThru -NoNewWindow
+          if (Test-Path -LiteralPath $logPath) { Get-Content -LiteralPath $logPath }
+          Write-Host "GODOT_FORMAL_PROCESS_EXIT_CODE=$($process.ExitCode)"
+          if ($process.ExitCode -ne 0) { throw 'Formal Territory identity composition gate failed' }
 
       - name: Run vNext focused validation
         shell: pwsh
