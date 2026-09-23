@@ -8,8 +8,12 @@ extends RefCounted
 signal state_changed(change: Dictionary)
 
 const SAVE_PATH: String = "user://formal_world_1900.json"
-const SCHEMA_ID: String = "formal_world_simulation_v9"
+const SCHEMA_ID: String = "formal_world_simulation_v10"
 const PREVIOUS_SCHEMA_ID: String = "formal_world_simulation_v8"
+const SPATIAL_BASELINE_SCHEMA_ID: String = "formal_world_simulation_v9"
+const TERRITORIAL_CONTROL_OWNER: String = "VNextSpatialWorld"
+const TERRITORY_AUTHORITY_PRODUCTION_STATUS: String = "SPATIAL_LEGACY_PLACE_AUTHORITY__TERRITORIAL_CONTROL_LEDGER_NON_PRODUCTION_UNCOMPOSED"
+const TERRITORIAL_CONTROL_LEDGER_PRODUCTION_COMPOSED: bool = false
 const ORGANIZATION_BASELINE_SCHEMA_ID: String = "formal_world_simulation_v7"
 const FORMAL_PERSON_SCHEMA_ID: String = "formal_world_simulation_v6"
 const LEGACY_ORGANIZATION_SCHEMA_ID: String = "formal_world_simulation_v5"
@@ -145,6 +149,9 @@ func initialize() -> bool:
 		initialized = false
 		return false
 	_refresh_read_only_views()
+	if not _configure_spatial_composition():
+		initialized = false
+		return false
 	if not _configure_formal_person_composition():
 		initialized = false
 		return false
@@ -235,6 +242,70 @@ func organization_responsibility_view() -> FormalWorldOrganizationResponsibility
 
 func organization_responsibility_query_port() -> FormalWorldOrganizationResponsibilityView:
 	return organization_responsibility_view()
+
+
+func spatial_current_hour() -> int:
+	return _spatial_world.current_hour() if _spatial_world != null else -1
+
+
+func spatial_authoritative_fingerprint() -> String:
+	if _spatial_world == null or not _spatial_world.is_valid():
+		return ""
+	return JSON.stringify(_spatial_world.snapshot()).sha256_text()
+
+
+func spatial_snapshot() -> Dictionary:
+	return _spatial_world.snapshot() if _spatial_world != null else {}
+
+
+func spatial_infrastructure_state(link_id: String) -> Dictionary:
+	return _spatial_world.infrastructure_state(link_id) if _spatial_world != null else {}
+
+
+func spatial_capacity_summary(link_id: String) -> Dictionary:
+	return _spatial_world.capacity_summary(link_id) if _spatial_world != null else {}
+
+
+func spatial_territorial_facts(entity_query: String) -> Dictionary:
+	return _spatial_world.get_territorial_facts(entity_query) if _spatial_world != null else {}
+
+
+func spatial_effective_capacity(link_id: String) -> float:
+	return _spatial_world.effective_capacity(link_id) if _spatial_world != null else 0.0
+
+
+func set_spatial_infrastructure_status(link_id: String, status_value: String) -> bool:
+	return (
+		initialized
+		and _spatial_world != null
+		and _spatial_world.set_infrastructure_status(link_id, status_value)
+	)
+
+
+func set_spatial_infrastructure_condition(link_id: String, condition_value: Variant) -> bool:
+	return (
+		initialized
+		and _spatial_world != null
+		and _spatial_world.set_infrastructure_condition(link_id, condition_value)
+	)
+
+
+func set_spatial_nominal_capacity(link_id: String, capacity_value: Variant) -> bool:
+	return (
+		initialized
+		and _spatial_world != null
+		and _spatial_world.set_nominal_capacity(link_id, capacity_value)
+	)
+
+
+func request_spatial_capacity(
+	request_id: String, link_id: String, demand: Variant
+) -> Dictionary:
+	if not initialized or _spatial_world == null:
+		return {"success": false, "accepted": false, "reason": "invalid_world"}
+	return _spatial_world.request_capacity(
+		request_id, link_id, _authoritative_total_hour(), demand
+	)
 
 
 func formal_person_count() -> int:
@@ -332,6 +403,9 @@ func advance_minutes(minutes: int) -> Dictionary:
 		if next_day_boundary_hour > target_total_hour:
 			break
 		total_minutes = next_day_boundary_hour * 60
+		if not _synchronize_spatial_to_authoritative_hour():
+			assert(false, "Formal Spatial failed to follow authoritative day boundary")
+			return _economy.world_summary()
 		_economy.settle_hour_range(
 			settled_through_hour, next_day_boundary_hour
 		)
@@ -354,6 +428,9 @@ func advance_minutes(minutes: int) -> Dictionary:
 	total_minutes = target_total_minutes
 	var current_total_hour := _authoritative_total_hour()
 	if current_total_hour > settled_through_hour:
+		if not _synchronize_spatial_to_authoritative_hour():
+			assert(false, "Formal Spatial failed to follow authoritative hour")
+			return _economy.world_summary()
 		_economy.settle_hour_range(
 			settled_through_hour, current_total_hour
 		)
@@ -460,6 +537,7 @@ func get_persistent_state() -> Dictionary:
 		"runtime_politics": _political_registry.snapshot(),
 		"markets": _market_registry.get_persistent_state(),
 		"economy": _economy.get_persistent_state(),
+		"spatial": _spatial_world.snapshot(),
 		"persons": _person_authority.snapshot(),
 		"player": _player_state.snapshot(),
 		"organization": _organization.snapshot(),
@@ -480,16 +558,20 @@ func authoritative_fingerprint() -> String:
 		or _person_authority == null
 		or _organization_authority == null
 		or not _organization_responsibilities.is_configured()
+		or _spatial_world == null
+		or not _spatial_world.is_valid()
+		or _spatial_world.current_hour() != _authoritative_total_hour()
 		or _military_state == null
 	):
 		return ""
 	return JSON.stringify({
-		"schema_id": "formal_world_authoritative_fingerprint_v5",
+		"schema_id": "formal_world_authoritative_fingerprint_v6",
 		"total_minutes": total_minutes,
 		"historical_evidence": _historical_evidence.fingerprint(),
 		"runtime_politics": JSON.stringify(_political_registry.snapshot()).sha256_text(),
 		"markets": JSON.stringify(_market_registry.get_persistent_state()).sha256_text(),
 		"economy": JSON.stringify(_economy.get_persistent_state()).sha256_text(),
+		"spatial": spatial_authoritative_fingerprint(),
 		"persons": _person_authority.state_fingerprint(),
 		"player": JSON.stringify(_player_state.snapshot()).sha256_text(),
 		"organization": _organization.state_fingerprint(),
@@ -523,6 +605,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 			FORMAL_PERSON_SCHEMA_ID,
 			ORGANIZATION_BASELINE_SCHEMA_ID,
 			PREVIOUS_SCHEMA_ID,
+			SPATIAL_BASELINE_SCHEMA_ID,
 			SCHEMA_ID,
 		]
 		or not state.get("economy", {}) is Dictionary
@@ -538,6 +621,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 		FORMAL_PERSON_SCHEMA_ID,
 		ORGANIZATION_BASELINE_SCHEMA_ID,
 		PREVIOUS_SCHEMA_ID,
+		SPATIAL_BASELINE_SCHEMA_ID,
 		SCHEMA_ID,
 	]:
 		if (
@@ -566,6 +650,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 		FORMAL_PERSON_SCHEMA_ID,
 		ORGANIZATION_BASELINE_SCHEMA_ID,
 		PREVIOUS_SCHEMA_ID,
+		SPATIAL_BASELINE_SCHEMA_ID,
 		SCHEMA_ID,
 	]:
 		if (
@@ -579,6 +664,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 		FORMAL_PERSON_SCHEMA_ID,
 		ORGANIZATION_BASELINE_SCHEMA_ID,
 		PREVIOUS_SCHEMA_ID,
+		SPATIAL_BASELINE_SCHEMA_ID,
 		SCHEMA_ID,
 	]:
 		if (
@@ -611,7 +697,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 			return false
 		if not _configure_organization_authority():
 			return false
-	elif schema_id in [PREVIOUS_SCHEMA_ID, SCHEMA_ID]:
+	elif schema_id in [PREVIOUS_SCHEMA_ID, SPATIAL_BASELINE_SCHEMA_ID, SCHEMA_ID]:
 		if (
 			not state.get("organization", {}) is Dictionary
 			or not state.get("organization_composition", {}) is Dictionary
@@ -632,9 +718,24 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 			return false
 		if not _configure_organization_authority():
 			return false
+	total_minutes = int(validated_time.get("total_minutes", -1))
+	if schema_id == SCHEMA_ID:
+		if (
+			not state.get("spatial", {}) is Dictionary
+			or not _spatial_world.restore(state.get("spatial", {}) as Dictionary)
+			or _spatial_world.current_hour() != _authoritative_total_hour()
+		):
+			return false
+	else:
+		# Pre-v10 Formal saves have no Spatial history. Migration reconstructs only
+		# the deterministic baseline and advances its explicit clock; no historical
+		# infrastructure/control mutation is inferred.
+		if not _spatial_world.advance_to_hour(_authoritative_total_hour()):
+			return false
 	if schema_id in [
 		ORGANIZATION_BASELINE_SCHEMA_ID,
 		PREVIOUS_SCHEMA_ID,
+		SPATIAL_BASELINE_SCHEMA_ID,
 		SCHEMA_ID,
 	]:
 		if (
@@ -650,14 +751,13 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 			)
 		):
 			return false
-	total_minutes = int(validated_time.get("total_minutes", -1))
 	if not _economy.restore_persistent_state(
 		state.get("economy", {}) as Dictionary
 	):
 		return false
 	if not _configure_organization_responsibilities(_authoritative_total_hour()):
 		return false
-	if schema_id == SCHEMA_ID:
+	if schema_id in [SPATIAL_BASELINE_SCHEMA_ID, SCHEMA_ID]:
 		if (
 			not state.get("organization_responsibilities", {}) is Dictionary
 			or not _organization_responsibilities.restore(
@@ -774,11 +874,29 @@ func _formal_population_total(population_territory_id: String) -> int:
 	return _population_input_view.population(population_territory_id)
 
 
+func _configure_spatial_composition() -> bool:
+	# Ownership closure: until a source-backed sealed TerritoryUnitCatalog exists,
+	# the alternate territory-control ledger remains outside Formal production.
+	# Current controller facts therefore have exactly one writable production
+	# owner: this SpatialWorld's legacy-place territorial state.
+	if TERRITORIAL_CONTROL_LEDGER_PRODUCTION_COMPOSED:
+		initialization_error = "Duplicate production territorial-control authority is forbidden"
+		return false
+	if not _spatial_catalog.load_legacy_world_map():
+		initialization_error = "Formal Spatial catalog could not load source topology"
+		return false
+	_spatial_world = VNextSpatialWorld.create(_spatial_catalog)
+	if _spatial_world == null or not _spatial_world.is_valid():
+		initialization_error = "Formal Spatial authority could not be composed"
+		return false
+	return _spatial_world.current_hour() == _authoritative_total_hour()
+
+
 func _configure_formal_person_composition() -> bool:
 	if not _population_input_view.is_configured():
 		initialization_error = "Formal Population input is not configured"
 		return false
-	if not _spatial_catalog.load_legacy_world_map():
+	if _spatial_world == null or not _spatial_world.is_valid() or not _spatial_catalog.is_loaded():
 		initialization_error = "Formal Person composition cannot bind Spatial places"
 		return false
 	_person_authority = VNextNamedPersonOverlay.create(
@@ -903,7 +1021,6 @@ func _configure_organization_authority() -> bool:
 
 
 func _configure_military_composition() -> bool:
-	_spatial_world = VNextSpatialWorld.create(_spatial_catalog)
 	if _spatial_world == null or not _spatial_world.is_valid():
 		initialization_error = "Formal Military composition cannot bind Spatial authority"
 		return false
@@ -1121,6 +1238,15 @@ func _authoritative_total_hour() -> int:
 	return int(total_minutes / 60)
 
 
+func _synchronize_spatial_to_authoritative_hour() -> bool:
+	return (
+		_spatial_world != null
+		and _spatial_world.is_valid()
+		and _spatial_world.advance_to_hour(_authoritative_total_hour())
+		and _spatial_world.current_hour() == _authoritative_total_hour()
+	)
+
+
 func _validated_time_state(state: Dictionary, schema_id: String) -> Dictionary:
 	var economy_state := state.get("economy", {}) as Dictionary
 	var saved_total_hour := int(economy_state.get("total_hour", -1))
@@ -1133,6 +1259,7 @@ func _validated_time_state(state: Dictionary, schema_id: String) -> Dictionary:
 		LEGACY_ORGANIZATION_SCHEMA_ID,
 		ORGANIZATION_BASELINE_SCHEMA_ID,
 		PREVIOUS_SCHEMA_ID,
+		SPATIAL_BASELINE_SCHEMA_ID,
 		SCHEMA_ID,
 	] and (
 		not state.has("total_minutes") or not state.has("minute_remainder")

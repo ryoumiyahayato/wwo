@@ -288,7 +288,7 @@ func _test_previous_schema_empty_migration() -> void:
 	if source == null:
 		return
 	var legacy := source.get_persistent_state()
-	legacy["schema_id"] = FormalWorldSimulation.PREVIOUS_SCHEMA_ID
+	legacy["schema_id"] = FormalWorldSimulation.FORMAL_PERSON_SCHEMA_ID
 	legacy.erase("organization_authority")
 	legacy.erase("military_state")
 	var first := FormalWorldSimulation.new(null, PERSON_IDS, PLACE_IDS)
