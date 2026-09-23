@@ -87,10 +87,20 @@ func _test_production_composition_and_ownership() -> void:
 			not _contains_key_recursive(economy_state, forbidden_key),
 			"Economy owns no duplicate Spatial capacity key: %s" % forbidden_key
 		)
+	for forbidden_key: String in [
+		"nominal_capacity",
+		"effective_capacity",
+		"used_capacity",
+		"remaining_capacity",
+	]:
 		_check(
 			not _contains_key_recursive(military_state, forbidden_key),
-			"Military owns no duplicate Spatial capacity key: %s" % forbidden_key
+			"Military owns no physical Spatial capacity key: %s" % forbidden_key
 		)
+	_check(
+		military_state.has("capacity_window_hour"),
+		"Military retains only its existing local transport-window attribution"
+	)
 	var person := world.formal_person(FormalWorldSimulation.DEFAULT_FORMAL_PERSON_ID)
 	_equal(
 		str(person.get("current_place_id", "")),
