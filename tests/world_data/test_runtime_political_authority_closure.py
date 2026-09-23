@@ -9,6 +9,9 @@ CATALOG = SCRIPTS / "formal" / "historical_political_evidence_catalog.gd"
 STANDALONE_BOOTSTRAP = (
     SCRIPTS / "formal" / "historical_evidence_standalone_bootstrap.gd"
 )
+TERRITORY_IDENTITY_PROVIDER = (
+    SCRIPTS / "vnext" / "territory" / "production_territory_unit_catalog_provider.gd"
+)
 
 
 class RuntimePoliticalAuthorityClosureTest(unittest.TestCase):
@@ -22,7 +25,12 @@ class RuntimePoliticalAuthorityClosureTest(unittest.TestCase):
     def test_only_catalog_names_the_dated_political_source(self) -> None:
         self.assertEqual(
             self._gd_sources_containing("political_units_1900.json"),
-            [CATALOG.relative_to(ROOT)],
+            sorted(
+                [
+                    CATALOG.relative_to(ROOT),
+                    TERRITORY_IDENTITY_PROVIDER.relative_to(ROOT),
+                ]
+            ),
         )
         self.assertEqual(
             self._gd_sources_containing("historical_political_entities_1900.json"),
