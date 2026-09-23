@@ -38,31 +38,32 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'build_batch4_run_manifest failed' }
 
       - name: Update exact inventory test baselines
-        shell: python
+        shell: pwsh
         run: |
-          from pathlib import Path
-          replacements = {
-              Path("tests/world_data/test_batch2_artifacts.py"): [
-                  ('self.assertEqual(self.data_manifest["file_count"], 184)', 'self.assertEqual(self.data_manifest["file_count"], 185)'),
-                  ('self.assertEqual(len(self.data_manifest["files"]), 184)', 'self.assertEqual(len(self.data_manifest["files"]), 185)'),
-              ],
-              Path("tests/world_data/test_batch3_contracts.py"): [
-                  ('self.assertEqual(self.signatures["data_json_count"], 184)', 'self.assertEqual(self.signatures["data_json_count"], 185)'),
-              ],
-              Path("tests/world_data/test_batch4_run_manifest.py"): [
-                  ('self.assertEqual(manifest["batch_results"]["batch1"]["inventory_files"], 184)', 'self.assertEqual(manifest["batch_results"]["batch1"]["inventory_files"], 185)'),
-              ],
-              Path("tests/world_data/test_validate_world_data.py"): [
-                  ('self.assertEqual(self.result["inventory"]["file_count"], 184)', 'self.assertEqual(self.result["inventory"]["file_count"], 185)'),
-              ],
+          $ErrorActionPreference = 'Stop'
+          $targets = @{
+            'tests/world_data/test_batch2_artifacts.py' = @(
+              @('self.assertEqual(self.data_manifest["file_count"], 184)', 'self.assertEqual(self.data_manifest["file_count"], 185)'),
+              @('self.assertEqual(len(self.data_manifest["files"]), 184)', 'self.assertEqual(len(self.data_manifest["files"]), 185)')
+            )
+            'tests/world_data/test_batch3_contracts.py' = @(
+              @('self.assertEqual(self.signatures["data_json_count"], 184)', 'self.assertEqual(self.signatures["data_json_count"], 185)')
+            )
+            'tests/world_data/test_batch4_run_manifest.py' = @(
+              @('self.assertEqual(manifest["batch_results"]["batch1"]["inventory_files"], 184)', 'self.assertEqual(manifest["batch_results"]["batch1"]["inventory_files"], 185)')
+            )
+            'tests/world_data/test_validate_world_data.py' = @(
+              @('self.assertEqual(self.result["inventory"]["file_count"], 184)', 'self.assertEqual(self.result["inventory"]["file_count"], 185)')
+            )
           }
-          for path, pairs in replacements.items():
-              text = path.read_text(encoding="utf-8")
-              for old, new in pairs:
-                  if old not in text:
-                      raise SystemExit(f"expected baseline not found: {path}: {old}")
-                  text = text.replace(old, new, 1)
-              path.write_text(text, encoding="utf-8")
+          foreach ($path in $targets.Keys) {
+            $text = [System.IO.File]::ReadAllText($path)
+            foreach ($pair in $targets[$path]) {
+              if (-not $text.Contains($pair[0])) { throw "expected baseline not found: $path : $($pair[0])" }
+              $text = $text.Replace($pair[0], $pair[1])
+            }
+            [System.IO.File]::WriteAllText($path, $text, (New-Object System.Text.UTF8Encoding($false)))
+          }
 
       - name: Verify refreshed world-data audit
         shell: pwsh
