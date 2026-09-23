@@ -605,6 +605,7 @@ func _restore_candidate_state(state: Dictionary) -> bool:
 			FORMAL_PERSON_SCHEMA_ID,
 			ORGANIZATION_BASELINE_SCHEMA_ID,
 			PREVIOUS_SCHEMA_ID,
+			SPATIAL_BASELINE_SCHEMA_ID,
 			SCHEMA_ID,
 		]
 		or not state.get("economy", {}) is Dictionary
