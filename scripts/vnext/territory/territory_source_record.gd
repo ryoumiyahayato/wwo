@@ -270,7 +270,15 @@ static func _validate_shape(candidate: Dictionary) -> bool:
 			return false
 	var feature_count_value: Variant = candidate.get("feature_count")
 	if feature_count_value != null:
-		if typeof(feature_count_value) != TYPE_INT or int(feature_count_value) < 0:
+		if typeof(feature_count_value) == TYPE_INT:
+			if int(feature_count_value) < 0:
+				return false
+		elif typeof(feature_count_value) == TYPE_FLOAT:
+			var feature_count_float := float(feature_count_value)
+			if feature_count_float < 0.0 or feature_count_float != floor(feature_count_float):
+				return false
+			candidate["feature_count"] = int(feature_count_float)
+		else:
 			return false
 	for field_name: String in [
 		"redistribution_allowed",
