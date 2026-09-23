@@ -13,7 +13,9 @@ func _run() -> void:
 	_test_source_backed_catalog()
 	_test_deterministic_reload()
 	print("Production TerritoryUnit catalog: %d checks, %d failures" % [checks, failures])
-	quit(1 if failures > 0 or checks <= 0 else 0)
+	var exit_code: int = 1 if failures > 0 or checks <= 0 else 0
+	print("PRODUCTION_TERRITORY_UNIT_CATALOG_EXIT_CODE=%d" % exit_code)
+	quit(exit_code)
 
 
 func _test_source_backed_catalog() -> void:
