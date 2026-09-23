@@ -88,19 +88,19 @@ jobs:
             throw "Godot project import failed with exit code $($process.ExitCode)"
           }
 
-      - name: Run vNext focused validation
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          python -B tools/run_vnext_validation.py --root . --godot "$env:GODOT_BIN" --suite focused
-          if ($LASTEXITCODE -ne 0) { throw "vNext focused validation failed with exit code $LASTEXITCODE" }
-
       - name: Run Formal Spatial authority integration
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
           & $env:GODOT_BIN --headless --audio-driver Dummy --path . --script res://tests/formal/formal_spatial_authority_integration_test.gd
           if ($LASTEXITCODE -ne 0) { throw "Formal Spatial integration failed with exit code $LASTEXITCODE" }
+
+      - name: Run vNext focused validation
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          python -B tools/run_vnext_validation.py --root . --godot "$env:GODOT_BIN" --suite focused
+          if ($LASTEXITCODE -ne 0) { throw "vNext focused validation failed with exit code $LASTEXITCODE" }
 
       - name: Run Formal exact persistence
         shell: pwsh
