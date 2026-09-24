@@ -110,6 +110,10 @@ Write-Host "`n=== Historical provenance deterministic generation ==="
 & $PythonPath "$ProjectPath/tools/provenance/generate_historical_provenance.py" --check
 if ($LASTEXITCODE -ne 0) { throw 'Historical provenance generated catalog check failed' }
 
+Write-Host "`n=== Territory source acquisition evidence ==="
+& $PythonPath -m unittest discover -s "$ProjectPath/tests/world_data" -p 'test_territory_source_acquisition.py' -v
+if ($LASTEXITCODE -ne 0) { throw 'Territory source acquisition evidence validation failed' }
+
 Write-Host "`n=== World data audit regressions ==="
 & $PythonPath -m unittest discover -s "$ProjectPath/tests/world_data" -p 'test_*.py' -v
 if ($LASTEXITCODE -ne 0) { throw 'World data audit regression suite failed' }
