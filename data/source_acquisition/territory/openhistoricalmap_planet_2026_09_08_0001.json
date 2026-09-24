@@ -1,0 +1,23 @@
+{
+  "schema_id": "territory_source_acquisition_record_v1",
+  "source_snapshot_id": "territory_source:openhistoricalmap_planet_2026_09_08_0001",
+  "provider": "OpenHistoricalMap",
+  "archive": "https://planet.openhistoricalmap.org/?prefix=planet/",
+  "object_filename": "planet-260908_0001.osm.pbf",
+  "object_url": "https://s3.amazonaws.com/planet.openhistoricalmap.org/planet/planet-260908_0001.osm.pbf",
+  "snapshot_timestamp": "2026-09-08T00:01:00Z",
+  "snapshot_kind": "DAILY_COMPLETE_CURRENT_DATABASE_PLANET_PBF",
+  "advertised_size": "1.2 GB",
+  "exact_byte_size": null,
+  "published_checksum": "",
+  "raw_sha256": "",
+  "pbf_header_timestamp": "",
+  "complete_planet_verified": null,
+  "acquisition_status": "PINNED_AWAITING_BYTES",
+  "verification_status": "PENDING",
+  "acquired_at": "",
+  "acquisition_method": "HTTPS_GET_EXACT_PINNED_OBJECT_URL",
+  "verification_method": "RAW_BYTE_COUNT_SHA256_PBF_HEADER_COMPLETE_PLANET_IDENTITY_CONSISTENCY",
+  "notes": "Pinned metadata only; the 1.2 GB planet bytes are intentionally not stored in this repository.",
+  "record_fingerprint": "d82d4a1309a031c7ac93539c1d061cfed143e319b02cc8e8ef311224b535a2ed"
+}
