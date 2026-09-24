@@ -1,5 +1,5 @@
 {
-  "artifact_digest": "c590da279aca2385af47eae7f534a416d3b422af7e93a0ef2b13b715b6535df8",
+  "artifact_digest": "87c271622594c3e910b018d7b6dbef32c11f489ac8d0497c24aff31714f0aaa7",
   "artifacts": [
     {
       "bytes": 40715,
@@ -12,9 +12,9 @@
       "sha256": "585ad6e1c15700bd420477d4f6f7eef625f59708549a9e21e7ad9226bb269ada"
     },
     {
-      "bytes": 104186,
+      "bytes": 104567,
       "path": "batch2_data_manifest.json",
-      "sha256": "01fcb1376742c3d9cd6fb39f9cf8ae5cdef17f0c35a3f9d59ad67023b2e8b991"
+      "sha256": "d750b87d6a72467d8ec0b48c1f5fdc2509fe43786805d55239fffa8089f3903a"
     },
     {
       "bytes": 747,
@@ -37,14 +37,14 @@
       "sha256": "f570caa664c0f2710db1a85e066e9b9deabaa60faec8a341a2953b2ce3882c54"
     },
     {
-      "bytes": 15708,
+      "bytes": 15987,
       "path": "batch3_loader_contract.json",
-      "sha256": "e86e11fb048f3969a44a16f7c7a13ba089094aba90dbdd6c8c9957c0316c4df8"
+      "sha256": "7cd776afc1e1e77a72895497826c3e5dfd3753c769dae9ebf0c4e0f4773dff52"
     },
     {
-      "bytes": 55602,
+      "bytes": 55848,
       "path": "batch3_record_signature_manifest.json",
-      "sha256": "7483fa76dcb44d709c16957081e246ea3a8e966901b4e63927fa1d2b12fc20bc"
+      "sha256": "587dd85235680406f055ba8a55dd4c382f4200a1a964680510bde2255f9f726a"
     },
     {
       "bytes": 30990,
@@ -62,9 +62,9 @@
       "sha256": "b3bb70cdbb7336d0fa141c9c091d1db9a21958b0d111887fb428bc13bdf1c67e"
     },
     {
-      "bytes": 2153401,
+      "bytes": 2154821,
       "path": "inventory.json",
-      "sha256": "a656cd21d5a28a1d69c5836bc233523e1d6cc0843c3a1a288327ba90a5eba7f5"
+      "sha256": "70ca9feea35561e89c182caa1beb70f0232efb85f46d82720045c11b10fd167d"
     },
     {
       "bytes": 392,
@@ -72,9 +72,9 @@
       "sha256": "2ddeade04a9ce044a5c1c672006e4fa83f3af34e6da441977e4acf269b2f66eb"
     },
     {
-      "bytes": 1925015,
+      "bytes": 1925053,
       "path": "staging_candidates.json",
-      "sha256": "a811ed32e16a40457ecb91149c239797fffdaec2e611826dca8ae8f4ccc40cc2"
+      "sha256": "32ba743b7448f7532053e598566c6081910a806f7c729e3370c085c4fc11869b"
     }
   ],
   "authoritative_source_modified": false,
@@ -86,7 +86,7 @@
       },
       "coverage_country_rows": 177,
       "finding_count": 110,
-      "inventory_files": 184,
+      "inventory_files": 185,
       "severity_counts": {
         "ERROR": 104,
         "WARNING": 6
@@ -96,7 +96,7 @@
       "asset_hash_mismatches": 0,
       "asset_missing": 0,
       "corpus_cases": 6,
-      "data_files": 184,
+      "data_files": 185,
       "data_parse_errors": 0,
       "manual_or_historical_items_remain": true,
       "verified_flag_assets": 60
@@ -108,11 +108,11 @@
       "loader_missing_directory_references": 0,
       "manual_or_historical_items_remain": true,
       "nested_duplicate_candidate_files": 3,
-      "signature_files": 184,
+      "signature_files": 185,
       "verified_or_documented_flag_units": 151
     },
     "batch4": {
-      "artifact_digest_before_manifest": "c590da279aca2385af47eae7f534a416d3b422af7e93a0ef2b13b715b6535df8",
+      "artifact_digest_before_manifest": "87c271622594c3e910b018d7b6dbef32c11f489ac8d0497c24aff31714f0aaa7",
       "artifact_file_count_before_manifest": 15,
       "concurrency": "1 process; no process pool or thread pool",
       "large_temporary_artifacts": [],

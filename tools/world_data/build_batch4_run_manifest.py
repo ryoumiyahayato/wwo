@@ -9,6 +9,11 @@ import json
 from pathlib import Path
 from typing import Any, Mapping
 
+try:
+    from tools.world_data.path_order import canonical_path_sort
+except ModuleNotFoundError:
+    from path_order import canonical_path_sort  # type: ignore[no-redef]
+
 
 SCHEMA_VERSION = "wwo_world_data_batch4_run_manifest_v1"
 
@@ -34,7 +39,7 @@ def dangling_reference_count(code_counts: Mapping[str, Any]) -> int:
 
 def build_file_manifest(output_dir: Path) -> list[dict[str, Any]]:
     rows = []
-    for path in sorted(output_dir.glob("*.json")):
+    for path in canonical_path_sort(output_dir.glob("*.json"), output_dir):
         if path.name == "batch4_run_manifest.json":
             continue
         content = canonical_file_bytes(path)

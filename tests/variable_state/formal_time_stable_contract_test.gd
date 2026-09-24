@@ -253,7 +253,7 @@ func _test_save_load_round_trip() -> void:
 		"读取恢复economy.total_hour"
 	)
 	_equal(
-		simulation.economy.get_persistent_state(),
+		(simulation.get_persistent_state().get("economy", {}) as Dictionary),
 		saved_economy,
 		"读取恢复完整正式经济持久化状态"
 	)
@@ -270,14 +270,14 @@ func _test_restore_failure_atomicity() -> void:
 	var before: Dictionary = SUPPORT.simulation_state(simulation)
 	var rejected: Dictionary = before.duplicate(true)
 	var rejected_economy: Dictionary = rejected.get("economy", {}) as Dictionary
-	var rejected_countries: Dictionary = rejected_economy.get("country_states", {}) as Dictionary
+	var rejected_countries: Dictionary = rejected_economy.get("market_states", {}) as Dictionary
 	var ids: Array = rejected_countries.keys()
 	ids.sort()
 	_check(not ids.is_empty(), "原子性测试拥有正式国家集合")
 	if ids.is_empty():
 		return
 	rejected_countries.erase(ids[0])
-	rejected_economy["country_states"] = rejected_countries
+	rejected_economy["market_states"] = rejected_countries
 	rejected["economy"] = rejected_economy
 	_check(
 		not simulation.restore_persistent_state(rejected),
@@ -290,7 +290,7 @@ func _test_restore_failure_atomicity() -> void:
 		"恢复失败后minute_remainder不变"
 	)
 	_equal(
-		simulation.economy.get_persistent_state(),
+		(simulation.get_persistent_state().get("economy", {}) as Dictionary),
 		before.get("economy", {}) as Dictionary,
 		"恢复失败后完整经济状态不变"
 	)

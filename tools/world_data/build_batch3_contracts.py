@@ -13,7 +13,7 @@ import json
 import re
 from collections import Counter
 from pathlib import Path
-from typing import Any, Iterator, Mapping
+from typing import Any, Iterable, Iterator, Mapping
 
 try:
     from tools.world_data.historical_flag_catalog import (
@@ -21,12 +21,14 @@ try:
         load_historical_flag_catalog,
         resource_path_for_record,
     )
+    from tools.world_data.path_order import canonical_path_sort
 except ModuleNotFoundError:
     from historical_flag_catalog import (  # type: ignore[no-redef]
         FLAG_REGISTRY_RELATIVE,
         load_historical_flag_catalog,
         resource_path_for_record,
     )
+    from path_order import canonical_path_sort  # type: ignore[no-redef]
 
 
 SCHEMA_VERSION = "wwo_world_data_batch3_contracts_v1"
@@ -60,8 +62,8 @@ def resource_to_local_path(repository_root: Path, resource: str) -> Path:
 
 def build_loader_contract(repository_root: Path) -> dict[str, Any]:
     script_roots = [repository_root / "scripts" / "world_map", repository_root / "scripts" / "formal"]
-    scripts = sorted(path for root in script_roots for path in root.rglob("*.gd"))
-    data_files = sorted(repository_root.joinpath("data", "world_map").rglob("*.json"))
+    scripts = canonical_path_sort((path for root in script_roots for path in root.rglob("*.gd")), repository_root)
+    data_files = canonical_path_sort(repository_root.joinpath("data", "world_map").rglob("*.json"), repository_root)
     data_file_resources = {"res://" + path.relative_to(repository_root).as_posix() for path in data_files}
     file_references: list[dict[str, Any]] = []
     directory_references: list[dict[str, Any]] = []
@@ -85,7 +87,7 @@ def build_loader_contract(repository_root: Path) -> dict[str, Any]:
             )
         for resource in directory_resources:
             local = resource_to_local_path(repository_root, resource)
-            matches = sorted(path for path in local.rglob("*.json")) if local.is_dir() else []
+            matches = canonical_path_sort(local.rglob("*.json"), repository_root) if local.is_dir() else []
             directory_references.append(
                 {
                     "script": script_rel,
@@ -201,9 +203,10 @@ def iter_objects(value: Any) -> Iterator[Mapping[str, Any]]:
             yield from iter_objects(child)
 
 
-def build_record_signatures(repository_root: Path) -> dict[str, Any]:
+def build_record_signatures(repository_root: Path, data_paths: Iterable[Path] | None = None) -> dict[str, Any]:
     rows: list[dict[str, Any]] = []
-    for path in sorted(repository_root.joinpath("data", "world_map").rglob("*.json")):
+    paths = repository_root.joinpath("data", "world_map").rglob("*.json") if data_paths is None else data_paths
+    for path in canonical_path_sort(paths, repository_root):
         document = read_json(path)
         ids: list[str] = []
         id_field_counts: dict[str, int] = {}

@@ -1,0 +1,124 @@
+name: Formal Exact Persistence
+
+on:
+  pull_request:
+    branches:
+      - canonical/current-world
+    paths:
+      - ".github/workflows/formal-exact-persistence.yml"
+      - "scripts/formal/**"
+      - "scripts/save/atomic_json_file_store.gd"
+      - "tests/formal/formal_exact_persistence_roundtrip_test.gd"
+  push:
+    branches:
+      - canonical/current-world
+    paths:
+      - ".github/workflows/formal-exact-persistence.yml"
+      - "scripts/formal/**"
+      - "scripts/save/atomic_json_file_store.gd"
+      - "tests/formal/formal_exact_persistence_roundtrip_test.gd"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formal-exact-persistence-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  exact-roundtrip:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact validation head
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $expected = "${{ github.event.pull_request.head.sha || github.sha }}"
+          $actual = (git rev-parse HEAD).Trim()
+          if ($actual -ne $expected) {
+            throw "Validation checked out $actual but expected exact head $expected"
+          }
+
+      - name: Install Godot 4.6.3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'godot.zip'
+          $install = Join-Path $env:RUNNER_TEMP 'godot-4.6.3'
+          Invoke-WebRequest -Uri 'https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_win64.exe.zip' -OutFile $archive
+          Expand-Archive -LiteralPath $archive -DestinationPath $install
+          $binary = (Get-ChildItem -LiteralPath $install -Filter 'Godot_v4.6.3-stable_win64.exe' -Recurse | Select-Object -First 1).FullName
+          if (-not $binary) { throw 'Godot 4.6.3 executable was not found' }
+          "GODOT_BIN=$binary" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          & $binary --version
+
+      - name: Prepare isolated user data
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $userDataRoot = Join-Path $env:RUNNER_TEMP 'formal-exact-persistence-user-data'
+          if (Test-Path -LiteralPath $userDataRoot) {
+            Remove-Item -LiteralPath $userDataRoot -Recurse -Force
+          }
+          New-Item -ItemType Directory -Force -Path $userDataRoot | Out-Null
+          "APPDATA=$userDataRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Prime Godot script class cache
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--editor', '--path', '.', '--quit'
+          ) -Wait -PassThru -NoNewWindow
+          if ($process.ExitCode -ne 0) {
+            throw "Godot project import failed with exit code $($process.ExitCode)"
+          }
+
+      - name: Run exact Formal persistence regression
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force -Path builds/formal-exact-persistence | Out-Null
+          $logPath = 'builds/formal-exact-persistence/roundtrip.log'
+          $stderrPath = 'builds/formal-exact-persistence/roundtrip.stderr.log'
+          $process = Start-Process -FilePath $env:GODOT_BIN -ArgumentList @(
+            '--headless', '--path', '.', '--script',
+            'res://tests/formal/formal_exact_persistence_roundtrip_test.gd'
+          ) -Wait -PassThru -NoNewWindow -RedirectStandardOutput $logPath -RedirectStandardError $stderrPath
+          if (Test-Path -LiteralPath $stderrPath) {
+            Get-Content -LiteralPath $stderrPath | Tee-Object -FilePath $logPath -Append
+          }
+          Get-Content -LiteralPath $logPath
+          if ($process.ExitCode -ne 0) {
+            throw "Formal Exact Persistence regression failed with exit code $($process.ExitCode)"
+          }
+          $log = Get-Content -LiteralPath $logPath -Raw
+          if ($log -notmatch 'Formal Exact Persistence: [0-9]+ checks, 0 failures') {
+            throw 'Formal Exact Persistence zero-failure summary is missing'
+          }
+          if ($log -notmatch 'FORMAL_EXACT_PERSISTENCE_COMPLETE=1') {
+            throw 'Formal Exact Persistence completion marker is missing'
+          }
+          if ($log -notmatch 'FORMAL_EXACT_180D_PRE_FINGERPRINT=([0-9a-f]{64})') {
+            throw '180-day pre-save fingerprint is missing'
+          }
+          if ($log -notmatch 'FORMAL_EXACT_180D_POST_FINGERPRINT=([0-9a-f]{64})') {
+            throw '180-day post-restore fingerprint is missing'
+          }
+
+      - name: Upload regression log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formal-exact-persistence
+          path: |
+            builds/formal-exact-persistence/roundtrip.log
+            builds/formal-exact-persistence/roundtrip.stderr.log
+          if-no-files-found: warn

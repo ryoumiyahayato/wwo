@@ -26,7 +26,6 @@ var _history_conflicts: Array[Dictionary] = []
 
 
 func _ready() -> void:
-	_history_document = _read_document("res://data/world_map/historical_political_entities_1900.json")
 	super._ready()
 	_rebuild_historical_political_world()
 	_load_historical_conflicts()
