@@ -1,5 +1,5 @@
 {
-  "data_json_count": 184,
+  "data_json_count": 185,
   "duplicate_id_file_count": 3,
   "files": [
     {
@@ -1804,6 +1804,13 @@
     },
     {
       "duplicate_ids": [],
+      "id_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "id_field_counts": {},
+      "id_record_count": 0,
+      "path": "data/world_map/territory_source_registry.json"
+    },
+    {
+      "duplicate_ids": [],
       "id_digest": "8c35f0bcd65270eac6237fc1bfbc45773703289b54a0c8e41cfb6c1dd2ed7ff2",
       "id_field_counts": {
         "id": 6
@@ -1834,6 +1841,6 @@
     }
   ],
   "files_with_id_records": 178,
-  "record_signature_digest": "41c7abc78eaba39afd8c2ce68c4bcf2091304406c3a2bac7c7d95de266ae433e",
+  "record_signature_digest": "b3f0e16ae6b2c11b600b195d010a39e4e7696ee12ccd8f6b502599095a6ceb22",
   "schema_version": "wwo_world_data_batch3_contracts_v1"
 }

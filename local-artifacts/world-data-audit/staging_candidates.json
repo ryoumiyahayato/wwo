@@ -81665,6 +81665,7 @@
     "road_segments.json",
     "shipping_routes.json",
     "strategic_military_overlay.json",
+    "territory_source_registry.json",
     "world_activity.json",
     "world_admin1.json",
     "world_coastlines.json"
