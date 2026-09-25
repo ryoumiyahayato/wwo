@@ -42,18 +42,41 @@ class TerritorySourceAcquisitionTests(unittest.TestCase):
     def _refresh_fingerprint(self, record: dict) -> None:
         record["record_fingerprint"] = acquisition.record_fingerprint(record)
 
-    def test_initial_pinned_record_is_valid_and_pending(self) -> None:
+    def _pending_fixture(self) -> dict:
+        pending = copy.deepcopy(self.record)
+        pending.update(
+            {
+                "source_snapshot_id": "territory_source:synthetic_pending_fixture",
+                "exact_byte_size": None,
+                "published_checksum": "",
+                "raw_sha256": "",
+                "pbf_header_timestamp": "",
+                "complete_planet_verified": None,
+                "acquisition_status": "PINNED_AWAITING_BYTES",
+                "verification_status": "PENDING",
+                "acquired_at": "",
+                "notes": "Synthetic pending fixture for missing-evidence assertions.",
+            }
+        )
+        self._refresh_fingerprint(pending)
+        return pending
+
+    def test_actual_record_is_valid(self) -> None:
         self.assertEqual(acquisition.validate_record(self.record), [])
         self.assertEqual(
             self.record["source_snapshot_id"],
             "territory_source:openhistoricalmap_planet_2026_09_08_0001",
         )
-        self.assertEqual(self.record["acquisition_status"], "PINNED_AWAITING_BYTES")
-        self.assertEqual(self.record["verification_status"], "PENDING")
-        self.assertEqual(self.record["raw_sha256"], "")
-        self.assertIsNone(self.record["exact_byte_size"])
-        self.assertEqual(self.record["pbf_header_timestamp"], "")
-        self.assertIsNone(self.record["complete_planet_verified"])
+
+    def test_synthetic_pending_record_is_valid_and_missing_bytes(self) -> None:
+        pending = self._pending_fixture()
+        self.assertEqual(acquisition.validate_record(pending), [])
+        self.assertEqual(pending["acquisition_status"], "PINNED_AWAITING_BYTES")
+        self.assertEqual(pending["verification_status"], "PENDING")
+        self.assertEqual(pending["raw_sha256"], "")
+        self.assertIsNone(pending["exact_byte_size"])
+        self.assertEqual(pending["pbf_header_timestamp"], "")
+        self.assertIsNone(pending["complete_planet_verified"])
 
     def test_required_source_identity_fields_are_enforced(self) -> None:
         for field in ("source_snapshot_id", "provider", "object_filename", "object_url", "snapshot_timestamp"):
@@ -87,7 +110,7 @@ class TerritorySourceAcquisitionTests(unittest.TestCase):
         self.assertTrue(any(error.startswith("pbf_header_timestamp: must not be later") for error in errors), errors)
 
     def test_verified_state_requires_byte_evidence(self) -> None:
-        malformed = copy.deepcopy(self.record)
+        malformed = self._pending_fixture()
         malformed["acquisition_status"] = "VERIFIED"
         malformed["verification_status"] = "PASSED"
         self._refresh_fingerprint(malformed)
@@ -98,7 +121,7 @@ class TerritorySourceAcquisitionTests(unittest.TestCase):
         self.assertIn("verified state: complete_planet_verified must be true", errors)
         self.assertIn("verified state: acquired_at is required", errors)
 
-        verified = copy.deepcopy(self.record)
+        verified = self._pending_fixture()
         verified.update(
             {
                 "exact_byte_size": 1234567890,
