@@ -15,6 +15,7 @@ var _last_summary: Dictionary = {}
 var _packaged_probe_failures: int = 0
 var _immutable_historical_evidence_report: Dictionary = {}
 var _historical_evidence_surface_building: bool = false
+var _player_context_cache: Dictionary = {}
 
 @onready var _background_cache_viewport: SubViewport = $BackgroundCacheViewport
 @onready var _background_display: TextureRect = $Background
@@ -25,6 +26,8 @@ func _ready() -> void:
 	_resize_background_cache()
 	var formal_initialized := formal_simulation.initialize()
 	if formal_initialized:
+		_refresh_player_context_cache()
+		formal_simulation.state_changed.connect(_on_formal_state_changed)
 		_dated_units_document = {
 			"units": formal_simulation.historical_political_evidence_units(),
 		}
@@ -52,6 +55,7 @@ func _ready() -> void:
 				)
 		else:
 			_formal_status = "新的1900正式世界已建立。"
+		_refresh_player_context_cache()
 		_sync_political_presentation()
 		_last_summary = formal_simulation.world_summary()
 	queue_redraw()
@@ -203,6 +207,7 @@ func _time_source_description() -> String:
 func _load_formal_state() -> SaveOperationResult:
 	var result := formal_simulation.load_from_user()
 	if result.success:
+		_refresh_player_context_cache()
 		_sync_political_presentation()
 		_last_summary = formal_simulation.world_summary()
 	return result
@@ -235,6 +240,7 @@ func _load_formal_state_from_ui() -> void:
 			else "没有可恢复的正式世界存档。"
 		)
 	if result.success:
+		_refresh_player_context_cache()
 		_sync_political_presentation()
 		_last_summary = formal_simulation.world_summary()
 	queue_redraw()
@@ -269,6 +275,33 @@ func _draw() -> void:
 	_draw_formal_world_status()
 	if economy_panel_open:
 		_draw_formal_polity_panel()
+
+
+func _on_formal_state_changed(change: Dictionary) -> void:
+	if (
+		bool(change.get("initialized", false))
+		or bool(change.get("restored", false))
+		or bool(change.get("player", false))
+		or bool(change.get("economy", false))
+	):
+		_refresh_player_context_cache()
+		queue_redraw()
+
+
+func _refresh_player_context_cache() -> void:
+	_player_context_cache = (
+		formal_simulation.player_context_view()
+		if formal_simulation.initialized
+		else {}
+	)
+
+
+func player_card_person_id() -> String:
+	return str(_player_context_cache.get("person_id", ""))
+
+
+func character_detail_person_id() -> String:
+	return str(_player_context_cache.get("person_id", ""))
 
 
 func _draw_formal_world_status() -> void:
@@ -470,8 +503,290 @@ func _activate_button(action: String) -> void:
 			_save_formal_state_from_ui()
 		"formal_load":
 			_load_formal_state_from_ui()
+		"switch_character", "mark_read":
+			# Formal identity is changed only by PlayerState-backed product flows.
+			return
 		_:
 			super._activate_button(action)
+
+
+func _read_document(path: String) -> Dictionary:
+	if path == "res://data/world_map/characters.json":
+		# The file remains an isolated prototype fixture. Formal presentation never
+		# opens it or treats its profiles as player facts.
+		return {"identities": {}}
+	return super._read_document(path)
+
+
+func _seed_world_events() -> void:
+	# Prototype institution agendas are not a personal inbox.
+	_world_events.clear()
+	_event_by_id.clear()
+	activity_unread = 0
+
+
+func _draw_corners() -> void:
+	var compact: bool = size.x < 940.0 or size.y < 620.0
+	var left_width: float = minf(284.0, size.x * 0.42)
+	var right_width: float = minf(282.0, size.x * 0.42)
+	var top_height: float = 56.0 if compact else 66.0
+	var bottom_height: float = 58.0 if compact else 70.0
+	var country_rect := Rect2(18.0, 18.0, left_width, top_height)
+	var time_rect := Rect2(
+		size.x - right_width - 18.0, 18.0, right_width, top_height
+	)
+	var character_rect := Rect2(
+		18.0, size.y - bottom_height - 18.0, left_width, bottom_height
+	)
+	var activity_rect := Rect2(
+		size.x - right_width - 18.0,
+		size.y - bottom_height - 18.0,
+		right_width,
+		bottom_height
+	)
+	_draw_corner(
+		country_rect,
+		_formal_home_polity_name(),
+		"所在地相关政治观察",
+		"toggle_country_panel",
+		Color(0.72, 0.64, 0.38, 0.22),
+		compact
+	)
+	_draw_corner(
+		character_rect,
+		_active_character_name(),
+		_active_character_position(),
+		"toggle_character_panel",
+		Color(0.72, 0.64, 0.38, 0.22),
+		compact
+	)
+	_draw_corner(
+		activity_rect,
+		"机构 / 世界观察",
+		"个人消息当前版本尚未模拟",
+		"toggle_activity_panel",
+		Color(0.72, 0.50, 0.25, 0.22),
+		compact
+	)
+	_panel(
+		time_rect,
+		Color(0.025, 0.055, 0.06, 0.88),
+		Color(0.72, 0.64, 0.38, 0.22)
+	)
+	_register_hit(time_rect, "toggle_time_panel", true)
+	_draw_label(time_rect.position + Vector2(12.0, 22.0), _format_sim_datetime(), 13)
+	var button_y: float = time_rect.end.y - 28.0
+	_draw_button(
+		Rect2(time_rect.position.x + 10.0, button_y, 44.0, 22.0),
+		"Ⅱ" if sim_paused else "▶",
+		"toggle_pause",
+		true
+	)
+	_draw_button(
+		Rect2(time_rect.position.x + 60.0, button_y, 38.0, 22.0),
+		"1×", "speed:1", true
+	)
+	_draw_button(
+		Rect2(time_rect.position.x + 102.0, button_y, 38.0, 22.0),
+		"2×", "speed:2", true
+	)
+	_draw_button(
+		Rect2(time_rect.position.x + 144.0, button_y, 38.0, 22.0),
+		"4×", "speed:4", true
+	)
+
+
+func _draw_character_panel(rect: Rect2) -> void:
+	if not bool(_player_context_cache.get("available", false)):
+		_draw_label(rect.position + Vector2(24.0, 42.0), "正式玩家上下文不可用", 19)
+		_draw_label(
+			rect.position + Vector2(24.0, 76.0),
+			str(_player_context_cache.get("reason", "player_person_unavailable")),
+			11,
+			Color(0.91, 0.70, 0.45, 0.98)
+		)
+		return
+	var person_id := str(_player_context_cache.get("person_id", ""))
+	var place := _player_context_cache.get("current_place", {}) as Dictionary
+	var demographic := (
+		_player_context_cache.get("demographic_identity", {}) as Dictionary
+	)
+	var source := _player_context_cache.get("population_source", {}) as Dictionary
+	var memberships := _player_context_cache.get("memberships", []) as Array
+	var appointments := _player_context_cache.get("appointments", []) as Array
+	_draw_label(
+		rect.position + Vector2(24.0, 38.0),
+		str(_player_context_cache.get("display_label", "正式人物")),
+		20
+	)
+	_draw_label(
+		rect.position + Vector2(24.0, 68.0),
+		"正式玩家 · %s" % ("存活" if bool(
+			_player_context_cache.get("alive", false)
+		) else "非存活"),
+		13
+	)
+	_draw_label(
+		rect.position + Vector2(24.0, 98.0),
+		"所在地：%s（%s）" % [
+			str(place.get("name", "不可用")), str(place.get("id", ""))
+		],
+		12
+	)
+	_draw_label(
+		rect.position + Vector2(24.0, 126.0),
+		"人口来源：%s · 出生年：%s" % [
+			str(source.get("id", "不可用")),
+			str(demographic.get("birth_year", "不可用")),
+		],
+		12
+	)
+	_draw_label(
+		rect.position + Vector2(24.0, 154.0),
+		"正式成员记录：%d · 正式任命记录：%d" % [
+			memberships.size(), appointments.size()
+		],
+		12
+	)
+	_draw_label(
+		rect.position + Vector2(24.0, 184.0),
+		"姓名、职业、工资、健康、关系、技能、私人消息：当前版本尚未模拟",
+		11,
+		Color(0.91, 0.70, 0.45, 0.98)
+	)
+	_draw_label(
+		rect.position + Vector2(24.0, rect.end.y - 26.0),
+		"技术身份：%s" % person_id,
+		9,
+		Color(0.68, 0.75, 0.72, 0.92)
+	)
+
+
+func _draw_country_panel(rect: Rect2) -> void:
+	var political := (
+		_player_context_cache.get("political_observation", {}) as Dictionary
+	)
+	var home_entity_id := str(political.get("polity_id", ""))
+	var selected_entity_id := selected_country_id
+	_draw_label(
+		rect.position + Vector2(24.0, 38.0),
+		str(political.get("name", "所在地政治观察不可用")),
+		20
+	)
+	_draw_label(
+		rect.position + Vector2(24.0, 72.0),
+		"所在地关联实体：%s" % (home_entity_id if not home_entity_id.is_empty() else "不可用"),
+		12
+	)
+	_draw_label(
+		rect.position + Vector2(24.0, 102.0),
+		"当前观察对象：%s" % (
+			selected_entity_id if not selected_entity_id.is_empty() else "尚未选择"
+		),
+		12
+	)
+	_draw_label(
+		rect.position + Vector2(24.0, 132.0),
+		"地图选择只改变观察对象，不改变玩家、人口 claim 或所在地。",
+		11,
+		Color(0.91, 0.70, 0.45, 0.98)
+	)
+	_draw_label(
+		rect.position + Vector2(24.0, 162.0),
+		"政策命令与人物政治行动：当前版本尚未模拟",
+		11,
+		Color(0.73, 0.82, 0.78, 1.0)
+	)
+
+
+func home_country_detail_report() -> Dictionary:
+	var home_entity_id := _home_historical_entity_id()
+	return {
+		"player_person_id": formal_simulation.player_person_id(),
+		"home_entity_id": home_entity_id,
+		"selected_entity_id": selected_country_id,
+		"selected_is_home": selected_country_id == home_entity_id,
+	}
+
+
+func _draw_activity_panel(rect: Rect2) -> void:
+	_draw_label(rect.position + Vector2(24.0, 40.0), "关系 / 信息能力", 19)
+	_draw_label(
+		rect.position + Vector2(24.0, 78.0),
+		"当前 Formal 世界没有人物关系图或私人收件箱 owner。",
+		12
+	)
+	_draw_label(
+		rect.position + Vector2(24.0, 108.0),
+		"因此不显示假联系人、假未读数或“标记已读”操作。",
+		12,
+		Color(0.91, 0.70, 0.45, 0.98)
+	)
+	_draw_label(
+		rect.position + Vector2(24.0, 146.0),
+		"Organization Responsibility 仅作为机构 / 世界观察。",
+		11,
+		Color(0.73, 0.82, 0.78, 1.0)
+	)
+
+
+func _draw_city_characters(rect: Rect2) -> void:
+	if not bool(_player_context_cache.get("available", false)):
+		return
+	var place := _player_context_cache.get("current_place", {}) as Dictionary
+	if str(place.get("map_id", "")) != selected_city_id:
+		return
+	var badge := Rect2(
+		rect.position.x + 34.0, rect.end.y - 54.0, 280.0, 30.0
+	)
+	_panel(
+		badge,
+		Color(0.07, 0.10, 0.095, 0.88),
+		Color(0.54, 0.70, 0.63, 0.34)
+	)
+	_draw_label(
+		badge.position + Vector2(10.0, 20.0),
+		"%s · 正式玩家" % str(
+			_player_context_cache.get("display_label", "正式人物")
+		),
+		11
+	)
+
+
+func _switch_character() -> void:
+	# Runtime identity switching is intentionally unavailable in Formal v1.
+	return
+
+
+func _active_character_name() -> String:
+	return str(_player_context_cache.get("display_label", "正式人物不可用"))
+
+
+func _active_character_position() -> String:
+	var place := _player_context_cache.get("current_place", {}) as Dictionary
+	if not bool(place.get("available", false)):
+		return "所在地不可用"
+	return "正式玩家 · %s" % str(place.get("name", place.get("id", "")))
+
+
+func _activity_summary() -> String:
+	return "个人关系与消息当前版本尚未模拟"
+
+
+func _formal_home_polity_name() -> String:
+	var observation := (
+		_player_context_cache.get("political_observation", {}) as Dictionary
+	)
+	if bool(observation.get("available", false)):
+		return str(observation.get("name_zh", "所在地政治观察"))
+	return "所在地政治观察不可用"
+
+
+func _home_historical_entity_id() -> String:
+	var observation := (
+		_player_context_cache.get("political_observation", {}) as Dictionary
+	)
+	return str(observation.get("runtime_entity_id", ""))
 
 
 func _selected_polity_entity_id() -> String:

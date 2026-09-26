@@ -345,7 +345,171 @@ func player_person_id() -> String:
 
 
 func select_player_person(person_id: String) -> bool:
-	return _player_state.set_player_id(person_id)
+	if not initialized or _person_authority == null:
+		return false
+	var person := _person_authority.person(person_id)
+	if person.is_empty() or not bool(person.get("alive", false)):
+		return false
+	if not _player_state.set_player_id(person_id):
+		return false
+	state_changed.emit({"player": true, "person_id": person_id})
+	return true
+
+
+func player_context_view() -> Dictionary:
+	## Narrow detached projection for the one authoritative player identity.
+	## Missing personal domains are reported as unavailable rather than fabricated.
+	var person_id := player_person_id()
+	if not initialized or person_id.is_empty() or _person_authority == null:
+		return {
+			"available": false,
+			"reason": "player_person_unavailable",
+			"person_id": person_id,
+		}
+	var person := _person_authority.person(person_id)
+	if person.is_empty():
+		return {
+			"available": false,
+			"reason": "player_person_missing",
+			"person_id": person_id,
+		}
+	var claim := _person_authority.population_claim(person_id)
+	var population_source_id := str(person.get("population_territory_id", ""))
+	var place_id := str(person.get("current_place_id", ""))
+	var place := (
+		_spatial_catalog.get_place(place_id)
+		if _spatial_catalog != null and _spatial_catalog.is_loaded()
+		else {}
+	)
+	var source_polity_id := str(place.get("parent_country_id", population_source_id))
+	var runtime_polity_id := _political_registry_view.runtime_id_for_source(
+		source_polity_id
+	)
+	if runtime_polity_id.is_empty():
+		runtime_polity_id = _political_registry_view.runtime_id_for_source(
+			population_source_id
+		)
+	var political_observation: Dictionary = {
+		"available": false,
+		"reason": "no_current_polity_mapping",
+		"runtime_entity_id": runtime_polity_id,
+		"source_entity_id": source_polity_id,
+	}
+	if not runtime_polity_id.is_empty():
+		var polity := CurrentWorldPoliticalProjection.polity_summary(
+			runtime_polity_id,
+			_political_registry_view,
+			_historical_evidence_view
+		)
+		if not polity.is_empty():
+			political_observation = {
+				"available": true,
+				"runtime_entity_id": runtime_polity_id,
+				"source_entity_id": source_polity_id,
+				"name_zh": str(polity.get(
+					"name_zh", polity.get("short_name_zh", runtime_polity_id)
+				)),
+				"status": str(polity.get("status", "")),
+				"relationship": str(polity.get("relationship", "")),
+				"authority_relations": (
+					polity.get("authority_relations", []) as Array
+				).duplicate(true),
+			}
+	var economy_entity_id := _economy.economy_entity_for_polity(
+		runtime_polity_id
+	)
+	if economy_entity_id.is_empty() and _population_input_view.fact(
+		population_source_id
+	).size() > 0:
+		economy_entity_id = population_source_id
+	var economic_observation: Dictionary = {
+		"available": false,
+		"reason": "no_regional_economy_mapping",
+		"economy_entity_id": economy_entity_id,
+	}
+	if not economy_entity_id.is_empty():
+		var economy_summary := _economy.country_summary(economy_entity_id)
+		if not economy_summary.is_empty():
+			economic_observation = {
+				"available": true,
+				"economy_entity_id": economy_entity_id,
+				"population": int(economy_summary.get("population", 0)),
+				"daily_totals": (
+					economy_summary.get("daily_totals", {}) as Dictionary
+				).duplicate(true),
+				"admission_status": str(
+					economy_summary.get("admission_status", "")
+				),
+			}
+	var demographic_identity := (
+		person.get("basic_demographic_identity", {}) as Dictionary
+	).duplicate(true)
+	var provenance := (person.get("provenance", {}) as Dictionary).duplicate(true)
+	return {
+		"available": true,
+		"reason": "",
+		"person_id": person_id,
+		"display_label": _stable_player_label(person_id),
+		"alive": bool(person.get("alive", false)),
+		"population_claim": claim.duplicate(true),
+		"population_source": {
+			"available": not population_source_id.is_empty(),
+			"id": population_source_id,
+			"population": _formal_population_total(population_source_id),
+			"anonymous_population": formal_person_anonymous_population(
+				population_source_id
+			),
+			"revision": _population_input_view.revision(),
+			"fingerprint": _population_input_view.fingerprint(),
+			"kind": str(provenance.get("population_source_kind", "")),
+		},
+		"current_place": {
+			"available": not place.is_empty(),
+			"id": place_id,
+			"map_id": VNextSpatialCatalog.place_query_to_map_id(place_id),
+			"name": str(place.get("name", place.get("display_name_zh", place_id))),
+			"object_level": str(place.get("object_level", "")),
+			"parent_country_id": str(place.get("parent_country_id", "")),
+			"parent_region_id": str(place.get("parent_region_id", "")),
+		},
+		"demographic_identity": demographic_identity,
+		"provenance_summary": {
+			"kind": str(provenance.get("kind", "")),
+			"basis": str(provenance.get("basis", "")),
+			"population_source_revision": str(
+				provenance.get("population_source_revision", "")
+			),
+			"population_source_fingerprint": str(
+				provenance.get("population_source_fingerprint", "")
+			),
+			"territory_mutation_converged": bool(
+				provenance.get("territory_mutation_converged", false)
+			),
+		},
+		"memberships": _organization.memberships_for_person(person_id),
+		"appointments": _organization.appointments_for_person(person_id),
+		"political_observation": political_observation,
+		"economic_observation": economic_observation,
+		"unsupported_personal_fields": {
+			"name": "unavailable",
+			"occupation": "unavailable",
+			"wage": "unavailable",
+			"cash": "unavailable",
+			"health": "unavailable",
+			"friends": "unavailable",
+			"relationships": "unavailable",
+			"plans": "unavailable",
+			"messages": "unavailable",
+			"skills": "unavailable",
+			"military_rank": "unavailable",
+		},
+	}
+
+
+func _stable_player_label(person_id: String) -> String:
+	if person_id.is_empty():
+		return "人物 ----"
+	return "人物 %s" % person_id.sha256_text().left(4).to_upper()
 
 
 func player_defend_formation(
