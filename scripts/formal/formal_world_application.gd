@@ -36,6 +36,14 @@ const POLITICS_TABS: Array[Dictionary] = [
 	{"id": POLITICS_TAB_OBSERVED, "label": "Observed"},
 	{"id": POLITICS_TAB_COMPARE, "label": "Local vs Observed"},
 ]
+const ORGANIZATION_TAB_MY_RECORDS: String = "my_records"
+const ORGANIZATION_TAB_BROWSER: String = "organizations"
+const ORGANIZATION_TAB_RESPONSIBILITY: String = "responsibility"
+const ORGANIZATION_TABS: Array[Dictionary] = [
+	{"id": ORGANIZATION_TAB_MY_RECORDS, "label": "My Records"},
+	{"id": ORGANIZATION_TAB_BROWSER, "label": "Organizations"},
+	{"id": ORGANIZATION_TAB_RESPONSIBILITY, "label": "Responsibility"},
+]
 const MAP_MODE_POLITICAL: String = "political"
 const MAP_MODE_FULFILLMENT: String = "economy_fulfillment"
 const MAP_MODE_SHORTAGE: String = "economy_shortage"
@@ -59,7 +67,6 @@ var _historical_evidence_surface_building: bool = false
 var _player_context_cache: Dictionary = {}
 var _formal_workspace: String = WORKSPACE_PERSON
 var _system_menu_open: bool = false
-var _organization_observation_cache: Dictionary = {}
 var _defend_options_cache: Dictionary = {}
 var _economy_tab: String = ECONOMY_TAB_OVERVIEW
 var _economy_observation_dirty: bool = true
@@ -84,6 +91,15 @@ var _economy_overlay_cache: Dictionary = {}
 var _politics_tab: String = POLITICS_TAB_COMPARE
 var _local_political_observation_cache: Dictionary = {}
 var _observed_political_observation_cache: Dictionary = {}
+var _organization_tab: String = ORGANIZATION_TAB_MY_RECORDS
+var _organization_catalog_cache: Dictionary = {}
+var _player_organization_cache: Dictionary = {}
+var _organization_detail_cache: Dictionary = {}
+var _organization_responsibility_cache: Dictionary = {}
+var _selected_organization_id: String = ""
+var _organization_page: int = 0
+var _responsibility_page: int = 0
+var _organization_refresh_count: int = 0
 
 @onready var _background_cache_viewport: SubViewport = $BackgroundCacheViewport
 @onready var _background_display: TextureRect = $Background
@@ -566,18 +582,48 @@ func _set_politics_tab(tab_id: String) -> bool:
 
 func _refresh_shell_observations() -> void:
 	if not formal_simulation.initialized:
-		_organization_observation_cache = {}
 		_defend_options_cache = {}
 		return
-	var organization_view := formal_simulation.organization_view()
-	var responsibility_view := formal_simulation.organization_responsibility_view()
-	_organization_observation_cache = {
-		"organization_count": organization_view.organization_count(),
-		"responsibility_count": responsibility_view.responsibility_count(),
-		"responsibility_status_counts": responsibility_view.status_counts(),
-		"responsibility_coverage": responsibility_view.coverage_summary(),
-	}
 	_defend_options_cache = formal_simulation.player_defend_options()
+
+
+func _refresh_organization_observations() -> void:
+	if not formal_simulation.initialized:
+		_organization_catalog_cache = {}
+		_player_organization_cache = {}
+		_organization_detail_cache = {}
+		_organization_responsibility_cache = {}
+		return
+	_organization_catalog_cache = formal_simulation.organization_observation_catalog()
+	_player_organization_cache = formal_simulation.player_organization_observation()
+	_organization_responsibility_cache = formal_simulation.organization_responsibility_observation()
+	var rows := _organization_catalog_cache.get("rows", []) as Array
+	if _selected_organization_id.is_empty() and not rows.is_empty():
+		_selected_organization_id = str((rows[0] as Dictionary).get("organization_id", ""))
+	_organization_detail_cache = formal_simulation.organization_observation(
+		_selected_organization_id
+	)
+	_organization_refresh_count += 1
+
+
+func _set_organization_tab(tab_id: String) -> bool:
+	for tab: Dictionary in ORGANIZATION_TABS:
+		if str(tab.get("id", "")) == tab_id:
+			_organization_tab = tab_id
+			_refresh_organization_observations()
+			queue_redraw()
+			return true
+	return false
+
+
+func _select_organization(organization_id: String) -> bool:
+	var detail := formal_simulation.organization_observation(organization_id)
+	if not bool(detail.get("available", false)):
+		return false
+	_selected_organization_id = organization_id
+	_organization_detail_cache = detail
+	queue_redraw()
+	return true
 
 
 func _my_market_id() -> String:
@@ -722,9 +768,11 @@ func set_formal_workspace(workspace_id: String) -> bool:
 		_refresh_economy_observations()
 	elif workspace_id == WORKSPACE_POLITICS:
 		_refresh_political_observations()
+	elif workspace_id == WORKSPACE_ORGANIZATION:
+		_refresh_organization_observations()
 	elif workspace_id == WORKSPACE_MAP and _map_observation_mode != MAP_MODE_POLITICAL:
 		_refresh_economy_overlay()
-	if workspace_id in [WORKSPACE_ORGANIZATION, WORKSPACE_MILITARY]:
+	if workspace_id == WORKSPACE_MILITARY:
 		_refresh_shell_observations()
 	queue_redraw()
 	return true
@@ -744,6 +792,18 @@ func observed_political_observation() -> Dictionary:
 
 func politics_tab_id() -> String:
 	return _politics_tab
+
+
+func organization_refresh_count() -> int:
+	return _organization_refresh_count
+
+
+func selected_organization_id() -> String:
+	return _selected_organization_id
+
+
+func selected_organization_observation() -> Dictionary:
+	return _organization_detail_cache.duplicate(true)
 
 
 func formal_page_execution_actions() -> Array[String]:
@@ -1363,34 +1423,124 @@ func _draw_relations_workspace(rect: Rect2) -> void:
 		"私人消息：当前版本尚未模拟（不显示固定未读数）",
 		"联系人 / 约见 / 发消息：没有 Formal 命令端口",
 		"Organization Responsibility 仅作为机构 / 世界观察。",
-		"机构观察记录：%d" % int(_organization_observation_cache.get("responsibility_count", 0)),
+		"机构观察记录：请在“组织 → Responsibility”中浏览正式记录",
 	], 28.0)
 	_draw_unavailable_notice(rect, "此页面没有“标记已读”、发消息或约见按钮")
 
 
 func _draw_organization_workspace(rect: Rect2) -> void:
-	_draw_workspace_heading(rect, "组织", "人物的真实 membership / appointment 与世界组织观察")
-	var memberships := _player_context_cache.get("memberships", []) as Array
-	var appointments := _player_context_cache.get("appointments", []) as Array
-	_draw_label(rect.position + Vector2(38.0, 126.0), "我的正式记录", 17, Color(0.91, 0.82, 0.58, 1.0))
-	var records: Array[String] = []
-	for membership: Dictionary in memberships:
-		records.append("成员 · %s" % str(membership.get("organization_id", "")))
-	for appointment: Dictionary in appointments:
-		records.append("任职 · %s / %s" % [str(appointment.get("organization_id", "")), str(appointment.get("position_id", ""))])
-	if records.is_empty():
-		records.append("暂无正式组织任职记录")
-	_draw_shell_lines(rect.position + Vector2(38.0, 160.0), records.slice(0, 8), 24.0)
-	var right := rect.position + Vector2(rect.size.x * 0.56, 126.0)
-	_draw_label(right, "世界组织 / Responsibility", 17, Color(0.91, 0.82, 0.58, 1.0))
-	var counts := _organization_observation_cache.get("responsibility_status_counts", {}) as Dictionary
-	_draw_shell_lines(right + Vector2(0.0, 34.0), [
-		"世界组织：%d" % int(_organization_observation_cache.get("organization_count", 0)),
-		"责任观察：%d" % int(_organization_observation_cache.get("responsibility_count", 0)),
-		"monitoring：%d" % int(counts.get("monitoring", 0)),
-		"attention required：%d" % int(counts.get("attention_required", 0)),
-	], 24.0)
+	_draw_workspace_heading(rect, "组织", "OrganizationCore 结构、Authority grant 与机构责任均为只读观察")
+	var x := rect.position.x + 32.0
+	for tab: Dictionary in ORGANIZATION_TABS:
+		var tab_id := str(tab.get("id", ""))
+		var width := 152.0 if tab_id != ORGANIZATION_TAB_RESPONSIBILITY else 166.0
+		var tab_rect := Rect2(x, rect.position.y + 94.0, width, 30.0)
+		_draw_button(tab_rect, str(tab.get("label", tab_id)), "formal_organization_tab:%s" % tab_id, true)
+		if tab_id == _organization_tab:
+			draw_line(tab_rect.position + Vector2(8.0, 28.0), tab_rect.end - Vector2(8.0, 2.0), Color(0.96, 0.76, 0.38, 0.95), 2.0)
+		x += width + 8.0
+	match _organization_tab:
+		ORGANIZATION_TAB_BROWSER:
+			_draw_organization_browser(rect)
+		ORGANIZATION_TAB_RESPONSIBILITY:
+			_draw_organization_responsibility(rect)
+		_:
+			_draw_player_organization_records(rect)
 	_draw_unavailable_notice(rect, "没有加入组织、升职、任命或工资命令；无任职不等于失业")
+
+
+func _draw_player_organization_records(rect: Rect2) -> void:
+	var memberships := _player_organization_cache.get("memberships", []) as Array
+	var appointments := _player_organization_cache.get("appointments", []) as Array
+	var capabilities := _player_organization_cache.get("effective_capabilities", []) as Array
+	var grants := _player_organization_cache.get("current_authority_grants", []) as Array
+	var left := rect.position + Vector2(38.0, 154.0)
+	_draw_label(left, "我的 Formal Organization 记录", 17, Color(0.91, 0.82, 0.58, 1.0))
+	var lines: Array[String] = [
+		"acting person：%s" % str(_player_organization_cache.get("person_id", "")),
+		"memberships：%d" % memberships.size(),
+		"appointments：%d" % appointments.size(),
+		"effective capabilities：%d" % capabilities.size(),
+		"current authority grants：%d" % grants.size(),
+	]
+	if memberships.is_empty() and appointments.is_empty():
+		lines.append("暂无正式组织记录")
+	for membership: Dictionary in memberships:
+		lines.append("成员 · %s" % str(membership.get("organization_id", "")))
+	for appointment: Dictionary in appointments:
+		lines.append("任职 · %s / %s" % [str(appointment.get("organization_id", "")), str(appointment.get("position_id", ""))])
+	_draw_shell_lines(left + Vector2(0.0, 36.0), lines.slice(0, 10), 24.0)
+	var right := rect.position + Vector2(rect.size.x * 0.57, 154.0)
+	_draw_label(right, "能力可用性说明", 17, Color(0.91, 0.82, 0.58, 1.0))
+	_draw_shell_lines(right + Vector2(0.0, 36.0), [
+		"No formal capability grant" if grants.is_empty() else "存在当前 holder-valid Formal grant",
+		"能力只来自 membership / appointment / Authority owner。",
+		"Organization Responsibility 是机构事项，不是“我的任务”。",
+		"DEFEND 仍在军事页通过正式权限端口提交并重验。",
+	], 24.0)
+
+
+func _draw_organization_browser(rect: Rect2) -> void:
+	var rows := _organization_catalog_cache.get("rows", []) as Array
+	var page_size := 8
+	var max_page := maxi(0, (rows.size() - 1) / page_size)
+	_organization_page = clampi(_organization_page, 0, max_page)
+	var start := _organization_page * page_size
+	var left_rect := Rect2(rect.position + Vector2(32.0, 142.0), Vector2(rect.size.x * 0.45, 390.0))
+	_draw_label(left_rect.position, "正式组织 %d · page %d/%d" % [rows.size(), _organization_page + 1, max_page + 1], 15, Color(0.91, 0.82, 0.58, 1.0))
+	var y := left_rect.position.y + 30.0
+	for index: int in range(start, mini(rows.size(), start + page_size)):
+		var row := rows[index] as Dictionary
+		var organization_id := str(row.get("organization_id", ""))
+		var item_rect := Rect2(left_rect.position.x, y - 17.0, left_rect.size.x - 12.0, 39.0)
+		_panel(item_rect, Color(0.07, 0.09, 0.085, 0.82) if organization_id == _selected_organization_id else Color(0.025, 0.05, 0.052, 0.75), Color(0.67, 0.57, 0.34, 0.34))
+		_register_hit(item_rect, "formal_organization_select:%s" % organization_id, true)
+		_draw_label(Vector2(item_rect.position.x + 10.0, y), _ellipsize(str(row.get("display_label", organization_id)), 39), 10)
+		_draw_label(Vector2(item_rect.position.x + 10.0, y + 16.0), "%s · active=%s · members=%d · appointments=%d" % [str(row.get("organization_kind", "")), str(row.get("active", false)), int(row.get("member_count", 0)), int(row.get("appointment_count", 0))], 8, Color(0.67, 0.76, 0.72, 0.95))
+		y += 43.0
+	_draw_button(Rect2(left_rect.position.x, left_rect.end.y - 8.0, 72.0, 25.0), "上一页", "formal_organization_page:-1", _organization_page > 0)
+	_draw_button(Rect2(left_rect.position.x + 80.0, left_rect.end.y - 8.0, 72.0, 25.0), "下一页", "formal_organization_page:1", _organization_page < max_page)
+	_draw_organization_detail(rect.position + Vector2(rect.size.x * 0.50, 142.0))
+
+
+func _draw_organization_detail(position: Vector2) -> void:
+	var detail := _organization_detail_cache
+	var evidence := detail.get("composition_evidence", {}) as Dictionary
+	var responsibilities := detail.get("responsibilities", []) as Array
+	_draw_label(position, "Organization Detail", 15, Color(0.91, 0.82, 0.58, 1.0))
+	_draw_label(position + Vector2(0.0, 30.0), _ellipsize(str(detail.get("display_label", "不可用")), 50), 14, Color(0.86, 0.87, 0.76, 1.0))
+	_draw_shell_lines(position + Vector2(0.0, 58.0), [
+		"ID：%s" % str(detail.get("organization_id", "")),
+		"kind / active：%s / %s" % [str(detail.get("organization_kind", "")), str(detail.get("active", false))],
+		"parent / children：%s / %d" % [str(detail.get("parent_organization_id", "none")) if not str(detail.get("parent_organization_id", "")).is_empty() else "none", (detail.get("child_organization_ids", []) as Array).size()],
+		"place reference：%s" % (str(detail.get("primary_place_id", "")) if not str(detail.get("primary_place_id", "")).is_empty() else "unavailable"),
+		"members / appointments：%d / %d" % [(detail.get("member_ids", []) as Array).size(), (detail.get("appointments", []) as Array).size()],
+		"positions / declared capabilities：%d / %d" % [(detail.get("positions", []) as Array).size(), (detail.get("declared_capability_ids", []) as Array).size()],
+		"current authority grants：%d" % (detail.get("current_authority_grants", []) as Array).size(),
+		"institution responsibility：%d" % responsibilities.size(),
+		"evidence：%s · exact historical name=%s" % [str(evidence.get("basis_class", "unavailable")), str(evidence.get("historical_exact_name_claimed", false))],
+	], 22.0, 9)
+
+
+func _draw_organization_responsibility(rect: Rect2) -> void:
+	var rows := _organization_responsibility_cache.get("rows", []) as Array
+	var counts := _organization_responsibility_cache.get("status_counts", {}) as Dictionary
+	var page_size := 9
+	var max_page := maxi(0, (rows.size() - 1) / page_size)
+	_responsibility_page = clampi(_responsibility_page, 0, max_page)
+	_draw_label(rect.position + Vector2(38.0, 150.0), "机构责任 / 世界观察 · %d" % rows.size(), 17, Color(0.91, 0.82, 0.58, 1.0))
+	_draw_label(rect.position + Vector2(38.0, 178.0), "MONITORING %d · ATTENTION_REQUIRED %d · NO_DETAILED_ECONOMY %d" % [int(counts.get("MONITORING", 0)), int(counts.get("ATTENTION_REQUIRED", 0)), int(counts.get("NO_DETAILED_ECONOMY", 0))], 9, Color(0.70, 0.80, 0.75, 0.96))
+	var y := rect.position.y + 218.0
+	var start := _responsibility_page * page_size
+	for index: int in range(start, mini(rows.size(), start + page_size)):
+		var row := rows[index] as Dictionary
+		var economy_id := str(row.get("economy_entity_id", ""))
+		var fulfillment_bp := int(row.get("current_fulfillment_bp", -1))
+		_draw_label(Vector2(rect.position.x + 48.0, y), "%s · %s · economy=%s · fulfillment=%s" % [_ellipsize(str(row.get("display_label", row.get("organization_id", ""))), 42), str(row.get("status", "")), economy_id if not economy_id.is_empty() else "unavailable", str(fulfillment_bp) if fulfillment_bp >= 0 else "unavailable"], 9)
+		y += 28.0
+	_draw_button(Rect2(rect.position.x + 38.0, rect.end.y - 112.0, 72.0, 25.0), "上一页", "formal_responsibility_page:-1", _responsibility_page > 0)
+	_draw_button(Rect2(rect.position.x + 118.0, rect.end.y - 112.0, 72.0, 25.0), "下一页", "formal_responsibility_page:1", _responsibility_page < max_page)
+	_draw_label(rect.position + Vector2(rect.size.x * 0.57, rect.end.y - 94.0), "这些是 Organization Responsibility，不是玩家消息、通知或个人任务。", 10, Color(0.91, 0.70, 0.45, 1.0))
 
 
 func _draw_politics_workspace(rect: Rect2) -> void:
@@ -1580,6 +1730,16 @@ func _activate_button(action: String) -> void:
 				_set_map_observation_mode(action.trim_prefix("formal_map_mode:"))
 			elif action.begins_with("formal_politics_tab:"):
 				_set_politics_tab(action.trim_prefix("formal_politics_tab:"))
+			elif action.begins_with("formal_organization_tab:"):
+				_set_organization_tab(action.trim_prefix("formal_organization_tab:"))
+			elif action.begins_with("formal_organization_select:"):
+				_select_organization(action.trim_prefix("formal_organization_select:"))
+			elif action.begins_with("formal_organization_page:"):
+				_organization_page = maxi(0, _organization_page + action.trim_prefix("formal_organization_page:").to_int())
+				queue_redraw()
+			elif action.begins_with("formal_responsibility_page:"):
+				_responsibility_page = maxi(0, _responsibility_page + action.trim_prefix("formal_responsibility_page:").to_int())
+				queue_redraw()
 			elif action.begins_with("formal_defend:"):
 				_execute_formal_defend(action.trim_prefix("formal_defend:").to_int())
 			else:
