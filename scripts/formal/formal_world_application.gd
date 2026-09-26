@@ -28,6 +28,14 @@ const ECONOMY_TABS: Array[Dictionary] = [
 	{"id": ECONOMY_TAB_SHORTAGES, "label": "Shortages"},
 	{"id": ECONOMY_TAB_TRANSPORT, "label": "Transport"},
 ]
+const POLITICS_TAB_LOCAL: String = "local"
+const POLITICS_TAB_OBSERVED: String = "observed"
+const POLITICS_TAB_COMPARE: String = "compare"
+const POLITICS_TABS: Array[Dictionary] = [
+	{"id": POLITICS_TAB_LOCAL, "label": "Local"},
+	{"id": POLITICS_TAB_OBSERVED, "label": "Observed"},
+	{"id": POLITICS_TAB_COMPARE, "label": "Local vs Observed"},
+]
 const MAP_MODE_POLITICAL: String = "political"
 const MAP_MODE_FULFILLMENT: String = "economy_fulfillment"
 const MAP_MODE_SHORTAGE: String = "economy_shortage"
@@ -73,6 +81,9 @@ var _shortage_sort: String = "unmet"
 var _economy_refresh_count: int = 0
 var _map_observation_mode: String = MAP_MODE_POLITICAL
 var _economy_overlay_cache: Dictionary = {}
+var _politics_tab: String = POLITICS_TAB_COMPARE
+var _local_political_observation_cache: Dictionary = {}
+var _observed_political_observation_cache: Dictionary = {}
 
 @onready var _background_cache_viewport: SubViewport = $BackgroundCacheViewport
 @onready var _background_display: TextureRect = $Background
@@ -426,6 +437,7 @@ func _gui_input(event: InputEvent) -> void:
 			_observed_market_id = mapped_market
 			if _formal_workspace == WORKSPACE_ECONOMY:
 				_refresh_selected_market()
+		_refresh_political_observations()
 		queue_redraw()
 
 
@@ -525,6 +537,31 @@ func _refresh_player_context_cache() -> void:
 		if formal_simulation.initialized
 		else {}
 	)
+	_refresh_political_observations()
+
+
+func _refresh_political_observations() -> void:
+	if not formal_simulation.initialized:
+		_local_political_observation_cache = {}
+		_observed_political_observation_cache = {}
+		return
+	var local_id := _home_historical_entity_id()
+	_local_political_observation_cache = formal_simulation.political_observation(
+		local_id
+	)
+	_observed_political_observation_cache = (
+		formal_simulation.political_observation(_selected_polity_entity_id())
+	)
+
+
+func _set_politics_tab(tab_id: String) -> bool:
+	for tab: Dictionary in POLITICS_TABS:
+		if str(tab.get("id", "")) == tab_id:
+			_politics_tab = tab_id
+			_refresh_political_observations()
+			queue_redraw()
+			return true
+	return false
 
 
 func _refresh_shell_observations() -> void:
@@ -683,6 +720,8 @@ func set_formal_workspace(workspace_id: String) -> bool:
 	set_process(false)
 	if workspace_id == WORKSPACE_ECONOMY:
 		_refresh_economy_observations()
+	elif workspace_id == WORKSPACE_POLITICS:
+		_refresh_political_observations()
 	elif workspace_id == WORKSPACE_MAP and _map_observation_mode != MAP_MODE_POLITICAL:
 		_refresh_economy_overlay()
 	if workspace_id in [WORKSPACE_ORGANIZATION, WORKSPACE_MILITARY]:
@@ -693,6 +732,18 @@ func set_formal_workspace(workspace_id: String) -> bool:
 
 func shell_player_person_id() -> String:
 	return str(_player_context_cache.get("person_id", ""))
+
+
+func local_political_observation() -> Dictionary:
+	return _local_political_observation_cache.duplicate(true)
+
+
+func observed_political_observation() -> Dictionary:
+	return _observed_political_observation_cache.duplicate(true)
+
+
+func politics_tab_id() -> String:
+	return _politics_tab
 
 
 func formal_page_execution_actions() -> Array[String]:
@@ -1343,25 +1394,74 @@ func _draw_organization_workspace(rect: Rect2) -> void:
 
 
 func _draw_politics_workspace(rect: Rect2) -> void:
-	_draw_workspace_heading(rect, "政治", "所在地与地图选择是观察上下文，不是玩家身份")
-	var home := _player_context_cache.get("political_observation", {}) as Dictionary
-	var selected := formal_simulation.polity_summary(_selected_polity_entity_id())
-	_draw_label(rect.position + Vector2(38.0, 126.0), "所在地相关 polity", 17, Color(0.91, 0.82, 0.58, 1.0))
-	_draw_shell_lines(rect.position + Vector2(38.0, 160.0), [
-		"%s" % str(home.get("name_zh", "不可用")),
-		"runtime：%s" % str(home.get("runtime_entity_id", "")),
-		"source：%s" % str(home.get("source_entity_id", "")),
-		"状态：%s · %s" % [str(home.get("status", "")), str(home.get("relationship", ""))],
-	], 24.0)
-	var right := rect.position + Vector2(rect.size.x * 0.56, 126.0)
-	_draw_label(right, "当前地图观察对象", 17, Color(0.91, 0.82, 0.58, 1.0))
-	_draw_shell_lines(right + Vector2(0.0, 34.0), [
-		"%s" % str(selected.get("name_zh", selected.get("short_name_zh", "尚未选择"))),
-		"ID：%s" % _selected_polity_entity_id(),
-		"状态：%s" % str(selected.get("status", "")),
-		"authority relations：%d" % (selected.get("authority_relations", []) as Array).size(),
-	], 24.0)
+	_draw_workspace_heading(rect, "政治", "LOCAL POLITY 与 OBSERVED POLITY 独立；地图选择只改变观察对象")
+	var x := rect.position.x + 32.0
+	for tab: Dictionary in POLITICS_TABS:
+		var tab_id := str(tab.get("id", ""))
+		var width := 176.0 if tab_id == POLITICS_TAB_COMPARE else 112.0
+		var tab_rect := Rect2(x, rect.position.y + 94.0, width, 30.0)
+		_draw_button(tab_rect, str(tab.get("label", tab_id)), "formal_politics_tab:%s" % tab_id, true)
+		if tab_id == _politics_tab:
+			draw_line(tab_rect.position + Vector2(8.0, 28.0), tab_rect.end - Vector2(8.0, 2.0), Color(0.96, 0.76, 0.38, 0.95), 2.0)
+		x += width + 8.0
+	match _politics_tab:
+		POLITICS_TAB_LOCAL:
+			_draw_political_observation_detail(rect, _local_political_observation_cache, "LOCAL POLITY · 玩家所在地政治环境")
+		POLITICS_TAB_OBSERVED:
+			_draw_political_observation_detail(rect, _observed_political_observation_cache, "OBSERVED POLITY · 地图观察对象")
+		_:
+			_draw_political_comparison(rect)
 	_draw_unavailable_notice(rect, "政策、投票、政变、革命和直接控制国家：当前版本没有人物命令")
+
+
+func _draw_political_comparison(rect: Rect2) -> void:
+	var left := rect.position + Vector2(38.0, 154.0)
+	var right := rect.position + Vector2(rect.size.x * 0.54, 154.0)
+	_draw_political_summary_column(left, _local_political_observation_cache, "LOCAL POLITY")
+	_draw_political_summary_column(right, _observed_political_observation_cache, "OBSERVED POLITY")
+	var same := str(_local_political_observation_cache.get("runtime_id", "")) == str(_observed_political_observation_cache.get("runtime_id", ""))
+	_draw_label(rect.position + Vector2(38.0, 390.0), "上下文：%s · player=%s · place保持不变" % ["相同政治实体" if same else "两个不同政治实体", formal_simulation.player_person_id()], 10, Color(0.74, 0.83, 0.78, 0.96))
+
+
+func _draw_political_summary_column(position: Vector2, observation: Dictionary, heading: String) -> void:
+	var evidence := observation.get("historical_evidence", {}) as Dictionary
+	_draw_label(position, heading, 16, Color(0.91, 0.82, 0.58, 1.0))
+	_draw_shell_lines(position + Vector2(0.0, 32.0), [
+		str(observation.get("display_name", "不可用")),
+		"runtime：%s" % str(observation.get("runtime_id", "")),
+		"source：%s" % str(observation.get("source_historical_id", "")),
+		"当前身份：%s" % str(observation.get("lifecycle_status", "")),
+		"历史状态：%s · %s" % [str(evidence.get("status", "不可用")), str(evidence.get("relationship", "不可用"))],
+		"权威关系：%d" % (observation.get("authority_relations", []) as Array).size(),
+		"有效期：%s → %s" % [str(evidence.get("valid_from", "不可用")), str(evidence.get("valid_to", "不可用"))],
+	], 23.0)
+
+
+func _draw_political_observation_detail(rect: Rect2, observation: Dictionary, heading: String) -> void:
+	var evidence := observation.get("historical_evidence", {}) as Dictionary
+	var left := rect.position + Vector2(38.0, 154.0)
+	var right := rect.position + Vector2(rect.size.x * 0.56, 154.0)
+	_draw_label(left, heading, 17, Color(0.91, 0.82, 0.58, 1.0))
+	_draw_shell_lines(left + Vector2(0.0, 34.0), [
+		str(observation.get("display_name", "不可用")),
+		"runtime identity：%s" % str(observation.get("runtime_id", "")),
+		"lifecycle：%s" % str(observation.get("lifecycle_status", "")),
+		"historical source：%s" % str(observation.get("source_historical_id", "")),
+		"状态 / 关系：%s / %s" % [str(evidence.get("status", "不可用")), str(evidence.get("relationship", "不可用"))],
+		"有效期：%s → %s" % [str(evidence.get("valid_from", "不可用")), str(evidence.get("valid_to", "不可用"))],
+	], 23.0)
+	_draw_label(right, "Authority / Historical Evidence", 17, Color(0.91, 0.82, 0.58, 1.0))
+	var lines: Array[String] = [
+		"当前世界日期：%s" % _format_sim_datetime(),
+		"authority relations：%d" % (observation.get("authority_relations", []) as Array).size(),
+		"geometry：%s · %s" % [str(evidence.get("geometry_provider", "不可用")), str(evidence.get("geometry_feature_id", "不可用"))],
+		"data quality：%s" % str(evidence.get("data_quality", "不可用")),
+		"flag evidence id：%s" % str(evidence.get("flag_id", "不可用")),
+		"flag mode：%s" % str(evidence.get("flag_mode", "不可用")),
+	]
+	for relation: Dictionary in observation.get("authority_relations", []) as Array:
+		lines.append(_authority_relation_label(relation))
+	_draw_shell_lines(right + Vector2(0.0, 34.0), lines.slice(0, 10), 22.0, 10)
 
 
 func _draw_military_workspace(rect: Rect2) -> void:
@@ -1478,6 +1578,8 @@ func _activate_button(action: String) -> void:
 				queue_redraw()
 			elif action.begins_with("formal_map_mode:"):
 				_set_map_observation_mode(action.trim_prefix("formal_map_mode:"))
+			elif action.begins_with("formal_politics_tab:"):
+				_set_politics_tab(action.trim_prefix("formal_politics_tab:"))
 			elif action.begins_with("formal_defend:"):
 				_execute_formal_defend(action.trim_prefix("formal_defend:").to_int())
 			else:

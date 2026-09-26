@@ -853,6 +853,64 @@ func polity_summary(entity_id: String) -> Dictionary:
 	return result
 
 
+func political_observation(entity_id: String) -> Dictionary:
+	## Narrow detached projection for the read-only politics surface. Runtime
+	## identity remains authoritative; dated metadata is explicitly evidence.
+	if not initialized or not _political_registry_view.has_entity(entity_id):
+		return {
+			"available": false,
+			"reason": "runtime_polity_unavailable",
+			"runtime_id": entity_id,
+		}
+	var runtime_entity := _political_registry_view.entity(entity_id)
+	var source_id := _political_registry_view.source_historical_id(entity_id)
+	var evidence := _historical_evidence_view.record(source_id)
+	var evidence_available := not evidence.is_empty()
+	var display_name := entity_id
+	if evidence_available:
+		display_name = str(evidence.get(
+			"name_zh",
+			evidence.get("short_name_zh", evidence.get("name", entity_id))
+		))
+	var historical_evidence: Dictionary = {
+		"available": evidence_available,
+		"source_historical_id": source_id,
+		"catalog_snapshot_date": _historical_evidence_view.snapshot_date(),
+		"catalog_fingerprint": _historical_evidence_view.fingerprint(),
+	}
+	if evidence_available:
+		for key: String in [
+			"name",
+			"name_zh",
+			"short_name_zh",
+			"status",
+			"relationship",
+			"valid_from",
+			"valid_to",
+			"geometry_feature_id",
+			"geometry_provider",
+			"data_quality",
+			"flag_id",
+			"flag_mode",
+		]:
+			if evidence.has(key):
+				historical_evidence[key] = evidence.get(key)
+	return {
+		"available": true,
+		"owner": "RuntimePoliticalEntityRegistry",
+		"runtime_id": entity_id,
+		"display_name": display_name,
+		"lifecycle_status": str(runtime_entity.get("lifecycle_status", "")),
+		"lineage": (runtime_entity.get("lineage", {}) as Dictionary).duplicate(true),
+		"source_historical_id": source_id,
+		"authority_relations": (
+			_political_registry_view.authority_relations_for_target(entity_id)
+		),
+		"historical_evidence": historical_evidence,
+		"current_date_time": date_time().duplicate(true),
+	}
+
+
 func has_polity(entity_id: String) -> bool:
 	return _political_registry.has_entity(entity_id)
 
