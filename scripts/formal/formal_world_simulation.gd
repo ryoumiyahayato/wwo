@@ -562,6 +562,140 @@ func player_defend_formation(
 	)
 
 
+func player_defend_options() -> Dictionary:
+	## Detached, read-only projection of the exact DEFEND contexts currently
+	## available to the authoritative player. The command port re-resolves the
+	## returned context at submission time, so this projection is never a grant.
+	var person_id := player_person_id()
+	var result := {
+		"acting_person_id": person_id,
+		"available": false,
+		"options": [],
+		"unavailable_reasons": [],
+	}
+	if (
+		not initialized
+		or person_id.is_empty()
+		or _organization == null
+		or _organization_authority == null
+		or _military_state == null
+	):
+		result.unavailable_reasons = ["formal_military_unavailable"]
+		return result
+
+	var formation_ids := _military_state.get_sorted_formation_ids()
+	var contexts := _player_defend_acting_contexts(person_id)
+	if formation_ids.is_empty():
+		(result.unavailable_reasons as Array).append("no_formation")
+	if contexts.is_empty():
+		(result.unavailable_reasons as Array).append("no_authority_context")
+
+	var options: Array[Dictionary] = []
+	for context: Dictionary in contexts:
+		for formation_id: String in formation_ids:
+			var authorization := _organization_authority.resolve_authority(
+				context,
+				VNextMilitaryAuthorityBridge.OPERATION_DEFEND,
+				VNextOrganizationAuthorityFoundation.STAGE_DOMAIN_EXECUTION,
+				formation_id,
+				"",
+				"",
+				0.0,
+				_authoritative_total_hour()
+			)
+			var formation := _military_state.get_formation(formation_id)
+			options.append({
+				"formation_id": formation_id,
+				"formation": formation.to_dict() if formation != null else {},
+				"acting_context": context.duplicate(true),
+				"authorization_status": str(authorization.get("status", "")),
+				"authorization": authorization.duplicate(true),
+				"authorized": str(authorization.get("status", "")) == VNextOrganizationAuthorityFoundation.STATUS_AUTHORIZED,
+			})
+	result.options = options
+	for option: Dictionary in options:
+		if bool(option.get("authorized", false)):
+			result.available = true
+			return result
+	if not formation_ids.is_empty() and not contexts.is_empty():
+		(result.unavailable_reasons as Array).append("no_authorized_formation")
+	return result
+
+
+func _player_defend_acting_contexts(person_id: String) -> Array[Dictionary]:
+	var output: Array[Dictionary] = []
+	var seen: Dictionary = {}
+	var authority_snapshot := _organization_authority.snapshot()
+	for raw_grant: Variant in authority_snapshot.get("authority_grants", []) as Array:
+		if not raw_grant is Dictionary:
+			continue
+		var grant := raw_grant as Dictionary
+		if str(grant.get("operation", "")) != VNextMilitaryAuthorityBridge.OPERATION_DEFEND:
+			continue
+		var authority_id := str(grant.get("authority_id", ""))
+		var represented := str(grant.get("represented_entity", ""))
+		var holder := grant.get("holder", {}) as Dictionary
+		var holder_kind := str(holder.get("kind", ""))
+		var acting_org := str(holder.get("organization_id", represented))
+		match holder_kind:
+			"position":
+				for appointment: Dictionary in _organization.appointments_for_person(person_id):
+					if (
+						str(appointment.get("organization_id", "")) == acting_org
+						and str(appointment.get("position_id", "")) == str(holder.get("local_id", ""))
+					):
+						_append_unique_defend_context(output, seen, VNextOrganizationAuthorityFoundation.acting_context(
+							person_id,
+							acting_org,
+							represented,
+							authority_id,
+							str(appointment.get("appointment_id", ""))
+						))
+			"membership":
+				if _organization.is_member(acting_org, person_id):
+					_append_unique_defend_context(output, seen, VNextOrganizationAuthorityFoundation.acting_context(
+						person_id, acting_org, represented, authority_id, "", true
+					))
+			"person":
+				if str(holder.get("person_id", "")) == person_id:
+					_append_unique_defend_context(output, seen, VNextOrganizationAuthorityFoundation.acting_context(
+						person_id, represented, represented, authority_id
+					))
+
+	for raw_delegation: Variant in authority_snapshot.get("delegations", []) as Array:
+		if not raw_delegation is Dictionary:
+			continue
+		var delegation := raw_delegation as Dictionary
+		if str(delegation.get("recipient_person_id", "")) != person_id:
+			continue
+		var source_id := str(delegation.get("source_id", ""))
+		var source_grant := _organization_authority.authority_grant(source_id)
+		if source_grant.is_empty() or str(source_grant.get("operation", "")) != VNextMilitaryAuthorityBridge.OPERATION_DEFEND:
+			continue
+		var represented := str(source_grant.get("represented_entity", ""))
+		_append_unique_defend_context(output, seen, VNextOrganizationAuthorityFoundation.acting_context(
+			person_id,
+			represented,
+			represented,
+			source_id,
+			"",
+			false,
+			"",
+			str(delegation.get("delegation_id", ""))
+		))
+	return output
+
+
+func _append_unique_defend_context(
+	output: Array[Dictionary], seen: Dictionary, context: Dictionary
+) -> void:
+	var fingerprint := JSON.stringify(context)
+	if seen.has(fingerprint):
+		return
+	seen[fingerprint] = true
+	output.append(context.duplicate(true))
+
+
 func economy_regression_snapshot() -> Dictionary:
 	return _economy.legacy_regression_snapshot()
 

@@ -99,6 +99,15 @@ func _run() -> void:
 	if not _require(application._data_errors.is_empty(), "地图初始化产生玩家可见数据错误"):
 		await _finish()
 		return
+	if not _require(application.formal_workspace_id() == FormalWorldApplication.WORKSPACE_PERSON, "正式产品未默认进入人物首页"):
+		await _finish()
+		return
+	if not _require(application.shell_player_person_id() == selected_player_id, "人物首页未绑定所选正式人物"):
+		await _finish()
+		return
+	if not _require(await _click_action(application, "formal_workspace:map"), "七入口中的地图/世界不可点击"):
+		await _finish()
+		return
 
 	application._ensure_projection_cache()
 	var france_point := application._country_screen_anchors.get(
@@ -117,6 +126,9 @@ func _run() -> void:
 		await _finish()
 		return
 	if not _require(application.info_open, "实体选择没有打开可见详情反馈"):
+		await _finish()
+		return
+	if not _require(application.formal_simulation.player_person_id() == selected_player_id, "地图选择改变了正式玩家身份"):
 		await _finish()
 		return
 	if not _require(
