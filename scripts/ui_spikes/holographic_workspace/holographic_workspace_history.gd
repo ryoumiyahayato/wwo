@@ -76,6 +76,7 @@ func _set_world_zoom(value: float, anchor: Vector2 = Vector2(INF, INF)) -> void:
 		return
 	world_zoom = next_zoom
 	_apply_world_zoom_geometry()
+	_update_map_visual_lod()
 	_mark_projection_dirty()
 	_sync_moon_visibility()
 	hover_country_id = ""

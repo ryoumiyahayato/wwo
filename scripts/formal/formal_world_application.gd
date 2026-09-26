@@ -100,6 +100,14 @@ var _selected_organization_id: String = ""
 var _organization_page: int = 0
 var _responsibility_page: int = 0
 var _organization_refresh_count: int = 0
+var _country_labels_enabled: bool = false
+var _formal_place_catalog_cache: Dictionary = {}
+var _formal_place_screen_cache: Dictionary = {}
+var _formal_place_projection_revision: int = -1
+var _formal_place_projection_lod: String = ""
+var _hover_place_id: String = ""
+var _selected_place_id: String = ""
+var _selected_place_context_cache: Dictionary = {}
 
 @onready var _background_cache_viewport: SubViewport = $BackgroundCacheViewport
 @onready var _background_display: TextureRect = $Background
@@ -152,6 +160,7 @@ func _ready() -> void:
 			_formal_status = "新的1900正式世界已建立。"
 		_refresh_player_context_cache()
 	_refresh_shell_observations()
+	_refresh_formal_place_catalog()
 	sim_paused = true
 	economy_panel_open = false
 	_sync_political_presentation()
@@ -443,6 +452,9 @@ func _gui_input(event: InputEvent) -> void:
 		if event is InputEventMouse or event is InputEventMouseMotion:
 			accept_event()
 			return
+	if _handle_formal_place_input(event):
+		accept_event()
+		return
 	var selection_before := selected_country_id
 	super._gui_input(event)
 	if selected_country_id != selection_before:
@@ -462,6 +474,7 @@ func _draw() -> void:
 	if _formal_workspace == WORKSPACE_MAP:
 		_draw_formal_world_status()
 		_draw_economy_map_controls()
+		_draw_formal_place_card()
 		if economy_panel_open:
 			_draw_formal_polity_panel()
 	else:
@@ -475,6 +488,20 @@ func _draw() -> void:
 func _draw_country_flag_skins() -> void:
 	if _map_observation_mode == MAP_MODE_POLITICAL:
 		super._draw_country_flag_skins()
+
+
+func _draw_zoom_country_labels() -> void:
+	# Country names are contextual by default: selected/hover labels are already
+	# rendered by the historical anchor layer.  The existing ranked label system
+	# remains available behind an explicit player toggle.
+	if _country_labels_enabled:
+		super._draw_zoom_country_labels()
+
+
+func _draw_global_world() -> void:
+	super._draw_global_world()
+	if _formal_workspace == WORKSPACE_MAP:
+		_draw_formal_place_layer()
 
 
 func _political_fill_color(entity_id: String, alpha: float) -> Color:
@@ -512,6 +539,12 @@ func _draw_economy_map_controls() -> void:
 		if mode_id == _map_observation_mode:
 			draw_line(button_rect.position + Vector2(7.0, 26.0), button_rect.end - Vector2(7.0, 2.0), Color(0.96, 0.76, 0.38, 0.95), 2.0)
 		x += width + 6.0
+	_draw_button(
+		Rect2(x, rect.position.y + 8.0, 112.0, 28.0),
+		"Labels ON" if _country_labels_enabled else "Labels OFF",
+		"formal_map_labels_toggle",
+		true
+	)
 	if _map_observation_mode == MAP_MODE_POLITICAL:
 		return
 	var legend := Rect2(700.0, 124.0, 238.0, 54.0)
@@ -526,7 +559,27 @@ func _draw_economy_map_controls() -> void:
 			else Color(0.24, 0.48, 0.45).lerp(Color(0.82, 0.24, 0.12), ratio)
 		)
 		draw_rect(Rect2(legend.position + Vector2(12.0 + index * 24.0, 32.0), Vector2(24.0, 12.0)), color)
-	_draw_label(legend.position + Vector2(12.0, 51.0), "灰色：无可靠 Formal 映射 / 尚未日结", 8, Color(0.70, 0.76, 0.72, 0.95))
+		_draw_label(legend.position + Vector2(12.0, 51.0), "灰色：无可靠 Formal 映射 / 尚未日结", 8, Color(0.70, 0.76, 0.72, 0.95))
+
+
+func _draw_formal_place_card() -> void:
+	if _selected_place_context_cache.is_empty():
+		return
+	var context := _selected_place_context_cache
+	var card := Rect2(size.x - 350.0, 190.0, 324.0, 190.0)
+	_panel(card, Color(0.012, 0.032, 0.036, 0.975), Color(0.79, 0.66, 0.35, 0.56))
+	_draw_label(card.position + Vector2(18.0, 30.0), str(context.get("display_label", "地点")), 18, Color(0.96, 0.84, 0.58, 1.0))
+	_draw_label(card.position + Vector2(18.0, 53.0), "PLACE CARD · %s" % str(context.get("kind", "place")).to_upper(), 9, Color(0.61, 0.78, 0.74, 0.96))
+	var statistics_level := "尚无 Formal 经济映射"
+	if str(context.get("economic_statistics_level", "")) == "economic_aggregate":
+		statistics_level = "%s aggregate" % str(context.get("economy_entity_id", ""))
+	_draw_shell_lines(card.position + Vector2(18.0, 82.0), [
+		"政治环境：%s" % str(context.get("runtime_polity_id", "不可用")),
+		"当前经济统计层级：%s" % statistics_level,
+		"正式组织：%d" % int(context.get("organization_count", 0)),
+		"来源：Formal Spatial catalogue",
+	], 21.0, 10, Color(0.80, 0.86, 0.80, 0.98))
+	_draw_button(Rect2(card.end.x - 70.0, card.position.y + 12.0, 54.0, 25.0), "关闭", "formal_place_close", true)
 
 
 func _on_formal_state_changed(change: Dictionary) -> void:
@@ -585,6 +638,163 @@ func _refresh_shell_observations() -> void:
 		_defend_options_cache = {}
 		return
 	_defend_options_cache = formal_simulation.player_defend_options()
+
+
+func _refresh_formal_place_catalog() -> void:
+	_formal_place_catalog_cache = (
+		formal_simulation.place_observation_catalog()
+		if formal_simulation.initialized
+		else {}
+	)
+	_formal_place_projection_revision = -1
+	_formal_place_screen_cache.clear()
+	if not _selected_place_id.is_empty():
+		_selected_place_context_cache = formal_simulation.place_context_view(
+			_selected_place_id
+		)
+
+
+func _rebuild_formal_place_screen_cache() -> void:
+	var lod := map_visual_lod()
+	if (
+		_formal_place_projection_revision == _projection_revision
+		and _formal_place_projection_lod == lod
+	):
+		return
+	_formal_place_projection_revision = _projection_revision
+	_formal_place_projection_lod = lod
+	_formal_place_screen_cache.clear()
+	if lod == MAP_VISUAL_LOD_WORLD:
+		return
+	var basis := Basis(Vector3.RIGHT, tilt) * Basis(Vector3.UP, yaw)
+	for row_value: Variant in _formal_place_catalog_cache.get("rows", []) as Array:
+		if not row_value is Dictionary:
+			continue
+		var row := row_value as Dictionary
+		var minimum_zoom := float(row.get("min_zoom", 0.0))
+		var maximum_zoom := float(row.get("max_zoom", WORLD_ZOOM_MAX))
+		if world_zoom < minimum_zoom or world_zoom > maximum_zoom:
+			continue
+		if lod == MAP_VISUAL_LOD_REGION and not bool(row.get("major", false)) and str(row.get("kind", "")) != "port":
+			continue
+		var lon_lat := row.get("lon_lat", []) as Array
+		if lon_lat.size() < 2:
+			continue
+		var rotated := basis * _lon_lat_to_unit(Vector2(float(lon_lat[0]), float(lon_lat[1])))
+		if rotated.z < 0.0:
+			continue
+		_formal_place_screen_cache[str(row.get("place_id", ""))] = {
+			"point": _sphere_screen(rotated),
+			"context": row.duplicate(true),
+		}
+
+
+func _handle_formal_place_input(event: InputEvent) -> bool:
+	if (
+		_formal_workspace != WORKSPACE_MAP
+		or map_visual_lod() == MAP_VISUAL_LOD_WORLD
+		or world_mode != WORLD_COUNTRIES
+		or space_level != WORLD
+	):
+		if not _hover_place_id.is_empty():
+			_hover_place_id = ""
+			queue_redraw()
+		return false
+	_rebuild_formal_place_screen_cache()
+	if event is InputEventMouseMotion:
+		var motion := event as InputEventMouseMotion
+		if dragging:
+			return false
+		var next_hover := _formal_place_id_at(motion.position)
+		if next_hover != _hover_place_id:
+			_hover_place_id = next_hover
+			queue_redraw()
+		# A marker hover owns only its small hit target; blank map remains draggable.
+		return not next_hover.is_empty()
+	if event is InputEventMouseButton:
+		var button := event as InputEventMouseButton
+		if button.button_index != MOUSE_BUTTON_LEFT or button.pressed:
+			return false
+		if drag_moved:
+			return false
+		var place_id := _formal_place_id_at(button.position)
+		if place_id.is_empty():
+			return false
+		dragging = false
+		angular_velocity = 0.0
+		set_process(false)
+		_selected_place_id = place_id
+		_selected_place_context_cache = formal_simulation.place_context_view(place_id)
+		queue_redraw()
+		return true
+	return false
+
+
+func _formal_place_id_at(position: Vector2) -> String:
+	var best_id := ""
+	var best_distance := INF
+	for place_key: Variant in _formal_place_screen_cache.keys():
+		var place_id := str(place_key)
+		var marker := _formal_place_screen_cache.get(place_id, {}) as Dictionary
+		var point := marker.get("point", Vector2.INF) as Vector2
+		var distance := position.distance_to(point)
+		if distance <= 10.0 and distance < best_distance:
+			best_id = place_id
+			best_distance = distance
+	return best_id
+
+
+func _draw_formal_place_layer() -> void:
+	_rebuild_formal_place_screen_cache()
+	if _formal_place_screen_cache.is_empty():
+		return
+	var lod := map_visual_lod()
+	var occupied: Array[Rect2] = []
+	var labels_drawn := 0
+	var maximum_labels := 8 if lod == MAP_VISUAL_LOD_REGION else 16
+	for place_key: Variant in _formal_place_screen_cache.keys():
+		var place_id := str(place_key)
+		var marker := _formal_place_screen_cache.get(place_id, {}) as Dictionary
+		var context := marker.get("context", {}) as Dictionary
+		var point := marker.get("point", Vector2.ZERO) as Vector2
+		var selected := place_id == _selected_place_id
+		var hovered := place_id == _hover_place_id
+		var kind := str(context.get("kind", "city"))
+		var radius := 5.0 if bool(context.get("major", false)) else 3.4
+		if selected or hovered:
+			radius += 2.0
+		var color := Color(0.76, 0.84, 0.72, 0.88)
+		if selected:
+			color = Color(0.96, 0.73, 0.32, 1.0)
+		elif hovered:
+			color = Color(0.43, 0.93, 0.91, 1.0)
+		if kind == "port":
+			draw_circle(point, radius + 1.5, Color(color.r, color.g, color.b, 0.12), false, 1.2)
+			draw_arc(point, radius + 1.5, 0.0, TAU, 20, color, 1.7, true)
+		else:
+			draw_circle(point, radius, color)
+		var show_label := selected or hovered or (
+			lod == MAP_VISUAL_LOD_CITY and labels_drawn < maximum_labels
+		)
+		if not show_label:
+			continue
+		var label := str(context.get("display_label", place_id))
+		var label_rect := Rect2(point + Vector2(8.0, -13.0), Vector2(maxf(40.0, label.length() * 12.0), 18.0))
+		var overlaps := false
+		if not selected and not hovered:
+			for existing: Rect2 in occupied:
+				if existing.intersects(label_rect.grow(3.0)):
+					overlaps = true
+					break
+		if overlaps:
+			continue
+		occupied.append(label_rect)
+		_draw_label(label_rect.position + Vector2(0.0, 13.0), label, 10, color)
+		labels_drawn += 1
+	if lod == MAP_VISUAL_LOD_CITY:
+		var badge := Rect2(_hemisphere_rect.position + Vector2(14.0, 56.0), Vector2(178.0, 27.0))
+		_panel(badge, Color(0.025, 0.052, 0.052, 0.94), Color(0.62, 0.73, 0.53, 0.42))
+		_draw_label(badge.position + Vector2(10.0, 18.0), "CITY · 地点观察层", 10, Color(0.87, 0.84, 0.65, 1.0))
 
 
 func _refresh_organization_observations() -> void:
@@ -873,6 +1083,84 @@ func map_observation_mode() -> String:
 
 func economy_overlay_observation() -> Dictionary:
 	return _economy_overlay_cache.duplicate(true)
+
+
+func formal_country_labels_enabled() -> bool:
+	return _country_labels_enabled
+
+
+func formal_place_catalog_observation() -> Dictionary:
+	return _formal_place_catalog_cache.duplicate(true)
+
+
+func formal_selected_place_id() -> String:
+	return _selected_place_id
+
+
+func formal_selected_place_context() -> Dictionary:
+	return _selected_place_context_cache.duplicate(true)
+
+
+func formal_place_screen_point(place_id: String) -> Vector2:
+	_rebuild_formal_place_screen_cache()
+	return ((_formal_place_screen_cache.get(place_id, {}) as Dictionary).get(
+		"point", Vector2.INF
+	) as Vector2)
+
+
+func formal_map_lod_report(include_diagnostics: bool = false) -> Dictionary:
+	var report := map_visual_state_report()
+	var mappings: Array[String] = []
+	for entity_key: Variant in _country_by_id.keys():
+		var entity_id := str(entity_key)
+		var entity := _country_by_id.get(entity_id, {}) as Dictionary
+		var flag_id := str(entity.get("flag_id", ""))
+		var imported := _historical_imported_flag_texture_by_id.get(flag_id) as Texture2D
+		mappings.append("%s|%s|%s" % [
+			entity_id,
+			flag_id,
+			str(imported.resource_path) if imported != null else "",
+		])
+	mappings.sort()
+	report["historical_imported_flag_count"] = _historical_imported_flag_texture_by_id.size()
+	report["flag_resource_mapping_fingerprint"] = "\n".join(mappings).sha256_text()
+	report["selected_country_id"] = selected_country_id
+	report["hover_country_id"] = hover_country_id
+	var world_revision := formal_simulation.economy_observation_revision()
+	report["world_revision"] = world_revision
+	var camera_state := "|".join([
+		"%.6f" % yaw,
+		"%.6f" % tilt,
+		"%.6f" % world_zoom,
+		str(report.get("visual_lod", "")),
+		selected_country_id,
+		hover_country_id,
+		str(world_revision),
+	])
+	report["camera_state_hash"] = camera_state.sha256_text()
+	if include_diagnostics:
+		report["edge_artifacts"] = map_screen_edge_artifact_report()
+		report["performance"] = map_performance_diagnostic_report()
+		var render_state := "|".join([
+			str(report.get("camera_state_hash", "")),
+			var_to_str(report.get("visible_political_entity_ids", [])),
+			str(report.get("flag_record_entity_count", 0)),
+			str(report.get("flag_eligible_entity_count", 0)),
+			str(report.get("drawn_flag_entity_count", 0)),
+			str(report.get("fallback_count", 0)),
+			map_render_projected_fingerprint().sha256_text(),
+			str(report.get("flag_resource_mapping_fingerprint", "")),
+		])
+		report["render_state_hash"] = render_state.sha256_text()
+		report["cache_dependencies"] = {
+			"political_projected_geometry": ["camera_state", "projection_revision", "geometry_revision"],
+			"flag_uv_batch": ["geometry_revision", "projection_revision", "clipping_regime", "flag_identity"],
+			"labels": ["camera_state", "visual_lod", "selection", "labels_toggle"],
+			"place_layer": ["camera_state", "visual_lod", "spatial_catalog_fingerprint", "selection"],
+			"economy_overlay": ["economy_observation_revision", "polity_economy_mapping", "map_mode"],
+			"imported_flag_textures": ["historical_flag_catalog_fingerprint"],
+		}
+	return report
 
 
 func _draw_formal_world_status() -> void:
@@ -1728,6 +2016,13 @@ func _activate_button(action: String) -> void:
 				queue_redraw()
 			elif action.begins_with("formal_map_mode:"):
 				_set_map_observation_mode(action.trim_prefix("formal_map_mode:"))
+			elif action == "formal_map_labels_toggle":
+				_country_labels_enabled = not _country_labels_enabled
+				queue_redraw()
+			elif action == "formal_place_close":
+				_selected_place_id = ""
+				_selected_place_context_cache = {}
+				queue_redraw()
 			elif action.begins_with("formal_politics_tab:"):
 				_set_politics_tab(action.trim_prefix("formal_politics_tab:"))
 			elif action.begins_with("formal_organization_tab:"):

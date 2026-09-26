@@ -3,6 +3,16 @@ extends "res://scripts/ui_spikes/holographic_workspace/holographic_workspace_fin
 const WORLD_ZOOM_MIN: float = 0.74
 const WORLD_ZOOM_MAX: float = 6.0
 const WORLD_ZOOM_STEP: float = 0.10
+const MAP_VISUAL_LOD_WORLD: String = "world"
+const MAP_VISUAL_LOD_REGION: String = "region"
+const MAP_VISUAL_LOD_CITY: String = "city"
+# Presentation-only thresholds.  Enter/exit values deliberately differ so a
+# wheel resting at the boundary cannot alternate city markers and country
+# presentation between adjacent frames.
+const MAP_REGION_ENTER_ZOOM: float = 1.55
+const MAP_REGION_EXIT_ZOOM: float = 1.35
+const MAP_CITY_ENTER_ZOOM: float = 4.80
+const MAP_CITY_EXIT_ZOOM: float = 4.35
 const COUNTRY_LABEL_FADE_START: float = 1.18
 const COUNTRY_LABEL_FADE_END: float = 2.40
 const FLAG_PHASE_RATE: float = 0.6
@@ -50,9 +60,9 @@ const MAP_STATIC_SURFACE_BUILD_BUDGET_USEC: int = 12000
 const MAP_INTERACTIVE_SURFACE_BUILD_BUDGET_USEC: int = 4000
 const MAP_DETAIL_RESTORE_BUDGET_USEC: int = 8000
 const MAP_USE_EXPLICIT_TRIANGLE_SUBMISSION: bool = true
-const INTERACTIVE_SURFACE_RING_POINTS: int = 64
-const INTERACTIVE_BOUNDARY_RING_POINTS: int = 96
-const INTERACTIVE_PHYSICAL_RING_POINTS: int = 64
+const INTERACTIVE_SURFACE_RING_POINTS: int = 24
+const INTERACTIVE_BOUNDARY_RING_POINTS: int = 32
+const INTERACTIVE_PHYSICAL_RING_POINTS: int = 24
 const MAP_PHASE_LAND_ONLY: String = "land"
 const MAP_PHASE_POLITICAL_SOLID: String = "political"
 const MAP_PHASE_SELECTION_BORDERS: String = "borders"
@@ -94,12 +104,20 @@ var map_debug_source_triangle_max_depth: int = MAP_MAX_SOURCE_TRIANGLE_SUBDIVISI
 # This is deliberately a presentation/LOD switch; it never changes ownership
 # or source geometry.
 var map_interaction_flag_lod_enabled: bool = true
+# The complete source triangulation remains available to explicit topology and
+# evidence probes. Production presentation uses the bounded source-derived
+# surface at WORLD/REGION/CITY scale; otherwise a single complex historical
+# polity can monopolize the main thread for seconds while building an idle-only
+# cache that is visually indistinguishable at the globe's screen resolution.
+var map_full_detail_idle_restore_enabled: bool = false
+var _map_visual_lod: String = MAP_VISUAL_LOD_WORLD
 var _base_hemisphere_radius: float = 220.0
 var _flag_time: float = 0.0
 var _flag_palettes: Dictionary = {}
 var _flag_screen_polygons: Dictionary = {}
 var _flag_screen_triangle_records: Dictionary = {}
 var _interactive_flag_screen_points: Dictionary = {}
+var _interactive_flag_screen_uvs: Dictionary = {}
 var _interactive_flag_screen_components: Dictionary = {}
 var _interactive_flag_screen_component_indices: Dictionary = {}
 var _interactive_flag_screen_source_triangles: Dictionary = {}
@@ -144,6 +162,13 @@ var _static_projection_cache_revision: int = -1
 var _detail_restore_in_progress: bool = false
 var _detail_restore_cursor: int = 0
 var _detail_restore_revision: int = -1
+var _detail_restore_flag_screen_polygons: Dictionary = {}
+var _detail_restore_flag_screen_triangle_records: Dictionary = {}
+var _detail_restore_flag_screen_bounds: Dictionary = {}
+var _detail_restore_country_screen_boundary_segments: Dictionary = {}
+var _detail_restore_country_screen_meshes: Dictionary = {}
+var _detail_restore_country_screen_triangle_counts: Dictionary = {}
+var _detail_restore_map_render_stage_records: Dictionary = {}
 var _interactive_source_triangles_processed: int = 0
 var _interactive_front_triangles: int = 0
 var _interactive_behind_triangles: int = 0
@@ -168,6 +193,9 @@ var _map_flag_texture_cache_hits: int = 0
 var _map_flag_texture_cache_misses: int = 0
 var _map_flag_draw_calls: int = 0
 var _flag_draw_validation_failures: Array[Dictionary] = []
+var _map_draw_frame_count: int = 0
+var _map_projection_rebuild_count: int = 0
+var _map_stage_timing_stats: Dictionary = {}
 var _map_player_audit_path: String = ""
 var _map_player_audit_samples: Array[Dictionary] = []
 var _map_player_audit_frame_index: int = 0
@@ -192,6 +220,7 @@ func _ready() -> void:
 	_load_flag_palettes()
 	super._ready()
 	_apply_world_zoom_geometry()
+	_update_map_visual_lod()
 	_mark_projection_dirty()
 	queue_redraw()
 	_map_runtime_interaction_enabled = true
@@ -204,6 +233,10 @@ func _map_render_phase_from_command_line() -> void:
 		if argument == "--map-topology-audit":
 			map_topology_validation_enabled = true
 			map_screen_topology_diagnostics_enabled = true
+			map_full_detail_idle_restore_enabled = true
+			continue
+		if argument == "--map-full-detail":
+			map_full_detail_idle_restore_enabled = true
 			continue
 		if argument == "--map-hide-physical-boundaries":
 			map_debug_hide_physical_boundaries = true
@@ -271,7 +304,7 @@ func _on_flag_timer_timeout() -> void:
 	# resubmit the complete high-resolution map without changing world state.
 	# During startup the same timer advances the bounded static-surface warmup;
 	# stop invalidating as soon as the complete cache is available.
-	if not _static_surface_build_complete:
+	if not _presentation_surface_ready():
 		queue_redraw()
 
 
@@ -312,13 +345,14 @@ func _ensure_projection_cache() -> void:
 	var rebuild_flags: bool = (
 		_projection_dirty
 		or _flag_projection_cache_revision != _projection_revision
+		or not _presentation_surface_ready()
 	)
 	if rebuild_flags:
 		_map_runtime_geometry_failure_samples.clear()
 	var base_projection_start_usec: int = Time.get_ticks_usec()
 	var defer_optional_camera_layers := (
 		map_interaction_flag_lod_enabled and _camera_interaction_active()
-		or not _static_surface_build_complete
+		or not _presentation_surface_ready()
 	)
 	if defer_optional_camera_layers:
 		# Keep the cheap authoritative anchor/coastline projection available while
@@ -327,7 +361,7 @@ func _ensure_projection_cache() -> void:
 		# every high-resolution source ring has finished triangulating.  During an
 		# active drag, retain the old lightweight deferral to avoid doing this work
 		# on the input frame.
-		if not _static_surface_build_complete and not _camera_interaction_active():
+		if not _presentation_surface_ready() and not _camera_interaction_active():
 			if _country_screen_anchors.is_empty():
 				_projection_dirty = true
 			super._ensure_projection_cache()
@@ -351,13 +385,17 @@ func _ensure_projection_cache() -> void:
 		# land remains visible and the next queued frame continues this bounded
 		# preparation.
 		_ensure_country_surface_triangle_buffers()
-		if (
-			not _static_surface_build_complete
-			or (map_interaction_flag_lod_enabled and not _interactive_surface_build_complete)
-		):
-			# The interactive source-triangle warmup is already available for the
-			# complete roster. Project that bounded LOD now so the player sees real
-			# political surfaces while full-resolution closure work continues.
+		if map_interaction_flag_lod_enabled and not _interactive_surface_build_complete:
+			# Never publish a growing subset of political entities.  The lightweight
+			# roster warmup is time-sliced, and physical land remains the neutral
+			# startup surface until every entity can enter the same generation.
+			if viewport != null:
+				viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+			queue_redraw()
+			return
+		if map_full_detail_idle_restore_enabled and not _static_surface_build_complete:
+			# The complete interaction roster is now available. Project that bounded
+			# LOD while full-resolution closure work continues in later slices.
 			_rebuild_country_flag_cache_fast()
 			if viewport != null:
 				viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
@@ -382,6 +420,7 @@ func camera_navigation_report() -> Dictionary:
 		"yaw_radians": yaw,
 		"tilt_radians": tilt,
 		"world_zoom": world_zoom,
+		"visual_lod": _map_visual_lod,
 		"hemisphere_center": [_hemisphere_center.x, _hemisphere_center.y],
 		"layout_center": [_layout_hemisphere_center.x, _layout_hemisphere_center.y],
 		"center_offset": [_world_view_center_offset.x, _world_view_center_offset.y],
@@ -403,6 +442,110 @@ func camera_navigation_report() -> Dictionary:
 			and _flag_projection_cache_revision == _projection_revision
 			and _physical_land_projection_cache_revision == _projection_revision
 		),
+		"detail_restore_in_progress": _detail_restore_in_progress,
+		"static_surface_dirty": (
+			map_full_detail_idle_restore_enabled and not _static_surface_build_complete
+		),
+	}
+
+
+func map_visual_lod() -> String:
+	return _map_visual_lod
+
+
+func _presentation_surface_ready() -> bool:
+	return (
+		_static_surface_build_complete
+		if map_full_detail_idle_restore_enabled
+		else _interactive_surface_build_complete
+	)
+
+
+func map_visual_state_report() -> Dictionary:
+	var visible_ids: Array[String] = []
+	var compact_source := (
+		_last_map_cache_lod == "interactive"
+		and not _interactive_flag_screen_points.is_empty()
+	)
+	var entity_source: Dictionary = (
+		_interactive_flag_screen_points
+		if compact_source
+		else _flag_screen_triangle_records
+	)
+	for entity_key: Variant in entity_source.keys():
+		var entity_id := str(entity_key)
+		var has_surface := false
+		if compact_source:
+			has_surface = not (entity_source.get(entity_id, PackedVector2Array()) as PackedVector2Array).is_empty()
+		else:
+			has_surface = not (entity_source.get(entity_id, []) as Array).is_empty()
+		if has_surface:
+			visible_ids.append(entity_id)
+	visible_ids.sort()
+	var drawn_flag_entities := 0
+	var flag_eligible_entities := 0
+	var presentation_lod_entities := 0
+	var fallback_count := 0
+	for entity_id: String in visible_ids:
+		var stage := _map_render_stage_records.get(entity_id, {}) as Dictionary
+		if bool(stage.get("flag_drawn", false)):
+			drawn_flag_entities += 1
+		if compact_source:
+			var compact_points: PackedVector2Array = _interactive_flag_screen_points.get(
+				entity_id, PackedVector2Array()
+			) as PackedVector2Array
+			var compact_uvs: PackedVector2Array = _interactive_flag_screen_uvs.get(
+				entity_id, PackedVector2Array()
+			) as PackedVector2Array
+			if not compact_points.is_empty() and compact_uvs.size() == compact_points.size():
+				flag_eligible_entities += 1
+		else:
+			var has_presentation_lod_record := false
+			var has_flag_eligible_record := false
+			for record_value: Variant in (_flag_screen_triangle_records.get(entity_id, []) as Array):
+				var record := record_value as Dictionary
+				has_presentation_lod_record = has_presentation_lod_record or int(record.get("source_triangle", -1)) < 0
+				has_flag_eligible_record = has_flag_eligible_record or (record.get("uvs", PackedVector2Array()) as PackedVector2Array).size() == 3
+			if has_flag_eligible_record:
+				flag_eligible_entities += 1
+			if has_presentation_lod_record:
+				presentation_lod_entities += 1
+		for count_value: Variant in (_map_render_fallbacks.get(entity_id, {}) as Dictionary).values():
+			fallback_count += int(count_value)
+	var source_triangle_count := 0
+	for buffer_value: Variant in _country_surface_triangle_buffers.values():
+		var buffer := buffer_value as Dictionary
+		source_triangle_count += int((buffer.get("points", PackedVector3Array()) as PackedVector3Array).size() / 3)
+	return {
+		"zoom": world_zoom,
+		"yaw": yaw,
+		"pitch": tilt,
+		"visual_lod": _map_visual_lod,
+		"cache_lod": _last_map_cache_lod,
+		"visible_political_entity_ids": visible_ids,
+		"visible_political_entity_count": visible_ids.size(),
+		"source_triangle_count": source_triangle_count,
+		"country_count": _countries.size(),
+		"static_surface_buffer_count": _country_surface_triangle_buffers.size(),
+		"interactive_surface_buffer_count": _interactive_country_surface_triangle_buffers.size(),
+		"interactive_surface_complete": _interactive_surface_build_complete,
+		"interactive_flag_entity_count": _interactive_flag_screen_points.size(),
+		"flag_palette_entity_count": _flag_palettes.size(),
+		"flag_record_entity_count": _flag_screen_triangle_records.size(),
+		"flag_eligible_entity_count": flag_eligible_entities,
+		"presentation_lod_entity_count": presentation_lod_entities,
+		"drawn_flag_entity_count": drawn_flag_entities,
+		"fallback_count": fallback_count,
+		"projection_revision": _projection_revision,
+		"projection_cache_revision": _projection_cache_revision,
+		"flag_projection_cache_revision": _flag_projection_cache_revision,
+		"static_surface_complete": _static_surface_build_complete,
+		"static_surface_dirty": (
+			map_full_detail_idle_restore_enabled and not _static_surface_build_complete
+		),
+		"presentation_surface_complete": _presentation_surface_ready(),
+		"full_detail_idle_restore_enabled": map_full_detail_idle_restore_enabled,
+		"detail_restore_in_progress": _detail_restore_in_progress,
 	}
 
 
@@ -537,6 +680,7 @@ func map_debug_focus_camera_on_unit_anchor(anchor: Vector3, zoom: float = 2.4) -
 	tilt = clampf(next_tilt, -HEMISPHERE_TILT_LIMIT, HEMISPHERE_TILT_LIMIT)
 	world_zoom = clampf(zoom, WORLD_ZOOM_MIN, WORLD_ZOOM_MAX)
 	_apply_world_zoom_geometry()
+	_update_map_visual_lod()
 	_mark_projection_dirty()
 	_ensure_projection_cache()
 	queue_redraw()
@@ -665,9 +809,10 @@ func _ensure_interactive_physical_land_triangle_cache() -> void:
 
 func _rebuild_physical_land_projection_cache(basis: Basis, interactive_lod: bool = false) -> void:
 	var projection_start_usec := Time.get_ticks_usec()
-	_ensure_physical_land_triangle_cache()
 	if interactive_lod:
 		_ensure_interactive_physical_land_triangle_cache()
+	else:
+		_ensure_physical_land_triangle_cache()
 	_physical_land_screen_triangles.clear()
 	_physical_land_screen_boundary_segments.clear()
 	var land_polygons: Array[PackedVector3Array] = _interactive_physical_land_polygons if interactive_lod else _physical_land_polygons
@@ -875,6 +1020,7 @@ func _set_world_zoom(value: float, anchor: Vector2 = Vector2(INF, INF)) -> void:
 	_reset_world_view_center()
 	world_zoom = next_zoom
 	_apply_world_zoom_geometry()
+	_update_map_visual_lod()
 	_reset_world_view_center()
 	_mark_projection_dirty()
 	_sync_moon_visibility()
@@ -884,13 +1030,34 @@ func _set_world_zoom(value: float, anchor: Vector2 = Vector2(INF, INF)) -> void:
 	queue_redraw()
 
 
+func _update_map_visual_lod() -> void:
+	match _map_visual_lod:
+		MAP_VISUAL_LOD_CITY:
+			if world_zoom < MAP_CITY_EXIT_ZOOM:
+				_map_visual_lod = (
+					MAP_VISUAL_LOD_REGION
+					if world_zoom >= MAP_REGION_EXIT_ZOOM
+					else MAP_VISUAL_LOD_WORLD
+				)
+		MAP_VISUAL_LOD_REGION:
+			if world_zoom >= MAP_CITY_ENTER_ZOOM:
+				_map_visual_lod = MAP_VISUAL_LOD_CITY
+			elif world_zoom < MAP_REGION_EXIT_ZOOM:
+				_map_visual_lod = MAP_VISUAL_LOD_WORLD
+		_:
+			if world_zoom >= MAP_CITY_ENTER_ZOOM:
+				_map_visual_lod = MAP_VISUAL_LOD_CITY
+			elif world_zoom >= MAP_REGION_ENTER_ZOOM:
+				_map_visual_lod = MAP_VISUAL_LOD_REGION
+
+
 func _select_global_object_at(position: Vector2, click: bool) -> void:
 	super._select_global_object_at(position, click)
 	if not hover_event_id.is_empty():
 		return
 	var surface_country_id := _country_id_at_projected_surface(position)
 	if surface_country_id.is_empty():
-		if not _static_surface_build_complete:
+		if not _presentation_surface_ready():
 			# The low-cost anchor projection remains authoritative for the normal
 			# player entry while high-resolution source buffers are still warming.
 			# Keep the base selection instead of interpreting a temporarily absent
@@ -1000,6 +1167,7 @@ func _rebuild_country_flag_cache() -> void:
 	_flag_screen_polygons.clear()
 	_flag_screen_triangle_records.clear()
 	_interactive_flag_screen_components.clear()
+	_interactive_flag_screen_uvs.clear()
 	_flag_screen_bounds.clear()
 	_country_screen_boundary_segments.clear()
 	_country_screen_meshes.clear()
@@ -1209,6 +1377,11 @@ func _rebuild_country_flag_cache() -> void:
 
 
 func _ensure_country_surface_triangle_buffers() -> void:
+	if not map_full_detail_idle_restore_enabled:
+		_ensure_interactive_surface_warmup()
+		_map_render_profile["static_surface_build_cursor"] = 0
+		_map_render_profile["static_surface_build_complete"] = false
+		return
 	if (
 		_static_surface_build_complete
 		and _country_surface_triangle_buffers.size() == _countries.size()
@@ -1239,23 +1412,23 @@ func _ensure_interactive_surface_warmup() -> void:
 	if _interactive_surface_build_complete or _countries.is_empty():
 		return
 	var warmup_start_usec := Time.get_ticks_usec()
-	for country_value: Variant in _countries:
-		var country := country_value as Dictionary
+	while _interactive_surface_build_cursor < _countries.size():
+		var country := _countries[_interactive_surface_build_cursor] as Dictionary
 		var country_id := str(country.get("id", ""))
-		if _interactive_country_surface_triangle_buffers.has(country_id):
-			continue
-		var source_polygons := _country_unit_polygons.get(country_id, []) as Array
-		var interactive_result := _build_interactive_surface_buffer(country_id, source_polygons)
-		var interactive_buffer := interactive_result.get("buffer", {}) as Dictionary
-		if interactive_buffer.is_empty():
-			continue
-		_interactive_country_surface_triangle_buffers[country_id] = interactive_buffer
-		_interactive_country_boundary_sources[country_id] = interactive_result.get(
-			"boundaries",
-			{"sources": source_polygons, "holes": []}
-		) as Dictionary
-	_interactive_surface_build_cursor = _countries.size()
-	_interactive_surface_build_complete = true
+		if not _interactive_country_surface_triangle_buffers.has(country_id):
+			var source_polygons := _country_unit_polygons.get(country_id, []) as Array
+			var interactive_result := _build_interactive_surface_buffer(country_id, source_polygons)
+			var interactive_buffer := interactive_result.get("buffer", {}) as Dictionary
+			if not interactive_buffer.is_empty():
+				_interactive_country_surface_triangle_buffers[country_id] = interactive_buffer
+				_interactive_country_boundary_sources[country_id] = interactive_result.get(
+					"boundaries",
+					{"sources": source_polygons, "holes": []}
+				) as Dictionary
+		_interactive_surface_build_cursor += 1
+		if Time.get_ticks_usec() - warmup_start_usec >= MAP_INTERACTIVE_SURFACE_BUILD_BUDGET_USEC:
+			break
+	_interactive_surface_build_complete = _interactive_surface_build_cursor >= _countries.size()
 	_map_render_profile["interactive_warmup_usec"] = Time.get_ticks_usec() - warmup_start_usec
 
 
@@ -1628,6 +1801,14 @@ func _on_camera_lod_refresh_timeout() -> void:
 		_schedule_camera_lod_refresh(float(remaining_usec) / 1000000.0)
 		return
 	_map_interaction_lod_until_usec = 0
+	if not map_full_detail_idle_restore_enabled:
+		# The bounded source-derived generation is the production presentation.
+		# It already represents the final camera state, so an idle transition must
+		# not invalidate it merely to build an audit-only high-density cache.
+		_last_map_cache_lod = "interactive"
+		_flag_projection_cache_revision = _projection_revision
+		_map_player_audit_input_kind = "idle"
+		return
 	if not _static_surface_build_complete:
 		# Do not start detail restoration against a partial static build. The
 		# complete interactive source-triangle warmup remains the visible LOD
@@ -1647,8 +1828,21 @@ func _on_camera_lod_refresh_timeout() -> void:
 
 func _rebuild_country_flag_cache_fast() -> void:
 	var cache_start_usec: int = Time.get_ticks_usec()
-	var static_build_incremental := not _static_surface_build_complete
-	var staged_detail_restore := _detail_restore_in_progress and _static_surface_build_complete
+	_map_projection_rebuild_count += 1
+	var presentation_surface_ready := _presentation_surface_ready()
+	var static_build_incremental := not presentation_surface_ready
+	var staged_detail_restore := (
+		map_full_detail_idle_restore_enabled
+		and _detail_restore_in_progress
+		and _static_surface_build_complete
+	)
+	var active_flag_screen_polygons := _flag_screen_polygons
+	var active_flag_screen_triangle_records := _flag_screen_triangle_records
+	var active_flag_screen_bounds := _flag_screen_bounds
+	var active_country_screen_boundary_segments := _country_screen_boundary_segments
+	var active_country_screen_meshes := _country_screen_meshes
+	var active_country_screen_triangle_counts := _country_screen_triangle_counts
+	var active_map_render_stage_records := _map_render_stage_records
 	_map_profile_static_triangulation_usec = 0
 	_interactive_source_triangles_processed = 0
 	_interactive_front_triangles = 0
@@ -1660,18 +1854,31 @@ func _rebuild_country_flag_cache_fast() -> void:
 	_interactive_provenance_string_lookups = 0
 	if staged_detail_restore:
 		if _detail_restore_revision != _projection_revision:
-			_flag_screen_polygons.clear()
-			_flag_screen_triangle_records.clear()
-			_flag_screen_bounds.clear()
-			_country_screen_boundary_segments.clear()
-			_country_screen_meshes.clear()
-			_country_screen_triangle_counts.clear()
+			_detail_restore_flag_screen_polygons.clear()
+			_detail_restore_flag_screen_triangle_records.clear()
+			_detail_restore_flag_screen_bounds.clear()
+			_detail_restore_country_screen_boundary_segments.clear()
+			_detail_restore_country_screen_meshes.clear()
+			_detail_restore_country_screen_triangle_counts.clear()
+			_detail_restore_map_render_stage_records.clear()
 			_detail_restore_cursor = 0
 			_detail_restore_revision = _projection_revision
+		# Every slice must write into the same staging generation. Partial slices
+		# restore the last validated surface below, so leaving these assignments
+		# inside the revision-change branch made the next slice append to that old
+		# interaction surface and eventually label the mixed generation as "full".
+		_flag_screen_polygons = _detail_restore_flag_screen_polygons
+		_flag_screen_triangle_records = _detail_restore_flag_screen_triangle_records
+		_flag_screen_bounds = _detail_restore_flag_screen_bounds
+		_country_screen_boundary_segments = _detail_restore_country_screen_boundary_segments
+		_country_screen_meshes = _detail_restore_country_screen_meshes
+		_country_screen_triangle_counts = _detail_restore_country_screen_triangle_counts
+		_map_render_stage_records = _detail_restore_map_render_stage_records
 	elif not static_build_incremental or _static_projection_cache_revision != _projection_revision:
 		_flag_screen_polygons.clear()
 		_flag_screen_triangle_records.clear()
 		_interactive_flag_screen_points.clear()
+		_interactive_flag_screen_uvs.clear()
 		_interactive_flag_screen_components.clear()
 		_interactive_flag_screen_component_indices.clear()
 		_interactive_flag_screen_source_triangles.clear()
@@ -1691,13 +1898,20 @@ func _rebuild_country_flag_cache_fast() -> void:
 	# The post-input replacement first expands the already-warmed interaction
 	# surface into flag records. This keeps geometry/UVs paired and avoids a
 	# synchronous full-resolution rebuild before the neutral map is stable.
-	var partial_surface_warmup := not _static_surface_build_complete
-	var interactive_lod := interaction_projection_active or staged_detail_restore or partial_surface_warmup
+	var partial_surface_warmup := not presentation_surface_ready
+	var interactive_lod := (
+		not map_full_detail_idle_restore_enabled
+		or interaction_projection_active
+		or partial_surface_warmup
+	)
 	var collect_screen_topology := map_screen_topology_diagnostics_enabled
 	# During active movement the flag/border layer is deferred.  Keep the same
 	# authoritative source triangles, but avoid allocating one nested Dictionary
 	# per screen triangle; the compact parallel buffers below retain provenance
 	# through submission and are expanded only for diagnostic/full-flag frames.
+	# Keep the interaction representation in parallel packed buffers.  This avoids
+	# allocating a Dictionary and an ArrayMesh per triangle while retaining the
+	# exact source/clipped UV stream needed to keep flags visible during movement.
 	var compact_interactive_records := (
 		interactive_lod
 		and not collect_screen_topology
@@ -1790,6 +2004,7 @@ func _rebuild_country_flag_cache_fast() -> void:
 		var compact_source_triangles := PackedInt32Array()
 		var compact_clipped_children := PackedInt32Array()
 		var compact_screen_points := PackedVector2Array()
+		var compact_screen_uvs := PackedVector2Array()
 		var visible_triangle_count := 0
 		var boundary_source_count := (
 			boundary_sources.size()
@@ -1941,56 +2156,69 @@ func _rebuild_country_flag_cache_fast() -> void:
 					var source_component_index: int = int(source_component_indices[triangle_index]) if triangle_index < source_component_indices.size() else -1
 					var source_triangle_id: int = int(source_triangles[triangle_index]) if triangle_index < source_triangles.size() else triangle_index
 					if triangle_area > MAP_SCREEN_TRIANGLE_AREA_EPSILON:
-						if compact_interactive_records:
-							compact_screen_points.append(first_screen)
-							compact_screen_points.append(second_screen)
-							compact_screen_points.append(third_screen)
-							compact_component_indices.append(source_component_index)
-							compact_source_triangles.append(source_triangle_id)
-							compact_clipped_children.append(0)
-						else:
-							var source_component_id: String = str(source_components[triangle_index]) if triangle_index < source_components.size() else ""
-							var component_bounds: Rect2 = source_component_screen_bounds.get(source_component_id, Rect2()) as Rect2
-							var source_triangle_original_planar := (
-								source_triangle_originals[triangle_index] as PackedVector2Array
-								if triangle_index < source_triangle_originals.size()
-								else PackedVector2Array()
-							)
-							var source_screen_triangle := PackedVector2Array([first_screen, second_screen, third_screen])
-							var triangle_uvs := PackedVector2Array([
-								source_uvs[triangle_offset],
-								source_uvs[triangle_offset + 1],
-								source_uvs[triangle_offset + 2],
-							])
-							var topology := (
-								_screen_triangle_topology_diagnostic(
-									source_screen_triangle,
-									component_bounds,
-									false,
-									source_triangle_original_planar,
-									basis
+						var source_component_id: String = str(source_components[triangle_index]) if triangle_index < source_components.size() else ""
+						var component_bounds: Rect2 = source_component_screen_bounds.get(source_component_id, Rect2()) as Rect2
+						var source_triangle_original_planar := (
+							source_triangle_originals[triangle_index] as PackedVector2Array
+							if triangle_index < source_triangle_originals.size()
+							else PackedVector2Array()
+						)
+						var source_screen_triangle := PackedVector2Array([first_screen, second_screen, third_screen])
+						var triangle_uvs := PackedVector2Array([
+							source_uvs[triangle_offset],
+							source_uvs[triangle_offset + 1],
+							source_uvs[triangle_offset + 2],
+						])
+						var render_records := _screen_triangle_render_records(
+							source_screen_triangle, triangle_uvs
+						)
+						for render_child: int in range(render_records.size()):
+							var render_record := render_records[render_child]
+							var render_screen := render_record.get(
+								"screen", PackedVector2Array()
+							) as PackedVector2Array
+							var render_uvs := render_record.get(
+								"uvs", PackedVector2Array()
+							) as PackedVector2Array
+							if compact_interactive_records:
+								for render_point: Vector2 in render_screen:
+									compact_screen_points.append(render_point)
+								for render_uv: Vector2 in render_uvs:
+									compact_screen_uvs.append(render_uv)
+								compact_component_indices.append(source_component_index)
+								compact_source_triangles.append(source_triangle_id)
+								compact_clipped_children.append(render_child)
+							else:
+								var topology := (
+									_screen_triangle_topology_diagnostic(
+										render_screen,
+										component_bounds,
+										false,
+										source_triangle_original_planar,
+										basis
+									)
+									if collect_screen_topology
+									else {}
 								)
-								if collect_screen_topology
-								else {}
-							)
-							visible_polygons.append(source_screen_triangle)
-							visible_triangle_records.append({
-								"screen": source_screen_triangle,
-								"uvs": triangle_uvs,
-								"source_component": source_component_id,
-								"source_triangle": source_triangle_id,
-								"clipped_child": 0,
-								"representation": "SOURCE_TRIANGLE",
-								"source_screen_area": triangle_area,
-								"topology": topology,
-						})
-						visible_triangle_count += 1
-						if compact_interactive_records:
-							_interactive_screen_triangles += 1
-						has_drawable_source_triangle = true
-						visible_projected_area += triangle_area
-						expected_visible_projected_area += triangle_area
-						projected_triangle_count = 1
+								visible_polygons.append(render_screen)
+								visible_triangle_records.append({
+									"screen": render_screen,
+									"uvs": render_uvs,
+									"source_component": source_component_id,
+									"source_triangle": source_triangle_id,
+									"clipped_child": render_child,
+									"representation": "SOURCE_TRIANGLE",
+									"source_screen_area": triangle_area,
+									"topology": topology,
+								})
+							visible_triangle_count += 1
+							if compact_interactive_records:
+								_interactive_screen_triangles += 1
+							has_drawable_source_triangle = true
+							var render_area := float(render_record.get("area", 0.0))
+							visible_projected_area += render_area
+							expected_visible_projected_area += render_area
+							projected_triangle_count += 1
 					if not interactive_lod:
 						has_bounds = true
 						minimum.x = minf(minimum.x, minf(first_screen.x, minf(second_screen.x, third_screen.x)))
@@ -2005,7 +2233,7 @@ func _rebuild_country_flag_cache_fast() -> void:
 								source_uvs[triangle_offset],
 								source_uvs[triangle_offset + 1],
 								source_uvs[triangle_offset + 2],
-							]) if not interactive_lod else PackedVector2Array(),
+							]),
 							"source_triangle": source_triangle_id,
 							"source_component_index": source_component_index,
 							"source_component": str(source_components[triangle_index]) if not compact_interactive_records and triangle_index < source_components.size() else "",
@@ -2017,29 +2245,37 @@ func _rebuild_country_flag_cache_fast() -> void:
 					second_point = basis * source_points[triangle_offset + 1]
 					third_point = basis * source_points[triangle_offset + 2]
 				if interactive_lod:
-					var screen_triangles := _interactive_clipped_screen_triangles(first_point, second_point, third_point)
+					var screen_triangles := PackedVector2Array()
 					var screen_triangle_uvs: Array[PackedVector2Array] = []
-					# Partial interactive projection must retain the same source-owned
-					# UV path as the full-detail cache.  The previous condition only
-					# populated interpolated UVs during staged restore, leaving the
-					# initial player-visible warmup triangles without material
-					# coordinates.
-					if interactive_lod:
-						var clipped_with_uv := _clip_front_facing_triangle_with_uv(
-							PackedVector3Array([first_point, second_point, third_point]),
-							PackedVector2Array([
-								source_uvs[triangle_offset],
-								source_uvs[triangle_offset + 1],
-								source_uvs[triangle_offset + 2],
-							])
-						)
-						var uv_records := _screen_triangle_records(
-							clipped_with_uv.get("points", PackedVector3Array()) as PackedVector3Array,
-							clipped_with_uv.get("uvs", PackedVector2Array()) as PackedVector2Array,
-							true
-						)
-						for uv_record_value: Variant in uv_records:
-							screen_triangle_uvs.append((uv_record_value as Dictionary).get("uvs", PackedVector2Array()) as PackedVector2Array)
+					# Project screen vertices and UVs from the same clipped polygon.
+					# Independent fast-screen and UV clipping could disagree on child
+					# order at the limb, producing spikes and torn flag fragments.
+					var clipped_with_uv := _clip_front_facing_triangle_with_uv(
+						PackedVector3Array([first_point, second_point, third_point]),
+						PackedVector2Array([
+							source_uvs[triangle_offset],
+							source_uvs[triangle_offset + 1],
+							source_uvs[triangle_offset + 2],
+						])
+					)
+					var uv_records := _screen_triangle_records(
+						clipped_with_uv.get("points", PackedVector3Array()) as PackedVector3Array,
+						clipped_with_uv.get("uvs", PackedVector2Array()) as PackedVector2Array,
+						true
+					)
+					for uv_record_value: Variant in uv_records:
+						var paired_record := uv_record_value as Dictionary
+						var paired_screen := paired_record.get(
+							"screen", PackedVector2Array()
+						) as PackedVector2Array
+						var paired_uvs := paired_record.get(
+							"uvs", PackedVector2Array()
+						) as PackedVector2Array
+						if paired_screen.size() != 3 or paired_uvs.size() != 3:
+							continue
+						for paired_point: Vector2 in paired_screen:
+							screen_triangles.append(paired_point)
+						screen_triangle_uvs.append(paired_uvs)
 					clipping_usec += Time.get_ticks_usec() - clipping_start_usec
 					var source_component_index: int = int(source_component_indices[triangle_index]) if triangle_index < source_component_indices.size() else -1
 					var source_triangle_id: int = int(source_triangles[triangle_index]) if triangle_index < source_triangles.size() else triangle_index
@@ -2074,6 +2310,18 @@ func _rebuild_country_flag_cache_fast() -> void:
 							compact_screen_points.append(first_clipped_screen)
 							compact_screen_points.append(second_clipped_screen)
 							compact_screen_points.append(third_clipped_screen)
+							var compact_child_uvs := (
+								screen_triangle_uvs[child_offset / 3]
+								if child_offset / 3 < screen_triangle_uvs.size()
+								else PackedVector2Array()
+							)
+							if compact_child_uvs.size() == 3:
+								for compact_uv: Vector2 in compact_child_uvs:
+									compact_screen_uvs.append(compact_uv)
+							else:
+								compact_screen_uvs.append(Vector2.ZERO)
+								compact_screen_uvs.append(Vector2.ZERO)
+								compact_screen_uvs.append(Vector2.ZERO)
 							compact_component_indices.append(source_component_index)
 							compact_source_triangles.append(source_triangle_id)
 							compact_clipped_children.append(child_offset / 3)
@@ -2247,7 +2495,7 @@ func _rebuild_country_flag_cache_fast() -> void:
 				continue
 			var component_bounds: Rect2 = source_component_screen_bounds.get(source_component_id, Rect2()) as Rect2
 			var candidate_uvs: PackedVector2Array = candidate.get("uvs", PackedVector2Array()) as PackedVector2Array
-			var marker_uvs := _minimum_surface_marker_uvs(candidate_uvs) if not interactive_lod else PackedVector2Array()
+			var marker_uvs := _minimum_surface_marker_uvs(candidate_uvs)
 			var topology := (
 				_screen_triangle_topology_diagnostic(marker_triangle, component_bounds, true)
 				if collect_screen_topology
@@ -2257,6 +2505,13 @@ func _rebuild_country_flag_cache_fast() -> void:
 				compact_screen_points.append(marker_triangle[0])
 				compact_screen_points.append(marker_triangle[1])
 				compact_screen_points.append(marker_triangle[2])
+				if marker_uvs.size() == 3:
+					for marker_uv: Vector2 in marker_uvs:
+						compact_screen_uvs.append(marker_uv)
+				else:
+					compact_screen_uvs.append(Vector2.ZERO)
+					compact_screen_uvs.append(Vector2.ZERO)
+					compact_screen_uvs.append(Vector2.ZERO)
 				compact_component_indices.append(candidate_component_index)
 				compact_source_triangles.append(int(candidate.get("source_triangle", -1)))
 				compact_clipped_children.append(int(candidate.get("clipped_child", 0)))
@@ -2313,6 +2568,7 @@ func _rebuild_country_flag_cache_fast() -> void:
 			continue
 		if compact_interactive_records:
 			_interactive_flag_screen_points[country_id] = compact_screen_points
+			_interactive_flag_screen_uvs[country_id] = compact_screen_uvs
 			_interactive_flag_screen_component_indices[country_id] = compact_component_indices
 			_interactive_flag_screen_source_triangles[country_id] = compact_source_triangles
 			_interactive_flag_screen_clipped_children[country_id] = compact_clipped_children
@@ -2350,29 +2606,52 @@ func _rebuild_country_flag_cache_fast() -> void:
 			_detail_restore_in_progress = false
 			_detail_restore_revision = _projection_revision
 			_last_map_cache_lod = "full"
-			# The staged pass above still projected the bounded interaction buffer.
-			# Do not advertise those source_triangle=-1 records as full detail. The
-			# next queued frame must invalidate the screen-record cache and rebuild
-			# from the authoritative source-triangle buffers before the flag layer is
-			# considered cache-ready.
-			_static_projection_cache_revision = -1
-			_flag_projection_cache_revision = -1
-			queue_redraw()
+			# The completed full-detail staging dictionaries are already installed.
+			# Publish their revision only after the last polity has been projected;
+			# incomplete frames continued drawing the previous validated surface.
+			_static_projection_cache_revision = _projection_revision
+			_flag_projection_cache_revision = _projection_revision
+			_map_player_audit_input_kind = "idle"
+			# The full generation is now authoritative. Drop the camera-local compact
+			# projection so diagnostics, memory use, and later cache selection cannot
+			# observe two different generations for the same camera state.
+			_interactive_flag_screen_points.clear()
+			_interactive_flag_screen_uvs.clear()
+			_interactive_flag_screen_components.clear()
+			_interactive_flag_screen_component_indices.clear()
+			_interactive_flag_screen_source_triangles.clear()
+			_interactive_flag_screen_clipped_children.clear()
+			_detail_restore_flag_screen_polygons = {}
+			_detail_restore_flag_screen_triangle_records = {}
+			_detail_restore_flag_screen_bounds = {}
+			_detail_restore_country_screen_boundary_segments = {}
+			_detail_restore_country_screen_meshes = {}
+			_detail_restore_country_screen_triangle_counts = {}
+			_detail_restore_map_render_stage_records = {}
 		else:
-			# Keep the interaction surface authoritative while the full flag layer
-			# is replaced entity by entity on subsequent redraws.
+			# Keep the previous validated surface authoritative until the staged
+			# full-detail dictionaries can be swapped as one complete generation.
+			_flag_screen_polygons = active_flag_screen_polygons
+			_flag_screen_triangle_records = active_flag_screen_triangle_records
+			_flag_screen_bounds = active_flag_screen_bounds
+			_country_screen_boundary_segments = active_country_screen_boundary_segments
+			_country_screen_meshes = active_country_screen_meshes
+			_country_screen_triangle_counts = active_country_screen_triangle_counts
+			_map_render_stage_records = active_map_render_stage_records
 			_flag_projection_cache_revision = -1
 			queue_redraw()
 	else:
 		# Keep the flag revision invalid until every static source buffer has been
 		# built. The next draw then continues the bounded build instead of blocking
 		# Formal World entry on one monolithic all-polity triangulation pass.
-		_flag_projection_cache_revision = _projection_revision if _static_surface_build_complete else -1
-	_map_render_profile["flag_cache_build_usec"] = Time.get_ticks_usec() - cache_start_usec
+		_flag_projection_cache_revision = _projection_revision if presentation_surface_ready else -1
+		if not interactive_lod and presentation_surface_ready:
+			_map_player_audit_input_kind = "idle"
+	_record_map_render_profile_stage("flag_cache_build_usec", Time.get_ticks_usec() - cache_start_usec)
 	_map_render_profile["source_triangulation_usec"] = _map_profile_static_triangulation_usec
-	_map_render_profile["boundary_projection_usec"] = boundary_projection_usec
-	_map_render_profile["camera_projection_usec"] = camera_projection_usec
-	_map_render_profile["hemisphere_clipping_usec"] = clipping_usec
+	_record_map_render_profile_stage("boundary_projection_usec", boundary_projection_usec)
+	_record_map_render_profile_stage("camera_projection_usec", camera_projection_usec)
+	_record_map_render_profile_stage("hemisphere_clipping_usec", clipping_usec)
 	_map_render_profile["mesh_build_usec"] = 0
 	_map_render_profile["static_triangulation_total_usec"] = _map_profile_static_triangulation_total_usec
 	_map_render_profile["projection_rejection_samples"] = projection_rejection_samples
@@ -2471,26 +2750,31 @@ func _surface_triangle_records(
 	for polygon: PackedVector2Array in planar_polygons:
 		var partition_lon_degrees := MAP_SOURCE_PARTITION_LON_DEGREES
 		var partition_lat_degrees := MAP_SOURCE_PARTITION_LAT_DEGREES
+		var source_historical_id := str(
+			(_country_by_id.get(country_id, {}) as Dictionary).get(
+				"source_historical_id", country_id
+			)
+		)
 		# These CShapes components contain narrow, highly concave historical
 		# regions.  Their 30x20 degree partition can still leave one complex
 		# cell that defeats a bounded triangulation; use a finer deterministic
 		# geographic grid for those known source families instead of inventing
 		# control data or accepting a hole.
-		if country_id in [
-			"state:cshapes_gw_750",
-			"state:cshapes_gw_902",
-			"state:cshapes_gw_903",
-			"state:russian_empire",
-			"state:dominion_of_canada",
-			"state:united_states_1900",
-			"state:brazil_1900",
+		if source_historical_id in [
+			"cshapes_gw_750",
+			"cshapes_gw_902",
+			"cshapes_gw_903",
+			"russian_empire",
+			"dominion_of_canada",
+			"united_states_1900",
+			"brazil_1900",
 		]:
 			partition_lon_degrees = 10.0
 			partition_lat_degrees = 10.0
-		if country_id == "state:russian_empire":
+		if source_historical_id == "russian_empire":
 			partition_lon_degrees = 5.0
 			partition_lat_degrees = 5.0
-		if country_id == "state:cshapes_gw_750" and source_index == 20:
+		if source_historical_id == "cshapes_gw_750" and source_index == 20:
 			partition_lon_degrees = 5.0
 			partition_lat_degrees = 5.0
 		var source_pieces := _partition_source_polygon(polygon, partition_lon_degrees, partition_lat_degrees)
@@ -2846,7 +3130,10 @@ func _tessellate_planar_triangle(triangle: PackedVector2Array, depth: int = 0) -
 	var triangle_area := _planar_polygon_area(triangle)
 	var maximum_latitude := 0.0
 	for edge_index: int in range(3):
-		maximum_edge = maxf(maximum_edge, triangle[edge_index].distance_to(triangle[(edge_index + 1) % 3]))
+		maximum_edge = maxf(
+			maximum_edge,
+			triangle[edge_index].distance_to(triangle[(edge_index + 1) % 3])
+		)
 		maximum_latitude = maxf(maximum_latitude, absf(triangle[edge_index].y))
 	var high_latitude := maximum_latitude >= MAP_HIGH_LATITUDE_THRESHOLD_DEGREES
 	var edge_limit := map_debug_source_triangle_max_edge_degrees
@@ -3002,11 +3289,68 @@ func _screen_triangle_records(
 		# geometry and must not be discarded as a whole-country visibility loss.
 		if _screen_polygon_area(triangle_screen) <= MAP_SCREEN_TRIANGLE_AREA_EPSILON:
 			continue
-		output.append({
-			"screen": triangle_screen,
-			"uvs": PackedVector2Array([clean_uvs[0], clean_uvs[index], clean_uvs[index + 1]]) if include_uvs else PackedVector2Array(),
-			"area": _screen_polygon_area(triangle_screen),
-		})
+		var triangle_uvs := (
+			PackedVector2Array([clean_uvs[0], clean_uvs[index], clean_uvs[index + 1]])
+			if include_uvs
+			else PackedVector2Array()
+		)
+		for record: Dictionary in _screen_triangle_render_records(triangle_screen, triangle_uvs):
+			output.append(record)
+	return output
+
+
+func _screen_triangle_render_records(
+	screen: PackedVector2Array,
+	uvs: PackedVector2Array,
+	refinement_depth: int = 0
+) -> Array[Dictionary]:
+	var output: Array[Dictionary] = []
+	if screen.size() != 3 or (not uvs.is_empty() and uvs.size() != 3):
+		return output
+	var area := _screen_polygon_area(screen)
+	if area <= MAP_SCREEN_TRIANGLE_AREA_EPSILON:
+		return output
+	var maximum_edge := 0.0
+	var maximum_edge_index := 0
+	for edge_index: int in range(3):
+		var edge_length := screen[edge_index].distance_to(screen[(edge_index + 1) % 3])
+		if edge_length > maximum_edge:
+			maximum_edge = edge_length
+			maximum_edge_index = edge_index
+	var altitude := 2.0 * area / maximum_edge if maximum_edge > 0.0001 else 0.0
+	var visible_needle := (
+		maximum_edge > maxf(32.0, _hemisphere_radius * 0.12)
+		and altitude < 0.35
+	)
+	if not visible_needle or refinement_depth >= 6:
+		output.append({"screen": screen, "uvs": uvs, "area": area})
+		return output
+	# The source triangle is valid, but an oblique camera can compress it into a
+	# long sub-pixel sliver. Split the already-projected triangle once along its
+	# longest edge and interpolate the paired UV at the same midpoint. The two
+	# children cover exactly the original screen area and cannot introduce a new
+	# political edge, while bounding the rasterized needle length without touching
+	# historical geometry or rebuilding the static triangulation cache.
+	var edge_end_index := (maximum_edge_index + 1) % 3
+	var opposite_index := (maximum_edge_index + 2) % 3
+	var midpoint := screen[maximum_edge_index].lerp(screen[edge_end_index], 0.5)
+	var midpoint_uv := Vector2.ZERO
+	if uvs.size() == 3:
+		midpoint_uv = uvs[maximum_edge_index].lerp(uvs[edge_end_index], 0.5)
+	for indices: PackedInt32Array in [
+		PackedInt32Array([maximum_edge_index, -1, opposite_index]),
+		PackedInt32Array([-1, edge_end_index, opposite_index]),
+	]:
+		var child_screen := PackedVector2Array()
+		var child_uvs := PackedVector2Array()
+		for child_index: int in indices:
+			child_screen.append(midpoint if child_index < 0 else screen[child_index])
+			if uvs.size() == 3:
+				child_uvs.append(midpoint_uv if child_index < 0 else uvs[child_index])
+		for child_record: Dictionary in _screen_triangle_render_records(
+			child_screen, child_uvs, refinement_depth + 1
+		):
+			output.append(child_record)
 	return output
 
 
@@ -4131,6 +4475,7 @@ func _make_map_render_stage_record(
 
 
 func _begin_map_render_audit() -> void:
+	_map_draw_frame_count += 1
 	_map_render_submitted_parts.clear()
 	_map_render_drawn_parts.clear()
 	_map_render_submitted_triangles.clear()
@@ -4236,6 +4581,30 @@ func _record_map_render_frame_profile(frame_usec: int) -> void:
 
 func _record_map_render_profile_stage(name: String, elapsed_usec: int) -> void:
 	_map_render_profile[name] = elapsed_usec
+	var stats := _map_stage_timing_stats.get(name, {
+		"count": 0,
+		"total_usec": 0,
+		"max_usec": 0,
+		"last_usec": 0,
+	}) as Dictionary
+	stats["count"] = int(stats.get("count", 0)) + 1
+	stats["total_usec"] = int(stats.get("total_usec", 0)) + elapsed_usec
+	stats["max_usec"] = maxi(int(stats.get("max_usec", 0)), elapsed_usec)
+	stats["last_usec"] = elapsed_usec
+	_map_stage_timing_stats[name] = stats
+
+
+func map_performance_diagnostic_report() -> Dictionary:
+	return {
+		"draw_frame_count": _map_draw_frame_count,
+		"projection_rebuild_count": _map_projection_rebuild_count,
+		"static_data_build_count": _static_data_build_count,
+		"static_uv_build_count": _static_uv_build_count,
+		"static_provenance_build_count": _static_provenance_build_count,
+		"static_triangulation_build_count": _static_triangulation_build_count,
+		"stage_timings": _map_stage_timing_stats.duplicate(true),
+		"last_profile": _map_render_profile.duplicate(true),
+	}
 
 
 func _record_map_render_rejection(country_id: String, reason: String) -> void:
@@ -4304,6 +4673,7 @@ func map_render_projected_fingerprint() -> String:
 	for entity_id: String in entity_ids:
 		if compact_interactive_records:
 			var compact_points: PackedVector2Array = _interactive_flag_screen_points.get(entity_id, PackedVector2Array()) as PackedVector2Array
+			var compact_uvs: PackedVector2Array = _interactive_flag_screen_uvs.get(entity_id, PackedVector2Array()) as PackedVector2Array
 			var compact_component_indices: PackedInt32Array = _interactive_flag_screen_component_indices.get(entity_id, PackedInt32Array()) as PackedInt32Array
 			var compact_source_triangles: PackedInt32Array = _interactive_flag_screen_source_triangles.get(entity_id, PackedInt32Array()) as PackedInt32Array
 			var compact_clipped_children: PackedInt32Array = _interactive_flag_screen_clipped_children.get(entity_id, PackedInt32Array()) as PackedInt32Array
@@ -4321,6 +4691,9 @@ func map_render_projected_fingerprint() -> String:
 				for point_offset: int in range(3):
 					var point := compact_points[index + point_offset]
 					values.append("%.5f,%.5f" % [point.x, point.y])
+					if index + point_offset < compact_uvs.size():
+						var uv := compact_uvs[index + point_offset]
+						values.append("%.5f,%.5f" % [uv.x, uv.y])
 				result.append("|".join(values))
 			continue
 		for record_value: Variant in (_flag_screen_triangle_records.get(entity_id, []) as Array):
@@ -4340,6 +4713,212 @@ func map_render_projected_fingerprint() -> String:
 			result.append("|".join(values))
 	result.sort()
 	return "\n".join(result)
+
+
+func map_screen_edge_artifact_report() -> Dictionary:
+	var compact_interactive := (
+		_last_map_cache_lod == "interactive"
+		and not _interactive_flag_screen_points.is_empty()
+	)
+	var triangle_count := 0
+	var invalid_count := 0
+	var needle_count := 0
+	var screen_span_count := 0
+	var parent_escape_count := 0
+	var outside_globe_count := 0
+	var near_limb_count := 0
+	var positive_winding_count := 0
+	var negative_winding_count := 0
+	var dateline_split_count := 0
+	var uv_out_of_range_count := 0
+	var uv_min := Vector2(INF, INF)
+	var uv_max := Vector2(-INF, -INF)
+	var samples: Array[Dictionary] = []
+	var basis := Basis(Vector3.RIGHT, tilt) * Basis(Vector3.UP, yaw)
+	var entity_source: Dictionary = (
+		_interactive_flag_screen_points
+		if compact_interactive
+		else _flag_screen_triangle_records
+	)
+	for entity_key: Variant in entity_source.keys():
+		var entity_id := str(entity_key)
+		if compact_interactive:
+			var compact_points: PackedVector2Array = _interactive_flag_screen_points.get(
+				entity_id, PackedVector2Array()
+			) as PackedVector2Array
+			var compact_uvs: PackedVector2Array = _interactive_flag_screen_uvs.get(
+				entity_id, PackedVector2Array()
+			) as PackedVector2Array
+			for point_index: int in range(0, compact_points.size(), 3):
+				if point_index + 2 >= compact_points.size():
+					break
+				var screen := PackedVector2Array([
+					compact_points[point_index],
+					compact_points[point_index + 1],
+					compact_points[point_index + 2],
+				])
+				var uvs := PackedVector2Array()
+				if point_index + 2 < compact_uvs.size():
+					uvs = PackedVector2Array([
+						compact_uvs[point_index],
+						compact_uvs[point_index + 1],
+						compact_uvs[point_index + 2],
+					])
+				var metrics := _screen_triangle_artifact_metrics(screen, uvs, Rect2())
+				triangle_count += 1
+				invalid_count += int(not bool(metrics.get("valid", false)))
+				needle_count += int(bool(metrics.get("needle", false)))
+				screen_span_count += int(bool(metrics.get("screen_span", false)))
+				outside_globe_count += int(bool(metrics.get("outside_globe", false)))
+				near_limb_count += int(bool(metrics.get("near_limb", false)))
+				positive_winding_count += int(float(metrics.get("signed_double_area", 0.0)) > 0.0)
+				negative_winding_count += int(float(metrics.get("signed_double_area", 0.0)) < 0.0)
+				for uv: Vector2 in uvs:
+					uv_min.x = minf(uv_min.x, uv.x)
+					uv_min.y = minf(uv_min.y, uv.y)
+					uv_max.x = maxf(uv_max.x, uv.x)
+					uv_max.y = maxf(uv_max.y, uv.y)
+					uv_out_of_range_count += int(uv.x < -0.0001 or uv.x > 1.0001 or uv.y < -0.0001 or uv.y > 1.0001)
+				if bool(metrics.get("artifact", false)) and samples.size() < 32:
+					metrics["entity_id"] = entity_id
+					metrics["triangle_index"] = point_index / 3
+					samples.append(metrics)
+			continue
+		for record_value: Variant in (_flag_screen_triangle_records.get(entity_id, []) as Array):
+			var record := record_value as Dictionary
+			var screen: PackedVector2Array = record.get("screen", PackedVector2Array()) as PackedVector2Array
+			var uvs: PackedVector2Array = record.get("uvs", PackedVector2Array()) as PackedVector2Array
+			var source_component := str(record.get("source_component", ""))
+			var source_triangle := int(record.get("source_triangle", -1))
+			var parent_planar := PackedVector2Array()
+			var component_records := _country_surface_triangle_records.get(source_component, []) as Array
+			if source_triangle >= 0 and source_triangle < component_records.size():
+				parent_planar = (component_records[source_triangle] as Dictionary).get(
+					"source_triangle_original_planar", PackedVector2Array()
+				) as PackedVector2Array
+			var parent_bounds := _source_planar_triangle_screen_bounds(parent_planar, basis)
+			var metrics := _screen_triangle_artifact_metrics(screen, uvs, parent_bounds)
+			triangle_count += 1
+			invalid_count += int(not bool(metrics.get("valid", false)))
+			needle_count += int(bool(metrics.get("needle", false)))
+			screen_span_count += int(bool(metrics.get("screen_span", false)))
+			parent_escape_count += int(bool(metrics.get("parent_escape", false)))
+			outside_globe_count += int(bool(metrics.get("outside_globe", false)))
+			near_limb_count += int(bool(metrics.get("near_limb", false)))
+			positive_winding_count += int(float(metrics.get("signed_double_area", 0.0)) > 0.0)
+			negative_winding_count += int(float(metrics.get("signed_double_area", 0.0)) < 0.0)
+			var longitude_min := INF
+			var longitude_max := -INF
+			for point: Vector2 in parent_planar:
+				longitude_min = minf(longitude_min, point.x)
+				longitude_max = maxf(longitude_max, point.x)
+			if longitude_min != INF and (
+				longitude_min < -180.0 or longitude_max > 180.0
+			):
+				dateline_split_count += 1
+			for uv: Vector2 in uvs:
+				uv_min.x = minf(uv_min.x, uv.x)
+				uv_min.y = minf(uv_min.y, uv.y)
+				uv_max.x = maxf(uv_max.x, uv.x)
+				uv_max.y = maxf(uv_max.y, uv.y)
+				uv_out_of_range_count += int(uv.x < -0.0001 or uv.x > 1.0001 or uv.y < -0.0001 or uv.y > 1.0001)
+			if bool(metrics.get("artifact", false)) and samples.size() < 32:
+				metrics["entity_id"] = entity_id
+				metrics["source_component"] = source_component
+				metrics["source_triangle"] = source_triangle
+				samples.append(metrics)
+	var trace := map_render_trace()
+	var trace_counts := trace.get("counts", {}) as Dictionary
+	var discarded_triangle_count := (
+		int(trace_counts.get("missing_visible_triangles", 0))
+		+ int(trace_counts.get("invalid_screen_triangles", 0))
+	)
+	var artifact_count := (
+		needle_count + screen_span_count + parent_escape_count + outside_globe_count
+	)
+	return {
+		"yaw": yaw,
+		"pitch": tilt,
+		"zoom": world_zoom,
+		"visual_lod": _map_visual_lod,
+		"cache_lod": _last_map_cache_lod,
+		"source_triangle_count": int(trace_counts.get("source_triangles", 0)),
+		"post_clip_triangle_count": triangle_count,
+		"discarded_triangle_count": discarded_triangle_count,
+		"winding_positive_count": positive_winding_count,
+		"winding_negative_count": negative_winding_count,
+		"near_limb_triangle_count": near_limb_count,
+		"dateline_split_triangle_count": dateline_split_count,
+		"invalid_or_degenerate_count": invalid_count,
+		"needle_triangle_count": needle_count,
+		"screen_span_triangle_count": screen_span_count,
+		"parent_escape_triangle_count": parent_escape_count,
+		"outside_globe_triangle_count": outside_globe_count,
+		"uv_out_of_range_count": uv_out_of_range_count,
+		"uv_range": [] if uv_min.x == INF else [uv_min.x, uv_min.y, uv_max.x, uv_max.y],
+		"screen_space_edge_artifacts": artifact_count,
+		"artifact_samples": samples,
+	}
+
+
+func _screen_triangle_artifact_metrics(
+	screen: PackedVector2Array,
+	uvs: PackedVector2Array,
+	parent_bounds: Rect2
+) -> Dictionary:
+	var finite := screen.size() == 3 and uvs.size() == 3
+	for point: Vector2 in screen:
+		finite = finite and is_finite(point.x) and is_finite(point.y)
+	for uv: Vector2 in uvs:
+		finite = finite and is_finite(uv.x) and is_finite(uv.y)
+	var signed_double_area := 0.0
+	var maximum_edge := 0.0
+	var area := 0.0
+	var bounds := Rect2()
+	var outside_globe := false
+	var near_limb := false
+	if screen.size() == 3:
+		signed_double_area = (
+			screen[0].x * (screen[1].y - screen[2].y)
+			+ screen[1].x * (screen[2].y - screen[0].y)
+			+ screen[2].x * (screen[0].y - screen[1].y)
+		)
+		area = absf(signed_double_area) * 0.5
+		maximum_edge = maxf(
+			screen[0].distance_to(screen[1]),
+			maxf(screen[1].distance_to(screen[2]), screen[2].distance_to(screen[0]))
+		)
+		bounds = _bounds_for_points(screen)
+		for point: Vector2 in screen:
+			var normalized_radius := point.distance_to(_hemisphere_center) / maxf(_hemisphere_radius, 1.0)
+			outside_globe = outside_globe or normalized_radius > 1.01
+			near_limb = near_limb or normalized_radius >= 0.95
+	var altitude := 2.0 * area / maximum_edge if maximum_edge > 0.0001 else 0.0
+	var needle := (
+		maximum_edge > maxf(32.0, _hemisphere_radius * 0.12)
+		and altitude < 0.35
+	)
+	var screen_span := maximum_edge > _hemisphere_radius * 2.02
+	var parent_escape := (
+		parent_bounds.size.x > 0.0
+		and parent_bounds.size.y > 0.0
+		and not parent_bounds.grow(4.0).encloses(bounds)
+	)
+	var valid := finite and area > MAP_SCREEN_TRIANGLE_AREA_EPSILON
+	return {
+		"valid": valid,
+		"signed_double_area": signed_double_area,
+		"area": area,
+		"maximum_edge": maximum_edge,
+		"altitude": altitude,
+		"bounds": [bounds.position.x, bounds.position.y, bounds.size.x, bounds.size.y],
+		"needle": needle,
+		"screen_span": screen_span,
+		"parent_escape": parent_escape,
+		"outside_globe": outside_globe,
+		"near_limb": near_limb,
+		"artifact": needle or screen_span or parent_escape or outside_globe,
+	}
 
 
 func map_render_trace() -> Dictionary:
@@ -4420,6 +4999,7 @@ func map_render_trace() -> Dictionary:
 		var compact_interactive_records := _last_map_cache_lod == "interactive" and _interactive_flag_screen_component_indices.has(country_id)
 		if compact_interactive_records:
 			var compact_points: PackedVector2Array = _interactive_flag_screen_points.get(country_id, PackedVector2Array()) as PackedVector2Array
+			var compact_uvs: PackedVector2Array = _interactive_flag_screen_uvs.get(country_id, PackedVector2Array()) as PackedVector2Array
 			var compact_component_indices: PackedInt32Array = _interactive_flag_screen_component_indices.get(country_id, PackedInt32Array()) as PackedInt32Array
 			var compact_source_triangles: PackedInt32Array = _interactive_flag_screen_source_triangles.get(country_id, PackedInt32Array()) as PackedInt32Array
 			for point_index: int in range(0, compact_points.size(), 3):
@@ -4427,6 +5007,14 @@ func map_render_trace() -> Dictionary:
 				screen_triangle_count += 1
 				if not _is_valid_screen_triangle_at(compact_points, point_index):
 					invalid_screen_triangles += 1
+				if point_index + 2 >= compact_uvs.size():
+					invalid_screen_triangles += 1
+				else:
+					for uv_offset: int in range(3):
+						var uv := compact_uvs[point_index + uv_offset]
+						if not is_finite(uv.x) or not is_finite(uv.y):
+							invalid_screen_triangles += 1
+							break
 				var source_component_index := int(compact_component_indices[index]) if index < compact_component_indices.size() else -1
 				var source_component := _interactive_source_component_id(country_id, source_component_index)
 				var source_triangle := int(compact_source_triangles[index]) if index < compact_source_triangles.size() else -1

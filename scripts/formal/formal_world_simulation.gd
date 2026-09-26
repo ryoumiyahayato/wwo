@@ -608,6 +608,113 @@ func player_person_id() -> String:
 	return _player_state.player_id()
 
 
+func place_context_view(place_id: String) -> Dictionary:
+	## Detached, source-traceable observation for one admitted Spatial place.
+	## Economy remains aggregate-owned; this projection never renames a country
+	## aggregate into a city market.
+	if not initialized or _spatial_catalog == null or not _spatial_catalog.is_loaded():
+		return {
+			"available": false,
+			"reason": "formal_spatial_catalog_unavailable",
+			"place_id": place_id,
+		}
+	var place := _spatial_catalog.get_place(place_id)
+	if place.is_empty():
+		return {
+			"available": false,
+			"reason": "formal_place_not_found",
+			"place_id": place_id,
+		}
+	var organization_count := 0
+	if _organization != null:
+		for organization_id: String in _organization.organization_ids():
+			if _organization.primary_place_id(organization_id) == str(place.get("place_id", "")):
+				organization_count += 1
+	return _place_context_projection(place, organization_count)
+
+
+func place_observation_catalog() -> Dictionary:
+	## Bounded product catalogue (32 cities + 8 ports at the current data
+	## revision).  Called on map entry/relevant refresh, never from _draw().
+	if not initialized or _spatial_catalog == null or not _spatial_catalog.is_loaded():
+		return {"available": false, "reason": "formal_spatial_catalog_unavailable"}
+	var organization_counts: Dictionary = {}
+	if _organization != null:
+		for organization_id: String in _organization.organization_ids():
+			var organization_place_id := _organization.primary_place_id(organization_id)
+			if not organization_place_id.is_empty():
+				organization_counts[organization_place_id] = int(
+					organization_counts.get(organization_place_id, 0)
+				) + 1
+	var rows: Array[Dictionary] = []
+	var places: Array[Dictionary] = []
+	places.append_array(_spatial_catalog.cities())
+	places.append_array(_spatial_catalog.ports())
+	for place: Dictionary in places:
+		var stable_place_id := str(place.get("place_id", ""))
+		rows.append(_place_context_projection(
+			place, int(organization_counts.get(stable_place_id, 0))
+		))
+	rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var priority_a := int(a.get("label_priority", 0))
+		var priority_b := int(b.get("label_priority", 0))
+		return (
+			str(a.get("place_id", "")) < str(b.get("place_id", ""))
+			if priority_a == priority_b
+			else priority_a > priority_b
+		)
+	)
+	return {
+		"available": true,
+		"owner": "VNextSpatialCatalog",
+		"derived": true,
+		"place_count": rows.size(),
+		"rows": rows,
+	}
+
+
+func _place_context_projection(place: Dictionary, organization_count: int) -> Dictionary:
+	var source_polity_id := str(place.get("parent_country_id", ""))
+	var runtime_polity_id := _political_registry_view.runtime_id_for_source(source_polity_id)
+	var economy_entity_id := (
+		_economy.economy_entity_for_polity(runtime_polity_id)
+		if not runtime_polity_id.is_empty()
+		else ""
+	)
+	var market_id := _economy.market_id_for_economic_aggregate(economy_entity_id)
+	var spatial_kind := str(place.get("spatial_kind", place.get("object_level", "")))
+	var source_path := str(VNextSpatialCatalog.SOURCE_PATHS.get(
+		"ports" if spatial_kind == "port" else "cities", ""
+	))
+	return {
+		"available": true,
+		"owner": "VNextSpatialCatalog",
+		"place_id": str(place.get("place_id", "")),
+		"map_id": str(place.get("map_id", place.get("id", ""))),
+		"display_label": str(place.get("name", place.get("display_name_zh", place.get("id", "")))),
+		"kind": spatial_kind,
+		"major": bool(place.get("major", false)),
+		"lon_lat": (place.get("lon_lat", []) as Array).duplicate(),
+		"label_priority": int(place.get("label_priority", 0)),
+		"min_zoom": float(place.get("min_zoom", 0.0)),
+		"max_zoom": float(place.get("max_zoom", 200.0)),
+		"source_polity_id": source_polity_id,
+		"runtime_polity_id": runtime_polity_id,
+		"population_source_id": source_polity_id,
+		"economy_entity_id": economy_entity_id,
+		"market_id": market_id,
+		"economic_statistics_level": (
+			"economic_aggregate" if not economy_entity_id.is_empty() else "unavailable"
+		),
+		"organization_count": organization_count,
+		"evidence": {
+			"classification": "historical_source_evidence",
+			"catalog": "VNextSpatialCatalog",
+			"source_path": source_path,
+		},
+	}
+
+
 func select_player_person(person_id: String) -> bool:
 	if not initialized or _person_authority == null:
 		return false

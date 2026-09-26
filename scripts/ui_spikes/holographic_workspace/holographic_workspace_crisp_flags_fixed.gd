@@ -39,7 +39,7 @@ func _ready() -> void:
 func _ensure_projection_cache() -> void:
 	var defer_optional_camera_layers := (
 		map_interaction_flag_lod_enabled and (_camera_interaction_active() or _detail_restore_in_progress)
-		or not _static_surface_build_complete
+		or not _presentation_surface_ready()
 	)
 	var rebuild_outlines: bool = _projection_dirty or _historical_outline_polygons.is_empty()
 	super._ensure_projection_cache()
@@ -69,7 +69,7 @@ func _draw_global_world() -> void:
 		not _flag_screen_triangle_records.is_empty()
 		or not _interactive_flag_screen_points.is_empty()
 	)
-	if not _static_surface_build_complete:
+	if not _presentation_surface_ready():
 		# The physical-land fallback is deliberately not drawn when the warmed
 		# political source-triangle cache is available.  Its simplified coastline
 		# triangulation is only a neutral fallback and can expose large black
@@ -90,7 +90,7 @@ func _draw_global_world() -> void:
 	# physical land visible during that warm-up instead of submitting a growing
 	# partial political mesh every frame; the latter made startup spend more
 	# time drawing provisional triangles than building the next source slice.
-	if not _static_surface_build_complete:
+	if not _presentation_surface_ready():
 		return
 	_draw_solid_political_fills()
 	if map_render_phase == MAP_PHASE_POLITICAL_SOLID:
@@ -99,15 +99,9 @@ func _draw_global_world() -> void:
 		_draw_selected_admin1_on_globe()
 		_draw_historical_entity_borders()
 		return
-	# During active camera input the solid political surface remains the
-	# authoritative visible layer. Flag shading is optional presentation work
-	# and is resumed after the camera settles; it must never remove the base
-	# surface or alter its provenance.
-	if map_interaction_flag_lod_enabled and _camera_interaction_active():
-		# The selected fill itself is the interaction highlight.  Normal border
-		# polylines are deferred until idle so stale boundary caches and thousands
-		# of line draw calls cannot dominate camera input.
-		return
+	# Camera interaction uses a bounded source surface, but it keeps the exact
+	# source-owned UV and batched flag submission path.  Political backing stays
+	# underneath the material; rotate/zoom may not replace flags with a gray LOD.
 	var flags_start_usec: int = Time.get_ticks_usec()
 	_draw_country_flag_skins()
 	_record_map_render_profile_stage("flags_draw_usec", Time.get_ticks_usec() - flags_start_usec)
@@ -190,7 +184,6 @@ func _draw_solid_political_fills() -> void:
 		# document that the neutral backing exists.
 		var final_flag_layer_owns_audit := (
 			map_render_phase == MAP_PHASE_HISTORICAL_FLAGS
-			and not (map_interaction_flag_lod_enabled and _camera_interaction_active())
 		)
 		if not final_flag_layer_owns_audit:
 			_record_map_render_submission(entity_id, drawn_count, area)
@@ -292,7 +285,6 @@ func _draw_solid_political_fills_batched(phase_alpha: float) -> bool:
 		_map_render_stage_records[entity_id] = stage
 		var final_flag_layer_owns_audit := (
 			map_render_phase == MAP_PHASE_HISTORICAL_FLAGS
-			and not (map_interaction_flag_lod_enabled and _camera_interaction_active())
 		)
 		if not final_flag_layer_owns_audit:
 			_record_map_render_submission(entity_id, drawn_count, area)
@@ -464,7 +456,16 @@ func map_debug_interaction_coloring_report() -> Dictionary:
 func _draw_country_flag_skins() -> void:
 	var zoom_mix: float = clampf(inverse_lerp(HISTORY_ZOOM_MIN, HISTORY_ZOOM_MAX, world_zoom), 0.0, 1.0)
 	var base_alpha: float = lerpf(0.50, 0.23, zoom_mix)
-	for entity_key_value: Variant in _flag_screen_polygons.keys():
+	var compact_interactive := (
+		_last_map_cache_lod == "interactive"
+		and not _interactive_flag_screen_points.is_empty()
+	)
+	var entity_source: Dictionary = (
+		_interactive_flag_screen_points
+		if compact_interactive
+		else _flag_screen_triangle_records
+	)
+	for entity_key_value: Variant in entity_source.keys():
 		var entity_id: String = str(entity_key_value)
 		var entity: Dictionary = _country_by_id.get(entity_id, {}) as Dictionary
 		var palette: Dictionary = _resolved_flag_palette(str(entity.get("iso_a3", "")))
@@ -487,8 +488,19 @@ func _draw_country_flag_triangles(
 	palette: Dictionary,
 	alpha: float
 ) -> void:
+	var compact_interactive := (
+		_last_map_cache_lod == "interactive"
+		and _interactive_flag_screen_points.has(entity_id)
+	)
 	var records: Array = _flag_screen_triangle_records.get(entity_id, []) as Array
-	if records.is_empty():
+	var compact_points: PackedVector2Array = _interactive_flag_screen_points.get(
+		entity_id, PackedVector2Array()
+	) as PackedVector2Array
+	var compact_uvs: PackedVector2Array = _interactive_flag_screen_uvs.get(
+		entity_id, PackedVector2Array()
+	) as PackedVector2Array
+	var triangle_count := compact_points.size() / 3 if compact_interactive else records.size()
+	if triangle_count <= 0:
 		_record_map_render_rejection(entity_id, "missing_screen_triangles")
 		var empty_stage := _map_render_stage_records.get(entity_id, {}) as Dictionary
 		if bool(empty_stage.get("front_facing_geometry", false)):
@@ -514,7 +526,7 @@ func _draw_country_flag_triangles(
 	stage["flag_material_classification"] = material_classification
 	stage["flag_submitted"] = true
 	_map_render_stage_records[entity_id] = stage
-	_record_map_render_submission(entity_id, records.size(), area)
+	_record_map_render_submission(entity_id, triangle_count, area)
 	if texture == null:
 		if material_classification == "EXPLICIT_NO_VERIFIED_FLAG":
 			_record_map_render_fallback(entity_id, "NO_VERIFIED_FLAG_ASSET")
@@ -524,7 +536,7 @@ func _draw_country_flag_triangles(
 		# drawable through the neutral solid backing layer.
 		stage["flag_drawn"] = true
 		_map_render_stage_records[entity_id] = stage
-		_record_map_render_draw(entity_id, records.size(), area)
+		_record_map_render_draw(entity_id, triangle_count, area)
 		return
 	var points: PackedVector2Array = _flag_draw_points_scratch
 	var uvs_buffer: PackedVector2Array = _flag_draw_uvs_scratch
@@ -533,7 +545,48 @@ func _draw_country_flag_triangles(
 	points.resize(0)
 	uvs_buffer.resize(0)
 	colors.resize(0)
+	if compact_interactive:
+		for point_index: int in range(0, compact_points.size(), 3):
+			if point_index + 2 >= compact_points.size() or point_index + 2 >= compact_uvs.size():
+				all_rejections_are_neutral_surface_fallbacks = false
+				_record_map_render_rejection(entity_id, "interactive_attribute_vertex_count")
+				continue
+			var polygon := PackedVector2Array([
+				compact_points[point_index],
+				compact_points[point_index + 1],
+				compact_points[point_index + 2],
+			])
+			var triangle_uvs := PackedVector2Array([
+				compact_uvs[point_index],
+				compact_uvs[point_index + 1],
+				compact_uvs[point_index + 2],
+			])
+			if not _is_valid_screen_polygon(polygon):
+				all_rejections_are_neutral_surface_fallbacks = false
+				_record_map_render_rejection(entity_id, "invalid_interactive_flag_triangle")
+				continue
+			var phase: float = float(abs(entity_id.hash()) % 997) / 997.0
+			var record_colors: PackedColorArray = _flag_triangle_colors_scratch
+			record_colors.resize(0)
+			for uv: Vector2 in triangle_uvs:
+				var cloth_wave := sin(_flag_time * (0.42 + phase * 0.18) + uv.y * TAU * 1.35 + phase * TAU)
+				var secondary := sin(_flag_time * 0.24 + uv.x * TAU * 0.85 - phase * 3.0)
+				var brightness := 0.96 + cloth_wave * 0.055 + secondary * 0.018
+				record_colors.append(Color(brightness, brightness, brightness, alpha * (0.97 + cloth_wave * 0.025)))
+			var draw_validation := _validate_flag_triangle_for_renderer(
+				polygon, triangle_uvs, record_colors
+			)
+			if not bool(draw_validation.get("valid", false)):
+				all_rejections_are_neutral_surface_fallbacks = false
+				_record_map_render_rejection(entity_id, "interactive_renderer_validation")
+				continue
+			for vertex_index: int in range(3):
+				points.append(polygon[vertex_index])
+				uvs_buffer.append(triangle_uvs[vertex_index])
+				colors.append(record_colors[vertex_index])
 	for record_index: int in range(records.size()):
+		if compact_interactive:
+			break
 		var record_value: Variant = records[record_index]
 		var record := record_value as Dictionary
 		var source_polygon: PackedVector2Array = record.get("screen", PackedVector2Array()) as PackedVector2Array
@@ -655,7 +708,7 @@ func _draw_country_flag_triangles(
 		_map_flag_draw_calls += 1
 	stage["flag_drawn"] = drawn_count > 0
 	_map_render_stage_records[entity_id] = stage
-	if drawn_count == 0 and not records.is_empty() and not all_rejections_are_neutral_surface_fallbacks:
+	if drawn_count == 0 and triangle_count > 0 and not all_rejections_are_neutral_surface_fallbacks:
 		_record_runtime_geometry_failure(
 			entity_id,
 			entity_id,
