@@ -34,11 +34,21 @@ var total_hour: int:
 		return int(_authoritative_hour_source.call())
 
 var _commodities: Dictionary = {}
+var _commodity_ids: Array[String] = []
+var _commodity_definitions_fingerprint: String = ""
 var _routes_by_country: Dictionary = {}
 var _crosswalk_records: Dictionary = {}
 ## Non-authoritative calculation cache pinned to the injected static and
 ## population fingerprints. It avoids per-day copies and is never persisted.
 var _calculation_inputs: Dictionary = {}
+## Non-authoritative invariant pair values. Each market owns two aligned
+## Float64 arrays in _commodity_ids order. Values are produced by the existing
+## demand and production-factor functions, never by a parallel formula.
+var _derived_market_commodity_values: Dictionary = {}
+var _derived_calculation_reference: Dictionary = {}
+var _daily_demand_calculation_count: int = 0
+var _production_factor_calculation_count: int = 0
+var _derived_pair_read_count: int = 0
 ## Non-authoritative settled-day projection cache. Rows are derived only from
 ## daily_metrics, are never persisted, and can be rebuilt deterministically.
 var _daily_shortage_rows_by_market_id: Dictionary = {}
@@ -70,8 +80,15 @@ func configure(
 	_routes_by_country.clear()
 	_crosswalk_records.clear()
 	_calculation_inputs.clear()
+	_derived_market_commodity_values.clear()
+	_derived_calculation_reference.clear()
 	_daily_shortage_rows_by_market_id.clear()
 	_commodities.clear()
+	_commodity_ids.clear()
+	_commodity_definitions_fingerprint = ""
+	_daily_demand_calculation_count = 0
+	_production_factor_calculation_count = 0
+	_derived_pair_read_count = 0
 	_last_day_index = -1
 	_next_shipment_sequence = 1
 	_political_unit_count = 0
@@ -92,8 +109,12 @@ func configure(
 	_political_unit_count = _political_registry.entity_count()
 	if not _load_injected_inputs():
 		return false
-	for record: Dictionary in _static_evidence.countries():
+	var country_records := _static_evidence.countries()
+	for record: Dictionary in country_records:
 		_cache_calculation_input(record)
+	if not _rebuild_derived_calculation_cache(country_records):
+		return false
+	for record: Dictionary in country_records:
 		_initialize_country(record)
 	_build_routes()
 	if market_states.size() != EXPECTED_MAJOR_ROSTER_COUNT:
@@ -140,12 +161,23 @@ func bind_authoritative_hour_source(source: Callable) -> void:
 func settle_hour_range(
 	previous_total_hour: int, current_total_hour: int
 ) -> Dictionary:
+	assert(
+		_derived_calculation_cache_is_current(),
+		"Formal economy derived calculation cache is stale"
+	)
 	if previous_total_hour < 0 or current_total_hour <= previous_total_hour:
 		return world_summary()
 	assert(current_total_hour == total_hour)
+	var last_settled_summary: Dictionary = {}
+	var last_settlement_hour := -1
 	for crossed_hour: int in range(previous_total_hour + 1, current_total_hour + 1):
 		if crossed_hour % HOURS_PER_DAY == 0:
-			_settle_day(crossed_hour)
+			var settled_summary := _settle_day(crossed_hour)
+			if not settled_summary.is_empty():
+				last_settled_summary = settled_summary
+				last_settlement_hour = crossed_hour
+	if last_settlement_hour == current_total_hour:
+		return last_settled_summary
 	return world_summary()
 
 
@@ -319,6 +351,35 @@ func read_only_snapshot() -> Dictionary:
 	}
 
 
+func derived_calculation_cache_snapshot() -> Dictionary:
+	## Detached diagnostics for equivalence/performance verification. This is not
+	## part of observation authority or persistence and does not change revision.
+	var values: Dictionary = {}
+	for market_id_value: Variant in _derived_market_commodity_values:
+		var market_id := str(market_id_value)
+		var row := _derived_market_commodity_values[market_id] as Dictionary
+		values[market_id] = {
+			"daily_demand": (
+				(row.get("daily_demand", PackedFloat64Array()) as PackedFloat64Array)
+				.duplicate()
+			),
+			"production_factor": (
+				(row.get("production_factor", PackedFloat64Array()) as PackedFloat64Array)
+				.duplicate()
+			),
+		}
+	return {
+		"reference": _derived_calculation_reference.duplicate(true),
+		"commodity_ids": _commodity_ids.duplicate(),
+		"values_by_market_id": values,
+		"market_count": _derived_market_commodity_values.size(),
+		"pair_count": _derived_market_commodity_values.size() * _commodity_ids.size(),
+		"daily_demand_calculation_count": _daily_demand_calculation_count,
+		"production_factor_calculation_count": _production_factor_calculation_count,
+		"derived_pair_read_count": _derived_pair_read_count,
+	}
+
+
 func read_only_country_observation_snapshot() -> Dictionary:
 	## Narrow detached observation for Organization supply-continuity monitoring.
 	## Economy remains the sole owner of market state; this projects only the facts
@@ -479,10 +540,15 @@ func restore_persistent_state(state: Dictionary) -> bool:
 	_state_revision += 1
 	return true
 func _load_injected_inputs() -> bool:
-	for commodity: Dictionary in _static_evidence.commodities():
+	var commodity_records := _static_evidence.commodities()
+	for commodity: Dictionary in commodity_records:
 		var commodity_id := str(commodity.get("commodity_id", ""))
 		if not commodity_id.is_empty():
 			_commodities[commodity_id] = commodity.duplicate(true)
+			_commodity_ids.append(commodity_id)
+	_commodity_definitions_fingerprint = JSON.stringify(
+		commodity_records
+	).sha256_text()
 	for record: Dictionary in _static_evidence.crosswalk_records():
 		var economy_id := str(record.get("economy_entity_id", ""))
 		var polity_ids := DataRecordUtils.to_string_array(record.get("polity_ids", []))
@@ -519,16 +585,22 @@ func _initialize_country(record: Dictionary) -> void:
 	var inventory: Dictionary = {}
 	var prices: Dictionary = {}
 	var daily_metrics: Dictionary = {}
-	for raw_id: Variant in _commodities:
-		var commodity_id := str(raw_id)
+	var derived_values := (
+		_derived_market_commodity_values[market_id] as Dictionary
+	)
+	var daily_demands := (
+		derived_values.get("daily_demand", PackedFloat64Array()) as PackedFloat64Array
+	)
+	var production_factors := (
+		derived_values.get("production_factor", PackedFloat64Array())
+		as PackedFloat64Array
+	)
+	for commodity_index: int in _commodity_ids.size():
+		var commodity_id := _commodity_ids[commodity_index]
 		var commodity := _commodities[commodity_id] as Dictionary
 		var base_price := maxi(1, int(commodity.get("base_price_centimes", 1)))
-		var demand := _daily_demand_for(
-			int(population_record.get("value", 0)),
-			int(income_record.get("value", 0)),
-			commodity
-		)
-		var capacity_factor := _production_factor(record, commodity)
+		var demand := daily_demands[commodity_index]
+		var capacity_factor := production_factors[commodity_index]
 		var opening_days := 8.0 + 22.0 * capacity_factor
 		inventory[commodity_id] = maxf(
 			demand * opening_days, capacity_factor * 40.0
@@ -578,6 +650,95 @@ func _cache_calculation_input(record: Dictionary) -> void:
 		"production": (record.get("production", {}) as Dictionary).duplicate(true),
 		"admission_status": str(coverage.get("status", "bounded_estimate")),
 	}
+
+
+func _rebuild_derived_calculation_cache(
+	country_records: Array[Dictionary]
+) -> bool:
+	_derived_market_commodity_values.clear()
+	_derived_calculation_reference.clear()
+	var market_bindings: Array[Dictionary] = []
+	for record: Dictionary in country_records:
+		var economy_id := str(record.get("entity_id", ""))
+		var market_id := _market_registry.market_id_for_economic_aggregate(economy_id)
+		if (
+			economy_id.is_empty()
+			or market_id.is_empty()
+			or not _calculation_inputs.has(economy_id)
+			or _derived_market_commodity_values.has(market_id)
+		):
+			return _fail("无法构建唯一市场商品派生计算缓存：%s" % economy_id)
+		var calculation_input := _calculation_inputs[economy_id] as Dictionary
+		var population := int(calculation_input.get("population", 0))
+		var income_per_capita := int(calculation_input.get("income_per_capita", 0))
+		var production := calculation_input.get("production", {}) as Dictionary
+		var daily_demands := PackedFloat64Array()
+		var production_factors := PackedFloat64Array()
+		daily_demands.resize(_commodity_ids.size())
+		production_factors.resize(_commodity_ids.size())
+		for commodity_index: int in _commodity_ids.size():
+			var commodity_id := _commodity_ids[commodity_index]
+			var commodity := _commodities[commodity_id] as Dictionary
+			daily_demands[commodity_index] = _daily_demand_for(
+				population, income_per_capita, commodity
+			)
+			production_factors[commodity_index] = (
+				_production_factor_for_capabilities(production, commodity)
+			)
+		_derived_market_commodity_values[market_id] = {
+			"daily_demand": daily_demands,
+			"production_factor": production_factors,
+		}
+		market_bindings.append({
+			"market_id": market_id,
+			"economic_aggregate_id": economy_id,
+		})
+	_derived_calculation_reference = {
+		"static_evidence_revision": _static_evidence.revision(),
+		"static_evidence_fingerprint": _static_evidence.fingerprint(),
+		"population_revision": _population_input.revision(),
+		"population_fingerprint": _population_input.fingerprint(),
+		"commodity_definitions_fingerprint": _commodity_definitions_fingerprint,
+		"calculation_inputs_fingerprint": JSON.stringify(
+			_calculation_inputs
+		).sha256_text(),
+		"market_revision": _market_registry.revision(),
+		"market_mapping_fingerprint": _market_registry.mapping_fingerprint(),
+		"market_bindings_fingerprint": JSON.stringify(
+			market_bindings
+		).sha256_text(),
+	}
+	return _derived_calculation_cache_is_current()
+
+
+func _derived_calculation_cache_is_current() -> bool:
+	return (
+		_derived_market_commodity_values.size() == _market_registry.market_count()
+		and _derived_market_commodity_values.size() == _calculation_inputs.size()
+		and str(_derived_calculation_reference.get(
+			"static_evidence_revision", ""
+		)) == _static_evidence.revision()
+		and str(_derived_calculation_reference.get(
+			"static_evidence_fingerprint", ""
+		)) == _static_evidence.fingerprint()
+		and str(_derived_calculation_reference.get(
+			"population_revision", ""
+		)) == _population_input.revision()
+		and str(_derived_calculation_reference.get(
+			"population_fingerprint", ""
+		)) == _population_input.fingerprint()
+		and str(_derived_calculation_reference.get(
+			"commodity_definitions_fingerprint", ""
+		)) == _commodity_definitions_fingerprint
+		and str(_derived_calculation_reference.get(
+			"market_revision", ""
+		)) == _market_registry.revision()
+		and str(_derived_calculation_reference.get(
+			"market_mapping_fingerprint", ""
+		)) == _market_registry.mapping_fingerprint()
+		and int(_derived_market_commodity_values.size() * _commodity_ids.size())
+		== EXPECTED_MAJOR_ROSTER_COUNT * _commodities.size()
+	)
 
 
 func _resolve_polity_ids(economy_id: String) -> Array[String]:
@@ -657,33 +818,41 @@ func _add_route(route: Dictionary) -> void:
 		_routes_by_country[country_id] = indexes
 
 
-func _settle_day(settlement_hour: int) -> void:
+func _settle_day(settlement_hour: int) -> Dictionary:
 	var day_index := settlement_hour / HOURS_PER_DAY
 	if day_index <= _last_day_index:
-		return
+		return {}
 	_deliver_shipments(settlement_hour)
 	for economy_id: String in _economic_aggregate_ids():
 		_settle_country(economy_id, settlement_hour)
 	_schedule_shortage_shipments(settlement_hour)
 	_last_day_index = day_index
-	var summary := world_summary()
+	var settled_summary := world_summary()
+	var history_summary := settled_summary.duplicate(true)
 	# Bulk advancement must record the boundary being settled, not the final
 	# composition-root hour that is visible while the range is processed.
-	summary["total_hour"] = settlement_hour
-	summary["day_index"] = day_index
-	history.append(summary)
+	history_summary["total_hour"] = settlement_hour
+	history_summary["day_index"] = day_index
+	history.append(history_summary)
 	while history.size() > HISTORY_LIMIT:
 		history.pop_front()
 	_state_revision += 1
+	return settled_summary
 
 
 func _settle_country(entity_id: String, settlement_hour: int) -> void:
 	var market_id := _market_registry.market_id_for_economic_aggregate(entity_id)
 	var state := market_states[market_id] as Dictionary
-	var calculation_input := _calculation_inputs[entity_id] as Dictionary
-	var population := int(calculation_input.get("population", 0))
-	var income_per_capita := int(calculation_input.get("income_per_capita", 0))
-	var production := calculation_input.get("production", {}) as Dictionary
+	var derived_values := (
+		_derived_market_commodity_values[market_id] as Dictionary
+	)
+	var daily_demands := (
+		derived_values.get("daily_demand", PackedFloat64Array()) as PackedFloat64Array
+	)
+	var production_factors := (
+		derived_values.get("production_factor", PackedFloat64Array())
+		as PackedFloat64Array
+	)
 	var inventory := state.get("inventory", {}) as Dictionary
 	var prices := state.get("prices", {}) as Dictionary
 	var metrics := state.get("daily_metrics", {}) as Dictionary
@@ -691,20 +860,14 @@ func _settle_country(entity_id: String, settlement_hour: int) -> void:
 	var produced_total := 0.0
 	var consumed_total := 0.0
 	var unmet_total := 0.0
-	for raw_id: Variant in _commodities:
-		var commodity_id := str(raw_id)
+	for commodity_index: int in _commodity_ids.size():
+		var commodity_id := _commodity_ids[commodity_index]
 		var commodity := _commodities[commodity_id] as Dictionary
 		var row := metrics.get(commodity_id, {}) as Dictionary
 		row["imports"] = 0.0
 		row["exports"] = 0.0
-		var demand := _daily_demand_for(
-			population,
-			income_per_capita,
-			commodity
-		)
-		var production_factor := _production_factor_for_capabilities(
-			production, commodity
-		)
+		var demand := daily_demands[commodity_index]
+		var production_factor := production_factors[commodity_index]
 		var produced := maxf(0.0, demand * production_factor)
 		inventory[commodity_id] = float(inventory.get(commodity_id, 0.0)) + produced
 		var consumed := minf(demand, float(inventory.get(commodity_id, 0.0)))
@@ -748,6 +911,7 @@ func _settle_country(entity_id: String, settlement_hour: int) -> void:
 	}
 	state["last_settlement_hour"] = settlement_hour
 	market_states[market_id] = state
+	_derived_pair_read_count += _commodity_ids.size()
 	_rebuild_daily_shortage_rows(market_id, state)
 
 
@@ -898,6 +1062,7 @@ func _candidate_suppliers(receiver_id: String, commodity_id: String) -> Array[Di
 func _daily_demand_for(
 	population: int, income_per_capita: int, commodity: Dictionary
 ) -> float:
+	_daily_demand_calculation_count += 1
 	var rate := float(commodity.get("base_daily_units_per_million", 0.0))
 	if rate <= 0.0 or population <= 0:
 		return 0.0
@@ -919,6 +1084,7 @@ func _production_factor(record: Dictionary, commodity: Dictionary) -> float:
 func _production_factor_for_capabilities(
 	production: Dictionary, commodity: Dictionary
 ) -> float:
+	_production_factor_calculation_count += 1
 	var category := str(commodity.get("category", ""))
 	var commodity_id := str(commodity.get("commodity_id", ""))
 	var agriculture := float(production.get("agriculture_capacity_index", 0)) / 100.0
@@ -1057,7 +1223,7 @@ func _shipment_count_for(entity_id: String) -> int:
 
 
 func _validate_state() -> bool:
-	return _validate_candidate_state(
+	return _derived_calculation_cache_is_current() and _validate_candidate_state(
 		market_states,
 		shipments,
 		_last_day_index,

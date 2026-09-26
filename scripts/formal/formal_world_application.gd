@@ -16,8 +16,13 @@ var _packaged_probe_failures: int = 0
 var _immutable_historical_evidence_report: Dictionary = {}
 var _historical_evidence_surface_building: bool = false
 
+@onready var _background_cache_viewport: SubViewport = $BackgroundCacheViewport
+@onready var _background_display: TextureRect = $Background
+
 
 func _ready() -> void:
+	_background_display.texture = _background_cache_viewport.get_texture()
+	_resize_background_cache()
 	var formal_initialized := formal_simulation.initialize()
 	if formal_initialized:
 		_dated_units_document = {
@@ -52,6 +57,20 @@ func _ready() -> void:
 	queue_redraw()
 	if PACKAGED_PROBE_ARGUMENT in OS.get_cmdline_user_args():
 		_run_packaged_player_baseline_probe.call_deferred()
+
+
+func _notification(what: int) -> void:
+	super._notification(what)
+	if what == NOTIFICATION_RESIZED and is_node_ready():
+		_resize_background_cache()
+
+
+func _resize_background_cache() -> void:
+	var size := get_viewport_rect().size
+	var pixels := Vector2i(maxi(1, ceili(size.x)), maxi(1, ceili(size.y)))
+	if _background_cache_viewport.size != pixels:
+		_background_cache_viewport.size = pixels
+	_background_cache_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 
 
 func _run_packaged_player_baseline_probe() -> void:

@@ -1,11 +1,15 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/formal/formal_world_application.gd" id="1_formal"]
 [ext_resource type="Script" path="res://scripts/ui_spikes/holographic_workspace/holographic_hemisphere_3d.gd" id="2_hemi"]
-[ext_resource type="Shader" path="res://shaders/ui_spikes/holographic_workspace/workspace_background.gdshader" id="3_background"]
+[ext_resource type="Shader" path="res://shaders/ui_spikes/holographic_workspace/workspace_background_static.gdshader" id="3_background_static"]
+[ext_resource type="Shader" path="res://shaders/ui_spikes/holographic_workspace/workspace_background_stars.gdshader" id="4_background_stars"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_background"]
-shader = ExtResource("3_background")
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_background_static"]
+shader = ExtResource("3_background_static")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_background_stars"]
+shader = ExtResource("4_background_stars")
 
 [node name="FormalWorldMain" type="Control"]
 layout_mode = 3
@@ -17,10 +21,38 @@ grow_vertical = 2
 mouse_filter = 0
 script = ExtResource("1_formal")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="BackgroundCacheViewport" type="SubViewport" parent="."]
+disable_3d = true
+size = Vector2i(1280, 720)
+render_target_update_mode = 0
+
+[node name="StaticBackground" type="ColorRect" parent="BackgroundCacheViewport"]
+material = SubResource("ShaderMaterial_background_static")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 1)
+
+[node name="Background" type="TextureRect" parent="."]
 show_behind_parent = true
 z_index = -20
-material = SubResource("ShaderMaterial_background")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 0
+mouse_filter = 2
+
+[node name="BackgroundStars" type="ColorRect" parent="."]
+show_behind_parent = true
+z_index = -19
+material = SubResource("ShaderMaterial_background_stars")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -70,7 +102,7 @@ wait_time = 0.25
 autostart = true
 
 [node name="FlagTimer" type="Timer" parent="."]
-wait_time = 0.2
+wait_time = 0.4
 autostart = true
 
 [connection signal="timeout" from="ClockTimer" to="." method="_on_clock_timer_timeout"]

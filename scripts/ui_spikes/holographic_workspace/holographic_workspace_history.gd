@@ -70,7 +70,7 @@ func _gui_input(event: InputEvent) -> void:
 	super._gui_input(event)
 
 
-func _set_world_zoom(value: float) -> void:
+func _set_world_zoom(value: float, anchor: Vector2 = Vector2(INF, INF)) -> void:
 	var next_zoom: float = clampf(value, HISTORY_ZOOM_MIN, HISTORY_ZOOM_MAX)
 	if is_equal_approx(next_zoom, world_zoom):
 		return
@@ -100,9 +100,10 @@ func _draw_global_world() -> void:
 	_draw_rotating_globe_grid()
 	_draw_country_flag_skins()
 
-	var internal_alpha: float = lerpf(0.035, 0.17, clampf(inverse_lerp(1.25, 4.5, world_zoom), 0.0, 1.0))
-	for segment: PackedVector2Array in _global_screen_segments:
-		draw_polyline(segment, Color(0.61, 0.77, 0.73, internal_alpha), 0.65, true)
+	if not map_debug_hide_physical_boundaries:
+		var internal_alpha: float = lerpf(0.035, 0.17, clampf(inverse_lerp(1.25, 4.5, world_zoom), 0.0, 1.0))
+		for segment: PackedVector2Array in _global_screen_segments:
+			draw_polyline(segment, Color(0.61, 0.77, 0.73, internal_alpha), 0.65, true)
 
 	_draw_historical_entity_borders()
 	_draw_historical_conflicts()
