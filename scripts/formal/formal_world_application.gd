@@ -16,6 +16,21 @@ const WORKSPACE_ORGANIZATION: String = "organization"
 const WORKSPACE_POLITICS: String = "politics"
 const WORKSPACE_MILITARY: String = "military"
 const WORKSPACE_MAP: String = "map"
+const ECONOMY_TAB_OVERVIEW: String = "overview"
+const ECONOMY_TAB_MARKETS: String = "markets"
+const ECONOMY_TAB_COMMODITIES: String = "commodities"
+const ECONOMY_TAB_SHORTAGES: String = "shortages"
+const ECONOMY_TAB_TRANSPORT: String = "transport"
+const ECONOMY_TABS: Array[Dictionary] = [
+	{"id": ECONOMY_TAB_OVERVIEW, "label": "Overview"},
+	{"id": ECONOMY_TAB_MARKETS, "label": "Markets"},
+	{"id": ECONOMY_TAB_COMMODITIES, "label": "Commodities"},
+	{"id": ECONOMY_TAB_SHORTAGES, "label": "Shortages"},
+	{"id": ECONOMY_TAB_TRANSPORT, "label": "Transport"},
+]
+const MAP_MODE_POLITICAL: String = "political"
+const MAP_MODE_FULFILLMENT: String = "economy_fulfillment"
+const MAP_MODE_SHORTAGE: String = "economy_shortage"
 const FORMAL_WORKSPACES: Array[Dictionary] = [
 	{"id": WORKSPACE_PERSON, "label": "人物"},
 	{"id": WORKSPACE_ECONOMY, "label": "工作/经济"},
@@ -38,6 +53,26 @@ var _formal_workspace: String = WORKSPACE_PERSON
 var _system_menu_open: bool = false
 var _organization_observation_cache: Dictionary = {}
 var _defend_options_cache: Dictionary = {}
+var _economy_tab: String = ECONOMY_TAB_OVERVIEW
+var _economy_observation_dirty: bool = true
+var _economy_catalog_cache: Dictionary = {}
+var _commodity_catalog_cache: Dictionary = {}
+var _selected_market_cache: Dictionary = {}
+var _commodity_rows_cache: Array[Dictionary] = []
+var _shortage_observation_cache: Dictionary = {}
+var _shortage_rows_cache: Array[Dictionary] = []
+var _transport_observation_cache: Dictionary = {}
+var _observed_market_id: String = ""
+var _market_page: int = 0
+var _commodity_page: int = 0
+var _shortage_page: int = 0
+var _transport_page: int = 0
+var _commodity_search: String = ""
+var _commodity_sort: String = "unmet"
+var _shortage_sort: String = "unmet"
+var _economy_refresh_count: int = 0
+var _map_observation_mode: String = MAP_MODE_POLITICAL
+var _economy_overlay_cache: Dictionary = {}
 
 @onready var _background_cache_viewport: SubViewport = $BackgroundCacheViewport
 @onready var _background_display: TextureRect = $Background
@@ -264,6 +299,7 @@ func _load_formal_state() -> SaveOperationResult:
 	var result := formal_simulation.load_from_user()
 	if result.success:
 		_refresh_player_context_cache()
+		_economy_observation_dirty = true
 		_sync_political_presentation()
 		_last_summary = formal_simulation.world_summary()
 	return result
@@ -297,6 +333,7 @@ func _load_formal_state_from_ui() -> void:
 		)
 	if result.success:
 		_refresh_player_context_cache()
+		_economy_observation_dirty = true
 		_sync_political_presentation()
 		_last_summary = formal_simulation.world_summary()
 	queue_redraw()
@@ -310,6 +347,24 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	var key_event := event as InputEventKey
 	if not key_event.pressed or key_event.echo:
 		super._unhandled_key_input(event)
+		return
+	if (
+		_formal_workspace == WORKSPACE_ECONOMY
+		and _economy_tab == ECONOMY_TAB_COMMODITIES
+		and key_event.keycode not in [KEY_ESCAPE, KEY_F5, KEY_F9]
+	):
+		if key_event.keycode == KEY_BACKSPACE:
+			_commodity_search = _commodity_search.left(maxi(0, _commodity_search.length() - 1))
+		elif key_event.keycode == KEY_DELETE:
+			_commodity_search = ""
+		elif key_event.unicode >= 32 and not key_event.ctrl_pressed and not key_event.alt_pressed and not key_event.meta_pressed:
+			_commodity_search = (_commodity_search + char(key_event.unicode)).left(32)
+		else:
+			super._unhandled_key_input(event)
+			return
+		_rebuild_commodity_rows_cache()
+		queue_redraw()
+		get_viewport().set_input_as_handled()
 		return
 
 	match key_event.keycode:
@@ -361,13 +416,24 @@ func _gui_input(event: InputEvent) -> void:
 		if event is InputEventMouse or event is InputEventMouseMotion:
 			accept_event()
 			return
+	var selection_before := selected_country_id
 	super._gui_input(event)
+	if selected_country_id != selection_before:
+		var mapped_market := formal_simulation.market_id_for_polity(
+			_selected_polity_entity_id()
+		)
+		if not mapped_market.is_empty():
+			_observed_market_id = mapped_market
+			if _formal_workspace == WORKSPACE_ECONOMY:
+				_refresh_selected_market()
+		queue_redraw()
 
 
 func _draw() -> void:
 	super._draw()
 	if _formal_workspace == WORKSPACE_MAP:
 		_draw_formal_world_status()
+		_draw_economy_map_controls()
 		if economy_panel_open:
 			_draw_formal_polity_panel()
 	else:
@@ -378,6 +444,63 @@ func _draw() -> void:
 		_draw_formal_system_menu()
 
 
+func _draw_country_flag_skins() -> void:
+	if _map_observation_mode == MAP_MODE_POLITICAL:
+		super._draw_country_flag_skins()
+
+
+func _political_fill_color(entity_id: String, alpha: float) -> Color:
+	if _map_observation_mode == MAP_MODE_POLITICAL:
+		return super._political_fill_color(entity_id, alpha)
+	var values := _economy_overlay_cache.get("values_by_polity_id", {}) as Dictionary
+	var observation := values.get(entity_id, {}) as Dictionary
+	if observation.is_empty():
+		return Color(0.22, 0.27, 0.27, minf(alpha, 0.72))
+	var normalized := float(observation.get("normalized_bp", 0)) / 10000.0
+	if _map_observation_mode == MAP_MODE_FULFILLMENT:
+		var fulfillment := float(observation.get("value", 0.0)) / 10000.0
+		var color := Color(0.66, 0.20, 0.13).lerp(Color(0.18, 0.68, 0.49), clampf(fulfillment, 0.0, 1.0))
+		color.a = minf(alpha, 0.84)
+		return color
+	var shortage_color := Color(0.24, 0.48, 0.45).lerp(Color(0.82, 0.24, 0.12), normalized)
+	shortage_color.a = minf(alpha, 0.84)
+	return shortage_color
+
+
+func _draw_economy_map_controls() -> void:
+	var rect := Rect2(324.0, 72.0, 632.0, 45.0)
+	_panel(rect, Color(0.012, 0.031, 0.035, 0.95), Color(0.67, 0.58, 0.34, 0.36))
+	var options: Array[Dictionary] = [
+		{"id": MAP_MODE_POLITICAL, "label": "Political"},
+		{"id": MAP_MODE_FULFILLMENT, "label": "Economy Fulfillment"},
+		{"id": MAP_MODE_SHORTAGE, "label": "Economy Shortage"},
+	]
+	var x := rect.position.x + 8.0
+	for option: Dictionary in options:
+		var mode_id := str(option.get("id", ""))
+		var width := 105.0 if mode_id == MAP_MODE_POLITICAL else 182.0
+		var button_rect := Rect2(x, rect.position.y + 8.0, width, 28.0)
+		_draw_button(button_rect, str(option.get("label", mode_id)), "formal_map_mode:%s" % mode_id, true)
+		if mode_id == _map_observation_mode:
+			draw_line(button_rect.position + Vector2(7.0, 26.0), button_rect.end - Vector2(7.0, 2.0), Color(0.96, 0.76, 0.38, 0.95), 2.0)
+		x += width + 6.0
+	if _map_observation_mode == MAP_MODE_POLITICAL:
+		return
+	var legend := Rect2(700.0, 124.0, 238.0, 54.0)
+	_panel(legend, Color(0.012, 0.031, 0.035, 0.94), Color(0.54, 0.66, 0.55, 0.30))
+	var title := "满足率  低 → 高" if _map_observation_mode == MAP_MODE_FULFILLMENT else "短缺量  低 → 高"
+	_draw_label(legend.position + Vector2(12.0, 22.0), title, 10, Color(0.90, 0.84, 0.66, 1.0))
+	for index: int in 8:
+		var ratio := float(index) / 7.0
+		var color := (
+			Color(0.66, 0.20, 0.13).lerp(Color(0.18, 0.68, 0.49), ratio)
+			if _map_observation_mode == MAP_MODE_FULFILLMENT
+			else Color(0.24, 0.48, 0.45).lerp(Color(0.82, 0.24, 0.12), ratio)
+		)
+		draw_rect(Rect2(legend.position + Vector2(12.0 + index * 24.0, 32.0), Vector2(24.0, 12.0)), color)
+	_draw_label(legend.position + Vector2(12.0, 51.0), "灰色：无可靠 Formal 映射 / 尚未日结", 8, Color(0.70, 0.76, 0.72, 0.95))
+
+
 func _on_formal_state_changed(change: Dictionary) -> void:
 	if (
 		bool(change.get("initialized", false))
@@ -386,6 +509,12 @@ func _on_formal_state_changed(change: Dictionary) -> void:
 		or bool(change.get("economy", false))
 	):
 		_refresh_player_context_cache()
+		if bool(change.get("economy", false)) or bool(change.get("restored", false)):
+			_economy_observation_dirty = true
+			if _formal_workspace == WORKSPACE_ECONOMY:
+				_refresh_economy_observations()
+			elif _formal_workspace == WORKSPACE_MAP and _map_observation_mode != MAP_MODE_POLITICAL:
+				_refresh_economy_overlay()
 		_refresh_shell_observations()
 		queue_redraw()
 
@@ -414,6 +543,123 @@ func _refresh_shell_observations() -> void:
 	_defend_options_cache = formal_simulation.player_defend_options()
 
 
+func _my_market_id() -> String:
+	var economic := _player_context_cache.get("economic_observation", {}) as Dictionary
+	var economy_id := str(economic.get("economy_entity_id", ""))
+	return formal_simulation.market_registry_view().market_id_for_economic_aggregate(
+		economy_id
+	)
+
+
+func _selected_polity_market_id() -> String:
+	return formal_simulation.market_id_for_polity(_selected_polity_entity_id())
+
+
+func _refresh_economy_catalog() -> void:
+	_economy_catalog_cache = formal_simulation.economy_observation_catalog()
+	_commodity_catalog_cache = formal_simulation.commodity_catalog_observation()
+	if _observed_market_id.is_empty():
+		_observed_market_id = _selected_polity_market_id()
+	if _observed_market_id.is_empty():
+		_observed_market_id = _my_market_id()
+
+
+func _refresh_selected_market() -> void:
+	_selected_market_cache = formal_simulation.market_observation(
+		_observed_market_id
+	)
+	_rebuild_commodity_rows_cache()
+
+
+func _refresh_economy_observations(force: bool = false) -> void:
+	if not formal_simulation.initialized:
+		return
+	var current_revision := formal_simulation.economy_observation_revision()
+	var cached_revision := int(_economy_catalog_cache.get("state_revision", -2))
+	if force or _economy_observation_dirty or cached_revision != current_revision:
+		_refresh_economy_catalog()
+		_economy_observation_dirty = false
+		_economy_refresh_count += 1
+	match _economy_tab:
+		ECONOMY_TAB_OVERVIEW, ECONOMY_TAB_MARKETS, ECONOMY_TAB_COMMODITIES:
+			_refresh_selected_market()
+		ECONOMY_TAB_SHORTAGES:
+			_shortage_observation_cache = formal_simulation.shortage_observation()
+			_rebuild_shortage_rows_cache()
+		ECONOMY_TAB_TRANSPORT:
+			_transport_observation_cache = formal_simulation.transport_observation()
+
+
+func _refresh_economy_overlay() -> void:
+	if _map_observation_mode == MAP_MODE_POLITICAL:
+		_economy_overlay_cache = {}
+		return
+	var mode := "fulfillment" if _map_observation_mode == MAP_MODE_FULFILLMENT else "shortage"
+	_economy_overlay_cache = formal_simulation.economy_overlay_observation(mode)
+	_economy_observation_dirty = false
+	queue_redraw()
+
+
+func _rebuild_commodity_rows_cache() -> void:
+	var rows := DataRecordUtils.to_dictionary_array(
+		_selected_market_cache.get("commodities", [])
+	)
+	var query := _commodity_search.to_lower()
+	if not query.is_empty():
+		var filtered: Array[Dictionary] = []
+		for row: Dictionary in rows:
+			if (
+				str(row.get("commodity_id", "")).to_lower().contains(query)
+				or str(row.get("name_zh", "")).to_lower().contains(query)
+			):
+				filtered.append(row)
+		rows = filtered
+	rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		match _commodity_sort:
+			"commodity":
+				return str(a.get("commodity_id", "")) < str(b.get("commodity_id", ""))
+			"fulfillment":
+				return int(a.get("fulfillment_bp", -1)) < int(b.get("fulfillment_bp", -1))
+			_:
+				return float(a.get("unmet", 0.0)) > float(b.get("unmet", 0.0))
+	)
+	_commodity_rows_cache = rows
+	_commodity_page = clampi(_commodity_page, 0, maxi(0, (rows.size() - 1) / 9))
+
+
+func _rebuild_shortage_rows_cache() -> void:
+	var rows := DataRecordUtils.to_dictionary_array(
+		_shortage_observation_cache.get("rows", [])
+	)
+	rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		match _shortage_sort:
+			"fulfillment":
+				return int(a.get("fulfillment_bp", -1)) < int(b.get("fulfillment_bp", -1))
+			"commodity":
+				return str(a.get("commodity_id", "")) < str(b.get("commodity_id", ""))
+			"market":
+				return str(a.get("market_id", "")) < str(b.get("market_id", ""))
+			_:
+				return float(a.get("unmet", 0.0)) > float(b.get("unmet", 0.0))
+	)
+	_shortage_rows_cache = rows
+	_shortage_page = clampi(_shortage_page, 0, maxi(0, (rows.size() - 1) / 9))
+
+
+func _set_economy_tab(tab_id: String) -> bool:
+	var valid := false
+	for tab: Dictionary in ECONOMY_TABS:
+		if str(tab.get("id", "")) == tab_id:
+			valid = true
+			break
+	if not valid:
+		return false
+	_economy_tab = tab_id
+	_refresh_economy_observations()
+	queue_redraw()
+	return true
+
+
 func formal_workspace_ids() -> Array[String]:
 	var output: Array[String] = []
 	for workspace: Dictionary in FORMAL_WORKSPACES:
@@ -435,6 +681,10 @@ func set_formal_workspace(workspace_id: String) -> bool:
 	dragging = false
 	angular_velocity = 0.0
 	set_process(false)
+	if workspace_id == WORKSPACE_ECONOMY:
+		_refresh_economy_observations()
+	elif workspace_id == WORKSPACE_MAP and _map_observation_mode != MAP_MODE_POLITICAL:
+		_refresh_economy_overlay()
 	if workspace_id in [WORKSPACE_ORGANIZATION, WORKSPACE_MILITARY]:
 		_refresh_shell_observations()
 	queue_redraw()
@@ -472,6 +722,46 @@ func player_card_person_id() -> String:
 
 func character_detail_person_id() -> String:
 	return str(_player_context_cache.get("person_id", ""))
+
+
+func economy_tab_id() -> String:
+	return _economy_tab
+
+
+func economy_observed_market_id() -> String:
+	return _observed_market_id
+
+
+func economy_my_market_id() -> String:
+	return _my_market_id()
+
+
+func economy_catalog_observation() -> Dictionary:
+	return _economy_catalog_cache.duplicate(true)
+
+
+func economy_selected_market_observation() -> Dictionary:
+	return _selected_market_cache.duplicate(true)
+
+
+func economy_shortage_observation() -> Dictionary:
+	return _shortage_observation_cache.duplicate(true)
+
+
+func economy_transport_observation() -> Dictionary:
+	return _transport_observation_cache.duplicate(true)
+
+
+func economy_observation_refresh_count() -> int:
+	return _economy_refresh_count
+
+
+func map_observation_mode() -> String:
+	return _map_observation_mode
+
+
+func economy_overlay_observation() -> Dictionary:
+	return _economy_overlay_cache.duplicate(true)
 
 
 func _draw_formal_world_status() -> void:
@@ -756,27 +1046,262 @@ func _draw_person_workspace(rect: Rect2) -> void:
 
 
 func _draw_economy_workspace(rect: Rect2) -> void:
-	_draw_workspace_heading(rect, "工作 / 经济", "个人工作与地区聚合经济严格分离")
+	_draw_workspace_heading(rect, "工作 / 经济", "个人工作 unavailable · Formal Economy / Market 只读观察")
+	_draw_economy_subnavigation(rect)
+	match _economy_tab:
+		ECONOMY_TAB_MARKETS:
+			_draw_market_browser(rect)
+		ECONOMY_TAB_COMMODITIES:
+			_draw_commodity_browser(rect)
+		ECONOMY_TAB_SHORTAGES:
+			_draw_shortage_browser(rect)
+		ECONOMY_TAB_TRANSPORT:
+			_draw_transport_browser(rect)
+		_:
+			_draw_economy_overview(rect)
+
+
+func _draw_economy_subnavigation(rect: Rect2) -> void:
+	var x := rect.position.x + 30.0
+	for tab: Dictionary in ECONOMY_TABS:
+		var tab_id := str(tab.get("id", ""))
+		var tab_rect := Rect2(x, rect.position.y + 96.0, 126.0, 28.0)
+		_draw_button(tab_rect, str(tab.get("label", tab_id)), "formal_economy_tab:%s" % tab_id, true)
+		if tab_id == _economy_tab:
+			draw_line(tab_rect.position + Vector2(7.0, 26.0), tab_rect.end - Vector2(7.0, 2.0), Color(0.96, 0.76, 0.38, 0.95), 2.0)
+		x += 132.0
+
+
+func _draw_economy_overview(rect: Rect2) -> void:
 	var economic := _player_context_cache.get("economic_observation", {}) as Dictionary
-	_draw_label(rect.position + Vector2(38.0, 126.0), "个人工作", 17, Color(0.91, 0.82, 0.58, 1.0))
-	_draw_shell_lines(rect.position + Vector2(38.0, 158.0), [
+	var place := _player_context_cache.get("current_place", {}) as Dictionary
+	var source := _player_context_cache.get("population_source", {}) as Dictionary
+	var left := Rect2(rect.position + Vector2(30.0, 140.0), Vector2(rect.size.x * 0.36, 350.0))
+	var right := Rect2(rect.position + Vector2(rect.size.x * 0.40, 140.0), Vector2(rect.size.x * 0.57, 350.0))
+	_panel(left, Color(0.020, 0.046, 0.050, 0.76), Color(0.48, 0.61, 0.52, 0.22))
+	_panel(right, Color(0.020, 0.046, 0.050, 0.76), Color(0.67, 0.58, 0.34, 0.28))
+	_draw_label(left.position + Vector2(18.0, 30.0), "个人工作", 16, Color(0.91, 0.82, 0.58, 1.0))
+	_draw_shell_lines(left.position + Vector2(18.0, 66.0), [
+		"人物：%s" % shell_player_person_id(),
+		"地点：%s" % str(place.get("name", place.get("id", "不可用"))),
+		"人口来源：%s" % str(source.get("id", "不可用")),
 		"Employment owner：unavailable",
-		"职业、雇佣合同、工资、个人现金：当前版本尚未模拟",
-		"聚合人口或国库不会被解释为这个人的工资或财富。",
-	], 24.0)
-	var right := rect.position + Vector2(rect.size.x * 0.54, 126.0)
-	_draw_label(right, "地区 / 聚合经济观察", 17, Color(0.91, 0.82, 0.58, 1.0))
-	if bool(economic.get("available", false)):
-		var totals := economic.get("daily_totals", {}) as Dictionary
-		_draw_shell_lines(right + Vector2(0.0, 32.0), [
-			"经济聚合：%s" % str(economic.get("economy_entity_id", "")),
-			"聚合人口：%s" % _compact_integer(int(economic.get("population", 0))),
-			"当日满足率：%.1f%%" % (float(totals.get("fulfillment_bp", 0)) / 100.0),
-			"证据状态：%s" % str(economic.get("admission_status", "")),
-		], 24.0)
+		"职业 / 合同 / 工资 / 个人现金：尚未模拟",
+	], 28.0, 11)
+	_draw_label(right.position + Vector2(18.0, 30.0), "地区 / 聚合经济观察", 16, Color(0.91, 0.82, 0.58, 1.0))
+	if not bool(economic.get("available", false)):
+		_draw_shell_lines(right.position + Vector2(18.0, 66.0), ["不可用：%s" % str(economic.get("reason", "unavailable"))], 27.0)
+		return
+	var totals := _selected_market_cache.get("daily_totals", {}) as Dictionary
+	var settled := bool(_selected_market_cache.get("settled", false))
+	var fulfillment := "尚未日结" if not settled else "%.1f%%" % (float(totals.get("fulfillment_bp", 0)) / 100.0)
+	_draw_shell_lines(right.position + Vector2(18.0, 66.0), [
+		"经济聚合：%s" % str(_selected_market_cache.get("economic_aggregate_id", economic.get("economy_entity_id", ""))),
+		"Market：%s" % str(_selected_market_cache.get("market_id", _my_market_id())),
+		"人口：%s" % _compact_integer(int(_selected_market_cache.get("population", economic.get("population", 0)))),
+		"需求 / 消费 / 未满足：%s / %s / %s" % [
+			_format_units_or_pending(totals, "demand_units", settled),
+			_format_units_or_pending(totals, "consumed_units", settled),
+			_format_units_or_pending(totals, "unmet_units", settled),
+		],
+		"满足率：%s" % fulfillment,
+		"在途运输：%d · 相关路线：%d" % [int(_selected_market_cache.get("active_shipment_count", 0)), int(_selected_market_cache.get("route_count", 0))],
+		"证据状态：%s" % str(_selected_market_cache.get("admission_status", economic.get("admission_status", ""))),
+		"当前时间：%s" % _format_sim_datetime(),
+	], 27.0, 11)
+	_draw_unavailable_notice(rect, "聚合经济是地区事实；不会被解释为个人工资、钱包或就业")
+
+
+func _draw_market_browser(rect: Rect2) -> void:
+	var rows := DataRecordUtils.to_dictionary_array(_economy_catalog_cache.get("markets", []))
+	var page_size := 7
+	var page_count := maxi(1, ceili(float(rows.size()) / float(page_size)))
+	_market_page = clampi(_market_page, 0, page_count - 1)
+	_draw_label(rect.position + Vector2(32.0, 153.0), "Formal Markets · %d" % rows.size(), 15, Color(0.91, 0.82, 0.58, 1.0))
+	_draw_button(Rect2(rect.end.x - 330.0, rect.position.y + 136.0, 92.0, 28.0), "My Market", "formal_market_my", not _my_market_id().is_empty())
+	_draw_button(Rect2(rect.end.x - 230.0, rect.position.y + 136.0, 198.0, 28.0), "Observed Polity Market", "formal_market_map_observed", not _selected_polity_market_id().is_empty())
+	var header_y := rect.position.y + 187.0
+	_draw_table_header(Vector2(rect.position.x + 32.0, header_y), ["Market / Aggregate", "Population", "Fulfillment", "Unmet", "Ship", "Routes"])
+	var start := _market_page * page_size
+	for local_index: int in page_size:
+		var index := start + local_index
+		if index >= rows.size():
+			break
+		var row := rows[index]
+		var totals := row.get("daily_totals", {}) as Dictionary
+		var settled := bool(row.get("settled", false))
+		var row_rect := Rect2(rect.position.x + 30.0, header_y + 14.0 + local_index * 43.0, rect.size.x - 60.0, 38.0)
+		var selected := str(row.get("market_id", "")) == _observed_market_id
+		_panel(row_rect, Color(0.09, 0.075, 0.035, 0.76) if selected else Color(0.026, 0.052, 0.055, 0.72), Color(0.82, 0.67, 0.34, 0.50) if selected else Color(0.42, 0.56, 0.50, 0.18))
+		_register_hit(row_rect, "formal_market_select:%s" % str(row.get("market_id", "")), true)
+		_draw_market_row(row_rect, row, totals, settled)
+	_draw_pager(rect, _market_page, page_count, "formal_market_page")
+	_draw_label(rect.position + Vector2(32.0, rect.end.y - 48.0), "当前观察：%s · 玩家仍为 %s" % [_observed_market_id, shell_player_person_id()], 9, Color(0.72, 0.80, 0.75, 0.96))
+
+
+func _draw_commodity_browser(rect: Rect2) -> void:
+	var page_size := 9
+	var page_count := maxi(1, ceili(float(_commodity_rows_cache.size()) / float(page_size)))
+	_commodity_page = clampi(_commodity_page, 0, page_count - 1)
+	_draw_label(rect.position + Vector2(32.0, 151.0), "Market：%s · Formal commodities %d" % [_observed_market_id, int(_commodity_catalog_cache.get("commodity_count", 0))], 14, Color(0.91, 0.82, 0.58, 1.0))
+	_draw_label(rect.position + Vector2(32.0, 178.0), "Search：%s%s" % [_commodity_search, "▌" if _commodity_search.length() < 32 else ""], 10, Color(0.75, 0.84, 0.79, 1.0))
+	_draw_button(Rect2(rect.position.x + 260.0, rect.position.y + 158.0, 70.0, 25.0), "Clear", "formal_commodity_search_clear", not _commodity_search.is_empty())
+	_draw_sort_buttons(rect.position + Vector2(360.0, 158.0), "formal_commodity_sort", _commodity_sort, ["unmet", "fulfillment", "commodity"])
+	var header_y := rect.position.y + 207.0
+	_draw_table_header(Vector2(rect.position.x + 32.0, header_y), ["Commodity", "Demand", "Consumed", "Unmet", "Fulfill", "Stock", "Price", "In"])
+	var start := _commodity_page * page_size
+	for local_index: int in page_size:
+		var index := start + local_index
+		if index >= _commodity_rows_cache.size():
+			break
+		_draw_commodity_row(Rect2(rect.position.x + 30.0, header_y + 12.0 + local_index * 31.0, rect.size.x - 60.0, 28.0), _commodity_rows_cache[index])
+	_draw_pager(rect, _commodity_page, page_count, "formal_commodity_page")
+
+
+func _draw_shortage_browser(rect: Rect2) -> void:
+	var page_size := 9
+	var page_count := maxi(1, ceili(float(_shortage_rows_cache.size()) / float(page_size)))
+	_shortage_page = clampi(_shortage_page, 0, page_count - 1)
+	_draw_label(rect.position + Vector2(32.0, 153.0), "Formal Shortages · %d · %s" % [_shortage_rows_cache.size(), _format_sim_datetime()], 14, Color(0.91, 0.82, 0.58, 1.0))
+	_draw_sort_buttons(rect.position + Vector2(390.0, 137.0), "formal_shortage_sort", _shortage_sort, ["unmet", "fulfillment", "commodity", "market"])
+	var header_y := rect.position.y + 188.0
+	_draw_table_header(Vector2(rect.position.x + 32.0, header_y), ["Commodity", "Market / Economy", "Demand", "Consumed", "Unmet", "Fulfill"])
+	var start := _shortage_page * page_size
+	for local_index: int in page_size:
+		var index := start + local_index
+		if index >= _shortage_rows_cache.size():
+			break
+		_draw_shortage_row(Rect2(rect.position.x + 30.0, header_y + 12.0 + local_index * 31.0, rect.size.x - 60.0, 28.0), _shortage_rows_cache[index])
+	if _shortage_rows_cache.is_empty():
+		_draw_label(rect.position + Vector2(42.0, 240.0), "当前没有已日结的 unmet > 0 记录；这不是伪造的零短缺。", 12, Color(0.76, 0.80, 0.73, 1.0))
+	_draw_pager(rect, _shortage_page, page_count, "formal_shortage_page")
+
+
+func _draw_transport_browser(rect: Rect2) -> void:
+	var shipments := DataRecordUtils.to_dictionary_array(_transport_observation_cache.get("active_shipments", []))
+	var routes := DataRecordUtils.to_dictionary_array(_transport_observation_cache.get("routes", []))
+	var source_rows := shipments if not shipments.is_empty() else routes
+	var page_size := 8
+	var page_count := maxi(1, ceili(float(source_rows.size()) / float(page_size)))
+	_transport_page = clampi(_transport_page, 0, page_count - 1)
+	_draw_label(rect.position + Vector2(32.0, 153.0), "Formal Transport · active shipments %d · routes %d" % [shipments.size(), routes.size()], 14, Color(0.91, 0.82, 0.58, 1.0))
+	_draw_label(rect.position + Vector2(32.0, 180.0), "当前展示：%s" % ("在途运输" if not shipments.is_empty() else "路线目录（当前无在途运输）"), 10, Color(0.72, 0.80, 0.75, 1.0))
+	var header_y := rect.position.y + 211.0
+	_draw_table_header(Vector2(rect.position.x + 32.0, header_y), ["Identity", "Source", "Destination", "Commodity / Mode", "Amount", "Arrival / Duration"])
+	var start := _transport_page * page_size
+	for local_index: int in page_size:
+		var index := start + local_index
+		if index >= source_rows.size():
+			break
+		_draw_transport_row(Rect2(rect.position.x + 30.0, header_y + 12.0 + local_index * 34.0, rect.size.x - 60.0, 31.0), source_rows[index], not shipments.is_empty())
+	_draw_pager(rect, _transport_page, page_count, "formal_transport_page")
+
+
+func _format_units_or_pending(totals: Dictionary, key: String, settled: bool) -> String:
+	return "尚未日结" if not settled else "%.1f" % float(totals.get(key, 0.0))
+
+
+func _draw_table_header(position: Vector2, labels: Array[String]) -> void:
+	var column_width := (size.x - 112.0) / maxf(1.0, float(labels.size()))
+	for index: int in labels.size():
+		_draw_label(position + Vector2(index * column_width + 8.0, 0.0), labels[index], 9, Color(0.62, 0.72, 0.68, 0.96))
+
+
+func _draw_market_row(rect: Rect2, row: Dictionary, totals: Dictionary, settled: bool) -> void:
+	var columns := [
+		"%s\n%s" % [str(row.get("market_id", "")), str(row.get("economic_aggregate_id", ""))],
+		_compact_integer(int(row.get("population", 0))),
+		"—" if not settled else "%.1f%%" % (float(totals.get("fulfillment_bp", 0)) / 100.0),
+		"—" if not settled else "%.1f" % float(totals.get("unmet_units", 0.0)),
+		str(row.get("active_shipment_count", 0)),
+		str(row.get("route_count", 0)),
+	]
+	var widths := PackedFloat32Array([0.32, 0.16, 0.15, 0.15, 0.10, 0.10])
+	var x := rect.position.x + 10.0
+	for index: int in columns.size():
+		var text := str(columns[index]).replace("\n", " · ")
+		_draw_label(Vector2(x, rect.position.y + 24.0), _ellipsize(text, 38 if index == 0 else 16), 9)
+		x += rect.size.x * widths[index]
+
+
+func _draw_commodity_row(rect: Rect2, row: Dictionary) -> void:
+	_panel(rect, Color(0.025, 0.050, 0.053, 0.72), Color(0.40, 0.54, 0.49, 0.16))
+	var settled := bool(row.get("settled", false))
+	var values: Array[String] = [
+		"%s · %s" % [str(row.get("name_zh", "")), str(row.get("commodity_id", ""))],
+		"—" if not settled else "%.1f" % float(row.get("demand", 0.0)),
+		"—" if not settled else "%.1f" % float(row.get("consumed", 0.0)),
+		"—" if not settled else "%.1f" % float(row.get("unmet", 0.0)),
+		"—" if int(row.get("fulfillment_bp", -1)) < 0 else "%.1f%%" % (float(row.get("fulfillment_bp", 0)) / 100.0),
+		"%.1f" % float(row.get("inventory", 0.0)),
+		"%d¢" % int(row.get("price_centimes", 0)),
+		str(row.get("incoming_shipment_count", 0)),
+	]
+	var widths := PackedFloat32Array([0.23, 0.11, 0.11, 0.11, 0.11, 0.12, 0.11, 0.08])
+	_draw_table_values(rect, values, widths)
+
+
+func _draw_shortage_row(rect: Rect2, row: Dictionary) -> void:
+	_panel(rect, Color(0.052, 0.043, 0.030, 0.76), Color(0.67, 0.49, 0.25, 0.20))
+	var values: Array[String] = [
+		"%s · %s" % [str(row.get("name_zh", "")), str(row.get("commodity_id", ""))],
+		"%s · %s" % [str(row.get("market_id", "")), str(row.get("economic_aggregate_id", ""))],
+		"%.1f" % float(row.get("demand", 0.0)),
+		"%.1f" % float(row.get("consumed", 0.0)),
+		"%.1f" % float(row.get("unmet", 0.0)),
+		"%.1f%%" % (float(row.get("fulfillment_bp", 0)) / 100.0),
+	]
+	var widths := PackedFloat32Array([0.24, 0.31, 0.12, 0.12, 0.11, 0.10])
+	_draw_table_values(rect, values, widths)
+
+
+func _draw_transport_row(rect: Rect2, row: Dictionary, shipment: bool) -> void:
+	_panel(rect, Color(0.025, 0.050, 0.053, 0.72), Color(0.40, 0.54, 0.49, 0.16))
+	var values: Array[String] = []
+	if shipment:
+		values = [
+			str(row.get("shipment_id", "")),
+			str(row.get("origin_entity_id", "")),
+			str(row.get("destination_entity_id", "")),
+			str(row.get("commodity_id", "")),
+			"%.1f" % float(row.get("units", 0.0)),
+			"h%d · %s" % [int(row.get("arrival_hour", 0)), str(row.get("route_id", ""))],
+		]
 	else:
-		_draw_shell_lines(right + Vector2(0.0, 32.0), ["地区经济观察不可用：%s" % str(economic.get("reason", "unavailable"))], 24.0)
-	_draw_unavailable_notice(rect, "地区 GDP、国库与市场人口都不是个人事实")
+		values = [
+			str(row.get("route_id", "")),
+			str(row.get("from", "")),
+			str(row.get("to", "")),
+			str(row.get("mode", "")),
+			"%.1f/day" % float(row.get("capacity_units_per_day", 0.0)),
+			"%dh" % int(row.get("duration_hours", 0)),
+		]
+	var widths := PackedFloat32Array([0.20, 0.20, 0.20, 0.15, 0.12, 0.13])
+	_draw_table_values(rect, values, widths)
+
+
+func _draw_table_values(rect: Rect2, values: Array[String], widths: PackedFloat32Array) -> void:
+	var x := rect.position.x + 8.0
+	for index: int in values.size():
+		_draw_label(Vector2(x, rect.position.y + 19.0), _ellipsize(values[index], 29 if index < 3 else 18), 9)
+		x += rect.size.x * widths[index]
+
+
+func _draw_sort_buttons(position: Vector2, action_prefix: String, selected: String, options: Array[String]) -> void:
+	var x := position.x
+	for option: String in options:
+		var rect := Rect2(x, position.y, 92.0, 25.0)
+		_draw_button(rect, option, "%s:%s" % [action_prefix, option], true)
+		if option == selected:
+			draw_line(rect.position + Vector2(6.0, 23.0), rect.end - Vector2(6.0, 2.0), Color(0.94, 0.73, 0.34, 0.94), 2.0)
+		x += 97.0
+
+
+func _draw_pager(rect: Rect2, page: int, page_count: int, action_prefix: String) -> void:
+	var y := rect.end.y - 48.0
+	_draw_button(Rect2(rect.end.x - 210.0, y - 22.0, 58.0, 26.0), "Prev", "%s:-1" % action_prefix, page > 0)
+	_draw_label(Vector2(rect.end.x - 142.0, y - 4.0), "%d / %d" % [page + 1, page_count], 9, Color(0.73, 0.80, 0.76, 1.0))
+	_draw_button(Rect2(rect.end.x - 84.0, y - 22.0, 58.0, 26.0), "Next", "%s:1" % action_prefix, page + 1 < page_count)
 
 
 func _draw_relations_workspace(rect: Rect2) -> void:
@@ -919,10 +1444,76 @@ func _activate_button(action: String) -> void:
 		_:
 			if action.begins_with("formal_workspace:"):
 				set_formal_workspace(action.trim_prefix("formal_workspace:"))
+			elif action.begins_with("formal_economy_tab:"):
+				_set_economy_tab(action.trim_prefix("formal_economy_tab:"))
+			elif action == "formal_market_my":
+				_select_observed_market(_my_market_id())
+			elif action == "formal_market_map_observed":
+				_select_observed_market(_selected_polity_market_id())
+			elif action.begins_with("formal_market_select:"):
+				_select_observed_market(action.trim_prefix("formal_market_select:"))
+			elif action.begins_with("formal_market_page:"):
+				_market_page = maxi(0, _market_page + action.trim_prefix("formal_market_page:").to_int())
+				queue_redraw()
+			elif action.begins_with("formal_commodity_page:"):
+				_commodity_page = maxi(0, _commodity_page + action.trim_prefix("formal_commodity_page:").to_int())
+				queue_redraw()
+			elif action.begins_with("formal_commodity_sort:"):
+				_commodity_sort = action.trim_prefix("formal_commodity_sort:")
+				_rebuild_commodity_rows_cache()
+				queue_redraw()
+			elif action == "formal_commodity_search_clear":
+				_commodity_search = ""
+				_rebuild_commodity_rows_cache()
+				queue_redraw()
+			elif action.begins_with("formal_shortage_page:"):
+				_shortage_page = maxi(0, _shortage_page + action.trim_prefix("formal_shortage_page:").to_int())
+				queue_redraw()
+			elif action.begins_with("formal_shortage_sort:"):
+				_shortage_sort = action.trim_prefix("formal_shortage_sort:")
+				_rebuild_shortage_rows_cache()
+				queue_redraw()
+			elif action.begins_with("formal_transport_page:"):
+				_transport_page = maxi(0, _transport_page + action.trim_prefix("formal_transport_page:").to_int())
+				queue_redraw()
+			elif action.begins_with("formal_map_mode:"):
+				_set_map_observation_mode(action.trim_prefix("formal_map_mode:"))
 			elif action.begins_with("formal_defend:"):
 				_execute_formal_defend(action.trim_prefix("formal_defend:").to_int())
 			else:
 				super._activate_button(action)
+
+
+func _select_observed_market(market_id: String) -> bool:
+	if market_id.is_empty():
+		_formal_status = "所选对象没有可靠的 Formal market 映射。"
+		queue_redraw()
+		return false
+	var observation := formal_simulation.market_observation(market_id)
+	if not bool(observation.get("available", false)):
+		_formal_status = "Market 不可用：%s" % str(observation.get("reason", "unknown"))
+		queue_redraw()
+		return false
+	_observed_market_id = market_id
+	_selected_market_cache = observation
+	_market_page = 0
+	_commodity_page = 0
+	_rebuild_commodity_rows_cache()
+	_formal_status = "观察市场已切换；玩家身份与所在地未改变。"
+	queue_redraw()
+	return true
+
+
+func _set_map_observation_mode(mode_id: String) -> bool:
+	if mode_id not in [MAP_MODE_POLITICAL, MAP_MODE_FULFILLMENT, MAP_MODE_SHORTAGE]:
+		return false
+	_map_observation_mode = mode_id
+	if mode_id == MAP_MODE_POLITICAL:
+		_economy_overlay_cache = {}
+	else:
+		_refresh_economy_overlay()
+	queue_redraw()
+	return true
 
 
 func _execute_formal_defend(option_index: int) -> void:

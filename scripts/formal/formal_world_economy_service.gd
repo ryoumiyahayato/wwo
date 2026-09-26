@@ -292,6 +292,253 @@ func economic_aggregate_id_for_market(market_id: String) -> String:
 	return _market_registry.economic_aggregate_id_for_market(market_id)
 
 
+func observation_revision() -> int:
+	return _state_revision
+
+
+func observation_catalog() -> Dictionary:
+	## Detached, bounded catalogue for player-facing market browsing. It projects
+	## one row per Formal market and never copies per-commodity state.
+	var shipment_counts: Dictionary = {}
+	for shipment: Dictionary in shipments:
+		for economy_id: String in [
+			str(shipment.get("origin_entity_id", "")),
+			str(shipment.get("destination_entity_id", "")),
+		]:
+			if not economy_id.is_empty():
+				shipment_counts[economy_id] = int(shipment_counts.get(economy_id, 0)) + 1
+	var route_counts: Dictionary = {}
+	for route: Dictionary in routes:
+		for economy_id: String in [
+			str(route.get("from", "")), str(route.get("to", "")),
+		]:
+			if not economy_id.is_empty():
+				route_counts[economy_id] = int(route_counts.get(economy_id, 0)) + 1
+	var market_rows: Array[Dictionary] = []
+	for economy_id: String in _economic_aggregate_ids():
+		var market_id := _market_registry.market_id_for_economic_aggregate(economy_id)
+		var state := market_states.get(market_id, {}) as Dictionary
+		var calculation := _calculation_inputs.get(economy_id, {}) as Dictionary
+		var totals := state.get("daily_totals", {}) as Dictionary
+		market_rows.append({
+			"market_id": market_id,
+			"economic_aggregate_id": economy_id,
+			"polity_ids": polity_ids_for_economy(economy_id),
+			"population": int(calculation.get("population", 0)),
+			"admission_status": str(calculation.get("admission_status", "")),
+			"settled": not totals.is_empty(),
+			"daily_totals": totals.duplicate(true),
+			"active_shipment_count": int(shipment_counts.get(economy_id, 0)),
+			"route_count": int(route_counts.get(economy_id, 0)),
+		})
+	market_rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return str(a.get("economic_aggregate_id", "")) < str(b.get("economic_aggregate_id", ""))
+	)
+	return {
+		"schema_id": "formal_economy_observation_catalog_v1",
+		"domain_owner": "FormalWorldEconomyService",
+		"state_revision": _state_revision,
+		"total_hour": total_hour,
+		"market_count": market_rows.size(),
+		"commodity_count": _commodity_ids.size(),
+		"active_shipment_count": shipments.size(),
+		"route_count": routes.size(),
+		"markets": market_rows,
+		"fact_sources": {
+			"static_evidence_revision": _static_evidence.revision(),
+			"static_evidence_fingerprint": _static_evidence.fingerprint(),
+			"population_revision": _population_input.revision(),
+			"population_fingerprint": _population_input.fingerprint(),
+			"market_revision": _market_registry.revision(),
+			"market_mapping_fingerprint": _market_registry.mapping_fingerprint(),
+		},
+	}
+
+
+func commodity_catalog_observation() -> Dictionary:
+	## The static evidence catalog is admitted by Formal composition. Only stable
+	## descriptive fields are exposed here; the UI never opens its source file.
+	var rows: Array[Dictionary] = []
+	for commodity_id: String in _commodity_ids:
+		var commodity := _commodities.get(commodity_id, {}) as Dictionary
+		rows.append({
+			"commodity_id": commodity_id,
+			"name_zh": str(commodity.get("name_zh", commodity_id)),
+			"category": str(commodity.get("category", "")),
+			"trade_class": str(commodity.get("trade_class", "")),
+			"unit_name_zh": str(commodity.get("unit_name_zh", "")),
+		})
+	return {
+		"schema_id": "formal_commodity_catalog_observation_v1",
+		"domain_owner": "FormalWorldEconomyService",
+		"state_revision": _state_revision,
+		"commodity_count": rows.size(),
+		"commodities": rows,
+		"evidence_revision": _static_evidence.revision(),
+		"evidence_fingerprint": _static_evidence.fingerprint(),
+	}
+
+
+func market_observation(market_id: String) -> Dictionary:
+	## One-market projection. Its O(commodity_count) work happens only when a
+	## consumer explicitly opens or refreshes that market.
+	var state := market_states.get(market_id, {}) as Dictionary
+	var economy_id := _market_registry.economic_aggregate_id_for_market(market_id)
+	if state.is_empty() or economy_id.is_empty():
+		return {
+			"available": false,
+			"reason": "unknown_market",
+			"market_id": market_id,
+			"state_revision": _state_revision,
+		}
+	var metrics := state.get("daily_metrics", {}) as Dictionary
+	var inventory := state.get("inventory", {}) as Dictionary
+	var prices := state.get("prices", {}) as Dictionary
+	var incoming_counts: Dictionary = {}
+	for shipment: Dictionary in shipments:
+		if str(shipment.get("destination_entity_id", "")) != economy_id:
+			continue
+		var commodity_id := str(shipment.get("commodity_id", ""))
+		incoming_counts[commodity_id] = int(incoming_counts.get(commodity_id, 0)) + 1
+	var shortage_rank_by_id: Dictionary = {}
+	var shortage_rows := _settled_day_shortage_rows(state)
+	for index: int in shortage_rows.size():
+		shortage_rank_by_id[str((shortage_rows[index] as Dictionary).get("commodity_id", ""))] = index + 1
+	var commodity_rows: Array[Dictionary] = []
+	for commodity_id: String in _commodity_ids:
+		var commodity := _commodities.get(commodity_id, {}) as Dictionary
+		var metric := metrics.get(commodity_id, {}) as Dictionary
+		var demand := float(metric.get("demand", 0.0))
+		var consumed := float(metric.get("consumed", 0.0))
+		commodity_rows.append({
+			"commodity_id": commodity_id,
+			"name_zh": str(commodity.get("name_zh", commodity_id)),
+			"category": str(commodity.get("category", "")),
+			"unit_name_zh": str(commodity.get("unit_name_zh", "")),
+			"settled": int(state.get("last_settlement_hour", 0)) > 0,
+			"demand": demand,
+			"consumed": consumed,
+			"unmet": float(metric.get("unmet", 0.0)),
+			"fulfillment_bp": -1 if demand <= 0.0 else int(round(clampf(consumed / demand, 0.0, 1.0) * BASIS_POINTS)),
+			"inventory": float(inventory.get(commodity_id, 0.0)),
+			"price_centimes": int(prices.get(commodity_id, 0)),
+			"incoming_shipment_count": int(incoming_counts.get(commodity_id, 0)),
+			"shortage_rank": int(shortage_rank_by_id.get(commodity_id, 0)),
+		})
+	return {
+		"available": true,
+		"reason": "",
+		"schema_id": "formal_market_observation_v1",
+		"domain_owner": "FormalWorldEconomyService",
+		"state_revision": _state_revision,
+		"total_hour": total_hour,
+		"market_id": market_id,
+		"economic_aggregate_id": economy_id,
+		"polity_ids": polity_ids_for_economy(economy_id),
+		"population": int((_calculation_inputs.get(economy_id, {}) as Dictionary).get("population", 0)),
+		"admission_status": str((_calculation_inputs.get(economy_id, {}) as Dictionary).get("admission_status", "")),
+		"settled": not (state.get("daily_totals", {}) as Dictionary).is_empty(),
+		"daily_totals": (state.get("daily_totals", {}) as Dictionary).duplicate(true),
+		"active_shipment_count": _shipment_count_for(economy_id),
+		"route_count": (_routes_by_country.get(economy_id, []) as Array).size(),
+		"commodities": commodity_rows,
+	}
+
+
+func shortage_observation() -> Dictionary:
+	## This explicit page-level query may inspect every Formal market once. The UI
+	## caches the detached result and never invokes it from _draw().
+	var rows: Array[Dictionary] = []
+	for market_id_value: Variant in market_states:
+		var market_id := str(market_id_value)
+		var state := market_states[market_id] as Dictionary
+		var economy_id := _market_registry.economic_aggregate_id_for_market(market_id)
+		var metrics := state.get("daily_metrics", {}) as Dictionary
+		for commodity_id: String in _commodity_ids:
+			var metric := metrics.get(commodity_id, {}) as Dictionary
+			var unmet := float(metric.get("unmet", 0.0))
+			if unmet <= 0.0001:
+				continue
+			var demand := float(metric.get("demand", 0.0))
+			var consumed := float(metric.get("consumed", 0.0))
+			var commodity := _commodities.get(commodity_id, {}) as Dictionary
+			rows.append({
+				"market_id": market_id,
+				"economic_aggregate_id": economy_id,
+				"polity_ids": polity_ids_for_economy(economy_id),
+				"commodity_id": commodity_id,
+				"name_zh": str(commodity.get("name_zh", commodity_id)),
+				"demand": demand,
+				"consumed": consumed,
+				"unmet": unmet,
+				"fulfillment_bp": -1 if demand <= 0.0 else int(round(clampf(consumed / demand, 0.0, 1.0) * BASIS_POINTS)),
+			})
+	rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return float(a.get("unmet", 0.0)) > float(b.get("unmet", 0.0))
+	)
+	return {
+		"schema_id": "formal_shortage_observation_v1",
+		"domain_owner": "FormalWorldEconomyService",
+		"state_revision": _state_revision,
+		"total_hour": total_hour,
+		"rows": rows,
+	}
+
+
+func transport_observation() -> Dictionary:
+	return {
+		"schema_id": "formal_transport_observation_v1",
+		"domain_owner": "FormalWorldEconomyService",
+		"state_revision": _state_revision,
+		"total_hour": total_hour,
+		"active_shipments": shipments.duplicate(true),
+		"routes": routes.duplicate(true),
+	}
+
+
+func overlay_observation(mode: String) -> Dictionary:
+	if mode not in ["fulfillment", "shortage"]:
+		return {"available": false, "reason": "unsupported_overlay_mode"}
+	var raw_by_economy: Dictionary = {}
+	var maximum := 0.0
+	for economy_id: String in _economic_aggregate_ids():
+		var market_id := _market_registry.market_id_for_economic_aggregate(economy_id)
+		var totals := (market_states[market_id] as Dictionary).get("daily_totals", {}) as Dictionary
+		if totals.is_empty():
+			continue
+		var value := (
+			float(totals.get("fulfillment_bp", 0))
+			if mode == "fulfillment"
+			else float(totals.get("unmet_units", 0.0))
+		)
+		raw_by_economy[economy_id] = value
+		maximum = maxf(maximum, value)
+	var values_by_polity: Dictionary = {}
+	for polity_id_value: Variant in economy_by_polity_id:
+		var polity_id := str(polity_id_value)
+		var economy_id := str(economy_by_polity_id[polity_id])
+		if not raw_by_economy.has(economy_id):
+			continue
+		var raw_value := float(raw_by_economy[economy_id])
+		values_by_polity[polity_id] = {
+			"economic_aggregate_id": economy_id,
+			"market_id": _market_registry.market_id_for_economic_aggregate(economy_id),
+			"value": raw_value,
+			"normalized_bp": int(round(clampf(raw_value / maximum, 0.0, 1.0) * BASIS_POINTS)) if maximum > 0.0 else 0,
+		}
+	return {
+		"available": true,
+		"schema_id": "formal_economy_map_overlay_v1",
+		"domain_owner": "FormalWorldEconomyService",
+		"derived": true,
+		"mode": mode,
+		"state_revision": _state_revision,
+		"total_hour": total_hour,
+		"maximum": maximum,
+		"values_by_polity_id": values_by_polity,
+	}
+
+
 func _has_economic_aggregate(economic_aggregate_id: String) -> bool:
 	var market_id := _market_registry.market_id_for_economic_aggregate(
 		economic_aggregate_id

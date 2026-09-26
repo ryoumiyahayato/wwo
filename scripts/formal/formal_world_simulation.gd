@@ -215,6 +215,48 @@ func economy_view() -> FormalWorldEconomyView:
 	return FormalWorldEconomyView.new(_economy.read_only_snapshot())
 
 
+func economy_observation_revision() -> int:
+	return _economy.observation_revision() if _economy.is_configured() else -1
+
+
+func economy_observation_catalog() -> Dictionary:
+	return _economy.observation_catalog() if _economy.is_configured() else {}
+
+
+func commodity_catalog_observation() -> Dictionary:
+	return _economy.commodity_catalog_observation() if _economy.is_configured() else {}
+
+
+func market_observation(market_id: String) -> Dictionary:
+	return _economy.market_observation(market_id) if _economy.is_configured() else {
+		"available": false,
+		"reason": "formal_economy_unavailable",
+		"market_id": market_id,
+	}
+
+
+func shortage_observation() -> Dictionary:
+	return _economy.shortage_observation() if _economy.is_configured() else {}
+
+
+func transport_observation() -> Dictionary:
+	return _economy.transport_observation() if _economy.is_configured() else {}
+
+
+func economy_overlay_observation(mode: String) -> Dictionary:
+	return _economy.overlay_observation(mode) if _economy.is_configured() else {
+		"available": false,
+		"reason": "formal_economy_unavailable",
+	}
+
+
+func market_id_for_polity(polity_id: String) -> String:
+	if not _economy.is_configured():
+		return ""
+	var economy_id := _economy.economy_entity_for_polity(polity_id)
+	return _economy.market_id_for_economic_aggregate(economy_id)
+
+
 func _organization_responsibility_economy_view() -> FormalWorldEconomyView:
 	if not _economy.is_configured():
 		return FormalWorldEconomyView.new()
