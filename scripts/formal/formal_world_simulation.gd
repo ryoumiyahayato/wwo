@@ -50,6 +50,7 @@ var _military_service := VNextMilitaryService.new()
 var _military_authority_bridge: VNextMilitaryAuthorityBridge = null
 var _organization_person_reference_ids: Array[String] = []
 var _organization_place_reference_ids: Array[String] = []
+var _formal_start_plan: Dictionary = {}
 var _organization_composition_error: String = ""
 var _explicit_organization_reference_injection: bool = false
 var economy: FormalWorldEconomyView:
@@ -67,8 +68,10 @@ var _minute_remainder: int:
 func _init(
 	organization_core_value: VNextOrganizationCore = null,
 	organization_person_reference_ids: Array[String] = [],
-	organization_place_reference_ids: Array[String] = []
+	organization_place_reference_ids: Array[String] = [],
+	formal_start_plan: Dictionary = {}
 ) -> void:
+	_formal_start_plan = formal_start_plan.duplicate(true)
 	_organization_person_reference_ids = organization_person_reference_ids.duplicate()
 	_organization_person_reference_ids.sort()
 	_organization_place_reference_ids = organization_place_reference_ids.duplicate()
@@ -78,6 +81,10 @@ func _init(
 		or not _organization_person_reference_ids.is_empty()
 		or not _organization_place_reference_ids.is_empty()
 	)
+	if _explicit_organization_reference_injection and not _formal_start_plan.is_empty():
+		_organization_composition_error = (
+			"Formal start plan cannot be combined with injected Organization references"
+		)
 	_organization = (
 		organization_core_value
 		if organization_core_value != null
@@ -340,6 +347,10 @@ func organization_person_reference_ids() -> Array[String]:
 	return _organization_person_reference_ids.duplicate()
 
 
+func organization_place_reference_ids() -> Array[String]:
+	return _organization_place_reference_ids.duplicate()
+
+
 func player_person_id() -> String:
 	return _player_state.player_id()
 
@@ -484,6 +495,16 @@ func player_context_view() -> Dictionary:
 			),
 			"territory_mutation_converged": bool(
 				provenance.get("territory_mutation_converged", false)
+			),
+			"generation_rules_version": str(
+				provenance.get("generation_rules_version", "unavailable")
+			),
+			"generation_seed": provenance.get("generation_seed", "unavailable"),
+			"accepted_draft_index": provenance.get(
+				"accepted_draft_index", "unavailable"
+			),
+			"source_catalog_fingerprint": str(
+				provenance.get("source_catalog_fingerprint", "unavailable")
 			),
 		},
 		"memberships": _organization.memberships_for_person(person_id),
@@ -1071,6 +1092,8 @@ func _configure_formal_person_composition() -> bool:
 	if _person_authority == null:
 		initialization_error = "Formal Person authority could not be created"
 		return false
+	if not _formal_start_plan.is_empty():
+		return _configure_selected_formal_person()
 	var person_ids_to_materialize: Array[String] = []
 	if (
 		_explicit_organization_reference_injection
@@ -1124,6 +1147,58 @@ func _configure_formal_person_composition() -> bool:
 	var person_ids := _person_authority.person_ids()
 	if person_ids.is_empty() or not _player_state.set_player_id(person_ids[0]):
 		initialization_error = "PlayerState could not select a Formal Person"
+		return false
+	return true
+
+
+func _configure_selected_formal_person() -> bool:
+	var person_id := str(_formal_start_plan.get("person_id", ""))
+	var claim_id := str(_formal_start_plan.get("claim_id", ""))
+	var source_id := str(_formal_start_plan.get("population_source_id", ""))
+	var place_id := str(_formal_start_plan.get("start_place_id", ""))
+	var demographic := (
+		_formal_start_plan.get("basic_demographic_identity", {}) as Dictionary
+	)
+	var provenance := _formal_start_plan.get("provenance", {}) as Dictionary
+	if (
+		person_id.is_empty()
+		or claim_id.is_empty()
+		or source_id.is_empty()
+		or place_id.is_empty()
+		or demographic.is_empty()
+		or provenance.is_empty()
+	):
+		initialization_error = "Formal selected-person start plan is incomplete"
+		return false
+	if _population_input_view.population(source_id) <= 0:
+		initialization_error = "Formal selected-person population source is unavailable"
+		return false
+	var place := _spatial_catalog.get_place(place_id)
+	if place.is_empty() or str(place.get("parent_country_id", "")) != source_id:
+		initialization_error = "Formal selected-person source/place combination is incompatible"
+		return false
+	if not _person_authority.materialize(
+		person_id,
+		claim_id,
+		source_id,
+		demographic,
+		place_id,
+		provenance
+	):
+		initialization_error = "Formal selected Person materialization failed: %s" % (
+			_person_authority.last_error()
+		)
+		return false
+	_organization_person_reference_ids = [person_id]
+	_organization_place_reference_ids = [place_id]
+	if not _bind_organization_reference_catalog():
+		return false
+	_player_state = VNextPlayerState.new()
+	if (
+		not _player_state.bind_person_authority(_person_authority)
+		or not _player_state.set_player_id(person_id)
+	):
+		initialization_error = "PlayerState could not bind selected Formal Person"
 		return false
 	return true
 
@@ -1240,7 +1315,14 @@ func _bind_organization_reference_catalog() -> bool:
 func _rebind_player_and_organization_for_restored_persons() -> bool:
 	_organization_person_reference_ids = _person_authority.person_ids()
 	if not _explicit_organization_reference_injection:
-		_organization_place_reference_ids = [DEFAULT_FORMAL_PERSON_PLACE_ID]
+		_organization_place_reference_ids.clear()
+		for person_id: String in _organization_person_reference_ids:
+			var place_id := _person_authority.current_place(person_id)
+			if not place_id.is_empty() and place_id not in _organization_place_reference_ids:
+				_organization_place_reference_ids.append(place_id)
+		_organization_place_reference_ids.sort()
+		if _organization_place_reference_ids.is_empty():
+			return false
 	_organization = VNextOrganizationCore.new()
 	if not _bind_organization_reference_catalog():
 		return false

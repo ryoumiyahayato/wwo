@@ -53,19 +53,47 @@ func _run() -> void:
 	if not _require(menu.title_label.text == "1900", "标题未显示1900"):
 		await _finish()
 		return
-	if not _require(menu.prompt_label.text.contains("按任意键"), "标题没有可执行的进入提示"):
+	if not _require(menu.prompt_label.text.contains("正式产品流程"), "标题没有正式流程提示"):
 		await _finish()
 		return
-
-	await _press_key(KEY_SPACE)
+	var new_game_button := menu.get_node(
+		"Center/Content/TitleActions/NewGameButton"
+	) as Button
+	if not _require(new_game_button != null, "标题没有 New Game 按钮"):
+		await _finish()
+		return
+	new_game_button.pressed.emit()
+	await _settle_frames(3)
+	if not _require(menu.wizard_panel.visible, "New Game 未进入 Character Origin"):
+		await _finish()
+		return
+	menu.next_button.pressed.emit()
+	await _settle_frames(3)
+	if not _require(menu.candidate_actions.get_child_count() == 3, "候选页没有三个配置化候选"):
+		await _finish()
+		return
+	(menu.candidate_actions.get_child(0) as Button).pressed.emit()
+	await _settle_frames(2)
+	if not _require(menu.confirm_button.visible, "候选未进入确认页"):
+		await _finish()
+		return
+	menu.confirm_button.pressed.emit()
 	var application := await _wait_for_application()
-	if not _require(application != null, "空格输入未从标题进入正式世界"):
+	if not _require(application != null, "正式 New Game 流程未进入世界"):
 		await _finish()
 		return
 	if not _require(application_scene_count == 1, "一次标题输入创建了多个正式世界场景"):
 		await _finish()
 		return
 	if not _require(application.formal_simulation.initialized, "正式世界模拟未初始化"):
+		await _finish()
+		return
+	var selected_player_id := application.formal_simulation.player_person_id()
+	if not _require(
+		application.formal_simulation.formal_person_count() == 1
+		and selected_player_id != FormalWorldSimulation.DEFAULT_FORMAL_PERSON_ID,
+		"正式 New Game 未且仅未建立所选玩家"
+	):
 		await _finish()
 		return
 	if not _require(application._data_errors.is_empty(), "地图初始化产生玩家可见数据错误"):
@@ -207,12 +235,25 @@ func _run() -> void:
 	if not _require(menu != null and menu.status_label.text.contains("存档"), "重启标题未提示继续正式存档"):
 		await _finish()
 		return
-	await _press_key(KEY_SPACE)
+	var load_button := menu.get_node(
+		"Center/Content/TitleActions/LoadButton"
+	) as Button
+	if not _require(load_button != null, "重启标题没有 Load 按钮"):
+		await _finish()
+		return
+	load_button.pressed.emit()
 	var continued := await _wait_for_application()
 	if not _require(continued != null and application_scene_count == 2, "重启后未且仅未创建一个继续世界"):
 		await _finish()
 		return
 	if not _require(continued._format_sim_datetime() == saved_date, "重启继续未恢复可见日期"):
+		await _finish()
+		return
+	if not _require(
+		continued.formal_simulation.player_person_id() == selected_player_id
+		and continued.formal_simulation.formal_person_count() == 1,
+		"Load 未恢复同一个玩家或追加了默认人物"
+	):
 		await _finish()
 		return
 	if not _require(_visible_economy_signature(continued) == saved_economy, "重启继续未恢复可见经济摘要"):

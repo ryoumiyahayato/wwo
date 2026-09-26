@@ -4,6 +4,7 @@ extends "res://scripts/ui_spikes/holographic_workspace/holographic_workspace_his
 ## political identities; historical evidence remains available to history UI.
 
 const LAUNCH_MODE_META: StringName = &"formal_world_launch_mode"
+const LAUNCH_WORLD_META: StringName = &"formal_world_launch_world"
 const PACKAGED_PROBE_ARGUMENT: String = "--wwo-player-baseline-probe"
 const PACKAGED_PROBE_ENTITY_ID: String = "state:country_fra"
 const PACKAGED_PROBE_FLAG_ID: String = "france_tricolour_1794"
@@ -24,7 +25,14 @@ var _player_context_cache: Dictionary = {}
 func _ready() -> void:
 	_background_display.texture = _background_cache_viewport.get_texture()
 	_resize_background_cache()
-	var formal_initialized := formal_simulation.initialize()
+	var supplied_world: Variant = get_tree().get_meta(LAUNCH_WORLD_META, null)
+	if supplied_world is FormalWorldSimulation:
+		formal_simulation = supplied_world as FormalWorldSimulation
+	if get_tree().has_meta(LAUNCH_WORLD_META):
+		get_tree().remove_meta(LAUNCH_WORLD_META)
+	var formal_initialized := (
+		formal_simulation.initialized or formal_simulation.initialize()
+	)
 	if formal_initialized:
 		_refresh_player_context_cache()
 		formal_simulation.state_changed.connect(_on_formal_state_changed)
@@ -44,7 +52,7 @@ func _ready() -> void:
 		var launch_mode := str(get_tree().get_meta(LAUNCH_MODE_META, "new"))
 		if get_tree().has_meta(LAUNCH_MODE_META):
 			get_tree().remove_meta(LAUNCH_MODE_META)
-		if launch_mode == "load":
+		if launch_mode == "load" and not supplied_world is FormalWorldSimulation:
 			var result := _load_formal_state()
 			_formal_status = result.message
 			if _formal_status.is_empty():

@@ -50,10 +50,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
+mouse_filter = 1
 
 [node name="Content" type="VBoxContainer" parent="Center"]
-custom_minimum_size = Vector2(560, 0)
+custom_minimum_size = Vector2(620, 0)
 layout_mode = 2
 theme_override_constants/separation = 13
 
@@ -98,6 +98,100 @@ theme_override_font_sizes/font_size = 13
 text = "按任意键进入正式世界"
 horizontal_alignment = 1
 
+[node name="TitleActions" type="HBoxContainer" parent="Center/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 12
+
+[node name="NewGameButton" type="Button" parent="Center/Content/TitleActions"]
+custom_minimum_size = Vector2(150, 42)
+layout_mode = 2
+text = "New Game"
+
+[node name="LoadButton" type="Button" parent="Center/Content/TitleActions"]
+custom_minimum_size = Vector2(150, 42)
+layout_mode = 2
+text = "Load"
+
+[node name="QuitButton" type="Button" parent="Center/Content/TitleActions"]
+custom_minimum_size = Vector2(150, 42)
+layout_mode = 2
+text = "Quit"
+
+[node name="WizardPanel" type="VBoxContainer" parent="Center/Content"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(620, 300)
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="StepLabel" type="Label" parent="Center/Content/WizardPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.91, 0.9, 0.82, 1)
+theme_override_font_sizes/font_size = 26
+text = "Character Origin"
+horizontal_alignment = 1
+
+[node name="DetailLabel" type="Label" parent="Center/Content/WizardPanel"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 70)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.76, 0.7, 1)
+theme_override_font_sizes/font_size = 13
+text = "正式人口与地点"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="OriginSelector" type="OptionButton" parent="Center/Content/WizardPanel"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+
+[node name="PlaceSelector" type="OptionButton" parent="Center/Content/WizardPanel"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+
+[node name="CandidateActions" type="VBoxContainer" parent="Center/Content/WizardPanel"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="WizardActions" type="HBoxContainer" parent="Center/Content/WizardPanel"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 10
+
+[node name="NextButton" type="Button" parent="Center/Content/WizardPanel/WizardActions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(130, 38)
+layout_mode = 2
+text = "生成候选"
+
+[node name="RerollButton" type="Button" parent="Center/Content/WizardPanel/WizardActions"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(130, 38)
+layout_mode = 2
+text = "重新抽取"
+
+[node name="ConfirmButton" type="Button" parent="Center/Content/WizardPanel/WizardActions"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(130, 38)
+layout_mode = 2
+text = "确认并进入"
+
+[node name="CancelButton" type="Button" parent="Center/Content/WizardPanel/WizardActions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(130, 38)
+layout_mode = 2
+text = "取消"
+
 [node name="StatusLabel" type="Label" parent="Center/Content"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 28)
@@ -107,3 +201,12 @@ theme_override_font_sizes/font_size = 12
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
+
+[connection signal="pressed" from="Center/Content/TitleActions/NewGameButton" to="." method="_on_new_game_pressed"]
+[connection signal="pressed" from="Center/Content/TitleActions/LoadButton" to="." method="_on_load_pressed"]
+[connection signal="pressed" from="Center/Content/TitleActions/QuitButton" to="." method="_on_quit_pressed"]
+[connection signal="item_selected" from="Center/Content/WizardPanel/OriginSelector" to="." method="_on_origin_selected"]
+[connection signal="pressed" from="Center/Content/WizardPanel/WizardActions/NextButton" to="." method="_on_next_pressed"]
+[connection signal="pressed" from="Center/Content/WizardPanel/WizardActions/RerollButton" to="." method="_on_reroll_pressed"]
+[connection signal="pressed" from="Center/Content/WizardPanel/WizardActions/ConfirmButton" to="." method="_on_confirm_pressed"]
+[connection signal="pressed" from="Center/Content/WizardPanel/WizardActions/CancelButton" to="." method="_on_cancel_pressed"]
