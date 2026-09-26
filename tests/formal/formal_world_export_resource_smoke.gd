@@ -47,6 +47,7 @@ func _run() -> void:
 	)
 	var source_asset_count := 0
 	var france_asset_path := ""
+	var source_asset_path_by_id: Dictionary = {}
 	for record_key: Variant in records.keys():
 		var record_value: Variant = records.get(record_key)
 		var record := record_value as Dictionary
@@ -59,6 +60,7 @@ func _run() -> void:
 			continue
 		source_asset_count += 1
 		var asset_path := str(record.get("asset_path", ""))
+		source_asset_path_by_id[flag_id] = asset_path
 		_check(
 			asset_path.begins_with(HISTORICAL_FLAG_ASSET_PREFIX),
 			"历史旗帜资源越出正式素材目录：" + flag_id
@@ -68,11 +70,19 @@ func _run() -> void:
 			ResourceLoader.exists(asset_path, "Texture2D"),
 			"发布资源不存在或未导入为Texture2D：" + flag_id
 		)
+		_check(
+			FileAccess.get_sha256(asset_path) == str(record.get("asset_sha256", "")),
+			"旗帜源资产哈希与正式目录不一致：" + flag_id
+		)
 		var resource := ResourceLoader.load(
 			asset_path, "Texture2D", ResourceLoader.CACHE_MODE_REUSE
 		)
 		_check(resource is Texture2D, "发布资源不能作为Texture2D加载：" + flag_id)
 		if resource is Texture2D:
+			_check(
+				str((resource as Texture2D).resource_path) == asset_path,
+				"导入Texture2D没有保留正式资源引用：" + flag_id
+			)
 			var image := (resource as Texture2D).get_image()
 			_check(image != null and not image.is_empty(), "发布纹理没有可绘制图像：" + flag_id)
 		if flag_id == INTENDED_FLAG_ID:
@@ -102,6 +112,15 @@ func _run() -> void:
 	for _index: int in range(6):
 		await process_frame
 	application._ensure_projection_cache()
+	var startup_imported_by_id := (
+		application._historical_imported_flag_texture_by_id as Dictionary
+	)
+	var startup_france := startup_imported_by_id.get(INTENDED_FLAG_ID) as Texture2D
+	_check(
+		startup_france != null
+		and str(startup_france.resource_path) == france_asset_path,
+		"正式政治投影重建后没有恢复法兰西导入Texture2D预热引用"
+	)
 	for entity_value: Variant in application._country_by_id.values():
 		var entity := entity_value as Dictionary
 		var entity_id := str(entity.get("id", ""))
@@ -129,6 +148,16 @@ func _run() -> void:
 	else:
 		_check(false, "正式世界没有法兰西历史政治单元")
 	_check(application._missing_flag_record_ids.is_empty(), "正式世界运行时发现缺失旗帜资源")
+	application._sync_political_presentation()
+	var imported_by_id := application._historical_imported_flag_texture_by_id as Dictionary
+	for flag_key: Variant in source_asset_path_by_id.keys():
+		var flag_id := str(flag_key)
+		var imported_texture := imported_by_id.get(flag_id) as Texture2D
+		_check(
+			imported_texture != null
+			and str(imported_texture.resource_path) == str(source_asset_path_by_id.get(flag_id, "")),
+			"正式地图没有通过统一导入Texture2D规则解析旗帜：" + flag_id
+		)
 	_check(application._data_errors.is_empty(), "正式世界运行时发现玩家可见数据错误")
 	application.queue_free()
 	await process_frame

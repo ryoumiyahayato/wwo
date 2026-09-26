@@ -155,8 +155,22 @@ func _run_packaged_player_baseline_probe() -> void:
 		"打包产品选中实体没有政经详情"
 	)
 	var imported_flags := _historical_imported_flag_texture_by_id as Dictionary
+	var france_flag_record := (
+		_historical_flag_records.get(PACKAGED_PROBE_FLAG_ID, {}) as Dictionary
+	)
+	var france_flag_path := str(france_flag_record.get("asset_path", ""))
+	var imported_france := imported_flags.get(PACKAGED_PROBE_FLAG_ID) as Texture2D
+	print(
+		"Historical flag runtime contract: path=%s exists=%s loaded_class=%s resource_path=%s"
+		% [
+			france_flag_path,
+			ResourceLoader.exists(france_flag_path, "Texture2D"),
+			imported_france.get_class() if imported_france != null else "null",
+			str(imported_france.resource_path) if imported_france != null else "",
+		]
+	)
 	_packaged_probe_require(
-		imported_flags.get(PACKAGED_PROBE_FLAG_ID) is Texture2D,
+		imported_france != null and str(imported_france.resource_path) == france_flag_path,
 		"打包产品没有通过导入Texture2D解析法兰西历史旗帜"
 	)
 

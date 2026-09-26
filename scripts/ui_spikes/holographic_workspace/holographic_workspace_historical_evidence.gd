@@ -104,7 +104,10 @@ func _rebuild_historical_political_world() -> void:
 	_history_entity_by_id.clear()
 	_history_territories_by_entity.clear()
 	_flag_texture_by_entity.clear()
-	_historical_imported_flag_texture_by_id.clear()
+	# The admitted flag registry is immutable for the lifetime of this surface.
+	# A political projection rebuild replaces entity presentation only; retaining
+	# the imported resources keeps the ResourceLoader contract independent from
+	# draw timing and avoids reloading identical Texture2D assets.
 
 	for unit_value: Variant in (_dated_units_document.get("units", []) as Array):
 		if unit_value is Dictionary:
