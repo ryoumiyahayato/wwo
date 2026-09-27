@@ -58,7 +58,13 @@ while (-not $process.HasExited) {
             }
         }
     }
-    $heartbeatAge = $(if ($heartbeatSeen) { ($now - $lastHeartbeatChange).TotalSeconds } else { 0.0 })
+    # A process that never reaches its first frame heartbeat is also stalled.
+    # Measure startup from launch instead of reporting a permanent zero, so the
+    # same 2/5/10 second contract covers synchronous initialization regressions.
+    $heartbeatAge = $(
+        if ($heartbeatSeen) { ($now - $lastHeartbeatChange).TotalSeconds }
+        else { ($now - $startedAt).TotalSeconds }
+    )
     $lineCount = 0
     if (Test-Path -LiteralPath $stdoutPath) {
         $lineCount = @(Get-Content -LiteralPath $stdoutPath -ErrorAction SilentlyContinue).Count
@@ -83,10 +89,11 @@ while (-not $process.HasExited) {
         heartbeat_stage = $(if ($null -ne $lastHeartbeat) { $lastHeartbeat.stage } else { 'startup' })
         stdout_lines_per_second = $lineRate
     })
-    if ($heartbeatSeen -and $heartbeatAge -gt 2.0 -and ($stallEvents.Count -eq 0 -or $heartbeatAge -gt ([double]$stallEvents[$stallEvents.Count - 1]['heartbeat_age_seconds'] + 1.0))) {
+    if ($heartbeatAge -gt 2.0 -and ($stallEvents.Count -eq 0 -or $heartbeatAge -gt ([double]$stallEvents[$stallEvents.Count - 1]['heartbeat_age_seconds'] + 1.0))) {
         $stallEvents.Add([ordered]@{
             elapsed_seconds = [Math]::Round(($now - $startedAt).TotalSeconds, 3)
             heartbeat_age_seconds = [Math]::Round($heartbeatAge, 3)
+            heartbeat_stage = $(if ($null -ne $lastHeartbeat) { $lastHeartbeat.stage } else { 'startup' })
             responding = $responding
             classification = $(if ($heartbeatAge -gt 5.0) { 'DIAGNOSTIC_STALL' } else { 'STALL' })
         })

@@ -60,9 +60,14 @@ const MAP_STATIC_SURFACE_BUILD_BUDGET_USEC: int = 12000
 const MAP_INTERACTIVE_SURFACE_BUILD_BUDGET_USEC: int = 4000
 const MAP_DETAIL_RESTORE_BUDGET_USEC: int = 8000
 const MAP_USE_EXPLICIT_TRIANGLE_SUBMISSION: bool = true
-const INTERACTIVE_SURFACE_RING_POINTS: int = 24
-const INTERACTIVE_BOUNDARY_RING_POINTS: int = 32
+const INTERACTIVE_SURFACE_RING_POINTS: int = 96
+const INTERACTIVE_BOUNDARY_RING_POINTS: int = 128
 const INTERACTIVE_PHYSICAL_RING_POINTS: int = 24
+const INTERACTIVE_SURFACE_PARTITION_LON_DEGREES: float = 30.0
+const INTERACTIVE_SURFACE_PARTITION_LAT_DEGREES: float = 20.0
+const INTERACTIVE_SURFACE_PARTITION_MAX_LON_SPAN: float = 60.0
+const INTERACTIVE_SURFACE_PARTITION_MAX_LAT_SPAN: float = 40.0
+const INTERACTIVE_SURFACE_PARTITION_HIGH_LATITUDE: float = 55.0
 const MAP_PHASE_LAND_ONLY: String = "land"
 const MAP_PHASE_POLITICAL_SOLID: String = "political"
 const MAP_PHASE_SELECTION_BORDERS: String = "borders"
@@ -182,6 +187,8 @@ var _interactive_clip_screen_scratch := PackedVector2Array()
 var _interactive_clip_output_scratch := PackedVector2Array()
 var _physical_land_triangle_records: Array[PackedVector3Array] = []
 var _interactive_physical_land_triangle_records: Array[PackedVector3Array] = []
+var _interactive_physical_land_indexed_vertices := PackedVector3Array()
+var _interactive_physical_land_triangle_indices := PackedInt32Array()
 var _interactive_physical_land_polygons: Array[PackedVector3Array] = []
 var _interactive_physical_land_holes: Array = []
 var _physical_land_screen_triangles: Array[PackedVector2Array] = []
@@ -747,7 +754,11 @@ func _ensure_physical_land_triangle_cache() -> void:
 
 
 func _ensure_interactive_physical_land_triangle_cache() -> void:
-	if not _interactive_physical_land_triangle_records.is_empty() or _physical_land_polygons.is_empty():
+	if not _interactive_physical_land_triangle_records.is_empty():
+		if _interactive_physical_land_indexed_vertices.is_empty():
+			_index_interactive_physical_land_triangles()
+		return
+	if _physical_land_polygons.is_empty():
 		return
 	for source_index: int in range(_physical_land_polygons.size()):
 		var source: PackedVector3Array = _physical_land_polygons[source_index]
@@ -775,36 +786,66 @@ func _ensure_interactive_physical_land_triangle_cache() -> void:
 						difference.append(result_value as PackedVector2Array)
 			planar_polygons = difference
 		for polygon: PackedVector2Array in planar_polygons:
-			var triangle_indices: PackedInt32Array = _triangulate_planar_polygon(polygon)
-			for index: int in range(0, triangle_indices.size(), 3):
-				if index + 2 >= triangle_indices.size():
-					break
-				var first_index := int(triangle_indices[index])
-				var second_index := int(triangle_indices[index + 1])
-				var third_index := int(triangle_indices[index + 2])
-				if (
-					first_index < 0
-					or second_index < 0
-					or third_index < 0
-					or first_index >= polygon.size()
-					or second_index >= polygon.size()
-					or third_index >= polygon.size()
-				):
-					continue
-				var planar_triangle := PackedVector2Array([
-					polygon[first_index],
-					polygon[second_index],
-					polygon[third_index],
-				])
-				if _planar_polygon_area(planar_triangle) > MAP_TRIANGLE_AREA_EPSILON:
-					for child_planar: PackedVector2Array in _tessellate_planar_triangle(planar_triangle):
-						if _planar_polygon_area(child_planar) <= MAP_TRIANGLE_AREA_EPSILON:
-							continue
-						_interactive_physical_land_triangle_records.append(PackedVector3Array([
-							_lon_lat_to_unit(child_planar[0]),
-							_lon_lat_to_unit(child_planar[1]),
-							_lon_lat_to_unit(child_planar[2]),
-						]))
+			# This neutral layer only identifies physical land below the political
+			# surface. Keep its globe chords bounded with geographic cells instead of
+			# recursively tessellating every triangle to the authoritative 8-degree
+			# political threshold; source gaps remain visible, but camera projection
+			# no longer spends most of its frame budget on an obscured backing layer.
+			var physical_pieces := _partition_source_polygon(
+				polygon,
+				INTERACTIVE_SURFACE_PARTITION_LON_DEGREES,
+				INTERACTIVE_SURFACE_PARTITION_LAT_DEGREES
+			)
+			if physical_pieces.is_empty():
+				physical_pieces.append(polygon)
+			for physical_piece: PackedVector2Array in physical_pieces:
+				var triangle_indices: PackedInt32Array = _triangulate_planar_polygon(
+					physical_piece, true
+				)
+				for index: int in range(0, triangle_indices.size(), 3):
+					if index + 2 >= triangle_indices.size():
+						break
+					var first_index := int(triangle_indices[index])
+					var second_index := int(triangle_indices[index + 1])
+					var third_index := int(triangle_indices[index + 2])
+					if (
+						first_index < 0
+						or second_index < 0
+						or third_index < 0
+						or first_index >= physical_piece.size()
+						or second_index >= physical_piece.size()
+						or third_index >= physical_piece.size()
+					):
+						continue
+					var planar_triangle := PackedVector2Array([
+						physical_piece[first_index],
+						physical_piece[second_index],
+						physical_piece[third_index],
+					])
+					if _planar_polygon_area(planar_triangle) <= MAP_TRIANGLE_AREA_EPSILON:
+						continue
+					_interactive_physical_land_triangle_records.append(PackedVector3Array([
+						_lon_lat_to_unit(planar_triangle[0]),
+						_lon_lat_to_unit(planar_triangle[1]),
+						_lon_lat_to_unit(planar_triangle[2]),
+					]))
+	_index_interactive_physical_land_triangles()
+
+
+func _index_interactive_physical_land_triangles() -> void:
+	_interactive_physical_land_indexed_vertices.clear()
+	_interactive_physical_land_triangle_indices.clear()
+	var vertex_lookup: Dictionary = {}
+	for triangle: PackedVector3Array in _interactive_physical_land_triangle_records:
+		if triangle.size() != 3:
+			continue
+		for point: Vector3 in triangle:
+			var vertex_index: int = int(vertex_lookup.get(point, -1))
+			if vertex_index < 0:
+				vertex_index = _interactive_physical_land_indexed_vertices.size()
+				vertex_lookup[point] = vertex_index
+				_interactive_physical_land_indexed_vertices.append(point)
+			_interactive_physical_land_triangle_indices.append(vertex_index)
 
 
 func _rebuild_physical_land_projection_cache(basis: Basis, interactive_lod: bool = false) -> void:
@@ -830,15 +871,38 @@ func _rebuild_physical_land_projection_cache(basis: Basis, interactive_lod: bool
 			for hole_value: Variant in holes:
 				for boundary_segment: PackedVector2Array in _project_closed_unit_boundary_fast(hole_value as PackedVector3Array, basis):
 					_physical_land_screen_boundary_segments.append(boundary_segment)
-	for triangle: PackedVector3Array in land_triangles:
+	var use_indexed_projection := (
+		interactive_lod
+		and not _interactive_physical_land_indexed_vertices.is_empty()
+		and _interactive_physical_land_triangle_indices.size() >= land_triangles.size() * 3
+	)
+	var projected_land_vertices := PackedVector3Array()
+	if use_indexed_projection:
+		projected_land_vertices.resize(_interactive_physical_land_indexed_vertices.size())
+		for vertex_index: int in range(_interactive_physical_land_indexed_vertices.size()):
+			projected_land_vertices[vertex_index] = basis * _interactive_physical_land_indexed_vertices[vertex_index]
+	for triangle_index: int in range(land_triangles.size()):
+		var triangle: PackedVector3Array = land_triangles[triangle_index]
 		var transformed := PackedVector3Array()
 		var maximum_depth := -INF
 		var minimum_depth := INF
-		for point: Vector3 in triangle:
-			var rotated := basis * point
+		for point_index: int in range(3):
+			var rotated := Vector3.ZERO
+			if use_indexed_projection:
+				var projected_index := int(
+					_interactive_physical_land_triangle_indices[triangle_index * 3 + point_index]
+				)
+				if projected_index < 0 or projected_index >= projected_land_vertices.size():
+					transformed.clear()
+					break
+				rotated = projected_land_vertices[projected_index]
+			else:
+				rotated = basis * triangle[point_index]
 			transformed.append(rotated)
 			maximum_depth = maxf(maximum_depth, rotated.z)
 			minimum_depth = minf(minimum_depth, rotated.z)
+		if transformed.size() != 3:
+			continue
 		if maximum_depth <= MAP_TRIANGLE_DEPTH_EPSILON:
 			continue
 		var visible_points := transformed
@@ -855,30 +919,15 @@ func _rebuild_physical_land_projection_cache(basis: Basis, interactive_lod: bool
 			screen.append(screen_point)
 		if screen.size() < 3:
 			continue
-		# Horizon clipping can turn a source triangle into a convex quad. Do not
-		# fan that polygon: a fan is invalid for a concave/edge-touching result
-		# and CanvasItem will reject it at draw time. Triangulate the clipped
-		# screen polygon into independent, validated draw polygons instead.
-		var screen_indices: PackedInt32Array = _triangulate_planar_polygon(screen)
-		for index: int in range(0, screen_indices.size(), 3):
-			if index + 2 >= screen_indices.size():
-				break
-			var first_index := int(screen_indices[index])
-			var second_index := int(screen_indices[index + 1])
-			var third_index := int(screen_indices[index + 2])
-			if (
-				first_index < 0
-				or second_index < 0
-				or third_index < 0
-				or first_index >= screen.size()
-				or second_index >= screen.size()
-				or third_index >= screen.size()
-			):
-				continue
+		# Clipping a triangle against the front hemisphere is a half-plane
+		# intersection, so the result is always an ordered convex triangle/quad.
+		# A fan preserves it exactly and avoids thousands of general-purpose
+		# triangulator calls on camera frames.
+		for index: int in range(1, screen.size() - 1):
 			var triangle_screen := PackedVector2Array([
-				screen[first_index],
-				screen[second_index],
-				screen[third_index],
+				screen[0],
+				screen[index],
+				screen[index + 1],
 			])
 			if _is_valid_physical_screen_triangle(triangle_screen):
 				_physical_land_screen_triangles.append(triangle_screen)
@@ -1599,6 +1648,9 @@ func _build_country_surface_triangle_buffer(country_id: String, source_polygons:
 func _build_interactive_surface_buffer(country_id: String, source_polygons: Array) -> Dictionary:
 	var points := PackedVector3Array()
 	var uvs := PackedVector2Array()
+	var indexed_vertices := PackedVector3Array()
+	var indexed_triangle_indices := PackedInt32Array()
+	var indexed_vertex_lookup: Dictionary = {}
 	var visibility_centers := PackedVector3Array()
 	var visibility_margins := PackedFloat32Array()
 	var source_components: Array[String] = []
@@ -1645,55 +1697,90 @@ func _build_interactive_surface_buffer(country_id: String, source_polygons: Arra
 		for polygon: PackedVector2Array in planar_polygons:
 			if polygon.size() < 3:
 				continue
-			var triangle_indices: PackedInt32Array = _triangulate_planar_polygon(polygon)
-			for index: int in range(0, triangle_indices.size(), 3):
-				if index + 2 >= triangle_indices.size():
-					break
-				var first_index := int(triangle_indices[index])
-				var second_index := int(triangle_indices[index + 1])
-				var third_index := int(triangle_indices[index + 2])
-				if (
-					first_index < 0
-					or second_index < 0
-					or third_index < 0
-					or first_index >= polygon.size()
-					or second_index >= polygon.size()
-					or third_index >= polygon.size()
-				):
+			# Split the compact ring into bounded geographic cells before it ever
+			# reaches the sphere. This preserves topology while keeping every
+			# presentation chord local; a Russia/Asia triangle can no longer bridge
+			# a polar concavity or span most of the CITY viewport.
+			var presentation_pieces: Array[PackedVector2Array] = []
+			var polygon_bounds := _bounds_for_points(polygon)
+			var needs_partition := (
+				polygon_bounds.size.x > INTERACTIVE_SURFACE_PARTITION_MAX_LON_SPAN
+				or polygon_bounds.size.y > INTERACTIVE_SURFACE_PARTITION_MAX_LAT_SPAN
+				or (
+					maxf(absf(polygon_bounds.position.y), absf(polygon_bounds.end.y))
+						>= INTERACTIVE_SURFACE_PARTITION_HIGH_LATITUDE
+					and polygon_bounds.size.x > INTERACTIVE_SURFACE_PARTITION_LON_DEGREES
+				)
+			)
+			if needs_partition:
+				presentation_pieces = _partition_source_polygon(
+					polygon,
+					INTERACTIVE_SURFACE_PARTITION_LON_DEGREES,
+					INTERACTIVE_SURFACE_PARTITION_LAT_DEGREES
+				)
+			if presentation_pieces.is_empty():
+				presentation_pieces.append(polygon)
+			for planar_piece: PackedVector2Array in presentation_pieces:
+				if planar_piece.size() < 3:
 					continue
-				var planar_triangle := PackedVector2Array([
-					polygon[first_index],
-					polygon[second_index],
-					polygon[third_index],
-				])
-				if _planar_polygon_area(planar_triangle) <= MAP_TRIANGLE_AREA_EPSILON:
-					continue
-				var triangle_points := PackedVector3Array([
-					_lon_lat_to_unit(planar_triangle[0]),
-					_lon_lat_to_unit(planar_triangle[1]),
-					_lon_lat_to_unit(planar_triangle[2]),
-				])
-				var center := (triangle_points[0] + triangle_points[1] + triangle_points[2]).normalized()
-				var angular_margin := 0.0
-				for point: Vector3 in triangle_points:
-					angular_margin = maxf(
-						angular_margin,
-						2.0 * sin(acos(clampf(center.dot(point), -1.0, 1.0)) * 0.5)
-					)
-				visibility_centers.append(center)
-				visibility_margins.append(angular_margin)
-				for point: Vector3 in triangle_points:
-					points.append(point)
-				for point: Vector2 in planar_triangle:
-					uvs.append(_planar_to_flag_uv(country_id, point))
-				source_components.append("%s:%d" % [country_id, source_index])
-				source_component_indices.append(source_index)
-				# This is a presentation LOD triangle, not a new political source
-				# triangle.  Keep the distinction explicit instead of pretending its
-				# local index addresses the full-resolution triangulation cache.
-				source_triangles.append(-1)
-				source_triangle_originals.append(planar_triangle)
-				triangulated_planar_area += _planar_polygon_area(planar_triangle)
+				# Presentation pieces are bounded and small, so the complete
+				# containment proof is cheap and mandatory.
+				var triangle_indices := _triangulate_planar_polygon(planar_piece, true)
+				for index: int in range(0, triangle_indices.size(), 3):
+					if index + 2 >= triangle_indices.size():
+						break
+					var first_index := int(triangle_indices[index])
+					var second_index := int(triangle_indices[index + 1])
+					var third_index := int(triangle_indices[index + 2])
+					if (
+						first_index < 0
+						or second_index < 0
+						or third_index < 0
+						or first_index >= planar_piece.size()
+						or second_index >= planar_piece.size()
+						or third_index >= planar_piece.size()
+					):
+						continue
+					var planar_triangle := PackedVector2Array([
+						planar_piece[first_index],
+						planar_piece[second_index],
+						planar_piece[third_index],
+					])
+					var triangle_area := _planar_polygon_area(planar_triangle)
+					if triangle_area <= MAP_TRIANGLE_AREA_EPSILON:
+						continue
+					var triangle_points := PackedVector3Array([
+						_lon_lat_to_unit(planar_triangle[0]),
+						_lon_lat_to_unit(planar_triangle[1]),
+						_lon_lat_to_unit(planar_triangle[2]),
+					])
+					var center := (triangle_points[0] + triangle_points[1] + triangle_points[2]).normalized()
+					var angular_margin := 0.0
+					for point: Vector3 in triangle_points:
+						angular_margin = maxf(
+							angular_margin,
+							2.0 * sin(acos(clampf(center.dot(point), -1.0, 1.0)) * 0.5)
+						)
+					visibility_centers.append(center)
+					visibility_margins.append(angular_margin)
+					for point: Vector3 in triangle_points:
+						points.append(point)
+						var vertex_index: int = int(indexed_vertex_lookup.get(point, -1))
+						if vertex_index < 0:
+							vertex_index = indexed_vertices.size()
+							indexed_vertex_lookup[point] = vertex_index
+							indexed_vertices.append(point)
+						indexed_triangle_indices.append(vertex_index)
+					for point: Vector2 in planar_triangle:
+						uvs.append(_planar_to_flag_uv(country_id, point))
+					source_components.append("%s:%d" % [country_id, source_index])
+					source_component_indices.append(source_index)
+					# This is a presentation LOD triangle, not a new political source
+					# triangle. Keep the distinction explicit instead of pretending its
+					# local index addresses the full-resolution triangulation cache.
+					source_triangles.append(-1)
+					source_triangle_originals.append(planar_triangle)
+					triangulated_planar_area += triangle_area
 	var country_visibility_center := Vector3.FORWARD
 	if not points.is_empty():
 		var center_sum := Vector3.ZERO
@@ -1711,6 +1798,8 @@ func _build_interactive_surface_buffer(country_id: String, source_polygons: Arra
 		"buffer": {
 			"points": points,
 			"uvs": uvs,
+			"indexed_vertices": indexed_vertices,
+			"indexed_triangle_indices": indexed_triangle_indices,
 			"visibility_centers": visibility_centers,
 			"visibility_margins": visibility_margins,
 			"source_components": source_components,
@@ -1748,13 +1837,64 @@ func _simplify_unit_ring(source: PackedVector3Array, max_points: int) -> PackedV
 		if sampled.size() >= 3:
 			simplification_source = sampled
 	var planar := _unwrapped_planar_ring(simplification_source, reference_longitude)
-	var simplified := _simplify_line(planar, max_points)
+	var simplified := _simplify_closed_planar_ring(planar, max_points)
 	if simplified.size() < 3:
 		return source
 	var output := PackedVector3Array()
 	for point: Vector2 in simplified:
 		output.append(_lon_lat_to_unit(point))
 	return output if output.size() >= 3 else source
+
+
+func _simplify_closed_planar_ring(
+	planar: PackedVector2Array,
+	max_points: int
+) -> PackedVector2Array:
+	var ring := _normalize_planar_ring(planar)
+	if ring.size() <= max_points:
+		return ring
+	if ring.size() < 3:
+		return PackedVector2Array()
+	# RDP is defined for an open line. Applying it directly to a political ring
+	# makes the arbitrary first/last source vertices a privileged chord and can
+	# collapse the opposite coastline into a saw tooth. Split the ring at the
+	# point farthest from vertex zero, simplify both closed-ring arcs with the
+	# same epsilon, then join them without their duplicate endpoints.
+	var split_index := 1
+	var split_distance := -1.0
+	for point_index: int in range(1, ring.size()):
+		var distance := ring[0].distance_squared_to(ring[point_index])
+		if distance > split_distance:
+			split_distance = distance
+			split_index = point_index
+	if split_index <= 0 or split_index >= ring.size():
+		return PackedVector2Array()
+	var first_arc := PackedVector2Array()
+	for point_index: int in range(0, split_index + 1):
+		first_arc.append(ring[point_index])
+	var second_arc := PackedVector2Array()
+	for point_index: int in range(split_index, ring.size()):
+		second_arc.append(ring[point_index])
+	second_arc.append(ring[0])
+	var epsilon := 0.015
+	var result := PackedVector2Array()
+	while epsilon < 16.0:
+		var first_result := _rdp(first_arc, epsilon)
+		var second_result := _rdp(second_arc, epsilon)
+		result.clear()
+		for point: Vector2 in first_result:
+			result.append(point)
+		# Both arcs contain the split vertex; the second arc also closes on the
+		# first vertex. The polygon API closes the ring itself, so keep neither
+		# duplicate in the joined array.
+		for point_index: int in range(1, maxi(second_result.size() - 1, 1)):
+			result.append(second_result[point_index])
+		if result.size() <= max_points:
+			break
+		epsilon *= 1.55
+	if result.size() < 3:
+		return PackedVector2Array()
+	return result
 
 
 func _camera_interaction_active() -> bool:
@@ -2156,6 +2296,41 @@ func _rebuild_country_flag_cache_fast() -> void:
 					var source_component_index: int = int(source_component_indices[triangle_index]) if triangle_index < source_component_indices.size() else -1
 					var source_triangle_id: int = int(source_triangles[triangle_index]) if triangle_index < source_triangles.size() else triangle_index
 					if triangle_area > MAP_SCREEN_TRIANGLE_AREA_EPSILON:
+						if compact_interactive_records:
+							var longest_edge := maxf(
+								first_screen.distance_to(second_screen),
+								maxf(
+									second_screen.distance_to(third_screen),
+									third_screen.distance_to(first_screen)
+								)
+							)
+							var altitude := 2.0 * triangle_area / longest_edge if longest_edge > 0.0001 else 0.0
+							var needs_screen_refinement := (
+								longest_edge > maxf(32.0, _hemisphere_radius * 0.12)
+								and altitude < 0.35
+							)
+							if not needs_screen_refinement:
+								# Normal fully-front triangles were already validated in source
+								# space. Publish the paired screen/UV stream directly and leave
+								# the existing allocation-heavy path only for visible needles.
+								compact_screen_points.append(first_screen)
+								compact_screen_points.append(second_screen)
+								compact_screen_points.append(third_screen)
+								compact_screen_uvs.append(source_uvs[triangle_offset])
+								compact_screen_uvs.append(source_uvs[triangle_offset + 1])
+								compact_screen_uvs.append(source_uvs[triangle_offset + 2])
+								compact_component_indices.append(source_component_index)
+								compact_source_triangles.append(source_triangle_id)
+								compact_clipped_children.append(0)
+								visible_triangle_count += 1
+								_interactive_screen_triangles += 1
+								has_drawable_source_triangle = true
+								visible_projected_area += triangle_area
+								expected_visible_projected_area += triangle_area
+								visible_source_triangle_count += 1
+								front_facing_geometry = true
+								clipped_visible_triangle_count += 1
+								continue
 						var source_component_id: String = str(source_components[triangle_index]) if triangle_index < source_components.size() else ""
 						var component_bounds: Rect2 = source_component_screen_bounds.get(source_component_id, Rect2()) as Rect2
 						var source_triangle_original_planar := (

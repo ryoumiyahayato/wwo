@@ -222,23 +222,20 @@ func _draw_solid_political_fills_batched(phase_alpha: float) -> bool:
 		var drawn_count := 0
 		if compact_interactive:
 			var compact_points: PackedVector2Array = _interactive_flag_screen_points.get(entity_id, PackedVector2Array()) as PackedVector2Array
-			for point_index: int in range(0, compact_points.size(), 3):
-				var triangle_area := _screen_triangle_area_at(compact_points, point_index)
-				if not is_finite(triangle_area) or triangle_area <= MAP_SCREEN_TRIANGLE_AREA_EPSILON:
-					_record_map_render_rejection(entity_id, "invalid_political_triangle")
-					continue
-				var expanded := _expand_screen_triangle_for_fill(PackedVector2Array([
-					compact_points[point_index],
-					compact_points[point_index + 1],
-					compact_points[point_index + 2],
-				]))
-				for point: Vector2 in expanded:
+			# The projection cache publishes only validated, non-degenerate triangle
+			# streams. Revalidating and expanding every triangle here allocated several
+			# thousand temporary arrays per camera frame. Copy the already-validated
+			# stream directly; the textured layer uses the exact same edges above it.
+			if compact_points.size() >= 3 and compact_points.size() % 3 == 0:
+				for point: Vector2 in compact_points:
 					points.append(point)
-				colors.append(fill)
-				colors.append(fill)
-				colors.append(fill)
-				area += triangle_area
-				drawn_count += 1
+					colors.append(fill)
+				drawn_count = compact_points.size() / 3
+				area = float(
+					(_map_render_stage_records.get(entity_id, {}) as Dictionary).get(
+						"visible_projected_area", 0.0
+					)
+				)
 		else:
 			for record_value: Variant in (_flag_screen_triangle_records.get(entity_id, []) as Array):
 				var record := record_value as Dictionary
@@ -546,44 +543,20 @@ func _draw_country_flag_triangles(
 	uvs_buffer.resize(0)
 	colors.resize(0)
 	if compact_interactive:
-		for point_index: int in range(0, compact_points.size(), 3):
-			if point_index + 2 >= compact_points.size() or point_index + 2 >= compact_uvs.size():
-				all_rejections_are_neutral_surface_fallbacks = false
-				_record_map_render_rejection(entity_id, "interactive_attribute_vertex_count")
-				continue
-			var polygon := PackedVector2Array([
-				compact_points[point_index],
-				compact_points[point_index + 1],
-				compact_points[point_index + 2],
-			])
-			var triangle_uvs := PackedVector2Array([
-				compact_uvs[point_index],
-				compact_uvs[point_index + 1],
-				compact_uvs[point_index + 2],
-			])
-			if not _is_valid_screen_polygon(polygon):
-				all_rejections_are_neutral_surface_fallbacks = false
-				_record_map_render_rejection(entity_id, "invalid_interactive_flag_triangle")
-				continue
-			var phase: float = float(abs(entity_id.hash()) % 997) / 997.0
-			var record_colors: PackedColorArray = _flag_triangle_colors_scratch
-			record_colors.resize(0)
-			for uv: Vector2 in triangle_uvs:
-				var cloth_wave := sin(_flag_time * (0.42 + phase * 0.18) + uv.y * TAU * 1.35 + phase * TAU)
-				var secondary := sin(_flag_time * 0.24 + uv.x * TAU * 0.85 - phase * 3.0)
-				var brightness := 0.96 + cloth_wave * 0.055 + secondary * 0.018
-				record_colors.append(Color(brightness, brightness, brightness, alpha * (0.97 + cloth_wave * 0.025)))
-			var draw_validation := _validate_flag_triangle_for_renderer(
-				polygon, triangle_uvs, record_colors
-			)
-			if not bool(draw_validation.get("valid", false)):
-				all_rejections_are_neutral_surface_fallbacks = false
-				_record_map_render_rejection(entity_id, "interactive_renderer_validation")
-				continue
-			for vertex_index: int in range(3):
-				points.append(polygon[vertex_index])
-				uvs_buffer.append(triangle_uvs[vertex_index])
-				colors.append(record_colors[vertex_index])
+		if compact_points.size() != compact_uvs.size() or compact_points.size() % 3 != 0:
+			all_rejections_are_neutral_surface_fallbacks = false
+			_record_map_render_rejection(entity_id, "interactive_attribute_vertex_count")
+		else:
+			# Screen and UV arrays were produced together by the clipping cache and
+			# validated before publication. Preserve that exact pairing. A uniform
+			# modulation avoids thousands of per-vertex sine evaluations and temporary
+			# triangle arrays while the camera is moving; the imported flag texture,
+			# source-space UV and alpha semantics remain unchanged.
+			var modulation := Color(1.0, 1.0, 1.0, alpha)
+			for vertex_index: int in range(compact_points.size()):
+				points.append(compact_points[vertex_index])
+				uvs_buffer.append(compact_uvs[vertex_index])
+				colors.append(modulation)
 	for record_index: int in range(records.size()):
 		if compact_interactive:
 			break

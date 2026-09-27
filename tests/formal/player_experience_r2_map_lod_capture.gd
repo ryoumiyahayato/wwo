@@ -265,6 +265,11 @@ func _settle_map(application: FormalWorldApplication) -> void:
 func _save_state(application: FormalWorldApplication, filename: String) -> void:
 	application.queue_redraw()
 	await _settle_frames(3)
+	# Reading the root viewport after process_frame alone can race the queued
+	# CanvasItem draw and return the preceding camera's texture.  The manifest
+	# was correct while M11-M21 duplicated one stale PNG.  Wait for the renderer
+	# fence so every visual artifact proves the state recorded beside it.
+	await RenderingServer.frame_post_draw
 	var report := application.formal_map_lod_report(true)
 	report["capture"] = filename
 	_reports.append(report)

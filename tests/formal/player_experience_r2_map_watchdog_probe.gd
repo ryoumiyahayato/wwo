@@ -11,15 +11,25 @@ var _stage := "bootstrap"
 var _frame_index := 0
 var _heartbeat_accumulator := 0.0
 var _rotate_velocity := 0.0
+var _last_process_ticks_usec := 0
+var _mature_idle_frame_usecs: Array[int] = []
 
 
 func _ready() -> void:
 	DisplayServer.window_set_size(Vector2i(1280, 720))
 	DirAccess.make_dir_recursive_absolute(OUTPUT_DIR)
+	# Publish ownership before Formal world/application construction. The external
+	# watchdog can now distinguish a real synchronous startup stall from a probe
+	# that simply had not written its first file yet.
+	_write_heartbeat()
 	_run.call_deferred()
 
 
 func _process(delta: float) -> void:
+	var process_ticks_usec := Time.get_ticks_usec()
+	if _last_process_ticks_usec > 0 and _stage == "global_idle":
+		_mature_idle_frame_usecs.append(process_ticks_usec - _last_process_ticks_usec)
+	_last_process_ticks_usec = process_ticks_usec
 	_frame_index += 1
 	_heartbeat_accumulator += delta
 	if _application != null and not is_zero_approx(_rotate_velocity):
@@ -124,6 +134,7 @@ func _run() -> void:
 	var diagnostic := {
 		"final_state": _application.formal_map_lod_report(true),
 		"performance": _application.map_performance_diagnostic_report(),
+		"mature_idle_frame_timing": _frame_timing_summary(_mature_idle_frame_usecs),
 		"player_person_id": _application.formal_simulation.player_person_id(),
 	}
 	var diagnostic_file := FileAccess.open(
@@ -141,7 +152,24 @@ func _run() -> void:
 
 func _stage_wait(stage_name: String, seconds: float) -> void:
 	_stage = stage_name
+	if stage_name == "global_idle":
+		_mature_idle_frame_usecs.clear()
+		_last_process_ticks_usec = 0
 	await get_tree().create_timer(seconds).timeout
+
+
+func _frame_timing_summary(values: Array[int]) -> Dictionary:
+	if values.is_empty():
+		return {"sample_count": 0, "p50_usec": 0, "p95_usec": 0, "max_usec": 0}
+	var sorted_values: Array[int] = values.duplicate()
+	sorted_values.sort()
+	var last_index := sorted_values.size() - 1
+	return {
+		"sample_count": sorted_values.size(),
+		"p50_usec": sorted_values[int(floor(float(last_index) * 0.50))],
+		"p95_usec": sorted_values[int(floor(float(last_index) * 0.95))],
+		"max_usec": sorted_values[last_index],
+	}
 
 
 func _frames(count: int) -> void:
