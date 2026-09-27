@@ -86,7 +86,6 @@ func _test_formal_application_identity_boundary() -> void:
 		"character detail uses PlayerState identity"
 	)
 	_check(application._character_profiles.is_empty(), "Formal product does not load prototype character profiles")
-	_equal(application.activity_unread, 0, "Formal product has no fake unread counter")
 	_check(application._world_events.is_empty(), "prototype institution agendas are not personal messages")
 	_check(
 		application._active_character_name() not in ["皮埃尔 · 勒费弗尔", "阿尔贝 · 杜瓦尔", "Pierre", "Albert"],
@@ -98,8 +97,9 @@ func _test_formal_application_identity_boundary() -> void:
 		not home_report.has("active_character_key"),
 		"home detail does not expose prototype character identity"
 	)
-	application._switch_character()
-	_equal(application.formal_simulation.player_person_id(), player_id, "prototype switch cannot change Formal player")
+	var application_source := FileAccess.get_file_as_string("res://scripts/formal/formal_world_application.gd")
+	_check(not application_source.contains("switch_character"), "Formal product has no prototype character-switch action")
+	_check(not application_source.contains("mark_read"), "Formal product has no fake unread action")
 	var other_polity := "state:german_empire"
 	if not application.formal_simulation.has_polity(other_polity):
 		other_polity = application.formal_simulation.first_polity_id()

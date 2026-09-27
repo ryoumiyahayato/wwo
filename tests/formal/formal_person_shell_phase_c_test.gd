@@ -24,7 +24,7 @@ func _run() -> void:
 	_equal(application.formal_workspace_id(), FormalWorldApplication.WORKSPACE_PERSON, "person home is the default workspace")
 	_check(application.sim_paused, "person home starts paused")
 	_equal(application.shell_player_person_id(), player_id, "person home identity equals player_person_id")
-	_equal(application.formal_prototype_character_count(), 0, "prototype character file does not drive Formal shell")
+	_check(application._character_profiles.is_empty(), "prototype character file does not drive Formal shell")
 
 	var expected_workspaces: Array[String] = [
 		FormalWorldApplication.WORKSPACE_PERSON,

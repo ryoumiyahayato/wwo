@@ -47,7 +47,6 @@ var drag_moved: bool = false
 
 var sim_paused: bool = true
 var sim_speed: int = 1
-var activity_unread: int = 2
 
 var _countries: Array[Dictionary] = []
 var _country_by_id: Dictionary = {}
@@ -286,13 +285,14 @@ func _load_all_data() -> void:
 			region_institutions.append(institution_id)
 			_institutions_by_region[institution_region_id] = region_institutions
 
-	var characters_document: Dictionary = _read_document("res://data/world_map/characters.json")
-	var identities: Dictionary = characters_document.get("identities", {}) as Dictionary
-	for key_value: Variant in identities.keys():
-		var key: String = str(key_value)
-		var profile_value: Variant = identities.get(key, {})
-		if profile_value is Dictionary:
-			_character_profiles[key] = profile_value as Dictionary
+	if _prototype_character_profiles_enabled():
+		var characters_document: Dictionary = _read_document("res://data/world_map/characters.json")
+		var identities: Dictionary = characters_document.get("identities", {}) as Dictionary
+		for key_value: Variant in identities.keys():
+			var key: String = str(key_value)
+			var profile_value: Variant = identities.get(key, {})
+			if profile_value is Dictionary:
+				_character_profiles[key] = profile_value as Dictionary
 
 	_seed_world_events()
 	_focus_bounds = _lon_lat_bounds(_all_region_polygons())
@@ -550,7 +550,10 @@ func _seed_world_events() -> void:
 		_world_events.append(event)
 		_event_by_id[event_id] = event
 		event_index += 1
-	activity_unread = mini(2, _world_events.size())
+
+
+func _prototype_character_profiles_enabled() -> bool:
+	return true
 
 
 func _apply_layout() -> void:
@@ -1099,7 +1102,7 @@ func _draw_corners() -> void:
 	var activity_rect: Rect2 = Rect2(size.x - right_width - 18.0, size.y - bottom_height - 18.0, right_width, bottom_height)
 	_draw_corner(country_rect, str(_country_profile.get("formal_name_zh", "法兰西第三共和国")), "国家 / 政权 / 机构", "toggle_country_panel", Color(0.72, 0.64, 0.38, 0.22), compact)
 	_draw_corner(character_rect, _active_character_name(), _active_character_position(), "toggle_character_panel", Color(0.72, 0.64, 0.38, 0.22), compact)
-	_draw_corner(activity_rect, "已知信息 · 未读 %d" % activity_unread, _activity_summary(), "toggle_activity_panel", Color(0.72, 0.50, 0.25, 0.22), compact)
+	_draw_corner(activity_rect, "机构 / 世界观察", _activity_summary(), "toggle_activity_panel", Color(0.72, 0.50, 0.25, 0.22), compact)
 	_panel(time_rect, Color(0.025, 0.055, 0.06, 0.88), Color(0.72, 0.64, 0.38, 0.22))
 	_register_hit(time_rect, "toggle_time_panel", true)
 	_draw_label(time_rect.position + Vector2(12.0, 22.0), _format_sim_datetime(), 13)
@@ -1250,7 +1253,6 @@ func _draw_character_panel(rect: Rect2) -> void:
 	_draw_label(rect.position + Vector2(24.0, 102.0), _ellipsize("所在地：" + str(profile.get("region", "未配置")), 62), 12)
 	_draw_label(rect.position + Vector2(24.0, 130.0), _ellipsize("当前事项：" + str(profile.get("plan", "未配置")), 62), 12)
 	_draw_label(rect.position + Vector2(24.0, 158.0), _ellipsize("关注：" + str(profile.get("primary_concern", "未配置")), 62), 12)
-	_draw_button(Rect2(rect.position.x + 24.0, rect.end.y - 50.0, 150.0, 32.0), "切换角色视角", "switch_character", _character_profiles.size() > 1)
 
 
 func _draw_activity_panel(rect: Rect2) -> void:
@@ -1265,7 +1267,6 @@ func _draw_activity_panel(rect: Rect2) -> void:
 		_register_hit(row, "inspect_event:" + event_id, true)
 		_draw_label(row.position + Vector2(8.0, 18.0), _ellipsize("• " + str(event.get("title", "状态")), 58), 10)
 		y += 31.0
-	_draw_button(Rect2(rect.position.x + 24.0, rect.end.y - 42.0, 118.0, 28.0), "标记已读", "mark_read", activity_unread > 0)
 
 
 func _draw_time_panel(rect: Rect2) -> void:
@@ -1375,11 +1376,6 @@ func _activate_button(action: String) -> void:
 		_toggle_hud_panel("time")
 	elif action == "close_hud_panel":
 		active_hud_panel = ""
-		queue_redraw()
-	elif action == "switch_character":
-		_switch_character()
-	elif action == "mark_read":
-		activity_unread = 0
 		queue_redraw()
 	elif action == "toggle_pause":
 		sim_paused = not sim_paused
@@ -1505,15 +1501,6 @@ func _go_back() -> void:
 
 func _toggle_hud_panel(panel: String) -> void:
 	active_hud_panel = "" if active_hud_panel == panel else panel
-	queue_redraw()
-
-
-func _switch_character() -> void:
-	var keys: Array = _character_profiles.keys()
-	if keys.size() < 2:
-		return
-	var current_index: int = keys.find(active_character_key)
-	active_character_key = str(keys[(current_index + 1) % keys.size()])
 	queue_redraw()
 
 

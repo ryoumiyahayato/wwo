@@ -1188,10 +1188,6 @@ func map_projection_revision() -> int:
 	return _projection_revision
 
 
-func formal_prototype_character_count() -> int:
-	return _character_profiles.size()
-
-
 func formal_system_menu_open() -> bool:
 	return _system_menu_open
 
@@ -2436,9 +2432,6 @@ func _activate_button(action: String) -> void:
 			get_tree().change_scene_to_file(TITLE_SCENE)
 		"formal_quit":
 			get_tree().quit(0)
-		"switch_character", "mark_read":
-			# Formal identity is changed only by PlayerState-backed product flows.
-			return
 		_:
 			if action.begins_with("formal_workspace:"):
 				set_formal_workspace(action.trim_prefix("formal_workspace:"))
@@ -2561,19 +2554,14 @@ func _execute_formal_defend(option_index: int) -> void:
 	queue_redraw()
 
 
-func _read_document(path: String) -> Dictionary:
-	if path.get_file() == "characters.json" and path.contains("/world_map/"):
-		# The file remains an isolated prototype fixture. Formal presentation never
-		# opens it or treats its profiles as player facts.
-		return {"identities": {}}
-	return super._read_document(path)
+func _prototype_character_profiles_enabled() -> bool:
+	return false
 
 
 func _seed_world_events() -> void:
 	# Prototype institution agendas are not a personal inbox.
 	_world_events.clear()
 	_event_by_id.clear()
-	activity_unread = 0
 
 
 func _draw_corners() -> void:
@@ -2813,11 +2801,6 @@ func _draw_city_characters(rect: Rect2) -> void:
 		),
 		11
 	)
-
-
-func _switch_character() -> void:
-	# Runtime identity switching is intentionally unavailable in Formal v1.
-	return
 
 
 func _active_character_name() -> String:
