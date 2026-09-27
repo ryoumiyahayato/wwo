@@ -16,6 +16,12 @@ const WORKSPACE_ORGANIZATION: String = "organization"
 const WORKSPACE_POLITICS: String = "politics"
 const WORKSPACE_MILITARY: String = "military"
 const WORKSPACE_MAP: String = "map"
+const PERSON_TAB_SITUATION: String = "situation"
+const PERSON_TAB_DETAILS: String = "details"
+const PERSON_TABS: Array[Dictionary] = [
+	{"id": PERSON_TAB_SITUATION, "label": "当前处境"},
+	{"id": PERSON_TAB_DETAILS, "label": "Details / Evidence"},
+]
 const ECONOMY_TAB_OVERVIEW: String = "overview"
 const ECONOMY_TAB_MARKETS: String = "markets"
 const ECONOMY_TAB_COMMODITIES: String = "commodities"
@@ -56,6 +62,17 @@ const FORMAL_WORKSPACES: Array[Dictionary] = [
 	{"id": WORKSPACE_MILITARY, "label": "军事"},
 	{"id": WORKSPACE_MAP, "label": "地图/世界"},
 ]
+const FORMAL_PRIMARY_NAVIGATION: Array[Dictionary] = [
+	{"id": WORKSPACE_PERSON, "label": "人物 / 当前处境"},
+	{"id": WORKSPACE_ECONOMY, "label": "经济 / 市场"},
+	{"id": WORKSPACE_ORGANIZATION, "label": "组织"},
+	{"id": WORKSPACE_MAP, "label": "世界"},
+]
+const WORLD_CONTEXT_NAVIGATION: Array[Dictionary] = [
+	{"id": WORKSPACE_MAP, "label": "地图"},
+	{"id": WORKSPACE_POLITICS, "label": "政治观察"},
+	{"id": WORKSPACE_MILITARY, "label": "军事"},
+]
 
 var formal_simulation := FormalWorldSimulation.new()
 var economy_panel_open: bool = true
@@ -66,8 +83,11 @@ var _immutable_historical_evidence_report: Dictionary = {}
 var _historical_evidence_surface_building: bool = false
 var _player_context_cache: Dictionary = {}
 var _formal_workspace: String = WORKSPACE_PERSON
+var _person_tab: String = PERSON_TAB_SITUATION
 var _system_menu_open: bool = false
 var _defend_options_cache: Dictionary = {}
+var _situation_market_cache: Dictionary = {}
+var _situation_player_organization_cache: Dictionary = {}
 var _economy_tab: String = ECONOMY_TAB_OVERVIEW
 var _economy_observation_dirty: bool = true
 var _economy_catalog_cache: Dictionary = {}
@@ -473,6 +493,7 @@ func _draw() -> void:
 	super._draw()
 	if _formal_workspace == WORKSPACE_MAP:
 		_draw_formal_world_status()
+		_draw_world_context_navigation(Vector2(324.0, 70.0))
 		_draw_economy_map_controls()
 		_draw_formal_place_card()
 		if economy_panel_open:
@@ -523,7 +544,7 @@ func _political_fill_color(entity_id: String, alpha: float) -> Color:
 
 
 func _draw_economy_map_controls() -> void:
-	var rect := Rect2(324.0, 72.0, 632.0, 45.0)
+	var rect := Rect2(324.0, 112.0, 632.0, 45.0)
 	_panel(rect, Color(0.012, 0.031, 0.035, 0.95), Color(0.67, 0.58, 0.34, 0.36))
 	var options: Array[Dictionary] = [
 		{"id": MAP_MODE_POLITICAL, "label": "Political"},
@@ -547,7 +568,7 @@ func _draw_economy_map_controls() -> void:
 	)
 	if _map_observation_mode == MAP_MODE_POLITICAL:
 		return
-	var legend := Rect2(700.0, 124.0, 238.0, 54.0)
+	var legend := Rect2(700.0, 164.0, 238.0, 54.0)
 	_panel(legend, Color(0.012, 0.031, 0.035, 0.94), Color(0.54, 0.66, 0.55, 0.30))
 	var title := "满足率  低 → 高" if _map_observation_mode == MAP_MODE_FULFILLMENT else "短缺量  低 → 高"
 	_draw_label(legend.position + Vector2(12.0, 22.0), title, 10, Color(0.90, 0.84, 0.66, 1.0))
@@ -566,7 +587,7 @@ func _draw_formal_place_card() -> void:
 	if _selected_place_context_cache.is_empty():
 		return
 	var context := _selected_place_context_cache
-	var card := Rect2(size.x - 350.0, 190.0, 324.0, 190.0)
+	var card := Rect2(size.x - 350.0, 230.0, 324.0, 218.0)
 	_panel(card, Color(0.012, 0.032, 0.036, 0.975), Color(0.79, 0.66, 0.35, 0.56))
 	_draw_label(card.position + Vector2(18.0, 30.0), str(context.get("display_label", "地点")), 18, Color(0.96, 0.84, 0.58, 1.0))
 	_draw_label(card.position + Vector2(18.0, 53.0), "PLACE CARD · %s" % str(context.get("kind", "place")).to_upper(), 9, Color(0.61, 0.78, 0.74, 0.96))
@@ -580,6 +601,20 @@ func _draw_formal_place_card() -> void:
 		"来源：Formal Spatial catalogue",
 	], 21.0, 10, Color(0.80, 0.86, 0.80, 0.98))
 	_draw_button(Rect2(card.end.x - 70.0, card.position.y + 12.0, 54.0, 25.0), "关闭", "formal_place_close", true)
+	var player_place := _player_context_cache.get("current_place", {}) as Dictionary
+	var is_player_place := str(player_place.get("id", "")) == str(context.get("place_id", ""))
+	_draw_label(
+		card.position + Vector2(18.0, 177.0),
+		"这是人物当前地点" if is_player_place else "观察地点不会移动人物",
+		9,
+		Color(0.91, 0.78, 0.49, 0.98) if is_player_place else Color(0.67, 0.77, 0.73, 0.96)
+	)
+	_draw_button(
+		Rect2(card.position.x + 18.0, card.end.y - 32.0, 144.0, 25.0),
+		"返回人物处境",
+		"formal_place_to_situation",
+		true
+	)
 
 
 func _on_formal_state_changed(change: Dictionary) -> void:
@@ -636,8 +671,22 @@ func _set_politics_tab(tab_id: String) -> bool:
 func _refresh_shell_observations() -> void:
 	if not formal_simulation.initialized:
 		_defend_options_cache = {}
+		_situation_market_cache = {}
+		_situation_player_organization_cache = {}
 		return
 	_defend_options_cache = formal_simulation.player_defend_options()
+	_situation_player_organization_cache = (
+		formal_simulation.player_organization_observation()
+	)
+	var market_id := _my_market_id()
+	_situation_market_cache = (
+		formal_simulation.market_observation(market_id)
+		if not market_id.is_empty()
+		else {
+			"available": false,
+			"reason": "no_formal_market_mapping",
+		}
+	)
 
 
 func _refresh_formal_place_catalog() -> void:
@@ -960,6 +1009,37 @@ func formal_workspace_ids() -> Array[String]:
 	return output
 
 
+func formal_primary_navigation_ids() -> Array[String]:
+	var output: Array[String] = []
+	for workspace: Dictionary in FORMAL_PRIMARY_NAVIGATION:
+		output.append(str(workspace.get("id", "")))
+	return output
+
+
+func world_context_navigation_ids() -> Array[String]:
+	var output: Array[String] = []
+	for workspace: Dictionary in WORLD_CONTEXT_NAVIGATION:
+		output.append(str(workspace.get("id", "")))
+	return output
+
+
+func person_tab_id() -> String:
+	return _person_tab
+
+
+func situation_observation() -> Dictionary:
+	return {
+		"owner": "FormalWorldApplication",
+		"derived": true,
+		"person": _player_context_cache.duplicate(true),
+		"market": _situation_market_cache.duplicate(true),
+		"organization": _situation_player_organization_cache.duplicate(true),
+		"local_politics": _local_political_observation_cache.duplicate(true),
+		"defend": _defend_options_cache.duplicate(true),
+		"time": formal_simulation.date_time().duplicate(true),
+	}
+
+
 func formal_workspace_id() -> String:
 	return _formal_workspace
 
@@ -974,7 +1054,9 @@ func set_formal_workspace(workspace_id: String) -> bool:
 	dragging = false
 	angular_velocity = 0.0
 	set_process(false)
-	if workspace_id == WORKSPACE_ECONOMY:
+	if workspace_id == WORKSPACE_PERSON:
+		_refresh_shell_observations()
+	elif workspace_id == WORKSPACE_ECONOMY:
 		_refresh_economy_observations()
 	elif workspace_id == WORKSPACE_POLITICS:
 		_refresh_political_observations()
@@ -986,6 +1068,16 @@ func set_formal_workspace(workspace_id: String) -> bool:
 		_refresh_shell_observations()
 	queue_redraw()
 	return true
+
+
+func _set_person_tab(tab_id: String) -> bool:
+	for tab: Dictionary in PERSON_TABS:
+		if str(tab.get("id", "")) == tab_id:
+			_person_tab = tab_id
+			_refresh_shell_observations()
+			queue_redraw()
+			return true
+	return false
 
 
 func shell_player_person_id() -> String:
@@ -1360,12 +1452,19 @@ func _draw_formal_navigation() -> void:
 	draw_rect(nav_rect, Color(0.010, 0.025, 0.030, 0.985))
 	draw_line(Vector2(0.0, 61.0), Vector2(size.x, 61.0), Color(0.72, 0.62, 0.36, 0.38), 1.0)
 	_draw_label(Vector2(20.0, 25.0), "1900", 19, Color(0.96, 0.86, 0.61, 1.0))
-	_draw_label(Vector2(20.0, 46.0), "FORMAL PERSON", 8, Color(0.60, 0.72, 0.68, 0.9))
-	var x := 130.0
-	for workspace: Dictionary in FORMAL_WORKSPACES:
+	_draw_label(Vector2(20.0, 46.0), "PLAYER SITUATION", 8, Color(0.60, 0.72, 0.68, 0.9))
+	var x := 154.0
+	for workspace: Dictionary in FORMAL_PRIMARY_NAVIGATION:
 		var workspace_id := str(workspace.get("id", ""))
-		var rect := Rect2(x, 14.0, 112.0, 34.0)
-		var active := workspace_id == _formal_workspace
+		var width := 154.0 if workspace_id in [WORKSPACE_PERSON, WORKSPACE_ECONOMY] else 112.0
+		var rect := Rect2(x, 14.0, width, 34.0)
+		var active := (
+			workspace_id == _formal_workspace
+			or (
+				workspace_id == WORKSPACE_MAP
+				and _formal_workspace in [WORKSPACE_POLITICS, WORKSPACE_MILITARY]
+			)
+		)
 		_panel(
 			rect,
 			Color(0.15, 0.13, 0.075, 0.96) if active else Color(0.035, 0.06, 0.062, 0.94),
@@ -1373,8 +1472,30 @@ func _draw_formal_navigation() -> void:
 		)
 		_register_hit(rect, "formal_workspace:%s" % workspace_id, true)
 		_draw_label(rect.position + Vector2(12.0, 22.0), str(workspace.get("label", workspace_id)), 11)
-		x += 118.0
+		x += width + 8.0
 	_draw_button(Rect2(size.x - 102.0, 14.0, 82.0, 34.0), "系统", "formal_system_toggle", true)
+
+
+func _draw_world_context_navigation(position: Vector2) -> void:
+	var x := position.x
+	for workspace: Dictionary in WORLD_CONTEXT_NAVIGATION:
+		var workspace_id := str(workspace.get("id", ""))
+		var width := 104.0 if workspace_id != WORKSPACE_POLITICS else 122.0
+		var rect := Rect2(x, position.y, width, 30.0)
+		_draw_button(
+			rect,
+			str(workspace.get("label", workspace_id)),
+			"formal_world_context:%s" % workspace_id,
+			true
+		)
+		if workspace_id == _formal_workspace:
+			draw_line(
+				rect.position + Vector2(8.0, 28.0),
+				rect.end - Vector2(8.0, 2.0),
+				Color(0.96, 0.76, 0.38, 0.95),
+				2.0
+			)
+		x += width + 7.0
 
 
 func _remove_hits_under(cover: Rect2) -> void:
@@ -1413,7 +1534,131 @@ func _draw_workspace_heading(rect: Rect2, title: String, subtitle: String) -> vo
 
 
 func _draw_person_workspace(rect: Rect2) -> void:
-	_draw_workspace_heading(rect, "人物首页", "同一 FormalWorldSimulation · 同一 player_person_id · 初始暂停")
+	_draw_workspace_heading(rect, "当前处境", "现在发生什么 · 与我有什么关系 · 当前能做什么")
+	_draw_person_subnavigation(rect)
+	if _person_tab == PERSON_TAB_DETAILS:
+		_draw_person_details(rect)
+	else:
+		_draw_person_situation(rect)
+
+
+func _draw_person_subnavigation(rect: Rect2) -> void:
+	var x := rect.position.x + 30.0
+	for tab: Dictionary in PERSON_TABS:
+		var tab_id := str(tab.get("id", ""))
+		var width := 148.0 if tab_id == PERSON_TAB_SITUATION else 176.0
+		var tab_rect := Rect2(x, rect.position.y + 96.0, width, 28.0)
+		_draw_button(
+			tab_rect,
+			str(tab.get("label", tab_id)),
+			"formal_person_tab:%s" % tab_id,
+			true
+		)
+		if tab_id == _person_tab:
+			draw_line(
+				tab_rect.position + Vector2(7.0, 26.0),
+				tab_rect.end - Vector2(7.0, 2.0),
+				Color(0.96, 0.76, 0.38, 0.95),
+				2.0
+			)
+		x += width + 8.0
+
+
+func _draw_person_situation(rect: Rect2) -> void:
+	var label := str(_player_context_cache.get("display_label", "正式人物不可用"))
+	var place := _player_context_cache.get("current_place", {}) as Dictionary
+	var source := _player_context_cache.get("population_source", {}) as Dictionary
+	var memberships := _situation_player_organization_cache.get("memberships", []) as Array
+	var appointments := _situation_player_organization_cache.get("appointments", []) as Array
+	var current_market := _situation_market_cache
+	var totals := current_market.get("daily_totals", {}) as Dictionary
+	var settled := bool(current_market.get("settled", false))
+	var fulfillment := (
+		"尚未日结"
+		if not settled
+		else "%.1f%%" % (float(totals.get("fulfillment_bp", 0)) / 100.0)
+	)
+	var local_shortage := _largest_market_shortage(current_market)
+	var local_politics := _local_political_observation_cache
+	var cards_top := rect.position.y + 138.0
+	var identity_card := Rect2(rect.position.x + 30.0, cards_top, 338.0, 174.0)
+	var livelihood_card := Rect2(rect.position.x + 382.0, cards_top, 400.0, 174.0)
+	var context_card := Rect2(rect.position.x + 796.0, cards_top, rect.size.x - 826.0, 174.0)
+	_draw_situation_card(identity_card, "现在", Color(0.70, 0.61, 0.36, 0.38))
+	_draw_label(identity_card.position + Vector2(18.0, 62.0), _format_sim_datetime(), 18, Color(0.96, 0.84, 0.57, 1.0))
+	_draw_label(identity_card.position + Vector2(18.0, 92.0), str(place.get("name", place.get("id", "地点不可用"))), 22, Color(0.89, 0.90, 0.80, 1.0))
+	_draw_shell_lines(identity_card.position + Vector2(18.0, 121.0), [
+		"%s · %s" % [label, "存活" if bool(_player_context_cache.get("alive", false)) else "非存活"],
+		"人口来源：%s" % str(source.get("id", "不可用")),
+	], 20.0, 9, Color(0.70, 0.80, 0.76, 0.96))
+
+	_draw_situation_card(livelihood_card, "生计 / 市场", Color(0.44, 0.64, 0.53, 0.30))
+	if bool(current_market.get("available", false)):
+		_draw_shell_lines(livelihood_card.position + Vector2(18.0, 59.0), [
+			"经济统计层级：%s aggregate" % str(current_market.get("economic_aggregate_id", "")),
+			"市场满足率：%s" % fulfillment,
+			"主要短缺：%s" % _shortage_situation_label(local_shortage, settled),
+			"在途运输：%d" % int(current_market.get("active_shipment_count", 0)),
+		], 24.0, 10)
+	else:
+		_draw_shell_lines(livelihood_card.position + Vector2(18.0, 59.0), [
+			"Local market：unavailable",
+			"当前地点没有可证明的 Formal market 映射",
+		], 24.0, 10)
+	_draw_button(
+		Rect2(livelihood_card.end.x - 116.0, livelihood_card.position.y + 13.0, 98.0, 25.0),
+		"查看经济",
+		"formal_workspace:%s" % WORKSPACE_ECONOMY,
+		true
+	)
+
+	_draw_situation_card(context_card, "组织 / 世界环境", Color(0.55, 0.51, 0.35, 0.30))
+	_draw_shell_lines(context_card.position + Vector2(18.0, 59.0), [
+		"正式成员 / 任职：%d / %d" % [memberships.size(), appointments.size()],
+		"%s" % ("暂无正式组织任职记录" if memberships.is_empty() and appointments.is_empty() else "Formal 组织记录可用"),
+		"所在地政治环境：%s" % str(local_politics.get("display_name", "不可用")),
+	], 25.0, 9)
+
+	var attention_card := Rect2(rect.position.x + 30.0, cards_top + 190.0, 730.0, 130.0)
+	var action_card := Rect2(rect.position.x + 774.0, cards_top + 190.0, rect.size.x - 804.0, 130.0)
+	_draw_situation_card(attention_card, "值得关注", Color(0.62, 0.40, 0.22, 0.28))
+	var attention_lines: Array[String] = []
+	if not settled:
+		attention_lines.append("Formal market 尚未完成首个日结；不伪造满足率或趋势。")
+	elif local_shortage.is_empty():
+		attention_lines.append("当前聚合市场没有 unmet > 0 的商品记录。")
+	else:
+		attention_lines.append("%s · unmet %.1f · fulfillment %.1f%%" % [
+			str(local_shortage.get("name_zh", local_shortage.get("commodity_id", "商品"))),
+			float(local_shortage.get("unmet", 0.0)),
+			float(local_shortage.get("fulfillment_bp", 0)) / 100.0,
+		])
+	attention_lines.append("关系 / 通信尚未 Formal 化；机构责任仅作为世界观察。")
+	_draw_shell_lines(attention_card.position + Vector2(18.0, 58.0), attention_lines, 25.0, 10)
+
+	_draw_situation_card(action_card, "当前可执行", Color(0.64, 0.54, 0.31, 0.32))
+	var authorized_count := 0
+	for option: Dictionary in _defend_options_cache.get("options", []) as Array:
+		if bool(option.get("authorized", false)):
+			authorized_count += 1
+	_draw_shell_lines(action_card.position + Vector2(18.0, 59.0), [
+		"当前版本尚无个人执行命令" if authorized_count == 0 else "可授权 DEFEND：%d" % authorized_count,
+		"世界观察与详情导航不会改变人物状态。",
+	], 25.0, 10)
+
+
+func _draw_situation_card(rect: Rect2, title: String, border: Color) -> void:
+	_panel(rect, Color(0.020, 0.046, 0.050, 0.82), border)
+	_draw_label(rect.position + Vector2(18.0, 31.0), title, 15, Color(0.91, 0.82, 0.58, 1.0))
+	draw_line(
+		rect.position + Vector2(18.0, 42.0),
+		Vector2(rect.end.x - 18.0, rect.position.y + 42.0),
+		Color(border.r, border.g, border.b, minf(0.42, border.a + 0.08)),
+		1.0
+	)
+
+
+func _draw_person_details(rect: Rect2) -> void:
 	var label := str(_player_context_cache.get("display_label", "正式人物不可用"))
 	var person_id := str(_player_context_cache.get("person_id", ""))
 	var place := _player_context_cache.get("current_place", {}) as Dictionary
@@ -1422,26 +1667,49 @@ func _draw_person_workspace(rect: Rect2) -> void:
 	var memberships := _player_context_cache.get("memberships", []) as Array
 	var appointments := _player_context_cache.get("appointments", []) as Array
 	var provenance := _player_context_cache.get("provenance_summary", {}) as Dictionary
-	_draw_label(rect.position + Vector2(38.0, 128.0), label, 28, Color(0.94, 0.79, 0.47, 1.0))
+	_draw_label(rect.position + Vector2(38.0, 154.0), label, 25, Color(0.94, 0.79, 0.47, 1.0))
 	var birth_year := int(demographic.get("birth_year", 0))
 	var current_year := int(formal_simulation.date_time().get("year", 1900))
-	var facts: Array[String] = [
+	_draw_shell_lines(rect.position + Vector2(38.0, 194.0), [
 		"状态：%s" % ("存活" if bool(_player_context_cache.get("alive", false)) else "非存活"),
 		"出生年 / 约龄：%s / %s" % [str(birth_year) if birth_year > 0 else "不可用", str(current_year - birth_year) if birth_year > 0 else "不可用"],
 		"当前地点：%s · %s" % [str(place.get("name", "不可用")), str(place.get("id", ""))],
 		"人口来源：%s" % str(source.get("id", "不可用")),
 		"正式 membership：%d · appointment：%d" % [memberships.size(), appointments.size()],
-	]
-	_draw_shell_lines(rect.position + Vector2(38.0, 166.0), facts, 22.0)
-	var right := rect.position + Vector2(rect.size.x * 0.54, 122.0)
-	_draw_label(right, "来源与正式身份", 15, Color(0.86, 0.87, 0.76, 1.0))
-	_draw_shell_lines(right + Vector2(0.0, 32.0), [
-		"技术 ID：%s" % person_id,
+	], 24.0)
+	var right := rect.position + Vector2(rect.size.x * 0.54, 154.0)
+	_draw_label(right, "Evidence / Technical Identity", 15, Color(0.86, 0.87, 0.76, 1.0))
+	_draw_shell_lines(right + Vector2(0.0, 34.0), [
+		"person_id：%s" % person_id,
 		"来源类型：%s" % str(provenance.get("kind", "不可用")),
 		"规则版本：%s" % str(provenance.get("generation_rules_version", "不可用")),
 		"接受候选序号：%s" % str(provenance.get("accepted_draft_index", "不可用")),
-	], 22.0, 10, Color(0.72, 0.80, 0.76, 0.96))
-	_draw_unavailable_notice(rect, "姓名、职业、技能、健康、工资、关系、个人计划：当前版本尚未模拟")
+		"population claim：%s" % str((_player_context_cache.get("population_claim", {}) as Dictionary).get("claim_id", "不可用")),
+	], 24.0, 10, Color(0.72, 0.80, 0.76, 0.96))
+	_draw_unavailable_notice(rect, "职业、技能、健康、工资、关系、通信和个人计划：当前版本尚未 Formal 化")
+
+
+func _largest_market_shortage(market: Dictionary) -> Dictionary:
+	var largest: Dictionary = {}
+	for value: Variant in market.get("commodities", []) as Array:
+		if not value is Dictionary:
+			continue
+		var row := value as Dictionary
+		if float(row.get("unmet", 0.0)) <= float(largest.get("unmet", 0.0)):
+			continue
+		largest = row.duplicate(true)
+	return largest
+
+
+func _shortage_situation_label(shortage: Dictionary, settled: bool) -> String:
+	if not settled:
+		return "尚未日结"
+	if shortage.is_empty():
+		return "当前无 unmet > 0 记录"
+	return "%s · unmet %.1f" % [
+		str(shortage.get("name_zh", shortage.get("commodity_id", "商品"))),
+		float(shortage.get("unmet", 0.0)),
+	]
 
 
 func _draw_economy_workspace(rect: Rect2) -> void:
@@ -1832,7 +2100,8 @@ func _draw_organization_responsibility(rect: Rect2) -> void:
 
 
 func _draw_politics_workspace(rect: Rect2) -> void:
-	_draw_workspace_heading(rect, "政治", "LOCAL POLITY 与 OBSERVED POLITY 独立；地图选择只改变观察对象")
+	_draw_workspace_heading(rect, "世界 / 政治观察", "LOCAL POLITY 与 OBSERVED POLITY 独立；地图选择只改变观察对象")
+	_draw_world_context_navigation(rect.position + Vector2(rect.size.x - 382.0, 18.0))
 	var x := rect.position.x + 32.0
 	for tab: Dictionary in POLITICS_TABS:
 		var tab_id := str(tab.get("id", ""))
@@ -1903,7 +2172,8 @@ func _draw_political_observation_detail(rect: Rect2, observation: Dictionary, he
 
 
 func _draw_military_workspace(rect: Rect2) -> void:
-	_draw_workspace_heading(rect, "军事", "仅显示当前玩家可证明的 DEFEND acting context")
+	_draw_workspace_heading(rect, "世界 / 军事", "仅显示当前玩家可证明的 DEFEND acting context")
+	_draw_world_context_navigation(rect.position + Vector2(rect.size.x - 382.0, 18.0))
 	_draw_label(rect.position + Vector2(38.0, 126.0), "acting person：%s" % str(_defend_options_cache.get("acting_person_id", "")), 13)
 	var options := _defend_options_cache.get("options", []) as Array
 	var y := 166.0
@@ -1982,6 +2252,10 @@ func _activate_button(action: String) -> void:
 		_:
 			if action.begins_with("formal_workspace:"):
 				set_formal_workspace(action.trim_prefix("formal_workspace:"))
+			elif action.begins_with("formal_world_context:"):
+				set_formal_workspace(action.trim_prefix("formal_world_context:"))
+			elif action.begins_with("formal_person_tab:"):
+				_set_person_tab(action.trim_prefix("formal_person_tab:"))
 			elif action.begins_with("formal_economy_tab:"):
 				_set_economy_tab(action.trim_prefix("formal_economy_tab:"))
 			elif action == "formal_market_my":
@@ -2023,6 +2297,9 @@ func _activate_button(action: String) -> void:
 				_selected_place_id = ""
 				_selected_place_context_cache = {}
 				queue_redraw()
+			elif action == "formal_place_to_situation":
+				_person_tab = PERSON_TAB_SITUATION
+				set_formal_workspace(WORKSPACE_PERSON)
 			elif action.begins_with("formal_politics_tab:"):
 				_set_politics_tab(action.trim_prefix("formal_politics_tab:"))
 			elif action.begins_with("formal_organization_tab:"):

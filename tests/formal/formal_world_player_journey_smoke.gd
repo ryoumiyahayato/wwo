@@ -110,6 +110,13 @@ func _run() -> void:
 		return
 
 	application._ensure_projection_cache()
+	for _surface_wait: int in 180:
+		application._ensure_projection_cache()
+		if int(application.formal_map_lod_report().get("flag_eligible_entity_count", 0)) >= 12:
+			break
+		await process_frame
+	var map_entry_report := application.formal_map_lod_report()
+	var visible_flag_entity_count := int(map_entry_report.get("flag_eligible_entity_count", 0))
 	var france_point := application._country_screen_anchors.get(
 		INTENDED_POLITY_ID, Vector2.INF
 	) as Vector2
@@ -149,7 +156,10 @@ func _run() -> void:
 	):
 		await _finish()
 		return
-	if not _require(application._flag_screen_polygons.size() >= 12, "当前半球没有形成可见政治实体图形"):
+	if not _require(
+		visible_flag_entity_count >= 12,
+		"当前半球没有形成可见政治实体旗帜绘制批次 | report=%s" % var_to_str(map_entry_report)
+	):
 		await _finish()
 		return
 	if not _require(application.viewport_container.is_visible_in_tree(), "半球地图视口不可见"):
