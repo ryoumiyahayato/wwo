@@ -291,13 +291,13 @@
     "res://data/world_map/territory_source_registry.json",
     "res://data/world_map/world_admin1.json"
   ],
-  "production_script_count": 36,
+  "production_script_count": 37,
   "production_script_roots": [
     "scripts/world_map",
     "scripts/formal"
   ],
   "schema_version": "wwo_world_data_batch3_contracts_v1",
-  "script_digest": "020126fedddf7023c56597d2dd6bc272ff6d423b9908ee126dc0f6d44bd65945",
+  "script_digest": "0f4bf3ae89377cb2ef04a7fd382643d565e33ff4e4101a1a1c4d4a04e6ce7857",
   "world_map_data_loader_entries": [
     {
       "exists": true,
