@@ -445,6 +445,96 @@ func market_observation(market_id: String) -> Dictionary:
 	}
 
 
+func market_pulse_observation(history_limit: int = 30, rank_limit: int = 5) -> Dictionary:
+	## Bounded global player projection. Formal stores daily global summaries, but
+	## not per-market or per-commodity price history; those unsupported trend
+	## levels are stated explicitly so presentation cannot invent movers.
+	var current := world_summary()
+	var history_rows := DataRecordUtils.to_dictionary_array(history)
+	var bounded_history: Array[Dictionary] = []
+	var start := maxi(0, history_rows.size() - maxi(0, history_limit))
+	for index: int in range(start, history_rows.size()):
+		var source := history_rows[index]
+		bounded_history.append({
+			"day_index": int(source.get("day_index", 0)),
+			"total_hour": int(source.get("total_hour", 0)),
+			"demand_units": float(source.get("demand_units", 0.0)),
+			"consumed_units": float(source.get("consumed_units", 0.0)),
+			"unmet_units": float(source.get("unmet_units", 0.0)),
+			"fulfillment_bp": int(source.get("fulfillment_bp", 0)),
+			"active_shipments": int(source.get("active_shipments", 0)),
+		})
+	var ranked_markets: Array[Dictionary] = []
+	for economy_id: String in _economic_aggregate_ids():
+		var market_id := _market_registry.market_id_for_economic_aggregate(economy_id)
+		var state := market_states.get(market_id, {}) as Dictionary
+		var totals := state.get("daily_totals", {}) as Dictionary
+		if totals.is_empty():
+			continue
+		ranked_markets.append({
+			"market_id": market_id,
+			"economic_aggregate_id": economy_id,
+			"polity_ids": polity_ids_for_economy(economy_id),
+			"fulfillment_bp": int(totals.get("fulfillment_bp", 0)),
+			"unmet_units": float(totals.get("unmet_units", 0.0)),
+			"active_shipment_count": _shipment_count_for(economy_id),
+		})
+	var lowest := ranked_markets.duplicate(true)
+	lowest.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var a_fulfillment := int(a.get("fulfillment_bp", 0))
+		var b_fulfillment := int(b.get("fulfillment_bp", 0))
+		return (
+			a_fulfillment < b_fulfillment
+			if a_fulfillment != b_fulfillment
+			else str(a.get("market_id", "")) < str(b.get("market_id", ""))
+		)
+	)
+	var highest := ranked_markets.duplicate(true)
+	highest.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var a_fulfillment := int(a.get("fulfillment_bp", 0))
+		var b_fulfillment := int(b.get("fulfillment_bp", 0))
+		return (
+			a_fulfillment > b_fulfillment
+			if a_fulfillment != b_fulfillment
+			else str(a.get("market_id", "")) < str(b.get("market_id", ""))
+		)
+	)
+	var bounded_rank_limit := maxi(0, rank_limit)
+	lowest = lowest.slice(0, mini(lowest.size(), bounded_rank_limit))
+	highest = highest.slice(0, mini(highest.size(), bounded_rank_limit))
+	var change := {
+		"available": bounded_history.size() >= 2,
+		"fulfillment_delta_bp": 0,
+		"unmet_delta_units": 0.0,
+		"shipment_delta": 0,
+	}
+	if bounded_history.size() >= 2:
+		var previous := bounded_history[bounded_history.size() - 2]
+		var latest := bounded_history[bounded_history.size() - 1]
+		change["fulfillment_delta_bp"] = int(latest.get("fulfillment_bp", 0)) - int(previous.get("fulfillment_bp", 0))
+		change["unmet_delta_units"] = float(latest.get("unmet_units", 0.0)) - float(previous.get("unmet_units", 0.0))
+		change["shipment_delta"] = int(latest.get("active_shipments", 0)) - int(previous.get("active_shipments", 0))
+	return {
+		"schema_id": "formal_market_pulse_observation_v1",
+		"domain_owner": "FormalWorldEconomyService",
+		"derived": true,
+		"state_revision": _state_revision,
+		"total_hour": total_hour,
+		"market_count": market_states.size(),
+		"current": current.duplicate(true),
+		"global_history": bounded_history,
+		"global_change": change,
+		"lowest_fulfillment_markets": lowest,
+		"highest_fulfillment_markets": highest,
+		"top_shortages": DataRecordUtils.to_dictionary_array(current.get("top_shortages", [])),
+		"history_capabilities": {
+			"global_summary": true,
+			"per_market": false,
+			"commodity_price": false,
+		},
+	}
+
+
 func shortage_observation() -> Dictionary:
 	## This explicit page-level query may inspect every Formal market once. The UI
 	## caches the detached result and never invokes it from _draw().

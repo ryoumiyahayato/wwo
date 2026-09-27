@@ -9,6 +9,7 @@ const PACKAGED_PROBE_ARGUMENT: String = "--wwo-player-baseline-probe"
 const PACKAGED_PROBE_ENTITY_ID: String = "state:country_fra"
 const PACKAGED_PROBE_FLAG_ID: String = "france_tricolour_1794"
 const TITLE_SCENE: String = "res://scenes/formal/formal_world_menu.tscn"
+const MINI_TREND_CONTROL := preload("res://scripts/formal/ui/formal_mini_trend.gd")
 const WORKSPACE_PERSON: String = "person"
 const WORKSPACE_ECONOMY: String = "economy"
 const WORKSPACE_RELATIONS: String = "relations"
@@ -23,13 +24,15 @@ const PERSON_TABS: Array[Dictionary] = [
 	{"id": PERSON_TAB_DETAILS, "label": "Details / Evidence"},
 ]
 const ECONOMY_TAB_OVERVIEW: String = "overview"
+const ECONOMY_TAB_PULSE: String = "pulse"
 const ECONOMY_TAB_MARKETS: String = "markets"
 const ECONOMY_TAB_COMMODITIES: String = "commodities"
 const ECONOMY_TAB_SHORTAGES: String = "shortages"
 const ECONOMY_TAB_TRANSPORT: String = "transport"
 const ECONOMY_TABS: Array[Dictionary] = [
-	{"id": ECONOMY_TAB_OVERVIEW, "label": "Overview"},
-	{"id": ECONOMY_TAB_MARKETS, "label": "Markets"},
+	{"id": ECONOMY_TAB_PULSE, "label": "Pulse"},
+	{"id": ECONOMY_TAB_OVERVIEW, "label": "Current Context"},
+	{"id": ECONOMY_TAB_MARKETS, "label": "Detailed Markets"},
 	{"id": ECONOMY_TAB_COMMODITIES, "label": "Commodities"},
 	{"id": ECONOMY_TAB_SHORTAGES, "label": "Shortages"},
 	{"id": ECONOMY_TAB_TRANSPORT, "label": "Transport"},
@@ -88,8 +91,9 @@ var _system_menu_open: bool = false
 var _defend_options_cache: Dictionary = {}
 var _situation_market_cache: Dictionary = {}
 var _situation_player_organization_cache: Dictionary = {}
-var _economy_tab: String = ECONOMY_TAB_OVERVIEW
+var _economy_tab: String = ECONOMY_TAB_PULSE
 var _economy_observation_dirty: bool = true
+var _market_pulse_cache: Dictionary = {}
 var _economy_catalog_cache: Dictionary = {}
 var _commodity_catalog_cache: Dictionary = {}
 var _selected_market_cache: Dictionary = {}
@@ -128,12 +132,20 @@ var _formal_place_projection_lod: String = ""
 var _hover_place_id: String = ""
 var _selected_place_id: String = ""
 var _selected_place_context_cache: Dictionary = {}
+var _pulse_fulfillment_trend: FormalMiniTrend
+var _pulse_unmet_trend: FormalMiniTrend
 
 @onready var _background_cache_viewport: SubViewport = $BackgroundCacheViewport
 @onready var _background_display: TextureRect = $Background
 
 
 func _ready() -> void:
+	_pulse_fulfillment_trend = MINI_TREND_CONTROL.new() as FormalMiniTrend
+	_pulse_unmet_trend = MINI_TREND_CONTROL.new() as FormalMiniTrend
+	add_child(_pulse_fulfillment_trend)
+	add_child(_pulse_unmet_trend)
+	_pulse_fulfillment_trend.visible = false
+	_pulse_unmet_trend.visible = false
 	_background_display.texture = _background_cache_viewport.get_texture()
 	_resize_background_cache()
 	var supplied_world: Variant = (
@@ -194,6 +206,7 @@ func _notification(what: int) -> void:
 	super._notification(what)
 	if what == NOTIFICATION_RESIZED and is_node_ready():
 		_resize_background_cache()
+		_sync_pulse_trend_controls()
 
 
 func _resize_background_cache() -> void:
@@ -427,6 +440,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		KEY_ESCAPE:
 			if _system_menu_open:
 				_system_menu_open = false
+				_sync_pulse_trend_controls()
 				queue_redraw()
 			elif not active_hud_panel.is_empty() or info_open or economy_panel_open:
 				active_hud_panel = ""
@@ -917,6 +931,19 @@ func _refresh_economy_observations(force: bool = false) -> void:
 	if not formal_simulation.initialized:
 		return
 	var current_revision := formal_simulation.economy_observation_revision()
+	if _economy_tab == ECONOMY_TAB_PULSE:
+		if _observed_market_id.is_empty():
+			_observed_market_id = _my_market_id()
+		if (
+			force
+			or _economy_observation_dirty
+			or int(_market_pulse_cache.get("state_revision", -2)) != current_revision
+		):
+			_market_pulse_cache = formal_simulation.market_pulse_observation()
+			_economy_observation_dirty = false
+			_economy_refresh_count += 1
+			_update_pulse_trend_series()
+		return
 	var cached_revision := int(_economy_catalog_cache.get("state_revision", -2))
 	if force or _economy_observation_dirty or cached_revision != current_revision:
 		_refresh_economy_catalog()
@@ -930,6 +957,44 @@ func _refresh_economy_observations(force: bool = false) -> void:
 			_rebuild_shortage_rows_cache()
 		ECONOMY_TAB_TRANSPORT:
 			_transport_observation_cache = formal_simulation.transport_observation()
+
+
+func _update_pulse_trend_series() -> void:
+	if _pulse_fulfillment_trend == null or _pulse_unmet_trend == null:
+		return
+	var rows := _market_pulse_cache.get("global_history", []) as Array
+	_pulse_fulfillment_trend.set_series(
+		rows,
+		"day_index",
+		"fulfillment_bp",
+		Color(0.42, 0.88, 0.64, 1.0)
+	)
+	_pulse_unmet_trend.set_series(
+		rows,
+		"day_index",
+		"unmet_units",
+		Color(0.91, 0.48, 0.27, 1.0),
+		true
+	)
+
+
+func _sync_pulse_trend_controls() -> void:
+	if _pulse_fulfillment_trend == null or _pulse_unmet_trend == null:
+		return
+	var should_show := (
+		_formal_workspace == WORKSPACE_ECONOMY
+		and _economy_tab == ECONOMY_TAB_PULSE
+		and not _system_menu_open
+	)
+	_pulse_fulfillment_trend.visible = should_show
+	_pulse_unmet_trend.visible = should_show
+	if not should_show:
+		return
+	var content := Rect2(24.0, 82.0, size.x - 48.0, size.y - 106.0)
+	_pulse_fulfillment_trend.position = content.position + Vector2(64.0, 405.0)
+	_pulse_fulfillment_trend.size = Vector2(content.size.x * 0.43 - 64.0, 82.0)
+	_pulse_unmet_trend.position = content.position + Vector2(content.size.x * 0.48 + 28.0, 405.0)
+	_pulse_unmet_trend.size = Vector2(content.size.x * 0.43 - 52.0, 82.0)
 
 
 func _refresh_economy_overlay() -> void:
@@ -998,6 +1063,7 @@ func _set_economy_tab(tab_id: String) -> bool:
 		return false
 	_economy_tab = tab_id
 	_refresh_economy_observations()
+	_sync_pulse_trend_controls()
 	queue_redraw()
 	return true
 
@@ -1066,6 +1132,7 @@ func set_formal_workspace(workspace_id: String) -> bool:
 		_refresh_economy_overlay()
 	if workspace_id == WORKSPACE_MILITARY:
 		_refresh_shell_observations()
+	_sync_pulse_trend_controls()
 	queue_redraw()
 	return true
 
@@ -1155,6 +1222,38 @@ func economy_catalog_observation() -> Dictionary:
 
 func economy_selected_market_observation() -> Dictionary:
 	return _selected_market_cache.duplicate(true)
+
+
+func economy_market_pulse_observation() -> Dictionary:
+	return _market_pulse_cache.duplicate(true)
+
+
+func economic_context_observation() -> Dictionary:
+	var place := _player_context_cache.get("current_place", {}) as Dictionary
+	var aggregate_market := (
+		_situation_market_cache
+		if not _situation_market_cache.is_empty()
+		else formal_simulation.market_observation(_my_market_id())
+	)
+	return {
+		"owner": "FormalWorldApplication",
+		"derived": true,
+		"place": place.duplicate(true),
+		"local_market": {
+			"available": false,
+			"reason": "no_place_scoped_formal_market",
+		},
+		"regional_market": {
+			"available": false,
+			"reason": "regional_market_layer_not_formalized",
+		},
+		"aggregate_market": aggregate_market.duplicate(true),
+		"global_market_count": int(_market_pulse_cache.get("market_count", 0)),
+		"employment": {
+			"available": false,
+			"reason": "employment_owner_unavailable",
+		},
+	}
 
 
 func economy_shortage_observation() -> Dictionary:
@@ -1713,9 +1812,11 @@ func _shortage_situation_label(shortage: Dictionary, settled: bool) -> String:
 
 
 func _draw_economy_workspace(rect: Rect2) -> void:
-	_draw_workspace_heading(rect, "工作 / 经济", "个人工作 unavailable · Formal Economy / Market 只读观察")
+	_draw_workspace_heading(rect, "经济 / 市场", "我的经济处境 · Formal 市场脉搏 · R1 详细资料")
 	_draw_economy_subnavigation(rect)
 	match _economy_tab:
+		ECONOMY_TAB_PULSE:
+			_draw_market_pulse(rect)
 		ECONOMY_TAB_MARKETS:
 			_draw_market_browser(rect)
 		ECONOMY_TAB_COMMODITIES:
@@ -1732,51 +1833,139 @@ func _draw_economy_subnavigation(rect: Rect2) -> void:
 	var x := rect.position.x + 30.0
 	for tab: Dictionary in ECONOMY_TABS:
 		var tab_id := str(tab.get("id", ""))
-		var tab_rect := Rect2(x, rect.position.y + 96.0, 126.0, 28.0)
+		var width := 112.0
+		match tab_id:
+			ECONOMY_TAB_OVERVIEW:
+				width = 148.0
+			ECONOMY_TAB_MARKETS:
+				width = 156.0
+			ECONOMY_TAB_COMMODITIES:
+				width = 132.0
+		var tab_rect := Rect2(x, rect.position.y + 96.0, width, 28.0)
 		_draw_button(tab_rect, str(tab.get("label", tab_id)), "formal_economy_tab:%s" % tab_id, true)
 		if tab_id == _economy_tab:
 			draw_line(tab_rect.position + Vector2(7.0, 26.0), tab_rect.end - Vector2(7.0, 2.0), Color(0.96, 0.76, 0.38, 0.95), 2.0)
-		x += 132.0
+		x += width + 7.0
+
+
+func _draw_market_pulse(rect: Rect2) -> void:
+	var pulse := _market_pulse_cache
+	var current := pulse.get("current", {}) as Dictionary
+	var change := pulse.get("global_change", {}) as Dictionary
+	var history_rows := pulse.get("global_history", []) as Array
+	var top_shortages := pulse.get("top_shortages", []) as Array
+	var lowest := pulse.get("lowest_fulfillment_markets", []) as Array
+	var highest := pulse.get("highest_fulfillment_markets", []) as Array
+	var cards_top := rect.position.y + 138.0
+	var world_card := Rect2(rect.position.x + 30.0, cards_top, 294.0, 178.0)
+	var pressure_card := Rect2(rect.position.x + 338.0, cards_top, 404.0, 178.0)
+	var range_card := Rect2(rect.position.x + 756.0, cards_top, rect.size.x - 786.0, 178.0)
+	_draw_situation_card(world_card, "世界经济脉搏", Color(0.46, 0.67, 0.54, 0.34))
+	_draw_label(world_card.position + Vector2(18.0, 72.0), "%.1f%%" % (float(current.get("fulfillment_bp", 0)) / 100.0), 30, Color(0.52, 0.91, 0.67, 1.0))
+	_draw_label(world_card.position + Vector2(18.0, 99.0), "GLOBAL FULFILLMENT", 8, Color(0.64, 0.76, 0.70, 0.96))
+	_draw_shell_lines(world_card.position + Vector2(18.0, 126.0), [
+		"Formal markets：%d" % int(pulse.get("market_count", current.get("market_count", 0))),
+		"在途运输：%d · 路线：%d" % [int(current.get("active_shipments", 0)), int(current.get("route_count", 0))],
+	], 20.0, 9)
+	if bool(change.get("available", false)):
+		_draw_label(
+			world_card.position + Vector2(176.0, 72.0),
+			"%s %.2f%%" % [
+				_delta_arrow(float(change.get("fulfillment_delta_bp", 0))),
+				absf(float(change.get("fulfillment_delta_bp", 0))) / 100.0,
+			],
+			11,
+			_delta_color(float(change.get("fulfillment_delta_bp", 0)), true)
+		)
+
+	_draw_situation_card(pressure_card, "短缺警报 · 当前 Formal 状态", Color(0.72, 0.44, 0.23, 0.32))
+	var shortage_lines: Array[String] = []
+	for index: int in mini(4, top_shortages.size()):
+		var shortage := top_shortages[index] as Dictionary
+		shortage_lines.append("%d. %s · %s · unmet %.1f" % [
+			index + 1,
+			str(shortage.get("commodity_name_zh", shortage.get("commodity_id", ""))),
+			str(shortage.get("economic_aggregate_id", shortage.get("market_id", ""))),
+			float(shortage.get("unmet_units", shortage.get("unmet", 0.0))),
+		])
+	if shortage_lines.is_empty():
+		shortage_lines.append("当前没有已日结的世界 unmet 记录。")
+	_draw_shell_lines(pressure_card.position + Vector2(18.0, 60.0), shortage_lines, 27.0, 9)
+
+	_draw_situation_card(range_card, "当前市场压力范围", Color(0.55, 0.51, 0.35, 0.30))
+	var range_lines: Array[String] = []
+	if not lowest.is_empty():
+		var low := lowest[0] as Dictionary
+		range_lines.append("最低满足：%s · %.1f%%" % [str(low.get("economic_aggregate_id", "")), float(low.get("fulfillment_bp", 0)) / 100.0])
+	if not highest.is_empty():
+		var high := highest[0] as Dictionary
+		range_lines.append("最高满足：%s · %.1f%%" % [str(high.get("economic_aggregate_id", "")), float(high.get("fulfillment_bp", 0)) / 100.0])
+	range_lines.append("Market movers：unavailable")
+	range_lines.append("原因：Formal 未保存逐市场历史")
+	_draw_shell_lines(range_card.position + Vector2(18.0, 60.0), range_lines, 26.0, 9)
+
+	var fulfillment_card := Rect2(rect.position.x + 30.0, rect.position.y + 332.0, rect.size.x * 0.45, 162.0)
+	var unmet_card := Rect2(rect.position.x + rect.size.x * 0.48, rect.position.y + 332.0, rect.size.x * 0.49, 162.0)
+	_draw_situation_card(fulfillment_card, "真实历史 · Global Fulfillment", Color(0.40, 0.68, 0.52, 0.28))
+	_draw_situation_card(unmet_card, "真实历史 · Global Unmet", Color(0.70, 0.42, 0.23, 0.28))
+	_draw_label(fulfillment_card.position + Vector2(18.0, 58.0), "%d 个日结点 · 不是市场价格指数" % history_rows.size(), 9, Color(0.66, 0.77, 0.71, 0.96))
+	_draw_label(unmet_card.position + Vector2(18.0, 58.0), "昨日变化：%s %.1f" % [_delta_arrow(-float(change.get("unmet_delta_units", 0.0))), absf(float(change.get("unmet_delta_units", 0.0)))], 9, _delta_color(-float(change.get("unmet_delta_units", 0.0)), true))
+	_draw_label(rect.position + Vector2(34.0, rect.end.y - 82.0), "详细数据：50个市场、67类商品、Shortages 与 Transport 均保留在上方二级页。", 9, Color(0.68, 0.78, 0.73, 0.96))
+	_draw_unavailable_notice(rect, "逐市场趋势与商品价格涨跌历史尚未 Formal 化，因此不显示假 movers 或假涨跌幅")
 
 
 func _draw_economy_overview(rect: Rect2) -> void:
 	var economic := _player_context_cache.get("economic_observation", {}) as Dictionary
 	var place := _player_context_cache.get("current_place", {}) as Dictionary
 	var source := _player_context_cache.get("population_source", {}) as Dictionary
-	var left := Rect2(rect.position + Vector2(30.0, 140.0), Vector2(rect.size.x * 0.36, 350.0))
-	var right := Rect2(rect.position + Vector2(rect.size.x * 0.40, 140.0), Vector2(rect.size.x * 0.57, 350.0))
-	_panel(left, Color(0.020, 0.046, 0.050, 0.76), Color(0.48, 0.61, 0.52, 0.22))
-	_panel(right, Color(0.020, 0.046, 0.050, 0.76), Color(0.67, 0.58, 0.34, 0.28))
-	_draw_label(left.position + Vector2(18.0, 30.0), "个人工作", 16, Color(0.91, 0.82, 0.58, 1.0))
-	_draw_shell_lines(left.position + Vector2(18.0, 66.0), [
-		"人物：%s" % shell_player_person_id(),
-		"地点：%s" % str(place.get("name", place.get("id", "不可用"))),
+	var cards_top := rect.position.y + 142.0
+	var local_card := Rect2(rect.position.x + 30.0, cards_top, 338.0, 198.0)
+	var regional_card := Rect2(rect.position.x + 382.0, cards_top, 338.0, 198.0)
+	var aggregate_card := Rect2(rect.position.x + 734.0, cards_top, rect.size.x - 764.0, 198.0)
+	_draw_situation_card(local_card, "LOCAL · 人物地点", Color(0.46, 0.66, 0.54, 0.30))
+	_draw_label(local_card.position + Vector2(18.0, 69.0), str(place.get("name", place.get("id", "不可用"))), 21, Color(0.91, 0.86, 0.66, 1.0))
+	_draw_shell_lines(local_card.position + Vector2(18.0, 105.0), [
+		"place：%s" % str(place.get("id", "不可用")),
+		"Local market：unavailable",
+		"该地点没有独立 Formal market owner。",
+	], 24.0, 9)
+
+	_draw_situation_card(regional_card, "REGIONAL", Color(0.46, 0.57, 0.55, 0.26))
+	_draw_shell_lines(regional_card.position + Vector2(18.0, 66.0), [
+		"区域市场层级尚未 Formal 化",
+		"不会把国家聚合市场改名冒充 region。",
 		"人口来源：%s" % str(source.get("id", "不可用")),
-		"Employment owner：unavailable",
-		"职业 / 合同 / 工资 / 个人现金：尚未模拟",
-	], 28.0, 11)
-	_draw_label(right.position + Vector2(18.0, 30.0), "地区 / 聚合经济观察", 16, Color(0.91, 0.82, 0.58, 1.0))
+	], 28.0, 10)
+
+	_draw_situation_card(aggregate_card, "CURRENT FORMAL ECONOMIC SCOPE", Color(0.70, 0.58, 0.31, 0.32))
 	if not bool(economic.get("available", false)):
-		_draw_shell_lines(right.position + Vector2(18.0, 66.0), ["不可用：%s" % str(economic.get("reason", "unavailable"))], 27.0)
+		_draw_shell_lines(aggregate_card.position + Vector2(18.0, 66.0), ["不可用：%s" % str(economic.get("reason", "unavailable"))], 27.0)
 		return
 	var totals := _selected_market_cache.get("daily_totals", {}) as Dictionary
 	var settled := bool(_selected_market_cache.get("settled", false))
 	var fulfillment := "尚未日结" if not settled else "%.1f%%" % (float(totals.get("fulfillment_bp", 0)) / 100.0)
-	_draw_shell_lines(right.position + Vector2(18.0, 66.0), [
-		"经济聚合：%s" % str(_selected_market_cache.get("economic_aggregate_id", economic.get("economy_entity_id", ""))),
+	_draw_shell_lines(aggregate_card.position + Vector2(18.0, 62.0), [
+		"统计层级：%s aggregate" % str(_selected_market_cache.get("economic_aggregate_id", economic.get("economy_entity_id", ""))),
 		"Market：%s" % str(_selected_market_cache.get("market_id", _my_market_id())),
 		"人口：%s" % _compact_integer(int(_selected_market_cache.get("population", economic.get("population", 0)))),
-		"需求 / 消费 / 未满足：%s / %s / %s" % [
-			_format_units_or_pending(totals, "demand_units", settled),
-			_format_units_or_pending(totals, "consumed_units", settled),
-			_format_units_or_pending(totals, "unmet_units", settled),
-		],
-		"满足率：%s" % fulfillment,
+		"满足率：%s · unmet：%s" % [fulfillment, _format_units_or_pending(totals, "unmet_units", settled)],
 		"在途运输：%d · 相关路线：%d" % [int(_selected_market_cache.get("active_shipment_count", 0)), int(_selected_market_cache.get("route_count", 0))],
 		"证据状态：%s" % str(_selected_market_cache.get("admission_status", economic.get("admission_status", ""))),
-		"当前时间：%s" % _format_sim_datetime(),
-	], 27.0, 11)
-	_draw_unavailable_notice(rect, "聚合经济是地区事实；不会被解释为个人工资、钱包或就业")
+	], 24.0, 9)
+
+	var global_card := Rect2(rect.position.x + 30.0, cards_top + 216.0, rect.size.x - 60.0, 112.0)
+	_draw_situation_card(global_card, "GLOBAL · Formal market network", Color(0.43, 0.62, 0.52, 0.25))
+	var current := _market_pulse_cache.get("current", {}) as Dictionary
+	_draw_shell_lines(global_card.position + Vector2(18.0, 59.0), [
+		"%d Formal markets · %d commodities · fulfillment %.1f%% · active shipments %d" % [
+			int(_market_pulse_cache.get("market_count", current.get("market_count", 0))),
+			int(current.get("commodity_count", 0)),
+			float(current.get("fulfillment_bp", 0)) / 100.0,
+			int(current.get("active_shipments", 0)),
+		],
+		"个人工作：Employment owner unavailable；职业、合同、工资与钱包尚未 Formal 化。",
+	], 24.0, 10)
+	_draw_unavailable_notice(rect, "country_fra aggregate 是聚合经济事实，不是“里尔市场”、个人工资或个人钱包")
 
 
 func _draw_market_browser(rect: Rect2) -> void:
@@ -2241,6 +2430,7 @@ func _activate_button(action: String) -> void:
 			_load_formal_state_from_ui()
 		"formal_system_toggle":
 			_system_menu_open = not _system_menu_open
+			_sync_pulse_trend_controls()
 			queue_redraw()
 		"formal_back_title":
 			get_tree().change_scene_to_file(TITLE_SCENE)
@@ -2730,6 +2920,25 @@ func _authority_relation_label(relation: Dictionary) -> String:
 		str(relation.get("valid_from", "")),
 		str(relation.get("valid_to", "")),
 	]
+
+
+func _delta_arrow(value: float) -> String:
+	if value > 0.0001:
+		return "▲"
+	if value < -0.0001:
+		return "▼"
+	return "±"
+
+
+func _delta_color(value: float, positive_is_good: bool) -> Color:
+	if absf(value) <= 0.0001:
+		return Color(0.72, 0.78, 0.72, 0.96)
+	var favorable := value > 0.0 if positive_is_good else value < 0.0
+	return (
+		Color(0.45, 0.88, 0.62, 1.0)
+		if favorable
+		else Color(0.92, 0.48, 0.29, 1.0)
+	)
 
 
 func _compact_integer(value: int) -> String:

@@ -235,6 +235,17 @@ func market_observation(market_id: String) -> Dictionary:
 	}
 
 
+func market_pulse_observation(history_limit: int = 30, rank_limit: int = 5) -> Dictionary:
+	return (
+		_economy.market_pulse_observation(history_limit, rank_limit)
+		if _economy.is_configured()
+		else {
+			"available": false,
+			"reason": "formal_economy_unavailable",
+		}
+	)
+
+
 func shortage_observation() -> Dictionary:
 	return _economy.shortage_observation() if _economy.is_configured() else {}
 
