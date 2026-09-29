@@ -3,7 +3,7 @@ name: Formal 1900 world economy
 on:
   pull_request:
     branches:
-      - master
+      - canonical/current-world
     paths:
       - "project.godot"
       - "data/alpha/**"

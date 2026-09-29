@@ -3,7 +3,7 @@ name: Variable state audit
 on:
   pull_request:
     branches:
-      - master
+      - canonical/current-world
     paths:
       - "project.godot"
       - "scripts/**"
