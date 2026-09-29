@@ -40,6 +40,13 @@ func _test_authorized_defend_and_owner_boundaries() -> void:
 		return
 	_check(_add_defend_grant(world, [FORMATION_A]), "exact DEFEND authority grant registers")
 	_check(world.select_player_person(PERSON_COMMANDER), "Formal Player selects commander Person")
+	var projected := world.player_defend_options()
+	_check(bool(projected.get("available", false)), "authorized commander receives a DEFEND option")
+	_check(_has_authorized_option(projected, FORMATION_A), "DEFEND projection names the exact authorized formation")
+	var projected_options := projected.get("options", []) as Array
+	if not projected_options.is_empty():
+		(projected_options[0] as Dictionary)["formation_id"] = "formation:mutated_copy"
+		_check(_has_authorized_option(world.player_defend_options(), FORMATION_A), "mutating returned options cannot mutate Military or Authority owners")
 	var context := _commander_context()
 	var before_world := world.get_persistent_state()
 	var before_fingerprint := world.authoritative_fingerprint()
@@ -101,6 +108,7 @@ func _test_authority_denials_and_acting_context_isolation() -> void:
 	if no_authority == null:
 		return
 	_check(no_authority.select_player_person(PERSON_COMMANDER), "no-authority fixture selects commander")
+	_check(not bool(no_authority.player_defend_options().get("available", true)), "no-authority projection exposes no executable DEFEND")
 	_assert_denied_without_military_mutation(no_authority, _commander_context(), FORMATION_A, "missing authority")
 
 	var world := _new_world()
@@ -139,8 +147,10 @@ func _test_stale_appointment() -> void:
 		"replacement commander Appointment starts"
 	)
 	_check(world.select_player_person(PERSON_COMMANDER), "old holder remains selectable Formal Person")
+	_check(not bool(world.player_defend_options().get("available", true)), "stale appointment disappears from DEFEND options")
 	_assert_denied_without_military_mutation(world, _commander_context(), FORMATION_A, "stale commander Appointment")
 	_check(world.select_player_person(PERSON_DELEGATE), "replacement holder selected as Formal Player")
+	_check(_has_authorized_option(world.player_defend_options(), FORMATION_A), "replacement appointment receives the same position authority option")
 	var new_holder := VNextOrganizationAuthorityFoundation.acting_context(
 		PERSON_DELEGATE, ARMY_ORG, ARMY_ORG, AUTHORITY_ID, "commander_delegate"
 	)
@@ -231,6 +241,7 @@ func _test_delegation_and_revocation_domain_effect() -> void:
 	_equal(str(first.get("status", "")), VNextMilitaryAuthorityBridge.RESULT_AUTHORIZED_AND_EXECUTED, "active scoped delegation produces real DEFEND domain effect")
 	var after_first := world._military_state.snapshot()
 	_check(world._organization_authority.revoke_delegation("delegation.defend.delegate", 0), "DEFEND delegation revokes")
+	_check(not bool(world.player_defend_options().get("available", true)), "revoked delegation disappears from executable options")
 	var second := world.player_defend_formation(delegate_context, FORMATION_A, DURATION_HOURS)
 	_equal(str(second.get("status", "")), VNextMilitaryAuthorityBridge.RESULT_AUTHORITY_DENIED, "revoked delegation blocks later DEFEND before Military domain")
 	_equal(str(second.get("authority_status", "")), VNextOrganizationAuthorityFoundation.STATUS_DELEGATION_INVALID, "revocation uses existing Authority delegation semantics")
@@ -392,6 +403,13 @@ func _commander_context() -> Dictionary:
 		AUTHORITY_ID,
 		"commander_primary"
 	)
+
+
+func _has_authorized_option(options_view: Dictionary, formation_id: String) -> bool:
+	for option: Dictionary in options_view.get("options", []) as Array:
+		if str(option.get("formation_id", "")) == formation_id and bool(option.get("authorized", false)):
+			return true
+	return false
 
 
 func _assert_denied_without_military_mutation(

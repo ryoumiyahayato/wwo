@@ -20,7 +20,7 @@ func _draw_corners() -> void:
 		compact
 	)
 	_draw_corner(character_rect, _active_character_name(), _active_character_position(), "toggle_character_panel", Color(0.72, 0.64, 0.38, 0.22), compact)
-	_draw_corner(activity_rect, "已知信息 · 未读 %d" % activity_unread, _activity_summary(), "toggle_activity_panel", Color(0.72, 0.50, 0.25, 0.22), compact)
+	_draw_corner(activity_rect, "机构 / 世界观察", _activity_summary(), "toggle_activity_panel", Color(0.72, 0.50, 0.25, 0.22), compact)
 	_panel(time_rect, Color(0.025, 0.055, 0.06, 0.88), Color(0.72, 0.64, 0.38, 0.22))
 	_register_hit(time_rect, "toggle_time_panel", true)
 	_draw_label(time_rect.position + Vector2(12.0, 22.0), _format_sim_datetime(), 13)

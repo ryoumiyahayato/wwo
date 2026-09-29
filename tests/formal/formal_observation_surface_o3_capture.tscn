@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tests/formal/formal_observation_surface_o3_capture.gd" id="1_capture"]
+
+[node name="FormalObservationSurfaceO3Capture" type="Node"]
+script = ExtResource("1_capture")

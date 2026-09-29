@@ -13,6 +13,7 @@ config_version=5
 config/name="1900"
 config/version="0.001a"
 run/main_scene="res://scenes/formal/formal_world_menu.tscn"
+run/max_fps=60
 config/features=PackedStringArray("4.6", "GL Compatibility")
 
 [display]

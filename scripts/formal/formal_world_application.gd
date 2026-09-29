@@ -4,9 +4,78 @@ extends "res://scripts/ui_spikes/holographic_workspace/holographic_workspace_his
 ## political identities; historical evidence remains available to history UI.
 
 const LAUNCH_MODE_META: StringName = &"formal_world_launch_mode"
+const LAUNCH_WORLD_META: StringName = &"formal_world_launch_world"
 const PACKAGED_PROBE_ARGUMENT: String = "--wwo-player-baseline-probe"
 const PACKAGED_PROBE_ENTITY_ID: String = "state:country_fra"
 const PACKAGED_PROBE_FLAG_ID: String = "france_tricolour_1794"
+const TITLE_SCENE: String = "res://scenes/formal/formal_world_menu.tscn"
+const MINI_TREND_CONTROL := preload("res://scripts/formal/ui/formal_mini_trend.gd")
+const WORKSPACE_PERSON: String = "person"
+const WORKSPACE_ECONOMY: String = "economy"
+const WORKSPACE_RELATIONS: String = "relations"
+const WORKSPACE_ORGANIZATION: String = "organization"
+const WORKSPACE_POLITICS: String = "politics"
+const WORKSPACE_MILITARY: String = "military"
+const WORKSPACE_MAP: String = "map"
+const PERSON_TAB_SITUATION: String = "situation"
+const PERSON_TAB_DETAILS: String = "details"
+const PERSON_TABS: Array[Dictionary] = [
+	{"id": PERSON_TAB_SITUATION, "label": "当前处境"},
+	{"id": PERSON_TAB_DETAILS, "label": "Details / Evidence"},
+]
+const ECONOMY_TAB_OVERVIEW: String = "overview"
+const ECONOMY_TAB_PULSE: String = "pulse"
+const ECONOMY_TAB_MARKETS: String = "markets"
+const ECONOMY_TAB_COMMODITIES: String = "commodities"
+const ECONOMY_TAB_SHORTAGES: String = "shortages"
+const ECONOMY_TAB_TRANSPORT: String = "transport"
+const ECONOMY_TABS: Array[Dictionary] = [
+	{"id": ECONOMY_TAB_PULSE, "label": "Pulse"},
+	{"id": ECONOMY_TAB_OVERVIEW, "label": "Current Context"},
+	{"id": ECONOMY_TAB_MARKETS, "label": "Detailed Markets"},
+	{"id": ECONOMY_TAB_COMMODITIES, "label": "Commodities"},
+	{"id": ECONOMY_TAB_SHORTAGES, "label": "Shortages"},
+	{"id": ECONOMY_TAB_TRANSPORT, "label": "Transport"},
+]
+const POLITICS_TAB_LOCAL: String = "local"
+const POLITICS_TAB_OBSERVED: String = "observed"
+const POLITICS_TAB_COMPARE: String = "compare"
+const POLITICS_TABS: Array[Dictionary] = [
+	{"id": POLITICS_TAB_LOCAL, "label": "Local"},
+	{"id": POLITICS_TAB_OBSERVED, "label": "Observed"},
+	{"id": POLITICS_TAB_COMPARE, "label": "Local vs Observed"},
+]
+const ORGANIZATION_TAB_MY_RECORDS: String = "my_records"
+const ORGANIZATION_TAB_BROWSER: String = "organizations"
+const ORGANIZATION_TAB_RESPONSIBILITY: String = "responsibility"
+const ORGANIZATION_TABS: Array[Dictionary] = [
+	{"id": ORGANIZATION_TAB_MY_RECORDS, "label": "My Records"},
+	{"id": ORGANIZATION_TAB_BROWSER, "label": "Organizations"},
+	{"id": ORGANIZATION_TAB_RESPONSIBILITY, "label": "Responsibility"},
+]
+const MAP_MODE_POLITICAL: String = "political"
+const MAP_MODE_FULFILLMENT: String = "economy_fulfillment"
+const MAP_MODE_SHORTAGE: String = "economy_shortage"
+const FORMAL_WORKSPACES: Array[Dictionary] = [
+	{"id": WORKSPACE_PERSON, "label": "人物"},
+	{"id": WORKSPACE_ECONOMY, "label": "工作/经济"},
+	{"id": WORKSPACE_RELATIONS, "label": "关系/信息"},
+	{"id": WORKSPACE_ORGANIZATION, "label": "组织"},
+	{"id": WORKSPACE_POLITICS, "label": "政治"},
+	{"id": WORKSPACE_MILITARY, "label": "军事"},
+	{"id": WORKSPACE_MAP, "label": "地图/世界"},
+]
+const FORMAL_PRIMARY_NAVIGATION: Array[Dictionary] = [
+	{"id": WORKSPACE_PERSON, "label": "人物 / 当前处境"},
+	{"id": WORKSPACE_ECONOMY, "label": "经济 / 市场"},
+	{"id": WORKSPACE_ORGANIZATION, "label": "组织"},
+	{"id": WORKSPACE_MAP, "label": "世界"},
+]
+const WORLD_CONTEXT_NAVIGATION: Array[Dictionary] = [
+	{"id": WORKSPACE_MAP, "label": "地图"},
+	{"id": WORKSPACE_POLITICS, "label": "政治观察"},
+	{"id": WORKSPACE_MILITARY, "label": "军事"},
+]
 
 var formal_simulation := FormalWorldSimulation.new()
 var economy_panel_open: bool = true
@@ -15,11 +84,85 @@ var _last_summary: Dictionary = {}
 var _packaged_probe_failures: int = 0
 var _immutable_historical_evidence_report: Dictionary = {}
 var _historical_evidence_surface_building: bool = false
+var _player_context_cache: Dictionary = {}
+var _formal_workspace: String = WORKSPACE_PERSON
+var _person_tab: String = PERSON_TAB_SITUATION
+var _system_menu_open: bool = false
+var _defend_options_cache: Dictionary = {}
+var _situation_market_cache: Dictionary = {}
+var _situation_player_organization_cache: Dictionary = {}
+var _economy_tab: String = ECONOMY_TAB_PULSE
+var _economy_observation_dirty: bool = true
+var _market_pulse_cache: Dictionary = {}
+var _economy_catalog_cache: Dictionary = {}
+var _commodity_catalog_cache: Dictionary = {}
+var _selected_market_cache: Dictionary = {}
+var _commodity_rows_cache: Array[Dictionary] = []
+var _shortage_observation_cache: Dictionary = {}
+var _shortage_rows_cache: Array[Dictionary] = []
+var _transport_observation_cache: Dictionary = {}
+var _observed_market_id: String = ""
+var _market_page: int = 0
+var _commodity_page: int = 0
+var _shortage_page: int = 0
+var _transport_page: int = 0
+var _commodity_search: String = ""
+var _commodity_sort: String = "unmet"
+var _shortage_sort: String = "unmet"
+var _economy_refresh_count: int = 0
+var _map_observation_mode: String = MAP_MODE_POLITICAL
+var _economy_overlay_cache: Dictionary = {}
+var _politics_tab: String = POLITICS_TAB_COMPARE
+var _local_political_observation_cache: Dictionary = {}
+var _observed_political_observation_cache: Dictionary = {}
+var _organization_tab: String = ORGANIZATION_TAB_MY_RECORDS
+var _organization_catalog_cache: Dictionary = {}
+var _player_organization_cache: Dictionary = {}
+var _organization_detail_cache: Dictionary = {}
+var _organization_responsibility_cache: Dictionary = {}
+var _selected_organization_id: String = ""
+var _organization_page: int = 0
+var _responsibility_page: int = 0
+var _organization_refresh_count: int = 0
+var _country_labels_enabled: bool = false
+var _formal_place_catalog_cache: Dictionary = {}
+var _formal_place_screen_cache: Dictionary = {}
+var _formal_place_projection_revision: int = -1
+var _formal_place_projection_lod: String = ""
+var _hover_place_id: String = ""
+var _selected_place_id: String = ""
+var _selected_place_context_cache: Dictionary = {}
+var _pulse_fulfillment_trend: FormalMiniTrend
+var _pulse_unmet_trend: FormalMiniTrend
+
+@onready var _background_cache_viewport: SubViewport = $BackgroundCacheViewport
+@onready var _background_display: TextureRect = $Background
 
 
 func _ready() -> void:
-	var formal_initialized := formal_simulation.initialize()
+	_pulse_fulfillment_trend = MINI_TREND_CONTROL.new() as FormalMiniTrend
+	_pulse_unmet_trend = MINI_TREND_CONTROL.new() as FormalMiniTrend
+	add_child(_pulse_fulfillment_trend)
+	add_child(_pulse_unmet_trend)
+	_pulse_fulfillment_trend.visible = false
+	_pulse_unmet_trend.visible = false
+	_background_display.texture = _background_cache_viewport.get_texture()
+	_resize_background_cache()
+	var supplied_world: Variant = (
+		get_tree().get_meta(LAUNCH_WORLD_META)
+		if get_tree().has_meta(LAUNCH_WORLD_META)
+		else null
+	)
+	if supplied_world is FormalWorldSimulation:
+		formal_simulation = supplied_world as FormalWorldSimulation
+	if get_tree().has_meta(LAUNCH_WORLD_META):
+		get_tree().remove_meta(LAUNCH_WORLD_META)
+	var formal_initialized := (
+		formal_simulation.initialized or formal_simulation.initialize()
+	)
 	if formal_initialized:
+		_refresh_player_context_cache()
+		formal_simulation.state_changed.connect(_on_formal_state_changed)
 		_dated_units_document = {
 			"units": formal_simulation.historical_political_evidence_units(),
 		}
@@ -36,7 +179,7 @@ func _ready() -> void:
 		var launch_mode := str(get_tree().get_meta(LAUNCH_MODE_META, "new"))
 		if get_tree().has_meta(LAUNCH_MODE_META):
 			get_tree().remove_meta(LAUNCH_MODE_META)
-		if launch_mode == "load":
+		if launch_mode == "load" and not supplied_world is FormalWorldSimulation:
 			var result := _load_formal_state()
 			_formal_status = result.message
 			if _formal_status.is_empty():
@@ -47,16 +190,38 @@ func _ready() -> void:
 				)
 		else:
 			_formal_status = "新的1900正式世界已建立。"
-		_sync_political_presentation()
-		_last_summary = formal_simulation.world_summary()
+		_refresh_player_context_cache()
+	_refresh_shell_observations()
+	_refresh_formal_place_catalog()
+	sim_paused = true
+	economy_panel_open = false
+	_sync_political_presentation()
+	_last_summary = formal_simulation.world_summary()
 	queue_redraw()
 	if PACKAGED_PROBE_ARGUMENT in OS.get_cmdline_user_args():
 		_run_packaged_player_baseline_probe.call_deferred()
 
 
+func _notification(what: int) -> void:
+	super._notification(what)
+	if what == NOTIFICATION_RESIZED and is_node_ready():
+		_resize_background_cache()
+		_sync_pulse_trend_controls()
+
+
+func _resize_background_cache() -> void:
+	var size := get_viewport_rect().size
+	var pixels := Vector2i(maxi(1, ceili(size.x)), maxi(1, ceili(size.y)))
+	if _background_cache_viewport.size != pixels:
+		_background_cache_viewport.size = pixels
+	_background_cache_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+
+
 func _run_packaged_player_baseline_probe() -> void:
 	await get_tree().process_frame
 	_packaged_probe_require(formal_simulation.initialized, "正式模拟未初始化")
+	_packaged_probe_require(_formal_workspace == WORKSPACE_PERSON, "正式产品未默认进入人物首页")
+	_packaged_probe_require(shell_player_person_id() == formal_simulation.player_person_id(), "人物首页身份与PlayerState不一致")
 	_packaged_probe_require(_data_errors.is_empty(), "正式模拟产生数据错误")
 	_packaged_probe_require(_history_entity_by_id.size() == 146, "运行时政治实体数量不正确")
 	_packaged_probe_require(
@@ -68,6 +233,10 @@ func _run_packaged_player_baseline_probe() -> void:
 	_packaged_probe_require(
 		int(evidence.get("unresolved_flag_count", -1)) == 0,
 		"历史旗帜证据仍未完全解析"
+	)
+	_packaged_probe_require(
+		await _packaged_probe_click_action("formal_workspace:map"),
+		"打包产品地图工作区入口不可点击"
 	)
 
 	_ensure_projection_cache()
@@ -90,8 +259,22 @@ func _run_packaged_player_baseline_probe() -> void:
 		"打包产品选中实体没有政经详情"
 	)
 	var imported_flags := _historical_imported_flag_texture_by_id as Dictionary
+	var france_flag_record := (
+		_historical_flag_records.get(PACKAGED_PROBE_FLAG_ID, {}) as Dictionary
+	)
+	var france_flag_path := str(france_flag_record.get("asset_path", ""))
+	var imported_france := imported_flags.get(PACKAGED_PROBE_FLAG_ID) as Texture2D
+	print(
+		"Historical flag runtime contract: path=%s exists=%s loaded_class=%s resource_path=%s"
+		% [
+			france_flag_path,
+			ResourceLoader.exists(france_flag_path, "Texture2D"),
+			imported_france.get_class() if imported_france != null else "null",
+			str(imported_france.resource_path) if imported_france != null else "",
+		]
+	)
 	_packaged_probe_require(
-		imported_flags.get(PACKAGED_PROBE_FLAG_ID) is Texture2D,
+		imported_france != null and str(imported_france.resource_path) == france_flag_path,
 		"打包产品没有通过导入Texture2D解析法兰西历史旗帜"
 	)
 
@@ -184,6 +367,8 @@ func _time_source_description() -> String:
 func _load_formal_state() -> SaveOperationResult:
 	var result := formal_simulation.load_from_user()
 	if result.success:
+		_refresh_player_context_cache()
+		_economy_observation_dirty = true
 		_sync_political_presentation()
 		_last_summary = formal_simulation.world_summary()
 	return result
@@ -216,6 +401,8 @@ func _load_formal_state_from_ui() -> void:
 			else "没有可恢复的正式世界存档。"
 		)
 	if result.success:
+		_refresh_player_context_cache()
+		_economy_observation_dirty = true
 		_sync_political_presentation()
 		_last_summary = formal_simulation.world_summary()
 	queue_redraw()
@@ -230,10 +417,46 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if not key_event.pressed or key_event.echo:
 		super._unhandled_key_input(event)
 		return
+	if (
+		_formal_workspace == WORKSPACE_ECONOMY
+		and _economy_tab == ECONOMY_TAB_COMMODITIES
+		and key_event.keycode not in [KEY_ESCAPE, KEY_F5, KEY_F9]
+	):
+		if key_event.keycode == KEY_BACKSPACE:
+			_commodity_search = _commodity_search.left(maxi(0, _commodity_search.length() - 1))
+		elif key_event.keycode == KEY_DELETE:
+			_commodity_search = ""
+		elif key_event.unicode >= 32 and not key_event.ctrl_pressed and not key_event.alt_pressed and not key_event.meta_pressed:
+			_commodity_search = (_commodity_search + char(key_event.unicode)).left(32)
+		else:
+			super._unhandled_key_input(event)
+			return
+		_rebuild_commodity_rows_cache()
+		queue_redraw()
+		get_viewport().set_input_as_handled()
+		return
 
 	match key_event.keycode:
+		KEY_ESCAPE:
+			if _system_menu_open:
+				_system_menu_open = false
+				_sync_pulse_trend_controls()
+				queue_redraw()
+			elif not active_hud_panel.is_empty() or info_open or economy_panel_open:
+				active_hud_panel = ""
+				info_open = false
+				economy_panel_open = false
+				queue_redraw()
+			elif _formal_workspace != WORKSPACE_PERSON:
+				set_formal_workspace(WORKSPACE_PERSON)
+			else:
+				super._unhandled_key_input(event)
+				return
 		KEY_E:
-			_toggle_formal_economy_panel()
+			if _formal_workspace == WORKSPACE_MAP:
+				_toggle_formal_economy_panel()
+			else:
+				set_formal_workspace(WORKSPACE_ECONOMY)
 		KEY_F5:
 			_save_formal_state_from_ui()
 		KEY_F9:
@@ -245,11 +468,886 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	get_viewport().set_input_as_handled()
 
 
+func _gui_input(event: InputEvent) -> void:
+	if _formal_workspace != WORKSPACE_MAP or _system_menu_open:
+		if event is InputEventMouseButton:
+			var button := event as InputEventMouseButton
+			if button.button_index == MOUSE_BUTTON_LEFT and button.pressed:
+				_handle_button_click(button.position)
+		accept_event()
+		return
+	if event is InputEventMouseButton:
+		var button := event as InputEventMouseButton
+		if button.button_index == MOUSE_BUTTON_LEFT and button.pressed:
+			if _handle_button_click(button.position):
+				accept_event()
+				return
+	if not active_hud_panel.is_empty() or info_open or economy_panel_open:
+		if event is InputEventMouse or event is InputEventMouseMotion:
+			accept_event()
+			return
+	if _handle_formal_place_input(event):
+		accept_event()
+		return
+	var selection_before := selected_country_id
+	super._gui_input(event)
+	if selected_country_id != selection_before:
+		var mapped_market := formal_simulation.market_id_for_polity(
+			_selected_polity_entity_id()
+		)
+		if not mapped_market.is_empty():
+			_observed_market_id = mapped_market
+			if _formal_workspace == WORKSPACE_ECONOMY:
+				_refresh_selected_market()
+		_refresh_political_observations()
+		queue_redraw()
+
+
 func _draw() -> void:
 	super._draw()
-	_draw_formal_world_status()
-	if economy_panel_open:
-		_draw_formal_polity_panel()
+	if _formal_workspace == WORKSPACE_MAP:
+		_draw_formal_world_status()
+		_draw_world_context_navigation(Vector2(324.0, 70.0))
+		_draw_economy_map_controls()
+		_draw_formal_place_card()
+		if economy_panel_open:
+			_draw_formal_polity_panel()
+	else:
+		_button_hits.clear()
+		_draw_formal_shell_page()
+	_draw_formal_navigation()
+	if _system_menu_open:
+		_draw_formal_system_menu()
+
+
+func _draw_country_flag_skins() -> void:
+	if _map_observation_mode == MAP_MODE_POLITICAL:
+		super._draw_country_flag_skins()
+
+
+func _draw_zoom_country_labels() -> void:
+	# Country names are contextual by default: selected/hover labels are already
+	# rendered by the historical anchor layer.  The existing ranked label system
+	# remains available behind an explicit player toggle.
+	if _country_labels_enabled:
+		super._draw_zoom_country_labels()
+
+
+func _draw_global_world() -> void:
+	super._draw_global_world()
+	if _formal_workspace == WORKSPACE_MAP:
+		_draw_formal_place_layer()
+
+
+func _political_fill_color(entity_id: String, alpha: float) -> Color:
+	if _map_observation_mode == MAP_MODE_POLITICAL:
+		return super._political_fill_color(entity_id, alpha)
+	var values := _economy_overlay_cache.get("values_by_polity_id", {}) as Dictionary
+	var observation := values.get(entity_id, {}) as Dictionary
+	if observation.is_empty():
+		return Color(0.22, 0.27, 0.27, minf(alpha, 0.72))
+	var normalized := float(observation.get("normalized_bp", 0)) / 10000.0
+	if _map_observation_mode == MAP_MODE_FULFILLMENT:
+		var fulfillment := float(observation.get("value", 0.0)) / 10000.0
+		var color := Color(0.66, 0.20, 0.13).lerp(Color(0.18, 0.68, 0.49), clampf(fulfillment, 0.0, 1.0))
+		color.a = minf(alpha, 0.84)
+		return color
+	var shortage_color := Color(0.24, 0.48, 0.45).lerp(Color(0.82, 0.24, 0.12), normalized)
+	shortage_color.a = minf(alpha, 0.84)
+	return shortage_color
+
+
+func _draw_economy_map_controls() -> void:
+	var rect := Rect2(324.0, 112.0, 632.0, 45.0)
+	_panel(rect, Color(0.012, 0.031, 0.035, 0.95), Color(0.67, 0.58, 0.34, 0.36))
+	var options: Array[Dictionary] = [
+		{"id": MAP_MODE_POLITICAL, "label": "Political"},
+		{"id": MAP_MODE_FULFILLMENT, "label": "Economy Fulfillment"},
+		{"id": MAP_MODE_SHORTAGE, "label": "Economy Shortage"},
+	]
+	var x := rect.position.x + 8.0
+	for option: Dictionary in options:
+		var mode_id := str(option.get("id", ""))
+		var width := 105.0 if mode_id == MAP_MODE_POLITICAL else 182.0
+		var button_rect := Rect2(x, rect.position.y + 8.0, width, 28.0)
+		_draw_button(button_rect, str(option.get("label", mode_id)), "formal_map_mode:%s" % mode_id, true)
+		if mode_id == _map_observation_mode:
+			draw_line(button_rect.position + Vector2(7.0, 26.0), button_rect.end - Vector2(7.0, 2.0), Color(0.96, 0.76, 0.38, 0.95), 2.0)
+		x += width + 6.0
+	_draw_button(
+		Rect2(x, rect.position.y + 8.0, 112.0, 28.0),
+		"Labels ON" if _country_labels_enabled else "Labels OFF",
+		"formal_map_labels_toggle",
+		true
+	)
+	if _map_observation_mode == MAP_MODE_POLITICAL:
+		return
+	var legend := Rect2(700.0, 164.0, 238.0, 54.0)
+	_panel(legend, Color(0.012, 0.031, 0.035, 0.94), Color(0.54, 0.66, 0.55, 0.30))
+	var title := "满足率  低 → 高" if _map_observation_mode == MAP_MODE_FULFILLMENT else "短缺量  低 → 高"
+	_draw_label(legend.position + Vector2(12.0, 22.0), title, 10, Color(0.90, 0.84, 0.66, 1.0))
+	for index: int in 8:
+		var ratio := float(index) / 7.0
+		var color := (
+			Color(0.66, 0.20, 0.13).lerp(Color(0.18, 0.68, 0.49), ratio)
+			if _map_observation_mode == MAP_MODE_FULFILLMENT
+			else Color(0.24, 0.48, 0.45).lerp(Color(0.82, 0.24, 0.12), ratio)
+		)
+		draw_rect(Rect2(legend.position + Vector2(12.0 + index * 24.0, 32.0), Vector2(24.0, 12.0)), color)
+		_draw_label(legend.position + Vector2(12.0, 51.0), "灰色：无可靠 Formal 映射 / 尚未日结", 8, Color(0.70, 0.76, 0.72, 0.95))
+
+
+func _draw_formal_place_card() -> void:
+	if _selected_place_context_cache.is_empty():
+		return
+	var context := _selected_place_context_cache
+	var card := Rect2(size.x - 350.0, 230.0, 324.0, 218.0)
+	_panel(card, Color(0.012, 0.032, 0.036, 0.975), Color(0.79, 0.66, 0.35, 0.56))
+	_draw_label(card.position + Vector2(18.0, 30.0), str(context.get("display_label", "地点")), 18, Color(0.96, 0.84, 0.58, 1.0))
+	_draw_label(card.position + Vector2(18.0, 53.0), "PLACE CARD · %s" % str(context.get("kind", "place")).to_upper(), 9, Color(0.61, 0.78, 0.74, 0.96))
+	var statistics_level := "尚无 Formal 经济映射"
+	if str(context.get("economic_statistics_level", "")) == "economic_aggregate":
+		statistics_level = "%s aggregate" % str(context.get("economy_entity_id", ""))
+	_draw_shell_lines(card.position + Vector2(18.0, 82.0), [
+		"政治环境：%s" % str(context.get("runtime_polity_id", "不可用")),
+		"当前经济统计层级：%s" % statistics_level,
+		"正式组织：%d" % int(context.get("organization_count", 0)),
+		"来源：Formal Spatial catalogue",
+	], 21.0, 10, Color(0.80, 0.86, 0.80, 0.98))
+	_draw_button(Rect2(card.end.x - 70.0, card.position.y + 12.0, 54.0, 25.0), "关闭", "formal_place_close", true)
+	var player_place := _player_context_cache.get("current_place", {}) as Dictionary
+	var is_player_place := str(player_place.get("id", "")) == str(context.get("place_id", ""))
+	_draw_label(
+		card.position + Vector2(18.0, 177.0),
+		"这是人物当前地点" if is_player_place else "观察地点不会移动人物",
+		9,
+		Color(0.91, 0.78, 0.49, 0.98) if is_player_place else Color(0.67, 0.77, 0.73, 0.96)
+	)
+	_draw_button(
+		Rect2(card.position.x + 18.0, card.end.y - 32.0, 144.0, 25.0),
+		"返回人物处境",
+		"formal_place_to_situation",
+		true
+	)
+
+
+func _on_formal_state_changed(change: Dictionary) -> void:
+	if (
+		bool(change.get("initialized", false))
+		or bool(change.get("restored", false))
+		or bool(change.get("player", false))
+		or bool(change.get("economy", false))
+	):
+		_refresh_player_context_cache()
+		if bool(change.get("economy", false)) or bool(change.get("restored", false)):
+			_economy_observation_dirty = true
+			if _formal_workspace == WORKSPACE_ECONOMY:
+				_refresh_economy_observations()
+			elif _formal_workspace == WORKSPACE_MAP and _map_observation_mode != MAP_MODE_POLITICAL:
+				_refresh_economy_overlay()
+		_refresh_shell_observations()
+		queue_redraw()
+
+
+func _refresh_player_context_cache() -> void:
+	_player_context_cache = (
+		formal_simulation.player_context_view()
+		if formal_simulation.initialized
+		else {}
+	)
+	_refresh_political_observations()
+
+
+func _refresh_political_observations() -> void:
+	if not formal_simulation.initialized:
+		_local_political_observation_cache = {}
+		_observed_political_observation_cache = {}
+		return
+	var local_id := _home_historical_entity_id()
+	_local_political_observation_cache = formal_simulation.political_observation(
+		local_id
+	)
+	_observed_political_observation_cache = (
+		formal_simulation.political_observation(_selected_polity_entity_id())
+	)
+
+
+func _set_politics_tab(tab_id: String) -> bool:
+	for tab: Dictionary in POLITICS_TABS:
+		if str(tab.get("id", "")) == tab_id:
+			_politics_tab = tab_id
+			_refresh_political_observations()
+			queue_redraw()
+			return true
+	return false
+
+
+func _refresh_shell_observations() -> void:
+	if not formal_simulation.initialized:
+		_defend_options_cache = {}
+		_situation_market_cache = {}
+		_situation_player_organization_cache = {}
+		return
+	_defend_options_cache = formal_simulation.player_defend_options()
+	_situation_player_organization_cache = (
+		formal_simulation.player_organization_observation()
+	)
+	var market_id := _my_market_id()
+	_situation_market_cache = (
+		formal_simulation.market_observation(market_id)
+		if not market_id.is_empty()
+		else {
+			"available": false,
+			"reason": "no_formal_market_mapping",
+		}
+	)
+
+
+func _refresh_formal_place_catalog() -> void:
+	_formal_place_catalog_cache = (
+		formal_simulation.place_observation_catalog()
+		if formal_simulation.initialized
+		else {}
+	)
+	_formal_place_projection_revision = -1
+	_formal_place_screen_cache.clear()
+	if not _selected_place_id.is_empty():
+		_selected_place_context_cache = formal_simulation.place_context_view(
+			_selected_place_id
+		)
+
+
+func _rebuild_formal_place_screen_cache() -> void:
+	var lod := map_visual_lod()
+	if (
+		_formal_place_projection_revision == _projection_revision
+		and _formal_place_projection_lod == lod
+	):
+		return
+	_formal_place_projection_revision = _projection_revision
+	_formal_place_projection_lod = lod
+	_formal_place_screen_cache.clear()
+	if lod == MAP_VISUAL_LOD_WORLD:
+		return
+	var basis := Basis(Vector3.RIGHT, tilt) * Basis(Vector3.UP, yaw)
+	for row_value: Variant in _formal_place_catalog_cache.get("rows", []) as Array:
+		if not row_value is Dictionary:
+			continue
+		var row := row_value as Dictionary
+		var minimum_zoom := float(row.get("min_zoom", 0.0))
+		var maximum_zoom := float(row.get("max_zoom", WORLD_ZOOM_MAX))
+		if world_zoom < minimum_zoom or world_zoom > maximum_zoom:
+			continue
+		if lod == MAP_VISUAL_LOD_REGION and not bool(row.get("major", false)) and str(row.get("kind", "")) != "port":
+			continue
+		var lon_lat := row.get("lon_lat", []) as Array
+		if lon_lat.size() < 2:
+			continue
+		var rotated := basis * _lon_lat_to_unit(Vector2(float(lon_lat[0]), float(lon_lat[1])))
+		if rotated.z < 0.0:
+			continue
+		_formal_place_screen_cache[str(row.get("place_id", ""))] = {
+			"point": _sphere_screen(rotated),
+			"context": row.duplicate(true),
+		}
+
+
+func _handle_formal_place_input(event: InputEvent) -> bool:
+	if (
+		_formal_workspace != WORKSPACE_MAP
+		or map_visual_lod() == MAP_VISUAL_LOD_WORLD
+		or world_mode != WORLD_COUNTRIES
+		or space_level != WORLD
+	):
+		if not _hover_place_id.is_empty():
+			_hover_place_id = ""
+			queue_redraw()
+		return false
+	_rebuild_formal_place_screen_cache()
+	if event is InputEventMouseMotion:
+		var motion := event as InputEventMouseMotion
+		if dragging:
+			return false
+		var next_hover := _formal_place_id_at(motion.position)
+		if next_hover != _hover_place_id:
+			_hover_place_id = next_hover
+			queue_redraw()
+		# A marker hover owns only its small hit target; blank map remains draggable.
+		return not next_hover.is_empty()
+	if event is InputEventMouseButton:
+		var button := event as InputEventMouseButton
+		if button.button_index != MOUSE_BUTTON_LEFT or button.pressed:
+			return false
+		if drag_moved:
+			return false
+		var place_id := _formal_place_id_at(button.position)
+		if place_id.is_empty():
+			return false
+		dragging = false
+		angular_velocity = 0.0
+		set_process(false)
+		_selected_place_id = place_id
+		_selected_place_context_cache = formal_simulation.place_context_view(place_id)
+		queue_redraw()
+		return true
+	return false
+
+
+func _formal_place_id_at(position: Vector2) -> String:
+	var best_id := ""
+	var best_distance := INF
+	for place_key: Variant in _formal_place_screen_cache.keys():
+		var place_id := str(place_key)
+		var marker := _formal_place_screen_cache.get(place_id, {}) as Dictionary
+		var point := marker.get("point", Vector2.INF) as Vector2
+		var distance := position.distance_to(point)
+		if distance <= 10.0 and distance < best_distance:
+			best_id = place_id
+			best_distance = distance
+	return best_id
+
+
+func _draw_formal_place_layer() -> void:
+	_rebuild_formal_place_screen_cache()
+	if _formal_place_screen_cache.is_empty():
+		return
+	var lod := map_visual_lod()
+	var occupied: Array[Rect2] = []
+	var labels_drawn := 0
+	var maximum_labels := 8 if lod == MAP_VISUAL_LOD_REGION else 16
+	for place_key: Variant in _formal_place_screen_cache.keys():
+		var place_id := str(place_key)
+		var marker := _formal_place_screen_cache.get(place_id, {}) as Dictionary
+		var context := marker.get("context", {}) as Dictionary
+		var point := marker.get("point", Vector2.ZERO) as Vector2
+		var selected := place_id == _selected_place_id
+		var hovered := place_id == _hover_place_id
+		var kind := str(context.get("kind", "city"))
+		var radius := 5.0 if bool(context.get("major", false)) else 3.4
+		if selected or hovered:
+			radius += 2.0
+		var color := Color(0.76, 0.84, 0.72, 0.88)
+		if selected:
+			color = Color(0.96, 0.73, 0.32, 1.0)
+		elif hovered:
+			color = Color(0.43, 0.93, 0.91, 1.0)
+		if kind == "port":
+			draw_circle(point, radius + 1.5, Color(color.r, color.g, color.b, 0.12), false, 1.2)
+			draw_arc(point, radius + 1.5, 0.0, TAU, 20, color, 1.7, true)
+		else:
+			draw_circle(point, radius, color)
+		var show_label := selected or hovered or (
+			lod == MAP_VISUAL_LOD_CITY and labels_drawn < maximum_labels
+		)
+		if not show_label:
+			continue
+		var label := str(context.get("display_label", place_id))
+		var label_rect := Rect2(point + Vector2(8.0, -13.0), Vector2(maxf(40.0, label.length() * 12.0), 18.0))
+		var overlaps := false
+		if not selected and not hovered:
+			for existing: Rect2 in occupied:
+				if existing.intersects(label_rect.grow(3.0)):
+					overlaps = true
+					break
+		if overlaps:
+			continue
+		occupied.append(label_rect)
+		_draw_label(label_rect.position + Vector2(0.0, 13.0), label, 10, color)
+		labels_drawn += 1
+	if lod == MAP_VISUAL_LOD_CITY:
+		var badge := Rect2(_hemisphere_rect.position + Vector2(14.0, 56.0), Vector2(178.0, 27.0))
+		_panel(badge, Color(0.025, 0.052, 0.052, 0.94), Color(0.62, 0.73, 0.53, 0.42))
+		_draw_label(badge.position + Vector2(10.0, 18.0), "CITY · 地点观察层", 10, Color(0.87, 0.84, 0.65, 1.0))
+
+
+func _refresh_organization_observations() -> void:
+	if not formal_simulation.initialized:
+		_organization_catalog_cache = {}
+		_player_organization_cache = {}
+		_organization_detail_cache = {}
+		_organization_responsibility_cache = {}
+		return
+	_organization_catalog_cache = formal_simulation.organization_observation_catalog()
+	_player_organization_cache = formal_simulation.player_organization_observation()
+	_organization_responsibility_cache = formal_simulation.organization_responsibility_observation()
+	var rows := _organization_catalog_cache.get("rows", []) as Array
+	if _selected_organization_id.is_empty() and not rows.is_empty():
+		_selected_organization_id = str((rows[0] as Dictionary).get("organization_id", ""))
+	_organization_detail_cache = formal_simulation.organization_observation(
+		_selected_organization_id
+	)
+	_organization_refresh_count += 1
+
+
+func _set_organization_tab(tab_id: String) -> bool:
+	for tab: Dictionary in ORGANIZATION_TABS:
+		if str(tab.get("id", "")) == tab_id:
+			_organization_tab = tab_id
+			_refresh_organization_observations()
+			queue_redraw()
+			return true
+	return false
+
+
+func _select_organization(organization_id: String) -> bool:
+	var detail := formal_simulation.organization_observation(organization_id)
+	if not bool(detail.get("available", false)):
+		return false
+	_selected_organization_id = organization_id
+	_organization_detail_cache = detail
+	queue_redraw()
+	return true
+
+
+func _my_market_id() -> String:
+	var economic := _player_context_cache.get("economic_observation", {}) as Dictionary
+	var economy_id := str(economic.get("economy_entity_id", ""))
+	return formal_simulation.market_registry_view().market_id_for_economic_aggregate(
+		economy_id
+	)
+
+
+func _selected_polity_market_id() -> String:
+	return formal_simulation.market_id_for_polity(_selected_polity_entity_id())
+
+
+func _refresh_economy_catalog() -> void:
+	_economy_catalog_cache = formal_simulation.economy_observation_catalog()
+	_commodity_catalog_cache = formal_simulation.commodity_catalog_observation()
+	if _observed_market_id.is_empty():
+		_observed_market_id = _selected_polity_market_id()
+	if _observed_market_id.is_empty():
+		_observed_market_id = _my_market_id()
+
+
+func _refresh_selected_market() -> void:
+	_selected_market_cache = formal_simulation.market_observation(
+		_observed_market_id
+	)
+	_rebuild_commodity_rows_cache()
+
+
+func _refresh_economy_observations(force: bool = false) -> void:
+	if not formal_simulation.initialized:
+		return
+	var current_revision := formal_simulation.economy_observation_revision()
+	if _economy_tab == ECONOMY_TAB_PULSE:
+		if _observed_market_id.is_empty():
+			_observed_market_id = _my_market_id()
+		if (
+			force
+			or _economy_observation_dirty
+			or int(_market_pulse_cache.get("state_revision", -2)) != current_revision
+		):
+			_market_pulse_cache = formal_simulation.market_pulse_observation()
+			_economy_observation_dirty = false
+			_economy_refresh_count += 1
+			_update_pulse_trend_series()
+		return
+	var cached_revision := int(_economy_catalog_cache.get("state_revision", -2))
+	if force or _economy_observation_dirty or cached_revision != current_revision:
+		_refresh_economy_catalog()
+		_economy_observation_dirty = false
+		_economy_refresh_count += 1
+	match _economy_tab:
+		ECONOMY_TAB_OVERVIEW, ECONOMY_TAB_MARKETS, ECONOMY_TAB_COMMODITIES:
+			_refresh_selected_market()
+		ECONOMY_TAB_SHORTAGES:
+			_shortage_observation_cache = formal_simulation.shortage_observation()
+			_rebuild_shortage_rows_cache()
+		ECONOMY_TAB_TRANSPORT:
+			_transport_observation_cache = formal_simulation.transport_observation()
+
+
+func _update_pulse_trend_series() -> void:
+	if _pulse_fulfillment_trend == null or _pulse_unmet_trend == null:
+		return
+	var rows := _market_pulse_cache.get("global_history", []) as Array
+	_pulse_fulfillment_trend.set_series(
+		rows,
+		"day_index",
+		"fulfillment_bp",
+		Color(0.42, 0.88, 0.64, 1.0)
+	)
+	_pulse_unmet_trend.set_series(
+		rows,
+		"day_index",
+		"unmet_units",
+		Color(0.91, 0.48, 0.27, 1.0),
+		true
+	)
+
+
+func _sync_pulse_trend_controls() -> void:
+	if _pulse_fulfillment_trend == null or _pulse_unmet_trend == null:
+		return
+	var should_show := (
+		_formal_workspace == WORKSPACE_ECONOMY
+		and _economy_tab == ECONOMY_TAB_PULSE
+		and not _system_menu_open
+	)
+	_pulse_fulfillment_trend.visible = should_show
+	_pulse_unmet_trend.visible = should_show
+	if not should_show:
+		return
+	var content := Rect2(24.0, 82.0, size.x - 48.0, size.y - 106.0)
+	_pulse_fulfillment_trend.position = content.position + Vector2(64.0, 405.0)
+	_pulse_fulfillment_trend.size = Vector2(content.size.x * 0.43 - 64.0, 82.0)
+	_pulse_unmet_trend.position = content.position + Vector2(content.size.x * 0.48 + 28.0, 405.0)
+	_pulse_unmet_trend.size = Vector2(content.size.x * 0.43 - 52.0, 82.0)
+
+
+func _refresh_economy_overlay() -> void:
+	if _map_observation_mode == MAP_MODE_POLITICAL:
+		_economy_overlay_cache = {}
+		return
+	var mode := "fulfillment" if _map_observation_mode == MAP_MODE_FULFILLMENT else "shortage"
+	_economy_overlay_cache = formal_simulation.economy_overlay_observation(mode)
+	_economy_observation_dirty = false
+	queue_redraw()
+
+
+func _rebuild_commodity_rows_cache() -> void:
+	var rows := DataRecordUtils.to_dictionary_array(
+		_selected_market_cache.get("commodities", [])
+	)
+	var query := _commodity_search.to_lower()
+	if not query.is_empty():
+		var filtered: Array[Dictionary] = []
+		for row: Dictionary in rows:
+			if (
+				str(row.get("commodity_id", "")).to_lower().contains(query)
+				or str(row.get("name_zh", "")).to_lower().contains(query)
+			):
+				filtered.append(row)
+		rows = filtered
+	rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		match _commodity_sort:
+			"commodity":
+				return str(a.get("commodity_id", "")) < str(b.get("commodity_id", ""))
+			"fulfillment":
+				return int(a.get("fulfillment_bp", -1)) < int(b.get("fulfillment_bp", -1))
+			_:
+				return float(a.get("unmet", 0.0)) > float(b.get("unmet", 0.0))
+	)
+	_commodity_rows_cache = rows
+	_commodity_page = clampi(_commodity_page, 0, maxi(0, (rows.size() - 1) / 9))
+
+
+func _rebuild_shortage_rows_cache() -> void:
+	var rows := DataRecordUtils.to_dictionary_array(
+		_shortage_observation_cache.get("rows", [])
+	)
+	rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		match _shortage_sort:
+			"fulfillment":
+				return int(a.get("fulfillment_bp", -1)) < int(b.get("fulfillment_bp", -1))
+			"commodity":
+				return str(a.get("commodity_id", "")) < str(b.get("commodity_id", ""))
+			"market":
+				return str(a.get("market_id", "")) < str(b.get("market_id", ""))
+			_:
+				return float(a.get("unmet", 0.0)) > float(b.get("unmet", 0.0))
+	)
+	_shortage_rows_cache = rows
+	_shortage_page = clampi(_shortage_page, 0, maxi(0, (rows.size() - 1) / 9))
+
+
+func _set_economy_tab(tab_id: String) -> bool:
+	var valid := false
+	for tab: Dictionary in ECONOMY_TABS:
+		if str(tab.get("id", "")) == tab_id:
+			valid = true
+			break
+	if not valid:
+		return false
+	_economy_tab = tab_id
+	_refresh_economy_observations()
+	_sync_pulse_trend_controls()
+	queue_redraw()
+	return true
+
+
+func formal_workspace_ids() -> Array[String]:
+	var output: Array[String] = []
+	for workspace: Dictionary in FORMAL_WORKSPACES:
+		output.append(str(workspace.get("id", "")))
+	return output
+
+
+func formal_primary_navigation_ids() -> Array[String]:
+	var output: Array[String] = []
+	for workspace: Dictionary in FORMAL_PRIMARY_NAVIGATION:
+		output.append(str(workspace.get("id", "")))
+	return output
+
+
+func world_context_navigation_ids() -> Array[String]:
+	var output: Array[String] = []
+	for workspace: Dictionary in WORLD_CONTEXT_NAVIGATION:
+		output.append(str(workspace.get("id", "")))
+	return output
+
+
+func person_tab_id() -> String:
+	return _person_tab
+
+
+func situation_observation() -> Dictionary:
+	return {
+		"owner": "FormalWorldApplication",
+		"derived": true,
+		"person": _player_context_cache.duplicate(true),
+		"market": _situation_market_cache.duplicate(true),
+		"organization": _situation_player_organization_cache.duplicate(true),
+		"local_politics": _local_political_observation_cache.duplicate(true),
+		"defend": _defend_options_cache.duplicate(true),
+		"time": formal_simulation.date_time().duplicate(true),
+	}
+
+
+func formal_workspace_id() -> String:
+	return _formal_workspace
+
+
+func set_formal_workspace(workspace_id: String) -> bool:
+	if not formal_workspace_ids().has(workspace_id):
+		return false
+	_formal_workspace = workspace_id
+	active_hud_panel = ""
+	info_open = false
+	economy_panel_open = false
+	dragging = false
+	angular_velocity = 0.0
+	set_process(false)
+	if workspace_id == WORKSPACE_PERSON:
+		_refresh_shell_observations()
+	elif workspace_id == WORKSPACE_ECONOMY:
+		_refresh_economy_observations()
+	elif workspace_id == WORKSPACE_POLITICS:
+		_refresh_political_observations()
+	elif workspace_id == WORKSPACE_ORGANIZATION:
+		_refresh_organization_observations()
+	elif workspace_id == WORKSPACE_MAP and _map_observation_mode != MAP_MODE_POLITICAL:
+		_refresh_economy_overlay()
+	if workspace_id == WORKSPACE_MILITARY:
+		_refresh_shell_observations()
+	_sync_pulse_trend_controls()
+	queue_redraw()
+	return true
+
+
+func _set_person_tab(tab_id: String) -> bool:
+	for tab: Dictionary in PERSON_TABS:
+		if str(tab.get("id", "")) == tab_id:
+			_person_tab = tab_id
+			_refresh_shell_observations()
+			queue_redraw()
+			return true
+	return false
+
+
+func shell_player_person_id() -> String:
+	return str(_player_context_cache.get("person_id", ""))
+
+
+func local_political_observation() -> Dictionary:
+	return _local_political_observation_cache.duplicate(true)
+
+
+func observed_political_observation() -> Dictionary:
+	return _observed_political_observation_cache.duplicate(true)
+
+
+func politics_tab_id() -> String:
+	return _politics_tab
+
+
+func organization_refresh_count() -> int:
+	return _organization_refresh_count
+
+
+func selected_organization_id() -> String:
+	return _selected_organization_id
+
+
+func selected_organization_observation() -> Dictionary:
+	return _organization_detail_cache.duplicate(true)
+
+
+func formal_page_execution_actions() -> Array[String]:
+	var actions: Array[String] = []
+	if _formal_workspace == WORKSPACE_MILITARY:
+		for option: Dictionary in _defend_options_cache.get("options", []) as Array:
+			if bool(option.get("authorized", false)):
+				actions.append("military.defend")
+	return actions
+
+
+func map_projection_revision() -> int:
+	return _projection_revision
+
+
+func formal_system_menu_open() -> bool:
+	return _system_menu_open
+
+
+func player_card_person_id() -> String:
+	return str(_player_context_cache.get("person_id", ""))
+
+
+func character_detail_person_id() -> String:
+	return str(_player_context_cache.get("person_id", ""))
+
+
+func economy_tab_id() -> String:
+	return _economy_tab
+
+
+func economy_observed_market_id() -> String:
+	return _observed_market_id
+
+
+func economy_my_market_id() -> String:
+	return _my_market_id()
+
+
+func economy_catalog_observation() -> Dictionary:
+	return _economy_catalog_cache.duplicate(true)
+
+
+func economy_selected_market_observation() -> Dictionary:
+	return _selected_market_cache.duplicate(true)
+
+
+func economy_market_pulse_observation() -> Dictionary:
+	return _market_pulse_cache.duplicate(true)
+
+
+func economic_context_observation() -> Dictionary:
+	var place := _player_context_cache.get("current_place", {}) as Dictionary
+	var aggregate_market := (
+		_situation_market_cache
+		if not _situation_market_cache.is_empty()
+		else formal_simulation.market_observation(_my_market_id())
+	)
+	return {
+		"owner": "FormalWorldApplication",
+		"derived": true,
+		"place": place.duplicate(true),
+		"local_market": {
+			"available": false,
+			"reason": "no_place_scoped_formal_market",
+		},
+		"regional_market": {
+			"available": false,
+			"reason": "regional_market_layer_not_formalized",
+		},
+		"aggregate_market": aggregate_market.duplicate(true),
+		"global_market_count": int(_market_pulse_cache.get("market_count", 0)),
+		"employment": {
+			"available": false,
+			"reason": "employment_owner_unavailable",
+		},
+	}
+
+
+func economy_shortage_observation() -> Dictionary:
+	return _shortage_observation_cache.duplicate(true)
+
+
+func economy_transport_observation() -> Dictionary:
+	return _transport_observation_cache.duplicate(true)
+
+
+func economy_observation_refresh_count() -> int:
+	return _economy_refresh_count
+
+
+func map_observation_mode() -> String:
+	return _map_observation_mode
+
+
+func economy_overlay_observation() -> Dictionary:
+	return _economy_overlay_cache.duplicate(true)
+
+
+func formal_country_labels_enabled() -> bool:
+	return _country_labels_enabled
+
+
+func formal_place_catalog_observation() -> Dictionary:
+	return _formal_place_catalog_cache.duplicate(true)
+
+
+func formal_selected_place_id() -> String:
+	return _selected_place_id
+
+
+func formal_selected_place_context() -> Dictionary:
+	return _selected_place_context_cache.duplicate(true)
+
+
+func formal_place_screen_point(place_id: String) -> Vector2:
+	_rebuild_formal_place_screen_cache()
+	return ((_formal_place_screen_cache.get(place_id, {}) as Dictionary).get(
+		"point", Vector2.INF
+	) as Vector2)
+
+
+func formal_map_lod_report(include_diagnostics: bool = false) -> Dictionary:
+	var report := map_visual_state_report()
+	var mappings: Array[String] = []
+	for entity_key: Variant in _country_by_id.keys():
+		var entity_id := str(entity_key)
+		var entity := _country_by_id.get(entity_id, {}) as Dictionary
+		var flag_id := str(entity.get("flag_id", ""))
+		var imported := _historical_imported_flag_texture_by_id.get(flag_id) as Texture2D
+		mappings.append("%s|%s|%s" % [
+			entity_id,
+			flag_id,
+			str(imported.resource_path) if imported != null else "",
+		])
+	mappings.sort()
+	report["historical_imported_flag_count"] = _historical_imported_flag_texture_by_id.size()
+	report["flag_resource_mapping_fingerprint"] = "\n".join(mappings).sha256_text()
+	report["selected_country_id"] = selected_country_id
+	report["hover_country_id"] = hover_country_id
+	var world_revision := formal_simulation.economy_observation_revision()
+	report["world_revision"] = world_revision
+	var camera_state := "|".join([
+		"%.6f" % yaw,
+		"%.6f" % tilt,
+		"%.6f" % world_zoom,
+		str(report.get("visual_lod", "")),
+		selected_country_id,
+		hover_country_id,
+		str(world_revision),
+	])
+	report["camera_state_hash"] = camera_state.sha256_text()
+	if include_diagnostics:
+		report["edge_artifacts"] = map_screen_edge_artifact_report()
+		report["performance"] = map_performance_diagnostic_report()
+		var render_state := "|".join([
+			str(report.get("camera_state_hash", "")),
+			var_to_str(report.get("visible_political_entity_ids", [])),
+			str(report.get("flag_record_entity_count", 0)),
+			str(report.get("flag_eligible_entity_count", 0)),
+			str(report.get("drawn_flag_entity_count", 0)),
+			str(report.get("fallback_count", 0)),
+			map_render_projected_fingerprint().sha256_text(),
+			str(report.get("flag_resource_mapping_fingerprint", "")),
+		])
+		report["render_state_hash"] = render_state.sha256_text()
+		report["cache_dependencies"] = {
+			"political_projected_geometry": ["camera_state", "projection_revision", "geometry_revision"],
+			"flag_uv_batch": ["geometry_revision", "projection_revision", "clipping_regime", "flag_identity"],
+			"labels": ["camera_state", "visual_lod", "selection", "labels_toggle"],
+			"place_layer": ["camera_state", "visual_lod", "spatial_catalog_fingerprint", "selection"],
+			"economy_overlay": ["economy_observation_revision", "polity_economy_mapping", "map_mode"],
+			"imported_flag_textures": ["historical_flag_catalog_fingerprint"],
+		}
+	return report
 
 
 func _draw_formal_world_status() -> void:
@@ -443,6 +1541,881 @@ func _draw_formal_panel_buttons(rect: Rect2) -> void:
 		)
 
 
+func _draw_formal_navigation() -> void:
+	var nav_rect := Rect2(0.0, 0.0, size.x, 62.0)
+	_remove_hits_under(nav_rect)
+	draw_rect(nav_rect, Color(0.010, 0.025, 0.030, 0.985))
+	draw_line(Vector2(0.0, 61.0), Vector2(size.x, 61.0), Color(0.72, 0.62, 0.36, 0.38), 1.0)
+	_draw_label(Vector2(20.0, 25.0), "1900", 19, Color(0.96, 0.86, 0.61, 1.0))
+	_draw_label(Vector2(20.0, 46.0), "PLAYER SITUATION", 8, Color(0.60, 0.72, 0.68, 0.9))
+	var x := 154.0
+	for workspace: Dictionary in FORMAL_PRIMARY_NAVIGATION:
+		var workspace_id := str(workspace.get("id", ""))
+		var width := 154.0 if workspace_id in [WORKSPACE_PERSON, WORKSPACE_ECONOMY] else 112.0
+		var rect := Rect2(x, 14.0, width, 34.0)
+		var active := (
+			workspace_id == _formal_workspace
+			or (
+				workspace_id == WORKSPACE_MAP
+				and _formal_workspace in [WORKSPACE_POLITICS, WORKSPACE_MILITARY]
+			)
+		)
+		_panel(
+			rect,
+			Color(0.15, 0.13, 0.075, 0.96) if active else Color(0.035, 0.06, 0.062, 0.94),
+			Color(0.88, 0.72, 0.38, 0.72) if active else Color(0.52, 0.54, 0.39, 0.28)
+		)
+		_register_hit(rect, "formal_workspace:%s" % workspace_id, true)
+		_draw_label(rect.position + Vector2(12.0, 22.0), str(workspace.get("label", workspace_id)), 11)
+		x += width + 8.0
+	_draw_button(Rect2(size.x - 102.0, 14.0, 82.0, 34.0), "系统", "formal_system_toggle", true)
+
+
+func _draw_world_context_navigation(position: Vector2) -> void:
+	var x := position.x
+	for workspace: Dictionary in WORLD_CONTEXT_NAVIGATION:
+		var workspace_id := str(workspace.get("id", ""))
+		var width := 104.0 if workspace_id != WORKSPACE_POLITICS else 122.0
+		var rect := Rect2(x, position.y, width, 30.0)
+		_draw_button(
+			rect,
+			str(workspace.get("label", workspace_id)),
+			"formal_world_context:%s" % workspace_id,
+			true
+		)
+		if workspace_id == _formal_workspace:
+			draw_line(
+				rect.position + Vector2(8.0, 28.0),
+				rect.end - Vector2(8.0, 2.0),
+				Color(0.96, 0.76, 0.38, 0.95),
+				2.0
+			)
+		x += width + 7.0
+
+
+func _remove_hits_under(cover: Rect2) -> void:
+	var retained: Array[Dictionary] = []
+	for hit: Dictionary in _button_hits:
+		var rect := hit.get("rect", Rect2()) as Rect2
+		if not rect.intersects(cover, true):
+			retained.append(hit)
+	_button_hits = retained
+
+
+func _draw_formal_shell_page() -> void:
+	draw_rect(Rect2(Vector2.ZERO, size), Color(0.008, 0.020, 0.024, 1.0))
+	var content := Rect2(24.0, 82.0, size.x - 48.0, size.y - 106.0)
+	_panel(content, Color(0.016, 0.037, 0.042, 0.99), Color(0.70, 0.61, 0.36, 0.32))
+	match _formal_workspace:
+		WORKSPACE_PERSON:
+			_draw_person_workspace(content)
+		WORKSPACE_ECONOMY:
+			_draw_economy_workspace(content)
+		WORKSPACE_RELATIONS:
+			_draw_relations_workspace(content)
+		WORKSPACE_ORGANIZATION:
+			_draw_organization_workspace(content)
+		WORKSPACE_POLITICS:
+			_draw_politics_workspace(content)
+		WORKSPACE_MILITARY:
+			_draw_military_workspace(content)
+	_draw_shell_footer(content)
+
+
+func _draw_workspace_heading(rect: Rect2, title: String, subtitle: String) -> void:
+	_draw_label(rect.position + Vector2(28.0, 42.0), title, 23, Color(0.96, 0.88, 0.67, 1.0))
+	_draw_label(rect.position + Vector2(28.0, 68.0), subtitle, 10, Color(0.67, 0.77, 0.73, 0.96))
+	draw_line(rect.position + Vector2(28.0, 84.0), Vector2(rect.end.x - 28.0, rect.position.y + 84.0), Color(0.64, 0.56, 0.33, 0.26), 1.0)
+
+
+func _draw_person_workspace(rect: Rect2) -> void:
+	_draw_workspace_heading(rect, "当前处境", "现在发生什么 · 与我有什么关系 · 当前能做什么")
+	_draw_person_subnavigation(rect)
+	if _person_tab == PERSON_TAB_DETAILS:
+		_draw_person_details(rect)
+	else:
+		_draw_person_situation(rect)
+
+
+func _draw_person_subnavigation(rect: Rect2) -> void:
+	var x := rect.position.x + 30.0
+	for tab: Dictionary in PERSON_TABS:
+		var tab_id := str(tab.get("id", ""))
+		var width := 148.0 if tab_id == PERSON_TAB_SITUATION else 176.0
+		var tab_rect := Rect2(x, rect.position.y + 96.0, width, 28.0)
+		_draw_button(
+			tab_rect,
+			str(tab.get("label", tab_id)),
+			"formal_person_tab:%s" % tab_id,
+			true
+		)
+		if tab_id == _person_tab:
+			draw_line(
+				tab_rect.position + Vector2(7.0, 26.0),
+				tab_rect.end - Vector2(7.0, 2.0),
+				Color(0.96, 0.76, 0.38, 0.95),
+				2.0
+			)
+		x += width + 8.0
+
+
+func _draw_person_situation(rect: Rect2) -> void:
+	var label := str(_player_context_cache.get("display_label", "正式人物不可用"))
+	var place := _player_context_cache.get("current_place", {}) as Dictionary
+	var source := _player_context_cache.get("population_source", {}) as Dictionary
+	var memberships := _situation_player_organization_cache.get("memberships", []) as Array
+	var appointments := _situation_player_organization_cache.get("appointments", []) as Array
+	var current_market := _situation_market_cache
+	var totals := current_market.get("daily_totals", {}) as Dictionary
+	var settled := bool(current_market.get("settled", false))
+	var fulfillment := (
+		"尚未日结"
+		if not settled
+		else "%.1f%%" % (float(totals.get("fulfillment_bp", 0)) / 100.0)
+	)
+	var local_shortage := _largest_market_shortage(current_market)
+	var local_politics := _local_political_observation_cache
+	var cards_top := rect.position.y + 138.0
+	var identity_card := Rect2(rect.position.x + 30.0, cards_top, 338.0, 174.0)
+	var livelihood_card := Rect2(rect.position.x + 382.0, cards_top, 400.0, 174.0)
+	var context_card := Rect2(rect.position.x + 796.0, cards_top, rect.size.x - 826.0, 174.0)
+	_draw_situation_card(identity_card, "现在", Color(0.70, 0.61, 0.36, 0.38))
+	_draw_label(identity_card.position + Vector2(18.0, 62.0), _format_sim_datetime(), 18, Color(0.96, 0.84, 0.57, 1.0))
+	_draw_label(identity_card.position + Vector2(18.0, 92.0), str(place.get("name", place.get("id", "地点不可用"))), 22, Color(0.89, 0.90, 0.80, 1.0))
+	_draw_shell_lines(identity_card.position + Vector2(18.0, 121.0), [
+		"%s · %s" % [label, "存活" if bool(_player_context_cache.get("alive", false)) else "非存活"],
+		"人口来源：%s" % str(source.get("id", "不可用")),
+	], 20.0, 9, Color(0.70, 0.80, 0.76, 0.96))
+
+	_draw_situation_card(livelihood_card, "生计 / 市场", Color(0.44, 0.64, 0.53, 0.30))
+	if bool(current_market.get("available", false)):
+		_draw_shell_lines(livelihood_card.position + Vector2(18.0, 59.0), [
+			"经济统计层级：%s aggregate" % str(current_market.get("economic_aggregate_id", "")),
+			"市场满足率：%s" % fulfillment,
+			"主要短缺：%s" % _shortage_situation_label(local_shortage, settled),
+			"在途运输：%d" % int(current_market.get("active_shipment_count", 0)),
+		], 24.0, 10)
+	else:
+		_draw_shell_lines(livelihood_card.position + Vector2(18.0, 59.0), [
+			"Local market：unavailable",
+			"当前地点没有可证明的 Formal market 映射",
+		], 24.0, 10)
+	_draw_button(
+		Rect2(livelihood_card.end.x - 116.0, livelihood_card.position.y + 13.0, 98.0, 25.0),
+		"查看经济",
+		"formal_workspace:%s" % WORKSPACE_ECONOMY,
+		true
+	)
+
+	_draw_situation_card(context_card, "组织 / 世界环境", Color(0.55, 0.51, 0.35, 0.30))
+	_draw_shell_lines(context_card.position + Vector2(18.0, 59.0), [
+		"正式成员 / 任职：%d / %d" % [memberships.size(), appointments.size()],
+		"%s" % ("暂无正式组织任职记录" if memberships.is_empty() and appointments.is_empty() else "Formal 组织记录可用"),
+		"所在地政治环境：%s" % str(local_politics.get("display_name", "不可用")),
+	], 25.0, 9)
+
+	var attention_card := Rect2(rect.position.x + 30.0, cards_top + 190.0, 730.0, 130.0)
+	var action_card := Rect2(rect.position.x + 774.0, cards_top + 190.0, rect.size.x - 804.0, 130.0)
+	_draw_situation_card(attention_card, "值得关注", Color(0.62, 0.40, 0.22, 0.28))
+	var attention_lines: Array[String] = []
+	if not settled:
+		attention_lines.append("Formal market 尚未完成首个日结；不伪造满足率或趋势。")
+	elif local_shortage.is_empty():
+		attention_lines.append("当前聚合市场没有 unmet > 0 的商品记录。")
+	else:
+		attention_lines.append("%s · unmet %.1f · fulfillment %.1f%%" % [
+			str(local_shortage.get("name_zh", local_shortage.get("commodity_id", "商品"))),
+			float(local_shortage.get("unmet", 0.0)),
+			float(local_shortage.get("fulfillment_bp", 0)) / 100.0,
+		])
+	attention_lines.append("关系 / 通信尚未 Formal 化；机构责任仅作为世界观察。")
+	_draw_shell_lines(attention_card.position + Vector2(18.0, 58.0), attention_lines, 25.0, 10)
+
+	_draw_situation_card(action_card, "当前可执行", Color(0.64, 0.54, 0.31, 0.32))
+	var authorized_count := 0
+	for option: Dictionary in _defend_options_cache.get("options", []) as Array:
+		if bool(option.get("authorized", false)):
+			authorized_count += 1
+	_draw_shell_lines(action_card.position + Vector2(18.0, 59.0), [
+		"当前版本尚无个人执行命令" if authorized_count == 0 else "可授权 DEFEND：%d" % authorized_count,
+		"世界观察与详情导航不会改变人物状态。",
+	], 25.0, 10)
+
+
+func _draw_situation_card(rect: Rect2, title: String, border: Color) -> void:
+	_panel(rect, Color(0.020, 0.046, 0.050, 0.82), border)
+	_draw_label(rect.position + Vector2(18.0, 31.0), title, 15, Color(0.91, 0.82, 0.58, 1.0))
+	draw_line(
+		rect.position + Vector2(18.0, 42.0),
+		Vector2(rect.end.x - 18.0, rect.position.y + 42.0),
+		Color(border.r, border.g, border.b, minf(0.42, border.a + 0.08)),
+		1.0
+	)
+
+
+func _draw_person_details(rect: Rect2) -> void:
+	var label := str(_player_context_cache.get("display_label", "正式人物不可用"))
+	var person_id := str(_player_context_cache.get("person_id", ""))
+	var place := _player_context_cache.get("current_place", {}) as Dictionary
+	var source := _player_context_cache.get("population_source", {}) as Dictionary
+	var demographic := _player_context_cache.get("demographic_identity", {}) as Dictionary
+	var memberships := _player_context_cache.get("memberships", []) as Array
+	var appointments := _player_context_cache.get("appointments", []) as Array
+	var provenance := _player_context_cache.get("provenance_summary", {}) as Dictionary
+	_draw_label(rect.position + Vector2(38.0, 154.0), label, 25, Color(0.94, 0.79, 0.47, 1.0))
+	var birth_year := int(demographic.get("birth_year", 0))
+	var current_year := int(formal_simulation.date_time().get("year", 1900))
+	_draw_shell_lines(rect.position + Vector2(38.0, 194.0), [
+		"状态：%s" % ("存活" if bool(_player_context_cache.get("alive", false)) else "非存活"),
+		"出生年 / 约龄：%s / %s" % [str(birth_year) if birth_year > 0 else "不可用", str(current_year - birth_year) if birth_year > 0 else "不可用"],
+		"当前地点：%s · %s" % [str(place.get("name", "不可用")), str(place.get("id", ""))],
+		"人口来源：%s" % str(source.get("id", "不可用")),
+		"正式 membership：%d · appointment：%d" % [memberships.size(), appointments.size()],
+	], 24.0)
+	var right := rect.position + Vector2(rect.size.x * 0.54, 154.0)
+	_draw_label(right, "Evidence / Technical Identity", 15, Color(0.86, 0.87, 0.76, 1.0))
+	_draw_shell_lines(right + Vector2(0.0, 34.0), [
+		"person_id：%s" % person_id,
+		"来源类型：%s" % str(provenance.get("kind", "不可用")),
+		"规则版本：%s" % str(provenance.get("generation_rules_version", "不可用")),
+		"接受候选序号：%s" % str(provenance.get("accepted_draft_index", "不可用")),
+		"population claim：%s" % str((_player_context_cache.get("population_claim", {}) as Dictionary).get("claim_id", "不可用")),
+	], 24.0, 10, Color(0.72, 0.80, 0.76, 0.96))
+	_draw_unavailable_notice(rect, "职业、技能、健康、工资、关系、通信和个人计划：当前版本尚未 Formal 化")
+
+
+func _largest_market_shortage(market: Dictionary) -> Dictionary:
+	var largest: Dictionary = {}
+	for value: Variant in market.get("commodities", []) as Array:
+		if not value is Dictionary:
+			continue
+		var row := value as Dictionary
+		if float(row.get("unmet", 0.0)) <= float(largest.get("unmet", 0.0)):
+			continue
+		largest = row.duplicate(true)
+	return largest
+
+
+func _shortage_situation_label(shortage: Dictionary, settled: bool) -> String:
+	if not settled:
+		return "尚未日结"
+	if shortage.is_empty():
+		return "当前无 unmet > 0 记录"
+	return "%s · unmet %.1f" % [
+		str(shortage.get("name_zh", shortage.get("commodity_id", "商品"))),
+		float(shortage.get("unmet", 0.0)),
+	]
+
+
+func _draw_economy_workspace(rect: Rect2) -> void:
+	_draw_workspace_heading(rect, "经济 / 市场", "我的经济处境 · Formal 市场脉搏 · R1 详细资料")
+	_draw_economy_subnavigation(rect)
+	match _economy_tab:
+		ECONOMY_TAB_PULSE:
+			_draw_market_pulse(rect)
+		ECONOMY_TAB_MARKETS:
+			_draw_market_browser(rect)
+		ECONOMY_TAB_COMMODITIES:
+			_draw_commodity_browser(rect)
+		ECONOMY_TAB_SHORTAGES:
+			_draw_shortage_browser(rect)
+		ECONOMY_TAB_TRANSPORT:
+			_draw_transport_browser(rect)
+		_:
+			_draw_economy_overview(rect)
+
+
+func _draw_economy_subnavigation(rect: Rect2) -> void:
+	var x := rect.position.x + 30.0
+	for tab: Dictionary in ECONOMY_TABS:
+		var tab_id := str(tab.get("id", ""))
+		var width := 112.0
+		match tab_id:
+			ECONOMY_TAB_OVERVIEW:
+				width = 148.0
+			ECONOMY_TAB_MARKETS:
+				width = 156.0
+			ECONOMY_TAB_COMMODITIES:
+				width = 132.0
+		var tab_rect := Rect2(x, rect.position.y + 96.0, width, 28.0)
+		_draw_button(tab_rect, str(tab.get("label", tab_id)), "formal_economy_tab:%s" % tab_id, true)
+		if tab_id == _economy_tab:
+			draw_line(tab_rect.position + Vector2(7.0, 26.0), tab_rect.end - Vector2(7.0, 2.0), Color(0.96, 0.76, 0.38, 0.95), 2.0)
+		x += width + 7.0
+
+
+func _draw_market_pulse(rect: Rect2) -> void:
+	var pulse := _market_pulse_cache
+	var current := pulse.get("current", {}) as Dictionary
+	var change := pulse.get("global_change", {}) as Dictionary
+	var history_rows := pulse.get("global_history", []) as Array
+	var top_shortages := pulse.get("top_shortages", []) as Array
+	var lowest := pulse.get("lowest_fulfillment_markets", []) as Array
+	var highest := pulse.get("highest_fulfillment_markets", []) as Array
+	var cards_top := rect.position.y + 138.0
+	var world_card := Rect2(rect.position.x + 30.0, cards_top, 294.0, 178.0)
+	var pressure_card := Rect2(rect.position.x + 338.0, cards_top, 404.0, 178.0)
+	var range_card := Rect2(rect.position.x + 756.0, cards_top, rect.size.x - 786.0, 178.0)
+	_draw_situation_card(world_card, "世界经济脉搏", Color(0.46, 0.67, 0.54, 0.34))
+	_draw_label(world_card.position + Vector2(18.0, 72.0), "%.1f%%" % (float(current.get("fulfillment_bp", 0)) / 100.0), 30, Color(0.52, 0.91, 0.67, 1.0))
+	_draw_label(world_card.position + Vector2(18.0, 99.0), "GLOBAL FULFILLMENT", 8, Color(0.64, 0.76, 0.70, 0.96))
+	_draw_shell_lines(world_card.position + Vector2(18.0, 126.0), [
+		"Formal markets：%d" % int(pulse.get("market_count", current.get("market_count", 0))),
+		"在途运输：%d · 路线：%d" % [int(current.get("active_shipments", 0)), int(current.get("route_count", 0))],
+	], 20.0, 9)
+	if bool(change.get("available", false)):
+		_draw_label(
+			world_card.position + Vector2(176.0, 72.0),
+			"%s %.2f%%" % [
+				_delta_arrow(float(change.get("fulfillment_delta_bp", 0))),
+				absf(float(change.get("fulfillment_delta_bp", 0))) / 100.0,
+			],
+			11,
+			_delta_color(float(change.get("fulfillment_delta_bp", 0)), true)
+		)
+
+	_draw_situation_card(pressure_card, "短缺警报 · 当前 Formal 状态", Color(0.72, 0.44, 0.23, 0.32))
+	var shortage_lines: Array[String] = []
+	for index: int in mini(4, top_shortages.size()):
+		var shortage := top_shortages[index] as Dictionary
+		shortage_lines.append("%d. %s · %s · unmet %.1f" % [
+			index + 1,
+			str(shortage.get("commodity_name_zh", shortage.get("commodity_id", ""))),
+			str(shortage.get("economic_aggregate_id", shortage.get("market_id", ""))),
+			float(shortage.get("unmet_units", shortage.get("unmet", 0.0))),
+		])
+	if shortage_lines.is_empty():
+		shortage_lines.append("当前没有已日结的世界 unmet 记录。")
+	_draw_shell_lines(pressure_card.position + Vector2(18.0, 60.0), shortage_lines, 27.0, 9)
+
+	_draw_situation_card(range_card, "当前市场压力范围", Color(0.55, 0.51, 0.35, 0.30))
+	var range_lines: Array[String] = []
+	if not lowest.is_empty():
+		var low := lowest[0] as Dictionary
+		range_lines.append("最低满足：%s · %.1f%%" % [str(low.get("economic_aggregate_id", "")), float(low.get("fulfillment_bp", 0)) / 100.0])
+	if not highest.is_empty():
+		var high := highest[0] as Dictionary
+		range_lines.append("最高满足：%s · %.1f%%" % [str(high.get("economic_aggregate_id", "")), float(high.get("fulfillment_bp", 0)) / 100.0])
+	range_lines.append("Market movers：unavailable")
+	range_lines.append("原因：Formal 未保存逐市场历史")
+	_draw_shell_lines(range_card.position + Vector2(18.0, 60.0), range_lines, 26.0, 9)
+
+	var fulfillment_card := Rect2(rect.position.x + 30.0, rect.position.y + 332.0, rect.size.x * 0.45, 162.0)
+	var unmet_card := Rect2(rect.position.x + rect.size.x * 0.48, rect.position.y + 332.0, rect.size.x * 0.49, 162.0)
+	_draw_situation_card(fulfillment_card, "真实历史 · Global Fulfillment", Color(0.40, 0.68, 0.52, 0.28))
+	_draw_situation_card(unmet_card, "真实历史 · Global Unmet", Color(0.70, 0.42, 0.23, 0.28))
+	_draw_label(fulfillment_card.position + Vector2(18.0, 58.0), "%d 个日结点 · 不是市场价格指数" % history_rows.size(), 9, Color(0.66, 0.77, 0.71, 0.96))
+	_draw_label(unmet_card.position + Vector2(18.0, 58.0), "昨日变化：%s %.1f" % [_delta_arrow(-float(change.get("unmet_delta_units", 0.0))), absf(float(change.get("unmet_delta_units", 0.0)))], 9, _delta_color(-float(change.get("unmet_delta_units", 0.0)), true))
+	_draw_label(rect.position + Vector2(34.0, rect.end.y - 82.0), "详细数据：50个市场、67类商品、Shortages 与 Transport 均保留在上方二级页。", 9, Color(0.68, 0.78, 0.73, 0.96))
+	_draw_unavailable_notice(rect, "逐市场趋势与商品价格涨跌历史尚未 Formal 化，因此不显示假 movers 或假涨跌幅")
+
+
+func _draw_economy_overview(rect: Rect2) -> void:
+	var economic := _player_context_cache.get("economic_observation", {}) as Dictionary
+	var place := _player_context_cache.get("current_place", {}) as Dictionary
+	var source := _player_context_cache.get("population_source", {}) as Dictionary
+	var cards_top := rect.position.y + 142.0
+	var local_card := Rect2(rect.position.x + 30.0, cards_top, 338.0, 198.0)
+	var regional_card := Rect2(rect.position.x + 382.0, cards_top, 338.0, 198.0)
+	var aggregate_card := Rect2(rect.position.x + 734.0, cards_top, rect.size.x - 764.0, 198.0)
+	_draw_situation_card(local_card, "LOCAL · 人物地点", Color(0.46, 0.66, 0.54, 0.30))
+	_draw_label(local_card.position + Vector2(18.0, 69.0), str(place.get("name", place.get("id", "不可用"))), 21, Color(0.91, 0.86, 0.66, 1.0))
+	_draw_shell_lines(local_card.position + Vector2(18.0, 105.0), [
+		"place：%s" % str(place.get("id", "不可用")),
+		"Local market：unavailable",
+		"该地点没有独立 Formal market owner。",
+	], 24.0, 9)
+
+	_draw_situation_card(regional_card, "REGIONAL", Color(0.46, 0.57, 0.55, 0.26))
+	_draw_shell_lines(regional_card.position + Vector2(18.0, 66.0), [
+		"区域市场层级尚未 Formal 化",
+		"不会把国家聚合市场改名冒充 region。",
+		"人口来源：%s" % str(source.get("id", "不可用")),
+	], 28.0, 10)
+
+	_draw_situation_card(aggregate_card, "CURRENT FORMAL ECONOMIC SCOPE", Color(0.70, 0.58, 0.31, 0.32))
+	if not bool(economic.get("available", false)):
+		_draw_shell_lines(aggregate_card.position + Vector2(18.0, 66.0), ["不可用：%s" % str(economic.get("reason", "unavailable"))], 27.0)
+		return
+	var totals := _selected_market_cache.get("daily_totals", {}) as Dictionary
+	var settled := bool(_selected_market_cache.get("settled", false))
+	var fulfillment := "尚未日结" if not settled else "%.1f%%" % (float(totals.get("fulfillment_bp", 0)) / 100.0)
+	_draw_shell_lines(aggregate_card.position + Vector2(18.0, 62.0), [
+		"统计层级：%s aggregate" % str(_selected_market_cache.get("economic_aggregate_id", economic.get("economy_entity_id", ""))),
+		"Market：%s" % str(_selected_market_cache.get("market_id", _my_market_id())),
+		"人口：%s" % _compact_integer(int(_selected_market_cache.get("population", economic.get("population", 0)))),
+		"满足率：%s · unmet：%s" % [fulfillment, _format_units_or_pending(totals, "unmet_units", settled)],
+		"在途运输：%d · 相关路线：%d" % [int(_selected_market_cache.get("active_shipment_count", 0)), int(_selected_market_cache.get("route_count", 0))],
+		"证据状态：%s" % str(_selected_market_cache.get("admission_status", economic.get("admission_status", ""))),
+	], 24.0, 9)
+
+	var global_card := Rect2(rect.position.x + 30.0, cards_top + 216.0, rect.size.x - 60.0, 112.0)
+	_draw_situation_card(global_card, "GLOBAL · Formal market network", Color(0.43, 0.62, 0.52, 0.25))
+	var current := _market_pulse_cache.get("current", {}) as Dictionary
+	_draw_shell_lines(global_card.position + Vector2(18.0, 59.0), [
+		"%d Formal markets · %d commodities · fulfillment %.1f%% · active shipments %d" % [
+			int(_market_pulse_cache.get("market_count", current.get("market_count", 0))),
+			int(current.get("commodity_count", 0)),
+			float(current.get("fulfillment_bp", 0)) / 100.0,
+			int(current.get("active_shipments", 0)),
+		],
+		"个人工作：Employment owner unavailable；职业、合同、工资与钱包尚未 Formal 化。",
+	], 24.0, 10)
+	_draw_unavailable_notice(rect, "country_fra aggregate 是聚合经济事实，不是“里尔市场”、个人工资或个人钱包")
+
+
+func _draw_market_browser(rect: Rect2) -> void:
+	var rows := DataRecordUtils.to_dictionary_array(_economy_catalog_cache.get("markets", []))
+	var page_size := 7
+	var page_count := maxi(1, ceili(float(rows.size()) / float(page_size)))
+	_market_page = clampi(_market_page, 0, page_count - 1)
+	_draw_label(rect.position + Vector2(32.0, 153.0), "Formal Markets · %d" % rows.size(), 15, Color(0.91, 0.82, 0.58, 1.0))
+	_draw_button(Rect2(rect.end.x - 330.0, rect.position.y + 136.0, 92.0, 28.0), "My Market", "formal_market_my", not _my_market_id().is_empty())
+	_draw_button(Rect2(rect.end.x - 230.0, rect.position.y + 136.0, 198.0, 28.0), "Observed Polity Market", "formal_market_map_observed", not _selected_polity_market_id().is_empty())
+	var header_y := rect.position.y + 187.0
+	_draw_table_header(Vector2(rect.position.x + 32.0, header_y), ["Market / Aggregate", "Population", "Fulfillment", "Unmet", "Ship", "Routes"])
+	var start := _market_page * page_size
+	for local_index: int in page_size:
+		var index := start + local_index
+		if index >= rows.size():
+			break
+		var row := rows[index]
+		var totals := row.get("daily_totals", {}) as Dictionary
+		var settled := bool(row.get("settled", false))
+		var row_rect := Rect2(rect.position.x + 30.0, header_y + 14.0 + local_index * 43.0, rect.size.x - 60.0, 38.0)
+		var selected := str(row.get("market_id", "")) == _observed_market_id
+		_panel(row_rect, Color(0.09, 0.075, 0.035, 0.76) if selected else Color(0.026, 0.052, 0.055, 0.72), Color(0.82, 0.67, 0.34, 0.50) if selected else Color(0.42, 0.56, 0.50, 0.18))
+		_register_hit(row_rect, "formal_market_select:%s" % str(row.get("market_id", "")), true)
+		_draw_market_row(row_rect, row, totals, settled)
+	_draw_pager(rect, _market_page, page_count, "formal_market_page")
+	_draw_label(rect.position + Vector2(32.0, rect.end.y - 48.0), "当前观察：%s · 玩家仍为 %s" % [_observed_market_id, shell_player_person_id()], 9, Color(0.72, 0.80, 0.75, 0.96))
+
+
+func _draw_commodity_browser(rect: Rect2) -> void:
+	var page_size := 9
+	var page_count := maxi(1, ceili(float(_commodity_rows_cache.size()) / float(page_size)))
+	_commodity_page = clampi(_commodity_page, 0, page_count - 1)
+	_draw_label(rect.position + Vector2(32.0, 151.0), "Market：%s · Formal commodities %d" % [_observed_market_id, int(_commodity_catalog_cache.get("commodity_count", 0))], 14, Color(0.91, 0.82, 0.58, 1.0))
+	_draw_label(rect.position + Vector2(32.0, 178.0), "Search：%s%s" % [_commodity_search, "▌" if _commodity_search.length() < 32 else ""], 10, Color(0.75, 0.84, 0.79, 1.0))
+	_draw_button(Rect2(rect.position.x + 260.0, rect.position.y + 158.0, 70.0, 25.0), "Clear", "formal_commodity_search_clear", not _commodity_search.is_empty())
+	_draw_sort_buttons(rect.position + Vector2(360.0, 158.0), "formal_commodity_sort", _commodity_sort, ["unmet", "fulfillment", "commodity"])
+	var header_y := rect.position.y + 207.0
+	_draw_table_header(Vector2(rect.position.x + 32.0, header_y), ["Commodity", "Demand", "Consumed", "Unmet", "Fulfill", "Stock", "Price", "In"])
+	var start := _commodity_page * page_size
+	for local_index: int in page_size:
+		var index := start + local_index
+		if index >= _commodity_rows_cache.size():
+			break
+		_draw_commodity_row(Rect2(rect.position.x + 30.0, header_y + 12.0 + local_index * 31.0, rect.size.x - 60.0, 28.0), _commodity_rows_cache[index])
+	_draw_pager(rect, _commodity_page, page_count, "formal_commodity_page")
+
+
+func _draw_shortage_browser(rect: Rect2) -> void:
+	var page_size := 9
+	var page_count := maxi(1, ceili(float(_shortage_rows_cache.size()) / float(page_size)))
+	_shortage_page = clampi(_shortage_page, 0, page_count - 1)
+	_draw_label(rect.position + Vector2(32.0, 153.0), "Formal Shortages · %d · %s" % [_shortage_rows_cache.size(), _format_sim_datetime()], 14, Color(0.91, 0.82, 0.58, 1.0))
+	_draw_sort_buttons(rect.position + Vector2(390.0, 137.0), "formal_shortage_sort", _shortage_sort, ["unmet", "fulfillment", "commodity", "market"])
+	var header_y := rect.position.y + 188.0
+	_draw_table_header(Vector2(rect.position.x + 32.0, header_y), ["Commodity", "Market / Economy", "Demand", "Consumed", "Unmet", "Fulfill"])
+	var start := _shortage_page * page_size
+	for local_index: int in page_size:
+		var index := start + local_index
+		if index >= _shortage_rows_cache.size():
+			break
+		_draw_shortage_row(Rect2(rect.position.x + 30.0, header_y + 12.0 + local_index * 31.0, rect.size.x - 60.0, 28.0), _shortage_rows_cache[index])
+	if _shortage_rows_cache.is_empty():
+		_draw_label(rect.position + Vector2(42.0, 240.0), "当前没有已日结的 unmet > 0 记录；这不是伪造的零短缺。", 12, Color(0.76, 0.80, 0.73, 1.0))
+	_draw_pager(rect, _shortage_page, page_count, "formal_shortage_page")
+
+
+func _draw_transport_browser(rect: Rect2) -> void:
+	var shipments := DataRecordUtils.to_dictionary_array(_transport_observation_cache.get("active_shipments", []))
+	var routes := DataRecordUtils.to_dictionary_array(_transport_observation_cache.get("routes", []))
+	var source_rows := shipments if not shipments.is_empty() else routes
+	var page_size := 8
+	var page_count := maxi(1, ceili(float(source_rows.size()) / float(page_size)))
+	_transport_page = clampi(_transport_page, 0, page_count - 1)
+	_draw_label(rect.position + Vector2(32.0, 153.0), "Formal Transport · active shipments %d · routes %d" % [shipments.size(), routes.size()], 14, Color(0.91, 0.82, 0.58, 1.0))
+	_draw_label(rect.position + Vector2(32.0, 180.0), "当前展示：%s" % ("在途运输" if not shipments.is_empty() else "路线目录（当前无在途运输）"), 10, Color(0.72, 0.80, 0.75, 1.0))
+	var header_y := rect.position.y + 211.0
+	_draw_table_header(Vector2(rect.position.x + 32.0, header_y), ["Identity", "Source", "Destination", "Commodity / Mode", "Amount", "Arrival / Duration"])
+	var start := _transport_page * page_size
+	for local_index: int in page_size:
+		var index := start + local_index
+		if index >= source_rows.size():
+			break
+		_draw_transport_row(Rect2(rect.position.x + 30.0, header_y + 12.0 + local_index * 34.0, rect.size.x - 60.0, 31.0), source_rows[index], not shipments.is_empty())
+	_draw_pager(rect, _transport_page, page_count, "formal_transport_page")
+
+
+func _format_units_or_pending(totals: Dictionary, key: String, settled: bool) -> String:
+	return "尚未日结" if not settled else "%.1f" % float(totals.get(key, 0.0))
+
+
+func _draw_table_header(position: Vector2, labels: Array[String]) -> void:
+	var column_width := (size.x - 112.0) / maxf(1.0, float(labels.size()))
+	for index: int in labels.size():
+		_draw_label(position + Vector2(index * column_width + 8.0, 0.0), labels[index], 9, Color(0.62, 0.72, 0.68, 0.96))
+
+
+func _draw_market_row(rect: Rect2, row: Dictionary, totals: Dictionary, settled: bool) -> void:
+	var columns := [
+		"%s\n%s" % [str(row.get("market_id", "")), str(row.get("economic_aggregate_id", ""))],
+		_compact_integer(int(row.get("population", 0))),
+		"—" if not settled else "%.1f%%" % (float(totals.get("fulfillment_bp", 0)) / 100.0),
+		"—" if not settled else "%.1f" % float(totals.get("unmet_units", 0.0)),
+		str(row.get("active_shipment_count", 0)),
+		str(row.get("route_count", 0)),
+	]
+	var widths := PackedFloat32Array([0.32, 0.16, 0.15, 0.15, 0.10, 0.10])
+	var x := rect.position.x + 10.0
+	for index: int in columns.size():
+		var text := str(columns[index]).replace("\n", " · ")
+		_draw_label(Vector2(x, rect.position.y + 24.0), _ellipsize(text, 38 if index == 0 else 16), 9)
+		x += rect.size.x * widths[index]
+
+
+func _draw_commodity_row(rect: Rect2, row: Dictionary) -> void:
+	_panel(rect, Color(0.025, 0.050, 0.053, 0.72), Color(0.40, 0.54, 0.49, 0.16))
+	var settled := bool(row.get("settled", false))
+	var values: Array[String] = [
+		"%s · %s" % [str(row.get("name_zh", "")), str(row.get("commodity_id", ""))],
+		"—" if not settled else "%.1f" % float(row.get("demand", 0.0)),
+		"—" if not settled else "%.1f" % float(row.get("consumed", 0.0)),
+		"—" if not settled else "%.1f" % float(row.get("unmet", 0.0)),
+		"—" if int(row.get("fulfillment_bp", -1)) < 0 else "%.1f%%" % (float(row.get("fulfillment_bp", 0)) / 100.0),
+		"%.1f" % float(row.get("inventory", 0.0)),
+		"%d¢" % int(row.get("price_centimes", 0)),
+		str(row.get("incoming_shipment_count", 0)),
+	]
+	var widths := PackedFloat32Array([0.23, 0.11, 0.11, 0.11, 0.11, 0.12, 0.11, 0.08])
+	_draw_table_values(rect, values, widths)
+
+
+func _draw_shortage_row(rect: Rect2, row: Dictionary) -> void:
+	_panel(rect, Color(0.052, 0.043, 0.030, 0.76), Color(0.67, 0.49, 0.25, 0.20))
+	var values: Array[String] = [
+		"%s · %s" % [str(row.get("name_zh", "")), str(row.get("commodity_id", ""))],
+		"%s · %s" % [str(row.get("market_id", "")), str(row.get("economic_aggregate_id", ""))],
+		"%.1f" % float(row.get("demand", 0.0)),
+		"%.1f" % float(row.get("consumed", 0.0)),
+		"%.1f" % float(row.get("unmet", 0.0)),
+		"%.1f%%" % (float(row.get("fulfillment_bp", 0)) / 100.0),
+	]
+	var widths := PackedFloat32Array([0.24, 0.31, 0.12, 0.12, 0.11, 0.10])
+	_draw_table_values(rect, values, widths)
+
+
+func _draw_transport_row(rect: Rect2, row: Dictionary, shipment: bool) -> void:
+	_panel(rect, Color(0.025, 0.050, 0.053, 0.72), Color(0.40, 0.54, 0.49, 0.16))
+	var values: Array[String] = []
+	if shipment:
+		values = [
+			str(row.get("shipment_id", "")),
+			str(row.get("origin_entity_id", "")),
+			str(row.get("destination_entity_id", "")),
+			str(row.get("commodity_id", "")),
+			"%.1f" % float(row.get("units", 0.0)),
+			"h%d · %s" % [int(row.get("arrival_hour", 0)), str(row.get("route_id", ""))],
+		]
+	else:
+		values = [
+			str(row.get("route_id", "")),
+			str(row.get("from", "")),
+			str(row.get("to", "")),
+			str(row.get("mode", "")),
+			"%.1f/day" % float(row.get("capacity_units_per_day", 0.0)),
+			"%dh" % int(row.get("duration_hours", 0)),
+		]
+	var widths := PackedFloat32Array([0.20, 0.20, 0.20, 0.15, 0.12, 0.13])
+	_draw_table_values(rect, values, widths)
+
+
+func _draw_table_values(rect: Rect2, values: Array[String], widths: PackedFloat32Array) -> void:
+	var x := rect.position.x + 8.0
+	for index: int in values.size():
+		_draw_label(Vector2(x, rect.position.y + 19.0), _ellipsize(values[index], 29 if index < 3 else 18), 9)
+		x += rect.size.x * widths[index]
+
+
+func _draw_sort_buttons(position: Vector2, action_prefix: String, selected: String, options: Array[String]) -> void:
+	var x := position.x
+	for option: String in options:
+		var rect := Rect2(x, position.y, 92.0, 25.0)
+		_draw_button(rect, option, "%s:%s" % [action_prefix, option], true)
+		if option == selected:
+			draw_line(rect.position + Vector2(6.0, 23.0), rect.end - Vector2(6.0, 2.0), Color(0.94, 0.73, 0.34, 0.94), 2.0)
+		x += 97.0
+
+
+func _draw_pager(rect: Rect2, page: int, page_count: int, action_prefix: String) -> void:
+	var y := rect.end.y - 48.0
+	_draw_button(Rect2(rect.end.x - 210.0, y - 22.0, 58.0, 26.0), "Prev", "%s:-1" % action_prefix, page > 0)
+	_draw_label(Vector2(rect.end.x - 142.0, y - 4.0), "%d / %d" % [page + 1, page_count], 9, Color(0.73, 0.80, 0.76, 1.0))
+	_draw_button(Rect2(rect.end.x - 84.0, y - 22.0, 58.0, 26.0), "Next", "%s:1" % action_prefix, page + 1 < page_count)
+
+
+func _draw_relations_workspace(rect: Rect2) -> void:
+	_draw_workspace_heading(rect, "关系 / 信息", "能力边界与真实世界资料入口")
+	_draw_label(rect.position + Vector2(38.0, 130.0), "当前 Formal 世界没有人物关系图或私人收件箱 owner。", 16)
+	_draw_shell_lines(rect.position + Vector2(38.0, 172.0), [
+		"好友：当前版本尚未模拟（不显示伪造的 0）",
+		"私人消息：当前版本尚未模拟（不显示固定未读数）",
+		"联系人 / 约见 / 发消息：没有 Formal 命令端口",
+		"Organization Responsibility 仅作为机构 / 世界观察。",
+		"机构观察记录：请在“组织 → Responsibility”中浏览正式记录",
+	], 28.0)
+	_draw_unavailable_notice(rect, "此页面没有“标记已读”、发消息或约见按钮")
+
+
+func _draw_organization_workspace(rect: Rect2) -> void:
+	_draw_workspace_heading(rect, "组织", "OrganizationCore 结构、Authority grant 与机构责任均为只读观察")
+	var x := rect.position.x + 32.0
+	for tab: Dictionary in ORGANIZATION_TABS:
+		var tab_id := str(tab.get("id", ""))
+		var width := 152.0 if tab_id != ORGANIZATION_TAB_RESPONSIBILITY else 166.0
+		var tab_rect := Rect2(x, rect.position.y + 94.0, width, 30.0)
+		_draw_button(tab_rect, str(tab.get("label", tab_id)), "formal_organization_tab:%s" % tab_id, true)
+		if tab_id == _organization_tab:
+			draw_line(tab_rect.position + Vector2(8.0, 28.0), tab_rect.end - Vector2(8.0, 2.0), Color(0.96, 0.76, 0.38, 0.95), 2.0)
+		x += width + 8.0
+	match _organization_tab:
+		ORGANIZATION_TAB_BROWSER:
+			_draw_organization_browser(rect)
+		ORGANIZATION_TAB_RESPONSIBILITY:
+			_draw_organization_responsibility(rect)
+		_:
+			_draw_player_organization_records(rect)
+	_draw_unavailable_notice(rect, "没有加入组织、升职、任命或工资命令；无任职不等于失业")
+
+
+func _draw_player_organization_records(rect: Rect2) -> void:
+	var memberships := _player_organization_cache.get("memberships", []) as Array
+	var appointments := _player_organization_cache.get("appointments", []) as Array
+	var capabilities := _player_organization_cache.get("effective_capabilities", []) as Array
+	var grants := _player_organization_cache.get("current_authority_grants", []) as Array
+	var left := rect.position + Vector2(38.0, 154.0)
+	_draw_label(left, "我的 Formal Organization 记录", 17, Color(0.91, 0.82, 0.58, 1.0))
+	var lines: Array[String] = [
+		"acting person：%s" % str(_player_organization_cache.get("person_id", "")),
+		"memberships：%d" % memberships.size(),
+		"appointments：%d" % appointments.size(),
+		"effective capabilities：%d" % capabilities.size(),
+		"current authority grants：%d" % grants.size(),
+	]
+	if memberships.is_empty() and appointments.is_empty():
+		lines.append("暂无正式组织记录")
+	for membership: Dictionary in memberships:
+		lines.append("成员 · %s" % str(membership.get("organization_id", "")))
+	for appointment: Dictionary in appointments:
+		lines.append("任职 · %s / %s" % [str(appointment.get("organization_id", "")), str(appointment.get("position_id", ""))])
+	_draw_shell_lines(left + Vector2(0.0, 36.0), lines.slice(0, 10), 24.0)
+	var right := rect.position + Vector2(rect.size.x * 0.57, 154.0)
+	_draw_label(right, "能力可用性说明", 17, Color(0.91, 0.82, 0.58, 1.0))
+	_draw_shell_lines(right + Vector2(0.0, 36.0), [
+		"No formal capability grant" if grants.is_empty() else "存在当前 holder-valid Formal grant",
+		"能力只来自 membership / appointment / Authority owner。",
+		"Organization Responsibility 是机构事项，不是“我的任务”。",
+		"DEFEND 仍在军事页通过正式权限端口提交并重验。",
+	], 24.0)
+
+
+func _draw_organization_browser(rect: Rect2) -> void:
+	var rows := _organization_catalog_cache.get("rows", []) as Array
+	var page_size := 8
+	var max_page := maxi(0, (rows.size() - 1) / page_size)
+	_organization_page = clampi(_organization_page, 0, max_page)
+	var start := _organization_page * page_size
+	var left_rect := Rect2(rect.position + Vector2(32.0, 142.0), Vector2(rect.size.x * 0.45, 390.0))
+	_draw_label(left_rect.position, "正式组织 %d · page %d/%d" % [rows.size(), _organization_page + 1, max_page + 1], 15, Color(0.91, 0.82, 0.58, 1.0))
+	var y := left_rect.position.y + 30.0
+	for index: int in range(start, mini(rows.size(), start + page_size)):
+		var row := rows[index] as Dictionary
+		var organization_id := str(row.get("organization_id", ""))
+		var item_rect := Rect2(left_rect.position.x, y - 17.0, left_rect.size.x - 12.0, 39.0)
+		_panel(item_rect, Color(0.07, 0.09, 0.085, 0.82) if organization_id == _selected_organization_id else Color(0.025, 0.05, 0.052, 0.75), Color(0.67, 0.57, 0.34, 0.34))
+		_register_hit(item_rect, "formal_organization_select:%s" % organization_id, true)
+		_draw_label(Vector2(item_rect.position.x + 10.0, y), _ellipsize(str(row.get("display_label", organization_id)), 39), 10)
+		_draw_label(Vector2(item_rect.position.x + 10.0, y + 16.0), "%s · active=%s · members=%d · appointments=%d" % [str(row.get("organization_kind", "")), str(row.get("active", false)), int(row.get("member_count", 0)), int(row.get("appointment_count", 0))], 8, Color(0.67, 0.76, 0.72, 0.95))
+		y += 43.0
+	_draw_button(Rect2(left_rect.position.x, left_rect.end.y - 8.0, 72.0, 25.0), "上一页", "formal_organization_page:-1", _organization_page > 0)
+	_draw_button(Rect2(left_rect.position.x + 80.0, left_rect.end.y - 8.0, 72.0, 25.0), "下一页", "formal_organization_page:1", _organization_page < max_page)
+	_draw_organization_detail(rect.position + Vector2(rect.size.x * 0.50, 142.0))
+
+
+func _draw_organization_detail(position: Vector2) -> void:
+	var detail := _organization_detail_cache
+	var evidence := detail.get("composition_evidence", {}) as Dictionary
+	var responsibilities := detail.get("responsibilities", []) as Array
+	_draw_label(position, "Organization Detail", 15, Color(0.91, 0.82, 0.58, 1.0))
+	_draw_label(position + Vector2(0.0, 30.0), _ellipsize(str(detail.get("display_label", "不可用")), 50), 14, Color(0.86, 0.87, 0.76, 1.0))
+	_draw_shell_lines(position + Vector2(0.0, 58.0), [
+		"ID：%s" % str(detail.get("organization_id", "")),
+		"kind / active：%s / %s" % [str(detail.get("organization_kind", "")), str(detail.get("active", false))],
+		"parent / children：%s / %d" % [str(detail.get("parent_organization_id", "none")) if not str(detail.get("parent_organization_id", "")).is_empty() else "none", (detail.get("child_organization_ids", []) as Array).size()],
+		"place reference：%s" % (str(detail.get("primary_place_id", "")) if not str(detail.get("primary_place_id", "")).is_empty() else "unavailable"),
+		"members / appointments：%d / %d" % [(detail.get("member_ids", []) as Array).size(), (detail.get("appointments", []) as Array).size()],
+		"positions / declared capabilities：%d / %d" % [(detail.get("positions", []) as Array).size(), (detail.get("declared_capability_ids", []) as Array).size()],
+		"current authority grants：%d" % (detail.get("current_authority_grants", []) as Array).size(),
+		"institution responsibility：%d" % responsibilities.size(),
+		"evidence：%s · exact historical name=%s" % [str(evidence.get("basis_class", "unavailable")), str(evidence.get("historical_exact_name_claimed", false))],
+	], 22.0, 9)
+
+
+func _draw_organization_responsibility(rect: Rect2) -> void:
+	var rows := _organization_responsibility_cache.get("rows", []) as Array
+	var counts := _organization_responsibility_cache.get("status_counts", {}) as Dictionary
+	var page_size := 9
+	var max_page := maxi(0, (rows.size() - 1) / page_size)
+	_responsibility_page = clampi(_responsibility_page, 0, max_page)
+	_draw_label(rect.position + Vector2(38.0, 150.0), "机构责任 / 世界观察 · %d" % rows.size(), 17, Color(0.91, 0.82, 0.58, 1.0))
+	_draw_label(rect.position + Vector2(38.0, 178.0), "MONITORING %d · ATTENTION_REQUIRED %d · NO_DETAILED_ECONOMY %d" % [int(counts.get("MONITORING", 0)), int(counts.get("ATTENTION_REQUIRED", 0)), int(counts.get("NO_DETAILED_ECONOMY", 0))], 9, Color(0.70, 0.80, 0.75, 0.96))
+	var y := rect.position.y + 218.0
+	var start := _responsibility_page * page_size
+	for index: int in range(start, mini(rows.size(), start + page_size)):
+		var row := rows[index] as Dictionary
+		var economy_id := str(row.get("economy_entity_id", ""))
+		var fulfillment_bp := int(row.get("current_fulfillment_bp", -1))
+		_draw_label(Vector2(rect.position.x + 48.0, y), "%s · %s · economy=%s · fulfillment=%s" % [_ellipsize(str(row.get("display_label", row.get("organization_id", ""))), 42), str(row.get("status", "")), economy_id if not economy_id.is_empty() else "unavailable", str(fulfillment_bp) if fulfillment_bp >= 0 else "unavailable"], 9)
+		y += 28.0
+	_draw_button(Rect2(rect.position.x + 38.0, rect.end.y - 112.0, 72.0, 25.0), "上一页", "formal_responsibility_page:-1", _responsibility_page > 0)
+	_draw_button(Rect2(rect.position.x + 118.0, rect.end.y - 112.0, 72.0, 25.0), "下一页", "formal_responsibility_page:1", _responsibility_page < max_page)
+	_draw_label(rect.position + Vector2(rect.size.x * 0.57, rect.end.y - 94.0), "这些是 Organization Responsibility，不是玩家消息、通知或个人任务。", 10, Color(0.91, 0.70, 0.45, 1.0))
+
+
+func _draw_politics_workspace(rect: Rect2) -> void:
+	_draw_workspace_heading(rect, "世界 / 政治观察", "LOCAL POLITY 与 OBSERVED POLITY 独立；地图选择只改变观察对象")
+	_draw_world_context_navigation(rect.position + Vector2(rect.size.x - 382.0, 18.0))
+	var x := rect.position.x + 32.0
+	for tab: Dictionary in POLITICS_TABS:
+		var tab_id := str(tab.get("id", ""))
+		var width := 176.0 if tab_id == POLITICS_TAB_COMPARE else 112.0
+		var tab_rect := Rect2(x, rect.position.y + 94.0, width, 30.0)
+		_draw_button(tab_rect, str(tab.get("label", tab_id)), "formal_politics_tab:%s" % tab_id, true)
+		if tab_id == _politics_tab:
+			draw_line(tab_rect.position + Vector2(8.0, 28.0), tab_rect.end - Vector2(8.0, 2.0), Color(0.96, 0.76, 0.38, 0.95), 2.0)
+		x += width + 8.0
+	match _politics_tab:
+		POLITICS_TAB_LOCAL:
+			_draw_political_observation_detail(rect, _local_political_observation_cache, "LOCAL POLITY · 玩家所在地政治环境")
+		POLITICS_TAB_OBSERVED:
+			_draw_political_observation_detail(rect, _observed_political_observation_cache, "OBSERVED POLITY · 地图观察对象")
+		_:
+			_draw_political_comparison(rect)
+	_draw_unavailable_notice(rect, "政策、投票、政变、革命和直接控制国家：当前版本没有人物命令")
+
+
+func _draw_political_comparison(rect: Rect2) -> void:
+	var left := rect.position + Vector2(38.0, 154.0)
+	var right := rect.position + Vector2(rect.size.x * 0.54, 154.0)
+	_draw_political_summary_column(left, _local_political_observation_cache, "LOCAL POLITY")
+	_draw_political_summary_column(right, _observed_political_observation_cache, "OBSERVED POLITY")
+	var same := str(_local_political_observation_cache.get("runtime_id", "")) == str(_observed_political_observation_cache.get("runtime_id", ""))
+	_draw_label(rect.position + Vector2(38.0, 390.0), "上下文：%s · player=%s · place保持不变" % ["相同政治实体" if same else "两个不同政治实体", formal_simulation.player_person_id()], 10, Color(0.74, 0.83, 0.78, 0.96))
+
+
+func _draw_political_summary_column(position: Vector2, observation: Dictionary, heading: String) -> void:
+	var evidence := observation.get("historical_evidence", {}) as Dictionary
+	_draw_label(position, heading, 16, Color(0.91, 0.82, 0.58, 1.0))
+	_draw_shell_lines(position + Vector2(0.0, 32.0), [
+		str(observation.get("display_name", "不可用")),
+		"runtime：%s" % str(observation.get("runtime_id", "")),
+		"source：%s" % str(observation.get("source_historical_id", "")),
+		"当前身份：%s" % str(observation.get("lifecycle_status", "")),
+		"历史状态：%s · %s" % [str(evidence.get("status", "不可用")), str(evidence.get("relationship", "不可用"))],
+		"权威关系：%d" % (observation.get("authority_relations", []) as Array).size(),
+		"有效期：%s → %s" % [str(evidence.get("valid_from", "不可用")), str(evidence.get("valid_to", "不可用"))],
+	], 23.0)
+
+
+func _draw_political_observation_detail(rect: Rect2, observation: Dictionary, heading: String) -> void:
+	var evidence := observation.get("historical_evidence", {}) as Dictionary
+	var left := rect.position + Vector2(38.0, 154.0)
+	var right := rect.position + Vector2(rect.size.x * 0.56, 154.0)
+	_draw_label(left, heading, 17, Color(0.91, 0.82, 0.58, 1.0))
+	_draw_shell_lines(left + Vector2(0.0, 34.0), [
+		str(observation.get("display_name", "不可用")),
+		"runtime identity：%s" % str(observation.get("runtime_id", "")),
+		"lifecycle：%s" % str(observation.get("lifecycle_status", "")),
+		"historical source：%s" % str(observation.get("source_historical_id", "")),
+		"状态 / 关系：%s / %s" % [str(evidence.get("status", "不可用")), str(evidence.get("relationship", "不可用"))],
+		"有效期：%s → %s" % [str(evidence.get("valid_from", "不可用")), str(evidence.get("valid_to", "不可用"))],
+	], 23.0)
+	_draw_label(right, "Authority / Historical Evidence", 17, Color(0.91, 0.82, 0.58, 1.0))
+	var lines: Array[String] = [
+		"当前世界日期：%s" % _format_sim_datetime(),
+		"authority relations：%d" % (observation.get("authority_relations", []) as Array).size(),
+		"geometry：%s · %s" % [str(evidence.get("geometry_provider", "不可用")), str(evidence.get("geometry_feature_id", "不可用"))],
+		"data quality：%s" % str(evidence.get("data_quality", "不可用")),
+		"flag evidence id：%s" % str(evidence.get("flag_id", "不可用")),
+		"flag mode：%s" % str(evidence.get("flag_mode", "不可用")),
+	]
+	for relation: Dictionary in observation.get("authority_relations", []) as Array:
+		lines.append(_authority_relation_label(relation))
+	_draw_shell_lines(right + Vector2(0.0, 34.0), lines.slice(0, 10), 22.0, 10)
+
+
+func _draw_military_workspace(rect: Rect2) -> void:
+	_draw_workspace_heading(rect, "世界 / 军事", "仅显示当前玩家可证明的 DEFEND acting context")
+	_draw_world_context_navigation(rect.position + Vector2(rect.size.x - 382.0, 18.0))
+	_draw_label(rect.position + Vector2(38.0, 126.0), "acting person：%s" % str(_defend_options_cache.get("acting_person_id", "")), 13)
+	var options := _defend_options_cache.get("options", []) as Array
+	var y := 166.0
+	var authorized_count := 0
+	for index: int in range(options.size()):
+		var option := options[index] as Dictionary
+		if not bool(option.get("authorized", false)):
+			continue
+		authorized_count += 1
+		_draw_label(rect.position + Vector2(38.0, y), "%s · AUTHORIZED" % str(option.get("formation_id", "")), 12, Color(0.72, 0.88, 0.73, 1.0))
+		_draw_button(Rect2(rect.end.x - 168.0, rect.position.y + y - 22.0, 126.0, 28.0), "DEFEND 24h", "formal_defend:%d" % index, true)
+		y += 38.0
+	if authorized_count == 0:
+		_draw_label(rect.position + Vector2(38.0, y), "当前没有可执行的 DEFEND。", 17, Color(0.91, 0.70, 0.45, 1.0))
+		y += 36.0
+		for reason: Variant in _defend_options_cache.get("unavailable_reasons", []) as Array:
+			_draw_label(rect.position + Vector2(52.0, y), "— %s" % str(reason), 11, Color(0.72, 0.78, 0.74, 0.96))
+			y += 22.0
+	_draw_unavailable_notice(rect, "默认生产世界没有 formation 与 grant；不会注入 commander / army_test fixture")
+
+
+func _draw_shell_lines(
+	position: Vector2,
+	lines: Array[String],
+	line_height: float = 23.0,
+	font_size: int = 11,
+	color: Color = Color(0.84, 0.86, 0.79, 0.98)
+) -> void:
+	var y := position.y
+	for line: String in lines:
+		_draw_label(Vector2(position.x, y), line, font_size, color)
+		y += line_height
+
+
+func _draw_unavailable_notice(rect: Rect2, text: String) -> void:
+	var notice := Rect2(rect.position.x + 28.0, rect.end.y - 78.0, rect.size.x - 56.0, 38.0)
+	_panel(notice, Color(0.07, 0.055, 0.028, 0.72), Color(0.75, 0.58, 0.28, 0.28))
+	_draw_label(notice.position + Vector2(14.0, 24.0), text, 10, Color(0.92, 0.76, 0.47, 0.98))
+
+
+func _draw_shell_footer(rect: Rect2) -> void:
+	_draw_label(rect.position + Vector2(28.0, rect.size.y - 14.0), "%s · %s · %s" % [_format_sim_datetime(), "已暂停" if sim_paused else "%d×运行" % sim_speed, _formal_status], 9, Color(0.60, 0.70, 0.67, 0.9))
+
+
+func _draw_formal_system_menu() -> void:
+	_button_hits.clear()
+	draw_rect(Rect2(Vector2.ZERO, size), Color(0.0, 0.0, 0.0, 0.58))
+	var rect := Rect2(size.x * 0.5 - 190.0, size.y * 0.5 - 166.0, 380.0, 332.0)
+	_panel(rect, Color(0.012, 0.030, 0.035, 0.995), Color(0.82, 0.68, 0.37, 0.68))
+	_draw_label(rect.position + Vector2(28.0, 42.0), "系统", 22, Color(0.96, 0.86, 0.62, 1.0))
+	_draw_button(Rect2(rect.position + Vector2(28.0, 72.0), Vector2(324.0, 42.0)), "Save", "formal_save", true)
+	_draw_button(Rect2(rect.position + Vector2(28.0, 122.0), Vector2(324.0, 42.0)), "Load", "formal_load", true)
+	_draw_button(Rect2(rect.position + Vector2(28.0, 172.0), Vector2(324.0, 42.0)), "Back to Title", "formal_back_title", true)
+	_draw_button(Rect2(rect.position + Vector2(28.0, 222.0), Vector2(324.0, 42.0)), "Quit", "formal_quit", true)
+	_draw_button(Rect2(rect.position + Vector2(248.0, 280.0), Vector2(104.0, 28.0)), "关闭 Esc", "formal_system_toggle", true)
+
+
 func _activate_button(action: String) -> void:
 	match action:
 		"formal_economy_toggle":
@@ -451,8 +2424,414 @@ func _activate_button(action: String) -> void:
 			_save_formal_state_from_ui()
 		"formal_load":
 			_load_formal_state_from_ui()
+		"formal_system_toggle":
+			_system_menu_open = not _system_menu_open
+			_sync_pulse_trend_controls()
+			queue_redraw()
+		"formal_back_title":
+			get_tree().change_scene_to_file(TITLE_SCENE)
+		"formal_quit":
+			get_tree().quit(0)
 		_:
-			super._activate_button(action)
+			if action.begins_with("formal_workspace:"):
+				set_formal_workspace(action.trim_prefix("formal_workspace:"))
+			elif action.begins_with("formal_world_context:"):
+				set_formal_workspace(action.trim_prefix("formal_world_context:"))
+			elif action.begins_with("formal_person_tab:"):
+				_set_person_tab(action.trim_prefix("formal_person_tab:"))
+			elif action.begins_with("formal_economy_tab:"):
+				_set_economy_tab(action.trim_prefix("formal_economy_tab:"))
+			elif action == "formal_market_my":
+				_select_observed_market(_my_market_id())
+			elif action == "formal_market_map_observed":
+				_select_observed_market(_selected_polity_market_id())
+			elif action.begins_with("formal_market_select:"):
+				_select_observed_market(action.trim_prefix("formal_market_select:"))
+			elif action.begins_with("formal_market_page:"):
+				_market_page = maxi(0, _market_page + action.trim_prefix("formal_market_page:").to_int())
+				queue_redraw()
+			elif action.begins_with("formal_commodity_page:"):
+				_commodity_page = maxi(0, _commodity_page + action.trim_prefix("formal_commodity_page:").to_int())
+				queue_redraw()
+			elif action.begins_with("formal_commodity_sort:"):
+				_commodity_sort = action.trim_prefix("formal_commodity_sort:")
+				_rebuild_commodity_rows_cache()
+				queue_redraw()
+			elif action == "formal_commodity_search_clear":
+				_commodity_search = ""
+				_rebuild_commodity_rows_cache()
+				queue_redraw()
+			elif action.begins_with("formal_shortage_page:"):
+				_shortage_page = maxi(0, _shortage_page + action.trim_prefix("formal_shortage_page:").to_int())
+				queue_redraw()
+			elif action.begins_with("formal_shortage_sort:"):
+				_shortage_sort = action.trim_prefix("formal_shortage_sort:")
+				_rebuild_shortage_rows_cache()
+				queue_redraw()
+			elif action.begins_with("formal_transport_page:"):
+				_transport_page = maxi(0, _transport_page + action.trim_prefix("formal_transport_page:").to_int())
+				queue_redraw()
+			elif action.begins_with("formal_map_mode:"):
+				_set_map_observation_mode(action.trim_prefix("formal_map_mode:"))
+			elif action == "formal_map_labels_toggle":
+				_country_labels_enabled = not _country_labels_enabled
+				queue_redraw()
+			elif action == "formal_place_close":
+				_selected_place_id = ""
+				_selected_place_context_cache = {}
+				queue_redraw()
+			elif action == "formal_place_to_situation":
+				_person_tab = PERSON_TAB_SITUATION
+				set_formal_workspace(WORKSPACE_PERSON)
+			elif action.begins_with("formal_politics_tab:"):
+				_set_politics_tab(action.trim_prefix("formal_politics_tab:"))
+			elif action.begins_with("formal_organization_tab:"):
+				_set_organization_tab(action.trim_prefix("formal_organization_tab:"))
+			elif action.begins_with("formal_organization_select:"):
+				_select_organization(action.trim_prefix("formal_organization_select:"))
+			elif action.begins_with("formal_organization_page:"):
+				_organization_page = maxi(0, _organization_page + action.trim_prefix("formal_organization_page:").to_int())
+				queue_redraw()
+			elif action.begins_with("formal_responsibility_page:"):
+				_responsibility_page = maxi(0, _responsibility_page + action.trim_prefix("formal_responsibility_page:").to_int())
+				queue_redraw()
+			elif action.begins_with("formal_defend:"):
+				_execute_formal_defend(action.trim_prefix("formal_defend:").to_int())
+			else:
+				super._activate_button(action)
+
+
+func _select_observed_market(market_id: String) -> bool:
+	if market_id.is_empty():
+		_formal_status = "所选对象没有可靠的 Formal market 映射。"
+		queue_redraw()
+		return false
+	var observation := formal_simulation.market_observation(market_id)
+	if not bool(observation.get("available", false)):
+		_formal_status = "Market 不可用：%s" % str(observation.get("reason", "unknown"))
+		queue_redraw()
+		return false
+	_observed_market_id = market_id
+	_selected_market_cache = observation
+	_market_page = 0
+	_commodity_page = 0
+	_rebuild_commodity_rows_cache()
+	_formal_status = "观察市场已切换；玩家身份与所在地未改变。"
+	queue_redraw()
+	return true
+
+
+func _set_map_observation_mode(mode_id: String) -> bool:
+	if mode_id not in [MAP_MODE_POLITICAL, MAP_MODE_FULFILLMENT, MAP_MODE_SHORTAGE]:
+		return false
+	_map_observation_mode = mode_id
+	if mode_id == MAP_MODE_POLITICAL:
+		_economy_overlay_cache = {}
+	else:
+		_refresh_economy_overlay()
+	queue_redraw()
+	return true
+
+
+func _execute_formal_defend(option_index: int) -> void:
+	var options := _defend_options_cache.get("options", []) as Array
+	if option_index < 0 or option_index >= options.size():
+		_formal_status = "DEFEND 选项已失效。"
+		queue_redraw()
+		return
+	var option := options[option_index] as Dictionary
+	var result := formal_simulation.player_defend_formation(
+		option.get("acting_context", {}) as Dictionary,
+		str(option.get("formation_id", "")),
+		24
+	)
+	_formal_status = (
+		"DEFEND 已通过 Formal 权限端口提交。"
+		if bool(result.get("success", false))
+		else "DEFEND 被拒绝：%s / %s" % [str(result.get("status", "")), str(result.get("authority_status", ""))]
+	)
+	_refresh_shell_observations()
+	queue_redraw()
+
+
+func _prototype_character_profiles_enabled() -> bool:
+	return false
+
+
+func _seed_world_events() -> void:
+	# Prototype institution agendas are not a personal inbox.
+	_world_events.clear()
+	_event_by_id.clear()
+
+
+func _draw_corners() -> void:
+	var compact: bool = size.x < 940.0 or size.y < 620.0
+	var left_width: float = minf(284.0, size.x * 0.42)
+	var right_width: float = minf(282.0, size.x * 0.42)
+	var top_height: float = 56.0 if compact else 66.0
+	var bottom_height: float = 58.0 if compact else 70.0
+	var top_y := 74.0 if _formal_workspace == WORKSPACE_MAP else 18.0
+	var country_rect := Rect2(18.0, top_y, left_width, top_height)
+	var time_rect := Rect2(
+		size.x - right_width - 18.0, top_y, right_width, top_height
+	)
+	var character_rect := Rect2(
+		18.0, size.y - bottom_height - 18.0, left_width, bottom_height
+	)
+	var activity_rect := Rect2(
+		size.x - right_width - 18.0,
+		size.y - bottom_height - 18.0,
+		right_width,
+		bottom_height
+	)
+	_draw_corner(
+		country_rect,
+		_formal_home_polity_name(),
+		"所在地相关政治观察",
+		"toggle_country_panel",
+		Color(0.72, 0.64, 0.38, 0.22),
+		compact
+	)
+	_draw_corner(
+		character_rect,
+		_active_character_name(),
+		_active_character_position(),
+		"toggle_character_panel",
+		Color(0.72, 0.64, 0.38, 0.22),
+		compact
+	)
+	_draw_corner(
+		activity_rect,
+		"机构 / 世界观察",
+		"个人消息当前版本尚未模拟",
+		"toggle_activity_panel",
+		Color(0.72, 0.50, 0.25, 0.22),
+		compact
+	)
+	_panel(
+		time_rect,
+		Color(0.025, 0.055, 0.06, 0.88),
+		Color(0.72, 0.64, 0.38, 0.22)
+	)
+	_register_hit(time_rect, "toggle_time_panel", true)
+	_draw_label(time_rect.position + Vector2(12.0, 22.0), _format_sim_datetime(), 13)
+	var button_y: float = time_rect.end.y - 28.0
+	_draw_button(
+		Rect2(time_rect.position.x + 10.0, button_y, 44.0, 22.0),
+		"Ⅱ" if sim_paused else "▶",
+		"toggle_pause",
+		true
+	)
+	_draw_button(
+		Rect2(time_rect.position.x + 60.0, button_y, 38.0, 22.0),
+		"1×", "speed:1", true
+	)
+	_draw_button(
+		Rect2(time_rect.position.x + 102.0, button_y, 38.0, 22.0),
+		"2×", "speed:2", true
+	)
+	_draw_button(
+		Rect2(time_rect.position.x + 144.0, button_y, 38.0, 22.0),
+		"4×", "speed:4", true
+	)
+
+
+func _draw_breadcrumbs() -> void:
+	if _formal_workspace != WORKSPACE_MAP:
+		super._draw_breadcrumbs()
+		return
+	_draw_label(Vector2(24.0, 160.0), _ellipsize(_breadcrumb_text(), 68), 13, Color(0.76, 0.82, 0.78, 1.0))
+	if space_level != WORLD:
+		_draw_button(Rect2(24.0, 176.0, 92.0, 30.0), "返回上层", "back", true)
+		_draw_button(Rect2(126.0, 176.0, 92.0, 30.0), "返回世界", "world", true)
+
+
+func _draw_character_panel(rect: Rect2) -> void:
+	if not bool(_player_context_cache.get("available", false)):
+		_draw_label(rect.position + Vector2(24.0, 42.0), "正式玩家上下文不可用", 19)
+		_draw_label(
+			rect.position + Vector2(24.0, 76.0),
+			str(_player_context_cache.get("reason", "player_person_unavailable")),
+			11,
+			Color(0.91, 0.70, 0.45, 0.98)
+		)
+		return
+	var person_id := str(_player_context_cache.get("person_id", ""))
+	var place := _player_context_cache.get("current_place", {}) as Dictionary
+	var demographic := (
+		_player_context_cache.get("demographic_identity", {}) as Dictionary
+	)
+	var source := _player_context_cache.get("population_source", {}) as Dictionary
+	var memberships := _player_context_cache.get("memberships", []) as Array
+	var appointments := _player_context_cache.get("appointments", []) as Array
+	_draw_label(
+		rect.position + Vector2(24.0, 38.0),
+		str(_player_context_cache.get("display_label", "正式人物")),
+		20
+	)
+	_draw_label(
+		rect.position + Vector2(24.0, 68.0),
+		"正式玩家 · %s" % ("存活" if bool(
+			_player_context_cache.get("alive", false)
+		) else "非存活"),
+		13
+	)
+	_draw_label(
+		rect.position + Vector2(24.0, 98.0),
+		"所在地：%s（%s）" % [
+			str(place.get("name", "不可用")), str(place.get("id", ""))
+		],
+		12
+	)
+	_draw_label(
+		rect.position + Vector2(24.0, 126.0),
+		"人口来源：%s · 出生年：%s" % [
+			str(source.get("id", "不可用")),
+			str(demographic.get("birth_year", "不可用")),
+		],
+		12
+	)
+	_draw_label(
+		rect.position + Vector2(24.0, 154.0),
+		"正式成员记录：%d · 正式任命记录：%d" % [
+			memberships.size(), appointments.size()
+		],
+		12
+	)
+	_draw_label(
+		rect.position + Vector2(24.0, 184.0),
+		"姓名、职业、工资、健康、关系、技能、私人消息：当前版本尚未模拟",
+		11,
+		Color(0.91, 0.70, 0.45, 0.98)
+	)
+	_draw_label(
+		rect.position + Vector2(24.0, rect.end.y - 26.0),
+		"技术身份：%s" % person_id,
+		9,
+		Color(0.68, 0.75, 0.72, 0.92)
+	)
+
+
+func _draw_country_panel(rect: Rect2) -> void:
+	var political := (
+		_player_context_cache.get("political_observation", {}) as Dictionary
+	)
+	var home_entity_id := str(political.get("polity_id", ""))
+	var selected_entity_id := selected_country_id
+	_draw_label(
+		rect.position + Vector2(24.0, 38.0),
+		str(political.get("name", "所在地政治观察不可用")),
+		20
+	)
+	_draw_label(
+		rect.position + Vector2(24.0, 72.0),
+		"所在地关联实体：%s" % (home_entity_id if not home_entity_id.is_empty() else "不可用"),
+		12
+	)
+	_draw_label(
+		rect.position + Vector2(24.0, 102.0),
+		"当前观察对象：%s" % (
+			selected_entity_id if not selected_entity_id.is_empty() else "尚未选择"
+		),
+		12
+	)
+	_draw_label(
+		rect.position + Vector2(24.0, 132.0),
+		"地图选择只改变观察对象，不改变玩家、人口 claim 或所在地。",
+		11,
+		Color(0.91, 0.70, 0.45, 0.98)
+	)
+	_draw_label(
+		rect.position + Vector2(24.0, 162.0),
+		"政策命令与人物政治行动：当前版本尚未模拟",
+		11,
+		Color(0.73, 0.82, 0.78, 1.0)
+	)
+
+
+func home_country_detail_report() -> Dictionary:
+	var home_entity_id := _home_historical_entity_id()
+	return {
+		"player_person_id": formal_simulation.player_person_id(),
+		"home_entity_id": home_entity_id,
+		"selected_entity_id": selected_country_id,
+		"selected_is_home": selected_country_id == home_entity_id,
+	}
+
+
+func _draw_activity_panel(rect: Rect2) -> void:
+	_draw_label(rect.position + Vector2(24.0, 40.0), "关系 / 信息能力", 19)
+	_draw_label(
+		rect.position + Vector2(24.0, 78.0),
+		"当前 Formal 世界没有人物关系图或私人收件箱 owner。",
+		12
+	)
+	_draw_label(
+		rect.position + Vector2(24.0, 108.0),
+		"因此不显示假联系人、假未读数或“标记已读”操作。",
+		12,
+		Color(0.91, 0.70, 0.45, 0.98)
+	)
+	_draw_label(
+		rect.position + Vector2(24.0, 146.0),
+		"Organization Responsibility 仅作为机构 / 世界观察。",
+		11,
+		Color(0.73, 0.82, 0.78, 1.0)
+	)
+
+
+func _draw_city_characters(rect: Rect2) -> void:
+	if not bool(_player_context_cache.get("available", false)):
+		return
+	var place := _player_context_cache.get("current_place", {}) as Dictionary
+	if str(place.get("map_id", "")) != selected_city_id:
+		return
+	var badge := Rect2(
+		rect.position.x + 34.0, rect.end.y - 54.0, 280.0, 30.0
+	)
+	_panel(
+		badge,
+		Color(0.07, 0.10, 0.095, 0.88),
+		Color(0.54, 0.70, 0.63, 0.34)
+	)
+	_draw_label(
+		badge.position + Vector2(10.0, 20.0),
+		"%s · 正式玩家" % str(
+			_player_context_cache.get("display_label", "正式人物")
+		),
+		11
+	)
+
+
+func _active_character_name() -> String:
+	return str(_player_context_cache.get("display_label", "正式人物不可用"))
+
+
+func _active_character_position() -> String:
+	var place := _player_context_cache.get("current_place", {}) as Dictionary
+	if not bool(place.get("available", false)):
+		return "所在地不可用"
+	return "正式玩家 · %s" % str(place.get("name", place.get("id", "")))
+
+
+func _activity_summary() -> String:
+	return "个人关系与消息当前版本尚未模拟"
+
+
+func _formal_home_polity_name() -> String:
+	var observation := (
+		_player_context_cache.get("political_observation", {}) as Dictionary
+	)
+	if bool(observation.get("available", false)):
+		return str(observation.get("name_zh", "所在地政治观察"))
+	return "所在地政治观察不可用"
+
+
+func _home_historical_entity_id() -> String:
+	var observation := (
+		_player_context_cache.get("political_observation", {}) as Dictionary
+	)
+	return str(observation.get("runtime_entity_id", ""))
 
 
 func _selected_polity_entity_id() -> String:
@@ -524,6 +2903,25 @@ func _authority_relation_label(relation: Dictionary) -> String:
 		str(relation.get("valid_from", "")),
 		str(relation.get("valid_to", "")),
 	]
+
+
+func _delta_arrow(value: float) -> String:
+	if value > 0.0001:
+		return "▲"
+	if value < -0.0001:
+		return "▼"
+	return "±"
+
+
+func _delta_color(value: float, positive_is_good: bool) -> Color:
+	if absf(value) <= 0.0001:
+		return Color(0.72, 0.78, 0.72, 0.96)
+	var favorable := value > 0.0 if positive_is_good else value < 0.0
+	return (
+		Color(0.45, 0.88, 0.62, 1.0)
+		if favorable
+		else Color(0.92, 0.48, 0.29, 1.0)
+	)
 
 
 func _compact_integer(value: int) -> String:

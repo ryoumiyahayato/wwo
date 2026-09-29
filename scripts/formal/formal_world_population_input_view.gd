@@ -48,5 +48,21 @@ func population(economy_entity_id: String) -> int:
 	)
 
 
+func economy_entity_ids() -> Array[String]:
+	var result: Array[String] = []
+	for raw_id: Variant in _records_by_economy_id.keys():
+		if typeof(raw_id) == TYPE_STRING:
+			result.append(str(raw_id))
+	result.sort()
+	return result
+
+
+func records() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for economy_entity_id: String in economy_entity_ids():
+		result.append(fact(economy_entity_id))
+	return result
+
+
 func provenance() -> Dictionary:
 	return _provenance.duplicate(true)

@@ -63,6 +63,16 @@ func parent_organization_id(organization_id: String) -> String:
 	return str((_record(organization_id)).get("parent_organization_id", ""))
 
 
+func subordinate_organization_ids(organization_id: String) -> Array[String]:
+	var output: Array[String] = []
+	if not has_organization(organization_id):
+		return output
+	for candidate_id: String in organization_ids():
+		if parent_organization_id(candidate_id) == organization_id:
+			output.append(candidate_id)
+	return output
+
+
 func is_organization_active(organization_id: String) -> bool:
 	return bool((_record(organization_id)).get("active", false))
 

@@ -50,6 +50,7 @@ var _military_service := VNextMilitaryService.new()
 var _military_authority_bridge: VNextMilitaryAuthorityBridge = null
 var _organization_person_reference_ids: Array[String] = []
 var _organization_place_reference_ids: Array[String] = []
+var _formal_start_plan: Dictionary = {}
 var _organization_composition_error: String = ""
 var _explicit_organization_reference_injection: bool = false
 var economy: FormalWorldEconomyView:
@@ -67,8 +68,10 @@ var _minute_remainder: int:
 func _init(
 	organization_core_value: VNextOrganizationCore = null,
 	organization_person_reference_ids: Array[String] = [],
-	organization_place_reference_ids: Array[String] = []
+	organization_place_reference_ids: Array[String] = [],
+	formal_start_plan: Dictionary = {}
 ) -> void:
+	_formal_start_plan = formal_start_plan.duplicate(true)
 	_organization_person_reference_ids = organization_person_reference_ids.duplicate()
 	_organization_person_reference_ids.sort()
 	_organization_place_reference_ids = organization_place_reference_ids.duplicate()
@@ -78,6 +81,10 @@ func _init(
 		or not _organization_person_reference_ids.is_empty()
 		or not _organization_place_reference_ids.is_empty()
 	)
+	if _explicit_organization_reference_injection and not _formal_start_plan.is_empty():
+		_organization_composition_error = (
+			"Formal start plan cannot be combined with injected Organization references"
+		)
 	_organization = (
 		organization_core_value
 		if organization_core_value != null
@@ -208,6 +215,59 @@ func economy_view() -> FormalWorldEconomyView:
 	return FormalWorldEconomyView.new(_economy.read_only_snapshot())
 
 
+func economy_observation_revision() -> int:
+	return _economy.observation_revision() if _economy.is_configured() else -1
+
+
+func economy_observation_catalog() -> Dictionary:
+	return _economy.observation_catalog() if _economy.is_configured() else {}
+
+
+func commodity_catalog_observation() -> Dictionary:
+	return _economy.commodity_catalog_observation() if _economy.is_configured() else {}
+
+
+func market_observation(market_id: String) -> Dictionary:
+	return _economy.market_observation(market_id) if _economy.is_configured() else {
+		"available": false,
+		"reason": "formal_economy_unavailable",
+		"market_id": market_id,
+	}
+
+
+func market_pulse_observation(history_limit: int = 30, rank_limit: int = 5) -> Dictionary:
+	return (
+		_economy.market_pulse_observation(history_limit, rank_limit)
+		if _economy.is_configured()
+		else {
+			"available": false,
+			"reason": "formal_economy_unavailable",
+		}
+	)
+
+
+func shortage_observation() -> Dictionary:
+	return _economy.shortage_observation() if _economy.is_configured() else {}
+
+
+func transport_observation() -> Dictionary:
+	return _economy.transport_observation() if _economy.is_configured() else {}
+
+
+func economy_overlay_observation(mode: String) -> Dictionary:
+	return _economy.overlay_observation(mode) if _economy.is_configured() else {
+		"available": false,
+		"reason": "formal_economy_unavailable",
+	}
+
+
+func market_id_for_polity(polity_id: String) -> String:
+	if not _economy.is_configured():
+		return ""
+	var economy_id := _economy.economy_entity_for_polity(polity_id)
+	return _economy.market_id_for_economic_aggregate(economy_id)
+
+
 func _organization_responsibility_economy_view() -> FormalWorldEconomyView:
 	if not _economy.is_configured():
 		return FormalWorldEconomyView.new()
@@ -242,6 +302,217 @@ func organization_responsibility_view() -> FormalWorldOrganizationResponsibility
 
 func organization_responsibility_query_port() -> FormalWorldOrganizationResponsibilityView:
 	return organization_responsibility_view()
+
+
+func organization_observation_catalog() -> Dictionary:
+	## Page-level detached projection. The 53-organization scan happens only on
+	## explicit UI refresh, never from draw/process.
+	if not initialized or _organization == null:
+		return {"available": false, "reason": "formal_organization_unavailable"}
+	var organizations := organization_view()
+	var evidence := organization_evidence_view()
+	var responsibilities := organization_responsibility_view()
+	var authority_snapshot := _organization_authority.snapshot()
+	var grant_counts: Dictionary = {}
+	for grant_value: Variant in authority_snapshot.get("authority_grants", []) as Array:
+		if not grant_value is Dictionary:
+			continue
+		var grant := grant_value as Dictionary
+		var organization_id := str(grant.get("represented_entity", ""))
+		if not organization_id.is_empty():
+			grant_counts[organization_id] = int(grant_counts.get(organization_id, 0)) + 1
+	var rows: Array[Dictionary] = []
+	for organization_id: String in organizations.organization_ids():
+		var basis := evidence.organization_basis(organization_id)
+		var represented_polity_id := str(basis.get("represented_polity_id", ""))
+		rows.append({
+			"organization_id": organization_id,
+			"display_label": _organization_observation_label(represented_polity_id),
+			"display_label_basis": "derived_governing_institution_label",
+			"organization_kind": organizations.organization_kind(organization_id),
+			"active": organizations.is_organization_active(organization_id),
+			"primary_place_id": organizations.primary_place_id(organization_id),
+			"parent_organization_id": organizations.parent_organization_id(organization_id),
+			"child_count": organizations.subordinate_organization_ids(organization_id).size(),
+			"member_count": organizations.member_ids(organization_id).size(),
+			"appointment_count": organizations.appointment_ids(organization_id).size(),
+			"declared_capability_count": organizations.capability_ids(organization_id).size(),
+			"authority_grant_count": int(grant_counts.get(organization_id, 0)),
+			"responsibility_status": responsibilities.responsibility_status(organization_id),
+			"represented_polity_id": represented_polity_id,
+			"evidence_basis_class": str(basis.get("basis_class", "")),
+		})
+	return {
+		"available": true,
+		"owner": "VNextOrganizationCore",
+		"revision": organizations.revision(),
+		"organization_count": rows.size(),
+		"rows": rows,
+		"responsibility_count": responsibilities.responsibility_count(),
+		"responsibility_status_counts": responsibilities.status_counts(),
+		"authority_revision": int(authority_snapshot.get("revision", 0)),
+	}
+
+
+func organization_observation(organization_id: String) -> Dictionary:
+	if not initialized or _organization == null:
+		return {"available": false, "reason": "formal_organization_unavailable"}
+	var organizations := organization_view()
+	if not organizations.has_organization(organization_id):
+		return {
+			"available": false,
+			"reason": "organization_not_found",
+			"organization_id": organization_id,
+		}
+	var record := organizations.organization(organization_id)
+	var basis := organization_evidence_view().organization_basis(organization_id)
+	var represented_polity_id := str(basis.get("represented_polity_id", ""))
+	var authority_grants: Array[Dictionary] = []
+	for grant_value: Variant in _organization_authority.snapshot().get("authority_grants", []) as Array:
+		if not grant_value is Dictionary:
+			continue
+		var grant := grant_value as Dictionary
+		var holder := grant.get("holder", {}) as Dictionary
+		if (
+			str(grant.get("represented_entity", "")) == organization_id
+			or str(holder.get("organization_id", "")) == organization_id
+		):
+			authority_grants.append(grant.duplicate(true))
+	return {
+		"available": true,
+		"owner": "VNextOrganizationCore",
+		"organization_id": organization_id,
+		"display_label": _organization_observation_label(represented_polity_id),
+		"display_label_basis": "derived_governing_institution_label",
+		"organization_kind": organizations.organization_kind(organization_id),
+		"active": organizations.is_organization_active(organization_id),
+		"primary_place_id": organizations.primary_place_id(organization_id),
+		"parent_organization_id": organizations.parent_organization_id(organization_id),
+		"child_organization_ids": organizations.subordinate_organization_ids(organization_id),
+		"member_ids": organizations.member_ids(organization_id),
+		"positions": (record.get("positions", []) as Array).duplicate(true),
+		"appointments": (record.get("appointments", []) as Array).duplicate(true),
+		"declared_capability_ids": organizations.capability_ids(organization_id),
+		"current_authority_grants": authority_grants,
+		"responsibilities": organization_responsibility_view().responsibilities_for_organization(organization_id),
+		"composition_evidence": basis.duplicate(true),
+	}
+
+
+func player_organization_observation() -> Dictionary:
+	var person_id := player_person_id()
+	if not initialized or person_id.is_empty() or _organization == null:
+		return {
+			"available": false,
+			"reason": "player_organization_context_unavailable",
+			"person_id": person_id,
+		}
+	var organizations := organization_view()
+	var memberships := organizations.memberships_for_person(person_id)
+	var appointments := organizations.appointments_for_person(person_id)
+	var effective_capabilities: Array[Dictionary] = []
+	var relevant_organization_ids: Array[String] = []
+	for membership: Dictionary in memberships:
+		var membership_organization_id := str(membership.get("organization_id", ""))
+		if not relevant_organization_ids.has(membership_organization_id):
+			relevant_organization_ids.append(membership_organization_id)
+	for appointment: Dictionary in appointments:
+		var appointment_organization_id := str(appointment.get("organization_id", ""))
+		if not relevant_organization_ids.has(appointment_organization_id):
+			relevant_organization_ids.append(appointment_organization_id)
+	relevant_organization_ids.sort()
+	for organization_id: String in relevant_organization_ids:
+		for capability_id: String in organizations.capability_ids(organization_id):
+			if organizations.has_capability(person_id, organization_id, capability_id):
+				effective_capabilities.append({
+					"organization_id": organization_id,
+					"capability_id": capability_id,
+					"basis": "appointment_position_capability",
+				})
+	var holder_grants: Array[Dictionary] = []
+	var total_hour := _authoritative_total_hour()
+	for grant_value: Variant in _organization_authority.snapshot().get("authority_grants", []) as Array:
+		if not grant_value is Dictionary:
+			continue
+		var grant := grant_value as Dictionary
+		if _organization_grant_holder_matches_player(
+			grant, person_id, memberships, appointments, total_hour
+		):
+			holder_grants.append(grant.duplicate(true))
+	return {
+		"available": true,
+		"person_id": person_id,
+		"memberships": memberships.duplicate(true),
+		"appointments": appointments.duplicate(true),
+		"effective_capabilities": effective_capabilities,
+		"current_authority_grants": holder_grants,
+	}
+
+
+func organization_responsibility_observation() -> Dictionary:
+	if not initialized:
+		return {"available": false, "reason": "formal_organization_unavailable"}
+	var view := organization_responsibility_view()
+	var evidence := organization_evidence_view()
+	var rows: Array[Dictionary] = []
+	for organization_id: String in view.organization_ids():
+		var record := view.responsibility_state(organization_id)
+		var represented_polity_id := evidence.represented_polity_id(organization_id)
+		record["display_label"] = _organization_observation_label(
+			represented_polity_id
+		)
+		rows.append(record)
+	return {
+		"available": true,
+		"owner": "FormalWorldOrganizationResponsibilityService",
+		"label": "organization_world_observation",
+		"responsibility_count": rows.size(),
+		"status_counts": view.status_counts(),
+		"rows": rows,
+	}
+
+
+func _organization_observation_label(represented_polity_id: String) -> String:
+	var political := _historical_evidence_view.record(represented_polity_id)
+	var polity_label := str(political.get(
+		"name_zh", political.get("short_name_zh", political.get("name", represented_polity_id))
+	))
+	return "治理机构 · %s" % (polity_label if not polity_label.is_empty() else represented_polity_id)
+
+
+func _organization_grant_holder_matches_player(
+	grant: Dictionary,
+	person_id: String,
+	memberships: Array[Dictionary],
+	appointments: Array[Dictionary],
+	total_hour: int
+) -> bool:
+	var valid_from := int(grant.get("valid_from", -1))
+	var valid_until := int(grant.get("valid_until", -1))
+	var revoked_at := int(grant.get("revoked_at", -1))
+	if valid_from < 0 or total_hour < valid_from:
+		return false
+	if valid_until >= 0 and total_hour > valid_until:
+		return false
+	if revoked_at >= 0 and total_hour >= revoked_at:
+		return false
+	var holder := grant.get("holder", {}) as Dictionary
+	var holder_kind := str(holder.get("kind", ""))
+	if holder_kind == "person":
+		return str(holder.get("person_id", "")) == person_id
+	var organization_id := str(holder.get("organization_id", ""))
+	if holder_kind == "membership":
+		for membership: Dictionary in memberships:
+			if str(membership.get("organization_id", "")) == organization_id:
+				return true
+	if holder_kind == "position":
+		for appointment: Dictionary in appointments:
+			if (
+				str(appointment.get("organization_id", "")) == organization_id
+				and str(appointment.get("position_id", "")) == str(holder.get("local_id", ""))
+			):
+				return true
+	return false
 
 
 func spatial_current_hour() -> int:
@@ -340,12 +611,297 @@ func organization_person_reference_ids() -> Array[String]:
 	return _organization_person_reference_ids.duplicate()
 
 
+func organization_place_reference_ids() -> Array[String]:
+	return _organization_place_reference_ids.duplicate()
+
+
 func player_person_id() -> String:
 	return _player_state.player_id()
 
 
+func place_context_view(place_id: String) -> Dictionary:
+	## Detached, source-traceable observation for one admitted Spatial place.
+	## Economy remains aggregate-owned; this projection never renames a country
+	## aggregate into a city market.
+	if not initialized or _spatial_catalog == null or not _spatial_catalog.is_loaded():
+		return {
+			"available": false,
+			"reason": "formal_spatial_catalog_unavailable",
+			"place_id": place_id,
+		}
+	var place := _spatial_catalog.get_place(place_id)
+	if place.is_empty():
+		return {
+			"available": false,
+			"reason": "formal_place_not_found",
+			"place_id": place_id,
+		}
+	var organization_count := 0
+	if _organization != null:
+		for organization_id: String in _organization.organization_ids():
+			if _organization.primary_place_id(organization_id) == str(place.get("place_id", "")):
+				organization_count += 1
+	return _place_context_projection(place, organization_count)
+
+
+func place_observation_catalog() -> Dictionary:
+	## Bounded product catalogue (32 cities + 8 ports at the current data
+	## revision).  Called on map entry/relevant refresh, never from _draw().
+	if not initialized or _spatial_catalog == null or not _spatial_catalog.is_loaded():
+		return {"available": false, "reason": "formal_spatial_catalog_unavailable"}
+	var organization_counts: Dictionary = {}
+	if _organization != null:
+		for organization_id: String in _organization.organization_ids():
+			var organization_place_id := _organization.primary_place_id(organization_id)
+			if not organization_place_id.is_empty():
+				organization_counts[organization_place_id] = int(
+					organization_counts.get(organization_place_id, 0)
+				) + 1
+	var rows: Array[Dictionary] = []
+	var places: Array[Dictionary] = []
+	places.append_array(_spatial_catalog.cities())
+	places.append_array(_spatial_catalog.ports())
+	for place: Dictionary in places:
+		var stable_place_id := str(place.get("place_id", ""))
+		rows.append(_place_context_projection(
+			place, int(organization_counts.get(stable_place_id, 0))
+		))
+	rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var priority_a := int(a.get("label_priority", 0))
+		var priority_b := int(b.get("label_priority", 0))
+		return (
+			str(a.get("place_id", "")) < str(b.get("place_id", ""))
+			if priority_a == priority_b
+			else priority_a > priority_b
+		)
+	)
+	return {
+		"available": true,
+		"owner": "VNextSpatialCatalog",
+		"derived": true,
+		"place_count": rows.size(),
+		"rows": rows,
+	}
+
+
+func _place_context_projection(place: Dictionary, organization_count: int) -> Dictionary:
+	var source_polity_id := str(place.get("parent_country_id", ""))
+	var runtime_polity_id := _political_registry_view.runtime_id_for_source(source_polity_id)
+	var economy_entity_id := (
+		_economy.economy_entity_for_polity(runtime_polity_id)
+		if not runtime_polity_id.is_empty()
+		else ""
+	)
+	var market_id := _economy.market_id_for_economic_aggregate(economy_entity_id)
+	var spatial_kind := str(place.get("spatial_kind", place.get("object_level", "")))
+	var source_path := str(VNextSpatialCatalog.SOURCE_PATHS.get(
+		"ports" if spatial_kind == "port" else "cities", ""
+	))
+	return {
+		"available": true,
+		"owner": "VNextSpatialCatalog",
+		"place_id": str(place.get("place_id", "")),
+		"map_id": str(place.get("map_id", place.get("id", ""))),
+		"display_label": str(place.get("name", place.get("display_name_zh", place.get("id", "")))),
+		"kind": spatial_kind,
+		"major": bool(place.get("major", false)),
+		"lon_lat": (place.get("lon_lat", []) as Array).duplicate(),
+		"label_priority": int(place.get("label_priority", 0)),
+		"min_zoom": float(place.get("min_zoom", 0.0)),
+		"max_zoom": float(place.get("max_zoom", 200.0)),
+		"source_polity_id": source_polity_id,
+		"runtime_polity_id": runtime_polity_id,
+		"population_source_id": source_polity_id,
+		"economy_entity_id": economy_entity_id,
+		"market_id": market_id,
+		"economic_statistics_level": (
+			"economic_aggregate" if not economy_entity_id.is_empty() else "unavailable"
+		),
+		"organization_count": organization_count,
+		"evidence": {
+			"classification": "historical_source_evidence",
+			"catalog": "VNextSpatialCatalog",
+			"source_path": source_path,
+		},
+	}
+
+
 func select_player_person(person_id: String) -> bool:
-	return _player_state.set_player_id(person_id)
+	if not initialized or _person_authority == null:
+		return false
+	var person := _person_authority.person(person_id)
+	if person.is_empty() or not bool(person.get("alive", false)):
+		return false
+	if not _player_state.set_player_id(person_id):
+		return false
+	state_changed.emit({"player": true, "person_id": person_id})
+	return true
+
+
+func player_context_view() -> Dictionary:
+	## Narrow detached projection for the one authoritative player identity.
+	## Missing personal domains are reported as unavailable rather than fabricated.
+	var person_id := player_person_id()
+	if not initialized or person_id.is_empty() or _person_authority == null:
+		return {
+			"available": false,
+			"reason": "player_person_unavailable",
+			"person_id": person_id,
+		}
+	var person := _person_authority.person(person_id)
+	if person.is_empty():
+		return {
+			"available": false,
+			"reason": "player_person_missing",
+			"person_id": person_id,
+		}
+	var claim := _person_authority.population_claim(person_id)
+	var population_source_id := str(person.get("population_territory_id", ""))
+	var place_id := str(person.get("current_place_id", ""))
+	var place := (
+		_spatial_catalog.get_place(place_id)
+		if _spatial_catalog != null and _spatial_catalog.is_loaded()
+		else {}
+	)
+	var source_polity_id := str(place.get("parent_country_id", population_source_id))
+	var runtime_polity_id := _political_registry_view.runtime_id_for_source(
+		source_polity_id
+	)
+	if runtime_polity_id.is_empty():
+		runtime_polity_id = _political_registry_view.runtime_id_for_source(
+			population_source_id
+		)
+	var political_observation: Dictionary = {
+		"available": false,
+		"reason": "no_current_polity_mapping",
+		"runtime_entity_id": runtime_polity_id,
+		"source_entity_id": source_polity_id,
+	}
+	if not runtime_polity_id.is_empty():
+		var polity := CurrentWorldPoliticalProjection.polity_summary(
+			runtime_polity_id,
+			_political_registry_view,
+			_historical_evidence_view
+		)
+		if not polity.is_empty():
+			political_observation = {
+				"available": true,
+				"runtime_entity_id": runtime_polity_id,
+				"source_entity_id": source_polity_id,
+				"name_zh": str(polity.get(
+					"name_zh", polity.get("short_name_zh", runtime_polity_id)
+				)),
+				"status": str(polity.get("status", "")),
+				"relationship": str(polity.get("relationship", "")),
+				"authority_relations": (
+					polity.get("authority_relations", []) as Array
+				).duplicate(true),
+			}
+	var economy_entity_id := _economy.economy_entity_for_polity(
+		runtime_polity_id
+	)
+	if economy_entity_id.is_empty() and _population_input_view.fact(
+		population_source_id
+	).size() > 0:
+		economy_entity_id = population_source_id
+	var economic_observation: Dictionary = {
+		"available": false,
+		"reason": "no_regional_economy_mapping",
+		"economy_entity_id": economy_entity_id,
+	}
+	if not economy_entity_id.is_empty():
+		var economy_summary := _economy.country_summary(economy_entity_id)
+		if not economy_summary.is_empty():
+			economic_observation = {
+				"available": true,
+				"economy_entity_id": economy_entity_id,
+				"population": int(economy_summary.get("population", 0)),
+				"daily_totals": (
+					economy_summary.get("daily_totals", {}) as Dictionary
+				).duplicate(true),
+				"admission_status": str(
+					economy_summary.get("admission_status", "")
+				),
+			}
+	var demographic_identity := (
+		person.get("basic_demographic_identity", {}) as Dictionary
+	).duplicate(true)
+	var provenance := (person.get("provenance", {}) as Dictionary).duplicate(true)
+	return {
+		"available": true,
+		"reason": "",
+		"person_id": person_id,
+		"display_label": _stable_player_label(person_id),
+		"alive": bool(person.get("alive", false)),
+		"population_claim": claim.duplicate(true),
+		"population_source": {
+			"available": not population_source_id.is_empty(),
+			"id": population_source_id,
+			"population": _formal_population_total(population_source_id),
+			"anonymous_population": formal_person_anonymous_population(
+				population_source_id
+			),
+			"revision": _population_input_view.revision(),
+			"fingerprint": _population_input_view.fingerprint(),
+			"kind": str(provenance.get("population_source_kind", "")),
+		},
+		"current_place": {
+			"available": not place.is_empty(),
+			"id": place_id,
+			"map_id": VNextSpatialCatalog.place_query_to_map_id(place_id),
+			"name": str(place.get("name", place.get("display_name_zh", place_id))),
+			"object_level": str(place.get("object_level", "")),
+			"parent_country_id": str(place.get("parent_country_id", "")),
+			"parent_region_id": str(place.get("parent_region_id", "")),
+		},
+		"demographic_identity": demographic_identity,
+		"provenance_summary": {
+			"kind": str(provenance.get("kind", "")),
+			"basis": str(provenance.get("basis", "")),
+			"population_source_revision": str(
+				provenance.get("population_source_revision", "")
+			),
+			"population_source_fingerprint": str(
+				provenance.get("population_source_fingerprint", "")
+			),
+			"territory_mutation_converged": bool(
+				provenance.get("territory_mutation_converged", false)
+			),
+			"generation_rules_version": str(
+				provenance.get("generation_rules_version", "unavailable")
+			),
+			"generation_seed": provenance.get("generation_seed", "unavailable"),
+			"accepted_draft_index": provenance.get(
+				"accepted_draft_index", "unavailable"
+			),
+			"source_catalog_fingerprint": str(
+				provenance.get("source_catalog_fingerprint", "unavailable")
+			),
+		},
+		"memberships": _organization.memberships_for_person(person_id),
+		"appointments": _organization.appointments_for_person(person_id),
+		"political_observation": political_observation,
+		"economic_observation": economic_observation,
+		"unsupported_personal_fields": {
+			"name": "unavailable",
+			"occupation": "unavailable",
+			"wage": "unavailable",
+			"cash": "unavailable",
+			"health": "unavailable",
+			"friends": "unavailable",
+			"relationships": "unavailable",
+			"plans": "unavailable",
+			"messages": "unavailable",
+			"skills": "unavailable",
+			"military_rank": "unavailable",
+		},
+	}
+
+
+func _stable_player_label(person_id: String) -> String:
+	if person_id.is_empty():
+		return "人物 ----"
+	return "人物 %s" % person_id.sha256_text().left(4).to_upper()
 
 
 func player_defend_formation(
@@ -375,6 +931,140 @@ func player_defend_formation(
 		duration_hours,
 		_authoritative_total_hour()
 	)
+
+
+func player_defend_options() -> Dictionary:
+	## Detached, read-only projection of the exact DEFEND contexts currently
+	## available to the authoritative player. The command port re-resolves the
+	## returned context at submission time, so this projection is never a grant.
+	var person_id := player_person_id()
+	var result := {
+		"acting_person_id": person_id,
+		"available": false,
+		"options": [],
+		"unavailable_reasons": [],
+	}
+	if (
+		not initialized
+		or person_id.is_empty()
+		or _organization == null
+		or _organization_authority == null
+		or _military_state == null
+	):
+		result.unavailable_reasons = ["formal_military_unavailable"]
+		return result
+
+	var formation_ids := _military_state.get_sorted_formation_ids()
+	var contexts := _player_defend_acting_contexts(person_id)
+	if formation_ids.is_empty():
+		(result.unavailable_reasons as Array).append("no_formation")
+	if contexts.is_empty():
+		(result.unavailable_reasons as Array).append("no_authority_context")
+
+	var options: Array[Dictionary] = []
+	for context: Dictionary in contexts:
+		for formation_id: String in formation_ids:
+			var authorization := _organization_authority.resolve_authority(
+				context,
+				VNextMilitaryAuthorityBridge.OPERATION_DEFEND,
+				VNextOrganizationAuthorityFoundation.STAGE_DOMAIN_EXECUTION,
+				formation_id,
+				"",
+				"",
+				0.0,
+				_authoritative_total_hour()
+			)
+			var formation := _military_state.get_formation(formation_id)
+			options.append({
+				"formation_id": formation_id,
+				"formation": formation.to_dict() if formation != null else {},
+				"acting_context": context.duplicate(true),
+				"authorization_status": str(authorization.get("status", "")),
+				"authorization": authorization.duplicate(true),
+				"authorized": str(authorization.get("status", "")) == VNextOrganizationAuthorityFoundation.STATUS_AUTHORIZED,
+			})
+	result.options = options
+	for option: Dictionary in options:
+		if bool(option.get("authorized", false)):
+			result.available = true
+			return result
+	if not formation_ids.is_empty() and not contexts.is_empty():
+		(result.unavailable_reasons as Array).append("no_authorized_formation")
+	return result
+
+
+func _player_defend_acting_contexts(person_id: String) -> Array[Dictionary]:
+	var output: Array[Dictionary] = []
+	var seen: Dictionary = {}
+	var authority_snapshot := _organization_authority.snapshot()
+	for raw_grant: Variant in authority_snapshot.get("authority_grants", []) as Array:
+		if not raw_grant is Dictionary:
+			continue
+		var grant := raw_grant as Dictionary
+		if str(grant.get("operation", "")) != VNextMilitaryAuthorityBridge.OPERATION_DEFEND:
+			continue
+		var authority_id := str(grant.get("authority_id", ""))
+		var represented := str(grant.get("represented_entity", ""))
+		var holder := grant.get("holder", {}) as Dictionary
+		var holder_kind := str(holder.get("kind", ""))
+		var acting_org := str(holder.get("organization_id", represented))
+		match holder_kind:
+			"position":
+				for appointment: Dictionary in _organization.appointments_for_person(person_id):
+					if (
+						str(appointment.get("organization_id", "")) == acting_org
+						and str(appointment.get("position_id", "")) == str(holder.get("local_id", ""))
+					):
+						_append_unique_defend_context(output, seen, VNextOrganizationAuthorityFoundation.acting_context(
+							person_id,
+							acting_org,
+							represented,
+							authority_id,
+							str(appointment.get("appointment_id", ""))
+						))
+			"membership":
+				if _organization.is_member(acting_org, person_id):
+					_append_unique_defend_context(output, seen, VNextOrganizationAuthorityFoundation.acting_context(
+						person_id, acting_org, represented, authority_id, "", true
+					))
+			"person":
+				if str(holder.get("person_id", "")) == person_id:
+					_append_unique_defend_context(output, seen, VNextOrganizationAuthorityFoundation.acting_context(
+						person_id, represented, represented, authority_id
+					))
+
+	for raw_delegation: Variant in authority_snapshot.get("delegations", []) as Array:
+		if not raw_delegation is Dictionary:
+			continue
+		var delegation := raw_delegation as Dictionary
+		if str(delegation.get("recipient_person_id", "")) != person_id:
+			continue
+		var source_id := str(delegation.get("source_id", ""))
+		var source_grant := _organization_authority.authority_grant(source_id)
+		if source_grant.is_empty() or str(source_grant.get("operation", "")) != VNextMilitaryAuthorityBridge.OPERATION_DEFEND:
+			continue
+		var represented := str(source_grant.get("represented_entity", ""))
+		_append_unique_defend_context(output, seen, VNextOrganizationAuthorityFoundation.acting_context(
+			person_id,
+			represented,
+			represented,
+			source_id,
+			"",
+			false,
+			"",
+			str(delegation.get("delegation_id", ""))
+		))
+	return output
+
+
+func _append_unique_defend_context(
+	output: Array[Dictionary], seen: Dictionary, context: Dictionary
+) -> void:
+	var fingerprint := JSON.stringify(context)
+	if seen.has(fingerprint):
+		return
+	seen[fingerprint] = true
+	output.append(context.duplicate(true))
 
 
 func economy_regression_snapshot() -> Dictionary:
@@ -490,6 +1180,64 @@ func polity_summary(entity_id: String) -> Dictionary:
 			economy_summary.get("primary_playable", false)
 		)
 	return result
+
+
+func political_observation(entity_id: String) -> Dictionary:
+	## Narrow detached projection for the read-only politics surface. Runtime
+	## identity remains authoritative; dated metadata is explicitly evidence.
+	if not initialized or not _political_registry_view.has_entity(entity_id):
+		return {
+			"available": false,
+			"reason": "runtime_polity_unavailable",
+			"runtime_id": entity_id,
+		}
+	var runtime_entity := _political_registry_view.entity(entity_id)
+	var source_id := _political_registry_view.source_historical_id(entity_id)
+	var evidence := _historical_evidence_view.record(source_id)
+	var evidence_available := not evidence.is_empty()
+	var display_name := entity_id
+	if evidence_available:
+		display_name = str(evidence.get(
+			"name_zh",
+			evidence.get("short_name_zh", evidence.get("name", entity_id))
+		))
+	var historical_evidence: Dictionary = {
+		"available": evidence_available,
+		"source_historical_id": source_id,
+		"catalog_snapshot_date": _historical_evidence_view.snapshot_date(),
+		"catalog_fingerprint": _historical_evidence_view.fingerprint(),
+	}
+	if evidence_available:
+		for key: String in [
+			"name",
+			"name_zh",
+			"short_name_zh",
+			"status",
+			"relationship",
+			"valid_from",
+			"valid_to",
+			"geometry_feature_id",
+			"geometry_provider",
+			"data_quality",
+			"flag_id",
+			"flag_mode",
+		]:
+			if evidence.has(key):
+				historical_evidence[key] = evidence.get(key)
+	return {
+		"available": true,
+		"owner": "RuntimePoliticalEntityRegistry",
+		"runtime_id": entity_id,
+		"display_name": display_name,
+		"lifecycle_status": str(runtime_entity.get("lifecycle_status", "")),
+		"lineage": (runtime_entity.get("lineage", {}) as Dictionary).duplicate(true),
+		"source_historical_id": source_id,
+		"authority_relations": (
+			_political_registry_view.authority_relations_for_target(entity_id)
+		),
+		"historical_evidence": historical_evidence,
+		"current_date_time": date_time().duplicate(true),
+	}
 
 
 func has_polity(entity_id: String) -> bool:
@@ -907,6 +1655,8 @@ func _configure_formal_person_composition() -> bool:
 	if _person_authority == null:
 		initialization_error = "Formal Person authority could not be created"
 		return false
+	if not _formal_start_plan.is_empty():
+		return _configure_selected_formal_person()
 	var person_ids_to_materialize: Array[String] = []
 	if (
 		_explicit_organization_reference_injection
@@ -960,6 +1710,58 @@ func _configure_formal_person_composition() -> bool:
 	var person_ids := _person_authority.person_ids()
 	if person_ids.is_empty() or not _player_state.set_player_id(person_ids[0]):
 		initialization_error = "PlayerState could not select a Formal Person"
+		return false
+	return true
+
+
+func _configure_selected_formal_person() -> bool:
+	var person_id := str(_formal_start_plan.get("person_id", ""))
+	var claim_id := str(_formal_start_plan.get("claim_id", ""))
+	var source_id := str(_formal_start_plan.get("population_source_id", ""))
+	var place_id := str(_formal_start_plan.get("start_place_id", ""))
+	var demographic := (
+		_formal_start_plan.get("basic_demographic_identity", {}) as Dictionary
+	)
+	var provenance := _formal_start_plan.get("provenance", {}) as Dictionary
+	if (
+		person_id.is_empty()
+		or claim_id.is_empty()
+		or source_id.is_empty()
+		or place_id.is_empty()
+		or demographic.is_empty()
+		or provenance.is_empty()
+	):
+		initialization_error = "Formal selected-person start plan is incomplete"
+		return false
+	if _population_input_view.population(source_id) <= 0:
+		initialization_error = "Formal selected-person population source is unavailable"
+		return false
+	var place := _spatial_catalog.get_place(place_id)
+	if place.is_empty() or str(place.get("parent_country_id", "")) != source_id:
+		initialization_error = "Formal selected-person source/place combination is incompatible"
+		return false
+	if not _person_authority.materialize(
+		person_id,
+		claim_id,
+		source_id,
+		demographic,
+		place_id,
+		provenance
+	):
+		initialization_error = "Formal selected Person materialization failed: %s" % (
+			_person_authority.last_error()
+		)
+		return false
+	_organization_person_reference_ids = [person_id]
+	_organization_place_reference_ids = [place_id]
+	if not _bind_organization_reference_catalog():
+		return false
+	_player_state = VNextPlayerState.new()
+	if (
+		not _player_state.bind_person_authority(_person_authority)
+		or not _player_state.set_player_id(person_id)
+	):
+		initialization_error = "PlayerState could not bind selected Formal Person"
 		return false
 	return true
 
@@ -1076,7 +1878,14 @@ func _bind_organization_reference_catalog() -> bool:
 func _rebind_player_and_organization_for_restored_persons() -> bool:
 	_organization_person_reference_ids = _person_authority.person_ids()
 	if not _explicit_organization_reference_injection:
-		_organization_place_reference_ids = [DEFAULT_FORMAL_PERSON_PLACE_ID]
+		_organization_place_reference_ids.clear()
+		for person_id: String in _organization_person_reference_ids:
+			var place_id := _person_authority.current_place(person_id)
+			if not place_id.is_empty() and place_id not in _organization_place_reference_ids:
+				_organization_place_reference_ids.append(place_id)
+		_organization_place_reference_ids.sort()
+		if _organization_place_reference_ids.is_empty():
+			return false
 	_organization = VNextOrganizationCore.new()
 	if not _bind_organization_reference_catalog():
 		return false
