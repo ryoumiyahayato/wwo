@@ -3,7 +3,7 @@ name: Build 1900 historical evidence
 on:
   pull_request:
     branches:
-      - master
+      - canonical/current-world
     paths:
       - ".gitattributes"
       - "tools/historical_data/**"

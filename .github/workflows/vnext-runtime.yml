@@ -3,7 +3,7 @@ name: vNext validation
 on:
   pull_request:
     branches:
-      - master
+      - canonical/current-world
     paths:
       - "scripts/vnext/**"
       - "tests/vnext/**"
