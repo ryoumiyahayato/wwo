@@ -5,7 +5,7 @@ name: Alpha/Fixture Diagnostics
 on:
   pull_request:
     branches:
-      - master
+      - canonical/current-world
 
 permissions:
   contents: read
