@@ -1,0 +1,1299 @@
+{
+  "schema_id": "wwo_world_simulation_acceptance_spec_v1",
+  "status": "design_only_not_implemented",
+  "baseline_commit": "85c073649e1ed17594f2a41d4f2081feceeabe8b",
+  "as_of": "2026-09-08",
+  "instructions": [
+    "每个case是拟新增测试规格；现有focused通过不等于这些用例通过。",
+    "numeric用例也必须最终通过正式领域接口运行，不能只把期待数字打印出来。",
+    "when是有序动作描述；实施AI需将动作映射为真实测试适配器，当前不是可直接执行的DSL。",
+    "case标识稳定，expected新增字段需要同时更新说明与测试。",
+    "同一测试的given默认为独立最小夹具，除明确引用全世界外，不代表历史1900初值。"
+  ],
+  "hash_scopes": {
+    "replay_hash": "全部权威持久模拟状态的canonical序列化，包括业务序号、余数、过程和已知信息；排除墙钟耗时、日志、可重建缓存。",
+    "physical_world_hash": "全部物理/经济/人口/组织/政治过程的权威状态；排除命令输入来源标签和UI已读/镜头等纯显示状态。"
+  },
+  "cases": [
+    {
+      "id": "T01",
+      "title": "真实基线和实际目录覆盖",
+      "kind": "repository",
+      "spec": [
+        "R01",
+        "R09"
+      ],
+      "given": {
+        "baseline_commit": "85c073649e1ed17594f2a41d4f2081feceeabe8b"
+      },
+      "when": [
+        "trace product constructor",
+        "count loaded market records rather than source_summary"
+      ],
+      "expect": {
+        "baseline": {
+          "political_units": 151,
+          "historical_economy_rows": 50,
+          "vnext_country_profiles": 2,
+          "vnext_region_profiles": 8,
+          "production_sites": 49,
+          "commodities": 67,
+          "recipes": 38
+        }
+      },
+      "checks": [
+        "运行时覆盖与资料摘要分别报告",
+        "完成迁移后正式世界不得使用两国架空目录"
+      ]
+    },
+    {
+      "id": "T02",
+      "title": "共享容量同级公平与顺序无关",
+      "kind": "numeric",
+      "spec": [
+        "A01"
+      ],
+      "given": {
+        "capacity": 100,
+        "requests": [
+          {
+            "id": "a",
+            "amount": 60,
+            "priority": 0
+          },
+          {
+            "id": "b",
+            "amount": 60,
+            "priority": 0
+          }
+        ]
+      },
+      "when": [
+        "allocate",
+        "repeat with request order reversed"
+      ],
+      "expect": {
+        "allocations": {
+          "a": 50,
+          "b": 50
+        },
+        "unused": 0,
+        "permutation_equal": true
+      }
+    },
+    {
+      "id": "T03",
+      "title": "整数积分分段等价",
+      "kind": "numeric",
+      "spec": [
+        "R02",
+        "R05"
+      ],
+      "given": {
+        "rate_numerator": 7,
+        "rate_denominator": 60,
+        "carry": 0,
+        "total_minutes": 60
+      },
+      "when": [
+        "integrate once for 60 minutes",
+        "integrate 60 times for 1 minute"
+      ],
+      "expect": {
+        "amount": 7,
+        "carry": 0,
+        "equal": true
+      }
+    },
+    {
+      "id": "T04",
+      "title": "最大余数与零需求",
+      "kind": "numeric",
+      "spec": [
+        "R02",
+        "A01"
+      ],
+      "given": {
+        "capacity": 2,
+        "requests": [
+          {
+            "id": "a",
+            "amount": 1
+          },
+          {
+            "id": "b",
+            "amount": 1
+          },
+          {
+            "id": "c",
+            "amount": 1
+          }
+        ]
+      },
+      "when": [
+        "allocate with equal priority",
+        "allocate separate empty/zero-weight group"
+      ],
+      "expect": {
+        "allocations": {
+          "a": 1,
+          "b": 1,
+          "c": 0
+        },
+        "zero_weight_allocation": 0
+      }
+    },
+    {
+      "id": "T05",
+      "title": "日期、引用和覆盖不能默认补齐",
+      "kind": "integration",
+      "spec": [
+        "R09"
+      ],
+      "given": {
+        "start_datetime": "1900-03-12T00:00",
+        "expected_total_minutes": 100800,
+        "mutations": [
+          "unknown place",
+          "overlapping population partition",
+          "recipe without labor unit",
+          "row outside valid date"
+        ]
+      },
+      "when": [
+        "initialize valid fixture",
+        "initialize each invalid mutation on fresh candidate"
+      ],
+      "expect": {
+        "valid_start_minute": 100800,
+        "each_invalid_rejected": true,
+        "errors_include_record_id": true
+      }
+    },
+    {
+      "id": "T06",
+      "title": "工资税消费的货币闭环",
+      "kind": "numeric",
+      "spec": [
+        "A03",
+        "A05"
+      ],
+      "given": {
+        "cash": {
+          "firm": 1000,
+          "household": 100,
+          "government": 100
+        },
+        "gross_wages": 80,
+        "wage_tax_bp": 1000,
+        "firm_bread": 10,
+        "bread_price": 10,
+        "bread_purchase_and_consumption": 6
+      },
+      "when": [
+        "pay gross wage split into net wage and tax",
+        "purchase and consume bread"
+      ],
+      "expect": {
+        "cash": {
+          "firm": 980,
+          "household": 112,
+          "government": 108
+        },
+        "cash_total": 1200,
+        "firm_bread": 4,
+        "household_bread": 0,
+        "bread_consumed": 6,
+        "wage_arrears": 0
+      }
+    },
+    {
+      "id": "T07",
+      "title": "部分工资支付留下欠款",
+      "kind": "numeric",
+      "spec": [
+        "A03"
+      ],
+      "given": {
+        "firm_cash": 50,
+        "household_cash": 0,
+        "government_cash": 0,
+        "gross_wages_due": 80,
+        "tax_on_paid_wages_bp": 1000
+      },
+      "when": [
+        "settle wages"
+      ],
+      "expect": {
+        "firm_cash": 0,
+        "household_cash": 45,
+        "government_cash": 5,
+        "wage_arrears": 30,
+        "total_cash": 50
+      }
+    },
+    {
+      "id": "T08",
+      "title": "限量成交与未用预留释放",
+      "kind": "numeric",
+      "spec": [
+        "A05"
+      ],
+      "given": {
+        "seller_stock": 10,
+        "price": 10,
+        "buyers": [
+          {
+            "id": "a",
+            "desired": 8,
+            "cash": 80
+          },
+          {
+            "id": "b",
+            "desired": 8,
+            "cash": 80
+          }
+        ]
+      },
+      "when": [
+        "reserve funded bids",
+        "clear local spot market"
+      ],
+      "expect": {
+        "quantity": {
+          "a": 5,
+          "b": 5
+        },
+        "cash_spent": {
+          "a": 50,
+          "b": 50
+        },
+        "unused_hold_released": {
+          "a": 30,
+          "b": 30
+        },
+        "seller_receipts": 100,
+        "seller_stock": 0
+      }
+    },
+    {
+      "id": "T09",
+      "title": "钱货运力三方失败不能半提交",
+      "kind": "fault_injection",
+      "spec": [
+        "R06",
+        "A06"
+      ],
+      "given": {
+        "valid_dispatch": "fixed fixture with money, stock and capacity",
+        "fault_points": [
+          "after_finance_prepare",
+          "after_stock_prepare",
+          "after_spatial_prepare",
+          "before_commit"
+        ]
+      },
+      "when": [
+        "inject each fault independently"
+      ],
+      "expect": {
+        "world_hash_unchanged": true,
+        "event_count_added": 0,
+        "active_reservation_count_added": 0,
+        "command_sequence_unchanged": true
+      }
+    },
+    {
+      "id": "T10",
+      "title": "最紧约束决定生产批次",
+      "kind": "numeric",
+      "spec": [
+        "A04"
+      ],
+      "given": {
+        "planned_batches": 3,
+        "flour": 25,
+        "water": 12,
+        "labor_minutes": 180,
+        "machine_batches": 2,
+        "recipe": {
+          "flour": 10,
+          "water": 5,
+          "labor_minutes": 120,
+          "machine_batches": 1,
+          "bread_output": 10
+        }
+      },
+      "when": [
+        "start and complete feasible production"
+      ],
+      "expect": {
+        "batches": 1,
+        "flour_remaining": 15,
+        "water_remaining": 7,
+        "labor_used_minutes": 120,
+        "labor_unused_minutes": 60,
+        "bread_produced": 10
+      }
+    },
+    {
+      "id": "T11",
+      "title": "生产时长和供应链不会因遍历次序瞬间串通",
+      "kind": "integration",
+      "spec": [
+        "A04",
+        "R05"
+      ],
+      "given": {
+        "upstream_duration_minutes": 60,
+        "upstream_output": 10,
+        "downstream_requires_upstream_output": true,
+        "start_minute": 0
+      },
+      "when": [
+        "advance to 59",
+        "advance to 60",
+        "repeat with reversed site storage order"
+      ],
+      "expect": {
+        "upstream_output_at_59": 0,
+        "upstream_output_at_60": 10,
+        "downstream_cannot_complete_by_60": true,
+        "world_hash_equal_across_storage_order": true
+      }
+    },
+    {
+      "id": "T12",
+      "title": "取消半成品明确记损失",
+      "kind": "numeric",
+      "spec": [
+        "A04"
+      ],
+      "given": {
+        "wip_input": 10,
+        "recipe_cancellation_recovery_bp": 5000,
+        "output_completed": 0
+      },
+      "when": [
+        "cancel process using explicit recovery rule"
+      ],
+      "expect": {
+        "input_returned": 5,
+        "input_loss": 5,
+        "wip_remaining": 0,
+        "output_created": 0
+      }
+    },
+    {
+      "id": "T13",
+      "title": "次日价格使用已融资供需",
+      "kind": "numeric",
+      "spec": [
+        "A05"
+      ],
+      "given": {
+        "price": 100,
+        "price_carry": 0,
+        "funded_demand": 150,
+        "eligible_supply": 50
+      },
+      "when": [
+        "update next-day price"
+      ],
+      "expect": {
+        "imbalance_bp": 5000,
+        "delta_bp": 500,
+        "next_price": 105,
+        "next_carry": 0
+      }
+    },
+    {
+      "id": "T14",
+      "title": "具名人物是人口子集",
+      "kind": "numeric",
+      "spec": [
+        "A02"
+      ],
+      "given": {
+        "population": 1000,
+        "labor_cohort": 600,
+        "anonymous_employed": 600,
+        "named_employed": 0
+      },
+      "when": [
+        "materialize one employed person"
+      ],
+      "expect": {
+        "population": 1000,
+        "labor_cohort": 600,
+        "anonymous_employed": 599,
+        "named_employed": 1
+      }
+    },
+    {
+      "id": "T15",
+      "title": "征兵不能凭空造人",
+      "kind": "integration",
+      "spec": [
+        "A02",
+        "A11"
+      ],
+      "given": {
+        "population": 1000,
+        "eligible_available": 100,
+        "already_employed": 500
+      },
+      "when": [
+        "request mobilization of 120 without employment release",
+        "request mobilization of 100"
+      ],
+      "expect": {
+        "first_request_rejected": true,
+        "second_request_personnel": 100,
+        "eligible_available_after": 0,
+        "population_after": 1000
+      }
+    },
+    {
+      "id": "T16",
+      "title": "伤亡在所有人口引用中只扣一次",
+      "kind": "integration",
+      "spec": [
+        "R03",
+        "A02",
+        "A11"
+      ],
+      "given": {
+        "population": 1000,
+        "named_active_person": "person:test_soldier",
+        "casualty_id": "casualty:test_1",
+        "loss_type": "dead"
+      },
+      "when": [
+        "commit casualty transition",
+        "repeat same casualty"
+      ],
+      "expect": {
+        "population": 999,
+        "person_alive": false,
+        "formation_assignment_removed_once": true,
+        "repeat_does_not_change_world": true
+      }
+    },
+    {
+      "id": "T17",
+      "title": "在途、交付、消费的实物守恒",
+      "kind": "numeric",
+      "spec": [
+        "R03",
+        "A06"
+      ],
+      "given": {
+        "seller_stock": 100,
+        "dispatch": 40,
+        "delivered": 10,
+        "consumed_from_delivery": 5
+      },
+      "when": [
+        "dispatch",
+        "partial delivery",
+        "consume"
+      ],
+      "expect": {
+        "seller_stock": 60,
+        "in_transit": 30,
+        "buyer_stock": 5,
+        "consumed": 5,
+        "remaining_physical_total": 95,
+        "remaining_plus_consumed": 100
+      }
+    },
+    {
+      "id": "T18",
+      "title": "旧区间与推进分段等价",
+      "kind": "integration",
+      "spec": [
+        "R02",
+        "R05"
+      ],
+      "given": {
+        "hourly_rate_before_minute_30": 60,
+        "hourly_rate_after_minute_30": 120,
+        "start_minute": 0,
+        "end_minute": 60
+      },
+      "when": [
+        "change rate at minute 30",
+        "compare one requested advance with correctly scheduled event against 60 one-minute advances"
+      ],
+      "expect": {
+        "integrated_amount": 90,
+        "replay_hash_equal": true,
+        "decisions_run_only_when_due": true
+      }
+    },
+    {
+      "id": "T19",
+      "title": "同刻撤职阻止新签署而不取消已有债务",
+      "kind": "integration",
+      "spec": [
+        "R04",
+        "R05"
+      ],
+      "given": {
+        "appointment_expires_minute": 60,
+        "new_command_effective_minute": 60,
+        "previously_valid_signed_claim_due_minute": 60
+      },
+      "when": [
+        "advance through minute 60"
+      ],
+      "expect": {
+        "new_signature_rejected": true,
+        "existing_claim_still_settles_or_remains_due": true,
+        "world_time": 60
+      }
+    },
+    {
+      "id": "T20",
+      "title": "断桥不回溯抹去旧区间",
+      "kind": "integration",
+      "spec": [
+        "R05",
+        "A06"
+      ],
+      "given": {
+        "link_fails_minute": 30,
+        "old_admissions_before_30": 20,
+        "unshipped_at_30": 20
+      },
+      "when": [
+        "fail link at exact boundary",
+        "advance to 60"
+      ],
+      "expect": {
+        "historical_admissions": 20,
+        "new_admissions_on_failed_link_after_30": 0,
+        "unshipped_stays_at_origin": true,
+        "in_transit_not_duplicated": true
+      }
+    },
+    {
+      "id": "T21",
+      "title": "想要、付得起和吃到分开",
+      "kind": "numeric",
+      "spec": [
+        "A05"
+      ],
+      "given": {
+        "food_desired": 10,
+        "food_price": 10,
+        "household_cash": 30,
+        "available_supply": 100
+      },
+      "when": [
+        "build funded demand",
+        "trade and consume"
+      ],
+      "expect": {
+        "desired": 10,
+        "funded": 3,
+        "consumed": 3,
+        "cash_remaining": 0,
+        "food_gap_bp": 7000
+      }
+    },
+    {
+      "id": "T22",
+      "title": "所有领域收集顺序不改变载荷结果",
+      "kind": "permutation",
+      "spec": [
+        "R05",
+        "A01",
+        "A06"
+      ],
+      "given": {
+        "domains": [
+          "economy",
+          "military",
+          "travel"
+        ],
+        "same_priority_load_each": 60,
+        "capacity": 120
+      },
+      "when": [
+        "run all six domain collection permutations through one finalize"
+      ],
+      "expect": {
+        "each_domain_allocation": 40,
+        "total_allocation": 120,
+        "world_hash_equal": true,
+        "finalize_count_per_window": 1
+      }
+    },
+    {
+      "id": "T23",
+      "title": "不得在真实到达前收到军需",
+      "kind": "integration",
+      "spec": [
+        "A06",
+        "A11"
+      ],
+      "given": {
+        "dispatch_minute": 0,
+        "travel_minutes": 120,
+        "shipment_ammo": 60,
+        "formation_initial_ammo": 0
+      },
+      "when": [
+        "advance to119",
+        "advance to120"
+      ],
+      "expect": {
+        "formation_ammo_at119": 0,
+        "formation_ammo_at120": 60,
+        "origin_debit_count": 1,
+        "shipment_remaining_after120": 0
+      }
+    },
+    {
+      "id": "T24",
+      "title": "火力受真实弹药约束",
+      "kind": "numeric",
+      "spec": [
+        "A11"
+      ],
+      "given": {
+        "desired_shots": 100,
+        "ammo": 60,
+        "ammo_per_shot": 1,
+        "losses_per_shot_bp": 500,
+        "target_exposure_bp": 10000,
+        "target_personnel": 100,
+        "casualty_carry": 0
+      },
+      "when": [
+        "resolve one engagement interval"
+      ],
+      "expect": {
+        "actual_shots": 60,
+        "ammo_remaining": 0,
+        "target_losses": 3,
+        "casualty_carry": 0
+      }
+    },
+    {
+      "id": "T25",
+      "title": "媒体报告按覆盖、信任和到达时间更新认知",
+      "kind": "numeric",
+      "spec": [
+        "A09"
+      ],
+      "given": {
+        "belief": 2000,
+        "claim": 8000,
+        "reach_bp": 5000,
+        "trust_bp": 8000,
+        "report_arrival_minute": 120
+      },
+      "when": [
+        "read before arrival",
+        "deliver report once",
+        "open report twice"
+      ],
+      "expect": {
+        "belief_before_arrival": 2000,
+        "belief_after_delivery": 4400,
+        "belief_after_two_opens": 4400,
+        "world_fact_unchanged": true
+      }
+    },
+    {
+      "id": "T26",
+      "title": "非法恢复不可改变任何已运行领域",
+      "kind": "fault_injection",
+      "spec": [
+        "R06",
+        "R08"
+      ],
+      "given": {
+        "valid_running_world": true,
+        "corruptions": [
+          "unknown stock owner",
+          "overreserved cash",
+          "extra population assignment",
+          "shipment with invalid place",
+          "process cursor after world time",
+          "invalid rule hash",
+          "negative inventory",
+          "integer outside JSON safe range"
+        ]
+      },
+      "when": [
+        "try each corrupt restore independently"
+      ],
+      "expect": {
+        "each_rejected": true,
+        "replay_hash_unchanged": true,
+        "owner_references_unchanged": true
+      }
+    },
+    {
+      "id": "T27",
+      "title": "全流程读档继续等价",
+      "kind": "replay",
+      "spec": [
+        "R08"
+      ],
+      "given": {
+        "checkpoints": [
+          "mid_production",
+          "mid_transit",
+          "strike_active",
+          "battle_active",
+          "loan_due_next_minute",
+          "minute_1439"
+        ]
+      },
+      "when": [
+        "save canonical world at each checkpoint",
+        "restore and rebuild indexes",
+        "advance restored and original by same 30 days and command stream"
+      ],
+      "expect": {
+        "replay_hash_equal": true,
+        "active_reservations_equal": true,
+        "no_duplicate_settlement": true
+      }
+    },
+    {
+      "id": "T28",
+      "title": "玩家与NPC使用同一命令，镜头不改算法",
+      "kind": "metamorphic",
+      "spec": [
+        "R01",
+        "A07"
+      ],
+      "given": {
+        "same_world_and_command_stream": true,
+        "variants": [
+          "player_command_source",
+          "npc_command_source",
+          "map_panel_open",
+          "map_panel_closed",
+          "different_camera_zoom"
+        ]
+      },
+      "when": [
+        "advance same 30 days"
+      ],
+      "expect": {
+        "physical_world_hash_equal": true,
+        "no_simulation_read_from_ui_state": true
+      }
+    },
+    {
+      "id": "T29",
+      "title": "罢工减少实际劳动",
+      "kind": "numeric",
+      "spec": [
+        "A09"
+      ],
+      "given": {
+        "employees": 100,
+        "striking": 40,
+        "hours_per_worker": 8
+      },
+      "when": [
+        "build next shift available labor"
+      ],
+      "expect": {
+        "effective_labor_hours": 480,
+        "striking_hours": 320,
+        "population_unchanged": true
+      }
+    },
+    {
+      "id": "T30",
+      "title": "支持按真实人数进入席位程序",
+      "kind": "numeric",
+      "spec": [
+        "A09"
+      ],
+      "given": {
+        "procedure": "proportional_hamilton",
+        "votes": {
+          "a": 60,
+          "b": 40
+        },
+        "seats": 5
+      },
+      "when": [
+        "close election and allocate seats"
+      ],
+      "expect": {
+        "seats": {
+          "a": 3,
+          "b": 2
+        },
+        "seat_total": 5,
+        "appointment_requires_following_procedure": true
+      }
+    },
+    {
+      "id": "T31",
+      "title": "行政执行受人员容量约束",
+      "kind": "numeric",
+      "spec": [
+        "A10"
+      ],
+      "given": {
+        "cases": 100,
+        "staff_minutes": 600,
+        "minutes_per_case": 10
+      },
+      "when": [
+        "execute one allocation period"
+      ],
+      "expect": {
+        "completed": 60,
+        "pending": 40,
+        "pending_ids_preserved": true
+      }
+    },
+    {
+      "id": "T32",
+      "title": "完整世界必须通过普通入口",
+      "kind": "product",
+      "spec": [
+        "R01",
+        "R09"
+      ],
+      "given": {
+        "manifest": "current_world_1900",
+        "launch": "normal_new_game"
+      },
+      "when": [
+        "start normal product",
+        "advance 30 days",
+        "save exit load",
+        "audit runtime allocations and loaded catalog"
+      ],
+      "expect": {
+        "formal_and_vnext_dual_runtime": false,
+        "all_required_polity_units_have_coverage": true,
+        "no_alpha_fictional_market_ids": true,
+        "all_required_domains_advance": true,
+        "summary_counts_equal_actual_records": true
+      }
+    },
+    {
+      "id": "T33",
+      "title": "无外部投入就不能无限输出",
+      "kind": "integration",
+      "spec": [
+        "A04",
+        "R03"
+      ],
+      "given": {
+        "finite_opening_inputs": true,
+        "no_external_imports": true,
+        "finite_resource_pools": true
+      },
+      "when": [
+        "run until constrained input exhausted"
+      ],
+      "expect": {
+        "dependent_production_stops": true,
+        "no_negative_stocks": true,
+        "no_auto_refill": true,
+        "loss_and_consumption_accounted": true
+      }
+    },
+    {
+      "id": "T34",
+      "title": "预算、资金预留和幂等不是新钱",
+      "kind": "integration",
+      "spec": [
+        "A03",
+        "R04",
+        "R08"
+      ],
+      "given": {
+        "cash": 100,
+        "approved_budget": 200,
+        "request_commitment": 150
+      },
+      "when": [
+        "attempt fully cash-funded commitment",
+        "commit affordable 80",
+        "repeat same command",
+        "repeat id with changed payload",
+        "retry below archived sequence watermark"
+      ],
+      "expect": {
+        "unfunded_150_rejected": true,
+        "affordable_80_held_once": true,
+        "cash_balance_still100_before_payment": true,
+        "available_cash_after_hold": 20,
+        "changed_payload_rejected": true,
+        "archived_sequence_rejected": true
+      }
+    },
+    {
+      "id": "T35",
+      "title": "边界数值和长期余数",
+      "kind": "numeric_properties",
+      "spec": [
+        "R02",
+        "A05"
+      ],
+      "given": {
+        "values": [
+          "0",
+          "negative",
+          "fractional JSON number",
+          "2^53",
+          "int64 multiplication overflow"
+        ],
+        "low_price": 1,
+        "persistent_excess_funded_demand": true
+      },
+      "when": [
+        "validate numeric boundary inputs",
+        "apply multiple legitimate price updates with saved residuals"
+      ],
+      "expect": {
+        "invalid_inputs_rejected_without_mutation": true,
+        "low_price_eventually_above1": true,
+        "split_integration_equal": true
+      }
+    },
+    {
+      "id": "T36",
+      "title": "队列陈旧项、分片与无限同刻循环",
+      "kind": "metamorphic",
+      "spec": [
+        "R05",
+        "R07",
+        "R08"
+      ],
+      "given": {
+        "reschedules": 100,
+        "final_generation": 100,
+        "batch_sizes": [
+          1,
+          17,
+          1000
+        ],
+        "same_minute_cycle_fixture": true
+      },
+      "when": [
+        "pop due process",
+        "compare all batch sizes",
+        "attempt cyclic same-phase dispatch"
+      ],
+      "expect": {
+        "live_process_executes_once": true,
+        "stale_entries_no_effect": true,
+        "replay_hash_equal_across_batches": true,
+        "cycle_explicitly_rejected": true
+      }
+    },
+    {
+      "id": "T37",
+      "title": "纸面禁令与实际执行分离",
+      "kind": "integration",
+      "spec": [
+        "A09",
+        "A10"
+      ],
+      "given": {
+        "strike_people": 40,
+        "anti_strike_rule_valid": true,
+        "enforcement_staff_minutes": 0
+      },
+      "when": [
+        "enact rule",
+        "advance one shift"
+      ],
+      "expect": {
+        "rule_present": true,
+        "enforcement_pending": true,
+        "automatic_return_to_work": 0,
+        "resource_change_without_executor": false
+      }
+    },
+    {
+      "id": "T38",
+      "title": "政府更替保留公共资源与债务",
+      "kind": "integration",
+      "spec": [
+        "A09",
+        "A10"
+      ],
+      "given": {
+        "treasury": 1000,
+        "outstanding_public_debt": 200,
+        "old_government": "g1",
+        "new_government": "g2",
+        "valid_transition_procedure": true
+      },
+      "when": [
+        "complete legal transition"
+      ],
+      "expect": {
+        "treasury": 1000,
+        "outstanding_public_debt": 200,
+        "old_appointments_ended": true,
+        "new_appointments_active": true,
+        "duplicate_government_positions": false
+      }
+    },
+    {
+      "id": "T39",
+      "title": "成长上界与职位权限分离",
+      "kind": "behavior",
+      "spec": [
+        "A07",
+        "A12"
+      ],
+      "given": {
+        "seeds": "0..999",
+        "valid_training": true,
+        "effective_minutes": "configured guaranteed upper bound",
+        "all_costs_and_preparation_met": true
+      },
+      "when": [
+        "complete training under all seeds",
+        "request appointment without vacancy or procedure"
+      ],
+      "expect": {
+        "training_success_count": 1000,
+        "unauthorized_appointment_rejected": true,
+        "skill_growth_from_effective_work_only": true
+      }
+    },
+    {
+      "id": "T40",
+      "title": "同时交战与多人目标封顶",
+      "kind": "metamorphic",
+      "spec": [
+        "A11"
+      ],
+      "given": {
+        "two_sides_simultaneous": true,
+        "two_attackers_same_target": true,
+        "target_personnel": 5,
+        "aggregate_expected_losses": 8
+      },
+      "when": [
+        "calculate from interval start snapshot",
+        "reverse attacker and defender update ordering"
+      ],
+      "expect": {
+        "total_target_losses": 5,
+        "no_negative_personnel": true,
+        "return_fire_uses_start_state": true,
+        "world_hash_equal": true,
+        "no_excess_casualty_carry_into_new_targets": true
+      }
+    },
+    {
+      "id": "T41",
+      "title": "贷款、跨行付款和本金偿还",
+      "kind": "numeric",
+      "spec": [
+        "A08"
+      ],
+      "given": {
+        "loan_principal": 1000,
+        "bank_a_opening_reserves": 800,
+        "bank_b_opening_reserves": 100,
+        "cross_bank_payment": 600,
+        "subsequent_principal_repayment_from_remaining_a_deposit": 200,
+        "interest": 0
+      },
+      "when": [
+        "create deposit loan",
+        "pay other-bank recipient",
+        "repay principal from remaining own-bank deposit"
+      ],
+      "expect": {
+        "bank_a_loan_asset": 800,
+        "borrower_debt": 800,
+        "borrower_a_deposit": 200,
+        "bank_a_deposit_liability": 200,
+        "bank_a_reserves": 200,
+        "bank_b_reserves": 700,
+        "recipient_b_deposit": 600,
+        "bank_b_deposit_liability": 600,
+        "total_customer_deposits": 800,
+        "total_reserves": 900
+      }
+    },
+    {
+      "id": "T42",
+      "title": "其他组织也要交付资源过程",
+      "kind": "integration",
+      "spec": [
+        "A12"
+      ],
+      "given": {
+        "fixtures": [
+          "training_with_no_teacher",
+          "research_with_no_money",
+          "charity_with_no_stock",
+          "theft_with_stock_transfer",
+          "court_order_with_no_executor",
+          "clinic_with_limited_beds"
+        ]
+      },
+      "when": [
+        "execute through standard typed command and process APIs"
+      ],
+      "expect": {
+        "no_teacher_no_effective_training": true,
+        "no_money_no_research_progress": true,
+        "no_stock_no_relief_delivery": true,
+        "theft_preserves_stock_total": true,
+        "unexecuted_court_order_no_asset_transfer": true,
+        "clinic_never_exceeds_beds": true
+      }
+    },
+    {
+      "id": "T43",
+      "title": "正式人物旅程和信息解释",
+      "kind": "product",
+      "spec": [
+        "R01",
+        "R04",
+        "A13"
+      ],
+      "given": {
+        "viewport": "1280x720",
+        "world": "same complete current world",
+        "journeys": [
+          "worker_income_and_food",
+          "operator_produce_deliver_collect",
+          "official_budget_and_implementation",
+          "military_supply_and_retreat"
+        ]
+      },
+      "when": [
+        "operate visible normal controls",
+        "pause resume save exit load",
+        "inspect failed command and choose feasible alternative"
+      ],
+      "expect": {
+        "no_debug_state_setters": true,
+        "acting_person_required": true,
+        "one_authoritative_world": true,
+        "explanations_reference_actual_constraints": true,
+        "background_processes_continue": true
+      },
+      "checks": [
+        "记录具体人物/地点/命令/日期与前后账项，不只录界面截图",
+        "未实现的旅程保持失败，不以其他旅程替代"
+      ]
+    },
+    {
+      "id": "T44",
+      "title": "规模和调度预算",
+      "kind": "performance",
+      "spec": [
+        "R07"
+      ],
+      "given": {
+        "worlds": [
+          "actual_current_world",
+          "synthetic_scale_fixture"
+        ],
+        "synthetic_scale": {
+          "cohorts": 20000,
+          "organizations": 100000,
+          "production_sites": 10000,
+          "formations": 3000,
+          "active_processes": 100000
+        },
+        "windows": [
+          "30_days",
+          "1_year"
+        ],
+        "frame_candidate_slice_target_ms": 4
+      },
+      "when": [
+        "record per-phase wall time and peak state size",
+        "run idle and broad-war/high-contention variants",
+        "compare batch sizes with equal outputs"
+      ],
+      "expect": {
+        "no_dropped_due_work": true,
+        "no_background_region_frozen": true,
+        "world_time_never_ahead_of_committed_state": true,
+        "record_tail_latency_and_backlog": true,
+        "ordering_independent_results": true
+      },
+      "targets": {
+        "hardware_must_be_recorded": true,
+        "30_day_cpu_seconds": 30,
+        "one_year_cpu_seconds": 360,
+        "peak_simulation_rss_gib": 2,
+        "ui_input_latency_p95_ms": 100
+      },
+      "checks": [
+        "数值为待测工程目标，不是本次性能实测结论",
+        "未达速度目标应降低现实推进速度并报告瓶颈，不能降低结算真实性",
+        "合成100000组织不是100000高级决策器；记录实际活跃/决策数量"
+      ]
+    },
+    {
+      "id": "T45",
+      "title": "行为因果、恢复和参数敏感性",
+      "kind": "model_validation",
+      "spec": [
+        "A13"
+      ],
+      "given": {
+        "seed_count": 20,
+        "baseline_days": 365,
+        "shocks": [
+          "bridge_capacity_halved",
+          "wage_payment_missed",
+          "food_supply_reduced",
+          "interest_cost_increased",
+          "leader_removed"
+        ],
+        "interventions": [
+          "reroute",
+          "funded_relief",
+          "replace_supplier",
+          "restore_capacity"
+        ],
+        "parameter_multipliers": [
+          0.5,
+          1,
+          2
+        ]
+      },
+      "when": [
+        "run paired baseline/shock/intervention at same seed",
+        "compare direct ledgers before downstream indicators",
+        "record tail outcomes and threshold residence"
+      ],
+      "expect": {
+        "causal_order_matches_spec": true,
+        "no_teleport_or_free_resource_recovery": true,
+        "no_camera_effect": true,
+        "nonaffected_reference_entities_equal_until_causal_reach": true,
+        "no_hidden_numeric_reset": true
+      },
+      "checks": [
+        "供应充分、有库存缓冲时，不强制短期政治/军事恶化",
+        "可能失业/破产/战争失败，不能把所有结果都要求平稳",
+        "默认校准目标：无冲击场景多数人口基本食物满足率≥90%，非强制保证；达不到必须解释是初值/算法/资源结构问题",
+        "报告长期价格、就业、违约、消费缺口分布和参数敏感性，不只检查数值有限"
+      ]
+    }
+  ]
+}

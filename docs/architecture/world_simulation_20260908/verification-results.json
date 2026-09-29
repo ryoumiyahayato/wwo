@@ -1,0 +1,350 @@
+{
+  "schema_id": "wwo_design_check_evidence_v1",
+  "baseline_commit": "85c073649e1ed17594f2a41d4f2081feceeabe8b",
+  "case_count": 45,
+  "task_count": 22,
+  "arithmetic_cases_checked": [
+    {
+      "case_id": "T02",
+      "fields_verified": [
+        "allocations",
+        "unused"
+      ]
+    },
+    {
+      "case_id": "T03",
+      "fields_verified": [
+        "amount",
+        "carry",
+        "equal"
+      ]
+    },
+    {
+      "case_id": "T04",
+      "fields_verified": [
+        "allocations",
+        "zero_weight_allocation"
+      ]
+    },
+    {
+      "case_id": "T05",
+      "fields_verified": [
+        "valid_start_minute"
+      ]
+    },
+    {
+      "case_id": "T06",
+      "fields_verified": [
+        "cash",
+        "cash_total",
+        "firm_bread",
+        "household_bread",
+        "bread_consumed",
+        "wage_arrears"
+      ]
+    },
+    {
+      "case_id": "T07",
+      "fields_verified": [
+        "firm_cash",
+        "household_cash",
+        "government_cash",
+        "wage_arrears",
+        "total_cash"
+      ]
+    },
+    {
+      "case_id": "T08",
+      "fields_verified": [
+        "quantity",
+        "cash_spent",
+        "unused_hold_released",
+        "seller_receipts",
+        "seller_stock"
+      ]
+    },
+    {
+      "case_id": "T10",
+      "fields_verified": [
+        "batches",
+        "flour_remaining",
+        "water_remaining",
+        "labor_used_minutes",
+        "labor_unused_minutes",
+        "bread_produced"
+      ]
+    },
+    {
+      "case_id": "T12",
+      "fields_verified": [
+        "input_returned",
+        "input_loss",
+        "wip_remaining",
+        "output_created"
+      ]
+    },
+    {
+      "case_id": "T13",
+      "fields_verified": [
+        "imbalance_bp",
+        "delta_bp",
+        "next_price",
+        "next_carry"
+      ]
+    },
+    {
+      "case_id": "T14",
+      "fields_verified": [
+        "population",
+        "labor_cohort",
+        "anonymous_employed",
+        "named_employed"
+      ]
+    },
+    {
+      "case_id": "T17",
+      "fields_verified": [
+        "seller_stock",
+        "in_transit",
+        "buyer_stock",
+        "consumed",
+        "remaining_physical_total",
+        "remaining_plus_consumed"
+      ]
+    },
+    {
+      "case_id": "T18",
+      "fields_verified": [
+        "integrated_amount"
+      ]
+    },
+    {
+      "case_id": "T21",
+      "fields_verified": [
+        "desired",
+        "funded",
+        "consumed",
+        "cash_remaining",
+        "food_gap_bp"
+      ]
+    },
+    {
+      "case_id": "T22",
+      "fields_verified": [
+        "each_domain_allocation",
+        "total_allocation"
+      ]
+    },
+    {
+      "case_id": "T24",
+      "fields_verified": [
+        "actual_shots",
+        "ammo_remaining",
+        "target_losses",
+        "casualty_carry"
+      ]
+    },
+    {
+      "case_id": "T25",
+      "fields_verified": [
+        "belief_before_arrival",
+        "belief_after_delivery",
+        "belief_after_two_opens"
+      ]
+    },
+    {
+      "case_id": "T29",
+      "fields_verified": [
+        "effective_labor_hours",
+        "striking_hours"
+      ]
+    },
+    {
+      "case_id": "T30",
+      "fields_verified": [
+        "seats",
+        "seat_total"
+      ]
+    },
+    {
+      "case_id": "T31",
+      "fields_verified": [
+        "completed",
+        "pending"
+      ]
+    },
+    {
+      "case_id": "T35",
+      "fields_verified": [
+        "low_price_eventually_above1"
+      ]
+    },
+    {
+      "case_id": "T41",
+      "fields_verified": [
+        "bank_a_loan_asset",
+        "borrower_debt",
+        "borrower_a_deposit",
+        "bank_a_deposit_liability",
+        "bank_a_reserves",
+        "bank_b_reserves",
+        "recipient_b_deposit",
+        "bank_b_deposit_liability",
+        "total_customer_deposits",
+        "total_reserves"
+      ]
+    }
+  ],
+  "arithmetic_only_not_game_execution": true,
+  "focused_test_scripts_passed": 23,
+  "focused_process_exit": 0,
+  "focused_steps": [
+    {
+      "name": "import/script scan",
+      "status": "PASS",
+      "exit": 0,
+      "elapsed_seconds": 9.7
+    },
+    {
+      "name": "res://tests/vnext/core_loop_integration_test.gd",
+      "status": "PASS",
+      "exit": 0,
+      "elapsed_seconds": 0.5
+    },
+    {
+      "name": "res://tests/vnext/event_knowledge_test.gd",
+      "status": "PASS",
+      "exit": 0,
+      "elapsed_seconds": 0.7
+    },
+    {
+      "name": "res://tests/vnext/location_travel_test.gd",
+      "status": "PASS",
+      "exit": 0,
+      "elapsed_seconds": 0.7
+    },
+    {
+      "name": "res://tests/vnext/macro_population_test.gd",
+      "status": "PASS",
+      "exit": 0,
+      "elapsed_seconds": 2.9
+    },
+    {
+      "name": "res://tests/vnext/market_economy_behavior_test.gd",
+      "status": "PASS",
+      "exit": 0,
+      "elapsed_seconds": 17.7
+    },
+    {
+      "name": "res://tests/vnext/market_economy_export_production_test.gd",
+      "status": "PASS",
+      "exit": 0,
+      "elapsed_seconds": 172.0
+    },
+    {
+      "name": "res://tests/vnext/market_economy_recovery_test.gd",
+      "status": "PASS",
+      "exit": 0,
+      "elapsed_seconds": 29.9
+    },
+    {
+      "name": "res://tests/vnext/market_economy_shipment_progress_authority_test.gd",
+      "status": "PASS",
+      "exit": 0,
+      "elapsed_seconds": 2.7
+    },
+    {
+      "name": "res://tests/vnext/market_economy_spatial_day_window_test.gd",
+      "status": "PASS",
+      "exit": 0,
+      "elapsed_seconds": 3.2
+    },
+    {
+      "name": "res://tests/vnext/market_economy_spatial_integration_test.gd",
+      "status": "PASS",
+      "exit": 0,
+      "elapsed_seconds": 1.5
+    },
+    {
+      "name": "res://tests/vnext/market_economy_test.gd",
+      "status": "PASS",
+      "exit": 0,
+      "elapsed_seconds": 20.1
+    },
+    {
+      "name": "res://tests/vnext/military_r3_findings_test.gd",
+      "status": "PASS",
+      "exit": 0,
+      "elapsed_seconds": 201.6
+    },
+    {
+      "name": "res://tests/vnext/military_spatial_capacity_integration_test.gd",
+      "status": "PASS",
+      "exit": 0,
+      "elapsed_seconds": 3.5
+    },
+    {
+      "name": "res://tests/vnext/military_strategy_test.gd",
+      "status": "PASS",
+      "exit": 0,
+      "elapsed_seconds": 50.5
+    },
+    {
+      "name": "res://tests/vnext/organization_core_test.gd",
+      "status": "PASS",
+      "exit": 0,
+      "elapsed_seconds": 0.8
+    },
+    {
+      "name": "res://tests/vnext/personal_economy_test.gd",
+      "status": "PASS",
+      "exit": 0,
+      "elapsed_seconds": 0.8
+    },
+    {
+      "name": "res://tests/vnext/player_action_test.gd",
+      "status": "PASS",
+      "exit": 0,
+      "elapsed_seconds": 0.8
+    },
+    {
+      "name": "res://tests/vnext/spatial_infrastructure_test.gd",
+      "status": "PASS",
+      "exit": 0,
+      "elapsed_seconds": 2.0
+    },
+    {
+      "name": "res://tests/vnext/stable_id_catalog_test.gd",
+      "status": "PASS",
+      "exit": 0,
+      "elapsed_seconds": 0.6
+    },
+    {
+      "name": "res://tests/vnext/state_politics_r3_transition_test.gd",
+      "status": "PASS",
+      "exit": 0,
+      "elapsed_seconds": 101.0
+    },
+    {
+      "name": "res://tests/vnext/state_politics_test.gd",
+      "status": "PASS",
+      "exit": 0,
+      "elapsed_seconds": 103.9
+    },
+    {
+      "name": "res://tests/vnext/world_runtime_test.gd",
+      "status": "PASS",
+      "exit": 0,
+      "elapsed_seconds": 0.8
+    },
+    {
+      "name": "res://tests/vnext/world_snapshot_store_test.gd",
+      "status": "PASS",
+      "exit": 0,
+      "elapsed_seconds": 0.8
+    }
+  ],
+  "log_sha256": "59aa0b3027e6dac0ca2bd882145d6210a208ed9e16108c74cb7b5d8e6a9a5f7d",
+  "log_hash_format": "sha256_raw_file_bytes",
+  "final_document_integrity": "pass"
+}
