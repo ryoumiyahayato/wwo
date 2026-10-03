@@ -1,13 +1,6 @@
 name: Generate city detail shards
 
 on:
-  push:
-    branches:
-      - agent/expand-city-map-ui-audit
-    paths:
-      - tools/world_map/generate_city_shards.py
-      - docs/WORLD_CITY_DATA_POLICY.md
-      - .github/workflows/generate-city-detail-shards.yml
   workflow_dispatch:
 
 permissions:
