@@ -3,7 +3,7 @@ name: Alpha three-year performance gate
 on:
   pull_request:
     branches:
-      - agent/formal-world-economy-integration
+      - canonical/current-world
     paths:
       - ".github/workflows/alpha-three-year-performance.yml"
       - "data/alpha/**"
