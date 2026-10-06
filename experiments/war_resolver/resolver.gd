@@ -136,6 +136,13 @@ func _posture(state: State, unit: Dictionary) -> String:
 			return "reserve"
 	if state.time < float(assignment.get("release_time", 0.0)):
 		return "reserve"
+	var command: Dictionary = state.command_coordination.get(unit.id, {})
+	if state.time < float(command.get("release_time", 0.0)):
+		return "reserve"
+	if state.tactical_intents.has(unit.id):
+		return str(state.tactical_intents[unit.id].posture)
+	if command.has("posture"):
+		return str(command.posture)
 	return str(assignment.get("role", mission.posture))
 
 
@@ -284,6 +291,8 @@ func _apply_area(state: State, area_id: String, plans: Dictionary, minutes: floa
 			log.append({"time": state.time, "kind": "losses", "unit_id": id, "personnel": loss, "equipment": equipment_loss})
 		if old_action != unit.action:
 			var reason: String = "mission"
+			if state.tactical_intents.has(id):
+				reason = "squad_tactical_intent"
 			if unit.action == "stalled":
 				reason = "suppression" if plan.advance_inhibited else "mobility"
 			elif unit.action == "withdraw" and mission.posture != "withdraw":
