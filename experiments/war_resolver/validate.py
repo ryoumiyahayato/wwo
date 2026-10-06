@@ -86,6 +86,13 @@ def main() -> int:
         for line in log.splitlines():
             if line.startswith("ROLE_SCALE_COUNTERS="):
                 print(line, flush=True)
+        log = run("sandbox-tests", [*headless, "res://experiments/war_resolver/sandbox/tests.gd"])
+        summary = re.search(r"War sandbox: (\d+) checks, 0 failures", log)
+        if summary is None or int(summary.group(1)) == 0:
+            raise RuntimeError("Missing sandbox check count / zero failure summary")
+        print(summary.group(0), flush=True)
+        run("sandbox-scene-smoke", ["--headless", "--path", str(root),
+            "res://experiments/war_resolver/sandbox/sandbox.tscn", "--quit-after", "5"])
         probe_a = run("replay-a", [*headless, "res://experiments/war_resolver/replay_probe.gd"])
         probe_b = run("replay-b", [*headless, "res://experiments/war_resolver/replay_probe.gd"])
         hash_a = re.findall(r"REPLAY_SHA256=([a-f0-9]{64})", probe_a)
@@ -100,6 +107,18 @@ def main() -> int:
         if len(role_hash_a) != 1 or role_hash_a != role_hash_b:
             raise RuntimeError("Fresh-process role replay differs or missing hash")
         print("Fresh-process role replay: " + role_hash_a[0], flush=True)
+        sandbox_a = run("sandbox-replay-a", [*headless, "res://experiments/war_resolver/sandbox/observation_probe.gd"])
+        sandbox_b = run("sandbox-replay-b", [*headless, "res://experiments/war_resolver/sandbox/observation_probe.gd"])
+        sandbox_hash_a = re.findall(r"SANDBOX_REPLAY_SHA256=([a-f0-9]{64})", sandbox_a)
+        sandbox_hash_b = re.findall(r"SANDBOX_REPLAY_SHA256=([a-f0-9]{64})", sandbox_b)
+        if len(sandbox_hash_a) != 1 or sandbox_hash_a != sandbox_hash_b:
+            raise RuntimeError("Fresh-process sandbox replay differs or missing hash")
+        observations = [json.loads(line.split("=", 1)[1]) for line in sandbox_a.splitlines()
+                        if line.startswith("SANDBOX_OBSERVATIONS_JSON=")]
+        if len(observations) != 1:
+            raise RuntimeError("Missing sandbox machine observations")
+        (output / "sandbox-observations.json").write_text(json.dumps(observations[0], indent=2), encoding="utf-8")
+        print("Fresh-process sandbox replay: " + sandbox_hash_a[0], flush=True)
         log = run("benchmark", [*headless, "res://experiments/war_resolver/benchmark.gd"])
         records = [json.loads(line.split("=", 1)[1]) for line in log.splitlines() if line.startswith("BENCHMARK_JSON=")]
         if len(records) < 4:
