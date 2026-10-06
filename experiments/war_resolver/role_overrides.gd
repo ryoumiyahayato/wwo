@@ -225,6 +225,32 @@ func report() -> Dictionary:
 	return result
 
 
+func command_scope() -> Dictionary:
+	# Read-only selection metadata. apply() still validates every submitted command.
+	if _state == null:
+		return _reject("not_configured")
+	var person: Dictionary = _people[_player_id]
+	var owner: String = str(person.formation_id)
+	var rank: int = ROLES.find(str(person.role))
+	var targets: Dictionary = {}
+	if rank == 0:
+		targets.local_action = [_player_id]
+	elif rank == 1:
+		targets.tactical_intent = [owner]
+	else:
+		var eligible: Array[String] = []
+		if rank >= 3 and not _leaves[owner].is_empty():
+			eligible.append(owner)
+		for child: String in State.sorted_ids(_children[owner]):
+			if not _leaves[child].is_empty():
+				eligible.append(child)
+		targets.mission = eligible.duplicate()
+		targets.coordination = eligible.duplicate()
+	return {"person_id": _player_id, "role": person.role, "formation_id": owner,
+		"targets": targets, "input_interval_seconds": INPUT_SECONDS[rank],
+		"next_input_at": _next_input.get(_player_id, 0.0)}
+
+
 func snapshot() -> Dictionary:
 	return {"player_id": _player_id, "missions": _mission_inputs.duplicate(true),
 		"coordination": _coordination_inputs.duplicate(true), "accepted_ids": _accepted_ids.duplicate(),
