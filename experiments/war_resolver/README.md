@@ -99,7 +99,7 @@ bit-identical contracts. StateDelta remains a proposal with no formal applicatio
 adapter. No formal population/equipment/inventory/geography/organization authority,
 FormalWorldSimulation, formal UI/maps, economy structures or save schema changed.
 
-Player-role overrides and observation UI (tasks 2/3), air/maritime combat,
+Air/maritime combat,
 death/succession, economy integration, historical data, ballistics, animation,
 models, split/merge and save migration are intentionally absent. Evidence supports
 **isolated player-role command research**, with these limits visible; it establishes
@@ -109,7 +109,7 @@ no production readiness or military-system completion.
 
 Task 2 is stacked on task 1 draft [PR #103](https://github.com/ryoumiyahayato/wwo/pull/103),
 base `524b669214469e4b343830afef8f4ef8768ec225`. Production integration status
-remains **NONE**. No task 3 visual sandbox or formal Organization/UI is included.
+remains **NONE**. Task 2 itself added no visual sandbox or formal Organization/UI.
 
 `role_overrides.gd` is a data-only adapter, configured once per isolated battle:
 
@@ -199,3 +199,30 @@ Windows CI runs subsequently completed successfully; that does not explain the
 Linux golden mismatch or constitute task 2 Windows acceptance. The inherited
 experimental CI targets `canonical/current-world`, so its target filter does not
 cover this stacked PR's task 1 base branch. No manual gameplay acceptance is claimed.
+
+
+## Task 3: standalone 2D observation sandbox
+
+Task 3 is stacked on task 2 draft [PR #104](https://github.com/ryoumiyahayato/wwo/pull/104),
+verified head `4c52ec37082d27c0d7b99359cfb165ae36878f15`. Neither predecessor is
+merged. Production integration status = **NONE**.
+
+```sh
+godot --path . res://experiments/war_resolver/sandbox/sandbox.tscn
+python3 -B experiments/war_resolver/validate.py --godot godot --regressions --output builds/sandbox-final-verified
+```
+
+The paused standalone observer compares two deeply cloned inputs, uses resolver
+time/results for all movement/combat, and submits role inputs through existing
+`apply` validation. New read-only `command_scope()` supplies eligible selections.
+Role/scenario changes reset the experiment rather than rebinding a live person.
+Nine small input fixtures and bounded traces/trails expose waits, suppression,
+withdrawal, terrain effects and dependencies with fixed layout lanes. No formal
+main scene, active component, world, UI, maps, Organization, Economy or saves change.
+
+[Sandbox launch/controls](sandbox/README.md), [observation report and manual
+checklist](sandbox/OBSERVATION_REPORT.md), and frozen
+[evidence](evidence/sandbox_results.json) record exact automated results and
+remaining gameplay questions. Rendered/manual visual acceptance is **NOT RUN**;
+headless scene smoke does not establish it. Inherited headless benchmark and
+known Linux economy golden failures remain separately disclosed.
