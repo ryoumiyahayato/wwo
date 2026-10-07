@@ -18,6 +18,20 @@ var _accepted_ids: Dictionary = {}
 var _next_input: Dictionary = {}
 var _player_id: String = ""
 var _personal_actions: Dictionary = {}
+var _lod_port: WeakRef = null
+
+
+func bind_lod(port: RefCounted) -> bool:
+	if _state == null or _lod_port != null or not port.owns_state(_state):
+		return false
+	_lod_port = weakref(port)
+	return true
+
+
+func _unit(id: String) -> Dictionary:
+	if _state.units.has(id):
+		return _state.units[id]
+	return _lod_port.get_ref().preview_leaf(id)
 
 
 func configure(state: State, formations: Dictionary, people: Dictionary, player_id: String) -> bool:
@@ -106,7 +120,7 @@ func apply(command: Dictionary) -> Dictionary:
 			if not _keys(values, ["posture", "objective", "direction"]) or not values.get("posture", "") in POSTURES or not _number(values.get("objective")) or not _number(values.get("direction")) or absf(float(values.direction)) != 1.0:
 				return _reject("invalid_mission")
 			for leaf: String in State.sorted_ids(_leaves[target]):
-				var unit: Dictionary = _state.units[_formations[leaf].unit_id]
+				var unit: Dictionary = _unit(str(_formations[leaf].unit_id))
 				if float(values.objective) < 0.0 or float(values.objective) > float(_state.areas[unit.area_id].size_km):
 					return _reject("objective_outside_scope")
 		else:
@@ -124,15 +138,19 @@ func apply(command: Dictionary) -> Dictionary:
 		var unit_id: String = str(_formations[leaf].unit_id)
 		# Replacing a prerequisite needs explicit dependency migration semantics.
 		# Reject the whole command rather than orphaning reserves on an old ID.
-		if kind == "mission" and not (_state.mission_dependents.get(_state.units[unit_id].mission_id, {}) as Dictionary).is_empty():
+		if kind == "mission" and not (_state.mission_dependents.get(_unit(unit_id).mission_id, {}) as Dictionary).is_empty():
 			return _reject("mission_has_dependents")
 		if kind == "mission" and _state.missions.has("role_" + id + "_" + unit_id):
 			return _reject("mission_id_collision")
 		if kind == "coordination" and _state.event_ids.has("role_release_" + id + "_" + unit_id):
 			return _reject("event_id_collision")
+	# Permission/value/ID/cooldown checks precede causal materialization.
+	if _lod_port != null and kind != "local_action":
+		for leaf: String in affected:
+			_lod_port.get_ref().materialize_leaf(str(_formations[leaf].unit_id), "subordinate_command")
 	var delta: Dictionary = {"units": {}, "missions": {}, "tactical_intents": {}, "command_coordination": {}, "personal_actions": {}}
 	if kind == "local_action":
-		var unit: Dictionary = _state.units[_formations[owner].unit_id]
+		var unit: Dictionary = _unit(str(_formations[owner].unit_id))
 		var personal: Dictionary = _personal_actions.get(_player_id, {"offset_km": 0.0}).duplicate(true)
 		var step: float = 0.005 if values.action == "step_forward" else (-0.005 if values.action == "step_back" else 0.0)
 		personal.offset_km = clampf(float(personal.offset_km) + step, -0.02, 0.02)
@@ -201,8 +219,10 @@ func report() -> Dictionary:
 	var result: Dictionary = {"person_id": _player_id, "role": person.role, "time": _state.time,
 		"input_interval_seconds": INPUT_SECONDS[rank], "next_input_at": _next_input.get(_player_id, 0.0),
 		"knowledge": "perfect experimental snapshot; no fog or communication latency"}
+	if _lod_port != null:
+		result.distribution = "macro current; suspended leaf values are unresolved proportional projections, not individual history"
 	if rank == 0:
-		var unit: Dictionary = _state.units[_formations[owner].unit_id]
+		var unit: Dictionary = _unit(str(_formations[owner].unit_id))
 		result.personal_action = _personal_actions.get(_player_id, {"action": "AI_follow_squad", "offset_km": 0.0}).duplicate(true)
 		result.personal_action.position = clampf(float(unit.position) + float(result.personal_action.offset_km), 0.0, float(_state.areas[unit.area_id].size_km))
 		return result
@@ -215,7 +235,7 @@ func report() -> Dictionary:
 	for target: String in targets:
 		var aggregate: Dictionary = {"squads": 0, "effective": 0.0, "casualties": 0.0, "ammunition": 0.0, "missions_complete": 0, "actions": {}}
 		for leaf: String in State.sorted_ids(_leaves[target]):
-			var unit: Dictionary = _state.units[_formations[leaf].unit_id]
+			var unit: Dictionary = _unit(str(_formations[leaf].unit_id))
 			aggregate.squads += 1
 			for key: String in ["effective", "casualties", "ammunition"]:
 				aggregate[key] += float(unit[key])

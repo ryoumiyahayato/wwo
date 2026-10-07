@@ -23,6 +23,13 @@ var counters: Dictionary = {"areas_examined": 0, "units_examined": 0,
 	"contacts_resolved": 0, "events_processed": 0, "segments": 0}
 var events: Array[Dictionary] = []
 var event_ids: Dictionary = {}
+var settlement_owner: RefCounted = null
+var materialization_port: WeakRef = null
+var lod_work: Dictionary = {}
+
+
+func knows_unit(id: String) -> bool:
+	return units.has(id) or materialization_port != null and materialization_port.get_ref() != null and materialization_port.get_ref().has_leaf(id)
 
 
 func add_area(record: Dictionary) -> void:
@@ -43,7 +50,7 @@ func add_mission(record: Dictionary) -> void:
 
 
 func add_unit(record: Dictionary) -> void:
-	assert(not units.has(record.id) and areas.has(record.area_id) and missions.has(record.mission_id))
+	assert(not knows_unit(str(record.id)) and areas.has(record.area_id) and missions.has(record.mission_id))
 	assert(float(record.effective) >= 0.0 and float(record.effective) <= float(record.personnel_total))
 	assert(float(record.ammunition) >= 0.0 and float(record.equipment) >= 0.0)
 	assert(is_equal_approx(float(record.personnel_total), float(record.effective) + float(record.casualties)))
@@ -66,6 +73,9 @@ func wake(area_id: String) -> void:
 
 func examine_unit(unit_id: String) -> Dictionary:
 	counters.units_examined += 1
+	if not lod_work.is_empty():
+		var key: String = "formation_records_examined" if units[unit_id].has("contact_weight") else "leaf_records_examined"
+		lod_work[key] += 1
 	return units[unit_id]
 
 
@@ -88,13 +98,13 @@ func schedule_event(id: String, due: float, kind: String, payload: Dictionary) -
 	if kind not in ["order", "reinforcement", "area_change", "coordination_release"]:
 		return false
 	# Validate references at submission; reinforcement is to an existing input area.
-	if kind == "order" and (not units.has(payload.get("unit_id", "")) or not missions.has(payload.get("mission_id", ""))):
+	if kind == "order" and (not knows_unit(str(payload.get("unit_id", ""))) or not missions.has(payload.get("mission_id", ""))):
 		return false
-	if kind == "reinforcement" and (not payload.has("unit") or units.has(payload.unit.id) or not areas.has(payload.unit.area_id) or not missions.has(payload.unit.mission_id)):
+	if kind == "reinforcement" and (not payload.has("unit") or knows_unit(str(payload.unit.id)) or not areas.has(payload.unit.area_id) or not missions.has(payload.unit.mission_id)):
 		return false
 	if kind == "area_change" and not areas.has(payload.get("area_id", "")):
 		return false
-	if kind == "coordination_release" and not units.has(payload.get("unit_id", "")):
+	if kind == "coordination_release" and not knows_unit(str(payload.get("unit_id", ""))):
 		return false
 	event_ids[id] = true
 	events.append({"id": id, "time": due, "kind": kind, "payload": payload.duplicate(true)})

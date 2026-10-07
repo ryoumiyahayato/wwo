@@ -11,7 +11,9 @@ const COHESION_PER_LOSS: float = 0.5
 const SLEEP_EPSILON: float = 0.001
 
 
-func resolve_until(state: State, target_game_time: float, resolution_policy: String = DETAILED) -> Dictionary:
+func resolve_until(state: State, target_game_time: float, resolution_policy: String = DETAILED, owner: RefCounted = null) -> Dictionary:
+	if state.settlement_owner != null and state.settlement_owner != owner:
+		return {"ok": false, "error": "Settlement belongs to the LOD coordinator"}
 	if not INTERVALS.has(resolution_policy) or not is_finite(target_game_time) or target_game_time < state.time:
 		return {"ok": false, "error": "Invalid policy or non-monotonic time"}
 	var start: float = state.time
@@ -96,6 +98,14 @@ func resolve_until(state: State, target_game_time: float, resolution_policy: Str
 
 func _process_due(state: State, log: Array[Dictionary], changes: Dictionary, area_changes: Dictionary) -> void:
 	while state.next_event_time() <= state.time:
+		if state.materialization_port != null and state.materialization_port.get_ref() != null:
+			var transition: Dictionary = state.materialization_port.get_ref().prepare_event(state.events[0])
+			for id: String in transition.get("retired", []):
+				changes.erase(id)
+				state.touched_units.erase(id)
+			for id: String in transition.get("changed", []):
+				changes[id] = state.units[id].duplicate(true)
+				state.touched_units[id] = true
 		var event: Dictionary = state.pop_event()
 		var payload: Dictionary = event.payload
 		state.counters.events_processed += 1
@@ -106,7 +116,7 @@ func _process_due(state: State, log: Array[Dictionary], changes: Dictionary, are
 			changes[unit.id] = unit.duplicate(true)
 			state.touched_units[unit.id] = true
 		elif event.kind == "reinforcement":
-			if state.units.has(payload.unit.id):
+			if state.knows_unit(str(payload.unit.id)):
 				log.append({"time": state.time, "kind": "rejected_reinforcement", "id": event.id})
 				continue
 			state.add_unit(payload.unit)
@@ -146,6 +156,15 @@ func _posture(state: State, unit: Dictionary) -> String:
 	return str(assignment.get("role", mission.posture))
 
 
+func _candidate_ids(_state: State, ids: Array[String], _unit: Dictionary) -> Array[String]:
+	return ids
+
+
+func _contact_weight(state: State, id: String) -> float:
+	var unit: Dictionary = state.units[id] if state.settlement_owner == null else state.examine_unit(id)
+	return float(unit.get("contact_weight", 1.0))
+
+
 func _prepare_area(state: State, area_id: String) -> Dictionary:
 	state.counters.areas_examined += 1
 	state.touched_areas[area_id] = true
@@ -169,7 +188,7 @@ func _prepare_area(state: State, area_id: String) -> Dictionary:
 		var unit: Dictionary = state.examine_unit(id)
 		var plan: Dictionary = plans[id]
 		var targets: Array[String] = []
-		for other_id: String in ids:
+		for other_id: String in _candidate_ids(state, ids, unit):
 			var other: Dictionary = state.examine_unit(other_id)
 			if other.side != unit.side and float(other.effective) > SLEEP_EPSILON and absf(float(unit.position) - float(other.position)) <= float(unit.weapon.range_km):
 				targets.append(other_id)
@@ -177,6 +196,10 @@ func _prepare_area(state: State, area_id: String) -> Dictionary:
 		if detection <= 0.0:
 			targets.clear()
 		plan.contacts = targets
+		var target_weight: float = 0.0
+		for target_id: String in targets:
+			target_weight += _contact_weight(state, target_id)
+		plan.target_weight = target_weight
 		if targets.is_empty():
 			continue
 		var capacity: float = minf(1.0, float(area.frontage) / maxf(0.001, float(side_frontage[unit.side])))
@@ -187,7 +210,7 @@ func _prepare_area(state: State, area_id: String) -> Dictionary:
 		plan.rounds = rounds
 		for other_id: String in targets:
 			var target_plan: Dictionary = plans[other_id]
-			var fire: float = rounds / float(targets.size())
+			var fire: float = rounds / target_weight * _contact_weight(state, other_id)
 			state.counters.contacts_resolved += 1
 			contact_records.append({"source": id, "target": other_id, "detection": detection,
 				"usable_fire_per_minute": fire, "exposure": target_plan.exposure})
@@ -231,9 +254,9 @@ func _apply_area(state: State, area_id: String, plans: Dictionary, minutes: floa
 		for target_id: String in plan.contacts:
 			var target_plan: Dictionary = plans[target_id]
 			var variation: float = state.variation(id + ":" + target_id, int(floorf((state.time - minutes * 60.0) / float(INTERVALS["AGGREGATE"]))))
-			var fire: float = float(plan.rounds) / float(plan.contacts.size()) * ratio
+			var fire: float = float(plan.rounds) / float(plan.target_weight) * _contact_weight(state, target_id) * ratio
 			incoming_losses[target_id] += fire * float(unit.weapon.lethality) * float(target_plan.exposure) * variation * minutes
-			incoming_pressure[target_id] += fire * SUPPRESSION_PER_ROUND * float(target_plan.exposure) / maxf(1.0, float(state.examine_unit(target_id).effective))
+			incoming_pressure[target_id] += fire * SUPPRESSION_PER_ROUND * float(target_plan.exposure) / maxf(_contact_weight(state, target_id), float(state.examine_unit(target_id).effective))
 		plan.spent = spent
 	var transfers: Array[Dictionary] = []
 	var remains_active: bool = false
@@ -260,7 +283,7 @@ func _apply_area(state: State, area_id: String, plans: Dictionary, minutes: floa
 		state.totals.ammo_spent += float(plan.spent)
 		var decay: float = exp(-SUPPRESSION_DECAY * minutes)
 		unit.suppression = clampf(float(unit.suppression) * decay + float(incoming_pressure[id]) / SUPPRESSION_DECAY * (1.0 - decay), 0.0, 1.0)
-		unit.cohesion = clampf(float(unit.cohesion) - loss / maxf(1.0, float(unit.personnel_total)) * COHESION_PER_LOSS, 0.0, 1.0)
+		unit.cohesion = clampf(float(unit.cohesion) - loss / maxf(float(unit.get("contact_weight", 1.0)), float(unit.personnel_total)) * COHESION_PER_LOSS, 0.0, 1.0)
 		unit.action = str(plan.posture)
 		if float(unit.effective) <= SLEEP_EPSILON:
 			unit.action = "disabled"
@@ -312,7 +335,7 @@ func _apply_area(state: State, area_id: String, plans: Dictionary, minutes: floa
 		var target: Dictionary = state.examine_unit(str(contact.target))
 		var source_plan: Dictionary = plans[contact.source]
 		contact.time = state.time
-		contact.usable_fire_per_minute = float(source_plan.spent) / minutes / float(source_plan.contacts.size())
+		contact.usable_fire_per_minute = float(source_plan.spent) / minutes / float(source_plan.target_weight) * float(target.get("contact_weight", 1.0))
 		contact.suppression = target.suppression
 		contact.movement_km_per_minute = plans[contact.target].speed
 		contact.advance_inhibited = target.action == "stalled"
