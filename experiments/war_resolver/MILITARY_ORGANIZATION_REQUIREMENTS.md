@@ -172,3 +172,48 @@ bonuses, multi-parent command, payroll/equipment/replacement transfer policies,
 historical staff tables, communication routing and a general succession algorithm
 remain unproven and unimplemented. Neither this military contract nor its synthetic
 fixtures choose the formal Organization kernel for other domains.
+
+## Task 6 evidence addendum — material supply and readiness
+
+**EXPERIMENTAL / NON-PRODUCTION. Production integration status = NONE.**
+Frozen base: Task 5 `1373c5b8d8255d860a08d6c778d1ec91fedad4a7`.
+See [logistics contract](logistics/README.md) and [local validation](logistics/TASK6_LOCAL_VALIDATION.md).
+Earlier supply-future statements describe the earlier unbound adapters.
+
+### IMPLEMENTED
+
+- A person-bound logistics adapter uses the existing effective ancestry: platoon
+  and higher request in scope; company and higher allocate/maintain in scope.
+  Ordinary soldiers cannot distribute a company warehouse or nominate an actor.
+- `supply_responsibility_reference` is now queried during actual attachment,
+  receipt and expiry tests. Permanent membership persists; operational responsibility
+  and future request scope move; existing unit stock stays with the unit.
+- Source ownership, source allocation scope, operational responsibility, stable
+  recipient identity and finite workshop-capacity scope are separate facts.
+- Accepted shipment reservations have immutable unit/formation/depot targets and
+  one receipt. Retired donors reject/return explicitly. Existing allocations
+  are physical stock transfers, not commands retargeted by a changed parent.
+- Maintenance rechecks the bound person's current scope at execution. Real
+  structure changes incrementally update current receipt-representation indexes.
+
+### EVIDENCE-BACKED FUTURE NEED
+
+- A formal Organization provider must expose permanent/effective relation and
+  supply-responsibility queries separately, at explicit world-time boundaries.
+  J/K and repeated attachment tests establish this need without choosing payroll.
+- Request, allocation approval, maintenance authorization and receipt destination
+  must be distinct interfaces. A/C/R show why a request is neither permission to
+  spend warehouse stock nor evidence of delivery.
+- Ownership/support obligation/financial approval/transport/receipt may be held
+  by different domains and offices. This experiment implements only the necessary
+  military scope plus externally admitted owner/capacity references, not all roles.
+- Stable recipient retirement and transaction outcomes must be available to other
+  domains; L demonstrates why silently delivering to an arbitrary survivor is
+  insufficient. General redirection/cancellation needs its own authorized event.
+
+### SPECULATIVE
+
+Quartermaster institutions, general delegation, shared allied depots, warehouse
+finance rules, national budgets, transport offices, procurement chains, logistics
+UI, historical staff tables and a universal Organization hierarchy remain
+unimplemented. These tests establish authority and conservation, not role enjoyment.
