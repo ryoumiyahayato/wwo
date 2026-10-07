@@ -1,5 +1,5 @@
 {
-  "content_sha256": "89b0f796fbf94c4165e920e70fc5924538599fd632954a3cce828992391a8165",
+  "content_sha256": "dbb1201330fa299212474fcdc68ab0cee9ae28db7478f36cd8471f30ed347422",
   "excluded": [
     {
       "path": ".git/",
@@ -72,14 +72,6 @@
     {
       "path": "docs/generated/",
       "reason": "data/material/secret/cache/nested-worktree path"
-    },
-    {
-      "path": "docs/performance/global-strategic-geography-r1-visuals.html",
-      "reason": "file outside reviewed exact file allowlist"
-    },
-    {
-      "path": "docs/performance/global-strategic-geography-r1.md",
-      "reason": "file outside reviewed exact file allowlist"
     },
     {
       "path": "docs/performance/ten-year-timing-verification-r1.md",
@@ -294,8 +286,8 @@
       "reason": "file outside reviewed exact file allowlist"
     }
   ],
-  "included_bytes": 5786571,
-  "included_files": 775,
+  "included_bytes": 5822058,
+  "included_files": 777,
   "owner_id": "7ed35d2d-c560-4b08-8c28-78af6d1cae6b",
   "remote": "https://github.com/ryoumiyahayato/wwo.git",
   "schema": 1,
