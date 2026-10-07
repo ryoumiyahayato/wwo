@@ -16,3 +16,12 @@
 
 003 M1修复：仅复制当前空间 intensive 状态、转移当前cell聚合索引；不重放运动、
 不改库存。builds/task9-m1-lod-fixed exit0。改进已证实；下一步冻结代码扩大门。
+
+004 M1扩大限定门：代码ae63fdd，builds/task9-m1-gate完整exit0，原43948/0及空间
+160/0，八组旧Linuxhash相同；明确未含统一验证。
+
+005 M1第二遍边界审查：新增输入重排/异质concealment诊断/低cohesion退却及动态
+terrain反例。第一跑因新fixture强类型Array ternary错误未实际完成，保留failed日志；
+仅修复fixture类型，再运行一次原命令不同输出目录，170 checks/3 failures，另有
+未实现schedule_ground调用错误。诊断fire factor遗漏和退却继续向前均实际复现。
+算法修复尚未开始；用户此时要求停止重开，故仅保存反例，不声称M1通过。

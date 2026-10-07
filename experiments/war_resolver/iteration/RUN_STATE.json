@@ -3,27 +3,32 @@
   "branch": "experiment/war-spatial-continuity-goal-v0",
   "stages": {
     "M0": "PASSED",
-    "M1": "RUNNING",
-    "M2": "NOT_STARTED",
-    "M3": "NOT_STARTED",
-    "M4": "NOT_STARTED"
+    "M1": "BLOCKED",
+    "M2": "DEFERRED",
+    "M3": "DEFERRED",
+    "M4": "DEFERRED"
   },
-  "last_verified_code_commit": "c4731a33177660b83c6490f41fe42dcbe7cfa7bb",
+  "last_verified_code_commit": "ae63fddb25046f02b3095ad70bdded538cdaef26",
   "started_utc": "2026-10-07T16:28:31Z",
-  "effective_minutes_estimate": 17,
-  "remaining_minutes_estimate": 583,
+  "effective_minutes_estimate": 50,
+  "remaining_minutes_estimate": 550,
   "estimate_quality": "approximate wall clock minus known wait; update at safe checkpoints",
   "platform_startup_wait_seconds": 13,
   "tests_completed": [
-    "Tasks1–8: 40960 checks, 0 failures",
-    "five retained regressions: 2988 checks, 0 failures",
-    "eight fresh-process replay pairs: identical on Linux"
+    "M0 Tasks1–8 + five regressions:43948/0; 8 replay pairs and 4 formal probe pairs match; equivalent unified48/49; audit31/0",
+    "ae63fdd scoped gate: original43948/0 + spatial160/0; all 8 predecessor Linux hashes unchanged; unified intentionally NOT RUN in that gate",
+    "Latest counterexample run completed exit1:170 checks/3 failures plus nonexistent schedule_ground script error; exact dirty sources now preserved in saved_unaccepted_code_commit"
   ],
   "tests_pending": [
-    "M1 new space tests and affected cross-layer regressions"
+    "No further commands authorized in stopped task; any resumed task must reconcile source/diff/evidence and inherited budget first"
   ],
-  "blockers": [],
-  "next": "Run cloud_validate.py baseline; compare current Linux independent processes.",
+  "blockers": [
+    "USER_REQUESTED_RESTART — no new implementation/tests",
+    "Per-target diagnostic fire rate omits detection factor (5.13 versus expected10.26 in ratio check)",
+    "Spatial route overrides inherited cohesion withdrawal, continuing outward (distance0.19995833194444 versus out/back0.1)",
+    "Dynamic schedule_ground API absent; counterexample invokes missing function"
+  ],
+  "next": "STOPPED. Handoff only; do not rerun or implement within this turn.",
   "validation_session": null,
   "connection_checks": [
     {
@@ -38,5 +43,14 @@
   "evidence": {
     "M0": "iteration/evidence/m0-linux/evidence.json",
     "M0_raw": "builds/task9-m0"
+  },
+  "stopped": true,
+  "stop_reason": "USER_REQUESTED_RESTART; stop implementation and new tests",
+  "stopped_utc": "2026-10-07T17:17:31.014654+00:00",
+  "saved_unaccepted_code_commit": "ed54ef6b68146df4a560b77865d8d47efd077730",
+  "highest_accepted_level": "NONE",
+  "publication": {
+    "status": "local checkpoint saved; remote save attempt result recorded in final handoff",
+    "draft_pr": "NOT CREATED; no accepted M1 and user requested stop"
   }
 }
