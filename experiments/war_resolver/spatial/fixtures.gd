@@ -31,12 +31,14 @@ static func topology(renamed: bool = false) -> Dictionary:
 			lanes[a + ":" + b] = {"observe": true, "fire": true}
 	return {"nodes": nodes, "edges": edges, "lanes": lanes}
 
-static func setup(motor: bool = true, combat: bool = false, renamed: bool = false, seed_value: int = 71, split_red: bool = false, reverse_inputs: bool = false) -> Dictionary:
+static func setup(motor: bool = true, combat: bool = false, renamed: bool = false, seed_value: int = 71, split_red: bool = false, reverse_inputs: bool = false, inputs: Dictionary = {}) -> Dictionary:
 	var state: State = State.new()
 	state.seed = seed_value
 	for index: int in range(100):
 		state.add_area(Data.area("cell_%03d" % index))
 	var graph: Dictionary = topology(renamed)
+	for edge: String in inputs.get("edge_ground", {}):
+		graph.edges[edge].ground = inputs.edge_ground[edge].duplicate(true)
 	if reverse_inputs:
 		for key: String in ["nodes", "edges", "lanes"]:
 			var reordered: Dictionary = {}
@@ -59,9 +61,9 @@ static func setup(motor: bool = true, combat: bool = false, renamed: bool = fals
 		var mission: Dictionary = Data.mission("mission_" + id, "advance" if index < 2 else "hold", 1.0, 0.1)
 		state.add_mission(mission)
 		var unit: Dictionary = Data.unit(id, "blue" if index < 2 else "red", graph.nodes[point].cell, mission.id)
-		unit.mobility = 0.6
-		unit.ammunition = 100.0 if combat else 0.0
-		unit.weapon.range_km = 0.3 if combat else 0.0
+		unit.mobility = float(inputs.get("mobility", 0.6))
+		unit.ammunition = float(inputs.get("blue_ammunition", 100.0)) if combat and index < 2 else (100.0 if combat else 0.0)
+		unit.weapon.range_km = float(inputs.get("range_km", 0.3)) if combat else 0.0
 		state.add_unit(unit)
 		nodes["node_" + id] = {"echelon": "squad", "side": unit.side,
 			"parent": "blue_platoon" if index < 2 else "red_platoon", "unit_id": id}

@@ -1,5 +1,6 @@
 extends RefCounted
 ## Opt-in synthetic spatial facts. The inherited resolver owns combat and time.
+signal route_feedback(unit_id: String, kind: String, cause_ref: String)
 const State = preload("res://experiments/war_resolver/battle_state.gd")
 var _state: State
 var _lod: RefCounted
@@ -105,7 +106,9 @@ func validate_path(unit: Dictionary, path: Variant, returning: bool) -> Dictiona
 		node = str(edge.to) if node == edge.from else str(edge.from)
 	return {"ok": true}
 
-func set_path(id: String, path: Array, returning: bool = false) -> Dictionary:
+func set_path(id: String, path: Array, returning: bool = false, role: RefCounted = null, token: RefCounted = null) -> Dictionary:
+	if _state.information_port != null and not _state.information_port.get_ref().allows_role_delivery(role, token, false):
+		return _reject("communication_delivery_required")
 	if not _state.units.has(id):
 		return _reject("route_requires_live_representation")
 	var unit: Dictionary = _state.units[id]
@@ -245,6 +248,7 @@ func move(unit: Dictionary, plan: Dictionary, minutes: float, log: Array[Diction
 			log.append({"id": "blocked_" + str(unit.id) + "_" + str(route.cause_ref), "time": _state.time,
 				"kind": "route_blocked", "unit_id": unit.id, "edge_ref": blocked, "cause_ref": route.cause_ref,
 				"scope": unit.area_id, "execution": "BLOCKED"})
+			route_feedback.emit(str(unit.id), "BLOCKED", str(route.cause_ref))
 	if float(plan.speed) == 0.0 or unit.action == "disabled":
 		return 0.0
 	if str(route.edge).is_empty():
@@ -283,6 +287,7 @@ func move(unit: Dictionary, plan: Dictionary, minutes: float, log: Array[Diction
 			_state.wake(destination)
 			log.append({"time": _state.time, "kind": "area_transition", "unit_id": unit.id, "from": previous, "to": destination})
 		log.append({"time": _state.time, "kind": "route_arrival", "unit_id": unit.id, "node_ref": route.node})
+		route_feedback.emit(str(unit.id), "ARRIVED", "")
 		if plan.get("route_retreat", false):
 			route.path.clear()
 			_state.missions[unit.mission_id].status = "withdrawn"

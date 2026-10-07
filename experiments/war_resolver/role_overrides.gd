@@ -145,6 +145,15 @@ func apply(command: Dictionary, communication_owner: RefCounted = null, validate
 			return _reject("wrong_owner_or_layer")
 		if not _keys(values, ["posture"]) or not values.get("posture", "") in ["hold", "advance", "support"]:
 			return _reject("invalid_tactical_intent")
+	elif kind == "route_intent":
+		if _state.spatial_port == null or not _active(target) or not (rank == 1 and target == owner or rank >= 2 and (target == owner and rank >= 3 or _scope_children(owner).has(target))):
+			return _reject("wrong_owner_or_layer")
+		if _scope_leaves(target).is_empty() or values.size() != 2 or not _keys(values, ["path", "return_to_start"]) or not values.get("path") is Array or not values.get("return_to_start") is bool:
+			return _reject("invalid_route_intent")
+		for leaf: String in State.sorted_ids(_scope_leaves(target)):
+			var route_check: Dictionary = _state.spatial_port.get_ref().validate_path(_unit(str(_node(leaf).unit_id)), values.path, values.return_to_start)
+			if not route_check.ok:
+				return route_check
 	elif kind in ["mission", "coordination"]:
 		# Higher rank does not inherit direct ownership of lower decision inputs.
 		if rank < 2 or not _active(target) or not (target == owner and rank >= 3 or _scope_children(owner).has(target)):
@@ -173,7 +182,7 @@ func apply(command: Dictionary, communication_owner: RefCounted = null, validate
 		var unit_id: String = str(_node(leaf).unit_id)
 		# Replacing a prerequisite needs explicit dependency migration semantics.
 		# Reject the whole command rather than orphaning reserves on an old ID.
-		if kind == "mission" and not (_state.mission_dependents.get(_unit(unit_id).mission_id, {}) as Dictionary).is_empty():
+		if kind in ["mission", "route_intent"] and not (_state.mission_dependents.get(_unit(unit_id).mission_id, {}) as Dictionary).is_empty():
 			return _reject("mission_has_dependents")
 		if kind == "mission" and _state.missions.has("role_" + id + "_" + unit_id):
 			return _reject("mission_id_collision")
@@ -201,6 +210,14 @@ func apply(command: Dictionary, communication_owner: RefCounted = null, validate
 		_state.tactical_intents[unit_id] = values.duplicate(true)
 		delta.tactical_intents[unit_id] = values.duplicate(true)
 		_state.wake(str(_state.units[unit_id].area_id))
+	elif kind == "route_intent":
+		for leaf: String in affected:
+			var unit_id: String = str(_node(leaf).unit_id)
+			var applied: Dictionary = _state.spatial_port.get_ref().set_path(unit_id, values.path, values.return_to_start, self, communication_owner)
+			assert(applied.ok)
+			delta.units[unit_id] = _state.units[unit_id].duplicate(true)
+			var mission_id: String = str(_state.units[unit_id].mission_id)
+			delta.missions[mission_id] = _state.missions[mission_id].duplicate(true)
 	else:
 		if kind == "mission":
 			_mission_inputs[target] = values.duplicate(true)

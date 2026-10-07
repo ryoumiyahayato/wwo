@@ -1,8 +1,11 @@
 extends RefCounted
 ## Military contract only. Knowledge is received claims, never a truth snapshot.
+signal observation_recorded(record: Dictionary)
+signal message_transition(record: Dictionary)
 const State = preload("res://experiments/war_resolver/battle_state.gd")
 const Roles = preload("res://experiments/war_resolver/role_overrides.gd")
 const FACTS: Array[String] = ["position", "status", "ammunition", "fuel", "readiness"]
+const SPATIAL_FACTS: Array[String] = ["route"]
 const MAX_CLAIMS: int = 8
 const MAX_QUERY: int = 64
 var _state: State
@@ -45,7 +48,7 @@ func configure(state: State, lod: RefCounted, structure: RefCounted, logistics: 
 		if not roles.has(source.get("observer_ref", "")) or not structure.active(str(source.get("scope_ref", ""))) or source.get("origin") not in ["DIRECT", "SUBORDINATE_REPORT", "HQ_REPORT", "EXTERNAL"] or not _quality(source.get("quality")) or not _positive(source.get("precision_km")) or not source.get("fact_kinds") is Array:
 			return false
 		for fact: String in source.fact_kinds:
-			if fact not in FACTS:
+			if fact not in FACTS and not (state.spatial_port != null and fact in SPATIAL_FACTS):
 				return false
 	for id: String in channels:
 		if not channels[id] is Dictionary:
@@ -110,10 +113,18 @@ func observe(actor: String, request: Dictionary) -> Dictionary:
 	record.quality = _sources[request.source_ref].quality
 	record.precision = "proxy_derived_estimate" if request.subject_kind == "unit" and ids[0] != request.subject_ref else "coarse_current_representation"
 	_observations[request.id] = record
+	observation_recorded.emit(record.duplicate(true))
 	# A producer gets a receipt reference, not hidden truth for the decision path.
 	return {"ok": true, "observation_id": request.id}
 
 func _fact(ids: Array[String], kind: String, precision: float) -> Dictionary:
+	if kind == "route":
+		if ids.size() != 1 or not _state.units[ids[0]].has("spatial"):
+			return {}
+		work.fact_records_examined += 1
+		var route: Dictionary = _state.units[ids[0]].spatial
+		return {"edge_ref": route.blocked_edge if not str(route.blocked_edge).is_empty() else route.edge,
+			"node_ref": route.node, "state": "BLOCKED" if not str(route.blocked_edge).is_empty() else ("TRAVELLING" if not str(route.edge).is_empty() else "ARRIVED"), "cause_ref": route.cause_ref}
 	var weight: float = 0.0
 	var position: float = 0.0
 	var stock: float = 0.0
@@ -154,11 +165,19 @@ func admit_external_observation(record: Dictionary) -> Dictionary:
 	stored.quality = source.quality
 	stored.precision = "external_claim"
 	_observations[record.id] = stored
+	observation_recorded.emit(stored.duplicate(true))
 	return {"ok": true, "observation_id": record.id}
 
 static func _valid_value(kind: String, value: Variant) -> bool:
 	if not value is Dictionary:
 		return false
+	if kind == "route":
+		if value.size() != 4 or not _keys(value, ["edge_ref", "node_ref", "state", "cause_ref"]) or value.get("state") not in ["AVAILABLE", "BLOCKED", "TRAVELLING", "ARRIVED"]:
+			return false
+		for key: String in ["edge_ref", "node_ref", "cause_ref"]:
+			if not value.get(key) is String or str(value[key]).length() > 128:
+				return false
+		return not str(value.node_ref).is_empty() and (value.state not in ["AVAILABLE", "BLOCKED", "TRAVELLING"] or not str(value.edge_ref).is_empty())
 	if kind == "position":
 		return value.size() == 3 and _keys(value, ["area_ref", "band_km", "precision_km"]) and value.get("area_ref") is String and not str(value.area_ref).is_empty() and value.get("band_km") is Array and value.band_km.size() == 2 and _nonnegative(value.band_km[0]) and _nonnegative(value.band_km[1]) and float(value.band_km[1]) >= float(value.band_km[0]) and _positive(value.get("precision_km"))
 	if kind == "status":
@@ -186,6 +205,7 @@ func send_report(actor: String, request: Dictionary) -> Dictionary:
 	_push_report(message)
 	_outboxes[actor].append(message.id)
 	work.messages_admitted += 1
+	message_transition.emit(message.duplicate(true))
 	return {"ok": true, "message_id": message.id, "issued_at": message.sent_at, "delivery_time": message.delivery_time}
 
 func _channel_allowed(actor: String, id: String, recipient: String, command: bool) -> bool:
@@ -221,6 +241,7 @@ func issue_command(actor: String, request: Dictionary) -> Dictionary:
 	_next_issue[actor] = _state.time + Roles.INPUT_SECONDS[Roles.ROLES.find(str(_structure._people[actor].role))]
 	_outboxes[actor].append(message.id)
 	work.messages_admitted += 1
+	message_transition.emit(message.duplicate(true))
 	return {"ok": true, "message_id": request.id, "issued_at": _state.time, "delivery_time": message.delivery_time}
 
 func allows_role_delivery(role: RefCounted, token: RefCounted, validate_only: bool) -> bool:
@@ -286,6 +307,7 @@ func process_command(event: Dictionary) -> Dictionary:
 	message.outcome = {"ok": result.ok, "reason": result.get("error", "executed_existing_role_input")}
 	work.messages_delivered += int(result.ok)
 	work.messages_failed += int(not result.ok)
+	message_transition.emit(message.duplicate(true))
 	return {"changed": State.sorted_ids(changed), "retired": State.sorted_ids(retired), "record": message.duplicate(true)}
 
 func _report_before(a: Dictionary, b: Dictionary) -> bool:
@@ -340,6 +362,7 @@ func _receive_report(message: Dictionary) -> void:
 		message.failed_at = message.delivery_time
 		message.reason = "channel_unavailable"
 		work.messages_failed += 1
+		message_transition.emit(message.duplicate(true))
 		return
 	message.status = "DELIVERED"
 	message.received_at = message.delivery_time
@@ -361,6 +384,7 @@ func _receive_report(message: Dictionary) -> void:
 			_subjects[person][key] = []
 		_subjects[person][key].append(entry)
 		work.knowledge_records_updated += 1
+	message_transition.emit(message.duplicate(true))
 
 func knowledge(person: String, subject_kind: String = "", subject: String = "", fact: String = "", limit: int = MAX_QUERY, before: int = -1) -> Dictionary:
 	if not _roles.has(person) or limit < 1 or limit > MAX_QUERY:

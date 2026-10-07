@@ -1,5 +1,6 @@
 extends RefCounted
 ## Explicit opportunities produce intents, then submit to existing domain ports.
+signal input_issued(person: String, decision_id: String, issued: Dictionary)
 const Context = preload("res://experiments/war_resolver/decision/decision_context.gd")
 const State = preload("res://experiments/war_resolver/battle_state.gd")
 const Roles = preload("res://experiments/war_resolver/role_overrides.gd")
@@ -12,6 +13,7 @@ var _persons: Dictionary = {}
 var _events: Dictionary = {}
 var _pending: Dictionary = {}
 var _ready: Dictionary = {}
+var _cycles: Dictionary = {}
 var work: Dictionary = {"decision_events_processed": 0, "decision_contexts_built": 0,
 	"knowledge_records_examined_for_decision": 0, "persons_examined": 0, "commands_issued_from_decision": 0,
 	"requests_issued_from_decision": 0, "urgent_decision_wakes": 0, "authority_checks": 0,
@@ -31,6 +33,8 @@ func configure(state: State, information: RefCounted, structure: RefCounted, log
 func enroll(person: String, definition: Dictionary, provider: RefCounted) -> bool:
 	if _state == null or _persons.has(person) or not _information._roles.has(person) or not definition.get("cadence") is float or not is_finite(definition.cadence) or float(definition.cadence) <= 0.0 or not definition.get("targets") is Array or definition.targets.size() > 64 or not definition.get("standing_orders") is Dictionary or not definition.get("urgent") is bool or provider == null:
 		return false
+	if definition.has("command_kind") and (definition.command_kind != "route_intent" or _state.spatial_port == null):
+		return false
 	for target: Variant in definition.targets:
 		if not target is String or not _structure._nodes.has(target):
 			return false
@@ -46,6 +50,35 @@ func schedule(person: String, id: String, due: float) -> Dictionary:
 	if _state == null or not _persons.has(person) or id.is_empty() or _events.has(id) or _pending.has(person) or not is_finite(due) or due < _state.time or due < float(_ready[person]):
 		return _reject("invalid_opportunity_or_cooldown")
 	return _schedule(person, id, due, "")
+
+func start_cycle(person: String, prefix: String, first: float, period: float, end: float, maximum: int) -> Dictionary:
+	if not _persons.has(person) or not _structure.active(str(_structure._people[person].formation_id)) or prefix.is_empty() or not is_finite(first) or not is_finite(period) or not is_finite(end) or first > end or period < float(_persons[person].definition.cadence) or maximum < 1 or maximum > 4096 or _cycles.get(person, {}).get("status", "") == "RUNNING":
+		return _reject("invalid_bounded_cycle")
+	var admitted: Dictionary = schedule(person, prefix + "_0", first)
+	if not admitted.ok:
+		return admitted
+	_cycles[person] = {"prefix": prefix, "period": period, "end": end, "maximum": maximum, "index": 0, "status": "RUNNING"}
+	return admitted
+
+func pause_cycle(person: String) -> Dictionary:
+	if not _cycles.has(person) or _cycles[person].status != "RUNNING":
+		return _reject("no_running_cycle")
+	_cycles[person].status = "PAUSED"
+	return {"ok": true}
+
+func _continue_cycle(person: String) -> void:
+	if not _cycles.has(person) or _cycles[person].status != "RUNNING":
+		return
+	var cycle: Dictionary = _cycles[person]
+	cycle.index += 1
+	var due: float = _state.time + float(cycle.period)
+	if int(cycle.index) >= int(cycle.maximum) or due > float(cycle.end):
+		cycle.status = "FINISHED"
+		return
+	var next: Dictionary = schedule(person, str(cycle.prefix) + "_%d" % int(cycle.index), due)
+	if not next.ok:
+		cycle.status = "BLOCKED"
+		cycle.reason = next.error
 
 func _schedule(person: String, id: String, due: float, urgent_message: String) -> Dictionary:
 	_events[id] = {"id": id, "person_id": person, "due": due, "status": "PENDING", "urgent_message": urgent_message}
@@ -97,8 +130,13 @@ func process_event(event: Dictionary) -> Dictionary:
 		return _transition(record.duplicate(true))
 	var person: String = str(record.person_id)
 	_pending.erase(person)
+	if _cycles.has(person) and (_cycles[person].status != "RUNNING" or not _structure.active(str(_structure._people[person].formation_id))):
+		record.status = "SKIPPED_CYCLE_PAUSED_OR_RETIRED"
+		_cycles[person].status = "PAUSED"
+		return _transition(record.duplicate(true))
 	if not str(record.urgent_message).is_empty() and _information._messages[record.urgent_message].status != "DELIVERED":
 		record.status = "SKIPPED_UNDELIVERED_REPORT"
+		_continue_cycle(person)
 		return _transition(record.duplicate(true))
 	work.persons_examined += 1
 	var context: Dictionary = preview(person)
@@ -118,6 +156,8 @@ func process_event(event: Dictionary) -> Dictionary:
 	record.creation_validation = validated.duplicate(true)
 	if validated.ok:
 		record.issued_input = _issue(person, str(record.id), proposal.intent)
+		input_issued.emit(person, str(record.id), record.issued_input.duplicate(true))
+	_continue_cycle(person)
 	return _transition(record.duplicate(true))
 
 func _validate(person: String, id: String, intent: Dictionary, context: Dictionary) -> Dictionary:
@@ -177,7 +217,10 @@ func result(id: String) -> Dictionary:
 	return record
 
 func snapshot() -> Dictionary:
-	return {"events": _events.duplicate(true), "pending": _pending.duplicate(), "ready": _ready.duplicate(), "work": work.duplicate()}
+	var result: Dictionary = {"events": _events.duplicate(true), "pending": _pending.duplicate(), "ready": _ready.duplicate(), "work": work.duplicate()}
+	if not _cycles.is_empty():
+		result.cycles = _cycles.duplicate(true)
+	return result
 
 static func _transition(record: Dictionary) -> Dictionary:
 	return {"changed": [], "retired": [], "record": record}
