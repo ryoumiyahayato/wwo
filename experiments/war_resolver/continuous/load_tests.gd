@@ -14,6 +14,7 @@ func _initialize() -> void:
 	_sparse()
 	_locality()
 	_lod()
+	_heterogeneous()
 	_capacity()
 	print("LOAD_EVIDENCE_JSON=" + JSON.stringify(evidence))
 	print("Task9 load: %d checks, %d failures" % [checks, failures])
@@ -126,3 +127,35 @@ func _capacity() -> void:
 	check(not result.ok and result.status == "BLOCKED" and result.error == "ACTIVE_SCOPE_CAPACITY" and state.time == 0.0 and state.units.size() == 1025, "capacity backpressure retains events, actors and old committed time")
 	check(state.snapshot().get("status") == "PENDING", "blocked partial input cannot be queried as current truth")
 	evidence.capacity = result
+
+func _heterogeneous() -> void:
+	var samples: Array[Dictionary] = []
+	for heterogeneous: bool in [false, true]:
+		var state: F.State = F.battle(40)
+		if heterogeneous:
+			state.units.unit_000.weapon.rounds_per_minute = 0.9
+		var owner: F.Authority = F.Authority.new()
+		owner.configure(state)
+		var accepted: int = 0
+		var rejected: Array[Dictionary] = []
+		for first: int in [0, 10, 20, 30]:
+			var ids: Array[String] = []
+			for index: int in range(first, first+10):
+				ids.append("unit_%03d" % index)
+			var result: Dictionary = owner.coalesce("group_%d" % first, ids)
+			if result.ok:
+				accepted += 1
+			else:
+				rejected.append(result)
+		check(accepted == (3 if heterogeneous else 4) and rejected.size() == (1 if heterogeneous else 0), "incompatible active cohort is retained in detail")
+		var started: int = Time.get_ticks_usec()
+		var output: Dictionary = finish(owner, 30.0)
+		var conserved: bool = output.ok and state.units.size() == (13 if heterogeneous else 4)
+		var ammo: float = 0.0
+		var people: float = 0.0
+		for id: String in state.units:
+			ammo += float(state.units[id].ammunition) + float(state.units[id].ammo_spent)
+			people += float(state.units[id].effective) + float(state.units[id].casualties)
+		check(conserved and absf(ammo-state.totals.ammunition) <= 0.000001 and absf(people-state.totals.personnel) <= 0.000001, "heterogeneous fallback does not duplicate resources or representations")
+		samples.append({"heterogeneous": heterogeneous, "eligible_groups": 4, "accepted_groups": accepted, "active_representations": state.units.size(), "work": owner.counters(), "wall_ms": (Time.get_ticks_usec()-started)/1000.0, "rejections": rejected})
+	evidence.heterogeneous_active_cost = samples

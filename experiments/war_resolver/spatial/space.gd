@@ -10,6 +10,7 @@ var _lanes: Dictionary = {}
 var _facts: Dictionary = {}
 var _cell_scope: Dictionary = {}
 var _scope_cells: Dictionary = {}
+var _scope_anchor: Dictionary = {}
 var _cell_nodes: Dictionary = {}
 var _cell_edges: Dictionary = {}
 var _loaded: Dictionary = {}
@@ -59,6 +60,8 @@ func configure(state: State, lod: RefCounted, nodes: Dictionary, edges: Dictiona
 			_cell_nodes[node.cell] = {}
 		_cell_nodes[node.cell][id] = true
 		work.input_records_examined += 1
+	for scope: String in _scope_cells:
+		_scope_anchor[scope] = State.sorted_ids(_scope_cells[scope])[0]
 	for id: String in edges:
 		var cell: String = str(nodes[edges[id].from].cell)
 		if not _cell_edges.has(cell):
@@ -131,8 +134,7 @@ func set_path(id: String, path: Array, returning: bool = false, role: RefCounted
 func resolution_scopes(active: Dictionary) -> Array[String]:
 	var selected: Dictionary = {}
 	for cell: String in active:
-		var cells: Array[String] = scope_cells(cell)
-		selected[cells[0]] = true
+		selected[_scope_anchor[_cell_scope[cell]] if _cell_scope.has(cell) else cell] = true
 	return State.sorted_ids(selected)
 
 func scope_cells(cell: String) -> Array[String]:
