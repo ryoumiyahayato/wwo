@@ -71,6 +71,7 @@ func _locality() -> void:
 	for id: String in scenario.env.lod._groups:
 		if scenario.env.state.units[id].area_id == "cell_099":
 			untouched[id] = scenario.env.lod._groups[id].duplicate(true)
+	var transition_started: int = Time.get_ticks_usec()
 	for index: int in range(4):
 		scenario.env.space.unload_cell("cell_037")
 		scenario.env.space.load_cell("cell_037")
@@ -81,7 +82,7 @@ func _locality() -> void:
 		unchanged = unchanged and scenario.env.lod._groups.has(id) and scenario.env.lod._groups[id] == untouched[id]
 	check(unchanged and untouched.size() == 2, "focus actions preserve unrelated sleeping cohorts")
 	check(scenario.ledger_balanced(), "focus operations preserve resources")
-	evidence.locality = {"unrelated_cohorts": untouched.size(), "materialized_leaf_delta": scenario.env.lod.work.leaf_records_materialized-materialized, "loaded_cells": scenario.env.space._loaded.size()}
+	evidence.locality = {"unrelated_cohorts": untouched.size(), "materialized_leaf_delta": scenario.env.lod.work.leaf_records_materialized-materialized, "loaded_cells": scenario.env.space._loaded.size(), "transition_and_check_ms": (Time.get_ticks_usec()-transition_started)/1000.0}
 func _project(scenario: Scenario) -> Dictionary:
 	var result: Dictionary = {}
 	for index: int in range(4):

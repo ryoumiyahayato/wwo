@@ -44,9 +44,12 @@ func _long_run(scenario: Scenario, seed_value: int) -> void:
 		var calls: int = 0
 		var measured: Dictionary = {}
 		var maximum: int = 0
+		var max_call_usec: int = 0
 		started = Time.get_ticks_usec()
 		while calls < 10000000:
+			var call_started: int = Time.get_ticks_usec()
 			measured = bounded.env.lod.advance_bounded(86400.0, quota)
+			max_call_usec = maxi(max_call_usec, Time.get_ticks_usec()-call_started)
 			maximum = maxi(maximum, int(measured.work_units))
 			calls += 1
 			if not measured.ok or measured.status != "PENDING":
@@ -57,7 +60,7 @@ func _long_run(scenario: Scenario, seed_value: int) -> void:
 		check(bounded.ledger_balanced() and storage(bounded).underlying_leaves == 400, "24h no resource duplication or representation overlap")
 		var after: Dictionary = storage(bounded)
 		check(after.diagnostic_retained <= 4096 and after.pending == 0 and after.static_memory_bytes <= 512*1024*1024, "bounded diagnostics, no backlog and registered capacity respected")
-		comparisons.append({"quota": quota, "calls": calls, "wall_ms": (Time.get_ticks_usec()-started)/1000.0, "last_call": measured, "storage": after})
+		comparisons.append({"quota": quota, "calls": calls, "max_call_usec": max_call_usec, "wall_ms": (Time.get_ticks_usec()-started)/1000.0, "last_call": measured, "storage": after})
 		print("LONG_PROGRESS seed=%d quota=%d calls=%d status=%s" % [seed_value, quota, calls, measured.status])
 	evidence[str(seed_value)] = {"normal_ms": normal_ms, "physical_sha256": JSON.stringify(physical).sha256_text(), "initial_storage": initial, "final_storage": storage(scenario), "coalescing": scenario.env.background.coalescing, "comparisons": comparisons}
 
@@ -74,10 +77,23 @@ static func storage(scenario: Scenario) -> Dictionary:
 	var knowledge_count: int = 0
 	for person: String in env.information._knowledge:
 		knowledge_count += env.information._knowledge[person].size()
+	var encoded_bytes: Dictionary = {}
+	for category: String in ["live", "representation_inputs", "pending", "identity", "knowledge", "decision_history", "domain_history", "diagnostic"]:
+		var records: Variant
+		match category:
+			"live": records = {"units": env.state.units, "areas": env.state.areas, "facilities": env.space._edges, "depots": env.logistics._depots}
+			"representation_inputs": records = {"cohorts": env.lod._groups, "mission_templates": env.state.missions, "organization_inputs": env.structure._nodes}
+			"pending": records = {"events": env.state.events, "reports": env.information._report_heap}
+			"identity": records = {"events": env.state.event_ids, "information": env.information._entry_ids, "logistics": env.logistics._used, "structure": env.structure._used_units}
+			"knowledge": records = {"observations": env.information._observations, "messages": env.information._messages, "knowledge": env.information._knowledge}
+			"decision_history": records = env.decisions._events
+			"domain_history": records = {"structure": env.structure.history, "requests": env.logistics._requests, "deliveries": env.logistics._deliveries, "maintenance": env.logistics._maintenance}
+			"diagnostic": records = scenario.trace.export()
+		encoded_bytes[category] = JSON.stringify(records).to_utf8_buffer().size()
 	return {"underlying_leaves": leaves.size() if not overlap else -1, "live_representations": env.state.units.size(), "active_cells": env.state.active_areas.size(), "geometry_focus_cells": env.space._loaded.size(),
 		"cohorts": env.lod._groups.size(), "pending": env.state.events.size() + env.information._report_heap.size(),
 		"event_identity_records": env.state.event_ids.size(), "information_identity_records": env.information._entry_ids.size(),
 		"observations": env.information._observations.size(), "messages": env.information._messages.size(), "knowledge_claims": knowledge_count,
 		"decision_history": env.decisions._events.size(), "structure_history": env.structure.history.size(), "logistics_identity_records": env.logistics._used.size(),
 		"diagnostic_retained": scenario.trace.page().retained, "diagnostic_total": scenario.trace.total,
-		"static_memory_bytes": OS.get_static_memory_usage()}
+		"static_memory_bytes": OS.get_static_memory_usage(), "category_json_bytes": encoded_bytes, "byte_note": "explicit diagnostic serialization sizes, not allocator/RAM estimates"}

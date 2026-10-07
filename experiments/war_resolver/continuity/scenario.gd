@@ -16,10 +16,13 @@ var trace: Trace = Trace.new()
 func configure(seed_value: int = 71, supplied: Dictionary = {}) -> bool:
 	options = {"bridge_cut": true, "report_latency": 47.0, "command_latency": 15.0, "supply": true, "repeated": true, "observer": true, "aggregate": true, "keep_only": false, "long_run": false}
 	options.merge(supplied, true)
+	var admission_start: int = Time.get_ticks_usec()
 	env = F.setup(true, true, false, seed_value, false, false, {"mobility": 0.08, "blue_ammunition": 4.0, "range_km": 0.05, "background": options.long_run, "background_mobility": 0.002,
 		"edge_ground": {"AC": F.ground("forest", 1.0), "CD": F.ground("slope", 0.0, 0.0, 0.2)}})
+	env.input_costs_ms = {"admission": (Time.get_ticks_usec()-admission_start)/1000.0, "coalesce_and_focus": 0.0, "geometry_focus_subset": 0.0}
 	trace.bind_state(env.state)
 	env.lod.physical_event_sink = _capture_physical
+	var coalesce_start: int = Time.get_ticks_usec()
 	if options.aggregate:
 		var pair: Array[String] = ["unit_000", "unit_001"]
 		if not env.lod.coalesce("blue_platoon", pair).ok:
@@ -38,8 +41,11 @@ func configure(seed_value: int = 71, supplied: Dictionary = {}) -> bool:
 		var reds: Array[String] = ["unit_002", "unit_003"]
 		if not env.lod.coalesce("red_platoon", reds).ok:
 			return false
+		var geometry_start: int = Time.get_ticks_usec()
 		env.space.load_cell("cell_037")
 		env.space.load_cell("cell_063")
+		env.input_costs_ms.geometry_focus_subset = (Time.get_ticks_usec()-geometry_start)/1000.0
+	env.input_costs_ms.coalesce_and_focus = (Time.get_ticks_usec()-coalesce_start)/1000.0
 	if not options.repeated or options.keep_only:
 		# Explicit initial route is trusted scenario input, not a policy truth read.
 		var rep: String = env.lod.representation_of("unit_000")

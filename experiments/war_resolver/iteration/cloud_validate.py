@@ -207,7 +207,10 @@ def main() -> int:
         for name in baseline["known_baseline_failure"]:
             if name == "baseline_golden_independent" or args.skip_unified:
                 continue
-            old = (args.baseline_evidence.parent / f"{name}.log").read_text()
+            original_log = args.baseline_evidence.parent / f"{name}.log"
+            if not original_log.exists():
+                original_log = args.baseline_evidence.parent / f"{name}.txt"
+            old = original_log.read_text()
             new = (output / f"{name}.log").read_text()
             if old == new:
                 report["known_baseline_failure"].append(name)

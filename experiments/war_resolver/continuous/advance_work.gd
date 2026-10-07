@@ -107,12 +107,15 @@ func resume(quota: int) -> Dictionary:
 	state.pending_committed_time = committed
 	if status == "COMPLETE":
 		state.settlement_pending = false
-	return {"ok": status != "BLOCKED", "status": status, "error": blocker, "requested_time": target,
+	var result: Dictionary = {"ok": status != "BLOCKED", "status": status, "error": blocker, "requested_time": target,
 		"committed_time": committed, "pending_boundary": boundary if status != "COMPLETE" else -1.0,
 		"work_units": used, "actual_unit_records_examined": int(state.counters.units_examined)-before,
 		"wall_usec": Time.get_ticks_usec()-started, "max_primitive_usec": max_primitive_usec,
 		"max_primitive": max_primitive, "max_native_id_snapshot": max_metadata_ids,
 		"events": [], "diagnostic_events_produced": call_event_count, "total_work_units": total_steps, "commit_count": commit_count}
+	if status == "COMPLETE":
+		result.phase_work_counts = primitives.duplicate()
+	return result
 
 func _step() -> void:
 	match phase:

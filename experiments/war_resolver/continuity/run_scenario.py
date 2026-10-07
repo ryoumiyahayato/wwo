@@ -44,6 +44,9 @@ def main():
               "complete": len(matches) == 1 and completed.returncode == 0 and fatal is None}
     if report["complete"]:
         result = json.loads(matches[0])
+        costs = re.findall(r"^WAR_CONTINUITY_OUTPUT_COST_JSON=(.*)$", log, re.M)
+        if len(costs) == 1:
+            result["output_costs"] = json.loads(costs[0])
         (args.output / "result.json").write_text(json.dumps(result, ensure_ascii=False, indent=2)+"\n", encoding="utf-8")
         (args.output / "timeline.txt").write_text(result["timeline"]+"\n", encoding="utf-8")
         print(json.dumps({"time": result["game_time"], "ledger_balanced": result["ledger_balanced"], "trace_records": len(result["trace"]), "wall_ms": result["wall_ms"]}, ensure_ascii=False))
