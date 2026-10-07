@@ -2,7 +2,7 @@
 
 Base / final code HEAD / final docs HEAD: `c4731a33177660b83c6490f41fe42dcbe7cfa7bb` / `69fa36d6202b2b0d8e9332406ff57d269749fa0c` / 文档HEAD见PR最终head及交付`HEADS.json`；不在commit内自引用未知SHA。
 Environment / Godot: Linux x86_64，`/workspace/wwo`，Python3.12.14，Godot `4.6.3.stable.official.7d41c59c4`。
-Effective execution budget used / estimate quality: 约275/600有效分钟（近似）；恢复未重置。暂停约6分钟、初始平台等待13秒、一次断连不足1分钟及环境切换约1分钟不确定等待单列。提前完成全部必需门，未等待凑满十小时。
+Effective execution budget used / estimate quality: 约285/600有效分钟（近似）；恢复未重置。暂停约6分钟、初始平台等待13秒、一次断连不足1分钟及环境切换约1分钟不确定等待单列。提前完成全部必需门，未等待凑满十小时。
 M0 / M1 / M2 / M3 / M4: PASSED / PASSED / PASSED / PASSED / PASSED。
 Highest accepted level: LEVEL_3。
 Overall: COMPLETE（本轮限定实验验收；冻结基线经济golden未通过范围保持，整个仓库并非全绿）。
@@ -14,7 +14,7 @@ Per-call budget bound / largest indivisible step: 每调用≤quota个实际prim
 Storage/queue growth: 诊断ring4096/分页256，人物知识与权威身份/decision历史保留增长；长run pending初12→末0，Godot static memory≤512MiB门；不称总内存常量。
 Predecessor regressions and platform caveats: Tasks1–8/五组43948/0，8旧Linux独立进程hash及4正式探针对相同；新增640/0，audit31/0、WorldData46测试通过。统一等价步骤只有economy golden原两项失败，日志931bytes逐字等于M0；PowerShell与Windows NOT RUN。
 New blockers and deterministic reproducers: 无新增blocker。退眠清理反例c8原失败、69fa36d修正、相关43/0及本次完整门均通过；原脚本/失败与修正日志保留。平台中断报告INCOMPLETE，未拼接成PASS。
-Draft PR / artifact location / publication status: 唯一Draft PR https://github.com/ryoumiyahayato/wwo/pull/111 ，base为冻结Task8分支；算法和报告已就绪，最终远端/小bundle+binary patch以交付HEADS.json及PR核验记录为准，不merge。
+Draft PR / artifact location / publication status: 唯一Draft PR https://github.com/ryoumiyahayato/wwo/pull/111 ，base为冻结Task8分支；代码、报告和证据已push并只读核实open/draft/unmerged（交付checkpoint e81cfff）；bundle验证与base临时索引patch应用检查通过。最终文档HEAD与SHA256见交付HEADS.json，不merge。
 Human visual acceptance: NOT REQUIRED / NOT RUN。
 Production integration status: NONE。
 Next smallest authorized follow-up: 尚未授权实施，仅列建议。对当前最大支持scope的native元数据/容器操作增加独立最坏容量压力例，先预登记成本与停止条件。

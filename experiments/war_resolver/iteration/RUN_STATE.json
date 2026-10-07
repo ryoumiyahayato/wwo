@@ -10,8 +10,8 @@
   },
   "last_verified_code_commit": "69fa36d6202b2b0d8e9332406ff57d269749fa0c",
   "started_utc": "2026-10-07T16:28:31Z",
-  "effective_minutes_estimate": 275,
-  "remaining_minutes_estimate": 325,
+  "effective_minutes_estimate": 285,
+  "remaining_minutes_estimate": 315,
   "estimate_quality": "approximate wall clock minus known wait; update at safe checkpoints",
   "platform_startup_wait_seconds": 13,
   "tests_completed": [
@@ -42,7 +42,7 @@
   ],
   "tests_pending": [],
   "blockers": [],
-  "next": "No new implementation authorized. Finish samePR final docs/artifact publication and readonly verify, then end task. Future followup is suggestion only.",
+  "next": "Task complete. No further implementation authorized; suggested native-capacity followup only. Final receipt commit/bundle regenerated, sameDraftPR body/HEAD readonly check before returning.",
   "validation_session": null,
   "connection_checks": [
     {
@@ -78,8 +78,13 @@
   "saved_unaccepted_code_commit": "ed54ef6b68146df4a560b77865d8d47efd077730",
   "highest_accepted_level": "LEVEL_3",
   "publication": {
-    "status": "FINAL_DOCS_READY_TO_PUSH; existing sameDraftPR111 open/unmerged; final push/manifest verification remains administrative",
-    "draft_pr": "https://github.com/ryoumiyahayato/wwo/pull/111"
+    "status": "PUBLISHED",
+    "draft_pr": "https://github.com/ryoumiyahayato/wwo/pull/111",
+    "published_delivery_checkpoint": "e81cfff4ad457aea7194af23a17d6b596940a693",
+    "verified_utc": "2026-10-07T21:17:01Z",
+    "verified_base": "c4731a33177660b83c6490f41fe42dcbe7cfa7bb",
+    "verified_state": "open/draft/unmerged",
+    "final_docs_head_note": "closing receipt docs-only commit is recorded in external builds/task9-final-delivery/HEADS.json and PR final head"
   },
   "resumed_utc": "2026-10-07T17:21:05Z",
   "control_history": [

@@ -148,3 +148,8 @@ long53/0完整结束，之后profile未完成；整轮evidence complete=false，
 最终400dense5样p50 888..936us/p95 1503..1776us/max19.635ms；长对照max37.157ms，
 最大primitive37.045ms apply_units，实测不是帧SLA。保留清理修正，无进一步算法改动。
 新增DELIVERY文档/有限raw/machine，预算约275min，进入唯一DraftPR最终发布。
+
+最终发布回执：21:17UTC GitHub只读确认PR111 head e81cfff/base c4731a3、open/draft/
+unmerged；报告和证据实际已push。小bundle约259KB verify成功，约1.8MB binarypatch
+在base替代临时index apply --check成功，不写工作树。关闭回执仅docs，source69fa36d
+及完整测试指纹不变；预算保守估计约285min，不把平台重启排队当新预算。
