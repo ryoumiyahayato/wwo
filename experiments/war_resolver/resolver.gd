@@ -350,7 +350,10 @@ func _apply_area(state: State, area_id: String, plans: Dictionary, minutes: floa
 		var old_position: float = float(unit.position)
 		var travelled: float
 		if unit.has("spatial"):
+			var prior_status: String = str(mission.status)
 			travelled = state.spatial_port.get_ref().move(unit, plan, minutes, log)
+			if mission.status != prior_status and mission.status in ["complete", "withdrawn"]:
+				_wake_dependents(state, str(mission.id))
 		else:
 			unit.position = clampf(old_position + movement, 0.0, float(area.size_km))
 			travelled = absf(float(unit.position) - old_position)
@@ -405,7 +408,7 @@ func _apply_area(state: State, area_id: String, plans: Dictionary, minutes: floa
 		var target: Dictionary = state.examine_unit(str(contact.target))
 		var source_plan: Dictionary = plans[contact.source]
 		contact.time = state.time
-		contact.usable_fire_per_minute = float(source_plan.spent) / minutes / float(source_plan.target_weight) * float(target.get("contact_weight", target.get("tactical_weight", 1.0)))
+		contact.usable_fire_per_minute = float(source_plan.spent) / minutes / float(source_plan.target_weight) * float(target.get("contact_weight", target.get("tactical_weight", 1.0))) * float(source_plan.get("contact_factors", {}).get(contact.target, 1.0))
 		contact.suppression = target.suppression
 		contact.movement_km_per_minute = plans[contact.target].speed
 		contact.advance_inhibited = target.action == "stalled"

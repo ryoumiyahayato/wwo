@@ -25,3 +25,13 @@ terrain反例。第一跑因新fixture强类型Array ternary错误未实际完�
 仅修复fixture类型，再运行一次原命令不同输出目录，170 checks/3 failures，另有
 未实现schedule_ground调用错误。诊断fire factor遗漏和退却继续向前均实际复现。
 算法修复尚未开始；用户此时要求停止重开，故仅保存反例，不声称M1通过。
+
+006 恢复同一任务：用户撤回停止，核实本地/远端f0e及原环境，无另一个Task9。
+最小修复：诊断乘原实际contact factor；已知路段退却；外部ground事实复用原heap。
+builds/task9-m1-physical-fixed完整exit0，173/0，三个原反例已改善。
+
+007 跨区间反例：长0.6km已走边的低cohesion退却与legacy依赖唤醒。
+builds/task9-m1-long-retreat-counterexample完整exit1，182/2，距离1.0989995而非
+手算1.2；依赖唤醒独立断言通过。假设=每段把已反向路段再次反转。仅保留一个
+当前退却方向标记，明确到达后清除；builds/task9-m1-long-retreat-fixed完整exit0，
+182/0。保留反例/修复，下一步冻结M1扩大门。

@@ -13,6 +13,7 @@ func _initialize() -> void:
 	_locality()
 	_rejections()
 	_dynamic_and_retreat()
+	_long_retreat_and_dependency()
 	print("SPATIAL_EVIDENCE_JSON=" + JSON.stringify(evidence))
 	print("Task9 spatial: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures > 0 else 0)
@@ -211,3 +212,38 @@ func _dynamic_and_retreat() -> void:
 	var fatigue_at_five: float = 0.004 * 5.0 / 60.0
 	near(changed.state.units.unit_000.distance_moved, 0.05 + 0.3 * (1.0 - fatigue_at_five * 0.5) * 5.0 / 60.0, "old speed before fact, new resistance afterward")
 	check(balanced(changed), "dynamic ground consumes only actual travel")
+
+func _long_retreat_and_dependency() -> void:
+	var retreat: Dictionary = F.setup()
+	retreat.space._edges.AB.length_km = 0.6
+	retreat.space.inject_path("unit_000", ["AB"])
+	retreat.lod.advance(65.0)
+	check(retreat.state.units.unit_000.spatial.node == "B", "known completed previous leg")
+	check(retreat.space.set_path("unit_000", ["bridge_BD"]).ok, "new task at current endpoint")
+	retreat.state.units.unit_000.cohesion = 0.1
+	retreat.lod.advance(200.0)
+	check(retreat.state.units.unit_000.spatial.node == "A", "retreat direction stays consistent across several segments")
+	near(retreat.state.units.unit_000.distance_moved, 1.2, "known 0.6-km leg out and back")
+	check(balanced(retreat), "long retreat preserves actual fuel")
+	var state: F.State = F.State.new()
+	for cell: String in ["cell_037", "cell_038", "cell_062", "cell_063", "cell_099"]:
+		state.add_area(F.Data.area(cell))
+	state.add_mission(F.Data.mission("lead", "advance"))
+	state.add_mission(F.Data.mission("follow", "advance", 1.0, 0.1))
+	for pair: Array in [["lead_unit", "cell_037", "lead"], ["follow_unit", "cell_099", "follow"]]:
+		var unit: Dictionary = F.Data.unit(pair[0], "blue", pair[1], pair[2])
+		unit.mobility = 0.6
+		unit.ammunition = 0.0
+		unit.weapon.range_km = 0.0
+		state.add_unit(unit)
+	state.set_coordination("follow_unit", {"after": ["lead"], "role": "advance"})
+	var lod: F.Authority = F.Authority.new()
+	check(lod.configure(state), "one owner for cross-area dependency")
+	var graph: Dictionary = F.topology()
+	graph.edges.AB.length_km = 0.6
+	var space: F.Space = F.Space.new()
+	check(space.configure(state, lod, graph.nodes, graph.edges, graph.lanes) and space.admit_unit("lead_unit", "A", "FOOT"), "mixed legacy/spatial dependency fixture")
+	space.inject_path("lead_unit", ["AB"])
+	lod.advance(80.0)
+	check(state.missions.lead.status == "complete" and state.missions.follow.status == "complete", "spatial completion wakes sleeping prerequisite follower")
+	near(state.units.follow_unit.position, 0.1, "released follower performs its old-kernel movement")

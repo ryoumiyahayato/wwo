@@ -23,11 +23,14 @@ MOTORIZED S=3/G=4, with motor traffic denied above softness .65 or slope .30.
 These are declared test parameters, not historical calibration or attack/defense
 bonuses. Every actual distance still consumes Task6's finite fuel/wear ledger.
 
-External closure applies at its exact old area-change phase. An in-transit unit
+External closure or structured ground changes apply at the exact old area-change phase. An in-transit unit
 stops at current progress; distance/fuel/time are not refunded and no casualties
 are invented. A later explicitly admitted route can return along occupied geometry
 to the departure endpoint before taking another route, or wait for reopening.
-Route replacement cannot teleport to an endpoint. Initial paths are explicit
+Route replacement cannot teleport to an endpoint. Inherited low-cohesion withdrawal
+returns along the occupied leg or the most recently traversed leg; a known reverse
+leg keeps its orientation across segments. No undiscovered retreat path is invented.
+Completion/withdrawal wakes the original indexed mission dependents. Initial paths are explicit
 trusted input. The later person-facing delayed route contract belongs to M2.
 
 Current route progress lives in the sole live representation. Only identical

@@ -80,7 +80,7 @@ func admit_unit(id: String, node: String, mode: String) -> bool:
 	if unit.has("supply_capability") and bool(unit.supply_capability.fuel_dependent) != (mode == "MOTORIZED"):
 		return false
 	unit.spatial = {"node": node, "edge": "", "from": node, "to": node, "progress": 0.0,
-		"path": [], "mode": mode, "returning": false, "blocked_edge": "", "cause_ref": ""}
+		"path": [], "traversed": [], "mode": mode, "returning": false, "retreating": false, "blocked_edge": "", "cause_ref": ""}
 	unit.position = float(_nodes[node].xy[0])
 	return true
 
@@ -114,6 +114,7 @@ func set_path(id: String, path: Array, returning: bool = false) -> Dictionary:
 		return valid
 	unit.spatial.path = path.duplicate()
 	unit.spatial.returning = returning and not str(unit.spatial.edge).is_empty()
+	unit.spatial.retreating = false
 	unit.spatial.blocked_edge = ""
 	_state.missions[unit.mission_id].status = "active"
 	_state.missions[unit.mission_id].posture = "advance"
@@ -128,7 +129,10 @@ func resolution_scopes(active: Dictionary) -> Array[String]:
 	return State.sorted_ids(selected)
 
 func scope_cells(cell: String) -> Array[String]:
-	return State.sorted_ids(_scope_cells[_cell_scope[cell]]) if _cell_scope.has(cell) else [cell]
+	if _cell_scope.has(cell):
+		return State.sorted_ids(_scope_cells[_cell_scope[cell]])
+	var cells: Array[String] = [cell]
+	return cells
 
 func combat_ids(cell: String) -> Array[String]:
 	var selected: Dictionary = {}
@@ -190,11 +194,20 @@ func prepare_movement(unit: Dictionary, plan: Dictionary) -> void:
 	plan.speed = 0.0
 	plan.route_edge = _next(unit)
 	plan.route_blocked = ""
+	plan.route_retreat = plan.posture == "withdraw" and _state.missions[unit.mission_id].posture != "withdraw"
+	if plan.route_retreat and str(unit.spatial.edge).is_empty():
+		if unit.spatial.traversed.is_empty():
+			plan.route_edge = {}
+		else:
+			var previous: String = str(unit.spatial.traversed[-1])
+			var known: Dictionary = _edges[previous]
+			plan.route_edge = {"edge": previous, "from": unit.spatial.node,
+				"to": known.to if unit.spatial.node == known.from else known.from}
 	if plan.route_edge.is_empty() or plan.posture not in ["advance", "withdraw"] or plan.advance_inhibited:
 		return
 	var edge: Dictionary = _edges[plan.route_edge.edge]
 	# Retreat along already occupied geometry remains possible after closure.
-	if not unit.spatial.returning and not edge.open:
+	if not unit.spatial.returning and not plan.route_retreat and not edge.open:
 		plan.route_blocked = plan.route_edge.edge
 		return
 	var factor: float = movement_factor(edge.ground, str(unit.spatial.mode))
@@ -205,18 +218,25 @@ func prepare_movement(unit: Dictionary, plan: Dictionary) -> void:
 	plan.speed = float(unit.mobility) * factor * float(unit.readiness)
 	plan.speed *= minf(1.0, float(ground.frontage) / maxf(1.0, float(plan.get("side_frontage", 1.0))))
 	plan.speed *= (1.0 - float(unit.fatigue) * 0.5) * (1.0 - float(unit.suppression))
-	if unit.spatial.returning:
+	if unit.spatial.returning or plan.route_retreat and not str(unit.spatial.edge).is_empty() and not unit.spatial.retreating:
 		plan.speed = -float(plan.speed)
 
 func movement_eta(unit: Dictionary, plan: Dictionary) -> float:
 	if not unit.has("spatial") or float(plan.speed) == 0.0:
 		return INF
 	var edge: Dictionary = _edges[plan.route_edge.edge]
-	var remaining: float = float(unit.spatial.progress) if unit.spatial.returning else float(edge.length_km) - float(unit.spatial.progress)
+	var remaining: float = float(unit.spatial.progress) if float(plan.speed) < 0.0 else float(edge.length_km) - float(unit.spatial.progress)
 	return remaining / absf(float(plan.speed)) * 60.0
 
 func move(unit: Dictionary, plan: Dictionary, minutes: float, log: Array[Dictionary]) -> float:
 	var route: Dictionary = unit.spatial
+	if plan.get("route_retreat", false) and plan.route_edge.is_empty():
+		# No previous leg exists: remain at this known node, never invent a route.
+		route.path.clear()
+		_state.missions[unit.mission_id].status = "withdrawn"
+		unit.action = "withdrawn"
+		log.append({"time": _state.time, "kind": "mission_withdrawn", "unit_id": unit.id, "mission_id": unit.mission_id})
+		return 0.0
 	if not str(plan.get("route_blocked", "")).is_empty():
 		var blocked: String = str(plan.route_blocked)
 		if route.blocked_edge != blocked:
@@ -232,6 +252,11 @@ func move(unit: Dictionary, plan: Dictionary, minutes: float, log: Array[Diction
 		route.from = plan.route_edge.from
 		route.to = plan.route_edge.to
 		route.progress = 0.0
+	elif plan.get("route_retreat", false) and not route.retreating:
+		route.returning = true
+	if plan.get("route_retreat", false):
+		# A reverse leg started at a node keeps its orientation across segments.
+		route.retreating = true
 	var old_progress: float = float(route.progress)
 	var length: float = float(_edges[route.edge].length_km)
 	route.progress = clampf(old_progress + float(plan.speed) * minutes, 0.0, length)
@@ -240,11 +265,13 @@ func move(unit: Dictionary, plan: Dictionary, minutes: float, log: Array[Diction
 	if absf(float(route.progress) - (0.0 if route.returning else length)) < 0.00000001:
 		var previous: String = str(unit.area_id)
 		route.node = route.from if route.returning else route.to
-		if not route.returning:
+		if not route.returning and not plan.get("route_retreat", false):
 			route.path.pop_front()
+			route.traversed.append(route.edge)
 		route.edge = ""
 		route.progress = 0.0
 		route.returning = false
+		route.retreating = false
 		route.blocked_edge = ""
 		unit.position = float(_nodes[route.node].xy[0])
 		var destination: String = str(_nodes[route.node].cell)
@@ -256,7 +283,12 @@ func move(unit: Dictionary, plan: Dictionary, minutes: float, log: Array[Diction
 			_state.wake(destination)
 			log.append({"time": _state.time, "kind": "area_transition", "unit_id": unit.id, "from": previous, "to": destination})
 		log.append({"time": _state.time, "kind": "route_arrival", "unit_id": unit.id, "node_ref": route.node})
-		if route.path.is_empty():
+		if plan.get("route_retreat", false):
+			route.path.clear()
+			_state.missions[unit.mission_id].status = "withdrawn"
+			unit.action = "withdrawn"
+			log.append({"time": _state.time, "kind": "mission_withdrawn", "unit_id": unit.id, "mission_id": unit.mission_id})
+		elif route.path.is_empty():
 			_state.missions[unit.mission_id].status = "complete"
 			log.append({"time": _state.time, "kind": "mission_complete", "unit_id": unit.id, "mission_id": unit.mission_id})
 	return travelled
@@ -270,7 +302,17 @@ func can_move(unit: Dictionary) -> bool:
 func schedule_fact(id: String, due: float, edge: String, open: bool) -> Dictionary:
 	if id.is_empty() or _facts.has(id) or not _edges.has(edge) or not is_finite(due) or due < _state.time:
 		return _reject("invalid_external_fact")
-	_facts[id] = {"id": id, "due": due, "edge_ref": edge, "open": open, "status": "PENDING"}
+	_facts[id] = {"id": id, "due": due, "edge_ref": edge, "open": open, "property": "open", "status": "PENDING"}
+	if not _state.schedule_event("spatial_" + id, due, "spatial", {"fact_id": id}):
+		_facts.erase(id)
+		return _reject("fact_schedule_failed")
+	return {"ok": true, "time": due}
+
+func schedule_ground(id: String, due: float, target_kind: String, target_ref: String, ground: Dictionary) -> Dictionary:
+	if id.is_empty() or _facts.has(id) or not is_finite(due) or due < _state.time or not _ground_valid(ground) or target_kind not in ["node", "edge"] or not (_nodes if target_kind == "node" else _edges).has(target_ref):
+		return _reject("invalid_ground_fact")
+	_facts[id] = {"id": id, "due": due, "target_kind": target_kind, "target_ref": target_ref,
+		"ground": ground.duplicate(true), "property": "ground", "status": "PENDING"}
 	if not _state.schedule_event("spatial_" + id, due, "spatial", {"fact_id": id}):
 		_facts.erase(id)
 		return _reject("fact_schedule_failed")
@@ -283,16 +325,27 @@ func process_event(event: Dictionary) -> Dictionary:
 	if event.time != _state.time or not accepts_event(str(event.id), event.payload, float(event.time)):
 		return {"changed": [], "retired": [], "record": _reject("invalid_fact_ticket")}
 	var fact: Dictionary = _facts[event.payload.fact_id]
-	var edge: Dictionary = _edges[fact.edge_ref]
 	work.spatial_events_processed += 1
-	var cell: String = str(_nodes[edge.from].cell)
-	if bool(edge.open) != bool(fact.open):
-		_fold_facility(cell, -1 if fact.open else 1)
-	edge.open = fact.open
-	edge.last_fact_id = fact.id
+	var affected: Array[String] = []
+	if fact.property == "ground":
+		var record: Dictionary = (_nodes if fact.target_kind == "node" else _edges)[fact.target_ref]
+		record.ground = fact.ground.duplicate(true)
+		record.last_fact_id = fact.id
+		if fact.target_kind == "node":
+			affected.append(str(fact.target_ref))
+		else:
+			affected.assign([record.from, record.to])
+	else:
+		var edge: Dictionary = _edges[fact.edge_ref]
+		var cell: String = str(_nodes[edge.from].cell)
+		if bool(edge.open) != bool(fact.open):
+			_fold_facility(cell, -1 if fact.open else 1)
+		edge.open = fact.open
+		edge.last_fact_id = fact.id
+		affected.assign([edge.from, edge.to])
 	fact.status = "APPLIED"
 	fact.processed_at = _state.time
-	for node: String in [edge.from, edge.to]:
+	for node: String in affected:
 		_state.wake(str(_nodes[node].cell))
 	return {"changed": [], "retired": [], "record": fact.duplicate(true)}
 
