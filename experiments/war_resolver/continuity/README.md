@@ -1,4 +1,4 @@
-# 有限知识与空间因果联动（M2）
+# 有限知识与空间因果联动（M2，M3续算入口）
 
 `scenario.gd`只提供合成初态、外部断桥、当地来源、有限仓库及独立ETA响应。
 原kernel计算实际运动/火力/损失；Task5改变有效关系、Task6转移有限库存、
@@ -24,8 +24,9 @@ Godot直接入口：
 
 `godot --headless --path . --script res://experiments/war_resolver/continuity/run.gd -- --scenario main --seed 71 --seconds 1800 --quota 0`
 
-场景：main/no-cut/slow-reports/no-supply/keep/cycles-disabled。当前quota=0是原
-同步推进；非零会明确拒绝，M3验收前不能宣称预算内续算。
+场景：main/no-cut/slow-reports/no-supply/keep/cycles-disabled/long。quota=0使用同步
+reference，正整数使用已通过M3门的同kernel可续接工作；支持/容量/24h压力说明见
+../continuous/README.md，最高LEVEL_3仍需最终M4门通过。
 阶段验收使用cloud_validate.py --mode affected，分别--script continuity/tests.gd、
 continuity/contract_tests.gd（均填完整experiments/war_resolver路径）。最终M4使用
 --mode final且不加--skip-unified，并带全部新增脚本及M0 evidence。

@@ -76,3 +76,41 @@ active scope128、domain affect64；Memory512MiB/pending100000背压，不硬帧
 016 M3集中混合：正规Task5临配、Task6有限reserve/ETA、Task7延迟输入、Task8
 机会，加498空间+498area事实，恰1000同刻t10。mixed-events-first完整54/0，
 独立expected phase1/2/5/6/9、原ID顺序严格匹配；均t10，未后延。保留原绿色M2。
+
+## M3 长run 初始活跃范围反例（2026-10-07约19:20UTC）
+
+缺口：400leaf/24h/六种续算实际输入尚未验证。假设：主场景扩展初态与有界
+周期source报告可以保持相同physics/knowledge/delivery，背景cohort只减少表示。
+先写factory缺失红测试，实际2checks/1failure；一次错误driver res://重复另记命令失败。
+新增opt-in396leaf（总400）与275个company机会，4次有限外部ETA和4次临配。
+实际long-first 51checks/2failures：两个seed均24h且quota1/7/31精确一致，
+失败都是初始activecell超10–20。定位Authority.coalesce无条件wake休眠cell，
+不是新事件或planner触发。最小修正仅spatial opt-in时保留原休眠状态；旧一轴
+路径保持原wake。long-fixed实际51/0完成，相关Task4/combined仍运行中。
+不通过减少验收统计或宽容差隐藏失败。下一步局部LOD/dormancy/capacity与峰值测试。
+
+## M3 容量预检 typed-array 修正
+
+缺口：native metadata仍需实际容量背压，通信必须按真实command target计范围。
+新增每scope1024、活跃metadata4096、cellscope128和路径历史4096的保留状态背压，
+pending包括纯报告heap。load-first新测试缩进ParseError；新容量分支Array到
+Array[String]运行赋值错误造成反复错误。107.02s后人工中断自己的Godot进程，
+exit-15明确FAIL，原重复日志2,387,971,360 bytes保留hash和有限首尾摘录，未当通过。
+最小修正typed append/assign和测试缩进；薄driver输出16MiB上限、触顶exit-1失败，
+fatal正则/断言保持。load-fixed同源码freeze运行，完成前不改gd/py。
+
+## M3 最后门与M4计量补充
+
+78d39a4冻结扩大门完整结束：旧43948/0，八组旧Linux双进程hash严格相同，新增597/0。
+24h两seed保持15活跃到末尾、400leaf/2geometry focus，正常/quota1/7/31精确等价。
+密集after60秒包含第二段（warmup+5samples）；400dense p50各样899..960us、
+p95 1562..1829us，maxcall20.586ms/maxprimitive19.510ms，容量化cleanup已计工作。
+before300秒与after60秒总吞吐不能直接相除；续算增加分派/排序成本，不声称更快吞吐。
+M3 PASSED检查点78d39a4；M4 RUNNING，最高accepted仍LEVEL_2直至最终门。
+
+最终复现包缺口：版本化M0原日志存.txt而薄driver只找.log；保持内容逐字比较，
+只补文件定位fallback。M4仅计量补充：输入coalesce/geometry子成本、JSON/输出成本、
+phase counts、长run最大完整call及live/冻结表示inputs/pending/identity/knowledge/
+decision/domain histories/diagnostic的序列化大小。不是新战斗功能，时间不入physics。
+冻结c8b489e；instrumentation quick60/0+load101/0完整通过，CLI main实际完成。
+下一long CLI完成后docs checkpoint/push同PR，最终完整统一/audit/new门。

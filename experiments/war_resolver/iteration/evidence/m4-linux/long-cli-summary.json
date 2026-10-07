@@ -1,0 +1,122 @@
+{
+  "schema": "WWO_TASK9_CAUSAL_V0",
+  "game_time": 86400.0,
+  "seed": 71,
+  "quota": 31,
+  "ledger_balanced": true,
+  "storage": {
+    "active_cells": 15,
+    "cohorts": 198,
+    "decision_history": 275,
+    "diagnostic_total": 2097,
+    "event_identity_records": 294,
+    "geometry_focus_cells": 2,
+    "live_representations": 202,
+    "messages": 567,
+    "observations": 564,
+    "pending_events": 0,
+    "pending_reports": 0,
+    "static_memory_bytes": 89740887,
+    "underlying_leaves": 400
+  },
+  "continuation": {
+    "calls": 117800,
+    "last_result": {
+      "actual_unit_records_examined": 0,
+      "commit_count": 3176,
+      "committed_time": 86400.0,
+      "diagnostic_events_produced": 0,
+      "error": "",
+      "events": [],
+      "max_native_id_snapshot": 16,
+      "max_primitive": "prepare:finish",
+      "max_primitive_usec": 4664,
+      "ok": true,
+      "pending_boundary": -1.0,
+      "phase_work_counts": {
+        "apply:apply_units": 146273,
+        "apply:contact_diagnostics": 48504,
+        "apply:incoming_init": 146273,
+        "apply:incoming_source": 146273,
+        "apply:incoming_targets": 98909,
+        "apply_start": 51109,
+        "changed_areas": 3194,
+        "changed_units": 101514,
+        "clear_delta": 101526,
+        "control_start": 52036,
+        "control_units": 147200,
+        "due": 4032,
+        "eta": 149448,
+        "event_changed_areas": 3195,
+        "event_changed_units": 101526,
+        "fold_start": 52047,
+        "fold_units": 147240,
+        "index_records": 146273,
+        "index_sort": 158630,
+        "index_start": 51109,
+        "prepare:candidate_query": 850960,
+        "prepare:candidates": 197912,
+        "prepare:detection": 1140,
+        "prepare:factors": 1140,
+        "prepare:finish": 146273,
+        "prepare:fire": 1140,
+        "prepare:release_old_contacts": 840,
+        "prepare:rounds": 570,
+        "prepare:source": 146273,
+        "prepare:units": 146273,
+        "prepare:weights": 98909,
+        "release_jobs": 149449,
+        "scope_capacity": 51428,
+        "select": 3175
+      },
+      "requested_time": 86400.0,
+      "status": "COMPLETE",
+      "total_work_units": 3651793,
+      "wall_usec": 101,
+      "work_units": 24
+    },
+    "max_call_usec": 11864,
+    "max_work_units": 31,
+    "recent_sample_usec": {
+      "count": 4096,
+      "p50": 193,
+      "p95": 351,
+      "scope": "last at most4096 calls; overall max measured across all calls"
+    }
+  },
+  "wall_ms": {
+    "advance": 24968.572,
+    "input_build": 74.475,
+    "query_and_result": 103.851
+  },
+  "input_cost_subsets_ms": {
+    "admission": 50.048,
+    "coalesce_and_focus": 23.131,
+    "geometry_focus_subset": 0.023
+  },
+  "output_costs": {
+    "encoded_bytes": 1054700,
+    "optional_file_ms": 0.007,
+    "serialization_ms": 24.998,
+    "stdout_ms": 5.642
+  },
+  "limits": [
+    "finite local encounter envelope",
+    "synthetic scope and test policy",
+    "external supply ETA independent of routes",
+    "counted work quota; no hard wall-clock frame promise",
+    "capacity backpressure preserves pending facts; authoritative histories grow"
+  ],
+  "ledger": {
+    "current_plus_spent_and_transit": {
+      "AMMUNITION": 1508.0,
+      "FUEL": 1640.0,
+      "SPARES": 1620.0
+    },
+    "initial": {
+      "AMMUNITION": 1508.0,
+      "FUEL": 1640.0,
+      "SPARES": 1620.0
+    }
+  }
+}

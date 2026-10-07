@@ -5,13 +5,13 @@
     "M0": "PASSED",
     "M1": "PASSED",
     "M2": "PASSED",
-    "M3": "RUNNING",
-    "M4": "NOT_STARTED"
+    "M3": "PASSED",
+    "M4": "RUNNING"
   },
-  "last_verified_code_commit": "0c93b66338c88fb31a05ff66444fa6d423b38f41",
+  "last_verified_code_commit": "c8b489ef1c90a1b70c33b24952423f77f7e6e16b",
   "started_utc": "2026-10-07T16:28:31Z",
-  "effective_minutes_estimate": 155,
-  "remaining_minutes_estimate": 445,
+  "effective_minutes_estimate": 210,
+  "remaining_minutes_estimate": 390,
   "estimate_quality": "approximate wall clock minus known wait; update at safe checkpoints",
   "platform_startup_wait_seconds": 13,
   "tests_completed": [
@@ -26,20 +26,31 @@
     "M3 shared equation extraction11008e8:resolver1876/0 Task4 17329/0 combined116/0; eight oldLinux hashes exactly match",
     "M3 budget first38/0+combined116/0+resolver1876/0; quota1/7/31 exact physics/knowledge/timestamps",
     "M3 streamed results cursors9/0+continuous38/0+combined116/0; pending world facts not returned",
-    "M3 mixed events54/0; 1000 at t10 actualTask5/6/7/8 plus spatial/area originalphase1/2/5/6/9 andID order exact"
+    "M3 mixed events54/0; 1000 at t10 actualTask5/6/7/8 plus spatial/area originalphase1/2/5/6/9 andID order exact",
+    "64f4b0d prototype gate COMPLETE: cursor9 budget54 spatial190 contracts56 combined116 Task4/5/6/7/8 all0 failures; builds/task9-m3-prototype-gate",
+    "M3 long-fixed51/0,Task4 17329/0,combined116/0, full ended",
+    "M3 load-fixed97/0 + continuous54/0: 10000/30000 dormant active counts identical, sparse400 candidates402 contacts2,6seedLOD worst3.508256% seed733 red/casualties; capacities block oldstamp without truncation",
+    "M3 stronger sustained24h53/0 seed71/109 normal/quota1/7/31: 17initial/15final active cells,400leaves,2focus,275opportunities; historical pre-retirement source fingerprint",
+    "M3 bounded cleanup54/0+load97/0; public/varyingquota60/0; latest anchor/heterogeneous101/0+space190/0 at78d39a4",
+    "CLI main1800/quota7 and long86400/quota31 actual completed at78d39a4: conserved stocks,275decisions,zero pending,standalone static89.7MB,maxcall56.495ms observed not hard frame guarantee",
+    "M3 frozen78d39a4 expanded gate COMPLETE: original43948/0,8sameLinux replaypairs, new597/0, sustained24h two seeds4quotas, profile60s warmup+5sample100/400"
   ],
   "tests_pending": [
-    "Expanded relevant predecessor gate on bounded prototype",
-    "400leaf24h actual longrun,6seed mixedLOD, dormancy/perf/storage measurements",
-    "M4 final complete validation"
+    "M3 frozen full Tasks1–8/5retained/8replaypairs/new597 checks/profile60s and sustained24h running",
+    "M4 full final unified/audit and publication"
   ],
   "blockers": [],
-  "next": "Freeze budget prototype, run relevant gate, then populate synthetic400leaf initial inputs and bounded longrun contracts.",
+  "next": "Commit docs/evidence checkpoint, fast-forward push samebranch, then run final full gate with versionedM0 exact .txt logs at frozen code c8b489e.",
   "validation_session": null,
   "connection_checks": [
     {
       "utc": "2026-10-07T16:42:50Z",
       "result": "fresh exec succeeds; original session27058 reachable; Godot PID1857 live; no restart"
+    },
+    {
+      "utc": "2026-10-07T19:57:33Z",
+      "result": "single exec transport disconnect after two CLI completions; fresh read succeeds, same branch/c8b489e, no Godot process; no reset/new task",
+      "platform_wait_estimate": "less than1min, uncertain; separately disclosed"
     }
   ],
   "baseline_known_failures": [
@@ -50,7 +61,8 @@
     "M0": "iteration/evidence/m0-linux/evidence.json",
     "M0_raw": "builds/task9-m0",
     "M1": "iteration/evidence/m1-linux/reuse.json",
-    "M2": "iteration/evidence/m2-linux/gate.json"
+    "M2": "iteration/evidence/m2-linux/gate.json",
+    "M3": "iteration/evidence/m3-linux/gate.json"
   },
   "stopped": false,
   "stop_reason": null,
@@ -58,7 +70,7 @@
   "saved_unaccepted_code_commit": "ed54ef6b68146df4a560b77865d8d47efd077730",
   "highest_accepted_level": "LEVEL_2",
   "publication": {
-    "status": "Draft PR111 open/draft/unmerged at M1 docs head6b1ac11; no merge",
+    "status": "Draft PR111 open/draft/unmerged, remote31fa059; M3 code local64f4b0d plus known in-scope working edits",
     "draft_pr": "https://github.com/ryoumiyahayato/wwo/pull/111"
   },
   "resumed_utc": "2026-10-07T17:21:05Z",
@@ -73,5 +85,7 @@
       "verified": "fresh exec; same local/remote f0e4276; no Godot process; no new task"
     }
   ],
-  "last_verified_refactor_commit": "11008e8"
+  "last_verified_refactor_commit": "64f4b0d562567cdf6010cf70472053f42347610b",
+  "last_full_verified_code_commit": "78d39a4a17d82768a5da9c42a5ae55e2ff026d46",
+  "last_verified_scope": "instrumentation quick60/0+load101/0 and two CLI runs; final full gate pending"
 }
