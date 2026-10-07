@@ -226,6 +226,18 @@ func issue_command(actor: String, request: Dictionary) -> Dictionary:
 func allows_role_delivery(role: RefCounted, token: RefCounted, validate_only: bool) -> bool:
 	return token == _token and _roles.get(_actor) == role and (_gate == "preflight" if validate_only else _gate == "delivery")
 
+func validate_intent(actor: String, command: Dictionary) -> Dictionary:
+	# Authority admission only; the provider never receives physical state.
+	if not _roles.has(actor) or command.get("kind") == "local_action":
+		return _reject("invalid_decision_actor_or_kind")
+	_actor = actor
+	_gate = "preflight"
+	work.authority_revalidations += 1
+	var result: Dictionary = _roles[actor].apply(command, _token, true)
+	_actor = ""
+	_gate = ""
+	return result
+
 func accepts_event(id: String, payload: Dictionary, due: float) -> bool:
 	if payload.size() != 1 or not payload.get("message_id") is String or not _messages.has(payload.message_id):
 		return false

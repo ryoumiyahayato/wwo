@@ -116,7 +116,7 @@ func _process_due(state: State, log: Array[Dictionary], changes: Dictionary, are
 		var event: Dictionary = state.pop_event()
 		var payload: Dictionary = event.payload
 		state.counters.events_processed += 1
-		if event.kind in ["structure", "logistics", "communication"]:
+		if event.kind in ["structure", "logistics", "communication", "decision"]:
 			log.append({"time": state.time, "kind": event.kind, "id": event.id, "result": transition.get("record", {})})
 			continue
 		if event.kind == "order":

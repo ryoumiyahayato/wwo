@@ -264,6 +264,8 @@ func representation_of(id: String) -> String:
 	return str(_owners.get(id, id))
 
 func prepare_event(event: Dictionary) -> Dictionary:
+	if event.kind == "decision":
+		return _state.decision_port.get_ref().process_event(event)
 	if event.kind == "structure":
 		var result: Dictionary = _state.structure_port.get_ref().process_event(event)
 		if _state.logistics_port != null:

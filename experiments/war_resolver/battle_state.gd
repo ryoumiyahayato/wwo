@@ -27,6 +27,7 @@ var settlement_owner: RefCounted = null
 var materialization_port: WeakRef = null
 var lod_work: Dictionary = {}
 var information_port: WeakRef = null
+var decision_port: WeakRef = null
 var logistics_port: WeakRef = null
 var logistics_ledger: Dictionary = {}
 var structure_port: WeakRef = null
@@ -103,13 +104,15 @@ func set_coordination(unit_id: String, assignment: Dictionary) -> void:
 func schedule_event(id: String, due: float, kind: String, payload: Dictionary) -> bool:
 	if id.is_empty() or event_ids.has(id) or not is_finite(due) or due < time:
 		return false
-	if kind not in ["order", "reinforcement", "area_change", "coordination_release", "structure", "logistics", "communication"]:
+	if kind not in ["order", "reinforcement", "area_change", "coordination_release", "structure", "logistics", "communication", "decision"]:
 		return false
 	if kind == "structure" and (structure_port == null or structure_port.get_ref() == null or not structure_port.get_ref().accepts_event(id, payload, due)):
 		return false
 	if kind == "logistics" and (logistics_port == null or logistics_port.get_ref() == null or not logistics_port.get_ref().accepts_event(id, payload, due)):
 		return false
 	if kind == "communication" and (information_port == null or information_port.get_ref() == null or not information_port.get_ref().accepts_event(id, payload, due)):
+		return false
+	if kind == "decision" and (decision_port == null or decision_port.get_ref() == null or not decision_port.get_ref().accepts_event(id, payload, due)):
 		return false
 	# Task 6 admits a fixed stock snapshot. Replacement/reinforcement admission
 	# needs an external asset transfer contract and is deliberately not implemented.
@@ -133,6 +136,10 @@ func schedule_event(id: String, due: float, kind: String, payload: Dictionary) -
 	if information_port != null:
 		# Preserve all earlier phase relations; reports are drained before commands.
 		record.phase = 0 if kind == "structure" and payload.get("expiry", false) else (1 if kind == "structure" else (2 if kind == "logistics" and payload.has("delivery_id") else (3 if kind == "logistics" else (5 if kind == "communication" else ["order", "reinforcement", "area_change", "coordination_release"].find(kind) + 6))))
+	if kind == "decision":
+		record.phase = 5
+	elif decision_port != null and int(record.get("phase", 0)) >= 5:
+		record.phase += 1
 	var unit_ref: String = str(payload.unit.id) if kind == "reinforcement" else str(payload.get("unit_id", ""))
 	if not unit_ref.is_empty():
 		if structure_port != null:
