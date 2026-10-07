@@ -45,6 +45,7 @@ func _install_world(built: WorldBuildResult) -> void:
 	main_shell.configure(historical_content.errors, map_controller, time_control)
 	map_renderer.configure(historical_content.geometry_content, map_controller)
 	map_renderer.local_content = historical_content.local_spatial
+	map_renderer.strategic_content = historical_content.strategic_spatial
 	map_renderer.relief.decode_asset = GeographyLoader.decode_relief
 	_refresh_map()
 	main_shell.refresh()

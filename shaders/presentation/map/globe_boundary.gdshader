@@ -13,6 +13,8 @@ uniform vec4 stroke_color = vec4(0.22, 0.29, 0.30, 0.62);
 uniform int rail_style = 0;
 varying vec4 line_color;
 varying vec2 track_position;
+varying vec2 map_pixel;
+uniform float paris_mask_weight = 0.0;
 
 vec4 line_value(int segment, int field) {
 	int texel = segment * 4 + field;
@@ -90,11 +92,27 @@ void vertex() {
 			VERTEX = point;
 		}
 	}
+ map_pixel = VERTEX;
+}
+
+
+float paris_mask(vec2 pixel) {
+ vec2 xy = (pixel-globe_center)*region_km_per_pixel;
+ vec2 km = vec2(xy.x*region_bearing.x+xy.y*region_bearing.y, xy.x*region_bearing.y-xy.y*region_bearing.x);
+ float angle = length(km)/6371.0088;
+ vec3 view = vec3(km*sin(angle)/max(length(km),0.000001),cos(angle));
+ vec3 earth = transpose(globe_basis)*view;
+ vec3 paris = vec3(0.0270144,0.7530652,0.6573912);
+ float distance_km = acos(clamp(dot(earth,normalize(paris)),-1.0,1.0))*6371.0088;
+ return 1.0-paris_mask_weight*(1.0-smoothstep(285.0,300.0,distance_km));
 }
 
 void fragment() {
 	COLOR = line_color;
-	if (rail_style > 0) {
+	if (region_mode && paris_mask_weight > 0.001) { COLOR.a *= paris_mask(map_pixel); }
+	if (rail_style == 3) {
+		COLOR.a *= 1.0-smoothstep(7.0,8.0,mod(track_position.x,13.0));
+	} else if (rail_style > 0) {
 		float core = 1.0-smoothstep(0.28,0.75,abs(track_position.y));
 		float tie = 1.0-smoothstep(0.6,1.15,abs(mod(track_position.x+3.5,7.0)-3.5));
 		vec3 dark = vec3(0.10,0.16,0.18);

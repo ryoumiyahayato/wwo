@@ -38,6 +38,11 @@ static func physical_weight(kind: String, mpp: float) -> float:
 	var full := 1800.0 if kind == "rail" else 1600.0 if kind == "river" else 3500.0
 	return 1.0 - smoothstep(log(full), log(begin), log(maxf(mpp, 1.0)))
 
+static func strategic_weight(kind: String, mpp: float) -> float:
+	var begin := 4200.0 if kind == "rail" else 8500.0
+	var full := 2200.0 if kind == "rail" else 5500.0 if kind == "lake" else 4000.0
+	return 1.0 - smoothstep(log(full), log(begin), log(maxf(mpp, 1.0)))
+
 static func settlement_limit(rank: int, id: String = "") -> float:
 	return 6000.0 if rank == 0 else 5000.0 if rank == 1 else 900.0 if id in REGIONAL_NODES else LOCAL_DETAIL_MPP
 

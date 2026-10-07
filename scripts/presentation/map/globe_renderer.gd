@@ -12,6 +12,8 @@ var controller: GlobeController
 var content: MapGeometryContent
 var local_content: LocalSpatialLoader
 var local_layer := LocalSpatialLayer.new()
+var strategic_content: StrategicSpatialLoader
+var strategic_layer := LocalSpatialLayer.new()
 var relief := MapRelief.new()
 # Empty until a separately sourced administrative-membership view exists.
 # Camera changes never invalidate this cache; controller changes are separate.
@@ -85,6 +87,8 @@ func _ready() -> void:
 func _exit_tree() -> void:
 	relief.dispose()
 	local_layer.clear()
+	strategic_layer.clear()
+	if strategic_content != null: strategic_content.dispose()
 	if local_content != null:
 		local_content.dispose()
 	_clear_surface_batches()
@@ -191,7 +195,9 @@ func _ensure_view() -> void:
 		if _region_labels_dirty:
 			_prepare_region_labels()
 	_sync_local_resources()
+	_sync_strategic_resources()
 	local_layer.update(controller.region_camera, controller, political.display_date, size)
+	_update_strategic_layer()
 	_anchors.clear()
 	_place_points.clear()
 	var basis := controller.orientation()
@@ -205,7 +211,7 @@ func _ensure_view() -> void:
 			_anchors[entity_id] = GlobeProjection.sphere_screen(rotated, _center, _radius)
 	if regional or controller.zoom >= 1.55:
 		for place_id: String in political.places:
-			if controller.region_camera.local_active:
+			if controller.region_camera.local_active or (regional and strategic_content != null):
 				continue
 			var place := political.places[place_id] as Dictionary
 			var raw_point: Variant = place.get("lon_lat", [])
@@ -218,6 +224,7 @@ func _ensure_view() -> void:
 					_place_points[place_id] = point
 			elif rotated.z >= 0.0:
 				_place_points[place_id] = GlobeProjection.sphere_screen(rotated, _center, _radius)
+	_place_points.merge(strategic_layer.visible_places, true)
 	_place_points.merge(local_layer.visible_places, true)
 
 func _clear_surface_batches() -> void:
@@ -487,9 +494,17 @@ func _draw() -> void:
 	if controller.region_camera.local_active:
 		_place_points = local_layer.visible_places.duplicate()
 	else:
+		_place_points.merge(strategic_layer.visible_places, true)
 		_place_points.merge(local_layer.visible_places, true)
 	if regional:
-		region_view.update_labels(controller.region_camera, controller, _font, size, local_layer.visible_places, local_layer.label_rects)
+		_update_strategic_layer()
+		_place_points.merge(strategic_layer.visible_places, false)
+		var covered := local_layer.visible_places.duplicate()
+		covered.merge(strategic_layer.visible_places)
+		if strategic_content != null: covered.merge(political.places)
+		var reserved := local_layer.label_rects.duplicate()
+		reserved.append_array(strategic_layer.label_rects)
+		region_view.update_labels(controller.region_camera, controller, _font, size, covered, reserved)
 	last_submit_parts["labels"] = Time.get_ticks_usec()-part_started
 	part_started = Time.get_ticks_usec()
 	if _transition_elapsed >= 0.0 and not transition_metrics.has("target_canvas_submit_usec"):
@@ -522,6 +537,8 @@ func _draw() -> void:
 	var space := MapScaleStyle.band(metric * 1000.0, regional, controller.region_camera.local_active)
 	if not local_layer.visible_places.is_empty():
 		space += " · Paris 1900 · 铁路走廊近似 · 现代水系参考"
+	if not strategic_layer.active_lod.is_empty():
+		space += " · 约1900战略骨架 · 虚线铁路位置概略 · 现代水系参考"
 	if relief.textures.has("world"):
 		space += " · ETOPO 2022 粗地形参考"
 	if regional and not controller.region_camera.local_active and metric <= RegionCamera.LOCAL_ENTER_KM_PER_PIXEL:
@@ -567,7 +584,7 @@ func _gui_input(event: InputEvent) -> void:
 		var place_id := _place_at(point)
 		var polity_id := _polity_at(point)
 		if not place_id.is_empty():
-			var place := local_layer.place(place_id) if local_layer.visible_places.has(place_id) else political.places[place_id] as Dictionary
+			var place := local_layer.place(place_id) if local_layer.visible_places.has(place_id) else strategic_layer.place(place_id) if strategic_layer.visible_places.has(place_id) else political.places[place_id] as Dictionary
 			polity_id = _political_view.runtime_id_for_source(str(place.get("parent_country_id", "")))
 		controller.hover(polity_id, place_id)
 		if clicked:
@@ -701,6 +718,29 @@ func _sync_local_resources() -> void:
 	else:
 		local_layer.release_gpu()
 
+func _sync_strategic_resources() -> void:
+	if strategic_content == null or controller == null: return
+	var camera := controller.region_camera
+	if not visible or not camera.active:
+		strategic_layer.clear()
+		strategic_content.release()
+		return
+	var center := RegionProjection.lon_lat(camera.unit_at(size*0.5))
+	strategic_content.request(center, camera.km_per_pixel*size.length()*0.5, political.display_date)
+	if strategic_content.content != null and strategic_content.content != strategic_layer.content_reference():
+		strategic_layer.rail_style = 3
+		strategic_layer.begin(strategic_content.content,region_view.viewport.world_2d.canvas)
+	if strategic_content.content == null and not strategic_content.preparing(): strategic_layer.clear()
+	strategic_layer.request_lods(camera.km_per_pixel*1000.0)
+	if strategic_content.preparing() or strategic_layer.preparing: set_process(visible)
+
+func _update_strategic_layer() -> void:
+	strategic_layer.suppressed_places = local_layer.visible_places
+	strategic_layer.paris_mask_weights = {}
+	if not local_layer.active_lod.is_empty():
+		strategic_layer.paris_mask_weights["river"] = MapScaleStyle.physical_weight("river",controller.region_camera.km_per_pixel*1000.0)
+	strategic_layer.update(controller.region_camera,controller,political.display_date,size)
+
 func _record_local_handoff(entering: bool, unit: Vector3, pixel: Vector2) -> void:
 	var started := Time.get_ticks_usec()
 	if not entering:
@@ -752,6 +792,12 @@ func _process(_delta: float) -> void:
 			_evaluate_scale()
 			if controller.region_camera.active:
 				queue_redraw()
+	if strategic_content != null and strategic_content.poll():
+		_sync_strategic_resources()
+		_invalidate_projection()
+	if strategic_layer.preparing:
+		strategic_layer.prepare_step(_font)
+		_invalidate_projection()
 	if local_content != null and local_content.poll():
 		if local_content.content.errors.is_empty():
 			local_layer.begin(local_content.content, region_view.viewport.world_2d.canvas)
@@ -777,13 +823,14 @@ func _process(_delta: float) -> void:
 			queue_redraw()
 	if _transition_elapsed < 0.0:
 		_sync_local_resources()
-	if not relief.preparing() and not region_view.preparing and not local_layer.preparing and (local_content == null or not local_content.preparing()) and _transition_elapsed < 0.0:
+	if not relief.preparing() and not region_view.preparing and not strategic_layer.preparing and (strategic_content == null or not strategic_content.preparing()) and not local_layer.preparing and (local_content == null or not local_content.preparing()) and _transition_elapsed < 0.0:
 		set_process(false)
 
 func _on_visibility_changed() -> void:
 	if controller == null:
 		return
 	_sync_relief()
+	_sync_strategic_resources()
 	if not visible:
 		_transition_elapsed = -1.0
 		set_process(false)
@@ -794,7 +841,7 @@ func _on_visibility_changed() -> void:
 		region_view.container.visible = controller.region_camera.active
 		_container.modulate.a = 1.0
 		region_view.container.modulate.a = 1.0
-		set_process(relief.preparing() or region_view.preparing or local_layer.preparing or (local_content != null and local_content.preparing()))
+		set_process(strategic_layer.preparing or (strategic_content != null and strategic_content.preparing()) or relief.preparing() or region_view.preparing or local_layer.preparing or (local_content != null and local_content.preparing()))
 		queue_redraw()
 
 func _prepare_region_labels() -> void:
@@ -812,7 +859,10 @@ func _prepare_region_labels() -> void:
 		var raw_point: Variant = (political.places[place_id] as Dictionary).get("lon_lat", [])
 		if raw_point is Array and (raw_point as Array).size() >= 2:
 			_region_place_km[place_id] = RegionProjection.forward(GlobeProjection.lon_lat_to_unit(Vector2(float(raw_point[0]), float(raw_point[1]))), frame)
-			labels.append({"id": place_id, "km": _region_place_km[place_id], "text": str((political.places[place_id] as Dictionary).get("name", place_id)), "rank": 0, "font_size": 10, "place": true})
+			# Formal Region cities come from admitted spatial content. Keeping
+			# prototype cities in the label source can resurrect them on redraw.
+			if strategic_content == null:
+				labels.append({"id": place_id, "km": _region_place_km[place_id], "text": str((political.places[place_id] as Dictionary).get("name", place_id)), "rank": 0, "font_size": 10, "place": true})
 	region_view.prepare_labels(labels, _font)
 	_region_labels_dirty = false
 	transition_metrics["label_prepare_usec"] = Time.get_ticks_usec() - started

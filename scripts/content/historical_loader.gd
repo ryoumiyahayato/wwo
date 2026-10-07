@@ -10,6 +10,7 @@ const REGIONS_PATH: String = "res://data/presentation/arabia_political_map_regio
 var _display_document: Dictionary = {}
 var geometry_content: MapGeometryContent
 var local_spatial := LocalSpatialLoader.new()
+var strategic_spatial := StrategicSpatialLoader.new()
 
 func load_current(gate: HistoricalProvenanceGate) -> bool:
 	geography.load_current(gate)
@@ -73,6 +74,14 @@ func resolve_world_page(time: Dictionary, polity: Dictionary, selected_place_id:
 				place["place_id"] = feature.id
 				place["name"] = feature.display_name
 				place["spatial_kind"] = "historical settlement"
+				break
+	if place.is_empty() and strategic_spatial.content != null and strategic_spatial.content.active_on(date):
+		for feature: Dictionary in strategic_spatial.content.features:
+			if str(feature.id) == selected_place_id and str(feature.kind) == "settlement":
+				place = feature.duplicate(true)
+				place["place_id"] = feature.id
+				place["name"] = feature.display_name
+				place["spatial_kind"] = "historical strategic settlement"
 				break
 	return WorldPageContent.new(date, administration.profiles.get(source_id, {}) as Dictionary, administration.historical_by_source.get(source_id, {}) as Dictionary, flag, texture, place)
 

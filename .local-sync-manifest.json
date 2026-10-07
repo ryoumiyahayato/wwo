@@ -1,5 +1,5 @@
 {
-  "content_sha256": "cb065ca71ebca4ba256db43e3316f36ae1f34b99cc9518e0a53c0ce8224d58a2",
+  "content_sha256": "89b0f796fbf94c4165e920e70fc5924538599fd632954a3cce828992391a8165",
   "excluded": [
     {
       "path": ".git/",
@@ -30,16 +30,32 @@
       "reason": "data/material/secret/cache/nested-worktree path"
     },
     {
+      "path": "docs/architecture/organization_scenario_examples_20260908.json",
+      "reason": "non-code JSON/labels/frozen evidence excluded before reading"
+    },
+    {
+      "path": "docs/architecture/world_simulation_20260908/acceptance.json",
+      "reason": "non-code JSON/labels/frozen evidence excluded before reading"
+    },
+    {
       "path": "docs/architecture/world_simulation_20260908/execution.md",
-      "reason": "content excluded: local profile path"
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "docs/architecture/world_simulation_20260908/verification-results.json",
+      "reason": "non-code JSON/labels/frozen evidence excluded before reading"
     },
     {
       "path": "docs/architecture/world_simulation_20260908/verification.md",
-      "reason": "content excluded: local profile path"
+      "reason": "file outside reviewed exact file allowlist"
     },
     {
       "path": "docs/audits/variable_state_inventory_20260803.md",
-      "reason": "oversized file"
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "docs/audits/world_transport_topology_audit_batch1.json",
+      "reason": "non-code JSON/labels/frozen evidence excluded before reading"
     },
     {
       "path": "docs/data/",
@@ -47,106 +63,194 @@
     },
     {
       "path": "docs/data_sources/provenance_manifest.json",
-      "reason": "content excluded: personal phone"
+      "reason": "non-code JSON/labels/frozen evidence excluded before reading"
     },
     {
       "path": "docs/data_sources/provenance_reference_matrix.json",
-      "reason": "content excluded: personal phone"
+      "reason": "non-code JSON/labels/frozen evidence excluded before reading"
     },
     {
       "path": "docs/generated/",
       "reason": "data/material/secret/cache/nested-worktree path"
     },
     {
+      "path": "docs/performance/global-strategic-geography-r1-visuals.html",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "docs/performance/global-strategic-geography-r1.md",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
       "path": "docs/performance/ten-year-timing-verification-r1.md",
-      "reason": "content excluded: personal phone"
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "docs/performance/world_data_coverage_matrix_20260812.json",
+      "reason": "non-code JSON/labels/frozen evidence excluded before reading"
+    },
+    {
+      "path": "docs/performance/world_data_quality_audit_20260812.json",
+      "reason": "non-code JSON/labels/frozen evidence excluded before reading"
+    },
+    {
+      "path": "docs/performance/world_data_regression_corpus_20260812.json",
+      "reason": "non-code JSON/labels/frozen evidence excluded before reading"
     },
     {
       "path": "local-artifacts/",
       "reason": "data/material/secret/cache/nested-worktree path"
     },
     {
-      "path": "packaging/windows/1900.iss",
-      "reason": "binary/unapproved file type"
+      "path": "packaging/",
+      "reason": "directory outside reviewed exact file allowlist"
     },
     {
-      "path": "scenes/boot/.gitkeep",
-      "reason": "binary/unapproved file type"
+      "path": "scenes/alpha/",
+      "reason": "directory outside reviewed exact file allowlist"
     },
     {
-      "path": "scenes/ui/.gitkeep",
-      "reason": "binary/unapproved file type"
+      "path": "scenes/boot/",
+      "reason": "directory outside reviewed exact file allowlist"
+    },
+    {
+      "path": "scenes/ui/",
+      "reason": "directory outside reviewed exact file allowlist"
+    },
+    {
+      "path": "scenes/ui_spikes/",
+      "reason": "directory outside reviewed exact file allowlist"
+    },
+    {
+      "path": "scenes/v2_2/",
+      "reason": "directory outside reviewed exact file allowlist"
+    },
+    {
+      "path": "scripts/action/",
+      "reason": "directory outside reviewed exact file allowlist"
     },
     {
       "path": "scripts/actions/.gitkeep",
-      "reason": "binary/unapproved file type"
+      "reason": "file outside reviewed exact file allowlist"
     },
     {
-      "path": "scripts/ai/.gitkeep",
-      "reason": "binary/unapproved file type"
+      "path": "scripts/ai/",
+      "reason": "directory outside reviewed exact file allowlist"
     },
     {
-      "path": "scripts/characters/.gitkeep",
-      "reason": "binary/unapproved file type"
+      "path": "scripts/character/",
+      "reason": "directory outside reviewed exact file allowlist"
+    },
+    {
+      "path": "scripts/characters/",
+      "reason": "directory outside reviewed exact file allowlist"
     },
     {
       "path": "scripts/core/models/",
       "reason": "data/material/secret/cache/nested-worktree path"
     },
     {
-      "path": "scripts/map/.gitkeep",
-      "reason": "binary/unapproved file type"
+      "path": "scripts/devtools/",
+      "reason": "directory outside reviewed exact file allowlist"
     },
     {
-      "path": "scripts/organizations/.gitkeep",
-      "reason": "binary/unapproved file type"
+      "path": "scripts/map/",
+      "reason": "directory outside reviewed exact file allowlist"
+    },
+    {
+      "path": "scripts/organization/",
+      "reason": "directory outside reviewed exact file allowlist"
+    },
+    {
+      "path": "scripts/organizations/",
+      "reason": "directory outside reviewed exact file allowlist"
+    },
+    {
+      "path": "scripts/relationship/",
+      "reason": "directory outside reviewed exact file allowlist"
     },
     {
       "path": "scripts/save/.gitkeep",
-      "reason": "binary/unapproved file type"
+      "reason": "file outside reviewed exact file allowlist"
     },
     {
       "path": "scripts/simulation/.gitkeep",
-      "reason": "binary/unapproved file type"
+      "reason": "file outside reviewed exact file allowlist"
     },
     {
-      "path": "scripts/utilities/.gitkeep",
-      "reason": "binary/unapproved file type"
+      "path": "scripts/system/",
+      "reason": "directory outside reviewed exact file allowlist"
+    },
+    {
+      "path": "scripts/ui_spikes/",
+      "reason": "directory outside reviewed exact file allowlist"
+    },
+    {
+      "path": "scripts/utilities/",
+      "reason": "directory outside reviewed exact file allowlist"
+    },
+    {
+      "path": "scripts/v2_2/",
+      "reason": "directory outside reviewed exact file allowlist"
+    },
+    {
+      "path": "scripts/v2_3/",
+      "reason": "directory outside reviewed exact file allowlist"
     },
     {
       "path": "shaders/presentation/map/hemisphere_surface.gdshader",
-      "reason": "content excluded: personal phone"
+      "reason": "file outside reviewed exact file allowlist"
     },
     {
       "path": "shaders/presentation/map/political_surface.gdshader",
-      "reason": "content excluded: personal phone"
+      "reason": "file outside reviewed exact file allowlist"
     },
     {
       "path": "shaders/presentation/map/relief_background.gdshader",
-      "reason": "content excluded: personal phone"
+      "reason": "file outside reviewed exact file allowlist"
     },
     {
-      "path": "tests/fixtures/.gitkeep",
-      "reason": "binary/unapproved file type"
+      "path": "shaders/ui_spikes/",
+      "reason": "directory outside reviewed exact file allowlist"
     },
     {
-      "path": "tests/integration/.gitkeep",
-      "reason": "binary/unapproved file type"
+      "path": "tests/fixtures/",
+      "reason": "data/material/secret/cache/nested-worktree path"
+    },
+    {
+      "path": "tests/integration/",
+      "reason": "directory outside reviewed exact file allowlist"
     },
     {
       "path": "tests/provenance/provenance_regression_corpus.json",
-      "reason": "content excluded: personal phone"
+      "reason": "non-code JSON/labels/frozen evidence excluded before reading"
+    },
+    {
+      "path": "tests/provenance/provenance_review_backlog.json",
+      "reason": "non-code JSON/labels/frozen evidence excluded before reading"
     },
     {
       "path": "tests/tools/__pycache__/",
       "reason": "data/material/secret/cache/nested-worktree path"
     },
     {
-      "path": "tests/unit/.gitkeep",
-      "reason": "binary/unapproved file type"
+      "path": "tests/unit/",
+      "reason": "directory outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tests/v2_2/",
+      "reason": "directory outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tests/v2_3/",
+      "reason": "directory outside reviewed exact file allowlist"
     },
     {
       "path": "tests/world_data/__pycache__/",
+      "reason": "data/material/secret/cache/nested-worktree path"
+    },
+    {
+      "path": "tests/world_data/fixtures/",
       "reason": "data/material/secret/cache/nested-worktree path"
     },
     {
@@ -162,12 +266,24 @@
       "reason": "data/material/secret/cache/nested-worktree path"
     },
     {
+      "path": "tools/map_preprocessing/manifest.schema.json",
+      "reason": "non-code JSON/labels/frozen evidence excluded before reading"
+    },
+    {
       "path": "tools/provenance/README.md",
-      "reason": "content excluded: local profile path"
+      "reason": "file outside reviewed exact file allowlist"
     },
     {
       "path": "tools/provenance/__pycache__/",
       "reason": "data/material/secret/cache/nested-worktree path"
+    },
+    {
+      "path": "tools/v2_2/",
+      "reason": "directory outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/v2_3/",
+      "reason": "directory outside reviewed exact file allowlist"
     },
     {
       "path": "tools/world_data/__pycache__/",
@@ -175,11 +291,11 @@
     },
     {
       "path": "tools/world_names/.gitignore",
-      "reason": "binary/unapproved file type"
+      "reason": "file outside reviewed exact file allowlist"
     }
   ],
-  "included_bytes": 7488229,
-  "included_files": 783,
+  "included_bytes": 5786571,
+  "included_files": 775,
   "owner_id": "7ed35d2d-c560-4b08-8c28-78af6d1cae6b",
   "remote": "https://github.com/ryoumiyahayato/wwo.git",
   "schema": 1,
@@ -188,473 +304,5 @@
   "source_head": "622b260bc641036c23efbf6345a548485ac6c475",
   "source_id": "WWO",
   "target_branch": "local-sync/current-world",
-  "tracked_code_deletions": [
-    "scenes/alpha/alpha_grid_fixture.tscn",
-    "scenes/alpha/alpha_main.tscn",
-    "scenes/alpha/alpha_menu.tscn",
-    "scenes/formal/formal_world_ui_capture.tscn",
-    "scenes/ui_spikes/holographic_workspace/holographic_workspace_admin1_probe.tscn",
-    "scenes/ui_spikes/holographic_workspace/holographic_workspace_capture.tscn",
-    "scenes/ui_spikes/holographic_workspace/holographic_workspace_interaction_probe.tscn",
-    "scenes/ui_spikes/holographic_workspace/holographic_workspace_release_probe.tscn",
-    "scenes/ui_spikes/holographic_workspace/holographic_workspace_spike.tscn",
-    "scenes/v2_2/v2_2_life_loop_main.tscn",
-    "scenes/v2_2/v2_2_life_loop_menu.tscn",
-    "scripts/action/action_instance_data.gd",
-    "scripts/action/action_instance_data.gd.uid",
-    "scripts/action/action_rules_config.gd",
-    "scripts/action/action_rules_config.gd.uid",
-    "scripts/action/action_service.gd",
-    "scripts/action/action_service.gd.uid",
-    "scripts/action/action_start_result.gd",
-    "scripts/action/action_start_result.gd.uid",
-    "scripts/action/player_action_context_service.gd",
-    "scripts/action/player_action_context_service.gd.uid",
-    "scripts/ai/ai_state_data.gd",
-    "scripts/ai/ai_state_data.gd.uid",
-    "scripts/ai/simple_ai_service.gd",
-    "scripts/ai/simple_ai_service.gd.uid",
-    "scripts/alpha/alpha_ai_service.gd",
-    "scripts/alpha/alpha_ai_service.gd.uid",
-    "scripts/alpha/alpha_asset_service.gd",
-    "scripts/alpha/alpha_asset_service.gd.uid",
-    "scripts/alpha/alpha_character_service.gd",
-    "scripts/alpha/alpha_character_service.gd.uid",
-    "scripts/alpha/alpha_commodity_market_service.gd",
-    "scripts/alpha/alpha_config.gd",
-    "scripts/alpha/alpha_config.gd.uid",
-    "scripts/alpha/alpha_contract_service.gd",
-    "scripts/alpha/alpha_contract_service.gd.uid",
-    "scripts/alpha/alpha_economy_integration_service.gd",
-    "scripts/alpha/alpha_economy_service.gd",
-    "scripts/alpha/alpha_economy_service.gd.uid",
-    "scripts/alpha/alpha_enterprise_service.gd",
-    "scripts/alpha/alpha_enterprise_service.gd.uid",
-    "scripts/alpha/alpha_fixture_gate.gd",
-    "scripts/alpha/alpha_fixture_gate.gd.uid",
-    "scripts/alpha/alpha_grid_fixture.gd",
-    "scripts/alpha/alpha_grid_fixture.gd.uid",
-    "scripts/alpha/alpha_labor_service.gd",
-    "scripts/alpha/alpha_labor_service.gd.uid",
-    "scripts/alpha/alpha_ledger_service.gd",
-    "scripts/alpha/alpha_ledger_service.gd.uid",
-    "scripts/alpha/alpha_main.gd",
-    "scripts/alpha/alpha_main.gd.uid",
-    "scripts/alpha/alpha_map_canvas.gd",
-    "scripts/alpha/alpha_map_canvas.gd.uid",
-    "scripts/alpha/alpha_menu.gd",
-    "scripts/alpha/alpha_menu.gd.uid",
-    "scripts/alpha/alpha_politics_service.gd",
-    "scripts/alpha/alpha_politics_service.gd.uid",
-    "scripts/alpha/alpha_save_migration.gd",
-    "scripts/alpha/alpha_save_migration.gd.uid",
-    "scripts/alpha/alpha_save_service.gd",
-    "scripts/alpha/alpha_save_service.gd.uid",
-    "scripts/alpha/alpha_scenario_runner.gd",
-    "scripts/alpha/alpha_scenario_runner.gd.uid",
-    "scripts/alpha/alpha_simulation_service.gd",
-    "scripts/alpha/alpha_simulation_service.gd.uid",
-    "scripts/alpha/alpha_topology_service.gd",
-    "scripts/alpha/alpha_topology_service.gd.uid",
-    "scripts/alpha/alpha_ui_binding.gd",
-    "scripts/alpha/alpha_ui_binding.gd.uid",
-    "scripts/alpha/alpha_v23_config.gd",
-    "scripts/alpha/alpha_v23_config.gd.uid",
-    "scripts/alpha/alpha_world_dynamics_service.gd",
-    "scripts/alpha/alpha_world_dynamics_service.gd.uid",
-    "scripts/alpha/alpha_world_service.gd",
-    "scripts/alpha/alpha_world_service.gd.uid",
-    "scripts/character/background_character_data.gd",
-    "scripts/character/background_character_data.gd.uid",
-    "scripts/character/character_generation_config.gd",
-    "scripts/character/character_generation_config.gd.uid",
-    "scripts/character/character_generation_result.gd",
-    "scripts/character/character_generation_result.gd.uid",
-    "scripts/character/character_generator.gd",
-    "scripts/character/character_generator.gd.uid",
-    "scripts/character/character_roster_service.gd",
-    "scripts/character/character_roster_service.gd.uid",
-    "scripts/character/character_tendency_service.gd",
-    "scripts/character/character_tendency_service.gd.uid",
-    "scripts/character/exited_character_record.gd",
-    "scripts/character/exited_character_record.gd.uid",
-    "scripts/character/game_session_service.gd",
-    "scripts/character/game_session_service.gd.uid",
-    "scripts/character/succession_candidate_data.gd",
-    "scripts/character/succession_candidate_data.gd.uid",
-    "scripts/character/succession_result.gd",
-    "scripts/character/succession_result.gd.uid",
-    "scripts/character/succession_service.gd",
-    "scripts/character/succession_service.gd.uid",
-    "scripts/core/core_data_load_result.gd",
-    "scripts/core/core_data_load_result.gd.uid",
-    "scripts/core/core_data_loader.gd",
-    "scripts/core/core_data_loader.gd.uid",
-    "scripts/core/core_data_set.gd",
-    "scripts/core/core_data_set.gd.uid",
-    "scripts/core/deterministic_random_service.gd",
-    "scripts/core/deterministic_random_service.gd.uid",
-    "scripts/core/log_service.gd",
-    "scripts/core/log_service.gd.uid",
-    "scripts/core/stable_id_service.gd",
-    "scripts/core/stable_id_service.gd.uid",
-    "scripts/devtools/developer_command_service.gd",
-    "scripts/devtools/developer_command_service.gd.uid",
-    "scripts/devtools/performance_stats_service.gd",
-    "scripts/devtools/performance_stats_service.gd.uid",
-    "scripts/devtools/settlement_log_service.gd",
-    "scripts/devtools/settlement_log_service.gd.uid",
-    "scripts/formal/formal_world_economy_service.gd",
-    "scripts/formal/formal_world_simulation.gd",
-    "scripts/formal/historical_evidence_standalone_bootstrap.gd",
-    "scripts/map/map_control_service.gd",
-    "scripts/map/map_control_service.gd.uid",
-    "scripts/map/map_rules_config.gd",
-    "scripts/map/map_rules_config.gd.uid",
-    "scripts/map/map_world_controller.gd",
-    "scripts/map/map_world_controller.gd.uid",
-    "scripts/map/regional_influence_service.gd",
-    "scripts/map/regional_influence_service.gd.uid",
-    "scripts/map/strategic_map_canvas.gd",
-    "scripts/map/strategic_map_canvas.gd.uid",
-    "scripts/organization/organization_service.gd",
-    "scripts/organization/organization_service.gd.uid",
-    "scripts/relationship/relationship_service.gd",
-    "scripts/relationship/relationship_service.gd.uid",
-    "scripts/save/action_save_validator.gd",
-    "scripts/save/action_save_validator.gd.uid",
-    "scripts/save/autosave_coordinator.gd",
-    "scripts/save/autosave_coordinator.gd.uid",
-    "scripts/save/game_save_service.gd",
-    "scripts/save/game_save_service.gd.uid",
-    "scripts/save/social_save_validator.gd",
-    "scripts/save/social_save_validator.gd.uid",
-    "scripts/simulation/continuity_rules_config.gd",
-    "scripts/simulation/continuity_rules_config.gd.uid",
-    "scripts/simulation/simulation_clock.gd",
-    "scripts/simulation/simulation_clock.gd.uid",
-    "scripts/simulation/simulation_clock_config.gd",
-    "scripts/simulation/simulation_clock_config.gd.uid",
-    "scripts/simulation/simulation_event_queue.gd",
-    "scripts/simulation/simulation_event_queue.gd.uid",
-    "scripts/simulation/simulation_runner.gd",
-    "scripts/simulation/simulation_runner.gd.uid",
-    "scripts/simulation/society_rules_config.gd",
-    "scripts/simulation/society_rules_config.gd.uid",
-    "scripts/simulation/society_simulation_service.gd",
-    "scripts/simulation/society_simulation_service.gd.uid",
-    "scripts/simulation/world_activity_service.gd",
-    "scripts/simulation/world_activity_service.gd.uid",
-    "scripts/ui_spikes/holographic_workspace/holographic_hemisphere_3d.gd",
-    "scripts/ui_spikes/holographic_workspace/holographic_workspace_admin1.gd",
-    "scripts/ui_spikes/holographic_workspace/holographic_workspace_admin1_probe.gd",
-    "scripts/ui_spikes/holographic_workspace/holographic_workspace_capture.gd",
-    "scripts/ui_spikes/holographic_workspace/holographic_workspace_crisp_flags_fixed.gd",
-    "scripts/ui_spikes/holographic_workspace/holographic_workspace_crisp_runtime.gd",
-    "scripts/ui_spikes/holographic_workspace/holographic_workspace_final.gd",
-    "scripts/ui_spikes/holographic_workspace/holographic_workspace_final_polish.gd",
-    "scripts/ui_spikes/holographic_workspace/holographic_workspace_flag_tuning.gd",
-    "scripts/ui_spikes/holographic_workspace/holographic_workspace_flags.gd",
-    "scripts/ui_spikes/holographic_workspace/holographic_workspace_historical_admin_runtime.gd",
-    "scripts/ui_spikes/holographic_workspace/holographic_workspace_historical_evidence.gd",
-    "scripts/ui_spikes/holographic_workspace/holographic_workspace_historical_evidence_ui.gd",
-    "scripts/ui_spikes/holographic_workspace/holographic_workspace_history.gd",
-    "scripts/ui_spikes/holographic_workspace/holographic_workspace_hud_polish.gd",
-    "scripts/ui_spikes/holographic_workspace/holographic_workspace_interaction_probe.gd",
-    "scripts/ui_spikes/holographic_workspace/holographic_workspace_polish.gd",
-    "scripts/ui_spikes/holographic_workspace/holographic_workspace_release.gd",
-    "scripts/ui_spikes/holographic_workspace/holographic_workspace_release_probe.gd",
-    "scripts/ui_spikes/holographic_workspace/holographic_workspace_runtime.gd",
-    "scripts/ui_spikes/holographic_workspace/holographic_workspace_spike_runtime.gd",
-    "scripts/ui_spikes/holographic_workspace/holographic_workspace_visual.gd",
-    "scripts/v2_2/v2_condition_service.gd",
-    "scripts/v2_2/v2_condition_service.gd.uid",
-    "scripts/v2_2/v2_datetime.gd",
-    "scripts/v2_2/v2_datetime.gd.uid",
-    "scripts/v2_2/v2_determinism_audit.gd",
-    "scripts/v2_2/v2_determinism_audit.gd.uid",
-    "scripts/v2_2/v2_employment_service.gd",
-    "scripts/v2_2/v2_employment_service.gd.uid",
-    "scripts/v2_2/v2_household_service.gd",
-    "scripts/v2_2/v2_household_service.gd.uid",
-    "scripts/v2_2/v2_ledger_service.gd",
-    "scripts/v2_2/v2_ledger_service.gd.uid",
-    "scripts/v2_2/v2_life_loop_config.gd",
-    "scripts/v2_2/v2_life_loop_config.gd.uid",
-    "scripts/v2_2/v2_life_loop_interface.gd",
-    "scripts/v2_2/v2_life_loop_interface.gd.uid",
-    "scripts/v2_2/v2_life_loop_interface_final.gd",
-    "scripts/v2_2/v2_life_loop_interface_final.gd.uid",
-    "scripts/v2_2/v2_life_loop_main.gd",
-    "scripts/v2_2/v2_life_loop_main.gd.uid",
-    "scripts/v2_2/v2_life_loop_menu.gd",
-    "scripts/v2_2/v2_life_loop_menu.gd.uid",
-    "scripts/v2_2/v2_life_loop_result.gd",
-    "scripts/v2_2/v2_life_loop_result.gd.uid",
-    "scripts/v2_2/v2_life_loop_simulation.gd",
-    "scripts/v2_2/v2_life_loop_simulation.gd.uid",
-    "scripts/v2_2/v2_life_loop_simulation_polish.gd",
-    "scripts/v2_2/v2_life_loop_simulation_polish.gd.uid",
-    "scripts/v2_2/v2_life_loop_ui_binding.gd",
-    "scripts/v2_2/v2_life_loop_ui_binding.gd.uid",
-    "scripts/v2_2/v2_life_loop_ui_binding_polish.gd",
-    "scripts/v2_2/v2_life_loop_ui_binding_polish.gd.uid",
-    "scripts/v2_2/v2_notification_service.gd",
-    "scripts/v2_2/v2_notification_service.gd.uid",
-    "scripts/v2_2/v2_organization_activity_service.gd",
-    "scripts/v2_2/v2_organization_activity_service.gd.uid",
-    "scripts/v2_2/v2_relationship_progress_service.gd",
-    "scripts/v2_2/v2_relationship_progress_service.gd.uid",
-    "scripts/v2_2/v2_review_save_service.gd",
-    "scripts/v2_2/v2_review_save_service.gd.uid",
-    "scripts/v2_2/v2_schedule_service.gd",
-    "scripts/v2_2/v2_schedule_service.gd.uid",
-    "scripts/v2_3/communication_service.gd",
-    "scripts/v2_3/communication_service.gd.uid",
-    "scripts/v2_3/knowledge_service.gd",
-    "scripts/v2_3/knowledge_service.gd.uid",
-    "scripts/v2_3/relationship_service.gd",
-    "scripts/v2_3/relationship_service.gd.uid",
-    "scripts/v2_3/route_planner_service.gd",
-    "scripts/v2_3/route_planner_service.gd.uid",
-    "scripts/v2_3/social_appointment_service.gd",
-    "scripts/v2_3/social_appointment_service.gd.uid",
-    "scripts/v2_3/social_introduction_service.gd",
-    "scripts/v2_3/social_introduction_service.gd.uid",
-    "scripts/v2_3/spatial_location_service.gd",
-    "scripts/v2_3/spatial_location_service.gd.uid",
-    "scripts/v2_3/spatial_npc_routine_service.gd",
-    "scripts/v2_3/spatial_npc_routine_service.gd.uid",
-    "scripts/v2_3/travel_execution_service.gd",
-    "scripts/v2_3/travel_execution_service.gd.uid",
-    "scripts/v2_3/travel_graph_service.gd",
-    "scripts/v2_3/travel_graph_service.gd.uid",
-    "scripts/v2_3/v2_3_config.gd",
-    "scripts/v2_3/v2_3_config.gd.uid",
-    "scripts/v2_3/v2_3_controlled_simulation.gd",
-    "scripts/v2_3/v2_3_controlled_simulation.gd.uid",
-    "scripts/v2_3/v2_3_controlled_ui_binding.gd",
-    "scripts/v2_3/v2_3_controlled_ui_binding.gd.uid",
-    "scripts/v2_3/v2_3_controlled_ui_binding_v2.gd",
-    "scripts/v2_3/v2_3_controlled_ui_binding_v2.gd.uid",
-    "scripts/v2_3/v2_3_finance_config.gd",
-    "scripts/v2_3/v2_3_finance_config.gd.uid",
-    "scripts/v2_3/v2_3_finance_service.gd",
-    "scripts/v2_3/v2_3_finance_service.gd.uid",
-    "scripts/v2_3/v2_3_formal_interface.gd",
-    "scripts/v2_3/v2_3_formal_interface.gd.uid",
-    "scripts/v2_3/v2_3_formal_main.gd.uid",
-    "scripts/v2_3/v2_3_formal_schedule_interface.gd",
-    "scripts/v2_3/v2_3_formal_schedule_interface.gd.uid",
-    "scripts/v2_3/v2_3_formal_simulation.gd",
-    "scripts/v2_3/v2_3_formal_simulation.gd.uid",
-    "scripts/v2_3/v2_3_formal_ui_binding.gd",
-    "scripts/v2_3/v2_3_formal_ui_binding.gd.uid",
-    "scripts/v2_3/v2_3_leave_service.gd",
-    "scripts/v2_3/v2_3_leave_service.gd.uid",
-    "scripts/v2_3/v2_3_life_loop_interface.gd",
-    "scripts/v2_3/v2_3_life_loop_interface.gd.uid",
-    "scripts/v2_3/v2_3_life_loop_main.gd.uid",
-    "scripts/v2_3/v2_3_life_loop_menu.gd.uid",
-    "scripts/v2_3/v2_3_life_loop_simulation.gd",
-    "scripts/v2_3/v2_3_life_loop_simulation.gd.uid",
-    "scripts/v2_3/v2_3_life_loop_ui_binding.gd",
-    "scripts/v2_3/v2_3_life_loop_ui_binding.gd.uid",
-    "scripts/v2_3/v2_3_minute_clock.gd",
-    "scripts/v2_3/v2_3_minute_clock.gd.uid",
-    "scripts/v2_3/v2_3_minute_controlled_simulation.gd",
-    "scripts/v2_3/v2_3_minute_controlled_simulation.gd.uid",
-    "scripts/v2_3/v2_3_minute_formal_interface.gd",
-    "scripts/v2_3/v2_3_minute_formal_interface.gd.uid",
-    "scripts/v2_3/v2_3_minute_formal_interface_v2.gd",
-    "scripts/v2_3/v2_3_minute_formal_interface_v2.gd.uid",
-    "scripts/v2_3/v2_3_player_ui_binding.gd",
-    "scripts/v2_3/v2_3_product_simulation.gd",
-    "scripts/v2_3/v2_3_product_simulation.gd.uid",
-    "scripts/v2_3/v2_3_product_simulation_v2.gd",
-    "scripts/v2_3/v2_3_product_simulation_v2.gd.uid",
-    "scripts/v2_3/v2_3_save_migration.gd",
-    "scripts/v2_3/v2_3_save_migration.gd.uid",
-    "scripts/v2_3/v2_3_save_service.gd",
-    "scripts/v2_3/v2_3_save_service.gd.uid",
-    "scripts/v2_3/v2_3_social_sandbox_service.gd",
-    "scripts/v2_3/v2_3_social_sandbox_service.gd.uid",
-    "scripts/v2_3/v2_3_social_sandbox_service_v2.gd",
-    "scripts/v2_3/v2_3_social_sandbox_service_v2.gd.uid",
-    "scripts/v2_3/v2_3_social_sandbox_service_v3.gd",
-    "scripts/v2_3/v2_3_survival_autonomy_service.gd",
-    "scripts/v2_3/v2_3_survival_autonomy_service_v2.gd",
-    "scripts/vnext/military/military_authority_bridge.gd",
-    "scripts/vnext/organization/organization_authority_foundation.gd",
-    "scripts/vnext/organization/organization_core.gd",
-    "scripts/world_map/historical_map_identity_style.gd",
-    "scripts/world_map/historical_map_identity_style.gd.uid",
-    "scripts/world_map/internal/world_map_canvas_impl.gd",
-    "scripts/world_map/internal/world_map_canvas_impl.gd.uid",
-    "scripts/world_map/internal/world_map_controller_impl.gd",
-    "scripts/world_map/internal/world_map_controller_impl.gd.uid",
-    "scripts/world_map/internal/world_map_interface_impl.gd",
-    "scripts/world_map/internal/world_map_interface_impl.gd.uid",
-    "scripts/world_map/internal/world_map_layer_impl.gd",
-    "scripts/world_map/internal/world_map_layer_impl.gd.uid",
-    "scripts/world_map/internal/world_map_spatial_index_impl.gd",
-    "scripts/world_map/internal/world_map_spatial_index_impl.gd.uid",
-    "scripts/world_map/world_city_shard_catalog.gd",
-    "scripts/world_map/world_map_canvas.gd",
-    "scripts/world_map/world_map_canvas.gd.uid",
-    "scripts/world_map/world_map_canvas_detail.gd",
-    "scripts/world_map/world_map_main.gd",
-    "scripts/world_map/world_map_main.gd.uid",
-    "shaders/ui_spikes/holographic_workspace/hemisphere_surface.gdshader",
-    "shaders/ui_spikes/holographic_workspace/moon_surface.gdshader",
-    "shaders/ui_spikes/holographic_workspace/workspace_background.gdshader",
-    "tests/alpha/alpha_ai_economy_stability_test.gd",
-    "tests/alpha/alpha_character_development_test.gd",
-    "tests/alpha/alpha_character_development_test.gd.uid",
-    "tests/alpha/alpha_commodity_market_test.gd",
-    "tests/alpha/alpha_composition_smoke.gd",
-    "tests/alpha/alpha_composition_smoke.gd.uid",
-    "tests/alpha/alpha_cross_system_scenarios_test.gd",
-    "tests/alpha/alpha_cross_system_scenarios_test.gd.uid",
-    "tests/alpha/alpha_economy_integration_phase2_test.gd",
-    "tests/alpha/alpha_economy_lifecycle_test.gd",
-    "tests/alpha/alpha_economy_lifecycle_test.gd.uid",
-    "tests/alpha/alpha_fixture_retained_services_performance_test.gd",
-    "tests/alpha/alpha_labor_enterprise_test.gd",
-    "tests/alpha/alpha_labor_enterprise_test.gd.uid",
-    "tests/alpha/alpha_organization_politics_test.gd",
-    "tests/alpha/alpha_organization_politics_test.gd.uid",
-    "tests/alpha/alpha_save_and_migration_test.gd",
-    "tests/alpha/alpha_save_and_migration_test.gd.uid",
-    "tests/alpha/alpha_state_equivalence_test.gd",
-    "tests/alpha/alpha_three_year_performance_test.gd.uid",
-    "tests/alpha/alpha_three_year_stage_profile_test.gd",
-    "tests/alpha/alpha_ui_and_presets_test.gd",
-    "tests/alpha/alpha_ui_and_presets_test.gd.uid",
-    "tests/alpha/alpha_window_smoke_test.gd",
-    "tests/alpha/alpha_window_smoke_test.gd.uid",
-    "tests/alpha/alpha_world_topology_test.gd",
-    "tests/alpha/alpha_world_topology_test.gd.uid",
-    "tests/codex_audit_regression.gd",
-    "tests/codex_audit_regression.gd.uid",
-    "tests/formal/formal_world_player_journey_smoke.gd",
-    "tests/formal/formal_world_ui_capture.gd",
-    "tests/formal/historical_evidence_bootstrap_regression_test.gd",
-    "tests/p0_r1_player_journey.gd",
-    "tests/p0_r1_player_journey.gd.uid",
-    "tests/p0_r1_player_journey_current.gd",
-    "tests/p0_r1_player_journey_current.gd.uid",
-    "tests/test_runner.gd",
-    "tests/test_runner.gd.uid",
-    "tests/v2_2/v2_2_atomicity_test.gd",
-    "tests/v2_2/v2_2_atomicity_test.gd.uid",
-    "tests/v2_2/v2_2_condition_test.gd",
-    "tests/v2_2/v2_2_condition_test.gd.uid",
-    "tests/v2_2/v2_2_config_datetime_test.gd",
-    "tests/v2_2/v2_2_config_datetime_test.gd.uid",
-    "tests/v2_2/v2_2_determinism_test.gd",
-    "tests/v2_2/v2_2_determinism_test.gd.uid",
-    "tests/v2_2/v2_2_employment_test.gd",
-    "tests/v2_2/v2_2_employment_test.gd.uid",
-    "tests/v2_2/v2_2_household_test.gd",
-    "tests/v2_2/v2_2_household_test.gd.uid",
-    "tests/v2_2/v2_2_life_loop_smoke.gd",
-    "tests/v2_2/v2_2_life_loop_smoke.gd.uid",
-    "tests/v2_2/v2_2_notification_test.gd",
-    "tests/v2_2/v2_2_notification_test.gd.uid",
-    "tests/v2_2/v2_2_performance_guard_test.gd",
-    "tests/v2_2/v2_2_performance_guard_test.gd.uid",
-    "tests/v2_2/v2_2_polish_test.gd",
-    "tests/v2_2/v2_2_polish_test.gd.uid",
-    "tests/v2_2/v2_2_review_report.gd",
-    "tests/v2_2/v2_2_review_report.gd.uid",
-    "tests/v2_2/v2_2_save_load_test.gd",
-    "tests/v2_2/v2_2_save_load_test.gd.uid",
-    "tests/v2_2/v2_2_schedule_test.gd",
-    "tests/v2_2/v2_2_schedule_test.gd.uid",
-    "tests/v2_2/v2_2_test_case.gd",
-    "tests/v2_2/v2_2_test_case.gd.uid",
-    "tests/v2_2/v2_2_time_test.gd",
-    "tests/v2_2/v2_2_time_test.gd.uid",
-    "tests/v2_2/v2_2_ui_binding_test.gd",
-    "tests/v2_2/v2_2_ui_binding_test.gd.uid",
-    "tests/v2_3/v2_3_appointment_test.gd",
-    "tests/v2_3/v2_3_appointment_test.gd.uid",
-    "tests/v2_3/v2_3_city_detail_performance_test.gd",
-    "tests/v2_3/v2_3_communication_test.gd",
-    "tests/v2_3/v2_3_communication_test.gd.uid",
-    "tests/v2_3/v2_3_controlled_world_test.gd",
-    "tests/v2_3/v2_3_controlled_world_test.gd.uid",
-    "tests/v2_3/v2_3_determinism_test.gd",
-    "tests/v2_3/v2_3_determinism_test.gd.uid",
-    "tests/v2_3/v2_3_entry_hud_capture.gd",
-    "tests/v2_3/v2_3_entry_hud_probe.gd",
-    "tests/v2_3/v2_3_formal_finance_test.gd",
-    "tests/v2_3/v2_3_formal_finance_test.gd.uid",
-    "tests/v2_3/v2_3_formal_leave_location_test.gd",
-    "tests/v2_3/v2_3_formal_leave_location_test.gd.uid",
-    "tests/v2_3/v2_3_full_loop_smoke.gd",
-    "tests/v2_3/v2_3_full_loop_smoke.gd.uid",
-    "tests/v2_3/v2_3_knowledge_test.gd",
-    "tests/v2_3/v2_3_knowledge_test.gd.uid",
-    "tests/v2_3/v2_3_location_test.gd",
-    "tests/v2_3/v2_3_location_test.gd.uid",
-    "tests/v2_3/v2_3_map_integration_test.gd",
-    "tests/v2_3/v2_3_map_integration_test.gd.uid",
-    "tests/v2_3/v2_3_npc_test.gd",
-    "tests/v2_3/v2_3_npc_test.gd.uid",
-    "tests/v2_3/v2_3_performance_guard_test.gd.uid",
-    "tests/v2_3/v2_3_player_interface_test.gd",
-    "tests/v2_3/v2_3_relationship_test.gd",
-    "tests/v2_3/v2_3_relationship_test.gd.uid",
-    "tests/v2_3/v2_3_review_artifact_generator.gd",
-    "tests/v2_3/v2_3_review_artifact_generator.gd.uid",
-    "tests/v2_3/v2_3_route_planner_test.gd",
-    "tests/v2_3/v2_3_route_planner_test.gd.uid",
-    "tests/v2_3/v2_3_save_load_test.gd",
-    "tests/v2_3/v2_3_save_load_test.gd.uid",
-    "tests/v2_3/v2_3_save_migration_test.gd",
-    "tests/v2_3/v2_3_save_migration_test.gd.uid",
-    "tests/v2_3/v2_3_schedule_integration_test.gd",
-    "tests/v2_3/v2_3_schedule_integration_test.gd.uid",
-    "tests/v2_3/v2_3_social_sandbox_completion_test.gd",
-    "tests/v2_3/v2_3_social_sandbox_completion_test.gd.uid",
-    "tests/v2_3/v2_3_social_sandbox_debug.gd",
-    "tests/v2_3/v2_3_social_sandbox_test.gd",
-    "tests/v2_3/v2_3_social_sandbox_test.gd.uid",
-    "tests/v2_3/v2_3_social_sandbox_test_base.gd",
-    "tests/v2_3/v2_3_survival_autonomy_test.gd",
-    "tests/v2_3/v2_3_test_case.gd",
-    "tests/v2_3/v2_3_test_case.gd.uid",
-    "tests/v2_3/v2_3_travel_execution_test.gd",
-    "tests/v2_3/v2_3_travel_execution_test.gd.uid",
-    "tests/v2_3/v2_3_ui_binding_test.gd",
-    "tests/v2_3/v2_3_ui_binding_test.gd.uid",
-    "tests/variable_state/generate_current_save_v1_fixture.gd",
-    "tests/variable_state/variable_state_behavior_baseline_test.gd",
-    "tests/vnext/organization_authority_foundation_test.gd",
-    "tests/vnext/organization_core_test.gd",
-    "tests/world_data_performance_baseline_test.gd",
-    "tests/world_data_performance_baseline_test.gd.uid",
-    "tools/audit_release_module_size.py",
-    "tools/generate_variable_state_docs.py",
-    "tools/pr58_spatial_capacity_integration_worker.py",
-    "tools/pr58_spatial_worker_bootstrap.py",
-    "tools/pr58_spatial_worker_runner.py",
-    "tools/render_variable_refactor_plan.py",
-    "tools/render_variable_state_audit_summary.py",
-    "tools/run_alpha_three_year_performance_gate.ps1",
-    "tools/run_focused_product_tests.ps1",
-    "tools/v2_2/capture_review.gd",
-    "tools/v2_2/capture_review.gd.uid",
-    "tools/v2_2/capture_review.tscn",
-    "tools/v2_2/perf_capture.gd",
-    "tools/v2_2/perf_capture.gd.uid",
-    "tools/v2_2/perf_capture.tscn",
-    "tools/v2_2/run_local_acceptance.ps1",
-    "tools/v2_3/generate_social_review_saves.gd",
-    "tools/v2_3/generate_social_review_saves.gd.uid",
-    "tools/world_data_performance_baseline.gd",
-    "tools/world_data_performance_baseline.gd.uid"
-  ]
+  "tracked_code_deletions": []
 }

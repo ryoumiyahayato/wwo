@@ -13,18 +13,38 @@ static func prepare(source: Array[Dictionary], lods: Array[String] = ["coarse", 
 		var counts: Dictionary = {}
 		var segments: int = 0
 		var vector_bytes: int = 0
+		var precomputed: bool = false
 		for chunk: Dictionary in source:
+			if chunk.has("lod") and str(chunk.lod) != lod_name:
+				continue
+			precomputed = precomputed or chunk.has("lod")
 			var kind := str(chunk.kind)
+			if chunk.has("polygons"):
+				var faces: Array[Dictionary] = []
+				for polygon: Array in chunk.polygons as Array:
+					var rings: Array[PackedVector2Array] = []
+					for ring: Array in polygon:
+						var points := PackedVector2Array()
+						for coordinate: Array in ring:
+							points.append(Vector2(float(coordinate[0]), float(coordinate[1])))
+						if points.size() > 3 and points[0].is_equal_approx(points[-1]): points.resize(points.size()-1)
+						rings.append(points)
+					if not rings.is_empty():
+						var mesh := GlobeProjection.source_mesh([{ "outer": rings[0], "holes": rings.slice(1)}], str(chunk.feature_id))
+						faces.append_array(mesh.triangles as Array[Dictionary])
+				chunks.append({"kind": "lake", "lod": lod_name, "faces": faces, "feature_id": chunk.feature_id})
+				vector_bytes += faces.size() * 60
+				continue
 			if not groups.has(kind):
 				groups[kind] = []
 				counts[kind] = 0
 			for boundary: Dictionary in chunk.boundaries as Array:
 				var points := boundary.points as PackedVector3Array
-				if lod_name != "local":
+				if lod_name != "local" and not chunk.has("lod"):
 					points = simplify(points, float(TOLERANCE_M[lod_name]))
 				if points.size() < 2:
 					continue
-				(groups[kind] as Array).append({"kind":kind, "points":points, "feature_id":boundary.feature_id, "source_fact_id":"local_spatial:" + str(boundary.feature_id)})
+				(groups[kind] as Array).append({"kind":kind, "points":points, "feature_id":boundary.feature_id, "source_fact_id":boundary.get("source_fact_id", "local_spatial:" + str(boundary.feature_id))})
 				counts[kind] += points.size() - 1
 				segments += points.size() - 1
 				vector_bytes += points.size() * 12
@@ -35,7 +55,7 @@ static func prepare(source: Array[Dictionary], lods: Array[String] = ["coarse", 
 		for kind: String in groups:
 			if not (groups[kind] as Array).is_empty():
 				chunks.append({"kind":kind, "boundaries":groups[kind], "lod":lod_name})
-		stats[lod_name] = {"segments":segments, "packed_vector_bytes":vector_bytes, "tolerance_m":TOLERANCE_M[lod_name]}
+		stats[lod_name] = {"segments":segments, "packed_vector_bytes":vector_bytes, "tolerance_m":(5000.0 if lod_name == "coarse" else 1500.0) if precomputed else TOLERANCE_M[lod_name], "precomputed": precomputed}
 	return {"chunks":chunks, "lod_stats":stats, "lod_prepare_usec":Time.get_ticks_usec()-started}
 
 static func simplify(points: PackedVector3Array, tolerance_m: float) -> PackedVector3Array:
