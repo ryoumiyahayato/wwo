@@ -1,0 +1,42 @@
+{
+  "baseline": "c4731a33177660b83c6490f41fe42dcbe7cfa7bb",
+  "branch": "experiment/war-spatial-continuity-goal-v0",
+  "stages": {
+    "M0": "PASSED",
+    "M1": "RUNNING",
+    "M2": "NOT_STARTED",
+    "M3": "NOT_STARTED",
+    "M4": "NOT_STARTED"
+  },
+  "last_verified_code_commit": "c4731a33177660b83c6490f41fe42dcbe7cfa7bb",
+  "started_utc": "2026-10-07T16:28:31Z",
+  "effective_minutes_estimate": 17,
+  "remaining_minutes_estimate": 583,
+  "estimate_quality": "approximate wall clock minus known wait; update at safe checkpoints",
+  "platform_startup_wait_seconds": 13,
+  "tests_completed": [
+    "Tasks1–8: 40960 checks, 0 failures",
+    "five retained regressions: 2988 checks, 0 failures",
+    "eight fresh-process replay pairs: identical on Linux"
+  ],
+  "tests_pending": [
+    "M1 new space tests and affected cross-layer regressions"
+  ],
+  "blockers": [],
+  "next": "Run cloud_validate.py baseline; compare current Linux independent processes.",
+  "validation_session": null,
+  "connection_checks": [
+    {
+      "utc": "2026-10-07T16:42:50Z",
+      "result": "fresh exec succeeds; original session27058 reachable; Godot PID1857 live; no restart"
+    }
+  ],
+  "baseline_known_failures": [
+    "unified_formal_world_economy_golden_test",
+    "baseline_golden_independent"
+  ],
+  "evidence": {
+    "M0": "iteration/evidence/m0-linux/evidence.json",
+    "M0_raw": "builds/task9-m0"
+  }
+}

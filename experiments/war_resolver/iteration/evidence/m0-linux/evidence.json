@@ -1,0 +1,1678 @@
+{
+  "mode": "baseline",
+  "source_head": "c4731a33177660b83c6490f41fe42dcbe7cfa7bb",
+  "frozen_base": "c4731a33177660b83c6490f41fe42dcbe7cfa7bb",
+  "version": "4.6.3.stable.official.7d41c59c4",
+  "source_digest": {
+    "experiments/war_resolver/role_tests.gd": "ff50e98b0b1fd0f065ffd798a698667fd98c5c85ba0c4abed75713771c34b1f9",
+    "experiments/war_resolver/data.gd": "ffff4828bd65058519a1ca761f19458e85417552225bd0a5dcd5d72ea7dd716b",
+    "experiments/war_resolver/tests.gd": "e830d6b5979625d312ad42153feb09b7269715039cc130adfc1bb3ac6f69d614",
+    "experiments/war_resolver/role_replay_probe.gd": "8f857013f97be93aad6d22ab5729d00cd4e225ddadf3c405c49b7dc93e78583f",
+    "experiments/war_resolver/resolver.gd": "f641e3a9c39d0893f585663ff01011008d370bfc156b2f5276d7c05564ead1c4",
+    "experiments/war_resolver/battle_state.gd": "9a6b9ce3f1745e86fd6b8facc9829a29570d178a31bf3fc0d3262b320b06435a",
+    "experiments/war_resolver/validate.py": "5763cb219b1cf914a1b6eb991fb715e769e6cca1843c5860b3babae24b3db9d2",
+    "experiments/war_resolver/role_scenarios.gd": "c7b46e566a549e827613efe249cac9ac4acaae40d5b53225e9bcd473683ec8c2",
+    "experiments/war_resolver/scenarios.gd": "9326f6e8e103edc821e8e9a0aabe7ff0ce7e3fe0dd7a5534412c0811028632e8",
+    "experiments/war_resolver/replay_probe.gd": "529757d052438b1e6c6e0bfd04afef56888e18bc9b7e07ac0b2b572e56b4de4b",
+    "experiments/war_resolver/role_overrides.gd": "44363f24768ece545bb09594807baee2bdb557c5e47745664c5daba32d50ffe7",
+    "experiments/war_resolver/benchmark.gd": "8fb09d68c8b2f6a3358936b6e82f93d0aba7a85b03e4e1d20565a2b01979e45b",
+    "experiments/war_resolver/iteration/cloud_validate.py": "380597a06c7f38cf1ff52130a5fcd8d0b655f16f4c08359fb97a9c1e307caddd",
+    "experiments/war_resolver/aggregation/authority.gd": "e68040217fd55b6acab0e9da57c274d256c93ba5742f68f0d3db04636594b6b8",
+    "experiments/war_resolver/aggregation/spatial_hierarchy.gd": "5b057ca26e7c9370ce4f5e283bec81f1f071a832bf1bdcd79d57a70fb4d7b8f2",
+    "experiments/war_resolver/aggregation/tests.gd": "a7e6042ecebc624145cbafb8fdd5df9aac2bab6052dd85890007f1b4003ed7d5",
+    "experiments/war_resolver/aggregation/fixtures.gd": "49c196a901d50a863ce17a1addd772bd47d446d8b7f8f9d63144096e0fd84e4a",
+    "experiments/war_resolver/aggregation/contact_index.gd": "d9bd056deeae1ffc83b4dad09f29092b30f83536d39842ae8aeae7e4961a041c",
+    "experiments/war_resolver/aggregation/validate.py": "065c0f5be0a5f7cc22efcfead6dbaad83e7edc7f6ec642f719f7af21cd83cae3",
+    "experiments/war_resolver/aggregation/replay_probe.gd": "8e2f6691cab8af0ea47e7f0bb51c7bbe9713f96cf1f103efef6d5f419c44e4fb",
+    "experiments/war_resolver/aggregation/indexed_resolver.gd": "b3d115e51ba57662fc437690ed3fe4ba00e8e42412e70be4a152e81db7871d7d",
+    "experiments/war_resolver/aggregation/benchmark.gd": "a01f7a80715f164791b611d22f169ef5599299950076b276da704d638484fbaa",
+    "experiments/war_resolver/information/reader.gd": "75d9357149c9f38dd07e490a4936fdbb8e96307a515047e4c9eb7c75b3924f82",
+    "experiments/war_resolver/information/decision.gd": "91b40544a83ceeec47831e1bf52d5312d4c75bc4b72468f343c770017f071937",
+    "experiments/war_resolver/information/tests.gd": "3aae0152c72332254bf1c986789cb489cb7fa6f6673639e2bd3102d1a7096c39",
+    "experiments/war_resolver/information/fixtures.gd": "4a5e246e3418eb2ca7ae3a437e7d84497a41b34d27bca9db745e32feba58990b",
+    "experiments/war_resolver/information/validate.py": "c322395a5cde3c53954eff492ce1c4de40bb281e6ff3a7545dfea9d2076272d5",
+    "experiments/war_resolver/information/service.gd": "d3cddda31dac9277fca4501a66c1668e6c8bcd04f103011ed297a9aeb80def15",
+    "experiments/war_resolver/information/replay_probe.gd": "0151795019bbaf0ab027a2f803ba7e447008ad2eea9dcfb2cade7d8d92928bf8",
+    "experiments/war_resolver/information/benchmark.gd": "88a00ef8580f140d3fb6f34b4444c2b51fa73f8461f377b60d6ccf33bb2e0457",
+    "experiments/war_resolver/sandbox/session.gd": "531db6195ae2e78025df9d8cffe132e59e73074b986aa6920d400d53e563fd13",
+    "experiments/war_resolver/sandbox/tests.gd": "43be0a460f9f941248ece2a26e4ebd48dee989d79be304bc42898f9709c32472",
+    "experiments/war_resolver/sandbox/canvas.gd": "2421704a8fbac8f0d374dfec2cf625246b379d42c0cf572749f6720c24b3d82a",
+    "experiments/war_resolver/sandbox/observation_probe.gd": "2d06b2a679a0c5db910efc1605bb89768bb78ba21532d903f96de2e79e5a84f6",
+    "experiments/war_resolver/sandbox/fixtures.gd": "8cdacf061b9374279396a741543cd66055445d60fe9efd10b720205ad1968dd7",
+    "experiments/war_resolver/sandbox/sandbox.gd": "4ba5c93a2c75a424e46286db435725812ee607f0d82c00ccca0034724ff736fa",
+    "experiments/war_resolver/structure/tests.gd": "a5faf588d9e4e96a0e21d9bc0674913b269233305565896f8619fcce22ef0e72",
+    "experiments/war_resolver/structure/fixtures.gd": "ca05f53a3cc13faee3b52f934c99ac8c04ac4bf994bcfae07b57083eda56ee92",
+    "experiments/war_resolver/structure/validate.py": "6797c384ad876d66421507ba33aa5522088c69f599b38d176842ad7660f329a5",
+    "experiments/war_resolver/structure/service.gd": "29f678d5857bb0597531a79a2b94eb0ae6582231c466979fb606ae8b8352d546",
+    "experiments/war_resolver/structure/commands.gd": "d6832f556e6311aab08baaea0a0d66333cef1d726b0517200a232dff8dce28cf",
+    "experiments/war_resolver/structure/replay_probe.gd": "283dea1d2e7b38ad6b6fc5e8008232b7a4c5a6ad2a4dfb5b31a493fe38ba1891",
+    "experiments/war_resolver/structure/benchmark.gd": "be81aa89e412f90ce20ff69497336948bdae9dbab8607317ad8766a6f3c1c62d",
+    "experiments/war_resolver/decision/test_policy.gd": "678e60e23a8bdba3412eded0832c298a18b53a61c27a41bb554ea95a2b6627d8",
+    "experiments/war_resolver/decision/tests.gd": "77cab7f2f567adbb9abda0fb6fdd7adc898cf613444e8bca352733ccf4d636f9",
+    "experiments/war_resolver/decision/adapter.gd": "06dfa0711d9df834b8cec964bfcbc8ee59da1f08e6242fa003e7cf9b9a7d0464",
+    "experiments/war_resolver/decision/decision_context.gd": "26ac78dcf3b2aaff96fc109f03241a24f002ecca37912a7193092b6f25269e2d",
+    "experiments/war_resolver/decision/fixtures.gd": "e3b66d1251f9b25eca1c57a60d0127abba828522e2cdee8986cb2d6b1eefd428",
+    "experiments/war_resolver/decision/validate.py": "aca45fc0929b1a12c4d569a75e702a90ef8c7f00d19c40a537b3db189bf4e42b",
+    "experiments/war_resolver/decision/service.gd": "a133ca08e6168a16663f6f9f3bae502d9f4bd86b2c65192b43aae1ef7c0dc68f",
+    "experiments/war_resolver/decision/replay_probe.gd": "9fde742225163437eca003dd9ae95a93db9dd08a822736de5f751424b6274c8d",
+    "experiments/war_resolver/decision/benchmark.gd": "8d0dc3d0ec09433453b4f9bd145c80931cad12ed6f6199d0bd6984f425e256e9",
+    "experiments/war_resolver/logistics/tests.gd": "995ce419b9966e4fc8b98fadd3a9361108f1c8501f50f8dffb686e5ac4669934",
+    "experiments/war_resolver/logistics/fixtures.gd": "2347dd2865cb9ae5df8156fa45ab387e270283e85cc2a8414d483134db057ac0",
+    "experiments/war_resolver/logistics/validate.py": "eb1879cb6f137ca168b17dcd4ade62f6c9af828efac2c265c3488baf86945030",
+    "experiments/war_resolver/logistics/service.gd": "fcd684e498997c4bb9f467876de9bdeb42ef6707af55c27a07774a0c614f16b6",
+    "experiments/war_resolver/logistics/commands.gd": "44fd74f7194ea2e38a876079da9c20c9a2b566fa4bcbe036bf40f4fd53ca2c25",
+    "experiments/war_resolver/logistics/replay_probe.gd": "67451ad58d204c16f116528d9f8dc89304430f76daeeaf9821353e3e0c926ef4",
+    "experiments/war_resolver/logistics/benchmark.gd": "fdd0c741d0517e404330cf6575b048055f60dee8575e1851a72f68ad98710f3d"
+  },
+  "platform": "linux",
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "steps": [
+    {
+      "name": "version",
+      "command": [
+        "/usr/local/bin/godot",
+        "--version"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.34974,
+      "fatal": null,
+      "log": "version.log",
+      "log_sha256": "1e07780c365549219ffd8e6bd120a818c80424e8295d4ee7451c10d0ed0fa84f",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "import",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--editor",
+        "--path",
+        "/workspace/wwo",
+        "--quit"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 4.96695,
+      "fatal": null,
+      "log": "import.log",
+      "log_sha256": "041d95195abd47c4a7fca4426db869943786b9e01bd10b61adcfdfb0fe1772c4",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "resolver_tests",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/tests.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 8.43883,
+      "fatal": null,
+      "log": "resolver_tests.log",
+      "log_sha256": "02f69c62d75f5fc391cf47e3cb5c8ae4cccfc3e81eb1b309e6b0fce97dfe465e",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "resolver_a",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/replay_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.89685,
+      "fatal": null,
+      "log": "resolver_a.log",
+      "log_sha256": "825ff490a798e248b285ccfa91520cb4ffff780a7b5f38ad9e3302329248e680",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "resolver_b",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/replay_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.99066,
+      "fatal": null,
+      "log": "resolver_b.log",
+      "log_sha256": "825ff490a798e248b285ccfa91520cb4ffff780a7b5f38ad9e3302329248e680",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "resolver_benchmark",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/benchmark.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 2.39657,
+      "fatal": null,
+      "log": "resolver_benchmark.log",
+      "log_sha256": "12d76a49da5d6ada094e9e8f25590a7cc6cfc321edbf1a28311d44578b8f1825",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "roles_tests",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/role_tests.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 8.24473,
+      "fatal": null,
+      "log": "roles_tests.log",
+      "log_sha256": "4c019bb2adf1b1e1f4bbd201e9aa50c0cfc56d75f987af44f099597bc1c12bfe",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "roles_a",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/role_replay_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 1.73512,
+      "fatal": null,
+      "log": "roles_a.log",
+      "log_sha256": "6370533f15a3ed2535cd5b55df12fe6d3938b31c2765816c11a7290b43ebe164",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "roles_b",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/role_replay_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 1.91994,
+      "fatal": null,
+      "log": "roles_b.log",
+      "log_sha256": "6370533f15a3ed2535cd5b55df12fe6d3938b31c2765816c11a7290b43ebe164",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "sandbox_tests",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/sandbox/tests.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 23.30989,
+      "fatal": null,
+      "log": "sandbox_tests.log",
+      "log_sha256": "4da70c4530f596cb58beafea4ea7fbdc3b1fe497a2c7b749090543835afdb186",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "sandbox_a",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/sandbox/observation_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 7.99489,
+      "fatal": null,
+      "log": "sandbox_a.log",
+      "log_sha256": "6fedb31ddba94bca068bb6e4f5c9ff7b84141ad7036f3af3dfc7d8c773375b4b",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "sandbox_b",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/sandbox/observation_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 7.99516,
+      "fatal": null,
+      "log": "sandbox_b.log",
+      "log_sha256": "6fedb31ddba94bca068bb6e4f5c9ff7b84141ad7036f3af3dfc7d8c773375b4b",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task4_tests",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/aggregation/tests.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 29.46733,
+      "fatal": null,
+      "log": "task4_tests.log",
+      "log_sha256": "2ba0c73c4f9e278938d482eb5e917dec2c87146363f6711a297d1e3941d0a4a6",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task4_a",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/aggregation/replay_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.61232,
+      "fatal": null,
+      "log": "task4_a.log",
+      "log_sha256": "0db62478bc70698c69c0be5b6bd6a36f83713b135fbd353b38854ed42d8ffdef",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task4_b",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/aggregation/replay_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.62122,
+      "fatal": null,
+      "log": "task4_b.log",
+      "log_sha256": "0db62478bc70698c69c0be5b6bd6a36f83713b135fbd353b38854ed42d8ffdef",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task4_benchmark",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/aggregation/benchmark.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 12.70764,
+      "fatal": null,
+      "log": "task4_benchmark.log",
+      "log_sha256": "a6f8c27f057921600638bf19318f0b5bee03d4f1cf3650da324b06f8a6b25d9a",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task5_tests",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/structure/tests.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 1.17463,
+      "fatal": null,
+      "log": "task5_tests.log",
+      "log_sha256": "fb21af7028fffa28a6c62743dc22283abbcdfc6ce74a07c2fa788628b8a12441",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task5_a",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/structure/replay_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.61538,
+      "fatal": null,
+      "log": "task5_a.log",
+      "log_sha256": "413fd1a464e8be10b71eee790428cbb06966b1c29fb4aa6c72b2e0423db1696d",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task5_b",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/structure/replay_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.61612,
+      "fatal": null,
+      "log": "task5_b.log",
+      "log_sha256": "413fd1a464e8be10b71eee790428cbb06966b1c29fb4aa6c72b2e0423db1696d",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task5_benchmark",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/structure/benchmark.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.80261,
+      "fatal": null,
+      "log": "task5_benchmark.log",
+      "log_sha256": "ed7fb79b65e90911eb3bc9ba27612327e2f46cbc53220bbf31774cd4ec2d9293",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task6_tests",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/logistics/tests.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 1.36602,
+      "fatal": null,
+      "log": "task6_tests.log",
+      "log_sha256": "7d1bb200df348fbfc578e228e0f3c2aeb0965edbd6556e2ead6ff3e6acb239e0",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task6_a",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/logistics/replay_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.70862,
+      "fatal": null,
+      "log": "task6_a.log",
+      "log_sha256": "f686dd28a379796b97076cab0a566f29591b6f3d5c17784b3492b84edfd81c0f",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task6_b",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/logistics/replay_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.71364,
+      "fatal": null,
+      "log": "task6_b.log",
+      "log_sha256": "f686dd28a379796b97076cab0a566f29591b6f3d5c17784b3492b84edfd81c0f",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task6_benchmark",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/logistics/benchmark.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.99489,
+      "fatal": null,
+      "log": "task6_benchmark.log",
+      "log_sha256": "ac9a23733a2a7b715fe2825737953439da97f8dd865049620f88ce87011d5a63",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task7_tests",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/information/tests.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 1.17701,
+      "fatal": null,
+      "log": "task7_tests.log",
+      "log_sha256": "c5a5af29250b1845d6c72489c15e416c0a1aaf2290e7f09c7100d7e8550a4a23",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task7_a",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/information/replay_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.70622,
+      "fatal": null,
+      "log": "task7_a.log",
+      "log_sha256": "b09447a45b8d7b5cb39b16d6d60dba965310696aa60675a8a48d0a729dfb7f79",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task7_b",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/information/replay_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.71051,
+      "fatal": null,
+      "log": "task7_b.log",
+      "log_sha256": "b09447a45b8d7b5cb39b16d6d60dba965310696aa60675a8a48d0a729dfb7f79",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task7_benchmark",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/information/benchmark.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.90291,
+      "fatal": null,
+      "log": "task7_benchmark.log",
+      "log_sha256": "0463a3c5a221e1cbc3a7ca790a5d24f5a11f3088bc9fb9f2fdd2f327e0c93ca3",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task8_tests",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/decision/tests.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 4.44732,
+      "fatal": null,
+      "log": "task8_tests.log",
+      "log_sha256": "77e27fb3da56eeb4ddd0240e0bb8f9c48ab1bd813d03d0b6dae413331451dabc",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task8_a",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/decision/replay_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.71177,
+      "fatal": null,
+      "log": "task8_a.log",
+      "log_sha256": "333a493143faf1276310be870e205e160d19d7d7d7647f450f7be93c516ce5db",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task8_b",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/decision/replay_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.70606,
+      "fatal": null,
+      "log": "task8_b.log",
+      "log_sha256": "333a493143faf1276310be870e205e160d19d7d7d7647f450f7be93c516ce5db",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task8_benchmark",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/decision/benchmark.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 4.08533,
+      "fatal": null,
+      "log": "task8_benchmark.log",
+      "log_sha256": "0d0c4ec14006083d28eb8878330cd91d1260d8cb4068e9077f322b6d139a779f",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "sandbox_scene",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "res://experiments/war_resolver/sandbox/sandbox.tscn",
+        "--quit-after",
+        "5"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.33695,
+      "fatal": null,
+      "log": "sandbox_scene.log",
+      "log_sha256": "a9912b85473f126d3f4f63ec824170c828df3473a292f866dde86cafda5b66da",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "military_strategy_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/vnext/military_strategy_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 23.31369,
+      "fatal": null,
+      "log": "military_strategy_test.log",
+      "log_sha256": "ebc4340f1a71dca59a5c51f88597b222f95afb98d211ec6e1b6115ad9d7787e3",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "military_r3_findings_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/vnext/military_r3_findings_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 87.95927,
+      "fatal": null,
+      "log": "military_r3_findings_test.log",
+      "log_sha256": "a2f9f3c96406a28510bb113928718717d483b10a4324f294e600eaa7758de5d8",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "military_spatial_capacity_integration_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/vnext/military_spatial_capacity_integration_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 1.45854,
+      "fatal": null,
+      "log": "military_spatial_capacity_integration_test.log",
+      "log_sha256": "084f40238f4c99e958d4b05443f5896275f1c92936b246f318acf02b3d044b89",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "formal_military_authorized_defend_integration_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/formal/formal_military_authorized_defend_integration_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 5.6536,
+      "fatal": null,
+      "log": "formal_military_authorized_defend_integration_test.log",
+      "log_sha256": "efc43c0e2a478a5413de4941b6dd99e38a6e9aebf73792202bb33cf6d7be7e97",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "formal_exact_persistence_roundtrip_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/formal/formal_exact_persistence_roundtrip_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 10.12765,
+      "fatal": null,
+      "log": "formal_exact_persistence_roundtrip_test.log",
+      "log_sha256": "03c81a462677605c15470fa08d67bd4bb771111892ff3afc3bd10a126ada7c1a",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "audit_1900_commodity_economy",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-B",
+        "tools/audit_1900_commodity_economy.py"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.02204,
+      "fatal": null,
+      "log": "audit_1900_commodity_economy.log",
+      "log_sha256": "160c77c30ca65fbbcd6d0ac202e8009ea96975b5825ccfe80409c0335c1089e8",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "audit_1900_economy_integration",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-B",
+        "tools/audit_1900_economy_integration.py"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.02429,
+      "fatal": null,
+      "log": "audit_1900_economy_integration.log",
+      "log_sha256": "27a5d2c9fae4501742eca2f997943b83711a8d42c9780c574e2448caef650c26",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "audit_1900_world_economy_compact",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-B",
+        "tools/audit_1900_world_economy_compact.py"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.02497,
+      "fatal": null,
+      "log": "audit_1900_world_economy_compact.log",
+      "log_sha256": "d3bce32f9745be2650c0208c84d802f6e5dc73381be87aa34174b9f0d6273be1",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "generate_historical_provenance",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-B",
+        "tools/provenance/generate_historical_provenance.py",
+        "--check"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.04035,
+      "fatal": null,
+      "log": "generate_historical_provenance.log",
+      "log_sha256": "083dfc6c925950dc6d05e7e41ba9345d79c809cd025113a13d697c2b727d19d6",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "world_data",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/world_data",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 25.35087,
+      "fatal": null,
+      "log": "world_data.log",
+      "log_sha256": "8f2971ff68d281b31d20ec09cdcc672430321b9bc5feeb7ead235df8fc83c44b",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_historical_provenance_foundation_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/formal/historical_provenance_foundation_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 1.00862,
+      "fatal": null,
+      "log": "unified_historical_provenance_foundation_test.log",
+      "log_sha256": "db389ebda6a00739944f382ca5c08d11ce7469079b3b9a3d178cb8da398e03fc",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_runtime_political_identity_foundation_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/formal/runtime_political_identity_foundation_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 11.44862,
+      "fatal": null,
+      "log": "unified_runtime_political_identity_foundation_test.log",
+      "log_sha256": "c96190edfb50449b099bced882e05342b2bfcbf8062c35236b1f2107ce7da022",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_formal_world_economy_golden_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/formal/formal_world_economy_golden_test.gd"
+      ],
+      "exit": 1,
+      "passed": false,
+      "wall_seconds": 13.82996,
+      "fatal": "ERROR:",
+      "log": "unified_formal_world_economy_golden_test.log",
+      "log_sha256": "00e56d2b8e804950b9edd118ec733dc7348da431ccdf1d81f99bfadd331c7d8b",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_formal_world_economic_boundary_closure_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/formal/formal_world_economic_boundary_closure_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 2.38851,
+      "fatal": null,
+      "log": "unified_formal_world_economic_boundary_closure_test.log",
+      "log_sha256": "21d3d26abc17cda531250095e7facd1b4d7c814cc7026501801285f5a6d2b71e",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_formal_world_market_identity_foundation_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/formal/formal_world_market_identity_foundation_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 5.55853,
+      "fatal": null,
+      "log": "unified_formal_world_market_identity_foundation_test.log",
+      "log_sha256": "4abb3b26bcf910d0c68e3a4b40a114840a3972d88ac217c7c5662918a66c9a81",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_organization_core_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/vnext/organization_core_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.26737,
+      "fatal": null,
+      "log": "unified_organization_core_test.log",
+      "log_sha256": "052fa67ced38f7cfe338183265eba1230c0798b3ab4491301457b85b618e9054",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_formal_world_organization_composition_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/formal/formal_world_organization_composition_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 8.80753,
+      "fatal": null,
+      "log": "unified_formal_world_organization_composition_test.log",
+      "log_sha256": "3b8136a79869affb3eb1a938751e729ec1c3040701bb38003feead3607df1ef4",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_current_world_domain_convergence_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/vnext/current_world_domain_convergence_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.99744,
+      "fatal": null,
+      "log": "unified_current_world_domain_convergence_test.log",
+      "log_sha256": "e91a54d4092326914b9c9841ae54861c9bb43bff1a989a5d8f640c3cca755417",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_formal_world_player_journey_smoke",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/formal/formal_world_player_journey_smoke.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 5.83036,
+      "fatal": null,
+      "log": "unified_formal_world_player_journey_smoke.log",
+      "log_sha256": "c0824798d32b00cc31df446921d8b5660fa30b66c47eb23844bf1aa5cd10a8bc",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_formal_world_export_resource_smoke",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/formal/formal_world_export_resource_smoke.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 2.10902,
+      "fatal": null,
+      "log": "unified_formal_world_export_resource_smoke.log",
+      "log_sha256": "960321057e5f9e551e672ac0ffbf80b5beb1c344af45b344298bd89bc6c425ac",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_formal_world_integration_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/formal/formal_world_integration_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 11.69175,
+      "fatal": null,
+      "log": "unified_formal_world_integration_test.log",
+      "log_sha256": "7008eb9942c5a3d418948b72fe710d135845b9f41db7d5f5502c055b97835176",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_formal_world_long_term_balance_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/formal/formal_world_long_term_balance_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 137.26279,
+      "fatal": null,
+      "log": "unified_formal_world_long_term_balance_test.log",
+      "log_sha256": "90c428e265231465b05ccd12dd5311963e3e58c9aa7488b3198fa4071ae215f5",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_v2_3_player_interface_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/v2_3/v2_3_player_interface_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 1.92032,
+      "fatal": null,
+      "log": "unified_v2_3_player_interface_test.log",
+      "log_sha256": "68e7e8f6ec4b3ef250e0089779657f020ddee84527325b1fd44dd72f0adf68f1",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_alpha_historical_world_economy_data_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/alpha/alpha_historical_world_economy_data_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.14769,
+      "fatal": null,
+      "log": "unified_alpha_historical_world_economy_data_test.log",
+      "log_sha256": "04e5cf195fd39e270ef2cbfb8f0ed4a57e818d8bb2c21af014535d09cc4251d1",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_v2_3_location_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/v2_3/v2_3_location_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.53295,
+      "fatal": null,
+      "log": "unified_v2_3_location_test.log",
+      "log_sha256": "8eb547298f3065bbec655515f156d36906fcd6aec7e2521fa1e458cfd7e73dc3",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_v2_3_route_planner_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/v2_3/v2_3_route_planner_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.52339,
+      "fatal": null,
+      "log": "unified_v2_3_route_planner_test.log",
+      "log_sha256": "aea05a62b6f581b2c7f2d9976365bbd20ac51d51b992b9f55fa10fc56d8281ec",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_v2_3_travel_execution_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/v2_3/v2_3_travel_execution_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.4284,
+      "fatal": null,
+      "log": "unified_v2_3_travel_execution_test.log",
+      "log_sha256": "f5aa519ba3d5c54ad305e1b02de91c2d0027f3ea0203b1a42a00386f37a05555",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_v2_3_schedule_integration_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/v2_3/v2_3_schedule_integration_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.52426,
+      "fatal": null,
+      "log": "unified_v2_3_schedule_integration_test.log",
+      "log_sha256": "06c99896b074d1640f6ca02c581440049038848a3476c68e9ed20ee6ebe347e2",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_v2_3_communication_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/v2_3/v2_3_communication_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.42733,
+      "fatal": null,
+      "log": "unified_v2_3_communication_test.log",
+      "log_sha256": "f3d8ff65bf515007ce0e3e5efcddf06824d58f97b726a5b018726b5a06c3ac15",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_v2_3_knowledge_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/v2_3/v2_3_knowledge_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.52332,
+      "fatal": null,
+      "log": "unified_v2_3_knowledge_test.log",
+      "log_sha256": "9988431d28c5f63880242f41125f2dbddb9882fd113ea8d8497cf2dc84913b0d",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_v2_3_relationship_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/v2_3/v2_3_relationship_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.42599,
+      "fatal": null,
+      "log": "unified_v2_3_relationship_test.log",
+      "log_sha256": "b634c96c6ebab14515058b7b022075e983d67c5dca60e7c8148a8bc78a0cd072",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_v2_3_appointment_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/v2_3/v2_3_appointment_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.52017,
+      "fatal": null,
+      "log": "unified_v2_3_appointment_test.log",
+      "log_sha256": "32ca5b4e91ce7f70b338d56541d7a06afc935e45e6b445342f3cf7c747b5a2a7",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_v2_3_npc_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/v2_3/v2_3_npc_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.52259,
+      "fatal": null,
+      "log": "unified_v2_3_npc_test.log",
+      "log_sha256": "110e65a07be5350351200d4d407b190011e5db0ca97dd387e8f381aba9086763",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_v2_3_social_sandbox_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/v2_3/v2_3_social_sandbox_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 7.12771,
+      "fatal": null,
+      "log": "unified_v2_3_social_sandbox_test.log",
+      "log_sha256": "168a37d29c20e31a945851dcf5438d6a8317cc2bb89017e0d6534facd06bbbad",
+      "retained_shutdown_diagnostics": 1
+    },
+    {
+      "name": "unified_v2_3_social_sandbox_completion_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/v2_3/v2_3_social_sandbox_completion_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 1.17189,
+      "fatal": null,
+      "log": "unified_v2_3_social_sandbox_completion_test.log",
+      "log_sha256": "633b2d42ffdf5347d7fef357449564979cfe7ee79011d8af47ac193c795c5e94",
+      "retained_shutdown_diagnostics": 1
+    },
+    {
+      "name": "unified_v2_3_survival_autonomy_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/v2_3/v2_3_survival_autonomy_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.99182,
+      "fatal": null,
+      "log": "unified_v2_3_survival_autonomy_test.log",
+      "log_sha256": "8a7370109d0a76af9bfa5a05c9a8c2f59bad51f8c17d5d24c6ccdaab86cbc710",
+      "retained_shutdown_diagnostics": 1
+    },
+    {
+      "name": "unified_alpha_commodity_market_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/alpha/alpha_commodity_market_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 3.8711,
+      "fatal": null,
+      "log": "unified_alpha_commodity_market_test.log",
+      "log_sha256": "9c118dcaf9e06da4d100a0828665df1e76e90729f9c8e11335e9d0154bf20431",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_alpha_economy_lifecycle_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/alpha/alpha_economy_lifecycle_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.24235,
+      "fatal": null,
+      "log": "unified_alpha_economy_lifecycle_test.log",
+      "log_sha256": "809f7df6b8a627ed0edb36789f23b47769e588838cf7f6353b5c4280ba6f991f",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_alpha_labor_enterprise_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/alpha/alpha_labor_enterprise_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.33599,
+      "fatal": null,
+      "log": "unified_alpha_labor_enterprise_test.log",
+      "log_sha256": "1c131335b1865244b082261ab78e56f754c5ddd4b793d035a9e1361451a0a19b",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_alpha_economy_integration_phase2_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/alpha/alpha_economy_integration_phase2_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 9.26689,
+      "fatal": null,
+      "log": "unified_alpha_economy_integration_phase2_test.log",
+      "log_sha256": "c3201dd24f3928d14d01f32ef4a0ca3e446fce04a5ed4449f727b3135754ea2d",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_alpha_ai_economy_stability_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/alpha/alpha_ai_economy_stability_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 144.23918,
+      "fatal": null,
+      "log": "unified_alpha_ai_economy_stability_test.log",
+      "log_sha256": "b0e1bdc5fc914b899c99a6a4ee10112db4c258500a7833e0bf2d1035624a2ca0",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_alpha_state_equivalence_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/alpha/alpha_state_equivalence_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 4.70945,
+      "fatal": null,
+      "log": "unified_alpha_state_equivalence_test.log",
+      "log_sha256": "aef67c42fb513cd85af6b86a2828df57cee280abeffa5adcd1185fd73619b844",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "unified_alpha_save_and_migration_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/alpha/alpha_save_and_migration_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 5.27593,
+      "fatal": null,
+      "log": "unified_alpha_save_and_migration_test.log",
+      "log_sha256": "9d847124b449e286a5859969ef04d655e7ad4a7a79331b0d1bd50b7f0ad8bc99",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "formal_political_a",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/formal/runtime_political_snapshot_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.80733,
+      "fatal": null,
+      "log": "formal_political_a.log",
+      "log_sha256": "5a08fcd4c010b1cb3a5a509ea800c43557e4bb7eccfaf4d02630cfbc06b1a8c3",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "formal_political_b",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/formal/runtime_political_snapshot_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.80293,
+      "fatal": null,
+      "log": "formal_political_b.log",
+      "log_sha256": "5a08fcd4c010b1cb3a5a509ea800c43557e4bb7eccfaf4d02630cfbc06b1a8c3",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "formal_market_a",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/formal/formal_world_market_snapshot_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.80724,
+      "fatal": null,
+      "log": "formal_market_a.log",
+      "log_sha256": "7d0d38c16a3065916c8db30982b17d8fef559dbed5294f9f477449db505e9c63",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "formal_market_b",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/formal/formal_world_market_snapshot_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.99967,
+      "fatal": null,
+      "log": "formal_market_b.log",
+      "log_sha256": "7d0d38c16a3065916c8db30982b17d8fef559dbed5294f9f477449db505e9c63",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "formal_economic_a",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/formal/formal_world_economic_snapshot_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 1.83738,
+      "fatal": null,
+      "log": "formal_economic_a.log",
+      "log_sha256": "6b5b369d1168af4e67af41b01a753c42ea04b7d5a9304e6eafbe2085cdc1f597",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "formal_economic_b",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/formal/formal_world_economic_snapshot_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 1.64401,
+      "fatal": null,
+      "log": "formal_economic_b.log",
+      "log_sha256": "6b5b369d1168af4e67af41b01a753c42ea04b7d5a9304e6eafbe2085cdc1f597",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "formal_fingerprint_a",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/formal/formal_world_fingerprint_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.90775,
+      "fatal": null,
+      "log": "formal_fingerprint_a.log",
+      "log_sha256": "bfedcb3f25b87d7f6e7526d4b976bdeef4e5a323032a2548f7382925851947ab",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "formal_fingerprint_b",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/formal/formal_world_fingerprint_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.8125,
+      "fatal": null,
+      "log": "formal_fingerprint_b.log",
+      "log_sha256": "bfedcb3f25b87d7f6e7526d4b976bdeef4e5a323032a2548f7382925851947ab",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "formal_startup",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--quit-after",
+        "5"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.61916,
+      "fatal": null,
+      "log": "formal_startup.log",
+      "log_sha256": "a9912b85473f126d3f4f63ec824170c828df3473a292f866dde86cafda5b66da",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "codex_audit",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/codex_audit_regression.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.90113,
+      "fatal": null,
+      "log": "codex_audit.log",
+      "log_sha256": "513213eea64f1e97b7a4326b303fe3d1609eeb81e7c1e7c061a67778440c8cb8",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "baseline_golden_independent",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/formal/formal_world_economy_golden_test.gd"
+      ],
+      "exit": 1,
+      "passed": false,
+      "wall_seconds": 14.84624,
+      "fatal": "ERROR:",
+      "log": "baseline_golden_independent.log",
+      "log_sha256": "00e56d2b8e804950b9edd118ec733dc7348da431ccdf1d81f99bfadd331c7d8b",
+      "retained_shutdown_diagnostics": 0
+    }
+  ],
+  "checks": {
+    "resolver": 1876,
+    "roles": 3762,
+    "sandbox": 8941,
+    "task4": 17329,
+    "task5": 788,
+    "task6": 5703,
+    "task7": 1341,
+    "task8": 1220,
+    "military_strategy_test": [
+      966
+    ],
+    "military_r3_findings_test": [
+      1803
+    ],
+    "military_spatial_capacity_integration_test": [
+      68
+    ],
+    "formal_military_authorized_defend_integration_test": [
+      120
+    ],
+    "formal_exact_persistence_roundtrip_test": [
+      31
+    ]
+  },
+  "hashes": {
+    "resolver": "8ca88032a57178deeded30379798dbb5e8eb8ee87ca4526e49a0de3f8d457f8a",
+    "roles": "db9392ed36557206aa05af062e0c9a55e9565b903c7ff78051021373762f36b3",
+    "sandbox": "dff74a5d00ae2e7335d3e6ff037c0274dc07df5e7969901e0c4792f2d1094d7c",
+    "task4": "73c47a49ca73e026227324581975b1315b9386183a21da022827d30e37a646f3",
+    "task5": "8ea04270be8ecbaf532d02f0b61b03446edf7904826a3a3c06fdb2ed9e58eaae",
+    "task6": "5492e4560c58ab48491404c5c5c2cb15db108b855a067f726f66b90875fa2e87",
+    "task7": "f05794a6fb87f8af58f9621023fb6e0eeac496fcfb11da53baf3f80a6e4f9fcf",
+    "task8": "70d7403501902e03ee8e81798d631c36c27408ea68bc2c176ab6e3bd144f60bd",
+    "formal_political": "603efe518481f49680b4010e1d0bf28ea45a40769afde64b13e81d871685b14b",
+    "formal_market": "a3fc4c2c77c1c4bab01560fd58214d0f4f1b3abc78e77ce0765da7a3ee2bb7f6",
+    "formal_economic": "5879f94a113ef32a1b69e98465e5e796d7a982bf7b4dd77bb79b1d381a781c59",
+    "formal_fingerprint": "4bc156a55b650fd2b850be769a11bb757736345506988a14f5ed2ead3269e87a"
+  },
+  "known_baseline_failure": [
+    "unified_formal_world_economy_golden_test",
+    "baseline_golden_independent"
+  ],
+  "official_powershell": "NOT RUN; equivalent steps",
+  "complete": true,
+  "baseline_golden_actual_hashes": [
+    "24519f5dc2d191d7d5bac67437e35e6d4c4e734700f5c9915ee1df620abdfdcf",
+    "241451cb8ce5a69d62a5105c0b0808fe16fbdc4ca1f0cb79ade3ffde780c56fd"
+  ],
+  "new_failed_steps": [],
+  "gate_passed_excluding_disclosed_baseline_failure": true
+}
