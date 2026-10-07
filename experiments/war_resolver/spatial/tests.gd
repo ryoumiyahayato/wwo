@@ -1,6 +1,7 @@
 extends SceneTree
 ## Expected values come from geometry, finite-stock arithmetic and transformations.
 const F = preload("res://experiments/war_resolver/spatial/fixtures.gd")
+const Information = preload("res://experiments/war_resolver/information/service.gd")
 var checks: int = 0
 var failures: int = 0
 var evidence: Dictionary = {}
@@ -14,6 +15,7 @@ func _initialize() -> void:
 	_rejections()
 	_dynamic_and_retreat()
 	_long_retreat_and_dependency()
+	_knowledge_boundary()
 	print("SPATIAL_EVIDENCE_JSON=" + JSON.stringify(evidence))
 	print("Task9 spatial: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures > 0 else 0)
@@ -193,7 +195,27 @@ func _rejections() -> void:
 	check(not env.space.schedule_fact("nan", NAN, "AB", false).ok, "NaN time rejected")
 	check(not env.space.schedule_fact("negative", -1.0, "AB", false).ok, "negative time rejected")
 	check(not env.state.schedule_event("unprepared", 1.0, "spatial", {"fact_id": "missing"}), "unprepared spatial ticket denied")
+	var invalid: Dictionary = F.ground()
+	invalid.resistance = NAN
+	check(not env.space.schedule_ground("invalid_ground", 1.0, "edge", "AB", invalid).ok, "NaN terrain rejected")
+	invalid.resistance = -1.0
+	check(not env.space.schedule_ground("negative_ground", 1.0, "edge", "AB", invalid).ok, "negative terrain rejected")
 	check(before == env.state.snapshot(), "malformed input is atomic")
+
+func _knowledge_boundary() -> void:
+	var env: Dictionary = F.setup()
+	var information: Information = Information.new()
+	var source: Dictionary = {"observer_ref": "company", "scope_ref": "blue_company", "origin": "EXTERNAL", "quality": 0.5, "precision_km": 0.1, "fact_kinds": ["status"]}
+	var channel: Dictionary = {"senders": ["company"], "recipients": ["company"], "latency": 0.0, "available": true, "quality": 1.0, "command_scope": "blue_company"}
+	check(information.configure(env.state, env.lod, env.structure, env.logistics, env.roles, {"old_source": source}, {"instant": channel}), "Task7 shares spatial world")
+	check(information.admit_external_observation({"id": "old", "source_ref": "old_source", "subject_kind": "unit", "subject_ref": "unit_000", "fact_kind": "status", "value": {"states": ["hold"]}, "observed_at": 0.0}).ok, "old report admitted")
+	check(information.send_report("company", {"id": "old_report", "recipient_ref": "company", "channel_ref": "instant", "observation_ids": ["old"]}).ok, "old report sent")
+	env.lod.advance(0.0)
+	var known: Dictionary = information.knowledge("company")
+	var stocks: Dictionary = env.logistics.audit()
+	check(env.space.schedule_fact("hidden_closure", 0.0, "bridge_BD", false).ok and env.lod.advance(0.0).ok, "hidden spatial fact applied at boundary")
+	check(known == information.knowledge("company"), "spatial truth does not refresh Task7 knowledge")
+	check(stocks == env.logistics.audit(), "bridge closure does not change any inventory")
 
 func _dynamic_and_retreat() -> void:
 	var retreat: Dictionary = F.setup()
