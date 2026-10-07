@@ -1,0 +1,23 @@
+extends SceneTree
+const F = preload("res://experiments/war_resolver/information/fixtures.gd")
+
+func _initialize() -> void:
+	var player_env: Dictionary = F.setup()
+	var autonomous_env: Dictionary = F.setup(40, 10000)
+	for env: Dictionary in [player_env, autonomous_env]:
+		assert(F.external(env, "received_status", "external_company", "status", {"states": ["hold"]}).ok)
+		assert(F.report(env, "decision_status", "received_status", "company", "division").ok)
+		assert(env.lod.advance(47.0).ok)
+	var player: F.Decision = F.Decision.new()
+	var autonomous: F.Decision = F.Decision.new()
+	assert(player.configure(player_env.readers.division))
+	assert(autonomous.configure(autonomous_env.readers.division))
+	var input: Dictionary = player.decision_input()
+	assert(not input.unknown and input.received_status_claims.size() == 1)
+	assert(input.received_status_claims[0].observed_at == 0.0 and input.received_status_claims[0].received_at == 47.0)
+	assert(input == autonomous.decision_input())
+	player_env.state.units[player_env.lod.representation_of("unit_000")].action = "withdraw"
+	autonomous_env.state.units[autonomous_env.lod.representation_of("unit_000")].action = "advance"
+	assert(input == player.decision_input() and input == autonomous.decision_input())
+	print("TASK7_SUPPLEMENTAL_Q_JSON=" + JSON.stringify({"checks": 12, "nonempty_received_status": true, "player_autonomous_equal": true, "hidden_truth_changes_do_not_refresh": true, "input": input}))
+	quit(0)
