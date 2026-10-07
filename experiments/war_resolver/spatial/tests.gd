@@ -1,0 +1,183 @@
+extends SceneTree
+## Expected values come from geometry, finite-stock arithmetic and transformations.
+const F = preload("res://experiments/war_resolver/spatial/fixtures.gd")
+var checks: int = 0
+var failures: int = 0
+var evidence: Dictionary = {}
+
+func _initialize() -> void:
+	_reference()
+	_attributes()
+	_bridge()
+	_contact()
+	_locality()
+	_rejections()
+	print("SPATIAL_EVIDENCE_JSON=" + JSON.stringify(evidence))
+	print("Task9 spatial: %d checks, %d failures" % [checks, failures])
+	quit(1 if failures > 0 else 0)
+
+func check(ok: bool, label: String) -> void:
+	checks += 1
+	if not ok:
+		failures += 1
+		print("FAIL " + label)
+
+func near(a: float, b: float, label: String, tolerance: float = 0.00000001) -> void:
+	check(absf(a - b) <= tolerance, label + " got=" + str(a) + " expected=" + str(b))
+
+func balanced(env: Dictionary) -> bool:
+	var ledger: Dictionary = env.logistics.audit()
+	for key: String in ledger.initial:
+		if absf(float(ledger.initial[key]) - float(ledger.current_plus_spent_and_transit[key])) > 0.000001:
+			return false
+	return true
+
+func _reference() -> void:
+	var env: Dictionary = F.setup()
+	check(env.space.inject_path("unit_000", ["AB"]).ok, "explicit initial path")
+	check(env.lod.advance(10.0).ok, "hand reference advance")
+	var unit: Dictionary = env.state.units.unit_000
+	# 0.1 km / 0.6 km/min = 10 s; 12 equipment * 0.2 fuel/km * 0.1 km.
+	near(unit.distance_moved, 0.1, "hand-computed distance")
+	near(unit.fuel_spent, 0.24, "Task6 actual fuel")
+	near(unit.fuel, 7.76, "finite stock remainder")
+	check(unit.spatial.node == "B" and unit.area_id == env.graph.nodes.B.cell, "actual arrival")
+	check(env.state.missions[unit.mission_id].status == "complete", "end of explicit route")
+	check(balanced(env), "resource ledger after movement")
+	var fork: Dictionary = F.setup(false)
+	check(fork.space.inject_path("unit_000", ["AC", "CD"]).ok, "alternative branch")
+	fork.lod.advance(25.0)
+	near(fork.state.units.unit_000.distance_moved, 0.2, "two-edge total distance")
+	check(fork.state.units.unit_000.spatial.node == "D", "alternative reaches D")
+	evidence.hand_reference = {"distance_km": unit.distance_moved, "fuel_spent": unit.fuel_spent, "time": env.state.time}
+
+func _attributes() -> void:
+	var reference: Dictionary = {}
+	for label: String in ["plain", "mountain", "forest", "desert", "swamp", "urban", "coast"]:
+		var env: Dictionary = F.setup(false)
+		env.space._edges.AB.ground.label = label
+		env.space.inject_path("unit_000", ["AB"])
+		env.lod.advance(10.0)
+		var result: Dictionary = env.state.units.unit_000.duplicate(true)
+		check(reference.is_empty() or result == reference, "same attributes different label " + label)
+		reference = result
+	var foot: Dictionary = F.setup(false)
+	var motor: Dictionary = F.setup(true)
+	for env: Dictionary in [foot, motor]:
+		env.space._edges.AB.ground = F.ground("wet_slope", 0.0, 0.8, 0.4)
+		env.space.inject_path("unit_000", ["AB"])
+		env.lod.advance(10.0)
+	check(foot.state.units.unit_000.distance_moved > 0.0 and motor.state.units.unit_000.distance_moved == 0.0, "wet/steep FOOT vs MOTORIZED")
+	near(motor.state.units.unit_000.fuel_spent, 0.0, "blocked movement cannot spend travel fuel")
+	var bare: Dictionary = F.setup(false, true)
+	var cover: Dictionary = F.setup(false, true)
+	var hidden: Dictionary = F.setup(false, true)
+	cover.space._nodes.D.ground.cover = 0.8
+	hidden.space._nodes.D.ground.concealment = 1.0
+	for env: Dictionary in [bare, cover, hidden]:
+		env.lod.advance(10.0)
+	check(cover.state.units.unit_002.casualties < bare.state.units.unit_002.casualties, "physical cover changes incoming losses")
+	near(cover.state.units.unit_000.ammo_spent, bare.state.units.unit_000.ammo_spent, "cover alone does not conceal")
+	near(hidden.state.units.unit_000.ammo_spent, 0.0, "full target concealment prevents outgoing detected fire")
+	check(hidden.state.units.unit_002.ammo_spent > 0.0, "concealed target still can observe exposed opponent")
+
+func _bridge() -> void:
+	var env: Dictionary = F.setup()
+	env.space.inject_path("unit_000", ["AB", "bridge_BD"])
+	check(env.space.schedule_fact("cut", 15.0, "bridge_BD", false).ok, "prepared external closure")
+	check(not env.space.schedule_fact("cut", 15.0, "bridge_BD", false).ok, "duplicate fact rejected")
+	env.lod.advance(15.0)
+	var stopped: float = env.state.units.unit_000.distance_moved
+	var fuel: float = env.state.units.unit_000.fuel
+	check(stopped > 0.1 and stopped < 0.2 and env.state.units.unit_000.spatial.edge == "bridge_BD", "bridge cut while in transit")
+	env.lod.advance(120.0)
+	near(env.state.units.unit_000.distance_moved, stopped, "no teleport/refund on closure")
+	near(env.state.units.unit_000.fuel, fuel, "no fuel refund")
+	check(env.state.units.unit_000.spatial.blocked_edge == "bridge_BD", "execution creates blocked fact")
+	check(env.space.set_path("unit_000", ["AB", "AC", "CD"], true).ok, "explicit return before alternative")
+	env.lod.advance(180.0)
+	check(env.state.units.unit_000.spatial.node == "D", "return and detour complete physically")
+	check(env.state.units.unit_000.distance_moved > 0.3 and balanced(env), "detour includes sunk outward/return movement")
+	var before: Dictionary = F.setup()
+	before.space.inject_path("unit_000", ["AB", "bridge_BD"])
+	before.space.schedule_fact("cut_before", 0.0, "bridge_BD", false)
+	before.lod.advance(120.0)
+	near(before.state.units.unit_000.distance_moved, 0.1, "closure before entering bridge")
+	evidence.in_transit = {"stopped_distance": stopped, "remaining_fuel": fuel, "final_distance": env.state.units.unit_000.distance_moved}
+
+func _contact() -> void:
+	for seed_value: int in [1, 7, 17, 71, 733, 999]:
+		var a: Dictionary = F.setup(false, true, false, seed_value)
+		var b: Dictionary = F.setup(false, true, true, seed_value)
+		a.lod.advance(120.0)
+		b.lod.advance(120.0)
+		for id: String in a.state.units:
+			for key: String in ["casualties", "ammo_spent", "equipment_lost", "suppression"]:
+				near(a.state.units[id][key], b.state.units[id][key], "physical contact invariant under cell IDs " + key, 0.0)
+		check(a.state.units.unit_000.ammo_spent > 0.0, "legal cross-cell contact")
+	var river: Dictionary = F.setup(true, true)
+	river.space._edges.bridge_BD.open = false
+	river.lod.advance(10.0)
+	check(river.state.units.unit_000.ammo_spent > 0.0, "closed movement edge does not block fire")
+	var wall: Dictionary = F.setup(true, true)
+	for key: String in wall.space._lanes:
+		wall.space._lanes[key].fire = false
+	wall.space.inject_path("unit_000", ["AB"])
+	wall.lod.advance(10.0)
+	near(wall.state.totals.ammo_spent, 0.0, "wall blocks fire")
+	near(wall.state.units.unit_000.distance_moved, 0.1, "wall does not disconnect movement")
+
+func _locality() -> void:
+	var env: Dictionary = F.setup()
+	var stocks: Dictionary = env.state.totals.duplicate(true)
+	var unit: Dictionary = env.state.units.unit_000.duplicate(true)
+	env.space.reset_work()
+	env.space.schedule_fact("local_cut", 0.0, "bridge_BD", false)
+	env.lod.advance(0.0)
+	check(env.space.work.fact_nodes_updated == 3 and env.space.work.fact_ancestors_updated == 2, "one facility updates one cell and two ancestors")
+	check(stocks == env.state.totals and unit == env.state.units.unit_000, "closure does not change inventory or unit knowledge")
+	check(env.space.load_cell(env.graph.nodes.B.cell).ok and env.space.unload_cell(env.graph.nodes.B.cell).ok, "local geometry loading")
+	check(env.space.load_cell(env.graph.nodes.B.cell).ok and not env.space.edge_view("bridge_BD").open, "damage survives unload/reload")
+	var future: Dictionary = F.setup()
+	var all_admitted: bool = true
+	for index: int in range(1000):
+		all_admitted = future.space.schedule_fact("future_%04d" % index, 1.0 if index < 3 else 10000.0 + index, "bridge_BD", index % 2 == 0).ok and all_admitted
+	check(all_admitted, "1000 future facts admitted as one fixture")
+	future.space.reset_work()
+	future.lod.advance(1.0)
+	check(future.space.work.spatial_events_processed == 3 and future.space.work.future_facts_examined == 0 and future.state.events.size() == 997, "three due do not scan 997 future facts")
+	var idle: Dictionary = F.setup()
+	idle.lod.advance(120.0)
+	idle.space.reset_work()
+	var counters: Dictionary = idle.state.counters.duplicate()
+	idle.lod.advance(86400.0)
+	check(counters == idle.state.counters and idle.space.work.route_records_examined == 0, "idle world skips space work")
+	var grouped: Dictionary = F.setup(false)
+	var ids: Array[String] = ["unit_000", "unit_001"]
+	check(grouped.lod.coalesce("blue_platoon", ids).ok, "same static footprint can coalesce")
+	check(grouped.lod.zoom_in(grouped.graph.nodes.A.cell).materialized == 2, "local LOD preserves identities")
+	check(balanced(grouped), "materialization preserves extended stocks")
+	var moving: Dictionary = F.setup(false)
+	for id: String in ["unit_000", "unit_001"]:
+		moving.space.inject_path(id, ["AB", "bridge_BD"])
+	var merged: Dictionary = moving.lod.coalesce("blue_platoon", ids)
+	check(merged.ok, "compatible moving route coalesces")
+	moving.lod.advance(15.0)
+	var route: Dictionary = moving.state.units[merged.aggregate_id].spatial.duplicate(true)
+	check(moving.lod.preview_leaf("unit_000").spatial == route, "lazy leaf inherits current progress, never frozen path")
+	check(moving.lod.zoom_in(moving.graph.nodes.B.cell).materialized == 2, "moving aggregate index follows destination cell")
+	check(moving.state.units.has("unit_000") and moving.state.units.unit_000.spatial == route and moving.state.time == 15.0 and balanced(moving), "local extraction does not replay past movement")
+	var incompatible: Dictionary = F.setup(false)
+	incompatible.space.inject_path("unit_000", ["AB"])
+	incompatible.space.inject_path("unit_001", ["AC"])
+	check(not incompatible.lod.coalesce("blue_platoon", ids).ok, "different routes retain distinct representations")
+
+func _rejections() -> void:
+	var env: Dictionary = F.setup()
+	var before: Dictionary = env.state.snapshot()
+	check(not env.space.inject_path("unit_000", ["unknown"]).ok, "unknown route rejected")
+	check(not env.space.inject_path("unit_000", ["CD"]).ok, "noncontiguous route rejected")
+	check(not env.space.schedule_fact("nan", NAN, "AB", false).ok, "NaN time rejected")
+	check(not env.space.schedule_fact("negative", -1.0, "AB", false).ok, "negative time rejected")
+	check(not env.state.schedule_event("unprepared", 1.0, "spatial", {"fact_id": "missing"}), "unprepared spatial ticket denied")
+	check(before == env.state.snapshot(), "malformed input is atomic")

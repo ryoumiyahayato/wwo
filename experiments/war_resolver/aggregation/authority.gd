@@ -84,6 +84,8 @@ func coalesce(source_formation: String, leaf_ids: Array[String], level: String =
 				return {"ok": false, "error": "incompatible_cohort"}
 		if _state.logistics_port != null and not _state.logistics_port.get_ref().compatible(unit, first, true):
 			return {"ok": false, "error": "supply_profile_requires_detail"}
+		if unit.get("spatial", {}) != first.get("spatial", {}):
+			return {"ok": false, "error": "spatial_route_requires_detail"}
 		if not is_equal_approx(float(unit.mobility), float(first.mobility)):
 			return {"ok": false, "error": "incompatible_mobility"}
 		# A footprint must not straddle a weapon boundary. This v0 admits a small
@@ -192,6 +194,12 @@ func preview_leaf(id: String) -> Dictionary:
 	for key: String in ["fatigue", "cohesion", "suppression"]:
 		result[key] = clampf(float(result[key]) + float(macro[key]) - float(base[key]), 0.0, 1.0)
 	result.position = clampf(float(result.position) + float(macro.position) - float(base.position), 0.0, float(_state.areas[result.area_id].size_km))
+	if macro.has("spatial"):
+		# Admission requires the exact same route footprint. Its current progress
+		# is intensive state, not a replay of the frozen member's initial path.
+		result.spatial = macro.spatial.duplicate(true)
+		result.area_id = macro.area_id
+		result.position = macro.position
 	result.distance_moved += float(macro.distance_moved) - float(base.distance_moved)
 	result.action = macro.action
 	result.resolved_through = _state.time
@@ -263,7 +271,18 @@ func zoom_in(cell_id: String) -> Dictionary:
 func representation_of(id: String) -> String:
 	return str(_owners.get(id, id))
 
+func on_spatial_transfer(id: String, source: String, destination: String) -> void:
+	if not _groups.has(id):
+		return
+	_area_groups[source].erase(id)
+	if not _area_groups.has(destination):
+		_area_groups[destination] = {}
+	_area_groups[destination][id] = true
+	_state.units[id].spatial_node = destination
+
 func prepare_event(event: Dictionary) -> Dictionary:
+	if event.kind == "spatial":
+		return _state.spatial_port.get_ref().process_event(event)
 	if event.kind == "decision":
 		return _state.decision_port.get_ref().process_event(event)
 	if event.kind == "structure":

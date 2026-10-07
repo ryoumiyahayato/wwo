@@ -38,7 +38,7 @@ func resolve_until(state: State, target_game_time: float, resolution_policy: Str
 		var boundary: float = (floorf(state.time / interval) + 1.0) * interval
 		boundary = minf(boundary, minf(target_game_time, state.next_event_time()))
 		var plans: Dictionary = {}
-		for area_id: String in State.sorted_ids(state.active_areas):
+		for area_id: String in _resolution_scopes(state):
 			plans[area_id] = _prepare_area(state, area_id)
 			for unit_id: String in State.sorted_ids(plans[area_id]):
 				var plan: Dictionary = plans[area_id][unit_id]
@@ -53,6 +53,9 @@ func resolve_until(state: State, target_game_time: float, resolution_policy: Str
 					if fuel_eta > 0.000001:
 						boundary = minf(boundary, state.time + fuel_eta)
 				if float(plan.speed) != 0.0:
+					if unit.has("spatial"):
+						boundary = minf(boundary, state.time + state.spatial_port.get_ref().movement_eta(unit, plan))
+						continue
 					var objective: float = float(mission.objective)
 					if plan.posture == "withdraw" and mission.posture != "withdraw":
 						objective = 0.0 if float(plan.speed) < 0.0 else float(state.areas[area_id].size_km)
@@ -67,6 +70,10 @@ func resolve_until(state: State, target_game_time: float, resolution_policy: Str
 		for area_id: String in State.sorted_ids(plans):
 			transfers.append_array(_apply_area(state, area_id, plans[area_id], minutes, output_events, changes))
 		var control_areas: Dictionary = plans.duplicate()
+		if state.spatial_port != null:
+			for scope: String in plans:
+				for cell: String in state.spatial_port.get_ref().scope_cells(scope):
+					control_areas[cell] = true
 		# Simultaneous arrivals cannot create transient faction-first control claims.
 		for transfer: Dictionary in transfers:
 			var unit: Dictionary = state.examine_unit(str(transfer.unit_id))
@@ -116,7 +123,7 @@ func _process_due(state: State, log: Array[Dictionary], changes: Dictionary, are
 		var event: Dictionary = state.pop_event()
 		var payload: Dictionary = event.payload
 		state.counters.events_processed += 1
-		if event.kind in ["structure", "logistics", "communication", "decision"]:
+		if event.kind in ["structure", "logistics", "communication", "decision", "spatial"]:
 			log.append({"time": state.time, "kind": event.kind, "id": event.id, "result": transition.get("record", {})})
 			continue
 		if event.kind == "order":
@@ -171,6 +178,15 @@ func _posture(state: State, unit: Dictionary) -> String:
 func _candidate_ids(_state: State, ids: Array[String], _unit: Dictionary) -> Array[String]:
 	return ids
 
+func _resolution_scopes(state: State) -> Array[String]:
+	return State.sorted_ids(state.active_areas) if state.spatial_port == null else state.spatial_port.get_ref().resolution_scopes(state.active_areas)
+
+func _combat_ids(state: State, area: String) -> Array[String]:
+	return State.sorted_ids(state.area_units[area]) if state.spatial_port == null else state.spatial_port.get_ref().combat_ids(area)
+
+func _terrain(state: State, unit: Dictionary) -> Dictionary:
+	return state.areas[unit.area_id] if state.spatial_port == null else state.spatial_port.get_ref().terrain(unit)
+
 
 func _contact_weight(state: State, id: String) -> float:
 	var unit: Dictionary = state.units[id] if state.settlement_owner == null else state.examine_unit(id)
@@ -189,11 +205,12 @@ func _prepare_area(state: State, area_id: String) -> Dictionary:
 	state.counters.areas_examined += 1
 	state.touched_areas[area_id] = true
 	var area: Dictionary = state.areas[area_id]
-	var ids: Array[String] = State.sorted_ids(state.area_units[area_id])
+	var ids: Array[String] = _combat_ids(state, area_id)
 	var plans: Dictionary = {}
 	var side_frontage: Dictionary = {}
 	for id: String in ids:
 		var unit: Dictionary = state.examine_unit(id)
+		area = _terrain(state, unit)
 		var posture: String = _posture(state, unit)
 		var commitment: float = minf(float(unit.effective), float(unit.get("serviceable_equipment", unit.equipment))) * float(unit.readiness)
 		commitment *= float(unit.cohesion) * (1.0 - float(unit.fatigue) * 0.5) * (1.0 - float(unit.suppression))
@@ -206,14 +223,19 @@ func _prepare_area(state: State, area_id: String) -> Dictionary:
 	var contact_records: Array[Dictionary] = []
 	for id: String in ids:
 		var unit: Dictionary = state.examine_unit(id)
+		area = _terrain(state, unit)
 		var plan: Dictionary = plans[id]
 		var targets: Array[String] = []
+		var detected: Dictionary = {}
 		for other_id: String in _candidate_ids(state, ids, unit):
 			var other: Dictionary = state.examine_unit(other_id)
-			if other.side != unit.side and float(other.effective) > _effective_epsilon(state, other) and absf(float(unit.position) - float(other.position)) <= float(unit.weapon.range_km):
+			var allowed: bool = absf(float(unit.position) - float(other.position)) <= float(unit.weapon.range_km) if state.spatial_port == null else state.spatial_port.get_ref().detection(unit, other) > 0.0
+			if other.side != unit.side and float(other.effective) > _effective_epsilon(state, other) and allowed:
 				targets.append(other_id)
+				if state.spatial_port != null:
+					detected[other_id] = state.spatial_port.get_ref().detection(unit, other)
 		var detection: float = float(area.visibility) * (1.0 - float(area.concealment))
-		if detection <= 0.0:
+		if detection <= 0.0 and state.spatial_port == null:
 			targets.clear()
 		plan.contacts = targets
 		var target_weight: float = 0.0
@@ -222,6 +244,13 @@ func _prepare_area(state: State, area_id: String) -> Dictionary:
 		plan.target_weight = target_weight
 		if targets.is_empty():
 			continue
+		if state.spatial_port != null:
+			detection = 0.0
+			for target_id: String in targets:
+				detection += float(detected[target_id]) * _contact_weight(state, target_id) / target_weight
+			plan.contact_factors = {}
+			for target_id: String in targets:
+				plan.contact_factors[target_id] = float(detected[target_id]) / detection
 		var capacity: float = minf(1.0, float(area.frontage) / maxf(0.001, float(side_frontage[unit.side])))
 		var rounds: float = float(plan.commitment) * capacity * float(unit.weapon.rounds_per_minute) * detection
 		if plan.posture == "support":
@@ -230,12 +259,13 @@ func _prepare_area(state: State, area_id: String) -> Dictionary:
 		plan.rounds = rounds
 		for other_id: String in targets:
 			var target_plan: Dictionary = plans[other_id]
-			var fire: float = rounds / target_weight * _contact_weight(state, other_id)
+			var fire: float = rounds / target_weight * _contact_weight(state, other_id) * float(plan.get("contact_factors", {}).get(other_id, 1.0))
 			state.counters.contacts_resolved += 1
 			contact_records.append({"source": id, "target": other_id, "detection": detection,
 				"usable_fire_per_minute": fire, "exposure": target_plan.exposure})
 	for id: String in ids:
 		var unit: Dictionary = state.examine_unit(id)
+		area = _terrain(state, unit)
 		var mission: Dictionary = state.missions[unit.mission_id]
 		var plan: Dictionary = plans[id]
 		if float(unit.effective) <= _effective_epsilon(state, unit):
@@ -252,6 +282,9 @@ func _prepare_area(state: State, area_id: String) -> Dictionary:
 				plan.speed = direction * float(unit.mobility) * float(area.movement_modifier) * float(unit.readiness)
 				plan.speed *= minf(1.0, float(area.frontage) / maxf(1.0, float(side_frontage[unit.side])))
 				plan.speed *= (1.0 - float(unit.fatigue) * 0.5) * (1.0 - float(unit.suppression))
+		if unit.has("spatial"):
+			plan.side_frontage = float(side_frontage[unit.side])
+			state.spatial_port.get_ref().prepare_movement(unit, plan)
 		if unit.has("supply_capability"):
 			state.logistics_port.get_ref().prepare_activity(unit, plan)
 	state.contacts[area_id] = contact_records
@@ -276,7 +309,7 @@ func _apply_area(state: State, area_id: String, plans: Dictionary, minutes: floa
 		for target_id: String in plan.contacts:
 			var target_plan: Dictionary = plans[target_id]
 			var variation: float = state.variation(id + ":" + target_id, int(floorf((state.time - minutes * 60.0) / float(INTERVALS["AGGREGATE"]))))
-			var fire: float = float(plan.rounds) / float(plan.target_weight) * _contact_weight(state, target_id) * ratio
+			var fire: float = float(plan.rounds) / float(plan.target_weight) * _contact_weight(state, target_id) * ratio * float(plan.get("contact_factors", {}).get(target_id, 1.0))
 			incoming_losses[target_id] += fire * float(unit.weapon.lethality) * float(target_plan.exposure) * variation * minutes
 			incoming_pressure[target_id] += fire * float((unit.get("supply_capability", {}) as Dictionary).get("suppression_per_round", SUPPRESSION_PER_ROUND)) * float(target_plan.exposure) / maxf(_contact_weight(state, target_id), float(state.examine_unit(target_id).effective))
 		plan.spent = spent
@@ -315,21 +348,26 @@ func _apply_area(state: State, area_id: String, plans: Dictionary, minutes: floa
 			unit.action = "stalled"
 		var movement: float = float(plan.speed) * minutes if unit.action != "disabled" else 0.0
 		var old_position: float = float(unit.position)
-		unit.position = clampf(old_position + movement, 0.0, float(area.size_km))
-		unit.distance_moved += absf(float(unit.position) - old_position)
+		var travelled: float
+		if unit.has("spatial"):
+			travelled = state.spatial_port.get_ref().move(unit, plan, minutes, log)
+		else:
+			unit.position = clampf(old_position + movement, 0.0, float(area.size_km))
+			travelled = absf(float(unit.position) - old_position)
+		unit.distance_moved += travelled
 		if unit.has("supply_capability"):
-			state.logistics_port.get_ref().consume_activity(unit, plan, absf(float(unit.position) - old_position))
+			state.logistics_port.get_ref().consume_activity(unit, plan, travelled)
 		if movement != 0.0 or float(plan.spent) > 0.0:
 			unit.fatigue = clampf(float(unit.fatigue) + FATIGUE_PER_MINUTE * minutes, 0.0, 1.0)
 		# Mission completion is after all fire was planned, never a faction update advantage.
-		if mission.status == "active" and plan.posture in ["advance", "withdraw"] and absf(float(unit.position) - float(mission.objective)) < 0.00001:
+		if not unit.has("spatial") and mission.status == "active" and plan.posture in ["advance", "withdraw"] and absf(float(unit.position) - float(mission.objective)) < 0.00001:
 			unit.position = float(mission.objective)
 			mission.status = "complete"
 			_wake_dependents(state, str(mission.id))
 			log.append({"time": state.time, "kind": "mission_complete", "unit_id": id, "mission_id": mission.id})
 			if not str(mission.destination).is_empty() and (area.links as Dictionary).has(mission.destination):
 				transfers.append({"unit_id": id, "destination": str(mission.destination)})
-		elif mission.status == "active" and plan.posture == "withdraw" and mission.posture != "withdraw":
+		elif not unit.has("spatial") and mission.status == "active" and plan.posture == "withdraw" and mission.posture != "withdraw":
 			if float(unit.position) <= 0.00001 or float(unit.position) >= float(area.size_km) - 0.00001:
 				unit.position = 0.0 if float(unit.position) <= 0.00001 else float(area.size_km)
 				mission.status = "withdrawn"
@@ -359,6 +397,8 @@ func _apply_area(state: State, area_id: String, plans: Dictionary, minutes: floa
 			has_fire = has_fire and float(unit.serviceable_equipment) > 0.0
 			if unit.supply_capability.fuel_dependent:
 				moving = moving and float(unit.fuel) > 0.0000001 and float(unit.serviceable_equipment) > 0.0
+		if unit.has("spatial"):
+			moving = moving and state.spatial_port.get_ref().can_move(unit)
 		# Reserves sleep until an indexed dependency notification or release event.
 		remains_active = remains_active or has_fire or moving or float(unit.suppression) > SLEEP_EPSILON
 	for contact: Dictionary in state.contacts[area_id]:
@@ -371,7 +411,11 @@ func _apply_area(state: State, area_id: String, plans: Dictionary, minutes: floa
 		contact.advance_inhibited = target.action == "stalled"
 		contact.disengaging = target.action in ["withdraw", "withdrawn"]
 	if not remains_active:
-		state.active_areas.erase(area_id)
+		if state.spatial_port != null:
+			for cell: String in state.spatial_port.get_ref().scope_cells(area_id):
+				state.active_areas.erase(cell)
+		else:
+			state.active_areas.erase(area_id)
 		state.contacts.erase(area_id)
 	return transfers
 

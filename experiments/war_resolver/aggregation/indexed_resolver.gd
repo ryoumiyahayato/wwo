@@ -6,7 +6,7 @@ var work: Dictionary = {"candidate_contacts_examined": 0, "index_records_examine
 var _index: Index = Index.new()
 
 func _prepare_area(state: State, area_id: String) -> Dictionary:
-	var ids: Array[String] = State.sorted_ids(state.area_units[area_id])
+	var ids: Array[String] = _combat_ids(state, area_id)
 	_index.build(state.units, ids, state)
 	work.index_records_examined += ids.size()
 	work.formations_resolved += ids.size()
@@ -14,7 +14,8 @@ func _prepare_area(state: State, area_id: String) -> Dictionary:
 
 func _candidate_ids(_state: State, ids: Array[String], unit: Dictionary) -> Array[String]:
 	var before: int = _index.probes
-	var result: Array[String] = _index.candidates(float(unit.position), float(unit.weapon.range_km))
+	var x: float = float(unit.position) if _state.spatial_port == null else float(_state.spatial_port.get_ref().xy(unit)[0])
+	var result: Array[String] = _index.candidates(x, float(unit.weapon.range_km))
 	work.range_probes += _index.probes - before
 	work.candidate_contacts_examined += result.size()
 	return result

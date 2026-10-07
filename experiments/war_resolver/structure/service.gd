@@ -227,6 +227,8 @@ func _validate(request: Dictionary, executing: bool) -> Dictionary:
 				return _reject("incompatible_spatial_or_capability")
 		if _state.logistics_port != null and not _state.logistics_port.get_ref().compatible(a, b, false):
 			return _reject("incompatible_supply_capability")
+		if a.get("spatial", {}) != b.get("spatial", {}):
+			return _reject("incompatible_spatial_route")
 		var am: Dictionary = _current_mission(str(values.survivor), a)
 		var bm: Dictionary = _current_mission(str(values.donor), b)
 		am.erase("id")

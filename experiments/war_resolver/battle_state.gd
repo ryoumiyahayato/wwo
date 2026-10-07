@@ -28,6 +28,7 @@ var materialization_port: WeakRef = null
 var lod_work: Dictionary = {}
 var information_port: WeakRef = null
 var decision_port: WeakRef = null
+var spatial_port: WeakRef = null
 var logistics_port: WeakRef = null
 var logistics_ledger: Dictionary = {}
 var structure_port: WeakRef = null
@@ -104,7 +105,9 @@ func set_coordination(unit_id: String, assignment: Dictionary) -> void:
 func schedule_event(id: String, due: float, kind: String, payload: Dictionary) -> bool:
 	if id.is_empty() or event_ids.has(id) or not is_finite(due) or due < time:
 		return false
-	if kind not in ["order", "reinforcement", "area_change", "coordination_release", "structure", "logistics", "communication", "decision"]:
+	if kind not in ["order", "reinforcement", "area_change", "coordination_release", "structure", "logistics", "communication", "decision", "spatial"]:
+		return false
+	if kind == "spatial" and (spatial_port == null or spatial_port.get_ref() == null or not spatial_port.get_ref().accepts_event(id, payload, due)):
 		return false
 	if kind == "structure" and (structure_port == null or structure_port.get_ref() == null or not structure_port.get_ref().accepts_event(id, payload, due)):
 		return false
@@ -140,6 +143,10 @@ func schedule_event(id: String, due: float, kind: String, payload: Dictionary) -
 		record.phase = 5
 	elif decision_port != null and int(record.get("phase", 0)) >= 5:
 		record.phase += 1
+	if kind == "spatial":
+		# External spatial facts share the old area-change phase. Old kinds keep
+		# their exact predecessor ordering, including unbound phase/ID semantics.
+		record.phase = 9 if decision_port != null else (8 if information_port != null else (6 if logistics_port != null else (4 if structure_port != null else 0)))
 	var unit_ref: String = str(payload.unit.id) if kind == "reinforcement" else str(payload.get("unit_id", ""))
 	if not unit_ref.is_empty():
 		if structure_port != null:

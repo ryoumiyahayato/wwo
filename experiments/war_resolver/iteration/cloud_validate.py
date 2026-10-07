@@ -43,6 +43,7 @@ def main() -> int:
     parser.add_argument("--mode", choices=["baseline", "final", "affected"], default="baseline")
     parser.add_argument("--baseline-evidence", type=Path)
     parser.add_argument("--script", action="append", default=[])
+    parser.add_argument("--skip-unified", action="store_true", help="Stage gate only; NOT final full acceptance")
     args = parser.parse_args()
     output = Path(args.output).resolve()
     output.mkdir(parents=True, exist_ok=False)
@@ -64,7 +65,8 @@ def main() -> int:
     report = dict(mode=args.mode, source_head=head, frozen_base=BASE, version=VERSION,
                   source_digest=digest, platform=sys.platform, python=sys.version,
                   steps=steps, checks=checks, hashes=hashes, known_baseline_failure=[],
-                  official_powershell="NOT RUN; equivalent steps", complete=False)
+                  official_powershell="NOT RUN; equivalent steps" if not args.skip_unified else "NOT RUN in this stage gate",
+                  skip_unified=args.skip_unified, complete=False)
 
     def save():
         (output / "evidence.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -132,52 +134,60 @@ def main() -> int:
             if not summaries:
                 report.setdefault("contract_failures", []).append(name + ": missing success summary")
 
-        # Same Python commands and unchanged original Godot scripts as the official runner.
-        for script in ["tools/audit_1900_commodity_economy.py", "tools/audit_1900_economy_integration.py", "tools/audit_1900_world_economy_compact.py", "tools/provenance/generate_historical_provenance.py"]:
-            run(Path(script).stem, [sys.executable, "-B", script, *(["--check"] if "provenance" in script else [])], 120, True)
-        run("world_data", [sys.executable, "-B", "-m", "unittest", "discover", "-s", "tests/world_data", "-p", "test_*.py", "-v"], 120, True)
-        definitions = re.findall(r"@\{ Name = '([^']+)'; Script = '([^']+)'(?:; TimeoutSeconds = (\d+))? \}", official)
-        if len(definitions) != 33:
-            raise RuntimeError(f"Official step extraction incomplete: {len(definitions)}")
-        for name, script, timeout in definitions:
-            gd("unified_" + Path(script).stem, script.removeprefix("res://"), int(timeout or 120), True)
-        for name, script, prefix, timeout in [
-            ("formal_political", "runtime_political_snapshot_probe.gd", "RUNTIME_POLITICAL_SNAPSHOT_SHA256", 120),
-            ("formal_market", "formal_world_market_snapshot_probe.gd", "FORMAL_MARKET_SNAPSHOT_SHA256", 120),
-            ("formal_economic", "formal_world_economic_snapshot_probe.gd", "FORMAL_ECONOMIC_SNAPSHOT_SHA256", 180),
-            ("formal_fingerprint", "formal_world_fingerprint_probe.gd", "FORMAL_WORLD_FINGERPRINT_SHA256", 180),
-        ]:
-            pair(name, "tests/formal/" + script, prefix, True, timeout)
-        run("formal_startup", [executable, "--headless", "--path", str(ROOT), "--quit-after", "5"], 30, True)
-        log = gd("codex_audit", "tests/codex_audit_regression.gd")
-        if re.findall(r"CODEX AUDIT REGRESSION PASSED: (\d+) checks", log) != ["31"]:
-            report.setdefault("contract_failures", []).append("audit: missing 31-check completion")
-        # Independent repeat on the frozen baseline; never classify a new failure by old reports.
-        if args.mode == "baseline":
-            gd("baseline_golden_independent", "tests/formal/formal_world_economy_golden_test.gd", 240, True)
-            original = (output / "unified_formal_world_economy_golden_test.log").read_text()
-            repeat = (output / "baseline_golden_independent.log").read_text()
-            expected = ["24519f5dc2d191d7d5bac67437e35e6d4c4e734700f5c9915ee1df620abdfdcf", "241451cb8ce5a69d62a5105c0b0808fe16fbdc4ca1f0cb79ade3ffde780c56fd"]
-            if all(value in original and value in repeat for value in expected) and "2 failures" in original and "2 failures" in repeat:
-                report["known_baseline_failure"] = ["unified_formal_world_economy_golden_test", "baseline_golden_independent"]
-                report["baseline_golden_actual_hashes"] = expected
+        if not args.skip_unified:
+            # Same Python commands and unchanged original Godot scripts as the official runner.
+            for script in ["tools/audit_1900_commodity_economy.py", "tools/audit_1900_economy_integration.py", "tools/audit_1900_world_economy_compact.py", "tools/provenance/generate_historical_provenance.py"]:
+                run(Path(script).stem, [sys.executable, "-B", script, *(["--check"] if "provenance" in script else [])], 120, True)
+            run("world_data", [sys.executable, "-B", "-m", "unittest", "discover", "-s", "tests/world_data", "-p", "test_*.py", "-v"], 120, True)
+            definitions = re.findall(r"@\{ Name = '([^']+)'; Script = '([^']+)'(?:; TimeoutSeconds = (\d+))? \}", official)
+            if len(definitions) != 33:
+                raise RuntimeError(f"Official step extraction incomplete: {len(definitions)}")
+            for name, script, timeout in definitions:
+                gd("unified_" + Path(script).stem, script.removeprefix("res://"), int(timeout or 120), True)
+            for name, script, prefix, timeout in [
+                ("formal_political", "runtime_political_snapshot_probe.gd", "RUNTIME_POLITICAL_SNAPSHOT_SHA256", 120),
+                ("formal_market", "formal_world_market_snapshot_probe.gd", "FORMAL_MARKET_SNAPSHOT_SHA256", 120),
+                ("formal_economic", "formal_world_economic_snapshot_probe.gd", "FORMAL_ECONOMIC_SNAPSHOT_SHA256", 180),
+                ("formal_fingerprint", "formal_world_fingerprint_probe.gd", "FORMAL_WORLD_FINGERPRINT_SHA256", 180),
+            ]:
+                pair(name, "tests/formal/" + script, prefix, True, timeout)
+            run("formal_startup", [executable, "--headless", "--path", str(ROOT), "--quit-after", "5"], 30, True)
+            log = gd("codex_audit", "tests/codex_audit_regression.gd")
+            if re.findall(r"CODEX AUDIT REGRESSION PASSED: (\d+) checks", log) != ["31"]:
+                report.setdefault("contract_failures", []).append("audit: missing 31-check completion")
+            # Independent repeat on the frozen baseline; never classify a new failure by old reports.
+            if args.mode == "baseline":
+                gd("baseline_golden_independent", "tests/formal/formal_world_economy_golden_test.gd", 240, True)
+                original = (output / "unified_formal_world_economy_golden_test.log").read_text()
+                repeat = (output / "baseline_golden_independent.log").read_text()
+                expected = ["24519f5dc2d191d7d5bac67437e35e6d4c4e734700f5c9915ee1df620abdfdcf", "241451cb8ce5a69d62a5105c0b0808fe16fbdc4ca1f0cb79ade3ffde780c56fd"]
+                if all(value in original and value in repeat for value in expected) and "2 failures" in original and "2 failures" in repeat:
+                    report["known_baseline_failure"] = ["unified_formal_world_economy_golden_test", "baseline_golden_independent"]
+                    report["baseline_golden_actual_hashes"] = expected
     for script in args.script:
-        gd("new_" + Path(script).stem, script)
+        name = "new_" + script.replace("/", "__").removesuffix(".gd")
+        log = gd(name, script)
+        match = re.findall(r"\b([1-9][0-9]*) checks, 0 failures", log)
+        checks[name] = list(map(int, match))
+        if not match:
+            report.setdefault("contract_failures", []).append(name + ": missing nonzero success summary")
     if args.baseline_evidence:
         baseline = json.loads(args.baseline_evidence.read_text())
         for key, value in hashes.items():
             if baseline["hashes"].get(key) != value:
                 report.setdefault("contract_failures", []).append("Same-platform retained hash changed: " + key)
         for name in baseline["known_baseline_failure"]:
-            if name == "baseline_golden_independent":
+            if name == "baseline_golden_independent" or args.skip_unified:
                 continue
             old = (args.baseline_evidence.parent / f"{name}.log").read_text()
             new = (output / f"{name}.log").read_text()
-            if all(value in new for value in baseline["baseline_golden_actual_hashes"]) and re.findall(r"^\[FAIL\].*$", old, re.M) == re.findall(r"^\[FAIL\].*$", new, re.M):
+            if old == new:
                 report["known_baseline_failure"].append(name)
             else:
                 report.setdefault("contract_failures", []).append("Baseline failure changed: " + name)
-    if any(hashlib.sha256((ROOT / name).read_bytes()).hexdigest() != value for name, value in digest.items()):
+    after_digest = {p.relative_to(ROOT).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
+                    for p in (ROOT / "experiments/war_resolver").rglob("*") if p.suffix in [".gd", ".py"]}
+    if after_digest != digest:
         report.setdefault("contract_failures", []).append("Sources changed during validation")
     report["complete"] = True
     report["new_failed_steps"] = [row["name"] for row in steps if not row["passed"] and row["name"] not in report["known_baseline_failure"]]

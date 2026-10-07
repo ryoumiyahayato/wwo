@@ -7,7 +7,8 @@ func build(units: Dictionary, ids: Array[String], state: RefCounted = null) -> v
 	_records.clear()
 	for id: String in ids:
 		var unit: Dictionary = units[id] if state == null else state.examine_unit(id)
-		_records.append({"id": id, "x": float(unit.position)})
+		var x: float = float(unit.position) if state == null or state.spatial_port == null else float(state.spatial_port.get_ref().xy(unit)[0])
+		_records.append({"id": id, "x": x})
 	_records.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return str(a.id) < str(b.id) if a.x == b.x else a.x < b.x)
 
