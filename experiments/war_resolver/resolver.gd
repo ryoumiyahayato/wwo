@@ -1,6 +1,7 @@
 extends RefCounted
 ## Replaceable, single-thread transition service; no SceneTree dependency.
 const State = preload("res://experiments/war_resolver/battle_state.gd")
+const SegmentWork = preload("res://experiments/war_resolver/continuous/segment_work.gd")
 const DETAILED: String = "DETAILED"
 const AGGREGATE: String = "AGGREGATE"
 const INTERVALS: Dictionary = {DETAILED: 30.0, AGGREGATE: 120.0}
@@ -202,225 +203,20 @@ func _effective_epsilon(state: State, unit: Dictionary) -> float:
 
 
 func _prepare_area(state: State, area_id: String) -> Dictionary:
-	state.counters.areas_examined += 1
-	state.touched_areas[area_id] = true
-	var area: Dictionary = state.areas[area_id]
-	var ids: Array[String] = _combat_ids(state, area_id)
-	var plans: Dictionary = {}
-	var side_frontage: Dictionary = {}
-	for id: String in ids:
-		var unit: Dictionary = state.examine_unit(id)
-		area = _terrain(state, unit)
-		var posture: String = _posture(state, unit)
-		var commitment: float = minf(float(unit.effective), float(unit.get("serviceable_equipment", unit.equipment))) * float(unit.readiness)
-		commitment *= float(unit.cohesion) * (1.0 - float(unit.fatigue) * 0.5) * (1.0 - float(unit.suppression))
-		if posture in ["idle", "reserve", "withdraw"]:
-			commitment = 0.0
-		side_frontage[unit.side] = float(side_frontage.get(unit.side, 0.0)) + commitment
-		var exposure: float = (1.15 if posture == "advance" else 0.65) * (1.0 - float(area.cover))
-		plans[id] = {"posture": posture, "commitment": commitment, "exposure": exposure,
-			"rounds": 0.0, "speed": 0.0, "contacts": [], "advance_inhibited": false}
-	var contact_records: Array[Dictionary] = []
-	for id: String in ids:
-		var unit: Dictionary = state.examine_unit(id)
-		area = _terrain(state, unit)
-		var plan: Dictionary = plans[id]
-		var targets: Array[String] = []
-		var detected: Dictionary = {}
-		for other_id: String in _candidate_ids(state, ids, unit):
-			var other: Dictionary = state.examine_unit(other_id)
-			var allowed: bool = absf(float(unit.position) - float(other.position)) <= float(unit.weapon.range_km) if state.spatial_port == null else state.spatial_port.get_ref().detection(unit, other) > 0.0
-			if other.side != unit.side and float(other.effective) > _effective_epsilon(state, other) and allowed:
-				targets.append(other_id)
-				if state.spatial_port != null:
-					detected[other_id] = state.spatial_port.get_ref().detection(unit, other)
-		var detection: float = float(area.visibility) * (1.0 - float(area.concealment))
-		if detection <= 0.0 and state.spatial_port == null:
-			targets.clear()
-		plan.contacts = targets
-		var target_weight: float = 0.0
-		for target_id: String in targets:
-			target_weight += _contact_weight(state, target_id)
-		plan.target_weight = target_weight
-		if targets.is_empty():
-			continue
-		if state.spatial_port != null:
-			detection = 0.0
-			for target_id: String in targets:
-				detection += float(detected[target_id]) * _contact_weight(state, target_id) / target_weight
-			plan.contact_factors = {}
-			for target_id: String in targets:
-				plan.contact_factors[target_id] = float(detected[target_id]) / detection
-		var capacity: float = minf(1.0, float(area.frontage) / maxf(0.001, float(side_frontage[unit.side])))
-		var rounds: float = float(plan.commitment) * capacity * float(unit.weapon.rounds_per_minute) * detection
-		if plan.posture == "support":
-			rounds *= 1.1
-		# The same causal fire rates are used at both resolutions. No microscopic rounds.
-		plan.rounds = rounds
-		for other_id: String in targets:
-			var target_plan: Dictionary = plans[other_id]
-			var fire: float = rounds / target_weight * _contact_weight(state, other_id) * float(plan.get("contact_factors", {}).get(other_id, 1.0))
-			state.counters.contacts_resolved += 1
-			contact_records.append({"source": id, "target": other_id, "detection": detection,
-				"usable_fire_per_minute": fire, "exposure": target_plan.exposure})
-	for id: String in ids:
-		var unit: Dictionary = state.examine_unit(id)
-		area = _terrain(state, unit)
-		var mission: Dictionary = state.missions[unit.mission_id]
-		var plan: Dictionary = plans[id]
-		if float(unit.effective) <= _effective_epsilon(state, unit):
-			continue
-		if float(unit.cohesion) < float(mission.withdraw_cohesion):
-			plan.posture = "withdraw"
-		if plan.posture in ["advance", "withdraw"] and mission.status == "active":
-			var inhibited: bool = plan.posture == "advance" and float(unit.suppression) >= float(mission.stop_suppression) and float(plan.exposure) > 0.3
-			plan.advance_inhibited = inhibited
-			if not inhibited:
-				var direction: float = signf(float(mission.objective) - float(unit.position))
-				if plan.posture == "withdraw" and mission.posture != "withdraw":
-					direction = -float(mission.direction)
-				plan.speed = direction * float(unit.mobility) * float(area.movement_modifier) * float(unit.readiness)
-				plan.speed *= minf(1.0, float(area.frontage) / maxf(1.0, float(side_frontage[unit.side])))
-				plan.speed *= (1.0 - float(unit.fatigue) * 0.5) * (1.0 - float(unit.suppression))
-		if unit.has("spatial"):
-			plan.side_frontage = float(side_frontage[unit.side])
-			state.spatial_port.get_ref().prepare_movement(unit, plan)
-		if unit.has("supply_capability"):
-			state.logistics_port.get_ref().prepare_activity(unit, plan)
-	state.contacts[area_id] = contact_records
-	return plans
+	var job: RefCounted = SegmentWork.new()
+	job.configure_prepare(self, state, area_id, _combat_ids(state, area_id))
+	while not job.prepare_step():
+		pass
+	return job.plans
 
 
 func _apply_area(state: State, area_id: String, plans: Dictionary, minutes: float,
 		log: Array[Dictionary], changes: Dictionary) -> Array[Dictionary]:
-	var area: Dictionary = state.areas[area_id]
-	# Scale outgoing effects to ammunition actually available during this segment.
-	var incoming_losses: Dictionary = {}
-	var incoming_pressure: Dictionary = {}
-	for id: String in State.sorted_ids(plans):
-		incoming_losses[id] = 0.0
-		incoming_pressure[id] = 0.0
-	for id: String in State.sorted_ids(plans):
-		var unit: Dictionary = state.examine_unit(id)
-		var plan: Dictionary = plans[id]
-		var wanted: float = float(plan.rounds) * minutes
-		var spent: float = minf(float(unit.ammunition), wanted)
-		var ratio: float = spent / wanted if wanted > 0.0 else 0.0
-		for target_id: String in plan.contacts:
-			var target_plan: Dictionary = plans[target_id]
-			var variation: float = state.variation(id + ":" + target_id, int(floorf((state.time - minutes * 60.0) / float(INTERVALS["AGGREGATE"]))))
-			var fire: float = float(plan.rounds) / float(plan.target_weight) * _contact_weight(state, target_id) * ratio * float(plan.get("contact_factors", {}).get(target_id, 1.0))
-			incoming_losses[target_id] += fire * float(unit.weapon.lethality) * float(target_plan.exposure) * variation * minutes
-			incoming_pressure[target_id] += fire * float((unit.get("supply_capability", {}) as Dictionary).get("suppression_per_round", SUPPRESSION_PER_ROUND)) * float(target_plan.exposure) / maxf(_contact_weight(state, target_id), float(state.examine_unit(target_id).effective))
-		plan.spent = spent
-	var transfers: Array[Dictionary] = []
-	var remains_active: bool = false
-	for id: String in State.sorted_ids(plans):
-		var unit: Dictionary = state.examine_unit(id)
-		var plan: Dictionary = plans[id]
-		var mission: Dictionary = state.missions[unit.mission_id]
-		var old_action: String = str(unit.action)
-		if state.coordination.has(id):
-			var old_status: String = str(state.coordination[id].get("status", ""))
-			state.coordination[id].status = "waiting" if plan.posture == "reserve" else "assigned"
-			if old_status != state.coordination[id].status:
-				log.append({"time": state.time, "kind": "coordination_changed", "unit_id": id, "status": state.coordination[id].status})
-		var loss: float = minf(float(unit.effective), float(incoming_losses[id]))
-		var equipment_loss: float = minf(float(unit.equipment), loss)
-		unit.effective = maxf(0.0, float(unit.effective) - loss)
-		unit.casualties += loss
-		if unit.has("supply_capability"):
-			state.logistics_port.get_ref().lose_equipment(unit, equipment_loss)
-		unit.equipment -= equipment_loss
-		unit.equipment_lost += equipment_loss
-		unit.ammunition = maxf(0.0, float(unit.ammunition) - float(plan.spent))
-		unit.ammo_spent += float(plan.spent)
-		state.totals.casualties += loss
-		state.totals.equipment_lost += equipment_loss
-		state.totals.ammo_spent += float(plan.spent)
-		var decay: float = exp(-SUPPRESSION_DECAY * minutes)
-		unit.suppression = clampf(float(unit.suppression) * decay + float(incoming_pressure[id]) / SUPPRESSION_DECAY * (1.0 - decay), 0.0, 1.0)
-		unit.cohesion = clampf(float(unit.cohesion) - loss / maxf(float(unit.get("contact_weight", unit.get("tactical_weight", 1.0))), float(unit.personnel_total)) * COHESION_PER_LOSS, 0.0, 1.0)
-		unit.action = str(plan.posture)
-		if float(unit.effective) <= _effective_epsilon(state, unit):
-			unit.action = "disabled"
-		elif plan.posture == "advance" and float(plan.speed) == 0.0:
-			unit.action = "stalled"
-		var movement: float = float(plan.speed) * minutes if unit.action != "disabled" else 0.0
-		var old_position: float = float(unit.position)
-		var travelled: float
-		if unit.has("spatial"):
-			var prior_status: String = str(mission.status)
-			travelled = state.spatial_port.get_ref().move(unit, plan, minutes, log)
-			if mission.status != prior_status and mission.status in ["complete", "withdrawn"]:
-				_wake_dependents(state, str(mission.id))
-		else:
-			unit.position = clampf(old_position + movement, 0.0, float(area.size_km))
-			travelled = absf(float(unit.position) - old_position)
-		unit.distance_moved += travelled
-		if unit.has("supply_capability"):
-			state.logistics_port.get_ref().consume_activity(unit, plan, travelled)
-		if movement != 0.0 or float(plan.spent) > 0.0:
-			unit.fatigue = clampf(float(unit.fatigue) + FATIGUE_PER_MINUTE * minutes, 0.0, 1.0)
-		# Mission completion is after all fire was planned, never a faction update advantage.
-		if not unit.has("spatial") and mission.status == "active" and plan.posture in ["advance", "withdraw"] and absf(float(unit.position) - float(mission.objective)) < 0.00001:
-			unit.position = float(mission.objective)
-			mission.status = "complete"
-			_wake_dependents(state, str(mission.id))
-			log.append({"time": state.time, "kind": "mission_complete", "unit_id": id, "mission_id": mission.id})
-			if not str(mission.destination).is_empty() and (area.links as Dictionary).has(mission.destination):
-				transfers.append({"unit_id": id, "destination": str(mission.destination)})
-		elif not unit.has("spatial") and mission.status == "active" and plan.posture == "withdraw" and mission.posture != "withdraw":
-			if float(unit.position) <= 0.00001 or float(unit.position) >= float(area.size_km) - 0.00001:
-				unit.position = 0.0 if float(unit.position) <= 0.00001 else float(area.size_km)
-				mission.status = "withdrawn"
-				_wake_dependents(state, str(mission.id))
-				unit.action = "withdrawn"
-				log.append({"time": state.time, "kind": "mission_withdrawn", "unit_id": id, "mission_id": mission.id})
-		if loss > 0.0:
-			log.append({"time": state.time, "kind": "losses", "unit_id": id, "personnel": loss, "equipment": equipment_loss})
-		if old_action != unit.action:
-			var reason: String = "mission"
-			if state.tactical_intents.has(id):
-				reason = "squad_tactical_intent"
-			if unit.action == "stalled":
-				reason = "suppression" if plan.advance_inhibited else "mobility"
-			elif unit.action == "withdraw" and mission.posture != "withdraw":
-				reason = "cohesion"
-			log.append({"time": state.time, "kind": "action_changed", "unit_id": id,
-				"action": unit.action, "reason": reason, "suppression": unit.suppression})
-		changes[id] = unit.duplicate(true)
-		state.touched_units[id] = true
-		var next_posture: String = _posture(state, unit)
-		var has_fire: bool = not (plan.contacts as Array).is_empty() and float(unit.ammunition) > 0.0 and float(unit.effective) > _effective_epsilon(state, unit)
-		# A completed dependency can release a reserve in this same simultaneous step.
-		# Keep that area awake so its freshly eligible mission is evaluated next.
-		var moving: bool = mission.status == "active" and next_posture in ["advance", "withdraw"] and float(unit.effective) > _effective_epsilon(state, unit) and float(unit.mobility) > 0.0 and float(unit.readiness) > 0.0 and float(area.movement_modifier) > 0.0
-		if unit.has("supply_capability"):
-			has_fire = has_fire and float(unit.serviceable_equipment) > 0.0
-			if unit.supply_capability.fuel_dependent:
-				moving = moving and float(unit.fuel) > 0.0000001 and float(unit.serviceable_equipment) > 0.0
-		if unit.has("spatial"):
-			moving = moving and state.spatial_port.get_ref().can_move(unit)
-		# Reserves sleep until an indexed dependency notification or release event.
-		remains_active = remains_active or has_fire or moving or float(unit.suppression) > SLEEP_EPSILON
-	for contact: Dictionary in state.contacts[area_id]:
-		var target: Dictionary = state.examine_unit(str(contact.target))
-		var source_plan: Dictionary = plans[contact.source]
-		contact.time = state.time
-		contact.usable_fire_per_minute = float(source_plan.spent) / minutes / float(source_plan.target_weight) * float(target.get("contact_weight", target.get("tactical_weight", 1.0))) * float(source_plan.get("contact_factors", {}).get(contact.target, 1.0))
-		contact.suppression = target.suppression
-		contact.movement_km_per_minute = plans[contact.target].speed
-		contact.advance_inhibited = target.action == "stalled"
-		contact.disengaging = target.action in ["withdraw", "withdrawn"]
-	if not remains_active:
-		if state.spatial_port != null:
-			for cell: String in state.spatial_port.get_ref().scope_cells(area_id):
-				state.active_areas.erase(cell)
-		else:
-			state.active_areas.erase(area_id)
-		state.contacts.erase(area_id)
-	return transfers
+	var job: RefCounted = SegmentWork.new()
+	job.configure_apply(self, state, area_id, plans, minutes, log, changes)
+	while not job.apply_step():
+		pass
+	return job.transfers
 
 
 func _update_control(state: State, area_id: String, log: Array[Dictionary], area_changes: Dictionary) -> void:
