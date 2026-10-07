@@ -115,11 +115,13 @@ func configure(state: State, formations: Dictionary, people: Dictionary, player_
 	return true
 
 
-func apply(command: Dictionary) -> Dictionary:
+func apply(command: Dictionary, communication_owner: RefCounted = null, validate_only: bool = false) -> Dictionary:
 	if _state == null:
 		return _reject("not_configured")
 	if not _binding_current():
 		return _reject("current_structure_binding_required")
+	if _state.information_port != null and not _state.information_port.get_ref().allows_role_delivery(self, communication_owner, validate_only):
+		return _reject("communication_delivery_required")
 	if not _keys(command, ["id", "kind", "target", "values"]) or not command.get("id") is String or str(command.id).is_empty() or not command.get("values") is Dictionary:
 		return _reject("invalid_command")
 	var id: String = str(command.id)
@@ -177,6 +179,8 @@ func apply(command: Dictionary) -> Dictionary:
 			return _reject("mission_id_collision")
 		if kind == "coordination" and _state.event_ids.has("role_release_" + id + "_" + unit_id):
 			return _reject("event_id_collision")
+	if validate_only:
+		return {"ok": true}
 	# Permission/value/ID/cooldown checks precede causal materialization.
 	if _lod_port != null and kind != "local_action":
 		for leaf: String in affected:
@@ -244,6 +248,8 @@ func _nearest_input(leaf: String, inputs: Dictionary) -> Dictionary:
 
 
 func report() -> Dictionary:
+	if _state != null and _state.information_port != null:
+		return _state.information_port.get_ref().role_report(self)
 	if _state == null:
 		return _reject("not_configured")
 	if not _binding_current():

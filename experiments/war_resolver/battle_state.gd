@@ -26,6 +26,7 @@ var event_ids: Dictionary = {}
 var settlement_owner: RefCounted = null
 var materialization_port: WeakRef = null
 var lod_work: Dictionary = {}
+var information_port: WeakRef = null
 var logistics_port: WeakRef = null
 var logistics_ledger: Dictionary = {}
 var structure_port: WeakRef = null
@@ -102,11 +103,13 @@ func set_coordination(unit_id: String, assignment: Dictionary) -> void:
 func schedule_event(id: String, due: float, kind: String, payload: Dictionary) -> bool:
 	if id.is_empty() or event_ids.has(id) or not is_finite(due) or due < time:
 		return false
-	if kind not in ["order", "reinforcement", "area_change", "coordination_release", "structure", "logistics"]:
+	if kind not in ["order", "reinforcement", "area_change", "coordination_release", "structure", "logistics", "communication"]:
 		return false
 	if kind == "structure" and (structure_port == null or structure_port.get_ref() == null or not structure_port.get_ref().accepts_event(id, payload, due)):
 		return false
 	if kind == "logistics" and (logistics_port == null or logistics_port.get_ref() == null or not logistics_port.get_ref().accepts_event(id, payload, due)):
+		return false
+	if kind == "communication" and (information_port == null or information_port.get_ref() == null or not information_port.get_ref().accepts_event(id, payload, due)):
 		return false
 	# Task 6 admits a fixed stock snapshot. Replacement/reinforcement admission
 	# needs an external asset transfer contract and is deliberately not implemented.
@@ -127,6 +130,9 @@ func schedule_event(id: String, due: float, kind: String, payload: Dictionary) -
 		record.phase = 0 if kind == "structure" and payload.get("expiry", false) else (["structure", "order", "reinforcement", "area_change", "coordination_release"].find(kind) + 1)
 	if logistics_port != null:
 		record.phase = 0 if kind == "structure" and payload.get("expiry", false) else (1 if kind == "structure" else (2 if kind == "logistics" and payload.has("delivery_id") else (3 if kind == "logistics" else ["order", "reinforcement", "area_change", "coordination_release"].find(kind) + 4)))
+	if information_port != null:
+		# Preserve all earlier phase relations; reports are drained before commands.
+		record.phase = 0 if kind == "structure" and payload.get("expiry", false) else (1 if kind == "structure" else (2 if kind == "logistics" and payload.has("delivery_id") else (3 if kind == "logistics" else (5 if kind == "communication" else ["order", "reinforcement", "area_change", "coordination_release"].find(kind) + 6))))
 	var unit_ref: String = str(payload.unit.id) if kind == "reinforcement" else str(payload.get("unit_id", ""))
 	if not unit_ref.is_empty():
 		if structure_port != null:
@@ -177,6 +183,8 @@ func pop_event() -> Dictionary:
 func _event_before(a: Dictionary, b: Dictionary) -> bool:
 	if logistics_port != null:
 		logistics_port.get_ref().work.heap_event_comparisons += 1
+	if information_port != null:
+		information_port.get_ref().work.command_heap_comparisons += 1
 	return _before(a, b)
 
 static func _before(a: Dictionary, b: Dictionary) -> bool:

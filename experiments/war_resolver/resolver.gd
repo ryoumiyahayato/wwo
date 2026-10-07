@@ -102,6 +102,8 @@ func resolve_until(state: State, target_game_time: float, resolution_policy: Str
 
 func _process_due(state: State, log: Array[Dictionary], changes: Dictionary, area_changes: Dictionary) -> void:
 	while state.next_event_time() <= state.time:
+		if state.information_port != null and int(state.events[0].get("phase", 0)) >= 5:
+			state.information_port.get_ref().deliver_reports_through(state.time)
 		var transition: Dictionary = {}
 		if state.materialization_port != null and state.materialization_port.get_ref() != null:
 			transition = state.materialization_port.get_ref().prepare_event(state.events[0])
@@ -114,7 +116,7 @@ func _process_due(state: State, log: Array[Dictionary], changes: Dictionary, are
 		var event: Dictionary = state.pop_event()
 		var payload: Dictionary = event.payload
 		state.counters.events_processed += 1
-		if event.kind in ["structure", "logistics"]:
+		if event.kind in ["structure", "logistics", "communication"]:
 			log.append({"time": state.time, "kind": event.kind, "id": event.id, "result": transition.get("record", {})})
 			continue
 		if event.kind == "order":
@@ -142,6 +144,8 @@ func _process_due(state: State, log: Array[Dictionary], changes: Dictionary, are
 			state.wake(str(area.id))
 			area_changes[area.id] = area.duplicate(true)
 		log.append({"time": state.time, "kind": event.kind, "id": event.id})
+	if state.information_port != null:
+		state.information_port.get_ref().deliver_reports_through(state.time)
 
 
 func _posture(state: State, unit: Dictionary) -> String:

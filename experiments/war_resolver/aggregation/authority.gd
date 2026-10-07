@@ -269,6 +269,8 @@ func prepare_event(event: Dictionary) -> Dictionary:
 		if _state.logistics_port != null:
 			_state.logistics_port.get_ref().on_structure(result)
 		return result
+	if event.kind == "communication":
+		return _state.information_port.get_ref().process_command(event)
 	if event.kind == "logistics":
 		return _state.logistics_port.get_ref().process_event(event)
 	if event.kind in ["order", "coordination_release"]:
