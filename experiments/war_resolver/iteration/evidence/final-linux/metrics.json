@@ -1,0 +1,1057 @@
+{
+  "base": "c4731a33177660b83c6490f41fe42dcbe7cfa7bb",
+  "exact_code_commit": "69fa36d6202b2b0d8e9332406ff57d269749fa0c",
+  "validation_checkout": "f609b75b4d7711863d8c769f3cfd9667bc84fb59",
+  "accepted_level": "LEVEL_3",
+  "new_failures": [],
+  "known_failure": "economy golden: 2 unchanged assertions, exact M0 log",
+  "unique_predecessor_checks": 43948,
+  "new_checks": 640,
+  "full_step_count": 95,
+  "profiles": {
+    "100": {
+      "samples": 5,
+      "warmup_samples_excluded": 1,
+      "p50_call_usec_range": [
+        910,
+        950
+      ],
+      "p95_call_usec_range": [
+        1564,
+        2075
+      ],
+      "max_call_usec": 5077,
+      "max_primitive_usec": 4167,
+      "advance_ms_range": [
+        1005.414,
+        1064.993
+      ]
+    },
+    "400": {
+      "samples": 5,
+      "warmup_samples_excluded": 1,
+      "p50_call_usec_range": [
+        888,
+        936
+      ],
+      "p95_call_usec_range": [
+        1503,
+        1776
+      ],
+      "max_call_usec": 19635,
+      "max_primitive_usec": 18536,
+      "advance_ms_range": [
+        18215.607,
+        19322.005
+      ]
+    }
+  },
+  "long_max_call_usec": 37157,
+  "long_largest_primitive": {
+    "usec": 37045,
+    "phase": "apply:apply_units",
+    "seed": "109",
+    "quota": 1
+  },
+  "storage_growth": {
+    "event_identity_records": {
+      "initial": 12,
+      "final": 294,
+      "net_per_game_hour": 11.75
+    },
+    "information_identity_records": {
+      "initial": 2,
+      "final": 564,
+      "net_per_game_hour": 23.416666666666668
+    },
+    "knowledge_claims": {
+      "initial": 2,
+      "final": 564,
+      "net_per_game_hour": 23.416666666666668
+    },
+    "messages": {
+      "initial": 3,
+      "final": 567,
+      "net_per_game_hour": 23.5
+    },
+    "decision_history": {
+      "initial": 1,
+      "final": 275,
+      "net_per_game_hour": 11.416666666666666
+    },
+    "structure_history": {
+      "initial": 0,
+      "final": 10,
+      "net_per_game_hour": 0.4166666666666667
+    },
+    "diagnostic_total": {
+      "initial": 8,
+      "final": 2097,
+      "net_per_game_hour": 87.04166666666667
+    },
+    "pending": {
+      "initial": 12,
+      "final": 0,
+      "net_per_game_hour": -0.5
+    },
+    "serialized_categories": {
+      "decision_history": {
+        "initial_bytes": 104,
+        "final_bytes": 7546263,
+        "net_bytes_per_game_hour": 314423.2916666667
+      },
+      "diagnostic": {
+        "initial_bytes": 1681,
+        "final_bytes": 516101,
+        "net_bytes_per_game_hour": 21434.166666666668
+      },
+      "domain_history": {
+        "initial_bytes": 2209,
+        "final_bytes": 4591,
+        "net_bytes_per_game_hour": 99.25
+      },
+      "identity": {
+        "initial_bytes": 7203,
+        "final_bytes": 37007,
+        "net_bytes_per_game_hour": 1241.8333333333333
+      },
+      "knowledge": {
+        "initial_bytes": 2897,
+        "final_bytes": 753833,
+        "net_bytes_per_game_hour": 31289.0
+      },
+      "live": {
+        "initial_bytes": 294540,
+        "final_bytes": 297281,
+        "net_bytes_per_game_hour": 114.20833333333333
+      },
+      "pending": {
+        "initial_bytes": 1594,
+        "final_bytes": 26,
+        "net_bytes_per_game_hour": -65.33333333333333
+      },
+      "representation_inputs": {
+        "initial_bytes": 840801,
+        "final_bytes": 838142,
+        "net_bytes_per_game_hour": -110.79166666666667
+      }
+    }
+  },
+  "long_cli": {
+    "schema": "WWO_TASK9_CAUSAL_V0",
+    "scenario": "long",
+    "synthetic": true,
+    "game_time": 86400.0,
+    "seed": 71,
+    "quota": 31,
+    "ledger_balanced": true,
+    "storage": {
+      "active_cells": 15,
+      "cohorts": 198,
+      "decision_history": 275,
+      "diagnostic_total": 2097,
+      "event_identity_records": 294,
+      "geometry_focus_cells": 2,
+      "live_representations": 202,
+      "messages": 567,
+      "observations": 564,
+      "pending_events": 0,
+      "pending_reports": 0,
+      "static_memory_bytes": 89742165,
+      "underlying_leaves": 400
+    },
+    "continuation": {
+      "calls": 117801,
+      "last_result": {
+        "actual_unit_records_examined": 0,
+        "commit_count": 3176,
+        "committed_time": 86400.0,
+        "diagnostic_events_produced": 0,
+        "error": "",
+        "events": [],
+        "max_native_id_snapshot": 16,
+        "max_primitive": "prepare:finish",
+        "max_primitive_usec": 10169,
+        "ok": true,
+        "pending_boundary": -1.0,
+        "phase_work_counts": {
+          "apply:apply_units": 146273,
+          "apply:contact_diagnostics": 48504,
+          "apply:incoming_init": 146273,
+          "apply:incoming_source": 146273,
+          "apply:incoming_targets": 98909,
+          "apply_start": 51109,
+          "changed_areas": 3194,
+          "changed_units": 101514,
+          "clear_delta": 101526,
+          "control_start": 52036,
+          "control_units": 147200,
+          "due": 4032,
+          "eta": 149448,
+          "event_changed_areas": 3195,
+          "event_changed_units": 101526,
+          "fold_start": 52047,
+          "fold_units": 147240,
+          "index_records": 146273,
+          "index_sort": 158630,
+          "index_start": 51109,
+          "prepare:candidate_query": 850960,
+          "prepare:candidates": 197912,
+          "prepare:detection": 1140,
+          "prepare:factors": 1140,
+          "prepare:finish": 146273,
+          "prepare:fire": 1140,
+          "prepare:release_old_contacts": 840,
+          "prepare:rounds": 570,
+          "prepare:source": 146273,
+          "prepare:units": 146273,
+          "prepare:weights": 98909,
+          "release_jobs": 149459,
+          "scope_capacity": 51428,
+          "select": 3175
+        },
+        "requested_time": 86400.0,
+        "status": "COMPLETE",
+        "total_work_units": 3651803,
+        "wall_usec": 20,
+        "work_units": 3
+      },
+      "max_call_usec": 25117,
+      "max_work_units": 31,
+      "recent_sample_usec": {
+        "count": 4096,
+        "p50": 211,
+        "p95": 438,
+        "scope": "last at most4096 calls; overall max measured across all calls"
+      }
+    },
+    "wall_ms": {
+      "advance": 25566.874,
+      "input_build": 70.475,
+      "query_and_result": 114.92
+    },
+    "input_cost_subsets_ms": {
+      "admission": 48.768,
+      "coalesce_and_focus": 20.674,
+      "geometry_focus_subset": 0.023
+    },
+    "output_costs": {
+      "encoded_bytes": 1054698,
+      "optional_file_ms": 0.01,
+      "serialization_ms": 25.718,
+      "stdout_ms": 6.774
+    },
+    "limits": [
+      "finite local encounter envelope",
+      "synthetic scope and test policy",
+      "external supply ETA independent of routes",
+      "counted work quota; no hard wall-clock frame promise",
+      "capacity backpressure preserves pending facts; authoritative histories grow"
+    ],
+    "ledger": {
+      "current_plus_spent_and_transit": {
+        "AMMUNITION": 1508.0,
+        "FUEL": 1640.0,
+        "SPARES": 1620.0
+      },
+      "initial": {
+        "AMMUNITION": 1508.0,
+        "FUEL": 1640.0,
+        "SPARES": 1620.0
+      }
+    }
+  },
+  "lod_worst": {
+    "distance_km": 5.55111512312578e-17,
+    "key": "casualties",
+    "leaf": "unit_000",
+    "relative": 0.0350825623595952,
+    "seed": 733,
+    "variant": "red"
+  },
+  "dormancy": [
+    {
+      "active_counters": {
+        "areas_examined": 1,
+        "contacts_resolved": 800,
+        "events_processed": 0,
+        "segments": 1,
+        "units_examined": 6760
+      },
+      "input_build_ms": 1.218,
+      "last_call": {
+        "actual_unit_records_examined": 0,
+        "commit_count": 2,
+        "committed_time": 30.0,
+        "diagnostic_events_produced": 0,
+        "error": "",
+        "events": [],
+        "max_native_id_snapshot": 40,
+        "max_primitive": "prepare:candidate_query",
+        "max_primitive_usec": 302,
+        "ok": true,
+        "pending_boundary": -1.0,
+        "phase_work_counts": {
+          "apply:apply_units": 41,
+          "apply:contact_diagnostics": 801,
+          "apply:incoming_init": 41,
+          "apply:incoming_source": 41,
+          "apply:incoming_targets": 840,
+          "apply_start": 2,
+          "changed_areas": 2,
+          "changed_units": 41,
+          "clear_delta": 42,
+          "control_start": 2,
+          "control_units": 41,
+          "due": 2,
+          "eta": 42,
+          "event_changed_areas": 3,
+          "event_changed_units": 42,
+          "fold_start": 3,
+          "fold_units": 41,
+          "index_records": 41,
+          "index_sort": 281,
+          "index_start": 2,
+          "prepare:candidate_query": 13400,
+          "prepare:candidates": 1640,
+          "prepare:finish": 41,
+          "prepare:fire": 840,
+          "prepare:rounds": 40,
+          "prepare:source": 41,
+          "prepare:units": 41,
+          "prepare:weights": 840,
+          "release_jobs": 43,
+          "scope_capacity": 2,
+          "select": 1
+        },
+        "requested_time": 30.0,
+        "status": "COMPLETE",
+        "total_work_units": 19280,
+        "wall_usec": 84,
+        "work_units": 29
+      },
+      "sleeping_areas": 0,
+      "sleeping_squads": 0,
+      "static_memory_bytes": 26941274
+    },
+    {
+      "active_counters": {
+        "areas_examined": 1,
+        "contacts_resolved": 800,
+        "events_processed": 0,
+        "segments": 1,
+        "units_examined": 6760
+      },
+      "input_build_ms": 334.89,
+      "last_call": {
+        "actual_unit_records_examined": 0,
+        "commit_count": 2,
+        "committed_time": 30.0,
+        "diagnostic_events_produced": 0,
+        "error": "",
+        "events": [],
+        "max_native_id_snapshot": 40,
+        "max_primitive": "prepare:candidate_query",
+        "max_primitive_usec": 275,
+        "ok": true,
+        "pending_boundary": -1.0,
+        "phase_work_counts": {
+          "apply:apply_units": 41,
+          "apply:contact_diagnostics": 801,
+          "apply:incoming_init": 41,
+          "apply:incoming_source": 41,
+          "apply:incoming_targets": 840,
+          "apply_start": 2,
+          "changed_areas": 2,
+          "changed_units": 41,
+          "clear_delta": 42,
+          "control_start": 2,
+          "control_units": 41,
+          "due": 2,
+          "eta": 42,
+          "event_changed_areas": 3,
+          "event_changed_units": 42,
+          "fold_start": 3,
+          "fold_units": 41,
+          "index_records": 41,
+          "index_sort": 281,
+          "index_start": 2,
+          "prepare:candidate_query": 13400,
+          "prepare:candidates": 1640,
+          "prepare:finish": 41,
+          "prepare:fire": 840,
+          "prepare:rounds": 40,
+          "prepare:source": 41,
+          "prepare:units": 41,
+          "prepare:weights": 840,
+          "release_jobs": 43,
+          "scope_capacity": 2,
+          "select": 1
+        },
+        "requested_time": 30.0,
+        "status": "COMPLETE",
+        "total_work_units": 19280,
+        "wall_usec": 95,
+        "work_units": 29
+      },
+      "sleeping_areas": 10000,
+      "sleeping_squads": 30000,
+      "static_memory_bytes": 135376018
+    }
+  ],
+  "heterogeneous_active_cost": [
+    {
+      "accepted_groups": 4,
+      "active_representations": 4,
+      "eligible_groups": 4,
+      "heterogeneous": false,
+      "rejections": [],
+      "wall_ms": 1.629,
+      "work": {
+        "actual_contacts_resolved": 8,
+        "candidate_contacts_examined": 16,
+        "events": 0,
+        "formation_records_examined": 100,
+        "formations_built": 4,
+        "formations_resolved": 4,
+        "index_records_examined": 4,
+        "input_leaf_records_examined": 0,
+        "leaf_records_examined": 80,
+        "leaf_records_materialized": 0,
+        "parent_nodes_updated": 0,
+        "range_probes": 20,
+        "segments": 1,
+        "spatial_nodes_examined": 0
+      }
+    },
+    {
+      "accepted_groups": 3,
+      "active_representations": 13,
+      "eligible_groups": 4,
+      "heterogeneous": true,
+      "rejections": [
+        {
+          "error": "incompatible_cohort",
+          "ok": false
+        }
+      ],
+      "wall_ms": 8.101,
+      "work": {
+        "actual_contacts_resolved": 44,
+        "candidate_contacts_examined": 169,
+        "events": 0,
+        "formation_records_examined": 210,
+        "formations_built": 3,
+        "formations_resolved": 13,
+        "index_records_examined": 13,
+        "input_leaf_records_examined": 0,
+        "leaf_records_examined": 402,
+        "leaf_records_materialized": 0,
+        "parent_nodes_updated": 0,
+        "range_probes": 91,
+        "segments": 1,
+        "spatial_nodes_examined": 0
+      }
+    }
+  ],
+  "locality": {
+    "loaded_cells": 2,
+    "materialized_leaf_delta": 2,
+    "transition_and_check_ms": 0.624,
+    "unrelated_cohorts": 2
+  },
+  "sparse": {
+    "actual_contacts_resolved": 2,
+    "candidate_contacts_examined": 402,
+    "events": 0,
+    "formation_records_examined": 0,
+    "formations_built": 0,
+    "formations_resolved": 400,
+    "index_records_examined": 400,
+    "input_leaf_records_examined": 0,
+    "leaf_records_examined": 4014,
+    "leaf_records_materialized": 0,
+    "parent_nodes_updated": 0,
+    "range_probes": 6979,
+    "segments": 1,
+    "spatial_nodes_examined": 0
+  },
+  "retirement": [
+    {
+      "calls": 20080,
+      "cleanup_work": 843,
+      "contacts": 800,
+      "max_call_usec": 300,
+      "quota": 1,
+      "result": {
+        "actual_unit_records_examined": 0,
+        "commit_count": 2,
+        "committed_time": 30.0,
+        "diagnostic_events_produced": 0,
+        "error": "",
+        "events": [],
+        "max_native_id_snapshot": 40,
+        "max_primitive": "apply:contact_diagnostics",
+        "max_primitive_usec": 297,
+        "ok": true,
+        "pending_boundary": -1.0,
+        "phase_work_counts": {
+          "apply:apply_units": 41,
+          "apply:contact_diagnostics": 801,
+          "apply:incoming_init": 41,
+          "apply:incoming_source": 41,
+          "apply:incoming_targets": 840,
+          "apply_start": 2,
+          "changed_areas": 2,
+          "changed_units": 41,
+          "clear_delta": 42,
+          "control_start": 2,
+          "control_units": 41,
+          "due": 2,
+          "eta": 42,
+          "event_changed_areas": 3,
+          "event_changed_units": 42,
+          "fold_start": 3,
+          "fold_units": 41,
+          "index_records": 41,
+          "index_sort": 281,
+          "index_start": 2,
+          "prepare:candidate_query": 13400,
+          "prepare:candidates": 1640,
+          "prepare:finish": 41,
+          "prepare:fire": 840,
+          "prepare:rounds": 40,
+          "prepare:source": 41,
+          "prepare:units": 41,
+          "prepare:weights": 840,
+          "release_jobs": 843,
+          "scope_capacity": 2,
+          "select": 1
+        },
+        "requested_time": 30.0,
+        "status": "COMPLETE",
+        "total_work_units": 20080,
+        "wall_usec": 3,
+        "work_units": 1
+      },
+      "sleeping": true,
+      "units": 40
+    },
+    {
+      "calls": 2869,
+      "cleanup_work": 843,
+      "contacts": 800,
+      "max_call_usec": 321,
+      "quota": 7,
+      "result": {
+        "actual_unit_records_examined": 0,
+        "commit_count": 2,
+        "committed_time": 30.0,
+        "diagnostic_events_produced": 0,
+        "error": "",
+        "events": [],
+        "max_native_id_snapshot": 40,
+        "max_primitive": "prepare:candidates",
+        "max_primitive_usec": 279,
+        "ok": true,
+        "pending_boundary": -1.0,
+        "phase_work_counts": {
+          "apply:apply_units": 41,
+          "apply:contact_diagnostics": 801,
+          "apply:incoming_init": 41,
+          "apply:incoming_source": 41,
+          "apply:incoming_targets": 840,
+          "apply_start": 2,
+          "changed_areas": 2,
+          "changed_units": 41,
+          "clear_delta": 42,
+          "control_start": 2,
+          "control_units": 41,
+          "due": 2,
+          "eta": 42,
+          "event_changed_areas": 3,
+          "event_changed_units": 42,
+          "fold_start": 3,
+          "fold_units": 41,
+          "index_records": 41,
+          "index_sort": 281,
+          "index_start": 2,
+          "prepare:candidate_query": 13400,
+          "prepare:candidates": 1640,
+          "prepare:finish": 41,
+          "prepare:fire": 840,
+          "prepare:rounds": 40,
+          "prepare:source": 41,
+          "prepare:units": 41,
+          "prepare:weights": 840,
+          "release_jobs": 843,
+          "scope_capacity": 2,
+          "select": 1
+        },
+        "requested_time": 30.0,
+        "status": "COMPLETE",
+        "total_work_units": 20080,
+        "wall_usec": 23,
+        "work_units": 4
+      },
+      "sleeping": true,
+      "units": 40
+    },
+    {
+      "calls": 648,
+      "cleanup_work": 843,
+      "contacts": 800,
+      "max_call_usec": 662,
+      "quota": 31,
+      "result": {
+        "actual_unit_records_examined": 0,
+        "commit_count": 2,
+        "committed_time": 30.0,
+        "diagnostic_events_produced": 0,
+        "error": "",
+        "events": [],
+        "max_native_id_snapshot": 40,
+        "max_primitive": "prepare:candidate_query",
+        "max_primitive_usec": 230,
+        "ok": true,
+        "pending_boundary": -1.0,
+        "phase_work_counts": {
+          "apply:apply_units": 41,
+          "apply:contact_diagnostics": 801,
+          "apply:incoming_init": 41,
+          "apply:incoming_source": 41,
+          "apply:incoming_targets": 840,
+          "apply_start": 2,
+          "changed_areas": 2,
+          "changed_units": 41,
+          "clear_delta": 42,
+          "control_start": 2,
+          "control_units": 41,
+          "due": 2,
+          "eta": 42,
+          "event_changed_areas": 3,
+          "event_changed_units": 42,
+          "fold_start": 3,
+          "fold_units": 41,
+          "index_records": 41,
+          "index_sort": 281,
+          "index_start": 2,
+          "prepare:candidate_query": 13400,
+          "prepare:candidates": 1640,
+          "prepare:finish": 41,
+          "prepare:fire": 840,
+          "prepare:rounds": 40,
+          "prepare:source": 41,
+          "prepare:units": 41,
+          "prepare:weights": 840,
+          "release_jobs": 843,
+          "scope_capacity": 2,
+          "select": 1
+        },
+        "requested_time": 30.0,
+        "status": "COMPLETE",
+        "total_work_units": 20080,
+        "wall_usec": 73,
+        "work_units": 23
+      },
+      "sleeping": true,
+      "units": 40
+    },
+    {
+      "calls": 75499,
+      "cleanup_work": 80403,
+      "contacts": 80000,
+      "max_call_usec": 26563,
+      "quota": 31,
+      "result": {
+        "actual_unit_records_examined": 0,
+        "commit_count": 2,
+        "committed_time": 30.0,
+        "diagnostic_events_produced": 0,
+        "error": "",
+        "events": [],
+        "max_native_id_snapshot": 400,
+        "max_primitive": "release_jobs",
+        "max_primitive_usec": 26419,
+        "ok": true,
+        "pending_boundary": -1.0,
+        "phase_work_counts": {
+          "apply:apply_units": 401,
+          "apply:contact_diagnostics": 80001,
+          "apply:incoming_init": 401,
+          "apply:incoming_source": 401,
+          "apply:incoming_targets": 80400,
+          "apply_start": 2,
+          "changed_areas": 2,
+          "changed_units": 401,
+          "clear_delta": 402,
+          "control_start": 2,
+          "control_units": 401,
+          "due": 2,
+          "eta": 402,
+          "event_changed_areas": 3,
+          "event_changed_units": 402,
+          "fold_start": 3,
+          "fold_units": 401,
+          "index_records": 401,
+          "index_sort": 4002,
+          "index_start": 2,
+          "prepare:candidate_query": 1768800,
+          "prepare:candidates": 160400,
+          "prepare:finish": 401,
+          "prepare:fire": 80400,
+          "prepare:rounds": 400,
+          "prepare:source": 401,
+          "prepare:units": 401,
+          "prepare:weights": 80400,
+          "release_jobs": 80403,
+          "scope_capacity": 2,
+          "select": 1
+        },
+        "requested_time": 30.0,
+        "status": "COMPLETE",
+        "total_work_units": 2340441,
+        "wall_usec": 76,
+        "work_units": 3
+      },
+      "sleeping": true,
+      "units": 400
+    },
+    {
+      "calls": 2755,
+      "cleanup_work": 43,
+      "contacts": 800,
+      "max_call_usec": 147,
+      "quota": 7,
+      "result": {
+        "actual_unit_records_examined": 0,
+        "commit_count": 2,
+        "committed_time": 30.0,
+        "diagnostic_events_produced": 0,
+        "error": "",
+        "events": [],
+        "max_native_id_snapshot": 40,
+        "max_primitive": "apply:apply_units",
+        "max_primitive_usec": 47,
+        "ok": true,
+        "pending_boundary": -1.0,
+        "phase_work_counts": {
+          "apply:apply_units": 41,
+          "apply:contact_diagnostics": 801,
+          "apply:incoming_init": 41,
+          "apply:incoming_source": 41,
+          "apply:incoming_targets": 840,
+          "apply_start": 2,
+          "changed_areas": 2,
+          "changed_units": 41,
+          "clear_delta": 42,
+          "control_start": 2,
+          "control_units": 41,
+          "due": 2,
+          "eta": 42,
+          "event_changed_areas": 3,
+          "event_changed_units": 42,
+          "fold_start": 3,
+          "fold_units": 41,
+          "index_records": 41,
+          "index_sort": 281,
+          "index_start": 2,
+          "prepare:candidate_query": 13400,
+          "prepare:candidates": 1640,
+          "prepare:finish": 41,
+          "prepare:fire": 840,
+          "prepare:rounds": 40,
+          "prepare:source": 41,
+          "prepare:units": 41,
+          "prepare:weights": 840,
+          "release_jobs": 43,
+          "scope_capacity": 2,
+          "select": 1
+        },
+        "requested_time": 30.0,
+        "status": "COMPLETE",
+        "total_work_units": 19280,
+        "wall_usec": 14,
+        "work_units": 2
+      },
+      "sleeping": false,
+      "units": 40
+    }
+  ],
+  "phase_work_counts_example": {
+    "apply:apply_units": 146273,
+    "apply:contact_diagnostics": 48504,
+    "apply:incoming_init": 146273,
+    "apply:incoming_source": 146273,
+    "apply:incoming_targets": 98909,
+    "apply_start": 51109,
+    "changed_areas": 3194,
+    "changed_units": 101514,
+    "clear_delta": 101526,
+    "control_start": 52036,
+    "control_units": 147200,
+    "due": 4032,
+    "eta": 149448,
+    "event_changed_areas": 3195,
+    "event_changed_units": 101526,
+    "fold_start": 52047,
+    "fold_units": 147240,
+    "index_records": 146273,
+    "index_sort": 158630,
+    "index_start": 51109,
+    "prepare:candidate_query": 850960,
+    "prepare:candidates": 197912,
+    "prepare:detection": 1140,
+    "prepare:factors": 1140,
+    "prepare:finish": 146273,
+    "prepare:fire": 1140,
+    "prepare:release_old_contacts": 840,
+    "prepare:rounds": 570,
+    "prepare:source": 146273,
+    "prepare:units": 146273,
+    "prepare:weights": 98909,
+    "release_jobs": 149459,
+    "scope_capacity": 51428,
+    "select": 3175
+  },
+  "causal_milestones": [
+    {
+      "cause_refs": [
+        "received_old_bridge_report"
+      ],
+      "id": "regular_0",
+      "input": "command",
+      "input_result": {
+        "domain": "COMMUNICATION",
+        "id": "input_regular_0",
+        "issued_at": 10.0,
+        "result": {
+          "delivery_time": 25.0,
+          "issued_at": 10.0,
+          "message_id": "input_regular_0",
+          "ok": true
+        }
+      },
+      "kind": "decision",
+      "scope": "blue_company",
+      "sequence": 14,
+      "subject": "company",
+      "time": 10.0
+    },
+    {
+      "cause_refs": [
+        "input_regular_0"
+      ],
+      "delivery_time": 25.0,
+      "execution": "EXECUTED",
+      "id": "executed_input_regular_0",
+      "kind": "command_result",
+      "outcome": {
+        "ok": true,
+        "reason": "executed_existing_role_input"
+      },
+      "scope": "blue_platoon",
+      "sequence": 16,
+      "subject": "blue_platoon",
+      "time": 25.0
+    },
+    {
+      "cause_refs": [
+        "stale_order"
+      ],
+      "delivery_time": 47.0,
+      "execution": "REJECTED",
+      "id": "executed_stale_order",
+      "kind": "command_result",
+      "outcome": {
+        "ok": false,
+        "reason": "wrong_owner_or_layer"
+      },
+      "scope": "node_unit_001",
+      "sequence": 18,
+      "subject": "node_unit_001",
+      "time": 47.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "id": "spatial_bridge_cut",
+        "kind": "spatial",
+        "result": {
+          "due": 120.0,
+          "edge_ref": "bridge_BD",
+          "id": "bridge_cut",
+          "open": false,
+          "processed_at": 120.0,
+          "property": "open",
+          "status": "APPLIED"
+        },
+        "time": 120.0
+      },
+      "execution": "APPLIED",
+      "id": "bridge_cut",
+      "kind": "spatial",
+      "scope": "",
+      "sequence": 26,
+      "subject": "world",
+      "time": 120.0
+    },
+    {
+      "cause_refs": [
+        "bridge_cut"
+      ],
+      "detail": {
+        "cause_ref": "bridge_cut",
+        "edge_ref": "bridge_BD",
+        "execution": "BLOCKED",
+        "id": "blocked_unit_000_bridge_cut",
+        "kind": "route_blocked",
+        "scope": "cell_038",
+        "time": 150.0,
+        "unit_id": "unit_000"
+      },
+      "execution": "BLOCKED",
+      "id": "blocked_unit_000_bridge_cut",
+      "kind": "route_blocked",
+      "scope": "cell_038",
+      "sequence": 31,
+      "subject": "unit_000",
+      "time": 150.0
+    },
+    {
+      "cause_refs": [
+        "received_report_local_2"
+      ],
+      "id": "regular_1",
+      "input": "command",
+      "input_result": {
+        "domain": "COMMUNICATION",
+        "id": "input_regular_1",
+        "issued_at": 325.0,
+        "result": {
+          "delivery_time": 340.0,
+          "issued_at": 325.0,
+          "message_id": "input_regular_1",
+          "ok": true
+        }
+      },
+      "kind": "decision",
+      "scope": "blue_company",
+      "sequence": 38,
+      "subject": "company",
+      "time": 325.0
+    },
+    {
+      "cause_refs": [
+        "input_regular_1"
+      ],
+      "delivery_time": 340.0,
+      "execution": "EXECUTED",
+      "id": "executed_input_regular_1",
+      "kind": "command_result",
+      "outcome": {
+        "ok": true,
+        "reason": "executed_existing_role_input"
+      },
+      "scope": "blue_platoon",
+      "sequence": 39,
+      "subject": "blue_platoon",
+      "time": 340.0
+    },
+    {
+      "cause_refs": [
+        "received_report_local_5_ammo"
+      ],
+      "id": "regular_2",
+      "input": "logistics_request",
+      "input_result": {
+        "domain": "LOGISTICS",
+        "id": "input_regular_2",
+        "issued_at": 640.0,
+        "result": {
+          "ok": true,
+          "status": "REQUESTED"
+        }
+      },
+      "kind": "decision",
+      "scope": "blue_company",
+      "sequence": 66,
+      "subject": "company",
+      "time": 640.0
+    },
+    {
+      "cause_refs": [
+        "input_regular_2"
+      ],
+      "detail": {
+        "id": "logistics_delivery_allocation_input_regular_2",
+        "kind": "logistics",
+        "result": {
+          "allocation_actor": "company",
+          "delivery_id": "allocation_input_regular_2",
+          "delivery_time": 670.0,
+          "issue_time": 640.0,
+          "quantity": 10.0,
+          "receipt_time": 670.0,
+          "recipient_kind": "formation",
+          "recipient_ref": "blue_platoon",
+          "request_id": "input_regular_2",
+          "resource_class": "AMMUNITION",
+          "source_ref": "source",
+          "status": "RECEIVED"
+        },
+        "time": 670.0
+      },
+      "execution": "APPLIED",
+      "id": "logistics_delivery_allocation_input_regular_2",
+      "kind": "logistics",
+      "scope": "",
+      "sequence": 72,
+      "subject": "world",
+      "time": 670.0
+    },
+    {
+      "cause_refs": [],
+      "id": "regular_3",
+      "input": "keep",
+      "input_result": {
+        "domain": "NONE",
+        "status": "STANDING_ORDER_CONTINUES"
+      },
+      "kind": "decision",
+      "scope": "blue_company",
+      "sequence": 105,
+      "subject": "company",
+      "time": 955.0
+    },
+    {
+      "cause_refs": [],
+      "id": "regular_4",
+      "input": "keep",
+      "input_result": {
+        "domain": "NONE",
+        "status": "STANDING_ORDER_CONTINUES"
+      },
+      "kind": "decision",
+      "scope": "blue_company",
+      "sequence": 115,
+      "subject": "company",
+      "time": 1270.0
+    },
+    {
+      "cause_refs": [],
+      "id": "regular_5",
+      "input": "keep",
+      "input_result": {
+        "domain": "NONE",
+        "status": "STANDING_ORDER_CONTINUES"
+      },
+      "kind": "decision",
+      "scope": "blue_company",
+      "sequence": 117,
+      "subject": "company",
+      "time": 1585.0
+    }
+  ],
+  "note": "each completed suite once; development/historical/interrupted runs are not cumulative checks; bytes are explicit serialization, not RAM"
+}

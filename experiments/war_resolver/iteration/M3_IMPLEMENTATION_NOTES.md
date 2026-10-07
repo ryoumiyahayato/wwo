@@ -1,4 +1,6 @@
-# M3 当前具体实施缺口
+# M3 历史实施备忘（11008e8时点）
+
+本文件保留当时计划，不作为当前恢复入口。当前状态以NEXT/RUN_STATE/FINAL_ACCEPTANCE与实际git/evidence为准。
 
 已实现11008e8：原resolver prepare/apply方程唯一移到continuous/segment_work.gd；
 原同步wrapper逐primitive驱动。resolver1876/0、Task4 17329/0、combined116/0，

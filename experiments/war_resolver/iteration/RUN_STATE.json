@@ -5,13 +5,13 @@
     "M0": "PASSED",
     "M1": "PASSED",
     "M2": "PASSED",
-    "M3": "RUNNING",
-    "M4": "RUNNING"
+    "M3": "PASSED",
+    "M4": "PASSED"
   },
   "last_verified_code_commit": "69fa36d6202b2b0d8e9332406ff57d269749fa0c",
   "started_utc": "2026-10-07T16:28:31Z",
-  "effective_minutes_estimate": 238,
-  "remaining_minutes_estimate": 362,
+  "effective_minutes_estimate": 275,
+  "remaining_minutes_estimate": 325,
   "estimate_quality": "approximate wall clock minus known wait; update at safe checkpoints",
   "platform_startup_wait_seconds": 13,
   "tests_completed": [
@@ -35,14 +35,14 @@
     "CLI main1800/quota7 and long86400/quota31 actual completed at78d39a4: conserved stocks,275decisions,zero pending,standalone static89.7MB,maxcall56.495ms observed not hard frame guarantee",
     "M3 frozen78d39a4 expanded gate COMPLETE: original43948/0,8sameLinux replaypairs, new597/0, sustained24h two seeds4quotas, profile60s warmup+5sample100/400",
     "c8 full M4 candidate ended complete/excluding identical known economy failure, old43948/0+new597/0; NOT final acceptance because independent retirement counter failed 1/1:80000 contacts vs403 cleanup units,41.532ms maxcall",
-    "retirement43/0 continuous60/0 load101/0 exactgdpy fingerprint69fa36d; original400 quota1 counter1/0 cleanup80403"
+    "retirement43/0 continuous60/0 load101/0 exactgdpy fingerprint69fa36d; original400 quota1 counter1/0 cleanup80403",
+    "interrupted recovered-candidate has completed original/new through long53/0, source exact; entirewrapper incomplete NOTaccepted",
+    "full recovered runner complete exit0: old43948/0 + new640/0 + allsameLinux hashes + equivalent unified/audit except exacteconomy knownfail",
+    "finalsource CLI main1800 quota7 and long86400 quota31 complete exit0, conserved ledgers,118/2097trace, no pending"
   ],
-  "tests_pending": [
-    "frozen69fa36d full original/new/unified/audit including retirement43 and long24h",
-    "final report/artifacts/samePR publication"
-  ],
+  "tests_pending": [],
   "blockers": [],
-  "next": "Freeze new full validation. M3 final scope recheck RUNNING, M4RUNNING; no code/HEAD changes while runner active.",
+  "next": "No new implementation authorized. Finish samePR final docs/artifact publication and readonly verify, then end task. Future followup is suggestion only.",
   "validation_session": null,
   "connection_checks": [
     {
@@ -53,6 +53,11 @@
       "utc": "2026-10-07T19:57:33Z",
       "result": "single exec transport disconnect after two CLI completions; fresh read succeeds, same branch/c8b489e, no Godot process; no reset/new task",
       "platform_wait_estimate": "less than1min, uncertain; separately disclosed"
+    },
+    {
+      "utc": "2026-10-07T20:43:31Z",
+      "result": "selected environment starting then ready; realfourcheckpoint/git reviewed. Samef609b75/69fa36d fingerprint, Godot4.6.3/Python3.12.14; runner dead, oldfull incomplete, longstep complete",
+      "platform_wait_estimate": "about1minute uncertain; explicit wait tool returned ready immediately; separately disclosed"
     }
   ],
   "baseline_known_failures": [
@@ -64,15 +69,16 @@
     "M0_raw": "builds/task9-m0",
     "M1": "iteration/evidence/m1-linux/reuse.json",
     "M2": "iteration/evidence/m2-linux/gate.json",
-    "M3": "iteration/evidence/m3-linux/gate.json"
+    "M3": "iteration/evidence/m3-linux/gate.json",
+    "FINAL": "iteration/evidence/final-linux/gate.json"
   },
   "stopped": false,
   "stop_reason": null,
   "stopped_utc": "2026-10-07T17:17:31.014654+00:00",
   "saved_unaccepted_code_commit": "ed54ef6b68146df4a560b77865d8d47efd077730",
-  "highest_accepted_level": "LEVEL_2",
+  "highest_accepted_level": "LEVEL_3",
   "publication": {
-    "status": "Draft PR111 remote cc64092 fast-forward push confirmed; final full gate RUNNING",
+    "status": "FINAL_DOCS_READY_TO_PUSH; existing sameDraftPR111 open/unmerged; final push/manifest verification remains administrative",
     "draft_pr": "https://github.com/ryoumiyahayato/wwo/pull/111"
   },
   "resumed_utc": "2026-10-07T17:21:05Z",
@@ -88,6 +94,8 @@
     }
   ],
   "last_verified_refactor_commit": "64f4b0d562567cdf6010cf70472053f42347610b",
-  "last_full_verified_code_commit": "78d39a4a17d82768a5da9c42a5ae55e2ff026d46",
-  "last_verified_scope": "retirement43/0 continuous60/0 load101/0 exactgdpy fingerprint69fa36d; original400 quota1 counter1/0 cleanup80403"
+  "last_full_verified_code_commit": "69fa36d6202b2b0d8e9332406ff57d269749fa0c",
+  "last_verified_scope": "retirement43/0 continuous60/0 load101/0 exactgdpy fingerprint69fa36d; original400 quota1 counter1/0 cleanup80403",
+  "last_full_verified_scope": "full recovered runner complete exit0: old43948/0 + new640/0 + allsameLinux hashes + equivalent unified/audit except exacteconomy knownfail",
+  "overall": "COMPLETE"
 }

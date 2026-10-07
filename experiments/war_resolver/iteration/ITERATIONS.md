@@ -130,3 +130,21 @@ published表，不改方程/事件时间。新增40三quota与400quota31、activ
 continuous60/0、load101/0全部完整exit0，gd/py fingerprint对应69fa36d。原反例
 quota1 exit0，清理80403，contacts80000，calls2340441，maxcall10.016ms。
 保留修正，仅改变过期诊断释放粒度。新完整最终门将含退眠门，不复用旧候选为最终。
+
+## 平台执行环境切换（20:43UTC恢复核验）
+
+selected环境starting→ready，实际AGENTS/四checkpoint/diff重读。源码fingerprint、
+f609b75、未提交文档/所有日志保留；engine4.6.3/Python3.12.14。旧runner已死，
+long53/0完整结束，之后profile未完成；整轮evidence complete=false，保留INTERRUPTED
+而不拼接成PASS。无新代码改动，重新同HEAD完整final；预算继承约250min，平台
+切换约1min不确定单列。无新Task/分支/后台续跑。
+
+## 最终完整门与交付CLI
+
+恢复同冻结69fa36d/f609b75的完整final全部结束：95步骤，旧43948/0、新640/0，
+8旧hash及4正式pair严格M0相同。唯一经济golden失败931byte逐字相同，保持2项
+未通过，整体wrapper exit0是排除明确knownfailure的实验门，不是全仓库全绿。
+最终CLI main1800/quota7与long86400/quota31同source均exit0，ledger平衡，无pending。
+最终400dense5样p50 888..936us/p95 1503..1776us/max19.635ms；长对照max37.157ms，
+最大primitive37.045ms apply_units，实测不是帧SLA。保留清理修正，无进一步算法改动。
+新增DELIVERY文档/有限raw/machine，预算约275min，进入唯一DraftPR最终发布。

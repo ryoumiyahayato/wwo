@@ -1,0 +1,15 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+FORMAL_ECONOMY_GOLDEN_30=24519f5dc2d191d7d5bac67437e35e6d4c4e734700f5c9915ee1df620abdfdcf
+ERROR: FAIL: day 30 economy matches trusted baseline
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://tests/formal/formal_world_economy_golden_test.gd:70)
+       [1] _run (res://tests/formal/formal_world_economy_golden_test.gd:32)
+FORMAL_ECONOMY_GOLDEN_365=241451cb8ce5a69d62a5105c0b0808fe16fbdc4ca1f0cb79ade3ffde780c56fd
+ERROR: FAIL: day 365 economy matches trusted baseline
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://tests/formal/formal_world_economy_golden_test.gd:70)
+       [1] _run (res://tests/formal/formal_world_economy_golden_test.gd:32)
+Formal world economy golden: 3 checks, 2 failures

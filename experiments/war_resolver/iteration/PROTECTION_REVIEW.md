@@ -1,7 +1,7 @@
 # 顺序第二遍保护边界复核（非独立人工审计）
 
 唯一writer顺序复核，未使用子代理；不是安全沙箱或正式军事系统验收。
-冻结基线c4731a3；M3候选78d39a4。最终M4还须在最终source重复相关实际门。
+冻结基线c4731a3；最终code69fa36d，完整M4 checkoutf609b75实际结束。历史候选和反例另保留。
 
 - base起tracked diff只在experiments/war_resolver；tools/tests/scripts/data/project/AGENTS
   没有tracked diff。旧Tasks1–8/五组assertions、goldens和PowerShell matcher未改。
@@ -28,3 +28,14 @@
   24h首次/最终活跃范围、聚合比例、异质fallback成本；不将空闲7天当持续压力。
 - 普通云端实施与同任务检查点；无原生Goal宣称、定时器、隐藏续跑或守护进程。
   PR111唯一Draft；不merge、force、改Task8/默认分支/生产。模型实际元数据不可查询。
+
+最终顺序复核补充：c8候选完整门结束后独立退眠反例揭露旧job数组最后引用
+在release_jobs整批释放。69fa36d仅对State.contacts已不发布的旧记录逐条释放，
+40三quota/400quota31、同步物理等价和active published表保留43/0；原400quota1
+反例从403到80403清理单位且完整exit0。新完整最终门在f609b75运行，旧候选
+证据不能替代它。范围候选机器记录m4-linux/range-review-candidate.json。
+
+最终恢复完整门已结束：f609b75 checkout/code69fa36d指纹严格相同，95steps只有
+1精确经济baseline失败，旧43948/0+new640/0、全部原Linuxhash保持。CLI main/long
+同source也完整结束；最终range-review在evidence/final-linux。旧中断wrapper保留
+INCOMPLETE，不将其拼接PASS。本审查仍为同一writer顺序复核，不宣称独立人工审计。

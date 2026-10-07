@@ -1,0 +1,14 @@
+{
+  "overall": "INCOMPLETE_NOT_ACCEPTED",
+  "reason": "execution environment transition terminated runner during remaining profile; no Godot remains",
+  "source_head": "f609b75b4d7711863d8c769f3cfd9667bc84fb59",
+  "source_fingerprint_reverified": true,
+  "completed_steps": 93,
+  "last_completed": "new_experiments__war_resolver__continuous__long_tests",
+  "uncompleted": [
+    "profile_after",
+    "retirement_tests",
+    "final source/baseline comparison and completion"
+  ],
+  "decision": "preserve logs; rerun full final suite at identical frozen69fa36d/f609b75; do not splice incomplete wrapper to PASS"
+}
