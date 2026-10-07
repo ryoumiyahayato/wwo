@@ -12,6 +12,7 @@ func _initialize() -> void:
 	_contact()
 	_locality()
 	_rejections()
+	_dynamic_and_retreat()
 	print("SPATIAL_EVIDENCE_JSON=" + JSON.stringify(evidence))
 	print("Task9 spatial: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures > 0 else 0)
@@ -80,6 +81,14 @@ func _attributes() -> void:
 	near(cover.state.units.unit_000.ammo_spent, bare.state.units.unit_000.ammo_spent, "cover alone does not conceal")
 	near(hidden.state.units.unit_000.ammo_spent, 0.0, "full target concealment prevents outgoing detected fire")
 	check(hidden.state.units.unit_002.ammo_spent > 0.0, "concealed target still can observe exposed opponent")
+	var varied: Dictionary = F.setup(false, true, false, 71, true)
+	varied.space._nodes.C.ground.concealment = 0.5
+	varied.lod.advance(10.0)
+	var fire: Dictionary = {}
+	for contact: Dictionary in varied.state.contacts[varied.graph.nodes.A.cell]:
+		if contact.source == "unit_000":
+			fire[contact.target] = contact.usable_fire_per_minute
+	near(fire.unit_002, 2.0 * float(fire.unit_003), "diagnostic fire respects independent target detection")
 
 func _bridge() -> void:
 	var env: Dictionary = F.setup()
@@ -115,6 +124,9 @@ func _contact() -> void:
 			for key: String in ["casualties", "ammo_spent", "equipment_lost", "suppression"]:
 				near(a.state.units[id][key], b.state.units[id][key], "physical contact invariant under cell IDs " + key, 0.0)
 		check(a.state.units.unit_000.ammo_spent > 0.0, "legal cross-cell contact")
+		var reordered: Dictionary = F.setup(false, true, false, seed_value, false, true)
+		reordered.lod.advance(120.0)
+		check(a.state.units == reordered.state.units and a.state.totals == reordered.state.totals, "input ID insertion order is physically neutral")
 	var river: Dictionary = F.setup(true, true)
 	river.space._edges.bridge_BD.open = false
 	river.lod.advance(10.0)
@@ -181,3 +193,21 @@ func _rejections() -> void:
 	check(not env.space.schedule_fact("negative", -1.0, "AB", false).ok, "negative time rejected")
 	check(not env.state.schedule_event("unprepared", 1.0, "spatial", {"fact_id": "missing"}), "unprepared spatial ticket denied")
 	check(before == env.state.snapshot(), "malformed input is atomic")
+
+func _dynamic_and_retreat() -> void:
+	var retreat: Dictionary = F.setup()
+	retreat.space.inject_path("unit_000", ["AB", "bridge_BD"])
+	retreat.lod.advance(5.0)
+	# Minimal kernel counterexample, not a scenario assigning a battle outcome.
+	retreat.state.units.unit_000.cohesion = 0.1
+	retreat.lod.advance(20.0)
+	check(retreat.state.units.unit_000.spatial.node == "A" and retreat.state.missions[retreat.state.units.unit_000.mission_id].status == "withdrawn", "existing cohesion withdrawal uses occupied known geometry")
+	near(retreat.state.units.unit_000.distance_moved, 0.1, "withdrawal travels out and back without refund")
+	check(balanced(retreat), "withdrawal conserves actual fuel")
+	var changed: Dictionary = F.setup()
+	changed.space.inject_path("unit_000", ["AB"])
+	check(changed.space.schedule_ground("soften", 5.0, "edge", "AB", F.ground("mud", 1.0)).ok, "validated exact ground event")
+	changed.lod.advance(10.0)
+	var fatigue_at_five: float = 0.004 * 5.0 / 60.0
+	near(changed.state.units.unit_000.distance_moved, 0.05 + 0.3 * (1.0 - fatigue_at_five * 0.5) * 5.0 / 60.0, "old speed before fact, new resistance afterward")
+	check(balanced(changed), "dynamic ground consumes only actual travel")

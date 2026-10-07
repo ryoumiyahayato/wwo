@@ -31,20 +31,31 @@ static func topology(renamed: bool = false) -> Dictionary:
 			lanes[a + ":" + b] = {"observe": true, "fire": true}
 	return {"nodes": nodes, "edges": edges, "lanes": lanes}
 
-static func setup(motor: bool = true, combat: bool = false, renamed: bool = false, seed_value: int = 71) -> Dictionary:
+static func setup(motor: bool = true, combat: bool = false, renamed: bool = false, seed_value: int = 71, split_red: bool = false, reverse_inputs: bool = false) -> Dictionary:
 	var state: State = State.new()
 	state.seed = seed_value
 	for index: int in range(100):
 		state.add_area(Data.area("cell_%03d" % index))
 	var graph: Dictionary = topology(renamed)
+	if reverse_inputs:
+		for key: String in ["nodes", "edges", "lanes"]:
+			var reordered: Dictionary = {}
+			var ids: Array[String] = State.sorted_ids(graph[key])
+			ids.reverse()
+			for id: String in ids:
+				reordered[id] = graph[key][id]
+			graph[key] = reordered
 	var nodes: Dictionary = {"blue_company": {"echelon": "company", "side": "blue", "parent": ""},
 		"blue_platoon": {"echelon": "platoon", "side": "blue", "parent": "blue_company"},
 		"blue_destination": {"echelon": "platoon", "side": "blue", "parent": "blue_company"},
 		"red_company": {"echelon": "company", "side": "red", "parent": ""},
 		"red_platoon": {"echelon": "platoon", "side": "red", "parent": "red_company"}}
-	for index: int in range(4):
+	var unit_order: Array[int] = [0, 1, 2, 3]
+	if reverse_inputs:
+		unit_order.reverse()
+	for index: int in unit_order:
 		var id: String = "unit_%03d" % index
-		var point: String = "A" if index < 2 else "D"
+		var point: String = "A" if index < 2 else ("C" if split_red and index == 3 else "D")
 		var mission: Dictionary = Data.mission("mission_" + id, "advance" if index < 2 else "hold", 1.0, 0.1)
 		state.add_mission(mission)
 		var unit: Dictionary = Data.unit(id, "blue" if index < 2 else "red", graph.nodes[point].cell, mission.id)
@@ -81,6 +92,7 @@ static func setup(motor: bool = true, combat: bool = false, renamed: bool = fals
 	var space: Space = Space.new()
 	assert(space.configure(state, lod, graph.nodes, graph.edges, graph.lanes))
 	for index: int in range(4):
-		assert(space.admit_unit("unit_%03d" % index, "A" if index < 2 else "D", "MOTORIZED" if motor and index < 2 else "FOOT"))
+		var point: String = "A" if index < 2 else ("C" if split_red and index == 3 else "D")
+		assert(space.admit_unit("unit_%03d" % index, point, "MOTORIZED" if motor and index < 2 else "FOOT"))
 	return {"state": state, "lod": lod, "service": structure, "structure": structure, "roles": roles,
 		"logistics": logistics, "space": space, "graph": graph, "people": people, "nodes": nodes}
