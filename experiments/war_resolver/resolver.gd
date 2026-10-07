@@ -48,6 +48,10 @@ func resolve_until(state: State, target_game_time: float, resolution_policy: Str
 					var exhaustion: float = float(unit.ammunition) / float(plan.rounds) * 60.0
 					if exhaustion > 0.000001:
 						boundary = minf(boundary, state.time + exhaustion)
+				if float(plan.get("fuel_rate", 0.0)) > 0.0:
+					var fuel_eta: float = float(unit.fuel) / float(plan.fuel_rate) * 60.0
+					if fuel_eta > 0.000001:
+						boundary = minf(boundary, state.time + fuel_eta)
 				if float(plan.speed) != 0.0:
 					var objective: float = float(mission.objective)
 					if plan.posture == "withdraw" and mission.posture != "withdraw":
@@ -110,8 +114,8 @@ func _process_due(state: State, log: Array[Dictionary], changes: Dictionary, are
 		var event: Dictionary = state.pop_event()
 		var payload: Dictionary = event.payload
 		state.counters.events_processed += 1
-		if event.kind == "structure":
-			log.append({"time": state.time, "kind": "structure", "id": event.id, "result": transition.get("record", {})})
+		if event.kind in ["structure", "logistics"]:
+			log.append({"time": state.time, "kind": event.kind, "id": event.id, "result": transition.get("record", {})})
 			continue
 		if event.kind == "order":
 			var unit: Dictionary = state.examine_unit(str(payload.unit_id))
@@ -187,7 +191,7 @@ func _prepare_area(state: State, area_id: String) -> Dictionary:
 	for id: String in ids:
 		var unit: Dictionary = state.examine_unit(id)
 		var posture: String = _posture(state, unit)
-		var commitment: float = minf(float(unit.effective), float(unit.equipment)) * float(unit.readiness)
+		var commitment: float = minf(float(unit.effective), float(unit.get("serviceable_equipment", unit.equipment))) * float(unit.readiness)
 		commitment *= float(unit.cohesion) * (1.0 - float(unit.fatigue) * 0.5) * (1.0 - float(unit.suppression))
 		if posture in ["idle", "reserve", "withdraw"]:
 			commitment = 0.0
@@ -244,6 +248,8 @@ func _prepare_area(state: State, area_id: String) -> Dictionary:
 				plan.speed = direction * float(unit.mobility) * float(area.movement_modifier) * float(unit.readiness)
 				plan.speed *= minf(1.0, float(area.frontage) / maxf(1.0, float(side_frontage[unit.side])))
 				plan.speed *= (1.0 - float(unit.fatigue) * 0.5) * (1.0 - float(unit.suppression))
+		if unit.has("supply_capability"):
+			state.logistics_port.get_ref().prepare_activity(unit, plan)
 	state.contacts[area_id] = contact_records
 	return plans
 
@@ -268,7 +274,7 @@ func _apply_area(state: State, area_id: String, plans: Dictionary, minutes: floa
 			var variation: float = state.variation(id + ":" + target_id, int(floorf((state.time - minutes * 60.0) / float(INTERVALS["AGGREGATE"]))))
 			var fire: float = float(plan.rounds) / float(plan.target_weight) * _contact_weight(state, target_id) * ratio
 			incoming_losses[target_id] += fire * float(unit.weapon.lethality) * float(target_plan.exposure) * variation * minutes
-			incoming_pressure[target_id] += fire * SUPPRESSION_PER_ROUND * float(target_plan.exposure) / maxf(_contact_weight(state, target_id), float(state.examine_unit(target_id).effective))
+			incoming_pressure[target_id] += fire * float((unit.get("supply_capability", {}) as Dictionary).get("suppression_per_round", SUPPRESSION_PER_ROUND)) * float(target_plan.exposure) / maxf(_contact_weight(state, target_id), float(state.examine_unit(target_id).effective))
 		plan.spent = spent
 	var transfers: Array[Dictionary] = []
 	var remains_active: bool = false
@@ -286,6 +292,8 @@ func _apply_area(state: State, area_id: String, plans: Dictionary, minutes: floa
 		var equipment_loss: float = minf(float(unit.equipment), loss)
 		unit.effective = maxf(0.0, float(unit.effective) - loss)
 		unit.casualties += loss
+		if unit.has("supply_capability"):
+			state.logistics_port.get_ref().lose_equipment(unit, equipment_loss)
 		unit.equipment -= equipment_loss
 		unit.equipment_lost += equipment_loss
 		unit.ammunition = maxf(0.0, float(unit.ammunition) - float(plan.spent))
@@ -305,6 +313,8 @@ func _apply_area(state: State, area_id: String, plans: Dictionary, minutes: floa
 		var old_position: float = float(unit.position)
 		unit.position = clampf(old_position + movement, 0.0, float(area.size_km))
 		unit.distance_moved += absf(float(unit.position) - old_position)
+		if unit.has("supply_capability"):
+			state.logistics_port.get_ref().consume_activity(unit, plan, absf(float(unit.position) - old_position))
 		if movement != 0.0 or float(plan.spent) > 0.0:
 			unit.fatigue = clampf(float(unit.fatigue) + FATIGUE_PER_MINUTE * minutes, 0.0, 1.0)
 		# Mission completion is after all fire was planned, never a faction update advantage.
@@ -341,6 +351,10 @@ func _apply_area(state: State, area_id: String, plans: Dictionary, minutes: floa
 		# A completed dependency can release a reserve in this same simultaneous step.
 		# Keep that area awake so its freshly eligible mission is evaluated next.
 		var moving: bool = mission.status == "active" and next_posture in ["advance", "withdraw"] and float(unit.effective) > _effective_epsilon(state, unit) and float(unit.mobility) > 0.0 and float(unit.readiness) > 0.0 and float(area.movement_modifier) > 0.0
+		if unit.has("supply_capability"):
+			has_fire = has_fire and float(unit.serviceable_equipment) > 0.0
+			if unit.supply_capability.fuel_dependent:
+				moving = moving and float(unit.fuel) > 0.0000001 and float(unit.serviceable_equipment) > 0.0
 		# Reserves sleep until an indexed dependency notification or release event.
 		remains_active = remains_active or has_fire or moving or float(unit.suppression) > SLEEP_EPSILON
 	for contact: Dictionary in state.contacts[area_id]:

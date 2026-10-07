@@ -36,16 +36,19 @@ func configure(state: State) -> bool:
 	for cell: String in spatial.leaf_descendants("region_50"):
 		if state.areas.has(cell):
 			var stocks: Dictionary = {}
-			for key: String in STOCKS:
+			for key: String in stock_keys():
 				stocks[key] = 0.0
 			for id: String in state.area_units[cell]:
 				work.input_leaf_records_examined += 1
-				for key: String in STOCKS:
+				for key: String in stock_keys():
 					stocks[key] += float(state.units[id][key])
 			spatial.update_leaf(cell, stocks, str(state.areas[cell].control))
 	spatial.clear_dirty()
 	spatial.counters = {"spatial_nodes_examined": 0, "parent_nodes_updated": 0}
 	return true
+
+func stock_keys() -> Array[String]:
+	return STOCKS + _state.logistics_port.get_ref().EXTRA_STOCKS if _state.logistics_port != null else STOCKS
 
 func owns_state(state: State) -> bool:
 	return state == _state
@@ -79,6 +82,8 @@ func coalesce(source_formation: String, leaf_ids: Array[String], level: String =
 		for key: String in ["side", "area_id", "weapon", "type"]:
 			if unit[key] != first[key]:
 				return {"ok": false, "error": "incompatible_cohort"}
+		if _state.logistics_port != null and not _state.logistics_port.get_ref().compatible(unit, first, true):
+			return {"ok": false, "error": "supply_profile_requires_detail"}
 		if not is_equal_approx(float(unit.mobility), float(first.mobility)):
 			return {"ok": false, "error": "incompatible_mobility"}
 		# A footprint must not straddle a weapon boundary. This v0 admits a small
@@ -89,12 +94,12 @@ func coalesce(source_formation: String, leaf_ids: Array[String], level: String =
 			if current[key] != mission[key]:
 				return {"ok": false, "error": "incompatible_mission"}
 		for key: String in ["readiness", "fatigue", "cohesion", "suppression"]:
-			if absf(float(unit[key]) - float(first[key])) > CONDITION_SPREAD:
+			if absf(float(unit.get(key, 0.0)) - float(first[key])) > CONDITION_SPREAD:
 				return {"ok": false, "error": "condition_requires_detail"}
 		for key: String in ["effective", "equipment", "ammunition"]:
-			var ratio: float = float(unit[key]) / maxf(1.0, float(unit.personnel_total))
+			var ratio: float = float(unit.get(key, 0.0)) / maxf(1.0, float(unit.personnel_total))
 			var reference_ratio: float = float(first[key]) / maxf(1.0, float(first.personnel_total))
-			if absf(ratio - reference_ratio) > maxf(1.0, reference_ratio) * CONDITION_SPREAD or (float(unit[key]) <= 0.000001) != (float(first[key]) <= 0.000001):
+			if absf(ratio - reference_ratio) > maxf(1.0, reference_ratio) * CONDITION_SPREAD or (float(unit.get(key, 0.0)) <= 0.000001) != (float(first[key]) <= 0.000001):
 				return {"ok": false, "error": "stock_profile_requires_detail"}
 		if (float(unit.effective) <= Kernel.SLEEP_EPSILON) != (float(first.effective) <= Kernel.SLEEP_EPSILON) or (float(unit.suppression) >= float(current.stop_suppression)) != (float(first.suppression) >= float(mission.stop_suppression)) or (float(unit.cohesion) < float(current.withdraw_cohesion)) != (float(first.cohesion) < float(mission.withdraw_cohesion)):
 			return {"ok": false, "error": "threshold_requires_detail"}
@@ -117,7 +122,7 @@ func coalesce(source_formation: String, leaf_ids: Array[String], level: String =
 	aggregate.contact_weight = 0.0
 	aggregate.range_envelope_km = first.weapon.range_km
 	aggregate.suppression_capability = Kernel.SUPPRESSION_PER_ROUND
-	for key: String in STOCKS:
+	for key: String in stock_keys():
 		aggregate[key] = 0.0
 	for key: String in CONDITIONS:
 		aggregate[key] = 0.0
@@ -127,10 +132,10 @@ func coalesce(source_formation: String, leaf_ids: Array[String], level: String =
 		var unit: Dictionary = images[id]
 		aggregate.contact_weight += float(unit.get("tactical_weight", 1.0))
 		work.leaf_records_examined += 1
-		for key: String in STOCKS:
-			aggregate[key] += float(unit[key])
+		for key: String in stock_keys():
+			aggregate[key] += float(unit.get(key, 0.0))
 		for key: String in CONDITIONS:
-			aggregate[key] += float(unit[key]) * float(unit.personnel_total)
+			aggregate[key] += float(unit.get(key, 0.0)) * float(unit.personnel_total)
 		aggregate.distance_moved += float(unit.distance_moved) * float(unit.personnel_total)
 		aggregate.position += float(unit.position) * float(unit.personnel_total)
 	for key: String in CONDITIONS:
@@ -154,6 +159,8 @@ func coalesce(source_formation: String, leaf_ids: Array[String], level: String =
 	_state.area_units[first.area_id][aggregate_id] = true
 	_state.contacts.erase(first.area_id)
 	_state.wake(str(first.area_id))
+	if _state.logistics_port != null:
+		_state.logistics_port.get_ref().on_coalesce(aggregate_id, ids)
 	work.formations_built += 1
 	return {"ok": true, "aggregate_id": aggregate_id, "leaf_count": ids.size(), "time": _state.time}
 
@@ -176,6 +183,10 @@ func preview_leaf(id: String) -> Dictionary:
 		var loss: float = minf(float(result[stock]), maxf(0.0, float(macro[spent]) - float(base[spent])) * share)
 		result[stock] -= loss
 		result[spent] += loss
+	if macro.has("supply_capability"):
+		var share: float = float(result.personnel_total) / float(base.personnel_total)
+		for key: String in stock_keys():
+			result[key] = float(macro.get(key, 0.0)) * share
 	# Readiness/mobility are immutable capabilities in this kernel. Only elapsed
 	# fatigue/cohesion/suppression changes are allocated; do not add roundoff to them.
 	for key: String in ["fatigue", "cohesion", "suppression"]:
@@ -212,13 +223,15 @@ func materialize_leaf(id: String, reason: String = "leaf_query") -> Dictionary:
 	leaf_mission.status = current_mission.status
 	_state.add_mission(leaf_mission)
 	result.mission_id = leaf_mission.id
-	for key: String in STOCKS:
+	for key: String in stock_keys():
 		macro[key] -= float(result[key])
-		group.base[key] -= float(initial[key])
+		group.base[key] -= float(initial.get(key, 0.0))
 	for key: String in CONDITIONS + ["distance_moved", "position"]:
 		if macro_weight > weight:
 			macro[key] = (float(macro[key]) * macro_weight - float(result[key]) * weight) / (macro_weight - weight)
-			group.base[key] = (float(group.base[key]) * base_weight - float(initial[key]) * weight) / (base_weight - weight)
+			group.base[key] = (float(group.base[key]) * base_weight - float(initial.get(key, 0.0)) * weight) / (base_weight - weight)
+	if _state.logistics_port != null:
+		_state.logistics_port.get_ref().on_materialize(id, aggregate_id)
 	group.leaf_refs.erase(id)
 	_owners.erase(id)
 	macro.contact_weight -= float(initial.get("tactical_weight", 1.0))
@@ -252,7 +265,12 @@ func representation_of(id: String) -> String:
 
 func prepare_event(event: Dictionary) -> Dictionary:
 	if event.kind == "structure":
-		return _state.structure_port.get_ref().process_event(event)
+		var result: Dictionary = _state.structure_port.get_ref().process_event(event)
+		if _state.logistics_port != null:
+			_state.logistics_port.get_ref().on_structure(result)
+		return result
+	if event.kind == "logistics":
+		return _state.logistics_port.get_ref().process_event(event)
 	if event.kind in ["order", "coordination_release"]:
 		var id: String = str(event.payload.unit_id)
 		if _owners.has(id):
@@ -277,12 +295,12 @@ func advance(target: float, policy: String = Kernel.DETAILED) -> Dictionary:
 		if not spatial.nodes.has(area_id):
 			continue
 		var stocks: Dictionary = {}
-		for key: String in STOCKS:
+		for key: String in stock_keys():
 			stocks[key] = 0.0
 		for id: String in State.sorted_ids(_state.area_units[area_id]):
 			var unit: Dictionary = _state.examine_unit(id)
-			for key: String in STOCKS:
-				stocks[key] += float(unit[key])
+			for key: String in stock_keys():
+				stocks[key] += float(unit.get(key, 0.0))
 		spatial.update_leaf(area_id, stocks, str(_state.areas[area_id].control))
 	return output
 
@@ -308,7 +326,7 @@ func macro_summary() -> Dictionary:
 				"complete": 0, "withdrawn": 0}
 		var side: Dictionary = sides[unit.side]
 		for key: String in ["effective", "casualties", "ammo_spent", "equipment_lost", "personnel_total"]:
-			side[key] += float(unit[key])
+			side[key] += float(unit.get(key, 0.0))
 		side.position_weighted += float(unit.position) * float(unit.personnel_total)
 		var status: String = str(_state.missions[unit.mission_id].status)
 		if status in ["complete", "withdrawn"]:

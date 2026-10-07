@@ -26,6 +26,8 @@ var event_ids: Dictionary = {}
 var settlement_owner: RefCounted = null
 var materialization_port: WeakRef = null
 var lod_work: Dictionary = {}
+var logistics_port: WeakRef = null
+var logistics_ledger: Dictionary = {}
 var structure_port: WeakRef = null
 var unit_event_counts: Dictionary = {}
 
@@ -100,9 +102,15 @@ func set_coordination(unit_id: String, assignment: Dictionary) -> void:
 func schedule_event(id: String, due: float, kind: String, payload: Dictionary) -> bool:
 	if id.is_empty() or event_ids.has(id) or not is_finite(due) or due < time:
 		return false
-	if kind not in ["order", "reinforcement", "area_change", "coordination_release", "structure"]:
+	if kind not in ["order", "reinforcement", "area_change", "coordination_release", "structure", "logistics"]:
 		return false
 	if kind == "structure" and (structure_port == null or structure_port.get_ref() == null or not structure_port.get_ref().accepts_event(id, payload, due)):
+		return false
+	if kind == "logistics" and (logistics_port == null or logistics_port.get_ref() == null or not logistics_port.get_ref().accepts_event(id, payload, due)):
+		return false
+	# Task 6 admits a fixed stock snapshot. Replacement/reinforcement admission
+	# needs an external asset transfer contract and is deliberately not implemented.
+	if kind == "reinforcement" and logistics_port != null:
 		return false
 	# Validate references at submission; reinforcement is to an existing input area.
 	if kind == "order" and (not knows_unit(str(payload.get("unit_id", ""))) or not missions.has(payload.get("mission_id", ""))):
@@ -117,6 +125,8 @@ func schedule_event(id: String, due: float, kind: String, payload: Dictionary) -
 	var record: Dictionary = {"id": id, "time": due, "kind": kind, "payload": payload.duplicate(true)}
 	if structure_port != null:
 		record.phase = 0 if kind == "structure" and payload.get("expiry", false) else (["structure", "order", "reinforcement", "area_change", "coordination_release"].find(kind) + 1)
+	if logistics_port != null:
+		record.phase = 0 if kind == "structure" and payload.get("expiry", false) else (1 if kind == "structure" else (2 if kind == "logistics" and payload.has("delivery_id") else (3 if kind == "logistics" else ["order", "reinforcement", "area_change", "coordination_release"].find(kind) + 4)))
 	var unit_ref: String = str(payload.unit.id) if kind == "reinforcement" else str(payload.get("unit_id", ""))
 	if not unit_ref.is_empty():
 		if structure_port != null:
@@ -127,7 +137,7 @@ func schedule_event(id: String, due: float, kind: String, payload: Dictionary) -
 	var index: int = events.size() - 1
 	while index > 0:
 		var parent: int = (index - 1) / 2
-		if not _before(events[index], events[parent]):
+		if not _event_before(events[index], events[parent]):
 			break
 		var swap: Dictionary = events[parent]
 		events[parent] = events[index]
@@ -153,9 +163,9 @@ func pop_event() -> Dictionary:
 	var index: int = 0
 	while index * 2 + 1 < events.size():
 		var child: int = index * 2 + 1
-		if child + 1 < events.size() and _before(events[child + 1], events[child]):
+		if child + 1 < events.size() and _event_before(events[child + 1], events[child]):
 			child += 1
-		if not _before(events[child], events[index]):
+		if not _event_before(events[child], events[index]):
 			break
 		var swap: Dictionary = events[index]
 		events[index] = events[child]
@@ -163,6 +173,11 @@ func pop_event() -> Dictionary:
 		index = child
 	return result
 
+
+func _event_before(a: Dictionary, b: Dictionary) -> bool:
+	if logistics_port != null:
+		logistics_port.get_ref().work.heap_event_comparisons += 1
+	return _before(a, b)
 
 static func _before(a: Dictionary, b: Dictionary) -> bool:
 	if float(a.time) != float(b.time):

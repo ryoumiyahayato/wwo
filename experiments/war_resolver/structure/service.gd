@@ -52,6 +52,9 @@ func configure(state: State, lod: RefCounted, formations: Dictionary, people: Di
 		"authority_scopes_updated": 0, "relations_changed": 0}
 	return true
 
+func stock_keys() -> Array[String]:
+	return Stocks + _state.logistics_port.get_ref().EXTRA_STOCKS if _state.logistics_port != null else Stocks
+
 func owns_state(state: State) -> bool:
 	return state == _state
 
@@ -190,7 +193,7 @@ func _validate(request: Dictionary, executing: bool) -> Dictionary:
 		return _reject("structure_authority_required")
 	var values: Dictionary = request.values
 	if request.kind == "split":
-		if not _keys(values, ["source", "new_id", "new_node", "allocation"]) or not values.get("allocation") is Dictionary or not _keys(values.allocation, Stocks) or values.allocation.size() != Stocks.size():
+		if not _keys(values, ["source", "new_id", "new_node", "allocation"]) or not values.get("allocation") is Dictionary or not _keys(values.allocation, stock_keys()) or values.allocation.size() != stock_keys().size():
 			return _reject("invalid_split")
 		if _nodes.has(values.get("source", "")) and _nodes[values.source].echelon == "company":
 			return _validate_company_split(request, owner)
@@ -207,8 +210,8 @@ func _validate(request: Dictionary, executing: bool) -> Dictionary:
 		if amount < MIN_REMAINDER or float(source.personnel_total) - amount < MIN_REMAINDER:
 			return _reject("empty_or_full_detachment")
 		var fraction: float = amount / float(source.personnel_total)
-		for key: String in Stocks:
-			if not _number(values.allocation.get(key)) or absf(float(values.allocation[key]) - float(source[key]) * fraction) > EPS:
+		for key: String in stock_keys():
+			if not _number(values.allocation.get(key)) or absf(float(values.allocation[key]) - float(source.get(key, 0.0)) * fraction) > EPS:
 				return _reject("proportional_allocation_required")
 	elif request.kind == "merge":
 		if not _keys(values, ["survivor", "donor"]) or values.get("survivor", "") == values.get("donor", "") or not _leaf_scope(owner, str(values.get("survivor", ""))) or not _leaf_scope(owner, str(values.get("donor", ""))):
@@ -222,6 +225,8 @@ func _validate(request: Dictionary, executing: bool) -> Dictionary:
 		for key: String in ["side", "area_id", "position", "type", "weapon", "readiness", "mobility"]:
 			if a[key] != b[key]:
 				return _reject("incompatible_spatial_or_capability")
+		if _state.logistics_port != null and not _state.logistics_port.get_ref().compatible(a, b, false):
+			return _reject("incompatible_supply_capability")
 		var am: Dictionary = _current_mission(str(values.survivor), a)
 		var bm: Dictionary = _current_mission(str(values.donor), b)
 		am.erase("id")
@@ -272,7 +277,7 @@ func _validate_company_split(request: Dictionary, owner: String) -> Dictionary:
 	if not v.get("new_id") is String or not v.get("new_node") is String or str(v.new_id).is_empty() or v.new_id != v.new_node or _used_nodes.has(v.new_id) or _used_units.has(v.new_id) or _state.knows_unit(str(v.new_id)) or _state.unit_event_counts.has(v.new_id):
 		return _reject("identity_collision")
 	var total: Dictionary = {}
-	for key: String in Stocks:
+	for key: String in stock_keys():
 		total[key] = 0.0
 	for child: String in _children[source]:
 		if _nodes[child].echelon != "platoon" or _nodes[child].parent != source or _attachments.has(child) or _used_nodes.has(str(v.new_id) + "_" + child):
@@ -284,14 +289,14 @@ func _validate_company_split(request: Dictionary, owner: String) -> Dictionary:
 		if _used_nodes.has("node_" + new_unit) or _used_units.has(new_unit) or _state.knows_unit(new_unit) or _state.unit_event_counts.has(new_unit) or _state.missions.has("structure_" + str(request.id) + "_" + unit_id + "_mission") or not _clear_leaf(unit_id):
 			return _reject("company_leaf_migration_required")
 		var unit: Dictionary = _lod.preview_leaf(unit_id)
-		for key: String in Stocks:
-			total[key] += float(unit[key])
+		for key: String in stock_keys():
+			total[key] += float(unit.get(key, 0.0))
 	if not _number(v.allocation.personnel_total) or float(total.personnel_total) <= 0.0:
 		return _reject("invalid_allocation")
 	var fraction: float = float(v.allocation.personnel_total) / float(total.personnel_total)
 	if fraction <= 0.0 or fraction >= 1.0:
 		return _reject("empty_or_full_detachment")
-	for key: String in Stocks:
+	for key: String in stock_keys():
 		if not _number(v.allocation[key]) or absf(float(v.allocation[key]) - float(total[key]) * fraction) > EPS:
 			return _reject("proportional_allocation_required")
 	for leaf: String in _leaves[source]:
@@ -327,8 +332,8 @@ func _split_company(request: Dictionary, changed: Dictionary) -> void:
 	for leaf: String in source_leaves:
 		var unit: String = str(_nodes[leaf].unit_id)
 		var allocation: Dictionary = {}
-		for key: String in Stocks:
-			allocation[key] = float(_state.units[unit][key]) * fraction
+		for key: String in stock_keys():
+			allocation[key] = float(_state.units[unit].get(key, 0.0)) * fraction
 		var new_unit: String = fresh + "_" + unit
 		_split({"id": str(request.id) + "_" + unit, "values": {"source": unit, "new_id": new_unit,
 			"new_node": "node_" + new_unit, "allocation": allocation}}, changed)
@@ -374,8 +379,9 @@ func _split(request: Dictionary, changed: Dictionary) -> void:
 	var fresh: Dictionary = source.duplicate(true)
 	var fraction: float = float(values.allocation.personnel_total) / float(source.personnel_total)
 	fresh.id = values.new_id
-	for key: String in Stocks:
-		fresh[key] = float(source[key]) * fraction
+	for key: String in stock_keys():
+		fresh[key] = float(source.get(key, 0.0)) * fraction
+		source[key] = float(source.get(key, 0.0))
 		source[key] -= float(fresh[key])
 	var weight: float = float(source.get("tactical_weight", 1.0))
 	fresh.tactical_weight = weight * fraction
@@ -411,8 +417,8 @@ func _split(request: Dictionary, changed: Dictionary) -> void:
 func _merge(request: Dictionary, changed: Dictionary, retired: Dictionary) -> void:
 	var a: Dictionary = _state.units[request.values.survivor]
 	var b: Dictionary = _state.units[request.values.donor]
-	for key: String in Stocks:
-		a[key] += float(b[key])
+	for key: String in stock_keys():
+		a[key] = float(a.get(key, 0.0)) + float(b.get(key, 0.0))
 	for key: String in ["fatigue", "suppression", "distance_moved"]:
 		a[key] = maxf(float(a[key]), float(b[key]))
 	a.cohesion = minf(float(a.cohesion), float(b.cohesion))

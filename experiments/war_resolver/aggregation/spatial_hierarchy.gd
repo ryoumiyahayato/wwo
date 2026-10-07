@@ -2,6 +2,7 @@ extends RefCounted
 ## Synthetic summaries only. A parent never calls a combat resolver.
 const STOCKS: Array[String] = ["personnel_total", "effective", "casualties", "equipment",
 	"equipment_lost", "ammunition", "ammo_spent"]
+var stock_keys: Array[String] = STOCKS.duplicate()
 var nodes: Dictionary = {}
 var dirty: Dictionary = {}
 var counters: Dictionary = {"spatial_nodes_examined": 0, "parent_nodes_updated": 0}
@@ -21,7 +22,7 @@ func configure() -> void:
 
 func _add(id: String, parent: String, extent: float, origin: Vector2) -> void:
 	var stocks: Dictionary = {}
-	for key: String in STOCKS:
+	for key: String in stock_keys:
 		stocks[key] = 0.0
 	nodes[id] = {"id": id, "parent": parent, "children": {}, "extent_km": extent,
 		"origin_km": [origin.x, origin.y], "stocks": stocks, "control_counts": {}, "dirty": false}
@@ -35,7 +36,7 @@ func update_leaf(id: String, stocks: Dictionary, control: String) -> bool:
 	var previous_control: String = str(leaf.get("control", ""))
 	var delta: Dictionary = {}
 	var changed: bool = previous_control != control
-	for key: String in STOCKS:
+	for key: String in stock_keys:
 		delta[key] = float(stocks.get(key, 0.0)) - float(leaf.stocks[key])
 		changed = changed or delta[key] != 0.0
 	if not changed:
@@ -45,7 +46,7 @@ func update_leaf(id: String, stocks: Dictionary, control: String) -> bool:
 	while not cursor.is_empty():
 		counters.spatial_nodes_examined += 1
 		var node: Dictionary = nodes[cursor]
-		for key: String in STOCKS:
+		for key: String in stock_keys:
 			node.stocks[key] += float(delta[key])
 		if previous_control != control:
 			node.control_counts[previous_control] = int(node.control_counts.get(previous_control, 0)) - 1
@@ -56,6 +57,13 @@ func update_leaf(id: String, stocks: Dictionary, control: String) -> bool:
 			counters.parent_nodes_updated += 1
 		cursor = str(node.parent)
 	return true
+
+func extend_stocks(keys: Array[String]) -> void:
+	for key: String in keys:
+		if key not in stock_keys:
+			stock_keys.append(key)
+			for id: String in nodes:
+				nodes[id].stocks[key] = 0.0
 
 func clear_dirty() -> void:
 	for id: String in dirty:
