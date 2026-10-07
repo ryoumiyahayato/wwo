@@ -26,10 +26,15 @@ var event_ids: Dictionary = {}
 var settlement_owner: RefCounted = null
 var materialization_port: WeakRef = null
 var lod_work: Dictionary = {}
+var structure_port: WeakRef = null
+var unit_event_counts: Dictionary = {}
 
 
 func knows_unit(id: String) -> bool:
 	return units.has(id) or materialization_port != null and materialization_port.get_ref() != null and materialization_port.get_ref().has_leaf(id)
+
+func identity_reserved(id: String) -> bool:
+	return knows_unit(id) or structure_port != null and structure_port.get_ref() != null and structure_port.get_ref().knows_identity(id)
 
 
 func add_area(record: Dictionary) -> void:
@@ -50,7 +55,7 @@ func add_mission(record: Dictionary) -> void:
 
 
 func add_unit(record: Dictionary) -> void:
-	assert(not knows_unit(str(record.id)) and areas.has(record.area_id) and missions.has(record.mission_id))
+	assert(not identity_reserved(str(record.id)) and areas.has(record.area_id) and missions.has(record.mission_id))
 	assert(float(record.effective) >= 0.0 and float(record.effective) <= float(record.personnel_total))
 	assert(float(record.ammunition) >= 0.0 and float(record.equipment) >= 0.0)
 	assert(is_equal_approx(float(record.personnel_total), float(record.effective) + float(record.casualties)))
@@ -95,19 +100,30 @@ func set_coordination(unit_id: String, assignment: Dictionary) -> void:
 func schedule_event(id: String, due: float, kind: String, payload: Dictionary) -> bool:
 	if id.is_empty() or event_ids.has(id) or not is_finite(due) or due < time:
 		return false
-	if kind not in ["order", "reinforcement", "area_change", "coordination_release"]:
+	if kind not in ["order", "reinforcement", "area_change", "coordination_release", "structure"]:
+		return false
+	if kind == "structure" and (structure_port == null or structure_port.get_ref() == null or not structure_port.get_ref().accepts_event(id, payload, due)):
 		return false
 	# Validate references at submission; reinforcement is to an existing input area.
 	if kind == "order" and (not knows_unit(str(payload.get("unit_id", ""))) or not missions.has(payload.get("mission_id", ""))):
 		return false
-	if kind == "reinforcement" and (not payload.has("unit") or knows_unit(str(payload.unit.id)) or not areas.has(payload.unit.area_id) or not missions.has(payload.unit.mission_id)):
+	if kind == "reinforcement" and (not payload.has("unit") or identity_reserved(str(payload.unit.id)) or not areas.has(payload.unit.area_id) or not missions.has(payload.unit.mission_id)):
 		return false
 	if kind == "area_change" and not areas.has(payload.get("area_id", "")):
 		return false
 	if kind == "coordination_release" and not knows_unit(str(payload.get("unit_id", ""))):
 		return false
 	event_ids[id] = true
-	events.append({"id": id, "time": due, "kind": kind, "payload": payload.duplicate(true)})
+	var record: Dictionary = {"id": id, "time": due, "kind": kind, "payload": payload.duplicate(true)}
+	if structure_port != null:
+		record.phase = 0 if kind == "structure" and payload.get("expiry", false) else (["structure", "order", "reinforcement", "area_change", "coordination_release"].find(kind) + 1)
+	var unit_ref: String = str(payload.unit.id) if kind == "reinforcement" else str(payload.get("unit_id", ""))
+	if not unit_ref.is_empty():
+		if structure_port != null:
+			record.unit_ref = unit_ref
+		if structure_port != null:
+			unit_event_counts[unit_ref] = int(unit_event_counts.get(unit_ref, 0)) + 1
+	events.append(record)
 	var index: int = events.size() - 1
 	while index > 0:
 		var parent: int = (index - 1) / 2
@@ -126,6 +142,10 @@ func next_event_time() -> float:
 
 func pop_event() -> Dictionary:
 	var result: Dictionary = events[0]
+	if result.has("unit_ref"):
+		unit_event_counts[result.unit_ref] -= 1
+		if int(unit_event_counts[result.unit_ref]) == 0:
+			unit_event_counts.erase(result.unit_ref)
 	var last: Dictionary = events.pop_back()
 	if events.is_empty():
 		return result
@@ -145,7 +165,11 @@ func pop_event() -> Dictionary:
 
 
 static func _before(a: Dictionary, b: Dictionary) -> bool:
-	return str(a.id) < str(b.id) if float(a.time) == float(b.time) else float(a.time) < float(b.time)
+	if float(a.time) != float(b.time):
+		return float(a.time) < float(b.time)
+	if int(a.get("phase", 0)) != int(b.get("phase", 0)):
+		return int(a.get("phase", 0)) < int(b.get("phase", 0))
+	return str(a.id) < str(b.id)
 
 
 static func sorted_ids(records: Dictionary) -> Array[String]:

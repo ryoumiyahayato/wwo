@@ -56,6 +56,8 @@ func has_leaf(id: String) -> bool:
 func coalesce(source_formation: String, leaf_ids: Array[String], level: String = "company") -> Dictionary:
 	if _state == null or source_formation.is_empty() or level not in LEVELS or leaf_ids.size() < 2:
 		return {"ok": false, "error": "invalid_cohort"}
+	if _state.structure_port != null and not _state.structure_port.get_ref().can_coalesce(source_formation, leaf_ids):
+		return {"ok": false, "error": "outside_effective_formation"}
 	var ids: Array[String] = leaf_ids.duplicate()
 	ids.sort()
 	var images: Dictionary = {}
@@ -103,7 +105,7 @@ func coalesce(source_formation: String, leaf_ids: Array[String], level: String =
 	var basis: String = (source_formation + ":" + ":".join(ids)).sha256_text().substr(0, 16)
 	var generation: int = int(_generations.get(basis, 0)) + 1
 	var aggregate_id: String = "aggregate_" + basis + "_%06d" % generation
-	if _state.knows_unit(aggregate_id) or _state.missions.has(aggregate_id + "_mission"):
+	if _state.identity_reserved(aggregate_id) or _state.missions.has(aggregate_id + "_mission"):
 		return {"ok": false, "error": "representation_id_collision"}
 	_serial += 1
 	_generations[basis] = generation
@@ -112,7 +114,7 @@ func coalesce(source_formation: String, leaf_ids: Array[String], level: String =
 	aggregate.source_formation_id = source_formation
 	aggregate.spatial_node = first.area_id
 	aggregate.resolution_level = level
-	aggregate.contact_weight = float(ids.size())
+	aggregate.contact_weight = 0.0
 	aggregate.range_envelope_km = first.weapon.range_km
 	aggregate.suppression_capability = Kernel.SUPPRESSION_PER_ROUND
 	for key: String in STOCKS:
@@ -123,6 +125,7 @@ func coalesce(source_formation: String, leaf_ids: Array[String], level: String =
 	aggregate.position = 0.0
 	for id: String in ids:
 		var unit: Dictionary = images[id]
+		aggregate.contact_weight += float(unit.get("tactical_weight", 1.0))
 		work.leaf_records_examined += 1
 		for key: String in STOCKS:
 			aggregate[key] += float(unit[key])
@@ -218,7 +221,7 @@ func materialize_leaf(id: String, reason: String = "leaf_query") -> Dictionary:
 			group.base[key] = (float(group.base[key]) * base_weight - float(initial[key]) * weight) / (base_weight - weight)
 	group.leaf_refs.erase(id)
 	_owners.erase(id)
-	macro.contact_weight = float(group.leaf_refs.size())
+	macro.contact_weight -= float(initial.get("tactical_weight", 1.0))
 	_state.units[id] = result
 	_state.area_units[result.area_id][id] = true
 	work.leaf_records_materialized += 1
@@ -244,7 +247,12 @@ func zoom_in(cell_id: String) -> Dictionary:
 			count += int(materialize_leaf(id, "zoom_in").materialized)
 	return {"ok": true, "materialized": count, "time": _state.time}
 
+func representation_of(id: String) -> String:
+	return str(_owners.get(id, id))
+
 func prepare_event(event: Dictionary) -> Dictionary:
+	if event.kind == "structure":
+		return _state.structure_port.get_ref().process_event(event)
 	if event.kind in ["order", "coordination_release"]:
 		var id: String = str(event.payload.unit_id)
 		if _owners.has(id):

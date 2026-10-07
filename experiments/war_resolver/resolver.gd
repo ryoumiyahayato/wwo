@@ -98,8 +98,9 @@ func resolve_until(state: State, target_game_time: float, resolution_policy: Str
 
 func _process_due(state: State, log: Array[Dictionary], changes: Dictionary, area_changes: Dictionary) -> void:
 	while state.next_event_time() <= state.time:
+		var transition: Dictionary = {}
 		if state.materialization_port != null and state.materialization_port.get_ref() != null:
-			var transition: Dictionary = state.materialization_port.get_ref().prepare_event(state.events[0])
+			transition = state.materialization_port.get_ref().prepare_event(state.events[0])
 			for id: String in transition.get("retired", []):
 				changes.erase(id)
 				state.touched_units.erase(id)
@@ -109,6 +110,9 @@ func _process_due(state: State, log: Array[Dictionary], changes: Dictionary, are
 		var event: Dictionary = state.pop_event()
 		var payload: Dictionary = event.payload
 		state.counters.events_processed += 1
+		if event.kind == "structure":
+			log.append({"time": state.time, "kind": "structure", "id": event.id, "result": transition.get("record", {})})
+			continue
 		if event.kind == "order":
 			var unit: Dictionary = state.examine_unit(str(payload.unit_id))
 			unit.mission_id = payload.mission_id
@@ -116,7 +120,7 @@ func _process_due(state: State, log: Array[Dictionary], changes: Dictionary, are
 			changes[unit.id] = unit.duplicate(true)
 			state.touched_units[unit.id] = true
 		elif event.kind == "reinforcement":
-			if state.knows_unit(str(payload.unit.id)):
+			if state.identity_reserved(str(payload.unit.id)):
 				log.append({"time": state.time, "kind": "rejected_reinforcement", "id": event.id})
 				continue
 			state.add_unit(payload.unit)
@@ -162,7 +166,15 @@ func _candidate_ids(_state: State, ids: Array[String], _unit: Dictionary) -> Arr
 
 func _contact_weight(state: State, id: String) -> float:
 	var unit: Dictionary = state.units[id] if state.settlement_owner == null else state.examine_unit(id)
-	return float(unit.get("contact_weight", 1.0))
+	return float(unit.get("contact_weight", unit.get("tactical_weight", 1.0)))
+
+
+func _effective_epsilon(state: State, unit: Dictionary) -> float:
+	# Real splits retain their original tactical measure: a tiny detachment must
+	# not become untargetable merely because its identity has changed.
+	if state.structure_port != null:
+		return SLEEP_EPSILON * float(unit.get("contact_weight", unit.get("tactical_weight", 1.0)))
+	return SLEEP_EPSILON
 
 
 func _prepare_area(state: State, area_id: String) -> Dictionary:
@@ -190,7 +202,7 @@ func _prepare_area(state: State, area_id: String) -> Dictionary:
 		var targets: Array[String] = []
 		for other_id: String in _candidate_ids(state, ids, unit):
 			var other: Dictionary = state.examine_unit(other_id)
-			if other.side != unit.side and float(other.effective) > SLEEP_EPSILON and absf(float(unit.position) - float(other.position)) <= float(unit.weapon.range_km):
+			if other.side != unit.side and float(other.effective) > _effective_epsilon(state, other) and absf(float(unit.position) - float(other.position)) <= float(unit.weapon.range_km):
 				targets.append(other_id)
 		var detection: float = float(area.visibility) * (1.0 - float(area.concealment))
 		if detection <= 0.0:
@@ -218,7 +230,7 @@ func _prepare_area(state: State, area_id: String) -> Dictionary:
 		var unit: Dictionary = state.examine_unit(id)
 		var mission: Dictionary = state.missions[unit.mission_id]
 		var plan: Dictionary = plans[id]
-		if float(unit.effective) <= SLEEP_EPSILON:
+		if float(unit.effective) <= _effective_epsilon(state, unit):
 			continue
 		if float(unit.cohesion) < float(mission.withdraw_cohesion):
 			plan.posture = "withdraw"
@@ -283,9 +295,9 @@ func _apply_area(state: State, area_id: String, plans: Dictionary, minutes: floa
 		state.totals.ammo_spent += float(plan.spent)
 		var decay: float = exp(-SUPPRESSION_DECAY * minutes)
 		unit.suppression = clampf(float(unit.suppression) * decay + float(incoming_pressure[id]) / SUPPRESSION_DECAY * (1.0 - decay), 0.0, 1.0)
-		unit.cohesion = clampf(float(unit.cohesion) - loss / maxf(float(unit.get("contact_weight", 1.0)), float(unit.personnel_total)) * COHESION_PER_LOSS, 0.0, 1.0)
+		unit.cohesion = clampf(float(unit.cohesion) - loss / maxf(float(unit.get("contact_weight", unit.get("tactical_weight", 1.0))), float(unit.personnel_total)) * COHESION_PER_LOSS, 0.0, 1.0)
 		unit.action = str(plan.posture)
-		if float(unit.effective) <= SLEEP_EPSILON:
+		if float(unit.effective) <= _effective_epsilon(state, unit):
 			unit.action = "disabled"
 		elif plan.posture == "advance" and float(plan.speed) == 0.0:
 			unit.action = "stalled"
@@ -325,17 +337,17 @@ func _apply_area(state: State, area_id: String, plans: Dictionary, minutes: floa
 		changes[id] = unit.duplicate(true)
 		state.touched_units[id] = true
 		var next_posture: String = _posture(state, unit)
-		var has_fire: bool = not (plan.contacts as Array).is_empty() and float(unit.ammunition) > 0.0 and float(unit.effective) > SLEEP_EPSILON
+		var has_fire: bool = not (plan.contacts as Array).is_empty() and float(unit.ammunition) > 0.0 and float(unit.effective) > _effective_epsilon(state, unit)
 		# A completed dependency can release a reserve in this same simultaneous step.
 		# Keep that area awake so its freshly eligible mission is evaluated next.
-		var moving: bool = mission.status == "active" and next_posture in ["advance", "withdraw"] and float(unit.effective) > SLEEP_EPSILON and float(unit.mobility) > 0.0 and float(unit.readiness) > 0.0 and float(area.movement_modifier) > 0.0
+		var moving: bool = mission.status == "active" and next_posture in ["advance", "withdraw"] and float(unit.effective) > _effective_epsilon(state, unit) and float(unit.mobility) > 0.0 and float(unit.readiness) > 0.0 and float(area.movement_modifier) > 0.0
 		# Reserves sleep until an indexed dependency notification or release event.
 		remains_active = remains_active or has_fire or moving or float(unit.suppression) > SLEEP_EPSILON
 	for contact: Dictionary in state.contacts[area_id]:
 		var target: Dictionary = state.examine_unit(str(contact.target))
 		var source_plan: Dictionary = plans[contact.source]
 		contact.time = state.time
-		contact.usable_fire_per_minute = float(source_plan.spent) / minutes / float(source_plan.target_weight) * float(target.get("contact_weight", 1.0))
+		contact.usable_fire_per_minute = float(source_plan.spent) / minutes / float(source_plan.target_weight) * float(target.get("contact_weight", target.get("tactical_weight", 1.0)))
 		contact.suppression = target.suppression
 		contact.movement_km_per_minute = plans[contact.target].speed
 		contact.advance_inhibited = target.action == "stalled"
@@ -350,7 +362,7 @@ func _update_control(state: State, area_id: String, log: Array[Dictionary], area
 	var present: Dictionary = {}
 	for id: String in State.sorted_ids(state.area_units[area_id]):
 		var unit: Dictionary = state.examine_unit(id)
-		if float(unit.effective) > SLEEP_EPSILON:
+		if float(unit.effective) > _effective_epsilon(state, unit):
 			present[unit.side] = true
 	var control: String = "contested" if present.size() > 1 else (str(present.keys()[0]) if present.size() == 1 else "")
 	if control != state.areas[area_id].control:

@@ -19,6 +19,35 @@ var _next_input: Dictionary = {}
 var _player_id: String = ""
 var _personal_actions: Dictionary = {}
 var _lod_port: WeakRef = null
+var _structure_port: WeakRef = null
+
+func bind_structure(port: RefCounted) -> bool:
+	if _state == null or _structure_port != null or not port.owns_state(_state) or not port.matches_admission(_formations, _people):
+		return false
+	_structure_port = weakref(port)
+	return true
+
+func _node(id: String) -> Dictionary:
+	return _formations[id] if _structure_port == null else _structure_port.get_ref().node(id)
+
+func _parent(id: String) -> String:
+	return str(_formations[id].get("parent", "")) if _structure_port == null else _structure_port.get_ref().parent(id)
+
+func _scope_children(id: String) -> Dictionary:
+	return _children[id] if _structure_port == null else _structure_port.get_ref().children(id)
+
+func _scope_leaves(id: String) -> Dictionary:
+	return _leaves[id] if _structure_port == null else _structure_port.get_ref().leaves(id)
+
+func _active(id: String) -> bool:
+	return _formations.has(id) if _structure_port == null else _structure_port.get_ref().active(id)
+
+func _binding_current() -> bool:
+	# A second, unbound legacy adapter cannot retain operational authority after
+	# this BattleState adopts dynamic relations. It must bind the same authority.
+	if _state.structure_port == null:
+		return true
+	return _structure_port != null and _structure_port.get_ref() != null and _structure_port.get_ref() == _state.structure_port.get_ref() and _lod_port != null and _lod_port.get_ref() != null and _lod_port.get_ref() == _state.materialization_port.get_ref()
 
 
 func bind_lod(port: RefCounted) -> bool:
@@ -89,6 +118,8 @@ func configure(state: State, formations: Dictionary, people: Dictionary, player_
 func apply(command: Dictionary) -> Dictionary:
 	if _state == null:
 		return _reject("not_configured")
+	if not _binding_current():
+		return _reject("current_structure_binding_required")
 	if not _keys(command, ["id", "kind", "target", "values"]) or not command.get("id") is String or str(command.id).is_empty() or not command.get("values") is Dictionary:
 		return _reject("invalid_command")
 	var id: String = str(command.id)
@@ -97,6 +128,8 @@ func apply(command: Dictionary) -> Dictionary:
 	var person: Dictionary = _people[_player_id]
 	var rank: int = ROLES.find(str(person.role))
 	var owner: String = str(person.formation_id)
+	if not _active(owner):
+		return _reject("position_retired")
 	var kind: String = str(command.get("kind", ""))
 	var target: String = str(command.get("target", ""))
 	var values: Dictionary = command.values
@@ -112,15 +145,15 @@ func apply(command: Dictionary) -> Dictionary:
 			return _reject("invalid_tactical_intent")
 	elif kind in ["mission", "coordination"]:
 		# Higher rank does not inherit direct ownership of lower decision inputs.
-		if rank < 2 or not _formations.has(target) or not (target == owner and rank >= 3 or _children[owner].has(target)):
+		if rank < 2 or not _active(target) or not (target == owner and rank >= 3 or _scope_children(owner).has(target)):
 			return _reject("wrong_owner_or_layer")
-		if _leaves[target].is_empty():
+		if _scope_leaves(target).is_empty():
 			return _reject("empty_scope")
 		if kind == "mission":
 			if not _keys(values, ["posture", "objective", "direction"]) or not values.get("posture", "") in POSTURES or not _number(values.get("objective")) or not _number(values.get("direction")) or absf(float(values.direction)) != 1.0:
 				return _reject("invalid_mission")
-			for leaf: String in State.sorted_ids(_leaves[target]):
-				var unit: Dictionary = _unit(str(_formations[leaf].unit_id))
+			for leaf: String in State.sorted_ids(_scope_leaves(target)):
+				var unit: Dictionary = _unit(str(_node(leaf).unit_id))
 				if float(values.objective) < 0.0 or float(values.objective) > float(_state.areas[unit.area_id].size_km):
 					return _reject("objective_outside_scope")
 		else:
@@ -132,10 +165,10 @@ func apply(command: Dictionary) -> Dictionary:
 		return _reject("input_not_due")
 	var affected: Array[String] = []
 	if kind != "local_action":
-		affected = State.sorted_ids(_leaves[target])
+		affected = State.sorted_ids(_scope_leaves(target))
 	# Preflight every resource ID before committing anything, including clocks/IDs.
 	for leaf: String in affected:
-		var unit_id: String = str(_formations[leaf].unit_id)
+		var unit_id: String = str(_node(leaf).unit_id)
 		# Replacing a prerequisite needs explicit dependency migration semantics.
 		# Reject the whole command rather than orphaning reserves on an old ID.
 		if kind == "mission" and not (_state.mission_dependents.get(_unit(unit_id).mission_id, {}) as Dictionary).is_empty():
@@ -147,10 +180,10 @@ func apply(command: Dictionary) -> Dictionary:
 	# Permission/value/ID/cooldown checks precede causal materialization.
 	if _lod_port != null and kind != "local_action":
 		for leaf: String in affected:
-			_lod_port.get_ref().materialize_leaf(str(_formations[leaf].unit_id), "subordinate_command")
+			_lod_port.get_ref().materialize_leaf(str(_node(leaf).unit_id), "subordinate_command")
 	var delta: Dictionary = {"units": {}, "missions": {}, "tactical_intents": {}, "command_coordination": {}, "personal_actions": {}}
 	if kind == "local_action":
-		var unit: Dictionary = _unit(str(_formations[owner].unit_id))
+		var unit: Dictionary = _unit(str(_node(owner).unit_id))
 		var personal: Dictionary = _personal_actions.get(_player_id, {"offset_km": 0.0}).duplicate(true)
 		var step: float = 0.005 if values.action == "step_forward" else (-0.005 if values.action == "step_back" else 0.0)
 		personal.offset_km = clampf(float(personal.offset_km) + step, -0.02, 0.02)
@@ -160,7 +193,7 @@ func apply(command: Dictionary) -> Dictionary:
 		_personal_actions[_player_id] = personal
 		delta.personal_actions[_player_id] = personal.duplicate(true)
 	elif kind == "tactical_intent":
-		var unit_id: String = str(_formations[target].unit_id)
+		var unit_id: String = str(_node(target).unit_id)
 		_state.tactical_intents[unit_id] = values.duplicate(true)
 		delta.tactical_intents[unit_id] = values.duplicate(true)
 		_state.wake(str(_state.units[unit_id].area_id))
@@ -170,7 +203,7 @@ func apply(command: Dictionary) -> Dictionary:
 		else:
 			_coordination_inputs[target] = {"posture": values.posture, "release_time": _state.time + float(values.release_after)}
 		for leaf: String in affected:
-			var unit_id: String = str(_formations[leaf].unit_id)
+			var unit_id: String = str(_node(leaf).unit_id)
 			var unit: Dictionary = _state.units[unit_id]
 			if kind == "mission":
 				var input: Dictionary = _nearest_input(leaf, _mission_inputs)
@@ -188,7 +221,7 @@ func apply(command: Dictionary) -> Dictionary:
 				var cursor: String = leaf
 				while not cursor.is_empty():
 					input.release_time = maxf(float(input.release_time), float(_coordination_inputs.get(cursor, {}).get("release_time", 0.0)))
-					cursor = str(_formations[cursor].get("parent", ""))
+					cursor = _parent(cursor)
 				_state.command_coordination[unit_id] = input
 				delta.command_coordination[unit_id] = input.duplicate(true)
 				if float(input.release_time) > _state.time:
@@ -206,15 +239,19 @@ func _nearest_input(leaf: String, inputs: Dictionary) -> Dictionary:
 	while not cursor.is_empty():
 		if inputs.has(cursor):
 			return inputs[cursor]
-		cursor = str(_formations[cursor].get("parent", ""))
+		cursor = _parent(cursor)
 	return {}
 
 
 func report() -> Dictionary:
 	if _state == null:
 		return _reject("not_configured")
+	if not _binding_current():
+		return _reject("current_structure_binding_required")
 	var person: Dictionary = _people[_player_id]
 	var owner: String = str(person.formation_id)
+	if not _active(owner):
+		return _reject("position_retired")
 	var rank: int = ROLES.find(str(person.role))
 	var result: Dictionary = {"person_id": _player_id, "role": person.role, "time": _state.time,
 		"input_interval_seconds": INPUT_SECONDS[rank], "next_input_at": _next_input.get(_player_id, 0.0),
@@ -222,7 +259,7 @@ func report() -> Dictionary:
 	if _lod_port != null:
 		result.distribution = "macro current; suspended leaf values are unresolved proportional projections, not individual history"
 	if rank == 0:
-		var unit: Dictionary = _unit(str(_formations[owner].unit_id))
+		var unit: Dictionary = _unit(str(_node(owner).unit_id))
 		result.personal_action = _personal_actions.get(_player_id, {"action": "AI_follow_squad", "offset_km": 0.0}).duplicate(true)
 		result.personal_action.position = clampf(float(unit.position) + float(result.personal_action.offset_km), 0.0, float(_state.areas[unit.area_id].size_km))
 		return result
@@ -230,12 +267,12 @@ func report() -> Dictionary:
 	if rank == 1:
 		targets.append(owner)
 	else:
-		targets = State.sorted_ids(_children[owner])
+		targets = State.sorted_ids(_scope_children(owner))
 	result.formations = {}
 	for target: String in targets:
 		var aggregate: Dictionary = {"squads": 0, "effective": 0.0, "casualties": 0.0, "ammunition": 0.0, "missions_complete": 0, "actions": {}}
-		for leaf: String in State.sorted_ids(_leaves[target]):
-			var unit: Dictionary = _unit(str(_formations[leaf].unit_id))
+		for leaf: String in State.sorted_ids(_scope_leaves(target)):
+			var unit: Dictionary = _unit(str(_node(leaf).unit_id))
 			aggregate.squads += 1
 			for key: String in ["effective", "casualties", "ammunition"]:
 				aggregate[key] += float(unit[key])
@@ -249,8 +286,12 @@ func command_scope() -> Dictionary:
 	# Read-only selection metadata. apply() still validates every submitted command.
 	if _state == null:
 		return _reject("not_configured")
+	if not _binding_current():
+		return _reject("current_structure_binding_required")
 	var person: Dictionary = _people[_player_id]
 	var owner: String = str(person.formation_id)
+	if not _active(owner):
+		return _reject("position_retired")
 	var rank: int = ROLES.find(str(person.role))
 	var targets: Dictionary = {}
 	if rank == 0:
@@ -259,10 +300,10 @@ func command_scope() -> Dictionary:
 		targets.tactical_intent = [owner]
 	else:
 		var eligible: Array[String] = []
-		if rank >= 3 and not _leaves[owner].is_empty():
+		if rank >= 3 and not _scope_leaves(owner).is_empty():
 			eligible.append(owner)
-		for child: String in State.sorted_ids(_children[owner]):
-			if not _leaves[child].is_empty():
+		for child: String in State.sorted_ids(_scope_children(owner)):
+			if not _scope_leaves(child).is_empty():
 				eligible.append(child)
 		targets.mission = eligible.duplicate()
 		targets.coordination = eligible.duplicate()
