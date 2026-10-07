@@ -14,10 +14,12 @@ var _sequence: int = 0
 var trace: Trace = Trace.new()
 
 func configure(seed_value: int = 71, supplied: Dictionary = {}) -> bool:
-	options = {"bridge_cut": true, "report_latency": 47.0, "supply": true, "repeated": true, "observer": true, "aggregate": true, "keep_only": false}
+	options = {"bridge_cut": true, "report_latency": 47.0, "command_latency": 15.0, "supply": true, "repeated": true, "observer": true, "aggregate": true, "keep_only": false}
 	options.merge(supplied, true)
 	env = F.setup(true, true, false, seed_value, false, false, {"mobility": 0.08, "blue_ammunition": 4.0, "range_km": 0.05,
 		"edge_ground": {"AC": F.ground("forest", 1.0), "CD": F.ground("slope", 0.0, 0.0, 0.2)}})
+	trace.bind_state(env.state)
+	env.lod.physical_event_sink = _capture_physical
 	if options.aggregate:
 		var pair: Array[String] = ["unit_000", "unit_001"]
 		if not env.lod.coalesce("blue_platoon", pair).ok:
@@ -31,7 +33,7 @@ func configure(seed_value: int = 71, supplied: Dictionary = {}) -> bool:
 		"old": {"observer_ref": "company", "scope_ref": "blue_company", "origin": "EXTERNAL", "quality": 0.5, "precision_km": 0.5, "fact_kinds": ["route"]}}
 	var channels: Dictionary = {}
 	var persons: Array[String] = F.State.sorted_ids(env.people)
-	for pair: Array in [["instant", 0.0], ["report", options.report_latency], ["command", 15.0], ["stale", 47.0]]:
+	for pair: Array in [["instant", 0.0], ["report", options.report_latency], ["command", options.command_latency], ["stale", 47.0]]:
 		channels[pair[0]] = {"senders": persons.duplicate(), "recipients": persons.duplicate(), "latency": pair[1], "available": true, "quality": 1.0, "command_scope": "blue_company"}
 	var information: Info = Info.new()
 	if not information.configure(env.state, env.lod, env.structure, env.logistics, env.roles, sources, channels):
@@ -130,21 +132,23 @@ func _on_message(message: Dictionary) -> void:
 func advance(target: float) -> Dictionary:
 	var output: Dictionary = env.lod.advance(target)
 	for event: Dictionary in output.get("events", []):
-		if event.kind in ["decision", "communication"]:
-			continue
-		var record: Dictionary = event.duplicate(true)
-		var id: String = str(record.get("id", "physical_%d" % trace.total))
-		var causes: Array[String] = []
-		if record.has("cause_ref") and not str(record.cause_ref).is_empty():
-			causes.append(str(record.cause_ref))
-		if event.kind == "spatial":
-			id = str(event.result.id)
-		if event.kind == "logistics":
-			if not str(event.result.get("request_id", "")).is_empty():
-				causes.append(str(event.result.request_id))
-		trace.append({"id": id, "time": record.time, "subject": record.get("unit_id", record.get("area_id", "world")), "kind": record.kind,
-			"cause_refs": causes, "scope": record.get("scope", record.get("node_ref", "")), "execution": record.get("execution", "APPLIED"), "detail": record})
+		_capture_physical(event)
 	return output
+
+func _capture_physical(event: Dictionary) -> void:
+	if event.kind in ["decision", "communication"]:
+		return
+	var record: Dictionary = event.duplicate(true)
+	var id: String = str(record.get("id", "physical_" + JSON.stringify(record).sha256_text().substr(0, 24)))
+	var causes: Array[String] = []
+	if record.has("cause_ref") and not str(record.cause_ref).is_empty():
+		causes.append(str(record.cause_ref))
+	if event.kind == "spatial":
+		id = str(event.result.id)
+	if event.kind == "logistics" and not str(event.result.get("request_id", "")).is_empty():
+		causes.append(str(event.result.request_id))
+	trace.append({"id": id, "time": record.time, "subject": record.get("unit_id", record.get("area_id", "world")), "kind": record.kind,
+		"cause_refs": causes, "scope": record.get("scope", record.get("node_ref", "")), "execution": record.get("execution", "APPLIED"), "detail": record})
 
 func ledger_balanced() -> bool:
 	var ledger: Dictionary = env.logistics.audit()

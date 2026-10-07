@@ -86,6 +86,8 @@ func admit_unit(id: String, node: String, mode: String) -> bool:
 	return true
 
 func inject_path(id: String, path: Array) -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	if _state.time != 0.0 or _state.information_port != null:
 		return _reject("initial_path_only")
 	return set_path(id, path, false)
@@ -107,6 +109,8 @@ func validate_path(unit: Dictionary, path: Variant, returning: bool) -> Dictiona
 	return {"ok": true}
 
 func set_path(id: String, path: Array, returning: bool = false, role: RefCounted = null, token: RefCounted = null) -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	if _state.information_port != null and not _state.information_port.get_ref().allows_role_delivery(role, token, false):
 		return _reject("communication_delivery_required")
 	if not _state.units.has(id):
@@ -305,6 +309,8 @@ func can_move(unit: Dictionary) -> bool:
 	return not next.is_empty() and (unit.spatial.returning or _edges[next.edge].open) and movement_factor(_edges[next.edge].ground, str(unit.spatial.mode)) > 0.0
 
 func schedule_fact(id: String, due: float, edge: String, open: bool) -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	if id.is_empty() or _facts.has(id) or not _edges.has(edge) or not is_finite(due) or due < _state.time:
 		return _reject("invalid_external_fact")
 	_facts[id] = {"id": id, "due": due, "edge_ref": edge, "open": open, "property": "open", "status": "PENDING"}
@@ -314,6 +320,8 @@ func schedule_fact(id: String, due: float, edge: String, open: bool) -> Dictiona
 	return {"ok": true, "time": due}
 
 func schedule_ground(id: String, due: float, target_kind: String, target_ref: String, ground: Dictionary) -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	if id.is_empty() or _facts.has(id) or not is_finite(due) or due < _state.time or not _ground_valid(ground) or target_kind not in ["node", "edge"] or not (_nodes if target_kind == "node" else _edges).has(target_ref):
 		return _reject("invalid_ground_fact")
 	_facts[id] = {"id": id, "due": due, "target_kind": target_kind, "target_ref": target_ref,
@@ -363,6 +371,8 @@ func _fold_facility(cell: String, delta: int) -> void:
 		cursor = str(_lod.spatial.nodes[cursor].parent)
 
 func load_cell(cell: String) -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	if not _state.areas.has(cell):
 		return _reject("unknown_cell")
 	var geometry: Dictionary = {}
@@ -373,14 +383,20 @@ func load_cell(cell: String) -> Dictionary:
 	return {"ok": true, "cell": cell, "geometry": geometry.duplicate(true)}
 
 func unload_cell(cell: String) -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	_loaded.erase(cell)
 	return {"ok": true}
 
 func edge_view(id: String) -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	work.query_records_examined += 1
 	return _edges.get(id, {}).duplicate(true)
 
 func facility_summary(id: String) -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	work.query_records_examined += 1
 	return {"time": _state.time, "node_ref": id, "closed_facilities": _facility_summaries.get(id, 0)}
 

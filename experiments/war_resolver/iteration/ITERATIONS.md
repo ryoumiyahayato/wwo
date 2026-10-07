@@ -58,3 +58,21 @@ builds/task9-m2-trace-and-boundaries完整exit0，116/0和56/0，相关旧集全
 012 M2冻结门：0c93b66完整exit0，旧43948/0及八Linuxhash相同；空间190/0，
 contracts56/0，combined116/0。冻结CLI无cache错误，actual1800秒/118trace/ledger平衡。
 M2 PASSED/LEVEL_2，证据索引保存，下一步先测M3峰值再改同一kernel。
+
+013 M3先测峰值：before完整78秒，400dense prepare677.986ms/apply667.28ms，
+1000due20.577ms。将方程唯一抽到SegmentWork，正常入口也用同一primitive，
+11008e8受影响1876/0+17329/0+116/0；八旧Linuxhash相同。保留，不另写战争算法。
+
+014 M3 budget契约先红：builds/task9-m3-contract-before完整1/1，无advance_bounded。
+最小Index增量sort/range、同方程cursor、临时AdvanceWork、原event-one、逐条report、
+pending公共读写门；builds/task9-m3-budget-first完整38/0+116/0+1876/0。不同quota
+物理/知识/机会结果相同，初次yield旧stamp，查询无结算。尚未长run，不称LEVEL_3。
+
+015 M3输出审查：pending不得输出当前physical events；结果只进度计数，可信host
+将事实流入受state门保护的诊断ring，事件/trace分页。native snapshot有1024容量门，
+active scope128、domain affect64；Memory512MiB/pending100000背压，不硬帧承诺。
+排序独立9/0，streamed-result gate38/0+116/0，原子步骤wall含云端抖动，未当用户帧率。
+
+016 M3集中混合：正规Task5临配、Task6有限reserve/ETA、Task7延迟输入、Task8
+机会，加498空间+498area事实，恰1000同刻t10。mixed-events-first完整54/0，
+独立expected phase1/2/5/6/9、原ID顺序严格匹配；均t10，未后延。保留原绿色M2。

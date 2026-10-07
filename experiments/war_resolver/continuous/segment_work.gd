@@ -29,6 +29,9 @@ var target_weight: float = 0.0
 var rounds: float = 0.0
 var spent: float = 0.0
 var ratio: float = 0.0
+var bounded: bool = false
+var candidate_cursor: RefCounted = null
+var candidate_probes: int = 0
 
 func configure_prepare(service: RefCounted, world: State, cell: String, selected: Array[String]) -> void:
 	kernel = service
@@ -58,8 +61,18 @@ func prepare_step() -> bool:
 				plan = plans[ids[i]]
 				targets = []
 				detected = {}
-				candidates = kernel._candidate_ids(state, ids, unit)
+				if bounded:
+					candidate_cursor = kernel.begin_candidate_cursor(state, ids, unit)
+					candidate_probes = int(kernel._index.probes)
+				else:
+					candidates = kernel._candidate_ids(state, ids, unit)
 				j = 0
+				phase = "candidate_query" if bounded else "candidates"
+		"candidate_query":
+			if candidate_cursor.step():
+				candidates = candidate_cursor.result
+				kernel.work.range_probes += int(kernel._index.probes) - candidate_probes
+				kernel.work.candidate_contacts_examined += candidates.size()
 				phase = "candidates"
 		"candidates":
 			if j < candidates.size():

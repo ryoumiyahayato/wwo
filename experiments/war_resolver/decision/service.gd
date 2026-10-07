@@ -47,11 +47,15 @@ func reset_work() -> void:
 		work[key] = 0
 
 func schedule(person: String, id: String, due: float) -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	if _state == null or not _persons.has(person) or id.is_empty() or _events.has(id) or _pending.has(person) or not is_finite(due) or due < _state.time or due < float(_ready[person]):
 		return _reject("invalid_opportunity_or_cooldown")
 	return _schedule(person, id, due, "")
 
 func start_cycle(person: String, prefix: String, first: float, period: float, end: float, maximum: int) -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	if not _persons.has(person) or not _structure.active(str(_structure._people[person].formation_id)) or prefix.is_empty() or not is_finite(first) or not is_finite(period) or not is_finite(end) or first > end or period < float(_persons[person].definition.cadence) or maximum < 1 or maximum > 4096 or _cycles.get(person, {}).get("status", "") == "RUNNING":
 		return _reject("invalid_bounded_cycle")
 	var admitted: Dictionary = schedule(person, prefix + "_0", first)
@@ -61,6 +65,8 @@ func start_cycle(person: String, prefix: String, first: float, period: float, en
 	return admitted
 
 func pause_cycle(person: String) -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	if not _cycles.has(person) or _cycles[person].status != "RUNNING":
 		return _reject("no_running_cycle")
 	_cycles[person].status = "PAUSED"
@@ -89,6 +95,8 @@ func _schedule(person: String, id: String, due: float, urgent_message: String) -
 	return {"ok": true, "id": id, "decision_time": due}
 
 func admit_urgent(person: String, message_id: String) -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	# Explicit host admission of one received-message wake, never all-message scans.
 	if not _persons.has(person) or not _persons[person].definition.urgent or not _information._messages.has(message_id):
 		return _reject("unadmitted_urgent_source")
@@ -114,6 +122,8 @@ func accepts_event(id: String, payload: Dictionary, due: float) -> bool:
 	return id == "decision_" + str(record.id) and due == float(record.due) and record.status in ["PENDING", "SUPERSEDED"]
 
 func preview(person: String) -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	if not _persons.has(person):
 		return _reject("unknown_decision_person")
 	var next_time: float = float(_events[_pending[person]].due) if _pending.has(person) else -1.0
@@ -208,6 +218,8 @@ func _issue(person: String, id: String, intent: Dictionary) -> Dictionary:
 	return {"domain": domain, "id": "input_" + id, "issued_at": _state.time, "result": result}
 
 func result(id: String) -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	if not _events.has(id):
 		return _reject("unknown_decision")
 	var record: Dictionary = _events[id].duplicate(true)
@@ -217,6 +229,8 @@ func result(id: String) -> Dictionary:
 	return record
 
 func snapshot() -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	var result: Dictionary = {"events": _events.duplicate(true), "pending": _pending.duplicate(), "ready": _ready.duplicate(), "work": work.duplicate()}
 	if not _cycles.is_empty():
 		result.cycles = _cycles.duplicate(true)

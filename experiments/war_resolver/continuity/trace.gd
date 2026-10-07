@@ -5,6 +5,10 @@ const PAGE_MAX: int = 256
 var _records: Array[Dictionary] = []
 var _next: int = 0
 var total: int = 0
+var _state: WeakRef = null
+
+func bind_state(state: RefCounted) -> void:
+	_state = weakref(state)
 
 func append(record: Dictionary) -> void:
 	var value: Dictionary = record.duplicate(true)
@@ -17,6 +21,8 @@ func append(record: Dictionary) -> void:
 		_next = (_next + 1) % CAPACITY
 
 func page(start: int = 0, limit: int = 64) -> Dictionary:
+	if _state != null and _state.get_ref().public_pending():
+		return _state.get_ref().pending_view()
 	if start < 0 or start > _records.size() or limit < 1 or limit > PAGE_MAX:
 		return {"ok": false, "error": "invalid_bounded_trace_page"}
 	var values: Array[Dictionary] = []
@@ -26,6 +32,8 @@ func page(start: int = 0, limit: int = 64) -> Dictionary:
 	return {"ok": true, "entries": values, "next": end if end < _records.size() else -1, "retained": _records.size(), "total": total, "diagnostic_overwritten": total - _records.size()}
 
 func export() -> Array[Dictionary]:
+	if _state != null and _state.get_ref().public_pending():
+		return []
 	var values: Array[Dictionary] = []
 	var cursor: int = 0
 	while cursor >= 0:

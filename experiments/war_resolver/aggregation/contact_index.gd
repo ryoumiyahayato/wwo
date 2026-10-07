@@ -1,7 +1,13 @@
 extends RefCounted
 ## Stable position range queries. Candidate counts include allies/self in range.
+const RangeCursor = preload("res://experiments/war_resolver/continuous/range_cursor.gd")
 var _records: Array[Dictionary] = []
 var probes: int = 0
+
+func begin_candidates(position: float, reach: float) -> RefCounted:
+	var cursor: RangeCursor = RangeCursor.new()
+	cursor.configure(self, position, reach)
+	return cursor
 
 func build(units: Dictionary, ids: Array[String], state: RefCounted = null) -> void:
 	_records.clear()

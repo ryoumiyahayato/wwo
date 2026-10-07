@@ -265,6 +265,8 @@ func _nearest_input(leaf: String, inputs: Dictionary) -> Dictionary:
 
 
 func report() -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	if _state != null and _state.information_port != null:
 		return _state.information_port.get_ref().role_report(self)
 	if _state == null:
@@ -306,6 +308,8 @@ func report() -> Dictionary:
 
 
 func command_scope() -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	# Read-only selection metadata. apply() still validates every submitted command.
 	if _state == null:
 		return _reject("not_configured")

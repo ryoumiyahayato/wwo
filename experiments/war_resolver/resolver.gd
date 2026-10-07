@@ -110,50 +110,53 @@ func resolve_until(state: State, target_game_time: float, resolution_policy: Str
 
 func _process_due(state: State, log: Array[Dictionary], changes: Dictionary, area_changes: Dictionary) -> void:
 	while state.next_event_time() <= state.time:
-		if state.information_port != null and int(state.events[0].get("phase", 0)) >= 5:
-			state.information_port.get_ref().deliver_reports_through(state.time)
-		var transition: Dictionary = {}
-		if state.materialization_port != null and state.materialization_port.get_ref() != null:
-			transition = state.materialization_port.get_ref().prepare_event(state.events[0])
-			for id: String in transition.get("retired", []):
-				changes.erase(id)
-				state.touched_units.erase(id)
-			for id: String in transition.get("changed", []):
-				changes[id] = state.units[id].duplicate(true)
-				state.touched_units[id] = true
-		var event: Dictionary = state.pop_event()
-		var payload: Dictionary = event.payload
-		state.counters.events_processed += 1
-		if event.kind in ["structure", "logistics", "communication", "decision", "spatial"]:
-			log.append({"time": state.time, "kind": event.kind, "id": event.id, "result": transition.get("record", {})})
-			continue
-		if event.kind == "order":
-			var unit: Dictionary = state.examine_unit(str(payload.unit_id))
-			unit.mission_id = payload.mission_id
-			state.wake(str(unit.area_id))
-			changes[unit.id] = unit.duplicate(true)
-			state.touched_units[unit.id] = true
-		elif event.kind == "reinforcement":
-			if state.identity_reserved(str(payload.unit.id)):
-				log.append({"time": state.time, "kind": "rejected_reinforcement", "id": event.id})
-				continue
-			state.add_unit(payload.unit)
-			state.wake(str(payload.unit.area_id))
-			changes[payload.unit.id] = state.units[payload.unit.id].duplicate(true)
-			state.touched_units[payload.unit.id] = true
-			_update_control(state, str(payload.unit.area_id), log, area_changes)
-		elif event.kind == "coordination_release":
-			state.wake(str(state.examine_unit(str(payload.unit_id)).area_id))
-		else:
-			var area: Dictionary = state.areas[payload.area_id]
-			for key: String in ["cover", "concealment", "visibility", "frontage", "movement_modifier"]:
-				if payload.has(key):
-					area[key] = clampf(float(payload[key]), 0.0, 1.0) if key in ["cover", "concealment", "visibility"] else maxf(0.0, float(payload[key]))
-			state.wake(str(area.id))
-			area_changes[area.id] = area.duplicate(true)
-		log.append({"time": state.time, "kind": event.kind, "id": event.id})
+		_process_due_one(state, log, changes, area_changes)
 	if state.information_port != null:
 		state.information_port.get_ref().deliver_reports_through(state.time)
+
+func _process_due_one(state: State, log: Array[Dictionary], changes: Dictionary, area_changes: Dictionary, fold_reports: bool = true) -> void:
+	if fold_reports and state.information_port != null and int(state.events[0].get("phase", 0)) >= 5:
+		state.information_port.get_ref().deliver_reports_through(state.time)
+	var transition: Dictionary = {}
+	if state.materialization_port != null and state.materialization_port.get_ref() != null:
+		transition = state.materialization_port.get_ref().prepare_event(state.events[0])
+		for id: String in transition.get("retired", []):
+			changes.erase(id)
+			state.touched_units.erase(id)
+		for id: String in transition.get("changed", []):
+			changes[id] = state.units[id].duplicate(true)
+			state.touched_units[id] = true
+	var event: Dictionary = state.pop_event()
+	var payload: Dictionary = event.payload
+	state.counters.events_processed += 1
+	if event.kind in ["structure", "logistics", "communication", "decision", "spatial"]:
+		log.append({"time": state.time, "kind": event.kind, "id": event.id, "result": transition.get("record", {})})
+		return
+	if event.kind == "order":
+		var unit: Dictionary = state.examine_unit(str(payload.unit_id))
+		unit.mission_id = payload.mission_id
+		state.wake(str(unit.area_id))
+		changes[unit.id] = unit.duplicate(true)
+		state.touched_units[unit.id] = true
+	elif event.kind == "reinforcement":
+		if state.identity_reserved(str(payload.unit.id)):
+			log.append({"time": state.time, "kind": "rejected_reinforcement", "id": event.id})
+			return
+		state.add_unit(payload.unit)
+		state.wake(str(payload.unit.area_id))
+		changes[payload.unit.id] = state.units[payload.unit.id].duplicate(true)
+		state.touched_units[payload.unit.id] = true
+		_update_control(state, str(payload.unit.area_id), log, area_changes)
+	elif event.kind == "coordination_release":
+		state.wake(str(state.examine_unit(str(payload.unit_id)).area_id))
+	else:
+		var area: Dictionary = state.areas[payload.area_id]
+		for key: String in ["cover", "concealment", "visibility", "frontage", "movement_modifier"]:
+			if payload.has(key):
+				area[key] = clampf(float(payload[key]), 0.0, 1.0) if key in ["cover", "concealment", "visibility"] else maxf(0.0, float(payload[key]))
+		state.wake(str(area.id))
+		area_changes[area.id] = area.duplicate(true)
+	log.append({"time": state.time, "kind": event.kind, "id": event.id})
 
 
 func _posture(state: State, unit: Dictionary) -> String:

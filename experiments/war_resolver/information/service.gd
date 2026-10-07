@@ -88,6 +88,8 @@ func _source_allowed(actor: String, source_id: String, subject_kind: String, sub
 	return _structure._contains(str(source.scope_ref), node_id)
 
 func observe(actor: String, request: Dictionary) -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	if request.size() != 5 or not _keys(request, ["id", "source_ref", "subject_kind", "subject_ref", "fact_kind"]) or not request.get("id") is String or str(request.id).is_empty() or _observations.has(request.id) or not _source_allowed(actor, str(request.get("source_ref", "")), str(request.get("subject_kind", "")), str(request.get("subject_ref", "")), str(request.get("fact_kind", ""))):
 		return _reject("invalid_observation_or_scope")
 	var ids: Array[String] = []
@@ -152,6 +154,8 @@ func _fact(ids: Array[String], kind: String, precision: float) -> Dictionary:
 	return {"level": "LOW" if stock / weight < (1.0 if kind != "readiness" else 0.5) else "AVAILABLE"}
 
 func admit_external_observation(record: Dictionary) -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	# Trusted source input may be wrong. Validate provenance/time/shape, not truth.
 	if record.size() != 7 or not _keys(record, ["id", "source_ref", "subject_kind", "subject_ref", "fact_kind", "value", "observed_at"]) or not record.get("id") is String or str(record.id).is_empty() or _observations.has(record.id) or not _sources.has(record.get("source_ref", "")) or _sources[record.source_ref].origin != "EXTERNAL" or record.get("subject_kind") not in ["unit", "formation"] or not record.get("subject_ref") is String or not _number(record.get("observed_at")) or float(record.observed_at) > _state.time or float(record.observed_at) < 0.0 or record.get("fact_kind") not in _sources[record.source_ref].fact_kinds or not _valid_value(str(record.fact_kind), record.get("value")):
 		return _reject("invalid_external_observation")
@@ -190,6 +194,8 @@ static func _valid_value(kind: String, value: Variant) -> bool:
 	return value.size() == 1 and value.get("level") in ["LOW", "AVAILABLE", "UNKNOWN"]
 
 func send_report(actor: String, request: Dictionary) -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	if request.size() != 4 or not _keys(request, ["id", "recipient_ref", "channel_ref", "observation_ids"]) or not request.get("id") is String or str(request.id).is_empty() or _messages.has(request.id) or not request.get("recipient_ref") is String or not _roles.has(request.recipient_ref) or not request.get("observation_ids") is Array or request.observation_ids.is_empty() or request.observation_ids.size() > MAX_CLAIMS or not _channel_allowed(actor, str(request.get("channel_ref", "")), str(request.recipient_ref), false):
 		return _reject("invalid_report")
 	var claims: Array[Dictionary] = []
@@ -219,6 +225,8 @@ func _message(actor: String, request: Dictionary, kind: String) -> Dictionary:
 		"channel_ref": request.channel_ref, "status": "PENDING", "unread": true}
 
 func issue_command(actor: String, request: Dictionary) -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	if request.size() != 3 or not _keys(request, ["id", "channel_ref", "command"]) or not request.get("id") is String or str(request.id).is_empty() or _messages.has(request.id) or not _roles.has(actor) or not request.get("command") is Dictionary or not request.command.get("target") is String:
 		return _reject("invalid_command_message")
 	var command: Dictionary = request.command.duplicate(true)
@@ -248,6 +256,8 @@ func allows_role_delivery(role: RefCounted, token: RefCounted, validate_only: bo
 	return token == _token and _roles.get(_actor) == role and (_gate == "preflight" if validate_only else _gate == "delivery")
 
 func validate_intent(actor: String, command: Dictionary) -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	# Authority admission only; the provider never receives physical state.
 	if not _roles.has(actor) or command.get("kind") == "local_action":
 		return _reject("invalid_decision_actor_or_kind")
@@ -350,8 +360,17 @@ func deliver_reports_through(time: float) -> void:
 		return
 	# Noncausal notifications have no combat deadline. They are folded through
 	# the same world time, retaining their exact logical arrival timestamps.
-	while not _report_heap.is_empty() and float(_report_heap[0].delivery_time) <= time:
-		_receive_report(_pop_report())
+	while deliver_one_report(time):
+		pass
+
+func has_due_report(time: float) -> bool:
+	return not _report_heap.is_empty() and float(_report_heap[0].delivery_time) <= time
+
+func deliver_one_report(time: float) -> bool:
+	if time != _state.time or not has_due_report(time):
+		return false
+	_receive_report(_pop_report())
+	return true
 
 func _receive_report(message: Dictionary) -> void:
 	if message.status != "PENDING" or float(message.delivery_time) > _state.time:
@@ -387,6 +406,8 @@ func _receive_report(message: Dictionary) -> void:
 	message_transition.emit(message.duplicate(true))
 
 func knowledge(person: String, subject_kind: String = "", subject: String = "", fact: String = "", limit: int = MAX_QUERY, before: int = -1) -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	if not _roles.has(person) or limit < 1 or limit > MAX_QUERY:
 		return _reject("invalid_bounded_knowledge_query")
 	var records: Array = _knowledge[person] if subject.is_empty() else _subjects[person].get(subject_kind + ":" + subject + ":" + fact, [])
@@ -401,6 +422,8 @@ func knowledge(person: String, subject_kind: String = "", subject: String = "", 
 	return {"ok": true, "holder_ref": person, "entries": entries, "total_matching": records.size(), "next_before": start if start > 0 else -1, "scope": "received claims only; no truth refresh; history retained"}
 
 func inbox(person: String, limit: int = MAX_QUERY) -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	if not _roles.has(person) or limit < 1 or limit > MAX_QUERY:
 		return _reject("invalid_mailbox_query")
 	var result: Array[Dictionary] = []
@@ -411,6 +434,8 @@ func inbox(person: String, limit: int = MAX_QUERY) -> Dictionary:
 	return {"ok": true, "holder_ref": person, "messages": result, "total_received": ids.size()}
 
 func role_report(role: RefCounted) -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	var person: String = role._player_id
 	if _roles.get(person) != role or not role._binding_current():
 		return _reject("information_binding_required")
@@ -418,6 +443,8 @@ func role_report(role: RefCounted) -> Dictionary:
 		"knowledge": knowledge(person), "inbox": inbox(person), "outbox": outbox(person)}
 
 func outbox(person: String, limit: int = MAX_QUERY) -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	if not _roles.has(person) or limit < 1 or limit > MAX_QUERY:
 		return _reject("invalid_outbox_query")
 	var result: Array[Dictionary] = []
@@ -431,6 +458,8 @@ func outbox(person: String, limit: int = MAX_QUERY) -> Dictionary:
 	return {"ok": true, "holder_ref": person, "messages": result, "total_sent": ids.size()}
 
 func snapshot() -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	return {"time": _state.time, "sources": _sources.duplicate(true), "channels": _channels.duplicate(true),
 		"observations": _observations.duplicate(true), "messages": _messages.duplicate(true),
 		"knowledge": _knowledge.duplicate(true), "inboxes": _inboxes.duplicate(true), "outboxes": _outboxes.duplicate(true),

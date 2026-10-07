@@ -10,8 +10,8 @@
   },
   "last_verified_code_commit": "0c93b66338c88fb31a05ff66444fa6d423b38f41",
   "started_utc": "2026-10-07T16:28:31Z",
-  "effective_minutes_estimate": 115,
-  "remaining_minutes_estimate": 485,
+  "effective_minutes_estimate": 155,
+  "remaining_minutes_estimate": 445,
   "estimate_quality": "approximate wall clock minus known wait; update at safe checkpoints",
   "platform_startup_wait_seconds": 13,
   "tests_completed": [
@@ -21,14 +21,20 @@
     "Resumed targeted corrections: builds/task9-m1-physical-fixed complete exit0,173/0",
     "Multi-segment retreat counterexample: builds/task9-m1-long-retreat-counterexample complete exit1,182/2; corrected builds/task9-m1-long-retreat-fixed complete exit0,182/0",
     "M2 first contract red18/7 then green27/0; integrated main/controls108/0",
-    "M2 trace/boundaries116/0 and contracts56/0, related space190/0, Task8 1220/0, Task7 1341/0, roles3762/0; CLI main1800 actual finite causal run completed"
+    "M2 trace/boundaries116/0 and contracts56/0, related space190/0, Task8 1220/0, Task7 1341/0, roles3762/0; CLI main1800 actual finite causal run completed",
+    "M3 actual before profile complete;400dense maxprepare677.986ms/maxapply667.28ms;1000due20.577ms",
+    "M3 shared equation extraction11008e8:resolver1876/0 Task4 17329/0 combined116/0; eight oldLinux hashes exactly match",
+    "M3 budget first38/0+combined116/0+resolver1876/0; quota1/7/31 exact physics/knowledge/timestamps",
+    "M3 streamed results cursors9/0+continuous38/0+combined116/0; pending world facts not returned",
+    "M3 mixed events54/0; 1000 at t10 actualTask5/6/7/8 plus spatial/area originalphase1/2/5/6/9 andID order exact"
   ],
   "tests_pending": [
-    "M3 profile-before, resumable work contracts, mixed concentrated events,24h actual mixed LOD load",
-    "M4 full unified/final acceptance"
+    "Expanded relevant predecessor gate on bounded prototype",
+    "400leaf24h actual longrun,6seed mixedLOD, dormancy/perf/storage measurements",
+    "M4 final complete validation"
   ],
   "blockers": [],
-  "next": "Measure original peak sections before cooperative refactor; retain M2 green checkpoint.",
+  "next": "Freeze budget prototype, run relevant gate, then populate synthetic400leaf initial inputs and bounded longrun contracts.",
   "validation_session": null,
   "connection_checks": [
     {
@@ -66,5 +72,6 @@
       "resume_requested": "2026-10-07T17:21Z",
       "verified": "fresh exec; same local/remote f0e4276; no Godot process; no new task"
     }
-  ]
+  ],
+  "last_verified_refactor_commit": "11008e8"
 }

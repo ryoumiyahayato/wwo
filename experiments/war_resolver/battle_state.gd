@@ -3,6 +3,15 @@ extends RefCounted
 
 const VERSION: String = "land-war-resolver-v0.1"
 var time: float = 0.0
+var settlement_pending: bool = false
+var inside_kernel_work: bool = false
+var pending_committed_time: float = 0.0
+
+func pending_view() -> Dictionary:
+	return {"ok": false, "status": "PENDING", "time": pending_committed_time, "committed_time": pending_committed_time}
+
+func public_pending() -> bool:
+	return settlement_pending and not inside_kernel_work
 var seed: int = 1
 var random_state: Dictionary = {"algorithm": "keyed-mod-prime-v1", "draws": 0}
 var units: Dictionary = {}
@@ -103,6 +112,8 @@ func set_coordination(unit_id: String, assignment: Dictionary) -> void:
 
 
 func schedule_event(id: String, due: float, kind: String, payload: Dictionary) -> bool:
+	if public_pending():
+		return false
 	if id.is_empty() or event_ids.has(id) or not is_finite(due) or due < time:
 		return false
 	if kind not in ["order", "reinforcement", "area_change", "coordination_release", "structure", "logistics", "communication", "decision", "spatial"]:
@@ -228,6 +239,8 @@ func variation(key: String, epoch: int) -> float:
 
 
 func snapshot() -> Dictionary:
+	if public_pending():
+		return pending_view()
 	# Explicit diagnostic export may scan the snapshot; resolve_until never uses it.
 	return {"version": VERSION, "time": time, "seed": seed,
 		"random_state": random_state.duplicate(true), "units": units.duplicate(true),

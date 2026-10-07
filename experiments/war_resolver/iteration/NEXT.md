@@ -1,9 +1,8 @@
-# 当前恢复入口：M2已通过，先测M3峰值
+# 当前恢复入口：M3预算prototype扩大验证
 
-M2 code0c93b66，builds/task9-m2-frozen-gate完整exit0；旧43948/0及八hash相同，
-空间190/0、contracts56/0、combined116/0，冻结CLI main1800秒实际运行/118trace，
-证据iteration/evidence/m2-linux。M0/M1/M2 PASSED，最高LEVEL_2，M3 RUNNING。
-约115分钟已用/485剩余，510分钟停止新增功能，保留90最终验证。
-下一步先profile原prepare/apply/events，再在同kernel拆分接触/效果/事件，原方程
-复用，提交边界对外PENDING，工作quota不能改变积分边界。尚未宣称LEVEL_3。
-PR111唯一draft；不merge/rebase/force，不改旧断言、生产或未知文件。
+M2绿色0c93b66/LEVEL_2保留。M3新的core已actual测试：cursor9/0，budget54/0，
+combined116/0，mixed1000同刻phase/ID正确。还未长run/perf/storage/LOD，因此M3 RUNNING。
+当前约155分钟已用/445剩余，510停止新增、90最终验证。下一冻结当前源码并运行相关
+旧层门，再添加synthetic400leaf初态/24h。实现细节M3_IMPLEMENTATION_NOTES旧计划部分
+已实现：advance_work/sort_cursor/range_cursor、pending guards、signal流式diagnostic。
+没有运行中Godot需要等待。未知生成UID不删；唯一writer，PR111，远端31fa059。

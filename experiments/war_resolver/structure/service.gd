@@ -65,6 +65,8 @@ func matches_admission(formations: Dictionary, people: Dictionary) -> bool:
 	return formations == _nodes and people == _people and history.is_empty()
 
 func node(id: String) -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	work.structure_records_examined += 1
 	return _nodes.get(id, {}).duplicate(true)
 
@@ -98,6 +100,8 @@ func can_coalesce(source: String, ids: Array[String]) -> bool:
 	return true
 
 func relation(id: String) -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	if not active(id):
 		return {"ok": false, "error": "inactive_node"}
 	return {"ok": true, "permanent_parent": _nodes[id].parent, "effective_parent": parent(id),
@@ -105,6 +109,8 @@ func relation(id: String) -> Dictionary:
 		"supply_responsibility_reference": parent(id)}
 
 func submit(person_id: String, command: Dictionary) -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	if _state == null or not _people.has(person_id):
 		return _reject("unknown_person")
 	if not _keys(command, ["id", "kind", "effective_time", "values"]) or command.size() != 4 or not command.get("kind") is String or not command.get("id") is String or str(command.id).is_empty() or not command.get("values") is Dictionary or not _number(command.get("effective_time")) or float(command.effective_time) < _state.time:
@@ -461,6 +467,8 @@ func _reparent(target: String, destination: String) -> void:
 	work.relations_changed += 1
 
 func snapshot() -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	return {"time": _state.time, "nodes": _nodes.duplicate(true), "children": _children.duplicate(true),
 		"leaves": _leaves.duplicate(true), "attachments": _attachments.duplicate(true),
 		"pending": _pending.duplicate(true), "requests": _requests.duplicate(true),
