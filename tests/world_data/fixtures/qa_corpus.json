@@ -1,0 +1,57 @@
+{
+  "schema_version": "wwo_world_data_qa_corpus_v1",
+  "cases": [
+    {
+      "id": "finite_json",
+      "kind": "json",
+      "text": "{\"value\": 1.25}\n",
+      "expected": {
+        "json_parse_error": false
+      }
+    },
+    {
+      "id": "nonfinite_json",
+      "kind": "json",
+      "text": "{\"value\": NaN}\n",
+      "expected": {
+        "json_parse_error": true
+      }
+    },
+    {
+      "id": "simple_square",
+      "kind": "ring",
+      "ring": [[0.0, 0.0], [2.0, 0.0], [2.0, 2.0], [0.0, 0.0]],
+      "expected": {
+        "self_intersects": false,
+        "nonzero_area": true
+      }
+    },
+    {
+      "id": "bow_tie",
+      "kind": "ring",
+      "ring": [[0.0, 0.0], [2.0, 2.0], [0.0, 2.0], [2.0, 0.0], [0.0, 0.0]],
+      "expected": {
+        "self_intersects": true,
+        "nonzero_area": false
+      }
+    },
+    {
+      "id": "zero_area_collinear",
+      "kind": "ring",
+      "ring": [[0.0, 0.0], [1.0, 0.0], [2.0, 0.0], [0.0, 0.0]],
+      "expected": {
+        "self_intersects": false,
+        "nonzero_area": false
+      }
+    },
+    {
+      "id": "canonical_rotation",
+      "kind": "ring_equivalence",
+      "ring": [[0.0, 0.0], [2.0, 0.0], [2.0, 2.0], [0.0, 0.0]],
+      "rotated_ring": [[2.0, 0.0], [2.0, 2.0], [0.0, 0.0], [2.0, 0.0]],
+      "expected": {
+        "canonical_equal": true
+      }
+    }
+  ]
+}

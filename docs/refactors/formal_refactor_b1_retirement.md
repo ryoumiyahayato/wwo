@@ -1,0 +1,548 @@
+# WWO — FORMAL REFACTOR B1
+
+日期：2026-10-05。基于当前 canonical/current-world 工作区施工；施工前已有的修改与删除不计入下面的实际删除清单。
+
+## RENAMED / MOVED
+
+- `res://scripts/v2_2/v2_datetime.gd` → `res://scripts/core/time/game_calendar.gd`
+- `res://scripts/v2_2/v2_datetime.gd.uid` → `res://scripts/core/time/game_calendar.gd.uid`
+- `class_name V2DateTime` → `class_name GameCalendar`。
+- 日历正文与移动前的文件逐字比较（忽略换行形式、仅反向替换类名）一致。所有算法、参数、返回值、常量及错误处理保持原样；UID 身份随文件移动，旧 UID 路径已退出。
+
+## UPDATED CALL SITES
+
+- `res://scripts/formal/formal_world_simulation.gd`
+- `res://scripts/formal/historical_political_evidence_catalog.gd`
+- `res://tests/tools/test_audit_formal_product_systems.py`
+- `res://tests/variable_state/formal_time_known_defects_test.gd`
+- `res://tests/variable_state/formal_time_stable_contract_test.gd`
+- `res://tools/audit_formal_product_systems.py`
+- `res://.github/workflows/formal-time-behavior-baseline.yml`
+
+## DELETED FILES
+
+实际物理删除 457 个文件（不含上述两个移走的日历旧路径）：150 个旧生产脚本、7 个场景、64 个旧测试脚本、4 个 GDScript 工具、7 个其他工具、2 个 workflow、223 个 UID 文件。
+
+- `res://.github/workflows/alpha-three-year-performance.yml`
+- `res://.github/workflows/social-sandbox-diagnostics.yml`
+- `res://scenes/alpha/alpha_grid_fixture.tscn`
+- `res://scenes/alpha/alpha_main.tscn`
+- `res://scenes/alpha/alpha_menu.tscn`
+- `res://scenes/v2_2/v2_2_life_loop_main.tscn`
+- `res://scenes/v2_2/v2_2_life_loop_menu.tscn`
+- `res://scripts/action/action_instance_data.gd`
+- `res://scripts/action/action_rules_config.gd`
+- `res://scripts/action/action_service.gd`
+- `res://scripts/action/action_start_result.gd`
+- `res://scripts/action/player_action_context_service.gd`
+- `res://scripts/ai/ai_state_data.gd`
+- `res://scripts/ai/simple_ai_service.gd`
+- `res://scripts/alpha/alpha_ai_service.gd`
+- `res://scripts/alpha/alpha_asset_service.gd`
+- `res://scripts/alpha/alpha_character_service.gd`
+- `res://scripts/alpha/alpha_commodity_market_service.gd`
+- `res://scripts/alpha/alpha_config.gd`
+- `res://scripts/alpha/alpha_contract_service.gd`
+- `res://scripts/alpha/alpha_economy_integration_service.gd`
+- `res://scripts/alpha/alpha_economy_service.gd`
+- `res://scripts/alpha/alpha_enterprise_service.gd`
+- `res://scripts/alpha/alpha_fixture_gate.gd`
+- `res://scripts/alpha/alpha_grid_fixture.gd`
+- `res://scripts/alpha/alpha_labor_service.gd`
+- `res://scripts/alpha/alpha_ledger_service.gd`
+- `res://scripts/alpha/alpha_main.gd`
+- `res://scripts/alpha/alpha_map_canvas.gd`
+- `res://scripts/alpha/alpha_menu.gd`
+- `res://scripts/alpha/alpha_politics_service.gd`
+- `res://scripts/alpha/alpha_save_migration.gd`
+- `res://scripts/alpha/alpha_save_service.gd`
+- `res://scripts/alpha/alpha_scenario_runner.gd`
+- `res://scripts/alpha/alpha_simulation_service.gd`
+- `res://scripts/alpha/alpha_topology_service.gd`
+- `res://scripts/alpha/alpha_ui_binding.gd`
+- `res://scripts/alpha/alpha_v23_config.gd`
+- `res://scripts/alpha/alpha_world_dynamics_service.gd`
+- `res://scripts/alpha/alpha_world_service.gd`
+- `res://scripts/character/background_character_data.gd`
+- `res://scripts/character/character_generation_config.gd`
+- `res://scripts/character/character_generation_result.gd`
+- `res://scripts/character/character_generator.gd`
+- `res://scripts/character/character_roster_service.gd`
+- `res://scripts/character/character_tendency_service.gd`
+- `res://scripts/character/exited_character_record.gd`
+- `res://scripts/character/game_session_service.gd`
+- `res://scripts/character/succession_candidate_data.gd`
+- `res://scripts/character/succession_result.gd`
+- `res://scripts/character/succession_service.gd`
+- `res://scripts/core/core_data_load_result.gd`
+- `res://scripts/core/core_data_loader.gd`
+- `res://scripts/core/core_data_set.gd`
+- `res://scripts/core/deterministic_random_service.gd`
+- `res://scripts/core/log_service.gd`
+- `res://scripts/core/models/action_definition_data.gd`
+- `res://scripts/core/models/character_data.gd`
+- `res://scripts/core/models/control_unit_data.gd`
+- `res://scripts/core/models/country_data.gd`
+- `res://scripts/core/models/organization_data.gd`
+- `res://scripts/core/models/population_group_data.gd`
+- `res://scripts/core/models/region_data.gd`
+- `res://scripts/core/models/relationship_data.gd`
+- `res://scripts/core/stable_id_service.gd`
+- `res://scripts/devtools/developer_command_service.gd`
+- `res://scripts/devtools/performance_stats_service.gd`
+- `res://scripts/devtools/settlement_log_service.gd`
+- `res://scripts/formal/historical_evidence_standalone_bootstrap.gd`
+- `res://scripts/map/map_control_service.gd`
+- `res://scripts/map/map_rules_config.gd`
+- `res://scripts/map/map_world_controller.gd`
+- `res://scripts/map/regional_influence_service.gd`
+- `res://scripts/map/strategic_map_canvas.gd`
+- `res://scripts/organization/organization_service.gd`
+- `res://scripts/relationship/relationship_service.gd`
+- `res://scripts/save/action_save_validator.gd`
+- `res://scripts/save/autosave_coordinator.gd`
+- `res://scripts/save/game_save_service.gd`
+- `res://scripts/save/social_save_validator.gd`
+- `res://scripts/simulation/continuity_rules_config.gd`
+- `res://scripts/simulation/simulation_clock.gd`
+- `res://scripts/simulation/simulation_clock_config.gd`
+- `res://scripts/simulation/simulation_event_queue.gd`
+- `res://scripts/simulation/simulation_runner.gd`
+- `res://scripts/simulation/society_rules_config.gd`
+- `res://scripts/simulation/society_simulation_service.gd`
+- `res://scripts/simulation/world_activity_service.gd`
+- `res://scripts/system/active_components.gd`
+- `res://scripts/v2_2/v2_condition_service.gd`
+- `res://scripts/v2_2/v2_determinism_audit.gd`
+- `res://scripts/v2_2/v2_employment_service.gd`
+- `res://scripts/v2_2/v2_household_service.gd`
+- `res://scripts/v2_2/v2_ledger_service.gd`
+- `res://scripts/v2_2/v2_life_loop_config.gd`
+- `res://scripts/v2_2/v2_life_loop_interface.gd`
+- `res://scripts/v2_2/v2_life_loop_interface_final.gd`
+- `res://scripts/v2_2/v2_life_loop_main.gd`
+- `res://scripts/v2_2/v2_life_loop_menu.gd`
+- `res://scripts/v2_2/v2_life_loop_result.gd`
+- `res://scripts/v2_2/v2_life_loop_simulation.gd`
+- `res://scripts/v2_2/v2_life_loop_simulation_polish.gd`
+- `res://scripts/v2_2/v2_life_loop_ui_binding.gd`
+- `res://scripts/v2_2/v2_life_loop_ui_binding_polish.gd`
+- `res://scripts/v2_2/v2_notification_service.gd`
+- `res://scripts/v2_2/v2_organization_activity_service.gd`
+- `res://scripts/v2_2/v2_relationship_progress_service.gd`
+- `res://scripts/v2_2/v2_review_save_service.gd`
+- `res://scripts/v2_2/v2_schedule_service.gd`
+- `res://scripts/v2_3/communication_service.gd`
+- `res://scripts/v2_3/knowledge_service.gd`
+- `res://scripts/v2_3/relationship_service.gd`
+- `res://scripts/v2_3/route_planner_service.gd`
+- `res://scripts/v2_3/social_appointment_service.gd`
+- `res://scripts/v2_3/social_introduction_service.gd`
+- `res://scripts/v2_3/spatial_location_service.gd`
+- `res://scripts/v2_3/spatial_npc_routine_service.gd`
+- `res://scripts/v2_3/travel_execution_service.gd`
+- `res://scripts/v2_3/travel_graph_service.gd`
+- `res://scripts/v2_3/v2_3_config.gd`
+- `res://scripts/v2_3/v2_3_controlled_simulation.gd`
+- `res://scripts/v2_3/v2_3_controlled_ui_binding.gd`
+- `res://scripts/v2_3/v2_3_controlled_ui_binding_v2.gd`
+- `res://scripts/v2_3/v2_3_finance_config.gd`
+- `res://scripts/v2_3/v2_3_finance_service.gd`
+- `res://scripts/v2_3/v2_3_formal_interface.gd`
+- `res://scripts/v2_3/v2_3_formal_schedule_interface.gd`
+- `res://scripts/v2_3/v2_3_formal_simulation.gd`
+- `res://scripts/v2_3/v2_3_formal_ui_binding.gd`
+- `res://scripts/v2_3/v2_3_leave_service.gd`
+- `res://scripts/v2_3/v2_3_life_loop_interface.gd`
+- `res://scripts/v2_3/v2_3_life_loop_simulation.gd`
+- `res://scripts/v2_3/v2_3_life_loop_ui_binding.gd`
+- `res://scripts/v2_3/v2_3_minute_clock.gd`
+- `res://scripts/v2_3/v2_3_minute_controlled_simulation.gd`
+- `res://scripts/v2_3/v2_3_minute_formal_interface.gd`
+- `res://scripts/v2_3/v2_3_minute_formal_interface_v2.gd`
+- `res://scripts/v2_3/v2_3_player_ui_binding.gd`
+- `res://scripts/v2_3/v2_3_product_simulation.gd`
+- `res://scripts/v2_3/v2_3_product_simulation_v2.gd`
+- `res://scripts/v2_3/v2_3_save_migration.gd`
+- `res://scripts/v2_3/v2_3_save_service.gd`
+- `res://scripts/v2_3/v2_3_social_sandbox_service.gd`
+- `res://scripts/v2_3/v2_3_social_sandbox_service_v2.gd`
+- `res://scripts/v2_3/v2_3_social_sandbox_service_v3.gd`
+- `res://scripts/v2_3/v2_3_survival_autonomy_service.gd`
+- `res://scripts/v2_3/v2_3_survival_autonomy_service_v2.gd`
+- `res://scripts/world_map/historical_map_identity_style.gd`
+- `res://scripts/world_map/internal/world_map_canvas_impl.gd`
+- `res://scripts/world_map/internal/world_map_controller_impl.gd`
+- `res://scripts/world_map/internal/world_map_interface_impl.gd`
+- `res://scripts/world_map/internal/world_map_layer_impl.gd`
+- `res://scripts/world_map/internal/world_map_spatial_index_impl.gd`
+- `res://scripts/world_map/world_city_shard_catalog.gd`
+- `res://scripts/world_map/world_map_canvas.gd`
+- `res://scripts/world_map/world_map_canvas_detail.gd`
+- `res://scripts/world_map/world_map_main.gd`
+- `res://tests/alpha/alpha_ai_economy_stability_test.gd`
+- `res://tests/alpha/alpha_character_development_test.gd`
+- `res://tests/alpha/alpha_commodity_market_test.gd`
+- `res://tests/alpha/alpha_composition_smoke.gd`
+- `res://tests/alpha/alpha_cross_system_scenarios_test.gd`
+- `res://tests/alpha/alpha_economy_integration_phase2_test.gd`
+- `res://tests/alpha/alpha_economy_lifecycle_test.gd`
+- `res://tests/alpha/alpha_fixture_retained_services_performance_test.gd`
+- `res://tests/alpha/alpha_labor_enterprise_test.gd`
+- `res://tests/alpha/alpha_organization_politics_test.gd`
+- `res://tests/alpha/alpha_save_and_migration_test.gd`
+- `res://tests/alpha/alpha_state_equivalence_test.gd`
+- `res://tests/alpha/alpha_three_year_stage_profile_test.gd`
+- `res://tests/alpha/alpha_ui_and_presets_test.gd`
+- `res://tests/alpha/alpha_window_smoke_test.gd`
+- `res://tests/alpha/alpha_world_topology_test.gd`
+- `res://tests/codex_audit_regression.gd`
+- `res://tests/p0_r1_player_journey.gd`
+- `res://tests/p0_r1_player_journey_current.gd`
+- `res://tests/test_runner.gd`
+- `res://tests/v2_2/v2_2_atomicity_test.gd`
+- `res://tests/v2_2/v2_2_condition_test.gd`
+- `res://tests/v2_2/v2_2_config_datetime_test.gd`
+- `res://tests/v2_2/v2_2_determinism_test.gd`
+- `res://tests/v2_2/v2_2_employment_test.gd`
+- `res://tests/v2_2/v2_2_household_test.gd`
+- `res://tests/v2_2/v2_2_life_loop_smoke.gd`
+- `res://tests/v2_2/v2_2_notification_test.gd`
+- `res://tests/v2_2/v2_2_performance_guard_test.gd`
+- `res://tests/v2_2/v2_2_polish_test.gd`
+- `res://tests/v2_2/v2_2_review_report.gd`
+- `res://tests/v2_2/v2_2_save_load_test.gd`
+- `res://tests/v2_2/v2_2_schedule_test.gd`
+- `res://tests/v2_2/v2_2_test_case.gd`
+- `res://tests/v2_2/v2_2_time_test.gd`
+- `res://tests/v2_2/v2_2_ui_binding_test.gd`
+- `res://tests/v2_3/v2_3_appointment_test.gd`
+- `res://tests/v2_3/v2_3_communication_test.gd`
+- `res://tests/v2_3/v2_3_controlled_world_test.gd`
+- `res://tests/v2_3/v2_3_determinism_test.gd`
+- `res://tests/v2_3/v2_3_entry_hud_capture.gd`
+- `res://tests/v2_3/v2_3_entry_hud_probe.gd`
+- `res://tests/v2_3/v2_3_formal_finance_test.gd`
+- `res://tests/v2_3/v2_3_formal_leave_location_test.gd`
+- `res://tests/v2_3/v2_3_full_loop_smoke.gd`
+- `res://tests/v2_3/v2_3_knowledge_test.gd`
+- `res://tests/v2_3/v2_3_location_test.gd`
+- `res://tests/v2_3/v2_3_map_integration_test.gd`
+- `res://tests/v2_3/v2_3_npc_test.gd`
+- `res://tests/v2_3/v2_3_relationship_test.gd`
+- `res://tests/v2_3/v2_3_review_artifact_generator.gd`
+- `res://tests/v2_3/v2_3_route_planner_test.gd`
+- `res://tests/v2_3/v2_3_save_load_test.gd`
+- `res://tests/v2_3/v2_3_save_migration_test.gd`
+- `res://tests/v2_3/v2_3_schedule_integration_test.gd`
+- `res://tests/v2_3/v2_3_social_sandbox_completion_test.gd`
+- `res://tests/v2_3/v2_3_social_sandbox_debug.gd`
+- `res://tests/v2_3/v2_3_social_sandbox_test.gd`
+- `res://tests/v2_3/v2_3_social_sandbox_test_base.gd`
+- `res://tests/v2_3/v2_3_survival_autonomy_test.gd`
+- `res://tests/v2_3/v2_3_travel_execution_test.gd`
+- `res://tests/variable_state/generate_current_save_v1_fixture.gd`
+- `res://tests/variable_state/variable_state_behavior_baseline_test.gd`
+- `res://tests/world_data_performance_baseline_test.gd`
+- `res://tools/audit_release_module_size.py`
+- `res://tools/generate_variable_state_docs.py`
+- `res://tools/render_variable_refactor_plan.py`
+- `res://tools/render_variable_state_audit_summary.py`
+- `res://tools/run_alpha_three_year_performance_gate.ps1`
+- `res://tools/run_focused_product_tests.ps1`
+- `res://tools/v2_2/capture_review.gd`
+- `res://tools/v2_2/capture_review.tscn`
+- `res://tools/v2_2/perf_capture.gd`
+- `res://tools/v2_2/perf_capture.tscn`
+- `res://tools/v2_2/run_local_acceptance.ps1`
+- `res://tools/v2_3/generate_social_review_saves.gd`
+- `res://tools/world_data_performance_baseline.gd`
+- `res://scripts/action/action_instance_data.gd.uid`
+- `res://scripts/action/action_rules_config.gd.uid`
+- `res://scripts/action/action_service.gd.uid`
+- `res://scripts/action/action_start_result.gd.uid`
+- `res://scripts/action/player_action_context_service.gd.uid`
+- `res://scripts/ai/ai_state_data.gd.uid`
+- `res://scripts/ai/simple_ai_service.gd.uid`
+- `res://scripts/alpha/alpha_ai_service.gd.uid`
+- `res://scripts/alpha/alpha_asset_service.gd.uid`
+- `res://scripts/alpha/alpha_character_service.gd.uid`
+- `res://scripts/alpha/alpha_commodity_market_service.gd.uid`
+- `res://scripts/alpha/alpha_config.gd.uid`
+- `res://scripts/alpha/alpha_contract_service.gd.uid`
+- `res://scripts/alpha/alpha_economy_integration_service.gd.uid`
+- `res://scripts/alpha/alpha_economy_service.gd.uid`
+- `res://scripts/alpha/alpha_enterprise_service.gd.uid`
+- `res://scripts/alpha/alpha_fixture_gate.gd.uid`
+- `res://scripts/alpha/alpha_grid_fixture.gd.uid`
+- `res://scripts/alpha/alpha_labor_service.gd.uid`
+- `res://scripts/alpha/alpha_ledger_service.gd.uid`
+- `res://scripts/alpha/alpha_main.gd.uid`
+- `res://scripts/alpha/alpha_map_canvas.gd.uid`
+- `res://scripts/alpha/alpha_menu.gd.uid`
+- `res://scripts/alpha/alpha_politics_service.gd.uid`
+- `res://scripts/alpha/alpha_save_migration.gd.uid`
+- `res://scripts/alpha/alpha_save_service.gd.uid`
+- `res://scripts/alpha/alpha_scenario_runner.gd.uid`
+- `res://scripts/alpha/alpha_simulation_service.gd.uid`
+- `res://scripts/alpha/alpha_topology_service.gd.uid`
+- `res://scripts/alpha/alpha_ui_binding.gd.uid`
+- `res://scripts/alpha/alpha_v23_config.gd.uid`
+- `res://scripts/alpha/alpha_world_dynamics_service.gd.uid`
+- `res://scripts/alpha/alpha_world_service.gd.uid`
+- `res://scripts/character/background_character_data.gd.uid`
+- `res://scripts/character/character_generation_config.gd.uid`
+- `res://scripts/character/character_generation_result.gd.uid`
+- `res://scripts/character/character_generator.gd.uid`
+- `res://scripts/character/character_roster_service.gd.uid`
+- `res://scripts/character/character_tendency_service.gd.uid`
+- `res://scripts/character/exited_character_record.gd.uid`
+- `res://scripts/character/game_session_service.gd.uid`
+- `res://scripts/character/succession_candidate_data.gd.uid`
+- `res://scripts/character/succession_result.gd.uid`
+- `res://scripts/character/succession_service.gd.uid`
+- `res://scripts/core/core_data_load_result.gd.uid`
+- `res://scripts/core/core_data_loader.gd.uid`
+- `res://scripts/core/core_data_set.gd.uid`
+- `res://scripts/core/deterministic_random_service.gd.uid`
+- `res://scripts/core/log_service.gd.uid`
+- `res://scripts/core/models/action_definition_data.gd.uid`
+- `res://scripts/core/models/character_data.gd.uid`
+- `res://scripts/core/models/control_unit_data.gd.uid`
+- `res://scripts/core/models/country_data.gd.uid`
+- `res://scripts/core/models/organization_data.gd.uid`
+- `res://scripts/core/models/population_group_data.gd.uid`
+- `res://scripts/core/models/region_data.gd.uid`
+- `res://scripts/core/models/relationship_data.gd.uid`
+- `res://scripts/core/stable_id_service.gd.uid`
+- `res://scripts/devtools/developer_command_service.gd.uid`
+- `res://scripts/devtools/performance_stats_service.gd.uid`
+- `res://scripts/devtools/settlement_log_service.gd.uid`
+- `res://scripts/formal/historical_evidence_standalone_bootstrap.gd.uid`
+- `res://scripts/map/map_control_service.gd.uid`
+- `res://scripts/map/map_rules_config.gd.uid`
+- `res://scripts/map/map_world_controller.gd.uid`
+- `res://scripts/map/regional_influence_service.gd.uid`
+- `res://scripts/map/strategic_map_canvas.gd.uid`
+- `res://scripts/organization/organization_service.gd.uid`
+- `res://scripts/relationship/relationship_service.gd.uid`
+- `res://scripts/save/action_save_validator.gd.uid`
+- `res://scripts/save/autosave_coordinator.gd.uid`
+- `res://scripts/save/game_save_service.gd.uid`
+- `res://scripts/save/social_save_validator.gd.uid`
+- `res://scripts/simulation/continuity_rules_config.gd.uid`
+- `res://scripts/simulation/simulation_clock.gd.uid`
+- `res://scripts/simulation/simulation_clock_config.gd.uid`
+- `res://scripts/simulation/simulation_event_queue.gd.uid`
+- `res://scripts/simulation/simulation_runner.gd.uid`
+- `res://scripts/simulation/society_rules_config.gd.uid`
+- `res://scripts/simulation/society_simulation_service.gd.uid`
+- `res://scripts/simulation/world_activity_service.gd.uid`
+- `res://scripts/system/active_components.gd.uid`
+- `res://scripts/v2_2/v2_condition_service.gd.uid`
+- `res://scripts/v2_2/v2_determinism_audit.gd.uid`
+- `res://scripts/v2_2/v2_employment_service.gd.uid`
+- `res://scripts/v2_2/v2_household_service.gd.uid`
+- `res://scripts/v2_2/v2_ledger_service.gd.uid`
+- `res://scripts/v2_2/v2_life_loop_config.gd.uid`
+- `res://scripts/v2_2/v2_life_loop_interface.gd.uid`
+- `res://scripts/v2_2/v2_life_loop_interface_final.gd.uid`
+- `res://scripts/v2_2/v2_life_loop_main.gd.uid`
+- `res://scripts/v2_2/v2_life_loop_menu.gd.uid`
+- `res://scripts/v2_2/v2_life_loop_result.gd.uid`
+- `res://scripts/v2_2/v2_life_loop_simulation.gd.uid`
+- `res://scripts/v2_2/v2_life_loop_simulation_polish.gd.uid`
+- `res://scripts/v2_2/v2_life_loop_ui_binding.gd.uid`
+- `res://scripts/v2_2/v2_life_loop_ui_binding_polish.gd.uid`
+- `res://scripts/v2_2/v2_notification_service.gd.uid`
+- `res://scripts/v2_2/v2_organization_activity_service.gd.uid`
+- `res://scripts/v2_2/v2_relationship_progress_service.gd.uid`
+- `res://scripts/v2_2/v2_review_save_service.gd.uid`
+- `res://scripts/v2_2/v2_schedule_service.gd.uid`
+- `res://scripts/v2_3/communication_service.gd.uid`
+- `res://scripts/v2_3/knowledge_service.gd.uid`
+- `res://scripts/v2_3/relationship_service.gd.uid`
+- `res://scripts/v2_3/route_planner_service.gd.uid`
+- `res://scripts/v2_3/social_appointment_service.gd.uid`
+- `res://scripts/v2_3/social_introduction_service.gd.uid`
+- `res://scripts/v2_3/spatial_location_service.gd.uid`
+- `res://scripts/v2_3/spatial_npc_routine_service.gd.uid`
+- `res://scripts/v2_3/travel_execution_service.gd.uid`
+- `res://scripts/v2_3/travel_graph_service.gd.uid`
+- `res://scripts/v2_3/v2_3_config.gd.uid`
+- `res://scripts/v2_3/v2_3_controlled_simulation.gd.uid`
+- `res://scripts/v2_3/v2_3_controlled_ui_binding.gd.uid`
+- `res://scripts/v2_3/v2_3_controlled_ui_binding_v2.gd.uid`
+- `res://scripts/v2_3/v2_3_finance_config.gd.uid`
+- `res://scripts/v2_3/v2_3_finance_service.gd.uid`
+- `res://scripts/v2_3/v2_3_formal_interface.gd.uid`
+- `res://scripts/v2_3/v2_3_formal_schedule_interface.gd.uid`
+- `res://scripts/v2_3/v2_3_formal_simulation.gd.uid`
+- `res://scripts/v2_3/v2_3_formal_ui_binding.gd.uid`
+- `res://scripts/v2_3/v2_3_leave_service.gd.uid`
+- `res://scripts/v2_3/v2_3_life_loop_interface.gd.uid`
+- `res://scripts/v2_3/v2_3_life_loop_simulation.gd.uid`
+- `res://scripts/v2_3/v2_3_life_loop_ui_binding.gd.uid`
+- `res://scripts/v2_3/v2_3_minute_clock.gd.uid`
+- `res://scripts/v2_3/v2_3_minute_controlled_simulation.gd.uid`
+- `res://scripts/v2_3/v2_3_minute_formal_interface.gd.uid`
+- `res://scripts/v2_3/v2_3_minute_formal_interface_v2.gd.uid`
+- `res://scripts/v2_3/v2_3_player_ui_binding.gd.uid`
+- `res://scripts/v2_3/v2_3_product_simulation.gd.uid`
+- `res://scripts/v2_3/v2_3_product_simulation_v2.gd.uid`
+- `res://scripts/v2_3/v2_3_save_migration.gd.uid`
+- `res://scripts/v2_3/v2_3_save_service.gd.uid`
+- `res://scripts/v2_3/v2_3_social_sandbox_service.gd.uid`
+- `res://scripts/v2_3/v2_3_social_sandbox_service_v2.gd.uid`
+- `res://scripts/v2_3/v2_3_social_sandbox_service_v3.gd.uid`
+- `res://scripts/v2_3/v2_3_survival_autonomy_service.gd.uid`
+- `res://scripts/v2_3/v2_3_survival_autonomy_service_v2.gd.uid`
+- `res://scripts/world_map/historical_map_identity_style.gd.uid`
+- `res://scripts/world_map/internal/world_map_canvas_impl.gd.uid`
+- `res://scripts/world_map/internal/world_map_controller_impl.gd.uid`
+- `res://scripts/world_map/internal/world_map_interface_impl.gd.uid`
+- `res://scripts/world_map/internal/world_map_layer_impl.gd.uid`
+- `res://scripts/world_map/internal/world_map_spatial_index_impl.gd.uid`
+- `res://scripts/world_map/world_city_shard_catalog.gd.uid`
+- `res://scripts/world_map/world_map_canvas.gd.uid`
+- `res://scripts/world_map/world_map_canvas_detail.gd.uid`
+- `res://scripts/world_map/world_map_main.gd.uid`
+- `res://tests/alpha/alpha_ai_economy_stability_test.gd.uid`
+- `res://tests/alpha/alpha_character_development_test.gd.uid`
+- `res://tests/alpha/alpha_commodity_market_test.gd.uid`
+- `res://tests/alpha/alpha_composition_smoke.gd.uid`
+- `res://tests/alpha/alpha_cross_system_scenarios_test.gd.uid`
+- `res://tests/alpha/alpha_economy_integration_phase2_test.gd.uid`
+- `res://tests/alpha/alpha_economy_lifecycle_test.gd.uid`
+- `res://tests/alpha/alpha_fixture_retained_services_performance_test.gd.uid`
+- `res://tests/alpha/alpha_labor_enterprise_test.gd.uid`
+- `res://tests/alpha/alpha_organization_politics_test.gd.uid`
+- `res://tests/alpha/alpha_save_and_migration_test.gd.uid`
+- `res://tests/alpha/alpha_state_equivalence_test.gd.uid`
+- `res://tests/alpha/alpha_three_year_stage_profile_test.gd.uid`
+- `res://tests/alpha/alpha_ui_and_presets_test.gd.uid`
+- `res://tests/alpha/alpha_window_smoke_test.gd.uid`
+- `res://tests/alpha/alpha_world_topology_test.gd.uid`
+- `res://tests/codex_audit_regression.gd.uid`
+- `res://tests/p0_r1_player_journey.gd.uid`
+- `res://tests/p0_r1_player_journey_current.gd.uid`
+- `res://tests/test_runner.gd.uid`
+- `res://tests/v2_2/v2_2_atomicity_test.gd.uid`
+- `res://tests/v2_2/v2_2_condition_test.gd.uid`
+- `res://tests/v2_2/v2_2_config_datetime_test.gd.uid`
+- `res://tests/v2_2/v2_2_determinism_test.gd.uid`
+- `res://tests/v2_2/v2_2_employment_test.gd.uid`
+- `res://tests/v2_2/v2_2_household_test.gd.uid`
+- `res://tests/v2_2/v2_2_life_loop_smoke.gd.uid`
+- `res://tests/v2_2/v2_2_notification_test.gd.uid`
+- `res://tests/v2_2/v2_2_performance_guard_test.gd.uid`
+- `res://tests/v2_2/v2_2_polish_test.gd.uid`
+- `res://tests/v2_2/v2_2_review_report.gd.uid`
+- `res://tests/v2_2/v2_2_save_load_test.gd.uid`
+- `res://tests/v2_2/v2_2_schedule_test.gd.uid`
+- `res://tests/v2_2/v2_2_test_case.gd.uid`
+- `res://tests/v2_2/v2_2_time_test.gd.uid`
+- `res://tests/v2_2/v2_2_ui_binding_test.gd.uid`
+- `res://tests/v2_3/v2_3_appointment_test.gd.uid`
+- `res://tests/v2_3/v2_3_communication_test.gd.uid`
+- `res://tests/v2_3/v2_3_controlled_world_test.gd.uid`
+- `res://tests/v2_3/v2_3_determinism_test.gd.uid`
+- `res://tests/v2_3/v2_3_entry_hud_capture.gd.uid`
+- `res://tests/v2_3/v2_3_entry_hud_probe.gd.uid`
+- `res://tests/v2_3/v2_3_formal_finance_test.gd.uid`
+- `res://tests/v2_3/v2_3_formal_leave_location_test.gd.uid`
+- `res://tests/v2_3/v2_3_full_loop_smoke.gd.uid`
+- `res://tests/v2_3/v2_3_knowledge_test.gd.uid`
+- `res://tests/v2_3/v2_3_location_test.gd.uid`
+- `res://tests/v2_3/v2_3_map_integration_test.gd.uid`
+- `res://tests/v2_3/v2_3_npc_test.gd.uid`
+- `res://tests/v2_3/v2_3_relationship_test.gd.uid`
+- `res://tests/v2_3/v2_3_review_artifact_generator.gd.uid`
+- `res://tests/v2_3/v2_3_route_planner_test.gd.uid`
+- `res://tests/v2_3/v2_3_save_load_test.gd.uid`
+- `res://tests/v2_3/v2_3_save_migration_test.gd.uid`
+- `res://tests/v2_3/v2_3_schedule_integration_test.gd.uid`
+- `res://tests/v2_3/v2_3_social_sandbox_completion_test.gd.uid`
+- `res://tests/v2_3/v2_3_social_sandbox_debug.gd.uid`
+- `res://tests/v2_3/v2_3_social_sandbox_test.gd.uid`
+- `res://tests/v2_3/v2_3_social_sandbox_test_base.gd.uid`
+- `res://tests/v2_3/v2_3_survival_autonomy_test.gd.uid`
+- `res://tests/v2_3/v2_3_travel_execution_test.gd.uid`
+- `res://tests/variable_state/generate_current_save_v1_fixture.gd.uid`
+- `res://tests/variable_state/variable_state_behavior_baseline_test.gd.uid`
+- `res://tests/world_data_performance_baseline_test.gd.uid`
+- `res://tools/v2_2/capture_review.gd.uid`
+- `res://tools/v2_2/perf_capture.gd.uid`
+- `res://tools/v2_3/generate_social_review_saves.gd.uid`
+- `res://tools/world_data_performance_baseline.gd.uid`
+- `res://scripts/v2_3/v2_3_formal_main.gd.uid`
+- `res://scripts/v2_3/v2_3_life_loop_main.gd.uid`
+- `res://scripts/v2_3/v2_3_life_loop_menu.gd.uid`
+- `res://tests/alpha/alpha_three_year_performance_test.gd.uid`
+- `res://tests/v2_3/v2_3_performance_guard_test.gd.uid`
+
+## REMOVED REFERENCES
+
+- 旧生产闭包中的继承、类型、load/preload 和场景引用随所属文件删除。
+- 删除仅服务于旧产品的测试、捕获/性能/存档夹具入口及专用 workflow；没有迁移旧玩法。
+- `run_validation.ps1` 与经济 workflow 删除旧服务/Alpha 夹具测试调用，保留当前 Formal 测试和历史经济静态输入检查。
+- Variable-state workflow 删除旧 P0 存档夹具任务与已退出的静态报告生成器调用，保留仍有效的扫描器与成员清单生成。
+- 数据字典及运输审计删除旧 canvas 的读取/断言项；保留当前 Formal 仍使用的 `world_map_data_impl.gd`。
+- 审计工具删除旧生产文件列表、旧字段覆盖和旧测试入口检查；旧证据改指本物理退出记录，不能作为当前 Formal 功能证据。
+- 删除两个 Python 测试中依赖旧产品或已删除生成器的检查，保留剩余测试；没有新增测试。
+
+## FILES MODIFIED TO REMOVE OLD REFERENCES
+
+- `res://.github/workflows/alpha-commodity-economy.yml`
+- `res://.github/workflows/formal-time-behavior-baseline.yml`
+- `res://.github/workflows/research-1900-historical-data.yml`
+- `res://.github/workflows/variable-state-audit.yml`
+- `res://.github/workflows/variable-state-behavior-baseline.yml`
+- `res://tests/tools/test_audit_formal_product_systems.py`
+- `res://tests/tools/test_variable_state_discovery.py`
+- `res://tools/audit_formal_product_systems.py`
+- `res://tools/audit_formal_variable_state.py`
+- `res://tools/run_validation.ps1`
+- `res://tools/world_data_dictionary/generate.py`
+- `res://tools/world_map/world_transport_topology_audit.py`
+
+其中日历调用列表与本列表的交集同时完成了日历名称/路径替换。除此之外，`formal_world_simulation.gd`、`historical_political_evidence_catalog.gd` 及两个时间测试只替换日历引用。
+
+## OLD EXECUTABLE REFERENCES
+
+- CURRENT FORMAL REFERENCES TO DELETED LEGACY PRODUCT = 0
+- 剩余源码、场景、测试、工具、workflow 对本次删除文件的直接路径引用 = 0。
+- `V2DateTime` / `v2_datetime.gd` 在源码、场景、测试、工具、workflow、project/export 配置中 = 0。
+- `GameCalendar` 实现 = 1。
+- 意外发现的当前 Formal 对删除候选的引用：无。
+- 已知共享依赖 `AlphaHistoricalWorldEconomyData`、`PrototypeV2Data/world_map_data_impl.gd` 及后续单独重构对象均保留。
+- `tests/v2_3/v2_3_ui_binding_test.gd` 实际测试当前 Formal，及其 `v2_3_test_case.gd` 通用测试辅助类均保留；同理保留 Alpha 目录中当前 Formal 经济测试及其辅助类。
+- 历史文档中的旧路径与名称保留。
+
+## REMAINING scripts/v2_2 FILES
+
+empty。
+
+`scripts/v2_3` 文件亦为空；空目录没有备用实现。
+
+## RECORDED ASSERTIONS
+
+旧测试中的下列工程约束仅记录，不搬入当前 Formal，不为其保留旧玩法实现：
+
+- 已经过的 NPC 行动区间用区间开始时保存的效率与上下文结算。
+- 学习选择技能、非学习行动对应实践成长、跨种子保证成功上界。
+- 继承/退场理由须由权威状态重验。
+- 活跃人数上限、存档恢复、索引一致性及行动唯一性检查。
+
+## VALIDATION
+
+- `git diff --check`：通过。
+- 引擎版本：`4.6.3.stable.official.7d41c59c4`。
+- Godot headless editor parse/import：退出码 0；日志无解析、类型、脚本/资源加载错误。
+- `formal_world_menu.tscn`：单独 headless editor 加载，退出码 0。
+- `formal_world_main.tscn`：单独 headless editor 加载，退出码 0。
+- 日志：`builds/formal-refactor-b1-import.log`、`builds/formal-refactor-b1-menu-load.log`、`builds/formal-refactor-b1-main-load.log`。
+- 按本轮指令未运行大型测试、benchmark、导出或人工玩法旅程；没有新增测试框架或 hash gate。
+
+本轮停止。未开始 TerritoryState、FormalWorldSimulation 拆分或 Organization 重构；未提交。
+

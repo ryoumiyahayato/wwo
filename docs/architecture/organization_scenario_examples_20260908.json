@@ -1,0 +1,3215 @@
+{
+  "schema_id": "wwo_organization_scenario_examples_v1",
+  "status": "design_examples",
+  "repository_baseline": "85c073649e1ed17594f2a41d4f2081feceeabe8b",
+  "notes": [
+    "五个独立的虚构制度样例；不合并为同一个存档。",
+    "只有core_v1和core_capability_checks对应当前已实现的OrganizationCore。粗权限为true仍须经过拟议治理规则。",
+    "governance_design及其cases是待实现的输入和预期结果，当前引擎不会解释这些字段。",
+    "fixture:引用是本样例的外部领域输入占位，不宣称已注册为正式stable ID，也不宣称相应业务接口已存在。",
+    "金额、席位、范围和门槛均为验收参数。执行AI须保留正反例语义，并使用选定运行链真实领域入口完成最后一步。"
+  ],
+  "examples": [
+    {
+      "id": "company",
+      "title": "公司：董事会批准、经理代表、采购限定范围",
+      "known_person_ids": [
+        "person:buyer",
+        "person:director_1",
+        "person:director_2",
+        "person:director_3",
+        "person:director_4",
+        "person:director_5",
+        "person:manager",
+        "person:site_manager"
+      ],
+      "known_place_ids": [
+        "place:capital"
+      ],
+      "core_v1": {
+        "schema_id": "vnext_organization_core_v1",
+        "organizations": [
+          {
+            "organization_id": "organization:river_company",
+            "organization_kind": "company",
+            "primary_place_id": "place:capital",
+            "parent_organization_id": "",
+            "active": true,
+            "member_ids": [],
+            "capability_ids": [
+              "contract.sign",
+              "investment.propose"
+            ],
+            "positions": [
+              {
+                "position_id": "manager",
+                "title": "总经理",
+                "slot_count": 1,
+                "capability_ids": [
+                  "contract.sign",
+                  "investment.propose"
+                ]
+              }
+            ],
+            "appointments": [
+              {
+                "appointment_id": "manager_current",
+                "person_id": "person:manager",
+                "position_id": "manager",
+                "requires_membership": false
+              }
+            ]
+          },
+          {
+            "organization_id": "organization:river_board",
+            "organization_kind": "internal_unit",
+            "primary_place_id": "place:capital",
+            "parent_organization_id": "organization:river_company",
+            "active": true,
+            "member_ids": [
+              "person:director_1",
+              "person:director_2",
+              "person:director_3",
+              "person:director_4",
+              "person:director_5"
+            ],
+            "capability_ids": [
+              "investment.vote",
+              "manager.appoint"
+            ],
+            "positions": [
+              {
+                "position_id": "director",
+                "title": "董事",
+                "slot_count": 5,
+                "capability_ids": [
+                  "investment.vote",
+                  "manager.appoint"
+                ]
+              }
+            ],
+            "appointments": [
+              {
+                "appointment_id": "director_1",
+                "person_id": "person:director_1",
+                "position_id": "director",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "director_2",
+                "person_id": "person:director_2",
+                "position_id": "director",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "director_3",
+                "person_id": "person:director_3",
+                "position_id": "director",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "director_4",
+                "person_id": "person:director_4",
+                "position_id": "director",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "director_5",
+                "person_id": "person:director_5",
+                "position_id": "director",
+                "requires_membership": true
+              }
+            ]
+          },
+          {
+            "organization_id": "organization:river_purchase",
+            "organization_kind": "internal_unit",
+            "primary_place_id": "place:capital",
+            "parent_organization_id": "organization:river_company",
+            "active": true,
+            "member_ids": [
+              "person:buyer"
+            ],
+            "capability_ids": [
+              "purchase.sign"
+            ],
+            "positions": [
+              {
+                "position_id": "buyer",
+                "title": "采购负责人",
+                "slot_count": 1,
+                "capability_ids": [
+                  "purchase.sign"
+                ]
+              }
+            ],
+            "appointments": [
+              {
+                "appointment_id": "buyer_current",
+                "person_id": "person:buyer",
+                "position_id": "buyer",
+                "requires_membership": true
+              }
+            ]
+          },
+          {
+            "organization_id": "organization:river_site_a",
+            "organization_kind": "internal_unit",
+            "primary_place_id": "place:capital",
+            "parent_organization_id": "organization:river_company",
+            "active": true,
+            "member_ids": [
+              "person:site_manager"
+            ],
+            "capability_ids": [
+              "investment.propose",
+              "production.plan"
+            ],
+            "positions": [
+              {
+                "position_id": "site_manager",
+                "title": "厂长",
+                "slot_count": 1,
+                "capability_ids": [
+                  "investment.propose",
+                  "production.plan"
+                ]
+              }
+            ],
+            "appointments": [
+              {
+                "appointment_id": "site_manager_current",
+                "person_id": "person:site_manager",
+                "position_id": "site_manager",
+                "requires_membership": true
+              }
+            ]
+          }
+        ]
+      },
+      "core_capability_checks": [
+        {
+          "person_id": "person:manager",
+          "organization_id": "organization:river_company",
+          "capability_id": "contract.sign",
+          "expected": true
+        },
+        {
+          "person_id": "person:manager",
+          "organization_id": "organization:river_purchase",
+          "capability_id": "purchase.sign",
+          "expected": false
+        },
+        {
+          "person_id": "person:director_1",
+          "organization_id": "organization:river_company",
+          "capability_id": "contract.sign",
+          "expected": false
+        }
+      ],
+      "governance_design": {
+        "references": [
+          {
+            "ref": "fixture:site_a",
+            "owner": "Production",
+            "role": "facility"
+          },
+          {
+            "ref": "fixture:company_account",
+            "owner": "Finance",
+            "role": "cash_account"
+          },
+          {
+            "ref": "fixture:project_p",
+            "owner": "Contract",
+            "role": "commitment_scope"
+          }
+        ],
+        "grants": [
+          {
+            "holder": {
+              "organization_id": "organization:river_company",
+              "position_id": "manager"
+            },
+            "represented_organization_id": "organization:river_company",
+            "operation": "contract.sign",
+            "scope": {
+              "site_ref": "fixture:site_a",
+              "category": "routine"
+            },
+            "limit": {
+              "amount": 100,
+              "unit": "fixture_currency",
+              "aggregation": "same_business_commitment"
+            },
+            "basis": "fixture:company_charter"
+          },
+          {
+            "holder": {
+              "organization_id": "organization:river_company",
+              "position_id": "manager"
+            },
+            "represented_organization_id": "organization:river_company",
+            "operation": "contract.sign",
+            "scope": {
+              "project_ref": "fixture:project_p"
+            },
+            "limit": {
+              "amount": 300,
+              "unit": "fixture_currency",
+              "aggregation": "whole_project"
+            },
+            "basis": "fixture:approved_project_p",
+            "validity": "until_project_decision_expiry"
+          },
+          {
+            "holder": {
+              "organization_id": "organization:river_purchase",
+              "position_id": "buyer"
+            },
+            "represented_organization_id": "organization:river_company",
+            "operation": "purchase.sign",
+            "scope": {
+              "site_ref": "fixture:site_a",
+              "category": "repair_material"
+            },
+            "limit": {
+              "amount": 40,
+              "unit": "fixture_currency",
+              "aggregation": "project_and_period"
+            },
+            "basis": "fixture:manager_delegation",
+            "validity": "ends_when_basis_appointment_ends"
+          }
+        ],
+        "procedure": {
+          "template": "collective_ballot",
+          "eligibility_source": {
+            "organization_id": "organization:river_board",
+            "position_ids": [
+              "director"
+            ]
+          },
+          "freeze_at": "voting_open",
+          "quorum": {
+            "denominator": "fixed_seats",
+            "total": 5,
+            "minimum_present": 3
+          },
+          "majority": {
+            "denominator": "present",
+            "operator": "strictly_more_than_half"
+          },
+          "abstention_counts_as_attendance": true,
+          "tie": "reject",
+          "after_eligibility_loss": "keep_valid_prior_vote_reject_new_vote",
+          "close": "explicit_fixture_deadline",
+          "result": "decision_only"
+        },
+        "cases": [
+          {
+            "id": "company_approved",
+            "input": {
+              "present": 3,
+              "yes": 2,
+              "no": 1,
+              "requested": 300,
+              "project_committed": 0,
+              "domain_resources": "available"
+            },
+            "expected": {
+              "decision": "approved",
+              "executor": {
+                "organization_id": "organization:river_company",
+                "position_id": "manager"
+              },
+              "domain_request": "contract.sign",
+              "execution": "requires_domain_commit"
+            }
+          },
+          {
+            "id": "company_tied",
+            "input": {
+              "present": 4,
+              "yes": 2,
+              "no": 2
+            },
+            "expected": {
+              "decision": "rejected",
+              "domain_request": null
+            }
+          },
+          {
+            "id": "company_split",
+            "input": {
+              "project_limit": 300,
+              "project_committed": 200,
+              "new_commitment": 150
+            },
+            "expected": {
+              "authority": "limit_exceeded",
+              "domain_request": null
+            }
+          },
+          {
+            "id": "company_empty_cash",
+            "input": {
+              "decision": "approved",
+              "cash": 0,
+              "required": 300,
+              "credit": 0
+            },
+            "expected": {
+              "decision": "approved",
+              "execution": "insufficient_funds",
+              "cash_created": 0
+            }
+          },
+          {
+            "id": "company_director_withdraw",
+            "input": {
+              "actor": "person:director_1",
+              "operation": "payment.execute"
+            },
+            "expected": {
+              "authority": "denied"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "government",
+      "title": "政府：议会、行政、地方的权限分别确定",
+      "known_person_ids": [
+        "person:head",
+        "person:judge",
+        "person:legislator_1",
+        "person:legislator_2",
+        "person:legislator_3",
+        "person:local_officer",
+        "person:minister"
+      ],
+      "known_place_ids": [
+        "place:capital"
+      ],
+      "core_v1": {
+        "schema_id": "vnext_organization_core_v1",
+        "organizations": [
+          {
+            "organization_id": "organization:assembly",
+            "organization_kind": "institution",
+            "primary_place_id": "place:capital",
+            "parent_organization_id": "",
+            "active": true,
+            "member_ids": [
+              "person:legislator_1",
+              "person:legislator_2",
+              "person:legislator_3"
+            ],
+            "capability_ids": [
+              "budget.vote"
+            ],
+            "positions": [
+              {
+                "position_id": "member",
+                "title": "议员",
+                "slot_count": 3,
+                "capability_ids": [
+                  "budget.vote"
+                ]
+              }
+            ],
+            "appointments": [
+              {
+                "appointment_id": "seat_1",
+                "person_id": "person:legislator_1",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_2",
+                "person_id": "person:legislator_2",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_3",
+                "person_id": "person:legislator_3",
+                "position_id": "member",
+                "requires_membership": true
+              }
+            ]
+          },
+          {
+            "organization_id": "organization:administration",
+            "organization_kind": "institution",
+            "primary_place_id": "place:capital",
+            "parent_organization_id": "",
+            "active": true,
+            "member_ids": [],
+            "capability_ids": [
+              "minister.nominate"
+            ],
+            "positions": [
+              {
+                "position_id": "head",
+                "title": "政府首脑",
+                "slot_count": 1,
+                "capability_ids": [
+                  "minister.nominate"
+                ]
+              }
+            ],
+            "appointments": [
+              {
+                "appointment_id": "head_current",
+                "person_id": "person:head",
+                "position_id": "head",
+                "requires_membership": false
+              }
+            ]
+          },
+          {
+            "organization_id": "organization:treasury",
+            "organization_kind": "internal_unit",
+            "primary_place_id": "place:capital",
+            "parent_organization_id": "organization:administration",
+            "active": true,
+            "member_ids": [],
+            "capability_ids": [
+              "budget.propose",
+              "payment.authorize"
+            ],
+            "positions": [
+              {
+                "position_id": "minister",
+                "title": "财政部长",
+                "slot_count": 1,
+                "capability_ids": [
+                  "payment.authorize",
+                  "budget.propose"
+                ]
+              }
+            ],
+            "appointments": [
+              {
+                "appointment_id": "minister_current",
+                "person_id": "person:minister",
+                "position_id": "minister",
+                "requires_membership": false
+              }
+            ]
+          },
+          {
+            "organization_id": "organization:local_a",
+            "organization_kind": "institution",
+            "primary_place_id": "place:capital",
+            "parent_organization_id": "",
+            "active": true,
+            "member_ids": [],
+            "capability_ids": [
+              "permit.issue"
+            ],
+            "positions": [
+              {
+                "position_id": "administrator",
+                "title": "地区A行政官",
+                "slot_count": 1,
+                "capability_ids": [
+                  "permit.issue"
+                ]
+              }
+            ],
+            "appointments": [
+              {
+                "appointment_id": "administrator_current",
+                "person_id": "person:local_officer",
+                "position_id": "administrator",
+                "requires_membership": false
+              }
+            ]
+          },
+          {
+            "organization_id": "organization:judiciary",
+            "organization_kind": "institution",
+            "primary_place_id": "place:capital",
+            "parent_organization_id": "",
+            "active": true,
+            "member_ids": [],
+            "capability_ids": [
+              "administrative.review"
+            ],
+            "positions": [
+              {
+                "position_id": "judge",
+                "title": "审查法官",
+                "slot_count": 1,
+                "capability_ids": [
+                  "administrative.review"
+                ]
+              }
+            ],
+            "appointments": [
+              {
+                "appointment_id": "judge_current",
+                "person_id": "person:judge",
+                "position_id": "judge",
+                "requires_membership": false
+              }
+            ]
+          }
+        ]
+      },
+      "core_capability_checks": [
+        {
+          "person_id": "person:minister",
+          "organization_id": "organization:treasury",
+          "capability_id": "payment.authorize",
+          "expected": true
+        },
+        {
+          "person_id": "person:head",
+          "organization_id": "organization:treasury",
+          "capability_id": "payment.authorize",
+          "expected": false
+        },
+        {
+          "person_id": "person:minister",
+          "organization_id": "organization:assembly",
+          "capability_id": "budget.vote",
+          "expected": false
+        }
+      ],
+      "governance_design": {
+        "fixture_note": "此结构样例为三席测试议会；政党样例另用100席。均不对应实际国家宪制。",
+        "relationships": [
+          {
+            "type": "budget_approval",
+            "source": "organization:assembly",
+            "target": "organization:administration",
+            "scope": [
+              "fixture:budget_a"
+            ],
+            "basis": "fixture:constitution"
+          },
+          {
+            "type": "judicial_review",
+            "source": "organization:judiciary",
+            "target": "organization:local_a",
+            "scope": [
+              "permit.issue"
+            ],
+            "basis": "fixture:constitution"
+          }
+        ],
+        "grants": [
+          {
+            "holder": {
+              "organization_id": "organization:treasury",
+              "position_id": "minister"
+            },
+            "represented_organization_id": "organization:administration",
+            "operation": "payment.authorize",
+            "scope": {
+              "budget_ref": "fixture:budget_a",
+              "account_ref": "fixture:treasury_account"
+            },
+            "basis": [
+              "fixture:minister_appointment",
+              "fixture:approved_budget"
+            ],
+            "limit_source": "Finance.remaining_budget_and_commitments"
+          },
+          {
+            "holder": {
+              "organization_id": "organization:local_a",
+              "position_id": "administrator"
+            },
+            "represented_organization_id": "organization:local_a",
+            "operation": "permit.issue",
+            "scope": {
+              "territory_ref": "fixture:region_a",
+              "subject": "fixture:local_permits"
+            },
+            "basis": "fixture:local_mandate"
+          }
+        ],
+        "appointment_rule": {
+          "target": {
+            "organization_id": "organization:treasury",
+            "position_id": "minister"
+          },
+          "template": "nomination_then_confirmation",
+          "nominator": {
+            "organization_id": "organization:administration",
+            "position_id": "head"
+          },
+          "confirmer": "organization:assembly",
+          "install": "only_after_both_steps"
+        },
+        "cases": [
+          {
+            "id": "government_correct_scope",
+            "input": {
+              "actor": "person:local_officer",
+              "territory": "fixture:region_a",
+              "operation": "permit.issue"
+            },
+            "expected": {
+              "authority": "allowed",
+              "execution": "domain_validation_required"
+            }
+          },
+          {
+            "id": "government_wrong_scope",
+            "input": {
+              "actor": "person:local_officer",
+              "territory": "fixture:region_b",
+              "operation": "permit.issue"
+            },
+            "expected": {
+              "authority": "scope_mismatch"
+            }
+          },
+          {
+            "id": "government_budget",
+            "input": {
+              "budget_approved": 500,
+              "cash_before": 50
+            },
+            "expected": {
+              "cash_after_approval": 50
+            }
+          },
+          {
+            "id": "government_turnover",
+            "input": {
+              "replace": "person:minister"
+            },
+            "expected": {
+              "organization_id": "organization:administration",
+              "preserve": [
+                "accounts",
+                "debts",
+                "valid_signed_contracts"
+              ],
+              "previous_minister_new_signature": "denied"
+            }
+          },
+          {
+            "id": "government_nomination_only",
+            "input": {
+              "nomination": true,
+              "confirmation": false
+            },
+            "expected": {
+              "appointment_created": false
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "party",
+      "title": "政党：联盟承诺与公共任命分开",
+      "known_person_ids": [
+        "person:mp_001",
+        "person:mp_002",
+        "person:mp_003",
+        "person:mp_004",
+        "person:mp_005",
+        "person:mp_006",
+        "person:mp_007",
+        "person:mp_008",
+        "person:mp_009",
+        "person:mp_010",
+        "person:mp_011",
+        "person:mp_012",
+        "person:mp_013",
+        "person:mp_014",
+        "person:mp_015",
+        "person:mp_016",
+        "person:mp_017",
+        "person:mp_018",
+        "person:mp_019",
+        "person:mp_020",
+        "person:mp_021",
+        "person:mp_022",
+        "person:mp_023",
+        "person:mp_024",
+        "person:mp_025",
+        "person:mp_026",
+        "person:mp_027",
+        "person:mp_028",
+        "person:mp_029",
+        "person:mp_030",
+        "person:mp_031",
+        "person:mp_032",
+        "person:mp_033",
+        "person:mp_034",
+        "person:mp_035",
+        "person:mp_036",
+        "person:mp_037",
+        "person:mp_038",
+        "person:mp_039",
+        "person:mp_040",
+        "person:mp_041",
+        "person:mp_042",
+        "person:mp_043",
+        "person:mp_044",
+        "person:mp_045",
+        "person:mp_046",
+        "person:mp_047",
+        "person:mp_048",
+        "person:mp_049",
+        "person:mp_050",
+        "person:mp_051",
+        "person:mp_052",
+        "person:mp_053",
+        "person:mp_054",
+        "person:mp_055",
+        "person:mp_056",
+        "person:mp_057",
+        "person:mp_058",
+        "person:mp_059",
+        "person:mp_060",
+        "person:mp_061",
+        "person:mp_062",
+        "person:mp_063",
+        "person:mp_064",
+        "person:mp_065",
+        "person:mp_066",
+        "person:mp_067",
+        "person:mp_068",
+        "person:mp_069",
+        "person:mp_070",
+        "person:mp_071",
+        "person:mp_072",
+        "person:mp_073",
+        "person:mp_074",
+        "person:mp_075",
+        "person:mp_076",
+        "person:mp_077",
+        "person:mp_078",
+        "person:mp_079",
+        "person:mp_080",
+        "person:mp_081",
+        "person:mp_082",
+        "person:mp_083",
+        "person:mp_084",
+        "person:mp_085",
+        "person:mp_086",
+        "person:mp_087",
+        "person:mp_088",
+        "person:mp_089",
+        "person:mp_090",
+        "person:mp_091",
+        "person:mp_092",
+        "person:mp_093",
+        "person:mp_094",
+        "person:mp_095",
+        "person:mp_096",
+        "person:mp_097",
+        "person:mp_098",
+        "person:mp_099",
+        "person:mp_100",
+        "person:party_a_leader",
+        "person:party_b_leader"
+      ],
+      "known_place_ids": [
+        "place:capital"
+      ],
+      "core_v1": {
+        "schema_id": "vnext_organization_core_v1",
+        "organizations": [
+          {
+            "organization_id": "organization:party_a",
+            "organization_kind": "party",
+            "primary_place_id": "place:capital",
+            "parent_organization_id": "",
+            "active": true,
+            "member_ids": [
+              "person:mp_001",
+              "person:mp_002",
+              "person:mp_003",
+              "person:mp_004",
+              "person:mp_005",
+              "person:mp_006",
+              "person:mp_007",
+              "person:mp_008",
+              "person:mp_009",
+              "person:mp_010",
+              "person:mp_011",
+              "person:mp_012",
+              "person:mp_013",
+              "person:mp_014",
+              "person:mp_015",
+              "person:mp_016",
+              "person:mp_017",
+              "person:mp_018",
+              "person:mp_019",
+              "person:mp_020",
+              "person:mp_021",
+              "person:mp_022",
+              "person:mp_023",
+              "person:mp_024",
+              "person:mp_025",
+              "person:mp_026",
+              "person:mp_027",
+              "person:mp_028",
+              "person:mp_029",
+              "person:mp_030",
+              "person:mp_031",
+              "person:mp_032",
+              "person:mp_033",
+              "person:mp_034",
+              "person:mp_035",
+              "person:mp_036",
+              "person:mp_037",
+              "person:mp_038",
+              "person:mp_039",
+              "person:mp_040",
+              "person:party_a_leader"
+            ],
+            "capability_ids": [
+              "candidate.nominate",
+              "coalition.negotiate"
+            ],
+            "positions": [
+              {
+                "position_id": "leader",
+                "title": "党主席",
+                "slot_count": 1,
+                "capability_ids": [
+                  "coalition.negotiate",
+                  "candidate.nominate"
+                ]
+              }
+            ],
+            "appointments": [
+              {
+                "appointment_id": "leader_current",
+                "person_id": "person:party_a_leader",
+                "position_id": "leader",
+                "requires_membership": true
+              }
+            ]
+          },
+          {
+            "organization_id": "organization:party_b",
+            "organization_kind": "party",
+            "primary_place_id": "place:capital",
+            "parent_organization_id": "",
+            "active": true,
+            "member_ids": [
+              "person:mp_041",
+              "person:mp_042",
+              "person:mp_043",
+              "person:mp_044",
+              "person:mp_045",
+              "person:mp_046",
+              "person:mp_047",
+              "person:mp_048",
+              "person:mp_049",
+              "person:mp_050",
+              "person:mp_051",
+              "person:mp_052",
+              "person:mp_053",
+              "person:mp_054",
+              "person:mp_055",
+              "person:mp_056",
+              "person:mp_057",
+              "person:mp_058",
+              "person:mp_059",
+              "person:mp_060",
+              "person:party_b_leader"
+            ],
+            "capability_ids": [
+              "candidate.nominate",
+              "coalition.negotiate"
+            ],
+            "positions": [
+              {
+                "position_id": "leader",
+                "title": "党主席",
+                "slot_count": 1,
+                "capability_ids": [
+                  "coalition.negotiate",
+                  "candidate.nominate"
+                ]
+              }
+            ],
+            "appointments": [
+              {
+                "appointment_id": "leader_current",
+                "person_id": "person:party_b_leader",
+                "position_id": "leader",
+                "requires_membership": true
+              }
+            ]
+          },
+          {
+            "organization_id": "organization:party_c",
+            "organization_kind": "party",
+            "primary_place_id": "place:capital",
+            "parent_organization_id": "",
+            "active": true,
+            "member_ids": [
+              "person:mp_061",
+              "person:mp_062",
+              "person:mp_063",
+              "person:mp_064",
+              "person:mp_065",
+              "person:mp_066",
+              "person:mp_067",
+              "person:mp_068",
+              "person:mp_069",
+              "person:mp_070",
+              "person:mp_071",
+              "person:mp_072",
+              "person:mp_073",
+              "person:mp_074",
+              "person:mp_075",
+              "person:mp_076",
+              "person:mp_077",
+              "person:mp_078",
+              "person:mp_079",
+              "person:mp_080",
+              "person:mp_081",
+              "person:mp_082",
+              "person:mp_083",
+              "person:mp_084",
+              "person:mp_085",
+              "person:mp_086",
+              "person:mp_087",
+              "person:mp_088",
+              "person:mp_089",
+              "person:mp_090",
+              "person:mp_091",
+              "person:mp_092",
+              "person:mp_093",
+              "person:mp_094",
+              "person:mp_095",
+              "person:mp_096",
+              "person:mp_097",
+              "person:mp_098",
+              "person:mp_099",
+              "person:mp_100"
+            ],
+            "capability_ids": [],
+            "positions": [],
+            "appointments": []
+          },
+          {
+            "organization_id": "organization:caucus_a",
+            "organization_kind": "internal_unit",
+            "primary_place_id": "place:capital",
+            "parent_organization_id": "organization:party_a",
+            "active": true,
+            "member_ids": [
+              "person:mp_001",
+              "person:mp_002",
+              "person:mp_003",
+              "person:mp_004",
+              "person:mp_005",
+              "person:mp_006",
+              "person:mp_007",
+              "person:mp_008",
+              "person:mp_009",
+              "person:mp_010",
+              "person:mp_011",
+              "person:mp_012",
+              "person:mp_013",
+              "person:mp_014",
+              "person:mp_015",
+              "person:mp_016",
+              "person:mp_017",
+              "person:mp_018",
+              "person:mp_019",
+              "person:mp_020",
+              "person:mp_021",
+              "person:mp_022",
+              "person:mp_023",
+              "person:mp_024",
+              "person:mp_025",
+              "person:mp_026",
+              "person:mp_027",
+              "person:mp_028",
+              "person:mp_029",
+              "person:mp_030",
+              "person:mp_031",
+              "person:mp_032",
+              "person:mp_033",
+              "person:mp_034",
+              "person:mp_035",
+              "person:mp_036",
+              "person:mp_037",
+              "person:mp_038",
+              "person:mp_039",
+              "person:mp_040"
+            ],
+            "capability_ids": [
+              "caucus.coordinate"
+            ],
+            "positions": [
+              {
+                "position_id": "whip",
+                "title": "党团协调人",
+                "slot_count": 1,
+                "capability_ids": [
+                  "caucus.coordinate"
+                ]
+              }
+            ],
+            "appointments": [
+              {
+                "appointment_id": "whip_current",
+                "person_id": "person:mp_001",
+                "position_id": "whip",
+                "requires_membership": true
+              }
+            ]
+          },
+          {
+            "organization_id": "organization:parliament",
+            "organization_kind": "institution",
+            "primary_place_id": "place:capital",
+            "parent_organization_id": "",
+            "active": true,
+            "member_ids": [
+              "person:mp_001",
+              "person:mp_002",
+              "person:mp_003",
+              "person:mp_004",
+              "person:mp_005",
+              "person:mp_006",
+              "person:mp_007",
+              "person:mp_008",
+              "person:mp_009",
+              "person:mp_010",
+              "person:mp_011",
+              "person:mp_012",
+              "person:mp_013",
+              "person:mp_014",
+              "person:mp_015",
+              "person:mp_016",
+              "person:mp_017",
+              "person:mp_018",
+              "person:mp_019",
+              "person:mp_020",
+              "person:mp_021",
+              "person:mp_022",
+              "person:mp_023",
+              "person:mp_024",
+              "person:mp_025",
+              "person:mp_026",
+              "person:mp_027",
+              "person:mp_028",
+              "person:mp_029",
+              "person:mp_030",
+              "person:mp_031",
+              "person:mp_032",
+              "person:mp_033",
+              "person:mp_034",
+              "person:mp_035",
+              "person:mp_036",
+              "person:mp_037",
+              "person:mp_038",
+              "person:mp_039",
+              "person:mp_040",
+              "person:mp_041",
+              "person:mp_042",
+              "person:mp_043",
+              "person:mp_044",
+              "person:mp_045",
+              "person:mp_046",
+              "person:mp_047",
+              "person:mp_048",
+              "person:mp_049",
+              "person:mp_050",
+              "person:mp_051",
+              "person:mp_052",
+              "person:mp_053",
+              "person:mp_054",
+              "person:mp_055",
+              "person:mp_056",
+              "person:mp_057",
+              "person:mp_058",
+              "person:mp_059",
+              "person:mp_060",
+              "person:mp_061",
+              "person:mp_062",
+              "person:mp_063",
+              "person:mp_064",
+              "person:mp_065",
+              "person:mp_066",
+              "person:mp_067",
+              "person:mp_068",
+              "person:mp_069",
+              "person:mp_070",
+              "person:mp_071",
+              "person:mp_072",
+              "person:mp_073",
+              "person:mp_074",
+              "person:mp_075",
+              "person:mp_076",
+              "person:mp_077",
+              "person:mp_078",
+              "person:mp_079",
+              "person:mp_080",
+              "person:mp_081",
+              "person:mp_082",
+              "person:mp_083",
+              "person:mp_084",
+              "person:mp_085",
+              "person:mp_086",
+              "person:mp_087",
+              "person:mp_088",
+              "person:mp_089",
+              "person:mp_090",
+              "person:mp_091",
+              "person:mp_092",
+              "person:mp_093",
+              "person:mp_094",
+              "person:mp_095",
+              "person:mp_096",
+              "person:mp_097",
+              "person:mp_098",
+              "person:mp_099",
+              "person:mp_100"
+            ],
+            "capability_ids": [
+              "confidence.vote"
+            ],
+            "positions": [
+              {
+                "position_id": "member",
+                "title": "议员",
+                "slot_count": 100,
+                "capability_ids": [
+                  "confidence.vote"
+                ]
+              }
+            ],
+            "appointments": [
+              {
+                "appointment_id": "seat_001",
+                "person_id": "person:mp_001",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_002",
+                "person_id": "person:mp_002",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_003",
+                "person_id": "person:mp_003",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_004",
+                "person_id": "person:mp_004",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_005",
+                "person_id": "person:mp_005",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_006",
+                "person_id": "person:mp_006",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_007",
+                "person_id": "person:mp_007",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_008",
+                "person_id": "person:mp_008",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_009",
+                "person_id": "person:mp_009",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_010",
+                "person_id": "person:mp_010",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_011",
+                "person_id": "person:mp_011",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_012",
+                "person_id": "person:mp_012",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_013",
+                "person_id": "person:mp_013",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_014",
+                "person_id": "person:mp_014",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_015",
+                "person_id": "person:mp_015",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_016",
+                "person_id": "person:mp_016",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_017",
+                "person_id": "person:mp_017",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_018",
+                "person_id": "person:mp_018",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_019",
+                "person_id": "person:mp_019",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_020",
+                "person_id": "person:mp_020",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_021",
+                "person_id": "person:mp_021",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_022",
+                "person_id": "person:mp_022",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_023",
+                "person_id": "person:mp_023",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_024",
+                "person_id": "person:mp_024",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_025",
+                "person_id": "person:mp_025",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_026",
+                "person_id": "person:mp_026",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_027",
+                "person_id": "person:mp_027",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_028",
+                "person_id": "person:mp_028",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_029",
+                "person_id": "person:mp_029",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_030",
+                "person_id": "person:mp_030",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_031",
+                "person_id": "person:mp_031",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_032",
+                "person_id": "person:mp_032",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_033",
+                "person_id": "person:mp_033",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_034",
+                "person_id": "person:mp_034",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_035",
+                "person_id": "person:mp_035",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_036",
+                "person_id": "person:mp_036",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_037",
+                "person_id": "person:mp_037",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_038",
+                "person_id": "person:mp_038",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_039",
+                "person_id": "person:mp_039",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_040",
+                "person_id": "person:mp_040",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_041",
+                "person_id": "person:mp_041",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_042",
+                "person_id": "person:mp_042",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_043",
+                "person_id": "person:mp_043",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_044",
+                "person_id": "person:mp_044",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_045",
+                "person_id": "person:mp_045",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_046",
+                "person_id": "person:mp_046",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_047",
+                "person_id": "person:mp_047",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_048",
+                "person_id": "person:mp_048",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_049",
+                "person_id": "person:mp_049",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_050",
+                "person_id": "person:mp_050",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_051",
+                "person_id": "person:mp_051",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_052",
+                "person_id": "person:mp_052",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_053",
+                "person_id": "person:mp_053",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_054",
+                "person_id": "person:mp_054",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_055",
+                "person_id": "person:mp_055",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_056",
+                "person_id": "person:mp_056",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_057",
+                "person_id": "person:mp_057",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_058",
+                "person_id": "person:mp_058",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_059",
+                "person_id": "person:mp_059",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_060",
+                "person_id": "person:mp_060",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_061",
+                "person_id": "person:mp_061",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_062",
+                "person_id": "person:mp_062",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_063",
+                "person_id": "person:mp_063",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_064",
+                "person_id": "person:mp_064",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_065",
+                "person_id": "person:mp_065",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_066",
+                "person_id": "person:mp_066",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_067",
+                "person_id": "person:mp_067",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_068",
+                "person_id": "person:mp_068",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_069",
+                "person_id": "person:mp_069",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_070",
+                "person_id": "person:mp_070",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_071",
+                "person_id": "person:mp_071",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_072",
+                "person_id": "person:mp_072",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_073",
+                "person_id": "person:mp_073",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_074",
+                "person_id": "person:mp_074",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_075",
+                "person_id": "person:mp_075",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_076",
+                "person_id": "person:mp_076",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_077",
+                "person_id": "person:mp_077",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_078",
+                "person_id": "person:mp_078",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_079",
+                "person_id": "person:mp_079",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_080",
+                "person_id": "person:mp_080",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_081",
+                "person_id": "person:mp_081",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_082",
+                "person_id": "person:mp_082",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_083",
+                "person_id": "person:mp_083",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_084",
+                "person_id": "person:mp_084",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_085",
+                "person_id": "person:mp_085",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_086",
+                "person_id": "person:mp_086",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_087",
+                "person_id": "person:mp_087",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_088",
+                "person_id": "person:mp_088",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_089",
+                "person_id": "person:mp_089",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_090",
+                "person_id": "person:mp_090",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_091",
+                "person_id": "person:mp_091",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_092",
+                "person_id": "person:mp_092",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_093",
+                "person_id": "person:mp_093",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_094",
+                "person_id": "person:mp_094",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_095",
+                "person_id": "person:mp_095",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_096",
+                "person_id": "person:mp_096",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_097",
+                "person_id": "person:mp_097",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_098",
+                "person_id": "person:mp_098",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_099",
+                "person_id": "person:mp_099",
+                "position_id": "member",
+                "requires_membership": true
+              },
+              {
+                "appointment_id": "seat_100",
+                "person_id": "person:mp_100",
+                "position_id": "member",
+                "requires_membership": true
+              }
+            ]
+          },
+          {
+            "organization_id": "organization:cabinet",
+            "organization_kind": "institution",
+            "primary_place_id": "place:capital",
+            "parent_organization_id": "",
+            "active": true,
+            "member_ids": [],
+            "capability_ids": [
+              "minister.nominate",
+              "payment.authorize"
+            ],
+            "positions": [
+              {
+                "position_id": "head",
+                "title": "政府首脑",
+                "slot_count": 1,
+                "capability_ids": [
+                  "minister.nominate"
+                ]
+              },
+              {
+                "position_id": "finance_minister",
+                "title": "财政部长",
+                "slot_count": 1,
+                "capability_ids": [
+                  "payment.authorize"
+                ]
+              }
+            ],
+            "appointments": []
+          }
+        ]
+      },
+      "core_capability_checks": [
+        {
+          "person_id": "person:mp_001",
+          "organization_id": "organization:parliament",
+          "capability_id": "confidence.vote",
+          "expected": true
+        },
+        {
+          "person_id": "person:party_a_leader",
+          "organization_id": "organization:parliament",
+          "capability_id": "confidence.vote",
+          "expected": false
+        },
+        {
+          "person_id": "person:party_b_leader",
+          "organization_id": "organization:cabinet",
+          "capability_id": "payment.authorize",
+          "expected": false
+        }
+      ],
+      "governance_design": {
+        "agreement": {
+          "parties": [
+            "organization:party_a",
+            "organization:party_b"
+          ],
+          "text_version": "fixture:coalition_text_v1",
+          "requires": "each_party_approval_of_identical_text",
+          "promised_candidates": {
+            "head": "person:party_a_leader",
+            "finance_minister": "person:party_b_leader"
+          },
+          "effect": "cooperation_commitment_only"
+        },
+        "confidence_procedure": {
+          "template": "collective_ballot",
+          "eligibility_source": {
+            "organization_id": "organization:parliament",
+            "position_ids": [
+              "member"
+            ]
+          },
+          "freeze_at": "voting_open",
+          "quorum": {
+            "denominator": "fixed_seats",
+            "total": 100,
+            "minimum_present": 51
+          },
+          "majority": {
+            "denominator": "fixed_seats",
+            "minimum_yes": 51
+          },
+          "abstention_counts_as_attendance": true,
+          "tie": "reject",
+          "after_eligibility_loss": "keep_valid_prior_vote_reject_new_vote",
+          "close": "explicit_fixture_deadline",
+          "result": "decision_only"
+        },
+        "cases": [
+          {
+            "id": "party_nominal_majority_insufficient",
+            "input": {
+              "coalition_seats": 60,
+              "yes_person_ids": [
+                "person:mp_001",
+                "person:mp_002",
+                "person:mp_003",
+                "person:mp_004",
+                "person:mp_005",
+                "person:mp_006",
+                "person:mp_007",
+                "person:mp_008",
+                "person:mp_009",
+                "person:mp_010",
+                "person:mp_011",
+                "person:mp_012",
+                "person:mp_013",
+                "person:mp_014",
+                "person:mp_015",
+                "person:mp_016",
+                "person:mp_017",
+                "person:mp_018",
+                "person:mp_019",
+                "person:mp_020",
+                "person:mp_021",
+                "person:mp_022",
+                "person:mp_023",
+                "person:mp_024",
+                "person:mp_025",
+                "person:mp_026",
+                "person:mp_027",
+                "person:mp_028",
+                "person:mp_029",
+                "person:mp_030",
+                "person:mp_031",
+                "person:mp_032",
+                "person:mp_033",
+                "person:mp_034",
+                "person:mp_035",
+                "person:mp_036",
+                "person:mp_037",
+                "person:mp_038",
+                "person:mp_039",
+                "person:mp_040",
+                "person:mp_041",
+                "person:mp_042",
+                "person:mp_043",
+                "person:mp_044",
+                "person:mp_045",
+                "person:mp_046",
+                "person:mp_047",
+                "person:mp_048"
+              ],
+              "present_person_ids": [
+                "person:mp_001",
+                "person:mp_002",
+                "person:mp_003",
+                "person:mp_004",
+                "person:mp_005",
+                "person:mp_006",
+                "person:mp_007",
+                "person:mp_008",
+                "person:mp_009",
+                "person:mp_010",
+                "person:mp_011",
+                "person:mp_012",
+                "person:mp_013",
+                "person:mp_014",
+                "person:mp_015",
+                "person:mp_016",
+                "person:mp_017",
+                "person:mp_018",
+                "person:mp_019",
+                "person:mp_020",
+                "person:mp_021",
+                "person:mp_022",
+                "person:mp_023",
+                "person:mp_024",
+                "person:mp_025",
+                "person:mp_026",
+                "person:mp_027",
+                "person:mp_028",
+                "person:mp_029",
+                "person:mp_030",
+                "person:mp_031",
+                "person:mp_032",
+                "person:mp_033",
+                "person:mp_034",
+                "person:mp_035",
+                "person:mp_036",
+                "person:mp_037",
+                "person:mp_038",
+                "person:mp_039",
+                "person:mp_040",
+                "person:mp_041",
+                "person:mp_042",
+                "person:mp_043",
+                "person:mp_044",
+                "person:mp_045",
+                "person:mp_046",
+                "person:mp_047",
+                "person:mp_048",
+                "person:mp_049",
+                "person:mp_050",
+                "person:mp_051",
+                "person:mp_052",
+                "person:mp_053",
+                "person:mp_054",
+                "person:mp_055",
+                "person:mp_056",
+                "person:mp_057",
+                "person:mp_058",
+                "person:mp_059",
+                "person:mp_060",
+                "person:mp_061",
+                "person:mp_062",
+                "person:mp_063",
+                "person:mp_064",
+                "person:mp_065",
+                "person:mp_066",
+                "person:mp_067",
+                "person:mp_068",
+                "person:mp_069",
+                "person:mp_070",
+                "person:mp_071",
+                "person:mp_072",
+                "person:mp_073",
+                "person:mp_074",
+                "person:mp_075",
+                "person:mp_076",
+                "person:mp_077",
+                "person:mp_078",
+                "person:mp_079",
+                "person:mp_080",
+                "person:mp_081",
+                "person:mp_082",
+                "person:mp_083",
+                "person:mp_084",
+                "person:mp_085",
+                "person:mp_086",
+                "person:mp_087",
+                "person:mp_088",
+                "person:mp_089",
+                "person:mp_090",
+                "person:mp_091",
+                "person:mp_092",
+                "person:mp_093",
+                "person:mp_094",
+                "person:mp_095",
+                "person:mp_096",
+                "person:mp_097",
+                "person:mp_098",
+                "person:mp_099",
+                "person:mp_100"
+              ]
+            },
+            "expected": {
+              "yes_count": 48,
+              "decision": "rejected",
+              "public_appointments_created": 0
+            }
+          },
+          {
+            "id": "party_actual_majority",
+            "input": {
+              "yes_person_ids": [
+                "person:mp_001",
+                "person:mp_002",
+                "person:mp_003",
+                "person:mp_004",
+                "person:mp_005",
+                "person:mp_006",
+                "person:mp_007",
+                "person:mp_008",
+                "person:mp_009",
+                "person:mp_010",
+                "person:mp_011",
+                "person:mp_012",
+                "person:mp_013",
+                "person:mp_014",
+                "person:mp_015",
+                "person:mp_016",
+                "person:mp_017",
+                "person:mp_018",
+                "person:mp_019",
+                "person:mp_020",
+                "person:mp_021",
+                "person:mp_022",
+                "person:mp_023",
+                "person:mp_024",
+                "person:mp_025",
+                "person:mp_026",
+                "person:mp_027",
+                "person:mp_028",
+                "person:mp_029",
+                "person:mp_030",
+                "person:mp_031",
+                "person:mp_032",
+                "person:mp_033",
+                "person:mp_034",
+                "person:mp_035",
+                "person:mp_036",
+                "person:mp_037",
+                "person:mp_038",
+                "person:mp_039",
+                "person:mp_040",
+                "person:mp_041",
+                "person:mp_042",
+                "person:mp_043",
+                "person:mp_044",
+                "person:mp_045",
+                "person:mp_046",
+                "person:mp_047",
+                "person:mp_048",
+                "person:mp_049",
+                "person:mp_050",
+                "person:mp_051",
+                "person:mp_052",
+                "person:mp_053",
+                "person:mp_054",
+                "person:mp_055",
+                "person:mp_056",
+                "person:mp_057",
+                "person:mp_058",
+                "person:mp_059",
+                "person:mp_060"
+              ],
+              "present_person_ids": [
+                "person:mp_001",
+                "person:mp_002",
+                "person:mp_003",
+                "person:mp_004",
+                "person:mp_005",
+                "person:mp_006",
+                "person:mp_007",
+                "person:mp_008",
+                "person:mp_009",
+                "person:mp_010",
+                "person:mp_011",
+                "person:mp_012",
+                "person:mp_013",
+                "person:mp_014",
+                "person:mp_015",
+                "person:mp_016",
+                "person:mp_017",
+                "person:mp_018",
+                "person:mp_019",
+                "person:mp_020",
+                "person:mp_021",
+                "person:mp_022",
+                "person:mp_023",
+                "person:mp_024",
+                "person:mp_025",
+                "person:mp_026",
+                "person:mp_027",
+                "person:mp_028",
+                "person:mp_029",
+                "person:mp_030",
+                "person:mp_031",
+                "person:mp_032",
+                "person:mp_033",
+                "person:mp_034",
+                "person:mp_035",
+                "person:mp_036",
+                "person:mp_037",
+                "person:mp_038",
+                "person:mp_039",
+                "person:mp_040",
+                "person:mp_041",
+                "person:mp_042",
+                "person:mp_043",
+                "person:mp_044",
+                "person:mp_045",
+                "person:mp_046",
+                "person:mp_047",
+                "person:mp_048",
+                "person:mp_049",
+                "person:mp_050",
+                "person:mp_051",
+                "person:mp_052",
+                "person:mp_053",
+                "person:mp_054",
+                "person:mp_055",
+                "person:mp_056",
+                "person:mp_057",
+                "person:mp_058",
+                "person:mp_059",
+                "person:mp_060",
+                "person:mp_061",
+                "person:mp_062",
+                "person:mp_063",
+                "person:mp_064",
+                "person:mp_065",
+                "person:mp_066",
+                "person:mp_067",
+                "person:mp_068",
+                "person:mp_069",
+                "person:mp_070",
+                "person:mp_071",
+                "person:mp_072",
+                "person:mp_073",
+                "person:mp_074",
+                "person:mp_075",
+                "person:mp_076",
+                "person:mp_077",
+                "person:mp_078",
+                "person:mp_079",
+                "person:mp_080",
+                "person:mp_081",
+                "person:mp_082",
+                "person:mp_083",
+                "person:mp_084",
+                "person:mp_085",
+                "person:mp_086",
+                "person:mp_087",
+                "person:mp_088",
+                "person:mp_089",
+                "person:mp_090",
+                "person:mp_091",
+                "person:mp_092",
+                "person:mp_093",
+                "person:mp_094",
+                "person:mp_095",
+                "person:mp_096",
+                "person:mp_097",
+                "person:mp_098",
+                "person:mp_099",
+                "person:mp_100"
+              ]
+            },
+            "expected": {
+              "yes_count": 60,
+              "decision": "approved",
+              "next": "lawful_head_appointment_then_minister_nomination_and_confirmation"
+            }
+          },
+          {
+            "id": "party_expulsion",
+            "input": {
+              "remove_membership": {
+                "organization_id": "organization:party_a",
+                "person_id": "person:mp_001"
+              }
+            },
+            "expected": {
+              "parliament_seat_preserved": true,
+              "caucus_eligibility": "recheck_by_party_rule"
+            }
+          },
+          {
+            "id": "party_leader_cannot_pay",
+            "input": {
+              "actor": "person:party_b_leader",
+              "operation": "payment.authorize",
+              "public_appointment": false
+            },
+            "expected": {
+              "authority": "no_public_appointment"
+            }
+          },
+          {
+            "id": "party_coalition_exit",
+            "input": {
+              "party": "organization:party_b",
+              "event": "leave_coalition"
+            },
+            "expected": {
+              "past_public_payments": "unchanged",
+              "head_appointment": "evaluate_explicit_confidence_rule"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "military",
+      "title": "军队：行政编制与限期作战配属",
+      "known_person_ids": [
+        "person:army_commander",
+        "person:corps_one_commander",
+        "person:corps_two_commander",
+        "person:division_commander",
+        "person:war_minister"
+      ],
+      "known_place_ids": [
+        "place:capital"
+      ],
+      "core_v1": {
+        "schema_id": "vnext_organization_core_v1",
+        "organizations": [
+          {
+            "organization_id": "organization:war_ministry",
+            "organization_kind": "institution",
+            "primary_place_id": "place:capital",
+            "parent_organization_id": "",
+            "active": true,
+            "member_ids": [],
+            "capability_ids": [
+              "military.budget.propose"
+            ],
+            "positions": [
+              {
+                "position_id": "minister",
+                "title": "战争部长",
+                "slot_count": 1,
+                "capability_ids": [
+                  "military.budget.propose"
+                ]
+              }
+            ],
+            "appointments": [
+              {
+                "appointment_id": "minister_current",
+                "person_id": "person:war_minister",
+                "position_id": "minister",
+                "requires_membership": false
+              }
+            ]
+          },
+          {
+            "organization_id": "organization:army_hq",
+            "organization_kind": "internal_unit",
+            "primary_place_id": "place:capital",
+            "parent_organization_id": "organization:war_ministry",
+            "active": true,
+            "member_ids": [
+              "person:army_commander"
+            ],
+            "capability_ids": [
+              "command.assign"
+            ],
+            "positions": [
+              {
+                "position_id": "commander",
+                "title": "陆军司令",
+                "slot_count": 1,
+                "capability_ids": [
+                  "command.assign"
+                ]
+              }
+            ],
+            "appointments": [
+              {
+                "appointment_id": "commander_current",
+                "person_id": "person:army_commander",
+                "position_id": "commander",
+                "requires_membership": true
+              }
+            ]
+          },
+          {
+            "organization_id": "organization:corps_one",
+            "organization_kind": "internal_unit",
+            "primary_place_id": "place:capital",
+            "parent_organization_id": "organization:army_hq",
+            "active": true,
+            "member_ids": [
+              "person:corps_one_commander"
+            ],
+            "capability_ids": [
+              "operational.order",
+              "supply.request"
+            ],
+            "positions": [
+              {
+                "position_id": "commander",
+                "title": "第一军军长",
+                "slot_count": 1,
+                "capability_ids": [
+                  "operational.order",
+                  "supply.request"
+                ]
+              }
+            ],
+            "appointments": [
+              {
+                "appointment_id": "commander_current",
+                "person_id": "person:corps_one_commander",
+                "position_id": "commander",
+                "requires_membership": true
+              }
+            ]
+          },
+          {
+            "organization_id": "organization:corps_two",
+            "organization_kind": "internal_unit",
+            "primary_place_id": "place:capital",
+            "parent_organization_id": "organization:army_hq",
+            "active": true,
+            "member_ids": [
+              "person:corps_two_commander"
+            ],
+            "capability_ids": [
+              "operational.order"
+            ],
+            "positions": [
+              {
+                "position_id": "commander",
+                "title": "第二军军长",
+                "slot_count": 1,
+                "capability_ids": [
+                  "operational.order"
+                ]
+              }
+            ],
+            "appointments": [
+              {
+                "appointment_id": "commander_current",
+                "person_id": "person:corps_two_commander",
+                "position_id": "commander",
+                "requires_membership": true
+              }
+            ]
+          },
+          {
+            "organization_id": "organization:division_ten",
+            "organization_kind": "internal_unit",
+            "primary_place_id": "place:capital",
+            "parent_organization_id": "organization:corps_one",
+            "active": true,
+            "member_ids": [
+              "person:division_commander"
+            ],
+            "capability_ids": [
+              "formation.order"
+            ],
+            "positions": [
+              {
+                "position_id": "commander",
+                "title": "第十师师长",
+                "slot_count": 1,
+                "capability_ids": [
+                  "formation.order"
+                ]
+              }
+            ],
+            "appointments": [
+              {
+                "appointment_id": "commander_current",
+                "person_id": "person:division_commander",
+                "position_id": "commander",
+                "requires_membership": true
+              }
+            ]
+          }
+        ]
+      },
+      "core_capability_checks": [
+        {
+          "person_id": "person:corps_two_commander",
+          "organization_id": "organization:corps_two",
+          "capability_id": "operational.order",
+          "expected": true
+        },
+        {
+          "person_id": "person:corps_two_commander",
+          "organization_id": "organization:division_ten",
+          "capability_id": "formation.order",
+          "expected": false
+        },
+        {
+          "person_id": "person:war_minister",
+          "organization_id": "organization:army_hq",
+          "capability_id": "command.assign",
+          "expected": false
+        }
+      ],
+      "governance_design": {
+        "bindings": [
+          {
+            "organization_id": "organization:division_ten",
+            "formation_ref": "fixture:formation_10",
+            "owner": "Military"
+          }
+        ],
+        "command_assignment": {
+          "issuer": {
+            "organization_id": "organization:army_hq",
+            "position_id": "commander"
+          },
+          "receiver": {
+            "organization_id": "organization:corps_two",
+            "position_id": "commander"
+          },
+          "formation_ref": "fixture:formation_10",
+          "scope": [
+            "operational.order"
+          ],
+          "validity": {
+            "start": 0,
+            "end": 259200,
+            "unit": "simulation_second",
+            "interval": "start_inclusive_end_exclusive"
+          },
+          "replaces_during_interval": {
+            "organization_id": "organization:corps_one",
+            "position_id": "commander"
+          },
+          "expiry": "restore_prior_operational_chain",
+          "administrative_parent_unchanged": true
+        },
+        "cases": [
+          {
+            "id": "military_new_commander",
+            "input": {
+              "at": 1,
+              "actor": "person:corps_two_commander",
+              "operation": "operational.order",
+              "target": "fixture:formation_10"
+            },
+            "expected": {
+              "authority": "allowed",
+              "execution": "Military_communication_and_state_validation"
+            }
+          },
+          {
+            "id": "military_previous_commander",
+            "input": {
+              "at": 1,
+              "actor": "person:corps_one_commander",
+              "operation": "operational.order",
+              "target": "fixture:formation_10"
+            },
+            "expected": {
+              "authority": "not_current_operational_chain"
+            }
+          },
+          {
+            "id": "military_admin_retained",
+            "input": {
+              "at": 1,
+              "actor": "person:corps_one_commander",
+              "operation": "supply.request",
+              "target": "fixture:formation_10"
+            },
+            "expected": {
+              "authority": "allowed_under_separate_administrative_grant"
+            }
+          },
+          {
+            "id": "military_overlap",
+            "input": {
+              "new_receiver": {
+                "organization_id": "organization:corps_one",
+                "position_id": "commander"
+              },
+              "start": 10,
+              "end": 20,
+              "explicit_replacement": false
+            },
+            "expected": {
+              "assignment": "rejected_overlap"
+            }
+          },
+          {
+            "id": "military_expiry",
+            "input": {
+              "at": 259200,
+              "actor": "person:corps_two_commander",
+              "operation": "operational.order",
+              "target": "fixture:formation_10"
+            },
+            "expected": {
+              "authority": "expired",
+              "prior_orders": "handled_by_Military_order_rules",
+              "position_changed_by_assignment": false
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "union",
+      "title": "工会：会员程序、参与名单和双方和解",
+      "known_person_ids": [
+        "person:employer_manager",
+        "person:union_secretary",
+        "person:worker_001",
+        "person:worker_002",
+        "person:worker_003",
+        "person:worker_004",
+        "person:worker_005",
+        "person:worker_006",
+        "person:worker_007",
+        "person:worker_008",
+        "person:worker_009",
+        "person:worker_010",
+        "person:worker_011",
+        "person:worker_012",
+        "person:worker_013",
+        "person:worker_014",
+        "person:worker_015",
+        "person:worker_016",
+        "person:worker_017",
+        "person:worker_018",
+        "person:worker_019",
+        "person:worker_020",
+        "person:worker_021",
+        "person:worker_022",
+        "person:worker_023",
+        "person:worker_024",
+        "person:worker_025",
+        "person:worker_026",
+        "person:worker_027",
+        "person:worker_028",
+        "person:worker_029",
+        "person:worker_030",
+        "person:worker_031",
+        "person:worker_032",
+        "person:worker_033",
+        "person:worker_034",
+        "person:worker_035",
+        "person:worker_036",
+        "person:worker_037",
+        "person:worker_038",
+        "person:worker_039",
+        "person:worker_040",
+        "person:worker_041",
+        "person:worker_042",
+        "person:worker_043",
+        "person:worker_044",
+        "person:worker_045",
+        "person:worker_046",
+        "person:worker_047",
+        "person:worker_048",
+        "person:worker_049",
+        "person:worker_050",
+        "person:worker_051",
+        "person:worker_052",
+        "person:worker_053",
+        "person:worker_054",
+        "person:worker_055",
+        "person:worker_056",
+        "person:worker_057",
+        "person:worker_058",
+        "person:worker_059",
+        "person:worker_060",
+        "person:worker_061",
+        "person:worker_062",
+        "person:worker_063",
+        "person:worker_064",
+        "person:worker_065",
+        "person:worker_066",
+        "person:worker_067",
+        "person:worker_068",
+        "person:worker_069",
+        "person:worker_070",
+        "person:worker_071",
+        "person:worker_072",
+        "person:worker_073",
+        "person:worker_074",
+        "person:worker_075",
+        "person:worker_076",
+        "person:worker_077",
+        "person:worker_078",
+        "person:worker_079",
+        "person:worker_080",
+        "person:worker_081",
+        "person:worker_082",
+        "person:worker_083",
+        "person:worker_084",
+        "person:worker_085",
+        "person:worker_086",
+        "person:worker_087",
+        "person:worker_088",
+        "person:worker_089",
+        "person:worker_090",
+        "person:worker_091",
+        "person:worker_092",
+        "person:worker_093",
+        "person:worker_094",
+        "person:worker_095",
+        "person:worker_096",
+        "person:worker_097",
+        "person:worker_098",
+        "person:worker_099",
+        "person:worker_100"
+      ],
+      "known_place_ids": [
+        "place:capital"
+      ],
+      "core_v1": {
+        "schema_id": "vnext_organization_core_v1",
+        "organizations": [
+          {
+            "organization_id": "organization:employer",
+            "organization_kind": "company",
+            "primary_place_id": "place:capital",
+            "parent_organization_id": "",
+            "active": true,
+            "member_ids": [],
+            "capability_ids": [
+              "settlement.sign"
+            ],
+            "positions": [
+              {
+                "position_id": "manager",
+                "title": "雇主代表",
+                "slot_count": 1,
+                "capability_ids": [
+                  "settlement.sign"
+                ]
+              }
+            ],
+            "appointments": [
+              {
+                "appointment_id": "manager_current",
+                "person_id": "person:employer_manager",
+                "position_id": "manager",
+                "requires_membership": false
+              }
+            ]
+          },
+          {
+            "organization_id": "organization:industry_union",
+            "organization_kind": "union",
+            "primary_place_id": "place:capital",
+            "parent_organization_id": "",
+            "active": true,
+            "member_ids": [
+              "person:union_secretary"
+            ],
+            "capability_ids": [
+              "branch.coordinate"
+            ],
+            "positions": [
+              {
+                "position_id": "secretary",
+                "title": "行业工会秘书",
+                "slot_count": 1,
+                "capability_ids": [
+                  "branch.coordinate"
+                ]
+              }
+            ],
+            "appointments": [
+              {
+                "appointment_id": "secretary_current",
+                "person_id": "person:union_secretary",
+                "position_id": "secretary",
+                "requires_membership": true
+              }
+            ]
+          },
+          {
+            "organization_id": "organization:plant_union",
+            "organization_kind": "union",
+            "primary_place_id": "place:capital",
+            "parent_organization_id": "organization:industry_union",
+            "active": true,
+            "member_ids": [
+              "person:worker_001",
+              "person:worker_002",
+              "person:worker_003",
+              "person:worker_004",
+              "person:worker_005",
+              "person:worker_006",
+              "person:worker_007",
+              "person:worker_008",
+              "person:worker_009",
+              "person:worker_010",
+              "person:worker_011",
+              "person:worker_012",
+              "person:worker_013",
+              "person:worker_014",
+              "person:worker_015",
+              "person:worker_016",
+              "person:worker_017",
+              "person:worker_018",
+              "person:worker_019",
+              "person:worker_020",
+              "person:worker_021",
+              "person:worker_022",
+              "person:worker_023",
+              "person:worker_024",
+              "person:worker_025",
+              "person:worker_026",
+              "person:worker_027",
+              "person:worker_028",
+              "person:worker_029",
+              "person:worker_030",
+              "person:worker_031",
+              "person:worker_032",
+              "person:worker_033",
+              "person:worker_034",
+              "person:worker_035",
+              "person:worker_036",
+              "person:worker_037",
+              "person:worker_038",
+              "person:worker_039",
+              "person:worker_040",
+              "person:worker_041",
+              "person:worker_042",
+              "person:worker_043",
+              "person:worker_044",
+              "person:worker_045",
+              "person:worker_046",
+              "person:worker_047",
+              "person:worker_048",
+              "person:worker_049",
+              "person:worker_050",
+              "person:worker_051",
+              "person:worker_052",
+              "person:worker_053",
+              "person:worker_054",
+              "person:worker_055",
+              "person:worker_056",
+              "person:worker_057",
+              "person:worker_058",
+              "person:worker_059",
+              "person:worker_060"
+            ],
+            "capability_ids": [
+              "settlement.negotiate",
+              "strike.propose"
+            ],
+            "positions": [
+              {
+                "position_id": "chair",
+                "title": "分会负责人",
+                "slot_count": 1,
+                "capability_ids": [
+                  "strike.propose",
+                  "settlement.negotiate"
+                ]
+              }
+            ],
+            "appointments": [
+              {
+                "appointment_id": "chair_current",
+                "person_id": "person:worker_001",
+                "position_id": "chair",
+                "requires_membership": true
+              }
+            ]
+          }
+        ]
+      },
+      "core_capability_checks": [
+        {
+          "person_id": "person:worker_001",
+          "organization_id": "organization:plant_union",
+          "capability_id": "settlement.negotiate",
+          "expected": true
+        },
+        {
+          "person_id": "person:worker_002",
+          "organization_id": "organization:plant_union",
+          "capability_id": "settlement.negotiate",
+          "expected": false
+        },
+        {
+          "person_id": "person:employer_manager",
+          "organization_id": "organization:plant_union",
+          "capability_id": "settlement.negotiate",
+          "expected": false
+        }
+      ],
+      "governance_design": {
+        "employment_fixture": {
+          "ref": "fixture:employer_workforce",
+          "owner": "Labor",
+          "person_ids": [
+            "person:worker_001",
+            "person:worker_002",
+            "person:worker_003",
+            "person:worker_004",
+            "person:worker_005",
+            "person:worker_006",
+            "person:worker_007",
+            "person:worker_008",
+            "person:worker_009",
+            "person:worker_010",
+            "person:worker_011",
+            "person:worker_012",
+            "person:worker_013",
+            "person:worker_014",
+            "person:worker_015",
+            "person:worker_016",
+            "person:worker_017",
+            "person:worker_018",
+            "person:worker_019",
+            "person:worker_020",
+            "person:worker_021",
+            "person:worker_022",
+            "person:worker_023",
+            "person:worker_024",
+            "person:worker_025",
+            "person:worker_026",
+            "person:worker_027",
+            "person:worker_028",
+            "person:worker_029",
+            "person:worker_030",
+            "person:worker_031",
+            "person:worker_032",
+            "person:worker_033",
+            "person:worker_034",
+            "person:worker_035",
+            "person:worker_036",
+            "person:worker_037",
+            "person:worker_038",
+            "person:worker_039",
+            "person:worker_040",
+            "person:worker_041",
+            "person:worker_042",
+            "person:worker_043",
+            "person:worker_044",
+            "person:worker_045",
+            "person:worker_046",
+            "person:worker_047",
+            "person:worker_048",
+            "person:worker_049",
+            "person:worker_050",
+            "person:worker_051",
+            "person:worker_052",
+            "person:worker_053",
+            "person:worker_054",
+            "person:worker_055",
+            "person:worker_056",
+            "person:worker_057",
+            "person:worker_058",
+            "person:worker_059",
+            "person:worker_060",
+            "person:worker_061",
+            "person:worker_062",
+            "person:worker_063",
+            "person:worker_064",
+            "person:worker_065",
+            "person:worker_066",
+            "person:worker_067",
+            "person:worker_068",
+            "person:worker_069",
+            "person:worker_070",
+            "person:worker_071",
+            "person:worker_072",
+            "person:worker_073",
+            "person:worker_074",
+            "person:worker_075",
+            "person:worker_076",
+            "person:worker_077",
+            "person:worker_078",
+            "person:worker_079",
+            "person:worker_080",
+            "person:worker_081",
+            "person:worker_082",
+            "person:worker_083",
+            "person:worker_084",
+            "person:worker_085",
+            "person:worker_086",
+            "person:worker_087",
+            "person:worker_088",
+            "person:worker_089",
+            "person:worker_090",
+            "person:worker_091",
+            "person:worker_092",
+            "person:worker_093",
+            "person:worker_094",
+            "person:worker_095",
+            "person:worker_096",
+            "person:worker_097",
+            "person:worker_098",
+            "person:worker_099",
+            "person:worker_100"
+          ],
+          "available_units_per_worker": 1,
+          "unit": "worker_shift"
+        },
+        "strike_procedure": {
+          "template": "collective_ballot",
+          "eligibility_source": {
+            "organization_id": "organization:plant_union",
+            "source": "member_ids",
+            "additional_filter": "employed_in_fixture_workforce"
+          },
+          "freeze_at": "voting_open",
+          "quorum": {
+            "denominator": "eligible_members",
+            "total": 60,
+            "minimum_present": 31
+          },
+          "majority": {
+            "denominator": "present",
+            "operator": "strictly_more_than_half"
+          },
+          "abstention_counts_as_attendance": true,
+          "tie": "reject",
+          "after_eligibility_loss": "keep_valid_prior_vote_reject_new_vote",
+          "close": "explicit_fixture_deadline",
+          "result": "decision_only"
+        },
+        "bargaining_mandate": {
+          "holder": {
+            "organization_id": "organization:plant_union",
+            "position_id": "chair"
+          },
+          "represented_organization_id": "organization:plant_union",
+          "scope": {
+            "employment_ref": "fixture:employer_workforce"
+          },
+          "minimum_wage_increase_basis_points": 600,
+          "below_minimum": "new_member_approval_required"
+        },
+        "settlement_rule": {
+          "template": "bilateral_approval",
+          "representatives": [
+            {
+              "organization_id": "organization:plant_union",
+              "position_id": "chair"
+            },
+            {
+              "organization_id": "organization:employer",
+              "position_id": "manager"
+            }
+          ],
+          "requires": [
+            "identical_text_version",
+            "each_side_valid_authority",
+            "each_side_approval_when_required",
+            "effective_time"
+          ],
+          "domain_owner": "Labor_or_Contract"
+        },
+        "cases": [
+          {
+            "id": "union_vote_and_participation",
+            "input": {
+              "present_person_ids": [
+                "person:worker_001",
+                "person:worker_002",
+                "person:worker_003",
+                "person:worker_004",
+                "person:worker_005",
+                "person:worker_006",
+                "person:worker_007",
+                "person:worker_008",
+                "person:worker_009",
+                "person:worker_010",
+                "person:worker_011",
+                "person:worker_012",
+                "person:worker_013",
+                "person:worker_014",
+                "person:worker_015",
+                "person:worker_016",
+                "person:worker_017",
+                "person:worker_018",
+                "person:worker_019",
+                "person:worker_020",
+                "person:worker_021",
+                "person:worker_022",
+                "person:worker_023",
+                "person:worker_024",
+                "person:worker_025",
+                "person:worker_026",
+                "person:worker_027",
+                "person:worker_028",
+                "person:worker_029",
+                "person:worker_030",
+                "person:worker_031",
+                "person:worker_032",
+                "person:worker_033",
+                "person:worker_034",
+                "person:worker_035",
+                "person:worker_036",
+                "person:worker_037",
+                "person:worker_038",
+                "person:worker_039",
+                "person:worker_040",
+                "person:worker_041",
+                "person:worker_042",
+                "person:worker_043",
+                "person:worker_044",
+                "person:worker_045",
+                "person:worker_046",
+                "person:worker_047",
+                "person:worker_048",
+                "person:worker_049",
+                "person:worker_050"
+              ],
+              "yes_person_ids": [
+                "person:worker_001",
+                "person:worker_002",
+                "person:worker_003",
+                "person:worker_004",
+                "person:worker_005",
+                "person:worker_006",
+                "person:worker_007",
+                "person:worker_008",
+                "person:worker_009",
+                "person:worker_010",
+                "person:worker_011",
+                "person:worker_012",
+                "person:worker_013",
+                "person:worker_014",
+                "person:worker_015",
+                "person:worker_016",
+                "person:worker_017",
+                "person:worker_018",
+                "person:worker_019",
+                "person:worker_020",
+                "person:worker_021",
+                "person:worker_022",
+                "person:worker_023",
+                "person:worker_024",
+                "person:worker_025",
+                "person:worker_026",
+                "person:worker_027",
+                "person:worker_028",
+                "person:worker_029",
+                "person:worker_030",
+                "person:worker_031",
+                "person:worker_032",
+                "person:worker_033",
+                "person:worker_034",
+                "person:worker_035"
+              ],
+              "no_person_ids": [
+                "person:worker_036",
+                "person:worker_037",
+                "person:worker_038",
+                "person:worker_039",
+                "person:worker_040",
+                "person:worker_041",
+                "person:worker_042",
+                "person:worker_043",
+                "person:worker_044",
+                "person:worker_045",
+                "person:worker_046",
+                "person:worker_047",
+                "person:worker_048",
+                "person:worker_049",
+                "person:worker_050"
+              ],
+              "confirmed_participants": [
+                "person:worker_001",
+                "person:worker_002",
+                "person:worker_003",
+                "person:worker_004",
+                "person:worker_005",
+                "person:worker_006",
+                "person:worker_007",
+                "person:worker_008",
+                "person:worker_009",
+                "person:worker_010",
+                "person:worker_011",
+                "person:worker_012",
+                "person:worker_013",
+                "person:worker_014",
+                "person:worker_015",
+                "person:worker_016",
+                "person:worker_017",
+                "person:worker_018",
+                "person:worker_019",
+                "person:worker_020",
+                "person:worker_021",
+                "person:worker_022",
+                "person:worker_023",
+                "person:worker_024",
+                "person:worker_025",
+                "person:worker_026",
+                "person:worker_027",
+                "person:worker_028",
+                "person:worker_029",
+                "person:worker_030",
+                "person:worker_031",
+                "person:worker_032",
+                "person:worker_033",
+                "person:worker_034",
+                "person:worker_035"
+              ]
+            },
+            "expected": {
+              "decision": "approved",
+              "labor_request_units": 35,
+              "remaining_worker_units": 65,
+              "effective": "next_covered_shift"
+            }
+          },
+          {
+            "id": "union_nonmember_vote",
+            "input": {
+              "person_id": "person:worker_061",
+              "operation": "strike.vote"
+            },
+            "expected": {
+              "vote": "ineligible"
+            }
+          },
+          {
+            "id": "union_below_mandate",
+            "input": {
+              "offer_basis_points": 500,
+              "member_reapproval": false
+            },
+            "expected": {
+              "settlement": "pending_new_member_approval",
+              "wage_mutation": false
+            }
+          },
+          {
+            "id": "union_one_side_only",
+            "input": {
+              "union_signed": true,
+              "employer_signed": false
+            },
+            "expected": {
+              "settlement": "pending_counterparty",
+              "wage_mutation": false
+            }
+          },
+          {
+            "id": "union_no_funds",
+            "input": {
+              "fund_balance": 0,
+              "assistance_due": 100
+            },
+            "expected": {
+              "cash_created": 0,
+              "assistance": "unfunded"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
