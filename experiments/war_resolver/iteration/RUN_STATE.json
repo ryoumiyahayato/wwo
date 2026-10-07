@@ -4,14 +4,14 @@
   "stages": {
     "M0": "PASSED",
     "M1": "PASSED",
-    "M2": "RUNNING",
-    "M3": "NOT_STARTED",
+    "M2": "PASSED",
+    "M3": "RUNNING",
     "M4": "NOT_STARTED"
   },
-  "last_verified_code_commit": "069e3f028ddf2dfe2bdb88e05fdad0de1bda2535",
+  "last_verified_code_commit": "0c93b66338c88fb31a05ff66444fa6d423b38f41",
   "started_utc": "2026-10-07T16:28:31Z",
-  "effective_minutes_estimate": 81,
-  "remaining_minutes_estimate": 519,
+  "effective_minutes_estimate": 115,
+  "remaining_minutes_estimate": 485,
   "estimate_quality": "approximate wall clock minus known wait; update at safe checkpoints",
   "platform_startup_wait_seconds": 13,
   "tests_completed": [
@@ -19,13 +19,16 @@
     "ae63fdd scoped gate: original43948/0 + spatial160/0; all 8 predecessor Linux hashes unchanged; unified intentionally NOT RUN in that gate",
     "Latest counterexample run completed exit1:170 checks/3 failures plus nonexistent schedule_ground script error; exact dirty sources now preserved in saved_unaccepted_code_commit",
     "Resumed targeted corrections: builds/task9-m1-physical-fixed complete exit0,173/0",
-    "Multi-segment retreat counterexample: builds/task9-m1-long-retreat-counterexample complete exit1,182/2; corrected builds/task9-m1-long-retreat-fixed complete exit0,182/0"
+    "Multi-segment retreat counterexample: builds/task9-m1-long-retreat-counterexample complete exit1,182/2; corrected builds/task9-m1-long-retreat-fixed complete exit0,182/0",
+    "M2 first contract red18/7 then green27/0; integrated main/controls108/0",
+    "M2 trace/boundaries116/0 and contracts56/0, related space190/0, Task8 1220/0, Task7 1341/0, roles3762/0; CLI main1800 actual finite causal run completed"
   ],
   "tests_pending": [
-    "M2 preregistered combined scenarios and contracts; M3/M4 not started"
+    "M3 profile-before, resumable work contracts, mixed concentrated events,24h actual mixed LOD load",
+    "M4 full unified/final acceptance"
   ],
   "blockers": [],
-  "next": "Implement and test delayed route intent, bounded recurrent opportunities, local route observations; run M2 main/controls.",
+  "next": "Measure original peak sections before cooperative refactor; retain M2 green checkpoint.",
   "validation_session": null,
   "connection_checks": [
     {
@@ -40,16 +43,17 @@
   "evidence": {
     "M0": "iteration/evidence/m0-linux/evidence.json",
     "M0_raw": "builds/task9-m0",
-    "M1": "iteration/evidence/m1-linux/reuse.json"
+    "M1": "iteration/evidence/m1-linux/reuse.json",
+    "M2": "iteration/evidence/m2-linux/gate.json"
   },
   "stopped": false,
   "stop_reason": null,
   "stopped_utc": "2026-10-07T17:17:31.014654+00:00",
   "saved_unaccepted_code_commit": "ed54ef6b68146df4a560b77865d8d47efd077730",
-  "highest_accepted_level": "LEVEL_1",
+  "highest_accepted_level": "LEVEL_2",
   "publication": {
-    "status": "checkpoint branch pushed and independently verified at f0e4276e50816bb92883a7b1ea6e02de717a73e0",
-    "draft_pr": "NOT CREATED yet"
+    "status": "Draft PR111 open/draft/unmerged at M1 docs head6b1ac11; no merge",
+    "draft_pr": "https://github.com/ryoumiyahayato/wwo/pull/111"
   },
   "resumed_utc": "2026-10-07T17:21:05Z",
   "control_history": [

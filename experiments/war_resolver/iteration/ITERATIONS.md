@@ -40,3 +40,21 @@ builds/task9-m1-long-retreat-counterexample完整exit1，182/2，距离1.0989995
 补全隐藏空间事实不刷新Task7知识/库存与NaN/负地形断言；代码069e3f0受影响门
 完整exit0，190/0。机器比对唯一变更源码为spatial/tests.gd，全部算法与旧测试
 同hash，明确复用已结束扩大日志。M1 PASSED/LEVEL_1；继续预登记M2。
+
+009 M2契约先红：route delivery/cycle能力缺口，builds/task9-m2-contract-before
+18 checks/7 failures实际结束；最小正规Role路线及有限循环接入后，contract-first
+27/0及Task7/8/角色/空间相关回归通过。未知关闭不从admission泄露。
+
+010 M2组合：预登记main、报告延迟、有限供给、纯预览/报告、keep关闭循环。
+首次组合108/0；继续紧急同刻合并、暂停/退役、因果trace及诊断4096ring，
+builds/task9-m2-trace-and-boundaries完整exit0，116/0和56/0，相关旧集全部过。
+
+011 M2实际CLI：main seed71 1800秒，ledger平衡，118事实trace，原路/改道/补给
+三轮及临配旧命令拒绝均真实运行。keep切分worst1.6098922e-6，73 vs67segments，
+不称绝对零成本。CLI wrapper首次version继承不可写字体cache产生环境诊断，
+统一改为本输出目录XDG，算法未改；code0c93b66冻结扩大门正在运行。
+日志更新脚本有一次Python字符串语法错误，未执行；随后纠正，未影响code/gate。
+
+012 M2冻结门：0c93b66完整exit0，旧43948/0及八Linuxhash相同；空间190/0，
+contracts56/0，combined116/0。冻结CLI无cache错误，actual1800秒/118trace/ledger平衡。
+M2 PASSED/LEVEL_2，证据索引保存，下一步先测M3峰值再改同一kernel。

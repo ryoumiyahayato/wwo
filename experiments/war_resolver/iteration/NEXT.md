@@ -1,8 +1,9 @@
-# 当前恢复入口：M1已通过，继续M2
+# 当前恢复入口：M2已通过，先测M3峰值
 
-M1代码069e3f0，190/0；扩大旧回归ce7b337完整43948/0及八hash一致。
-仅新增空间测试源码不同，算法文件hash相同，复用已结束原日志，不重复统计。
-M1 evidence/m1-linux/reuse.json；历史失败保留。M0经济golden仍失败，不称仓库全绿。
-M2_SCENARIOS.md已在首次新增场景运行前预登记；下一步正规路线意图、局部反馈与
-登记人物有限重复机会，再真实三轮闭环。约81分钟已用/519剩余，不重置预算。
-唯一写入者/原分支/冻结base不变；不得merge/force/生产改动。
+M2 code0c93b66，builds/task9-m2-frozen-gate完整exit0；旧43948/0及八hash相同，
+空间190/0、contracts56/0、combined116/0，冻结CLI main1800秒实际运行/118trace，
+证据iteration/evidence/m2-linux。M0/M1/M2 PASSED，最高LEVEL_2，M3 RUNNING。
+约115分钟已用/485剩余，510分钟停止新增功能，保留90最终验证。
+下一步先profile原prepare/apply/events，再在同kernel拆分接触/效果/事件，原方程
+复用，提交边界对外PENDING，工作quota不能改变积分边界。尚未宣称LEVEL_3。
+PR111唯一draft；不merge/rebase/force，不改旧断言、生产或未知文件。
