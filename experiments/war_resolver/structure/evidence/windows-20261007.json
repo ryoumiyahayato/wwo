@@ -1,0 +1,780 @@
+{
+  "version": "4.6.3.stable.official.7d41c59c4",
+  "base": "f80cc6ce0752a53f6a6dabc7913db45a7735046c",
+  "validation_head": "f80cc6ce0752a53f6a6dabc7913db45a7735046c",
+  "source_digest": {
+    "experiments/war_resolver/aggregation/authority.gd": "7681ab83f290a3c7b1c8c0c52a7ce2e66c78ed4be573292ba9eec5c384d55194",
+    "experiments/war_resolver/aggregation/benchmark.gd": "a01f7a80715f164791b611d22f169ef5599299950076b276da704d638484fbaa",
+    "experiments/war_resolver/aggregation/contact_index.gd": "d9bd056deeae1ffc83b4dad09f29092b30f83536d39842ae8aeae7e4961a041c",
+    "experiments/war_resolver/aggregation/fixtures.gd": "49c196a901d50a863ce17a1addd772bd47d446d8b7f8f9d63144096e0fd84e4a",
+    "experiments/war_resolver/aggregation/indexed_resolver.gd": "b3d115e51ba57662fc437690ed3fe4ba00e8e42412e70be4a152e81db7871d7d",
+    "experiments/war_resolver/aggregation/replay_probe.gd": "8e2f6691cab8af0ea47e7f0bb51c7bbe9713f96cf1f103efef6d5f419c44e4fb",
+    "experiments/war_resolver/aggregation/spatial_hierarchy.gd": "02a30b691008b22b2a905388989cea25b9fa3f74cac8872f2e5f9d77cbe03c73",
+    "experiments/war_resolver/aggregation/tests.gd": "a7e6042ecebc624145cbafb8fdd5df9aac2bab6052dd85890007f1b4003ed7d5",
+    "experiments/war_resolver/aggregation/validate.py": "065c0f5be0a5f7cc22efcfead6dbaad83e7edc7f6ec642f719f7af21cd83cae3",
+    "experiments/war_resolver/battle_state.gd": "20c374c17613b2e1e91b8a2a1506b8bec0a67e803ce2fc39c0b6cd04fe381a15",
+    "experiments/war_resolver/benchmark.gd": "cc177c3758e6332fb43299c509bae92d7726460ea3e331c039bf3235b69d700d",
+    "experiments/war_resolver/data.gd": "5b34dda92ce041fe0f47804a66f31e4d9980ead5b45b19a0b140bc5bb8ee479e",
+    "experiments/war_resolver/replay_probe.gd": "e82c63ea5996162366cda1cdf4c39462188145da234a1854462bf6cb8fb71733",
+    "experiments/war_resolver/resolver.gd": "7ba0813c864f0755f371ad017cf5f7a9fd50dba7a6276c9051fb754be6136a4c",
+    "experiments/war_resolver/role_overrides.gd": "0148d7ca32c1ba8be509a28e426cdf1237d04a7e570a064692a9717aaa1b1b9a",
+    "experiments/war_resolver/role_replay_probe.gd": "e5d64882242075cd0072ea72965527f16cfdf243304923f59ff44efa8bc50dfc",
+    "experiments/war_resolver/role_scenarios.gd": "7abc5e580d833583e7d2c4ee194450daaa2216e06fc274d7495df45dc00dc222",
+    "experiments/war_resolver/role_tests.gd": "39295958433fe123e72a6fd4f078027d00e7ead6587c300f18363bfa5f9807d9",
+    "experiments/war_resolver/sandbox/canvas.gd": "3155dd727b21de1ac3b6fe776daad4fa0f2f2693197444c2cbd13f1666db8ee8",
+    "experiments/war_resolver/sandbox/fixtures.gd": "75decec2c8b277e8496f3f93e37cfdb04d3ef910aab65a9431a976a2eb71b103",
+    "experiments/war_resolver/sandbox/observation_probe.gd": "e7f3c013ef924b17e55a45a5c8e9d629a53dd49e3d5df5f87024ad92dca83e3e",
+    "experiments/war_resolver/sandbox/sandbox.gd": "e158cb91551768f93aacc26032b8dfbce4e10a0086bf48495cefa4f635efa993",
+    "experiments/war_resolver/sandbox/session.gd": "dfbfc749cbb7a8e51a84c9d504f81511996cf3b2fc2cca125bc483a3f554359c",
+    "experiments/war_resolver/sandbox/tests.gd": "0534b6c5650e4dd6b243b538df2f80c5ca9d9003d501a6f8768ccbbab33ed372",
+    "experiments/war_resolver/scenarios.gd": "fc74132c90e1e9cc7f9e541792559a3a2cc49186e8558359e556d6b5e46bf581",
+    "experiments/war_resolver/structure/benchmark.gd": "be81aa89e412f90ce20ff69497336948bdae9dbab8607317ad8766a6f3c1c62d",
+    "experiments/war_resolver/structure/commands.gd": "d6832f556e6311aab08baaea0a0d66333cef1d726b0517200a232dff8dce28cf",
+    "experiments/war_resolver/structure/fixtures.gd": "ca05f53a3cc13faee3b52f934c99ac8c04ac4bf994bcfae07b57083eda56ee92",
+    "experiments/war_resolver/structure/replay_probe.gd": "283dea1d2e7b38ad6b6fc5e8008232b7a4c5a6ad2a4dfb5b31a493fe38ba1891",
+    "experiments/war_resolver/structure/service.gd": "d6d8042080c19ce62a6c9a6773bd4f984a0133156dc59d57df81ddfb566b1d69",
+    "experiments/war_resolver/structure/tests.gd": "a5faf588d9e4e96a0e21d9bc0674913b269233305565896f8619fcce22ef0e72",
+    "experiments/war_resolver/structure/validate.py": "6797c384ad876d66421507ba33aa5522088c69f599b38d176842ad7660f329a5",
+    "experiments/war_resolver/tests.gd": "2e520ff1234f4bdfd4779f2cbd06ebed4a8f675a184a0d9b31e5d14a5a29c7b1",
+    "experiments/war_resolver/validate.py": "ad5d2954283bd0f0fb19518a218175f046328cd97ffd58e72d39a65ed4dfc261"
+  },
+  "checks": 788,
+  "failures": 0,
+  "replay_sha256": "c2da3bc13475afb8540ccae93d49b7ce8a5ba072f7c2c4e768ad6f0f7cded664",
+  "tests": [
+    {
+      "after": {
+        "ammo_spent": 460.0,
+        "ammunition": 37940.0,
+        "casualties": 4.0,
+        "effective": 476.0,
+        "equipment": 475.0,
+        "equipment_lost": 5.0,
+        "personnel_total": 480.0
+      },
+      "before": {
+        "ammo_spent": 460.0,
+        "ammunition": 37940.0,
+        "casualties": 4.0,
+        "effective": 476.0,
+        "equipment": 475.0,
+        "equipment_lost": 5.0,
+        "personnel_total": 480.0
+      },
+      "cycles": 20,
+      "test": "A_B_C_D_P",
+      "time": 0.0,
+      "work": {
+        "aggregate_memberships_rebuilt": 0,
+        "authority_scopes_updated": 231,
+        "leaves_materialized_for_structure": 0,
+        "relations_changed": 42,
+        "structure_events_processed": 42,
+        "structure_records_examined": 630
+      }
+    },
+    {
+      "after": {
+        "ammo_spent": 0.0,
+        "ammunition": 38400.0,
+        "casualties": 0.0,
+        "effective": 480.0,
+        "equipment": 480.0,
+        "equipment_lost": 0.0,
+        "personnel_total": 480.0
+      },
+      "before": {
+        "ammo_spent": 0.0,
+        "ammunition": 38400.0,
+        "casualties": 0.0,
+        "effective": 480.0,
+        "equipment": 480.0,
+        "equipment_lost": 0.0,
+        "personnel_total": 480.0
+      },
+      "test": "A_B_company",
+      "work": {
+        "aggregate_memberships_rebuilt": 0,
+        "authority_scopes_updated": 180,
+        "leaves_materialized_for_structure": 0,
+        "relations_changed": 41,
+        "structure_events_processed": 1,
+        "structure_records_examined": 585
+      }
+    },
+    {
+      "relation": {
+        "attachment": {
+          "from": 17.0,
+          "id": "attach_company",
+          "operational_parent": "blue_battalion_b",
+          "permanent_parent": "blue_battalion",
+          "until": 77.0
+        },
+        "effective_parent": "blue_battalion_b",
+        "ok": true,
+        "permanent_parent": "blue_battalion",
+        "supply_responsibility_reference": "blue_battalion_b"
+      },
+      "reverted": {
+        "attachment": {},
+        "effective_parent": "blue_battalion",
+        "ok": true,
+        "permanent_parent": "blue_battalion",
+        "supply_responsibility_reference": "blue_battalion"
+      },
+      "test": "E_J",
+      "work": {
+        "aggregate_memberships_rebuilt": 2,
+        "authority_scopes_updated": 4,
+        "leaves_materialized_for_structure": 20,
+        "relations_changed": 2,
+        "structure_events_processed": 2,
+        "structure_records_examined": 318
+      }
+    },
+    {
+      "attachment_work": {
+        "aggregate_memberships_rebuilt": 1,
+        "authority_scopes_updated": 12,
+        "leaves_materialized_for_structure": 1,
+        "relations_changed": 2,
+        "structure_events_processed": 2,
+        "structure_records_examined": 63
+      },
+      "dirty": [
+        "cell_037",
+        "parent_01",
+        "region_50"
+      ],
+      "split_work": {
+        "aggregate_memberships_rebuilt": 1,
+        "authority_scopes_updated": 5,
+        "leaves_materialized_for_structure": 1,
+        "relations_changed": 1,
+        "structure_events_processed": 1,
+        "structure_records_examined": 9
+      },
+      "test": "G_H_I_K_M"
+    },
+    {
+      "cycles": 12,
+      "test": "F_P",
+      "work": {
+        "aggregate_memberships_rebuilt": 1,
+        "authority_scopes_updated": 156,
+        "leaves_materialized_for_structure": 1,
+        "relations_changed": 26,
+        "structure_events_processed": 39,
+        "structure_records_examined": 1089
+      }
+    },
+    {
+      "history": [
+        {
+          "actor": "regiment",
+          "id": "structure_z_attach",
+          "outcome": {
+            "kind": "attach",
+            "ok": true,
+            "values": {
+              "parent": "blue_destination",
+              "target": "node_unit_000",
+              "until": 47.0
+            }
+          },
+          "time": 17.0
+        }
+      ],
+      "order": [
+        "structure_z_attach",
+        "a_order",
+        "b_reinforcement",
+        "c_terrain"
+      ],
+      "test": "N"
+    },
+    {
+      "outcome_hash": "65b0f94572dad9b1b89784333da515f9afcce762d88d6a90627c783854d98c46",
+      "test": "L",
+      "work": {
+        "combat": {
+          "areas_examined": 12,
+          "contacts_resolved": 132,
+          "events_processed": 2,
+          "segments": 12,
+          "units_examined": 1527
+        },
+        "lod": {
+          "actual_contacts_resolved": 132,
+          "candidate_contacts_examined": 273,
+          "events": 2,
+          "formation_records_examined": 1303,
+          "formations_built": 4,
+          "formations_resolved": 57,
+          "index_records_examined": 57,
+          "input_leaf_records_examined": 40,
+          "leaf_records_examined": 308,
+          "leaf_records_materialized": 1,
+          "parent_nodes_updated": 2,
+          "range_probes": 285,
+          "segments": 12,
+          "spatial_nodes_examined": 3
+        },
+        "structure": {
+          "aggregate_memberships_rebuilt": 1,
+          "authority_scopes_updated": 12,
+          "leaves_materialized_for_structure": 1,
+          "relations_changed": 2,
+          "structure_events_processed": 2,
+          "structure_records_examined": 60
+        }
+      }
+    },
+    {
+      "hashes": [
+        "ed9c3f453c83ab1607b94bf9d781032d0d7f35d78c2a6d69d664dc4e3798f07f",
+        "ed9c3f453c83ab1607b94bf9d781032d0d7f35d78c2a6d69d664dc4e3798f07f"
+      ],
+      "test": "N_order"
+    },
+    {
+      "no_input_exact_equivalence": true,
+      "test": "H_K_P_edges",
+      "work": {
+        "aggregate_memberships_rebuilt": 4,
+        "authority_scopes_updated": 24,
+        "leaves_materialized_for_structure": 4,
+        "relations_changed": 4,
+        "structure_events_processed": 4,
+        "structure_records_examined": 122
+      }
+    }
+  ],
+  "benchmark": [
+    {
+      "active_sides": {
+        "blue": {
+          "ammo_spent": 91.2,
+          "casualties": 0.75435654951553,
+          "complete": 0,
+          "effective": 239.245643450484,
+          "equipment_lost": 0.75435654951553,
+          "personnel_total": 240.0,
+          "position_weighted": 126.748988273422,
+          "withdrawn": 0
+        },
+        "red": {
+          "ammo_spent": 91.2,
+          "casualties": 0.426935935045949,
+          "complete": 0,
+          "effective": 239.573064064954,
+          "equipment_lost": 0.426935935045949,
+          "personnel_total": 240.0,
+          "position_weighted": 840.0,
+          "withdrawn": 0
+        }
+      },
+      "case": "detailed_company_split",
+      "combat_work": {
+        "areas_examined": 0,
+        "contacts_resolved": 0,
+        "events_processed": 1,
+        "segments": 0,
+        "units_examined": 60
+      },
+      "lod_work": {
+        "actual_contacts_resolved": 0,
+        "candidate_contacts_examined": 0,
+        "events": 1,
+        "formation_records_examined": 0,
+        "formations_built": 0,
+        "formations_resolved": 0,
+        "index_records_examined": 0,
+        "input_leaf_records_examined": 0,
+        "leaf_records_examined": 200,
+        "leaf_records_materialized": 0,
+        "parent_nodes_updated": 2,
+        "range_probes": 0,
+        "segments": 0,
+        "spatial_nodes_examined": 3
+      },
+      "outcome": {
+        "actor": "battalion",
+        "id": "structure_company_detachment",
+        "outcome": {
+          "kind": "split",
+          "ok": true,
+          "values": {
+            "allocation": {
+              "ammo_spent": 22.8,
+              "ammunition": 4777.2,
+              "casualties": 0.188589137378882,
+              "effective": 59.8114108626211,
+              "equipment": 59.8114108626211,
+              "equipment_lost": 0.188589137378882,
+              "personnel_total": 60.0
+            },
+            "new_id": "detached_company",
+            "new_node": "detached_company",
+            "source": "blue_company"
+          }
+        },
+        "time": 120.0
+      },
+      "sleeping_areas": 0,
+      "sleeping_squads": 0,
+      "structure_work": {
+        "aggregate_memberships_rebuilt": 0,
+        "authority_scopes_updated": 180,
+        "leaves_materialized_for_structure": 0,
+        "relations_changed": 41,
+        "structure_events_processed": 1,
+        "structure_records_examined": 515
+      },
+      "time_after": 120.0,
+      "time_before": 120.0,
+      "underlying_squads": 40,
+      "wall_ms": 4.126
+    },
+    {
+      "active_sides": {
+        "blue": {
+          "ammo_spent": 91.2,
+          "casualties": 0.758987350631355,
+          "complete": 0,
+          "effective": 239.241012649369,
+          "equipment_lost": 0.758987350631355,
+          "personnel_total": 240.0,
+          "position_weighted": 126.749062996464,
+          "withdrawn": 0
+        },
+        "red": {
+          "ammo_spent": 91.2,
+          "casualties": 0.430512275705162,
+          "complete": 0,
+          "effective": 239.569487724295,
+          "equipment_lost": 0.430512275705162,
+          "personnel_total": 240.0,
+          "position_weighted": 840.0,
+          "withdrawn": 0
+        }
+      },
+      "case": "aggregate_leaf_detachment",
+      "combat_work": {
+        "areas_examined": 0,
+        "contacts_resolved": 0,
+        "events_processed": 1,
+        "segments": 0,
+        "units_examined": 7
+      },
+      "lod_work": {
+        "actual_contacts_resolved": 0,
+        "candidate_contacts_examined": 0,
+        "events": 1,
+        "formation_records_examined": 17,
+        "formations_built": 0,
+        "formations_resolved": 0,
+        "index_records_examined": 0,
+        "input_leaf_records_examined": 0,
+        "leaf_records_examined": 9,
+        "leaf_records_materialized": 1,
+        "parent_nodes_updated": 2,
+        "range_probes": 0,
+        "segments": 0,
+        "spatial_nodes_examined": 3
+      },
+      "outcome": {
+        "actor": "regiment",
+        "id": "structure_split",
+        "outcome": {
+          "kind": "split",
+          "ok": true,
+          "values": {
+            "allocation": {
+              "ammo_spent": 1.13998086533729,
+              "ammunition": 238.860019134663,
+              "casualties": 0.00957474511799934,
+              "effective": 2.990425254882,
+              "equipment": 2.990425254882,
+              "equipment_lost": 0.00957474511799934,
+              "personnel_total": 3.0
+            },
+            "new_id": "detachment",
+            "new_node": "node_detachment",
+            "source": "unit_000"
+          }
+        },
+        "time": 120.0
+      },
+      "sleeping_areas": 0,
+      "sleeping_squads": 0,
+      "structure_work": {
+        "aggregate_memberships_rebuilt": 1,
+        "authority_scopes_updated": 5,
+        "leaves_materialized_for_structure": 1,
+        "relations_changed": 1,
+        "structure_events_processed": 1,
+        "structure_records_examined": 9
+      },
+      "time_after": 120.0,
+      "time_before": 120.0,
+      "underlying_squads": 40,
+      "wall_ms": 0.455
+    },
+    {
+      "active_sides": {
+        "blue": {
+          "ammo_spent": 91.2,
+          "casualties": 0.758987350631355,
+          "complete": 0,
+          "effective": 239.241012649369,
+          "equipment_lost": 0.758987350631355,
+          "personnel_total": 240.0,
+          "position_weighted": 126.749062996464,
+          "withdrawn": 0
+        },
+        "red": {
+          "ammo_spent": 91.2,
+          "casualties": 0.430512275705162,
+          "complete": 0,
+          "effective": 239.569487724295,
+          "equipment_lost": 0.430512275705162,
+          "personnel_total": 240.0,
+          "position_weighted": 840.0,
+          "withdrawn": 0
+        }
+      },
+      "case": "40_aggregate_one_attachment",
+      "combat_work": {
+        "areas_examined": 0,
+        "contacts_resolved": 0,
+        "events_processed": 1,
+        "segments": 0,
+        "units_examined": 6
+      },
+      "lod_work": {
+        "actual_contacts_resolved": 0,
+        "candidate_contacts_examined": 0,
+        "events": 1,
+        "formation_records_examined": 7,
+        "formations_built": 0,
+        "formations_resolved": 0,
+        "index_records_examined": 0,
+        "input_leaf_records_examined": 0,
+        "leaf_records_examined": 3,
+        "leaf_records_materialized": 1,
+        "parent_nodes_updated": 2,
+        "range_probes": 0,
+        "segments": 0,
+        "spatial_nodes_examined": 3
+      },
+      "outcome": {
+        "actor": "regiment",
+        "id": "structure_attachment",
+        "outcome": {
+          "kind": "attach",
+          "ok": true,
+          "values": {
+            "parent": "blue_destination",
+            "target": "node_unit_000",
+            "until": 157.0
+          }
+        },
+        "time": 120.0
+      },
+      "sleeping_areas": 0,
+      "sleeping_squads": 0,
+      "structure_work": {
+        "aggregate_memberships_rebuilt": 1,
+        "authority_scopes_updated": 6,
+        "leaves_materialized_for_structure": 1,
+        "relations_changed": 1,
+        "structure_events_processed": 1,
+        "structure_records_examined": 42
+      },
+      "time_after": 120.0,
+      "time_before": 120.0,
+      "underlying_squads": 40,
+      "wall_ms": 0.371
+    },
+    {
+      "active_sides": {
+        "blue": {
+          "ammo_spent": 91.2,
+          "casualties": 0.753478298441118,
+          "complete": 0,
+          "effective": 599.246521701559,
+          "equipment_lost": 0.753478298441118,
+          "personnel_total": 600.0,
+          "position_weighted": 306.741688598181,
+          "withdrawn": 0
+        },
+        "red": {
+          "ammo_spent": 91.2,
+          "casualties": 0.423785264553612,
+          "complete": 0,
+          "effective": 599.576214735446,
+          "equipment_lost": 0.423785264553612,
+          "personnel_total": 600.0,
+          "position_weighted": 2100.0,
+          "withdrawn": 0
+        }
+      },
+      "case": "100_aggregate_one_attachment",
+      "combat_work": {
+        "areas_examined": 0,
+        "contacts_resolved": 0,
+        "events_processed": 1,
+        "segments": 0,
+        "units_examined": 12
+      },
+      "lod_work": {
+        "actual_contacts_resolved": 0,
+        "candidate_contacts_examined": 0,
+        "events": 1,
+        "formation_records_examined": 13,
+        "formations_built": 0,
+        "formations_resolved": 0,
+        "index_records_examined": 0,
+        "input_leaf_records_examined": 0,
+        "leaf_records_examined": 3,
+        "leaf_records_materialized": 1,
+        "parent_nodes_updated": 0,
+        "range_probes": 0,
+        "segments": 0,
+        "spatial_nodes_examined": 0
+      },
+      "outcome": {
+        "actor": "regiment",
+        "id": "structure_attachment",
+        "outcome": {
+          "kind": "attach",
+          "ok": true,
+          "values": {
+            "parent": "blue_destination",
+            "target": "node_unit_000",
+            "until": 157.0
+          }
+        },
+        "time": 120.0
+      },
+      "sleeping_areas": 0,
+      "sleeping_squads": 0,
+      "structure_work": {
+        "aggregate_memberships_rebuilt": 1,
+        "authority_scopes_updated": 6,
+        "leaves_materialized_for_structure": 1,
+        "relations_changed": 1,
+        "structure_events_processed": 1,
+        "structure_records_examined": 42
+      },
+      "time_after": 120.0,
+      "time_before": 120.0,
+      "underlying_squads": 100,
+      "wall_ms": 0.475
+    },
+    {
+      "active_sides": {
+        "blue": {
+          "ammo_spent": 91.2,
+          "casualties": 0.758987350631355,
+          "complete": 0,
+          "effective": 239.241012649369,
+          "equipment_lost": 0.758987350631355,
+          "personnel_total": 240.0,
+          "position_weighted": 126.749062996464,
+          "withdrawn": 0
+        },
+        "red": {
+          "ammo_spent": 91.2,
+          "casualties": 0.430512275705162,
+          "complete": 0,
+          "effective": 239.569487724295,
+          "equipment_lost": 0.430512275705162,
+          "personnel_total": 240.0,
+          "position_weighted": 840.0,
+          "withdrawn": 0
+        }
+      },
+      "case": "40_aggregate_sleeping_attachment",
+      "combat_work": {
+        "areas_examined": 0,
+        "contacts_resolved": 0,
+        "events_processed": 1,
+        "segments": 0,
+        "units_examined": 6
+      },
+      "lod_work": {
+        "actual_contacts_resolved": 0,
+        "candidate_contacts_examined": 0,
+        "events": 1,
+        "formation_records_examined": 7,
+        "formations_built": 0,
+        "formations_resolved": 0,
+        "index_records_examined": 0,
+        "input_leaf_records_examined": 0,
+        "leaf_records_examined": 3,
+        "leaf_records_materialized": 1,
+        "parent_nodes_updated": 2,
+        "range_probes": 0,
+        "segments": 0,
+        "spatial_nodes_examined": 3
+      },
+      "outcome": {
+        "actor": "regiment",
+        "id": "structure_attachment",
+        "outcome": {
+          "kind": "attach",
+          "ok": true,
+          "values": {
+            "parent": "blue_destination",
+            "target": "node_unit_000",
+            "until": 157.0
+          }
+        },
+        "time": 120.0
+      },
+      "sleeping_areas": 10000,
+      "sleeping_squads": 30000,
+      "structure_work": {
+        "aggregate_memberships_rebuilt": 1,
+        "authority_scopes_updated": 6,
+        "leaves_materialized_for_structure": 1,
+        "relations_changed": 1,
+        "structure_events_processed": 1,
+        "structure_records_examined": 42
+      },
+      "time_after": 120.0,
+      "time_before": 120.0,
+      "underlying_squads": 40,
+      "wall_ms": 0.387
+    },
+    {
+      "active_sides": {
+        "blue": {
+          "ammo_spent": 119.32,
+          "casualties": 0.992772934356485,
+          "complete": 0,
+          "effective": 239.007227065644,
+          "equipment_lost": 0.992772934356485,
+          "personnel_total": 240.0,
+          "position_weighted": 128.836811372203,
+          "withdrawn": 0
+        },
+        "red": {
+          "ammo_spent": 119.32,
+          "casualties": 0.563183053023778,
+          "complete": 0,
+          "effective": 239.436816946976,
+          "equipment_lost": 0.563183053023778,
+          "personnel_total": 240.0,
+          "position_weighted": 840.0,
+          "withdrawn": 0
+        }
+      },
+      "case": "attachment_expiry",
+      "combat_work": {
+        "areas_examined": 1,
+        "contacts_resolved": 12,
+        "events_processed": 1,
+        "segments": 1,
+        "units_examined": 142
+      },
+      "lod_work": {
+        "actual_contacts_resolved": 12,
+        "candidate_contacts_examined": 25,
+        "events": 1,
+        "formation_records_examined": 116,
+        "formations_built": 0,
+        "formations_resolved": 5,
+        "index_records_examined": 5,
+        "input_leaf_records_examined": 0,
+        "leaf_records_examined": 26,
+        "leaf_records_materialized": 0,
+        "parent_nodes_updated": 2,
+        "range_probes": 25,
+        "segments": 1,
+        "spatial_nodes_examined": 3
+      },
+      "outcome": {
+        "actor": "regiment",
+        "id": "structure_expiry_attachment",
+        "outcome": {
+          "kind": "attachment_expired",
+          "ok": true,
+          "target": "node_unit_000"
+        },
+        "time": 157.0
+      },
+      "sleeping_areas": 0,
+      "sleeping_squads": 0,
+      "structure_work": {
+        "aggregate_memberships_rebuilt": 0,
+        "authority_scopes_updated": 6,
+        "leaves_materialized_for_structure": 0,
+        "relations_changed": 1,
+        "structure_events_processed": 1,
+        "structure_records_examined": 18
+      },
+      "time_after": 157.0,
+      "time_before": 156.0,
+      "underlying_squads": 40,
+      "wall_ms": 1.143
+    }
+  ],
+  "retained_hashes": {
+    "replay-a": "3c369000cbf20ed19fb53d20dde0f47fea9f025a5c1ee32a010cc332b0d92904",
+    "role-replay-a": "60d41290019b0efeaa7e21bee3201461a912cff8bfb838642cfe8ae6ef83b3e3",
+    "sandbox-replay-a": "a079c498616d72209811861d72fad70ccab5dd6ea3c13bceedcaed3ad8882390"
+  },
+  "task4_replay_sha256": "73c47a49ca73e026227324581975b1315b9386183a21da022827d30e37a646f3",
+  "task4_checks": 17329,
+  "validated_code_commit": "c18ba00c7ca9e865f2d814c5fb348bae8abd35dc",
+  "validation_head_note": "Validation executed before commit; all frozen GDScript/Python source hashes verified identical afterward.",
+  "additional_validation": {
+    "retained_checks": 17567,
+    "retained_failures": 0,
+    "unified_godot_checks": 4178,
+    "unified_python_tests": 46,
+    "unified_exit": 0,
+    "audit_checks": 31,
+    "audit_failures": 0,
+    "unified_allowlisted_resource_exit_diagnostics": 3
+  },
+  "original_protection": {
+    "agent_writes": false,
+    "snapshots": [
+      {
+        "snapshot": "status",
+        "unchanged": false,
+        "original_sha256": "62bad246725377ea84361c3b27c40c909969ffafb4896dd86c66ce56bb816b89",
+        "final_sha256": "9a2d1311860a59bde2da29685e3c4b83eefc1ded4ca4ca422755b2190315cc1f"
+      },
+      {
+        "snapshot": "diff",
+        "unchanged": true,
+        "original_sha256": "dcb5dcd7f57ef567687e35a49bc0177a14fa5233a987c39bb42d7c34d852de32",
+        "final_sha256": "dcb5dcd7f57ef567687e35a49bc0177a14fa5233a987c39bb42d7c34d852de32"
+      },
+      {
+        "snapshot": "staged",
+        "unchanged": true,
+        "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "final_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "snapshot": "head",
+        "unchanged": true,
+        "original_sha256": "0e4979b7f9288458dc1155d1dc8337738716a306f4ba575d6fef375ced7e9a9d",
+        "final_sha256": "0e4979b7f9288458dc1155d1dc8337738716a306f4ba575d6fef375ced7e9a9d"
+      },
+      {
+        "snapshot": "branch",
+        "unchanged": true,
+        "original_sha256": "aec1da17172c9a3522619a47b28293ed80c3151e1d35c657d7912d0cd121b519",
+        "final_sha256": "aec1da17172c9a3522619a47b28293ed80c3151e1d35c657d7912d0cd121b519"
+      }
+    ]
+  }
+}

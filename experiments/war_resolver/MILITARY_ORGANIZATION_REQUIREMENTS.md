@@ -1,7 +1,9 @@
 # Organization information required by the military role experiment
 
 **EXPERIMENTAL / NON-PRODUCTION. Production integration status = NONE.**
-This document concerns only task 2's military decision inputs. It proposes no
+The original sections below record task 2's military decision inputs. Task 5's
+evidence addendum at the end supersedes static-relation limitations only for the
+explicitly structure-bound experiment. It proposes no
 universal Organization model and changes no formal organization authority.
 Dependency: task 1, draft PR [#103](https://github.com/ryoumiyahayato/wwo/pull/103),
 `experiment/land-war-resolver-v0-20261006` at
@@ -116,3 +118,57 @@ longer-interval AGGREGATE policy (no formation coalescing), quadratic local cont
 search, abstract one-axis objectives, trusted snapshots and unresolved baseline
 economy golden failures visible. Air/sea combat, formal UI, maps, saves, Economy
 and Organization integration remain out of scope.
+
+## Task 5 evidence addendum — real unit structure and temporary attachment
+
+**EXPERIMENTAL / NON-PRODUCTION. Production integration status = NONE.**
+Frozen local base is Task 4 `f80cc6ce0752a53f6a6dabc7913db45a7735046c`.
+See [structure contract](structure/README.md),
+[local validation](structure/TASK5_LOCAL_VALIDATION.md) and machine evidence.
+Earlier statements that attachment is future-only describe the unbound task 2
+adapter; optional task 5 binding supplies the following experiment-level facts.
+
+### IMPLEMENTED
+
+- Permanent membership and a distinct effective operational parent, with start,
+  expiry, revoke and stable attachment ID. No concurrent operational parents.
+- Command eligibility and scoped perfect reports follow current effective
+  ancestry; transferred subtrees leave the old superior's operational scope.
+  A subordinate office retains its own scope. Pending structural submissions
+  revalidate the actual bound person's authority at delivery.
+- Real resource-bearing proportional detachments and constrained compatible leaf
+  merges, with persistent source/survivor identities, retired donor history and
+  identity reuse rejection. Conditions are inherited or conservatively combined;
+  no stock/ledger reinjection or state reset.
+- Structural events share the authoritative world clock and deterministic
+  timestamp phases. A pending-unit-reference index permits rejection of unsupported
+  migration without global scans. Partial LOD materialization changes only the
+  affected leaf/subtree and updates unique proxy membership before new coalescing.
+- `supply_responsibility_reference` identifies the operational-parent lookup
+  point. It is a reference, not implementation of supply ownership or logistics.
+
+### EVIDENCE-BACKED FUTURE NEED
+
+- Consumers need permanent and operational relation queries separately, with an
+  as-of boundary and revision/expiry identity; command/report tests demonstrate
+  why a single overwritten parent or UI grouping is insufficient.
+- Persistent unit identity and provenance/retirement links must survive genuine
+  structural change. Combat stocks belong to current resource-bearing records;
+  historical donor images must never be counted as current resources.
+- Accepted future deliveries need authority revalidation and explicit rejection
+  outcomes. General migration of existing orders/reserve dependencies needs a
+  separate contract; this experiment rejects unsupported split/merge cases.
+- A future supply domain needs a responsibility lookup and a policy distinguishing
+  command authority from ownership/support obligations. Attachment alone does not
+  prove that the recipient should fund payroll or own equipment.
+- New/retired structures eventually require appointment and lifecycle rules if
+  gameplay binds officers there. No officer, successor or person is manufactured
+  here; unsupported retired bindings become inactive.
+
+### SPECULATIVE
+
+Universal army/company/government graph, full delegation, attachment-related combat
+bonuses, multi-parent command, payroll/equipment/replacement transfer policies,
+historical staff tables, communication routing and a general succession algorithm
+remain unproven and unimplemented. Neither this military contract nor its synthetic
+fixtures choose the formal Organization kernel for other domains.
