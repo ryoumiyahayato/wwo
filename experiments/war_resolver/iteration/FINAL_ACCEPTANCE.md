@@ -1,7 +1,7 @@
 # WWO WAR ALGORITHM — TASK9+ BOUNDED ITERATION
 
-RUNNING，尚无最终验收。用户2026-10-07 17:21撤回此前停止指令，继续同一任务。
-此前停止保存报告保留为STOPPED_CHECKPOINT.md，仅是历史检查点，非当前结论。
-冻结base/原分支/约600分钟总预算均不变；累计约53分钟，剩余约547。
-M0 PASSED（披露原经济golden失败），M1 RUNNING，M2–4 NOT_STARTED。
-最新M1反例170 checks/3 failures及未实现ground API脚本错误仍须修复，未宣称M1通过。
+RUNNING；已保留LEVEL_1绿色检查点069e3f0。M0/M1 PASSED，M2 RUNNING，M3/M4 NOT_STARTED。
+空间190/0，旧43948/0与八Linuxhash保留；M1限定门未运行统一，M4仍必须完整验证。
+冻结基线独立重现Linux economy golden失败，未声称整个仓库全绿。
+实际Godot4.6.3/Linux/Python3.12.14；约81分钟已用/519剩余，不重置预算。
+此前停止报告仅为历史，已恢复同一任务。最终交付状态待M2–M4实际运行结果。

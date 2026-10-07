@@ -35,3 +35,8 @@ builds/task9-m1-long-retreat-counterexample完整exit1，182/2，距离1.0989995
 手算1.2；依赖唤醒独立断言通过。假设=每段把已反向路段再次反转。仅保留一个
 当前退却方向标记，明确到达后清除；builds/task9-m1-long-retreat-fixed完整exit0，
 182/0。保留反例/修复，下一步冻结M1扩大门。
+
+008 M1冻结门：ce7b337完整扩大门exit0，旧43948/0及八Linuxhash一致，空间182/0。
+补全隐藏空间事实不刷新Task7知识/库存与NaN/负地形断言；代码069e3f0受影响门
+完整exit0，190/0。机器比对唯一变更源码为spatial/tests.gd，全部算法与旧测试
+同hash，明确复用已结束扩大日志。M1 PASSED/LEVEL_1；继续预登记M2。

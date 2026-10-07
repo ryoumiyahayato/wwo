@@ -3,15 +3,15 @@
   "branch": "experiment/war-spatial-continuity-goal-v0",
   "stages": {
     "M0": "PASSED",
-    "M1": "RUNNING",
-    "M2": "NOT_STARTED",
+    "M1": "PASSED",
+    "M2": "RUNNING",
     "M3": "NOT_STARTED",
     "M4": "NOT_STARTED"
   },
-  "last_verified_code_commit": "ae63fddb25046f02b3095ad70bdded538cdaef26",
+  "last_verified_code_commit": "069e3f028ddf2dfe2bdb88e05fdad0de1bda2535",
   "started_utc": "2026-10-07T16:28:31Z",
-  "effective_minutes_estimate": 72,
-  "remaining_minutes_estimate": 528,
+  "effective_minutes_estimate": 81,
+  "remaining_minutes_estimate": 519,
   "estimate_quality": "approximate wall clock minus known wait; update at safe checkpoints",
   "platform_startup_wait_seconds": 13,
   "tests_completed": [
@@ -22,10 +22,10 @@
     "Multi-segment retreat counterexample: builds/task9-m1-long-retreat-counterexample complete exit1,182/2; corrected builds/task9-m1-long-retreat-fixed complete exit0,182/0"
   ],
   "tests_pending": [
-    "Expanded M1 gate on corrected frozen code; M2–M4 not started"
+    "M2 preregistered combined scenarios and contracts; M3/M4 not started"
   ],
   "blockers": [],
-  "next": "Freeze corrected M1 code; run expanded predecessor and spatial gate.",
+  "next": "Implement and test delayed route intent, bounded recurrent opportunities, local route observations; run M2 main/controls.",
   "validation_session": null,
   "connection_checks": [
     {
@@ -39,13 +39,14 @@
   ],
   "evidence": {
     "M0": "iteration/evidence/m0-linux/evidence.json",
-    "M0_raw": "builds/task9-m0"
+    "M0_raw": "builds/task9-m0",
+    "M1": "iteration/evidence/m1-linux/reuse.json"
   },
   "stopped": false,
   "stop_reason": null,
   "stopped_utc": "2026-10-07T17:17:31.014654+00:00",
   "saved_unaccepted_code_commit": "ed54ef6b68146df4a560b77865d8d47efd077730",
-  "highest_accepted_level": "NONE",
+  "highest_accepted_level": "LEVEL_1",
   "publication": {
     "status": "checkpoint branch pushed and independently verified at f0e4276e50816bb92883a7b1ea6e02de717a73e0",
     "draft_pr": "NOT CREATED yet"

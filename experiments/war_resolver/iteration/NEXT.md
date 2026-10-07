@@ -1,8 +1,8 @@
-# 当前恢复入口：M1 冻结与扩大门
+# 当前恢复入口：M1已通过，继续M2
 
-同一任务已恢复；预算不重置，约72分钟已用/528剩余。冻结Task8 base不变。
-实际Godot4.6.3/Python3.12.14可用；本地/远端现有分支，不另建Task9。
-空间173/0修正后，追加长撤退/依赖唤醒反例182/2；仅修正跨区间方向状态，
-最新builds/task9-m1-long-retreat-fixed完整exit0、182/0。M1尚须冻结扩大门。
-下一命令：cloud_validate.py --mode final --skip-unified --baseline-evidence builds/task9-m0/evidence.json --script experiments/war_resolver/spatial/tests.gd --output builds/task9-m1-frozen-gate
-不得merge/force/rebase；不改生产/旧断言，不删除旧失败或未知文件。
+M1代码069e3f0，190/0；扩大旧回归ce7b337完整43948/0及八hash一致。
+仅新增空间测试源码不同，算法文件hash相同，复用已结束原日志，不重复统计。
+M1 evidence/m1-linux/reuse.json；历史失败保留。M0经济golden仍失败，不称仓库全绿。
+M2_SCENARIOS.md已在首次新增场景运行前预登记；下一步正规路线意图、局部反馈与
+登记人物有限重复机会，再真实三轮闭环。约81分钟已用/519剩余，不重置预算。
+唯一写入者/原分支/冻结base不变；不得merge/force/生产改动。
