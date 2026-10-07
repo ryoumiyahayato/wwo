@@ -1,0 +1,17 @@
+{
+  "exact_code_commit": "69fa36d6202b2b0d8e9332406ff57d269749fa0c",
+  "command": [
+    "/usr/local/bin/godot",
+    "--headless",
+    "--path",
+    "/workspace/wwo",
+    "--script",
+    "/tmp/task9-retirement-counterexample.gd"
+  ],
+  "exit": 0,
+  "script_sha256": "b4d9c59afca19027ec1b51b7bc5aa95b0988a4620e13467fe85c93f82e53f2b8",
+  "log_sha256": "8da0ef7d4dadbe1b443c944c15377050238ab08223bb1cc75cba60d8ef2ea801",
+  "source_fingerprint_matches_targeted_report": true,
+  "targeted_report_head": "cc64092; dirty gd/py fingerprint equals69fa36d",
+  "wall_caveat": "same cloud; brief overlapping end of targeted tests; final frozen profiles are sequential"
+}

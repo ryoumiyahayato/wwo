@@ -5,13 +5,13 @@
     "M0": "PASSED",
     "M1": "PASSED",
     "M2": "PASSED",
-    "M3": "PASSED",
+    "M3": "RUNNING",
     "M4": "RUNNING"
   },
-  "last_verified_code_commit": "c8b489ef1c90a1b70c33b24952423f77f7e6e16b",
+  "last_verified_code_commit": "69fa36d6202b2b0d8e9332406ff57d269749fa0c",
   "started_utc": "2026-10-07T16:28:31Z",
-  "effective_minutes_estimate": 210,
-  "remaining_minutes_estimate": 390,
+  "effective_minutes_estimate": 238,
+  "remaining_minutes_estimate": 362,
   "estimate_quality": "approximate wall clock minus known wait; update at safe checkpoints",
   "platform_startup_wait_seconds": 13,
   "tests_completed": [
@@ -33,14 +33,16 @@
     "M3 stronger sustained24h53/0 seed71/109 normal/quota1/7/31: 17initial/15final active cells,400leaves,2focus,275opportunities; historical pre-retirement source fingerprint",
     "M3 bounded cleanup54/0+load97/0; public/varyingquota60/0; latest anchor/heterogeneous101/0+space190/0 at78d39a4",
     "CLI main1800/quota7 and long86400/quota31 actual completed at78d39a4: conserved stocks,275decisions,zero pending,standalone static89.7MB,maxcall56.495ms observed not hard frame guarantee",
-    "M3 frozen78d39a4 expanded gate COMPLETE: original43948/0,8sameLinux replaypairs, new597/0, sustained24h two seeds4quotas, profile60s warmup+5sample100/400"
+    "M3 frozen78d39a4 expanded gate COMPLETE: original43948/0,8sameLinux replaypairs, new597/0, sustained24h two seeds4quotas, profile60s warmup+5sample100/400",
+    "c8 full M4 candidate ended complete/excluding identical known economy failure, old43948/0+new597/0; NOT final acceptance because independent retirement counter failed 1/1:80000 contacts vs403 cleanup units,41.532ms maxcall",
+    "retirement43/0 continuous60/0 load101/0 exactgdpy fingerprint69fa36d; original400 quota1 counter1/0 cleanup80403"
   ],
   "tests_pending": [
-    "M3 frozen full Tasks1–8/5retained/8replaypairs/new597 checks/profile60s and sustained24h running",
-    "M4 full final unified/audit and publication"
+    "frozen69fa36d full original/new/unified/audit including retirement43 and long24h",
+    "final report/artifacts/samePR publication"
   ],
   "blockers": [],
-  "next": "Commit docs/evidence checkpoint, fast-forward push samebranch, then run final full gate with versionedM0 exact .txt logs at frozen code c8b489e.",
+  "next": "Freeze new full validation. M3 final scope recheck RUNNING, M4RUNNING; no code/HEAD changes while runner active.",
   "validation_session": null,
   "connection_checks": [
     {
@@ -70,7 +72,7 @@
   "saved_unaccepted_code_commit": "ed54ef6b68146df4a560b77865d8d47efd077730",
   "highest_accepted_level": "LEVEL_2",
   "publication": {
-    "status": "Draft PR111 open/draft/unmerged, remote31fa059; M3 code local64f4b0d plus known in-scope working edits",
+    "status": "Draft PR111 remote cc64092 fast-forward push confirmed; final full gate RUNNING",
     "draft_pr": "https://github.com/ryoumiyahayato/wwo/pull/111"
   },
   "resumed_utc": "2026-10-07T17:21:05Z",
@@ -87,5 +89,5 @@
   ],
   "last_verified_refactor_commit": "64f4b0d562567cdf6010cf70472053f42347610b",
   "last_full_verified_code_commit": "78d39a4a17d82768a5da9c42a5ae55e2ff026d46",
-  "last_verified_scope": "instrumentation quick60/0+load101/0 and two CLI runs; final full gate pending"
+  "last_verified_scope": "retirement43/0 continuous60/0 load101/0 exactgdpy fingerprint69fa36d; original400 quota1 counter1/0 cleanup80403"
 }

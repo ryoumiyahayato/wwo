@@ -114,3 +114,19 @@ phase counts、长run最大完整call及live/冻结表示inputs/pending/identity
 decision/domain histories/diagnostic的序列化大小。不是新战斗功能，时间不入physics。
 冻结c8b489e；instrumentation quick60/0+load101/0完整通过，CLI main实际完成。
 下一long CLI完成后docs checkpoint/push同PR，最终完整统一/audit/new门。
+
+## M4 最终顺序审查：退眠清理反例
+
+缺口：旧scope退眠后State.contacts已移除，job可能成为contact_records最后引用。
+独立反例初态400 stationary/zero-ammo，两边200故80000 directed合法接触；
+要求每条无发布引用的记录占用cleanup工作。c8实际exit1，1/1failure，只有403
+release_jobs，maxcall41.532ms/maxprimitive41.487ms；旧完整M4不因此冒充最终通过。
+最小修正：plans逐单位释放后，未在State.contacts发布的旧array逐条pop；保留当前
+published表，不改方程/事件时间。新增40三quota与400quota31、active表保留对照。
+保留上一LEVEL_2与M3范围内绿色检查点，重开M3并重新冻结最终门。
+
+退眠修正实际验证：首新测试错误使用不存在totals.losses，driver虽看到39/0摘要
+仍因SCRIPT ERROR判FAIL；改为既有totals.casualties，未放宽matcher。修正后43/0、
+continuous60/0、load101/0全部完整exit0，gd/py fingerprint对应69fa36d。原反例
+quota1 exit0，清理80403，contacts80000，calls2340441，maxcall10.016ms。
+保留修正，仅改变过期诊断释放粒度。新完整最终门将含退眠门，不复用旧候选为最终。

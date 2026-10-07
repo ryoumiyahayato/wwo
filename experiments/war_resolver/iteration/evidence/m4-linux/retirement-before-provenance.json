@@ -1,0 +1,16 @@
+{
+  "source_code": "c8b489ef1c90a1b70c33b24952423f77f7e6e16b",
+  "checkout": "cc64092c94d5ceebd1b80ccdefc0d131f472ed32",
+  "exit": 1,
+  "command": [
+    "/usr/local/bin/godot",
+    "--headless",
+    "--path",
+    "/workspace/wwo",
+    "--script",
+    "/tmp/task9-retirement-counterexample.gd"
+  ],
+  "script_sha256": "b4d9c59afca19027ec1b51b7bc5aa95b0988a4620e13467fe85c93f82e53f2b8",
+  "log_sha256": "e7a1ecfe79d66459c270bdbc0ef86df0a230748b96d07fedd03b49e90180f307",
+  "expected": "retired unpublished contacts require per-record counted cleanup; no wall threshold"
+}

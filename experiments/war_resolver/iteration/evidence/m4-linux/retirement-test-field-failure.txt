@@ -1,0 +1,24 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+SCRIPT ERROR: Invalid access to property or key 'losses' on a base object of type 'Dictionary'.
+          at: run_case (res://experiments/war_resolver/continuous/retirement_tests.gd:58)
+          GDScript backtrace (most recent call first):
+              [0] run_case (res://experiments/war_resolver/continuous/retirement_tests.gd:58)
+              [1] _initialize (res://experiments/war_resolver/continuous/retirement_tests.gd:66)
+SCRIPT ERROR: Invalid access to property or key 'losses' on a base object of type 'Dictionary'.
+          at: run_case (res://experiments/war_resolver/continuous/retirement_tests.gd:58)
+          GDScript backtrace (most recent call first):
+              [0] run_case (res://experiments/war_resolver/continuous/retirement_tests.gd:58)
+              [1] _initialize (res://experiments/war_resolver/continuous/retirement_tests.gd:66)
+SCRIPT ERROR: Invalid access to property or key 'losses' on a base object of type 'Dictionary'.
+          at: run_case (res://experiments/war_resolver/continuous/retirement_tests.gd:58)
+          GDScript backtrace (most recent call first):
+              [0] run_case (res://experiments/war_resolver/continuous/retirement_tests.gd:58)
+              [1] _initialize (res://experiments/war_resolver/continuous/retirement_tests.gd:66)
+SCRIPT ERROR: Invalid access to property or key 'losses' on a base object of type 'Dictionary'.
+          at: run_case (res://experiments/war_resolver/continuous/retirement_tests.gd:58)
+          GDScript backtrace (most recent call first):
+              [0] run_case (res://experiments/war_resolver/continuous/retirement_tests.gd:58)
+              [1] _initialize (res://experiments/war_resolver/continuous/retirement_tests.gd:67)
+RETIREMENT_EVIDENCE_JSON=[{"calls":2755,"cleanup_work":43,"contacts":800,"max_call_usec":3104,"quota":7,"result":{"actual_unit_records_examined":0,"commit_count":2,"committed_time":30.0,"diagnostic_events_produced":0,"error":"","events":[],"max_native_id_snapshot":40,"max_primitive":"prepare:candidate_query","max_primitive_usec":540,"ok":true,"pending_boundary":-1.0,"phase_work_counts":{"apply:apply_units":41,"apply:contact_diagnostics":801,"apply:incoming_init":41,"apply:incoming_source":41,"apply:incoming_targets":840,"apply_start":2,"changed_areas":2,"changed_units":41,"clear_delta":42,"control_start":2,"control_units":41,"due":2,"eta":42,"event_changed_areas":3,"event_changed_units":42,"fold_start":3,"fold_units":41,"index_records":41,"index_sort":281,"index_start":2,"prepare:candidate_query":13400,"prepare:candidates":1640,"prepare:finish":41,"prepare:fire":840,"prepare:rounds":40,"prepare:source":41,"prepare:units":41,"prepare:weights":840,"release_jobs":43,"scope_capacity":2,"select":1},"requested_time":30.0,"status":"COMPLETE","total_work_units":19280,"wall_usec":12,"work_units":2},"sleeping":false,"units":40}]
+Task9 retirement: 39 checks, 0 failures
