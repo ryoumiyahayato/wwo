@@ -6,6 +6,9 @@ const Sort = preload("res://experiments/war_resolver/continuous/sort_cursor.gd")
 const Trace = preload("res://experiments/war_resolver/continuity/trace.gd")
 const SCOPE_CAP: int = 1024
 const EVENT_SCOPE_CAP: int = 64
+const METADATA_CAP: int = 4096
+const CELL_SCOPE_CAP: int = 128
+const ROUTE_HISTORY_CAP: int = 4096
 var state: State
 var kernel: RefCounted
 var _authority: WeakRef
@@ -45,6 +48,11 @@ var max_metadata_ids: int = 0
 var primitives: Dictionary = {}
 var commit_count: int = 0
 var ticket_trace: Trace = Trace.new()
+var active_representation_count: int = 0
+var release_ids: Array[String] = []
+var release_index: int = 0
+var release_plan_index: int = 0
+var complete_after_release: bool = false
 
 func configure(world: State, service: RefCounted, owner: RefCounted, requested: float, accuracy: String) -> void:
 	state = world
@@ -65,12 +73,16 @@ func resume(quota: int) -> Dictionary:
 	var before: int = int(state.counters.units_examined)
 	call_event_count = 0
 	state.inside_kernel_work = true
-	if OS.get_static_memory_usage() > 512 * 1024 * 1024 or state.events.size() > 100000:
+	var pending_reports: int = 0 if state.information_port == null else state.information_port.get_ref()._report_heap.size()
+	if OS.get_static_memory_usage() > 512 * 1024 * 1024 or state.events.size() + pending_reports > 100000:
 		_block("STORAGE_OR_QUEUE_CAPACITY")
 	while used < quota and status == "PENDING":
+		if maxi(maxi(changes.size(), area_changes.size()), maxi(changed_cells.size(), control_cells.size())) > METADATA_CAP:
+			_block("CHANGED_METADATA_CAPACITY")
+			break
 		var label: String = phase + (":" + str(job.phase) if job != null and phase in ["prepare", "apply"] else "")
 		var time_start: int = Time.get_ticks_usec()
-		state.time = boundary if phase not in ["select", "index_start", "index_records", "index_sort", "prepare", "eta"] else segment_start
+		state.time = boundary if phase not in ["select", "scope_capacity", "index_start", "index_records", "index_sort", "prepare", "eta"] else segment_start
 		if phase == "due":
 			state.time = boundary
 		_step()
@@ -139,6 +151,9 @@ func _step() -> void:
 			if cursor < fold_cells.size():
 				var cell: String = fold_cells[cursor]
 				authority._observed_areas[cell] = true
+				if state.area_units[cell].size() > SCOPE_CAP:
+					_block("ACTIVE_SCOPE_CAPACITY")
+					return
 				fold_ids = State.sorted_ids(state.area_units[cell])
 				if not _bounded_ids(fold_ids):
 					return
@@ -148,6 +163,14 @@ func _step() -> void:
 				scope_index = 0
 				phase = "fold_units"
 			else:
+				ids = State.sorted_ids(changes)
+				cursor = 0
+				phase = "clear_delta"
+		"clear_delta":
+			if cursor < ids.size():
+				changes.erase(ids[cursor])
+				cursor += 1
+			else:
 				committed = boundary
 				state.pending_committed_time = committed
 				commit_count += 1
@@ -155,7 +178,7 @@ func _step() -> void:
 				area_changes.clear()
 				changed_cells.clear()
 				if committed >= target:
-					status = "COMPLETE"
+					_begin_release(true)
 				else:
 					phase = "select"
 		"fold_units":
@@ -178,21 +201,64 @@ func _step() -> void:
 			else:
 				var interval: float = float(kernel.INTERVALS[policy])
 				boundary = minf(boundary, (floorf(committed/interval)+1.0)*interval)
+				if state.active_areas.size() > CELL_SCOPE_CAP:
+					_block("ACTIVE_SCOPE_COUNT_CAPACITY")
+					return
+				ids = State.sorted_ids(state.active_areas)
+				cursor = 0
+				phase = "scope_capacity"
+		"scope_capacity":
+			if cursor < ids.size():
+				if state.spatial_port != null:
+					var space: RefCounted = state.spatial_port.get_ref()
+					var scope: String = str(space._cell_scope.get(ids[cursor], ""))
+					if not scope.is_empty() and space._scope_cells[scope].size() > CELL_SCOPE_CAP:
+						_block("SPATIAL_SCOPE_CELL_CAPACITY")
+						return
+				cursor += 1
+			else:
 				scopes = kernel._resolution_scopes(state)
 				if scopes.size() > 128:
 					_block("ACTIVE_SCOPE_COUNT_CAPACITY")
 					return
 				max_metadata_ids = maxi(max_metadata_ids, scopes.size())
 				scope_index = 0
-				jobs.clear()
 				control_cells.clear()
-				phase = "index_start"
+				active_representation_count = 0
+				_begin_release(false)
+		"release_jobs":
+			if release_index < release_ids.size():
+				var old: Segment = jobs[release_ids[release_index]]
+				if release_plan_index < old.ids.size():
+					old.plans.erase(old.ids[release_plan_index])
+					release_plan_index += 1
+				else:
+					jobs.erase(release_ids[release_index])
+					release_index += 1
+					release_plan_index = 0
+			else:
+				if complete_after_release:
+					status = "COMPLETE"
+				else:
+					phase = "index_start"
 		"index_start":
 			if scope_index >= scopes.size():
 				cursor = 0
 				scope_index = 0
 				phase = "eta"
 			else:
+				var count: int = 0
+				var cells: Array[String] = []
+				if state.spatial_port == null:
+					cells.append(scopes[scope_index])
+				else:
+					cells = state.spatial_port.get_ref().scope_cells(scopes[scope_index])
+				for cell: String in cells:
+					count += state.area_units[cell].size()
+				active_representation_count += count
+				if count > SCOPE_CAP or active_representation_count > METADATA_CAP:
+					_block("ACTIVE_SCOPE_CAPACITY")
+					return
 				ids = kernel._combat_ids(state, scopes[scope_index])
 				if not _bounded_ids(ids):
 					return
@@ -202,6 +268,9 @@ func _step() -> void:
 		"index_records":
 			if cursor < ids.size():
 				var unit: Dictionary = state.examine_unit(ids[cursor])
+				if unit.get("spatial", {}).get("traversed", []).size() > ROUTE_HISTORY_CAP:
+					_block("ROUTE_HISTORY_CAPACITY")
+					return
 				var x: float = float(unit.position) if state.spatial_port == null else float(state.spatial_port.get_ref().xy(unit)[0])
 				kernel._index._records.append({"id": ids[cursor], "x": x})
 				kernel.work.index_records_examined += 1
@@ -274,6 +343,9 @@ func _step() -> void:
 				changed_cells[source] = true
 				changed_cells[transfer.destination] = true
 			elif cursor < control_ids.size():
+				if state.area_units[control_ids[cursor]].size() > SCOPE_CAP:
+					_block("ACTIVE_SCOPE_CAPACITY")
+					return
 				ids = State.sorted_ids(state.area_units[control_ids[cursor]])
 				if not _bounded_ids(ids):
 					return
@@ -343,6 +415,15 @@ func _bounded_ids(values: Array[String]) -> bool:
 		return false
 	return true
 
+func _begin_release(final: bool) -> void:
+	job = null
+	sorter = null
+	release_ids = State.sorted_ids(jobs)
+	release_index = 0
+	release_plan_index = 0
+	complete_after_release = final
+	phase = "release_jobs"
+
 func _block(reason: String) -> void:
 	status = "BLOCKED"
 	blocker = reason
@@ -351,7 +432,7 @@ func _event_scope(event: Dictionary) -> int:
 	var payload: Dictionary = event.payload
 	if event.kind == "communication":
 		var message: Dictionary = state.information_port.get_ref()._messages[payload.message_id]
-		return authority._state.structure_port.get_ref()._leaves.get(message.recipient_ref, {}).size()
+		return maxi(1, state.structure_port.get_ref()._leaves.get(message.command.get("target", ""), {}).size())
 	if event.kind == "structure":
 		var service: RefCounted = state.structure_port.get_ref()
 		var request: Dictionary = service._requests[payload.request_id]
@@ -365,8 +446,8 @@ func _event_scope(event: Dictionary) -> int:
 	if event.kind == "decision":
 		var service: RefCounted = state.decision_port.get_ref()
 		var person: String = str(service._events[payload.decision_id].person_id)
-		var maximum: int = 1
+		var affected: int = 0
 		for target_ref: String in service._persons[person].definition.targets:
-			maximum = maxi(maximum, state.structure_port.get_ref()._leaves.get(target_ref, {}).size())
-		return maximum
+			affected += state.structure_port.get_ref()._leaves.get(target_ref, {}).size()
+		return maxi(1, affected)
 	return 1

@@ -14,9 +14,9 @@ var _sequence: int = 0
 var trace: Trace = Trace.new()
 
 func configure(seed_value: int = 71, supplied: Dictionary = {}) -> bool:
-	options = {"bridge_cut": true, "report_latency": 47.0, "command_latency": 15.0, "supply": true, "repeated": true, "observer": true, "aggregate": true, "keep_only": false}
+	options = {"bridge_cut": true, "report_latency": 47.0, "command_latency": 15.0, "supply": true, "repeated": true, "observer": true, "aggregate": true, "keep_only": false, "long_run": false}
 	options.merge(supplied, true)
-	env = F.setup(true, true, false, seed_value, false, false, {"mobility": 0.08, "blue_ammunition": 4.0, "range_km": 0.05,
+	env = F.setup(true, true, false, seed_value, false, false, {"mobility": 0.08, "blue_ammunition": 4.0, "range_km": 0.05, "background": options.long_run, "background_mobility": 0.002,
 		"edge_ground": {"AC": F.ground("forest", 1.0), "CD": F.ground("slope", 0.0, 0.0, 0.2)}})
 	trace.bind_state(env.state)
 	env.lod.physical_event_sink = _capture_physical
@@ -24,6 +24,22 @@ func configure(seed_value: int = 71, supplied: Dictionary = {}) -> bool:
 		var pair: Array[String] = ["unit_000", "unit_001"]
 		if not env.lod.coalesce("blue_platoon", pair).ok:
 			return false
+	if options.long_run:
+		env.background.coalescing = {"attempted": 0, "accepted": 0, "rejected": []}
+		for parent: String in F.State.sorted_ids(env.background.groups):
+			var ids: Array[String] = []
+			ids.assign(env.background.groups[parent])
+			var result: Dictionary = env.lod.coalesce(parent, ids)
+			env.background.coalescing.attempted += 1
+			if result.ok:
+				env.background.coalescing.accepted += 1
+			else:
+				env.background.coalescing.rejected.append({"formation": parent, "result": result})
+		var reds: Array[String] = ["unit_002", "unit_003"]
+		if not env.lod.coalesce("red_platoon", reds).ok:
+			return false
+		env.space.load_cell("cell_037")
+		env.space.load_cell("cell_063")
 	if not options.repeated or options.keep_only:
 		# Explicit initial route is trusted scenario input, not a policy truth read.
 		var rep: String = env.lod.representation_of("unit_000")
@@ -62,7 +78,7 @@ func configure(seed_value: int = 71, supplied: Dictionary = {}) -> bool:
 	if options.observer:
 		env.space.route_feedback.connect(_on_feedback)
 	decisions.input_issued.connect(_on_input)
-	if options.repeated and not decisions.start_cycle("company", "regular", 10.0, 315.0, 1800.0, 6).ok:
+	if options.repeated and not decisions.start_cycle("company", "regular", 10.0, 315.0, 86400.0 if options.long_run else 1800.0, 275 if options.long_run else 6).ok:
 		return false
 	if not information.issue_command("platoon", {"id": "stale_order", "channel_ref": "stale", "command": {"id": "stale_order", "kind": "mission", "target": "node_unit_001", "values": {"posture": "hold", "objective": 0.0, "direction": 1.0}}}).ok:
 		return false
@@ -70,7 +86,22 @@ func configure(seed_value: int = 71, supplied: Dictionary = {}) -> bool:
 		return false
 	if options.bridge_cut and not env.space.schedule_fact("bridge_cut", 120.0, "bridge_BD", false).ok:
 		return false
+	if options.long_run and not _long_inputs():
+		return false
 	return env.lod.advance(0.0).ok
+
+func _long_inputs() -> bool:
+	# Given external ETA facts reserve finite stock at t0. No traffic simulation.
+	for index: int in range(4):
+		var time: float = [14400.0, 28800.0, 43200.0, 72000.0][index]
+		var request_id: String = "scheduled_request_%d" % index
+		if not env.logistics.submit("company", {"id": request_id, "kind": "request", "target_kind": "formation", "target": "blue_platoon", "resource_class": "AMMUNITION", "quantity": 10.0}).ok:
+			return false
+		if not env.logistics.submit("company", {"id": "scheduled_delivery_%d" % index, "kind": "allocate", "request_id": request_id, "source_ref": "source", "delivery_time": time}).ok:
+			return false
+		if not env.structure.submit("company", {"id": "scheduled_attachment_%d" % index, "kind": "attach", "effective_time": time, "values": {"target": "node_unit_001", "parent": "blue_destination", "until": time + 50.0}}).ok:
+			return false
+	return true
 
 func _observe(fact: String, id: String, channel: String) -> bool:
 	var observed: Dictionary = env.information.observe("squad", {"id": id, "source_ref": "local", "subject_kind": "unit", "subject_ref": "unit_000", "fact_kind": fact})
@@ -98,6 +129,10 @@ func _on_input(person: String, decision_id: String, issued: Dictionary) -> void:
 		"input": decision.proposal.intent.kind, "input_result": issued.duplicate(true), "scope": decision.context.position_ref})
 	if issued.domain == "LOGISTICS" and issued.result.ok:
 		trace.append({"id": issued.id, "time": env.state.time, "subject": person, "kind": "logistics_request", "cause_refs": [decision_id], "scope": decision.context.position_ref, "execution": issued.result.status})
+	if options.long_run and options.observer:
+		# Qualified local source, sent after this decision; only later receipt is known.
+		_observe("route", "cycle_route_" + decision_id, "report")
+		_observe("ammunition", "cycle_ammo_" + decision_id, "report")
 	if issued.domain != "LOGISTICS" or not issued.result.ok or not options.supply or env.logistics._used.has("allocation_" + str(issued.id)):
 		return
 	var result: Dictionary = env.logistics.submit(person, {"id": "allocation_" + str(issued.id), "kind": "allocate", "request_id": issued.id, "source_ref": "source", "delivery_time": env.state.time + 30.0})

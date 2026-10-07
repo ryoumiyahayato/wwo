@@ -117,6 +117,7 @@ func coalesce(source_formation: String, leaf_ids: Array[String], level: String =
 	if total_personnel <= 0.0:
 		return {"ok": false, "error": "empty_stock"}
 	var basis: String = (source_formation + ":" + ":".join(ids)).sha256_text().substr(0, 16)
+	var was_active: bool = _state.active_areas.has(first.area_id)
 	var generation: int = int(_generations.get(basis, 0)) + 1
 	var aggregate_id: String = "aggregate_" + basis + "_%06d" % generation
 	if _state.identity_reserved(aggregate_id) or _state.missions.has(aggregate_id + "_mission"):
@@ -167,7 +168,10 @@ func coalesce(source_formation: String, leaf_ids: Array[String], level: String =
 	_state.units[aggregate_id] = aggregate
 	_state.area_units[first.area_id][aggregate_id] = true
 	_state.contacts.erase(first.area_id)
-	_state.wake(str(first.area_id))
+	# Opt-in spatial aggregation changes representation only. A sleeping cell's
+	# identical missions/stocks cannot require a new combat tick merely to zoom out.
+	if _state.spatial_port == null or was_active:
+		_state.wake(str(first.area_id))
 	if _state.logistics_port != null:
 		_state.logistics_port.get_ref().on_coalesce(aggregate_id, ids)
 	work.formations_built += 1

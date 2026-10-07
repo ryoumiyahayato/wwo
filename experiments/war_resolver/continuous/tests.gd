@@ -16,6 +16,8 @@ func _initialize() -> void:
 		_same_time()
 		_combined()
 		_mixed_events()
+		_varying()
+		_public_ports()
 	print("CONTINUOUS_EVIDENCE_JSON=" + JSON.stringify(evidence))
 	print("Task9 continuous: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures > 0 else 0)
@@ -154,3 +156,42 @@ func _mixed_events() -> void:
 	check(actual == expected and actual.size() == 1000, "original phase1/2/5/6/9 and ID order without timestamp drift")
 	check(bounded.env.information._messages.mixed_command.processed_at == 10.0 and bounded.env.logistics._deliveries.mixed_delivery.receipt_time == 10.0, "mixed domain effects still use exact original world time")
 	evidence.mixed_same_time = {"measurement": measured, "count_at_ten": actual.size(), "phase_order": [1, 2, 5, 6, 9]}
+
+func _varying() -> void:
+	var expected: F.State = F.battle(40)
+	var reference: F.Authority = F.Authority.new()
+	reference.configure(expected)
+	reference.advance(120.0)
+	var actual: F.State = F.battle(40)
+	var owner: F.Authority = F.Authority.new()
+	owner.configure(actual)
+	var result: Dictionary = {}
+	var quotas: Array[int] = [1, 64, 3, 17, 2, 9]
+	var calls: int = 0
+	while calls < 200000:
+		var quota: int = quotas[calls % quotas.size()]
+		result = owner.advance_bounded(120.0, quota)
+		calls += 1
+		if not result.ok or result.work_units > quota or result.status != "PENDING":
+			break
+	check(result.ok and result.status == "COMPLETE" and physical(expected) == physical(actual), "changing quota at arbitrary cursor positions preserves physical results")
+	evidence.varying = {"quotas": quotas, "calls": calls, "result": result}
+
+func _public_ports() -> void:
+	var scenario: Scenario = Scenario.new()
+	check(scenario.configure(), "pending public-port fixture")
+	var env: Dictionary = scenario.env
+	var first: Dictionary = env.lod.advance_bounded(1800.0, 1)
+	var counters: Dictionary = env.state.counters.duplicate()
+	var messages: int = env.information._messages.size()
+	var events: int = env.state.events.size()
+	var views: Array[Dictionary] = [env.information.knowledge("company"), env.information.inbox("company"), env.information.snapshot(),
+		env.logistics.audit(), env.logistics.snapshot(), env.structure.node("blue_platoon"), env.structure.relation("node_unit_000"), env.structure.snapshot(),
+		env.space.edge_view("bridge_BD"), env.space.facility_summary("region_50"), env.decisions.preview("company"), env.decisions.snapshot(), scenario.trace.page()]
+	var guarded: bool = first.status == "PENDING"
+	for view: Dictionary in views:
+		guarded = guarded and view.get("status") == "PENDING" and view.get("committed_time") == 0.0
+	check(guarded, "all observer domain views expose only pending/old stamp")
+	check(not env.logistics.submit("company", {}).ok and not env.structure.submit("company", {}).ok and not env.space.load_cell("cell_037").ok and not env.decisions.schedule("company", "forged", 0.0).ok and not env.information.issue_command("company", {}).ok, "pending writes cannot modify unfinished inputs")
+	check(counters == env.state.counters and messages == env.information._messages.size() and events == env.state.events.size(), "pending reads/writes have no physical or queue side effects")
+	check(run(env.lod, 1800.0, 31).result.status == "COMPLETE" and scenario.ledger_balanced(), "guarded state can finish original request")

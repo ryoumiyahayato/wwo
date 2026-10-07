@@ -67,6 +67,9 @@ static func setup(motor: bool = true, combat: bool = false, renamed: bool = fals
 		state.add_unit(unit)
 		nodes["node_" + id] = {"echelon": "squad", "side": unit.side,
 			"parent": "blue_platoon" if index < 2 else "red_platoon", "unit_id": id}
+	var background: Dictionary = {}
+	if inputs.get("background", false):
+		background = _background(state, nodes, graph, float(inputs.get("background_mobility", 0.08)))
 	var people: Dictionary = {"squad": {"role": "squad_leader", "formation_id": "node_unit_000"},
 		"platoon": {"role": "platoon_leader", "formation_id": "blue_platoon"},
 		"recipient": {"role": "platoon_leader", "formation_id": "blue_destination"},
@@ -96,5 +99,53 @@ static func setup(motor: bool = true, combat: bool = false, renamed: bool = fals
 	for index: int in range(4):
 		var point: String = "A" if index < 2 else ("C" if split_red and index == 3 else "D")
 		assert(space.admit_unit("unit_%03d" % index, point, "MOTORIZED" if motor and index < 2 else "FOOT"))
+	for id: String in background.get("units", {}):
+		var spec: Dictionary = background.units[id]
+		assert(space.admit_unit(id, spec.node, "MOTORIZED" if spec.blue else "FOOT"))
+		if spec.active and spec.blue:
+			assert(space.inject_path(id, [spec.edge]).ok)
 	return {"state": state, "lod": lod, "service": structure, "structure": structure, "roles": roles,
-		"logistics": logistics, "space": space, "graph": graph, "people": people, "nodes": nodes}
+		"logistics": logistics, "space": space, "graph": graph, "people": people, "nodes": nodes, "background": background}
+
+static func _background(state: State, nodes: Dictionary, graph: Dictionary, mobility: float) -> Dictionary:
+	var units: Dictionary = {}
+	var groups: Dictionary = {}
+	for cell_index: int in range(100):
+		var cell: String = "cell_%03d" % cell_index
+		var scope: String = "local_envelope" if cell_index in [37, 38, 62, 63] else "scope_" + cell
+		var points: Array[String] = ["bg_point_%03d_blue" % cell_index, "bg_point_%03d_red" % cell_index]
+		var x: float = float(cell_index % 10) * 5.0 + 0.5
+		var y: float = float(cell_index / 10) * 5.0 + 0.5
+		for side_index: int in range(2):
+			graph.nodes[points[side_index]] = {"xy": [x + 3.0 * side_index, y], "cell": cell, "scope": scope,
+				"ground": ground("synthetic_background", 0.0, 0.0, 0.0, 0.1, 0.05)}
+		var edge: String = "bg_edge_%03d" % cell_index
+		graph.edges[edge] = {"from": points[0], "to": points[1], "length_km": 3.0, "open": true,
+			"kind": "road", "modes": ["FOOT", "MOTORIZED"], "ground": ground(), "capacity": 100.0}
+		for a: String in points:
+			for b: String in points:
+				graph.lanes[a + ":" + b] = {"observe": true, "fire": true}
+		for index: int in range(4):
+			if cell_index == 37 and index < 2 or cell_index == 63 and index >= 2:
+				continue # The four main scenario leaves occupy these slots.
+			var id: String = "bg_%03d_%d" % [cell_index, index]
+			var blue: bool = index < 2
+			var active: bool = cell_index < 15
+			var side: String = "blue" if blue else "red"
+			var parent: String = "bg_" + side + "_%03d" % cell_index
+			if not nodes.has(parent):
+				nodes[parent] = {"echelon": "platoon", "side": side, "parent": side + "_company"}
+				groups[parent] = []
+			groups[parent].append(id)
+			var mission: Dictionary = Data.mission("mission_" + id, ("advance" if blue else "hold") if active else "idle", 1.0, 3.0)
+			state.add_mission(mission)
+			var unit: Dictionary = Data.unit(id, side, cell, mission.id)
+			unit.mobility = mobility
+			unit.ammunition = 20.0 if active else 0.0
+			unit.weapon.range_km = 0.2
+			if cell_index == 63 and index == 1:
+				unit.weapon.rounds_per_minute = 0.9 # Explicit incompatible cohort; must remain detailed.
+			state.add_unit(unit)
+			nodes["node_" + id] = {"echelon": "squad", "side": side, "parent": parent, "unit_id": id}
+			units[id] = {"node": points[0] if blue else points[1], "edge": edge, "blue": blue, "active": active}
+	return {"units": units, "groups": groups, "underlying_leaves": 400, "initial_background_active_cells": 15, "mobility_km_per_minute": mobility}

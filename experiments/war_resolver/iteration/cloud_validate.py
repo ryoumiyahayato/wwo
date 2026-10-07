@@ -12,6 +12,7 @@ import json
 import os
 from pathlib import Path
 import re
+import selectors
 import shutil
 import subprocess
 import sys
@@ -73,12 +74,38 @@ def main() -> int:
 
     def run(name, command, timeout=1800, unified=False):
         started = time.perf_counter()
-        try:
-            proc = subprocess.run(command, cwd=ROOT, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=timeout)
-            log, code = proc.stdout.decode("utf-8", errors="replace"), proc.returncode
-        except subprocess.TimeoutExpired as exc:
-            raw = exc.stdout or b""
-            log, code = raw.decode("utf-8", errors="replace") if isinstance(raw, bytes) else raw, -1
+        # A broken GDScript cursor can repeat errors without making progress.
+        # Bound runner diagnostics too; reaching the cap is an explicit failure.
+        limit = 16 * 1024 * 1024
+        chunks, size, aborted = [], 0, None
+        proc = subprocess.Popen(command, cwd=ROOT, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        with selectors.DefaultSelector() as selector:
+            selector.register(proc.stdout, selectors.EVENT_READ)
+            while selector.get_map():
+                if time.perf_counter() - started > timeout:
+                    aborted = "TIMEOUT"
+                    break
+                for key, _ in selector.select(0.25):
+                    raw = os.read(key.fd, 65536)
+                    if not raw:
+                        selector.unregister(key.fileobj)
+                        continue
+                    size += len(raw)
+                    if size > limit:
+                        chunks.append(raw[:max(0, limit - sum(map(len, chunks)))])
+                        aborted = "LOG_CAPACITY_ABORTED"
+                        break
+                    chunks.append(raw)
+                if aborted:
+                    break
+        if aborted:
+            proc.kill()
+        proc.wait()
+        proc.stdout.close()
+        log = b"".join(chunks).decode("utf-8", errors="replace")
+        code = -1 if aborted else proc.returncode
+        if aborted:
+            log += f"\nRUNNER_ABORT={aborted}; incomplete output is never PASS\n"
         (output / f"{name}.log").write_text(log, encoding="utf-8")
         fatal = (official_fatal if unified else EXPERIMENT_FATAL).search(log)
         passed = code == 0 and not fatal
@@ -87,6 +114,7 @@ def main() -> int:
                    fatal=fatal.group(0) if fatal else None,
                    log=f"{name}.log", log_sha256=hashlib.sha256(log.encode()).hexdigest(),
                    retained_shutdown_diagnostics=len(re.findall(r"(?m)^ERROR: \d+ resources still in use at exit", log)))
+        row.update(diagnostic_limit_bytes=limit, aborted_reason=aborted)
         steps.append(row)
         save()
         print(f"{'PASS' if passed else 'FAIL'} {name}: exit={code}; {row['wall_seconds']}s", flush=True)

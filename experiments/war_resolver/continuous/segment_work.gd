@@ -139,6 +139,17 @@ func prepare_step() -> bool:
 				_finish_plan(ids[i])
 				i += 1
 			else:
+				if bounded and not state.contacts.get(area_id, []).is_empty():
+					phase = "release_old_contacts"
+				else:
+					state.contacts[area_id] = contact_records
+					phase = "prepared"
+		"release_old_contacts":
+			# Retiring a dense old diagnostic array is also real work, one record
+			# per step. Public ports remain PENDING while this internal array changes.
+			if not state.contacts[area_id].is_empty():
+				state.contacts[area_id].pop_back()
+			else:
 				state.contacts[area_id] = contact_records
 				phase = "prepared"
 	return phase == "prepared"
