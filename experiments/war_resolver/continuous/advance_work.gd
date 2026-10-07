@@ -235,6 +235,10 @@ func _step() -> void:
 				if release_plan_index < old.ids.size():
 					old.plans.erase(old.ids[release_plan_index])
 					release_plan_index += 1
+				elif not state.contacts.has(old.area_id) and not old.contact_records.is_empty():
+					# Sleeping scopes no longer publish this array. Retire its last
+					# reference one record at a time, including after the final commit.
+					old.contact_records.pop_back()
 				else:
 					jobs.erase(release_ids[release_index])
 					release_index += 1

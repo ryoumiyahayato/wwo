@@ -46,7 +46,7 @@ cycles-disabled；同CLI支持seed、seconds、quota。更久的目标时间不�
 Linux扩大/最终门：
 
 ```sh
-python3 -B experiments/war_resolver/iteration/cloud_validate.py --mode final --output builds/task9-final-review --baseline-evidence experiments/war_resolver/iteration/evidence/m0-linux/evidence.json --script experiments/war_resolver/spatial/tests.gd --script experiments/war_resolver/continuity/contract_tests.gd --script experiments/war_resolver/continuity/tests.gd --script experiments/war_resolver/continuous/cursor_tests.gd --script experiments/war_resolver/continuous/tests.gd --script experiments/war_resolver/continuous/load_tests.gd --script experiments/war_resolver/continuous/long_tests.gd --script experiments/war_resolver/continuous/profile_after.gd
+python3 -B experiments/war_resolver/iteration/cloud_validate.py --mode final --output builds/task9-final-review --baseline-evidence experiments/war_resolver/iteration/evidence/m0-linux/evidence.json --script experiments/war_resolver/spatial/tests.gd --script experiments/war_resolver/continuity/contract_tests.gd --script experiments/war_resolver/continuity/tests.gd --script experiments/war_resolver/continuous/cursor_tests.gd --script experiments/war_resolver/continuous/tests.gd --script experiments/war_resolver/continuous/load_tests.gd --script experiments/war_resolver/continuous/long_tests.gd --script experiments/war_resolver/continuous/profile_after.gd --script experiments/war_resolver/continuous/retirement_tests.gd
 ```
 
 正式门不能加--skip-unified。该driver执行原PowerShell的等价步骤，原PowerShell
@@ -64,3 +64,7 @@ python3 -B experiments/war_resolver/iteration/cloud_validate.py --mode final --o
 Windows本轮NOT RUN。Linux cloud_validate使用selector读取pipe；不假称它是
 Windows官方runner。Windows应使用仓库原PowerShell导入/统一验证、固定Godot
 直接运行相同GDScript，run_scenario.py的--godot可指定本机exe；这些本轮未实测。
+
+退眠清理反例门使用独立N*N/2有向接触计数与零弹药/静止初态，覆盖当前contact
+表已移除时的逐记录释放，并对照同步物理结果和仍发布的active contact表。
+新清理只处理已不发布的旧诊断引用，不退回时间/燃料，不提前丢合法接触。
