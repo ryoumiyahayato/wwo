@@ -1,0 +1,21 @@
+extends SceneTree
+const F = preload("res://experiments/war_resolver/decision/fixtures.gd")
+
+func _initialize() -> void:
+	var env: Dictionary = F.setup(40, 0, true, 71, true, 1000)
+	for person: String in env.people:
+		assert(F.opportunity(env, "person_" + person, person, 10.0 if person in ["platoon", "company", "soldier"] else 100000.0).ok)
+	var admission_comparisons: int = int(env.information.work.command_heap_comparisons)
+	env.information.reset_work()
+	env.decisions.reset_work()
+	assert(env.lod.advance(120.0).ok)
+	assert(env.decisions.work.decision_events_processed == 3)
+	assert(env.decisions.work.persons_examined == 3)
+	assert(env.decisions.work.decision_contexts_built == 3)
+	assert(env.decisions.work.future_persons_examined == 0)
+	assert(env.state.events.size() == 997)
+	assert(env.information.work.command_heap_comparisons > 0 and env.information.work.command_heap_comparisons <= 80)
+	print("TASK8_DUE_HEAP_JSON=" + JSON.stringify({"opportunities_admitted": 1000, "probe_assertions_excluding_admission": 7,
+		"admission_heap_comparisons": admission_comparisons, "resolution_heap_comparisons": env.information.work.command_heap_comparisons,
+		"decision_work": env.decisions.work.duplicate(), "pending": env.state.events.size()}))
+	quit(0)
