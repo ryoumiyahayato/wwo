@@ -1,0 +1,26 @@
+{
+  "base": "3515734e5dfdf4bfa04fc0047764f53c380389ed",
+  "tree_sha": "4fdbbeb658b96d1d7bb94bc0b0207c782a9b6ee6",
+  "tree_entries": 1814,
+  "blob_entries": 1641,
+  "tree_response_bytes": 458175,
+  "tree_response_sha256": "38e32fda386d272a301e374b89206d0f556fb69cfdd7c47f70a0d4a5e6a55650",
+  "truncated": false,
+  "all_tree_objects_locally_hash_verified": true,
+  "full_blob_checkout": false,
+  "source_recovery": "INCOMPLETE",
+  "missing_target": {
+    "path": "data/world_map/world_admin1.json",
+    "mode": "100644",
+    "type": "blob",
+    "sha": "0ce36f617f565d4d5c9cf4efb445e8b80876ba02",
+    "size": 5897821,
+    "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/0ce36f617f565d4d5c9cf4efb445e8b80876ba02"
+  },
+  "source_commit_object_exact": true,
+  "commit_header_timezone_recovered_by_SHA_check": {
+    "author": "+0000",
+    "committer": "+0000"
+  },
+  "request_id": "NOT_RETURNED"
+}

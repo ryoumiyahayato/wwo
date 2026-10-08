@@ -1,0 +1,57 @@
+{
+  "kind": "source recovery and environment provenance; no performance samples",
+  "files": {
+    "ACCEPTANCE_AND_MEASUREMENT.md": {
+      "bytes": 4875,
+      "sha256": "b82b87312430fb574e647887216ea41d5d1b45f85f0c73f1d662c62fd7a96e50"
+    },
+    "STEP_COST_LOCAL_VALIDATION.md": {
+      "bytes": 7578,
+      "sha256": "0bfb6b4169df2b7510dac9306c593174663c7fb62aeb854a8ac0264416abd94a"
+    },
+    "evidence/CHECKPOINT.json": {
+      "bytes": 1395,
+      "sha256": "08a8d27e5b246c6aa0de6ca53025beb1e395656b94b5c248862058a537ac2efe"
+    },
+    "evidence/environment.txt": {
+      "bytes": 2082,
+      "sha256": "2c6a952a1caf7db19be0ceb3e7333795017839357aed26aaca8fd9359db4616d"
+    },
+    "evidence/ENVIRONMENT.json": {
+      "bytes": 569,
+      "sha256": "848b05048bfb30b3f59e5480ea69be4e610c64b926e01b3b00200ec87ea91c6b"
+    },
+    "evidence/RESULTS.json": {
+      "bytes": 779,
+      "sha256": "70df99dff3100a328640fb673b1f94760e02df7b8ccbf25fdd833c67407c3efd"
+    },
+    "evidence/local_commit_failure.txt": {
+      "bytes": 632,
+      "sha256": "cc82dbf5f18253ec506ed08b107ab76010c12aca1a3d73997d3cf392a8e90a78"
+    },
+    "evidence/source/base_tree_summary.json": {
+      "bytes": 909,
+      "sha256": "8d4ee48809ba21ea410ce6bcc27d932b6b1e4ad6ba2f654197c119da2f3c32a9"
+    },
+    "evidence/source/ACQUISITION.json": {
+      "bytes": 555,
+      "sha256": "ee5c95d2ec31f4bf2ac08a099842727f4b47b4957aff718c613aafe80ca39640"
+    },
+    "evidence/source/acquired_manifest.json": {
+      "bytes": 153911,
+      "sha256": "4626021b07904ec42324c586fb2781e00ee8807ea4ada652ff5e38a44fb2c8a9"
+    },
+    "evidence/source/source_failure.json": {
+      "bytes": 919,
+      "sha256": "79b130dd8c85fff0c34ffccb6836c995d9b2be4b4235f518fe0ff4fc4914826e"
+    },
+    "evidence/source/base_commit.json": {
+      "bytes": 1149,
+      "sha256": "22e9efe14e5b3fb85812d61aef7453dc179b5682f1caf5801a2dac6f0aa00464"
+    },
+    "evidence/source/base_tree.json": {
+      "bytes": 458175,
+      "sha256": "38e32fda386d272a301e374b89206d0f556fb69cfdd7c47f70a0d4a5e6a55650"
+    }
+  }
+}

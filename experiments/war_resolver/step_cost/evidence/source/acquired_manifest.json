@@ -1,0 +1,3512 @@
+{
+  "base": "3515734e5dfdf4bfa04fc0047764f53c380389ed",
+  "tree": "4fdbbeb658b96d1d7bb94bc0b0207c782a9b6ee6",
+  "selected_paths": 1417,
+  "fetched_unique_blobs": 368,
+  "fetched_path_count": 389,
+  "fetched_bytes": 51783874,
+  "status": "INCOMPLETE_FIXED_BASELINE",
+  "path_records": [
+    {
+      "path": ".gitattributes",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "09aae5d1d3a7dfda71524f645743bf46543abcef",
+      "size": 541,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/09aae5d1d3a7dfda71524f645743bf46543abcef",
+      "sha256": "ba228d0a99383b4c19f8853ac2e837d0e5be0eae244678925c0dca803f39f181"
+    },
+    {
+      "path": ".gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "996b565dc2c082ec6eacb7a7cc379e9d67007569",
+      "size": 345,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/996b565dc2c082ec6eacb7a7cc379e9d67007569",
+      "sha256": "1f5212ee35eedff69fb789b6c6323faf571541e41b425c3b76eb339ebe20f0e8"
+    },
+    {
+      "path": "AGENTS.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0046c2b0057a4f14363a77db3636996d876a0d66",
+      "size": 4069,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/0046c2b0057a4f14363a77db3636996d876a0d66",
+      "sha256": "1779c866347f6861a0e89002f59e273a6d1e42501142d6d20b5d15ecaf053ada"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a7b05d451d9d6907047116cf35d9c5ea1febf72c",
+      "size": 11871,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/a7b05d451d9d6907047116cf35d9c5ea1febf72c",
+      "sha256": "102daa61233b2d9188ac1862d5a8723db390b172a453f0427742e637863eebe3"
+    },
+    {
+      "path": "DECISIONS.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "82c949b180759a82b1801f4bb403ec2646c0541c",
+      "size": 380,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/82c949b180759a82b1801f4bb403ec2646c0541c",
+      "sha256": "58caafe7c4fbcdc371cc561f074abe95e3ddf32aeea73a3cf38ee0866be2347d"
+    },
+    {
+      "path": "README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "79e4f37cf5c449466104f3ccf93db3231ccfdf36",
+      "size": 8373,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/79e4f37cf5c449466104f3ccf93db3231ccfdf36",
+      "sha256": "9c4c84e1474eb7cb60ce17a6daefe8039b2c9b08e51ef35bd5943024fe1df265"
+    },
+    {
+      "path": "assets/fonts/.gitkeep",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "assets/historical_flags/1900/afghanistan_1880.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "84720377cf66048065e7172527d6b83e03e43382",
+      "size": 540,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/84720377cf66048065e7172527d6b83e03e43382",
+      "sha256": "0e17e7edcbd97d3dac51f31327b050e90341e779a7f0fe18849e23d013f7ffd9"
+    },
+    {
+      "path": "assets/historical_flags/1900/argentina_1861.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aaeeef5ea5a9c8dc8b1032250716bf531bbdee07",
+      "size": 7359,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/aaeeef5ea5a9c8dc8b1032250716bf531bbdee07",
+      "sha256": "39c4190ebec485f5c02eee2899222543835e24288a1d166d673600c3844dac1c"
+    },
+    {
+      "path": "assets/historical_flags/1900/austria_hungary_civil_1869.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "79b941c8cf9bf168357063365d5f0d7a195d8576",
+      "size": 16801,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/79b941c8cf9bf168357063365d5f0d7a195d8576",
+      "sha256": "4b47873d849ff1f2c9750d418a8ebb67a151f07d29e0583b25af4703474de56b"
+    },
+    {
+      "path": "assets/historical_flags/1900/belgium_1831.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "848d141ebdf80b0410658ef513eb79828728765d",
+      "size": 598,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/848d141ebdf80b0410658ef513eb79828728765d",
+      "sha256": "80455869aaef6a981526e53a99d9e6572992515b142b74040724a54d071339bd"
+    },
+    {
+      "path": "assets/historical_flags/1900/bolivia_1851.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3873bc574c6832e403e720cec41a19d7d7a42c28",
+      "size": 671,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/3873bc574c6832e403e720cec41a19d7d7a42c28",
+      "sha256": "e60a1526481bb11261bbb1142194f2cdf3e0fa0c5bb4074905274bfa7ed7828b"
+    },
+    {
+      "path": "assets/historical_flags/1900/brazil_1889.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0205b90503661bae3dcbbb19a24c3bef8e51fa55",
+      "size": 17230,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/0205b90503661bae3dcbbb19a24c3bef8e51fa55",
+      "sha256": "7f99e1e9169b89955394cb260eaf86f4c79a5c39d4241d86abb49513de14fe3b"
+    },
+    {
+      "path": "assets/historical_flags/1900/brunei_yellow_pre1906.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3850b1476befb9b8d16077b6b4c47f2cf21854af",
+      "size": 490,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/3850b1476befb9b8d16077b6b4c47f2cf21854af",
+      "sha256": "ac695a598f8c8263678756a69465c4757efed43bfea135da0073269f3a102df2"
+    },
+    {
+      "path": "assets/historical_flags/1900/bukhara_1868.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "371ea1ac29ae71fc10774aaad5301618ad9ed18f",
+      "size": 46029,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/371ea1ac29ae71fc10774aaad5301618ad9ed18f",
+      "sha256": "82a76e59ea0c42b9359b03575e0fd53147bcc8c8358b45ba38f5e93b13b17f60"
+    },
+    {
+      "path": "assets/historical_flags/1900/bulgaria_1878.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9d853c76cdce7840f0548eeab9b7ef49851eed7a",
+      "size": 15769,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/9d853c76cdce7840f0548eeab9b7ef49851eed7a",
+      "sha256": "abaaa0247382edaef16e4a56d49c954bd0d8da7dfeae01ba00f2681b1611b49b"
+    },
+    {
+      "path": "assets/historical_flags/1900/canada_red_ensign_1892.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "00a6e30667360ae340fcde205de08b4973cab2c4",
+      "size": 14797,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/00a6e30667360ae340fcde205de08b4973cab2c4",
+      "sha256": "fe8cff088784ec1cfa47feb74c543000cea7fe4f9b39b9ddcaf376d34686b08b"
+    },
+    {
+      "path": "assets/historical_flags/1900/chile_1817.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2e5c187595bcffcb27d75f9269f752853fad114e",
+      "size": 2946,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/2e5c187595bcffcb27d75f9269f752853fad114e",
+      "sha256": "2af8e749b2e71892e38882416c0b88b7afb8e19f0286c9ef554d2e478683d4e4"
+    },
+    {
+      "path": "assets/historical_flags/1900/colombia_1861.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "66695d5e7a6ea47f65e265c1da10c2c8496ac874",
+      "size": 616,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/66695d5e7a6ea47f65e265c1da10c2c8496ac874",
+      "sha256": "4bb5692616861d54b4fa7f1c5ac236f7c3475c84e3583f2c7905240aedc0dac1"
+    },
+    {
+      "path": "assets/historical_flags/1900/congo_free_state_1885.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f9e8ce6b3468349cf4f4f4ec4242ea0a9a26de6a",
+      "size": 5326,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/f9e8ce6b3468349cf4f4f4ec4242ea0a9a26de6a",
+      "sha256": "af8fef05af0db90d3bf0a055a6f92bc494c2cee604247532b44a3780260165b5"
+    },
+    {
+      "path": "assets/historical_flags/1900/costa_rica_1848.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4e5fbb0d6ad2374fe31b7f6d111f5ca4c0831a5d",
+      "size": 19407,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/4e5fbb0d6ad2374fe31b7f6d111f5ca4c0831a5d",
+      "sha256": "8bc5cd8201cc751d40f1d5e42aba7b131f6d524abfb43dd5c275d70dbaa5f274"
+    },
+    {
+      "path": "assets/historical_flags/1900/denmark_dannebrog.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0b185cb415c187ab1926ed380fa8891e5e3e044b",
+      "size": 1008,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/0b185cb415c187ab1926ed380fa8891e5e3e044b",
+      "sha256": "b849788847e585ab59556931283afb84ee201e638ee885c74b934a3e59434e91"
+    },
+    {
+      "path": "assets/historical_flags/1900/dominican_1865.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e0523451070ff24403e9f49d53f8ec428d18e188",
+      "size": 5875,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/e0523451070ff24403e9f49d53f8ec428d18e188",
+      "sha256": "ee321d2247af3f2a9d4d6df91f2c6c7c93ecc329662f7f6cc1d1d930b124c9f8"
+    },
+    {
+      "path": "assets/historical_flags/1900/ecuador_1860.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "956b760c9b1961fff2c2237bdd828536a8142fa7",
+      "size": 11067,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/956b760c9b1961fff2c2237bdd828536a8142fa7",
+      "sha256": "3651b88d004dc59d1d5d45a7880c40567c8ebdf71498933332fc5e92919187b1"
+    },
+    {
+      "path": "assets/historical_flags/1900/egypt_1882.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "de214e82eb203d9aaf8f0c680027877365d7df34",
+      "size": 12214,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/de214e82eb203d9aaf8f0c680027877365d7df34",
+      "sha256": "47f53080074025a3cc28862f1a11ef93dc1a3c746a6f52c1308632edd948c93f"
+    },
+    {
+      "path": "assets/historical_flags/1900/el_salvador_1875.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dfe561611f151355a130818dd18868ea846bedac",
+      "size": 6402,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/dfe561611f151355a130818dd18868ea846bedac",
+      "sha256": "7c05cfe8bf2c1cea38e1ab8e61168f244d9bfa96325f66265d593be87f2049db"
+    },
+    {
+      "path": "assets/historical_flags/1900/ethiopia_1897.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e0f74e72c3090d92e798bbd3525ab0785ff0ff78",
+      "size": 2413,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/e0f74e72c3090d92e798bbd3525ab0785ff0ff78",
+      "sha256": "c70c24824d4614f577db4923ecd78c50d2a19bb5848f69811f6cf16f21c22034"
+    },
+    {
+      "path": "assets/historical_flags/1900/france_tricolour_1794.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ece3a4277643cc6965cc95ef553d46e556e051f8",
+      "size": 600,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/ece3a4277643cc6965cc95ef553d46e556e051f8",
+      "sha256": "f778bbd6ff6612c441fb2ac1ea3ea2b4c8408c4381e22ff389f2629e752929f5"
+    },
+    {
+      "path": "assets/historical_flags/1900/german_empire_1867.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7530e7309370a70eb74ff6acc1747af087af268a",
+      "size": 609,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/7530e7309370a70eb74ff6acc1747af087af268a",
+      "sha256": "3a3db3b5c661fb9e43a2d968d9aa2f32a3526112a440b715493e3475401849d7"
+    },
+    {
+      "path": "assets/historical_flags/1900/greece_1822.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8aa60915828cfc7b60de1c95a4a113be7a327a97",
+      "size": 863,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8aa60915828cfc7b60de1c95a4a113be7a327a97",
+      "sha256": "e9da3fbc2f282f99260dd2332c148668d8374b76e7b04e443183695395763b33"
+    },
+    {
+      "path": "assets/historical_flags/1900/guatemala_1871.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9778647fb34c815537fface607b5b890aad6ecbe",
+      "size": 19146,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/9778647fb34c815537fface607b5b890aad6ecbe",
+      "sha256": "c95365439fb7a05aa41b9413f55c48d1f468fc2bc751f58019cb1954b47f2954"
+    },
+    {
+      "path": "assets/historical_flags/1900/haiti_1859.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "10b1b4f970736ff8f99ee43a9d1e5c8c3a3ecfc1",
+      "size": 12191,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/10b1b4f970736ff8f99ee43a9d1e5c8c3a3ecfc1",
+      "sha256": "add0c7f902f49459e8369c781c64bd0ec45ba823cde51c6ede65afff6bc85786"
+    },
+    {
+      "path": "assets/historical_flags/1900/honduras_1898.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c13498938133e7897205f0c6ef970055f4486ecf",
+      "size": 2989,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/c13498938133e7897205f0c6ef970055f4486ecf",
+      "sha256": "5527994bdf18bc88baeffd9e9e112bfd0096956ad81c165913fa5fc79ff8a8f8"
+    },
+    {
+      "path": "assets/historical_flags/1900/italy_1861.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "62ee2e5a9778379af8cfc976213cd27bad6cfd0b",
+      "size": 3285,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/62ee2e5a9778379af8cfc976213cd27bad6cfd0b",
+      "sha256": "1e35ec914575fa9df4cc87fc03429595c460d4e666d95fec5fea6564b84ed039"
+    },
+    {
+      "path": "assets/historical_flags/1900/japan_1870.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cd2cf49efafd380c7b31f7e1da53670d9d6f8b3c",
+      "size": 5186,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/cd2cf49efafd380c7b31f7e1da53670d9d6f8b3c",
+      "sha256": "a30de5913171f410f7815c3423c18691b47a701e30cbdc2be19749ccf21522fb"
+    },
+    {
+      "path": "assets/historical_flags/1900/khiva_historical.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "14a3cecb70b8859797a0c47edb8002a78bb99d84",
+      "size": 4181,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/14a3cecb70b8859797a0c47edb8002a78bb99d84",
+      "sha256": "4e6cd2dbdbaa08cb3ffc937c93cf1d3c488f3725ab60d8e9b907a182c630813d"
+    },
+    {
+      "path": "assets/historical_flags/1900/korea_taegeuk_1897.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7312695a251aadd98e85fefde6a8ded5d87e3f19",
+      "size": 19852,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/7312695a251aadd98e85fefde6a8ded5d87e3f19",
+      "sha256": "e8f0fad877186262f0afcc3cf54b0bff80af9028ccfcd2285558052f8f710804"
+    },
+    {
+      "path": "assets/historical_flags/1900/liberia_1847.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "da6b8636f8bd468d7163f7ebf87571c316c12406",
+      "size": 3124,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/da6b8636f8bd468d7163f7ebf87571c316c12406",
+      "sha256": "bd1422a7ea07bdc9aa3d05dd0580bfd1900d93e54c4b9e7111971615d8bfac3c"
+    },
+    {
+      "path": "assets/historical_flags/1900/luxembourg_1845.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1fdead8ad823ecd645ac12715c3b2d20dda4823c",
+      "size": 592,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/1fdead8ad823ecd645ac12715c3b2d20dda4823c",
+      "sha256": "1db34e361aeab8682922c2f2eb4e93256bdd5918ffc010a1787f9280c80cac94"
+    },
+    {
+      "path": "assets/historical_flags/1900/mexico_1893.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b601fcbd4c21a663c9ffe8e3c93328acf03eb75e",
+      "size": 12648,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/b601fcbd4c21a663c9ffe8e3c93328acf03eb75e",
+      "sha256": "9ae575285e7b67c2120379c6055cc9516091f9d29dc3a1b37837eaeed9c5f6bf"
+    },
+    {
+      "path": "assets/historical_flags/1900/montenegro_1876.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fd73e2827393230d66d2f68d40ef701234498fd2",
+      "size": 26724,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/fd73e2827393230d66d2f68d40ef701234498fd2",
+      "sha256": "79e7b9b9aa95b302ffe5564ed9fd89825abd710f52fd5285549c11be9a9ddb9a"
+    },
+    {
+      "path": "assets/historical_flags/1900/morocco_plain_red.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c513d8adde83b2b3940c44162740dd2d8f49feb8",
+      "size": 545,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/c513d8adde83b2b3940c44162740dd2d8f49feb8",
+      "sha256": "77295e051e5c0b142084ae4d2b708748d3f331a2715fa09071fa73bfd17cc038"
+    },
+    {
+      "path": "assets/historical_flags/1900/muscat_oman_plain_red.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e4672608597782fa798f56557dac4ad516c79a2e",
+      "size": 545,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/e4672608597782fa798f56557dac4ad516c79a2e",
+      "sha256": "c4810b67063d0b8b6833eb7ac4b48f77185b70bab11a703961cd2b6b72d0da34"
+    },
+    {
+      "path": "assets/historical_flags/1900/nepal_historical_pennants.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4fcf30ee2650a0d4248cb5ad63d357f989f3c695",
+      "size": 19175,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/4fcf30ee2650a0d4248cb5ad63d357f989f3c695",
+      "sha256": "cf0b56a75d8bca4de47af60301a5bb29d69f1956f65e9cdcee2c6d5c68ab018d"
+    },
+    {
+      "path": "assets/historical_flags/1900/netherlands_tricolour.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8f52ea0bdc47dd499ea0426350af5524e391a10e",
+      "size": 624,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8f52ea0bdc47dd499ea0426350af5524e391a10e",
+      "sha256": "2cb51bb5f5ca4284c3c8aa77ba14fce20c1e75b013f38cf61a9952cf7a076de6"
+    },
+    {
+      "path": "assets/historical_flags/1900/nicaragua_1896.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b9b4cf14ff7d17c8abcf17f930cecaa4f7c97d5b",
+      "size": 8148,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/b9b4cf14ff7d17c8abcf17f930cecaa4f7c97d5b",
+      "sha256": "2da793674643aa0f504d1b1987813b8c11022bffc6e6f85ec7da366f88777161"
+    },
+    {
+      "path": "assets/historical_flags/1900/orange_free_state_1857.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c68e2d8254b29a9d5f747ad604ce5631723dee44",
+      "size": 1030,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/c68e2d8254b29a9d5f747ad604ce5631723dee44",
+      "sha256": "64216330e2770a592ef8bdd9486b4c3d43ec66e337aa4b414b8ca521b33a99be"
+    },
+    {
+      "path": "assets/historical_flags/1900/ottoman_1844.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fc8684eba1ea0f0bd50719a86c0bc07480c76438",
+      "size": 7911,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/fc8684eba1ea0f0bd50719a86c0bc07480c76438",
+      "sha256": "1e6d1e456402fc73a5cb768cb23aedd3fd53c7a18cbb6474cfd2824c3f39122b"
+    },
+    {
+      "path": "assets/historical_flags/1900/paraguay_1842.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "14b840f938209adfe1dd481e19f921fee9576ff1",
+      "size": 8392,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/14b840f938209adfe1dd481e19f921fee9576ff1",
+      "sha256": "d53ff8aaef96036d36c63987f5b518412e47ce7a4c3f12e3c2d4fd6a03fd7216"
+    },
+    {
+      "path": "assets/historical_flags/1900/peru_1884.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c623896beaa83a2c26c682fa95d340d222910301",
+      "size": 15423,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/c623896beaa83a2c26c682fa95d340d222910301",
+      "sha256": "8141867da9d4e23814a10ddfdf31855fd71334ac036cd7a1306b193913c3356c"
+    },
+    {
+      "path": "assets/historical_flags/1900/portugal_1830.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ceeefada834bf27aa12ca5e55c4e800a9cdd5f0c",
+      "size": 21350,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/ceeefada834bf27aa12ca5e55c4e800a9cdd5f0c",
+      "sha256": "1bbe4cf0661a3a1dbee8a4bcb91875f1d6d585117966a7d9f444ffe73d2f1d81"
+    },
+    {
+      "path": "assets/historical_flags/1900/qajar_persia_lion_sun.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f1c981bce28ca2644fba688786e62561dc8134a9",
+      "size": 29487,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/f1c981bce28ca2644fba688786e62561dc8134a9",
+      "sha256": "00a120b5dac85258bac909dc8647b6719e04657d3617dfe2f21cb7eaf78e5e00"
+    },
+    {
+      "path": "assets/historical_flags/1900/qing_1889.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8c5b54266ad125aa0e6fbb033af3bb62db5095a4",
+      "size": 44548,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8c5b54266ad125aa0e6fbb033af3bb62db5095a4",
+      "sha256": "19900f739878e83804f524c1e23b2e9dd25a58b94229823e15e2a56123105e81"
+    },
+    {
+      "path": "assets/historical_flags/1900/romania_1867.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b3f406153d83ce15c72b74476348bcc57eaf434",
+      "size": 595,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8b3f406153d83ce15c72b74476348bcc57eaf434",
+      "sha256": "d869305f04ed2e9fbc36fb7eba18d7cec13e4f57015b22dc01d2e74c9ada9d8f"
+    },
+    {
+      "path": "assets/historical_flags/1900/russia_1896.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a5fcda44324ff74a36e75f6ec08bf130cd703b25",
+      "size": 628,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/a5fcda44324ff74a36e75f6ec08bf130cd703b25",
+      "sha256": "e26ac783d917278c6b4dd9c6d327cf04455c8c1acece7be977701e1882ea7a53"
+    },
+    {
+      "path": "assets/historical_flags/1900/serbia_1882.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c96528f930ab7500527af5787e97fcfc6cc147e5",
+      "size": 31216,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/c96528f930ab7500527af5787e97fcfc6cc147e5",
+      "sha256": "d725f4362c9cea8b67eee6144e3dd53b6681f00dedb7a626b32d570e047794b0"
+    },
+    {
+      "path": "assets/historical_flags/1900/siam_white_elephant_1855.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aa2c18a2fde6ce9ca677e6089e719fae58546012",
+      "size": 30595,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/aa2c18a2fde6ce9ca677e6089e719fae58546012",
+      "sha256": "0c0a127313175483406020a81bcff67b9ab6d29a32af97d106fcc2dfb9d5dce6"
+    },
+    {
+      "path": "assets/historical_flags/1900/spain_1875.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "69e44cffc84625002b745dc596c3b18df6b1f1d5",
+      "size": 11344,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/69e44cffc84625002b745dc596c3b18df6b1f1d5",
+      "sha256": "8658a602c85e3523f89c73a463bfefa18f6cc7e03b6c99e4b1b55f7057343e22"
+    },
+    {
+      "path": "assets/historical_flags/1900/sweden_norway_union_1844.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e279a25cb9c66606452ad9f5801ec7fd9a10c8d5",
+      "size": 3795,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/e279a25cb9c66606452ad9f5801ec7fd9a10c8d5",
+      "sha256": "aa76a2c802e9bf59d9b405e3a53b8f4a3a3f79be23c9b5ea3b18a65b018b48d6"
+    },
+    {
+      "path": "assets/historical_flags/1900/switzerland_1889.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6269d07034ea5384b434c793509d1ca4e6eabd61",
+      "size": 1034,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/6269d07034ea5384b434c793509d1ca4e6eabd61",
+      "sha256": "836459de8f98a414c4e394e28657474544e6e0f2e7a5771ba25712cd32394f11"
+    },
+    {
+      "path": "assets/historical_flags/1900/transvaal_vierkleur_1857.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bc52c8d3ec569b2bce788d60cf17272f7ab58a88",
+      "size": 753,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/bc52c8d3ec569b2bce788d60cf17272f7ab58a88",
+      "sha256": "95233bb854e0351bf5f34d7d81bad7c0315dc00414f10aa52e638683862a6e4b"
+    },
+    {
+      "path": "assets/historical_flags/1900/tunisia_1831.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8cc3d71038f239b14dc9034aa5a4768baf2ab934",
+      "size": 8921,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8cc3d71038f239b14dc9034aa5a4768baf2ab934",
+      "sha256": "fe967d290ad530222d625680d56a061cc940d0ef0fe252f3d5959944b0ef9ef8"
+    },
+    {
+      "path": "assets/historical_flags/1900/uk_union_1801.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cba7d7340261f7f17d4288dff8ab60ecad902ba0",
+      "size": 15991,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/cba7d7340261f7f17d4288dff8ab60ecad902ba0",
+      "sha256": "7d8aaebab8e7aa7c23b90f8207a3cdeef7816c5f0ee5c0b870388288855b2080"
+    },
+    {
+      "path": "assets/historical_flags/1900/uruguay_1830.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0abd244736552a3c639ef76c49317573ad344a44",
+      "size": 12390,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/0abd244736552a3c639ef76c49317573ad344a44",
+      "sha256": "520569288e49cbd7e4e64459e211f43ca92aefadaca5d9f0ef0e11809e07d330"
+    },
+    {
+      "path": "assets/historical_flags/1900/us_1896_45_star.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ec3c1bda762d92aa1a4b775d0f4bc6509b27fd72",
+      "size": 14808,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/ec3c1bda762d92aa1a4b775d0f4bc6509b27fd72",
+      "sha256": "a713f34e0834be572f9432e009422445b9d4d9cd03e7d0060194a9adb78d6dd2"
+    },
+    {
+      "path": "assets/historical_flags/1900/venezuela_1863.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "95f8935fc09e2a7755dcb7bfbdd59950c57787be",
+      "size": 5205,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/95f8935fc09e2a7755dcb7bfbdd59950c57787be",
+      "sha256": "b77994a79578f893fa278c6e6a9247001c78498467585b7434ac3d7508eca042"
+    },
+    {
+      "path": "assets/historical_flags/1900/zanzibar_1896.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "33e3b9d1f7ad53f2deb863ba62924298ce27c734",
+      "size": 545,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/33e3b9d1f7ad53f2deb863ba62924298ce27c734",
+      "sha256": "6cb5494efce31ee8df7a7d500c083a02aaa07b4e4210d9f055b3b488ff8e94b2"
+    },
+    {
+      "path": "assets/icons/.gitkeep",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "assets/placeholders/.gitkeep",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "assets/prototype_v2/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d37248e8add91b7aaa1296372e44108e67b7da04",
+      "size": 342,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/d37248e8add91b7aaa1296372e44108e67b7da04",
+      "sha256": "ccbb9b546e18331eb54678364ca877f05e64c3bf85a3eeaf973c482f3ecbd1ab"
+    },
+    {
+      "path": "data/actions/.gitkeep",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "data/alpha/commodity_market_1900.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "62dc18e1f9404582d193ef7a6776243ea3801e6c",
+      "size": 67363,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/62dc18e1f9404582d193ef7a6776243ea3801e6c",
+      "sha256": "b7445ed14db276d50b0ea9632fd59d949ce7011685d793ea78d524a35a5424b8"
+    },
+    {
+      "path": "data/alpha/economy.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "04f81fc716c00ccb74bdbb0641f2d921f9d2e243",
+      "size": 11815,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/04f81fc716c00ccb74bdbb0641f2d921f9d2e243",
+      "sha256": "e55ae98ef4ca3f8dfd77bd19b3a4f8a9946f20aa9897b022c668e8f9a671a9d1"
+    },
+    {
+      "path": "data/alpha/economy_integration_1900.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "12ba37dc385c38df02c86cb1d92da2314318b32a",
+      "size": 12278,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/12ba37dc385c38df02c86cb1d92da2314318b32a",
+      "sha256": "d372522933db074190fc96d88e0659011a02ed043bd111699fc9e180cbbc988f"
+    },
+    {
+      "path": "data/alpha/historical_economy_coverage_1900.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c118dcf8301d96baa49289a3ee812c3d96e33b51",
+      "size": 5139,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/c118dcf8301d96baa49289a3ee812c3d96e33b51",
+      "sha256": "840207be360b52e8f314b7c6ef8be220c40b5f291013affb974064af3680c482"
+    },
+    {
+      "path": "data/alpha/historical_household_budgets_1900.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "56a1fd4b49496553c29b56d648b377eae850be8d",
+      "size": 3632,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/56a1fd4b49496553c29b56d648b377eae850be8d",
+      "sha256": "4e4da0c59203e8562f692ffb36f00d0d242a0b8a09204e3d6eae15b2903f1907"
+    },
+    {
+      "path": "data/alpha/historical_transport_network_1900.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9950a77baa6442412e7f503fcde8ec5fb8c55405",
+      "size": 495,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/9950a77baa6442412e7f503fcde8ec5fb8c55405",
+      "sha256": "1fa896fbfad6e67fbe474f4072f4829acd645f4f9f6f6ae3409b10b485e33437"
+    },
+    {
+      "path": "data/alpha/historical_transport_network_1900/transport_compact.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5c8c6a00c7f0e7ba6f1be6bf03d6ada0d1ef3d15",
+      "size": 10163,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/5c8c6a00c7f0e7ba6f1be6bf03d6ada0d1ef3d15",
+      "sha256": "ea49277a31f214f2949e458f9f5fb787aef92659ec08aa4078f1e37a04563a00"
+    },
+    {
+      "path": "data/alpha/historical_world_economy_1900.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b8ba36091ed28087e58e00b597be1f3a86877b1",
+      "size": 4443,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8b8ba36091ed28087e58e00b597be1f3a86877b1",
+      "sha256": "86bb1c3569fe83d444250d48f0aed96510424fbf4a99d7558758f39df3ee613f"
+    },
+    {
+      "path": "data/alpha/historical_world_economy_1900/countries_compact.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "10945ab072c187048199cb12f09e2d315562148a",
+      "size": 12660,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/10945ab072c187048199cb12f09e2d315562148a",
+      "sha256": "e8d3175cf3fbc49904a052ed3b2638238a83a91524b8ca2cd15f7082873a52cb"
+    },
+    {
+      "path": "data/alpha/politics.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ef94d173499e3f1e85913fb9263bc036900c846d",
+      "size": 7489,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/ef94d173499e3f1e85913fb9263bc036900c846d",
+      "sha256": "70a2231216b71d7b1ef27c83e5f3c1044b4486c9efa2b2c75525d2af858af84d"
+    },
+    {
+      "path": "data/alpha/presets.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4449d0a7e60dcf6d6969984871246f504f5c39b7",
+      "size": 3787,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/4449d0a7e60dcf6d6969984871246f504f5c39b7",
+      "sha256": "4fc6c3aad6d29806b52bc8a84330a4d9ee5c4230acaa005b2c419cf32ab31505"
+    },
+    {
+      "path": "data/alpha/world.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1d33853d1ec849f1fae2904366a1f7e9a67651e7",
+      "size": 21168,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/1d33853d1ec849f1fae2904366a1f7e9a67651e7",
+      "sha256": "17cdda281f16e3b4e0356a5b2918dced290573050bd3f2b3d8550047157acc8d"
+    },
+    {
+      "path": "data/balance/.gitkeep",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "data/balance/action_rules.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "07b608e06c23dcd2dc9edcaa53b8cf6b83de8079",
+      "size": 3773,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/07b608e06c23dcd2dc9edcaa53b8cf6b83de8079",
+      "sha256": "62d7faa54de1f90225ebfa89af4b583f8549420f35f33321b6cf3ff21793d013"
+    },
+    {
+      "path": "data/balance/continuity_rules.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "01c4f0c954fe6822c46539f274291caa57092d58",
+      "size": 1734,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/01c4f0c954fe6822c46539f274291caa57092d58",
+      "sha256": "705e7784db0638a4d6dde6b0b8402235ce1112e42bc99861e3a1be03d28cb35e"
+    },
+    {
+      "path": "data/balance/map_rules.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "826d5774055474544cce171d853383e35c9f5c11",
+      "size": 742,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/826d5774055474544cce171d853383e35c9f5c11",
+      "sha256": "41f2b6aa15b278b82b4ac1a2c693aa46cc428be9bc86c0733c326d60a73357a0"
+    },
+    {
+      "path": "data/balance/random_service.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b02302040733f99d5232e06914bae2fae8f1cf76",
+      "size": 54,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/b02302040733f99d5232e06914bae2fae8f1cf76",
+      "sha256": "426f2cb78dfc3b59d65a66897dddd7c25db653988f1bb014f777bcc271d7df93"
+    },
+    {
+      "path": "data/balance/simulation_clock.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1ce4ec78523e4d5331a13a1b5be42a3872a3c1da",
+      "size": 187,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/1ce4ec78523e4d5331a13a1b5be42a3872a3c1da",
+      "sha256": "7ec43e564d7033d744a9030b76ff14788393682c5d272135a7cc9caa1b8b6ea7"
+    },
+    {
+      "path": "data/balance/society_rules.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "06fd8e828838ebbd20c9fa2924563cdd5a15ad2f",
+      "size": 2417,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/06fd8e828838ebbd20c9fa2924563cdd5a15ad2f",
+      "sha256": "9157326522aa94dddf79b61ef57cd9516a60923562864d7424cad3368031c486"
+    },
+    {
+      "path": "data/characters/.gitkeep",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "data/characters/character_generation.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d3fee823c2ca1ca7fe909be81c3ce8c5059c8594",
+      "size": 9566,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/d3fee823c2ca1ca7fe909be81c3ce8c5059c8594",
+      "sha256": "5b7fb7b9e1b865590cd0b1dc51029a3f7cc0fc9db57ec75a2bfc9bda12e2c1cc"
+    },
+    {
+      "path": "data/countries/.gitkeep",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "data/organizations/.gitkeep",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "data/provenance/historical_fact_evidence.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0f60d26cc2162f36aab2c3b7e3daab425370e1fe",
+      "size": 286457,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/0f60d26cc2162f36aab2c3b7e3daab425370e1fe",
+      "sha256": "07dbdfd1fdeb1cfe7259ab47b42efd8f33b66eee8d246b0febcc586075fbc218"
+    },
+    {
+      "path": "data/provenance/historical_source_registry.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0966d0921fe2f32d59e5663ec25d5df42a086e7e",
+      "size": 2444,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/0966d0921fe2f32d59e5663ec25d5df42a086e7e",
+      "sha256": "f4fbdd46feffbe0c312271fa95eb0340aed3f87a59bacc3cc9f45e7efb32e103"
+    },
+    {
+      "path": "data/regions/.gitkeep",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "data/scenarios/v2_2_lille_life_loop.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ef3009e7ee57bf327f8ace2ac8bf1a94e3d08ddd",
+      "size": 438,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/ef3009e7ee57bf327f8ace2ac8bf1a94e3d08ddd",
+      "sha256": "716cb76da3152411a7cddf8c2b189269543087164cf4df1cb7eea4d1236f7461"
+    },
+    {
+      "path": "data/scenarios/v2_3_lille_space_cognition.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0844cba5bd5abcfecf50c2be419fb103fb22904a",
+      "size": 437,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/0844cba5bd5abcfecf50c2be419fb103fb22904a",
+      "sha256": "b082876124c9bdb6bb67de9a513e5f3b2a8e60f08ae5b45fcfe96d964a13604f"
+    },
+    {
+      "path": "data/staging/1900/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "20560ffa998f42128c1b8fbab762fb0730ce146e",
+      "size": 2326,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/20560ffa998f42128c1b8fbab762fb0730ce146e",
+      "sha256": "658c263af6fd2c2c2e1e492523971181f3e72abf684f456653e657cba74a4558"
+    },
+    {
+      "path": "data/staging/1900/batch1_deterministic_corpus.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a9f012f1cab00d448ecbbdcf2bff1af736dd3e47",
+      "size": 1314,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/a9f012f1cab00d448ecbbdcf2bff1af736dd3e47",
+      "sha256": "8d681101f3da012ab02a297b01b9b9470b9f35448ba07890ac8b1c4a2d50ad78"
+    },
+    {
+      "path": "data/staging/1900/batch1_manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "58118e4ed3a807d0323f67ff5f2c8bc2331b0d7c",
+      "size": 1696,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/58118e4ed3a807d0323f67ff5f2c8bc2331b0d7c",
+      "sha256": "dacce3ed047d69b229aa5f904bb0c20be2fee61442a0ab9a912f6fdf4b9664a2"
+    },
+    {
+      "path": "data/staging/1900/batch2_deterministic_corpus.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c466c966c2991ac2fc2fc22e6140a98ada4c403e",
+      "size": 1502,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/c466c966c2991ac2fc2fc22e6140a98ada4c403e",
+      "sha256": "fbff8d95182b5e3b137704202c71e1d9314a470aef2f30e7365c2710b0c7d614"
+    },
+    {
+      "path": "data/staging/1900/batch2_manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "622cf4a0dd697c6d27c4d32baed59444062e39f1",
+      "size": 2065,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/622cf4a0dd697c6d27c4d32baed59444062e39f1",
+      "sha256": "294df7a82d5d131f905c833036bc65515dfa268029b693e4be180fae95dbb0a7"
+    },
+    {
+      "path": "data/staging/1900/batch2_political_unit_records.schema.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6fa10766093bc12357f08e9be2d95c4635d5d11e",
+      "size": 8038,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/6fa10766093bc12357f08e9be2d95c4635d5d11e",
+      "sha256": "1a568e49b55f2be8b5b98314e13d8d6af54f9a9f1cecc64ff346958fc07c5414"
+    },
+    {
+      "path": "data/staging/1900/batch2_qa_report.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0a08e1956f0bb43f8faac000d15489e175a4782a",
+      "size": 3990,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/0a08e1956f0bb43f8faac000d15489e175a4782a",
+      "sha256": "8e422b3df6b88df99a8a21fd1b0ef47b99ba4ccc317ca20b73975307e544e6fd"
+    },
+    {
+      "path": "data/staging/1900/batch3_deterministic_corpus.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bdbaf730cd14157c29c3e9d5674f755219a433c8",
+      "size": 2376,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/bdbaf730cd14157c29c3e9d5674f755219a433c8",
+      "sha256": "e8d8de582c4569c76cf4897e91bb16766c4821b5e934b91a24bfeb7eeced2375"
+    },
+    {
+      "path": "data/staging/1900/batch3_manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fe0d01462bd36c51e150e3956e4bf848586cc3f7",
+      "size": 2990,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/fe0d01462bd36c51e150e3956e4bf848586cc3f7",
+      "sha256": "bc21a00a693def6bfab4fcbba93f8a9d49e91838d4d8a33a4b7fb552cc86e15c"
+    },
+    {
+      "path": "data/staging/1900/batch3_qa_report.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ab58d022616ab07774b9ed5902bd3658117ce31e",
+      "size": 5442,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/ab58d022616ab07774b9ed5902bd3658117ce31e",
+      "sha256": "048e50cc3555d39097497ef51d1c95eea337bb2f26dd8a864d3b27e3d80bc7d7"
+    },
+    {
+      "path": "data/staging/1900/batch3_repository_inventory.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a85f762e18505120083b71d14feb138a10832dcc",
+      "size": 9846,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/a85f762e18505120083b71d14feb138a10832dcc",
+      "sha256": "2190d230d6acc3cb8aecea4cb9009701c232743ee282cfbe796fab41b0df711e"
+    },
+    {
+      "path": "data/staging/1900/batch3_source_gap_candidates.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "765de6f7bca146961bb7f08c65a3979b80e820aa",
+      "size": 60914,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/765de6f7bca146961bb7f08c65a3979b80e820aa",
+      "sha256": "e3e2aa06013f64a6a6af798522ea66a71a095d86df3b6bb83336caeda1a24118"
+    },
+    {
+      "path": "data/staging/1900/batch3_source_gap_candidates.schema.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0e5cd49d31f13d3e6fb88b3b2f87b5c45799606d",
+      "size": 3126,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/0e5cd49d31f13d3e6fb88b3b2f87b5c45799606d",
+      "sha256": "0191b38f4c2a1d8aab94bb922665641ef5e3e658c42ece8a0ff4f0e0f42e7c08"
+    },
+    {
+      "path": "data/staging/1900/batch4_coverage_review_queue.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8959a21b774620be561b02321de4a30c51529c03",
+      "size": 259115,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8959a21b774620be561b02321de4a30c51529c03",
+      "sha256": "0412c986e36967ea1d9148f40dd8085b3a192648e2b9b6712db2a4376f93d174"
+    },
+    {
+      "path": "data/staging/1900/batch4_coverage_review_queue.schema.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "372df55e015efd1e66198a8c630405213fc655be",
+      "size": 4445,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/372df55e015efd1e66198a8c630405213fc655be",
+      "sha256": "1762d012a2efd51ef34a6ade2d275a5d9d1dba545891bd74a50ec2a8a79d0b56"
+    },
+    {
+      "path": "data/staging/1900/batch4_deterministic_corpus.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "11ffa45e7137bfdb595158390b731199b1f031f1",
+      "size": 1078,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/11ffa45e7137bfdb595158390b731199b1f031f1",
+      "sha256": "d2de8bce34c10f509973029aef49f9199575da5a7db024f1ed2fb681d5f57fa8"
+    },
+    {
+      "path": "data/staging/1900/batch4_manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "199cdb5d282339405e0b3aacf0f72ee1e6148d62",
+      "size": 1654,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/199cdb5d282339405e0b3aacf0f72ee1e6148d62",
+      "sha256": "3303739c1a88534182d8424841eff5f83f480148fff358c1f521c7b435fd8e4d"
+    },
+    {
+      "path": "data/staging/1900/batch4_qa_report.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "048c65f834f62e99a15cebe577cc34156e5f2529",
+      "size": 9805,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/048c65f834f62e99a15cebe577cc34156e5f2529",
+      "sha256": "8536a832712b87614846383a874664cd4a50df9276c1fcd932ccffa74ff63f6b"
+    },
+    {
+      "path": "data/staging/1900/canonical_crosswalk.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "eab0f45b1b50b90b8ee2e54858369a09493a66ea",
+      "size": 68935,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/eab0f45b1b50b90b8ee2e54858369a09493a66ea",
+      "sha256": "b2b26466daa35e47b08aef068997d841873cde5a7317c346e62a55947a53d304"
+    },
+    {
+      "path": "data/staging/1900/canonical_crosswalk.schema.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3af3598b1b675851ba6641223186f51ac00bfffa",
+      "size": 5445,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/3af3598b1b675851ba6641223186f51ac00bfffa",
+      "sha256": "d247b648c0be6bd970f217afde6d3e5e067fae52c8760d41bdea6c8aa42b3c6b"
+    },
+    {
+      "path": "data/staging/1900/conflict_register.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "38dbab4a8fc00aa78eed59c2e76c9c85a5d63d6f",
+      "size": 838,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/38dbab4a8fc00aa78eed59c2e76c9c85a5d63d6f",
+      "sha256": "679571c1fa52d2e165da0c43f60b14a8205a07e09d70e7b48ac03b935614ca64"
+    },
+    {
+      "path": "data/staging/1900/pack_manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b71d46c51b44ea87c7348983c9b61e4988721070",
+      "size": 6401,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/b71d46c51b44ea87c7348983c9b61e4988721070",
+      "sha256": "674fd45c0ae6354374590617b3ac4aa26441e219c521960cb8cb8b047c0a564c"
+    },
+    {
+      "path": "data/staging/1900/political_unit_records_1900.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "155cae7ce09f4de1742369ba954df7e58da84fd8",
+      "size": 376281,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/155cae7ce09f4de1742369ba954df7e58da84fd8",
+      "sha256": "77f15d349ff11a0d4753aa80851d7cb9bd8cc69a23ab84f41280836df2338771"
+    },
+    {
+      "path": "data/staging/1900/priority_backlog.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d000ae7f971322d5a9f3f34f96f3ccc8f08e069c",
+      "size": 23304,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/d000ae7f971322d5a9f3f34f96f3ccc8f08e069c",
+      "sha256": "0595789b2b62fbd012b8d76d96dbea3146d2a8ff7193db04817a88fb41877e14"
+    },
+    {
+      "path": "data/staging/1900/source_manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cbf423b2365b68575de23228bc6bd920c86ee084",
+      "size": 6891,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/cbf423b2365b68575de23228bc6bd920c86ee084",
+      "sha256": "5945552a62f13eef88e414ceb19182d5661690cbe8ede90c8f69c012a6f88a06"
+    },
+    {
+      "path": "data/staging/1900/source_record.schema.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "39642ec0f92987ce560b45d429257ab95f66242c",
+      "size": 2760,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/39642ec0f92987ce560b45d429257ab95f66242c",
+      "sha256": "5af2614a6473edc471a95b4f0c52d881a47005f01e66f6c5d0667b6fef1115ae"
+    },
+    {
+      "path": "data/staging/1900/source_records.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b7a1c3b6b59de7fbf3dd7af6eeadee5d5d555c7f",
+      "size": 32401,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/b7a1c3b6b59de7fbf3dd7af6eeadee5d5d555c7f",
+      "sha256": "7ca39a6308364781728fea5d44114763acc653a8a7fff5941b72d1ecc73ce4df"
+    },
+    {
+      "path": "data/staging/1900/source_records.schema.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a70315ffc6fcf8b57e123347f2efdb00bf76e880",
+      "size": 863,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/a70315ffc6fcf8b57e123347f2efdb00bf76e880",
+      "sha256": "a48cfac5d17924776c62f7df21433583b83e5c7b82518c2821e2c6d42d36c91b"
+    },
+    {
+      "path": "data/staging/world_names/aliases.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "df4452cf9d9ee420e26651ccd0c09d043f7482ea",
+      "size": 1277173,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/df4452cf9d9ee420e26651ccd0c09d043f7482ea",
+      "sha256": "38acc9aa23873e48fea175afeb545337c8d9956382d4466a24936da5b707587c"
+    },
+    {
+      "path": "data/staging/world_names/artifact_manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ece30f94b16a7e6aad396be2efb1d038ba5ea16c",
+      "size": 3581,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/ece30f94b16a7e6aad396be2efb1d038ba5ea16c",
+      "sha256": "10489725f3c627542d997d5a6729e29a75f4259b5c7a3fd604ac5ad94b069d5c"
+    },
+    {
+      "path": "data/staging/world_names/candidate_collision_ledger.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5537b45119164f9be6e5978ee076556e5c3a6df7",
+      "size": 213668,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/5537b45119164f9be6e5978ee076556e5c3a6df7",
+      "sha256": "eda69e081a8146936e7334f49dec88a7842082f7235156583151ceb15c1f44b0"
+    },
+    {
+      "path": "data/staging/world_names/collision_report.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5ca4354e5076ed6eb8ba06fc4cb353954aa01738",
+      "size": 252212,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/5ca4354e5076ed6eb8ba06fc4cb353954aa01738",
+      "sha256": "039db137206e0e262f38d2b37da1a1556b3bd7fa1abba1c363bcd61dd2abeff6"
+    },
+    {
+      "path": "data/staging/world_names/coverage_manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ec81e4c1f4d9a1670b509a965d584ab8a09f5576",
+      "size": 143530,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/ec81e4c1f4d9a1670b509a965d584ab8a09f5576",
+      "sha256": "afe1a6350e12fc4cc14b0aec1e758d62e42163676c6e2291b53b8d54e40eb9ef"
+    },
+    {
+      "path": "data/staging/world_names/deterministic_corpus.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "91ba42eabe72528882f2bb8ba81e7db626ec85a5",
+      "size": 54688,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/91ba42eabe72528882f2bb8ba81e7db626ec85a5",
+      "sha256": "d625da08acba41dd6c6d40ceb462c066d2dfa40e95d7e6e84a890bbcdd33b4bf"
+    },
+    {
+      "path": "data/staging/world_names/name_inventory.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3e1ef9d73c4fcbcb9fa8d30dadd17787e8913961",
+      "size": 2358416,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/3e1ef9d73c4fcbcb9fa8d30dadd17787e8913961",
+      "sha256": "53cd326541e43366c19587b09e54fdb7d46f6589dc365e0a4ee2331134d3f683"
+    },
+    {
+      "path": "data/staging/world_names/remaining_gaps.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "52f127a6136809954238eed40bcc30cff8451e56",
+      "size": 224142,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/52f127a6136809954238eed40bcc30cff8451e56",
+      "sha256": "297035758e6490368097b87e0799246dcaeaed19a390cf9d43752cefef900c07"
+    },
+    {
+      "path": "data/staging/world_names/review_candidates.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a0f70926b89fc52a67c2900de6b8184a390bb1bc",
+      "size": 1140212,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/a0f70926b89fc52a67c2900de6b8184a390bb1bc",
+      "sha256": "87e1edd526832c074dec4c3c863f530eb45a3f2a42053aca29a2ff93ed81515b"
+    },
+    {
+      "path": "data/staging/world_names/search_index.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d11c94e47b769a86425d0e4f129c8e06198842ab",
+      "size": 106907,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/d11c94e47b769a86425d0e4f129c8e06198842ab",
+      "sha256": "9f4ee76d5d356b5326cd51c2c1da3b66aac42a365a24f5b148aceb301747fd14"
+    },
+    {
+      "path": "data/staging/world_transport_topology_audit_batch1_candidate_fixes.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "61f18896620106f6978323a7c373b14c99b2ef90",
+      "size": 372,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/61f18896620106f6978323a7c373b14c99b2ef90",
+      "sha256": "bb0542f305d82c675f702923665fa87de1ecbbe0c6fb026c91dedc657d6feb6b"
+    },
+    {
+      "path": "data/v2_2/lille_demo_employment.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "021e0e1f5044331a84600c24c18d9cc39569ea62",
+      "size": 2138,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/021e0e1f5044331a84600c24c18d9cc39569ea62",
+      "sha256": "9c0efdc4f15dcb739b1dcad06c7b8fc10efb35830d72bbecde23b4a4d6b6398a"
+    },
+    {
+      "path": "data/v2_2/lille_demo_living_costs.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "479112c478118ac9904a0146a5ba5ae56d7d6e2f",
+      "size": 577,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/479112c478118ac9904a0146a5ba5ae56d7d6e2f",
+      "sha256": "b32a47ed1b6903668d6ba91dbd8169b6cce9704ea390a136aa9af535718e125c"
+    },
+    {
+      "path": "data/v2_2/lille_demo_locations.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "37fb3206372351927d0d842aa485ec339878c79b",
+      "size": 1142,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/37fb3206372351927d0d842aa485ec339878c79b",
+      "sha256": "f94401e31b599ede9488249738dca45fe3df8e7849f09e7a721a3c32fe424535"
+    },
+    {
+      "path": "data/v2_2/lille_demo_people.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3a7432a2e6c8696fdfdc2213fe6b4fb3783bacea",
+      "size": 3903,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/3a7432a2e6c8696fdfdc2213fe6b4fb3783bacea",
+      "sha256": "0a7ed052c392da9b23c5dbf284b02e7425394e6c4af2e9dc81eacf6ab9869314"
+    },
+    {
+      "path": "data/v2_2/v2_2_balance.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "075095510e6bc2d5cec895d57855dba968c83682",
+      "size": 2600,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/075095510e6bc2d5cec895d57855dba968c83682",
+      "sha256": "b68c846c2b99604c8b5f7982069860018b69969b0384e82d4f25f3b72be0ff54"
+    },
+    {
+      "path": "data/v2_3/communication_channels.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "312ccc77213536a1e69b37444922dcfae7479b69",
+      "size": 1255,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/312ccc77213536a1e69b37444922dcfae7479b69",
+      "sha256": "a40faebbf87ccaa7f9c30b00714f3e075ca42991cdb2de8797ce5fb51501bec0"
+    },
+    {
+      "path": "data/v2_3/cross_border_locations.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "feece0e1bd67c8d4b0695f5b082eee103cb2b877",
+      "size": 4880,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/feece0e1bd67c8d4b0695f5b082eee103cb2b877",
+      "sha256": "476f7fb21f25b59e03d21def85bc3c9bb8f1cacf8fd67ba47f89381477112109"
+    },
+    {
+      "path": "data/v2_3/cross_border_travel_graph.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "10ac5f64fd2999daf6f5c44e82f83101396006dd",
+      "size": 4458,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/10ac5f64fd2999daf6f5c44e82f83101396006dd",
+      "sha256": "c326b854780d746dba859094367e572e09b207e6ce1a89e353670735a5313642"
+    },
+    {
+      "path": "data/v2_3/knowledge_rules.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "127fe8bfa7ddee24f49e482d38714c78db7a7ced",
+      "size": 450,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/127fe8bfa7ddee24f49e482d38714c78db7a7ced",
+      "sha256": "0c382b6cbce05aaa5e935ef4e00b4e3c86957e6cc150db55b6b43dbde922d95c"
+    },
+    {
+      "path": "data/v2_3/lille_finance.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2579c1b1d3e0ea93d46b9851c7ba0b90bf2e38de",
+      "size": 1431,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/2579c1b1d3e0ea93d46b9851c7ba0b90bf2e38de",
+      "sha256": "66aac38fb0db88d11ea976a73a291f6cf01fc34e0e5281b66b79d5496f28e229"
+    },
+    {
+      "path": "data/v2_3/lille_locations.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "696f26b5c24dcfab99db6c2636652f5f4e0e15d1",
+      "size": 9371,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/696f26b5c24dcfab99db6c2636652f5f4e0e15d1",
+      "sha256": "d63f6cd4090f20f0cc7bbab3cbb750b8fe185a0997674771994fbdb7e74d28ba"
+    },
+    {
+      "path": "data/v2_3/lille_travel_graph.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "feba1171da18cc248499e72af28db6e5523c6e43",
+      "size": 10161,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/feba1171da18cc248499e72af28db6e5523c6e43",
+      "sha256": "483c8396ac80dd3024726bdbe20316ca681cfb7ef862ce3a8f1594e554ec9a70"
+    },
+    {
+      "path": "data/v2_3/minute_clock.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0ea1d2de03cbe651d69741a5e3900a7c9bcc74f7",
+      "size": 451,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/0ea1d2de03cbe651d69741a5e3900a7c9bcc74f7",
+      "sha256": "5ccfeb92055bfe77db0aa10e5b4a16675166ff41d980fc72ab9144fcebbce35a"
+    },
+    {
+      "path": "data/v2_3/relationship_rules.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "44b758a84fe62eb6a796557fce00973dc9ee1ce8",
+      "size": 1803,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/44b758a84fe62eb6a796557fce00973dc9ee1ce8",
+      "sha256": "12c63710aaf9189888563591e00f69ddbf8967dc015d730ffcd70b9ac2928df9"
+    },
+    {
+      "path": "data/v2_3/social_people.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "963835de2766d2fbbe944eea7048aec786123a98",
+      "size": 5714,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/963835de2766d2fbbe944eea7048aec786123a98",
+      "sha256": "75ed520a503a6cac8e0bba84ac8ee1996010469059621180b706bbc0f7cacc30"
+    },
+    {
+      "path": "data/v2_3/social_sandbox_rules.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3b7247d4db04f95b9f7f5e10880250481f6df671",
+      "size": 10334,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/3b7247d4db04f95b9f7f5e10880250481f6df671",
+      "sha256": "f117a3c4469e17651b6aba60e4859dd91b15eb28da681fd825e074aa2376e205"
+    },
+    {
+      "path": "data/v2_3/transport_modes.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "04718402a37d224f69f825e2ea82e74efba70591",
+      "size": 1045,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/04718402a37d224f69f825e2ea82e74efba70591",
+      "sha256": "1efdcc4a642fbbccfce1ef735048f975ac65b3315ed400518594ad6b10de65bd"
+    },
+    {
+      "path": "data/v2_3/v2_3_balance.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c368bbd872d00c9c7bb56013a58ada5ed92a84a7",
+      "size": 921,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/c368bbd872d00c9c7bb56013a58ada5ed92a84a7",
+      "sha256": "4075e4b1f647e762d9c21fcd86d1bce22d05b03371d37ff24318dc42e7aceccb"
+    },
+    {
+      "path": "data/vnext/organizations/formal_organization_composition_1900.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ae3dbfd17da91c5cd64f7b293be4ed4ae62ab8c8",
+      "size": 877,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/ae3dbfd17da91c5cd64f7b293be4ed4ae62ab8c8",
+      "sha256": "adbde256a28c79892c202e18da6f3bda2888d664814a8564e1fb3a886a773159"
+    },
+    {
+      "path": "data/vnext/organizations/formal_organization_responsibilities_1900.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "09e425369e89eef113c3b95ae0029f2097ba7f97",
+      "size": 791,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/09e425369e89eef113c3b95ae0029f2097ba7f97",
+      "sha256": "fa1ae86343994992c23c4bd96c80dde9e83071e5044a6b710190342241419106"
+    },
+    {
+      "path": "data/vnext/politics/state_politics_1900.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3b37e19c7a9a8900d75fe973406c2f7ac1356355",
+      "size": 9039,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/3b37e19c7a9a8900d75fe973406c2f7ac1356355",
+      "sha256": "49e7e1ba19a261692f49ff7dd16293099d5f145d1e2a2e3fd1e04af3033b3fcb"
+    },
+    {
+      "path": "data/world/demo_world.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b494d8c41195691fb43adba393a3efaa1b37b550",
+      "size": 86635,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/b494d8c41195691fb43adba393a3efaa1b37b550",
+      "sha256": "3ba9a80a42a8f7f1ca57a4b172a3a0f6a381dca81e78a706a3b45d4b97a1b77d"
+    },
+    {
+      "path": "data/world_map/characters.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2724cf9316af7053d212a0c986f5979d694afcec",
+      "size": 6738,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/2724cf9316af7053d212a0c986f5979d694afcec",
+      "sha256": "25144e0a1e6a3a6867620bdec1de4098570be56833b2dacc3cc9dae796338075"
+    },
+    {
+      "path": "data/world_map/cities.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "af3d27bf8a42cfd74eeb5fd2dde4ec9633fb6021",
+      "size": 7411,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/af3d27bf8a42cfd74eeb5fd2dde4ec9633fb6021",
+      "sha256": "860d1399a651a249d39e1ee224439f99f175ef1476d51d60572d815ea8bbda69"
+    },
+    {
+      "path": "data/world_map/city_detail/LICENSE.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7b5ae0c5a628a415784e0f28444f0f20d54ca85a",
+      "size": 238,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/7b5ae0c5a628a415784e0f28444f0f20d54ca85a",
+      "sha256": "c1edc6f8a523ac6ab2cefe9a5bbb373934a1f04b7ade83e59f15c40d2b359b51"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/AD.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "22f140db10c6f922c460374aa83785eace3f372d",
+      "size": 3380,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/22f140db10c6f922c460374aa83785eace3f372d",
+      "sha256": "2713fa95ed0d3c3aeca6f825d687ecd55ac94475bb013ac53f0ec74fd7b5bed1"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/AE.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1471608e077812c82fca8ae211e8c874bda3dbf1",
+      "size": 41920,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/1471608e077812c82fca8ae211e8c874bda3dbf1",
+      "sha256": "d65ae9b4316f262db8d5323000b0ae0b5077ccd8a5ebe5878ca9a79b7e6448e1"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/AF.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "151f7ca9824591c32170e251452018e6ceccffe7",
+      "size": 43096,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/151f7ca9824591c32170e251452018e6ceccffe7",
+      "sha256": "de82995b0b2857b7322a289ab28a89aa403bafb49f86295f79160bc6317148b9"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/AG.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e1cac84b8c581d4eafe92be3d9620e484fbc5706",
+      "size": 4753,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/e1cac84b8c581d4eafe92be3d9620e484fbc5706",
+      "sha256": "020bbd06faa056497f7b6fe3faf4f7dd6aee21f721b0e6a132ea3952d43bbcee"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/AI.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a44078658f0fb8f98c36ce3b42d820979490ce93",
+      "size": 6687,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/a44078658f0fb8f98c36ce3b42d820979490ce93",
+      "sha256": "cab57f966ff368d35c28eef1ce90e2ee273c7bb57162bf6d4aaca9166f77e7b7"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/AL.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "44741ce199930a03fbc2882cfe0141436b815fb1",
+      "size": 32233,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/44741ce199930a03fbc2882cfe0141436b815fb1",
+      "sha256": "ab972c7ba8c70b1617794d85e6f745d91efdefe36fa18d9b8792ad430e403313"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/AM.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0b9ece5bea4690860707f8acfa92e2af9fdd522c",
+      "size": 35129,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/0b9ece5bea4690860707f8acfa92e2af9fdd522c",
+      "sha256": "74da5e96b799662e05ee92478b34385f03755c5b32c742dbbad39a32c6eade8e"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/AT.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7fd869d5df8c37be2933aae1f1a5eb853d74ab02",
+      "size": 94982,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/7fd869d5df8c37be2933aae1f1a5eb853d74ab02",
+      "sha256": "b382243f9a8532acea8c1385cb2025fb379b993b3d4dae7e2d963fc87376bbb4"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/AW.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e9666e4faf73e5ef3be55576fea645417689161f",
+      "size": 5529,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/e9666e4faf73e5ef3be55576fea645417689161f",
+      "sha256": "91d411fc82c213f0cf2b1cbea88bc12155550f9108262cdcd34bc4889900d88e"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/AX.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "898fc20e8a759baf9f7526ca8617d7b2519ace5f",
+      "size": 1620,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/898fc20e8a759baf9f7526ca8617d7b2519ace5f",
+      "sha256": "777048c099ad05811a72a4f3d20fdae5d5640a5c63a6a9bedd6e56aa9fda06cf"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/AZ.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ee8ed8cd4821155af8135bbe6617aab94628e1a6",
+      "size": 57238,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/ee8ed8cd4821155af8135bbe6617aab94628e1a6",
+      "sha256": "91d14f2dfd177de00b62ca2c1c1cfc73777e67113def2dbb406ac2bcdddfaedd"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/BA.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f82bb1d02fb5f4552b7ea9c6c31baedef3ce60b6",
+      "size": 51152,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/f82bb1d02fb5f4552b7ea9c6c31baedef3ce60b6",
+      "sha256": "ae1dadbc0f3db443411d2ded689f47cf828862c7aaf397ce86addf05cbc078c4"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/BB.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a90a336946b215ca7780ae131a5099811871583a",
+      "size": 5144,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/a90a336946b215ca7780ae131a5099811871583a",
+      "sha256": "9739035ab55d4b298fecb8d56c713cc9fd102d16b17a8b428367fd4937fcb9c6"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/BD.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f8a33ace1a7470c8b23bdecf64fd8047483ba414",
+      "size": 65385,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/f8a33ace1a7470c8b23bdecf64fd8047483ba414",
+      "sha256": "494c63069903a3a07355991e07ff35f1cc04a092acb97ac4b143ec5ebe69589c"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/BE.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "22525e7685edb724599991b1a769759e74a84a62",
+      "size": 305554,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/22525e7685edb724599991b1a769759e74a84a62",
+      "sha256": "df429e871f2bb06743e415080a713c6bf78394759a260602cf708b363f4696cb"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/BG.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ab62f68489f0300a5550882bac357bd08bd5fb60",
+      "size": 60175,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/ab62f68489f0300a5550882bac357bd08bd5fb60",
+      "sha256": "476dc7b125e89471d41117e014cd13c8ff6267d63c685f7f8c098e9707053807"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/BH.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "90d1560fdd2667b5d886387034a5ee33dd0577ad",
+      "size": 5090,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/90d1560fdd2667b5d886387034a5ee33dd0577ad",
+      "sha256": "8ae19dfd8697e9b65e30d1a8b968718ac9a4562f97600cb6cdff613f9ca87167"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/BL.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4cb2b6059cdb52344c256498a3e032201897d876",
+      "size": 757,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/4cb2b6059cdb52344c256498a3e032201897d876",
+      "sha256": "eb3d58633d2978204f02680cce84d484b6862083c04379c22bcfdd20a1a359c9"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/BM.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "80c187ad261ca0863d6fe705a51806ef5559b710",
+      "size": 4857,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/80c187ad261ca0863d6fe705a51806ef5559b710",
+      "sha256": "590a2d2d21cba6f372e902834def926a28c6caab8f5ac24398dea398f05bef27"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/BN.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "17eb83a6aec193cb78f73b4630bb16eb9f7ef918",
+      "size": 12607,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/17eb83a6aec193cb78f73b4630bb16eb9f7ef918",
+      "sha256": "6437be10cc0861354b2d108647669f710b4112f092c8fc8ce9626e83456ca7b7"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/BQ.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f1904afdee02b00c520d49f6c00bf5514f021be0",
+      "size": 1653,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/f1904afdee02b00c520d49f6c00bf5514f021be0",
+      "sha256": "4059a2ab427e75336f9ea26c4e29474ae023f4ff5242d02fb4ed84777420ddd4"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/BS.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "416b549053ba91cd531772009a1b7655c8e3387f",
+      "size": 10874,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/416b549053ba91cd531772009a1b7655c8e3387f",
+      "sha256": "e8e4a07a57636e7a99c34371299183c0d25f5eab449fe35064b7ce83af9769e6"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/BT.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1dd065c20a04433ebc665864a2ebfcf683e4c9f4",
+      "size": 10193,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/1dd065c20a04433ebc665864a2ebfcf683e4c9f4",
+      "sha256": "c2cb7711780d356fb83ddd27f077de878d96e3e0459ce89c9f738de645b958eb"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/BY.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "543ea09bd1226433e1674235a3e8ec0a910d93b4",
+      "size": 60572,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/543ea09bd1226433e1674235a3e8ec0a910d93b4",
+      "sha256": "714826d6ba2fe9569db9d938221803f88427abf7be50fabd3d5c65b9d0e88ba6"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/BZ.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b24d730e0fb51f6479bf045a77572d06e15ae12a",
+      "size": 6032,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/b24d730e0fb51f6479bf045a77572d06e15ae12a",
+      "sha256": "0816917a7d45b6b8e8b50922307cda2c3cb86ad2550520fa918e7d15efc78b1b"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/CA.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "31e6b981ad869029a2011afd0cb1e30e4e596a51",
+      "size": 594111,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/31e6b981ad869029a2011afd0cb1e30e4e596a51",
+      "sha256": "e6be00db966a64dd6acee15915e11697040a16e42865bff606926befaf866129"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/CC.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1f506d7d0990079b468b49c81c298d2fe7ac2e63",
+      "size": 751,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/1f506d7d0990079b468b49c81c298d2fe7ac2e63",
+      "sha256": "bec3d4a0179c525cebd226649b04d3eade6b4b9b336d69ac6142b66a57a45864"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/CH.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0e4bbf76212e64a545300cca3a4c2c6596b2ea62",
+      "size": 157367,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/0e4bbf76212e64a545300cca3a4c2c6596b2ea62",
+      "sha256": "f11dd061044e17d82e820ca7b079c7bee6287ba714392914bd7fd5bf2a40de36"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/CN.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6ea9b8522d909aead73174743833983d38cd176c",
+      "size": 1253539,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/6ea9b8522d909aead73174743833983d38cd176c",
+      "sha256": "2a2aa61855d09b1fc6816f49373d1584aced21a6de8926dbab0d00e60734a4e5"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/CR.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "57d37f5e007adfc2943dfb8f3dc655c5c04ce965",
+      "size": 34296,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/57d37f5e007adfc2943dfb8f3dc655c5c04ce965",
+      "sha256": "de18c34279067a2f12da8c51a6af6e6d960f07339490279a485b2deaaae76470"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/CU.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dadbd13ccb8ee119740ecc4bd425d0da1761c35e",
+      "size": 75418,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/dadbd13ccb8ee119740ecc4bd425d0da1761c35e",
+      "sha256": "f8ce05ee94997afc685ee561fc6cf19d255f6f29862e547595ad44df5f100d1d"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/CW.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "beba6d2fafe3fa02157ea41bcbe41de238f425fb",
+      "size": 2956,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/beba6d2fafe3fa02157ea41bcbe41de238f425fb",
+      "sha256": "35eb752947a9a2cff2f71239b9d279a28618ad6cc13d1db111a50294bdf5ff73"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/CY.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "88d2bd41c737c89871525c68d838dbc7b557082b",
+      "size": 15510,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/88d2bd41c737c89871525c68d838dbc7b557082b",
+      "sha256": "50b5669d8702187e189383d2c68a39f44c005ee3c36c90006462194d84b8a14c"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/CZ.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ed07489d5516f1ca27a39c6f8582024c6db50f52",
+      "size": 158496,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/ed07489d5516f1ca27a39c6f8582024c6db50f52",
+      "sha256": "015d2776e0153de223ffd1acc8356825e537436691aeb739eec514d9a2b7cd10"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/DE.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2f84bda62960d5e4d34c4981eddc5780573bd483",
+      "size": 1390212,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/2f84bda62960d5e4d34c4981eddc5780573bd483",
+      "sha256": "0b6ad13edb81cace52a3808c4b3f045901f934d9929c2e53ecb1d88996734e77"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/DK.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4a5e750a15c0b0afa290980618131441389d0e67",
+      "size": 71694,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/4a5e750a15c0b0afa290980618131441389d0e67",
+      "sha256": "487663270f72b9091d54fb66792a32f176c7484f4efefc007a5cf1d581b9fd61"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/DM.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "505e6006f19cccc55be0325e13db0064e93657fe",
+      "size": 4673,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/505e6006f19cccc55be0325e13db0064e93657fe",
+      "sha256": "bf48bfd2f05171b99eff866488b6c5f48d1ddbc33215cc8842876a6452ea133d"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/DO.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "da467ee73d33c7aa121869a9342e3fcf6e4052e6",
+      "size": 55634,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/da467ee73d33c7aa121869a9342e3fcf6e4052e6",
+      "sha256": "9cb1f9ead51c0c72260baf048749fe507a2be689e182b744a41e619b561e8930"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/EE.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "35994c59b9c0096d223eab18b9f500ce18c9abcf",
+      "size": 17263,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/35994c59b9c0096d223eab18b9f500ce18c9abcf",
+      "sha256": "4efc4f0f72a314bd6bd5d8107b960a4cf732a3d6df484ae2d13988a27a48280d"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/ES.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "29bc6dab1fbe5837fd81b6c13988422d80dbcee2",
+      "size": 660547,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/29bc6dab1fbe5837fd81b6c13988422d80dbcee2",
+      "sha256": "62755f24b84bf98b687aacdb563d44976f609ad9431d20cc413d412b8f8eb922"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/FI.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "553f1d00b8ed136e3332e4356c74da8bb346c826",
+      "size": 151137,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/553f1d00b8ed136e3332e4356c74da8bb346c826",
+      "sha256": "b63d3868dd58763ef0640a470af695695ab69080f89329ff560404a09800be5c"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/FO.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d39425f57fa74817c9a2182adea3edc9bff57c63",
+      "size": 2924,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/d39425f57fa74817c9a2182adea3edc9bff57c63",
+      "sha256": "857c60384fedacbb7077db29fb068ecddbf26c7f101fbfe4dcae103be42167f8"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/GB.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e5aa1699d7bdd623096f9f6e2c95c2ca923bb65f",
+      "size": 846104,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/e5aa1699d7bdd623096f9f6e2c95c2ca923bb65f",
+      "sha256": "33b3d04f640a319017cd96c6da4eeb6abad22104e4536bcc5a8f1a2b83bbd91f"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/GD.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e30db3bded78e116940835855481a7c976878ded",
+      "size": 3389,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/e30db3bded78e116940835855481a7c976878ded",
+      "sha256": "7cd6d5aa20570934f0b728e5ea1e4b4d6c256e6dcdeb0fddeb8a279bc507fc2a"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/GE.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d1ff13a3433e04dc778e6b4197f47c6d636c1496",
+      "size": 25462,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/d1ff13a3433e04dc778e6b4197f47c6d636c1496",
+      "sha256": "20ca21c5a3ca3ddec1e241dda2c83dac63ada31f9dbe789854b407ec14d1d5e7"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/GG.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "78a19f6ec9d1964c90ad25891bd601bf464330ce",
+      "size": 5230,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/78a19f6ec9d1964c90ad25891bd601bf464330ce",
+      "sha256": "6ba7e3b647d2c2153a6d45b15004cd022fe2133c2637a198ee39d36775e13c4c"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/GI.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "310bb64982ba6babd6516f17e9d69f1b521de702",
+      "size": 1658,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/310bb64982ba6babd6516f17e9d69f1b521de702",
+      "sha256": "bf58072dbc28f7d4a6ed8f700652301d13cdd3ea34d914a9cbf9bee2d0babc5a"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/GL.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "639c390f2cfcf6cd2725ebd09e3a76dda3f8326a",
+      "size": 2467,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/639c390f2cfcf6cd2725ebd09e3a76dda3f8326a",
+      "sha256": "e2b6ed87d03b85b1e3b09516d0339a51d10883d8120a1d64dd6be614b2a953f1"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/GP.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "31999a96505d60e105ee81912429c4fc84dbc75f",
+      "size": 10415,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/31999a96505d60e105ee81912429c4fc84dbc75f",
+      "sha256": "9305ec65582805e0b9350a138d6a96f4b50599d5e83d822d2f72451cbd6a3c95"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/GR.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "da0c3caf349649123cdb1d78f80a5e651a760157",
+      "size": 126125,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/da0c3caf349649123cdb1d78f80a5e651a760157",
+      "sha256": "a839f3283af05fb90c3e57d1b311e6fb4f6c097970bcbf9144c6faf59fd43658"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/GT.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5c977474b89624b9e6fc6fb694d9bfaf0b2e6ccf",
+      "size": 92970,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/5c977474b89624b9e6fc6fb694d9bfaf0b2e6ccf",
+      "sha256": "fde08f4702cd399522a7a0b6882d9405af4bb78aa63d30d1c49d614dc2b69b20"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/HK.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1f85ec39824ba479b2b19a12bf8ed2b87d55d68a",
+      "size": 119120,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/1f85ec39824ba479b2b19a12bf8ed2b87d55d68a",
+      "sha256": "8c33434ad0418fb86ce786934c49cf267398c9466fc2482849217e6668c1624e"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/HN.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "67dbfcc9867ee8f6bcbb30f31aae9a0a78f5e252",
+      "size": 71213,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/67dbfcc9867ee8f6bcbb30f31aae9a0a78f5e252",
+      "sha256": "43c4fb952224246fc04a4e15ef3e2462e9788a674b5409f2efa8d0852f9d7c9d"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/HR.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e5bdf8e5f86d3d14fb6d2d87c8eb382c24d670d1",
+      "size": 33632,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/e5bdf8e5f86d3d14fb6d2d87c8eb382c24d670d1",
+      "sha256": "aa0bd3b44c2a1ac044b6e5f8d2e95973a3e5cd12e3fa3af83784ca5ffa12d8da"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/HT.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4f956875ea6ca0e9ed5838994b3bd58d20a297ef",
+      "size": 23500,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/4f956875ea6ca0e9ed5838994b3bd58d20a297ef",
+      "sha256": "7bd6a44db298f0723b4e42dccab54b79b894c30f562039a9c05a4499984c4946"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/HU.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "35707df4fe079fe451dd901ee24c9178cd7621ca",
+      "size": 166599,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/35707df4fe079fe451dd901ee24c9178cd7621ca",
+      "sha256": "4d10fe9a305dd6a6b5af17d897cf486a334e55a4d117313a49cc32faa23a595e"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/ID.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e615efc50af769db3b46d41c6ea1e7ee751eaee7",
+      "size": 208423,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/e615efc50af769db3b46d41c6ea1e7ee751eaee7",
+      "sha256": "1f45bb31beaaed4aba3367fc5834ea686fa2f924d159c3d2a07bec70b0eedb30"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/IE.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4cd500fbf13fea9ffe84cc4bedb6df06c3cf7eaf",
+      "size": 66095,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/4cd500fbf13fea9ffe84cc4bedb6df06c3cf7eaf",
+      "sha256": "5b2a3f7dde88e250afe37f0971640693eed04226b97874c70c78537c0fd6b410"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/IL.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3e079293f8727911e2e5af3a1fd5a8fd62c2e8ae",
+      "size": 78192,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/3e079293f8727911e2e5af3a1fd5a8fd62c2e8ae",
+      "sha256": "561ed6126b113745da725b233cb4b12139c570325054c48fd1bd7e5cb7425b94"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/IM.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8252b5e48580f493d73f95243871afee6945060e",
+      "size": 9482,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8252b5e48580f493d73f95243871afee6945060e",
+      "sha256": "b04b2ead7375ed509574aaa0e46ff3250a924c5687849e5cab6f08fffb81dd23"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/IN.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "98275e8ae508032ae9094eb3e93c3dda49085600",
+      "size": 2868835,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/98275e8ae508032ae9094eb3e93c3dda49085600",
+      "sha256": "fde386d64916d62551fc8879a550157282ea6fb7fcab4102046002a11eef0993"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/IQ.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c6d0352353928a86686ee5e6ee42ff545daa5919",
+      "size": 46554,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/c6d0352353928a86686ee5e6ee42ff545daa5919",
+      "sha256": "b5b99eb52608ccc402a07e0630f0a2cabe9cc7d2adbc8e2194f1cadc35dce774"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/IR.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bc5a05441341548c157b95ce48124d14a4d2fe5f",
+      "size": 361652,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/bc5a05441341548c157b95ce48124d14a4d2fe5f",
+      "sha256": "bcd1caa03569186e6ce964fd0d47dbd08339df25a323fa9239fcbb096bd39d28"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/IS.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "521ffe564e4c57a4d989424a94fceedd0286ebf7",
+      "size": 6576,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/521ffe564e4c57a4d989424a94fceedd0286ebf7",
+      "sha256": "21c26c5143ee4cd569053d2ef9952edfb2194d8ba913bb0e5ec8f8c1e9f60f9a"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/IT.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "602e9b59e9795d6e28f42baa9ba13b4d40ddef97",
+      "size": 906484,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/602e9b59e9795d6e28f42baa9ba13b4d40ddef97",
+      "sha256": "27a0a1db756f0af7217d515db35236ed064647df6723e10b9a51f754ff383995"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/JE.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "271a7cf0eb91dcf8e5c49a16cfbff73a3c3e0638",
+      "size": 1621,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/271a7cf0eb91dcf8e5c49a16cfbff73a3c3e0638",
+      "sha256": "9c7bffc70a1c10e3fc11876ba7d3ce4660d30de0b334dfe8b273614ff2e8f1c1"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/JM.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6719734a92ec683baeb1f99c0ae68f94d6de9c87",
+      "size": 19858,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/6719734a92ec683baeb1f99c0ae68f94d6de9c87",
+      "sha256": "fc604e96f49da264a2e25d5a9e2e23e9865c69df58b764e61d2dd295e7155bc3"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/JO.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "552852dd524be4ddc9205f3a328d5993373c8049",
+      "size": 33039,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/552852dd524be4ddc9205f3a328d5993373c8049",
+      "sha256": "0c9391e0f2ec0484632fc9c56d66133fe4215cf4638917dc9ae6fd497f64b50b"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/JP.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1b816f91c075e53ad09417ac63d73086532a2b47",
+      "size": 785353,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/1b816f91c075e53ad09417ac63d73086532a2b47",
+      "sha256": "73ead42b2c955fa29ddce6d9e1c5e2da0f42640733d6bbf2cbad801c398a700a"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/KG.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "30ff1ecf50501bd44178d7cca33df83e1d9464c2",
+      "size": 26638,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/30ff1ecf50501bd44178d7cca33df83e1d9464c2",
+      "sha256": "162172aa4566ea12e3d6f9eeac7bb69217d19b47e17ed1f7acc393c8c79060e2"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/KH.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cff7d860578c0df39da2e87292fdc6714e5de26a",
+      "size": 56344,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/cff7d860578c0df39da2e87292fdc6714e5de26a",
+      "sha256": "4de161ef5c40eaec097432a7d205355013b32daff7a58ad77bee48857479a867"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/KN.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8e7a9ad9cdbd21de24a41e537537bda0749cb33a",
+      "size": 6510,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8e7a9ad9cdbd21de24a41e537537bda0749cb33a",
+      "sha256": "e46b24e27207c91c340dcb756df10107796e4d0260ce79641870a109c9c73e0a"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/KP.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "72a08ff83cd1fc0d13dabc523dd9f0dd10e22e15",
+      "size": 52130,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/72a08ff83cd1fc0d13dabc523dd9f0dd10e22e15",
+      "sha256": "1644c91b700547931fe0ad86b9cc606d5ec5f16eba59e736314453169aab7ecd"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/KR.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "448d77f6b1b6f94051271b78808af0c1c49c13e6",
+      "size": 67378,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/448d77f6b1b6f94051271b78808af0c1c49c13e6",
+      "sha256": "351baedd21d0eea46bcd77d6db2a8f72b60227da67e986277ba6774a135a4694"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/KW.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0c0531fb8acc3ba29ab77ebf445e82639cfb4607",
+      "size": 10406,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/0c0531fb8acc3ba29ab77ebf445e82639cfb4607",
+      "sha256": "fe0ebc29b74e34fef9ad0f854ca6cb2c376b867ab14a41d2e9ac4e8aceb3c513"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/KY.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4ba7a94378911a814148bbe39db75bd321dba101",
+      "size": 20207,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/4ba7a94378911a814148bbe39db75bd321dba101",
+      "sha256": "ffbc461b585c42a0a47197d359fefb0febdca93d9c4b4d95ecf9beb283949962"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/KZ.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f230bfd59cc4f8290b9255d537563ae3de61b2d8",
+      "size": 88465,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/f230bfd59cc4f8290b9255d537563ae3de61b2d8",
+      "sha256": "f6368a6cf47f6aabcef32ad3094cff05e892ba0b583e0908b8ad0085daec17dd"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/LA.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c1f46de49beca160565be84d8e71e632f3e93f71",
+      "size": 15231,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/c1f46de49beca160565be84d8e71e632f3e93f71",
+      "sha256": "44055db53e3ab8c3f846a6a297542c8b483509263bf28b599b9f93021567aaed"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/LB.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0472ef0b8a708ce129b74ddb85405f3aa269c984",
+      "size": 13152,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/0472ef0b8a708ce129b74ddb85405f3aa269c984",
+      "sha256": "69c38f79aa043860437f2d1ed1e68b586da7d6a17b4aa944c133cb32e65ff1df"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/LC.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f7042fa2db73bbb51f2a3a14da4baaec2152ba7d",
+      "size": 4734,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/f7042fa2db73bbb51f2a3a14da4baaec2152ba7d",
+      "sha256": "01ea5ae9529c382d60dd0c8dab5e6f38ffd0d9d99a41804932a71e26c32c2086"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/LI.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7b396141b4b9ad99094883b9ed43804413dbc653",
+      "size": 4996,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/7b396141b4b9ad99094883b9ed43804413dbc653",
+      "sha256": "909e21be6e1b25734801933683a68f3a7a0d4404fe7ddf9125ab2c9f4501de5c"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/LK.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "94a6607bec713eafaa438252b3ea5bdea4179465",
+      "size": 32056,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/94a6607bec713eafaa438252b3ea5bdea4179465",
+      "sha256": "0b780601c5890c2d27ccda0c0ddbb5002f0155c82b859032a09c930ed20ca232"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/LT.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e258adb4ec4e575668f4286af9990dcedda59160",
+      "size": 31509,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/e258adb4ec4e575668f4286af9990dcedda59160",
+      "sha256": "841277cedb1534e3cc2e7b66081878cad0bfa17986a185b33b8e4ba36b751657"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/LU.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "868dde84a47b4dc316a11ad7a1cd8911bfcb5870",
+      "size": 14854,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/868dde84a47b4dc316a11ad7a1cd8911bfcb5870",
+      "sha256": "494459c9f80132f655ff31629a9026cea4d0308b635a088d46835cbc8f60c572"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/LV.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2f368362374a9f5cdad3d7eda106c037b5d6102d",
+      "size": 22778,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/2f368362374a9f5cdad3d7eda106c037b5d6102d",
+      "sha256": "9454eaade968b5b0e7cd792cb73321a10b0d37b2445d42f168a67229f4ad1edf"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/MC.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9a83f528548d6ce9a72e09fb3a05684e087ede79",
+      "size": 2497,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/9a83f528548d6ce9a72e09fb3a05684e087ede79",
+      "sha256": "4d5a9fe9c76ebe2feb6f7ebea19b75b2d3938fd71f6417fc7b27d466e92df880"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/MD.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d057e0725ce8c54255a27b6345432a4f78522ee2",
+      "size": 27554,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/d057e0725ce8c54255a27b6345432a4f78522ee2",
+      "sha256": "a5b7ba8af9e4898699139c42eaaf20e776be7c19249dbe0f3f7c9ace5a51fedf"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/ME.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b06c55898de8b9f23492f90465b8708400be610d",
+      "size": 11511,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/b06c55898de8b9f23492f90465b8708400be610d",
+      "sha256": "8f9da6363d169d53ec9bf898336352968d8a8fdee49aea115464d07b2492a2dd"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/MF.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "27642eff20f6391a67b6928c61c5bedb1202e3b6",
+      "size": 1620,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/27642eff20f6391a67b6928c61c5bedb1202e3b6",
+      "sha256": "1e97e0780dfd4cadc8643bc1c3b19bf6538fcf8d271fef5784b980b8e15ce79a"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/MK.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f28773297f7bb6aca513af51c7b71f59f378ad12",
+      "size": 39142,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/f28773297f7bb6aca513af51c7b71f59f378ad12",
+      "sha256": "1be2e89a01cd1d75c443e4903576fdb79edac79277f09472a0aeda9bbb1b68c2"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/MM.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8e022e142e9ce18c1f548a3dae0ae70c4d0fc4da",
+      "size": 113442,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8e022e142e9ce18c1f548a3dae0ae70c4d0fc4da",
+      "sha256": "b5e09e36e0c32c2d724a9d39d28ab25ca32e17b3f13d85523c2de2aeb903d2de"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/MN.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3b7964401413a5899e808e2ebf66a0799b6220ce",
+      "size": 15514,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/3b7964401413a5899e808e2ebf66a0799b6220ce",
+      "sha256": "020eb4f1f594e4e55cb105176644b900f71913bea2951fdd4ec432410e9cd36c"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/MO.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aee61f547a9b15c8cf26e91dca550dcfef2c450c",
+      "size": 2882,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/aee61f547a9b15c8cf26e91dca550dcfef2c450c",
+      "sha256": "ba5da6316a6971b57a410027af99e09e664b02efbc83d0a94b26241ce7a2a3b7"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/MQ.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cabd61de5a084d859da49a1ff02acb83887eb326",
+      "size": 8099,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/cabd61de5a084d859da49a1ff02acb83887eb326",
+      "sha256": "2e3c6077292afa92c8d83990f0a3d2b6df9aacac4dade689a31479400db33dbc"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/MS.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "64858d303cfbe56cd9d2525817cfdd0a03a6a089",
+      "size": 1188,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/64858d303cfbe56cd9d2525817cfdd0a03a6a089",
+      "sha256": "1916a0cbf3f25b54d121a847058ae9af25c92f98e492e385746e2f9a0a129d36"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/MT.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1ffda0795bc604945398fe1d4ea8a860dfb328dc",
+      "size": 28072,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/1ffda0795bc604945398fe1d4ea8a860dfb328dc",
+      "sha256": "cbcc1c679df349199bcd763d80c7c19d7f4062685d3de9db1316b409d52404a0"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/MV.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4554d6d7f3a74346c8fe37d9cd34fdb7b3e055db",
+      "size": 8535,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/4554d6d7f3a74346c8fe37d9cd34fdb7b3e055db",
+      "sha256": "d284119c16a7629b758e075a63724b36a7d54025b1f453b508a6da3854e71645"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/MX.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4e6e66ba7ed8496f8c5fc88cd3c4653e7b8b8bc3",
+      "size": 838651,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/4e6e66ba7ed8496f8c5fc88cd3c4653e7b8b8bc3",
+      "sha256": "f8ebdaa31b11b97a8563b80f8312129d9b6538f743829f27565be69f61635e6a"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/MY.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e91030631bdfef41566cb497e5c56a21cee13c88",
+      "size": 237180,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/e91030631bdfef41566cb497e5c56a21cee13c88",
+      "sha256": "986e35d2c135233707abdeac41c4a23ce35e04423b3474f46570d97d81940bb3"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/NI.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "77055d2282d735f0cb909c31b2cc141199e22d98",
+      "size": 33664,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/77055d2282d735f0cb909c31b2cc141199e22d98",
+      "sha256": "a0b1604cb40dadf66b394ab6a5f6e0e973ccb89b82fc709f9606f5d7c222ba74"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/NL.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "413f1e7b1883c6c024fb990f56520ad733531f4e",
+      "size": 238624,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/413f1e7b1883c6c024fb990f56520ad733531f4e",
+      "sha256": "ea970590be94c4b21dd2bbbb2e415df42e16633770c4aa9515243d63fb7edb86"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/NO.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e6390f15aa3e3f25bb569775d48b621f21cdec95",
+      "size": 51151,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/e6390f15aa3e3f25bb569775d48b621f21cdec95",
+      "sha256": "e469c0b5bde240b8cf199548e92ed7136011770b4408b422a97290b6caa9c2da"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/NP.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3df01ce82498412b39265084e89754762737c817",
+      "size": 24612,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/3df01ce82498412b39265084e89754762737c817",
+      "sha256": "8445b81656e9ad98626722877bfd6fb8d68c1e564bf3018ee8116c4c955d9674"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/OM.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c579ad483a15cea97a20f042452471b4a70e2319",
+      "size": 13977,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/c579ad483a15cea97a20f042452471b4a70e2319",
+      "sha256": "d80e591c005619579e5b7722d0bbe09328375fc05894652fc050e07b77b916a4"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/PA.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5f1fcff8ee3449473e0688da18ba134ef34f3385",
+      "size": 31261,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/5f1fcff8ee3449473e0688da18ba134ef34f3385",
+      "sha256": "884fcc7ae8177e479e3bcf2cc1d460e9895b7e3613382471bc2deaecc31505e4"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/PH.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "31eae144eb60979fe38f44d452c906ae7565b2a0",
+      "size": 605087,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/31eae144eb60979fe38f44d452c906ae7565b2a0",
+      "sha256": "82bb7389a025325a914d354898f6c965ad7b87a99a1186aca278a3f0c96d4b5f"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/PK.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6ef9c93ac742c93d369850257b1a2c3cd7db1024",
+      "size": 218349,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/6ef9c93ac742c93d369850257b1a2c3cd7db1024",
+      "sha256": "df9e76a70bbe2f585ef96cd18aaf1cd2ab7f98ec67eb25e8996f99c28877ff2e"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/PL.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "896ff9e642b4a43fe3b03c27570490f3170b9eb8",
+      "size": 343678,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/896ff9e642b4a43fe3b03c27570490f3170b9eb8",
+      "sha256": "4486e47271d497706bcb613636e9ff69316deff831d06ed83ec079bb59e17abc"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/PM.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "16e529928a93592950cbf953a03f9fc89d7ada4c",
+      "size": 1209,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/16e529928a93592950cbf953a03f9fc89d7ada4c",
+      "sha256": "3f6dd4395b542f9a97bb9d8363ab6d8500abba19b83f91486ce68c2e5caf2c65"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/PR.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "04788cff8d995d7d8dfc04180ed32a121d48e49d",
+      "size": 42268,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/04788cff8d995d7d8dfc04180ed32a121d48e49d",
+      "sha256": "830e706f02031ba2a4d6191da8a56c6dcc99f878e2049872358b5adddfd99cf8"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/PS.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c48873c6baa259c15353085aba0f52de78fb120b",
+      "size": 56210,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/c48873c6baa259c15353085aba0f52de78fb120b",
+      "sha256": "9817c9a9605dbeca81f7c96b81c330e51dc2b87307b474372ee8b44611914729"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/PT.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b021baff53d28d2cbbc854e95f603bd64a4eecf4",
+      "size": 243562,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/b021baff53d28d2cbbc854e95f603bd64a4eecf4",
+      "sha256": "df76185f3463b55cc5c03fd2f7b56588c638669dcb14db8ea3f2775b6a1bf872"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/QA.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a24454cc6b6fa5de1d365ac24e16e9fc44c23ece",
+      "size": 16898,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/a24454cc6b6fa5de1d365ac24e16e9fc44c23ece",
+      "sha256": "d3cd8143ed6a377ead124101a4e864e2eb944faf0f998c01f0827a7222eded60"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/RO.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "83bfb9ab37f1a1c78affa6586a55ca2125fdb290",
+      "size": 346310,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/83bfb9ab37f1a1c78affa6586a55ca2125fdb290",
+      "sha256": "c9055a3c4f8915a3d41f6c5cdc87a48f2cfc37f4da7124dc56dd920b4027182a"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/RS.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c1aa53838218c25782680447eab14a0cffda2428",
+      "size": 46926,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/c1aa53838218c25782680447eab14a0cffda2428",
+      "sha256": "137900dc362be79fb714975aa27e39a5670629053355a2709d9f25cb883c867c"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/RU.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1cb055adc95055769490a5bd3a81b8ac98d80ea6",
+      "size": 1202424,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/1cb055adc95055769490a5bd3a81b8ac98d80ea6",
+      "sha256": "4db3f3ecdaaf7cb7fa59e66ba467914767aea9b75f0aac408e00c2c20b61894a"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/SA.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8785a07f8ccb8d3e39cdc073ffef0a56e1720099",
+      "size": 62579,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8785a07f8ccb8d3e39cdc073ffef0a56e1720099",
+      "sha256": "a8ef145f4ec22073f145e54e8380b8f780b902c4698e03f4babdbcffc756dafb"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/SE.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "04c145bf3e4667fc4d094c6df7544ebbba6a1ddc",
+      "size": 122840,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/04c145bf3e4667fc4d094c6df7544ebbba6a1ddc",
+      "sha256": "c5bce8aa6482721508fbaf7165c0942030df46eb5a055b5e61c1f8e2f7a72712"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/SG.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "68761ac802a8afd8ea526b461886d0630d3d045f",
+      "size": 42659,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/68761ac802a8afd8ea526b461886d0630d3d045f",
+      "sha256": "905f850e6905566b25648581bc4fefc1ec14c500b07f11376378196e1482cca1"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/SI.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fb8fba8135366127d24e75ce492dffd5b43bedc8",
+      "size": 93577,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/fb8fba8135366127d24e75ce492dffd5b43bedc8",
+      "sha256": "f37b88cfbf855ea0e4d26c3697fd59837c7e38be1a37f3ca5491618e80e6ea17"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/SJ.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a7a94663b4b38a8bce7c4524068e08827eef9d03",
+      "size": 1217,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/a7a94663b4b38a8bce7c4524068e08827eef9d03",
+      "sha256": "68cd255b99d249f51896376a4188df6044eb67c25af435b35ceb290bd4cc2c52"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/SK.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9f1ff574e0c02d7317f80afb5793308e2af3ac71",
+      "size": 66400,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/9f1ff574e0c02d7317f80afb5793308e2af3ac71",
+      "sha256": "ee8c19aa46a5fe4840653c8acdb4f8fb925c85a8bf995e3781d9d48a6aec6712"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/SM.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8276890166bda0206067caeee557805ff37c0d9c",
+      "size": 5177,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8276890166bda0206067caeee557805ff37c0d9c",
+      "sha256": "d853e9447e8eb506f1c8603bc54fad6506ae9f129e9b9734a2e5fbb8ffb556df"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/SV.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9a013fb83ae368508c69271dcf61d50039df2b56",
+      "size": 33388,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/9a013fb83ae368508c69271dcf61d50039df2b56",
+      "sha256": "772a707f68db697831ec751332bf792e2458c46a6acb410a30cb8dc8fa19c37c"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/SX.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a239abd34a85d19753b61c1bc486505108ec40be",
+      "size": 2569,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/a239abd34a85d19753b61c1bc486505108ec40be",
+      "sha256": "e862cf34fe26c18ee4bea3d8a839b7e9b272cd69b7e4c6bb5222c701b40b8281"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/SY.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2142ffc4636e8a3574e17ece2e4fb524ca25a474",
+      "size": 49392,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/2142ffc4636e8a3574e17ece2e4fb524ca25a474",
+      "sha256": "ec75fdbcc1a840eddcaec61fc6e0a40c632b19c7bc05fedb6fc8bcae83e3bf3d"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/TC.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dffc3b88f84461922062ba302a1061537b1e7295",
+      "size": 1231,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/dffc3b88f84461922062ba302a1061537b1e7295",
+      "sha256": "a59fe0387b09f493d90119706a3fc81f718d9ee1fc1b0730efdae3bb80f875a5"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/TH.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f9d3d281445ae686b9578a7f85d01efdeb21824e",
+      "size": 200472,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/f9d3d281445ae686b9578a7f85d01efdeb21824e",
+      "sha256": "a1010418ea91c3a221269bfc6c96142f30228acaff030542df13e7e15c30611b"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/TJ.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3b0a9711a167ccd8b0c3a4ffbd7c81247a2b956e",
+      "size": 27998,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/3b0a9711a167ccd8b0c3a4ffbd7c81247a2b956e",
+      "sha256": "a042b8a2d6649aee1c09b8cc6ea2f4179fb811fe739a6bb0161944a86bd6c215"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/TM.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9fbcb5b5055bc89f4b040644216e04dd6713ae18",
+      "size": 32222,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/9fbcb5b5055bc89f4b040644216e04dd6713ae18",
+      "sha256": "e1e53e55275dfe2d28d9944853724786894039442f99edee96ee9fc325344a45"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/TR.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4146d49341e270de848ce6295306e6cbf9d7da50",
+      "size": 379803,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/4146d49341e270de848ce6295306e6cbf9d7da50",
+      "sha256": "0858fe9c0f79a7e598e6b4728e4db1d3c423e06ec7268e823e948557473b2466"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/TT.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fccc9694528209dedd8c148a651b06e894aac8d5",
+      "size": 10108,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/fccc9694528209dedd8c148a651b06e894aac8d5",
+      "sha256": "e446c0021261f673e2c431f192c85c859a899090e426ec3c16fc22888618b5f7"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/TW.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fba1a2c4260e09f5e8bb58eb792f3d8182b12bb4",
+      "size": 35557,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/fba1a2c4260e09f5e8bb58eb792f3d8182b12bb4",
+      "sha256": "310541bc7a3fdeb3a9c191ab0e185ecd3c61f3e35d71e0c53d5bc086ab9dbf48"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/UA.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "68c9d9a3e89f6849712ee8a7a9be7837c09188ca",
+      "size": 443331,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/68c9d9a3e89f6849712ee8a7a9be7837c09188ca",
+      "sha256": "3e8c84e1593148c90461fbd6b2244a941fd4f78f776027a2933cfaa50ba3e177"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/US.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4fef44ac7ecb12f52f4bdc92584acc507f003ce0",
+      "size": 3369039,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/4fef44ac7ecb12f52f4bdc92584acc507f003ce0",
+      "sha256": "c5f7ee773ef09d26016da027fd9a0713c529333bd9facf36b6776ee7163819cc"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/UZ.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b07418595bb99c1d03a450ef728311898fa5d08b",
+      "size": 62127,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/b07418595bb99c1d03a450ef728311898fa5d08b",
+      "sha256": "8984a1a785787485923fbfa28d575ad973db098b3f55fc7e6dd387f89f51e3fe"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/VA.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "42678ecef4ee12e2007b8fcdd9483dae03fdc4cf",
+      "size": 747,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/42678ecef4ee12e2007b8fcdd9483dae03fdc4cf",
+      "sha256": "d9e8e2f6dd7e1cd51cca21773ae23a9ddc5660c7dd6613c1f6e03aea7506a4f9"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/VC.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "508d0402c9a41491473e8a10e9698396b72cba96",
+      "size": 3428,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/508d0402c9a41491473e8a10e9698396b72cba96",
+      "sha256": "eef8ee05f6f3724ec9b3b00cb6fef8c663fb1857d487f9980203b761dbc2a3e9"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/VG.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bfb4e8728f3349e06b92d5489594cbb6241757e3",
+      "size": 760,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/bfb4e8728f3349e06b92d5489594cbb6241757e3",
+      "sha256": "2c14a2008bec61fa6d922b081d2bda3adc780681500a2081f9f9f8a9d4d5341f"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/VI.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c4ad928268f86d095f7981b36d0182626035fbe2",
+      "size": 2104,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/c4ad928268f86d095f7981b36d0182626035fbe2",
+      "sha256": "52391b4d2de1a3fcf25dcd2899285ff1dc87afb81748f514025895b11b320540"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/VN.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "134638bf925a1355f0c0adeba1585445ee4fcc16",
+      "size": 202146,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/134638bf925a1355f0c0adeba1585445ee4fcc16",
+      "sha256": "1fa373ba11e99680fbe67b17242e167393106e303301f1f86d233c9c3ec5fcc5"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/XK.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "56d67c8511f599e33bd18548921630d743e95dbb",
+      "size": 15702,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/56d67c8511f599e33bd18548921630d743e95dbb",
+      "sha256": "5b09615bd73f08d8fb5793c461a908cf0fe1e4b2748af0c9b6c383edc04239d2"
+    },
+    {
+      "path": "data/world_map/city_detail/countries/YE.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9e517b11660ff79faf7a478f929657120bc27c05",
+      "size": 14906,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/9e517b11660ff79faf7a478f929657120bc27c05",
+      "sha256": "addcdbd3cfd61262b8057bc7dfd74257b68aba82c6fd2490aa01103f064c00b7"
+    },
+    {
+      "path": "data/world_map/city_detail/france/FR-11.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b4d45330ca6c2053cc5936eba9793e8558eb6179",
+      "size": 767018,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/b4d45330ca6c2053cc5936eba9793e8558eb6179",
+      "sha256": "d644803ef3b9d1d3f42d7eb59abd5c1513693cf586a8d27a77c9dd3d504821b5"
+    },
+    {
+      "path": "data/world_map/city_detail/france/FR-24.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8d855cf3e1a9099731c96bce05fb48571a082f70",
+      "size": 837780,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8d855cf3e1a9099731c96bce05fb48571a082f70",
+      "sha256": "46a2de5810cc22bbfb920c967c46045bdac42b85ecdc48f064adf5757ca0fe75"
+    },
+    {
+      "path": "data/world_map/city_detail/france/FR-27.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "880a906ab71853ada9840d70145b523b1e409dca",
+      "size": 1717739,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/880a906ab71853ada9840d70145b523b1e409dca",
+      "sha256": "108e13359810750f99e34f78f9aa064da620126db216f3892aff19da4f9604d4"
+    },
+    {
+      "path": "data/world_map/city_detail/france/FR-28.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "622cf8a60465cdf431f2d4a925b92d934aba3788",
+      "size": 1265896,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/622cf8a60465cdf431f2d4a925b92d934aba3788",
+      "sha256": "9f024d7827557fc43a3b15f6c73def186377318fe877bc9c99f7a7e7e22c0d25"
+    },
+    {
+      "path": "data/world_map/city_detail/france/FR-32.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bc741c115cff87266a6e0e1fc1eb794b7c9a1e97",
+      "size": 1825295,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/bc741c115cff87266a6e0e1fc1eb794b7c9a1e97",
+      "sha256": "b2fa214030e8b923504db9d5a384606c01d27385e9d77fc4bceec7cf9eda1c1c"
+    },
+    {
+      "path": "data/world_map/city_detail/france/FR-44.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "529267d223f8388337fb8fedb6fee9ed2bec0086",
+      "size": 2415885,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/529267d223f8388337fb8fedb6fee9ed2bec0086",
+      "sha256": "2cb2269db1bb284afb128420515ea9663bfd2665606065c9b28a4e0af49ce30c"
+    },
+    {
+      "path": "data/world_map/city_detail/france/FR-52.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ad06c2a67c3f6dc34416ab30dfdcaf3073f96373",
+      "size": 615430,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/ad06c2a67c3f6dc34416ab30dfdcaf3073f96373",
+      "sha256": "87896383ff426741fd5bd16b2ec2c5be020c15f9a1c4a2f3eea662c4a49be0b2"
+    },
+    {
+      "path": "data/world_map/city_detail/france/FR-53.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "164805b7764736a975f45369b1988ad15e6eec34",
+      "size": 593748,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/164805b7764736a975f45369b1988ad15e6eec34",
+      "sha256": "21f1be55a948e1f023935eb99c5318e735ab054b679acd249fb88c8ff016dee3"
+    },
+    {
+      "path": "data/world_map/city_detail/france/FR-75.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bb5c37a7050a4ecf079151db331dbcd37b340eb6",
+      "size": 2041031,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/bb5c37a7050a4ecf079151db331dbcd37b340eb6",
+      "sha256": "4c197df9d4939ef8f9447bfd474dc4f42a4e47f9c65d574b3070f1a99b2f3057"
+    },
+    {
+      "path": "data/world_map/city_detail/france/FR-76.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "950f2141a11d23e64e4af717039586ea8ef3f294",
+      "size": 2095487,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/950f2141a11d23e64e4af717039586ea8ef3f294",
+      "sha256": "1a7d35f084827e64dbe3c4b872480c3104588f968f305a0d3d415be2bfc1b25d"
+    },
+    {
+      "path": "data/world_map/city_detail/france/FR-84.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5121d53d42d4a3caca51b1ee0fca9be38318c67c",
+      "size": 1955867,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/5121d53d42d4a3caca51b1ee0fca9be38318c67c",
+      "sha256": "0e7d5e9ccb1e2e26c8ce477d466a4795a1c0b14bd89afd563b490445a3e3d8b4"
+    },
+    {
+      "path": "data/world_map/city_detail/france/FR-93.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fe9417e955bad46170a72d12f47ca5fb59dddcea",
+      "size": 559382,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/fe9417e955bad46170a72d12f47ca5fb59dddcea",
+      "sha256": "e4b2ed4f8063e0275d7aa7e04d92821703136546c3be7d470ecda06ac7c82184"
+    },
+    {
+      "path": "data/world_map/city_detail/france/FR-94.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "11f8bed4e044bdbbaa3dcb5aa51803338c04f38c",
+      "size": 165745,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/11f8bed4e044bdbbaa3dcb5aa51803338c04f38c",
+      "sha256": "69c1a763276e8a59f62027d3dda7758a278ea54903b105603b8478ba2d2e79aa"
+    },
+    {
+      "path": "data/world_map/city_detail/index.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a2910bd9769515d7e8489ed0594b4939a87f740b",
+      "size": 35668,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/a2910bd9769515d7e8489ed0594b4939a87f740b",
+      "sha256": "de514037f04720493792b7961e39e698741bb4506b4dd91bd9f03ff7b8d7adaa"
+    },
+    {
+      "path": "data/world_map/countries.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bddc086f3dbefa2c518c9b4bf3b2f05267bd8184",
+      "size": 173232,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/bddc086f3dbefa2c518c9b4bf3b2f05267bd8184",
+      "sha256": "02b3d0882c224547d362a4ed9fdf6871c64f536e01b01c765d450e8288aacc3d"
+    },
+    {
+      "path": "data/world_map/country_flag_palettes.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "500478889eab55181c0d261e90c7b8d5bf61f89e",
+      "size": 4409,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/500478889eab55181c0d261e90c7b8d5bf61f89e",
+      "sha256": "d36c200d431d7d3b6ccc782538c094b202cffcfaa423594473faeddb160441df"
+    },
+    {
+      "path": "data/world_map/historical/CShapes-2.0-ATTRIBUTION.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1e1d30dc87e7e7144389c3a182068639b37c5ce6",
+      "size": 976,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/1e1d30dc87e7e7144389c3a182068639b37c5ce6",
+      "sha256": "c9224eb731e0569a549f41f5eed0053a9b0505424e4ab36d1b2ff12a8e115df4"
+    },
+    {
+      "path": "data/world_map/historical/FLAG_ASSET_ATTRIBUTION.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e3da0067865fda0ad9034a2a30465a8c52aad308",
+      "size": 14488,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/e3da0067865fda0ad9034a2a30465a8c52aad308",
+      "sha256": "dfc60fa220a5ed0aa571c04efc843a0d0ca7589d42f3f3a72b3c000528714d8a"
+    },
+    {
+      "path": "data/world_map/historical/cshapes_1900_snapshot.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "03a35ab7f966c75cb50aa9c406c3e9181c504560",
+      "size": 523432,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/03a35ab7f966c75cb50aa9c406c3e9181c504560",
+      "sha256": "00b1a500dddd161f18710a0e6ff02b7ded80953f81ad96dbdd5fb7158c71a17e"
+    },
+    {
+      "path": "data/world_map/historical/flags_1900.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2d8e5483ebfb23dc30017810ce853276c5a26026",
+      "size": 78692,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/2d8e5483ebfb23dc30017810ce853276c5a26026",
+      "sha256": "8c74b37babc435aa11a672f36d127c697c1472775f9c39b7dc2c32d589f02bcd"
+    },
+    {
+      "path": "data/world_map/historical/historical_admin1_1900.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "30b5abf4449810474bdf468320297cee77fc1942",
+      "size": 9567,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/30b5abf4449810474bdf468320297cee77fc1942",
+      "sha256": "690396058a7a6096211f819a12b7c9f52d51c67f905b50c86a1700831b23a6a3"
+    },
+    {
+      "path": "data/world_map/historical/major_economy_polity_crosswalk_1900.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9b36ea743721e36d163659723ebf73d2bb68f50a",
+      "size": 1034,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/9b36ea743721e36d163659723ebf73d2bb68f50a",
+      "sha256": "7209dde2749a9902a874ff895efc4f685a006f07c720a713b0decb387a70f45b"
+    },
+    {
+      "path": "data/world_map/historical/major_state_profiles_1900.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dd1035a615ba4d63ed1c9826e50521653ee74259",
+      "size": 13352,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/dd1035a615ba4d63ed1c9826e50521653ee74259",
+      "sha256": "03935ba8016a868732f815891f00e396ab9cb59f6c11c7ae3d4c0116501cc1c3"
+    },
+    {
+      "path": "data/world_map/historical/political_units_1900.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d18b6b646ffa0b565815f7dd36a1aafc8d445076",
+      "size": 85456,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/d18b6b646ffa0b565815f7dd36a1aafc8d445076",
+      "sha256": "d62a8d9c566c1dfea9d57fc197a6fa3606c6be259782a582050aeaffa002c5f9"
+    },
+    {
+      "path": "data/world_map/historical_political_entities_1900.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b3492fc3a0e582f225c3144685ba31b4eff0aa79",
+      "size": 17193,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/b3492fc3a0e582f225c3144685ba31b4eff0aa79",
+      "sha256": "8aed226372b106e1a492466edf8acab61ea8a8b159473e4d574b81cb004cf0ba"
+    },
+    {
+      "path": "data/world_map/institutions.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f9544dee95077822ec2214a3fa2a6e6d93280379",
+      "size": 10574,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/f9544dee95077822ec2214a3fa2a6e6d93280379",
+      "sha256": "dbfb1a35bcc63f5c2129f821cd28be33e704fc69b7fe2349c3a6a777637e50c2"
+    },
+    {
+      "path": "data/world_map/map_geometry_cache.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a93c3be31319da309be103d10b5cd0a4051a391d",
+      "size": 2128382,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/a93c3be31319da309be103d10b5cd0a4051a391d",
+      "sha256": "816acc92ba5402f3232eb8531eadc3932fc083cae44a4ba5ffa7cfef127960b8"
+    },
+    {
+      "path": "data/world_map/map_modes.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9d922d689cb701b42538fbfe1670ea2b35d5a290",
+      "size": 1940,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/9d922d689cb701b42538fbfe1670ea2b35d5a290",
+      "sha256": "65c61c2817953902043ac542a2c95f5f32d15487d5531855aa1099801510546b"
+    },
+    {
+      "path": "data/world_map/name_pool_fr.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b877cb2a141b5dcec9e0975b49e9851e436ec53d",
+      "size": 10542,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/b877cb2a141b5dcec9e0975b49e9851e436ec53d",
+      "sha256": "ed67332e77b22fd33cee22f342faef96d263132cd82a1aeb13024175fa48c229"
+    },
+    {
+      "path": "data/world_map/organizations.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ef7b8186ec47413811ccafd9b3ff3462028e1b85",
+      "size": 11559,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/ef7b8186ec47413811ccafd9b3ff3462028e1b85",
+      "sha256": "178341c4f522f56bfa1e5c8ab98ec0c3b677fe3b4265329c61291b2b78392533"
+    },
+    {
+      "path": "data/world_map/ports.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d60723507acf41ea51b3e40d98f31154e0282211",
+      "size": 1915,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/d60723507acf41ea51b3e40d98f31154e0282211",
+      "sha256": "cbf735ad2daf640293ade56461412a1068a02a8e42493b8933c513fb79626230"
+    },
+    {
+      "path": "data/world_map/rail_segments.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aa798ea89fac144d5078d2a6808b2e082e76c019",
+      "size": 1575,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/aa798ea89fac144d5078d2a6808b2e082e76c019",
+      "sha256": "d5b1321a73e21cf1e1e2da6898734764467e0e85d62f3dda1c2d2d566d4bbeda"
+    },
+    {
+      "path": "data/world_map/regions.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2f325cef6da3b2a0ecae56f8c18d76ffc11b9884",
+      "size": 451662,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/2f325cef6da3b2a0ecae56f8c18d76ffc11b9884",
+      "sha256": "65e885135016f70eade124f8adf7030f5ce63b8983eb44d01e650cc87da5b1ba"
+    },
+    {
+      "path": "data/world_map/relationships.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "71523e23c47ef498116bad41d7c17383c1891836",
+      "size": 6465,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/71523e23c47ef498116bad41d7c17383c1891836",
+      "sha256": "803b7874c99ddf08c3e6b11118c2a48a128098be4fe054c23905f33cb3dcf72d"
+    },
+    {
+      "path": "data/world_map/road_segments.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c6cca810089656e31243c8a7620b5649d1a5fbbb",
+      "size": 458,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/c6cca810089656e31243c8a7620b5649d1a5fbbb",
+      "sha256": "b0b15bf94ce4e5a8bee6ce6a756f78bcfabbded6bd8cebd6b06f11af7dfecaea"
+    },
+    {
+      "path": "data/world_map/shipping_routes.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b84e792173d7114db7fb20cc534f1497e6cebaa5",
+      "size": 849,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/b84e792173d7114db7fb20cc534f1497e6cebaa5",
+      "sha256": "bee274fca9ec500c6b889faf2cc44cf3b8a7afeebfccb29a8a6ee0bbc65d7266"
+    },
+    {
+      "path": "data/world_map/strategic_military_overlay.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "505fc64043a94bb9f9d7b971c6b78f5587b99bd9",
+      "size": 8469,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/505fc64043a94bb9f9d7b971c6b78f5587b99bd9",
+      "sha256": "42e0536552c26f8abefd95a91c3363573b5783fe7f2350cfed06e44d34b9eddb"
+    },
+    {
+      "path": "data/world_map/territory_source_registry.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c3a52a02eef601582a84b7b1e04fc3b9aaba449d",
+      "size": 11894,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/c3a52a02eef601582a84b7b1e04fc3b9aaba449d",
+      "sha256": "5644b4167a9e7f7a3af4cc395289d4c3f3a1235fd7abc992d33e76daa0074af7"
+    },
+    {
+      "path": "data/world_map/world_activity.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f6053b2a380d8b99b425ce8e1851c3ed747d4d2f",
+      "size": 4586,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/f6053b2a380d8b99b425ce8e1851c3ed747d4d2f",
+      "sha256": "a74514c2ca6af4b18800b2d426e7ae48b4247bd751b171319ba9e84478d5f1ab"
+    },
+    {
+      "path": "experiments/war_resolver/MILITARY_DECISION_REQUIREMENTS.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "30ffe50926ccb9140ce0f7fe885b009b7e6fe8c7",
+      "size": 5290,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/30ffe50926ccb9140ce0f7fe885b009b7e6fe8c7",
+      "sha256": "75bbc3945a176f20f6582add42ebcfd1edbe6d396f01c96a6f9978d9759f1e78"
+    },
+    {
+      "path": "experiments/war_resolver/MILITARY_ECONOMY_REQUIREMENTS.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2f620abbd01dc64ab37c3742218c1074d690f717",
+      "size": 2706,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/2f620abbd01dc64ab37c3742218c1074d690f717",
+      "sha256": "3f0f0efa23887fc128e8e9d00817c2efcb5170004f66c785bdc7695cc1898311"
+    },
+    {
+      "path": "experiments/war_resolver/MILITARY_INFORMATION_REQUIREMENTS.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c211dde9c1d0053c9a04f66fbc13d40cb1e1c529",
+      "size": 5395,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/c211dde9c1d0053c9a04f66fbc13d40cb1e1c529",
+      "sha256": "b6f6e23c3d28ba284d8d263c7f318a0dc9b16a0e9ca7b00d0a17f4866839c963"
+    },
+    {
+      "path": "experiments/war_resolver/MILITARY_ORGANIZATION_REQUIREMENTS.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1bfd8bf0769893434efa9b3cd384bc26653753dc",
+      "size": 15142,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/1bfd8bf0769893434efa9b3cd384bc26653753dc",
+      "sha256": "7d748bdf83756a8e1d350b2db50e8060e27571ee57166831a8911d75c6dd2303"
+    },
+    {
+      "path": "experiments/war_resolver/MILITARY_TECHNOLOGY_REQUIREMENTS.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ce2f1792749bf6d7adb29b09cfb0b6ed2d6b58cf",
+      "size": 2098,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/ce2f1792749bf6d7adb29b09cfb0b6ed2d6b58cf",
+      "sha256": "401b24105815dac8cb6ab5e8bc6dcf836950d3b01282785ec2710fcfd29ff384"
+    },
+    {
+      "path": "experiments/war_resolver/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "785cc32b8ad89ce5376a22c9010b71ced5548b2b",
+      "size": 13545,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/785cc32b8ad89ce5376a22c9010b71ced5548b2b",
+      "sha256": "f8d092a97218b60ab4042c7028d9aa9bad225b982f0c7317226834ce84e0b66e"
+    },
+    {
+      "path": "experiments/war_resolver/aggregation/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1ee7d5aec57acbab2dc4309d5f4f82cd327b3048",
+      "size": 9500,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/1ee7d5aec57acbab2dc4309d5f4f82cd327b3048",
+      "sha256": "791d190259b6e36315b12abfee402f08f28c51f8d5e8cd17d085ff636d70f46c"
+    },
+    {
+      "path": "experiments/war_resolver/aggregation/TASK4_LOCAL_VALIDATION.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "deced069e4d1ef055ac6762aea55209bad0cdb0b",
+      "size": 8408,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/deced069e4d1ef055ac6762aea55209bad0cdb0b",
+      "sha256": "cc11dd9cd1e397419f43a6d8e511a539687f15012bc7065fd0eeca69920d80d9"
+    },
+    {
+      "path": "experiments/war_resolver/aggregation/authority.gd",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e41d963a1c6f351bce7b14660baf392beb870c3d",
+      "size": 20790,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/e41d963a1c6f351bce7b14660baf392beb870c3d",
+      "sha256": "b1d1e9b122aac2c0888e3008c2fb48d8f30c0992ba57fb5777b1abc4c0a3045a"
+    },
+    {
+      "path": "experiments/war_resolver/aggregation/authority.gd.uid",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "90fdd63630e48f15872652ad6581d4c023de9449",
+      "size": 20,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/90fdd63630e48f15872652ad6581d4c023de9449",
+      "sha256": "c6c4a52f5e17c4d384439debafa48934e69d3e56fc445cf0e1b4d7fc51ff5f69"
+    },
+    {
+      "path": "experiments/war_resolver/aggregation/benchmark.gd",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "04bec7b35d48e375c97024646066adb874858e90",
+      "size": 3433,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/04bec7b35d48e375c97024646066adb874858e90",
+      "sha256": "a01f7a80715f164791b611d22f169ef5599299950076b276da704d638484fbaa"
+    },
+    {
+      "path": "experiments/war_resolver/aggregation/benchmark.gd.uid",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9c9e96c9cb16ffa5e820011c800fa70f1c64e53c",
+      "size": 20,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/9c9e96c9cb16ffa5e820011c800fa70f1c64e53c",
+      "sha256": "fa47198e62d1013f004ee27f0f17dff47923f7cbb7279f961fc41794b3d201ae"
+    },
+    {
+      "path": "experiments/war_resolver/aggregation/contact_index.gd",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c8e01ac8440cad0c5501fd0e03dc9f95afd166cb",
+      "size": 1557,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/c8e01ac8440cad0c5501fd0e03dc9f95afd166cb",
+      "sha256": "de50a639702188fc15e760d896781d5810d9875f637ff9bac6e714db4f14908f"
+    },
+    {
+      "path": "experiments/war_resolver/aggregation/contact_index.gd.uid",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a282bac2c0085103c060ffca9f722690ec2d979b",
+      "size": 20,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/a282bac2c0085103c060ffca9f722690ec2d979b",
+      "sha256": "8f7a2a64cd433895eba4206bf8bdb16d82e1b8360b91f28506867e437da4340e"
+    },
+    {
+      "path": "experiments/war_resolver/aggregation/evidence/windows-20261007.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f02f9f0bad5c1cefeda0be0306144fd7dc9fa98f",
+      "size": 105076,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/f02f9f0bad5c1cefeda0be0306144fd7dc9fa98f",
+      "sha256": "7984e4c72b32ff6e2815903bd5c532c2559177a3dd7ddda751ee67ed8d1415e9"
+    },
+    {
+      "path": "experiments/war_resolver/aggregation/fixtures.gd",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fb4a240460e973a4c1f65481fcc3ffd6d99c00fd",
+      "size": 2649,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/fb4a240460e973a4c1f65481fcc3ffd6d99c00fd",
+      "sha256": "49c196a901d50a863ce17a1addd772bd47d446d8b7f8f9d63144096e0fd84e4a"
+    },
+    {
+      "path": "experiments/war_resolver/aggregation/fixtures.gd.uid",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1024cc52c4a8a056f8cb3fe4cf9894e1cf551a61",
+      "size": 19,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/1024cc52c4a8a056f8cb3fe4cf9894e1cf551a61",
+      "sha256": "d854c52c402f5b1c34daf18930d0dcae6ecb6eedb9e26e9a062abba3891a5ec0"
+    },
+    {
+      "path": "experiments/war_resolver/aggregation/indexed_resolver.gd",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "09ef2b06945e1f7537e8008c49c89d1ced9cf7cd",
+      "size": 1384,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/09ef2b06945e1f7537e8008c49c89d1ced9cf7cd",
+      "sha256": "61186a890be21997532581032947c9e2c6bfdc83e1492c01c3f41ea1ac04c2bb"
+    },
+    {
+      "path": "experiments/war_resolver/aggregation/indexed_resolver.gd.uid",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "606093440a3ee896674cbc7d4a934241e48da478",
+      "size": 20,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/606093440a3ee896674cbc7d4a934241e48da478",
+      "sha256": "f697bef7f8f9e8bda00d845837f8019cd80dfd6cd0a00436abce36973b215ced"
+    },
+    {
+      "path": "experiments/war_resolver/aggregation/replay_probe.gd",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2be83b8d5a39457c0d0de749d1048d68af9e3502",
+      "size": 1032,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/2be83b8d5a39457c0d0de749d1048d68af9e3502",
+      "sha256": "8e2f6691cab8af0ea47e7f0bb51c7bbe9713f96cf1f103efef6d5f419c44e4fb"
+    },
+    {
+      "path": "experiments/war_resolver/aggregation/replay_probe.gd.uid",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b63997840982ebdea4f191e9df2c4a1fbef9b1c0",
+      "size": 20,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/b63997840982ebdea4f191e9df2c4a1fbef9b1c0",
+      "sha256": "a79b7fcddc4c7ca31f9066c70f68c32fa4da9b36374510d7e9abb1271fab18d9"
+    },
+    {
+      "path": "experiments/war_resolver/aggregation/spatial_hierarchy.gd",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b71b6922985b7a21aea8a9f6f2d71a2557cd8b19",
+      "size": 3360,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/b71b6922985b7a21aea8a9f6f2d71a2557cd8b19",
+      "sha256": "b0c741f60dd912b18912dcf5e37a9ac5bb92c33076bef6205f970852c3092757"
+    },
+    {
+      "path": "experiments/war_resolver/aggregation/spatial_hierarchy.gd.uid",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aade2fddc4546506700057854163c4b9456b72a7",
+      "size": 20,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/aade2fddc4546506700057854163c4b9456b72a7",
+      "sha256": "5c1513244bec4c24793e4f0b66c3152ce8101e649c039d55ba8683b61ead63ee"
+    },
+    {
+      "path": "experiments/war_resolver/aggregation/tests.gd",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "62d7de053c76b7657f0656778de3a113c634e5d0",
+      "size": 23381,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/62d7de053c76b7657f0656778de3a113c634e5d0",
+      "sha256": "a7e6042ecebc624145cbafb8fdd5df9aac2bab6052dd85890007f1b4003ed7d5"
+    },
+    {
+      "path": "experiments/war_resolver/continuous/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cca76849e91e165bb36c4af2fff2fb4198746288",
+      "size": 5594,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/cca76849e91e165bb36c4af2fff2fb4198746288",
+      "sha256": "182e28300dd10403f87c5d08f3706a1f173105a92644c07a3c9ba92cf5aa8591"
+    },
+    {
+      "path": "experiments/war_resolver/iteration/ACCEPTANCE.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "745d0be03483b5357d9b01ab1f51d26deec2d464",
+      "size": 4872,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/745d0be03483b5357d9b01ab1f51d26deec2d464",
+      "sha256": "73683e7204294ab59be3f5b82e0b886d3087c46c8ec8bf308abe25656e74d284"
+    },
+    {
+      "path": "experiments/war_resolver/iteration/FINAL_ACCEPTANCE.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b8dc976c614552abe8e1420b791ad594af6e4333",
+      "size": 11164,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/b8dc976c614552abe8e1420b791ad594af6e4333",
+      "sha256": "667cd671792f6d9ef506e6f1a45ebcb0a5454278bb3ce7f3ab45231032c70488"
+    },
+    {
+      "path": "experiments/war_resolver/iteration/REPRODUCE.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "49d9b756602966adc794096f269624d96bb5209d",
+      "size": 3634,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/49d9b756602966adc794096f269624d96bb5209d",
+      "sha256": "c0d8617d41706592a7dc57e9c32052f4aeb40086846e8793eac779c9ee2450de"
+    },
+    {
+      "path": "experiments/war_resolver/iteration/cloud_validate.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0a7a21f8fd417d3999e9e6bc7307f6be0a8fa50b",
+      "size": 14058,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/0a7a21f8fd417d3999e9e6bc7307f6be0a8fa50b",
+      "sha256": "4ce8391f1f603abe6056addf42fbc1f7fb4e1130c613737c80fc9abf96864f63"
+    },
+    {
+      "path": "project.godot",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1efd8c3844671a5b7e6420ce549656d921e2ad5d",
+      "size": 2139,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/1efd8c3844671a5b7e6420ce549656d921e2ad5d",
+      "sha256": "125277a9e2cc57a700f3c2788bd8392a8af0cc1e65f55176868cb0956e1418d5"
+    },
+    {
+      "path": "scenes/boot/.gitkeep",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "scenes/ui/.gitkeep",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "scripts/actions/.gitkeep",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "scripts/ai/.gitkeep",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "scripts/characters/.gitkeep",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "scripts/map/.gitkeep",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "scripts/organizations/.gitkeep",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "scripts/save/.gitkeep",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "scripts/simulation/.gitkeep",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "scripts/utilities/.gitkeep",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "tests/fixtures/.gitkeep",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "tests/integration/.gitkeep",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "tests/unit/.gitkeep",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "tools/run_validation.ps1",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7620c0c38a80f1e7fbcc20efebdec4a77bf855d3",
+      "size": 14429,
+      "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/7620c0c38a80f1e7fbcc20efebdec4a77bf855d3",
+      "sha256": "6dffb5e53dd1738466ed3b79d94d820839bd90c30558554393a04415279b83c6"
+    }
+  ]
+}

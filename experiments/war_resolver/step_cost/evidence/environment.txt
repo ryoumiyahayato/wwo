@@ -1,0 +1,58 @@
+2026-10-08T05:02:49Z
+Linux 0b8bed348ecd 6.18.44 #1 SMP Sat Sep 26 20:02:31 UTC 2026 x86_64 GNU/Linux
+processor	: 0
+vendor_id	: AuthenticAMD
+cpu family	: 25
+model		: 17
+model name	: AMD EPYC 9V74 80-Core Processor
+stepping	: 1
+microcode	: 0x1000065
+cpu MHz		: 2596.142
+cache size	: 1024 KB
+physical id	: 0
+siblings	: 9
+core id		: 0
+cpu cores	: 9
+apicid		: 0
+initial apicid	: 0
+cat: write error: Broken pipe
+9
+MemTotal:       10206508 kB
+MemFree:         3521612 kB
+MemAvailable:    8952152 kB
+Buffers:           10072 kB
+Cached:          5537364 kB
+SwapCached:            0 kB
+Python 3.12.14
+git version 2.52.0
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+4.6.3.stable.official.7d41c59c4

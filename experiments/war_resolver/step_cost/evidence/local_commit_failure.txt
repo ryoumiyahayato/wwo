@@ -1,0 +1,9 @@
+Command: GIT_EDITOR=true git commit -m 'docs: seal war step-cost source recovery blocker'
+Repository: isolated partial exact-base experiment workspace
+Returned by: 2026-10-08T05:05:54Z
+Actual stderr:
+error: invalid object 100644 59cf7f839d294f5201609560c3ce551bbded78b6 for '.github/workflows/alpha-commodity-economy.yml'
+error: invalid object 100644 59cf7f839d294f5201609560c3ce551bbded78b6 for '.github/workflows/alpha-commodity-economy.yml'
+error: Error building trees
+Result: no new commit; branch HEAD remains exact base.
+No bypass, missing-object suppression, synthetic altered tree, or additional source fetch was attempted.

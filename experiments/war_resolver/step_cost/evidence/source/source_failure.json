@@ -1,0 +1,28 @@
+{
+  "status": "BLOCKED_BY_CONTRACT_OR_ENVIRONMENT",
+  "stage": "G0",
+  "failure_time_utc": "2026-10-08T05:01:00Z approximate; call returned by 05:01:05Z",
+  "path": "data/world_map/world_admin1.json",
+  "tool": "mcp__codex_apps__github_fetch",
+  "response": {
+    "content": [
+      {
+        "type": "text",
+        "text": "tool call error: tool call failed for `codex_apps/github.fetch`\n\nCaused by:\n    Transport closed"
+      }
+    ],
+    "isError": true
+  },
+  "retry": false,
+  "remaining_acquisition_stopped": true,
+  "G1": "NOT_RUN",
+  "G2": "NOT_RUN",
+  "G3": "NOT_RUN",
+  "G4": "BLOCKED_NO_RUNNABLE_FIXED_BASELINE",
+  "runtime_changed": false,
+  "production_changed": false,
+  "blob_sha": "0ce36f617f565d4d5c9cf4efb445e8b80876ba02",
+  "expected_bytes": 5897821,
+  "url": "https://api.github.com/repos/ryoumiyahayato/wwo/git/blobs/0ce36f617f565d4d5c9cf4efb445e8b80876ba02",
+  "request_id": "NOT_RETURNED"
+}

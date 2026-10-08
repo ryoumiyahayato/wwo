@@ -1,0 +1,17 @@
+{
+  "research_outcome": "BLOCKED_BY_CONTRACT_OR_ENVIRONMENT",
+  "outcome_letter": "E",
+  "completion": "BLOCKED",
+  "base": "3515734e5dfdf4bfa04fc0047764f53c380389ed",
+  "branch": "experiment/war-step-cost-bound-v1-20261008",
+  "runtime_code_changed": false,
+  "new_godot_war_experiments": false,
+  "stages": {"G0": "BLOCKED", "G1": "NOT_RUN", "G2": "NOT_RUN", "G3": "NOT_RUN", "G4_full_regression": "NOT_RUN"},
+  "before_after": {"normal": null, "quota1": null, "reason": "No runnable fixed baseline; no performance samples"},
+  "B_triggered": false,
+  "published": false,
+  "remote_state": "NOT_PUBLISHED — NOT_AUTHORIZED",
+  "production_integration": "NONE",
+  "request_id": "NOT_RETURNED",
+  "evidence_kind": "source-recovery provenance; not an algorithm acceptance run"
+}

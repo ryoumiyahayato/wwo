@@ -1,0 +1,165 @@
+{
+  "kind": "docs-only publication payload manifest; no algorithm acceptance",
+  "repository": "ryoumiyahayato/wwo",
+  "publication_branch": "experiment/war-step-cost-bound-v1-20261008",
+  "source_sha": "3515734e5dfdf4bfa04fc0047764f53c380389ed",
+  "source_tree_sha": "4fdbbeb658b96d1d7bb94bc0b0207c782a9b6ee6",
+  "historical_runtime_algorithm_sha": "69fa36d6202b2b0d8e9332406ff57d269749fa0c",
+  "research_outcome": "E / BLOCKED_BY_CONTRACT_OR_ENVIRONMENT",
+  "G0": "BLOCKED",
+  "G1": "NOT_RUN",
+  "G2": "NOT_RUN",
+  "G3": "NOT_RUN",
+  "G4_full_regression": "NOT_RUN",
+  "new_runtime_algorithm": false,
+  "environment_recovery": false,
+  "new_godot_war_experiment": false,
+  "production_integration": "NONE",
+  "scope": "Only added reports, sealed source-recovery/environment evidence, historical read-only analysis, and this publication index/manifest under experiments/war_resolver/step_cost; entire inherited source tree unchanged",
+  "history_policy": "Original NOT_PUBLISHED / NOT_AUTHORIZED and no new local commit fields describe the sealed state, not the later explicitly authorized remote docs-only publication. No original file content was changed.",
+  "canonical_library_file_ids": {
+    "sealed_report": "libfile_4bfc55d68a208191a4045c97f6c133a6",
+    "sealed_package": "libfile_b6c849a8cd388191a43c17616ec23304"
+  },
+  "sealed_archive": {
+    "name": "war-step-cost-delivery.tar.gz",
+    "sha256": "05424c5b02e5ac0b1927fc008f66fc7c3a9dd3cc682c55f63305ab3c5ac5eb8c",
+    "remote_copy": "Original archive is delivered through the canonical Library item; duplicate archive bytes are not uploaded into Git"
+  },
+  "sealed_patch": {
+    "name": "war-step-cost-source-blocker.patch",
+    "bytes": 643600,
+    "sha256": "9799a89062154615a0d64a8fcf6b0a8b4128ec2ebc7f9cfa48c5cb169f5dbec7",
+    "location": "canonical sealed package",
+    "purpose": "Equivalent addition of the 14 sealed reports/evidence, not a runtime code patch"
+  },
+  "manifest_hashing_note": "Each payload file except this manifest is listed. The manifest itself has no self-referential hash; its Git blob SHA is verified separately when creating the remote tree.",
+  "files": [
+    {
+      "path": "experiments/war_resolver/step_cost/ACCEPTANCE_AND_MEASUREMENT.md",
+      "bytes": 4875,
+      "git_blob_sha1": "56317ca3a8a75f9c447912797d0865dc973224b4",
+      "sha256": "b82b87312430fb574e647887216ea41d5d1b45f85f0c73f1d662c62fd7a96e50",
+      "kind": "sealed_original_evidence_or_historical_read_only_analysis"
+    },
+    {
+      "path": "experiments/war_resolver/step_cost/HEADS.json",
+      "bytes": 2634,
+      "git_blob_sha1": "46c983ceeb0bc02e505850f54c0173ab088fb5c1",
+      "sha256": "7adc5bcd25908a167db79154ea308dc691c371bf2799afc9670187340eeffd6f",
+      "kind": "sealed_original_evidence_or_historical_read_only_analysis"
+    },
+    {
+      "path": "experiments/war_resolver/step_cost/README.md",
+      "bytes": 6089,
+      "git_blob_sha1": "6df85abfd8e716cbccd9cfdaf4bda2d439e779a2",
+      "sha256": "66d32439c1f12d7618b09cbf70b3a2c8caffe820133a3681f78c4b084299d41e",
+      "kind": "publication_index"
+    },
+    {
+      "path": "experiments/war_resolver/step_cost/SEALED_README.txt",
+      "bytes": 785,
+      "git_blob_sha1": "c7e1a55209035836ab2fccde888217355c60e435",
+      "sha256": "fc22cc79a0db5c35e15d76b4f74486e5dde520e591bdd65b43bf5c9973729ef6",
+      "kind": "sealed_original_evidence_or_historical_read_only_analysis"
+    },
+    {
+      "path": "experiments/war_resolver/step_cost/STEP_COST_LOCAL_VALIDATION.md",
+      "bytes": 7578,
+      "git_blob_sha1": "51fbd48f2e522672d30d7f949024b4326361c841",
+      "sha256": "0bfb6b4169df2b7510dac9306c593174663c7fb62aeb854a8ac0264416abd94a",
+      "kind": "sealed_original_evidence_or_historical_read_only_analysis"
+    },
+    {
+      "path": "experiments/war_resolver/step_cost/TASK9_FOLLOWUP_READ_ONLY_ANALYSIS_ZH.md",
+      "bytes": 26250,
+      "git_blob_sha1": "866450a2ba2e91d838fdec69620bb8d260e6c521",
+      "sha256": "4b9e19a0c776e5bda5cab370f609fccfba19c4d8d2347f736da38c09c57d3f75",
+      "kind": "sealed_original_evidence_or_historical_read_only_analysis"
+    },
+    {
+      "path": "experiments/war_resolver/step_cost/evidence/CHECKPOINT.json",
+      "bytes": 1395,
+      "git_blob_sha1": "4e2a8dfdccc56ea33c1bbc18d2f92b5cfe296f47",
+      "sha256": "08a8d27e5b246c6aa0de6ca53025beb1e395656b94b5c248862058a537ac2efe",
+      "kind": "sealed_original_evidence_or_historical_read_only_analysis"
+    },
+    {
+      "path": "experiments/war_resolver/step_cost/evidence/ENVIRONMENT.json",
+      "bytes": 569,
+      "git_blob_sha1": "4233056721cc781e95939050013b4b73211e64c4",
+      "sha256": "848b05048bfb30b3f59e5480ea69be4e610c64b926e01b3b00200ec87ea91c6b",
+      "kind": "sealed_original_evidence_or_historical_read_only_analysis"
+    },
+    {
+      "path": "experiments/war_resolver/step_cost/evidence/RESULTS.json",
+      "bytes": 779,
+      "git_blob_sha1": "b4d2aa991320025d67e5de6322357fae4637abb9",
+      "sha256": "70df99dff3100a328640fb673b1f94760e02df7b8ccbf25fdd833c67407c3efd",
+      "kind": "sealed_original_evidence_or_historical_read_only_analysis"
+    },
+    {
+      "path": "experiments/war_resolver/step_cost/evidence/environment.txt",
+      "bytes": 2082,
+      "git_blob_sha1": "cc808ab2fd3525903343ca7754667290cc42211b",
+      "sha256": "2c6a952a1caf7db19be0ceb3e7333795017839357aed26aaca8fd9359db4616d",
+      "kind": "sealed_original_evidence_or_historical_read_only_analysis"
+    },
+    {
+      "path": "experiments/war_resolver/step_cost/evidence/local_commit_failure.txt",
+      "bytes": 632,
+      "git_blob_sha1": "e5961b06458a3736702b92bac18451d8ce9a7d43",
+      "sha256": "cc82dbf5f18253ec506ed08b107ab76010c12aca1a3d73997d3cf392a8e90a78",
+      "kind": "sealed_original_evidence_or_historical_read_only_analysis"
+    },
+    {
+      "path": "experiments/war_resolver/step_cost/evidence/raw-index.json",
+      "bytes": 2061,
+      "git_blob_sha1": "daf8281f3ee3b15810750340f87178d8580b01d2",
+      "sha256": "33ab6967206aa3c02ee0863e91ec55b4817927632129b2b955bb67b14cd2a193",
+      "kind": "sealed_original_evidence_or_historical_read_only_analysis"
+    },
+    {
+      "path": "experiments/war_resolver/step_cost/evidence/source/ACQUISITION.json",
+      "bytes": 555,
+      "git_blob_sha1": "9a09b202067bae5452070e01e02798fed3c4616c",
+      "sha256": "ee5c95d2ec31f4bf2ac08a099842727f4b47b4957aff718c613aafe80ca39640",
+      "kind": "sealed_original_evidence_or_historical_read_only_analysis"
+    },
+    {
+      "path": "experiments/war_resolver/step_cost/evidence/source/acquired_manifest.json",
+      "bytes": 153911,
+      "git_blob_sha1": "55401241a6bc0fa64df31cbb0a379dc5a687a693",
+      "sha256": "4626021b07904ec42324c586fb2781e00ee8807ea4ada652ff5e38a44fb2c8a9",
+      "kind": "sealed_original_evidence_or_historical_read_only_analysis"
+    },
+    {
+      "path": "experiments/war_resolver/step_cost/evidence/source/base_commit.json",
+      "bytes": 1149,
+      "git_blob_sha1": "8eff71a5ef3ea301f1acc63b7df7e3161a56c4c6",
+      "sha256": "22e9efe14e5b3fb85812d61aef7453dc179b5682f1caf5801a2dac6f0aa00464",
+      "kind": "sealed_original_evidence_or_historical_read_only_analysis"
+    },
+    {
+      "path": "experiments/war_resolver/step_cost/evidence/source/base_tree.json",
+      "bytes": 458175,
+      "git_blob_sha1": "e27153e6681319b33d6f47a6eaea30a34537225a",
+      "sha256": "38e32fda386d272a301e374b89206d0f556fb69cfdd7c47f70a0d4a5e6a55650",
+      "kind": "sealed_original_evidence_or_historical_read_only_analysis"
+    },
+    {
+      "path": "experiments/war_resolver/step_cost/evidence/source/base_tree_summary.json",
+      "bytes": 909,
+      "git_blob_sha1": "18d8305df043ac6ed1e93f2e28e452b94cfdccba",
+      "sha256": "8d4ee48809ba21ea410ce6bcc27d932b6b1e4ad6ba2f654197c119da2f3c32a9",
+      "kind": "sealed_original_evidence_or_historical_read_only_analysis"
+    },
+    {
+      "path": "experiments/war_resolver/step_cost/evidence/source/source_failure.json",
+      "bytes": 919,
+      "git_blob_sha1": "e4d346ba099483595e101e76f30595e75d2def2f",
+      "sha256": "79b130dd8c85fff0c34ffccb6836c995d9b2be4b4235f518fe0ff4fc4914826e",
+      "kind": "sealed_original_evidence_or_historical_read_only_analysis"
+    }
+  ]
+}

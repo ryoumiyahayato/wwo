@@ -1,0 +1,14 @@
+{
+  "os": "Linux x86_64",
+  "kernel": "6.18.44",
+  "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+  "visible_cpu_count": 9,
+  "cpu_count_source": "nproc and /proc/cpuinfo; lscpu unavailable /sys/devices/system/cpu/possible",
+  "proc_memtotal_kib": 10206508,
+  "memory_limit": "NOT_AVAILABLE; cgroup memory.max not readable/present in supplied namespace; proc MemTotal is not a verified process/container limit",
+  "godot": "4.6.3.stable.official.7d41c59c4",
+  "python": "3.12.14",
+  "git": "2.52.0",
+  "godot_war_experiment_run": false,
+  "version_check_only": true
+}

@@ -1,0 +1,35 @@
+{
+  "checkpoint_time_utc": "2026-10-08T05:06:45Z",
+  "task_start_utc": "2026-10-08T04:55:44Z",
+  "branch": "experiment/war-step-cost-bound-v1-20261008",
+  "base_and_runtime_code_head": "3515734e5dfdf4bfa04fc0047764f53c380389ed",
+  "budget_authorized_effective_minutes": 360,
+  "effective_minutes_estimate_at_checkpoint": 11,
+  "estimate_method": "elapsed active source/provenance work; network/tool wait included; not precise per-HTTP accounting",
+  "verified_platform_interruptions_minutes": 0,
+  "indefinite_waiting": false,
+  "stages_passed": [],
+  "current_hypothesis": "NOT_SELECTED_G0_BLOCKED",
+  "code_changes": "No algorithm runtime change; report and source-provenance files only",
+  "performed": [
+    "read full authorization and exact AGENTS",
+    "check pinned versions",
+    "verify exact commit/tree Git SHA",
+    "single bounded read-only source recovery",
+    "verify retained blob SHA and SHA256",
+    "record exact source failure"
+  ],
+  "not_passed": [
+    "complete runnable fixed source",
+    "current-environment regression baseline",
+    "G0",
+    "G1",
+    "G2",
+    "G3",
+    "G4 full validation"
+  ],
+  "next_action": "Create and verify report/provenance artifact and binary patch; stop. No further source retrieval.",
+  "docs_head": "NOT_CREATED_SOURCE_INCOMPLETE",
+  "new_commit_list": [],
+  "local_commit_failure": "missing exact base blob; Error building trees"
+}
