@@ -395,6 +395,24 @@ def build() -> tuple[dict[str, Any], dict[str, Any]]:
         methodology="SGF T210 1900 records 73/76 verify historical names. Official archives/prefecture histories verify capitals. Identity reference only; no geometry, membership, exact founding/dissolution dates or modern crosswalk admitted.",
         confidence=.95, review_status="VERIFIED",
     ))
+    land_path = "res://data/land/paris_land_pilot_r1.json"
+    land = read_json(land_path)
+    require_schema(land, "schema_id", "paris_land_pilot_r1")
+    land_source = {
+        "source_id": "paris_land_pilot_r1", "title": "Paris mainland pilot: qualified physical source and generated partition",
+        "publisher": "WWO derivation from Natural Earth", "version": land["seed_version"],
+        "license": "PUBLIC_DOMAIN", "locator": land_path,
+        "access_metadata": {"source_review": land["source_review"], "historical_admin_boundary": "UNRESOLVED"},
+    }
+    sources.append(land_source)
+    facts.append(evidence(
+        fact_id="spatial_boundary:paris_land_pilot_r1", domain="spatial_boundary", source=land_source,
+        runtime_assertion=assertion("paris_land_pilot_r1", land, "qualified_physical_source_generated_partition",
+                                   {"from":"1900-01-01", "to":"1900-01-01"},
+                                   {"kind":"bounded_paris_pilot", "id":"paris_land_pilot_r1"}),
+        methodology="Pinned public-domain continental mask admits bounded interior inclusion only. Extent and partitions are generated game geometry; inland waters unclassified; France controller is an explicit opening-world assumption; historical administrative membership unresolved.",
+        confidence=.8, review_status="GENERATED_SIMULATION_ASSUMPTION",
+    ))
     sources.sort(key=lambda item: item["source_id"])
     facts.sort(key=lambda item: item["fact_id"])
     unique_records(sources, "source_id")

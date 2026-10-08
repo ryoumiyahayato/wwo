@@ -148,10 +148,19 @@ func _configure_spatial_composition(r: WorldBuildResult) -> bool:
 		r.error = "Formal Spatial authority could not be composed"
 		return false
 	r.world.territory_state = TerritoryState.new()
+	var pilot := LandPilotLoader.new()
+	if not pilot.load_current(r.world.provenance.gate(),r.world.political_registry) or not r.world.spatial_world.install_land(pilot.topology,pilot.initial_politics,r.world.political_registry):
+		r.error = "Formal Paris land admission failed: " + pilot.error
+		return false
+	r.world.territory_state.bind_land_scope(pilot.topology,r.world.political_registry)
 	var controllers: Dictionary = {}
+	var control_ids := r.world.spatial_catalog.place_map_ids()
 	for place_id: String in r.world.spatial_catalog.place_map_ids():
 		controllers[place_id] = str(r.world.spatial_catalog.get_place(place_id)["parent_country_id"])
-	if not r.world.territory_state.restore({"schema_id": TerritoryState.SCHEMA_ID, "controllers": controllers}, r.world.spatial_catalog.place_map_ids()):
+	for id: String in pilot.topology.land_ids():
+		controllers[id] = pilot.initial_politics.controller_polity_id
+		control_ids.append(id)
+	if not r.world.territory_state.restore({"schema_id": TerritoryState.SCHEMA_ID, "controllers": controllers}, control_ids):
 		r.error = r.world.territory_state.error
 		return false
 	if r.world.spatial_world.current_hour() != r.world.game_clock.current_hour():

@@ -3,7 +3,7 @@ extends RefCounted
 ## Exact save representation and isolated candidate validation. No domain actions.
 
 const SAVE_PATH: String = "user://formal_world_1900.json"
-const SCHEMA_ID: String = "formal_world_simulation_v14"
+const SCHEMA_ID: String = "formal_world_simulation_v15"
 const ORGANIZATION_COMPOSITION_STATE_SCHEMA_ID: String = "formal_organization_composition_state_v1"
 const EVIDENCE_STATE_SCHEMA_ID: String = "historical_political_evidence_v1"
 
@@ -100,7 +100,7 @@ func authoritative_fingerprint() -> String:
 	}).sha256_text()
 
 func save_version_error(found: String) -> String:
-	return "SAVE FORMAT VERSION MISMATCH\nExpected: %s\nFound: %s\nReason: Personal accounts, recorded cash transfers and wage periods require independent ledger/personal_economy fields." % [SCHEMA_ID, found]
+	return "SAVE FORMAT VERSION MISMATCH\nExpected: %s\nFound: %s\nReason: Formal land identity, topology, sovereignty, control and split lineage require spatial land fields; old saves cannot infer fine land." % [SCHEMA_ID, found]
 
 func restore_candidate(state: Dictionary) -> WorldBuildResult:
 	var r := WorldBuildResult.new()
@@ -178,7 +178,11 @@ func _restore_candidate_state(r: WorldBuildResult, state: Dictionary) -> bool:
 	if not r.world.spatial_world.restore(state["spatial"]) or r.world.spatial_world.current_hour() != r.world.game_clock.current_hour():
 		r.error = "SAVE CANDIDATE VALIDATION FAILED: Spatial snapshot hour differs from the restored GameClock or spatial facts are invalid"
 		return false
-	if not r.world.territory_state.restore(state["territory"], r.world.spatial_catalog.place_map_ids()):
+	var land := r.world.spatial_world.land_topology()
+	r.world.territory_state.bind_land_scope(land,r.world.political_registry)
+	var control_ids := r.world.spatial_catalog.place_map_ids()
+	control_ids.append_array(land.land_ids())
+	if not r.world.territory_state.restore(state["territory"], control_ids):
 		r.error = r.world.territory_state.error
 		return false
 	if not r.world.military_state.restore(state["military_state"], r.world.military_map, r.world.spatial_world, r.world.territory_state):

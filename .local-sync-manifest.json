@@ -1,5 +1,5 @@
 {
-  "content_sha256": "45f26ec6f815865e64c40abc8b1deddf56b6903f30042ec42fa1b3582254273f",
+  "content_sha256": "d688dcfcbc71ccfc61ec9c0a3f1f0883cbdb15aebe2c1fd6d46a70f0c240ac3d",
   "excluded": [
     {
       "path": ".git/",
@@ -78,6 +78,10 @@
       "reason": "file outside reviewed exact file allowlist"
     },
     {
+      "path": "docs/map/paris_land_unit_pilot_r1.md",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
       "path": "docs/performance/ten-year-timing-verification-r1.md",
       "reason": "file outside reviewed exact file allowlist"
     },
@@ -142,6 +146,14 @@
       "reason": "directory outside reviewed exact file allowlist"
     },
     {
+      "path": "scripts/content/land_pilot_loader.gd",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "scripts/content/land_pilot_loader.gd.uid",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
       "path": "scripts/core/models/",
       "reason": "data/material/secret/cache/nested-worktree path"
     },
@@ -194,6 +206,14 @@
       "reason": "directory outside reviewed exact file allowlist"
     },
     {
+      "path": "scripts/vnext/spatial/land_topology.gd",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "scripts/vnext/spatial/land_topology.gd.uid",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
       "path": "shaders/presentation/map/hemisphere_surface.gdshader",
       "reason": "file outside reviewed exact file allowlist"
     },
@@ -219,6 +239,14 @@
     },
     {
       "path": "tests/formal/formal_administrative_foundation_test.gd.uid",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tests/formal/formal_paris_land_pilot_test.gd",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tests/formal/formal_paris_land_pilot_test.gd.uid",
       "reason": "file outside reviewed exact file allowlist"
     },
     {
@@ -286,7 +314,27 @@
       "reason": "file outside reviewed exact file allowlist"
     },
     {
+      "path": "tools/map/build_paris_land_measurement.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/build_paris_land_pilot.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/paris_land_release_probe.gd",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/paris_land_release_probe.gd.uid",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
       "path": "tools/map/summarize_administrative_measurement.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/summarize_paris_land_measurement.py",
       "reason": "file outside reviewed exact file allowlist"
     },
     {
@@ -318,7 +366,7 @@
       "reason": "file outside reviewed exact file allowlist"
     }
   ],
-  "included_bytes": 5829488,
+  "included_bytes": 5839639,
   "included_files": 777,
   "owner_id": "7ed35d2d-c560-4b08-8c28-78af6d1cae6b",
   "remote": "https://github.com/ryoumiyahayato/wwo.git",

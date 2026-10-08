@@ -31,7 +31,7 @@ func _run() -> void:
 	test.equal(int(world.economy_state.world_summary()["total_hour"]), 24, "Economy follows day boundary")
 	var snapshot := persistence.snapshot()
 	test.equal(snapshot.size(), 18, "Current save includes independent Population and personal economy facts")
-	test.equal(snapshot["schema_id"], "formal_world_simulation_v14", "Current save schema includes personal accounts and wage periods")
+	test.equal(snapshot["schema_id"], "formal_world_simulation_v15", "Current save schema includes personal accounts and wage periods")
 	var candidate := persistence.restore_candidate(snapshot)
 	test.expect(candidate.success, "Persistence restores without UI")
 	test.expect(candidate.world != world, "Candidate has independent installed-world container")

@@ -146,7 +146,7 @@ class FormalApplicationArchitectureTest(unittest.TestCase):
         self.assertIn("r.world.economy_state.restore_persistent_state", persistence)
         self.assertNotIn("FormalWorldEconomySimulation", persistence)
         self.assertNotIn("settle_hour_range(", persistence)
-        self.assertIn('SCHEMA_ID: String = "formal_world_simulation_v14"', persistence)
+        self.assertIn('SCHEMA_ID: String = "formal_world_simulation_v15"', persistence)
 
     def test_economy_readers_do_not_depend_on_computation(self) -> None:
         presenter = source("presentation/formal_world_presenter.gd")

@@ -114,7 +114,7 @@ func _run() -> void:
 	test.expect(renderer.relief.textures.is_empty(), "Leaving map releases relief texture resources")
 	test.equal((renderer.region_view.background.material as ShaderMaterial).get_shader_parameter("relief_world"), null, "Hidden background clears texture reference")
 	test.equal(saved, (app.get("_persistence") as FormalPersistence).snapshot(), "Relief leaves exact authoritative save unchanged")
-	test.equal(FormalPersistence.SCHEMA_ID, "formal_world_simulation_v14", "Save schema unchanged")
+	test.equal(FormalPersistence.SCHEMA_ID, "formal_world_simulation_v15", "Save schema unchanged")
 	app.queue_free()
 	await process_frame
 	test.finish(self, "Global physical relief R1")

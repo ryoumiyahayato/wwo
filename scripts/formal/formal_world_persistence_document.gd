@@ -29,7 +29,7 @@ static func encode(snapshot: Dictionary) -> Dictionary:
 static func decode(document: Dictionary) -> Dictionary:
 	var found: String = str(document.get(SNAPSHOT_SCHEMA_FIELD, document.get("schema_id", "missing")))
 	if str(document.get(FORMAT_FIELD, "missing")) != FORMAT_ID or found != FormalPersistence.SCHEMA_ID:
-		var failure: Dictionary = _fail("SAVE FORMAT VERSION MISMATCH\nExpected: %s / %s\nFound: %s / %s\nReason: Personal accounts and wage periods require independent ledger/personal_economy fields." % [FORMAT_ID, FormalPersistence.SCHEMA_ID, document.get(FORMAT_FIELD, "missing"), found])
+		var failure: Dictionary = _fail("SAVE FORMAT VERSION MISMATCH\nExpected: %s / %s\nFound: %s / %s\nReason: Formal land geometry, sovereignty, current control and split lineage require spatial land fields; old saves cannot infer fine land." % [FORMAT_ID, FormalPersistence.SCHEMA_ID, document.get(FORMAT_FIELD, "missing"), found])
 		failure["error_code"] = "save_format_version_mismatch"
 		return failure
 	if typeof(document.get(SNAPSHOT_SCHEMA_FIELD, null)) != TYPE_STRING:
@@ -47,7 +47,7 @@ static func decode(document: Dictionary) -> Dictionary:
 		return _fail("正式世界精确载荷不是快照对象")
 	var snapshot := decoded as Dictionary
 	if str(snapshot.get("schema_id", "missing")) != FormalPersistence.SCHEMA_ID:
-		var failure: Dictionary = _fail("SAVE FORMAT VERSION MISMATCH\nExpected: %s\nFound: %s\nReason: Personal accounts and wage periods require independent ledger/personal_economy fields." % [FormalPersistence.SCHEMA_ID, snapshot.get("schema_id", "missing")])
+		var failure: Dictionary = _fail("SAVE FORMAT VERSION MISMATCH\nExpected: %s\nFound: %s\nReason: Formal land geometry, sovereignty, current control and split lineage require spatial land fields; old saves cannot infer fine land." % [FormalPersistence.SCHEMA_ID, snapshot.get("schema_id", "missing")])
 		failure["error_code"] = "save_format_version_mismatch"
 		return failure
 	return {

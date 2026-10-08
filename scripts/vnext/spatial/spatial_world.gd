@@ -16,6 +16,62 @@ var _current_hour: int = 0
 var _infrastructure: Dictionary = {}
 var _territories: Dictionary = {}
 var _capacity: VNextSpatialCapacityWindow = null
+var _land: LandTopology
+var _land_facts: Dictionary = {}
+var _land_politics: RuntimePoliticalEntityRegistry
+
+func install_land(topology: LandTopology, opening: Dictionary, politics: RuntimePoliticalEntityRegistry) -> bool:
+	if _land != null or topology == null or not topology.is_initialized() or politics == null:
+		return false
+	var facts: Dictionary = {}
+	for id: String in topology.land_ids():
+		facts[id] = {"id":id,"sovereign_polity_id":opening.get("sovereign_polity_id"),"administrative_status":"UNRESOLVED","administrative_region_id":null}
+	if not _valid_land_facts(topology,facts,politics):
+		return false
+	_land = topology
+	_land_facts = facts
+	_land_politics = politics
+	return true
+
+func land_topology() -> LandTopology:
+	return _land
+
+func land_facts(id: String) -> Dictionary:
+	return (_land_facts.get(id,{}) as Dictionary).duplicate(true)
+
+func set_land_sovereign(id: String, polity_id: String) -> bool:
+	if not _land_facts.has(id) or not _land_politics.has_entity(polity_id):
+		return false
+	_land_facts[id]["sovereign_polity_id"] = polity_id
+	return true
+
+func split_land(id: String, first_id: String, first: PackedVector2Array, second_id: String, second: PackedVector2Array, control: TerritoryState) -> bool:
+	if _land == null or control == null or not control.is_bound_to_land(_land) or not _land_facts.has(id):
+		return false
+	var plan := _land.prepare_split(id,first_id,first,second_id,second)
+	if plan.is_empty() or not control.can_split_land(id,first_id,second_id):
+		return false
+	var inherited := land_facts(id)
+	# Both owners are preflighted. No signals, await or fallible operation during commit.
+	_land.commit_split(plan)
+	control.commit_land_split(id,first_id,second_id)
+	_land_facts.erase(id)
+	for child: String in [first_id,second_id]:
+		_land_facts[child] = inherited.duplicate(true)
+		_land_facts[child]["id"] = child
+	return true
+
+func _valid_land_facts(topology: LandTopology, facts: Dictionary, politics: RuntimePoliticalEntityRegistry) -> bool:
+	if facts.size() != topology.land_ids().size():
+		return false
+	for id: String in topology.land_ids():
+		var raw: Variant = facts.get(id)
+		if not raw is Dictionary:
+			return false
+		var row := raw as Dictionary
+		if row.size() != 4 or row.get("id") != id or not row.get("sovereign_polity_id") is String or not politics.has_entity(str(row.get("sovereign_polity_id"))) or row.get("administrative_status") != "UNRESOLVED" or not row.has("administrative_region_id") or row.administrative_region_id != null:
+			return false
+	return true
 
 
 func _init(catalog_value: VNextSpatialCatalog = null) -> void:
@@ -314,19 +370,23 @@ func snapshot() -> Dictionary:
 	var territories: Array[Dictionary] = []
 	for entity_id: String in _catalog.place_map_ids():
 		territories.append((_territories[entity_id] as Dictionary).duplicate(true))
-	return {
-		"schema_id": SNAPSHOT_SCHEMA_ID,
+	var output := {
+		"schema_id": SNAPSHOT_SCHEMA_ID if _land == null else "vnext_spatial_world_v3",
 		"current_hour": _current_hour,
 		"infrastructure": infrastructure,
 		"territories": territories,
 		"capacity_window": _capacity.snapshot(),
 	}
+	if _land != null:
+		output["land"] = {"topology":_land.snapshot(),"politics":_land_facts.duplicate(true)}
+	return output
 
 
 func restore(snapshot_value: Dictionary) -> bool:
 	if not _is_internal_state_valid():
 		return false
-	if snapshot_value.size() != 5 or snapshot_value.get("schema_id") != SNAPSHOT_SCHEMA_ID:
+	var expected_schema := SNAPSHOT_SCHEMA_ID if _land == null else "vnext_spatial_world_v3"
+	if snapshot_value.size() != (5 if _land == null else 6) or snapshot_value.get("schema_id") != expected_schema:
 		return false
 	if not _has_fields(snapshot_value, [
 		"schema_id", "current_hour", "infrastructure", "territories", "capacity_window",
@@ -385,6 +445,17 @@ func restore(snapshot_value: Dictionary) -> bool:
 			return false
 
 	var candidate := VNextSpatialWorld.new()
+	if _land != null:
+		if not snapshot_value.get("land") is Dictionary:
+			return false
+		var land_value := snapshot_value.land as Dictionary
+		if land_value.size() != 2 or not land_value.get("topology") is Dictionary or not land_value.get("politics") is Dictionary:
+			return false
+		candidate._land = _land.restored_copy(land_value.topology)
+		if candidate._land == null or not _valid_land_facts(candidate._land,land_value.politics,_land_politics):
+			return false
+		candidate._land_facts = (land_value.politics as Dictionary).duplicate(true)
+		candidate._land_politics = _land_politics
 	candidate._catalog = _catalog
 	candidate._current_hour = candidate_hour
 	candidate._infrastructure = candidate_infrastructure
@@ -407,11 +478,16 @@ func restore(snapshot_value: Dictionary) -> bool:
 	_infrastructure = candidate._infrastructure
 	_territories = candidate._territories
 	_capacity = candidate._capacity
+	_land = candidate._land
+	_land_facts = candidate._land_facts
 	return true
 
 
 func _is_internal_state_valid() -> bool:
 	if _catalog == null or not _catalog.is_loaded() or _capacity == null:
+		return false
+	# Land is validated at admission/mutation/restore; hourly settlement never scans it.
+	if _land != null and not _land.is_initialized():
 		return false
 	if not _validate_infrastructure_collection():
 		return false

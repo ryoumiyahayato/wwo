@@ -157,7 +157,7 @@ func _run() -> void:
 	test.expect(not camera.local_active,"188 mpp retains REGION if chart offset exceeds 500 km")
 	observations.append({"mpp":188,"local_ready":layer.available_lods.has("local"),"supported":LocalSpatialLoader.covers(RegionProjection.lon_lat(camera.unit_at(pixel))),"chart_offset_km":RegionProjection.forward(paris,camera.tangent_frame).length(),"result":"REGION"})
 	test.equal(controller.selected_place_id,"place:paris","Bearing and lifecycle preserve selection")
-	test.equal((app.get("_persistence") as FormalPersistence).snapshot(),saved,"Camera/resource changes preserve entire v14 snapshot")
+	test.equal((app.get("_persistence") as FormalPersistence).snapshot(),saved,"Camera/resource changes preserve entire v15 snapshot")
 	DirAccess.make_dir_recursive_absolute("res://local-artifacts/map-resource-r2")
 	var file := FileAccess.open("res://local-artifacts/map-resource-r2/anchor-and-handoff.json",FileAccess.WRITE)
 	file.store_string(JSON.stringify(observations,"  "))

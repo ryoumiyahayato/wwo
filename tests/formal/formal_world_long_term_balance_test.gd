@@ -28,6 +28,9 @@ func _run() -> void:
 		_finish({})
 		return
 	var started_usec := Time.get_ticks_usec()
+	var land := simulation.world.spatial_world.land_topology()
+	var land_before := land.snapshot()
+	var land_metrics_before := land.metrics()
 	var annual_fulfillment: Array[int] = []
 	for year: int in range(1, YEARS + 1):
 		simulation.simulation_step.advance_minutes(HOURS_PER_YEAR * 60)
@@ -47,6 +50,8 @@ func _run() -> void:
 			"第%d年主要政权高细节目录保持50个" % year
 		)
 	var elapsed_usec := Time.get_ticks_usec() - started_usec
+	_check(land.snapshot() == land_before, "十年循环不修改土地几何、身份或谱系")
+	_check(land.metrics() == land_metrics_before, "十年循环不重建、不遍历邻接或 picking 土地")
 	var final_view := FormalWorldEconomyView.new(simulation.world.economy_state.read_only_snapshot())
 	var final_summary := simulation.world.economy_state.world_summary().merged({"world_political_unit_count": simulation.world.political_registry.entity_count(), "historical_political_record_count": simulation.world.historical_evidence.record_count(), "formal_person_count": simulation.world.person_overlay.person_count(), "background_polity_count": maxi(0, simulation.world.political_registry.entity_count() - int(simulation.world.economy_state.world_summary().get("detailed_polity_unit_count", 0)))})
 	_check(
@@ -73,6 +78,8 @@ func _run() -> void:
 	_finish({
 		"years": YEARS,
 		"elapsed_usec": elapsed_usec,
+		"land_metrics_before": land_metrics_before,
+		"land_metrics_after": land.metrics(),
 		"annual_fulfillment_bp": annual_fulfillment,
 		"save_state_bytes": serialized_bytes,
 		"active_shipments": final_view.shipments.size(),

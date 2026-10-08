@@ -92,7 +92,7 @@ func _run() -> void:
 		test.expect(layer.visible_places.is_empty() and layer.active_lod.is_empty(),"Loaded Paris cannot leak into another region")
 		test.expect(not camera.local_active,"Loaded Paris cannot enable unsupported Local")
 	test.expect(renderer.administrative_boundaries.dirty_regions().is_empty(),"Camera causes no administrative rebuild")
-	test.equal((app.get("_persistence") as FormalPersistence).snapshot(),before,"Presentation changes preserve entire world and v14 save")
+	test.equal((app.get("_persistence") as FormalPersistence).snapshot(),before,"Presentation changes preserve entire world and v15 save")
 	app.queue_free()
 	await process_frame
 	test.finish(self,"Map visual scale utilization R1")

@@ -1,11 +1,34 @@
 class_name TerritoryState
 extends RefCounted
-## The sole mutable owner of current place control. Controller IDs are opaque.
+## Sole current control owner for places and active land. Place IDs retain legacy semantics.
 
 const SCHEMA_ID: String = "territory_state_v1"
 
 var error: String = ""
 var _controllers: Dictionary[String, String] = {}
+var _land: LandTopology
+var _politics: RuntimePoliticalEntityRegistry
+
+func bind_land_scope(land: LandTopology, politics: RuntimePoliticalEntityRegistry) -> void:
+	_land = land
+	_politics = politics
+
+func is_bound_to_land(land: LandTopology) -> bool:
+	return _land == land
+
+func _valid_land_controller(id: String, controller: String) -> bool:
+	if not id.begins_with("territory_unit:"):
+		return true
+	return _land != null and _land.has_land(id) and _politics != null and _politics.has_entity(controller)
+
+func can_split_land(id: String, first: String, second: String) -> bool:
+	return _land != null and _land.has_land(id) and _controllers.has(id) and _valid_land_controller(id,_controllers[id]) and not _controllers.has(first) and not _controllers.has(second)
+
+func commit_land_split(id: String, first: String, second: String) -> void:
+	var inherited := _controllers[id]
+	_controllers.erase(id)
+	_controllers[first] = inherited
+	_controllers[second] = inherited
 
 
 func has_territory(territory_id: String) -> bool:
@@ -25,6 +48,9 @@ func set_controller(territory_id: String, controller_id: String) -> bool:
 	if controller_id.is_empty():
 		error = "UNKNOWN CONTROLLER for territory: %s" % territory_id
 		push_error(error)
+		return false
+	if not _valid_land_controller(territory_id,controller_id):
+		error = "INVALID LAND CONTROLLER: " + controller_id
 		return false
 	_controllers[territory_id] = controller_id
 	error = ""
@@ -46,6 +72,11 @@ func snapshot() -> Dictionary:
 
 func restore(value: Dictionary, expected_ids: Array[String]) -> bool:
 	error = ""
+	if _land != null:
+		for id: String in _land.land_ids():
+			if not expected_ids.has(id):
+				error = "MISSING LAND CONTROL SCOPE: " + id
+				return false
 	if value.size() != 2 or value.get("schema_id") != SCHEMA_ID or not value.get("controllers") is Dictionary:
 		error = "INVALID TERRITORY SNAPSHOT: expected %s" % SCHEMA_ID
 		push_error(error)
@@ -58,7 +89,7 @@ func restore(value: Dictionary, expected_ids: Array[String]) -> bool:
 			push_error(error)
 			return false
 		var controller: Variant = records[raw_id]
-		if not controller is String or (controller as String).is_empty():
+		if not controller is String or (controller as String).is_empty() or not _valid_land_controller(str(raw_id),str(controller)):
 			error = "UNKNOWN CONTROLLER for territory: %s" % str(raw_id)
 			push_error(error)
 			return false

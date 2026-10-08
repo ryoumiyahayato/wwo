@@ -58,7 +58,7 @@ func _run() -> void:
 	test.equal(population.population(FRA), 40_700_000, "Materialization preserves historical total")
 	var registry := VNextTerritorySourceRegistry.new()
 	test.expect(registry.configure_from_path(), "Existing territory source policy loads")
-	test.equal(registry.admitted_sources().size(), 0, "Population integration does not admit territory geometry")
+	test.equal(registry.admitted_sources().size(), 1, "Qualified Paris pilot does not change Population authority")
 	before = population.snapshot()
 	test.expect(world.territory_state.set_controller("paris", DEU), "Current controller can change independently")
 	test.equal(population.snapshot(), before, "Controller change leaves all Population facts unchanged")

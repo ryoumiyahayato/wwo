@@ -308,7 +308,7 @@ func _test_live_registry_classification_and_audit() -> void:
 	_equal(report.get("REGISTERED_SOURCE_COUNT"), sources.size(), "live audit covers current input sources")
 	_equal(report.get("REFERENCE_ONLY_SOURCE_COUNT"), sources.filter(func(row: Dictionary) -> bool: return row.production_admission_status == "REFERENCE_ONLY").size(), "reference-only audit covers input classification")
 	_equal(report.get("CANDIDATE_SOURCE_COUNT"), sources.filter(func(row: Dictionary) -> bool: return row.production_admission_status == "CANDIDATE").size(), "candidate audit covers input classification")
-	_equal(report.get("ADMITTED_SOURCE_COUNT"), 0, "live registry admits no production geography")
+	_equal(report.get("ADMITTED_SOURCE_COUNT"), 1, "live registry admits qualified Paris physical geography")
 	_equal(report.get("REJECTED_SOURCE_COUNT"), sources.filter(func(row: Dictionary) -> bool: return row.production_admission_status == "REJECTED").size(), "rejected audit covers input classification")
 	_equal(report.get("PROTOTYPE_SOURCE_COUNT"), sources.filter(func(row: Dictionary) -> bool: return bool(row.prototype_only)).size(), "prototype audit covers input classification")
 	_equal(report.get("LICENSE_RESTRICTED_SOURCE_COUNT"), sources.filter(func(row: Dictionary) -> bool: return row.redistribution_allowed == false or row.derivative_work_allowed == false or row.commercial_use_allowed == false or row.share_alike_required == true).size(), "license restrictions are counted from explicit permissions")
@@ -317,7 +317,7 @@ func _test_live_registry_classification_and_audit() -> void:
 	_equal(report.get("UNRESOLVED_HISTORICAL_FIT_COUNT"), sources.filter(func(row: Dictionary) -> bool: return row.historical_fit_status == "UNRESOLVED").size(), "historical fit audit covers unresolved records")
 	_equal(report.get("DERIVED_SOURCE_COUNT"), sources.filter(func(row: Dictionary) -> bool: return row.derivation_kind != "RAW_EXTERNAL").size(), "derived audit covers all current supplements")
 	_equal(report.get("UNTRACEABLE_DERIVATION_COUNT"), 0, "all registered derived source lineage is traceable")
-	_equal(report.get("PRODUCTION_GEOGRAPHY_AVAILABLE"), "NO", "live registry reports production geography unavailable")
+	_equal(report.get("PRODUCTION_GEOGRAPHY_AVAILABLE"), "YES", "live registry reports bounded pilot geography available")
 	_check(not (live.admission_for("territory_source:arabia_gulf_1900_bounded_supplement").gates as Dictionary).has(VNextTerritorySourceAdmission.SOURCE_HASH_VERIFIED), "derived supplement does not claim byte-checksum verification")
 	print("REGISTERED_SOURCE_COUNT=%d" % int(report.get("REGISTERED_SOURCE_COUNT", -1)))
 	print("REFERENCE_ONLY_SOURCE_COUNT=%d" % int(report.get("REFERENCE_ONLY_SOURCE_COUNT", -1)))
@@ -362,7 +362,7 @@ func _test_admitted_query_and_zero_admitted_state() -> void:
 
 
 func _test_formal_non_composition_boundaries() -> void:
-	_equal(FormalPersistence.SCHEMA_ID, "formal_world_simulation_v14", "Formal schema is v14")
+	_equal(FormalPersistence.SCHEMA_ID, "formal_world_simulation_v15", "Formal schema is v15")
 	_equal(WorldBootstrap.TERRITORIAL_CONTROL_OWNER, "TerritoryState", "territorial controller ownership is TerritoryState")
 	_equal(
 		WorldBootstrap.TERRITORIAL_CONTROL_OWNER,
@@ -371,8 +371,8 @@ func _test_formal_non_composition_boundaries() -> void:
 	)
 	var formal_source := FileAccess.get_file_as_string("res://scripts/content/world_bootstrap.gd")
 	_check(
-		not formal_source.contains("VNextTerritoryUnitCatalog"),
-		"V. no VNextTerritoryUnitCatalog is composed in Formal"
+		formal_source.contains("LandPilotLoader"),
+		"V. admitted seed catalog enters Formal through LandPilotLoader"
 	)
 	_check(
 		not formal_source.contains("VNextPopulationAuthority"),

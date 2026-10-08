@@ -135,7 +135,7 @@ func _run() -> void:
 		renderer._evaluate_scale()
 		test.expect(not camera.active, "Hysteresis prevents immediate re-entry at the exit scale")
 	test.equal((app.get("_persistence") as FormalPersistence).snapshot(), before, "Presentation round trips change no world fact or saved field")
-	test.equal(FormalPersistence.SCHEMA_ID, "formal_world_simulation_v14", "Schema unchanged")
+	test.equal(FormalPersistence.SCHEMA_ID, "formal_world_simulation_v15", "Schema unchanged")
 	test.expect(world == app.get("_world"), "No new WorldState is constructed")
 	var afghan := ""
 	for unit: Dictionary in FormalWorldPresenter.map_units(world):

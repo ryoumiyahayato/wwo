@@ -151,7 +151,7 @@ func _run() -> void:
 	test.expect(not camera.local_active, "Unready canvas remains REGION")
 	renderer.region_view.ready = true
 	test.equal(persistence.snapshot(), before, "Every camera operation leaves all world/save facts identical")
-	test.equal(FormalPersistence.SCHEMA_ID, "formal_world_simulation_v14", "Save schema unchanged")
+	test.equal(FormalPersistence.SCHEMA_ID, "formal_world_simulation_v15", "Save schema unchanged")
 	test.equal(renderer.political.places.size(), 40, "No extra modern cities or fabricated nodes")
 	DirAccess.make_dir_recursive_absolute("res://local-artifacts/local-foundation-r1")
 	var output := FileAccess.open("res://local-artifacts/local-foundation-r1/anchor-tests.json", FileAccess.WRITE)

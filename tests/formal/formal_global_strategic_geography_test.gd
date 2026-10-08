@@ -89,7 +89,7 @@ func _run() -> void:
 	test.expect(renderer.strategic_layer.available_lods.is_empty(),"Hidden GPU resources released")
 	test.expect(renderer.strategic_content.content == null,"Hidden CPU region data released")
 	test.equal(saved,(app.get("_persistence") as FormalPersistence).snapshot(),"Whole World/save unchanged")
-	test.equal(FormalPersistence.SCHEMA_ID,"formal_world_simulation_v14","Save v14 unchanged")
+	test.equal(FormalPersistence.SCHEMA_ID,"formal_world_simulation_v15","Save v15 unchanged")
 	app.queue_free()
 	await process_frame
 	test.finish(self,"Global strategic geography R1")

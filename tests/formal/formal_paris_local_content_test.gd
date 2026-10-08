@@ -124,7 +124,7 @@ func _run() -> void:
 	test.equal(loader.content.line_chunks.size(), chunks, "Pan/zoom reuse prepared geometry")
 	test.equal((app.get("_persistence") as FormalPersistence).snapshot(), before, "All population/economy/personal/save facts remain identical")
 	test.equal(world, app.get("_world"), "Same sole WorldState")
-	test.equal(FormalPersistence.SCHEMA_ID, "formal_world_simulation_v14", "v14 unchanged")
+	test.equal(FormalPersistence.SCHEMA_ID, "formal_world_simulation_v15", "v15 unchanged")
 	# Dated presentation refresh rejects expired Local data without advancing
 	# the simulation or creating a test-only world-state exception.
 	var future := app.historical_content.resolve_map({"year": 1901, "month": 1, "day": 1}, FormalWorldPresenter.map_units(world))
