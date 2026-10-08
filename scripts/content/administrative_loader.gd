@@ -6,6 +6,7 @@ const PROFILE_PATH: String = "res://data/world_map/historical/major_state_profil
 const ADMIN_PATH: String = "res://data/world_map/historical/historical_admin1_1900.json"
 const AUTHORITY_PATH: String = "res://data/world_map/historical/historical_authorities_1900.json"
 const COVERAGE_PATH: String = "res://data/world_map/historical/arabia_authority_coverage_1900.json"
+const FRANCE_IDENTITY_PATH: String = "res://data/world_map/historical/france_administrative_identity_1900.json"
 var errors: Array[String] = []
 var profiles: Dictionary = {}
 var observer_notes: Dictionary = {}
@@ -36,7 +37,33 @@ func load_current(gate: HistoricalProvenanceGate) -> bool:
 		historical_by_source[source_id] = country
 	_load_authorities(gate, AUTHORITY_PATH, "map_authorities_1900_01_01")
 	_load_authorities(gate, COVERAGE_PATH, "arabia_authority_coverage_1900_01_01")
+	_load_france_identity(gate)
 	return errors.is_empty()
+
+func _load_france_identity(gate: HistoricalProvenanceGate) -> void:
+	var document := ContentDocument.read(FRANCE_IDENTITY_PATH, errors)
+	if document.get("schema_id") != "france_administrative_identity_r1" or not document.get("units") is Array:
+		errors.append("Unsupported France administrative identity evidence")
+		return
+	var assertion := {
+		"subject_id": "france_administrative_identity_1900",
+		"value": document, "unit": "historical_identity_reference",
+		"observation_period": {"from": "1900-01-01", "to": "1900-01-01"},
+		"spatial_scope": {"kind": "partial_department_roster", "id": "country_fra"},
+		"lower_bound": null, "upper_bound": null,
+	}
+	if gate == null or not gate.is_verified("administrative_identity:france_administrative_identity_1900", "administrative_identity", assertion):
+		errors.append("France administrative identities failed evidence admission")
+		return
+	# This supplies the existing historical dossier only, never current world facts.
+	document["runtime_units"] = document.units.duplicate(true)
+	historical_by_source["country_fra"] = document
+
+func administration_for(source_id: String, date: String) -> Dictionary:
+	var document := historical_by_source.get(source_id, {}) as Dictionary
+	if document.has("valid_from") and not (str(document.valid_from) <= date and date < str(document.valid_to)):
+		return {}
+	return document.duplicate(true)
 
 func _load_authorities(gate: HistoricalProvenanceGate, path: String, subject: String) -> void:
 	var authority_document := ContentDocument.read(path, errors)
@@ -123,4 +150,3 @@ func authorities_active_on(date: String) -> Array[Dictionary]:
 
 func observer_note(home_source: String, target_source: String) -> String:
 	return str((observer_notes.get(home_source, {}) as Dictionary).get(target_source, ""))
-

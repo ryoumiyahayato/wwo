@@ -21,6 +21,7 @@ SPATIAL_PATH = "res://data/world_map/historical/cshapes_1900_snapshot.json"
 POPULATION_PATH = "res://data/alpha/historical_world_economy_1900/countries_compact.json"
 POPULATION_MANIFEST_PATH = "res://data/alpha/historical_world_economy_1900.json"
 GENERATOR = "tools/provenance/generate_historical_provenance.py:v2"
+FRANCE_ADMIN_PATH = "res://data/world_map/historical/france_administrative_identity_1900.json"
 SUPPLEMENTS = (
     ("arabia_gulf_geography_1900.json", "arabia_gulf_geography_1900_01_01", "spatial_boundary", "M2.6-v1"),
     ("historical_authorities_1900.json", "map_authorities_1900_01_01", "administrative_authority", "M2.6-v1"),
@@ -110,6 +111,29 @@ def assertion(
         "upper_bound": upper_bound,
         "value": value,
     }
+
+
+def validate_france_administrative_identity(document: dict, political_ids: set[str], place_ids: set[str]) -> None:
+    require_schema(document, "schema_id", "france_administrative_identity_r1")
+    valid_period(document["valid_from"], document["valid_to"])
+    if not document["valid_from"] <= document["target_date"] < document["valid_to"]:
+        raise ProvenanceSourceContractError("administrative evidence date outside coverage")
+    if document["entity_id"] not in political_ids or document["coverage_status"] != "PARTIAL_IDENTITY_ONLY" or document["geometry_status"] != "ADMIN_BOUNDARY_DATA_GAP" or document["membership_status"] != "BLOCKED_SPATIAL_MODEL":
+        raise ProvenanceSourceContractError("unsupported administrative evidence scope")
+    source_ids = unique_records(document["sources"], "source_id")
+    unique_records(document["units"], "id")
+    if not document["units"]:
+        raise ProvenanceSourceContractError("empty administrative identity evidence")
+    for unit in document["units"]:
+        if not unit["id"].startswith("administrative_region:") or unit["polity_id"] != "state:" + document["entity_id"] or unit["unit_type"] != "departement" or type(unit["level"]) is not int or unit["level"] != 1 or unit["parent_region_id"] is not None:
+            raise ProvenanceSourceContractError("invalid administrative identity/type/level")
+        if not unit["historical_name"] or not unit["name_zh"] or not unit["capital_name"] or not unit["identity_locator"] or not unit["source_ids"] or not set(unit["source_ids"]) <= source_ids:
+            raise ProvenanceSourceContractError("unresolved administrative identity evidence")
+        capital = unit["capital_place_id"]
+        if (capital is not None and (capital not in place_ids or unit["capital_reference_status"] != "EXISTING_STABLE_PLACE")) or (capital is None and unit["capital_reference_status"] != "PLACE_REFERENCE_MISSING"):
+            raise ProvenanceSourceContractError("unresolved administrative capital reference")
+        if any(key in unit for key in ("members", "geometry", "controller_id", "population")):
+            raise ProvenanceSourceContractError("identity evidence cannot carry world facts or boundaries")
 
 
 def evidence(
@@ -345,6 +369,32 @@ def build() -> tuple[dict[str, Any], dict[str, Any]]:
             confidence=.55 if filename == "arabia_authority_coverage_1900.json" else .6,
             review_status="APPROXIMATE",
         ))
+    admin = read_json(FRANCE_ADMIN_PATH)
+    place_ids = {"place:" + record["id"] for record in read_json("res://data/world_map/cities.json")["cities"]}
+    local = read_json("res://data/local/paris_northern_france_1900.json")
+    place_ids.update(fact["value"]["id"] for fact in local["evidence_catalog"]["facts"]
+                     if isinstance(fact["value"], dict) and fact["value"].get("kind") == "settlement")
+    validate_france_administrative_identity(admin, political_ids, place_ids)
+    sources.extend(admin["sources"])
+    admin_source = {
+        "source_id": "france_administrative_identity_1900",
+        "title": "WWO partial France 1900 administrative identity evidence",
+        "publisher": "WWO factual extraction from SGF and official institutional histories",
+        "version": admin["schema_id"], "license": "PROJECT_AUTHORED_FACTUAL_COMPILATION",
+        "locator": FRANCE_ADMIN_PATH,
+        "access_metadata": {"source_ids": sorted(item["source_id"] for item in admin["sources"]),
+                            "geometry_admission": "NONE", "membership_admission": "NONE"},
+    }
+    sources.append(admin_source)
+    facts.append(evidence(
+        fact_id="administrative_identity:france_administrative_identity_1900", domain="administrative_identity",
+        source=admin_source,
+        runtime_assertion=assertion("france_administrative_identity_1900", admin, "historical_identity_reference",
+                                    {"from": admin["target_date"], "to": admin["target_date"]},
+                                    {"kind": "partial_department_roster", "id": admin["entity_id"]}),
+        methodology="SGF T210 1900 records 73/76 verify historical names. Official archives/prefecture histories verify capitals. Identity reference only; no geometry, membership, exact founding/dissolution dates or modern crosswalk admitted.",
+        confidence=.95, review_status="VERIFIED",
+    ))
     sources.sort(key=lambda item: item["source_id"])
     facts.sort(key=lambda item: item["fact_id"])
     unique_records(sources, "source_id")

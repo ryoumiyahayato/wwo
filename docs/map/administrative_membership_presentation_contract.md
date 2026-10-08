@@ -1,6 +1,6 @@
 # Administrative membership / territory / control：Presentation 边界
 
-本文件是后续接入约束。本轮没有行政系统、占领算法、行政编辑器或持久化变更。
+本文件是后续接入约束。Administrative Region Foundation R1 已接入法国两个历史身份的只读资料页，以及独立合成成员实验；没有正式行政成员系统、占领算法、行政编辑器或持久化变更。详见 [R1 审查与验证报告](administrative_region_foundation_r1.md)。
 
 ## 身份和关系
 
@@ -34,6 +34,8 @@ Renderer 的 `administrative_boundaries` 是一个当前为空的 Presentation �
 Camera pan、zoom、map mode、label collision 不触发 membership revision，不调用 union，不失效行政边界。Rename / capital change 可更新标签资料；如果成员没有改变，不重建 polygon 边界。Controller change 更新独立控制层，不把行政 grouping 当作占领原子单位。
 
 缓存不保存行政 membership、不执行编辑，也不写 WorldState / save。其回归覆盖受影响区域失效、未受影响区域保留、旧 revision 拒绝和 dissolved grouping 的空边界。
+
+R1 增加 `retire(region_id, revision)`：停用单位只清除该单位 geometry/dirty，保留单调 revision 墓碑以拒绝尚未完成的旧结果；`metrics()` 只读返回失效、存入、停用及驻留计数。没有每帧调用或新增 GPU batch。独立合成夹具用精确共享边抵消研究边界更新，不是正式 GIS polygon union。
 
 ## 聚合尺度
 

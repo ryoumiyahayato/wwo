@@ -83,7 +83,7 @@ func resolve_world_page(time: Dictionary, polity: Dictionary, selected_place_id:
 				place["name"] = feature.display_name
 				place["spatial_kind"] = "historical strategic settlement"
 				break
-	return WorldPageContent.new(date, administration.profiles.get(source_id, {}) as Dictionary, administration.historical_by_source.get(source_id, {}) as Dictionary, flag, texture, place)
+	return WorldPageContent.new(date, administration.profiles.get(source_id, {}) as Dictionary, administration.administration_for(source_id, date), flag, texture, place)
 
 static func _date_key(time: Dictionary) -> String:
 	return "%04d-%02d-%02d" % [int(time.year), int(time.month), int(time.day)]

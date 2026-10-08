@@ -51,7 +51,11 @@ func draw_administration(shell: MainShell, rect: Rect2) -> void:
 	var units := _administration.get("runtime_units", []) as Array
 	var y := rect.position.y + 128.0
 	for index: int in range(admin_page * ADMIN_PAGE_SIZE, mini(units.size(), (admin_page + 1) * ADMIN_PAGE_SIZE)):
-		shell.label(Vector2(rect.position.x + 30.0, y), str((units[index] as Dictionary).get("name_zh", "")), 13)
+		var unit := units[index] as Dictionary
+		var text := str(unit.get("name_zh", ""))
+		if unit.has("capital_name"):
+			text += " · 首府 " + str(unit.capital_name)
+		shell.label(Vector2(rect.position.x + 30.0, y), text, 13)
 		y += 25.0
 	shell.button(Rect2(rect.position.x + 28.0, rect.end.y - 40.0, 82.0, 26.0), "上一页", "admin:previous", admin_page > 0)
 	shell.button(Rect2(rect.position.x + 126.0, rect.end.y - 40.0, 82.0, 26.0), "下一页", "admin:next", (admin_page + 1) * ADMIN_PAGE_SIZE < units.size())

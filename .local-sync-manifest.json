@@ -1,5 +1,5 @@
 {
-  "content_sha256": "dbb1201330fa299212474fcdc68ab0cee9ae28db7478f36cd8471f30ed347422",
+  "content_sha256": "45f26ec6f815865e64c40abc8b1deddf56b6903f30042ec42fa1b3582254273f",
   "excluded": [
     {
       "path": ".git/",
@@ -72,6 +72,10 @@
     {
       "path": "docs/generated/",
       "reason": "data/material/secret/cache/nested-worktree path"
+    },
+    {
+      "path": "docs/map/administrative_region_foundation_r1.md",
+      "reason": "file outside reviewed exact file allowlist"
     },
     {
       "path": "docs/performance/ten-year-timing-verification-r1.md",
@@ -210,6 +214,14 @@
       "reason": "data/material/secret/cache/nested-worktree path"
     },
     {
+      "path": "tests/formal/formal_administrative_foundation_test.gd",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tests/formal/formal_administrative_foundation_test.gd.uid",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
       "path": "tests/integration/",
       "reason": "directory outside reviewed exact file allowlist"
     },
@@ -246,6 +258,10 @@
       "reason": "data/material/secret/cache/nested-worktree path"
     },
     {
+      "path": "tests/world_data/test_administrative_identity_contract.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
       "path": "tools/__pycache__/",
       "reason": "data/material/secret/cache/nested-worktree path"
     },
@@ -256,6 +272,22 @@
     {
       "path": "tools/map/__pycache__/",
       "reason": "data/material/secret/cache/nested-worktree path"
+    },
+    {
+      "path": "tools/map/administrative_foundation_release_probe.gd",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/administrative_foundation_release_probe.gd.uid",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/build_administrative_measurement.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/summarize_administrative_measurement.py",
+      "reason": "file outside reviewed exact file allowlist"
     },
     {
       "path": "tools/map_preprocessing/manifest.schema.json",
@@ -286,7 +318,7 @@
       "reason": "file outside reviewed exact file allowlist"
     }
   ],
-  "included_bytes": 5822058,
+  "included_bytes": 5829488,
   "included_files": 777,
   "owner_id": "7ed35d2d-c560-4b08-8c28-78af6d1cae6b",
   "remote": "https://github.com/ryoumiyahayato/wwo.git",
