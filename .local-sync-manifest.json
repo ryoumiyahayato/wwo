@@ -1,5 +1,5 @@
 {
-  "content_sha256": "79b67d354494120b2dfb4e05386652b1f4b18e8e9e0095ad7a8f3105ff7f028c",
+  "content_sha256": "86152af76897bf9d9dc2a56e9fecec5520960a83c10b0d10eb9049c415dbebbb",
   "excluded": [
     {
       "path": ".git/",
@@ -75,6 +75,14 @@
     },
     {
       "path": "docs/map/administrative_region_foundation_r1.md",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "docs/map/historical_boundary_source_review_r1.json",
+      "reason": "non-code JSON/labels/frozen evidence excluded before reading"
+    },
+    {
+      "path": "docs/map/historical_boundary_water_presentation_r1.md",
       "reason": "file outside reviewed exact file allowlist"
     },
     {
@@ -178,6 +186,10 @@
       "reason": "file outside reviewed exact file allowlist"
     },
     {
+      "path": "scripts/presentation/map/hydrography_style.gd.uid",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
       "path": "scripts/relationship/",
       "reason": "directory outside reviewed exact file allowlist"
     },
@@ -243,6 +255,14 @@
     },
     {
       "path": "tests/formal/formal_administrative_foundation_test.gd.uid",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tests/formal/formal_hydrography_presentation_test.gd",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tests/formal/formal_hydrography_presentation_test.gd.uid",
       "reason": "file outside reviewed exact file allowlist"
     },
     {
@@ -330,7 +350,19 @@
       "reason": "file outside reviewed exact file allowlist"
     },
     {
+      "path": "tools/map/historical_water_product_journey.gd",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/historical_water_product_journey.gd.uid",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
       "path": "tools/map/historical_water_release_probe.gd",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/historical_water_release_probe.gd.uid",
       "reason": "file outside reviewed exact file allowlist"
     },
     {
@@ -382,7 +414,7 @@
       "reason": "file outside reviewed exact file allowlist"
     }
   ],
-  "included_bytes": 5839944,
+  "included_bytes": 5840052,
   "included_files": 777,
   "owner_id": "7ed35d2d-c560-4b08-8c28-78af6d1cae6b",
   "remote": "https://github.com/ryoumiyahayato/wwo.git",

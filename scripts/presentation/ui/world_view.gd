@@ -47,7 +47,12 @@ func draw_politics(shell: MainShell, rect: Rect2) -> void:
 	shell.lines(rect.position + Vector2(30.0, 128.0), lines, rect.size.x - 60.0)
 
 func draw_administration(shell: MainShell, rect: Rect2) -> void:
-	shell.heading(rect, str(_polity.get("name_zh", "")) + " · " + str(_administration.get("level_name_zh", "历史行政区")), str(_administration.get("source_basis", "")))
+	var caption := str(_administration.get("source_basis", ""))
+	if str(_administration.get("schema_id", "")) == "france_administrative_identity_r1":
+		# The evidence retains its original review status; it cannot describe
+		# the current land model after the separate Paris land pilot admission.
+		caption = "1900 年 SGF 名录与官方档案：仅核实 Seine、Seine-et-Oise 身份及首府；不是完整法国名录，历史行政边界与土地归属仍待核实。"
+	shell.heading(rect, str(_polity.get("name_zh", "")) + " · " + str(_administration.get("level_name_zh", "历史行政区")), caption)
 	var units := _administration.get("runtime_units", []) as Array
 	var y := rect.position.y + 128.0
 	for index: int in range(admin_page * ADMIN_PAGE_SIZE, mini(units.size(), (admin_page + 1) * ADMIN_PAGE_SIZE)):

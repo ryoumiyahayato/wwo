@@ -102,18 +102,10 @@ void vertex() {
 		if (abs(determinant) > 0.000001) {
 			int corner = (slot % 6) / 2;
 			vec2 point = triangle[corner];
-			vec2 incoming = normalize(point - triangle[(corner + 2) % 3]);
-			vec2 outgoing = normalize(triangle[(corner + 1) % 3] - point);
-			vec2 before = vec2(incoming.y, -incoming.x) * sign(determinant);
-			vec2 after = vec2(outgoing.y, -outgoing.x) * sign(determinant);
-			float tangent = tan(atan(cross_2d(before, after), dot(before, after)) * 0.25);
-			// Clipper's square join, retaining the existing fixed 0.45 pixel margin.
-			vec2 covered = point + 0.45 * (slot % 2 == 0
-				? before + vec2(-before.y, before.x) * tangent
-				: after - vec2(-after.y, after.x) * tangent);
-			if (dot(before, after) > 0.999) {
-				covered = point + 0.45 * (before + after) / (1.0 + dot(before, after));
-			}
+			// Expanded political faces hide opaque seams, but cause repeated alpha
+			// blending during water fade-in. Pair each existing corner exactly;
+			// shared edges rasterize once with no new mesh, triangulation or draw.
+			vec2 covered = point;
 			vec2 delta = covered - triangle[0];
 			vec2 uv = uvs[0] + (uvs[fan + 1] - uvs[0]) * cross_2d(delta, second) / determinant
 				+ (uvs[fan + 2] - uvs[0]) * cross_2d(first, delta) / determinant;
