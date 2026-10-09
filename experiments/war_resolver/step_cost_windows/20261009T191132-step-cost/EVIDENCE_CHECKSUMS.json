@@ -1,12 +1,20 @@
 {
   "files": {
-    "CANDIDATE_DECISION.md": {
-      "bytes": 645,
-      "sha256": "7553b9626370d69fa00999b03dffedcb2d5e63251920114caae0e41da0de4418"
-    },
     "CONCLUDE_ZH.md": {
       "bytes": 2391,
       "sha256": "f32f6af85aff277c49dd6d059fe8699d30489fb9f7f6b5aead8edd5395268b29"
+    },
+    "HEADS_AND_SOURCE.json": {
+      "bytes": 9296,
+      "sha256": "2e827f777cd23bdbde2fa386f60823379d3534a1450055ee52deb6b79221ab58"
+    },
+    "WINDOWS_BASELINE.json": {
+      "bytes": 18698,
+      "sha256": "9a4fadc19f6f36ca4a5833972da8157ea52ced72bda9db26335f0a27b4bca325"
+    },
+    "MEASUREMENT_SCOPE.md": {
+      "bytes": 3422,
+      "sha256": "402d9806b081f310fc13dd44a2101f74e28f72609c783a84dcf5f5cd7f4f4371"
     },
     "COST_PROFILE.json": {
       "bytes": 353481,
@@ -16,29 +24,21 @@
       "bytes": 1121,
       "sha256": "5619a7075ae6a59ddd38cf3e3f30a24c2e7465be90973bcaa57d6592489dc017"
     },
+    "CANDIDATE_DECISION.md": {
+      "bytes": 645,
+      "sha256": "7553b9626370d69fa00999b03dffedcb2d5e63251920114caae0e41da0de4418"
+    },
     "FINAL_VALIDATION.json": {
-      "bytes": 64717,
-      "sha256": "936e9e733cbc0ae35f4d46d7103bdd2ffd451e4b3c466cffc909dd7246478398"
-    },
-    "HEADS_AND_SOURCE.json": {
-      "bytes": 9296,
-      "sha256": "2e827f777cd23bdbde2fa386f60823379d3534a1450055ee52deb6b79221ab58"
-    },
-    "MEASUREMENT_SCOPE.md": {
-      "bytes": 3422,
-      "sha256": "402d9806b081f310fc13dd44a2101f74e28f72609c783a84dcf5f5cd7f4f4371"
-    },
-    "raw-evidence.zip": {
-      "bytes": 3914279,
-      "sha256": "9ace762486c4b96766054146c514b7c9a925d7d71215fd036db4ebb19a5a5c21"
+      "bytes": 66780,
+      "sha256": "3e983647f4de1ba3f6d293d0d06d374c1d56232303a860677896a521e4bddf32"
     },
     "REPRODUCE_WINDOWS.md": {
       "bytes": 2954,
       "sha256": "3494ce862d69ac35362af19de4e6c1c630fab6781a23befd58ad8e5f63360dc0"
     },
-    "WINDOWS_BASELINE.json": {
-      "bytes": 18698,
-      "sha256": "9a4fadc19f6f36ca4a5833972da8157ea52ced72bda9db26335f0a27b4bca325"
+    "raw-evidence.zip": {
+      "bytes": 3947236,
+      "sha256": "4b34109e78e78704335949b29102d411e32792eaaa9bd497faee47cc558c83e4"
     }
   },
   "raw_original_file_count": 476,
@@ -50,5 +50,6 @@
     "Git objects",
     "caches"
   ],
-  "supplemental_raw_file_count": 4
+  "supplemental_raw_file_count": 4,
+  "raw_original_and_supplemental_file_count": 485
 }

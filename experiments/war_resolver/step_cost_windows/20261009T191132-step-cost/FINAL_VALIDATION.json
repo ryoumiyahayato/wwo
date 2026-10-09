@@ -67,7 +67,7 @@
     }
   },
   "fingerprint_recheck": {
-    "checked_utc": "2026-10-09T13:02:49.932259+00:00",
+    "checked_utc": "2026-10-09T13:23:52.786803+00:00",
     "unchanged": true,
     "changed_paths": [],
     "frozen_digest": "da06177e42019e31545a20cd05273ec4eaee80ef3ee2725ab616bd5748b51c60",
@@ -82,7 +82,8 @@
       "read_experiments__war_resolver__iteration__cloud_validate.py": "4ce8391f1f603abe6056addf42fbc1f7fb4e1130c613737c80fc9abf96864f63",
       "run_bounded.py": "2ac0479412f14915160b452be0cda5ae9742c7d150a1ad9f0b5ccbc12326df7e",
       "run_gate.py": "1b701ea51f6d51ba11ad3d2516ef708d2b1d75e73b93b1502fe04b84d095dbe9"
-    }
+    },
+    "post_code_commit": "a094f7e73d13b821a713656062e93fcbe5e003f7"
   },
   "windows_baseline_allowed_test_failures": [],
   "windows_economy_day30_day365_failures": 0,
@@ -1315,7 +1316,21 @@
       ],
       "porcelain_status_equal": false,
       "start_status_sha256": "e9c0ba327c9422f43a1e9312226464387627545f8b3fbb30e4b83ea7f60c6b19",
-      "end_status_sha256": "df9164524af971d08557e11aafa43ea416d9c424d6c00456aef698c92887897c"
+      "end_status_sha256": "df9164524af971d08557e11aafa43ea416d9c424d6c00456aef698c92887897c",
+      "sealing_end": {
+        "path": "D:\\WWO\\wwo",
+        "head": "622b260bc641036c23efbf6345a548485ac6c475",
+        "branch": "canonical/current-world",
+        "tracked": 592,
+        "untracked": 1184,
+        "staged": 0,
+        "checked_utc": "2026-10-09T13:23:52.786803+00:00"
+      },
+      "sealing_status_sha256": "6080254fa74c9c02d62f3deecb559cfdf89b640c41e9cd72a7a7e5943cae22ef",
+      "start_vs_sealing_porcelain_equal": false,
+      "sealing_changed_metadata_fields": [
+        "untracked"
+      ]
     },
     "existing_lab": {
       "start": {
@@ -1339,7 +1354,19 @@
       "changed_metadata_fields": [],
       "porcelain_status_equal": true,
       "start_status_sha256": "01a9a3608da92c6578f7e444a85cb55985b27b5d357e1110c719e141d17af6c0",
-      "end_status_sha256": "01a9a3608da92c6578f7e444a85cb55985b27b5d357e1110c719e141d17af6c0"
+      "end_status_sha256": "01a9a3608da92c6578f7e444a85cb55985b27b5d357e1110c719e141d17af6c0",
+      "sealing_end": {
+        "path": "D:\\programs\\WWO\\research\\military\\wwo-war-lab-local",
+        "head": "c4731a33177660b83c6490f41fe42dcbe7cfa7bb",
+        "branch": "experiment/military-decision-contract-v0-20261007",
+        "tracked": 0,
+        "untracked": 225,
+        "staged": 0,
+        "checked_utc": "2026-10-09T13:23:52.786803+00:00"
+      },
+      "sealing_status_sha256": "a615308b7f0c5557d9be7a29b73de2dec8ac3265947ae040878b915a9abd70b2",
+      "start_vs_sealing_porcelain_equal": false,
+      "sealing_changed_metadata_fields": []
     },
     "agent_formal_source_index_HEAD_writes": "NONE",
     "shared_git_metadata_additions": "bounded object acquisition, isolated branch/worktree registration and local commits; frozen43 was fetched at depth1",
@@ -1354,24 +1381,30 @@
     "method": "elapsed wall time of this active turn including bounded waits, source recovery, analysis, validation and delivery; no known user/platform pauses; rounded estimate, not exact CPU accounting",
     "freeze_when_remaining_minutes": 75,
     "prior_budget_not_added": true,
-    "measured_through_utc": "2026-10-09T13:04:11.816999+00:00",
-    "known_active_elapsed_minutes": 112.66361665,
-    "effective_minutes_estimate": 115,
+    "measured_through_utc": "2026-10-09T13:23:52.786803+00:00",
+    "known_active_elapsed_minutes": 132.34644671666666,
+    "effective_minutes_estimate": 135,
     "initial_unknown_time_budget_allowance_minutes": 2,
     "verified_pauses": [],
     "includes_failed_attempts_and_uploads": true,
-    "remaining_budget_estimate_minutes": 125
+    "remaining_budget_estimate_minutes": 105
   },
   "disk": {
     "new_worktree_file_bytes_including_required_source": 112467628,
     "source_staging_bytes": 280473,
-    "research_output_bytes_so_far": 55086953,
+    "research_output_bytes_so_far": 66564205,
     "reuse_tools_new_download_bytes": 0,
     "required_source_network_transfer_bytes": "UNKNOWN; one bounded frozen43 fetch; no reliable wire-byte capture",
     "required_source_tree_git_blob_bytes": 110611765,
     "new_output_hard_cap_bytes": 104857600,
     "delivery_archive_target_bytes": 20971520,
-    "shared_git_object_store_increment_bytes": "UNKNOWN; shared repository concurrent activity prevents attribution"
+    "shared_git_object_store_increment_bytes": "UNKNOWN; shared repository concurrent activity prevents attribution",
+    "measured_through_utc": "2026-10-09T13:23:52.786803+00:00",
+    "run_directory_bytes": 61432852,
+    "delivery_bytes": 4372698,
+    "new_worktree_output_and_cache_bytes": 758655,
+    "reserved_upper_bound_for_remaining_cloud_transfer_records_and_local_docs_bytes": 25165824,
+    "measurement_note": "Source staging and original frozen tracked source paths excluded as necessary recovery; new code, generated UID/import caches, run artifacts, API request/response records, delivery and local evidence copies counted. Closing figures recorded separately."
   },
   "not_run": [
     "historical five sparse capacity table 2/16/64/400/1024 as a new performance study",
@@ -1409,5 +1442,10 @@
     "log_sha256": "84320a28a2872c41c971d3b043d75c2229e76d50c35e31b0f213d01cb76a910f",
     "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache"
   },
-  "validated_bytes_match_local_code_commit": true
+  "validated_bytes_match_local_code_commit": true,
+  "publication_repair": {
+    "reason": "text read normalized local CRLF to LF for Git tree content; same text, unequal raw SHA256",
+    "initial_remote_commit": "049bd1717a5bcf71e98c7f584b906f044248a725",
+    "correction": "one bounded owned docs-branch repair with base64 original bytes; runtime unchanged"
+  }
 }
