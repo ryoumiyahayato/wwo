@@ -1,0 +1,532 @@
+{
+  "WINDOWS_BASELINE": "ESTABLISHED",
+  "G0": "PASSED",
+  "source": "SOURCE_EQUIVALENT_NOT_ORIGINAL_COMMIT",
+  "unified_actual_powershell": {
+    "name": "g0_unified_actual",
+    "command": [
+      "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+      "-NoProfile",
+      "-File",
+      "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132\\tools\\run_validation.ps1",
+      "-ProjectPath",
+      "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+      "-PythonPath",
+      "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe"
+    ],
+    "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+    "exit": 0,
+    "elapsed_seconds": 565.1893629000115,
+    "aborted": null,
+    "log_complete": true,
+    "log_bytes": 103064,
+    "log_sha256": "533c24b3b33cb0e96348151261e63834a18cde063068322239050c50fb4551d9",
+    "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache"
+  },
+  "unified_step_sections": [
+    {
+      "name": "Godot version",
+      "summary_lines": [],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Clean import and script scan",
+      "summary_lines": [],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "1900 economy static audits",
+      "summary_lines": [
+        "Unified economy audit passed: 8 regions, 9 sparse routes, 49 production sites, 67 commodities, 15 source-gated historical states."
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Historical provenance deterministic generation",
+      "summary_lines": [],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "World data audit regressions",
+      "summary_lines": [],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Historical provenance foundation",
+      "summary_lines": [
+        "Historical provenance foundation: 34 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Runtime political identity foundation",
+      "summary_lines": [
+        "Runtime political identity foundation: 1190 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Formal economy 30-day and one-year golden",
+      "summary_lines": [
+        "FORMAL_ECONOMY_GOLDEN_30=90408a5dbe3075b6f64b893e9314736be0116293f3e6196b9dd4f04029657133",
+        "FORMAL_ECONOMY_GOLDEN_365=c73d9ca3fe8e8bb114e43354beb53a6ace1b4704832e58dacdbcc27eed9e1286",
+        "Formal world economy golden: 3 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Formal economic boundary closure",
+      "summary_lines": [
+        "Formal economic boundary closure: 537 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Formal market identity foundation",
+      "summary_lines": [
+        "Formal market identity foundation: 649 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Organization foundation",
+      "summary_lines": [
+        "PASS: organization kind catalog fingerprint is deterministic",
+        "PASS: capability registry fingerprint is deterministic",
+        "PASS: detached reference catalog fingerprint is deterministic",
+        "PASS: organization snapshot binds its deterministic state fingerprint",
+        "VNext organization core: 139 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Formal organization composition",
+      "summary_lines": [
+        "PASS: fresh equivalent Formal worlds have the same world fingerprint",
+        "PASS: Organization fingerprint is persisted by its owner",
+        "PASS: same complete world produces the same deterministic world fingerprint",
+        "PASS: Organization state contributes to the world fingerprint",
+        "PASS: Organization fingerprint restores exactly",
+        "PASS: world fingerprint survives save/load",
+        "PASS: corrupted Organization fingerprint fails Formal load closed",
+        "PASS: corrupted Organization fingerprint preserves whole-world hash",
+        "PASS: corrupted Organization fingerprint preserves Organization authority",
+        "PASS: corrupted Organization fingerprint preserves every other authoritative domain",
+        "PASS: malformed Organization snapshot preserves whole-world hash",
+        "Formal organization composition: 104 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Current world domain convergence",
+      "summary_lines": [
+        "PASS: control prepare preserves Population fingerprint",
+        "PASS: control prepare preserves Economic Geography fingerprint",
+        "PASS: controller adopt changes Control fingerprint",
+        "PASS: controller adopt preserves Population fingerprint",
+        "PASS: controller adopt preserves Economic Geography fingerprint",
+        "PASS: Population prepare preserves Control fingerprint",
+        "PASS: Population adopt changes Population fingerprint",
+        "PASS: Population adopt preserves Control fingerprint",
+        "PASS: remap changes Economic Geography fingerprint",
+        "Current world domain convergence: 32 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Formal player release journey",
+      "summary_lines": [
+        "Formal player journey: 43 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Formal Windows export resource contract",
+      "summary_lines": [
+        "Formal export resource smoke: 526 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Formal world integration",
+      "summary_lines": [
+        "Formal world integration: 83 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Formal world ten-year balance",
+      "summary_lines": [
+        "Formal world long-term balance: 40 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Formal hemisphere product surface",
+      "summary_lines": [
+        "Formal hemisphere player surface: 12 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Historical world economy data",
+      "summary_lines": [
+        "Alpha historical world economy data: 11 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Retained location service",
+      "summary_lines": [
+        "V2.3 locations: 16 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Retained route planner service",
+      "summary_lines": [
+        "V2.3 route planner: 13 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Retained travel execution service",
+      "summary_lines": [
+        "V2.3 travel execution: 11 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Retained schedule integration",
+      "summary_lines": [
+        "V2.3 schedule integration: 10 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Retained communication service",
+      "summary_lines": [
+        "V2.3 communication: 13 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Retained knowledge service",
+      "summary_lines": [
+        "V2.3 knowledge: 10 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Retained relationship service",
+      "summary_lines": [
+        "V2.3 relationships: 14 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Retained appointment service",
+      "summary_lines": [
+        "V2.3 appointments: 12 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Retained NPC spatial routine",
+      "summary_lines": [
+        "V2.3 NPC spatial routine: 16 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Retained social sandbox",
+      "summary_lines": [
+        "V2.3 formal social sandbox conformance: 367 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": [
+        "ERROR: 41 resources still in use at exit (run with --verbose for details)."
+      ]
+    },
+    {
+      "name": "Retained social completion",
+      "summary_lines": [
+        "V2.3 social sandbox completion: 16 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": [
+        "ERROR: 41 resources still in use at exit (run with --verbose for details)."
+      ]
+    },
+    {
+      "name": "Retained survival autonomy",
+      "summary_lines": [
+        "V2.3 survival autonomy: 20 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": [
+        "ERROR: 41 resources still in use at exit (run with --verbose for details)."
+      ]
+    },
+    {
+      "name": "Quarantined commodity fixture",
+      "summary_lines": [
+        "Alpha 1900 commodity market: 36 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Quarantined economy lifecycle fixture",
+      "summary_lines": [
+        "Alpha economy lifecycle: 46 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Quarantined labor-enterprise fixture",
+      "summary_lines": [
+        "Alpha labor and enterprise: 57 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Quarantined unified economy fixture",
+      "summary_lines": [
+        "Alpha economy integration phase two: 74 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Quarantined AI economy fixture",
+      "summary_lines": [
+        "Alpha AI economy stability: 15 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Quarantined Alpha save-restore equivalence",
+      "summary_lines": [
+        "Alpha state equivalence: 6 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Quarantined save-migration fixture",
+      "summary_lines": [
+        "Alpha save and migration: 23 checks, 0 failures"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Runtime political fresh-process hash A",
+      "summary_lines": [
+        "RUNTIME_POLITICAL_SNAPSHOT_SHA256=603efe518481f49680b4010e1d0bf28ea45a40769afde64b13e81d871685b14b"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Runtime political fresh-process hash B",
+      "summary_lines": [
+        "RUNTIME_POLITICAL_SNAPSHOT_SHA256=603efe518481f49680b4010e1d0bf28ea45a40769afde64b13e81d871685b14b"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Formal market fresh-process hash A",
+      "summary_lines": [
+        "FORMAL_MARKET_SNAPSHOT_SHA256=a3fc4c2c77c1c4bab01560fd58214d0f4f1b3abc78e77ce0765da7a3ee2bb7f6"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Formal market fresh-process hash B",
+      "summary_lines": [
+        "FORMAL_MARKET_SNAPSHOT_SHA256=a3fc4c2c77c1c4bab01560fd58214d0f4f1b3abc78e77ce0765da7a3ee2bb7f6"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Formal economic fresh-process hash A",
+      "summary_lines": [
+        "FORMAL_ECONOMIC_SNAPSHOT_SHA256=6056f4f3b7f69e322412d453bc1397677ef53aace08af05cdd610b04dcb21eed"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Formal economic fresh-process hash B",
+      "summary_lines": [
+        "FORMAL_ECONOMIC_SNAPSHOT_SHA256=6056f4f3b7f69e322412d453bc1397677ef53aace08af05cdd610b04dcb21eed"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Formal world fingerprint fresh-process A",
+      "summary_lines": [
+        "FORMAL_WORLD_FINGERPRINT_SHA256=5efd0f566fc4b3ddc3e6bf80b8507e9ad7a6da386abd9273b37ea647b0b60455"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Formal world fingerprint fresh-process B",
+      "summary_lines": [
+        "FORMAL_WORLD_FINGERPRINT_SHA256=5efd0f566fc4b3ddc3e6bf80b8507e9ad7a6da386abd9273b37ea647b0b60455",
+        "Formal world fresh-process deterministic fingerprint: 5efd0f566fc4b3ddc3e6bf80b8507e9ad7a6da386abd9273b37ea647b0b60455"
+      ],
+      "shutdown_resource_diagnostics": []
+    },
+    {
+      "name": "Headless formal product startup",
+      "summary_lines": [
+        "Formal hemisphere world, long-term balance and retained service validation passed."
+      ],
+      "shutdown_resource_diagnostics": []
+    }
+  ],
+  "windows_allowed_test_failures": [],
+  "windows_economy_day30_day365_test_failures": 0,
+  "old_matcher_unchanged": true,
+  "retained_shutdown_resource_diagnostic_count": 3,
+  "supplement": [
+    {
+      "name": "g0_contracts",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "--script",
+        "res://experiments/war_resolver/continuity/contract_tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+      "exit": 0,
+      "elapsed_seconds": 0.605343700008234,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 126,
+      "log_sha256": "d837fa6f404fcd0319eb079b49eca3978021583e8e2f03b6ca70e05e80de77f8",
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+      "assertion_summaries": [
+        "Task9 continuity contracts: 56 checks, 0 failures"
+      ],
+      "fatal": null
+    },
+    {
+      "name": "g0_continuous",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "--script",
+        "res://experiments/war_resolver/continuous/tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+      "exit": 0,
+      "elapsed_seconds": 4.115856199990958,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 10339,
+      "log_sha256": "222d14bdb393ec26aafcff9fe960771cc47195ddefb1d712d1805e972df155f7",
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+      "assertion_summaries": [
+        "Task9 continuous: 60 checks, 0 failures"
+      ],
+      "fatal": null
+    },
+    {
+      "name": "g0_audit",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "--script",
+        "res://tests/codex_audit_regression.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+      "exit": 0,
+      "elapsed_seconds": 1.428377599993837,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 1715,
+      "log_sha256": "99fa4072cb7f60e5d7541a0873ac1e029062f6eb8f67d7beea7e59baf8510bec",
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+      "assertion_summaries": [
+        "CODEX AUDIT REGRESSION PASSED: 31 checks"
+      ],
+      "fatal": null
+    },
+    {
+      "name": "g0_main_seed71",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "--script",
+        "res://experiments/war_resolver/continuity/run.gd",
+        "--",
+        "--scenario",
+        "main",
+        "--seed",
+        "71",
+        "--seconds",
+        "1800",
+        "--quota",
+        "7"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+      "exit": 0,
+      "elapsed_seconds": 0.800211699999636,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 84949,
+      "log_sha256": "837c3711bec98e404fe505d954128892ac4d24905d0c0802c4a8e8cdee0af4c7",
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+      "result_count": 1,
+      "fatal": null,
+      "game_time": 1800.0,
+      "ledger_balanced": true,
+      "wall_ms": {
+        "advance": 142.541,
+        "input_build": 5.087,
+        "query_and_result": 2.798
+      }
+    },
+    {
+      "name": "g0_main_seed109",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "--script",
+        "res://experiments/war_resolver/continuity/run.gd",
+        "--",
+        "--scenario",
+        "main",
+        "--seed",
+        "109",
+        "--seconds",
+        "1800",
+        "--quota",
+        "7"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+      "exit": 0,
+      "elapsed_seconds": 0.7819652999896789,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 84558,
+      "log_sha256": "a94620873f3cd91c90e523dbcae3d51542a251214ae849d2141c243644b813ad",
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+      "result_count": 1,
+      "fatal": null,
+      "game_time": 1800.0,
+      "ledger_balanced": true,
+      "wall_ms": {
+        "advance": 146.316,
+        "input_build": 4.793,
+        "query_and_result": 2.717
+      }
+    }
+  ],
+  "no_import_or_runtime_errors_classified_as_baseline_failure": true
+}
