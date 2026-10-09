@@ -4,6 +4,7 @@ extends RefCounted
 const RELIEF_PATH: String = "res://data/presentation/global_physical_relief.json"
 const GEOMETRY_PATH: String = "res://data/world_map/historical/cshapes_1900_snapshot.json"
 const SUPPLEMENT_PATH: String = "res://data/world_map/historical/arabia_gulf_geography_1900.json"
+const REGIONAL_DISPLAY_PATH: String = "res://data/presentation/cshapes_region_display_r3.json"
 var errors: Array[String] = []
 var metadata: Dictionary = {}
 var parts_by_feature: Dictionary = {}
@@ -96,6 +97,66 @@ func _points_from_raw(raw_value: Variant) -> PackedVector2Array:
 			return PackedVector2Array()
 		output.append(Vector2(lon, lat))
 	return output
+
+static func prepare_regional_display(lod: String) -> Dictionary:
+	var started := Time.get_ticks_usec()
+	var failures: Array[String] = []
+	var result: Dictionary = {"errors": failures, "lod": lod, "meshes": {}, "metrics": {}}
+	var document := ContentDocument.read(REGIONAL_DISPLAY_PATH, failures)
+	var sources := HistoricalSourceRegistry.new()
+	var facts := HistoricalEvidenceCatalog.new()
+	if str(document.get("schema_id", "")) != "regional_political_display_r3" or not sources.load_document(document.get("source_registry", {}) as Dictionary) or not facts.load_document(document.get("evidence_catalog", {}) as Dictionary):
+		failures.append("Invalid regional display evidence")
+		return result
+	var evidence := facts.fact("regional_display:cshapes_1900")
+	var gate := HistoricalProvenanceGate.new(sources, facts)
+	if evidence == null or not gate.admit_runtime_fact(evidence.fact_id, "spatial_boundary", evidence.output_material()):
+		failures.append("Unadmitted regional display geometry")
+		return result
+	var value := evidence.value as Dictionary
+	if str(value.get("geometry_role", "")) != "PRESENTATION_ONLY" or str(value.get("encoding", "")) != "ZLIB_JSON_UTF8":
+		failures.append("Regional geometry cannot replace canonical territory")
+		return result
+	if FileAccess.get_sha256(GEOMETRY_PATH) != str(value.get("canonical_geometry_sha256", "")):
+		failures.append("Regional display canonical binding mismatch")
+		return result
+	var asset: Dictionary = {}
+	for candidate: Dictionary in value.assets:
+		if str(candidate.id) == lod: asset = candidate
+	if asset.is_empty():
+		failures.append("Missing regional display LOD")
+		return result
+	var bytes := FileAccess.get_file_as_bytes(str(asset.path))
+	var hash := HashingContext.new()
+	hash.start(HashingContext.HASH_SHA256)
+	hash.update(bytes)
+	if bytes.size() != int(asset.bytes) or hash.finish().hex_encode() != str(asset.sha256):
+		failures.append("Regional display payload binding mismatch")
+		return result
+	var decoded := bytes.decompress_dynamic(int(asset.decoded_bytes), FileAccess.COMPRESSION_DEFLATE)
+	if decoded.size() != int(asset.decoded_bytes):
+		failures.append("Invalid regional display encoding")
+		return result
+	var parser := JSON.new()
+	if parser.parse(decoded.get_string_from_utf8()) != OK or not parser.data is Dictionary:
+		failures.append("Invalid regional display JSON")
+		return result
+	var loader := GeographyLoader.new()
+	loader._load_features(parser.data as Dictionary)
+	failures.append_array(loader.errors)
+	var ids := loader.parts_by_feature.keys()
+	ids.sort()
+	var expected := (value.feature_ids as Array).duplicate()
+	expected.sort()
+	if ids != expected or not failures.is_empty():
+		failures.append("Regional display identities differ from canonical snapshot")
+		return result
+	result.metrics["decode_usec"] = Time.get_ticks_usec() - started
+	for id: String in ids:
+		(result.meshes as Dictionary)[id] = GlobeProjection.source_mesh(loader.parts_by_feature[id] as Array, id)
+	result.metrics["prepare_usec"] = Time.get_ticks_usec() - started
+	result.metrics["source_bytes"] = bytes.size()
+	return result
 
 static func decode_relief(level: String, admitted: Dictionary) -> Dictionary:
 	var started := Time.get_ticks_usec()

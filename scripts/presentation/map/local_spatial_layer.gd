@@ -18,6 +18,8 @@ var prepare_count: int = 0
 var _chunks: Array[Dictionary] = []
 var _lod_thread: Thread
 var _batches: Array[Dictionary] = []
+var _fallback_batches: Array[Dictionary] = []
+var _fallback_lod: String = ""
 var _places: Dictionary = {}
 var _labels: Array[Dictionary] = []
 var _content: LocalSpatialContent
@@ -42,7 +44,20 @@ func _lod(mpp: float) -> String:
 	return "medium" if strategic and value == "local" else value
 
 func begin(content: LocalSpatialContent, canvas: RID, mpp: float = 4500.0) -> void:
+	# Reading a new shard and uploading it are two separate waits. Retain the
+	# displayed geometry through both, then release it at the replacement boundary.
+	var previous: Array[Dictionary] = []
+	var previous_lod := active_lod
+	if strategic and ready:
+		previous = _batches
+		_batches = []
+	elif strategic and not _fallback_batches.is_empty():
+		previous = _fallback_batches
+		previous_lod = _fallback_lod
+		_fallback_batches = []
 	clear()
+	_fallback_batches = previous
+	_fallback_lod = previous_lod
 	_content = content
 	strategic = str(content.metadata.get("content_level", "")) == "strategic"
 	prepare_count += 1
@@ -54,7 +69,7 @@ func begin(content: LocalSpatialContent, canvas: RID, mpp: float = 4500.0) -> vo
 	for feature: Dictionary in content.features:
 		if str(feature.kind) == "settlement":
 			_places[str(feature.id)] = feature
-			_labels.append({"feature": feature, "item": RID(), "km": Vector2.ZERO})
+			_labels.append({"feature": feature, "item": RID(), "km": Vector2.ZERO, "projected": false})
 	_labels.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.feature.rank) < int(b.feature.rank))
 	_cursor = 0
 	_label_cursor = 0
@@ -99,6 +114,8 @@ func _queue_preparation() -> void:
 	ready = available_lods.has(_target)
 
 func _trim_gpu() -> void:
+	if available_lods.has(_target):
+		_clear_fallback()
 	# Keep the old displayed batch until the requested replacement is complete.
 	var fallback := active_lod
 	if not available_lods.has(fallback) and not available_lods.is_empty():
@@ -116,7 +133,7 @@ func _trim_gpu() -> void:
 
 func resident_buffer_bytes() -> int:
 	var bytes: int = 0
-	for batch: Dictionary in _batches:
+	for batch: Dictionary in _batches + _fallback_batches:
 		if bool(batch.get("water", false)):
 			var geometry := batch.geometry as GlobeSurfaceBatch
 			bytes += int(batch.faces) * (12*8+24*4) + geometry.data.get_width()*geometry.data.get_height()*16
@@ -128,6 +145,7 @@ func resident_buffer_bytes() -> int:
 func release_gpu() -> void:
 	if not _resident: return
 	_resident = false
+	_clear_fallback()
 	for batch: Dictionary in _batches: RenderingServer.free_rid(batch.item as RID)
 	_batches.clear()
 	for label: Dictionary in _labels:
@@ -261,16 +279,17 @@ func place(id: String) -> Dictionary:
 	return _places.get(id, {}) as Dictionary
 
 func update(camera: RegionCamera, controller: GlobeController, date: String, viewport_size: Vector2) -> void:
-	var show := _resident and _content != null and not available_lods.is_empty() and camera.active and _content.active_on(date) and (not camera.local_active if strategic else LocalSpatialLoader.covers(RegionProjection.lon_lat(camera.unit_at(viewport_size * 0.5))))
+	var show := _resident and _content != null and (not available_lods.is_empty() or not _fallback_batches.is_empty()) and camera.active and _content.active_on(date) and (not camera.local_active if strategic else LocalSpatialLoader.covers(RegionProjection.lon_lat(camera.unit_at(viewport_size * 0.5))))
 	var mpp := camera.km_per_pixel * 1000.0
 	active_lod = _lod(mpp) if show else ""
 	if show and not available_lods.has(active_lod):
-		active_lod = str(available_lods.keys()[0])
+		active_lod = str(available_lods.keys()[0]) if not available_lods.is_empty() else _fallback_lod
 	visible_places.clear()
 	label_rects.clear()
 	var visible_line := false
-	for batch: Dictionary in _batches:
+	for batch: Dictionary in _batches + _fallback_batches:
 		var weight := MapScaleStyle.strategic_weight(str(batch.kind), mpp) if strategic else MapScaleStyle.physical_weight(str(batch.kind), mpp)
+		if strategic and str(batch.kind) == "rail" and controller.map_mode == "political": weight = 0.0
 		var visible := show and str(batch.lod) == active_lod and weight > 0.001
 		if visible != bool(batch.visible):
 			RenderingServer.canvas_item_set_visible(batch.item as RID, visible)
@@ -304,9 +323,10 @@ func update(camera: RegionCamera, controller: GlobeController, date: String, vie
 			continue
 		if date < str(feature.valid_from) or date >= str(feature.valid_to):
 			continue
-		if changed_frame:
+		if changed_frame or not bool(label.projected):
 			var coordinates := feature.geometry.coordinates as Array
 			label.km = RegionProjection.forward(GlobeProjection.lon_lat_to_unit(Vector2(float(coordinates[0]), float(coordinates[1]))), _frame)
+			label.projected = true
 		var selected := str(feature.id) == controller.selected_place_id
 		var limit := float(feature.get("max_mpp", 0.0)) if strategic else MapScaleStyle.settlement_limit(int(feature.rank), str(feature.id))
 		if mpp > limit and not selected:
@@ -327,12 +347,13 @@ func update(camera: RegionCamera, controller: GlobeController, date: String, vie
 		label_rects.append(rect)
 		RenderingServer.canvas_item_set_transform(label.item as RID, Transform2D(0.0, point))
 		RenderingServer.canvas_item_set_visible(label.item as RID, true)
-	if visible_line and not _first_visible:
+	if visible_line and available_lods.has(active_lod) and not _first_visible:
 		_first_visible = true
-		_mark_first_frame.call_deferred()
+		_mark_first_frame.call_deferred(prepare_count)
 
-func _mark_first_frame() -> void:
+func _mark_first_frame(generation: int) -> void:
 	await RenderingServer.frame_post_draw
+	if generation != prepare_count or _content == null: return
 	metrics["first_visible_frame_since_prepare_usec"] = Time.get_ticks_usec() - _started
 	metrics["first_visible_frame_since_load_usec"] = Time.get_ticks_usec() - int(metrics.load_started_usec)
 
@@ -340,6 +361,7 @@ func clear() -> void:
 	if _lod_thread != null:
 		_lod_thread.wait_to_finish()
 		_lod_thread = null
+	_clear_fallback()
 	for batch: Dictionary in _batches:
 		RenderingServer.free_rid(batch.item as RID)
 	for label: Dictionary in _labels:
@@ -362,3 +384,11 @@ func clear() -> void:
 	_first_visible = false
 	_frame = Basis()
 	_content = null
+	metrics["resident_gpu_buffer_bytes"] = 0
+	metrics["resident_lods"] = []
+
+func _clear_fallback() -> void:
+	for batch: Dictionary in _fallback_batches:
+		RenderingServer.free_rid(batch.item as RID)
+	_fallback_batches.clear()
+	_fallback_lod = ""

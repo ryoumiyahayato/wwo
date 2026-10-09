@@ -100,6 +100,14 @@ func clear_labels() -> void:
 			RenderingServer.free_rid(label.item as RID)
 	_labels.clear()
 
+func replace_display_geometry(owner: String, geometry: GlobeSurfaceBatch) -> void:
+	if not surfaces.has(owner): return
+	var batch := surfaces[owner] as Dictionary
+	batch.geometry = geometry
+	(batch.material as ShaderMaterial).set_shader_parameter("face_data", geometry.data)
+	RenderingServer.canvas_item_clear(batch.item as RID)
+	RenderingServer.canvas_item_add_mesh(batch.item as RID, geometry.mesh.get_rid(), Transform2D(), Color.WHITE, batch.texture as RID)
+
 func prepare_labels(candidates: Array[Dictionary], font: Font) -> void:
 	clear_labels()
 	label_prepare_count += 1

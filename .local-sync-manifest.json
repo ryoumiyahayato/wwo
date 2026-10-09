@@ -1,5 +1,5 @@
 {
-  "content_sha256": "3b4f3ce079d80136cff65c6ce7b568e791a608627ff19b5d635a6c3dd83481b9",
+  "content_sha256": "0ddf380ab24e7a143d9fd07ca9354e583578b8deb1c1926628a98b3b53645e91",
   "excluded": [
     {
       "path": ".git/",
@@ -350,6 +350,10 @@
       "reason": "file outside reviewed exact file allowlist"
     },
     {
+      "path": "tools/map/audit_map_triangles.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
       "path": "tools/map/build_administrative_measurement.py",
       "reason": "file outside reviewed exact file allowlist"
     },
@@ -370,11 +374,23 @@
       "reason": "file outside reviewed exact file allowlist"
     },
     {
+      "path": "tools/map/build_map_correctness_probe.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
       "path": "tools/map/build_paris_land_measurement.py",
       "reason": "file outside reviewed exact file allowlist"
     },
     {
       "path": "tools/map/build_paris_land_pilot.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/build_regional_political_display.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/check_regional_display.gd",
       "reason": "file outside reviewed exact file allowlist"
     },
     {
@@ -399,6 +415,26 @@
     },
     {
       "path": "tools/map/historical_water_release_probe.gd.uid",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/map_correctness_release_probe.gd",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/map_correctness_release_probe.gd.uid",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/map_triangle_diagnostic.gd",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/map_triangle_diagnostic.gd.uid",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/pack_strategic_geometry.py",
       "reason": "file outside reviewed exact file allowlist"
     },
     {
@@ -454,7 +490,7 @@
       "reason": "file outside reviewed exact file allowlist"
     }
   ],
-  "included_bytes": 5847108,
+  "included_bytes": 5858492,
   "included_files": 777,
   "owner_id": "7ed35d2d-c560-4b08-8c28-78af6d1cae6b",
   "remote": "https://github.com/ryoumiyahayato/wwo.git",

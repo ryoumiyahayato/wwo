@@ -23,8 +23,8 @@ static func flag_weight(mpp: float) -> float:
 
 static func relief_weight(mpp: float, map_mode: String) -> float:
 	# The 9.8 km reference cannot acquire finer terrain by camera magnification.
-	var weight := lerpf(0.10, 0.62, 1.0 - smoothstep(log(1500.0), log(16000.0), log(maxf(mpp, 1.0))))
-	weight *= lerpf(0.08, 1.0, smoothstep(log(50.0), log(1800.0), log(maxf(mpp, 1.0))))
+	var weight := lerpf(0.10, 0.80, 1.0 - smoothstep(log(1500.0), log(16000.0), log(maxf(mpp, 1.0))))
+	weight *= lerpf(0.08, 1.0, smoothstep(log(50.0), log(350.0), log(maxf(mpp, 1.0))))
 	return weight * (1.0 if map_mode == "political" else 0.20)
 
 static func relief_detail_weight(mpp: float) -> float:

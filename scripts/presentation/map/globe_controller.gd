@@ -16,6 +16,7 @@ var _orientation: Quaternion = (
 	Quaternion(Vector3.RIGHT, -0.18) * Quaternion(Vector3.UP, -0.08)
 ).normalized()
 var zoom: float = 0.86
+var initial_framing_pending: bool = true
 var selected_polity_id: String = ""
 var selected_place_id: String = ""
 var hovered_polity_id: String = ""
@@ -60,6 +61,7 @@ func handle_input(event: InputEvent, globe_rect: Rect2) -> bool:
 			_bearing_dragging = false
 			return false
 		if button.pressed and globe_rect.has_point(button.position):
+			initial_framing_pending = false
 			if button.button_index == MOUSE_BUTTON_WHEEL_UP or button.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 				if region_camera.active:
 					region_camera.zoom_at(button.position, 1.0 / ZOOM_FACTOR if button.button_index == MOUSE_BUTTON_WHEEL_UP else ZOOM_FACTOR, globe_rect.size)

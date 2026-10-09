@@ -1,9 +1,9 @@
 class_name GlobeRenderer
 extends Control
 ## One map renderer: geographic surfaces, final display borders and controller input.
-const POLITICAL_UNDER_COLOR: Color = Color(0.10, 0.13, 0.15, 0.88)
+const POLITICAL_UNDER_COLOR: Color = Color(0.12, 0.18, 0.19, 0.80)
 const POLITICAL_INNER_COLOR: Color = Color(0.66, 0.63, 0.56, 0.88)
-const POLITICAL_UNDER_WIDTH: float = 2.1
+const POLITICAL_UNDER_WIDTH: float = 0.85
 const POLITICAL_INNER_WIDTH: float = 0.9
 const COAST_COLOR: Color = Color(0.22, 0.29, 0.30, 0.62)
 const COAST_WIDTH: float = 0.65
@@ -54,6 +54,11 @@ var _region_label_frame := Basis()
 var render_draw_count: int = 0
 var view_update_count: int = 0
 var cpu_projection_count: int = 0
+var regional_display_metrics: Dictionary = {}
+var _regional_display_thread: Thread
+var _regional_display_wanted: String = ""
+var _regional_display_loading: String = ""
+var _regional_display_ready: String = ""
 var last_submit_usec: int = 0
 var last_submit_parts: Dictionary = {}
 
@@ -85,6 +90,8 @@ func _ready() -> void:
 	set_process(false)
 
 func _exit_tree() -> void:
+	if _regional_display_thread != null:
+		_regional_display_thread.wait_to_finish()
 	relief.dispose()
 	local_layer.clear()
 	strategic_layer.clear()
@@ -122,6 +129,7 @@ func refresh(registry: RuntimePoliticalEntityView, evidence: HistoricalPolitical
 		_source_boundaries = political.display_boundary_sources(GlobeProjection.boundary_sources(_source_meshes, political.boundary_features), content)
 		_prepare_surface_batches()
 		_prepare_boundary_batches()
+		_regional_display_ready = ""
 	_source_dirty = false
 	if not _relief_shader_warmed and DisplayServer.get_name() != "headless":
 		_relief_shader_warmed = true
@@ -174,6 +182,11 @@ func _ensure_view() -> void:
 	_container.size = size
 	_center = size * 0.5
 	var base_radius := minf(size.y / 2.55, size.x * 0.49)
+	if controller.initial_framing_pending and visible and size.x > 0.0 and size.y > 0.0:
+		controller.initial_framing_pending = false
+		if not controller.region_camera.active and is_equal_approx(controller.zoom, 0.86):
+			var target_radius := minf(float(get_window().size.y) / 3.0, minf(size.x, size.y) * 0.48)
+			controller.zoom = clampf(target_radius / base_radius, GlobeController.MIN_ZOOM, GlobeController.MAX_ZOOM)
 	_radius = base_radius * controller.zoom
 	_camera.size = 2.55 / controller.zoom
 	_moon.visible = controller.zoom <= 1.10
@@ -196,6 +209,7 @@ func _ensure_view() -> void:
 			_prepare_region_labels()
 	_sync_local_resources()
 	_sync_strategic_resources()
+	_sync_regional_display()
 	local_layer.update(controller.region_camera, controller, political.display_date, size)
 	_update_strategic_layer()
 	_anchors.clear()
@@ -449,13 +463,14 @@ func _prepare_boundary_batches() -> void:
 			strokes.append({"width": COAST_WIDTH, "color": COAST_COLOR})
 		else:
 			strokes.append({"width": POLITICAL_UNDER_WIDTH, "color": POLITICAL_UNDER_COLOR})
-			strokes.append({"width": POLITICAL_INNER_WIDTH, "color": POLITICAL_INNER_COLOR})
 		for stroke: Dictionary in strokes:
 			var material := ShaderMaterial.new()
 			material.shader = shader
 			material.set_shader_parameter("line_data", geometry.data)
 			material.set_shader_parameter("stroke_width", stroke.width)
 			material.set_shader_parameter("stroke_color", stroke.color)
+			material.set_shader_parameter("miter_limit", 1.5)
+			material.set_shader_parameter("stroke_feather", 0.65)
 			var item := RenderingServer.canvas_item_create()
 			RenderingServer.canvas_item_set_parent(item, _viewport.world_2d.canvas)
 			RenderingServer.canvas_item_set_draw_behind_parent(item, true)
@@ -530,7 +545,9 @@ func _draw() -> void:
 	for place_id: String in _place_points:
 		var selected := place_id == controller.selected_place_id
 		var point := _place_points[place_id] as Vector2
-		draw_circle(point, 4.5 if selected else 2.7, Color(0.96, 0.84, 0.55, 0.96))
+		var place := local_layer.place(place_id) if local_layer.visible_places.has(place_id) else strategic_layer.place(place_id) if strategic_layer.visible_places.has(place_id) else political.places.get(place_id, {}) as Dictionary
+		var rank := int(place.get("rank", 1))
+		draw_circle(point, 4.0 if selected else 2.2 if rank == 0 else 1.7, Color(0.84, 0.80, 0.67, 0.92) if selected else Color(0.68, 0.70, 0.64, 0.78))
 		if regional:
 			continue
 		if controller.zoom >= 4.8 or selected or place_id == controller.hovered_place_id:
@@ -742,6 +759,55 @@ func _sync_strategic_resources() -> void:
 		strategic_layer.request_lods(camera.km_per_pixel*1000.0)
 	if strategic_content.preparing() or strategic_layer.preparing: set_process(visible)
 
+func _sync_regional_display() -> void:
+	if not controller.region_camera.active or not visible or controller.region_camera.local_active or political.display_date < "1900-01-01" or political.display_date >= "1901-01-01":
+		_regional_display_wanted = ""
+		if not _regional_display_ready.is_empty():
+			for owner: String in region_view.surfaces:
+				region_view.replace_display_geometry(owner, (_surface_batches[owner] as Dictionary).geometry as GlobeSurfaceBatch)
+			_regional_display_ready = ""
+		return
+	_regional_display_wanted = "coarse" if controller.region_camera.km_per_pixel * 1000.0 > MapScaleStyle.MEDIUM_LOD_MPP else "medium"
+	if _regional_display_thread == null and region_view.ready and _regional_display_ready != _regional_display_wanted:
+		_regional_display_loading = _regional_display_wanted
+		_regional_display_thread = Thread.new()
+		_regional_display_thread.start(GeographyLoader.prepare_regional_display.bind(_regional_display_loading))
+	if _regional_display_thread != null: set_process(visible)
+
+func _poll_regional_display() -> void:
+	if _regional_display_thread == null or _regional_display_thread.is_alive(): return
+	var result := _regional_display_thread.wait_to_finish() as Dictionary
+	_regional_display_thread = null
+	if _regional_display_loading != _regional_display_wanted or not region_view.ready:
+		_sync_regional_display()
+		return
+	if not (result.errors as Array).is_empty():
+		push_error("Regional display source rejected: " + str(result.errors))
+		_regional_display_ready = _regional_display_wanted
+		return
+	var faces_by_owner: Dictionary = {}
+	var scoped_owners: Dictionary = {}
+	var scoped := political.get("_scope_features") as Array
+	var owners := political.get("_whole_owner_by_feature") as Dictionary
+	for feature_id: String in scoped:
+		scoped_owners[str(owners.get(feature_id, ""))] = true
+	for feature_id: String in result.meshes:
+		var owner := str(owners.get(feature_id, ""))
+		if scoped_owners.has(owner): continue
+		if not faces_by_owner.has(owner): faces_by_owner[owner] = []
+		(faces_by_owner[owner] as Array).append_array((result.meshes[feature_id] as Dictionary).triangles as Array)
+	var uploaded := 0
+	for owner: String in faces_by_owner:
+		var geometry := GlobeSurfaceBatch.new()
+		geometry.prepare(faces_by_owner[owner] as Array)
+		region_view.replace_display_geometry(owner, geometry)
+		uploaded += (faces_by_owner[owner] as Array).size()
+	_regional_display_ready = _regional_display_loading
+	regional_display_metrics = result.metrics as Dictionary
+	regional_display_metrics["faces"] = uploaded
+	regional_display_metrics["lod"] = _regional_display_ready
+	_invalidate_projection()
+
 func _update_strategic_layer() -> void:
 	strategic_layer.suppressed_places = local_layer.visible_places
 	strategic_layer.paris_mask_weights = {}
@@ -795,6 +861,8 @@ func _process(_delta: float) -> void:
 		_bind_relief()
 		queue_redraw()
 	_sync_relief()
+	_poll_regional_display()
+	_sync_regional_display()
 	if region_view.preparing:
 		region_view.prepare_step(_surface_batches, _boundary_batches)
 		if region_view.ready:
@@ -832,7 +900,7 @@ func _process(_delta: float) -> void:
 			queue_redraw()
 	if _transition_elapsed < 0.0:
 		_sync_local_resources()
-	if not relief.preparing() and not region_view.preparing and not strategic_layer.preparing and (strategic_content == null or not strategic_content.preparing()) and not local_layer.preparing and (local_content == null or not local_content.preparing()) and _transition_elapsed < 0.0:
+	if _regional_display_thread == null and not relief.preparing() and not region_view.preparing and not strategic_layer.preparing and (strategic_content == null or not strategic_content.preparing()) and not local_layer.preparing and (local_content == null or not local_content.preparing()) and _transition_elapsed < 0.0:
 		set_process(false)
 
 func _on_visibility_changed() -> void:
@@ -840,6 +908,7 @@ func _on_visibility_changed() -> void:
 		return
 	_sync_relief()
 	_sync_strategic_resources()
+	_sync_regional_display()
 	if not visible:
 		_transition_elapsed = -1.0
 		set_process(false)

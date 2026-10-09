@@ -123,6 +123,7 @@ static func _load(index: Dictionary, selected: Array[String]) -> LocalSpatialCon
 	result.metrics = {"load_started_usec": started, "file_read_usec": 0, "parse_usec": 0, "source_resolution_usec": 0, "geometry_prepare_usec": 0, "file_reads": 0, "source_admissions": 0, "source_bytes": 0}
 	result.metadata = {"content_level": "strategic", "valid_from": index.valid_from, "valid_to": index.valid_to, "local_support": false, "presentation_lods": ["coarse", "medium"], "regions": selected}
 	var ids: Dictionary = {}
+	var geometry_assets: Dictionary = {}
 	var descriptors: Array = (index.regions as Array).duplicate()
 	descriptors.append_array(index.get("coast_regions", []) as Array)
 	for parent: Dictionary in index.get("coast_regions", []) as Array:
@@ -164,7 +165,42 @@ static func _load(index: Dictionary, selected: Array[String]) -> LocalSpatialCon
 			if not fact.value is Dictionary or not gate.admit_runtime_fact(fact_id, fact.domain, fact.output_material()):
 				result.errors.append("Unadmitted strategic fact: " + fact_id)
 				return result
-			var feature := fact.value as Dictionary
+			var feature := (fact.value as Dictionary).duplicate()
+			if feature.has("geometry_asset"):
+				var asset := feature.geometry_asset as Dictionary
+				var path := str(asset.get("path", ""))
+				if not path.begins_with("res://data/strategic/") or path.simplify_path() != path or int(asset.get("decoded_bytes", 0)) <= 0 or int(asset.get("decoded_bytes", 0)) > 33554432:
+					result.errors.append("Invalid strategic geometry descriptor: " + fact_id)
+					return result
+				if not geometry_assets.has(path):
+					var packed := FileAccess.get_file_as_bytes(path)
+					var packed_hash := HashingContext.new()
+					packed_hash.start(HashingContext.HASH_SHA256)
+					packed_hash.update(packed)
+					if not path.begins_with("res://data/strategic/") or str(asset.get("encoding", "")) != "ZLIB_JSON_UTF8" or packed.size() != int(asset.get("bytes", -1)) or packed_hash.finish().hex_encode() != str(asset.get("sha256", "")):
+						result.errors.append("Strategic geometry payload binding rejected: " + path)
+						return result
+					var decoded := packed.decompress_dynamic(int(asset.decoded_bytes), FileAccess.COMPRESSION_DEFLATE)
+					var decoded_hash := HashingContext.new()
+					decoded_hash.start(HashingContext.HASH_SHA256)
+					decoded_hash.update(decoded)
+					var geometry_parser := JSON.new()
+					if decoded.size() != int(asset.decoded_bytes) or decoded_hash.finish().hex_encode() != str(asset.decoded_sha256) or geometry_parser.parse(decoded.get_string_from_utf8()) != OK or not geometry_parser.data is Dictionary:
+						result.errors.append("Invalid strategic geometry payload: " + path)
+						return result
+					geometry_assets[path] = {"descriptor":asset,"geometries":geometry_parser.data}
+					result.metrics.source_bytes += packed.size()
+					result.metrics.file_reads += 1
+				var bound := geometry_assets[path] as Dictionary
+				if bound.descriptor != asset or not (bound.geometries as Dictionary).has(str(feature.id)):
+					result.errors.append("Strategic geometry identity binding rejected: " + fact_id)
+					return result
+				var geometry_value := (bound.geometries as Dictionary)[str(feature.id)] as Dictionary
+				if geometry_value.size() != 2 or not geometry_value.get("geometry") is Dictionary or not geometry_value.get("lod_geometry") is Dictionary:
+					result.errors.append("Invalid strategic geometry fields: " + fact_id)
+					return result
+				feature["geometry"] = geometry_value.geometry
+				feature["lod_geometry"] = geometry_value.lod_geometry
 			if ids.has(str(feature.get("id", ""))) or not valid_feature(feature) or fact.subject_id != str(feature.id) or fact.source_id != str(feature.source_id):
 				result.errors.append("Invalid/duplicate strategic feature: " + fact_id)
 				return result
