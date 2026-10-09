@@ -120,7 +120,7 @@ func dispose() -> void:
 static func _load(index: Dictionary, selected: Array[String]) -> LocalSpatialContent:
 	var result := LocalSpatialContent.new()
 	var started := Time.get_ticks_usec()
-	result.metrics = {"load_started_usec": started, "file_read_usec": 0, "parse_usec": 0, "source_resolution_usec": 0, "geometry_prepare_usec": 0, "file_reads": 0, "source_admissions": 0, "source_bytes": 0}
+	result.metrics = {"load_started_usec": started, "file_read_usec": 0, "parse_usec": 0, "source_resolution_usec": 0, "payload_decode_usec": 0, "payload_hash_usec": 0, "payload_parse_usec": 0, "decoded_geometry_bytes": 0, "geometry_prepare_usec": 0, "file_reads": 0, "source_admissions": 0, "source_bytes": 0}
 	result.metadata = {"content_level": "strategic", "valid_from": index.valid_from, "valid_to": index.valid_to, "local_support": false, "presentation_lods": ["coarse", "medium"], "regions": selected}
 	var ids: Dictionary = {}
 	var geometry_assets: Dictionary = {}
@@ -155,6 +155,7 @@ static func _load(index: Dictionary, selected: Array[String]) -> LocalSpatialCon
 		var sources := HistoricalSourceRegistry.new()
 		var facts := HistoricalEvidenceCatalog.new()
 		var admitted_at := Time.get_ticks_usec()
+		var payload_elapsed: int = 0
 		if not sources.load_document(document.get("source_registry", {}) as Dictionary) or not facts.load_document(document.get("evidence_catalog", {}) as Dictionary):
 			result.errors.append_array(sources.errors())
 			result.errors.append_array(facts.errors())
@@ -173,22 +174,35 @@ static func _load(index: Dictionary, selected: Array[String]) -> LocalSpatialCon
 					result.errors.append("Invalid strategic geometry descriptor: " + fact_id)
 					return result
 				if not geometry_assets.has(path):
+					var payload_started := Time.get_ticks_usec()
 					var packed := FileAccess.get_file_as_bytes(path)
+					result.metrics.file_read_usec += Time.get_ticks_usec() - payload_started
+					var hash_started := Time.get_ticks_usec()
 					var packed_hash := HashingContext.new()
 					packed_hash.start(HashingContext.HASH_SHA256)
 					packed_hash.update(packed)
 					if not path.begins_with("res://data/strategic/") or str(asset.get("encoding", "")) != "ZLIB_JSON_UTF8" or packed.size() != int(asset.get("bytes", -1)) or packed_hash.finish().hex_encode() != str(asset.get("sha256", "")):
 						result.errors.append("Strategic geometry payload binding rejected: " + path)
 						return result
+					result.metrics.payload_hash_usec += Time.get_ticks_usec() - hash_started
+					var decode_started := Time.get_ticks_usec()
 					var decoded := packed.decompress_dynamic(int(asset.decoded_bytes), FileAccess.COMPRESSION_DEFLATE)
+					result.metrics.payload_decode_usec += Time.get_ticks_usec() - decode_started
+					result.metrics.decoded_geometry_bytes += decoded.size()
+					hash_started = Time.get_ticks_usec()
 					var decoded_hash := HashingContext.new()
 					decoded_hash.start(HashingContext.HASH_SHA256)
 					decoded_hash.update(decoded)
+					var decoded_matches := decoded.size() == int(asset.decoded_bytes) and decoded_hash.finish().hex_encode() == str(asset.decoded_sha256)
+					result.metrics.payload_hash_usec += Time.get_ticks_usec() - hash_started
+					var payload_parse_started := Time.get_ticks_usec()
 					var geometry_parser := JSON.new()
-					if decoded.size() != int(asset.decoded_bytes) or decoded_hash.finish().hex_encode() != str(asset.decoded_sha256) or geometry_parser.parse(decoded.get_string_from_utf8()) != OK or not geometry_parser.data is Dictionary:
+					if not decoded_matches or geometry_parser.parse(decoded.get_string_from_utf8()) != OK or not geometry_parser.data is Dictionary:
 						result.errors.append("Invalid strategic geometry payload: " + path)
 						return result
 					geometry_assets[path] = {"descriptor":asset,"geometries":geometry_parser.data}
+					result.metrics.payload_parse_usec += Time.get_ticks_usec() - payload_parse_started
+					payload_elapsed += Time.get_ticks_usec() - payload_started
 					result.metrics.source_bytes += packed.size()
 					result.metrics.file_reads += 1
 				var bound := geometry_assets[path] as Dictionary
@@ -196,18 +210,19 @@ static func _load(index: Dictionary, selected: Array[String]) -> LocalSpatialCon
 					result.errors.append("Strategic geometry identity binding rejected: " + fact_id)
 					return result
 				var geometry_value := (bound.geometries as Dictionary)[str(feature.id)] as Dictionary
-				if geometry_value.size() != 2 or not geometry_value.get("geometry") is Dictionary or not geometry_value.get("lod_geometry") is Dictionary:
+				if geometry_value.size() not in [2,3] or not geometry_value.get("geometry") is Dictionary or not geometry_value.get("lod_geometry") is Dictionary or (geometry_value.size()==3 and not geometry_value.get("lod_visual_reference_indices") is Dictionary):
 					result.errors.append("Invalid strategic geometry fields: " + fact_id)
 					return result
 				feature["geometry"] = geometry_value.geometry
 				feature["lod_geometry"] = geometry_value.lod_geometry
+				if geometry_value.has("lod_visual_reference_indices"): feature["lod_visual_reference_indices"] = geometry_value.lod_visual_reference_indices
 			if ids.has(str(feature.get("id", ""))) or not valid_feature(feature) or fact.subject_id != str(feature.id) or fact.source_id != str(feature.source_id):
 				result.errors.append("Invalid/duplicate strategic feature: " + fact_id)
 				return result
 			ids[str(feature.id)] = true
 			result.features.append(feature)
 		result.metrics.source_admissions += facts.fact_ids().size()
-		result.metrics.source_resolution_usec += Time.get_ticks_usec() - admitted_at
+		result.metrics.source_resolution_usec += Time.get_ticks_usec() - admitted_at - payload_elapsed
 	var prepare_started := Time.get_ticks_usec()
 	for feature: Dictionary in result.features:
 		if str(feature.kind) == "settlement":
@@ -218,7 +233,7 @@ static func _load(index: Dictionary, selected: Array[String]) -> LocalSpatialCon
 			if str(feature.kind) == "rail":
 				raw = [raw]
 			elif str(feature.kind) in ["lake", "land_reference", "ocean_reference"]:
-				result.line_chunks.append({"kind": feature.kind, "lod": lod, "tolerance_m": tolerance, "polygons": raw, "feature_id": feature.id, "source_geometry_file": feature.get("source_geometry_file", "")})
+				result.line_chunks.append({"kind": feature.kind, "lod": lod, "tolerance_m": tolerance, "polygons": raw, "feature_id": feature.id, "source_geometry_file": feature.get("source_geometry_file", ""), "visual_reference_features":feature.get("visual_reference_features",[]), "visual_reference_indices":(feature.get("lod_visual_reference_indices",{}) as Dictionary).get(lod,[])})
 				continue
 			var boundaries: Array[Dictionary] = []
 			for line: Array in raw:
@@ -256,6 +271,15 @@ static func valid_feature(feature: Dictionary) -> bool:
 			if lod not in ["coarse","medium"]: return false
 			var raw := (feature.lod_geometry as Dictionary).get(lod, []) as Array
 			if not _valid_geometry(kind,{"type":geometry.get("type", ""),"coordinates":raw},str(feature.get("geometry_role", ""))): return false
+			if feature.has("visual_reference_features"):
+				if kind != "land_reference" or str(feature.get("visual_reference_role", "")) != "BOUNDED_TEXTURE_CONTINUATION_ONLY" or feature.get("visual_reference_authority", true) != false or float(feature.get("visual_reference_max_distance_m",0)) != 9000.0: return false
+				var references := feature.visual_reference_features as Array
+				var indices := (feature.get("lod_visual_reference_indices",{}) as Dictionary).get(lod,[]) as Array
+				if references.is_empty() or indices.size()!=raw.size(): return false
+				for index: Variant in indices:
+					if typeof(index) not in [TYPE_FLOAT,TYPE_INT] or float(index)!=floorf(float(index)) or int(index)<0 or int(index)>=references.size(): return false
+				for reference: String in references:
+					if not reference.is_empty() and (not reference.begins_with("gw_") or not reference.substr(3).is_valid_int()): return false
 	return _valid_geometry(kind,geometry,str(feature.get("geometry_role", "")))
 
 static func _valid_geometry(kind: String, geometry: Dictionary, role: String) -> bool:

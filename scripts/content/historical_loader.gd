@@ -17,7 +17,7 @@ func load_current(gate: HistoricalProvenanceGate) -> bool:
 	administration.load_current(gate)
 	evidence.load_current()
 	_display_document = ContentDocument.read(REGIONS_PATH, errors)
-	geometry_content = MapGeometryContent.new(geography.parts_by_feature)
+	geometry_content = MapGeometryContent.new(geography.parts_by_feature, geography.presentation)
 	errors.append_array(geography.errors)
 	errors.append_array(administration.errors)
 	errors.append_array(evidence.errors)

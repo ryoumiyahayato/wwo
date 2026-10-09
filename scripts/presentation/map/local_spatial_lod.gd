@@ -4,12 +4,13 @@ extends RefCounted
 const TOLERANCE_M: Dictionary = {"coarse": 600.0, "medium": 120.0, "local": 0.0}
 const EARTH_RADIUS_M: float = 6371008.8
 
-static func prepare(source: Array[Dictionary], lods: Array[String] = ["coarse", "medium", "local"]) -> Dictionary:
+static func prepare(source: Array[Dictionary], lods: Array[String] = ["coarse", "medium", "local"], visual_frames: Dictionary = {}) -> Dictionary:
 	var started := Time.get_ticks_usec()
 	var chunks: Array[Dictionary] = []
 	var stats: Dictionary = {}
 	for lod_name: String in lods:
 		var groups: Dictionary = {}
+		var surface_groups: Dictionary = {}
 		var counts: Dictionary = {}
 		var segments: int = 0
 		var vector_bytes: int = 0
@@ -23,18 +24,37 @@ static func prepare(source: Array[Dictionary], lods: Array[String] = ["coarse", 
 			if chunk.has("tolerance_m"): source_tolerances[kind] = chunk.tolerance_m
 			if chunk.has("polygons"):
 				var faces: Array[Dictionary] = []
+				var reference_groups: Dictionary = {}
+				var source_face_index := 0
 				if kind in ["land_reference", "ocean_reference"]:
 					# These are already constrained source triangles. Re-running the
 					# polygon pipeline both wastes work and rejects subpixel slivers
 					# that collapse in Godot's float32 vectors. Degenerate display
 					# faces have no area; no source or territorial polygon is edited.
 					for polygon: Array in chunk.polygons as Array:
+						var reference := ""
+						var references := chunk.get("visual_reference_features", []) as Array
+						var reference_indices := chunk.get("visual_reference_indices", []) as Array
+						if source_face_index < reference_indices.size(): reference = str(references[int(reference_indices[source_face_index])])
+						source_face_index += 1
+						if not visual_frames.has(reference): reference = ""
+						if not reference_groups.has(reference): reference_groups[reference] = []
 						var ring := polygon[0] as Array
 						var triangle := PackedVector2Array()
 						for point: Array in ring.slice(0,3): triangle.append(Vector2(float(point[0]),float(point[1])))
 						if GlobeProjection.polygon_area(triangle)<=0.0: continue
 						for child: PackedVector2Array in GlobeProjection.tessellate_triangle(triangle):
-							faces.append({"points":GlobeProjection.to_unit_line(child),"uvs":PackedVector2Array([Vector2.ZERO,Vector2.ZERO,Vector2.ZERO]),"component_index":0})
+							var uvs := PackedVector2Array([Vector2.ZERO,Vector2.ZERO,Vector2.ZERO])
+							if not reference.is_empty():
+								var bounds := visual_frames[reference] as Rect2
+								for corner: int in range(3):
+									var point := child[corner]
+									point.x += 360.0 * roundf((bounds.get_center().x - point.x) / 360.0)
+									var uv := (point - bounds.position) / bounds.size
+									uvs[corner] = Vector2(uv.x,1.0-uv.y)
+							var face := {"points":GlobeProjection.to_unit_line(child),"uvs":uvs,"component_index":0}
+							(reference_groups[reference] as Array).append(face)
+							faces.append(face)
 				for polygon: Array in chunk.polygons as Array:
 					if kind in ["land_reference", "ocean_reference"]: break
 					var rings: Array[PackedVector2Array] = []
@@ -49,8 +69,14 @@ static func prepare(source: Array[Dictionary], lods: Array[String] = ["coarse", 
 						faces.append_array(mesh.triangles as Array[Dictionary])
 				# Limit a single upload step; exact offline patch triangles need no
 				# camera-time topology or second political geometry.
-				for first: int in range(0, faces.size(), 1024):
-					chunks.append({"kind": kind, "lod": lod_name, "faces": faces.slice(first,first+1024), "feature_id": chunk.feature_id, "water_class": HydrographyStyle.surface_class(chunk)})
+				if reference_groups.is_empty(): reference_groups[""] = faces
+				for reference: String in reference_groups:
+					var reference_faces := reference_groups[reference] as Array
+					var water_class := HydrographyStyle.surface_class(chunk)
+					var key := kind + ":" + water_class + ":" + reference
+					if not surface_groups.has(key): surface_groups[key] = {"kind":kind,"water_class":water_class,"reference":reference,"faces":[],"feature_ids":[]}
+					(surface_groups[key].faces as Array).append_array(reference_faces)
+					(surface_groups[key].feature_ids as Array).append(chunk.feature_id)
 				vector_bytes += faces.size() * 60
 				continue
 			if not groups.has(kind):
@@ -74,6 +100,11 @@ static func prepare(source: Array[Dictionary], lods: Array[String] = ["coarse", 
 					chunks.append({"kind":kind, "boundaries":groups[kind], "lod":lod_name})
 					groups[kind] = []
 					counts[kind] = 0
+		for key: String in surface_groups:
+			var group := surface_groups[key] as Dictionary
+			var faces := group.faces as Array
+			for first: int in range(0,faces.size(),1024):
+				chunks.append({"kind":group.kind,"lod":lod_name,"faces":faces.slice(first,first+1024),"feature_id":group.feature_ids[0],"source_feature_ids":group.feature_ids,"water_class":group.water_class,"visual_reference_feature":group.reference})
 		for kind: String in groups:
 			if not (groups[kind] as Array).is_empty():
 				chunks.append({"kind":kind, "boundaries":groups[kind], "lod":lod_name})

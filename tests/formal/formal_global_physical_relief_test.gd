@@ -52,7 +52,7 @@ func _run() -> void:
 	test.expect(not (rejected.errors as Array).is_empty() and not rejected.has("image"), "Corrupt byte binding fails closed")
 	for scale: float in [50, 75, 188, 350, 1200, 4500, 8000, 16000]:
 		var weight := MapScaleStyle.relief_weight(scale, "political")
-		test.expect(weight >= 0.0 and weight <= 0.65, "Restrained relief blend")
+		test.expect(weight >= 0.0 and weight <= 0.80, "R3 static relief blend remains bounded below full replacement")
 		test.expect(absf(weight-MapScaleStyle.relief_weight(scale+0.01, "political")) < 0.001, "Continuous scale blend")
 		test.expect(MapScaleStyle.relief_weight(scale, "economy_fulfillment") < weight, "Economy colors remain dominant")
 	test.expect(MapScaleStyle.relief_weight(75, "political") < MapScaleStyle.relief_weight(1200, "political"), "Local cannot imply finer terrain")

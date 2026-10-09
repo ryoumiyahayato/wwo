@@ -1,5 +1,5 @@
 {
-  "content_sha256": "0ddf380ab24e7a143d9fd07ca9354e583578b8deb1c1926628a98b3b53645e91",
+  "content_sha256": "6dbf78e9b2e4d0528fd5d72a37e761032ef46fd1263b43445d67a8a02bdf2d57",
   "excluded": [
     {
       "path": ".git/",
@@ -282,6 +282,14 @@
       "reason": "file outside reviewed exact file allowlist"
     },
     {
+      "path": "tests/formal/formal_map_correctness_r3_test.gd",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tests/formal/formal_map_correctness_r3_test.gd.uid",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
       "path": "tests/formal/formal_paris_land_pilot_test.gd",
       "reason": "file outside reviewed exact file allowlist"
     },
@@ -350,11 +358,27 @@
       "reason": "file outside reviewed exact file allowlist"
     },
     {
+      "path": "tools/map/audit_coastal_coverage_r3.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/audit_correctness_release.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
       "path": "tools/map/audit_map_triangles.py",
       "reason": "file outside reviewed exact file allowlist"
     },
     {
+      "path": "tools/map/bind_display_bounds.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
       "path": "tools/map/build_administrative_measurement.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/build_country_label_layout.py",
       "reason": "file outside reviewed exact file allowlist"
     },
     {
@@ -386,11 +410,23 @@
       "reason": "file outside reviewed exact file allowlist"
     },
     {
+      "path": "tools/map/build_political_border_display.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
       "path": "tools/map/build_regional_political_display.py",
       "reason": "file outside reviewed exact file allowlist"
     },
     {
-      "path": "tools/map/check_regional_display.gd",
+      "path": "tools/map/check_regional_display.gd.uid",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/check_strategic_payloads.gd",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/check_strategic_payloads.gd.uid",
       "reason": "file outside reviewed exact file allowlist"
     },
     {
@@ -446,6 +482,18 @@
       "reason": "file outside reviewed exact file allowlist"
     },
     {
+      "path": "tools/map/remove_refined_display_trial.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/repair_syvash_display_r3.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/run_correctness_focused.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
       "path": "tools/map/summarize_administrative_measurement.py",
       "reason": "file outside reviewed exact file allowlist"
     },
@@ -459,6 +507,10 @@
     },
     {
       "path": "tools/map/summarize_paris_land_measurement.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/write_correctness_report.py",
       "reason": "file outside reviewed exact file allowlist"
     },
     {
@@ -490,7 +542,7 @@
       "reason": "file outside reviewed exact file allowlist"
     }
   ],
-  "included_bytes": 5858492,
+  "included_bytes": 5867435,
   "included_files": 777,
   "owner_id": "7ed35d2d-c560-4b08-8c28-78af6d1cae6b",
   "remote": "https://github.com/ryoumiyahayato/wwo.git",

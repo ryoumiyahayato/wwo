@@ -163,6 +163,7 @@ $tests = @(
 	@{ Name = 'Global strategic geography R1'; Script = 'res://tests/formal/formal_global_strategic_geography_test.gd'; TimeoutSeconds = 240 },
 	@{ Name = 'Hydrography presentation R1'; Script = 'res://tests/formal/formal_hydrography_presentation_test.gd'; TimeoutSeconds = 240 },
 	@{ Name = 'Map geographic foundation R1'; Script = 'res://tests/formal/formal_geographic_foundation_test.gd'; TimeoutSeconds = 240 },
+	@{ Name = 'Map correctness R3'; Script = 'res://tests/formal/formal_map_correctness_r3_test.gd'; TimeoutSeconds = 240 },
 	@{ Name = 'Historical provenance foundation'; Script = 'res://tests/formal/historical_provenance_foundation_test.gd'; TimeoutSeconds = 180 },
 	@{ Name = 'Runtime political identity foundation'; Script = 'res://tests/formal/runtime_political_identity_foundation_test.gd'; TimeoutSeconds = 240 },
 	@{ Name = 'Formal economy 30-day and one-year golden'; Script = 'res://tests/formal/formal_world_economy_golden_test.gd'; TimeoutSeconds = 240 },

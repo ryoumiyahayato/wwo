@@ -264,7 +264,7 @@ static func source_mesh(parts: Array, feature_id: String) -> Dictionary:
 					triangles.append({"points": to_unit_line(child), "uvs": uvs, "component_index": part.component_index})
 		if triangles.size() == component_start:
 			push_error("Globe geometry %s component %d: no surface survived source preparation" % [feature_id, part.component_index])
-	return {"triangles": triangles, "borders": borders}
+	return {"triangles": triangles, "borders": borders, "uv_bounds": uv_bounds}
 
 static func edge_key(a: Vector3, b: Vector3) -> String:
 	var first := str(Vector3i(roundi(a.x * 1000000.0), roundi(a.y * 1000000.0), roundi(a.z * 1000000.0)))

@@ -4,6 +4,7 @@ render_mode unshaded;
 varying vec4 political_color;
 uniform vec4 water_color = vec4(0.15,0.36,0.48,0.96);
 uniform float paris_mask_weight = 0.0;
+uniform float surface_expand_pixels = 0.0;
 varying vec2 map_pixel;
 uniform sampler2D relief_world : filter_linear, repeat_enable;
 uniform sampler2D relief_region : filter_linear, repeat_enable;
@@ -106,6 +107,22 @@ void vertex() {
 			// blending during water fade-in. Pair each existing corner exactly;
 			// shared edges rasterize once with no new mesh, triangulation or draw.
 			vec2 covered = point;
+			// Opaque coastal subtraction must also cover the political mesh's
+			// subpixel seam expansion beyond its canonical exterior. Lakes and
+			// translucent transitions keep exact corners to avoid repeated blend.
+			if (surface_expand_pixels > 0.0 && water_color.a > 0.999) {
+				vec2 incoming = normalize(point - triangle[(corner + 2) % 3]);
+				vec2 outgoing = normalize(triangle[(corner + 1) % 3] - point);
+				vec2 before = vec2(incoming.y, -incoming.x) * sign(determinant);
+				vec2 after = vec2(outgoing.y, -outgoing.x) * sign(determinant);
+				float tangent = tan(atan(cross_2d(before, after), dot(before, after)) * 0.25);
+				covered += surface_expand_pixels * (slot % 2 == 0
+					? before + vec2(-before.y, before.x) * tangent
+					: after - vec2(-after.y, after.x) * tangent);
+				if (dot(before, after) > 0.999) {
+					covered = point + surface_expand_pixels * (before + after) / (1.0 + dot(before, after));
+				}
+			}
 			vec2 delta = covered - triangle[0];
 			vec2 uv = uvs[0] + (uvs[fan + 1] - uvs[0]) * cross_2d(delta, second) / determinant
 				+ (uvs[fan + 2] - uvs[0]) * cross_2d(first, delta) / determinant;

@@ -37,6 +37,8 @@ var _source_dirty: bool = true
 var _surface_batches: Dictionary = {}
 var _boundary_batches: Array[Dictionary] = []
 var _font := UIDrawing.create_font()
+var _country_font := SystemFont.new()
+var _country_label_layouts: Dictionary = {}
 var _surface_shader: Shader
 var _physical_background: Dictionary = {}
 var _relief_shader_warmed: bool = false
@@ -54,11 +56,6 @@ var _region_label_frame := Basis()
 var render_draw_count: int = 0
 var view_update_count: int = 0
 var cpu_projection_count: int = 0
-var regional_display_metrics: Dictionary = {}
-var _regional_display_thread: Thread
-var _regional_display_wanted: String = ""
-var _regional_display_loading: String = ""
-var _regional_display_ready: String = ""
 var last_submit_usec: int = 0
 var last_submit_parts: Dictionary = {}
 
@@ -79,6 +76,7 @@ static func _bounds(batch: Dictionary, viewport_size: Vector2) -> void:
 @onready var _moon: MeshInstance3D = $HemisphereViewportContainer/HemisphereViewport/GlobeSurface/Moon
 
 func _ready() -> void:
+	_country_font.font_names = PackedStringArray(["Georgia", "Cambria", "Times New Roman", "SimSun"])
 	# The existing viewport also retains the prepared 2D map. Static camera and
 	# appearance reuse its texture instead of projecting all faces on the GPU.
 	_viewport.world_2d = World2D.new()
@@ -90,8 +88,6 @@ func _ready() -> void:
 	set_process(false)
 
 func _exit_tree() -> void:
-	if _regional_display_thread != null:
-		_regional_display_thread.wait_to_finish()
 	relief.dispose()
 	local_layer.clear()
 	strategic_layer.clear()
@@ -107,6 +103,7 @@ func configure(content_value: MapGeometryContent, controller_value: GlobeControl
 	_source_dirty = true
 	content = content_value
 	controller = controller_value
+	_country_label_layouts = content.presentation_document("country_labels").get("layouts", {}) as Dictionary
 	if not controller.view_changed.is_connected(_invalidate_projection):
 		controller.view_changed.connect(_invalidate_projection)
 		controller.selection_changed.connect(queue_redraw)
@@ -127,15 +124,39 @@ func refresh(registry: RuntimePoliticalEntityView, evidence: HistoricalPolitical
 	if political.bind_source_meshes(_source_meshes, _source_dirty):
 		region_view.clear()
 		_source_boundaries = political.display_boundary_sources(GlobeProjection.boundary_sources(_source_meshes, political.boundary_features), content)
+		_source_boundaries = _shared_border_display(_source_boundaries)
 		_prepare_surface_batches()
 		_prepare_boundary_batches()
-		_regional_display_ready = ""
 	_source_dirty = false
 	if not _relief_shader_warmed and DisplayServer.get_name() != "headless":
 		_relief_shader_warmed = true
 		_warm_relief_shaders()
 	# The layer has rebuilt final macro ownership, including dated display links.
 	_invalidate_projection()
+
+func _shared_border_display(original: Array[Dictionary]) -> Array[Dictionary]:
+	if political.display_date < "1900-01-01" or political.display_date >= "1901-01-01": return original
+	var document := content.presentation_document("shared_borders")
+	if document.is_empty(): return original
+	var output: Array[Dictionary] = []
+	var area := Rect2(Vector2(33.9,11.9),Vector2(27.2,23.2))
+	for boundary: Dictionary in original:
+		var points := PackedVector2Array()
+		for point: Vector3 in boundary.points: points.append(RegionProjection.lon_lat(point))
+		if str(boundary.kind) != "macro" or area.intersects(GlobeProjection.lon_lat_bounds([points]),true): output.append(boundary)
+	var current_owners := political.get("_whole_owner_by_feature") as Dictionary
+	for boundary: Dictionary in document.get("boundaries",[]) as Array:
+		var features := boundary.source_features as Array
+		var owners := PackedStringArray()
+		for feature: String in features:
+			var owner := str(current_owners.get(feature,""))
+			if not owner.is_empty() and owner not in owners: owners.append(owner)
+		if owners.size()!=2: continue
+		var coordinates := PackedVector2Array()
+		for point: Array in boundary.points: coordinates.append(Vector2(float(point[0]),float(point[1])))
+		if area.intersects(GlobeProjection.lon_lat_bounds([coordinates]),true): continue
+		output.append({"points":GlobeProjection.to_unit_line(coordinates),"owners":owners,"kind":"macro"})
+	return output
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_RESIZED and is_node_ready():
@@ -209,14 +230,18 @@ func _ensure_view() -> void:
 			_prepare_region_labels()
 	_sync_local_resources()
 	_sync_strategic_resources()
-	_sync_regional_display()
 	local_layer.update(controller.region_camera, controller, political.display_date, size)
 	_update_strategic_layer()
 	_anchors.clear()
 	_place_points.clear()
 	var basis := controller.orientation()
 	for entity_id: String in political.records:
-		var rotated := basis * (political.anchors.get(entity_id, Vector3.ZERO) as Vector3)
+		var unit := political.anchors.get(entity_id, Vector3.ZERO) as Vector3
+		var layout := _country_label_layouts.get(str((political.records[entity_id] as Dictionary).get("geometry_feature_id","")),{}) as Dictionary
+		if not bool((political.records[entity_id] as Dictionary).get("display_only",false)) and not (layout.get("positions",[]) as Array).is_empty():
+			var coordinates := (layout.positions[0] as Dictionary).lon_lat as Array
+			unit = GlobeProjection.lon_lat_to_unit(Vector2(float(coordinates[0]),float(coordinates[1])))
+		var rotated := basis * unit
 		if regional:
 			var point := _region_label_point(_region_anchor_km[entity_id] as Vector2)
 			if Rect2(Vector2.ZERO, size).has_point(point):
@@ -288,7 +313,10 @@ func _draw_surfaces(regional: bool = false) -> void:
 	var background := region_view.background if regional else _physical_background
 	var style_key := Vector3(relief_style.x, relief_style.y, float(batches.size()))
 	var relief_style_changed: bool = background.get("surface_relief_style", Vector3(-1.0, -1.0, -1.0)) != style_key
-	_parameter(background, "relief_weight", relief_style.x)
+	# Once admitted physical land/sea coverage is ready, coarse DEM height
+	# interpolation must not paint a second shoreline over its actual sea.
+	var physical_coverage := regional and not strategic_layer.active_lod.is_empty()
+	_parameter(background, "relief_weight", 0.0 if physical_coverage else relief_style.x)
 	if regional:
 		_parameter(background, "relief_detail_weight", relief_style.y)
 		_set_region_uniforms(background)
@@ -516,14 +544,15 @@ func _draw() -> void:
 		_place_points.merge(strategic_layer.visible_places, true)
 		_place_points.merge(local_layer.visible_places, true)
 	if regional:
-		_update_strategic_layer()
 		_place_points.merge(strategic_layer.visible_places, false)
 		var covered := local_layer.visible_places.duplicate()
 		covered.merge(strategic_layer.visible_places)
 		if strategic_content != null: covered.merge(political.places)
-		var reserved := local_layer.label_rects.duplicate()
-		reserved.append_array(strategic_layer.label_rects)
-		region_view.update_labels(controller.region_camera, controller, _font, size, covered, reserved)
+		region_view.update_labels(controller.region_camera, controller, _font, size, covered)
+		local_layer.reserved_label_rects = region_view.country_label_rects
+		local_layer.update(controller.region_camera, controller, political.display_date, size)
+		strategic_layer.reserved_label_rects = region_view.country_label_rects
+		_update_strategic_layer()
 	last_submit_parts["labels"] = Time.get_ticks_usec()-part_started
 	part_started = Time.get_ticks_usec()
 	if _transition_elapsed >= 0.0 and not transition_metrics.has("target_canvas_submit_usec"):
@@ -553,7 +582,13 @@ func _draw() -> void:
 		if controller.zoom >= 4.8 or selected or place_id == controller.hovered_place_id:
 			UIDrawing.label(self, _font, point + Vector2(7.0, -6.0), str((political.places[place_id] as Dictionary).get("name", place_id)), 10)
 	if not regional:
-		GlobeLabels.draw(self, _font, _anchors, political.records, Rect2(Vector2.ZERO, size), controller.zoom, controller.selected_polity_id, controller.hovered_polity_id, controller.labels_enabled)
+		var label_records := political.records.duplicate()
+		for id: String in label_records:
+			var layout := _country_label_layouts.get(str((label_records[id] as Dictionary).get("geometry_feature_id","")),{}) as Dictionary
+			if layout.has("name"):
+				label_records[id] = (label_records[id] as Dictionary).duplicate()
+				label_records[id]["short_name_zh"] = layout.name
+		GlobeLabels.draw(self, _country_font, _anchors, label_records, Rect2(Vector2.ZERO, size), controller.zoom, controller.selected_polity_id, controller.hovered_polity_id, controller.labels_enabled)
 	var metric := controller.region_camera.km_per_pixel if regional else RegionProjection.world_scale(RegionProjection.world_unit(_center, _center, _radius, controller.orientation()), controller.orientation(), _radius)
 	var space := MapScaleStyle.band(metric * 1000.0, regional, controller.region_camera.local_active)
 	if not local_layer.visible_places.is_empty():
@@ -750,7 +785,16 @@ func _sync_strategic_resources() -> void:
 	strategic_content.request(center, camera.km_per_pixel*size.length()*0.5, political.display_date, camera.km_per_pixel*1000.0)
 	if strategic_content.content != null and strategic_content.content != strategic_layer.content_reference():
 		strategic_layer.rail_style = 3
-		strategic_layer.begin(strategic_content.content,region_view.viewport.world_2d.canvas,camera.km_per_pixel*1000.0)
+		var frames: Dictionary = {}
+		var templates: Dictionary = {}
+		var owners := political.get("_whole_owner_by_feature") as Dictionary
+		for feature: Dictionary in strategic_content.content.features:
+			for reference: String in feature.get("visual_reference_features", []) as Array:
+				var owner := str(owners.get(reference, ""))
+				if not reference.is_empty() and _source_meshes.has(reference) and region_view.surfaces.has(owner):
+					frames[reference] = (_source_meshes[reference] as Dictionary).uv_bounds
+					templates[reference] = region_view.surfaces[owner]
+		strategic_layer.begin(strategic_content.content,region_view.viewport.world_2d.canvas,camera.km_per_pixel*1000.0,{"frames":frames,"templates":templates})
 	if strategic_content.content == null and not strategic_content.preparing(): strategic_layer.clear()
 	# Preserve the displayed physical LOD while its replacement shard is read.
 	# The old coarse-only coast cannot supply a finer view by preparing an
@@ -759,56 +803,8 @@ func _sync_strategic_resources() -> void:
 		strategic_layer.request_lods(camera.km_per_pixel*1000.0)
 	if strategic_content.preparing() or strategic_layer.preparing: set_process(visible)
 
-func _sync_regional_display() -> void:
-	if not controller.region_camera.active or not visible or controller.region_camera.local_active or political.display_date < "1900-01-01" or political.display_date >= "1901-01-01":
-		_regional_display_wanted = ""
-		if not _regional_display_ready.is_empty():
-			for owner: String in region_view.surfaces:
-				region_view.replace_display_geometry(owner, (_surface_batches[owner] as Dictionary).geometry as GlobeSurfaceBatch)
-			_regional_display_ready = ""
-		return
-	_regional_display_wanted = "coarse" if controller.region_camera.km_per_pixel * 1000.0 > MapScaleStyle.MEDIUM_LOD_MPP else "medium"
-	if _regional_display_thread == null and region_view.ready and _regional_display_ready != _regional_display_wanted:
-		_regional_display_loading = _regional_display_wanted
-		_regional_display_thread = Thread.new()
-		_regional_display_thread.start(GeographyLoader.prepare_regional_display.bind(_regional_display_loading))
-	if _regional_display_thread != null: set_process(visible)
-
-func _poll_regional_display() -> void:
-	if _regional_display_thread == null or _regional_display_thread.is_alive(): return
-	var result := _regional_display_thread.wait_to_finish() as Dictionary
-	_regional_display_thread = null
-	if _regional_display_loading != _regional_display_wanted or not region_view.ready:
-		_sync_regional_display()
-		return
-	if not (result.errors as Array).is_empty():
-		push_error("Regional display source rejected: " + str(result.errors))
-		_regional_display_ready = _regional_display_wanted
-		return
-	var faces_by_owner: Dictionary = {}
-	var scoped_owners: Dictionary = {}
-	var scoped := political.get("_scope_features") as Array
-	var owners := political.get("_whole_owner_by_feature") as Dictionary
-	for feature_id: String in scoped:
-		scoped_owners[str(owners.get(feature_id, ""))] = true
-	for feature_id: String in result.meshes:
-		var owner := str(owners.get(feature_id, ""))
-		if scoped_owners.has(owner): continue
-		if not faces_by_owner.has(owner): faces_by_owner[owner] = []
-		(faces_by_owner[owner] as Array).append_array((result.meshes[feature_id] as Dictionary).triangles as Array)
-	var uploaded := 0
-	for owner: String in faces_by_owner:
-		var geometry := GlobeSurfaceBatch.new()
-		geometry.prepare(faces_by_owner[owner] as Array)
-		region_view.replace_display_geometry(owner, geometry)
-		uploaded += (faces_by_owner[owner] as Array).size()
-	_regional_display_ready = _regional_display_loading
-	regional_display_metrics = result.metrics as Dictionary
-	regional_display_metrics["faces"] = uploaded
-	regional_display_metrics["lod"] = _regional_display_ready
-	_invalidate_projection()
-
 func _update_strategic_layer() -> void:
+	strategic_layer.reference_relief = relief.textures
 	strategic_layer.suppressed_places = local_layer.visible_places
 	strategic_layer.paris_mask_weights = {}
 	if not local_layer.active_lod.is_empty():
@@ -861,8 +857,6 @@ func _process(_delta: float) -> void:
 		_bind_relief()
 		queue_redraw()
 	_sync_relief()
-	_poll_regional_display()
-	_sync_regional_display()
 	if region_view.preparing:
 		region_view.prepare_step(_surface_batches, _boundary_batches)
 		if region_view.ready:
@@ -900,7 +894,7 @@ func _process(_delta: float) -> void:
 			queue_redraw()
 	if _transition_elapsed < 0.0:
 		_sync_local_resources()
-	if _regional_display_thread == null and not relief.preparing() and not region_view.preparing and not strategic_layer.preparing and (strategic_content == null or not strategic_content.preparing()) and not local_layer.preparing and (local_content == null or not local_content.preparing()) and _transition_elapsed < 0.0:
+	if not relief.preparing() and not region_view.preparing and not strategic_layer.preparing and (strategic_content == null or not strategic_content.preparing()) and not local_layer.preparing and (local_content == null or not local_content.preparing()) and _transition_elapsed < 0.0:
 		set_process(false)
 
 func _on_visibility_changed() -> void:
@@ -908,7 +902,6 @@ func _on_visibility_changed() -> void:
 		return
 	_sync_relief()
 	_sync_strategic_resources()
-	_sync_regional_display()
 	if not visible:
 		_transition_elapsed = -1.0
 		set_process(false)
@@ -932,7 +925,14 @@ func _prepare_region_labels() -> void:
 	for entity_id: String in political.records:
 		_region_anchor_km[entity_id] = RegionProjection.forward(political.anchors.get(entity_id, Vector3.ZERO) as Vector3, frame)
 		var record := political.records[entity_id] as Dictionary
-		labels.append({"id": entity_id, "km": _region_anchor_km[entity_id], "text": str(record.get("short_name_zh", record.get("name_zh", entity_id))), "rank": int(record.get("label_rank", 9)) + 10, "font_size": 11, "place": false})
+		var layout := _country_label_layouts.get(str(record.get("geometry_feature_id", "")), {}) as Dictionary
+		var candidates: Array[Dictionary] = []
+		if not bool(record.get("display_only", false)):
+			for position: Dictionary in layout.get("positions", []) as Array:
+				var coordinates := position.lon_lat as Array
+				candidates.append({"km":RegionProjection.forward(GlobeProjection.lon_lat_to_unit(Vector2(float(coordinates[0]),float(coordinates[1]))),frame),"clearance_km":position.clearance_km})
+		if candidates.is_empty(): candidates.append({"km":_region_anchor_km[entity_id],"clearance_km":100.0})
+		labels.append({"id": entity_id, "km": candidates[0].km, "candidates":candidates,"candidate_index":0,"text": str(layout.get("name",record.get("short_name_zh", record.get("name_zh", entity_id)))), "rank": int(record.get("label_rank", 9)) + 10, "font_size": 24, "place": false})
 	for place_id: String in political.places:
 		var raw_point: Variant = (political.places[place_id] as Dictionary).get("lon_lat", [])
 		if raw_point is Array and (raw_point as Array).size() >= 2:
@@ -941,7 +941,7 @@ func _prepare_region_labels() -> void:
 			# prototype cities in the label source can resurrect them on redraw.
 			if strategic_content == null:
 				labels.append({"id": place_id, "km": _region_place_km[place_id], "text": str((political.places[place_id] as Dictionary).get("name", place_id)), "rank": 0, "font_size": 10, "place": true})
-	region_view.prepare_labels(labels, _font)
+	region_view.prepare_labels(labels, _font, _country_font)
 	_region_labels_dirty = false
 	transition_metrics["label_prepare_usec"] = Time.get_ticks_usec() - started
 

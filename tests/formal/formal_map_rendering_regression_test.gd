@@ -21,7 +21,7 @@ func _run() -> void:
 	var renderer := app.map_renderer
 	var batches := renderer.get("_surface_batches") as Dictionary
 	var boundaries := renderer.get("_boundary_batches") as Array[Dictionary]
-	test.equal(boundaries.size(), 3, "Coast and both macro strokes are actually submitted")
+	test.equal(boundaries.size(), 2, "Coast and the single restrained macro stroke are actually submitted")
 	var submitted_faces: int = 0
 	for batch: Dictionary in batches.values():
 		var mesh := (batch.geometry as GlobeSurfaceBatch).mesh
@@ -33,7 +33,7 @@ func _run() -> void:
 		source_segments[str(boundary.kind)] += (boundary.points as PackedVector3Array).size() - 1
 	test.equal((boundaries[0].geometry as GlobeBoundaryBatch).segment_count, source_segments.coast, "Coast batch retains all source segments")
 	test.equal((boundaries[1].geometry as GlobeBoundaryBatch).segment_count, source_segments.macro, "Macro batch retains all source segments")
-	test.expect((boundaries[1].geometry as GlobeBoundaryBatch) == (boundaries[2].geometry as GlobeBoundaryBatch), "Both macro strokes share geometry, keeping separate widths")
+	test.equal((boundaries[1].material as ShaderMaterial).get_shader_parameter("stroke_width"), GlobeRenderer.POLITICAL_UNDER_WIDTH, "Single macro stroke uses the specified screen-space width")
 	var first_mesh := (batches.values()[0] as Dictionary).geometry as GlobeSurfaceBatch
 	app._advance_world(60)
 	test.expect(((renderer.get("_surface_batches") as Dictionary).values()[0] as Dictionary).geometry == first_mesh, "Economic settlement does not recreate display geometry")

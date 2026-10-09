@@ -18,7 +18,8 @@ static func draw(canvas: CanvasItem, font: Font, anchors: Dictionary, records: D
 		var record := records.get(entity_id, {}) as Dictionary
 		var point := anchors[entity_id] as Vector2
 		var name := str(record.get("short_name_zh", record.get("name_zh", entity_id)))
-		var rect := Rect2(point + Vector2(8.0, -15.0), Vector2(maxf(42.0, name.length() * 10.5), 18.0))
+		var text_size := font.get_string_size(name,HORIZONTAL_ALIGNMENT_LEFT,-1,16)
+		var rect := Rect2(point - text_size * .5, text_size)
 		if not bounds.encloses(rect):
 			continue
 		var overlaps := false
@@ -28,4 +29,4 @@ static func draw(canvas: CanvasItem, font: Font, anchors: Dictionary, records: D
 		if overlaps or occupied.size() >= 42:
 			continue
 		occupied.append(rect)
-		UIDrawing.label(canvas, font, rect.position + Vector2(0.0, 13.0), name, 11)
+		UIDrawing.label(canvas, font, rect.position + Vector2(0.0, 15.0), name, 16)

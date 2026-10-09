@@ -38,12 +38,16 @@ var _target: String = "coarse"
 var strategic: bool = false
 var suppressed_places: Dictionary = {}
 var paris_mask_weights: Dictionary = {}
+var _reference_visuals: Dictionary = {}
+var _reference_frames: Dictionary = {}
+var reference_relief: Dictionary = {}
+var reserved_label_rects: Array[Rect2] = []
 
 func _lod(mpp: float) -> String:
 	var value := MapScaleStyle.lod(mpp)
 	return "medium" if strategic and value == "local" else value
 
-func begin(content: LocalSpatialContent, canvas: RID, mpp: float = 4500.0) -> void:
+func begin(content: LocalSpatialContent, canvas: RID, mpp: float = 4500.0, visual_context: Dictionary = {}) -> void:
 	# Reading a new shard and uploading it are two separate waits. Retain the
 	# displayed geometry through both, then release it at the replacement boundary.
 	var previous: Array[Dictionary] = []
@@ -58,6 +62,8 @@ func begin(content: LocalSpatialContent, canvas: RID, mpp: float = 4500.0) -> vo
 	clear()
 	_fallback_batches = previous
 	_fallback_lod = previous_lod
+	_reference_visuals = visual_context.get("templates", {}) as Dictionary
+	_reference_frames = visual_context.get("frames", {}) as Dictionary
 	_content = content
 	strategic = str(content.metadata.get("content_level", "")) == "strategic"
 	prepare_count += 1
@@ -102,7 +108,7 @@ func _queue_preparation() -> void:
 		if not _cpu_ready.has(lod_name): missing.append(lod_name)
 	if not missing.is_empty():
 		_lod_thread = Thread.new()
-		_lod_thread.start(LocalSpatialLod.prepare.bind(_content.line_chunks,missing))
+		_lod_thread.start(LocalSpatialLod.prepare.bind(_content.line_chunks,missing,_reference_frames))
 		preparing = true
 		return
 	_upload_chunks.clear()
@@ -210,9 +216,18 @@ func prepare_step(font: Font) -> void:
 		if texture == null or mesh.get_surface_count() == 0:
 			_cursor += 1
 			continue
-		var material := ShaderMaterial.new()
-		material.shader = load("res://shaders/presentation/map/globe_water_surface.gdshader") as Shader if water else _shader
+		var reference := str(line.get("visual_reference_feature", ""))
+		var template := _reference_visuals.get(reference, {}) as Dictionary
+		var material := (template.material as ShaderMaterial).duplicate() as ShaderMaterial if not template.is_empty() else ShaderMaterial.new()
+		var land_reference := str(line.kind) == "land_reference"
+		if template.is_empty(): material.shader = load("res://shaders/presentation/map/political_surface.gdshader" if land_reference else "res://shaders/presentation/map/globe_water_surface.gdshader") as Shader if water else _shader
+		if land_reference:
+			material.set_shader_parameter("surface_expand_pixels", 0.0)
+			if template.is_empty():
+				material.set_shader_parameter("flag_weight", 0.0)
+				material.set_shader_parameter("political_base_color", Vector3(107.0/255.0,128.0/255.0,117.0/255.0))
 		material.set_shader_parameter("region_mode", true)
+		if str(line.kind) == "ocean_reference": material.set_shader_parameter("surface_expand_pixels", 0.55)
 		material.set_shader_parameter("face_data" if water else "line_data", texture)
 		if water:
 			material.set_shader_parameter("water_color", HydrographyStyle.color(str(line.kind), str(line.get("water_class", "lake"))))
@@ -226,10 +241,10 @@ func prepare_step(font: Font) -> void:
 		RenderingServer.canvas_item_set_parent(item, _canvas)
 		RenderingServer.canvas_item_set_draw_index(item, DRAW_ORDER-2 if str(line.kind) in ["land_reference", "ocean_reference"] else DRAW_ORDER-1 if str(line.kind)=="coast" else DRAW_ORDER)
 		RenderingServer.canvas_item_set_material(item, material.get_rid())
-		RenderingServer.canvas_item_add_mesh(item, mesh.get_rid())
+		RenderingServer.canvas_item_add_mesh(item, mesh.get_rid(), Transform2D(), Color.WHITE, template.texture as RID if not template.is_empty() else RID())
 		RenderingServer.canvas_item_set_visible(item, false)
 		var buffer_bytes := geometry_bytes + texture.get_width() * texture.get_height() * 16 if texture != null else 0
-		_batches.append({"item": item, "material": material, "geometry": geometry, "lod":line.lod, "kind":line.kind, "visible":false, "water": water, "water_class": line.get("water_class", "lake"), "faces": (line.get("faces", []) as Array).size()})
+		_batches.append({"item": item, "material": material, "geometry": geometry, "lod":line.lod, "kind":line.kind, "visible":false, "water": water, "water_class": line.get("water_class", "lake"), "faces": (line.get("faces", []) as Array).size(), "visual_template":template})
 		_cursor += 1
 		metrics.gpu_enqueue_usec += Time.get_ticks_usec() - started
 		metrics.upload_bytes_estimate += buffer_bytes
@@ -289,6 +304,9 @@ func update(camera: RegionCamera, controller: GlobeController, date: String, vie
 	var visible_line := false
 	for batch: Dictionary in _batches + _fallback_batches:
 		var weight := MapScaleStyle.strategic_weight(str(batch.kind), mpp) if strategic else MapScaleStyle.physical_weight(str(batch.kind), mpp)
+		# A prepared geometric correction must fully replace the inaccurate
+		# footprint; fading it exposes old triangles through actual sea water.
+		if strategic and str(batch.kind) in ["land_reference", "ocean_reference"]: weight = 1.0
 		if strategic and str(batch.kind) == "rail" and controller.map_mode == "political": weight = 0.0
 		var visible := show and str(batch.lod) == active_lod and weight > 0.001
 		if visible != bool(batch.visible):
@@ -300,6 +318,18 @@ func update(camera: RegionCamera, controller: GlobeController, date: String, vie
 			var color := HydrographyStyle.color(str(batch.kind), str(batch.water_class))
 			color.a *= weight
 			GlobeRenderer._parameter(batch, "water_color" if bool(batch.water) else "stroke_color", color)
+			var template := batch.get("visual_template", {}) as Dictionary
+			if not template.is_empty():
+				for parameter: String in ["surface_color","political_base_color","flag_weight","political_weight","flag_bounds","flag_uv_scale","flag_uv_offset","flag_uv_rotation","relief_world","relief_region","relief_weight","relief_detail_weight"]:
+					GlobeRenderer._parameter(batch, parameter, (template.material as ShaderMaterial).get_shader_parameter(parameter))
+				GlobeRenderer._parameter(batch,"reference_opacity",weight)
+			elif str(batch.kind)=="land_reference":
+				GlobeRenderer._parameter(batch,"reference_opacity",weight)
+				GlobeRenderer._parameter(batch,"political_weight",MapScaleStyle.political_weight(mpp) if controller.map_mode=="political" else 0.0)
+				GlobeRenderer._parameter(batch,"relief_world",reference_relief.get("world"))
+				GlobeRenderer._parameter(batch,"relief_region",reference_relief.get("region"))
+				GlobeRenderer._parameter(batch,"relief_weight",MapScaleStyle.relief_weight(mpp,controller.map_mode) if reference_relief.has("world") else 0.0)
+				GlobeRenderer._parameter(batch,"relief_detail_weight",MapScaleStyle.relief_detail_weight(mpp) if reference_relief.has("region") else 0.0)
 			if not bool(batch.water): GlobeRenderer._parameter(batch, "rail_style", rail_style if str(batch.kind)=="rail" else 0)
 			if strategic: GlobeRenderer._parameter(batch, "paris_mask_weight", float(paris_mask_weights.get(str(batch.kind), 0.0)))
 			GlobeRenderer._parameter(batch, "globe_basis", camera.tangent_frame.transposed())
@@ -310,7 +340,7 @@ func update(camera: RegionCamera, controller: GlobeController, date: String, vie
 	var changed_frame := _frame != camera.tangent_frame
 	if show:
 		_frame = camera.tangent_frame
-	var occupied: Array[Rect2] = []
+	var occupied: Array[Rect2] = reserved_label_rects.duplicate()
 	var axes := RegionProjection.screen_axes(camera.bearing)
 	for label: Dictionary in _labels:
 		if not (label.item as RID).is_valid():
@@ -384,6 +414,8 @@ func clear() -> void:
 	_first_visible = false
 	_frame = Basis()
 	_content = null
+	_reference_visuals.clear()
+	_reference_frames.clear()
 	metrics["resident_gpu_buffer_bytes"] = 0
 	metrics["resident_lods"] = []
 

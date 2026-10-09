@@ -17,6 +17,7 @@ var background: Dictionary = {}
 var _labels: Array[Dictionary] = []
 var label_prepare_count: int = 0
 var glyph_submit_count: int = 0
+var country_label_rects: Array[Rect2] = []
 
 func initialize(parent: Control) -> void:
 	container = SubViewportContainer.new()
@@ -74,7 +75,7 @@ func prepare_step(source: Dictionary, lines: Array[Dictionary]) -> void:
 		material.set_shader_parameter("region_mode", true)
 		var item := RenderingServer.canvas_item_create()
 		RenderingServer.canvas_item_set_parent(item, viewport.world_2d.canvas)
-		RenderingServer.canvas_item_set_draw_index(item, surfaces.size() + boundaries.size() + 1)
+		RenderingServer.canvas_item_set_draw_index(item, LocalSpatialLayer.DRAW_ORDER + 2 if str(original.get("kind", "")) == "macro" else surfaces.size() + boundaries.size() + 1)
 		RenderingServer.canvas_item_set_material(item, material.get_rid())
 		RenderingServer.canvas_item_add_mesh(item, (original.geometry as GlobeBoundaryBatch).mesh.get_rid())
 		boundaries.append({"geometry": original.geometry, "material": material, "item": item, "kind": original.get("kind", "")})
@@ -100,24 +101,18 @@ func clear_labels() -> void:
 			RenderingServer.free_rid(label.item as RID)
 	_labels.clear()
 
-func replace_display_geometry(owner: String, geometry: GlobeSurfaceBatch) -> void:
-	if not surfaces.has(owner): return
-	var batch := surfaces[owner] as Dictionary
-	batch.geometry = geometry
-	(batch.material as ShaderMaterial).set_shader_parameter("face_data", geometry.data)
-	RenderingServer.canvas_item_clear(batch.item as RID)
-	RenderingServer.canvas_item_add_mesh(batch.item as RID, geometry.mesh.get_rid(), Transform2D(), Color.WHITE, batch.texture as RID)
-
-func prepare_labels(candidates: Array[Dictionary], font: Font) -> void:
+func prepare_labels(candidates: Array[Dictionary], font: Font, country_font: Font = null) -> void:
 	clear_labels()
 	label_prepare_count += 1
 	_labels = candidates
 	_labels.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.rank) < int(b.rank))
 	for label: Dictionary in _labels:
 		label["item"] = RID()
-		label["text_size"] = font.get_string_size(str(label.text), HORIZONTAL_ALIGNMENT_LEFT, -1.0, int(label.font_size))
+		label["font"] = country_font if not bool(label.place) and country_font != null else font
+		label["text_size"] = (label.font as Font).get_string_size(str(label.text), HORIZONTAL_ALIGNMENT_LEFT, -1.0, int(label.font_size))
 
 func update_labels(camera: RegionCamera, controller: GlobeController, font: Font, viewport_size: Vector2, shard_places: Dictionary = {}, reserved_labels: Array[Rect2] = []) -> void:
+	country_label_rects.clear()
 	var occupied: Array[Rect2] = reserved_labels.duplicate()
 	var axes := RegionProjection.screen_axes(camera.bearing)
 	var bounds := Rect2(Vector2.ZERO, viewport_size)
@@ -138,11 +133,31 @@ func update_labels(camera: RegionCamera, controller: GlobeController, font: Font
 			var order := 0 if selected else 1 if hovered else 2
 			if priority != order:
 				continue
-			var detailed := controller.labels_enabled and (camera.km_per_pixel <= RegionCamera.PLACE_LABEL_KM_PER_PIXEL if place else camera.km_per_pixel > MapScaleStyle.REGION_NEAR_MPP / 1000.0)
+			var detailed := controller.labels_enabled and (camera.km_per_pixel <= RegionCamera.PLACE_LABEL_KM_PER_PIXEL if place else true)
 			if not detailed and not selected and not hovered:
 				continue
 			var point := camera.origin + axes * ((label.km as Vector2) / camera.km_per_pixel)
-			var offset := Vector2(7.0, -6.0) if place else Vector2(8.0, -2.0)
+			if not place and label.has("candidates"):
+				var candidates := label.candidates as Array[Dictionary]
+				var index := int(label.candidate_index)
+				if not bounds.grow(-40.0).has_point(point):
+					var distance := INF
+					for candidate_index: int in range(candidates.size()):
+						var candidate_point := camera.origin + axes * ((candidates[candidate_index].km as Vector2) / camera.km_per_pixel)
+						if bounds.grow(-40.0).has_point(candidate_point) and candidate_point.distance_squared_to(bounds.get_center()) < distance:
+							distance = candidate_point.distance_squared_to(bounds.get_center())
+							index = candidate_index
+					label.candidate_index = index
+				label.km = candidates[index].km
+				point = camera.origin + axes * ((label.km as Vector2) / camera.km_per_pixel)
+				var room := minf(float(candidates[index].clearance_km) / camera.km_per_pixel, viewport_size.y * 0.35)
+				var font_size := clampi(int(room * 0.14 / 4.0) * 4, 16, 28)
+				if font_size != int(label.font_size):
+					if (label.item as RID).is_valid(): RenderingServer.free_rid(label.item as RID)
+					label.item = RID()
+					label.font_size = font_size
+					label.text_size = (label.font as Font).get_string_size(str(label.text), HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size)
+			var offset := Vector2(7.0, -6.0) if place else Vector2(-(label.text_size as Vector2).x * 0.5, float(label.font_size)*0.35)
 			var rect := Rect2(point + offset - Vector2(0.0, float(label.font_size)), (label.text_size as Vector2) + Vector2(0.0, 3.0))
 			if not bounds.encloses(rect) or occupied.size() >= 42:
 				continue
@@ -152,11 +167,14 @@ func update_labels(camera: RegionCamera, controller: GlobeController, font: Font
 			if overlaps:
 				continue
 			occupied.append(rect)
+			if not place: country_label_rects.append(rect)
 			if not (label.item as RID).is_valid():
 				var item := RenderingServer.canvas_item_create()
 				RenderingServer.canvas_item_set_parent(item, viewport.world_2d.canvas)
-				RenderingServer.canvas_item_set_draw_index(item, surfaces.size() + boundaries.size() + 1 + _labels.find(label))
-				font.draw_string(item, offset, str(label.text), HORIZONTAL_ALIGNMENT_LEFT, -1.0, int(label.font_size), Color(0.90, 0.91, 0.84))
+				RenderingServer.canvas_item_set_draw_index(item, LocalSpatialLayer.DRAW_ORDER + 3 + _labels.find(label))
+				var label_font := label.font as Font
+				label_font.draw_string_outline(item, offset, str(label.text), HORIZONTAL_ALIGNMENT_LEFT, -1.0, int(label.font_size), 2, Color(0.08,0.12,0.13,0.75))
+				label_font.draw_string(item, offset, str(label.text), HORIZONTAL_ALIGNMENT_LEFT, -1.0, int(label.font_size), Color(0.90, 0.91, 0.84))
 				label["item"] = item
 				glyph_submit_count += 1
 			RenderingServer.canvas_item_set_transform(label.item as RID, Transform2D(0.0, point))
