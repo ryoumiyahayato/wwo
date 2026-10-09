@@ -67,7 +67,7 @@
     }
   },
   "fingerprint_recheck": {
-    "checked_utc": "2026-10-09T13:23:52.786803+00:00",
+    "checked_utc": "2026-10-09T13:30:33.882022+00:00",
     "unchanged": true,
     "changed_paths": [],
     "frozen_digest": "da06177e42019e31545a20cd05273ec4eaee80ef3ee2725ab616bd5748b51c60",
@@ -1322,11 +1322,11 @@
         "head": "622b260bc641036c23efbf6345a548485ac6c475",
         "branch": "canonical/current-world",
         "tracked": 592,
-        "untracked": 1184,
+        "untracked": 1185,
         "staged": 0,
-        "checked_utc": "2026-10-09T13:23:52.786803+00:00"
+        "checked_utc": "2026-10-09T13:30:33.882022+00:00"
       },
-      "sealing_status_sha256": "6080254fa74c9c02d62f3deecb559cfdf89b640c41e9cd72a7a7e5943cae22ef",
+      "sealing_status_sha256": "3d59d3f5796ac9a3e684f7b41dd51165cbb04edc26ac1814804ca3d62af0a9ff",
       "start_vs_sealing_porcelain_equal": false,
       "sealing_changed_metadata_fields": [
         "untracked"
@@ -1362,7 +1362,7 @@
         "tracked": 0,
         "untracked": 225,
         "staged": 0,
-        "checked_utc": "2026-10-09T13:23:52.786803+00:00"
+        "checked_utc": "2026-10-09T13:30:33.882022+00:00"
       },
       "sealing_status_sha256": "a615308b7f0c5557d9be7a29b73de2dec8ac3265947ae040878b915a9abd70b2",
       "start_vs_sealing_porcelain_equal": false,
@@ -1381,29 +1381,29 @@
     "method": "elapsed wall time of this active turn including bounded waits, source recovery, analysis, validation and delivery; no known user/platform pauses; rounded estimate, not exact CPU accounting",
     "freeze_when_remaining_minutes": 75,
     "prior_budget_not_added": true,
-    "measured_through_utc": "2026-10-09T13:23:52.786803+00:00",
-    "known_active_elapsed_minutes": 132.34644671666666,
-    "effective_minutes_estimate": 135,
+    "measured_through_utc": "2026-10-09T13:30:33.882022+00:00",
+    "known_active_elapsed_minutes": 139.03136703333334,
+    "effective_minutes_estimate": 142,
     "initial_unknown_time_budget_allowance_minutes": 2,
     "verified_pauses": [],
     "includes_failed_attempts_and_uploads": true,
-    "remaining_budget_estimate_minutes": 105
+    "remaining_budget_estimate_minutes": 98
   },
   "disk": {
     "new_worktree_file_bytes_including_required_source": 112467628,
     "source_staging_bytes": 280473,
-    "research_output_bytes_so_far": 66564205,
+    "research_output_bytes_so_far": 74710239,
     "reuse_tools_new_download_bytes": 0,
     "required_source_network_transfer_bytes": "UNKNOWN; one bounded frozen43 fetch; no reliable wire-byte capture",
     "required_source_tree_git_blob_bytes": 110611765,
     "new_output_hard_cap_bytes": 104857600,
     "delivery_archive_target_bytes": 20971520,
     "shared_git_object_store_increment_bytes": "UNKNOWN; shared repository concurrent activity prevents attribution",
-    "measured_through_utc": "2026-10-09T13:23:52.786803+00:00",
-    "run_directory_bytes": 61432852,
-    "delivery_bytes": 4372698,
+    "measured_through_utc": "2026-10-09T13:30:33.882022+00:00",
+    "run_directory_bytes": 69543814,
+    "delivery_bytes": 4407770,
     "new_worktree_output_and_cache_bytes": 758655,
-    "reserved_upper_bound_for_remaining_cloud_transfer_records_and_local_docs_bytes": 25165824,
+    "reserved_upper_bound_for_remaining_cloud_transfer_records_and_local_docs_bytes": 8388608,
     "measurement_note": "Source staging and original frozen tracked source paths excluded as necessary recovery; new code, generated UID/import caches, run artifacts, API request/response records, delivery and local evidence copies counted. Closing figures recorded separately."
   },
   "not_run": [
@@ -1447,5 +1447,20 @@
     "reason": "text read normalized local CRLF to LF for Git tree content; same text, unequal raw SHA256",
     "initial_remote_commit": "049bd1717a5bcf71e98c7f584b906f044248a725",
     "correction": "one bounded owned docs-branch repair with base64 original bytes; runtime unchanged"
+  },
+  "cloud_publication_limit": {
+    "docs_uploaded": true,
+    "text_files_actual_remote_SHA256_verified": 10,
+    "archive_created": true,
+    "archive_remote_Git_blob_SHA_matches": true,
+    "archive_actual_remote_bytes_roundtrip_verified": false,
+    "failed_reads": [
+      "base64 JSON GET timeout at60seconds",
+      "one raw GET attempt stream CANCEL received from peer"
+    ],
+    "further_retries": "STOPPED",
+    "local_archive_retained": true,
+    "runtime_code_branch_pushed": false,
+    "PR_created": false
   }
 }

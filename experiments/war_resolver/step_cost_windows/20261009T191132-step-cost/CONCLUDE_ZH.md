@@ -17,3 +17,7 @@
 唯一聚合对照的候选663→658、单位读取4467→4435，同时物理/知识变化，无法隔离收益。决策成本又分散于构建、复制/provider、验证和发令回调，故不进入最小修正；5%采纳门未改、未启用。
 
 Windows完整门及24h/seeds71、109/normal、quota1/7/31通过，本机旧测试失败0；旧资源退出诊断保留。正式因果/状态契约通过，原始混合trace逐序列仍不同。历史37ms未归因，当前偶发约7ms外层值也仍有未知墙钟成分。没有目标帧预算、全容量组合或正式玩法结论；因证据不足以支持修改而封存，完成后停止。
+
+云端10项文本实际字节已核验；压缩证据已创建且Git blob SHA一致，但两次有界读取未成功，未取得远端原始字节复核，因此云端封存为PENDING，完整交付包留本地，停止重试。
+
+SOURCE=VERIFIED_SOURCE_EQUIVALENT；WINDOWS_BASELINE=ESTABLISHED；ATTRIBUTION=PARTIAL；RUNTIME_CHANGE=NONE；VALIDATION=PASSED_WITH_DECLARED_BASELINE_LIMITS；CLOUD_EVIDENCE=PENDING；PRODUCTION_INTEGRATION=NONE。

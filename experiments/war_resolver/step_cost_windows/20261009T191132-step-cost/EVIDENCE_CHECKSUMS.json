@@ -1,8 +1,8 @@
 {
   "files": {
     "CONCLUDE_ZH.md": {
-      "bytes": 2391,
-      "sha256": "f32f6af85aff277c49dd6d059fe8699d30489fb9f7f6b5aead8edd5395268b29"
+      "bytes": 2843,
+      "sha256": "9758e6a09e28c4a56fc605498dc0b85f03c401dfd21c1f9ef1fe5922b1f57228"
     },
     "HEADS_AND_SOURCE.json": {
       "bytes": 9296,
@@ -29,8 +29,8 @@
       "sha256": "7553b9626370d69fa00999b03dffedcb2d5e63251920114caae0e41da0de4418"
     },
     "FINAL_VALIDATION.json": {
-      "bytes": 66780,
-      "sha256": "3e983647f4de1ba3f6d293d0d06d374c1d56232303a860677896a521e4bddf32"
+      "bytes": 67317,
+      "sha256": "fd1b6c364e0ee39a9b18c33794fc71b2b3d039d896ee5a756d077934e40bacb5"
     },
     "REPRODUCE_WINDOWS.md": {
       "bytes": 2954,
