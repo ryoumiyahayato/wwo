@@ -7,10 +7,14 @@ const VERTICES_PER_SEGMENT: int = 16
 var mesh := ArrayMesh.new()
 var data: ImageTexture
 var segment_count: int = 0
+var vertex_count: int = 0
+var index_count: int = 0
 
-func prepare(boundaries: Array[Dictionary], kind: String) -> void:
+func prepare(boundaries: Array[Dictionary], kind: String, compact_internal_caps: bool = false) -> void:
 	mesh.clear_surfaces()
 	data = null
+	vertex_count = 0
+	index_count = 0
 	var segments: Array[Dictionary] = []
 	for boundary: Dictionary in boundaries:
 		if str(boundary.kind) != kind:
@@ -29,9 +33,7 @@ func prepare(boundaries: Array[Dictionary], kind: String) -> void:
 	var values := PackedFloat32Array()
 	values.resize(DATA_WIDTH * height * 4)
 	var vertices := PackedVector2Array()
-	vertices.resize(segment_count * VERTICES_PER_SEGMENT)
 	var indices := PackedInt32Array()
-	indices.resize(segment_count * 54)
 	for index: int in range(segment_count):
 		var segment := segments[index] as Dictionary
 		var neighbors: Array[Vector3] = [segment.a, segment.b, segment.before, segment.after]
@@ -42,19 +44,28 @@ func prepare(boundaries: Array[Dictionary], kind: String) -> void:
 			values[offset + 2] = neighbors[neighbor].z
 		values[index * 16 + 3] = 1.0 if bool(segment.begin_cap) else 0.0
 		values[index * 16 + 7] = 1.0 if bool(segment.end_cap) else 0.0
-		for slot: int in range(VERTICES_PER_SEGMENT):
-			vertices[index * VERTICES_PER_SEGMENT + slot] = Vector2(float(index), float(slot))
-		# Three bands (left feather / stroke / right feather), with end feathers.
+		var core := vertices.size()
+		for slot: int in range(8):
+			vertices.append(Vector2(float(index), float(slot)))
+		var start_cap := -1
+		var end_cap := -1
+		if not compact_internal_caps or bool(segment.begin_cap):
+			start_cap = vertices.size()
+			for slot: int in range(8,12): vertices.append(Vector2(float(index), float(slot)))
+		if not compact_internal_caps or bool(segment.end_cap):
+			end_cap = vertices.size()
+			for slot: int in range(12,16): vertices.append(Vector2(float(index), float(slot)))
+		# Inside the bounded REGION viewport, internal cap strips coincide and
+		# have zero area. Dynamic horizon caps lie beyond its 9000 km extent.
+		# WORLD retains them. Preserve every original shader slot and join.
 		for strip: int in range(3):
-			var first := 0 if strip == 0 else 8 if strip == 1 else 4
-			var second := 4 if strip == 0 else 0 if strip == 1 else 12
+			if strip == 1 and start_cap < 0 or strip == 2 and end_cap < 0: continue
+			var first := core if strip == 0 else start_cap if strip == 1 else core+4
+			var second := core+4 if strip == 0 else core if strip == 1 else end_cap
 			for band: int in range(3):
-				var offset := index * 54 + strip * 18 + band * 6
-				var base := index * VERTICES_PER_SEGMENT
-				var quad := PackedInt32Array([base + first + band, base + first + band + 1, base + second + band,
-					base + second + band, base + first + band + 1, base + second + band + 1])
-				for corner: int in range(6):
-					indices[offset + corner] = quad[corner]
+				indices.append_array(PackedInt32Array([first+band, first+band+1, second+band, second+band, first+band+1, second+band+1]))
+	vertex_count = vertices.size()
+	index_count = indices.size()
 	data = ImageTexture.create_from_image(Image.create_from_data(DATA_WIDTH, height, false, Image.FORMAT_RGBAF, values.to_byte_array()))
 	var arrays: Array = []
 	arrays.resize(Mesh.ARRAY_MAX)

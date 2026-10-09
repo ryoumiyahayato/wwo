@@ -23,6 +23,7 @@ var hovered_polity_id: String = ""
 var hovered_place_id: String = ""
 var map_mode: String = "political"
 var labels_enabled: bool = false
+var strategic_rails_enabled: bool = false
 var region_camera := RegionCamera.new()
 var _angular_velocity: float = 0.0
 var _dragging: bool = false
@@ -147,4 +148,8 @@ func set_map_mode(mode: String) -> void:
 
 func toggle_labels() -> void:
 	labels_enabled = not labels_enabled
+	appearance_changed.emit()
+
+func toggle_strategic_rails() -> void:
+	strategic_rails_enabled = not strategic_rails_enabled
 	appearance_changed.emit()

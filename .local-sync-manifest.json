@@ -1,5 +1,5 @@
 {
-  "content_sha256": "b39c70ec7442ef956b8b5406419754e1010f3d605f97b62095e7e2b7ab79c2ea",
+  "content_sha256": "c3bc9a22b3e1fd63846309ca1d7e5724a5a5cac32ec96f017450195eb2ab9708",
   "excluded": [
     {
       "path": ".git/",
@@ -366,6 +366,14 @@
       "reason": "file outside reviewed exact file allowlist"
     },
     {
+      "path": "tools/map/audit_continuation_batch_visuals.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/audit_continuation_release.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
       "path": "tools/map/audit_correctness_release.py",
       "reason": "file outside reviewed exact file allowlist"
     },
@@ -466,6 +474,10 @@
       "reason": "file outside reviewed exact file allowlist"
     },
     {
+      "path": "tools/map/inspect_presentation_continuation.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
       "path": "tools/map/map_correctness_release_probe.gd",
       "reason": "file outside reviewed exact file allowlist"
     },
@@ -495,6 +507,10 @@
     },
     {
       "path": "tools/map/paris_land_release_probe.gd.uid",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/refactor_surface_appearance_cache.py",
       "reason": "file outside reviewed exact file allowlist"
     },
     {
@@ -530,6 +546,10 @@
       "reason": "file outside reviewed exact file allowlist"
     },
     {
+      "path": "tools/map/write_continuation_report.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
       "path": "tools/map/write_correctness_report.py",
       "reason": "file outside reviewed exact file allowlist"
     },
@@ -562,7 +582,7 @@
       "reason": "file outside reviewed exact file allowlist"
     }
   ],
-  "included_bytes": 5871985,
+  "included_bytes": 5880254,
   "included_files": 777,
   "owner_id": "7ed35d2d-c560-4b08-8c28-78af6d1cae6b",
   "remote": "https://github.com/ryoumiyahayato/wwo.git",

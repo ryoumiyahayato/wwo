@@ -86,6 +86,7 @@ func prepare_step(source: Dictionary, lines: Array[Dictionary]) -> void:
 func clear() -> void:
 	clear_labels()
 	background.erase("surface_relief_style")
+	background.erase("surface_appearance_style")
 	for batch: Dictionary in surfaces.values():
 		RenderingServer.free_rid(batch.item as RID)
 	for batch: Dictionary in boundaries:

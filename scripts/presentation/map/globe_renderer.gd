@@ -40,6 +40,7 @@ var _font := UIDrawing.create_font()
 var _country_font := SystemFont.new()
 var _country_label_layouts: Dictionary = {}
 var _world_label_records: Dictionary = {}
+var _world_labels := GlobeLabels.new()
 var _surface_shader: Shader
 var _physical_background: Dictionary = {}
 var _relief_shader_warmed: bool = false
@@ -59,6 +60,11 @@ var view_update_count: int = 0
 var cpu_projection_count: int = 0
 var last_submit_usec: int = 0
 var last_submit_parts: Dictionary = {}
+var _footer_prefix_item := RID()
+var _footer_scale_item := RID()
+var _footer_prefix: String = ""
+var _footer_scale: String = ""
+var _footer_prefix_width: float = 0.0
 
 static func _parameter(batch: Dictionary, name: StringName, value: Variant) -> void:
 	if not batch.has("parameters"): batch["parameters"] = {}
@@ -89,6 +95,9 @@ func _ready() -> void:
 	set_process(false)
 
 func _exit_tree() -> void:
+	_world_labels.clear()
+	if _footer_prefix_item.is_valid(): RenderingServer.free_rid(_footer_prefix_item)
+	if _footer_scale_item.is_valid(): RenderingServer.free_rid(_footer_scale_item)
 	relief.dispose()
 	local_layer.clear()
 	strategic_layer.clear()
@@ -111,6 +120,8 @@ func configure(content_value: MapGeometryContent, controller_value: GlobeControl
 		controller.appearance_changed.connect(queue_redraw)
 
 func refresh(registry: RuntimePoliticalEntityView, evidence: HistoricalPoliticalEvidenceView, economy: FormalWorldEconomyView, places: Array[Dictionary], date: Dictionary, display: ResolvedMapContent) -> void:
+	_world_labels.clear()
+	for background: Dictionary in [_physical_background,region_view.background]: background.erase("surface_appearance_style")
 	_political_view = registry
 	political.refresh(registry, evidence, economy, places, date, content, display)
 	_world_label_records = political.records.duplicate()
@@ -237,8 +248,10 @@ func _ensure_view() -> void:
 			_prepare_region_labels()
 	_sync_local_resources()
 	_sync_strategic_resources()
-	local_layer.update(controller.region_camera, controller, political.display_date, size)
-	_update_strategic_layer()
+	# Queries need current picking/settlement positions, but the final draw
+	# commits GPU uniforms and collision-prioritized glyphs once below.
+	local_layer.update(controller.region_camera, controller, political.display_date, size, false)
+	_update_strategic_layer(false)
 	_anchors.clear()
 	_place_points.clear()
 	var basis := controller.orientation()
@@ -303,7 +316,9 @@ func _prepare_surface_batches() -> void:
 		RenderingServer.canvas_item_set_draw_index(item, _surface_batches.size() + 1)
 		RenderingServer.canvas_item_set_material(item, material.get_rid())
 		_surface_batches[owner] = {"geometry": geometry, "material": material, "item": item, "texture": RID()}
-	for background: Dictionary in [_physical_background, region_view.background]: background.erase("surface_relief_style")
+	for background: Dictionary in [_physical_background, region_view.background]:
+		background.erase("surface_relief_style")
+		background.erase("surface_appearance_style")
 	_bind_relief()
 
 func _draw_surfaces(regional: bool = false) -> void:
@@ -320,6 +335,8 @@ func _draw_surfaces(regional: bool = false) -> void:
 	var background := region_view.background if regional else _physical_background
 	var style_key := Vector3(relief_style.x, relief_style.y, float(batches.size()))
 	var relief_style_changed: bool = background.get("surface_relief_style", Vector3(-1.0, -1.0, -1.0)) != style_key
+	var appearance_key: Array = [controller.map_mode,controller.selected_polity_id,controller.hovered_polity_id]
+	var appearance_changed: bool = background.get("surface_appearance_style",[]) != appearance_key
 	# Once admitted physical land/sea coverage is ready, coarse DEM height
 	# interpolation must not paint a second shoreline over its actual sea.
 	var physical_coverage := regional and not strategic_layer.active_lod.is_empty()
@@ -331,34 +348,10 @@ func _draw_surfaces(regional: bool = false) -> void:
 		_parameter(background, "globe_basis", basis)
 	for owner: String in batches:
 		var batch := batches[owner] as Dictionary
-		var material := batch.material as ShaderMaterial
-		var color := Color("465451") if owner.is_empty() else political.color(owner, controller.map_mode)
-		var base_color := Color(str((political.resolved_visuals.get(owner, {}) as Dictionary).get("color", "#6b8075"))) if controller.map_mode == "political" else color
-		if not owner.is_empty() and owner == controller.selected_polity_id:
-			color = color.lerp(Color(0.62, 0.51, 0.31), 0.22)
-			base_color = base_color.lerp(Color(0.62, 0.51, 0.31), 0.22)
-		elif not owner.is_empty() and owner == controller.hovered_polity_id:
-			color = color.lightened(0.035)
-		var texture: Texture2D = political.visual_textures.get(owner) if controller.map_mode == "political" else null
-		var texture_rid := texture.get_rid() if texture != null else RID()
-		var bounds := Rect2(Vector2.ZERO, Vector2.ONE)
-		var uv_scale := Vector2.ONE
-		var uv_offset := Vector2.ZERO
-		var uv_rotation := 0.0
-		if texture != null:
-			var style := (political.resolved_visuals[owner] as Dictionary).map_visual as Dictionary
-			var feature_id := str((political.records[owner] as Dictionary).get("geometry_feature_id", ""))
-			bounds = (_source_meshes[feature_id] as Dictionary).flag_bounds as Rect2
-			if political.region_frames.has(owner):
-				bounds = Rect2(Vector2.ZERO, Vector2.ONE)
-			uv_scale = Vector2(float(style.uv_scale[0]), float(style.uv_scale[1]))
-			uv_offset = Vector2(float(style.uv_offset[0]), float(style.uv_offset[1]))
-			uv_rotation = deg_to_rad(float(style.uv_rotation))
-		color.a = 1.0 if texture != null else 0.0
-		_parameter(batch, "surface_color", color)
-		_parameter(batch, "political_base_color", Vector3(base_color.r, base_color.g, base_color.b))
-		_parameter(batch, "flag_weight", flag_blend)
-		_parameter(batch, "political_weight", fill_weight)
+		if appearance_changed:
+			_apply_surface_appearance(batch,owner,flag_blend,fill_weight)
+		_parameter(batch,"flag_weight",flag_blend)
+		_parameter(batch,"political_weight",fill_weight)
 		if relief_style_changed:
 			_parameter(batch, "relief_weight", relief_style.x)
 			_parameter(batch, "relief_detail_weight", relief_style.y)
@@ -368,19 +361,50 @@ func _draw_surfaces(regional: bool = false) -> void:
 			_parameter(batch, "globe_basis", basis)
 			_parameter(batch, "globe_center", _center)
 			_parameter(batch, "globe_radius", _radius)
-		_parameter(batch, "flag_bounds", Vector4(bounds.position.x, bounds.position.y, bounds.size.x, bounds.size.y))
-		_parameter(batch, "flag_uv_scale", uv_scale)
-		_parameter(batch, "flag_uv_offset", uv_offset)
-		_parameter(batch, "flag_uv_rotation", Vector2(cos(uv_rotation), sin(uv_rotation)))
 		_bounds(batch,size)
-		if not bool(batch.get("submitted", false)) or (batch.texture as RID) != texture_rid:
-			RenderingServer.canvas_item_clear(batch.item as RID)
-			RenderingServer.canvas_item_add_mesh(batch.item as RID, (batch.geometry as GlobeSurfaceBatch).mesh.get_rid(), Transform2D(), Color.WHITE, texture_rid)
-			batch["texture"] = texture_rid
-			batch["submitted"] = true
 	background["surface_relief_style"] = style_key
+	background["surface_appearance_style"] = appearance_key
 	var detail_used := relief_style.y > 0.0
 	if relief.needs_presented(detail_used): _relief_presented(detail_used)
+
+func _apply_surface_appearance(batch: Dictionary, owner: String, flag_blend: float, fill_weight: float) -> void:
+	# Content refresh invalidates appearance; camera updates only projection.
+	var color := Color("465451") if owner.is_empty() else political.color(owner, controller.map_mode)
+	var base_color := Color(str((political.resolved_visuals.get(owner, {}) as Dictionary).get("color", "#6b8075"))) if controller.map_mode == "political" else color
+	if not owner.is_empty() and owner == controller.selected_polity_id:
+		color = color.lerp(Color(0.62, 0.51, 0.31), 0.22)
+		base_color = base_color.lerp(Color(0.62, 0.51, 0.31), 0.22)
+	elif not owner.is_empty() and owner == controller.hovered_polity_id:
+		color = color.lightened(0.035)
+	var texture: Texture2D = political.visual_textures.get(owner) if controller.map_mode == "political" else null
+	var texture_rid := texture.get_rid() if texture != null else RID()
+	var bounds := Rect2(Vector2.ZERO, Vector2.ONE)
+	var uv_scale := Vector2.ONE
+	var uv_offset := Vector2.ZERO
+	var uv_rotation := 0.0
+	if texture != null:
+		var style := (political.resolved_visuals[owner] as Dictionary).map_visual as Dictionary
+		var feature_id := str((political.records[owner] as Dictionary).get("geometry_feature_id", ""))
+		bounds = (_source_meshes[feature_id] as Dictionary).flag_bounds as Rect2
+		if political.region_frames.has(owner):
+			bounds = Rect2(Vector2.ZERO, Vector2.ONE)
+		uv_scale = Vector2(float(style.uv_scale[0]), float(style.uv_scale[1]))
+		uv_offset = Vector2(float(style.uv_offset[0]), float(style.uv_offset[1]))
+		uv_rotation = deg_to_rad(float(style.uv_rotation))
+	color.a = 1.0 if texture != null else 0.0
+	_parameter(batch, "surface_color", color)
+	_parameter(batch, "political_base_color", Vector3(base_color.r, base_color.g, base_color.b))
+	_parameter(batch, "flag_weight", flag_blend)
+	_parameter(batch, "political_weight", fill_weight)
+	_parameter(batch, "flag_bounds", Vector4(bounds.position.x, bounds.position.y, bounds.size.x, bounds.size.y))
+	_parameter(batch, "flag_uv_scale", uv_scale)
+	_parameter(batch, "flag_uv_offset", uv_offset)
+	_parameter(batch, "flag_uv_rotation", Vector2(cos(uv_rotation), sin(uv_rotation)))
+	if not bool(batch.get("submitted", false)) or (batch.texture as RID) != texture_rid:
+		RenderingServer.canvas_item_clear(batch.item as RID)
+		RenderingServer.canvas_item_add_mesh(batch.item as RID, (batch.geometry as GlobeSurfaceBatch).mesh.get_rid(), Transform2D(), Color.WHITE, texture_rid)
+		batch["texture"] = texture_rid
+		batch["submitted"] = true
 
 func _sync_relief(mpp: float = -1.0) -> void:
 	if mpp < 0.0:
@@ -534,7 +558,9 @@ func _draw() -> void:
 	if controller == null:
 		return
 	var view_was_dirty := _view_dirty
+	var view_started := Time.get_ticks_usec()
 	_ensure_view()
+	last_submit_parts["view"] = Time.get_ticks_usec()-view_started
 	var regional := controller.region_camera.active and region_view.ready
 	var submission_started := Time.get_ticks_usec()
 	_draw_surfaces(regional)
@@ -543,10 +569,16 @@ func _draw() -> void:
 	_draw_boundaries(regional)
 	last_submit_parts["boundaries"] = Time.get_ticks_usec()-part_started
 	part_started = Time.get_ticks_usec()
-	if not view_was_dirty:
+	if not regional:
 		local_layer.update(controller.region_camera, controller, political.display_date, size)
+	elif not view_was_dirty:
+		local_layer.update(controller.region_camera, controller, political.display_date, size, false)
+		_update_strategic_layer(false)
 	if controller.region_camera.local_active:
 		_place_points = local_layer.visible_places.duplicate()
+	elif regional and strategic_content != null:
+		_place_points = strategic_layer.visible_places.duplicate()
+		_place_points.merge(local_layer.visible_places, true)
 	else:
 		_place_points.merge(strategic_layer.visible_places, true)
 		_place_points.merge(local_layer.visible_places, true)
@@ -573,6 +605,7 @@ func _draw() -> void:
 		_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 	last_submit_parts["viewport"] = Time.get_ticks_usec()-part_started
 	part_started = Time.get_ticks_usec()
+	_world_labels.update(get_canvas_item(),_country_font,_anchors,_world_label_records,Rect2(Vector2.ZERO,size),controller.zoom,controller.selected_polity_id,controller.hovered_polity_id,controller.labels_enabled,not regional and _transition_elapsed < 0.0)
 	if _transition_elapsed >= 0.0:
 		return
 	for entity_id: String in _anchors:
@@ -583,13 +616,21 @@ func _draw() -> void:
 		var point := _place_points[place_id] as Vector2
 		var place := local_layer.place(place_id) if local_layer.visible_places.has(place_id) else strategic_layer.place(place_id) if strategic_layer.visible_places.has(place_id) else political.places.get(place_id, {}) as Dictionary
 		var rank := int(place.get("rank", 1))
-		draw_circle(point, 4.0 if selected else 2.2 if rank == 0 else 1.7, Color(0.84, 0.80, 0.67, 0.92) if selected else Color(0.68, 0.70, 0.64, 0.78))
+		var radius := float(MapScaleStyle.SETTLEMENT_RADII[clampi(rank,0,2)])
+		var marker_color := Color(0.68,0.70,0.64,0.78)
+		if selected:
+			draw_arc(point,4.0,0.0,TAU,16,Color(0.84,0.80,0.67,0.92),1.0,true)
+			draw_circle(point,1.2,marker_color)
+		elif rank == 0:
+			draw_rect(Rect2(point-Vector2.ONE*radius,Vector2.ONE*radius*2.0),marker_color)
+		elif rank == 1:
+			draw_arc(point,radius,0.0,TAU,12,marker_color,1.0,true)
+		else:
+			draw_circle(point,radius,Color(0.61,0.65,0.61,0.70))
 		if regional:
 			continue
 		if controller.zoom >= 4.8 or selected or place_id == controller.hovered_place_id:
 			UIDrawing.label(self, _font, point + Vector2(7.0, -6.0), str((political.places[place_id] as Dictionary).get("name", place_id)), 10)
-	if not regional:
-		GlobeLabels.draw(self, _country_font, _anchors, _world_label_records, Rect2(Vector2.ZERO, size), controller.zoom, controller.selected_polity_id, controller.hovered_polity_id, controller.labels_enabled)
 	var metric := controller.region_camera.km_per_pixel if regional else RegionProjection.world_scale(RegionProjection.world_unit(_center, _center, _radius, controller.orientation()), controller.orientation(), _radius)
 	var space := MapScaleStyle.band(metric * 1000.0, regional, controller.region_camera.local_active)
 	if not local_layer.visible_places.is_empty():
@@ -600,9 +641,30 @@ func _draw() -> void:
 		space += " · ETOPO 2022 粗地形参考"
 	if regional and not controller.region_camera.local_active and metric <= RegionCamera.LOCAL_ENTER_KM_PER_PIXEL:
 		space += " · 详细地图资料准备中" if (local_content != null and local_content.preparing()) or local_layer.preparing else " · 更详细地图资料尚不可用"
-	UIDrawing.label(self, _font, Vector2(20.0, size.y - 18.0), "%s · CShapes 2.0 历史政治边界    %s · %.0f m/px" % [political.display_date, space, metric * 1000.0], 10, Color(0.70, 0.79, 0.73, 0.8))
+	_update_footer("%s · CShapes 2.0 历史政治边界    %s · " % [political.display_date, space],"%.0f m/px" % (metric * 1000.0))
 	last_submit_parts["dots_footer"] = Time.get_ticks_usec()-part_started
 	last_submit_usec = Time.get_ticks_usec()-submission_started
+
+func _update_footer(prefix: String, scale_text: String) -> void:
+	# The long provenance label is static during pan/zoom. Keep its shaped
+	# glyph commands separate from the short, exact meters-per-pixel number.
+	if not _footer_prefix_item.is_valid():
+		_footer_prefix_item = RenderingServer.canvas_item_create()
+		_footer_scale_item = RenderingServer.canvas_item_create()
+		for item: RID in [_footer_prefix_item,_footer_scale_item]:
+			RenderingServer.canvas_item_set_parent(item,get_canvas_item())
+			RenderingServer.canvas_item_set_draw_index(item,1000000)
+	if _footer_prefix != prefix:
+		_footer_prefix = prefix
+		RenderingServer.canvas_item_clear(_footer_prefix_item)
+		_font.draw_string(_footer_prefix_item,Vector2.ZERO,prefix,HORIZONTAL_ALIGNMENT_LEFT,-1.0,10,Color(0.70,0.79,0.73,0.8))
+		_footer_prefix_width = _font.get_string_size(prefix,HORIZONTAL_ALIGNMENT_LEFT,-1.0,10).x
+	if _footer_scale != scale_text:
+		_footer_scale = scale_text
+		RenderingServer.canvas_item_clear(_footer_scale_item)
+		_font.draw_string(_footer_scale_item,Vector2.ZERO,scale_text,HORIZONTAL_ALIGNMENT_LEFT,-1.0,10,Color(0.70,0.79,0.73,0.8))
+	RenderingServer.canvas_item_set_transform(_footer_prefix_item,Transform2D(0.0,Vector2(20.0,size.y-18.0)))
+	RenderingServer.canvas_item_set_transform(_footer_scale_item,Transform2D(0.0,Vector2(20.0+_footer_prefix_width,size.y-18.0)))
 
 func _gui_input(event: InputEvent) -> void:
 	if controller == null:
@@ -804,14 +866,14 @@ func _sync_strategic_resources() -> void:
 		strategic_layer.request_lods(camera.km_per_pixel*1000.0)
 	if strategic_content.preparing() or strategic_layer.preparing: set_process(visible)
 
-func _update_strategic_layer() -> void:
+func _update_strategic_layer(commit_canvas: bool = true) -> void:
 	strategic_layer.reference_relief = relief.textures
 	strategic_layer.suppressed_places = local_layer.visible_places
 	strategic_layer.paris_mask_weights = {}
 	if not local_layer.active_lod.is_empty():
 		strategic_layer.paris_mask_weights["river"] = MapScaleStyle.physical_weight("river",controller.region_camera.km_per_pixel*1000.0)
 		strategic_layer.paris_mask_weights["coast"] = MapScaleStyle.physical_weight("coast",controller.region_camera.km_per_pixel*1000.0)
-	strategic_layer.update(controller.region_camera,controller,political.display_date,size)
+	strategic_layer.update(controller.region_camera,controller,political.display_date,size,commit_canvas)
 
 func _record_local_handoff(entering: bool, unit: Vector3, pixel: Vector2) -> void:
 	var started := Time.get_ticks_usec()

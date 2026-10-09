@@ -3,8 +3,6 @@ extends RefCounted
 ## Finite load-time caches derived from admitted facts, never new source facts.
 const TOLERANCE_M: Dictionary = {"coarse": 600.0, "medium": 120.0, "local": 0.0}
 const EARTH_RADIUS_M: float = 6371008.8
-const SURFACE_BATCH_FACES: int = 1024
-const SPATIAL_SORT_BITS: int = 15
 
 static func prepare(source: Array[Dictionary], lods: Array[String] = ["coarse", "medium", "local"], visual_frames: Dictionary = {}) -> Dictionary:
 	var started := Time.get_ticks_usec()
@@ -105,10 +103,8 @@ static func prepare(source: Array[Dictionary], lods: Array[String] = ["coarse", 
 		for key: String in surface_groups:
 			var group := surface_groups[key] as Dictionary
 			var faces := group.faces as Array
-			if str(group.kind) in ["land_reference", "ocean_reference"]:
-				faces = _spatially_order_faces(faces)
-			for first: int in range(0,faces.size(),SURFACE_BATCH_FACES):
-				chunks.append({"kind":group.kind,"lod":lod_name,"faces":faces.slice(first,first+SURFACE_BATCH_FACES),"feature_id":group.feature_ids[0],"source_feature_ids":group.feature_ids,"water_class":group.water_class,"visual_reference_feature":group.reference})
+			for first: int in range(0,faces.size(),1024):
+				chunks.append({"kind":group.kind,"lod":lod_name,"faces":faces.slice(first,first+1024),"feature_id":group.feature_ids[0],"source_feature_ids":group.feature_ids,"water_class":group.water_class,"visual_reference_feature":group.reference})
 		for kind: String in groups:
 			if not (groups[kind] as Array).is_empty():
 				chunks.append({"kind":kind, "boundaries":groups[kind], "lod":lod_name})
@@ -132,31 +128,6 @@ static func prepare(source: Array[Dictionary], lods: Array[String] = ["coarse", 
 		chunk["cull_axis"] = center.normalized()
 		chunk["cull_angle"] = acos(clampf(lower_dot,-1.0,1.0)) + deg_to_rad(GlobeProjection.SURFACE_EDGE_DEGREES)
 	return {"chunks":chunks, "lod_stats":stats, "lod_prepare_usec":Time.get_ticks_usec()-started}
-
-static func _spatially_order_faces(faces: Array) -> Array:
-	# Source order can interleave distant coasts in every upload batch. Sort
-	# opaque corrections once in the worker so existing conservative culling
-	# can reject them. Keep every face/UV and the same bounded batch count.
-	if faces.size() <= SURFACE_BATCH_FACES:
-		return faces
-	var entries: Array[Dictionary] = []
-	var grid_max := (1 << SPATIAL_SORT_BITS) - 1
-	for index: int in range(faces.size()):
-		var points := (faces[index] as Dictionary).points as PackedVector3Array
-		var center := (points[0] + points[1] + points[2]).normalized()
-		var coordinate := RegionProjection.lon_lat(center)
-		var x := clampi(int((coordinate.x + 180.0) / 360.0 * grid_max), 0, grid_max)
-		var y := clampi(int((coordinate.y + 90.0) / 180.0 * grid_max), 0, grid_max)
-		var key: int = 0
-		for bit: int in range(SPATIAL_SORT_BITS):
-			key |= ((x >> bit) & 1) << (bit * 2)
-			key |= ((y >> bit) & 1) << (bit * 2 + 1)
-		entries.append({"key":key,"index":index})
-	entries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.key) < int(b.key) if a.key != b.key else int(a.index) < int(b.index))
-	var ordered: Array = []
-	for entry: Dictionary in entries:
-		ordered.append(faces[int(entry.index)])
-	return ordered
 
 static func simplify(points: PackedVector3Array, tolerance_m: float) -> PackedVector3Array:
 	if points.size() <= 2:

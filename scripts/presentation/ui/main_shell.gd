@@ -13,6 +13,8 @@ const PRIMARY_NAVIGATION: Array[Dictionary] = [
 var current_page: String = "person"
 var status_message: String = ""
 var _system_open: bool = false
+var _map_modes_open: bool = false
+var _map_display_open: bool = false
 var _hits: Array[Dictionary] = []
 var _font := UIDrawing.create_font()
 var _date: Dictionary = {}
@@ -37,6 +39,8 @@ func refresh() -> void:
 	queue_redraw()
 
 func set_page(page: String) -> void:
+	_map_modes_open = false
+	_map_display_open = false
 	if page in ["person", "economy", "organization", "map", "politics", "military", "administration"]:
 		current_page = page
 		action_requested.emit("page_changed")
@@ -62,6 +66,8 @@ func _draw() -> void:
 		world_page.draw_card(self, Rect2(size.x - 318.0, 150.0, 294.0, 288.0))
 	_draw_navigation()
 	_draw_time_bar()
+	if current_page == "map":
+		_draw_map_menus()
 	if _system_open:
 		_draw_system_menu()
 	if not _content_errors.is_empty():
@@ -83,17 +89,35 @@ func _draw_navigation() -> void:
 
 func _draw_map_controls() -> void:
 	var x: float = 24.0
-	for item: Dictionary in [{"id": "map", "label": "地图"}, {"id": "politics", "label": "政治观察"}, {"id": "military", "label": "军事"}]:
+	for item: Dictionary in [{"id": "map", "label": "地图"}, {"id": "politics", "label": "政治观察"}]:
 		button(Rect2(x, 106.0, 104.0, 30.0), str(item.label), "page:" + str(item.id))
 		x += 112.0
-	var controls: Array[Dictionary] = [{"id": "political", "label": "Political", "width": 96.0}, {"id": "fulfillment", "label": "Economy Fulfillment", "width": 156.0}, {"id": "shortage", "label": "Economy Shortage", "width": 148.0}]
-	for item: Dictionary in controls:
-		var width := float(item.width)
-		button(Rect2(x, 106.0, width, 30.0), str(item.label), "map_mode:" + str(item.id))
-		if _controller.map_mode == str(item.id):
-			draw_rect(Rect2(x, 106.0, width, 30.0), Color(0.91, 0.74, 0.4), false, 1.0)
-		x += width + 8.0
-	button(Rect2(x, 106.0, 100.0, 30.0), "Labels ON" if _controller.labels_enabled else "Labels OFF", "map:labels")
+	var mode_names: Dictionary = {"political":"Political","fulfillment":"Economy / Fulfillment","shortage":"Economy / Shortage"}
+	button(Rect2(x,106.0,190.0,30.0),str(mode_names[_controller.map_mode])+" ▾","map:mode_menu")
+	button(Rect2(x+198.0,106.0,140.0,30.0),"显示选项 / 图例 ▾","map:display_menu")
+
+func _draw_map_menus() -> void:
+	if _map_modes_open:
+		var rect := Rect2(248,142,264,178)
+		panel(rect,Color(0.017,0.036,0.039,0.99),Color(0.70,0.61,0.36,0.7))
+		_hits.append({"rect":rect,"action":"noop","enabled":true})
+		button(Rect2(260,154,240,30),"Political","map_mode:political")
+		label(Vector2(272,205),"Economy 地图图层",11)
+		button(Rect2(260,212,240,30),"  Fulfillment","map_mode:fulfillment")
+		button(Rect2(260,250,240,30),"  Shortage","map_mode:shortage")
+		label(Vector2(272,303),"Military：正式图层尚未接入",10,Color(0.55,0.61,0.58))
+	if _map_display_open:
+		var rect := Rect2(446,142,350,250)
+		panel(rect,Color(0.017,0.036,0.039,0.99),Color(0.70,0.61,0.36,0.7))
+		_hits.append({"rect":rect,"action":"noop","enabled":true})
+		button(Rect2(458,154,326,30),("☑ " if _controller.labels_enabled else "☐ ")+"地名 / 国家名称","map:labels")
+		button(Rect2(458,192,326,30),("☑ " if _controller.strategic_rails_enabled else "☐ ")+"战略铁路连接（线位近似）","map:rails")
+		label(Vector2(462,247),"虚线：有历史依据的近似战略连接",11)
+		label(Vector2(462,270),"双轨：Paris Local 参考线，非运力网络",11)
+		label(Vector2(462,293),"方块 / 圆环 / 小点：历史展示等级",11)
+		label(Vector2(462,316),"等级不等于首都、港口或行政身份",10,Color(0.70,0.79,0.73))
+		label(Vector2(462,339),"河湖岸线：现代物理参考，不复原水位",10,Color(0.70,0.79,0.73))
+		label(Vector2(462,373),"滚轮缩放 · 左键平移 · 右键旋转",10,Color(0.70,0.79,0.73))
 
 func _draw_time_bar() -> void:
 	var rect := Rect2(0.0, size.y - 52.0, size.x, 52.0)
@@ -126,13 +150,20 @@ func _input(event: InputEvent) -> void:
 						_activate(str(hit.action))
 					get_viewport().set_input_as_handled()
 					return
+			if _map_modes_open or _map_display_open:
+				_map_modes_open = false
+				_map_display_open = false
+				queue_redraw()
 	if event is InputEventKey:
 		var key := event as InputEventKey
 		if not key.pressed or key.echo:
 			return
 		match key.keycode:
 			KEY_ESCAPE:
-				if _system_open:
+				if _map_modes_open or _map_display_open:
+					_map_modes_open = false
+					_map_display_open = false
+				elif _system_open:
 					_system_open = false
 				elif current_page == "administration":
 					set_page("map")
@@ -146,7 +177,18 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _activate(action: String) -> void:
-	if action.begins_with("page:"):
+	if action == "map:mode_menu":
+		_map_modes_open = not _map_modes_open
+		_map_display_open = false
+	elif action == "map:display_menu":
+		_map_display_open = not _map_display_open
+		_map_modes_open = false
+	elif action == "map:rails":
+		_controller.toggle_strategic_rails()
+	elif action.begins_with("map_mode:"):
+		_map_modes_open = false
+		action_requested.emit(action)
+	elif action.begins_with("page:"):
 		set_page(action.trim_prefix("page:"))
 	elif action == "system":
 		_system_open = not _system_open

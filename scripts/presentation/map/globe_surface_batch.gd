@@ -12,15 +12,16 @@ var _pick_chunks: Array[Dictionary] = []
 var vertex_count_per_face: int = VERTICES_PER_FACE
 var index_count_per_face: int = 24
 
-func prepare(faces: Array, retain_picking: bool = true, regional_reference: bool = false) -> void:
+func prepare(faces: Array, retain_picking: bool = true, regional_reference: bool = false, zero_expansion: bool = false) -> void:
 	_pick_chunks.clear()
 	mesh.clear_surfaces()
 	data = null
 	# A regional viewport ends before the horizon by more than the maximum
 	# source edge. Its reference faces need only the first triangle fan; the
 	# WORLD and authoritative picking meshes retain both horizon fans.
-	vertex_count_per_face = 6 if regional_reference else VERTICES_PER_FACE
-	index_count_per_face = 12 if regional_reference else 24
+	var compact := regional_reference and zero_expansion
+	vertex_count_per_face = 3 if compact else 6 if regional_reference else VERTICES_PER_FACE
+	index_count_per_face = 3 if compact else 12 if regional_reference else 24
 	if faces.is_empty():
 		return
 	var height := maxi(1, ceili(float(faces.size() * TEXELS_PER_FACE) / DATA_WIDTH))
@@ -52,7 +53,13 @@ func prepare(faces: Array, retain_picking: bool = true, regional_reference: bool
 			_pick_chunks.append({"bounds": chunk_bounds, "faces": chunk_faces})
 			chunk_faces = []
 		for slot: int in range(vertex_count_per_face):
-			vertices[face_index * vertex_count_per_face + slot] = Vector2(float(face_index), float(slot))
+			# At zero expansion, paired corners coincide and three of the four
+			# fan triangles have zero area. Keep the original surviving slots.
+			var shader_slot: int = [0,3,4][slot] if compact else slot
+			vertices[face_index * vertex_count_per_face + slot] = Vector2(float(face_index), float(shader_slot))
+		if compact:
+			for corner: int in range(3): indices[face_index*3+corner] = face_index*3+corner
+			continue
 		for fan: int in range(vertex_count_per_face / 6):
 			var base := face_index * vertex_count_per_face + fan * 6
 			for triangle: int in range(4):

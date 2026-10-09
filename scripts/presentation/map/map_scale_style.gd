@@ -9,6 +9,7 @@ const MEDIUM_LOD_MPP: float = StrategicSpatialLoader.MEDIUM_LOD_MPP
 const LOCAL_LOD_MPP: float = 220.0
 const REGIONAL_NODES: Array[String] = ["place:versailles", "place:saint_denis", "place:creil", "place:longueau", "place:melun", "place:meaux", "place:chantilly", "place:mantes", "place:vernon", "place:chateau_thierry"]
 const FLAG_STOPS: Array[Vector2] = [Vector2(300.0, 0.0), Vector2(1200.0, 0.08), Vector2(3000.0, 0.30), Vector2(5500.0, 0.65), Vector2(8000.0, 0.95), Vector2(16000.0, 1.0)]
+const SETTLEMENT_RADII: Dictionary = {0:2.2,1:1.7,2:1.1}
 
 static func flag_weight(mpp: float) -> float:
 	if mpp <= FLAG_STOPS[0].x:
@@ -39,9 +40,12 @@ static func physical_weight(kind: String, mpp: float) -> float:
 	return 1.0 - smoothstep(log(full), log(begin), log(maxf(mpp, 1.0)))
 
 static func strategic_weight(kind: String, mpp: float) -> float:
-	var begin := 4200.0 if kind == "rail" else 8500.0
-	var full := 2200.0 if kind == "rail" else 5500.0 if kind == "lake" else 4000.0
+	var begin := 6500.0 if kind == "rail" else 8500.0
+	var full := 2500.0 if kind == "rail" else 5500.0 if kind == "lake" else 4000.0
 	return 1.0 - smoothstep(log(full), log(begin), log(maxf(mpp, 1.0)))
+
+static func strategic_rail_width(mpp: float) -> float:
+	return lerpf(1.15,1.85,1.0-smoothstep(log(900.0),log(6500.0),log(maxf(mpp,1.0))))
 
 static func settlement_limit(rank: int, id: String = "") -> float:
 	return 6000.0 if rank == 0 else 5000.0 if rank == 1 else 900.0 if id in REGIONAL_NODES else LOCAL_DETAIL_MPP

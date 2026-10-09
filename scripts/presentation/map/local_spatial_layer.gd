@@ -145,7 +145,7 @@ func resident_buffer_bytes() -> int:
 			bytes += int(batch.faces) * (geometry.vertex_count_per_face*8+geometry.index_count_per_face*4) + geometry.data.get_width()*geometry.data.get_height()*16
 		else:
 			var geometry := batch.geometry as GlobeBoundaryBatch
-			bytes += geometry.segment_count * (16*8+54*4) + geometry.data.get_width()*geometry.data.get_height()*16
+			bytes += geometry.vertex_count*8 + geometry.index_count*4 + geometry.data.get_width()*geometry.data.get_height()*16
 	return bytes
 
 func release_gpu() -> void:
@@ -200,7 +200,7 @@ func prepare_step(font: Font) -> void:
 		if water:
 			var surfaces := GlobeSurfaceBatch.new()
 			# Physical reference patches are never territorial picking surfaces.
-			surfaces.prepare(line.faces as Array, false, true)
+			surfaces.prepare(line.faces as Array, false, true, str(line.kind) in ["land_reference","lake"])
 			geometry = surfaces
 			mesh = surfaces.mesh
 			texture = surfaces.data
@@ -209,11 +209,11 @@ func prepare_step(font: Font) -> void:
 			var boundaries: Array[Dictionary] = []
 			boundaries.assign(line.boundaries as Array)
 			var strokes := GlobeBoundaryBatch.new()
-			strokes.prepare(boundaries, str(line.kind))
+			strokes.prepare(boundaries, str(line.kind), str(line.kind) in ["coast","river"])
 			geometry = strokes
 			mesh = strokes.mesh
 			texture = strokes.data
-			geometry_bytes = strokes.segment_count * (16*8+54*4)
+			geometry_bytes = strokes.vertex_count*8 + strokes.index_count*4
 		if texture == null or mesh.get_surface_count() == 0:
 			_cursor += 1
 			continue
@@ -301,7 +301,7 @@ func content_reference() -> LocalSpatialContent:
 func place(id: String) -> Dictionary:
 	return _places.get(id, {}) as Dictionary
 
-func update(camera: RegionCamera, controller: GlobeController, date: String, viewport_size: Vector2) -> void:
+func update(camera: RegionCamera, controller: GlobeController, date: String, viewport_size: Vector2, commit_canvas: bool = true) -> void:
 	var show := _resident and _content != null and (not available_lods.is_empty() or not _fallback_batches.is_empty()) and camera.active and _content.active_on(date) and (not camera.local_active if strategic else LocalSpatialLoader.covers(RegionProjection.lon_lat(camera.unit_at(viewport_size * 0.5))))
 	var mpp := camera.km_per_pixel * 1000.0
 	active_lod = _lod(mpp) if show else ""
@@ -314,11 +314,12 @@ func update(camera: RegionCamera, controller: GlobeController, date: String, vie
 	var view_center := camera.unit_at(viewport_size*0.5)
 	var view_angle := (viewport_size.length()*0.5+8.0)*camera.km_per_pixel/6371.0088
 	for batch: Dictionary in _batches + _fallback_batches:
+		if not commit_canvas: break
 		var weight := MapScaleStyle.strategic_weight(str(batch.kind), mpp) if strategic else MapScaleStyle.physical_weight(str(batch.kind), mpp)
 		# A prepared geometric correction must fully replace the inaccurate
 		# footprint; fading it exposes old triangles through actual sea water.
 		if strategic and str(batch.kind) in ["land_reference", "ocean_reference"]: weight = 1.0
-		if strategic and str(batch.kind) == "rail" and controller.map_mode == "political": weight = 0.0
+		if strategic and str(batch.kind) == "rail" and not controller.strategic_rails_enabled: weight = 0.0
 		var visible := show and str(batch.lod) == active_lod and weight > 0.001
 		# A load-time enclosing spherical cap rejects wholly offscreen batches.
 		# This visits existing batches, never polygons, on controlled redraws.
@@ -355,6 +356,7 @@ func update(camera: RegionCamera, controller: GlobeController, date: String, vie
 				GlobeRenderer._parameter(batch,"relief_weight",MapScaleStyle.relief_weight(mpp,controller.map_mode) if reference_relief.has("world") else 0.0)
 				GlobeRenderer._parameter(batch,"relief_detail_weight",MapScaleStyle.relief_detail_weight(mpp) if reference_relief.has("region") else 0.0)
 			if not bool(batch.water): GlobeRenderer._parameter(batch, "rail_style", rail_style if str(batch.kind)=="rail" else 0)
+			if strategic and str(batch.kind)=="rail": GlobeRenderer._parameter(batch,"stroke_width",MapScaleStyle.strategic_rail_width(mpp))
 			if strategic: GlobeRenderer._parameter(batch, "paris_mask_weight", float(paris_mask_weights.get(str(batch.kind), 0.0)))
 			GlobeRenderer._parameter(batch, "globe_basis", camera.tangent_frame.transposed())
 			GlobeRenderer._parameter(batch, "globe_center", camera.origin)
@@ -369,7 +371,7 @@ func update(camera: RegionCamera, controller: GlobeController, date: String, vie
 	for label: Dictionary in _labels:
 		if not (label.item as RID).is_valid():
 			continue
-		RenderingServer.canvas_item_set_visible(label.item as RID, false)
+		if commit_canvas: RenderingServer.canvas_item_set_visible(label.item as RID, false)
 		if not show:
 			continue
 		var feature := label.feature as Dictionary
@@ -389,6 +391,7 @@ func update(camera: RegionCamera, controller: GlobeController, date: String, vie
 		if not Rect2(Vector2.ZERO, viewport_size).has_point(point):
 			continue
 		visible_places[str(feature.id)] = point
+		if not commit_canvas: continue
 		if not controller.labels_enabled and not selected:
 			continue
 		var rect := Rect2(point + Vector2(7.0, -17.0), label.text_size as Vector2)
