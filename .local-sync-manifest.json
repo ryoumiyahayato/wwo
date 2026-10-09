@@ -1,5 +1,5 @@
 {
-  "content_sha256": "d3a0e7fb67e0dcb1e089a4b1be21b759134b0886508b6e661c82dce0d8fcbbeb",
+  "content_sha256": "3b4f3ce079d80136cff65c6ce7b568e791a608627ff19b5d635a6c3dd83481b9",
   "excluded": [
     {
       "path": ".git/",
@@ -454,7 +454,7 @@
       "reason": "file outside reviewed exact file allowlist"
     }
   ],
-  "included_bytes": 5846681,
+  "included_bytes": 5847108,
   "included_files": 777,
   "owner_id": "7ed35d2d-c560-4b08-8c28-78af6d1cae6b",
   "remote": "https://github.com/ryoumiyahayato/wwo.git",

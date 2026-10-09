@@ -96,6 +96,12 @@ func _run() -> void:
 		var one := (renderer.relief.metrics.loads as Dictionary).get("region", []) as Array
 		test.equal(one.size(), (loads.region as Array).size(), "Global travel needs no re-decode")
 	test.equal(renderer.cpu_projection_count, projections, "Travel does not CPU-reproject source geography")
+	# The relief texture is already resident, but changing regions also starts
+	# finite physical-vector preparation. Observe idle after that work finishes.
+	var content_deadline := Time.get_ticks_msec() + 30000
+	while renderer.is_processing() and Time.get_ticks_msec() < content_deadline:
+		await create_timer(0.005).timeout
+	test.expect(not renderer.is_processing(), "Regional content preparation terminates within its deadline")
 	await create_timer(0.3).timeout
 	var redraws := renderer.render_draw_count
 	var updates := renderer.view_update_count
