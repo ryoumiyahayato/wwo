@@ -4,8 +4,6 @@ extends RefCounted
 
 const PREPARE_BUDGET_USEC: int = 2000
 const DRAW_ORDER: int = 100000
-const COLORS: Dictionary = {"rail": Color(0.78, 0.69, 0.48, 0.90), "river": Color(0.32, 0.65, 0.80, 0.94), "coast": Color(0.40, 0.74, 0.88, 0.96), "lake": Color(0.15, 0.36, 0.48, 1.0)}
-const WIDTHS: Dictionary = {"rail": 2.4, "river": 2.1, "coast": 1.8}
 const LODS: Array[String] = ["coarse", "medium", "local"]
 var residency_policy: String = "active"
 var rail_style: int = 2
@@ -199,10 +197,12 @@ func prepare_step(font: Font) -> void:
 		material.set_shader_parameter("region_mode", true)
 		material.set_shader_parameter("face_data" if water else "line_data", texture)
 		if water:
-			material.set_shader_parameter("water_color", COLORS.lake)
+			material.set_shader_parameter("water_color", HydrographyStyle.color("lake", str(line.get("water_class", "lake"))))
 		else:
-			material.set_shader_parameter("stroke_color", COLORS[str(line.kind)])
-			material.set_shader_parameter("stroke_width", WIDTHS[str(line.kind)])
+			material.set_shader_parameter("stroke_color", HydrographyStyle.color(str(line.kind)))
+			material.set_shader_parameter("stroke_width", HydrographyStyle.WIDTHS[str(line.kind)])
+			material.set_shader_parameter("miter_limit", HydrographyStyle.miter_limit(str(line.kind)))
+			material.set_shader_parameter("stroke_feather", HydrographyStyle.feather(str(line.kind)))
 			material.set_shader_parameter("rail_style", rail_style if str(line.kind)=="rail" else 0)
 		var item := RenderingServer.canvas_item_create()
 		RenderingServer.canvas_item_set_parent(item, _canvas)
@@ -211,7 +211,7 @@ func prepare_step(font: Font) -> void:
 		RenderingServer.canvas_item_add_mesh(item, mesh.get_rid())
 		RenderingServer.canvas_item_set_visible(item, false)
 		var buffer_bytes := geometry_bytes + texture.get_width() * texture.get_height() * 16 if texture != null else 0
-		_batches.append({"item": item, "material": material, "geometry": geometry, "lod":line.lod, "kind":line.kind, "visible":false, "water": water, "faces": (line.get("faces", []) as Array).size()})
+		_batches.append({"item": item, "material": material, "geometry": geometry, "lod":line.lod, "kind":line.kind, "visible":false, "water": water, "water_class": line.get("water_class", "lake"), "faces": (line.get("faces", []) as Array).size()})
 		_cursor += 1
 		metrics.gpu_enqueue_usec += Time.get_ticks_usec() - started
 		metrics.upload_bytes_estimate += buffer_bytes
@@ -278,7 +278,7 @@ func update(camera: RegionCamera, controller: GlobeController, date: String, vie
 		if visible:
 			visible_line = true
 			var material := batch.material as ShaderMaterial
-			var color := COLORS[str(batch.kind)] as Color
+			var color := HydrographyStyle.color(str(batch.kind), str(batch.water_class))
 			color.a *= weight
 			GlobeRenderer._parameter(batch, "water_color" if bool(batch.water) else "stroke_color", color)
 			if not bool(batch.water): GlobeRenderer._parameter(batch, "rail_style", rail_style if str(batch.kind)=="rail" else 0)

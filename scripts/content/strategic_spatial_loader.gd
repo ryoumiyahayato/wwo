@@ -142,7 +142,7 @@ static func _load(index: Dictionary, selected: Array[String]) -> LocalSpatialCon
 			if str(feature.kind) == "rail":
 				raw = [raw]
 			elif str(feature.kind) == "lake":
-				result.line_chunks.append({"kind": "lake", "lod": lod, "polygons": raw, "feature_id": feature.id})
+				result.line_chunks.append({"kind": "lake", "lod": lod, "polygons": raw, "feature_id": feature.id, "source_geometry_file": feature.get("source_geometry_file", "")})
 				continue
 			var boundaries: Array[Dictionary] = []
 			for line: Array in raw:

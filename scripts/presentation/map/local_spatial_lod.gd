@@ -32,7 +32,7 @@ static func prepare(source: Array[Dictionary], lods: Array[String] = ["coarse", 
 					if not rings.is_empty():
 						var mesh := GlobeProjection.source_mesh([{ "outer": rings[0], "holes": rings.slice(1)}], str(chunk.feature_id))
 						faces.append_array(mesh.triangles as Array[Dictionary])
-				chunks.append({"kind": "lake", "lod": lod_name, "faces": faces, "feature_id": chunk.feature_id})
+				chunks.append({"kind": "lake", "lod": lod_name, "faces": faces, "feature_id": chunk.feature_id, "water_class": HydrographyStyle.surface_class(chunk)})
 				vector_bytes += faces.size() * 60
 				continue
 			if not groups.has(kind):

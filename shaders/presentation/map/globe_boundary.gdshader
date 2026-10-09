@@ -9,6 +9,8 @@ uniform bool region_mode = false;
 uniform float region_km_per_pixel = 5.5;
 uniform vec2 region_bearing = vec2(1.0, 0.0);
 uniform float stroke_width = 0.65;
+uniform float miter_limit = 3.0;
+uniform float stroke_feather = 1.25;
 uniform vec4 stroke_color = vec4(0.22, 0.29, 0.30, 0.62);
 uniform int rail_style = 0;
 varying vec4 line_color;
@@ -42,7 +44,7 @@ vec2 edge_offset(vec2 before, vec2 after) {
 	vec2 difference = before - after;
 	vec2 bisector = length(difference) > 0.00001 ? normalize(difference) : vec2(after.y, -after.x);
 	float sine = bisector.x * before.y - bisector.y * before.x;
-	float extent = abs(sine) > 0.00001 && length(difference) > 0.00001 ? clamp(1.0 / sine, -3.0, 3.0) : 1.0;
+	float extent = abs(sine) > 0.00001 && length(difference) > 0.00001 ? clamp(1.0 / sine, -miter_limit, miter_limit) : 1.0;
 	return bisector * extent;
 }
 
@@ -77,7 +79,7 @@ void vertex() {
 			bool at_start = slot < 4 || (slot >= 8 && slot < 12);
 			bool feather_cap = slot >= 8;
 			int band = slot % 4;
-			float feather = 1.25 * min(stroke_width, 1.0);
+			float feather = stroke_feather * min(stroke_width, 1.0);
 			float side = band < 2 ? 1.0 : -1.0;
 			bool outer = band == 0 || band == 3;
 			vec2 point = at_start ? start : end;
