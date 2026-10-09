@@ -1,0 +1,55 @@
+{
+  "files": {
+    "CONCLUDE_ZH.md": {
+      "bytes": 2843,
+      "sha256": "9758e6a09e28c4a56fc605498dc0b85f03c401dfd21c1f9ef1fe5922b1f57228"
+    },
+    "HEADS_AND_SOURCE.json": {
+      "bytes": 9296,
+      "sha256": "2e827f777cd23bdbde2fa386f60823379d3534a1450055ee52deb6b79221ab58"
+    },
+    "WINDOWS_BASELINE.json": {
+      "bytes": 18698,
+      "sha256": "9a4fadc19f6f36ca4a5833972da8157ea52ced72bda9db26335f0a27b4bca325"
+    },
+    "MEASUREMENT_SCOPE.md": {
+      "bytes": 3422,
+      "sha256": "402d9806b081f310fc13dd44a2101f74e28f72609c783a84dcf5f5cd7f4f4371"
+    },
+    "COST_PROFILE.json": {
+      "bytes": 353481,
+      "sha256": "6594a0ed8e0d66d8aa9dcf04cca37a3898b0c8f7a9d053e5aa06581aea651334"
+    },
+    "COUNTEREXAMPLE_RESULT.md": {
+      "bytes": 1121,
+      "sha256": "5619a7075ae6a59ddd38cf3e3f30a24c2e7465be90973bcaa57d6592489dc017"
+    },
+    "CANDIDATE_DECISION.md": {
+      "bytes": 645,
+      "sha256": "7553b9626370d69fa00999b03dffedcb2d5e63251920114caae0e41da0de4418"
+    },
+    "FINAL_VALIDATION.json": {
+      "bytes": 67317,
+      "sha256": "fd1b6c364e0ee39a9b18c33794fc71b2b3d039d896ee5a756d077934e40bacb5"
+    },
+    "REPRODUCE_WINDOWS.md": {
+      "bytes": 2954,
+      "sha256": "3494ce862d69ac35362af19de4e6c1c630fab6781a23befd58ad8e5f63360dc0"
+    },
+    "raw-evidence.zip": {
+      "bytes": 3947236,
+      "sha256": "4b34109e78e78704335949b29102d411e32792eaaa9bd497faee47cc558c83e4"
+    }
+  },
+  "raw_original_file_count": 476,
+  "excludes": [
+    "runtime source",
+    "candidate patches",
+    "source ZIP/bundle",
+    "engine",
+    "Git objects",
+    "caches"
+  ],
+  "supplemental_raw_file_count": 4,
+  "raw_original_and_supplemental_file_count": 485
+}

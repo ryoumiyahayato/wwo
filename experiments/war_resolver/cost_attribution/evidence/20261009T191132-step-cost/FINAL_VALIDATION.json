@@ -1,0 +1,1466 @@
+{
+  "SOURCE": "VERIFIED_SOURCE_EQUIVALENT",
+  "WINDOWS_BASELINE": "ESTABLISHED",
+  "ATTRIBUTION": "PARTIAL",
+  "RUNTIME_CHANGE": "NONE",
+  "VALIDATION": "PASSED_WITH_DECLARED_BASELINE_LIMITS",
+  "CLOUD_EVIDENCE": "PENDING",
+  "PRODUCTION_INTEGRATION": "NONE",
+  "source_freeze": {
+    "frozen_utc": "2026-10-09T12:20:05.596256+00:00",
+    "actual_git_head": "43f35befe62d1c939b60d479a1af39532e8955e4",
+    "branch": "experiment/continuous-war-step-cost-windows-20261009T191132",
+    "working_tree_has_diagnostic_changes": true,
+    "runtime_algorithm_change": "NONE",
+    "digest": "da06177e42019e31545a20cd05273ec4eaee80ef3ee2725ab616bd5748b51c60",
+    "fixed_path_count": 1666,
+    "method": "SHA256 of compact sorted UTF8 path-to-raw-SHA256 JSON; fixed original1660 tracked paths plus new attribution GD/UID files; later documentation paths excluded",
+    "runtime_digest": "d4a354d8983d127fe10869d44967b1d51270763c5ce21418e2fcfefee8b7d342",
+    "runtime_files": {
+      "experiments/war_resolver/aggregation/authority.gd": "7538e9c4fdf83c211ef1615cad388a5aa86b865461a6e8cbd0263c4566f6dc2a",
+      "experiments/war_resolver/aggregation/contact_index.gd": "de50a639702188fc15e760d896781d5810d9875f637ff9bac6e714db4f14908f",
+      "experiments/war_resolver/aggregation/indexed_resolver.gd": "61186a890be21997532581032947c9e2c6bfdc83e1492c01c3f41ea1ac04c2bb",
+      "experiments/war_resolver/aggregation/spatial_hierarchy.gd": "b0c741f60dd912b18912dcf5e37a9ac5bb92c33076bef6205f970852c3092757",
+      "experiments/war_resolver/battle_state.gd": "ea1a2d6b83c0c06f30508b3ca3c54f3e0a7234c999f58d959efc3561c022e76d",
+      "experiments/war_resolver/continuity/policy.gd": "fe1e2a40594699ce6d781b28196edc37bfab61804516fcec426719ec9590be48",
+      "experiments/war_resolver/continuity/run.gd": "feb4e61fa238d079008d26753a525f0d671472a334fd44d1ae945349e956a82a",
+      "experiments/war_resolver/continuity/scenario.gd": "2835260b07987ba5f40487250aec5d53fe3a88c51276c67663fe90b1025aeaa8",
+      "experiments/war_resolver/continuity/trace.gd": "be815cfc7c20b1e59537dab2048ad8e7c398e09649e3e5ce5e19b8fb8328324f",
+      "experiments/war_resolver/continuous/advance_work.gd": "53035d4cab0e215f6ba08628587e8f97d7aa816d918276c3fc97606827e74efa",
+      "experiments/war_resolver/continuous/range_cursor.gd": "d59bff8fd70fab0306ff785e012012dcd91c6c960d31550b415ab3d426cdafb3",
+      "experiments/war_resolver/continuous/segment_work.gd": "26f647f3a963c15e30b05b93aab334b002d92f8fae0a153dfc5191d8056ffb4e",
+      "experiments/war_resolver/continuous/sort_cursor.gd": "80f07dc86bdc0853c89f4e95c625229515746dcc87840e472ec37ce403af5c2c",
+      "experiments/war_resolver/data.gd": "ffff4828bd65058519a1ca761f19458e85417552225bd0a5dcd5d72ea7dd716b",
+      "experiments/war_resolver/decision/adapter.gd": "06dfa0711d9df834b8cec964bfcbc8ee59da1f08e6242fa003e7cf9b9a7d0464",
+      "experiments/war_resolver/decision/decision_context.gd": "5a07ab261a3ae8c36809850dfb885e7e55ee427654bee44a4e880e1c9b052592",
+      "experiments/war_resolver/decision/service.gd": "ab7644fef7d28a44fefdd9499a0302e1be1bf5e6d6cf17c58e873a19237fef35",
+      "experiments/war_resolver/information/service.gd": "8bc0a2d4729d38136807b3cfee718cefdb0e93bc0e417692c6ca3d018d9a432a",
+      "experiments/war_resolver/logistics/service.gd": "f62b9221c4f522398425744e38efc48a7a267d9a3aeb7e9a4aeb94a0566711d2",
+      "experiments/war_resolver/resolver.gd": "5c087302edc11cc8c6d98e8a68d086317e6a3f89eb087398b045e2c50ed612f0",
+      "experiments/war_resolver/role_overrides.gd": "a4c2e2969efae5c7eea7b606b47483946c8ea59b11cc87e8d8184ee0035ea423",
+      "experiments/war_resolver/spatial/fixtures.gd": "327bdb33fae2642c61b3552de8ee6d9a75c86d9d8d09056994f319c4653518de",
+      "experiments/war_resolver/spatial/space.gd": "ad7725daff4d46f5a534e2ccb183105d08179f16a058439e1a5fdccac09f9825",
+      "experiments/war_resolver/structure/service.gd": "8189316ed4c51ee807b5bafc221393a7288c550f06072a4a5b897617627a8422",
+      "project.godot": "125277a9e2cc57a700f3c2788bd8392a8af0cc1e65f55176868cb0956e1418d5",
+      "experiments/war_resolver/aggregation/authority.gd.uid": "c6c4a52f5e17c4d384439debafa48934e69d3e56fc445cf0e1b4d7fc51ff5f69",
+      "experiments/war_resolver/aggregation/contact_index.gd.uid": "8f7a2a64cd433895eba4206bf8bdb16d82e1b8360b91f28506867e437da4340e",
+      "experiments/war_resolver/aggregation/indexed_resolver.gd.uid": "f697bef7f8f9e8bda00d845837f8019cd80dfd6cd0a00436abce36973b215ced",
+      "experiments/war_resolver/aggregation/spatial_hierarchy.gd.uid": "5c1513244bec4c24793e4f0b66c3152ce8101e649c039d55ba8683b61ead63ee",
+      "experiments/war_resolver/battle_state.gd.uid": "8a18027c327c1e2221ff39f5bb38b9df145bdd7be6dc6b0175832d1777e5ef81",
+      "experiments/war_resolver/continuity/policy.gd.uid": "2f96d36709fe06854d55c964a0a25112733c0710d8fbdbe2c1437e1a4548a4f7",
+      "experiments/war_resolver/continuity/run.gd.uid": "fb62ee93a4535695b38fcc0ffab4f1af5aaeba6ff6de1553017534e7431c5eef",
+      "experiments/war_resolver/continuity/scenario.gd.uid": "02692a2dfe8bf116dc8db06561e6c7cb0fa42520a75f5cd770f1a0b01c017e01",
+      "experiments/war_resolver/continuity/trace.gd.uid": "8fff8ad8a7c9825459faad23fa304a5ec572a2489f0eaf709edb676f204da6d7",
+      "experiments/war_resolver/continuous/advance_work.gd.uid": "0b1a0ccf0603a96bca068fbc3ec3eaaac24de8a8f57ac153096859dbfa8b704d",
+      "experiments/war_resolver/continuous/range_cursor.gd.uid": "6917aefb94b7c3305848c9cd966368035bbed7fb784d501f8a8533c723b81c7b",
+      "experiments/war_resolver/continuous/segment_work.gd.uid": "553b34e2476f082f252571894eb019c08d95263f5d1da8b0d9c41b7f19d813f1",
+      "experiments/war_resolver/continuous/sort_cursor.gd.uid": "84c5d2456693753a417bf6d04e64e45e2ef53860f5d98db38a579e6886a3ef8e",
+      "experiments/war_resolver/decision/decision_context.gd.uid": "aae729b68cd0c28b29f55c01203c0b9165f2cb38f63536793549a7be9cacdb53",
+      "experiments/war_resolver/decision/service.gd.uid": "4ba24d4dd3cf54dbb7f8f84a7731166361a54b9e94efd00847f68034b0e7be52",
+      "experiments/war_resolver/information/service.gd.uid": "8bda263797d4684df0893c485dd986e9f102c3c3c957a8a77471bd101223b962",
+      "experiments/war_resolver/logistics/service.gd.uid": "1d5a8eb7f13bfa4ca31d23eb1e1e3d60b7bd2634b47340c583bac1e1a754ce19",
+      "experiments/war_resolver/resolver.gd.uid": "7c7736f8f4b3ec34bea88476fde08b5d9c31b90c597a402428d0a1f5e6761f49",
+      "experiments/war_resolver/role_overrides.gd.uid": "6d538579965efb7a41f5e6c1f5bbd543f2fd80d1ead6f6acf3080fe75e5566da",
+      "experiments/war_resolver/spatial/fixtures.gd.uid": "001882aa9d9cb34b83b1e2f7e9b1f5e84704fc9001bda189fa247c89cfc75e0a",
+      "experiments/war_resolver/spatial/space.gd.uid": "8a7c64786b89b83d60bd01bb285d57ceff31304e7472e21063271a6f5c7655a1",
+      "experiments/war_resolver/structure/service.gd.uid": "3cc595f23a5cee7660b8de9106636410d6315960ee6493d8c94093245b4a23ca"
+    }
+  },
+  "fingerprint_recheck": {
+    "checked_utc": "2026-10-09T13:30:33.882022+00:00",
+    "unchanged": true,
+    "changed_paths": [],
+    "frozen_digest": "da06177e42019e31545a20cd05273ec4eaee80ef3ee2725ab616bd5748b51c60",
+    "runtime_digest": "d4a354d8983d127fe10869d44967b1d51270763c5ce21418e2fcfefee8b7d342",
+    "external_cleanup_script_sha256": "a577c40a870655a615995f8778f35cc55b616ddedf50cff79ade71cdb8299dc1",
+    "harness_fingerprints": {
+      "g0_supplement.py": "a87e482d9b780ba601f27f3a5f113fedf533882d26cd79f43c00946e333588d4",
+      "g1_samples.py": "6c46b42eb863eeb493d46f45ee3dd9ae41eb4ebd8cd2276a298388d5c261ba98",
+      "g2_contrast.py": "263d47954a40047e07ce36a025d874644626eb0cb1e7c488049e6d48b1a9afb3",
+      "g4_contract_capture.py": "d8825ac59f2eec62fd40e75289bea9047c33a035f84d800ffdb21237e2a84433",
+      "generate_delivery.py": "c37bca09021d6c6212981d367f7865a7c846a7c4dd8cdccede4817e2372d9ed4",
+      "read_experiments__war_resolver__iteration__cloud_validate.py": "4ce8391f1f603abe6056addf42fbc1f7fb4e1130c613737c80fc9abf96864f63",
+      "run_bounded.py": "2ac0479412f14915160b452be0cda5ae9742c7d150a1ad9f0b5ccbc12326df7e",
+      "run_gate.py": "1b701ea51f6d51ba11ad3d2516ef708d2b1d75e73b93b1502fe04b84d095dbe9"
+    },
+    "post_code_commit": "a094f7e73d13b821a713656062e93fcbe5e003f7"
+  },
+  "windows_baseline_allowed_test_failures": [],
+  "windows_economy_day30_day365_failures": 0,
+  "unified": {
+    "name": "g4_unified",
+    "command": [
+      "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+      "-NoProfile",
+      "-File",
+      "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132\\tools\\run_validation.ps1",
+      "-ProjectPath",
+      "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+      "-PythonPath",
+      "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe"
+    ],
+    "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+    "exit": 0,
+    "elapsed_seconds": 582.6622378000029,
+    "aborted": null,
+    "log_complete": true,
+    "log_bytes": 71067,
+    "log_sha256": "e9bf88b8817044b1efe939c27c84b5bcdd799a79a35ac166f5793b1676ffa7d0",
+    "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache"
+  },
+  "unified_assertion_failure_matches": [],
+  "retained_and_war_gate": {
+    "mode": "g4_final",
+    "steps": [
+      {
+        "name": "g4_final_resolver_tests",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/tests.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 18.181223100007628,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 114,
+        "log_sha256": "51afa50488550a0c8b3283538ed2416653fc7fbda9d9ee8c416ede505f6b5806",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [
+          "War resolver: 1876 checks, 0 failures"
+        ],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_resolver_replay_a",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/replay_probe.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 1.8862726999941515,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 155,
+        "log_sha256": "eb182c96913519af8c035e0c61f749a0f58170077015e1a9ce934c1e8b9ed138",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_resolver_replay_b",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/replay_probe.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 1.89077769999858,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 155,
+        "log_sha256": "eb182c96913519af8c035e0c61f749a0f58170077015e1a9ce934c1e8b9ed138",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_resolver_benchmark",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/benchmark.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 4.49573650000093,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 137337,
+        "log_sha256": "1ac3c83b2cb6c1a3dda95e75a94a220f469c23644854e6c926953a4433777ceb",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_roles_tests",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/role_tests.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 17.352028199995402,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 241,
+        "log_sha256": "4a66e6d4a20fbe67ae2cf0438479e09ea99f2d920bac46e570e2e1552086ccc2",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [
+          "Role overrides: 3762 checks, 0 failures"
+        ],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_roles_replay_a",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/role_replay_probe.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 3.8361830999929225,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 160,
+        "log_sha256": "ca8693a2249a2a6bbf6426986e07b21c6edea83ee2d26b3501492f4cbdcd7df9",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_roles_replay_b",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/role_replay_probe.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 3.64226459999918,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 160,
+        "log_sha256": "ca8693a2249a2a6bbf6426986e07b21c6edea83ee2d26b3501492f4cbdcd7df9",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_sandbox_tests",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/sandbox/tests.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 45.03623990000051,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 113,
+        "log_sha256": "47b7e910730c4a4d444bb02b4fd01895b5a7739dec57fc9af44f145cab80c962",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [
+          "War sandbox: 8941 checks, 0 failures"
+        ],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_sandbox_replay_a",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/sandbox/observation_probe.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 15.659280499996385,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 798479,
+        "log_sha256": "5d06770d2d5981d45efe768d22090f66a3e7e9382b97d2ab1f4f8026e62a6ec2",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_sandbox_replay_b",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/sandbox/observation_probe.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 15.593092700000852,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 798479,
+        "log_sha256": "5d06770d2d5981d45efe768d22090f66a3e7e9382b97d2ab1f4f8026e62a6ec2",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_task4_tests",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/aggregation/tests.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 53.82896879999316,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 49134,
+        "log_sha256": "b3d7fae1ed0bb7b884a3c8fa7652085d2a7d612e39c077da852e5cca2bde4b1e",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [
+          "Task4 aggregation: 17329 checks, 0 failures"
+        ],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_task4_replay_a",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/aggregation/replay_probe.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 1.06383499999356,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 161,
+        "log_sha256": "f8c3f127c6ff55a266ec4e7c4c955840391133842e70191a9486e3205f309601",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_task4_replay_b",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/aggregation/replay_probe.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 1.0486603000026662,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 161,
+        "log_sha256": "f8c3f127c6ff55a266ec4e7c4c955840391133842e70191a9486e3205f309601",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_task4_benchmark",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/aggregation/benchmark.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 23.630892400004086,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 14966,
+        "log_sha256": "f8d048363fbfaa504f32ec604771684b4390c68f7d0a8f3983bf823990361122",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_task5_tests",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/structure/tests.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 1.9748863999993773,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 4031,
+        "log_sha256": "cf83365ab2b19eeff4d274eda5d3541452b2661fb083211c09a2a3c2ae7d706e",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [
+          "Task5 structure: 788 checks, 0 failures"
+        ],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_task5_replay_a",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/structure/replay_probe.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 1.0566477999964263,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 161,
+        "log_sha256": "783e9f404788e11aa12646703b3b763499acdd75c7b32a92d62448f2e8f61fc0",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_task5_replay_b",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/structure/replay_probe.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 0.9578087999980198,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 161,
+        "log_sha256": "783e9f404788e11aa12646703b3b763499acdd75c7b32a92d62448f2e8f61fc0",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_task5_benchmark",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/structure/benchmark.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 1.2407998999988195,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 9284,
+        "log_sha256": "41efa10c78ac6584fdcd0e0df4e5195195590db793dd1a2ffa2b5697b3a6bffc",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_task6_tests",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/logistics/tests.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 1.8910142999957316,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 3012,
+        "log_sha256": "8bb012046652cc8718ed514cc54127d30e8e1edc307dbcbc835c50471b0e83d1",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [
+          "Task6 logistics: 5703 checks, 0 failures"
+        ],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_task6_replay_a",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/logistics/replay_probe.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 1.1426000999927055,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 161,
+        "log_sha256": "d1ca26a5e03b1ec66a7701be7b64ad58c7c661bc03ac3d5f2ee364041f4e935a",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_task6_replay_b",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/logistics/replay_probe.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 1.1490515000041341,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 161,
+        "log_sha256": "d1ca26a5e03b1ec66a7701be7b64ad58c7c661bc03ac3d5f2ee364041f4e935a",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_task6_benchmark",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/logistics/benchmark.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 1.517326699991827,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 24675,
+        "log_sha256": "e240161a8c45c7bbf2149c1f6e05ebc3a545272829d179c511eae86696f8653c",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_task7_tests",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/information/tests.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 1.71366529999068,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 5248,
+        "log_sha256": "f9f775dab7e037de111e51cb974f190fbbf558e39f293b1fc032436503518f16",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [
+          "Task7 information: 1341 checks, 0 failures"
+        ],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_task7_replay_a",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/information/replay_probe.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 1.1381551000085892,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 161,
+        "log_sha256": "082ef2700ebf653708491b2a9b3920068fb6093214c77d797e0569d3e5810858",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_task7_replay_b",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/information/replay_probe.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 1.1362499999959255,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 161,
+        "log_sha256": "082ef2700ebf653708491b2a9b3920068fb6093214c77d797e0569d3e5810858",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_task7_benchmark",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/information/benchmark.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 1.418233299991698,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 35387,
+        "log_sha256": "2bf2e8669ff348ff95cc38077ae484873fe657cd124277a82bf94794f181db43",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_task8_tests",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/decision/tests.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 6.240204699992319,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 18000,
+        "log_sha256": "bbb81e41b9bcf60e6b717999f9b9ad0e3d7320335721cf30b6d41bc19c6b9008",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [
+          "Task8 decision: 1220 checks, 0 failures"
+        ],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_task8_replay_a",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/decision/replay_probe.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 1.2298329000041122,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 161,
+        "log_sha256": "3b6da122d1349874ec3af88b640f74886d593e8872147679e9170190ff0fe86e",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_task8_replay_b",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/decision/replay_probe.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 1.2314207000017632,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 161,
+        "log_sha256": "3b6da122d1349874ec3af88b640f74886d593e8872147679e9170190ff0fe86e",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_task8_benchmark",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/decision/benchmark.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 5.9598515999969095,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 44679,
+        "log_sha256": "095f57d8104028004151621a3f6df2ed7b010ceaffefba4705fb30df668a3c5e",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_military_strategy_test",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://tests/vnext/military_strategy_test.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 30.663223900002777,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 45724,
+        "log_sha256": "05ffb4b11d66349155e04ceb1b9d4056c27eb8ca724c76dc527994d70e0ceadf",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [
+          "VNext military strategic system: 966 checks, 0 failures"
+        ],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_military_r3_findings_test",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://tests/vnext/military_r3_findings_test.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 128.47008959999948,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 128,
+        "log_sha256": "f96efd2660919a15f87d6fb29a7c0ca7fea56d53dc850c5a086a49b3227503e0",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [
+          "VNext military R3 findings: 1803 checks, 0 failures"
+        ],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_military_spatial_capacity_integration_test",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://tests/vnext/military_spatial_capacity_integration_test.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 2.2919508000049973,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 143,
+        "log_sha256": "d130abd35b159595c913a38281638bba4bc463b7763bfc79c79a196dfa458136",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [
+          "VNext Military/Spatial capacity integration: 68 checks, 0 failures"
+        ],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_formal_military_authorized_defend_integration_test",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://tests/formal/formal_military_authorized_defend_integration_test.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 6.6259279000078095,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 4961646,
+        "log_sha256": "c057145c4313765de89e973fabbd259fe130b8eb08d98e5ea269d823b8c2dbcb",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [
+          "Formal Military authorized DEFEND integration: 120 checks, 0 failures"
+        ],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_formal_exact_persistence_roundtrip_test",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://tests/formal/formal_exact_persistence_roundtrip_test.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 12.914651900005993,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 362,
+        "log_sha256": "d7f357257492752d48fbea544522aac14e76d5918a9b799b1ad906336279cf07",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [
+          "Formal Exact Persistence: 31 checks, 0 failures"
+        ],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_new_spatial__tests",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/spatial/tests.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 1.0125205000076676,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 318,
+        "log_sha256": "2438aa806a553fbec0eb0f95921fc97e07a8a2c1f10b7a908f705134122581b6",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [
+          "Task9 spatial: 190 checks, 0 failures"
+        ],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_new_continuity__contract_tests",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/continuity/contract_tests.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 0.7449789999955101,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 126,
+        "log_sha256": "d837fa6f404fcd0319eb079b49eca3978021583e8e2f03b6ca70e05e80de77f8",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [
+          "Task9 continuity contracts: 56 checks, 0 failures"
+        ],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_new_continuity__tests",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/continuity/tests.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 2.4233916999946814,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 119349,
+        "log_sha256": "7c5a6599e9778f97c7f581b9f312bc1e163fa7c0f87180447a8ad89a6c623881",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [
+          "Task9 continuity: 116 checks, 0 failures"
+        ],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_new_continuous__cursor_tests",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/continuous/cursor_tests.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 0.33934510000108276,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 112,
+        "log_sha256": "0af24bfa9f458b9938c4fdcdbec499c9e7df05e6f5fb5c098f921cccaf85ee76",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [
+          "Task9 cursors: 9 checks, 0 failures"
+        ],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_new_continuous__tests",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/continuous/tests.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 4.870008199999575,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 10354,
+        "log_sha256": "b24fb6b0d048b6c88ebec351bbdfab5ab18e4a37c1f1714cf13192ece98dbd84",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [
+          "Task9 continuous: 60 checks, 0 failures"
+        ],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_new_continuous__load_tests",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/continuous/load_tests.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 7.021766100006062,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 4629,
+        "log_sha256": "af9c7cc70979800f0fcf0d174a1753a35c4ead9372fa17244426b86f653b6a93",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [
+          "Task9 load: 101 checks, 0 failures"
+        ],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_new_continuous__long_tests",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/continuous/long_tests.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 353.82757959999435,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 15368,
+        "log_sha256": "fa3e9a81f1d3bcd84370577e224b7ef21053d8bfa19f260a29083853269298ea",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [
+          "Task9 long: 53 checks, 0 failures"
+        ],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_new_continuous__profile_after",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/continuous/profile_after.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 187.59485829999903,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 8972,
+        "log_sha256": "7c01209a577e55ef41f3e72cc564a7a9bb517b309cfe5b8ddba8149e74e3b766",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [
+          "Task9 profile: 12 checks, 0 failures"
+        ],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_new_continuous__retirement_tests",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://experiments/war_resolver/continuous/retirement_tests.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 18.696125400005258,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 5735,
+        "log_sha256": "064a7642d57e8d646f08614ea86713401d01d67e2a277fe39e27aae3416e66de",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [
+          "Task9 retirement: 43 checks, 0 failures"
+        ],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_codex_audit",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+          "--script",
+          "res://tests/codex_audit_regression.gd"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 1.8569124000059674,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 1715,
+        "log_sha256": "99fa4072cb7f60e5d7541a0873ac1e029062f6eb8f67d7beea7e59baf8510bec",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache",
+        "fatal": null,
+        "summary_lines": [
+          "CODEX AUDIT REGRESSION PASSED: 31 checks"
+        ],
+        "retained_resource_exit_diagnostics": []
+      },
+      {
+        "name": "g4_final_world_data",
+        "command": [
+          "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "-B",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests/world_data",
+          "-p",
+          "test_*.py",
+          "-v"
+        ],
+        "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "exit": 0,
+        "elapsed_seconds": 37.89200500000152,
+        "aborted": null,
+        "log_complete": true,
+        "log_bytes": 8112,
+        "log_sha256": "ea7ebeab078137cc3ae975c887e52535b14867332ae6630b25dc673de8736fb1",
+        "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache"
+      }
+    ],
+    "hashes": {
+      "resolver": "3c369000cbf20ed19fb53d20dde0f47fea9f025a5c1ee32a010cc332b0d92904",
+      "roles": "60d41290019b0efeaa7e21bee3201461a912cff8bfb838642cfe8ae6ef83b3e3",
+      "sandbox": "a079c498616d72209811861d72fad70ccab5dd6ea3c13bceedcaed3ad8882390",
+      "task4": "73c47a49ca73e026227324581975b1315b9386183a21da022827d30e37a646f3",
+      "task5": "c2da3bc13475afb8540ccae93d49b7ce8a5ba072f7c2c4e768ad6f0f7cded664",
+      "task6": "0245979431dca576e2194e884011572d632a1bcdc7c22cc3cd2eea4fb99698f1",
+      "task7": "3528e2eafc4a4945750cb21451a1855db0fd4200ec76809970414c7d8ba9b17e",
+      "task8": "aac8ba463b08ad859adba6a28bc69ee50333bed234b4bcdc43899a96905470ff"
+    },
+    "failures": [],
+    "complete": true,
+    "actual_git_head": "43f35befe62d1c939b60d479a1af39532e8955e4",
+    "old_matchers_unchanged": true,
+    "baseline_allowed_failures": [],
+    "same_platform_retained_replay_hashes_exact": true,
+    "passed": true
+  },
+  "diagnostic_correctness": {
+    "name": "g4_attribution_tests",
+    "command": [
+      "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+      "--headless",
+      "--path",
+      "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+      "--script",
+      "res://experiments/war_resolver/cost_attribution/tests.gd"
+    ],
+    "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+    "exit": 0,
+    "elapsed_seconds": 2.238728899988928,
+    "aborted": null,
+    "log_complete": true,
+    "log_bytes": 120,
+    "log_sha256": "84320a28a2872c41c971d3b043d75c2229e76d50c35e31b0f213d01cb76a910f",
+    "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache"
+  },
+  "cleanup_reference_check": {
+    "failures": 0,
+    "rows": [
+      {
+        "caller_world_handle_release_usec": 1350,
+        "diagnostic_data_and_probe_release_usec": 1,
+        "diagnostic_encoded_bytes": 2,
+        "diagnostic_records_counted_including_alias_rows": 0,
+        "mode": "off",
+        "probe_alive_after_explicit_release": false,
+        "public_result_release_usec": 523,
+        "scenario_alive_after_handle_release": false,
+        "seed": 71,
+        "world_alive_after_handle_release": false
+      },
+      {
+        "caller_world_handle_release_usec": 903,
+        "diagnostic_data_and_probe_release_usec": 132,
+        "diagnostic_encoded_bytes": 117062,
+        "diagnostic_records_counted_including_alias_rows": 229,
+        "mode": "broad",
+        "probe_alive_after_explicit_release": false,
+        "public_result_release_usec": 309,
+        "scenario_alive_after_handle_release": false,
+        "seed": 71,
+        "world_alive_after_handle_release": false
+      },
+      {
+        "caller_world_handle_release_usec": 930,
+        "diagnostic_data_and_probe_release_usec": 95,
+        "diagnostic_encoded_bytes": 67999,
+        "diagnostic_records_counted_including_alias_rows": 112,
+        "mode": "narrow",
+        "probe_alive_after_explicit_release": false,
+        "public_result_release_usec": 296,
+        "scenario_alive_after_handle_release": false,
+        "seed": 71,
+        "world_alive_after_handle_release": false
+      },
+      {
+        "caller_world_handle_release_usec": 609,
+        "diagnostic_data_and_probe_release_usec": 0,
+        "diagnostic_encoded_bytes": 2,
+        "diagnostic_records_counted_including_alias_rows": 0,
+        "mode": "off",
+        "probe_alive_after_explicit_release": false,
+        "public_result_release_usec": 225,
+        "scenario_alive_after_handle_release": false,
+        "seed": 109,
+        "world_alive_after_handle_release": false
+      },
+      {
+        "caller_world_handle_release_usec": 780,
+        "diagnostic_data_and_probe_release_usec": 126,
+        "diagnostic_encoded_bytes": 117845,
+        "diagnostic_records_counted_including_alias_rows": 233,
+        "mode": "broad",
+        "probe_alive_after_explicit_release": false,
+        "public_result_release_usec": 281,
+        "scenario_alive_after_handle_release": false,
+        "seed": 109,
+        "world_alive_after_handle_release": false
+      },
+      {
+        "caller_world_handle_release_usec": 1151,
+        "diagnostic_data_and_probe_release_usec": 146,
+        "diagnostic_encoded_bytes": 68275,
+        "diagnostic_records_counted_including_alias_rows": 113,
+        "mode": "narrow",
+        "probe_alive_after_explicit_release": false,
+        "public_result_release_usec": 433,
+        "scenario_alive_after_handle_release": false,
+        "seed": 109,
+        "world_alive_after_handle_release": false
+      }
+    ],
+    "scope": "correctness check of weak-reference liveness and explicit release stages; six observations, no statistical performance or native allocator reclamation guarantee"
+  },
+  "normal_quota_public_results_exact": true,
+  "raw_mixed_trace_stronger_sequence_exact": false,
+  "raw_mixed_trace_difference_file": "raw-evidence.zip:G4_NORMAL_QUOTA_RAW_COMPARISON.json",
+  "candidate_commit": null,
+  "production_protection": {
+    "production": {
+      "start": {
+        "path": "D:\\WWO\\wwo",
+        "exit_code": 0,
+        "head": "622b260bc641036c23efbf6345a548485ac6c475",
+        "branch": "canonical/current-world",
+        "git_dir": "D:/WWO/wwo/.git",
+        "tracked": 592,
+        "untracked": 1176,
+        "staged": 0
+      },
+      "end": {
+        "path": "D:\\WWO\\wwo",
+        "head": "622b260bc641036c23efbf6345a548485ac6c475",
+        "branch": "canonical/current-world",
+        "tracked": 592,
+        "untracked": 1184,
+        "staged": 0
+      },
+      "changed_metadata_fields": [
+        "untracked"
+      ],
+      "porcelain_status_equal": false,
+      "start_status_sha256": "e9c0ba327c9422f43a1e9312226464387627545f8b3fbb30e4b83ea7f60c6b19",
+      "end_status_sha256": "df9164524af971d08557e11aafa43ea416d9c424d6c00456aef698c92887897c",
+      "sealing_end": {
+        "path": "D:\\WWO\\wwo",
+        "head": "622b260bc641036c23efbf6345a548485ac6c475",
+        "branch": "canonical/current-world",
+        "tracked": 592,
+        "untracked": 1185,
+        "staged": 0,
+        "checked_utc": "2026-10-09T13:30:33.882022+00:00"
+      },
+      "sealing_status_sha256": "3d59d3f5796ac9a3e684f7b41dd51165cbb04edc26ac1814804ca3d62af0a9ff",
+      "start_vs_sealing_porcelain_equal": false,
+      "sealing_changed_metadata_fields": [
+        "untracked"
+      ]
+    },
+    "existing_lab": {
+      "start": {
+        "path": "D:\\programs\\WWO\\research\\military\\wwo-war-lab-local",
+        "exit_code": 0,
+        "head": "c4731a33177660b83c6490f41fe42dcbe7cfa7bb",
+        "branch": "experiment/military-decision-contract-v0-20261007",
+        "git_dir": "D:/WWO/wwo/.git/worktrees/wwo-war-lab-local",
+        "tracked": 0,
+        "untracked": 225,
+        "staged": 0
+      },
+      "end": {
+        "path": "D:\\programs\\WWO\\research\\military\\wwo-war-lab-local",
+        "head": "c4731a33177660b83c6490f41fe42dcbe7cfa7bb",
+        "branch": "experiment/military-decision-contract-v0-20261007",
+        "tracked": 0,
+        "untracked": 225,
+        "staged": 0
+      },
+      "changed_metadata_fields": [],
+      "porcelain_status_equal": true,
+      "start_status_sha256": "01a9a3608da92c6578f7e444a85cb55985b27b5d357e1110c719e141d17af6c0",
+      "end_status_sha256": "01a9a3608da92c6578f7e444a85cb55985b27b5d357e1110c719e141d17af6c0",
+      "sealing_end": {
+        "path": "D:\\programs\\WWO\\research\\military\\wwo-war-lab-local",
+        "head": "c4731a33177660b83c6490f41fe42dcbe7cfa7bb",
+        "branch": "experiment/military-decision-contract-v0-20261007",
+        "tracked": 0,
+        "untracked": 225,
+        "staged": 0,
+        "checked_utc": "2026-10-09T13:30:33.882022+00:00"
+      },
+      "sealing_status_sha256": "a615308b7f0c5557d9be7a29b73de2dec8ac3265947ae040878b915a9abd70b2",
+      "start_vs_sealing_porcelain_equal": false,
+      "sealing_changed_metadata_fields": []
+    },
+    "agent_formal_source_index_HEAD_writes": "NONE",
+    "shared_git_metadata_additions": "bounded object acquisition, isolated branch/worktree registration and local commits; frozen43 was fetched at depth1",
+    "concurrent_formal_test_process_observed": true,
+    "byte_for_byte_workspace_equality_claimed": false,
+    "policy": "differences only recorded, no rollback or attribution"
+  },
+  "time": {
+    "budget_effective_minutes": 240,
+    "first_recorded_utc": "2026-10-09T11:11:32Z",
+    "pre_first_record_duration": "UNKNOWN; initial request read and instruction scan occurred before timestamp",
+    "method": "elapsed wall time of this active turn including bounded waits, source recovery, analysis, validation and delivery; no known user/platform pauses; rounded estimate, not exact CPU accounting",
+    "freeze_when_remaining_minutes": 75,
+    "prior_budget_not_added": true,
+    "measured_through_utc": "2026-10-09T13:30:33.882022+00:00",
+    "known_active_elapsed_minutes": 139.03136703333334,
+    "effective_minutes_estimate": 142,
+    "initial_unknown_time_budget_allowance_minutes": 2,
+    "verified_pauses": [],
+    "includes_failed_attempts_and_uploads": true,
+    "remaining_budget_estimate_minutes": 98
+  },
+  "disk": {
+    "new_worktree_file_bytes_including_required_source": 112467628,
+    "source_staging_bytes": 280473,
+    "research_output_bytes_so_far": 74710239,
+    "reuse_tools_new_download_bytes": 0,
+    "required_source_network_transfer_bytes": "UNKNOWN; one bounded frozen43 fetch; no reliable wire-byte capture",
+    "required_source_tree_git_blob_bytes": 110611765,
+    "new_output_hard_cap_bytes": 104857600,
+    "delivery_archive_target_bytes": 20971520,
+    "shared_git_object_store_increment_bytes": "UNKNOWN; shared repository concurrent activity prevents attribution",
+    "measured_through_utc": "2026-10-09T13:30:33.882022+00:00",
+    "run_directory_bytes": 69543814,
+    "delivery_bytes": 4407770,
+    "new_worktree_output_and_cache_bytes": 758655,
+    "reserved_upper_bound_for_remaining_cloud_transfer_records_and_local_docs_bytes": 8388608,
+    "measurement_note": "Source staging and original frozen tracked source paths excluded as necessary recovery; new code, generated UID/import caches, run artifacts, API request/response records, delivery and local evidence copies counted. Closing figures recorded separately."
+  },
+  "not_run": [
+    "historical five sparse capacity table 2/16/64/400/1024 as a new performance study",
+    "all legal capacity combinations",
+    "an algorithm candidate and its5% adoption gate",
+    "target-device frame budget acceptance",
+    "formal gameplay/UI/export integration",
+    "cross-process saves/resume",
+    "historical37ms reproduction as a required goal",
+    "native allocator/OS scheduling decomposition"
+  ],
+  "interpretation": "Zero new test failures under existing matchers; retained resource-exit diagnostics remain in full logs. Raw trace difference is separately disclosed and is not promoted to formal causal/state failure or stronger equivalence success.",
+  "retained_resource_exit_diagnostics": [
+    "ERROR: 41 resources still in use at exit (run with --verbose for details).",
+    "ERROR: 41 resources still in use at exit (run with --verbose for details).",
+    "ERROR: 41 resources still in use at exit (run with --verbose for details)."
+  ],
+  "post_commit_actual_runtime_head": "a094f7e73d13b821a713656062e93fcbe5e003f7",
+  "post_commit_diagnostic_verification": {
+    "name": "g4_postcommit_attribution",
+    "command": [
+      "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+      "--headless",
+      "--path",
+      "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+      "--script",
+      "res://experiments/war_resolver/cost_attribution/tests.gd"
+    ],
+    "cwd": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+    "exit": 0,
+    "elapsed_seconds": 1.9059858999971766,
+    "aborted": null,
+    "log_complete": true,
+    "log_bytes": 120,
+    "log_sha256": "84320a28a2872c41c971d3b043d75c2229e76d50c35e31b0f213d01cb76a910f",
+    "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261009T191132-step-cost\\runtime-cache"
+  },
+  "validated_bytes_match_local_code_commit": true,
+  "publication_repair": {
+    "reason": "text read normalized local CRLF to LF for Git tree content; same text, unequal raw SHA256",
+    "initial_remote_commit": "049bd1717a5bcf71e98c7f584b906f044248a725",
+    "correction": "one bounded owned docs-branch repair with base64 original bytes; runtime unchanged"
+  },
+  "cloud_publication_limit": {
+    "docs_uploaded": true,
+    "text_files_actual_remote_SHA256_verified": 10,
+    "archive_created": true,
+    "archive_remote_Git_blob_SHA_matches": true,
+    "archive_actual_remote_bytes_roundtrip_verified": false,
+    "failed_reads": [
+      "base64 JSON GET timeout at60seconds",
+      "one raw GET attempt stream CANCEL received from peer"
+    ],
+    "further_retries": "STOPPED",
+    "local_archive_retained": true,
+    "runtime_code_branch_pushed": false,
+    "PR_created": false
+  }
+}

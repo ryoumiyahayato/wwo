@@ -1,0 +1,92 @@
+{
+  "status": "PENDING",
+  "publication": "DOCUMENTS_AND_ARCHIVE_CREATED_TEXTS_VERIFIED_ARCHIVE_ROUNDTRIP_INCOMPLETE",
+  "head": "73127196d134423233645889b28baf703880029c",
+  "tree": "99ccce7e9432248c7f8f0cf76ba0341d2785dc88",
+  "branch": "evidence/war-step-cost-windows-20261009T191132",
+  "base": "43f35befe62d1c939b60d479a1af39532e8955e4",
+  "checked_utc": "2026-10-09T13:31:31.887227+00:00",
+  "files": [
+    {
+      "name": "CONCLUDE_ZH.md",
+      "bytes": 2843,
+      "sha256": "9758e6a09e28c4a56fc605498dc0b85f03c401dfd21c1f9ef1fe5922b1f57228",
+      "git_blob_sha": "dbebc57ccab5f82e4f949c66931b6eae9cf8658e",
+      "remote_roundtrip_SHA256_verified": true
+    },
+    {
+      "name": "HEADS_AND_SOURCE.json",
+      "bytes": 9296,
+      "sha256": "2e827f777cd23bdbde2fa386f60823379d3534a1450055ee52deb6b79221ab58",
+      "git_blob_sha": "f39f235fc489c71f58a659e77cb1ea124ba8a2fd",
+      "remote_roundtrip_SHA256_verified": true
+    },
+    {
+      "name": "WINDOWS_BASELINE.json",
+      "bytes": 18698,
+      "sha256": "9a4fadc19f6f36ca4a5833972da8157ea52ced72bda9db26335f0a27b4bca325",
+      "git_blob_sha": "55f7f6c47219f3cf0587de94d5752fd245c61cdb",
+      "remote_roundtrip_SHA256_verified": true
+    },
+    {
+      "name": "MEASUREMENT_SCOPE.md",
+      "bytes": 3422,
+      "sha256": "402d9806b081f310fc13dd44a2101f74e28f72609c783a84dcf5f5cd7f4f4371",
+      "git_blob_sha": "13e89dc40300dd6d815c3bd0d84baebeaaec7e7f",
+      "remote_roundtrip_SHA256_verified": true
+    },
+    {
+      "name": "COST_PROFILE.json",
+      "bytes": 353481,
+      "sha256": "6594a0ed8e0d66d8aa9dcf04cca37a3898b0c8f7a9d053e5aa06581aea651334",
+      "git_blob_sha": "7efc3c6fb1c1b3ac6b495318b9a065d98bd9514b",
+      "remote_roundtrip_SHA256_verified": true
+    },
+    {
+      "name": "COUNTEREXAMPLE_RESULT.md",
+      "bytes": 1121,
+      "sha256": "5619a7075ae6a59ddd38cf3e3f30a24c2e7465be90973bcaa57d6592489dc017",
+      "git_blob_sha": "45fc7c6ebbafab676044a7267bcb96386a7b8591",
+      "remote_roundtrip_SHA256_verified": true
+    },
+    {
+      "name": "CANDIDATE_DECISION.md",
+      "bytes": 645,
+      "sha256": "7553b9626370d69fa00999b03dffedcb2d5e63251920114caae0e41da0de4418",
+      "git_blob_sha": "990c8ab1ebc6736f0229eda4fdd9706884bb3ddc",
+      "remote_roundtrip_SHA256_verified": true
+    },
+    {
+      "name": "FINAL_VALIDATION.json",
+      "bytes": 67317,
+      "sha256": "fd1b6c364e0ee39a9b18c33794fc71b2b3d039d896ee5a756d077934e40bacb5",
+      "git_blob_sha": "e81bcbdee07182fabf049ed2d2bfa19f167e652c",
+      "remote_roundtrip_SHA256_verified": true
+    },
+    {
+      "name": "REPRODUCE_WINDOWS.md",
+      "bytes": 2954,
+      "sha256": "3494ce862d69ac35362af19de4e6c1c630fab6781a23befd58ad8e5f63360dc0",
+      "git_blob_sha": "467922d60ce6566cb7deb089abcc68bd75482d3d",
+      "remote_roundtrip_SHA256_verified": true
+    },
+    {
+      "name": "EVIDENCE_CHECKSUMS.json",
+      "bytes": 1746,
+      "sha256": "ddb211ed41481377b0763c3830e241bb224e3328303b80198dc71623602cf89b",
+      "git_blob_sha": "7d3afae80fb426519f42d4da7d055a8a34a8be8d",
+      "remote_roundtrip_SHA256_verified": true
+    },
+    {
+      "name": "raw-evidence.zip",
+      "bytes": 3947236,
+      "sha256": "4b34109e78e78704335949b29102d411e32792eaaa9bd497faee47cc558c83e4",
+      "git_blob_sha": "dfde5b2bdc8879cfcc82b6296babc0d4c687a5f6",
+      "remote_roundtrip_SHA256_verified": false,
+      "verification": "remote content-address SHA agrees; actual ZIP GET failed twice, not claimed fully verified"
+    }
+  ],
+  "runtime_code_branch_pushed": false,
+  "PR_created": false,
+  "report_url": "https://github.com/ryoumiyahayato/wwo/blob/73127196d134423233645889b28baf703880029c/experiments/war_resolver/step_cost_windows/20261009T191132-step-cost/CONCLUDE_ZH.md"
+}
