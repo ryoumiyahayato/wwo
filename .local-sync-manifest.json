@@ -1,5 +1,5 @@
 {
-  "content_sha256": "6dbf78e9b2e4d0528fd5d72a37e761032ef46fd1263b43445d67a8a02bdf2d57",
+  "content_sha256": "b39c70ec7442ef956b8b5406419754e1010f3d605f97b62095e7e2b7ab79c2ea",
   "excluded": [
     {
       "path": ".git/",
@@ -91,6 +91,10 @@
     },
     {
       "path": "docs/map/historical_boundary_water_presentation_r1.md",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "docs/map/map_correctness_cartographic_r3.md",
       "reason": "file outside reviewed exact file allowlist"
     },
     {
@@ -366,6 +370,10 @@
       "reason": "file outside reviewed exact file allowlist"
     },
     {
+      "path": "tools/map/audit_correctness_visuals.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
       "path": "tools/map/audit_map_triangles.py",
       "reason": "file outside reviewed exact file allowlist"
     },
@@ -430,6 +438,10 @@
       "reason": "file outside reviewed exact file allowlist"
     },
     {
+      "path": "tools/map/export_correctness_product.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
       "path": "tools/map/geographic_foundation_release_probe.gd",
       "reason": "file outside reviewed exact file allowlist"
     },
@@ -470,6 +482,10 @@
       "reason": "file outside reviewed exact file allowlist"
     },
     {
+      "path": "tools/map/measure_correctness_followups.ps1",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
       "path": "tools/map/pack_strategic_geometry.py",
       "reason": "file outside reviewed exact file allowlist"
     },
@@ -495,6 +511,10 @@
     },
     {
       "path": "tools/map/summarize_administrative_measurement.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/summarize_correctness_cold.py",
       "reason": "file outside reviewed exact file allowlist"
     },
     {
@@ -542,7 +562,7 @@
       "reason": "file outside reviewed exact file allowlist"
     }
   ],
-  "included_bytes": 5867435,
+  "included_bytes": 5871985,
   "included_files": 777,
   "owner_id": "7ed35d2d-c560-4b08-8c28-78af6d1cae6b",
   "remote": "https://github.com/ryoumiyahayato/wwo.git",

@@ -9,27 +9,33 @@ const PICK_CHUNK_SIZE: int = 128
 var mesh := ArrayMesh.new()
 var data: ImageTexture
 var _pick_chunks: Array[Dictionary] = []
+var vertex_count_per_face: int = VERTICES_PER_FACE
+var index_count_per_face: int = 24
 
-func prepare(faces: Array) -> void:
+func prepare(faces: Array, retain_picking: bool = true, regional_reference: bool = false) -> void:
 	_pick_chunks.clear()
 	mesh.clear_surfaces()
 	data = null
+	# A regional viewport ends before the horizon by more than the maximum
+	# source edge. Its reference faces need only the first triangle fan; the
+	# WORLD and authoritative picking meshes retain both horizon fans.
+	vertex_count_per_face = 6 if regional_reference else VERTICES_PER_FACE
+	index_count_per_face = 12 if regional_reference else 24
 	if faces.is_empty():
 		return
 	var height := maxi(1, ceili(float(faces.size() * TEXELS_PER_FACE) / DATA_WIDTH))
 	var values := PackedFloat32Array()
 	values.resize(DATA_WIDTH * height * 4)
 	var vertices := PackedVector2Array()
-	vertices.resize(faces.size() * VERTICES_PER_FACE)
+	vertices.resize(faces.size() * vertex_count_per_face)
 	var indices := PackedInt32Array()
-	indices.resize(faces.size() * 24)
+	indices.resize(faces.size() * index_count_per_face)
 	var chunk_faces: Array[Dictionary] = []
 	var chunk_bounds := AABB()
 	for face_index: int in range(faces.size()):
 		var face := faces[face_index] as Dictionary
 		var points := face.points as PackedVector3Array
 		var uvs := face.uvs as PackedVector2Array
-		var face_bounds := AABB(points[0], Vector3.ZERO).expand(points[1]).expand(points[2]).grow(GlobeProjection.SOURCE_EPSILON)
 		for corner: int in range(3):
 			var offset := (face_index * TEXELS_PER_FACE + corner) * 4
 			values[offset] = points[corner].x
@@ -38,19 +44,19 @@ func prepare(faces: Array) -> void:
 			offset += 12
 			values[offset] = uvs[corner].x
 			values[offset + 1] = uvs[corner].y
-			if chunk_faces.is_empty() and corner == 0:
+			if retain_picking and chunk_faces.is_empty() and corner == 0:
 				chunk_bounds = AABB(points[0], Vector3.ZERO)
-			chunk_bounds = chunk_bounds.expand(points[corner])
-		chunk_faces.append({"face": face, "bounds": face_bounds})
-		if chunk_faces.size() == PICK_CHUNK_SIZE or face_index == faces.size() - 1:
+			if retain_picking: chunk_bounds = chunk_bounds.expand(points[corner])
+		if retain_picking: chunk_faces.append({"face": face, "bounds": AABB(points[0], Vector3.ZERO).expand(points[1]).expand(points[2]).grow(GlobeProjection.SOURCE_EPSILON)})
+		if retain_picking and (chunk_faces.size() == PICK_CHUNK_SIZE or face_index == faces.size() - 1):
 			_pick_chunks.append({"bounds": chunk_bounds, "faces": chunk_faces})
 			chunk_faces = []
-		for slot: int in range(VERTICES_PER_FACE):
-			vertices[face_index * VERTICES_PER_FACE + slot] = Vector2(float(face_index), float(slot))
-		for fan: int in range(2):
-			var base := face_index * VERTICES_PER_FACE + fan * 6
+		for slot: int in range(vertex_count_per_face):
+			vertices[face_index * vertex_count_per_face + slot] = Vector2(float(face_index), float(slot))
+		for fan: int in range(vertex_count_per_face / 6):
+			var base := face_index * vertex_count_per_face + fan * 6
 			for triangle: int in range(4):
-				var offset := face_index * 24 + fan * 12 + triangle * 3
+				var offset := face_index * index_count_per_face + fan * 12 + triangle * 3
 				indices[offset] = base
 				indices[offset + 1] = base + triangle + 1
 				indices[offset + 2] = base + triangle + 2

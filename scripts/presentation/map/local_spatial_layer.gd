@@ -105,7 +105,7 @@ func _queue_preparation() -> void:
 		return
 	var missing: Array[String] = []
 	for lod_name: String in _wanted:
-		if not _cpu_ready.has(lod_name): missing.append(lod_name)
+		if not _cpu_ready.has(lod_name) and not available_lods.has(lod_name): missing.append(lod_name)
 	if not missing.is_empty():
 		_lod_thread = Thread.new()
 		_lod_thread.start(LocalSpatialLod.prepare.bind(_content.line_chunks,missing,_reference_frames))
@@ -142,7 +142,7 @@ func resident_buffer_bytes() -> int:
 	for batch: Dictionary in _batches + _fallback_batches:
 		if bool(batch.get("water", false)):
 			var geometry := batch.geometry as GlobeSurfaceBatch
-			bytes += int(batch.faces) * (12*8+24*4) + geometry.data.get_width()*geometry.data.get_height()*16
+			bytes += int(batch.faces) * (geometry.vertex_count_per_face*8+geometry.index_count_per_face*4) + geometry.data.get_width()*geometry.data.get_height()*16
 		else:
 			var geometry := batch.geometry as GlobeBoundaryBatch
 			bytes += geometry.segment_count * (16*8+54*4) + geometry.data.get_width()*geometry.data.get_height()*16
@@ -199,11 +199,12 @@ func prepare_step(font: Font) -> void:
 		var texture: ImageTexture
 		if water:
 			var surfaces := GlobeSurfaceBatch.new()
-			surfaces.prepare(line.faces as Array)
+			# Physical reference patches are never territorial picking surfaces.
+			surfaces.prepare(line.faces as Array, false, true)
 			geometry = surfaces
 			mesh = surfaces.mesh
 			texture = surfaces.data
-			geometry_bytes = (line.faces as Array).size() * (12*8+24*4)
+			geometry_bytes = (line.faces as Array).size() * (surfaces.vertex_count_per_face*8+surfaces.index_count_per_face*4)
 		else:
 			var boundaries: Array[Dictionary] = []
 			boundaries.assign(line.boundaries as Array)
@@ -244,7 +245,7 @@ func prepare_step(font: Font) -> void:
 		RenderingServer.canvas_item_add_mesh(item, mesh.get_rid(), Transform2D(), Color.WHITE, template.texture as RID if not template.is_empty() else RID())
 		RenderingServer.canvas_item_set_visible(item, false)
 		var buffer_bytes := geometry_bytes + texture.get_width() * texture.get_height() * 16 if texture != null else 0
-		_batches.append({"item": item, "material": material, "geometry": geometry, "lod":line.lod, "kind":line.kind, "visible":false, "water": water, "water_class": line.get("water_class", "lake"), "faces": (line.get("faces", []) as Array).size(), "visual_template":template})
+		_batches.append({"item": item, "material": material, "geometry": geometry, "lod":line.lod, "kind":line.kind, "visible":false, "water": water, "water_class": line.get("water_class", "lake"), "faces": (line.get("faces", []) as Array).size(), "visual_template":template,"visual_reference_feature":reference,"skin_signature":-1,"cull_axis":line.get("cull_axis",Vector3.ZERO),"cull_angle":line.get("cull_angle",PI)})
 		_cursor += 1
 		metrics.gpu_enqueue_usec += Time.get_ticks_usec() - started
 		metrics.upload_bytes_estimate += buffer_bytes
@@ -265,6 +266,13 @@ func prepare_step(font: Font) -> void:
 	if not metrics.has("ready_since_load_usec"):
 		metrics.ready_since_load_usec = Time.get_ticks_usec() - int(metrics.load_started_usec)
 	preparing = false
+	if strategic:
+		# Source geometry stays in Content; uploaded display-face dictionaries
+		# are disposable. Regenerate only after an explicit GPU eviction.
+		_chunks.clear()
+		_upload_chunks.clear()
+		_cursor = 0
+		_cpu_ready.clear()
 	_queue_preparation()
 	_trim_gpu()
 
@@ -302,6 +310,9 @@ func update(camera: RegionCamera, controller: GlobeController, date: String, vie
 	visible_places.clear()
 	label_rects.clear()
 	var visible_line := false
+	var skins: Dictionary = {}
+	var view_center := camera.unit_at(viewport_size*0.5)
+	var view_angle := (viewport_size.length()*0.5+8.0)*camera.km_per_pixel/6371.0088
 	for batch: Dictionary in _batches + _fallback_batches:
 		var weight := MapScaleStyle.strategic_weight(str(batch.kind), mpp) if strategic else MapScaleStyle.physical_weight(str(batch.kind), mpp)
 		# A prepared geometric correction must fully replace the inaccurate
@@ -309,6 +320,10 @@ func update(camera: RegionCamera, controller: GlobeController, date: String, vie
 		if strategic and str(batch.kind) in ["land_reference", "ocean_reference"]: weight = 1.0
 		if strategic and str(batch.kind) == "rail" and controller.map_mode == "political": weight = 0.0
 		var visible := show and str(batch.lod) == active_lod and weight > 0.001
+		# A load-time enclosing spherical cap rejects wholly offscreen batches.
+		# This visits existing batches, never polygons, on controlled redraws.
+		if visible and not view_center.is_zero_approx() and float(batch.cull_angle)<PI*0.5:
+			visible = (batch.cull_axis as Vector3).angle_to(view_center) <= float(batch.cull_angle)+view_angle
 		if visible != bool(batch.visible):
 			RenderingServer.canvas_item_set_visible(batch.item as RID, visible)
 			batch.visible = visible
@@ -320,8 +335,17 @@ func update(camera: RegionCamera, controller: GlobeController, date: String, vie
 			GlobeRenderer._parameter(batch, "water_color" if bool(batch.water) else "stroke_color", color)
 			var template := batch.get("visual_template", {}) as Dictionary
 			if not template.is_empty():
-				for parameter: String in ["surface_color","political_base_color","flag_weight","political_weight","flag_bounds","flag_uv_scale","flag_uv_offset","flag_uv_rotation","relief_world","relief_region","relief_weight","relief_detail_weight"]:
-					GlobeRenderer._parameter(batch, parameter, (template.material as ShaderMaterial).get_shader_parameter(parameter))
+				var reference := str(batch.visual_reference_feature)
+				if not skins.has(reference):
+					var values: Dictionary = {}
+					var parameters := template.get("parameters", {}) as Dictionary
+					for parameter: String in ["surface_color","political_base_color","flag_weight","political_weight","flag_bounds","flag_uv_scale","flag_uv_offset","flag_uv_rotation","relief_world","relief_region","relief_weight","relief_detail_weight"]:
+						if parameters.has(parameter): values[parameter] = parameters[parameter]
+					skins[reference] = {"values":values,"signature":values.hash()}
+				var skin := skins[reference] as Dictionary
+				if int(batch.skin_signature) != int(skin.signature):
+					for parameter: String in skin.values: GlobeRenderer._parameter(batch, parameter, skin.values[parameter])
+					batch.skin_signature = skin.signature
 				GlobeRenderer._parameter(batch,"reference_opacity",weight)
 			elif str(batch.kind)=="land_reference":
 				GlobeRenderer._parameter(batch,"reference_opacity",weight)

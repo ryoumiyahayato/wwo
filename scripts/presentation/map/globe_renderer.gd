@@ -39,6 +39,7 @@ var _boundary_batches: Array[Dictionary] = []
 var _font := UIDrawing.create_font()
 var _country_font := SystemFont.new()
 var _country_label_layouts: Dictionary = {}
+var _world_label_records: Dictionary = {}
 var _surface_shader: Shader
 var _physical_background: Dictionary = {}
 var _relief_shader_warmed: bool = false
@@ -112,6 +113,12 @@ func configure(content_value: MapGeometryContent, controller_value: GlobeControl
 func refresh(registry: RuntimePoliticalEntityView, evidence: HistoricalPoliticalEvidenceView, economy: FormalWorldEconomyView, places: Array[Dictionary], date: Dictionary, display: ResolvedMapContent) -> void:
 	_political_view = registry
 	political.refresh(registry, evidence, economy, places, date, content, display)
+	_world_label_records = political.records.duplicate()
+	for id: String in _world_label_records:
+		var layout := _country_label_layouts.get(str((_world_label_records[id] as Dictionary).get("geometry_feature_id", "")), {}) as Dictionary
+		if layout.has("name"):
+			_world_label_records[id] = (_world_label_records[id] as Dictionary).duplicate()
+			_world_label_records[id]["short_name_zh"] = layout.name
 	if controller.region_camera.local_active and (local_content == null or local_content.content == null or not local_content.content.active_on(display.date())):
 		controller.region_camera.leave_local()
 	_region_labels_dirty = true
@@ -582,13 +589,7 @@ func _draw() -> void:
 		if controller.zoom >= 4.8 or selected or place_id == controller.hovered_place_id:
 			UIDrawing.label(self, _font, point + Vector2(7.0, -6.0), str((political.places[place_id] as Dictionary).get("name", place_id)), 10)
 	if not regional:
-		var label_records := political.records.duplicate()
-		for id: String in label_records:
-			var layout := _country_label_layouts.get(str((label_records[id] as Dictionary).get("geometry_feature_id","")),{}) as Dictionary
-			if layout.has("name"):
-				label_records[id] = (label_records[id] as Dictionary).duplicate()
-				label_records[id]["short_name_zh"] = layout.name
-		GlobeLabels.draw(self, _country_font, _anchors, label_records, Rect2(Vector2.ZERO, size), controller.zoom, controller.selected_polity_id, controller.hovered_polity_id, controller.labels_enabled)
+		GlobeLabels.draw(self, _country_font, _anchors, _world_label_records, Rect2(Vector2.ZERO, size), controller.zoom, controller.selected_polity_id, controller.hovered_polity_id, controller.labels_enabled)
 	var metric := controller.region_camera.km_per_pixel if regional else RegionProjection.world_scale(RegionProjection.world_unit(_center, _center, _radius, controller.orientation()), controller.orientation(), _radius)
 	var space := MapScaleStyle.band(metric * 1000.0, regional, controller.region_camera.local_active)
 	if not local_layer.visible_places.is_empty():
