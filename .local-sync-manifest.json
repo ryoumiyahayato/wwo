@@ -1,5 +1,5 @@
 {
-  "content_sha256": "86152af76897bf9d9dc2a56e9fecec5520960a83c10b0d10eb9049c415dbebbb",
+  "content_sha256": "d3a0e7fb67e0dcb1e089a4b1be21b759134b0886508b6e661c82dce0d8fcbbeb",
   "excluded": [
     {
       "path": ".git/",
@@ -76,6 +76,14 @@
     {
       "path": "docs/map/administrative_region_foundation_r1.md",
       "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "docs/map/geographic_foundation_completion_r1.md",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "docs/map/geographic_foundation_source_review_r1.json",
+      "reason": "non-code JSON/labels/frozen evidence excluded before reading"
     },
     {
       "path": "docs/map/historical_boundary_source_review_r1.json",
@@ -258,6 +266,14 @@
       "reason": "file outside reviewed exact file allowlist"
     },
     {
+      "path": "tests/formal/formal_geographic_foundation_test.gd",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tests/formal/formal_geographic_foundation_test.gd.uid",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
       "path": "tests/formal/formal_hydrography_presentation_test.gd",
       "reason": "file outside reviewed exact file allowlist"
     },
@@ -338,6 +354,18 @@
       "reason": "file outside reviewed exact file allowlist"
     },
     {
+      "path": "tools/map/build_geographic_foundation.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/build_geographic_foundation_measurement.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/build_geographic_foundation_ui.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
       "path": "tools/map/build_historical_water_measurement.py",
       "reason": "file outside reviewed exact file allowlist"
     },
@@ -347,6 +375,14 @@
     },
     {
       "path": "tools/map/build_paris_land_pilot.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/geographic_foundation_release_probe.gd",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/geographic_foundation_release_probe.gd.uid",
       "reason": "file outside reviewed exact file allowlist"
     },
     {
@@ -375,6 +411,10 @@
     },
     {
       "path": "tools/map/summarize_administrative_measurement.py",
+      "reason": "file outside reviewed exact file allowlist"
+    },
+    {
+      "path": "tools/map/summarize_geographic_foundation.py",
       "reason": "file outside reviewed exact file allowlist"
     },
     {
@@ -414,7 +454,7 @@
       "reason": "file outside reviewed exact file allowlist"
     }
   ],
-  "included_bytes": 5840052,
+  "included_bytes": 5846681,
   "included_files": 777,
   "owner_id": "7ed35d2d-c560-4b08-8c28-78af6d1cae6b",
   "remote": "https://github.com/ryoumiyahayato/wwo.git",

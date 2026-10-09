@@ -77,7 +77,7 @@ func prepare_step(source: Dictionary, lines: Array[Dictionary]) -> void:
 		RenderingServer.canvas_item_set_draw_index(item, surfaces.size() + boundaries.size() + 1)
 		RenderingServer.canvas_item_set_material(item, material.get_rid())
 		RenderingServer.canvas_item_add_mesh(item, (original.geometry as GlobeBoundaryBatch).mesh.get_rid())
-		boundaries.append({"geometry": original.geometry, "material": material, "item": item})
+		boundaries.append({"geometry": original.geometry, "material": material, "item": item, "kind": original.get("kind", "")})
 	preparation_usec += Time.get_ticks_usec() - started
 	preparing = false
 	ready = true

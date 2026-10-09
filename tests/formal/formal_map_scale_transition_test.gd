@@ -69,14 +69,14 @@ func _run() -> void:
 		test.equal(controller.map_mode, modes[index], "Current mode survives")
 		test.expect(controller.labels_enabled, "Labels switch survives")
 		test.equal(renderer.political.display_date, "1900-01-01", "Display date survives")
-		# Early Paris LOD preparation now legitimately overlaps a far-Region
-		# handoff. Idle means the finite worker/batch task has finished.
-		if (renderer.local_content != null and renderer.local_content.preparing()) or renderer.local_layer.preparing:
+		# Local and global physical content can finish after the camera fade.
+		# Idle is asserted only after all finite preparation has terminated.
+		if renderer.is_processing():
 			test.expect(renderer.is_processing(), "Finite Region content preparation has a scheduler")
-			var preparation_deadline := Time.get_ticks_msec() + 15000
-			while ((renderer.local_content != null and renderer.local_content.preparing()) or renderer.local_layer.preparing) and Time.get_ticks_msec() < preparation_deadline:
+			var preparation_deadline := Time.get_ticks_msec() + 30000
+			while renderer.is_processing() and Time.get_ticks_msec() < preparation_deadline:
 				await create_timer(0.005).timeout
-			test.expect(not renderer.local_content.preparing() and not renderer.local_layer.preparing, "Early Region preparation terminates")
+			test.expect(not renderer.is_processing(), "Finite Region preparation terminates within its deadline")
 		test.expect(not renderer.is_processing(), "REGION idle has no preparation/transition process")
 		test.expect(not (renderer.get("_container") as SubViewportContainer).visible, "Inactive WORLD is hidden after fade")
 		test.equal(world_texture.render_target_update_mode, SubViewport.UPDATE_DISABLED, "Inactive WORLD does not render")

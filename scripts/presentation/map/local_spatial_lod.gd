@@ -14,14 +14,29 @@ static func prepare(source: Array[Dictionary], lods: Array[String] = ["coarse", 
 		var segments: int = 0
 		var vector_bytes: int = 0
 		var precomputed: bool = false
+		var source_tolerances: Dictionary = {}
 		for chunk: Dictionary in source:
 			if chunk.has("lod") and str(chunk.lod) != lod_name:
 				continue
 			precomputed = precomputed or chunk.has("lod")
 			var kind := str(chunk.kind)
+			if chunk.has("tolerance_m"): source_tolerances[kind] = chunk.tolerance_m
 			if chunk.has("polygons"):
 				var faces: Array[Dictionary] = []
+				if kind in ["land_reference", "ocean_reference"]:
+					# These are already constrained source triangles. Re-running the
+					# polygon pipeline both wastes work and rejects subpixel slivers
+					# that collapse in Godot's float32 vectors. Degenerate display
+					# faces have no area; no source or territorial polygon is edited.
+					for polygon: Array in chunk.polygons as Array:
+						var ring := polygon[0] as Array
+						var triangle := PackedVector2Array()
+						for point: Array in ring.slice(0,3): triangle.append(Vector2(float(point[0]),float(point[1])))
+						if GlobeProjection.polygon_area(triangle)<=0.0: continue
+						for child: PackedVector2Array in GlobeProjection.tessellate_triangle(triangle):
+							faces.append({"points":GlobeProjection.to_unit_line(child),"uvs":PackedVector2Array([Vector2.ZERO,Vector2.ZERO,Vector2.ZERO]),"component_index":0})
 				for polygon: Array in chunk.polygons as Array:
+					if kind in ["land_reference", "ocean_reference"]: break
 					var rings: Array[PackedVector2Array] = []
 					for ring: Array in polygon:
 						var points := PackedVector2Array()
@@ -32,7 +47,10 @@ static func prepare(source: Array[Dictionary], lods: Array[String] = ["coarse", 
 					if not rings.is_empty():
 						var mesh := GlobeProjection.source_mesh([{ "outer": rings[0], "holes": rings.slice(1)}], str(chunk.feature_id))
 						faces.append_array(mesh.triangles as Array[Dictionary])
-				chunks.append({"kind": "lake", "lod": lod_name, "faces": faces, "feature_id": chunk.feature_id, "water_class": HydrographyStyle.surface_class(chunk)})
+				# Limit a single upload step; exact offline patch triangles need no
+				# camera-time topology or second political geometry.
+				for first: int in range(0, faces.size(), 1024):
+					chunks.append({"kind": kind, "lod": lod_name, "faces": faces.slice(first,first+1024), "feature_id": chunk.feature_id, "water_class": HydrographyStyle.surface_class(chunk)})
 				vector_bytes += faces.size() * 60
 				continue
 			if not groups.has(kind):
@@ -48,14 +66,18 @@ static func prepare(source: Array[Dictionary], lods: Array[String] = ["coarse", 
 				counts[kind] += points.size() - 1
 				segments += points.size() - 1
 				vector_bytes += points.size() * 12
-				if int(counts[kind]) >= 256:
+				# Keep per-source line slices bounded, but coalesce their static
+				# coastal draws. The native FAR probe exposed driver overhead
+				# from many tiny batches, rather than insufficient source detail.
+				var batch_limit: int = 1024 if kind=="coast" and chunk.has("lod") else 256
+				if int(counts[kind]) >= batch_limit:
 					chunks.append({"kind":kind, "boundaries":groups[kind], "lod":lod_name})
 					groups[kind] = []
 					counts[kind] = 0
 		for kind: String in groups:
 			if not (groups[kind] as Array).is_empty():
 				chunks.append({"kind":kind, "boundaries":groups[kind], "lod":lod_name})
-		stats[lod_name] = {"segments":segments, "packed_vector_bytes":vector_bytes, "tolerance_m":(5000.0 if lod_name == "coarse" else 1500.0) if precomputed else TOLERANCE_M[lod_name], "precomputed": precomputed}
+		stats[lod_name] = {"segments":segments, "packed_vector_bytes":vector_bytes, "tolerance_m":(5000.0 if lod_name == "coarse" else 1500.0) if precomputed else TOLERANCE_M[lod_name], "source_tolerances_m":source_tolerances, "precomputed": precomputed}
 	return {"chunks":chunks, "lod_stats":stats, "lod_prepare_usec":Time.get_ticks_usec()-started}
 
 static func simplify(points: PackedVector3Array, tolerance_m: float) -> PackedVector3Array:

@@ -3,6 +3,8 @@ extends RefCounted
 ## Bounded Content slices on the existing evidence contracts, never Local support.
 const INDEX_PATH: String = "res://data/strategic/index.json"
 const MAX_ACTIVE_REGIONS: int = 2
+const MAX_ACTIVE_COAST_REGIONS: int = 64
+const MEDIUM_LOD_MPP: float = 1500.0
 var content: LocalSpatialContent
 var metrics: Dictionary = {"file_reads": 0, "source_admissions": 0, "loads": 0, "active_regions": []}
 var errors: Array[String] = []
@@ -12,7 +14,7 @@ var _wanted: Array[String] = []
 var _loading: Array[String] = []
 var _date: String = ""
 
-func request(center: Vector2, radius_km: float, date: String) -> void:
+func request(center: Vector2, radius_km: float, date: String, mpp: float = 4500.0) -> void:
 	_date = date
 	if _index.is_empty():
 		_index = ContentDocument.read(INDEX_PATH, errors)
@@ -34,6 +36,23 @@ func request(center: Vector2, radius_km: float, date: String) -> void:
 	var wanted: Array[String] = []
 	for candidate: Dictionary in candidates.slice(0, MAX_ACTIVE_REGIONS):
 		wanted.append(str(candidate.id))
+	# Fixed display packing only. Wrapped copies select date-line neighbours;
+	# no region, ownership or administrative identities are manufactured.
+	var coast_wanted: Array[String] = []
+	var lat_padding := minf(90.0, radius_km / 111.195)
+	var lon_padding := minf(180.0, lat_padding / maxf(0.1, cos(deg_to_rad(center.y))))
+	if absf(center.y)+lat_padding>=90.0: lon_padding = 180.0
+	for descriptor: Dictionary in _index.get("coast_regions", []) as Array:
+		if mpp>8500.0 or not _intersects(descriptor.bounds as Array,center,lat_padding,lon_padding): continue
+		if mpp>MEDIUM_LOD_MPP:
+			coast_wanted.append(str(descriptor.id))
+		else:
+			for child: Dictionary in descriptor.get("medium_regions", []) as Array:
+				if _intersects(child.bounds as Array,center,lat_padding,lon_padding): coast_wanted.append(str(child.id))
+	# Conservative polar coverage spans all longitudes; never truncate an
+	# ordinary viewport by nearest city, and never load hidden coarse detail.
+	coast_wanted = coast_wanted.slice(0, MAX_ACTIVE_COAST_REGIONS)
+	wanted.append_array(coast_wanted)
 	wanted.sort()
 	if wanted.is_empty():
 		release()
@@ -42,6 +61,12 @@ func request(center: Vector2, radius_km: float, date: String) -> void:
 		return
 	_wanted = wanted
 	_start()
+
+static func _intersects(bounds: Array, center: Vector2, lat_padding: float, lon_padding: float) -> bool:
+	if center.y+lat_padding < float(bounds[2]) or center.y-lat_padding > float(bounds[3]): return false
+	for shift: float in [-360.0,0.0,360.0]:
+		if center.x+lon_padding>=float(bounds[0])+shift and center.x-lon_padding<=float(bounds[1])+shift: return true
+	return false
 
 func _start() -> void:
 	if _thread != null or _wanted.is_empty():
@@ -67,8 +92,15 @@ func poll() -> bool:
 		return false
 	content = result
 	errors.append_array(result.errors)
-	metrics["active_regions"] = _loading.duplicate()
+	var strategic_regions: Array[String] = []
+	var coast_regions: Array[String] = []
+	for id: String in _loading:
+		if id.begins_with("physical_"): coast_regions.append(id)
+		else: strategic_regions.append(id)
+	metrics["active_regions"] = strategic_regions
+	metrics["active_coast_regions"] = coast_regions
 	metrics["active_features"] = result.features.size()
+	metrics["active_source_bytes"] = int(result.metrics.get("source_bytes",0))
 	return true
 
 func release() -> void:
@@ -76,6 +108,8 @@ func release() -> void:
 	content = null
 	metrics["active_regions"] = []
 	metrics["active_features"] = 0
+	metrics["active_coast_regions"] = []
+	metrics["active_source_bytes"] = 0
 
 func dispose() -> void:
 	if _thread != null:
@@ -86,14 +120,19 @@ func dispose() -> void:
 static func _load(index: Dictionary, selected: Array[String]) -> LocalSpatialContent:
 	var result := LocalSpatialContent.new()
 	var started := Time.get_ticks_usec()
-	result.metrics = {"load_started_usec": started, "file_read_usec": 0, "parse_usec": 0, "source_resolution_usec": 0, "geometry_prepare_usec": 0, "file_reads": 0, "source_admissions": 0}
+	result.metrics = {"load_started_usec": started, "file_read_usec": 0, "parse_usec": 0, "source_resolution_usec": 0, "geometry_prepare_usec": 0, "file_reads": 0, "source_admissions": 0, "source_bytes": 0}
 	result.metadata = {"content_level": "strategic", "valid_from": index.valid_from, "valid_to": index.valid_to, "local_support": false, "presentation_lods": ["coarse", "medium"], "regions": selected}
 	var ids: Dictionary = {}
-	for descriptor: Dictionary in index.regions as Array:
+	var descriptors: Array = (index.regions as Array).duplicate()
+	descriptors.append_array(index.get("coast_regions", []) as Array)
+	for parent: Dictionary in index.get("coast_regions", []) as Array:
+		descriptors.append_array(parent.get("medium_regions", []) as Array)
+	for descriptor: Dictionary in descriptors:
 		if str(descriptor.id) not in selected:
 			continue
 		var read_started := Time.get_ticks_usec()
 		var bytes := FileAccess.get_file_as_bytes(str(descriptor.path))
+		result.metrics.source_bytes += bytes.size()
 		result.metrics.file_read_usec += Time.get_ticks_usec() - read_started
 		result.metrics.file_reads += 1
 		var hash := HashingContext.new()
@@ -137,12 +176,13 @@ static func _load(index: Dictionary, selected: Array[String]) -> LocalSpatialCon
 	for feature: Dictionary in result.features:
 		if str(feature.kind) == "settlement":
 			continue
-		for lod: String in ["coarse", "medium"]:
+		for lod: String in feature.get("presentation_lods", ["coarse", "medium"]) as Array:
 			var raw: Array = (feature.lod_geometry as Dictionary).get(lod, []) as Array
+			var tolerance := float((feature.get("lod_tolerance_m", {}) as Dictionary).get(lod,5000.0 if lod=="coarse" else 1500.0))
 			if str(feature.kind) == "rail":
 				raw = [raw]
-			elif str(feature.kind) == "lake":
-				result.line_chunks.append({"kind": "lake", "lod": lod, "polygons": raw, "feature_id": feature.id, "source_geometry_file": feature.get("source_geometry_file", "")})
+			elif str(feature.kind) in ["lake", "land_reference", "ocean_reference"]:
+				result.line_chunks.append({"kind": feature.kind, "lod": lod, "tolerance_m": tolerance, "polygons": raw, "feature_id": feature.id, "source_geometry_file": feature.get("source_geometry_file", "")})
 				continue
 			var boundaries: Array[Dictionary] = []
 			for line: Array in raw:
@@ -152,8 +192,14 @@ static func _load(index: Dictionary, selected: Array[String]) -> LocalSpatialCon
 					var lat := deg_to_rad(float(coordinate[1]))
 					points.append(Vector3(cos(lat) * sin(lon), sin(lat), cos(lat) * cos(lon)))
 				if points.size() >= 2:
-					boundaries.append({"kind": feature.kind, "points": points, "feature_id": feature.id, "source_fact_id": "strategic_spatial:" + str(feature.id)})
-			result.line_chunks.append({"kind": feature.kind, "lod": lod, "boundaries": boundaries})
+					if str(feature.kind)=="coast":
+						# Match the existing Local line packing: bound an individual
+						# upload even when a source continental ring is very long.
+						for first: int in range(0,points.size()-1,128):
+							boundaries.append({"kind":feature.kind,"points":points.slice(first,mini(first+129,points.size())),"feature_id":feature.id,"source_fact_id":"strategic_spatial:"+str(feature.id)})
+					else:
+						boundaries.append({"kind": feature.kind, "points": points, "feature_id": feature.id, "source_fact_id": "strategic_spatial:" + str(feature.id)})
+			result.line_chunks.append({"kind": feature.kind, "lod": lod, "tolerance_m": tolerance, "boundaries": boundaries})
 	result.metrics.geometry_prepare_usec = Time.get_ticks_usec() - prepare_started
 	result.metrics.worker_elapsed_usec = Time.get_ticks_usec() - started
 	return result
@@ -161,19 +207,36 @@ static func _load(index: Dictionary, selected: Array[String]) -> LocalSpatialCon
 static func valid_feature(feature: Dictionary) -> bool:
 	if str(feature.get("id", "")).is_empty() or feature.has("owner") or feature.has("controller_id") or feature.has("polity_id") or feature.has("administrative_region_id"):
 		return false
-	if str(feature.get("kind", "")) not in ["settlement", "rail", "river", "lake"] or not HistoricalFactEvidence.valid_date(str(feature.get("valid_from", ""))) or not HistoricalFactEvidence.valid_date(str(feature.get("valid_to", ""))) or str(feature.valid_from) >= str(feature.valid_to):
+	if str(feature.get("kind", "")) not in ["settlement", "rail", "river", "coast", "lake", "land_reference", "ocean_reference"] or not HistoricalFactEvidence.valid_date(str(feature.get("valid_from", ""))) or not HistoricalFactEvidence.valid_date(str(feature.get("valid_to", ""))) or str(feature.valid_from) >= str(feature.valid_to):
 		return false
 	var geometry := feature.get("geometry", {}) as Dictionary
+	var kind := str(feature.kind)
+	if kind in ["land_reference", "ocean_reference"] and (str(feature.get("geometry_role", "")) != "PRESENTATION_DIFFERENCE_ONLY" or str(feature.get("source_type", "")) != "REFERENCE_ONLY" or str(feature.get("lod_geometry_role", "")) != "PRECOMPUTED_DISPLAY_TRIANGLES"): return false
+	if kind != "settlement":
+		if not feature.get("lod_geometry") is Dictionary: return false
+		var lods := feature.get("presentation_lods", ["coarse", "medium"]) as Array
+		if lods.is_empty() or lods.size()>2 or lods.size()!=(feature.lod_geometry as Dictionary).size(): return false
+		for lod: String in lods:
+			if lod not in ["coarse","medium"]: return false
+			var raw := (feature.lod_geometry as Dictionary).get(lod, []) as Array
+			if not _valid_geometry(kind,{"type":geometry.get("type", ""),"coordinates":raw},str(feature.get("geometry_role", ""))): return false
+	return _valid_geometry(kind,geometry,str(feature.get("geometry_role", "")))
+
+static func _valid_geometry(kind: String, geometry: Dictionary, role: String) -> bool:
 	var coordinates := geometry.get("coordinates", []) as Array
 	if not _valid_coordinates(coordinates): return false
-	match str(feature.kind):
+	match kind:
 		"settlement": return str(geometry.get("type", "")) == "Point" and coordinates.size() == 2
-		"rail": return str(geometry.get("type", "")) == "LineString" and coordinates.size() >= 2 and str(feature.get("geometry_role", "")) == "APPROXIMATE_STRATEGIC_CORRIDOR"
-		"river":
+		"rail": return str(geometry.get("type", "")) == "LineString" and coordinates.size() >= 2 and role == "APPROXIMATE_STRATEGIC_CORRIDOR"
+		"river", "coast":
 			if str(geometry.get("type", "")) != "MultiLineString": return false
 			for line: Array in coordinates:
 				if line.size() < 2: return false
-		"lake":
+				var distinct: bool = false
+				for point: Array in line:
+					distinct = distinct or point!=line[0]
+				if not distinct: return false
+		"lake", "land_reference", "ocean_reference":
 			if str(geometry.get("type", "")) != "MultiPolygon": return false
 			for polygon: Array in coordinates:
 				for ring: Array in polygon:

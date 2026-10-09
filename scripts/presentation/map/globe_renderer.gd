@@ -462,13 +462,17 @@ func _prepare_boundary_batches() -> void:
 			RenderingServer.canvas_item_set_draw_index(item, _surface_batches.size() + _boundary_batches.size() + 1)
 			RenderingServer.canvas_item_set_material(item, material.get_rid())
 			RenderingServer.canvas_item_add_mesh(item, geometry.mesh.get_rid())
-			_boundary_batches.append({"geometry": geometry, "material": material, "item": item})
+			_boundary_batches.append({"geometry": geometry, "material": material, "item": item, "kind": kind})
 
 func _draw_boundaries(regional: bool = false) -> void:
 	for batch: Dictionary in region_view.boundaries if regional else _boundary_batches:
 		var material := batch.material as ShaderMaterial
 		if regional:
 			_set_region_uniforms(batch)
+			if str(batch.get("kind", "")) == "coast":
+				var color := COAST_COLOR
+				if not strategic_layer.active_lod.is_empty(): color.a *= 1.0-MapScaleStyle.strategic_weight("coast",controller.region_camera.km_per_pixel*1000.0)
+				_parameter(batch,"stroke_color",color)
 		else:
 			_parameter(batch, "globe_basis", controller.orientation())
 			_parameter(batch, "globe_center", _center)
@@ -538,7 +542,7 @@ func _draw() -> void:
 	if not local_layer.visible_places.is_empty():
 		space += " · Paris 1900 · 铁路走廊近似 · 现代水系参考"
 	if not strategic_layer.active_lod.is_empty():
-		space += " · 约1900战略骨架 · 虚线铁路位置概略 · 现代水系参考"
+		space += " · 约1900战略骨架 · 虚线铁路概略 · 现代岸线/水系参考"
 	if relief.textures.has("world"):
 		space += " · ETOPO 2022 粗地形参考"
 	if regional and not controller.region_camera.local_active and metric <= RegionCamera.LOCAL_ENTER_KM_PER_PIXEL:
@@ -721,17 +725,21 @@ func _sync_local_resources() -> void:
 func _sync_strategic_resources() -> void:
 	if strategic_content == null or controller == null: return
 	var camera := controller.region_camera
-	if not visible or not camera.active:
+	if not visible or not camera.active or camera.local_active:
 		strategic_layer.clear()
 		strategic_content.release()
 		return
 	var center := RegionProjection.lon_lat(camera.unit_at(size*0.5))
-	strategic_content.request(center, camera.km_per_pixel*size.length()*0.5, political.display_date)
+	strategic_content.request(center, camera.km_per_pixel*size.length()*0.5, political.display_date, camera.km_per_pixel*1000.0)
 	if strategic_content.content != null and strategic_content.content != strategic_layer.content_reference():
 		strategic_layer.rail_style = 3
-		strategic_layer.begin(strategic_content.content,region_view.viewport.world_2d.canvas)
+		strategic_layer.begin(strategic_content.content,region_view.viewport.world_2d.canvas,camera.km_per_pixel*1000.0)
 	if strategic_content.content == null and not strategic_content.preparing(): strategic_layer.clear()
-	strategic_layer.request_lods(camera.km_per_pixel*1000.0)
+	# Preserve the displayed physical LOD while its replacement shard is read.
+	# The old coarse-only coast cannot supply a finer view by preparing an
+	# otherwise empty medium overlay from its historical backbone alone.
+	if strategic_content.content != null:
+		strategic_layer.request_lods(camera.km_per_pixel*1000.0)
 	if strategic_content.preparing() or strategic_layer.preparing: set_process(visible)
 
 func _update_strategic_layer() -> void:
@@ -739,6 +747,7 @@ func _update_strategic_layer() -> void:
 	strategic_layer.paris_mask_weights = {}
 	if not local_layer.active_lod.is_empty():
 		strategic_layer.paris_mask_weights["river"] = MapScaleStyle.physical_weight("river",controller.region_camera.km_per_pixel*1000.0)
+		strategic_layer.paris_mask_weights["coast"] = MapScaleStyle.physical_weight("coast",controller.region_camera.km_per_pixel*1000.0)
 	strategic_layer.update(controller.region_camera,controller,political.display_date,size)
 
 func _record_local_handoff(entering: bool, unit: Vector3, pixel: Vector2) -> void:

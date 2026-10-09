@@ -41,7 +41,7 @@ func _lod(mpp: float) -> String:
 	var value := MapScaleStyle.lod(mpp)
 	return "medium" if strategic and value == "local" else value
 
-func begin(content: LocalSpatialContent, canvas: RID) -> void:
+func begin(content: LocalSpatialContent, canvas: RID, mpp: float = 4500.0) -> void:
 	clear()
 	_content = content
 	strategic = str(content.metadata.get("content_level", "")) == "strategic"
@@ -58,7 +58,7 @@ func begin(content: LocalSpatialContent, canvas: RID) -> void:
 	_labels.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.feature.rank) < int(b.feature.rank))
 	_cursor = 0
 	_label_cursor = 0
-	request_lods(4500.0)
+	request_lods(mpp)
 
 func request_lods(mpp: float) -> void:
 	if _content == null:
@@ -197,7 +197,7 @@ func prepare_step(font: Font) -> void:
 		material.set_shader_parameter("region_mode", true)
 		material.set_shader_parameter("face_data" if water else "line_data", texture)
 		if water:
-			material.set_shader_parameter("water_color", HydrographyStyle.color("lake", str(line.get("water_class", "lake"))))
+			material.set_shader_parameter("water_color", HydrographyStyle.color(str(line.kind), str(line.get("water_class", "lake"))))
 		else:
 			material.set_shader_parameter("stroke_color", HydrographyStyle.color(str(line.kind)))
 			material.set_shader_parameter("stroke_width", HydrographyStyle.WIDTHS[str(line.kind)])
@@ -206,7 +206,7 @@ func prepare_step(font: Font) -> void:
 			material.set_shader_parameter("rail_style", rail_style if str(line.kind)=="rail" else 0)
 		var item := RenderingServer.canvas_item_create()
 		RenderingServer.canvas_item_set_parent(item, _canvas)
-		RenderingServer.canvas_item_set_draw_index(item, DRAW_ORDER)
+		RenderingServer.canvas_item_set_draw_index(item, DRAW_ORDER-2 if str(line.kind) in ["land_reference", "ocean_reference"] else DRAW_ORDER-1 if str(line.kind)=="coast" else DRAW_ORDER)
 		RenderingServer.canvas_item_set_material(item, material.get_rid())
 		RenderingServer.canvas_item_add_mesh(item, mesh.get_rid())
 		RenderingServer.canvas_item_set_visible(item, false)
