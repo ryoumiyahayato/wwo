@@ -9,6 +9,7 @@ const EVENT_SCOPE_CAP: int = 64
 const METADATA_CAP: int = 4096
 const CELL_SCOPE_CAP: int = 128
 const ROUTE_HISTORY_CAP: int = 4096
+const COST_FULL_CONTEXT: Array[String] = ["due", "apply:apply_units", "apply_start", "release_jobs", "clear_delta", "scope_capacity"]
 var state: State
 var kernel: RefCounted
 var _authority: WeakRef
@@ -69,6 +70,7 @@ func configure(world: State, service: RefCounted, owner: RefCounted, requested: 
 
 func resume(quota: int) -> Dictionary:
 	var started: int = Time.get_ticks_usec()
+	var active_cost_probe: RefCounted = authority.cost_probe
 	var used: int = 0
 	var before: int = int(state.counters.units_examined)
 	call_event_count = 0
@@ -81,12 +83,19 @@ func resume(quota: int) -> Dictionary:
 			_block("CHANGED_METADATA_CAPACITY")
 			break
 		var label: String = phase + (":" + str(job.phase) if job != null and phase in ["prepare", "apply"] else "")
+		var cost_capture: bool = active_cost_probe != null and ((active_cost_probe.level1_enabled and (label in COST_FULL_CONTEXT or int(primitives.get(label, 0)) % 16 == 0)) or (active_cost_probe.level2_enabled and label == "due"))
+		if active_cost_probe != null and active_cost_probe.level2_enabled and label == "due":
+			active_cost_probe.primitive_id = total_steps + 1
+		if cost_capture:
+			active_cost_probe.before(self, label)
 		var time_start: int = Time.get_ticks_usec()
 		state.time = boundary if phase not in ["select", "scope_capacity", "index_start", "index_records", "index_sort", "prepare", "eta"] else segment_start
 		if phase == "due":
 			state.time = boundary
 		_step()
 		var elapsed: int = Time.get_ticks_usec()-time_start
+		if cost_capture:
+			active_cost_probe.observe(label, elapsed, self)
 		if elapsed > max_primitive_usec:
 			max_primitive_usec = elapsed
 			max_primitive = label
@@ -95,6 +104,8 @@ func resume(quota: int) -> Dictionary:
 		used += 1
 		# Only a bounded number of events can arise from one declared primitive.
 		call_event_count += log.size()
+		var cost_callback_started: int = Time.get_ticks_usec() if active_cost_probe != null and active_cost_probe.level1_enabled and not log.is_empty() else 0
+		var cost_callback_count: int = log.size()
 		for event: Dictionary in log:
 			if event.kind == "area_transition":
 				changed_cells[event.from] = true
@@ -102,6 +113,10 @@ func resume(quota: int) -> Dictionary:
 			if authority.physical_event_sink.is_valid():
 				authority.physical_event_sink.call(event)
 		log.clear()
+		if cost_callback_started != 0:
+			active_cost_probe.callback_usec += Time.get_ticks_usec() - cost_callback_started
+			active_cost_probe.callback_count += cost_callback_count
+	var cost_finalizer_started: int = Time.get_ticks_usec() if active_cost_probe != null and active_cost_probe.level1_enabled else 0
 	state.inside_kernel_work = false
 	state.time = committed
 	state.pending_committed_time = committed
@@ -115,6 +130,8 @@ func resume(quota: int) -> Dictionary:
 		"events": [], "diagnostic_events_produced": call_event_count, "total_work_units": total_steps, "commit_count": commit_count}
 	if status == "COMPLETE":
 		result.phase_work_counts = primitives.duplicate()
+	if cost_finalizer_started != 0:
+		active_cost_probe.finalizer_usec += Time.get_ticks_usec() - cost_finalizer_started
 	return result
 
 func _step() -> void:
@@ -291,6 +308,8 @@ func _step() -> void:
 			if sorter.step():
 				kernel._index._records = sorter.sorted
 				job = Segment.new()
+				if authority.cost_probe != null:
+					job.cost_job_id = authority.cost_probe.new_job_id()
 				job.configure_prepare(kernel, state, scopes[scope_index], ids)
 				job.bounded = true
 				jobs[scopes[scope_index]] = job
@@ -321,6 +340,8 @@ func _step() -> void:
 				var cell: String = scopes[scope_index]
 				var prepared: Dictionary = jobs[cell].plans
 				job = Segment.new()
+				if authority.cost_probe != null:
+					job.cost_job_id = authority.cost_probe.new_job_id()
 				job.configure_apply(kernel, state, cell, prepared, (boundary-segment_start)/60.0, log, changes)
 				control_cells[cell] = true
 				if state.spatial_port != null:

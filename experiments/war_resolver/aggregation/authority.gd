@@ -26,6 +26,7 @@ var materialization_events: Array[Dictionary] = []
 var _continuation: AdvanceWork = null
 var _last_continuation: AdvanceWork = null
 var physical_event_sink: Callable
+var cost_probe: RefCounted = null
 
 func configure(state: State) -> bool:
 	if _state != null or state.settlement_owner != null:
@@ -347,6 +348,10 @@ func advance(target: float, policy: String = Kernel.DETAILED) -> Dictionary:
 	return output
 
 func advance_bounded(target: float, quota: int, policy: String = Kernel.DETAILED) -> Dictionary:
+	var cost_started: int = 0
+	if cost_probe != null:
+		cost_started = Time.get_ticks_usec()
+		cost_probe.begin_call(target, quota, _state.time)
 	if quota < 1 or not is_finite(target) or target < _state.time or not Kernel.INTERVALS.has(policy):
 		return {"ok": false, "error": "invalid_bounded_request"}
 	if _continuation != null and (target != _continuation.target or policy != _continuation.policy):
@@ -355,12 +360,16 @@ func advance_bounded(target: float, quota: int, policy: String = Kernel.DETAILED
 		_continuation = AdvanceWork.new()
 		_continuation.configure(_state, _kernel, self, target, policy)
 	var output: Dictionary = _continuation.resume(quota)
+	var cost_cleanup_started: int = Time.get_ticks_usec() if cost_probe != null else 0
 	if output.status == "COMPLETE":
 		_last_continuation = _continuation
 		_last_continuation.jobs.clear()
 		_last_continuation.job = null
 		_last_continuation.sorter = null
 		_continuation = null
+	if cost_probe != null:
+		cost_probe.api_cleanup_usec += Time.get_ticks_usec() - cost_cleanup_started
+		cost_probe.end_call(output, Time.get_ticks_usec() - cost_started)
 	return output
 
 func continuation_ticket_page(start: int = 0, limit: int = 64) -> Dictionary:

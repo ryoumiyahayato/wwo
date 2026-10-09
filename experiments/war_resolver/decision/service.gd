@@ -9,6 +9,7 @@ var _information: RefCounted
 var _structure: RefCounted
 var _logistics: RefCounted
 var _context: Context = Context.new()
+var cost_probe: RefCounted = null
 var _persons: Dictionary = {}
 var _events: Dictionary = {}
 var _pending: Dictionary = {}
@@ -149,26 +150,43 @@ func process_event(event: Dictionary) -> Dictionary:
 		_continue_cycle(person)
 		return _transition(record.duplicate(true))
 	work.persons_examined += 1
+	var cost_observed: bool = cost_probe != null and cost_probe.level2_enabled
+	var cost_started: int = Time.get_ticks_usec() if cost_observed else 0
 	var context: Dictionary = preview(person)
+	if cost_observed:
+		cost_probe.subspan("decision_context", Time.get_ticks_usec()-cost_started, str(event.id), person, context.get("received_claims", []).size(), _events.size(), _state.time)
 	work.decision_contexts_built += 1
 	if not context.ok:
 		record.status = "REJECTED_CONTEXT"
 		return _transition(record.duplicate(true))
 	work.knowledge_records_examined_for_decision += context.received_claims.size()
+	cost_started = Time.get_ticks_usec() if cost_observed else 0
 	record.context = context.duplicate(true)
 	var proposal: Dictionary = _persons[person].provider.evaluate(context.duplicate(true))
 	record.decision_source = _persons[person].provider.source
 	record.proposal = proposal.duplicate(true)
+	if cost_observed:
+		cost_probe.subspan("decision_copy_and_provider", Time.get_ticks_usec()-cost_started, str(event.id), person, context.received_claims.size(), _events.size(), _state.time)
 	work.authority_checks += 1
+	cost_started = Time.get_ticks_usec() if cost_observed else 0
 	var validated: Dictionary = _validate(person, str(record.id), proposal.intent, context) if proposal.get("intent") is Dictionary else _reject("invalid_intent_shape")
 	_ready[person] = _state.time + float(_persons[person].definition.cadence)
 	record.status = "ACCEPTED" if validated.ok else "REJECTED"
 	record.creation_validation = validated.duplicate(true)
+	if cost_observed:
+		cost_probe.subspan("decision_validation", Time.get_ticks_usec()-cost_started, str(event.id), person, context.received_claims.size(), _events.size(), _state.time)
+	cost_started = Time.get_ticks_usec() if cost_observed else 0
 	if validated.ok:
 		record.issued_input = _issue(person, str(record.id), proposal.intent)
 		input_issued.emit(person, str(record.id), record.issued_input.duplicate(true))
+	if cost_observed:
+		cost_probe.subspan("decision_issue_and_callback", Time.get_ticks_usec()-cost_started, str(event.id), person, context.received_claims.size(), _events.size(), _state.time)
+	cost_started = Time.get_ticks_usec() if cost_observed else 0
 	_continue_cycle(person)
-	return _transition(record.duplicate(true))
+	var transition: Dictionary = _transition(record.duplicate(true))
+	if cost_observed:
+		cost_probe.subspan("decision_cycle_and_result", Time.get_ticks_usec()-cost_started, str(event.id), person, context.received_claims.size(), _events.size(), _state.time)
+	return transition
 
 func _validate(person: String, id: String, intent: Dictionary, context: Dictionary) -> Dictionary:
 	if not intent.get("kind") in context.output_kinds:

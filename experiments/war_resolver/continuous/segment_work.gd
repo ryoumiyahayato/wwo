@@ -32,6 +32,7 @@ var ratio: float = 0.0
 var bounded: bool = false
 var candidate_cursor: RefCounted = null
 var candidate_probes: int = 0
+var cost_job_id: int = 0
 
 func configure_prepare(service: RefCounted, world: State, cell: String, selected: Array[String]) -> void:
 	kernel = service
