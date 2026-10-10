@@ -1,0 +1,448 @@
+{
+  "warmups": 1,
+  "measured_samples": 5,
+  "kernel_summary": [
+    {
+      "case": "headless_no_projection",
+      "samples": 5,
+      "units": 6,
+      "reads": 1,
+      "timing_usec": {
+        "construction_usec": {
+          "min": 4711,
+          "median": 4775,
+          "max": 4834
+        },
+        "input_including_due_work_usec": {
+          "min": 0,
+          "median": 0,
+          "max": 0
+        },
+        "read_usec": {
+          "min": 5,
+          "median": 5,
+          "max": 5
+        },
+        "auto_interval_usec": {
+          "min": 393947,
+          "median": 406717,
+          "max": 408271
+        },
+        "export_copy_and_serialize_usec": {
+          "min": 1306,
+          "median": 1344,
+          "max": 1414
+        }
+      },
+      "work_delta": {
+        "knowledge_records": 0,
+        "materializations": 0,
+        "personal_records": 0,
+        "reads": 0,
+        "receipt_records": 0,
+        "timeline_records": 0,
+        "unit_table_scans": 0,
+        "world_exports": 0
+      },
+      "actual_information_records_examined": 0,
+      "persistent_host": {
+        "cached_view_bytes": 53,
+        "pending_inputs": 0,
+        "receipt_bytes": 2,
+        "receipt_ids": 0,
+        "timeline": 0,
+        "timeline_bytes": 2,
+        "timeline_dropped": 0
+      },
+      "read_world_unchanged": true
+    },
+    {
+      "case": "host_no_input",
+      "samples": 5,
+      "units": 6,
+      "reads": 1,
+      "timing_usec": {
+        "construction_usec": {
+          "min": 4811,
+          "median": 4877,
+          "max": 5097
+        },
+        "input_including_due_work_usec": {
+          "min": 0,
+          "median": 0,
+          "max": 0
+        },
+        "read_usec": {
+          "min": 47,
+          "median": 48,
+          "max": 83
+        },
+        "auto_interval_usec": {
+          "min": 397438,
+          "median": 401125,
+          "max": 429141
+        },
+        "export_copy_and_serialize_usec": {
+          "min": 1549,
+          "median": 1575,
+          "max": 1633
+        }
+      },
+      "work_delta": {
+        "knowledge_records": 3,
+        "materializations": 0,
+        "personal_records": 0,
+        "reads": 1,
+        "receipt_records": 0,
+        "timeline_records": 3,
+        "unit_table_scans": 0,
+        "world_exports": 0
+      },
+      "actual_information_records_examined": 3,
+      "persistent_host": {
+        "cached_view_bytes": 4033,
+        "pending_inputs": 0,
+        "receipt_bytes": 2,
+        "receipt_ids": 0,
+        "timeline": 3,
+        "timeline_bytes": 1809,
+        "timeline_dropped": 0
+      },
+      "read_world_unchanged": true
+    },
+    {
+      "case": "host_input",
+      "samples": 5,
+      "units": 6,
+      "reads": 1,
+      "timing_usec": {
+        "construction_usec": {
+          "min": 4788,
+          "median": 4945,
+          "max": 5109
+        },
+        "input_including_due_work_usec": {
+          "min": 634,
+          "median": 646,
+          "max": 651
+        },
+        "read_usec": {
+          "min": 90,
+          "median": 91,
+          "max": 243
+        },
+        "auto_interval_usec": {
+          "min": 416437,
+          "median": 422309,
+          "max": 856251
+        },
+        "export_copy_and_serialize_usec": {
+          "min": 2494,
+          "median": 2567,
+          "max": 6152
+        }
+      },
+      "work_delta": {
+        "knowledge_records": 6,
+        "materializations": 0,
+        "personal_records": 0,
+        "reads": 1,
+        "receipt_records": 1,
+        "timeline_records": 9,
+        "unit_table_scans": 0,
+        "world_exports": 0
+      },
+      "actual_information_records_examined": 6,
+      "persistent_host": {
+        "cached_view_bytes": 8299,
+        "pending_inputs": 0,
+        "receipt_bytes": 561,
+        "receipt_ids": 1,
+        "timeline": 9,
+        "timeline_bytes": 4286,
+        "timeline_dropped": 0
+      },
+      "read_world_unchanged": true
+    },
+    {
+      "case": "host_100_reads",
+      "samples": 5,
+      "units": 6,
+      "reads": 100,
+      "timing_usec": {
+        "construction_usec": {
+          "min": 11448,
+          "median": 14022,
+          "max": 15424
+        },
+        "input_including_due_work_usec": {
+          "min": 1244,
+          "median": 1752,
+          "max": 2496
+        },
+        "read_usec": {
+          "min": 18734,
+          "median": 22956,
+          "max": 25456
+        },
+        "auto_interval_usec": {
+          "min": 1116458,
+          "median": 1397575,
+          "max": 1462498
+        },
+        "export_copy_and_serialize_usec": {
+          "min": 4904,
+          "median": 5590,
+          "max": 6480
+        }
+      },
+      "work_delta": {
+        "knowledge_records": 600,
+        "materializations": 0,
+        "personal_records": 0,
+        "reads": 100,
+        "receipt_records": 100,
+        "timeline_records": 900,
+        "unit_table_scans": 0,
+        "world_exports": 0
+      },
+      "actual_information_records_examined": 600,
+      "persistent_host": {
+        "cached_view_bytes": 8299,
+        "pending_inputs": 0,
+        "receipt_bytes": 561,
+        "receipt_ids": 1,
+        "timeline": 9,
+        "timeline_bytes": 4286,
+        "timeline_dropped": 0
+      },
+      "read_world_unchanged": true
+    },
+    {
+      "case": "host_pages",
+      "samples": 5,
+      "units": 6,
+      "reads": 20,
+      "timing_usec": {
+        "construction_usec": {
+          "min": 10936,
+          "median": 10996,
+          "max": 13465
+        },
+        "input_including_due_work_usec": {
+          "min": 1284,
+          "median": 1382,
+          "max": 1442
+        },
+        "read_usec": {
+          "min": 4221,
+          "median": 4720,
+          "max": 4902
+        },
+        "auto_interval_usec": {
+          "min": 1073704,
+          "median": 1091772,
+          "max": 1592627
+        },
+        "export_copy_and_serialize_usec": {
+          "min": 4527,
+          "median": 4877,
+          "max": 5553
+        }
+      },
+      "work_delta": {
+        "knowledge_records": 120,
+        "materializations": 0,
+        "personal_records": 0,
+        "reads": 20,
+        "receipt_records": 20,
+        "timeline_records": 180,
+        "unit_table_scans": 0,
+        "world_exports": 0
+      },
+      "actual_information_records_examined": 120,
+      "persistent_host": {
+        "cached_view_bytes": 8299,
+        "pending_inputs": 0,
+        "receipt_bytes": 561,
+        "receipt_ids": 1,
+        "timeline": 9,
+        "timeline_bytes": 4286,
+        "timeline_dropped": 0
+      },
+      "read_world_unchanged": true
+    },
+    {
+      "case": "company_summary",
+      "samples": 5,
+      "units": 6,
+      "reads": 1,
+      "timing_usec": {
+        "construction_usec": {
+          "min": 8373,
+          "median": 13228,
+          "max": 14754
+        },
+        "input_including_due_work_usec": {
+          "min": 1149,
+          "median": 1556,
+          "max": 2490
+        },
+        "read_usec": {
+          "min": 194,
+          "median": 269,
+          "max": 705
+        },
+        "auto_interval_usec": {
+          "min": 1200953,
+          "median": 1351952,
+          "max": 1421535
+        },
+        "export_copy_and_serialize_usec": {
+          "min": 4851,
+          "median": 6473,
+          "max": 8808
+        }
+      },
+      "work_delta": {
+        "knowledge_records": 6,
+        "materializations": 0,
+        "personal_records": 0,
+        "reads": 1,
+        "receipt_records": 1,
+        "timeline_records": 9,
+        "unit_table_scans": 0,
+        "world_exports": 0
+      },
+      "actual_information_records_examined": 6,
+      "persistent_host": {
+        "cached_view_bytes": 8203,
+        "pending_inputs": 0,
+        "receipt_bytes": 559,
+        "receipt_ids": 1,
+        "timeline": 9,
+        "timeline_bytes": 4103,
+        "timeline_dropped": 0
+      },
+      "read_world_unchanged": true
+    },
+    {
+      "case": "sleep_10000",
+      "samples": 5,
+      "units": 30006,
+      "reads": 100,
+      "timing_usec": {
+        "construction_usec": {
+          "min": 1720128,
+          "median": 2184726,
+          "max": 2329228
+        },
+        "input_including_due_work_usec": {
+          "min": 1475,
+          "median": 2777,
+          "max": 3466
+        },
+        "read_usec": {
+          "min": 27772,
+          "median": 39064,
+          "max": 41737
+        },
+        "auto_interval_usec": {
+          "min": 1693907,
+          "median": 2074787,
+          "max": 2140503
+        },
+        "export_copy_and_serialize_usec": {
+          "min": 486241,
+          "median": 512403,
+          "max": 547808
+        }
+      },
+      "work_delta": {
+        "knowledge_records": 600,
+        "materializations": 0,
+        "personal_records": 0,
+        "reads": 100,
+        "receipt_records": 100,
+        "timeline_records": 900,
+        "unit_table_scans": 0,
+        "world_exports": 0
+      },
+      "actual_information_records_examined": 600,
+      "persistent_host": {
+        "cached_view_bytes": 8299,
+        "pending_inputs": 0,
+        "receipt_bytes": 561,
+        "receipt_ids": 1,
+        "timeline": 9,
+        "timeline_bytes": 4286,
+        "timeline_dropped": 0
+      },
+      "read_world_unchanged": true
+    }
+  ],
+  "scope_notes": [
+    "All samples, including warmup, retained. Wall timings vary with same-machine load; no frame budget or cross-run attribution.",
+    "Read samples at committed t1800. Input at t10. AUTO uses the same30s target cuts to1800.",
+    "Session input/advance/read timer spans overlap. Do not sum them. Python formatting excludes printing; demo CLI output timer includes printing.",
+    "Payload bytes describe serialized cache/receipts/timeline, not allocator RSS. One transport packet/response and fixed buffers are also retained.",
+    "Benchmark dispose internal timer can exclude deferred temporary-reference destruction. Quit-to-child-reaped wall includes destruction, shutdown and reader cleanup.",
+    "World construction, cleanup and explicit final audit may scale with sleepers. Look never calls audit or world_result. Diagnostics OFF."
+  ],
+  "pipe": [
+    {
+      "case": "no_input",
+      "read_io_median_seconds": 0.0006646999972872436,
+      "format_total_median_seconds": 3.979999746661633e-05,
+      "launch_median_seconds": 0.6222182999990764,
+      "all_released": true
+    },
+    {
+      "case": "input",
+      "read_io_median_seconds": 0.0009136000007856637,
+      "format_total_median_seconds": 4.7900000936351717e-05,
+      "launch_median_seconds": 0.6292910999982269,
+      "all_released": true
+    },
+    {
+      "case": "reads100",
+      "read_io_median_seconds": 0.0008587499978602864,
+      "format_total_median_seconds": 0.0037315999579732306,
+      "launch_median_seconds": 0.6516827000014018,
+      "all_released": true
+    },
+    {
+      "case": "pages",
+      "read_io_median_seconds": 0.0007673499967495445,
+      "format_total_median_seconds": 0.0008693000127095729,
+      "launch_median_seconds": 0.6606271000055131,
+      "all_released": true
+    },
+    {
+      "case": "company",
+      "read_io_median_seconds": 0.0010126999986823648,
+      "format_total_median_seconds": 4.829999670619145e-05,
+      "launch_median_seconds": 0.6328469000000041,
+      "all_released": true
+    },
+    {
+      "case": "sleep10000",
+      "read_io_median_seconds": 0.000890900002559647,
+      "format_total_median_seconds": 0.004377499921247363,
+      "launch_median_seconds": 1.1993616000036127,
+      "all_released": true
+    }
+  ],
+  "cleanup": [
+    {
+      "sleeping_areas": 0,
+      "quit_to_child_reaped_median_seconds": 0.10327590000088094,
+      "all_released": true
+    },
+    {
+      "sleeping_areas": 10000,
+      "quit_to_child_reaped_median_seconds": 0.20644149999861838,
+      "all_released": true
+    }
+  ]
+}
