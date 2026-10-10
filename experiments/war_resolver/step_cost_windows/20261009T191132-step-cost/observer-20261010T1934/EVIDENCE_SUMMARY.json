@@ -1,0 +1,44 @@
+{
+  "status": "PERSON_BOUND_INTERACTIVE_SLICE_SUPPORTED",
+  "runtime_head": "12025f391ea16b1ed040399cc1beff7fec516d91",
+  "final_unified": {
+    "exit": 0,
+    "passed": true,
+    "sections": 47,
+    "elapsed_seconds": 569.6155731000035,
+    "resource_exit_diagnostics": [
+      "ERROR: 41 resources still in use at exit (run with --verbose for details).",
+      "ERROR: 41 resources still in use at exit (run with --verbose for details).",
+      "ERROR: 41 resources still in use at exit (run with --verbose for details)."
+    ]
+  },
+  "retained_war_steps": 53,
+  "contract_checks": 231,
+  "process_e2e_checks": 498,
+  "e2e_passed": true,
+  "seeds": [
+    71,
+    109,
+    347,
+    2027
+  ],
+  "seed_status": "regression; not holdout",
+  "all_required24h_and_quota": "old/new/hosted; normal0 and bounded1/7/31 passed",
+  "past_full_gate_failures": [
+    {
+      "case": "g5_unified_final",
+      "exit": 1,
+      "elapsed_seconds": 607.2027755999989
+    },
+    {
+      "case": "g5_unified_retry",
+      "exit": 1,
+      "elapsed_seconds": 195.55220359999657
+    }
+  ],
+  "runtime_code_push": "NONE",
+  "formal_game_integration": "NONE",
+  "human_visual_acceptance": "NOT_RUN",
+  "historical37ms_attribution": "UNRESOLVED",
+  "local_bundle": "delivery/20261010T1934-observer; full logs and bounded person records preserved; no complete world snapshots in archive"
+}
