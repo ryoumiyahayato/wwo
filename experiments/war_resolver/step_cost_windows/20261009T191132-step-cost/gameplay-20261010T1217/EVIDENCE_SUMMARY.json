@@ -1,0 +1,3656 @@
+{
+  "status": "LAND_GAMEPLAY_SLICE_SUPPORTED",
+  "runtime_head": "3052a0c142b4c97b53e5600ef772ac1bf9887ac0",
+  "validation": {
+    "complete": true,
+    "passed": true,
+    "old_matchers_and_goldens_changed": false,
+    "baseline_allowed_failures": [],
+    "retained_replay_matches_windows_baseline": true,
+    "frozen_steps": [
+      {
+        "name": "g5_frozen_tests",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+          "--script",
+          "res://experiments/war_resolver/gameplay/tests.gd"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 1.3650440999999773,
+        "summaries": [
+          "Gameplay G1: 48 checks, 0 failures"
+        ],
+        "passed": true
+      },
+      {
+        "name": "g5_frozen_participation",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+          "--script",
+          "res://experiments/war_resolver/gameplay/participation_tests.gd"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 1.8430462999995143,
+        "summaries": [
+          "Gameplay participation: 109 checks, 0 failures"
+        ],
+        "passed": true
+      },
+      {
+        "name": "g5_frozen_scenarios",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+          "--script",
+          "res://experiments/war_resolver/gameplay/scenario_tests.gd"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 7.575402500000564,
+        "summaries": [
+          "Gameplay scenarios: 269 checks, 0 failures"
+        ],
+        "passed": true
+      },
+      {
+        "name": "g5_frozen_holdout",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+          "--script",
+          "res://experiments/war_resolver/gameplay/scenario_tests.gd",
+          "--",
+          "--holdout"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 3.6945974999998725,
+        "summaries": [
+          "Gameplay scenarios: 174 checks, 0 failures"
+        ],
+        "passed": true
+      },
+      {
+        "name": "g5_frozen_benchmark",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+          "--script",
+          "res://experiments/war_resolver/gameplay/benchmark.gd"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 8.888139100000444,
+        "summaries": [
+          "Gameplay costs: 360 checks, 0 failures"
+        ],
+        "passed": true
+      },
+      {
+        "name": "g5_frozen_demo_S1",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+          "--script",
+          "res://experiments/war_resolver/gameplay/run.gd",
+          "--",
+          "--scene=S1",
+          "--seed=71",
+          "--variant=valid",
+          "--actor=squad",
+          "--quota=0",
+          "--seconds=1800",
+          "--output=D:/programs/WWO/research/military/runs/20261010T1217-gameplay/demos_frozen/S1"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 0.797927300000083,
+        "passed": true
+      },
+      {
+        "name": "g5_frozen_demo_S2",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+          "--script",
+          "res://experiments/war_resolver/gameplay/run.gd",
+          "--",
+          "--scene=S2",
+          "--seed=109",
+          "--variant=valid",
+          "--actor=platoon",
+          "--quota=7",
+          "--seconds=1800",
+          "--output=D:/programs/WWO/research/military/runs/20261010T1217-gameplay/demos_frozen/S2"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 0.8797144000000117,
+        "passed": true
+      },
+      {
+        "name": "g5_frozen_demo_S3",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+          "--script",
+          "res://experiments/war_resolver/gameplay/run.gd",
+          "--",
+          "--scene=S3",
+          "--seed=71",
+          "--variant=valid",
+          "--actor=soldier",
+          "--quota=31",
+          "--seconds=1800",
+          "--output=D:/programs/WWO/research/military/runs/20261010T1217-gameplay/demos_frozen/S3"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 0.9781073000003744,
+        "passed": true
+      },
+      {
+        "name": "g5_frozen_demo_S3_company_custom",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+          "--script",
+          "res://experiments/war_resolver/gameplay/run.gd",
+          "--",
+          "--scene=S3",
+          "--seed=71",
+          "--variant=valid",
+          "--actor=company",
+          "--quota=7",
+          "--seconds=1800",
+          "--output=D:/programs/WWO/research/military/runs/20261010T1217-gameplay/demos_frozen/S3_company_custom",
+          "--inputs=D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217\\experiments\\war_resolver\\gameplay\\example_inputs.json"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 0.8931492000001526,
+        "passed": true
+      },
+      {
+        "name": "g5_gameplay_long_fixed_v1",
+        "command": [
+          "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+          "--script",
+          "res://experiments/war_resolver/gameplay/long_tests.gd"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 68.96975620000012,
+        "summaries": [
+          "Gameplay 24h: 90 checks, 0 failures"
+        ],
+        "passed": true
+      },
+      {
+        "name": "g5_unified_frozen",
+        "command": [
+          "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-NoProfile",
+          "-File",
+          "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217\\tools\\run_validation.ps1",
+          "-ProjectPath",
+          "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+          "-PythonPath",
+          "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 569.9375702999996,
+        "log_encoding": "gb18030",
+        "sections": 47,
+        "retained_resource_exit_diagnostics": [
+          "ERROR: 41 resources still in use at exit (run with --verbose for details).",
+          "ERROR: 41 resources still in use at exit (run with --verbose for details).",
+          "ERROR: 41 resources still in use at exit (run with --verbose for details)."
+        ],
+        "passed": true
+      }
+    ]
+  },
+  "scenario_rows": [
+    {
+      "scene": "S1",
+      "variant": "autonomous",
+      "seed": 71,
+      "time": 1800.0,
+      "position_km": [
+        0.0,
+        0.0
+      ],
+      "distance_km": 0.0,
+      "loss_capacity": 0.820368046049442,
+      "ammunition": 0.0,
+      "spent": 110.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": []
+    },
+    {
+      "scene": "S1",
+      "variant": "valid",
+      "seed": 71,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.0
+      ],
+      "distance_km": 0.12,
+      "loss_capacity": 0.903953819570151,
+      "ammunition": 0.0,
+      "spent": 110.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ]
+    },
+    {
+      "scene": "S1",
+      "variant": "invalid",
+      "seed": 71,
+      "time": 1800.0,
+      "position_km": [
+        0.0,
+        0.0
+      ],
+      "distance_km": 0.0,
+      "loss_capacity": 0.820368046049442,
+      "ammunition": 0.0,
+      "spent": 110.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": []
+    },
+    {
+      "scene": "S1",
+      "variant": "condition",
+      "seed": 71,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.0
+      ],
+      "distance_km": 0.12,
+      "loss_capacity": 0.0,
+      "ammunition": 0.0,
+      "spent": 30.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ]
+    },
+    {
+      "scene": "S1",
+      "variant": "reserve",
+      "seed": 71,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.0
+      ],
+      "distance_km": 0.12,
+      "loss_capacity": 0.904001169367005,
+      "ammunition": 0.0,
+      "spent": 110.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_company",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ]
+    },
+    {
+      "scene": "S2",
+      "variant": "autonomous",
+      "seed": 71,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.0
+      ],
+      "distance_km": 0.12,
+      "loss_capacity": 0.0,
+      "ammunition": 110.0,
+      "spent": 0.0,
+      "mission": "failed",
+      "route_complete": false,
+      "local_condition": false,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        }
+      ]
+    },
+    {
+      "scene": "S2",
+      "variant": "valid",
+      "seed": 71,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.08
+      ],
+      "distance_km": 0.8,
+      "loss_capacity": 1.69704751549569,
+      "ammunition": 31.2063144844787,
+      "spent": 78.7936855155214,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": false,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 295.0,
+          "id": "input_opportunity_platoon_2",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 280.0,
+          "status": "EXECUTED"
+        }
+      ]
+    },
+    {
+      "scene": "S2",
+      "variant": "invalid",
+      "seed": 71,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.0
+      ],
+      "distance_km": 0.12,
+      "loss_capacity": 0.0,
+      "ammunition": 110.0,
+      "spent": 0.0,
+      "mission": "failed",
+      "route_complete": false,
+      "local_condition": false,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        }
+      ]
+    },
+    {
+      "scene": "S2",
+      "variant": "condition",
+      "seed": 71,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.08
+      ],
+      "distance_km": 0.2,
+      "loss_capacity": 1.6965157792037,
+      "ammunition": 0.0,
+      "spent": 110.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": false,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        }
+      ]
+    },
+    {
+      "scene": "S2",
+      "variant": "slow_reports",
+      "seed": 71,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.08
+      ],
+      "distance_km": 0.8,
+      "loss_capacity": 1.30552058548365,
+      "ammunition": 48.3644607575412,
+      "spent": 61.6355392424589,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": false,
+      "effective_incoming_contact": true,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 700.0,
+          "id": "input_opportunity_platoon_5",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 685.0,
+          "status": "EXECUTED"
+        }
+      ]
+    },
+    {
+      "scene": "S2",
+      "variant": "wait",
+      "seed": 71,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.0
+      ],
+      "distance_km": 0.12,
+      "loss_capacity": 0.0,
+      "ammunition": 110.0,
+      "spent": 0.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 295.0,
+          "id": "input_opportunity_platoon_2",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 280.0,
+          "status": "EXECUTED"
+        }
+      ]
+    },
+    {
+      "scene": "S3",
+      "variant": "autonomous",
+      "seed": 71,
+      "time": 1800.0,
+      "position_km": [
+        0.0,
+        0.3
+      ],
+      "distance_km": 0.42,
+      "loss_capacity": 0.488227479798901,
+      "ammunition": 70.4499281457988,
+      "spent": 39.5500718542012,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.959314376683425,
+        "injury": 0.0406856233165751,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      }
+    },
+    {
+      "scene": "S3",
+      "variant": "valid",
+      "seed": 71,
+      "time": 1800.0,
+      "position_km": [
+        0.0,
+        0.3
+      ],
+      "distance_km": 0.42,
+      "loss_capacity": 0.505938184408598,
+      "ammunition": 70.2572767931813,
+      "spent": 39.7427232068187,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.966762109348939,
+        "injury": 0.0332378906510615,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      }
+    },
+    {
+      "scene": "S3",
+      "variant": "invalid",
+      "seed": 71,
+      "time": 1800.0,
+      "position_km": [
+        0.0,
+        0.3
+      ],
+      "distance_km": 0.42,
+      "loss_capacity": 0.488227479798901,
+      "ammunition": 70.4499281457988,
+      "spent": 39.5500718542012,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.959314376683425,
+        "injury": 0.0406856233165751,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      }
+    },
+    {
+      "scene": "S3",
+      "variant": "condition",
+      "seed": 71,
+      "time": 1800.0,
+      "position_km": [
+        0.0,
+        0.3
+      ],
+      "distance_km": 0.42,
+      "loss_capacity": 1.72813277220993,
+      "ammunition": 0.0,
+      "spent": 110.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": true,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.855988935649172,
+        "injury": 0.144011064350827,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      }
+    },
+    {
+      "scene": "S1",
+      "variant": "autonomous",
+      "seed": 109,
+      "time": 1800.0,
+      "position_km": [
+        0.0,
+        0.0
+      ],
+      "distance_km": 0.0,
+      "loss_capacity": 0.826158820919397,
+      "ammunition": 0.0,
+      "spent": 110.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": []
+    },
+    {
+      "scene": "S1",
+      "variant": "valid",
+      "seed": 109,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.0
+      ],
+      "distance_km": 0.12,
+      "loss_capacity": 0.91032962311035,
+      "ammunition": 0.0,
+      "spent": 110.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ]
+    },
+    {
+      "scene": "S1",
+      "variant": "invalid",
+      "seed": 109,
+      "time": 1800.0,
+      "position_km": [
+        0.0,
+        0.0
+      ],
+      "distance_km": 0.0,
+      "loss_capacity": 0.826158820919397,
+      "ammunition": 0.0,
+      "spent": 110.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": []
+    },
+    {
+      "scene": "S1",
+      "variant": "condition",
+      "seed": 109,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.0
+      ],
+      "distance_km": 0.12,
+      "loss_capacity": 0.0,
+      "ammunition": 0.0,
+      "spent": 30.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ]
+    },
+    {
+      "scene": "S1",
+      "variant": "reserve",
+      "seed": 109,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.0
+      ],
+      "distance_km": 0.12,
+      "loss_capacity": 0.910377366232724,
+      "ammunition": 0.0,
+      "spent": 110.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_company",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ]
+    },
+    {
+      "scene": "S2",
+      "variant": "autonomous",
+      "seed": 109,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.0
+      ],
+      "distance_km": 0.12,
+      "loss_capacity": 0.0,
+      "ammunition": 110.0,
+      "spent": 0.0,
+      "mission": "failed",
+      "route_complete": false,
+      "local_condition": false,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        }
+      ]
+    },
+    {
+      "scene": "S2",
+      "variant": "valid",
+      "seed": 109,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.08
+      ],
+      "distance_km": 0.8,
+      "loss_capacity": 1.70902078286378,
+      "ammunition": 31.3194759724269,
+      "spent": 78.6805240275732,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": false,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 295.0,
+          "id": "input_opportunity_platoon_2",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 280.0,
+          "status": "EXECUTED"
+        }
+      ]
+    },
+    {
+      "scene": "S2",
+      "variant": "invalid",
+      "seed": 109,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.0
+      ],
+      "distance_km": 0.12,
+      "loss_capacity": 0.0,
+      "ammunition": 110.0,
+      "spent": 0.0,
+      "mission": "failed",
+      "route_complete": false,
+      "local_condition": false,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        }
+      ]
+    },
+    {
+      "scene": "S2",
+      "variant": "condition",
+      "seed": 109,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.08
+      ],
+      "distance_km": 0.2,
+      "loss_capacity": 1.70849046841562,
+      "ammunition": 0.0,
+      "spent": 110.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": false,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        }
+      ]
+    },
+    {
+      "scene": "S2",
+      "variant": "slow_reports",
+      "seed": 109,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.08
+      ],
+      "distance_km": 0.8,
+      "loss_capacity": 1.31466352809752,
+      "ammunition": 48.4059586636414,
+      "spent": 61.5940413363586,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": false,
+      "effective_incoming_contact": true,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 700.0,
+          "id": "input_opportunity_platoon_5",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 685.0,
+          "status": "EXECUTED"
+        }
+      ]
+    },
+    {
+      "scene": "S2",
+      "variant": "wait",
+      "seed": 109,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.0
+      ],
+      "distance_km": 0.12,
+      "loss_capacity": 0.0,
+      "ammunition": 110.0,
+      "spent": 0.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 295.0,
+          "id": "input_opportunity_platoon_2",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 280.0,
+          "status": "EXECUTED"
+        }
+      ]
+    },
+    {
+      "scene": "S3",
+      "variant": "autonomous",
+      "seed": 109,
+      "time": 1800.0,
+      "position_km": [
+        0.0,
+        0.3
+      ],
+      "distance_km": 0.42,
+      "loss_capacity": 0.491590776989204,
+      "ammunition": 70.4529762983717,
+      "spent": 39.5470237016283,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.959034101917566,
+        "injury": 0.0409658980824336,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      }
+    },
+    {
+      "scene": "S3",
+      "variant": "valid",
+      "seed": 109,
+      "time": 1800.0,
+      "position_km": [
+        0.0,
+        0.3
+      ],
+      "distance_km": 0.42,
+      "loss_capacity": 0.509417924533483,
+      "ammunition": 70.2602169002121,
+      "spent": 39.7397830997879,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.966532505224147,
+        "injury": 0.0334674947758528,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      }
+    },
+    {
+      "scene": "S3",
+      "variant": "invalid",
+      "seed": 109,
+      "time": 1800.0,
+      "position_km": [
+        0.0,
+        0.3
+      ],
+      "distance_km": 0.42,
+      "loss_capacity": 0.491590776989204,
+      "ammunition": 70.4529762983717,
+      "spent": 39.5470237016283,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.959034101917566,
+        "injury": 0.0409658980824336,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      }
+    },
+    {
+      "scene": "S3",
+      "variant": "condition",
+      "seed": 109,
+      "time": 1800.0,
+      "position_km": [
+        0.0,
+        0.3
+      ],
+      "distance_km": 0.42,
+      "loss_capacity": 1.73972935589259,
+      "ammunition": 0.0,
+      "spent": 110.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": true,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.855022553675618,
+        "injury": 0.144977446324382,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      }
+    },
+    {
+      "scene": "S2",
+      "variant": "no_supply",
+      "seed": 71,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.0
+      ],
+      "distance_km": 0.12,
+      "loss_capacity": 0.0,
+      "ammunition": 80.0,
+      "spent": 0.0,
+      "mission": "failed",
+      "route_complete": false,
+      "local_condition": false,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        }
+      ]
+    },
+    {
+      "scene": "S1",
+      "variant": "valid",
+      "seed": 71,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.0
+      ],
+      "distance_km": 0.12,
+      "loss_capacity": 0.903953819570151,
+      "ammunition": 0.0,
+      "spent": 110.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ]
+    },
+    {
+      "scene": "S2",
+      "variant": "valid",
+      "seed": 71,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.08
+      ],
+      "distance_km": 0.8,
+      "loss_capacity": 1.69704751549569,
+      "ammunition": 31.2063144844787,
+      "spent": 78.7936855155214,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": false,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 295.0,
+          "id": "input_opportunity_platoon_2",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 280.0,
+          "status": "EXECUTED"
+        }
+      ]
+    },
+    {
+      "scene": "S3",
+      "variant": "valid",
+      "seed": 71,
+      "time": 1800.0,
+      "position_km": [
+        0.0,
+        0.3
+      ],
+      "distance_km": 0.42,
+      "loss_capacity": 0.505938184408598,
+      "ammunition": 70.2572767931813,
+      "spent": 39.7427232068187,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.966762109348939,
+        "injury": 0.0332378906510615,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      }
+    },
+    {
+      "scene": "S1",
+      "variant": "autonomous",
+      "seed": 347,
+      "time": 1800.0,
+      "position_km": [
+        0.0,
+        0.0
+      ],
+      "distance_km": 0.0,
+      "loss_capacity": 0.82685772208161,
+      "ammunition": 0.0,
+      "spent": 110.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": []
+    },
+    {
+      "scene": "S1",
+      "variant": "valid",
+      "seed": 347,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.0
+      ],
+      "distance_km": 0.12,
+      "loss_capacity": 0.911099011348137,
+      "ammunition": 0.0,
+      "spent": 110.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ]
+    },
+    {
+      "scene": "S1",
+      "variant": "invalid",
+      "seed": 347,
+      "time": 1800.0,
+      "position_km": [
+        0.0,
+        0.0
+      ],
+      "distance_km": 0.0,
+      "loss_capacity": 0.82685772208161,
+      "ammunition": 0.0,
+      "spent": 110.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": []
+    },
+    {
+      "scene": "S1",
+      "variant": "condition",
+      "seed": 347,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.0
+      ],
+      "distance_km": 0.12,
+      "loss_capacity": 0.0,
+      "ammunition": 0.0,
+      "spent": 30.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ]
+    },
+    {
+      "scene": "S1",
+      "variant": "reserve",
+      "seed": 347,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.0
+      ],
+      "distance_km": 0.12,
+      "loss_capacity": 0.911146637834016,
+      "ammunition": 0.0,
+      "spent": 110.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_company",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ]
+    },
+    {
+      "scene": "S2",
+      "variant": "autonomous",
+      "seed": 347,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.0
+      ],
+      "distance_km": 0.12,
+      "loss_capacity": 0.0,
+      "ammunition": 110.0,
+      "spent": 0.0,
+      "mission": "failed",
+      "route_complete": false,
+      "local_condition": false,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        }
+      ]
+    },
+    {
+      "scene": "S2",
+      "variant": "valid",
+      "seed": 347,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.08
+      ],
+      "distance_km": 0.8,
+      "loss_capacity": 1.7104658518285,
+      "ammunition": 31.3082177587156,
+      "spent": 78.6917822412843,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": false,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 295.0,
+          "id": "input_opportunity_platoon_2",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 280.0,
+          "status": "EXECUTED"
+        }
+      ]
+    },
+    {
+      "scene": "S2",
+      "variant": "invalid",
+      "seed": 347,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.0
+      ],
+      "distance_km": 0.12,
+      "loss_capacity": 0.0,
+      "ammunition": 110.0,
+      "spent": 0.0,
+      "mission": "failed",
+      "route_complete": false,
+      "local_condition": false,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        }
+      ]
+    },
+    {
+      "scene": "S2",
+      "variant": "condition",
+      "seed": 347,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.08
+      ],
+      "distance_km": 0.2,
+      "loss_capacity": 1.70993503667311,
+      "ammunition": 0.0,
+      "spent": 110.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": false,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        }
+      ]
+    },
+    {
+      "scene": "S2",
+      "variant": "slow_reports",
+      "seed": 347,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.08
+      ],
+      "distance_km": 0.8,
+      "loss_capacity": 1.31507979827794,
+      "ammunition": 48.3847254386589,
+      "spent": 61.6152745613412,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": false,
+      "effective_incoming_contact": true,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 700.0,
+          "id": "input_opportunity_platoon_5",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 685.0,
+          "status": "EXECUTED"
+        }
+      ]
+    },
+    {
+      "scene": "S2",
+      "variant": "wait",
+      "seed": 347,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.0
+      ],
+      "distance_km": 0.12,
+      "loss_capacity": 0.0,
+      "ammunition": 110.0,
+      "spent": 0.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 295.0,
+          "id": "input_opportunity_platoon_2",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 280.0,
+          "status": "EXECUTED"
+        }
+      ]
+    },
+    {
+      "scene": "S3",
+      "variant": "autonomous",
+      "seed": 347,
+      "time": 1800.0,
+      "position_km": [
+        0.0,
+        0.3
+      ],
+      "distance_km": 0.42,
+      "loss_capacity": 0.492085253632908,
+      "ammunition": 70.45334301631,
+      "spent": 39.54665698369,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.958992895530591,
+        "injury": 0.041007104469409,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      }
+    },
+    {
+      "scene": "S3",
+      "variant": "valid",
+      "seed": 347,
+      "time": 1800.0,
+      "position_km": [
+        0.0,
+        0.3
+      ],
+      "distance_km": 0.42,
+      "loss_capacity": 0.509941008776859,
+      "ammunition": 70.260569698035,
+      "spent": 39.739430301965,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.966496069026004,
+        "injury": 0.0335039309739962,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      }
+    },
+    {
+      "scene": "S3",
+      "variant": "invalid",
+      "seed": 347,
+      "time": 1800.0,
+      "position_km": [
+        0.0,
+        0.3
+      ],
+      "distance_km": 0.42,
+      "loss_capacity": 0.492085253632908,
+      "ammunition": 70.45334301631,
+      "spent": 39.54665698369,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.958992895530591,
+        "injury": 0.041007104469409,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      }
+    },
+    {
+      "scene": "S3",
+      "variant": "condition",
+      "seed": 347,
+      "time": 1800.0,
+      "position_km": [
+        0.0,
+        0.3
+      ],
+      "distance_km": 0.42,
+      "loss_capacity": 1.74108877940237,
+      "ammunition": 0.0,
+      "spent": 110.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": true,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.854909268383135,
+        "injury": 0.145090731616865,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      }
+    },
+    {
+      "scene": "S1",
+      "variant": "autonomous",
+      "seed": 2027,
+      "time": 1800.0,
+      "position_km": [
+        0.0,
+        0.0
+      ],
+      "distance_km": 0.0,
+      "loss_capacity": 0.830085898121111,
+      "ammunition": 0.0,
+      "spent": 110.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": []
+    },
+    {
+      "scene": "S1",
+      "variant": "valid",
+      "seed": 2027,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.0
+      ],
+      "distance_km": 0.12,
+      "loss_capacity": 0.914653403181381,
+      "ammunition": 0.0,
+      "spent": 110.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ]
+    },
+    {
+      "scene": "S1",
+      "variant": "invalid",
+      "seed": 2027,
+      "time": 1800.0,
+      "position_km": [
+        0.0,
+        0.0
+      ],
+      "distance_km": 0.0,
+      "loss_capacity": 0.830085898121111,
+      "ammunition": 0.0,
+      "spent": 110.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": []
+    },
+    {
+      "scene": "S1",
+      "variant": "condition",
+      "seed": 2027,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.0
+      ],
+      "distance_km": 0.12,
+      "loss_capacity": 0.0,
+      "ammunition": 0.0,
+      "spent": 30.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ]
+    },
+    {
+      "scene": "S1",
+      "variant": "reserve",
+      "seed": 2027,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.0
+      ],
+      "distance_km": 0.12,
+      "loss_capacity": 0.914701413480291,
+      "ammunition": 0.0,
+      "spent": 110.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_company",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ]
+    },
+    {
+      "scene": "S2",
+      "variant": "autonomous",
+      "seed": 2027,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.0
+      ],
+      "distance_km": 0.12,
+      "loss_capacity": 0.0,
+      "ammunition": 110.0,
+      "spent": 0.0,
+      "mission": "failed",
+      "route_complete": false,
+      "local_condition": false,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        }
+      ]
+    },
+    {
+      "scene": "S2",
+      "variant": "valid",
+      "seed": 2027,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.08
+      ],
+      "distance_km": 0.8,
+      "loss_capacity": 1.71714058467042,
+      "ammunition": 31.3961537140171,
+      "spent": 78.6038462859829,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": false,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 295.0,
+          "id": "input_opportunity_platoon_2",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 280.0,
+          "status": "EXECUTED"
+        }
+      ]
+    },
+    {
+      "scene": "S2",
+      "variant": "invalid",
+      "seed": 2027,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.0
+      ],
+      "distance_km": 0.12,
+      "loss_capacity": 0.0,
+      "ammunition": 110.0,
+      "spent": 0.0,
+      "mission": "failed",
+      "route_complete": false,
+      "local_condition": false,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        }
+      ]
+    },
+    {
+      "scene": "S2",
+      "variant": "condition",
+      "seed": 2027,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.08
+      ],
+      "distance_km": 0.2,
+      "loss_capacity": 1.71661123351353,
+      "ammunition": 0.0,
+      "spent": 110.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": false,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        }
+      ]
+    },
+    {
+      "scene": "S2",
+      "variant": "slow_reports",
+      "seed": 2027,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.08
+      ],
+      "distance_km": 0.8,
+      "loss_capacity": 1.32086342853346,
+      "ammunition": 48.4340877061652,
+      "spent": 61.5659122938348,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": false,
+      "effective_incoming_contact": true,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 700.0,
+          "id": "input_opportunity_platoon_5",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 685.0,
+          "status": "EXECUTED"
+        }
+      ]
+    },
+    {
+      "scene": "S2",
+      "variant": "wait",
+      "seed": 2027,
+      "time": 1800.0,
+      "position_km": [
+        0.12,
+        0.0
+      ],
+      "distance_km": 0.12,
+      "loss_capacity": 0.0,
+      "ammunition": 110.0,
+      "spent": 0.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 295.0,
+          "id": "input_opportunity_platoon_2",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 280.0,
+          "status": "EXECUTED"
+        }
+      ]
+    },
+    {
+      "scene": "S3",
+      "variant": "autonomous",
+      "seed": 2027,
+      "time": 1800.0,
+      "position_km": [
+        0.0,
+        0.3
+      ],
+      "distance_km": 0.42,
+      "loss_capacity": 0.49387098040111,
+      "ammunition": 70.4550432026216,
+      "spent": 39.5449567973784,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.958844084966574,
+        "injury": 0.0411559150334259,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      }
+    },
+    {
+      "scene": "S3",
+      "variant": "valid",
+      "seed": 2027,
+      "time": 1800.0,
+      "position_km": [
+        0.0,
+        0.3
+      ],
+      "distance_km": 0.42,
+      "loss_capacity": 0.511777027596283,
+      "ammunition": 70.2622105420229,
+      "spent": 39.7377894579771,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.966376836293456,
+        "injury": 0.0336231637065439,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      }
+    },
+    {
+      "scene": "S3",
+      "variant": "invalid",
+      "seed": 2027,
+      "time": 1800.0,
+      "position_km": [
+        0.0,
+        0.3
+      ],
+      "distance_km": 0.42,
+      "loss_capacity": 0.49387098040111,
+      "ammunition": 70.4550432026216,
+      "spent": 39.5449567973784,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": false,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.958844084966574,
+        "injury": 0.0411559150334259,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      }
+    },
+    {
+      "scene": "S3",
+      "variant": "condition",
+      "seed": 2027,
+      "time": 1800.0,
+      "position_km": [
+        0.0,
+        0.3
+      ],
+      "distance_km": 0.42,
+      "loss_capacity": 1.74758900888509,
+      "ammunition": 0.0,
+      "spent": 110.0,
+      "mission": "complete",
+      "route_complete": true,
+      "local_condition": true,
+      "effective_incoming_contact": true,
+      "remote_groups": 2,
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.854367582592909,
+        "injury": 0.145632417407091,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      }
+    }
+  ],
+  "new_24h_rows": [
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 864,
+        "goal_commits": 216,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 18
+      },
+      "message_count": 20,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 71,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3716,
+      "world_counters": {
+        "areas_examined": 2256,
+        "contacts_resolved": 5142,
+        "events_processed": 10,
+        "segments": 2151,
+        "units_examined": 84056
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 864,
+        "goal_commits": 216,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 18
+      },
+      "message_count": 20,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 1,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 71,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3716,
+      "world_counters": {
+        "areas_examined": 2256,
+        "contacts_resolved": 5142,
+        "events_processed": 10,
+        "segments": 2151,
+        "units_examined": 88776
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 864,
+        "goal_commits": 216,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 18
+      },
+      "message_count": 20,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 7,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 71,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3716,
+      "world_counters": {
+        "areas_examined": 2256,
+        "contacts_resolved": 5142,
+        "events_processed": 10,
+        "segments": 2151,
+        "units_examined": 88776
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 864,
+        "goal_commits": 216,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 18
+      },
+      "message_count": 20,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 31,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 71,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3716,
+      "world_counters": {
+        "areas_examined": 2256,
+        "contacts_resolved": 5142,
+        "events_processed": 10,
+        "segments": 2151,
+        "units_examined": 88776
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 864,
+        "goal_commits": 216,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 18
+      },
+      "message_count": 20,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 109,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3681,
+      "world_counters": {
+        "areas_examined": 2136,
+        "contacts_resolved": 4902,
+        "events_processed": 10,
+        "segments": 2031,
+        "units_examined": 79976
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 864,
+        "goal_commits": 216,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 18
+      },
+      "message_count": 20,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 1,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 109,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3681,
+      "world_counters": {
+        "areas_examined": 2136,
+        "contacts_resolved": 4902,
+        "events_processed": 10,
+        "segments": 2031,
+        "units_examined": 84456
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 864,
+        "goal_commits": 216,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 18
+      },
+      "message_count": 20,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 7,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 109,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3681,
+      "world_counters": {
+        "areas_examined": 2136,
+        "contacts_resolved": 4902,
+        "events_processed": 10,
+        "segments": 2031,
+        "units_examined": 84456
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 864,
+        "goal_commits": 216,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 18
+      },
+      "message_count": 20,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 31,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 109,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3681,
+      "world_counters": {
+        "areas_examined": 2136,
+        "contacts_resolved": 4902,
+        "events_processed": 10,
+        "segments": 2031,
+        "units_examined": 84456
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 1176,
+        "goal_commits": 294,
+        "goal_inputs": 3,
+        "timers_processed": 4,
+        "transitions": 24
+      },
+      "message_count": 31,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 71,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3822,
+      "world_counters": {
+        "areas_examined": 2311,
+        "contacts_resolved": 4790,
+        "events_processed": 24,
+        "segments": 2167,
+        "units_examined": 82872
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 1176,
+        "goal_commits": 294,
+        "goal_inputs": 3,
+        "timers_processed": 4,
+        "transitions": 24
+      },
+      "message_count": 31,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 1,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 71,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3822,
+      "world_counters": {
+        "areas_examined": 2311,
+        "contacts_resolved": 4790,
+        "events_processed": 24,
+        "segments": 2167,
+        "units_examined": 87784
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 1176,
+        "goal_commits": 294,
+        "goal_inputs": 3,
+        "timers_processed": 4,
+        "transitions": 24
+      },
+      "message_count": 31,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 7,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 71,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3822,
+      "world_counters": {
+        "areas_examined": 2311,
+        "contacts_resolved": 4790,
+        "events_processed": 24,
+        "segments": 2167,
+        "units_examined": 87784
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 1176,
+        "goal_commits": 294,
+        "goal_inputs": 3,
+        "timers_processed": 4,
+        "transitions": 24
+      },
+      "message_count": 31,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 31,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 71,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3822,
+      "world_counters": {
+        "areas_examined": 2311,
+        "contacts_resolved": 4790,
+        "events_processed": 24,
+        "segments": 2167,
+        "units_examined": 87784
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 1176,
+        "goal_commits": 294,
+        "goal_inputs": 3,
+        "timers_processed": 4,
+        "transitions": 24
+      },
+      "message_count": 31,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 109,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3786,
+      "world_counters": {
+        "areas_examined": 2191,
+        "contacts_resolved": 4550,
+        "events_processed": 24,
+        "segments": 2047,
+        "units_examined": 78792
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 1176,
+        "goal_commits": 294,
+        "goal_inputs": 3,
+        "timers_processed": 4,
+        "transitions": 24
+      },
+      "message_count": 31,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 1,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 109,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3786,
+      "world_counters": {
+        "areas_examined": 2191,
+        "contacts_resolved": 4550,
+        "events_processed": 24,
+        "segments": 2047,
+        "units_examined": 83464
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 1176,
+        "goal_commits": 294,
+        "goal_inputs": 3,
+        "timers_processed": 4,
+        "transitions": 24
+      },
+      "message_count": 31,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 7,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 109,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3786,
+      "world_counters": {
+        "areas_examined": 2191,
+        "contacts_resolved": 4550,
+        "events_processed": 24,
+        "segments": 2047,
+        "units_examined": 83464
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 1176,
+        "goal_commits": 294,
+        "goal_inputs": 3,
+        "timers_processed": 4,
+        "transitions": 24
+      },
+      "message_count": 31,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 31,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 109,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3786,
+      "world_counters": {
+        "areas_examined": 2191,
+        "contacts_resolved": 4550,
+        "events_processed": 24,
+        "segments": 2047,
+        "units_examined": 83464
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 2372,
+        "goal_commits": 593,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 23
+      },
+      "message_count": 25,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 2,
+        "local_actions": 1,
+        "member_allocations": 48,
+        "member_preparations": 293,
+        "member_settlements": 293
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 71,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3947,
+      "world_counters": {
+        "areas_examined": 2444,
+        "contacts_resolved": 5416,
+        "events_processed": 15,
+        "segments": 2151,
+        "units_examined": 94998
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 2372,
+        "goal_commits": 593,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 23
+      },
+      "message_count": 25,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 2,
+        "local_actions": 1,
+        "member_allocations": 48,
+        "member_preparations": 293,
+        "member_settlements": 293
+      },
+      "quota": 1,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 71,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3947,
+      "world_counters": {
+        "areas_examined": 2444,
+        "contacts_resolved": 5416,
+        "events_processed": 15,
+        "segments": 2151,
+        "units_examined": 100470
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 2372,
+        "goal_commits": 593,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 23
+      },
+      "message_count": 25,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 2,
+        "local_actions": 1,
+        "member_allocations": 48,
+        "member_preparations": 293,
+        "member_settlements": 293
+      },
+      "quota": 7,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 71,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3947,
+      "world_counters": {
+        "areas_examined": 2444,
+        "contacts_resolved": 5416,
+        "events_processed": 15,
+        "segments": 2151,
+        "units_examined": 100470
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 2372,
+        "goal_commits": 593,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 23
+      },
+      "message_count": 25,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 2,
+        "local_actions": 1,
+        "member_allocations": 48,
+        "member_preparations": 293,
+        "member_settlements": 293
+      },
+      "quota": 31,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 71,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3947,
+      "world_counters": {
+        "areas_examined": 2444,
+        "contacts_resolved": 5416,
+        "events_processed": 15,
+        "segments": 2151,
+        "units_examined": 100470
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 2364,
+        "goal_commits": 591,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 23
+      },
+      "message_count": 25,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 2,
+        "local_actions": 1,
+        "member_allocations": 48,
+        "member_preparations": 292,
+        "member_settlements": 292
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 109,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3905,
+      "world_counters": {
+        "areas_examined": 2323,
+        "contacts_resolved": 5172,
+        "events_processed": 15,
+        "segments": 2031,
+        "units_examined": 90842
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 2364,
+        "goal_commits": 591,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 23
+      },
+      "message_count": 25,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 2,
+        "local_actions": 1,
+        "member_allocations": 48,
+        "member_preparations": 292,
+        "member_settlements": 292
+      },
+      "quota": 1,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 109,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3905,
+      "world_counters": {
+        "areas_examined": 2323,
+        "contacts_resolved": 5172,
+        "events_processed": 15,
+        "segments": 2031,
+        "units_examined": 96070
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 2364,
+        "goal_commits": 591,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 23
+      },
+      "message_count": 25,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 2,
+        "local_actions": 1,
+        "member_allocations": 48,
+        "member_preparations": 292,
+        "member_settlements": 292
+      },
+      "quota": 7,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 109,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3905,
+      "world_counters": {
+        "areas_examined": 2323,
+        "contacts_resolved": 5172,
+        "events_processed": 15,
+        "segments": 2031,
+        "units_examined": 96070
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 2364,
+        "goal_commits": 591,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 23
+      },
+      "message_count": 25,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 2,
+        "local_actions": 1,
+        "member_allocations": 48,
+        "member_preparations": 292,
+        "member_settlements": 292
+      },
+      "quota": 31,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 109,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3905,
+      "world_counters": {
+        "areas_examined": 2323,
+        "contacts_resolved": 5172,
+        "events_processed": 15,
+        "segments": 2031,
+        "units_examined": 96070
+      }
+    }
+  ],
+  "cost_medians": {
+    "burst": {
+      "admission_usec": 495,
+      "advance_usec": 96521,
+      "built_static_memory_delta_bytes": 863164,
+      "cleanup_usec": 419,
+      "construction_usec": 3322,
+      "goal_commit_usec": 6026,
+      "input_issue_usec": 404,
+      "intent_delivery_usec": 526,
+      "lod_conversion_usec": 0,
+      "output_bytes": 891,
+      "output_serialization_usec": 36,
+      "result_preparation_usec": 327,
+      "summary_state_bytes": 4494,
+      "person_usec_median": 2274,
+      "core_work": {
+        "areas_examined": 136,
+        "contacts_resolved": 680,
+        "events_processed": 10,
+        "segments": 68,
+        "units_examined": 9388
+      },
+      "new_goal_work": {
+        "goal_candidate_reads": 572,
+        "goal_commits": 143,
+        "goal_inputs": 5,
+        "timers_processed": 7,
+        "transitions": 23
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 1,
+        "member_allocations": 136,
+        "member_preparations": 68,
+        "member_settlements": 68
+      }
+    },
+    "goals": {
+      "admission_usec": 572,
+      "advance_usec": 81459,
+      "built_static_memory_delta_bytes": 860716,
+      "cleanup_usec": 489,
+      "construction_usec": 3677,
+      "goal_commit_usec": 3036,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "lod_conversion_usec": 0,
+      "output_bytes": 873,
+      "output_serialization_usec": 44,
+      "result_preparation_usec": 388,
+      "summary_state_bytes": 4196,
+      "person_usec_median": 0,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 630,
+        "events_processed": 2,
+        "segments": 63,
+        "units_examined": 8698
+      },
+      "new_goal_work": {
+        "goal_candidate_reads": 264,
+        "goal_commits": 66,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      }
+    },
+    "lod": {
+      "admission_usec": 495,
+      "advance_usec": 97280,
+      "built_static_memory_delta_bytes": 860716,
+      "cleanup_usec": 386,
+      "construction_usec": 3345,
+      "goal_commit_usec": 2970,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "lod_conversion_usec": 300,
+      "output_bytes": 874,
+      "output_serialization_usec": 34,
+      "result_preparation_usec": 317,
+      "summary_state_bytes": 4196,
+      "person_usec_median": 0,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 882,
+        "events_processed": 2,
+        "segments": 63,
+        "units_examined": 11644
+      },
+      "new_goal_work": {
+        "goal_candidate_reads": 264,
+        "goal_commits": 66,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      }
+    },
+    "off": {
+      "admission_usec": 324,
+      "advance_usec": 75269,
+      "built_static_memory_delta_bytes": 824500,
+      "cleanup_usec": 394,
+      "construction_usec": 3469,
+      "goal_commit_usec": 0,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "lod_conversion_usec": 1,
+      "output_bytes": 865,
+      "output_serialization_usec": 36,
+      "result_preparation_usec": 309,
+      "summary_state_bytes": 4188,
+      "person_usec_median": 0,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 630,
+        "events_processed": 0,
+        "segments": 63,
+        "units_examined": 8698
+      },
+      "new_goal_work": {
+        "goal_candidate_reads": 0,
+        "goal_commits": 0,
+        "goal_inputs": 0,
+        "timers_processed": 0,
+        "transitions": 0
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      }
+    },
+    "person": {
+      "admission_usec": 487,
+      "advance_usec": 85265,
+      "built_static_memory_delta_bytes": 863164,
+      "cleanup_usec": 401,
+      "construction_usec": 3316,
+      "goal_commit_usec": 3106,
+      "input_issue_usec": 136,
+      "intent_delivery_usec": 0,
+      "lod_conversion_usec": 0,
+      "output_bytes": 886,
+      "output_serialization_usec": 34,
+      "result_preparation_usec": 323,
+      "summary_state_bytes": 4478,
+      "person_usec_median": 1804,
+      "core_work": {
+        "areas_examined": 128,
+        "contacts_resolved": 640,
+        "events_processed": 3,
+        "segments": 64,
+        "units_examined": 8836
+      },
+      "new_goal_work": {
+        "goal_candidate_reads": 268,
+        "goal_commits": 67,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 1,
+        "local_actions": 1,
+        "member_allocations": 128,
+        "member_preparations": 64,
+        "member_settlements": 64
+      }
+    },
+    "senior": {
+      "admission_usec": 485,
+      "advance_usec": 92840,
+      "built_static_memory_delta_bytes": 860716,
+      "cleanup_usec": 399,
+      "construction_usec": 3438,
+      "goal_commit_usec": 6098,
+      "input_issue_usec": 156,
+      "intent_delivery_usec": 262,
+      "lod_conversion_usec": 0,
+      "output_bytes": 880,
+      "output_serialization_usec": 34,
+      "result_preparation_usec": 319,
+      "summary_state_bytes": 4254,
+      "person_usec_median": 0,
+      "core_work": {
+        "areas_examined": 136,
+        "contacts_resolved": 680,
+        "events_processed": 5,
+        "segments": 68,
+        "units_examined": 9388
+      },
+      "new_goal_work": {
+        "goal_candidate_reads": 560,
+        "goal_commits": 140,
+        "goal_inputs": 3,
+        "timers_processed": 4,
+        "transitions": 18
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      }
+    },
+    "sleeping": {
+      "admission_usec": 546,
+      "advance_usec": 82249,
+      "built_static_memory_delta_bytes": 109241048,
+      "cleanup_usec": 91168,
+      "construction_usec": 536117,
+      "goal_commit_usec": 3220,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "lod_conversion_usec": 0,
+      "output_bytes": 885,
+      "output_serialization_usec": 56,
+      "result_preparation_usec": 46316,
+      "summary_state_bytes": 4196,
+      "person_usec_median": 0,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 630,
+        "events_processed": 2,
+        "segments": 63,
+        "units_examined": 8698
+      },
+      "new_goal_work": {
+        "goal_candidate_reads": 264,
+        "goal_commits": 66,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      }
+    }
+  },
+  "cost_note": "Single Windows host; no p95, frame guarantee or historical 37ms attribution.",
+  "causal_example_S2": {
+    "bridge_closed": 60,
+    "local_block_report": 120,
+    "commander_received": 167,
+    "intent_issued": 280,
+    "intent_delivered": 295,
+    "old_authority_delivered_rejection": 15
+  },
+  "known_limits": [
+    "Synthetic local nodes; no formal map or traffic planner",
+    "Finite supply ETA independent of route planner",
+    "Continuous personal capacity is not named death",
+    "Unsupported split/merge/coalesce with causal members explicitly rejected",
+    "No subjective fun or human visual acceptance",
+    "No historical 37ms attribution"
+  ],
+  "flags": {
+    "FINAL_WAR_GAMEPLAY_ACCEPTED": "NO",
+    "FORMAL_GAME_INTEGRATION": "NONE",
+    "HUMAN_VISUAL_ACCEPTANCE": "NOT_RUN",
+    "HISTORICAL_37MS_ATTRIBUTION": "UNRESOLVED"
+  },
+  "failure_history": [
+    {
+      "name": "g4_dev_S1",
+      "resolution": "Typed String array repaired; final demos pass."
+    },
+    {
+      "name": "g4_scenarios_dev",
+      "resolution": "Typed seed array repaired; owned hung process aborted, no pass claimed."
+    },
+    {
+      "name": "g4_scenarios_dev_fixed",
+      "resolution": "Assertion used global casualties although only main-area ammo disabled; narrowed to specified main squad without changing combat."
+    },
+    {
+      "name": "g5_body_observation_counterexample",
+      "resolution": "Incapacitated observer retains body position and cannot observe through displaced unit."
+    },
+    {
+      "name": "g5_gameplay_long_tests",
+      "resolution": "100000-call driver ceiling truncated quota1; finite 10000000-call ceiling completes all 24h results; PENDING ledger query returns false."
+    }
+  ],
+  "raw_evidence_location": "D:\\programs\\WWO\\research\\military\\delivery\\20261010T1217-gameplay\\raw-evidence.zip",
+  "runtime_source_cloud_push": "NONE",
+  "documentation_head": "6be7343c799e178c2986a69831d615310a370183"
+}
