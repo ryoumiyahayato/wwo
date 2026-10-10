@@ -1,0 +1,15 @@
+look
+advance 100
+drain
+look
+advance 70
+drain
+look
+intent detour node_unit_000 advance D AB,AC,CD
+look
+advance 15
+drain
+look
+auto 1800 30
+look
+quit

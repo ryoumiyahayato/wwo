@@ -1,0 +1,8 @@
+look
+advance 10
+drain
+intent deploy blue_platoon advance B AB
+look
+auto 1800 30
+look
+quit

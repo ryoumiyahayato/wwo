@@ -1,0 +1,11 @@
+look
+advance 10
+drain
+intent move node_unit_000 advance B AB
+look
+advance 15
+drain
+look
+auto 1800 30
+look
+quit
