@@ -209,6 +209,6 @@ func _quota() -> void:
 	var pending: Scenario = Scenario.new()
 	check(pending.configure("S3", 71, {"variant": "valid"}), "pending query world")
 	var result: Dictionary = pending.env.lod.advance_bounded(1800.0, 1)
-	check(result.status == "PENDING" and pending.observation.person("soldier").status == "PENDING" and pending.env.gameplay.participants.view("soldier").status == "PENDING", "PENDING never exposes a half settled person or timeline")
+	check(result.status == "PENDING" and pending.observation.person("soldier").status == "PENDING" and pending.env.gameplay.participants.view("soldier").status == "PENDING" and not pending.balanced(), "PENDING never exposes a half settled person, timeline or successful ledger query")
 	check(F.advance(pending.env, 1800.0, 31).ok, "pending world remains resumable")
 	pending.dispose()

@@ -181,6 +181,8 @@ func physical() -> Dictionary:
 		"lod_groups": env.lod._groups.size(), "bridge_open": env.space.edge_view("bridge_BD").open}
 
 func balanced() -> bool:
+	if env.state.public_pending():
+		return false
 	var ledger: Dictionary = env.logistics.audit()
 	for key: String in ledger.initial:
 		if absf(float(ledger.initial[key]) - float(ledger.current_plus_spent_and_transit[key])) > 0.000001:

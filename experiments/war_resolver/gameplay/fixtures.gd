@@ -155,7 +155,8 @@ static func advance(env: Dictionary, target: float, quota: int = 0) -> Dictionar
 	if quota == 0:
 		return env.lod.advance(target)
 	var output: Dictionary = {}
-	for index: int in range(100000):
+	# Finite driver ceiling covers 24h at quota=1; it is not a kernel work quota.
+	for index: int in range(10000000):
 		output = env.lod.advance_bounded(target, quota)
 		if output.get("status", "") != "PENDING":
 			return output
