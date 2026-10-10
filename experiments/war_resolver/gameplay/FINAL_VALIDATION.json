@@ -1,0 +1,1359 @@
+{
+  "actual_runtime_head": "3052a0c142b4c97b53e5600ef772ac1bf9887ac0",
+  "steps": [
+    {
+      "name": "g5_resolver_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 21.09258200000022,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 114,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "War resolver: 1876 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_resolver_replay_a",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/replay_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 2.6014645999994173,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 155,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_resolver_replay_b",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/replay_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 2.598236099999667,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 155,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_resolver_benchmark",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/benchmark.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 5.520495100000517,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 137337,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_roles_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/role_tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 19.66034589999981,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 241,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Role overrides: 3762 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_roles_replay_a",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/role_replay_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 4.353654600000482,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 160,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_roles_replay_b",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/role_replay_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 4.185224200000448,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 160,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_sandbox_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/sandbox/tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 48.46577989999969,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 113,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "War sandbox: 8941 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_sandbox_replay_a",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/sandbox/observation_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 17.137474099999963,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 798479,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_sandbox_replay_b",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/sandbox/observation_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 16.765135600000576,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 798479,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task4_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/aggregation/tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 56.06503109999994,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 49134,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Task4 aggregation: 17329 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_task4_replay_a",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/aggregation/replay_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 1.177022599999873,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 161,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task4_replay_b",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/aggregation/replay_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 1.1696240999999645,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 161,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task4_benchmark",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/aggregation/benchmark.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 25.10398619999978,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 14963,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task5_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/structure/tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 2.114408100000219,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 4031,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Task5 structure: 788 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_task5_replay_a",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/structure/replay_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 1.0338767000002917,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 161,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task5_replay_b",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/structure/replay_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 1.009747299999617,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 161,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task5_benchmark",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/structure/benchmark.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 1.3872848999999405,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 9284,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task6_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/logistics/tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 2.119064499999695,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 3012,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Task6 logistics: 5703 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_task6_replay_a",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/logistics/replay_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 1.3061786999996912,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 161,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task6_replay_b",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/logistics/replay_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 1.1829395999993721,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 161,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task6_benchmark",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/logistics/benchmark.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 1.6675310999999056,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 24675,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task7_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/information/tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 1.9441962999999305,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 5248,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Task7 information: 1341 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_task7_replay_a",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/information/replay_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 1.37119789999997,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 161,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task7_replay_b",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/information/replay_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 1.2702885999997306,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 161,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task7_benchmark",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/information/benchmark.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 1.4622440000002825,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 35394,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task8_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/decision/tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 7.110079499999301,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 18000,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Task8 decision: 1220 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_task8_replay_a",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/decision/replay_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 1.5525300999997853,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 161,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task8_replay_b",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/decision/replay_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 1.560269800000242,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 161,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task8_benchmark",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/decision/benchmark.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 7.598665599999549,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 44681,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_military_strategy_test",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://tests/vnext/military_strategy_test.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 37.01467899999989,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 45724,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "VNext military strategic system: 966 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_military_r3_findings_test",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://tests/vnext/military_r3_findings_test.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 131.78655570000046,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 128,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "VNext military R3 findings: 1803 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_military_spatial_capacity_integration_test",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://tests/vnext/military_spatial_capacity_integration_test.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 2.1829717999999048,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 143,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "VNext Military/Spatial capacity integration: 68 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_formal_military_authorized_defend_integration_test",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://tests/formal/formal_military_authorized_defend_integration_test.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 6.574027200000273,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 4961646,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Formal Military authorized DEFEND integration: 120 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_formal_exact_persistence_roundtrip_test",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://tests/formal/formal_exact_persistence_roundtrip_test.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 12.427355099999659,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 362,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Formal Exact Persistence: 31 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_war_spatial__tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/spatial/tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 0.9410915999997087,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 318,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Task9 spatial: 190 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_war_continuity__contract_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/continuity/contract_tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 0.6102116000001843,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 126,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Task9 continuity contracts: 56 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_war_continuity__tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/continuity/tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 2.4442216999996162,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 119349,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Task9 continuity: 116 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_war_continuous__cursor_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/continuous/cursor_tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 0.3453374000000622,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 112,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Task9 cursors: 9 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_war_continuous__tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/continuous/tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 4.803018599999632,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 10348,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Task9 continuous: 60 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_war_continuous__load_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/continuous/load_tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 6.3958136000001105,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 4636,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Task9 load: 101 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_war_continuous__long_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/continuous/long_tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 325.4705143000001,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 15391,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Task9 long: 53 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_war_continuous__profile_after",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/continuous/profile_after.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 169.66048819999924,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 8970,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Task9 profile: 12 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_war_continuous__retirement_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/continuous/retirement_tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 18.514972500000113,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 5706,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Task9 retirement: 43 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_war_cost_attribution__tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/cost_attribution/tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 1.8571863999995912,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 120,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "WWO cost attribution: 52 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_codex_audit",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://tests/codex_audit_regression.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 1.5650908999996318,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 1715,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_world_data",
+      "command": [
+        "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/world_data",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 36.6983596,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 8112,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache"
+    },
+    {
+      "name": "g5_frozen_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/gameplay/tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 1.3650440999999773,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 4057,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "summaries": [
+        "Gameplay G1: 48 checks, 0 failures"
+      ],
+      "fatal": null,
+      "passed": true
+    },
+    {
+      "name": "g5_frozen_participation",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/gameplay/participation_tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 1.8430462999995143,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 866,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "summaries": [
+        "Gameplay participation: 109 checks, 0 failures"
+      ],
+      "fatal": null,
+      "passed": true
+    },
+    {
+      "name": "g5_frozen_scenarios",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/gameplay/scenario_tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 7.575402500000564,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 44810,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "summaries": [
+        "Gameplay scenarios: 269 checks, 0 failures"
+      ],
+      "fatal": null,
+      "passed": true
+    },
+    {
+      "name": "g5_frozen_holdout",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/gameplay/scenario_tests.gd",
+        "--",
+        "--holdout"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 3.6945974999998725,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 30964,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "summaries": [
+        "Gameplay scenarios: 174 checks, 0 failures"
+      ],
+      "fatal": null,
+      "passed": true
+    },
+    {
+      "name": "g5_frozen_benchmark",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/gameplay/benchmark.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 8.888139100000444,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 38554,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "summaries": [
+        "Gameplay costs: 360 checks, 0 failures"
+      ],
+      "fatal": null,
+      "passed": true
+    },
+    {
+      "name": "g5_frozen_demo_S1",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/gameplay/run.gd",
+        "--",
+        "--scene=S1",
+        "--seed=71",
+        "--variant=valid",
+        "--actor=squad",
+        "--quota=0",
+        "--seconds=1800",
+        "--output=D:/programs/WWO/research/military/runs/20261010T1217-gameplay/demos_frozen/S1"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 0.797927300000083,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 1641,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "passed": true
+    },
+    {
+      "name": "g5_frozen_demo_S2",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/gameplay/run.gd",
+        "--",
+        "--scene=S2",
+        "--seed=109",
+        "--variant=valid",
+        "--actor=platoon",
+        "--quota=7",
+        "--seconds=1800",
+        "--output=D:/programs/WWO/research/military/runs/20261010T1217-gameplay/demos_frozen/S2"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 0.8797144000000117,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 1784,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "passed": true
+    },
+    {
+      "name": "g5_frozen_demo_S3",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/gameplay/run.gd",
+        "--",
+        "--scene=S3",
+        "--seed=71",
+        "--variant=valid",
+        "--actor=soldier",
+        "--quota=31",
+        "--seconds=1800",
+        "--output=D:/programs/WWO/research/military/runs/20261010T1217-gameplay/demos_frozen/S3"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 0.9781073000003744,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 1759,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "passed": true
+    },
+    {
+      "name": "g5_frozen_demo_S3_company_custom",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/gameplay/run.gd",
+        "--",
+        "--scene=S3",
+        "--seed=71",
+        "--variant=valid",
+        "--actor=company",
+        "--quota=7",
+        "--seconds=1800",
+        "--output=D:/programs/WWO/research/military/runs/20261010T1217-gameplay/demos_frozen/S3_company_custom",
+        "--inputs=D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217\\experiments\\war_resolver\\gameplay\\example_inputs.json"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 0.8931492000001526,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 1561,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "passed": true
+    },
+    {
+      "name": "g5_gameplay_long_fixed_v1",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "--script",
+        "res://experiments/war_resolver/gameplay/long_tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exit": 0,
+      "elapsed_seconds": 68.96975620000012,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 13094,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+      "summaries": [
+        "Gameplay 24h: 90 checks, 0 failures"
+      ],
+      "passed": true
+    }
+  ],
+  "failures": [],
+  "retained_hashes": {
+    "resolver": "3c369000cbf20ed19fb53d20dde0f47fea9f025a5c1ee32a010cc332b0d92904",
+    "roles": "60d41290019b0efeaa7e21bee3201461a912cff8bfb838642cfe8ae6ef83b3e3",
+    "sandbox": "a079c498616d72209811861d72fad70ccab5dd6ea3c13bceedcaed3ad8882390",
+    "task4": "73c47a49ca73e026227324581975b1315b9386183a21da022827d30e37a646f3",
+    "task5": "c2da3bc13475afb8540ccae93d49b7ce8a5ba072f7c2c4e768ad6f0f7cded664",
+    "task6": "0245979431dca576e2194e884011572d632a1bcdc7c22cc3cd2eea4fb99698f1",
+    "task7": "3528e2eafc4a4945750cb21451a1855db0fd4200ec76809970414c7d8ba9b17e",
+    "task8": "aac8ba463b08ad859adba6a28bc69ee50333bed234b4bcdc43899a96905470ff"
+  },
+  "complete": true,
+  "baseline_allowed_failures": [],
+  "old_matchers_and_goldens_changed": false,
+  "windows_unified": {
+    "name": "g5_unified_frozen",
+    "command": [
+      "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+      "-NoProfile",
+      "-File",
+      "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217\\tools\\run_validation.ps1",
+      "-ProjectPath",
+      "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "-PythonPath",
+      "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe"
+    ],
+    "cwd": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+    "exit": 0,
+    "elapsed_seconds": 569.9375702999996,
+    "aborted": null,
+    "log_complete": true,
+    "log_bytes": 71319,
+    "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1217-gameplay\\runtime-cache",
+    "log_encoding": "gb18030",
+    "fatal": null,
+    "sections": 47,
+    "retained_resource_exit_diagnostics": [
+      "ERROR: 41 resources still in use at exit (run with --verbose for details).",
+      "ERROR: 41 resources still in use at exit (run with --verbose for details).",
+      "ERROR: 41 resources still in use at exit (run with --verbose for details)."
+    ],
+    "final_success_message": true,
+    "passed": true
+  },
+  "retained_hashes_match_same_platform_baseline": true,
+  "passed": true,
+  "validation_execution_start_head": "9a3a8252806b12258a5642da426d6e3f93c489fd",
+  "retained_execution_bytes_commit": "8d1a7c58b6b6c4d7e6420d55a91ec2dd6be39aea",
+  "retained_runtime_unchanged_on_final": true,
+  "retained_scope_note": "Only gameplay fixtures.gd call ceiling, scenario.gd PENDING ledger guard and new scenario assertion changed after first freeze; original kernel/old test inputs are byte-identical. Current frozen unified and all new checks executed on final code.",
+  "historical_failure_report": "FINAL_VALIDATION_FIRST.json",
+  "failure_history": "FAILURE_HISTORY.json",
+  "resolved_failures": [
+    {
+      "name": "gameplay_long_tests",
+      "old_exit": 1,
+      "old_failures": 18,
+      "reason": "headless test_call_limit at quota=1 before 24h; no false completed state",
+      "repair_round": 1,
+      "replacement": "g5_gameplay_long_fixed_v1",
+      "replacement_failures": 0
+    }
+  ],
+  "overall_status": "LAND_GAMEPLAY_SLICE_SUPPORTED",
+  "flags": {
+    "FINAL_WAR_GAMEPLAY_ACCEPTED": "NO",
+    "FORMAL_GAME_INTEGRATION": "NONE",
+    "HUMAN_VISUAL_ACCEPTANCE": "NOT_RUN",
+    "HISTORICAL_37MS_ATTRIBUTION": "UNRESOLVED"
+  },
+  "source_end_recheck": "SOURCE_END_RECHECK.json",
+  "no_custom_source_hashes": true
+}

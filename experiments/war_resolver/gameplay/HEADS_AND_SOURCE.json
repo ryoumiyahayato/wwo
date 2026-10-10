@@ -1,0 +1,37 @@
+{
+  "source_status": "VERIFIED_SOURCE_EQUIVALENT",
+  "LOCAL_FROZEN_BASE": "9a3a8252806b12258a5642da426d6e3f93c489fd",
+  "prior_runtime_code_commit": "a094f7e73d13b821a713656062e93fcbe5e003f7",
+  "old_original_runtime_reference": "b411846eab24aab668d6d5ea70c562d346dd0338",
+  "recovered_freeze_reference": "43f35befe62d1c939b60d479a1af39532e8955e4",
+  "old_document_reference": "36e629d10fe7592faf85729a039d054d2584bbaf",
+  "previous_cloud_document_commit": "73127196d134423233645889b28baf703880029c",
+  "initial_runtime_commit": "8d1a7c58b6b6c4d7e6420d55a91ec2dd6be39aea",
+  "runtime_head": "3052a0c142b4c97b53e5600ef772ac1bf9887ac0",
+  "documentation_head": null,
+  "documentation_head_location": "Filled in delivery copy after document commit; source copy records the runtime identity.",
+  "branch": "experiment/war-gameplay-causal-slice-v1-20261010T1217",
+  "worktree": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+  "git_common_dir": "D:/programs/WWO/wwo/.git",
+  "Godot_version": "4.6.3.stable.official.7d41c59c4",
+  "Godot_executable": "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+  "python_executable": "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+  "source_checks": "Direct raw bytes against Git commit. No new custom source hashes. Existing tool replay integrity mechanisms preserved.",
+  "formal_game_integration": "NONE",
+  "runtime_code_cloud_push": "NONE",
+  "pull_request": "NONE",
+  "production_mutations": "NONE",
+  "cloud_destination": {
+    "repository": "ryoumiyahayato/wwo",
+    "branch": "evidence/war-step-cost-windows-20261009T191132",
+    "parent": "experiments/war_resolver/step_cost_windows/20261009T191132-step-cost",
+    "new_child": "gameplay-20261010T1217"
+  },
+  "budget": {
+    "minutes": 600,
+    "start_utc": "2026-10-10T04:17:29Z",
+    "initial_unmeasured_allowance_minutes": 2,
+    "previous_budgets_reused": false,
+    "pause_minutes": 0
+  }
+}

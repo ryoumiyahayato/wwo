@@ -1,0 +1,5367 @@
+{
+  "runtime_head": "3052a0c142b4c97b53e5600ef772ac1bf9887ac0",
+  "development_seeds": [
+    71,
+    109
+  ],
+  "holdout_seeds": [
+    347,
+    2027
+  ],
+  "holdout_policy": "Registered before G4; no combat parameter adjustment after holdout.",
+  "scenario_rows": [
+    {
+      "commands": [],
+      "personal": {},
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.0,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1200.0,
+          "dependency_deadline": 300.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": 0.0,
+          "hold_seconds": 60.0,
+          "input_ref": "standing_primary",
+          "intent": "hold",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 0.0,
+          "target_node": "A",
+          "terminal_reason": "local_hold_satisfied",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.820368046049442,
+        "mission": "complete",
+        "spent": 110.0,
+        "xy": [
+          0.0,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 71,
+      "time": 1800.0,
+      "truth_events": 306,
+      "variant": "autonomous"
+    },
+    {
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1225.0,
+          "dependency_deadline": 325.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "advance",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 25.0,
+          "target_node": "B",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.903953819570151,
+        "mission": "complete",
+        "spent": 110.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 71,
+      "time": 1800.0,
+      "truth_events": 360,
+      "variant": "valid"
+    },
+    {
+      "commands": [],
+      "personal": {},
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.0,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1200.0,
+          "dependency_deadline": 300.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": 0.0,
+          "hold_seconds": 60.0,
+          "input_ref": "standing_primary",
+          "intent": "hold",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 0.0,
+          "target_node": "A",
+          "terminal_reason": "local_hold_satisfied",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.820368046049442,
+        "mission": "complete",
+        "spent": 110.0,
+        "xy": [
+          0.0,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 71,
+      "time": 1800.0,
+      "truth_events": 306,
+      "variant": "invalid"
+    },
+    {
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1225.0,
+          "dependency_deadline": 325.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "advance",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 25.0,
+          "target_node": "B",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.0,
+        "mission": "complete",
+        "spent": 30.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 71,
+      "time": 1800.0,
+      "truth_events": 230,
+      "variant": "condition"
+    },
+    {
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_company",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "company",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1225.0,
+          "dependency_deadline": 325.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_company",
+          "intent": "advance",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 25.0,
+          "target_node": "B",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.904001169367005,
+        "mission": "complete",
+        "spent": 110.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 71,
+      "time": 1800.0,
+      "truth_events": 373,
+      "variant": "reserve"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 110.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1200.0,
+          "dependency_deadline": 300.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "standing_primary",
+          "intent": "advance",
+          "local_condition": false,
+          "radius_km": 0.03,
+          "reason": "route_blocked",
+          "route_complete": false,
+          "standing_rule": "hold_and_fire",
+          "started_at": 0.0,
+          "target_node": "D",
+          "terminal_reason": "deadline_exceeded",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.0,
+        "mission": "failed",
+        "spent": 0.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 71,
+      "time": 1800.0,
+      "truth_events": 242,
+      "variant": "autonomous"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 295.0,
+          "id": "input_opportunity_platoon_2",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 280.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 31.2063144844787,
+        "distance": 0.8,
+        "goal": {
+          "actor": "platoon",
+          "continuing_fire": true,
+          "continuing_movement": false,
+          "deadline": 1495.0,
+          "dependency_deadline": 595.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_opportunity_platoon_2",
+          "intent": "advance",
+          "local_condition": false,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 295.0,
+          "target_node": "D",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 1.69704751549569,
+        "mission": "complete",
+        "spent": 78.7936855155214,
+        "xy": [
+          0.12,
+          0.08
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 71,
+      "time": 1800.0,
+      "truth_events": 445,
+      "variant": "valid"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 110.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1200.0,
+          "dependency_deadline": 300.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "standing_primary",
+          "intent": "advance",
+          "local_condition": false,
+          "radius_km": 0.03,
+          "reason": "route_blocked",
+          "route_complete": false,
+          "standing_rule": "hold_and_fire",
+          "started_at": 0.0,
+          "target_node": "D",
+          "terminal_reason": "deadline_exceeded",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.0,
+        "mission": "failed",
+        "spent": 0.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 71,
+      "time": 1800.0,
+      "truth_events": 242,
+      "variant": "invalid"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.2,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1200.0,
+          "dependency_deadline": 300.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "standing_primary",
+          "intent": "advance",
+          "local_condition": false,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 0.0,
+          "target_node": "D",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 1.6965157792037,
+        "mission": "complete",
+        "spent": 110.0,
+        "xy": [
+          0.12,
+          0.08
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 71,
+      "time": 1800.0,
+      "truth_events": 401,
+      "variant": "condition"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 700.0,
+          "id": "input_opportunity_platoon_5",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 685.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 48.3644607575412,
+        "distance": 0.8,
+        "goal": {
+          "actor": "platoon",
+          "continuing_fire": true,
+          "continuing_movement": false,
+          "deadline": 1900.0,
+          "dependency_deadline": 1000.0,
+          "effective_incoming_contact": true,
+          "execution": "STOPPED",
+          "fire_reason": "",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_opportunity_platoon_5",
+          "intent": "advance",
+          "local_condition": false,
+          "radius_km": 0.03,
+          "reason": "suppression",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 700.0,
+          "target_node": "D",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 1.30552058548365,
+        "mission": "complete",
+        "spent": 61.6355392424589,
+        "xy": [
+          0.12,
+          0.08
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 71,
+      "time": 1800.0,
+      "truth_events": 392,
+      "variant": "slow_reports"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 295.0,
+          "id": "input_opportunity_platoon_2",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 280.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 110.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "platoon",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1495.0,
+          "dependency_deadline": 595.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": 295.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_opportunity_platoon_2",
+          "intent": "hold",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 295.0,
+          "target_node": "B",
+          "terminal_reason": "local_hold_satisfied",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.0,
+        "mission": "complete",
+        "spent": 0.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 71,
+      "time": 1800.0,
+      "truth_events": 278,
+      "variant": "wait"
+    },
+    {
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.959314376683425,
+        "injury": 0.0406856233165751,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "primary": {
+        "ammo": 70.4499281457988,
+        "distance": 0.42,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1395.0,
+          "dependency_deadline": 495.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "withdraw",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 195.0,
+          "target_node": "C",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.488227479798901,
+        "mission": "complete",
+        "spent": 39.5500718542012,
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 71,
+      "time": 1800.0,
+      "truth_events": 413,
+      "variant": "autonomous"
+    },
+    {
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.966762109348939,
+        "injury": 0.0332378906510615,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "primary": {
+        "ammo": 70.2572767931813,
+        "distance": 0.42,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1395.0,
+          "dependency_deadline": 495.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "withdraw",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 195.0,
+          "target_node": "C",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.505938184408598,
+        "mission": "complete",
+        "spent": 39.7427232068187,
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 71,
+      "time": 1800.0,
+      "truth_events": 439,
+      "variant": "valid"
+    },
+    {
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.959314376683425,
+        "injury": 0.0406856233165751,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "primary": {
+        "ammo": 70.4499281457988,
+        "distance": 0.42,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1395.0,
+          "dependency_deadline": 495.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "withdraw",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 195.0,
+          "target_node": "C",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.488227479798901,
+        "mission": "complete",
+        "spent": 39.5500718542012,
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 71,
+      "time": 1800.0,
+      "truth_events": 413,
+      "variant": "invalid"
+    },
+    {
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.855988935649172,
+        "injury": 0.144011064350827,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.42,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1395.0,
+          "dependency_deadline": 495.0,
+          "effective_incoming_contact": true,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "withdraw",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 195.0,
+          "target_node": "C",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 1.72813277220993,
+        "mission": "complete",
+        "spent": 110.0,
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 71,
+      "time": 1800.0,
+      "truth_events": 594,
+      "variant": "condition"
+    },
+    {
+      "commands": [],
+      "personal": {},
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.0,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1200.0,
+          "dependency_deadline": 300.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": 0.0,
+          "hold_seconds": 60.0,
+          "input_ref": "standing_primary",
+          "intent": "hold",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 0.0,
+          "target_node": "A",
+          "terminal_reason": "local_hold_satisfied",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.826158820919397,
+        "mission": "complete",
+        "spent": 110.0,
+        "xy": [
+          0.0,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 109,
+      "time": 1800.0,
+      "truth_events": 306,
+      "variant": "autonomous"
+    },
+    {
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1225.0,
+          "dependency_deadline": 325.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "advance",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 25.0,
+          "target_node": "B",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.91032962311035,
+        "mission": "complete",
+        "spent": 110.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 109,
+      "time": 1800.0,
+      "truth_events": 362,
+      "variant": "valid"
+    },
+    {
+      "commands": [],
+      "personal": {},
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.0,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1200.0,
+          "dependency_deadline": 300.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": 0.0,
+          "hold_seconds": 60.0,
+          "input_ref": "standing_primary",
+          "intent": "hold",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 0.0,
+          "target_node": "A",
+          "terminal_reason": "local_hold_satisfied",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.826158820919397,
+        "mission": "complete",
+        "spent": 110.0,
+        "xy": [
+          0.0,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 109,
+      "time": 1800.0,
+      "truth_events": 306,
+      "variant": "invalid"
+    },
+    {
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1225.0,
+          "dependency_deadline": 325.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "advance",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 25.0,
+          "target_node": "B",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.0,
+        "mission": "complete",
+        "spent": 30.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 109,
+      "time": 1800.0,
+      "truth_events": 230,
+      "variant": "condition"
+    },
+    {
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_company",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "company",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1225.0,
+          "dependency_deadline": 325.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_company",
+          "intent": "advance",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 25.0,
+          "target_node": "B",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.910377366232724,
+        "mission": "complete",
+        "spent": 110.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 109,
+      "time": 1800.0,
+      "truth_events": 375,
+      "variant": "reserve"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 110.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1200.0,
+          "dependency_deadline": 300.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "standing_primary",
+          "intent": "advance",
+          "local_condition": false,
+          "radius_km": 0.03,
+          "reason": "route_blocked",
+          "route_complete": false,
+          "standing_rule": "hold_and_fire",
+          "started_at": 0.0,
+          "target_node": "D",
+          "terminal_reason": "deadline_exceeded",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.0,
+        "mission": "failed",
+        "spent": 0.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 109,
+      "time": 1800.0,
+      "truth_events": 242,
+      "variant": "autonomous"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 295.0,
+          "id": "input_opportunity_platoon_2",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 280.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 31.3194759724269,
+        "distance": 0.8,
+        "goal": {
+          "actor": "platoon",
+          "continuing_fire": true,
+          "continuing_movement": false,
+          "deadline": 1495.0,
+          "dependency_deadline": 595.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_opportunity_platoon_2",
+          "intent": "advance",
+          "local_condition": false,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 295.0,
+          "target_node": "D",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 1.70902078286378,
+        "mission": "complete",
+        "spent": 78.6805240275732,
+        "xy": [
+          0.12,
+          0.08
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 109,
+      "time": 1800.0,
+      "truth_events": 444,
+      "variant": "valid"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 110.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1200.0,
+          "dependency_deadline": 300.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "standing_primary",
+          "intent": "advance",
+          "local_condition": false,
+          "radius_km": 0.03,
+          "reason": "route_blocked",
+          "route_complete": false,
+          "standing_rule": "hold_and_fire",
+          "started_at": 0.0,
+          "target_node": "D",
+          "terminal_reason": "deadline_exceeded",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.0,
+        "mission": "failed",
+        "spent": 0.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 109,
+      "time": 1800.0,
+      "truth_events": 242,
+      "variant": "invalid"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.2,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1200.0,
+          "dependency_deadline": 300.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "standing_primary",
+          "intent": "advance",
+          "local_condition": false,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 0.0,
+          "target_node": "D",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 1.70849046841562,
+        "mission": "complete",
+        "spent": 110.0,
+        "xy": [
+          0.12,
+          0.08
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 109,
+      "time": 1800.0,
+      "truth_events": 401,
+      "variant": "condition"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 700.0,
+          "id": "input_opportunity_platoon_5",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 685.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 48.4059586636414,
+        "distance": 0.8,
+        "goal": {
+          "actor": "platoon",
+          "continuing_fire": true,
+          "continuing_movement": false,
+          "deadline": 1900.0,
+          "dependency_deadline": 1000.0,
+          "effective_incoming_contact": true,
+          "execution": "STOPPED",
+          "fire_reason": "",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_opportunity_platoon_5",
+          "intent": "advance",
+          "local_condition": false,
+          "radius_km": 0.03,
+          "reason": "suppression",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 700.0,
+          "target_node": "D",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 1.31466352809752,
+        "mission": "complete",
+        "spent": 61.5940413363586,
+        "xy": [
+          0.12,
+          0.08
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 109,
+      "time": 1800.0,
+      "truth_events": 392,
+      "variant": "slow_reports"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 295.0,
+          "id": "input_opportunity_platoon_2",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 280.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 110.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "platoon",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1495.0,
+          "dependency_deadline": 595.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": 295.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_opportunity_platoon_2",
+          "intent": "hold",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 295.0,
+          "target_node": "B",
+          "terminal_reason": "local_hold_satisfied",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.0,
+        "mission": "complete",
+        "spent": 0.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 109,
+      "time": 1800.0,
+      "truth_events": 278,
+      "variant": "wait"
+    },
+    {
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.959034101917566,
+        "injury": 0.0409658980824336,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "primary": {
+        "ammo": 70.4529762983717,
+        "distance": 0.42,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1395.0,
+          "dependency_deadline": 495.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "withdraw",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 195.0,
+          "target_node": "C",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.491590776989204,
+        "mission": "complete",
+        "spent": 39.5470237016283,
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 109,
+      "time": 1800.0,
+      "truth_events": 415,
+      "variant": "autonomous"
+    },
+    {
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.966532505224147,
+        "injury": 0.0334674947758528,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "primary": {
+        "ammo": 70.2602169002121,
+        "distance": 0.42,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1395.0,
+          "dependency_deadline": 495.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "withdraw",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 195.0,
+          "target_node": "C",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.509417924533483,
+        "mission": "complete",
+        "spent": 39.7397830997879,
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 109,
+      "time": 1800.0,
+      "truth_events": 437,
+      "variant": "valid"
+    },
+    {
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.959034101917566,
+        "injury": 0.0409658980824336,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "primary": {
+        "ammo": 70.4529762983717,
+        "distance": 0.42,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1395.0,
+          "dependency_deadline": 495.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "withdraw",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 195.0,
+          "target_node": "C",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.491590776989204,
+        "mission": "complete",
+        "spent": 39.5470237016283,
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 109,
+      "time": 1800.0,
+      "truth_events": 415,
+      "variant": "invalid"
+    },
+    {
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.855022553675618,
+        "injury": 0.144977446324382,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.42,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1395.0,
+          "dependency_deadline": 495.0,
+          "effective_incoming_contact": true,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "withdraw",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 195.0,
+          "target_node": "C",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 1.73972935589259,
+        "mission": "complete",
+        "spent": 110.0,
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 109,
+      "time": 1800.0,
+      "truth_events": 596,
+      "variant": "condition"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 80.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1200.0,
+          "dependency_deadline": 300.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "standing_primary",
+          "intent": "advance",
+          "local_condition": false,
+          "radius_km": 0.03,
+          "reason": "route_blocked",
+          "route_complete": false,
+          "standing_rule": "hold_and_fire",
+          "started_at": 0.0,
+          "target_node": "D",
+          "terminal_reason": "deadline_exceeded",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.0,
+        "mission": "failed",
+        "spent": 0.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 71,
+      "time": 1800.0,
+      "truth_events": 240,
+      "variant": "no_supply"
+    },
+    {
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1225.0,
+          "dependency_deadline": 325.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "advance",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 25.0,
+          "target_node": "B",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.903953819570151,
+        "mission": "complete",
+        "spent": 110.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 71,
+      "time": 1800.0,
+      "truth_events": 360,
+      "variant": "valid"
+    },
+    {
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1225.0,
+          "dependency_deadline": 325.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "advance",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 25.0,
+          "target_node": "B",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.903953819570151,
+        "mission": "complete",
+        "spent": 110.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 1,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 71,
+      "time": 1800.0,
+      "truth_events": 360,
+      "variant": "valid"
+    },
+    {
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1225.0,
+          "dependency_deadline": 325.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "advance",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 25.0,
+          "target_node": "B",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.903953819570151,
+        "mission": "complete",
+        "spent": 110.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 7,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 71,
+      "time": 1800.0,
+      "truth_events": 360,
+      "variant": "valid"
+    },
+    {
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1225.0,
+          "dependency_deadline": 325.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "advance",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 25.0,
+          "target_node": "B",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.903953819570151,
+        "mission": "complete",
+        "spent": 110.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 31,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 71,
+      "time": 1800.0,
+      "truth_events": 360,
+      "variant": "valid"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 295.0,
+          "id": "input_opportunity_platoon_2",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 280.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 31.2063144844787,
+        "distance": 0.8,
+        "goal": {
+          "actor": "platoon",
+          "continuing_fire": true,
+          "continuing_movement": false,
+          "deadline": 1495.0,
+          "dependency_deadline": 595.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_opportunity_platoon_2",
+          "intent": "advance",
+          "local_condition": false,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 295.0,
+          "target_node": "D",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 1.69704751549569,
+        "mission": "complete",
+        "spent": 78.7936855155214,
+        "xy": [
+          0.12,
+          0.08
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 71,
+      "time": 1800.0,
+      "truth_events": 445,
+      "variant": "valid"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 295.0,
+          "id": "input_opportunity_platoon_2",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 280.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 31.2063144844787,
+        "distance": 0.8,
+        "goal": {
+          "actor": "platoon",
+          "continuing_fire": true,
+          "continuing_movement": false,
+          "deadline": 1495.0,
+          "dependency_deadline": 595.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_opportunity_platoon_2",
+          "intent": "advance",
+          "local_condition": false,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 295.0,
+          "target_node": "D",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 1.69704751549569,
+        "mission": "complete",
+        "spent": 78.7936855155214,
+        "xy": [
+          0.12,
+          0.08
+        ]
+      },
+      "quota": 1,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 71,
+      "time": 1800.0,
+      "truth_events": 445,
+      "variant": "valid"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 295.0,
+          "id": "input_opportunity_platoon_2",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 280.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 31.2063144844787,
+        "distance": 0.8,
+        "goal": {
+          "actor": "platoon",
+          "continuing_fire": true,
+          "continuing_movement": false,
+          "deadline": 1495.0,
+          "dependency_deadline": 595.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_opportunity_platoon_2",
+          "intent": "advance",
+          "local_condition": false,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 295.0,
+          "target_node": "D",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 1.69704751549569,
+        "mission": "complete",
+        "spent": 78.7936855155214,
+        "xy": [
+          0.12,
+          0.08
+        ]
+      },
+      "quota": 7,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 71,
+      "time": 1800.0,
+      "truth_events": 445,
+      "variant": "valid"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 295.0,
+          "id": "input_opportunity_platoon_2",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 280.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 31.2063144844787,
+        "distance": 0.8,
+        "goal": {
+          "actor": "platoon",
+          "continuing_fire": true,
+          "continuing_movement": false,
+          "deadline": 1495.0,
+          "dependency_deadline": 595.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_opportunity_platoon_2",
+          "intent": "advance",
+          "local_condition": false,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 295.0,
+          "target_node": "D",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 1.69704751549569,
+        "mission": "complete",
+        "spent": 78.7936855155214,
+        "xy": [
+          0.12,
+          0.08
+        ]
+      },
+      "quota": 31,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 71,
+      "time": 1800.0,
+      "truth_events": 445,
+      "variant": "valid"
+    },
+    {
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.966762109348939,
+        "injury": 0.0332378906510615,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "primary": {
+        "ammo": 70.2572767931813,
+        "distance": 0.42,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1395.0,
+          "dependency_deadline": 495.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "withdraw",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 195.0,
+          "target_node": "C",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.505938184408598,
+        "mission": "complete",
+        "spent": 39.7427232068187,
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 71,
+      "time": 1800.0,
+      "truth_events": 439,
+      "variant": "valid"
+    },
+    {
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.966762109348939,
+        "injury": 0.0332378906510615,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "primary": {
+        "ammo": 70.2572767931813,
+        "distance": 0.42,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1395.0,
+          "dependency_deadline": 495.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "withdraw",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 195.0,
+          "target_node": "C",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.505938184408598,
+        "mission": "complete",
+        "spent": 39.7427232068187,
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "quota": 1,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 71,
+      "time": 1800.0,
+      "truth_events": 439,
+      "variant": "valid"
+    },
+    {
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.966762109348939,
+        "injury": 0.0332378906510615,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "primary": {
+        "ammo": 70.2572767931813,
+        "distance": 0.42,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1395.0,
+          "dependency_deadline": 495.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "withdraw",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 195.0,
+          "target_node": "C",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.505938184408598,
+        "mission": "complete",
+        "spent": 39.7427232068187,
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "quota": 7,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 71,
+      "time": 1800.0,
+      "truth_events": 439,
+      "variant": "valid"
+    },
+    {
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.966762109348939,
+        "injury": 0.0332378906510615,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "primary": {
+        "ammo": 70.2572767931813,
+        "distance": 0.42,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1395.0,
+          "dependency_deadline": 495.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "withdraw",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 195.0,
+          "target_node": "C",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.505938184408598,
+        "mission": "complete",
+        "spent": 39.7427232068187,
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "quota": 31,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 71,
+      "time": 1800.0,
+      "truth_events": 439,
+      "variant": "valid"
+    },
+    {
+      "commands": [],
+      "personal": {},
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.0,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1200.0,
+          "dependency_deadline": 300.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": 0.0,
+          "hold_seconds": 60.0,
+          "input_ref": "standing_primary",
+          "intent": "hold",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 0.0,
+          "target_node": "A",
+          "terminal_reason": "local_hold_satisfied",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.82685772208161,
+        "mission": "complete",
+        "spent": 110.0,
+        "xy": [
+          0.0,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 347,
+      "time": 1800.0,
+      "truth_events": 304,
+      "variant": "autonomous"
+    },
+    {
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1225.0,
+          "dependency_deadline": 325.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "advance",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 25.0,
+          "target_node": "B",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.911099011348137,
+        "mission": "complete",
+        "spent": 110.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 347,
+      "time": 1800.0,
+      "truth_events": 360,
+      "variant": "valid"
+    },
+    {
+      "commands": [],
+      "personal": {},
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.0,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1200.0,
+          "dependency_deadline": 300.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": 0.0,
+          "hold_seconds": 60.0,
+          "input_ref": "standing_primary",
+          "intent": "hold",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 0.0,
+          "target_node": "A",
+          "terminal_reason": "local_hold_satisfied",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.82685772208161,
+        "mission": "complete",
+        "spent": 110.0,
+        "xy": [
+          0.0,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 347,
+      "time": 1800.0,
+      "truth_events": 304,
+      "variant": "invalid"
+    },
+    {
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1225.0,
+          "dependency_deadline": 325.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "advance",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 25.0,
+          "target_node": "B",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.0,
+        "mission": "complete",
+        "spent": 30.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 347,
+      "time": 1800.0,
+      "truth_events": 230,
+      "variant": "condition"
+    },
+    {
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_company",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "company",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1225.0,
+          "dependency_deadline": 325.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_company",
+          "intent": "advance",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 25.0,
+          "target_node": "B",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.911146637834016,
+        "mission": "complete",
+        "spent": 110.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 347,
+      "time": 1800.0,
+      "truth_events": 375,
+      "variant": "reserve"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 110.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1200.0,
+          "dependency_deadline": 300.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "standing_primary",
+          "intent": "advance",
+          "local_condition": false,
+          "radius_km": 0.03,
+          "reason": "route_blocked",
+          "route_complete": false,
+          "standing_rule": "hold_and_fire",
+          "started_at": 0.0,
+          "target_node": "D",
+          "terminal_reason": "deadline_exceeded",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.0,
+        "mission": "failed",
+        "spent": 0.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 347,
+      "time": 1800.0,
+      "truth_events": 242,
+      "variant": "autonomous"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 295.0,
+          "id": "input_opportunity_platoon_2",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 280.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 31.3082177587156,
+        "distance": 0.8,
+        "goal": {
+          "actor": "platoon",
+          "continuing_fire": true,
+          "continuing_movement": false,
+          "deadline": 1495.0,
+          "dependency_deadline": 595.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_opportunity_platoon_2",
+          "intent": "advance",
+          "local_condition": false,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 295.0,
+          "target_node": "D",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 1.7104658518285,
+        "mission": "complete",
+        "spent": 78.6917822412843,
+        "xy": [
+          0.12,
+          0.08
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 347,
+      "time": 1800.0,
+      "truth_events": 445,
+      "variant": "valid"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 110.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1200.0,
+          "dependency_deadline": 300.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "standing_primary",
+          "intent": "advance",
+          "local_condition": false,
+          "radius_km": 0.03,
+          "reason": "route_blocked",
+          "route_complete": false,
+          "standing_rule": "hold_and_fire",
+          "started_at": 0.0,
+          "target_node": "D",
+          "terminal_reason": "deadline_exceeded",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.0,
+        "mission": "failed",
+        "spent": 0.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 347,
+      "time": 1800.0,
+      "truth_events": 242,
+      "variant": "invalid"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.2,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1200.0,
+          "dependency_deadline": 300.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "standing_primary",
+          "intent": "advance",
+          "local_condition": false,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 0.0,
+          "target_node": "D",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 1.70993503667311,
+        "mission": "complete",
+        "spent": 110.0,
+        "xy": [
+          0.12,
+          0.08
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 347,
+      "time": 1800.0,
+      "truth_events": 400,
+      "variant": "condition"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 700.0,
+          "id": "input_opportunity_platoon_5",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 685.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 48.3847254386589,
+        "distance": 0.8,
+        "goal": {
+          "actor": "platoon",
+          "continuing_fire": true,
+          "continuing_movement": false,
+          "deadline": 1900.0,
+          "dependency_deadline": 1000.0,
+          "effective_incoming_contact": true,
+          "execution": "STOPPED",
+          "fire_reason": "",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_opportunity_platoon_5",
+          "intent": "advance",
+          "local_condition": false,
+          "radius_km": 0.03,
+          "reason": "suppression",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 700.0,
+          "target_node": "D",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 1.31507979827794,
+        "mission": "complete",
+        "spent": 61.6152745613412,
+        "xy": [
+          0.12,
+          0.08
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 347,
+      "time": 1800.0,
+      "truth_events": 392,
+      "variant": "slow_reports"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 295.0,
+          "id": "input_opportunity_platoon_2",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 280.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 110.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "platoon",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1495.0,
+          "dependency_deadline": 595.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": 295.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_opportunity_platoon_2",
+          "intent": "hold",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 295.0,
+          "target_node": "B",
+          "terminal_reason": "local_hold_satisfied",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.0,
+        "mission": "complete",
+        "spent": 0.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 347,
+      "time": 1800.0,
+      "truth_events": 278,
+      "variant": "wait"
+    },
+    {
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.958992895530591,
+        "injury": 0.041007104469409,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "primary": {
+        "ammo": 70.45334301631,
+        "distance": 0.42,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1395.0,
+          "dependency_deadline": 495.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "withdraw",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 195.0,
+          "target_node": "C",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.492085253632908,
+        "mission": "complete",
+        "spent": 39.54665698369,
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 347,
+      "time": 1800.0,
+      "truth_events": 413,
+      "variant": "autonomous"
+    },
+    {
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.966496069026004,
+        "injury": 0.0335039309739962,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "primary": {
+        "ammo": 70.260569698035,
+        "distance": 0.42,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1395.0,
+          "dependency_deadline": 495.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "withdraw",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 195.0,
+          "target_node": "C",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.509941008776859,
+        "mission": "complete",
+        "spent": 39.739430301965,
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 347,
+      "time": 1800.0,
+      "truth_events": 439,
+      "variant": "valid"
+    },
+    {
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.958992895530591,
+        "injury": 0.041007104469409,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "primary": {
+        "ammo": 70.45334301631,
+        "distance": 0.42,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1395.0,
+          "dependency_deadline": 495.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "withdraw",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 195.0,
+          "target_node": "C",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.492085253632908,
+        "mission": "complete",
+        "spent": 39.54665698369,
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 347,
+      "time": 1800.0,
+      "truth_events": 413,
+      "variant": "invalid"
+    },
+    {
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.854909268383135,
+        "injury": 0.145090731616865,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.42,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1395.0,
+          "dependency_deadline": 495.0,
+          "effective_incoming_contact": true,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "withdraw",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 195.0,
+          "target_node": "C",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 1.74108877940237,
+        "mission": "complete",
+        "spent": 110.0,
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 347,
+      "time": 1800.0,
+      "truth_events": 594,
+      "variant": "condition"
+    },
+    {
+      "commands": [],
+      "personal": {},
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.0,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1200.0,
+          "dependency_deadline": 300.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": 0.0,
+          "hold_seconds": 60.0,
+          "input_ref": "standing_primary",
+          "intent": "hold",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 0.0,
+          "target_node": "A",
+          "terminal_reason": "local_hold_satisfied",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.830085898121111,
+        "mission": "complete",
+        "spent": 110.0,
+        "xy": [
+          0.0,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 2027,
+      "time": 1800.0,
+      "truth_events": 302,
+      "variant": "autonomous"
+    },
+    {
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1225.0,
+          "dependency_deadline": 325.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "advance",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 25.0,
+          "target_node": "B",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.914653403181381,
+        "mission": "complete",
+        "spent": 110.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 2027,
+      "time": 1800.0,
+      "truth_events": 362,
+      "variant": "valid"
+    },
+    {
+      "commands": [],
+      "personal": {},
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.0,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1200.0,
+          "dependency_deadline": 300.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": 0.0,
+          "hold_seconds": 60.0,
+          "input_ref": "standing_primary",
+          "intent": "hold",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 0.0,
+          "target_node": "A",
+          "terminal_reason": "local_hold_satisfied",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.830085898121111,
+        "mission": "complete",
+        "spent": 110.0,
+        "xy": [
+          0.0,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 2027,
+      "time": 1800.0,
+      "truth_events": 302,
+      "variant": "invalid"
+    },
+    {
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1225.0,
+          "dependency_deadline": 325.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "advance",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 25.0,
+          "target_node": "B",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.0,
+        "mission": "complete",
+        "spent": 30.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 2027,
+      "time": 1800.0,
+      "truth_events": 230,
+      "variant": "condition"
+    },
+    {
+      "commands": [
+        {
+          "due": 25.0,
+          "id": "input_choice_company",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 10.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "company",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1225.0,
+          "dependency_deadline": 325.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_company",
+          "intent": "advance",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 25.0,
+          "target_node": "B",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.914701413480291,
+        "mission": "complete",
+        "spent": 110.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 2027,
+      "time": 1800.0,
+      "truth_events": 377,
+      "variant": "reserve"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 110.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1200.0,
+          "dependency_deadline": 300.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "standing_primary",
+          "intent": "advance",
+          "local_condition": false,
+          "radius_km": 0.03,
+          "reason": "route_blocked",
+          "route_complete": false,
+          "standing_rule": "hold_and_fire",
+          "started_at": 0.0,
+          "target_node": "D",
+          "terminal_reason": "deadline_exceeded",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.0,
+        "mission": "failed",
+        "spent": 0.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 2027,
+      "time": 1800.0,
+      "truth_events": 242,
+      "variant": "autonomous"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 295.0,
+          "id": "input_opportunity_platoon_2",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 280.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 31.3961537140171,
+        "distance": 0.8,
+        "goal": {
+          "actor": "platoon",
+          "continuing_fire": true,
+          "continuing_movement": false,
+          "deadline": 1495.0,
+          "dependency_deadline": 595.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_opportunity_platoon_2",
+          "intent": "advance",
+          "local_condition": false,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 295.0,
+          "target_node": "D",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 1.71714058467042,
+        "mission": "complete",
+        "spent": 78.6038462859829,
+        "xy": [
+          0.12,
+          0.08
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 2027,
+      "time": 1800.0,
+      "truth_events": 445,
+      "variant": "valid"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 110.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1200.0,
+          "dependency_deadline": 300.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "standing_primary",
+          "intent": "advance",
+          "local_condition": false,
+          "radius_km": 0.03,
+          "reason": "route_blocked",
+          "route_complete": false,
+          "standing_rule": "hold_and_fire",
+          "started_at": 0.0,
+          "target_node": "D",
+          "terminal_reason": "deadline_exceeded",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.0,
+        "mission": "failed",
+        "spent": 0.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 2027,
+      "time": 1800.0,
+      "truth_events": 242,
+      "variant": "invalid"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.2,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1200.0,
+          "dependency_deadline": 300.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "standing_primary",
+          "intent": "advance",
+          "local_condition": false,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 0.0,
+          "target_node": "D",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 1.71661123351353,
+        "mission": "complete",
+        "spent": 110.0,
+        "xy": [
+          0.12,
+          0.08
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 2027,
+      "time": 1800.0,
+      "truth_events": 398,
+      "variant": "condition"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 700.0,
+          "id": "input_opportunity_platoon_5",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 685.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 48.4340877061652,
+        "distance": 0.8,
+        "goal": {
+          "actor": "platoon",
+          "continuing_fire": true,
+          "continuing_movement": false,
+          "deadline": 1900.0,
+          "dependency_deadline": 1000.0,
+          "effective_incoming_contact": true,
+          "execution": "STOPPED",
+          "fire_reason": "",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_opportunity_platoon_5",
+          "intent": "advance",
+          "local_condition": false,
+          "radius_km": 0.03,
+          "reason": "suppression",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 700.0,
+          "target_node": "D",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 1.32086342853346,
+        "mission": "complete",
+        "spent": 61.5659122938348,
+        "xy": [
+          0.12,
+          0.08
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 2027,
+      "time": 1800.0,
+      "truth_events": 392,
+      "variant": "slow_reports"
+    },
+    {
+      "commands": [
+        {
+          "due": 15.0,
+          "id": "old_authority",
+          "outcome": {
+            "ok": false,
+            "reason": "wrong_owner_or_layer"
+          },
+          "sent": 0.0,
+          "status": "REJECTED"
+        },
+        {
+          "due": 295.0,
+          "id": "input_opportunity_platoon_2",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 280.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {},
+      "primary": {
+        "ammo": 110.0,
+        "distance": 0.12,
+        "goal": {
+          "actor": "platoon",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1495.0,
+          "dependency_deadline": 595.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": 295.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_opportunity_platoon_2",
+          "intent": "hold",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 295.0,
+          "target_node": "B",
+          "terminal_reason": "local_hold_satisfied",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.0,
+        "mission": "complete",
+        "spent": 0.0,
+        "xy": [
+          0.12,
+          0.0
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 2027,
+      "time": 1800.0,
+      "truth_events": 278,
+      "variant": "wait"
+    },
+    {
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.958844084966574,
+        "injury": 0.0411559150334259,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "primary": {
+        "ammo": 70.4550432026216,
+        "distance": 0.42,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1395.0,
+          "dependency_deadline": 495.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "withdraw",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 195.0,
+          "target_node": "C",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.49387098040111,
+        "mission": "complete",
+        "spent": 39.5449567973784,
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 2027,
+      "time": 1800.0,
+      "truth_events": 413,
+      "variant": "autonomous"
+    },
+    {
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.966376836293456,
+        "injury": 0.0336231637065439,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "primary": {
+        "ammo": 70.2622105420229,
+        "distance": 0.42,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1395.0,
+          "dependency_deadline": 495.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "withdraw",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 195.0,
+          "target_node": "C",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.511777027596283,
+        "mission": "complete",
+        "spent": 39.7377894579771,
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 2027,
+      "time": 1800.0,
+      "truth_events": 439,
+      "variant": "valid"
+    },
+    {
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.958844084966574,
+        "injury": 0.0411559150334259,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "primary": {
+        "ammo": 70.4550432026216,
+        "distance": 0.42,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1395.0,
+          "dependency_deadline": 495.0,
+          "effective_incoming_contact": false,
+          "execution": "STOPPED",
+          "fire_reason": "no_effective_target",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "withdraw",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 195.0,
+          "target_node": "C",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 0.49387098040111,
+        "mission": "complete",
+        "spent": 39.5449567973784,
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 2027,
+      "time": 1800.0,
+      "truth_events": 413,
+      "variant": "invalid"
+    },
+    {
+      "commands": [
+        {
+          "due": 195.0,
+          "id": "input_choice_squad",
+          "outcome": {
+            "ok": true,
+            "reason": "executed_existing_role_input"
+          },
+          "sent": 180.0,
+          "status": "EXECUTED"
+        }
+      ],
+      "personal": {
+        "action_ref": "",
+        "actionable": true,
+        "actor_ref": "soldier",
+        "cover_ref": "",
+        "health": 0.854367582592909,
+        "injury": 0.145632417407091,
+        "state": "FOLLOWING",
+        "time": 1800.0,
+        "unit_ref": "unit_000",
+        "view": "PERSON_VISIBLE",
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "primary": {
+        "ammo": 0.0,
+        "distance": 0.42,
+        "goal": {
+          "actor": "squad",
+          "continuing_fire": false,
+          "continuing_movement": false,
+          "deadline": 1395.0,
+          "dependency_deadline": 495.0,
+          "effective_incoming_contact": true,
+          "execution": "STOPPED",
+          "fire_reason": "ammunition_exhausted",
+          "held_since": -1.0,
+          "hold_seconds": 60.0,
+          "input_ref": "input_choice_squad",
+          "intent": "withdraw",
+          "local_condition": true,
+          "radius_km": 0.03,
+          "reason": "",
+          "route_complete": true,
+          "standing_rule": "hold_and_fire",
+          "started_at": 195.0,
+          "target_node": "C",
+          "terminal_reason": "route_arrived",
+          "unit_id": "unit_000",
+          "version": "land-gameplay-slice-v1"
+        },
+        "loss": 1.74758900888509,
+        "mission": "complete",
+        "spent": 110.0,
+        "xy": [
+          0.0,
+          0.3
+        ]
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 2027,
+      "time": 1800.0,
+      "truth_events": 594,
+      "variant": "condition"
+    }
+  ],
+  "long_rows": [
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 864,
+        "goal_commits": 216,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 18
+      },
+      "message_count": 20,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 71,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3716,
+      "world_counters": {
+        "areas_examined": 2256,
+        "contacts_resolved": 5142,
+        "events_processed": 10,
+        "segments": 2151,
+        "units_examined": 84056
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 864,
+        "goal_commits": 216,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 18
+      },
+      "message_count": 20,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 1,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 71,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3716,
+      "world_counters": {
+        "areas_examined": 2256,
+        "contacts_resolved": 5142,
+        "events_processed": 10,
+        "segments": 2151,
+        "units_examined": 88776
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 864,
+        "goal_commits": 216,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 18
+      },
+      "message_count": 20,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 7,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 71,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3716,
+      "world_counters": {
+        "areas_examined": 2256,
+        "contacts_resolved": 5142,
+        "events_processed": 10,
+        "segments": 2151,
+        "units_examined": 88776
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 864,
+        "goal_commits": 216,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 18
+      },
+      "message_count": 20,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 31,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 71,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3716,
+      "world_counters": {
+        "areas_examined": 2256,
+        "contacts_resolved": 5142,
+        "events_processed": 10,
+        "segments": 2151,
+        "units_examined": 88776
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 864,
+        "goal_commits": 216,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 18
+      },
+      "message_count": 20,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 109,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3681,
+      "world_counters": {
+        "areas_examined": 2136,
+        "contacts_resolved": 4902,
+        "events_processed": 10,
+        "segments": 2031,
+        "units_examined": 79976
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 864,
+        "goal_commits": 216,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 18
+      },
+      "message_count": 20,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 1,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 109,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3681,
+      "world_counters": {
+        "areas_examined": 2136,
+        "contacts_resolved": 4902,
+        "events_processed": 10,
+        "segments": 2031,
+        "units_examined": 84456
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 864,
+        "goal_commits": 216,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 18
+      },
+      "message_count": 20,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 7,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 109,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3681,
+      "world_counters": {
+        "areas_examined": 2136,
+        "contacts_resolved": 4902,
+        "events_processed": 10,
+        "segments": 2031,
+        "units_examined": 84456
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 864,
+        "goal_commits": 216,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 18
+      },
+      "message_count": 20,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 31,
+      "remote_groups": 2,
+      "scene": "S1",
+      "seed": 109,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3681,
+      "world_counters": {
+        "areas_examined": 2136,
+        "contacts_resolved": 4902,
+        "events_processed": 10,
+        "segments": 2031,
+        "units_examined": 84456
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 1176,
+        "goal_commits": 294,
+        "goal_inputs": 3,
+        "timers_processed": 4,
+        "transitions": 24
+      },
+      "message_count": 31,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 71,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3822,
+      "world_counters": {
+        "areas_examined": 2311,
+        "contacts_resolved": 4790,
+        "events_processed": 24,
+        "segments": 2167,
+        "units_examined": 82872
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 1176,
+        "goal_commits": 294,
+        "goal_inputs": 3,
+        "timers_processed": 4,
+        "transitions": 24
+      },
+      "message_count": 31,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 1,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 71,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3822,
+      "world_counters": {
+        "areas_examined": 2311,
+        "contacts_resolved": 4790,
+        "events_processed": 24,
+        "segments": 2167,
+        "units_examined": 87784
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 1176,
+        "goal_commits": 294,
+        "goal_inputs": 3,
+        "timers_processed": 4,
+        "transitions": 24
+      },
+      "message_count": 31,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 7,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 71,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3822,
+      "world_counters": {
+        "areas_examined": 2311,
+        "contacts_resolved": 4790,
+        "events_processed": 24,
+        "segments": 2167,
+        "units_examined": 87784
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 1176,
+        "goal_commits": 294,
+        "goal_inputs": 3,
+        "timers_processed": 4,
+        "transitions": 24
+      },
+      "message_count": 31,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 31,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 71,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3822,
+      "world_counters": {
+        "areas_examined": 2311,
+        "contacts_resolved": 4790,
+        "events_processed": 24,
+        "segments": 2167,
+        "units_examined": 87784
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 1176,
+        "goal_commits": 294,
+        "goal_inputs": 3,
+        "timers_processed": 4,
+        "transitions": 24
+      },
+      "message_count": 31,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 109,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3786,
+      "world_counters": {
+        "areas_examined": 2191,
+        "contacts_resolved": 4550,
+        "events_processed": 24,
+        "segments": 2047,
+        "units_examined": 78792
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 1176,
+        "goal_commits": 294,
+        "goal_inputs": 3,
+        "timers_processed": 4,
+        "transitions": 24
+      },
+      "message_count": 31,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 1,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 109,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3786,
+      "world_counters": {
+        "areas_examined": 2191,
+        "contacts_resolved": 4550,
+        "events_processed": 24,
+        "segments": 2047,
+        "units_examined": 83464
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 1176,
+        "goal_commits": 294,
+        "goal_inputs": 3,
+        "timers_processed": 4,
+        "transitions": 24
+      },
+      "message_count": 31,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 7,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 109,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3786,
+      "world_counters": {
+        "areas_examined": 2191,
+        "contacts_resolved": 4550,
+        "events_processed": 24,
+        "segments": 2047,
+        "units_examined": 83464
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 1176,
+        "goal_commits": 294,
+        "goal_inputs": 3,
+        "timers_processed": 4,
+        "transitions": 24
+      },
+      "message_count": 31,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "quota": 31,
+      "remote_groups": 2,
+      "scene": "S2",
+      "seed": 109,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3786,
+      "world_counters": {
+        "areas_examined": 2191,
+        "contacts_resolved": 4550,
+        "events_processed": 24,
+        "segments": 2047,
+        "units_examined": 83464
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 2372,
+        "goal_commits": 593,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 23
+      },
+      "message_count": 25,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 2,
+        "local_actions": 1,
+        "member_allocations": 48,
+        "member_preparations": 293,
+        "member_settlements": 293
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 71,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3947,
+      "world_counters": {
+        "areas_examined": 2444,
+        "contacts_resolved": 5416,
+        "events_processed": 15,
+        "segments": 2151,
+        "units_examined": 94998
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 2372,
+        "goal_commits": 593,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 23
+      },
+      "message_count": 25,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 2,
+        "local_actions": 1,
+        "member_allocations": 48,
+        "member_preparations": 293,
+        "member_settlements": 293
+      },
+      "quota": 1,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 71,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3947,
+      "world_counters": {
+        "areas_examined": 2444,
+        "contacts_resolved": 5416,
+        "events_processed": 15,
+        "segments": 2151,
+        "units_examined": 100470
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 2372,
+        "goal_commits": 593,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 23
+      },
+      "message_count": 25,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 2,
+        "local_actions": 1,
+        "member_allocations": 48,
+        "member_preparations": 293,
+        "member_settlements": 293
+      },
+      "quota": 7,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 71,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3947,
+      "world_counters": {
+        "areas_examined": 2444,
+        "contacts_resolved": 5416,
+        "events_processed": 15,
+        "segments": 2151,
+        "units_examined": 100470
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 2372,
+        "goal_commits": 593,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 23
+      },
+      "message_count": 25,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 2,
+        "local_actions": 1,
+        "member_allocations": 48,
+        "member_preparations": 293,
+        "member_settlements": 293
+      },
+      "quota": 31,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 71,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3947,
+      "world_counters": {
+        "areas_examined": 2444,
+        "contacts_resolved": 5416,
+        "events_processed": 15,
+        "segments": 2151,
+        "units_examined": 100470
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 2364,
+        "goal_commits": 591,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 23
+      },
+      "message_count": 25,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 2,
+        "local_actions": 1,
+        "member_allocations": 48,
+        "member_preparations": 292,
+        "member_settlements": 292
+      },
+      "quota": 0,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 109,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3905,
+      "world_counters": {
+        "areas_examined": 2323,
+        "contacts_resolved": 5172,
+        "events_processed": 15,
+        "segments": 2031,
+        "units_examined": 90842
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 2364,
+        "goal_commits": 591,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 23
+      },
+      "message_count": 25,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 2,
+        "local_actions": 1,
+        "member_allocations": 48,
+        "member_preparations": 292,
+        "member_settlements": 292
+      },
+      "quota": 1,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 109,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3905,
+      "world_counters": {
+        "areas_examined": 2323,
+        "contacts_resolved": 5172,
+        "events_processed": 15,
+        "segments": 2031,
+        "units_examined": 96070
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 2364,
+        "goal_commits": 591,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 23
+      },
+      "message_count": 25,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 2,
+        "local_actions": 1,
+        "member_allocations": 48,
+        "member_preparations": 292,
+        "member_settlements": 292
+      },
+      "quota": 7,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 109,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3905,
+      "world_counters": {
+        "areas_examined": 2323,
+        "contacts_resolved": 5172,
+        "events_processed": 15,
+        "segments": 2031,
+        "units_examined": 96070
+      }
+    },
+    {
+      "active_areas": 0,
+      "goal_work": {
+        "goal_candidate_reads": 2364,
+        "goal_commits": 591,
+        "goal_inputs": 3,
+        "timers_processed": 5,
+        "transitions": 23
+      },
+      "message_count": 25,
+      "mission_count": 13,
+      "pending": 0,
+      "person_work": {
+        "action_events": 2,
+        "local_actions": 1,
+        "member_allocations": 48,
+        "member_preparations": 292,
+        "member_settlements": 292
+      },
+      "quota": 31,
+      "remote_groups": 2,
+      "scene": "S3",
+      "seed": 109,
+      "time": 86400.0,
+      "trace_dropped": 0,
+      "trace_records": 3905,
+      "world_counters": {
+        "areas_examined": 2323,
+        "contacts_resolved": 5172,
+        "events_processed": 15,
+        "segments": 2031,
+        "units_examined": 96070
+      }
+    }
+  ],
+  "physical_invalid_input_equals_autonomous": true,
+  "comparison_note": "Equality assertions passed in actual 1800s scripts; instrumentation counters excluded from formal comparison, not world/knowledge/ledger facts."
+}

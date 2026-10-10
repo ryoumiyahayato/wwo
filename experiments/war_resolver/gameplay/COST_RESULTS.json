@@ -1,0 +1,2289 @@
+{
+  "runtime_head": "3052a0c142b4c97b53e5600ef772ac1bf9887ac0",
+  "samples_per_case": 5,
+  "warmup_per_case": 1,
+  "order": "forward/reverse interleaved",
+  "clock": "Godot microseconds, wall clock; no frame budget gate",
+  "samples": [
+    {
+      "active_representations": 6,
+      "admission_usec": 359,
+      "advance_usec": 76969,
+      "built_static_memory_delta_bytes": 824500,
+      "case": "off",
+      "cleanup_usec": 403,
+      "construction_usec": 3617,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 630,
+        "events_processed": 0,
+        "segments": 63,
+        "units_examined": 8698
+      },
+      "goal_commit_usec": 0,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 0,
+      "new_goal_work": {
+        "goal_candidate_reads": 0,
+        "goal_commits": 0,
+        "goal_inputs": 0,
+        "timers_processed": 0,
+        "transitions": 0
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 864,
+      "output_serialization_usec": 37,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 353,
+      "sample": 0,
+      "summary_state_bytes": 4188,
+      "warmup": true,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 521,
+      "advance_usec": 80963,
+      "built_static_memory_delta_bytes": 860716,
+      "case": "goals",
+      "cleanup_usec": 403,
+      "construction_usec": 3595,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 630,
+        "events_processed": 2,
+        "segments": 63,
+        "units_examined": 8698
+      },
+      "goal_commit_usec": 3013,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 1,
+      "new_goal_work": {
+        "goal_candidate_reads": 264,
+        "goal_commits": 66,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 872,
+      "output_serialization_usec": 39,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 331,
+      "sample": 0,
+      "summary_state_bytes": 4196,
+      "warmup": true,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 560,
+      "advance_usec": 87195,
+      "built_static_memory_delta_bytes": 109241048,
+      "case": "sleeping",
+      "cleanup_usec": 85016,
+      "construction_usec": 562651,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 630,
+        "events_processed": 2,
+        "segments": 63,
+        "units_examined": 8698
+      },
+      "goal_commit_usec": 3215,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 0,
+      "new_goal_work": {
+        "goal_candidate_reads": 264,
+        "goal_commits": 66,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 884,
+      "output_serialization_usec": 60,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 46342,
+      "sample": 0,
+      "summary_state_bytes": 4196,
+      "warmup": true,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 866,
+      "advance_usec": 97395,
+      "built_static_memory_delta_bytes": 860716,
+      "case": "senior",
+      "cleanup_usec": 393,
+      "construction_usec": 5364,
+      "core_work": {
+        "areas_examined": 136,
+        "contacts_resolved": 680,
+        "events_processed": 5,
+        "segments": 68,
+        "units_examined": 9388
+      },
+      "goal_commit_usec": 6394,
+      "input_issue_usec": 271,
+      "intent_delivery_usec": 425,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 0,
+      "new_goal_work": {
+        "goal_candidate_reads": 560,
+        "goal_commits": 140,
+        "goal_inputs": 3,
+        "timers_processed": 4,
+        "transitions": 18
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 879,
+      "output_serialization_usec": 35,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 332,
+      "sample": 0,
+      "summary_state_bytes": 4254,
+      "warmup": true,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 487,
+      "advance_usec": 86925,
+      "built_static_memory_delta_bytes": 863164,
+      "case": "person",
+      "cleanup_usec": 430,
+      "construction_usec": 3574,
+      "core_work": {
+        "areas_examined": 128,
+        "contacts_resolved": 640,
+        "events_processed": 3,
+        "segments": 64,
+        "units_examined": 8836
+      },
+      "goal_commit_usec": 3219,
+      "input_issue_usec": 140,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 0,
+      "new_goal_work": {
+        "goal_candidate_reads": 268,
+        "goal_commits": 67,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 1,
+        "local_actions": 1,
+        "member_allocations": 128,
+        "member_preparations": 64,
+        "member_settlements": 64
+      },
+      "output_bytes": 886,
+      "output_serialization_usec": 38,
+      "person_count": 1,
+      "person_processing_usec": {
+        "allocation": 444,
+        "prepare": 450,
+        "settlement": 1043
+      },
+      "result_preparation_usec": 347,
+      "sample": 0,
+      "summary_state_bytes": 4478,
+      "warmup": true,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 8,
+      "admission_usec": 478,
+      "advance_usec": 129570,
+      "built_static_memory_delta_bytes": 860716,
+      "case": "lod",
+      "cleanup_usec": 387,
+      "construction_usec": 3472,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 882,
+        "events_processed": 2,
+        "segments": 63,
+        "units_examined": 11644
+      },
+      "goal_commit_usec": 4362,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 534,
+      "new_goal_work": {
+        "goal_candidate_reads": 264,
+        "goal_commits": 66,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 874,
+      "output_serialization_usec": 37,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 302,
+      "sample": 0,
+      "summary_state_bytes": 4196,
+      "warmup": true,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 491,
+      "advance_usec": 107697,
+      "built_static_memory_delta_bytes": 863164,
+      "case": "burst",
+      "cleanup_usec": 393,
+      "construction_usec": 3286,
+      "core_work": {
+        "areas_examined": 136,
+        "contacts_resolved": 680,
+        "events_processed": 10,
+        "segments": 68,
+        "units_examined": 9388
+      },
+      "goal_commit_usec": 6840,
+      "input_issue_usec": 399,
+      "intent_delivery_usec": 551,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 0,
+      "new_goal_work": {
+        "goal_candidate_reads": 572,
+        "goal_commits": 143,
+        "goal_inputs": 5,
+        "timers_processed": 7,
+        "transitions": 23
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 1,
+        "member_allocations": 136,
+        "member_preparations": 68,
+        "member_settlements": 68
+      },
+      "output_bytes": 891,
+      "output_serialization_usec": 36,
+      "person_count": 1,
+      "person_processing_usec": {
+        "allocation": 531,
+        "prepare": 540,
+        "settlement": 1238
+      },
+      "result_preparation_usec": 381,
+      "sample": 0,
+      "summary_state_bytes": 4494,
+      "warmup": true,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 474,
+      "advance_usec": 113105,
+      "built_static_memory_delta_bytes": 863164,
+      "case": "burst",
+      "cleanup_usec": 451,
+      "construction_usec": 3248,
+      "core_work": {
+        "areas_examined": 136,
+        "contacts_resolved": 680,
+        "events_processed": 10,
+        "segments": 68,
+        "units_examined": 9388
+      },
+      "goal_commit_usec": 6845,
+      "input_issue_usec": 404,
+      "intent_delivery_usec": 514,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 0,
+      "new_goal_work": {
+        "goal_candidate_reads": 572,
+        "goal_commits": 143,
+        "goal_inputs": 5,
+        "timers_processed": 7,
+        "transitions": 23
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 1,
+        "member_allocations": 136,
+        "member_preparations": 68,
+        "member_settlements": 68
+      },
+      "output_bytes": 892,
+      "output_serialization_usec": 36,
+      "person_count": 1,
+      "person_processing_usec": {
+        "allocation": 553,
+        "prepare": 532,
+        "settlement": 1237
+      },
+      "result_preparation_usec": 332,
+      "sample": 1,
+      "summary_state_bytes": 4494,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 8,
+      "admission_usec": 524,
+      "advance_usec": 159027,
+      "built_static_memory_delta_bytes": 860716,
+      "case": "lod",
+      "cleanup_usec": 569,
+      "construction_usec": 3697,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 882,
+        "events_processed": 2,
+        "segments": 63,
+        "units_examined": 11644
+      },
+      "goal_commit_usec": 4935,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 500,
+      "new_goal_work": {
+        "goal_candidate_reads": 264,
+        "goal_commits": 66,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 875,
+      "output_serialization_usec": 55,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 456,
+      "sample": 1,
+      "summary_state_bytes": 4196,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 802,
+      "advance_usec": 87689,
+      "built_static_memory_delta_bytes": 863164,
+      "case": "person",
+      "cleanup_usec": 426,
+      "construction_usec": 5713,
+      "core_work": {
+        "areas_examined": 128,
+        "contacts_resolved": 640,
+        "events_processed": 3,
+        "segments": 64,
+        "units_examined": 8836
+      },
+      "goal_commit_usec": 3196,
+      "input_issue_usec": 223,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 0,
+      "new_goal_work": {
+        "goal_candidate_reads": 268,
+        "goal_commits": 67,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 1,
+        "local_actions": 1,
+        "member_allocations": 128,
+        "member_preparations": 64,
+        "member_settlements": 64
+      },
+      "output_bytes": 886,
+      "output_serialization_usec": 35,
+      "person_count": 1,
+      "person_processing_usec": {
+        "allocation": 424,
+        "prepare": 434,
+        "settlement": 946
+      },
+      "result_preparation_usec": 351,
+      "sample": 1,
+      "summary_state_bytes": 4478,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 483,
+      "advance_usec": 101167,
+      "built_static_memory_delta_bytes": 860716,
+      "case": "senior",
+      "cleanup_usec": 411,
+      "construction_usec": 3438,
+      "core_work": {
+        "areas_examined": 136,
+        "contacts_resolved": 680,
+        "events_processed": 5,
+        "segments": 68,
+        "units_examined": 9388
+      },
+      "goal_commit_usec": 6788,
+      "input_issue_usec": 156,
+      "intent_delivery_usec": 262,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 0,
+      "new_goal_work": {
+        "goal_candidate_reads": 560,
+        "goal_commits": 140,
+        "goal_inputs": 3,
+        "timers_processed": 4,
+        "transitions": 18
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 881,
+      "output_serialization_usec": 35,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 319,
+      "sample": 1,
+      "summary_state_bytes": 4254,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 623,
+      "advance_usec": 81553,
+      "built_static_memory_delta_bytes": 109241048,
+      "case": "sleeping",
+      "cleanup_usec": 90487,
+      "construction_usec": 523845,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 630,
+        "events_processed": 2,
+        "segments": 63,
+        "units_examined": 8698
+      },
+      "goal_commit_usec": 3050,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 0,
+      "new_goal_work": {
+        "goal_candidate_reads": 264,
+        "goal_commits": 66,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 885,
+      "output_serialization_usec": 56,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 45864,
+      "sample": 1,
+      "summary_state_bytes": 4196,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 572,
+      "advance_usec": 81094,
+      "built_static_memory_delta_bytes": 860716,
+      "case": "goals",
+      "cleanup_usec": 446,
+      "construction_usec": 3677,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 630,
+        "events_processed": 2,
+        "segments": 63,
+        "units_examined": 8698
+      },
+      "goal_commit_usec": 2936,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 1,
+      "new_goal_work": {
+        "goal_candidate_reads": 264,
+        "goal_commits": 66,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 873,
+      "output_serialization_usec": 34,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 349,
+      "sample": 1,
+      "summary_state_bytes": 4196,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 316,
+      "advance_usec": 75828,
+      "built_static_memory_delta_bytes": 824500,
+      "case": "off",
+      "cleanup_usec": 411,
+      "construction_usec": 3480,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 630,
+        "events_processed": 0,
+        "segments": 63,
+        "units_examined": 8698
+      },
+      "goal_commit_usec": 0,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 1,
+      "new_goal_work": {
+        "goal_candidate_reads": 0,
+        "goal_commits": 0,
+        "goal_inputs": 0,
+        "timers_processed": 0,
+        "transitions": 0
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 865,
+      "output_serialization_usec": 34,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 308,
+      "sample": 1,
+      "summary_state_bytes": 4188,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 375,
+      "advance_usec": 73656,
+      "built_static_memory_delta_bytes": 824500,
+      "case": "off",
+      "cleanup_usec": 394,
+      "construction_usec": 3198,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 630,
+        "events_processed": 0,
+        "segments": 63,
+        "units_examined": 8698
+      },
+      "goal_commit_usec": 0,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 1,
+      "new_goal_work": {
+        "goal_candidate_reads": 0,
+        "goal_commits": 0,
+        "goal_inputs": 0,
+        "timers_processed": 0,
+        "transitions": 0
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 865,
+      "output_serialization_usec": 33,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 304,
+      "sample": 2,
+      "summary_state_bytes": 4188,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 494,
+      "advance_usec": 86674,
+      "built_static_memory_delta_bytes": 860716,
+      "case": "goals",
+      "cleanup_usec": 556,
+      "construction_usec": 3478,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 630,
+        "events_processed": 2,
+        "segments": 63,
+        "units_examined": 8698
+      },
+      "goal_commit_usec": 3246,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 0,
+      "new_goal_work": {
+        "goal_candidate_reads": 264,
+        "goal_commits": 66,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 873,
+      "output_serialization_usec": 50,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 504,
+      "sample": 2,
+      "summary_state_bytes": 4196,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 509,
+      "advance_usec": 80448,
+      "built_static_memory_delta_bytes": 109241048,
+      "case": "sleeping",
+      "cleanup_usec": 78414,
+      "construction_usec": 575088,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 630,
+        "events_processed": 2,
+        "segments": 63,
+        "units_examined": 8698
+      },
+      "goal_commit_usec": 2978,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 0,
+      "new_goal_work": {
+        "goal_candidate_reads": 264,
+        "goal_commits": 66,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 885,
+      "output_serialization_usec": 52,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 46518,
+      "sample": 2,
+      "summary_state_bytes": 4196,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 678,
+      "advance_usec": 126047,
+      "built_static_memory_delta_bytes": 860716,
+      "case": "senior",
+      "cleanup_usec": 399,
+      "construction_usec": 4111,
+      "core_work": {
+        "areas_examined": 136,
+        "contacts_resolved": 680,
+        "events_processed": 5,
+        "segments": 68,
+        "units_examined": 9388
+      },
+      "goal_commit_usec": 8654,
+      "input_issue_usec": 222,
+      "intent_delivery_usec": 420,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 1,
+      "new_goal_work": {
+        "goal_candidate_reads": 560,
+        "goal_commits": 140,
+        "goal_inputs": 3,
+        "timers_processed": 4,
+        "transitions": 18
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 881,
+      "output_serialization_usec": 36,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 366,
+      "sample": 2,
+      "summary_state_bytes": 4254,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 487,
+      "advance_usec": 83255,
+      "built_static_memory_delta_bytes": 863164,
+      "case": "person",
+      "cleanup_usec": 411,
+      "construction_usec": 3316,
+      "core_work": {
+        "areas_examined": 128,
+        "contacts_resolved": 640,
+        "events_processed": 3,
+        "segments": 64,
+        "units_examined": 8836
+      },
+      "goal_commit_usec": 2942,
+      "input_issue_usec": 136,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 0,
+      "new_goal_work": {
+        "goal_candidate_reads": 268,
+        "goal_commits": 67,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 1,
+        "local_actions": 1,
+        "member_allocations": 128,
+        "member_preparations": 64,
+        "member_settlements": 64
+      },
+      "output_bytes": 886,
+      "output_serialization_usec": 34,
+      "person_count": 1,
+      "person_processing_usec": {
+        "allocation": 404,
+        "prepare": 449,
+        "settlement": 897
+      },
+      "result_preparation_usec": 323,
+      "sample": 2,
+      "summary_state_bytes": 4478,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 8,
+      "admission_usec": 530,
+      "advance_usec": 99049,
+      "built_static_memory_delta_bytes": 860716,
+      "case": "lod",
+      "cleanup_usec": 386,
+      "construction_usec": 3567,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 882,
+        "events_processed": 2,
+        "segments": 63,
+        "units_examined": 11644
+      },
+      "goal_commit_usec": 3094,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 300,
+      "new_goal_work": {
+        "goal_candidate_reads": 264,
+        "goal_commits": 66,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 874,
+      "output_serialization_usec": 35,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 317,
+      "sample": 2,
+      "summary_state_bytes": 4196,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 519,
+      "advance_usec": 96521,
+      "built_static_memory_delta_bytes": 863164,
+      "case": "burst",
+      "cleanup_usec": 410,
+      "construction_usec": 3396,
+      "core_work": {
+        "areas_examined": 136,
+        "contacts_resolved": 680,
+        "events_processed": 10,
+        "segments": 68,
+        "units_examined": 9388
+      },
+      "goal_commit_usec": 6026,
+      "input_issue_usec": 409,
+      "intent_delivery_usec": 608,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 0,
+      "new_goal_work": {
+        "goal_candidate_reads": 572,
+        "goal_commits": 143,
+        "goal_inputs": 5,
+        "timers_processed": 7,
+        "transitions": 23
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 1,
+        "member_allocations": 136,
+        "member_preparations": 68,
+        "member_settlements": 68
+      },
+      "output_bytes": 891,
+      "output_serialization_usec": 35,
+      "person_count": 1,
+      "person_processing_usec": {
+        "allocation": 467,
+        "prepare": 474,
+        "settlement": 1175
+      },
+      "result_preparation_usec": 309,
+      "sample": 2,
+      "summary_state_bytes": 4494,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 515,
+      "advance_usec": 93749,
+      "built_static_memory_delta_bytes": 863164,
+      "case": "burst",
+      "cleanup_usec": 434,
+      "construction_usec": 3310,
+      "core_work": {
+        "areas_examined": 136,
+        "contacts_resolved": 680,
+        "events_processed": 10,
+        "segments": 68,
+        "units_examined": 9388
+      },
+      "goal_commit_usec": 5864,
+      "input_issue_usec": 419,
+      "intent_delivery_usec": 526,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 1,
+      "new_goal_work": {
+        "goal_candidate_reads": 572,
+        "goal_commits": 143,
+        "goal_inputs": 5,
+        "timers_processed": 7,
+        "transitions": 23
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 1,
+        "member_allocations": 136,
+        "member_preparations": 68,
+        "member_settlements": 68
+      },
+      "output_bytes": 891,
+      "output_serialization_usec": 79,
+      "person_count": 1,
+      "person_processing_usec": {
+        "allocation": 454,
+        "prepare": 427,
+        "settlement": 1045
+      },
+      "result_preparation_usec": 386,
+      "sample": 3,
+      "summary_state_bytes": 4494,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 8,
+      "admission_usec": 495,
+      "advance_usec": 95916,
+      "built_static_memory_delta_bytes": 860716,
+      "case": "lod",
+      "cleanup_usec": 420,
+      "construction_usec": 3345,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 882,
+        "events_processed": 2,
+        "segments": 63,
+        "units_examined": 11644
+      },
+      "goal_commit_usec": 2940,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 298,
+      "new_goal_work": {
+        "goal_candidate_reads": 264,
+        "goal_commits": 66,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 874,
+      "output_serialization_usec": 34,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 335,
+      "sample": 3,
+      "summary_state_bytes": 4196,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 544,
+      "advance_usec": 108488,
+      "built_static_memory_delta_bytes": 863164,
+      "case": "person",
+      "cleanup_usec": 384,
+      "construction_usec": 3403,
+      "core_work": {
+        "areas_examined": 128,
+        "contacts_resolved": 640,
+        "events_processed": 3,
+        "segments": 64,
+        "units_examined": 8836
+      },
+      "goal_commit_usec": 4068,
+      "input_issue_usec": 151,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 0,
+      "new_goal_work": {
+        "goal_candidate_reads": 268,
+        "goal_commits": 67,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 1,
+        "local_actions": 1,
+        "member_allocations": 128,
+        "member_preparations": 64,
+        "member_settlements": 64
+      },
+      "output_bytes": 888,
+      "output_serialization_usec": 38,
+      "person_count": 1,
+      "person_processing_usec": {
+        "allocation": 574,
+        "prepare": 531,
+        "settlement": 1229
+      },
+      "result_preparation_usec": 323,
+      "sample": 3,
+      "summary_state_bytes": 4478,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 485,
+      "advance_usec": 90004,
+      "built_static_memory_delta_bytes": 860716,
+      "case": "senior",
+      "cleanup_usec": 424,
+      "construction_usec": 3238,
+      "core_work": {
+        "areas_examined": 136,
+        "contacts_resolved": 680,
+        "events_processed": 5,
+        "segments": 68,
+        "units_examined": 9388
+      },
+      "goal_commit_usec": 5797,
+      "input_issue_usec": 154,
+      "intent_delivery_usec": 234,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 0,
+      "new_goal_work": {
+        "goal_candidate_reads": 560,
+        "goal_commits": 140,
+        "goal_inputs": 3,
+        "timers_processed": 4,
+        "transitions": 18
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 880,
+      "output_serialization_usec": 33,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 311,
+      "sample": 3,
+      "summary_state_bytes": 4254,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 574,
+      "advance_usec": 82249,
+      "built_static_memory_delta_bytes": 109241048,
+      "case": "sleeping",
+      "cleanup_usec": 92793,
+      "construction_usec": 531644,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 630,
+        "events_processed": 2,
+        "segments": 63,
+        "units_examined": 8698
+      },
+      "goal_commit_usec": 3220,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 1,
+      "new_goal_work": {
+        "goal_candidate_reads": 264,
+        "goal_commits": 66,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 885,
+      "output_serialization_usec": 88,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 46316,
+      "sample": 3,
+      "summary_state_bytes": 4196,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 789,
+      "advance_usec": 82514,
+      "built_static_memory_delta_bytes": 860716,
+      "case": "goals",
+      "cleanup_usec": 489,
+      "construction_usec": 6145,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 630,
+        "events_processed": 2,
+        "segments": 63,
+        "units_examined": 8698
+      },
+      "goal_commit_usec": 3056,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 0,
+      "new_goal_work": {
+        "goal_candidate_reads": 264,
+        "goal_commits": 66,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 873,
+      "output_serialization_usec": 53,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 396,
+      "sample": 3,
+      "summary_state_bytes": 4196,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 492,
+      "advance_usec": 81024,
+      "built_static_memory_delta_bytes": 824500,
+      "case": "off",
+      "cleanup_usec": 394,
+      "construction_usec": 4857,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 630,
+        "events_processed": 0,
+        "segments": 63,
+        "units_examined": 8698
+      },
+      "goal_commit_usec": 0,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 0,
+      "new_goal_work": {
+        "goal_candidate_reads": 0,
+        "goal_commits": 0,
+        "goal_inputs": 0,
+        "timers_processed": 0,
+        "transitions": 0
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 865,
+      "output_serialization_usec": 47,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 309,
+      "sample": 3,
+      "summary_state_bytes": 4188,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 324,
+      "advance_usec": 75269,
+      "built_static_memory_delta_bytes": 824500,
+      "case": "off",
+      "cleanup_usec": 437,
+      "construction_usec": 3398,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 630,
+        "events_processed": 0,
+        "segments": 63,
+        "units_examined": 8698
+      },
+      "goal_commit_usec": 0,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 0,
+      "new_goal_work": {
+        "goal_candidate_reads": 0,
+        "goal_commits": 0,
+        "goal_inputs": 0,
+        "timers_processed": 0,
+        "transitions": 0
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 865,
+      "output_serialization_usec": 39,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 361,
+      "sample": 4,
+      "summary_state_bytes": 4188,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 599,
+      "advance_usec": 81459,
+      "built_static_memory_delta_bytes": 860716,
+      "case": "goals",
+      "cleanup_usec": 597,
+      "construction_usec": 3981,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 630,
+        "events_processed": 2,
+        "segments": 63,
+        "units_examined": 8698
+      },
+      "goal_commit_usec": 3036,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 1,
+      "new_goal_work": {
+        "goal_candidate_reads": 264,
+        "goal_commits": 66,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 873,
+      "output_serialization_usec": 44,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 351,
+      "sample": 4,
+      "summary_state_bytes": 4196,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 491,
+      "advance_usec": 82553,
+      "built_static_memory_delta_bytes": 109241048,
+      "case": "sleeping",
+      "cleanup_usec": 91168,
+      "construction_usec": 559675,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 630,
+        "events_processed": 2,
+        "segments": 63,
+        "units_examined": 8698
+      },
+      "goal_commit_usec": 3244,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 0,
+      "new_goal_work": {
+        "goal_candidate_reads": 264,
+        "goal_commits": 66,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 885,
+      "output_serialization_usec": 53,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 46047,
+      "sample": 4,
+      "summary_state_bytes": 4196,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 528,
+      "advance_usec": 92840,
+      "built_static_memory_delta_bytes": 860716,
+      "case": "senior",
+      "cleanup_usec": 396,
+      "construction_usec": 3690,
+      "core_work": {
+        "areas_examined": 136,
+        "contacts_resolved": 680,
+        "events_processed": 5,
+        "segments": 68,
+        "units_examined": 9388
+      },
+      "goal_commit_usec": 6098,
+      "input_issue_usec": 168,
+      "intent_delivery_usec": 264,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 1,
+      "new_goal_work": {
+        "goal_candidate_reads": 560,
+        "goal_commits": 140,
+        "goal_inputs": 3,
+        "timers_processed": 4,
+        "transitions": 18
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 880,
+      "output_serialization_usec": 34,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 337,
+      "sample": 4,
+      "summary_state_bytes": 4254,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 475,
+      "advance_usec": 84837,
+      "built_static_memory_delta_bytes": 863164,
+      "case": "person",
+      "cleanup_usec": 401,
+      "construction_usec": 3286,
+      "core_work": {
+        "areas_examined": 128,
+        "contacts_resolved": 640,
+        "events_processed": 3,
+        "segments": 64,
+        "units_examined": 8836
+      },
+      "goal_commit_usec": 3104,
+      "input_issue_usec": 133,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 0,
+      "new_goal_work": {
+        "goal_candidate_reads": 268,
+        "goal_commits": 67,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 1,
+        "local_actions": 1,
+        "member_allocations": 128,
+        "member_preparations": 64,
+        "member_settlements": 64
+      },
+      "output_bytes": 886,
+      "output_serialization_usec": 34,
+      "person_count": 1,
+      "person_processing_usec": {
+        "allocation": 419,
+        "prepare": 410,
+        "settlement": 928
+      },
+      "result_preparation_usec": 317,
+      "sample": 4,
+      "summary_state_bytes": 4478,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 8,
+      "admission_usec": 481,
+      "advance_usec": 97280,
+      "built_static_memory_delta_bytes": 860716,
+      "case": "lod",
+      "cleanup_usec": 378,
+      "construction_usec": 3317,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 882,
+        "events_processed": 2,
+        "segments": 63,
+        "units_examined": 11644
+      },
+      "goal_commit_usec": 2970,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 297,
+      "new_goal_work": {
+        "goal_candidate_reads": 264,
+        "goal_commits": 66,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 874,
+      "output_serialization_usec": 33,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 300,
+      "sample": 4,
+      "summary_state_bytes": 4196,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 495,
+      "advance_usec": 106309,
+      "built_static_memory_delta_bytes": 863164,
+      "case": "burst",
+      "cleanup_usec": 419,
+      "construction_usec": 3322,
+      "core_work": {
+        "areas_examined": 136,
+        "contacts_resolved": 680,
+        "events_processed": 10,
+        "segments": 68,
+        "units_examined": 9388
+      },
+      "goal_commit_usec": 6487,
+      "input_issue_usec": 403,
+      "intent_delivery_usec": 535,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 1,
+      "new_goal_work": {
+        "goal_candidate_reads": 572,
+        "goal_commits": 143,
+        "goal_inputs": 5,
+        "timers_processed": 7,
+        "transitions": 23
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 1,
+        "member_allocations": 136,
+        "member_preparations": 68,
+        "member_settlements": 68
+      },
+      "output_bytes": 892,
+      "output_serialization_usec": 69,
+      "person_count": 1,
+      "person_processing_usec": {
+        "allocation": 558,
+        "prepare": 512,
+        "settlement": 1317
+      },
+      "result_preparation_usec": 327,
+      "sample": 4,
+      "summary_state_bytes": 4494,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 488,
+      "advance_usec": 95748,
+      "built_static_memory_delta_bytes": 863164,
+      "case": "burst",
+      "cleanup_usec": 403,
+      "construction_usec": 3333,
+      "core_work": {
+        "areas_examined": 136,
+        "contacts_resolved": 680,
+        "events_processed": 10,
+        "segments": 68,
+        "units_examined": 9388
+      },
+      "goal_commit_usec": 6014,
+      "input_issue_usec": 400,
+      "intent_delivery_usec": 521,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 0,
+      "new_goal_work": {
+        "goal_candidate_reads": 572,
+        "goal_commits": 143,
+        "goal_inputs": 5,
+        "timers_processed": 7,
+        "transitions": 23
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 1,
+        "member_allocations": 136,
+        "member_preparations": 68,
+        "member_settlements": 68
+      },
+      "output_bytes": 891,
+      "output_serialization_usec": 33,
+      "person_count": 1,
+      "person_processing_usec": {
+        "allocation": 504,
+        "prepare": 442,
+        "settlement": 1328
+      },
+      "result_preparation_usec": 323,
+      "sample": 5,
+      "summary_state_bytes": 4494,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 8,
+      "admission_usec": 494,
+      "advance_usec": 95832,
+      "built_static_memory_delta_bytes": 860716,
+      "case": "lod",
+      "cleanup_usec": 381,
+      "construction_usec": 3283,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 882,
+        "events_processed": 2,
+        "segments": 63,
+        "units_examined": 11644
+      },
+      "goal_commit_usec": 2969,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 300,
+      "new_goal_work": {
+        "goal_candidate_reads": 264,
+        "goal_commits": 66,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 874,
+      "output_serialization_usec": 33,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 298,
+      "sample": 5,
+      "summary_state_bytes": 4196,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 473,
+      "advance_usec": 85265,
+      "built_static_memory_delta_bytes": 863164,
+      "case": "person",
+      "cleanup_usec": 400,
+      "construction_usec": 3249,
+      "core_work": {
+        "areas_examined": 128,
+        "contacts_resolved": 640,
+        "events_processed": 3,
+        "segments": 64,
+        "units_examined": 8836
+      },
+      "goal_commit_usec": 3106,
+      "input_issue_usec": 133,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 0,
+      "new_goal_work": {
+        "goal_candidate_reads": 268,
+        "goal_commits": 67,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 1,
+        "local_actions": 1,
+        "member_allocations": 128,
+        "member_preparations": 64,
+        "member_settlements": 64
+      },
+      "output_bytes": 886,
+      "output_serialization_usec": 33,
+      "person_count": 1,
+      "person_processing_usec": {
+        "allocation": 427,
+        "prepare": 428,
+        "settlement": 953
+      },
+      "result_preparation_usec": 309,
+      "sample": 5,
+      "summary_state_bytes": 4478,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 477,
+      "advance_usec": 91375,
+      "built_static_memory_delta_bytes": 860716,
+      "case": "senior",
+      "cleanup_usec": 391,
+      "construction_usec": 3268,
+      "core_work": {
+        "areas_examined": 136,
+        "contacts_resolved": 680,
+        "events_processed": 5,
+        "segments": 68,
+        "units_examined": 9388
+      },
+      "goal_commit_usec": 5989,
+      "input_issue_usec": 150,
+      "intent_delivery_usec": 251,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 0,
+      "new_goal_work": {
+        "goal_candidate_reads": 560,
+        "goal_commits": 140,
+        "goal_inputs": 3,
+        "timers_processed": 4,
+        "transitions": 18
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 880,
+      "output_serialization_usec": 32,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 304,
+      "sample": 5,
+      "summary_state_bytes": 4254,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 546,
+      "advance_usec": 87876,
+      "built_static_memory_delta_bytes": 109241048,
+      "case": "sleeping",
+      "cleanup_usec": 98164,
+      "construction_usec": 536117,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 630,
+        "events_processed": 2,
+        "segments": 63,
+        "units_examined": 8698
+      },
+      "goal_commit_usec": 3305,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 0,
+      "new_goal_work": {
+        "goal_candidate_reads": 264,
+        "goal_commits": 66,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 885,
+      "output_serialization_usec": 56,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 50166,
+      "sample": 5,
+      "summary_state_bytes": 4196,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 518,
+      "advance_usec": 79828,
+      "built_static_memory_delta_bytes": 860716,
+      "case": "goals",
+      "cleanup_usec": 393,
+      "construction_usec": 3610,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 630,
+        "events_processed": 2,
+        "segments": 63,
+        "units_examined": 8698
+      },
+      "goal_commit_usec": 2929,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 0,
+      "new_goal_work": {
+        "goal_candidate_reads": 264,
+        "goal_commits": 66,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 873,
+      "output_serialization_usec": 41,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 388,
+      "sample": 5,
+      "summary_state_bytes": 4196,
+      "warmup": false,
+      "world_handle_released": true
+    },
+    {
+      "active_representations": 6,
+      "admission_usec": 317,
+      "advance_usec": 74297,
+      "built_static_memory_delta_bytes": 824500,
+      "case": "off",
+      "cleanup_usec": 375,
+      "construction_usec": 3469,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 630,
+        "events_processed": 0,
+        "segments": 63,
+        "units_examined": 8698
+      },
+      "goal_commit_usec": 0,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "ledger_balanced": true,
+      "lod_conversion_usec": 1,
+      "new_goal_work": {
+        "goal_candidate_reads": 0,
+        "goal_commits": 0,
+        "goal_inputs": 0,
+        "timers_processed": 0,
+        "transitions": 0
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      },
+      "output_bytes": 865,
+      "output_serialization_usec": 36,
+      "person_count": 0,
+      "person_processing_usec": {
+        "allocation": 0,
+        "prepare": 0,
+        "settlement": 0
+      },
+      "result_preparation_usec": 309,
+      "sample": 5,
+      "summary_state_bytes": 4188,
+      "warmup": false,
+      "world_handle_released": true
+    }
+  ],
+  "medians": {
+    "burst": {
+      "admission_usec": 495,
+      "advance_usec": 96521,
+      "built_static_memory_delta_bytes": 863164,
+      "cleanup_usec": 419,
+      "construction_usec": 3322,
+      "goal_commit_usec": 6026,
+      "input_issue_usec": 404,
+      "intent_delivery_usec": 526,
+      "lod_conversion_usec": 0,
+      "output_bytes": 891,
+      "output_serialization_usec": 36,
+      "result_preparation_usec": 327,
+      "summary_state_bytes": 4494,
+      "person_usec_median": 2274,
+      "core_work": {
+        "areas_examined": 136,
+        "contacts_resolved": 680,
+        "events_processed": 10,
+        "segments": 68,
+        "units_examined": 9388
+      },
+      "new_goal_work": {
+        "goal_candidate_reads": 572,
+        "goal_commits": 143,
+        "goal_inputs": 5,
+        "timers_processed": 7,
+        "transitions": 23
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 1,
+        "member_allocations": 136,
+        "member_preparations": 68,
+        "member_settlements": 68
+      }
+    },
+    "goals": {
+      "admission_usec": 572,
+      "advance_usec": 81459,
+      "built_static_memory_delta_bytes": 860716,
+      "cleanup_usec": 489,
+      "construction_usec": 3677,
+      "goal_commit_usec": 3036,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "lod_conversion_usec": 0,
+      "output_bytes": 873,
+      "output_serialization_usec": 44,
+      "result_preparation_usec": 388,
+      "summary_state_bytes": 4196,
+      "person_usec_median": 0,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 630,
+        "events_processed": 2,
+        "segments": 63,
+        "units_examined": 8698
+      },
+      "new_goal_work": {
+        "goal_candidate_reads": 264,
+        "goal_commits": 66,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      }
+    },
+    "lod": {
+      "admission_usec": 495,
+      "advance_usec": 97280,
+      "built_static_memory_delta_bytes": 860716,
+      "cleanup_usec": 386,
+      "construction_usec": 3345,
+      "goal_commit_usec": 2970,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "lod_conversion_usec": 300,
+      "output_bytes": 874,
+      "output_serialization_usec": 34,
+      "result_preparation_usec": 317,
+      "summary_state_bytes": 4196,
+      "person_usec_median": 0,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 882,
+        "events_processed": 2,
+        "segments": 63,
+        "units_examined": 11644
+      },
+      "new_goal_work": {
+        "goal_candidate_reads": 264,
+        "goal_commits": 66,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      }
+    },
+    "off": {
+      "admission_usec": 324,
+      "advance_usec": 75269,
+      "built_static_memory_delta_bytes": 824500,
+      "cleanup_usec": 394,
+      "construction_usec": 3469,
+      "goal_commit_usec": 0,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "lod_conversion_usec": 1,
+      "output_bytes": 865,
+      "output_serialization_usec": 36,
+      "result_preparation_usec": 309,
+      "summary_state_bytes": 4188,
+      "person_usec_median": 0,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 630,
+        "events_processed": 0,
+        "segments": 63,
+        "units_examined": 8698
+      },
+      "new_goal_work": {
+        "goal_candidate_reads": 0,
+        "goal_commits": 0,
+        "goal_inputs": 0,
+        "timers_processed": 0,
+        "transitions": 0
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      }
+    },
+    "person": {
+      "admission_usec": 487,
+      "advance_usec": 85265,
+      "built_static_memory_delta_bytes": 863164,
+      "cleanup_usec": 401,
+      "construction_usec": 3316,
+      "goal_commit_usec": 3106,
+      "input_issue_usec": 136,
+      "intent_delivery_usec": 0,
+      "lod_conversion_usec": 0,
+      "output_bytes": 886,
+      "output_serialization_usec": 34,
+      "result_preparation_usec": 323,
+      "summary_state_bytes": 4478,
+      "person_usec_median": 1804,
+      "core_work": {
+        "areas_examined": 128,
+        "contacts_resolved": 640,
+        "events_processed": 3,
+        "segments": 64,
+        "units_examined": 8836
+      },
+      "new_goal_work": {
+        "goal_candidate_reads": 268,
+        "goal_commits": 67,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 1,
+        "local_actions": 1,
+        "member_allocations": 128,
+        "member_preparations": 64,
+        "member_settlements": 64
+      }
+    },
+    "senior": {
+      "admission_usec": 485,
+      "advance_usec": 92840,
+      "built_static_memory_delta_bytes": 860716,
+      "cleanup_usec": 399,
+      "construction_usec": 3438,
+      "goal_commit_usec": 6098,
+      "input_issue_usec": 156,
+      "intent_delivery_usec": 262,
+      "lod_conversion_usec": 0,
+      "output_bytes": 880,
+      "output_serialization_usec": 34,
+      "result_preparation_usec": 319,
+      "summary_state_bytes": 4254,
+      "person_usec_median": 0,
+      "core_work": {
+        "areas_examined": 136,
+        "contacts_resolved": 680,
+        "events_processed": 5,
+        "segments": 68,
+        "units_examined": 9388
+      },
+      "new_goal_work": {
+        "goal_candidate_reads": 560,
+        "goal_commits": 140,
+        "goal_inputs": 3,
+        "timers_processed": 4,
+        "transitions": 18
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      }
+    },
+    "sleeping": {
+      "admission_usec": 546,
+      "advance_usec": 82249,
+      "built_static_memory_delta_bytes": 109241048,
+      "cleanup_usec": 91168,
+      "construction_usec": 536117,
+      "goal_commit_usec": 3220,
+      "input_issue_usec": 0,
+      "intent_delivery_usec": 0,
+      "lod_conversion_usec": 0,
+      "output_bytes": 885,
+      "output_serialization_usec": 56,
+      "result_preparation_usec": 46316,
+      "summary_state_bytes": 4196,
+      "person_usec_median": 0,
+      "core_work": {
+        "areas_examined": 126,
+        "contacts_resolved": 630,
+        "events_processed": 2,
+        "segments": 63,
+        "units_examined": 8698
+      },
+      "new_goal_work": {
+        "goal_candidate_reads": 264,
+        "goal_commits": 66,
+        "goal_inputs": 1,
+        "timers_processed": 2,
+        "transitions": 7
+      },
+      "new_person_work": {
+        "action_events": 0,
+        "local_actions": 0,
+        "member_allocations": 0,
+        "member_preparations": 0,
+        "member_settlements": 0
+      }
+    }
+  },
+  "diagnostic_scope": "Only goal delivery/commit and member preparation/allocation/settlement narrow counters ON in this benchmark. Broad probe OFF. Demo calculation records separate and OFF in benchmark.",
+  "inactive_world_comparison": "10000 additional dormant areas / 30000 unmanaged idle squads; exact active physical state, RNG and work checked by existing benchmark. Result audit and cleanup include stored dormant world.",
+  "claims": "Single Windows host; no p95, frame guarantee or historical 37ms attribution."
+}
