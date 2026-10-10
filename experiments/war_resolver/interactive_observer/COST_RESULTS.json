@@ -1,0 +1,3807 @@
+{
+  "warmups": 1,
+  "measured_samples": 5,
+  "kernel_summary": [
+    {
+      "case": "headless_no_projection",
+      "samples": 5,
+      "units": 6,
+      "reads": 1,
+      "timing_usec": {
+        "construction_usec": {
+          "min": 4711,
+          "median": 4775,
+          "max": 4834
+        },
+        "input_including_due_work_usec": {
+          "min": 0,
+          "median": 0,
+          "max": 0
+        },
+        "read_usec": {
+          "min": 5,
+          "median": 5,
+          "max": 5
+        },
+        "auto_interval_usec": {
+          "min": 393947,
+          "median": 406717,
+          "max": 408271
+        },
+        "export_copy_and_serialize_usec": {
+          "min": 1306,
+          "median": 1344,
+          "max": 1414
+        }
+      },
+      "work_delta": {
+        "knowledge_records": 0,
+        "materializations": 0,
+        "personal_records": 0,
+        "reads": 0,
+        "receipt_records": 0,
+        "timeline_records": 0,
+        "unit_table_scans": 0,
+        "world_exports": 0
+      },
+      "actual_information_records_examined": 0,
+      "persistent_host": {
+        "cached_view_bytes": 53,
+        "pending_inputs": 0,
+        "receipt_bytes": 2,
+        "receipt_ids": 0,
+        "timeline": 0,
+        "timeline_bytes": 2,
+        "timeline_dropped": 0
+      },
+      "read_world_unchanged": true
+    },
+    {
+      "case": "host_no_input",
+      "samples": 5,
+      "units": 6,
+      "reads": 1,
+      "timing_usec": {
+        "construction_usec": {
+          "min": 4811,
+          "median": 4877,
+          "max": 5097
+        },
+        "input_including_due_work_usec": {
+          "min": 0,
+          "median": 0,
+          "max": 0
+        },
+        "read_usec": {
+          "min": 47,
+          "median": 48,
+          "max": 83
+        },
+        "auto_interval_usec": {
+          "min": 397438,
+          "median": 401125,
+          "max": 429141
+        },
+        "export_copy_and_serialize_usec": {
+          "min": 1549,
+          "median": 1575,
+          "max": 1633
+        }
+      },
+      "work_delta": {
+        "knowledge_records": 3,
+        "materializations": 0,
+        "personal_records": 0,
+        "reads": 1,
+        "receipt_records": 0,
+        "timeline_records": 3,
+        "unit_table_scans": 0,
+        "world_exports": 0
+      },
+      "actual_information_records_examined": 3,
+      "persistent_host": {
+        "cached_view_bytes": 4033,
+        "pending_inputs": 0,
+        "receipt_bytes": 2,
+        "receipt_ids": 0,
+        "timeline": 3,
+        "timeline_bytes": 1809,
+        "timeline_dropped": 0
+      },
+      "read_world_unchanged": true
+    },
+    {
+      "case": "host_input",
+      "samples": 5,
+      "units": 6,
+      "reads": 1,
+      "timing_usec": {
+        "construction_usec": {
+          "min": 4788,
+          "median": 4945,
+          "max": 5109
+        },
+        "input_including_due_work_usec": {
+          "min": 634,
+          "median": 646,
+          "max": 651
+        },
+        "read_usec": {
+          "min": 90,
+          "median": 91,
+          "max": 243
+        },
+        "auto_interval_usec": {
+          "min": 416437,
+          "median": 422309,
+          "max": 856251
+        },
+        "export_copy_and_serialize_usec": {
+          "min": 2494,
+          "median": 2567,
+          "max": 6152
+        }
+      },
+      "work_delta": {
+        "knowledge_records": 6,
+        "materializations": 0,
+        "personal_records": 0,
+        "reads": 1,
+        "receipt_records": 1,
+        "timeline_records": 9,
+        "unit_table_scans": 0,
+        "world_exports": 0
+      },
+      "actual_information_records_examined": 6,
+      "persistent_host": {
+        "cached_view_bytes": 8299,
+        "pending_inputs": 0,
+        "receipt_bytes": 561,
+        "receipt_ids": 1,
+        "timeline": 9,
+        "timeline_bytes": 4286,
+        "timeline_dropped": 0
+      },
+      "read_world_unchanged": true
+    },
+    {
+      "case": "host_100_reads",
+      "samples": 5,
+      "units": 6,
+      "reads": 100,
+      "timing_usec": {
+        "construction_usec": {
+          "min": 11448,
+          "median": 14022,
+          "max": 15424
+        },
+        "input_including_due_work_usec": {
+          "min": 1244,
+          "median": 1752,
+          "max": 2496
+        },
+        "read_usec": {
+          "min": 18734,
+          "median": 22956,
+          "max": 25456
+        },
+        "auto_interval_usec": {
+          "min": 1116458,
+          "median": 1397575,
+          "max": 1462498
+        },
+        "export_copy_and_serialize_usec": {
+          "min": 4904,
+          "median": 5590,
+          "max": 6480
+        }
+      },
+      "work_delta": {
+        "knowledge_records": 600,
+        "materializations": 0,
+        "personal_records": 0,
+        "reads": 100,
+        "receipt_records": 100,
+        "timeline_records": 900,
+        "unit_table_scans": 0,
+        "world_exports": 0
+      },
+      "actual_information_records_examined": 600,
+      "persistent_host": {
+        "cached_view_bytes": 8299,
+        "pending_inputs": 0,
+        "receipt_bytes": 561,
+        "receipt_ids": 1,
+        "timeline": 9,
+        "timeline_bytes": 4286,
+        "timeline_dropped": 0
+      },
+      "read_world_unchanged": true
+    },
+    {
+      "case": "host_pages",
+      "samples": 5,
+      "units": 6,
+      "reads": 20,
+      "timing_usec": {
+        "construction_usec": {
+          "min": 10936,
+          "median": 10996,
+          "max": 13465
+        },
+        "input_including_due_work_usec": {
+          "min": 1284,
+          "median": 1382,
+          "max": 1442
+        },
+        "read_usec": {
+          "min": 4221,
+          "median": 4720,
+          "max": 4902
+        },
+        "auto_interval_usec": {
+          "min": 1073704,
+          "median": 1091772,
+          "max": 1592627
+        },
+        "export_copy_and_serialize_usec": {
+          "min": 4527,
+          "median": 4877,
+          "max": 5553
+        }
+      },
+      "work_delta": {
+        "knowledge_records": 120,
+        "materializations": 0,
+        "personal_records": 0,
+        "reads": 20,
+        "receipt_records": 20,
+        "timeline_records": 180,
+        "unit_table_scans": 0,
+        "world_exports": 0
+      },
+      "actual_information_records_examined": 120,
+      "persistent_host": {
+        "cached_view_bytes": 8299,
+        "pending_inputs": 0,
+        "receipt_bytes": 561,
+        "receipt_ids": 1,
+        "timeline": 9,
+        "timeline_bytes": 4286,
+        "timeline_dropped": 0
+      },
+      "read_world_unchanged": true
+    },
+    {
+      "case": "company_summary",
+      "samples": 5,
+      "units": 6,
+      "reads": 1,
+      "timing_usec": {
+        "construction_usec": {
+          "min": 8373,
+          "median": 13228,
+          "max": 14754
+        },
+        "input_including_due_work_usec": {
+          "min": 1149,
+          "median": 1556,
+          "max": 2490
+        },
+        "read_usec": {
+          "min": 194,
+          "median": 269,
+          "max": 705
+        },
+        "auto_interval_usec": {
+          "min": 1200953,
+          "median": 1351952,
+          "max": 1421535
+        },
+        "export_copy_and_serialize_usec": {
+          "min": 4851,
+          "median": 6473,
+          "max": 8808
+        }
+      },
+      "work_delta": {
+        "knowledge_records": 6,
+        "materializations": 0,
+        "personal_records": 0,
+        "reads": 1,
+        "receipt_records": 1,
+        "timeline_records": 9,
+        "unit_table_scans": 0,
+        "world_exports": 0
+      },
+      "actual_information_records_examined": 6,
+      "persistent_host": {
+        "cached_view_bytes": 8203,
+        "pending_inputs": 0,
+        "receipt_bytes": 559,
+        "receipt_ids": 1,
+        "timeline": 9,
+        "timeline_bytes": 4103,
+        "timeline_dropped": 0
+      },
+      "read_world_unchanged": true
+    },
+    {
+      "case": "sleep_10000",
+      "samples": 5,
+      "units": 30006,
+      "reads": 100,
+      "timing_usec": {
+        "construction_usec": {
+          "min": 1720128,
+          "median": 2184726,
+          "max": 2329228
+        },
+        "input_including_due_work_usec": {
+          "min": 1475,
+          "median": 2777,
+          "max": 3466
+        },
+        "read_usec": {
+          "min": 27772,
+          "median": 39064,
+          "max": 41737
+        },
+        "auto_interval_usec": {
+          "min": 1693907,
+          "median": 2074787,
+          "max": 2140503
+        },
+        "export_copy_and_serialize_usec": {
+          "min": 486241,
+          "median": 512403,
+          "max": 547808
+        }
+      },
+      "work_delta": {
+        "knowledge_records": 600,
+        "materializations": 0,
+        "personal_records": 0,
+        "reads": 100,
+        "receipt_records": 100,
+        "timeline_records": 900,
+        "unit_table_scans": 0,
+        "world_exports": 0
+      },
+      "actual_information_records_examined": 600,
+      "persistent_host": {
+        "cached_view_bytes": 8299,
+        "pending_inputs": 0,
+        "receipt_bytes": 561,
+        "receipt_ids": 1,
+        "timeline": 9,
+        "timeline_bytes": 4286,
+        "timeline_dropped": 0
+      },
+      "read_world_unchanged": true
+    }
+  ],
+  "kernel_all_samples": {
+    "diagnostic_calculations": "OFF",
+    "failures": 0,
+    "measured_samples": 5,
+    "rows": [
+      {
+        "actual_information_records_examined": 0,
+        "auto_interval_usec": 405930,
+        "bounded_calls": 1613,
+        "case": "headless_no_projection",
+        "construction_usec": 5397,
+        "costs": {
+          "advance_usec": 409020,
+          "cleanup_usec": 462,
+          "construction_usec": 5375,
+          "input_usec": 0,
+          "reading_usec": 0
+        },
+        "export_bytes": 24907,
+        "export_copy_and_serialize_usec": 1436,
+        "input_including_due_work_usec": 0,
+        "persistent_host": {
+          "cached_view_bytes": 53,
+          "pending_inputs": 0,
+          "receipt_bytes": 2,
+          "receipt_ids": 0,
+          "timeline": 0,
+          "timeline_bytes": 2,
+          "timeline_dropped": 0
+        },
+        "read_usec": 5,
+        "read_world_unchanged": true,
+        "reads": 1,
+        "sample": 0,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": true,
+        "work_delta": {
+          "knowledge_records": 0,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 0,
+          "receipt_records": 0,
+          "timeline_records": 0,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 0,
+        "auto_interval_usec": 408271,
+        "bounded_calls": 1613,
+        "case": "headless_no_projection",
+        "construction_usec": 4834,
+        "costs": {
+          "advance_usec": 411082,
+          "cleanup_usec": 457,
+          "construction_usec": 4827,
+          "input_usec": 0,
+          "reading_usec": 0
+        },
+        "export_bytes": 24907,
+        "export_copy_and_serialize_usec": 1344,
+        "input_including_due_work_usec": 0,
+        "persistent_host": {
+          "cached_view_bytes": 53,
+          "pending_inputs": 0,
+          "receipt_bytes": 2,
+          "receipt_ids": 0,
+          "timeline": 0,
+          "timeline_bytes": 2,
+          "timeline_dropped": 0
+        },
+        "read_usec": 5,
+        "read_world_unchanged": true,
+        "reads": 1,
+        "sample": 1,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 0,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 0,
+          "receipt_records": 0,
+          "timeline_records": 0,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 0,
+        "auto_interval_usec": 406717,
+        "bounded_calls": 1613,
+        "case": "headless_no_projection",
+        "construction_usec": 4775,
+        "costs": {
+          "advance_usec": 409535,
+          "cleanup_usec": 445,
+          "construction_usec": 4768,
+          "input_usec": 0,
+          "reading_usec": 0
+        },
+        "export_bytes": 24907,
+        "export_copy_and_serialize_usec": 1306,
+        "input_including_due_work_usec": 0,
+        "persistent_host": {
+          "cached_view_bytes": 53,
+          "pending_inputs": 0,
+          "receipt_bytes": 2,
+          "receipt_ids": 0,
+          "timeline": 0,
+          "timeline_bytes": 2,
+          "timeline_dropped": 0
+        },
+        "read_usec": 5,
+        "read_world_unchanged": true,
+        "reads": 1,
+        "sample": 2,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 0,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 0,
+          "receipt_records": 0,
+          "timeline_records": 0,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 0,
+        "auto_interval_usec": 407673,
+        "bounded_calls": 1613,
+        "case": "headless_no_projection",
+        "construction_usec": 4784,
+        "costs": {
+          "advance_usec": 410529,
+          "cleanup_usec": 553,
+          "construction_usec": 4776,
+          "input_usec": 0,
+          "reading_usec": 0
+        },
+        "export_bytes": 24907,
+        "export_copy_and_serialize_usec": 1340,
+        "input_including_due_work_usec": 0,
+        "persistent_host": {
+          "cached_view_bytes": 53,
+          "pending_inputs": 0,
+          "receipt_bytes": 2,
+          "receipt_ids": 0,
+          "timeline": 0,
+          "timeline_bytes": 2,
+          "timeline_dropped": 0
+        },
+        "read_usec": 5,
+        "read_world_unchanged": true,
+        "reads": 1,
+        "sample": 3,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 0,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 0,
+          "receipt_records": 0,
+          "timeline_records": 0,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 0,
+        "auto_interval_usec": 393947,
+        "bounded_calls": 1613,
+        "case": "headless_no_projection",
+        "construction_usec": 4759,
+        "costs": {
+          "advance_usec": 396788,
+          "cleanup_usec": 425,
+          "construction_usec": 4751,
+          "input_usec": 0,
+          "reading_usec": 0
+        },
+        "export_bytes": 24907,
+        "export_copy_and_serialize_usec": 1393,
+        "input_including_due_work_usec": 0,
+        "persistent_host": {
+          "cached_view_bytes": 53,
+          "pending_inputs": 0,
+          "receipt_bytes": 2,
+          "receipt_ids": 0,
+          "timeline": 0,
+          "timeline_bytes": 2,
+          "timeline_dropped": 0
+        },
+        "read_usec": 5,
+        "read_world_unchanged": true,
+        "reads": 1,
+        "sample": 4,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 0,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 0,
+          "receipt_records": 0,
+          "timeline_records": 0,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 0,
+        "auto_interval_usec": 405404,
+        "bounded_calls": 1613,
+        "case": "headless_no_projection",
+        "construction_usec": 4711,
+        "costs": {
+          "advance_usec": 408316,
+          "cleanup_usec": 428,
+          "construction_usec": 4703,
+          "input_usec": 0,
+          "reading_usec": 0
+        },
+        "export_bytes": 24907,
+        "export_copy_and_serialize_usec": 1414,
+        "input_including_due_work_usec": 0,
+        "persistent_host": {
+          "cached_view_bytes": 53,
+          "pending_inputs": 0,
+          "receipt_bytes": 2,
+          "receipt_ids": 0,
+          "timeline": 0,
+          "timeline_bytes": 2,
+          "timeline_dropped": 0
+        },
+        "read_usec": 5,
+        "read_world_unchanged": true,
+        "reads": 1,
+        "sample": 5,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 0,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 0,
+          "receipt_records": 0,
+          "timeline_records": 0,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 3,
+        "auto_interval_usec": 404431,
+        "bounded_calls": 1613,
+        "case": "host_no_input",
+        "construction_usec": 4784,
+        "costs": {
+          "advance_usec": 407411,
+          "cleanup_usec": 447,
+          "construction_usec": 4777,
+          "input_usec": 0,
+          "reading_usec": 2789
+        },
+        "export_bytes": 24917,
+        "export_copy_and_serialize_usec": 1544,
+        "input_including_due_work_usec": 0,
+        "persistent_host": {
+          "cached_view_bytes": 4033,
+          "pending_inputs": 0,
+          "receipt_bytes": 2,
+          "receipt_ids": 0,
+          "timeline": 3,
+          "timeline_bytes": 1809,
+          "timeline_dropped": 0
+        },
+        "read_usec": 48,
+        "read_world_unchanged": true,
+        "reads": 1,
+        "sample": 0,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": true,
+        "work_delta": {
+          "knowledge_records": 3,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 1,
+          "receipt_records": 0,
+          "timeline_records": 3,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 3,
+        "auto_interval_usec": 401125,
+        "bounded_calls": 1613,
+        "case": "host_no_input",
+        "construction_usec": 4811,
+        "costs": {
+          "advance_usec": 403998,
+          "cleanup_usec": 443,
+          "construction_usec": 4802,
+          "input_usec": 0,
+          "reading_usec": 3059
+        },
+        "export_bytes": 24917,
+        "export_copy_and_serialize_usec": 1553,
+        "input_including_due_work_usec": 0,
+        "persistent_host": {
+          "cached_view_bytes": 4033,
+          "pending_inputs": 0,
+          "receipt_bytes": 2,
+          "receipt_ids": 0,
+          "timeline": 3,
+          "timeline_bytes": 1809,
+          "timeline_dropped": 0
+        },
+        "read_usec": 47,
+        "read_world_unchanged": true,
+        "reads": 1,
+        "sample": 1,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 3,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 1,
+          "receipt_records": 0,
+          "timeline_records": 3,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 3,
+        "auto_interval_usec": 429141,
+        "bounded_calls": 1613,
+        "case": "host_no_input",
+        "construction_usec": 4857,
+        "costs": {
+          "advance_usec": 431936,
+          "cleanup_usec": 496,
+          "construction_usec": 4849,
+          "input_usec": 0,
+          "reading_usec": 3323
+        },
+        "export_bytes": 24917,
+        "export_copy_and_serialize_usec": 1588,
+        "input_including_due_work_usec": 0,
+        "persistent_host": {
+          "cached_view_bytes": 4033,
+          "pending_inputs": 0,
+          "receipt_bytes": 2,
+          "receipt_ids": 0,
+          "timeline": 3,
+          "timeline_bytes": 1809,
+          "timeline_dropped": 0
+        },
+        "read_usec": 48,
+        "read_world_unchanged": true,
+        "reads": 1,
+        "sample": 2,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 3,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 1,
+          "receipt_records": 0,
+          "timeline_records": 3,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 3,
+        "auto_interval_usec": 425265,
+        "bounded_calls": 1613,
+        "case": "host_no_input",
+        "construction_usec": 5097,
+        "costs": {
+          "advance_usec": 428145,
+          "cleanup_usec": 431,
+          "construction_usec": 5089,
+          "input_usec": 0,
+          "reading_usec": 2964
+        },
+        "export_bytes": 24917,
+        "export_copy_and_serialize_usec": 1575,
+        "input_including_due_work_usec": 0,
+        "persistent_host": {
+          "cached_view_bytes": 4033,
+          "pending_inputs": 0,
+          "receipt_bytes": 2,
+          "receipt_ids": 0,
+          "timeline": 3,
+          "timeline_bytes": 1809,
+          "timeline_dropped": 0
+        },
+        "read_usec": 48,
+        "read_world_unchanged": true,
+        "reads": 1,
+        "sample": 3,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 3,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 1,
+          "receipt_records": 0,
+          "timeline_records": 3,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 3,
+        "auto_interval_usec": 398193,
+        "bounded_calls": 1613,
+        "case": "host_no_input",
+        "construction_usec": 4877,
+        "costs": {
+          "advance_usec": 401084,
+          "cleanup_usec": 494,
+          "construction_usec": 4869,
+          "input_usec": 0,
+          "reading_usec": 2751
+        },
+        "export_bytes": 24917,
+        "export_copy_and_serialize_usec": 1633,
+        "input_including_due_work_usec": 0,
+        "persistent_host": {
+          "cached_view_bytes": 4033,
+          "pending_inputs": 0,
+          "receipt_bytes": 2,
+          "receipt_ids": 0,
+          "timeline": 3,
+          "timeline_bytes": 1809,
+          "timeline_dropped": 0
+        },
+        "read_usec": 49,
+        "read_world_unchanged": true,
+        "reads": 1,
+        "sample": 4,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 3,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 1,
+          "receipt_records": 0,
+          "timeline_records": 3,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 3,
+        "auto_interval_usec": 397438,
+        "bounded_calls": 1613,
+        "case": "host_no_input",
+        "construction_usec": 5038,
+        "costs": {
+          "advance_usec": 400402,
+          "cleanup_usec": 457,
+          "construction_usec": 5030,
+          "input_usec": 0,
+          "reading_usec": 2841
+        },
+        "export_bytes": 24917,
+        "export_copy_and_serialize_usec": 1549,
+        "input_including_due_work_usec": 0,
+        "persistent_host": {
+          "cached_view_bytes": 4033,
+          "pending_inputs": 0,
+          "receipt_bytes": 2,
+          "receipt_ids": 0,
+          "timeline": 3,
+          "timeline_bytes": 1809,
+          "timeline_dropped": 0
+        },
+        "read_usec": 83,
+        "read_world_unchanged": true,
+        "reads": 1,
+        "sample": 5,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 3,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 1,
+          "receipt_records": 0,
+          "timeline_records": 3,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 6,
+        "auto_interval_usec": 417626,
+        "bounded_calls": 1652,
+        "case": "host_input",
+        "construction_usec": 4953,
+        "costs": {
+          "advance_usec": 421198,
+          "cleanup_usec": 552,
+          "construction_usec": 4946,
+          "input_usec": 620,
+          "reading_usec": 5305
+        },
+        "export_bytes": 39210,
+        "export_copy_and_serialize_usec": 2647,
+        "input_including_due_work_usec": 652,
+        "persistent_host": {
+          "cached_view_bytes": 8299,
+          "pending_inputs": 0,
+          "receipt_bytes": 561,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4286,
+          "timeline_dropped": 0
+        },
+        "read_usec": 89,
+        "read_world_unchanged": true,
+        "reads": 1,
+        "sample": 0,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": true,
+        "work_delta": {
+          "knowledge_records": 6,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 1,
+          "receipt_records": 1,
+          "timeline_records": 9,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 6,
+        "auto_interval_usec": 425597,
+        "bounded_calls": 1652,
+        "case": "host_input",
+        "construction_usec": 5004,
+        "costs": {
+          "advance_usec": 428983,
+          "cleanup_usec": 485,
+          "construction_usec": 4996,
+          "input_usec": 602,
+          "reading_usec": 5302
+        },
+        "export_bytes": 39210,
+        "export_copy_and_serialize_usec": 2494,
+        "input_including_due_work_usec": 634,
+        "persistent_host": {
+          "cached_view_bytes": 8299,
+          "pending_inputs": 0,
+          "receipt_bytes": 561,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4286,
+          "timeline_dropped": 0
+        },
+        "read_usec": 90,
+        "read_world_unchanged": true,
+        "reads": 1,
+        "sample": 1,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 6,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 1,
+          "receipt_records": 1,
+          "timeline_records": 9,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 6,
+        "auto_interval_usec": 422309,
+        "bounded_calls": 1652,
+        "case": "host_input",
+        "construction_usec": 4918,
+        "costs": {
+          "advance_usec": 425772,
+          "cleanup_usec": 484,
+          "construction_usec": 4912,
+          "input_usec": 604,
+          "reading_usec": 5210
+        },
+        "export_bytes": 39210,
+        "export_copy_and_serialize_usec": 2529,
+        "input_including_due_work_usec": 635,
+        "persistent_host": {
+          "cached_view_bytes": 8299,
+          "pending_inputs": 0,
+          "receipt_bytes": 561,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4286,
+          "timeline_dropped": 0
+        },
+        "read_usec": 90,
+        "read_world_unchanged": true,
+        "reads": 1,
+        "sample": 2,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 6,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 1,
+          "receipt_records": 1,
+          "timeline_records": 9,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 6,
+        "auto_interval_usec": 418699,
+        "bounded_calls": 1652,
+        "case": "host_input",
+        "construction_usec": 4788,
+        "costs": {
+          "advance_usec": 422281,
+          "cleanup_usec": 569,
+          "construction_usec": 4781,
+          "input_usec": 614,
+          "reading_usec": 5450
+        },
+        "export_bytes": 39210,
+        "export_copy_and_serialize_usec": 2598,
+        "input_including_due_work_usec": 646,
+        "persistent_host": {
+          "cached_view_bytes": 8299,
+          "pending_inputs": 0,
+          "receipt_bytes": 561,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4286,
+          "timeline_dropped": 0
+        },
+        "read_usec": 92,
+        "read_world_unchanged": true,
+        "reads": 1,
+        "sample": 3,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 6,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 1,
+          "receipt_records": 1,
+          "timeline_records": 9,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 6,
+        "auto_interval_usec": 416437,
+        "bounded_calls": 1652,
+        "case": "host_input",
+        "construction_usec": 5109,
+        "costs": {
+          "advance_usec": 419902,
+          "cleanup_usec": 516,
+          "construction_usec": 5102,
+          "input_usec": 615,
+          "reading_usec": 5308
+        },
+        "export_bytes": 39210,
+        "export_copy_and_serialize_usec": 2567,
+        "input_including_due_work_usec": 648,
+        "persistent_host": {
+          "cached_view_bytes": 8299,
+          "pending_inputs": 0,
+          "receipt_bytes": 561,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4286,
+          "timeline_dropped": 0
+        },
+        "read_usec": 91,
+        "read_world_unchanged": true,
+        "reads": 1,
+        "sample": 4,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 6,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 1,
+          "receipt_records": 1,
+          "timeline_records": 9,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 6,
+        "auto_interval_usec": 856251,
+        "bounded_calls": 1652,
+        "case": "host_input",
+        "construction_usec": 4945,
+        "costs": {
+          "advance_usec": 858777,
+          "cleanup_usec": 1724,
+          "construction_usec": 4937,
+          "input_usec": 618,
+          "reading_usec": 11282
+        },
+        "export_bytes": 39210,
+        "export_copy_and_serialize_usec": 6152,
+        "input_including_due_work_usec": 651,
+        "persistent_host": {
+          "cached_view_bytes": 8299,
+          "pending_inputs": 0,
+          "receipt_bytes": 561,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4286,
+          "timeline_dropped": 0
+        },
+        "read_usec": 243,
+        "read_world_unchanged": true,
+        "reads": 1,
+        "sample": 5,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 6,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 1,
+          "receipt_records": 1,
+          "timeline_records": 9,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 600,
+        "auto_interval_usec": 1452350,
+        "bounded_calls": 1652,
+        "case": "host_100_reads",
+        "construction_usec": 13687,
+        "costs": {
+          "advance_usec": 1463837,
+          "cleanup_usec": 1911,
+          "construction_usec": 13673,
+          "input_usec": 1869,
+          "reading_usec": 36554
+        },
+        "export_bytes": 39213,
+        "export_copy_and_serialize_usec": 5901,
+        "input_including_due_work_usec": 1952,
+        "persistent_host": {
+          "cached_view_bytes": 8299,
+          "pending_inputs": 0,
+          "receipt_bytes": 561,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4286,
+          "timeline_dropped": 0
+        },
+        "read_usec": 25736,
+        "read_world_unchanged": true,
+        "reads": 100,
+        "sample": 0,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": true,
+        "work_delta": {
+          "knowledge_records": 600,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 100,
+          "receipt_records": 100,
+          "timeline_records": 900,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 600,
+        "auto_interval_usec": 1462498,
+        "bounded_calls": 1652,
+        "case": "host_100_reads",
+        "construction_usec": 14467,
+        "costs": {
+          "advance_usec": 1473575,
+          "cleanup_usec": 1488,
+          "construction_usec": 14447,
+          "input_usec": 1664,
+          "reading_usec": 35582
+        },
+        "export_bytes": 39213,
+        "export_copy_and_serialize_usec": 5590,
+        "input_including_due_work_usec": 1752,
+        "persistent_host": {
+          "cached_view_bytes": 8299,
+          "pending_inputs": 0,
+          "receipt_bytes": 561,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4286,
+          "timeline_dropped": 0
+        },
+        "read_usec": 24045,
+        "read_world_unchanged": true,
+        "reads": 100,
+        "sample": 1,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 600,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 100,
+          "receipt_records": 100,
+          "timeline_records": 900,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 600,
+        "auto_interval_usec": 1397575,
+        "bounded_calls": 1652,
+        "case": "host_100_reads",
+        "construction_usec": 13391,
+        "costs": {
+          "advance_usec": 1408469,
+          "cleanup_usec": 1518,
+          "construction_usec": 13372,
+          "input_usec": 1581,
+          "reading_usec": 35920
+        },
+        "export_bytes": 39213,
+        "export_copy_and_serialize_usec": 6480,
+        "input_including_due_work_usec": 1659,
+        "persistent_host": {
+          "cached_view_bytes": 8299,
+          "pending_inputs": 0,
+          "receipt_bytes": 561,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4286,
+          "timeline_dropped": 0
+        },
+        "read_usec": 25456,
+        "read_world_unchanged": true,
+        "reads": 100,
+        "sample": 2,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 600,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 100,
+          "receipt_records": 100,
+          "timeline_records": 900,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 600,
+        "auto_interval_usec": 1409340,
+        "bounded_calls": 1652,
+        "case": "host_100_reads",
+        "construction_usec": 14022,
+        "costs": {
+          "advance_usec": 1422785,
+          "cleanup_usec": 1574,
+          "construction_usec": 14003,
+          "input_usec": 2395,
+          "reading_usec": 33756
+        },
+        "export_bytes": 39213,
+        "export_copy_and_serialize_usec": 5951,
+        "input_including_due_work_usec": 2496,
+        "persistent_host": {
+          "cached_view_bytes": 8299,
+          "pending_inputs": 0,
+          "receipt_bytes": 561,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4286,
+          "timeline_dropped": 0
+        },
+        "read_usec": 22956,
+        "read_world_unchanged": true,
+        "reads": 100,
+        "sample": 3,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 600,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 100,
+          "receipt_records": 100,
+          "timeline_records": 900,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 600,
+        "auto_interval_usec": 1276469,
+        "bounded_calls": 1652,
+        "case": "host_100_reads",
+        "construction_usec": 15424,
+        "costs": {
+          "advance_usec": 1288114,
+          "cleanup_usec": 1214,
+          "construction_usec": 15404,
+          "input_usec": 1873,
+          "reading_usec": 29310
+        },
+        "export_bytes": 39213,
+        "export_copy_and_serialize_usec": 4970,
+        "input_including_due_work_usec": 1959,
+        "persistent_host": {
+          "cached_view_bytes": 8299,
+          "pending_inputs": 0,
+          "receipt_bytes": 561,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4286,
+          "timeline_dropped": 0
+        },
+        "read_usec": 19410,
+        "read_world_unchanged": true,
+        "reads": 100,
+        "sample": 4,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 600,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 100,
+          "receipt_records": 100,
+          "timeline_records": 900,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 600,
+        "auto_interval_usec": 1116458,
+        "bounded_calls": 1652,
+        "case": "host_100_reads",
+        "construction_usec": 11448,
+        "costs": {
+          "advance_usec": 1124837,
+          "cleanup_usec": 1159,
+          "construction_usec": 11435,
+          "input_usec": 1186,
+          "reading_usec": 26791
+        },
+        "export_bytes": 39213,
+        "export_copy_and_serialize_usec": 4904,
+        "input_including_due_work_usec": 1244,
+        "persistent_host": {
+          "cached_view_bytes": 8299,
+          "pending_inputs": 0,
+          "receipt_bytes": 561,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4286,
+          "timeline_dropped": 0
+        },
+        "read_usec": 18734,
+        "read_world_unchanged": true,
+        "reads": 100,
+        "sample": 5,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 600,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 100,
+          "receipt_records": 100,
+          "timeline_records": 900,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 120,
+        "auto_interval_usec": 1103445,
+        "bounded_calls": 1652,
+        "case": "host_pages",
+        "construction_usec": 10258,
+        "costs": {
+          "advance_usec": 1112015,
+          "cleanup_usec": 1226,
+          "construction_usec": 10243,
+          "input_usec": 1223,
+          "reading_usec": 14656
+        },
+        "export_bytes": 39210,
+        "export_copy_and_serialize_usec": 4872,
+        "input_including_due_work_usec": 1283,
+        "persistent_host": {
+          "cached_view_bytes": 8299,
+          "pending_inputs": 0,
+          "receipt_bytes": 561,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4286,
+          "timeline_dropped": 0
+        },
+        "read_usec": 4495,
+        "read_world_unchanged": true,
+        "reads": 20,
+        "sample": 0,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": true,
+        "work_delta": {
+          "knowledge_records": 120,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 20,
+          "receipt_records": 20,
+          "timeline_records": 180,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 120,
+        "auto_interval_usec": 1091772,
+        "bounded_calls": 1652,
+        "case": "host_pages",
+        "construction_usec": 10972,
+        "costs": {
+          "advance_usec": 1100669,
+          "cleanup_usec": 1179,
+          "construction_usec": 10955,
+          "input_usec": 1367,
+          "reading_usec": 14301
+        },
+        "export_bytes": 39210,
+        "export_copy_and_serialize_usec": 4655,
+        "input_including_due_work_usec": 1433,
+        "persistent_host": {
+          "cached_view_bytes": 8299,
+          "pending_inputs": 0,
+          "receipt_bytes": 561,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4286,
+          "timeline_dropped": 0
+        },
+        "read_usec": 4593,
+        "read_world_unchanged": true,
+        "reads": 20,
+        "sample": 1,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 120,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 20,
+          "receipt_records": 20,
+          "timeline_records": 180,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 120,
+        "auto_interval_usec": 1073704,
+        "bounded_calls": 1652,
+        "case": "host_pages",
+        "construction_usec": 10936,
+        "costs": {
+          "advance_usec": 1082378,
+          "cleanup_usec": 1133,
+          "construction_usec": 10920,
+          "input_usec": 1381,
+          "reading_usec": 14311
+        },
+        "export_bytes": 39210,
+        "export_copy_and_serialize_usec": 4877,
+        "input_including_due_work_usec": 1442,
+        "persistent_host": {
+          "cached_view_bytes": 8299,
+          "pending_inputs": 0,
+          "receipt_bytes": 561,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4286,
+          "timeline_dropped": 0
+        },
+        "read_usec": 4902,
+        "read_world_unchanged": true,
+        "reads": 20,
+        "sample": 2,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 120,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 20,
+          "receipt_records": 20,
+          "timeline_records": 180,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 120,
+        "auto_interval_usec": 1128725,
+        "bounded_calls": 1652,
+        "case": "host_pages",
+        "construction_usec": 10996,
+        "costs": {
+          "advance_usec": 1137235,
+          "cleanup_usec": 1466,
+          "construction_usec": 10983,
+          "input_usec": 1226,
+          "reading_usec": 14489
+        },
+        "export_bytes": 39210,
+        "export_copy_and_serialize_usec": 5553,
+        "input_including_due_work_usec": 1284,
+        "persistent_host": {
+          "cached_view_bytes": 8299,
+          "pending_inputs": 0,
+          "receipt_bytes": 561,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4286,
+          "timeline_dropped": 0
+        },
+        "read_usec": 4221,
+        "read_world_unchanged": true,
+        "reads": 20,
+        "sample": 3,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 120,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 20,
+          "receipt_records": 20,
+          "timeline_records": 180,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 120,
+        "auto_interval_usec": 1075722,
+        "bounded_calls": 1652,
+        "case": "host_pages",
+        "construction_usec": 13465,
+        "costs": {
+          "advance_usec": 1085973,
+          "cleanup_usec": 1332,
+          "construction_usec": 13445,
+          "input_usec": 1316,
+          "reading_usec": 13915
+        },
+        "export_bytes": 39210,
+        "export_copy_and_serialize_usec": 4527,
+        "input_including_due_work_usec": 1382,
+        "persistent_host": {
+          "cached_view_bytes": 8299,
+          "pending_inputs": 0,
+          "receipt_bytes": 561,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4286,
+          "timeline_dropped": 0
+        },
+        "read_usec": 4720,
+        "read_world_unchanged": true,
+        "reads": 20,
+        "sample": 4,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 120,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 20,
+          "receipt_records": 20,
+          "timeline_records": 180,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 120,
+        "auto_interval_usec": 1592627,
+        "bounded_calls": 1652,
+        "case": "host_pages",
+        "construction_usec": 11475,
+        "costs": {
+          "advance_usec": 1601056,
+          "cleanup_usec": 1221,
+          "construction_usec": 11461,
+          "input_usec": 1270,
+          "reading_usec": 22133
+        },
+        "export_bytes": 39210,
+        "export_copy_and_serialize_usec": 4968,
+        "input_including_due_work_usec": 1334,
+        "persistent_host": {
+          "cached_view_bytes": 8299,
+          "pending_inputs": 0,
+          "receipt_bytes": 561,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4286,
+          "timeline_dropped": 0
+        },
+        "read_usec": 4893,
+        "read_world_unchanged": true,
+        "reads": 20,
+        "sample": 5,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 120,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 20,
+          "receipt_records": 20,
+          "timeline_records": 180,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 6,
+        "auto_interval_usec": 1283033,
+        "bounded_calls": 1665,
+        "case": "company_summary",
+        "construction_usec": 11404,
+        "costs": {
+          "advance_usec": 1291625,
+          "cleanup_usec": 935,
+          "construction_usec": 11388,
+          "input_usec": 1326,
+          "reading_usec": 18048
+        },
+        "export_bytes": 40045,
+        "export_copy_and_serialize_usec": 4696,
+        "input_including_due_work_usec": 1388,
+        "persistent_host": {
+          "cached_view_bytes": 8203,
+          "pending_inputs": 0,
+          "receipt_bytes": 559,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4103,
+          "timeline_dropped": 0
+        },
+        "read_usec": 176,
+        "read_world_unchanged": true,
+        "reads": 1,
+        "sample": 0,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": true,
+        "work_delta": {
+          "knowledge_records": 6,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 1,
+          "receipt_records": 1,
+          "timeline_records": 9,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 6,
+        "auto_interval_usec": 1351952,
+        "bounded_calls": 1665,
+        "case": "company_summary",
+        "construction_usec": 8373,
+        "costs": {
+          "advance_usec": 1356672,
+          "cleanup_usec": 1503,
+          "construction_usec": 8360,
+          "input_usec": 1097,
+          "reading_usec": 15219
+        },
+        "export_bytes": 40045,
+        "export_copy_and_serialize_usec": 7429,
+        "input_including_due_work_usec": 1149,
+        "persistent_host": {
+          "cached_view_bytes": 8203,
+          "pending_inputs": 0,
+          "receipt_bytes": 559,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4103,
+          "timeline_dropped": 0
+        },
+        "read_usec": 347,
+        "read_world_unchanged": true,
+        "reads": 1,
+        "sample": 1,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 6,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 1,
+          "receipt_records": 1,
+          "timeline_records": 9,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 6,
+        "auto_interval_usec": 1274130,
+        "bounded_calls": 1665,
+        "case": "company_summary",
+        "construction_usec": 14754,
+        "costs": {
+          "advance_usec": 1290990,
+          "cleanup_usec": 1205,
+          "construction_usec": 14729,
+          "input_usec": 2390,
+          "reading_usec": 13870
+        },
+        "export_bytes": 40045,
+        "export_copy_and_serialize_usec": 4851,
+        "input_including_due_work_usec": 2490,
+        "persistent_host": {
+          "cached_view_bytes": 8203,
+          "pending_inputs": 0,
+          "receipt_bytes": 559,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4103,
+          "timeline_dropped": 0
+        },
+        "read_usec": 196,
+        "read_world_unchanged": true,
+        "reads": 1,
+        "sample": 2,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 6,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 1,
+          "receipt_records": 1,
+          "timeline_records": 9,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 6,
+        "auto_interval_usec": 1421535,
+        "bounded_calls": 1665,
+        "case": "company_summary",
+        "construction_usec": 10709,
+        "costs": {
+          "advance_usec": 1429366,
+          "cleanup_usec": 2521,
+          "construction_usec": 10694,
+          "input_usec": 1270,
+          "reading_usec": 16175
+        },
+        "export_bytes": 40045,
+        "export_copy_and_serialize_usec": 8808,
+        "input_including_due_work_usec": 1328,
+        "persistent_host": {
+          "cached_view_bytes": 8203,
+          "pending_inputs": 0,
+          "receipt_bytes": 559,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4103,
+          "timeline_dropped": 0
+        },
+        "read_usec": 705,
+        "read_world_unchanged": true,
+        "reads": 1,
+        "sample": 3,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 6,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 1,
+          "receipt_records": 1,
+          "timeline_records": 9,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 6,
+        "auto_interval_usec": 1415139,
+        "bounded_calls": 1665,
+        "case": "company_summary",
+        "construction_usec": 14145,
+        "costs": {
+          "advance_usec": 1429533,
+          "cleanup_usec": 1520,
+          "construction_usec": 14127,
+          "input_usec": 1822,
+          "reading_usec": 15678
+        },
+        "export_bytes": 40045,
+        "export_copy_and_serialize_usec": 6473,
+        "input_including_due_work_usec": 1919,
+        "persistent_host": {
+          "cached_view_bytes": 8203,
+          "pending_inputs": 0,
+          "receipt_bytes": 559,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4103,
+          "timeline_dropped": 0
+        },
+        "read_usec": 269,
+        "read_world_unchanged": true,
+        "reads": 1,
+        "sample": 4,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 6,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 1,
+          "receipt_records": 1,
+          "timeline_records": 9,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 6,
+        "auto_interval_usec": 1200953,
+        "bounded_calls": 1665,
+        "case": "company_summary",
+        "construction_usec": 13228,
+        "costs": {
+          "advance_usec": 1211318,
+          "cleanup_usec": 1323,
+          "construction_usec": 13209,
+          "input_usec": 1482,
+          "reading_usec": 13573
+        },
+        "export_bytes": 40045,
+        "export_copy_and_serialize_usec": 5217,
+        "input_including_due_work_usec": 1556,
+        "persistent_host": {
+          "cached_view_bytes": 8203,
+          "pending_inputs": 0,
+          "receipt_bytes": 559,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4103,
+          "timeline_dropped": 0
+        },
+        "read_usec": 194,
+        "read_world_unchanged": true,
+        "reads": 1,
+        "sample": 5,
+        "time": 1800.0,
+        "units": 6,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 6,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 1,
+          "receipt_records": 1,
+          "timeline_records": 9,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 600,
+        "auto_interval_usec": 1101112,
+        "bounded_calls": 1652,
+        "case": "sleep_10000",
+        "construction_usec": 1478172,
+        "costs": {
+          "advance_usec": 1110777,
+          "cleanup_usec": 210914,
+          "construction_usec": 1478156,
+          "input_usec": 1350,
+          "reading_usec": 26205
+        },
+        "export_bytes": 39414,
+        "export_copy_and_serialize_usec": 335303,
+        "input_including_due_work_usec": 1414,
+        "persistent_host": {
+          "cached_view_bytes": 8299,
+          "pending_inputs": 0,
+          "receipt_bytes": 561,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4286,
+          "timeline_dropped": 0
+        },
+        "read_usec": 18495,
+        "read_world_unchanged": true,
+        "reads": 100,
+        "sample": 0,
+        "time": 1800.0,
+        "units": 30006,
+        "warmup": true,
+        "work_delta": {
+          "knowledge_records": 600,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 100,
+          "receipt_records": 100,
+          "timeline_records": 900,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 600,
+        "auto_interval_usec": 1693907,
+        "bounded_calls": 1652,
+        "case": "sleep_10000",
+        "construction_usec": 1720128,
+        "costs": {
+          "advance_usec": 1709996,
+          "cleanup_usec": 291086,
+          "construction_usec": 1720100,
+          "input_usec": 2700,
+          "reading_usec": 46800
+        },
+        "export_bytes": 39414,
+        "export_copy_and_serialize_usec": 486241,
+        "input_including_due_work_usec": 3100,
+        "persistent_host": {
+          "cached_view_bytes": 8299,
+          "pending_inputs": 0,
+          "receipt_bytes": 561,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4286,
+          "timeline_dropped": 0
+        },
+        "read_usec": 31369,
+        "read_world_unchanged": true,
+        "reads": 100,
+        "sample": 1,
+        "time": 1800.0,
+        "units": 30006,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 600,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 100,
+          "receipt_records": 100,
+          "timeline_records": 900,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 600,
+        "auto_interval_usec": 2140503,
+        "bounded_calls": 1652,
+        "case": "sleep_10000",
+        "construction_usec": 1736983,
+        "costs": {
+          "advance_usec": 2152638,
+          "cleanup_usec": 313176,
+          "construction_usec": 1736953,
+          "input_usec": 1395,
+          "reading_usec": 58260
+        },
+        "export_bytes": 39414,
+        "export_copy_and_serialize_usec": 512403,
+        "input_including_due_work_usec": 1475,
+        "persistent_host": {
+          "cached_view_bytes": 8299,
+          "pending_inputs": 0,
+          "receipt_bytes": 561,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4286,
+          "timeline_dropped": 0
+        },
+        "read_usec": 41737,
+        "read_world_unchanged": true,
+        "reads": 100,
+        "sample": 2,
+        "time": 1800.0,
+        "units": 30006,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 600,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 100,
+          "receipt_records": 100,
+          "timeline_records": 900,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 600,
+        "auto_interval_usec": 2128659,
+        "bounded_calls": 1652,
+        "case": "sleep_10000",
+        "construction_usec": 2329228,
+        "costs": {
+          "advance_usec": 2148806,
+          "cleanup_usec": 321400,
+          "construction_usec": 2329200,
+          "input_usec": 2641,
+          "reading_usec": 57166
+        },
+        "export_bytes": 39414,
+        "export_copy_and_serialize_usec": 486715,
+        "input_including_due_work_usec": 2777,
+        "persistent_host": {
+          "cached_view_bytes": 8299,
+          "pending_inputs": 0,
+          "receipt_bytes": 561,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4286,
+          "timeline_dropped": 0
+        },
+        "read_usec": 39064,
+        "read_world_unchanged": true,
+        "reads": 100,
+        "sample": 3,
+        "time": 1800.0,
+        "units": 30006,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 600,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 100,
+          "receipt_records": 100,
+          "timeline_records": 900,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 600,
+        "auto_interval_usec": 2074787,
+        "bounded_calls": 1652,
+        "case": "sleep_10000",
+        "construction_usec": 2184726,
+        "costs": {
+          "advance_usec": 2086166,
+          "cleanup_usec": 321646,
+          "construction_usec": 2184698,
+          "input_usec": 1648,
+          "reading_usec": 56097
+        },
+        "export_bytes": 39414,
+        "export_copy_and_serialize_usec": 547808,
+        "input_including_due_work_usec": 1737,
+        "persistent_host": {
+          "cached_view_bytes": 8299,
+          "pending_inputs": 0,
+          "receipt_bytes": 561,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4286,
+          "timeline_dropped": 0
+        },
+        "read_usec": 39835,
+        "read_world_unchanged": true,
+        "reads": 100,
+        "sample": 4,
+        "time": 1800.0,
+        "units": 30006,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 600,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 100,
+          "receipt_records": 100,
+          "timeline_records": 900,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      },
+      {
+        "actual_information_records_examined": 600,
+        "auto_interval_usec": 1997657,
+        "bounded_calls": 1652,
+        "case": "sleep_10000",
+        "construction_usec": 2231781,
+        "costs": {
+          "advance_usec": 2016033,
+          "cleanup_usec": 287648,
+          "construction_usec": 2231754,
+          "input_usec": 3321,
+          "reading_usec": 47353
+        },
+        "export_bytes": 39414,
+        "export_copy_and_serialize_usec": 523779,
+        "input_including_due_work_usec": 3466,
+        "persistent_host": {
+          "cached_view_bytes": 8299,
+          "pending_inputs": 0,
+          "receipt_bytes": 561,
+          "receipt_ids": 1,
+          "timeline": 9,
+          "timeline_bytes": 4286,
+          "timeline_dropped": 0
+        },
+        "read_usec": 27772,
+        "read_world_unchanged": true,
+        "reads": 100,
+        "sample": 5,
+        "time": 1800.0,
+        "units": 30006,
+        "warmup": false,
+        "work_delta": {
+          "knowledge_records": 600,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 100,
+          "receipt_records": 100,
+          "timeline_records": 900,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        }
+      }
+    ],
+    "timing_scope": "same process; kernel and projection separated; final audit excluded from look; serialized bytes are payload sizes not allocator RSS",
+    "warmups": 1
+  },
+  "kernel_source_note": "benchmark.gd/session.gd/reader.gd unchanged bytes between v2 and v3; parser not imported by kernel benchmark; pipe and cleanup samples rerun v3",
+  "pipe_all_samples": {
+    "warmups": 1,
+    "measured_samples": 5,
+    "rows": [
+      {
+        "case": "no_input",
+        "sample": 0,
+        "warmup": true,
+        "launch_and_admission_seconds": 0.6093242999995709,
+        "read_count": 1,
+        "reads_io_seconds": 0.0005872999972780235,
+        "read_io_median_seconds": 0.0005872999972780235,
+        "format_seconds": 4.70000013592653e-05,
+        "auto_wall_seconds": 0.4606387000021641,
+        "host": {
+          "calls": 1613,
+          "costs": {
+            "advance_usec": 443874,
+            "cleanup_usec": 538,
+            "construction_usec": 5973,
+            "input_usec": 0,
+            "reading_usec": 3223
+          },
+          "reader_work": {
+            "knowledge_records": 186,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 63,
+            "receipt_records": 0,
+            "timeline_records": 186,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.4647536999982549,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "no_input",
+        "sample": 1,
+        "warmup": false,
+        "launch_and_admission_seconds": 0.7003275000024587,
+        "read_count": 1,
+        "reads_io_seconds": 0.0005984000017633662,
+        "read_io_median_seconds": 0.0005984000017633662,
+        "format_seconds": 3.909999941242859e-05,
+        "auto_wall_seconds": 0.47180280000611674,
+        "host": {
+          "calls": 1613,
+          "costs": {
+            "advance_usec": 453546,
+            "cleanup_usec": 730,
+            "construction_usec": 5560,
+            "input_usec": 0,
+            "reading_usec": 3361
+          },
+          "reader_work": {
+            "knowledge_records": 186,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 63,
+            "receipt_records": 0,
+            "timeline_records": 186,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.4754548999844701,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "no_input",
+        "sample": 2,
+        "warmup": false,
+        "launch_and_admission_seconds": 0.6199758000002475,
+        "read_count": 1,
+        "reads_io_seconds": 0.0010050000055343844,
+        "read_io_median_seconds": 0.0010050000055343844,
+        "format_seconds": 6.10999995842576e-05,
+        "auto_wall_seconds": 0.4682450000036624,
+        "host": {
+          "calls": 1613,
+          "costs": {
+            "advance_usec": 455293,
+            "cleanup_usec": 697,
+            "construction_usec": 6967,
+            "input_usec": 0,
+            "reading_usec": 3266
+          },
+          "reader_work": {
+            "knowledge_records": 186,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 63,
+            "receipt_records": 0,
+            "timeline_records": 186,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.4735723999910988,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "no_input",
+        "sample": 3,
+        "warmup": false,
+        "launch_and_admission_seconds": 0.6222182999990764,
+        "read_count": 1,
+        "reads_io_seconds": 0.0006645000030403025,
+        "read_io_median_seconds": 0.0006645000030403025,
+        "format_seconds": 4.8800000513438135e-05,
+        "auto_wall_seconds": 0.44114730000001146,
+        "host": {
+          "calls": 1613,
+          "costs": {
+            "advance_usec": 428477,
+            "cleanup_usec": 538,
+            "construction_usec": 5730,
+            "input_usec": 0,
+            "reading_usec": 3415
+          },
+          "reader_work": {
+            "knowledge_records": 186,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 63,
+            "receipt_records": 0,
+            "timeline_records": 186,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.4452518000252894,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "no_input",
+        "sample": 4,
+        "warmup": false,
+        "launch_and_admission_seconds": 0.6372203999999329,
+        "read_count": 1,
+        "reads_io_seconds": 0.0007304000027943403,
+        "read_io_median_seconds": 0.0007304000027943403,
+        "format_seconds": 3.860000288113952e-05,
+        "auto_wall_seconds": 0.4521247000011499,
+        "host": {
+          "calls": 1613,
+          "costs": {
+            "advance_usec": 436159,
+            "cleanup_usec": 501,
+            "construction_usec": 6376,
+            "input_usec": 0,
+            "reading_usec": 3220
+          },
+          "reader_work": {
+            "knowledge_records": 186,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 63,
+            "receipt_records": 0,
+            "timeline_records": 186,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.4564053999929456,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "no_input",
+        "sample": 5,
+        "warmup": false,
+        "launch_and_admission_seconds": 0.6088297000023886,
+        "read_count": 1,
+        "reads_io_seconds": 0.0006646999972872436,
+        "read_io_median_seconds": 0.0006646999972872436,
+        "format_seconds": 3.979999746661633e-05,
+        "auto_wall_seconds": 0.4364791000043624,
+        "host": {
+          "calls": 1613,
+          "costs": {
+            "advance_usec": 422000,
+            "cleanup_usec": 509,
+            "construction_usec": 5299,
+            "input_usec": 0,
+            "reading_usec": 2953
+          },
+          "reader_work": {
+            "knowledge_records": 186,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 63,
+            "receipt_records": 0,
+            "timeline_records": 186,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.4409209000004921,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "input",
+        "sample": 0,
+        "warmup": true,
+        "launch_and_admission_seconds": 0.587909200003196,
+        "read_count": 1,
+        "reads_io_seconds": 0.0008897000006982125,
+        "read_io_median_seconds": 0.0008897000006982125,
+        "format_seconds": 5.149999924469739e-05,
+        "auto_wall_seconds": 0.4566995000059251,
+        "host": {
+          "calls": 1652,
+          "costs": {
+            "advance_usec": 443564,
+            "cleanup_usec": 573,
+            "construction_usec": 5965,
+            "input_usec": 702,
+            "reading_usec": 5268
+          },
+          "reader_work": {
+            "knowledge_records": 366,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 64,
+            "receipt_records": 62,
+            "timeline_records": 551,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.462434100023529,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "input",
+        "sample": 1,
+        "warmup": false,
+        "launch_and_admission_seconds": 0.5884504000059678,
+        "read_count": 1,
+        "reads_io_seconds": 0.0008641999957035296,
+        "read_io_median_seconds": 0.0008641999957035296,
+        "format_seconds": 4.579999949783087e-05,
+        "auto_wall_seconds": 0.45508239999617217,
+        "host": {
+          "calls": 1652,
+          "costs": {
+            "advance_usec": 445438,
+            "cleanup_usec": 546,
+            "construction_usec": 5451,
+            "input_usec": 723,
+            "reading_usec": 5312
+          },
+          "reader_work": {
+            "knowledge_records": 366,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 64,
+            "receipt_records": 62,
+            "timeline_records": 551,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.46075620000920026,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "input",
+        "sample": 2,
+        "warmup": false,
+        "launch_and_admission_seconds": 0.6541337000016938,
+        "read_count": 1,
+        "reads_io_seconds": 0.0009136000007856637,
+        "read_io_median_seconds": 0.0009136000007856637,
+        "format_seconds": 5.1099996198900044e-05,
+        "auto_wall_seconds": 0.4571827999970992,
+        "host": {
+          "calls": 1652,
+          "costs": {
+            "advance_usec": 446712,
+            "cleanup_usec": 603,
+            "construction_usec": 5762,
+            "input_usec": 673,
+            "reading_usec": 5545
+          },
+          "reader_work": {
+            "knowledge_records": 366,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 64,
+            "receipt_records": 62,
+            "timeline_records": 551,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.4634346999882837,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "input",
+        "sample": 3,
+        "warmup": false,
+        "launch_and_admission_seconds": 0.6292910999982269,
+        "read_count": 1,
+        "reads_io_seconds": 0.0008795999965514056,
+        "read_io_median_seconds": 0.0008795999965514056,
+        "format_seconds": 4.440000338945538e-05,
+        "auto_wall_seconds": 0.4609767000001739,
+        "host": {
+          "calls": 1652,
+          "costs": {
+            "advance_usec": 449663,
+            "cleanup_usec": 602,
+            "construction_usec": 5752,
+            "input_usec": 851,
+            "reading_usec": 5652
+          },
+          "reader_work": {
+            "knowledge_records": 366,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 64,
+            "receipt_records": 62,
+            "timeline_records": 551,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.4663346999659552,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "input",
+        "sample": 4,
+        "warmup": false,
+        "launch_and_admission_seconds": 0.6665671000009752,
+        "read_count": 1,
+        "reads_io_seconds": 0.000973999995039776,
+        "read_io_median_seconds": 0.000973999995039776,
+        "format_seconds": 4.7900000936351717e-05,
+        "auto_wall_seconds": 0.47925689999829046,
+        "host": {
+          "calls": 1652,
+          "costs": {
+            "advance_usec": 464826,
+            "cleanup_usec": 643,
+            "construction_usec": 7306,
+            "input_usec": 774,
+            "reading_usec": 5694
+          },
+          "reader_work": {
+            "knowledge_records": 366,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 64,
+            "receipt_records": 62,
+            "timeline_records": 551,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.4856454000037047,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "input",
+        "sample": 5,
+        "warmup": false,
+        "launch_and_admission_seconds": 0.6176238999978523,
+        "read_count": 1,
+        "reads_io_seconds": 0.0009585000007064082,
+        "read_io_median_seconds": 0.0009585000007064082,
+        "format_seconds": 4.859999899053946e-05,
+        "auto_wall_seconds": 0.47078020000481047,
+        "host": {
+          "calls": 1652,
+          "costs": {
+            "advance_usec": 453964,
+            "cleanup_usec": 1039,
+            "construction_usec": 6226,
+            "input_usec": 988,
+            "reading_usec": 5759
+          },
+          "reader_work": {
+            "knowledge_records": 366,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 64,
+            "receipt_records": 62,
+            "timeline_records": 551,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.4784914999981993,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "reads100",
+        "sample": 0,
+        "warmup": true,
+        "launch_and_admission_seconds": 0.6269267000025138,
+        "read_count": 100,
+        "reads_io_seconds": 0.09355729998787865,
+        "read_io_median_seconds": 0.0008940000006987248,
+        "format_seconds": 0.003668300028948579,
+        "auto_wall_seconds": 0.4767435999965528,
+        "host": {
+          "calls": 1652,
+          "costs": {
+            "advance_usec": 460543,
+            "cleanup_usec": 734,
+            "construction_usec": 5547,
+            "input_usec": 675,
+            "reading_usec": 14969
+          },
+          "reader_work": {
+            "knowledge_records": 960,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 163,
+            "receipt_records": 161,
+            "timeline_records": 1442,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.5736694999723113,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "reads100",
+        "sample": 1,
+        "warmup": false,
+        "launch_and_admission_seconds": 0.6516827000014018,
+        "read_count": 100,
+        "reads_io_seconds": 0.08909780003887136,
+        "read_io_median_seconds": 0.0008587499978602864,
+        "format_seconds": 0.0035770999966189265,
+        "auto_wall_seconds": 0.45595000000321306,
+        "host": {
+          "calls": 1652,
+          "costs": {
+            "advance_usec": 441521,
+            "cleanup_usec": 795,
+            "construction_usec": 5722,
+            "input_usec": 787,
+            "reading_usec": 15400
+          },
+          "reader_work": {
+            "knowledge_records": 960,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 163,
+            "receipt_records": 161,
+            "timeline_records": 1442,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.5485548000142444,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "reads100",
+        "sample": 2,
+        "warmup": false,
+        "launch_and_admission_seconds": 0.6101694000026328,
+        "read_count": 100,
+        "reads_io_seconds": 0.08891500005847774,
+        "read_io_median_seconds": 0.0008732999995118007,
+        "format_seconds": 0.003693200029374566,
+        "auto_wall_seconds": 0.4609633000000031,
+        "host": {
+          "calls": 1652,
+          "costs": {
+            "advance_usec": 445976,
+            "cleanup_usec": 632,
+            "construction_usec": 5973,
+            "input_usec": 1039,
+            "reading_usec": 15155
+          },
+          "reader_work": {
+            "knowledge_records": 960,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 163,
+            "receipt_records": 161,
+            "timeline_records": 1442,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.5541402999806451,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "reads100",
+        "sample": 3,
+        "warmup": false,
+        "launch_and_admission_seconds": 0.640079799995874,
+        "read_count": 100,
+        "reads_io_seconds": 0.0832894999985001,
+        "read_io_median_seconds": 0.0008159000026353169,
+        "format_seconds": 0.004068300026119687,
+        "auto_wall_seconds": 0.46532350000052247,
+        "host": {
+          "calls": 1652,
+          "costs": {
+            "advance_usec": 453750,
+            "cleanup_usec": 593,
+            "construction_usec": 7514,
+            "input_usec": 835,
+            "reading_usec": 15886
+          },
+          "reader_work": {
+            "knowledge_records": 960,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 163,
+            "receipt_records": 161,
+            "timeline_records": 1442,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.5534785000127158,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "reads100",
+        "sample": 4,
+        "warmup": false,
+        "launch_and_admission_seconds": 0.6615668000013102,
+        "read_count": 100,
+        "reads_io_seconds": 0.09035189997666748,
+        "read_io_median_seconds": 0.0008888999982445966,
+        "format_seconds": 0.0037315999579732306,
+        "auto_wall_seconds": 0.4871960000018589,
+        "host": {
+          "calls": 1652,
+          "costs": {
+            "advance_usec": 471265,
+            "cleanup_usec": 611,
+            "construction_usec": 6666,
+            "input_usec": 872,
+            "reading_usec": 15752
+          },
+          "reader_work": {
+            "knowledge_records": 960,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 163,
+            "receipt_records": 161,
+            "timeline_records": 1442,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.5804298000730341,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "reads100",
+        "sample": 5,
+        "warmup": false,
+        "launch_and_admission_seconds": 0.6675823999976274,
+        "read_count": 100,
+        "reads_io_seconds": 0.08215830002154689,
+        "read_io_median_seconds": 0.0008128999979817308,
+        "format_seconds": 0.004177499991783407,
+        "auto_wall_seconds": 0.4612383999992744,
+        "host": {
+          "calls": 1652,
+          "costs": {
+            "advance_usec": 448546,
+            "cleanup_usec": 754,
+            "construction_usec": 5693,
+            "input_usec": 899,
+            "reading_usec": 14510
+          },
+          "reader_work": {
+            "knowledge_records": 960,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 163,
+            "receipt_records": 161,
+            "timeline_records": 1442,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.5476290000151494,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "pages",
+        "sample": 0,
+        "warmup": true,
+        "launch_and_admission_seconds": 0.6238548000037554,
+        "read_count": 20,
+        "reads_io_seconds": 0.015310300004784949,
+        "read_io_median_seconds": 0.0007621000004292,
+        "format_seconds": 0.0008330000200658105,
+        "auto_wall_seconds": 0.45673839999653865,
+        "host": {
+          "calls": 1652,
+          "costs": {
+            "advance_usec": 443480,
+            "cleanup_usec": 566,
+            "construction_usec": 5579,
+            "input_usec": 772,
+            "reading_usec": 7141
+          },
+          "reader_work": {
+            "knowledge_records": 480,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 83,
+            "receipt_records": 81,
+            "timeline_records": 722,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.48514969993266277,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "pages",
+        "sample": 1,
+        "warmup": false,
+        "launch_and_admission_seconds": 0.6085330999994767,
+        "read_count": 20,
+        "reads_io_seconds": 0.015888700014329515,
+        "read_io_median_seconds": 0.0007666500023333356,
+        "format_seconds": 0.0008202999961213209,
+        "auto_wall_seconds": 0.45785869999963325,
+        "host": {
+          "calls": 1652,
+          "costs": {
+            "advance_usec": 442176,
+            "cleanup_usec": 597,
+            "construction_usec": 6043,
+            "input_usec": 718,
+            "reading_usec": 7094
+          },
+          "reader_work": {
+            "knowledge_records": 480,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 83,
+            "receipt_records": 81,
+            "timeline_records": 722,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.48860720000084257,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "pages",
+        "sample": 2,
+        "warmup": false,
+        "launch_and_admission_seconds": 0.623561400003382,
+        "read_count": 20,
+        "reads_io_seconds": 0.016755200005718507,
+        "read_io_median_seconds": 0.0008379499995498918,
+        "format_seconds": 0.0008693000127095729,
+        "auto_wall_seconds": 0.46237269999983255,
+        "host": {
+          "calls": 1652,
+          "costs": {
+            "advance_usec": 450276,
+            "cleanup_usec": 564,
+            "construction_usec": 5859,
+            "input_usec": 735,
+            "reading_usec": 7601
+          },
+          "reader_work": {
+            "knowledge_records": 480,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 83,
+            "receipt_records": 81,
+            "timeline_records": 722,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.49426119998679496,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "pages",
+        "sample": 3,
+        "warmup": false,
+        "launch_and_admission_seconds": 0.6606271000055131,
+        "read_count": 20,
+        "reads_io_seconds": 0.015814400001545437,
+        "read_io_median_seconds": 0.0007673499967495445,
+        "format_seconds": 0.0008897000152501278,
+        "auto_wall_seconds": 0.46289640000031795,
+        "host": {
+          "calls": 1652,
+          "costs": {
+            "advance_usec": 448065,
+            "cleanup_usec": 612,
+            "construction_usec": 5700,
+            "input_usec": 715,
+            "reading_usec": 7443
+          },
+          "reader_work": {
+            "knowledge_records": 480,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 83,
+            "receipt_records": 81,
+            "timeline_records": 722,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.493250799991074,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "pages",
+        "sample": 4,
+        "warmup": false,
+        "launch_and_admission_seconds": 0.6645575000002282,
+        "read_count": 20,
+        "reads_io_seconds": 0.015374900001916103,
+        "read_io_median_seconds": 0.0007305499966605566,
+        "format_seconds": 0.0008197000133804977,
+        "auto_wall_seconds": 0.46616979999816976,
+        "host": {
+          "calls": 1652,
+          "costs": {
+            "advance_usec": 455711,
+            "cleanup_usec": 554,
+            "construction_usec": 6291,
+            "input_usec": 841,
+            "reading_usec": 7388
+          },
+          "reader_work": {
+            "knowledge_records": 480,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 83,
+            "receipt_records": 81,
+            "timeline_records": 722,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.4967780000079074,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "pages",
+        "sample": 5,
+        "warmup": false,
+        "launch_and_admission_seconds": 0.6890318000005209,
+        "read_count": 20,
+        "reads_io_seconds": 0.01619879999634577,
+        "read_io_median_seconds": 0.0007779499974276405,
+        "format_seconds": 0.0008702000195626169,
+        "auto_wall_seconds": 0.4858606999987387,
+        "host": {
+          "calls": 1652,
+          "costs": {
+            "advance_usec": 472309,
+            "cleanup_usec": 594,
+            "construction_usec": 6471,
+            "input_usec": 720,
+            "reading_usec": 7694
+          },
+          "reader_work": {
+            "knowledge_records": 480,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 83,
+            "receipt_records": 81,
+            "timeline_records": 722,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.5173225999824353,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "company",
+        "sample": 0,
+        "warmup": true,
+        "launch_and_admission_seconds": 0.5914222999999765,
+        "read_count": 1,
+        "reads_io_seconds": 0.0014968999967095442,
+        "read_io_median_seconds": 0.0014968999967095442,
+        "format_seconds": 8.169999637175351e-05,
+        "auto_wall_seconds": 0.5094364999968093,
+        "host": {
+          "calls": 1665,
+          "costs": {
+            "advance_usec": 491202,
+            "cleanup_usec": 708,
+            "construction_usec": 6792,
+            "input_usec": 698,
+            "reading_usec": 6100
+          },
+          "reader_work": {
+            "knowledge_records": 350,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 64,
+            "receipt_records": 62,
+            "timeline_records": 535,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.5157100000360515,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "company",
+        "sample": 1,
+        "warmup": false,
+        "launch_and_admission_seconds": 0.6328469000000041,
+        "read_count": 1,
+        "reads_io_seconds": 0.0009164000002783723,
+        "read_io_median_seconds": 0.0009164000002783723,
+        "format_seconds": 4.829999670619145e-05,
+        "auto_wall_seconds": 0.47137110000039684,
+        "host": {
+          "calls": 1665,
+          "costs": {
+            "advance_usec": 456350,
+            "cleanup_usec": 604,
+            "construction_usec": 5430,
+            "input_usec": 706,
+            "reading_usec": 5372
+          },
+          "reader_work": {
+            "knowledge_records": 350,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 64,
+            "receipt_records": 62,
+            "timeline_records": 535,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.47714879995328374,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "company",
+        "sample": 2,
+        "warmup": false,
+        "launch_and_admission_seconds": 0.6561772999993991,
+        "read_count": 1,
+        "reads_io_seconds": 0.0011086000013165176,
+        "read_io_median_seconds": 0.0011086000013165176,
+        "format_seconds": 4.769999941345304e-05,
+        "auto_wall_seconds": 0.470600699998613,
+        "host": {
+          "calls": 1665,
+          "costs": {
+            "advance_usec": 456181,
+            "cleanup_usec": 572,
+            "construction_usec": 5681,
+            "input_usec": 723,
+            "reading_usec": 5658
+          },
+          "reader_work": {
+            "knowledge_records": 350,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 64,
+            "receipt_records": 62,
+            "timeline_records": 535,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.4763327000182471,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "company",
+        "sample": 3,
+        "warmup": false,
+        "launch_and_admission_seconds": 0.6113493999946513,
+        "read_count": 1,
+        "reads_io_seconds": 0.0010126999986823648,
+        "read_io_median_seconds": 0.0010126999986823648,
+        "format_seconds": 4.9899994337465614e-05,
+        "auto_wall_seconds": 0.4775636999984272,
+        "host": {
+          "calls": 1665,
+          "costs": {
+            "advance_usec": 459949,
+            "cleanup_usec": 572,
+            "construction_usec": 5529,
+            "input_usec": 685,
+            "reading_usec": 5608
+          },
+          "reader_work": {
+            "knowledge_records": 350,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 64,
+            "receipt_records": 62,
+            "timeline_records": 535,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.4833443000607076,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "company",
+        "sample": 4,
+        "warmup": false,
+        "launch_and_admission_seconds": 0.6789554999995744,
+        "read_count": 1,
+        "reads_io_seconds": 0.0009682000018074177,
+        "read_io_median_seconds": 0.0009682000018074177,
+        "format_seconds": 4.780000017490238e-05,
+        "auto_wall_seconds": 0.461107200004335,
+        "host": {
+          "calls": 1665,
+          "costs": {
+            "advance_usec": 445874,
+            "cleanup_usec": 611,
+            "construction_usec": 5968,
+            "input_usec": 990,
+            "reading_usec": 5175
+          },
+          "reader_work": {
+            "knowledge_records": 350,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 64,
+            "receipt_records": 62,
+            "timeline_records": 535,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.46743049997166963,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "company",
+        "sample": 5,
+        "warmup": false,
+        "launch_and_admission_seconds": 0.6093496999965282,
+        "read_count": 1,
+        "reads_io_seconds": 0.0010383999979239888,
+        "read_io_median_seconds": 0.0010383999979239888,
+        "format_seconds": 4.8999994760379195e-05,
+        "auto_wall_seconds": 0.5256647999995039,
+        "host": {
+          "calls": 1665,
+          "costs": {
+            "advance_usec": 506135,
+            "cleanup_usec": 595,
+            "construction_usec": 6854,
+            "input_usec": 1097,
+            "reading_usec": 5916
+          },
+          "reader_work": {
+            "knowledge_records": 350,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 64,
+            "receipt_records": 62,
+            "timeline_records": 535,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.5334737000448513,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "sleep10000",
+        "sample": 0,
+        "warmup": true,
+        "launch_and_admission_seconds": 1.1657609999965644,
+        "read_count": 100,
+        "reads_io_seconds": 0.08788770002138335,
+        "read_io_median_seconds": 0.0008463999984087422,
+        "format_seconds": 0.003787999987252988,
+        "auto_wall_seconds": 0.45731979999982286,
+        "host": {
+          "calls": 1652,
+          "costs": {
+            "advance_usec": 447135,
+            "cleanup_usec": 99260,
+            "construction_usec": 550520,
+            "input_usec": 668,
+            "reading_usec": 14751
+          },
+          "reader_work": {
+            "knowledge_records": 960,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 163,
+            "receipt_records": 161,
+            "timeline_records": 1442,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.5480344999596127,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "sleep10000",
+        "sample": 1,
+        "warmup": false,
+        "launch_and_admission_seconds": 1.225711399994907,
+        "read_count": 100,
+        "reads_io_seconds": 0.12424490003468236,
+        "read_io_median_seconds": 0.0012168499997642357,
+        "format_seconds": 0.006224700016900897,
+        "auto_wall_seconds": 0.5051324000014574,
+        "host": {
+          "calls": 1652,
+          "costs": {
+            "advance_usec": 489116,
+            "cleanup_usec": 83297,
+            "construction_usec": 578943,
+            "input_usec": 756,
+            "reading_usec": 18994
+          },
+          "reader_work": {
+            "knowledge_records": 960,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 163,
+            "receipt_records": 161,
+            "timeline_records": 1442,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.6310529999464052,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "sleep10000",
+        "sample": 2,
+        "warmup": false,
+        "launch_and_admission_seconds": 1.228609099998721,
+        "read_count": 100,
+        "reads_io_seconds": 0.09194179999030894,
+        "read_io_median_seconds": 0.0009030500004882924,
+        "format_seconds": 0.003910099963832181,
+        "auto_wall_seconds": 0.4675978000013856,
+        "host": {
+          "calls": 1652,
+          "costs": {
+            "advance_usec": 451715,
+            "cleanup_usec": 81433,
+            "construction_usec": 563977,
+            "input_usec": 747,
+            "reading_usec": 14712
+          },
+          "reader_work": {
+            "knowledge_records": 960,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 163,
+            "receipt_records": 161,
+            "timeline_records": 1442,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.5625532000485691,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "sleep10000",
+        "sample": 3,
+        "warmup": false,
+        "launch_and_admission_seconds": 1.1491543000011006,
+        "read_count": 100,
+        "reads_io_seconds": 0.0940073000092525,
+        "read_io_median_seconds": 0.000890900002559647,
+        "format_seconds": 0.0044018999906256795,
+        "auto_wall_seconds": 0.5155011999959243,
+        "host": {
+          "calls": 1652,
+          "costs": {
+            "advance_usec": 498562,
+            "cleanup_usec": 106523,
+            "construction_usec": 566608,
+            "input_usec": 872,
+            "reading_usec": 15913
+          },
+          "reader_work": {
+            "knowledge_records": 960,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 163,
+            "receipt_records": 161,
+            "timeline_records": 1442,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.6122043999930611,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "sleep10000",
+        "sample": 4,
+        "warmup": false,
+        "launch_and_admission_seconds": 1.1993616000036127,
+        "read_count": 100,
+        "reads_io_seconds": 0.08401089996186784,
+        "read_io_median_seconds": 0.0008116999997582752,
+        "format_seconds": 0.004377499921247363,
+        "auto_wall_seconds": 0.5122185000000172,
+        "host": {
+          "calls": 1652,
+          "costs": {
+            "advance_usec": 498262,
+            "cleanup_usec": 87471,
+            "construction_usec": 592287,
+            "input_usec": 701,
+            "reading_usec": 15176
+          },
+          "reader_work": {
+            "knowledge_records": 960,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 163,
+            "receipt_records": 161,
+            "timeline_records": 1442,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.598788399976911,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      },
+      {
+        "case": "sleep10000",
+        "sample": 5,
+        "warmup": false,
+        "launch_and_admission_seconds": 1.190160600002855,
+        "read_count": 100,
+        "reads_io_seconds": 0.08923429998685606,
+        "read_io_median_seconds": 0.0008612000019638799,
+        "format_seconds": 0.0037273999623721465,
+        "auto_wall_seconds": 0.45748119999916526,
+        "host": {
+          "calls": 1652,
+          "costs": {
+            "advance_usec": 442340,
+            "cleanup_usec": 82685,
+            "construction_usec": 558243,
+            "input_usec": 656,
+            "reading_usec": 14876
+          },
+          "reader_work": {
+            "knowledge_records": 960,
+            "materializations": 0,
+            "personal_records": 0,
+            "reads": 163,
+            "receipt_records": 161,
+            "timeline_records": 1442,
+            "unit_table_scans": 0,
+            "world_exports": 0
+          },
+          "released": true,
+          "session": "cost"
+        },
+        "client": {
+          "io_seconds": 0.5502417000025162,
+          "format_seconds": 0.0
+        },
+        "raw_diagnostics": [
+          "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org",
+          ""
+        ]
+      }
+    ],
+    "failures": [],
+    "scope": "real pipe; process launch includes engine startup; default diagnostic OFF; formatting excludes printing; input and advance costs overlap and must not be summed"
+  },
+  "cleanup_all_samples": {
+    "rows": [
+      {
+        "sleeping_areas": 0,
+        "sample": 0,
+        "warmup": true,
+        "quit_to_child_reaped_seconds": 0.1301240000029793,
+        "dispose_internal_usec": 514,
+        "released": true,
+        "calls": 1613
+      },
+      {
+        "sleeping_areas": 0,
+        "sample": 1,
+        "warmup": false,
+        "quit_to_child_reaped_seconds": 0.13773309999669436,
+        "dispose_internal_usec": 540,
+        "released": true,
+        "calls": 1613
+      },
+      {
+        "sleeping_areas": 0,
+        "sample": 2,
+        "warmup": false,
+        "quit_to_child_reaped_seconds": 0.08803910000278847,
+        "dispose_internal_usec": 566,
+        "released": true,
+        "calls": 1613
+      },
+      {
+        "sleeping_areas": 0,
+        "sample": 3,
+        "warmup": false,
+        "quit_to_child_reaped_seconds": 0.08717999999498716,
+        "dispose_internal_usec": 512,
+        "released": true,
+        "calls": 1613
+      },
+      {
+        "sleeping_areas": 0,
+        "sample": 4,
+        "warmup": false,
+        "quit_to_child_reaped_seconds": 0.14853600000060396,
+        "dispose_internal_usec": 492,
+        "released": true,
+        "calls": 1613
+      },
+      {
+        "sleeping_areas": 0,
+        "sample": 5,
+        "warmup": false,
+        "quit_to_child_reaped_seconds": 0.10327590000088094,
+        "dispose_internal_usec": 508,
+        "released": true,
+        "calls": 1613
+      },
+      {
+        "sleeping_areas": 10000,
+        "sample": 0,
+        "warmup": true,
+        "quit_to_child_reaped_seconds": 0.2071412999939639,
+        "dispose_internal_usec": 103564,
+        "released": true,
+        "calls": 1613
+      },
+      {
+        "sleeping_areas": 10000,
+        "sample": 1,
+        "warmup": false,
+        "quit_to_child_reaped_seconds": 0.212409599997045,
+        "dispose_internal_usec": 90758,
+        "released": true,
+        "calls": 1613
+      },
+      {
+        "sleeping_areas": 10000,
+        "sample": 2,
+        "warmup": false,
+        "quit_to_child_reaped_seconds": 0.20644149999861838,
+        "dispose_internal_usec": 81468,
+        "released": true,
+        "calls": 1613
+      },
+      {
+        "sleeping_areas": 10000,
+        "sample": 3,
+        "warmup": false,
+        "quit_to_child_reaped_seconds": 0.17599399999744492,
+        "dispose_internal_usec": 96104,
+        "released": true,
+        "calls": 1613
+      },
+      {
+        "sleeping_areas": 10000,
+        "sample": 4,
+        "warmup": false,
+        "quit_to_child_reaped_seconds": 0.17074649999995017,
+        "dispose_internal_usec": 98182,
+        "released": true,
+        "calls": 1613
+      },
+      {
+        "sleeping_areas": 10000,
+        "sample": 5,
+        "warmup": false,
+        "quit_to_child_reaped_seconds": 0.24107159999402938,
+        "dispose_internal_usec": 97988,
+        "released": true,
+        "calls": 1613
+      }
+    ],
+    "warmups": 1,
+    "measured_samples": 5,
+    "scope": "wall from quit through child wait and stdout reader cleanup; includes deferred object destruction and process shutdown; no diagnostic export"
+  },
+  "scope_notes": [
+    "All samples, including warmup, retained. Wall timings vary with same-machine load; no frame budget or cross-run attribution.",
+    "Read samples at committed t1800. Input at t10. AUTO uses the same30s target cuts to1800.",
+    "Session input/advance/read timer spans overlap. Do not sum them. Python formatting excludes printing; demo CLI output timer includes printing.",
+    "Payload bytes describe serialized cache/receipts/timeline, not allocator RSS. One transport packet/response and fixed buffers are also retained.",
+    "Benchmark dispose internal timer can exclude deferred temporary-reference destruction. Quit-to-child-reaped wall includes destruction, shutdown and reader cleanup.",
+    "World construction, cleanup and explicit final audit may scale with sleepers. Look never calls audit or world_result. Diagnostics OFF."
+  ]
+}

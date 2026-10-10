@@ -1,0 +1,1694 @@
+{
+  "complete": true,
+  "passed": true,
+  "actual_runtime_head": "12025f391ea16b1ed040399cc1beff7fec516d91",
+  "tested_base_head": "6be7343c799e178c2986a69831d615310a370183",
+  "tested_new_source": "freeze v3, direct bytes equal committed runtime; old kernel/session source unchanged from v2; only host JSON error decoding corrected",
+  "windows_allowed_test_failures": [],
+  "original_matchers_and_goldens_changed": false,
+  "original_unified_attempts": [
+    {
+      "name": "g5_unified_final",
+      "command": [
+        "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934\\tools\\run_validation.ps1",
+        "-GodotPath",
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "-ProjectPath",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "-PythonPath",
+        "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 1,
+      "elapsed_seconds": 607.2027755999989,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 28989,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "sections": 17,
+      "passed": false,
+      "resource_exit_diagnostics": []
+    },
+    {
+      "name": "g5_unified_retry",
+      "command": [
+        "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934\\tools\\run_validation.ps1",
+        "-GodotPath",
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "-ProjectPath",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "-PythonPath",
+        "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 1,
+      "elapsed_seconds": 195.55220359999657,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 26306,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": "ERROR:",
+      "sections": 12,
+      "passed": false,
+      "resource_exit_diagnostics": []
+    },
+    {
+      "name": "g5_unified_after_isolation",
+      "command": [
+        "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934\\tools\\run_validation.ps1",
+        "-GodotPath",
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "-ProjectPath",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "-PythonPath",
+        "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 734.6716506000012,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 71069,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "sections": 47,
+      "passed": true,
+      "resource_exit_diagnostics": [
+        "ERROR: 41 resources still in use at exit (run with --verbose for details).",
+        "ERROR: 41 resources still in use at exit (run with --verbose for details).",
+        "ERROR: 41 resources still in use at exit (run with --verbose for details)."
+      ]
+    },
+    {
+      "name": "g5_unified_v3",
+      "command": [
+        "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934\\tools\\run_validation.ps1",
+        "-GodotPath",
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "-ProjectPath",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "-PythonPath",
+        "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 569.6155731000035,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 71068,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "sections": 47,
+      "passed": true,
+      "resource_exit_diagnostics": [
+        "ERROR: 41 resources still in use at exit (run with --verbose for details).",
+        "ERROR: 41 resources still in use at exit (run with --verbose for details).",
+        "ERROR: 41 resources still in use at exit (run with --verbose for details)."
+      ]
+    }
+  ],
+  "final_original_unified": {
+    "name": "g5_unified_v3",
+    "command": [
+      "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+      "-NoProfile",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934\\tools\\run_validation.ps1",
+      "-GodotPath",
+      "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+      "-ProjectPath",
+      "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "-PythonPath",
+      "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe"
+    ],
+    "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+    "exit": 0,
+    "elapsed_seconds": 569.6155731000035,
+    "aborted": null,
+    "log_complete": true,
+    "log_bytes": 71068,
+    "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+    "fatal": null,
+    "sections": 47,
+    "passed": true,
+    "resource_exit_diagnostics": [
+      "ERROR: 41 resources still in use at exit (run with --verbose for details).",
+      "ERROR: 41 resources still in use at exit (run with --verbose for details).",
+      "ERROR: 41 resources still in use at exit (run with --verbose for details)."
+    ]
+  },
+  "retained_war_steps": [
+    {
+      "name": "g5_resolver_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 37.58954720000111,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 114,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "War resolver: 1876 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_resolver_replay_a",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/replay_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 2.0893610999992234,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 155,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_resolver_replay_b",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/replay_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 2.0144901999992726,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 155,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_resolver_benchmark",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/benchmark.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 4.492637300001661,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 137337,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_roles_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/role_tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 34.28090009999869,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 241,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Role overrides: 3762 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_roles_replay_a",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/role_replay_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 3.478894300002139,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 160,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_roles_replay_b",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/role_replay_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 3.5871397000009893,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 160,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_sandbox_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/sandbox/tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 123.96105549999993,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 113,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "War sandbox: 8941 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_sandbox_replay_a",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/sandbox/observation_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 33.75061640000058,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 798479,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_sandbox_replay_b",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/sandbox/observation_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 33.65220880000197,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 798479,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task4_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/aggregation/tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 87.89248450000014,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 49134,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Task4 aggregation: 17329 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_task4_replay_a",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/aggregation/replay_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 1.0662798000012117,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 161,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task4_replay_b",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/aggregation/replay_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 1.085437900001125,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 161,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task4_benchmark",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/aggregation/benchmark.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 23.665925799999968,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 14966,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task5_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/structure/tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 1.9012122000021918,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 4031,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Task5 structure: 788 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_task5_replay_a",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/structure/replay_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 0.9738837000004423,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 161,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task5_replay_b",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/structure/replay_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 0.9758057999970333,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 161,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task5_benchmark",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/structure/benchmark.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 1.2555919000005815,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 9285,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task6_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/logistics/tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 1.903875899999548,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 3012,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Task6 logistics: 5703 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_task6_replay_a",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/logistics/replay_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 1.0635078999985126,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 161,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task6_replay_b",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/logistics/replay_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 1.0637085000016668,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 161,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task6_benchmark",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/logistics/benchmark.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 1.5347040999986348,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 24672,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task7_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/information/tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 1.621853700002248,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 5248,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Task7 information: 1341 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_task7_replay_a",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/information/replay_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 1.1589386999985436,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 161,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task7_replay_b",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/information/replay_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 1.151247500001773,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 161,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task7_benchmark",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/information/benchmark.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 1.3487386999986484,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 35395,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task8_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/decision/tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 6.173885700001847,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 18000,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Task8 decision: 1220 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_task8_replay_a",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/decision/replay_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 1.350809899999149,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 161,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task8_replay_b",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/decision/replay_probe.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 1.2635346999995818,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 161,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_task8_benchmark",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/decision/benchmark.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 5.906602399998519,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 44678,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_military_strategy_test",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://tests/vnext/military_strategy_test.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 30.6095075000012,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 45724,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "VNext military strategic system: 966 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_military_r3_findings_test",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://tests/vnext/military_r3_findings_test.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 134.2719904000005,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 128,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "VNext military R3 findings: 1803 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_military_spatial_capacity_integration_test",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://tests/vnext/military_spatial_capacity_integration_test.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 2.083363499998086,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 143,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "VNext Military/Spatial capacity integration: 68 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_formal_military_authorized_defend_integration_test",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://tests/formal/formal_military_authorized_defend_integration_test.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 6.7942552999993495,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 4961646,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Formal Military authorized DEFEND integration: 120 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_formal_exact_persistence_roundtrip_test",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://tests/formal/formal_exact_persistence_roundtrip_test.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 14.544194599999173,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 362,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Formal Exact Persistence: 31 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_war_spatial__tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/spatial/tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 1.1986026000013226,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 318,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Task9 spatial: 190 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_war_continuity__contract_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/continuity/contract_tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 0.776844699998037,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 126,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Task9 continuity contracts: 56 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_war_continuity__tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/continuity/tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 3.029698799997277,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 119349,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Task9 continuity: 116 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_war_continuous__cursor_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/continuous/cursor_tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 0.3697490000013204,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 112,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Task9 cursors: 9 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_war_continuous__tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/continuous/tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 5.200954699997965,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 10344,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Task9 continuous: 60 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_war_continuous__load_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/continuous/load_tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 7.542962600000465,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 4633,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Task9 load: 101 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_war_continuous__long_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/continuous/long_tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 327.4563534000008,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 15360,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Task9 long: 53 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_war_continuous__profile_after",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/continuous/profile_after.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 176.04758769999899,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 8960,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Task9 profile: 12 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_war_continuous__retirement_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/continuous/retirement_tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 17.805537700001878,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 5734,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Task9 retirement: 43 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_war_cost_attribution__tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/cost_attribution/tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 1.7034363000020676,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 120,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "WWO cost attribution: 52 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_codex_audit",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://tests/codex_audit_regression.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 1.4937823999971442,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 1715,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [],
+      "passed": true
+    },
+    {
+      "name": "g5_world_data",
+      "command": [
+        "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/world_data",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 32.23692300000039,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 8112,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache"
+    },
+    {
+      "name": "g5_gameplay_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/gameplay/tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 1.2527544000004127,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 4057,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Gameplay G1: 48 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_gameplay_participation_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/gameplay/participation_tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 1.9309776000009151,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 866,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Gameplay participation: 109 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_gameplay_scenario_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/gameplay/scenario_tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 7.344677599998249,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 44810,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Gameplay scenarios: 269 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_gameplay_long_tests",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/gameplay/long_tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 61.95490470000004,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 13094,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Gameplay 24h: 90 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_gameplay_benchmark",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/gameplay/benchmark.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 12.28941009999835,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 38603,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Gameplay costs: 360 checks, 0 failures"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g5_gameplay_holdout",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/gameplay/scenario_tests.gd",
+        "--",
+        "--holdout"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 4.802856400001474,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 30964,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+      "fatal": null,
+      "summaries": [
+        "Gameplay scenarios: 174 checks, 0 failures"
+      ],
+      "passed": true
+    }
+  ],
+  "retained_war_steps_passed": 53,
+  "same_platform_original_replay_checks": "all eight unchanged; original tool integrity checks retained; no new custom hash",
+  "raw_retained_driver_exit_note": "exit 1 includes first full-gate timeout; all 53 war/regression steps passed; final unified success is recorded separately",
+  "new_final_steps": [
+    {
+      "name": "g5_interaction_v3",
+      "command": [
+        "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+        "--headless",
+        "--path",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "--script",
+        "res://experiments/war_resolver/interactive_observer/tests.gd"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 1.398436600000423,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 198,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache"
+    },
+    {
+      "name": "g5_e2e_v3",
+      "command": [
+        "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "-B",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934\\experiments\\war_resolver\\interactive_observer\\e2e_tests.py",
+        "--output",
+        "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\e2e_v3",
+        "--long"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 130.1927577999959,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 416,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache"
+    },
+    {
+      "name": "g5_cost_pipe_v3",
+      "command": [
+        "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "-B",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934\\experiments\\war_resolver\\interactive_observer\\costs.py",
+        "--output",
+        "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\COST_PIPE_V3.json"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 49.05439060000208,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 85,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache"
+    },
+    {
+      "name": "g5_cleanup_v3",
+      "command": [
+        "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "-B",
+        "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\measure_final_cleanup.py",
+        "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\COST_CLEANUP_V3.json"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 18.63327030000073,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 50,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache"
+    },
+    {
+      "name": "g5_start_v3",
+      "command": [
+        "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\start_smoke.ps1"
+      ],
+      "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exit": 0,
+      "elapsed_seconds": 1.420969899998454,
+      "aborted": null,
+      "log_complete": true,
+      "log_bytes": 8693,
+      "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache"
+    }
+  ],
+  "unchanged_kernel_cost_step": {
+    "name": "g5_cost_kernel_final",
+    "command": [
+      "D:\\Tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe",
+      "--headless",
+      "--path",
+      "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "--script",
+      "res://experiments/war_resolver/interactive_observer/benchmark.gd"
+    ],
+    "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+    "exit": 0,
+    "elapsed_seconds": 60.61645390000194,
+    "aborted": null,
+    "log_complete": true,
+    "log_bytes": 33338,
+    "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache",
+    "fatal": null,
+    "passed": true,
+    "summaries": [],
+    "sections": 0,
+    "retained_resource_exit_diagnostics": []
+  },
+  "raw_new_driver_exit_note": "exit 1 includes second full-gate native crash; all five new steps passed",
+  "source_frozen_bytes_equal": true,
+  "cleanup_samples": {
+    "name": "g5_process_cleanup_samples",
+    "command": [
+      "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+      "-B",
+      "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\measure_final_cleanup.py",
+      "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\COST_CLEANUP_FINAL.json"
+    ],
+    "cwd": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+    "exit": 0,
+    "elapsed_seconds": 18.42726219999895,
+    "aborted": null,
+    "log_complete": true,
+    "log_bytes": 50,
+    "cache_root": "D:\\programs\\WWO\\research\\military\\runs\\20261010T1934-observer\\runtime-cache"
+  },
+  "continuous_two_choice": {
+    "passed": true,
+    "formal_equal_reference": true,
+    "ledger_balanced": true,
+    "inputs": [
+      {
+        "accepted": true,
+        "accepted_at": 125.0,
+        "delivery_time": 140.0,
+        "id": "mistaken",
+        "intent": {
+          "channel_ref": "command",
+          "command_kind": "goal_intent",
+          "kind": "command",
+          "target": "node_unit_000",
+          "values": {
+            "intent": "advance",
+            "path": [
+              "bridge_BD"
+            ],
+            "return_to_start": false,
+            "target_node": "D"
+          }
+        },
+        "received_at": 125.0,
+        "status": "ISSUED_WAITING"
+      },
+      {
+        "accepted": true,
+        "accepted_at": 260.0,
+        "delivery_time": 275.0,
+        "id": "corrected",
+        "intent": {
+          "channel_ref": "command",
+          "command_kind": "goal_intent",
+          "kind": "command",
+          "target": "node_unit_000",
+          "values": {
+            "intent": "advance",
+            "path": [
+              "AB",
+              "AC",
+              "CD"
+            ],
+            "return_to_start": false,
+            "target_node": "D"
+          }
+        },
+        "received_at": 260.0,
+        "status": "ISSUED_WAITING"
+      }
+    ],
+    "final_node": "D",
+    "closed": {
+      "program_exit": {
+        "calls": 5501,
+        "costs": {
+          "advance_usec": 0,
+          "cleanup_usec": 663,
+          "construction_usec": 6313,
+          "export_usec": 9662,
+          "input_usec": 0,
+          "reading_usec": 0
+        },
+        "reader_work": {
+          "knowledge_records": 480,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 74,
+          "receipt_records": 122,
+          "timeline_records": 988,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        },
+        "released": true,
+        "session": "continuous_choice"
+      },
+      "client_costs": {
+        "io_seconds": 0.43857240003853804,
+        "format_seconds": 0.0019919999976991676
+      }
+    },
+    "125": {
+      "receipts": [],
+      "blocked_reports": []
+    },
+    "140": {
+      "receipts": [
+        {
+          "accepted": true,
+          "accepted_at": 125.0,
+          "delivery_time": 140.0,
+          "id": "mistaken",
+          "intent": {
+            "channel_ref": "command",
+            "command_kind": "goal_intent",
+            "kind": "command",
+            "target": "node_unit_000",
+            "values": {
+              "intent": "advance",
+              "path": [
+                "bridge_BD"
+              ],
+              "return_to_start": false,
+              "target_node": "D"
+            }
+          },
+          "processed_at": 140.0,
+          "reason": "executed_existing_role_input",
+          "received_at": 125.0,
+          "status": "DELIVERED_ACCEPTED"
+        }
+      ],
+      "blocked_reports": []
+    },
+    "200": {
+      "receipts": [
+        {
+          "accepted": true,
+          "accepted_at": 125.0,
+          "delivery_time": 140.0,
+          "id": "mistaken",
+          "intent": {
+            "channel_ref": "command",
+            "command_kind": "goal_intent",
+            "kind": "command",
+            "target": "node_unit_000",
+            "values": {
+              "intent": "advance",
+              "path": [
+                "bridge_BD"
+              ],
+              "return_to_start": false,
+              "target_node": "D"
+            }
+          },
+          "processed_at": 140.0,
+          "reason": "executed_existing_role_input",
+          "received_at": 125.0,
+          "status": "DELIVERED_ACCEPTED"
+        }
+      ],
+      "blocked_reports": [
+        [
+          100.0,
+          147.0
+        ],
+        [
+          150.0,
+          197.0
+        ]
+      ]
+    },
+    "1800": {
+      "receipts": [
+        {
+          "accepted": true,
+          "accepted_at": 125.0,
+          "delivery_time": 140.0,
+          "id": "mistaken",
+          "intent": {
+            "channel_ref": "command",
+            "command_kind": "goal_intent",
+            "kind": "command",
+            "target": "node_unit_000",
+            "values": {
+              "intent": "advance",
+              "path": [
+                "bridge_BD"
+              ],
+              "return_to_start": false,
+              "target_node": "D"
+            }
+          },
+          "processed_at": 140.0,
+          "reason": "executed_existing_role_input",
+          "received_at": 125.0,
+          "status": "DELIVERED_ACCEPTED"
+        },
+        {
+          "accepted": true,
+          "accepted_at": 260.0,
+          "delivery_time": 275.0,
+          "id": "corrected",
+          "intent": {
+            "channel_ref": "command",
+            "command_kind": "goal_intent",
+            "kind": "command",
+            "target": "node_unit_000",
+            "values": {
+              "intent": "advance",
+              "path": [
+                "AB",
+                "AC",
+                "CD"
+              ],
+              "return_to_start": false,
+              "target_node": "D"
+            }
+          },
+          "processed_at": 275.0,
+          "reason": "executed_existing_role_input",
+          "received_at": 260.0,
+          "status": "DELIVERED_ACCEPTED"
+        }
+      ],
+      "blocked_reports": [
+        [
+          100.0,
+          147.0
+        ],
+        [
+          150.0,
+          197.0
+        ]
+      ]
+    }
+  },
+  "old_cli_holdout_marker": "retained old --holdout flag only; seeds347/2027 are regression, not blind holdout",
+  "native_failure_attribution": "UNRESOLVED; original JSON.parse_string world-map loader; isolated original test104/0 and final unchanged full gate passed",
+  "human_acceptance": "NOT_RUN",
+  "formal_integration": "NONE"
+}

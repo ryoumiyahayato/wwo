@@ -1,0 +1,437 @@
+{
+  "checks": 498,
+  "failures": [],
+  "cases": [
+    {
+      "case": "seed71_squad",
+      "elapsed_seconds": 2.5877545999974245,
+      "calls": 1640,
+      "facts": {
+        "input": 10,
+        "delivery": 25
+      }
+    },
+    {
+      "case": "seed71_platoon",
+      "elapsed_seconds": 2.485242000002472,
+      "calls": 5570,
+      "facts": {
+        "bridge_damage": 60,
+        "observation": 100.0,
+        "received": 147.0,
+        "input": 170,
+        "delivery": 185
+      }
+    },
+    {
+      "case": "seed71_soldier",
+      "elapsed_seconds": 3.324143499994534,
+      "calls": 48845,
+      "facts": {
+        "input": 10,
+        "entered_at": 15.0048744017304,
+        "final_health": 0.967707678601977
+      }
+    },
+    {
+      "case": "seed71_company",
+      "elapsed_seconds": 2.47364209999796,
+      "calls": 1665,
+      "facts": {
+        "input": 10,
+        "delivery": 25
+      }
+    },
+    {
+      "case": "seed109_squad",
+      "elapsed_seconds": 2.5161039999948116,
+      "calls": 1640,
+      "facts": {
+        "input": 10,
+        "delivery": 25
+      }
+    },
+    {
+      "case": "seed109_platoon",
+      "elapsed_seconds": 2.3903828999973484,
+      "calls": 5570,
+      "facts": {
+        "bridge_damage": 60,
+        "observation": 100.0,
+        "received": 147.0,
+        "input": 170,
+        "delivery": 185
+      }
+    },
+    {
+      "case": "seed109_soldier",
+      "elapsed_seconds": 3.2888789999997243,
+      "calls": 48845,
+      "facts": {
+        "input": 10,
+        "entered_at": 15.0049088514376,
+        "final_health": 0.967484552782532
+      }
+    },
+    {
+      "case": "seed109_company",
+      "elapsed_seconds": 2.459168100001989,
+      "calls": 1665,
+      "facts": {
+        "input": 10,
+        "delivery": 25
+      }
+    },
+    {
+      "case": "seed347_squad",
+      "elapsed_seconds": 2.456856800003152,
+      "calls": 1640,
+      "facts": {
+        "input": 10,
+        "delivery": 25
+      }
+    },
+    {
+      "case": "seed347_platoon",
+      "elapsed_seconds": 2.3676173999992898,
+      "calls": 5570,
+      "facts": {
+        "bridge_damage": 60,
+        "observation": 100.0,
+        "received": 147.0,
+        "input": 170,
+        "delivery": 185
+      }
+    },
+    {
+      "case": "seed347_soldier",
+      "elapsed_seconds": 3.409263399997144,
+      "calls": 48845,
+      "facts": {
+        "input": 10,
+        "entered_at": 15.004913009193,
+        "final_health": 0.967449139265824
+      }
+    },
+    {
+      "case": "seed347_company",
+      "elapsed_seconds": 2.4715423000016017,
+      "calls": 1665,
+      "facts": {
+        "input": 10,
+        "delivery": 25
+      }
+    },
+    {
+      "case": "seed2027_squad",
+      "elapsed_seconds": 2.498468799996772,
+      "calls": 1640,
+      "facts": {
+        "input": 10,
+        "delivery": 25
+      }
+    },
+    {
+      "case": "seed2027_platoon",
+      "elapsed_seconds": 2.3582317999971565,
+      "calls": 5570,
+      "facts": {
+        "bridge_damage": 60,
+        "observation": 100.0,
+        "received": 147.0,
+        "input": 170,
+        "delivery": 185
+      }
+    },
+    {
+      "case": "seed2027_soldier",
+      "elapsed_seconds": 3.38226289999875,
+      "calls": 48845,
+      "facts": {
+        "input": 10,
+        "entered_at": 15.0049322141526,
+        "final_health": 0.967333275640912
+      }
+    },
+    {
+      "case": "seed2027_company",
+      "elapsed_seconds": 2.506210799998371,
+      "calls": 1665,
+      "facts": {
+        "input": 10,
+        "delivery": 25
+      }
+    },
+    {
+      "case": "host24h_quota1",
+      "time": 86400.0,
+      "calls": 584408,
+      "persistent_host": {
+        "cached_view_bytes": 8316,
+        "pending_inputs": 0,
+        "receipt_bytes": 577,
+        "receipt_ids": 1,
+        "timeline": 9,
+        "timeline_bytes": 4302,
+        "timeline_dropped": 0
+      }
+    },
+    {
+      "case": "host24h_quota7",
+      "time": 86400.0,
+      "calls": 84640,
+      "persistent_host": {
+        "cached_view_bytes": 8316,
+        "pending_inputs": 0,
+        "receipt_bytes": 577,
+        "receipt_ids": 1,
+        "timeline": 9,
+        "timeline_bytes": 4302,
+        "timeline_dropped": 0
+      }
+    },
+    {
+      "case": "host24h_quota31",
+      "time": 86400.0,
+      "calls": 19722,
+      "persistent_host": {
+        "cached_view_bytes": 8316,
+        "pending_inputs": 0,
+        "receipt_bytes": 577,
+        "receipt_ids": 1,
+        "timeline": 9,
+        "timeline_bytes": 4302,
+        "timeline_dropped": 0
+      }
+    }
+  ],
+  "seeds": [
+    71,
+    109,
+    347,
+    2027
+  ],
+  "seed_status": "regression; not holdout",
+  "elapsed_seconds": 130.06336839999858,
+  "passed": true,
+  "contract_checks": 231,
+  "continuous_two_choice": {
+    "passed": true,
+    "formal_equal_reference": true,
+    "ledger_balanced": true,
+    "inputs": [
+      {
+        "accepted": true,
+        "accepted_at": 125.0,
+        "delivery_time": 140.0,
+        "id": "mistaken",
+        "intent": {
+          "channel_ref": "command",
+          "command_kind": "goal_intent",
+          "kind": "command",
+          "target": "node_unit_000",
+          "values": {
+            "intent": "advance",
+            "path": [
+              "bridge_BD"
+            ],
+            "return_to_start": false,
+            "target_node": "D"
+          }
+        },
+        "received_at": 125.0,
+        "status": "ISSUED_WAITING"
+      },
+      {
+        "accepted": true,
+        "accepted_at": 260.0,
+        "delivery_time": 275.0,
+        "id": "corrected",
+        "intent": {
+          "channel_ref": "command",
+          "command_kind": "goal_intent",
+          "kind": "command",
+          "target": "node_unit_000",
+          "values": {
+            "intent": "advance",
+            "path": [
+              "AB",
+              "AC",
+              "CD"
+            ],
+            "return_to_start": false,
+            "target_node": "D"
+          }
+        },
+        "received_at": 260.0,
+        "status": "ISSUED_WAITING"
+      }
+    ],
+    "final_node": "D",
+    "closed": {
+      "program_exit": {
+        "calls": 5501,
+        "costs": {
+          "advance_usec": 0,
+          "cleanup_usec": 663,
+          "construction_usec": 6313,
+          "export_usec": 9662,
+          "input_usec": 0,
+          "reading_usec": 0
+        },
+        "reader_work": {
+          "knowledge_records": 480,
+          "materializations": 0,
+          "personal_records": 0,
+          "reads": 74,
+          "receipt_records": 122,
+          "timeline_records": 988,
+          "unit_table_scans": 0,
+          "world_exports": 0
+        },
+        "released": true,
+        "session": "continuous_choice"
+      },
+      "client_costs": {
+        "io_seconds": 0.43857240003853804,
+        "format_seconds": 0.0019919999976991676
+      }
+    },
+    "125": {
+      "receipts": [],
+      "blocked_reports": []
+    },
+    "140": {
+      "receipts": [
+        {
+          "accepted": true,
+          "accepted_at": 125.0,
+          "delivery_time": 140.0,
+          "id": "mistaken",
+          "intent": {
+            "channel_ref": "command",
+            "command_kind": "goal_intent",
+            "kind": "command",
+            "target": "node_unit_000",
+            "values": {
+              "intent": "advance",
+              "path": [
+                "bridge_BD"
+              ],
+              "return_to_start": false,
+              "target_node": "D"
+            }
+          },
+          "processed_at": 140.0,
+          "reason": "executed_existing_role_input",
+          "received_at": 125.0,
+          "status": "DELIVERED_ACCEPTED"
+        }
+      ],
+      "blocked_reports": []
+    },
+    "200": {
+      "receipts": [
+        {
+          "accepted": true,
+          "accepted_at": 125.0,
+          "delivery_time": 140.0,
+          "id": "mistaken",
+          "intent": {
+            "channel_ref": "command",
+            "command_kind": "goal_intent",
+            "kind": "command",
+            "target": "node_unit_000",
+            "values": {
+              "intent": "advance",
+              "path": [
+                "bridge_BD"
+              ],
+              "return_to_start": false,
+              "target_node": "D"
+            }
+          },
+          "processed_at": 140.0,
+          "reason": "executed_existing_role_input",
+          "received_at": 125.0,
+          "status": "DELIVERED_ACCEPTED"
+        }
+      ],
+      "blocked_reports": [
+        [
+          100.0,
+          147.0
+        ],
+        [
+          150.0,
+          197.0
+        ]
+      ]
+    },
+    "1800": {
+      "receipts": [
+        {
+          "accepted": true,
+          "accepted_at": 125.0,
+          "delivery_time": 140.0,
+          "id": "mistaken",
+          "intent": {
+            "channel_ref": "command",
+            "command_kind": "goal_intent",
+            "kind": "command",
+            "target": "node_unit_000",
+            "values": {
+              "intent": "advance",
+              "path": [
+                "bridge_BD"
+              ],
+              "return_to_start": false,
+              "target_node": "D"
+            }
+          },
+          "processed_at": 140.0,
+          "reason": "executed_existing_role_input",
+          "received_at": 125.0,
+          "status": "DELIVERED_ACCEPTED"
+        },
+        {
+          "accepted": true,
+          "accepted_at": 260.0,
+          "delivery_time": 275.0,
+          "id": "corrected",
+          "intent": {
+            "channel_ref": "command",
+            "command_kind": "goal_intent",
+            "kind": "command",
+            "target": "node_unit_000",
+            "values": {
+              "intent": "advance",
+              "path": [
+                "AB",
+                "AC",
+                "CD"
+              ],
+              "return_to_start": false,
+              "target_node": "D"
+            }
+          },
+          "processed_at": 275.0,
+          "reason": "executed_existing_role_input",
+          "received_at": 260.0,
+          "status": "DELIVERED_ACCEPTED"
+        }
+      ],
+      "blocked_reports": [
+        [
+          100.0,
+          147.0
+        ],
+        [
+          150.0,
+          197.0
+        ]
+      ]
+    }
+  },
+  "old_person_incapacitation": "retained original participation tests109/0; bound client uses unchanged Decision/Role local action gate; no new death model"
+}
