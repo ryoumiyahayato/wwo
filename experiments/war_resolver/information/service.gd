@@ -6,6 +6,7 @@ const State = preload("res://experiments/war_resolver/battle_state.gd")
 const Roles = preload("res://experiments/war_resolver/role_overrides.gd")
 const FACTS: Array[String] = ["position", "status", "ammunition", "fuel", "readiness"]
 const SPATIAL_FACTS: Array[String] = ["route"]
+const GAMEPLAY_FACTS: Array[String] = ["cover", "objective", "contact"]
 const MAX_CLAIMS: int = 8
 const MAX_QUERY: int = 64
 var _state: State
@@ -48,7 +49,7 @@ func configure(state: State, lod: RefCounted, structure: RefCounted, logistics: 
 		if not roles.has(source.get("observer_ref", "")) or not structure.active(str(source.get("scope_ref", ""))) or source.get("origin") not in ["DIRECT", "SUBORDINATE_REPORT", "HQ_REPORT", "EXTERNAL"] or not _quality(source.get("quality")) or not _positive(source.get("precision_km")) or not source.get("fact_kinds") is Array:
 			return false
 		for fact: String in source.fact_kinds:
-			if fact not in FACTS and not (state.spatial_port != null and fact in SPATIAL_FACTS):
+			if fact not in FACTS and not (state.spatial_port != null and fact in SPATIAL_FACTS) and not (state.gameplay_port != null and fact in GAMEPLAY_FACTS):
 				return false
 	for id: String in channels:
 		if not channels[id] is Dictionary:
@@ -84,6 +85,11 @@ func _source_allowed(actor: String, source_id: String, subject_kind: String, sub
 	var source: Dictionary = _sources[source_id]
 	if source.observer_ref != actor or fact not in source.fact_kinds:
 		return false
+	if fact in GAMEPLAY_FACTS:
+		if _state.gameplay_port == null or subject_kind != "unit" or not _structure._nodes[_structure._people[actor].formation_id].has("unit_id") or _structure._nodes[_structure._people[actor].formation_id].unit_id != subject:
+			return false
+		if not _state.gameplay_port.get_ref().participants.observation_opportunity(actor, subject):
+			return false
 	var node_id: String = str(_structure._unit_nodes.get(subject, "")) if subject_kind == "unit" else subject
 	return _structure._contains(str(source.scope_ref), node_id)
 
@@ -120,6 +126,9 @@ func observe(actor: String, request: Dictionary) -> Dictionary:
 	return {"ok": true, "observation_id": request.id}
 
 func _fact(ids: Array[String], kind: String, precision: float) -> Dictionary:
+	if kind in GAMEPLAY_FACTS and _state.gameplay_port != null:
+		work.fact_records_examined += ids.size()
+		return _state.gameplay_port.get_ref().visible_fact(ids, kind)
 	if kind == "route":
 		if ids.size() != 1 or not _state.units[ids[0]].has("spatial"):
 			return {}
@@ -175,6 +184,22 @@ func admit_external_observation(record: Dictionary) -> Dictionary:
 static func _valid_value(kind: String, value: Variant) -> bool:
 	if not value is Dictionary:
 		return false
+	if kind == "cover":
+		if value.size() != 2 or not value.get("node_ref") is String or not value.get("cover_refs") is Array or value.cover_refs.size() > 16:
+			return false
+		for id: Variant in value.cover_refs:
+			if not id is String or str(id).length() > 128:
+				return false
+		return true
+	if kind == "contact":
+		if value.size() != 1 or not value.get("observed_unit_refs") is Array or value.observed_unit_refs.size() > 16:
+			return false
+		for id: Variant in value.observed_unit_refs:
+			if not id is String or str(id).length() > 128:
+				return false
+		return true
+	if kind == "objective":
+		return value.size() == 4 and value.get("target_node") is String and value.get("route_complete") is bool and value.get("local_condition") is bool and value.get("status") in ["active", "complete", "failed", "cancelled"]
 	if kind == "route":
 		if value.size() != 4 or not _keys(value, ["edge_ref", "node_ref", "state", "cause_ref"]) or value.get("state") not in ["AVAILABLE", "BLOCKED", "TRAVELLING", "ARRIVED"]:
 			return false
@@ -259,7 +284,7 @@ func validate_intent(actor: String, command: Dictionary) -> Dictionary:
 	if _state != null and _state.public_pending():
 		return _state.pending_view()
 	# Authority admission only; the provider never receives physical state.
-	if not _roles.has(actor) or command.get("kind") == "local_action":
+	if not _roles.has(actor) or command.get("kind") == "local_action" and _state.gameplay_port == null:
 		return _reject("invalid_decision_actor_or_kind")
 	_actor = actor
 	_gate = "preflight"
@@ -267,6 +292,21 @@ func validate_intent(actor: String, command: Dictionary) -> Dictionary:
 	var result: Dictionary = _roles[actor].apply(command, _token, true)
 	_actor = ""
 	_gate = ""
+	return result
+
+func perform_local_action(actor: String, command: Dictionary) -> Dictionary:
+	if _state.public_pending():
+		return _state.pending_view()
+	if _state.gameplay_port == null or command.get("kind") != "local_action":
+		return _reject("personal_gameplay_not_enabled")
+	var valid: Dictionary = validate_intent(actor, command)
+	if not valid.ok:
+		return valid
+	_actor = actor
+	_gate = "delivery"
+	var result: Dictionary = _roles[actor].apply(command, _token)
+	_gate = ""
+	_actor = ""
 	return result
 
 func accepts_event(id: String, payload: Dictionary, due: float) -> bool:

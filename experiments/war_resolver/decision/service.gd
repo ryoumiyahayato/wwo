@@ -34,7 +34,7 @@ func configure(state: State, information: RefCounted, structure: RefCounted, log
 func enroll(person: String, definition: Dictionary, provider: RefCounted) -> bool:
 	if _state == null or _persons.has(person) or not _information._roles.has(person) or not definition.get("cadence") is float or not is_finite(definition.cadence) or float(definition.cadence) <= 0.0 or not definition.get("targets") is Array or definition.targets.size() > 64 or not definition.get("standing_orders") is Dictionary or not definition.get("urgent") is bool or provider == null:
 		return false
-	if definition.has("command_kind") and (definition.command_kind != "route_intent" or _state.spatial_port == null):
+	if definition.has("command_kind") and not (definition.command_kind == "route_intent" and _state.spatial_port != null or definition.command_kind == "goal_intent" and _state.gameplay_port != null):
 		return false
 	for target: Variant in definition.targets:
 		if not target is String or not _structure._nodes.has(target):
@@ -197,6 +197,10 @@ func _validate(person: String, id: String, intent: Dictionary, context: Dictiona
 		if intent.size() != 5 or intent.get("command_kind") != context.command_kind or intent.get("target") not in context.command_targets or not intent.get("values") is Dictionary or not intent.get("channel_ref") is String:
 			return _reject("invalid_bounded_command_intent")
 		return _information.validate_intent(person, {"id": "input_" + id, "kind": intent.command_kind, "target": intent.target, "values": intent.values})
+	if intent.kind == "local_action":
+		if intent.size() != 2 or not intent.get("values") is Dictionary:
+			return _reject("invalid_personal_intent")
+		return _information.validate_intent(person, {"id": "input_" + id, "kind": "local_action", "target": person, "values": intent.values})
 	if intent.kind == "logistics_request":
 		if intent.size() != 4 or not context.authority_targets.has(intent.get("target", "")) or intent.get("resource_class") not in _logistics.CLASSES or not (intent.get("quantity") is float or intent.get("quantity") is int) or not is_finite(float(intent.quantity)) or float(intent.quantity) <= 0.0 or float(intent.quantity) > 100.0 or not _logistics._allowed(person, "formation", str(intent.target), 2):
 			return _reject("invalid_logistics_intent")
@@ -224,6 +228,10 @@ func _issue(person: String, id: String, intent: Dictionary) -> Dictionary:
 		domain = "COMMUNICATION"
 		result = _information.issue_command(person, {"id": "input_" + id, "channel_ref": intent.channel_ref,
 			"command": {"id": "input_" + id, "kind": intent.command_kind, "target": intent.target, "values": intent.values}})
+		work.commands_issued_from_decision += int(result.ok)
+	elif intent.kind == "local_action":
+		domain = "PERSONAL"
+		result = _information.perform_local_action(person, {"id": "input_" + id, "kind": "local_action", "target": person, "values": intent.values})
 		work.commands_issued_from_decision += int(result.ok)
 	elif intent.kind == "logistics_request":
 		domain = "LOGISTICS"

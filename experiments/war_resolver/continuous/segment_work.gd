@@ -165,6 +165,8 @@ func _candidate(other_id: String) -> void:
 
 func _prepare_unit(id: String) -> void:
 	var unit: Dictionary = state.examine_unit(id)
+	if state.gameplay_port != null:
+		state.gameplay_port.get_ref().note_unit(id)
 	area = kernel._terrain(state, unit)
 	var posture: String = kernel._posture(state, unit)
 	var commitment: float = minf(float(unit.effective), float(unit.get("serviceable_equipment", unit.equipment))) * float(unit.readiness)
@@ -175,6 +177,8 @@ func _prepare_unit(id: String) -> void:
 	var exposure: float = (1.15 if posture == "advance" else 0.65) * (1.0 - float(area.cover))
 	plans[id] = {"posture": posture, "commitment": commitment, "exposure": exposure,
 		"rounds": 0.0, "speed": 0.0, "contacts": [], "advance_inhibited": false}
+	if state.gameplay_port != null:
+		state.gameplay_port.get_ref().participants.prepare(unit, plans[id])
 
 func _finish_plan(id: String) -> void:
 	var unit: Dictionary = state.examine_unit(id)
@@ -183,7 +187,7 @@ func _finish_plan(id: String) -> void:
 	var plan: Dictionary = plans[id]
 	if float(unit.effective) <= kernel._effective_epsilon(state, unit):
 		return
-	if float(unit.cohesion) < float(mission.withdraw_cohesion):
+	if float(unit.cohesion) < float(mission.withdraw_cohesion) and (not mission.has("goal_v1") or mission.status == "active"):
 		plan.posture = "withdraw"
 	if plan.posture in ["advance", "withdraw"] and mission.status == "active":
 		var inhibited: bool = plan.posture == "advance" and float(unit.suppression) >= float(mission.stop_suppression) and float(plan.exposure) > 0.3
@@ -198,6 +202,8 @@ func _finish_plan(id: String) -> void:
 	if unit.has("spatial"):
 		plan.side_frontage = float(side_frontage[unit.side])
 		state.spatial_port.get_ref().prepare_movement(unit, plan)
+	if state.gameplay_port != null:
+		state.gameplay_port.get_ref().participants.constrain_movement(plan)
 	if unit.has("supply_capability"):
 		state.logistics_port.get_ref().prepare_activity(unit, plan)
 
@@ -266,6 +272,8 @@ func _incoming(target_id: String) -> void:
 	var variation: float = state.variation(id + ":" + target_id, int(floorf((state.time - minutes * 60.0) / float(kernel.INTERVALS["AGGREGATE"]))))
 	var fire: float = float(plan.rounds) / float(plan.target_weight) * kernel._contact_weight(state, target_id) * ratio * float(plan.get("contact_factors", {}).get(target_id, 1.0))
 	incoming_losses[target_id] += fire * float(unit.weapon.lethality) * float(target_plan.exposure) * variation * minutes
+	if target_plan.has("personal_ledger"):
+		state.gameplay_port.get_ref().participants.incoming(target_plan, fire * float(unit.weapon.lethality) * variation * minutes)
 	incoming_pressure[target_id] += fire * float((unit.get("supply_capability", {}) as Dictionary).get("suppression_per_round", kernel.SUPPRESSION_PER_ROUND)) * float(target_plan.exposure) / maxf(kernel._contact_weight(state, target_id), float(state.examine_unit(target_id).effective))
 
 func _apply_unit(id: String) -> void:
@@ -279,6 +287,8 @@ func _apply_unit(id: String) -> void:
 		if old_status != state.coordination[id].status:
 			log.append({"time": state.time, "kind": "coordination_changed", "unit_id": id, "status": state.coordination[id].status})
 	var loss: float = minf(float(unit.effective), float(incoming_losses[id]))
+	if plan.has("personal_ledger"):
+		loss = state.gameplay_port.get_ref().participants.settle(unit, plan)
 	var equipment_loss: float = minf(float(unit.equipment), loss)
 	unit.effective = maxf(0.0, float(unit.effective) - loss)
 	unit.casualties += loss
@@ -355,6 +365,10 @@ func _apply_unit(id: String) -> void:
 			moving = moving and float(unit.fuel) > 0.0000001 and float(unit.serviceable_equipment) > 0.0
 	if unit.has("spatial"):
 		moving = moving and state.spatial_port.get_ref().can_move(unit)
+		# A versioned route must produce its first local obstruction feedback before
+		# sleeping. Later identical obstruction stays asleep until a real wake.
+		if mission.has("goal_v1") and mission.status == "active" and not unit.spatial.path.is_empty() and str(unit.spatial.blocked_edge).is_empty() and not state.spatial_port.get_ref().can_move(unit):
+			moving = true
 	# Reserves sleep until an indexed dependency notification or release event.
 	remains_active = remains_active or has_fire or moving or float(unit.suppression) > kernel.SLEEP_EPSILON
 

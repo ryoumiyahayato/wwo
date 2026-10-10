@@ -191,6 +191,8 @@ func process_event(event: Dictionary) -> Dictionary:
 	return {"changed": State.sorted_ids(changed), "retired": State.sorted_ids(retired), "record": record}
 
 func _validate(request: Dictionary, executing: bool) -> Dictionary:
+	if _state.gameplay_port != null and _state.gameplay_port.get_ref().blocks_structure(str(request.kind), request.values):
+		return _reject("gameplay_identity_migration_not_supported")
 	if executing and float(request.effective_time) != _state.time:
 		return _reject("wrong_time_boundary")
 	var person: Dictionary = _people[request.person_id]

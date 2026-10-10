@@ -77,6 +77,8 @@ func coalesce(source_formation: String, leaf_ids: Array[String], level: String =
 	var total_personnel: float = 0.0
 	for id: String in ids:
 		work.leaf_records_examined += 1
+		if _state.gameplay_port != null and _state.gameplay_port.get_ref().requires_detail(id):
+			return {"ok": false, "error": "gameplay_causal_detail_required"}
 		if images.has(id) or not _state.units.has(id) or _state.units[id].has("contact_weight"):
 			return {"ok": false, "error": "leaf_not_detailed"}
 		var unit: Dictionary = _state.units[id]
@@ -299,6 +301,8 @@ func on_spatial_transfer(id: String, source: String, destination: String) -> voi
 	_state.units[id].spatial_node = destination
 
 func prepare_event(event: Dictionary) -> Dictionary:
+	if event.kind == "gameplay":
+		return _state.gameplay_port.get_ref().process_event(event)
 	if event.kind == "spatial":
 		return _state.spatial_port.get_ref().process_event(event)
 	if event.kind == "decision":

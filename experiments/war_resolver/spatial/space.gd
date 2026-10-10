@@ -186,6 +186,17 @@ func detection(source: Dictionary, target: Dictionary) -> float:
 	var target_ground: Dictionary = terrain(target)
 	return float(target_ground.visibility) * (1.0 - float(target_ground.concealment))
 
+func observation(source: Dictionary, target: Dictionary) -> float:
+	if _distance(xy(source), xy(target)) > float(source.weapon.get("observation_range_km", source.weapon.range_km)):
+		return 0.0
+	if not source.has("spatial") or not target.has("spatial"):
+		return 0.0
+	var key: String = str(source.spatial.node) + ":" + str(target.spatial.node)
+	if not _lanes.get(key, {}).get("observe", false):
+		return 0.0
+	var ground: Dictionary = terrain(target)
+	return float(ground.visibility) * (1.0 - float(ground.concealment))
+
 func _next(unit: Dictionary) -> Dictionary:
 	var route: Dictionary = unit.spatial
 	if not str(route.edge).is_empty():
@@ -239,10 +250,14 @@ func movement_eta(unit: Dictionary, plan: Dictionary) -> float:
 
 func move(unit: Dictionary, plan: Dictionary, minutes: float, log: Array[Dictionary]) -> float:
 	var route: Dictionary = unit.spatial
+	var versioned: bool = _state.missions[unit.mission_id].has("goal_v1")
+	if versioned and _state.missions[unit.mission_id].status != "active":
+		return 0.0
 	if plan.get("route_retreat", false) and plan.route_edge.is_empty():
 		# No previous leg exists: remain at this known node, never invent a route.
 		route.path.clear()
-		_state.missions[unit.mission_id].status = "withdrawn"
+		if not versioned:
+			_state.missions[unit.mission_id].status = "withdrawn"
 		unit.action = "withdrawn"
 		log.append({"time": _state.time, "kind": "mission_withdrawn", "unit_id": unit.id, "mission_id": unit.mission_id})
 		return 0.0
@@ -296,10 +311,11 @@ func move(unit: Dictionary, plan: Dictionary, minutes: float, log: Array[Diction
 		route_feedback.emit(str(unit.id), "ARRIVED", "")
 		if plan.get("route_retreat", false):
 			route.path.clear()
-			_state.missions[unit.mission_id].status = "withdrawn"
+			if not versioned:
+				_state.missions[unit.mission_id].status = "withdrawn"
 			unit.action = "withdrawn"
 			log.append({"time": _state.time, "kind": "mission_withdrawn", "unit_id": unit.id, "mission_id": unit.mission_id})
-		elif route.path.is_empty():
+		elif route.path.is_empty() and not versioned:
 			_state.missions[unit.mission_id].status = "complete"
 			log.append({"time": _state.time, "kind": "mission_complete", "unit_id": unit.id, "mission_id": unit.mission_id})
 	return travelled

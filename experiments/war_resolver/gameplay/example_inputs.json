@@ -1,0 +1,5 @@
+{
+  "soldier": [
+    {"id": "one_cover_intent", "at": 10.0, "intent": {"kind": "local_action", "values": {"action": "take_cover"}}}
+  ]
+}

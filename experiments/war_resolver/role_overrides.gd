@@ -140,6 +140,10 @@ func apply(command: Dictionary, communication_owner: RefCounted = null, validate
 			return _reject("wrong_owner_or_layer")
 		if not _keys(values, ["action"]) or not values.get("action", "") in ["wait", "take_cover", "step_forward", "step_back"]:
 			return _reject("invalid_local_action")
+		if _state.gameplay_port != null:
+			var local_check: Dictionary = _state.gameplay_port.get_ref().participants.validate_action(_player_id, str(values.action))
+			if not local_check.ok:
+				return local_check
 	elif kind == "tactical_intent":
 		if rank != 1 or target != owner:
 			return _reject("wrong_owner_or_layer")
@@ -154,6 +158,13 @@ func apply(command: Dictionary, communication_owner: RefCounted = null, validate
 			var route_check: Dictionary = _state.spatial_port.get_ref().validate_path(_unit(str(_node(leaf).unit_id)), values.path, values.return_to_start)
 			if not route_check.ok:
 				return route_check
+	elif kind == "goal_intent":
+		if _state.gameplay_port == null:
+			return _reject("wrong_layer")
+		if not _active(target) or not (rank == 1 and target == owner or rank >= 2 and (target == owner and rank >= 3 or _scope_children(owner).has(target))):
+			return _reject("wrong_owner_or_layer")
+		if _scope_leaves(target).is_empty():
+			return _reject("empty_scope")
 	elif kind in ["mission", "coordination"]:
 		# Higher rank does not inherit direct ownership of lower decision inputs.
 		if rank < 2 or not _active(target) or not (target == owner and rank >= 3 or _scope_children(owner).has(target)):
@@ -177,6 +188,13 @@ func apply(command: Dictionary, communication_owner: RefCounted = null, validate
 	var affected: Array[String] = []
 	if kind != "local_action":
 		affected = State.sorted_ids(_scope_leaves(target))
+	if kind == "goal_intent":
+		var goal_units: Array[String] = []
+		for leaf: String in affected:
+			goal_units.append(str(_node(leaf).unit_id))
+		var goal_check: Dictionary = _state.gameplay_port.get_ref().validate_batch(_player_id, goal_units, values, id)
+		if not goal_check.ok:
+			return goal_check
 	# Preflight every resource ID before committing anything, including clocks/IDs.
 	for leaf: String in affected:
 		var unit_id: String = str(_node(leaf).unit_id)
@@ -184,6 +202,10 @@ func apply(command: Dictionary, communication_owner: RefCounted = null, validate
 		# Reject the whole command rather than orphaning reserves on an old ID.
 		if kind in ["mission", "route_intent"] and not (_state.mission_dependents.get(_unit(unit_id).mission_id, {}) as Dictionary).is_empty():
 			return _reject("mission_has_dependents")
+		if kind == "goal_intent" and not (_state.mission_dependents.get(_unit(unit_id).mission_id, {}) as Dictionary).is_empty() and not _state.missions[_unit(unit_id).mission_id].has("goal_v1"):
+			return _reject("legacy_dependency_migration_required")
+		if kind in ["mission", "route_intent"] and _state.missions[_unit(unit_id).mission_id].has("goal_v1"):
+			return _reject("versioned_goal_intent_required")
 		if kind == "mission" and _state.missions.has("role_" + id + "_" + unit_id):
 			return _reject("mission_id_collision")
 		if kind == "coordination" and _state.event_ids.has("role_release_" + id + "_" + unit_id):
@@ -196,20 +218,32 @@ func apply(command: Dictionary, communication_owner: RefCounted = null, validate
 			_lod_port.get_ref().materialize_leaf(str(_node(leaf).unit_id), "subordinate_command")
 	var delta: Dictionary = {"units": {}, "missions": {}, "tactical_intents": {}, "command_coordination": {}, "personal_actions": {}}
 	if kind == "local_action":
-		var unit: Dictionary = _unit(str(_node(owner).unit_id))
-		var personal: Dictionary = _personal_actions.get(_player_id, {"offset_km": 0.0}).duplicate(true)
-		var step: float = 0.005 if values.action == "step_forward" else (-0.005 if values.action == "step_back" else 0.0)
-		personal.offset_km = clampf(float(personal.offset_km) + step, -0.02, 0.02)
-		personal.action = values.action
-		personal.time = _state.time
-		personal.position = clampf(float(unit.position) + float(personal.offset_km), 0.0, float(_state.areas[unit.area_id].size_km))
-		_personal_actions[_player_id] = personal
-		delta.personal_actions[_player_id] = personal.duplicate(true)
+		if _state.gameplay_port != null:
+			var personal_result: Dictionary = _state.gameplay_port.get_ref().participants.apply_action(_player_id, id, str(values.action))
+			assert(personal_result.ok)
+			delta.personal_actions[_player_id] = personal_result
+		else:
+			var unit: Dictionary = _unit(str(_node(owner).unit_id))
+			var personal: Dictionary = _personal_actions.get(_player_id, {"offset_km": 0.0}).duplicate(true)
+			var step: float = 0.005 if values.action == "step_forward" else (-0.005 if values.action == "step_back" else 0.0)
+			personal.offset_km = clampf(float(personal.offset_km) + step, -0.02, 0.02)
+			personal.action = values.action
+			personal.time = _state.time
+			personal.position = clampf(float(unit.position) + float(personal.offset_km), 0.0, float(_state.areas[unit.area_id].size_km))
+			_personal_actions[_player_id] = personal
+			delta.personal_actions[_player_id] = personal.duplicate(true)
 	elif kind == "tactical_intent":
 		var unit_id: String = str(_node(target).unit_id)
 		_state.tactical_intents[unit_id] = values.duplicate(true)
 		delta.tactical_intents[unit_id] = values.duplicate(true)
 		_state.wake(str(_state.units[unit_id].area_id))
+	elif kind == "goal_intent":
+		for leaf: String in affected:
+			var unit_id: String = str(_node(leaf).unit_id)
+			var result: Dictionary = _state.gameplay_port.get_ref().apply_goal(unit_id, id, _player_id, values)
+			assert(result.ok)
+			delta.units[unit_id] = _state.units[unit_id].duplicate(true)
+			delta.missions[_state.units[unit_id].mission_id] = _state.missions[_state.units[unit_id].mission_id].duplicate(true)
 	elif kind == "route_intent":
 		for leaf: String in affected:
 			var unit_id: String = str(_node(leaf).unit_id)
@@ -325,6 +359,8 @@ func command_scope() -> Dictionary:
 		targets.local_action = [_player_id]
 	elif rank == 1:
 		targets.tactical_intent = [owner]
+		if _state.gameplay_port != null:
+			targets.goal_intent = [owner]
 	else:
 		var eligible: Array[String] = []
 		if rank >= 3 and not _scope_leaves(owner).is_empty():
@@ -334,6 +370,8 @@ func command_scope() -> Dictionary:
 				eligible.append(child)
 		targets.mission = eligible.duplicate()
 		targets.coordination = eligible.duplicate()
+		if _state.gameplay_port != null:
+			targets.goal_intent = eligible.duplicate()
 	return {"person_id": _player_id, "role": person.role, "formation_id": owner,
 		"targets": targets, "input_interval_seconds": INPUT_SECONDS[rank],
 		"next_input_at": _next_input.get(_player_id, 0.0)}

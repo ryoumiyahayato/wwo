@@ -381,6 +381,15 @@ func _step() -> void:
 				scope_index = 0
 				phase = "control_units"
 			else:
+				if state.gameplay_port != null:
+					state.gameplay_port.get_ref().begin_commit()
+					phase = "gameplay_commit"
+				else:
+					phase = "changed_units"
+					ids = State.sorted_ids(changes)
+					cursor = 0
+		"gameplay_commit":
+			if state.gameplay_port.get_ref().commit_step():
 				phase = "changed_units"
 				ids = State.sorted_ids(changes)
 				cursor = 0

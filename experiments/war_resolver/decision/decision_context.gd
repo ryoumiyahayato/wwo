@@ -24,6 +24,8 @@ func build(person: String, time: float, definition: Dictionary, next_time: float
 		if rank == 1 and id == position.formation_id or rank >= 2 and (id == position.formation_id and rank >= 3 or _structure.parent(id) == position.formation_id):
 			command_targets.append(id)
 	var kinds: Array[String] = ["keep"]
+	if rank == 0 and _information._state.gameplay_port != null:
+		kinds.append("local_action")
 	if rank >= 1:
 		kinds.append("command")
 	if rank >= 2:

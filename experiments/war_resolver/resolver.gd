@@ -89,6 +89,8 @@ func resolve_until(state: State, target_game_time: float, resolution_policy: Str
 			output_events.append({"time": state.time, "kind": "area_transition", "unit_id": unit.id, "from": source, "to": transfer.destination})
 		for area_id: String in State.sorted_ids(control_areas):
 			_update_control(state, area_id, output_events, area_changes)
+		if state.gameplay_port != null:
+			state.gameplay_port.get_ref().commit_all()
 	var counter_delta: Dictionary = {}
 	for key: String in state.counters:
 		counter_delta[key] = int(state.counters[key]) - int(counters_before[key])
@@ -129,7 +131,7 @@ func _process_due_one(state: State, log: Array[Dictionary], changes: Dictionary,
 	var event: Dictionary = state.pop_event()
 	var payload: Dictionary = event.payload
 	state.counters.events_processed += 1
-	if event.kind in ["structure", "logistics", "communication", "decision", "spatial"]:
+	if event.kind in ["structure", "logistics", "communication", "decision", "spatial", "gameplay"]:
 		log.append({"time": state.time, "kind": event.kind, "id": event.id, "result": transition.get("record", {})})
 		return
 	if event.kind == "order":
@@ -161,6 +163,8 @@ func _process_due_one(state: State, log: Array[Dictionary], changes: Dictionary,
 
 func _posture(state: State, unit: Dictionary) -> String:
 	var mission: Dictionary = state.missions[unit.mission_id]
+	if state.gameplay_port != null and mission.has("goal_v1"):
+		return state.gameplay_port.get_ref().posture(unit)
 	if mission.status != "active":
 		return "hold"
 	var assignment: Dictionary = state.coordination.get(unit.id, {})
