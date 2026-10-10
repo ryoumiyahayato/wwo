@@ -26,7 +26,8 @@ func _initialize() -> void:
 			break
 		var response: Dictionary = {"ok": false, "layer": "PROGRAM_STATUS", "error": "incomplete_frame"}
 		if frame.size() == Session.FRAME:
-			var value: Variant = JSON.parse_string(frame.get_string_from_utf8().strip_edges())
+			var parser: JSON = JSON.new()
+			var value: Variant = parser.data if parser.parse(frame.get_string_from_utf8().strip_edges()) == OK else null
 			response = session.handle(value) if value is Dictionary else {"ok": false, "layer": "PROGRAM_STATUS", "error": "invalid_json_frame"}
 		print("PERSON_BOUND=" + JSON.stringify(response))
 	if not str(options.diagnostic).is_empty():
