@@ -1,0 +1,69 @@
+{
+  "status": "UNCOMMITTED_CANDIDATE_FROZEN_AT_STOP",
+  "git_head": "2fb4f70199b98de4ed9173888a8f63e8ca6b244f",
+  "validated_previous_runtime_head": "12025f391ea16b1ed040399cc1beff7fec516d91",
+  "base_document_head": "2fb4f70199b98de4ed9173888a8f63e8ca6b244f",
+  "branch": "experiment/war-person-objective-attachment-v0-20261011T0010",
+  "worktree": "D:\\programs\\WWO\\research\\military\\wwo-person-attachment-20261011T0010",
+  "git_common_dir": "D:/programs/WWO/wwo/.git",
+  "files": [
+    "experiments/war_resolver/attachment_continuity/e2e_tests.py",
+    "experiments/war_resolver/attachment_continuity/reader.gd",
+    "experiments/war_resolver/attachment_continuity/reader.gd.uid",
+    "experiments/war_resolver/attachment_continuity/scenario.gd",
+    "experiments/war_resolver/attachment_continuity/scenario.gd.uid",
+    "experiments/war_resolver/attachment_continuity/scripts/A1.txt",
+    "experiments/war_resolver/attachment_continuity/scripts/A2.txt",
+    "experiments/war_resolver/attachment_continuity/scripts/A2_old.txt",
+    "experiments/war_resolver/attachment_continuity/scripts/A2_soldier.txt",
+    "experiments/war_resolver/attachment_continuity/scripts/A3.txt",
+    "experiments/war_resolver/attachment_continuity/server.gd",
+    "experiments/war_resolver/attachment_continuity/server.gd.uid",
+    "experiments/war_resolver/attachment_continuity/session.gd",
+    "experiments/war_resolver/attachment_continuity/session.gd.uid",
+    "experiments/war_resolver/attachment_continuity/tests.gd",
+    "experiments/war_resolver/decision/service.gd",
+    "experiments/war_resolver/interactive_observer/client.py",
+    "experiments/war_resolver/interactive_observer/reference.gd",
+    "experiments/war_resolver/interactive_observer/session.gd",
+    "experiments/war_resolver/structure/service.gd"
+  ],
+  "bytes": 124616,
+  "method": "direct byte equality working files == frozen_source_stop; no custom SHA/MD5 calculation",
+  "freeze_equal": true,
+  "final_candidate_validation": "NOT_COMPLETE",
+  "runtime_commit": "NOT_CREATED: original unified validation not run before budget stop",
+  "document_commit": "NOT_CREATED",
+  "runtime_push": "NONE",
+  "PR": "NONE",
+  "protected_observations": [
+    {
+      "path": "D:\\WWO\\wwo",
+      "exists": false
+    },
+    {
+      "path": "D:\\programs\\WWO\\wwo",
+      "exists": true,
+      "head": "622b260bc641036c23efbf6345a548485ac6c475",
+      "branch": "canonical/current-world",
+      "head_equal_start": true,
+      "status_equal_start": false
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "exists": true,
+      "head": "2fb4f70199b98de4ed9173888a8f63e8ca6b244f",
+      "branch": "experiment/war-person-observer-v0-20261010T1934",
+      "head_equal_start": true,
+      "status_equal_start": true
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "exists": true,
+      "head": "6be7343c799e178c2986a69831d615310a370183",
+      "branch": "experiment/war-gameplay-causal-slice-v1-20261010T1217",
+      "head_equal_start": true,
+      "status_equal_start": true
+    }
+  ]
+}
