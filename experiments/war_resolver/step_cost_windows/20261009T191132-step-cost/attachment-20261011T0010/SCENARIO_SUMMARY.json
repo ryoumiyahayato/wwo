@@ -1,0 +1,60 @@
+{
+  "status": "PARTIAL_WITH_ACCEPTED_CHECKPOINT",
+  "g2": {
+    "checks": 1284,
+    "failures": 0,
+    "boundary_events": 256,
+    "immediate_neutral_all": true,
+    "seeds": [
+      71,
+      109,
+      347,
+      2027
+    ],
+    "quota": [
+      0,
+      1,
+      7,
+      31
+    ],
+    "simulation_end": 3600,
+    "source_relation_to_frozen_stop": "Two later changes not covered by this G2 run: end audit supply_receipts and sanitized structural error text"
+  },
+  "real_e2e": {
+    "checks": 42,
+    "failures": [
+      "KeyError: 'observer_ref'"
+    ],
+    "cases": [
+      {
+        "case": "seed71_A1_soldier",
+        "elapsed_seconds": 3.1622653000085847,
+        "calls": 25959,
+        "materializations": 0,
+        "formal_match": true
+      },
+      {
+        "case": "seed71_A2_recipient",
+        "elapsed_seconds": 2.397151799988933,
+        "calls": 3657,
+        "materializations": 0,
+        "formal_match": true
+      }
+    ],
+    "seeds": [
+      71,
+      109,
+      347,
+      2027
+    ],
+    "seed_status": "existing regression seeds; not holdout",
+    "passed": false
+  },
+  "missing": [
+    "Windows unified",
+    "retained gates",
+    "24h normal/quota",
+    "cost comparisons",
+    "query-density and large-world comparisons"
+  ]
+}
