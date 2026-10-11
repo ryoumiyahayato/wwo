@@ -1,0 +1,31 @@
+{
+  "status": "NOT_RUN_AS_REQUIRED_COST_COMPARISON",
+  "observed_local_counts_only": {
+    "already_detailed_leaf_materializations": 0,
+    "unrelated_live_proxies": 2,
+    "six_cycle_example": {
+      "continuity_work": {
+        "dependency_records": 72,
+        "leaf_previews": 18,
+        "relation_events": 12
+      },
+      "end": 3600.0,
+      "live_goals": 1,
+      "live_persons": 1,
+      "pending": 0,
+      "quota": 0,
+      "reader_work": {
+        "authority_candidates_read": 10,
+        "authority_refreshes": 2,
+        "cache_invalidations": 12
+      },
+      "scene": "A3",
+      "seed": 71,
+      "structure_history": 12
+    },
+    "event_measurement": "256 same-time neutrality hooks include test copies; not exclusive structure timing or benchmark"
+  },
+  "seven_required_size_comparisons": "NOT_RUN",
+  "memory_claim": "NONE",
+  "world_scan_claim": "NOT_ESTABLISHED_THIS_CYCLE"
+}
