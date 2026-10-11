@@ -1,0 +1,72 @@
+{
+  "status": "PARTIAL_WITH_ACCEPTED_CHECKPOINT",
+  "complete": false,
+  "passed": false,
+  "g2": {
+    "checks": 1284,
+    "failures": 0,
+    "boundary_events": 256,
+    "immediate_neutral_all": true,
+    "seeds": [
+      71,
+      109,
+      347,
+      2027
+    ],
+    "quota": [
+      0,
+      1,
+      7,
+      31
+    ],
+    "simulation_end": 3600,
+    "source_relation_to_frozen_stop": "Two later changes not covered by this G2 run: end audit supply_receipts and sanitized structural error text"
+  },
+  "real_e2e": {
+    "checks": 42,
+    "failures": [
+      "KeyError: 'observer_ref'"
+    ],
+    "cases": [
+      {
+        "case": "seed71_A1_soldier",
+        "elapsed_seconds": 3.1622653000085847,
+        "calls": 25959,
+        "materializations": 0,
+        "formal_match": true
+      },
+      {
+        "case": "seed71_A2_recipient",
+        "elapsed_seconds": 2.397151799988933,
+        "calls": 3657,
+        "materializations": 0,
+        "formal_match": true
+      }
+    ],
+    "seeds": [
+      71,
+      109,
+      347,
+      2027
+    ],
+    "seed_status": "existing regression seeds; not holdout",
+    "passed": false
+  },
+  "windows_unified_47_sections": "NOT_RUN_THIS_CYCLE",
+  "retained_algorithm_gameplay_observer_gates": "NOT_RUN_THIS_CYCLE",
+  "original_and_new_24h_quota": "NOT_RUN_THIS_CYCLE",
+  "cost_benchmark": "NOT_RUN",
+  "query_density_and_sleep10000": "NOT_RUN",
+  "human_acceptance": "NOT_RUN",
+  "prior_passes_not_reused": true,
+  "failures_preserved": [
+    "first before probe assertion: future destination was already current parent; corrected fixture",
+    "before-probe driver argument placement: WinError 2",
+    "initial A1 runtime typed Array mismatch; typed local fixed",
+    "initial G2 typed ternary Array mismatch; typed assign fixed",
+    "G2 v2: four test-only assumptions about report.ok; corrected to actual mode",
+    "G3: KeyError observer_ref in test; not fixed or rerun after budget stop"
+  ],
+  "source_frozen_stop_direct_bytes_equal": true,
+  "owned_processes_at_stop": "No matching owned Godot process observed"
+}
