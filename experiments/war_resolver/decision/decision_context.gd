@@ -35,5 +35,5 @@ func build(person: String, time: float, definition: Dictionary, next_time: float
 		"command_issue_ready_at": _information._next_issue.get(person, 0.0),
 		"decision_time": time, "received_claims": received.entries, "knowledge_total": received.total_matching,
 		"authority_targets": targets, "command_targets": command_targets, "output_kinds": kinds,
-		"command_kind": definition.get("command_kind", "tactical_intent" if rank == 1 else "mission"), "standing_orders": definition.standing_orders.duplicate(true),
+		"command_kind": "tactical_intent" if rank == 1 else "mission", "standing_orders": definition.standing_orders.duplicate(true),
 		"cadence_seconds": definition.cadence, "next_opportunity": next_time, "ready_at": ready}

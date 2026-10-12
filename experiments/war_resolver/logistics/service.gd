@@ -183,8 +183,6 @@ func on_structure(result: Dictionary) -> void:
 		_index(id, id, _structure._path(str(_structure._unit_nodes[id])))
 
 func responsibility(unit_id: String) -> Dictionary:
-	if _state != null and _state.public_pending():
-		return _state.pending_view()
 	work.responsibility_queries += 1
 	return _structure.relation(str(_structure._unit_nodes.get(unit_id, "")))
 
@@ -200,8 +198,6 @@ func _allowed(person_id: String, target_kind: String, target: String, rank: int)
 	return _structure._contains(str(person.formation_id), node_id)
 
 func submit(person_id: String, command: Dictionary) -> Dictionary:
-	if _state != null and _state.public_pending():
-		return _state.pending_view()
 	if _state == null or not command.get("id") is String or str(command.id).is_empty() or not command.get("kind") is String or _used.has(command.id):
 		return _reject("invalid_or_duplicate_request")
 	if command.kind == "request":
@@ -390,8 +386,6 @@ func _record(record: Dictionary, result: Dictionary) -> Dictionary:
 	return {"changed": result.get("changed", []), "retired": result.get("retired", []), "record": record.duplicate(true)}
 
 func audit() -> Dictionary:
-	if _state != null and _state.public_pending():
-		return _state.pending_view()
 	# Explicit diagnostic export; this global scan is never a resolver dependency.
 	var mass: Dictionary = {"AMMUNITION": 0.0, "FUEL": 0.0, "SPARES": 0.0}
 	for id: String in _depots:
@@ -409,8 +403,6 @@ func audit() -> Dictionary:
 	return {"initial": _initial.duplicate(), "current_plus_spent_and_transit": mass}
 
 func snapshot() -> Dictionary:
-	if _state != null and _state.public_pending():
-		return _state.pending_view()
 	return {"time": _state.time, "depots": _depots.duplicate(true), "maintenance_capacities": _capacities.duplicate(true),
 		"requests": _requests.duplicate(true), "deliveries": _deliveries.duplicate(true), "maintenance": _maintenance.duplicate(true),
 		"history": history.duplicate(true), "initial": _initial.duplicate(), "ledger": _state.logistics_ledger.duplicate(), "work": work.duplicate()}

@@ -3,15 +3,6 @@ extends RefCounted
 
 const VERSION: String = "land-war-resolver-v0.1"
 var time: float = 0.0
-var settlement_pending: bool = false
-var inside_kernel_work: bool = false
-var pending_committed_time: float = 0.0
-
-func pending_view() -> Dictionary:
-	return {"ok": false, "status": "PENDING", "time": pending_committed_time, "committed_time": pending_committed_time}
-
-func public_pending() -> bool:
-	return settlement_pending and not inside_kernel_work
 var seed: int = 1
 var random_state: Dictionary = {"algorithm": "keyed-mod-prime-v1", "draws": 0}
 var units: Dictionary = {}
@@ -37,7 +28,6 @@ var materialization_port: WeakRef = null
 var lod_work: Dictionary = {}
 var information_port: WeakRef = null
 var decision_port: WeakRef = null
-var spatial_port: WeakRef = null
 var logistics_port: WeakRef = null
 var logistics_ledger: Dictionary = {}
 var structure_port: WeakRef = null
@@ -112,13 +102,9 @@ func set_coordination(unit_id: String, assignment: Dictionary) -> void:
 
 
 func schedule_event(id: String, due: float, kind: String, payload: Dictionary) -> bool:
-	if public_pending():
-		return false
 	if id.is_empty() or event_ids.has(id) or not is_finite(due) or due < time:
 		return false
-	if kind not in ["order", "reinforcement", "area_change", "coordination_release", "structure", "logistics", "communication", "decision", "spatial"]:
-		return false
-	if kind == "spatial" and (spatial_port == null or spatial_port.get_ref() == null or not spatial_port.get_ref().accepts_event(id, payload, due)):
+	if kind not in ["order", "reinforcement", "area_change", "coordination_release", "structure", "logistics", "communication", "decision"]:
 		return false
 	if kind == "structure" and (structure_port == null or structure_port.get_ref() == null or not structure_port.get_ref().accepts_event(id, payload, due)):
 		return false
@@ -154,10 +140,6 @@ func schedule_event(id: String, due: float, kind: String, payload: Dictionary) -
 		record.phase = 5
 	elif decision_port != null and int(record.get("phase", 0)) >= 5:
 		record.phase += 1
-	if kind == "spatial":
-		# External spatial facts share the old area-change phase. Old kinds keep
-		# their exact predecessor ordering, including unbound phase/ID semantics.
-		record.phase = 9 if decision_port != null else (8 if information_port != null else (6 if logistics_port != null else (4 if structure_port != null else 0)))
 	var unit_ref: String = str(payload.unit.id) if kind == "reinforcement" else str(payload.get("unit_id", ""))
 	if not unit_ref.is_empty():
 		if structure_port != null:
@@ -239,8 +221,6 @@ func variation(key: String, epoch: int) -> float:
 
 
 func snapshot() -> Dictionary:
-	if public_pending():
-		return pending_view()
 	# Explicit diagnostic export may scan the snapshot; resolve_until never uses it.
 	return {"version": VERSION, "time": time, "seed": seed,
 		"random_state": random_state.duplicate(true), "units": units.duplicate(true),
