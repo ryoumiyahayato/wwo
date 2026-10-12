@@ -1,0 +1,3998 @@
+{
+  "recorded_date": "2026-10-06",
+  "platform": "Linux headless",
+  "engine_version": "4.6.3.stable.official.7d41c59c4",
+  "production_integration": "NONE",
+  "task": "2 - role-scoped decision/command overrides",
+  "dependency": {
+    "draft_pr": "https://github.com/ryoumiyahayato/wwo/pull/103",
+    "branch": "experiment/land-war-resolver-v0-20261006",
+    "sha": "524b669214469e4b343830afef8f4ef8768ec225",
+    "merged": false,
+    "windows_ci": {
+      "37540008017": "success",
+      "37540007933": "success",
+      "37540007951": "success"
+    }
+  },
+  "formal_baseline": {
+    "branch": "canonical/current-world",
+    "sha": "622b260bc641036c23efbf6345a548485ac6c475"
+  },
+  "experimental_branch": "experiment/military-role-overrides-v0-20261006",
+  "command": "python3 -B experiments/war_resolver/validate.py --godot godot --regressions --output builds/role-final-verified",
+  "resolver_checks": 1876,
+  "role_checks": 3762,
+  "retained_checks": 2988,
+  "failures": 0,
+  "resolver_replay_sha256": "8ca88032a57178deeded30379798dbb5e8eb8ee87ca4526e49a0de3f8d457f8a",
+  "role_replay_sha256": "db9392ed36557206aa05af062e0c9a55e9565b903c7ff78051021373762f36b3",
+  "role_scale_counters": {
+    "areas_examined": 36,
+    "contacts_resolved": 1728,
+    "events_processed": 0,
+    "segments": 36,
+    "units_examined": 9576
+  },
+  "role_scale": {
+    "active_squads": 10,
+    "commanded_squads": 6,
+    "sleeping_areas": 10000,
+    "sleeping_squads": 30000,
+    "policy": "AGGREGATE",
+    "active_outcomes_and_counters_match": true,
+    "combat_records_created": 0
+  },
+  "benchmarks": [
+    {
+      "case": "few_active_detailed",
+      "initial_active_areas": 1,
+      "initial_active_units": 10,
+      "simulated_seconds": 3600,
+      "sleeping_areas": 0,
+      "sleeping_units": 0,
+      "wall_usec": 78280,
+      "static_memory_delta": 1093060,
+      "summary": {
+        "control": {
+          "field": "contested"
+        },
+        "counters": {
+          "areas_examined": 126,
+          "contacts_resolved": 6048,
+          "events_processed": 0,
+          "segments": 126,
+          "units_examined": 33516
+        },
+        "missions": {
+          "mission_attack_00": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_00",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_attack_01": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_01",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_attack_02": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_02",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_attack_03": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_03",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_attack_04": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_04",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_attack_05": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_05",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_defend_00": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_defend_00",
+            "objective": 4.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_defend_01": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_defend_01",
+            "objective": 4.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_defend_02": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_defend_02",
+            "objective": 4.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_defend_03": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_defend_03",
+            "objective": 4.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          }
+        },
+        "policy": "DETAILED",
+        "scope": "units and areas examined or changed during the latest resolve call",
+        "seed": 71,
+        "time": 3600.0,
+        "totals": {
+          "ammo_spent": 4237.71511886745,
+          "ammunition": 9600.0,
+          "casualties": 23.1664296110986,
+          "equipment": 120.0,
+          "equipment_lost": 23.1664296110986,
+          "personnel": 120.0
+        },
+        "units": {
+          "attack_00": {
+            "action": "hold",
+            "ammo_spent": 454.78051215126,
+            "ammunition": 505.21948784874,
+            "area_id": "field",
+            "casualties": 1.75441676247513,
+            "cohesion": 0.876899301563536,
+            "distance_moved": 1.5,
+            "effective": 10.2455832375249,
+            "equipment": 10.2455832375249,
+            "equipment_lost": 1.75441676247513,
+            "fatigue": 0.24,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.102710729720825
+          },
+          "attack_01": {
+            "action": "hold",
+            "ammo_spent": 457.856578315314,
+            "ammunition": 502.143421684686,
+            "area_id": "field",
+            "casualties": 1.68645526206441,
+            "cohesion": 0.879731030747316,
+            "distance_moved": 1.5,
+            "effective": 10.3135447379356,
+            "equipment": 10.3135447379356,
+            "equipment_lost": 1.68645526206441,
+            "fatigue": 0.24,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.102072008463689
+          },
+          "attack_02": {
+            "action": "hold",
+            "ammo_spent": 456.760082276243,
+            "ammunition": 503.239917723757,
+            "area_id": "field",
+            "casualties": 1.71234177847014,
+            "cohesion": 0.878652425897077,
+            "distance_moved": 1.5,
+            "effective": 10.2876582215298,
+            "equipment": 10.2876582215298,
+            "equipment_lost": 1.71234177847014,
+            "fatigue": 0.24,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.10231275691123
+          },
+          "attack_03": {
+            "action": "hold",
+            "ammo_spent": 456.9405259846,
+            "ammunition": 503.059474015399,
+            "area_id": "field",
+            "casualties": 1.70846670997199,
+            "cohesion": 0.8788138870845,
+            "distance_moved": 1.5,
+            "effective": 10.291533290028,
+            "equipment": 10.291533290028,
+            "equipment_lost": 1.70846670997199,
+            "fatigue": 0.24,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.102276370915945
+          },
+          "attack_04": {
+            "action": "hold",
+            "ammo_spent": 455.489149591288,
+            "ammunition": 504.510850408713,
+            "area_id": "field",
+            "casualties": 1.73932952298707,
+            "cohesion": 0.877527936542205,
+            "distance_moved": 1.5,
+            "effective": 10.2606704770129,
+            "equipment": 10.2606704770129,
+            "equipment_lost": 1.73932952298707,
+            "fatigue": 0.24,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.10256770419923
+          },
+          "attack_05": {
+            "action": "hold",
+            "ammo_spent": 454.039917121659,
+            "ammunition": 505.960082878341,
+            "area_id": "field",
+            "casualties": 1.77019736748956,
+            "cohesion": 0.876241776354602,
+            "distance_moved": 1.5,
+            "effective": 10.2298026325104,
+            "equipment": 10.2298026325104,
+            "equipment_lost": 1.77019736748956,
+            "fatigue": 0.24,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.102860757728291
+          },
+          "defend_00": {
+            "action": "hold",
+            "ammo_spent": 376.845898124854,
+            "ammunition": 583.154101875145,
+            "area_id": "field",
+            "casualties": 3.15685662959131,
+            "cohesion": 0.818464307100362,
+            "distance_moved": 0.0,
+            "effective": 8.84314337040869,
+            "equipment": 8.84314337040869,
+            "equipment_lost": 3.15685662959131,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.486409502643328
+          },
+          "defend_01": {
+            "action": "hold",
+            "ammo_spent": 375.004896614701,
+            "ammunition": 584.995103385299,
+            "area_id": "field",
+            "casualties": 3.21396182941299,
+            "cohesion": 0.816084923774459,
+            "distance_moved": 0.0,
+            "effective": 8.786038170587,
+            "equipment": 8.786038170587,
+            "equipment_lost": 3.21396182941299,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.489189252504281
+          },
+          "defend_02": {
+            "action": "hold",
+            "ammo_spent": 374.54633819738,
+            "ammunition": 585.45366180262,
+            "area_id": "field",
+            "casualties": 3.22426097501005,
+            "cohesion": 0.815655792707914,
+            "distance_moved": 0.0,
+            "effective": 8.77573902498994,
+            "equipment": 8.77573902498994,
+            "equipment_lost": 3.22426097501005,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.489816116163885
+          },
+          "defend_03": {
+            "action": "hold",
+            "ammo_spent": 375.451220490151,
+            "ammunition": 584.54877950985,
+            "area_id": "field",
+            "casualties": 3.20014277362599,
+            "cohesion": 0.816660717765584,
+            "distance_moved": 0.0,
+            "effective": 8.79985722637401,
+            "equipment": 8.79985722637401,
+            "equipment_lost": 3.20014277362599,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.488513280507885
+          }
+        },
+        "version": "land-war-resolver-v0.1"
+      },
+      "events_by_kind": {
+        "action_changed": 16,
+        "control_changed": 1,
+        "losses": 1260,
+        "mission_complete": 6
+      },
+      "event_count": 1283
+    },
+    {
+      "case": "many_sleeping_detailed",
+      "initial_active_areas": 1,
+      "initial_active_units": 10,
+      "simulated_seconds": 3600,
+      "sleeping_areas": 10000,
+      "sleeping_units": 30000,
+      "wall_usec": 82535,
+      "static_memory_delta": 1020452,
+      "summary": {
+        "control": {
+          "field": "contested"
+        },
+        "counters": {
+          "areas_examined": 126,
+          "contacts_resolved": 6048,
+          "events_processed": 0,
+          "segments": 126,
+          "units_examined": 33516
+        },
+        "missions": {
+          "mission_attack_00": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_00",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_attack_01": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_01",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_attack_02": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_02",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_attack_03": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_03",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_attack_04": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_04",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_attack_05": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_05",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_defend_00": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_defend_00",
+            "objective": 4.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_defend_01": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_defend_01",
+            "objective": 4.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_defend_02": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_defend_02",
+            "objective": 4.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_defend_03": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_defend_03",
+            "objective": 4.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          }
+        },
+        "policy": "DETAILED",
+        "scope": "units and areas examined or changed during the latest resolve call",
+        "seed": 71,
+        "time": 3600.0,
+        "totals": {
+          "ammo_spent": 4237.71511886745,
+          "ammunition": 28809600.0,
+          "casualties": 23.1664296110986,
+          "equipment": 360120.0,
+          "equipment_lost": 23.1664296110986,
+          "personnel": 360120.0
+        },
+        "units": {
+          "attack_00": {
+            "action": "hold",
+            "ammo_spent": 454.78051215126,
+            "ammunition": 505.21948784874,
+            "area_id": "field",
+            "casualties": 1.75441676247513,
+            "cohesion": 0.876899301563536,
+            "distance_moved": 1.5,
+            "effective": 10.2455832375249,
+            "equipment": 10.2455832375249,
+            "equipment_lost": 1.75441676247513,
+            "fatigue": 0.24,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.102710729720825
+          },
+          "attack_01": {
+            "action": "hold",
+            "ammo_spent": 457.856578315314,
+            "ammunition": 502.143421684686,
+            "area_id": "field",
+            "casualties": 1.68645526206441,
+            "cohesion": 0.879731030747316,
+            "distance_moved": 1.5,
+            "effective": 10.3135447379356,
+            "equipment": 10.3135447379356,
+            "equipment_lost": 1.68645526206441,
+            "fatigue": 0.24,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.102072008463689
+          },
+          "attack_02": {
+            "action": "hold",
+            "ammo_spent": 456.760082276243,
+            "ammunition": 503.239917723757,
+            "area_id": "field",
+            "casualties": 1.71234177847014,
+            "cohesion": 0.878652425897077,
+            "distance_moved": 1.5,
+            "effective": 10.2876582215298,
+            "equipment": 10.2876582215298,
+            "equipment_lost": 1.71234177847014,
+            "fatigue": 0.24,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.10231275691123
+          },
+          "attack_03": {
+            "action": "hold",
+            "ammo_spent": 456.9405259846,
+            "ammunition": 503.059474015399,
+            "area_id": "field",
+            "casualties": 1.70846670997199,
+            "cohesion": 0.8788138870845,
+            "distance_moved": 1.5,
+            "effective": 10.291533290028,
+            "equipment": 10.291533290028,
+            "equipment_lost": 1.70846670997199,
+            "fatigue": 0.24,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.102276370915945
+          },
+          "attack_04": {
+            "action": "hold",
+            "ammo_spent": 455.489149591288,
+            "ammunition": 504.510850408713,
+            "area_id": "field",
+            "casualties": 1.73932952298707,
+            "cohesion": 0.877527936542205,
+            "distance_moved": 1.5,
+            "effective": 10.2606704770129,
+            "equipment": 10.2606704770129,
+            "equipment_lost": 1.73932952298707,
+            "fatigue": 0.24,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.10256770419923
+          },
+          "attack_05": {
+            "action": "hold",
+            "ammo_spent": 454.039917121659,
+            "ammunition": 505.960082878341,
+            "area_id": "field",
+            "casualties": 1.77019736748956,
+            "cohesion": 0.876241776354602,
+            "distance_moved": 1.5,
+            "effective": 10.2298026325104,
+            "equipment": 10.2298026325104,
+            "equipment_lost": 1.77019736748956,
+            "fatigue": 0.24,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.102860757728291
+          },
+          "defend_00": {
+            "action": "hold",
+            "ammo_spent": 376.845898124854,
+            "ammunition": 583.154101875145,
+            "area_id": "field",
+            "casualties": 3.15685662959131,
+            "cohesion": 0.818464307100362,
+            "distance_moved": 0.0,
+            "effective": 8.84314337040869,
+            "equipment": 8.84314337040869,
+            "equipment_lost": 3.15685662959131,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.486409502643328
+          },
+          "defend_01": {
+            "action": "hold",
+            "ammo_spent": 375.004896614701,
+            "ammunition": 584.995103385299,
+            "area_id": "field",
+            "casualties": 3.21396182941299,
+            "cohesion": 0.816084923774459,
+            "distance_moved": 0.0,
+            "effective": 8.786038170587,
+            "equipment": 8.786038170587,
+            "equipment_lost": 3.21396182941299,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.489189252504281
+          },
+          "defend_02": {
+            "action": "hold",
+            "ammo_spent": 374.54633819738,
+            "ammunition": 585.45366180262,
+            "area_id": "field",
+            "casualties": 3.22426097501005,
+            "cohesion": 0.815655792707914,
+            "distance_moved": 0.0,
+            "effective": 8.77573902498994,
+            "equipment": 8.77573902498994,
+            "equipment_lost": 3.22426097501005,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.489816116163885
+          },
+          "defend_03": {
+            "action": "hold",
+            "ammo_spent": 375.451220490151,
+            "ammunition": 584.54877950985,
+            "area_id": "field",
+            "casualties": 3.20014277362599,
+            "cohesion": 0.816660717765584,
+            "distance_moved": 0.0,
+            "effective": 8.79985722637401,
+            "equipment": 8.79985722637401,
+            "equipment_lost": 3.20014277362599,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.488513280507885
+          }
+        },
+        "version": "land-war-resolver-v0.1"
+      },
+      "events_by_kind": {
+        "action_changed": 16,
+        "control_changed": 1,
+        "losses": 1260,
+        "mission_complete": 6
+      },
+      "event_count": 1283
+    },
+    {
+      "case": "same_battle_aggregate",
+      "initial_active_areas": 1,
+      "initial_active_units": 10,
+      "simulated_seconds": 3600,
+      "sleeping_areas": 0,
+      "sleeping_units": 0,
+      "wall_usec": 51313,
+      "static_memory_delta": 341852,
+      "summary": {
+        "control": {
+          "field": "contested"
+        },
+        "counters": {
+          "areas_examined": 36,
+          "contacts_resolved": 1728,
+          "events_processed": 0,
+          "segments": 36,
+          "units_examined": 9576
+        },
+        "missions": {
+          "mission_attack_00": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_00",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_attack_01": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_01",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_attack_02": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_02",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_attack_03": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_03",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_attack_04": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_04",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_attack_05": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_05",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_defend_00": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_defend_00",
+            "objective": 4.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_defend_01": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_defend_01",
+            "objective": 4.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_defend_02": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_defend_02",
+            "objective": 4.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_defend_03": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_defend_03",
+            "objective": 4.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          }
+        },
+        "policy": "AGGREGATE",
+        "scope": "units and areas examined or changed during the latest resolve call",
+        "seed": 71,
+        "time": 3600.0,
+        "totals": {
+          "ammo_spent": 4264.00698211563,
+          "ammunition": 9600.0,
+          "casualties": 23.3639103231877,
+          "equipment": 120.0,
+          "equipment_lost": 23.3639103231877,
+          "personnel": 120.0
+        },
+        "units": {
+          "attack_00": {
+            "action": "hold",
+            "ammo_spent": 454.570697699779,
+            "ammunition": 505.42930230022,
+            "area_id": "field",
+            "casualties": 1.78880145271169,
+            "cohesion": 0.875466606137013,
+            "distance_moved": 1.5,
+            "effective": 10.2111985472883,
+            "equipment": 10.2111985472883,
+            "equipment_lost": 1.78880145271169,
+            "fatigue": 0.24,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.104719460843745
+          },
+          "attack_01": {
+            "action": "hold",
+            "ammo_spent": 457.650548401592,
+            "ammunition": 502.349451598408,
+            "area_id": "field",
+            "casualties": 1.71953295587247,
+            "cohesion": 0.878352793505314,
+            "distance_moved": 1.5,
+            "effective": 10.2804670441275,
+            "equipment": 10.2804670441275,
+            "equipment_lost": 1.71953295587247,
+            "fatigue": 0.24,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.104058823728134
+          },
+          "attack_02": {
+            "action": "hold",
+            "ammo_spent": 456.554647676353,
+            "ammunition": 503.445352323647,
+            "area_id": "field",
+            "casualties": 1.74590907036706,
+            "cohesion": 0.877253788734706,
+            "distance_moved": 1.5,
+            "effective": 10.2540909296329,
+            "equipment": 10.2540909296329,
+            "equipment_lost": 1.74590907036706,
+            "fatigue": 0.24,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.104307539520962
+          },
+          "attack_03": {
+            "action": "hold",
+            "ammo_spent": 456.735222084147,
+            "ammunition": 503.264777915853,
+            "area_id": "field",
+            "casualties": 1.74196487488773,
+            "cohesion": 0.877418130213011,
+            "distance_moved": 1.5,
+            "effective": 10.2580351251123,
+            "equipment": 10.2580351251123,
+            "equipment_lost": 1.74196487488773,
+            "fatigue": 0.24,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.104269951472601
+          },
+          "attack_04": {
+            "action": "hold",
+            "ammo_spent": 455.280799880792,
+            "ammunition": 504.719200119209,
+            "area_id": "field",
+            "casualties": 1.77342322336662,
+            "cohesion": 0.876107365693058,
+            "distance_moved": 1.5,
+            "effective": 10.2265767766334,
+            "equipment": 10.2265767766334,
+            "equipment_lost": 1.77342322336662,
+            "fatigue": 0.24,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.104571440965201
+          },
+          "attack_05": {
+            "action": "hold",
+            "ammo_spent": 453.828587503619,
+            "ammunition": 506.171412496381,
+            "area_id": "field",
+            "casualties": 1.80488632406521,
+            "cohesion": 0.87479640316395,
+            "distance_moved": 1.5,
+            "effective": 10.1951136759348,
+            "equipment": 10.1951136759348,
+            "equipment_lost": 1.80488632406521,
+            "fatigue": 0.24,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.104874733617846
+          },
+          "defend_00": {
+            "action": "hold",
+            "ammo_spent": 383.688343744687,
+            "ammunition": 576.311656255313,
+            "area_id": "field",
+            "casualties": 3.15541858312772,
+            "cohesion": 0.818524225703011,
+            "distance_moved": 0.0,
+            "effective": 8.84458141687228,
+            "equipment": 8.84458141687228,
+            "equipment_lost": 3.15541858312772,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.484072127361612
+          },
+          "defend_01": {
+            "action": "hold",
+            "ammo_spent": 381.904082433583,
+            "ammunition": 578.095917566418,
+            "area_id": "field",
+            "casualties": 3.21249776996788,
+            "cohesion": 0.816145926251338,
+            "distance_moved": 0.0,
+            "effective": 8.78750223003212,
+            "equipment": 8.78750223003212,
+            "equipment_lost": 3.21249776996788,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.486782598620763
+          },
+          "defend_02": {
+            "action": "hold",
+            "ammo_spent": 381.457310812268,
+            "ammunition": 578.542689187732,
+            "area_id": "field",
+            "casualties": 3.22279082367485,
+            "cohesion": 0.815717049013547,
+            "distance_moved": 0.0,
+            "effective": 8.77720917632515,
+            "equipment": 8.77720917632515,
+            "equipment_lost": 3.22279082367485,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.487413417593427
+          },
+          "defend_03": {
+            "action": "hold",
+            "ammo_spent": 382.33674187881,
+            "ammunition": 577.663258121191,
+            "area_id": "field",
+            "casualties": 3.19868524514649,
+            "cohesion": 0.816721448118896,
+            "distance_moved": 0.0,
+            "effective": 8.80131475485351,
+            "equipment": 8.80131475485351,
+            "equipment_lost": 3.19868524514649,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.486123470383441
+          }
+        },
+        "version": "land-war-resolver-v0.1"
+      },
+      "events_by_kind": {
+        "action_changed": 16,
+        "control_changed": 1,
+        "losses": 360,
+        "mission_complete": 6
+      },
+      "event_count": 383
+    },
+    {
+      "case": "many_sleeping_aggregate",
+      "initial_active_areas": 1,
+      "initial_active_units": 10,
+      "simulated_seconds": 3600,
+      "sleeping_areas": 10000,
+      "sleeping_units": 30000,
+      "wall_usec": 33577,
+      "static_memory_delta": 341852,
+      "summary": {
+        "control": {
+          "field": "contested"
+        },
+        "counters": {
+          "areas_examined": 36,
+          "contacts_resolved": 1728,
+          "events_processed": 0,
+          "segments": 36,
+          "units_examined": 9576
+        },
+        "missions": {
+          "mission_attack_00": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_00",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_attack_01": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_01",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_attack_02": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_02",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_attack_03": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_03",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_attack_04": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_04",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_attack_05": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_05",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_defend_00": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_defend_00",
+            "objective": 4.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_defend_01": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_defend_01",
+            "objective": 4.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_defend_02": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_defend_02",
+            "objective": 4.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_defend_03": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_defend_03",
+            "objective": 4.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          }
+        },
+        "policy": "AGGREGATE",
+        "scope": "units and areas examined or changed during the latest resolve call",
+        "seed": 71,
+        "time": 3600.0,
+        "totals": {
+          "ammo_spent": 4264.00698211563,
+          "ammunition": 28809600.0,
+          "casualties": 23.3639103231877,
+          "equipment": 360120.0,
+          "equipment_lost": 23.3639103231877,
+          "personnel": 360120.0
+        },
+        "units": {
+          "attack_00": {
+            "action": "hold",
+            "ammo_spent": 454.570697699779,
+            "ammunition": 505.42930230022,
+            "area_id": "field",
+            "casualties": 1.78880145271169,
+            "cohesion": 0.875466606137013,
+            "distance_moved": 1.5,
+            "effective": 10.2111985472883,
+            "equipment": 10.2111985472883,
+            "equipment_lost": 1.78880145271169,
+            "fatigue": 0.24,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.104719460843745
+          },
+          "attack_01": {
+            "action": "hold",
+            "ammo_spent": 457.650548401592,
+            "ammunition": 502.349451598408,
+            "area_id": "field",
+            "casualties": 1.71953295587247,
+            "cohesion": 0.878352793505314,
+            "distance_moved": 1.5,
+            "effective": 10.2804670441275,
+            "equipment": 10.2804670441275,
+            "equipment_lost": 1.71953295587247,
+            "fatigue": 0.24,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.104058823728134
+          },
+          "attack_02": {
+            "action": "hold",
+            "ammo_spent": 456.554647676353,
+            "ammunition": 503.445352323647,
+            "area_id": "field",
+            "casualties": 1.74590907036706,
+            "cohesion": 0.877253788734706,
+            "distance_moved": 1.5,
+            "effective": 10.2540909296329,
+            "equipment": 10.2540909296329,
+            "equipment_lost": 1.74590907036706,
+            "fatigue": 0.24,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.104307539520962
+          },
+          "attack_03": {
+            "action": "hold",
+            "ammo_spent": 456.735222084147,
+            "ammunition": 503.264777915853,
+            "area_id": "field",
+            "casualties": 1.74196487488773,
+            "cohesion": 0.877418130213011,
+            "distance_moved": 1.5,
+            "effective": 10.2580351251123,
+            "equipment": 10.2580351251123,
+            "equipment_lost": 1.74196487488773,
+            "fatigue": 0.24,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.104269951472601
+          },
+          "attack_04": {
+            "action": "hold",
+            "ammo_spent": 455.280799880792,
+            "ammunition": 504.719200119209,
+            "area_id": "field",
+            "casualties": 1.77342322336662,
+            "cohesion": 0.876107365693058,
+            "distance_moved": 1.5,
+            "effective": 10.2265767766334,
+            "equipment": 10.2265767766334,
+            "equipment_lost": 1.77342322336662,
+            "fatigue": 0.24,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.104571440965201
+          },
+          "attack_05": {
+            "action": "hold",
+            "ammo_spent": 453.828587503619,
+            "ammunition": 506.171412496381,
+            "area_id": "field",
+            "casualties": 1.80488632406521,
+            "cohesion": 0.87479640316395,
+            "distance_moved": 1.5,
+            "effective": 10.1951136759348,
+            "equipment": 10.1951136759348,
+            "equipment_lost": 1.80488632406521,
+            "fatigue": 0.24,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.104874733617846
+          },
+          "defend_00": {
+            "action": "hold",
+            "ammo_spent": 383.688343744687,
+            "ammunition": 576.311656255313,
+            "area_id": "field",
+            "casualties": 3.15541858312772,
+            "cohesion": 0.818524225703011,
+            "distance_moved": 0.0,
+            "effective": 8.84458141687228,
+            "equipment": 8.84458141687228,
+            "equipment_lost": 3.15541858312772,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.484072127361612
+          },
+          "defend_01": {
+            "action": "hold",
+            "ammo_spent": 381.904082433583,
+            "ammunition": 578.095917566418,
+            "area_id": "field",
+            "casualties": 3.21249776996788,
+            "cohesion": 0.816145926251338,
+            "distance_moved": 0.0,
+            "effective": 8.78750223003212,
+            "equipment": 8.78750223003212,
+            "equipment_lost": 3.21249776996788,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.486782598620763
+          },
+          "defend_02": {
+            "action": "hold",
+            "ammo_spent": 381.457310812268,
+            "ammunition": 578.542689187732,
+            "area_id": "field",
+            "casualties": 3.22279082367485,
+            "cohesion": 0.815717049013547,
+            "distance_moved": 0.0,
+            "effective": 8.77720917632515,
+            "equipment": 8.77720917632515,
+            "equipment_lost": 3.22279082367485,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.487413417593427
+          },
+          "defend_03": {
+            "action": "hold",
+            "ammo_spent": 382.33674187881,
+            "ammunition": 577.663258121191,
+            "area_id": "field",
+            "casualties": 3.19868524514649,
+            "cohesion": 0.816721448118896,
+            "distance_moved": 0.0,
+            "effective": 8.80131475485351,
+            "equipment": 8.80131475485351,
+            "equipment_lost": 3.19868524514649,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.486123470383441
+          }
+        },
+        "version": "land-war-resolver-v0.1"
+      },
+      "events_by_kind": {
+        "action_changed": 16,
+        "control_changed": 1,
+        "losses": 360,
+        "mission_complete": 6
+      },
+      "event_count": 383
+    },
+    {
+      "case": "four_active_groups",
+      "initial_active_areas": 1,
+      "initial_active_units": 4,
+      "simulated_seconds": 3600,
+      "sleeping_areas": 0,
+      "sleeping_units": 0,
+      "wall_usec": 28140,
+      "static_memory_delta": 341484,
+      "summary": {
+        "control": {
+          "field": "contested"
+        },
+        "counters": {
+          "areas_examined": 120,
+          "contacts_resolved": 960,
+          "events_processed": 0,
+          "segments": 120,
+          "units_examined": 7200
+        },
+        "missions": {
+          "mission_group_00": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_00",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_01": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_01",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_02": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_02",
+            "objective": 2.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_03": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_03",
+            "objective": 2.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          }
+        },
+        "policy": "DETAILED",
+        "scope": "units and areas examined or changed during the latest resolve call",
+        "seed": 71,
+        "time": 3600.0,
+        "totals": {
+          "ammo_spent": 1606.03512593614,
+          "ammunition": 3840.0,
+          "casualties": 11.7622431552604,
+          "equipment": 48.0,
+          "equipment_lost": 11.7622431552604,
+          "personnel": 48.0
+        },
+        "units": {
+          "group_00": {
+            "action": "stalled",
+            "ammo_spent": 209.618685983694,
+            "ammunition": 750.381314016306,
+            "area_id": "field",
+            "casualties": 4.90080902492222,
+            "cohesion": 0.745799623961574,
+            "distance_moved": 0.637991787876742,
+            "effective": 7.09919097507777,
+            "equipment": 7.09919097507777,
+            "equipment_lost": 4.90080902492222,
+            "fatigue": 0.24,
+            "position": 1.13799178787674,
+            "side": "blue",
+            "suppression": 0.889398299726163
+          },
+          "group_01": {
+            "action": "stalled",
+            "ammo_spent": 211.606199957377,
+            "ammunition": 748.393800042623,
+            "area_id": "field",
+            "casualties": 4.88233324953917,
+            "cohesion": 0.746569447935867,
+            "distance_moved": 0.638304427132847,
+            "effective": 7.11766675046082,
+            "equipment": 7.11766675046082,
+            "equipment_lost": 4.88233324953917,
+            "fatigue": 0.24,
+            "position": 1.13830442713285,
+            "side": "blue",
+            "suppression": 0.886336883718798
+          },
+          "group_02": {
+            "action": "hold",
+            "ammo_spent": 592.002386152091,
+            "ammunition": 367.997613847909,
+            "area_id": "field",
+            "casualties": 0.993477195130268,
+            "cohesion": 0.908605116869572,
+            "distance_moved": 0.0,
+            "effective": 11.0065228048697,
+            "equipment": 11.0065228048697,
+            "equipment_lost": 0.993477195130268,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.0342242507101305
+          },
+          "group_03": {
+            "action": "hold",
+            "ammo_spent": 592.807853842979,
+            "ammunition": 367.192146157021,
+            "area_id": "field",
+            "casualties": 0.985623685668772,
+            "cohesion": 0.908932346430468,
+            "distance_moved": 0.0,
+            "effective": 11.0143763143312,
+            "equipment": 11.0143763143312,
+            "equipment_lost": 0.985623685668772,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.0341977717206556
+          }
+        },
+        "version": "land-war-resolver-v0.1"
+      },
+      "events_by_kind": {
+        "action_changed": 6,
+        "control_changed": 1,
+        "losses": 480
+      },
+      "event_count": 487
+    },
+    {
+      "case": "forty_active_groups",
+      "initial_active_areas": 1,
+      "initial_active_units": 40,
+      "simulated_seconds": 3600,
+      "sleeping_areas": 0,
+      "sleeping_units": 0,
+      "wall_usec": 1206517,
+      "static_memory_delta": 4730924,
+      "summary": {
+        "control": {
+          "field": "contested"
+        },
+        "counters": {
+          "areas_examined": 120,
+          "contacts_resolved": 96000,
+          "events_processed": 0,
+          "segments": 120,
+          "units_examined": 417600
+        },
+        "missions": {
+          "mission_group_00": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_00",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_01": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_01",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_02": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_02",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_03": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_03",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_04": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_04",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_05": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_05",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_06": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_06",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_07": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_07",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_08": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_08",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_09": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_09",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_10": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_10",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_11": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_11",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_12": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_12",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_13": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_13",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_14": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_14",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_15": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_15",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_16": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_16",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_17": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_17",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_18": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_18",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_19": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_19",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_20": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_20",
+            "objective": 2.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_21": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_21",
+            "objective": 2.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_22": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_22",
+            "objective": 2.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_23": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_23",
+            "objective": 2.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_24": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_24",
+            "objective": 2.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_25": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_25",
+            "objective": 2.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_26": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_26",
+            "objective": 2.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_27": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_27",
+            "objective": 2.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_28": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_28",
+            "objective": 2.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_29": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_29",
+            "objective": 2.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_30": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_30",
+            "objective": 2.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_31": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_31",
+            "objective": 2.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_32": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_32",
+            "objective": 2.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_33": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_33",
+            "objective": 2.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_34": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_34",
+            "objective": 2.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_35": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_35",
+            "objective": 2.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_36": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_36",
+            "objective": 2.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_37": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_37",
+            "objective": 2.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_38": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_38",
+            "objective": 2.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_group_39": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_group_39",
+            "objective": 2.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          }
+        },
+        "policy": "DETAILED",
+        "scope": "units and areas examined or changed during the latest resolve call",
+        "seed": 71,
+        "time": 3600.0,
+        "totals": {
+          "ammo_spent": 5471.99999999999,
+          "ammunition": 38400.0,
+          "casualties": 35.461297429484,
+          "equipment": 480.0,
+          "equipment_lost": 35.461297429484,
+          "personnel": 480.0
+        },
+        "units": {
+          "group_00": {
+            "action": "advance",
+            "ammo_spent": 136.817364147247,
+            "ammunition": 823.182635852753,
+            "area_id": "field",
+            "casualties": 1.13046335950025,
+            "cohesion": 0.902897360020823,
+            "distance_moved": 0.907104830866089,
+            "effective": 10.8695366404997,
+            "equipment": 10.8695366404997,
+            "equipment_lost": 1.13046335950025,
+            "fatigue": 0.24,
+            "position": 1.40710483086609,
+            "side": "blue",
+            "suppression": 0.143303410301318
+          },
+          "group_01": {
+            "action": "advance",
+            "ammo_spent": 136.785733790995,
+            "ammunition": 823.214266209005,
+            "area_id": "field",
+            "casualties": 1.13479676620074,
+            "cohesion": 0.902716801408303,
+            "distance_moved": 0.907088152795218,
+            "effective": 10.8652032337993,
+            "equipment": 10.8652032337993,
+            "equipment_lost": 1.13479676620074,
+            "fatigue": 0.24,
+            "position": 1.40708815279522,
+            "side": "blue",
+            "suppression": 0.143351828123884
+          },
+          "group_02": {
+            "action": "advance",
+            "ammo_spent": 136.78520689031,
+            "ammunition": 823.21479310969,
+            "area_id": "field",
+            "casualties": 1.13383989983704,
+            "cohesion": 0.902756670840123,
+            "distance_moved": 0.90708724497207,
+            "effective": 10.866160100163,
+            "equipment": 10.866160100163,
+            "equipment_lost": 1.13383989983704,
+            "fatigue": 0.24,
+            "position": 1.40708724497207,
+            "side": "blue",
+            "suppression": 0.143342390756654
+          },
+          "group_03": {
+            "action": "advance",
+            "ammo_spent": 136.745961808178,
+            "ammunition": 823.254038191822,
+            "area_id": "field",
+            "casualties": 1.1381734760404,
+            "cohesion": 0.902576105164983,
+            "distance_moved": 0.907065918622889,
+            "effective": 10.8618265239596,
+            "equipment": 10.8618265239596,
+            "equipment_lost": 1.1381734760404,
+            "fatigue": 0.24,
+            "position": 1.40706591862289,
+            "side": "blue",
+            "suppression": 0.143395555276263
+          },
+          "group_04": {
+            "action": "advance",
+            "ammo_spent": 136.845422774944,
+            "ammunition": 823.154577225056,
+            "area_id": "field",
+            "casualties": 1.12814540390833,
+            "cohesion": 0.90299394150382,
+            "distance_moved": 0.907120676401199,
+            "effective": 10.8718545960917,
+            "equipment": 10.8718545960917,
+            "equipment_lost": 1.12814540390833,
+            "fatigue": 0.24,
+            "position": 1.4071206764012,
+            "side": "blue",
+            "suppression": 0.14327417842541
+          },
+          "group_05": {
+            "action": "advance",
+            "ammo_spent": 136.798610706702,
+            "ammunition": 823.201389293298,
+            "area_id": "field",
+            "casualties": 1.13247877495515,
+            "cohesion": 0.902813384376868,
+            "distance_moved": 0.907094595367381,
+            "effective": 10.8675212250449,
+            "equipment": 10.8675212250449,
+            "equipment_lost": 1.13247877495515,
+            "fatigue": 0.24,
+            "position": 1.40709459536738,
+            "side": "blue",
+            "suppression": 0.143328042004664
+          },
+          "group_06": {
+            "action": "advance",
+            "ammo_spent": 136.818189259281,
+            "ammunition": 823.181810740719,
+            "area_id": "field",
+            "casualties": 1.13152173595034,
+            "cohesion": 0.902853261002069,
+            "distance_moved": 0.907106028338671,
+            "effective": 10.8684782640497,
+            "equipment": 10.8684782640497,
+            "equipment_lost": 1.13152173595034,
+            "fatigue": 0.24,
+            "position": 1.40710602833867,
+            "side": "blue",
+            "suppression": 0.143313121484831
+          },
+          "group_07": {
+            "action": "advance",
+            "ammo_spent": 136.76393281978,
+            "ammunition": 823.23606718022,
+            "area_id": "field",
+            "casualties": 1.13585588790745,
+            "cohesion": 0.90267267133719,
+            "distance_moved": 0.907075398408965,
+            "effective": 10.8641441120925,
+            "equipment": 10.8641441120925,
+            "equipment_lost": 1.13585588790745,
+            "fatigue": 0.24,
+            "position": 1.40707539840897,
+            "side": "blue",
+            "suppression": 0.14336714330038
+          },
+          "group_08": {
+            "action": "advance",
+            "ammo_spent": 136.777246923142,
+            "ammunition": 823.222753076858,
+            "area_id": "field",
+            "casualties": 1.13565342942394,
+            "cohesion": 0.902681107107336,
+            "distance_moved": 0.907083477081435,
+            "effective": 10.8643465705761,
+            "equipment": 10.8643465705761,
+            "equipment_lost": 1.13565342942394,
+            "fatigue": 0.24,
+            "position": 1.40708347708143,
+            "side": "blue",
+            "suppression": 0.143361955722795
+          },
+          "group_09": {
+            "action": "advance",
+            "ammo_spent": 136.821665482128,
+            "ammunition": 823.178334517871,
+            "area_id": "field",
+            "casualties": 1.13016065018495,
+            "cohesion": 0.90290997290896,
+            "distance_moved": 0.907107323844761,
+            "effective": 10.8698393498151,
+            "equipment": 10.8698393498151,
+            "equipment_lost": 1.13016065018495,
+            "fatigue": 0.24,
+            "position": 1.40710732384476,
+            "side": "blue",
+            "suppression": 0.143298915295937
+          },
+          "group_10": {
+            "action": "advance",
+            "ammo_spent": 136.845670292548,
+            "ammunition": 823.154329707452,
+            "area_id": "field",
+            "casualties": 1.12874875764324,
+            "cohesion": 0.902968801764865,
+            "distance_moved": 0.90712115682043,
+            "effective": 10.8712512423568,
+            "equipment": 10.8712512423568,
+            "equipment_lost": 1.12874875764324,
+            "fatigue": 0.24,
+            "position": 1.40712115682043,
+            "side": "blue",
+            "suppression": 0.143280365874306
+          },
+          "group_11": {
+            "action": "advance",
+            "ammo_spent": 136.811479200106,
+            "ammunition": 823.188520799894,
+            "area_id": "field",
+            "casualties": 1.13157029447957,
+            "cohesion": 0.902851237730018,
+            "distance_moved": 0.907101989749897,
+            "effective": 10.8684297055204,
+            "equipment": 10.8684297055204,
+            "equipment_lost": 1.13157029447957,
+            "fatigue": 0.24,
+            "position": 1.4071019897499,
+            "side": "blue",
+            "suppression": 0.143314633953494
+          },
+          "group_12": {
+            "action": "advance",
+            "ammo_spent": 136.805891629312,
+            "ammunition": 823.194108370689,
+            "area_id": "field",
+            "casualties": 1.13212495350704,
+            "cohesion": 0.902828126937207,
+            "distance_moved": 0.90709893952338,
+            "effective": 10.867875046493,
+            "equipment": 10.867875046493,
+            "equipment_lost": 1.13212495350704,
+            "fatigue": 0.24,
+            "position": 1.40709893952338,
+            "side": "blue",
+            "suppression": 0.14332404337671
+          },
+          "group_13": {
+            "action": "advance",
+            "ammo_spent": 136.784244195575,
+            "ammunition": 823.215755804426,
+            "area_id": "field",
+            "casualties": 1.13494753239818,
+            "cohesion": 0.902710519483409,
+            "distance_moved": 0.907087332414322,
+            "effective": 10.8650524676018,
+            "equipment": 10.8650524676018,
+            "equipment_lost": 1.13494753239818,
+            "fatigue": 0.24,
+            "position": 1.40708733241432,
+            "side": "blue",
+            "suppression": 0.143353609193609
+          },
+          "group_14": {
+            "action": "advance",
+            "ammo_spent": 136.779822965584,
+            "ammunition": 823.220177034416,
+            "area_id": "field",
+            "casualties": 1.13323335806814,
+            "cohesion": 0.902781943413828,
+            "distance_moved": 0.907083502992086,
+            "effective": 10.8667666419319,
+            "equipment": 10.8667666419319,
+            "equipment_lost": 1.13323335806814,
+            "fatigue": 0.24,
+            "position": 1.40708350299209,
+            "side": "blue",
+            "suppression": 0.143339753506047
+          },
+          "group_15": {
+            "action": "advance",
+            "ammo_spent": 136.833187868926,
+            "ammunition": 823.166812131075,
+            "area_id": "field",
+            "casualties": 1.13000818967297,
+            "cohesion": 0.902916325430293,
+            "distance_moved": 0.907114285937471,
+            "effective": 10.869991810327,
+            "equipment": 10.869991810327,
+            "equipment_lost": 1.13000818967297,
+            "fatigue": 0.24,
+            "position": 1.40711428593747,
+            "side": "blue",
+            "suppression": 0.143295241162727
+          },
+          "group_16": {
+            "action": "advance",
+            "ammo_spent": 136.787721857945,
+            "ammunition": 823.212278142055,
+            "area_id": "field",
+            "casualties": 1.13358606076109,
+            "cohesion": 0.902767247468288,
+            "distance_moved": 0.907088630401691,
+            "effective": 10.8664139392389,
+            "equipment": 10.8664139392389,
+            "equipment_lost": 1.13358606076109,
+            "fatigue": 0.24,
+            "position": 1.40708863040169,
+            "side": "blue",
+            "suppression": 0.143339390523569
+          },
+          "group_17": {
+            "action": "advance",
+            "ammo_spent": 136.792239064081,
+            "ammunition": 823.207760935919,
+            "area_id": "field",
+            "casualties": 1.1341404829592,
+            "cohesion": 0.902744146543367,
+            "distance_moved": 0.907091736556139,
+            "effective": 10.8658595170408,
+            "equipment": 10.8658595170408,
+            "equipment_lost": 1.1341404829592,
+            "fatigue": 0.24,
+            "position": 1.40709173655614,
+            "side": "blue",
+            "suppression": 0.143344069400944
+          },
+          "group_18": {
+            "action": "advance",
+            "ammo_spent": 136.758056097769,
+            "ammunition": 823.24194390223,
+            "area_id": "field",
+            "casualties": 1.13696186936814,
+            "cohesion": 0.902626588776327,
+            "distance_moved": 0.907072559123513,
+            "effective": 10.8630381306319,
+            "equipment": 10.8630381306319,
+            "equipment_lost": 1.13696186936814,
+            "fatigue": 0.24,
+            "position": 1.40707255912351,
+            "side": "blue",
+            "suppression": 0.143378366756333
+          },
+          "group_19": {
+            "action": "advance",
+            "ammo_spent": 136.842352225446,
+            "ammunition": 823.157647774554,
+            "area_id": "field",
+            "casualties": 1.12844567791988,
+            "cohesion": 0.902981430086671,
+            "distance_moved": 0.907119013737566,
+            "effective": 10.8715543220801,
+            "equipment": 10.8715543220801,
+            "equipment_lost": 1.12844567791988,
+            "fatigue": 0.24,
+            "position": 1.40711901373757,
+            "side": "blue",
+            "suppression": 0.143280579564424
+          },
+          "group_20": {
+            "action": "hold",
+            "ammo_spent": 136.798735368159,
+            "ammunition": 823.201264631841,
+            "area_id": "field",
+            "casualties": 0.6403981513529,
+            "cohesion": 0.923316743693629,
+            "distance_moved": 0.0,
+            "effective": 11.3596018486471,
+            "equipment": 11.3596018486471,
+            "equipment_lost": 0.6403981513529,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.0778526643524855
+          },
+          "group_21": {
+            "action": "hold",
+            "ammo_spent": 136.813277147731,
+            "ammunition": 823.186722852268,
+            "area_id": "field",
+            "casualties": 0.638915206974287,
+            "cohesion": 0.923378533042738,
+            "distance_moved": 0.0,
+            "effective": 11.3610847930257,
+            "equipment": 11.3610847930257,
+            "equipment_lost": 0.638915206974287,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.0778434710111141
+          },
+          "group_22": {
+            "action": "hold",
+            "ammo_spent": 136.826251185718,
+            "ammunition": 823.173748814282,
+            "area_id": "field",
+            "casualties": 0.63751852883125,
+            "cohesion": 0.923436727965364,
+            "distance_moved": 0.0,
+            "effective": 11.3624814711688,
+            "equipment": 11.3624814711688,
+            "equipment_lost": 0.63751852883125,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.0778348669586308
+          },
+          "group_23": {
+            "action": "hold",
+            "ammo_spent": 136.791575239209,
+            "ammunition": 823.208424760792,
+            "area_id": "field",
+            "casualties": 0.641250592503269,
+            "cohesion": 0.923281225312363,
+            "distance_moved": 0.0,
+            "effective": 11.3587494074967,
+            "equipment": 11.3587494074967,
+            "equipment_lost": 0.641250592503269,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.0778578640465292
+          },
+          "group_24": {
+            "action": "hold",
+            "ammo_spent": 136.804537874224,
+            "ammunition": 823.195462125777,
+            "area_id": "field",
+            "casualties": 0.639856042532354,
+            "cohesion": 0.923339331561152,
+            "distance_moved": 0.0,
+            "effective": 11.3601439574676,
+            "equipment": 11.3601439574676,
+            "equipment_lost": 0.639856042532354,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.0778492680322743
+          },
+          "group_25": {
+            "action": "hold",
+            "ammo_spent": 136.817514126256,
+            "ammunition": 823.182485873744,
+            "area_id": "field",
+            "casualties": 0.638459200683939,
+            "cohesion": 0.923397533304837,
+            "distance_moved": 0.0,
+            "effective": 11.3615407993161,
+            "equipment": 11.3615407993161,
+            "equipment_lost": 0.638459200683939,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.0778406613778978
+          },
+          "group_26": {
+            "action": "hold",
+            "ammo_spent": 136.806663773047,
+            "ammunition": 823.193336226953,
+            "area_id": "field",
+            "casualties": 0.639626662989425,
+            "cohesion": 0.923348889042107,
+            "distance_moved": 0.0,
+            "effective": 11.3603733370106,
+            "equipment": 11.3603733370106,
+            "equipment_lost": 0.639626662989425,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.0778478555939748
+          },
+          "group_27": {
+            "action": "hold",
+            "ammo_spent": 136.795810844832,
+            "ammunition": 823.204189155167,
+            "area_id": "field",
+            "casualties": 0.64079470079029,
+            "cohesion": 0.923300220800405,
+            "distance_moved": 0.0,
+            "effective": 11.3592052992097,
+            "equipment": 11.3592052992097,
+            "equipment_lost": 0.64079470079029,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.0778550541374831
+          },
+          "group_28": {
+            "action": "hold",
+            "ammo_spent": 136.784953282769,
+            "ammunition": 823.21504671723,
+            "area_id": "field",
+            "casualties": 0.641963829441423,
+            "cohesion": 0.923251507106607,
+            "distance_moved": 0.0,
+            "effective": 11.3580361705586,
+            "equipment": 11.3580361705586,
+            "equipment_lost": 0.641963829441423,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.0778622598121513
+          },
+          "group_29": {
+            "action": "hold",
+            "ammo_spent": 136.797917938359,
+            "ammunition": 823.202082061641,
+            "area_id": "field",
+            "casualties": 0.64056879290315,
+            "cohesion": 0.923309633629036,
+            "distance_moved": 0.0,
+            "effective": 11.3594312070969,
+            "equipment": 11.3594312070969,
+            "equipment_lost": 0.64056879290315,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.0778536602302722
+          },
+          "group_30": {
+            "action": "hold",
+            "ammo_spent": 136.797399322329,
+            "ammunition": 823.202600677671,
+            "area_id": "field",
+            "casualties": 0.640624311332354,
+            "cohesion": 0.923307320361152,
+            "distance_moved": 0.0,
+            "effective": 11.3593756886677,
+            "equipment": 11.3593756886677,
+            "equipment_lost": 0.640624311332354,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.0778540028877617
+          },
+          "group_31": {
+            "action": "hold",
+            "ammo_spent": 136.810375165758,
+            "ammunition": 823.189624834241,
+            "area_id": "field",
+            "casualties": 0.639227469483939,
+            "cohesion": 0.923365522104836,
+            "distance_moved": 0.0,
+            "effective": 11.3607725305161,
+            "equipment": 11.3607725305161,
+            "equipment_lost": 0.639227469483939,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.077845395174755
+          },
+          "group_32": {
+            "action": "hold",
+            "ammo_spent": 136.799525154176,
+            "ammunition": 823.200474845824,
+            "area_id": "field",
+            "casualties": 0.640394931789424,
+            "cohesion": 0.923316877842107,
+            "distance_moved": 0.0,
+            "effective": 11.3596050682106,
+            "equipment": 11.3596050682106,
+            "equipment_lost": 0.640394931789424,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.0778525902757122
+          },
+          "group_33": {
+            "action": "hold",
+            "ammo_spent": 136.788672567698,
+            "ammunition": 823.211327432301,
+            "area_id": "field",
+            "casualties": 0.64156296959029,
+            "cohesion": 0.923268209600405,
+            "distance_moved": 0.0,
+            "effective": 11.3584370304097,
+            "equipment": 11.3584370304097,
+            "equipment_lost": 0.64156296959029,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.0778597897047227
+          },
+          "group_34": {
+            "action": "hold",
+            "ammo_spent": 136.77781534757,
+            "ammunition": 823.22218465243,
+            "area_id": "field",
+            "casualties": 0.642732098241423,
+            "cohesion": 0.923219495906607,
+            "distance_moved": 0.0,
+            "effective": 11.3572679017586,
+            "equipment": 11.3572679017586,
+            "equipment_lost": 0.642732098241423,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.0778669962658654
+          },
+          "group_35": {
+            "action": "hold",
+            "ammo_spent": 136.791407026614,
+            "ammunition": 823.208592973385,
+            "area_id": "field",
+            "casualties": 0.640909574917006,
+            "cohesion": 0.923295434378458,
+            "distance_moved": 0.0,
+            "effective": 11.359090425083,
+            "equipment": 11.359090425083,
+            "equipment_lost": 0.640909574917006,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.0778568856911288
+          },
+          "group_36": {
+            "action": "hold",
+            "ammo_spent": 136.803758761563,
+            "ammunition": 823.196241238437,
+            "area_id": "field",
+            "casualties": 0.639939565374287,
+            "cohesion": 0.923335851442738,
+            "distance_moved": 0.0,
+            "effective": 11.3600604346257,
+            "equipment": 11.3600604346257,
+            "equipment_lost": 0.639939565374287,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.0778497833304189
+          },
+          "group_37": {
+            "action": "hold",
+            "ammo_spent": 136.816732254855,
+            "ammunition": 823.183267745145,
+            "area_id": "field",
+            "casualties": 0.63854288723125,
+            "cohesion": 0.923394046365364,
+            "distance_moved": 0.0,
+            "effective": 11.3614571127687,
+            "equipment": 11.3614571127687,
+            "equipment_lost": 0.63854288723125,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.0778411778669165
+          },
+          "group_38": {
+            "action": "hold",
+            "ammo_spent": 136.782057764148,
+            "ammunition": 823.217942235853,
+            "area_id": "field",
+            "casualties": 0.642274950903269,
+            "cohesion": 0.923238543712364,
+            "distance_moved": 0.0,
+            "effective": 11.3577250490967,
+            "equipment": 11.3577250490967,
+            "equipment_lost": 0.642274950903269,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.077864178726551
+          },
+          "group_39": {
+            "action": "hold",
+            "ammo_spent": 136.795019854982,
+            "ammunition": 823.204980145019,
+            "area_id": "field",
+            "casualties": 0.640880400932354,
+            "cohesion": 0.923296649961152,
+            "distance_moved": 0.0,
+            "effective": 11.3591195990676,
+            "equipment": 11.3591195990676,
+            "equipment_lost": 0.640880400932354,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.0778555813023504
+          }
+        },
+        "version": "land-war-resolver-v0.1"
+      },
+      "events_by_kind": {
+        "action_changed": 40,
+        "control_changed": 1,
+        "losses": 4800
+      },
+      "event_count": 4841
+    },
+    {
+      "case": "six_due_orders",
+      "initial_active_areas": 1,
+      "initial_active_units": 10,
+      "simulated_seconds": 3600,
+      "sleeping_areas": 0,
+      "sleeping_units": 0,
+      "wall_usec": 33730,
+      "static_memory_delta": 126068,
+      "summary": {
+        "control": {
+          "field": "contested"
+        },
+        "counters": {
+          "areas_examined": 37,
+          "contacts_resolved": 1776,
+          "events_processed": 6,
+          "segments": 37,
+          "units_examined": 9848
+        },
+        "missions": {
+          "mission_attack_00": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_00",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_attack_01": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_01",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_attack_02": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_02",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_attack_03": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_03",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_attack_04": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_04",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_attack_05": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_attack_05",
+            "objective": 2.0,
+            "posture": "advance",
+            "priority": 1,
+            "status": "complete",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_defend_00": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_defend_00",
+            "objective": 4.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_defend_01": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_defend_01",
+            "objective": 4.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_defend_02": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_defend_02",
+            "objective": 4.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          },
+          "mission_defend_03": {
+            "destination": "",
+            "direction": 1.0,
+            "id": "mission_defend_03",
+            "objective": 4.0,
+            "posture": "hold",
+            "priority": 1,
+            "status": "active",
+            "stop_suppression": 0.55,
+            "withdraw_cohesion": 0.25
+          }
+        },
+        "policy": "AGGREGATE",
+        "scope": "units and areas examined or changed during the latest resolve call",
+        "seed": 71,
+        "time": 3600.0,
+        "totals": {
+          "ammo_spent": 3908.17344393536,
+          "ammunition": 9600.0,
+          "casualties": 21.7082655967138,
+          "equipment": 120.0,
+          "equipment_lost": 21.7082655967138,
+          "personnel": 120.0
+        },
+        "units": {
+          "attack_00": {
+            "action": "hold",
+            "ammo_spent": 321.264719575633,
+            "ammunition": 638.735280424367,
+            "area_id": "field",
+            "casualties": 2.14165478875976,
+            "cohesion": 0.860764383801677,
+            "distance_moved": 1.5,
+            "effective": 9.85834521124024,
+            "equipment": 9.85834521124024,
+            "equipment_lost": 2.14165478875976,
+            "fatigue": 0.18,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.146395876316875
+          },
+          "attack_01": {
+            "action": "hold",
+            "ammo_spent": 324.619704087519,
+            "ammunition": 635.380295912481,
+            "area_id": "field",
+            "casualties": 2.0551118765715,
+            "cohesion": 0.864370338476187,
+            "distance_moved": 1.5,
+            "effective": 9.9448881234285,
+            "equipment": 9.9448881234285,
+            "equipment_lost": 2.0551118765715,
+            "fatigue": 0.18,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.145169100756363
+          },
+          "attack_02": {
+            "action": "hold",
+            "ammo_spent": 323.29816438514,
+            "ammunition": 636.70183561486,
+            "area_id": "field",
+            "casualties": 2.09002352586406,
+            "cohesion": 0.862915686422331,
+            "distance_moved": 1.5,
+            "effective": 9.90997647413594,
+            "equipment": 9.90997647413594,
+            "equipment_lost": 2.09002352586406,
+            "fatigue": 0.18,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.14565826914238
+          },
+          "attack_03": {
+            "action": "hold",
+            "ammo_spent": 323.481616007026,
+            "ammunition": 636.518383992974,
+            "area_id": "field",
+            "casualties": 2.08534084111119,
+            "cohesion": 0.863110798287034,
+            "distance_moved": 1.5,
+            "effective": 9.91465915888881,
+            "equipment": 9.91465915888881,
+            "equipment_lost": 2.08534084111119,
+            "fatigue": 0.18,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.145591931052378
+          },
+          "attack_04": {
+            "action": "hold",
+            "ammo_spent": 321.991868931782,
+            "ammunition": 638.008131068218,
+            "area_id": "field",
+            "casualties": 2.12316299579064,
+            "cohesion": 0.86153487517539,
+            "distance_moved": 1.5,
+            "effective": 9.87683700420936,
+            "equipment": 9.87683700420936,
+            "equipment_lost": 2.12316299579064,
+            "fatigue": 0.18,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.146130892761174
+          },
+          "attack_05": {
+            "action": "hold",
+            "ammo_spent": 320.504938747117,
+            "ammunition": 639.495061252884,
+            "area_id": "field",
+            "casualties": 2.16099817672293,
+            "cohesion": 0.859958409303211,
+            "distance_moved": 1.5,
+            "effective": 9.83900182327707,
+            "equipment": 9.83900182327707,
+            "equipment_lost": 2.16099817672293,
+            "fatigue": 0.18,
+            "position": 2.0,
+            "side": "blue",
+            "suppression": 0.146674109594266
+          },
+          "defend_00": {
+            "action": "hold",
+            "ammo_spent": 493.989416167178,
+            "ammunition": 466.010583832822,
+            "area_id": "field",
+            "casualties": 2.23359606545862,
+            "cohesion": 0.856933497272558,
+            "distance_moved": 0.0,
+            "effective": 9.76640393454138,
+            "equipment": 9.76640393454138,
+            "equipment_lost": 2.23359606545862,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.430657060647502
+          },
+          "defend_01": {
+            "action": "hold",
+            "ammo_spent": 493.00997480587,
+            "ammunition": 466.99002519413,
+            "area_id": "field",
+            "casualties": 2.27398829422435,
+            "cohesion": 0.855250487740652,
+            "distance_moved": 0.0,
+            "effective": 9.72601170577565,
+            "equipment": 9.72601170577565,
+            "equipment_lost": 2.27398829422435,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.432140399198838
+          },
+          "defend_02": {
+            "action": "hold",
+            "ammo_spent": 492.766652519907,
+            "ammunition": 467.233347480094,
+            "area_id": "field",
+            "casualties": 2.28012227649235,
+            "cohesion": 0.854994905146152,
+            "distance_moved": 0.0,
+            "effective": 9.71987772350765,
+            "equipment": 9.71987772350765,
+            "equipment_lost": 2.28012227649235,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.432469995973492
+          },
+          "defend_03": {
+            "action": "hold",
+            "ammo_spent": 493.246388708181,
+            "ammunition": 466.75361129182,
+            "area_id": "field",
+            "casualties": 2.26426675571834,
+            "cohesion": 0.855655551845069,
+            "distance_moved": 0.0,
+            "effective": 9.73573324428166,
+            "equipment": 9.73573324428166,
+            "equipment_lost": 2.26426675571834,
+            "fatigue": 0.24,
+            "position": 3.5,
+            "side": "red",
+            "suppression": 0.431782116002214
+          }
+        },
+        "version": "land-war-resolver-v0.1"
+      },
+      "events_by_kind": {
+        "action_changed": 16,
+        "control_changed": 1,
+        "losses": 338,
+        "mission_complete": 6,
+        "order": 6
+      },
+      "event_count": 367
+    }
+  ],
+  "benchmark_notes": "3600 game seconds; input construction, diagnostic snapshots and serialization excluded from core counters. Wall times are observations under concurrent validation, not gates. Local search remains quadratic; AGGREGATE has longer intervals without coalescing.",
+  "broad_validation": {
+    "command": "python3 -B /tmp/wwo_broad_validation.py",
+    "literal_powershell": "NOT RUN - POWERSHELL UNAVAILABLE",
+    "steps": [
+      {
+        "name": "Godot version",
+        "command": [
+          "godot",
+          "--version"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 0.41,
+        "summaries": []
+      },
+      {
+        "name": "Editor import",
+        "command": [
+          "godot",
+          "--editor",
+          "--headless",
+          "--path",
+          ".",
+          "--quit"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 6.443,
+        "summaries": []
+      },
+      {
+        "name": "tools/audit_1900_commodity_economy.py",
+        "command": [
+          "python3",
+          "-B",
+          "tools/audit_1900_commodity_economy.py"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 0.032,
+        "summaries": []
+      },
+      {
+        "name": "tools/audit_1900_economy_integration.py",
+        "command": [
+          "python3",
+          "-B",
+          "tools/audit_1900_economy_integration.py"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 0.031,
+        "summaries": []
+      },
+      {
+        "name": "tools/audit_1900_world_economy_compact.py",
+        "command": [
+          "python3",
+          "-B",
+          "tools/audit_1900_world_economy_compact.py"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 0.032,
+        "summaries": []
+      },
+      {
+        "name": "Provenance generation",
+        "command": [
+          "python3",
+          "-B",
+          "tools/provenance/generate_historical_provenance.py",
+          "--check"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 0.065,
+        "summaries": []
+      },
+      {
+        "name": "World data audits",
+        "command": [
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests/world_data",
+          "-p",
+          "test_*.py",
+          "-v"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 35.427,
+        "summaries": [
+          "Ran 46 tests in 34.449s",
+          "OK"
+        ]
+      },
+      {
+        "name": "Historical provenance foundation",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/formal/historical_provenance_foundation_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 1.496,
+        "summaries": [
+          "Historical provenance foundation: 34 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Runtime political identity foundation",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/formal/runtime_political_identity_foundation_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 15.458,
+        "summaries": [
+          "Runtime political identity foundation: 1190 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Formal economy 30-day and one-year golden",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/formal/formal_world_economy_golden_test.gd"
+        ],
+        "returncode": 1,
+        "passed": false,
+        "wall_seconds": 21.048,
+        "summaries": [
+          "Formal world economy golden: 3 checks, 2 failures"
+        ]
+      },
+      {
+        "name": "Formal economic boundary closure",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/formal/formal_world_economic_boundary_closure_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 3.17,
+        "summaries": [
+          "Formal economic boundary closure: 537 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Formal market identity foundation",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/formal/formal_world_market_identity_foundation_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 7.241,
+        "summaries": [
+          "Formal market identity foundation: 649 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Organization foundation",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/vnext/organization_core_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 0.26,
+        "summaries": [
+          "VNext organization core: 139 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Formal organization composition",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/formal/formal_world_organization_composition_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 12.083,
+        "summaries": [
+          "Formal organization composition: 104 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Current world domain convergence",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/vnext/current_world_domain_convergence_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 1.395,
+        "summaries": [
+          "Current world domain convergence: 32 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Formal player release journey",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/formal/formal_world_player_journey_smoke.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 7.536,
+        "summaries": [
+          "Formal player journey: 43 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Formal Windows export resource contract",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/formal/formal_world_export_resource_smoke.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 3.169,
+        "summaries": [
+          "Formal export resource smoke: 526 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Formal world integration",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/formal/formal_world_integration_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 14.321,
+        "summaries": [
+          "Formal world integration: 83 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Formal world ten-year balance",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/formal/formal_world_long_term_balance_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 186.07,
+        "summaries": [
+          "Formal world long-term balance: 40 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Formal hemisphere product surface",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/v2_3/v2_3_player_interface_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 3.159,
+        "summaries": [
+          "Formal hemisphere player surface: 12 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Historical world economy data",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/alpha/alpha_historical_world_economy_data_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 0.267,
+        "summaries": [
+          "Alpha historical world economy data: 11 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Retained location service",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/v2_3/v2_3_location_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 0.671,
+        "summaries": [
+          "V2.3 locations: 16 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Retained route planner service",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/v2_3/v2_3_route_planner_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 0.642,
+        "summaries": [
+          "V2.3 route planner: 13 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Retained travel execution service",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/v2_3/v2_3_travel_execution_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 0.748,
+        "summaries": [
+          "V2.3 travel execution: 11 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Retained schedule integration",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/v2_3/v2_3_schedule_integration_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 0.664,
+        "summaries": [
+          "V2.3 schedule integration: 10 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Retained communication service",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/v2_3/v2_3_communication_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 0.742,
+        "summaries": [
+          "V2.3 communication: 13 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Retained knowledge service",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/v2_3/v2_3_knowledge_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 0.738,
+        "summaries": [
+          "V2.3 knowledge: 10 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Retained relationship service",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/v2_3/v2_3_relationship_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 0.742,
+        "summaries": [
+          "V2.3 relationships: 14 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Retained appointment service",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/v2_3/v2_3_appointment_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 0.848,
+        "summaries": [
+          "V2.3 appointments: 12 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Retained NPC spatial routine",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/v2_3/v2_3_npc_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 0.842,
+        "summaries": [
+          "V2.3 NPC spatial routine: 16 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Retained social sandbox",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/v2_3/v2_3_social_sandbox_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 10.323,
+        "summaries": [
+          "V2.3 formal social sandbox conformance: 367 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Retained social completion",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/v2_3/v2_3_social_sandbox_completion_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 1.878,
+        "summaries": [
+          "V2.3 social sandbox completion: 16 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Retained survival autonomy",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/v2_3/v2_3_survival_autonomy_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 1.579,
+        "summaries": [
+          "V2.3 survival autonomy: 20 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Quarantined commodity fixture",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/alpha/alpha_commodity_market_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 4.915,
+        "summaries": [
+          "Alpha 1900 commodity market: 36 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Quarantined economy lifecycle fixture",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/alpha/alpha_economy_lifecycle_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 0.364,
+        "summaries": [
+          "Alpha economy lifecycle: 46 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Quarantined labor-enterprise fixture",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/alpha/alpha_labor_enterprise_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 0.454,
+        "summaries": [
+          "Alpha labor and enterprise: 57 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Quarantined unified economy fixture",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/alpha/alpha_economy_integration_phase2_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 13.118,
+        "summaries": [
+          "Alpha economy integration phase two: 74 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Quarantined AI economy fixture",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/alpha/alpha_ai_economy_stability_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 201.318,
+        "summaries": [
+          "Alpha AI economy stability: 15 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Quarantined Alpha save-restore equivalence",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/alpha/alpha_state_equivalence_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 7.065,
+        "summaries": [
+          "Alpha state equivalence: 6 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "Quarantined save-migration fixture",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/alpha/alpha_save_and_migration_test.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 7.368,
+        "summaries": [
+          "Alpha save and migration: 23 checks, 0 failures"
+        ]
+      },
+      {
+        "name": "tests/formal/runtime_political_snapshot_probe.gd A",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/formal/runtime_political_snapshot_probe.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 1.205,
+        "summaries": [
+          "RUNTIME_POLITICAL_SNAPSHOT_SHA256=603efe518481f49680b4010e1d0bf28ea45a40769afde64b13e81d871685b14b"
+        ]
+      },
+      {
+        "name": "tests/formal/runtime_political_snapshot_probe.gd B",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/formal/runtime_political_snapshot_probe.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 1.295,
+        "summaries": [
+          "RUNTIME_POLITICAL_SNAPSHOT_SHA256=603efe518481f49680b4010e1d0bf28ea45a40769afde64b13e81d871685b14b"
+        ]
+      },
+      {
+        "name": "tests/formal/formal_world_market_snapshot_probe.gd A",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/formal/formal_world_market_snapshot_probe.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 1.202,
+        "summaries": [
+          "FORMAL_MARKET_SNAPSHOT_SHA256=a3fc4c2c77c1c4bab01560fd58214d0f4f1b3abc78e77ce0765da7a3ee2bb7f6"
+        ]
+      },
+      {
+        "name": "tests/formal/formal_world_market_snapshot_probe.gd B",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/formal/formal_world_market_snapshot_probe.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 1.221,
+        "summaries": [
+          "FORMAL_MARKET_SNAPSHOT_SHA256=a3fc4c2c77c1c4bab01560fd58214d0f4f1b3abc78e77ce0765da7a3ee2bb7f6"
+        ]
+      },
+      {
+        "name": "tests/formal/formal_world_economic_snapshot_probe.gd A",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/formal/formal_world_economic_snapshot_probe.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 2.508,
+        "summaries": [
+          "FORMAL_ECONOMIC_SNAPSHOT_SHA256=5879f94a113ef32a1b69e98465e5e796d7a982bf7b4dd77bb79b1d381a781c59"
+        ]
+      },
+      {
+        "name": "tests/formal/formal_world_economic_snapshot_probe.gd B",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/formal/formal_world_economic_snapshot_probe.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 2.323,
+        "summaries": [
+          "FORMAL_ECONOMIC_SNAPSHOT_SHA256=5879f94a113ef32a1b69e98465e5e796d7a982bf7b4dd77bb79b1d381a781c59"
+        ]
+      },
+      {
+        "name": "tests/formal/formal_world_fingerprint_probe.gd A",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/formal/formal_world_fingerprint_probe.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 1.199,
+        "summaries": [
+          "FORMAL_WORLD_FINGERPRINT_SHA256=4bc156a55b650fd2b850be769a11bb757736345506988a14f5ed2ead3269e87a"
+        ]
+      },
+      {
+        "name": "tests/formal/formal_world_fingerprint_probe.gd B",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--script",
+          "res://tests/formal/formal_world_fingerprint_probe.gd"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 1.127,
+        "summaries": [
+          "FORMAL_WORLD_FINGERPRINT_SHA256=4bc156a55b650fd2b850be769a11bb757736345506988a14f5ed2ead3269e87a"
+        ]
+      },
+      {
+        "name": "Headless formal startup",
+        "command": [
+          "godot",
+          "--headless",
+          "--path",
+          ".",
+          "--quit-after",
+          "5"
+        ],
+        "returncode": 0,
+        "passed": true,
+        "wall_seconds": 0.826,
+        "summaries": []
+      }
+    ],
+    "passed": 48,
+    "failed": 1,
+    "godot_checks": 4178,
+    "godot_failures": 2,
+    "python_world_data_tests": 46,
+    "probe_pairs_match": true,
+    "failure": "formal_world_economy_golden_test.gd: 3 checks / 2 failures",
+    "day30": "24519f5dc2d191d7d5bac67437e35e6d4c4e734700f5c9915ee1df620abdfdcf",
+    "day365": "241451cb8ce5a69d62a5105c0b0808fe16fbdc4ca1f0cb79ade3ffde780c56fd",
+    "baseline_evidence": "Task1 evidence/results.json records pristine-baseline reproduction; task2 rerun emits exactly the same hashes. Cause unresolved.",
+    "adapter_source": "import json, os, re, subprocess, time\nfrom pathlib import Path\nroot=Path('/workspace/wwo-role-overrides')\nout=root/'builds/role-broad';out.mkdir(parents=True,exist_ok=True)\nenv=os.environ.copy()\nfor key,sub in [('XDG_DATA_HOME','data'),('XDG_CONFIG_HOME','config'),('XDG_CACHE_HOME','cache')]:\n p=out/'.xdg'/sub;p.mkdir(parents=True,exist_ok=True);env[key]=str(p)\nsteps=json.loads((root/'experiments/war_resolver/evidence/results.json').read_text())['unified_validation']['steps']\nfatal=re.compile(r'(?im)^ERROR:(?!\\s+\\d+\\s+resources still in use at exit\\b)|SCRIPT ERROR|Parse Error|Failed to load script|Assertion failed|[1-9][0-9]* failures')\nresults=[]\nfor i,step in enumerate(steps):\n started=time.monotonic();command=step['command']\n try:\n  p=subprocess.run(command,cwd=root,env=env,capture_output=True,text=True,timeout=600);log=p.stdout+p.stderr;code=p.returncode\n except subprocess.TimeoutExpired: log='TIMEOUT';code=-1\n (out/f'{i:02d}.log').write_text(log)\n results.append(dict(name=step['name'],command=command,returncode=code,passed=code==0 and not fatal.search(log),wall_seconds=round(time.monotonic()-started,3),summaries=[s for s in log.splitlines() if re.search(r'checks|SHA256|Ran \\d+ tests|^FAILED|^OK$',s)]))\n (out/'results.json').write_text(json.dumps(results,indent=2))\n print(f\"{i+1}/49 {'PASS' if results[-1]['passed'] else 'FAIL'} {step['name']}\",flush=True)\nprint('RESULT',sum(s['passed'] for s in results),'passed',len(results),'total')\n"
+  },
+  "limits": [
+    "Ordinary soldier action/offset has no individual survival or fire consequences.",
+    "Standing AI mission inputs and inherited translation; no operational mission generator.",
+    "Static membership/positions; no attachment, delegation, succession or transmission latency.",
+    "One adapter per battle, configured once.",
+    "Mission replacement with indexed dependents is atomically rejected until migration/cancellation semantics exist.",
+    "Accepted commands and cloned mission records accumulate; no bounded production persistence.",
+    "Higher-role scopes tested on small abstract formations; gameplay enjoyment not established.",
+    "No task3 visual sandbox, production integration or production acceptance."
+  ],
+  "source_sha256": {
+    "experiments/war_resolver/battle_state.gd": "93e0ad4217c72e06db002375c7fb6954d35a7490314674f409effe2a96c6fcdd",
+    "experiments/war_resolver/resolver.gd": "d767ccd2c3f0d11d41853f4c2790f13956c63b7fb13ddc4a4c4c3be7f843655b",
+    "experiments/war_resolver/role_overrides.gd": "07eb5b1ab6eb85dad520990446a3cf2b002c53a6e79e01b1a429f25074593f2d",
+    "experiments/war_resolver/role_scenarios.gd": "c7b46e566a549e827613efe249cac9ac4acaae40d5b53225e9bcd473683ec8c2",
+    "experiments/war_resolver/role_tests.gd": "ff50e98b0b1fd0f065ffd798a698667fd98c5c85ba0c4abed75713771c34b1f9",
+    "experiments/war_resolver/role_replay_probe.gd": "8f857013f97be93aad6d22ab5729d00cd4e225ddadf3c405c49b7dc93e78583f",
+    "experiments/war_resolver/validate.py": "19d7899212cc23d957cfe696e8bd44514adb9443a2dcd8aa87458341052b5cbe"
+  },
+  "process_results": [
+    {
+      "name": "version",
+      "command": [
+        "/usr/local/bin/godot",
+        "--version"
+      ],
+      "returncode": 0,
+      "passed": true,
+      "wall_seconds": 0.3993,
+      "log": "/workspace/wwo-role-overrides/builds/role-final-verified/version.log",
+      "summaries": []
+    },
+    {
+      "name": "import",
+      "command": [
+        "/usr/local/bin/godot",
+        "--editor",
+        "--headless",
+        "--path",
+        "/workspace/wwo-role-overrides",
+        "--quit"
+      ],
+      "returncode": 0,
+      "passed": true,
+      "wall_seconds": 7.0382,
+      "log": "/workspace/wwo-role-overrides/builds/role-final-verified/import.log",
+      "summaries": []
+    },
+    {
+      "name": "resolver-tests",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo-role-overrides",
+        "--script",
+        "res://experiments/war_resolver/tests.gd"
+      ],
+      "returncode": 0,
+      "passed": true,
+      "wall_seconds": 9.1987,
+      "log": "/workspace/wwo-role-overrides/builds/role-final-verified/resolver-tests.log",
+      "summaries": [
+        "War resolver: 1876 checks, 0 failures"
+      ]
+    },
+    {
+      "name": "role-tests",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo-role-overrides",
+        "--script",
+        "res://experiments/war_resolver/role_tests.gd"
+      ],
+      "returncode": 0,
+      "passed": true,
+      "wall_seconds": 8.929,
+      "log": "/workspace/wwo-role-overrides/builds/role-final-verified/role-tests.log",
+      "summaries": [
+        "ROLE_SCALE_COUNTERS={\"areas_examined\":36,\"contacts_resolved\":1728,\"events_processed\":0,\"segments\":36,\"units_examined\":9576}",
+        "Role overrides: 3762 checks, 0 failures"
+      ]
+    },
+    {
+      "name": "replay-a",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo-role-overrides",
+        "--script",
+        "res://experiments/war_resolver/replay_probe.gd"
+      ],
+      "returncode": 0,
+      "passed": true,
+      "wall_seconds": 1.005,
+      "log": "/workspace/wwo-role-overrides/builds/role-final-verified/replay-a.log",
+      "summaries": [
+        "REPLAY_SHA256=8ca88032a57178deeded30379798dbb5e8eb8ee87ca4526e49a0de3f8d457f8a"
+      ]
+    },
+    {
+      "name": "replay-b",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo-role-overrides",
+        "--script",
+        "res://experiments/war_resolver/replay_probe.gd"
+      ],
+      "returncode": 0,
+      "passed": true,
+      "wall_seconds": 1.0363,
+      "log": "/workspace/wwo-role-overrides/builds/role-final-verified/replay-b.log",
+      "summaries": [
+        "REPLAY_SHA256=8ca88032a57178deeded30379798dbb5e8eb8ee87ca4526e49a0de3f8d457f8a"
+      ]
+    },
+    {
+      "name": "role-replay-a",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo-role-overrides",
+        "--script",
+        "res://experiments/war_resolver/role_replay_probe.gd"
+      ],
+      "returncode": 0,
+      "passed": true,
+      "wall_seconds": 1.85,
+      "log": "/workspace/wwo-role-overrides/builds/role-final-verified/role-replay-a.log",
+      "summaries": [
+        "ROLE_REPLAY_SHA256=db9392ed36557206aa05af062e0c9a55e9565b903c7ff78051021373762f36b3"
+      ]
+    },
+    {
+      "name": "role-replay-b",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo-role-overrides",
+        "--script",
+        "res://experiments/war_resolver/role_replay_probe.gd"
+      ],
+      "returncode": 0,
+      "passed": true,
+      "wall_seconds": 2.034,
+      "log": "/workspace/wwo-role-overrides/builds/role-final-verified/role-replay-b.log",
+      "summaries": [
+        "ROLE_REPLAY_SHA256=db9392ed36557206aa05af062e0c9a55e9565b903c7ff78051021373762f36b3"
+      ]
+    },
+    {
+      "name": "benchmark",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo-role-overrides",
+        "--script",
+        "res://experiments/war_resolver/benchmark.gd"
+      ],
+      "returncode": 0,
+      "passed": true,
+      "wall_seconds": 3.4443,
+      "log": "/workspace/wwo-role-overrides/builds/role-final-verified/benchmark.log",
+      "summaries": []
+    },
+    {
+      "name": "military_strategy_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo-role-overrides",
+        "--script",
+        "res://tests/vnext/military_strategy_test.gd"
+      ],
+      "returncode": 0,
+      "passed": true,
+      "wall_seconds": 33.8521,
+      "log": "/workspace/wwo-role-overrides/builds/role-final-verified/military_strategy_test.log",
+      "summaries": [
+        "VNext military strategic system: 966 checks, 0 failures"
+      ]
+    },
+    {
+      "name": "military_r3_findings_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo-role-overrides",
+        "--script",
+        "res://tests/vnext/military_r3_findings_test.gd"
+      ],
+      "returncode": 0,
+      "passed": true,
+      "wall_seconds": 116.6754,
+      "log": "/workspace/wwo-role-overrides/builds/role-final-verified/military_r3_findings_test.log",
+      "summaries": [
+        "VNext military R3 findings: 1803 checks, 0 failures"
+      ]
+    },
+    {
+      "name": "military_spatial_capacity_integration_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo-role-overrides",
+        "--script",
+        "res://tests/vnext/military_spatial_capacity_integration_test.gd"
+      ],
+      "returncode": 0,
+      "passed": true,
+      "wall_seconds": 1.6577,
+      "log": "/workspace/wwo-role-overrides/builds/role-final-verified/military_spatial_capacity_integration_test.log",
+      "summaries": [
+        "VNext Military/Spatial capacity integration: 68 checks, 0 failures"
+      ]
+    },
+    {
+      "name": "formal_military_authorized_defend_integration_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo-role-overrides",
+        "--script",
+        "res://tests/formal/formal_military_authorized_defend_integration_test.gd"
+      ],
+      "returncode": 0,
+      "passed": true,
+      "wall_seconds": 6.9517,
+      "log": "/workspace/wwo-role-overrides/builds/role-final-verified/formal_military_authorized_defend_integration_test.log",
+      "summaries": [
+        "Formal Military authorized DEFEND integration: 120 checks, 0 failures"
+      ]
+    },
+    {
+      "name": "formal_exact_persistence_roundtrip_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo-role-overrides",
+        "--script",
+        "res://tests/formal/formal_exact_persistence_roundtrip_test.gd"
+      ],
+      "returncode": 0,
+      "passed": true,
+      "wall_seconds": 11.2594,
+      "log": "/workspace/wwo-role-overrides/builds/role-final-verified/formal_exact_persistence_roundtrip_test.log",
+      "summaries": [
+        "Formal Exact Persistence: 31 checks, 0 failures"
+      ]
+    }
+  ]
+}

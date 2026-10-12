@@ -9,6 +9,8 @@ var units: Dictionary = {}
 var areas: Dictionary = {}
 var missions: Dictionary = {}
 var coordination: Dictionary = {}
+var tactical_intents: Dictionary = {}
+var command_coordination: Dictionary = {}
 var mission_dependents: Dictionary = {}
 var contacts: Dictionary = {}
 var area_units: Dictionary = {}
@@ -160,6 +162,7 @@ func snapshot() -> Dictionary:
 		"random_state": random_state.duplicate(true), "units": units.duplicate(true),
 		"areas": areas.duplicate(true), "missions": missions.duplicate(true),
 		"coordination": coordination.duplicate(true), "mission_dependents": mission_dependents.duplicate(true),
+		"tactical_intents": tactical_intents.duplicate(true), "command_coordination": command_coordination.duplicate(true),
 		"contacts": contacts.duplicate(true),
 		"active_areas": active_areas.duplicate(), "events": events.duplicate(true),
 		"totals": totals.duplicate(), "counters": counters.duplicate()}
