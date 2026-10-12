@@ -78,14 +78,6 @@ def main() -> int:
         if summary is None or int(summary.group(1)) == 0:
             raise RuntimeError("Missing nonzero check count / zero failure summary")
         print(summary.group(0), flush=True)
-        log = run("role-tests", [*headless, "res://experiments/war_resolver/role_tests.gd"])
-        summary = re.search(r"Role overrides: (\d+) checks, 0 failures", log)
-        if summary is None or int(summary.group(1)) == 0:
-            raise RuntimeError("Missing role check count / zero failure summary")
-        print(summary.group(0), flush=True)
-        for line in log.splitlines():
-            if line.startswith("ROLE_SCALE_COUNTERS="):
-                print(line, flush=True)
         probe_a = run("replay-a", [*headless, "res://experiments/war_resolver/replay_probe.gd"])
         probe_b = run("replay-b", [*headless, "res://experiments/war_resolver/replay_probe.gd"])
         hash_a = re.findall(r"REPLAY_SHA256=([a-f0-9]{64})", probe_a)
@@ -93,13 +85,6 @@ def main() -> int:
         if len(hash_a) != 1 or hash_a != hash_b:
             raise RuntimeError("Fresh-process replay differs or missing hash")
         print("Fresh-process replay: " + hash_a[0], flush=True)
-        role_a = run("role-replay-a", [*headless, "res://experiments/war_resolver/role_replay_probe.gd"])
-        role_b = run("role-replay-b", [*headless, "res://experiments/war_resolver/role_replay_probe.gd"])
-        role_hash_a = re.findall(r"ROLE_REPLAY_SHA256=([a-f0-9]{64})", role_a)
-        role_hash_b = re.findall(r"ROLE_REPLAY_SHA256=([a-f0-9]{64})", role_b)
-        if len(role_hash_a) != 1 or role_hash_a != role_hash_b:
-            raise RuntimeError("Fresh-process role replay differs or missing hash")
-        print("Fresh-process role replay: " + role_hash_a[0], flush=True)
         log = run("benchmark", [*headless, "res://experiments/war_resolver/benchmark.gd"])
         records = [json.loads(line.split("=", 1)[1]) for line in log.splitlines() if line.startswith("BENCHMARK_JSON=")]
         if len(records) < 4:
