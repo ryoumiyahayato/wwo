@@ -1,4 +1,5 @@
 extends RefCounted
+var settlement_state: WeakRef = null
 ## Synthetic summaries only. A parent never calls a combat resolver.
 const STOCKS: Array[String] = ["personnel_total", "effective", "casualties", "equipment",
 	"equipment_lost", "ammunition", "ammo_spent"]
@@ -71,6 +72,8 @@ func clear_dirty() -> void:
 	dirty.clear()
 
 func view(id: String) -> Dictionary:
+	if settlement_state != null and settlement_state.get_ref().public_pending():
+		return settlement_state.get_ref().pending_view()
 	return nodes[id].duplicate(true) if nodes.has(id) else {}
 
 func leaf_descendants(id: String) -> Array[String]:

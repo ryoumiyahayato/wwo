@@ -1,0 +1,85 @@
+{
+  "source_head": "f609b75b4d7711863d8c769f3cfd9667bc84fb59",
+  "exact_code_commit": "69fa36d6202b2b0d8e9332406ff57d269749fa0c",
+  "logs": [
+    {
+      "original_log": "new_experiments__war_resolver__spatial__tests.log",
+      "packaged_log": "spatial.txt",
+      "sha256": "cc23a60353085bc09911d129f76e892abb6b10725018d08470631570bb7d9908",
+      "bytes": 314
+    },
+    {
+      "original_log": "new_experiments__war_resolver__continuity__contract_tests.log",
+      "packaged_log": "contracts.txt",
+      "sha256": "a7a5ea019aa73495aae2c985037c22598d168deaa803bc47f8e90c03f3e10b58",
+      "bytes": 123
+    },
+    {
+      "original_log": "new_experiments__war_resolver__continuity__tests.log",
+      "packaged_log": "integrated.txt",
+      "sha256": "b6443d6b313b5c0197a0dc12b10d19dfd40fd4cb7830de7823aa66672ba7b4ec",
+      "bytes": 119345
+    },
+    {
+      "original_log": "new_experiments__war_resolver__continuous__cursor_tests.log",
+      "packaged_log": "cursors.txt",
+      "sha256": "c62a6f3866100b1bb29ad8a79bdb5e1a0507e59216d52536f084f7b1db52ffe6",
+      "bytes": 109
+    },
+    {
+      "original_log": "new_experiments__war_resolver__continuous__tests.log",
+      "packaged_log": "continuous.txt",
+      "sha256": "fd3baeb37f9917b6c37e710742c83f39678599bd23f7e1d1a2e123892c7b38f7",
+      "bytes": 10368
+    },
+    {
+      "original_log": "new_experiments__war_resolver__continuous__load_tests.log",
+      "packaged_log": "load.txt",
+      "sha256": "05018532a8a9ba342abbad0a5c2606a3195844c04ee4d6123bdbb06a38b6bb2e",
+      "bytes": 4629
+    },
+    {
+      "original_log": "new_experiments__war_resolver__continuous__long_tests.log",
+      "packaged_log": "long.txt",
+      "sha256": "634d099649d4f3aa57995489b2d7ad97c012aa6363c8dd922919af760b2c61ea",
+      "bytes": 15395
+    },
+    {
+      "original_log": "new_experiments__war_resolver__continuous__profile_after.log",
+      "packaged_log": "profile.txt",
+      "sha256": "0d36e3383b80f3e672eed4e3f9a956cb1ff667199a67dd0a5f10fc11081a08b9",
+      "bytes": 9000
+    },
+    {
+      "original_log": "new_experiments__war_resolver__continuous__retirement_tests.log",
+      "packaged_log": "retirement.txt",
+      "sha256": "0d373ac83a62f33a46eea693ab2bb8289a4ed09d190b62f981904292188dd748",
+      "bytes": 5712
+    },
+    {
+      "original_log": "unified_formal_world_economy_golden_test.log",
+      "packaged_log": "baseline-known-failure.txt",
+      "sha256": "00e56d2b8e804950b9edd118ec733dc7348da431ccdf1d81f99bfadd331c7d8b",
+      "bytes": 931
+    },
+    {
+      "original_log": "codex_audit.log",
+      "packaged_log": "audit.txt",
+      "sha256": "513213eea64f1e97b7a4326b303fe3d1609eeb81e7c1e7c061a67778440c8cb8",
+      "bytes": 1681
+    },
+    {
+      "original_log": "world_data.log",
+      "packaged_log": "world-data.txt",
+      "sha256": "5776ba5727887fdfbdb26cbd2e03adb9e954c25e8ca7e932b063e5bf0da26316",
+      "bytes": 8061
+    },
+    {
+      "original_log": "version.log",
+      "packaged_log": "version.txt",
+      "sha256": "1e07780c365549219ffd8e6bd120a818c80424e8295d4ee7451c10d0ed0fa84f",
+      "bytes": 32
+    }
+  ],
+  "other_raw_logs": "builds/task9-m4-final-recovered; all commands/exits/log hashes in gate.json"
+}

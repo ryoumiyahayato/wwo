@@ -1,0 +1,866 @@
+{
+  "mode": "final",
+  "source_head": "0c93b66338c88fb31a05ff66444fa6d423b38f41",
+  "frozen_base": "c4731a33177660b83c6490f41fe42dcbe7cfa7bb",
+  "version": "4.6.3.stable.official.7d41c59c4",
+  "source_digest": {
+    "experiments/war_resolver/role_tests.gd": "ff50e98b0b1fd0f065ffd798a698667fd98c5c85ba0c4abed75713771c34b1f9",
+    "experiments/war_resolver/data.gd": "ffff4828bd65058519a1ca761f19458e85417552225bd0a5dcd5d72ea7dd716b",
+    "experiments/war_resolver/tests.gd": "e830d6b5979625d312ad42153feb09b7269715039cc130adfc1bb3ac6f69d614",
+    "experiments/war_resolver/role_replay_probe.gd": "8f857013f97be93aad6d22ab5729d00cd4e225ddadf3c405c49b7dc93e78583f",
+    "experiments/war_resolver/resolver.gd": "c894a8f05c355315d0d2e3d3420e17304d4b67869139e3d46a621bb1976a4134",
+    "experiments/war_resolver/battle_state.gd": "318b21c0656e9190138a884bacd32887095dec7c4db64762cf74de834b71bb36",
+    "experiments/war_resolver/validate.py": "5763cb219b1cf914a1b6eb991fb715e769e6cca1843c5860b3babae24b3db9d2",
+    "experiments/war_resolver/role_scenarios.gd": "c7b46e566a549e827613efe249cac9ac4acaae40d5b53225e9bcd473683ec8c2",
+    "experiments/war_resolver/scenarios.gd": "9326f6e8e103edc821e8e9a0aabe7ff0ce7e3fe0dd7a5534412c0811028632e8",
+    "experiments/war_resolver/replay_probe.gd": "529757d052438b1e6c6e0bfd04afef56888e18bc9b7e07ac0b2b572e56b4de4b",
+    "experiments/war_resolver/role_overrides.gd": "8ce4293f5c7169287041e22560ea08227dc564a1faeece34627f1e1288b2d049",
+    "experiments/war_resolver/benchmark.gd": "8fb09d68c8b2f6a3358936b6e82f93d0aba7a85b03e4e1d20565a2b01979e45b",
+    "experiments/war_resolver/iteration/cloud_validate.py": "17b1af5f06bd7bdf9546ebb2faa7dd5f4e21f670f3569aa8598ec32d3af0ab58",
+    "experiments/war_resolver/aggregation/authority.gd": "8940e9d90edfc8ed7859e6514a1740f6193f8788cbf4161dc210eaca5cf6774f",
+    "experiments/war_resolver/aggregation/spatial_hierarchy.gd": "5b057ca26e7c9370ce4f5e283bec81f1f071a832bf1bdcd79d57a70fb4d7b8f2",
+    "experiments/war_resolver/aggregation/tests.gd": "a7e6042ecebc624145cbafb8fdd5df9aac2bab6052dd85890007f1b4003ed7d5",
+    "experiments/war_resolver/aggregation/fixtures.gd": "49c196a901d50a863ce17a1addd772bd47d446d8b7f8f9d63144096e0fd84e4a",
+    "experiments/war_resolver/aggregation/contact_index.gd": "e5aba85d13201412f33b2ee70d3d175626373b3a4c271be6204f866368669377",
+    "experiments/war_resolver/aggregation/validate.py": "065c0f5be0a5f7cc22efcfead6dbaad83e7edc7f6ec642f719f7af21cd83cae3",
+    "experiments/war_resolver/aggregation/replay_probe.gd": "8e2f6691cab8af0ea47e7f0bb51c7bbe9713f96cf1f103efef6d5f419c44e4fb",
+    "experiments/war_resolver/aggregation/indexed_resolver.gd": "26da61a881c3f1a3099d086d729b554333d01ecbb2069f2012b21f588c4df6f4",
+    "experiments/war_resolver/aggregation/benchmark.gd": "a01f7a80715f164791b611d22f169ef5599299950076b276da704d638484fbaa",
+    "experiments/war_resolver/information/reader.gd": "75d9357149c9f38dd07e490a4936fdbb8e96307a515047e4c9eb7c75b3924f82",
+    "experiments/war_resolver/information/decision.gd": "91b40544a83ceeec47831e1bf52d5312d4c75bc4b72468f343c770017f071937",
+    "experiments/war_resolver/information/tests.gd": "3aae0152c72332254bf1c986789cb489cb7fa6f6673639e2bd3102d1a7096c39",
+    "experiments/war_resolver/information/fixtures.gd": "4a5e246e3418eb2ca7ae3a437e7d84497a41b34d27bca9db745e32feba58990b",
+    "experiments/war_resolver/information/validate.py": "c322395a5cde3c53954eff492ce1c4de40bb281e6ff3a7545dfea9d2076272d5",
+    "experiments/war_resolver/information/service.gd": "0febbb28355bc5d6aebba21cbe72afcc23a3c2dae5ae979ee339c801ecf106e2",
+    "experiments/war_resolver/information/replay_probe.gd": "0151795019bbaf0ab027a2f803ba7e447008ad2eea9dcfb2cade7d8d92928bf8",
+    "experiments/war_resolver/information/benchmark.gd": "88a00ef8580f140d3fb6f34b4444c2b51fa73f8461f377b60d6ccf33bb2e0457",
+    "experiments/war_resolver/sandbox/session.gd": "531db6195ae2e78025df9d8cffe132e59e73074b986aa6920d400d53e563fd13",
+    "experiments/war_resolver/sandbox/tests.gd": "43be0a460f9f941248ece2a26e4ebd48dee989d79be304bc42898f9709c32472",
+    "experiments/war_resolver/sandbox/canvas.gd": "2421704a8fbac8f0d374dfec2cf625246b379d42c0cf572749f6720c24b3d82a",
+    "experiments/war_resolver/sandbox/observation_probe.gd": "2d06b2a679a0c5db910efc1605bb89768bb78ba21532d903f96de2e79e5a84f6",
+    "experiments/war_resolver/sandbox/fixtures.gd": "8cdacf061b9374279396a741543cd66055445d60fe9efd10b720205ad1968dd7",
+    "experiments/war_resolver/sandbox/sandbox.gd": "4ba5c93a2c75a424e46286db435725812ee607f0d82c00ccca0034724ff736fa",
+    "experiments/war_resolver/structure/tests.gd": "a5faf588d9e4e96a0e21d9bc0674913b269233305565896f8619fcce22ef0e72",
+    "experiments/war_resolver/structure/fixtures.gd": "ca05f53a3cc13faee3b52f934c99ac8c04ac4bf994bcfae07b57083eda56ee92",
+    "experiments/war_resolver/structure/validate.py": "6797c384ad876d66421507ba33aa5522088c69f599b38d176842ad7660f329a5",
+    "experiments/war_resolver/structure/service.gd": "d799299264df65bb3cc0090edb5cd508425c0c098f9e2b14d5f2e957c1782ea0",
+    "experiments/war_resolver/structure/commands.gd": "d6832f556e6311aab08baaea0a0d66333cef1d726b0517200a232dff8dce28cf",
+    "experiments/war_resolver/structure/replay_probe.gd": "283dea1d2e7b38ad6b6fc5e8008232b7a4c5a6ad2a4dfb5b31a493fe38ba1891",
+    "experiments/war_resolver/structure/benchmark.gd": "be81aa89e412f90ce20ff69497336948bdae9dbab8607317ad8766a6f3c1c62d",
+    "experiments/war_resolver/decision/test_policy.gd": "678e60e23a8bdba3412eded0832c298a18b53a61c27a41bb554ea95a2b6627d8",
+    "experiments/war_resolver/decision/tests.gd": "77cab7f2f567adbb9abda0fb6fdd7adc898cf613444e8bca352733ccf4d636f9",
+    "experiments/war_resolver/decision/adapter.gd": "06dfa0711d9df834b8cec964bfcbc8ee59da1f08e6242fa003e7cf9b9a7d0464",
+    "experiments/war_resolver/decision/decision_context.gd": "5a07ab261a3ae8c36809850dfb885e7e55ee427654bee44a4e880e1c9b052592",
+    "experiments/war_resolver/decision/fixtures.gd": "e3b66d1251f9b25eca1c57a60d0127abba828522e2cdee8986cb2d6b1eefd428",
+    "experiments/war_resolver/decision/validate.py": "aca45fc0929b1a12c4d569a75e702a90ef8c7f00d19c40a537b3db189bf4e42b",
+    "experiments/war_resolver/decision/service.gd": "356e0f49f97c7de4e613397db134908735be2b0fc3c1ded5c7cd01b251288f13",
+    "experiments/war_resolver/decision/replay_probe.gd": "9fde742225163437eca003dd9ae95a93db9dd08a822736de5f751424b6274c8d",
+    "experiments/war_resolver/decision/benchmark.gd": "8d0dc3d0ec09433453b4f9bd145c80931cad12ed6f6199d0bd6984f425e256e9",
+    "experiments/war_resolver/logistics/tests.gd": "995ce419b9966e4fc8b98fadd3a9361108f1c8501f50f8dffb686e5ac4669934",
+    "experiments/war_resolver/logistics/fixtures.gd": "2347dd2865cb9ae5df8156fa45ab387e270283e85cc2a8414d483134db057ac0",
+    "experiments/war_resolver/logistics/validate.py": "eb1879cb6f137ca168b17dcd4ade62f6c9af828efac2c265c3488baf86945030",
+    "experiments/war_resolver/logistics/service.gd": "fcd684e498997c4bb9f467876de9bdeb42ef6707af55c27a07774a0c614f16b6",
+    "experiments/war_resolver/logistics/commands.gd": "44fd74f7194ea2e38a876079da9c20c9a2b566fa4bcbe036bf40f4fd53ca2c25",
+    "experiments/war_resolver/logistics/replay_probe.gd": "67451ad58d204c16f116528d9f8dc89304430f76daeeaf9821353e3e0c926ef4",
+    "experiments/war_resolver/logistics/benchmark.gd": "fdd0c741d0517e404330cf6575b048055f60dee8575e1851a72f68ad98710f3d",
+    "experiments/war_resolver/spatial/tests.gd": "c4d43f9d77f62cbac1f1a13e2faf4c92627d7e5e3c8e90b23cb4b67628878f91",
+    "experiments/war_resolver/spatial/fixtures.gd": "069979952ab88df139fb0c4f4b1f116910a75a7757b5ca973476519113109d25",
+    "experiments/war_resolver/spatial/space.gd": "96be657506ea8b8f1af4c7ed1114449cb7fa8702b386947c789426e3836aa5ff",
+    "experiments/war_resolver/continuity/run.gd": "99382180d61a4defe196f36f0b64eb20492165b1a35575324fa7a6552dbc7dd3",
+    "experiments/war_resolver/continuity/run_scenario.py": "6a5b73da83daff7d74e930562ca3c8201845bc72f6a43949b3cfbfac06774a1f",
+    "experiments/war_resolver/continuity/contract_tests.gd": "512dbed011c3999ad37bc600e3ce319f42024c1bedad22c46483195a81374c81",
+    "experiments/war_resolver/continuity/policy.gd": "fe1e2a40594699ce6d781b28196edc37bfab61804516fcec426719ec9590be48",
+    "experiments/war_resolver/continuity/tests.gd": "56da3a3a4137da63924928d89a190346370d647e8624ca88ba9ddb273d20573b",
+    "experiments/war_resolver/continuity/scenario.gd": "9b9838375a3dbfe212119b89b14238a723a9f8bb483bd065bd37ebd833b63fab",
+    "experiments/war_resolver/continuity/trace.gd": "421342b2d327ff03a501a58d5dc695890a5fb83b2fde2c29fd9fe0b7df7bbfc7"
+  },
+  "platform": "linux",
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "steps": [
+    {
+      "name": "version",
+      "command": [
+        "/usr/local/bin/godot",
+        "--version"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.30326,
+      "fatal": null,
+      "log": "version.log",
+      "log_sha256": "1e07780c365549219ffd8e6bd120a818c80424e8295d4ee7451c10d0ed0fa84f",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "import",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--editor",
+        "--path",
+        "/workspace/wwo",
+        "--quit"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 4.97563,
+      "fatal": null,
+      "log": "import.log",
+      "log_sha256": "88a65891fcfd1b9f913a70de3df0508e5bc3ce83dca9418150bf4d7ac5d341b2",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "resolver_tests",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/tests.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 9.26894,
+      "fatal": null,
+      "log": "resolver_tests.log",
+      "log_sha256": "02f69c62d75f5fc391cf47e3cb5c8ae4cccfc3e81eb1b309e6b0fce97dfe465e",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "resolver_a",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/replay_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.99101,
+      "fatal": null,
+      "log": "resolver_a.log",
+      "log_sha256": "825ff490a798e248b285ccfa91520cb4ffff780a7b5f38ad9e3302329248e680",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "resolver_b",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/replay_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 1.08591,
+      "fatal": null,
+      "log": "resolver_b.log",
+      "log_sha256": "825ff490a798e248b285ccfa91520cb4ffff780a7b5f38ad9e3302329248e680",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "resolver_benchmark",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/benchmark.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 2.48485,
+      "fatal": null,
+      "log": "resolver_benchmark.log",
+      "log_sha256": "8d48b32d18c901a5a1240e0fca1c926c9bc84533931fff42f93809705fe4f046",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "roles_tests",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/role_tests.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 8.89627,
+      "fatal": null,
+      "log": "roles_tests.log",
+      "log_sha256": "4c019bb2adf1b1e1f4bbd201e9aa50c0cfc56d75f987af44f099597bc1c12bfe",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "roles_a",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/role_replay_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 1.92063,
+      "fatal": null,
+      "log": "roles_a.log",
+      "log_sha256": "6370533f15a3ed2535cd5b55df12fe6d3938b31c2765816c11a7290b43ebe164",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "roles_b",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/role_replay_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 2.01518,
+      "fatal": null,
+      "log": "roles_b.log",
+      "log_sha256": "6370533f15a3ed2535cd5b55df12fe6d3938b31c2765816c11a7290b43ebe164",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "sandbox_tests",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/sandbox/tests.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 25.26927,
+      "fatal": null,
+      "log": "sandbox_tests.log",
+      "log_sha256": "4da70c4530f596cb58beafea4ea7fbdc3b1fe497a2c7b749090543835afdb186",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "sandbox_a",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/sandbox/observation_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 8.37258,
+      "fatal": null,
+      "log": "sandbox_a.log",
+      "log_sha256": "6fedb31ddba94bca068bb6e4f5c9ff7b84141ad7036f3af3dfc7d8c773375b4b",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "sandbox_b",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/sandbox/observation_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 8.65031,
+      "fatal": null,
+      "log": "sandbox_b.log",
+      "log_sha256": "6fedb31ddba94bca068bb6e4f5c9ff7b84141ad7036f3af3dfc7d8c773375b4b",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task4_tests",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/aggregation/tests.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 31.03813,
+      "fatal": null,
+      "log": "task4_tests.log",
+      "log_sha256": "2ba0c73c4f9e278938d482eb5e917dec2c87146363f6711a297d1e3941d0a4a6",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task4_a",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/aggregation/replay_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.61526,
+      "fatal": null,
+      "log": "task4_a.log",
+      "log_sha256": "0db62478bc70698c69c0be5b6bd6a36f83713b135fbd353b38854ed42d8ffdef",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task4_b",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/aggregation/replay_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.61981,
+      "fatal": null,
+      "log": "task4_b.log",
+      "log_sha256": "0db62478bc70698c69c0be5b6bd6a36f83713b135fbd353b38854ed42d8ffdef",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task4_benchmark",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/aggregation/benchmark.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 14.29069,
+      "fatal": null,
+      "log": "task4_benchmark.log",
+      "log_sha256": "48ecb0765b1292ee1ebce95baabd7af988131ef2c0dad801dbc3a25fcf163048",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task5_tests",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/structure/tests.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 1.27829,
+      "fatal": null,
+      "log": "task5_tests.log",
+      "log_sha256": "fb21af7028fffa28a6c62743dc22283abbcdfc6ce74a07c2fa788628b8a12441",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task5_a",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/structure/replay_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.61971,
+      "fatal": null,
+      "log": "task5_a.log",
+      "log_sha256": "413fd1a464e8be10b71eee790428cbb06966b1c29fb4aa6c72b2e0423db1696d",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task5_b",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/structure/replay_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.61964,
+      "fatal": null,
+      "log": "task5_b.log",
+      "log_sha256": "413fd1a464e8be10b71eee790428cbb06966b1c29fb4aa6c72b2e0423db1696d",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task5_benchmark",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/structure/benchmark.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.80758,
+      "fatal": null,
+      "log": "task5_benchmark.log",
+      "log_sha256": "b5cb879819f6ad484ef87bb48c39c5dd52866ab44ddb52ffa5dcc2153306b2e6",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task6_tests",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/logistics/tests.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 1.38212,
+      "fatal": null,
+      "log": "task6_tests.log",
+      "log_sha256": "7d1bb200df348fbfc578e228e0f3c2aeb0965edbd6556e2ead6ff3e6acb239e0",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task6_a",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/logistics/replay_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.83674,
+      "fatal": null,
+      "log": "task6_a.log",
+      "log_sha256": "f686dd28a379796b97076cab0a566f29591b6f3d5c17784b3492b84edfd81c0f",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task6_b",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/logistics/replay_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.80745,
+      "fatal": null,
+      "log": "task6_b.log",
+      "log_sha256": "f686dd28a379796b97076cab0a566f29591b6f3d5c17784b3492b84edfd81c0f",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task6_benchmark",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/logistics/benchmark.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 1.19035,
+      "fatal": null,
+      "log": "task6_benchmark.log",
+      "log_sha256": "cef57739674f4a2f775c2e9f4f0f03ffe8ae6e5be86998b69fa4e566e17ec857",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task7_tests",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/information/tests.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 1.29581,
+      "fatal": null,
+      "log": "task7_tests.log",
+      "log_sha256": "c5a5af29250b1845d6c72489c15e416c0a1aaf2290e7f09c7100d7e8550a4a23",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task7_a",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/information/replay_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.82575,
+      "fatal": null,
+      "log": "task7_a.log",
+      "log_sha256": "b09447a45b8d7b5cb39b16d6d60dba965310696aa60675a8a48d0a729dfb7f79",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task7_b",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/information/replay_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.81649,
+      "fatal": null,
+      "log": "task7_b.log",
+      "log_sha256": "b09447a45b8d7b5cb39b16d6d60dba965310696aa60675a8a48d0a729dfb7f79",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task7_benchmark",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/information/benchmark.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 1.00339,
+      "fatal": null,
+      "log": "task7_benchmark.log",
+      "log_sha256": "7cc9f89e9da2e3a1e29bbfa34b4e918a1d04d46ce165a26bfe2447fbfc800c7d",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task8_tests",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/decision/tests.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 5.0187,
+      "fatal": null,
+      "log": "task8_tests.log",
+      "log_sha256": "77e27fb3da56eeb4ddd0240e0bb8f9c48ab1bd813d03d0b6dae413331451dabc",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task8_a",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/decision/replay_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 1.00629,
+      "fatal": null,
+      "log": "task8_a.log",
+      "log_sha256": "333a493143faf1276310be870e205e160d19d7d7d7647f450f7be93c516ce5db",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task8_b",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/decision/replay_probe.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.82809,
+      "fatal": null,
+      "log": "task8_b.log",
+      "log_sha256": "333a493143faf1276310be870e205e160d19d7d7d7647f450f7be93c516ce5db",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "task8_benchmark",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/decision/benchmark.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 4.5465,
+      "fatal": null,
+      "log": "task8_benchmark.log",
+      "log_sha256": "013af25735b22ff74ae823b059b130d87374b9a4eff88126995d6414652f2dfa",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "sandbox_scene",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "res://experiments/war_resolver/sandbox/sandbox.tscn",
+        "--quit-after",
+        "5"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.24346,
+      "fatal": null,
+      "log": "sandbox_scene.log",
+      "log_sha256": "a9912b85473f126d3f4f63ec824170c828df3473a292f866dde86cafda5b66da",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "military_strategy_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/vnext/military_strategy_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 22.6672,
+      "fatal": null,
+      "log": "military_strategy_test.log",
+      "log_sha256": "ebc4340f1a71dca59a5c51f88597b222f95afb98d211ec6e1b6115ad9d7787e3",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "military_r3_findings_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/vnext/military_r3_findings_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 86.83872,
+      "fatal": null,
+      "log": "military_r3_findings_test.log",
+      "log_sha256": "a2f9f3c96406a28510bb113928718717d483b10a4324f294e600eaa7758de5d8",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "military_spatial_capacity_integration_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/vnext/military_spatial_capacity_integration_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 1.45583,
+      "fatal": null,
+      "log": "military_spatial_capacity_integration_test.log",
+      "log_sha256": "084f40238f4c99e958d4b05443f5896275f1c92936b246f318acf02b3d044b89",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "formal_military_authorized_defend_integration_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/formal/formal_military_authorized_defend_integration_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 4.52455,
+      "fatal": null,
+      "log": "formal_military_authorized_defend_integration_test.log",
+      "log_sha256": "efc43c0e2a478a5413de4941b6dd99e38a6e9aebf73792202bb33cf6d7be7e97",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "formal_exact_persistence_roundtrip_test",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://tests/formal/formal_exact_persistence_roundtrip_test.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 8.61986,
+      "fatal": null,
+      "log": "formal_exact_persistence_roundtrip_test.log",
+      "log_sha256": "03c81a462677605c15470fa08d67bd4bb771111892ff3afc3bd10a126ada7c1a",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "new_experiments__war_resolver__spatial__tests",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/spatial/tests.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.52426,
+      "fatal": null,
+      "log": "new_experiments__war_resolver__spatial__tests.log",
+      "log_sha256": "cc23a60353085bc09911d129f76e892abb6b10725018d08470631570bb7d9908",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "new_experiments__war_resolver__continuity__contract_tests",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/continuity/contract_tests.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 0.35814,
+      "fatal": null,
+      "log": "new_experiments__war_resolver__continuity__contract_tests.log",
+      "log_sha256": "a7a5ea019aa73495aae2c985037c22598d168deaa803bc47f8e90c03f3e10b58",
+      "retained_shutdown_diagnostics": 0
+    },
+    {
+      "name": "new_experiments__war_resolver__continuity__tests",
+      "command": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        "/workspace/wwo",
+        "--script",
+        "res://experiments/war_resolver/continuity/tests.gd"
+      ],
+      "exit": 0,
+      "passed": true,
+      "wall_seconds": 1.36856,
+      "fatal": null,
+      "log": "new_experiments__war_resolver__continuity__tests.log",
+      "log_sha256": "3e061627ef9a2174fcc37e961768550d3e202fc53936cfc46145bac6fe4d2cd4",
+      "retained_shutdown_diagnostics": 0
+    }
+  ],
+  "checks": {
+    "resolver": 1876,
+    "roles": 3762,
+    "sandbox": 8941,
+    "task4": 17329,
+    "task5": 788,
+    "task6": 5703,
+    "task7": 1341,
+    "task8": 1220,
+    "military_strategy_test": [
+      966
+    ],
+    "military_r3_findings_test": [
+      1803
+    ],
+    "military_spatial_capacity_integration_test": [
+      68
+    ],
+    "formal_military_authorized_defend_integration_test": [
+      120
+    ],
+    "formal_exact_persistence_roundtrip_test": [
+      31
+    ],
+    "new_experiments__war_resolver__spatial__tests": [
+      190
+    ],
+    "new_experiments__war_resolver__continuity__contract_tests": [
+      56
+    ],
+    "new_experiments__war_resolver__continuity__tests": [
+      116
+    ]
+  },
+  "hashes": {
+    "resolver": "8ca88032a57178deeded30379798dbb5e8eb8ee87ca4526e49a0de3f8d457f8a",
+    "roles": "db9392ed36557206aa05af062e0c9a55e9565b903c7ff78051021373762f36b3",
+    "sandbox": "dff74a5d00ae2e7335d3e6ff037c0274dc07df5e7969901e0c4792f2d1094d7c",
+    "task4": "73c47a49ca73e026227324581975b1315b9386183a21da022827d30e37a646f3",
+    "task5": "8ea04270be8ecbaf532d02f0b61b03446edf7904826a3a3c06fdb2ed9e58eaae",
+    "task6": "5492e4560c58ab48491404c5c5c2cb15db108b855a067f726f66b90875fa2e87",
+    "task7": "f05794a6fb87f8af58f9621023fb6e0eeac496fcfb11da53baf3f80a6e4f9fcf",
+    "task8": "70d7403501902e03ee8e81798d631c36c27408ea68bc2c176ab6e3bd144f60bd"
+  },
+  "known_baseline_failure": [],
+  "official_powershell": "NOT RUN in this stage gate",
+  "skip_unified": true,
+  "complete": true,
+  "new_failed_steps": [],
+  "gate_passed_excluding_disclosed_baseline_failure": true
+}

@@ -1,0 +1,22 @@
+{
+  "code_head": "069e3f028ddf2dfe2bdb88e05fdad0de1bda2535",
+  "reused_expanded_head": "ce7b33718daa334338dec791cddf14e7285dda5c",
+  "changed_source_files": [
+    "experiments/war_resolver/spatial/tests.gd"
+  ],
+  "reason": "Only additional spatial tests changed; every algorithm and predecessor source digest identical. Ended expanded logs reused, not counted twice. M4 full rerun remains required.",
+  "M1": "PASSED",
+  "checks": 190,
+  "predecessor_checks": 43948,
+  "predecessor_hashes": {
+    "resolver": "8ca88032a57178deeded30379798dbb5e8eb8ee87ca4526e49a0de3f8d457f8a",
+    "roles": "db9392ed36557206aa05af062e0c9a55e9565b903c7ff78051021373762f36b3",
+    "sandbox": "dff74a5d00ae2e7335d3e6ff037c0274dc07df5e7969901e0c4792f2d1094d7c",
+    "task4": "73c47a49ca73e026227324581975b1315b9386183a21da022827d30e37a646f3",
+    "task5": "8ea04270be8ecbaf532d02f0b61b03446edf7904826a3a3c06fdb2ed9e58eaae",
+    "task6": "5492e4560c58ab48491404c5c5c2cb15db108b855a067f726f66b90875fa2e87",
+    "task7": "f05794a6fb87f8af58f9621023fb6e0eeac496fcfb11da53baf3f80a6e4f9fcf",
+    "task8": "70d7403501902e03ee8e81798d631c36c27408ea68bc2c176ab6e3bd144f60bd"
+  },
+  "unified_in_M1": "NOT RUN"
+}

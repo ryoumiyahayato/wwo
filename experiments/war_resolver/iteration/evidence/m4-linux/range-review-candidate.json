@@ -1,0 +1,18 @@
+{
+  "base": "c4731a33177660b83c6490f41fe42dcbe7cfa7bb",
+  "final_code_candidate": "69fa36d6202b2b0d8e9332406ff57d269749fa0c",
+  "validation_checkout": "f609b75b4d7711863d8c769f3cfd9667bc84fb59",
+  "scope": "experiments/war_resolver/",
+  "tracked_outside_scope": [],
+  "predecessor_test_probe_benchmark_changes": [],
+  "protected_sha256_equal_base": {
+    "AGENTS.md": "1779c866347f6861a0e89002f59e273a6d1e42501142d6d20b5d15ecaf053ada",
+    "project.godot": "125277a9e2cc57a700f3c2788bd8392a8af0cc1e65f55176868cb0956e1418d5",
+    "tools/run_validation.ps1": "6dffb5e53dd1738466ed3b79d94d820839bd90c30558554393a04415279b83c6",
+    ".github/workflows/windows-prototype-release.yml": "e3ecdcaedb80c895b7bb60e03b085e69a79f219a37895fddd43a31bbb8ef3890",
+    "tests/codex_audit_regression.gd": "3777cc35aa20d3bbe2396c7c1d029fff981aeb0b29e6465cb4b8308c38a74654"
+  },
+  "production_untracked_uid_files": "preserved/excluded; not part of tracked patch",
+  "review": "single writer sequential second pass; no sub-agent/human audit",
+  "final_status": "PENDING full final gate"
+}

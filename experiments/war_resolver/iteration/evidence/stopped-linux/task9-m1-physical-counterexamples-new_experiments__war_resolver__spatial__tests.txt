@@ -1,0 +1,87 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+SCRIPT ERROR: Trying to assign an array of type "Array" to a variable of type "Array[int]".
+          at: setup (res://experiments/war_resolver/spatial/fixtures.gd:53)
+          GDScript backtrace (most recent call first):
+              [0] setup (res://experiments/war_resolver/spatial/fixtures.gd:53)
+              [1] _reference (res://experiments/war_resolver/spatial/tests.gd:37)
+              [2] _initialize (res://experiments/war_resolver/spatial/tests.gd:9)
+SCRIPT ERROR: Invalid access to property or key 'space' on a base object of type 'Dictionary'.
+          at: _reference (res://experiments/war_resolver/spatial/tests.gd:38)
+          GDScript backtrace (most recent call first):
+              [0] _reference (res://experiments/war_resolver/spatial/tests.gd:38)
+              [1] _initialize (res://experiments/war_resolver/spatial/tests.gd:9)
+SCRIPT ERROR: Trying to assign an array of type "Array" to a variable of type "Array[int]".
+          at: setup (res://experiments/war_resolver/spatial/fixtures.gd:53)
+          GDScript backtrace (most recent call first):
+              [0] setup (res://experiments/war_resolver/spatial/fixtures.gd:53)
+              [1] _attributes (res://experiments/war_resolver/spatial/tests.gd:58)
+              [2] _initialize (res://experiments/war_resolver/spatial/tests.gd:10)
+SCRIPT ERROR: Invalid access to property or key 'space' on a base object of type 'Dictionary'.
+          at: _attributes (res://experiments/war_resolver/spatial/tests.gd:59)
+          GDScript backtrace (most recent call first):
+              [0] _attributes (res://experiments/war_resolver/spatial/tests.gd:59)
+              [1] _initialize (res://experiments/war_resolver/spatial/tests.gd:10)
+SCRIPT ERROR: Trying to assign an array of type "Array" to a variable of type "Array[int]".
+          at: setup (res://experiments/war_resolver/spatial/fixtures.gd:53)
+          GDScript backtrace (most recent call first):
+              [0] setup (res://experiments/war_resolver/spatial/fixtures.gd:53)
+              [1] _bridge (res://experiments/war_resolver/spatial/tests.gd:94)
+              [2] _initialize (res://experiments/war_resolver/spatial/tests.gd:11)
+SCRIPT ERROR: Invalid access to property or key 'space' on a base object of type 'Dictionary'.
+          at: _bridge (res://experiments/war_resolver/spatial/tests.gd:95)
+          GDScript backtrace (most recent call first):
+              [0] _bridge (res://experiments/war_resolver/spatial/tests.gd:95)
+              [1] _initialize (res://experiments/war_resolver/spatial/tests.gd:11)
+SCRIPT ERROR: Trying to assign an array of type "Array" to a variable of type "Array[int]".
+          at: setup (res://experiments/war_resolver/spatial/fixtures.gd:53)
+          GDScript backtrace (most recent call first):
+              [0] setup (res://experiments/war_resolver/spatial/fixtures.gd:53)
+              [1] _contact (res://experiments/war_resolver/spatial/tests.gd:119)
+              [2] _initialize (res://experiments/war_resolver/spatial/tests.gd:12)
+SCRIPT ERROR: Trying to assign an array of type "Array" to a variable of type "Array[int]".
+          at: setup (res://experiments/war_resolver/spatial/fixtures.gd:53)
+          GDScript backtrace (most recent call first):
+              [0] setup (res://experiments/war_resolver/spatial/fixtures.gd:53)
+              [1] _contact (res://experiments/war_resolver/spatial/tests.gd:120)
+              [2] _initialize (res://experiments/war_resolver/spatial/tests.gd:12)
+SCRIPT ERROR: Invalid access to property or key 'lod' on a base object of type 'Dictionary'.
+          at: _contact (res://experiments/war_resolver/spatial/tests.gd:121)
+          GDScript backtrace (most recent call first):
+              [0] _contact (res://experiments/war_resolver/spatial/tests.gd:121)
+              [1] _initialize (res://experiments/war_resolver/spatial/tests.gd:12)
+SCRIPT ERROR: Trying to assign an array of type "Array" to a variable of type "Array[int]".
+          at: setup (res://experiments/war_resolver/spatial/fixtures.gd:53)
+          GDScript backtrace (most recent call first):
+              [0] setup (res://experiments/war_resolver/spatial/fixtures.gd:53)
+              [1] _locality (res://experiments/war_resolver/spatial/tests.gd:143)
+              [2] _initialize (res://experiments/war_resolver/spatial/tests.gd:13)
+SCRIPT ERROR: Invalid access to property or key 'state' on a base object of type 'Dictionary'.
+          at: _locality (res://experiments/war_resolver/spatial/tests.gd:144)
+          GDScript backtrace (most recent call first):
+              [0] _locality (res://experiments/war_resolver/spatial/tests.gd:144)
+              [1] _initialize (res://experiments/war_resolver/spatial/tests.gd:13)
+SCRIPT ERROR: Trying to assign an array of type "Array" to a variable of type "Array[int]".
+          at: setup (res://experiments/war_resolver/spatial/fixtures.gd:53)
+          GDScript backtrace (most recent call first):
+              [0] setup (res://experiments/war_resolver/spatial/fixtures.gd:53)
+              [1] _rejections (res://experiments/war_resolver/spatial/tests.gd:188)
+              [2] _initialize (res://experiments/war_resolver/spatial/tests.gd:14)
+SCRIPT ERROR: Invalid access to property or key 'state' on a base object of type 'Dictionary'.
+          at: _rejections (res://experiments/war_resolver/spatial/tests.gd:189)
+          GDScript backtrace (most recent call first):
+              [0] _rejections (res://experiments/war_resolver/spatial/tests.gd:189)
+              [1] _initialize (res://experiments/war_resolver/spatial/tests.gd:14)
+SCRIPT ERROR: Trying to assign an array of type "Array" to a variable of type "Array[int]".
+          at: setup (res://experiments/war_resolver/spatial/fixtures.gd:53)
+          GDScript backtrace (most recent call first):
+              [0] setup (res://experiments/war_resolver/spatial/fixtures.gd:53)
+              [1] _dynamic_and_retreat (res://experiments/war_resolver/spatial/tests.gd:198)
+              [2] _initialize (res://experiments/war_resolver/spatial/tests.gd:15)
+SCRIPT ERROR: Invalid access to property or key 'space' on a base object of type 'Dictionary'.
+          at: _dynamic_and_retreat (res://experiments/war_resolver/spatial/tests.gd:199)
+          GDScript backtrace (most recent call first):
+              [0] _dynamic_and_retreat (res://experiments/war_resolver/spatial/tests.gd:199)
+              [1] _initialize (res://experiments/war_resolver/spatial/tests.gd:15)
+SPATIAL_EVIDENCE_JSON={}
+Task9 spatial: 0 checks, 0 failures

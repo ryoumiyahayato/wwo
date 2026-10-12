@@ -1,0 +1,34 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+[PASS] 正式世界数据可加载
+[PASS] 人物生成配置有效
+[PASS] 行动规则配置有效
+[PASS] 地图规则配置有效
+[PASS] 唯一权威时钟配置有效
+[PASS] 可创建 Codex 审计回归人物
+[PASS] 权威社会服务可初始化
+[PASS] 学习行动接受正式选择的技能
+[PASS] 学习行动提高所选政治活动技能
+[PASS] 选择其他技能时不再固定提高调查技能
+[PASS] 非学习行动可建立实践成长测试
+[PASS] 完成实际行动会提高该行动的主要技能
+[PASS] 普通与完整人口模式共抽样 1000 个角色
+[PASS] 充分训练、准备和资金使全部核心行动达到保证线
+[PASS] 年轻健康人物不能伪造退出原因：death
+[PASS] 年轻健康人物不能伪造退出原因：retirement
+[PASS] 年轻健康人物不能伪造退出原因：long_imprisonment
+[PASS] 年轻健康人物不能伪造退出原因：disgrace
+[PASS] 自愿退出仍是正式可选路径
+[PASS] 达到退休年龄后退休原因变为合法
+[PASS] 可建立 NPC 旧区间结算测试行动
+[PASS] NPC 可在边界登记新上下文而不重算旧区间
+[PASS] NPC 已经过的 24 小时按旧效率结算
+[PASS] 新失效条件只从日边界起中断行动
+[PASS] 可构建存档不变量测试快照
+[PASS] 缺少任一活跃 NPC 的 AI 状态时拒绝恢复
+[PASS] 人物激活种子缺失时拒绝恢复
+[PASS] 超过活跃人物上限的存档被拒绝
+[PASS] 可建立玩家行动 ID 唯一性测试
+[PASS] 可建立 NPC 行动 ID 唯一性测试
+[PASS] 玩家与 NPC 行动实例 ID 重复时拒绝恢复
+CODEX AUDIT REGRESSION PASSED: 31 checks

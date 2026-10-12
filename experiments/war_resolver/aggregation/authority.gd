@@ -4,6 +4,7 @@ extends RefCounted
 const State = preload("res://experiments/war_resolver/battle_state.gd")
 const Kernel = preload("res://experiments/war_resolver/aggregation/indexed_resolver.gd")
 const Spatial = preload("res://experiments/war_resolver/aggregation/spatial_hierarchy.gd")
+const AdvanceWork = preload("res://experiments/war_resolver/continuous/advance_work.gd")
 const STOCKS: Array[String] = Spatial.STOCKS
 const CONDITIONS: Array[String] = ["readiness", "fatigue", "cohesion", "suppression", "mobility"]
 const LEVELS: Array[String] = ["platoon", "company", "battalion"]
@@ -22,6 +23,9 @@ var _serial: int = 0
 var _generations: Dictionary = {}
 var _observed_areas: Dictionary = {}
 var materialization_events: Array[Dictionary] = []
+var _continuation: AdvanceWork = null
+var _last_continuation: AdvanceWork = null
+var physical_event_sink: Callable
 
 func configure(state: State) -> bool:
 	if _state != null or state.settlement_owner != null:
@@ -31,6 +35,7 @@ func configure(state: State) -> bool:
 	_state.materialization_port = weakref(self)
 	_state.lod_work = work
 	spatial.configure()
+	spatial.settlement_state = weakref(state)
 	_observed_areas = state.active_areas.duplicate()
 	# Synthetic hierarchy admission is input work, never an hourly global scan.
 	for cell: String in spatial.leaf_descendants("region_50"):
@@ -57,6 +62,8 @@ func has_leaf(id: String) -> bool:
 	return _state.units.has(id) and not _state.units[id].has("contact_weight") or _owners.has(id)
 
 func coalesce(source_formation: String, leaf_ids: Array[String], level: String = "company") -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	if _state == null or source_formation.is_empty() or level not in LEVELS or leaf_ids.size() < 2:
 		return {"ok": false, "error": "invalid_cohort"}
 	if _state.structure_port != null and not _state.structure_port.get_ref().can_coalesce(source_formation, leaf_ids):
@@ -84,6 +91,8 @@ func coalesce(source_formation: String, leaf_ids: Array[String], level: String =
 				return {"ok": false, "error": "incompatible_cohort"}
 		if _state.logistics_port != null and not _state.logistics_port.get_ref().compatible(unit, first, true):
 			return {"ok": false, "error": "supply_profile_requires_detail"}
+		if unit.get("spatial", {}) != first.get("spatial", {}):
+			return {"ok": false, "error": "spatial_route_requires_detail"}
 		if not is_equal_approx(float(unit.mobility), float(first.mobility)):
 			return {"ok": false, "error": "incompatible_mobility"}
 		# A footprint must not straddle a weapon boundary. This v0 admits a small
@@ -108,6 +117,7 @@ func coalesce(source_formation: String, leaf_ids: Array[String], level: String =
 	if total_personnel <= 0.0:
 		return {"ok": false, "error": "empty_stock"}
 	var basis: String = (source_formation + ":" + ":".join(ids)).sha256_text().substr(0, 16)
+	var was_active: bool = _state.active_areas.has(first.area_id)
 	var generation: int = int(_generations.get(basis, 0)) + 1
 	var aggregate_id: String = "aggregate_" + basis + "_%06d" % generation
 	if _state.identity_reserved(aggregate_id) or _state.missions.has(aggregate_id + "_mission"):
@@ -158,13 +168,18 @@ func coalesce(source_formation: String, leaf_ids: Array[String], level: String =
 	_state.units[aggregate_id] = aggregate
 	_state.area_units[first.area_id][aggregate_id] = true
 	_state.contacts.erase(first.area_id)
-	_state.wake(str(first.area_id))
+	# Opt-in spatial aggregation changes representation only. A sleeping cell's
+	# identical missions/stocks cannot require a new combat tick merely to zoom out.
+	if _state.spatial_port == null or was_active:
+		_state.wake(str(first.area_id))
 	if _state.logistics_port != null:
 		_state.logistics_port.get_ref().on_coalesce(aggregate_id, ids)
 	work.formations_built += 1
 	return {"ok": true, "aggregate_id": aggregate_id, "leaf_count": ids.size(), "time": _state.time}
 
 func preview_leaf(id: String) -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	work.leaf_records_examined += 1
 	if _state.units.has(id):
 		return _state.units[id].duplicate(true)
@@ -192,6 +207,12 @@ func preview_leaf(id: String) -> Dictionary:
 	for key: String in ["fatigue", "cohesion", "suppression"]:
 		result[key] = clampf(float(result[key]) + float(macro[key]) - float(base[key]), 0.0, 1.0)
 	result.position = clampf(float(result.position) + float(macro.position) - float(base.position), 0.0, float(_state.areas[result.area_id].size_km))
+	if macro.has("spatial"):
+		# Admission requires the exact same route footprint. Its current progress
+		# is intensive state, not a replay of the frozen member's initial path.
+		result.spatial = macro.spatial.duplicate(true)
+		result.area_id = macro.area_id
+		result.position = macro.position
 	result.distance_moved += float(macro.distance_moved) - float(base.distance_moved)
 	result.action = macro.action
 	result.resolved_through = _state.time
@@ -204,6 +225,8 @@ func read_leaf(id: String) -> Dictionary:
 	return _state.units[id].duplicate(true) if result.ok else result
 
 func materialize_leaf(id: String, reason: String = "leaf_query") -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	if _state.units.has(id) and not _state.units[id].has("contact_weight"):
 		return {"ok": true, "materialized": 0}
 	if not _owners.has(id):
@@ -251,6 +274,8 @@ func materialize_leaf(id: String, reason: String = "leaf_query") -> Dictionary:
 		"changed": [id] if group.leaf_refs.is_empty() else [id, aggregate_id]}
 
 func zoom_in(cell_id: String) -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	if not spatial.nodes.has(cell_id) or not spatial.nodes[cell_id].children.is_empty():
 		return {"ok": false, "error": "requires_one_5km_cell"}
 	var count: int = 0
@@ -263,7 +288,18 @@ func zoom_in(cell_id: String) -> Dictionary:
 func representation_of(id: String) -> String:
 	return str(_owners.get(id, id))
 
+func on_spatial_transfer(id: String, source: String, destination: String) -> void:
+	if not _groups.has(id):
+		return
+	_area_groups[source].erase(id)
+	if not _area_groups.has(destination):
+		_area_groups[destination] = {}
+	_area_groups[destination][id] = true
+	_state.units[id].spatial_node = destination
+
 func prepare_event(event: Dictionary) -> Dictionary:
+	if event.kind == "spatial":
+		return _state.spatial_port.get_ref().process_event(event)
 	if event.kind == "decision":
 		return _state.decision_port.get_ref().process_event(event)
 	if event.kind == "structure":
@@ -282,6 +318,8 @@ func prepare_event(event: Dictionary) -> Dictionary:
 	return {"retired": [], "changed": []}
 
 func advance(target: float, policy: String = Kernel.DETAILED) -> Dictionary:
+	if _state.settlement_pending:
+		return _state.pending_view()
 	var output: Dictionary = _kernel.resolve_until(_state, target, policy, _token)
 	if not output.ok:
 		return output
@@ -308,6 +346,30 @@ func advance(target: float, policy: String = Kernel.DETAILED) -> Dictionary:
 		spatial.update_leaf(area_id, stocks, str(_state.areas[area_id].control))
 	return output
 
+func advance_bounded(target: float, quota: int, policy: String = Kernel.DETAILED) -> Dictionary:
+	if quota < 1 or not is_finite(target) or target < _state.time or not Kernel.INTERVALS.has(policy):
+		return {"ok": false, "error": "invalid_bounded_request"}
+	if _continuation != null and (target != _continuation.target or policy != _continuation.policy):
+		return {"ok": false, "error": "pending_request_must_finish"}
+	if _continuation == null:
+		_continuation = AdvanceWork.new()
+		_continuation.configure(_state, _kernel, self, target, policy)
+	var output: Dictionary = _continuation.resume(quota)
+	if output.status == "COMPLETE":
+		_last_continuation = _continuation
+		_last_continuation.jobs.clear()
+		_last_continuation.job = null
+		_last_continuation.sorter = null
+		_continuation = null
+	return output
+
+func continuation_ticket_page(start: int = 0, limit: int = 64) -> Dictionary:
+	if _state.public_pending():
+		return _state.pending_view()
+	if _last_continuation == null:
+		return {"ok": false, "error": "no_finished_continuation"}
+	return _last_continuation.ticket_trace.page(start, limit)
+
 func counters() -> Dictionary:
 	var result: Dictionary = work.duplicate()
 	result.merge(_kernel.work)
@@ -318,6 +380,8 @@ func counters() -> Dictionary:
 	return result
 
 func macro_summary() -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	var sides: Dictionary = {}
 	var selected: Dictionary = {}
 	for area_id: String in _observed_areas:
@@ -341,6 +405,8 @@ func macro_summary() -> Dictionary:
 	return {"time": _state.time, "sides": sides, "totals": _state.totals.duplicate(), "control": controls}
 
 func snapshot() -> Dictionary:
+	if _state != null and _state.public_pending():
+		return _state.pending_view()
 	var current: Dictionary = _state.snapshot()
 	var live_missions: Dictionary = {}
 	for id: String in _state.units:

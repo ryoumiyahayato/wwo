@@ -1,0 +1,4166 @@
+{
+  "continuation": {
+    "calls": 2235,
+    "last_result": {
+      "actual_unit_records_examined": 0,
+      "commit_count": 74,
+      "committed_time": 1800.0,
+      "diagnostic_events_produced": 0,
+      "error": "",
+      "events": [],
+      "max_native_id_snapshot": 4,
+      "max_primitive": "prepare:candidates",
+      "max_primitive_usec": 1360,
+      "ok": true,
+      "pending_boundary": -1.0,
+      "phase_work_counts": {
+        "apply:apply_units": 349,
+        "apply:contact_diagnostics": 254,
+        "apply:incoming_init": 349,
+        "apply:incoming_source": 349,
+        "apply:incoming_targets": 463,
+        "apply_start": 140,
+        "changed_areas": 77,
+        "changed_units": 349,
+        "clear_delta": 356,
+        "control_start": 350,
+        "control_units": 559,
+        "due": 99,
+        "eta": 419,
+        "event_changed_areas": 81,
+        "event_changed_units": 356,
+        "fold_start": 234,
+        "fold_units": 442,
+        "index_records": 349,
+        "index_sort": 768,
+        "index_start": 140,
+        "prepare:candidate_query": 4596,
+        "prepare:candidates": 942,
+        "prepare:detection": 322,
+        "prepare:factors": 322,
+        "prepare:finish": 349,
+        "prepare:fire": 322,
+        "prepare:release_old_contacts": 225,
+        "prepare:rounds": 138,
+        "prepare:source": 349,
+        "prepare:units": 349,
+        "prepare:weights": 463,
+        "release_jobs": 420,
+        "scope_capacity": 291,
+        "select": 73
+      },
+      "requested_time": 1800.0,
+      "status": "COMPLETE",
+      "total_work_units": 15644,
+      "wall_usec": 19,
+      "work_units": 6
+    },
+    "max_call_usec": 1429,
+    "max_work_units": 7,
+    "recent_sample_usec": {
+      "count": 2235,
+      "p50": 37,
+      "p95": 111,
+      "scope": "last at most4096 calls; overall max measured across all calls"
+    }
+  },
+  "decisions": {
+    "cycles": {
+      "company": {
+        "end": 1800.0,
+        "index": 6,
+        "maximum": 6,
+        "period": 315.0,
+        "prefix": "regular",
+        "status": "FINISHED"
+      }
+    },
+    "events": {
+      "regular_0": {
+        "context": {
+          "authority_targets": {
+            "blue_destination": {
+              "echelon": "platoon",
+              "unit_ref": ""
+            },
+            "blue_platoon": {
+              "echelon": "platoon",
+              "unit_ref": ""
+            }
+          },
+          "cadence_seconds": 300.0,
+          "command_issue_ready_at": 0.0,
+          "command_kind": "route_intent",
+          "command_ready_at": 0.0,
+          "command_targets": [
+            "blue_platoon",
+            "blue_destination"
+          ],
+          "decision_time": 10.0,
+          "knowledge_total": 2,
+          "next_opportunity": -1.0,
+          "ok": true,
+          "output_kinds": [
+            "keep",
+            "command",
+            "logistics_request",
+            "structure_request"
+          ],
+          "person_id": "company",
+          "position_ref": "blue_company",
+          "ready_at": 0.0,
+          "received_claims": [
+            {
+              "claimed_value": {
+                "cause_ref": "synthetic_initial_report",
+                "edge_ref": "bridge_BD",
+                "node_ref": "A",
+                "state": "AVAILABLE"
+              },
+              "created_at": 0.0,
+              "entry_id": "old_bridge_report:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "old_bridge_report",
+              "observed_at": 0.0,
+              "origin": "EXTERNAL",
+              "precision": "external_claim",
+              "received_at": 0.0,
+              "reliability": 0.5,
+              "sent_at": 0.0,
+              "source_ref": "old",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 0.0,
+              "entry_id": "report_initial_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_initial_ammo",
+              "observed_at": 0.0,
+              "origin": "DIRECT",
+              "precision": "proxy_derived_estimate",
+              "received_at": 0.0,
+              "reliability": 0.9,
+              "sent_at": 0.0,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            }
+          ],
+          "role": "company_commander",
+          "standing_orders": {
+            "fallback_path": [
+              "AB",
+              "AC",
+              "CD"
+            ],
+            "initial_path": [
+              "AB",
+              "bridge_BD"
+            ],
+            "keep_only": false,
+            "subject": "unit_000",
+            "target": "blue_platoon"
+          }
+        },
+        "creation_validation": {
+          "ok": true
+        },
+        "decision_source": "autonomous",
+        "due": 10.0,
+        "id": "regular_0",
+        "issued_input": {
+          "domain": "COMMUNICATION",
+          "id": "input_regular_0",
+          "issued_at": 10.0,
+          "result": {
+            "delivery_time": 25.0,
+            "issued_at": 10.0,
+            "message_id": "input_regular_0",
+            "ok": true
+          }
+        },
+        "person_id": "company",
+        "proposal": {
+          "intent": {
+            "channel_ref": "command",
+            "command_kind": "route_intent",
+            "kind": "command",
+            "target": "blue_platoon",
+            "values": {
+              "path": [
+                "AB",
+                "bridge_BD"
+              ],
+              "return_to_start": false
+            }
+          },
+          "selected_claim": "old_bridge_report:0"
+        },
+        "status": "ACCEPTED",
+        "urgent_message": ""
+      },
+      "regular_1": {
+        "context": {
+          "authority_targets": {
+            "blue_destination": {
+              "echelon": "platoon",
+              "unit_ref": ""
+            },
+            "blue_platoon": {
+              "echelon": "platoon",
+              "unit_ref": ""
+            }
+          },
+          "cadence_seconds": 300.0,
+          "command_issue_ready_at": 310.0,
+          "command_kind": "route_intent",
+          "command_ready_at": 325.0,
+          "command_targets": [
+            "blue_platoon",
+            "blue_destination"
+          ],
+          "decision_time": 325.0,
+          "knowledge_total": 6,
+          "next_opportunity": -1.0,
+          "ok": true,
+          "output_kinds": [
+            "keep",
+            "command",
+            "logistics_request",
+            "structure_request"
+          ],
+          "person_id": "company",
+          "position_ref": "blue_company",
+          "ready_at": 310.0,
+          "received_claims": [
+            {
+              "claimed_value": {
+                "cause_ref": "synthetic_initial_report",
+                "edge_ref": "bridge_BD",
+                "node_ref": "A",
+                "state": "AVAILABLE"
+              },
+              "created_at": 0.0,
+              "entry_id": "old_bridge_report:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "old_bridge_report",
+              "observed_at": 0.0,
+              "origin": "EXTERNAL",
+              "precision": "external_claim",
+              "received_at": 0.0,
+              "reliability": 0.5,
+              "sent_at": 0.0,
+              "source_ref": "old",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 0.0,
+              "entry_id": "report_initial_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_initial_ammo",
+              "observed_at": 0.0,
+              "origin": "DIRECT",
+              "precision": "proxy_derived_estimate",
+              "received_at": 0.0,
+              "reliability": 0.9,
+              "sent_at": 0.0,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "cause_ref": "",
+                "edge_ref": "",
+                "node_ref": "B",
+                "state": "ARRIVED"
+              },
+              "created_at": 100.069183230332,
+              "entry_id": "report_local_1:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "report_local_1",
+              "observed_at": 100.069183230332,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 147.069183230332,
+              "reliability": 0.9,
+              "sent_at": 100.069183230332,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 100.069183230332,
+              "entry_id": "report_local_1_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_local_1_ammo",
+              "observed_at": 100.069183230332,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 147.069183230332,
+              "reliability": 0.9,
+              "sent_at": 100.069183230332,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "cause_ref": "bridge_cut",
+                "edge_ref": "bridge_BD",
+                "node_ref": "B",
+                "state": "BLOCKED"
+              },
+              "created_at": 150.0,
+              "entry_id": "report_local_2:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "report_local_2",
+              "observed_at": 150.0,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 197.0,
+              "reliability": 0.9,
+              "sent_at": 150.0,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 150.0,
+              "entry_id": "report_local_2_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_local_2_ammo",
+              "observed_at": 150.0,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 197.0,
+              "reliability": 0.9,
+              "sent_at": 150.0,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            }
+          ],
+          "role": "company_commander",
+          "standing_orders": {
+            "fallback_path": [
+              "AB",
+              "AC",
+              "CD"
+            ],
+            "initial_path": [
+              "AB",
+              "bridge_BD"
+            ],
+            "keep_only": false,
+            "subject": "unit_000",
+            "target": "blue_platoon"
+          }
+        },
+        "creation_validation": {
+          "ok": true
+        },
+        "decision_source": "autonomous",
+        "due": 325.0,
+        "id": "regular_1",
+        "issued_input": {
+          "domain": "COMMUNICATION",
+          "id": "input_regular_1",
+          "issued_at": 325.0,
+          "result": {
+            "delivery_time": 340.0,
+            "issued_at": 325.0,
+            "message_id": "input_regular_1",
+            "ok": true
+          }
+        },
+        "person_id": "company",
+        "proposal": {
+          "intent": {
+            "channel_ref": "command",
+            "command_kind": "route_intent",
+            "kind": "command",
+            "target": "blue_platoon",
+            "values": {
+              "path": [
+                "AB",
+                "AC",
+                "CD"
+              ],
+              "return_to_start": true
+            }
+          },
+          "selected_claim": "report_local_2:0"
+        },
+        "status": "ACCEPTED",
+        "urgent_message": ""
+      },
+      "regular_2": {
+        "context": {
+          "authority_targets": {
+            "blue_destination": {
+              "echelon": "platoon",
+              "unit_ref": ""
+            },
+            "blue_platoon": {
+              "echelon": "platoon",
+              "unit_ref": ""
+            }
+          },
+          "cadence_seconds": 300.0,
+          "command_issue_ready_at": 625.0,
+          "command_kind": "route_intent",
+          "command_ready_at": 640.0,
+          "command_targets": [
+            "blue_platoon",
+            "blue_destination"
+          ],
+          "decision_time": 640.0,
+          "knowledge_total": 12,
+          "next_opportunity": -1.0,
+          "ok": true,
+          "output_kinds": [
+            "keep",
+            "command",
+            "logistics_request",
+            "structure_request"
+          ],
+          "person_id": "company",
+          "position_ref": "blue_company",
+          "ready_at": 625.0,
+          "received_claims": [
+            {
+              "claimed_value": {
+                "cause_ref": "synthetic_initial_report",
+                "edge_ref": "bridge_BD",
+                "node_ref": "A",
+                "state": "AVAILABLE"
+              },
+              "created_at": 0.0,
+              "entry_id": "old_bridge_report:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "old_bridge_report",
+              "observed_at": 0.0,
+              "origin": "EXTERNAL",
+              "precision": "external_claim",
+              "received_at": 0.0,
+              "reliability": 0.5,
+              "sent_at": 0.0,
+              "source_ref": "old",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 0.0,
+              "entry_id": "report_initial_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_initial_ammo",
+              "observed_at": 0.0,
+              "origin": "DIRECT",
+              "precision": "proxy_derived_estimate",
+              "received_at": 0.0,
+              "reliability": 0.9,
+              "sent_at": 0.0,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "cause_ref": "",
+                "edge_ref": "",
+                "node_ref": "B",
+                "state": "ARRIVED"
+              },
+              "created_at": 100.069183230332,
+              "entry_id": "report_local_1:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "report_local_1",
+              "observed_at": 100.069183230332,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 147.069183230332,
+              "reliability": 0.9,
+              "sent_at": 100.069183230332,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 100.069183230332,
+              "entry_id": "report_local_1_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_local_1_ammo",
+              "observed_at": 100.069183230332,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 147.069183230332,
+              "reliability": 0.9,
+              "sent_at": 100.069183230332,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "cause_ref": "bridge_cut",
+                "edge_ref": "bridge_BD",
+                "node_ref": "B",
+                "state": "BLOCKED"
+              },
+              "created_at": 150.0,
+              "entry_id": "report_local_2:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "report_local_2",
+              "observed_at": 150.0,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 197.0,
+              "reliability": 0.9,
+              "sent_at": 150.0,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 150.0,
+              "entry_id": "report_local_2_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_local_2_ammo",
+              "observed_at": 150.0,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 197.0,
+              "reliability": 0.9,
+              "sent_at": 150.0,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "cause_ref": "bridge_cut",
+                "edge_ref": "",
+                "node_ref": "B",
+                "state": "ARRIVED"
+              },
+              "created_at": 359.94410008206,
+              "entry_id": "report_local_3:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "report_local_3",
+              "observed_at": 359.94410008206,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 406.94410008206,
+              "reliability": 0.9,
+              "sent_at": 359.94410008206,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 359.94410008206,
+              "entry_id": "report_local_3_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_local_3_ammo",
+              "observed_at": 359.94410008206,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 406.94410008206,
+              "reliability": 0.9,
+              "sent_at": 359.94410008206,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "cause_ref": "bridge_cut",
+                "edge_ref": "",
+                "node_ref": "A",
+                "state": "ARRIVED"
+              },
+              "created_at": 435.293526498829,
+              "entry_id": "report_local_4:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "report_local_4",
+              "observed_at": 435.293526498829,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 482.293526498829,
+              "reliability": 0.9,
+              "sent_at": 435.293526498829,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 435.293526498829,
+              "entry_id": "report_local_4_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_local_4_ammo",
+              "observed_at": 435.293526498829,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 482.293526498829,
+              "reliability": 0.9,
+              "sent_at": 435.293526498829,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "cause_ref": "bridge_cut",
+                "edge_ref": "",
+                "node_ref": "C",
+                "state": "ARRIVED"
+              },
+              "created_at": 586.566279415999,
+              "entry_id": "report_local_5:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "report_local_5",
+              "observed_at": 586.566279415999,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 633.566279415999,
+              "reliability": 0.9,
+              "sent_at": 586.566279415999,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 586.566279415999,
+              "entry_id": "report_local_5_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_local_5_ammo",
+              "observed_at": 586.566279415999,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 633.566279415999,
+              "reliability": 0.9,
+              "sent_at": 586.566279415999,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            }
+          ],
+          "role": "company_commander",
+          "standing_orders": {
+            "fallback_path": [
+              "AB",
+              "AC",
+              "CD"
+            ],
+            "initial_path": [
+              "AB",
+              "bridge_BD"
+            ],
+            "keep_only": false,
+            "subject": "unit_000",
+            "target": "blue_platoon"
+          }
+        },
+        "creation_validation": {
+          "ok": true
+        },
+        "decision_source": "autonomous",
+        "due": 640.0,
+        "id": "regular_2",
+        "issued_input": {
+          "domain": "LOGISTICS",
+          "id": "input_regular_2",
+          "issued_at": 640.0,
+          "result": {
+            "ok": true,
+            "status": "REQUESTED"
+          }
+        },
+        "person_id": "company",
+        "proposal": {
+          "intent": {
+            "kind": "logistics_request",
+            "quantity": 10.0,
+            "resource_class": "AMMUNITION",
+            "target": "blue_platoon"
+          },
+          "selected_claim": "report_local_5_ammo:0"
+        },
+        "status": "ACCEPTED",
+        "urgent_message": ""
+      },
+      "regular_3": {
+        "context": {
+          "authority_targets": {
+            "blue_destination": {
+              "echelon": "platoon",
+              "unit_ref": ""
+            },
+            "blue_platoon": {
+              "echelon": "platoon",
+              "unit_ref": ""
+            }
+          },
+          "cadence_seconds": 300.0,
+          "command_issue_ready_at": 625.0,
+          "command_kind": "route_intent",
+          "command_ready_at": 640.0,
+          "command_targets": [
+            "blue_platoon",
+            "blue_destination"
+          ],
+          "decision_time": 955.0,
+          "knowledge_total": 14,
+          "next_opportunity": -1.0,
+          "ok": true,
+          "output_kinds": [
+            "keep",
+            "command",
+            "logistics_request",
+            "structure_request"
+          ],
+          "person_id": "company",
+          "position_ref": "blue_company",
+          "ready_at": 940.0,
+          "received_claims": [
+            {
+              "claimed_value": {
+                "cause_ref": "synthetic_initial_report",
+                "edge_ref": "bridge_BD",
+                "node_ref": "A",
+                "state": "AVAILABLE"
+              },
+              "created_at": 0.0,
+              "entry_id": "old_bridge_report:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "old_bridge_report",
+              "observed_at": 0.0,
+              "origin": "EXTERNAL",
+              "precision": "external_claim",
+              "received_at": 0.0,
+              "reliability": 0.5,
+              "sent_at": 0.0,
+              "source_ref": "old",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 0.0,
+              "entry_id": "report_initial_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_initial_ammo",
+              "observed_at": 0.0,
+              "origin": "DIRECT",
+              "precision": "proxy_derived_estimate",
+              "received_at": 0.0,
+              "reliability": 0.9,
+              "sent_at": 0.0,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "cause_ref": "",
+                "edge_ref": "",
+                "node_ref": "B",
+                "state": "ARRIVED"
+              },
+              "created_at": 100.069183230332,
+              "entry_id": "report_local_1:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "report_local_1",
+              "observed_at": 100.069183230332,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 147.069183230332,
+              "reliability": 0.9,
+              "sent_at": 100.069183230332,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 100.069183230332,
+              "entry_id": "report_local_1_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_local_1_ammo",
+              "observed_at": 100.069183230332,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 147.069183230332,
+              "reliability": 0.9,
+              "sent_at": 100.069183230332,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "cause_ref": "bridge_cut",
+                "edge_ref": "bridge_BD",
+                "node_ref": "B",
+                "state": "BLOCKED"
+              },
+              "created_at": 150.0,
+              "entry_id": "report_local_2:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "report_local_2",
+              "observed_at": 150.0,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 197.0,
+              "reliability": 0.9,
+              "sent_at": 150.0,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 150.0,
+              "entry_id": "report_local_2_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_local_2_ammo",
+              "observed_at": 150.0,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 197.0,
+              "reliability": 0.9,
+              "sent_at": 150.0,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "cause_ref": "bridge_cut",
+                "edge_ref": "",
+                "node_ref": "B",
+                "state": "ARRIVED"
+              },
+              "created_at": 359.94410008206,
+              "entry_id": "report_local_3:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "report_local_3",
+              "observed_at": 359.94410008206,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 406.94410008206,
+              "reliability": 0.9,
+              "sent_at": 359.94410008206,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 359.94410008206,
+              "entry_id": "report_local_3_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_local_3_ammo",
+              "observed_at": 359.94410008206,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 406.94410008206,
+              "reliability": 0.9,
+              "sent_at": 359.94410008206,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "cause_ref": "bridge_cut",
+                "edge_ref": "",
+                "node_ref": "A",
+                "state": "ARRIVED"
+              },
+              "created_at": 435.293526498829,
+              "entry_id": "report_local_4:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "report_local_4",
+              "observed_at": 435.293526498829,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 482.293526498829,
+              "reliability": 0.9,
+              "sent_at": 435.293526498829,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 435.293526498829,
+              "entry_id": "report_local_4_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_local_4_ammo",
+              "observed_at": 435.293526498829,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 482.293526498829,
+              "reliability": 0.9,
+              "sent_at": 435.293526498829,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "cause_ref": "bridge_cut",
+                "edge_ref": "",
+                "node_ref": "C",
+                "state": "ARRIVED"
+              },
+              "created_at": 586.566279415999,
+              "entry_id": "report_local_5:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "report_local_5",
+              "observed_at": 586.566279415999,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 633.566279415999,
+              "reliability": 0.9,
+              "sent_at": 586.566279415999,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 586.566279415999,
+              "entry_id": "report_local_5_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_local_5_ammo",
+              "observed_at": 586.566279415999,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 633.566279415999,
+              "reliability": 0.9,
+              "sent_at": 586.566279415999,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "cause_ref": "bridge_cut",
+                "edge_ref": "",
+                "node_ref": "D",
+                "state": "ARRIVED"
+              },
+              "created_at": 732.524776858955,
+              "entry_id": "report_local_6:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "report_local_6",
+              "observed_at": 732.524776858955,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 779.524776858955,
+              "reliability": 0.9,
+              "sent_at": 732.524776858955,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 732.524776858955,
+              "entry_id": "report_local_6_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_local_6_ammo",
+              "observed_at": 732.524776858955,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 779.524776858955,
+              "reliability": 0.9,
+              "sent_at": 732.524776858955,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            }
+          ],
+          "role": "company_commander",
+          "standing_orders": {
+            "fallback_path": [
+              "AB",
+              "AC",
+              "CD"
+            ],
+            "initial_path": [
+              "AB",
+              "bridge_BD"
+            ],
+            "keep_only": false,
+            "subject": "unit_000",
+            "target": "blue_platoon"
+          }
+        },
+        "creation_validation": {
+          "ok": true
+        },
+        "decision_source": "autonomous",
+        "due": 955.0,
+        "id": "regular_3",
+        "issued_input": {
+          "domain": "NONE",
+          "status": "STANDING_ORDER_CONTINUES"
+        },
+        "person_id": "company",
+        "proposal": {
+          "intent": {
+            "kind": "keep"
+          },
+          "selected_claim": ""
+        },
+        "status": "ACCEPTED",
+        "urgent_message": ""
+      },
+      "regular_4": {
+        "context": {
+          "authority_targets": {
+            "blue_destination": {
+              "echelon": "platoon",
+              "unit_ref": ""
+            },
+            "blue_platoon": {
+              "echelon": "platoon",
+              "unit_ref": ""
+            }
+          },
+          "cadence_seconds": 300.0,
+          "command_issue_ready_at": 625.0,
+          "command_kind": "route_intent",
+          "command_ready_at": 640.0,
+          "command_targets": [
+            "blue_platoon",
+            "blue_destination"
+          ],
+          "decision_time": 1270.0,
+          "knowledge_total": 14,
+          "next_opportunity": -1.0,
+          "ok": true,
+          "output_kinds": [
+            "keep",
+            "command",
+            "logistics_request",
+            "structure_request"
+          ],
+          "person_id": "company",
+          "position_ref": "blue_company",
+          "ready_at": 1255.0,
+          "received_claims": [
+            {
+              "claimed_value": {
+                "cause_ref": "synthetic_initial_report",
+                "edge_ref": "bridge_BD",
+                "node_ref": "A",
+                "state": "AVAILABLE"
+              },
+              "created_at": 0.0,
+              "entry_id": "old_bridge_report:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "old_bridge_report",
+              "observed_at": 0.0,
+              "origin": "EXTERNAL",
+              "precision": "external_claim",
+              "received_at": 0.0,
+              "reliability": 0.5,
+              "sent_at": 0.0,
+              "source_ref": "old",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 0.0,
+              "entry_id": "report_initial_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_initial_ammo",
+              "observed_at": 0.0,
+              "origin": "DIRECT",
+              "precision": "proxy_derived_estimate",
+              "received_at": 0.0,
+              "reliability": 0.9,
+              "sent_at": 0.0,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "cause_ref": "",
+                "edge_ref": "",
+                "node_ref": "B",
+                "state": "ARRIVED"
+              },
+              "created_at": 100.069183230332,
+              "entry_id": "report_local_1:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "report_local_1",
+              "observed_at": 100.069183230332,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 147.069183230332,
+              "reliability": 0.9,
+              "sent_at": 100.069183230332,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 100.069183230332,
+              "entry_id": "report_local_1_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_local_1_ammo",
+              "observed_at": 100.069183230332,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 147.069183230332,
+              "reliability": 0.9,
+              "sent_at": 100.069183230332,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "cause_ref": "bridge_cut",
+                "edge_ref": "bridge_BD",
+                "node_ref": "B",
+                "state": "BLOCKED"
+              },
+              "created_at": 150.0,
+              "entry_id": "report_local_2:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "report_local_2",
+              "observed_at": 150.0,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 197.0,
+              "reliability": 0.9,
+              "sent_at": 150.0,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 150.0,
+              "entry_id": "report_local_2_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_local_2_ammo",
+              "observed_at": 150.0,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 197.0,
+              "reliability": 0.9,
+              "sent_at": 150.0,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "cause_ref": "bridge_cut",
+                "edge_ref": "",
+                "node_ref": "B",
+                "state": "ARRIVED"
+              },
+              "created_at": 359.94410008206,
+              "entry_id": "report_local_3:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "report_local_3",
+              "observed_at": 359.94410008206,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 406.94410008206,
+              "reliability": 0.9,
+              "sent_at": 359.94410008206,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 359.94410008206,
+              "entry_id": "report_local_3_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_local_3_ammo",
+              "observed_at": 359.94410008206,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 406.94410008206,
+              "reliability": 0.9,
+              "sent_at": 359.94410008206,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "cause_ref": "bridge_cut",
+                "edge_ref": "",
+                "node_ref": "A",
+                "state": "ARRIVED"
+              },
+              "created_at": 435.293526498829,
+              "entry_id": "report_local_4:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "report_local_4",
+              "observed_at": 435.293526498829,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 482.293526498829,
+              "reliability": 0.9,
+              "sent_at": 435.293526498829,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 435.293526498829,
+              "entry_id": "report_local_4_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_local_4_ammo",
+              "observed_at": 435.293526498829,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 482.293526498829,
+              "reliability": 0.9,
+              "sent_at": 435.293526498829,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "cause_ref": "bridge_cut",
+                "edge_ref": "",
+                "node_ref": "C",
+                "state": "ARRIVED"
+              },
+              "created_at": 586.566279415999,
+              "entry_id": "report_local_5:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "report_local_5",
+              "observed_at": 586.566279415999,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 633.566279415999,
+              "reliability": 0.9,
+              "sent_at": 586.566279415999,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 586.566279415999,
+              "entry_id": "report_local_5_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_local_5_ammo",
+              "observed_at": 586.566279415999,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 633.566279415999,
+              "reliability": 0.9,
+              "sent_at": 586.566279415999,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "cause_ref": "bridge_cut",
+                "edge_ref": "",
+                "node_ref": "D",
+                "state": "ARRIVED"
+              },
+              "created_at": 732.524776858955,
+              "entry_id": "report_local_6:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "report_local_6",
+              "observed_at": 732.524776858955,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 779.524776858955,
+              "reliability": 0.9,
+              "sent_at": 732.524776858955,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 732.524776858955,
+              "entry_id": "report_local_6_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_local_6_ammo",
+              "observed_at": 732.524776858955,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 779.524776858955,
+              "reliability": 0.9,
+              "sent_at": 732.524776858955,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            }
+          ],
+          "role": "company_commander",
+          "standing_orders": {
+            "fallback_path": [
+              "AB",
+              "AC",
+              "CD"
+            ],
+            "initial_path": [
+              "AB",
+              "bridge_BD"
+            ],
+            "keep_only": false,
+            "subject": "unit_000",
+            "target": "blue_platoon"
+          }
+        },
+        "creation_validation": {
+          "ok": true
+        },
+        "decision_source": "autonomous",
+        "due": 1270.0,
+        "id": "regular_4",
+        "issued_input": {
+          "domain": "NONE",
+          "status": "STANDING_ORDER_CONTINUES"
+        },
+        "person_id": "company",
+        "proposal": {
+          "intent": {
+            "kind": "keep"
+          },
+          "selected_claim": ""
+        },
+        "status": "ACCEPTED",
+        "urgent_message": ""
+      },
+      "regular_5": {
+        "context": {
+          "authority_targets": {
+            "blue_destination": {
+              "echelon": "platoon",
+              "unit_ref": ""
+            },
+            "blue_platoon": {
+              "echelon": "platoon",
+              "unit_ref": ""
+            }
+          },
+          "cadence_seconds": 300.0,
+          "command_issue_ready_at": 625.0,
+          "command_kind": "route_intent",
+          "command_ready_at": 640.0,
+          "command_targets": [
+            "blue_platoon",
+            "blue_destination"
+          ],
+          "decision_time": 1585.0,
+          "knowledge_total": 14,
+          "next_opportunity": -1.0,
+          "ok": true,
+          "output_kinds": [
+            "keep",
+            "command",
+            "logistics_request",
+            "structure_request"
+          ],
+          "person_id": "company",
+          "position_ref": "blue_company",
+          "ready_at": 1570.0,
+          "received_claims": [
+            {
+              "claimed_value": {
+                "cause_ref": "synthetic_initial_report",
+                "edge_ref": "bridge_BD",
+                "node_ref": "A",
+                "state": "AVAILABLE"
+              },
+              "created_at": 0.0,
+              "entry_id": "old_bridge_report:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "old_bridge_report",
+              "observed_at": 0.0,
+              "origin": "EXTERNAL",
+              "precision": "external_claim",
+              "received_at": 0.0,
+              "reliability": 0.5,
+              "sent_at": 0.0,
+              "source_ref": "old",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 0.0,
+              "entry_id": "report_initial_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_initial_ammo",
+              "observed_at": 0.0,
+              "origin": "DIRECT",
+              "precision": "proxy_derived_estimate",
+              "received_at": 0.0,
+              "reliability": 0.9,
+              "sent_at": 0.0,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "cause_ref": "",
+                "edge_ref": "",
+                "node_ref": "B",
+                "state": "ARRIVED"
+              },
+              "created_at": 100.069183230332,
+              "entry_id": "report_local_1:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "report_local_1",
+              "observed_at": 100.069183230332,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 147.069183230332,
+              "reliability": 0.9,
+              "sent_at": 100.069183230332,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 100.069183230332,
+              "entry_id": "report_local_1_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_local_1_ammo",
+              "observed_at": 100.069183230332,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 147.069183230332,
+              "reliability": 0.9,
+              "sent_at": 100.069183230332,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "cause_ref": "bridge_cut",
+                "edge_ref": "bridge_BD",
+                "node_ref": "B",
+                "state": "BLOCKED"
+              },
+              "created_at": 150.0,
+              "entry_id": "report_local_2:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "report_local_2",
+              "observed_at": 150.0,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 197.0,
+              "reliability": 0.9,
+              "sent_at": 150.0,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 150.0,
+              "entry_id": "report_local_2_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_local_2_ammo",
+              "observed_at": 150.0,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 197.0,
+              "reliability": 0.9,
+              "sent_at": 150.0,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "cause_ref": "bridge_cut",
+                "edge_ref": "",
+                "node_ref": "B",
+                "state": "ARRIVED"
+              },
+              "created_at": 359.94410008206,
+              "entry_id": "report_local_3:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "report_local_3",
+              "observed_at": 359.94410008206,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 406.94410008206,
+              "reliability": 0.9,
+              "sent_at": 359.94410008206,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 359.94410008206,
+              "entry_id": "report_local_3_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_local_3_ammo",
+              "observed_at": 359.94410008206,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 406.94410008206,
+              "reliability": 0.9,
+              "sent_at": 359.94410008206,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "cause_ref": "bridge_cut",
+                "edge_ref": "",
+                "node_ref": "A",
+                "state": "ARRIVED"
+              },
+              "created_at": 435.293526498829,
+              "entry_id": "report_local_4:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "report_local_4",
+              "observed_at": 435.293526498829,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 482.293526498829,
+              "reliability": 0.9,
+              "sent_at": 435.293526498829,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 435.293526498829,
+              "entry_id": "report_local_4_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_local_4_ammo",
+              "observed_at": 435.293526498829,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 482.293526498829,
+              "reliability": 0.9,
+              "sent_at": 435.293526498829,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "cause_ref": "bridge_cut",
+                "edge_ref": "",
+                "node_ref": "C",
+                "state": "ARRIVED"
+              },
+              "created_at": 586.566279415999,
+              "entry_id": "report_local_5:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "report_local_5",
+              "observed_at": 586.566279415999,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 633.566279415999,
+              "reliability": 0.9,
+              "sent_at": 586.566279415999,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 586.566279415999,
+              "entry_id": "report_local_5_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_local_5_ammo",
+              "observed_at": 586.566279415999,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 633.566279415999,
+              "reliability": 0.9,
+              "sent_at": 586.566279415999,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "cause_ref": "bridge_cut",
+                "edge_ref": "",
+                "node_ref": "D",
+                "state": "ARRIVED"
+              },
+              "created_at": 732.524776858955,
+              "entry_id": "report_local_6:0",
+              "fact_kind": "route",
+              "holder_ref": "company",
+              "message_id": "report_local_6",
+              "observed_at": 732.524776858955,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 779.524776858955,
+              "reliability": 0.9,
+              "sent_at": 732.524776858955,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            },
+            {
+              "claimed_value": {
+                "level": "LOW"
+              },
+              "created_at": 732.524776858955,
+              "entry_id": "report_local_6_ammo:0",
+              "fact_kind": "ammunition",
+              "holder_ref": "company",
+              "message_id": "report_local_6_ammo",
+              "observed_at": 732.524776858955,
+              "origin": "DIRECT",
+              "precision": "coarse_current_representation",
+              "received_at": 779.524776858955,
+              "reliability": 0.9,
+              "sent_at": 732.524776858955,
+              "source_ref": "local",
+              "subject_kind": "unit",
+              "subject_ref": "unit_000"
+            }
+          ],
+          "role": "company_commander",
+          "standing_orders": {
+            "fallback_path": [
+              "AB",
+              "AC",
+              "CD"
+            ],
+            "initial_path": [
+              "AB",
+              "bridge_BD"
+            ],
+            "keep_only": false,
+            "subject": "unit_000",
+            "target": "blue_platoon"
+          }
+        },
+        "creation_validation": {
+          "ok": true
+        },
+        "decision_source": "autonomous",
+        "due": 1585.0,
+        "id": "regular_5",
+        "issued_input": {
+          "domain": "NONE",
+          "status": "STANDING_ORDER_CONTINUES"
+        },
+        "person_id": "company",
+        "proposal": {
+          "intent": {
+            "kind": "keep"
+          },
+          "selected_claim": ""
+        },
+        "status": "ACCEPTED",
+        "urgent_message": ""
+      }
+    },
+    "pending": {},
+    "ready": {
+      "company": 1885.0
+    },
+    "work": {
+      "authority_checks": 9,
+      "commands_issued_from_decision": 2,
+      "decision_contexts_built": 6,
+      "decision_events_processed": 6,
+      "future_persons_examined": 0,
+      "knowledge_records_examined_for_decision": 62,
+      "persons_examined": 6,
+      "requests_issued_from_decision": 1,
+      "superseded_events_processed": 0,
+      "urgent_decision_wakes": 0,
+      "world_truth_reads_for_decision": 0
+    }
+  },
+  "diagnostic_retained": 118,
+  "engine": "4.6.3-stable (official)",
+  "game_time": 1800.0,
+  "input_cost_subsets_ms": {
+    "admission": 2.632,
+    "coalesce_and_focus": 0.185,
+    "geometry_focus_subset": 0.0
+  },
+  "ledger_balanced": true,
+  "limits": [
+    "finite local encounter envelope",
+    "synthetic scope and test policy",
+    "external supply ETA independent of routes",
+    "counted work quota; no hard wall-clock frame promise",
+    "capacity backpressure preserves pending facts; authoritative histories grow"
+  ],
+  "physical": {
+    "controls": {
+      "cell_037": "blue",
+      "cell_038": "",
+      "cell_062": "",
+      "cell_063": "contested"
+    },
+    "ledger": {
+      "current_plus_spent_and_transit": {
+        "AMMUNITION": 308.0,
+        "FUEL": 56.0,
+        "SPARES": 36.0
+      },
+      "initial": {
+        "AMMUNITION": 308.0,
+        "FUEL": 56.0,
+        "SPARES": 36.0
+      }
+    },
+    "time": 1800.0,
+    "totals": {
+      "ammo_spent": 214.0,
+      "ammunition": 218.0,
+      "casualties": 1.22526009448326,
+      "equipment": 48.0,
+      "equipment_lost": 1.22526009448326,
+      "personnel": 48.0
+    },
+    "units": {
+      "unit_000": {
+        "action": "hold",
+        "ammo_spent": 14.0,
+        "ammunition": 0.0,
+        "area_id": "cell_063",
+        "casualties": 1.15372603558721,
+        "cohesion": 0.901928081850532,
+        "damaged_equipment": 0.0,
+        "distance_moved": 0.453015850040357,
+        "echelon": "squad",
+        "effective": 10.8462739644128,
+        "equipment": 10.8462739644128,
+        "equipment_lost": 1.15372603558721,
+        "fatigue": 0.032501651790597,
+        "fuel": 6.91365651262273,
+        "fuel_spent": 1.08634348737727,
+        "id": "unit_000",
+        "mission_id": "materialized_aggregate_617759c25fe6ab7f_000001_unit_000",
+        "mobility": 0.08,
+        "parent_id": "",
+        "personnel_total": 12.0,
+        "position": 0.1,
+        "readiness": 1.0,
+        "repair_restored": 0.0,
+        "resolved_through": 25.0,
+        "serviceable_equipment": 10.8462739644128,
+        "side": "blue",
+        "spares": 4.0,
+        "spares_spent": 0.0,
+        "spatial": {
+          "blocked_edge": "",
+          "cause_ref": "bridge_cut",
+          "edge": "",
+          "from": "C",
+          "mode": "MOTORIZED",
+          "node": "D",
+          "path": [],
+          "progress": 0.0,
+          "retreating": false,
+          "returning": false,
+          "to": "D",
+          "traversed": [
+            "AB",
+            "AB",
+            "AC",
+            "CD"
+          ]
+        },
+        "supply_capability": {
+          "fuel_dependent": true,
+          "fuel_per_equipment_km": 0.2,
+          "spares_per_repair": 1.0,
+          "suppression_per_round": 0.12,
+          "wear_per_km": 0.0
+        },
+        "suppression": 0.102511297801642,
+        "type": "infantry",
+        "unresolved_history": {
+          "allocation": "unresolved_proportional_stock_deltas",
+          "from": 0.0,
+          "no_individual_contact_history": true,
+          "to": 25.0
+        },
+        "weapon": {
+          "lethality": 0.008,
+          "range_km": 0.05,
+          "rounds_per_minute": 1.2
+        },
+        "wear_damage": 0.0
+      },
+      "unit_001": {
+        "action": "stalled",
+        "ammo_spent": 0.0,
+        "ammunition": 4.0,
+        "area_id": "cell_037",
+        "casualties": 0.0,
+        "cohesion": 0.95,
+        "damaged_equipment": 0.0,
+        "distance_moved": 0.0,
+        "echelon": "squad",
+        "effective": 12.0,
+        "equipment": 12.0,
+        "equipment_lost": 0.0,
+        "fatigue": 0.0,
+        "fuel": 8.0,
+        "fuel_spent": 0.0,
+        "id": "unit_001",
+        "mission_id": "materialized_aggregate_617759c25fe6ab7f_000001_unit_001",
+        "mobility": 0.08,
+        "parent_id": "",
+        "personnel_total": 12.0,
+        "position": 0.0,
+        "readiness": 1.0,
+        "repair_restored": 0.0,
+        "resolved_through": 15.0,
+        "serviceable_equipment": 12.0,
+        "side": "blue",
+        "spares": 4.0,
+        "spares_spent": 0.0,
+        "spatial": {
+          "blocked_edge": "",
+          "cause_ref": "",
+          "edge": "",
+          "from": "A",
+          "mode": "MOTORIZED",
+          "node": "A",
+          "path": [],
+          "progress": 0.0,
+          "retreating": false,
+          "returning": false,
+          "to": "A",
+          "traversed": []
+        },
+        "supply_capability": {
+          "fuel_dependent": true,
+          "fuel_per_equipment_km": 0.2,
+          "spares_per_repair": 1.0,
+          "suppression_per_round": 0.12,
+          "wear_per_km": 0.0
+        },
+        "suppression": 0.0,
+        "type": "infantry",
+        "unresolved_history": {
+          "allocation": "unresolved_proportional_stock_deltas",
+          "from": 0.0,
+          "no_individual_contact_history": true,
+          "to": 15.0
+        },
+        "weapon": {
+          "lethality": 0.008,
+          "range_km": 0.05,
+          "rounds_per_minute": 1.2
+        },
+        "wear_damage": 0.0
+      },
+      "unit_002": {
+        "action": "hold",
+        "ammo_spent": 100.0,
+        "ammunition": 0.0,
+        "area_id": "cell_063",
+        "casualties": 0.0354423414480243,
+        "cohesion": 0.948523235772999,
+        "damaged_equipment": 0.0,
+        "distance_moved": 0.0,
+        "echelon": "squad",
+        "effective": 11.964557658552,
+        "equipment": 11.964557658552,
+        "equipment_lost": 0.0354423414480243,
+        "fatigue": 0.0302921420324923,
+        "fuel": 0.0,
+        "fuel_spent": 0.0,
+        "id": "unit_002",
+        "mission_id": "mission_unit_002",
+        "mobility": 0.08,
+        "parent_id": "",
+        "personnel_total": 12.0,
+        "position": 0.1,
+        "readiness": 1.0,
+        "repair_restored": 0.0,
+        "serviceable_equipment": 11.964557658552,
+        "side": "red",
+        "spares": 4.0,
+        "spares_spent": 0.0,
+        "spatial": {
+          "blocked_edge": "",
+          "cause_ref": "",
+          "edge": "",
+          "from": "D",
+          "mode": "FOOT",
+          "node": "D",
+          "path": [],
+          "progress": 0.0,
+          "retreating": false,
+          "returning": false,
+          "to": "D",
+          "traversed": []
+        },
+        "supply_capability": {
+          "fuel_dependent": false,
+          "fuel_per_equipment_km": 0.0,
+          "spares_per_repair": 1.0,
+          "suppression_per_round": 0.12,
+          "wear_per_km": 0.0
+        },
+        "suppression": 0.00165227242906158,
+        "type": "infantry",
+        "weapon": {
+          "lethality": 0.008,
+          "range_km": 0.05,
+          "rounds_per_minute": 1.2
+        },
+        "wear_damage": 0.0
+      },
+      "unit_003": {
+        "action": "hold",
+        "ammo_spent": 100.0,
+        "ammunition": 0.0,
+        "area_id": "cell_063",
+        "casualties": 0.0360917174480243,
+        "cohesion": 0.948496178439666,
+        "damaged_equipment": 0.0,
+        "distance_moved": 0.0,
+        "echelon": "squad",
+        "effective": 11.963908282552,
+        "equipment": 11.963908282552,
+        "equipment_lost": 0.0360917174480243,
+        "fatigue": 0.032,
+        "fuel": 0.0,
+        "fuel_spent": 0.0,
+        "id": "unit_003",
+        "mission_id": "mission_unit_003",
+        "mobility": 0.08,
+        "parent_id": "",
+        "personnel_total": 12.0,
+        "position": 0.1,
+        "readiness": 1.0,
+        "repair_restored": 0.0,
+        "serviceable_equipment": 11.963908282552,
+        "side": "red",
+        "spares": 4.0,
+        "spares_spent": 0.0,
+        "spatial": {
+          "blocked_edge": "",
+          "cause_ref": "",
+          "edge": "",
+          "from": "D",
+          "mode": "FOOT",
+          "node": "D",
+          "path": [],
+          "progress": 0.0,
+          "retreating": false,
+          "returning": false,
+          "to": "D",
+          "traversed": []
+        },
+        "supply_capability": {
+          "fuel_dependent": false,
+          "fuel_per_equipment_km": 0.0,
+          "spares_per_repair": 1.0,
+          "suppression_per_round": 0.12,
+          "wear_per_km": 0.0
+        },
+        "suppression": 0.00165230529227997,
+        "type": "infantry",
+        "weapon": {
+          "lethality": 0.008,
+          "range_km": 0.05,
+          "rounds_per_minute": 1.2
+        },
+        "wear_damage": 0.0
+      }
+    }
+  },
+  "platform": "Linux",
+  "quota": 7,
+  "scenario": "main",
+  "schema": "WWO_TASK9_CAUSAL_V0",
+  "seed": 71,
+  "storage": {
+    "active_cells": 4,
+    "cohorts": 0,
+    "decision_history": 6,
+    "diagnostic_total": 118,
+    "event_identity_records": 13,
+    "geometry_focus_cells": 0,
+    "live_representations": 4,
+    "messages": 17,
+    "observations": 14,
+    "pending_events": 0,
+    "pending_reports": 0,
+    "static_memory_bytes": 27208621,
+    "underlying_leaves": 4
+  },
+  "synthetic": true,
+  "timeline": "t=0.000 | synthetic_input | 事件initial_claim | id=synthetic_initial_report | cause=\nt=0.000 | company | 局部来源形成观察 | id=observation_old_bridge | cause=synthetic_initial_report\nt=0.000 | company | 报告发送，等待送达 | id=old_bridge_report | cause=observation_old_bridge\nt=0.000 | squad | 局部来源形成观察 | id=observation_initial_ammo | cause=\nt=0.000 | squad | 报告发送，等待送达 | id=report_initial_ammo | cause=observation_initial_ammo\nt=0.000 | platoon | 命令发送，等待送达 | id=stale_order | cause=\nt=0.000 | company | 人物收到报告 | id=received_old_bridge_report | cause=old_bridge_report\nt=0.000 | company | 人物收到报告 | id=received_report_initial_ammo | cause=report_initial_ammo\nt=10.000 | aggregate_617759c25fe6ab7f_000001 | 事件action_changed | id=physical_ecb9bdfe2dfddad9b6f88d8c | cause=\nt=10.000 | unit_002 | 事件action_changed | id=physical_1f50d5092c7f626edc55834c | cause=\nt=10.000 | unit_003 | 事件action_changed | id=physical_25f4071bf032e60b8c31ca03 | cause=\nt=10.000 | cell_037 | 事件control_changed | id=physical_3856876fe666fd9b69ac660d | cause=\nt=10.000 | cell_063 | 事件control_changed | id=physical_1180d269ef16691698c97838 | cause=\nt=10.000 | company | 命令发送，等待送达 | id=input_regular_0 | cause=regular_0\nt=10.000 | company | 人物在明确机会提交command | id=regular_0 | cause=received_old_bridge_report\nt=15.000 | world | 有效结构关系事件结算 | id=structure_temporary_attachment | cause=\nt=25.000 | blue_platoon | 命令送达重验：EXECUTED | id=executed_input_regular_0 | cause=input_regular_0\nt=30.000 | unit_000 | 事件action_changed | id=physical_5fd999c607cdc5359d5ddcd4 | cause=\nt=47.000 | node_unit_001 | 命令送达重验：REJECTED | id=executed_stale_order | cause=stale_order\nt=100.069 | squad | 局部来源形成观察 | id=observation_local_1 | cause=\nt=100.069 | squad | 报告发送，等待送达 | id=report_local_1 | cause=observation_local_1\nt=100.069 | squad | 局部来源形成观察 | id=observation_local_1_ammo | cause=\nt=100.069 | squad | 报告发送，等待送达 | id=report_local_1_ammo | cause=observation_local_1_ammo\nt=100.069 | unit_000 | 事件area_transition | id=physical_7773f3ca194415df963e06e5 | cause=\nt=100.069 | unit_000 | 沿真实路段到达 | id=physical_88af3440e6a5fd5f3e490a56 | cause=\nt=100.069 | cell_038 | 事件control_changed | id=physical_a4a42d18f01e6aa1db155110 | cause=\nt=120.000 | world | 外部空间事实生效 | id=bridge_cut | cause=\nt=147.069 | company | 人物收到报告 | id=received_report_local_1 | cause=report_local_1\nt=147.069 | company | 人物收到报告 | id=received_report_local_1_ammo | cause=report_local_1_ammo\nt=150.000 | squad | 局部来源形成观察 | id=observation_local_2 | cause=bridge_cut\nt=150.000 | squad | 报告发送，等待送达 | id=report_local_2 | cause=observation_local_2\nt=150.000 | squad | 局部来源形成观察 | id=observation_local_2_ammo | cause=\nt=150.000 | squad | 报告发送，等待送达 | id=report_local_2_ammo | cause=observation_local_2_ammo\nt=150.000 | unit_000 | 实际路线受阻 | id=blocked_unit_000_bridge_cut | cause=bridge_cut\nt=150.000 | unit_000 | 事件action_changed | id=physical_5a9c59c5d8ecc2b459bd254e | cause=\nt=197.000 | company | 人物收到报告 | id=received_report_local_2 | cause=report_local_2\nt=197.000 | company | 人物收到报告 | id=received_report_local_2_ammo | cause=report_local_2_ammo\nt=325.000 | company | 命令发送，等待送达 | id=input_regular_1 | cause=regular_1\nt=325.000 | company | 人物在明确机会提交command | id=regular_1 | cause=received_report_local_2\nt=340.000 | blue_platoon | 命令送达重验：EXECUTED | id=executed_input_regular_1 | cause=input_regular_1\nt=359.944 | squad | 局部来源形成观察 | id=observation_local_3 | cause=bridge_cut\nt=359.944 | squad | 报告发送，等待送达 | id=report_local_3 | cause=observation_local_3\nt=359.944 | squad | 局部来源形成观察 | id=observation_local_3_ammo | cause=\nt=359.944 | squad | 报告发送，等待送达 | id=report_local_3_ammo | cause=observation_local_3_ammo\nt=359.944 | unit_000 | 沿真实路段到达 | id=physical_487da2e215ccd940178b39bd | cause=\nt=359.944 | unit_000 | 事件action_changed | id=physical_f57741fda1854eaad84dfb92 | cause=\nt=406.944 | company | 人物收到报告 | id=received_report_local_3 | cause=report_local_3\nt=406.944 | company | 人物收到报告 | id=received_report_local_3_ammo | cause=report_local_3_ammo\nt=435.294 | squad | 局部来源形成观察 | id=observation_local_4 | cause=bridge_cut\nt=435.294 | squad | 报告发送，等待送达 | id=report_local_4 | cause=observation_local_4\nt=435.294 | squad | 局部来源形成观察 | id=observation_local_4_ammo | cause=\nt=435.294 | squad | 报告发送，等待送达 | id=report_local_4_ammo | cause=observation_local_4_ammo\nt=435.294 | unit_000 | 事件area_transition | id=physical_f73f93db9abbeaffe3d01c29 | cause=\nt=435.294 | unit_000 | 沿真实路段到达 | id=physical_2883ce449cbc81b64e0872ff | cause=\nt=435.294 | cell_038 | 事件control_changed | id=physical_4a22381986c4e096f574a52e | cause=\nt=482.294 | company | 人物收到报告 | id=received_report_local_4 | cause=report_local_4\nt=482.294 | company | 人物收到报告 | id=received_report_local_4_ammo | cause=report_local_4_ammo\nt=586.566 | squad | 局部来源形成观察 | id=observation_local_5 | cause=bridge_cut\nt=586.566 | squad | 报告发送，等待送达 | id=report_local_5 | cause=observation_local_5\nt=586.566 | squad | 局部来源形成观察 | id=observation_local_5_ammo | cause=\nt=586.566 | squad | 报告发送，等待送达 | id=report_local_5_ammo | cause=observation_local_5_ammo\nt=586.566 | unit_000 | 事件area_transition | id=physical_68bfdcfcae6ebdb7c3ec5210 | cause=\nt=586.566 | unit_000 | 沿真实路段到达 | id=physical_941ffbec7d8d6a973daa88da | cause=\nt=586.566 | cell_062 | 事件control_changed | id=physical_c97e21309ff2385d85a785e1 | cause=\nt=633.566 | company | 人物收到报告 | id=received_report_local_5 | cause=report_local_5\nt=633.566 | company | 人物收到报告 | id=received_report_local_5_ammo | cause=report_local_5_ammo\nt=640.000 | company | 人物在明确机会提交logistics_request | id=regular_2 | cause=received_report_local_5_ammo\nt=640.000 | company | 事件logistics_request | id=input_regular_2 | cause=regular_2\nt=640.000 | company | 事件allocation | id=allocation_input_regular_2 | cause=regular_2\nt=670.000 | unit_000 | 事件losses | id=physical_b5cc484e44a9e3d4b7a03273 | cause=\nt=670.000 | unit_002 | 事件losses | id=physical_4c3a05b0ea7ecd8296d28407 | cause=\nt=670.000 | unit_003 | 事件losses | id=physical_9cab69c7f06959803d8c6b12 | cause=\nt=670.000 | world | 有限补给事件结算 | id=logistics_delivery_allocation_input_regular_2 | cause=input_regular_2\nt=690.000 | unit_000 | 事件losses | id=physical_4aa2ddadd6e35d858b431140 | cause=\nt=690.000 | unit_002 | 事件losses | id=physical_c3bc1d579846dabb59d430ff | cause=\nt=690.000 | unit_003 | 事件losses | id=physical_5dfe153b21ff69dd25cbd6dd | cause=\nt=720.000 | unit_000 | 事件losses | id=physical_0a75deca853bfa4441207711 | cause=\nt=720.000 | unit_002 | 事件losses | id=physical_48ea37b32e7940e419d23927 | cause=\nt=720.000 | unit_003 | 事件losses | id=physical_e64b38e1ef36dbd0301d8252 | cause=\nt=732.051 | unit_000 | 事件losses | id=physical_7e29590fc76aa419987cf7c4 | cause=\nt=732.051 | unit_002 | 事件losses | id=physical_5a412f491240e3000190422f | cause=\nt=732.051 | unit_003 | 事件losses | id=physical_5d7f5769ed5a29574592db49 | cause=\nt=732.525 | squad | 局部来源形成观察 | id=observation_local_6 | cause=bridge_cut\nt=732.525 | squad | 报告发送，等待送达 | id=report_local_6 | cause=observation_local_6\nt=732.525 | squad | 局部来源形成观察 | id=observation_local_6_ammo | cause=\nt=732.525 | squad | 报告发送，等待送达 | id=report_local_6_ammo | cause=observation_local_6_ammo\nt=732.525 | unit_000 | 事件area_transition | id=physical_a81c42492048c83d763ea6f5 | cause=\nt=732.525 | unit_000 | 沿真实路段到达 | id=physical_8507b9b6d76dcb380fbb28f8 | cause=\nt=732.525 | unit_000 | 事件mission_complete | id=physical_4ec814b32b9642cdb215e34b | cause=\nt=732.525 | unit_000 | 事件losses | id=physical_4ae9172c3e6fdca3781cedc4 | cause=\nt=732.525 | unit_002 | 事件losses | id=physical_3cf0bc784023171a14b30f0c | cause=\nt=732.525 | unit_003 | 事件losses | id=physical_b6de6ed49a53b85f982e668c | cause=\nt=732.525 | cell_062 | 事件control_changed | id=physical_72214bea8f9d71bf751f9f15 | cause=\nt=732.525 | cell_063 | 事件control_changed | id=physical_1d3eb4908d6273cd7719efc9 | cause=\nt=750.000 | unit_000 | 事件losses | id=physical_0ae4dededd27a0cdec2a74b2 | cause=\nt=750.000 | unit_000 | 事件action_changed | id=physical_45c32522d3a88559c751e8fd | cause=\nt=779.525 | company | 人物收到报告 | id=received_report_local_6 | cause=report_local_6\nt=779.525 | company | 人物收到报告 | id=received_report_local_6_ammo | cause=report_local_6_ammo\nt=780.000 | unit_000 | 事件losses | id=physical_ab017526051225e09f811a31 | cause=\nt=810.000 | unit_000 | 事件losses | id=physical_5be79d8d474f0f67bde9abad | cause=\nt=840.000 | unit_000 | 事件losses | id=physical_3382597dad77d199253fc257 | cause=\nt=870.000 | unit_000 | 事件losses | id=physical_006c2de998f48acb38098d9c | cause=\nt=900.000 | unit_000 | 事件losses | id=physical_fb6845e1c33268902fd8d777 | cause=\nt=930.000 | unit_000 | 事件losses | id=physical_c86c2b16b23b7f12d93c63e4 | cause=\nt=955.000 | unit_000 | 事件losses | id=physical_c6775a026e0a2e8b2afe499f | cause=\nt=955.000 | company | 人物在明确机会提交keep | id=regular_3 | cause=\nt=960.000 | unit_000 | 事件losses | id=physical_95dbf3efc80c01e3325992a2 | cause=\nt=990.000 | unit_000 | 事件losses | id=physical_3578028e897352c63662e06c | cause=\nt=1020.000 | unit_000 | 事件losses | id=physical_94bced255d8dc17e9fe703de | cause=\nt=1050.000 | unit_000 | 事件losses | id=physical_85957f83edc4d1fe6452ca3e | cause=\nt=1080.000 | unit_000 | 事件losses | id=physical_ecebeea5013f0cd51d439b99 | cause=\nt=1110.000 | unit_000 | 事件losses | id=physical_923b86a172a537f6da057327 | cause=\nt=1114.382 | unit_000 | 事件losses | id=physical_4d216979ecd8c23591f89456 | cause=\nt=1114.416 | unit_000 | 事件losses | id=physical_4613e58023460e82fcb7b0e2 | cause=\nt=1140.000 | unit_000 | 事件losses | id=physical_8fe7deffb2756d842b8aca99 | cause=\nt=1270.000 | company | 人物在明确机会提交keep | id=regular_4 | cause=\nt=1500.000 | world | 有效结构关系事件结算 | id=structure_expiry_temporary_attachment | cause=\nt=1585.000 | company | 人物在明确机会提交keep | id=regular_5 | cause=",
+  "trace": [
+    {
+      "cause_refs": [],
+      "id": "synthetic_initial_report",
+      "kind": "initial_claim",
+      "scope": "bridge_BD",
+      "sequence": 0,
+      "subject": "synthetic_input",
+      "time": 0.0
+    },
+    {
+      "cause_refs": [
+        "synthetic_initial_report"
+      ],
+      "fact_kind": "route",
+      "id": "observation_old_bridge",
+      "kind": "observation",
+      "scope": "unit_000",
+      "sequence": 1,
+      "source_ref": "old",
+      "subject": "company",
+      "time": 0.0,
+      "value": {
+        "cause_ref": "synthetic_initial_report",
+        "edge_ref": "bridge_BD",
+        "node_ref": "A",
+        "state": "AVAILABLE"
+      }
+    },
+    {
+      "cause_refs": [
+        "observation_old_bridge"
+      ],
+      "delivery_time": 0.0,
+      "execution": "PENDING",
+      "id": "old_bridge_report",
+      "kind": "report_sent",
+      "outcome": {},
+      "scope": "company",
+      "sequence": 2,
+      "subject": "company",
+      "time": 0.0
+    },
+    {
+      "cause_refs": [],
+      "fact_kind": "ammunition",
+      "id": "observation_initial_ammo",
+      "kind": "observation",
+      "scope": "unit_000",
+      "sequence": 3,
+      "source_ref": "local",
+      "subject": "squad",
+      "time": 0.0,
+      "value": {
+        "level": "LOW"
+      }
+    },
+    {
+      "cause_refs": [
+        "observation_initial_ammo"
+      ],
+      "delivery_time": 0.0,
+      "execution": "PENDING",
+      "id": "report_initial_ammo",
+      "kind": "report_sent",
+      "outcome": {},
+      "scope": "company",
+      "sequence": 4,
+      "subject": "squad",
+      "time": 0.0
+    },
+    {
+      "cause_refs": [],
+      "delivery_time": 47.0,
+      "execution": "PENDING",
+      "id": "stale_order",
+      "kind": "command_sent",
+      "outcome": {},
+      "scope": "node_unit_001",
+      "sequence": 5,
+      "subject": "platoon",
+      "time": 0.0
+    },
+    {
+      "cause_refs": [
+        "old_bridge_report"
+      ],
+      "delivery_time": 0.0,
+      "execution": "DELIVERED",
+      "id": "received_old_bridge_report",
+      "kind": "report_received",
+      "outcome": {},
+      "scope": "company",
+      "sequence": 6,
+      "subject": "company",
+      "time": 0.0
+    },
+    {
+      "cause_refs": [
+        "report_initial_ammo"
+      ],
+      "delivery_time": 0.0,
+      "execution": "DELIVERED",
+      "id": "received_report_initial_ammo",
+      "kind": "report_received",
+      "outcome": {},
+      "scope": "company",
+      "sequence": 7,
+      "subject": "company",
+      "time": 0.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "action": "stalled",
+        "kind": "action_changed",
+        "reason": "mobility",
+        "suppression": 0.0,
+        "time": 10.0,
+        "unit_id": "aggregate_617759c25fe6ab7f_000001"
+      },
+      "execution": "APPLIED",
+      "id": "physical_ecb9bdfe2dfddad9b6f88d8c",
+      "kind": "action_changed",
+      "scope": "",
+      "sequence": 8,
+      "subject": "aggregate_617759c25fe6ab7f_000001",
+      "time": 10.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "action": "hold",
+        "kind": "action_changed",
+        "reason": "mission",
+        "suppression": 0.0,
+        "time": 10.0,
+        "unit_id": "unit_002"
+      },
+      "execution": "APPLIED",
+      "id": "physical_1f50d5092c7f626edc55834c",
+      "kind": "action_changed",
+      "scope": "",
+      "sequence": 9,
+      "subject": "unit_002",
+      "time": 10.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "action": "hold",
+        "kind": "action_changed",
+        "reason": "mission",
+        "suppression": 0.0,
+        "time": 10.0,
+        "unit_id": "unit_003"
+      },
+      "execution": "APPLIED",
+      "id": "physical_25f4071bf032e60b8c31ca03",
+      "kind": "action_changed",
+      "scope": "",
+      "sequence": 10,
+      "subject": "unit_003",
+      "time": 10.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "area_id": "cell_037",
+        "control": "blue",
+        "kind": "control_changed",
+        "time": 10.0
+      },
+      "execution": "APPLIED",
+      "id": "physical_3856876fe666fd9b69ac660d",
+      "kind": "control_changed",
+      "scope": "",
+      "sequence": 11,
+      "subject": "cell_037",
+      "time": 10.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "area_id": "cell_063",
+        "control": "red",
+        "kind": "control_changed",
+        "time": 10.0
+      },
+      "execution": "APPLIED",
+      "id": "physical_1180d269ef16691698c97838",
+      "kind": "control_changed",
+      "scope": "",
+      "sequence": 12,
+      "subject": "cell_063",
+      "time": 10.0
+    },
+    {
+      "cause_refs": [
+        "regular_0"
+      ],
+      "delivery_time": 25.0,
+      "execution": "PENDING",
+      "id": "input_regular_0",
+      "kind": "command_sent",
+      "outcome": {},
+      "scope": "blue_platoon",
+      "sequence": 13,
+      "subject": "company",
+      "time": 10.0
+    },
+    {
+      "cause_refs": [
+        "received_old_bridge_report"
+      ],
+      "id": "regular_0",
+      "input": "command",
+      "input_result": {
+        "domain": "COMMUNICATION",
+        "id": "input_regular_0",
+        "issued_at": 10.0,
+        "result": {
+          "delivery_time": 25.0,
+          "issued_at": 10.0,
+          "message_id": "input_regular_0",
+          "ok": true
+        }
+      },
+      "kind": "decision",
+      "scope": "blue_company",
+      "sequence": 14,
+      "subject": "company",
+      "time": 10.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "id": "structure_temporary_attachment",
+        "kind": "structure",
+        "result": {
+          "actor": "company",
+          "id": "structure_temporary_attachment",
+          "outcome": {
+            "kind": "attach",
+            "ok": true,
+            "values": {
+              "parent": "blue_destination",
+              "target": "node_unit_001",
+              "until": 1500.0
+            }
+          },
+          "time": 15.0
+        },
+        "time": 15.0
+      },
+      "execution": "APPLIED",
+      "id": "structure_temporary_attachment",
+      "kind": "structure",
+      "scope": "",
+      "sequence": 15,
+      "subject": "world",
+      "time": 15.0
+    },
+    {
+      "cause_refs": [
+        "input_regular_0"
+      ],
+      "delivery_time": 25.0,
+      "execution": "EXECUTED",
+      "id": "executed_input_regular_0",
+      "kind": "command_result",
+      "outcome": {
+        "ok": true,
+        "reason": "executed_existing_role_input"
+      },
+      "scope": "blue_platoon",
+      "sequence": 16,
+      "subject": "blue_platoon",
+      "time": 25.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "action": "advance",
+        "kind": "action_changed",
+        "reason": "mission",
+        "suppression": 0.0,
+        "time": 30.0,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_5fd999c607cdc5359d5ddcd4",
+      "kind": "action_changed",
+      "scope": "",
+      "sequence": 17,
+      "subject": "unit_000",
+      "time": 30.0
+    },
+    {
+      "cause_refs": [
+        "stale_order"
+      ],
+      "delivery_time": 47.0,
+      "execution": "REJECTED",
+      "id": "executed_stale_order",
+      "kind": "command_result",
+      "outcome": {
+        "ok": false,
+        "reason": "wrong_owner_or_layer"
+      },
+      "scope": "node_unit_001",
+      "sequence": 18,
+      "subject": "node_unit_001",
+      "time": 47.0
+    },
+    {
+      "cause_refs": [],
+      "fact_kind": "route",
+      "id": "observation_local_1",
+      "kind": "observation",
+      "scope": "unit_000",
+      "sequence": 19,
+      "source_ref": "local",
+      "subject": "squad",
+      "time": 100.069183230332,
+      "value": {
+        "cause_ref": "",
+        "edge_ref": "",
+        "node_ref": "B",
+        "state": "ARRIVED"
+      }
+    },
+    {
+      "cause_refs": [
+        "observation_local_1"
+      ],
+      "delivery_time": 147.069183230332,
+      "execution": "PENDING",
+      "id": "report_local_1",
+      "kind": "report_sent",
+      "outcome": {},
+      "scope": "company",
+      "sequence": 20,
+      "subject": "squad",
+      "time": 100.069183230332
+    },
+    {
+      "cause_refs": [],
+      "fact_kind": "ammunition",
+      "id": "observation_local_1_ammo",
+      "kind": "observation",
+      "scope": "unit_000",
+      "sequence": 21,
+      "source_ref": "local",
+      "subject": "squad",
+      "time": 100.069183230332,
+      "value": {
+        "level": "LOW"
+      }
+    },
+    {
+      "cause_refs": [
+        "observation_local_1_ammo"
+      ],
+      "delivery_time": 147.069183230332,
+      "execution": "PENDING",
+      "id": "report_local_1_ammo",
+      "kind": "report_sent",
+      "outcome": {},
+      "scope": "company",
+      "sequence": 22,
+      "subject": "squad",
+      "time": 100.069183230332
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "from": "cell_037",
+        "kind": "area_transition",
+        "time": 100.069183230332,
+        "to": "cell_038",
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_7773f3ca194415df963e06e5",
+      "kind": "area_transition",
+      "scope": "",
+      "sequence": 23,
+      "subject": "unit_000",
+      "time": 100.069183230332
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "kind": "route_arrival",
+        "node_ref": "B",
+        "time": 100.069183230332,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_88af3440e6a5fd5f3e490a56",
+      "kind": "route_arrival",
+      "scope": "B",
+      "sequence": 24,
+      "subject": "unit_000",
+      "time": 100.069183230332
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "area_id": "cell_038",
+        "control": "blue",
+        "kind": "control_changed",
+        "time": 100.069183230332
+      },
+      "execution": "APPLIED",
+      "id": "physical_a4a42d18f01e6aa1db155110",
+      "kind": "control_changed",
+      "scope": "",
+      "sequence": 25,
+      "subject": "cell_038",
+      "time": 100.069183230332
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "id": "spatial_bridge_cut",
+        "kind": "spatial",
+        "result": {
+          "due": 120.0,
+          "edge_ref": "bridge_BD",
+          "id": "bridge_cut",
+          "open": false,
+          "processed_at": 120.0,
+          "property": "open",
+          "status": "APPLIED"
+        },
+        "time": 120.0
+      },
+      "execution": "APPLIED",
+      "id": "bridge_cut",
+      "kind": "spatial",
+      "scope": "",
+      "sequence": 26,
+      "subject": "world",
+      "time": 120.0
+    },
+    {
+      "cause_refs": [
+        "report_local_1"
+      ],
+      "delivery_time": 147.069183230332,
+      "execution": "DELIVERED",
+      "id": "received_report_local_1",
+      "kind": "report_received",
+      "outcome": {},
+      "scope": "company",
+      "sequence": 33,
+      "subject": "company",
+      "time": 147.069183230332
+    },
+    {
+      "cause_refs": [
+        "report_local_1_ammo"
+      ],
+      "delivery_time": 147.069183230332,
+      "execution": "DELIVERED",
+      "id": "received_report_local_1_ammo",
+      "kind": "report_received",
+      "outcome": {},
+      "scope": "company",
+      "sequence": 34,
+      "subject": "company",
+      "time": 147.069183230332
+    },
+    {
+      "cause_refs": [
+        "bridge_cut"
+      ],
+      "fact_kind": "route",
+      "id": "observation_local_2",
+      "kind": "observation",
+      "scope": "unit_000",
+      "sequence": 27,
+      "source_ref": "local",
+      "subject": "squad",
+      "time": 150.0,
+      "value": {
+        "cause_ref": "bridge_cut",
+        "edge_ref": "bridge_BD",
+        "node_ref": "B",
+        "state": "BLOCKED"
+      }
+    },
+    {
+      "cause_refs": [
+        "observation_local_2"
+      ],
+      "delivery_time": 197.0,
+      "execution": "PENDING",
+      "id": "report_local_2",
+      "kind": "report_sent",
+      "outcome": {},
+      "scope": "company",
+      "sequence": 28,
+      "subject": "squad",
+      "time": 150.0
+    },
+    {
+      "cause_refs": [],
+      "fact_kind": "ammunition",
+      "id": "observation_local_2_ammo",
+      "kind": "observation",
+      "scope": "unit_000",
+      "sequence": 29,
+      "source_ref": "local",
+      "subject": "squad",
+      "time": 150.0,
+      "value": {
+        "level": "LOW"
+      }
+    },
+    {
+      "cause_refs": [
+        "observation_local_2_ammo"
+      ],
+      "delivery_time": 197.0,
+      "execution": "PENDING",
+      "id": "report_local_2_ammo",
+      "kind": "report_sent",
+      "outcome": {},
+      "scope": "company",
+      "sequence": 30,
+      "subject": "squad",
+      "time": 150.0
+    },
+    {
+      "cause_refs": [
+        "bridge_cut"
+      ],
+      "detail": {
+        "cause_ref": "bridge_cut",
+        "edge_ref": "bridge_BD",
+        "execution": "BLOCKED",
+        "id": "blocked_unit_000_bridge_cut",
+        "kind": "route_blocked",
+        "scope": "cell_038",
+        "time": 150.0,
+        "unit_id": "unit_000"
+      },
+      "execution": "BLOCKED",
+      "id": "blocked_unit_000_bridge_cut",
+      "kind": "route_blocked",
+      "scope": "cell_038",
+      "sequence": 31,
+      "subject": "unit_000",
+      "time": 150.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "action": "stalled",
+        "kind": "action_changed",
+        "reason": "mobility",
+        "suppression": 0.0,
+        "time": 150.0,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_5a9c59c5d8ecc2b459bd254e",
+      "kind": "action_changed",
+      "scope": "",
+      "sequence": 32,
+      "subject": "unit_000",
+      "time": 150.0
+    },
+    {
+      "cause_refs": [
+        "report_local_2"
+      ],
+      "delivery_time": 197.0,
+      "execution": "DELIVERED",
+      "id": "received_report_local_2",
+      "kind": "report_received",
+      "outcome": {},
+      "scope": "company",
+      "sequence": 35,
+      "subject": "company",
+      "time": 197.0
+    },
+    {
+      "cause_refs": [
+        "report_local_2_ammo"
+      ],
+      "delivery_time": 197.0,
+      "execution": "DELIVERED",
+      "id": "received_report_local_2_ammo",
+      "kind": "report_received",
+      "outcome": {},
+      "scope": "company",
+      "sequence": 36,
+      "subject": "company",
+      "time": 197.0
+    },
+    {
+      "cause_refs": [
+        "regular_1"
+      ],
+      "delivery_time": 340.0,
+      "execution": "PENDING",
+      "id": "input_regular_1",
+      "kind": "command_sent",
+      "outcome": {},
+      "scope": "blue_platoon",
+      "sequence": 37,
+      "subject": "company",
+      "time": 325.0
+    },
+    {
+      "cause_refs": [
+        "received_report_local_2"
+      ],
+      "id": "regular_1",
+      "input": "command",
+      "input_result": {
+        "domain": "COMMUNICATION",
+        "id": "input_regular_1",
+        "issued_at": 325.0,
+        "result": {
+          "delivery_time": 340.0,
+          "issued_at": 325.0,
+          "message_id": "input_regular_1",
+          "ok": true
+        }
+      },
+      "kind": "decision",
+      "scope": "blue_company",
+      "sequence": 38,
+      "subject": "company",
+      "time": 325.0
+    },
+    {
+      "cause_refs": [
+        "input_regular_1"
+      ],
+      "delivery_time": 340.0,
+      "execution": "EXECUTED",
+      "id": "executed_input_regular_1",
+      "kind": "command_result",
+      "outcome": {
+        "ok": true,
+        "reason": "executed_existing_role_input"
+      },
+      "scope": "blue_platoon",
+      "sequence": 39,
+      "subject": "blue_platoon",
+      "time": 340.0
+    },
+    {
+      "cause_refs": [
+        "bridge_cut"
+      ],
+      "fact_kind": "route",
+      "id": "observation_local_3",
+      "kind": "observation",
+      "scope": "unit_000",
+      "sequence": 40,
+      "source_ref": "local",
+      "subject": "squad",
+      "time": 359.94410008206,
+      "value": {
+        "cause_ref": "bridge_cut",
+        "edge_ref": "",
+        "node_ref": "B",
+        "state": "ARRIVED"
+      }
+    },
+    {
+      "cause_refs": [
+        "observation_local_3"
+      ],
+      "delivery_time": 406.94410008206,
+      "execution": "PENDING",
+      "id": "report_local_3",
+      "kind": "report_sent",
+      "outcome": {},
+      "scope": "company",
+      "sequence": 41,
+      "subject": "squad",
+      "time": 359.94410008206
+    },
+    {
+      "cause_refs": [],
+      "fact_kind": "ammunition",
+      "id": "observation_local_3_ammo",
+      "kind": "observation",
+      "scope": "unit_000",
+      "sequence": 42,
+      "source_ref": "local",
+      "subject": "squad",
+      "time": 359.94410008206,
+      "value": {
+        "level": "LOW"
+      }
+    },
+    {
+      "cause_refs": [
+        "observation_local_3_ammo"
+      ],
+      "delivery_time": 406.94410008206,
+      "execution": "PENDING",
+      "id": "report_local_3_ammo",
+      "kind": "report_sent",
+      "outcome": {},
+      "scope": "company",
+      "sequence": 43,
+      "subject": "squad",
+      "time": 359.94410008206
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "kind": "route_arrival",
+        "node_ref": "B",
+        "time": 359.94410008206,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_487da2e215ccd940178b39bd",
+      "kind": "route_arrival",
+      "scope": "B",
+      "sequence": 44,
+      "subject": "unit_000",
+      "time": 359.94410008206
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "action": "advance",
+        "kind": "action_changed",
+        "reason": "mission",
+        "suppression": 0.0,
+        "time": 359.94410008206,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_f57741fda1854eaad84dfb92",
+      "kind": "action_changed",
+      "scope": "",
+      "sequence": 45,
+      "subject": "unit_000",
+      "time": 359.94410008206
+    },
+    {
+      "cause_refs": [
+        "report_local_3"
+      ],
+      "delivery_time": 406.94410008206,
+      "execution": "DELIVERED",
+      "id": "received_report_local_3",
+      "kind": "report_received",
+      "outcome": {},
+      "scope": "company",
+      "sequence": 46,
+      "subject": "company",
+      "time": 406.94410008206
+    },
+    {
+      "cause_refs": [
+        "report_local_3_ammo"
+      ],
+      "delivery_time": 406.94410008206,
+      "execution": "DELIVERED",
+      "id": "received_report_local_3_ammo",
+      "kind": "report_received",
+      "outcome": {},
+      "scope": "company",
+      "sequence": 47,
+      "subject": "company",
+      "time": 406.94410008206
+    },
+    {
+      "cause_refs": [
+        "bridge_cut"
+      ],
+      "fact_kind": "route",
+      "id": "observation_local_4",
+      "kind": "observation",
+      "scope": "unit_000",
+      "sequence": 48,
+      "source_ref": "local",
+      "subject": "squad",
+      "time": 435.293526498829,
+      "value": {
+        "cause_ref": "bridge_cut",
+        "edge_ref": "",
+        "node_ref": "A",
+        "state": "ARRIVED"
+      }
+    },
+    {
+      "cause_refs": [
+        "observation_local_4"
+      ],
+      "delivery_time": 482.293526498829,
+      "execution": "PENDING",
+      "id": "report_local_4",
+      "kind": "report_sent",
+      "outcome": {},
+      "scope": "company",
+      "sequence": 49,
+      "subject": "squad",
+      "time": 435.293526498829
+    },
+    {
+      "cause_refs": [],
+      "fact_kind": "ammunition",
+      "id": "observation_local_4_ammo",
+      "kind": "observation",
+      "scope": "unit_000",
+      "sequence": 50,
+      "source_ref": "local",
+      "subject": "squad",
+      "time": 435.293526498829,
+      "value": {
+        "level": "LOW"
+      }
+    },
+    {
+      "cause_refs": [
+        "observation_local_4_ammo"
+      ],
+      "delivery_time": 482.293526498829,
+      "execution": "PENDING",
+      "id": "report_local_4_ammo",
+      "kind": "report_sent",
+      "outcome": {},
+      "scope": "company",
+      "sequence": 51,
+      "subject": "squad",
+      "time": 435.293526498829
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "from": "cell_038",
+        "kind": "area_transition",
+        "time": 435.293526498829,
+        "to": "cell_037",
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_f73f93db9abbeaffe3d01c29",
+      "kind": "area_transition",
+      "scope": "",
+      "sequence": 52,
+      "subject": "unit_000",
+      "time": 435.293526498829
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "kind": "route_arrival",
+        "node_ref": "A",
+        "time": 435.293526498829,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_2883ce449cbc81b64e0872ff",
+      "kind": "route_arrival",
+      "scope": "A",
+      "sequence": 53,
+      "subject": "unit_000",
+      "time": 435.293526498829
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "area_id": "cell_038",
+        "control": "",
+        "kind": "control_changed",
+        "time": 435.293526498829
+      },
+      "execution": "APPLIED",
+      "id": "physical_4a22381986c4e096f574a52e",
+      "kind": "control_changed",
+      "scope": "",
+      "sequence": 54,
+      "subject": "cell_038",
+      "time": 435.293526498829
+    },
+    {
+      "cause_refs": [
+        "report_local_4"
+      ],
+      "delivery_time": 482.293526498829,
+      "execution": "DELIVERED",
+      "id": "received_report_local_4",
+      "kind": "report_received",
+      "outcome": {},
+      "scope": "company",
+      "sequence": 55,
+      "subject": "company",
+      "time": 482.293526498829
+    },
+    {
+      "cause_refs": [
+        "report_local_4_ammo"
+      ],
+      "delivery_time": 482.293526498829,
+      "execution": "DELIVERED",
+      "id": "received_report_local_4_ammo",
+      "kind": "report_received",
+      "outcome": {},
+      "scope": "company",
+      "sequence": 56,
+      "subject": "company",
+      "time": 482.293526498829
+    },
+    {
+      "cause_refs": [
+        "bridge_cut"
+      ],
+      "fact_kind": "route",
+      "id": "observation_local_5",
+      "kind": "observation",
+      "scope": "unit_000",
+      "sequence": 57,
+      "source_ref": "local",
+      "subject": "squad",
+      "time": 586.566279415999,
+      "value": {
+        "cause_ref": "bridge_cut",
+        "edge_ref": "",
+        "node_ref": "C",
+        "state": "ARRIVED"
+      }
+    },
+    {
+      "cause_refs": [
+        "observation_local_5"
+      ],
+      "delivery_time": 633.566279415999,
+      "execution": "PENDING",
+      "id": "report_local_5",
+      "kind": "report_sent",
+      "outcome": {},
+      "scope": "company",
+      "sequence": 58,
+      "subject": "squad",
+      "time": 586.566279415999
+    },
+    {
+      "cause_refs": [],
+      "fact_kind": "ammunition",
+      "id": "observation_local_5_ammo",
+      "kind": "observation",
+      "scope": "unit_000",
+      "sequence": 59,
+      "source_ref": "local",
+      "subject": "squad",
+      "time": 586.566279415999,
+      "value": {
+        "level": "LOW"
+      }
+    },
+    {
+      "cause_refs": [
+        "observation_local_5_ammo"
+      ],
+      "delivery_time": 633.566279415999,
+      "execution": "PENDING",
+      "id": "report_local_5_ammo",
+      "kind": "report_sent",
+      "outcome": {},
+      "scope": "company",
+      "sequence": 60,
+      "subject": "squad",
+      "time": 586.566279415999
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "from": "cell_037",
+        "kind": "area_transition",
+        "time": 586.566279415999,
+        "to": "cell_062",
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_68bfdcfcae6ebdb7c3ec5210",
+      "kind": "area_transition",
+      "scope": "",
+      "sequence": 61,
+      "subject": "unit_000",
+      "time": 586.566279415999
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "kind": "route_arrival",
+        "node_ref": "C",
+        "time": 586.566279415999,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_941ffbec7d8d6a973daa88da",
+      "kind": "route_arrival",
+      "scope": "C",
+      "sequence": 62,
+      "subject": "unit_000",
+      "time": 586.566279415999
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "area_id": "cell_062",
+        "control": "blue",
+        "kind": "control_changed",
+        "time": 586.566279415999
+      },
+      "execution": "APPLIED",
+      "id": "physical_c97e21309ff2385d85a785e1",
+      "kind": "control_changed",
+      "scope": "",
+      "sequence": 63,
+      "subject": "cell_062",
+      "time": 586.566279415999
+    },
+    {
+      "cause_refs": [
+        "report_local_5"
+      ],
+      "delivery_time": 633.566279415999,
+      "execution": "DELIVERED",
+      "id": "received_report_local_5",
+      "kind": "report_received",
+      "outcome": {},
+      "scope": "company",
+      "sequence": 64,
+      "subject": "company",
+      "time": 633.566279415999
+    },
+    {
+      "cause_refs": [
+        "report_local_5_ammo"
+      ],
+      "delivery_time": 633.566279415999,
+      "execution": "DELIVERED",
+      "id": "received_report_local_5_ammo",
+      "kind": "report_received",
+      "outcome": {},
+      "scope": "company",
+      "sequence": 65,
+      "subject": "company",
+      "time": 633.566279415999
+    },
+    {
+      "cause_refs": [
+        "received_report_local_5_ammo"
+      ],
+      "id": "regular_2",
+      "input": "logistics_request",
+      "input_result": {
+        "domain": "LOGISTICS",
+        "id": "input_regular_2",
+        "issued_at": 640.0,
+        "result": {
+          "ok": true,
+          "status": "REQUESTED"
+        }
+      },
+      "kind": "decision",
+      "scope": "blue_company",
+      "sequence": 66,
+      "subject": "company",
+      "time": 640.0
+    },
+    {
+      "cause_refs": [
+        "regular_2"
+      ],
+      "execution": "REQUESTED",
+      "id": "input_regular_2",
+      "kind": "logistics_request",
+      "scope": "blue_company",
+      "sequence": 67,
+      "subject": "company",
+      "time": 640.0
+    },
+    {
+      "cause_refs": [
+        "regular_2"
+      ],
+      "execution": "IN_TRANSIT",
+      "id": "allocation_input_regular_2",
+      "kind": "allocation",
+      "scope": "blue_platoon",
+      "sequence": 68,
+      "subject": "company",
+      "time": 640.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 0.04137138432,
+        "kind": "losses",
+        "personnel": 0.04137138432,
+        "time": 670.0,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_b5cc484e44a9e3d4b7a03273",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 69,
+      "subject": "unit_000",
+      "time": 670.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 0.00569212938528,
+        "kind": "losses",
+        "personnel": 0.00569212938528,
+        "time": 670.0,
+        "unit_id": "unit_002"
+      },
+      "execution": "APPLIED",
+      "id": "physical_4c3a05b0ea7ecd8296d28407",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 70,
+      "subject": "unit_002",
+      "time": 670.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 0.00579642195392,
+        "kind": "losses",
+        "personnel": 0.00579642195392,
+        "time": 670.0,
+        "unit_id": "unit_003"
+      },
+      "execution": "APPLIED",
+      "id": "physical_9cab69c7f06959803d8c6b12",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 71,
+      "subject": "unit_003",
+      "time": 670.0
+    },
+    {
+      "cause_refs": [
+        "input_regular_2"
+      ],
+      "detail": {
+        "id": "logistics_delivery_allocation_input_regular_2",
+        "kind": "logistics",
+        "result": {
+          "allocation_actor": "company",
+          "delivery_id": "allocation_input_regular_2",
+          "delivery_time": 670.0,
+          "issue_time": 640.0,
+          "quantity": 10.0,
+          "receipt_time": 670.0,
+          "recipient_kind": "formation",
+          "recipient_ref": "blue_platoon",
+          "request_id": "input_regular_2",
+          "resource_class": "AMMUNITION",
+          "source_ref": "source",
+          "status": "RECEIVED"
+        },
+        "time": 670.0
+      },
+      "execution": "APPLIED",
+      "id": "logistics_delivery_allocation_input_regular_2",
+      "kind": "logistics",
+      "scope": "",
+      "sequence": 72,
+      "subject": "world",
+      "time": 670.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 0.0820597465297126,
+        "kind": "losses",
+        "personnel": 0.0820597465297126,
+        "time": 690.0,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_4aa2ddadd6e35d858b431140",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 73,
+      "subject": "unit_000",
+      "time": 690.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 0.0107357608690321,
+        "kind": "losses",
+        "personnel": 0.0107357608690321,
+        "time": 690.0,
+        "unit_id": "unit_002"
+      },
+      "execution": "APPLIED",
+      "id": "physical_c3bc1d579846dabb59d430ff",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 74,
+      "subject": "unit_002",
+      "time": 690.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 0.0109324640712172,
+        "kind": "losses",
+        "personnel": 0.0109324640712172,
+        "time": 690.0,
+        "unit_id": "unit_003"
+      },
+      "execution": "APPLIED",
+      "id": "physical_5dfe153b21ff69dd25cbd6dd",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 75,
+      "subject": "unit_003",
+      "time": 690.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 0.121233988698793,
+        "kind": "losses",
+        "personnel": 0.121233988698793,
+        "time": 720.0,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_0a75deca853bfa4441207711",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 76,
+      "subject": "unit_000",
+      "time": 720.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 0.0142740898413749,
+        "kind": "losses",
+        "personnel": 0.0142740898413749,
+        "time": 720.0,
+        "unit_id": "unit_002"
+      },
+      "execution": "APPLIED",
+      "id": "physical_48ea37b32e7940e419d23927",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 77,
+      "subject": "unit_002",
+      "time": 720.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 0.0145356231611207,
+        "kind": "losses",
+        "personnel": 0.0145356231611207,
+        "time": 720.0,
+        "unit_id": "unit_003"
+      },
+      "execution": "APPLIED",
+      "id": "physical_e64b38e1ef36dbd0301d8252",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 78,
+      "subject": "unit_003",
+      "time": 720.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 0.0477830482193911,
+        "kind": "losses",
+        "personnel": 0.0477830482193911,
+        "time": 732.051286947692,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_7e29590fc76aa419987cf7c4",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 79,
+      "subject": "unit_000",
+      "time": 732.051286947692
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 0.00474036135233731,
+        "kind": "losses",
+        "personnel": 0.00474036135233731,
+        "time": 732.051286947692,
+        "unit_id": "unit_002"
+      },
+      "execution": "APPLIED",
+      "id": "physical_5a412f491240e3000190422f",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 80,
+      "subject": "unit_002",
+      "time": 732.051286947692
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 0.00482720826176643,
+        "kind": "losses",
+        "personnel": 0.00482720826176643,
+        "time": 732.051286947692,
+        "unit_id": "unit_003"
+      },
+      "execution": "APPLIED",
+      "id": "physical_5d7f5769ed5a29574592db49",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 81,
+      "subject": "unit_003",
+      "time": 732.051286947692
+    },
+    {
+      "cause_refs": [
+        "bridge_cut"
+      ],
+      "fact_kind": "route",
+      "id": "observation_local_6",
+      "kind": "observation",
+      "scope": "unit_000",
+      "sequence": 82,
+      "source_ref": "local",
+      "subject": "squad",
+      "time": 732.524776858955,
+      "value": {
+        "cause_ref": "bridge_cut",
+        "edge_ref": "",
+        "node_ref": "D",
+        "state": "ARRIVED"
+      }
+    },
+    {
+      "cause_refs": [
+        "observation_local_6"
+      ],
+      "delivery_time": 779.524776858955,
+      "execution": "PENDING",
+      "id": "report_local_6",
+      "kind": "report_sent",
+      "outcome": {},
+      "scope": "company",
+      "sequence": 83,
+      "subject": "squad",
+      "time": 732.524776858955
+    },
+    {
+      "cause_refs": [],
+      "fact_kind": "ammunition",
+      "id": "observation_local_6_ammo",
+      "kind": "observation",
+      "scope": "unit_000",
+      "sequence": 84,
+      "source_ref": "local",
+      "subject": "squad",
+      "time": 732.524776858955,
+      "value": {
+        "level": "LOW"
+      }
+    },
+    {
+      "cause_refs": [
+        "observation_local_6_ammo"
+      ],
+      "delivery_time": 779.524776858955,
+      "execution": "PENDING",
+      "id": "report_local_6_ammo",
+      "kind": "report_sent",
+      "outcome": {},
+      "scope": "company",
+      "sequence": 85,
+      "subject": "squad",
+      "time": 732.524776858955
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "from": "cell_062",
+        "kind": "area_transition",
+        "time": 732.524776858955,
+        "to": "cell_063",
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_a81c42492048c83d763ea6f5",
+      "kind": "area_transition",
+      "scope": "",
+      "sequence": 86,
+      "subject": "unit_000",
+      "time": 732.524776858955
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "kind": "route_arrival",
+        "node_ref": "D",
+        "time": 732.524776858955,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_8507b9b6d76dcb380fbb28f8",
+      "kind": "route_arrival",
+      "scope": "D",
+      "sequence": 87,
+      "subject": "unit_000",
+      "time": 732.524776858955
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "kind": "mission_complete",
+        "mission_id": "materialized_aggregate_617759c25fe6ab7f_000001_unit_000",
+        "time": 732.524776858955,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_4ec814b32b9642cdb215e34b",
+      "kind": "mission_complete",
+      "scope": "",
+      "sequence": 88,
+      "subject": "unit_000",
+      "time": 732.524776858955
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 0.00186630412893515,
+        "kind": "losses",
+        "personnel": 0.00186630412893515,
+        "time": 732.524776858955,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_4ae9172c3e6fdca3781cedc4",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 89,
+      "subject": "unit_000",
+      "time": 732.524776858955
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 1.57406816470029e-17,
+        "kind": "losses",
+        "personnel": 1.57406816470029e-17,
+        "time": 732.524776858955,
+        "unit_id": "unit_002"
+      },
+      "execution": "APPLIED",
+      "id": "physical_3cf0bc784023171a14b30f0c",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 90,
+      "subject": "unit_002",
+      "time": 732.524776858955
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 1.60290625217385e-17,
+        "kind": "losses",
+        "personnel": 1.60290625217385e-17,
+        "time": 732.524776858955,
+        "unit_id": "unit_003"
+      },
+      "execution": "APPLIED",
+      "id": "physical_b6de6ed49a53b85f982e668c",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 91,
+      "subject": "unit_003",
+      "time": 732.524776858955
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "area_id": "cell_062",
+        "control": "",
+        "kind": "control_changed",
+        "time": 732.524776858955
+      },
+      "execution": "APPLIED",
+      "id": "physical_72214bea8f9d71bf751f9f15",
+      "kind": "control_changed",
+      "scope": "",
+      "sequence": 92,
+      "subject": "cell_062",
+      "time": 732.524776858955
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "area_id": "cell_063",
+        "control": "contested",
+        "kind": "control_changed",
+        "time": 732.524776858955
+      },
+      "execution": "APPLIED",
+      "id": "physical_1d3eb4908d6273cd7719efc9",
+      "kind": "control_changed",
+      "scope": "",
+      "sequence": 93,
+      "subject": "cell_063",
+      "time": 732.524776858955
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 0.0389340166295405,
+        "kind": "losses",
+        "personnel": 0.0389340166295405,
+        "time": 750.0,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_0ae4dededd27a0cdec2a74b2",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 94,
+      "subject": "unit_000",
+      "time": 750.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "action": "hold",
+        "kind": "action_changed",
+        "reason": "mission",
+        "suppression": 0.37007766183433,
+        "time": 750.0,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_45c32522d3a88559c751e8fd",
+      "kind": "action_changed",
+      "scope": "",
+      "sequence": 95,
+      "subject": "unit_000",
+      "time": 750.0
+    },
+    {
+      "cause_refs": [
+        "report_local_6"
+      ],
+      "delivery_time": 779.524776858955,
+      "execution": "DELIVERED",
+      "id": "received_report_local_6",
+      "kind": "report_received",
+      "outcome": {},
+      "scope": "company",
+      "sequence": 97,
+      "subject": "company",
+      "time": 779.524776858955
+    },
+    {
+      "cause_refs": [
+        "report_local_6_ammo"
+      ],
+      "delivery_time": 779.524776858955,
+      "execution": "DELIVERED",
+      "id": "received_report_local_6_ammo",
+      "kind": "report_received",
+      "outcome": {},
+      "scope": "company",
+      "sequence": 98,
+      "subject": "company",
+      "time": 779.524776858955
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 0.0669441359670281,
+        "kind": "losses",
+        "personnel": 0.0669441359670281,
+        "time": 780.0,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_ab017526051225e09f811a31",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 96,
+      "subject": "unit_000",
+      "time": 780.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 0.0671078313732242,
+        "kind": "losses",
+        "personnel": 0.0671078313732242,
+        "time": 810.0,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_5be79d8d474f0f67bde9abad",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 99,
+      "subject": "unit_000",
+      "time": 810.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 0.0672512149818764,
+        "kind": "losses",
+        "personnel": 0.0672512149818764,
+        "time": 840.0,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_3382597dad77d199253fc257",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 100,
+      "subject": "unit_000",
+      "time": 840.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 0.067381518517851,
+        "kind": "losses",
+        "personnel": 0.067381518517851,
+        "time": 870.0,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_006c2de998f48acb38098d9c",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 101,
+      "subject": "unit_000",
+      "time": 870.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 0.0674894330098078,
+        "kind": "losses",
+        "personnel": 0.0674894330098078,
+        "time": 900.0,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_fb6845e1c33268902fd8d777",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 102,
+      "subject": "unit_000",
+      "time": 900.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 0.0675818863216634,
+        "kind": "losses",
+        "personnel": 0.0675818863216634,
+        "time": 930.0,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_c86c2b16b23b7f12d93c63e4",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 103,
+      "subject": "unit_000",
+      "time": 930.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 0.0563835192477005,
+        "kind": "losses",
+        "personnel": 0.0563835192477005,
+        "time": 955.0,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_c6775a026e0a2e8b2afe499f",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 104,
+      "subject": "unit_000",
+      "time": 955.0
+    },
+    {
+      "cause_refs": [],
+      "id": "regular_3",
+      "input": "keep",
+      "input_result": {
+        "domain": "NONE",
+        "status": "STANDING_ORDER_CONTINUES"
+      },
+      "kind": "decision",
+      "scope": "blue_company",
+      "sequence": 105,
+      "subject": "company",
+      "time": 955.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 0.0112859348816551,
+        "kind": "losses",
+        "personnel": 0.0112859348816551,
+        "time": 960.0,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_95dbf3efc80c01e3325992a2",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 106,
+      "subject": "unit_000",
+      "time": 960.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 0.0677311642460024,
+        "kind": "losses",
+        "personnel": 0.0677311642460024,
+        "time": 990.0,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_3578028e897352c63662e06c",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 107,
+      "subject": "unit_000",
+      "time": 990.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 0.0677848486822232,
+        "kind": "losses",
+        "personnel": 0.0677848486822232,
+        "time": 1020.0,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_94bced255d8dc17e9fe703de",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 108,
+      "subject": "unit_000",
+      "time": 1020.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 0.0678277878476564,
+        "kind": "losses",
+        "personnel": 0.0678277878476564,
+        "time": 1050.0,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_85957f83edc4d1fe6452ca3e",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 109,
+      "subject": "unit_000",
+      "time": 1050.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 0.0678609162863325,
+        "kind": "losses",
+        "personnel": 0.0678609162863325,
+        "time": 1080.0,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_ecebeea5013f0cd51d439b99",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 110,
+      "subject": "unit_000",
+      "time": 1080.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 0.0678905929504379,
+        "kind": "losses",
+        "personnel": 0.0678905929504379,
+        "time": 1110.0,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_923b86a172a537f6da057327",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 111,
+      "subject": "unit_000",
+      "time": 1110.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 0.00991918415066716,
+        "kind": "losses",
+        "personnel": 0.00991918415066716,
+        "time": 1114.38213048738,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_4d216979ecd8c23591f89456",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 112,
+      "subject": "unit_000",
+      "time": 1114.38213048738
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 3.75785967147021e-05,
+        "kind": "losses",
+        "personnel": 3.75785967147021e-05,
+        "time": 1114.41610574232,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_4613e58023460e82fcb7b0e2",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 113,
+      "subject": "unit_000",
+      "time": 1114.41610574232
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "equipment": 4.47480645038301e-17,
+        "kind": "losses",
+        "personnel": 4.47480645038301e-17,
+        "time": 1140.0,
+        "unit_id": "unit_000"
+      },
+      "execution": "APPLIED",
+      "id": "physical_8fe7deffb2756d842b8aca99",
+      "kind": "losses",
+      "scope": "",
+      "sequence": 114,
+      "subject": "unit_000",
+      "time": 1140.0
+    },
+    {
+      "cause_refs": [],
+      "id": "regular_4",
+      "input": "keep",
+      "input_result": {
+        "domain": "NONE",
+        "status": "STANDING_ORDER_CONTINUES"
+      },
+      "kind": "decision",
+      "scope": "blue_company",
+      "sequence": 115,
+      "subject": "company",
+      "time": 1270.0
+    },
+    {
+      "cause_refs": [],
+      "detail": {
+        "id": "structure_expiry_temporary_attachment",
+        "kind": "structure",
+        "result": {
+          "actor": "company",
+          "id": "structure_expiry_temporary_attachment",
+          "outcome": {
+            "kind": "attachment_expired",
+            "ok": true,
+            "target": "node_unit_001"
+          },
+          "time": 1500.0
+        },
+        "time": 1500.0
+      },
+      "execution": "APPLIED",
+      "id": "structure_expiry_temporary_attachment",
+      "kind": "structure",
+      "scope": "",
+      "sequence": 116,
+      "subject": "world",
+      "time": 1500.0
+    },
+    {
+      "cause_refs": [],
+      "id": "regular_5",
+      "input": "keep",
+      "input_result": {
+        "domain": "NONE",
+        "status": "STANDING_ORDER_CONTINUES"
+      },
+      "kind": "decision",
+      "scope": "blue_company",
+      "sequence": 117,
+      "subject": "company",
+      "time": 1585.0
+    }
+  ],
+  "wall_ms": {
+    "advance": 111.552,
+    "input_build": 3.362,
+    "query_and_result": 1.966
+  },
+  "work": {
+    "decisions": {
+      "authority_checks": 9,
+      "commands_issued_from_decision": 2,
+      "decision_contexts_built": 6,
+      "decision_events_processed": 6,
+      "future_persons_examined": 0,
+      "knowledge_records_examined_for_decision": 62,
+      "persons_examined": 6,
+      "requests_issued_from_decision": 1,
+      "superseded_events_processed": 0,
+      "urgent_decision_wakes": 0,
+      "world_truth_reads_for_decision": 0
+    },
+    "information": {
+      "authority_revalidations": 8,
+      "command_deliveries_processed": 3,
+      "command_heap_comparisons": 35,
+      "communication_events_processed": 17,
+      "fact_records_examined": 13,
+      "future_messages_examined": 0,
+      "knowledge_records_examined": 62,
+      "knowledge_records_updated": 14,
+      "leaves_materialized_for_commands": 1,
+      "leaves_materialized_for_information": 0,
+      "messages_admitted": 17,
+      "messages_delivered": 16,
+      "messages_failed": 1,
+      "report_heap_comparisons": 11
+    },
+    "kernel": {
+      "areas_examined": 70,
+      "contacts_resolved": 184,
+      "events_processed": 13,
+      "segments": 70,
+      "units_examined": 4467
+    },
+    "lod": {
+      "actual_contacts_resolved": 184,
+      "candidate_contacts_examined": 663,
+      "events": 13,
+      "formation_records_examined": 55,
+      "formations_built": 1,
+      "formations_resolved": 279,
+      "index_records_examined": 279,
+      "input_leaf_records_examined": 4,
+      "leaf_records_examined": 4466,
+      "leaf_records_materialized": 2,
+      "parent_nodes_updated": 110,
+      "range_probes": 1413,
+      "segments": 70,
+      "spatial_nodes_examined": 165
+    },
+    "spatial": {
+      "fact_ancestors_updated": 2,
+      "fact_nodes_updated": 3,
+      "future_facts_examined": 0,
+      "geometry_records_loaded": 0,
+      "input_records_examined": 8,
+      "query_records_examined": 0,
+      "route_records_examined": 279,
+      "spatial_events_processed": 1
+    }
+  },
+  "output_costs": {
+    "encoded_bytes": 84736,
+    "optional_file_ms": 0.002,
+    "serialization_ms": 2.197,
+    "stdout_ms": 0.921
+  }
+}

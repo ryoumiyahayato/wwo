@@ -1,0 +1,27 @@
+extends SceneTree
+const F = preload("res://experiments/war_resolver/aggregation/fixtures.gd")
+func _initialize() -> void:
+	var state: F.State = F.battle(400)
+	for id: String in state.units:
+		state.units[id].ammunition = 0.0
+		state.units[id].mobility = 0.0
+		state.missions[state.units[id].mission_id].posture = "hold"
+	state.totals.ammunition = 0.0 # Initial synthetic input, before Authority admission.
+	var owner: F.Authority = F.Authority.new()
+	owner.configure(state)
+	var result: Dictionary = {}
+	var calls: int = 0
+	var maximum: int = 0
+	while calls < 5000000:
+		var start: int = Time.get_ticks_usec()
+		result = owner.advance_bounded(30.0, 1)
+		maximum = maxi(maximum, Time.get_ticks_usec()-start)
+		calls += 1
+		if not result.ok or result.status != "PENDING":
+			break
+	var contacts: int = state.counters.contacts_resolved
+	var cleanup: int = result.get("phase_work_counts", {}).get("release_jobs", 0)
+	var ok: bool = result.ok and result.status == "COMPLETE" and contacts == 80000 and state.contacts.is_empty() and cleanup >= contacts
+	print("RETIREMENT_COUNTER_JSON=" + JSON.stringify({"contacts_generated": contacts, "cleanup_work": cleanup, "max_call_usec": maximum, "calls": calls, "result": result, "expected": "all retired contacts get counted finite release work, even when current table erased"}))
+	print("Task9 retirement counter: 1 checks, %d failures" % int(not ok))
+	quit(0 if ok else 1)

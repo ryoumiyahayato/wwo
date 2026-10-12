@@ -1,0 +1,106 @@
+{
+  "baseline": "c4731a33177660b83c6490f41fe42dcbe7cfa7bb",
+  "branch": "experiment/war-spatial-continuity-goal-v0",
+  "stages": {
+    "M0": "PASSED",
+    "M1": "PASSED",
+    "M2": "PASSED",
+    "M3": "PASSED",
+    "M4": "PASSED"
+  },
+  "last_verified_code_commit": "69fa36d6202b2b0d8e9332406ff57d269749fa0c",
+  "started_utc": "2026-10-07T16:28:31Z",
+  "effective_minutes_estimate": 285,
+  "remaining_minutes_estimate": 315,
+  "estimate_quality": "approximate wall clock minus known wait; update at safe checkpoints",
+  "platform_startup_wait_seconds": 13,
+  "tests_completed": [
+    "M0 Tasks1–8 + five regressions:43948/0; 8 replay pairs and 4 formal probe pairs match; equivalent unified48/49; audit31/0",
+    "ae63fdd scoped gate: original43948/0 + spatial160/0; all 8 predecessor Linux hashes unchanged; unified intentionally NOT RUN in that gate",
+    "Latest counterexample run completed exit1:170 checks/3 failures plus nonexistent schedule_ground script error; exact dirty sources now preserved in saved_unaccepted_code_commit",
+    "Resumed targeted corrections: builds/task9-m1-physical-fixed complete exit0,173/0",
+    "Multi-segment retreat counterexample: builds/task9-m1-long-retreat-counterexample complete exit1,182/2; corrected builds/task9-m1-long-retreat-fixed complete exit0,182/0",
+    "M2 first contract red18/7 then green27/0; integrated main/controls108/0",
+    "M2 trace/boundaries116/0 and contracts56/0, related space190/0, Task8 1220/0, Task7 1341/0, roles3762/0; CLI main1800 actual finite causal run completed",
+    "M3 actual before profile complete;400dense maxprepare677.986ms/maxapply667.28ms;1000due20.577ms",
+    "M3 shared equation extraction11008e8:resolver1876/0 Task4 17329/0 combined116/0; eight oldLinux hashes exactly match",
+    "M3 budget first38/0+combined116/0+resolver1876/0; quota1/7/31 exact physics/knowledge/timestamps",
+    "M3 streamed results cursors9/0+continuous38/0+combined116/0; pending world facts not returned",
+    "M3 mixed events54/0; 1000 at t10 actualTask5/6/7/8 plus spatial/area originalphase1/2/5/6/9 andID order exact",
+    "64f4b0d prototype gate COMPLETE: cursor9 budget54 spatial190 contracts56 combined116 Task4/5/6/7/8 all0 failures; builds/task9-m3-prototype-gate",
+    "M3 long-fixed51/0,Task4 17329/0,combined116/0, full ended",
+    "M3 load-fixed97/0 + continuous54/0: 10000/30000 dormant active counts identical, sparse400 candidates402 contacts2,6seedLOD worst3.508256% seed733 red/casualties; capacities block oldstamp without truncation",
+    "M3 stronger sustained24h53/0 seed71/109 normal/quota1/7/31: 17initial/15final active cells,400leaves,2focus,275opportunities; historical pre-retirement source fingerprint",
+    "M3 bounded cleanup54/0+load97/0; public/varyingquota60/0; latest anchor/heterogeneous101/0+space190/0 at78d39a4",
+    "CLI main1800/quota7 and long86400/quota31 actual completed at78d39a4: conserved stocks,275decisions,zero pending,standalone static89.7MB,maxcall56.495ms observed not hard frame guarantee",
+    "M3 frozen78d39a4 expanded gate COMPLETE: original43948/0,8sameLinux replaypairs, new597/0, sustained24h two seeds4quotas, profile60s warmup+5sample100/400",
+    "c8 full M4 candidate ended complete/excluding identical known economy failure, old43948/0+new597/0; NOT final acceptance because independent retirement counter failed 1/1:80000 contacts vs403 cleanup units,41.532ms maxcall",
+    "retirement43/0 continuous60/0 load101/0 exactgdpy fingerprint69fa36d; original400 quota1 counter1/0 cleanup80403",
+    "interrupted recovered-candidate has completed original/new through long53/0, source exact; entirewrapper incomplete NOTaccepted",
+    "full recovered runner complete exit0: old43948/0 + new640/0 + allsameLinux hashes + equivalent unified/audit except exacteconomy knownfail",
+    "finalsource CLI main1800 quota7 and long86400 quota31 complete exit0, conserved ledgers,118/2097trace, no pending"
+  ],
+  "tests_pending": [],
+  "blockers": [],
+  "next": "Task complete. No further implementation authorized; suggested native-capacity followup only. Final receipt commit/bundle regenerated, sameDraftPR body/HEAD readonly check before returning.",
+  "validation_session": null,
+  "connection_checks": [
+    {
+      "utc": "2026-10-07T16:42:50Z",
+      "result": "fresh exec succeeds; original session27058 reachable; Godot PID1857 live; no restart"
+    },
+    {
+      "utc": "2026-10-07T19:57:33Z",
+      "result": "single exec transport disconnect after two CLI completions; fresh read succeeds, same branch/c8b489e, no Godot process; no reset/new task",
+      "platform_wait_estimate": "less than1min, uncertain; separately disclosed"
+    },
+    {
+      "utc": "2026-10-07T20:43:31Z",
+      "result": "selected environment starting then ready; realfourcheckpoint/git reviewed. Samef609b75/69fa36d fingerprint, Godot4.6.3/Python3.12.14; runner dead, oldfull incomplete, longstep complete",
+      "platform_wait_estimate": "about1minute uncertain; explicit wait tool returned ready immediately; separately disclosed"
+    }
+  ],
+  "baseline_known_failures": [
+    "unified_formal_world_economy_golden_test",
+    "baseline_golden_independent"
+  ],
+  "evidence": {
+    "M0": "iteration/evidence/m0-linux/evidence.json",
+    "M0_raw": "builds/task9-m0",
+    "M1": "iteration/evidence/m1-linux/reuse.json",
+    "M2": "iteration/evidence/m2-linux/gate.json",
+    "M3": "iteration/evidence/m3-linux/gate.json",
+    "FINAL": "iteration/evidence/final-linux/gate.json"
+  },
+  "stopped": false,
+  "stop_reason": null,
+  "stopped_utc": "2026-10-07T17:17:31.014654+00:00",
+  "saved_unaccepted_code_commit": "ed54ef6b68146df4a560b77865d8d47efd077730",
+  "highest_accepted_level": "LEVEL_3",
+  "publication": {
+    "status": "PUBLISHED",
+    "draft_pr": "https://github.com/ryoumiyahayato/wwo/pull/111",
+    "published_delivery_checkpoint": "e81cfff4ad457aea7194af23a17d6b596940a693",
+    "verified_utc": "2026-10-07T21:17:01Z",
+    "verified_base": "c4731a33177660b83c6490f41fe42dcbe7cfa7bb",
+    "verified_state": "open/draft/unmerged",
+    "final_docs_head_note": "closing receipt docs-only commit is recorded in external builds/task9-final-delivery/HEADS.json and PR final head"
+  },
+  "resumed_utc": "2026-10-07T17:21:05Z",
+  "control_history": [
+    {
+      "stop_requested": "2026-10-07T17:15Z",
+      "saved_code": "ed54ef6b68146df4a560b77865d8d47efd077730",
+      "saved_docs": "f0e4276e50816bb92883a7b1ea6e02de717a73e0"
+    },
+    {
+      "resume_requested": "2026-10-07T17:21Z",
+      "verified": "fresh exec; same local/remote f0e4276; no Godot process; no new task"
+    }
+  ],
+  "last_verified_refactor_commit": "64f4b0d562567cdf6010cf70472053f42347610b",
+  "last_full_verified_code_commit": "69fa36d6202b2b0d8e9332406ff57d269749fa0c",
+  "last_verified_scope": "retirement43/0 continuous60/0 load101/0 exactgdpy fingerprint69fa36d; original400 quota1 counter1/0 cleanup80403",
+  "last_full_verified_scope": "full recovered runner complete exit0: old43948/0 + new640/0 + allsameLinux hashes + equivalent unified/audit except exacteconomy knownfail",
+  "overall": "COMPLETE"
+}

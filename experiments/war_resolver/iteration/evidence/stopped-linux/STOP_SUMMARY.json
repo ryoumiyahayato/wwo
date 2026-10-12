@@ -1,0 +1,16 @@
+{
+  "stopped_by_user": true,
+  "stop_utc": "2026-10-07T17:17:31.014654+00:00",
+  "frozen_base": "c4731a33177660b83c6490f41fe42dcbe7cfa7bb",
+  "final_code_head": "ed54ef6b68146df4a560b77865d8d47efd077730",
+  "last_complete_scoped_gate_head": "ae63fddb25046f02b3095ad70bdded538cdaef26",
+  "counterexample_source_matches_saved_code": true,
+  "last_counterexample_exit": 1,
+  "counterexample_checks": 170,
+  "counterexample_failures": 3,
+  "additional_script_error": "schedule_ground is not implemented",
+  "current_processes": "No Godot process remained at stop verification",
+  "highest_accepted_level": "NONE",
+  "production_integration": "NONE",
+  "human_visual_acceptance": "NOT REQUIRED / NOT RUN"
+}
