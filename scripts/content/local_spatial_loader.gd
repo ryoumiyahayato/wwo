@@ -143,6 +143,9 @@ static func _load(path: String, current: Callable) -> LocalSpatialContent:
 		if ids.has(id) or not _valid_feature(feature) or fact.subject_id != id or str(feature.get("source_id", "")) != fact.source_id:
 			result.errors.append("Invalid or duplicate Local feature: " + id)
 			return result
+		if feature.has("miniature_layout") and not _valid_miniature(feature,expected):
+			result.errors.append("Invalid bounded settlement composition: "+id)
+			return result
 		ids[id] = true
 		if not LocalSpatialContent.historical_rail_alignment(feature): continue
 		result.features.append(feature)
@@ -222,6 +225,30 @@ static func _valid_surface(surface: Dictionary) -> bool:
 				if not coordinate is Array or coordinate.size()!=2: return false
 				for value: Variant in coordinate:
 					if typeof(value) not in [TYPE_INT,TYPE_FLOAT] or not is_finite(float(value)): return false
+	return true
+
+static func _valid_miniature(feature: Dictionary, anchor_id: String) -> bool:
+	var layout: Variant = feature.miniature_layout
+	if not layout is Dictionary or str(feature.kind)!="geographic_region" or str(feature.geometry.type)!="Point": return false
+	if str(layout.get("anchor_place_id",""))!=anchor_id or str(layout.get("model_path",""))!="res://assets/settlements/cabinet_building_modules.glb" or str(layout.get("geometry_role",""))!="ABSTRACT_MINIATURE_COMPOSITION": return false
+	if str(layout.get("placement_notice_zh","" )).is_empty() or float(layout.get("max_mpp",0))<=0 or float(layout.max_mpp)>24.0 or float(layout.get("scale_max",0))<=0 or float(layout.scale_max)>3.0: return false
+	for field: String in ["max_mpp","scale_max","target_height_px"]:
+		var value: Variant = layout.get(field,null)
+		if typeof(value) not in [TYPE_INT,TYPE_FLOAT] or not is_finite(float(value)) or float(value)<=0.0: return false
+	if float(layout.target_height_px)>16.0: return false
+	var placements: Variant = layout.get("placements",[])
+	if not placements is Array or placements.size()>96: return false
+	for entry: Variant in placements:
+		if not entry is Dictionary or str(entry.get("module","")) not in ["paris_mansard","london_terrace","rural_house","civic_hall","warehouse","quay_platform"]: return false
+		var offset: Variant = entry.get("offset_m",[])
+		var scale: Variant = entry.get("scale",[])
+		if not offset is Array or offset.size()!=2 or not scale is Array or scale.size()!=3: return false
+		for value: Variant in offset:
+			if typeof(value) not in [TYPE_INT,TYPE_FLOAT] or not is_finite(float(value)) or absf(float(value))>500.0: return false
+		for value: Variant in scale:
+			if typeof(value) not in [TYPE_INT,TYPE_FLOAT] or not is_finite(float(value)) or float(value)<=0 or float(value)>1.0: return false
+		var heading: Variant = entry.get("heading_degrees",null)
+		if typeof(heading) not in [TYPE_INT,TYPE_FLOAT] or not is_finite(float(heading)): return false
 	return true
 
 static func _valid_feature(feature: Dictionary) -> bool:

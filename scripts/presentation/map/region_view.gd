@@ -21,6 +21,7 @@ var _labels: Array[Dictionary] = []
 var country_label_rects: Array[Rect2] = []
 const MINIATURE_ELEVATION: float = 0.6108652382 # 35 degrees, true oblique ground.
 const MAX_CACHED_LANDMARK_SCENES: int = 2
+const SETTLEMENT_MODULE_PATH: String = "res://assets/settlements/cabinet_building_modules.glb"
 var landmark_screen_bounds: Dictionary = {}
 var _landmark_scenes: Dictionary = {}
 var _landmark_scene_order: Array[String] = []
@@ -49,6 +50,12 @@ var _local_elevation: float = MINIATURE_ELEVATION
 var _surface_view_height: float = 0.0
 var _surface_cover_mesh: ArrayMesh
 var _surface_cover: MeshInstance3D
+var _settlement_meshes: Dictionary = {}
+var _settlement_nodes: Dictionary = {}
+var _settlement_drawn: Dictionary = {}
+var _settlement_presented: Dictionary = {}
+var _settlement_pick_rects: Dictionary = {}
+var _settlement_demanded: bool = false
 
 func initialize(parent: Control) -> void:
 	container = SubViewportContainer.new()
@@ -231,6 +238,16 @@ func landmark_preparing() -> bool:
 func landmark_visible(id: String) -> bool:
 	return _landmark_presented.has(id) and _landmark_instances.has(id) and landmark_screen_bounds.has(id)
 
+func settlement_visible(id: String) -> bool:
+	return _settlement_presented.has(id) and _settlement_drawn.has(id)
+
+func settlement_at(pixel: Vector2) -> String:
+	for id: String in _settlement_pick_rects:
+		if not settlement_visible(id): continue
+		for rectangle: Rect2 in _settlement_pick_rects[id] as Array:
+			if rectangle.has_point(pixel): return id
+	return ""
+
 func _landmark_failed_load(path: String) -> void:
 	_landmark_failed[path] = true
 	landmark_load_failed.emit("地标模型读取失败，暂保留地图剪影。")
@@ -243,8 +260,10 @@ func prepare_landmarks() -> bool:
 		if status==ResourceLoader.THREAD_LOAD_LOADED:
 			var scene := ResourceLoader.load_threaded_get(path) as PackedScene
 			if scene!=null:
-				_landmark_scenes[path] = scene
-				_touch_landmark_scene(path)
+				# A retired LOCAL composition does not retain a late bundle result.
+				if path!=SETTLEMENT_MODULE_PATH or _settlement_demanded:
+					_landmark_scenes[path] = scene
+					_touch_landmark_scene(path)
 			else: _landmark_failed_load(path)
 		else: _landmark_failed_load(path)
 		_landmark_pending.erase(path)
@@ -253,7 +272,7 @@ func prepare_landmarks() -> bool:
 	if completed: _landmark_view_key.clear()
 	return completed
 
-func update_landmarks(visuals: Array[Dictionary], camera: RegionCamera, viewport_size: Vector2, surface: Dictionary = {}, reference_lines: Array[Dictionary] = []) -> void:
+func update_landmarks(visuals: Array[Dictionary], camera: RegionCamera, viewport_size: Vector2, surface: Dictionary = {}, reference_lines: Array[Dictionary] = [], settlements: Array[Dictionary] = []) -> void:
 	var wanted: Dictionary = {}
 	if ready and camera.active and camera.local_active:
 		for visual: Dictionary in visuals:
@@ -293,11 +312,12 @@ func update_landmarks(visuals: Array[Dictionary], camera: RegionCamera, viewport
 		_landmark_instances[id] = instance
 		_landmark_view_key.clear()
 	_update_surface_demand(surface,camera,viewport_size,reference_lines)
+	var settlement_wanted := _settlement_demand(settlements,camera,viewport_size)
 	_trim_landmark_scenes()
 	if _landmark_instances.is_empty() and _local_surface==null:
 		release_landmarks()
 		return
-	var key: Array = [camera.tangent_frame,camera.origin,camera.km_per_pixel,camera.bearing,viewport_size,_landmark_instances.keys(),_local_surface!=null]
+	var key: Array = [camera.tangent_frame,camera.origin,camera.km_per_pixel,camera.bearing,viewport_size,_landmark_instances.keys(),_local_surface!=null,settlement_wanted.keys(),_settlement_meshes.size()]
 	if key==_landmark_view_key: return
 	_landmark_view_key = key
 	# A single orthographic miniature camera uses this existing map viewport.
@@ -314,6 +334,7 @@ func update_landmarks(visuals: Array[Dictionary], camera: RegionCamera, viewport
 	for id: String in _landmark_instances:
 		var visual := wanted[id] as Dictionary
 		_update_landmark_pose(_landmark_instances[id] as Node3D,visual,camera,viewport_size)
+	_update_settlement_batches(settlement_wanted,camera,viewport_size)
 	viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 	if not _landmark_render_pending:
 		_landmark_render_pending = true
@@ -325,7 +346,131 @@ func _landmark_frame_ready() -> void:
 	_landmark_presented.clear()
 	for id: String in _landmark_instances:
 		if landmark_screen_bounds.has(id) and (landmark_screen_bounds[id] as Rect2).intersects(Rect2(Vector2.ZERO,Vector2(viewport.size))): _landmark_presented[id] = true
+	_settlement_presented = _settlement_drawn.duplicate()
 	landmark_display_changed.emit()
+
+func _settlement_demand(features: Array[Dictionary], camera: RegionCamera, viewport_size: Vector2) -> Dictionary:
+	var wanted: Dictionary = {}
+	if ready and camera.local_active and _local_surface!=null:
+		for feature: Dictionary in features:
+			var layout := feature.miniature_layout as Dictionary
+			if str(layout.anchor_place_id)!=camera.local_place_id or camera.km_per_pixel*1000.0>float(layout.max_mpp)*1.4: continue
+			var raw := feature.geometry.coordinates as Array
+			var coordinate := Vector2(float(raw[0]),float(raw[1]))
+			if not _surface_contains(coordinate): continue
+			var point := camera.project(GlobeProjection.lon_lat_to_unit(coordinate))
+			if Rect2(Vector2.ZERO,viewport_size).grow(500.0/(camera.km_per_pixel*1000.0)+128.0).has_point(point): wanted[str(feature.id)] = feature
+	_settlement_demanded = not wanted.is_empty()
+	if not _settlement_demanded:
+		_release_settlements()
+		return wanted
+	if not _settlement_meshes.is_empty(): return wanted
+	if _landmark_failed.has(SETTLEMENT_MODULE_PATH): return wanted
+	if not _landmark_scenes.has(SETTLEMENT_MODULE_PATH):
+		if not _landmark_pending.has(SETTLEMENT_MODULE_PATH):
+			if ResourceLoader.load_threaded_request(SETTLEMENT_MODULE_PATH,"PackedScene")==OK: _landmark_pending[SETTLEMENT_MODULE_PATH] = true
+			else: _landmark_failed_load(SETTLEMENT_MODULE_PATH)
+		return wanted
+	var source := (_landmark_scenes[SETTLEMENT_MODULE_PATH] as PackedScene).instantiate()
+	var nodes: Array[Node] = [source]
+	while not nodes.is_empty():
+		var node := nodes.pop_back() as Node
+		if node is MeshInstance3D:
+			var mesh := (node as MeshInstance3D).mesh
+			if mesh!=null: _settlement_meshes[str(node.name)] = mesh
+		for child: Node in node.get_children(): nodes.append(child)
+	# Only the six shared meshes/material remain. No per-building scene copies.
+	source.free()
+	_landmark_scenes.erase(SETTLEMENT_MODULE_PATH)
+	_landmark_scene_order.erase(SETTLEMENT_MODULE_PATH)
+	_landmark_view_key.clear()
+	return wanted
+
+func _update_settlement_batches(features: Dictionary, camera: RegionCamera, viewport_size: Vector2) -> void:
+	var transforms: Dictionary = {}
+	_settlement_drawn.clear()
+	_settlement_pick_rects.clear()
+	if _local_surface!=null and _landmark_camera!=null:
+		for feature: Dictionary in features.values():
+			var layout := feature.miniature_layout as Dictionary
+			var mpp := camera.km_per_pixel*1000.0
+			var lod_weight := 1.0-smoothstep(float(layout.max_mpp)*0.75,float(layout.max_mpp),mpp)
+			if lod_weight<=0.02: continue
+			var raw := feature.geometry.coordinates as Array
+			var geographic := RegionProjection.frame(Vector2(float(raw[0]),float(raw[1])))
+			for placement: Dictionary in layout.placements as Array:
+				var module := str(placement.module)
+				if not _settlement_meshes.has(module): continue
+				var offset := placement.offset_m as Array
+				var unit := RegionProjection.inverse(Vector2(float(offset[0]),float(offset[1]))/1000.0,geographic)
+				var coordinate := RegionProjection.lon_lat(unit)
+				if not _surface_contains(coordinate): continue
+				var metric := RegionProjection.forward(unit,RegionProjection.frame(_local_surface_anchor))*1000.0
+				var position := _local_surface.transform*Vector3(metric.x,_surface_height(coordinate)-_surface_base_height,-metric.y)
+				var pixel := _landmark_camera.unproject_position(position)
+				if not Rect2(Vector2.ZERO,viewport_size).grow(48.0).has_point(pixel): continue
+				var mesh := _settlement_meshes[module] as Mesh
+				var scale := placement.scale as Array
+				var dimensions := Vector3(float(scale[0]),float(scale[1]),float(scale[2]))
+				var height := (mesh.get_aabb() as AABB).size.y*dimensions.y
+				var local_mpp := camera.scale_at(unit)*1000.0
+				var enlargement := clampf(float(layout.target_height_px)*local_mpp/maxf(height*cos(_local_elevation),1.0),1.0,float(layout.scale_max))*lod_weight
+				# Rigid module: same east/north chart and true vertical as landmarks.
+				var east := _local_surface.basis.x.normalized()
+				var north := Vector3.UP.cross(east)
+				var orientation := Basis(east,Vector3.UP,-north).rotated(Vector3.UP,deg_to_rad(float(placement.heading_degrees)))
+				var pose := Transform3D(orientation*Basis.from_scale(dimensions*(enlargement/local_mpp)),position)
+				var box := mesh.get_aabb()
+				var rectangle := Rect2(pixel,Vector2.ZERO)
+				for corner: int in range(8): rectangle = rectangle.expand(_landmark_camera.unproject_position(pose*box.get_endpoint(corner)))
+				var obscures_landmark := false
+				for bounds: Rect2 in landmark_screen_bounds.values():
+					if rectangle.intersects(bounds.grow(3.0)):
+						obscures_landmark = true
+						break
+				if obscures_landmark: continue
+				if not transforms.has(module): transforms[module] = []
+				(transforms[module] as Array).append(pose)
+				if lod_weight>0.15:
+					var id := str(feature.id)
+					_settlement_drawn[id] = true
+					if not _settlement_pick_rects.has(id): _settlement_pick_rects[id] = []
+					(_settlement_pick_rects[id] as Array).append(rectangle.grow(2.0))
+	for module: String in _settlement_nodes.keys():
+		if transforms.has(module): continue
+		var retired := _settlement_nodes[module] as MultiMeshInstance3D
+		retired.visible = false
+		retired.multimesh = null
+		retired.queue_free()
+		_settlement_nodes.erase(module)
+	for module: String in transforms:
+		if not _settlement_nodes.has(module):
+			var node := MultiMeshInstance3D.new()
+			node.name = "Shared_"+module
+			node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			node.multimesh = MultiMesh.new()
+			node.multimesh.transform_format = MultiMesh.TRANSFORM_3D
+			node.multimesh.mesh = _settlement_meshes[module] as Mesh
+			_landmark_root.add_child(node)
+			_settlement_nodes[module] = node
+		var node := _settlement_nodes[module] as MultiMeshInstance3D
+		var poses := transforms[module] as Array
+		if node.multimesh.instance_count!=poses.size(): node.multimesh.instance_count = poses.size()
+		for index: int in range(poses.size()): node.multimesh.set_instance_transform(index,poses[index] as Transform3D)
+
+func _release_settlements() -> void:
+	_settlement_demanded = false
+	for node: MultiMeshInstance3D in _settlement_nodes.values():
+		node.visible = false
+		node.multimesh = null
+		node.queue_free()
+	_settlement_nodes.clear()
+	_settlement_meshes.clear()
+	_settlement_drawn.clear()
+	_settlement_presented.clear()
+	_settlement_pick_rects.clear()
+	_landmark_scenes.erase(SETTLEMENT_MODULE_PATH)
+	_landmark_scene_order.erase(SETTLEMENT_MODULE_PATH)
 
 func _enable_landmark_3d() -> void:
 	if _landmark_root!=null: return
@@ -696,6 +841,7 @@ func surface_screen_point(unit: Vector3) -> Vector2:
 	return _landmark_camera.unproject_position(_local_surface.global_transform*Vector3(metric.x,_surface_height(coordinate)-_surface_base_height,-metric.y))
 
 func release_landmarks() -> void:
+	_release_settlements()
 	landmark_screen_bounds.clear()
 	_landmark_presented.clear()
 	_landmark_instances.clear()

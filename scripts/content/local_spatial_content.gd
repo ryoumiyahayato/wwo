@@ -19,6 +19,15 @@ func landmark_visuals() -> Array[Dictionary]:
 		result.append(visual)
 	return result
 
+func settlement_visuals(date: String) -> Array[Dictionary]:
+	# Admitted geographic references carry display-only module placements.
+	# They never create a settlement, building owner or transport operator.
+	var result: Array[Dictionary] = []
+	for feature: Dictionary in features:
+		if feature.has("miniature_layout") and str(feature.valid_from)<=date and date<str(feature.valid_to):
+			result.append(feature)
+	return result
+
 func active_on(date: String) -> bool:
 	return errors.is_empty() and (has_content or not features.is_empty()) and str(metadata.get("valid_from", "")) <= date and date < str(metadata.get("valid_to", ""))
 

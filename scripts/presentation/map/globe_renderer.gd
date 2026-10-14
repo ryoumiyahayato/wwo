@@ -766,6 +766,16 @@ func _draw() -> void:
 			draw_line(point+Vector2(-4,4),point+Vector2(4,4),ink,1.0,true)
 			if selected or place_id==controller.hovered_place_id: draw_arc(point,7.0,0.0,TAU,16,ink,1.0,true)
 			continue
+		if str(place.get("display_kind","")) in ["settlement_miniature","historic_wharf"]:
+			var ink := Color(0.76,0.72,0.59,0.92)
+			if not region_view.settlement_visible(place_id):
+				# Locality symbol, never a per-building ownership or parcel marker.
+				for offset: Vector2 in [Vector2(-6,-2),Vector2(-1,-5),Vector2(4,-1)]:
+					draw_rect(Rect2(point+offset,Vector2(3,5-offset.y)),ink,false,1.0)
+				draw_line(point+Vector2(-8,5),point+Vector2(9,5),ink,1.0,true)
+				if str(place.display_kind)=="historic_wharf": draw_line(point+Vector2(-7,8),point+Vector2(7,8),Color(0.39,0.59,0.61),1.0,true)
+			if selected or place_id==controller.hovered_place_id: draw_arc(point,10.0,0.0,TAU,20,ink,1.0,true)
+			continue
 		var rank := int(place.get("rank", 1))
 		var radius := float(MapScaleStyle.SETTLEMENT_RADII[clampi(rank,0,2)])
 		var marker_color := Color(0.68,0.70,0.64,0.78)
@@ -994,6 +1004,8 @@ func _place_at(point: Vector2) -> String:
 	if controller.region_camera.local_active:
 		for id: String in region_view.landmark_screen_bounds:
 			if (region_view.landmark_screen_bounds[id] as Rect2).has_point(point): return id
+		var settlement := region_view.settlement_at(point)
+		if not settlement.is_empty(): return settlement
 	for id: String in _landmark_symbols:
 		if (_landmark_symbols[id] as Rect2).has_point(point): return id
 	for place_id: String in _place_points:
@@ -1232,7 +1244,9 @@ func _sync_landmark_display() -> void:
 	var surface := local_content.content.surface_reference if visible and local_content!=null and local_content.content!=null and controller.region_camera.local_place_id==str(local_content.content.metadata.anchor_place_id) else {}
 	var lines: Array[Dictionary] = []
 	if not surface.is_empty() and local_content.content.active_on(political.display_date): lines.assign(local_content.content.features)
-	region_view.update_landmarks(visuals,controller.region_camera,size,surface,lines)
+	var settlements: Array[Dictionary] = []
+	if not surface.is_empty(): settlements = local_content.content.settlement_visuals(political.display_date)
+	region_view.update_landmarks(visuals,controller.region_camera,size,surface,lines,settlements)
 	if controller.region_camera.local_active:
 		for id: String in _place_points:
 			var place := _display_place(id)

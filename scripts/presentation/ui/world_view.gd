@@ -98,6 +98,8 @@ func selection_kind() -> String:
 	if not _selected_administration().is_empty(): return "历史行政区"
 	if str(_place.get("spatial_kind","")) == "historical_landmark": return "历史地标"
 	if str(_place.get("display_kind",""))=="transport_node": return "历史交通地点"
+	if str(_place.get("display_kind",""))=="settlement_miniature": return "城镇微缩表现参考"
+	if str(_place.get("display_kind",""))=="historic_wharf": return "历史河岸码头地域"
 	if _place.has("political_source_id"): return "历史地理地域"
 	if _place.has("note_zh"): return "物理地理区域"
 	if not _place.is_empty(): return "城市 / 地点"
@@ -161,6 +163,8 @@ func draw_card(shell: MainShell, rect: Rect2) -> void:
 
 func _place_type() -> String:
 	if str(_place.get("display_kind",""))=="transport_node": return "历史车站 / 桥梁位置参考"
+	if str(_place.get("display_kind",""))=="settlement_miniature": return "有来源的城市地域 · 抽象建筑组合"
+	if str(_place.get("display_kind",""))=="historic_wharf": return "历史河岸工业 / 码头地域参考"
 	var kind := str(_place.get("spatial_kind",_place.get("kind","")))
 	return str({"city":"城市","port":"港口","region":"地域","historical_landmark":"历史地标","historical settlement":"历史聚落","historical strategic settlement":"历史聚落","settlement":"聚落","island":"岛屿","continent":"大陆","geographic_region":"地理区域"}.get(kind,"物理地理区域" if _place.has("note_zh") else "未知"))
 
@@ -214,6 +218,9 @@ func draw_details(shell: MainShell, rect: Rect2) -> void:
 		shell.wrapped(right,str(_place.get("note_zh","")),rect.end.x-right.x-22,11,6)
 		shell.wrapped(right+Vector2(0,145),str(_place.get("source_reference","")),rect.end.x-right.x-22,10,4)
 		shell.wrapped(right+Vector2(0,240),str(_place.get("source_license","")),rect.end.x-right.x-22,10,2)
+		if _place.has("miniature_layout"):
+			var layout := _place.miniature_layout as Dictionary
+			shell.wrapped(right+Vector2(0,294),str(layout.get("placement_notice_zh","")),rect.end.x-right.x-22,10,3)
 	elif _place.has("political_source_id"):
 		shell.wrapped(right,str(_place.get("note_zh","")),rect.end.x-right.x-22,11,6)
 		shell.wrapped(right+Vector2(0,135),str(_place.get("source_reference","")),rect.end.x-right.x-22,10,4)
