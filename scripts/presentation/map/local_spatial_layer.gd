@@ -172,20 +172,20 @@ func release_gpu() -> void:
 	active_lod = ""
 	visible_places.clear()
 	label_rects.clear()
+	_chunks.clear()
+	_cpu_ready.clear()
+	_wanted.clear()
 	ready = false
 	preparing = _lod_thread != null
 
 func prepare_step(font: Font) -> bool:
-	if _content == null or _content.cancelled:
-		preparing = false
-		return false
 	var step_started := Time.get_ticks_usec()
 	if _lod_thread != null:
 		if _lod_thread.is_alive():
 			return false
 		var prepared := _lod_thread.wait_to_finish() as Dictionary
 		_lod_thread = null
-		if _lod_generation != _generation:
+		if _lod_generation != _generation or _content == null or _content.cancelled or not _resident:
 			_queue_preparation()
 			return false
 		_chunks.append_array(prepared.chunks as Array[Dictionary])
@@ -193,6 +193,9 @@ func prepare_step(font: Font) -> bool:
 		_queue_preparation()
 		if _lod_thread != null:
 			return false
+	if _content == null or _content.cancelled:
+		preparing = false
+		return false
 	if not _resident:
 		preparing = false
 		return false
@@ -251,7 +254,9 @@ func prepare_step(font: Font) -> bool:
 		RenderingServer.canvas_item_add_mesh(item, mesh.get_rid(), Transform2D(), Color.WHITE, template.texture as RID if not template.is_empty() else RID())
 		RenderingServer.canvas_item_set_visible(item, false)
 		_batches.append({"item": item, "material": material, "geometry": geometry, "lod":line.lod, "kind":line.kind, "visible":false, "complete":false, "water": water, "water_class": line.get("water_class", "lake"), "faces": int(line.get("face_count",0)), "visual_template":template,"texture":template.get("texture",RID()),"visual_reference_feature":reference,"skin_values":{},"cull_axis":line.get("cull_axis",Vector3.ZERO),"cull_angle":line.get("cull_angle",PI)})
-		if strategic: line.erase("payload")
+		# The installed geometry owns its mesh, texture and required picking data.
+		# Encoded staging arrays are no longer needed by either content level.
+		line.erase("payload")
 		_cursor += 1
 		if _cursor == _upload_chunks.size() or str(_upload_chunks[_cursor].lod) != str(line.lod):
 			for batch: Dictionary in _batches:
@@ -269,13 +274,12 @@ func prepare_step(font: Font) -> bool:
 			available_lods[lod_name] = true
 	ready = available_lods.has(_target)
 	preparing = false
-	if strategic:
-		# Source geometry stays in Content; uploaded display-face dictionaries
-		# are disposable. Regenerate only after an explicit GPU eviction.
-		_chunks.clear()
-		_upload_chunks.clear()
-		_cursor = 0
-		_cpu_ready.clear()
+	# Source geometry stays in Content. Another LOD is prepared on demand;
+	# already installed LODs do not require a second CPU upload cache.
+	_chunks.clear()
+	_upload_chunks.clear()
+	_cursor = 0
+	_cpu_ready.clear()
 	_queue_preparation()
 	_trim_gpu()
 	display_changed.emit()
@@ -501,12 +505,15 @@ func clear() -> void:
 	visible_places.clear()
 	label_rects.clear()
 	ready = false
-	preparing = false
+	preparing = _lod_thread != null
 	_frame = Basis()
 	_display_canvas = RID()
 	_content = null
 	_reference_visuals.clear()
 	_reference_frames.clear()
+	reference_relief = {}
+	suppressed_places = {}
+	reserved_label_rects.clear()
 
 func dispose() -> void:
 	clear()

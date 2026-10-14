@@ -14,6 +14,32 @@ static func panel(canvas: CanvasItem, rect: Rect2, fill: Color, border: Color) -
 static func label(canvas: CanvasItem, font: Font, point: Vector2, text: String, font_size: int = 12, color: Color = Color(0.90, 0.91, 0.84, 1.0), width: float = -1.0) -> void:
 	canvas.draw_string(font, point, text, HORIZONTAL_ALIGNMENT_LEFT, width, font_size, color)
 
+static func archive_drawer(canvas: CanvasItem, rect: Rect2, style: Dictionary) -> void:
+	canvas.draw_rect(rect,style.body as Color)
+	var edge := style.metal as Color
+	edge.a = 0.55
+	canvas.draw_line(rect.position+Vector2(1,6),Vector2(rect.position.x+1,rect.end.y-6),edge,1,true)
+	canvas.draw_line(rect.position+Vector2(9,3),Vector2(rect.end.x,rect.position.y+3),style.seam,3,true)
+	canvas.draw_line(Vector2(rect.position.x+9,rect.end.y-3),rect.end-Vector2(0,3),style.seam,3,true)
+	canvas.draw_line(rect.position+Vector2(14,59),Vector2(rect.end.x-36,rect.position.y+59),Color(0.39,0.57,0.56,0.25),1,true)
+	for y: float in [12.0,rect.size.y-12.0]:
+		canvas.draw_circle(rect.position+Vector2(7,y),1.7,style.bronze)
+		canvas.draw_line(rect.position+Vector2(6,y),rect.position+Vector2(8,y),style.highlight,0.7,true)
+
+static func archive_handle(canvas: CanvasItem, rect: Rect2, style: Dictionary, opened: bool, hovered: bool) -> void:
+	var shape := PackedVector2Array([Vector2(7,0),Vector2(rect.size.x,0),rect.size,Vector2(7,rect.size.y),Vector2(0,rect.size.y-8),Vector2(0,8)])
+	canvas.draw_colored_polygon(shape,Color(0.07,0.12,0.14,0.98) if hovered else style.body)
+	canvas.draw_polyline(PackedVector2Array([Vector2(7,1),Vector2(1,8),Vector2(1,rect.size.y-8),Vector2(7,rect.size.y-1)]),style.highlight if hovered else style.metal,1,true)
+	var middle := rect.get_center()
+	for offset: float in [-9.0,0.0,9.0]: canvas.draw_line(middle+Vector2(-3,offset),middle+Vector2(3,offset),style.muted,1,true)
+	var sign := 1.0 if opened else -1.0
+	canvas.draw_polyline(PackedVector2Array([middle+Vector2(-sign*2,-23),middle+Vector2(sign*2,-19),middle+Vector2(-sign*2,-15)]),style.highlight,1,true)
+
+static func archive_notice(canvas: CanvasItem, rect: Rect2, style: Dictionary, attention: bool) -> void:
+	canvas.draw_rect(rect,style.body)
+	canvas.draw_line(Vector2(2,10),Vector2(2,rect.size.y-10),style.status if attention else style.teal,2,true)
+	canvas.draw_line(Vector2(12,rect.size.y-2),Vector2(rect.size.x-12,rect.size.y-2),Color(0.58,0.47,0.29,0.24),1,true)
+
 static func nautical_globe(canvas: CanvasItem, center: Vector2, radius: float, glow: float = 0.0) -> void:
 	var brass := InterfaceSettings.theme_parameters().brass as Color
 	brass.a = 1.0

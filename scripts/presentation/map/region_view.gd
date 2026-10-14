@@ -20,8 +20,10 @@ var background: Dictionary = {}
 var _labels: Array[Dictionary] = []
 var country_label_rects: Array[Rect2] = []
 const MINIATURE_ELEVATION: float = 0.6108652382 # 35 degrees; presentation only.
+const MAX_CACHED_LANDMARK_SCENES: int = 2
 var landmark_screen_bounds: Dictionary = {}
 var _landmark_scenes: Dictionary = {}
+var _landmark_scene_order: Array[String] = []
 var _landmark_pending: Dictionary = {}
 var _landmark_failed: Dictionary = {}
 var _landmark_instances: Dictionary = {}
@@ -125,6 +127,8 @@ func clear() -> void:
 		RenderingServer.free_rid(batch.item as RID)
 	surfaces.clear()
 	boundaries.clear()
+	_owners.clear()
+	_cursor = 0
 	ready = false
 	preparing = false
 
@@ -210,6 +214,7 @@ func update_labels(canvas: CanvasItem, camera: RegionCamera, controller: GlobeCo
 func dispose() -> void:
 	clear()
 	_landmark_scenes.clear()
+	_landmark_scene_order.clear()
 	_landmark_pending.clear()
 	_local_surface_mesh = null
 	_surface_reference.clear()
@@ -233,11 +238,14 @@ func prepare_landmarks() -> bool:
 		if status==ResourceLoader.THREAD_LOAD_IN_PROGRESS: continue
 		if status==ResourceLoader.THREAD_LOAD_LOADED:
 			var scene := ResourceLoader.load_threaded_get(path) as PackedScene
-			if scene!=null: _landmark_scenes[path] = scene
+			if scene!=null:
+				_landmark_scenes[path] = scene
+				_touch_landmark_scene(path)
 			else: _landmark_failed_load(path)
 		else: _landmark_failed_load(path)
 		_landmark_pending.erase(path)
 		completed = true
+	_trim_landmark_scenes()
 	if completed: _landmark_view_key.clear()
 	return completed
 
@@ -260,13 +268,16 @@ func update_landmarks(visuals: Array[Dictionary], camera: RegionCamera, viewport
 		var visual := wanted[id] as Dictionary
 		var path := str(visual.model_path)
 		if _landmark_failed.has(path): continue
+		if _landmark_instances.has(id):
+			if _landmark_scenes.has(path): _touch_landmark_scene(path)
+			continue
 		if not _landmark_scenes.has(path):
 			if not _landmark_pending.has(path) and not _landmark_failed.has(path):
 				if ResourceLoader.load_threaded_request(path,"PackedScene")==OK:
 					_landmark_pending[path] = true
 				else: _landmark_failed_load(path)
 			continue
-		if _landmark_instances.has(id): continue
+		_touch_landmark_scene(path)
 		var node := (_landmark_scenes[path] as PackedScene).instantiate()
 		var instance := node as Node3D
 		if instance==null:
@@ -278,6 +289,7 @@ func update_landmarks(visuals: Array[Dictionary], camera: RegionCamera, viewport
 		_landmark_instances[id] = instance
 		_landmark_view_key.clear()
 	_update_surface_demand(surface,camera,viewport_size,reference_lines)
+	_trim_landmark_scenes()
 	if _landmark_instances.is_empty() and _local_surface==null:
 		release_landmarks()
 		return
@@ -414,6 +426,7 @@ func _update_surface_demand(surface: Dictionary, camera: RegionCamera, viewport_
 			_local_surface.queue_free()
 			_local_surface = null
 			_landmark_view_key.clear()
+		_release_surface_geometry()
 		return
 	var source_key := str(surface.content_path)
 	if _local_surface!=null and source_key==_local_surface_key: return
@@ -626,6 +639,7 @@ func release_landmarks() -> void:
 	_landmark_view_key.clear()
 	_local_surface = null
 	_surface_lines = null
+	_release_surface_geometry()
 	if _landmark_root!=null:
 		_landmark_root.visible = false
 		_landmark_root.queue_free()
@@ -634,3 +648,25 @@ func release_landmarks() -> void:
 		viewport.find_world_3d().environment = null
 		viewport.disable_3d = true
 		viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+	_trim_landmark_scenes()
+
+func _release_surface_geometry() -> void:
+	_local_surface_mesh = null
+	_surface_line_mesh = null
+	_local_surface_key = ""
+	_surface_reference = {}
+	_surface_vertices = PackedVector3Array()
+	_surface_indices = PackedInt32Array()
+	_surface_pick_chunks.clear()
+	_surface_pick_pixel = Vector2(INF,INF)
+	_surface_pick_unit = Vector3.ZERO
+
+func _touch_landmark_scene(path: String) -> void:
+	_landmark_scene_order.erase(path)
+	_landmark_scene_order.append(path)
+
+func _trim_landmark_scenes() -> void:
+	# Instances hold their own mesh/material references. Only the small recent
+	# PackedScene working set remains here after LOCAL has been left.
+	while _landmark_scene_order.size()>MAX_CACHED_LANDMARK_SCENES:
+		_landmark_scenes.erase(_landmark_scene_order.pop_front())

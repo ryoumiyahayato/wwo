@@ -169,16 +169,16 @@ static func refresh_map(world: WorldState, renderer: GlobeRenderer, content: Res
 	renderer.refresh(politics,world.historical_evidence_view,economy,places,world.game_clock.current_date(),content)
 
 static func show_initialization_error(shell: MainShell, message: String) -> void:
-	shell.show_feedback("正式世界初始化失败：" + message)
+	shell.show_feedback("正式世界初始化失败：" + message,"","system","error")
 
 static func show_new_world(shell: MainShell) -> void:
 	shell.show_feedback("新的1900正式世界已建立。")
 
 static func show_advance_error(shell: MainShell, message: String) -> void:
-	shell.show_feedback("正式时间推进失败：" + message)
+	shell.show_feedback("正式时间推进失败：" + message,"","system","error")
 
 static func show_save_result(shell: MainShell, result: SaveOperationResult) -> void:
-	shell.show_feedback(result.message if not result.message.is_empty() else ("正式世界已保存。" if result.success else "正式世界保存失败。"))
+	shell.show_feedback(result.message if not result.message.is_empty() else ("正式世界已保存。" if result.success else "正式世界保存失败。"),"","system","info" if result.success else "error")
 
 static func show_load_result(shell: MainShell, result: SaveOperationResult) -> void:
-	shell.show_feedback(result.message if not result.message.is_empty() else ("正式世界存档已恢复。" if result.success else "没有可恢复的正式世界存档。"))
+	shell.show_feedback(result.message if not result.message.is_empty() else ("正式世界存档已恢复。" if result.success else "没有可恢复的正式世界存档。"),"","system","info" if result.success else "error")

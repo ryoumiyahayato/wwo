@@ -59,7 +59,7 @@ func _ready() -> void:
 	time_control.controls_changed.connect(main_shell.refresh_clock)
 	map_controller.appearance_changed.connect(_refresh_economic_map)
 	map_controller.selection_changed.connect(main_shell.map_selection_changed)
-	map_renderer.map_notice.connect(main_shell.show_feedback)
+	map_renderer.map_notice.connect(main_shell.show_map_feedback)
 	map_renderer.geographic_reference_selected.connect(func(reference: Dictionary) -> void:
 		if historical_content!=null: historical_content.remember_geographic_reference(reference))
 	map_renderer.place_content_ready.connect(_on_place_content_ready)
@@ -170,6 +170,8 @@ func _on_world_changed(change: Dictionary) -> void:
 	_organization_view_dirty = _organization_view_dirty or bool(change.get("organization_responsibilities",false))
 	_economic_map_dirty = _economic_map_dirty or _economy_view_dirty
 	var date := _world.game_clock.current_date()
+	# Feedback records receive the current world time before their UI delivery.
+	main_shell.set_date(date)
 	var date_key := HistoricalLoader._date_key(date)
 	var previous_date := map_renderer.political.display_date
 	var reference_changed := false
@@ -188,9 +190,9 @@ func _on_world_changed(change: Dictionary) -> void:
 		var transaction_id := str(receipt.get("transaction_id",""))
 		if not transaction_id.is_empty() and transaction_id != _last_personal_transaction_id:
 			_last_personal_transaction_id = transaction_id
-			main_shell.show_feedback("工资到账：+%s 模拟单位。" % receipt.amount,"person:accounts")
+			main_shell.show_feedback("工资到账：+%s 模拟单位。" % receipt.amount,"person:accounts","domain","info",transaction_id)
 		elif bool(personal.get("wage_unpaid",false)):
-			main_shell.show_feedback("自己的工资已到期，雇主储备不足。","person:accounts")
+			main_shell.show_feedback("自己的工资已到期，雇主储备不足。","person:accounts","domain","error")
 	if bool(change.get("personal_life_changed",false)):
 		var living := _world.personal_economy_state.living_records(_world.player_state.player_id(),1)
 		if not living.is_empty() and str(living[0].record_id) != _last_living_record_id:
@@ -203,8 +205,7 @@ func _on_world_changed(change: Dictionary) -> void:
 				message = "商品已实际到货：%s %d %s。" % [record.name_zh,int(record.quantity),record.unit_name_zh]
 			elif str(record.kind) in ["consume","native_consume"]:
 				message = "消费已完成：%s %.3f %s。" % [record.name_zh,float(record.quantity_milli)/float(record.get("quantity_scale",1000)),record.get("unit_name_zh","")]
-			main_shell.show_feedback(message,"living:record:"+str(record.record_id))
-	main_shell.set_date(date)
+			main_shell.show_feedback(message,"living:record:"+str(record.record_id),"domain","info",str(record.record_id))
 	var page := main_shell.current_page
 	var personal_changed := bool(change.get("personal_life_changed",false)) or bool(change.get("persons_changed",false)) or bool(change.get("native_changed",false)) or int(change.get("wages_paid",0))>0 or int(change.get("wages_failed",0))>0
 	if reference_changed or (page=="person" and personal_changed) or (page=="economy" and (economic_state_changed or bool(change.get("native_changed",false)))) or (page=="organization" and _organization_view_dirty):

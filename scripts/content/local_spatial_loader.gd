@@ -84,10 +84,14 @@ func poll() -> bool:
 	return true
 
 func dispose() -> void:
-	cancel_pending()
+	release()
 	if _thread != null:
 		_thread.wait_to_finish()
 		_thread = null
+
+func release() -> void:
+	cancel_pending()
+	content = null
 
 static func _load(path: String, current: Callable) -> LocalSpatialContent:
 	var result := LocalSpatialContent.new()

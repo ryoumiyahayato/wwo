@@ -129,6 +129,7 @@ func _exit_tree() -> void:
 	_overlay_generation += 1
 	_overlay_mutex.unlock()
 	if _overlay_thread != null: _overlay_thread.wait_to_finish()
+	_clear_overlay_installing()
 	_clear_overlay_batches()
 	_world_labels.clear()
 	if _footer_prefix_item.is_valid(): RenderingServer.free_rid(_footer_prefix_item)
@@ -1180,8 +1181,9 @@ func _sync_local_resources() -> void:
 				break
 	var supported := not request_unit.is_zero_approx() and LocalSpatialLoader.covers(RegionProjection.lon_lat(request_unit))
 	if not visible or not supported or _strategic_mpp() > LocalSpatialLoader.PREWARM_KM_PER_PIXEL*1000.0:
-		local_content.cancel_pending()
-		local_layer.release_gpu()
+		local_content.release()
+		if local_layer.content_reference()!=null: local_layer.clear()
+		if local_layer.preparing or local_content.preparing(): set_process(visible)
 		return
 	# First focus or pan into supported coverage needs no wheel event.
 	local_content.request(RegionProjection.lon_lat(request_unit))
@@ -1234,6 +1236,11 @@ func _sync_strategic_resources() -> void:
 	var unit := (camera.valid_anchor(size).unit as Vector3) if camera.active else controller.orientation().transposed()*Vector3.BACK
 	var center := RegionProjection.lon_lat(unit)
 	_sync_overlay_resources()
+	# The shared WORLD meshes remain owned by the WORLD batches. Only the
+	# departing regional RIDs/material copies are retired beyond the prewarm band.
+	if not camera.active and _transition_elapsed<0.0 and mpp>MapRelief.RELEASE_MPP and (region_view.ready or region_view.preparing):
+		region_view.clear()
+		_region_labels_dirty = true
 	if not visible or mpp > RegionCamera.PREWARM_KM_PER_PIXEL*1000.0:
 		strategic_layer.clear()
 		strategic_content.release()
@@ -1322,7 +1329,7 @@ func _sync_overlay_resources() -> void:
 			var old_lod := str((_overlay_batches.get(id,[{"lod":""}]) as Array)[0].lod)
 			var detail := mpp<450.0 or (old_lod.begins_with("country_detail") and mpp<650.0)
 			demand.append({"id":id,"kind":"country","lod":("country_detail:" if detail else "country_coarse:")+str(_boundary_source_revision),"points":border.points,"detail_path":border.get("detail_path","") if detail else "","owners":border.owners,"anchor":anchor,"angle":angle,"step":0.025 if detail else 0.12})
-	var query_id := selected if spatial_world.administrative_identity(selected).has("reference_descriptor") and not spatial_world.administrative_coverage_ready(selected) else ""
+	var query_id := selected if show and spatial_world.administrative_identity(selected).has("reference_descriptor") and not spatial_world.administrative_coverage_ready(selected) else ""
 	# Keep one padded display window, including hidden layer batches, for toggles.
 	var reuse_window := same_window
 	_overlay_owner = spatial_world
@@ -1336,15 +1343,13 @@ func _sync_overlay_resources() -> void:
 	_overlay_query_id = query_id
 	if not reuse_window: _overlay_view = preparation_view
 	_overlay_revision = revision
-	_overlay_uploads.clear()
-	for group: Array in _overlay_installing.values():
-		for batch: Dictionary in group: RenderingServer.free_rid(batch.item)
-	_overlay_installing.clear()
+	_clear_overlay_installing()
 	# Evict geometry only on a changed geographic window or topology; switching
 	# a layer off leaves the bounded current window available for reuse.
 	if not reuse_window:
 		_clear_overlay_batches()
 		spatial_world.retain_administrative_boundaries([])
+	_retire_overlay_demand()
 	_update_overlay_batches(view)
 	_start_overlay_prepare()
 
@@ -1571,6 +1576,25 @@ func _clear_overlay_batches() -> void:
 		for batch: Dictionary in group: RenderingServer.free_rid(batch.item)
 	_overlay_batches.clear()
 
+func _clear_overlay_installing() -> void:
+	_overlay_uploads.clear()
+	for group: Array in _overlay_installing.values():
+		for batch: Dictionary in group: RenderingServer.free_rid(batch.item)
+	_overlay_installing.clear()
+
+func _retire_overlay_demand() -> void:
+	var keep: Array[String] = []
+	for row: Dictionary in _overlay_demand: keep.append(str(row.id))
+	for id: String in _overlay_batches.keys():
+		if id in keep: continue
+		for batch: Dictionary in _overlay_batches[id]: RenderingServer.free_rid(batch.item)
+		_overlay_batches.erase(id)
+	# This evicts display/picking components only, never administrative identity
+	# or actual land membership. A replacement LOD keeps its previous components
+	# until install_administrative_boundary swaps the same object's reference.
+	if not _overlay_query_id.is_empty(): keep.append(_overlay_query_id)
+	spatial_world.retain_administrative_boundaries(keep)
+
 func _update_overlay_batches(view: Rect2) -> void:
 	var wanted: Dictionary = {}
 	for row: Dictionary in _overlay_demand: wanted[str(row.id)] = row
@@ -1675,7 +1699,16 @@ func _begin_transition(to_region: bool) -> void:
 
 func _process(_delta: float) -> void:
 	if not visible:
-		set_process(false)
+		# Join cancelled workers and discard their results even while hidden.
+		# This processing stops as soon as the existing requests have drained.
+		_poll_overlay_prepare()
+		if strategic_content!=null: strategic_content.poll()
+		if local_content!=null: local_content.poll()
+		local_layer.prepare_step(_font)
+		strategic_layer.prepare_step(_font)
+		region_view.prepare_landmarks()
+		relief.poll()
+		set_process(_has_pending_preparation())
 		return
 	_poll_overlay_prepare()
 	if relief.poll():
@@ -1719,8 +1752,11 @@ func _process(_delta: float) -> void:
 			queue_redraw()
 	if _transition_elapsed < 0.0:
 		_sync_local_resources()
-	if _overlay_thread==null and _overlay_uploads.is_empty() and not relief.preparing() and not region_view.preparing and not region_view.landmark_preparing() and not strategic_layer.preparing and (strategic_content == null or not strategic_content.preparing()) and not local_layer.preparing and (local_content == null or not local_content.preparing()) and _transition_elapsed < 0.0:
+	if not _has_pending_preparation() and _transition_elapsed < 0.0:
 		set_process(false)
+
+func _has_pending_preparation() -> bool:
+	return _overlay_thread!=null or not _overlay_uploads.is_empty() or relief.preparing() or region_view.preparing or region_view.landmark_preparing() or strategic_layer.preparing or local_layer.preparing or (strategic_content!=null and strategic_content.preparing()) or (local_content!=null and local_content.preparing())
 
 func _on_strategic_content_changed() -> void:
 	_sync_strategic_resources()
@@ -1740,11 +1776,11 @@ func _on_visibility_changed() -> void:
 	_sync_relief()
 	_sync_strategic_resources()
 	if not visible:
-		region_view.release_landmarks()
-		local_layer.release_gpu()
-		if local_content != null: local_content.cancel_pending()
+		region_view.clear()
+		local_layer.clear()
+		if local_content != null: local_content.release()
 		_transition_elapsed = -1.0
-		set_process(false)
+		set_process(_has_pending_preparation())
 		_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 		region_view.viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 	else:
@@ -1755,7 +1791,7 @@ func _on_visibility_changed() -> void:
 		_view_dirty = true
 		_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 		if region_view.ready: region_view.viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
-		set_process(_overlay_thread!=null or not _overlay_uploads.is_empty() or strategic_layer.preparing or (strategic_content != null and strategic_content.preparing()) or relief.preparing() or region_view.preparing or region_view.landmark_preparing() or local_layer.preparing or (local_content != null and local_content.preparing()))
+		set_process(_has_pending_preparation())
 		queue_redraw()
 
 func _prepare_region_labels() -> void:

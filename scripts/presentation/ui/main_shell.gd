@@ -12,6 +12,25 @@ var status_message: String = ""
 var feedback_action: String = ""
 var _messages_open: bool = false
 var _messages: Array[Dictionary] = []
+const MESSAGE_HISTORY_LIMIT: int = 64
+const MESSAGE_DRAWER_WIDTH: float = 320.0
+var _message_sequence: int = 0
+var _message_list_dirty: bool = true
+var _message_drawer: Control
+var _message_handle: Control
+var _message_scroll: ScrollContainer
+var _message_rows: VBoxContainer
+var _message_drawer_bounds := Rect2()
+var _message_handle_bounds := Rect2()
+var _drawer_tween: Tween
+var _drawer_outside_press := Vector2(INF,INF)
+var _notice_canvas: Control
+var _notice_title: Label
+var _notice_body: Label
+var _notice_link: Button
+var _notice_tween: Tween
+var _notice_visible: bool = false
+var _notice_bounds := Rect2()
 var _system_open: bool = false
 var _settings_open: bool = false
 var _preferences: Dictionary = {}
@@ -101,6 +120,7 @@ func _ready() -> void:
 	_track_frame = _hud_canvas("HistoryFrame",_draw_track_frame)
 	_track_marker = _hud_canvas("HistoryTime",_draw_track_marker)
 	_person_canvas = _hud_canvas("PortraitCameo",_draw_person_contents)
+	_initialize_messages()
 	resized.connect(refresh)
 
 func _hud_canvas(node_name: String, paint: Callable) -> Control:
@@ -112,6 +132,8 @@ func _hud_canvas(node_name: String, paint: Callable) -> Control:
 	return canvas
 
 func _exit_tree() -> void:
+	if _notice_tween!=null: _notice_tween.kill()
+	if _drawer_tween!=null: _drawer_tween.kill()
 	if _instrument_item.is_valid(): RenderingServer.free_rid(_instrument_item)
 
 func _update_instrument(center: Vector2, radius: float) -> void:
@@ -137,10 +159,12 @@ func _update_instrument(center: Vector2, radius: float) -> void:
 		_instrument_material.set_shader_parameter("view_basis",basis)
 
 func configure(content_errors: Array[String], controller: GlobeController, time: TimeControl) -> void:
+	var changed_errors := content_errors!=_content_errors
 	_content_errors = content_errors.duplicate()
 	_controller = controller
 	_time = time
 	if not controller.view_changed.is_connected(queue_redraw): controller.view_changed.connect(queue_redraw)
+	if changed_errors and not _content_errors.is_empty(): show_feedback("地图资料读取失败："+"; ".join(_content_errors),"","map","error")
 
 func set_date(value: Dictionary) -> void:
 	if _date==value: return
@@ -162,13 +186,28 @@ func set_view_polity(polity: Dictionary, flag: Texture2D) -> void:
 	_view_polity = polity
 	_view_flag = flag
 
-func show_feedback(message: String, action: String = "") -> void:
+func show_feedback(message: String, action: String = "", source: String = "system", level: String = "info", feedback_id: String = "") -> void:
 	status_message = message
 	feedback_action = action
-	if not message.is_empty() and (_messages.is_empty() or str(_messages.back().message)!=message):
-		_messages.append({"message":message,"action":action})
-		if _messages.size()>12: _messages.pop_front()
+	if message.is_empty():
+		if _notice_tween!=null: _notice_tween.kill()
+		_hide_notice()
+		return
+	# Re-delivery of an explicitly identified feedback can be ignored. Without
+	# such a reference, two equal messages are still two real notifications.
+	if not feedback_id.is_empty() and not _messages.is_empty():
+		var previous := _messages.back() as Dictionary
+		if str(previous.feedback_id)==feedback_id and str(previous.source)==source and str(previous.message)==message and str(previous.action)==action: return
+	_message_sequence += 1
+	_messages.append({"sequence":_message_sequence,"message":message,"action":action,"source":source,"level":level,"feedback_id":feedback_id,"received_at":date_text()})
+	if _messages.size()>MESSAGE_HISTORY_LIMIT: _messages.pop_front()
+	_message_list_dirty = true
+	if _messages_open: _rebuild_message_rows()
+	if _notice_canvas!=null: _present_notice()
 	queue_redraw()
+
+func show_map_feedback(message: String) -> void:
+	show_feedback(message,"","map")
 
 func refresh() -> void:
 	refresh_requested.emit()
@@ -226,7 +265,7 @@ func _close_popups() -> void:
 	_system_open = false
 	_settings_open = false
 	_map_modes_open = false
-	_messages_open = false
+	_set_messages_open(false)
 
 func map_selection_changed() -> void:
 	_context_open = true
@@ -258,10 +297,18 @@ func _history_rect() -> Rect2:
 	var width := minf(560.0,right-left)
 	return Rect2((left+right-width)*0.5,24,width,20)
 
-func _message_rect() -> Rect2:
-	var bounds := _hud_bounds()
-	var height := 292.0 if _messages_open else 70.0
-	return Rect2(bounds.end.x-254,bounds.end.y-height,254,height)
+func _message_drawer_rect() -> Rect2:
+	var width := minf(MESSAGE_DRAWER_WIDTH,size.x*0.34)
+	var top := _time_rect().end.y+20.0
+	var bottom := size.y-120.0
+	var height := minf(430.0,maxf(200.0,bottom-top))
+	return Rect2(size.x-width,top+(bottom-top-height)*0.5,width,height)
+
+func _message_handle_rect() -> Rect2:
+	return Rect2(size.x-22.0,_message_drawer_rect().get_center().y-36.0,22.0,72.0)
+
+func _notice_rect() -> Rect2:
+	return Rect2(size.x-minf(300.0,size.x*0.34)-12.0,size.y-100.0,minf(300.0,size.x*0.34),88.0)
 
 func _instrument_radius() -> float:
 	return clampf(size.x*0.056,52.0,78.0)
@@ -307,7 +354,9 @@ func _confirm_rect() -> Rect2:
 	return Rect2(size*0.5-Vector2(220,height*0.5),Vector2(440,height))
 
 func map_occlusions() -> Array[Rect2]:
-	var result: Array[Rect2] = [_polity_rect(),_person_rect(),_time_rect(),_message_rect(),_dock_rect()]
+	var result: Array[Rect2] = [_polity_rect(),_person_rect(),_time_rect(),_message_handle_rect(),_dock_rect()]
+	if _messages_open: result.append(Rect2(_message_drawer.position,_message_drawer.size))
+	if _notice_visible and _notice_canvas.visible: result.append(_notice_rect())
 	if not _confirmation.is_empty() or not _slot_mode.is_empty(): return [Rect2(Vector2.ZERO,size)]
 	if current_page != "map": result.append(workspace_rect())
 	elif world_page.has_selection() and _context_open: result.append(_context_rect())
@@ -462,21 +511,194 @@ func _draw_track_marker() -> void:
 	UIDrawing.history_track_indicator(_track_marker,_track_rect,_hud_style,int(_date.get("hour",0))*60+int(_date.get("minute",0)))
 
 func _draw_feedback() -> void:
-	var rect := _message_rect()
-	block_panel(rect)
-	button(Rect2(rect.position+Vector2(10,7),Vector2(rect.size.x-20,24)),"消息 ▾" if _messages_open else "消息 ▴","messages:toggle",true,_messages_open)
-	if not _messages_open:
-		var message := status_message if _content_errors.is_empty() else "地图资料读取失败："+_content_errors[0]
-		wrapped(rect.position+Vector2(12,49),"暂无消息。" if message.is_empty() else message,rect.size.x-24,11,1)
-		return
-	var y := rect.position.y+52
-	if _messages.is_empty(): label(Vector2(rect.position.x+12,y),"暂无消息。",11)
-	for index: int in range(_messages.size()-1,maxi(-1,_messages.size()-5),-1):
-		var row := _messages[index]
-		wrapped(Vector2(rect.position.x+12,y),str(row.message),rect.size.x-24,11,2)
-		if not str(row.action).is_empty(): button(Rect2(rect.end.x-64,y+18,52,20),"查看",str(row.action))
-		y += 47
-	button(Rect2(rect.position.x+12,rect.end.y-39,rect.size.x-24,27),"百科 / 帮助","encyclopedia")
+	_sync_message_layout()
+	var modal := not _confirmation.is_empty() or not _slot_mode.is_empty() or _system_open or _settings_open or _navigation_open or _map_modes_open
+	_message_handle.visible = not modal
+	_message_drawer.visible = _messages_open and not modal
+	_notice_canvas.visible = _notice_visible and not modal
+	if modal: return
+	_hits.append({"rect":_message_handle_rect(),"action":"messages:toggle","enabled":true,"tooltip":"消息记录"})
+	if _messages_open: _blocks.append(Rect2(_message_drawer.position,_message_drawer.size))
+	if _notice_visible: _blocks.append(_notice_rect())
+	var handle_hover := _hover_action=="messages:toggle"
+	if _message_handle.get_meta("hovered",false)!=handle_hover:
+		_message_handle.set_meta("hovered",handle_hover)
+		_message_handle.queue_redraw()
+
+func _initialize_messages() -> void:
+	_message_drawer = Control.new()
+	_message_drawer.name = "MessageArchive"
+	_message_drawer.mouse_filter = Control.MOUSE_FILTER_STOP
+	_message_drawer.clip_contents = true
+	_message_drawer.theme = UIDrawing.shell_theme()
+	_message_drawer.visible = false
+	_message_drawer.draw.connect(func() -> void: UIDrawing.archive_drawer(_message_drawer,Rect2(Vector2.ZERO,_message_drawer.size),_hud_style))
+	add_child(_message_drawer)
+	var margin := MarginContainer.new()
+	_message_drawer.add_child(margin)
+	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	margin.mouse_filter = Control.MOUSE_FILTER_PASS
+	for side: String in ["left","top","bottom"]: margin.add_theme_constant_override("margin_"+side,16)
+	margin.add_theme_constant_override("margin_right",36)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation",9)
+	margin.add_child(column)
+	column.add_child(_message_label("ARCHIVES · 消息记录",14,_hud_style.ivory))
+	column.add_child(_message_label("当前会话 · 最近记录",10,_hud_style.muted))
+	_message_scroll = ScrollContainer.new()
+	_message_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_message_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_message_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	column.add_child(_message_scroll)
+	_message_rows = VBoxContainer.new()
+	_message_rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_message_rows.add_theme_constant_override("separation",13)
+	_message_scroll.add_child(_message_rows)
+	column.add_child(_message_button("百科 / 帮助","encyclopedia"))
+	_message_handle = _hud_canvas("MessageArchiveHandle",func() -> void: UIDrawing.archive_handle(_message_handle,Rect2(Vector2.ZERO,_message_handle.size),_hud_style,_messages_open,bool(_message_handle.get_meta("hovered",false))))
+	_notice_canvas = Control.new()
+	_notice_canvas.name = "ImmediateNotice"
+	_notice_canvas.mouse_filter = Control.MOUSE_FILTER_STOP
+	_notice_canvas.clip_contents = true
+	_notice_canvas.visible = false
+	_notice_canvas.draw.connect(func() -> void: UIDrawing.archive_notice(_notice_canvas,Rect2(Vector2.ZERO,_notice_canvas.size),_hud_style,not _messages.is_empty() and str(_messages.back().level)=="error"))
+	add_child(_notice_canvas)
+	_notice_title = _message_label("",10,_hud_style.muted)
+	_notice_body = _message_label("",12,_hud_style.ivory)
+	_notice_canvas.add_child(_notice_title)
+	_notice_canvas.add_child(_notice_body)
+	_notice_body.max_lines_visible = 2
+	_notice_link = _message_button("查看","")
+	_notice_link.pressed.connect(func() -> void:
+		if not _messages.is_empty() and not str(_messages.back().action).is_empty(): _activate(str(_messages.back().action)))
+	_notice_canvas.add_child(_notice_link)
+	_sync_message_layout()
+	if not _messages.is_empty(): _present_notice()
+
+func _message_label(text: String, font_size: int, color: Color) -> Label:
+	var result := Label.new()
+	result.text = text
+	result.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	result.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	result.add_theme_font_override("font",_font)
+	result.add_theme_font_size_override("font_size",font_size)
+	result.add_theme_color_override("font_color",color)
+	return result
+
+func _message_button(text: String, action: String) -> Button:
+	var result := Button.new()
+	result.text = text
+	result.custom_minimum_size.y = 26
+	result.add_theme_font_override("font",_button_font)
+	result.add_theme_font_size_override("font_size",11)
+	result.add_theme_color_override("font_color",_hud_style.ivory)
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = _hud_style.seam
+	normal.border_color = (_hud_style.metal as Color)*Color(1,1,1,0.35)
+	normal.border_width_bottom = 1
+	normal.content_margin_left = 8
+	normal.content_margin_right = 8
+	result.add_theme_stylebox_override("normal",normal)
+	var hovered := normal.duplicate() as StyleBoxFlat
+	hovered.bg_color = Color(0.07,0.12,0.14,0.97)
+	result.add_theme_stylebox_override("hover",hovered)
+	result.add_theme_stylebox_override("pressed",hovered)
+	if not action.is_empty(): result.pressed.connect(_activate.bind(action))
+	return result
+
+func _sync_message_layout() -> void:
+	var drawer := _message_drawer_rect()
+	if drawer!=_message_drawer_bounds:
+		if _drawer_tween!=null: _drawer_tween.kill()
+		_message_drawer_bounds = drawer
+		_message_drawer.position = drawer.position
+		_message_drawer.size = drawer.size
+		_message_drawer.queue_redraw()
+	var handle := _message_handle_rect()
+	if handle!=_message_handle_bounds:
+		_message_handle_bounds = handle
+		_message_handle.position = handle.position
+		_message_handle.size = handle.size
+		_message_handle.queue_redraw()
+	var notice := _notice_rect()
+	if notice!=_notice_bounds:
+		_notice_bounds = notice
+		_notice_canvas.position = notice.position
+		_notice_canvas.size = notice.size
+		_notice_title.position = Vector2(16,9)
+		_notice_title.size = Vector2(notice.size.x-32,16)
+		_notice_body.position = Vector2(16,30)
+		_notice_body.size = Vector2(notice.size.x-32,36)
+		_notice_link.position = Vector2(notice.size.x-62,notice.size.y-27)
+		_notice_link.size = Vector2(48,24)
+		_notice_canvas.queue_redraw()
+
+func _set_messages_open(value: bool) -> void:
+	var changed := value!=_messages_open
+	_messages_open = value
+	if _message_drawer==null: return
+	if not changed: return
+	_drawer_outside_press = Vector2(INF,INF)
+	if _drawer_tween!=null: _drawer_tween.kill()
+	_message_drawer.visible = value
+	if value and _message_list_dirty: _rebuild_message_rows()
+	if value:
+		_message_drawer.position.x = size.x
+		_drawer_tween = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS).set_ignore_time_scale(true)
+		_drawer_tween.tween_property(_message_drawer,"position:x",_message_drawer_rect().position.x,0.18).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+		_drawer_tween.tween_callback(queue_redraw)
+	_message_handle.queue_redraw()
+	queue_redraw()
+
+func _native_feedback_at(point: Vector2) -> bool:
+	return (_message_drawer.visible and Rect2(_message_drawer.position,_message_drawer.size).has_point(point) and not _message_handle_rect().has_point(point)) or (_notice_canvas.visible and _notice_rect().has_point(point))
+
+func _message_source_name(source: String) -> String:
+	return str({"system":"系统反馈","map":"地图反馈","domain":"状态提示"}.get(source,"操作反馈"))
+
+func _rebuild_message_rows() -> void:
+	if _message_rows==null: return
+	for child: Node in _message_rows.get_children():
+		_message_rows.remove_child(child)
+		child.queue_free()
+	if _messages.is_empty(): _message_rows.add_child(_message_label("暂无消息。",12,_hud_style.muted))
+	for index: int in range(_messages.size()-1,-1,-1):
+		var record := _messages[index]
+		var row := VBoxContainer.new()
+		row.add_theme_constant_override("separation",5)
+		_message_rows.add_child(row)
+		row.add_child(_message_label(_message_source_name(str(record.source))+" · 接收于 "+str(record.received_at),10,_hud_style.muted))
+		row.add_child(_message_label(str(record.message),12,_hud_style.ivory))
+		if not str(record.action).is_empty(): row.add_child(_message_button("查看",str(record.action)))
+		var separator := HSeparator.new()
+		separator.modulate = Color(0.58,0.47,0.29,0.28)
+		row.add_child(separator)
+	_message_scroll.scroll_vertical = 0
+	_message_list_dirty = false
+
+func _present_notice() -> void:
+	if _notice_tween!=null: _notice_tween.kill()
+	var record := _messages.back() as Dictionary
+	_notice_title.text = _message_source_name(str(record.source))
+	_notice_body.text = str(record.message)
+	_notice_canvas.tooltip_text = str(record.message)
+	_notice_link.visible = not str(record.action).is_empty()
+	_notice_body.size.y = 29.0 if _notice_link.visible else 46.0
+	_notice_visible = true
+	_notice_canvas.visible = true
+	_notice_canvas.modulate.a = 0.0
+	_notice_canvas.queue_redraw()
+	# Visual time is independent of GameClock and continues while it is paused.
+	_notice_tween = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS).set_ignore_time_scale(true)
+	_notice_tween.tween_property(_notice_canvas,"modulate:a",1.0,0.2).set_trans(Tween.TRANS_SINE)
+	_notice_tween.tween_interval(6.0)
+	_notice_tween.tween_property(_notice_canvas,"modulate:a",0.0,0.8).set_trans(Tween.TRANS_SINE)
+	_notice_tween.tween_callback(_hide_notice)
+
+func _hide_notice() -> void:
+	_notice_visible = false
+	if _notice_canvas!=null: _notice_canvas.visible = false
+	queue_redraw()
 
 func _draw_map_dock() -> void:
 	var rect := _dock_rect()
@@ -625,7 +847,9 @@ func _back_layer(open_system: bool = true) -> bool:
 	elif _system_open: _system_open = false
 	elif _map_modes_open: _map_modes_open = false
 	elif _navigation_open: _navigation_open = false
-	elif _messages_open: _messages_open = false
+	elif _messages_open:
+		_set_messages_open(false)
+		return true
 	elif current_page=="person" and not person_page.selected_record_id.is_empty():
 		if not _history.is_empty(): go_back()
 		else: person_page.selected_record_id = ""
@@ -655,6 +879,14 @@ func _input(event: InputEvent) -> void:
 	if _controller == null: return
 	if event is InputEventMouseButton:
 		var mouse := event as InputEventMouseButton
+		if mouse.button_index==MOUSE_BUTTON_LEFT and not mouse.pressed and is_finite(_drawer_outside_press.x):
+			var click := mouse.position.distance_to(_drawer_outside_press)<=6.0
+			_drawer_outside_press = Vector2(INF,INF)
+			_set_messages_open(false)
+			if click:
+				_controller.suspend_motion()
+				get_viewport().set_input_as_handled()
+				return
 		if mouse.button_index==MOUSE_BUTTON_LEFT and mouse.pressed:
 			var popup := _country_menu_rect() if _navigation_open else _map_menu_rect() if _map_modes_open else _system_rect()
 			if (_navigation_open or _map_modes_open or _system_open or _settings_open) and _slot_mode.is_empty() and _confirmation.is_empty() and not popup.has_point(mouse.position):
@@ -662,6 +894,13 @@ func _input(event: InputEvent) -> void:
 				queue_redraw()
 				_controller.appearance_changed.emit()
 				get_viewport().set_input_as_handled()
+				return
+			if _messages_open and not _native_feedback_at(mouse.position) and not _message_handle_rect().has_point(mouse.position) and not blocks_map(mouse.position):
+				# Outside dragging remains map input. A simple dismissal click does
+				# not replace or clear the current geographic selection.
+				_drawer_outside_press = mouse.position
+			if _native_feedback_at(mouse.position):
+				_controller.suspend_motion()
 				return
 			if _quantity_input.visible and _quantity_input.get_global_rect().has_point(mouse.position):
 				_controller.suspend_motion()
@@ -672,6 +911,11 @@ func _input(event: InputEvent) -> void:
 					get_viewport().set_input_as_handled()
 					if bool(hit.enabled): _activate(str(hit.action))
 					return
+		# Let native scroll/buttons process GUI input inside these regions. The
+		# renderer's input_blocked callback excludes exactly the same bounds.
+		if _native_feedback_at(mouse.position):
+			_controller.suspend_motion()
+			return
 		if blocks_map(mouse.position):
 			_controller.suspend_motion()
 			get_viewport().set_input_as_handled()
@@ -731,6 +975,7 @@ func _activate(action: String) -> void:
 		if _quantity_context.begins_with("economy:"): economy_page.quantity_milli = int(round(value*float(_quantity_scale)))
 		else: person_page.quantity_milli = int(round(value*float(_quantity_scale)))
 	if action == "navigation":
+		_set_messages_open(false)
 		_settings_open = false
 		_navigation_open = not _navigation_open
 		_system_open = false
@@ -738,9 +983,10 @@ func _activate(action: String) -> void:
 	elif action == "messages:toggle":
 		var opened := not _messages_open
 		_close_popups()
-		_messages_open = opened
+		_set_messages_open(opened)
 	elif action == "back": _back_layer(false)
 	elif action == "map:mode_menu":
+		_set_messages_open(false)
 		_settings_open = false
 		_map_modes_open = not _map_modes_open
 		_system_open = false
@@ -795,6 +1041,7 @@ func _activate(action: String) -> void:
 		set_page("person",false)
 	elif action.begins_with("page:"): set_page(action.trim_prefix("page:"))
 	elif action == "system":
+		_set_messages_open(false)
 		_settings_open = false
 		_system_open = not _system_open
 		_navigation_open = false
@@ -932,6 +1179,9 @@ func _hit_contains(hit: Dictionary, point: Vector2) -> bool:
 	return true
 
 func blocks_map(point: Vector2) -> bool:
+	if _message_handle!=null and _message_handle.visible and _message_handle_rect().has_point(point): return true
+	if _message_drawer!=null and _native_feedback_at(point): return true
+	if _notice_canvas!=null and _notice_canvas.visible and _notice_rect().has_point(point): return true
 	for rect: Rect2 in _blocks:
 		if rect.has_point(point): return true
 	for hit: Dictionary in _hits:
@@ -1030,4 +1280,4 @@ func set_save_pending(value: bool) -> void:
 func show_save_error(message: String) -> void:
 	_slot_error = message
 	if not _confirmation.is_empty(): _confirmation["error"] = message
-	show_feedback(message)
+	show_feedback(message,"","system","error")
