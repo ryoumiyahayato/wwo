@@ -27,11 +27,10 @@ func admit_runtime_fact(fact_id: String, domain: String, assertion: Dictionary) 
 		evidence.source_version != str(source.get("version", ""))
 		or evidence.source_locator != str(source.get("locator", ""))
 		or evidence.license != str(source.get("license", ""))
-		or evidence.input_hash != str(source.get("content_hash", ""))
 	):
 		return _reject("source binding mismatch: " + fact_id)
-	if HistoricalFactEvidence.sha256(assertion) != evidence.output_hash:
-		return _reject("runtime fact hash mismatch: " + fact_id)
+	if HistoricalFactEvidence.canonical_json(assertion) != HistoricalFactEvidence.canonical_json(evidence.output_material()):
+		return _reject("runtime fact content mismatch: " + fact_id)
 	return true
 
 

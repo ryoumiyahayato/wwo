@@ -3,7 +3,7 @@ extends RefCounted
 
 ## Immutable composition evidence for production Formal organizations.
 ## This catalog owns only why an Organization should exist. Runtime Organization
-## state remains solely in VNextOrganizationCore.
+## state remains solely in OrganizationState.
 
 const DEFAULT_PATH: String = "res://data/vnext/organizations/formal_organization_composition_1900.json"
 const SCHEMA_ID: String = "formal_organization_composition_v1"

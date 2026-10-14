@@ -11,6 +11,11 @@ var _catalog: VNextSpatialCatalog = null
 var _infrastructure: Dictionary = {}
 var _current_hour: int = 0
 var _requests: Dictionary = {}
+# Adopted entry is irrevocable usage, not a candidate allocation. Historic facts
+# survive hour rollover; current-hour access is derived, not a second capacity.
+var _adoptions: Dictionary = {}
+var _adopted_by_request: Dictionary = {}
+var _entered_by_link: Dictionary = {}
 
 
 func initialize(
@@ -26,6 +31,9 @@ func initialize(
 	_infrastructure = infrastructure_value
 	_current_hour = initial_hour
 	_requests = {}
+	_adoptions = {}
+	_adopted_by_request = {}
+	_entered_by_link = {}
 	for link_id: String in _catalog.link_ids():
 		_requests[link_id] = {}
 	return _is_internal_state_valid()
@@ -182,7 +190,11 @@ func cancel_capacity_request(request_id: String, link_id: String, window_hour: i
 		return false
 	if not _requests.has(link_id) or not (_requests[link_id] as Dictionary).has(request_id):
 		return false
-	(_requests[link_id] as Dictionary).erase(request_id)
+	var entered := float(_adopted_by_request.get(request_id, 0.0))
+	if entered > 0.0:
+		(_requests[link_id] as Dictionary)[request_id]["demand"] = entered
+	else:
+		(_requests[link_id] as Dictionary).erase(request_id)
 	_recompute_allocations()
 	return true
 
@@ -322,13 +334,14 @@ func snapshot() -> Dictionary:
 		"window_hour": _current_hour,
 		"reservations": reservations,
 		"link_usage": link_usage,
+		"adoptions": _adoptions.duplicate(true),
 	}
 
 
 func restore(snapshot_value: Dictionary) -> bool:
 	if not _is_internal_state_valid():
 		return false
-	if snapshot_value.size() != 3 or not _has_fields(
+	if snapshot_value.size() != (4 if snapshot_value.has("adoptions") else 3) or not _has_fields(
 		snapshot_value, ["window_hour", "reservations", "link_usage"]
 	):
 		return false
@@ -422,6 +435,7 @@ func restore(snapshot_value: Dictionary) -> bool:
 	candidate._infrastructure = _infrastructure
 	candidate._current_hour = candidate_hour
 	candidate._requests = candidate_requests
+	if not candidate._restore_adoptions(snapshot_value.get("adoptions", {})): return false
 	if not candidate._is_internal_state_valid():
 		return false
 	var calculation: Dictionary = candidate._calculate_allocations()
@@ -449,6 +463,9 @@ func restore(snapshot_value: Dictionary) -> bool:
 			return false
 	_current_hour = candidate._current_hour
 	_requests = candidate._requests
+	_adoptions = candidate._adoptions
+	_adopted_by_request = candidate._adopted_by_request
+	_entered_by_link = candidate._entered_by_link
 	return true
 
 
@@ -505,13 +522,14 @@ func _calculate_allocations() -> Dictionary:
 		if state == null:
 			continue
 		var effective: float = state.effective_capacity()
-		var used: float = 0.0
+		var used: float = float(_entered_by_link.get(link_id, 0.0))
 		var link_requests: Dictionary = _requests.get(link_id, {})
 		for request_id: String in _sorted_keys(link_requests):
 			var demand: float = maxf(0.0, float(link_requests[request_id].get("demand", 0.0)))
-			var allocated: float = _round_capacity(minf(demand, maxf(0.0, effective - used)))
-			allocations[request_id] = allocated
-			used = _round_capacity(used + allocated)
+			var entered: float = float(_adopted_by_request.get(request_id, 0.0))
+			var tentative: float = _round_capacity(minf(maxf(0.0, demand-entered), maxf(0.0, effective-used)))
+			allocations[request_id] = _round_capacity(entered+tentative)
+			used = _round_capacity(used+tentative)
 		usage[link_id] = {
 			"effective_capacity": _round_capacity(effective),
 			"used_capacity": used,
@@ -528,6 +546,8 @@ func _recompute_allocations() -> void:
 
 
 func _clear_requests() -> void:
+	_adopted_by_request.clear()
+	_entered_by_link.clear()
 	_requests.clear()
 	for link_id: String in _catalog.link_ids():
 		_requests[link_id] = {}
@@ -637,3 +657,48 @@ static func _sorted_keys(value: Dictionary) -> Array[String]:
 		output.append(str(key))
 	output.sort()
 	return output
+
+## Read final allocations immediately before entry. accepted/partial candidate
+## results alone never authorize physical use. Whole batch is checked first.
+func consume_capacity_batch(entries: Array[Dictionary]) -> Dictionary:
+	if not _is_internal_state_valid() or entries.is_empty(): return {"success": false, "reason": "INVALID_ENTRY_BATCH"}
+	var pending: Dictionary = {}
+	var amounts: Dictionary = {}
+	for e: Dictionary in entries:
+		if not _has_fields(e, ["adoption_id", "request_id", "link_id", "window_hour", "amount", "source_id"]) or e.size() != 6 or not e["adoption_id"] is String or e["adoption_id"].is_empty() or not e["source_id"] is String or e["source_id"].is_empty(): return {"success": false, "reason": "INVALID_ENTRY"}
+		if _adoptions.has(e["adoption_id"]):
+			if _adoptions[e["adoption_id"]] != e: return {"success": false, "reason": "ENTRY_ID_CONFLICT"}
+			continue
+		if pending.has(e["adoption_id"]) or e["window_hour"] != _current_hour or not _requests.has(e["link_id"]) or not _requests[e["link_id"]].has(e["request_id"]): return {"success": false, "reason": "NO_CURRENT_ALLOCATION"}
+		var q := _parse_positive_finite(e["amount"])
+		if q <= 0.0 or not _approximately_equal(q, _round_capacity(q)): return {"success": false, "reason": "INVALID_ENTRY_AMOUNT"}
+		pending[e["adoption_id"]] = e.duplicate(true)
+		amounts[e["request_id"]] = float(amounts.get(e["request_id"], 0.0))+q
+		var available := float(_requests[e["link_id"]][e["request_id"]]["allocated_capacity"])-float(_adopted_by_request.get(e["request_id"], 0.0))
+		if float(amounts[e["request_id"]]) > available+CAPACITY_EPSILON: return {"success": false, "reason": "ALLOCATION_CHANGED_OR_PARTIAL"}
+	for e: Dictionary in pending.values():
+		_adoptions[e["adoption_id"]] = e
+		_adopted_by_request[e["request_id"]] = _round_capacity(float(_adopted_by_request.get(e["request_id"], 0.0))+float(e["amount"]))
+		_entered_by_link[e["link_id"]] = _round_capacity(float(_entered_by_link.get(e["link_id"], 0.0))+float(e["amount"]))
+	_recompute_allocations()
+	return {"success": true, "adoptions": pending.duplicate(true)}
+
+func capacity_adoption(id: String) -> Dictionary:
+	return (_adoptions.get(id, {}) as Dictionary).duplicate(true)
+
+func _restore_adoptions(raw: Variant) -> bool:
+	if not raw is Dictionary: return false
+	var by_request: Dictionary = {}
+	var by_link: Dictionary = {}
+	for id: String in raw:
+		var e: Variant = raw[id]
+		if not e is Dictionary or e.size() != 6 or not _has_fields(e, ["adoption_id", "request_id", "link_id", "window_hour", "amount", "source_id"]) or e["adoption_id"] != id or not e["source_id"] is String or e["source_id"].is_empty() or not _is_valid_request_id(str(e["request_id"])) or not _catalog.has_link(str(e["link_id"])) or _parse_hour(e["window_hour"]) < 0 or int(e["window_hour"]) > _current_hour or _parse_positive_finite(e["amount"]) <= 0.0: return false
+		if e["window_hour"] == _current_hour:
+			if not _requests[e["link_id"]].has(e["request_id"]): return false
+			by_request[e["request_id"]] = _round_capacity(float(by_request.get(e["request_id"], 0.0))+float(e["amount"]))
+			by_link[e["link_id"]] = _round_capacity(float(by_link.get(e["link_id"], 0.0))+float(e["amount"]))
+			if float(by_request[e["request_id"]]) > float(_requests[e["link_id"]][e["request_id"]]["demand"])+CAPACITY_EPSILON: return false
+	_adoptions = raw.duplicate(true)
+	_adopted_by_request = by_request
+	_entered_by_link = by_link
+	return true

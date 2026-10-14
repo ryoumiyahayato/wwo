@@ -33,7 +33,8 @@ static func map_units(
 static func polity_summary(
 	runtime_id: String,
 	registry: RuntimePoliticalEntityView,
-	evidence: HistoricalPoliticalEvidenceView
+	evidence: HistoricalPoliticalEvidenceView,
+	economy: FormalWorldEconomyView = null
 ) -> Dictionary:
 	if registry == null or evidence == null or not registry.has_entity(runtime_id):
 		return {}
@@ -53,6 +54,28 @@ static func polity_summary(
 		registry.authority_relations_for_target(runtime_id)
 	)
 	result["runtime_entity"] = registry.entity(runtime_id)
+	if economy != null:
+		var economy_id := economy.economy_entity_for_polity(runtime_id)
+		var detailed := not economy_id.is_empty()
+		result["has_detailed_economy"] = detailed
+		result["economy_entity_id"] = economy_id
+		result["major_roster"] = detailed
+		result["primary_playable"] = false
+		result["playability_tier"] = "background_npc"
+		result["playability_tier_zh"] = "背景政治单元"
+		if detailed:
+			var economy_summary := economy.country_summary(economy_id)
+			result["economy"] = economy_summary
+			result["rank"] = int(economy_summary.get("rank", 0))
+			result["playability_tier"] = str(
+				economy_summary.get("playability_tier", "secondary_roster")
+			)
+			result["playability_tier_zh"] = str(
+				economy_summary.get("playability_tier_zh", "次要政权候选")
+			)
+			result["primary_playable"] = bool(
+				economy_summary.get("primary_playable", false)
+			)
 	return result
 
 

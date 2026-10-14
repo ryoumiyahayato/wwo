@@ -1,6 +1,6 @@
 class_name VNextMilitaryMapAdapter
 extends RefCounted
-## Reads the existing world-map dataset and adds military-only semantics by stable ID.
+## Uses the supplied Spatial topology and adds military-only semantics by stable ID.
 ## It never owns geometry, city records, or a second world map.
 ## Spatial owns physical infrastructure and shared capacity; this adapter owns only Military semantics.
 
@@ -10,10 +10,6 @@ const MODE_RAIL: String = "rail"
 const MODE_SHIPPING: String = "shipping"
 
 var errors: Array[String] = []
-var cities: Dictionary = {}
-var countries: Dictionary = {}
-var regions: Dictionary = {}
-var ports: Dictionary = {}
 var links: Dictionary = {}
 var links_by_city: Dictionary = {}
 var terrain_profiles: Dictionary = {}
@@ -33,87 +29,44 @@ func load_existing_map(spatial_world_value: VNextSpatialWorld = null) -> bool:
 	if spatial_world == null or not spatial_world.is_valid():
 		errors.append("authoritative VNextSpatialWorld is required")
 		return false
-	var source := PrototypeV2Data.new()
-	if not source.load_all():
-		errors.append_array(source.errors)
-		return false
-	if not _load_base_documents(source):
-		return false
 	if not _load_overlay():
 		return false
-	_build_network(source)
+	_build_network(spatial_world.catalog())
 	for link_id: String in _sorted_string_keys(links):
 		if spatial_world.infrastructure_state(link_id).is_empty():
 			errors.append("Military topology link missing from Spatial: %s" % link_id)
-	return errors.is_empty() and not cities.is_empty() and not links.is_empty()
+	return errors.is_empty() and not spatial_world.catalog().city_ids().is_empty() and not links.is_empty()
 
 
 func get_city_ids() -> Array[String]:
-	return _sorted_string_keys(cities)
-
-
-func get_region_ids() -> Array[String]:
-	var ids: Array[String] = []
-	for city_id: String in get_city_ids():
-		var region_id: String = get_region_id_for_city(city_id)
-		if not region_id.is_empty() and not ids.has(region_id):
-			ids.append(region_id)
-	ids.sort()
-	return ids
+	return spatial_world.catalog().city_ids()
 
 
 func has_city(city_id: String) -> bool:
-	return cities.has(city_id)
-
-
-func has_country(country_id: String) -> bool:
-	return countries.has(country_id)
+	return VNextSpatialCatalog.is_valid_map_id(city_id) and spatial_world.catalog().has_city(city_id)
 
 
 func has_region(region_id: String) -> bool:
-	return get_region_ids().has(region_id)
+	return spatial_world.catalog().military_scope_ids().has(region_id)
 
 
 func get_city(city_id: String) -> Dictionary:
-	return _duplicate_dictionary(cities.get(city_id, {}))
-
-
-func get_region_id_for_city(city_id: String) -> String:
-	var city: Dictionary = cities.get(city_id, {}) as Dictionary
-	if city.is_empty():
-		return ""
-	var parent_region_id: String = str(city.get("parent_region_id", ""))
-	if not parent_region_id.is_empty() and regions.has(parent_region_id):
-		return parent_region_id
-	var country_id: String = str(city.get("parent_country_id", ""))
-	return country_id if countries.has(country_id) else ""
-
-
-func get_city_ids_for_region(region_id: String) -> Array[String]:
-	var ids: Array[String] = []
-	for city_id: String in get_city_ids():
-		if get_region_id_for_city(city_id) == region_id:
-			ids.append(city_id)
-	return ids
+	if not VNextSpatialCatalog.is_valid_map_id(city_id):
+		return {}
+	var city := spatial_world.catalog().get_city(city_id)
+	# Keep the military record shape; normalization metadata belongs to Spatial.
+	for key: String in ["map_id", "place_id", "spatial_kind"]:
+		city.erase(key)
+	return city
 
 
 func get_port_ids_for_city(city_id: String) -> Array[String]:
 	var result: Array[String] = []
-	for port_id: String in _sorted_string_keys(ports):
-		var port: Dictionary = ports[port_id] as Dictionary
+	for port_id: String in spatial_world.catalog().port_ids():
+		var port: Dictionary = spatial_world.catalog().get_port(port_id)
 		if str(port.get("city_id", "")) == city_id:
 			result.append(port_id)
 	return result
-
-
-func get_initial_controller(region_id: String) -> String:
-	var overlay: Dictionary = _overlay_for_region(region_id)
-	var configured: String = str(overlay.get("initial_controller_id", ""))
-	if not configured.is_empty() and has_country(configured):
-		return configured
-	if regions.has(region_id):
-		return str((regions[region_id] as Dictionary).get("parent_country_id", ""))
-	return region_id if has_country(region_id) else ""
 
 
 func get_initial_garrison(region_id: String) -> int:
@@ -121,14 +74,16 @@ func get_initial_garrison(region_id: String) -> int:
 	return maxi(0, int(overlay.get("initial_garrison_personnel", 0)))
 
 
-func get_region_report(region_id: String, controls: Dictionary = {}) -> Dictionary:
+func get_region_report(region_id: String) -> Dictionary:
 	if not has_region(region_id):
-		return {}
+		var message: String = "UNRESOLVED TERRITORY SCOPE: %s" % region_id
+		push_error(message)
+		return {"success": false, "reason": message}
 	var overlay: Dictionary = _overlay_for_region(region_id)
 	var terrain_id: String = str(overlay.get("terrain_id", "plains"))
 	var terrain: Dictionary = _duplicate_dictionary(terrain_profiles.get(terrain_id, {}))
 	var city_summaries: Array[Dictionary] = []
-	var region_city_ids: Array[String] = get_city_ids_for_region(region_id)
+	var region_city_ids: Array[String] = spatial_world.catalog().military_scope_city_ids(region_id)
 	for city_id: String in region_city_ids:
 		city_summaries.append(_city_military_view(city_id))
 	var transport_ids: Array[String] = []
@@ -148,15 +103,14 @@ func get_region_report(region_id: String, controls: Dictionary = {}) -> Dictiona
 				rail_ids.append(link_id)
 			MODE_SHIPPING:
 				shipping_ids.append(link_id)
-	for port_id: String in _sorted_string_keys(ports):
-		var port: Dictionary = ports[port_id] as Dictionary
-		if get_region_id_for_city(str(port.get("city_id", ""))) == region_id:
+	for port_id: String in spatial_world.catalog().port_ids():
+		var port: Dictionary = spatial_world.catalog().get_port(port_id)
+		if spatial_world.catalog().military_scope_for_city(str(port.get("city_id", ""))) == region_id:
 			port_ids.append(port_id)
-	var controller_id: String = str(controls.get(region_id, get_initial_controller(region_id)))
 	return {
 		"region_id": region_id,
 		"name": _region_name(region_id),
-		"region_kind": "macro_region" if regions.has(region_id) else "country_fallback",
+		"region_kind": "macro_region" if spatial_world.catalog().has_region(region_id) else "country_scope",
 		"terrain_id": terrain_id,
 		"terrain": terrain,
 		"city_ids": region_city_ids,
@@ -168,8 +122,6 @@ func get_region_report(region_id: String, controls: Dictionary = {}) -> Dictiona
 		"port_ids": port_ids,
 		"resources": DataRecordUtils.to_string_array(overlay.get("resources", [])),
 		"strategic_value": clampf(float(overlay.get("strategic_value", 0.5)), 0.0, 1.0),
-		"controller_country_id": controller_id,
-		"controller_name": _country_name(controller_id),
 		"initial_garrison_personnel": get_initial_garrison(region_id),
 	}
 
@@ -207,9 +159,9 @@ func get_link_transport_capacity_per_hour(link_id: String) -> float:
 func find_route(
 	origin_city_id: String,
 	destination_city_id: String,
+	territory: TerritoryState,
 	allowed_modes: Array[String] = [],
-	controller_country_id: String = "",
-	controls: Dictionary = {},
+	controller_id: String = "",
 	allow_enemy_destination: bool = false
 ) -> Dictionary:
 	if not has_city(origin_city_id) or not has_city(destination_city_id):
@@ -234,7 +186,7 @@ func find_route(
 			if get_link_transport_capacity_per_hour(link_id) <= 0.0:
 				continue
 			var next_city_id: String = _other_city(link, current_city_id)
-			if next_city_id.is_empty() or not _route_edge_allowed(current_city_id, next_city_id, destination_city_id, controller_country_id, controls, allow_enemy_destination):
+			if next_city_id.is_empty() or not _route_edge_allowed(current_city_id, next_city_id, destination_city_id, controller_id, territory, allow_enemy_destination):
 				continue
 			var movement_hours: float = maxf(1.0, float(link.get("movement_hours", 0.0)))
 			var candidate_cost: float = float(distances[current_city_id]) + movement_hours
@@ -258,8 +210,8 @@ func can_enter_link(
 	link_id: String,
 	from_city_id: String,
 	destination_city_id: String,
-	controller_country_id: String,
-	controls: Dictionary,
+	controller_id: String,
+	territory: TerritoryState,
 	allow_enemy_destination: bool
 ) -> bool:
 	var link: Dictionary = links.get(link_id, {}) as Dictionary
@@ -268,7 +220,7 @@ func can_enter_link(
 	var next_city_id: String = _other_city(link, from_city_id)
 	if next_city_id.is_empty():
 		return false
-	return _route_edge_allowed(from_city_id, next_city_id, destination_city_id, controller_country_id, controls, allow_enemy_destination)
+	return _route_edge_allowed(from_city_id, next_city_id, destination_city_id, controller_id, territory, allow_enemy_destination)
 
 
 func get_route_capacity_per_day(route: Dictionary) -> float:
@@ -306,38 +258,7 @@ func get_overlay_rules() -> Dictionary:
 	}
 
 
-func _load_base_documents(source: PrototypeV2Data) -> bool:
-	var country_document: Dictionary = source.get_document("countries")
-	for raw_country: Variant in country_document.get("countries", []) as Array:
-		if raw_country is Dictionary:
-			var country: Dictionary = (raw_country as Dictionary).duplicate(true)
-			var id: String = str(country.get("id", country.get("stable_id", "")))
-			if not id.is_empty():
-				countries[id] = country
-	var region_document: Dictionary = source.get_document("regions")
-	for raw_region: Variant in region_document.get("regions", []) as Array:
-		if raw_region is Dictionary:
-			var region: Dictionary = (raw_region as Dictionary).duplicate(true)
-			var region_id: String = str(region.get("id", region.get("stable_id", "")))
-			if not region_id.is_empty():
-				regions[region_id] = region
-	var city_document: Dictionary = source.get_document("cities")
-	for raw_city: Variant in city_document.get("cities", []) as Array:
-		if raw_city is Dictionary:
-			var city: Dictionary = (raw_city as Dictionary).duplicate(true)
-			var city_id: String = str(city.get("id", ""))
-			if not city_id.is_empty():
-				cities[city_id] = city
-	var port_document: Dictionary = source.get_document("ports")
-	for raw_port: Variant in port_document.get("ports", []) as Array:
-		if raw_port is Dictionary:
-			var port: Dictionary = (raw_port as Dictionary).duplicate(true)
-			var port_id: String = str(port.get("id", ""))
-			if not port_id.is_empty():
-				ports[port_id] = port
-	if cities.is_empty() or countries.is_empty():
-		errors.append("existing world-map cities or countries are empty")
-	return errors.is_empty()
+
 
 
 func _load_overlay() -> bool:
@@ -381,16 +302,13 @@ func _load_overlay() -> bool:
 	return not terrain_profiles.is_empty() and not transport_profiles.is_empty()
 
 
-func _build_network(source: PrototypeV2Data) -> void:
-	for raw_segment: Variant in source.get_document("road_segments").get("segments", []) as Array:
-		if raw_segment is Dictionary:
-			_add_transport_segment(raw_segment as Dictionary, MODE_ROAD)
-	for raw_segment: Variant in source.get_document("rail_segments").get("segments", []) as Array:
-		if raw_segment is Dictionary:
-			_add_transport_segment(raw_segment as Dictionary, MODE_RAIL)
-	for raw_route: Variant in source.get_document("shipping_routes").get("routes", []) as Array:
-		if raw_route is Dictionary:
-			_add_shipping_route(raw_route as Dictionary)
+func _build_network(catalog: VNextSpatialCatalog) -> void:
+	for link: Dictionary in catalog.links():
+		match str(link["link_type"]):
+			MODE_ROAD, MODE_RAIL:
+				_add_transport_segment(link, str(link["link_type"]))
+			MODE_SHIPPING:
+				_add_shipping_route(link)
 
 
 func _add_transport_segment(segment: Dictionary, mode: String) -> void:
@@ -404,8 +322,8 @@ func _add_transport_segment(segment: Dictionary, mode: String) -> void:
 
 
 func _add_shipping_route(route: Dictionary) -> void:
-	var from_port: Dictionary = ports.get(str(route.get("from_port_id", "")), {}) as Dictionary
-	var to_port: Dictionary = ports.get(str(route.get("to_port_id", "")), {}) as Dictionary
+	var from_port: Dictionary = spatial_world.catalog().get_port(str(route.get("from_port_id", "")))
+	var to_port: Dictionary = spatial_world.catalog().get_port(str(route.get("to_port_id", "")))
 	var from_city_id: String = str(from_port.get("city_id", ""))
 	var to_city_id: String = str(to_port.get("city_id", ""))
 	if not has_city(from_city_id) or not has_city(to_city_id):
@@ -426,7 +344,7 @@ func _add_link(
 	if link_id.is_empty() or links.has(link_id):
 		errors.append("duplicate or empty transport link ID: %s" % link_id)
 		return
-	var terrain: Dictionary = get_region_terrain(get_region_id_for_city(to_city_id))
+	var terrain: Dictionary = get_region_terrain(spatial_world.catalog().military_scope_for_city(to_city_id))
 	var terrain_factor: float = clampf(float(terrain.get("movement_factor", 1.0)), 0.1, 2.0)
 	var speed: float = maxf(float(profile.get("movement_speed_km_per_day", 1.0)), 1.0)
 	var movement_hours: int = maxi(int(profile.get("minimum_movement_hours", 12)), ceili(distance_km / speed * 24.0 / terrain_factor))
@@ -451,19 +369,18 @@ func _route_edge_allowed(
 	current_city_id: String,
 	next_city_id: String,
 	destination_city_id: String,
-	controller_country_id: String,
-	controls: Dictionary,
+	controller_id: String,
+	territory: TerritoryState,
 	allow_enemy_destination: bool
 ) -> bool:
-	if controller_country_id.is_empty():
+	if controller_id.is_empty():
 		return true
-	var current_region_id: String = get_region_id_for_city(current_city_id)
-	var next_region_id: String = get_region_id_for_city(next_city_id)
-	var current_controller: String = str(controls.get(current_region_id, get_initial_controller(current_region_id)))
-	var next_controller: String = str(controls.get(next_region_id, get_initial_controller(next_region_id)))
-	if current_controller != controller_country_id:
+	assert(territory != null, "TerritoryState is required for military route access")
+	var current_controller: String = territory.get_controller(current_city_id)
+	var next_controller: String = territory.get_controller(next_city_id)
+	if current_controller != controller_id:
 		return false
-	if next_controller == controller_country_id:
+	if next_controller == controller_id:
 		return true
 	return allow_enemy_destination and next_city_id == destination_city_id
 
@@ -500,7 +417,7 @@ func _build_route_result(
 			modes.append(mode)
 	var region_ids: Array[String] = []
 	for city_id: String in reversed_city_ids:
-		var region_id: String = get_region_id_for_city(city_id)
+		var region_id: String = spatial_world.catalog().military_scope_for_city(city_id)
 		if not region_ids.has(region_id):
 			region_ids.append(region_id)
 	return {
@@ -556,22 +473,18 @@ func _overlay_for_region(region_id: String) -> Dictionary:
 
 
 func _region_name(region_id: String) -> String:
-	if regions.has(region_id):
-		return str((regions[region_id] as Dictionary).get("name", region_id))
-	if countries.has(region_id):
-		var country: Dictionary = countries[region_id] as Dictionary
+	var catalog := spatial_world.catalog()
+	if catalog.has_region(region_id):
+		return str(catalog.get_region(region_id).get("name", region_id))
+	if catalog.has_country(region_id):
+		var country := catalog.get_country(region_id)
 		return str(country.get("display_name_zh", country.get("name", region_id)))
 	return region_id
 
 
-func _country_name(country_id: String) -> String:
-	var country: Dictionary = countries.get(country_id, {}) as Dictionary
-	return str(country.get("display_name_zh", country.get("name", country_id)))
-
-
 func _city_distance_km(first_city_id: String, second_city_id: String) -> float:
-	var first: Dictionary = cities[first_city_id] as Dictionary
-	var second: Dictionary = cities[second_city_id] as Dictionary
+	var first: Dictionary = spatial_world.catalog().get_city(first_city_id)
+	var second: Dictionary = spatial_world.catalog().get_city(second_city_id)
 	return _great_circle_km(first.get("lon_lat", [0.0, 0.0]) as Array, second.get("lon_lat", [0.0, 0.0]) as Array)
 
 
@@ -596,10 +509,6 @@ func _great_circle_km(first: Array, second: Array) -> float:
 
 
 func _clear_runtime_indexes() -> void:
-	cities.clear()
-	countries.clear()
-	regions.clear()
-	ports.clear()
 	links.clear()
 	links_by_city.clear()
 	terrain_profiles.clear()

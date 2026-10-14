@@ -2,7 +2,7 @@ class_name HistoricalEvidenceCatalog
 extends RefCounted
 ## Deterministic fact-level evidence index. Duplicate fact IDs fail closed.
 
-const SCHEMA_ID: String = "historical_fact_evidence_catalog_v1"
+const SCHEMA_ID: String = "historical_fact_evidence_catalog_v2"
 
 var _facts_by_id: Dictionary = {}
 var _errors: Array[String] = []

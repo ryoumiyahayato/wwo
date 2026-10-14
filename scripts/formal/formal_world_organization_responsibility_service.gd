@@ -79,7 +79,6 @@ const _CLOSURE_REASONS: Array[String] = [
 var initialization_error: String = ""
 var _configured: bool = false
 var _rule_version: String = ""
-var _rule_fingerprint: String = ""
 var _baseline_hour: int = 0
 var _last_completed_review_day: int = 0
 var _revision: int = 0
@@ -97,7 +96,6 @@ func configure(
 		return _configure_fail("Organization responsibility service is already configured")
 	initialization_error = ""
 	_rule_version = ""
-	_rule_fingerprint = ""
 	_responsibilities.clear()
 	_revision = 0
 	if (
@@ -367,7 +365,7 @@ func snapshot() -> Dictionary:
 		_responsibilities
 	)
 	payload["schema_id"] = SNAPSHOT_SCHEMA_ID
-	payload["rule_fingerprint"] = _rule_fingerprint
+	payload["rule_fingerprint"] = _rule_version
 	payload["state_fingerprint"] = state_fingerprint()
 	return payload
 
@@ -447,10 +445,13 @@ func restore(
 	economy_view: FormalWorldEconomyView,
 	current_hour: int
 ) -> bool:
+	initialization_error = ""
+	if str(snapshot_value.get("rule_fingerprint", "")) != _rule_version:
+		initialization_error = "Unsupported Organization responsibility rule version: expected %s, found %s" % [_rule_version, snapshot_value.get("rule_fingerprint", "missing")]
+		return false
 	if (
 		not _configured
 		or str(snapshot_value.get("schema_id", "")) != SNAPSHOT_SCHEMA_ID
-		or str(snapshot_value.get("rule_fingerprint", "")) != _rule_fingerprint
 		or current_hour < 0
 		or economy_view == null
 		or economy_view.total_hour != current_hour
@@ -596,7 +597,10 @@ func _load_rule() -> bool:
 	_rule_version = str(document.get("rule_version", ""))
 	if _rule_version.is_empty():
 		return _configure_fail("Organization responsibility rule version is missing")
-	_rule_fingerprint = source_text.sha256_text()
+	# The existing serialized key carries the supported rule generation. JSON
+	# bytes are not a compatibility version; responsibility rules are unchanged.
+	if _rule_version != "economic_supply_continuity_v1":
+		return _configure_fail("Unsupported Organization responsibility rule_version")
 	return true
 
 
@@ -933,7 +937,7 @@ func _state_fingerprint_for(
 ) -> String:
 	return JSON.stringify({
 		"schema_id": SNAPSHOT_SCHEMA_ID,
-		"rule_fingerprint": _rule_fingerprint,
+		"rule_fingerprint": _rule_version,
 		"state": _state_payload(
 			baseline_hour,
 			last_completed_review_day,

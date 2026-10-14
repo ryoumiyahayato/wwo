@@ -6,6 +6,7 @@ const _SNAPSHOT_FIELDS: Array[String] = ["schema_id", "player_id"]
 
 var _player_id: String = ""
 var _person_authority: RefCounted = null
+var _locked_player_id: String = ""
 
 
 func _init(initial_player_id: String = "", person_authority: RefCounted = null) -> void:
@@ -32,6 +33,8 @@ func has_person_authority() -> bool:
 
 
 func set_player_id(candidate_player_id: String) -> bool:
+	if not _locked_player_id.is_empty() and candidate_player_id != _locked_player_id:
+		return false
 	if not _is_valid_player_id(candidate_player_id):
 		return false
 	if (
@@ -45,6 +48,12 @@ func set_player_id(candidate_player_id: String) -> bool:
 
 func player_id() -> String:
 	return _player_id
+
+
+func lock_current_player() -> bool:
+	if not is_valid(): return false
+	_locked_player_id = _player_id
+	return true
 
 
 func is_valid() -> bool:
@@ -75,6 +84,8 @@ func restore(snapshot_value: Dictionary) -> bool:
 		return false
 
 	var candidate_player_id: String = candidate_player_id_value
+	if not _locked_player_id.is_empty() and candidate_player_id != _locked_player_id:
+		return false
 	if not _is_valid_player_id(candidate_player_id):
 		return false
 	if (

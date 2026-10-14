@@ -20,8 +20,6 @@ const REQUIRED_FIELDS: Array[String] = [
 	"license",
 	"review_status",
 	"generator",
-	"input_hash",
-	"output_hash",
 ]
 
 var fact_id: String
@@ -41,13 +39,14 @@ var upper_bound: Variant
 var license: String
 var review_status: String
 var generator: String
-var input_hash: String
-var output_hash: String
 
 
 static func from_dictionary(document: Dictionary) -> HistoricalFactEvidence:
 	for field: String in REQUIRED_FIELDS:
 		if not document.has(field):
+			return null
+	for field: String in ["fact_id", "domain", "subject_id", "unit", "source_id", "source_version", "source_locator", "methodology", "license", "review_status", "generator"]:
+		if not document[field] is String:
 			return null
 	if not document.get("observation_period") is Dictionary:
 		return null
@@ -65,14 +64,14 @@ static func from_dictionary(document: Dictionary) -> HistoricalFactEvidence:
 	evidence.observation_period = (document.get("observation_period") as Dictionary).duplicate(true)
 	evidence.spatial_scope = (document.get("spatial_scope") as Dictionary).duplicate(true)
 	evidence.methodology = str(document.get("methodology"))
+	if typeof(document.get("confidence")) not in [TYPE_INT, TYPE_FLOAT]:
+		return null
 	evidence.confidence = float(document.get("confidence"))
 	evidence.lower_bound = document.get("lower_bound")
 	evidence.upper_bound = document.get("upper_bound")
 	evidence.license = str(document.get("license"))
 	evidence.review_status = str(document.get("review_status"))
 	evidence.generator = str(document.get("generator"))
-	evidence.input_hash = str(document.get("input_hash"))
-	evidence.output_hash = str(document.get("output_hash"))
 	return evidence
 
 
@@ -89,10 +88,19 @@ func validation_error() -> String:
 		return "spatial_scope is empty"
 	if confidence < 0.0 or confidence > 1.0 or is_nan(confidence):
 		return "confidence is outside [0, 1]"
-	if not is_sha256(input_hash) or not is_sha256(output_hash):
-		return "evidence hash is not SHA-256"
-	if output_hash != sha256(output_material()):
-		return "output hash mismatch"
+	if review_status not in ["EVIDENCE_LINKED", "BOUNDED_ESTIMATE", "APPROXIMATE", "VERIFIED", "HISTORICAL_EVIDENCE", "GENERATED_SIMULATION_ASSUMPTION", "RUNTIME_FACT", "UNKNOWN"]:
+		return "unsupported review_status"
+	var start: String = str(observation_period.get("from", ""))
+	var end: String = str(observation_period.get("to", ""))
+	if not valid_date(start) or not valid_date(end) or start > end:
+		return "invalid observation period"
+	if not spatial_scope.has("kind") or not spatial_scope.has("id"):
+		return "invalid spatial scope"
+	for bound: Variant in [lower_bound, upper_bound]:
+		if bound != null and typeof(bound) not in [TYPE_INT, TYPE_FLOAT]:
+			return "invalid bound type"
+	if lower_bound != null and upper_bound != null and float(lower_bound) > float(upper_bound):
+		return "invalid bounds"
 	return ""
 
 
@@ -127,8 +135,6 @@ func to_dictionary() -> Dictionary:
 		"license": license,
 		"review_status": review_status,
 		"generator": generator,
-		"input_hash": input_hash,
-		"output_hash": output_hash,
 	}
 
 
@@ -163,10 +169,18 @@ static func canonical_json(value_to_encode: Variant) -> String:
 	return JSON.stringify(value_to_encode)
 
 
-static func is_sha256(candidate: String) -> bool:
-	if candidate.length() != 64:
+static func valid_date(candidate: String) -> bool:
+	if candidate.length() != 10 or candidate[4] != "-" or candidate[7] != "-":
 		return false
-	for character: String in candidate.to_lower():
-		if character not in "0123456789abcdef":
-			return false
-	return true
+	var year := candidate.substr(0, 4)
+	var month := candidate.substr(5, 2)
+	var day := candidate.substr(8, 2)
+	if not year.is_valid_int() or not month.is_valid_int() or not day.is_valid_int():
+		return false
+	var y := int(year)
+	var m := int(month)
+	var d := int(day)
+	if y <= 0 or m < 1 or m > 12 or d < 1:
+		return false
+	var days: Array[int] = [31, 29 if y % 4 == 0 and (y % 100 != 0 or y % 400 == 0) else 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+	return d <= days[m - 1]

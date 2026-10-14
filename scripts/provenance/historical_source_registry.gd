@@ -1,12 +1,12 @@
 class_name HistoricalSourceRegistry
 extends RefCounted
-## Source identity and immutable content-hash registry. It owns no domain data.
+## Source identity and provenance metadata. Internal JSON has no byte identity gate.
 
 const REQUIRED_FIELDS: Array[String] = [
 	"source_id", "title", "publisher", "version", "license", "locator",
-	"access_metadata", "content_hash",
+	"access_metadata",
 ]
-const SCHEMA_ID: String = "historical_source_registry_v1"
+const SCHEMA_ID: String = "historical_source_registry_v2"
 
 var _sources_by_id: Dictionary = {}
 var _errors: Array[String] = []
@@ -38,13 +38,9 @@ func register_source(source: Dictionary) -> bool:
 		return false
 	var source_id := str(source.get("source_id"))
 	for field: String in ["source_id", "title", "publisher", "version", "license", "locator"]:
-		if str(source.get(field)).strip_edges().is_empty():
+		if not source.get(field) is String or str(source.get(field)).strip_edges().is_empty():
 			_errors.append("source field is empty: " + field)
 			return false
-	var content_hash := str(source.get("content_hash"))
-	if not HistoricalFactEvidence.is_sha256(content_hash):
-		_errors.append("source content_hash is not SHA-256")
-		return false
 	if source_id in _sources_by_id:
 		_errors.append("duplicate source_id: " + source_id)
 		return false
@@ -52,9 +48,6 @@ func register_source(source: Dictionary) -> bool:
 	if locator.begins_with("res://"):
 		if not FileAccess.file_exists(locator):
 			_errors.append("source locator does not exist: " + locator)
-			return false
-		if FileAccess.get_sha256(locator) != content_hash:
-			_errors.append("source content hash mismatch: " + source_id)
 			return false
 	_sources_by_id[source_id] = source.duplicate(true)
 	return true

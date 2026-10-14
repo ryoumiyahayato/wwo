@@ -1,0 +1,16 @@
+Map country-name fonts (unmodified author files)
+
+Source Han Serif CN Regular, version 2.003.
+https://github.com/adobe-fonts/source-han-serif
+Author-provided Simplified Chinese subset:
+https://raw.githubusercontent.com/adobe-fonts/source-han-serif/release/SubsetOTF/CN/SourceHanSerifCN-Regular.otf
+Copyright and SIL OFL 1.1: SourceHan-LICENSE.txt
+
+EB Garamond Medium.
+https://github.com/octaviopardo/EBGaramond12
+https://raw.githubusercontent.com/octaviopardo/EBGaramond12/master/fonts/ttf/EBGaramond-Medium.ttf
+Copyright and SIL OFL 1.1: EBGaramond-OFL.txt
+
+Only country/geographic map names use these fonts. City and UI text keep the existing font.
+Chinese names use the complete Source Han face; Latin and Cyrillic names use EB Garamond.
+Godot's finite 16/20/24/28 country glyph caches remain in use.

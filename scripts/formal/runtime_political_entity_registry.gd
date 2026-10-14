@@ -6,7 +6,6 @@ extends RefCounted
 const SCHEMA_ID: String = "runtime_political_registry_v2"
 const LEGACY_SCHEMA_ID: String = "runtime_political_registry_v1"
 const INITIAL_DATE: String = "1900-01-01"
-const EXPECTED_INITIAL_ENTITY_COUNT: int = 146
 const ALLOWED_RELATION_KINDS: Array[String] = [
 	"administration",
 	"legacy_controller",
@@ -45,12 +44,8 @@ func configure(evidence: HistoricalPoliticalEvidenceCatalog) -> bool:
 		_entities_by_runtime_id[entity.runtime_id] = entity.snapshot()
 		_runtime_id_by_source_id[source_id] = entity.runtime_id
 
-	if _entities_by_runtime_id.size() != EXPECTED_INITIAL_ENTITY_COUNT:
-		return _fail(
-			"1900-01-01 runtime political entity count must be %d" % (
-				EXPECTED_INITIAL_ENTITY_COUNT
-			)
-		)
+	if _entities_by_runtime_id.is_empty():
+		return _fail("No dated political entities available for initial world")
 	if not _seed_authority_relations(evidence):
 		return false
 	_evidence_fingerprint = evidence.fingerprint()
@@ -133,8 +128,6 @@ func restore_snapshot(
 		return false
 	if (
 		str(snapshot_value.get("schema_id", "")) not in [SCHEMA_ID, LEGACY_SCHEMA_ID]
-		or str(snapshot_value.get("evidence_fingerprint", ""))
-		!= evidence.fingerprint()
 		or not snapshot_value.get("entities", []) is Array
 		or not snapshot_value.get("authority_relations", []) is Array
 	):

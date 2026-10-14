@@ -13,7 +13,7 @@ const RESOURCE_IDS: PackedStringArray = ["food", "ammunition", "equipment", "tra
 const SUPPLY_STATUSES: PackedStringArray = ["full", "strained", "low", "cut"]
 
 var formation_id: String = ""
-var country_id: String = ""
+var affiliation_id: String = ""
 var service_branch: String = "army"
 var parent_formation_id: String = ""
 var personnel: int = 0
@@ -33,7 +33,7 @@ var daily_requirements: Dictionary = {}
 
 func configure(
 	id: String,
-	owner_country_id: String,
+	owner_affiliation_id: String,
 	branch: String,
 	starting_personnel: int,
 	starting_equipment: Dictionary,
@@ -43,14 +43,14 @@ func configure(
 	starting_city_id: String,
 	requirements: Dictionary = {}
 ) -> bool:
-	if VNextStableId.kind_of(id) != "formation" or owner_country_id.is_empty() or starting_city_id.is_empty():
+	if VNextStableId.kind_of(id) != "formation" or owner_affiliation_id.is_empty() or starting_city_id.is_empty():
 		return false
 	if starting_personnel < 0:
 		return false
 	if not _is_unit_float_valid(starting_training) or not _is_unit_float_valid(starting_morale) or not _is_unit_float_valid(starting_organization):
 		return false
 	formation_id = id
-	country_id = owner_country_id
+	affiliation_id = owner_affiliation_id
 	service_branch = branch if not branch.is_empty() else "army"
 	personnel = starting_personnel
 	equipment_sets = starting_equipment.duplicate(true)
@@ -76,7 +76,7 @@ func configure(
 
 
 func is_valid() -> bool:
-	if VNextStableId.kind_of(formation_id) != "formation" or country_id.is_empty() or current_city_id.is_empty() or personnel < 0:
+	if VNextStableId.kind_of(formation_id) != "formation" or affiliation_id.is_empty() or current_city_id.is_empty() or personnel < 0:
 		return false
 	if formation_status not in [STATUS_ACTIVE, STATUS_DESTROYED]:
 		return false
@@ -173,7 +173,7 @@ func update_supply(
 func to_dict() -> Dictionary:
 	return {
 		"formation_id": formation_id,
-		"country_id": country_id,
+		"affiliation_id": affiliation_id,
 		"service_branch": service_branch,
 		"parent_formation_id": parent_formation_id,
 		"personnel": personnel,
@@ -209,7 +209,7 @@ func restore(data: Dictionary) -> bool:
 		return false
 	if not configure(
 		str(data.get("formation_id", "")),
-		str(data.get("country_id", "")),
+		str(data.get("affiliation_id", "")),
 		str(data.get("service_branch", "army")),
 		int(data.get("personnel", -1)),
 		restored_equipment as Dictionary,

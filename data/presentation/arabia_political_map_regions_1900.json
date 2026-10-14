@@ -1,0 +1,3168 @@
+{
+  "schema_version": 1,
+  "target_date": "1900-01-01",
+  "valid_from": "1900-01-01",
+  "valid_to": "1901-01-01",
+  "purpose": "World-scale display interpretation only; not sovereignty, administration or simulation control",
+  "scope_feature_ids": [
+    "arabia_rashidi_1900",
+    "arabia_aden_settlement_1900",
+    "arabia_aden_treaty_states_1900",
+    "arabia_kathiri_1900",
+    "arabia_quaiti_1900",
+    "arabia_mahra_1900",
+    "arabia_kuwait_1900",
+    "arabia_qatar_1900",
+    "arabia_bahrain_1900",
+    "arabia_undelimited_desert_1900",
+    "gw_640",
+    "gw_696",
+    "gw_698"
+  ],
+  "partial_scope_masks": {
+    "gw_640": [
+      {
+        "outer": [
+          [
+            34.5,
+            30.0
+          ],
+          [
+            38.5,
+            30.0
+          ],
+          [
+            40.8,
+            26.5
+          ],
+          [
+            42.5,
+            23.0
+          ],
+          [
+            43.8,
+            19.8
+          ],
+          [
+            46.2,
+            18.8
+          ],
+          [
+            46.2,
+            12.0
+          ],
+          [
+            34.5,
+            12.0
+          ]
+        ],
+        "holes": []
+      },
+      {
+        "outer": [
+          [
+            47.7,
+            24.0
+          ],
+          [
+            47.7,
+            28.8
+          ],
+          [
+            51.0,
+            28.8
+          ],
+          [
+            51.0,
+            24.0
+          ]
+        ],
+        "holes": []
+      }
+    ]
+  },
+  "political_map_regions": [
+    {
+      "id": "political_map_region:bahrain",
+      "historical_authority_id": "map_authority:arabia_bahrain_1900",
+      "representative_visual_id": "bahrain_authority_1900",
+      "name_zh": "巴林",
+      "short_name_zh": "巴林",
+      "label_anchor": {
+        "lon": 50.55,
+        "lat": 26
+      },
+      "is_world_map_display_only": true,
+      "boundary_kind": "APPROXIMATE_CARTOGRAPHIC_BOUNDARY",
+      "approximate": true,
+      "confidence": "low",
+      "flag_frame": [
+        50.47,
+        25.79,
+        50.63,
+        26.24
+      ],
+      "mask_cells": [
+        {
+          "outer": [
+            [
+              50.3,
+              26.5
+            ],
+            [
+              50.8,
+              26.5
+            ],
+            [
+              50.8,
+              25.7
+            ],
+            [
+              50.3,
+              25.7
+            ]
+          ],
+          "holes": []
+        }
+      ]
+    },
+    {
+      "id": "political_map_region:qatar",
+      "historical_authority_id": "map_authority:arabia_qatar_1900",
+      "representative_visual_id": "qatar_representative",
+      "name_zh": "卡塔尔",
+      "short_name_zh": "卡塔尔",
+      "label_anchor": {
+        "lon": 51.12,
+        "lat": 25.35
+      },
+      "is_world_map_display_only": true,
+      "boundary_kind": "APPROXIMATE_CARTOGRAPHIC_BOUNDARY",
+      "approximate": true,
+      "confidence": "low",
+      "flag_frame": [
+        50.7,
+        24.5,
+        51.6111076629105,
+        26.1
+      ],
+      "mask_cells": [
+        {
+          "outer": [
+            [
+              50.7,
+              25.7
+            ],
+            [
+              50.8,
+              25.7
+            ],
+            [
+              50.8,
+              26.25
+            ],
+            [
+              51.65,
+              26.25
+            ],
+            [
+              51.65,
+              24.5
+            ],
+            [
+              50.7,
+              24.5
+            ]
+          ],
+          "holes": []
+        }
+      ]
+    },
+    {
+      "id": "political_map_region:kuwait",
+      "historical_authority_id": "map_authority:arabia_kuwait_1900",
+      "representative_visual_id": "kuwait_representative",
+      "name_zh": "科威特",
+      "short_name_zh": "科威特",
+      "label_anchor": {
+        "lon": 47.75,
+        "lat": 29.1
+      },
+      "is_world_map_display_only": true,
+      "boundary_kind": "APPROXIMATE_CARTOGRAPHIC_BOUNDARY",
+      "approximate": true,
+      "confidence": "low",
+      "flag_frame": [
+        46.6023101263438,
+        27.8,
+        49.0,
+        30.3514873467795
+      ],
+      "mask_cells": [
+        {
+          "outer": [
+            [
+              48.8,
+              30.4
+            ],
+            [
+              49.0,
+              28.1
+            ],
+            [
+              47.8,
+              27.8
+            ],
+            [
+              46.7,
+              28.3
+            ],
+            [
+              46.6,
+              30.4
+            ],
+            [
+              47.2,
+              30.7
+            ]
+          ],
+          "holes": []
+        }
+      ]
+    },
+    {
+      "id": "political_map_region:aden",
+      "historical_authority_id": "map_authority:arabia_aden_treaty_states_1900",
+      "representative_visual_id": "aden_representative",
+      "name_zh": "亚丁",
+      "short_name_zh": "亚丁",
+      "label_anchor": {
+        "lon": 45.3,
+        "lat": 13.6
+      },
+      "is_world_map_display_only": true,
+      "boundary_kind": "APPROXIMATE_CARTOGRAPHIC_BOUNDARY",
+      "approximate": true,
+      "confidence": "low",
+      "flag_frame": [
+        42.6470588235294,
+        12.65,
+        47.2,
+        15.5
+      ],
+      "mask_cells": [
+        {
+          "outer": [
+            [
+              34.0,
+              15.0
+            ],
+            [
+              43.3,
+              15.0
+            ],
+            [
+              44.4,
+              15.3
+            ],
+            [
+              45.8,
+              15.5
+            ],
+            [
+              47.2,
+              15.0
+            ],
+            [
+              47.2,
+              12.0
+            ],
+            [
+              34.0,
+              12.0
+            ]
+          ],
+          "holes": []
+        }
+      ]
+    },
+    {
+      "id": "political_map_region:yemen",
+      "historical_authority_id": "map_display:yemen_1900",
+      "representative_visual_id": "yemen_representative",
+      "name_zh": "也门",
+      "short_name_zh": "也门",
+      "label_anchor": {
+        "lon": 43.8,
+        "lat": 17.5
+      },
+      "is_world_map_display_only": true,
+      "boundary_kind": "APPROXIMATE_CARTOGRAPHIC_BOUNDARY",
+      "approximate": true,
+      "confidence": "low",
+      "flag_frame": [
+        39.7757575757576,
+        15.0,
+        47.2,
+        19.8
+      ],
+      "mask_cells": [
+        {
+          "outer": [
+            [
+              45.0,
+              19.4
+            ],
+            [
+              45.8,
+              18.6
+            ],
+            [
+              46.5,
+              17.4
+            ],
+            [
+              47.2,
+              15.0
+            ],
+            [
+              45.8,
+              15.5
+            ],
+            [
+              44.4,
+              15.3
+            ],
+            [
+              43.3,
+              15.0
+            ],
+            [
+              34.0,
+              15.0
+            ],
+            [
+              34.0,
+              19.8
+            ],
+            [
+              43.8,
+              19.8
+            ]
+          ],
+          "holes": []
+        }
+      ]
+    },
+    {
+      "id": "political_map_region:hejaz",
+      "historical_authority_id": "map_display:hejaz_1900",
+      "representative_visual_id": "hejaz_representative",
+      "name_zh": "汉志",
+      "short_name_zh": "汉志",
+      "label_anchor": {
+        "lon": 39.5,
+        "lat": 25
+      },
+      "is_world_map_display_only": true,
+      "boundary_kind": "APPROXIMATE_CARTOGRAPHIC_BOUNDARY",
+      "approximate": true,
+      "confidence": "low",
+      "flag_frame": [
+        37.0,
+        21.0,
+        42.5,
+        31.5
+      ],
+      "mask_cells": [
+        {
+          "outer": [
+            [
+              40.7,
+              29.5
+            ],
+            [
+              41.2,
+              27.0
+            ],
+            [
+              41.9,
+              24.5
+            ],
+            [
+              42.7,
+              21.8
+            ],
+            [
+              43.8,
+              19.8
+            ],
+            [
+              34.0,
+              19.8
+            ],
+            [
+              34.0,
+              35.0
+            ],
+            [
+              39.5,
+              35.0
+            ],
+            [
+              40.1,
+              32.0
+            ]
+          ],
+          "holes": []
+        }
+      ]
+    },
+    {
+      "id": "political_map_region:trucial",
+      "historical_authority_id": "trucial_states",
+      "representative_visual_id": "trucial_representative",
+      "name_zh": "特鲁西尔",
+      "short_name_zh": "特鲁西尔",
+      "label_anchor": {
+        "lon": 54.5,
+        "lat": 24.5
+      },
+      "is_world_map_display_only": true,
+      "boundary_kind": "APPROXIMATE_CARTOGRAPHIC_BOUNDARY",
+      "approximate": true,
+      "confidence": "low",
+      "flag_frame": [
+        51.6,
+        21.8,
+        56.0,
+        25.95
+      ],
+      "mask_cells": [
+        {
+          "outer": [
+            [
+              56.0,
+              27.0
+            ],
+            [
+              56.0,
+              25.0
+            ],
+            [
+              55.8,
+              23.2
+            ],
+            [
+              54.8,
+              22.5
+            ],
+            [
+              53.4,
+              21.8
+            ],
+            [
+              51.6,
+              21.8
+            ],
+            [
+              51.6,
+              24.5
+            ],
+            [
+              51.65,
+              24.5
+            ],
+            [
+              51.65,
+              26.25
+            ],
+            [
+              51.6,
+              26.25
+            ],
+            [
+              51.6,
+              27.0
+            ]
+          ],
+          "holes": []
+        }
+      ]
+    },
+    {
+      "id": "political_map_region:oman",
+      "historical_authority_id": "sultanate_of_muscat_oman",
+      "representative_visual_id": "muscat_oman_plain_red",
+      "name_zh": "阿曼",
+      "short_name_zh": "阿曼",
+      "label_anchor": {
+        "lon": 57.2,
+        "lat": 22.7
+      },
+      "is_world_map_display_only": true,
+      "boundary_kind": "APPROXIMATE_CARTOGRAPHIC_BOUNDARY",
+      "approximate": true,
+      "confidence": "low",
+      "flag_frame": [
+        53.2,
+        16.6753090983439,
+        59.8092,
+        26.3687
+      ],
+      "mask_cells": [
+        {
+          "outer": [
+            [
+              54.1,
+              19.5
+            ],
+            [
+              55.0,
+              21.5
+            ],
+            [
+              55.8,
+              23.2
+            ],
+            [
+              56.0,
+              25.0
+            ],
+            [
+              56.0,
+              27.0
+            ],
+            [
+              56.0,
+              35.0
+            ],
+            [
+              61.0,
+              35.0
+            ],
+            [
+              61.0,
+              12.0
+            ],
+            [
+              53.2,
+              12.0
+            ],
+            [
+              53.2,
+              17.8
+            ]
+          ],
+          "holes": []
+        }
+      ]
+    },
+    {
+      "id": "political_map_region:mahra",
+      "historical_authority_id": "map_authority:arabia_mahra_1900",
+      "representative_visual_id": "mahra_representative",
+      "name_zh": "马赫拉",
+      "short_name_zh": "马赫拉",
+      "label_anchor": {
+        "lon": 52.15,
+        "lat": 17
+      },
+      "is_world_map_display_only": true,
+      "boundary_kind": "APPROXIMATE_CARTOGRAPHIC_BOUNDARY",
+      "approximate": true,
+      "confidence": "low",
+      "flag_frame": [
+        51.1,
+        15.38,
+        53.2,
+        18.5
+      ],
+      "mask_cells": [
+        {
+          "outer": [
+            [
+              51.1,
+              18.0
+            ],
+            [
+              51.8,
+              18.5
+            ],
+            [
+              52.7,
+              18.4
+            ],
+            [
+              53.2,
+              17.8
+            ],
+            [
+              53.2,
+              12.0
+            ],
+            [
+              51.1,
+              12.0
+            ]
+          ],
+          "holes": []
+        }
+      ]
+    },
+    {
+      "id": "political_map_region:hasa",
+      "historical_authority_id": "map_display:hasa_1900",
+      "representative_visual_id": "hasa_representative",
+      "name_zh": "哈萨",
+      "short_name_zh": "哈萨",
+      "label_anchor": {
+        "lon": 49.3,
+        "lat": 26.3
+      },
+      "is_world_map_display_only": true,
+      "boundary_kind": "APPROXIMATE_CARTOGRAPHIC_BOUNDARY",
+      "approximate": true,
+      "confidence": "low",
+      "flag_frame": [
+        47.6,
+        23.2,
+        51.2,
+        28.4
+      ],
+      "mask_cells": [
+        {
+          "outer": [
+            [
+              47.5,
+              25.0
+            ],
+            [
+              47.5,
+              27.0
+            ],
+            [
+              47.639661016949155,
+              27.872881355932204
+            ],
+            [
+              47.8,
+              27.8
+            ],
+            [
+              49.0,
+              28.1
+            ],
+            [
+              48.8,
+              30.4
+            ],
+            [
+              48.02542787286064,
+              30.54523227383863
+            ],
+            [
+              48.2,
+              32.0
+            ],
+            [
+              48.2,
+              35.0
+            ],
+            [
+              56.0,
+              35.0
+            ],
+            [
+              56.0,
+              27.0
+            ],
+            [
+              51.6,
+              27.0
+            ],
+            [
+              51.6,
+              26.25
+            ],
+            [
+              50.8,
+              26.25
+            ],
+            [
+              50.8,
+              26.5
+            ],
+            [
+              50.3,
+              26.5
+            ],
+            [
+              50.3,
+              25.7
+            ],
+            [
+              50.7,
+              25.7
+            ],
+            [
+              50.7,
+              24.5
+            ],
+            [
+              51.6,
+              24.5
+            ],
+            [
+              51.6,
+              21.8
+            ],
+            [
+              49.0,
+              21.8
+            ],
+            [
+              48.1,
+              23.4
+            ]
+          ],
+          "holes": []
+        },
+        {
+          "outer": [
+            [
+              53.4,
+              21.8
+            ],
+            [
+              54.8,
+              22.5
+            ],
+            [
+              55.8,
+              23.2
+            ],
+            [
+              55.141176470588235,
+              21.8
+            ]
+          ],
+          "holes": []
+        }
+      ]
+    },
+    {
+      "id": "political_map_region:rashidi",
+      "historical_authority_id": "map_authority:arabia_rashidi_1900",
+      "representative_visual_id": "jabal_shammar_representative",
+      "name_zh": "拉希德／贾巴尔沙马尔",
+      "short_name_zh": "拉希德／沙马尔",
+      "label_anchor": {
+        "lon": 44.8,
+        "lat": 27
+      },
+      "is_world_map_display_only": true,
+      "boundary_kind": "APPROXIMATE_CARTOGRAPHIC_BOUNDARY",
+      "approximate": true,
+      "confidence": "low",
+      "flag_frame": [
+        41.0,
+        22.0,
+        47.0,
+        30.0
+      ],
+      "mask_cells": [
+        {
+          "outer": [
+            [
+              48.02542787286064,
+              30.54523227383863
+            ],
+            [
+              47.2,
+              30.7
+            ],
+            [
+              46.6,
+              30.4
+            ],
+            [
+              46.7,
+              28.3
+            ],
+            [
+              47.639661016949155,
+              27.8728813559322
+            ],
+            [
+              47.5,
+              27.0
+            ],
+            [
+              47.5,
+              25.0
+            ],
+            [
+              48.1,
+              23.4
+            ],
+            [
+              49.0,
+              21.8
+            ],
+            [
+              47.2,
+              20.5
+            ],
+            [
+              45.5,
+              20.0
+            ],
+            [
+              43.8,
+              19.8
+            ],
+            [
+              42.7,
+              21.8
+            ],
+            [
+              41.9,
+              24.5
+            ],
+            [
+              41.2,
+              27.0
+            ],
+            [
+              40.7,
+              29.5
+            ],
+            [
+              40.1,
+              32.0
+            ],
+            [
+              39.5,
+              35.0
+            ],
+            [
+              48.2,
+              35.0
+            ],
+            [
+              48.2,
+              32.0
+            ]
+          ],
+          "holes": []
+        }
+      ]
+    },
+    {
+      "id": "political_map_region:hadramaut",
+      "historical_authority_id": "map_display:hadramaut_1900",
+      "representative_visual_id": "hadramaut_representative",
+      "name_zh": "哈德拉毛",
+      "short_name_zh": "哈德拉毛",
+      "label_anchor": {
+        "lon": 49.1,
+        "lat": 17.8
+      },
+      "is_world_map_display_only": true,
+      "boundary_kind": "APPROXIMATE_CARTOGRAPHIC_BOUNDARY",
+      "approximate": true,
+      "confidence": "low",
+      "flag_frame": [
+        47.4,
+        15.4,
+        52.4,
+        20.2
+      ],
+      "mask_cells": [
+        {
+          "outer": [
+            [
+              47.2,
+              12.0
+            ],
+            [
+              47.2,
+              15.0
+            ],
+            [
+              46.5,
+              17.4
+            ],
+            [
+              45.8,
+              18.6
+            ],
+            [
+              45.0,
+              19.4
+            ],
+            [
+              43.8,
+              19.8
+            ],
+            [
+              45.5,
+              20.0
+            ],
+            [
+              47.2,
+              20.5
+            ],
+            [
+              49.0,
+              21.8
+            ],
+            [
+              51.6,
+              21.8
+            ],
+            [
+              53.4,
+              21.8
+            ],
+            [
+              55.141176470588235,
+              21.8
+            ],
+            [
+              55.8,
+              23.2
+            ],
+            [
+              55.0,
+              21.5
+            ],
+            [
+              54.1,
+              19.5
+            ],
+            [
+              53.2,
+              17.8
+            ],
+            [
+              52.7,
+              18.4
+            ],
+            [
+              51.8,
+              18.5
+            ],
+            [
+              51.1,
+              18.0
+            ],
+            [
+              51.1,
+              12.0
+            ]
+          ],
+          "holes": []
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "region_ids": [
+        "political_map_region:qatar",
+        "political_map_region:trucial"
+      ],
+      "points": [
+        [
+          51.611107662910506,
+          24.5
+        ],
+        [
+          51.6,
+          24.5
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:qatar",
+        "political_map_region:hasa"
+      ],
+      "points": [
+        [
+          50.7,
+          24.5
+        ],
+        [
+          50.7,
+          24.88125
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:qatar",
+        "political_map_region:hasa"
+      ],
+      "points": [
+        [
+          51.6,
+          24.5
+        ],
+        [
+          50.7,
+          24.5
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:kuwait",
+        "political_map_region:hasa"
+      ],
+      "points": [
+        [
+          47.8,
+          27.8
+        ],
+        [
+          47.73919889977652,
+          27.827636863737947
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:kuwait",
+        "political_map_region:hasa"
+      ],
+      "points": [
+        [
+          48.997115384615384,
+          28.133173076923075
+        ],
+        [
+          49.0,
+          28.1
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:kuwait",
+        "political_map_region:hasa"
+      ],
+      "points": [
+        [
+          49.0,
+          28.1
+        ],
+        [
+          47.8,
+          27.8
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:kuwait",
+        "political_map_region:rashidi"
+      ],
+      "points": [
+        [
+          47.639661016949155,
+          27.8728813559322
+        ],
+        [
+          46.7,
+          28.3
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:kuwait",
+        "political_map_region:rashidi"
+      ],
+      "points": [
+        [
+          46.7,
+          28.3
+        ],
+        [
+          46.60231012634384,
+          30.35148734677951
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:aden",
+        "political_map_region:yemen"
+      ],
+      "points": [
+        [
+          44.4,
+          15.3
+        ],
+        [
+          45.8,
+          15.5
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:aden",
+        "political_map_region:yemen"
+      ],
+      "points": [
+        [
+          45.8,
+          15.5
+        ],
+        [
+          47.2,
+          15.0
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:aden",
+        "political_map_region:yemen"
+      ],
+      "points": [
+        [
+          42.64705882352941,
+          15.0
+        ],
+        [
+          43.3,
+          15.0
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:aden",
+        "political_map_region:yemen"
+      ],
+      "points": [
+        [
+          43.3,
+          15.0
+        ],
+        [
+          44.4,
+          15.3
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:aden",
+        "political_map_region:hadramaut"
+      ],
+      "points": [
+        [
+          47.2,
+          15.0
+        ],
+        [
+          47.2,
+          13.614285714285716
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:yemen",
+        "political_map_region:hejaz"
+      ],
+      "points": [
+        [
+          39.775757575757574,
+          19.8
+        ],
+        [
+          43.8,
+          19.8
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:yemen",
+        "political_map_region:hadramaut"
+      ],
+      "points": [
+        [
+          45.8,
+          18.6
+        ],
+        [
+          46.5,
+          17.4
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:yemen",
+        "political_map_region:hadramaut"
+      ],
+      "points": [
+        [
+          46.5,
+          17.4
+        ],
+        [
+          47.2,
+          15.0
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:yemen",
+        "political_map_region:hadramaut"
+      ],
+      "points": [
+        [
+          43.8,
+          19.8
+        ],
+        [
+          45.0,
+          19.4
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:yemen",
+        "political_map_region:hadramaut"
+      ],
+      "points": [
+        [
+          45.0,
+          19.4
+        ],
+        [
+          45.8,
+          18.6
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:hejaz",
+        "political_map_region:rashidi"
+      ],
+      "points": [
+        [
+          41.2,
+          27.0
+        ],
+        [
+          41.9,
+          24.5
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:hejaz",
+        "political_map_region:rashidi"
+      ],
+      "points": [
+        [
+          41.9,
+          24.5
+        ],
+        [
+          42.7,
+          21.8
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:hejaz",
+        "political_map_region:rashidi"
+      ],
+      "points": [
+        [
+          42.7,
+          21.8
+        ],
+        [
+          43.8,
+          19.8
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:hejaz",
+        "political_map_region:rashidi"
+      ],
+      "points": [
+        [
+          39.71990305616083,
+          33.90048471919584
+        ],
+        [
+          40.1,
+          32.0
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:hejaz",
+        "political_map_region:rashidi"
+      ],
+      "points": [
+        [
+          40.1,
+          32.0
+        ],
+        [
+          40.7,
+          29.5
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:hejaz",
+        "political_map_region:rashidi"
+      ],
+      "points": [
+        [
+          40.7,
+          29.5
+        ],
+        [
+          41.2,
+          27.0
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:trucial",
+        "political_map_region:oman"
+      ],
+      "points": [
+        [
+          56.0,
+          25.940513922902493
+        ],
+        [
+          56.0,
+          25.0
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:trucial",
+        "political_map_region:oman"
+      ],
+      "points": [
+        [
+          56.0,
+          25.0
+        ],
+        [
+          55.8,
+          23.2
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:trucial",
+        "political_map_region:oman"
+      ],
+      "points": [
+        [
+          56.0,
+          25.95
+        ],
+        [
+          56.0,
+          25.940515790811464
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:trucial",
+        "political_map_region:hasa"
+      ],
+      "points": [
+        [
+          55.8,
+          23.2
+        ],
+        [
+          55.20803779678094,
+          22.785626457746663
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:trucial",
+        "political_map_region:hasa"
+      ],
+      "points": [
+        [
+          55.208035418276324,
+          22.785624792793428
+        ],
+        [
+          54.8,
+          22.5
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:trucial",
+        "political_map_region:hasa"
+      ],
+      "points": [
+        [
+          54.8,
+          22.5
+        ],
+        [
+          53.4,
+          21.8
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:trucial",
+        "political_map_region:hasa"
+      ],
+      "points": [
+        [
+          51.6,
+          21.8
+        ],
+        [
+          51.6,
+          24.5
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:trucial",
+        "political_map_region:hadramaut"
+      ],
+      "points": [
+        [
+          53.4,
+          21.8
+        ],
+        [
+          51.6,
+          21.8
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:oman",
+        "political_map_region:mahra"
+      ],
+      "points": [
+        [
+          53.2,
+          16.6753090983439
+        ],
+        [
+          53.2,
+          17.8
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:oman",
+        "political_map_region:hadramaut"
+      ],
+      "points": [
+        [
+          53.2,
+          17.8
+        ],
+        [
+          54.1,
+          19.5
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:oman",
+        "political_map_region:hadramaut"
+      ],
+      "points": [
+        [
+          54.1,
+          19.5
+        ],
+        [
+          55.0,
+          21.5
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:oman",
+        "political_map_region:hadramaut"
+      ],
+      "points": [
+        [
+          55.0,
+          21.5
+        ],
+        [
+          55.8,
+          23.2
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:mahra",
+        "political_map_region:hadramaut"
+      ],
+      "points": [
+        [
+          51.8,
+          18.5
+        ],
+        [
+          52.7,
+          18.4
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:mahra",
+        "political_map_region:hadramaut"
+      ],
+      "points": [
+        [
+          52.7,
+          18.4
+        ],
+        [
+          53.2,
+          17.8
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:mahra",
+        "political_map_region:hadramaut"
+      ],
+      "points": [
+        [
+          51.1,
+          15.38
+        ],
+        [
+          51.1,
+          18.0
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:mahra",
+        "political_map_region:hadramaut"
+      ],
+      "points": [
+        [
+          51.1,
+          18.0
+        ],
+        [
+          51.8,
+          18.5
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:hasa",
+        "political_map_region:rashidi"
+      ],
+      "points": [
+        [
+          49.0,
+          21.8
+        ],
+        [
+          48.1,
+          23.4
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:hasa",
+        "political_map_region:rashidi"
+      ],
+      "points": [
+        [
+          48.1,
+          23.4
+        ],
+        [
+          47.5,
+          25.0
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:hasa",
+        "political_map_region:rashidi"
+      ],
+      "points": [
+        [
+          47.5,
+          25.0
+        ],
+        [
+          47.5,
+          27.0
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:hasa",
+        "political_map_region:rashidi"
+      ],
+      "points": [
+        [
+          47.5,
+          27.0
+        ],
+        [
+          47.639661016949155,
+          27.8728813559322
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:hasa",
+        "political_map_region:hadramaut"
+      ],
+      "points": [
+        [
+          55.8,
+          23.2
+        ],
+        [
+          55.141176470588235,
+          21.8
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:hasa",
+        "political_map_region:hadramaut"
+      ],
+      "points": [
+        [
+          55.141176470588235,
+          21.8
+        ],
+        [
+          53.4,
+          21.8
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:hasa",
+        "political_map_region:hadramaut"
+      ],
+      "points": [
+        [
+          51.6,
+          21.8
+        ],
+        [
+          49.0,
+          21.8
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:rashidi",
+        "political_map_region:hadramaut"
+      ],
+      "points": [
+        [
+          49.0,
+          21.8
+        ],
+        [
+          47.2,
+          20.5
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:rashidi",
+        "political_map_region:hadramaut"
+      ],
+      "points": [
+        [
+          47.2,
+          20.5
+        ],
+        [
+          45.5,
+          20.0
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:rashidi",
+        "political_map_region:hadramaut"
+      ],
+      "points": [
+        [
+          45.5,
+          20.0
+        ],
+        [
+          43.8,
+          19.8
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:bahrain"
+      ],
+      "points": [
+        [
+          50.49,
+          26.05
+        ],
+        [
+          50.47,
+          26.16
+        ],
+        [
+          50.52,
+          26.2
+        ],
+        [
+          50.58,
+          26.24
+        ],
+        [
+          50.605,
+          26.22
+        ],
+        [
+          50.625,
+          26.17
+        ],
+        [
+          50.63,
+          26.1
+        ],
+        [
+          50.62,
+          26.03
+        ],
+        [
+          50.6,
+          25.98
+        ],
+        [
+          50.575,
+          25.9
+        ],
+        [
+          50.58,
+          25.84
+        ],
+        [
+          50.56,
+          25.79
+        ],
+        [
+          50.535,
+          25.83
+        ],
+        [
+          50.51,
+          25.96
+        ],
+        [
+          50.49,
+          26.05
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:bahrain"
+      ],
+      "points": [
+        [
+          50.675,
+          26.15
+        ],
+        [
+          50.665,
+          26.105
+        ],
+        [
+          50.64,
+          26.13
+        ],
+        [
+          50.65,
+          26.165
+        ],
+        [
+          50.675,
+          26.15
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:bahrain"
+      ],
+      "points": [
+        [
+          50.42,
+          26.19
+        ],
+        [
+          50.425,
+          26.13
+        ],
+        [
+          50.4,
+          26.115
+        ],
+        [
+          50.39,
+          26.18
+        ],
+        [
+          50.42,
+          26.19
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:bahrain"
+      ],
+      "points": [
+        [
+          50.6,
+          26.255
+        ],
+        [
+          50.635,
+          26.28
+        ],
+        [
+          50.65,
+          26.25
+        ],
+        [
+          50.68,
+          26.26
+        ],
+        [
+          50.685,
+          26.23
+        ],
+        [
+          50.665,
+          26.215
+        ],
+        [
+          50.64,
+          26.225
+        ],
+        [
+          50.6,
+          26.255
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:qatar"
+      ],
+      "points": [
+        [
+          50.7,
+          24.88125
+        ],
+        [
+          50.75,
+          24.8
+        ],
+        [
+          50.8,
+          25.0
+        ],
+        [
+          50.95,
+          25.7
+        ],
+        [
+          51.1,
+          26.1
+        ],
+        [
+          51.3,
+          26.1
+        ],
+        [
+          51.5,
+          25.7
+        ],
+        [
+          51.55,
+          25.2
+        ],
+        [
+          51.58,
+          24.7
+        ],
+        [
+          51.60333,
+          24.55
+        ],
+        [
+          51.611107662910506,
+          24.5
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:kuwait"
+      ],
+      "points": [
+        [
+          47.73919889977652,
+          27.827636863737947
+        ],
+        [
+          47.73623236922766,
+          27.92703249241196
+        ],
+        [
+          47.73898,
+          27.83492
+        ],
+        [
+          47.73919736806357,
+          27.8276375599711
+        ],
+        [
+          46.7,
+          28.3
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:kuwait"
+      ],
+      "points": [
+        [
+          46.60231012634384,
+          30.35148734677951
+        ],
+        [
+          46.7517,
+          30.2967
+        ],
+        [
+          46.86449,
+          30.2
+        ],
+        [
+          47.2921,
+          29.8334
+        ],
+        [
+          47.7,
+          28.488517136204887
+        ],
+        [
+          47.7,
+          28.8
+        ],
+        [
+          48.28451265626276,
+          28.8
+        ],
+        [
+          48.6033,
+          28.1211
+        ],
+        [
+          48.54909,
+          28.23656
+        ],
+        [
+          48.0286,
+          29.345
+        ],
+        [
+          47.83038,
+          29.364
+        ],
+        [
+          47.95,
+          29.39
+        ],
+        [
+          48.2,
+          29.35
+        ],
+        [
+          48.5,
+          28.7
+        ],
+        [
+          48.53863,
+          28.65494
+        ],
+        [
+          48.538630257523366,
+          28.654929699557716
+        ],
+        [
+          48.8,
+          28.35
+        ],
+        [
+          48.997115384615384,
+          28.133173076923075
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:kuwait"
+      ],
+      "points": [
+        [
+          47.7146,
+          29.38318
+        ],
+        [
+          47.71563,
+          29.37499
+        ],
+        [
+          47.7072,
+          29.3758
+        ],
+        [
+          47.7146,
+          29.38318
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:kuwait"
+      ],
+      "points": [
+        [
+          48.1224,
+          29.7224
+        ],
+        [
+          48.10491,
+          29.70491
+        ],
+        [
+          47.9594,
+          30.0331
+        ],
+        [
+          48.17143,
+          29.99999
+        ],
+        [
+          48.18231,
+          29.92385
+        ],
+        [
+          48.1188,
+          29.9795
+        ],
+        [
+          48.08,
+          29.7733
+        ],
+        [
+          48.1224,
+          29.7224
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:aden"
+      ],
+      "points": [
+        [
+          42.7855,
+          13.911
+        ],
+        [
+          42.6897,
+          14.0125
+        ],
+        [
+          42.7671,
+          14.0662
+        ],
+        [
+          42.7999,
+          13.9969
+        ],
+        [
+          42.7855,
+          13.911
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:aden"
+      ],
+      "points": [
+        [
+          47.2,
+          13.614285714285716
+        ],
+        [
+          46.6,
+          13.4
+        ],
+        [
+          45.8,
+          13.05
+        ],
+        [
+          45.07,
+          12.73
+        ],
+        [
+          44.9,
+          12.76
+        ],
+        [
+          44.4,
+          12.65
+        ],
+        [
+          43.4,
+          12.7
+        ],
+        [
+          43.38684,
+          12.72632
+        ],
+        [
+          43.15,
+          13.2
+        ],
+        [
+          42.64705882352941,
+          15.0
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:aden"
+      ],
+      "points": [
+        [
+          43.2306,
+          13.2711
+        ],
+        [
+          43.46732,
+          12.84337
+        ],
+        [
+          43.4833,
+          12.8145
+        ],
+        [
+          43.2306,
+          13.2711
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:yemen"
+      ],
+      "points": [
+        [
+          42.64705882352941,
+          15.0
+        ],
+        [
+          42.2,
+          16.6
+        ],
+        [
+          42.12918230668414,
+          16.670817693315854
+        ],
+        [
+          42.1706,
+          16.5628
+        ],
+        [
+          41.9319,
+          16.6558
+        ],
+        [
+          41.7536,
+          16.8761
+        ],
+        [
+          41.945,
+          16.7108
+        ],
+        [
+          42.0757,
+          16.8103
+        ],
+        [
+          42.02687,
+          16.77313
+        ],
+        [
+          41.97193,
+          16.82807
+        ],
+        [
+          41.9395,
+          16.9758
+        ],
+        [
+          41.9879,
+          16.7553
+        ],
+        [
+          41.92274705882353,
+          16.877252941176472
+        ],
+        [
+          40.6,
+          18.2
+        ],
+        [
+          39.775757575757574,
+          19.8
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:hejaz"
+      ],
+      "points": [
+        [
+          39.775757575757574,
+          19.8
+        ],
+        [
+          38.9,
+          21.5
+        ],
+        [
+          37.60164,
+          24.2822
+        ],
+        [
+          38.4469,
+          23.7891
+        ],
+        [
+          37.4424,
+          24.3751
+        ],
+        [
+          37.1545,
+          24.8401
+        ],
+        [
+          37.23354669888614,
+          24.863344501522505
+        ],
+        [
+          36.4,
+          26.0
+        ],
+        [
+          35.91644174641149,
+          26.967116507177025
+        ],
+        [
+          35.1606,
+          28.0567
+        ],
+        [
+          34.5772,
+          28.0891
+        ],
+        [
+          34.8068,
+          28.5391
+        ],
+        [
+          35.0037,
+          29.5282
+        ],
+        [
+          34.96141,
+          29.31577
+        ],
+        [
+          34.9,
+          29.5
+        ],
+        [
+          34.906799899608366,
+          29.53150953480289
+        ],
+        [
+          34.8778,
+          29.5325
+        ],
+        [
+          34.705232009828556,
+          30.0
+        ],
+        [
+          36.404674918851434,
+          30.0
+        ],
+        [
+          36.3515,
+          30.7331
+        ],
+        [
+          36.5024,
+          31.476
+        ],
+        [
+          38.8783,
+          33.9068
+        ],
+        [
+          39.71990305616083,
+          33.90048471919584
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:trucial"
+      ],
+      "points": [
+        [
+          56.0,
+          25.940515790811464
+        ],
+        [
+          55.8594,
+          25.7204
+        ],
+        [
+          56.0,
+          25.940513922902493
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:trucial"
+      ],
+      "points": [
+        [
+          55.20803779678094,
+          22.785626457746663
+        ],
+        [
+          55.21182280980103,
+          22.822426665920936
+        ],
+        [
+          55.21181844729798,
+          22.822414899911283
+        ],
+        [
+          55.208035418276324,
+          22.785624792793428
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:trucial"
+      ],
+      "points": [
+        [
+          51.611107662910506,
+          24.5
+        ],
+        [
+          51.64846995795081,
+          24.259810270320237
+        ],
+        [
+          51.7258,
+          24.2611
+        ],
+        [
+          51.736681738236285,
+          24.22935958614228
+        ],
+        [
+          52.35279,
+          24.08267
+        ],
+        [
+          52.086,
+          23.956
+        ],
+        [
+          52.5816,
+          24.1913
+        ],
+        [
+          53.406731117082664,
+          24.07067111178408
+        ],
+        [
+          53.7,
+          24.1
+        ],
+        [
+          53.78467,
+          24.14233
+        ],
+        [
+          53.9,
+          24.1325
+        ],
+        [
+          53.6326,
+          24.1553
+        ],
+        [
+          53.8527,
+          24.2678
+        ],
+        [
+          53.879912006920414,
+          24.189961003460205
+        ],
+        [
+          54.38514521657251,
+          24.442577608286253
+        ],
+        [
+          54.3306,
+          24.4568
+        ],
+        [
+          54.3867,
+          24.5129
+        ],
+        [
+          54.42157069727937,
+          24.47427078445099
+        ],
+        [
+          54.64514,
+          24.72579
+        ],
+        [
+          54.5756,
+          24.441
+        ],
+        [
+          54.6503,
+          24.7469
+        ],
+        [
+          54.6981770613664,
+          24.785447944123884
+        ],
+        [
+          54.8,
+          24.9
+        ],
+        [
+          55.0351996416484,
+          25.05679976109893
+        ],
+        [
+          55.565123325475966,
+          25.483464806344266
+        ],
+        [
+          55.85,
+          25.8
+        ],
+        [
+          56.0,
+          25.95
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:oman"
+      ],
+      "points": [
+        [
+          58.6515,
+          20.3704
+        ],
+        [
+          58.9195,
+          20.6823
+        ],
+        [
+          58.6512,
+          20.1699
+        ],
+        [
+          58.6515,
+          20.3704
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:oman"
+      ],
+      "points": [
+        [
+          56.0,
+          25.940513922902493
+        ],
+        [
+          56.0799,
+          26.0656
+        ],
+        [
+          56.2019,
+          26.2609
+        ],
+        [
+          56.3039,
+          26.2011
+        ],
+        [
+          56.4015,
+          26.2198
+        ],
+        [
+          56.311,
+          26.2227
+        ],
+        [
+          56.4042,
+          26.3687
+        ],
+        [
+          56.4714,
+          26.1422
+        ],
+        [
+          56.3207,
+          26.1669
+        ],
+        [
+          56.4239,
+          25.9503
+        ],
+        [
+          56.2697,
+          25.636
+        ],
+        [
+          56.39969,
+          25.90094
+        ],
+        [
+          56.4,
+          25.9
+        ],
+        [
+          57.0,
+          24.6
+        ],
+        [
+          58.0,
+          23.9
+        ],
+        [
+          58.480279635840915,
+          23.65986018207954
+        ],
+        [
+          58.6093,
+          23.6328
+        ],
+        [
+          58.66222467963079,
+          23.568887660184604
+        ],
+        [
+          58.8,
+          23.5
+        ],
+        [
+          59.529464832313224,
+          22.63375613665905
+        ],
+        [
+          59.8017,
+          22.5369
+        ],
+        [
+          59.8092,
+          22.2233
+        ],
+        [
+          59.3443,
+          21.442
+        ],
+        [
+          58.8372,
+          21.0394
+        ],
+        [
+          58.5207,
+          20.4195
+        ],
+        [
+          58.2115,
+          20.3972
+        ],
+        [
+          58.25522,
+          20.40035
+        ],
+        [
+          57.81540272191563,
+          20.169971425753545
+        ],
+        [
+          57.6876,
+          19.7083
+        ],
+        [
+          57.8057,
+          18.971
+        ],
+        [
+          56.8104,
+          18.7444
+        ],
+        [
+          56.6439,
+          18.5792
+        ],
+        [
+          56.5592,
+          18.1333
+        ],
+        [
+          56.3523,
+          17.9412
+        ],
+        [
+          55.436,
+          17.8261
+        ],
+        [
+          55.2306,
+          17.55
+        ],
+        [
+          55.2505,
+          17.2669
+        ],
+        [
+          55.0319,
+          17.0147
+        ],
+        [
+          54.0926,
+          17.0143
+        ],
+        [
+          53.2,
+          16.6753090983439
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:oman"
+      ],
+      "points": [
+        [
+          56.0,
+          25.95
+        ],
+        [
+          56.01677,
+          25.96677
+        ],
+        [
+          56.0,
+          25.940515790811464
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:mahra"
+      ],
+      "points": [
+        [
+          53.2,
+          16.6753090983439
+        ],
+        [
+          53.1144,
+          16.6428
+        ],
+        [
+          52.64557230581655,
+          17.63355639973393
+        ],
+        [
+          53.09026,
+          16.6938
+        ],
+        [
+          52.55,
+          16.35
+        ],
+        [
+          52.48696,
+          16.23292
+        ],
+        [
+          52.48694304372192,
+          16.232907080886175
+        ],
+        [
+          52.2,
+          15.7
+        ],
+        [
+          51.58605,
+          15.54651
+        ],
+        [
+          51.4,
+          15.5
+        ],
+        [
+          51.1,
+          15.38
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:mahra"
+      ],
+      "points": [
+        [
+          52.52456684902121,
+          17.889272800898134
+        ],
+        [
+          52.52456684902121,
+          17.889272800898137
+        ],
+        [
+          52.4,
+          18.0
+        ],
+        [
+          52.52456684902121,
+          17.889272800898134
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:hasa"
+      ],
+      "points": [
+        [
+          55.208035418276324,
+          22.785624792793428
+        ],
+        [
+          55.1992,
+          22.6997
+        ],
+        [
+          55.20803779678094,
+          22.785626457746663
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:hasa"
+      ],
+      "points": [
+        [
+          47.73919736806357,
+          27.827637559971105
+        ],
+        [
+          47.7568,
+          27.2379
+        ],
+        [
+          47.73919889977652,
+          27.827636863737947
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:hasa"
+      ],
+      "points": [
+        [
+          48.997115384615384,
+          28.133173076923075
+        ],
+        [
+          49.3,
+          27.8
+        ],
+        [
+          49.75,
+          27.45
+        ],
+        [
+          49.95,
+          26.95
+        ],
+        [
+          50.05142,
+          26.74717
+        ],
+        [
+          49.5422,
+          27.1711
+        ],
+        [
+          50.1554,
+          26.6606
+        ],
+        [
+          49.9964,
+          26.7425
+        ],
+        [
+          50.07364,
+          26.70271
+        ],
+        [
+          50.25,
+          26.35
+        ],
+        [
+          50.15,
+          25.8
+        ],
+        [
+          50.19742,
+          25.71702
+        ],
+        [
+          49.9939,
+          26.02
+        ],
+        [
+          50.2554,
+          25.6307
+        ],
+        [
+          50.1486,
+          25.6987
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:hasa"
+      ],
+      "points": [
+        [
+          50.1486,
+          25.6987
+        ],
+        [
+          50.4771,
+          25.4207
+        ],
+        [
+          50.6433,
+          24.9948
+        ],
+        [
+          50.1865,
+          24.2901
+        ],
+        [
+          50.63654,
+          24.98437
+        ],
+        [
+          50.7,
+          24.88125
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:hasa"
+      ],
+      "points": [
+        [
+          47.5,
+          27.0
+        ],
+        [
+          47.639661016949155,
+          27.872881355932204
+        ],
+        [
+          47.73919736806357,
+          27.827637559971105
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:hasa"
+      ],
+      "points": [
+        [
+          48.24313,
+          26.38433
+        ],
+        [
+          49.0934,
+          25.6377
+        ],
+        [
+          48.1286,
+          26.4849
+        ],
+        [
+          48.24313,
+          26.38433
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:hasa"
+      ],
+      "points": [
+        [
+          50.24179,
+          25.63936
+        ],
+        [
+          50.2634,
+          25.60155
+        ],
+        [
+          50.1486,
+          25.6987
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:hasa"
+      ],
+      "points": [
+        [
+          50.1486,
+          25.6987
+        ],
+        [
+          50.24179,
+          25.63936
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:rashidi"
+      ],
+      "points": [
+        [
+          39.71990305616083,
+          33.90048471919584
+        ],
+        [
+          41.397,
+          33.8879
+        ],
+        [
+          42.6837,
+          33.0692
+        ],
+        [
+          43.7845,
+          31.8753
+        ],
+        [
+          44.5197,
+          31.3215
+        ],
+        [
+          45.3109,
+          30.8251
+        ],
+        [
+          46.60231012634384,
+          30.35148734677951
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:hadramaut"
+      ],
+      "points": [
+        [
+          51.1,
+          15.38
+        ],
+        [
+          51.0,
+          15.34
+        ],
+        [
+          50.4,
+          15.1
+        ],
+        [
+          49.75,
+          14.78
+        ],
+        [
+          49.12,
+          14.5
+        ],
+        [
+          48.1,
+          14.1
+        ],
+        [
+          47.97097,
+          14.02742
+        ],
+        [
+          47.3,
+          13.65
+        ],
+        [
+          47.2,
+          13.614285714285716
+        ]
+      ]
+    },
+    {
+      "region_ids": [
+        "political_map_region:hadramaut"
+      ],
+      "points": [
+        [
+          49.40352,
+          16.69548
+        ],
+        [
+          49.4,
+          16.7
+        ],
+        [
+          49.75,
+          16.25
+        ],
+        [
+          49.40352,
+          16.69548
+        ]
+      ]
+    }
+  ]
+}

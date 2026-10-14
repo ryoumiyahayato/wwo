@@ -1,0 +1,926 @@
+{
+  "schema_version": 1,
+  "visual_date": "1900-01-01",
+  "geometry_source_date": "1900-03-12",
+  "policy": {
+    "resolver_order": [
+      "LOCAL_OFFICIAL_FLAG",
+      "COLONIAL_FLAG",
+      "PROTECTORATE_FLAG",
+      "DOMINION_FLAG",
+      "ADMINISTRATIVE_STANDARD",
+      "GOVERNOR_STANDARD",
+      "COMPANY_FLAG",
+      "METROPOLITAN_FLAG",
+      "COLOR_FALLBACK"
+    ],
+    "presentation_never_changes_runtime_authority": true,
+    "no_emblem_extraction": true
+  },
+  "records": {
+    "sudan_governor_general_1899": {
+      "id": "sudan_governor_general_1899",
+      "visual_kind": "ADMINISTRATIVE_STANDARD",
+      "display_role": "GOVERNOR_STANDARD",
+      "valid_from": "1899-01-19",
+      "valid_to": "1956-01-01",
+      "asset_path": "res://assets/historical_liveries/1900/sudan_governor_general_1899.svg",
+      "asset_sha256": "e2a1dc59f7485c4f9731b5fd350ab11dd3e8e7eaaf9969a4777710cc20574766",
+      "source_title": "Governor-General of Anglo-Egyptian Sudan: personal flag afloat",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Flag_of_the_Governor-General_of_the_Anglo-Egyptian_Sudan.svg",
+      "source_asset": "https://upload.wikimedia.org/wikipedia/commons/1/15/Flag_of_the_Governor-General_of_the_Anglo-Egyptian_Sudan.svg",
+      "source_artist": "Hoshie; Sodacan; Turtle-bienhoa",
+      "source_license": "Public domain",
+      "confidence": "medium",
+      "historical_design_claim": true,
+      "evidence": [
+        "https://www.flaginstitute.org/wp/wp-content/uploads/2021/02/Badges-of-the-British-Commonwealth.pdf",
+        "https://www.fotw.info/flags/sd-hist.html"
+      ],
+      "evidence_note": "Flag Institute badge index dates Sudan governor to 1899; FOTW describes the personal flag afloat. SVG is a modern reconstruction; typography is not a 1900 facsimile."
+    },
+    "bsac_company_1893": {
+      "id": "bsac_company_1893",
+      "visual_kind": "COMPANY_FLAG",
+      "display_role": "COMPANY_FLAG",
+      "valid_from": "1893-11-04",
+      "valid_to": "1923-10-01",
+      "asset_path": "res://assets/historical_liveries/1900/bsac_company_1893.svg",
+      "asset_sha256": "4ecfd8762851da11fe54b42bcc2e4d7baca0a64f928a881395bf61e66e97e017",
+      "source_title": "British South Africa Company: Union Flag with company crest",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Flag_of_the_British_South_Africa_Company.svg",
+      "source_asset": "https://upload.wikimedia.org/wikipedia/commons/3/34/Flag_of_the_British_South_Africa_Company.svg",
+      "source_artist": "Mangwanani",
+      "source_license": "Public domain",
+      "confidence": "medium",
+      "historical_design_claim": true,
+      "evidence": [
+        "https://fiav.org/wp-content/uploads/2021/05/15-09Berry-BritishSouthAfricaCompany.pdf",
+        "https://collection.nam.ac.uk/detail.php?acc=1998-03-21-1"
+      ],
+      "evidence_note": "Berry records the company flag at Bulawayo in 1893. Red ring and lettering differ among surviving variants; selected SVG is a reconstruction, not proof of one unique exact design. Excludes 1902 ensigns."
+    },
+    "cape_colonial_1876": {
+      "id": "cape_colonial_1876",
+      "visual_kind": "COLONIAL_FLAG",
+      "display_role": "COLONIAL_FLAG",
+      "valid_from": "1876-09-05",
+      "valid_to": "1910-05-31",
+      "asset_path": "res://assets/historical_liveries/1900/cape_colonial_1876.svg",
+      "asset_sha256": "5e31e3d9a9d6a5f9f4a2c96c31ad8766ddf919d0d48bd4eeb1f2b1dc67d82fbe",
+      "source_title": "Cape Colony: Blue Ensign",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Flag_of_the_Cape_Colony_%281876%E2%80%931910%29.svg",
+      "source_asset": "https://upload.wikimedia.org/wikipedia/commons/a/ac/Flag_of_the_Cape_Colony_%281876%E2%80%931910%29.svg",
+      "source_artist": "Sodacan; Fry1989",
+      "source_license": "CC BY-SA 4.0",
+      "confidence": "medium",
+      "historical_design_claim": true,
+      "evidence": [
+        "https://www.crwflags.com/fotw/flags/za-c.html",
+        "https://www.rmg.co.uk/collections/objects/rmgc-object-721"
+      ]
+    },
+    "natal_colonial_1905": {
+      "id": "natal_colonial_1905",
+      "visual_kind": "COLONIAL_FLAG",
+      "display_role": "APPROXIMATE_HISTORICAL_VISUAL",
+      "valid_from": "1905-01-01",
+      "valid_to": "1910-05-31",
+      "asset_path": "res://assets/historical_liveries/1900/natal_colonial_1905.svg",
+      "asset_sha256": "a25c59fc19e9320fe7e2a3778dc238fcb6872b17fad42605c291bf06d4eb139d",
+      "source_title": "Natal: later simplified badge Blue Ensign, approximate map representative",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Flag_of_the_Natal_Colony_%281875%E2%80%931910%29.svg",
+      "source_asset": "https://upload.wikimedia.org/wikipedia/commons/6/63/Flag_of_the_Natal_Colony_%281875%E2%80%931910%29.svg",
+      "source_artist": "Sodacan",
+      "source_license": "CC BY-SA 4.0",
+      "confidence": "low",
+      "historical_design_claim": false,
+      "priority_role": "COLONIAL_FLAG",
+      "approximate_valid_from": "1900-01-01",
+      "approximate_valid_to": "1905-01-01",
+      "evidence": [
+        "https://www.crwflags.com/fotw/flags/za-n.html"
+      ],
+      "evidence_note": "FOTW archival correspondence CO 323/326 places replacement of the original Public Seal badge in 1905, despite misleading SVG filename. Later same-colony Blue Ensign represents administrative continuity; not claimed as exact 1900 flag."
+    },
+    "india_governor_general_1885": {
+      "id": "india_governor_general_1885",
+      "visual_kind": "ADMINISTRATIVE_STANDARD",
+      "display_role": "GOVERNOR_STANDARD",
+      "valid_from": "1885-01-01",
+      "valid_to": "1947-08-15",
+      "asset_path": "res://assets/historical_liveries/1900/india_governor_general_1885.svg",
+      "asset_sha256": "e0d32be9afcbe8a6286707feec61ae65eb73ee83f39fd18b1c4d76a74e879623",
+      "source_title": "India: Governor-General / Viceroy standard",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Flag_of_the_Governor-General_of_India_%281885%E2%80%931947%29.svg",
+      "source_asset": "https://upload.wikimedia.org/wikipedia/commons/1/11/Flag_of_the_Governor-General_of_India_%281885%E2%80%931947%29.svg",
+      "source_artist": "Greentubing; Zscout; subsequent Commons contributors",
+      "source_license": "Public domain",
+      "confidence": "medium",
+      "historical_design_claim": true,
+      "evidence": [
+        "https://www.rmg.co.uk/collections/objects/rmgc-object-271"
+      ],
+      "evidence_note": "Museum specimen AAA0271 supports Governor-General standard. Full Union Flag with Star of India and crown; SVG is a modern reconstruction."
+    },
+    "algeria_colonial_ensign": {
+      "id": "algeria_colonial_ensign",
+      "visual_kind": "COLONIAL_FLAG",
+      "display_role": "APPROXIMATE_HISTORICAL_VISUAL",
+      "valid_from": "1848-01-01",
+      "valid_to": "1910-01-01",
+      "asset_path": "res://assets/historical_liveries/1900/algeria_colonial_ensign.svg",
+      "asset_sha256": "d93dfedfe01589771be19c8a6d8b8668c4f6e735ca4780f093a7ad4f7e1c2e37",
+      "source_title": "French Algeria: reported colonial / naval double-tricolour ensign",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Naval_ensign_of_French_Algeria_%281848%E2%80%931910%29.svg",
+      "source_asset": "https://upload.wikimedia.org/wikipedia/commons/4/46/Naval_ensign_of_French_Algeria_%281848%E2%80%931910%29.svg",
+      "source_artist": "Master Uegly",
+      "source_license": "CC0 1.0",
+      "confidence": "low",
+      "historical_design_claim": false,
+      "priority_role": "COLONIAL_FLAG",
+      "evidence_note": "Reported double-tricolour ensign: Commons cites 1844 Dictionary of Trade, Commerce and Navigation and 1908 cigarette card. This is a representative maritime colonial visual, not proof of universal official land use on 1900-01-01. Not the erroneous blue flag with French canton."
+    },
+    "egypt_administration_pre1914": {
+      "id": "egypt_administration_pre1914",
+      "visual_kind": "STATE_FLAG",
+      "display_role": "LOCAL_OFFICIAL_FLAG",
+      "valid_from": "1899-01-19",
+      "valid_to": "1914-12-19",
+      "asset_path": "res://assets/historical_flags/1900/ottoman_1844.png",
+      "asset_sha256": "1e6d1e456402fc73a5cb768cb23aedd3fd53c7a18cbb6474cfd2824c3f39122b",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Flag_of_the_Ottoman_Empire_(1844%E2%80%931922).svg",
+      "source_license": "Public domain",
+      "source_artist": "User:Orwellianist",
+      "confidence": "medium",
+      "evidence": [
+        "https://www.fotw.info/flags/sd-hist.html"
+      ],
+      "evidence_note": "Egyptian public flag in Sudan before 1914: red with one crescent/star, same design as Ottoman flag. Reuses full design; does not assert Ottoman administration of Sudan."
+    },
+    "sudan_joint_authority_1899": {
+      "id": "sudan_joint_authority_1899",
+      "visual_kind": "AUTHORITY_LIVERY",
+      "display_role": "APPROXIMATE_HISTORICAL_VISUAL",
+      "priority_role": "METROPOLITAN_FLAG",
+      "valid_from": "1899-01-19",
+      "valid_to": "1914-12-19",
+      "components": [
+        "uk_union_1801",
+        "egypt_administration_pre1914"
+      ],
+      "layout": "stacked_full_flags",
+      "source_page": "https://en.wikisource.org/wiki/Sudan_Convention_(1899)",
+      "evidence": [
+        "https://en.wikisource.org/wiki/Sudan_Convention_(1899)",
+        "https://www.fotw.info/flags/sd-hist.html"
+      ],
+      "evidence_note": "Article II requires joint British/Egyptian flags. Stacked panels are a presentation composition, never a historical Sudan flag. Suakin exception is not separately represented in this geometry.",
+      "confidence": "medium",
+      "historical_design_claim": false,
+      "historical_national_flag": "NONE",
+      "presentation_visual_kind": "AUTHORITY_LIVERY"
+    },
+    "swaziland_zar_authority_1894": {
+      "id": "swaziland_zar_authority_1894",
+      "visual_kind": "AUTHORITY_LIVERY",
+      "display_role": "METROPOLITAN_FLAG",
+      "valid_from": "1894-01-01",
+      "valid_to": "1902-05-31",
+      "components": [
+        "transvaal_vierkleur_1857"
+      ],
+      "layout": "single",
+      "historical_design_claim": false,
+      "confidence": "medium",
+      "source_page": "https://www.crwflags.com/fotw/Flags/sz_prot.html",
+      "evidence_note": "Full Vierkleur as protecting-power representative. Swazi monarchy and territory were not incorporated into ZAR; wartime practical control is disputed."
+    },
+    "rashidi_authority_1900": {
+      "id": "rashidi_authority_1900",
+      "visual_kind": "AUTHORITY_LIVERY",
+      "display_role": "APPROXIMATE_HISTORICAL_VISUAL",
+      "priority_role": "LOCAL_OFFICIAL_FLAG",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "asset_path": "res://assets/historical_liveries/1900/jabal_shammar_representative.svg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Flag_of_the_Emirate_of_Ha%27il.svg",
+      "confidence": "low",
+      "historical_design_claim": false,
+      "evidence_note": "Clean red/yellow Ha'il / Jabal Shammar associated representative flag. A modern reconstruction, not newly verified as exact for 1900. No lettering or scan content.",
+      "license": "CC BY-SA 3.0",
+      "source_date": "2007 reconstruction / 2019 simplification",
+      "historical_national_flag": "NOT_ASSERTED",
+      "asset_sha256": "e80554b635d8ba5b75f5d86bba6aff18f12d798d0981c13e649f640884106dbb",
+      "approximate": true,
+      "representative_basis": "Historically associated Jabal Shammar representative design; bounded approximate use",
+      "source_artist": "Guilherme Paula; simplified by NikNaks",
+      "source_license": "CC BY-SA 3.0",
+      "previous_historical_evidence_note": "Contemporary repository image arabia_zwemer_1900_flags.jpg; border, proportions and outlined Arial lettering are approximate.",
+      "previous_historical_source_page": "https://www.gutenberg.org/cache/epub/63928/pg63928-images.html#Page_200"
+    },
+    "bahrain_authority_1900": {
+      "id": "bahrain_authority_1900",
+      "visual_kind": "AUTHORITY_LIVERY",
+      "display_role": "APPROXIMATE_HISTORICAL_VISUAL",
+      "priority_role": "LOCAL_OFFICIAL_FLAG",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "asset_path": "res://assets/historical_liveries/1900/bahrain_authority_1900.svg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Flag_of_Bahrain_(1820%E2%80%931932).svg",
+      "confidence": "medium",
+      "historical_design_claim": false,
+      "evidence_note": "Historical red and white design, straight hoist panel. Source file description notes de facto 1910; exact 1900 proportions/layout unverified. Approximate full historical livery, no modern serrations or national flag assertion.",
+      "license": "PROJECT_AUTHORED_SIMPLE_LIVERY",
+      "source_date": "1820 design / 1910 reconstructed variant",
+      "historical_national_flag": "NOT_ASSERTED",
+      "approximate": true
+    },
+    "hadramaut_quaiti_livery_1900": {
+      "id": "hadramaut_quaiti_livery_1900",
+      "visual_kind": "AUTHORITY_LIVERY",
+      "display_role": "APPROXIMATE_HISTORICAL_VISUAL",
+      "priority_role": "LOCAL_OFFICIAL_FLAG",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "asset_path": "res://assets/historical_liveries/1900/quaiti_1880.svg",
+      "asset_sha256": "dd5ccca8ffea2391b519ce64b4d1e8e98007ce58f1eea4b27c8fc94ebcb58880",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Flag_of_Qu%27aiti_State_in_Hadhramaut_(1880-1939).svg",
+      "source_asset": "https://upload.wikimedia.org/wikipedia/commons/b/b2/Flag_of_Qu%27aiti_State_in_Hadhramaut_%281880-1939%29.svg",
+      "source_artist": "Dekodrak; Andel",
+      "license": "Public domain (PD-shape)",
+      "source_date": "1880-1939 design / 2019 reconstruction",
+      "confidence": "medium_low",
+      "historical_national_flag": "NOT_ASSERTED",
+      "historical_design_claim": false,
+      "evidence_note": "Full red/white Quaiti historical flag reconstruction used as an approximate regional Hadramaut livery. Not a Kathiri national flag, unified Hadramaut state, or assertion of 1900 British protection over Kathiri. No 1939 emblem flag used.",
+      "approximate": true
+    },
+    "hejaz_representative": {
+      "id": "hejaz_representative",
+      "visual_kind": "AUTHORITY_LIVERY",
+      "display_role": "APPROXIMATE_HISTORICAL_VISUAL",
+      "priority_role": "LOCAL_OFFICIAL_FLAG",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "asset_path": "res://assets/historical_liveries/1900/hejaz_representative.svg",
+      "asset_sha256": "d671bf2ebab05a4c8c62ebbb39bae9e8f82eb9936b239a64db8e5e1ca3a83cb4",
+      "approximate": true,
+      "confidence": "medium",
+      "historical_national_flag": "NOT_ASSERTED",
+      "historical_design_claim": false,
+      "representative_basis": "1917 Sharifian / Hejaz-associated flag",
+      "evidence_note": "Nearby-date local representative tricolour. Does not assert an independent Kingdom of Hejaz in 1900.",
+      "source_artist": "WWO",
+      "source_license": "PROJECT_AUTHORED_SIMPLE_LIVERY",
+      "source_page": "res://assets/historical_liveries/1900/ATTRIBUTION.md"
+    },
+    "hasa_representative": {
+      "id": "hasa_representative",
+      "visual_kind": "AUTHORITY_LIVERY",
+      "display_role": "APPROXIMATE_HISTORICAL_VISUAL",
+      "priority_role": "LOCAL_OFFICIAL_FLAG",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "asset_path": "res://assets/historical_liveries/1900/hasa_representative.svg",
+      "asset_sha256": "898ed2611b117b6d25e3f59f57941e530abe304b30aa9b2f04e3a3127dd1c65c",
+      "approximate": true,
+      "confidence": "low",
+      "historical_national_flag": "NOT_ASSERTED",
+      "historical_design_claim": false,
+      "representative_basis": "Regional Wahhabi red/white standard illustrated in 1900",
+      "evidence_note": "Historically associated regional livery from the repository flag plate. Hasa is still Ottoman-linked in authority metadata; this is not its exact provincial flag or a claim of Saudi rule in 1900.",
+      "source_artist": "WWO",
+      "source_license": "PROJECT_AUTHORED_SIMPLE_LIVERY",
+      "source_page": "res://assets/historical_liveries/1900/ATTRIBUTION.md"
+    },
+    "yemen_representative": {
+      "id": "yemen_representative",
+      "visual_kind": "AUTHORITY_LIVERY",
+      "display_role": "APPROXIMATE_HISTORICAL_VISUAL",
+      "priority_role": "LOCAL_OFFICIAL_FLAG",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "asset_path": "res://assets/historical_liveries/1900/yemen_representative.svg",
+      "asset_sha256": "1fc6684f073621ebbeed7690b4727530ed29abc94a03ee64ef0576dd0cb0cc37",
+      "approximate": true,
+      "confidence": "low",
+      "historical_national_flag": "NOT_ASSERTED",
+      "historical_design_claim": false,
+      "representative_basis": "Later Yemeni imamate red standard with sword and five stars",
+      "evidence_note": "Nearby-date local dynasty representative (1927 design family), simplified sword; not an exact Ottoman Yemen flag in 1900.",
+      "source_artist": "WWO",
+      "source_license": "PROJECT_AUTHORED_SIMPLE_LIVERY",
+      "source_page": "res://assets/historical_liveries/1900/ATTRIBUTION.md"
+    },
+    "trucial_representative": {
+      "id": "trucial_representative",
+      "visual_kind": "AUTHORITY_LIVERY",
+      "display_role": "APPROXIMATE_HISTORICAL_VISUAL",
+      "priority_role": "LOCAL_OFFICIAL_FLAG",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "asset_path": "res://assets/historical_liveries/1900/trucial_representative.svg",
+      "asset_sha256": "039dc897036e6d91e5b0ae206ed4976055ce77af30589425251a057fdc39b557",
+      "approximate": true,
+      "confidence": "medium",
+      "historical_national_flag": "NOT_ASSERTED",
+      "historical_design_claim": false,
+      "representative_basis": "Local treaty-coast red flag in a white border",
+      "evidence_note": "Qasimi / treaty-coast representative full flag. Border proportions are bounded approximation; does not assert a unified Trucial national flag.",
+      "source_artist": "WWO",
+      "source_license": "PROJECT_AUTHORED_SIMPLE_LIVERY",
+      "source_page": "res://assets/historical_liveries/1900/ATTRIBUTION.md"
+    },
+    "kuwait_representative": {
+      "id": "kuwait_representative",
+      "visual_kind": "AUTHORITY_LIVERY",
+      "display_role": "APPROXIMATE_HISTORICAL_VISUAL",
+      "priority_role": "LOCAL_OFFICIAL_FLAG",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "asset_path": "res://assets/historical_liveries/1900/kuwait_representative.svg",
+      "asset_sha256": "8f74c5f1da8535dfafed311e3de88dc542b738c5a585d86c03f11de73b17c8c9",
+      "approximate": true,
+      "confidence": "medium",
+      "historical_national_flag": "NOT_ASSERTED",
+      "historical_design_claim": false,
+      "representative_basis": "Nearby-date Kuwait red flag with local name",
+      "evidence_note": "1914 local design family with outlined Kuwait inscription. Typeface and proportions approximate; not an exact 1900 flag.",
+      "source_artist": "WWO",
+      "source_license": "PROJECT_AUTHORED_SIMPLE_LIVERY",
+      "source_page": "res://assets/historical_liveries/1900/ATTRIBUTION.md"
+    },
+    "qatar_representative": {
+      "id": "qatar_representative",
+      "visual_kind": "AUTHORITY_LIVERY",
+      "display_role": "APPROXIMATE_HISTORICAL_VISUAL",
+      "priority_role": "LOCAL_OFFICIAL_FLAG",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "asset_path": "res://assets/historical_liveries/1900/qatar_representative.svg",
+      "asset_sha256": "565d43b320c0f318a2d83aa1af27a66ddfba544c10a6b4248c2d0ea9a15d7b83",
+      "approximate": true,
+      "confidence": "low",
+      "historical_national_flag": "NOT_ASSERTED",
+      "historical_design_claim": false,
+      "representative_basis": "Nearby-date Qatar maroon/white serrated flag",
+      "evidence_note": "1930s local design family; maroon, nine serrations and proportions are representative, not asserted exact for 1900.",
+      "source_artist": "WWO",
+      "source_license": "PROJECT_AUTHORED_SIMPLE_LIVERY",
+      "source_page": "res://assets/historical_liveries/1900/ATTRIBUTION.md"
+    },
+    "mahra_representative": {
+      "id": "mahra_representative",
+      "visual_kind": "AUTHORITY_LIVERY",
+      "display_role": "APPROXIMATE_HISTORICAL_VISUAL",
+      "priority_role": "LOCAL_OFFICIAL_FLAG",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "asset_path": "res://assets/historical_liveries/1900/mahra_representative.svg",
+      "asset_sha256": "bd1f591c2810e1d2dca3961000e23b3356d3b1828152c4fe9d4c6b5749f48c30",
+      "approximate": true,
+      "confidence": "low",
+      "historical_national_flag": "NOT_ASSERTED",
+      "historical_design_claim": false,
+      "representative_basis": "Later Mahra-associated green/white/blue flag with red hoist",
+      "evidence_note": "Historically associated later sultanate design family, rather than a nearby-date exact flag. No later political status is backdated.",
+      "source_artist": "WWO",
+      "source_license": "PROJECT_AUTHORED_SIMPLE_LIVERY",
+      "source_page": "res://assets/historical_liveries/1900/ATTRIBUTION.md"
+    },
+    "aden_representative": {
+      "id": "aden_representative",
+      "visual_kind": "AUTHORITY_LIVERY",
+      "display_role": "APPROXIMATE_HISTORICAL_VISUAL",
+      "priority_role": "LOCAL_OFFICIAL_FLAG",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "asset_path": "res://assets/historical_liveries/1900/aden_representative.svg",
+      "asset_sha256": "99bfbe7e80df4b1d543b0baf379d1451b89f9825ec9f290d45c8ee2b5f0fa744",
+      "approximate": true,
+      "confidence": "low",
+      "historical_national_flag": "NOT_ASSERTED",
+      "historical_design_claim": false,
+      "representative_basis": "Later Aden colonial Blue Ensign with dhow badge",
+      "evidence_note": "1937 colonial design family, authored simplified dhow reconstruction within the complete ensign. Representative for the macro Aden region including treaty hinterland, not its exact 1900 administrative flag.",
+      "source_artist": "WWO",
+      "source_license": "PROJECT_AUTHORED_SIMPLE_LIVERY",
+      "source_page": "res://assets/historical_liveries/1900/ATTRIBUTION.md"
+    },
+    "hadramaut_representative": {
+      "id": "hadramaut_representative",
+      "visual_kind": "AUTHORITY_LIVERY",
+      "display_role": "APPROXIMATE_HISTORICAL_VISUAL",
+      "priority_role": "LOCAL_OFFICIAL_FLAG",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "asset_path": "res://assets/historical_liveries/1900/hadramaut_representative.svg",
+      "asset_sha256": "62d4ae96dbeb0ba43ddab1122d58b88908f5debccfcf22a906d4831195df027b",
+      "approximate": true,
+      "confidence": "low",
+      "historical_national_flag": "NOT_ASSERTED",
+      "historical_design_claim": false,
+      "representative_basis": "Later Quaiti-associated blue/red full flag",
+      "evidence_note": "Later 1939 Quaiti design family representative for the macro Hadramaut display. Does not replace Kathiri/Quaiti historical records or assert a unified 1900 state. Proportions and star are approximate.",
+      "source_artist": "WWO",
+      "source_license": "PROJECT_AUTHORED_SIMPLE_LIVERY",
+      "source_page": "res://assets/historical_liveries/1900/ATTRIBUTION.md"
+    },
+    "jabal_shammar_representative": {
+      "id": "jabal_shammar_representative",
+      "visual_kind": "AUTHORITY_LIVERY",
+      "display_role": "APPROXIMATE_HISTORICAL_VISUAL",
+      "priority_role": "LOCAL_OFFICIAL_FLAG",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "asset_path": "res://assets/historical_liveries/1900/jabal_shammar_representative.svg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Flag_of_the_Emirate_of_Ha%27il.svg",
+      "confidence": "low",
+      "historical_design_claim": false,
+      "evidence_note": "Clean red/yellow Ha'il / Jabal Shammar associated representative flag. A modern reconstruction, not newly verified as exact for 1900. No lettering or scan content.",
+      "license": "CC BY-SA 3.0",
+      "source_date": "2007 reconstruction / 2019 simplification",
+      "historical_national_flag": "NOT_ASSERTED",
+      "asset_sha256": "e80554b635d8ba5b75f5d86bba6aff18f12d798d0981c13e649f640884106dbb",
+      "approximate": true,
+      "representative_basis": "Historically associated Jabal Shammar representative design; bounded approximate use",
+      "source_artist": "Guilherme Paula; simplified by NikNaks",
+      "source_license": "CC BY-SA 3.0",
+      "previous_historical_evidence_note": "Contemporary repository image arabia_zwemer_1900_flags.jpg; border, proportions and outlined Arial lettering are approximate.",
+      "previous_historical_source_page": "https://www.gutenberg.org/cache/epub/63928/pg63928-images.html#Page_200"
+    }
+  },
+  "territories": {
+    "cshapes_gw_625": {
+      "geometry_feature_id": "gw_625",
+      "visual_ids": [
+        "sudan_joint_authority_1899"
+      ],
+      "administrative_visual_ids": [
+        "sudan_governor_general_1899"
+      ],
+      "authority_ids": [
+        "british_isles_1900",
+        "khedivate_of_egypt"
+      ],
+      "administration_kind": "condominium",
+      "evidence_note": "User selected B: two full British/Egyptian authority flags as territorial presentation livery. Governor-General personal standard is retained as historical/administrative evidence only, excluded from territorial visual candidates.",
+      "historical_national_flag": "NONE",
+      "review_selection": "sudan_joint_authority_1899",
+      "review_candidates": [
+        "sudan_governor_general_1899",
+        "sudan_joint_authority_1899"
+      ]
+    },
+    "cshapes_gw_561": {
+      "geometry_feature_id": "gw_561",
+      "visual_ids": [
+        "cape_colonial_1876"
+      ],
+      "authority_ids": [
+        "british_isles_1900"
+      ],
+      "administration_kind": "colony",
+      "evidence_note": "Colonial Blue Ensign; no sovereign-state inference."
+    },
+    "cshapes_gw_562": {
+      "geometry_feature_id": "gw_562",
+      "visual_ids": [
+        "natal_colonial_1905"
+      ],
+      "authority_ids": [
+        "british_isles_1900"
+      ],
+      "administration_kind": "colony",
+      "evidence_note": "Explicit approximate later badge from same colonial administration."
+    },
+    "cshapes_gw_750": {
+      "geometry_feature_id": "gw_750",
+      "visual_ids": [
+        "india_governor_general_1885"
+      ],
+      "authority_ids": [
+        "british_isles_1900"
+      ],
+      "administration_kind": "colony",
+      "evidence_note": "Governor-General standard, not independent national flag."
+    },
+    "cshapes_gw_615": {
+      "geometry_feature_id": "gw_615",
+      "visual_ids": [
+        "algeria_colonial_ensign"
+      ],
+      "authority_ids": [
+        "country_fra"
+      ],
+      "administration_kind": "colonial_department",
+      "evidence_note": "Reported maritime ensign is an approximate representative; exact land fallback remains French tricolour."
+    },
+    "cshapes_gw_552": {
+      "geometry_feature_id": "gw_552",
+      "visual_ids": [
+        "bsac_company_1893"
+      ],
+      "authority_ids": [
+        "british_south_africa_company",
+        "british_isles_1900"
+      ],
+      "administration_kind": "chartered_company_administration",
+      "evidence_note": "Pending political assignment: candidate only at Jan 1. Keep original CShapes valid_from 1900-01-29 and neutral geography.",
+      "candidate_only_before": "1900-01-29",
+      "historical_national_flag": "NONE"
+    },
+    "cshapes_gw_5518": {
+      "geometry_feature_id": "gw_5518",
+      "visual_ids": [
+        "bsac_company_1893"
+      ],
+      "authority_ids": [
+        "british_south_africa_company",
+        "british_isles_1900"
+      ],
+      "administration_kind": "chartered_company_administration",
+      "evidence_note": "Pending political assignment: candidate only at Jan 1. Keep original CShapes valid_from 1900-01-29 and neutral geography.",
+      "candidate_only_before": "1900-01-29",
+      "historical_national_flag": "NONE"
+    },
+    "cshapes_gw_5519": {
+      "geometry_feature_id": "gw_5519",
+      "visual_ids": [
+        "bsac_company_1893"
+      ],
+      "authority_ids": [
+        "british_south_africa_company",
+        "british_isles_1900"
+      ],
+      "administration_kind": "chartered_company_administration",
+      "evidence_note": "Pending political assignment: candidate only at Jan 1. Keep original CShapes valid_from 1900-01-29 and neutral geography.",
+      "candidate_only_before": "1900-01-29",
+      "historical_national_flag": "NONE"
+    },
+    "cshapes_gw_572": {
+      "geometry_feature_id": "gw_572",
+      "visual_ids": [
+        "swaziland_zar_authority_1894"
+      ],
+      "authority_ids": [
+        "south_african_republic"
+      ],
+      "administration_kind": "protection_without_incorporation",
+      "evidence_note": "1894 convention: ZAR protection/administration without incorporation. Wartime control disputed; display context does not rewrite runtime authority.",
+      "historical_national_flag": "NONE",
+      "evidence": [
+        "https://www.crwflags.com/fotw/Flags/sz_prot.html",
+        "https://libsysdigi.library.illinois.edu/ilharvest/Africana/Books2011-05/469190/469190_1929/469190_1929_opt.pdf"
+      ]
+    },
+    "cshapes_gw_570": {
+      "geometry_feature_id": "gw_570",
+      "visual_ids": [],
+      "authority_ids": [
+        "british_isles_1900"
+      ],
+      "administration_kind": "protectorate",
+      "evidence_note": "Full British protecting-power fallback. Excludes 1931 High Commissioner flag.",
+      "evidence": [
+        "https://www.crwflags.com/FOTW/FLAGS/bw_hist.html"
+      ]
+    },
+    "cshapes_gw_571": {
+      "geometry_feature_id": "gw_571",
+      "visual_ids": [],
+      "authority_ids": [
+        "british_isles_1900"
+      ],
+      "administration_kind": "protectorate",
+      "evidence_note": "Full British protecting-power fallback. Excludes 1931 High Commissioner flag.",
+      "evidence": [
+        "https://www.crwflags.com/FOTW/FLAGS/bw_hist.html"
+      ]
+    },
+    "south_african_republic": {
+      "geometry_feature_id": "gw_563",
+      "visual_ids": [],
+      "authority_ids": [
+        "south_african_republic"
+      ],
+      "administration_kind": "republic",
+      "evidence_note": "Keep dated republic flag; no post-war colonial substitution."
+    },
+    "orange_free_state": {
+      "geometry_feature_id": "gw_564",
+      "visual_ids": [],
+      "authority_ids": [
+        "orange_free_state"
+      ],
+      "administration_kind": "republic",
+      "evidence_note": "Keep dated republic flag; no post-war colonial substitution."
+    },
+    "cshapes_gw_460": {
+      "geometry_feature_id": "gw_460",
+      "visual_ids": [],
+      "authority_ids": [
+        "german_empire"
+      ],
+      "administration_kind": "colony",
+      "evidence_note": "German imperial full-flag fallback; unadopted 1914 colony flag proposals excluded.",
+      "evidence": [
+        "https://www.crwflags.com/fotw/flags/de_col14.html"
+      ]
+    },
+    "cshapes_gw_470": {
+      "geometry_feature_id": "gw_470",
+      "visual_ids": [],
+      "authority_ids": [
+        "german_empire"
+      ],
+      "administration_kind": "colony",
+      "evidence_note": "German imperial full-flag fallback; unadopted 1914 colony flag proposals excluded.",
+      "evidence": [
+        "https://www.crwflags.com/fotw/flags/de_col14.html"
+      ]
+    },
+    "cshapes_gw_510": {
+      "geometry_feature_id": "gw_510",
+      "visual_ids": [],
+      "authority_ids": [
+        "german_empire"
+      ],
+      "administration_kind": "colony",
+      "evidence_note": "German imperial full-flag fallback; unadopted 1914 colony flag proposals excluded.",
+      "evidence": [
+        "https://www.crwflags.com/fotw/flags/de_col14.html"
+      ]
+    },
+    "cshapes_gw_565": {
+      "geometry_feature_id": "gw_565",
+      "visual_ids": [],
+      "authority_ids": [
+        "german_empire"
+      ],
+      "administration_kind": "colony",
+      "evidence_note": "German imperial full-flag fallback; unadopted 1914 colony flag proposals excluded.",
+      "evidence": [
+        "https://www.crwflags.com/fotw/flags/de_col14.html"
+      ]
+    },
+    "cshapes_gw_912": {
+      "geometry_feature_id": "gw_912",
+      "visual_ids": [],
+      "authority_ids": [
+        "german_empire"
+      ],
+      "administration_kind": "colony",
+      "evidence_note": "German imperial full-flag fallback; unadopted 1914 colony flag proposals excluded.",
+      "evidence": [
+        "https://www.crwflags.com/fotw/flags/de_col14.html"
+      ]
+    },
+    "cshapes_gw_402": {
+      "geometry_feature_id": "gw_402",
+      "visual_ids": [],
+      "authority_ids": [
+        "kingdom_of_portugal"
+      ],
+      "administration_kind": "colony",
+      "evidence_note": "1830 Portuguese full-flag fallback. Excludes post-1910 republic flag and subregional concession company flags."
+    },
+    "cshapes_gw_404": {
+      "geometry_feature_id": "gw_404",
+      "visual_ids": [],
+      "authority_ids": [
+        "kingdom_of_portugal"
+      ],
+      "administration_kind": "colony",
+      "evidence_note": "1830 Portuguese full-flag fallback. Excludes post-1910 republic flag and subregional concession company flags."
+    },
+    "cshapes_gw_540": {
+      "geometry_feature_id": "gw_540",
+      "visual_ids": [],
+      "authority_ids": [
+        "kingdom_of_portugal"
+      ],
+      "administration_kind": "colony",
+      "evidence_note": "1830 Portuguese full-flag fallback. Excludes post-1910 republic flag and subregional concession company flags."
+    },
+    "cshapes_gw_541": {
+      "geometry_feature_id": "gw_541",
+      "visual_ids": [],
+      "authority_ids": [
+        "kingdom_of_portugal"
+      ],
+      "administration_kind": "colony",
+      "evidence_note": "1830 Portuguese full-flag fallback. Excludes post-1910 republic flag and subregional concession company flags."
+    },
+    "cshapes_gw_860": {
+      "geometry_feature_id": "gw_860",
+      "visual_ids": [],
+      "authority_ids": [
+        "kingdom_of_portugal"
+      ],
+      "administration_kind": "colony",
+      "evidence_note": "1830 Portuguese full-flag fallback. Excludes post-1910 republic flag and subregional concession company flags."
+    },
+    "kingdom_of_bhutan": {
+      "fallback_color": "#8f7449",
+      "fallback_note": "Stable presentation palette only; no historical flag claim."
+    },
+    "trucial_states": {
+      "fallback_color": "#97634e",
+      "fallback_note": "Stable presentation palette only; no historical flag claim.",
+      "visual_ids": [
+        "trucial_representative"
+      ],
+      "historical_national_flag": "NOT_ASSERTED",
+      "approximate": true,
+      "confidence": "medium",
+      "representative_visual_note": "Qasimi / treaty-coast representative full flag. Border proportions are bounded approximation; does not assert a unified Trucial national flag."
+    },
+    "cshapes_gw_781": {
+      "fallback_color": "#637f78",
+      "fallback_note": "Stable presentation palette only; no historical flag claim."
+    },
+    "cuba_occupation_1900": {
+      "fallback_color": "#7e8392",
+      "fallback_note": "Stable presentation palette only; no historical flag claim."
+    },
+    "map_authority:arabia_rashidi_1900": {
+      "visual_ids": [
+        "jabal_shammar_representative"
+      ],
+      "historical_national_flag": "NOT_ASSERTED",
+      "authority_type": "LOCAL_DYNASTIC_ADMINISTRATION",
+      "authority_source": "https://www.gutenberg.org/cache/epub/63928/pg63928-images.html#Page_200",
+      "fallback_color": "#6b8075",
+      "evidence_note": "Rashidi emirate; nominal Ottoman alliance/tribute, local administration; representative asset does not define sovereignty.",
+      "approximate": true,
+      "confidence": "low",
+      "representative_visual_note": "Clean red/yellow Ha'il / Jabal Shammar associated representative flag. A modern reconstruction, not newly verified as exact for 1900. No lettering or scan content."
+    },
+    "map_authority:arabia_aden_settlement_1900": {
+      "visual_ids": [],
+      "historical_national_flag": "NOT_ASSERTED",
+      "authority_type": "COLONIAL_ADMINISTRATION",
+      "authority_source": "https://www.gutenberg.org/cache/epub/63928/pg63928-images.html#Page_218",
+      "fallback_color": "#6b8075",
+      "evidence_note": "British possession under Bombay Presidency; distinct from inland treaty states; representative asset does not define sovereignty."
+    },
+    "map_authority:arabia_aden_treaty_states_1900": {
+      "visual_ids": [
+        "aden_representative"
+      ],
+      "historical_national_flag": "NOT_ASSERTED",
+      "authority_type": "PROTECTED_LOCAL_AUTHORITIES",
+      "authority_source": "https://www.qdl.qa/en/archive/81055/vdc_100023462214.0x000011",
+      "fallback_color": "#6b8075",
+      "evidence_note": "Separate local rulers, treaty relations managed by Aden Residency; not one sovereign state; representative asset does not define sovereignty.",
+      "approximate": true,
+      "confidence": "low",
+      "representative_visual_note": "1937 colonial design family, authored simplified dhow reconstruction within the complete ensign. Representative for the macro Aden region including treaty hinterland, not its exact 1900 administrative flag."
+    },
+    "map_authority:arabia_kathiri_1900": {
+      "visual_ids": [],
+      "historical_national_flag": "NOT_ASSERTED",
+      "authority_type": "LOCAL_SULTANATE",
+      "authority_source": "https://www.qdl.qa/en/archive/81055/vdc_100023462214.0x000011",
+      "fallback_color": "#b48a46",
+      "evidence_note": "Local Kathiri authority; the 1918 British agreement is not active in 1900; representative asset does not define sovereignty."
+    },
+    "map_authority:arabia_quaiti_1900": {
+      "visual_ids": [],
+      "historical_national_flag": "NOT_ASSERTED",
+      "authority_type": "PROTECTED_LOCAL_AUTHORITY",
+      "authority_source": "https://www.gutenberg.org/cache/epub/63928/pg63928-images.html#Page_72",
+      "fallback_color": "#6b8075",
+      "evidence_note": "Local Quaiti ruler; British protection treaty 1888, no British annexation; representative asset does not define sovereignty."
+    },
+    "map_authority:arabia_mahra_1900": {
+      "visual_ids": [
+        "mahra_representative"
+      ],
+      "historical_national_flag": "NOT_ASSERTED",
+      "authority_type": "PROTECTED_LOCAL_AUTHORITY",
+      "authority_source": "https://www.qdl.qa/en/archive/81055/vdc_100023462214.0x000011",
+      "fallback_color": "#6b8075",
+      "evidence_note": "Local Mahra ruler; British treaty/protection relationship, not annexation; representative asset does not define sovereignty.",
+      "approximate": true,
+      "confidence": "low",
+      "representative_visual_note": "Historically associated later sultanate design family, rather than a nearby-date exact flag. No later political status is backdated."
+    },
+    "map_authority:arabia_kuwait_1900": {
+      "visual_ids": [
+        "kuwait_representative"
+      ],
+      "historical_national_flag": "NOT_ASSERTED",
+      "authority_type": "PROTECTED_LOCAL_AUTHORITY",
+      "authority_source": "https://e.gov.kw/sites/kgoenglish/Pages/Visitors/AboutKuwait/GoverningBodyOverView.aspx",
+      "fallback_color": "#6b8075",
+      "evidence_note": "Mubarak Al Sabah locally administers; British exclusive agreement 1899-01-23; Ottoman nominal claim remains contested; representative asset does not define sovereignty.",
+      "approximate": true,
+      "confidence": "medium",
+      "representative_visual_note": "1914 local design family with outlined Kuwait inscription. Typeface and proportions approximate; not an exact 1900 flag."
+    },
+    "map_authority:arabia_qatar_1900": {
+      "visual_ids": [
+        "qatar_representative"
+      ],
+      "historical_national_flag": "NOT_ASSERTED",
+      "authority_type": "LOCAL_ADMINISTRATION",
+      "authority_source": "https://www.diwan.gov.qa/about-qatar/qatars-rulers/sheikh-jassim-bin-mohammed-bin-thani",
+      "fallback_color": "#6b8075",
+      "evidence_note": "Jassim Al Thani de facto local authority; Ottoman garrison/nominal sovereignty; no 1916 British protectorate; representative asset does not define sovereignty.",
+      "approximate": true,
+      "confidence": "low",
+      "representative_visual_note": "1930s local design family; maroon, nine serrations and proportions are representative, not asserted exact for 1900."
+    },
+    "map_authority:arabia_bahrain_1900": {
+      "visual_ids": [
+        "bahrain_authority_1900"
+      ],
+      "historical_national_flag": "NOT_ASSERTED",
+      "authority_type": "PROTECTED_LOCAL_AUTHORITY",
+      "authority_source": "https://www.gutenberg.org/cache/epub/63928/pg63928-images.html#Page_219",
+      "fallback_color": "#6b8075",
+      "evidence_note": "Sheikh Isa Al Khalifa local authority; British protection, not Britain as a sovereign nation-state identity; representative asset does not define sovereignty."
+    },
+    "map_authority:gw_552": {
+      "visual_ids": [
+        "bsac_company_1893"
+      ],
+      "historical_national_flag": "NOT_ASSERTED",
+      "authority_type": "COMPANY_ADMINISTRATION",
+      "authority_source": "https://collection.nam.ac.uk/detail.php?acc=1998-03-21-1",
+      "fallback_color": "#6b8075",
+      "evidence_note": "British imperial charter/sphere; separate company administrator, no sovereign BSAC nation; representative asset does not define sovereignty."
+    },
+    "map_authority:gw_5518": {
+      "visual_ids": [
+        "bsac_company_1893"
+      ],
+      "historical_national_flag": "NOT_ASSERTED",
+      "authority_type": "COMPANY_ADMINISTRATION",
+      "authority_source": "https://calmview.derbyshire.gov.uk/CalmView/Record.aspx?id=D3287%2FBSA%2F8%2F6&src=calmview.catalog",
+      "fallback_color": "#6b8075",
+      "evidence_note": "BSAC deputy administration at Fort Jameson in April 1899; formal protectorate Order 1900-01-29 later; representative asset does not define sovereignty."
+    },
+    "map_authority:gw_5519": {
+      "visual_ids": [
+        "bsac_company_1893"
+      ],
+      "historical_national_flag": "NOT_ASSERTED",
+      "authority_type": "COMPANY_ADMINISTRATION",
+      "authority_source": "https://upload.wikimedia.org/wikipedia/commons/a/ab/UKSRO_1901.pdf",
+      "fallback_color": "#6b8075",
+      "evidence_note": "BSAC administration alongside Lewanika/local courts; British protection; Order signed 1899-11-28, printed SR&O 1901/567; representative asset does not define sovereignty."
+    },
+    "map_display:hejaz_1900": {
+      "visual_ids": [
+        "hejaz_representative"
+      ],
+      "historical_national_flag": "NOT_ASSERTED",
+      "map_assignment": "APPROXIMATE",
+      "display_only": true,
+      "evidence_note": "Display identity only; not a sovereignty, administration or simulation entity",
+      "approximate": true,
+      "confidence": "medium",
+      "representative_visual_note": "Nearby-date local representative tricolour. Does not assert an independent Kingdom of Hejaz in 1900."
+    },
+    "map_display:hasa_1900": {
+      "visual_ids": [
+        "hasa_representative"
+      ],
+      "historical_national_flag": "NOT_ASSERTED",
+      "map_assignment": "APPROXIMATE",
+      "display_only": true,
+      "evidence_note": "Display identity only; not a sovereignty, administration or simulation entity",
+      "approximate": true,
+      "confidence": "low",
+      "representative_visual_note": "Historically associated regional livery from the repository flag plate. Hasa is still Ottoman-linked in authority metadata; this is not its exact provincial flag or a claim of Saudi rule in 1900."
+    },
+    "map_display:yemen_1900": {
+      "visual_ids": [
+        "yemen_representative"
+      ],
+      "historical_national_flag": "NOT_ASSERTED",
+      "map_assignment": "APPROXIMATE",
+      "display_only": true,
+      "evidence_note": "Display identity only; not a sovereignty, administration or simulation entity",
+      "approximate": true,
+      "confidence": "low",
+      "representative_visual_note": "Nearby-date local dynasty representative (1927 design family), simplified sword; not an exact Ottoman Yemen flag in 1900."
+    },
+    "map_display:hadramaut_1900": {
+      "visual_ids": [
+        "hadramaut_representative"
+      ],
+      "historical_national_flag": "NOT_ASSERTED",
+      "map_assignment": "APPROXIMATE",
+      "display_only": true,
+      "evidence_note": "Display identity only; not a sovereignty, administration or simulation entity",
+      "approximate": true,
+      "confidence": "low",
+      "representative_visual_note": "Later 1939 Quaiti design family representative for the macro Hadramaut display. Does not replace Kathiri/Quaiti historical records or assert a unified 1900 state. Proportions and star are approximate."
+    }
+  }
+}

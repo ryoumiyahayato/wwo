@@ -52,11 +52,15 @@ static func evaluate(
 		DERIVATION_TRACEABLE: derivation_status,
 		PROTOTYPE_ONLY_FALSE: FAIL if bool(record.get("prototype_only", true)) else PASS,
 	}
+	var required_gates := REQUIRED_GATES.duplicate()
+	if str(record.get("derivation_kind", "")) != SOURCE_RECORD.DERIVATION_RAW_EXTERNAL:
+		gates.erase(SOURCE_HASH_VERIFIED)
+		required_gates.erase(SOURCE_HASH_VERIFIED)
 	var all_pass := true
 	var failure_count := 0
 	var unresolved_count := 0
 	var reasons: Array[String] = []
-	for gate_name: String in REQUIRED_GATES:
+	for gate_name: String in required_gates:
 		var gate_status := str(gates.get(gate_name, UNRESOLVED))
 		if gate_status != PASS:
 			all_pass = false

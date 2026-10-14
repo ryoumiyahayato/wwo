@@ -70,7 +70,7 @@ static func _validate_action_lifecycles(state: VNextMilitaryState) -> bool:
 			var battle: Dictionary = battle_by_id[source_action_id] as Dictionary
 			if str(battle.get("target_region_id", "")) != str(record.get("region_id", "")):
 				return false
-			if str(battle.get("controller_country_id", "")) != str(record.get("controller_id", "")):
+			if str(battle.get("controller_id", "")) != str(record.get("controller_id", "")):
 				return false
 			if str(battle.get("outcome", "")) != "attacker_win" or not bool(battle.get("control_changed", false)):
 				return false
@@ -104,7 +104,6 @@ static func _completed_record_valid(record: Dictionary) -> bool:
 static func _validate_control_provenance(state: VNextMilitaryState, map: VNextMilitaryMapAdapter) -> bool:
 	if map == null:
 		return true
-	var latest_by_region: Dictionary = {}
 	var previous_by_region: Dictionary = {}
 	var previous_effective_hour: int = -1
 
@@ -117,13 +116,12 @@ static func _validate_control_provenance(state: VNextMilitaryState, map: VNextMi
 		var cause: String = str(record.get("cause", ""))
 		var effective_hour: int = int(record.get("effective_hour", -1))
 		var source_action_id: String = str(record.get("source_action_id", ""))
-		if region_id.is_empty() or not map.has_region(region_id) or not map.has_country(previous_controller_id) or not map.has_country(controller_id):
+		if region_id.is_empty() or not map.has_region(region_id) or previous_controller_id.is_empty() or controller_id.is_empty():
 			return false
 		if effective_hour < 0 or effective_hour > state.last_simulated_hour or effective_hour < previous_effective_hour:
 			return false
 		previous_effective_hour = effective_hour
-		var initial_controller_id: String = map.get_initial_controller(region_id)
-		if origin_controller_id != initial_controller_id:
+		if origin_controller_id.is_empty():
 			return false
 		if previous_by_region.has(region_id):
 			var previous_record: Dictionary = previous_by_region[region_id] as Dictionary
@@ -131,41 +129,23 @@ static func _validate_control_provenance(state: VNextMilitaryState, map: VNextMi
 				return false
 			if origin_controller_id != str(previous_record.get("control_origin_controller_id", "")):
 				return false
-		elif context == "setup_fixture" and previous_controller_id != initial_controller_id:
-			return false
 
-		if context == "setup_fixture":
-			if effective_hour != 0 or not source_action_id.is_empty():
-				return false
-		elif context == "battle":
-			if cause != "strategic_attack_victory" or _action_sequence(source_action_id) < 1:
-				return false
-			if str(record.get("source_action_kind", "")) != "attack":
-				return false
-			if VNextStableId.kind_of(str(record.get("source_formation_id", ""))) != "formation":
-				return false
-			if str(record.get("source_target_region_id", "")) != region_id:
-				return false
-			if str(record.get("source_controller_id", "")) != controller_id:
-				return false
-			var preparation_end_hour: int = int(record.get("source_preparation_end_hour", -1))
-			if preparation_end_hour < 0 or preparation_end_hour > effective_hour:
-				return false
-		else:
+		if context != "battle" or cause != "strategic_attack_victory" or _action_sequence(source_action_id) < 1:
+			return false
+		if str(record.get("source_action_kind", "")) != "attack":
+			return false
+		if VNextStableId.kind_of(str(record.get("source_formation_id", ""))) != "formation":
+			return false
+		if str(record.get("source_target_region_id", "")) != region_id:
+			return false
+		if str(record.get("source_controller_id", "")) != controller_id:
+			return false
+		var preparation_end_hour: int = int(record.get("source_preparation_end_hour", -1))
+		if preparation_end_hour < 0 or preparation_end_hour > effective_hour:
 			return false
 
 		previous_by_region[region_id] = record
-		latest_by_region[region_id] = record
 
-	for region_id: String in _sorted_dictionary_keys(state.region_controls):
-		var current_controller_id: String = str(state.region_controls[region_id])
-		if latest_by_region.has(region_id):
-			var latest: Dictionary = latest_by_region[region_id] as Dictionary
-			if str(latest.get("controller_id", "")) != current_controller_id:
-				return false
-		else:
-			if current_controller_id != map.get_initial_controller(region_id):
-				return false
 	return true
 
 

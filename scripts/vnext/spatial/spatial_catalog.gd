@@ -33,6 +33,9 @@ var _cities_by_id: Dictionary = {}
 var _ports_by_id: Dictionary = {}
 var _links_by_id: Dictionary = {}
 var _places_by_id: Dictionary = {}
+var _military_scope_places: Dictionary = {}
+var _military_scope_cities: Dictionary = {}
+var _military_scope_by_city: Dictionary = {}
 
 
 static func map_id_to_place_id(map_id: String) -> String:
@@ -145,6 +148,58 @@ func load_from_documents(documents: Dictionary) -> bool:
 		_places_by_id[record["map_id"]] = record
 
 	_loaded = true
+	return _build_military_scopes()
+
+
+func military_scope_ids() -> Array[String]:
+	return _sorted_ids(_military_scope_places)
+
+
+func military_scope_for_city(city_id: String) -> String:
+	assert(_military_scope_by_city.has(city_id), "UNRESOLVED TERRITORY SCOPE for city: %s" % city_id)
+	return str(_military_scope_by_city[city_id])
+
+
+func military_scope_place_ids(scope_id: String) -> Array[String]:
+	assert(_military_scope_places.has(scope_id), "UNRESOLVED TERRITORY SCOPE: %s" % scope_id)
+	var ids: Array[String] = []
+	ids.assign(_military_scope_places[scope_id])
+	return ids
+
+
+func military_scope_city_ids(scope_id: String) -> Array[String]:
+	assert(_military_scope_cities.has(scope_id), "UNRESOLVED TERRITORY SCOPE: %s" % scope_id)
+	var ids: Array[String] = []
+	ids.assign(_military_scope_cities[scope_id])
+	return ids
+
+
+func _build_military_scopes() -> bool:
+	_military_scope_places.clear()
+	_military_scope_cities.clear()
+	_military_scope_by_city.clear()
+	for city: Dictionary in _cities:
+		var city_id: String = str(city["map_id"])
+		var region_id: String = str(city.get("parent_region_id", ""))
+		var scope_id: String = region_id if not region_id.is_empty() else str(city["parent_country_id"])
+		if (not region_id.is_empty() and not _regions_by_id.has(region_id)) or (region_id.is_empty() and not _countries_by_id.has(scope_id)):
+			_errors.append("UNRESOLVED TERRITORY SCOPE: %s city=%s" % [scope_id, city_id])
+			return false
+		if not _military_scope_places.has(scope_id):
+			_military_scope_places[scope_id] = [region_id] if not region_id.is_empty() else []
+			_military_scope_cities[scope_id] = []
+		_military_scope_places[scope_id].append(city_id)
+		_military_scope_cities[scope_id].append(city_id)
+		_military_scope_by_city[city_id] = scope_id
+	for port: Dictionary in _ports:
+		var city_id: String = str(port["city_id"])
+		if not _military_scope_by_city.has(city_id):
+			_errors.append("UNRESOLVED TERRITORY SCOPE: port=%s city=%s" % [port["map_id"], city_id])
+			return false
+		_military_scope_places[_military_scope_by_city[city_id]].append(str(port["map_id"]))
+	for scope_id: String in military_scope_ids():
+		_military_scope_places[scope_id].sort()
+		_military_scope_cities[scope_id].sort()
 	return true
 
 
