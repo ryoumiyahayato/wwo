@@ -351,7 +351,7 @@ func update(camera: RegionCamera, controller: GlobeController, date: String, vie
 	var weights: Dictionary = {}
 	var colors: Dictionary = {}
 	if commit_canvas:
-		for kind: String in ["coast","river","rail","land_reference","ocean_reference","lake"]:
+		for kind: String in ["coast","river","rail","land_reference","ocean_reference","lake","water_surface"]:
 			var weight := MapScaleStyle.strategic_weight(kind,mpp) if strategic else MapScaleStyle.physical_weight(kind,mpp)
 			if strategic and kind in ["land_reference","ocean_reference"]: weight = 1.0
 			if kind == "rail" and not controller.strategic_rails_enabled: weight = 0.0
@@ -454,6 +454,7 @@ func update(camera: RegionCamera, controller: GlobeController, date: String, vie
 			label.projected = true
 		var selected := str(feature.id) == controller.selected_place_id
 		var limit := float(feature.get("max_mpp", 0.0)) if strategic else MapScaleStyle.settlement_limit(int(feature.rank), str(feature.id))
+		if feature.has("display_kind"): limit = float(feature.get("max_mpp",650.0))
 		if str(feature.kind)=="landmark": limit = float(feature.symbol_max_mpp)
 		if mpp > limit and not selected:
 			continue

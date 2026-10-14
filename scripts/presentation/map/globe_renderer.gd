@@ -760,6 +760,12 @@ func _draw() -> void:
 				_draw_landmark_symbol(place_id,place,point)
 			if selected or place_id==controller.hovered_place_id: draw_arc(point,7.0,0,TAU,20,Color(0.84,0.77,0.55,0.8),1.0,true)
 			continue
+		if str(place.get("display_kind",""))=="transport_node":
+			var ink := Color(0.77,0.71,0.55,0.95)
+			draw_rect(Rect2(point-Vector2(3,3),Vector2(6,6)),ink,false,1.0)
+			draw_line(point+Vector2(-4,4),point+Vector2(4,4),ink,1.0,true)
+			if selected or place_id==controller.hovered_place_id: draw_arc(point,7.0,0.0,TAU,16,ink,1.0,true)
+			continue
 		var rank := int(place.get("rank", 1))
 		var radius := float(MapScaleStyle.SETTLEMENT_RADII[clampi(rank,0,2)])
 		var marker_color := Color(0.68,0.70,0.64,0.78)
@@ -792,6 +798,9 @@ func _draw() -> void:
 	if controller.administrative_map_active():
 		source = "1900 历史 GIS 重建省界"
 		if political.display_date < "1900-01-01" or political.display_date >= "1901-01-01": source = "1900 省界参考超出适用年份"
+	if regional and local_content!=null and local_content.content!=null and (controller.region_camera.local_active or local_layer.has_visible_kind("water_surface")):
+		var attribution := str(local_content.content.metadata.get("map_attribution_zh",""))
+		if not attribution.is_empty(): source = attribution
 	if show_footer: _update_footer(space+" · "+source+"   ","%.0f 米/像素" % (metric * 1000.0))
 
 func _draw_landmark_symbol(id: String, visual: Dictionary, point: Vector2) -> void:
@@ -1134,6 +1143,8 @@ func _evaluate_scale() -> void:
 		if scale <= RegionCamera.LOCAL_ENTER_KM_PER_PIXEL and region_view.ready and LocalSpatialLoader.covers(RegionProjection.lon_lat(unit)):
 			if local_content == null or local_content.content == null or not local_content.content.covers(RegionProjection.lon_lat(unit)) or not local_content.content.display_active_on(political.display_date):
 				return
+			# A transport-only regional shard does not claim a LOCAL terrain.
+			if not bool(local_content.content.metadata.get("local_enabled",true)): return
 			var anchor := (local_content.content.metadata.get("anchor_lon_lat",[]) as Array)
 			var anchor_unit := GlobeProjection.lon_lat_to_unit(Vector2(float(anchor[0]),float(anchor[1])))
 			if camera.enter_local(anchor_unit,camera.project(anchor_unit),size,str(local_content.content.metadata.anchor_place_id),float(local_content.content.metadata.get("local_min_mpp",25.0))):
@@ -1189,6 +1200,10 @@ func _sync_local_resources() -> void:
 	local_content.request(RegionProjection.lon_lat(request_unit))
 	if local_content.preparing(): set_process(visible)
 	if local_content.content == null: return
+	if local_content.content.errors.is_empty() and camera.local_active and camera.local_place_id!=str(local_content.content.metadata.anchor_place_id):
+		# Both synchronous reuse and asynchronous completion retain the chart,
+		# bearing and scale while admitting the new LOCAL anchor.
+		camera.leave_local()
 	if local_content.content!=local_layer.content_reference() and local_content.content.errors.is_empty():
 		local_layer.begin(local_content.content,region_view.map_canvas,camera.km_per_pixel*1000.0)
 	if camera.active and supported and local_content.content.covers(RegionProjection.lon_lat(request_unit)) and local_content.content.display_active_on(political.display_date):

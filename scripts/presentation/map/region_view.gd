@@ -19,7 +19,7 @@ var _background: RID
 var background: Dictionary = {}
 var _labels: Array[Dictionary] = []
 var country_label_rects: Array[Rect2] = []
-const MINIATURE_ELEVATION: float = 0.6108652382 # 35 degrees; presentation only.
+const MINIATURE_ELEVATION: float = 0.6108652382 # 35 degrees, true oblique ground.
 const MAX_CACHED_LANDMARK_SCENES: int = 2
 var landmark_screen_bounds: Dictionary = {}
 var _landmark_scenes: Dictionary = {}
@@ -45,6 +45,10 @@ var _surface_line_mesh: ArrayMesh
 var _surface_pick_chunks: Array[Dictionary] = []
 var _surface_pick_pixel := Vector2(INF,INF)
 var _surface_pick_unit := Vector3.ZERO
+var _local_elevation: float = MINIATURE_ELEVATION
+var _surface_view_height: float = 0.0
+var _surface_cover_mesh: ArrayMesh
+var _surface_cover: MeshInstance3D
 
 func initialize(parent: Control) -> void:
 	container = SubViewportContainer.new()
@@ -299,9 +303,12 @@ func update_landmarks(visuals: Array[Dictionary], camera: RegionCamera, viewport
 	# A single orthographic miniature camera uses this existing map viewport.
 	# Ground positions are obtained from RegionCamera.project, not a new chart.
 	_landmark_camera.size = viewport_size.y
+	# A near-top view hands off continuously to an oblique LOCAL view. Ground
+	# axes retain metres in every direction; no inverse-sine flattening.
+	_local_elevation = lerpf(MINIATURE_ELEVATION,deg_to_rad(85.0),smoothstep(25.0,120.0,camera.km_per_pixel*1000.0))
 	var distance := maxf(2048.0,viewport_size.length()*2.0)
-	_landmark_camera.position = Vector3(0,sin(MINIATURE_ELEVATION),cos(MINIATURE_ELEVATION))*distance
-	_landmark_camera.rotation = Vector3(-MINIATURE_ELEVATION,0,0)
+	_landmark_camera.position = Vector3(0,sin(_local_elevation),cos(_local_elevation))*distance
+	_landmark_camera.rotation = Vector3(-_local_elevation,0,0)
 	_landmark_camera.far = distance*4.0
 	if _local_surface!=null: _update_surface_pose(camera,viewport_size)
 	for id: String in _landmark_instances:
@@ -336,7 +343,7 @@ func _enable_landmark_3d() -> void:
 	environment.background_canvas_max_layer = -1
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environment.ambient_light_color = Color(0.76,0.78,0.72)
-	environment.ambient_light_energy = 0.65
+	environment.ambient_light_energy = 0.45
 	environment.ambient_light_sky_contribution = 0.0
 	environment.reflected_light_source = Environment.REFLECTION_SOURCE_DISABLED
 	# Viewport composition checks the scenario's environment, not the camera
@@ -367,11 +374,11 @@ func _update_landmark_pose(instance: Node3D, visual: Dictionary, camera: RegionC
 	var width := float(visual.model_base_width_m)
 	var near_weight := 1.0-smoothstep(RegionCamera.LOCAL_MIN_KM_PER_PIXEL*1000.0,float(visual.model_max_mpp),mpp)
 	var desired := lerpf(float(visual.display_height_min_px),float(visual.display_height_max_px),near_weight)
-	var exaggeration := minf(float(visual.display_scale_max),desired*mpp/(height*cos(MINIATURE_ELEVATION)))
+	var exaggeration := minf(float(visual.display_scale_max),desired*mpp/(height*cos(_local_elevation)))
 	var heading := deg_to_rad(float(visual.model_heading_degrees))
 	var screen_width := width*(absf(east.x*cos(heading)+north.x*sin(heading))+absf(east.x*sin(heading)-north.x*cos(heading)))
 	exaggeration = minf(exaggeration,float(visual.display_width_max_px)/maxf(screen_width,0.000001))
-	var sine := sin(MINIATURE_ELEVATION)
+	var sine := sin(_local_elevation)
 	# A rigid miniature preserves the GLB silhouette, unlike stretching its
 	# horizontal axes to cancel the oblique camera's ground foreshortening.
 	var e := Vector3(east.x,0,east.y).normalized()
@@ -388,11 +395,11 @@ func _update_landmark_pose(instance: Node3D, visual: Dictionary, camera: RegionC
 	exaggeration = minf(exaggeration,float(visual.display_width_max_px)*mpp/maxf(span,1.0))
 	var basis := orientation.scaled(Vector3.ONE*(exaggeration/mpp))
 	var offset := point-viewport_size*0.5
-	instance.transform = Transform3D(basis,Vector3(offset.x,0,offset.y/sine))
+	instance.transform = Transform3D(basis,Vector3(offset.x,0,offset.y))
 	if _local_surface!=null and _surface_contains(location):
-		# The anchor is sampled on the same native triangle as the terrain mesh.
-		var altitude := (_surface_height(location)-_surface_base_height)/mpp
-		instance.position += Vector3(0,altitude,0)
+		# Exact same transform and native triangle as the terrain and its ray hit.
+		var metric := RegionProjection.forward(unit,RegionProjection.frame(_local_surface_anchor))*1000.0
+		instance.position = _local_surface.transform*Vector3(metric.x,_surface_height(location)-_surface_base_height,-metric.y)
 	# Godot GLB is Y-up; its bottom origin is exactly on the existing chart plane.
 	var bounds := Rect2(_landmark_camera.unproject_position(instance.position),Vector2.ZERO)
 	for x: float in [-float(footprint[0])*0.5,float(footprint[0])*0.5]:
@@ -416,8 +423,13 @@ func _update_surface_demand(surface: Dictionary, camera: RegionCamera, viewport_
 				var point := camera.project(GlobeProjection.lon_lat_to_unit(coordinate))
 				rectangle = Rect2(point,Vector2.ZERO) if first else rectangle.expand(point)
 				first = false
-		show = rectangle.intersects(Rect2(Vector2.ZERO,viewport_size),true)
+		var relief_margin := (float(surface.get("height_max_m",0.0))-float(surface.get("height_min_m",0.0)))/maxf(mpp,1.0)
+		show = rectangle.grow(maxf(0.0,relief_margin)).intersects(Rect2(Vector2.ZERO,viewport_size),true)
 	if not show:
+		if _surface_cover!=null:
+			_surface_cover.visible = false
+			_surface_cover.queue_free()
+			_surface_cover = null
 		if _surface_lines!=null:
 			_surface_lines.queue_free()
 			_surface_lines = null
@@ -438,6 +450,17 @@ func _update_surface_demand(surface: Dictionary, camera: RegionCamera, viewport_
 		_surface_base_height = _surface_height(_local_surface_anchor)
 		_make_surface_mesh()
 		_make_surface_lines(reference_lines)
+		_make_surface_cover()
+		# A new shard may have no rivers or no acquired cover. Retire previous
+		# nodes as well as meshes, rather than showing an old region's geometry.
+		if _surface_lines!=null:
+			_surface_lines.visible = false
+			_surface_lines.queue_free()
+			_surface_lines = null
+		if _surface_cover!=null:
+			_surface_cover.visible = false
+			_surface_cover.queue_free()
+			_surface_cover = null
 	_enable_landmark_3d()
 	if _local_surface==null:
 		_local_surface = MeshInstance3D.new()
@@ -462,6 +485,20 @@ func _update_surface_demand(surface: Dictionary, camera: RegionCamera, viewport_
 			_surface_lines.material_override = ink
 			_landmark_root.add_child(_surface_lines)
 		_surface_lines.mesh = _surface_line_mesh
+	if _surface_cover_mesh!=null:
+		if _surface_cover==null:
+			_surface_cover = MeshInstance3D.new()
+			_surface_cover.name = "BoundedPhysicalCover"
+			_surface_cover.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			var cover_material := StandardMaterial3D.new()
+			cover_material.vertex_color_use_as_albedo = true
+			cover_material.roughness = 1.0
+			cover_material.metallic_specular = 0.0
+			cover_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+			cover_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+			_surface_cover.material_override = cover_material
+			_landmark_root.add_child(_surface_cover)
+		_surface_cover.mesh = _surface_cover_mesh
 	_landmark_view_key.clear()
 
 func _surface_height(coordinate: Vector2) -> float:
@@ -520,15 +557,15 @@ func _make_surface_mesh() -> void:
 	for vertex: Vector3 in vertices:
 		lowest = minf(lowest,vertex.y)
 		highest = maxf(highest,vertex.y)
-	var light_direction := Vector3(-0.55,0.80,0.32).normalized()
 	for index: int in range(vertices.size()):
 		# Derived once from acquired elevations: no noise, height exaggeration,
 		# vegetation classes or historical land-use claims.
 		var slope := smoothstep(0.04,0.55,1.0-normals[index].y)
 		var relief := (vertices[index].y-lowest)/maxf(highest-lowest,1.0)
-		var shade := 0.72+0.28*maxf(0.0,normals[index].dot(light_direction))
 		var tint := low.lerp(rock,clampf(slope*0.75+relief*0.25,0.0,1.0))
-		colors.append(Color(tint.r*shade,tint.g*shade,tint.b*shade,1.0))
+		# Lighting uses the transformed normals once; baked shading plus a real
+		# light previously darkened the same slope twice.
+		colors.append(tint)
 	_surface_vertices = vertices
 	_surface_indices = indices
 	_surface_pick_chunks.clear()
@@ -555,14 +592,40 @@ func _update_surface_pose(camera: RegionCamera, viewport_size: Vector2) -> void:
 	var east := (camera.project((unit+geographic.x*step).normalized())-point)/metres
 	var north := (camera.project((unit+geographic.y*step).normalized())-point)/metres
 	var mpp := camera.scale_at(unit)*1000.0
-	var sine := sin(MINIATURE_ELEVATION)
 	# Preserve actual height displacement. Picking intersects this same mesh.
 	var height_axis := Vector3.UP/mpp
-	var basis := Basis(Vector3(east.x,0,east.y/sine),height_axis,-Vector3(north.x,0,north.y/sine))
+	var basis := Basis(Vector3(east.x,0,east.y),height_axis,-Vector3(north.x,0,north.y))
 	var offset := point-viewport_size*0.5
-	_local_surface.transform = Transform3D(basis,Vector3(offset.x,0,offset.y/sine))
+	var center := RegionProjection.lon_lat(camera.unit_at(viewport_size*0.5))
+	_surface_view_height = _surface_height(center)-_surface_base_height if _surface_contains(center) else 0.0
+	_local_surface.transform = Transform3D(basis,Vector3(offset.x,-_surface_view_height/mpp,offset.y))
 	_surface_pick_pixel = Vector2(INF,INF)
 	if _surface_lines!=null: _surface_lines.transform = _local_surface.transform
+	if _surface_cover!=null: _surface_cover.transform = _local_surface.transform
+
+func _make_surface_cover() -> void:
+	_surface_cover_mesh = null
+	var vertices := PackedVector3Array()
+	var colors := PackedColorArray()
+	var frame := RegionProjection.frame(_local_surface_anchor)
+	# Offline intersection with native DEM triangles preserves island holes,
+	# river banks and the exact surface interpolation. No guessed river width.
+	for cover: Dictionary in _surface_reference.get("cover_meshes",[]) as Array:
+		var color := Color(0.19,0.36,0.43) if str(cover.kind)=="water_surface" else Color(0.26,0.34,0.25)
+		for triangle: Array in cover.triangles as Array:
+			for raw: Array in triangle:
+				var coordinate := Vector2(float(raw[0]),float(raw[1]))
+				var metric := RegionProjection.forward(GlobeProjection.lon_lat_to_unit(coordinate),frame)*1000.0
+				var altitude := float(cover.reference_elevation_m) if cover.has("reference_elevation_m") else _surface_height(coordinate)
+				vertices.append(Vector3(metric.x,altitude-_surface_base_height+0.25,-metric.y))
+				colors.append(color)
+	if vertices.is_empty(): return
+	var arrays: Array = []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = vertices
+	arrays[Mesh.ARRAY_COLOR] = colors
+	_surface_cover_mesh = ArrayMesh.new()
+	_surface_cover_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
 
 func _make_surface_lines(features: Array[Dictionary]) -> void:
 	_surface_line_mesh = null
@@ -639,6 +702,7 @@ func release_landmarks() -> void:
 	_landmark_view_key.clear()
 	_local_surface = null
 	_surface_lines = null
+	_surface_cover = null
 	_release_surface_geometry()
 	if _landmark_root!=null:
 		_landmark_root.visible = false
@@ -653,6 +717,7 @@ func release_landmarks() -> void:
 func _release_surface_geometry() -> void:
 	_local_surface_mesh = null
 	_surface_line_mesh = null
+	_surface_cover_mesh = null
 	_local_surface_key = ""
 	_surface_reference = {}
 	_surface_vertices = PackedVector3Array()

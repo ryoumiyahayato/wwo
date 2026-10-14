@@ -32,7 +32,7 @@ static func surface_class(feature: Dictionary) -> String:
 static func color(kind: String, water_class: String = "lake") -> Color:
 	if kind == "ocean_reference": return Color(0.10, 0.14, 0.16, 1.0)
 	if kind == "land_reference": return Color(0.66,0.73,0.76,1.0) if water_class == "antarctic_land" else Color(0.27, 0.32, 0.29, 1.0)
-	return SURFACE_COLORS[water_class] as Color if kind == "lake" else LINE_COLORS[kind] as Color
+	return SURFACE_COLORS[water_class] as Color if kind in ["lake","water_surface"] else LINE_COLORS[kind] as Color
 
 static func miter_limit(kind: String) -> float:
 	return WATER_MITER_LIMIT if kind in ["river", "coast"] else LEGACY_MITER_LIMIT

@@ -10,7 +10,8 @@ const SOURCES: Array[Dictionary] = [
 	{"path":PARIS_PATH,"anchor":ANCHOR,"anchor_id":"place:paris","radius_km":300.0},
 	{"path":GIZA_PATH,"anchor":GIZA_ANCHOR,"anchor_id":"landmark:giza_pyramids_1900","radius_km":20.0},
 	{"path":"res://data/local/london_westminster_1900.json","anchor":Vector2(-0.1246,51.5007),"anchor_id":"place:london","radius_km":15.0},
-	{"path":"res://data/local/zermatt_west_physical_reference.json","anchor":Vector2(7.703304,46.010743),"anchor_id":"geographic_region:zermatt_west_reference","radius_km":8.0}]
+	{"path":"res://data/local/zermatt_west_physical_reference.json","anchor":Vector2(7.703304,46.010743),"anchor_id":"geographic_region:zermatt_west_reference","radius_km":8.0},
+	{"path":"res://data/local/berlin_transport_1900.json","anchor":Vector2(13.388,52.5219),"anchor_id":"place:berlin","radius_km":20.0}]
 const PREWARM_KM_PER_PIXEL: float = 6.0
 var content: LocalSpatialContent
 var _thread: Thread
@@ -174,6 +175,11 @@ static func _load(path: String, current: Callable) -> LocalSpatialContent:
 			return result
 		if str(feature.kind) in ["settlement","landmark","geographic_region"]:
 			continue
+		if str(feature.kind)=="water_surface":
+			var geometry := feature.geometry as Dictionary
+			var polygons: Array = [geometry.coordinates] if str(geometry.type)=="Polygon" else geometry.coordinates as Array
+			result.line_chunks.append({"kind":"water_surface","polygons":polygons,"feature_id":str(feature.id),"max_mpp":200.0})
+			continue
 		var points := PackedVector3Array()
 		for coordinate: Array in feature.geometry.coordinates as Array:
 			var lon := deg_to_rad(float(coordinate[0]))
@@ -208,6 +214,14 @@ static func _valid_surface(surface: Dictionary) -> bool:
 		if not row is Array or (row as Array).size()!=width: return false
 		for value: Variant in row:
 			if typeof(value) not in [TYPE_INT,TYPE_FLOAT] or not is_finite(float(value)): return false
+	for cover: Variant in surface.get("cover_meshes",[]) as Array:
+		if not cover is Dictionary or str(cover.get("kind","")) not in ["water_surface","woodland"] or str(cover.get("source_reference","")).is_empty(): return false
+		for triangle: Variant in cover.get("triangles",[]) as Array:
+			if not triangle is Array or triangle.size()!=3: return false
+			for coordinate: Variant in triangle:
+				if not coordinate is Array or coordinate.size()!=2: return false
+				for value: Variant in coordinate:
+					if typeof(value) not in [TYPE_INT,TYPE_FLOAT] or not is_finite(float(value)): return false
 	return true
 
 static func _valid_feature(feature: Dictionary) -> bool:
@@ -216,7 +230,7 @@ static func _valid_feature(feature: Dictionary) -> bool:
 	if not HistoricalFactEvidence.valid_date(str(feature.get("valid_from", ""))) or not HistoricalFactEvidence.valid_date(str(feature.get("valid_to", ""))) or str(feature.valid_from) >= str(feature.valid_to):
 		return false
 	var kind := str(feature.get("kind", ""))
-	if kind not in ["settlement", "landmark", "geographic_region", "rail", "river", "coast"]:
+	if kind not in ["settlement", "landmark", "geographic_region", "rail", "river", "coast","water_surface"]:
 		return false
 	var geometry := feature.get("geometry", {}) as Dictionary
 	var points: Array = []
@@ -226,6 +240,14 @@ static func _valid_feature(feature: Dictionary) -> bool:
 		points = geometry.get("coordinates", []) as Array
 		if points.size() < 2:
 			return false
+	elif kind=="water_surface" and str(geometry.get("type","")) in ["Polygon","MultiPolygon"]:
+		var polygons: Array = [geometry.coordinates] if str(geometry.type)=="Polygon" else geometry.coordinates as Array
+		if polygons.is_empty(): return false
+		for polygon: Array in polygons:
+			if polygon.is_empty(): return false
+			for ring: Array in polygon:
+				if ring.size()<4 or ring[0]!=ring[-1]: return false
+				points.append_array(ring.slice(0,ring.size()-1))
 	else:
 		return false
 	var previous: Array = []

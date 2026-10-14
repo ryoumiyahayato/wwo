@@ -97,6 +97,7 @@ func selection_name() -> String:
 func selection_kind() -> String:
 	if not _selected_administration().is_empty(): return "历史行政区"
 	if str(_place.get("spatial_kind","")) == "historical_landmark": return "历史地标"
+	if str(_place.get("display_kind",""))=="transport_node": return "历史交通地点"
 	if _place.has("political_source_id"): return "历史地理地域"
 	if _place.has("note_zh"): return "物理地理区域"
 	if not _place.is_empty(): return "城市 / 地点"
@@ -112,6 +113,8 @@ func _scope_text() -> String:
 		if not bool(_selected_administration().get("historical_reference_active",true)): return "当前成员读取正式世界状态。历史参考已超出适用年份，不作为当年行政界线显示。"
 		return str(_selected_administration().get("temporal_note_zh","历史参考边界；当前成员读取正式世界状态。")) if _selected_administration().get("boundary_status")=="HISTORICAL_GIS_RECONSTRUCTION" else "历史名称资料；没有已接入边界。"
 	if str(_place.get("spatial_kind","")) == "historical_landmark": return str(_place.historical_reference_zh)
+	if str(_place.get("display_kind",""))=="transport_node": return "1900 年存在记录 · 代表位置；不代表已恢复精确线路。"
+	if str(_place.get("display_kind",""))=="physical_cover": return "现代物理范围参考；不作为 1900 年土地利用事实。"
 	if _place.has("note_zh"): return str(_place.note_zh)
 	if not _place.is_empty(): return "已有正式地点身份。" if _formal_place else "历史展示地点，尚无正式地点身份。"
 	if bool(_polity.get("display_only",false)):
@@ -157,6 +160,7 @@ func draw_card(shell: MainShell, rect: Rect2) -> void:
 	else: shell.button(Rect2(rect.end.x-90,rect.end.y-34,78,24),"地图定位","admin:focus",administration.get("boundary_status")=="HISTORICAL_GIS_RECONSTRUCTION" and bool(administration.get("historical_reference_active",true)))
 
 func _place_type() -> String:
+	if str(_place.get("display_kind",""))=="transport_node": return "历史车站 / 桥梁位置参考"
 	var kind := str(_place.get("spatial_kind",_place.get("kind","")))
 	return str({"city":"城市","port":"港口","region":"地域","historical_landmark":"历史地标","historical settlement":"历史聚落","historical strategic settlement":"历史聚落","settlement":"聚落","island":"岛屿","continent":"大陆","geographic_region":"地理区域"}.get(kind,"物理地理区域" if _place.has("note_zh") else "未知"))
 
@@ -178,6 +182,9 @@ func draw_details(shell: MainShell, rect: Rect2) -> void:
 		facts.append("地点类型："+(_place_type() if str(_place.get("spatial_kind",""))=="historical_landmark" else str(_place.get("spatial_kind",_place.get("kind","未记录")))))
 		facts.append("来源："+str(_place.get("source_name_zh",_place.get("source_id","正式空间目录" if _formal_place else "未记录"))))
 		facts.append("历史政治关系："+_place_political_name())
+		if _place.has("transport_evidence_class"):
+			facts.append("资料类型："+("历史连接关系，线位未恢复" if str(_place.transport_evidence_class).begins_with("B_") else "存在及代表位置"))
+			facts.append("历史参考："+str(_place.get("historical_reference_date","未记录")))
 		var historical := _place.get("historical_political_identity",{}) as Dictionary
 		if not historical.is_empty():
 			facts.append("历史地位："+str(historical.get("status_zh","未记录")))
@@ -203,6 +210,10 @@ func draw_details(shell: MainShell, rect: Rect2) -> void:
 		shell.wrapped(right+Vector2(0,76),str(_place.coordinate_notice_zh),rect.end.x-right.x-22,11,3)
 		shell.wrapped(right+Vector2(0,151),str(_place.get("real_dimensions_note_zh","")),rect.end.x-right.x-22,11,3)
 		if _place.has("terrain_note_zh"): shell.wrapped(right+Vector2(0,217),str(_place.terrain_note_zh),rect.end.x-right.x-22,10,3)
+	elif _place.has("display_kind"):
+		shell.wrapped(right,str(_place.get("note_zh","")),rect.end.x-right.x-22,11,6)
+		shell.wrapped(right+Vector2(0,145),str(_place.get("source_reference","")),rect.end.x-right.x-22,10,4)
+		shell.wrapped(right+Vector2(0,240),str(_place.get("source_license","")),rect.end.x-right.x-22,10,2)
 	elif _place.has("political_source_id"):
 		shell.wrapped(right,str(_place.get("note_zh","")),rect.end.x-right.x-22,11,6)
 		shell.wrapped(right+Vector2(0,135),str(_place.get("source_reference","")),rect.end.x-right.x-22,10,4)
