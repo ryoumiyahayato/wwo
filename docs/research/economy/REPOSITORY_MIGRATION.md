@@ -16,7 +16,13 @@
 
 私有仓库：[ryoumiyahayato/wwo-economy-lab](https://github.com/ryoumiyahayato/wwo-economy-lab)。旧 main 基点为 `48b280a37be8f5fd72f0c277f4ae435e675efa1f`。归档目标为 [archive/economy-lab-before-sandbox-20261014](https://github.com/ryoumiyahayato/wwo-economy-lab/tree/archive/economy-lab-before-sandbox-20261014)。它保留旧 main 全树和祖先历史。原 main、Round3–Round6、goal-cycle-01、goal-cycle-02 和 controlled-workbench 分支不删除、不重写；独有内容仍可从各原分支访问。
 
+另建立并确认 [Cycle02 归档](https://github.com/ryoumiyahayato/wwo-economy-lab/tree/archive/economy-goal-cycle02-20261014) 和 [受控工作台归档](https://github.com/ryoumiyahayato/wwo-economy-lab/tree/archive/controlled-workbench-before-sandbox-20261014)。它们分别保留 `fd557efe1b837ddde7b456651c568bb31718d10b` 和 `dab110e89a4ffabc2e844fcd14b31cb2008df391`，不把未在旧 main 合并的研究误称为已经由 main 归档覆盖。
+
 新的日常入口为 [sandbox/main](https://github.com/ryoumiyahayato/wwo-economy-lab/tree/sandbox/main)。它以旧 main 为父提交，用正常提交移除当前树中的旧产品和历史验证入口，只保留沙盒说明与实验约定。历史仍在父提交和归档分支，不创建孤立历史。切换默认分支后，不改变旧分支名字、提交或显式 clone 引用；旧分支 PR 仍须单独选择目标。默认 clone 和未指定分支的浏览、Contents API 改指向沙盒。WWO 不依赖此默认入口。
+
+沙盒提交 [64e60224](https://github.com/ryoumiyahayato/wwo-economy-lab/commit/64e60224951364889a21e0efc28e7ab6d536997b) 已推送；GitHub 默认分支已确认是 sandbox/main。当前树仅有 `.gitignore`、`AGENTS.md`、`README.md` 和 `experiments/README.md`。WWO 源码整合提交 [409199f1](https://github.com/ryoumiyahayato/wwo/commit/409199f1e60f0d042ed61357f1c2b67aa46d2eca) 已推送，225 个文件包含实际源码及研究快照，不是仅文档。
+
+迁移局部检查：122 个正式脚本依赖均有文件及 UID；Application 的 Godot 4.6.3 解析通过。正式主场景以显式资金压力参数短启动，修复发布树内 GlobeRenderer 现有无类型数组赋值后未再出现脚本错误；仍有原 SubViewport 尺寸和 anchor 警告。该修复只在隔离发布树，已告知地图工作线，未覆盖其正式工作区。研究最小入口实际推进一日，产生 1 个订单、29 个事件。没有重新运行 30/50 日场景、历史矩阵、全仓回归或内容哈希。正式主工作树及原研究目录的未提交内容保留。
 
 ## 未迁入内容
 
